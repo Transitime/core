@@ -1,0 +1,265 @@
+<!-- This is the configuration file for the logback logging system. This file 
+     will be used if it is in the classpath (because logback looks for the file
+     logback.xml in the classpath) or if explicitly invoked using the 
+     Java param -Dlogback.configurationFile=/DIR/src/main/config/logback.xml
+  -->
+       
+<!-- Note that scanPeriod is set to 30 seconds so that config file will
+     be automatically reloaded if needed and take effect every 30 seconds.
+  -->
+<configuration scan="true" scanPeriod="30 seconds" >
+
+  <!-- Set properties here. NOTE: it is expected that the property
+       -Dtransitest.core.agencyId=xx will be set. -->
+
+  <property name="LOG_FILE_ROOT" value="/Logs/${transitest.core.agencyId:-DEFAULT}/%d{yyyy/MM/dd}" />
+  <!-- The pattern layout how the log file should log info is set here. Note that 
+       a newline is used at beginning so that there is a blank line between
+       each entry. Newline needs to be at beginning so stack traces for exceptions
+       are displayed properly since they are displayed after the message.
+       Info on layouts is out http://logback.qos.ch/manual/layouts.html 
+    -->
+  <property name="DEFAULT_PATTERN" value="%n%d{HH:mm:ss.SSS} %-5level [%file:%line] %msg%n" />
+
+  <!-- For logging to stdout logback status message for when logback is initializing
+    -->
+  <!-- <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" /> -->
+
+  <!-- The main appender for the Core module. use a RollingFileAppender
+       so that can store log files in a calendar based directory structure
+       logs/yyyy/MM/dd/logFile.log . The logs go under the project directory
+       so in Eclipse on Windows they end up in a place such as 
+       C:/Users/Mike/git/testProject/testProject/logs... The log file
+       is called "core.log". The files are rolled over at
+       midnight since "dd" specify that logs should be dealt with daily. 
+       Logs are compressed automatically since "gz" specified.
+    -->
+  <appender name="CORE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- daily rollover. Compress the file when rolling it over.
+        -->
+      <fileNamePattern>${LOG_FILE_ROOT}/core.log.gz</fileNamePattern> 
+    </rollingPolicy>
+
+    <!-- Only want this appender to take effect if not DEBUG level. This
+         way when DEBUG level the CORE_DEBUG can instead handle things
+         and use more verbose logging that could be useful for debugging.
+      -->
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>DEBUG</level>
+      <onMatch>DENY</onMatch>
+      <onMismatch>ACCEPT</onMismatch>
+    </filter>
+
+    <encoder>
+      <!-- Info on possible patterns is at 
+           http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
+        -->
+      <pattern>${DEFAULT_PATTERN}</pattern> 
+    </encoder>
+  </appender>
+
+
+
+  <!-- For debugging probably want to log additional info so the
+       pattern is enhanced. Otherwise it should be identical to 
+       the CORE appender.
+    -->
+  <appender name="CORE_DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- daily rollover. Compress the file when rolling it over.
+        -->
+      <fileNamePattern>${LOG_FILE_ROOT}/core.log.gz</fileNamePattern>
+    </rollingPolicy>
+
+    <!-- Only want this appender to take effect if DEBUG level. This
+         way when DEBUG level this CORE_DEBUG appender can handle things
+         and use more verbose logging that could be useful for debugging.
+      -->
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>DEBUG</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+
+    <encoder>
+      <!-- A more complete pattern that provides additional info for debugging.
+        -->
+      <!-- Take out thread info for now <pattern>%n%d{HH:mm:ss.SSS} %-5level [%thread] [%logger{10}:%line] %msg%n</pattern> -->
+      <pattern>%n%d{HH:mm:ss.SSS} %-5level [%logger{10}:%line] %msg%n</pattern>
+    </encoder>
+  </appender>
+
+
+  <!-- For sending out e-mails when there is an logging message that is marked
+       for notification. Usually, but not necessarily always, this will be
+       and ERROR level message.
+    -->
+  <appender name="ERROR_SMTP" class="ch.qos.logback.classic.net.SMTPAppender">
+
+    <!-- LIST ALL E-MAIL ADDRESS HERE.
+         Note that gmail seems to filter out messages sometimes. Therefore
+         make sure using non-gmail accounts. 
+      -->
+    <to>msmithtransit@gmail.com</to> 
+    <to>skibu@smith.net</to>
+
+    <!-- Only send e-mail if special "EMAIL" marker is specified for an
+         ERROR level message. 
+      -->
+    <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+     <marker>EMAIL</marker>
+   </evaluator>
+
+   <!-- Don't include messages that are DEBUG or TRACE if using cyclicBufferTracker
+     -->
+   <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+     <level>INFO</level>
+   </filter>
+
+   <!-- Provide last 5 entries (INFO, WARN, or ERROR) to provide context.
+     -->
+   <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+     <bufferSize>3</bufferSize>
+   </cyclicBufferTracker>
+
+    <!-- NOTE: it is important to set asynchronousSending to false. Otherwise
+         if trigger two SMTP messages within a short interval (within about 3
+         seconds) they overwrite each other causing the first message to be 
+         delivered but to have the same content as the 2nd message. Also,
+         need async so that if program exits the message is first sent. 
+         This means that if an error message sends out an e-mail the thread
+         will hang for the few seconds it takes to complete the sending of
+         the e-mail.
+      -->
+    <asynchronousSending>false</asynchronousSending>
+
+    <!-- Specifies details of how the message is sent and the format of it
+      -->
+    <smtpHost>smtp.gmail.com</smtpHost>
+    <smtpPort>465</smtpPort>
+    <SSL>true</SSL>
+    <username>transittestsmtp@gmail.com</username>
+    <password>transittest1</password>
+    <from>msmithtransit@gmail.com</from>
+    <subject>%level %logger{0} - %m</subject>
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>%d{MMM dd yyyy - HH:mm:ss.SSS} - %-5level - %logger{35} :%n%message%n</pattern>
+    </layout>
+  </appender>
+
+  <!-- Separate file for AVL logging -->
+  <appender name="AVL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/avl.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <pattern>${DEFAULT_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- In case easiest to write logs to console.  -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  
+  <!--======================================================-->
+  <!--=============== Loggers defined here =================-->
+  <!--======================================================-->
+
+  <!-- Specify various loggers. This where the logging
+       level is specified for each class. Note: cannot just have
+       two loggers defined for a name in order to define different
+       logging types depending on the level. Only the last definition is used
+       when duplicating the logging for a name. But can use filters as shown in
+       http://stackoverflow.com/questions/5653062/how-can-i-configure-logback-to-log-different-levels-for-a-logger-to-different-de
+    -->
+
+<!--
+  <logger name="org.transitime.db.hibernate.DataDbLogger" level="debug" additivity="true">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+  
+  <!--  In order to log the hibernate SQL queries need to set org.hibernate.SQL
+        to debug. To show the values of the parameters need to set
+        org.hibernate.type to trace. Probably also want to set in 
+        hibernate.cfg.xml the properties format_sql and use_sql_comments 
+        to true so that the output of the SQL looks nice and includes the 
+        SQL comments. 
+
+        NOTE: Turning on this logging can greaty slow things down.
+        When inserting 10000 rows of AVLReports the time increated
+        from about 2.5 seconds to 10 seconds when the sql logging
+        was enabled. So don't use all the time!-->
+  <!--
+  <logger name="org.hibernate.SQL" level="debug" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+  <logger name="org.hibernate.type" level="trace" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+  -->
+
+  <!--
+  <logger name="org.transitime.avl.NextBusAvlModule" level="debug" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+  -->
+
+  <logger name="org.transitime.avl" level="debug" additivity="false">
+    <appender-ref ref="AVL" />
+  </logger>
+
+  <!-- for debugging lazy loading -->
+  <logger name="org.transitime.db.structs" level="debug" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+
+  <logger name="org.transitime.gtfs" level="debug" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+
+  <logger name="org.transitime.core" level="debug" additivity="true">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+
+<!-- Don't want debug level for SpatialMatcher 
+     and TravelTimes because would log info
+     when trying to match every single segment, which is incredibly 
+     verbose. Therefore set logging level to info for this class. -->
+<!-- 
+  <logger name="org.transitime.core.SpatialMatcher" level="info" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+
+<!-- 
+  <logger name="org.transitime.core.TemporalMatcher" level="info" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+-->
+
+<!-- -->
+  <logger name="org.transitime.core.TravelTimes" level="info" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+<!-- -->
+
+  <!-- Set default level of root logger to "info" instead of to the
+       the default of "debug". This way the default is to only see important
+       messages. Debug messages have to be enabled by creating a logger
+       for the class. Was originally hoping to log errors to stdout but
+       this interfered with other loggers. If another logger level was set
+       to debug then for that class the message would also be logged via root
+       even though the logging level for route is configured to be info, 
+       which is a higher level.
+    -->
+  <root level="info">          
+    <appender-ref ref="CORE" />
+    <appender-ref ref="ERROR_SMTP" />
+  </root>
+</configuration>
