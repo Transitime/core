@@ -72,7 +72,7 @@ public class CoreConfig {
 	}
 	private static StringConfigValue hibernateConfigFileName = 
 			new StringConfigValue("transitime.hibernate.configFile", 
-					"C:/Users/Mike/git/testProject/testProject/src/main/config/hibernate.cfg.xml");
+					"/REPOSITORY/PROJECT/src/main/config/hibernate.cfg.xml");
 	
 	/**
 	 * The list of names of all of the modules that should be automatically
