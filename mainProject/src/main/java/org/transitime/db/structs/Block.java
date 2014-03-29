@@ -148,20 +148,20 @@ public final class Block implements Serializable {
 	}
 	
 	/**
-	 * Returns list of TripPattern objects for the specified configRev
+	 * Returns list of Block objects for the specified configRev
 	 * 
 	 * @param session
 	 * @param configRev
-	 * @return
+	 * @return List of Block objects
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Block> getBlocks(Session session, int dbScheduleRev) 
+	public static List<Block> getBlocks(Session session, int configRev) 
 			throws HibernateException {
 		String hql = "FROM Blocks " +
 				"    WHERE configRev = :configRev";
 		Query query = session.createQuery(hql);
-		query.setInteger("configRev", dbScheduleRev);
+		query.setInteger("configRev", configRev);
 		return query.list();
 	}
 
@@ -192,7 +192,7 @@ public final class Block implements Serializable {
 		int rowsUpdated = 0;
 		rowsUpdated += 
 				session.createSQLQuery("DELETE FROM Block_to_Trip_joinTable " + 
-						               "WHERE Blocks_dbScheduleRev=0").
+						               "WHERE Blocks_configRev=0").
 				executeUpdate();
 		rowsUpdated += 
 				session.createSQLQuery("DELETE FROM Trips WHERE configRev=0").
