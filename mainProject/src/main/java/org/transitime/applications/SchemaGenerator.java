@@ -59,9 +59,17 @@ public class SchemaGenerator {
 
 		SchemaExport export = new SchemaExport(cfg);
 		export.setDelimiter(";");
+		
+		// Determine file name. Use "ddl_" plus dialect name such as mysql or
+		// oracle plus the first two components of the package name such as
+		// org_transitime.
+		int secondDotPos = packageName.indexOf('.', packageName.indexOf('.')+1);
+		String packeNameSuffix = 
+				packageName.substring(0, secondDotPos).replace(".", "_");
 		String outputFilename = (outputDirectory!=null?outputDirectory+"/" : "") + 
 				"ddl_" + dialect.name().toLowerCase() + 
-				"_" + packageName.replace(".", "-") + ".sql";
+				"_" + packeNameSuffix + ".sql";
+		
 		export.setOutputFile(outputFilename);
 		
 		// Export, but only to an sql file. Don't actually modify the database
@@ -134,7 +142,12 @@ public class SchemaGenerator {
 	/**
 	 * @param args args[0] is the package name for the Hibernate annotated 
 	 * classes whose schema is to be exported. args[1] is optional output
-	 * directory where the resulting files are to go.
+	 * directory where the resulting files are to go. If the optional output
+	 * directory is not specified then schema files written to local directory.
+	 * <p>
+	 * The resulting files have the name "ddl_" plus dialect name such as mysql 
+	 * or oracle plus the first two components of the package name such as
+     * org_transitime.
 	 */
 	public static void main(String[] args) throws Exception {
 		final String packageName = args[0];
