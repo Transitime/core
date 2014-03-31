@@ -29,5 +29,3 @@
  * 
  */
 package org.transitime.avl;
-import org.transitime.configData.CoreConfig;
-import org.transitime.modules.Module;
