@@ -16,23 +16,22 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Test
- * <p>
  * The classes used as part of specifying the configuration parameters for an 
  * application. These parameters can be set either through command line options
  * or through a configuration file. Default values are specified when each 
- * parameter is declared. 
+ * parameter is declared.  
  * <p>
- * Parameters are declared in a Java class as static members. An example:
- * <p>
- * <code>
+ * Parameters are declared in a Java class as static members. An example is:
+ * <pre>
+ * {@code
  * 	public static String getProjectId() {
- *		return projectId.getValue();
- *	}
- *	private static StringConfigValue projectId = 
- *			new StringConfigValue("transitime.core.projectId", "sf-muni");
- * </code>
- * <p>
+ *    return projectId.getValue();
+ *  }
+ *  private static StringConfigValue projectId = 
+ *    new StringConfigValue("transitime.core.projectId", "sf-muni");
+ * }
+ * </pre>
+ * 
  * Such a parameter can be set either using a command line java property when the 
  * application is invoked, such as:
  * <code>
@@ -40,8 +39,8 @@
  * </code>
  * <p>
  * Or in a configuration file:
- * <p>
- * <code>
+ * <pre>
+ * {@code
  * <?xml version="1.0"?>
  * <transitime>
  *   <core>
@@ -53,8 +52,9 @@
  *     </defaultBreakTimeSec>
  *   </core>
  * </transitime>
- * </code>
- * <p>
+ * }
+ * </pre>
+ * 
  * Most parameters should be declared in org.transitimie.configData package.
  * <p>
  * Currently the configuration information is only read in at application

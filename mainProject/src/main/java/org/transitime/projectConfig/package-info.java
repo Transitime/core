@@ -16,9 +16,11 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains high-level information for project such as the database host
+ * and RMI host. NOTE: this should be changed so that the config is read 
+ * along with all of the other configuration data.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.projectConfig;

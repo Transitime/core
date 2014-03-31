@@ -16,9 +16,10 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the classes for logging debug, warning, error, and info information
+ * to logfiles using logback.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.logging;

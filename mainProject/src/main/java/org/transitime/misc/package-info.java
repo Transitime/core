@@ -16,9 +16,9 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the test and other classes that don't fit anywhere else.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.misc;

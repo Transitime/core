@@ -16,9 +16,10 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the classes for communicating data via JMS. Used for the AVL feed
+ * so that multiple clients can receive data from a single feed.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.ipc.jms;

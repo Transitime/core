@@ -16,9 +16,11 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the classes for Interprocess Communication for both RMI and JMS.
+ * <p>
+ * The data is serialized in order to be transmitted.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.ipc;

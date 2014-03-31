@@ -16,9 +16,10 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the client side code for connecting to an RMI interface in order
+ * to read configuration, predictions, or vehicle data from the server.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.ipc.clients;

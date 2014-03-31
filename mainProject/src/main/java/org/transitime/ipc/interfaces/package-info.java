@@ -16,9 +16,10 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the Interfaces for communicating data via RMI between a server
+ * and a client.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.ipc.interfaces;

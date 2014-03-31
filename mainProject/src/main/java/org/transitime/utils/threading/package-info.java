@@ -16,9 +16,10 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the classes for dealing with threads and making it easier
+ * to use and debug them.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.utils.threading;

@@ -16,9 +16,9 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the utility classes that are used by many parts of the project.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.utils;

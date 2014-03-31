@@ -1,5 +1,4 @@
-/**
- * 
+/* 
  * This file is part of Transitime.org
  * 
  * Transitime.org is free software: you can redistribute it and/or modify
@@ -15,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
+
 /**
- *
+ * For writing GTFS configuration data in CSV format to files. 
+ * 
  * @author SkiBu Smith
  *
  */

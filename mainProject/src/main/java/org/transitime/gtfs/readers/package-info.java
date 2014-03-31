@@ -1,5 +1,4 @@
-/**
- * 
+/* 
  * This file is part of Transitime.org
  * 
  * Transitime.org is free software: you can redistribute it and/or modify
@@ -18,7 +17,7 @@
 
 /**
  * For reading in a GTFS file in CSV format. 
- * 
+ * <p>
  * Note: GtfsBaseReader specifies that a line is a comment if it
  * starts with '-' character. This means can comment out lines by
  * starting them with "--", as with SQL. 

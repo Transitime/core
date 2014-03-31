@@ -1,5 +1,4 @@
-/**
- * 
+/* 
  * This file is part of Transitime.org
  * 
  * Transitime.org is free software: you can redistribute it and/or modify
@@ -15,8 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
+
 /**
- *
+ * Contains statistics classes such as for generating more accurate schedule
+ * times by using GPS information on when the vehicles really do depart.
+ *   
  * @author SkiBu Smith
  *
  */

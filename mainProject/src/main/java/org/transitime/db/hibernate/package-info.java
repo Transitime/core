@@ -1,5 +1,4 @@
-/**
- * 
+/*
  * This file is part of Transitime.org
  * 
  * Transitime.org is free software: you can redistribute it and/or modify
@@ -17,7 +16,8 @@
  */
 
 /**
- * Notes about Hibernate.
+ * Classes having to do with reading and writing to the database using
+ * Hibernate.
  * <p>
  * Hibernate was selected as the ORM (Object Relational Mapping) tool because
  * it is both very widely used yet very simple. Once one gets the hang of it

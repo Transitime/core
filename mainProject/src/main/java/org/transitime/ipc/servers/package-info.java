@@ -16,9 +16,9 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains the classes for the servers that provide data via RMI.
  * 
  * @author SkiBu Smith
  *
  */
-package org.transitime.worldbank;
+package org.transitime.ipc.servers;

@@ -16,7 +16,7 @@
  */
 
 /**
- *
+ * Contains the classes used for providing a GTFS-realtime feed.
  *
  * @author SkiBu Smith
  *

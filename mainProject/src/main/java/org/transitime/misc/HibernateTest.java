@@ -1,5 +1,4 @@
-/**
- * 
+/* 
  * This file is part of Transitime.org
  * 
  * Transitime.org is free software: you can redistribute it and/or modify
@@ -15,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.test;
+package org.transitime.misc;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -29,6 +28,7 @@ import org.transitime.utils.IntervalTimer;
 /**
  * For testing writing data to database. Compares batch to stateless processing.
  * Makes it easy to see what happens when turn on logging and such.
+ * 
  * @author SkiBu Smith
  *
  */
