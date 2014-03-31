@@ -16,10 +16,11 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Contains the top level main() methods for the applications that constitute the 
- * Transitime system.
+ * Contains the declarations of the configuration parameters used for the
+ * applications. The declarations include default values. The values can
+ * be set through command line options or through a configuration file.
  *  
  * @author SkiBu Smith
  *
  */
-package org.transitime.applications;
+package org.transitime.configData;

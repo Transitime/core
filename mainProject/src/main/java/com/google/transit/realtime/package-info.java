@@ -16,7 +16,9 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- *
+ * Contains automatically generated Google protobuffer code that is used for 
+ * GTFS-realtime feeds.
+ * 
  * @author SkiBu Smith
  *
  */
