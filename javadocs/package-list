@@ -8,11 +8,13 @@ org.transitime.core.dataCache
 org.transitime.db
 org.transitime.db.hibernate
 org.transitime.db.structs
+org.transitime.feed
 org.transitime.feed.gtfsRt
 org.transitime.gtfs
 org.transitime.gtfs.gtfsStructs
 org.transitime.gtfs.readers
 org.transitime.gtfs.writers
+org.transitime.ipc
 org.transitime.ipc.clients
 org.transitime.ipc.data
 org.transitime.ipc.interfaces
@@ -24,7 +26,6 @@ org.transitime.misc
 org.transitime.modules
 org.transitime.projectConfig
 org.transitime.statistics
-org.transitime.test
 org.transitime.utils
 org.transitime.utils.threading
 org.transitime.worldbank
