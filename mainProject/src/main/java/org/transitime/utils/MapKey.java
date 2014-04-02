@@ -31,12 +31,13 @@ import net.jcip.annotations.Immutable;
 @Immutable
 public class MapKey {
 
-	// The key is made up of these three strings. Null values are OK. If only
-	// two strings are needed then s3 will be null.
+	// The key is made up of these four strings. Null values are OK. If fewer
+	// than four strings are needed then the remaining ones will be null.
 	private final String s1;
 	private final String s2;
 	private final String s3;
-
+	private final String s4;
+	
 	// Since hashCode() can be called a lot might as well cache the value
 	// since this object is immutable.
 	private int cachedHashCode;
@@ -55,6 +56,7 @@ public class MapKey {
 		this.s1 = s1;
 		this.s2 = s2;
 		this.s3 = null;
+		this.s4 = null;
 		this.cachedHashCode = createHashCode();
 	}
 
@@ -72,6 +74,27 @@ public class MapKey {
 		this.s1 = s1;
 		this.s2 = s2;
 		this.s3 = s3;
+		this.s4 = null;
+		this.cachedHashCode = createHashCode();
+	}
+
+	/**
+	 * For when need a key consisting of four strings.
+	 * 
+	 * @param s1
+	 *            String to be part of the key
+	 * @param s2
+	 *            String to be part of the key
+	 * @param s3
+	 *            String to be part of the key
+	 * @param s4
+	 *            String to be part of the key
+	 */
+	public MapKey(String s1, String s2, String s3, String s4) {
+		this.s1 = s1;
+		this.s2 = s2;
+		this.s3 = s3;
+		this.s4 = s4;
 		this.cachedHashCode = createHashCode();
 	}
 
@@ -106,6 +129,24 @@ public class MapKey {
 	}
 
 	/**
+	 * A different way of creating a MapKey by using a static method instead of
+	 * using new MapKey(). For when key consists of four strings.
+	 * 
+	 * @param s1
+	 *            String to be part of the key
+	 * @param s2
+	 *            String to be part of the key
+	 * @param s3
+	 *            String to be part of the key
+	 * @param s4
+	 *            String to be part of the key
+	 * @return the MapKey for the specified strings
+	 */
+	public static MapKey create(String s1, String s2, String s3, String s4) {
+		return new MapKey(s1, s2, s3, s4);
+	}
+
+	/**
 	 * Using cached hash code for speed. Therefore this method is used by
 	 * constructors to initialize the cached hash code.
 	 * 
@@ -117,6 +158,7 @@ public class MapKey {
 		result = prime * result + ((s1 == null) ? 0 : s1.hashCode());
 		result = prime * result + ((s2 == null) ? 0 : s2.hashCode());
 		result = prime * result + ((s3 == null) ? 0 : s3.hashCode());
+		result = prime * result + ((s4 == null) ? 0 : s4.hashCode());
 		return result;
 	}
 
@@ -154,6 +196,11 @@ public class MapKey {
 			if (other.s3 != null)
 				return false;
 		} else if (!s3.equals(other.s3))
+			return false;
+		if (s4 == null) {
+			if (other.s4 != null)
+				return false;
+		} else if (!s4.equals(other.s4))
 			return false;
 		return true;
 	}
