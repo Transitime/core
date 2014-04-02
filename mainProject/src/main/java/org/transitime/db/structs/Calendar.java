@@ -18,7 +18,9 @@ package org.transitime.db.structs;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +34,7 @@ import net.jcip.annotations.Immutable;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
@@ -120,7 +123,7 @@ public class Calendar implements Serializable {
 	 * 
 	 * @param session
 	 * @param configRev
-	 * @return
+	 * @return List of Calendar objects
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings("unchecked")
@@ -134,6 +137,32 @@ public class Calendar implements Serializable {
 		return query.list();
 	}
 
+	/**
+	 * Opens up a new db session and returns Map of Calendar objects for the
+	 * specified database revision. The map is keyed on the serviceId.
+	 * 
+	 * @param projectId
+	 * @param configRev
+	 * @return Map of Calendar objects keyed on serviceId
+	 * @throws HibernateException
+	 */
+	public static Map<String, Calendar> getCalendars(String projectId, int configRev) 
+			throws HibernateException {
+		// Get the database session. This is supposed to be pretty light weight
+		SessionFactory sessionFactory = 
+				HibernateUtils.getSessionFactory(projectId);
+		Session session = sessionFactory.openSession();
+		
+		// Get list of calendars
+		List<Calendar> calendarList = getCalendars(session, configRev);
+		
+		// Convert list to map and return result
+		Map<String, Calendar> map = new HashMap<String, Calendar>();
+		for (Calendar calendar : calendarList)
+			map.put(calendar.getServiceId(), calendar);
+		return map;
+	}
+	
 	/**
 	 * Returns true if the parameter zeroOrOne is set to "1". Otherwise
 	 * returns false.
