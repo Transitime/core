@@ -43,6 +43,7 @@ import org.transitime.core.TemporalMatch;
 import org.transitime.core.VehicleState;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
+import org.transitime.utils.IntervalTimer;
 
 /**
  * For persisting the match for the vehicle. This data is later used
@@ -267,6 +268,8 @@ public class Match implements Serializable {
 			String projectId, Date beginTime, Date endTime, 
 			String sqlClause,
 			final int firstResult, final int maxResults) {
+		IntervalTimer timer = new IntervalTimer();
+
 		// Get the database session. This is supposed to be pretty light weight
 		SessionFactory sessionFactory = 
 				HibernateUtils.getSessionFactory(projectId);
@@ -292,6 +295,8 @@ public class Match implements Serializable {
 		try {
 			@SuppressWarnings("unchecked")
 			List<Match> matches = query.list();
+			logger.debug("Getting matches from database took {} msec",
+					timer.elapsedMsec());
 			return matches;
 		} catch (HibernateException e) {
 			// Log error to the Core logger
