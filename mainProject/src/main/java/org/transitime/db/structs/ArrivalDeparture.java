@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.utils.IntervalTimer;
 
 /**
  * For persisting an Arrival or a Departure time. Should use Arrival or 
@@ -135,12 +136,21 @@ public class ArrivalDeparture implements Serializable {
 	@Column 
 	private final int tripIndex;
 	
-	// The index of which path this is within the trip.
-	// Different from the stopSequence. The stopPathIndex starts
-	// at 0 and increments by one for every stop. The stopSequence
+	// The index of which stop path this is within the trip.
+	// Different from the GTFS stopSequence. The stopPathIndex starts
+	// at 0 and increments by one for every stop. The GTFS stopSequence
 	// on the other hand doesn't need to be sequential.
 	@Column 
 	private final int pathIndex;
+	
+	// Sometimes want to look at travel times using arrival/departure times.
+	// This would be complicated if had to get the path length by using
+	// tripIndex to determine trip to determine trip pattern to determine
+	// StopPath to determine length. So simply storing the stop path
+	// length along with arrivals/departures so that it is easy to obtain
+	// for post-processing.
+	@Column
+	private final float stopPathLength;
 	
 	// Needed because some methods need to know if dealing with arrivals or 
 	// departures.
@@ -208,6 +218,7 @@ public class ArrivalDeparture implements Serializable {
 		this.tripStartTime = trip.getStartTime();
 		this.stopId = stopId;
 		this.stopSequence = path.getStopSequence();
+		this.stopPathLength = (float) path.getLength();
 		this.routeId = trip.getRouteId();
 		this.routeShortName = trip.getRouteShortName();
 		this.serviceId = block.getServiceId();
@@ -234,6 +245,7 @@ public class ArrivalDeparture implements Serializable {
 		this.tripStartTime = null;
 		this.stopId = null;
 		this.stopSequence = -1;
+		this.stopPathLength = Float.NaN;
 		this.routeId = null;
 		this.routeShortName = null;
 		this.serviceId = null;
@@ -353,6 +365,7 @@ public class ArrivalDeparture implements Serializable {
 				+ ", serviceId=" + serviceId
 				+ ", tripIndex=" + tripIndex 
 				+ ", stopPathIndex=" + pathIndex 
+				+ ", stopPathLength=" + stopPathLength
 				+ "]";
 	}
 	
@@ -408,6 +421,8 @@ public class ArrivalDeparture implements Serializable {
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
 			String projectId, Date beginTime, Date endTime) {
+		IntervalTimer timer = new IntervalTimer();
+		
 		// Get the database session. This is supposed to be pretty light weight
 		SessionFactory sessionFactory = 
 				HibernateUtils.getSessionFactory(projectId);
@@ -427,6 +442,8 @@ public class ArrivalDeparture implements Serializable {
 		try {
 			@SuppressWarnings("unchecked")
 			List<ArrivalDeparture> arrivalsDeparatures = query.list();
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
 			return arrivalsDeparatures;
 		} catch (HibernateException e) {
 			// Log error to the Core logger
@@ -469,6 +486,8 @@ public class ArrivalDeparture implements Serializable {
 			String sqlClause,
 			final int firstResult, final int maxResults,
 			ArrivalsOrDepartures arrivalOrDeparture) {
+		IntervalTimer timer = new IntervalTimer();
+		
 		// Get the database session. This is supposed to be pretty light weight
 		SessionFactory sessionFactory = 
 				HibernateUtils.getSessionFactory(projectId);
@@ -500,6 +519,8 @@ public class ArrivalDeparture implements Serializable {
 		try {
 			@SuppressWarnings("unchecked")
 			List<ArrivalDeparture> arrivalsDeparatures = query.list();
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
 			return arrivalsDeparatures;
 		} catch (HibernateException e) {
 			// Log error to the Core logger
@@ -510,6 +531,7 @@ public class ArrivalDeparture implements Serializable {
 			// it might actually be detrimental and slow things down.
 			session.close();
 		}
+		
 	}
 
 	public String getVehicleId() {
@@ -556,4 +578,8 @@ public class ArrivalDeparture implements Serializable {
 		return pathIndex;
 	}
 
+	public float getStopPathLength() {
+		return stopPathLength;
+	}
+	
 }

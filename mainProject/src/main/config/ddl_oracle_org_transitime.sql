@@ -78,6 +78,7 @@
         routeShortName varchar(60),
         scheduledTime datetime,
         serviceId varchar(60),
+        stopPathLength float,
         tripIndex integer,
         primary key (vehicleId, tripStartTime, tripId, time, stopSequence, stopId, isArrival)
     );
