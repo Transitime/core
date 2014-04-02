@@ -50,12 +50,12 @@ public class SpatialMatch {
 	/********************** Member Functions **************************/
 
 	public SpatialMatch(String vehicleId, Block block, int tripIndex,
-			int pathIndex, int segmentIndex, double distanceToSegment,
+			int stopPathIndex, int segmentIndex, double distanceToSegment,
 			double distanceAlongSegment) {
 		this.vehicleId = vehicleId;
 		this.block = block;
 		this.tripIndex = tripIndex;
-		this.stopPathIndex = pathIndex;
+		this.stopPathIndex = stopPathIndex;
 		this.segmentIndex = segmentIndex;
 		this.distanceToSegment = distanceToSegment;
 		this.distanceAlongSegment = distanceAlongSegment;
