@@ -167,7 +167,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			// Log raw info for debugging
 			logger.debug("vehicleId={} time={} lat={} lon={} spd={} head={} " +
 					"blk={} drvr={}", 
-					vehicleId, Time.timeStr(gpsEpochTime), lat, lon, speed, 
+					vehicleId, Time.timeStrMsec(gpsEpochTime), lat, lon, speed, 
 					heading, block, driverId);
 				
 			// Create the AVL object and send it to the JMS topic.
