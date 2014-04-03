@@ -396,32 +396,34 @@ public class TravelTimes {
 		}
 		
 		// Start with travel time from beginning location to end of first 
-		// travel time segment
-		int travelTimeMsec = expectedTravelTimeFromMatchToEndOfStopPath(match1AfterStop);
+		// stop path.
+		int travelTimeMsec = 
+				expectedTravelTimeFromMatchToEndOfStopPath(match1AfterStop);
 		logger.debug("For vehicleId={} travel time for first partial " +
-				"segment={} msec. {}", 
+				"stop path is {} msec. {}", 
 				vehicleId, travelTimeMsec, match1AfterStop);
 		
-		// For special case where both matches are on the same travel time 
-		// segment need to subtract out the travel time for the travel time 
-		// segment since adding the begin time and end time together. This 
+		// For special case where both matches are on the same stop path 
+		// need to subtract out the travel time for the travel time 
+		// stop path since adding the begin time and end time together. This 
 		// is a bit odd but draw it out to understand what is going on.
-		if (indices.equals(endIndices)) {
+		if (indices.equalStopPath(endIndices)) {
 			int pathTravelTime = expectedTravelTimeForStopPath(indices);
-			logger.debug("For vehicleId={} both matches are the same so " +
-					"subtracting travel time for segment of {} msec",
-					vehicleId, pathTravelTime);
 			travelTimeMsec -= pathTravelTime; 
+			logger.debug("For vehicleId={} both matches are on same stop " +
+					"path so subtracted travel time for stop path of {} " +
+					"msec so travel time is now {} msec",
+					vehicleId, pathTravelTime, travelTimeMsec);
 		}
 		
-		// If at end of path for this first segment then need to also include 
-		// stop time
-		if (!indices.equals(endIndices) && indices.atEndOfStopPath()) {
+		// If will be going to next stop path then need to include the stop
+		// time for the first stop path.
+		if (!indices.equalStopPath(endIndices)) {
 			int stopTimeMsec = indices.getStopTimeForPath();
 			travelTimeMsec += stopTimeMsec;
-			logger.debug("For vehicleId={} adding stop time={} msec for " +
-					"indices={}",
-					vehicleId, stopTimeMsec, indices);
+			logger.debug("For vehicleId={} adding stop time={} msec so " +
+					"travel time now is {} msec for stop at indices={}",
+					vehicleId, stopTimeMsec, travelTimeMsec, indices);
 		}
 		
 		// TODO make sure this is tested 
@@ -440,12 +442,14 @@ public class TravelTimes {
 			int stopPathTravelTime = expectedTravelTimeForStopPath(indices);
 			travelTimeMsec += stopPathTravelTime;
 			logger.debug("For vehicleId={} adding stop path travel time={} " +
-					"msec for {}", vehicleId, stopPathTravelTime, indices);
+					"msec so travel time now is {} for {}", 
+					vehicleId, stopPathTravelTime, travelTimeMsec, indices);
 
 			int stopTimeMsec = indices.getStopTimeForPath();
 			travelTimeMsec += stopTimeMsec;
-			logger.debug("For vehicleId={} adding stop time={} msec for {}",
-					vehicleId, stopTimeMsec, indices);
+			logger.debug("For vehicleId={} adding stop time={} msec so " +
+					"travel time now is {} msec for {}",
+					vehicleId, stopTimeMsec, travelTimeMsec, indices);
 			
 			// TODO make sure this is tested 
 			// If layover then take that into account. For such a case the 
@@ -464,10 +468,10 @@ public class TravelTimes {
 		// Add travel time for last partial segment
 		int travelTimeForPartialLastStopPath =
 				expectedTravelTimeFromBeginningOfStopPathToMatch(match2BeforeStop);
-		logger.debug("For vehicleId={} adding travel time for last " +
-				"partial stop path of {} msec", 
-				vehicleId, travelTimeForPartialLastStopPath);
 		travelTimeMsec += travelTimeForPartialLastStopPath;
+		logger.debug("For vehicleId={} added travel time for last " +
+				"partial stop path of {} msec so now travel time is {} msec", 
+				vehicleId, travelTimeForPartialLastStopPath, travelTimeMsec);
 		
 		// Return the results
 		logger.debug("For vehicleId={} returning total travel time={} msec. {}" , 
