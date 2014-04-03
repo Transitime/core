@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 
 /**
@@ -365,7 +366,7 @@ public class ArrivalDeparture implements Serializable {
 				+ ", serviceId=" + serviceId
 				+ ", tripIndex=" + tripIndex 
 				+ ", stopPathIndex=" + pathIndex 
-				+ ", stopPathLength=" + stopPathLength
+				+ ", stopPathLength=" + Geo.distanceFormat(stopPathLength)
 				+ "]";
 	}
 	
