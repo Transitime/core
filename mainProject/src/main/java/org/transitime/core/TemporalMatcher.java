@@ -239,10 +239,10 @@ public class TemporalMatcher {
 	public TemporalMatch getBestTemporalMatch(VehicleState vehicleState,
 			List<SpatialMatch> spatialMatches) {
 		// Convenience variables		
-		SpatialMatch previousMatch = vehicleState.getLastMatch();
+		SpatialMatch previousMatch = vehicleState.getMatch();
 		Date previousAvlTime =
-				vehicleState.getPreviousToLastAvlReport().getDate();
-		Date avlTime = vehicleState.getLastAvlReport().getDate();
+				vehicleState.getPreviousAvlReport().getDate();
+		Date avlTime = vehicleState.getAvlReport().getDate();
 		long avlTimeDifferenceMsec = avlTime.getTime() - previousAvlTime.getTime();
 
 		// Find best temporal match of the spatial matches

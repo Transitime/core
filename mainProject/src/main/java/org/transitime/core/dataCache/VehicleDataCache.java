@@ -172,7 +172,7 @@ public class VehicleDataCache {
 	 */
 	public void updateVehicle(VehicleState vs) {
 		Vehicle vehicle = new Vehicle(new Avl(
-				vs.getLastAvlReport()), vs.getRouteId(),
+				vs.getAvlReport()), vs.getRouteId(),
 				vs.getRouteShortName(), vs.getTrip().getId(),
 				vs.isPredictable());
 		updateVehicle(vehicle);

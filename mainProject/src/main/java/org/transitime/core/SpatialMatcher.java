@@ -396,14 +396,14 @@ public class SpatialMatcher {
 	 */
 	public static List<SpatialMatch> getSpatialMatches(VehicleState vehicleState) {
 		// Some convenience variables
-		TemporalMatch previousMatch = vehicleState.getLastMatch();
+		TemporalMatch previousMatch = vehicleState.getMatch();
 		SpatialMatcher spatialMatcher = new SpatialMatcher();
 
 		// Don't want to waste time search forward too far. So limit distance
 		// such that vehicle would have traveled at 50% more than the max speed 
 		// plus a couple hundred meters just to be safe.
-		long timeBetweenFixesMsec = vehicleState.getLastAvlReport().getTime()
-				- vehicleState.getPreviousToLastAvlReport().getTime();
+		long timeBetweenFixesMsec = vehicleState.getAvlReport().getTime()
+				- vehicleState.getPreviousAvlReport().getTime();
 		double distanceAlongPathToSearch = AvlConfig.getMaxAvlSpeed() * 1.5
 				* timeBetweenFixesMsec / Time.MS_PER_SEC + 200.0;
 
@@ -421,7 +421,7 @@ public class SpatialMatcher {
 		while (!indices.pastEndOfBlock()
 				&& distanceSearched < distanceAlongPathToSearch) {
 			spatialMatcher.processPossiblePotentialMatch(
-					vehicleState.getLastAvlReport(), indices);
+					vehicleState.getAvlReport(), indices);
 
 			distanceSearched += indices.getSegment().length();
 

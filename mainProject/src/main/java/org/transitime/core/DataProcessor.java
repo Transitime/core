@@ -111,7 +111,7 @@ public class DataProcessor {
 			VehicleState vehicleState) {
 		// Make sure state is correct
 		if (!vehicleState.isPredictable() || 
-				vehicleState.getLastMatch() == null) {
+				vehicleState.getMatch() == null) {
 			throw new RuntimeException("Called DataProcessor.matchNewFix() " +
 					"for a vehicle that was not already predictable. " + 
 					vehicleState);
@@ -160,7 +160,7 @@ public class DataProcessor {
 		logger.debug("Matching unassigned vehicle to assignment. {}", vehicleState);
 		
 		// Initialize some variables
-		AvlReport avlReport = vehicleState.getLastAvlReport();
+		AvlReport avlReport = vehicleState.getAvlReport();
 		TemporalMatch bestMatch = null;
 		BlockAssignmentMethod blockAssignmentMethod = null;
 		boolean predictable = false;
@@ -260,7 +260,7 @@ public class DataProcessor {
 	 */
 	private void handlePossibleEndOfBlock(VehicleState vehicleState) {
 		// Determine if at end of block assignment
-		TemporalMatch temporalMatch = vehicleState.getLastMatch();
+		TemporalMatch temporalMatch = vehicleState.getMatch();
 		if (temporalMatch != null) {
 			VehicleAtStopInfo atStopInfo = temporalMatch.getAtStop();
 			if (atStopInfo != null) {

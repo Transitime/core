@@ -117,12 +117,12 @@ public class Match implements Serializable {
 	 */
 	public Match(VehicleState vehicleState) {
 		this.vehicleId = vehicleState.getVehicleId();
-		this.avlTime = vehicleState.getLastAvlReport().getDate();
+		this.avlTime = vehicleState.getAvlReport().getDate();
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.serviceId = vehicleState.getBlock().getServiceId();
 		this.blockId = vehicleState.getBlock().getId();
 		
-		TemporalMatch lastMatch = vehicleState.getLastMatch();
+		TemporalMatch lastMatch = vehicleState.getMatch();
 		this.tripId = lastMatch!=null ? lastMatch.getTrip().getId() : null;
 		this.stopPathIndex = lastMatch!=null ? lastMatch.getStopPathIndex() : -1;
 		this.segmentIndex = lastMatch!=null ? lastMatch.getSegmentIndex() : -1;
