@@ -49,6 +49,9 @@ public class VehicleState {
 	private VehicleAtStopInfo vehicleAtStopInfo;
 	private List<Prediction> predictions;
 	
+	// So can make sure that departure time is after the arrival time
+	private Date previousArrivalTime;
+	
 	private static int MATCH_HISTORY_MAX_SIZE = 6;
 	private static int AVL_HISTORY_MAX_SIZE = 6;
 	
@@ -118,7 +121,7 @@ public class VehicleState {
 	 * Returns the last temporal match. Returns null if there isn't one.
 	 * @return
 	 */
-	public TemporalMatch getLastMatch() {
+	public TemporalMatch getMatch() {
 		try {
 			return temporalMatchHistory.getFirst();
 		} catch (NoSuchElementException e) {
@@ -133,7 +136,7 @@ public class VehicleState {
 	 * @return Trip or null.
 	 */
 	public Trip getTrip() {
-		TemporalMatch lastMatch = getLastMatch();
+		TemporalMatch lastMatch = getMatch();
 		return lastMatch!=null ? lastMatch.getTrip() : null;
 	}
 	
@@ -165,7 +168,7 @@ public class VehicleState {
 	 * @return true if at a layover
 	 */
 	public boolean atLayover() {
-		TemporalMatch temporalMatch = getLastMatch();
+		TemporalMatch temporalMatch = getMatch();
 		if (temporalMatch == null)
 			return false;
 		else
@@ -180,7 +183,7 @@ public class VehicleState {
 	 * 
 	 * @return
 	 */
-	public TemporalMatch getPreviousToLastMatch() {
+	public TemporalMatch getPreviousMatch() {
 		if (temporalMatchHistory.size() >= 2)
 			return temporalMatchHistory.get(1);
 		else
@@ -188,10 +191,10 @@ public class VehicleState {
 	}
 
 	/**
-	 * Returns the last AvlReport. Returns null if there isn't one.
+	 * Returns the current AvlReport. Returns null if there isn't one.
 	 * @return
 	 */
-	public AvlReport getLastAvlReport() {
+	public AvlReport getAvlReport() {
 		try {
 			return avlReportHistory.getFirst();
 		} catch (NoSuchElementException e) {
@@ -205,7 +208,7 @@ public class VehicleState {
 	 * 
 	 * @return
 	 */
-	public AvlReport getPreviousToLastAvlReport() {
+	public AvlReport getPreviousAvlReport() {
 		if (avlReportHistory.size() >= 2) 
 			return avlReportHistory.get(1);
 		else
@@ -263,6 +266,17 @@ public class VehicleState {
 		this.vehicleAtStopInfo = vehicleAtStopInfo;
 	}
 
+	public void setPreviousArrivalTime(Date previousArrivalTime) {
+		this.previousArrivalTime = previousArrivalTime;
+	}
+	
+	/**
+	 * The last arrival time of a vehicle. Can be null. 
+	 */
+	public Date getPreviousArrivalTime() {
+		return previousArrivalTime;
+	}
+	
 	/**
 	 * Note: this is different from whether the SpatialMatch is currently at
 	 * a stop. The SpatialMatch simply looks at the current stop indicated by
@@ -302,9 +316,10 @@ public class VehicleState {
 				+ ", assignmentMethod=" + assignmentMethod
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
+				+ ", previousArrivalTime=" + previousArrivalTime
 				+ ", vehicleAtStopInfo=" + vehicleAtStopInfo
-				+ ", getLastMatch()=" + getLastMatch()
-				+ ", getLastAvlReport()=" + getLastAvlReport()
+				+ ", getLastMatch()=" + getMatch()
+				+ ", getLastAvlReport()=" + getAvlReport()
 				//+ ",\n  block=" + block // Block info too verbose so commented out
 				//+ ",\n  temporalMatchHistory=" + temporalMatchHistory 
 				//+ ",\n  avlReportHistory=" + avlReportHistory 
@@ -318,9 +333,10 @@ public class VehicleState {
 				+ ", assignmentMethod=" + assignmentMethod
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
+				+ ", previousArrivalTime=" + previousArrivalTime
 				+ ", vehicleAtStopInfo=" + vehicleAtStopInfo
-				+ ", getLastMatch()=" + getLastMatch()
-				+ ", getLastAvlReport()=" + getLastAvlReport()
+				+ ", getLastMatch()=" + getMatch()
+				+ ", getLastAvlReport()=" + getAvlReport()
 				//+ ", \nblock=" + block // Block info too verbose so commented out
 				+ ",\n  temporalMatchHistory=" + temporalMatchHistory 
 				+ ",\n  avlReportHistory=" + avlReportHistory 
