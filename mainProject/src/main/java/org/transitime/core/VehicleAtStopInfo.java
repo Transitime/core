@@ -17,8 +17,6 @@
  */
 package org.transitime.core;
 
-import java.util.Date;
-
 import org.transitime.db.structs.Block;
 
 /**
@@ -29,8 +27,6 @@ import org.transitime.db.structs.Block;
  *
  */
 public class VehicleAtStopInfo extends Indices {
-
-	private Date arrivalTime;
 	
 	/********************** Member Functions **************************/
 
@@ -55,12 +51,13 @@ public class VehicleAtStopInfo extends Indices {
 				0); // segment index
 	}
 	
-	public void setArrivalTime(Date arrivalTime) {
-		this.arrivalTime = arrivalTime;
+	@Override
+	public String toString() {
+		return "Indices [" 
+				+ "blockId=" + getBlock().getId() 
+				+ ", tripIndex=" + getTripIndex()
+				+ ", stopPathIndex=" + getStopPathIndex() 
+				+ "]";
 	}
-	
-	public Date getArrivalTime() {
-		return arrivalTime;
-	}
-	
+
 }
