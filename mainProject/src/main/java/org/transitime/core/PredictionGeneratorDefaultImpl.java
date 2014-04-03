@@ -222,11 +222,11 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		List<Prediction> newPredictions = new ArrayList<Prediction>();
 
 		// Get the new match for the vehicle that predictions are to be based on
-		TemporalMatch match = vehicleState.getLastMatch();
+		TemporalMatch match = vehicleState.getMatch();
 		Indices indices = match.getIndices();
 		
 		// Initialize predictionTime to the time of the AVL report.
-		AvlReport avlReport = vehicleState.getLastAvlReport();
+		AvlReport avlReport = vehicleState.getAvlReport();
 		long avlTime = avlReport.getTime();
 		
 		// Get time to end of first path and thereby determine prediction for 
