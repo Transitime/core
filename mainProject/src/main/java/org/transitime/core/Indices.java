@@ -388,6 +388,25 @@ class Indices {
 		return true;
 	}
 
+	/**
+	 * Returns true if both this and the other parameter point to the same stop
+	 * path.
+	 * 
+	 * @param other
+	 * @return
+	 */
+	public boolean equalStopPath(Indices other) {
+		if (block == null) {
+			if (other.block != null)
+				return false;
+		} else if (!block.equals(other.block))
+			return false;
+		
+		return tripIndex == other.tripIndex && 
+				stopPathIndex == other.stopPathIndex;
+
+	}
+	
 	/********************** Getter Methods ****************************/
 	
 	public Block getBlock() {
