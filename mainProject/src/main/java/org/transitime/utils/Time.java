@@ -76,6 +76,9 @@ public class Time {
 	private static final DateFormat timeFormat24Msec =
 			new SimpleDateFormat("HH:mm:ss.SSS z");
 
+	private static final DateFormat timeFormat24MsecNoTimeZone =
+			new SimpleDateFormat("HH:mm:ss.SSS");
+
 	// So can output headings and such with a consistent number of decimal places
 	private static final DecimalFormat oneDigitFormat = new DecimalFormat("0.0");
 
@@ -498,6 +501,28 @@ public class Time {
 		return timeFormat24Msec.format(epochTime);
 	}
 
+	/**
+	 * Returns just the time string. Includes msec but no timezone.
+	 * e.g. "HH:mm:ss.SSS"
+	 * 
+	 * @param epochTime
+	 * @return
+	 */
+	public static String timeStrMsecNoTimeZone(long epochTime) {
+		return timeFormat24MsecNoTimeZone.format(epochTime);
+	}
+	
+	/**
+	 * Returns just the time string. Includes msec but no timezone.
+	 * e.g. "HH:mm:ss.SSS"
+	 * 
+	 * @param epochTime
+	 * @return
+	 */
+	public static String timeStrMsecNoTimeZone(Date epochTime) {
+		return timeFormat24MsecNoTimeZone.format(epochTime);
+	}
+	
 	/**
 	 * Simply calls Thread.sleep() but catches the InterruptedException
 	 * so that the calling function doesn't need to.
