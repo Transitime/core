@@ -59,12 +59,20 @@ public class ArrivalDeparture implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String vehicleId;
 	
-	// Note that not specifying that need fractional seconds for arrival/
-	// departure times since they are only estimates and therefore should
-	// not be considered to be accurate to within a second. Therefore the
-	// @Column definition does not include (columnDefinition="datetime(3)")
+	// Originally did not use msec precision (datetime(3)) specification
+	// because arrival/departure times are only estimates and having such
+	// precision is not generally appropriate. But found that then some
+	// arrival and departures for a stop would have the same time and when
+	// one would query for the arrivals/departures and order by time one
+	// could get a departure before an arrival. To avoid this kind of
+	// incorrect ordering using the additional precision. And this way
+	// don't have to add an entire second to a departure time to make 
+	// sure that it is after the arrival. Adding a second is an 
+	// exaggeration because it implies the vehicle was stopped for a second
+	// when most likely it zoomed by the stop. It looks better to add
+	// only a msec to make the departure after the arrival.
 	@Id 
-	@Column	
+	@Column(columnDefinition="datetime(3)")
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date time;
 
@@ -103,7 +111,7 @@ public class ArrivalDeparture implements Serializable {
 	
 	// So can match the ArrivalDeparture time to the AvlReport that
 	// generated it by using vehicleId and avlTime.
-	@Column	
+	@Column(columnDefinition="datetime(3)")	
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date avlTime;
 	
@@ -356,7 +364,7 @@ public class ArrivalDeparture implements Serializable {
 		return (isArrival ? "Arrival  " : "Departure") + " [" 
 				+ "vehicleId=" + vehicleId 
 				// + ", isArrival=" + isArrival
-				+ ", time=" + Time.dateTimeStr(time)
+				+ ", time=" + Time.dateTimeStrMsec(time)
 				+ ", routeId="	+ routeId 
 				+ ", routeShortName=" + routeShortName
 				+ ", stopId=" + stopId 
