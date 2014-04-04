@@ -357,6 +357,17 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				// arrival time. Don't want them even to be equal so that
 				// can be sure they will be listed in expected order in
 				// management reports.
+				if (logger.isDebugEnabled()) {
+					logger.debug("vehicleId={} determined departure time was " +
+							"{} which is less than or equal to the previous " +
+							"arrival time of {}. Therefore the departure time " +
+							"adjusted to {}.",
+							vehicleState.getVehicleId(), 
+							Time.dateTimeStrMsec(departureTime),
+							Time.dateTimeStrMsec(arrivalTime),
+							Time.dateTimeStrMsec(arrivalTime.getTime() + 1));
+				}
+				
 				departureTime = arrivalTime.getTime() + 1;
 			}
 			
