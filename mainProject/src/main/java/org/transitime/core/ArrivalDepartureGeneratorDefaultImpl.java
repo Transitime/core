@@ -389,7 +389,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					TravelTimes.getInstance().expectedTravelTimeBetweenMatches(
 							vehicleState.getVehicleId(), avlReport.getDate(), 
 							oldMatch, matchAtStop);
-			long arrivalTime = previousAvlReport.getTime() + travelTimeMsec;
+			// At first it appears that should use the time of the previous AVL
+			// report plus the travel time. But since vehicle might have just 
+			// departed the previous stop should use that departure time instead.
+			// By using beginTime we are using the correct value.
+			long arrivalTime = beginTime + travelTimeMsec;
 			
 			// Write out the arrival time
 			arrivalDepartures.add(createArrivalTime(vehicleState, arrivalTime, 
