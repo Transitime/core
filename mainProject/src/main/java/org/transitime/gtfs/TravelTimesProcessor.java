@@ -237,12 +237,20 @@ public class TravelTimesProcessor {
 						travelTimesMsec.add(travelTimeForSegmentMsec);
 					}
 					
+					// Determine the stop time. Use the default value except
+					// use zero for the last stop in the trip since stop time
+					// is not used for such a stop. Instead, schedule time and
+					// layover time is used.
+					int stopTimeMsec = (stopPathIndex < numberOfPaths-1) ? 
+							defaultWaitTimeAtStopMsec : 0;
+					
+					// Create and add the travel time for this stop path
 					TravelTimesForStopPath travelTimesForStopPath = 
 							new TravelTimesForStopPath(
 									stopPathId, 
 									travelTimeSegmentsLength,
 									travelTimesMsec, 
-									defaultWaitTimeAtStopMsec,    // stopTimeMsec
+									stopTimeMsec,
 									-1);  // daysOfWeekOverride
 					travelTimes.add(travelTimesForStopPath);
 				}
