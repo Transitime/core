@@ -46,7 +46,8 @@ public class DbPrediction implements Serializable {
 		
 	// Need an ID but using a regular column doesn't really make
 	// sense. So use an auto generated one.
-	@Id @GeneratedValue(strategy=GenerationType.AUTO)
+	@Id 
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
 	// The revision of the configuration data that was being used
