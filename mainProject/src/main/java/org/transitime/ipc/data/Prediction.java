@@ -284,22 +284,23 @@ public class Prediction implements Serializable {
 	public String toString() {
 		return "Prediction [" 
 				+ "vehicleId=" + vehicleId
-				+ ", routeId=" + routeId
-				+ ", routeShortName=" + routeShortName
-				+ ", stopId=" + stopId
-				+ (stopName!=null ? ", stopName=" + stopName : "") 
-				+ ", stopSequence=" + stopSequence
-				+ ", tripId=" + tripId 
-				+ ", blockId=" + blockId 
-				+ ", predictionTime=" + Time.timeStrMsec(predictionTime) 
-				+ ", avlTime=" + Time.timeStrMsec(avlTime)
-				+ ", creationTime=" + Time.timeStrMsec(creationTime)
-				+ ", affectedByWaitStop=" + affectedByWaitStop
-				+ (driverId!=null ? ", driverId=" + driverId : "")
-				+ (isPassengerCountValid() ? ", passengerCount=" + passengerCount : "")
+				+ ", route=" + routeId
+				+ ", rteName=" + routeShortName
+				+ ", stop=" + stopId
+				+ (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "") 
+				+ ", gtfsStopSeq=" + stopSequence
+				+ ", trip=" + tripId 
+				+ ", block=" + blockId 
+				+ ", predTime=" + Time.timeStrMsecNoTimeZone(predictionTime) 
+				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
+				+ ", creatTime=" + Time.timeStrMsecNoTimeZone(creationTime)
+				+ ", waitStop=" + (affectedByWaitStop?"t":"f")
+				+ (driverId!=null ? ", driver=" + driverId : "")
+				+ (isPassengerCountValid() ? ", psngrCnt=" + passengerCount : "")
 				+ (!Float.isNaN(passengerFullness) ? 
-						", passengerFullness=" + StringUtils.twoDigitFormat(passengerFullness) : "")
-				+ ", isArrival=" + isArrival
+						", psngrFullness=" + 
+						StringUtils.twoDigitFormat(passengerFullness) : "")
+				+ ", arrival=" + (isArrival?"t":"f")
 				+ "]";
 	}
 
