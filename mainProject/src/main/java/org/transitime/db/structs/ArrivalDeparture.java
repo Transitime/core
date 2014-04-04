@@ -40,6 +40,7 @@ import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.Time;
 
 /**
  * For persisting an Arrival or a Departure time. Should use Arrival or 
@@ -352,21 +353,22 @@ public class ArrivalDeparture implements Serializable {
 
 	@Override
 	public String toString() {
-		return "ArrivalDeparture [" 
+		return (isArrival ? "Arrival  " : "Departure") + " [" 
 				+ "vehicleId=" + vehicleId 
-				+ ", time=" + time
+				// + ", isArrival=" + isArrival
+				+ ", time=" + Time.dateTimeStr(time)
+				+ ", routeId="	+ routeId 
+				+ ", routeShortName=" + routeShortName
 				+ ", stopId=" + stopId 
+				+ ", avlTime=" + Time.timeStrMsec(avlTime)
 				+ ", gtfsStopSequence=" + stopSequence
-				+ ", isArrival=" + isArrival
+				+ ", stopPathIndex=" + pathIndex 
+				+ ", stopPathLength=" + Geo.distanceFormat(stopPathLength)
 				+ ", configRev=" + configRev
 				+ ", tripId=" + tripId 
 				+ ", blockId=" + blockId 
-				+ ", routeId="	+ routeId 
-				+ ", routeShortName=" + routeShortName
 				+ ", serviceId=" + serviceId
 				+ ", tripIndex=" + tripIndex 
-				+ ", stopPathIndex=" + pathIndex 
-				+ ", stopPathLength=" + Geo.distanceFormat(stopPathLength)
 				+ "]";
 	}
 	
