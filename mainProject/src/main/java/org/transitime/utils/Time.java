@@ -459,6 +459,7 @@ public class Time {
 	
 	/**
 	 * Returns just the time string
+	 * 
 	 * @param epochTime
 	 * @return
 	 */
@@ -466,6 +467,16 @@ public class Time {
 		return timeFormat24.format(epochTime);
 	}
 
+	/**
+	 * Returns just the time string
+	 * 
+	 * @param epochTime
+	 * @return
+	 */
+	public static String timeStr(Date epochTime) {
+		return timeStr(epochTime.getTime());
+	}
+	
 	/**
 	 * Returns just the time string. Includes msec.
 	 * 
