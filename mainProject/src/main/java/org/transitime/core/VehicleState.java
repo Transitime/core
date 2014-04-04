@@ -46,7 +46,6 @@ public class VehicleState {
 			new LinkedList<TemporalMatch>();
 	private LinkedList<AvlReport> avlReportHistory =
 			new LinkedList<AvlReport>();
-	private VehicleAtStopInfo vehicleAtStopInfo;
 	private List<Prediction> predictions;
 	
 	// So can make sure that departure time is after the arrival time
@@ -261,11 +260,7 @@ public class VehicleState {
 	public boolean isPredictable() {
 		return predictable;
 	}
-
-	public void setVehicleAtStopInfo(VehicleAtStopInfo vehicleAtStopInfo) {
-		this.vehicleAtStopInfo = vehicleAtStopInfo;
-	}
-
+	
 	public void setPreviousArrivalTime(Date previousArrivalTime) {
 		this.previousArrivalTime = previousArrivalTime;
 	}
@@ -275,19 +270,6 @@ public class VehicleState {
 	 */
 	public Date getPreviousArrivalTime() {
 		return previousArrivalTime;
-	}
-	
-	/**
-	 * Note: this is different from whether the SpatialMatch is currently at
-	 * a stop. The SpatialMatch simply looks at the current stop indicated by
-	 * the path index to determine if it is at that stop. But vehicleAtStopInfo
-	 * keeps track of which stop the vehicle is on with respect to 
-	 * arrivals/departures. It could match to a previous stop if the allowable
-	 * distance after the stop is large, such as for a terminal.
-	 * @return
-	 */
-	public VehicleAtStopInfo getVehicleAtStopInfo() {
-		return vehicleAtStopInfo;
 	}
 	
 	/**
@@ -317,7 +299,6 @@ public class VehicleState {
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
 				+ ", previousArrivalTime=" + previousArrivalTime
-				+ ", vehicleAtStopInfo=" + vehicleAtStopInfo
 				+ ", getLastMatch()=" + getMatch()
 				+ ", getLastAvlReport()=" + getAvlReport()
 				//+ ",\n  block=" + block // Block info too verbose so commented out
@@ -334,7 +315,6 @@ public class VehicleState {
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
 				+ ", previousArrivalTime=" + previousArrivalTime
-				+ ", vehicleAtStopInfo=" + vehicleAtStopInfo
 				+ ", getLastMatch()=" + getMatch()
 				+ ", getLastAvlReport()=" + getAvlReport()
 				//+ ", \nblock=" + block // Block info too verbose so commented out

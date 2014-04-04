@@ -510,9 +510,6 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				"in between the new and the old AVL report.", 
 				vehicleState.getVehicleId());
 
-		// Store the new stop state since it has changed
-		vehicleState.setVehicleAtStopInfo(newVehicleAtStopInfo);
-		
 		// Return the list of generated arrivals/departures
 		return arrivalDepartures;
 	}
