@@ -365,18 +365,18 @@ public class ArrivalDeparture implements Serializable {
 				+ "vehicleId=" + vehicleId 
 				// + ", isArrival=" + isArrival
 				+ ", time=" + Time.dateTimeStrMsec(time)
-				+ ", routeId="	+ routeId 
-				+ ", routeShortName=" + routeShortName
-				+ ", stopId=" + stopId 
+				+ ", route="	+ routeId 
+				+ ", rteName=" + routeShortName
+				+ ", stop=" + stopId 
+				+ ", gtfsStopSeq=" + stopSequence
+				+ ", stopIdx=" + pathIndex 
 				+ ", avlTime=" + Time.timeStrMsec(avlTime)
-				+ ", gtfsStopSequence=" + stopSequence
-				+ ", stopPathIndex=" + pathIndex 
-				+ ", stopPathLength=" + Geo.distanceFormat(stopPathLength)
-				+ ", configRev=" + configRev
-				+ ", tripId=" + tripId 
-				+ ", blockId=" + blockId 
-				+ ", serviceId=" + serviceId
-				+ ", tripIndex=" + tripIndex 
+				+ ", trip=" + tripId 
+				+ ", tripIdx=" + tripIndex 
+				+ ", block=" + blockId 
+				+ ", srv=" + serviceId
+				+ ", cfg=" + configRev
+				+ ", pathLnth=" + Geo.distanceFormat(stopPathLength)
 				+ "]";
 	}
 	
