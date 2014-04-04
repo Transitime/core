@@ -68,15 +68,16 @@ public class AvlReport implements Serializable {
 	// vehicleId is an @Id since might get multiple AVL reports
 	// for different vehicles with the same time but need a unique
 	// primary key.
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
 	@Id
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
 	private final String vehicleId;
 	
 	// Need to use columnDefinition to explicitly specify that should use 
 	// fractional seconds. This column is an Id since shouldn't get two
 	// AVL reports for the same vehicle for the same time.
-	@Column(columnDefinition="datetime(3)")	@Temporal(TemporalType.TIMESTAMP)
 	@Id
+	@Column(columnDefinition="datetime(3)")	
+	@Temporal(TemporalType.TIMESTAMP)
 	private final Date time;
 	
 	// There is a delay between the time an AVL report is first generated
@@ -85,7 +86,8 @@ public class AvlReport implements Serializable {
 	// latency. Will be null if AV report not yet being processed.
 	// Need to use columnDefinition to explicitly specify that should use 
 	// fractional seconds.
-	@Column(columnDefinition="datetime(3)")	@Temporal(TemporalType.TIMESTAMP)
+	@Column(columnDefinition="datetime(3)")	
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date timeProcessed;
 	
 	@Embedded
