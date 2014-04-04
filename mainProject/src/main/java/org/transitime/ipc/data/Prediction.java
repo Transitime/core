@@ -287,7 +287,9 @@ public class Prediction implements Serializable {
 				+ ", route=" + routeId
 				+ ", rteName=" + routeShortName
 				+ ", stop=" + stopId
-				+ (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "") 
+				// stop name taken out because it is too verbose in the  
+				// predictions log file
+//				+ (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "") 
 				+ ", gtfsStopSeq=" + stopSequence
 				+ ", trip=" + tripId 
 				+ ", block=" + blockId 
