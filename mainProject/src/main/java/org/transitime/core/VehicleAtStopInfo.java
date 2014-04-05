@@ -57,6 +57,7 @@ public class VehicleAtStopInfo extends Indices {
 				+ "blockId=" + getBlock().getId() 
 				+ ", tripIndex=" + getTripIndex()
 				+ ", stopPathIndex=" + getStopPathIndex() 
+				+ ", stopId=" + getStopPath().getStopId()
 				+ "]";
 	}
 
