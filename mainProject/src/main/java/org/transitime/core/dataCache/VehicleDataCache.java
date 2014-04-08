@@ -174,7 +174,7 @@ public class VehicleDataCache {
 		Vehicle vehicle = new Vehicle(new Avl(
 				vs.getAvlReport()), vs.getRouteId(),
 				vs.getRouteShortName(), vs.getTrip().getId(),
-				vs.isPredictable());
+				vs.isPredictable(), vs.getRealTimeSchedAdh());
 		updateVehicle(vehicle);
 	}
 }
