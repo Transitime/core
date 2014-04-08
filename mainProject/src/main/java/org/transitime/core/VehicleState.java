@@ -47,6 +47,7 @@ public class VehicleState {
 	private LinkedList<AvlReport> avlReportHistory =
 			new LinkedList<AvlReport>();
 	private List<Prediction> predictions;
+	private TemporalDifference realTimeSchedAdh;
 	
 	// So can make sure that departure time is after the arrival time
 	private Date previousArrivalTime;
@@ -290,6 +291,29 @@ public class VehicleState {
 		return predictions;
 	}
 	
+	/**
+	 * Stores the real-time schedule adherence for the vehicle.
+	 * 
+	 * @param realTimeSchedAdh
+	 */
+	public void setRealTimeSchedAdh(TemporalDifference realTimeSchedAdh) {
+		this.realTimeSchedAdh = realTimeSchedAdh;
+	}
+	
+	/**
+	 * Returns the current real-time schedule adherence for the vehicle,
+	 * or null if schedule adherence not currently valid (vehicle is
+	 * not predictable or running a non-schedule based assignment).
+	 * 
+	 * @return
+	 */
+	public TemporalDifference getRealTimeSchedAdh() {
+		if (isPredictable())
+			return realTimeSchedAdh;
+		else
+			return null;
+	}
+	
 	@Override
 	public String toString() {
 		return "VehicleState [" 
@@ -298,6 +322,7 @@ public class VehicleState {
 				+ ", assignmentMethod=" + assignmentMethod
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
+				+ ", realTimeSchedAdh=" + realTimeSchedAdh
 				+ ", previousArrivalTime=" + previousArrivalTime
 				+ ", getLastMatch()=" + getMatch()
 				+ ", getLastAvlReport()=" + getAvlReport()
@@ -314,6 +339,7 @@ public class VehicleState {
 				+ ", assignmentMethod=" + assignmentMethod
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
+				+ ", realTimeSchedAdh=" + realTimeSchedAdh
 				+ ", previousArrivalTime=" + previousArrivalTime
 				+ ", getLastMatch()=" + getMatch()
 				+ ", getLastAvlReport()=" + getAvlReport()
