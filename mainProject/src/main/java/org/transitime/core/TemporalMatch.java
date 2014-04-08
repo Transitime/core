@@ -19,12 +19,16 @@ package org.transitime.core;
 import org.transitime.utils.Geo;
 
 /**
- * Describes where an AVL report matches to an assignment temporally. It
- * is a SpatialMatch but also include the temporal difference of how
- * far off the expected time the match is.
+ * Describes where an AVL report matches to an assignment temporally. It is a
+ * SpatialMatch but also include the temporal difference of how far off the
+ * expected time the match is. The temporal difference is not respect to the
+ * schedule. It is with respect to where the vehicle should be based on the
+ * previous AVL report. So if a vehicle is really behind schedule but is now
+ * traveling as fast as expected then the temporal difference will be close to
+ * zero.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class TemporalMatch extends SpatialMatch {
 
