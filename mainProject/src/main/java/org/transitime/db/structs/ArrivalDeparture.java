@@ -37,6 +37,7 @@ import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.TemporalDifference;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
@@ -120,7 +121,7 @@ public class ArrivalDeparture implements Serializable {
 	// stop (there is an arrival schedule time and this is the last stop for
 	// a trip and and this is an arrival time OR there is a departure schedule
 	// time and this is not the last stop for a trip and this is a departure 
-	// time.
+	// time. Otherwise will be null.
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date scheduledTime;
@@ -151,7 +152,7 @@ public class ArrivalDeparture implements Serializable {
 	// at 0 and increments by one for every stop. The GTFS stopSequence
 	// on the other hand doesn't need to be sequential.
 	@Column 
-	private final int pathIndex;
+	private final int stopPathIndex;
 	
 	// Sometimes want to look at travel times using arrival/departure times.
 	// This would be complicated if had to get the path length by using
@@ -187,19 +188,19 @@ public class ArrivalDeparture implements Serializable {
 	 * @param isArrival
 	 */
 	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block, 
-			int tripIndex, int pathIndex, boolean isArrival) {
+			int tripIndex, int stopPathIndex, boolean isArrival) {
 		this.vehicleId = vehicleId;
 		this.time = time;
 		this.avlTime = avlTime;
 		this.tripIndex = tripIndex;
-		this.pathIndex = pathIndex;
+		this.stopPathIndex = stopPathIndex;
 		this.isArrival = isArrival;
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		
 		// Some useful convenience variables
 		Trip trip = block.getTrip(tripIndex);
-		StopPath path = trip.getStopPath(pathIndex);
-		String stopId = path.getStopId();
+		StopPath stopPath = trip.getStopPath(stopPathIndex);
+		String stopId = stopPath.getStopId();
 		
 		// Determine the schedule time, which is a bit complicated.
 		// The schedule time will only be set if the schedule info was available
@@ -210,12 +211,12 @@ public class ArrivalDeparture implements Serializable {
 		// time.
 		ScheduleTime scheduleTime = trip.getScheduleTime(stopId);
 		Date scheduledEpochTime = null;
-		if (path.isLastStopInTrip() && scheduleTime.getArrivalTime() != null
+		if (stopPath.isLastStopInTrip() && scheduleTime.getArrivalTime() != null
 				&& isArrival) {
 			long epochTime = Core.getInstance().getTime()
 					.getEpochTime(scheduleTime.getArrivalTime(), time);
 			scheduledEpochTime = new Date(epochTime);
-		} else if (!path.isLastStopInTrip()
+		} else if (!stopPath.isLastStopInTrip()
 				&& scheduleTime.getDepartureTime() != null && !isArrival) {
 			long epochTime = Core.getInstance().getTime()
 					.getEpochTime(scheduleTime.getDepartureTime(), time);
@@ -227,8 +228,8 @@ public class ArrivalDeparture implements Serializable {
 		this.tripId = trip.getId();
 		this.tripStartTime = trip.getStartTime();
 		this.stopId = stopId;
-		this.stopSequence = path.getStopSequence();
-		this.stopPathLength = (float) path.getLength();
+		this.stopSequence = stopPath.getStopSequence();
+		this.stopPathLength = (float) stopPath.getLength();
 		this.routeId = trip.getRouteId();
 		this.routeShortName = trip.getRouteShortName();
 		this.serviceId = block.getServiceId();
@@ -246,7 +247,7 @@ public class ArrivalDeparture implements Serializable {
 		this.time = null;
 		this.avlTime = null;
 		this.tripIndex = -1;
-		this.pathIndex = -1;
+		this.stopPathIndex = -1;
 		this.isArrival = false;
 		this.configRev = -1;
 		this.scheduledTime = null;
@@ -271,7 +272,7 @@ public class ArrivalDeparture implements Serializable {
 		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
 		result = prime * result + configRev;
 		result = prime * result + (isArrival ? 1231 : 1237);
-		result = prime * result + pathIndex;
+		result = prime * result + stopPathIndex;
 		result = prime * result + stopSequence;
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime * result + 
@@ -310,7 +311,7 @@ public class ArrivalDeparture implements Serializable {
 			return false;
 		if (isArrival != other.isArrival)
 			return false;
-		if (pathIndex != other.pathIndex)
+		if (stopPathIndex != other.stopPathIndex)
 			return false;
 		if (stopSequence != other.stopSequence)
 			return false;
@@ -369,7 +370,7 @@ public class ArrivalDeparture implements Serializable {
 				+ ", rteName=" + routeShortName
 				+ ", stop=" + stopId 
 				+ ", gtfsStopSeq=" + stopSequence
-				+ ", stopIdx=" + pathIndex 
+				+ ", stopIdx=" + stopPathIndex 
 				+ ", avlTime=" + Time.timeStrMsec(avlTime)
 				+ ", trip=" + tripId 
 				+ ", tripIdx=" + tripIndex 
@@ -585,12 +586,41 @@ public class ArrivalDeparture implements Serializable {
 		return tripIndex;
 	}
 
-	public int getPathIndex() {
-		return pathIndex;
+	public int getStopPathIndex() {
+		return stopPathIndex;
 	}
 
 	public float getStopPathLength() {
 		return stopPathLength;
 	}
+
+	/**
+	 * The schedule time will only be set if the schedule info was available
+	 * from the GTFS data and it is the proper type of arrival or departure
+	 * stop (there is an arrival schedule time and this is the last stop for
+	 * a trip and and this is an arrival time OR there is a departure schedule
+	 * time and this is not the last stop for a trip and this is a departure
+	 * time. Otherwise will be null.
+	 * 
+	 * @return
+	 */
+	public Date getScheduledTime() {
+		return scheduledTime;
+	}
 	
+	/**
+	 * Returns the schedule adherence for the stop if there was a schedule
+	 * time. Otherwise returns null.
+	 * 
+	 * @return
+	 */
+	public TemporalDifference getScheduleAdherence() {
+		// If there is no schedule time for this stop then there
+		// is no schedule adherence information.
+		if (scheduledTime == null)
+			return null;
+		
+		// Return the schedule adherence
+		return new TemporalDifference(scheduledTime.getTime() - time.getTime());
+	}
 }
