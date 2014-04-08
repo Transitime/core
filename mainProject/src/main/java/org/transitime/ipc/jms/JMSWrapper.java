@@ -316,16 +316,28 @@ public class JMSWrapper {
 		if (destination == null)
 			return null;
 		
+		MessageConsumer messageConsumer = null;
+		
 		try {
-			MessageConsumer messageConsumer = 
-					session.createConsumer(destination);
-			return messageConsumer;
-		} catch (JMSException e) {
-			logger.error("Could not created JMS consumer " + type + 
-					" \"" + name + "\"", e);
-			return null;
+			messageConsumer = session.createConsumer(destination);
+		} catch (Exception e) {
+			logger.error("Could not created JMS consumer {} \"{}\"", 
+					type, name, e);
+			
+			// If session closed then try opening it again.
+			if (e instanceof IllegalStateException) {
+				try {
+					initiateConnection();
+					messageConsumer = session.createConsumer(destination);
+				} catch (Exception e1) {
+					logger.error("Could not created JMS consumer {} \"{}\" " + 
+							"even after calling initiateConnection()", 
+							type, name, e);
+				}
+			}
 		}
-
+		
+		return messageConsumer;
 	}
 
 	/**
