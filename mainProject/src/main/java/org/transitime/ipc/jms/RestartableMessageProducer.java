@@ -43,7 +43,7 @@ public class RestartableMessageProducer {
 	private Destination destination;
 	MessageProducer messageProducer;
 	
-	private static final Logger logger= 
+	private static final Logger logger = 
 			LoggerFactory.getLogger(RestartableMessageProducer.class);
 	
 	/********************** Member Functions **************************/
@@ -113,7 +113,7 @@ public class RestartableMessageProducer {
 			// Producers are sometimes closed so try opening it up again
 			// and then send the message again.
 			logger.error("Trying to send create producer and then send " + 
-					"message again because go JMSException " + e.getMessage());
+					"message again because got JMSException " + e.getMessage());
 			createProducer();
 			// Now try sending the message again
 			messageProducer.send(objectMessage);
@@ -137,11 +137,13 @@ public class RestartableMessageProducer {
 			// service on a laptop and then closing it. For this situation
 			// try opening session again and then try to create the object
 			// message again.
-			logger.error("Trying to open session again because got JMSException " + e.getMessage());
+			logger.error("Trying to open session again because got " +
+					"JMSException " + e.getMessage());
 			try {
 				jmsWrapper.initiateConnection();
 			} catch (NamingException e1) {
-				logger.error("Got NamingException exeption when trying to re-initiate the connection", e);
+				logger.error("Got NamingException exeption when trying to " +
+						"re-initiate the connection", e);
 				// Throw the initial JMSException
 				throw e; 
 			}
@@ -154,7 +156,8 @@ public class RestartableMessageProducer {
 		} catch (Exception e) {
 			// Producers are sometimes closed so try opening it up again
 			// and then send the message again.
-			logger.error("Trying to send message again because go JMSException " + e.getMessage());
+			logger.error("Trying to send message again because got " +
+					"JMSException " + e.getMessage());
 			createProducer();
 			// Now try sending the message again
 			messageProducer.send(textMessage);
