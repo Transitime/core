@@ -50,7 +50,9 @@ public class TravelTimesForStopPath implements Serializable {
 	// having a separate set for each trip would be too much. But will usually
 	// still have a few per path and trip pattern. Therefore also need the
 	// generated ID.
-	@Column @Id @GeneratedValue 
+	@Id 
+	@Column 
+	@GeneratedValue 
 	private Integer id;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -209,6 +211,9 @@ public class TravelTimesForStopPath implements Serializable {
 	}
 	
 	/**
+	 * How long the vehicle is expected to dwell at stop. Doesn't include
+	 * layover times and such. Based on historic AVL data.
+	 * 
 	 * @return the stopTimeMsec
 	 */
 	public int getStopTimeMsec() {
