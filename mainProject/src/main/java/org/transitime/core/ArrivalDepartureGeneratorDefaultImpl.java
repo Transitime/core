@@ -222,10 +222,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// Determine departure time for first stop of trip
 			SpatialMatch beginningOfTrip = 
 					new SpatialMatch(vehicleId, block, tripIndex, 0, 0, 0.0, 0.0);
-			long travelTimeFromFirstStopToMatch =
-					TravelTimes.getInstance().expectedTravelTimeBetweenMatches(
-							vehicleId, avlReportTime, beginningOfTrip, 
-					newMatch);
+			long travelTimeFromFirstStopToMatch = TravelTimes.getInstance()
+					.expectedTravelTimeBetweenMatches(vehicleId, avlReportTime,
+							beginningOfTrip, newMatch);
 			long departureTime = 
 					avlReportTime.getTime() - travelTimeFromFirstStopToMatch;
 			
