@@ -46,7 +46,7 @@ public class AvlJmsClient extends Module {
 
 	private final BoundedExecutor avlClientExecutor;
 	
-	private static final Logger logger= 
+	private static final Logger logger = 
 			LoggerFactory.getLogger(AvlJmsClient.class);	
 
 	/********************** Member Functions **************************/
@@ -101,18 +101,22 @@ public class AvlJmsClient extends Module {
 	/**
 	 * Initiates the processing of the AVL data in separate threads.
 	 * 
-	 * @param clientName Specifies name of JMS topic to read AVL
-	 * data from. Topic name is clientName + "-AVLTopic".
-	 * @param maxAVLQueueSize How large the AVL queue can be before
-	 * will block inserting additional reports from the JMS feed.
-	 * @param numberThreads How many threads to be used to simultaneous process
-	 * the AVL data by AVLCients. For systems that receive a very high volume of data 
-	 * using multiple threads allows a server to be more fully utilized. This is 
-	 * especially true if the processing of the AVL data takes a lot of IO time
-	 * or is simply computationally expensive. Must be between 1 and MAX_THREADS.
-	 *
-	 * @throws NamingException 
-	 * @throws JMSException 
+	 * @param clientName
+	 *            Specifies name of JMS topic to read AVL data from. Topic name
+	 *            is clientName + "-AVLTopic".
+	 * @param maxAVLQueueSize
+	 *            How large the AVL queue can be before will block inserting
+	 *            additional reports from the JMS feed.
+	 * @param numberThreads
+	 *            How many threads to be used to simultaneous process the AVL
+	 *            data by AVLCients. For systems that receive a very high volume
+	 *            of data using multiple threads allows a server to be more
+	 *            fully utilized. This is especially true if the processing of
+	 *            the AVL data takes a lot of IO time or is simply
+	 *            computationally expensive. Must be between 1 and MAX_THREADS.
+	 * 
+	 * @throws NamingException
+	 * @throws JMSException
 	 */
 	public static void start(final String clientName, final int maxAVLQueueSize, 
 			final int numberThreads) 
@@ -136,6 +140,33 @@ public class AvlJmsClient extends Module {
 	}		
 	
 	/**
+	 * Creates the JMS message consumer. If there is a problem then
+	 * msgConsumer will be null.
+	 */
+	private void createMessageConsumer() {
+		// Establish the AVL message consumer. 
+		String jmsTopicName = getTopicName(projectId);		
+		JMSWrapper jmsWrapper = null;
+		try {
+			jmsWrapper = JMSWrapper.getJMSWrapper();
+		} catch (JMSException e1) {
+			logger.error("JMSException when getting JMS Wrapper. " + 
+					"Make sure the HornetQ/JMS server is running!!! " + "" +
+					"AVL feed terminated.", e1);
+			msgConsumer = null;
+			return;
+		} catch (NamingException e1) {
+			logger.error("NamingException when getting JMS Wrapper. " + 
+					"Make sure the HornetQ/JMS server is running!!! " + "" +
+					"AVL feed terminated.", e1);
+			msgConsumer = null;
+			return;
+		}
+		
+		msgConsumer = jmsWrapper.createTopicConsumer(jmsTopicName);
+	}
+	
+	/**
 	 * So that Runnable interface used for each thread.
 	 * Makes sure that runs continuously even if an 
 	 * exception is thrown.
@@ -147,23 +178,7 @@ public class AvlJmsClient extends Module {
 		// of in the constructor since can't access session from multiple
 		// threads. So apparently need to create it in thread that it is used.
 		// Otherwise get a warning "HQ214021: Invalid concurrent session usage."
-		String jmsTopicName = getTopicName(projectId);		
-		JMSWrapper jmsWrapper = null;
-		try {
-			jmsWrapper = JMSWrapper.getJMSWrapper();
-		} catch (JMSException e1) {
-			logger.error("JMSException when getting JMS Wrapper. " + 
-					"Make sure the HornetQ/JMS server is running!!! " + "" +
-					"AVL feed terminated.", e1);
-			return;
-		} catch (NamingException e1) {
-			logger.error("NamingException when getting JMS Wrapper. " + 
-					"Make sure the HornetQ/JMS server is running!!! " + "" +
-					"AVL feed terminated.", e1);
-			return;
-		}
-		
-		msgConsumer = jmsWrapper.createTopicConsumer(jmsTopicName);
+		createMessageConsumer();
 
 		// Simply continue to do things
 		while (true) {
@@ -207,13 +222,17 @@ public class AvlJmsClient extends Module {
 				// This kind of exception can happen when there is a problem
 				// with JMS such as "Consumer is closed". When this happens
 				// need to make sure that don't just cycle through the while
-				// loop and log a huge amount quickly. Therefore not 
+				// loop and log a huge amount quickly. Therefore  
 				// displaying only the exception message instead of the full 
 				// stack trace. Also, sleeping for a couple of seconds so 
 				// that only get an error message every couple of seconds.
 				logger.error("Error when waiting for AVL message. {}", 
 						e.getMessage());
 				Time.sleep(2000);
+				
+				// Since there was a problem try creating the message consumer
+				// again.
+				createMessageConsumer();
 			} catch (ClassCastException e) {
 				logger.error("AVL Client received an object that was not an AvlReport", e);
 			} catch (InterruptedException e) {
