@@ -20,7 +20,7 @@ import net.jcip.annotations.Immutable;
 
 /**
  * This class is for having a key for a map that is made up of two or three
- * Strings. Often for such keys a shortcut is taken where one simply appends the
+ * objects. Often for such keys a shortcut is taken where one simply appends 
  * strings together along with a separator character so one gets a key such as
  * "string1|string2". But that is really clunky. Best to do it right and use
  * this class as the key for a map.
@@ -32,12 +32,12 @@ import net.jcip.annotations.Immutable;
 public class MapKey {
 
 	// The key is made up of these four strings. Null values are OK. If fewer
-	// than four strings are needed then the remaining ones will be null.
-	private final String s1;
-	private final String s2;
-	private final String s3;
-	private final String s4;
-	
+	// than four objects are needed then the remaining ones will be null.
+	private final Object s1;
+	private final Object s2;
+	private final Object s3;
+	private final Object s4;
+
 	// Since hashCode() can be called a lot might as well cache the value
 	// since this object is immutable.
 	private int cachedHashCode;
@@ -45,14 +45,14 @@ public class MapKey {
 	/********************** Member Functions **************************/
 
 	/**
-	 * For when need a key consisting of two strings.
+	 * For when need a key consisting of two objects.
 	 * 
 	 * @param s1
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s2
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 */
-	public MapKey(String s1, String s2) {
+	public MapKey(Object s1, Object s2) {
 		this.s1 = s1;
 		this.s2 = s2;
 		this.s3 = null;
@@ -61,16 +61,16 @@ public class MapKey {
 	}
 
 	/**
-	 * For when need a key consisting of three strings.
+	 * For when need a key consisting of three objects.
 	 * 
 	 * @param s1
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s2
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s3
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 */
-	public MapKey(String s1, String s2, String s3) {
+	public MapKey(Object s1, Object s2, Object s3) {
 		this.s1 = s1;
 		this.s2 = s2;
 		this.s3 = s3;
@@ -79,18 +79,18 @@ public class MapKey {
 	}
 
 	/**
-	 * For when need a key consisting of four strings.
+	 * For when need a key consisting of four objects.
 	 * 
 	 * @param s1
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s2
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s3
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s4
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 */
-	public MapKey(String s1, String s2, String s3, String s4) {
+	public MapKey(Object s1, Object s2, Object s3, Object s4) {
 		this.s1 = s1;
 		this.s2 = s2;
 		this.s3 = s3;
@@ -103,12 +103,12 @@ public class MapKey {
 	 * using new MapKey(). For when key consists of two strings.
 	 * 
 	 * @param s1
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s2
-	 *            String to be part of the key
-	 * @return the MapKey for the specified strings
+	 *            Object to be part of the key
+	 * @return the MapKey for the specified objects
 	 */
-	public static MapKey create(String s1, String s2) {
+	public static MapKey create(Object s1, Object s2) {
 		return new MapKey(s1, s2);
 	}
 
@@ -117,32 +117,32 @@ public class MapKey {
 	 * using new MapKey(). For when key consists of three strings.
 	 * 
 	 * @param s1
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s2
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s3
-	 *            String to be part of the key
-	 * @return the MapKey for the specified strings
+	 *            Object to be part of the key
+	 * @return the MapKey for the specified objects
 	 */
-	public static MapKey create(String s1, String s2, String s3) {
+	public static MapKey create(Object s1, Object s2, Object s3) {
 		return new MapKey(s1, s2, s3);
 	}
 
 	/**
 	 * A different way of creating a MapKey by using a static method instead of
-	 * using new MapKey(). For when key consists of four strings.
+	 * using new MapKey(). For when key consists of four objects.
 	 * 
 	 * @param s1
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s2
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s3
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @param s4
-	 *            String to be part of the key
+	 *            Object to be part of the key
 	 * @return the MapKey for the specified strings
 	 */
-	public static MapKey create(String s1, String s2, String s3, String s4) {
+	public static MapKey create(Object s1, Object s2, Object s3, Object s4) {
 		return new MapKey(s1, s2, s3, s4);
 	}
 
