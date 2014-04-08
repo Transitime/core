@@ -316,10 +316,6 @@
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 
-  <logger name="org.transitime.avl.AvlJmsClient" level="info" additivity="false">
-    <appender-ref ref="CORE_DEBUG" />
-  </logger>
-
   <logger name="org.transitime.core.dataCache.PredictionDataCache" level="info" additivity="false">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
