@@ -45,7 +45,9 @@ public class Prediction implements Serializable {
 	// so it has been added. It is only available on the server side since
 	// want to send as little info as possible to client side, especially
 	// when GTFS-RT feed is provided, which is really data intensive.
+	@SuppressWarnings("unused")
 	private final String stopName;
+	
 	private final int stopSequence;
 	private final String routeId;
 	// routeShortName needed because routeId is sometimes not consistent over
@@ -129,7 +131,7 @@ public class Prediction implements Serializable {
 			boolean isArrival) {
 		this.vehicleId = vehicleId;
 		this.stopId = stopId;
-		// stopName is only for debugging on the client side
+		// stopName is only for debugging so not made available on client side
 		this.stopName = null;
 		this.stopSequence = stopSequence;
 		this.routeId = routeId;
