@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import org.transitime.core.TemporalDifference;
 import net.jcip.annotations.Immutable;
 
 /**
@@ -45,6 +46,7 @@ public class Vehicle implements Serializable {
 	private final String routeShortName;
 	private final String tripId;
 	private final boolean predictable;
+	private final TemporalDifference realTimeSchedAdh;
 	
 	private static final long serialVersionUID = -1744566765456572042L;
 
@@ -59,12 +61,13 @@ public class Vehicle implements Serializable {
 	 * @param predictable
 	 */
 	public Vehicle(Avl avl, String routeId, String routeShortName,
-			String tripId, boolean predictable) {
+			String tripId, boolean predictable, TemporalDifference realTimeSchdAdh) {
 		this.avl = avl;
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.tripId = tripId;
 		this.predictable = predictable;
+		this.realTimeSchedAdh = realTimeSchdAdh;
 	}
 
 	/*
@@ -78,6 +81,7 @@ public class Vehicle implements Serializable {
 		private String routeShortName;
 		private String tripId;
 		private boolean predictable;
+		private TemporalDifference realTimeSchdAdh;
 		
 		private static final long serialVersionUID = -4996254752417270043L;
 		private static final short serializationVersion = 0;
@@ -91,6 +95,7 @@ public class Vehicle implements Serializable {
 			this.routeShortName = v.routeShortName;
 			this.tripId = v.tripId;
 			this.predictable = v.predictable;
+			this.realTimeSchdAdh = v.realTimeSchedAdh;
 		}
 		
 		/*
@@ -107,6 +112,7 @@ public class Vehicle implements Serializable {
 			stream.writeObject(routeShortName);
 			stream.writeObject(tripId);
 			stream.writeBoolean(predictable);
+			stream.writeObject(realTimeSchdAdh);
 		}
 
 		/*
@@ -127,6 +133,7 @@ public class Vehicle implements Serializable {
 			routeShortName = (String) stream.readObject();
 			tripId = (String) stream.readObject();
 			predictable = stream.readBoolean();
+			realTimeSchdAdh = (TemporalDifference) stream.readObject();
 		}
 		
 		/*
@@ -138,7 +145,7 @@ public class Vehicle implements Serializable {
 		 */
 		private Object readResolve() {
 			return new Vehicle(avl, routeId, routeShortName, tripId,
-					predictable);
+					predictable, realTimeSchdAdh);
 		}
 	}  // End of SerializationProxy class
 
@@ -213,14 +220,20 @@ public class Vehicle implements Serializable {
 		return predictable;
 	}
 
+	public TemporalDifference getRealTimeSchedAdh() {
+		return realTimeSchedAdh;
+	}
+	
 	@Override
 	public String toString() {
 		return "Vehicle [" 
-				+ "avl=" + avl
+				+ "vehicleId=" + avl.getVehicleId()
 				+ ", routeId=" + routeId 
 				+ ", routeShortName=" + routeShortName
 				+ ", tripId=" + tripId
-				+ ", predictable=" + predictable 
+				+ ", predictable=" + predictable
+				+ ", realTimeSchedAdh=" + realTimeSchedAdh
+				+ ", avl=" + avl
 				+ "]";
 	}
 
@@ -230,7 +243,7 @@ public class Vehicle implements Serializable {
 	public static void main(String args[]) {
 		Avl avl = new Avl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f, 
 				"block", "driver", "license", 0);
-		Vehicle v = new Vehicle(avl, "routeId", "routeShortName", "tripId", true);
+		Vehicle v = new Vehicle(avl, "routeId", "routeShortName", "tripId", true, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);
