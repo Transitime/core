@@ -131,8 +131,9 @@ public class MatchProcessor {
 	}
 	
 	/**
-	 * Stores the spatial match in log file and to database so can be
-	 * processed later to determine expected travel times.
+	 * Stores the spatial match in log file and to database so can be processed
+	 * later to determine expected travel times.
+	 * 
 	 * @param vehicleState
 	 */
 	private void processSpatialMatch(VehicleState vehicleState) {
@@ -143,6 +144,18 @@ public class MatchProcessor {
 		
 		// Store match in database
 		Core.getInstance().getDbLogger().add(match);
+	}
+	
+	private void processRealTimeScheduleAdherence(VehicleState vehicleState) {
+		logger.debug("Processing real-time schedule adherence for vehicleId={}",
+				vehicleState.getVehicleId());
+	
+		// Determine the schedule adherence for the vehicle
+		TemporalDifference scheduleAdherence = 
+				RealTimeSchedAdhProcessor.generate(vehicleState);
+		
+		// Store the schedule adherence with the vehicle
+		vehicleState.setRealTimeSchedAdh(scheduleAdherence);
 	}
 	
 	/**
@@ -168,6 +181,7 @@ public class MatchProcessor {
 		processHeadways(vehicleState);
 		processArrivalDepartures(vehicleState);
 		processSpatialMatch(vehicleState);
+		processRealTimeScheduleAdherence(vehicleState);
 		
 		// Update the VehicleDataCache so that client can access vehicle data
 		VehicleDataCache.getInstance().updateVehicle(vehicleState);
