@@ -1,0 +1,275 @@
+/*
+ * This file is part of Transitime.org
+ * 
+ * Transitime.org is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License (GPL) as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * Transitime.org is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.transitime.core.travelTimes;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.db.structs.Calendar;
+import org.transitime.db.structs.Match;
+import org.transitime.gtfs.DbConfig;
+import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.MapKey;
+
+/**
+ * For retrieving historic AVL based data from database so that travel times can
+ * be determined.
+ * 
+ * @author SkiBu Smith
+ * 
+ */
+public class DataFetcher {
+
+	private Map<String, Calendar> gtfsCalendars = null;
+	
+	private List<Integer> specialDaysOfWeek = null;
+
+	private static final Logger logger = 
+			LoggerFactory.getLogger(DataFetcher.class);
+
+	/********************** Member Functions **************************/
+
+	/**
+	 * Sets up needed calendar information if separating out data for special
+	 * days of the week, such as Fridays for weekday service.
+	 * 
+	 * @param projectId
+	 * @param newSpecialDaysOfWeek
+	 *            List of Integers indicating day of week. Uses
+	 *            java.util.Calendar values such as java.util.Calendar.MONDAY .
+	 */
+	public DataFetcher(String projectId, List<Integer> newSpecialDaysOfWeek) {
+		// Read calendar configuration from db
+		gtfsCalendars = Calendar.getCalendars(projectId, DbConfig.SANDBOX_REV);
+		
+		specialDaysOfWeek = newSpecialDaysOfWeek;
+	}
+	
+	/**
+	 * Gets the day of the week string for use with the keys for the maps. If special
+	 * days of the week were specified using initializeServiceInfo() and the day of the week
+	 * as specified by the data parameter is for a day of the week for the calendar specified
+	 * by the service ID then a string representing the day of the week is returned.
+	 * 
+	 * @param serviceId
+	 *            the service ID
+	 * @param date
+	 *            for determining day of the week
+	 * @return string indicating day of the week if there is a match, otherwise null
+	 */
+	private String getMatchingDayOfWeek(String serviceId, Date date) {
+		if (specialDaysOfWeek != null && gtfsCalendars != null) {
+			// Determine the day of the week for the data
+			java.util.Calendar cal = new GregorianCalendar();
+			cal.setTime(date);
+			int dayOfWeek = cal.get(java.util.Calendar.DAY_OF_WEEK);
+			
+			// If the day of the week is not one of the special days of the week
+			// then it doesn't need special treatment so return null.
+			if (!specialDaysOfWeek.contains(dayOfWeek))
+				return null;
+			
+			// The day of the week is a special day. Therefore see if it is included
+			// in the calendar specified by the service ID. If it is then return
+			// string indicating that the data for the day should be treated special.
+			Calendar gtfsCalendar = gtfsCalendars.get(serviceId);
+			if (dayOfWeek== java.util.Calendar.MONDAY && gtfsCalendar.getMonday())
+				return "Monday";
+			else if (dayOfWeek== java.util.Calendar.TUESDAY && gtfsCalendar.getTuesday())
+				return "Tuesday";
+			else if (dayOfWeek== java.util.Calendar.WEDNESDAY && gtfsCalendar.getWednesday())
+				return "Wednesday";
+			else if (dayOfWeek== java.util.Calendar.THURSDAY && gtfsCalendar.getThursday())
+				return "Thursday";
+			else if (dayOfWeek== java.util.Calendar.FRIDAY && gtfsCalendar.getFriday())
+				return "Friday";
+			else if (dayOfWeek== java.util.Calendar.SATURDAY && gtfsCalendar.getSaturday())
+				return "Saturday";
+			else if (dayOfWeek== java.util.Calendar.SUNDAY && gtfsCalendar.getSunday())
+				return "Sunday";
+		}
+		
+		// Not a match so return null
+		return null;		
+	}
+
+	/**
+	 * Returns a key for use in a map. They key consists of the serviceId, an
+	 * optional day of the week if the day specified by the date parameter
+	 * matches the calendar specified by the service ID, the tripId, and the
+	 * vehicleId. This way can separate out data for special days like Fridays
+	 * for a weekday service class.
+	 * 
+	 * @param serviceId
+	 * @param date
+	 * @param tripId
+	 * @param vehicleId
+	 * @return
+	 */
+	private MapKey getKey(String serviceId, Date date, String tripId,
+			String vehicleId) {
+		String dayOfWeek = getMatchingDayOfWeek(serviceId, date);
+		return new MapKey(serviceId, dayOfWeek, tripId, vehicleId);
+	}
+	
+	/**
+	 * Adds the arrival/departure to the map.
+	 * 
+	 * @param map
+	 * @param arrDep
+	 */
+	private void addArrivalDepartureToMap(
+			Map<MapKey, List<ArrivalDeparture>> map, ArrivalDeparture arrDep) {
+		MapKey key = getKey(arrDep.getServiceId(), arrDep.getTime(),
+				arrDep.getTripId(), arrDep.getVehicleId());
+		List<ArrivalDeparture> list = map.get(key);
+		if (list == null) {
+			list = new ArrayList<ArrivalDeparture>();
+			map.put(key, list);
+		}
+		list.add(arrDep);
+	}
+	
+	/**
+	 * Reads arrivals/departures from db into so can be processed.
+	 * 
+	 * @param projectId
+	 * @param beginTime
+	 * @param endTime
+	 * @return
+	 */
+	public Map<MapKey, List<ArrivalDeparture>> readArrivalsDepartures(
+			String projectId, Date beginTime, Date endTime) {
+		IntervalTimer timer = new IntervalTimer();
+
+		// For returning the results
+		Map<MapKey, List<ArrivalDeparture>> resultsMap = 
+				new HashMap<MapKey, List<ArrivalDeparture>>();
+		
+		// For keeping track of which rows should be returned by the batch.
+		int firstResult = 0;
+		// Batch size of 50k found to be significantly faster than 10k,
+		// by about a factor of 2.
+		int batchSize = 50000;  // Also known as maxResults
+		// The temporary list for the loop that contains a batch of results
+		List<ArrivalDeparture> arrDepBatchList;
+		// Read in batch of 50k rows of data and process it
+		do {				
+			arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
+					projectId, 
+					beginTime, endTime, 
+					// Order results by time so that process them in the same
+					// way that a vehicle travels.
+					"ORDER BY time", // SQL clause
+					firstResult, batchSize,
+					null); // arrivalOrDeparture. Null means read in both
+			
+			// Add arrivals/departures to map
+			for (ArrivalDeparture arrDep : arrDepBatchList) {
+				addArrivalDepartureToMap(resultsMap, arrDep);
+			}
+			
+			logger.info("Read in {} arrival/departures", 
+					firstResult+arrDepBatchList.size());
+			
+			// Update firstResult for reading next batch of data
+			firstResult += batchSize;
+		} while (arrDepBatchList.size() == batchSize);
+
+		logger.info("Reading matches took {} msec", timer.elapsedMsec());
+
+		// Return the resulting map of arrivals/departures
+		return resultsMap;
+	}
+	
+	/**
+	 * Adds the arrival/departure to the map.
+	 * 
+	 * @param map
+	 * @param arrDep
+	 */
+	private void addMatchToMap(Map<MapKey, List<Match>> map, Match match) {
+		MapKey key = getKey(match.getServiceId(), match.getTime(),
+				match.getTripId(), match.getVehicleId());
+		List<Match> list = map.get(key);
+		if (list == null) {
+			list = new ArrayList<Match>();
+			map.put(key, list);
+		}
+		list.add(match);
+	}
+	
+	/**
+	 * Reads matches from db into so can be processed.
+     *
+	 * @param projectId
+	 * @param beginTime
+	 * @param endTime
+	 * @return
+	 */
+	public Map<MapKey, List<Match>> readMatches(
+			String projectId, Date beginTime, Date endTime) {
+		IntervalTimer timer = new IntervalTimer();
+		
+		// For returning the results
+		Map<MapKey, List<Match>> resultsMap = 
+				new HashMap<MapKey, List<Match>>();
+		
+		// For keeping track of which rows should be returned by the batch.
+		int firstResult = 0;
+		// Batch size of 50k found to be significantly faster than 10k,
+		// by about a factor of 2.
+		int batchSize = 50000;  // Also known as maxResults
+		// The temporary list for the loop that contains a batch of results
+		List<Match> matchBatchList;
+		// Read in batch of 50k rows of data and process it
+		do {				
+			matchBatchList = Match.getMatchesFromDb(
+					projectId, 
+					beginTime, endTime, 
+					// Order results by time so that process them in the same
+					// way that a vehicle travels.
+					"ORDER BY avlTime", // SQL clause
+					firstResult, batchSize);
+			
+			// Add arrivals/departures to map
+			for (Match match : matchBatchList) {
+				addMatchToMap(resultsMap, match);
+			}
+			
+			logger.info("Read in {} matches", 
+					firstResult+matchBatchList.size());
+			
+			// Update firstResult for reading next batch of data
+			firstResult += batchSize;
+		} while (matchBatchList.size() == batchSize);
+
+		logger.info("Reading matches took {} msec", timer.elapsedMsec());
+
+		// Return the resulting map of arrivals/departures
+		return resultsMap;
+	}
+
+}
