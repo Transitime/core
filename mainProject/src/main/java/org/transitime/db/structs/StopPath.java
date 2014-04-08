@@ -508,6 +508,13 @@ public class StopPath implements Serializable {
 	}
 	
 	/**
+	 * @return Number of segments in path.
+	 */
+	public int getNumberSegments() {
+		return locations.size()-1;
+	}
+	
+	/**
 	 * Returns the end of the path, which is where the stop is. Note that
 	 * it is not exactly the stop location because stops do not need to be
 	 * on the path.
