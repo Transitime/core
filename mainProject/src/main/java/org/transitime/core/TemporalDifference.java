@@ -16,21 +16,29 @@
  */
 package org.transitime.core;
 
+import java.io.Serializable;
+
 import org.transitime.configData.CoreConfig;
 import org.transitime.utils.Time;
 
 /**
- * For keeping track of how far off a vehicle is from the expected time.
- * For schedule adherence and for determining temporal matches.
+ * For keeping track of how far off a vehicle is from the expected time. For
+ * schedule adherence and for determining temporal matches. Positive means ahead
+ * of and traveling faster than expected.
+ * <p>
+ * Class made serializable so that schedule adherence data can be made available
+ * through RMI calls.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
-public class TemporalDifference {
+public class TemporalDifference implements Serializable {
 
 	// Positive means ahead of and traveling faster than expected. Negative 
 	// means behind and traveling slower than expected.
 	private final int temporalDifferenceMsec;
+
+	private static final long serialVersionUID = 3306638473792296250L;
 
 	/********************** Member Functions **************************/
 
