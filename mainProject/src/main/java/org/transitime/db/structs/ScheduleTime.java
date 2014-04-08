@@ -51,7 +51,9 @@ public class ScheduleTime implements Serializable {
 	}
 	
 	/**
-	 * Time of day in seconds. Can be null.
+	 * Time of day in seconds. Will be null if there is no arrival time (even
+	 * if there is a departure time).
+	 * 
 	 * @return
 	 */
 	public Integer getArrivalTime() {
@@ -59,7 +61,9 @@ public class ScheduleTime implements Serializable {
 	}
 	
 	/**
-	 * Time of day in seconds. Can be null.
+	 * Time of day in seconds. Will be null if there is no departure time (even
+	 * if there is an arrival time).
+	 * 
 	 * @return
 	 */
 	public Integer getDepartureTime() {
