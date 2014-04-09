@@ -64,20 +64,37 @@ public class TemporalDifference implements Serializable {
 	}
 
 	/**
-	 * Returns true if the temporal difference is within the bounds specified
-	 * by CoreConfig.getAllowableEarlySeconds() and 
+	 * Returns true if the temporal difference is within the bounds specified by
+	 * CoreConfig.getAllowableEarlySeconds() and
 	 * CoreConfig.getAllowableLateSeconds().
+	 * 
 	 * @return true if within bounds
 	 */
 	public boolean isWithinBounds() {
-		return temporalDifferenceMsec < CoreConfig.getAllowableEarlySeconds() * 1000 &&
-				-temporalDifferenceMsec < CoreConfig.getAllowableLateSeconds() * 1000;
+		return temporalDifferenceMsec < 
+					CoreConfig.getAllowableEarlySeconds() * 1000 
+				&& -temporalDifferenceMsec < 
+					CoreConfig.getAllowableLateSeconds() * 1000;
+	}
+	
+	/**
+	 * Returns whether the temporal difference is within the specified bounds.
+	 * 
+	 * @param allowableEarlySeconds
+	 * @param allowableLateSeconds
+	 * @return
+	 */
+	public boolean isWithinBounds(int allowableEarlySeconds,
+			int allowableLateSeconds) {
+		return temporalDifferenceMsec < allowableEarlySeconds
+				&& -temporalDifferenceMsec < allowableLateSeconds;
 	}
 	
 	/**
 	 * Returns an easily comparable positive value for the temporal difference
 	 * that takes into account that being early is far worse and less likely
 	 * than being late.
+	 * 
 	 * @return
 	 */
 	private int temporalDifferenceAbsoluteValue() {
