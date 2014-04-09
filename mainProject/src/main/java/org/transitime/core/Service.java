@@ -164,7 +164,7 @@ public class Service {
 			// If the time is within 24 hours of the midnight time of the calendar date
 			// then it indeed matches the date. Note that this method of checking is
 			// much faster than using Calendar class to see if on same day.
-			if (epochTime.getTime() < calendarDate.getDate().getTime() + 1*Time.MS_PER_DAY) {
+			if (epochTime.getTime() < calendarDate.getTime() + 1*Time.MS_PER_DAY) {
 				// Yes, there is special service for this date
 				if (calendarDate.addService()) {
 					// Add the service for this date
