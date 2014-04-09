@@ -196,6 +196,13 @@ public class CalendarDate implements Serializable{
 	}
 
 	/**
+	 * @return the epoch time
+	 */
+	public long getTime() {
+		return date.getTime();
+	}
+	
+	/**
 	 * Note that is probably more clear to use addService() since
 	 * that way don't need to know what valid values of exception_type
 	 * are in GTFS.
