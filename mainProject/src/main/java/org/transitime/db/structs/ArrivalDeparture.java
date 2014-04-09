@@ -366,6 +366,11 @@ public class ArrivalDeparture implements Serializable {
 				+ "vehicleId=" + vehicleId 
 				// + ", isArrival=" + isArrival
 				+ ", time=" + Time.dateTimeStrMsec(time)
+				+ (scheduledTime != null ? 
+						", schedTime=" + Time.timeStr(scheduledTime) : "")
+				+ (scheduledTime != null ? 
+						", schedAdh=" + new TemporalDifference(
+								scheduledTime.getTime() - time.getTime()) : "")
 				+ ", route="	+ routeId 
 				+ ", rteName=" + routeShortName
 				+ ", stop=" + stopId 
