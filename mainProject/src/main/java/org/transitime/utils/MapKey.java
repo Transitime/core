@@ -24,6 +24,10 @@ import net.jcip.annotations.Immutable;
  * strings together along with a separator character so one gets a key such as
  * "string1|string2". But that is really clunky. Best to do it right and use
  * this class as the key for a map.
+ * <p>
+ * It is probably best to subclass this class for each type of map key so that
+ * you can make sure that the proper type of key is used for the map. Otherwise
+ * it could be confusing if one has multiple different MapKeys.
  * 
  * @author SkiBu Smith
  * 
