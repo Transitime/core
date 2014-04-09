@@ -567,6 +567,14 @@ public class ArrivalDeparture implements Serializable {
 		return isArrival;
 	}
 
+	/**
+	 * Can be more clear than using !isArrival()
+	 * @return
+	 */
+	public boolean isDeparture() {
+		return !isArrival;
+	}
+	
 	public String getTripId() {
 		return tripId;
 	}
