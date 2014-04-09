@@ -135,11 +135,13 @@ public class DataFetcher {
 	 * 
 	 * @param serviceId
 	 * @param date
+	 *            Used to determine the day of week to be used in conjunction
+	 *            with the service class.
 	 * @param tripId
 	 * @param vehicleId
 	 * @return
 	 */
-	private DbDataMapKey getKey(String serviceId, Date date, String tripId,
+	public DbDataMapKey getKey(String serviceId, Date date, String tripId,
 			String vehicleId) {
 		String dayOfWeek = getMatchingDayOfWeek(serviceId, date);
 		return new DbDataMapKey(serviceId, dayOfWeek, tripId, vehicleId);
