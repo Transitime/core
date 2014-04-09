@@ -116,6 +116,17 @@ public class DataFetcher {
 	}
 
 	/**
+	 * Special MapKey class so that can make sure using the proper one for the
+	 * associated maps in this class.
+	 */
+	public static class DbDataMapKey extends MapKey {
+		private DbDataMapKey(String serviceId, String dayOfWeek, String tripId,
+				String vehicleId) {
+			super(serviceId, dayOfWeek, tripId, vehicleId);
+		}
+	}
+	
+	/**
 	 * Returns a key for use in a map. They key consists of the serviceId, an
 	 * optional day of the week if the day specified by the date parameter
 	 * matches the calendar specified by the service ID, the tripId, and the
@@ -128,10 +139,10 @@ public class DataFetcher {
 	 * @param vehicleId
 	 * @return
 	 */
-	private MapKey getKey(String serviceId, Date date, String tripId,
+	private DbDataMapKey getKey(String serviceId, Date date, String tripId,
 			String vehicleId) {
 		String dayOfWeek = getMatchingDayOfWeek(serviceId, date);
-		return new MapKey(serviceId, dayOfWeek, tripId, vehicleId);
+		return new DbDataMapKey(serviceId, dayOfWeek, tripId, vehicleId);
 	}
 	
 	/**
@@ -141,8 +152,8 @@ public class DataFetcher {
 	 * @param arrDep
 	 */
 	private void addArrivalDepartureToMap(
-			Map<MapKey, List<ArrivalDeparture>> map, ArrivalDeparture arrDep) {
-		MapKey key = getKey(arrDep.getServiceId(), arrDep.getTime(),
+			Map<DbDataMapKey, List<ArrivalDeparture>> map, ArrivalDeparture arrDep) {
+		DbDataMapKey key = getKey(arrDep.getServiceId(), arrDep.getTime(),
 				arrDep.getTripId(), arrDep.getVehicleId());
 		List<ArrivalDeparture> list = map.get(key);
 		if (list == null) {
@@ -160,13 +171,13 @@ public class DataFetcher {
 	 * @param endTime
 	 * @return
 	 */
-	public Map<MapKey, List<ArrivalDeparture>> readArrivalsDepartures(
+	public Map<DbDataMapKey, List<ArrivalDeparture>> readArrivalsDepartures(
 			String projectId, Date beginTime, Date endTime) {
 		IntervalTimer timer = new IntervalTimer();
 
 		// For returning the results
-		Map<MapKey, List<ArrivalDeparture>> resultsMap = 
-				new HashMap<MapKey, List<ArrivalDeparture>>();
+		Map<DbDataMapKey, List<ArrivalDeparture>> resultsMap = 
+				new HashMap<DbDataMapKey, List<ArrivalDeparture>>();
 		
 		// For keeping track of which rows should be returned by the batch.
 		int firstResult = 0;
@@ -210,8 +221,8 @@ public class DataFetcher {
 	 * @param map
 	 * @param arrDep
 	 */
-	private void addMatchToMap(Map<MapKey, List<Match>> map, Match match) {
-		MapKey key = getKey(match.getServiceId(), match.getTime(),
+	private void addMatchToMap(Map<DbDataMapKey, List<Match>> map, Match match) {
+		DbDataMapKey key = getKey(match.getServiceId(), match.getTime(),
 				match.getTripId(), match.getVehicleId());
 		List<Match> list = map.get(key);
 		if (list == null) {
@@ -229,13 +240,13 @@ public class DataFetcher {
 	 * @param endTime
 	 * @return
 	 */
-	public Map<MapKey, List<Match>> readMatches(
+	public Map<DbDataMapKey, List<Match>> readMatches(
 			String projectId, Date beginTime, Date endTime) {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// For returning the results
-		Map<MapKey, List<Match>> resultsMap = 
-				new HashMap<MapKey, List<Match>>();
+		Map<DbDataMapKey, List<Match>> resultsMap = 
+				new HashMap<DbDataMapKey, List<Match>>();
 		
 		// For keeping track of which rows should be returned by the batch.
 		int firstResult = 0;
