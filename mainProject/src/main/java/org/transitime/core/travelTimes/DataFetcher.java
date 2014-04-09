@@ -153,7 +153,7 @@ public class DataFetcher {
 	 */
 	private void addArrivalDepartureToMap(
 			Map<DbDataMapKey, List<ArrivalDeparture>> map, ArrivalDeparture arrDep) {
-		DbDataMapKey key = getKey(arrDep.getServiceId(), arrDep.getTime(),
+		DbDataMapKey key = getKey(arrDep.getServiceId(), arrDep.getDate(),
 				arrDep.getTripId(), arrDep.getVehicleId());
 		List<ArrivalDeparture> list = map.get(key);
 		if (list == null) {

@@ -198,7 +198,7 @@ public class ScheduleStatistics {
 			Map<String, List<Integer>> timesByTripMap, ArrivalDeparture ad) {
 		// Get the existing list of times for the trip/stop
 		String key = getTripStopKey(ad.getTripId(), ad.getStopId());
-		int secsIntoDay = timeForUsingCalendar.getSecondsIntoDay(ad.getTime());
+		int secsIntoDay = timeForUsingCalendar.getSecondsIntoDay(ad.getDate());
 
 		// If list of times for the trip/stop doesn't exist, yet create it
 		List<Integer> times = timesByTripMap.get(key);

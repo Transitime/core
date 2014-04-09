@@ -555,10 +555,14 @@ public class ArrivalDeparture implements Serializable {
 		return vehicleId;
 	}
 
-	public Date getTime() {
+	public Date getDate() {
 		return time;
 	}
 
+	public long getTime() {
+		return time.getTime();
+	}
+	
 	public String getStopId() {
 		return stopId;
 	}
