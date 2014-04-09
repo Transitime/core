@@ -26,7 +26,6 @@ import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Trip;
-import org.transitime.utils.Time;
 
 /**
  * Takes the AVL data and processes it. Matches vehicles to their assignments.
@@ -251,7 +250,7 @@ public class DataProcessor {
 		}
 	}
 	
-	/*
+	/**
 	 * Looks at the last match in vehicleState to determine if at end of
 	 * block assignment. Note that this will not always work since might
 	 * not actually get an AVL report that matches to the last stop.
@@ -271,10 +270,50 @@ public class DataProcessor {
 				}
 			}
 		}
-
 	}
 	
-	/*
+	/**
+	 * Determines the real-time schedule adherence for the vehicle. To be called
+	 * after the vehicle is matched.
+	 * <p>
+	 * If schedule adherence is not within bounds then will try to match the
+	 * vehicle to the assignment again. This can be important if system is run
+	 * for a while and then paused and then started up again. Vehicle might
+	 * continue to match to the pre-paused match, but by then the vehicle might
+	 * be on a whole different trip, causing schedule adherence to be really far
+	 * off. To prevent this the vehicle is re-matched to the assignment.
+	 * 
+	 * @param vehicleState
+	 * @return
+	 */
+	private TemporalDifference checkScheduleAdherence(VehicleState vehicleState) {
+		logger.debug("Processing real-time schedule adherence for vehicleId={}",
+				vehicleState.getVehicleId());
+	
+		// Determine the schedule adherence for the vehicle
+		TemporalDifference scheduleAdherence = 
+				RealTimeSchedAdhProcessor.generate(vehicleState);
+		
+		// Make sure the schedule adherence is reasonable
+		if (!scheduleAdherence.isWithinBounds()) { 
+			// Schedule adherence not reasonable so match vehicle to assignment
+			// again.
+			matchVehicleToAssignment(vehicleState);
+			
+			// Now that have matched vehicle to assignment again determine
+			// schedule adherence once more.
+			scheduleAdherence = 
+					RealTimeSchedAdhProcessor.generate(vehicleState);
+		}
+		
+		// Store the schedule adherence with the vehicle
+		vehicleState.setRealTimeSchedAdh(scheduleAdherence);
+		
+		// Return results
+		return scheduleAdherence;
+	}
+	
+	/**
 	 * Processes the AVL report by matching to the assignment and
 	 * generating predictions and such. Sets VehicleState for the
 	 * vehicle based on the results.
@@ -295,7 +334,8 @@ public class DataProcessor {
 		// Logging to syserr just for debugging. This should eventually be removed
 		System.err.println("Processing avlReport for vehicleId=" + 
 				avlReport.getVehicleId() + 
-				" AVL time=" + Time.timeStrMsec(avlReport.getTime()) + 
+				//" AVL time=" + Time.timeStrMsec(avlReport.getTime()) +
+				" " + avlReport +
 				" ...");
 		
 		// Determine previous state of vehicle
@@ -339,6 +379,11 @@ public class DataProcessor {
 				// vehicle.
 				vehicleState.setMatch(null);
 			}
+			
+			// Determine and store the schedule adherence. If schedule 
+			// adherence is bad then try matching vehicle to assignment
+			// again.
+			checkScheduleAdherence(vehicleState);
 			
 			// Generates the corresponding data for the vehicle such as 
 			// predictions and arrival times

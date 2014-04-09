@@ -146,18 +146,6 @@ public class MatchProcessor {
 		Core.getInstance().getDbLogger().add(match);
 	}
 	
-	private void processRealTimeScheduleAdherence(VehicleState vehicleState) {
-		logger.debug("Processing real-time schedule adherence for vehicleId={}",
-				vehicleState.getVehicleId());
-	
-		// Determine the schedule adherence for the vehicle
-		TemporalDifference scheduleAdherence = 
-				RealTimeSchedAdhProcessor.generate(vehicleState);
-		
-		// Store the schedule adherence with the vehicle
-		vehicleState.setRealTimeSchedAdh(scheduleAdherence);
-	}
-	
 	/**
 	 * Called when vehicle is matched successfully. Generates predictions
 	 * arrival/departure times, headways and such.
@@ -181,7 +169,6 @@ public class MatchProcessor {
 		processHeadways(vehicleState);
 		processArrivalDepartures(vehicleState);
 		processSpatialMatch(vehicleState);
-		processRealTimeScheduleAdherence(vehicleState);
 		
 		// Update the VehicleDataCache so that client can access vehicle data
 		VehicleDataCache.getInstance().updateVehicle(vehicleState);
