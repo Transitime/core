@@ -621,8 +621,16 @@ public class ArrivalDeparture implements Serializable {
 	 * 
 	 * @return
 	 */
-	public Date getScheduledTime() {
+	public Date getScheduledDate() {
 		return scheduledTime;
+	}
+	
+	/**
+	 * Same as getScheduledDate() but returns long epoch time.
+	 * @return
+	 */
+	public long getScheduledTime() {
+		return scheduledTime.getTime();
 	}
 	
 	/**
