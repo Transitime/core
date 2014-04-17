@@ -314,10 +314,14 @@ public class Match implements Serializable {
 		return vehicleId;
 	}
 
-	public Date getTime() {
+	public Date getDate() {
 		return avlTime;
 	}
 
+	public long getTime() {
+		return avlTime.getTime();
+	}
+	
 	public int getConfigRev() {
 		return configRev;
 	}
