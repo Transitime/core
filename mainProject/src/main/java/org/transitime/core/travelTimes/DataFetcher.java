@@ -224,7 +224,7 @@ public class DataFetcher {
 	 * @param arrDep
 	 */
 	private void addMatchToMap(Map<DbDataMapKey, List<Match>> map, Match match) {
-		DbDataMapKey key = getKey(match.getServiceId(), match.getTime(),
+		DbDataMapKey key = getKey(match.getServiceId(), match.getDate(),
 				match.getTripId(), match.getVehicleId());
 		List<Match> list = map.get(key);
 		if (list == null) {
