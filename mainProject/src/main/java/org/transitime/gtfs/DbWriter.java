@@ -17,6 +17,8 @@
  */
 package org.transitime.gtfs;
 
+import java.util.List;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -165,8 +167,52 @@ public class DbWriter {
 	}
 	
 	/**
+	 * Writes the list of Trips to the database. Useful for when updating trip
+	 * data, such as the associated travel times.
+	 * 
+	 * @param sessionFactory
+	 * @param trips
+	 */
+	public static void writeTrips(Session session, List<Trip> trips) {
+		// For logging how long things take
+		IntervalTimer timer = new IntervalTimer();
+
+		// Let user know what is going on
+		logger.info("Writing Trip data to database...");
+
+		Transaction tx = session.beginTransaction();
+		
+		// Write each of the Trips to the database
+		int counter = 0;
+		try {
+			for (Trip trip : trips) {
+				session.saveOrUpdate(trip);
+
+				// Since can writing large amount of data should use Hibernate 
+				// batching to make sure don't run out memory.
+				counter++;
+				if (counter % HibernateUtils.BATCH_SIZE == 0) {
+					session.flush();
+					session.clear();
+				}
+			}
+			
+			// Done writing data so commit it
+			tx.commit();
+		} catch (HibernateException e) {
+			logger.error("Error writing Trip data to db.", e);
+		}
+
+		// Let user know what is going on
+		logger.info("Finished writing Trip data to database . Took {} msec.",
+				timer.elapsedMsec());		
+	}
+	
+	/**
 	 * Writes the data for the collections that are part of the GtfsData
 	 * object passed in to the constructor.
+     *
+	 * @param sessionFactory
 	 */
 	public void write(SessionFactory sessionFactory) {
 		// For logging how long things take
@@ -192,6 +238,7 @@ public class DbWriter {
 		}
 
 		// Let user know what is going on
-		logger.info("Finished writing GTFS data to database . Took {} msec.",timer.elapsedMsec());		
+		logger.info("Finished writing GTFS data to database . Took {} msec.",
+				timer.elapsedMsec());		
 	}
 }
