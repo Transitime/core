@@ -295,7 +295,7 @@ public class DataProcessor {
 				RealTimeSchedAdhProcessor.generate(vehicleState);
 		
 		// Make sure the schedule adherence is reasonable
-		if (!scheduleAdherence.isWithinBounds()) { 
+		if (scheduleAdherence != null && !scheduleAdherence.isWithinBounds()) { 
 			// Schedule adherence not reasonable so match vehicle to assignment
 			// again.
 			matchVehicleToAssignment(vehicleState);
