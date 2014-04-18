@@ -121,7 +121,8 @@ public class CalendarDate implements Serializable{
 				+ "configRev=" + configRev 
 				+ ", serviceId=" + serviceId
 				+ ", date=" + date 
-				+ ", exceptionType=" + exceptionType
+				+ ", exceptionType=" + exceptionType 
+				+ " (" + (addService()?"add":"subtract") + " service)"
 				+ "]";
 	}
 	
@@ -189,6 +190,8 @@ public class CalendarDate implements Serializable{
 	}
 
 	/**
+	 * The epoch start time of midnight, the beginning of the day.
+	 * 
 	 * @return the date
 	 */
 	public Date getDate() {
@@ -196,6 +199,8 @@ public class CalendarDate implements Serializable{
 	}
 
 	/**
+	 * The epoch start time of midnight, the beginning of the day.
+	 * 
 	 * @return the epoch time
 	 */
 	public long getTime() {
