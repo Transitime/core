@@ -454,7 +454,7 @@ public class TravelTimesProcessor {
 				TravelTimesForTrip.getTravelTimesForTrips(projectId, 
 						DbConfig.SANDBOX_REV);
 
-		int originalNumberTravelTimes = numberTravelTimes(travelTimesFromDbMap);
+		int originalNumberTravelTimes = numberOfTravelTimes(travelTimesFromDbMap);
 		
 		// Will likely be storing data in db so start transaction
 		Session session = sessionFactory.openSession();
@@ -485,7 +485,7 @@ public class TravelTimesProcessor {
 				"Total number of trips={}. " + 
 				"Wrote {} records. Took {} msec.", 
 				originalNumberTravelTimes,
-				numberTravelTimes(travelTimesFromDbMap),
+				numberOfTravelTimes(travelTimesFromDbMap),
 				gtfsData.getTrips().size(),
 				counter, 
 				timer.elapsedMsec());
@@ -496,7 +496,7 @@ public class TravelTimesProcessor {
 	 * @param travelTimesFromDbMap
 	 * @return
 	 */
-	private static int numberTravelTimes(Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
+	private static int numberOfTravelTimes(Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
 		int count = 0;
 		for (List<TravelTimesForTrip> travelTimes : travelTimesFromDbMap.values()) {
 			count += travelTimes.size();
