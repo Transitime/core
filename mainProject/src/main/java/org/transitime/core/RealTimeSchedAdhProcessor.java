@@ -55,8 +55,13 @@ public class RealTimeSchedAdhProcessor {
 	 *         schedule time.
 	 */
 	public static TemporalDifference generate(VehicleState vehicleState) {
+		// If vehicle not matched/predictable then cannot provide schedule
+		// adherence
+		if (!vehicleState.isPredictable())
+			return null;
+		
 		// Convenience variables
-		TemporalMatch match = vehicleState.getMatch();
+		TemporalMatch match = vehicleState.getMatch();		
 		Trip trip = match.getTrip();
 		Date avlTime = vehicleState.getAvlReport().getDate();
 		String vehicleId = vehicleState.getVehicleId();
