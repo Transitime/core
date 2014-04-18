@@ -97,11 +97,11 @@
         avlTime datetime(3),
         blockId varchar(60),
         configRev integer,
-        pathIndex integer,
         routeId varchar(60),
         routeShortName varchar(60),
         scheduledTime datetime,
         serviceId varchar(60),
+        stopPathIndex integer,
         stopPathLength float,
         tripIndex integer,
         primary key (vehicleId, tripStartTime, tripId, time, stopSequence, stopId, isArrival)
