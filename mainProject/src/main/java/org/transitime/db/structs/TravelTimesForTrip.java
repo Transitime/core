@@ -168,7 +168,7 @@ public class TravelTimesForTrip implements Serializable {
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings("unchecked")
-	public static Map<String, List<TravelTimesForTrip>> getTravelTimesForTrip(
+	public static Map<String, List<TravelTimesForTrip>> getTravelTimesForTrips(
 			String projectId, int configRev) 
 			throws HibernateException {
 		// Create the db session

@@ -451,7 +451,7 @@ public class TravelTimesProcessor {
 
 		// Read existing data from db and put into travelTimesFromDbMap member
 		Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap = 
-				TravelTimesForTrip.getTravelTimesForTrip(projectId, 
+				TravelTimesForTrip.getTravelTimesForTrips(projectId, 
 						DbConfig.SANDBOX_REV);
 
 		int originalNumberTravelTimes = numberTravelTimes(travelTimesFromDbMap);
