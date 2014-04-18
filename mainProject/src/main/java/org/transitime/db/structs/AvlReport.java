@@ -639,7 +639,7 @@ public class AvlReport implements Serializable {
 	public static boolean matchesUnpredictableAssignment(String assignment) {
 		if (unpredictableAssignmentsPatternInitialized == false) {
 			String regEx = AvlConfig.getUnpredictableAssignmentsRegEx();
-			if (regEx != null) {
+			if (regEx != null && !regEx.isEmpty()) {
 				regExPattern = Pattern.compile(regEx);
 			}
 			unpredictableAssignmentsPatternInitialized = true;

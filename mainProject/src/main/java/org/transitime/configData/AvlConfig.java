@@ -136,13 +136,15 @@ public class AvlConfig {
 	/**
 	 * So can filter out unpredictable assignments such as for training coaches,
 	 * service vehicles, or simply vehicles that are not in service and should
-	 * not be attempted to be made predictable.
+	 * not be attempted to be made predictable. Returns empty string, the
+	 * default value if transitime.avl.unpredictableAssignmentsRegEx is not set.
 	 */
 	public static String getUnpredictableAssignmentsRegEx() {
 		return unpredictableAssignmentsRegEx.getValue();
 	}
 	private static StringConfigValue unpredictableAssignmentsRegEx =
-			new StringConfigValue("transitime.avl.unpredictableAssignmentsRegEx", null);
+			new StringConfigValue("transitime.avl.unpredictableAssignmentsRegEx", 
+					"");
 	
 	/**
 	 * For AVL timeouts. If don't get an AVL report for the vehicle in this
