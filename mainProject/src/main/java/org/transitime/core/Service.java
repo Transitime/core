@@ -161,10 +161,12 @@ public class Service {
 		// Go through calendar_dates to see if there is special service for 
 		// this date. Add or remove the special service.
 		for (CalendarDate calendarDate : dbConfig.getCalendarDates()) {
-			// If the time is within 24 hours of the midnight time of the calendar date
-			// then it indeed matches the date. Note that this method of checking is
-			// much faster than using Calendar class to see if on same day.
-			if (epochTime.getTime() < calendarDate.getTime() + 1*Time.MS_PER_DAY) {
+			// If the time is for the calendar date specified then add
+			// or subtract the special service. Note that this 
+			// method of checking is much faster than using Calendar class 
+			// to see if on same day.
+			if (calendarDate.getTime() < epochTime.getTime() &&
+					epochTime.getTime() < calendarDate.getTime() + 1*Time.MS_PER_DAY) {
 				// Yes, there is special service for this date
 				if (calendarDate.addService()) {
 					// Add the service for this date
@@ -174,8 +176,8 @@ public class Service {
 					serviceIds.remove(calendarDate.getServiceId());
 				}
 				
-				logger.debug("{} is special service date in calendar_dates.txt file. " + 
-						"Services now are {}",
+				logger.debug("{} is special service date in " +
+						"calendar_dates.txt file. Services now are {}",
 						epochTime, serviceIds);
 			}
 		}
