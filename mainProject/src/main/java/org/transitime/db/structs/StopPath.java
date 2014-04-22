@@ -428,6 +428,8 @@ public class StopPath implements Serializable {
 	}
 	
 	/**
+	 * The stop_sequence for the trip from the GTFS stop_times.txt file
+	 * 
 	 * @return the stopSequence
 	 */
 	public int getStopSequence() {
