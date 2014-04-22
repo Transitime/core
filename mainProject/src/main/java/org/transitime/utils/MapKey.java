@@ -37,10 +37,10 @@ public class MapKey {
 
 	// The key is made up of these four strings. Null values are OK. If fewer
 	// than four objects are needed then the remaining ones will be null.
-	private final Object s1;
-	private final Object s2;
-	private final Object s3;
-	private final Object s4;
+	protected final Object o1;
+	protected final Object o2;
+	protected final Object o3;
+	protected final Object o4;
 
 	// Since hashCode() can be called a lot might as well cache the value
 	// since this object is immutable.
@@ -51,54 +51,54 @@ public class MapKey {
 	/**
 	 * For when need a key consisting of two objects.
 	 * 
-	 * @param s1
+	 * @param o1
 	 *            Object to be part of the key
-	 * @param s2
+	 * @param o2
 	 *            Object to be part of the key
 	 */
-	public MapKey(Object s1, Object s2) {
-		this.s1 = s1;
-		this.s2 = s2;
-		this.s3 = null;
-		this.s4 = null;
+	public MapKey(Object o1, Object o2) {
+		this.o1 = o1;
+		this.o2 = o2;
+		this.o3 = null;
+		this.o4 = null;
 		this.cachedHashCode = createHashCode();
 	}
 
 	/**
 	 * For when need a key consisting of three objects.
 	 * 
-	 * @param s1
+	 * @param o1
 	 *            Object to be part of the key
-	 * @param s2
+	 * @param o2
 	 *            Object to be part of the key
-	 * @param s3
+	 * @param o3
 	 *            Object to be part of the key
 	 */
-	public MapKey(Object s1, Object s2, Object s3) {
-		this.s1 = s1;
-		this.s2 = s2;
-		this.s3 = s3;
-		this.s4 = null;
+	public MapKey(Object o1, Object o2, Object o3) {
+		this.o1 = o1;
+		this.o2 = o2;
+		this.o3 = o3;
+		this.o4 = null;
 		this.cachedHashCode = createHashCode();
 	}
 
 	/**
 	 * For when need a key consisting of four objects.
 	 * 
-	 * @param s1
+	 * @param o1
 	 *            Object to be part of the key
-	 * @param s2
+	 * @param o2
 	 *            Object to be part of the key
-	 * @param s3
+	 * @param o3
 	 *            Object to be part of the key
-	 * @param s4
+	 * @param o4
 	 *            Object to be part of the key
 	 */
-	public MapKey(Object s1, Object s2, Object s3, Object s4) {
-		this.s1 = s1;
-		this.s2 = s2;
-		this.s3 = s3;
-		this.s4 = s4;
+	public MapKey(Object o1, Object o2, Object o3, Object o4) {
+		this.o1 = o1;
+		this.o2 = o2;
+		this.o3 = o3;
+		this.o4 = o4;
 		this.cachedHashCode = createHashCode();
 	}
 
@@ -106,48 +106,48 @@ public class MapKey {
 	 * A different way of creating a MapKey by using a static method instead of
 	 * using new MapKey(). For when key consists of two strings.
 	 * 
-	 * @param s1
+	 * @param o1
 	 *            Object to be part of the key
-	 * @param s2
+	 * @param o2
 	 *            Object to be part of the key
 	 * @return the MapKey for the specified objects
 	 */
-	public static MapKey create(Object s1, Object s2) {
-		return new MapKey(s1, s2);
+	public static MapKey create(Object o1, Object o2) {
+		return new MapKey(o1, o2);
 	}
 
 	/**
 	 * A different way of creating a MapKey by using a static method instead of
 	 * using new MapKey(). For when key consists of three strings.
 	 * 
-	 * @param s1
+	 * @param o1
 	 *            Object to be part of the key
-	 * @param s2
+	 * @param o2
 	 *            Object to be part of the key
-	 * @param s3
+	 * @param o3
 	 *            Object to be part of the key
 	 * @return the MapKey for the specified objects
 	 */
-	public static MapKey create(Object s1, Object s2, Object s3) {
-		return new MapKey(s1, s2, s3);
+	public static MapKey create(Object o1, Object o2, Object o3) {
+		return new MapKey(o1, o2, o3);
 	}
 
 	/**
 	 * A different way of creating a MapKey by using a static method instead of
 	 * using new MapKey(). For when key consists of four objects.
 	 * 
-	 * @param s1
+	 * @param o1
 	 *            Object to be part of the key
-	 * @param s2
+	 * @param o2
 	 *            Object to be part of the key
-	 * @param s3
+	 * @param o3
 	 *            Object to be part of the key
-	 * @param s4
+	 * @param o4
 	 *            Object to be part of the key
 	 * @return the MapKey for the specified strings
 	 */
-	public static MapKey create(Object s1, Object s2, Object s3, Object s4) {
-		return new MapKey(s1, s2, s3, s4);
+	public static MapKey create(Object o1, Object o2, Object o3, Object o4) {
+		return new MapKey(o1, o2, o3, o4);
 	}
 
 	/**
@@ -159,10 +159,10 @@ public class MapKey {
 	private int createHashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((s1 == null) ? 0 : s1.hashCode());
-		result = prime * result + ((s2 == null) ? 0 : s2.hashCode());
-		result = prime * result + ((s3 == null) ? 0 : s3.hashCode());
-		result = prime * result + ((s4 == null) ? 0 : s4.hashCode());
+		result = prime * result + ((o1 == null) ? 0 : o1.hashCode());
+		result = prime * result + ((o2 == null) ? 0 : o2.hashCode());
+		result = prime * result + ((o3 == null) ? 0 : o3.hashCode());
+		result = prime * result + ((o4 == null) ? 0 : o4.hashCode());
 		return result;
 	}
 
@@ -186,25 +186,25 @@ public class MapKey {
 		if (getClass() != obj.getClass())
 			return false;
 		MapKey other = (MapKey) obj;
-		if (s1 == null) {
-			if (other.s1 != null)
+		if (o1 == null) {
+			if (other.o1 != null)
 				return false;
-		} else if (!s1.equals(other.s1))
+		} else if (!o1.equals(other.o1))
 			return false;
-		if (s2 == null) {
-			if (other.s2 != null)
+		if (o2 == null) {
+			if (other.o2 != null)
 				return false;
-		} else if (!s2.equals(other.s2))
+		} else if (!o2.equals(other.o2))
 			return false;
-		if (s3 == null) {
-			if (other.s3 != null)
+		if (o3 == null) {
+			if (other.o3 != null)
 				return false;
-		} else if (!s3.equals(other.s3))
+		} else if (!o3.equals(other.o3))
 			return false;
-		if (s4 == null) {
-			if (other.s4 != null)
+		if (o4 == null) {
+			if (other.o4 != null)
 				return false;
-		} else if (!s4.equals(other.s4))
+		} else if (!o4.equals(other.o4))
 			return false;
 		return true;
 	}
