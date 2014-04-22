@@ -71,31 +71,58 @@ public class RealTimeSchedAdhProcessor {
 		// been reached yet or the vehicle is late.
 		VehicleAtStopInfo stopInfo = match.getAtStop();
 		if (stopInfo != null) {
-			ScheduleTime schedTime = stopInfo.getScheduleTime();
+			ScheduleTime schedTime = stopInfo.getScheduleTime();	
+			
 			if (schedTime != null && schedTime.getDepartureTime() != null) {
 				// Determine the scheduled departure time in epoch time
 				long departureEpochTime = Core.getInstance().getTime()
 						.getEpochTime(schedTime.getDepartureTime(), avlTime);
 				
-				// If departure time hasn't been reached yet...
-				if (avlTime.getTime() < departureEpochTime) {
-					// Departure time not yet reached so perfectly on time!
-					logger.debug("For vehicleId={} vehicle at stop but " +
-							"haven't reached departure time yet so returning " +
-							"0 as the schedule adherence. avlTime={} and " +
-							"scheduled time={}",
-							vehicleId, avlTime, schedTime);
-					return new TemporalDifference(0);
-				} else {
-					TemporalDifference scheduleAdherence = new TemporalDifference(departureEpochTime - 
-							avlTime.getTime());
+				// Wait stops are handled specially since if before the 
+				// departure time then schedule adherence is 0. The scheduled
+				// arrival time doesn't matter.
+				if (stopInfo.isWaitStop()) {
+					// If departure time hasn't been reached yet...
+					if (avlTime.getTime() < departureEpochTime) {
+						// Departure time not yet reached so perfectly on time!
+						logger.debug("For vehicleId={} vehicle at wait stop " +
+								"but haven't reached departure time yet so " +
+								"returning 0 as the schedule adherence. " +
+								"avlTime={} and scheduled departure time={}",
+								vehicleId, avlTime, schedTime);
+						return new TemporalDifference(0);
+					} else {
+						TemporalDifference scheduleAdherence = 
+								new TemporalDifference(departureEpochTime - 
+										avlTime.getTime());
+	
+						// Already past departure time so return that vehicle 
+						// is late
+						logger.debug("For vehicleId={} vehicle at wait stop " +
+								"but have reached departure time so returning " +
+								"schedule adherence={}. avlTime={} and " +
+								"scheduled departure time={}",
+								vehicleId, scheduleAdherence, avlTime, 
+								schedTime);
+						return scheduleAdherence;
+					}					
+				} else { 
+					// Not a wait stop where vehicle is supposed to wait
+					// to depart until scheduled time. Therefore simply
+					// return difference between scheduled departure
+					// time and the AVL time.
+					TemporalDifference scheduleAdherence = 
+							new TemporalDifference(departureEpochTime - 
+									avlTime.getTime());
 
-					// Already past departure time so return that vehicle is late
+					// Already past departure time so return that vehicle 
+					// is late
 					logger.debug("For vehicleId={} vehicle at stop but " +
 							"have reached departure time so returning " +
 							"schedule adherence={}. avlTime={} and " +
 							"scheduled time={}",
-							vehicleId, scheduleAdherence, avlTime, schedTime);
+							vehicleId, scheduleAdherence, avlTime, 
+							schedTime);
 					return scheduleAdherence;
 				}
 			}
