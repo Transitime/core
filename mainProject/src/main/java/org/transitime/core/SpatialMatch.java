@@ -350,6 +350,7 @@ public class SpatialMatch {
 				// + ", block=" + block.toShortString() too verbose!
 				+ ", blockId=" + block.getId()
 				+ ", tripIndex=" + tripIndex
+				+ ", gtfsStopSeq=" + getStopPath().getStopSequence()
 				+ ", stopPathIndex=" + stopPathIndex
 				+ ", segmentIndex=" + segmentIndex
 				+ ", atLayover=" + atLayover()

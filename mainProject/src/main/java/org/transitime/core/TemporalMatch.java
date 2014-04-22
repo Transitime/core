@@ -49,6 +49,7 @@ public class TemporalMatch extends SpatialMatch {
 				+ ", vehicleId=" + vehicleId
 				+ ", blockId=" + block.getId()
 				+ ", tripIndex=" + tripIndex
+				+ ", gtfsStopSeq=" + getStopPath().getStopSequence()
 				+ ", stopPathIndex=" + stopPathIndex
 				+ ", segmentIndex=" + segmentIndex
 				+ ", atLayover=" + atLayover()
