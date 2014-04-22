@@ -195,14 +195,14 @@ public class DataProcessor {
 					avlReport.getVehicleId(), bestMatch);
 			
 			// If couldn't find an adequate spatial/temporal match then resort
-			// to matching to a layover at a terminal. 
+			// to matching to a wait stop at a terminal. 
 			if (bestMatch == null) {
 				logger.debug("For vehicleId={} could not find reasonable " +
-						"match so will try to match to layover.",
+						"match so will try to match to wait stop.",
 						avlReport.getVehicleId());
 				
-				Trip trip = TemporalMatcher.getInstance().matchToLayoverEvenIfOffRoute(
-						avlReport, potentialTrips);
+				Trip trip = TemporalMatcher.getInstance().
+						matchToWaitStopEvenIfOffRoute(avlReport, potentialTrips);
 				if (trip != null) {
 					SpatialMatch beginningOfTrip = 
 							new SpatialMatch(vehicleState.getVehicleId(),
