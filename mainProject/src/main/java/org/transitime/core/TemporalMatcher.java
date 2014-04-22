@@ -166,7 +166,9 @@ public class TemporalMatcher {
 	 * @param for logging messages
 	 * @param date
 	 * @param spatialMatch
-	 * @return
+	 * @return The TemporalDifference between the AVL time and when the vehicle
+	 *         is expected to be at that match. Returns null if the temporal
+	 *         difference is beyond the allowable bounds.
 	 */
 	private static TemporalDifference determineHowFarOffScheduledTime(
 			String vehicleId, Date date, SpatialMatch spatialMatch) {
@@ -176,7 +178,7 @@ public class TemporalMatcher {
 		SpatialMatch beginningOfTrip = new SpatialMatch(vehicleId,
 				spatialMatch.getBlock(), 
 				spatialMatch.getTripIndex(), 
-				0,    //  stopPathIndex 
+				0,    // stopPathIndex 
 				0,    // segmentIndex 
 				0.0,  // distanceToSegment
 				0.0); // distanceAlongSegment
@@ -207,7 +209,7 @@ public class TemporalMatcher {
 			deltaFromSchedule = afterMidnightExpectedTimeDelta;
 			
 		// Return adherence but return null if adherence is beyond limits
-		if (deltaFromSchedule.isWithinBounds()) {
+		if (deltaFromSchedule.isWithinBoundsForInitialMatching()) {
 			logger.debug("For vehicleId={} determineHowFarOffScheduledTime() "
 					+ "returning expectedTimeDelta={} for {}", 
 					vehicleId, deltaFromSchedule, spatialMatch);
@@ -361,20 +363,21 @@ public class TemporalMatcher {
 	}
 	
 	/**
-	 * From the list of spatial matches passed in, determines which
-	 * one has the best valid temporal match.
+	 * From the list of spatial matches passed in, determines which one has the
+	 * best valid temporal match.
 	 * 
-	 * @param spatialMatches The spatial matches to examine
-	 * @return The match passed in that best matches temporally where vehicle 
-	 * should be. Returns null if no adequate temporal match.
+	 * @param spatialMatches
+	 *            The spatial matches to examine
+	 * @return The match passed in that best matches temporally where vehicle
+	 *         should be. Returns null if no adequate temporal match.
 	 */
 	public TemporalMatch getBestTemporalMatchComparedToSchedule(
 			AvlReport avlReport, List<SpatialMatch> spatialMatches) {
 		TemporalDifference bestDifferenceFromExpectedTime = null;
-		SpatialMatch bestSpatialMatch= null;
+		SpatialMatch bestSpatialMatch = null;
 		
-		for (SpatialMatch spatialMatch : spatialMatches) {			
-			// If not at layover then determine temporal match based on 
+		for (SpatialMatch spatialMatch : spatialMatches) {	
+			// If not at wait stop then determine temporal match based on 
 			// how long it should take vehicle to travel from the beginning
 			// of the trip to the spatial match.
 			TemporalDifference differenceFromExpectedTime = 
@@ -471,15 +474,15 @@ public class TemporalMatcher {
 	 *            specifies which trips to examine
 	 * @return
 	 */
-	public Trip matchToLayoverEvenIfOffRoute(
+	public Trip matchToWaitStopEvenIfOffRoute(
 			AvlReport avlReport, List<Trip> potentialTrips) {
-		// Determine upcoming layover
+		// Determine upcoming wait stop
 		for (Trip trip : potentialTrips) {
 			if (canDeadheadToBeginningOfTripInTime(avlReport, trip))
 				return trip;
 		}
 		
-		// Didn't find a layover that it could get to in time so return null
+		// Didn't find a wait stop that it could get to in time so return null
 		return null;
 	}
 	

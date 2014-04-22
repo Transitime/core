@@ -76,7 +76,24 @@ public class TemporalDifference implements Serializable {
 				&& -temporalDifferenceMsec < 
 					CoreConfig.getAllowableLateSeconds() * 1000;
 	}
-	
+
+	/**
+	 * Returns true if the temporal difference is within the bounds specified by
+	 * CoreConfig.getAllowableEarlySecondsForInitialMatching() and
+	 * CoreConfig.getAllowableLateSecondsForInitialMatching(). For use when
+	 * initially matching a vehicle. Need to be more restrictive than for other
+	 * matching since the initial matching is more difficult. Need to only match
+	 * if it is a reasonable match since vehicles do really peculiar things.
+	 * 
+	 * @return true if within bounds
+	 */
+	public boolean isWithinBoundsForInitialMatching() {
+		return temporalDifferenceMsec < 
+					CoreConfig.getAllowableEarlySecondsForInitialMatching() * 1000 
+				&& -temporalDifferenceMsec < 
+					CoreConfig.getAllowableLateSecondsForInitialMatching() * 1000;
+	}
+
 	/**
 	 * Returns whether the temporal difference is within the specified bounds.
 	 * 

@@ -220,6 +220,29 @@ public class CoreConfig {
 					90 * Time.SEC_PER_MIN);
 
 	/**
+	 * How early a vehicle can be and still be matched to its block assignment
+	 * @return
+	 */
+	public static int getAllowableEarlySecondsForInitialMatching() {
+		return allowableEarlySecondsForInitialMatching.getValue();
+	}
+	private static IntegerConfigValue allowableEarlySecondsForInitialMatching = 
+			new IntegerConfigValue("transitime.core.allowableEarlySecondsForInitialMatching", 
+					10 * Time.SEC_PER_MIN);
+
+	/**
+	 * How late a vehicle can be and still be matched to its block assignment
+	 * @return
+	 */
+	public static int getAllowableLateSecondsForInitialMatching() {
+		return allowableLateSecondsForInitialMatching.getValue();
+	}
+	private static IntegerConfigValue allowableLateSecondsForInitialMatching = 
+			new IntegerConfigValue("transitime.core.allowableLateSecondsForInitialMatching", 
+					20 * Time.SEC_PER_MIN);
+
+	
+	/**
 	 * How far along path past a layover a vehicle can spatially match but 
 	 * still be considered to be at that layover. Important for determining 
 	 * predictions and such.
