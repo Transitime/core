@@ -17,6 +17,7 @@
 package org.transitime.avl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,25 +58,36 @@ public class BatchGtfsRealtimeModule extends Module {
 		super(projectId);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
+	/**
+	 * Zhengzhou had trouble providing valid GTFS-RT data. So this method can be
+	 * used for Zhengzhou to add logging info so that can see how many valid
+	 * reports there are. Also filters out AVL reports that are not within 15km
+	 * of downtown Zhengzhou. It is only for debugging.
+	 * 
+	 * @param avlReports
+	 *            The full set of AVL reports
+	 * @return The AVL reports, filtered so that only ones within 15km of
+	 *         Zhengzhou are provided.
 	 */
-	@Override
-	public void run() {
-		List<AvlReport> avlReports = GtfsRealtimeModule.getAvlReports();
-		
-		// FIXME just for debugging  bad data for Zhengzhou
-		logger.info("The following AVL reports are for within 15km of Zhengzhou");
+	private List<AvlReport> handleZhengzhou(List<AvlReport> avlReports) {
+		//logger.info("The following AVL reports are for within 15km of Zhengzhou");
 		List<AvlReport> zhengzhouAvlReports = new ArrayList<AvlReport>();
 		Set<String> zhengzhouVehicles = new HashSet<String>();
 		Set<String> zhengzhouRoutes = new HashSet<String>();
+		long earliestTime = Long.MAX_VALUE;
+		long latestTime = Long.MIN_VALUE;
 		for (AvlReport avlReport : avlReports) {
 			if (avlReport.getLocation().distance(new Location(34.75, 113.65)) < 15000) {
-				logger.info("Zhengzhou avlReport={}", avlReport);
+				//logger.info("Zhengzhou avlReport={}", avlReport);
 				zhengzhouAvlReports.add(avlReport);
 				
 				zhengzhouVehicles.add(avlReport.getVehicleId());
 				zhengzhouRoutes.add(avlReport.getAssignmentId());
+				
+				if (avlReport.getTime() < earliestTime)
+					earliestTime = avlReport.getTime();
+				if (avlReport.getTime() > latestTime)
+					latestTime = avlReport.getTime();
 			}
 		}
 		logger.info("For Zhengzhou got {} AVl reports out of total of {}.",
@@ -84,7 +96,24 @@ public class BatchGtfsRealtimeModule extends Module {
 				zhengzhouVehicles.size(), zhengzhouVehicles);
 		logger.info("For Zhengzhou found {} routes={}", 
 				zhengzhouRoutes.size(), zhengzhouRoutes);
-		avlReports = zhengzhouAvlReports;
+		logger.info("Earliest AVL time was {} and latest was {}",
+				new Date(earliestTime), new Date(latestTime));
+
+		return zhengzhouAvlReports;		
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
+	@Override
+	public void run() {
+		List<AvlReport> avlReports = GtfsRealtimeModule.getAvlReports();
+		
+		// Zhengzhou had trouble providing valid GPS reports so this method
+		// can be used to log debugging info and to filter out reports that
+		// are not actually in Zhengzhou
+		if (projectId.equals("zhengzhou"))
+			avlReports = handleZhengzhou(avlReports);
 		
 		// Process the AVL Reports read in.
 		for (AvlReport avlReport : avlReports) {
