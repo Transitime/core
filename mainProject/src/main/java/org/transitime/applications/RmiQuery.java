@@ -16,6 +16,9 @@
  */
 package org.transitime.applications;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -295,6 +298,16 @@ public class RmiQuery {
 
 		// Write message out to stdout
 		System.out.println(decodedMessage);
+		
+		String fileName = "gtfsRtVehiclePositions";
+		System.out.println("\nWriting GTFS-RT vehicle positions file to " + fileName);
+		try {
+			OutputStream outputStream = new FileOutputStream(fileName);
+			message.writeTo(outputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 	
 	/**
@@ -313,6 +326,15 @@ public class RmiQuery {
 		// Write message out to stdout
 		System.out.println(decodedMessage);
 
+		// Write data to binary file
+		String fileName = "gtfsRtTripUpdate";
+		System.out.println("\nWriting GTFS-RT trip update file to " + fileName);
+		try {
+			OutputStream outputStream = new FileOutputStream(fileName);
+			message.writeTo(outputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 	}
 	
 	/**
