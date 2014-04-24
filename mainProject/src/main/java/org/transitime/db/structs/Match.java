@@ -271,9 +271,7 @@ public class Match implements Serializable {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
-		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(projectId);
-		Session session = sessionFactory.openSession();
+		Session session = HibernateUtils.getSession(projectId);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.

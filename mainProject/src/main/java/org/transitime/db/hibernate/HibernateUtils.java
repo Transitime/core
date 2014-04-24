@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
@@ -59,12 +60,13 @@ public class HibernateUtils {
 	 * Creates a new session factory. This is to be cached and only access
 	 * internally since creating one is expensive.
 	 * 
+	 * @param projectId
 	 * @return
 	 */
-	private static SessionFactory createSessionFactory() 
+	private static SessionFactory createSessionFactory(String projectId) 
 			throws HibernateException {
 		logger.debug("Creating new Hibernate SessionFactory for projectId={}", 
-				CoreConfig.getProjectId());
+				projectId);
 		
 		// Create a Hibernate configuration based on the XML file we've put
 		// in the standard place
@@ -78,7 +80,7 @@ public class HibernateUtils {
 		// to configure().
 		String fileName = CoreConfig.getHibernateConfigFileName();
 		logger.info("Configuring Hibernate for projectId={} using config file={}",
-				CoreConfig.getProjectId(), fileName);
+				projectId, fileName);
 		File f = new File(fileName);
 		config.configure(f);
 
@@ -88,7 +90,7 @@ public class HibernateUtils {
 		// Set the db info
 		String dbUrl = "jdbc:mysql://" +
 				CoreConfig.getDbHost() +
-				"/" + CoreConfig.getProjectId();
+				"/" + projectId;
 		config.setProperty("hibernate.connection.url", dbUrl);
 		String username = CoreConfig.getDbUserName();
 		config.setProperty("hibernate.connection.username", username);
@@ -97,7 +99,7 @@ public class HibernateUtils {
 		
 		logger.debug("For Hibernate factory project projectId={} " +
 				"using url={} username={}, and configured password",
-				CoreConfig.getProjectId(), dbUrl, username);
+				projectId, dbUrl, username);
 		
 		// Get the session factory for persistence
 		Properties properties = config.getProperties();
@@ -125,7 +127,7 @@ public class HibernateUtils {
 			// If factory not yet created for this projectId then create it
 			if (factory == null) {
 				try {
-					factory = createSessionFactory();
+					factory = createSessionFactory(projectId);
 					sessionFactoryCache.put(projectId, factory);
 				} catch (Exception e) {
 					logger.error("Could not create SessionFactor for projectId={}", projectId, e);
@@ -136,4 +138,16 @@ public class HibernateUtils {
 		return factory;
 	}
 
+	/**
+	 * Returns session for the specified projectId.
+	 * 
+	 * @param projectId
+	 * @return The Session
+	 */
+	public static Session getSession(String projectId) {
+		SessionFactory sessionFactory = 
+				HibernateUtils.getSessionFactory(projectId);
+		Session session = sessionFactory.openSession();
+		return session;
+	}
 }

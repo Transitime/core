@@ -34,7 +34,6 @@ import javax.persistence.TemporalType;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Index;
@@ -788,9 +787,7 @@ public class AvlReport implements Serializable {
 			String vehicleId) {
 		// Sessions are not threadsafe so need to create a new one each time.
 		// They are supposed to be lightweight so this should be OK.
-		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(projectId);
-		Session session = sessionFactory.openSession();
+		Session session = HibernateUtils.getSession(projectId);
 		
 		// Create the query. Table name is case sensitive!
 		String hql = "FROM AvlReport " +

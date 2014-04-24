@@ -149,9 +149,7 @@ public class Calendar implements Serializable {
 	public static Map<String, Calendar> getCalendars(String projectId, int configRev) 
 			throws HibernateException {
 		// Get the database session. This is supposed to be pretty light weight
-		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(projectId);
-		Session session = sessionFactory.openSession();
+		Session session = HibernateUtils.getSession(projectId);
 		
 		// Get list of calendars
 		List<Calendar> calendarList = getCalendars(session, configRev);
