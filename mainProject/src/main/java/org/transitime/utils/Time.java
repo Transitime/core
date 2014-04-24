@@ -524,6 +524,26 @@ public class Time {
 	}
 	
 	/**
+	 * Returns the absolute value of the difference between the two times. If
+	 * the difference is greater than 12 hours then 24hours-difference is
+	 * returned. This is useful for when the times wrap around midnight. For
+	 * example, if the times are 11:50pm and 12:05am then the difference will be
+	 * 15 minutes instead of 23 hours and 45 minutes.
+	 * 
+	 * @param time1SecsIntoDay
+	 * @param time2SecsIntoDay
+	 * @return The absolute value of the difference between the two times
+	 */
+	public static int getTimeDifference(int time1SecsIntoDay,
+			int time2SecsIntoDay) {
+		int timeDiffSecs = Math.abs(time1SecsIntoDay - time2SecsIntoDay);
+		if (timeDiffSecs > 12 * Time.SEC_PER_HOUR)
+			return Time.SEC_PER_DAY - timeDiffSecs;
+		else
+			return timeDiffSecs;
+	}
+	
+	/**
 	 * Simply calls Thread.sleep() but catches the InterruptedException
 	 * so that the calling function doesn't need to.
 	 * @param msec
