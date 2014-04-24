@@ -31,7 +31,6 @@ import javax.persistence.TemporalType;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
@@ -52,7 +51,7 @@ import org.transitime.utils.Time;
 @Entity @DynamicUpdate 
 @Table(name="ArrivalsDepartures") 
 @org.hibernate.annotations.Table(appliesTo = "ArrivalsDepartures", 
-   indexes = { @Index(name="indexTest", 
+   indexes = { @Index(name="timeIndex", 
                       columnNames={"time"} ) } )
 public class ArrivalDeparture implements Serializable {
 	
@@ -441,9 +440,7 @@ public class ArrivalDeparture implements Serializable {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(projectId);
-		Session session = sessionFactory.openSession();
+		Session session = HibernateUtils.getSession(projectId);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
@@ -506,9 +503,7 @@ public class ArrivalDeparture implements Serializable {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(projectId);
-		Session session = sessionFactory.openSession();
+		Session session = HibernateUtils.getSession(projectId);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
