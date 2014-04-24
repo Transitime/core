@@ -17,6 +17,7 @@
 package org.transitime.db.hibernate;
 
 import org.hibernate.cfg.Configuration;
+import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Agency;
@@ -59,6 +60,7 @@ public class AnnotatedClassesList {
 
 	// List here all the annotated classes that can be stored in the db
 	private static Class<?>[] classList = new Class[] {
+		ActiveRevisions.class,
 		Agency.class,
 		Arrival.class,
 		AvlReport.class,
