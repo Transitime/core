@@ -33,7 +33,6 @@ import net.jcip.annotations.Immutable;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
