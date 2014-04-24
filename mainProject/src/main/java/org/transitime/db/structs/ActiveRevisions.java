@@ -61,15 +61,6 @@ public class ActiveRevisions {
 	}
 	
 	/**
-	 * So can set member variable projectId for when object is read from db.
-	 * 
-	 * @param projectId
-	 */
-	private void setProjectId(String projectId) {
-		this.projectId = projectId;
-	}
-
-	/**
 	 * Reads revisions from database.
 	 * 
 	 * @param projectId
@@ -104,7 +95,7 @@ public class ActiveRevisions {
 		}
 		
 		// Always make sure the project ID is set
-		activeRevisions.setProjectId(projectId);
+		activeRevisions.projectId = projectId;
 		
 		// Return the object
 		return activeRevisions;
