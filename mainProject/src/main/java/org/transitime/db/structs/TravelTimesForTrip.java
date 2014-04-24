@@ -38,8 +38,8 @@ import javax.persistence.Table;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Index;
 import org.transitime.db.hibernate.HibernateUtils;
 
 
@@ -52,6 +52,9 @@ import org.transitime.db.hibernate.HibernateUtils;
  *
  */
 @Entity @DynamicUpdate @Table(name="TravelTimesForTrips")
+@org.hibernate.annotations.Table(appliesTo = "TravelTimesForTrips", 
+indexes = { @Index(name="travelTimesRevIndex", 
+                   columnNames={"travelTimesRev"} ) } )
 public class TravelTimesForTrip implements Serializable {
 
 	// Need a generated ID because trying to share TravelTimesForStopPath 
@@ -67,6 +70,13 @@ public class TravelTimesForTrip implements Serializable {
 	// cleaned out can also get rid of old travel times.
 	@Column
 	private final int configRev;
+	
+	// Each time update travel times it gets a new travel time rev. This
+	// way can compare travel times with previous revisions. Probably only need
+	// to keep the previous travel time rev around for comparison but by
+	// using an integer for the rev all of the can be kept. 
+	@Column
+	private final int travelTimesRev;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripPatternId;
@@ -129,8 +139,9 @@ public class TravelTimesForTrip implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	public TravelTimesForTrip(int configRev, Trip trip, HowSet howSet) {
+	public TravelTimesForTrip(int configRev, int travelTimesRev, Trip trip, HowSet howSet) {
 		this.configRev = configRev;
+		this.travelTimesRev = travelTimesRev;
 		this.tripPatternId = trip.getTripPattern().getId();
 		this.tripCreatedForId = trip.getId();
 		this.howSet = howSet;
@@ -142,6 +153,7 @@ public class TravelTimesForTrip implements Serializable {
 	@SuppressWarnings("unused")
 	private TravelTimesForTrip() {
 		this.configRev = -1;
+		this.travelTimesRev= -1;
 		this.tripPatternId = null;
 		this.tripCreatedForId = null;
 		this.howSet = HowSet.SCHEDULE_TIMES;
@@ -163,24 +175,22 @@ public class TravelTimesForTrip implements Serializable {
 	 * of TravelTimesForTrip instead of just a single one.
 	 * 
 	 * @param projectId
-	 * @param configRev
+	 * @param travelTimesRev
 	 * @return Map keyed by tripPatternId of Lists of TripPatterns
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, List<TravelTimesForTrip>> getTravelTimesForTrips(
-			String projectId, int configRev) 
+			String projectId, int travelTimesRev) 
 			throws HibernateException {
 		// Create the db session
-		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(projectId);
-		Session session = sessionFactory.openSession();
+		Session session = HibernateUtils.getSession(projectId);
 
 		// Get List of all TravelTimesForTrip for the specified rev
 		String hql = "FROM TravelTimesForTrip " +
-				"    WHERE configRev = :configRev";
+				"    WHERE travelTimesRev = :travelTimesRev";
 		Query query = session.createQuery(hql);
-		query.setInteger("configRev", configRev);
+		query.setInteger("travelTimesRev", travelTimesRev);
 		List<TravelTimesForTrip> allTravelTimes;
 		try {
 			allTravelTimes = query.list();
@@ -216,6 +226,7 @@ public class TravelTimesForTrip implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + configRev;
+		result = prime * result + travelTimesRev;
 		result = prime * result + tripPatternId.hashCode();
 		result = prime * result + tripCreatedForId.hashCode();
 		result = prime * result + travelTimesForStopPaths.hashCode();
@@ -238,6 +249,8 @@ public class TravelTimesForTrip implements Serializable {
 			return false;
 		if (configRev != other.configRev)
 			return false;
+		if (travelTimesRev != other.travelTimesRev)
+			return false;
 		if (!tripPatternId.equals(other.tripPatternId))
 			return false;
 		if (!tripCreatedForId.equals(other.tripCreatedForId))
@@ -250,6 +263,7 @@ public class TravelTimesForTrip implements Serializable {
 	public String toString() {
 		return "TravelTimesForTrip ["
 				+ "configRev=" + configRev
+				+ ", travelTimesRev=" + travelTimesRev
 				+ ", tripPatternId=" + tripPatternId 
 				+ ", tripCreatedForId=" + tripCreatedForId
 				+ ", travelTimesForStopPaths=" + travelTimesForStopPaths 
@@ -263,6 +277,10 @@ public class TravelTimesForTrip implements Serializable {
 		return configRev;
 	}
 
+	public int getTravelTimeRev() {
+		return travelTimesRev;
+	}
+	
 	public String getTripPatternId() {
 		return tripPatternId;
 	}

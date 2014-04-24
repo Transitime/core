@@ -27,6 +27,7 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.ScheduleTime;
 import org.transitime.db.structs.TravelTimesForStopPath;
@@ -60,6 +61,9 @@ public class TravelTimesProcessor {
 	// For keeping track of which project working with
 	private final String projectId;
 	
+	// So know what the current travel time rev is
+	private final int activeTravelTimeRev;
+	
 	// For reading and writing to db
 	private final SessionFactory sessionFactory;
 	
@@ -78,6 +82,9 @@ public class TravelTimesProcessor {
 		this.sessionFactory = HibernateUtils.getSessionFactory(projectId);
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
+		
+		ActiveRevisions activeRevs = ActiveRevisions.get(projectId);
+		this.activeTravelTimeRev = activeRevs.getTravelTimesRev();
 	}
 	
 	/**
@@ -130,8 +137,9 @@ public class TravelTimesProcessor {
 		TripPattern tripPattern = trip.getTripPattern();
 		
 		// Create the TravelTimesForTrip object to be returned
-		TravelTimesForTrip travelTimes = 
-				new TravelTimesForTrip(DbConfig.SANDBOX_REV, trip, HowSet.SCHEDULE_TIMES);
+		TravelTimesForTrip travelTimes = new TravelTimesForTrip(
+				DbConfig.SANDBOX_REV, activeTravelTimeRev, trip,
+				HowSet.SCHEDULE_TIMES);
 		
 		// Handle first path specially since it is a special case where it is
 		// simply a stub path. It therefore has no travel or stop time.
@@ -449,10 +457,14 @@ public class TravelTimesProcessor {
 		// Let user know what is going on
 		logger.info("Processing travel time data...");
 
+		// Determine the currently used travel times rev so can read in 
+		// that data
+		ActiveRevisions activeRevisions = ActiveRevisions.get(projectId);
+		
 		// Read existing data from db and put into travelTimesFromDbMap member
 		Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap = 
 				TravelTimesForTrip.getTravelTimesForTrips(projectId, 
-						DbConfig.SANDBOX_REV);
+						activeRevisions.getTravelTimesRev());
 
 		int originalNumberTravelTimes = numberOfTravelTimes(travelTimesFromDbMap);
 		
