@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -84,7 +83,7 @@ public class DbConfig {
 	// Database revision is the configuration being modified. Once finished then
 	// it will be copied to a working revision.
 	public static final int SANDBOX_REV = 0;
-	
+		
 	private static final Logger logger = 
 			LoggerFactory.getLogger(DbConfig.class);
 
@@ -116,8 +115,7 @@ public class DbConfig {
 		this.configRev = configRev;
 		
 		// Open up Hibernate session so can read in data
-		SessionFactory sessionFactory = HibernateUtils.getSessionFactory(projectId);
-		Session session = sessionFactory.openSession();		
+		Session session = HibernateUtils.getSession(projectId);		
 		
 		// Do the low-level processing
 		try {
