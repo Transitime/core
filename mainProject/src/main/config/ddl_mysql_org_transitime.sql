@@ -31,6 +31,8 @@
         drop 
         foreign key FK_676npp7h4bxh8sjcnugnxt5wb;
 
+    drop table if exists ActiveRevisions;
+
     drop table if exists Agencies;
 
     drop table if exists ArrivalsDepartures;
@@ -74,6 +76,12 @@
     drop table if exists TripPatterns;
 
     drop table if exists Trips;
+
+    create table ActiveRevisions (
+        configRev integer not null,
+        travelTimesRev integer,
+        primary key (configRev)
+    );
 
     create table Agencies (
         configRev integer not null,
@@ -313,6 +321,7 @@
         id integer not null auto_increment,
         configRev integer,
         howSet varchar(40),
+        travelTimesRev integer,
         tripCreatedForId varchar(60),
         tripPatternId varchar(60),
         primary key (id)
@@ -361,7 +370,7 @@
         primary key (tripId, startTime, configRev)
     );
 
-    create index indexTest on ArrivalsDepartures (time);
+    create index timeIndex on ArrivalsDepartures (time);
 
     create index timeIndex on AvlReports (time);
 
@@ -393,6 +402,8 @@
         add constraint FK_9j1s8ewsmokqg4m35wrr29na7 
         foreign key (TravelTimesForTrips_id) 
         references TravelTimesForTrips (id);
+
+    create index travelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
 
     alter table TripPattern_to_Path_joinTable 
         add constraint UK_s0gaw8iv60vc17a5ltryqwg27 unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);

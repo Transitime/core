@@ -1,4 +1,6 @@
 
+    drop table ActiveRevisions cascade constraints;
+
     drop table Agencies cascade constraints;
 
     drop table ArrivalsDepartures cascade constraints;
@@ -44,6 +46,12 @@
     drop table Trips cascade constraints;
 
     drop sequence hibernate_sequence;
+
+    create table ActiveRevisions (
+        configRev integer not null,
+        travelTimesRev integer,
+        primary key (configRev)
+    );
 
     create table Agencies (
         configRev integer not null,
@@ -283,6 +291,7 @@
         id integer not null,
         configRev integer,
         howSet varchar(40),
+        travelTimesRev integer,
         tripCreatedForId varchar(60),
         tripPatternId varchar(60),
         primary key (id)
@@ -331,7 +340,7 @@
         primary key (tripId, startTime, configRev)
     );
 
-    create index indexTest on ArrivalsDepartures (time);
+    create index timeIndex on ArrivalsDepartures (time);
 
     create index timeIndex on AvlReports (time);
 
@@ -359,6 +368,8 @@
         add constraint FK_9j1s8ewsmokqg4m35wrr29na7 
         foreign key (TravelTimesForTrips_id) 
         references TravelTimesForTrips;
+
+    create index travelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
 
     alter table TripPattern_to_Path_joinTable 
         add constraint UK_s0gaw8iv60vc17a5ltryqwg27 unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
