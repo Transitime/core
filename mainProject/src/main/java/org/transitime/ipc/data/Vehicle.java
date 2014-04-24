@@ -39,6 +39,7 @@ import net.jcip.annotations.Immutable;
 public class Vehicle implements Serializable {
 
 	private final Avl avl;
+	private final float pathHeading;
 	private final String routeId;
 	
 	// routeShortName needed because routeId is sometimes not consistent over
@@ -56,13 +57,17 @@ public class Vehicle implements Serializable {
 	 * Constructors a Vehicle object.
 	 * 
 	 * @param avl
+	 * @param pathHeading
 	 * @param routeId
 	 * @param routeShortName
+	 * @param tripId
 	 * @param predictable
+	 * @param realTimeSchdAdh
 	 */
-	public Vehicle(Avl avl, String routeId, String routeShortName,
+	public Vehicle(Avl avl, float pathHeading, String routeId, String routeShortName,
 			String tripId, boolean predictable, TemporalDifference realTimeSchdAdh) {
 		this.avl = avl;
+		this.pathHeading = pathHeading;
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.tripId = tripId;
@@ -77,6 +82,7 @@ public class Vehicle implements Serializable {
 	private static class SerializationProxy implements Serializable {
 		// Exact copy of fields of Vehicle enclosing class object
 		private Avl avl;
+		private float pathHeading;
 		private String routeId;
 		private String routeShortName;
 		private String tripId;
@@ -91,6 +97,7 @@ public class Vehicle implements Serializable {
 		 */
 		private SerializationProxy(Vehicle v) {
 			this.avl = v.avl;
+			this.pathHeading = v.pathHeading;
 			this.routeId = v.routeId;
 			this.routeShortName = v.routeShortName;
 			this.tripId = v.tripId;
@@ -108,6 +115,7 @@ public class Vehicle implements Serializable {
 				throws IOException {
 			stream.writeShort(serializationVersion);
 			stream.writeObject(avl);
+			stream.writeFloat(pathHeading);
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
 			stream.writeObject(tripId);
@@ -129,6 +137,7 @@ public class Vehicle implements Serializable {
 
 			// serialization version is OK so read in object
 			avl = (Avl) stream.readObject();
+			pathHeading = stream.readFloat();
 			routeId = (String) stream.readObject();
 			routeShortName = (String) stream.readObject();
 			tripId = (String) stream.readObject();
@@ -144,8 +153,8 @@ public class Vehicle implements Serializable {
 		 * class object.
 		 */
 		private Object readResolve() {
-			return new Vehicle(avl, routeId, routeShortName, tripId,
-					predictable, realTimeSchdAdh);
+			return new Vehicle(avl, pathHeading, routeId, routeShortName,
+					tripId, predictable, realTimeSchdAdh);
 		}
 	}  // End of SerializationProxy class
 
@@ -179,6 +188,15 @@ public class Vehicle implements Serializable {
 	 */
 	public float getHeading() {
 		return avl.getHeading();
+	}
+	
+	/**
+	 * The path heading is determined from the segment that the vehicle
+	 * has been matched to. Useful for drawing vehicles on a map.
+	 * @return
+	 */
+	public float getPathHeading() {
+		return pathHeading;
 	}
 	
 	/**
@@ -234,6 +252,7 @@ public class Vehicle implements Serializable {
 				+ ", predictable=" + predictable
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
 				+ ", avl=" + avl
+				+ ", pathHeading=" + pathHeading
 				+ "]";
 	}
 
@@ -243,7 +262,7 @@ public class Vehicle implements Serializable {
 	public static void main(String args[]) {
 		Avl avl = new Avl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f, 
 				"block", "driver", "license", 0);
-		Vehicle v = new Vehicle(avl, "routeId", "routeShortName", "tripId", true, null);
+		Vehicle v = new Vehicle(avl, 123.456f, "routeId", "routeShortName", "tripId", true, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);

@@ -25,8 +25,10 @@ import java.util.NoSuchElementException;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.ipc.data.Prediction;
+import org.transitime.utils.StringUtils;
 
 /**
  * Keeps track of vehicle state including its block assignment, where it
@@ -314,6 +316,38 @@ public class VehicleState {
 			return null;
 	}
 	
+	/**
+	 * Determines the heading of the vector that defines the stop path segment
+	 * that the vehicle is currently on.
+	 * 
+	 * @return Heading of vehicle according to path segment. NaN if not
+	 *         currently matched or there is no heading for that segment.
+	 */
+	public float getPathHeading() {
+		SpatialMatch match = getMatch();
+		if (match == null)
+			return Float.NaN;
+		
+		StopPath stopPath = getTrip().getStopPath(match.getStopPathIndex());
+		return stopPath.getSegmentVector(match.getSegmentIndex()).getHeading();
+	}
+	
+	/**
+	 * Normally uses the heading from getPathHeading(). But if that returns NaN
+	 * then uses heading from last AVL report, though that might be NaN as well.
+	 * This can be better then always using heading from AVL report since that 
+	 * often won't line up with the path.
+	 * 
+	 * @return The best heading for a vehicle
+	 */
+	public float getHeading() {
+		float heading = getPathHeading();
+		if (Float.isNaN(heading))
+			return getAvlReport().getHeading();
+		else
+			return heading;
+	}
+	
 	@Override
 	public String toString() {
 		return "VehicleState [" 
@@ -323,6 +357,7 @@ public class VehicleState {
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
+				+ ", pathHeading=" + StringUtils.twoDigitFormat(getHeading())
 				+ ", previousArrivalTime=" + previousArrivalTime
 				+ ", getLastMatch()=" + getMatch()
 				+ ", getLastAvlReport()=" + getAvlReport()
@@ -340,6 +375,7 @@ public class VehicleState {
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
+				+ ", pathHeading=" + StringUtils.twoDigitFormat(getHeading())
 				+ ", previousArrivalTime=" + previousArrivalTime
 				+ ", getLastMatch()=" + getMatch()
 				+ ", getLastAvlReport()=" + getAvlReport()
