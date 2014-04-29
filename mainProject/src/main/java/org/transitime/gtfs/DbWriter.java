@@ -17,8 +17,7 @@
  */
 package org.transitime.gtfs;
 
-import java.util.List;
-
+import java.util.Collection;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -173,7 +172,7 @@ public class DbWriter {
 	 * @param sessionFactory
 	 * @param trips
 	 */
-	public static void writeTrips(Session session, List<Trip> trips) {
+	public static void writeTrips(Session session, Collection<Trip> trips) {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
 
