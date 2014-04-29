@@ -292,6 +292,10 @@
      TravelTimes, and PredictionsProcessor and PredictionDataCache because 
      would log info when trying to match every single segment, which is 
      incredibly verbose. Therefore set logging level to info for this class. -->
+  <logger name="org.transitime.core.Service" level="info" additivity="false">
+    <appender-ref ref="CORE_DEBUG" />
+  </logger>
+
   <logger name="org.transitime.core.SpatialMatcher" level="info" additivity="false">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
