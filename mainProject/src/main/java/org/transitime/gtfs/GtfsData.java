@@ -1544,8 +1544,8 @@ public class GtfsData {
 				HibernateUtils.getSessionFactory(getProjectId());
 
 		// Now process travel times and update the Trip objects. 
-		TravelTimesProcessor travelTimesProcesssor = 
-				new TravelTimesProcessor(getProjectId(),  
+		ScheduleBasedTravelTimesProcessor travelTimesProcesssor = 
+				new ScheduleBasedTravelTimesProcessor(getProjectId(),  
 						maxTravelTimeSegmentLength,	defaultWaitTimeAtStopMsec);
 		travelTimesProcesssor.process(this);
 		
