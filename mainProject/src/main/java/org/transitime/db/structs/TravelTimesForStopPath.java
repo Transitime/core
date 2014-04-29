@@ -22,8 +22,11 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -103,9 +106,51 @@ public class TravelTimesForStopPath implements Serializable {
 	@Column
 	private final int daysOfWeekOverride;
 
+	// For keeping track of how the data was obtained (historic GPS,
+	// schedule, default speed, etc)
+	@Column(length=17)
+	@Enumerated(EnumType.STRING)
+	private final HowSet howSet;
+	
 	// Needed because class is serializable
 	private static final long serialVersionUID = -5136757109373446841L;
 
+	/**
+	 * This enumeration is for keeping track of how the travel times were  
+	 * determined. This way can tell of they should be overridden or not.  
+	 */
+	public enum HowSet {
+		// From when there are no schedule times so simply need to use a
+		// default speed
+		DEFAULT_SPEED(0),
+
+		// From interpolating data in GTFS stop_times.txt file
+		SCHEDULE_TIMES(1),
+		
+		// No AVL data was available for the actual day so using data from
+		// another day.
+		AVL_OTHER_SERVICE(2),
+	
+		// No AVL data was available for the actual trip so using data from
+		// a trip that is before or after the trip in question
+		AVL_OTHER_TRIP(3),
+		
+		// Based on actual running times as determined by AVL data
+		AVL_DATA(4);
+		
+		@SuppressWarnings("unused")
+		private int value;
+		
+		private HowSet(int value) {
+			this.value =  value;
+		}
+		
+		public boolean isScheduleBased() {
+			return this == DEFAULT_SPEED || 
+					this == SCHEDULE_TIMES;
+		}
+	};
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -113,18 +158,21 @@ public class TravelTimesForStopPath implements Serializable {
 	 * 
 	 * @param stopPathId
 	 * @param travelTimesMsec
+	 *            The travel times for the travel time segments. 
 	 * @param stopTimeMsec
 	 * @param howSet
 	 * @param daysOfWeekOverride
 	 */
-	public TravelTimesForStopPath(String stopPathId, double travelTimeSegmentDistance,
-			ArrayList<Integer> travelTimesMsec, 
-			int stopTimeMsec, int daysOfWeekOverride) {
+	public TravelTimesForStopPath(String stopPathId,
+			double travelTimeSegmentDistance,
+			List<Integer> travelTimesMsec, int stopTimeMsec,
+			int daysOfWeekOverride, HowSet howSet) {
 		this.stopPathId = stopPathId;
 		this.travelTimeSegmentLength = travelTimeSegmentDistance;
-		this.travelTimesMsec = travelTimesMsec;
+		this.travelTimesMsec = (ArrayList<Integer>) travelTimesMsec;
 		this.stopTimeMsec = stopTimeMsec;
 		this.daysOfWeekOverride = daysOfWeekOverride;
+		this.howSet = howSet;
 	}
 	
 	/**
@@ -137,8 +185,22 @@ public class TravelTimesForStopPath implements Serializable {
 		this.travelTimesMsec = null;
 		this.stopTimeMsec = -1;
 		this.daysOfWeekOverride = -1;
+		this.howSet = HowSet.SCHEDULE_TIMES;
 	}
 	
+	/**
+	 * Creates a new object. Useful for when need to copy a schedule based
+	 * travel time. By having a copy can erase the original one when done with
+	 * the rev, without deleting this new one.
+	 * 
+	 * @param original
+	 * @return
+	 */
+	public TravelTimesForStopPath clone() {
+		return new TravelTimesForStopPath(stopPathId,
+				travelTimeSegmentLength, travelTimesMsec,
+				stopTimeMsec, daysOfWeekOverride, howSet);
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -151,7 +213,8 @@ public class TravelTimesForStopPath implements Serializable {
 				+ ", travelTimeSegmentLength=" + travelTimeSegmentLength
 				+ ", travelTimesMsec=" + travelTimesMsec 
 				+ ", stopTimeMsec=" + stopTimeMsec
-				+ ", daysOfWeekOverride=" + daysOfWeekOverride 
+				+ ", daysOfWeekOverride=" + daysOfWeekOverride
+				+ ", howSet=" + howSet 
 				+ "]";
 	}
 
@@ -227,7 +290,14 @@ public class TravelTimesForStopPath implements Serializable {
 		return daysOfWeekOverride;
 	}
 
-	/************************* Database Methods *************************88/
+	/**
+	 * @return the howSet
+	 */
+	public HowSet getHowSet() {
+		return howSet;
+	}
+	
+	/************************* Database Methods *************************/
 
 	/**
 	 * Reads in all the travel times for the specified rev

@@ -25,8 +25,6 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -92,59 +90,18 @@ public class TravelTimesForTrip implements Serializable {
 	private final List<TravelTimesForStopPath> travelTimesForStopPaths = 
 			new ArrayList<TravelTimesForStopPath>();
 
-	@Column(length=40)
-	@Enumerated(EnumType.STRING)
-	private final HowSet howSet;
-	
 	// Hibernate requires that this class be serializable if it has multiple 
 	// column IDs so doing it in case have multiple ID columns in future.
 	private static final long serialVersionUID = -5208608077900300605L;
 
-	/**
-	 * This enumeration is for keeping track of how the travel times were  
-	 * determined. This way can tell of they should be overridden or not.  
-	 */
-	public enum HowSet {
-		// From when there are no schedule times so simply need to use a
-		// default speed
-		DEFAULT_SPEED(0),
-
-		// From interpolating data in GTFS stop_times.txt file
-		SCHEDULE_TIMES(1),
-		
-		// No AVL data was available for the actual day so using data from
-		// another day.
-		AVL_DATA_FOR_ANOTHER_DAY(2),
-	
-		// No AVL data was available for the actual trip so using data from
-		// a trip that is before or after the trip in question
-		AVL_DATA_FOR_ADJACENT_TRIP(3),
-		
-		// Based on actual running times as determined by AVL data
-		AVL_DATA(4);
-		
-		@SuppressWarnings("unused")
-		private int value;
-		
-		private HowSet(int value) {
-			this.value =  value;
-		}
-		
-		public boolean isScheduleBased() {
-			return this == DEFAULT_SPEED || 
-					this == SCHEDULE_TIMES;
-		}
-	};
-	
 
 	/********************** Member Functions **************************/
 
-	public TravelTimesForTrip(int configRev, int travelTimesRev, Trip trip, HowSet howSet) {
+	public TravelTimesForTrip(int configRev, int travelTimesRev, Trip trip) {
 		this.configRev = configRev;
 		this.travelTimesRev = travelTimesRev;
 		this.tripPatternId = trip.getTripPattern().getId();
 		this.tripCreatedForId = trip.getId();
-		this.howSet = howSet;
 	}
 	
 	/**
@@ -156,7 +113,6 @@ public class TravelTimesForTrip implements Serializable {
 		this.travelTimesRev= -1;
 		this.tripPatternId = null;
 		this.tripCreatedForId = null;
-		this.howSet = HowSet.SCHEDULE_TIMES;
 	}
 	
 	/**
@@ -221,6 +177,20 @@ public class TravelTimesForTrip implements Serializable {
 		return map;
 	}
 
+	/**
+	 * Returns true if every single stop path travel time is schedule based.
+	 * @return
+	 */
+	public boolean purelyScheduleBased() {
+		for (TravelTimesForStopPath times : travelTimesForStopPaths) {
+			if (!times.getHowSet().isScheduleBased())
+				return false;
+		}
+		
+		// All of them travel times are schedule based so return true
+		return true;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -267,7 +237,6 @@ public class TravelTimesForTrip implements Serializable {
 				+ ", tripPatternId=" + tripPatternId 
 				+ ", tripCreatedForId=" + tripCreatedForId
 				+ ", travelTimesForStopPaths=" + travelTimesForStopPaths 
-				+ ", howSet=" + howSet 
 				+ "]";
 	}
 
@@ -304,11 +273,4 @@ public class TravelTimesForTrip implements Serializable {
 		return travelTimesForStopPaths.size();
 	}
 
-	/**
-	 * @return the howSet
-	 */
-	public HowSet getHowSet() {
-		return howSet;
-	}
-	
 }

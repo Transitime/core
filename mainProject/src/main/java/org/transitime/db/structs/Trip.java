@@ -262,7 +262,8 @@ public class Trip implements Serializable {
 	}
 	
 	/**
-	 * Returns list of Trip objects for the specified configRev
+	 * Returns map of Trip objects for the specified configRev. The
+	 * map is keyed on the trip IDs.
 	 * 
 	 * @param session
 	 * @param configRev
@@ -270,13 +271,19 @@ public class Trip implements Serializable {
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Trip> getTrips(Session session, int configRev) 
+	public static Map<String, Trip> getTrips(Session session, int configRev) 
 			throws HibernateException {
 		String hql = "FROM Trip " +
 				"    WHERE configRev = :configRev";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
-		return query.list();
+
+		Map<String, Trip> tripsMap = new HashMap<String, Trip>();
+		List<Trip> tripsList = query.list();
+		for (Trip trip : tripsList) {
+			tripsMap.put(trip.getId(), trip);
+		}
+		return tripsMap;
 	}
 
 	/**
@@ -611,4 +618,5 @@ public class Trip implements Serializable {
 	public StopPath getStopPath(int stopPathIndex) {
 		return tripPattern.getStopPath(stopPathIndex);
 	}
+	
 }

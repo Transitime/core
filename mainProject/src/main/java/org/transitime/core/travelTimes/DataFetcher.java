@@ -42,6 +42,10 @@ import org.transitime.utils.MapKey;
  */
 public class DataFetcher {
 
+	// The data ends up in arrivalDepartureMap and matchesMap
+	private Map<DbDataMapKey, List<ArrivalDeparture>> arrivalDepartureMap;
+	private Map<DbDataMapKey, List<Match>> matchesMap;
+
 	private Map<String, Calendar> gtfsCalendars = null;
 	
 	private List<Integer> specialDaysOfWeek = null;
@@ -116,8 +120,8 @@ public class DataFetcher {
 	}
 
 	/**
-	 * Special MapKey class so that can make sure using the proper one for the
-	 * associated maps in this class.
+	 * Special MapKey class so that can make sure using the proper key for the
+	 * associated maps in this class. 
 	 */
 	public static class DbDataMapKey extends MapKey {
 		private DbDataMapKey(String serviceId, String dayOfWeek, String tripId,
@@ -242,7 +246,7 @@ public class DataFetcher {
 	 * @param endTime
 	 * @return
 	 */
-	public Map<DbDataMapKey, List<Match>> readMatches(
+	private Map<DbDataMapKey, List<Match>> readMatches(
 			String projectId, Date beginTime, Date endTime) {
 		IntervalTimer timer = new IntervalTimer();
 		
@@ -285,4 +289,43 @@ public class DataFetcher {
 		return resultsMap;
 	}
 
+	/**
+	 * Reads arrival/departure times and matches from the db and puts the
+	 * data into the arrivalDepartureMap and matchesMap members.
+	 * @param projectId
+	 * @param beginTime
+	 * @param endTime
+	 */
+	public void readData(String projectId, Date beginTime, 
+			Date endTime) {
+		// Read in arrival/departure times and matches from db
+		logger.info("Reading historic data from db...");
+		matchesMap = readMatches(projectId, beginTime, endTime);
+		arrivalDepartureMap = 
+				readArrivalsDepartures(projectId, beginTime, endTime);
+	}
+
+	/**
+	 * Provides the arrival/departure data in a map. The values in the map are
+	 * Lists of ArrivalDeparture times, one list for each trip where there was
+	 * historic data.
+	 * 
+	 * @return arrival/departure data
+	 */
+	public Map<DbDataMapKey, List<ArrivalDeparture>> getArrivalDepartureMap() {
+		return arrivalDepartureMap;
+	}
+
+	/**
+	 * Provides the Match data in a map. The values in the map are Lists of
+	 * Match objects, one list for each trip where there was historic data.
+	 * 
+	 * @return match data
+	 */
+	public Map<DbDataMapKey, List<Match>> getMatchesMap() {
+		return matchesMap;
+	}
+
+
+	
 }
