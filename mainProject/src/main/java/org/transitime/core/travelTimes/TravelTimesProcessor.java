@@ -85,12 +85,21 @@ public class TravelTimesProcessor {
 	 * associated maps in this class.
 	 */
 	public static class ProcessedDataMapKey extends MapKey {
-		private ProcessedDataMapKey(String tripId, int stopIndex) {
-			super(tripId, stopIndex);
+		private ProcessedDataMapKey(String tripId, int stopPathIndex) {
+			super(tripId, stopPathIndex);
 		}
 		
 		private String getTripId() {
 			return (String) o1;
+		}
+		
+		private int getStopPathIndex() {
+			return (int) o2;
+		}
+
+		@Override
+		public String toString() {
+			return "ProcessedDataMapKey [tripId=" + o1 + ", stopPathIndex=" + o2 + "]";
 		}
 	}
 
@@ -581,7 +590,8 @@ public class TravelTimesProcessor {
 	
 	/**
 	 * Takes the data from the stopTimesMap and travelTimesMap and creates
-	 * corresponding travel times.
+	 * corresponding travel times. Puts those travel times into the
+	 * TravelTimeInfoMap that is returned.
 	 * 
 	 * @param tripMap
 	 *            contains all the trips that are configured and that need
@@ -589,6 +599,9 @@ public class TravelTimesProcessor {
 	 * @return TravelTimeInfoMap The generated travel times
 	 */
 	public TravelTimeInfoMap createTravelTimesFromMaps(Map<String, Trip> tripMap) {
+		logger.info("Processing data into a TravelTimeInfoMap...");
+		IntervalTimer intervalTimer = new IntervalTimer();
+
 		TravelTimeInfoMap travelTimeInfoMap = new TravelTimeInfoMap();
 		
 		// For each trip that had historical arrivals/departures and or 
@@ -604,41 +617,41 @@ public class TravelTimesProcessor {
 				continue;
 			}
 			
-			// For this trip process all the travel and stop times
-			for (int stopPathIdx = 0; 
-					stopPathIdx < trip.getTripPattern().getNumberStopPaths(); 
-					++stopPathIdx) {
-				// Determine average travel times this trip/stop path
-				List<List<Integer>> travelTimesForStopPathForTrip =
-						travelTimesMap.get(mapKey);
-				List<List<Integer>> travelTimesBySegment = 
-					bySegment(travelTimesForStopPathForTrip);
-				List<Integer> averageTravelTimes = new ArrayList<Integer>();
-				for (List<Integer> travelTimesByTripForSegment : 
-						travelTimesBySegment) {
-					int averageTravelTimeForSegment = 
-							getAverage(travelTimesByTripForSegment);
-					averageTravelTimes.add(averageTravelTimeForSegment);
-				}
-				
-				// Determine average stop time for this trip/stop
-				List<Integer> stopTimesForStopPathForTrip = 
-						stopTimesMap.get(mapKey);
-				int averageStopTime = getAverage(stopTimesForStopPathForTrip);
-				
-				// Determine the travel time segment length actually used
-				double travelTimeSegLength = 
-						getTravelTimeSegmentLength(trip, stopPathIdx);
-				
-				// Put the results into TravelTimeInfo object and put into 
-				// TravelTimeInfo map so can be used to find best travel times 
-				// when there is no data for particular trip.
-				TravelTimeInfo travelTimeInfo = new TravelTimeInfo(trip,
-						stopPathIdx, averageStopTime, averageTravelTimes, travelTimeSegLength);
-				travelTimeInfoMap.add(travelTimeInfo);
+			// Determine average travel times this trip/stop path
+			List<List<Integer>> travelTimesForStopPathForTrip =
+					travelTimesMap.get(mapKey);
+			List<List<Integer>> travelTimesBySegment = 
+				bySegment(travelTimesForStopPathForTrip);
+			List<Integer> averageTravelTimes = new ArrayList<Integer>();
+			for (List<Integer> travelTimesByTripForSegment : 
+					travelTimesBySegment) {
+				int averageTravelTimeForSegment = 
+						getAverage(travelTimesByTripForSegment);
+				averageTravelTimes.add(averageTravelTimeForSegment);
 			}
+			
+			// Determine average stop time for this trip/stop
+			List<Integer> stopTimesForStopPathForTrip = 
+					stopTimesMap.get(mapKey);
+			int averageStopTime = getAverage(stopTimesForStopPathForTrip);
+			
+			// Determine the travel time segment length actually used
+			double travelTimeSegLength = 
+					getTravelTimeSegmentLength(trip, mapKey.getStopPathIndex());
+			
+			// Put the results into TravelTimeInfo object and put into 
+			// TravelTimeInfo map so can be used to find best travel times 
+			// when there is no data for particular trip.
+			TravelTimeInfo travelTimeInfo = new TravelTimeInfo(trip,
+					mapKey.getStopPathIndex(), averageStopTime,
+					averageTravelTimes, travelTimeSegLength);
+			travelTimeInfoMap.add(travelTimeInfo);
 		}
 		
+		// Nice to log how long things took so can see progress and bottle necks
+		logger.info("Processing data into a TravelTimeInfoMap took {} msec.", 
+				intervalTimer.elapsedMsec());
+
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
 	}
@@ -655,15 +668,14 @@ public class TravelTimesProcessor {
 	 */
 	public void readAndProcessHistoricData(String projectId, 
 			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
-		// Initialize calendar information
+		// Read the arrivals/departures and matches into a DataFetcher
 		DataFetcher dataFetcher = new DataFetcher(projectId, specialDaysOfWeek);
-
 		dataFetcher.readData(projectId, beginTime, endTime);
 		
 		// Process all the historic data read from the database. Puts 
 		// resulting data into stopTimesMap and travelTimesMap.
-		IntervalTimer intervalTimer = new IntervalTimer();
 		logger.info("Processing data into travel time maps...");
+		IntervalTimer intervalTimer = new IntervalTimer();
 		Collection<List<ArrivalDeparture>> arrivalDepartures =
 				dataFetcher.getArrivalDepartureMap().values();
 		for (List<ArrivalDeparture> arrDepList : arrivalDepartures) {
