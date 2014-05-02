@@ -1,0 +1,58 @@
+<!-- This is the configuration file for the logback logging system. This file 
+     will be used if it is in the classpath (because logback looks for the file
+     logback.xml in the classpath) or if explicitly invoked using the 
+     Java param -Dlogback.configurationFile=/DIR/src/main/config/logbackUpdateTravelTimes.xml
+  -->
+       
+<configuration>
+
+  <!-- Set properties here. NOTE: it is expected that the property
+       -Dtransitime.core.projectId=xx will be set. Also, if want logging
+       to use the proper timezone then need to set the timezone property
+       to something like -Dlogback.timezone=America/Los_Angeles . Valid 
+       timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
+    -->
+  <property name="LOG_FILE_ROOT" value="D:/Logs/${transitime.core.projectId:-DEFAULT}" />
+
+  <!-- The pattern layout how the log file should log info is set here. Note that 
+       a newline is used at beginning so that there is a blank line between
+       each entry. Newline needs to be at beginning so stack traces for exceptions
+       are displayed properly since they are displayed after the message.
+       Info on layouts is out http://logback.qos.ch/manual/layouts.html .
+       The timezone for logging is set using the Java property 
+       -Dlogback.timezone=America/New_York or such. Timezone formats are described
+       at http://en.wikipedia.org/wiki/List_of_tz_zones .
+    -->
+  <property name="DEFAULT_PATTERN" value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level [%file:%line] %msg%n" />
+
+  <!-- The main appender for the Core module. use a RollingFileAppender
+       so that can store log files in a calendar based directory structure
+       logs/yyyy/MM/dd/logFile.log . The logs go under the project directory
+       so in Eclipse on Windows they end up in a place such as 
+       C:/Users/Mike/git/testProject/testProject/logs... The log file
+       is called "core.log". The files are rolled over at
+       midnight since "dd" specify that logs should be dealt with daily. 
+       Logs are compressed automatically since "gz" specified.
+    -->
+  <appender name="CORE" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/updateTravelTimes.log</file> 
+
+    <encoder>
+      <pattern>${DEFAULT_PATTERN}</pattern> 
+    </encoder>
+  </appender>
+
+  <!--======================================================-->
+  <!--=============== Loggers defined here =================-->
+  <!--======================================================-->
+
+
+  <!-- Set default level of root logger to "info" instead of to the
+       the default of "debug". This way the default is to only see important
+       messages. Debug messages have to be enabled by creating a logger
+       for the class. 
+    -->
+  <root level="info">          
+    <appender-ref ref="CORE" />
+  </root>
+</configuration>
