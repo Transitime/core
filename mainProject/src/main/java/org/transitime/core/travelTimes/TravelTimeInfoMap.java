@@ -30,7 +30,7 @@ import org.transitime.utils.Time;
 /**
  * For keeping track of the historic data such that if no data is
  * available for a trip then can find closest trip. Keyed by trip pattern
- *
+ * and stop path index.
  * @author SkiBu Smith
  *
  */
@@ -38,8 +38,16 @@ public class TravelTimeInfoMap {
 	
 	// Special key just for travelTimesByTripPattern map
 	public static class TripPatternStopMapKey extends MapKey {
-		private TripPatternStopMapKey(String tripPatternId, int stopIndex) {
-			super(tripPatternId, stopIndex);
+		private TripPatternStopMapKey(String tripPatternId, int stopPathIndex) {
+			super(tripPatternId, stopPathIndex);
+		}
+
+		@Override
+		public String toString() {
+			return "TripPatternStopMapKey [" 
+					+ "tripPatternId=" + o1 
+					+ ", stopPathIndex=" + o2 
+					+ "]";
 		}
 	}
 
