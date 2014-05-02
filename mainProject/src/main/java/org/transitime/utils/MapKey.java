@@ -209,4 +209,11 @@ public class MapKey {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "MapKey [" 
+				+ "o1=" + o1 + ", o2=" + o2 + ", o3=" + o3 + ", o4=" + o4
+				+ "]";
+	}
+
 }
