@@ -128,6 +128,17 @@ public class DataFetcher {
 				String vehicleId) {
 			super(serviceId, dayOfWeek, tripId, vehicleId);
 		}
+		
+		@Override
+		public String toString() {
+			return "DbDataMapKey [" 
+					+ "serviceId=" + o1 
+					+ ", dayOfWeek=" + o2 
+					+ ", tripId=" + o3 
+					+ ", vehicleId=" + o4 
+					+ "]";
+		}
+
 	}
 	
 	/**
