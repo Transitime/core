@@ -56,6 +56,17 @@ public class TravelTimeInfo {
 		this.travelTimeSegLength = toCopy.travelTimeSegLength;
 	}
 	
+	@Override
+	public String toString() {
+		return "TravelTimeInfo [" 
+				+ "trip=" + trip 
+				+ ", stopPathIndex=" + stopPathIndex 
+				+ ", travelTimes=" + travelTimes
+				+ ", stopTime=" + stopTime 
+				+ ", travelTimeSegLength=" + travelTimeSegLength 
+				+ "]";
+	}
+
 	public Trip getTrip() {
 		return trip;
 	}
