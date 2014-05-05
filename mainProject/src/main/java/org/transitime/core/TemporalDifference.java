@@ -72,9 +72,9 @@ public class TemporalDifference implements Serializable {
 	 */
 	public boolean isWithinBounds() {
 		return temporalDifferenceMsec < 
-					CoreConfig.getAllowableEarlySeconds() * 1000 
+					CoreConfig.getAllowableEarlySeconds() * Time.MS_PER_SEC 
 				&& -temporalDifferenceMsec < 
-					CoreConfig.getAllowableLateSeconds() * 1000;
+					CoreConfig.getAllowableLateSeconds() * Time.MS_PER_SEC;
 	}
 
 	/**
@@ -88,10 +88,11 @@ public class TemporalDifference implements Serializable {
 	 * @return true if within bounds
 	 */
 	public boolean isWithinBoundsForInitialMatching() {
-		return temporalDifferenceMsec < 
-					CoreConfig.getAllowableEarlySecondsForInitialMatching() * 1000 
-				&& -temporalDifferenceMsec < 
-					CoreConfig.getAllowableLateSecondsForInitialMatching() * 1000;
+		return temporalDifferenceMsec < CoreConfig
+				.getAllowableEarlySecondsForInitialMatching() * Time.MS_PER_SEC
+				&& -temporalDifferenceMsec < CoreConfig
+						.getAllowableLateSecondsForInitialMatching()
+						* Time.MS_PER_SEC;
 	}
 
 	/**
@@ -103,8 +104,9 @@ public class TemporalDifference implements Serializable {
 	 */
 	public boolean isWithinBounds(int allowableEarlySeconds,
 			int allowableLateSeconds) {
-		return temporalDifferenceMsec < allowableEarlySeconds
-				&& -temporalDifferenceMsec < allowableLateSeconds;
+		return temporalDifferenceMsec < allowableEarlySeconds * Time.MS_PER_SEC
+				&& -temporalDifferenceMsec < allowableLateSeconds
+						* Time.MS_PER_SEC;
 	}
 	
 	/**
