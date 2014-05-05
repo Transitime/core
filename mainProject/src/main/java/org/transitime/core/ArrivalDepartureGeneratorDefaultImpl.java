@@ -440,7 +440,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		if (arrivalTimeBasedOnNewMatch < arrivalTimeBasedOnOldMatch) {
 			logger.debug("For vehicleId={} using arrival time based on new " +
 					"match because it is {} instead of the later value " +
-					"based on the new match of {}", vehicleId, 
+					"based on the old match of {}", vehicleId, 
 					new Date(arrivalTimeBasedOnNewMatch), 
 					new Date(arrivalTimeBasedOnOldMatch));
 			arrivalTime = arrivalTimeBasedOnNewMatch;
