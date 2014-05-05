@@ -135,6 +135,15 @@ public class ActiveRevisions {
 		return travelTimesRev;
 	}
 	
+	@Override
+	public String toString() {
+		return "ActiveRevisions [" 
+				+ "projectId=" + projectId 
+				+ ", configRev=" + configRev 
+				+ ", travelTimesRev=" + travelTimesRev 
+				+ "]";
+	}
+
 	/*
 	 * Just for debugging
 	 */
@@ -142,4 +151,5 @@ public class ActiveRevisions {
 		ActiveRevisions activeRevisions = get("mbta");
 		activeRevisions.setTravelTimesRev(1);
 	}
+
 }
