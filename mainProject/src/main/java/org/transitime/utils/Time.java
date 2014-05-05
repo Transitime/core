@@ -434,6 +434,7 @@ public class Time {
 	
 	/**
 	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss z
+	 * 
 	 * @param epochTime
 	 * @return
 	 */
@@ -442,7 +443,8 @@ public class Time {
 	}	
 	
 	/**
-	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss z
+	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss.SSS z
+	 * 
 	 * @param epochTime
 	 * @return
 	 */
@@ -453,6 +455,7 @@ public class Time {
 	/**
 	 * Returns epochTime as a string, including msec, in the 
 	 * format MM-dd-yyyy HH:mm:ss.SSS z
+	 * 
 	 * @param epochTime
 	 * @return
 	 */
