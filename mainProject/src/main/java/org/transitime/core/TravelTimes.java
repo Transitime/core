@@ -332,16 +332,19 @@ public class TravelTimes {
 	 * Determines expected travel time in msec between the two matches based on
 	 * the travel times from the database.
 	 * 
-	 * Note: would like to make travel times more accurate by also looking at how
-	 * fast vehicle has been moving compared to expected travel times for the
-	 * last few minutes. Would also like to look at how fast previous vehicle
-	 * went if it was recent.
+	 * Note: would like to make travel times more accurate by also looking at
+	 * how fast vehicle has been moving compared to expected travel times for
+	 * the last few minutes. Would also like to look at how fast previous
+	 * vehicle went if it was recent.
 	 * 
-	 * @param vehicleId for logging messages
-	 * @param timeOfDaySecs so can take layovers into account
+	 * @param vehicleId
+	 *            for logging messages
+	 * @param timeOfDaySecs
+	 *            so can take layovers into account
 	 * @param match1AfterStop
 	 * @param match2BeforeStop
-	 * @return travel time in msec between matches
+	 * @return travel time in msec between matches. Returns 0 if match2 is
+	 *         before match1
 	 */
 	public int expectedTravelTimeBetweenMatches(String vehicleId,
 			int timeOfDaySecs, SpatialMatch match1, SpatialMatch match2) {
@@ -481,7 +484,7 @@ public class TravelTimes {
 	
 	/**
 	 * Determines expected travel time in msec between the two matches based on
-	 * the travel times from the database. * Same as other
+	 * the travel times from the database. Same as other
 	 * travelTimeBetweenMatches() method but uses Date to determine seconds into
 	 * day. Therefore it can be simpler to use since AvlReports and such have a
 	 * Date. Returns travel time in msec.
@@ -491,7 +494,8 @@ public class TravelTimes {
 	 * @param time
 	 * @param match1
 	 * @param match2
-	 * @return
+	 * @return travel time in msec between matches. Returns 0 if match2 is
+	 *         before match1
 	 */
 	public int expectedTravelTimeBetweenMatches(String vehicleId,
 			Date time, SpatialMatch match1, SpatialMatch match2) {
