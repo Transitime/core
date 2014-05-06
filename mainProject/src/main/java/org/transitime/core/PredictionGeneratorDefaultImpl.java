@@ -203,6 +203,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	 * @param vehicleState
 	 *            Contains the new match for the vehicle that the predictions
 	 *            are to be based on.
+	 * @return List of Predictions. Can be empty but will not be null.
 	 */
 	@Override
 	public List<Prediction> generate(VehicleState vehicleState) {	

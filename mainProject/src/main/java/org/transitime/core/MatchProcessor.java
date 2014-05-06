@@ -164,11 +164,14 @@ public class MatchProcessor {
 		logger.debug("Processing results for match for {}", vehicleState);
 
 		// Process predictions, headways, arrivals/departures, and and spatial
-		// matches
-		processPredictions(vehicleState);
-		processHeadways(vehicleState);
-		processArrivalDepartures(vehicleState);
-		processSpatialMatch(vehicleState);
+		// matches. But only do this if shouldn't ignore because it is a 
+		// non-lead car in a consist.
+		if (!vehicleState.getAvlReport().ignoreBecauseInConsist()) {
+			processPredictions(vehicleState);
+			processHeadways(vehicleState);
+			processArrivalDepartures(vehicleState);
+			processSpatialMatch(vehicleState);
+		}
 		
 		// Update the VehicleDataCache so that client can access vehicle data
 		VehicleDataCache.getInstance().updateVehicle(vehicleState);

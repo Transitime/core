@@ -30,6 +30,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -121,13 +122,19 @@ public class AvlReport implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private AssignmentType assignmentType;
 
+	// Optional. This value is transient because it is usually not set. 
+	// Initially only used for San Francisco Muni. Therefore not as
+	// worthwhile for storing in the database.
+	@Transient
+	private final String leadVehicleId;
+	
 	// Optional
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private String driverId;
+	private final String driverId;
 	
 	// Optional
 	@Column(length=10)
-	private String licensePlate;
+	private final String licensePlate;
 	
 	// Optional. Set to null if passenger count info is not available
 	@Column
@@ -167,6 +174,7 @@ public class AvlReport implements Serializable {
 		heading = null;
 		assignmentId = null;
 		assignmentType = AssignmentType.UNSET;
+		leadVehicleId = null;
 		driverId = null;
 		licensePlate = null;
 		timeProcessed = null;
@@ -197,6 +205,7 @@ public class AvlReport implements Serializable {
 		this.heading = Float.isNaN(heading) ? null : heading;
 		this.assignmentId = null;
 		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = null;
 		this.driverId = null;
 		this.licensePlate = null;
 		this.passengerCount = null;
@@ -218,6 +227,8 @@ public class AvlReport implements Serializable {
 	 *            should be set to Float.NaN if speed not available
 	 * @param heading
 	 *            should be set to Float.NaN if speed not available
+	 * @param leadVehicleId
+	 *            Optional value. Set to null if not available.
 	 * @param driverId
 	 *            Optional value. Set to null if not available.
 	 * @param licensePlate
@@ -227,11 +238,12 @@ public class AvlReport implements Serializable {
 	 *            Set to null if not available.
 	 * @param passengerFullness
 	 *            Optional Value. Fractional fullness of vehicle. 0.0=empty,
-	 *            1.0=full, NaN if data not available.
+	 *            1.0=full. Set to Float.NaN if data not available.
 	 */
-	public AvlReport(String vehicleId, long time, double lat, double lon, 
-			float speed, float heading, String driverId, String licensePlate,
-			Integer passengerCount, float passengerFullness) {
+	public AvlReport(String vehicleId, long time, double lat, double lon,
+			float speed, float heading, String leadVehicleId,
+			String driverId, String licensePlate, Integer passengerCount,
+			float passengerFullness) {
 		// Store the values
 		this.vehicleId = vehicleId;
 		this.time = new Date(time);
@@ -240,6 +252,7 @@ public class AvlReport implements Serializable {
 		this.heading = Float.isNaN(heading) ? null : heading;
 		this.assignmentId = null;
 		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = leadVehicleId;
 		this.driverId = driverId;
 		this.licensePlate = licensePlate;
 		this.passengerCount = passengerCount;
@@ -272,6 +285,7 @@ public class AvlReport implements Serializable {
 		this.heading = Float.isNaN(heading) ? null : heading;
 		this.assignmentId = null;
 		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = null;
 		this.driverId = null;
 		this.licensePlate = null;
 		this.passengerCount = null;
@@ -299,6 +313,7 @@ public class AvlReport implements Serializable {
 		this.heading = toCopy.heading;
 		this.assignmentId = toCopy.assignmentId;
 		this.assignmentType = toCopy.assignmentType;
+		this.leadVehicleId = toCopy.leadVehicleId;
 		this.driverId = toCopy.driverId;
 		this.licensePlate = toCopy.licensePlate;
 		this.timeProcessed = toCopy.timeProcessed;
@@ -324,6 +339,7 @@ public class AvlReport implements Serializable {
 		this.heading = null;
 		this.assignmentId = null;
 		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = null;
 		this.driverId = null;
 		this.licensePlate = null;
 		this.passengerCount = null;
@@ -350,6 +366,7 @@ public class AvlReport implements Serializable {
 		this.heading = null;
 		this.assignmentId = null;
 		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = null;
 		this.driverId = null;
 		this.licensePlate = null;
 		this.passengerCount = null;
@@ -684,22 +701,35 @@ public class AvlReport implements Serializable {
 		this.assignmentType = assignmentType;
 	}
 	
-	public String getDriverId() {
-		return driverId;
+	/**
+	 * Returns the ID of the leading vehicle if this is an AVL report for a
+	 * non-lead vehicle in a multi-car consist. Otherwise returns null.
+	 * 
+	 * @return
+	 */
+	public String getLeadVehicleId() {
+		return leadVehicleId;
 	}
 	
-	public void setDriverId(String driverId) {
-		this.driverId = driverId;
+	/**
+	 * If this is a vehicle in a multi-car consist and it is not the lead
+	 * vehicle then shouldn't generate redundant arrival/departure times,
+	 * predictions etc.
+	 * 
+	 * @return True if non-lead car in multi-car consist
+	 */
+	public boolean ignoreBecauseInConsist() {
+		return leadVehicleId != null;
+	}
+	
+	public String getDriverId() {
+		return driverId;
 	}
 	
 	public String getLicensePlate() {
 		return licensePlate;
 	}
-	
-	public void setLicensePlate(String licensePlate) {
-		this.licensePlate = licensePlate;
-	}
-	
+		
 	/**
 	 * Returns the passenger count, as obtained from AVL feed.
 	 * If passenger count not available returns -1.
@@ -762,6 +792,7 @@ public class AvlReport implements Serializable {
 				", heading=" + Geo.headingFormat(getHeading()) + 
 				", assignmentId=" + assignmentId +
 				", assignmentType=" + assignmentType +
+				(leadVehicleId==null? "" : ", leadVehicleId=" + leadVehicleId) +
 				(driverId==null? "" : ", driverId=" + driverId) +
 				(licensePlate==null? "" : ", licensePlate=" + licensePlate) +	
 				(passengerCount==null? "" : ", passengerCount=" + passengerCount) +

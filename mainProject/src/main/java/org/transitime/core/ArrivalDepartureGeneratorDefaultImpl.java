@@ -313,11 +313,24 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// from there. This will prevent us from using 
 		// departureTimeBasedOnNewMatch if that time is to early due to 
 		// expected travel times being too long.
-		int travelTimeToOldMatchMsec = TravelTimes.getInstance()
-				.expectedTravelTimeBetweenMatches(vehicleId,
-						previousAvlReport.getDate(), matchAtStop, oldMatch);
-		long departureTimeBasedOnOldMatch =
-				previousAvlReport.getTime() - travelTimeToOldMatchMsec;
+		long departureTimeBasedOnOldMatch;
+		if (matchAtStop.lessThan(oldMatch)) {
+			// The stop is before the oldMatch so need to subtract travel time
+			// from the stop to the oldMatch from the previous AVL report time.
+			int travelTimeFromStopToOldMatchMsec = TravelTimes.getInstance()
+					.expectedTravelTimeBetweenMatches(vehicleId,
+							previousAvlReport.getDate(), matchAtStop, oldMatch);
+			departureTimeBasedOnOldMatch =
+					previousAvlReport.getTime() - travelTimeFromStopToOldMatchMsec;
+		} else {
+			// The oldMatch is before the stop so add the travel time from the 
+			// oldMatch to the stop to the previous AVL report time.
+			int travelTimeFromOldMatchToStopMsec = TravelTimes.getInstance()
+					.expectedTravelTimeBetweenMatches(vehicleId,
+							previousAvlReport.getDate(), oldMatch, matchAtStop);
+			departureTimeBasedOnOldMatch =
+					previousAvlReport.getTime() + travelTimeFromOldMatchToStopMsec;			
+		}
 		
 		// Determine which departure time to use. Use the later one since
 		// that will prevent from using a time that is earlier than the previous
@@ -329,8 +342,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			logger.debug("For vehicleId={} using departure time based on old " +
 					"match because it is {} instead of the earlier value " +
 					"based on the new match of {}", vehicleId, 
-					new Date(departureTimeBasedOnOldMatch), 
-					new Date(departureTimeBasedOnNewMatch));
+					Time.dateTimeStrMsec(departureTimeBasedOnOldMatch), 
+					Time.dateTimeStrMsec(departureTimeBasedOnNewMatch));
 			departureTime = departureTimeBasedOnOldMatch;
 		}
 		
@@ -423,13 +436,28 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		// Need to also look at arrival time based on the new match. This
 		// will prevent us from using arrivalTimeBasedOnOldMatch if that
-		// time is in the future due to the expected travel times being
-		// too long.
-		int travelTimeFromNewMatchMsec = TravelTimes.getInstance()
-				.expectedTravelTimeBetweenMatches(vehicleId,
-						avlReport.getDate(), newMatch, matchAtStop);
-		long arrivalTimeBasedOnNewMatch = 
-				avlReport.getTime() + travelTimeFromNewMatchMsec;
+		// time is in the future due to the expected travel times incorrectly
+		// being too long.
+		long arrivalTimeBasedOnNewMatch;
+		if (newMatch.lessThan(matchAtStop)) {
+			// The new match is before the stop so add the travel time
+			// from the match to the stop to the AVL time to get the
+			// arrivalTimeBasedOnNewMatch.
+			int travelTimeFromNewMatchToStopMsec = TravelTimes.getInstance()
+					.expectedTravelTimeBetweenMatches(vehicleId,
+							avlReport.getDate(), newMatch, matchAtStop);
+			arrivalTimeBasedOnNewMatch = 
+					avlReport.getTime() + travelTimeFromNewMatchToStopMsec;
+		} else {
+			// The new match is after the stop so subtract the travel time
+			// from the stop to the match from the AVL time to get the
+			// arrivalTimeBasedOnNewMatch.
+			int travelTimeFromStoptoNewMatchMsec = TravelTimes.getInstance()
+					.expectedTravelTimeBetweenMatches(vehicleId,
+							avlReport.getDate(), matchAtStop, newMatch);
+			arrivalTimeBasedOnNewMatch = 
+					avlReport.getTime() - travelTimeFromStoptoNewMatchMsec;			
+		}
 		
 		// Determine which arrival time to use. Use the earlier one since
 		// that will prevent from using a time that is past the current
@@ -441,8 +469,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			logger.debug("For vehicleId={} using arrival time based on new " +
 					"match because it is {} instead of the later value " +
 					"based on the old match of {}", vehicleId, 
-					new Date(arrivalTimeBasedOnNewMatch), 
-					new Date(arrivalTimeBasedOnOldMatch));
+					Time.dateTimeStrMsec(arrivalTimeBasedOnNewMatch), 
+					Time.dateTimeStrMsec(arrivalTimeBasedOnOldMatch));
 			arrivalTime = arrivalTimeBasedOnNewMatch;
 		}
 		

@@ -160,7 +160,12 @@ public class GtfsRealtimeModule extends AvlModule {
 		    // of precision so round to just 5 decimal places.
 			AvlReport avlReport = new AvlReport(vehicleId, gpsTime,
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
-					heading);
+					heading,
+					null, // leadingVehicleId,
+					null, // driverId
+					getLicensePlate(vehicle), 
+					null, // passengerCount
+					Float.NaN); // passengerFullness
 			
 			// Determine vehicle assignment information
 			if (vehicle.hasTrip()) {
@@ -174,9 +179,6 @@ public class GtfsRealtimeModule extends AvlModule {
 							AssignmentType.ROUTE_ID);
 				}
 			}
-			
-			// Set the license plate if data is available
-			avlReport.setLicensePlate(getLicensePlate(vehicle));
 			
 			logger.debug("Processed {}", avlReport);
 			

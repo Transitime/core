@@ -149,6 +149,9 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			// doesn't match the GTFS data need to process the block ID.
 			String block = processBlockId(vehicle.getAttributeValue("block"));
 			
+			// Determine if part of consist
+			String leadingVehicleId = vehicle.getAttributeValue("leadingVehicleId");
+			
 			// Get driver ID. Be consistent about using null if not set 
 			// instead of empty string
 			String driverId = vehicle.getAttributeValue("driverId");
@@ -166,16 +169,16 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			
 			// Log raw info for debugging
 			logger.debug("vehicleId={} time={} lat={} lon={} spd={} head={} " +
-					"blk={} drvr={}", 
+					"blk={} leadVeh={} drvr={} psngCnt={}", 
 					vehicleId, Time.timeStrMsec(gpsEpochTime), lat, lon, speed, 
-					heading, block, driverId);
+					heading, block, leadingVehicleId, driverId, passengerCount);
 				
 			// Create the AVL object and send it to the JMS topic.
 			// The NextBus feed provides silly amount of precision so 
 			// round to just 5 decimal places.
 			AvlReport avlReport = new AvlReport(vehicleId, gpsEpochTime, 
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), 
-					speed, heading, driverId, 
+					speed, heading, leadingVehicleId, driverId, 
 					null,       // license plate
 					passengerCount,
 					Float.NaN); // passengerFullness
@@ -183,7 +186,6 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 				avlReport.setAssignment(block, AssignmentType.BLOCK_ID);
 			else
 				avlReport.setAssignment(null, AssignmentType.UNSET);
-			avlReport.setDriverId(driverId);
 			
 			writeAvlReportToJms(avlReport);
 		}		
