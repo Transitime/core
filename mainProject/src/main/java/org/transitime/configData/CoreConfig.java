@@ -151,6 +151,12 @@ public class CoreConfig {
 	 **************************************************************************
 	 * For predictions
 	 */
+	
+	/**
+	 * How far forward into the future should generate predictions for.
+	 * 
+	 * @return
+	 */
 	public static int getMaxPredictionsTimeSecs() {
 		return maxPredictionsTimeSecs.getValue();
 	}
@@ -161,6 +167,12 @@ public class CoreConfig {
 			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
 					60 * Time.SEC_PER_MIN);
 	
+	/**
+	 * For specifying whether to use arrival predictions or departure
+	 * predictions for normal, non-wait time, stops.
+	 * 
+	 * @return
+	 */
 	public static boolean getUseArrivalPredictionsForNormalStops() {
 		return useArrivalPredictionsForNormalStops.getValue();
 	}
@@ -187,7 +199,9 @@ public class CoreConfig {
 	 * How early a vehicle can be and still be matched to a layover. Needs to 
 	 * be pretty large because sometimes vehicles will be assigned to a layover
 	 * quite early, and want to be able to make the vehicle predictable and 
-	 * generate predictions far in advance.
+	 * generate predictions far in advance. Don't want it to be too large, like
+	 * 90 minutes, though because then could match incorrectly if vehicle
+	 * simply stays at terminal.
 	 * @return
 	 */
 	public static int getAllowableEarlyForLayoverSeconds() {
@@ -195,7 +209,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue allowableEarlyForLayoverSeconds = 
 			new IntegerConfigValue("transitime.core.allowableEarlyForLayoverSeconds", 
-					90 * Time.SEC_PER_MIN);
+					60 * Time.SEC_PER_MIN);
 
 	/**
 	 * How early a vehicle can be and still be matched to its block assignment
