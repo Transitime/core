@@ -40,24 +40,32 @@ import org.transitime.db.hibernate.HibernateUtils;
 @Entity @DynamicUpdate
 public class ActiveRevisions {
 
-	// Not from database. Instead, specified which db to use
-	@Transient
-	private String projectId;
-	
+	// For the configuration data for routes, stops, schedule, etc.
 	@Column
 	@Id
 	private int configRev;
 	
+	// For the travel time configuration data. Updated independently of
+	// configRev.
 	@Column
 	private int travelTimesRev;
 
+	// Not from database. Instead, specified which db to use. Useful for
+	// when calling setConfigRev(int) or setTravelTimesRev(int) because
+	// can then automatically open a new session using the project ID
+	// and then store the object.
+	@Transient
+	private String projectId;
+	
 	/********************** Member Functions **************************/
 
 	/**
 	 * Constructor made private so that have to use getActiveRevisions() to get
-	 * object.
+	 * object. Sets the revisions to -1 so that when incremented they will be 0.
 	 */
 	private ActiveRevisions() {
+		configRev = -1;
+		travelTimesRev = -1;
 	}
 	
 	/**
@@ -101,6 +109,37 @@ public class ActiveRevisions {
 		return activeRevisions;
 	}
 	
+	/**
+	 * Updates configRev member and calls saveOrUpdate(this) on the session.
+	 * Useful for when want to update the value but don't want to commit it
+	 * until all other data is also written out successfully.
+	 * 
+	 * @param session
+	 * @param configRev
+	 */
+	public void setConfigRev(Session session, int configRev) {
+		this.configRev = configRev;
+		session.saveOrUpdate(this);
+	}
+	
+	/**
+	 * Updates travelTimeRev member and calls saveOrUpdate(this) on the session.
+	 * Useful for when want to update the value but don't want to commit it
+	 * until all other data is also written out successfully.
+	 * 
+	 * @param session
+	 * @param travelTimeRev
+	 */
+	public void setTravelTimesRev(Session session, int travelTimeRev) {
+		this.travelTimesRev = travelTimeRev;
+		session.saveOrUpdate(this);
+	}
+	
+	/**
+	 * Creates new db session and writes the new value to the db.
+	 * 
+	 * @param travelTimeRev
+	 */
 	public void setTravelTimesRev(int travelTimeRev) {
 		Session session = HibernateUtils.getSession(projectId);
 		this.travelTimesRev = travelTimeRev;
@@ -115,6 +154,11 @@ public class ActiveRevisions {
 		}
 	}
 	
+	/**
+	 * Creates new db session and writes the new value to the db.
+	 * 
+	 * @param configRev
+	 */
 	public void setConfigRev(int configRev) {
 		Session session = HibernateUtils.getSession(projectId);
 		this.configRev = configRev;
