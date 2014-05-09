@@ -98,6 +98,8 @@ public class Trip implements Serializable {
 	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	private TravelTimesForTrip travelTimes;
 	
+	// Contains schedule time for each stop as obtained from GTFS 
+	// stop_times.txt file.
 	// NOTE: since trying to use serialization need to use ArrayList<> instead
 	// of List<> since List<> doesn't implement Serializable. Serialization 
 	// makes the data not readable in the db using regular SQL but it means
@@ -617,6 +619,15 @@ public class Trip implements Serializable {
 	 */
 	public StopPath getStopPath(int stopPathIndex) {
 		return tripPattern.getStopPath(stopPathIndex);
+	}
+	
+	/**
+	 * Returns number of stop paths defined for this trip.
+	 * 
+	 * @return Number of stop paths
+	 */
+	public int getNumberStopPaths() {
+		return getTripPattern().getStopPaths().size();
 	}
 	
 }
