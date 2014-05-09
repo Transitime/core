@@ -55,14 +55,11 @@ public class ScheduleBasedTravelTimesProcessor {
 	private final int defaultWaitTimeAtStopMsec; 
 	private final double maxTravelTimeSegmentLength;
 	
-	// For when determining when to flush when writing data
-	private int counter = 0;
-	
 	// For keeping track of which project working with
 	private final String projectId;
 	
 	// So know what the current travel time rev is
-	private final int activeTravelTimeRev;
+	private final int travelTimeRevToUse;
 	
 	// For reading and writing to db
 	private final SessionFactory sessionFactory;
@@ -84,7 +81,10 @@ public class ScheduleBasedTravelTimesProcessor {
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
 		
 		ActiveRevisions activeRevs = ActiveRevisions.get(projectId);
-		this.activeTravelTimeRev = activeRevs.getTravelTimesRev();
+		
+		// Use the next travel times rev so that any existing travel time data
+		// is left alone.
+		this.travelTimeRevToUse = activeRevs.getTravelTimesRev() + 1;
 	}
 	
 	/**
@@ -138,7 +138,7 @@ public class ScheduleBasedTravelTimesProcessor {
 		
 		// Create the TravelTimesForTrip object to be returned
 		TravelTimesForTrip travelTimes = new TravelTimesForTrip(
-				DbConfig.SANDBOX_REV, activeTravelTimeRev, trip);
+				DbConfig.SANDBOX_REV, travelTimeRevToUse, trip);
 		
 		// Handle first path specially since it is a special case where it is
 		// simply a stub path. It therefore has no travel or stop time.
@@ -153,7 +153,7 @@ public class ScheduleBasedTravelTimesProcessor {
 						firstPathId, firstPath.length(), firstPathTravelTimesMsec, 
 						0,   // stopTimeMsec
 						-1,  // daysOfWeekOverride
-						HowSet.SCHEDULE_TIMES); 
+						HowSet.SCHED); 
 		travelTimes.add(firstPathTravelTimesForPath);
 		
 		// Go through the schedule times for the trip pattern.
@@ -224,8 +224,9 @@ public class ScheduleBasedTravelTimesProcessor {
 					if (pathLength > maxTravelTimeSegmentLength) {
 						// The stop path is longer then the max so divide it into
 						// shorter travel time segments
-						numberTravelTimeSegments = (int) (pathLength /
-								maxTravelTimeSegmentLength + 0.999999999);
+						numberTravelTimeSegments = 
+								(int) (pathLength /	maxTravelTimeSegmentLength +
+										1.0);
 						travelTimeSegmentsLength = 
 								pathLength / numberTravelTimeSegments;
 					} else {
@@ -260,7 +261,7 @@ public class ScheduleBasedTravelTimesProcessor {
 									travelTimesMsec, 
 									stopTimeMsec,
 									-1,  // daysOfWeekOverride
-									HowSet.SCHEDULE_TIMES);
+									HowSet.SCHED);
 					travelTimes.add(travelTimesForStopPath);
 				}
 				
@@ -383,8 +384,9 @@ public class ScheduleBasedTravelTimesProcessor {
 					"is for tripPatternId={} for routeId={}.", 
 					trip.getId(), tripPattern.getId(), trip.getRouteId());
 
-			// For determining if can use existing TravelTimesForTrip from database. 
-			List<TravelTimesForTrip> travelTimesForTripFromDbList = 
+			// For determining if can use existing TravelTimesForTrip from 
+			// database. 
+			List<TravelTimesForTrip> ttForTripFromDbList = 
 					travelTimesFromDbMap.get(tripPattern.getId());			
 				
 			// See if any of the existing travel times from the db are adequate.
@@ -394,17 +396,19 @@ public class ScheduleBasedTravelTimesProcessor {
 			TravelTimesForTrip travelTimesToUse = scheduleBasedTravelTimes;
 			
 			boolean adequateMatchFoundInDb = false;
-			if (travelTimesForTripFromDbList != null) {
+			if (ttForTripFromDbList != null) {
 				// Go through list and look for suitable match
-				for (TravelTimesForTrip travelTimesForTripFromDb : travelTimesForTripFromDbList) {
+				for (TravelTimesForTrip ttForTripFromDb : ttForTripFromDbList) {
 					// If suitable travel times already in db then use them
-					if (adequateMatch(trip, scheduleBasedTravelTimes, travelTimesForTripFromDb, gtfsData)) {
-						travelTimesToUse = travelTimesForTripFromDb;
+					if (adequateMatch(trip, scheduleBasedTravelTimes, 
+							ttForTripFromDb, gtfsData)) {
+						travelTimesToUse = ttForTripFromDb;
 						adequateMatchFoundInDb = true;
 						logger.debug("Found adequate travel time match for " + 
-								"tripId={} which is for tripPatternId={} so will " + 
-								"use the old one created for tripId={}", 
-							trip.getId(), tripPattern.getId(), travelTimesForTripFromDb.getTripCreatedForId());
+								"tripId={} which is for tripPatternId={} so " +
+								"will use the old one created for tripId={}",
+								trip.getId(), tripPattern.getId(),
+								ttForTripFromDb.getTripCreatedForId());
 						break;
 					}
 				}
@@ -420,11 +424,11 @@ public class ScheduleBasedTravelTimesProcessor {
 					trip.getId(), tripPattern.getId());
 				// If list of travel times doesn't exist for this trip pattern yet
 				// then create it
-				if (travelTimesForTripFromDbList == null) {
-					travelTimesForTripFromDbList = new ArrayList<TravelTimesForTrip>();
-					travelTimesFromDbMap.put(tripPattern.getId(), travelTimesForTripFromDbList);
+				if (ttForTripFromDbList == null) {
+					ttForTripFromDbList = new ArrayList<TravelTimesForTrip>();
+					travelTimesFromDbMap.put(tripPattern.getId(), ttForTripFromDbList);
 				}
-				travelTimesForTripFromDbList.add(scheduleBasedTravelTimes);					
+				ttForTripFromDbList.add(scheduleBasedTravelTimes);					
 			}
 			
 			// Add the resulting TravelTimesForTrip to the Trip so it can be stored
@@ -497,12 +501,10 @@ public class ScheduleBasedTravelTimesProcessor {
 		logger.info("Finished processing travel time data. " + 
 				"Number of travel times read from db={}. " + 
 				"Total number of travel times needed to cover each trip={}. " + 
-				"Total number of trips={}. " + 
-				"Wrote {} records. Took {} msec.", 
+				"Total number of trips={}.  Took {} msec.", 
 				originalNumberTravelTimes,
 				numberOfTravelTimes(travelTimesFromDbMap),
 				gtfsData.getTrips().size(),
-				counter, 
 				timer.elapsedMsec());
 	}
 	
