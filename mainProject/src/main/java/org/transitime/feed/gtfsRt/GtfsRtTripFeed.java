@@ -82,7 +82,7 @@ public class GtfsRtTripFeed {
 		// Add the StopTimeUpdate information for each prediction
 		for (Prediction pred : predsForTrip) {
 			StopTimeUpdate.Builder stopTimeUpdate =	StopTimeUpdate.newBuilder()
-					.setStopSequence(pred.getStopSequence())
+					.setStopSequence(pred.getGtfsStopSeq())
 					.setStopId(pred.getStopId());
 			StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
 			stopTimeEvent.setTime(pred.getTime());
