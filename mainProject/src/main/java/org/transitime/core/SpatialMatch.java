@@ -343,6 +343,67 @@ public class SpatialMatch {
 		return indices;
 	}
 	
+	/**
+	 * Returns true if this is before the other SpatialMatch passed in.
+	 * 
+	 * @param other
+	 *            The Spatial Match to compare to
+	 * @return true if this is before the other SpatialMatch
+	 */
+	public boolean lessThan(SpatialMatch other) {
+		if (tripIndex > other.tripIndex)
+			return false;
+		if (tripIndex < other.tripIndex)
+			return true;
+		
+		// tripIndex == other.tripIndex
+		if (stopPathIndex > other.stopPathIndex)
+			return false;
+		if (stopPathIndex < other.stopPathIndex)
+			return true;
+		
+		// stopPathIndex == other.pathIndex
+		if (segmentIndex > other.segmentIndex)
+			return false;
+		if (segmentIndex < other.segmentIndex)
+			return true;
+		
+		// segmentIndex == other.segmentIndex
+		return distanceAlongSegment < other.distanceAlongSegment;
+	}
+
+	/**
+	 * Returns the total number of stops traversed between the two
+	 * matches.
+	 * 
+	 * @param match1
+	 * @param match2
+	 * @return Number of stops
+	 */
+	public static int numberStopsBetweenMatches(SpatialMatch match1,
+			SpatialMatch match2) {
+		// Stop index for first trip
+		int stopIdxInFirstTrip = match1.getStopPathIndex();
+
+		// Stops for intermediate trips
+		Block block = match2.getBlock();
+		int numIntermediateTripsStops = 0;
+		for (int tripIndex = match1.getTripIndex(); 
+				tripIndex < match2.getTripIndex(); 
+				++tripIndex) {
+			numIntermediateTripsStops += 
+					block.getTrip(tripIndex).getNumberStopPaths();
+		}
+
+		// Stops for last trip
+		int stopIdxInLastTrip = match2.getStopPathIndex();
+
+		// Return total number of stops traversed between matches
+		int totalStopsBetweenMatches = stopIdxInLastTrip - stopIdxInFirstTrip
+				+ numIntermediateTripsStops;
+		return totalStopsBetweenMatches;
+	}
+	
 	@Override
 	public String toString() {
 		return "SpatialMatch [" 
@@ -350,7 +411,7 @@ public class SpatialMatch {
 				// + ", block=" + block.toShortString() too verbose!
 				+ ", blockId=" + block.getId()
 				+ ", tripIndex=" + tripIndex
-				+ ", gtfsStopSeq=" + getStopPath().getStopSequence()
+				+ ", gtfsStopSeq=" + getStopPath().getGtfsStopSeq()
 				+ ", stopPathIndex=" + stopPathIndex
 				+ ", segmentIndex=" + segmentIndex
 				+ ", atLayover=" + atLayover()
@@ -360,7 +421,6 @@ public class SpatialMatch {
 				+ ", trip=" + getTrip().toShortString()
 				+ "]";
 	}
-
 
 	/********************* Getter Methods *****************************/
 	
@@ -425,6 +485,13 @@ public class SpatialMatch {
 	 */
 	public VehicleAtStopInfo getAtStop() {
 		return atStop;
+	}
+	
+	/**
+	 * @return true if vehicle is at or near a stop.
+	 */
+	public boolean isAtStop() {
+		return atStop != null;
 	}
 	
 	/**
