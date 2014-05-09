@@ -46,6 +46,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	// when vehicle did not actually traverse that stop.
 	private static final int MAX_STOPS_WHEN_NO_PREVIOUS_MATCH = 6;
 	
+	private static final int MAX_STOPS_BETWEEN_MATCHES = 12;
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ArrivalDepartureGeneratorDefaultImpl.class);
 
@@ -105,11 +107,14 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	}
 	
 	/**
-	 * Determines if need to determine arrival/departure times due to 
-	 * vehicle having traversed a stop. 
+	 * Determines if need to determine arrival/departure times due to vehicle
+	 * having traversed a stop.
 	 * 
 	 * @param oldMatch
+	 *            The old match for the vehicle. Should be null if not previous
+	 *            match
 	 * @param newMatch
+	 *            The new match for the vehicle.
 	 * @return
 	 */
 	private boolean shouldProcessArrivedOrDepartedStops(SpatialMatch oldMatch, 
@@ -122,6 +127,21 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		if (oldMatch == null)
 			return true;
 
+		// If jumping too many stops then something is strange, such as
+		// matching to a very different part of the assignment. Since don't
+		// truly know what is going on it is best to not generate
+		// arrivals/departures for between the matches.
+		int stopsTraversed = SpatialMatch.numberStopsBetweenMatches(oldMatch, newMatch);
+		if (stopsTraversed > MAX_STOPS_BETWEEN_MATCHES) {
+			logger.error("Attempting to traverse {} stops between oldMatch " +
+					"and newMatch, which is more thanThere are more than " +
+					"MAX_STOPS_BETWEEN_MATCHES={}. Therefore not generating " +
+					"arrival/departure times. oldMatch={} newMatch={}",
+					stopsTraversed, MAX_STOPS_BETWEEN_MATCHES, oldMatch, newMatch);
+			return false;
+		}
+		
+		// Determine if should generate arrivals/departures
 		VehicleAtStopInfo oldStopInfo = oldMatch.getAtStop();
 		VehicleAtStopInfo newStopInfo = newMatch.getAtStop();
 		
