@@ -165,7 +165,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue maxPredictionsTimeSecs =
 			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
-					60 * Time.SEC_PER_MIN);
+					45 * Time.SEC_PER_MIN);
 	
 	/**
 	 * For specifying whether to use arrival predictions or departure
