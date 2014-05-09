@@ -84,11 +84,14 @@ public final class Block implements Serializable {
 	// using regular trips. For this situation don't want Hibernate to
 	// try to store the same trip twice because then would get a uniqueness
 	// violation.
-	// For the List of Trips want to use FetchType.EAGER
-	// because otherwise need to keep the session open till the Trips
-	// are accessed with the default LAZY loading. And use CascadeType.ALL
-	// so that when the TripPattern is stored the Paths are
-	// automatically stored.
+	//
+	// Use CascadeType.ALL so that when the TripPattern is stored the Paths 
+	// are automatically stored.
+	//
+	// Use FetchType.LAZY so that don't read in all trip data at once since
+	// that in turn reads in trip pattern and travel time info, which can
+	// be voluminous and therefore slow. The trips will be read in when
+	// getTrips() is called.
 	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
 	@JoinTable(name="Block_to_Trip_joinTable")
 	@OrderColumn(name="listIndex")
