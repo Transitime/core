@@ -27,6 +27,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import net.jcip.annotations.Immutable;
 
@@ -73,33 +74,53 @@ public class Match implements Serializable {
 	// Need to use columnDefinition to explicitly specify that should use 
 	// fractional seconds. This column is an Id since shouldn't get two
 	// AVL reports for the same vehicle for the same avlTime.
-	@Column(columnDefinition="datetime(3)")	@Temporal(TemporalType.TIMESTAMP)
+	@Column(columnDefinition="datetime(3)")	
+	@Temporal(TemporalType.TIMESTAMP)
 	@Id
 	private final Date avlTime;
 
+	// So that know which configuration was being used when this data point 
+	// was created
 	@Column
 	private final int configRev;
 	
+	// So that know which service type was used when this data point was created
 	@Column
 	private final String serviceId;
 	
+	// Not truly needed because currently using only trip info for generating
+	// travel times, which is the main use of Match data from the db.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String blockId;
 	
+	// Creating travel times on a trip by trip basis so this element is 
+	// important.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripId;
 	
+	// Important because generating travel times on a per stop path basis
 	@Column
 	private final int stopPathIndex;
 	
+	// Not currently needed. Added for possible future uses of Match
 	@Column
 	private final int segmentIndex;
 	
+	// Not currently needed. Added for possible future uses of Match
 	@Column
 	private final float distanceAlongSegment;
 
+	// The distanceAlongStopPath is the important item since travel times are
+	// based on dividing up the stop path into travel time paths. These travel
+	// time paths are independent of the path segments.
 	@Column
 	private final float distanceAlongStopPath;
+	
+	// Whether vehicle is considered to be at a stop. Used to determine if match
+	// should be stored to database.
+	@Transient
+	private final boolean atStop;
+	
 	
 	// Needed because serializable due to Hibernate requirement
 	private static final long serialVersionUID = -7582135605912244678L;
@@ -129,8 +150,9 @@ public class Match implements Serializable {
 				(float) (lastMatch!=null ? lastMatch.getDistanceAlongSegment() : 0.0);
 		this.distanceAlongStopPath =
 				(float) (lastMatch!=null ? lastMatch.getDistanceAlongStopPath() : 0.0);
+		this.atStop = vehicleState.getMatch().isAtStop();
 		
-		// Log each creation of a Match
+		// Log each creation of a Match to the match.log log file
 		logger.info(this.toString());
 	}
 
@@ -157,6 +179,7 @@ public class Match implements Serializable {
 		this.segmentIndex = -1;
 		this.distanceAlongSegment = Float.NaN;	
 		this.distanceAlongStopPath = Float.NaN;
+		this.atStop = false;
 	}
 
 	/**
@@ -245,6 +268,7 @@ public class Match implements Serializable {
 				+ ", segmentIndex=" + segmentIndex 
 				+ ", distanceAlongSegment="	+ Geo.distanceFormat(distanceAlongSegment)
 				+ ", distanceAlongStopPath=" + Geo.distanceFormat(distanceAlongStopPath)
+				+ ", atStop=" + atStop
 				+ "]";
 	}
 	
@@ -349,5 +373,15 @@ public class Match implements Serializable {
 	
 	public float getDistanceAlongStopPath() {
 		return distanceAlongStopPath;
+	}
+	
+	/**
+	 * Returns true if vehicle is at or near a stop. The atStop member is
+	 * transient which means it is not set properly if the Match object was read
+	 * from the database. It is only set when the Match is created by the
+	 * predictor software.
+	 */
+	public boolean isAtStop() {
+		return atStop;
 	}
 }
