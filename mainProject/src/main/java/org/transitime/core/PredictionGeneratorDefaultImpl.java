@@ -92,7 +92,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		// Determine additional parameters for the prediction to be generated
 		StopPath path = indices.getStopPath();
 		String stopId = path.getStopId();
-		int stopSequence = path.getStopSequence();
+		int stopSequence = path.getGtfsStopSeq();
 		Trip trip = indices.getTrip();
 		int expectedStopTimeMsec =
 				TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
