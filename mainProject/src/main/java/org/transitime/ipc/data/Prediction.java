@@ -48,7 +48,7 @@ public class Prediction implements Serializable {
 	@SuppressWarnings("unused")
 	private final String stopName;
 	
-	private final int stopSequence;
+	private final int gtfsStopSeq;
 	private final String routeId;
 	// routeShortName needed because routeId is sometimes not consistent over
 	// schedule changes but routeShortName usually is.
@@ -78,7 +78,7 @@ public class Prediction implements Serializable {
 	 * 
 	 * @param vehicleId
 	 * @param stopId
-	 * @param stopSequence
+	 * @param gtfsStopSeq
 	 * @param trip
 	 *            Can be set to null for testing but usually will be a valid
 	 *            trip
@@ -91,14 +91,14 @@ public class Prediction implements Serializable {
 	 * @param passengerFullness
 	 * @param isArrival
 	 */
-	public Prediction(String vehicleId, String stopId, int stopSequence,
+	public Prediction(String vehicleId, String stopId, int gtfsStopSeq,
 			Trip trip, long predictionTime, long avlTime, long creationTime,
 			boolean predictionAffectedByWaitStop, String driverId,
 			int passengerCount, float passengerFullness, boolean isArrival) {
 		this.vehicleId = vehicleId;
 		this.stopId = stopId;
 		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
-		this.stopSequence = stopSequence;
+		this.gtfsStopSeq = gtfsStopSeq;
 		this.routeId = trip != null ? trip.getRouteId() : null;
 		this.routeShortName = trip != null ? trip.getRouteShortName() : null;
 		// For when trip is null use "" instead of null for the tripId
@@ -123,7 +123,7 @@ public class Prediction implements Serializable {
 	 * Constructor used for when deserializing a proxy object. Declared
 	 * private because only used internally by the proxy class.
 	 */
-	private Prediction(String vehicleId, String stopId, int stopSequence,
+	private Prediction(String vehicleId, String stopId, int gtfsStopSeq,
 			String routeId, String routeShortName, String tripId,
 			String blockId, long predictionTime, long avlTime,
 			long creationTime, boolean affectedByWaitStop, 
@@ -133,7 +133,7 @@ public class Prediction implements Serializable {
 		this.stopId = stopId;
 		// stopName is only for debugging so not made available on client side
 		this.stopName = null;
-		this.stopSequence = stopSequence;
+		this.gtfsStopSeq = gtfsStopSeq;
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.tripId = tripId;
@@ -156,7 +156,7 @@ public class Prediction implements Serializable {
 		// Exact copy of fields of Prediction enclosing class object
 		private String vehicleId;
 		private String stopId;
-		private int stopSequence;
+		private int gtfsStopSeq;
 		private String routeId;
 		private String routeShortName;
 		private String tripId;
@@ -179,7 +179,7 @@ public class Prediction implements Serializable {
 		private SerializationProxy(Prediction p) {
 			this.vehicleId = p.vehicleId;
 			this.stopId = p.stopId;
-			this.stopSequence = p.stopSequence;
+			this.gtfsStopSeq = p.gtfsStopSeq;
 			this.routeId = p.routeId;
 			this.routeShortName =p.routeShortName;
 			this.tripId = p.tripId;
@@ -205,7 +205,7 @@ public class Prediction implements Serializable {
 			stream.writeShort(serializationVersion);
 			stream.writeObject(vehicleId);
 			stream.writeObject(stopId);
-			stream.writeInt(stopSequence);
+			stream.writeInt(gtfsStopSeq);
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
 			stream.writeObject(tripId);
@@ -235,7 +235,7 @@ public class Prediction implements Serializable {
 			// serialization version is OK so read in object
 			vehicleId = (String) stream.readObject();
 			stopId = (String) stream.readObject();
-			stopSequence = stream.readInt();
+			gtfsStopSeq = stream.readInt();
 			routeId = (String) stream.readObject();
 			routeShortName = (String) stream.readObject();
 			tripId = (String) stream.readObject();
@@ -258,7 +258,7 @@ public class Prediction implements Serializable {
 		 * class object.
 		 */
 		private Object readResolve() {
-			return new Prediction(vehicleId, stopId, stopSequence, routeId,
+			return new Prediction(vehicleId, stopId, gtfsStopSeq, routeId,
 					routeShortName, tripId, blockId, predictionTime, avlTime,
 					creationTime, affectedByWaitStop, driverId, passengerCount, 
 					passengerFullness, isArrival);
@@ -292,7 +292,7 @@ public class Prediction implements Serializable {
 				// stop name taken out because it is too verbose in the  
 				// predictions log file
 //				+ (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "") 
-				+ ", gtfsStopSeq=" + stopSequence
+				+ ", gtfsStopSeq=" + gtfsStopSeq
 				+ ", trip=" + tripId 
 				+ ", block=" + blockId 
 				+ ", predTime=" + Time.timeStrMsecNoTimeZone(predictionTime) 
@@ -325,8 +325,11 @@ public class Prediction implements Serializable {
 		return stopId;
 	}
 
-	public int getStopSequence() {
-		return stopSequence;
+	/**
+	 * @return the stop_sequence from the GTFS stop_times.txt file
+	 */
+	public int getGtfsStopSeq() {
+		return gtfsStopSeq;
 	}
 	
 	public String getTripId() {
