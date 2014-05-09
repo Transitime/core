@@ -42,7 +42,10 @@ import org.transitime.utils.MapKey;
  */
 public class DataFetcher {
 
-	// The data ends up in arrivalDepartureMap and matchesMap
+	// The data ends up in arrivalDepartureMap and matchesMap.
+	// It is keyed by DbDataMapKey which means that data is grouped
+	// per vehicle trip. This way can later subsequent arrivals/departures
+	// for a vehicle trip to determine travel and stop times.
 	private Map<DbDataMapKey, List<ArrivalDeparture>> arrivalDepartureMap;
 	private Map<DbDataMapKey, List<Match>> matchesMap;
 
