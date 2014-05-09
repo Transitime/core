@@ -432,7 +432,7 @@ public class StopPath implements Serializable {
 	 * 
 	 * @return the stopSequence
 	 */
-	public int getStopSequence() {
+	public int getGtfsStopSeq() {
 		return stopSequence;
 	}
 	
