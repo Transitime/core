@@ -92,7 +92,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		// Determine additional parameters for the prediction to be generated
 		StopPath path = indices.getStopPath();
 		String stopId = path.getStopId();
-		int stopSequence = path.getGtfsStopSeq();
+		int gtfsStopSeq = path.getGtfsStopSeq();
 		Trip trip = indices.getTrip();
 		int expectedStopTimeMsec =
 				TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
@@ -101,7 +101,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
 			return new Prediction(avlReport.getVehicleId(), stopId,
-					stopSequence, trip, predictionTime, 
+					gtfsStopSeq, trip, predictionTime, 
 					avlReport.getTime(), avlReport.getTimeProcessed(), 
 					affectedByWaitStop, avlReport.getDriverId(),
 					avlReport.getPassengerCount(), avlReport.getPassengerFullness(),
@@ -174,7 +174,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				// Add in expected stop time since vehicles often don't depart
 				// on time.
 				return new Prediction(avlReport.getVehicleId(), stopId,
-						stopSequence, trip, 
+						gtfsStopSeq, trip, 
 						adjustedDeparatureTime + expectedStopTimeMsec,
 						avlReport.getTime(), avlReport.getTimeProcessed(),
 						affectedByWaitStop,
@@ -185,7 +185,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				// Create and return the departure prediction for this 
 				// non-layover stop
 				return new Prediction(avlReport.getVehicleId(), stopId,
-						stopSequence, trip, 
+						gtfsStopSeq, trip, 
 						predictionTime + expectedStopTimeMsec,
 						avlReport.getTime(), avlReport.getTimeProcessed(),
 						affectedByWaitStop,

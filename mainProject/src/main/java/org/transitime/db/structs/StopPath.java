@@ -68,7 +68,7 @@ public class StopPath implements Serializable {
 	
 	// The stop_sequence for the trip from the GTFS stop_times.txt file 
 	@Column
-	private final int stopSequence;
+	private final int gtfsStopSeq;
 	
 	// Needed for schedule adherence so can return scheduled departure time
 	// for most stops but the scheduled arrival time for the last stop for
@@ -133,7 +133,7 @@ public class StopPath implements Serializable {
 	 * 
 	 * @param pathId
 	 * @param stopId
-	 * @param stopSequence
+	 * @param gtfsStopSeq
 	 * @param lastStopInTrip
 	 * @param routeId
 	 * @param layoverStop
@@ -143,7 +143,7 @@ public class StopPath implements Serializable {
 	 */
 	public StopPath(String pathId, 
 			String stopId,
-			int stopSequence,
+			int gtfsStopSeq,
 			boolean lastStopInTrip,
 			String routeId, 
 			boolean layoverStop,
@@ -153,7 +153,7 @@ public class StopPath implements Serializable {
 		this.configRev = DbConfig.SANDBOX_REV;
 		this.stopPathId = pathId;
 		this.stopId = stopId;
-		this.stopSequence = stopSequence;
+		this.gtfsStopSeq = gtfsStopSeq;
 		this.lastStopInTrip = lastStopInTrip;
 		this.routeId = routeId;
 		this.locations = null;
@@ -173,7 +173,7 @@ public class StopPath implements Serializable {
 		this.configRev = -1;
 		this.stopPathId = null;
 		this.stopId = null;
-		this.stopSequence = -1;
+		this.gtfsStopSeq = -1;
 		this.lastStopInTrip = false;
 		this.routeId = null;
 		this.tripPatternId = null;
@@ -248,7 +248,7 @@ public class StopPath implements Serializable {
 				+ "configRev=" + configRev
 				+ ", stopPathId=" + stopPathId 
 				+ ", stopId=" + stopId 				
-				+ ", stopSequence=" + stopSequence 
+				+ ", gtfsStopSeq=" + gtfsStopSeq 
 				+ ", lastStopInTrip=" + lastStopInTrip
 				+ ", routeId=" + routeId 
 				+ ", tripPatternId=" + tripPatternId
@@ -345,7 +345,7 @@ public class StopPath implements Serializable {
 				return false;
 		} else if (!stopId.equals(other.stopId))
 			return false;
-		if (stopSequence != other.stopSequence)
+		if (gtfsStopSeq != other.gtfsStopSeq)
 			return false;
 		if (lastStopInTrip != other.lastStopInTrip)
 			return false;
@@ -399,7 +399,7 @@ public class StopPath implements Serializable {
 				return false;
 		} else if (!stopId.equals(other.stopId))
 			return false;
-		if (stopSequence != other.stopSequence)
+		if (gtfsStopSeq != other.gtfsStopSeq)
 			return false;
 		return true;
 	}
@@ -430,10 +430,10 @@ public class StopPath implements Serializable {
 	/**
 	 * The stop_sequence for the trip from the GTFS stop_times.txt file
 	 * 
-	 * @return the stopSequence
+	 * @return the gtfsStopSeq
 	 */
 	public int getGtfsStopSeq() {
-		return stopSequence;
+		return gtfsStopSeq;
 	}
 	
 	/**
