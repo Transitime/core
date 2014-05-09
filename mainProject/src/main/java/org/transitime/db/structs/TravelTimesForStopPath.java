@@ -58,12 +58,14 @@ public class TravelTimesForStopPath implements Serializable {
 	@GeneratedValue 
 	private Integer id;
 	
+	// Which stop on the trip the travel times are for
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String stopPathId;
 	
-	// The distance for each travel time segment for this path
+	// The distance for each travel time segment for this path. Doesn't 
+	// need to be precise so use float instead of double to save memory.
 	@Column
-	private final double travelTimeSegmentLength;
+	private final float travelTimeSegmentLength;
 	
 	// Travel time is a List of Integers containing the expected travel time
 	// for each travel time segment whose length is travelTimeSegmentLength. 
@@ -104,11 +106,11 @@ public class TravelTimesForStopPath implements Serializable {
 	// different travel times for Fridays since afternoon rush hour is 
 	// definitely different for Fridays. 
 	@Column
-	private final int daysOfWeekOverride;
+	private final short daysOfWeekOverride;
 
 	// For keeping track of how the data was obtained (historic GPS,
 	// schedule, default speed, etc)
-	@Column(length=17)
+	@Column(length=5)
 	@Enumerated(EnumType.STRING)
 	private final HowSet howSet;
 	
@@ -122,21 +124,21 @@ public class TravelTimesForStopPath implements Serializable {
 	public enum HowSet {
 		// From when there are no schedule times so simply need to use a
 		// default speed
-		DEFAULT_SPEED(0),
+		SPEED(0),
 
 		// From interpolating data in GTFS stop_times.txt file
-		SCHEDULE_TIMES(1),
+		SCHED(1),
 		
 		// No AVL data was available for the actual day so using data from
 		// another day.
-		AVL_OTHER_SERVICE(2),
+		SERVC(2),
 	
 		// No AVL data was available for the actual trip so using data from
 		// a trip that is before or after the trip in question
-		AVL_OTHER_TRIP(3),
+		TRIP(3),
 		
 		// Based on actual running times as determined by AVL data
-		AVL_DATA(4);
+		AVL(4);
 		
 		@SuppressWarnings("unused")
 		private int value;
@@ -146,8 +148,8 @@ public class TravelTimesForStopPath implements Serializable {
 		}
 		
 		public boolean isScheduleBased() {
-			return this == DEFAULT_SPEED || 
-					this == SCHEDULE_TIMES;
+			return this == SPEED || 
+					this == SCHED;
 		}
 	};
 	
@@ -168,10 +170,10 @@ public class TravelTimesForStopPath implements Serializable {
 			List<Integer> travelTimesMsec, int stopTimeMsec,
 			int daysOfWeekOverride, HowSet howSet) {
 		this.stopPathId = stopPathId;
-		this.travelTimeSegmentLength = travelTimeSegmentDistance;
+		this.travelTimeSegmentLength = (float) travelTimeSegmentDistance;
 		this.travelTimesMsec = (ArrayList<Integer>) travelTimesMsec;
 		this.stopTimeMsec = stopTimeMsec;
-		this.daysOfWeekOverride = daysOfWeekOverride;
+		this.daysOfWeekOverride = (short) daysOfWeekOverride;
 		this.howSet = howSet;
 	}
 	
@@ -181,17 +183,17 @@ public class TravelTimesForStopPath implements Serializable {
 	@SuppressWarnings("unused")
 	private TravelTimesForStopPath() {
 		this.stopPathId = null;
-		this.travelTimeSegmentLength = Double.NaN;
+		this.travelTimeSegmentLength = Float.NaN;
 		this.travelTimesMsec = null;
 		this.stopTimeMsec = -1;
 		this.daysOfWeekOverride = -1;
-		this.howSet = HowSet.SCHEDULE_TIMES;
+		this.howSet = HowSet.SCHED;
 	}
 	
 	/**
 	 * Creates a new object. Useful for when need to copy a schedule based
 	 * travel time. By having a copy can erase the original one when done with
-	 * the rev, without deleting this new one.
+	 * the rev, without deleting this new one. 
 	 * 
 	 * @param original
 	 * @return
@@ -333,6 +335,66 @@ public class TravelTimesForStopPath implements Serializable {
 			// it might actually be detrimental and slow things down.
 			session.close();
 		}
+	}
+
+	/**
+	 * Defined so can use as key in map
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + daysOfWeekOverride;
+		result = prime * result + ((howSet == null) ? 0 : howSet.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result
+				+ ((stopPathId == null) ? 0 : stopPathId.hashCode());
+		result = prime * result + stopTimeMsec;
+		long temp;
+		temp = Double.doubleToLongBits(travelTimeSegmentLength);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((travelTimesMsec == null) ? 0 : travelTimesMsec.hashCode());
+		return result;
+	}
+
+	/**
+	 * Defined so can use as key in map
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TravelTimesForStopPath other = (TravelTimesForStopPath) obj;
+		if (daysOfWeekOverride != other.daysOfWeekOverride)
+			return false;
+		if (howSet != other.howSet)
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (stopPathId == null) {
+			if (other.stopPathId != null)
+				return false;
+		} else if (!stopPathId.equals(other.stopPathId))
+			return false;
+		if (stopTimeMsec != other.stopTimeMsec)
+			return false;
+		if (Double.doubleToLongBits(travelTimeSegmentLength) != Double
+				.doubleToLongBits(other.travelTimeSegmentLength))
+			return false;
+		if (travelTimesMsec == null) {
+			if (other.travelTimesMsec != null)
+				return false;
+		} else if (!travelTimesMsec.equals(other.travelTimesMsec))
+			return false;
+		return true;
 	}
 	
 }

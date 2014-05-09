@@ -26,10 +26,13 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.core.TemporalDifference;
 import org.transitime.core.travelTimes.DataFetcher.DbDataMapKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Match;
 import org.transitime.db.structs.Trip;
+import org.transitime.statistics.MiscStatistics;
+import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
 import org.transitime.utils.Time;
@@ -51,8 +54,8 @@ public class TravelTimesProcessor {
 	private final static int MAX_SCHED_ADH_FOR_FIRST_STOP_TIME = 
 			10*Time.MS_PER_MIN;
 	
-	private final static int MAX_SCHED_ADH =
-			30*Time.MS_PER_MIN;
+	private final static int MAX_SCHED_ADH_SECS =
+			30*Time.SEC_PER_MIN;
 	
 	private double maxTravelTimeSegmentLength;
 		
@@ -124,13 +127,17 @@ public class TravelTimesProcessor {
 	}
 	
 	/**
-	 * Adds travel times for stop path for a single trip to the travelTimesMap
+	 * Adds travel times for stop path for a single trip to the travelTimesMap.
 	 * 
 	 * @param mapKey
 	 * @param travelTimesForStopPath
 	 */
 	private static void addTravelTimesToMap(ProcessedDataMapKey mapKey, 
 			List<Integer> travelTimesForStopPath) {
+		// If there is no data then simply return
+		if (travelTimesForStopPath == null || travelTimesForStopPath.isEmpty())
+			return;
+		
 		List<List<Integer>> travelTimesForStop = travelTimesMap.get(mapKey);
 		if (travelTimesForStop == null) {
 			travelTimesForStop = new ArrayList<List<Integer>>();
@@ -233,16 +240,32 @@ public class TravelTimesProcessor {
 	 * time segments within a stop path. 
 	 */
 	private static class MatchPoint {
-		private Date time;
-		private float distance;
-		private MatchPoint(Date time, float distance) {
+		private final Date time;
+		private final float distance;
+		private final MatchPointReason reason;
+		
+		public enum MatchPointReason {DEPARTURE, MATCH, ARRIVAL};
+		
+		private MatchPoint(Date time, float distance, MatchPointReason reason) {
 			this.time = time;
 			this.distance = distance;
+			this.reason = reason;
 		}
 		
 		private long getTime() {
 			return time.getTime();
 		}
+
+		@Override
+		public String toString() {
+			return "MatchPoint [" 
+					+ "time=" + time
+					+ ", distance=" + Geo.distanceFormat(distance) 
+					+ ", reason=" + reason
+					+ "]";
+		}
+		
+		
 	}
 	
 	/**
@@ -254,8 +277,7 @@ public class TravelTimesProcessor {
 	 */
 	private int getNumTravelTimeSegments(double pathLength) {
 		int numberTravelTimeSegments = 
-				(int) (pathLength / maxTravelTimeSegmentLength +
-						0.99999999);		
+				(int) (pathLength / maxTravelTimeSegmentLength + 1.0);		
 		return numberTravelTimeSegments;
 	}
 
@@ -311,7 +333,8 @@ public class TravelTimesProcessor {
 		List<MatchPoint> matchPoints = new ArrayList<MatchPoint>();
 		
 		// Add the departure time to the list of data points
-		matchPoints.add(new MatchPoint(arrDep1.getDate(), 0.0f));
+		matchPoints.add(new MatchPoint(arrDep1.getDate(), 0.0f,
+				MatchPoint.MatchPointReason.DEPARTURE));
 		
 		// Stop path is long enough such that have more than one travel
 		// time segment. Get the corresponding matches
@@ -321,12 +344,13 @@ public class TravelTimesProcessor {
 		// Add the matches that are in between the arrival and the departure.
 		for (Match match : matchesForStopPath) {
 			matchPoints.add(new MatchPoint(match.getDate(), 
-					match.getDistanceAlongStopPath()));
+					match.getDistanceAlongStopPath(), 
+					MatchPoint.MatchPointReason.MATCH));
 		}
 		
 		// Add the arrival time to the list of data points
 		matchPoints.add(new MatchPoint(arrDep2.getDate(), 
-				arrDep2.getStopPathLength()));
+				arrDep2.getStopPathLength(), MatchPoint.MatchPointReason.ARRIVAL));
 
 		// Return the list of time/distance points
 		return matchPoints;
@@ -348,14 +372,16 @@ public class TravelTimesProcessor {
 	 * @param arrDep2
 	 *            The arrival stop. Also defines which stop path working with.
 	 * @return List of travel times in msec. There is a separate travel time for
-	 *         each travel time segment.
+	 *         each travel time segment. If the match points are garbled and go
+	 *         backwards in time then null is returned.
 	 */
 	private List<Integer> addTravelTimesForMultiSegments(
 			DataFetcher dataFetcher, ArrivalDeparture arrDep1,
 			ArrivalDeparture arrDep2) {
 		double travelTimeSegmentLength = getTravelTimeSegmentLength(arrDep2);
 
-		List<MatchPoint> matchPoints = getMatchPoints(dataFetcher, arrDep1, arrDep2);
+		List<MatchPoint> matchPoints = 
+				getMatchPoints(dataFetcher, arrDep1, arrDep2);
 		
 		// The times when a travel time segment vertex is crossed.
 		// Will include the departure time, the middle vertices, and
@@ -368,12 +394,23 @@ public class TravelTimesProcessor {
 		for (int i=0; i<matchPoints.size()-1; ++i) {
 			MatchPoint pt1 = matchPoints.get(i);
 			MatchPoint pt2 = matchPoints.get(i+1);
+
+			// If the match points decrease in time then it means that data
+			// is messed up and can't determine travel times. This can happen
+			// if the predictor is restarted and vehicles are first matched
+			// incorrectly due to them being off schedule.			
+			if (pt2.getTime() < pt1.getTime()) {
+				logger.error("Encountered two match points that go backwards " +
+						"in time and are therefore incorrect. They are {} " +
+						"and {} between {} and {}", pt1, pt2, arrDep1, arrDep2);
+				return null;
+			}
 			
 			// Determine which travel time segment the match points are on.
 			// Need to subtract 0.0000001 for segIndex2 because the distance
 			// can be the distance to the end of the stop path which of
 			// course is an exact multiple of the travelTimeSegmentLength.
-			// To get the right seg index need to subtract a bit.
+			// To get the right segment index need to subtract a bit.
 			int segIndex1 = (int) (pt1.distance / travelTimeSegmentLength);
 			int segIndex2 = 
 					(int) ((pt2.distance-0.0000001) / travelTimeSegmentLength);
@@ -418,32 +455,40 @@ public class TravelTimesProcessor {
 	}
 	
 	/**
-	 * For looking at travel time between two stops.
+	 * For looking at travel time between two arrival/departures. It can be an
+	 * arrival and then a departure for the same stop or a departure for one
+	 * stop and then an arrival for the subsequent stop. If the schedule
+	 * adherence is off too much (by MAX_SCHED_ADH_SECS) then the data is
+	 * ignored. If schedule adherence is acceptable then the resulting travel
+	 * and stop/dwell times are put into the stopTimesMap and travelTimesMap
+	 * members for further processing.
 	 * 
 	 * @param dataFetcher
-	 * @param departure
-	 * @param arrival
+	 *            Contains the AVL based historic data in maps
+	 * @param arrDep1
+	 *            The first arrival/departure
+	 * @param arrDep2
+	 *            The second arrival/departure
 	 */
 	private void processDataBetweenTwoArrivalDepartures(
 			DataFetcher dataFetcher, ArrivalDeparture arrDep1,
 			ArrivalDeparture arrDep2) {
-		
 		// If schedule adherence is really far off then ignore the data
 		// point because it would skew the results.
-		Date scheduleDate = arrDep1.getScheduledDate();
-		if (scheduleDate == null)
-			scheduleDate = arrDep2.getScheduledDate();
-		if (scheduleDate != null) {
-			int lateTimeMsec = 
-					(int) (scheduleDate.getTime() - arrDep2.getTime());
-			if (Math.abs(lateTimeMsec) > MAX_SCHED_ADH) 
-				return;
+		TemporalDifference schedAdh = arrDep1.getScheduleAdherence();
+		if (schedAdh == null)
+			schedAdh = arrDep2.getScheduleAdherence();
+		if (schedAdh != null
+				&& !schedAdh.isWithinBounds(MAX_SCHED_ADH_SECS,
+						MAX_SCHED_ADH_SECS)) {
+			// Schedule adherence is off so don't use this data
+			return;
 		}
 		
 		// Determine the key for storing the data into appropriate map
 		ProcessedDataMapKey mapKeyForTravelTimes = 
 				getKey(arrDep2.getTripId(), arrDep2.getStopPathIndex());
-
+			
 		// If looking at arrival and departure for same stop then determine
 		// the stop time.
 		if (arrDep1.getStopPathIndex() == arrDep2.getStopPathIndex() 
@@ -492,7 +537,9 @@ public class TravelTimesProcessor {
 	 * into stopTimesMap and travelTimesMap.
 	 * 
 	 * @param dataFetcher
+	 *            Contains arrival/departures and matches fetched from database
 	 * @param arrDepList
+	 *            List of ArrivalDepartures for vehicle for a trip
 	 */
 	private void aggregateTripDataInfoMaps(DataFetcher dataFetcher,
 			List<ArrivalDeparture> arrDepList) {
@@ -554,41 +601,6 @@ public class TravelTimesProcessor {
 	}
 	
 	/**
-	 * Gets the average value of the values passed in. Filters outliers that are
-	 * less than 0.7 or greater than 1.3 of the average of all values.
-	 * 
-	 * @param values
-	 *            The values to be averaged
-	 * @return The average value, after outliers have been filtered
-	 */
-	private static int getAverage(List<Integer> values) {
-		// If only a single value then return it
-		if (values.size() == 1) 
-			return values.get(0);
-
-		// There are multiple values so determine average
-		int sum = 0;
-		for (int value : values) 
-			sum += value;
-		int average = sum / values.size();
-		
-		// Go through values but don't include outliers
-		int numValidValues = 0;
-		int filteredSum = 0;
-		for (int value : values) {
-			// Only use values that are reasonably close to the average 
-			// (throw out outliers).
-			if (value > average * 0.7 && value < average * 1.3) {
-				++numValidValues;
-				filteredSum += value;
-			}
-		}
-		
-		int filteredAverage = filteredSum / numValidValues;
-		return filteredAverage;
-	}
-	
-	/**
 	 * Takes the data from the stopTimesMap and travelTimesMap and creates
 	 * corresponding travel times. Puts those travel times into the
 	 * TravelTimeInfoMap that is returned.
@@ -605,8 +617,19 @@ public class TravelTimesProcessor {
 		TravelTimeInfoMap travelTimeInfoMap = new TravelTimeInfoMap();
 		
 		// For each trip that had historical arrivals/departures and or 
-		// matches in the database
+		// matches in the database...
 		for (ProcessedDataMapKey mapKey : travelTimesMap.keySet()) {
+			// Make sure that also have a stopTime for this key. Otherwise
+			// something is wrong and should log the problem and continue
+			// to the next map key.
+			List<Integer> stopTimesForStopPathForTrip = 
+					stopTimesMap.get(mapKey);
+			if (stopTimesForStopPathForTrip == null) {
+				logger.error("No stop times for {} even though there are " +
+						"travel times for that map key", mapKey);
+				continue;
+			}
+
 			// Determine the associated Trip object for the data
 			Trip trip = tripMap.get(mapKey.getTripId());
 			if (trip == null) {
@@ -617,7 +640,7 @@ public class TravelTimesProcessor {
 				continue;
 			}
 			
-			// Determine average travel times this trip/stop path
+			// Determine average travel times for this trip/stop path
 			List<List<Integer>> travelTimesForStopPathForTrip =
 					travelTimesMap.get(mapKey);
 			List<List<Integer>> travelTimesBySegment = 
@@ -626,14 +649,13 @@ public class TravelTimesProcessor {
 			for (List<Integer> travelTimesByTripForSegment : 
 					travelTimesBySegment) {
 				int averageTravelTimeForSegment = 
-						getAverage(travelTimesByTripForSegment);
+						MiscStatistics.filteredAverage(travelTimesByTripForSegment, 0.7);
 				averageTravelTimes.add(averageTravelTimeForSegment);
 			}
 			
 			// Determine average stop time for this trip/stop
-			List<Integer> stopTimesForStopPathForTrip = 
-					stopTimesMap.get(mapKey);
-			int averageStopTime = getAverage(stopTimesForStopPathForTrip);
+			int averageStopTime = 
+					MiscStatistics.filteredAverage(stopTimesForStopPathForTrip, 0.7);
 			
 			// Determine the travel time segment length actually used
 			double travelTimeSegLength = 

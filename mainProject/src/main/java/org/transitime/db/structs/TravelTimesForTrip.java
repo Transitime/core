@@ -80,13 +80,14 @@ public class TravelTimesForTrip implements Serializable {
 	private final String tripPatternId;
 	
 	// So know which trip these travel times were created for. Useful
-	// for logging statements.
+	// for logging statements. Used when creating travel times based
+	// on schedule.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripCreatedForId;
 	
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable")
-	@OrderColumn( name="listIndex")
+	@OrderColumn(name="listIndex")
 	private final List<TravelTimesForStopPath> travelTimesForStopPaths = 
 			new ArrayList<TravelTimesForStopPath>();
 
@@ -97,6 +98,15 @@ public class TravelTimesForTrip implements Serializable {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * Simple constructor.
+	 * 
+	 * @param configRev
+	 * @param travelTimesRev
+	 * @param trip
+	 *            So can determine trip pattern ID and set which trip this was
+	 *            created for.
+	 */
 	public TravelTimesForTrip(int configRev, int travelTimesRev, Trip trip) {
 		this.configRev = configRev;
 		this.travelTimesRev = travelTimesRev;
@@ -191,6 +201,18 @@ public class TravelTimesForTrip implements Serializable {
 		return true;
 	}
 	
+	/**
+	 * Needed because of Hibernate and also because want to cache 
+	 * TravelTimesForTrip and to do so need to store the objects
+	 * as keys in a map and need hashCode() and equals() for doing
+	 * that properly. 
+	 * <p>
+	 * Note that not comparing tripCreatedForId. This
+	 * is VERY IMPORTANT because when caching TravelTimesForTrip
+	 * don't need to the tripCreatedForId to match. This is the only
+	 * way that can used cached values for other trips when processing
+	 * historic travel data.
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -198,11 +220,23 @@ public class TravelTimesForTrip implements Serializable {
 		result = prime * result + configRev;
 		result = prime * result + travelTimesRev;
 		result = prime * result + tripPatternId.hashCode();
-		result = prime * result + tripCreatedForId.hashCode();
+//		result = prime * result + tripCreatedForId.hashCode();
 		result = prime * result + travelTimesForStopPaths.hashCode();
 		return result;
 	}
 
+	/**
+	 * Needed because of Hibernate and also because want to cache 
+	 * TravelTimesForTrip and to do so need to store the objects
+	 * as keys in a map and need hashCode() and equals() for doing
+	 * that properly.
+	 * <p>
+	 * Note that not comparing tripCreatedForId. This
+	 * is VERY IMPORTANT because when caching TravelTimesForTrip
+	 * don't need to the tripCreatedForId to match. This is the only
+	 * way that can used cached values for other trips when processing
+	 * historic travel data.
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -223,8 +257,8 @@ public class TravelTimesForTrip implements Serializable {
 			return false;
 		if (!tripPatternId.equals(other.tripPatternId))
 			return false;
-		if (!tripCreatedForId.equals(other.tripCreatedForId))
-			return false;
+//		if (!tripCreatedForId.equals(other.tripCreatedForId))
+//			return false;
 		return true;
 	}
 

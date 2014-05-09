@@ -20,9 +20,9 @@ package org.transitime.applications;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,50 +64,63 @@ public class UpdateTravelTimes {
 	 * objects can be stored in db and the corresponding travel times will also
 	 * be stored.
 	 * 
+	 * @param session
 	 * @param projectId
 	 * @param tripMap
 	 *            Map of all of the trips. Keyed on tripId.
 	 * @param travelTimeInfoMap
 	 *            Contains travel times that are available by trip pattern ID
 	 */
-	private static void setTravelTimesForAllTrips(String projectId,
+	private static void setTravelTimesForAllTrips(Session session, String projectId,
 			Map<String, Trip> tripMap, TravelTimeInfoMap travelTimeInfoMap) {
+		// For caching TravelTimesForTrip and TravelTimesForStopPaths that are
+		// created. This way won't store duplicate objects. Caching both 
+		// because want to reduce object use as much as possible. Of course
+		// this won't matter if processing travel times for a couple of weeks
+		// because then will get unique data for almost every trip/stop. 
+		// But at least it will speed things up initially when working
+		// with smaller data sets.
+		Map<TravelTimesForTrip, TravelTimesForTrip> ttForTripCache =
+				new HashMap<TravelTimesForTrip, TravelTimesForTrip>();
+		Map<TravelTimesForStopPath, TravelTimesForStopPath> ttForStopPathCache = 
+				new HashMap<TravelTimesForStopPath, TravelTimesForStopPath>();
+		
 		// Determine which travel times rev is currently being used and which
 		// rev should be used for the new travel times.
 		ActiveRevisions activeRevisions = ActiveRevisions.get(projectId);
 		int currentTravelTimesRev = activeRevisions.getTravelTimesRev();
 		int newTravelTimesRev = currentTravelTimesRev + 1;
 		
+		// Store the new travelTimesRev but don't actually do so until
+		// the session is committed.
+		activeRevisions.setTravelTimesRev(session, newTravelTimesRev);
+		
 		// For every single trip that is configured...
 		for (Trip trip : tripMap.values()) {			
 			// Create a new TravelTimesForTrip object to be used since the
 			// old one will have different travel time rev and different
 			// values. 
-			TravelTimesForTrip travelTimesForTrip = new TravelTimesForTrip(
-					trip.getConfigRev(), // Same so don't have to create whole new config
+			TravelTimesForTrip ttForTrip = new TravelTimesForTrip(
+					trip.getConfigRev(), // Not creating whole new config
 					newTravelTimesRev, trip);
 			
-			// For every single stop path for the trip...
+			// For every single stop path for the configured trip...
 			int numStopsInTrip = trip.getTripPattern().getNumberStopPaths();
 			for (int stopIdx=0; stopIdx<numStopsInTrip; ++stopIdx) {
-				// Get historic data for this trip/stop
+				// Get historic AVL based data for this trip/stop
 				TravelTimeInfoWithHowSet travelTimeInfo =
 						travelTimeInfoMap.getBestMatch(trip, stopIdx);
 				
-				// Determine original travel times
-				TravelTimesForStopPath originalTravelTimes =
-						trip.getTravelTimesForStopPath(stopIdx);
-
 				// Determine the travel times to use for the stop path.
 				// If there was historic data then use it to create travel time
 				// info object. But if no data then use old values that are 
 				// based on the schedule.
-				TravelTimesForStopPath travelTimesForStopPathToUse;
+				TravelTimesForStopPath ttForStopPathToUse;
 				if (travelTimeInfo != null) {
 					// Create and add the travel time for this stop path
-					travelTimesForStopPathToUse = 
+					ttForStopPathToUse = 
 							new TravelTimesForStopPath(
-									originalTravelTimes.getStopPathId(), 
+									trip.getStopPath(stopIdx).getId(), 
 									travelTimeInfo.getTravelTimeSegLength(),
 									travelTimeInfo.getTravelTimes(),
 									travelTimeInfo.getStopTime(),
@@ -116,26 +129,68 @@ public class UpdateTravelTimes {
 				} else {
 					// No historic data so use old travel time info based on
 					// schedule. Therefore need to use old travel times.
+					// Determine original travel times
+					TravelTimesForStopPath originalTravelTimes =
+							trip.getTravelTimesForStopPath(stopIdx);
+
 					// Create copy of the original travel times but update the 
 					// travel time rev.
-					travelTimesForStopPathToUse = 
+					ttForStopPathToUse = 
 							(TravelTimesForStopPath) originalTravelTimes.clone();
+				}
+
+				// FIXME test this!
+				// If already have created the exact same TravelTimesForStopPath 
+				// then use the existing one so don't generate too many db 
+				// objects.
+				TravelTimesForStopPath cachedTTForStopPath =
+						ttForStopPathCache.get(ttForStopPathToUse);
+				if (cachedTTForStopPath == null) {
+					// Haven't encountered this TravelTimesForStopPath so add it
+					// to the cache. Will end up storing this in db.
+					ttForStopPathCache.put(ttForStopPathToUse,
+							ttForStopPathToUse);
+				} else {
+					// Already created equivalent TravelTimesForStopPath so use it.
+					ttForStopPathToUse = cachedTTForStopPath;
 				}
 				
 				// Update the travel times so that the travel times for path 
 				// will be stored to db
-				travelTimesForTrip.add(travelTimesForStopPathToUse);
+				ttForTrip.add(ttForStopPathToUse);
 			}
 			
+			// FIXME test this!!
+			// If already created the exact same TravelTimesForTrip 
+			// then use the existing one so don't generate too many db 
+			TravelTimesForTrip cachedTTForTrip =
+					ttForTripCache.get(ttForTrip);
+			if (cachedTTForTrip == null) {
+				// Haven't encountered this TravelTimesForStopPath so add it
+				// to the cache. Will end up storing this in db.
+				ttForTripCache.put(ttForTrip, ttForTrip);
+			} else {
+				// Already created equivalent TravelTimesForStopPath so use it.
+				ttForTrip = cachedTTForTrip;
+			}
+			
+			
 			// Store the new travel times as part of the trip
-			trip.setTravelTimes(travelTimesForTrip);
+			trip.setTravelTimes(ttForTrip);
 		} // End of for each trip that is configured		
 	}
 	
+	/**
+	 * Writes the trips to the session so that they will be stored when
+	 * the session is committed.
+	 * 
+	 * @param session
+	 * @param tripMap
+	 */
 	private static void writeNewTripDataToDb(Session session,
 			Map<String, Trip> tripMap) {
-		// Write out the trips to the database
-		// FIXME Test to make sure this also storing the travel times???
+		// Write out the trips to the database. This also writes out the
+		// cascading data which includes the new travel times.
 		DbWriter.writeTrips(session, tripMap.values());		
 	}
 	
@@ -192,7 +247,7 @@ public class UpdateTravelTimes {
 				processor.createTravelTimesFromMaps(tripMap);
 		
 		// Update also the Trip objects with the new travel times
-		setTravelTimesForAllTrips(projectId, tripMap, travelTimeInfoMap);
+		setTravelTimesForAllTrips(session, projectId, tripMap, travelTimeInfoMap);
 		
 		// Write out the trip objects, which also writes out the travel times
 		writeNewTripDataToDb(session, tripMap);
@@ -208,8 +263,8 @@ public class UpdateTravelTimes {
 		// Determine the parameters
 		// FIXME These are hard coded simply to get things going
 		String projectId = "sf-muni";
-		String startDateStr = "4-4-2014";
-		String endDateStr = "4-10-14";
+		String startDateStr = "5-6-2014";
+		String endDateStr = "5-6-14";
 		double maxTravelTimeSegmentLength = 120.0;
 		
 		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();

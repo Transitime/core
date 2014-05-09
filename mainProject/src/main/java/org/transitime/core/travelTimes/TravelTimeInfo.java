@@ -21,7 +21,7 @@ import java.util.List;
 import org.transitime.db.structs.Trip;
 
 /**
- * For holding the GPS based travel times for a trip/stop path. Contains
+ * For holding the GPS based travel times for each trip/stop path. Contains
  * the trip info so can determine things such as the trip pattern and the
  * trip start time so that can find best match for when GPS data is not
  * available for a particular trip.
