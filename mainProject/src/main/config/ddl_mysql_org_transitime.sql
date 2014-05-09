@@ -302,10 +302,11 @@
 
     create table TravelTimesForStopPath (
         id integer not null auto_increment,
-        daysOfWeekOverride integer,
+        daysOfWeekOverride smallint,
+        howSet varchar(5),
         stopPathId varchar(60),
         stopTimeMsec integer,
-        travelTimeSegmentLength double precision,
+        travelTimeSegmentLength float,
         travelTimesMsec blob,
         primary key (id)
     );
@@ -320,7 +321,6 @@
     create table TravelTimesForTrips (
         id integer not null auto_increment,
         configRev integer,
-        howSet varchar(40),
         travelTimesRev integer,
         tripCreatedForId varchar(60),
         tripPatternId varchar(60),
