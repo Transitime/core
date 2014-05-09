@@ -80,7 +80,7 @@ public class ArrivalDeparture implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String stopId;
 	
-	// From the GTFS stop_times.txt file for the trip. The stopSequence can
+	// From the GTFS stop_times.txt file for the trip. The gtfsStopSeq can
 	// be different from stopPathIndex. The stopIndex is included here so that
 	// it is easy to find the corresponding stop in the stop_times.txt file.
 	// It needs to be part of the @Id because can have loops for a route
@@ -88,7 +88,7 @@ public class ArrivalDeparture implements Serializable {
 	// constraint violation.
 	@Id
 	@Column
-	private final int stopSequence;
+	private final int gtfsStopSeq;
 	
 	@Id 
 	@Column
@@ -147,8 +147,8 @@ public class ArrivalDeparture implements Serializable {
 	private final int tripIndex;
 	
 	// The index of which stop path this is within the trip.
-	// Different from the GTFS stopSequence. The stopPathIndex starts
-	// at 0 and increments by one for every stop. The GTFS stopSequence
+	// Different from the GTFS gtfsStopSeq. The stopPathIndex starts
+	// at 0 and increments by one for every stop. The GTFS gtfsStopSeq
 	// on the other hand doesn't need to be sequential.
 	@Column 
 	private final int stopPathIndex;
@@ -227,7 +227,7 @@ public class ArrivalDeparture implements Serializable {
 		this.tripId = trip.getId();
 		this.tripStartTime = trip.getStartTime();
 		this.stopId = stopId;
-		this.stopSequence = stopPath.getStopSequence();
+		this.gtfsStopSeq = stopPath.getGtfsStopSeq();
 		this.stopPathLength = (float) stopPath.getLength();
 		this.routeId = trip.getRouteId();
 		this.routeShortName = trip.getRouteShortName();
@@ -254,7 +254,7 @@ public class ArrivalDeparture implements Serializable {
 		this.tripId = null;
 		this.tripStartTime = null;
 		this.stopId = null;
-		this.stopSequence = -1;
+		this.gtfsStopSeq = -1;
 		this.stopPathLength = Float.NaN;
 		this.routeId = null;
 		this.routeShortName = null;
@@ -272,7 +272,7 @@ public class ArrivalDeparture implements Serializable {
 		result = prime * result + configRev;
 		result = prime * result + (isArrival ? 1231 : 1237);
 		result = prime * result + stopPathIndex;
-		result = prime * result + stopSequence;
+		result = prime * result + gtfsStopSeq;
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime * result + 
 				((routeShortName == null) ? 0 : routeShortName.hashCode());
@@ -312,7 +312,7 @@ public class ArrivalDeparture implements Serializable {
 			return false;
 		if (stopPathIndex != other.stopPathIndex)
 			return false;
-		if (stopSequence != other.stopSequence)
+		if (gtfsStopSeq != other.gtfsStopSeq)
 			return false;
 		if (routeId == null) {
 			if (other.routeId != null)
@@ -373,7 +373,7 @@ public class ArrivalDeparture implements Serializable {
 				+ ", route="	+ routeId 
 				+ ", rteName=" + routeShortName
 				+ ", stop=" + stopId 
-				+ ", gtfsStopSeq=" + stopSequence
+				+ ", gtfsStopSeq=" + gtfsStopSeq
 				+ ", stopIdx=" + stopPathIndex 
 				+ ", avlTime=" + Time.timeStrMsec(avlTime)
 				+ ", trip=" + tripId 
