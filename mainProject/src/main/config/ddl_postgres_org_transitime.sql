@@ -99,9 +99,9 @@
         tripStartTime integer not null,
         tripId varchar(60) not null,
         time datetime(3) not null,
-        stopSequence integer not null,
         stopId varchar(60) not null,
         isArrival boolean not null,
+        gtfsStopSeq integer not null,
         avlTime datetime(3),
         blockId varchar(60),
         configRev integer,
@@ -112,7 +112,7 @@
         stopPathIndex integer,
         stopPathLength float,
         tripIndex integer,
-        primary key (vehicleId, tripStartTime, tripId, time, stopSequence, stopId, isArrival)
+        primary key (vehicleId, tripStartTime, tripId, time, stopId, isArrival, gtfsStopSeq)
     );
 
     create table AvlReports (
@@ -259,6 +259,7 @@
         stopPathId varchar(60) not null,
         configRev integer not null,
         breakTime integer,
+        gtfsStopSeq integer,
         lastStopInTrip boolean,
         layoverStop boolean,
         locations blob,
@@ -266,7 +267,6 @@
         routeId varchar(60),
         scheduleAdherenceStop boolean,
         stopId varchar(60),
-        stopSequence integer,
         waitStop boolean,
         primary key (tripPatternId, stopPathId, configRev)
     );
