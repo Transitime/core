@@ -191,8 +191,14 @@ public class DbWriter {
 				// batching to make sure don't run out memory.
 				counter++;
 				if (counter % HibernateUtils.BATCH_SIZE == 0) {
+					IntervalTimer flushTimer = new IntervalTimer();
+					logger.debug("Flushing and clearing {} Trips", HibernateUtils.BATCH_SIZE);
+					
 					session.flush();
 					session.clear();
+					
+					logger.debug("Flushing and clearing {} Trips took {}msec", 
+							HibernateUtils.BATCH_SIZE, flushTimer.elapsedMsec());					
 				}
 			}
 			
@@ -203,8 +209,9 @@ public class DbWriter {
 		}
 
 		// Let user know what is going on
-		logger.info("Finished writing Trip data to database . Took {} msec.",
-				timer.elapsedMsec());		
+		logger.info("Finished writing Trip data to database. Wrote {} Trips. " +
+				"Took {} msec.",
+				counter, timer.elapsedMsec());		
 	}
 	
 	/**
