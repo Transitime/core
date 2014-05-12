@@ -90,7 +90,7 @@ public class BlocksProcessor {
 						gtfsRoute.getUnscheduledBlockSuffix();
 				int startTimeForBlock = 0;      // start at midnight
 				int endTimeForBlock = 24*60*60; // end at midnight
-				int headwaySecs = 0;
+				int headwaySecs = 0;            // Unscheduled service
 				
 				// find the two trips to make up the block. Use longest trip for
 				// each direction.
@@ -218,7 +218,7 @@ public class BlocksProcessor {
 				// frequency.txt file.
 				String firstTripId = tripsListForBlock.get(0).getId();
 				List<Frequency> frequencyList = gtfsData.getFrequencyList(firstTripId);
-				if (frequencyList == null || frequencyList.get(0).getExactTimes()) {
+				if (frequencyList == null || !frequencyList.get(0).getExactTimes()) {
 					// It is schedule based block so mark headway as -1
 					headwaySecs = -1;
 					
