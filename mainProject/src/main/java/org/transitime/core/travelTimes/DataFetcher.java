@@ -229,7 +229,7 @@ public class DataFetcher {
 			firstResult += batchSize;
 		} while (arrDepBatchList.size() == batchSize);
 
-		logger.info("Reading matches took {} msec", timer.elapsedMsec());
+		logger.info("Reading arrival/departures took {} msec", timer.elapsedMsec());
 
 		// Return the resulting map of arrivals/departures
 		return resultsMap;
