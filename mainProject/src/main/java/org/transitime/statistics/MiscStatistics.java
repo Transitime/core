@@ -86,7 +86,7 @@ public class MiscStatistics {
 		int worstOffenderIndex = -1;
 		for (int index=0; index<values.size(); ++index) {
 			int value = values.get(index);
-			double fraction = value/target;
+			double fraction = (double) value/target;
 			
 			// Use fraction value between 0.0 and 1.0. So if value greater
 			// than 1.0 use the reciprocal.
