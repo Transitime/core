@@ -275,13 +275,17 @@ public class Trip implements Serializable {
 	@SuppressWarnings("unchecked")
 	public static Map<String, Trip> getTrips(Session session, int configRev) 
 			throws HibernateException {
+		// Setup the query
 		String hql = "FROM Trip " +
 				"    WHERE configRev = :configRev";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 
-		Map<String, Trip> tripsMap = new HashMap<String, Trip>();
+		// Actually perform the query
 		List<Trip> tripsList = query.list();
+
+		// Now put the Trips into a map and return it
+		Map<String, Trip> tripsMap = new HashMap<String, Trip>();
 		for (Trip trip : tripsList) {
 			tripsMap.put(trip.getId(), trip);
 		}
