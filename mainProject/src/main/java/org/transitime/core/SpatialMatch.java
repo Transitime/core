@@ -429,7 +429,7 @@ public class SpatialMatch {
 	}
 	
 	/**
-	 * Returns the indices of the match as an Indices object.
+	 * Returns copy of the indices of the match as an Indices object.
 	 * The Indices object is newly created and independent so
 	 * it can be changed (incremented and decremented) at will.
 	 * @return
@@ -480,6 +480,9 @@ public class SpatialMatch {
 	}
 	
 	/**
+	 * Can be either at stop at beginning of the stop path or at the stop at the
+	 * end of the stop path.
+	 * 
 	 * @return VehicleAtStopInfo object containing trip and path index of stop
 	 *         that match is nearby. Returns null if match is not near a stop.
 	 */
@@ -488,6 +491,51 @@ public class SpatialMatch {
 	}
 	
 	/**
+	 * Returns the VehicleAtStopInfo if match indicates that vehicle is at the
+	 * stop at the end of the path.
+	 * 
+	 * @return VehicleAtStopInfo if vehicle at stop at end of stop path.
+	 *         Otherwise null.
+	 */
+	public VehicleAtStopInfo getAtEndStop() {
+		if (atStop == null)
+			return null;
+		
+		// At a stop so see if it is the end of path stop
+		if (atStop.getStopPathIndex() == stopPathIndex) {
+			// At end of path stop so return it
+			return atStop;
+		} else {
+			// At a stop but it is the beginning stop so return null
+			return null;
+		}
+	}
+	
+	/**
+	 * Returns the VehicleAtStopInfo if match indicates that vehicle is at the
+	 * stop at the beginning of the path.
+	 * 
+	 * @return VehicleAtStopInfo if vehicle at stop at beginning of stop path.
+	 *         Otherwise null.
+	 */
+	public VehicleAtStopInfo getAtBeginningStop() {
+		if (atStop == null)
+			return null;
+		
+		// At a stop so see if it is the end of path stop
+		if (atStop.getStopPathIndex() == stopPathIndex) {
+			// At end of path stop so return null
+			return null;
+		} else {
+			// At beginning stop so return it
+			return atStop;
+		}	
+	}
+	
+	/**
+	 * Returns true if vehicle is at or near a stop. Can be either at stop at
+	 * beginning of the stop path or at the stop at the end of the stop path.
+	 * 
 	 * @return true if vehicle is at or near a stop.
 	 */
 	public boolean isAtStop() {
@@ -503,3 +551,4 @@ public class SpatialMatch {
 		return getIndices().isLayover();
 	}
 }
+
