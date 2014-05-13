@@ -620,7 +620,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		long travelTimeToFirstStop = TravelTimes.getInstance()
 				.expectedTravelTimeBetweenMatches(vehicleId,
 						avlDate, oldMatch, matchAtNextStop);
-		long time = beginTime + Math.round(travelTimeToFirstStop * speedRatio);
+		long timeWithoutSpeedRatio = travelTimeToFirstStop;
+		long arrivalTime = beginTime + Math.round(timeWithoutSpeedRatio * speedRatio);
 
 		// Go through each stop between the old match and the new match and
 		// determine the arrival and departure times...
@@ -630,7 +631,6 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		Block block = indices.getBlock();
 		while (indices.earlierStopPathThan(endIndices)) {
 			// Determine arrival time for current stop
-			long arrivalTime = time;
 			ArrivalDeparture arrival = createArrivalTime(vehicleState,
 					arrivalTime, 
 					newMatch.getBlock(), 
@@ -639,15 +639,15 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			arrivalDepartures.add(arrival);
 			
 			// Determine departure time for current stop
-			int configuredStopTime = block.getPathStopTime(indices.getTripIndex(), 
+			int stopTime = block.getPathStopTime(indices.getTripIndex(), 
 					indices.getStopPathIndex());
-			long stopTime = Math.round(configuredStopTime * speedRatio);
 			// Make sure that the departure time is different by at least
 			// 1 msec so that times will be ordered properly when querying
 			// the db.
 			if (stopTime == 0)
 				stopTime = 1;
-			long departureTime = time + stopTime;
+			timeWithoutSpeedRatio += stopTime;
+			long departureTime = beginTime + Math.round(timeWithoutSpeedRatio * speedRatio);
 			ArrivalDeparture departure = createDepartureTime(vehicleState, 
 					departureTime, 
 					newMatch.getBlock(), 
@@ -658,14 +658,13 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// Determine travel time to next time for next time through 
 			// the while loop
 			indices.incrementStopPath();
-			int configuredPathTravelTime = 
+			int pathTravelTime = 
 					block.getStopPathTravelTime(indices.getTripIndex(), 
 							indices.getStopPathIndex());
-			long pathTravelTime = 
-					Math.round(configuredPathTravelTime * speedRatio);
 			if (pathTravelTime == 0) 
 				pathTravelTime = 1;
-			time = departureTime + pathTravelTime;
+			timeWithoutSpeedRatio += pathTravelTime;
+			arrivalTime = beginTime + Math.round(timeWithoutSpeedRatio * speedRatio);
 		}
 		
 		logger.debug("For vehicleId={} done determining if it traversed stops " +
