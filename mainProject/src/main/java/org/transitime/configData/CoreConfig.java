@@ -279,7 +279,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue beforeStopDistance =
 			new DoubleConfigValue("transitime.core.beforeStopDistance", 
-					100.0);
+					50.0);
 	
 	/**
 	 * How far a vehicle can be past a stop and still be considered at the stop.
