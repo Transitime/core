@@ -61,10 +61,14 @@ public class Geo {
 	 * @return
 	 */
 	public static String distanceFormat(double arg) {
-		// Handle NaN specially
+		// Handle NaN and other special cases
 		if (Double.isNaN(arg))
 			return "NaN";
+		if (arg == Double.MAX_VALUE) 
+			return "Double.MAX_VALUE";
 		
+		// Not a special case so output the value with just two digits
+		// past decimal place and append "m" to indicate meters.
 		return twoDigitFormat.format(arg) + "m";
 	}
 
@@ -206,6 +210,12 @@ public class Geo {
 		double d2 = distance(loc, vector.getL2());
 		// v is length of the vector
 		double v = distance(vector.getL1(), vector.getL2());
+		
+		// Handle v==0 where we have a zero length vector as a special case
+		// so that don't divide by zero and end up with a NaN.
+		if (v == 0.0)
+			return d1;
+
 		// v1 is the distance from the first loc of the vector to where the
 		// distance to the location is the shortest. It is where a line to
 		// the location will be at a right angle to the vector.
