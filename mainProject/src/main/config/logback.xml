@@ -275,6 +275,11 @@
     <appender-ref ref="AVL" />
   </logger>
 
+  <!-- Want TimeoutHandler events to be logged in regular core log file -->
+  <logger name="org.transitime.avl.TimeoutHandler" level="debug" additivity="false">
+    <appender-ref ref="AVL" />
+  </logger>
+
   <!-- for debugging lazy loading -->
   <logger name="org.transitime.db.structs" level="debug" additivity="false">
     <appender-ref ref="CORE_DEBUG" />
