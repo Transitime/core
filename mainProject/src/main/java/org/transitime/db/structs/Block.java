@@ -577,8 +577,9 @@ public final class Block implements Serializable {
 	}
 	
 	/**
-	 * Returns true if path is for a stop that is configured to be layover
-	 * stop for the trip pattern.
+	 * Returns true if path is for a stop that is configured to be layover stop
+	 * for the trip pattern. A layover stop is when a vehicle can leave route
+	 * path before departing this stop since the driver is taking a break.
 	 * 
 	 * @param tripIndex
 	 * @param stopPathIndex
