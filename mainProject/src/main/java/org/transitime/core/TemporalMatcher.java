@@ -245,10 +245,11 @@ public class TemporalMatcher {
 		Date previousAvlTime =
 				vehicleState.getPreviousAvlReport().getDate();
 		Date avlTime = vehicleState.getAvlReport().getDate();
-		long avlTimeDifferenceMsec = avlTime.getTime() - previousAvlTime.getTime();
+		long avlTimeDifferenceMsec = 
+				avlTime.getTime() - previousAvlTime.getTime();
 
 		// Find best temporal match of the spatial matches
-		TemporalMatch bestTemporalMatch = null;
+		TemporalMatch bestTemporalMatchSoFar = null;
 		for (SpatialMatch spatialMatch : spatialMatches) {
 			logger.debug("Examining spatial match {}", spatialMatch);
 			
@@ -261,12 +262,12 @@ public class TemporalMatcher {
 							previousMatch, spatialMatch);
 			
 			// Determine how far off the expected travel time. If match is
-			// for a layover and the vehicle had enough time to make it from
+			// for a layover stop and the vehicle had enough time to make it from
 			// the previous match to the layover then it is a special
 			// case. Yes, this part is quite complicated but tried to show
 			// clearly in comments what all the important factors are.
 			TemporalDifference differenceFromExpectedTime;
-			if (spatialMatch.atLayover() && 
+			if (spatialMatch.isLayover() && 
 					avlTimeDifferenceMsec > expectedTravelTimeMsec) {
 				// If already was at this layover then the expected travel
 				// time will be 0. For this situation need to determine
@@ -274,12 +275,12 @@ public class TemporalMatcher {
 				// time difference is 0, or if the vehicle is instead
 				// late since the layover time has already passed.
 				if (expectedTravelTimeMsec == 0) {
-					// Determine layover departure time. If it is before that 
-					// time then it is still at layover and the temporal
+					// Determine layover stop departure time. If it is before that 
+					// time then it is still at layover stop and the temporal
 					// difference should be 0. But if it is after the departure
 					// time then the vehicle is behind where it should be.
 					int departureTimeSecs = 
-							spatialMatch.getScheduledLayoverTime();
+							spatialMatch.getScheduledWaitStopTime();
 					long scheduledDepartureTime =	
 							Core.getInstance().getTime().getEpochTime(
 									departureTimeSecs, avlTime);
@@ -288,26 +289,26 @@ public class TemporalMatcher {
 						differenceFromExpectedTime = 
 								new TemporalDifference(scheduledDepartureTime -
 										avlTime.getTime());
-						logger.debug("For vehicleId={} match at layover but " +
-								"currently after the layover time so indicating " +
-								"that the vehicle is behind where it should be. " +
-								"avlTime={}, scheduledDepTime={}",
+						logger.debug("For vehicleId={} match at layover stop but " +
+								"currently after the layover time so " +
+								"indicating that the vehicle is behind where " +
+								"it should be. avlTime={}, scheduledDepTime={}",
 								vehicleState.getVehicleId(), avlTime, 
 								new Date(scheduledDepartureTime));
 
 					} else {
-						// Still at the layover so use time difference of 0
+						// Still at the layover stop so use time difference of 0
 						differenceFromExpectedTime = new TemporalDifference(0);
-						logger.debug("For vehicleId={} match is for layover but " +
-								"this match is at layover but had enough time " +
-								"to get there so temporalDifference=0. ",
+						logger.debug("For vehicleId={} match is for layover stop " +
+								"but this match is at layover but had enough " +
+								"time to get there so temporalDifference=0. ",
 								vehicleState.getVehicleId());
 					}
 				} else {
-					// Wasn't already at layover. But since had enough time to
+					// Wasn't already at layover stop. But since had enough time to
 					// get to the layover the time difference is 0.
 					differenceFromExpectedTime = new TemporalDifference(0);
-					logger.debug("For vehicleId={} wasn't at layover but " +
+					logger.debug("For vehicleId={} wasn't at layover stop but " +
 							"this match is at layover yet had enough time " +
 							"to get there so temporalDifference=0. " +
 							"avlTimeDifferenceMsec={}, " +
@@ -320,7 +321,7 @@ public class TemporalMatcher {
 				// time is from expected time the normal way
 				differenceFromExpectedTime = new TemporalDifference(
 						expectedTravelTimeMsec - avlTimeDifferenceMsec);
-				logger.debug("For vehicleId={} not at layover so returning " +
+				logger.debug("For vehicleId={} not at layover so examining " +
 						"normal temporal difference. " +
 						"avlTimeDifferenceMsec={}, " +
 						"expectedTravelTimeMsec={}",
@@ -333,18 +334,32 @@ public class TemporalMatcher {
 					vehicleState.getVehicleId(), differenceFromExpectedTime);
 			
 			// If this temporal match is better than the previous best one
-			// then remember it.
-			if (differenceFromExpectedTime != null && 
-					(bestTemporalMatch == null ||
+			// then remember it. The logic in determining this is complicated
+			// so first determining boolean thisMatchIsBest using if statements.
+			boolean thisMatchIsBest = false;
+			// If there is a valid time difference with current spatial match..
+			if (differenceFromExpectedTime != null) {
+				// If this is the best match so far...
+				if (bestTemporalMatchSoFar == null ||
 					differenceFromExpectedTime.betterThanOrEqualTo(
-							bestTemporalMatch.getTemporalDifference()))) {
-				bestTemporalMatch = new TemporalMatch(spatialMatch, 
+							bestTemporalMatchSoFar.getTemporalDifference())) {
+					// Want to use a regular match instead of layover stop match
+					// when possible since layovers are really a backup match.
+					if (bestTemporalMatchSoFar == null || 
+							bestTemporalMatchSoFar.isLayover() || 
+							!spatialMatch.isLayover()) {
+						thisMatchIsBest = true;
+					}
+				}
+			}
+			if (thisMatchIsBest) {
+				bestTemporalMatchSoFar = new TemporalMatch(spatialMatch, 
 								differenceFromExpectedTime);
 			} else {
 				// This temporal match was not better. If already found a 
 				// temporal match then can stop looking since it will only
 				// get worse for the remaining spatial matches.
-				if (bestTemporalMatch != null) {
+				if (bestTemporalMatchSoFar != null) {
 					logger.debug("For vehicleId={} temporal match is getting " +
 							"worse which means that don't need to look at " +
 							"additional spatial matches since it would only " +
@@ -356,10 +371,10 @@ public class TemporalMatcher {
 		}
 		
 		logger.debug("For vehicleId={} best temporal match was found to be {}",
-				vehicleState.getVehicleId(), bestTemporalMatch);
+				vehicleState.getVehicleId(), bestTemporalMatchSoFar);
 		
 		// Return the best temporal match (if there is one)
-		return bestTemporalMatch;
+		return bestTemporalMatchSoFar;
 	}
 	
 	/**
