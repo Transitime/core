@@ -210,6 +210,16 @@ public class TemporalMatcher {
 			
 		// Return adherence but return null if adherence is beyond limits
 		if (deltaFromSchedule.isWithinBoundsForInitialMatching()) {
+			// Want to favor regular matches over layovers. So if layover
+			// add getAllowableLateSecondsForInitialMatching() (20 minutes) 
+			// to the deltaFromSchedule so that it is less likely to end up 
+			// being the best match.
+			if (spatialMatch.isLayover()) {
+				deltaFromSchedule.addTime(CoreConfig
+						.getAllowableLateSecondsForInitialMatching()
+						* Time.MS_PER_SEC);
+			}
+			
 			logger.debug("For vehicleId={} determineHowFarOffScheduledTime() "
 					+ "returning expectedTimeDelta={} for {}", 
 					vehicleId, deltaFromSchedule, spatialMatch);
