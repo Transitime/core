@@ -43,8 +43,8 @@ public class TimeoutHandler {
 	// Keyed on vehicle ID. Using a LinkedHashMap to maintain
 	// the time order of the AVL reports. This way it is easy to
 	// look back at the oldest ones to see if that have expired.
-	private LinkedHashMap<String, AvlReport> orderedAvlReportsMap = new LinkedHashMap<String, AvlReport>(
-			100, 0.75f, true);
+	private LinkedHashMap<String, AvlReport> orderedAvlReportsMap = 
+			new LinkedHashMap<String, AvlReport>(100, 0.75f, true);
 
 	// This is a singleton class
 	private static TimeoutHandler singleton = new TimeoutHandler();
@@ -60,7 +60,7 @@ public class TimeoutHandler {
 	private TimeoutHandler() {
 	}
 
-	public static TimeoutHandler get() {
+	public static TimeoutHandler getInstance() {
 		return singleton;
 	}
 
