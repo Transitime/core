@@ -52,7 +52,7 @@ public class TemporalMatch extends SpatialMatch {
 				+ ", gtfsStopSeq=" + getStopPath().getGtfsStopSeq()
 				+ ", stopPathIndex=" + stopPathIndex
 				+ ", segmentIndex=" + segmentIndex
-				+ ", atLayover=" + atLayover()
+				+ ", isLayover=" + isLayover()
 				+ ", distanceToSegment=" + Geo.distanceFormat(distanceToSegment) 
 				+ ", distanceAlongSegment=" + Geo.distanceFormat(distanceAlongSegment)
 				+ ", trip=" + getTrip().toShortString()

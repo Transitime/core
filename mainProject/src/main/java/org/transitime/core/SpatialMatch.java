@@ -262,6 +262,9 @@ public class SpatialMatch {
 	}
 	
 	/**
+	 * A layover stop is when a vehicle can leave route path before departing
+	 * this stop since the driver is taking a break.
+	 * 
 	 * @return true if this spatial match is for a layover
 	 */
 	public boolean isLayover() {
@@ -269,6 +272,9 @@ public class SpatialMatch {
 	}
 	
 	/**
+	 * Wait stop is when a vehicle is not supposed to depart the stop until the
+	 * scheduled departure time.
+	 * 
 	 * @return true if this spatial match is for a waitStop
 	 */
 	public boolean isWaitStop() {
@@ -281,12 +287,12 @@ public class SpatialMatch {
 	 * @return the scheduled time vehicle is to leave the stop. Time
 	 * is seconds into day.
 	 */
-	public int getScheduledLayoverTime() { 
+	public int getScheduledWaitStopTime() { 
 		try {
 			ScheduleTime scheduleTime = block.getScheduleTime(tripIndex, stopPathIndex);
 			return scheduleTime.getDepartureTime();
 		} catch (Exception e) {
-			logger.error("Tried to get layover time for a stop that didn't have one. {}", 
+			logger.error("Tried to get wait stop time for a stop that didn't have one. {}", 
 					this);
 			return -1; 
 		}
@@ -414,7 +420,7 @@ public class SpatialMatch {
 				+ ", gtfsStopSeq=" + getStopPath().getGtfsStopSeq()
 				+ ", stopPathIndex=" + stopPathIndex
 				+ ", segmentIndex=" + segmentIndex
-				+ ", atLayover=" + atLayover()
+				+ ", isLayover=" + isLayover()
 				+ ", distanceToSegment=" + Geo.distanceFormat(distanceToSegment) 
 				+ ", distanceAlongSegment=" + Geo.distanceFormat(distanceAlongSegment) 
 				+ ", atStop=" + atStop
@@ -542,13 +548,5 @@ public class SpatialMatch {
 		return atStop != null;
 	}
 	
-	/**
-	 * Returns true if the trip, path, and segment indices indicate
-	 * that on last segment of a path that is a layover
-	 * @return
-	 */
-	public boolean atLayover() {
-		return getIndices().isLayover();
-	}
 }
 
