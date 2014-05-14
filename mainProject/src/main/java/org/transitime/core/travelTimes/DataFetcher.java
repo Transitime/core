@@ -172,7 +172,8 @@ public class DataFetcher {
 	 * @param arrDep
 	 */
 	private void addArrivalDepartureToMap(
-			Map<DbDataMapKey, List<ArrivalDeparture>> map, ArrivalDeparture arrDep) {
+			Map<DbDataMapKey, List<ArrivalDeparture>> map,
+			ArrivalDeparture arrDep) {
 		DbDataMapKey key = getKey(arrDep.getServiceId(), arrDep.getDate(),
 				arrDep.getTripId(), arrDep.getVehicleId());
 		List<ArrivalDeparture> list = map.get(key);
@@ -229,7 +230,8 @@ public class DataFetcher {
 			firstResult += batchSize;
 		} while (arrDepBatchList.size() == batchSize);
 
-		logger.info("Reading arrival/departures took {} msec", timer.elapsedMsec());
+		logger.info("Reading arrival/departures took {} msec", 
+				timer.elapsedMsec());
 
 		// Return the resulting map of arrivals/departures
 		return resultsMap;
