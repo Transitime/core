@@ -12,7 +12,7 @@
        to something like -Dlogback.timezone=America/Los_Angeles . Valid 
        timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
     -->
-  <property name="LOG_FILE_ROOT" value="D:/Logs/${transitime.core.projectId:-DEFAULT}" />
+  <property name="LOG_FILE_ROOT" value="D:/Logs/${transitime.core.projectId:-DEFAULT}/updateTravelTimes/%d{yyyy/MM/dd}" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
