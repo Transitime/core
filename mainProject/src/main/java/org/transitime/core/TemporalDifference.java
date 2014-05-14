@@ -36,7 +36,7 @@ public class TemporalDifference implements Serializable {
 
 	// Positive means ahead of and traveling faster than expected. Negative 
 	// means behind and traveling slower than expected.
-	private final int temporalDifferenceMsec;
+	private int temporalDifferenceMsec;
 
 	private static final long serialVersionUID = 3306638473792296250L;
 
@@ -63,6 +63,23 @@ public class TemporalDifference implements Serializable {
 		this.temporalDifferenceMsec = (int) temporalDifferenceMsec;
 	}
 
+	/**
+	 * Adds the latenessMsec to this. If the vehicle is early then the
+	 * latenessMsec is simply subtracted. But if vehicle is late then
+	 * latenessMsec is added, but only after dividing it by the early to late
+	 * ratio since early vehicles are considered worse than late vehicles.
+	 * 
+	 * @param latenessMsec
+	 *            How much lateness to add.
+	 */
+	public void addTime(int latenessMsec) {
+		if (temporalDifferenceMsec < 0)
+			temporalDifferenceMsec -= latenessMsec;
+		else
+			temporalDifferenceMsec += latenessMsec
+					/ CoreConfig.getEarlyToLateRatio();
+	}
+	
 	/**
 	 * Returns true if the temporal difference is within the bounds specified by
 	 * CoreConfig.getAllowableEarlySeconds() and
