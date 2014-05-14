@@ -15,7 +15,7 @@
 
   <!-- For writing to logfile -->
   <appender name="LOGFILE" class="ch.qos.logback.core.FileAppender">
-    <file>D:/Logs/gtfsConfig.log</file>
+    <file>D:/Logs/${transitime.core.projectId:-DEFAULT}/gtfsConfig.log</file>
     <append>true</append>
     <encoder>
       <charset>UTF-8</charset>
