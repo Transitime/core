@@ -125,8 +125,10 @@ public class DataProcessor {
 		// Find possible spatial matches
 		List<SpatialMatch> spatialMatches = 
 				SpatialMatcher.getSpatialMatches(vehicleState);
-		logger.debug("For vehicleId={} found the following {} spatial matches: {}",
-				vehicleState.getVehicleId(), spatialMatches.size(), spatialMatches);
+		logger.debug("For vehicleId={} found the following {} spatial " +
+				"matches: {}",
+				vehicleState.getVehicleId(), spatialMatches.size(), 
+				spatialMatches);
 
 		// Find best temporal match of the spatial matches
 		TemporalMatch bestTemporalMatch =
