@@ -104,63 +104,6 @@
   </appender>
 
 
-  <!-- For sending out e-mails when there is an logging message that is marked
-       for notification. Usually, but not necessarily always, this will be
-       and ERROR level message.
-    -->
-  <appender name="ERROR_SMTP" class="ch.qos.logback.classic.net.SMTPAppender">
-
-    <!-- LIST ALL E-MAIL ADDRESS HERE.
-         Note that gmail seems to filter out messages sometimes. Therefore
-         make sure using non-gmail accounts. 
-      -->
-    <to>msmithtransit@gmail.com</to> 
-    <to>skibu@smith.net</to>
-
-    <!-- Only send e-mail if special "EMAIL" marker is specified for an
-         ERROR level message. 
-      -->
-    <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-     <marker>EMAIL</marker>
-   </evaluator>
-
-   <!-- Don't include messages that are DEBUG or TRACE if using cyclicBufferTracker
-     -->
-   <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-     <level>INFO</level>
-   </filter>
-
-   <!-- Provide last 5 entries (INFO, WARN, or ERROR) to provide context.
-     -->
-   <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
-     <bufferSize>3</bufferSize>
-   </cyclicBufferTracker>
-
-    <!-- NOTE: it is important to set asynchronousSending to false. Otherwise
-         if trigger two SMTP messages within a short interval (within about 3
-         seconds) they overwrite each other causing the first message to be 
-         delivered but to have the same content as the 2nd message. Also,
-         need async so that if program exits the message is first sent. 
-         This means that if an error message sends out an e-mail the thread
-         will hang for the few seconds it takes to complete the sending of
-         the e-mail.
-      -->
-    <asynchronousSending>false</asynchronousSending>
-
-    <!-- Specifies details of how the message is sent and the format of it
-      -->
-    <smtpHost>smtp.gmail.com</smtpHost>
-    <smtpPort>465</smtpPort>
-    <SSL>true</SSL>
-    <username>transittestsmtp@gmail.com</username>
-    <password>transittest1</password>
-    <from>msmithtransit@gmail.com</from>
-    <subject>%level %logger{0} - %m</subject>
-    <layout class="ch.qos.logback.classic.PatternLayout">
-      <pattern>%d{MMM dd yyyy - HH:mm:ss.SSS} - %-5level - %logger{35} :%n%message%n</pattern>
-    </layout>
-  </appender>
-
   <!-- Separate file for AVL logging -->
   <appender name="AVL" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -289,24 +232,16 @@
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 
-<!-- Don't want debug level for SpatialMatcher, TemporalMatcher 
-     TravelTimes, and PredictionsProcessor and PredictionDataCache because 
-     would log info when trying to match every single segment, which is 
-     incredibly verbose. Therefore set logging level to info for this class. -->
-  <logger name="org.transitime.core.Service" level="info" additivity="false">
+  <logger name="org.transitime.core.SpatialMatcher" level="debug" additivity="false">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 
-<!--
-  <logger name="org.transitime.core.SpatialMatcher" level="info" additivity="false">
+  <logger name="org.transitime.core.TemporalMatcher" level="debug" additivity="false">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 
-  <logger name="org.transitime.core.TemporalMatcher" level="info" additivity="false">
-    <appender-ref ref="CORE_DEBUG" />
-  </logger>
-
-  <logger name="org.transitime.core.TravelTimes" level="info" additivity="false">
+<!-- TravelTimes makes things too verbose so keep it at info level
+  <logger name="org.transitime.core.TravelTimes" level="debug" additivity="false">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 -->
@@ -338,6 +273,5 @@
     -->
   <root level="info">          
     <appender-ref ref="CORE" />
-    <appender-ref ref="ERROR_SMTP" />
   </root>
 </configuration>
