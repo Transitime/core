@@ -361,8 +361,8 @@ public class VehicleState {
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
 				+ ", pathHeading=" + StringUtils.twoDigitFormat(getHeading())
 				+ ", previousArrivalTime=" + previousArrivalTime
-				+ ", getLastMatch()=" + getMatch()
-				+ ", getLastAvlReport()=" + getAvlReport()
+				+ ", getMatch()=" + getMatch()
+				+ ", getAvlReport()=" + getAvlReport()
 				//+ ",\n  block=" + block // Block info too verbose so commented out
 				//+ ",\n  temporalMatchHistory=" + temporalMatchHistory 
 				//+ ",\n  avlReportHistory=" + avlReportHistory 
@@ -379,8 +379,8 @@ public class VehicleState {
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
 				+ ", pathHeading=" + StringUtils.twoDigitFormat(getHeading())
 				+ ", previousArrivalTime=" + previousArrivalTime
-				+ ", getLastMatch()=" + getMatch()
-				+ ", getLastAvlReport()=" + getAvlReport()
+				+ ", getMatch()=" + getMatch()
+				+ ", getAvlReport()=" + getAvlReport()
 				//+ ", \nblock=" + block // Block info too verbose so commented out
 				+ ",\n  temporalMatchHistory=" + temporalMatchHistory 
 				+ ",\n  avlReportHistory=" + avlReportHistory 
