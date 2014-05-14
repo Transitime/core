@@ -165,8 +165,10 @@ public class VehicleState {
 	}
 	
 	/**
-	 * Returns true if last temporal match for vehicle indicates that it
-	 * is at a layover.
+	 * Returns true if last temporal match for vehicle indicates that it is at a
+	 * layover. A layover stop is when a vehicle can leave route path before
+	 * departing this stop since the driver is taking a break.
+	 * 
 	 * @return true if at a layover
 	 */
 	public boolean atLayover() {
@@ -174,13 +176,13 @@ public class VehicleState {
 		if (temporalMatch == null)
 			return false;
 		else
-			return temporalMatch.atLayover();
+			return temporalMatch.isLayover();
 	}
 	
 	/**
 	 * Returns the next to last temporal match. Returns null if there isn't
 	 * one. Useful for when need to compare the previous to last match with
-	 * the last one, such as for determining if vehicle has transversed any
+	 * the last one, such as for determining if vehicle has crossed any
 	 * stops.
 	 * 
 	 * @return
