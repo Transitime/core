@@ -234,8 +234,9 @@ public class CoreConfig {
 					90 * Time.SEC_PER_MIN);
 
 	/**
-	 * How early a vehicle can be and still be matched to its block assignment
-	 * @return
+	 * How early a vehicle can be and still be matched to its block assignment.
+	 * 
+	 * @return time in seconds
 	 */
 	public static int getAllowableEarlySecondsForInitialMatching() {
 		return allowableEarlySecondsForInitialMatching.getValue();
@@ -245,8 +246,9 @@ public class CoreConfig {
 					10 * Time.SEC_PER_MIN);
 
 	/**
-	 * How late a vehicle can be and still be matched to its block assignment
-	 * @return
+	 * How late a vehicle can be and still be matched to its block assignment.
+	 * 
+	 * @return time in seconds
 	 */
 	public static int getAllowableLateSecondsForInitialMatching() {
 		return allowableLateSecondsForInitialMatching.getValue();
@@ -255,6 +257,20 @@ public class CoreConfig {
 			new IntegerConfigValue("transitime.core.allowableLateSecondsForInitialMatching", 
 					20 * Time.SEC_PER_MIN);
 
+	/**
+	 * For initial matching. If the spatial match is for a layover then the
+	 * temporal match is biased by this amount in order to make match to
+	 * non-layover more likely. This prevents wrongly matching vehicles to 
+	 * layovers when they are running late.
+	 * 
+	 * @return layover bias in seconds
+	 */
+	public static int getLayoverBiasForInitialMatching() {
+		return layoverBiasSecondsForInitialMatching.getValue();
+	}
+	private static IntegerConfigValue layoverBiasSecondsForInitialMatching = 
+			new IntegerConfigValue("transitime.core.layoverBiasSecondsForInitialMatching", 
+					20 * Time.SEC_PER_MIN);
 	
 	/**
 	 * How far along path past a layover a vehicle can spatially match but 
