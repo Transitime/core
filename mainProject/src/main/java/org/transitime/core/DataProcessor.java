@@ -67,6 +67,8 @@ public class DataProcessor {
 	 *            The vehicle to be made unpredictable
 	 */
 	public void makeVehicleUnpredictable(String vehicleId) {
+		logger.info("Making vehicleId={} unpredictable", vehicleId);
+		
 		VehicleState vehicleState =
 				VehicleStateManager.getInstance().getVehicleState(vehicleId);
 
@@ -329,7 +331,7 @@ public class DataProcessor {
 		// If any vehicles have timed out then handle them. This is done
 		// here instead of using a regular timer so that it will work
 		// even when in playback mode or when reading batch data.
-		TimeoutHandler.get().handlePossibleTimeout(avlReport);
+		TimeoutHandler.getInstance().handlePossibleTimeout(avlReport);
 		
 		// Logging to syserr just for debugging. This should eventually be removed
 		System.err.println("Processing avlReport for vehicleId=" + 
