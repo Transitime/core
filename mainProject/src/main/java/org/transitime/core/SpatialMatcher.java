@@ -63,8 +63,8 @@ public class SpatialMatcher {
 	// need to make the system more lenient.
 	private SpatialMatch smallestDistanceSpatialMatch = null;
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(SpatialMatcher.class);
+	private static final Logger logger = 
+			LoggerFactory.getLogger(SpatialMatcher.class);
 
 	/********************** Member Functions **************************/
 
@@ -441,11 +441,20 @@ public class SpatialMatcher {
 					.add(spatialMatcher.previousPotentialSpatialMatch);
 		}
 
-		logger.debug(
-				"For vehicleId={} the match with the best distance was {}",
-				vehicleState.getVehicleId(),
-				spatialMatcher.smallestDistanceSpatialMatch);
-
+		if (spatialMatcher.spatialMatches.size() > 0) {
+			logger.debug("For vehicleId={} the match with the best " +
+					"distance was {}",
+					vehicleState.getVehicleId(),
+					spatialMatcher.smallestDistanceSpatialMatch);
+		} else {
+			// There were no spatial matches so log this problem
+			logger.error("For vehicleId={} found no spatial matches within " +
+					"allowable distance of segments. Best spatial match " +
+					"distance was {} for spatial match {}",
+					spatialMatcher.smallestDistanceSpatialMatch.getDistanceToSegment(), 
+					spatialMatcher.smallestDistanceSpatialMatch);
+		}
+		
 		// Return the list of local matches
 		return spatialMatcher.spatialMatches;
 	}
