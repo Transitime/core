@@ -75,16 +75,18 @@ public class DataFetcher {
 	}
 	
 	/**
-	 * Gets the day of the week string for use with the keys for the maps. If special
-	 * days of the week were specified using initializeServiceInfo() and the day of the week
-	 * as specified by the data parameter is for a day of the week for the calendar specified
-	 * by the service ID then a string representing the day of the week is returned.
+	 * Gets the day of the week string for use with the keys for the maps. If
+	 * special days of the week were specified using initializeServiceInfo() and
+	 * the day of the week as specified by the data parameter is for a day of
+	 * the week for the calendar specified by the service ID then a string
+	 * representing the day of the week is returned.
 	 * 
 	 * @param serviceId
 	 *            the service ID
 	 * @param date
 	 *            for determining day of the week
-	 * @return string indicating day of the week if there is a match, otherwise null
+	 * @return string indicating day of the week if there is a match, otherwise
+	 *         null
 	 */
 	private String getMatchingDayOfWeek(String serviceId, Date date) {
 		if (specialDaysOfWeek != null && gtfsCalendars != null) {
