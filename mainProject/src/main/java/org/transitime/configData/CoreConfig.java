@@ -107,6 +107,18 @@ public class CoreConfig {
 			new DoubleConfigValue("transitime.core.maxDistanceFromSegment", 60.0);
 	
 	/**
+	 * How many bad spatial/temporal matches a predictable vehicle can have in a
+	 * row before the vehicle is made unpredictable.
+	 * 
+	 * @return
+	 */
+	public static int getAllowableNumberOfBadMatches() {
+		return allowableNumberOfBadMatches.getValue();
+	}
+	private static IntegerConfigValue allowableNumberOfBadMatches =
+			new IntegerConfigValue("transitime.core.allowableNumberOfBadMatches", 2);
+			
+	/**
 	 * How far heading in degrees of vehicle can be away from path segment
 	 * and still be considered a match. Needs to be pretty lenient because
 	 * stopPaths and heading might not be that accurate.
