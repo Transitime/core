@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.avl;
+package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,9 +24,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.AvlConfig;
-import org.transitime.core.DataProcessor;
-import org.transitime.core.VehicleStateManager;
-import org.transitime.core.VehicleState;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.utils.Time;
 
