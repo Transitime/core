@@ -490,7 +490,7 @@ public class Route implements Serializable {
 	 * 
 	 * @return the max distance if set, otherwise NaN
 	 */
-	public double getMaxDistanceFromSegment() {
+	public double getMaxAllowableDistanceFromSegment() {
 		if (maxDistance != null)
 			return maxDistance;
 		else
