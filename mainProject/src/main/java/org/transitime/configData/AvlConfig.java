@@ -77,13 +77,13 @@ public class AvlConfig {
 	
 	/**
 	 * Max speed that an AVL report is allowed to have.
-	 * @return
+	 * @return max speed in m/s
 	 */
 	public static double getMaxAvlSpeed() {
 		return maxAvlSpeed.getValue();
 	}
 	private static DoubleConfigValue maxAvlSpeed =
-			new DoubleConfigValue("transitime.avl.maxSpeed", 45.0); // 45m/s = 100mph
+			new DoubleConfigValue("transitime.avl.maxSpeed", 26.8); // 31m/s = 60mph
 	
 	public static double minSpeedForValidHeading() {
 		return minSpeedForValidHeading.getValue();
