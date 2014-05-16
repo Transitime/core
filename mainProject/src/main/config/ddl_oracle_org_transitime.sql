@@ -357,9 +357,6 @@
     create index avlTimeIndex on Matches (avlTime);
 
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
-        add constraint UK_hh5uepurijcqj0pyc6e3h5mqw unique (travelTimesForStopPaths_id);
-
-    alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 
         foreign key (travelTimesForStopPaths_id) 
         references TravelTimesForStopPath;

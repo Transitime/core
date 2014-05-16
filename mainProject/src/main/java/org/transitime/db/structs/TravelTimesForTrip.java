@@ -29,7 +29,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
@@ -85,7 +85,7 @@ public class TravelTimesForTrip implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripCreatedForId;
 	
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable")
 	@OrderColumn(name="listIndex")
 	private final List<TravelTimesForStopPath> travelTimesForStopPaths = 
