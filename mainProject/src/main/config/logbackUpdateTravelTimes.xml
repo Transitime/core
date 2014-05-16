@@ -12,7 +12,9 @@
        to something like -Dlogback.timezone=America/Los_Angeles . Valid 
        timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
     -->
-  <property name="LOG_FILE_ROOT" value="D:/Logs/${transitime.core.projectId:-DEFAULT}/updateTravelTimes/%d{yyyy/MM/dd}" />
+  <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
+
+  <property name="LOG_FILE_ROOT" value="D:/Logs/${transitime.core.projectId:-DEFAULT}/updateTravelTimes/" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
@@ -25,17 +27,10 @@
     -->
   <property name="DEFAULT_PATTERN" value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level [%file:%line] %msg%n" />
 
-  <!-- The main appender for the Core module. use a RollingFileAppender
-       so that can store log files in a calendar based directory structure
-       logs/yyyy/MM/dd/logFile.log . The logs go under the project directory
-       so in Eclipse on Windows they end up in a place such as 
-       C:/Users/Mike/git/testProject/testProject/logs... The log file
-       is called "core.log". The files are rolled over at
-       midnight since "dd" specify that logs should be dealt with daily. 
-       Logs are compressed automatically since "gz" specified.
+  <!-- The main appender for the Core module. 
     -->
   <appender name="CORE" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/updateTravelTimes.log</file> 
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/updateTravelTimes.log</file> 
 
     <encoder>
       <pattern>${DEFAULT_PATTERN}</pattern> 
@@ -54,7 +49,7 @@
         from about 2.5 seconds to 10 seconds when the sql logging
         was enabled. So don't use all the time!-->
   <appender name="SQL" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/updateTravelTimes.sql</file> 
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/updateTravelTimes.sql</file> 
 
     <encoder>
       <pattern>${DEFAULT_PATTERN}</pattern> 
@@ -70,6 +65,18 @@
     <appender-ref ref="SQL" />
   </logger>
   -->
+
+  <!-- For setting debug mode to Transitime code. Can't just set
+       level to debug for the root because then get a huge number
+       of unuseful Hibernate messages.
+    -->
+  <logger name="org.transitime" level="debug" additivity="false">
+    <appender-ref ref="CORE" />
+  </logger>
+
+  <logger name="org.transitime.core.travelTimes" level="info" additivity="false">
+    <appender-ref ref="CORE" />
+  </logger>
 
   <!--======================================================-->
   <!--=============== Loggers defined here =================-->
