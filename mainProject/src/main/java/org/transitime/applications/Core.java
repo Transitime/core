@@ -365,7 +365,7 @@ public class Core {
 			}
 			
 			// For making sure logger configured properly
-			outputLoggerStatus();
+			//outputLoggerStatus();
 			
 			// Read in config params
 			try {
