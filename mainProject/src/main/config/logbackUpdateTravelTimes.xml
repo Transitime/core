@@ -74,7 +74,15 @@
     <appender-ref ref="CORE" />
   </logger>
 
+  <!-- There are some Transitime classes don't want debug info for
+       since that would just be too verbose.
+    -->
   <logger name="org.transitime.core.travelTimes" level="info" additivity="false">
+    <appender-ref ref="CORE" />
+  </logger>
+
+  <logger name="org.transitime.db.hibernate.AnnotatedClassesList" level="info" 
+   additivity="false">
     <appender-ref ref="CORE" />
   </logger>
 
