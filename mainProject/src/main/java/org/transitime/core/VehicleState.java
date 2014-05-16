@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
@@ -50,6 +51,10 @@ public class VehicleState {
 			new LinkedList<AvlReport>();
 	private List<Prediction> predictions;
 	private TemporalDifference realTimeSchedAdh;
+	
+	// For keeping track of how many bad matches have been encountered.
+	// This way can ignore bad matches if only get a couple
+	private int numberOfBadMatches = 0;
 	
 	// So can make sure that departure time is after the arrival time
 	private Date previousArrivalTime;
@@ -84,7 +89,8 @@ public class VehicleState {
 	
 	/**
 	 * Sets the match for the vehicle into the history. If set to null then
-	 * VehicleState.predictable is set to false.
+	 * VehicleState.predictable is set to false. Also resets numberOfBadMatches
+	 * to 0.
 	 * 
 	 * @param match
 	 */
@@ -97,10 +103,65 @@ public class VehicleState {
 			predictable = false;
 		}
 		
+		// Reset numberOfBadMatches
+		numberOfBadMatches = 0;
+		
 		// Truncate list if it has gotten too long
 		while (temporalMatchHistory.size() > MATCH_HISTORY_MAX_SIZE) {
 			temporalMatchHistory.removeLast();
 		}
+	}
+	
+	/**
+	 * Returns the last temporal match. Returns null if there isn't one.
+	 * @return
+	 */
+	public TemporalMatch getMatch() {
+		try {
+			return temporalMatchHistory.getFirst();
+		} catch (NoSuchElementException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * To be called when predictable vehicle has no valid spatial/temporal
+	 * match. Only allowed so many of these before vehicle is made
+	 * unpredictable.
+	 */
+	public void incrementNumberOfBadMatches() {
+		++numberOfBadMatches;
+	}
+	
+	/**
+	 * Returns if have exceeded the number of allowed bad matches. If so
+	 * then vehicle should be made unpredictable.
+	 * 
+	 * @return
+	 */
+	public boolean overLimitOfBadMatches() {
+		return numberOfBadMatches > CoreConfig.getAllowableNumberOfBadMatches();
+	}
+	
+	/**
+	 * Returns the number of sequential bad spatial/temporal matches that
+	 * occurred while vehicle was predictable.
+	 * 
+	 * @return current number of bad matches
+	 */
+	public int numberOfBadMatches() {
+		return numberOfBadMatches;
+	}
+	
+	/**
+	 * Returns true if the last AVL report was successfully matched to the
+	 * assignment indicating that can generate predictions and arrival/departure
+	 * times etc.
+	 * 
+	 * @return True if last match is valid
+	 */
+	public boolean lastMatchIsValid() {
+		return numberOfBadMatches == 0;
 	}
 	
 	/**
@@ -119,18 +180,6 @@ public class VehicleState {
 		}
 	}
 	
-	/**
-	 * Returns the last temporal match. Returns null if there isn't one.
-	 * @return
-	 */
-	public TemporalMatch getMatch() {
-		try {
-			return temporalMatchHistory.getFirst();
-		} catch (NoSuchElementException e) {
-			return null;
-		}
-	}
-
 	/**
 	 * Returns the current Trip for the vehicle. Returns null if there is not
 	 * current trip.
@@ -207,14 +256,19 @@ public class VehicleState {
 	}
 	
 	/**
-	 * Returns the next to last AvlReport. Returns null if there isn't
-	 * one.
+	 * Returns the next to last AvlReport where successfully matched the
+	 * vehicle. This isn't necessarily simply the previous AvlReport since that
+	 * report might not have been successfully matched. It is important to use
+	 * the proper AvlReport when matching a vehicle or such because otherwise
+	 * the elapsed time between the last successful match and the current match
+	 * would be wrong.
 	 * 
-	 * @return
+	 * @return The last successfully matched AvlReport, or null if no such
+	 *         report is available
 	 */
-	public AvlReport getPreviousAvlReport() {
-		if (avlReportHistory.size() >= 2) 
-			return avlReportHistory.get(1);
+	public AvlReport getPreviousAvlReportFromSuccessfulMatch() {
+		if (avlReportHistory.size() >= 2+numberOfBadMatches) 
+			return avlReportHistory.get(1+numberOfBadMatches);
 		else
 			return null;
 	}

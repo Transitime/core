@@ -21,7 +21,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.transitime.avl.TimeoutHandler;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
@@ -136,12 +135,35 @@ public class DataProcessor {
 						spatialMatches);
 		
 		// Log this as info since matching is a significant milestone
-		logger.info("For vehicleId={} the best match={}",
+		logger.info("For vehicleId={} the best match is {}",
 				vehicleState.getVehicleId(), bestTemporalMatch);
 
-		// Record this match
-		vehicleState.setMatch(bestTemporalMatch);
-
+		// If didn't get a match then remember such in VehicleState
+		if (bestTemporalMatch == null)
+			vehicleState.incrementNumberOfBadMatches();
+		
+		// Record this match unless the match was null and haven't
+		// reached number of bad matches.
+		if (bestTemporalMatch != null || vehicleState.overLimitOfBadMatches()) {
+			// If going to make vehicle unpredictable due to bad matches log
+			// that info.
+			if (bestTemporalMatch == null && vehicleState.overLimitOfBadMatches()) {
+				logger.error("For vehicleId={} got {} bad matches which is " +
+						"over the allowable limit. Therefore setting vehicle " +
+						"state to null which will make it unpredictable.",
+						vehicleState.getVehicleId(), vehicleState.numberOfBadMatches());
+			}
+			
+			// Set the match of the vehicle. If null then it will make the vehicle
+			// unpredictable.
+			vehicleState.setMatch(bestTemporalMatch);
+		} else {
+			logger.info("For vehicleId={} got a bad match, {} in a row, so " +
+					"not updating match for vehicle",
+					vehicleState.getVehicleId(), 
+					vehicleState.numberOfBadMatches());
+		}
+		
 		// Return results
 		return bestTemporalMatch;
 	}
@@ -383,19 +405,23 @@ public class DataProcessor {
 				// vehicle.
 				vehicleState.setMatch(null);
 			}
-			
-			// Determine and store the schedule adherence. If schedule 
-			// adherence is bad then try matching vehicle to assignment
-			// again.
-			checkScheduleAdherence(vehicleState);
-			
-			// Generates the corresponding data for the vehicle such as 
-			// predictions and arrival times
-			if (vehicleState.isPredictable())
-				MatchProcessor.getInstance().generateResultsOfMatch(vehicleState);
-			
-			// If finished block assignment then should remove assignment
-			handlePossibleEndOfBlock(vehicleState);
+
+			// If the last match is actually valid then generate associated
+			// data like predictions and arrival/departure times.
+			if (vehicleState.lastMatchIsValid()) {
+				// Determine and store the schedule adherence. If schedule 
+				// adherence is bad then try matching vehicle to assignment
+				// again.
+				checkScheduleAdherence(vehicleState);
+				
+				// Generates the corresponding data for the vehicle such as 
+				// predictions and arrival times
+				if (vehicleState.isPredictable())
+					MatchProcessor.getInstance().generateResultsOfMatch(vehicleState);
+				
+				// If finished block assignment then should remove assignment
+				handlePossibleEndOfBlock(vehicleState);
+			}
 		}  // End of synchronizing on vehicleState
 	}
 	

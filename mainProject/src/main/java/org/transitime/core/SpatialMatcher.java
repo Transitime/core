@@ -209,9 +209,9 @@ public class SpatialMatcher {
 	 * @param indices
 	 * @return
 	 */
-	private double getMaxDistanceFromSegment(Indices indices) {
+	private double getMaxAllowableDistanceFromSegment(Indices indices) {
 		Route route = indices.getRoute();
-		double maxDistance = route.getMaxDistanceFromSegment();
+		double maxDistance = route.getMaxAllowableDistanceFromSegment();
 		if (Double.isNaN(maxDistance))
 			maxDistance = CoreConfig.getMaxDistanceFromSegment();
 		return maxDistance;
@@ -226,7 +226,7 @@ public class SpatialMatcher {
 	 * @param avlReport
 	 *            The new AVL report
 	 * @param potentialMatchIndices
-	 *            where in block to start looking for matches
+	 *            Specifies block/trip/stop path where to look at match
 	 */
 	private void processPossiblePotentialMatch(AvlReport avlReport,
 			Indices potentialMatchIndices) {
@@ -297,11 +297,10 @@ public class SpatialMatcher {
 		// If the match is better than the previous one then it trending 
 		// towards a minimum so keep track of it if heading and distance are OK. 
 		if (distanceToSegment <= previousDistanceToSegment) {
-			boolean headingOK = 
-					segmentVector.headingOK(avlReport.getHeading(), 
-							CoreConfig.getMaxHeadingOffsetFromSegment());
-			boolean distanceOK = 
-					distanceToSegment < getMaxDistanceFromSegment(potentialMatchIndices);
+			boolean headingOK = segmentVector.headingOK(avlReport.getHeading(),
+					CoreConfig.getMaxHeadingOffsetFromSegment());
+			boolean distanceOK = distanceToSegment < 
+					getMaxAllowableDistanceFromSegment(potentialMatchIndices);
 			if (headingOK && distanceOK) {
 				// Heading and distance OK so store this as a potential match
 				previousPotentialSpatialMatch = spatialMatch;
@@ -392,7 +391,8 @@ public class SpatialMatcher {
 	 * 
 	 * @param vehicleState
 	 *            the previous vehicle state
-	 * @return list of possible spatial matches
+	 * @return list of possible spatial matches. If no spatial matches then
+	 *         returns empty list (as opposed to null)
 	 */
 	public static List<SpatialMatch> getSpatialMatches(VehicleState vehicleState) {
 		// Some convenience variables
@@ -400,11 +400,11 @@ public class SpatialMatcher {
 		SpatialMatcher spatialMatcher = new SpatialMatcher();
 
 		// Don't want to waste time search forward too far. So limit distance
-		// such that vehicle would have traveled at 50% more than the max speed 
+		// such that vehicle would have traveled at 30% more than the max speed 
 		// plus a couple hundred meters just to be safe.
 		long timeBetweenFixesMsec = vehicleState.getAvlReport().getTime()
-				- vehicleState.getPreviousAvlReport().getTime();
-		double distanceAlongPathToSearch = AvlConfig.getMaxAvlSpeed() * 1.5
+				- vehicleState.getPreviousAvlReportFromSuccessfulMatch().getTime();
+		double distanceAlongPathToSearch = AvlConfig.getMaxAvlSpeed() * 1.2
 				* timeBetweenFixesMsec / Time.MS_PER_SEC + 200.0;
 
 		// Since already traveled some along segment should start
@@ -451,7 +451,9 @@ public class SpatialMatcher {
 			logger.error("For vehicleId={} found no spatial matches within " +
 					"allowable distance of segments. Best spatial match " +
 					"distance was {} for spatial match {}",
-					spatialMatcher.smallestDistanceSpatialMatch.getDistanceToSegment(), 
+					vehicleState.getVehicleId(),
+					Geo.distanceFormat(spatialMatcher.
+							smallestDistanceSpatialMatch.getDistanceToSegment()),
 					spatialMatcher.smallestDistanceSpatialMatch);
 		}
 		

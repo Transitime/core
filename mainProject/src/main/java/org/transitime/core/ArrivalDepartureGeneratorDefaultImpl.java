@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
@@ -304,7 +305,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// previous AVL time as the beginTime.
 		SpatialMatch oldMatch = vehicleState.getPreviousMatch();
 		VehicleAtStopInfo oldVehicleAtStopInfo = oldMatch.getAtStop();
-		AvlReport previousAvlReport = vehicleState.getPreviousAvlReport();
+		AvlReport previousAvlReport = vehicleState.getPreviousAvlReportFromSuccessfulMatch();
 		if (oldVehicleAtStopInfo == null)
 			return previousAvlReport.getTime();
 		
@@ -569,7 +570,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		String vehicleId = vehicleState.getVehicleId();
 		SpatialMatch oldMatch = vehicleState.getPreviousMatch();
 		SpatialMatch newMatch = vehicleState.getMatch();
-		Date previousAvlDate = vehicleState.getPreviousAvlReport().getDate();
+		Date previousAvlDate = vehicleState.getPreviousAvlReportFromSuccessfulMatch().getDate();
 		Date avlDate = vehicleState.getAvlReport().getDate();
 		
 		int numZeroTimes = numberOfZeroTravelOrStopTimes(oldMatch, newMatch);
@@ -690,12 +691,14 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		if (!vehicleState.isPredictable()) {
 			logger.error("Vehicle was not predictable when trying to process " +
 					"arrival/departure times. {}", vehicleState);
+			// Return empty arrivalDepartures list
 			return arrivalDepartures;
 		}
 		SpatialMatch newMatch = vehicleState.getMatch();
 		if (newMatch == null) {
 			logger.error("Vehicle was not matched when trying to process " +
 					"arrival/departure times. {}", vehicleState);
+			// Return empty arrivalDepartures list
 			return arrivalDepartures;			
 		}
 		
@@ -714,9 +717,28 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			return estimateArrivalsDeparturesWithoutPreviousMatch(vehicleState);
 		}
 
+		// If either the old or the new match were for layovers but where
+		// the distance to the match is large, then shouldn't determine
+		// arrival/departure times because the vehicles isn't or wasn't
+		// actually at the layover. This can happen because sometimes
+		// can jump the match ahead to the layover even though the
+		// vehicle isn't actually there.
+		if (oldMatch.getDistanceToSegment() > 
+						CoreConfig.getMaxDistanceFromSegment()
+				|| newMatch.getDistanceToSegment() > 
+						CoreConfig.getMaxDistanceFromSegment()) {
+			logger.debug("For vehicleId={} the old or the new match had a " +
+					"match distance greater than allowed. Therefore not " +
+					"generating arrival/departure times. maxDistanceFromSegment={}. " +
+					"oldMatch={} newMatch={}",
+					CoreConfig.getMaxDistanceFromSegment(), oldMatch, newMatch);
+			// Return empty arrivalDepartures list
+			return arrivalDepartures;
+		}
+		
 		// If too many stops were traversed given the AVL time then there must
 		// be something wrong so return
-		AvlReport previousAvlReport = vehicleState.getPreviousAvlReport();
+		AvlReport previousAvlReport = vehicleState.getPreviousAvlReportFromSuccessfulMatch();
 		AvlReport avlReport = vehicleState.getAvlReport();
 		if (tooManyStopsTraversed(oldMatch, newMatch, previousAvlReport, avlReport))
 			return arrivalDepartures;
