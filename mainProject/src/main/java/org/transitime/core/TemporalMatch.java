@@ -55,6 +55,7 @@ public class TemporalMatch extends SpatialMatch {
 				+ ", isLayover=" + isLayover()
 				+ ", distanceToSegment=" + Geo.distanceFormat(distanceToSegment) 
 				+ ", distanceAlongSegment=" + Geo.distanceFormat(distanceAlongSegment)
+				+ ", atStop=" + atStop
 				+ ", trip=" + getTrip().toShortString()
 				+ "]";
 	}
