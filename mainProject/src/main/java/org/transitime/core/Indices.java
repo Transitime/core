@@ -402,9 +402,24 @@ class Indices {
 		} else if (!block.equals(other.block))
 			return false;
 		
-		return tripIndex == other.tripIndex && 
-				stopPathIndex == other.stopPathIndex;
+		return tripIndex == other.tripIndex 
+				&& stopPathIndex == other.stopPathIndex;
 
+	}
+	
+	/**
+	 * Returns true if stop represented by this is the same as the stop
+	 * represented by the blockId, tripIndex, and stopPathIndex parameters.
+	 * 
+	 * @param blockId
+	 * @param tripIndex
+	 * @param stopPathIndex
+	 * @return True if same stop
+	 */
+	public boolean equals(String blockId, int tripIndex, int stopPathIndex) {
+		return block.getId().equals(blockId) 
+				&& this.tripIndex == tripIndex 
+				&& this.stopPathIndex == stopPathIndex;
 	}
 	
 	/********************** Getter Methods ****************************/
