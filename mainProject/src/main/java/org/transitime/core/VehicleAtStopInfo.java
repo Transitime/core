@@ -35,8 +35,8 @@ public class VehicleAtStopInfo extends Indices {
 	 * @param tripIndex
 	 * @param stopPathIndex
 	 */
-	public VehicleAtStopInfo(Block block, int tripIndex, int pathIndex) {
-		super(block, tripIndex, pathIndex, 
+	public VehicleAtStopInfo(Block block, int tripIndex, int stopPathIndex) {
+		super(block, tripIndex, stopPathIndex, 
 				0); // segment index
 	}
 		
