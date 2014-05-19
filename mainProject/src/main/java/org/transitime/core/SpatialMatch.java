@@ -548,5 +548,19 @@ public class SpatialMatch {
 		return atStop != null;
 	}
 	
+	/**
+	 * Returns true if this match indicates that the vehicle is at the stop
+	 * indicated by the tripIndex and stopPathIndex parameters.
+	 * 
+	 * @param tripIndex
+	 * @param stopPathIndex
+	 * @return True if at specified stop
+	 */
+	public boolean isAtStop(int tripIndex, int stopPathIndex) {
+		return atStop != null
+				&& atStop.equals(atStop.getBlock().getId(), tripIndex, 
+						stopPathIndex);
+	}
+	
 }
 
