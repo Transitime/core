@@ -195,9 +195,14 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 */
 	private ArrivalDeparture createArrivalTime(VehicleState vehicleState,
 			long arrivalTime, Block block, int tripIndex, int pathIndex) {
+		// Remember the arrival time so that can make sure that subsequent
+		// departure time is after the arrival time. 
+		Date arrivalDate = new Date(arrivalTime);
+		vehicleState.setPreviousArrivalTime(arrivalDate);
+		
 		// Store the arrival in the database via the db logger
 		Arrival arrival = new Arrival(vehicleState.getVehicleId(), 
-				new Date(arrivalTime),
+				arrivalDate,
 				vehicleState.getAvlReport().getDate(),
 				block,
 				tripIndex,
@@ -512,10 +517,6 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				newVehicleAtStopInfo.getTripIndex(), 
 				newVehicleAtStopInfo.getStopPathIndex()));
 
-		// Remember the arrival time so that can make sure that subsequent
-		// departure time is after the arrival time. 
-		vehicleState.setPreviousArrivalTime(new Date(arrivalTime));
-		
 		// The new endTime to be used to determine arrival/departure
 		// times at intermediate stops
 		return arrivalTime;
