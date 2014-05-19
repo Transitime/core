@@ -239,6 +239,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			Date avlReportTime = vehicleState.getAvlReport().getDate();
 			Block block = newMatch.getBlock();
 			final int tripIndex = 0;
+			int stopPathIndex = 0;
 			
 			// Determine departure time for first stop of trip
 			SpatialMatch beginningOfTrip = 
@@ -249,26 +250,36 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			long departureTime = 
 					avlReportTime.getTime() - travelTimeFromFirstStopToMatch;
 			
-			// Create departure time for first stop of trip
-			arrivalDepartures.add(createDepartureTime(vehicleState,
-					departureTime, block, tripIndex, 0)); // stopPathIndex
-			
-			// Go through remaining stops to determine arrival/departure times
-			for (int pathIndex = 1; pathIndex < newMatch.getStopPathIndex(); ++pathIndex) {
-				long arrivalTime = departureTime
-						+ block.getStopPathTravelTime(tripIndex, pathIndex);
-				arrivalDepartures.add(createArrivalTime(vehicleState,
-						arrivalTime, block, tripIndex, pathIndex));
-
-				int stopTime = block.getPathStopTime(tripIndex, pathIndex);
-				departureTime = arrivalTime + stopTime;
+			// Create departure time for first stop of trip if it has left that 
+			// stop
+			if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
 				arrivalDepartures.add(createDepartureTime(vehicleState,
-						departureTime, block, tripIndex, pathIndex));
+						departureTime, block, tripIndex, stopPathIndex));
 			}
 			
-			// Need to add final arrival time if newMatch is at a stop
-			VehicleAtStopInfo atStopInfo = newMatch.getAtStop();
-			if (atStopInfo != null) {
+			// Go through remaining intermediate stops to determine 
+			// arrival/departure times
+			for (stopPathIndex = 1; 
+					stopPathIndex < newMatch.getStopPathIndex(); 
+					++stopPathIndex) {
+				// Create the arrival
+				long arrivalTime = departureTime
+						+ block.getStopPathTravelTime(tripIndex, stopPathIndex);
+				arrivalDepartures.add(createArrivalTime(vehicleState,
+						arrivalTime, block, tripIndex, stopPathIndex));
+
+				// If the vehicle has left this stop then create the departure
+				if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
+					int stopTime = block.getPathStopTime(tripIndex, stopPathIndex);
+					departureTime = arrivalTime + stopTime;
+					arrivalDepartures.add(createDepartureTime(vehicleState,
+							departureTime, block, tripIndex, stopPathIndex));
+				}
+			}
+			
+			// Need to add final arrival time if newMatch is at the
+			// stop for the match
+			if (newMatch.isAtStop(tripIndex, newMatch.getStopPathIndex())) {
 				arrivalDepartures.add(createArrivalTime(vehicleState,
 						avlReportTime.getTime(), block, tripIndex,
 						newMatch.getStopPathIndex()));
