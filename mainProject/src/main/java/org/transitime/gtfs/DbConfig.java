@@ -155,7 +155,8 @@ public class DbConfig {
 					blocksByServiceMap.get(block.getServiceId());
 			if (blocksByBlockIdMap == null) {
 				blocksByBlockIdMap = new HashMap<String, Block>();
-				blocksByServiceMap.put(block.getServiceId(), blocksByBlockIdMap);
+				blocksByServiceMap
+						.put(block.getServiceId(), blocksByBlockIdMap);
 			}
 			
 			blocksByBlockIdMap.put(block.getId(), block);
