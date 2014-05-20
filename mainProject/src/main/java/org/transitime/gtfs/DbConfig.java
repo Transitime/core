@@ -109,7 +109,8 @@ public class DbConfig {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Let user know what is going on
-		logger.info("Reading configuration database for configRev={}...", configRev);
+		logger.info("Reading configuration database for configRev={}...", 
+				configRev);
 
 		// Remember which revision of data is being used
 		this.configRev = configRev;
@@ -121,8 +122,8 @@ public class DbConfig {
 		try {
 			actuallyReadData(session, configRev);
 		} catch (HibernateException e) {
-			logger.error("Error reading configuration data from db for configRev={}.", 
-					configRev);
+			logger.error("Error reading configuration data from db for " +
+					"configRev={}.", configRev);
 		} finally {
 			// Usually would always make sure session gets closed. But
 			// don't close session for now so can use lazy initialization
@@ -136,19 +137,22 @@ public class DbConfig {
 				"Took {} msec.", timer.elapsedMsec());		
 	}
 	
-	/*
-	 * Creates a map of a map so that blocks can be looked up easily by service and 
-	 * block IDs.
+	/**
+	 * Creates a map of a map so that blocks can be looked up easily by service
+	 * and block IDs.
 	 * 
-	 * @param blocks List of blocks to be put into map
+	 * @param blocks
+	 *            List of blocks to be put into map
 	 * @return Map keyed on service ID of map keyed on block ID of blocks
 	 */
-	private static Map<String, Map<String, Block>> putBlocksIntoMap(List<Block> blocks) {
+	private static Map<String, Map<String, Block>> putBlocksIntoMap(
+			List<Block> blocks) {
 		Map<String, Map<String, Block>> blocksByServiceMap = 
 				new HashMap<String, Map<String, Block>>();
 		
 		for (Block block : blocks) {
-			Map<String, Block> blocksByBlockIdMap = blocksByServiceMap.get(block.getServiceId());
+			Map<String, Block> blocksByBlockIdMap = 
+					blocksByServiceMap.get(block.getServiceId());
 			if (blocksByBlockIdMap == null) {
 				blocksByBlockIdMap = new HashMap<String, Block>();
 				blocksByServiceMap.put(block.getServiceId(), blocksByBlockIdMap);
