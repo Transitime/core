@@ -104,7 +104,7 @@ class Indices {
 	 * @param indices
 	 * @return
 	 */
-	public boolean earlierStopPathThan(Indices indices) {
+	public boolean isEarlierStopPathThan(Indices indices) {
 		if (tripIndex > indices.tripIndex)
 			return false;
 		if (tripIndex < indices.tripIndex)
