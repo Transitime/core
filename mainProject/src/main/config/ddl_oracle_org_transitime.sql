@@ -250,13 +250,13 @@
     create table Stops (
         id varchar(60) not null,
         configRev integer not null,
-        adherenceStop boolean,
         code integer,
         hidden boolean,
         layoverStop boolean,
         lat double precision,
         lon double precision,
         name varchar(255),
+        timepointStop boolean,
         waitStop boolean,
         primary key (id, configRev)
     );
