@@ -46,7 +46,7 @@ public class GtfsStop extends GtfsBase {
 	// Extensions to GTFS spec:
 
 	// If should generate special ScheduleAdherence data for this stop
-	private final Boolean adherenceStop;
+	private final Boolean timepointStop;
 	// Indicates that vehicle can leave route path before departing this stop
 	// since the driver is taking a break.
 	private final Boolean layoverStop;
@@ -87,10 +87,10 @@ public class GtfsStop extends GtfsBase {
 		stopTimezone = getOptionalValue(record, "stop_timezone");
 		wheelchairBoarding = getOptionalValue(record, "wheelchair_boarding");
 		
-		// adherenc.stop is an extra column not defined in GTFS spec.
+		// timepoint is an extra column not defined in GTFS spec.
 		// Useful for supplemental files because allows one to specify
 		// which stops should show schedule adherence in reports for.
-		adherenceStop = getOptionalBooleanValue(record, "adhrence_stop");
+		timepointStop = getOptionalBooleanValue(record, "timepoint");
 
 		// layove.stop indicates that the driver is supposed to wait 
 		// until the scheduled departure time before continuing and
@@ -132,7 +132,7 @@ public class GtfsStop extends GtfsBase {
 		this.stopTimezone = original.stopTimezone;
 		this.wheelchairBoarding = original.wheelchairBoarding;
 		// Extensions to GTFS spec:
-		this.adherenceStop = original.adherenceStop;
+		this.timepointStop = original.timepointStop;
 		this.layoverStop = original.layoverStop;
 		this.waitStop = original.waitStop;
 		this.hidden = original.hidden;
@@ -168,7 +168,7 @@ public class GtfsStop extends GtfsBase {
 		parentStation = s.parentStation == null ? o.parentStation : s.parentStation;
 		stopTimezone = s.stopTimezone == null ? o.stopTimezone : s.stopTimezone;
 		wheelchairBoarding = s.wheelchairBoarding == null ? o.wheelchairBoarding : s.wheelchairBoarding;
-		adherenceStop = s.adherenceStop == null ? o.adherenceStop : s.adherenceStop;
+		timepointStop = s.timepointStop == null ? o.timepointStop : s.timepointStop;
 		layoverStop = s.layoverStop == null ? o.layoverStop : s.layoverStop;
 		waitStop = s.waitStop == null ? o.waitStop : s.waitStop;
 		hidden = s.hidden == null ? o.hidden : s.hidden;
@@ -230,8 +230,8 @@ public class GtfsStop extends GtfsBase {
 	 * of stops.
 	 * @return null if not set in config files
 	 */
-	public Boolean getAdherenceStop() {
-		return adherenceStop;
+	public Boolean getTimepointStop() {
+		return timepointStop;
 	}
 
 	/**
@@ -279,7 +279,7 @@ public class GtfsStop extends GtfsBase {
 				+ (parentStation != null ? ", parentStation=" + parentStation : "")
 				+ (stopTimezone != null ? ", stopTimezone=" + stopTimezone : "")
 				+ (wheelchairBoarding != null ? ", wheelchairBoarding=" + wheelchairBoarding : "")
-				+ ", adherenceStop=" + adherenceStop
+				+ ", timepointStop=" + timepointStop
 				+ ", layoverStop=" + layoverStop
 				+ ", waitStop=" + waitStop
 				+ ", hidden=" + hidden

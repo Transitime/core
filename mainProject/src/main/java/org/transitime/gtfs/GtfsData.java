@@ -795,9 +795,11 @@ public class GtfsData {
 				// But should also be true if there is associated time and it is
 				// first or last stop of the trip.
 				boolean scheduleAdherenceStop = 
-						(depTime != null && 
-							(firstStopInTrip || stop.isScheduleAdherenceStop())) ||
-						(arrTime != null && lastStopInTrip);
+						(depTime != null  
+							&& (firstStopInTrip 
+									|| gtfsStopTime.isTimepointStop() 
+									|| stop.isTimepointStop())) 
+						|| (arrTime != null && lastStopInTrip);
 				
 				// Determine the pathId. Make sure that use a unique path ID by
 				// appending "_loop" if looping over the same stops

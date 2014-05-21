@@ -67,7 +67,7 @@ public class Stop implements Serializable {
 
 	// If should generate special ScheduleAdherence data for this stop
 	@Column
-	private final boolean adherenceStop;
+	private final boolean timepointStop;
 
 	// Indicates that vehicle can leave route path before departing this stop
 	// since the driver is taking a break.
@@ -94,8 +94,8 @@ public class Stop implements Serializable {
 		
 		id = gtfsStop.getStopId();
 		
-		// Some agencies like SFMTA don't bother to fill in the stop_code field in 
-		// the GTFS data. But if they use a numeric stopId can use that.
+		// Some agencies like SFMTA don't bother to fill in the stop_code field
+		// in the GTFS data. But if they use a numeric stopId can use that.
 		Integer stopCode = gtfsStop.getStopCode();
 		if (stopCode == null) {
 			// stop_code was not set in GTFS data so try using stop_id
@@ -111,7 +111,8 @@ public class Stop implements Serializable {
 		name = titleFormatter.processTitle(gtfsStop.getStopName());
 		loc = new Location(gtfsStop.getStopLat(), gtfsStop.getStopLon());
 		// If adherence_stop not set then the default is false
-		adherenceStop = (gtfsStop.getAdherenceStop() != null ?  gtfsStop.getAdherenceStop() : false); 
+		timepointStop = (gtfsStop.getTimepointStop() != null ?  
+				gtfsStop.getTimepointStop() : false); 
 		// If layover_stop not set then the default is false
 		layoverStop = gtfsStop.getlayoverStop(); 
 		// If wait_stop not set then the default is false
@@ -130,7 +131,7 @@ public class Stop implements Serializable {
 		code = null;
 		name = null;
 		loc = null;
-		adherenceStop = false; 
+		timepointStop = false; 
 		layoverStop = null; 
 		waitStop = null; 
 		hidden = false; 
@@ -147,7 +148,7 @@ public class Stop implements Serializable {
 				+ ", code=" + code 
 				+ ", name=" + name
 				+ ", loc=" + loc 
-				+ ", adherenceStop=" + adherenceStop
+				+ ", timepointStop=" + timepointStop
 				+ ", layoverStop=" + layoverStop
 				+ ", waitStop=" + waitStop
 				+ ", hidden=" + hidden 
@@ -193,7 +194,7 @@ public class Stop implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (adherenceStop ? 1231 : 1237);
+		result = prime * result + (timepointStop ? 1231 : 1237);
 		result = prime * result + ((code == null) ? 0 : code.hashCode());
 		result = prime * result + configRev;
 		result = prime * result + (hidden ? 1231 : 1237);
@@ -217,7 +218,7 @@ public class Stop implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Stop other = (Stop) obj;
-		if (adherenceStop != other.adherenceStop)
+		if (timepointStop != other.timepointStop)
 			return false;
 		if (code == null) {
 			if (other.code != null)
@@ -300,10 +301,10 @@ public class Stop implements Serializable {
 	 * determining schedule adherence for every single stop would
 	 * clutter things up. Only want to show adherence for a subset
 	 * of stops.
-     * @return the adherenceStop
+     * @return the timepointStop
 	 */
-	public boolean isScheduleAdherenceStop() {
-		return adherenceStop;
+	public boolean isTimepointStop() {
+		return timepointStop;
 	}
 
 	/**

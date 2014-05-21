@@ -37,6 +37,7 @@ public class GtfsStopTime extends GtfsBase implements Comparable<GtfsStopTime> {
 	private final String stopHeadsign;
 	private final String pickupType;
 	private final String dropOffType;
+	private final Boolean timepointStop;
 	// Can be null
 	private final Double shapeDistTraveled; 
 
@@ -80,6 +81,8 @@ public class GtfsStopTime extends GtfsBase implements Comparable<GtfsStopTime> {
 		String shapeDistTraveledStr = getOptionalValue(record, "shape_dist_traveled");
 		shapeDistTraveled = shapeDistTraveledStr == null ? 
 				null : Double.parseDouble(shapeDistTraveledStr);
+		
+		timepointStop = getOptionalBooleanValue(record, "timepoint");
 	}
 
 	/**
@@ -108,7 +111,8 @@ public class GtfsStopTime extends GtfsBase implements Comparable<GtfsStopTime> {
 		pickupType = originalValues.pickupType;
 		dropOffType = originalValues.dropOffType;
 		shapeDistTraveled = originalValues.shapeDistTraveled;
-
+		timepointStop = originalValues.timepointStop;
+		
 		// Set the appropriate arrival/departure times. If null passed in
 		// then use the original values.
 		Integer newArrivalTimeSecs = newArrivalTime!=null ? 
@@ -166,6 +170,15 @@ public class GtfsStopTime extends GtfsBase implements Comparable<GtfsStopTime> {
 	}
 
 	/**
+	 * Returns true if the stop_time is configured as a timepoint
+	 * stop that should be included with schedule adherence reports.
+	 * @return
+	 */
+	public boolean isTimepointStop() {
+		return timepointStop != null && timepointStop;
+	}
+	
+	/**
 	 * 
 	 * @return shape_dist_traveled or null if not set
 	 */
@@ -190,6 +203,7 @@ public class GtfsStopTime extends GtfsBase implements Comparable<GtfsStopTime> {
 				+ (dropOffType != null ? "dropOffType=" + dropOffType + ", " : "")
 				+ (shapeDistTraveled != null ? "shapeDistTraveled="
 						+ shapeDistTraveled : "") 
+				+ (timepointStop != null ? "timepointStop=" + timepointStop : "")
 				+ "]";
 	}
 
