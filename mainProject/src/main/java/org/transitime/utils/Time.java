@@ -151,6 +151,26 @@ public class Time {
 	}
 	
 	/**
+	 * Returns the epoch time of the start of the current day for the specified
+	 * timezone.
+	 * 
+	 * @param tz
+	 * @return
+	 */
+	public static long getStartOfDay(TimeZone tz) {
+		Calendar calendar = new GregorianCalendar(tz);
+
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+
+		// Get the epoch time
+		long epochTime = calendar.getTimeInMillis();
+		return epochTime;
+	}
+	
+	/**
 	 * Converts secondsIntoDay into an epoch time.
 	 * 
 	 * @param secondsIntoDay
