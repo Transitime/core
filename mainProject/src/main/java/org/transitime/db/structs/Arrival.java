@@ -60,4 +60,18 @@ public class Arrival extends ArrivalDeparture {
 	private Arrival() {
 		super();
 	}
+	
+	/**
+	 * A copy constructor that creates a new Arrival by copying this
+	 * one but using the newTime. This method is needed to update a time given
+	 * that the class has all final elements.
+	 * 
+	 * @param newTime
+	 * @return The newly constructed Arrival with the new time.
+	 */
+	public Arrival withUpdatedTime(Date newTime) {
+		return new Arrival(getVehicleId(), newTime, getAvlTime(), getBlock(),
+				getTripIndex(), getStopPathIndex());
+	}
+	
 }
