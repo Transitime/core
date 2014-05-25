@@ -136,9 +136,11 @@ class Indices {
 	}
 
 	/**
-	 * Increments indices so it points to the next path.
+	 * Increments indices so it points to the next path. Also sets the
+	 * segmentIndex to 0 since the returned Indices are to point to the
+	 * beginning of the next StopPath.
 	 * 
-	 * @return
+	 * @return Indices for the next StopPath for the assignment
 	 */
 	public Indices incrementStopPath() {
 		++stopPathIndex;
