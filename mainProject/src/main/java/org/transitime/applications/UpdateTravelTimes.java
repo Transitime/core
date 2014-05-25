@@ -26,6 +26,7 @@ import java.util.Map;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.CoreConfig;
 import org.transitime.core.travelTimes.TravelTimeInfoMap;
 import org.transitime.core.travelTimes.TravelTimeInfoWithHowSet;
 import org.transitime.core.travelTimes.TravelTimesProcessor;
@@ -117,13 +118,28 @@ public class UpdateTravelTimes {
 				// based on the schedule.
 				TravelTimesForStopPath ttForStopPathToUse;
 				if (travelTimeInfo != null) {
+					// Determine stop time to use. There are situations where
+					// only get an arrival time and no departure time for a stop
+					// so don't get stop time. This can happen at end of 
+					// assignment, if vehicle goes off route, if vehicle doesn't
+					// continue, stop getting AVL data for vehicle, etc. For 
+					// this situation use the old stop time.
+					int stopTime;
+					if (travelTimeInfo.isStopTimeValid()) {
+						stopTime = travelTimeInfo.getStopTime();
+					} else {
+						// Stop time not valid so use old time
+						TravelTimesForStopPath originalTravelTimes =
+								trip.getTravelTimesForStopPath(stopIdx);
+						stopTime = originalTravelTimes.getStopTimeMsec();
+					}
 					// Create and add the travel time for this stop path
 					ttForStopPathToUse = 
 							new TravelTimesForStopPath(
 									trip.getStopPath(stopIdx).getId(), 
 									travelTimeInfo.getTravelTimeSegLength(),
 									travelTimeInfo.getTravelTimes(),
-									travelTimeInfo.getStopTime(),
+									stopTime,
 									-1,  // daysOfWeekOverride
 									travelTimeInfo.howSet());
 				} else {
@@ -262,9 +278,10 @@ public class UpdateTravelTimes {
 	public static void main(String[] args) {
 		// Determine the parameters
 		// FIXME These are hard coded simply to get things going
-		String projectId = "sf-muni";
-		String startDateStr = "5-6-2014";
-		String endDateStr = "5-6-14";
+		String projectId = CoreConfig.getProjectId();
+		
+		String startDateStr = "5-23-2014";
+		String endDateStr = "5-23-14";
 		double maxTravelTimeSegmentLength = 120.0;
 		
 		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();

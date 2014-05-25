@@ -132,22 +132,127 @@ public class SpatialMatch {
 	}
 	
 	/**
-	 * Returns a SpatialMatch that corresponds to the the current match 
-	 * but will be moved to after a stop if the current match is
-	 * just before the stop. This way can pass in this modified match to
-	 * the methods that determine travel time and the layover/stop time
-	 * for the stop where the SpatialMatch is will not be included in the
-	 * calculations. If the current object is not just before a stop then
-	 * the original object is returned.
-	 * @return
+	 * Returns true if the match is to the stop at the end of the stop path.
+	 * This can be important because atStop can also be set to the previous
+	 * stop, which is something very different. If match is not for at a stop
+	 * then null is returned.
+	 * 
+	 * @return True if match is for at stop at end of stop path
 	 */
-	public SpatialMatch getMatchAfterStop() {
+	public boolean atEndOfPathStop() {
+		return atStop != null && atStop.getTripIndex() == tripIndex
+				&& atStop.getStopPathIndex() == stopPathIndex;
+	}
+	
+	/**
+	 * Returns true if the match is to the stop for the previous stop path. This
+	 * can be important because atStop can also be set to the stop for the
+	 * current stop path, which is very different. If match is not for at a stop
+	 * then null is returned.
+	 * 
+	 * @return True if match is for stop for the previous stop path
+	 */
+	public boolean atBeginningOfPathStop() {
+		return atStop != null 
+				&& atStop.getTripIndex() == tripIndex  
+				&& atStop.getStopPathIndex() != stopPathIndex;		
+	}
+	
+	/**
+	 * For when need to determine arrival time when vehicle matches to a stop.
+	 * Returns a SpatialMatch that corresponds to the end of the stop path for
+	 * the stop indicated by the current SpatialMatch. If the match is for stop
+	 * for the previous stop path (the vehicle is matching to just beyond the
+	 * stop) the the previous stop path is used. Only to be called when vehicle
+	 * is matched to a stop. Logs error and returns null if match is not for at
+	 * a stop.
+	 * 
+	 * @return SpatialMatch adjusted so it is at end of path for the stop
+	 */
+	public SpatialMatch getMatchAdjustedToEndOfPath() {
+		// If not at a stop then we have a problem
+		if (atStop == null) {
+			logger.error("For vehicleId={} wrongly called " +
+					"getMatchAdjustedToEndOfPath() when vehicle is not at " +
+					"a stop. This is not allowed.",
+					vehicleId);
+			return null;
+		}
+		
+		// Determine Indices for the atStop for the Match. If match 
+		// is for stop at the beginning of the path instead of the end
+		// then decrement the indices so will point to proper stop path.
+		Indices indices = getIndices();
+		if (!atEndOfPathStop()) {
+			indices.decrementStopPath();
+		}
+
+		// Determine and return spatial match that is at the end of
+		// the StopPath indicates by indices
+		StopPath stopPath = indices.getStopPath();
+		int segmentIndex = stopPath.getNumberSegments()-1;
+		Vector segmentVector = stopPath.getSegmentVector(segmentIndex);
+		double distanceAlongSegment = segmentVector.length();
+		Indices endOfStopPathIndices = new Indices(block,
+				indices.getTripIndex(), indices.getStopPathIndex(),
+				segmentIndex);
+		return new SpatialMatch(this, endOfStopPathIndices,
+				distanceAlongSegment);
+	}
+	
+	/**
+	 * For when need to determine departure time at a stop. Returns a
+	 * SpatialMatch that corresponds to the beginning of the next stop path for
+	 * the stop indicated by the current SpatialMatch. Only to be called when vehicle
+	 * is matched to a stop. Logs error and returns null if match is not for at
+	 * a stop.
+	 * 
+	 * @return SpatialMatch adjusted so it is at beginning of path for the stop
+	 */
+	public SpatialMatch getMatchAdjustedToBeginningOfPath() {
+		// If not at a stop then we have a problem
+		if (atStop == null) {
+			logger.error("For vehicleId={} wrongly called " +
+					"getMatchAdjustedToBeginningOfPath() when vehicle is " +
+					"not at a stop. This is not allowed.",
+					vehicleId);
+			return null;
+		}
+
+		// Determine Indices for the atStop for the Match. If match 
+		// is for stop at the beginning of the path instead of the end
+		// then decrement the indices so will point to proper stop path.
+		Indices indices = getIndices();
+		if (!atBeginningOfPathStop()) {
+			indices.incrementStopPath();
+		}
+
+		// Create a new SpatialMatch that is at the beginning of
+		// stop path
+		int segmentIndex = 0;
+		double distanceAlongSegment = 0.0;
+		Indices beginningOfStopPathIndices = new Indices(block,
+				indices.getTripIndex(), indices.getStopPathIndex(),
+				segmentIndex);
+		return new SpatialMatch(this, beginningOfStopPathIndices,
+				distanceAlongSegment);
+	}
+	
+	/**
+	 * Returns a SpatialMatch that corresponds to the current match but will be
+	 * moved to after a stop if the current match is just before the stop. This
+	 * way can pass in this modified match to the methods that determine travel
+	 * time and the layover/stop time for the stop where the SpatialMatch is
+	 * will not be included in the calculations. If the current object is not
+	 * just before a stop then the original object is returned.
+	 * 
+	 * @return This match or one after the stop if at end of stop path
+	 */
+	private SpatialMatch getMatchAfterStopIfAtStop() {
 		// If the spatialMatch is not just before a stop then return
 		// spatialMatch. The spatialMatch is just before a stop if
 		// atStop trip and path indices are the same as for the match.
-		if (atStop == null || 
-				atStop.getTripIndex() != tripIndex || 
-				atStop.getStopPathIndex() != stopPathIndex)
+		if (!atEndOfPathStop())
 			return this;
 		
 		// The spatialMatch is just before a stop so create a new spatial
@@ -157,44 +262,21 @@ public class SpatialMatch {
 	}
 
 	/**
-	 * Returns a SpatialMatch that corresponds to the current match 
-	 * but will be moved to before a stop if the current match is
-	 * just after the stop. This way can pass in this modified match to
-	 * the methods that determine travel time and the layover/stop time
-	 * for the stop where the SpatialMatch is will not be included in the
-	 * calculations. If the current object is not just after a stop then
-	 * the original object is returned.
+	 * Returns a SpatialMatch that corresponds to just before the next stop.
+	 * Useful if need to determine travel time to next stop.
+	 * 
 	 * @return
 	 */
-	public SpatialMatch getMatchBeforeStop() {
-		// If the spatialMatch is not just after a stop then return
-		// spatialMatch. The spatialMatch is after before a stop if
-		// atStop trip and path indices are different than for the match.
-		if (atStop == null || 
-				(atStop.getTripIndex() == tripIndex && 
-				 atStop.getStopPathIndex() == stopPathIndex))
-			return this;
-		
-		// The spatialMatch is just after a stop so create a new spatial
-		// match but use the end of the previous path.
-		Indices previousPathIndices = getIndices().decrementStopPath();
-		return new SpatialMatch(this, previousPathIndices, 
-				previousPathIndices.getSegment().length());
-	}
-
-	/**
-	 * Returns a SpatialMatch that corresponds to the next stop. Useful if
-	 * need to determine travel time to next stop. 
-	 * @return
-	 */
-	public SpatialMatch getMatchAtNextStop() {
+	public SpatialMatch getMatchAtJustBeforeNextStop() {
 		// First need to get on the proper path. If just before a stop
 		// then need to get a match just after that stop.
-		SpatialMatch m = getMatchAfterStop();
+		SpatialMatch m = getMatchAfterStopIfAtStop();
 		
-		int segmentIndex = block.numSegments(m.getTripIndex(), m.getStopPathIndex())-1;
-		double segmentLength =
-				block.getSegmentVector(m.getTripIndex(), m.getStopPathIndex(), segmentIndex).length();
+		int segmentIndex = 
+				block.numSegments(m.getTripIndex(), m.getStopPathIndex())-1;
+		Vector segmentVector = block.getSegmentVector(m.getTripIndex(),
+				m.getStopPathIndex(), segmentIndex);
+		double segmentLength = segmentVector.length();
 		
 		// Return a match that is at the end of the path
 		return new SpatialMatch(vehicleId,
@@ -207,6 +289,29 @@ public class SpatialMatch {
 	}
 	
 	/**
+	 * Returns a SpatialMatch that corresponds to the current match but will be
+	 * moved to before a stop if the current match is just after the stop. This
+	 * way can pass in this modified match to the methods that determine travel
+	 * time and the layover/stop time for the stop where the SpatialMatch is
+	 * will not be included in the calculations. If the current object is not
+	 * just after a stop then the original object is returned.
+	 * 
+	 * @return This match or one before the stop if at beginning of stop path
+	 */
+	private SpatialMatch getMatchBeforeStopIfAtStop() {
+		// If the spatialMatch is not just after a stop then return
+		// spatialMatch. 
+		if (!atBeginningOfPathStop())
+			return this;
+		
+		// The spatialMatch is just after a stop so create a new spatial
+		// match but use the end of the previous path.
+		Indices previousPathIndices = getIndices().decrementStopPath();
+		return new SpatialMatch(this, previousPathIndices, 
+				previousPathIndices.getSegment().length());
+	}
+
+	/**
 	 * Returns a SpatialMatch that corresponds to the previous stop. The 
 	 * returned match will be just before the previous stop. Useful
 	 * if need to determine travel time from previous stop.
@@ -215,10 +320,11 @@ public class SpatialMatch {
 	public SpatialMatch getMatchAtPreviousStop() {
 		// First need to get on the proper path. If just before a stop
 		// then need to get a match just after that stop.
-		Indices indices = getMatchBeforeStop().getIndices().decrementStopPath();
+		Indices indices = 
+				getMatchBeforeStopIfAtStop().getIndices().decrementStopPath();
 		
 		// Return a match that is at the end of the path
-		Vector vector = indices.getBlock().getSegmentVector(
+		Vector segmentVector = indices.getBlock().getSegmentVector(
 				indices.getTripIndex(), indices.getStopPathIndex(),
 				indices.getSegmentIndex());
 		return new SpatialMatch(vehicleId,
@@ -227,13 +333,15 @@ public class SpatialMatch {
 				indices.getStopPathIndex(),
 				indices.getSegmentIndex(),
 				Double.NaN,       // distanceToSegment not set to a valid value
-				vector.length()); // segmentLength
+				segmentVector.length()); 
 	}
 	
 	/**
 	 * Determines if the match means that the vehicle is considered to be at a
 	 * stop. Looks forward and back from the match to see if it is within the
-	 * allowable distance of the stop.
+	 * allowable distance of the stop. Intended to be called by constructor
+	 * to set the atStop member variable so that only have to determine if
+	 * SpatialMatch is at the stop once.
 	 * 
 	 * @return VehicleAtStopInfo object containing trip and path index of stop
 	 *         that match is nearby. Returns null if match is not near a stop.
@@ -423,6 +531,7 @@ public class SpatialMatch {
 				+ ", isLayover=" + isLayover()
 				+ ", distanceToSegment=" + Geo.distanceFormat(distanceToSegment) 
 				+ ", distanceAlongSegment=" + Geo.distanceFormat(distanceAlongSegment) 
+				+ ", distanceAlongStopPath=" + Geo.distanceFormat(getDistanceAlongStopPath())
 				+ ", atStop=" + atStop
 				+ ", trip=" + getTrip().toShortString()
 				+ "]";

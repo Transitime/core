@@ -24,7 +24,6 @@ import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
-import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.DbPrediction;
 import org.transitime.db.structs.Match;
 import org.transitime.ipc.data.Prediction;
@@ -122,12 +121,7 @@ public class MatchProcessor {
 		logger.debug("Processing arrivals/departures for vehicleId={}",
 				vehicleState.getVehicleId());
 		
-		List<ArrivalDeparture> arrivalDepartures = 
-				ArrivalDepartureGeneratorFactory.getInstance().generate(vehicleState);
-		
-		for (ArrivalDeparture arrivalDeparture : arrivalDepartures) {
-			Core.getInstance().getDbLogger().add(arrivalDeparture);
-		}
+		ArrivalDepartureGeneratorFactory.getInstance().generate(vehicleState);
 	}
 	
 	/**

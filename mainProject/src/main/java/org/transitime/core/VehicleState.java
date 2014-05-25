@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.transitime.configData.CoreConfig;
+import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
@@ -57,7 +58,8 @@ public class VehicleState {
 	private int numberOfBadMatches = 0;
 	
 	// So can make sure that departure time is after the arrival time
-	private Date previousArrivalTime;
+	private Arrival arrivalToStoreToDb;
+	private long lastArrivalTime = 0;
 	
 	private static int MATCH_HISTORY_MAX_SIZE = 6;
 	private static int AVL_HISTORY_MAX_SIZE = 6;
@@ -101,6 +103,11 @@ public class VehicleState {
 		// Set predictability
 		if (match == null) {
 			predictable = false;
+			
+			// Make sure that the arrival time buffer is cleared so that
+			// when get a new assignment won't try to use it since something
+			// peculiar might have happened.
+			setArrivalToStoreToDb(null);
 		}
 		
 		// Reset numberOfBadMatches
@@ -320,15 +327,20 @@ public class VehicleState {
 		return predictable;
 	}
 	
-	public void setPreviousArrivalTime(Date previousArrivalTime) {
-		this.previousArrivalTime = previousArrivalTime;
+	/**
+	 * Records the specified arrival as one that still needs to be stored to the
+	 * db. This is important because can generate arrivals into the future but
+	 * need to make sure that the arrival is before the subsequent departure and
+	 * can't do so until get additional AVL reports.
+	 * 
+	 * @param arrival
+	 */
+	public void setArrivalToStoreToDb(Arrival arrival) {
+		this.arrivalToStoreToDb = arrival;
 	}
 	
-	/**
-	 * The last arrival time of a vehicle. Can be null. 
-	 */
-	public Date getPreviousArrivalTime() {
-		return previousArrivalTime;
+	public Arrival getArrivalToStoreToDb() {
+		return arrivalToStoreToDb;
 	}
 	
 	/**
@@ -414,9 +426,9 @@ public class VehicleState {
 				+ ", predictable=" + predictable 
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
 				+ ", pathHeading=" + StringUtils.twoDigitFormat(getHeading())
-				+ ", previousArrivalTime=" + previousArrivalTime
 				+ ", getMatch()=" + getMatch()
 				+ ", getAvlReport()=" + getAvlReport()
+				+ (arrivalToStoreToDb != null ? "\n  arrivalToStoreToDb=" + arrivalToStoreToDb : "")
 				//+ ",\n  block=" + block // Block info too verbose so commented out
 				//+ ",\n  temporalMatchHistory=" + temporalMatchHistory 
 				//+ ",\n  avlReportHistory=" + avlReportHistory 
@@ -432,12 +444,31 @@ public class VehicleState {
 				+ ", predictable=" + predictable 
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
 				+ ", pathHeading=" + StringUtils.twoDigitFormat(getHeading())
-				+ ", previousArrivalTime=" + previousArrivalTime
 				+ ", getMatch()=" + getMatch()
 				+ ", getAvlReport()=" + getAvlReport()
 				//+ ", \nblock=" + block // Block info too verbose so commented out
 				+ ",\n  temporalMatchHistory=" + temporalMatchHistory 
 				+ ",\n  avlReportHistory=" + avlReportHistory 
+				+ (arrivalToStoreToDb != null ? "\n  arrivalToStoreToDb=" + arrivalToStoreToDb : "")
 				+ "]";
+	}
+
+	/**
+	 * Stores the last arrival time so that can make sure that departure
+	 * times are after the arrival times.
+	 * @param arrivalTime
+	 */
+	public void setLastArrivalTime(long arrivalTime) {
+		lastArrivalTime = arrivalTime;
+	}
+
+	/**
+	 * Returns the last stored arrival time so can make sure that departure
+	 * times are after the arrival times.
+	 * 
+	 * @return
+	 */
+	public long getLastArrivalTime() {
+		return lastArrivalTime;
 	}
 }

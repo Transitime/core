@@ -17,10 +17,6 @@
 
 package org.transitime.core;
 
-import java.util.List;
-
-import org.transitime.db.structs.ArrivalDeparture;
-
 /**
  *
  *
@@ -29,7 +25,7 @@ import org.transitime.db.structs.ArrivalDeparture;
  */
 public interface ArrivalDepartureGenerator {
 	/**
-	 * Generates List of ArrivalDeparture objects such that they can be stored.
+	 * Determines arrival/departure times and stores them into db.
 	 * Also should call vehicleState.setVehicleAtStopInfo(newVehicleAtStopInfo)
 	 * to specify if vehicle at a stop. This is done in
 	 * ArrivalDepartureGenerator.generate() since that is where this info is
@@ -38,6 +34,6 @@ public interface ArrivalDepartureGenerator {
 	 * @param vehicleState
 	 * @return List of ArrivalDeparture objects generated
 	 */
-	public List<ArrivalDeparture> generate(VehicleState vehicleState);
+	public void generate(VehicleState vehicleState);
 
 }

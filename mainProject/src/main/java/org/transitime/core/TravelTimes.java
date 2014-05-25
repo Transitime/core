@@ -331,17 +331,12 @@ public class TravelTimes {
 	 * Determines expected travel time in msec between the two matches based on
 	 * the travel times from the database.
 	 * 
-	 * Note: would like to make travel times more accurate by also looking at
-	 * how fast vehicle has been moving compared to expected travel times for
-	 * the last few minutes. Would also like to look at how fast previous
-	 * vehicle went if it was recent.
-	 * 
 	 * @param vehicleId
 	 *            for logging messages
 	 * @param timeOfDaySecs
 	 *            so can take layovers into account
-	 * @param match1AfterStop
-	 * @param match2BeforeStop
+	 * @param match1
+	 * @param match2
 	 * @return travel time in msec between matches. Returns 0 if match2 is
 	 *         before match1
 	 */
@@ -352,51 +347,22 @@ public class TravelTimes {
 				"  match1={}\n" +
 				"  match2={}", 
 				vehicleId, match1, match2);
-
-		// Sometimes the matches will be at stops. But don't want to include
-		// the layover time for the first stop if the match is just
-		// before that stop. And don't want to include the layover
-		// time for the last stop if the match happens to be just after the
-		// stop. Only want the expected travel times so that can accurately 
-		// determine arrival/departure times and such. Therefore adjust the
-		// matches to make sure that unwanted layover times are not
-		// included in the travel time calculation.
-		SpatialMatch match1Adjusted;
-		VehicleAtStopInfo match1AtStop = match1.getAtEndStop();
-		if (match1AtStop != null && match1AtStop.isWaitStop())
-			match1Adjusted = match1.getMatchAfterStop();
-		else
-			match1Adjusted = match1;
-		
-		SpatialMatch match2Adjusted;
-		VehicleAtStopInfo match2AtStop = match2.getAtBeginningStop();
-		if (match2AtStop != null && match2AtStop.isWaitStop())
-			match2Adjusted = match2.getMatchBeforeStop();
-		else
-			match2Adjusted = match2;
-		
-		logger.debug("For vehicleId={} after adjusting matches to not include " +
-				"stop/layover times:\n" +
-				"  match1Adjusted={}\n" +
-				"  match2Adjusted={}",
-				vehicleId, match1Adjusted, match2Adjusted);
 		
 		// Determine the indices for both match1 and match2 so that can see if
 		// need to add stop/layover time.
-		Indices indices = match1Adjusted.getIndices();
-		Indices endIndices = match2Adjusted.getIndices();
+		Indices indices = match1.getIndices();
+		Indices endIndices = match2.getIndices();
 
 		// If the indices are not increasing then can simply return a travel 
-		// time of 0msec. This can happen when at a stop since adjusting
-		// the matches to be after or before a stop.
+		// time of 0msec. This shouldn't happen so log an error.
 		if (!indices.lessThan(endIndices)) {
 			if (!indices.equals(endIndices)
-					|| match1Adjusted.getDistanceAlongSegment() > 
-						match2Adjusted.getDistanceAlongSegment()) {
-				logger.debug("For vehicleId={} match1AfterStop is after " +
+					|| match1.getDistanceAlongSegment() > 
+						match2.getDistanceAlongSegment()) {
+				logger.error("For vehicleId={} match1AfterStop is after " +
 						"match2BeforeStop so returning travel time of 0. " +
 						"match1AfterStop={}, match2BeforeStop={}",
-						vehicleId, match1Adjusted, match2Adjusted);
+						vehicleId, match1, match2);
 				return 0;
 			}
 		}
@@ -404,10 +370,10 @@ public class TravelTimes {
 		// Start with travel time from beginning location to end of first 
 		// stop path.
 		int travelTimeMsec = 
-				expectedTravelTimeFromMatchToEndOfStopPath(match1Adjusted);
+				expectedTravelTimeFromMatchToEndOfStopPath(match1);
 		logger.debug("For vehicleId={} travel time for first partial " +
 				"stop path is {} msec. {}", 
-				vehicleId, travelTimeMsec, match1Adjusted);
+				vehicleId, travelTimeMsec, match1);
 		
 		// For special case where both matches are on the same stop path 
 		// need to subtract out the travel time for the travel time 
@@ -444,7 +410,7 @@ public class TravelTimes {
 		indices.incrementStopPath();
 		
 		// For all segments between the begin and end ones...
-		while (indices.earlierStopPathThan(endIndices)) {
+		while (indices.isEarlierStopPathThan(endIndices)) {
 			int stopPathTravelTime = expectedTravelTimeForStopPath(indices);
 			travelTimeMsec += stopPathTravelTime;
 			logger.debug("For vehicleId={} adding stop path travel time={} " +
@@ -473,7 +439,7 @@ public class TravelTimes {
 		
 		// Add travel time for last partial segment
 		int travelTimeForPartialLastStopPath =
-				expectedTravelTimeFromBeginningOfStopPathToMatch(match2Adjusted);
+				expectedTravelTimeFromBeginningOfStopPathToMatch(match2);
 		travelTimeMsec += travelTimeForPartialLastStopPath;
 		logger.debug("For vehicleId={} added travel time for last " +
 				"partial stop path of {} msec so now travel time is {} msec", 
@@ -481,7 +447,7 @@ public class TravelTimes {
 		
 		// Return the results
 		logger.debug("For vehicleId={} returning total travel time={} msec. {}" , 
-				vehicleId, travelTimeMsec, match2Adjusted);
+				vehicleId, travelTimeMsec, match2);
 		return travelTimeMsec;
 	}
 	

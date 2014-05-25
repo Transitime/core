@@ -36,6 +36,8 @@ public class TravelTimeInfo {
 	private final List<Integer> travelTimes;
 	private final int stopTime;
 	private final double travelTimeSegLength;
+	
+	public static final int STOP_TIME_NOT_VALID = -1;
 		
 	/********************** Member Functions **************************/
 
@@ -83,6 +85,10 @@ public class TravelTimeInfo {
 		return stopTime;
 	}
 
+	public boolean isStopTimeValid() {
+		return stopTime != STOP_TIME_NOT_VALID;
+	}
+	
 	public double getTravelTimeSegLength() {
 		return travelTimeSegLength;
 	}

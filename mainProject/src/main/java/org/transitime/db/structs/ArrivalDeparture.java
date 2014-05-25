@@ -27,6 +27,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -162,6 +163,10 @@ public class ArrivalDeparture implements Serializable {
 	@Column
 	private final float stopPathLength;
 	
+	// So can easily create copy constructor withUpdatedTime()
+	@Transient
+	private final Block block;
+	
 	// Needed because some methods need to know if dealing with arrivals or 
 	// departures.
 	public enum ArrivalsOrDepartures {ARRIVALS, DEPARTURES};
@@ -191,6 +196,7 @@ public class ArrivalDeparture implements Serializable {
 		this.vehicleId = vehicleId;
 		this.time = time;
 		this.avlTime = avlTime;
+		this.block = block;
 		this.tripIndex = tripIndex;
 		this.stopPathIndex = stopPathIndex;
 		this.isArrival = isArrival;
@@ -232,9 +238,6 @@ public class ArrivalDeparture implements Serializable {
 		this.routeId = trip.getRouteId();
 		this.routeShortName = trip.getRouteShortName();
 		this.serviceId = block.getServiceId();
-				
-		// Log each creation of an ArrivalDeparture
-		logger.info(this.toString());
 	}
 	
 	/**
@@ -245,6 +248,7 @@ public class ArrivalDeparture implements Serializable {
 		this.vehicleId = null;
 		this.time = null;
 		this.avlTime = null;
+		this.block = null;
 		this.tripIndex = -1;
 		this.stopPathIndex = -1;
 		this.isArrival = false;
@@ -261,6 +265,14 @@ public class ArrivalDeparture implements Serializable {
 		this.serviceId = null;
 	}
 
+	/**
+	 * For logging each creation of an ArrivalDeparture to the separate
+	 * ArrivalsDepartures.log file.
+	 */
+	public void logCreation() {
+		logger.info(this.toString());
+	}
+	
 	/**
 	 * Because using a composite Id Hibernate wants this member.
 	 */
@@ -554,6 +566,10 @@ public class ArrivalDeparture implements Serializable {
 		return time;
 	}
 
+	public Date getAvlTime() {
+		return avlTime;
+	}
+	
 	public long getTime() {
 		return time.getTime();
 	}
@@ -606,6 +622,16 @@ public class ArrivalDeparture implements Serializable {
 		return stopPathLength;
 	}
 
+	/**
+	 * Note that the block is a transient element so will not be available if
+	 * this object was read from the database. In that case it will be null.
+	 * 
+	 * @return
+	 */
+	public Block getBlock() {
+		return block;
+	}
+	
 	/**
 	 * The schedule time will only be set if the schedule info was available
 	 * from the GTFS data and it is the proper type of arrival or departure
