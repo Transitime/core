@@ -225,7 +225,7 @@ public class DataFetcher {
 				addArrivalDepartureToMap(resultsMap, arrDep);
 			}
 			
-			logger.info("Read in {} arrival/departures", 
+			logger.info("Read in total of {} arrival/departures", 
 					firstResult+arrDepBatchList.size());
 			
 			// Update firstResult for reading next batch of data
@@ -294,7 +294,7 @@ public class DataFetcher {
 				addMatchToMap(resultsMap, match);
 			}
 			
-			logger.info("Read in {} matches", 
+			logger.info("Read in total of {} matches", 
 					firstResult+matchBatchList.size());
 			
 			// Update firstResult for reading next batch of data
