@@ -51,8 +51,8 @@ public class HibernateUtils {
 	private static HashMap<String, SessionFactory> sessionFactoryCache =
 			new HashMap<String, SessionFactory>();
 
-	public static final Logger logger = LoggerFactory
-			.getLogger(HibernateUtils.class);
+	public static final Logger logger = 
+			LoggerFactory.getLogger(HibernateUtils.class);
 
 	/********************** Member Functions **************************/
 
