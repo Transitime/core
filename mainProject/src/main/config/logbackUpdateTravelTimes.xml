@@ -81,7 +81,11 @@
     <appender-ref ref="CORE" />
   </logger>
 
-  <logger name="org.transitime.db.hibernate.AnnotatedClassesList" level="info" 
+  <logger name="org.transitime.core.travelTimes.TravelTimesProcessor" level="debug" additivity="false">
+    <appender-ref ref="CORE" />
+  </logger>
+
+  <logger name="org.transitime.db.hibernate.HibernateUtils" level="info" 
    additivity="false">
     <appender-ref ref="CORE" />
   </logger>
