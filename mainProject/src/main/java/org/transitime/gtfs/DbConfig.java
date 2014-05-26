@@ -16,6 +16,7 @@
  */
 package org.transitime.gtfs;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.MapKey;
 
 /**
  * Reads all the configuration data from the database. The data is based on GTFS
@@ -61,8 +63,12 @@ public class DbConfig {
 	
 	// Following is for all the data read from the database
 	private List<Block> blocks;
-	// So can access blocks by session ID and block ID easily
-	Map<String, Map<String, Block>> blocksByServiceMap = null;
+	
+	// So can access blocks by service ID and block ID easily
+	private Map<String, Map<String, Block>> blocksByServiceMap = null;
+	
+	// So can access blocks by service ID and route ID easily
+	private Map<RouteServiceMapKey, List<Block>> blocksByRouteMap = null;
 	
 	private List<Route> routes;
 	// Keyed on routeId
@@ -164,7 +170,89 @@ public class DbConfig {
 		
 		return blocksByServiceMap;
 	}
+	
+	private static class RouteServiceMapKey extends MapKey {
+		private RouteServiceMapKey(String serviceId, String routeId) {
+			super(serviceId, routeId);
+		}
+		
+		@Override
+		public String toString() {
+			return "RouteServiceMapKey [" 
+					+ "serviceId=" + o1 
+					+ ", routeId=" + o2 
+					+ "]";
+		}
+	}
+	
+	/**
+	 * To be used by putBlocksIntoMapByRoute().
+	 * 
+	 * @param serviceId
+	 * @param routeId
+	 * @param block
+	 */
+	private static void addBlockToMapByRouteMap(
+			Map<RouteServiceMapKey, List<Block>> blocksByRouteMap,
+			String serviceId, String routeId, Block block) {
+		RouteServiceMapKey key = new RouteServiceMapKey(serviceId, routeId);
+		List<Block> blocksList = blocksByRouteMap.get(key);
+		if (blocksList == null) {
+			blocksList = new ArrayList<Block>();
+			blocksByRouteMap.put(key, blocksList);
+		}
+		blocksList.add(block);
+	}
+	
+	/**
+	 * Takes in List of Blocks read from db and puts them into the
+	 * blocksByRouteMap so that getBlocksForRoute() can be used to retrieve the
+	 * list of blocks that are associated with a route for a specified service
+	 * ID.
+	 * 
+	 * @param blocks
+	 * @return the newly created blocksByRouteMap
+	 */
+	private static Map<RouteServiceMapKey, List<Block>> putBlocksIntoMapByRoute(
+			List<Block> blocks) {
+		Map<RouteServiceMapKey, List<Block>> blocksByRouteMap = 
+				new HashMap<RouteServiceMapKey, List<Block>>();
+		
+		for (Block block : blocks) {
+			String serviceId = block.getServiceId();
+			
+			Collection<String> routeIdsForBlock = block.getRoutes();
+			for (String routeId : routeIdsForBlock)
+				addBlockToMapByRouteMap(blocksByRouteMap, serviceId, routeId,
+						block);
+		}
+		
+		return blocksByRouteMap;
+	}
 
+	/**
+	 * Returns List of Blocks associated with the serviceId and routeId.
+	 * 
+	 * @param serviceId
+	 * @param routeId
+	 * @return List of Blocks
+	 */
+	public List<Block> getBlocksForRoute(String serviceId, String routeId) {
+		// Read in data if it hasn't been read in yet. This isn't done at 
+		// startup since it causes all trips and travel times to be read in,
+		// which of course takes a while. Therefore only want to do this
+		// if the blocksByRouteMap is actually being used, which is probably
+		// only for situations where AVL feed provides route IDs instead
+		// block assignments.
+		if (blocksByRouteMap == null) {
+			blocksByRouteMap = putBlocksIntoMapByRoute(blocks);
+		}
+
+		RouteServiceMapKey key = new RouteServiceMapKey(serviceId, routeId);
+		List<Block> blocksList = blocksByRouteMap.get(key);
+		return blocksList;
+	}
+	
 	/**
 	 * Converts the stops list into a map.
 	 * 

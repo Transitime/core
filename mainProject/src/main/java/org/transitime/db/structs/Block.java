@@ -20,8 +20,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -461,6 +463,21 @@ public final class Block implements Serializable {
 	 */
 	public int getTripIndex(Trip trip) {
 		return getTripIndex(trip.getId());
+	}
+	
+	/**
+	 * Returns collection of route IDs associated with the Block. 
+	 * Each route ID will only be included once.
+	 * @return
+	 */
+	public Collection<String> getRoutes() {
+		Set<String> routeIdsSet = new HashSet<String>();
+		
+		for (Trip trip : getTrips()) {
+			routeIdsSet.add(trip.getRouteId());
+		}
+		
+		return routeIdsSet;
 	}
 	
 	/**
