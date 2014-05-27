@@ -522,29 +522,25 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					+ travelTimeFromOldMatchToStopMsec;
 		}
 		
-		// Determine actual departure time to use. If 
-		// departureTimeBasedOnOldMatch is greater than 
-		// departureTimeBasedOnNewMatch then might be going back too far.
-		// This could be because vehicle traveling faster than expected,
-		// which is common since vehicles will never travel exactly as
-		// fast as expected. But don't want to just use 
-		// departureTimeBasedOnOldMatch because it could be to high. So
-		// use average of the two.
+		// Determine actual departure time to use. If the old match departure
+		// time is greater than the new match time then we know that the
+		// vehicle was still at the stop at the old match departure time.
+		// Using the new match departure time would be too early in this
+		// case. So for this case use the departure time based on the old
+		// match.
 		long departureTime = departureTimeBasedOnNewMatch;
 		if (departureTimeBasedOnOldMatch > departureTimeBasedOnNewMatch) {
-			// Use average of departure times
-			departureTime = (departureTimeBasedOnOldMatch + 
-					departureTimeBasedOnNewMatch) / 2;
+			// Use departure time based on old match since we definitely
+			// know that the vehicle was still at the stop at that time.
+			departureTime = departureTimeBasedOnOldMatch;
 
 			// Log what is going on
 			if (logger.isDebugEnabled()) {
 				logger.debug("For vehicleId={} using departure time {} based "
-								+ "on average times because old match is "
-								+ "{} which is greater than the earlier value "
-								+ "based on the new match of {}", 
-						vehicleId,
+						+ "on old match because it is greater than the "
+						+ "earlier value " + "based on the new match of {}",
+						vehicleId, 
 						Time.dateTimeStrMsec(departureTime),
-						Time.dateTimeStrMsec(departureTimeBasedOnOldMatch),
 						Time.dateTimeStrMsec(departureTimeBasedOnNewMatch));
 			}
 		}
@@ -571,7 +567,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				departureTimeBasedOnNewMatch, vehicleState);
 
 		// Create and write out the departure time to db
-		ArrivalDeparture departure = createDepartureTime(vehicleState,
+		Departure departure = createDepartureTime(vehicleState,
 				departureTime, oldVehicleAtStopInfo.getBlock(),
 				oldVehicleAtStopInfo.getTripIndex(),
 				oldVehicleAtStopInfo.getStopPathIndex());
@@ -662,25 +658,26 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					avlReport.getTime() - travelTimeFromStoptoNewMatchMsec;			
 		}
 		
-		// Determine which arrival time to use. Use the earlier one since
-		// that will prevent from using a time that is past the current
-		// AVL report arrival time. Given that the vehicle is already at
-		// the stop if using the old match plus travel time is further in
-		// the future then it must be wrong.
+		// Determine which arrival time to use. If the one based on the old
+		// match is greater than the one based on the new match it means that
+		// the vehicle traveled faster than expected. This is pretty common
+		// since the travel times can be based on the schedule, which is often
+		// not very accurate. For this case need to use the arrival time
+		// based on the new match since we know that the vehicle has arrived
+		// at the stop by that time. 
 		long arrivalTime = arrivalTimeBasedOnOldMatch;
 		if (arrivalTimeBasedOnNewMatch < arrivalTimeBasedOnOldMatch) {
-			// Use average of arrival times
-			arrivalTime = (arrivalTimeBasedOnOldMatch +
-					arrivalTimeBasedOnNewMatch) / 2;
+			// Use arrival time based on new match since we definitely know
+			// the vehicle has arrived at this time.
+			arrivalTime = arrivalTimeBasedOnNewMatch;
 			
 			// Log what is going on
 			if (logger.isDebugEnabled()) {
-				logger.debug("For vehicleId={} using arrival time {} based on " +
-					"average times because new match is {} which is less " +
-					"than the later value based on the old match of {}", 
+				logger.debug("For vehicleId={} using arrival time {} based " +
+					"on new match because it is less than the later value " +
+					"based on the old match of {}", 
 					vehicleId, 
 					Time.dateTimeStrMsec(arrivalTime),
-					Time.dateTimeStrMsec(arrivalTimeBasedOnNewMatch), 
 					Time.dateTimeStrMsec(arrivalTimeBasedOnOldMatch));
 			}
 		}
