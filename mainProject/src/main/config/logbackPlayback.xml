@@ -246,10 +246,12 @@
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 
+<!-- TravelTimes are verbose, even for playback mode
   <logger name="org.transitime.core.TravelTimes" 
    level="debug" additivity="true">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
+-->
 
   <logger name="org.transitime.core.ArrivalDepartureGeneratorDefaultImpl" 
    level="debug" additivity="true">
