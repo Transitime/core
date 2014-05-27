@@ -324,6 +324,7 @@ public class Trip implements Serializable {
 				+ ", dirName=\"" + name + "\""
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
+				+ ", routeShortName=" + routeShortName
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
@@ -346,6 +347,7 @@ public class Trip implements Serializable {
 				+ ", dirName=\"" + name + "\""
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
+				+ ", routeShortName=" + routeShortName
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
