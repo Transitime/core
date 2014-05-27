@@ -249,7 +249,9 @@ public class BlocksProcessor {
 					startTimeForBlock = frequency.getStartTime();
 	
 					// End time for unscheduled block is from the frequencies.txt file
-					endTimeForBlock = frequency.getEndTime();
+					Trip firstTripForBlock = tripsListForBlock.get(0);
+					int tripEndTime = firstTripForBlock.getEndTime();
+					endTimeForBlock = frequency.getEndTime() + tripEndTime;
 				}
 				
 				// Create the Block
