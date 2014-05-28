@@ -143,7 +143,7 @@ public class AvlReport implements Serializable {
 	@Column
 	private final Float passengerFullness;
 		
-	private static final Logger logger= 
+	private static final Logger logger = 
 			LoggerFactory.getLogger(AvlReport.class);	
 
 	// Needed because serializable so can transmit using JMS or RMI
