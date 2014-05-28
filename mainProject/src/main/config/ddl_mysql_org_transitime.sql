@@ -77,6 +77,8 @@
 
     drop table if exists Trips;
 
+    drop table if exists VehicleEvents;
+
     create table ActiveRevisions (
         configRev integer not null,
         travelTimesRev integer,
@@ -370,6 +372,24 @@
         primary key (tripId, startTime, configRev)
     );
 
+    create table VehicleEvents (
+        vehicleId varchar(60) not null,
+        time datetime(3) not null,
+        eventType varchar(60) not null,
+        becameUnpredictable boolean,
+        blockId varchar(60),
+        description longtext,
+        lat double precision,
+        lon double precision,
+        predictable boolean,
+        routeId varchar(60),
+        routeShortName varchar(60),
+        stopId varchar(60),
+        supervisor varchar(60),
+        tripId varchar(60),
+        primary key (vehicleId, time, eventType)
+    );
+
     create index timeIndex on ArrivalsDepartures (time);
 
     create index timeIndex on AvlReports (time);
@@ -428,3 +448,5 @@
         add constraint FK_676npp7h4bxh8sjcnugnxt5wb 
         foreign key (tripPattern_id, tripPattern_configRev) 
         references TripPatterns (id, configRev);
+
+    create index timeIndex on VehicleEvents (time);

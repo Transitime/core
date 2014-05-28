@@ -142,7 +142,8 @@ public class SpatialMatcher {
 	 */
 	public static List<SpatialMatch> getSpatialMatches(AvlReport avlReport,
 			List<Trip> tripsToInvestigate, Block block) {
-		List<SpatialMatch> spatialMatchesForAllTrips = new ArrayList<SpatialMatch>();
+		List<SpatialMatch> spatialMatchesForAllTrips = 
+				new ArrayList<SpatialMatch>();
 
 		// So can reuse spatial matches if looking at same trip pattern
 		Set<String> tripPatternIdsCovered = new HashSet<String>();
@@ -156,8 +157,8 @@ public class SpatialMatcher {
 				// So can determine when to stop copying. Need to stop
 				// when starting to look at another trip.
 				String tripIdThatFoundTripPatternFor = null;
-				List<SpatialMatch> matchListForIteration = new ArrayList<SpatialMatch>(
-						spatialMatchesForAllTrips);
+				List<SpatialMatch> matchListForIteration = 
+						new ArrayList<SpatialMatch>(spatialMatchesForAllTrips);
 				for (SpatialMatch spatialMatch : matchListForIteration) {
 					String spatialMatchTripPatternId = spatialMatch.getTrip()
 							.getTripPattern().getId();

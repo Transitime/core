@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.AvlConfig;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.VehicleEvent;
 import org.transitime.utils.Time;
 
 /**
@@ -113,11 +114,7 @@ public class TimeoutHandler {
 				} else {
 					// Vehicle is not a layover so handle normally
 
-					// Make vehicle unpredictable
-					DataProcessor.getInstance().
-							makeVehicleUnpredictable(avlReport.getVehicleId());
-
-					// Remove that AVL report from the map since it was handled
+					// Log what is happening
 					logger.info("vehicleId={} timed out so making it unpredictable. "
 							+ "The last AVL report for that vehicle was at {} but "
 							+ "currently processing for time {}, which makes it "
@@ -131,6 +128,25 @@ public class TimeoutHandler {
 									- avlReport.getTime()),
 							Time.elapsedTimeStr(AvlConfig.getAvlTimeoutSecs()
 									* Time.MS_PER_SEC), avlReport);
+					
+					TemporalMatch lastMatch = vehicleState.getMatch();
+					String eventDescription = "Vehicle timed out because it "
+							+ "has not reported in " 
+							+ Time.elapsedTimeStr(newAvlReport.getTime() - 
+									avlReport.getTime()) 
+							+ " and so was made unpredictable.";
+					VehicleEvent.create(avlReport, lastMatch,
+							VehicleEvent.TIMEOUT,
+							eventDescription,
+							false, // predictable,
+							false, // becameUnpredictable
+							null);  // supervisor
+
+					// Make vehicle unpredictable
+					DataProcessor.getInstance().
+							makeVehicleUnpredictable(avlReport.getVehicleId());
+
+					// Remove that AVL report from the map since it was handled
 					mapIterator.remove();
 				}
 			} else {

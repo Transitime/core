@@ -38,6 +38,7 @@ import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
+import org.transitime.db.structs.VehicleEvent;
 
 /**
  * 
@@ -81,6 +82,7 @@ public class AnnotatedClassesList {
 		TravelTimesForTrip.class,
 		Trip.class,
 		TripPattern.class,
+		VehicleEvent.class,
 	};
 	
 	/********************** Member Functions **************************/

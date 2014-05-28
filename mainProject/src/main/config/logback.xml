@@ -164,7 +164,7 @@
       <fileNamePattern>${LOG_FILE_ROOT}/avl.log.gz</fileNamePattern>
     </rollingPolicy>
     <encoder>
-      <pattern>${DEFAULT_PATTERN}</pattern>
+      <pattern>${DATA_PATTERN}</pattern>
     </encoder>
   </appender>
 
@@ -172,6 +172,16 @@
   <appender name="ARRIVAL_DEPARTURE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>${LOG_FILE_ROOT}/arrivalDeparture.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Separate file for VehicleEvents logging -->
+  <appender name="VEHICLE_EVENTS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/vehicleEvents.log.gz</fileNamePattern>
     </rollingPolicy>
     <encoder>
       <pattern>${DATA_PATTERN}</pattern>
@@ -225,6 +235,11 @@
   <logger name="org.transitime.db.structs.ArrivalDeparture"
    level="info" additivity="false">
     <appender-ref ref="ARRIVAL_DEPARTURE" />
+  </logger>
+
+  <logger name="org.transitime.db.structs.VehicleEvent"
+   level="info" additivity="false">
+    <appender-ref ref="VEHICLE_EVENTS" />
   </logger>
 
   <logger name="org.transitime.ipc.data.Prediction"

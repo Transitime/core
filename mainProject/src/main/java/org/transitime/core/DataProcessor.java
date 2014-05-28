@@ -25,6 +25,7 @@ import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.VehicleEvent;
 
 /**
  * Takes the AVL data and processes it. Matches vehicles to their assignments.
@@ -109,7 +110,7 @@ public class DataProcessor {
 	 */
 	public TemporalMatch matchNewFixForPredictableVehicle(
 			VehicleState vehicleState) {
-		// Make sure state is correct
+		// Make sure state is coherent
 		if (!vehicleState.isPredictable() || 
 				vehicleState.getMatch() == null) {
 			throw new RuntimeException("Called DataProcessor.matchNewFix() " +
@@ -147,11 +148,26 @@ public class DataProcessor {
 		if (bestTemporalMatch != null || vehicleState.overLimitOfBadMatches()) {
 			// If going to make vehicle unpredictable due to bad matches log
 			// that info.
-			if (bestTemporalMatch == null && vehicleState.overLimitOfBadMatches()) {
+			if (bestTemporalMatch == null 
+					&& vehicleState.overLimitOfBadMatches()) {
 				logger.error("For vehicleId={} got {} bad matches which is " +
 						"over the allowable limit. Therefore setting vehicle " +
 						"state to null which will make it unpredictable.",
-						vehicleState.getVehicleId(), vehicleState.numberOfBadMatches());
+						vehicleState.getVehicleId(), 
+						vehicleState.numberOfBadMatches());
+				
+				// Log that vehicle is being made unpredictable as a VehicleEvent
+				String eventDescription = "Vehicle had " 
+						+ vehicleState.numberOfBadMatches() 
+						+ " bad spatial matches in a row."
+						+ " and so was made unpredictable.";
+				VehicleEvent.create(vehicleState.getAvlReport(), 
+						vehicleState.getMatch(),
+						VehicleEvent.NO_MATCH,
+						eventDescription,
+						false, // predictable,
+						false, // becameUnpredictable
+						null);  // supervisor 
 			}
 			
 			// Set the match of the vehicle. If null then it will make the vehicle
@@ -206,8 +222,8 @@ public class DataProcessor {
 			// Determine best spatial matches for trips that are currently
 			// active. Currently active means that the AVL time is within
 			// reasonable range of the start and end time of the trip.
-			List<Trip> potentialTrips = 
-					TemporalMatcher.getInstance().getTripsCurrentlyActive(avlReport, block);
+			List<Trip> potentialTrips = TemporalMatcher.getInstance()
+					.getTripsCurrentlyActive(avlReport, block);
 			List<SpatialMatch> spatialMatches = 
 					SpatialMatcher.getSpatialMatches(avlReport, potentialTrips, 
 							block);
@@ -259,6 +275,16 @@ public class DataProcessor {
 				logger.info("For vehicleId={} matched to blockId={}. " +
 						"Vehicle is now predictable. Match={}",
 						avlReport.getVehicleId(), block.getId(), bestMatch);
+
+				// Record a corresponding VehicleEvent
+				String eventDescription = "Vehicle successfully matched to block " +
+						"assignment and is now predictable.";
+				VehicleEvent.create(avlReport, bestMatch,
+						VehicleEvent.PREDICTABLE,
+						eventDescription,
+						true,  // predictable
+						false, // becameUnpredictable
+						null); // supervisor
 			} else {
 				logger.info("For vehicleId={} could not assign to blockId={}. " +
 						"Therefore vehicle is not predictable.",
@@ -290,6 +316,19 @@ public class DataProcessor {
 			VehicleAtStopInfo atStopInfo = temporalMatch.getAtStop();
 			if (atStopInfo != null) {
 				if (atStopInfo.atEndOfBlock()) {
+					// Log that vehicle is being made unpredictable as a VehicleEvent
+					String eventDescription = "Block assignment " 
+							+ vehicleState.getBlock().getId() 
+							+ " ended for vehicle so it was made unpredictable.";
+					VehicleEvent.create(vehicleState.getAvlReport(), 
+							vehicleState.getMatch(),
+							VehicleEvent.END_OF_BLOCK,
+							eventDescription,
+							false,  // predictable,
+							true,   // becameUnpredictable
+							null);  // supervisor 
+
+					
 					// At end of block assignment so remove it
 					makeVehicleUnpredictableAndRemoveAssignment(
 							vehicleState.getVehicleId());
@@ -319,9 +358,10 @@ public class DataProcessor {
 		// Determine the schedule adherence for the vehicle
 		TemporalDifference scheduleAdherence = 
 				RealTimeSchedAdhProcessor.generate(vehicleState);
-		
+				
 		// Make sure the schedule adherence is reasonable
-		if (scheduleAdherence != null && !scheduleAdherence.isWithinBounds()) { 
+		if (scheduleAdherence != null 
+				&& !scheduleAdherence.isWithinBounds(vehicleState)) {
 			// Schedule adherence not reasonable so match vehicle to assignment
 			// again.
 			matchVehicleToAssignment(vehicleState);
