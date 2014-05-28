@@ -36,7 +36,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,8 +61,7 @@ import net.jcip.annotations.Immutable;
 @Table(name="AvlReports") 
 @org.hibernate.annotations.Table(appliesTo = "AvlReports", 
                                  indexes = { @Index(name="timeIndex", 
-                                                    columnNames={"time"} ) },
-                                 foreignKey = @ForeignKey(name="testForeignKey"))
+                                                    columnNames={"time"} ) })
 public class AvlReport implements Serializable {
 	// vehicleId is an @Id since might get multiple AVL reports
 	// for different vehicles with the same time but need a unique
