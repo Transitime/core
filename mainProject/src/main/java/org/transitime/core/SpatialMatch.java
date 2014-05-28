@@ -347,19 +347,29 @@ public class SpatialMatch {
 	 *         that match is nearby. Returns null if match is not near a stop.
 	 */
 	private VehicleAtStopInfo atStop() {
-		// Determine if just before a stop
-		StopPath path = block.getStopPath(tripIndex, stopPathIndex);		
-		if (getDistanceRemainingInStopPath() < path.getBeforeStopDistance()) {
+		// Determine if just before a stop. Need to look at both how far the
+		// match is ahead of the stop and whether the stop is a layover because
+		// could have a peculiar config (yes, SFMTA again, this time for route
+		// 71) where there is a long path for the first stop, so the distance
+		// of the match to the layover stop might be really far but since
+		// it is a layover stop should consider the match to be at that stop
+		// anyways.
+		StopPath stopPath = block.getStopPath(tripIndex, stopPathIndex);
+		double distanceRemaining = getDistanceRemainingInStopPath();
+		double beforeStopDistance = stopPath.getBeforeStopDistance();
+		if (stopPath.isLayoverStop() 
+				|| distanceRemaining < beforeStopDistance) {
 			// Indeed just before the stop so return the current stop/path index
 			return new VehicleAtStopInfo(block, tripIndex, stopPathIndex);
 		} 
 		
 		// Not just before a stop so see if just after a stop
 		Indices previousPathIndices = getIndices().decrementStopPath();
-		if (!previousPathIndices.beforeBeginningOfBlock()) {
-			StopPath previousPath = previousPathIndices.getStopPath();
-			if (previousPath != null &&
-					getDistanceAlongStopPath() < previousPath.getAfterStopDistance())
+ 		if (!previousPathIndices.beforeBeginningOfBlock()) {
+			StopPath previousStopPath = previousPathIndices.getStopPath();
+			if (previousStopPath != null
+					&& getDistanceAlongStopPath() < 
+						previousStopPath.getAfterStopDistance())
 				return new VehicleAtStopInfo(block,
 						previousPathIndices.getTripIndex(), 
 						previousPathIndices.getStopPathIndex());
