@@ -164,7 +164,6 @@ public class AvlReport implements Serializable {
 	 * Not quite as "final" as one might think. But at least it works.
 	 */
 	protected AvlReport() {
-		// Copy the member values
 		vehicleId = null;
 		time = null;
 		location = null;
