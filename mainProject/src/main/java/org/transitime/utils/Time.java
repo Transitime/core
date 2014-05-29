@@ -258,8 +258,9 @@ public class Time {
 	}
 	
 	/**
-	 * Parses the datetimeStr and returns a Date object.
-	 * Format is "MM-dd-yyyy HH:mm:ss z"
+	 * Parses the datetimeStr and returns a Date object. Format is
+	 * "MM-dd-yyyy HH:mm:ss z". Tries multiple formats including with
+	 * milliseconds and with and without time zones.
 	 * 
 	 * @param datetimeStr
 	 * @return
