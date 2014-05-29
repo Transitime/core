@@ -67,28 +67,32 @@ public abstract class GtfsBaseReader<T> {
 
 	/**
 	 * Constructor. Stores the file name to be used.
+	 * 
 	 * @param dirName
 	 * @param fileName
+	 * @param required
+	 * @param supplemental
 	 */
-	protected GtfsBaseReader(String dirName, String fileName, boolean required, boolean supplemental) {
+	protected GtfsBaseReader(String dirName, String fileName, boolean required,
+			boolean supplemental) {
 		this.fileName = dirName + "/" + fileName;
 		this.required = required;
 		this.supplemental = supplemental;
 	}
 	
 	/**
-	 * Called for every record in file. Must be overridden by subclass
-	 * since an object of the appropriate type needs to be created.
+	 * Called for every record in file. Must be overridden by subclass since an
+	 * object of the appropriate type needs to be created.
+	 * 
 	 * @param record
 	 */
 	abstract protected T handleRecord(CSVRecord record, boolean supplemental)
 		throws ParseException, NumberFormatException;
 	
 	/**
-	 * Parse the GTFS file. Reads in the header info and then
-	 * each line. Calls the abstract handleRecord() method for
-	 * each record. Adds each resulting GTFS object to the 
-	 * _gtfsObjecgts array.
+	 * Parse the GTFS file. Reads in the header info and then each line. Calls
+	 * the abstract handleRecord() method for each record. Adds each resulting
+	 * GTFS object to the gtfsObjecgts array.
 	 */
 	private void parse() {
 		CSVRecord record = null;
@@ -125,7 +129,8 @@ public abstract class GtfsBaseReader<T> {
 			// certain data is missing. Using the '-' character so can
 			// comment out line that starts with "--", which is what is 
 			// used for SQL. 
-			CSVFormat formatter = CSVFormat.DEFAULT.withHeader().withCommentStart('-');
+			CSVFormat formatter = 
+					CSVFormat.DEFAULT.withHeader().withCommentStart('-');
 			
 			// Parse the file
 			Iterable<CSVRecord> records = formatter.parse(in);
@@ -148,14 +153,16 @@ public abstract class GtfsBaseReader<T> {
 				try {
 					gtfsObject = handleRecord(record, supplemental);
 				} catch (ParseException e) {
-					logger.error("ParseException occurred on line {} for filename {} . {}", 
+					logger.error("ParseException occurred on line {} for " +
+							"filename {} . {}", 
 							record.getRecordNumber(), fileName, e.getMessage());
 
 					// Continue even though there was an error so that all errors 
 					// logged at once.					
 					continue;
 				} catch (NumberFormatException e) {
-					logger.error("NumberFormatException occurred on line {} for filename {} . {}", 
+					logger.error("NumberFormatException occurred on line {} " +
+							"for filename {} . {}", 
 							record.getRecordNumber(), fileName, e.getMessage());
 
 					// Continue even though there was an error so that all errors 
@@ -166,16 +173,19 @@ public abstract class GtfsBaseReader<T> {
 				// Add the newly created GTFS object to the object list
 				gtfsObjects.add(gtfsObject);		
 				
-				// Log info if it has been a while. Check only every 20,000 lines
-				// to see if the 10 seconds has gone by. If so, then log number
-				// of lines. By only looking at timer every 20,000 lines not slowing
-				// things down by for every line doing system call for to get current time.
+				// Log info if it has been a while. Check only every 20,000
+				// lines to see if the 10 seconds has gone by. If so, then log
+				// number of lines. By only looking at timer every 20,000 lines
+				// not slowing things down by for every line doing system call 
+				// for to get current time.
 				final int LINES_TO_PROCESS_BEFORE_CHECKING_IF_SHOULD_LOG = 20000;
 				final long SECONDS_ELSAPSED_UNTIL_SHOULD_LOG = 5;
 				if (record.getRecordNumber() >= 
-						lineNumberWhenLogged + LINES_TO_PROCESS_BEFORE_CHECKING_IF_SHOULD_LOG) {
+						lineNumberWhenLogged + 
+							LINES_TO_PROCESS_BEFORE_CHECKING_IF_SHOULD_LOG) {
 					lineNumberWhenLogged = (int) record.getRecordNumber();
-					if (loggingTimer.elapsedMsec() > SECONDS_ELSAPSED_UNTIL_SHOULD_LOG*Time.MS_PER_SEC) {
+					if (loggingTimer.elapsedMsec() > 
+					SECONDS_ELSAPSED_UNTIL_SHOULD_LOG*Time.MS_PER_SEC) {
 						logger.info("  Processed {} lines. Took {} msec...", 
 								lineNumberWhenLogged, timer.elapsedMsec());
 						loggingTimer = new IntervalTimer();
@@ -192,15 +202,18 @@ public abstract class GtfsBaseReader<T> {
 			if (required)
 				logger.error("Required GTFS file {} not found.", fileName);
 			else 
-				logger.info("GTFS file {} not found but OK because this file not required.", fileName);
+				logger.info("GTFS file {} not found but OK because this file "
+						+ "not required.", fileName);
 		} catch (IOException e) {
-			logger.error("IOException occurred when reading in filename {}.", fileName, e);
+			logger.error("IOException occurred when reading in filename {}.", 
+					fileName, e);
 		}
 	}
 	
 	/**
-	 * The way one gets the list of GTFS objects. Uses default
-	 * size for creating ArrayList of 100. 
+	 * The way one gets the list of GTFS objects. Uses default size for creating
+	 * ArrayList of 100.
+	 * 
 	 * @return List of GTFS objects
 	 */
 	public List<T> get() {
@@ -208,10 +221,12 @@ public abstract class GtfsBaseReader<T> {
 	}
 
 	/**
-	 * The way one gets the list of GTFS objects. 
-	 * @param initialSize Initial size of array that returns the objects. For
-	 * when expect a really large array, such as for stop_times then can initialize
-	 * to large value.
+	 * The way one gets the list of GTFS objects.
+	 * 
+	 * @param initialSize
+	 *            Initial size of array that returns the objects. For when
+	 *            expect a really large array, such as for stop_times then can
+	 *            initialize to large value.
 	 * @return List of GTFS objects
 	 */
 	public List<T> get(int initialSize) {
