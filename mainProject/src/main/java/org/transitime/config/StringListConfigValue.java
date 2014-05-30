@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * For specifying a List of Strings parameter that can be read in from xml
  * config file. When parameter set as a command line argument then the
- * ConfigValue.LIST_SEPARATOR is used (":") when need to specify multiple
+ * ConfigValue.LIST_SEPARATOR is used (";") when need to specify multiple
  * items. 
  * 
  * @author SkiBu Smith
