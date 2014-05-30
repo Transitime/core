@@ -632,6 +632,12 @@ public class AvlReport implements Serializable {
 		return heading != null;
 	}
 
+	/**
+	 * Returns the assignment ID if it is set. If it is not set then
+	 * null is returned.
+	 * 
+	 * @return
+	 */
 	public String getAssignmentId() {
 		return assignmentId;
 	}
