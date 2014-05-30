@@ -17,15 +17,17 @@
 package org.transitime.utils;
 
 /**
- * For dealing with the map offset issue in China. All maps have to be offset 
- * in China, a legacy from the cold war. So to properly show stops and shapes 
- * on a map in China need to offset the locations. Code is based on 
- * https://on4wp7.codeplex.com/SourceControl/changeset/view/21455#EvilTransform.cs 
- * as described at the very useful posting at 
- * http://www.sinosplice.com/life/archives/2013/07/16/a-more-complete-ios-solution-to-the-china-gps-offset-problem.
+ * For dealing with the map offset issue in China. All maps have to be offset in
+ * China, a legacy from the cold war. So to properly show stops and shapes on a
+ * map, such as a Google one, for China need to offset the locations. Code is
+ * based on https://on4wp7.codeplex.com/SourceControl/changeset/view/21455#
+ * EvilTransform.cs as described at the very useful posting at
+ * http://www.sinosplice
+ * .com/life/archives/2013/07/16/a-more-complete-ios-solution
+ * -to-the-china-gps-offset-problem.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class ChinaGpsOffset {
 
@@ -60,7 +62,9 @@ public class ChinaGpsOffset {
     }
 
     /**
-     * World Geodetic System ==> Mars Geodetic System.
+     * World Geodetic System ==> Mars Geodetic System. For transforming between
+     * a regular latitude/longitude to values that can be used with a map API
+     * so that the datapoints will be displayed in the correct place on the maps.
      * 
      * @param wgLat
      * @param wgLon
