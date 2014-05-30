@@ -18,6 +18,7 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.utils.csv.CsvBase;
 
 /**
  * A GTFS fare_rules object.
@@ -25,7 +26,7 @@ import org.apache.commons.csv.CSVRecord;
  * @author SkiBu Smith
  *
  */
-public class GtfsFareRule extends GtfsBase {
+public class GtfsFareRule extends CsvBase {
 
 	private final String fareId;
 	private final String routeId;

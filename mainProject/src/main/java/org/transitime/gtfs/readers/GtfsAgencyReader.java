@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsAgency;
+import org.transitime.utils.csv.CsvBaseReader;
 
 
 /**
@@ -28,7 +29,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsAgency;
  * @author SkiBu Smith
  *
  */
-public class GtfsAgencyReader extends GtfsBaseReader<GtfsAgency> {
+public class GtfsAgencyReader extends CsvBaseReader<GtfsAgency> {
 
 	public GtfsAgencyReader(String dirName) {
 		super(dirName, "agency.txt", true, false);

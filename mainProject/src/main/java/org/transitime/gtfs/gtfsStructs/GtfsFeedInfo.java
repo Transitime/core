@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.utils.csv.CsvBase;
 
 
 /**
@@ -28,7 +29,7 @@ import org.apache.commons.csv.CSVRecord;
  * @author SkiBu Smith
  *
  */
-public class GtfsFeedInfo extends GtfsBase {
+public class GtfsFeedInfo extends CsvBase {
 
 	private final String feedPublisherName;
 	private final String feedPublisherUrl;

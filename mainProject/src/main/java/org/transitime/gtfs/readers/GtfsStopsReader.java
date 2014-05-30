@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsStop;
+import org.transitime.utils.csv.CsvBaseReader;
 
 
 /**
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsStop;
  * @author SkiBu Smith
  *
  */
-public class GtfsStopsReader extends GtfsBaseReader<GtfsStop> {
+public class GtfsStopsReader extends CsvBaseReader<GtfsStop> {
 
 	public GtfsStopsReader(String dirName) {
 		super(dirName, "stops.txt", true, false);

@@ -19,6 +19,7 @@ package org.transitime.gtfs.gtfsStructs;
 import net.jcip.annotations.Immutable;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.utils.csv.CsvBase;
 
 
 /**
@@ -32,7 +33,7 @@ import org.apache.commons.csv.CSVRecord;
  * 
  */
 @Immutable
-public class GtfsRoute extends GtfsBase {
+public class GtfsRoute extends CsvBase {
 
 	private final String routeId;
 	private final String agencyId;

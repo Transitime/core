@@ -20,13 +20,14 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsFrequency;
+import org.transitime.utils.csv.CsvBaseReader;
 
 /**
  * GTFS reader for the frequencies.txt file
  * @author SkiBu Smith
  *
  */
-public class GtfsFrequenciesReader extends GtfsBaseReader<GtfsFrequency> {
+public class GtfsFrequenciesReader extends CsvBaseReader<GtfsFrequency> {
 
 	public GtfsFrequenciesReader(String dirName) {
 		super(dirName, "frequencies.txt", false, false);

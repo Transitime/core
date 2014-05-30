@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.gtfs.gtfsStructs;
+package org.transitime.utils.csv;
 
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -26,21 +26,22 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Base class for GTFS struct classes. The main GTFS struct classes must inherit
+ * Base class for CSV struct classes. The main CSV struct classes must inherit
  * from this class. Keeps track of line numbers. Also handles errors when 
- * necessary data is missing in GTFS file.
+ * necessary data is missing in CSV file.
  * 
  * @author SkiBu Smith
  *
  */
-public class GtfsBase {
+public class CsvBase {
 
+	protected final CSVRecord record;
 	protected final int lineNumber;
 	private final String fileName;
 	
 	private final boolean supplementalFileSoSomeRequiredItemsCanBeMissing;
 	
-	// This is the format that dates are in for GTFS. Should
+	// This is the format that dates are in for CSV. Should
 	// share this formatter. Note that it will not be set until
 	// the timezone is known and createDateFormatter() is called.
 	// This is done when the agency.txt file with the timezone is
@@ -48,29 +49,35 @@ public class GtfsBase {
 	protected static SimpleDateFormat dateFormatter = null;
 
 	protected static final Logger logger = 
-			LoggerFactory.getLogger(GtfsBase.class);
+			LoggerFactory.getLogger(CsvBase.class);
 
 	/********************** Member Functions **************************/
 
 	/**
-	 * Main constructor for when creating GTFS object from a GTFS file.
+	 * Main constructor for when creating CSV object from a CSV file.
+	 * 
 	 * @param record
 	 * @param supplementalFile
-	 * @param fileName for logging errors
+	 * @param fileName
+	 *            for logging errors
 	 */
-	protected GtfsBase(CSVRecord record, boolean supplementalFile, String fileName) {
+	protected CsvBase(CSVRecord record, boolean supplementalFile,
+			String fileName) {
+		this.record = record;
 		this.lineNumber = (int) record.getRecordNumber();
 		this.supplementalFileSoSomeRequiredItemsCanBeMissing = supplementalFile;
 		this.fileName = fileName;
 	}
 		
 	/**
-	 * For when creating a new object by combining in supplemental
-	 * object with a regular object or when generating additional
-	 * information that is to be put into GTFS file.
+	 * For when creating a new object by combining in supplemental object with a
+	 * regular object or when generating additional information that is to be
+	 * put into CSV file.
+	 * 
 	 * @param original
 	 */
-	protected GtfsBase(GtfsBase original) {
+	protected CsvBase(CsvBase original) {
+		this.record = original.record;
 		this.lineNumber = original.lineNumber;
 		this.supplementalFileSoSomeRequiredItemsCanBeMissing = 
 				original.supplementalFileSoSomeRequiredItemsCanBeMissing;
@@ -78,9 +85,10 @@ public class GtfsBase {
 	}
 	
 	/**
-	 * Creates the static dateFormatter using the specified timezone.
-	 * The dateFormatter will be null until this method is called when the
-	 * agency timezone is retrieved from the agency.txt GTFS file.
+	 * Creates the static dateFormatter using the specified timezone. The
+	 * dateFormatter will be null until this method is called when the agency
+	 * timezone is retrieved from the agency.txt CSV file.
+	 * 
 	 * @param timezoneName
 	 */
 	protected void createDateFormatter(String timezoneName) {
@@ -90,8 +98,9 @@ public class GtfsBase {
 	}
 	
 	/**
-	 * The line number in GTFS file that the record came from.
-	 * Useful for debugging.
+	 * The line number in CSV file that the record came from. Useful for
+	 * debugging.
+	 * 
 	 * @return
 	 */
 	public int getLineNumber() {
@@ -106,13 +115,13 @@ public class GtfsBase {
 	}
 	
 	/**
-	 * For reading a value that is required in GTFS and is required even if
+	 * For reading a value that is required in CSV and is required even if
 	 * reading in a supplemental file. If data is missing the error is logged.
 	 * 
 	 * @param record
-	 *            The data for the row in the GTFS file
+	 *            The data for the row in the CSV file
 	 * @param name
-	 *            The name of the column in the GTFS file
+	 *            The name of the column in the CSV file
 	 * @return The value, or null if it was not defined
 	 */
 	protected String getRequiredValue(CSVRecord record, String name) {
@@ -121,15 +130,15 @@ public class GtfsBase {
 	}
 	
 	/**
-	 * For reading a value that is required in GTFS, but is not needed if
-	 * reading in a supplemental file that will be combined with a regular GTFS
+	 * For reading a value that is required in CSV, but is not needed if
+	 * reading in a supplemental file that will be combined with a regular CSV
 	 * file. If data is missing and not a supplemental file then error is
 	 * logged.
 	 * 
 	 * @param record
-	 *            The data for the row in the GTFS file
+	 *            The data for the row in the CSV file
 	 * @param name
-	 *            The name of the column in the GTFS file
+	 *            The name of the column in the CSV file
 	 * @return The value, or null if it was not defined
 	 */
 	protected String getRequiredUnlessSupplementalValue(CSVRecord record, String name) {
@@ -138,12 +147,12 @@ public class GtfsBase {
 	}
 	
 	/**
-	 * For reading in a value that is not required in GTFS.
+	 * For reading in a value that is not required in CSV.
 	 * 
 	 * @param record
-	 *            The data for the row in the GTFS file
+	 *            The data for the row in the CSV file
 	 * @param name
-	 *            The name of the column in the GTFS file
+	 *            The name of the column in the CSV file
 	 * @return The value, or null if it was not defined
 	 */
 	protected String getOptionalValue(CSVRecord record, String name) {
@@ -152,14 +161,14 @@ public class GtfsBase {
 	}
 	
 	/**
-	 * For boolean extensions to GTFS, such as whether a stop or route is
+	 * For boolean extensions to CSV, such as whether a stop or route is
 	 * hidden.
 	 * 
 	 * @param record
-	 *            The data for the row in the GTFS file
+	 *            The data for the row in the CSV file
 	 * @param name
-	 *            The name of the column in the GTFS file
-	 * @return true or false if column set in GTFS file. Otherwise null.
+	 *            The name of the column in the CSV file
+	 * @return true or false if column set in CSV file. Otherwise null.
 	 */
 	protected Boolean getOptionalBooleanValue(CSVRecord record, String name) {
 		String booleanStr = getOptionalValue(record, name);
@@ -176,12 +185,12 @@ public class GtfsBase {
 	}
 	
 	/**
-	 * For Integer extensions to GTFS, such as for route order and break time.
+	 * For Integer extensions to CSV, such as for route order and break time.
 	 * 
 	 * @param record
-	 *            The data for the row in the GTFS file
+	 *            The data for the row in the CSV file
 	 * @param name
-	 *            The name of the column in the GTFS file
+	 *            The name of the column in the CSV file
 	 * @return The optional Integer value or null if it is not set or could not
 	 *         be parsed.
 	 */
@@ -202,12 +211,12 @@ public class GtfsBase {
 	}
 	
 	/**
-	 * For Double extensions to GTFS, such as for route max_distance.
+	 * For Double extensions to CSV, such as for route max_distance.
 	 * 
 	 * @param record
-	 *            The data for the row in the GTFS file
+	 *            The data for the row in the CSV file
 	 * @param name
-	 *            The name of the column in the GTFS file
+	 *            The name of the column in the CSV file
 	 * @return The optional Double value or null if it is not set or could not
 	 *         be parsed.
 	 */
@@ -229,7 +238,7 @@ public class GtfsBase {
 	
 	/**
 	 * For reading values from a CSVRecord. If the column was not defined then
-	 * CSVRecord.get() throws an exception. Therefore for optional GTFS columns
+	 * CSVRecord.get() throws an exception. Therefore for optional CSV columns
 	 * better to use this function so don't get exception. This way can continue
 	 * processing and all errors for the data will be logged. Better than just
 	 * logging first error and then quitting.
@@ -239,9 +248,9 @@ public class GtfsBase {
 	 * spaces.
 	 * 
 	 * @param record
-	 *            The data for the row in the GTFS file
+	 *            The data for the row in the CSV file
 	 * @param name
-	 *            The name of the column in the GTFS file
+	 *            The name of the column in the CSV file
 	 * @param required
 	 *            Whether this value is required. If required and the value is
 	 *            not set then an error is logged and null is returned.

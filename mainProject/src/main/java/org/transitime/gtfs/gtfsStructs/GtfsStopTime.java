@@ -18,6 +18,7 @@ package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.utils.Time;
+import org.transitime.utils.csv.CsvBase;
 
 /**
  * A GTFS stop_times object
@@ -25,7 +26,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class GtfsStopTime extends GtfsBase implements Comparable<GtfsStopTime> {
+public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 
 	private final String tripId;
 	// arrivalTimeSecs is in seconds into day. Can be null

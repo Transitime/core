@@ -18,6 +18,7 @@ package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.db.structs.Location;
+import org.transitime.utils.csv.CsvBase;
 
 
 /**
@@ -26,7 +27,7 @@ import org.transitime.db.structs.Location;
  * @author SkiBu Smith
  *
  */
-public class GtfsShape extends GtfsBase implements Comparable<GtfsShape> {
+public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 
 	private final String shapeId;
 	private final double shapePtLat;

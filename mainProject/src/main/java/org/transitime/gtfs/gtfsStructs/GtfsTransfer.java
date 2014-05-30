@@ -18,13 +18,14 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.utils.csv.CsvBase;
 
 /**
  *
  * @author SkiBu Smith
  *
  */
-public class GtfsTransfer extends GtfsBase {
+public class GtfsTransfer extends CsvBase {
 
 	private final String fromStopId;
 	private final String toStopId;

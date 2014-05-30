@@ -17,6 +17,7 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.utils.csv.CsvBase;
 
 /**
  * A GTFS trip object.
@@ -24,7 +25,7 @@ import org.apache.commons.csv.CSVRecord;
  * @author SkiBu Smith
  *
  */
-public class GtfsTrip extends GtfsBase {
+public class GtfsTrip extends CsvBase {
 
 	private final String routeId;
 	private final String serviceId;

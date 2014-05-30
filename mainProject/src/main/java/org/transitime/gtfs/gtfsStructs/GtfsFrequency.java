@@ -19,13 +19,14 @@ package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.utils.Time;
+import org.transitime.utils.csv.CsvBase;
 
 /**
  * A GTFS frequencies object. 
  * @author SkiBu Smith
  *
  */
-public class GtfsFrequency extends GtfsBase {
+public class GtfsFrequency extends CsvBase {
 
 	private final String tripId;
 	private final int startTime;

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.gtfs.readers;
+package org.transitime.utils.csv;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -35,33 +35,33 @@ import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 /**
- * For parsing a GTFS file. Does all of the hard work. This class is
+ * For parsing a CSV file. Does all of the hard work. This class is
  * abstract because it needs to be subclassed to read in specific
- * GTFS file type.
+ * CSV file type.
  * 
  * @author SkiBu Smith
  *
  */
-public abstract class GtfsBaseReader<T> {
+public abstract class CsvBaseReader<T> {
 
-	// Full file name of GTFS file to be read
+	// Full file name of CSV file to be read
 	private final String fileName;
 	
 	// Keeps track whether this file is required or not as per
-	// the GTFS spec. 
+	// the CSV spec. 
 	private final boolean required;
 	
 	// Whether file is a supplemental one or not. For supplemental
-	// files some of elements specified as required in the GTFS
+	// files some of elements specified as required in the CSV
 	// spec can actually be missing since the data from supplemental
 	// file is going to be combined with the main file.
 	private final boolean supplemental;
 	
-	// The GTFS objects read from the file
+	// The CSV objects read from the file
 	protected List<T> gtfsObjects;
 
 	protected static final Logger logger = 
-			LoggerFactory.getLogger(GtfsBaseReader.class);
+			LoggerFactory.getLogger(CsvBaseReader.class);
 
 	/********************** Member Functions **************************/
 
@@ -73,11 +73,23 @@ public abstract class GtfsBaseReader<T> {
 	 * @param required
 	 * @param supplemental
 	 */
-	protected GtfsBaseReader(String dirName, String fileName, boolean required,
+	protected CsvBaseReader(String dirName, String fileName, boolean required,
 			boolean supplemental) {
 		this.fileName = dirName + "/" + fileName;
 		this.required = required;
 		this.supplemental = supplemental;
+	}
+	
+	/**
+	 * Constructor with fewer params. More useful for non-CSV files. 
+	 * Sets required to true and supplemental to false.
+	 * 
+	 * @param fileName
+	 */
+	protected CsvBaseReader(String fileName) {
+		this.fileName = fileName;
+		this.required = true;
+		this.supplemental = false;
 	}
 	
 	/**
@@ -90,9 +102,9 @@ public abstract class GtfsBaseReader<T> {
 		throws ParseException, NumberFormatException;
 	
 	/**
-	 * Parse the GTFS file. Reads in the header info and then each line. Calls
+	 * Parse the CSV file. Reads in the header info and then each line. Calls
 	 * the abstract handleRecord() method for each record. Adds each resulting
-	 * GTFS object to the gtfsObjecgts array.
+	 * CSV object to the gtfsObjecgts array.
 	 */
 	private void parse() {
 		CSVRecord record = null;
@@ -148,7 +160,7 @@ public abstract class GtfsBaseReader<T> {
 				record = iterator.next();
 				
 				// Process the record using appropriate handler
-				// and create the corresponding GTFS object
+				// and create the corresponding CSV object
 				T gtfsObject;
 				try {
 					gtfsObject = handleRecord(record, supplemental);
@@ -170,7 +182,7 @@ public abstract class GtfsBaseReader<T> {
 					continue;
 				}
 				
-				// Add the newly created GTFS object to the object list
+				// Add the newly created CSV object to the object list
 				gtfsObjects.add(gtfsObject);		
 				
 				// Log info if it has been a while. Check only every 20,000
@@ -200,9 +212,9 @@ public abstract class GtfsBaseReader<T> {
 					fileName, timer.elapsedMsec());
 		} catch (FileNotFoundException e) {
 			if (required)
-				logger.error("Required GTFS file {} not found.", fileName);
+				logger.error("Required CSV file {} not found.", fileName);
 			else 
-				logger.info("GTFS file {} not found but OK because this file "
+				logger.info("CSV file {} not found but OK because this file "
 						+ "not required.", fileName);
 		} catch (IOException e) {
 			logger.error("IOException occurred when reading in filename {}.", 
@@ -211,23 +223,23 @@ public abstract class GtfsBaseReader<T> {
 	}
 	
 	/**
-	 * The way one gets the list of GTFS objects. Uses default size for creating
+	 * The way one gets the list of CSV objects. Uses default size for creating
 	 * ArrayList of 100.
 	 * 
-	 * @return List of GTFS objects
+	 * @return List of CSV objects
 	 */
 	public List<T> get() {
 		return get(100);
 	}
 
 	/**
-	 * The way one gets the list of GTFS objects.
+	 * The way one gets the list of CSV objects.
 	 * 
 	 * @param initialSize
 	 *            Initial size of array that returns the objects. For when
 	 *            expect a really large array, such as for stop_times then can
 	 *            initialize to large value.
-	 * @return List of GTFS objects
+	 * @return List of CSV objects
 	 */
 	public List<T> get(int initialSize) {
 		gtfsObjects = new ArrayList<T>(initialSize);

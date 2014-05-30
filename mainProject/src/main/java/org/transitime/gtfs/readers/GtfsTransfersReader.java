@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsTransfer;
+import org.transitime.utils.csv.CsvBaseReader;
 
 
 /**
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsTransfer;
  * @author SkiBu Smith
  *
  */
-public class GtfsTransfersReader extends GtfsBaseReader<GtfsTransfer> {
+public class GtfsTransfersReader extends CsvBaseReader<GtfsTransfer> {
 
 	public GtfsTransfersReader(String dirName) {
 		super(dirName, "transfers.txt", false, false);

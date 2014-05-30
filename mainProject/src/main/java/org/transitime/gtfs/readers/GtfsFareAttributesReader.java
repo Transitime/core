@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsFareAttribute;
+import org.transitime.utils.csv.CsvBaseReader;
 
 
 /**
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsFareAttribute;
  * @author SkiBu Smith
  *
  */
-public class GtfsFareAttributesReader extends GtfsBaseReader<GtfsFareAttribute> {
+public class GtfsFareAttributesReader extends CsvBaseReader<GtfsFareAttribute> {
 
 	public GtfsFareAttributesReader(String dirName) {
 		super(dirName, "fare_attributes.txt", false, false);

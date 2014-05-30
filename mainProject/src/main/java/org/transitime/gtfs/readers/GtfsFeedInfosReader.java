@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsFeedInfo;
+import org.transitime.utils.csv.CsvBaseReader;
 
 /**
  * GTFS reader for the feed_info.txt file
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsFeedInfo;
  * @author SkiBu Smith
  *
  */
-public class GtfsFeedInfosReader extends GtfsBaseReader<GtfsFeedInfo> {
+public class GtfsFeedInfosReader extends CsvBaseReader<GtfsFeedInfo> {
 
 	public GtfsFeedInfosReader(String dirName) {
 		super(dirName, "feed_info.txt", false, false);

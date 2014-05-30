@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsShape;
+import org.transitime.utils.csv.CsvBaseReader;
 
 
 /**
@@ -28,7 +29,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsShape;
  * @author SkiBu Smith
  *
  */
-public class GtfsShapesReader extends GtfsBaseReader<GtfsShape> {
+public class GtfsShapesReader extends CsvBaseReader<GtfsShape> {
 
 	public GtfsShapesReader(String dirName) {
 		super(dirName, "shapes.txt", false, false);

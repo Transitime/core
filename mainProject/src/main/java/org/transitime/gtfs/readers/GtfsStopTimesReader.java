@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
+import org.transitime.utils.csv.CsvBaseReader;
 
 /**
  * GTFS reader for the stop_times.txt file
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
  * @author SkiBu Smith
  *
  */
-public class GtfsStopTimesReader extends GtfsBaseReader<GtfsStopTime> {
+public class GtfsStopTimesReader extends CsvBaseReader<GtfsStopTime> {
 
 	public GtfsStopTimesReader(String dirName) {
 		super(dirName, "stop_times.txt", true, false);

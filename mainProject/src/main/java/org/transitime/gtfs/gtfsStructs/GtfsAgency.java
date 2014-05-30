@@ -18,13 +18,14 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.utils.csv.CsvBase;
 
 /**
  *
  * @author SkiBu Smith
  *
  */
-public class GtfsAgency extends GtfsBase {
+public class GtfsAgency extends CsvBase {
 
 	private final String agencyId;
 	private final String agencyName;

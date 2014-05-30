@@ -22,6 +22,7 @@ import java.util.Date;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.utils.Time;
+import org.transitime.utils.csv.CsvBase;
 
 
 /**
@@ -29,7 +30,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-public class GtfsCalendar extends GtfsBase {
+public class GtfsCalendar extends CsvBase {
 
 	private final String serviceId;
 	private final String monday;

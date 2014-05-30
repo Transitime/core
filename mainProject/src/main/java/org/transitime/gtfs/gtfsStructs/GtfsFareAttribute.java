@@ -18,13 +18,14 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.utils.csv.CsvBase;
 
 /**
  * A GTFS fare_attributes object.
  * @author SkiBu Smith
  *
  */
-public class GtfsFareAttribute extends GtfsBase {
+public class GtfsFareAttribute extends CsvBase {
 
 	private final String fareId;
 	private final float price;

@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsRoute;
+import org.transitime.utils.csv.CsvBaseReader;
 
 /**
  * GTFS reader for the route.txt file
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsRoute;
  * @author SkiBu Smith
  *
  */
-public class GtfsRoutesReader extends GtfsBaseReader<GtfsRoute> {
+public class GtfsRoutesReader extends CsvBaseReader<GtfsRoute> {
 
 	public GtfsRoutesReader(String dirName) {
 		super(dirName, "routes.txt", true, false);

@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsFareRule;
+import org.transitime.utils.csv.CsvBaseReader;
 
 /**
  * GTFS reader for the fare_rules.txt file
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsFareRule;
  * @author SkiBu Smith
  *
  */
-public class GtfsFareRulesReader extends GtfsBaseReader<GtfsFareRule> {
+public class GtfsFareRulesReader extends CsvBaseReader<GtfsFareRule> {
 
 	public GtfsFareRulesReader(String dirName) {
 		super(dirName, "fare_rules.txt", false, false);

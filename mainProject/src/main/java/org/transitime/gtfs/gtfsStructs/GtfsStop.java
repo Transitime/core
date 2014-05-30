@@ -17,6 +17,7 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.utils.csv.CsvBase;
 
 /**
  * A GTFS stops object.
@@ -28,7 +29,7 @@ import org.apache.commons.csv.CSVRecord;
  * @author SkiBu Smith
  *
  */
-public class GtfsStop extends GtfsBase {
+public class GtfsStop extends CsvBase {
 
 	private final String stopId;
 	private final Integer stopCode;

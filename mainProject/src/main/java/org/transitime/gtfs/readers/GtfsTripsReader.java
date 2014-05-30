@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsTrip;
+import org.transitime.utils.csv.CsvBaseReader;
 
 /**
  * GTFS reader for the trips.txt file
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsTrip;
  * @author SkiBu Smith
  *
  */
-public class GtfsTripsReader extends GtfsBaseReader<GtfsTrip> {
+public class GtfsTripsReader extends CsvBaseReader<GtfsTrip> {
 
 	public GtfsTripsReader(String dirName) {
 		super(dirName, "trips.txt", true, false);

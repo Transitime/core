@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsCalendarDate;
+import org.transitime.utils.csv.CsvBaseReader;
 
 /**
  * GTFS reader for the calendar_dates.txt file
@@ -27,7 +28,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsCalendarDate;
  * @author SkiBu Smith
  *
  */
-public class GtfsCalendarDatesReader extends GtfsBaseReader<GtfsCalendarDate> {
+public class GtfsCalendarDatesReader extends CsvBaseReader<GtfsCalendarDate> {
 
 	public GtfsCalendarDatesReader(String dirName) {
 		super(dirName, "calendar_dates.txt", false, false);

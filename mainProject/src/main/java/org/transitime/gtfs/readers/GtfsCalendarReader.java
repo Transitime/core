@@ -20,13 +20,14 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsCalendar;
+import org.transitime.utils.csv.CsvBaseReader;
 
 /**
  *
  * @author SkiBu Smith
  *
  */
-public class GtfsCalendarReader extends GtfsBaseReader<GtfsCalendar> {
+public class GtfsCalendarReader extends CsvBaseReader<GtfsCalendar> {
 
 	public GtfsCalendarReader(String dirName) {
 		super(dirName, "calendar.txt", true, false);
