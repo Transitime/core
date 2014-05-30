@@ -22,8 +22,10 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.utils.ChinaGpsOffset;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
+import org.transitime.utils.ChinaGpsOffset.LatLon;
 import org.transitime.utils.csv.CsvWriterBase;
 
 /**
@@ -64,7 +66,7 @@ public class AvlCsvWriter extends CsvWriterBase {
 	@Override
 	protected void writeHeader() throws IOException {
 	    // Write the header
-	    writer.append("vehicleId,time,latitude,longitude,speed,heading," +
+	    writer.append("vehicleId,time,justTime,latitude,longitude,speed,heading," +
 	    		"assignmentId,assignmentType\n");		
 	}
 
@@ -72,8 +74,12 @@ public class AvlCsvWriter extends CsvWriterBase {
 	 * Appends an AvlReport to the CSV file.
 	 * 
 	 * @param avlReport
+	 *            The AvlReport to be appended to the CSV file
+	 * @param transformForChinaMap
+	 *            If true then will convert lat/lon so that can be displayed on
+	 *            map of China.
 	 */
-	public void write(AvlReport avlReport) {
+	public void write(AvlReport avlReport, boolean transformForChinaMap) {
 		try {
 			// Write out the GtfsShape
 			append(avlReport.getVehicleId());
@@ -83,10 +89,21 @@ public class AvlCsvWriter extends CsvWriterBase {
 					avlReport.getTime()));
 			append(',');
 			
-			append(Geo.format(avlReport.getLat()));
+			append(timeUsingTimeZone.timeStrForTimezone(avlReport.getTime()));
 			append(',');
 			
-			append(Geo.format(avlReport.getLon()));
+			// Determine lat/lon. Offset for use in map of China if necessary.
+			double lat = avlReport.getLat();
+			double lon = avlReport.getLon();
+			if (transformForChinaMap) {
+				LatLon offsetLatLon = ChinaGpsOffset.transform(lat, lon);
+				lat = offsetLatLon.getLat();
+				lon = offsetLatLon.getLon();				
+			}
+			append(Geo.format(lat));
+			append(',');
+			
+			append(Geo.format(lon));
 			append(',');
 			
 			if (!Float.isNaN(avlReport.getSpeed()))
