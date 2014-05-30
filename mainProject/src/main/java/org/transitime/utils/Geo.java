@@ -73,6 +73,18 @@ public class Geo {
 	}
 
 	/**
+	 * Outputs arg with just a single digit. No other formatting is done.
+	 * Useful when want to output speed or heading but don't want to
+	 * include units.
+	 * 
+	 * @param arg
+	 * @return
+	 */
+	public static String oneDigitFormat(float arg) {
+		return oneDigitFormat.format(arg);
+	}
+	
+	/**
 	 * Outputs heading in degrees with just a single digit past the
 	 * decimal point. Appends "deg" to indicate units.
 	 * 
