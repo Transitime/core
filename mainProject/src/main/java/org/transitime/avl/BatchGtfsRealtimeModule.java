@@ -25,9 +25,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.StringConfigValue;
 import org.transitime.core.DataProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Location;
+import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
 import org.transitime.modules.Module;
 import org.transitime.utils.Time;
 
@@ -53,6 +55,14 @@ public class BatchGtfsRealtimeModule extends Module {
 
 	private static final Logger logger = 
 			LoggerFactory.getLogger(BatchGtfsRealtimeModule.class);
+
+	/*********** Configurable Parameters for this module ***********/
+	public static String getGtfsRealtimeURI() {
+		return gtfsRealtimeURI.getValue();
+	}
+	private static StringConfigValue gtfsRealtimeURI =
+			new StringConfigValue("transitime.avl.gtfsRealtimeFeedURI", 
+					"file:///C:/Users/Mike/gtfsRealtimeData");
 
 	/********************** Member Functions **************************/
 
@@ -115,7 +125,8 @@ public class BatchGtfsRealtimeModule extends Module {
 	 */
 	@Override
 	public void run() {
-		List<AvlReport> avlReports = GtfsRealtimeModule.getAvlReports();
+		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
+				.getAvlReports(getGtfsRealtimeURI());
 		
 		// Zhengzhou had trouble providing valid GPS reports so this method
 		// can be used to log debugging info and to filter out reports that
