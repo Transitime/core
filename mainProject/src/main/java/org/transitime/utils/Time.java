@@ -291,7 +291,8 @@ public class Time {
 			return date;
 		} catch (ParseException e) {}
 		
-		// As last resort try the default syntax
+		// As last resort try the default syntax. Will throw a ParseException
+		// if can't parse.
 		return new SimpleDateFormat().parse(datetimeStr);
 	}
 	
