@@ -568,7 +568,8 @@ public class AvlReport implements Serializable {
 	}
 	
 	/**
-	 * @return Speed of vehicle in meters per second.
+	 * @return Speed of vehicle in meters per second. Returns Float.NaN if speed
+	 *         is not valid.
 	 */
 	public float getSpeed() {
 		return speed==null? Float.NaN : speed;
