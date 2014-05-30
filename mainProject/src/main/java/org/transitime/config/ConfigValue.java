@@ -38,7 +38,8 @@ public abstract class ConfigValue<T> {
 	// Name of the param. Also used as Java property name (e.g. -Dtransitime.limit 2)
 	protected final String id;
 	
-	// Value to use if not specified in config file
+	// Value to use if not specified in config file. Null means no default is
+	// available, which means that null can't be used as a default.
 	protected final T defaultValue;
 	
 	// The current value
