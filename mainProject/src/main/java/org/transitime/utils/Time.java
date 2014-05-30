@@ -83,6 +83,8 @@ public class Time {
 	// timezone via a Time object.
 	private final DateFormat readableDateFormat24MsecForTimeZone =
 			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
+	private final DateFormat readableTimeFormatForTimeZone =
+			new SimpleDateFormat("HH:mm:ss");
 	
 	// So can output headings and such with a consistent number of decimal places
 	private static final DecimalFormat oneDigitFormat = new DecimalFormat("0.0");
@@ -110,7 +112,7 @@ public class Time {
 		this.calendar = new GregorianCalendar(timeZone);
 		
 		readableDateFormat24MsecForTimeZone.setCalendar(this.calendar);
-
+		readableTimeFormatForTimeZone.setCalendar(this.calendar);
 	}
 	
 	/**
@@ -493,6 +495,10 @@ public class Time {
 	 */
 	public String dateTimeStrMsecForTimezone(long epochTime) {
 		return readableDateFormat24MsecForTimeZone.format(epochTime);
+	}
+	
+	public String timeStrForTimezone(long epochTime) {
+		return readableTimeFormatForTimeZone.format(epochTime);
 	}
 	
 	/**
