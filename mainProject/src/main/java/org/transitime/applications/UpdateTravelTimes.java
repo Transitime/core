@@ -273,17 +273,18 @@ public class UpdateTravelTimes {
 	}
 	
 	/**
+	 * First arg specifies both the start and end date.
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// Determine the parameters
-		// FIXME These are hard coded simply to get things going
 		String projectId = CoreConfig.getProjectId();
 		
-		String startDateStr = "5-23-2014";
-		String endDateStr = "5-23-14";
-		double maxTravelTimeSegmentLength = 120.0;
+		String startDateStr = args[0];
+		String endDateStr = args[0];
 		
+		// FIXME These couple of params are hard coded simply to get things going
+		double maxTravelTimeSegmentLength = 120.0;		
 		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();
 		specialDaysOfWeek.add(java.util.Calendar.FRIDAY);
 		
