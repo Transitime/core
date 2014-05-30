@@ -79,6 +79,11 @@ public class Time {
 	private static final DateFormat timeFormat24MsecNoTimeZone =
 			new SimpleDateFormat("HH:mm:ss.SSS");
 
+	// Note that this one is not static. It is for when need to include
+	// timezone via a Time object.
+	private final DateFormat readableDateFormat24MsecForTimeZone =
+			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
+	
 	// So can output headings and such with a consistent number of decimal places
 	private static final DecimalFormat oneDigitFormat = new DecimalFormat("0.0");
 
@@ -96,11 +101,16 @@ public class Time {
 	 * frequently call members such as getSecondsIntoDay() that need an
 	 * expensive calendar object.
 	 * 
-	 * @param timezoneStr Such as "America/Los_Angeles"
+	 * @param timeZoneStr
+	 *            Such as "America/Los_Angeles" . List of time zones can be found
+	 *            at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 	 */
-	public Time(String timezoneStr) {
-		TimeZone timeZone = TimeZone.getTimeZone(timezoneStr);
+	public Time(String timeZoneStr) {
+		TimeZone timeZone = TimeZone.getTimeZone(timeZoneStr);
 		this.calendar = new GregorianCalendar(timeZone);
+		
+		readableDateFormat24MsecForTimeZone.setCalendar(this.calendar);
+
 	}
 	
 	/**
@@ -472,6 +482,17 @@ public class Time {
 	 */
 	public static String dateTimeStrMsec(long epochTime) {
 		return readableDateFormat24Msec.format(epochTime);
+	}
+	
+	/**
+	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss.SSS z
+	 * but does so for the Timezone specified by this Time object.
+	 * 
+	 * @param epochTime
+	 * @return
+	 */
+	public String dateTimeStrMsecForTimezone(long epochTime) {
+		return readableDateFormat24MsecForTimeZone.format(epochTime);
 	}
 	
 	/**
