@@ -164,7 +164,7 @@
       <fileNamePattern>${LOG_FILE_ROOT}/avl.log.gz</fileNamePattern>
     </rollingPolicy>
     <encoder>
-      <pattern>${DATA_PATTERN}</pattern>
+      <pattern>${DEFAULT_PATTERN}</pattern>
     </encoder>
   </appender>
 
