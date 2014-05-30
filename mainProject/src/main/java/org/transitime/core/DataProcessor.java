@@ -21,6 +21,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.transitime.applications.Core;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
@@ -382,7 +383,8 @@ public class DataProcessor {
 	/**
 	 * Processes the AVL report by matching to the assignment and
 	 * generating predictions and such. Sets VehicleState for the
-	 * vehicle based on the results.
+	 * vehicle based on the results. Also stores AVL report into
+	 * the database (if not in playback mode).
 	 * 
 	 * @param avlReport
 	 */
@@ -391,6 +393,14 @@ public class DataProcessor {
 		// in processing data so log it as info.
 		logger.info("====================================================" +
 				"DataProcessor processing {}", avlReport);		
+		
+		// Record when the AvlReport was actually processed. This is done here so
+		// that the value will be set when the avlReport is stored in the database
+		// using the DbLogger.
+		avlReport.setTimeProcessed();
+
+		// Store the AVL report into the database
+		Core.getInstance().getDbLogger().add(avlReport);
 		
 		// If any vehicles have timed out then handle them. This is done
 		// here instead of using a regular timer so that it will work

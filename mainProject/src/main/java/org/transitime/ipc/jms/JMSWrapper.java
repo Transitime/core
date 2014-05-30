@@ -88,9 +88,6 @@ public class JMSWrapper {
 	private Connection connection;
 	private Session session;
 	
-	// The singleton since only need a single JMSWrapper object.
-	private static JMSWrapper sharedWrapper = null;
-
 	private static final Logger logger= 
 			LoggerFactory.getLogger(JMSWrapper.class);
 	
@@ -135,17 +132,19 @@ public class JMSWrapper {
 	}
 	
 	/**
-	 * Creating a JMSWrapper is a heavyweight operation. Also, only 
-	 * need a single JMSWrapper for the application. This method
-	 * is a factory method that provides the singleton JMSWrapper.
+	 * Creating a JMSWrapper is a heavyweight operation. Therefore initially
+	 * tried making this class a singleton and reusing the JMSWrapper. But then
+	 * was using it in different threads because have separate threads for
+	 * producer and consumer. Therefore changed so this method always returns a
+	 * new JMSWrapper.
+	 * 
 	 * @return
 	 * @throws JMSException
 	 * @throws NamingException
 	 */
-	public static JMSWrapper getJMSWrapper() throws JMSException, NamingException {
-		if (sharedWrapper == null)
-			sharedWrapper = new JMSWrapper();
-		return sharedWrapper;
+	public static JMSWrapper getJMSWrapper() 
+			throws JMSException, NamingException {
+		return new JMSWrapper();
 	}
 	
 	/**

@@ -1,4 +1,4 @@
-/* 
+/*
  * This file is part of Transitime.org
  * 
  * Transitime.org is free software: you can redistribute it and/or modify
@@ -15,14 +15,32 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.transitime.avl;
+
+import java.text.ParseException;
+
+import org.apache.commons.csv.CSVRecord;
+import org.transitime.db.structs.AvlReport;
+import org.transitime.utils.csv.CsvBaseReader;
+
 /**
- * For reading in a GTFS file in CSV format. 
- * <p>
- * Note: CsvBaseReader specifies that a line is a comment if it
- * starts with '-' character. This means can comment out lines by
- * starting them with "--", as with SQL. 
- * 
+ * For reading in AVL data from a CSV file.
+ *
  * @author SkiBu Smith
  *
  */
-package org.transitime.gtfs.readers;
+public class AvlCsvReader extends CsvBaseReader<AvlReport> {
+
+	/********************** Member Functions **************************/
+
+	public AvlCsvReader(String fileName) {
+		super(fileName);
+	}
+
+	@Override
+	public AvlReport handleRecord(CSVRecord record, boolean supplemental) 
+		throws ParseException {
+		return AvlCsvRecord.getAvlReport(record, getFileName());
+	}
+
+}

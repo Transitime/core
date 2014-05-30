@@ -26,6 +26,7 @@ import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AvlConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.jms.JMSWrapper;
 import org.transitime.modules.Module;
@@ -39,7 +40,7 @@ import org.transitime.utils.threading.NamedThreadFactory;
  * 
  * @author SkiBu Smith
  */
-public class AvlJmsClient extends Module {
+public class AvlJmsClientModule extends Module {
 	private final static int MAX_THREADS = 100;
 
 	private MessageConsumer msgConsumer;
@@ -47,89 +48,51 @@ public class AvlJmsClient extends Module {
 	private final BoundedExecutor avlClientExecutor;
 	
 	private static final Logger logger = 
-			LoggerFactory.getLogger(AvlJmsClient.class);	
+			LoggerFactory.getLogger(AvlJmsClientModule.class);	
 
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructor made private because it should only be called by start()
-	 * since caller doesn't need access to object.
+	 * Constructor. start() needs to be run to actually start the thing.
 	 * 
 	 * @param projectId
 	 *            Specifies name of JMS topic to read AVL data from. Topic name
 	 *            is clientName + "-AVLTopic".
-	 * @param maxAVLQueueSize
-	 *            How large the AVL queue can be before will block inserting
-	 *            additional reports from the JMS feed.
-	 * @param numberThreads
-	 *            How many threads to be used to simultaneous process the AVL
-	 *            data by AVLCients. For systems that receive a very high volume
-	 *            of data using multiple threads allows a server to be more
-	 *            fully utilized. This is especially true if the processing of
-	 *            the AVL data takes a lot of IO time or is simply
-	 *            computationally expensive. Must be between 1 and MAX_THREADS.
 	 * 
 	 * @throws NamingException
 	 * @throws JMSException
 	 */
-	private AvlJmsClient(final String projectId, int maxAVLQueueSize, int numberThreads) 
-			throws JMSException, NamingException {
+	public AvlJmsClientModule(String projectId) throws JMSException, NamingException {
 		super(projectId);
 		
-		logger.info("Starting AvlClient for projectId={} with maxAVLQueueSize={} and numberThreads={}", 
-				projectId, maxAVLQueueSize, numberThreads);
+		int maxAVLQueueSize = AvlConfig.getAvlQueueSize();
+		int numberThreads = AvlConfig.getNumAvlThreads();
 		
+		logger.info("Starting AvlClient for projectId={} with "
+				+ "maxAVLQueueSize={} and numberThreads={}", projectId,
+				maxAVLQueueSize, numberThreads);
+
 		// Make sure that numberThreads is reasonable
 		if (numberThreads < 1) {
-			logger.error("Number of threads must be at least 1 but " + numberThreads +
-					" was specified. Therefore using 1 thread.");
+			logger.error("Number of threads must be at least 1 but {} was "
+					+ "specified. Therefore using 1 thread.", numberThreads);
 			numberThreads = 1;
 		}
 		if (numberThreads > MAX_THREADS) {
-			logger.error("Number of threads must be no greater than " + MAX_THREADS + 
-					" but " + numberThreads + " was specified. Therefore using " +
-					MAX_THREADS + " threads.");
+			logger.error("Number of threads must be no greater than {} but "
+					+ "{} was specified. Therefore using {} threads.",
+					MAX_THREADS, numberThreads, MAX_THREADS);
 			numberThreads = MAX_THREADS;
 		}
-		
-		// Create the executor that actually processes the AVL data 
-		NamedThreadFactory avlClientThreadFactory = new NamedThreadFactory("avlClient");
-		Executor executor = Executors.newFixedThreadPool(numberThreads, avlClientThreadFactory);
+
+		// Create the executor that actually processes the AVL data
+		NamedThreadFactory avlClientThreadFactory = new NamedThreadFactory(
+				"avlClient");
+		Executor executor = Executors.newFixedThreadPool(numberThreads,
+				avlClientThreadFactory);
 		avlClientExecutor = new BoundedExecutor(executor, maxAVLQueueSize);
 	}
-	
-	/**
-	 * Initiates the processing of the AVL data in separate threads.
-	 * 
-	 * @param clientName
-	 *            Specifies name of JMS topic to read AVL data from. Topic name
-	 *            is clientName + "-AVLTopic".
-	 * @param maxAVLQueueSize
-	 *            How large the AVL queue can be before will block inserting
-	 *            additional reports from the JMS feed.
-	 * @param numberThreads
-	 *            How many threads to be used to simultaneous process the AVL
-	 *            data by AVLCients. For systems that receive a very high volume
-	 *            of data using multiple threads allows a server to be more
-	 *            fully utilized. This is especially true if the processing of
-	 *            the AVL data takes a lot of IO time or is simply
-	 *            computationally expensive. Must be between 1 and MAX_THREADS.
-	 * 
-	 * @throws NamingException
-	 * @throws JMSException
-	 */
-	public static void start(final String clientName, final int maxAVLQueueSize, 
-			final int numberThreads) 
-			throws JMSException, NamingException{
-		AvlJmsClient avlJmsClient = 
-				new AvlJmsClient(clientName, maxAVLQueueSize, numberThreads);
-		// Spawn the single thread that will read the AVL data from the JMS topic.
-		// This is done here in start() instead of in the constructor because don't
-		// want the constructor to call execute(this) since that would "leak"
-		// the object before it was fully constructed.
-		avlJmsClient.start();
-	}
-	
+		
 	/**
 	 * Returns the name of the JMS topic to be used for the AVL feed.
 	 * @param projectId Topic name is clientName + "-AVLTopic".
@@ -241,18 +204,4 @@ public class AvlJmsClient extends Module {
 		}
 	}
 	 
-	/**
-	 * Just for testing.
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		try {
-			new AvlJmsClient("testAVLFeed", 100, 3);
-		} catch (JMSException e) {
-			e.printStackTrace();
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
-	}
-
 }

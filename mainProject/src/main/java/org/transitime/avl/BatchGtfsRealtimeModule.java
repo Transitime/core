@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.core.DataProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Location;
@@ -36,6 +37,10 @@ import org.transitime.utils.Time;
  * read data. This module was created for the World Bank project so that 
  * could determine actual arrival times based on batched GPS data and then
  * output more accurate schedule times for the GTFS stop_times.txt file.
+ * <p>
+ * The AVL data is processed directly by this class by it calling
+ * DataProcessor.processAvlReport(avlReport). The messages do not go through
+ * the JMS server and JMS server does not need to be running.
  * <p>
  * Note: the URL for the GTFS-realtime feed is obtained in GtfsRealtimeModule
  * from CoreConfig.getGtfsRealtimeURI(). This means it can be set in the
@@ -102,7 +107,10 @@ public class BatchGtfsRealtimeModule extends Module {
 		return zhengzhouAvlReports;		
 	}
 	
-	/* (non-Javadoc)
+	/* 
+	 * Reads in AVL reports from GTFS-realtime file and processes them.
+	 * 
+	 * (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
@@ -117,7 +125,11 @@ public class BatchGtfsRealtimeModule extends Module {
 		
 		// Process the AVL Reports read in.
 		for (AvlReport avlReport : avlReports) {
-			logger.debug("Processing avlReport={}", avlReport);
+			logger.info("Processing avlReport={}", avlReport);
+			
+			// Update the Core SystemTime to use this AVL time
+			Core.getInstance().setSystemTime(avlReport.getTime());
+
 			DataProcessor.getInstance().processAvlReport(avlReport);
 		}
 		

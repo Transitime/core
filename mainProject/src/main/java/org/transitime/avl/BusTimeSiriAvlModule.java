@@ -170,7 +170,7 @@ public class BusTimeSiriAvlModule extends XmlPollingAvlModule {
 				AvlReport avlReport = new AvlReport(vehicleId, gpsEpochTime, lat, lon, speed, heading);
 				avlReport.setAssignment(block, AssignmentType.BLOCK_ID);
 				
-				writeAvlReportToJms(avlReport);
+				processAvlReport(avlReport);
 			}
 		}
 		

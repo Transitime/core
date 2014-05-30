@@ -20,8 +20,8 @@ import javax.jms.JMSException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.applications.Core;
 import org.transitime.configData.AvlConfig;
+import org.transitime.core.DataProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.jms.JMSWrapper;
 import org.transitime.ipc.jms.RestartableMessageProducer;
@@ -40,8 +40,7 @@ import org.transitime.utils.Time;
  */
 public abstract class AvlModule extends Module {
 	// For writing the AVL data to the JMS topic
-	protected JMSWrapper jmsWrapper = null;
-	protected RestartableMessageProducer msgProducer = null; 
+	protected RestartableMessageProducer jmsMsgProducer = null; 
 
 	private static final Logger logger= 
 			LoggerFactory.getLogger(AvlModule.class);	
@@ -52,35 +51,32 @@ public abstract class AvlModule extends Module {
 	 * @param projectId
 	 */
 	protected AvlModule(String projectId) {
-		super(projectId);
-		
-		// Create the MessageProducer that the AVL data can be written to
-		try {
-			jmsWrapper = JMSWrapper.getJMSWrapper();
-			String jmsTopicName = AvlJmsClient.getTopicName(projectId);
-			msgProducer = jmsWrapper.createTopicProducer(jmsTopicName);
-		} catch (Exception e) {
-			logger.error("Problem when setting up JMSWrapper for the AVL feed", e);			
-		}
-	}
-
-	/**
-	 * Calls the Module.start() method, but only if not in playback mode
-	 */
-	public void start() {
-		// If in playback mode then will be getting avl data from db.
-		// Therefore shouldn't be running AVL feed.
-		if (Core.inPlaybackMode()) {
-			logger.info("In playback mode so not running module {} for projectId={}", 
-					getClass().getName(), getProjectId());
-			return;
-		}
-		
-		super.start();
+		super(projectId);		
 	}
 	
 	/**
-	 * Actually reads data from feed and writes it to JMS topic.
+	 * Initializes JMS if need be. Needs to be done from same thread that
+	 * JMS is written to. Otherwise get concurrency error. 
+	 */
+	private void initializeJmsIfNeedTo() {
+		// If JMS already initialized then can return
+		if (jmsMsgProducer != null)
+			return;
+		
+		// JMS not already initialized so create the MessageProducer 
+		// that the AVL data can be written to
+		try {
+			String jmsTopicName = AvlJmsClientModule.getTopicName(projectId);
+			JMSWrapper jmsWrapper = JMSWrapper.getJMSWrapper();
+			jmsMsgProducer = jmsWrapper.createTopicProducer(jmsTopicName);
+		} catch (Exception e) {
+			logger.error("Problem when setting up JMSWrapper for the AVL feed", e);			
+		}
+
+	}
+	
+	/**
+	 * Actually reads data from feed and processes it.
 	 */
 	protected abstract void getAndProcessData();
 	
@@ -124,12 +120,25 @@ public abstract class AvlModule extends Module {
 	}
 	
 	/**
+	 * Processes AVL report read from feed. Can use JMS or bypass it, depending
+	 * on how configured.
+	 */
+	protected void processAvlReport(AvlReport avlReport) {
+		if (AvlConfig.shouldUseJms()) {
+			processAvlReportUsingJms(avlReport);
+		} else {
+			processAvlReportWithoutJms(avlReport);
+		}
+	}
+	
+	/**
 	 * Sends the AvlReport object to the JMS topic so that AVL clients can read it.
 	 * @param avlReport
 	 */
-	protected void writeAvlReportToJms(AvlReport avlReport) {
+	private void processAvlReportUsingJms(AvlReport avlReport) {
 		// Make sure the JMS stuff setup successfully
-		if (jmsWrapper == null || msgProducer == null) {
+		initializeJmsIfNeedTo();
+		if (jmsMsgProducer == null) {
 			logger.error("Cannot write AvlReport to JMS because JMS tools " + 
 					"were not initialized successfully.");
 			return;
@@ -137,10 +146,19 @@ public abstract class AvlModule extends Module {
 			
 		// Send the AVL report to the JMS topic
 		try {
-			msgProducer.sendObjectMessage(avlReport);
+			jmsMsgProducer.sendObjectMessage(avlReport);
 		} catch (JMSException e) {
 			logger.error("Problem sending AvlReport to the JMS topic", e);
 		}		
 	}
 
+	/**
+	 * Instead of writing AVL report to JMS topic this method directly
+	 * processes it. By doing this one can bypass the need for a JMS server.
+	 * 
+	 * @param avlReport
+	 */
+	private void processAvlReportWithoutJms(AvlReport avlReport) {
+		DataProcessor.getInstance().processAvlReport(avlReport);
+	}
 }

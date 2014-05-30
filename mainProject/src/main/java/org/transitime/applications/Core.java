@@ -17,12 +17,8 @@
 package org.transitime.applications;
 
 import java.io.PrintWriter;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
-import javax.jms.JMSException;
-import javax.naming.NamingException;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -34,14 +30,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.util.StatusPrinter;
-
-import org.transitime.avl.AvlJmsClient;
-import org.transitime.avl.BatchGtfsRealtimeModule;
-import org.transitime.avl.PlaybackModule;
 import org.transitime.config.Config;
-import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.Service;
 import org.transitime.core.dataCache.PredictionDataCache;
@@ -52,6 +41,7 @@ import org.transitime.ipc.servers.ConfigServer;
 import org.transitime.ipc.servers.PredictionsServer;
 import org.transitime.ipc.servers.VehiclesServer;
 import org.transitime.modules.Module;
+import org.transitime.utils.SettableSystemTime;
 import org.transitime.utils.SystemTime;
 import org.transitime.utils.SystemCurrentTime;
 import org.transitime.utils.Time;
@@ -81,22 +71,7 @@ public class Core {
 	
 	// Set by command line option. Specifies which config file to read in. 
 	private static String configFile = null;
-	
-	// Set by command line option. If not null then in 
-	// playback mode and should get AVL data
-	// from the database instead of from AVL feed.
-	private static Date playbackStartTime = null;
-	
-	// Set by command line option. If in playback mode 
-	// and playbackVehicle is set then will 
-	// playback for only for specified vehicle.
-	private static String playbackVehicle = null;
-	
-	// Set by command line option. Indicates if instead 
-	// of using realtime AVL feed should instead
-	// get AVL data from a batch GTFS-realtime file.
-	private static boolean batchGtfsRealtimeMode = false;
-	
+		
 	private static final Logger logger = 
 			LoggerFactory.getLogger(Core.class);
 	
@@ -113,7 +88,8 @@ public class Core {
 		// to database via a robust queue. But don't actually log data
 		// if in playback mode since then would be writing data again 
 		// that was first written when predictor was run in real time.
-		dataDbLogger = DataDbLogger.getDataDbLogger(projectId, inPlaybackMode());
+		dataDbLogger = 
+				DataDbLogger.getDataDbLogger(projectId, CoreConfig.storeDataInDatabase());
 		
 		// Read in all config data
 		configData = new DbConfig(projectId);
@@ -192,6 +168,15 @@ public class Core {
 	}
 	
 	/**
+	 * For setting the system time when in playback or batch mode.
+	 * 
+	 * @param systemTime
+	 */
+	public void setSystemTime(long systemEpochTime) {
+		this.systemTime = new SettableSystemTime(systemEpochTime);
+	}
+	
+	/**
 	 * Returns the Core logger so that each class doesn't need to create
 	 * its own and have it be configured properly.
 	 * @return
@@ -206,31 +191,9 @@ public class Core {
 	 */
 	private static void outputLoggerStatus() {
 		// For debugging output current state of logger
-	    LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-	    StatusPrinter.print(lc);
-		
-	}
-	
-	/**
-	 * Returns true if in playback mode, indicating that shouldn't be
-	 * running AVL feeds nor logging data to db.
-	 * @return
-	 */
-	public static boolean inPlaybackMode() {
-		return playbackStartTime != null;
-	}
-	
-	/**
-	 * Returns true if in batch GTFS-realtime mode. This means that
-	 * shouldn't be running realtime AVL feeds. Instead, the AVL data will
-	 * come from a single batch file. Useful for the World Bank project
-	 * where want to determine departure times from historic GPS data
-	 * and update the schedule times in the GTFS stop_times.txt file to
-	 * make them more accurate.
-	 * @return
-	 */
-	public static boolean inBatchGtfsRealtimeMode() {
-		return batchGtfsRealtimeMode;
+// Commented out for now because not truly useful
+//	    LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+//	    StatusPrinter.print(lc);		
 	}
 	
 	/**
@@ -258,26 +221,6 @@ public class Core {
                 .create("c")
                 );
 		
-		options.addOption(OptionBuilder.withArgName("\"MM-dd-yyyy HH:mm:ss z\"")
-                .hasArg()
-                .withDescription("For playback. Specifies what time play should start. " + 
-                		"Format is \"MM-dd-yyyy HH:mm:ss.SSS z\", " +
-                		"such as \"9-20-2014 17:00:00.021 EST\".")
-                .withLongOpt("time")
-                .create("t")
-                );
-
-		options.addOption(OptionBuilder.withArgName("vehicleId")
-                .hasArg()
-                .withDescription("For playback. Specifies which vehicle to playback.")
-                .withLongOpt("vehicle")
-                .create("v")
-                );
-		
-		options.addOption("b", "batchGtfsRealtimeMode", false, 
-				"Specifies that instead of regular AVL feed should use a " +
-				"batch GTFS-realtime file.");
-		
 		// Parse the options
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = parser.parse( options, args);
@@ -286,37 +229,7 @@ public class Core {
 		if (cmd.hasOption("c")) {
 			configFile = cmd.getOptionValue("c");
 		}
-		
-		// Handle date/time option for playback
-		if (cmd.hasOption("t")) {
-			String datetimeStr = cmd.getOptionValue("t");
-			try {
-				playbackStartTime = Time.parse(datetimeStr);
-				
-				// If specified time is in the future then reject.
-				if (playbackStartTime.getTime() > System.currentTimeMillis()) {
-					System.err.println("Paramater -t \"" + datetimeStr + 
-							"\" is in the future and therefore invalid!");
-					System.exit(-1);					
-				}
-					
-			} catch (java.text.ParseException e) {
-				System.err.println("Paramater -t \"" + datetimeStr + 
-						"\" could not be parsed. Format must be \"MM-dd-yyyy HH:mm:ss\"");
-				System.exit(-1);
-			}
-		}
-		
-		// Handle vehicle option for playback
-		if (cmd.hasOption("v")) {
-			playbackVehicle = cmd.getOptionValue("v");
-		}
-		
-		// Handle batch GTFS-realtime data mode
-		if (cmd.hasOption("batchGtfsRealtimeMode")) {
-			batchGtfsRealtimeMode = true;
-		}
-		
+								
 		// Handle help option
 		if (cmd.hasOption("h")) {
 			// Display help
@@ -365,7 +278,7 @@ public class Core {
 			}
 			
 			// For making sure logger configured properly
-			//outputLoggerStatus();
+			outputLoggerStatus();
 			
 			// Read in config params
 			try {
@@ -378,31 +291,7 @@ public class Core {
 			}
 			
 			String projectId = CoreConfig.getProjectId();
-			Core core = createCore(projectId);
-			
-			if (inPlaybackMode()) {
-				// Get AVL data from database
-				PlaybackModule playbackModule = 
-						new PlaybackModule(projectId, playbackStartTime, 
-								playbackVehicle);
-				core.systemTime = playbackModule.getSystemTime();
-				playbackModule.start();
-			} else if (inBatchGtfsRealtimeMode()) {
-				// Get AVL data from batch GTFS-realtime file
-				(new BatchGtfsRealtimeModule(projectId)).start();				
-			} else {
-				// Not in playback or batch mode so need to get AVL data through JMS feed.
-				// Start the AVL Client threads which read in the AVL data from JMS
-				// and processes it to generate predictions and all other data.
-				try {
-					AvlJmsClient.start(projectId, AvlConfig.getAvlQueueSize(), 
-							AvlConfig.getNumAvlThreads());
-				} catch (JMSException e) {
-					logger.error("Exception when starting AvlJmsClient", e);
-				} catch (NamingException e) {
-					logger.error("Exception when starting AvlJmsClient", e);
-				}
-			}
+			createCore(projectId);
 			
 			// Start any optional modules. 
 			// For how CoreConfig default modules includes the NextBus AVL feed

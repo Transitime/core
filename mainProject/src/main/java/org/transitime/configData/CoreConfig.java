@@ -61,7 +61,19 @@ public class CoreConfig {
 	private static StringConfigValue dbPassword = 
 			new StringConfigValue("transitime.core.dbPassword", "transitime");
 	
-	
+	/**
+	 * When in playback mode or some other situations don't want to store generated
+	 * data such as arrivals/departures, events, and such to the database because
+	 * only debugging.
+	 * 
+	 * @return
+	 */
+	public static boolean storeDataInDatabase() {
+		return storeDataInDatabase.getValue();
+	}
+	private static BooleanConfigValue storeDataInDatabase =
+			new BooleanConfigValue("transitime.core.storeDataInDatabase", true);
+
 	/**
 	 * So that have flexibility with where the hibernate config file is.
 	 * This way can easily access it within Eclipse.

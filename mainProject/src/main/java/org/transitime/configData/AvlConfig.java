@@ -17,6 +17,7 @@
 
 package org.transitime.configData;
 
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.FloatConfigValue;
 import org.transitime.config.IntegerConfigValue;
@@ -30,6 +31,17 @@ import org.transitime.utils.Time;
  *
  */
 public class AvlConfig {
+	/**
+	 * Specifies whether should use JMS to queue AVL data or if should
+	 * process directly using single thread.
+	 * @return
+	 */
+	public static boolean shouldUseJms() {
+		return shouldUseJms.getValue();
+	}
+	private static BooleanConfigValue shouldUseJms =
+			new BooleanConfigValue("transitime.avl.shouldUseJms", false);
+	
 	/**
 	 * How frequently an AVL feed should be polled for new data.
 	 * @return
@@ -63,7 +75,7 @@ public class AvlConfig {
 
 	/**
 	 * How many threads to be used for processing the AVL data. For most
-	 * applications just using a singe thread is probably sufficient and it
+	 * applications just using a single thread is probably sufficient and it
 	 * makes the logging simpler since the messages will not be interleaved.
 	 * But for large systems with lots of vehicles then should use multiple 
 	 * threads, such as 3-5 so that more of the cores are used.

@@ -187,7 +187,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			else
 				avlReport.setAssignment(null, AssignmentType.UNSET);
 			
-			writeAvlReportToJms(avlReport);
+			processAvlReport(avlReport);
 		}		
 	}
 	

@@ -21,11 +21,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
+import org.transitime.config.StringConfigValue;
 import org.transitime.core.DataProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
-import org.transitime.utils.SettableSystemTime;
-import org.transitime.utils.SystemTime;
 import org.transitime.utils.Time;
 
 /**
@@ -50,16 +50,22 @@ public class PlaybackModule extends Module {
 	
 	// For keeping track of beginning of timespan for doing query
 	private long dbReadBeginTime;
+		
+	/*********** Configurable Parameters for this module ***********/
+	private static String getPlaybackVehicleId() {
+		return playbackVehicleId.getValue();
+	}
+	private static StringConfigValue playbackVehicleId =
+			new StringConfigValue("transitime.avl.playbackVehicleId", "");
+
+	private static String getPlaybackStartTimeStr() {
+		return playbackStartTimeStr.getValue();
+	}
+	private static StringConfigValue playbackStartTimeStr =
+			new StringConfigValue("transitime.avl.playbackStartTime", "");
+
 	
-	// Time when to start getting AVL data
-	private final long playbackStartTime;
-	
-	// Vehicle to get AVL data data for. If null then get data for all vehicles.
-	private final String playbackVehicleId;
-	
-	private final SettableSystemTime playbackSystemTime = 
-			new SettableSystemTime();
-	
+	/********************* Logging **************************/
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PlaybackModule.class);
 
@@ -69,23 +75,47 @@ public class PlaybackModule extends Module {
 	/**
 	 * @param projectId
 	 */
-	public PlaybackModule(String projectId, 
-			Date playbackStartTime, 
-			String playbackVehicleId) {
+	public PlaybackModule(String projectId) {
 		super(projectId);
 		
-		this.playbackStartTime = playbackStartTime.getTime();
-		this.playbackVehicleId = playbackVehicleId;
+		// Make sure params are set
+		if (getPlaybackVehicleId() == null 
+				|| getPlaybackVehicleId().isEmpty()
+				|| getPlaybackStartTimeStr() == null
+				|| getPlaybackStartTimeStr().isEmpty()) {
+			System.err.println("Parameters not set. See log file for details. Exiting.");
+			System.exit(-1);
+		}
 		
-		this.dbReadBeginTime = this.playbackStartTime;
+		// Initialize the dbReadBeingTime member
+		this.dbReadBeginTime = parsePlaybackStartTime(getPlaybackStartTimeStr());
 	}
 	
-	/**
-	 * Returns SystemTime object that uses the time of the last AVL report.
-	 * @return
-	 */
-	public SystemTime getSystemTime() {
-		return playbackSystemTime;
+	private static long parsePlaybackStartTime(String playbackStartTimeStr) {
+		try {
+			long playbackStartTime = Time.parse(playbackStartTimeStr).getTime();
+			
+			// If specified time is in the future then reject.
+			if (playbackStartTime > System.currentTimeMillis()) {
+				logger.error("Playback start time \"{}\" specified by " +
+						"transitime.avl.playbackStartTime parameter is in " +
+						"the future and therefore invalid!",
+						playbackStartTimeStr);
+				System.exit(-1);					
+			}
+				
+			return playbackStartTime;
+		} catch (java.text.ParseException e) {
+			logger.error("Paramater -t \"{}\" specified by " +
+					"transitime.avl.playbackStartTime parameter could not " +
+					"be parsed. Format must be \"MM-dd-yyyy HH:mm:ss\"",
+					playbackStartTimeStr);
+			System.exit(-1);
+			
+			// Will never be reached because the above state exits program but
+			// needed so compiler doesn't complain.
+			return -1;
+		}
 	}
 	
 	/**
@@ -108,7 +138,7 @@ public class PlaybackModule extends Module {
 				AvlReport.getAvlReportsFromDb(getProjectId(),
 						new Date(start), 
 						new Date(end), 
-						playbackVehicleId);
+						getPlaybackVehicleId());
 		
 		logger.info("PlaybackModule read {} AVLReports.", avlReports.size());
 
@@ -131,10 +161,10 @@ public class PlaybackModule extends Module {
 			
 			// Process the AVL Reports read in.
 			for (AvlReport avlReport : avlReports) {
-				logger.debug("Processing avlReport={}", avlReport);
+				logger.info("Processing avlReport={}", avlReport);
 				
-				// Update the SystemTime object to use this AVL time
-				playbackSystemTime.set(avlReport.getTime());
+				// Update the Core SystemTime to use this AVL time
+				Core.getInstance().setSystemTime(avlReport.getTime());
 				
 				// Do the actual processing of the AVL data
 				DataProcessor.getInstance().processAvlReport(avlReport);

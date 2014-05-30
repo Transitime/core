@@ -236,7 +236,7 @@ public class GtfsRealtimeModule extends AvlModule {
 	protected void getAndProcessData() {
 		List<AvlReport> avlReports = getAvlReports();
 		for (AvlReport avlReport : avlReports) {
-			writeAvlReportToJms(avlReport);
+			processAvlReport(avlReport);
 		}
 	}
 

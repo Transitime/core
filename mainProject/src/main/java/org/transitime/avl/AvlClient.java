@@ -20,12 +20,11 @@ import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.applications.Core;
 import org.transitime.core.DataProcessor;
 import org.transitime.db.structs.AvlReport;
 
 /**
- * Receives data from the AvlJmsClient and processes it.
+ * Receives data from the AvlJmsClientModule and processes it.
  * Can use multiple threads to handle data.
  * 
  * @author SkiBu Smith
@@ -81,14 +80,6 @@ public class AvlClient implements Runnable {
 			}
 			avlReports.put(avlReport.getVehicleId(), avlReport);
 		}
-		
-		// Record when the AvlReport was actually processed. This is done here so
-		// that the value will be set when the avlReport is stored in the database
-		// using the DbLogger.
-		avlReport.setTimeProcessed();
-
-		// Store the AVL report into the database
-		Core.getInstance().getDbLogger().add(avlReport);
 		
 		// Process the report
 		logger.info("Thread={} AvlClient processing AVL data {}", 
