@@ -26,6 +26,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.avl.AvlCsvWriter;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
@@ -71,6 +72,12 @@ public class ConvertGtfsRtToCsvFile {
 			new StringConfigValue("transitime.avl.timeZoneStr", 
 					"");
 
+	private static boolean shouldOffsetForMapOfChina() {
+		return offsetForMapOfChina.getValue();
+	}
+	private static BooleanConfigValue offsetForMapOfChina = 
+			new BooleanConfigValue("transitime.avl.offsetForMapOfChina", false);
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -105,7 +112,7 @@ public class ConvertGtfsRtToCsvFile {
 			List<AvlReport> avlReportsForVehicle = 
 					avlReportsByVehicle.get(vehicleId);
 			for (AvlReport avlReport : avlReportsForVehicle) {
-				writer.write(avlReport);
+				writer.write(avlReport, shouldOffsetForMapOfChina());
 			}
 			writer.close();
 		}
