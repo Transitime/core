@@ -21,6 +21,7 @@ import java.io.Writer;
 
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
 import org.transitime.utils.Time;
+import org.transitime.utils.csv.CsvWriterBase;
 
 /**
  * For writing a GTFS stop_times.txt file. Since this is pretty simple
@@ -29,7 +30,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-public class GtfsStopTimesWriter extends GtfsWriterBase {
+public class GtfsStopTimesWriter extends CsvWriterBase {
 
 	/********************** Member Functions **************************/
 	

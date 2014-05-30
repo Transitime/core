@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.gtfs.writers;
+package org.transitime.utils.csv;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,12 +25,12 @@ import java.io.Writer;
 import org.transitime.utils.StringUtils;
 
 /**
- * A base class for writing out a GTFS file
+ * A base class for writing out a CSV file
  * 
  * @author SkiBu Smith
  *
  */
-public abstract class GtfsWriterBase {
+public abstract class CsvWriterBase {
 
 	protected Writer writer;
 			
@@ -41,7 +41,7 @@ public abstract class GtfsWriterBase {
 	 * 
 	 * @param fileName
 	 */
-	public GtfsWriterBase(String fileName) {
+	public CsvWriterBase(String fileName) {
 		try {
 			// Create the directory if necessary.
 			// First, determine directory name by finding the last slash.
@@ -72,7 +72,7 @@ public abstract class GtfsWriterBase {
 	}
 
 	/**
-	 * To be overridden
+	 * To be overridden. Automatically called by constructor.
 	 */
 	protected abstract void writeHeader() throws IOException;
 	

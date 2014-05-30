@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 
 import org.transitime.gtfs.gtfsStructs.GtfsStop;
+import org.transitime.utils.csv.CsvWriterBase;
 
 
 /**
@@ -28,7 +29,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsStop;
  * @author SkiBu Smith
  *
  */
-public class GtfsStopsWriter extends GtfsWriterBase {
+public class GtfsStopsWriter extends CsvWriterBase {
 
 	private static DecimalFormat sixDigitFormatter = 
 			new DecimalFormat("0.000000");
