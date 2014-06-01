@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -102,6 +100,17 @@ public final class Block implements Serializable {
 	@Column
 	private final int headwaySecs; // For non-scheduled blocks
 
+	// Sometimes will get vehicle assignment by routeId. This means that need
+	// to know which blocks are associated with a route. Getting the routeIds
+	// from the Trip objects is problematic because then all the Trip data
+	// needs to be lazy loaded such that if need to look at all blocks then
+	// need to load in all trips. That takes too long for when doing debugging.
+	// So to speed things up the routeIds for a block are stored here.
+	// NOTE: since trying to use serialization need to use ArrayList<> instead
+	// of List<> since List<> doesn't implement Serializable.
+	@Column(length=500)
+	private final HashSet<String> routeIds;
+	
 	// For making sure only lazy load trips collection via one thread
 	// at a time.
 	private static final Object lazyLoadingSyncObject = new Object();
@@ -114,18 +123,21 @@ public final class Block implements Serializable {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Note: startTime and endTime could in theory be determined here
-	 * by looking at first and last TripElements. But what if they haven't
-	 * been set in GTFS? Want the calling function to do this kind of error
-	 * checking because it does other error checking and can log issues
+	 * This constructor called when processing GTFS data and creating a Block to
+	 * be stored in the database. Note: startTime and endTime could in theory be
+	 * determined here by looking at first and last TripElements. But what if
+	 * they haven't been set in GTFS? Want the calling function to do this kind
+	 * of error checking because it does other error checking and can log issues
 	 * appropriately.
+	 * 
 	 * @param blockId
 	 * @param startTime
 	 * @param endTime
 	 * @param trips
-	 * @param headwaySecs If less than 0 then it is schedule based block. If 0 
-	 * then it is unscheduled block where vehicles run whenever. If greater
-	 * than 0 then vehicles are to run on this specified headway
+	 * @param headwaySecs
+	 *            If less than 0 then it is schedule based block. If 0 then it
+	 *            is unscheduled block where vehicles run whenever. If greater
+	 *            than 0 then vehicles are to run on this specified headway
 	 */
 	public Block (String blockId, String serviceId, int startTime, int endTime, 
 			List<Trip> trips, int headwaySecs) {
@@ -136,6 +148,12 @@ public final class Block implements Serializable {
 		this.endTime = endTime;
 		this.trips = trips;
 		this.headwaySecs = headwaySecs;
+		
+		// Obtain the set of route IDs from the trips
+		this.routeIds = new HashSet<String>();
+		for (Trip trip : trips) {
+			this.routeIds.add(trip.getRouteId());
+		}
 	}
 
 	/**
@@ -149,7 +167,8 @@ public final class Block implements Serializable {
 		this.startTime = -1;
 		this.endTime = -1;
 		this.trips = null;
-		this.headwaySecs = -1;		
+		this.headwaySecs = -1;	
+		this.routeIds = null;
 	}
 	
 	/**
@@ -471,13 +490,17 @@ public final class Block implements Serializable {
 	 * @return
 	 */
 	public Collection<String> getRoutes() {
-		Set<String> routeIdsSet = new HashSet<String>();
-		
-		for (Trip trip : getTrips()) {
-			routeIdsSet.add(trip.getRouteId());
-		}
-		
-		return routeIdsSet;
+		return routeIds;
+//      Note: previously was getting them from trips but this requires a call
+//      to getTrips() which loads in all the data from db for the trips for
+//      the block, which is quite slow. By generating the routeIds when the
+//      GTFS data is processed and storing them in the db then don't need
+//      the application to load in all trip data, which is great for debugging.		
+//		Set<String> routeIdsSet = new HashSet<String>();		
+//		for (Trip trip : getTrips()) {
+//			routeIdsSet.add(trip.getRouteId());
+//		}		
+//		return routeIdsSet;
 	}
 	
 	/**

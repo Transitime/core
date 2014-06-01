@@ -157,6 +157,7 @@
         blockId varchar(60) not null,
         endTime integer,
         headwaySecs integer,
+        routeIds blob,
         startTime integer,
         primary key (serviceId, configRev, blockId)
     );
