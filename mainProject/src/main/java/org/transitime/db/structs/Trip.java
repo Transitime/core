@@ -100,8 +100,7 @@ public class Trip implements Serializable {
 	
 	// Contains schedule time for each stop as obtained from GTFS 
 	// stop_times.txt file.
-	// NOTE: since trying to use serialization need to use ArrayList<> instead
-	// of List<> since List<> doesn't implement Serializable. Serialization 
+	// NOTE: trying to use serialization. Serialization 
 	// makes the data not readable in the db using regular SQL but it means
 	// that don't need separate table and the data can be read and written
 	// much faster.
@@ -321,7 +320,7 @@ public class Trip implements Serializable {
 				+ ", tripIndex=" + getIndex()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
-				+ ", dirName=\"" + name + "\""
+				+ ", name=\"" + name + "\""
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
 				+ ", routeShortName=" + routeShortName
@@ -344,7 +343,7 @@ public class Trip implements Serializable {
 				+ ", tripIndex=" + getIndex()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
-				+ ", dirName=\"" + name + "\""
+				+ ", name=\"" + name + "\""
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
 				+ ", routeShortName=" + routeShortName
