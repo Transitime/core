@@ -65,7 +65,7 @@ import org.transitime.utils.threading.NamedThreadFactory;
  * 
  * When in playback mode then don't want to store the data because it would
  * interfere with data stored when the application was run in real time. 
- * Therefore when running in playback mode set doNotStoreToDb to true
+ * Therefore when running in playback mode set shouldStoreToDb to true
  * when calling getDataDbLogger().
  * 
  * @author SkiBu Smith
@@ -88,8 +88,9 @@ public class DataDbLogger {
 	// When running in playback mode where getting AVLReports from database
 	// instead of from an AVL feed, then debugging and don't want to store
 	// derived data into the database because that would interfere with the
-	// derived data that was already stored in real time.
-	private final boolean doNotStoreToDb;
+	// derived data that was already stored in real time. For that situation
+	// shouldStoreToDb should be set to false.
+	private final boolean shouldStoreToDb;
 	
 	// For keeping track of index into levels, which level of capacity of
 	// queue being used. When level changes then an e-mail is sent out warning
@@ -119,16 +120,20 @@ public class DataDbLogger {
 	 * Factory method. Returns the singleton db logger for the specified
 	 * projectId.
 	 * 
-	 * @param projectId Id of database to be written to
-	 * @param doNotStoreToDb Specifies if in playback mode and shouldn't
-	 * write data to db.
+	 * @param projectId
+	 *            Id of database to be written to
+	 * @param shouldStoreToDb
+	 *            Specifies whether data should actually be written to db. If in
+	 *            playback mode and shouldn't write data to db then set to
+	 *            false.
 	 * @return The DataDbLogger for the specified projectId
 	 */
-	public static DataDbLogger getDataDbLogger(String projectId, boolean doNotStoreToDb) {
+	public static DataDbLogger getDataDbLogger(String projectId,
+			boolean shouldStoreToDb) {
 		synchronized (dataDbLoggerMap) {
 			DataDbLogger logger = dataDbLoggerMap.get(projectId);
 			if (logger == null) {
-				logger = new DataDbLogger(projectId, doNotStoreToDb);
+				logger = new DataDbLogger(projectId, shouldStoreToDb);
 				dataDbLoggerMap.put(projectId, logger);
 			}
 			return logger;
@@ -136,17 +141,20 @@ public class DataDbLogger {
 	}
 	
 	/**
-	 * Constructor. Private so that factory method getDataDbLogger()
-	 * has to be used. Starts up separate thread that actually
-	 * reads from queue and stores the data.
+	 * Constructor. Private so that factory method getDataDbLogger() has to be
+	 * used. Starts up separate thread that actually reads from queue and stores
+	 * the data.
 	 * 
-	 * @param projectId Id of database to be written to
-	 * @param doNotStoreToDb Specifies if in playback mode and shouldn't
-	 * write data to db.
+	 * @param projectId
+	 *            Id of database to be written to
+	 * @param shouldStoreToDb
+	 *            Specifies whether data should actually be written to db. If in
+	 *            playback mode and shouldn't write data to db then set to
+	 *            false.
 	 */
-	private DataDbLogger(String projectId, boolean doNotStoreToDb) {
+	private DataDbLogger(String projectId, boolean shouldStoreToDb) {
 		this.projectId = projectId;
-		this.doNotStoreToDb = doNotStoreToDb;
+		this.shouldStoreToDb = shouldStoreToDb;
 		
 		// Create the reusable heavy weight session factory
 		sessionFactory = HibernateUtils.getSessionFactory(projectId);
@@ -192,20 +200,21 @@ public class DataDbLogger {
 	}
 	
 	/**
-	 * Adds an object to be saved in the database to the queue.
-	 * If queue is getting filled up then an e-mail will be sent
-	 * out indicating there is a problem. The queue levels at which
-	 * an e-mail is sent out is specified by levels. If queue has
-	 * reached capacity then an error message is logged.
+	 * Adds an object to be saved in the database to the queue. If queue is
+	 * getting filled up then an e-mail will be sent out indicating there is a
+	 * problem. The queue levels at which an e-mail is sent out is specified by
+	 * levels. If queue has reached capacity then an error message is logged.
 	 * 
-	 * @param o The object that should be logged to the database
-	 * @return True if object added to queue. False if queue was full.
+	 * @param o
+	 *            The object that should be logged to the database
+	 * @return True if OK (object added to queue or logging disabled). False if
+	 *         queue was full.
 	 */
 	public boolean add(Object o) {	
 		// If in playback mode then don't want to store the
 		// derived data because it would interfere with the
 		// derived data already stored when was running in real time.
-		if (doNotStoreToDb)
+		if (!shouldStoreToDb)
 			return true;
 		
 		// Add the object to the queue
