@@ -97,4 +97,23 @@ public class BlockAssigner {
 		return null;
 	}
 	
+	/**
+	 * Returns the route ID specified in the AVL feed. If no route ID then
+	 * returns null.
+	 * 
+	 * @param avlReport
+	 * @return The route ID or null if none assigned
+	 */
+	public String getRouteId(AvlReport avlReport) {
+		if (avlReport != null
+				&& avlReport.getAssignmentId() != null
+				&& avlReport.getAssignmentType() == AssignmentType.ROUTE_ID) {
+			// Route ID specified so return it
+			return avlReport.getAssignmentId();
+		} else {
+			// No route ID specified in AVL feed so return null
+			return null;
+		}
+			
+	}
 }
