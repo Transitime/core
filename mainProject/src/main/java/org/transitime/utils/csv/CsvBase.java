@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CsvBase {
 
-	protected final CSVRecord record;
 	protected final int lineNumber;
 	private final String fileName;
 	
@@ -63,10 +62,9 @@ public class CsvBase {
 	 */
 	protected CsvBase(CSVRecord record, boolean supplementalFile,
 			String fileName) {
-		this.record = record;
 		this.lineNumber = (int) record.getRecordNumber();
 		this.supplementalFileSoSomeRequiredItemsCanBeMissing = supplementalFile;
-		this.fileName = fileName;
+		this.fileName = fileName.intern();
 	}
 		
 	/**
@@ -77,7 +75,6 @@ public class CsvBase {
 	 * @param original
 	 */
 	protected CsvBase(CsvBase original) {
-		this.record = original.record;
 		this.lineNumber = original.lineNumber;
 		this.supplementalFileSoSomeRequiredItemsCanBeMissing = 
 				original.supplementalFileSoSomeRequiredItemsCanBeMissing;
