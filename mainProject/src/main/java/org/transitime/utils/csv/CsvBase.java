@@ -17,9 +17,6 @@
  */
 package org.transitime.utils.csv;
 
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
-
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +37,6 @@ public class CsvBase {
 	
 	private final boolean supplementalFileSoSomeRequiredItemsCanBeMissing;
 	
-	// This is the format that dates are in for CSV. Should
-	// share this formatter. Note that it will not be set until
-	// the timezone is known and createDateFormatter() is called.
-	// This is done when the agency.txt file with the timezone is
-	// read in.
-	protected static SimpleDateFormat dateFormatter = null;
-
 	protected static final Logger logger = 
 			LoggerFactory.getLogger(CsvBase.class);
 
@@ -64,7 +54,7 @@ public class CsvBase {
 			String fileName) {
 		this.lineNumber = (int) record.getRecordNumber();
 		this.supplementalFileSoSomeRequiredItemsCanBeMissing = supplementalFile;
-		this.fileName = fileName.intern();
+		this.fileName = fileName;
 	}
 		
 	/**
@@ -79,19 +69,6 @@ public class CsvBase {
 		this.supplementalFileSoSomeRequiredItemsCanBeMissing = 
 				original.supplementalFileSoSomeRequiredItemsCanBeMissing;
 		this.fileName = original.getFileName();
-	}
-	
-	/**
-	 * Creates the static dateFormatter using the specified timezone. The
-	 * dateFormatter will be null until this method is called when the agency
-	 * timezone is retrieved from the agency.txt CSV file.
-	 * 
-	 * @param timezoneName
-	 */
-	protected void createDateFormatter(String timezoneName) {
-		TimeZone timezone = TimeZone.getTimeZone(timezoneName);
-		dateFormatter =	new SimpleDateFormat("yyyyMMdd");
-		dateFormatter.setTimeZone(timezone);		
 	}
 	
 	/**

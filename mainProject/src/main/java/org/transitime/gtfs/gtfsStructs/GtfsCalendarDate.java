@@ -18,22 +18,20 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import java.text.ParseException;
-import java.util.Date;
-
 import org.apache.commons.csv.CSVRecord;
-import org.transitime.utils.Time;
 import org.transitime.utils.csv.CsvBase;
 
 
 /**
  * A GTFS calendar_dates object.
+ * 
  * @author SkiBu Smith
  *
  */
 public class GtfsCalendarDate extends CsvBase {
 
 	private final String serviceId;
-	private final Date date;
+	private final String date;
 	private final String exceptionType;
 	
 	/********************** Member Functions **************************/
@@ -50,7 +48,7 @@ public class GtfsCalendarDate extends CsvBase {
 		super(record, supplemental, fileName);
 		
 		serviceId = getRequiredValue(record, "service_id");
-		date = dateFormatter.parse(getRequiredValue(record, "date"));
+		date = getRequiredValue(record, "date");
 		exceptionType = getRequiredValue(record, "exception_type");
 	}
 
@@ -58,7 +56,7 @@ public class GtfsCalendarDate extends CsvBase {
 		return serviceId;
 	}
 
-	public Date getDate() {
+	public String getDate() {
 		return date;
 	}
 
@@ -70,8 +68,9 @@ public class GtfsCalendarDate extends CsvBase {
 	public String toString() {
 		return "GtfsCalendarDates [lineNumber=" + lineNumber
 				+ ", serviceId=" + serviceId 
-				+ ", date=" + Time.dateStr(date) 
-				+ ", exceptionType=" + exceptionType + "]";
+				+ ", date=" + date 
+				+ ", exceptionType=" + exceptionType 
+				+ "]";
 	}
 	
 }

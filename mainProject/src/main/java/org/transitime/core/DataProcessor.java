@@ -211,6 +211,19 @@ public class DataProcessor {
 		// then use it.
 		Block block = BlockAssigner.getInstance().getBlock(avlReport);
 		if (block == null) {
+			// FIXME experimenting with ROUTE_ID based assignments
+			String routeId = BlockAssigner.getInstance().getRouteId(avlReport);
+			if (routeId != null) {
+				Service service = Core.getInstance().getService();
+				List<String> serviceIds = service.getServiceIds(avlReport.getDate());
+				for (String serviceId : serviceIds) {
+					List<Block> blocks = Core.getInstance().getDbConfig().
+							getBlocksForRoute(serviceId, routeId);
+					// FIXME just for debugging
+					System.err.println(blocks);
+				}
+			}
+			
 			// There was no valid block assignment from AVL feed so can't
 			// do anything. But set the block assignment for the vehicle
 			// so it is up to date. This call also sets the vehicle state
@@ -415,7 +428,7 @@ public class DataProcessor {
 				" ...");
 		
 		// Determine previous state of vehicle
-		String vehicleId =avlReport.getVehicleId();
+		String vehicleId = avlReport.getVehicleId();
 		VehicleState vehicleState =
 				VehicleStateManager.getInstance().getVehicleState(vehicleId);
 		

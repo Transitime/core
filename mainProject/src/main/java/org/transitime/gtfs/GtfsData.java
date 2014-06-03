@@ -16,6 +16,7 @@
  */
 package org.transitime.gtfs;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -153,18 +155,28 @@ public class GtfsData {
 	// Keyed on tripPatternId and pathId using getPathMapKey(tripPatternId, pathId)
 	private HashMap<String, StopPath> pathsMap;
 	
+	private List<Calendar> calendars;
+	private List<CalendarDate> calendarDates;
+	private Set<String> validServiceIds;
+	
 	// Data for the other GTFS files
 	// Key for frequencyMap is trip_id. Values are a List of Frequency objects
 	// since each trip can be listed in frequencies.txt file multiple times in
 	// order to define a different headway for different time ranges.
 	private Map<String, List<Frequency>> frequencyMap;
 	private List<Agency> agencies;
-	private List<Calendar> calendars;
-	private List<CalendarDate> calendarDates;
 	private List<FareAttribute> fareAttributes;
 	private List<FareRule> fareRules;
 	private List<Transfer> transfers;
 	
+	// This is the format that dates are in for CSV. Should
+	// share this formatter. Note that it will not be set until
+	// the timezone is known and createDateFormatter() is called.
+	// This is done when the agency.txt file with the timezone is
+	// read in and createDateFormatter() is called.
+	protected SimpleDateFormat dateFormatter = null;
+
+
 	// Logging
 	public static final Logger logger = 
 			LoggerFactory.getLogger(GtfsData.class);
@@ -193,6 +205,24 @@ public class GtfsData {
 		this.titleFormatter = titleFormatter;
 	}
 	
+	/**
+	 * Creates the static dateFormatter using the specified timezone. The
+	 * timezone is obtained from the first agency in the agency.txt file.
+	 * 
+	 * @param timezoneName
+	 */
+	private void createDateFormatter() {
+		// Read in the agency.txt GTFS data from file
+		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
+		List<GtfsAgency> gtfsAgencies = agencyReader.get();
+		String timezoneName = gtfsAgencies.get(0).getAgencyTimezone();
+		
+		TimeZone timezone = TimeZone.getTimeZone(timezoneName);
+		dateFormatter =	new SimpleDateFormat("yyyyMMdd");
+		dateFormatter.setTimeZone(timezone);		
+	}
+	
+
 	/**
 	 * Reads routes.txt files from both gtfsDirectoryName and supplementDir
 	 * and combines them together. End result is that gtfsRoutesMap is created
@@ -440,7 +470,7 @@ public class GtfsData {
 					"GtfsData.processTripsData() is. Exiting.");
 			System.exit(-1);
 		}
-
+		
 		// Let user know what is going on
 		logger.info("Processing trips.txt data...");
 		
@@ -456,7 +486,7 @@ public class GtfsData {
 			// not then something is fishy with the data so output a warning.
 			if (getGtfsRoute(gtfsTrip.getRouteId()) != null) {
 				// Refers to a valid route so we should process this trip
-				gtfsTripsMap.put(gtfsTrip.getTripId(), gtfsTrip);
+				gtfsTripsMap.put(gtfsTrip.getTripId(), gtfsTrip);;
 			} else {
 				logger.warn("The trip id={} in the trips.txt file at " + 
 						"line # {} refers to route id={} but that route is " +
@@ -625,7 +655,7 @@ public class GtfsData {
 		// Put the GtfsStopTimes into the map
 		for (GtfsStopTime gtfsStopTime : gtfsStopTimes) {
 			String tripId = gtfsStopTime.getTripId();
-			
+						
 			// Add the GtfsStopTime to the map so later can create Trips and TripPatterns
 			List<GtfsStopTime> gtfsStopTimesForTrip = gtfsStopTimesForTripMap.get(tripId);
 			if (gtfsStopTimesForTrip == null) {
@@ -673,11 +703,18 @@ public class GtfsData {
 	
 	/**
 	 * 
-	 * @param gtfsStopTimesForTripMap Keyed by tripId. List of GtfsStopTimes for the tripId.
+	 * @param gtfsStopTimesForTripMap
+	 *            Keyed by tripId. List of GtfsStopTimes for the tripId.
 	 */
-	private void createTripsAndTripPatterns(Map<String, List<GtfsStopTime>> gtfsStopTimesForTripMap) {
+	private void createTripsAndTripPatterns(
+			Map<String, List<GtfsStopTime>> gtfsStopTimesForTripMap) {
 		if (frequencyMap == null) {
 			logger.error("processFrequencies() must be called before " + 
+					"GtfsData.createTripsAndTripPatterns() is. Exiting.");
+			System.exit(-1);
+		}
+		if (validServiceIds == null || validServiceIds.isEmpty()) {
+			logger.error("GtfsData.processServiceIds() must be called before " +
 					"GtfsData.createTripsAndTripPatterns() is. Exiting.");
 			System.exit(-1);
 		}
@@ -709,7 +746,7 @@ public class GtfsData {
 			// Determine the Trip element for the trip ID. Create new one if need to.
 			Trip trip = tripsInStopTimesFileMap.get(tripId);
 			if (trip == null) {
-				// Determine the GtfsTrip for the id so can be used
+				// Determine the GtfsTrip for the ID so can be used
 				// to construct the Trip object.
 				GtfsTrip gtfsTrip = getGtfsTrip(tripId);
 				
@@ -717,17 +754,33 @@ public class GtfsData {
 				// then need to log this problem (and log this only once) and continue
 				if (gtfsTrip == null) {
 					logger.warn("Encountered trip_id={} in the stop_times.txt " +
-							"file but that trip_id is not in the trips.txt file. " + 
+							"file but that trip_id is not in the trips.txt " +
+							"file or the service ID for the trip is not " +
+							"valid in anytime in the future. " + 
 							"Therefore this trip cannot be configured and has been discarded.",
 							tripId);
 					
-					// Can't deal with this trip Id so skip to next trip
+					// Can't deal with this trip Id so skip to next trip ID
 					continue;
 				}
 				
+				// FIXME keep all gtfs trips but only write them if service ID
+				// valid and only write stop times if service valid!
+				if (!validServiceIds.contains(gtfsTrip.getServiceId())) {
+					// Service ID not valid for this trip so log warning message
+					// and continue on to next trip ID
+					logger.warn("For trip ID={} and service ID={} the " +
+							"service is not valid in the future so the trip " +
+							"is being filtered out.", 
+							gtfsTrip.getTripId(), gtfsTrip.getServiceId());
+					continue;
+				}
+
 				// If this route is actually a sub-route of a parent then use the
 				// parent ID.
 				String properRouteId = getProperIdOfRoute(gtfsTrip.getRouteId());
+				
+				// Create the Trip and store the stop times into the associated map
 				String routeShortName = 
 						gtfsRoutesMap.get(gtfsTrip.getRouteId()).getRouteShortName();
 				trip = new Trip(gtfsTrip, properRouteId, routeShortName, titleFormatter);
@@ -1045,6 +1098,13 @@ public class GtfsData {
 	 * Reads agency.txt file and puts data into agencies list.
 	 */
 	private void processAgencies() {
+		// Make sure necessary data read in
+		if (getRoutes() == null || getRoutes().isEmpty()) {
+			logger.error("GtfsData.processRoutesData() must be called before " + 
+					"GtfsData.processAgencies() is. Exiting.");
+			System.exit(-1);
+		}
+		
 		// Let user know what is going on
 		logger.info("Processing agency.txt data...");
 		
@@ -1066,6 +1126,37 @@ public class GtfsData {
 	}
 
 	/**
+	 * Determines if the specified calendar is active in the future. It is
+	 * active if the end date is in the future or if it is added in the future
+	 * via calendar_dates.txt
+	 * 
+	 * @param calendar
+	 * @param calendarDates
+	 * @return
+	 */
+	private static boolean isCalendarActiveInTheFuture(Calendar calendar,
+			List<CalendarDate> calendarDates) {
+		// If calendar end date is for sometime in the future then it is
+		// definitely active.
+		if (calendar.getEndDate().getTime() > System.currentTimeMillis()) 
+			return true;
+		
+		// End date is not in the future so see if it is being added as an
+		// exception via the calendar_dates.txt file.
+		for (CalendarDate calendarDate : calendarDates) {
+			if (calendarDate.getServiceId().equals(calendarDate.getServiceId())
+					&& calendarDate.addService() 
+					&& calendarDate.getDate().getTime() > System.currentTimeMillis()) {
+				return true;
+			}
+		}
+		
+		// The calendar is for in the past and the associated service is not 
+		// listed as an "add service" in a calendar date so must not be valid.
+		return false;
+	}
+	
+	/**
 	 * Reads calendar.txt file and puts data into calendars list.
 	 */
 	private void processCalendars() {
@@ -1076,12 +1167,13 @@ public class GtfsData {
 		calendars = new ArrayList<Calendar>();
 
 		// Read in the calendar.txt GTFS data from file
-		GtfsCalendarReader calendarReader = new GtfsCalendarReader(gtfsDirectoryName);
+		GtfsCalendarReader calendarReader = 
+				new GtfsCalendarReader(gtfsDirectoryName);
 		List<GtfsCalendar> gtfsCalendars = calendarReader.get();
 		
 		for (GtfsCalendar gtfsCalendar : gtfsCalendars) {
 			// Create the Calendar object and put it into the array
-			Calendar calendar = new Calendar(gtfsCalendar);
+			Calendar calendar = new Calendar(gtfsCalendar, dateFormatter);
 			calendars.add(calendar);
 		}		
 					
@@ -1100,12 +1192,14 @@ public class GtfsData {
 		calendarDates = new ArrayList<CalendarDate>();
 
 		// Read in the calendar_dates.txt GTFS data from file
-		GtfsCalendarDatesReader calendarDatesReader = new GtfsCalendarDatesReader(gtfsDirectoryName);
+		GtfsCalendarDatesReader calendarDatesReader = 
+				new GtfsCalendarDatesReader(gtfsDirectoryName);
 		List<GtfsCalendarDate> gtfsCalendarDates = calendarDatesReader.get();
 		
 		for (GtfsCalendarDate gtfsCalendarDate : gtfsCalendarDates) {
 			// Create the CalendarDate object and put it into the array
-			CalendarDate calendarDate = new CalendarDate(gtfsCalendarDate);
+			CalendarDate calendarDate = 
+					new CalendarDate(gtfsCalendarDate, dateFormatter);
 			calendarDates.add(calendarDate);
 		}		
 					
@@ -1113,6 +1207,34 @@ public class GtfsData {
 		logger.info("Finished processing calendar_dates.txt data. ");
 	}
 
+	private void processServiceIds() {
+		// Make sure needed data is already read in. 
+		if (calendars == null) {
+			logger.error("GtfsData.processCalendars() must be called " +
+					"before GtfsData.processServiceIds() is. Exiting.");
+			System.exit(-1);
+		}
+		if (calendarDates == null) {
+			logger.error("GtfsData.processCalendarDates() must be called " +
+					"before GtfsData.processServiceIds() is. Exiting.");
+			System.exit(-1);
+		}
+
+		// Create set of service IDs
+		validServiceIds = new HashSet<String>();
+		for (Calendar calendar : calendars) {
+			if (isCalendarActiveInTheFuture(calendar, calendarDates)) {
+				validServiceIds.add(calendar.getServiceId());
+			} else {
+				logger.warn("The service ID {} is not configured for in the " +
+						"future in calendar.txt and calendar_dates.txt and " +
+						"is therefore not being included in the " +
+						"configuration. {}",
+						calendar.getServiceId(), calendar);
+			}
+		}
+	}
+	
 	/**
 	 * Reads fare_attributes.txt file and puts data into fareAttributes list.
 	 */
@@ -1518,23 +1640,28 @@ public class GtfsData {
 		logger.info("Processing GTFS data from {} ...",
 				gtfsDirectoryName);
 
+		// Need a date formatter using timezone before some data that
+		// has dates is processed. Includes calendars and calendar_dates.
+		createDateFormatter();
+		
 		// Note. The order of how these are processed in important because
 		// some datasets rely on others in order to be fully processed.
 		// If the order is wrong then the methods below will log an error and
 		// exit.
 		processGtfsRouteData();
 		processStopData();		
+		processCalendarDates();
+		processCalendars();
+		processServiceIds();
 		processTripsData();	
 		processFrequencies();
 		processStopTimesData();		
 		processRouteData(); 
 		processBlocks();
 		processPaths();
+		processAgencies();
 		
 		// Following are simple objects that don't require combining tables
-		processAgencies();
-		processCalendars();
-		processCalendarDates();
 		processFareAttributes();
 		processFareRules();
 		processTransfers();

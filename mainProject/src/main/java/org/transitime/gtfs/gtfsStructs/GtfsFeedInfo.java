@@ -18,8 +18,6 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import java.text.ParseException;
-import java.util.Date;
-
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.utils.csv.CsvBase;
 
@@ -34,8 +32,8 @@ public class GtfsFeedInfo extends CsvBase {
 	private final String feedPublisherName;
 	private final String feedPublisherUrl;
 	private final String feedLang;
-	private final Date feedStartDate;
-	private final Date feedEndDate;
+	private final String feedStartDate;
+	private final String feedEndDate;
 	private final String feedVersion;
 
 	/********************** Member Functions **************************/
@@ -53,20 +51,9 @@ public class GtfsFeedInfo extends CsvBase {
 
 		feedPublisherName = getRequiredValue(record, "feed_publisher_name");
 		feedPublisherUrl = getRequiredValue(record, "feed_publisher_url");
-		feedLang = getRequiredValue(record, "feed_lang");
-		
-		String feedStartDateStr = getOptionalValue(record, "feed_start_date");
-		if (feedStartDateStr != null)
-			feedStartDate = dateFormatter.parse(record.get(feedStartDateStr));
-		else
-			feedStartDate = null;
-
-		String feedEndDateStr = getOptionalValue(record, "feed_end_date");
-		if (feedEndDateStr != null)
-			feedEndDate = dateFormatter.parse(record.get(feedEndDateStr));
-		else
-			feedEndDate = null;
-		
+		feedLang = getRequiredValue(record, "feed_lang");		
+		feedStartDate = getOptionalValue(record, "feed_start_date");
+		feedEndDate = getOptionalValue(record, "feed_end_date");
 		feedVersion = getOptionalValue(record, "feed_version");
 	}
 
@@ -82,11 +69,11 @@ public class GtfsFeedInfo extends CsvBase {
 		return feedLang;
 	}
 
-	public Date getFeedStartDate() {
+	public String getFeedStartDate() {
 		return feedStartDate;
 	}
 
-	public Date getFeedEndDate() {
+	public String getFeedEndDate() {
 		return feedEndDate;
 	}
 
@@ -103,7 +90,8 @@ public class GtfsFeedInfo extends CsvBase {
 				+ ", feedLang=" + feedLang 
 				+ ", feedStartDate=" + feedStartDate
 				+ ", feedEndDate=" + feedEndDate 
-				+ ", feedVersion="	+ feedVersion + "]";
+				+ ", feedVersion="	+ feedVersion 
+				+ "]";
 	}
 
 }

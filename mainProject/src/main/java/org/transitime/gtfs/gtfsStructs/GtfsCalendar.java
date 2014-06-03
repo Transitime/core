@@ -18,10 +18,7 @@
 package org.transitime.gtfs.gtfsStructs;
 
 import java.text.ParseException;
-import java.util.Date;
-
 import org.apache.commons.csv.CSVRecord;
-import org.transitime.utils.Time;
 import org.transitime.utils.csv.CsvBase;
 
 
@@ -40,8 +37,8 @@ public class GtfsCalendar extends CsvBase {
 	private final String friday;
 	private final String saturday;
 	private final String sunday;
-	private final Date startDate;
-	private final Date endDate;
+	private final String startDate;
+	private final String endDate;
 	
 	/********************** Member Functions **************************/
 
@@ -65,8 +62,8 @@ public class GtfsCalendar extends CsvBase {
 		saturday = getRequiredValue(record, "saturday");
 		sunday = getRequiredValue(record, "sunday");
 		
-		startDate = dateFormatter.parse(getRequiredValue(record, "start_date"));
-		endDate = dateFormatter.parse(getRequiredValue(record, "end_date"));
+		startDate = getRequiredValue(record, "start_date");
+		endDate = getRequiredValue(record, "end_date");
 	}
 
 	public String getServiceId() {
@@ -101,23 +98,35 @@ public class GtfsCalendar extends CsvBase {
 		return sunday;
 	}
 
-	public Date getStartDate() {
+	public String getStartDate() {
 		return startDate;
 	}
 
-	public Date getEndDate() {
+	/**
+	 * End of the last day of service. This means that when an end date is
+	 * specified the service runs for up to and including that day.
+	 * 
+	 * @return
+	 */
+	public String getEndDate() {
 		return endDate;
 	}
 
 	@Override
 	public String toString() {
-		return "GtfsCalendar [lineNumber=" + lineNumber 
-				+ ", serviceId=" + serviceId + ", monday="
-				+ monday + ", tuesday=" + tuesday + ", wednesday="
-				+ wednesday + ", thursday=" + thursday + ", friday="
-				+ friday + ", saturday=" + saturday + ", sunday=" + sunday
-				+ ", startDate=" + Time.dateStr(startDate) 
-				+ ", endDate=" + Time.dateStr(endDate) + "]";
+		return "GtfsCalendar [" 
+				+ "lineNumber=" + lineNumber 
+				+ ", serviceId=" + serviceId 
+				+ ", monday=" + monday 
+				+ ", tuesday=" + tuesday 
+				+ ", wednesday=" + wednesday 
+				+ ", thursday=" + thursday 
+				+ ", friday=" + friday 
+				+ ", saturday=" + saturday 
+				+ ", sunday=" + sunday
+				+ ", startDate=" + startDate 
+				+ ", endDate=" + endDate 
+				+ "]";
 	}
 	
 }

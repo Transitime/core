@@ -18,6 +18,8 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +33,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsCalendarDate;
@@ -57,16 +61,35 @@ public class CalendarDate implements Serializable{
 	@Column(length=2)
 	private final String exceptionType;
 
+	// Logging
+	public static final Logger logger = 
+			LoggerFactory.getLogger(CalendarDate.class);
+
 	// Because Hibernate requires objects with composite IDs to be Serializable
 	private static final long serialVersionUID = -4825360997804688749L;
 
 	/********************** Member Functions **************************/
 
-	public CalendarDate(GtfsCalendarDate gc) {
+	public CalendarDate(GtfsCalendarDate gtfsCalendarDate, 
+			DateFormat dateFormat) {
 		configRev = DbConfig.SANDBOX_REV;
-		serviceId = gc.getServiceId();
-		date = gc.getDate();
-		exceptionType = gc.getExceptionType();
+		serviceId = gtfsCalendarDate.getServiceId();
+		
+		// Dealing with date is complicated because must parse
+		Date tempDate;
+		try {
+			tempDate = dateFormat.parse(gtfsCalendarDate.getDate());
+		} catch (ParseException e) {
+			logger.error("Could not parse calendar date \"{}\" from " +
+					"line #{} from file {}", 
+					gtfsCalendarDate.getDate(), 
+					gtfsCalendarDate.getLineNumber(),
+					gtfsCalendarDate.getFileName());
+			tempDate = new Date();
+		}
+		date = tempDate;
+		
+		exceptionType = gtfsCalendarDate.getExceptionType();
 	}
 
 	/**

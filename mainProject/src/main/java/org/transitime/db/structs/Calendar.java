@@ -17,6 +17,8 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +36,9 @@ import net.jcip.annotations.Immutable;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.annotations.DynamicUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsCalendar;
@@ -52,45 +55,62 @@ import org.transitime.utils.Time;
 @Entity @DynamicUpdate @Table(name="Calendars")
 public class Calendar implements Serializable {
 
-	@Column @Id
+	@Column 
+	@Id
 	private final int configRev;
 	
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) @Id
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
+	@Id
 	private final String serviceId;
 	
-	@Column @Id
+	@Column 
+	@Id
 	private final boolean monday;
 	
-	@Column @Id
+	@Column 
+	@Id
 	private final boolean tuesday;
 	
-	@Column @Id
+	@Column 
+	@Id
 	private final boolean wednesday;
 	
-	@Column @Id
+	@Column 
+	@Id
 	private final boolean thursday;
 	
-	@Column @Id
+	@Column 
+	@Id
 	private final boolean friday;
 	
-	@Column @Id
+	@Column 
+	@Id
 	private final boolean saturday;
 	
-	@Column @Id
+	@Column 
+	@Id
 	private final boolean sunday;
 	
-	@Temporal(TemporalType.DATE) @Id
+	@Temporal(TemporalType.DATE) 
+	@Id
 	private final Date startDate;
 	
-	@Temporal(TemporalType.DATE) @Id
+	// Midnight at the end of the end date
+	@Temporal(TemporalType.DATE) 
+	@Id
 	private final Date endDate;
 
-	// Because Hibernate requires objects with composite Ids to be Serializable
+	
+	// Logging
+	public static final Logger logger = LoggerFactory.getLogger(Calendar.class);
+
+	// Because Hibernate requires objects with composite IDs to be Serializable
 	private static final long serialVersionUID = -7513544548678963561L;
 
 	/********************** Member Functions **************************/
 
-	public Calendar(GtfsCalendar gc) {
+	public Calendar(GtfsCalendar gc, 
+			DateFormat dateFormat) {
 		configRev = DbConfig.SANDBOX_REV;
 		serviceId = gc.getServiceId();
 		monday = isSetToTrue(gc.getMonday());
@@ -100,8 +120,34 @@ public class Calendar implements Serializable {
 		friday = isSetToTrue(gc.getFriday());
 		saturday = isSetToTrue(gc.getSaturday());
 		sunday = isSetToTrue(gc.getSunday());
-		startDate = gc.getStartDate();
-		endDate = gc.getEndDate();
+		
+		// Dealing with dates is complicated because must parse
+		Date tempDate;
+		try {
+			tempDate = dateFormat.parse(gc.getStartDate());
+		} catch (ParseException e) {
+			logger.error("Could not parse calendar start_date \"{}\" from " +
+					"line #{} from file {}", 
+					gc.getStartDate(), 
+					gc.getLineNumber(),
+					gc.getFileName());
+			tempDate = new Date();
+		}
+		startDate = tempDate;
+
+		// For end date parse the specified date and add a day so that
+		// the end date will be midnight of the date specified.
+		try {
+			tempDate = dateFormat.parse(gc.getEndDate());
+		} catch (ParseException e) {
+			logger.error("Could not parse calendar end_date \"{}\" from " +
+					"line #{} from file {}", 
+					gc.getStartDate(), 
+					gc.getLineNumber(),
+					gc.getFileName());
+			tempDate = new Date();
+		}
+		endDate = new Date(tempDate.getTime() + Time.MS_PER_DAY);
 	}
 	
 	/**
@@ -350,6 +396,8 @@ public class Calendar implements Serializable {
 	}
 
 	/**
+	 * End of the last day of service. This means that when an end date is
+	 * specified the service runs for up to and including that day.
 	 * @return the endDate
 	 */
 	public Date getEndDate() {

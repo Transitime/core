@@ -55,8 +55,6 @@ public class GtfsAgency extends CsvBase {
 		agencyLang = getOptionalValue(record, "agency_lang");
 		agencyPhone = getOptionalValue(record, "agency_phone");
 		agencyFareUrl = getOptionalValue(record, "agency_fare_url");
-		
-		createDateFormatter(agencyTimezone);
 	}
 
 	public String getAgencyId() {
