@@ -66,6 +66,7 @@
       <!-- Info on possible patterns is at 
            http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
         -->
+      <charset>UTF-8</charset>
       <pattern>${DEFAULT_PATTERN}</pattern> 
     </encoder>
   </appender>
@@ -96,6 +97,7 @@
     <encoder>
       <!-- A more complete pattern that provides additional info for debugging.
         -->
+      <charset>UTF-8</charset>
       <pattern>${DEBUG_PATTERN}</pattern>
     </encoder>
   </appender>
@@ -164,6 +166,7 @@
       <fileNamePattern>${LOG_FILE_ROOT}/avl.log.gz</fileNamePattern>
     </rollingPolicy>
     <encoder>
+      <charset>UTF-8</charset>
       <pattern>${DEFAULT_PATTERN}</pattern>
     </encoder>
   </appender>
@@ -174,6 +177,7 @@
       <fileNamePattern>${LOG_FILE_ROOT}/arrivalDeparture.log.gz</fileNamePattern>
     </rollingPolicy>
     <encoder>
+      <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
     </encoder>
   </appender>
@@ -184,6 +188,7 @@
       <fileNamePattern>${LOG_FILE_ROOT}/vehicleEvents.log.gz</fileNamePattern>
     </rollingPolicy>
     <encoder>
+      <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
     </encoder>
   </appender>
@@ -194,6 +199,7 @@
       <fileNamePattern>${LOG_FILE_ROOT}/prediction.log.gz</fileNamePattern>
     </rollingPolicy>
     <encoder>
+      <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
     </encoder>
   </appender>
@@ -204,6 +210,7 @@
       <fileNamePattern>${LOG_FILE_ROOT}/match.log.gz</fileNamePattern>
     </rollingPolicy>
     <encoder>
+      <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
     </encoder>
   </appender>
@@ -211,6 +218,7 @@
   <!-- In case easiest to write logs to console.  -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
+      <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
     </encoder>
   </appender>
