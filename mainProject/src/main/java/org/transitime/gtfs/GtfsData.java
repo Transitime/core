@@ -79,8 +79,8 @@ import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 /**
- * Contains all the GTFS data processed into Java lists and such.
- * Also combines in info from supplemental routes.txt file if there is one.
+ * Contains all the GTFS data processed into Java lists and such. Also combines
+ * in info from supplemental routes.txt file if there is one.
  * 
  * @author SkiBu Smith
  * 
@@ -613,9 +613,9 @@ public class GtfsData {
 	/**
 	 * Reads the data from stop_times.txt and puts it into
 	 * gtfsStopTimesForTripMap map. Also processes the data to determine Trips
-	 * (_tripMap) and TripPatterns (_tripPatterns). When processing Trips uses
-	 * frequency.txt data to determine if each trip ID is actually for multiple
-	 * trips with unique start times defined by the headway.
+	 * and TripPatterns. When processing Trips uses frequency.txt data to
+	 * determine if each trip ID is actually for multiple trips with unique
+	 * start times defined by the headway.
 	 */
 	private void processStopTimesData() {
 		// Make sure needed data is already read in. This method determines
@@ -734,40 +734,44 @@ public class GtfsData {
 		// For each trip in the stop_times.txt file ...
 		for (String tripId : gtfsStopTimesForTripMap.keySet()) {
 			// Determine the gtfs stop times for this trip
-			List<GtfsStopTime> gtfsStopTimesForTrip = gtfsStopTimesForTripMap.get(tripId);
+			List<GtfsStopTime> gtfsStopTimesForTrip = 
+					gtfsStopTimesForTripMap.get(tripId);
 
 			// Create list of Paths for creating trip pattern
 			List<StopPath> paths = new ArrayList<StopPath>();
 			
-			// Create set of path IDs for this trip so can tell if looping back on path
-			// such that need to create a unique path ID
+			// Create set of path IDs for this trip so can tell if looping 
+			// back on path such that need to create a unique path ID
 			Set<String> pathIdsForTrip = new HashSet<String>();
 			
-			// Determine the Trip element for the trip ID. Create new one if need to.
+			// Determine the Trip element for the trip ID. Create new one if 
+			// need to.
 			Trip trip = tripsInStopTimesFileMap.get(tripId);
 			if (trip == null) {
 				// Determine the GtfsTrip for the ID so can be used
 				// to construct the Trip object.
 				GtfsTrip gtfsTrip = getGtfsTrip(tripId);
 				
-				// If resulting gtfsTrip is null because it wasn't defined in trips.txt
-				// then need to log this problem (and log this only once) and continue
+				// If resulting gtfsTrip is null because it wasn't defined in
+				// trips.txt then need to log this problem (and log this only 
+				// once) and continue
 				if (gtfsTrip == null) {
-					logger.warn("Encountered trip_id={} in the stop_times.txt " +
-							"file but that trip_id is not in the trips.txt " +
-							"file or the service ID for the trip is not " +
-							"valid in anytime in the future. " + 
-							"Therefore this trip cannot be configured and has been discarded.",
+					logger.warn("Encountered trip_id={} in the " +
+							"stop_times.txt file but that trip_id is not in " +
+							"the trips.txt file or the service ID for the " +
+							"trip is not valid in anytime in the future. " + 
+							"Therefore this trip cannot be configured and " +
+							"has been discarded.",
 							tripId);
 					
 					// Can't deal with this trip Id so skip to next trip ID
 					continue;
 				}
 				
-				// FIXME keep all gtfs trips but only write them if service ID
-				// valid and only write stop times if service valid!
+				// If the service ID for the trip is not valid in the future 
+				// then don't need to process this Trip				
 				if (!validServiceIds.contains(gtfsTrip.getServiceId())) {
-					// Service ID not valid for this trip so log warning message
+					// ServiceUtils ID not valid for this trip so log warning message
 					// and continue on to next trip ID
 					logger.warn("For trip ID={} and service ID={} the " +
 							"service is not valid in the future so the trip " +
@@ -776,14 +780,16 @@ public class GtfsData {
 					continue;
 				}
 
-				// If this route is actually a sub-route of a parent then use the
-				// parent ID.
-				String properRouteId = getProperIdOfRoute(gtfsTrip.getRouteId());
+				// If this route is actually a sub-route of a parent then use
+				// the parent ID.
+				String properRouteId = 
+						getProperIdOfRoute(gtfsTrip.getRouteId());
 				
-				// Create the Trip and store the stop times into the associated map
-				String routeShortName = 
-						gtfsRoutesMap.get(gtfsTrip.getRouteId()).getRouteShortName();
-				trip = new Trip(gtfsTrip, properRouteId, routeShortName, titleFormatter);
+				// Create the Trip and store the stop times into associated map
+				GtfsRoute gtfsRoute = gtfsRoutesMap.get(gtfsTrip.getRouteId());
+				String routeShortName = gtfsRoute.getRouteShortName();
+				trip = new Trip(gtfsTrip, properRouteId, routeShortName,
+						titleFormatter);
 				tripsInStopTimesFileMap.put(tripId, trip);
 			}
 			
@@ -814,7 +820,7 @@ public class GtfsData {
 						filteredArr = null;
 				}
 				ScheduleTime scheduleTime = new ScheduleTime(filteredArr, filteredDep);
-				trip.add(stopId, scheduleTime);
+				trip.addScheduleTime(stopId, scheduleTime);
 				
 				// Create StopPath so it can be used to create TripPattern. 
 				// First determine attributes layoverStop, 
@@ -887,6 +893,26 @@ public class GtfsData {
 	}
 	
 	/**
+	 * Returns whether the trip specified is frequency based with an exact
+	 * schedule. This means that won't have block assignments made out of
+	 * multiple trips because there won't be a real concept of multiple trips
+	 * for a block for a vehicle.
+	 * 
+	 * @param tripId
+	 * @return True if specified trip is frequency based with an exact time
+	 */
+	public boolean isTripFrequencyBased(String tripId) {
+		// Get list of frequencies associated with trip ID
+		List<Frequency> frequencyList = getFrequencyList(tripId);
+		
+		// If first frequency is specified for "exact times" in GTFS then
+		// return true.
+		return frequencyList != null 
+				&& frequencyList.size() > 0
+				&& frequencyList.get(0).getExactTimes();
+	}
+
+	/**
 	 * Now that have the tripsInStopTimesFileMap need to create collection of
 	 * all trips if headways are defined in frequencyMap from the
 	 * frequencies.txt file. Creates and fills in tripsCollection.
@@ -899,9 +925,7 @@ public class GtfsData {
 			// Handle depending on whether a regular Trip or one defined
 			// in the frequencies.txt file.
 			String tripId = tripFromStopTimes.getId();
-			List<Frequency> frequencyListForTripId = frequencyMap.get(tripId);
-			if (frequencyListForTripId == null || 
-					!frequencyListForTripId.get(0).getExactTimes()) {
+			if (!isTripFrequencyBased(tripId)) {
 				// This is an actual Trip that is not affected by the
 				// frequencies.txt data. Therefore simply add it to
 				// the collection.
@@ -910,6 +934,7 @@ public class GtfsData {
 				// For this trip ID there is an entry in the frequencies.txt
 				// file with exact_times set indicating that need to create
 				// a separate Trip for each actual trip.  
+				List<Frequency> frequencyListForTripId = frequencyMap.get(tripId);
 				for (Frequency frequency : frequencyListForTripId) {
 					for (int tripStartTime = frequency.getStartTime(); 
 							tripStartTime < frequency.getEndTime();
@@ -1666,7 +1691,7 @@ public class GtfsData {
 		processFareRules();
 		processTransfers();
 		
-		// FIXME debugging
+		// debugging
 		//outputPathsAndStopsForGraphing("8699");
 		
 		SessionFactory sessionFactory = 
@@ -1693,7 +1718,7 @@ public class GtfsData {
 		logger.info("Finished processing GTFS data from {} . Took {} msec.",
 				gtfsDirectoryName, timer.elapsedMsec());		
 
-		// FIXME just for debugging
+		// just for debugging
 //		GtfsLoggingAppender.outputMessagesToSysErr();
 //		
 //		//outputShapesForGraphing("102589" /*"102829"*/);

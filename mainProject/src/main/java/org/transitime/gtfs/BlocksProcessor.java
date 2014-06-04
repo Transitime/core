@@ -146,7 +146,7 @@ public class BlocksProcessor {
 			}
 		}
 	}
-	
+
 	/**
 	 * Actually processes the trips into block assignments. Includes "unscheduled"
 	 * block assignments for the routes that have been configured for such.
@@ -167,6 +167,10 @@ public class BlocksProcessor {
 				new HashMap<String, HashMap<String, List<Trip>>>();
 		for (Trip trip : gtfsData.getTrips()) {
 			String serviceId = trip.getServiceId();
+			
+			// Determine block ID. For frequency based trips need to have a
+			// separate block for each trip. So need to modify the block ID
+			// for that case.
 			String blockId = trip.getBlockId();
 			
 			// Get the map for the specified service ID
@@ -198,62 +202,55 @@ public class BlocksProcessor {
 			for (String blockId : tripListForBlocksMap.keySet()) {
 				// Determine list of trips for the current block
 				List<Trip> tripsListForBlock = tripListForBlocksMap.get(blockId);
-				
-				
-				// The following parameters need to be determined to create the Block.
-				// The differ depending on whether the block is supposed to be
-				// schedule based or not. It is schedule based if the trips are not
-				// listed in the frequencies.txt file.
+								
+				// The following parameters need to be determined to create the
+				// Block. The differ depending on whether the block is supposed
+				// to be schedule based or not. It is schedule based if the
+				// trips are not listed in the frequencies.txt file.
 				int startTimeForBlock;
 				int endTimeForBlock;
-				int headwaySecs;
+				int headwaySecs = -1; // If not frequency based headway set to -1
 				
-				// If schedule based block then handle normally. A block is schedule
-				// based if its trips are listed in the frequencies.txt file. 
-				// Using the frequencies file is a bit vague though. It appears to be
-				// for individual trips but actually need a block to consist of multiple
-				// trips so that can predict through to the next trip. Only thing can
-				// do for now is to get the tripId for the first trip for the block
-				// (as defined in the stop_times.txt file) and see if it is in the
-				// frequency.txt file.
-				String firstTripId = tripsListForBlock.get(0).getId();
-				List<Frequency> frequencyList = gtfsData.getFrequencyList(firstTripId);
-				if (frequencyList == null || !frequencyList.get(0).getExactTimes()) {
-					// It is schedule based block so mark headway as -1
-					headwaySecs = -1;
-					
-					// Sort the List of Trips chronologically since they might be
-					// listed in the stop_times.txt file in any order.
-					Collections.sort(tripsListForBlock, 
-							new Comparator<Trip>() {
-								@Override
-								public int compare(Trip arg0, Trip arg1) {
-									return arg0.getStartTime().compareTo(arg1.getStartTime());
-								}
-							} );
-								
-					// Determine start time for block from the first trip.
-					Trip firstTripForBlock = tripsListForBlock.get(0);
-					startTimeForBlock = firstTripForBlock.getStartTime();
-					
-					// Determine end time for block from the last trip.
-					Trip lastTripForBlock = tripsListForBlock.get(tripsListForBlock.size()-1);
-					endTimeForBlock = lastTripForBlock.getEndTime();
-				} else {
-					Frequency frequency = frequencyList.get(0);
-					
-					// It is a frequency based block so use proper headway from file
+				// Determine headway for frequency based trips
+				// If schedule based block then handle normally. A block is 
+				// schedule based if its trips are listed in the frequencies.txt 
+				// file. Using the frequencies file is a bit vague though. It
+				// appears to be for individual trips but actually need a block
+				// to consist of multiple trips so that can predict through to 
+				// the next trip. Only thing can do for now is to get the tripId
+				// for the first trip for the block (as defined in the
+				// stop_times.txt file) and see if it is in the frequency.txt
+				// file.
+				String firstTripForBlockId = tripsListForBlock.get(0).getId();
+				if (gtfsData.isTripFrequencyBased(firstTripForBlockId)) {
+					// It is a frequency based block so use proper headway from
+					// file
+					List<Frequency> frequencyList = 
+							gtfsData.getFrequencyList(firstTripForBlockId);
+					Frequency frequency = frequencyList.get(0);		
 					headwaySecs = frequency.getHeadwaySecs();
-					
-					// Start time for unscheduled block is from the frequencies.txt file
-					startTimeForBlock = frequency.getStartTime();
-	
-					// End time for unscheduled block is from the frequencies.txt file
-					Trip firstTripForBlock = tripsListForBlock.get(0);
-					int tripEndTime = firstTripForBlock.getEndTime();
-					endTimeForBlock = frequency.getEndTime() + tripEndTime;
 				}
 				
+				// Sort the List of Trips chronologically since they might
+				// be listed in the stop_times.txt file in any order.
+				Collections.sort(tripsListForBlock, 
+						new Comparator<Trip>() {
+							@Override
+							public int compare(Trip arg0, Trip arg1) {
+								return arg0.getStartTime().
+										compareTo(arg1.getStartTime());
+							}
+						} );
+							
+				// Determine start time for block from the first trip.
+				Trip firstTripForBlock = tripsListForBlock.get(0);
+				startTimeForBlock = firstTripForBlock.getStartTime();
+				
+				// Determine end time for block from the last trip.
+				Trip lastTripForBlock = 
+						tripsListForBlock.get(tripsListForBlock.size()-1);
+				endTimeForBlock = lastTripForBlock.getEndTime();
+
 				// Create the Block
 				Block block = new Block(blockId,
 							serviceId,
