@@ -66,12 +66,12 @@ public class BlockAssigner {
 	 * @param avlReport
 	 * @return Block corresponding to the time and blockId from AVL report.
 	 */
-	public Block getBlock(AvlReport avlReport) {
+	public Block getBlockAssignment(AvlReport avlReport) {
 		if (avlReport != null &&
 				avlReport.getAssignmentId() != null && 
 				avlReport.getAssignmentType()==AssignmentType.BLOCK_ID) {
 			DbConfig config = Core.getInstance().getDbConfig();
-			Service service = Core.getInstance().getService();
+			ServiceUtils service = Core.getInstance().getServiceUtils();
 			List<String> serviceIds = service.getServiceIds(avlReport.getDate());
 			boolean blockFoundForServiceId = false;
 			for (String serviceId : serviceIds) {
@@ -104,7 +104,7 @@ public class BlockAssigner {
 	 * @param avlReport
 	 * @return The route ID or null if none assigned
 	 */
-	public String getRouteId(AvlReport avlReport) {
+	public String getRouteIdAssignment(AvlReport avlReport) {
 		if (avlReport != null
 				&& avlReport.getAssignmentId() != null
 				&& avlReport.getAssignmentType() == AssignmentType.ROUTE_ID) {

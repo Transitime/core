@@ -36,23 +36,24 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-public class Service {
+public class ServiceUtils {
 
 	private final GregorianCalendar calendar;
 	
 	private final DbConfig dbConfig;
 	
-	private static final Logger logger = LoggerFactory.getLogger(Service.class);
+	private static final Logger logger = 
+			LoggerFactory.getLogger(ServiceUtils.class);
 
 	/********************** Member Functions **************************/
 
 	/**
-	 * Service constructor. Creates reusable GregorianCalendar and sets the
+	 * ServiceUtils constructor. Creates reusable GregorianCalendar and sets the
 	 * timezone so that the calendar can be reused.
 	 * 
 	 * @param timezoneName See http://en.wikipedia.org/wiki/List_of_tz_zones
 	 */
-	public Service(DbConfig dbConfig) { 
+	public ServiceUtils(DbConfig dbConfig) { 
 		this.calendar = 
 				new GregorianCalendar(dbConfig.getFirstAgency().getTimeZone());
 		this.dbConfig = dbConfig;

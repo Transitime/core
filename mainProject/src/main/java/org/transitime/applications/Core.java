@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import org.transitime.config.Config;
 import org.transitime.configData.CoreConfig;
-import org.transitime.core.Service;
+import org.transitime.core.ServiceUtils;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.DataDbLogger;
@@ -63,7 +63,7 @@ public class Core {
 	// For logging data such as AVL reports and arrival times to database
 	private final DataDbLogger dataDbLogger;
 
-	private final Service service;
+	private final ServiceUtils service;
 	private final Time time;
 
 	// So that can access the current time, even when in playback mode
@@ -103,7 +103,7 @@ public class Core {
 		String timezoneStr = configData.getFirstAgency().getTimeZoneStr();
 		TimeZone.setDefault(TimeZone.getTimeZone(timezoneStr));
 
-		service = new Service(configData);
+		service = new ServiceUtils(configData);
 		time = new Time(configData);
 	}
 	
@@ -142,10 +142,10 @@ public class Core {
 	}
 	
 	/**
-	 * Returns the Service object that can be reused for efficiency.
+	 * Returns the ServiceUtils object that can be reused for efficiency.
 	 * @return
 	 */
-	public Service getService() {
+	public ServiceUtils getServiceUtils() {
 		return service;
 	}
 	
