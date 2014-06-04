@@ -235,7 +235,7 @@ public class DbConfig {
 	 * 
 	 * @param serviceId
 	 * @param routeId
-	 * @return List of Blocks
+	 * @return List of Blocks. Null of no blocks for the serviceId and routeId
 	 */
 	public List<Block> getBlocksForRoute(String serviceId, String routeId) {
 		// Read in data if it hasn't been read in yet. This isn't done at 
