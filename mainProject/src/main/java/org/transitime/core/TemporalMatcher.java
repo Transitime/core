@@ -113,7 +113,8 @@ public class TemporalMatcher {
 	 * 
 	 * @param avlReport
 	 * @param block
-	 * @return
+	 * @return List of Trips that are active. If none are active an empty list
+	 *         is returned.
 	 */
 	public List<Trip> getTripsCurrentlyActive(
 			AvlReport avlReport, Block block) {
