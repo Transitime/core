@@ -19,6 +19,7 @@ package org.transitime.db.structs;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +41,8 @@ import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
+import org.transitime.configData.CoreConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
@@ -353,6 +356,23 @@ public final class Block implements Serializable {
 		} else if (!trips.equals(other.trips))
 			return false;
 		return true;
+	}
+	
+	/**
+	 * Returns true if the time of day of the date passed in is between the
+	 * startTime (minus allowable early time for layover) and the endTime (plus
+	 * the allowable late time) for the block. Note: does not look to see if the
+	 * service associated with the block is active. Only looks at time of day.
+	 * 
+	 * @param date
+	 * @return True if the block is active.
+	 */
+	public boolean isActive(Date date) {
+		int secsInDayForAvlReport = 
+				Core.getInstance().getTime().getSecondsIntoDay(date);
+
+		return secsInDayForAvlReport > startTime - CoreConfig.getAllowableEarlyForLayoverSeconds() &&
+				secsInDayForAvlReport < endTime + CoreConfig.getAllowableLateSeconds();
 	}
 
 	/***************************** Getter Methods ************************/
