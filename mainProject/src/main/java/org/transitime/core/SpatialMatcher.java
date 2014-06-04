@@ -93,7 +93,9 @@ public class SpatialMatcher {
 
 	/**
 	 * Goes through entire TripPattern for specified Trip and determines spatial
-	 * matches.
+	 * matches. Matches must be within getMaxAllowableDistanceFromSegment()
+	 * except layovers are always included since vehicle are allowed to be away
+	 * from the route path during layovers.
 	 * 
 	 * @param avlReport
 	 * @param block
@@ -132,7 +134,10 @@ public class SpatialMatcher {
 
 	/**
 	 * Goes through the Block assignment data and determines the closest spatial
-	 * matches. For first matching a vehicle to a block assignment.
+	 * matches. For first matching a vehicle to a block assignment. Matches must
+	 * be within getMaxAllowableDistanceFromSegment() except layovers are always
+	 * included since vehicle are allowed to be away from the route path during
+	 * layovers.
 	 * 
 	 * @param avlReport
 	 * @param tripPatternsToInvestigate
@@ -222,7 +227,10 @@ public class SpatialMatcher {
 	 * For determining possible spatial matches. A spatial match is when the AVL
 	 * report location is within allowable distance of the path segment and the
 	 * heading is OK and the distance to the segment is a local minimum (it is a
-	 * best match). To be called for a series of segments.
+	 * best match). Matches must be within getMaxAllowableDistanceFromSegment()
+	 * except layovers are always included since vehicle are allowed to be away
+	 * from the route path during layovers. To be called for a series of
+	 * segments.
 	 * 
 	 * @param avlReport
 	 *            The new AVL report
