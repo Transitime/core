@@ -60,11 +60,13 @@ public class Trip implements Serializable {
 	// The startTime needs to be an Id column because GTFS frequencies.txt
 	// file can be used to define multiple trips with the same trip ID. 
 	// It is in number of seconds into the day.
+	// Not final because only used for frequency based trips.
 	@Column
 	@Id 
 	private Integer startTime;
 	
-	// Number of seconds into the day
+	// Number of seconds into the day.
+	// Not final because only used for frequency based trips.
 	@Column
 	private Integer endTime;
 	
@@ -99,7 +101,7 @@ public class Trip implements Serializable {
 	private TravelTimesForTrip travelTimes;
 	
 	// Contains schedule time for each stop as obtained from GTFS 
-	// stop_times.txt file.
+	// stop_times.txt file. Useful for determining schedule adherence.
 	// NOTE: trying to use serialization. Serialization 
 	// makes the data not readable in the db using regular SQL but it means
 	// that don't need separate table and the data can be read and written
@@ -112,19 +114,22 @@ public class Trip implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String serviceId;
 	
+	// The GTFS trips.txt trip_headsign if set. Otherwise null.
 	@Column
 	private final String name;
 	
+	// From GTFS trips.txt block_id if set. Otherwise the trip_id.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String blockId;
 	
+	// The GTFS trips.txt shape_id
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String shapeId;
 
 	// Note: though trip_short_name and wheelchair_accessible are available
 	// as part of the GTFS spec and in a GtfsTrip object, they are not
 	// included here because currently don't understand how best to use them
-	// for RTPI. Route and shape can be determined from the TripPattern so don't 
+	// for RTPI. Route and shape can be determined from the TripPattern so don't
 	// need to be here.
 	
 	// Hibernate requires class to be serializable because has composite Id
@@ -158,7 +163,8 @@ public class Trip implements Serializable {
 		this.name = gtfsTrip.getTripHeadsign();
 		// block column is optional in GTFS trips.txt file. Best can do for
 		// this situation is to use the tripId as the block.
-		this.blockId = gtfsTrip.getBlockId()!=null? gtfsTrip.getBlockId() : gtfsTrip.getTripId();
+		this.blockId = gtfsTrip.getBlockId() != null ? 
+				gtfsTrip.getBlockId() : gtfsTrip.getTripId();
 		this.shapeId = gtfsTrip.getShapeId();
 	}
 	
@@ -178,7 +184,6 @@ public class Trip implements Serializable {
 		this.routeShortName = tripFromStopTimes.routeShortName;
 		this.serviceId = tripFromStopTimes.serviceId;
 		this.name = tripFromStopTimes.name;
-		this.blockId = tripFromStopTimes.blockId;
 		this.shapeId = tripFromStopTimes.shapeId;
 		this.tripPattern = tripFromStopTimes.tripPattern;
 		this.travelTimes = tripFromStopTimes.travelTimes;
@@ -188,6 +193,13 @@ public class Trip implements Serializable {
 		this.startTime = tripFromStopTimes.startTime + frequenciesBasedStartTime;
 		this.endTime = tripFromStopTimes.endTime + frequenciesBasedStartTime;
 		
+		// Since frequencies being used for configuration we will have multiple
+		// trips with the same ID. But need a different block ID for each one.
+		// Therefore use the original trip's block ID but then append the 
+		// start time as a string to make it unique. 
+		this.blockId = tripFromStopTimes.blockId + "_" + 
+				Time.timeOfDayStr(this.startTime);
+
 		// Set the scheduledTimesMap by using the frequencies based start time
 		for (String stopIdKey : tripFromStopTimes.scheduledTimesMap.keySet()) {
 			ScheduleTime schedTimeFromStopTimes = 
@@ -230,7 +242,7 @@ public class Trip implements Serializable {
 	 * @param stopId
 	 * @param scheduleTime
 	 */
-	public void add(String stopId, ScheduleTime scheduleTime) {
+	public void addScheduleTime(String stopId, ScheduleTime scheduleTime) {
 		scheduledTimesMap.put(stopId, scheduleTime);
 		
 		// Determine the begin and end time. Assumes that times are added in order
@@ -316,7 +328,8 @@ public class Trip implements Serializable {
 		return "\n    Trip [" 
 				+ "configRev=" + configRev
 				+ ", tripId=" + tripId 
-				+ ", tripPatternId=" + tripPattern.getId()
+				+ ", tripPatternId=" 
+					+ (tripPattern != null ? tripPattern.getId() : "null")
 				+ ", tripIndex=" + getIndex()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
@@ -339,7 +352,8 @@ public class Trip implements Serializable {
 	public String toShortString() {
 		return "Trip ["
 				+ "tripId=" + tripId 
-				+ ", tripPatternId=" + tripPattern.getId()
+				+ ", tripPatternId=" 
+					+ (tripPattern != null ? tripPattern.getId() : "null")
 				+ ", tripIndex=" + getIndex()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
@@ -550,20 +564,42 @@ public class Trip implements Serializable {
 	}
 	
 	/**
-	 * Returns the Block that the Trip is associated with
-	 * @return
-	 */
-	public Block getBlock() {
-		return Core.getInstance().getDbConfig().getBlock(serviceId, blockId);
-	}
-	
-	/**
-	 * Returns the index of the trip in the block.
+	 * Returns the Block that the Trip is associated with. Only valid
+	 * when running the core application where can use Core.getInstance().
+	 * Otherwise returns null.
 	 * 
 	 * @return
 	 */
+	public Block getBlock() {
+		// If not part of the core project where DbConfig is available
+		// then just return null.
+		Core core = Core.getInstance();
+		if (core == null)
+			return null;
+		DbConfig dbConfig = core.getDbConfig();
+		if (dbConfig == null)
+			return null;
+		
+		// Part of core project so return the Block
+		return dbConfig.getBlock(serviceId, blockId);
+	}
+	
+	/**
+	 * Returns the index of the trip in the block. Uses DbConfig from the core
+	 * project to determine the Block. If not part of the core project the Block
+	 * info is not available and -1 is returned.
+	 * 
+	 * @return The index of the trip in the block or -1 if block info not
+	 *         available.
+	 */
 	public int getIndex() {
-		return getBlock().getTripIndex(getId());
+		// If block info no available then simply return -1
+		Block block = getBlock();
+		if (block == null)
+			return -1;
+		
+		// Block info available so return the trip index
+		return block.getTripIndex(getId());
 	}
 	
 	/**
@@ -588,9 +624,9 @@ public class Trip implements Serializable {
 	}
 	
 	/**
-	 * Returns the ScheduleTime object for the stopId. Will 
-	 * return null if there are no schedule times associated with
-	 * that stop for this trip.
+	 * Returns the ScheduleTime object for the stopId. Will return null if there
+	 * are no schedule times associated with that stop for this trip. Useful for
+	 * determining schedule adherence.
 	 * 
 	 * @param stopId
 	 * @return
