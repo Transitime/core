@@ -188,7 +188,7 @@ public class GtfsRtVehiclePositionsReader {
 	 */
 	public static List<AvlReport> getAvlReports(String urlString) {
 		try {
-			logger.info("Getting GTFS-realtime AVL data from URL={}", 
+			logger.info("Getting GTFS-realtime AVL data from URL={} ...", 
 					urlString);
 			
 			URI uri = new URI(urlString);
@@ -205,6 +205,8 @@ public class GtfsRtVehiclePositionsReader {
 			
 			// Actual read in the data into a list of AVLReport objects
 			FeedMessage feed = FeedMessage.parseFrom(codedStream);
+			logger.info("Converting GTFS-realtime AVL data to list of " +
+					"AvlReports...");
 			List<AvlReport> avlReports = processMessage(feed);
 			return avlReports;
 		} catch (Exception e) {
