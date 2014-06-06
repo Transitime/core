@@ -35,19 +35,19 @@ import org.transitime.gtfs.writers.GtfsStopsWriter;
 import org.transitime.utils.ChinaGpsOffset;
 
 /**
- * Maps are offset for China such that when GTFS data is plotted it is not 
- * accurately located with respect to the streets. This makes it really 
- * hard to use ScheduleViewer to debug data. Therefore this application
- * can be used to offset the locations in the stops.txt and the shapes.txt 
- * files such that when displayed on a map they will be correct. 
+ * Maps are offset for China such that when GTFS data is plotted it is not
+ * accurately located with respect to the streets. This makes it really hard to
+ * use ScheduleViewer to debug data. Therefore this application can be used to
+ * offset the locations in the stops.txt and the shapes.txt files such that when
+ * displayed on a map they will be correct.
  * 
- * New files called "shapes.txt_offset" and "stops.txt_offset" are created 
- * such that the original files are not overwritten. To use in 
- * ScheduleViewer you will need to do something like move shapes.txt to
- * shapes.txt_orig and then copy the new shapes.txt_offset to shapes.txt .
+ * A modified copy of all of the GTFS files is made into a new directory. The
+ * new directory has a suffix specified by GTFS_OUTPUT_DIR_SUFFIX. So if
+ * offsetting the directory /users/msmith/GTFS/agency the resulting files go
+ * into /users/msmith/GTFS/agency_mapOffset.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class OffsetGtfsLocsForChina {
 
@@ -218,6 +218,11 @@ public class OffsetGtfsLocsForChina {
 	 * Converts for specified GTFS directory the shapes.txt and stops.txt
 	 * locations from Geodetic ==> Mars coordinates used for China maps. Can
 	 * also be used to transform back from Mars ==> Geodetic coordinates.
+	 * 
+	 * A modified copy of all of the GTFS files is made into a new directory.
+	 * The new directory has a suffix specified by GTFS_OUTPUT_DIR_SUFFIX. So if
+	 * offsetting the directory /users/msmith/GTFS/agency the resulting files go
+	 * into /users/msmith/GTFS/agency_mapOffset.
 	 * 
 	 * @param args
 	 *            If first arg is set to "-back" then does a reverse
