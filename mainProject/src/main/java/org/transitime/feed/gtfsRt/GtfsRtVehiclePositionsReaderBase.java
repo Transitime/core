@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MathUtils;
 
 import com.google.protobuf.CodedInputStream;
@@ -100,13 +101,16 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 	protected abstract void handleAvlReport(AvlReport avlReport);
 	
 	/**
-	 * For each vehicle in the GTFS-realtime message put AvlReport
-	 * into list.
+	 * For each vehicle in the GTFS-realtime message put AvlReport into list.
 	 * 
 	 * @param message
+	 *            Contains all of the VehiclePosition objects
 	 * @return List of AvlReports
 	 */
 	private void processMessage(FeedMessage message) {
+		logger.info("Processing each individual AvlReport...");
+		IntervalTimer timer = new IntervalTimer();
+		
 		// For each entity/vehicle process the data
 		int counter = 0;
 		for (FeedEntity entity : message.getEntityList()) {
@@ -185,8 +189,8 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		  }
 		
 		logger.info("Successfully processed {} AVL reports from " +
-				"GTFS-realtime feed",
-				counter);
+				"GTFS-realtime feed in {} msec",
+				counter, timer.elapsedMsec());
 	}
 	
 	/**
@@ -197,6 +201,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		try {
 			logger.info("Getting GTFS-realtime AVL data from URL={} ...", 
 					urlString);
+			IntervalTimer timer = new IntervalTimer();
 			
 			URI uri = new URI(urlString);
 			URL url = uri.toURL();
@@ -208,12 +213,19 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 					CodedInputStream.newInstance(url.openStream());
 			// What to use instead of default 64MB limit
 			final int GTFS_SIZE_LIMIT = 200000000;
-			codedStream.setSizeLimit(GTFS_SIZE_LIMIT);
+			codedStream.setSizeLimit(GTFS_SIZE_LIMIT);	
 			
-			// Actual read in the data into a list of AVLReport objects
+			// Actual read in the data into a protobuffer FeedMessage object.
+			// Would prefer to do this one VehiclePosition at a time using
+			// something like VehiclePosition.parseFrom(codedStream) so that
+			// wouldn't have to load entire protobuffer file into memory. But
+			// it never seemed to complete, even for just a single call to
+			// parseFrom(). Therefore loading in entire file at once.
 			FeedMessage feed = FeedMessage.parseFrom(codedStream);
-			logger.info("Converting GTFS-realtime AVL data to list of " +
-					"AvlReports...");
+			logger.info("Parsing GTFS-realtime file into a FeedMessage took " +
+					"{} msec", timer.elapsedMsec());
+			
+			// Process each individual VehiclePostions message
 			processMessage(feed);
 		} catch (Exception e) {
 			logger.error("Exception when reading GTFS-realtime data from " + 
