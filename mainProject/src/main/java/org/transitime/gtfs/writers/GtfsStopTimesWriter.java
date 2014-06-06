@@ -39,7 +39,7 @@ public class GtfsStopTimesWriter extends CsvWriterBase {
 	 * @param fileName
 	 */
 	public GtfsStopTimesWriter(String fileName) {
-		super(fileName);
+		super(fileName, false);
 	}
 
 	/**

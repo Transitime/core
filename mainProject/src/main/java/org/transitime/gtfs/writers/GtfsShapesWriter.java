@@ -41,7 +41,7 @@ public class GtfsShapesWriter extends CsvWriterBase {
 	 * @param fileName
 	 */
 	public GtfsShapesWriter(String fileName) {
-		super(fileName);
+		super(fileName, false);
 	}
 
 	/**

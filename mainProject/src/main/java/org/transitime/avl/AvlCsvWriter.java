@@ -54,7 +54,7 @@ public class AvlCsvWriter extends CsvWriterBase {
 	 *            output time in local time.
 	 */
 	public AvlCsvWriter(String fileName, String timezoneStr) {
-		super(fileName);
+		super(fileName, true);
 		
 		timeUsingTimeZone = new Time(timezoneStr);
 	}

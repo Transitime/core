@@ -42,7 +42,7 @@ public class GtfsStopsWriter extends CsvWriterBase {
 	 * @param fileName
 	 */
 	public GtfsStopsWriter(String fileName) {
-		super(fileName);
+		super(fileName, false);
 	}
 
 	/**

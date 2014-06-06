@@ -37,11 +37,15 @@ public abstract class CsvWriterBase {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Creates file writer and writes the header. 
+	 * Creates file writer and writes the header.
 	 * 
 	 * @param fileName
+	 * @param append
+	 *            Set to true if should append data to CSV file if it already
+	 *            exists. If false then will write new file along with the
+	 *            header.
 	 */
-	public CsvWriterBase(String fileName) {
+	public CsvWriterBase(String fileName, boolean append) {
 		try {
 			// Create the directory if necessary.
 			// First, determine directory name by finding the last slash.
@@ -56,13 +60,17 @@ public abstract class CsvWriterBase {
 				dir.mkdirs();
 			}
 			
+			// Determine if file exists
+			boolean fileAlreadyExists = (new File(fileName)).exists();
+			
 			// Create the writer. Need to use UTF-8 since sometimes will be
 			// writing Chinese or other characters for route names and such.
 			writer = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(fileName), "UTF-8"));
+					new FileOutputStream(fileName, append), "UTF-8"));
 			
-		    // Write the header
-			writeHeader();
+		    // Write the header if it is a new file or not appending
+			if (!fileAlreadyExists || !append)
+				writeHeader();
 		} catch (IOException e) {
 			// Only expect to run this in batch mode so don't really
 			// need to log an error using regular logging. Printing
