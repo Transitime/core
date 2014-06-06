@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.avl.AvlCsvWriter;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.config.StringListConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
 
@@ -40,20 +41,15 @@ import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
  */
 public class ConvertGtfsRtToCsvFile {
 
-	// Keyed on vehicleId
-	private static Map<String, List<AvlReport>> avlReportsByVehicle =
-			new HashMap<String, List<AvlReport>>();
-			
-	private static final Logger logger = LoggerFactory
-			.getLogger(ConvertGtfsRtToCsvFile.class);
+	private static final Logger logger = 
+			LoggerFactory.getLogger(ConvertGtfsRtToCsvFile.class);
 
 	/*********** Configurable Parameters for this module ***********/
-	private static String getGtfsRealtimeURI() {
-		return gtfsRealtimeURI.getValue();
+	private static List<String> getGtfsRealtimeURIs() {
+		return gtfsRealtimeURIs.getValue();
 	}
-	private static StringConfigValue gtfsRealtimeURI =
-			new StringConfigValue("transitime.avl.gtfsRealtimeFeedURI", 
-					"file:///C:/Users/Mike/gtfsRealtimeData");
+	private static StringListConfigValue gtfsRealtimeURIs =
+			new StringListConfigValue("transitime.avl.gtfsRealtimeFeedURIs");
 	
 	private static String getCsvFileOutputDir() {
 		return csvFileOutputDir.getValue();
@@ -84,8 +80,10 @@ public class ConvertGtfsRtToCsvFile {
 	 * Adds avlReport to avlReportsByVehicle map.
 	 * 
 	 * @param avlReport
+	 * @param avlReportsByVehicle
 	 */
-	private static void processReport(AvlReport avlReport) {
+	private static void processReport(AvlReport avlReport,
+			Map<String, List<AvlReport>> avlReportsByVehicle) {
 		String vehicleId = avlReport.getVehicleId();
 		List<AvlReport> avlReportsForVehicle =
 				avlReportsByVehicle.get(vehicleId);
@@ -99,8 +97,11 @@ public class ConvertGtfsRtToCsvFile {
 	
 	/**
 	 * Writes out separate CSV file of AvlReports for each vehicle.
+	 * 
+	 * @param avlReportsByVehicle
 	 */
-	private static void writeCsvFiles() {
+	private static void writeCsvFiles(
+			Map<String, List<AvlReport>> avlReportsByVehicle) {
 		String directory = getCsvFileOutputDir();
 		logger.info("Writing out CSV files to directory {}", directory);
 		
@@ -119,20 +120,32 @@ public class ConvertGtfsRtToCsvFile {
 	}
 	
 	/**
+	 * Reads in a GTFS-realtime file for a Vehicle Positions feed and converts
+	 * it to a CSV file containing the AVL reports.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		List<String> uris = getGtfsRealtimeURIs();
+		
 		// Read in GTFS-realtime data
-		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
-				.getAvlReports(getGtfsRealtimeURI());
-		
-		// Load all AvlReports into map by vehicle ID
-		for (AvlReport avlReport : avlReports) {
-			processReport(avlReport);
+		for (String uri : uris) {
+			// For keeping track of all the AVL reports. Keyed on vehicleId
+			Map<String, List<AvlReport>> avlReportsByVehicle =
+					new HashMap<String, List<AvlReport>>();
+					
+			// Read in all the AvlReports
+			List<AvlReport> avlReports = 
+					GtfsRtVehiclePositionsReader.getAvlReports(uri);
+			
+			// Load all AvlReports into map by vehicle ID
+			for (AvlReport avlReport : avlReports) {
+				processReport(avlReport, avlReportsByVehicle);
+			}
+			
+			// Write out the CSV files, one per vehicle
+			writeCsvFiles(avlReportsByVehicle);
 		}
-		
-		// Write out the CSV files, one per vehicle
-		writeCsvFiles();
 		
 		logger.info("Done writing out CSV files!");
 	}
