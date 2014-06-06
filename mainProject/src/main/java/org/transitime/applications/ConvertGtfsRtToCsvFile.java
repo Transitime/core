@@ -48,21 +48,21 @@ public class ConvertGtfsRtToCsvFile {
 			.getLogger(ConvertGtfsRtToCsvFile.class);
 
 	/*********** Configurable Parameters for this module ***********/
-	public static String getGtfsRealtimeURI() {
+	private static String getGtfsRealtimeURI() {
 		return gtfsRealtimeURI.getValue();
 	}
 	private static StringConfigValue gtfsRealtimeURI =
 			new StringConfigValue("transitime.avl.gtfsRealtimeFeedURI", 
 					"file:///C:/Users/Mike/gtfsRealtimeData");
 	
-	public static String getCsvFileDir() {
-		return csvFileDir.getValue();
+	private static String getCsvFileOutputDir() {
+		return csvFileOutputDir.getValue();
 	}
-	private static StringConfigValue csvFileDir =
-			new StringConfigValue("transitime.avl.csvFileDir", 
+	private static StringConfigValue csvFileOutputDir =
+			new StringConfigValue("transitime.avl.csvFileOutputDir", 
 					"/Users/Mike/gtfsRealtimeData/csv");
 
-	public static String getTimeZoneStr() {
+	private static String getTimeZoneStr() {
 		if (timeZoneStr.getValue().isEmpty())
 			return null;
 		else
@@ -101,7 +101,7 @@ public class ConvertGtfsRtToCsvFile {
 	 * Writes out separate CSV file of AvlReports for each vehicle.
 	 */
 	private static void writeCsvFiles() {
-		String directory = getCsvFileDir();
+		String directory = getCsvFileOutputDir();
 		logger.info("Writing out CSV files to directory {}", directory);
 		
 		Set<String> vehicleIds = avlReportsByVehicle.keySet();
