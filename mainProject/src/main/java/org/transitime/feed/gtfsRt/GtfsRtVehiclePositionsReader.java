@@ -59,7 +59,7 @@ public class GtfsRtVehiclePositionsReader extends
 	 * Returns list of AvlReports read from GTFS-realtime file
 	 * specified by urlString.
 	 * 
-	 * @param urlString URL of GTFS-rt file
+	 * @param urlString URL of GTFS-realtime file
 	 * @return List of AvlReports
 	 */
 	public static List<AvlReport> getAvlReports(String urlString) {
