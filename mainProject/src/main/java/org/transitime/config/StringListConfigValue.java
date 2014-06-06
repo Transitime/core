@@ -28,8 +28,13 @@ import java.util.List;
  * 
  */
 public class StringListConfigValue extends ConfigValue<List<String>> {
+	
 	/**
 	 * No default is specified. If value not in config file then error occurs.
+	 * When parameter set as a command line argument then the
+	 * ConfigValue.LIST_SEPARATOR is used (";") when need to specify multiple
+	 * items.
+	 * 
 	 * @param configValuesList
 	 * @param id
 	 */
@@ -37,6 +42,14 @@ public class StringListConfigValue extends ConfigValue<List<String>> {
 		super(id, null);
 	}
 	
+	/**
+	 * When parameter set as a command line argument then the
+	 * ConfigValue.LIST_SEPARATOR is used (";") when need to specify multiple
+	 * items.
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 */
 	public StringListConfigValue(String id, List<String> defaultValue) {
 		super(id, defaultValue);
 	}
