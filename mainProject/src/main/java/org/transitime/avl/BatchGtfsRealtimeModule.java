@@ -25,11 +25,12 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
-import org.transitime.config.StringConfigValue;
+import org.transitime.config.StringListConfigValue;
 import org.transitime.core.DataProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Location;
 import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
+import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReaderBase;
 import org.transitime.modules.Module;
 import org.transitime.utils.Time;
 
@@ -53,17 +54,48 @@ import org.transitime.utils.Time;
  */
 public class BatchGtfsRealtimeModule extends Module {
 
+	/*********** Logging *******************************************/
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(BatchGtfsRealtimeModule.class);
 
 	/*********** Configurable Parameters for this module ***********/
-	public static String getGtfsRealtimeURI() {
-		return gtfsRealtimeURI.getValue();
+	
+	public static List<String> getGtfsRealtimeURIs() {
+		return gtfsRealtimeURIs.getValue();
 	}
-	private static StringConfigValue gtfsRealtimeURI =
-			new StringConfigValue("transitime.avl.gtfsRealtimeFeedURI", 
-					"file:///C:/Users/Mike/gtfsRealtimeData");
+	private static StringListConfigValue gtfsRealtimeURIs =
+			new StringListConfigValue("transitime.avl.gtfsRealtimeFeedURIs");
 
+	/********************* Helper Class ************************/
+
+	/**
+	 * For reading data from GTFS-realtime feed and processing one AVL report at
+	 * a time. By using this class don't have to read in all AVL reports into
+	 * memory.
+	 */
+	static class GtfsRtBatchReader extends GtfsRtVehiclePositionsReaderBase {
+		public GtfsRtBatchReader(String urlString) {
+			super(urlString);
+		}
+
+		/**
+		 * (non-Javadoc)
+		 * 
+		 * @see org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReaderBase#handleAvlReport(
+		 * org.transitime.db.structs.AvlReport)
+		 */
+		@Override
+		protected void handleAvlReport(AvlReport avlReport) {
+			// Update the Core SystemTime to use this AVL time
+			Core.getInstance().setSystemTime(avlReport.getTime());
+
+			// Actually process the AvlReport
+			DataProcessor.getInstance().processAvlReport(avlReport);
+		}
+		
+	}
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -78,43 +110,45 @@ public class BatchGtfsRealtimeModule extends Module {
 	 * used for Zhengzhou to add logging info so that can see how many valid
 	 * reports there are. Also filters out AVL reports that are not within 15km
 	 * of downtown Zhengzhou. It is only for debugging.
-	 * 
-	 * @param avlReports
-	 *            The full set of AVL reports
-	 * @return The AVL reports, filtered so that only ones within 15km of
-	 *         Zhengzhou are provided.
 	 */
-	private List<AvlReport> handleZhengzhou(List<AvlReport> avlReports) {
-		//logger.info("The following AVL reports are for within 15km of Zhengzhou");
-		List<AvlReport> zhengzhouAvlReports = new ArrayList<AvlReport>();
-		Set<String> zhengzhouVehicles = new HashSet<String>();
-		Set<String> zhengzhouRoutes = new HashSet<String>();
-		long earliestTime = Long.MAX_VALUE;
-		long latestTime = Long.MIN_VALUE;
-		for (AvlReport avlReport : avlReports) {
-			if (avlReport.getLocation().distance(new Location(34.75, 113.65)) < 15000) {
-				//logger.info("Zhengzhou avlReport={}", avlReport);
-				zhengzhouAvlReports.add(avlReport);
-				
-				zhengzhouVehicles.add(avlReport.getVehicleId());
-				zhengzhouRoutes.add(avlReport.getAssignmentId());
-				
-				if (avlReport.getTime() < earliestTime)
-					earliestTime = avlReport.getTime();
-				if (avlReport.getTime() > latestTime)
-					latestTime = avlReport.getTime();
+	private void debugZhengzhou() {
+		for (String uri : getGtfsRealtimeURIs()) {
+			List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
+					.getAvlReports(uri);
+	
+			// Location of downtown Zhengzhou
+			Location downtown = new Location(34.75, 113.65);
+			
+			//logger.info("The following AVL reports are within 15km of Zhengzhou");
+			List<AvlReport> zhengzhouAvlReports = new ArrayList<AvlReport>();
+			Set<String> zhengzhouVehicles = new HashSet<String>();
+			Set<String> zhengzhouRoutes = new HashSet<String>();
+			long earliestTime = Long.MAX_VALUE;
+			long latestTime = Long.MIN_VALUE;
+			for (AvlReport avlReport : avlReports) {
+				if (avlReport.getLocation().distance(downtown) < 15000) {
+					//logger.info("Zhengzhou avlReport={}", avlReport);
+					zhengzhouAvlReports.add(avlReport);
+					
+					zhengzhouVehicles.add(avlReport.getVehicleId());
+					zhengzhouRoutes.add(avlReport.getAssignmentId());
+					
+					if (avlReport.getTime() < earliestTime)
+						earliestTime = avlReport.getTime();
+					if (avlReport.getTime() > latestTime)
+						latestTime = avlReport.getTime();
+				}
 			}
+			logger.info("For Zhengzhou got {} AVl reports out of total of {}.",
+					zhengzhouAvlReports.size(), avlReports.size());
+			logger.info("For Zhengzhou found {} vehicles={}", 
+					zhengzhouVehicles.size(), zhengzhouVehicles);
+			logger.info("For Zhengzhou found {} routes={}", 
+					zhengzhouRoutes.size(), zhengzhouRoutes);
+			logger.info("Earliest AVL time was {} and latest was {}",
+					new Date(earliestTime), new Date(latestTime));
 		}
-		logger.info("For Zhengzhou got {} AVl reports out of total of {}.",
-				zhengzhouAvlReports.size(), avlReports.size());
-		logger.info("For Zhengzhou found {} vehicles={}", 
-				zhengzhouVehicles.size(), zhengzhouVehicles);
-		logger.info("For Zhengzhou found {} routes={}", 
-				zhengzhouRoutes.size(), zhengzhouRoutes);
-		logger.info("Earliest AVL time was {} and latest was {}",
-				new Date(earliestTime), new Date(latestTime));
 
-		return zhengzhouAvlReports;		
 	}
 	
 	/* 
@@ -125,23 +159,17 @@ public class BatchGtfsRealtimeModule extends Module {
 	 */
 	@Override
 	public void run() {
-		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
-				.getAvlReports(getGtfsRealtimeURI());
-		
 		// Zhengzhou had trouble providing valid GPS reports so this method
 		// can be used to log debugging info and to filter out reports that
 		// are not actually in Zhengzhou
-		if (projectId.equals("zhengzhou"))
-			avlReports = handleZhengzhou(avlReports);
+		if (projectId.equals("zhengzhouXX")) {
+			debugZhengzhou();
+		}
 		
-		// Process the AVL Reports read in.
-		for (AvlReport avlReport : avlReports) {
-			logger.info("Processing avlReport={}", avlReport);
-			
-			// Update the Core SystemTime to use this AVL time
-			Core.getInstance().setSystemTime(avlReport.getTime());
-
-			DataProcessor.getInstance().processAvlReport(avlReport);
+		// Process the VehiclePosition reports from the GTFS-realtime files
+		for (String uri : getGtfsRealtimeURIs()) {
+			GtfsRtBatchReader reader = new GtfsRtBatchReader(uri);
+			reader.process();		
 		}
 		
 		// Done processing the batch data. Wait a bit more to make sure system
