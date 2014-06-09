@@ -502,7 +502,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// departureTimeBasedOnNewMatch if that time is too early due to 
 		// expected travel times being too long.
 		long departureTimeBasedOnOldMatch;
-		if (matchJustAfterStop.lessThan(oldMatch)) {
+		if (matchJustAfterStop.lessThanOrEqualTo(oldMatch)) {
 			// The stop is before the oldMatch so need to subtract travel time
 			// from the stop to the oldMatch from the previous AVL report time.
 			int travelTimeFromStopToOldMatchMsec = TravelTimes.getInstance()
@@ -637,7 +637,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// time is in the future due to the expected travel times incorrectly
 		// being too long.
 		long arrivalTimeBasedOnNewMatch;
-		if (newMatch.lessThan(matchJustBeforeStop)) {
+		if (newMatch.lessThanOrEqualTo(matchJustBeforeStop)) {
 			// The new match is before the stop so add the travel time
 			// from the match to the stop to the AVL time to get the
 			// arrivalTimeBasedOnNewMatch.
