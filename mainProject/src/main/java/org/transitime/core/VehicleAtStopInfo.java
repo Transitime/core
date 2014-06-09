@@ -61,4 +61,19 @@ public class VehicleAtStopInfo extends Indices {
 				+ "]";
 	}
 
+	/**
+	 * Returns true if tripIndex, stopPathIndex, and segmentIndex are for the
+	 * very last trip, path, segment for the block assignment. Had to override
+	 * Indices.atEndOfBlock() because this class doesn't use the segment index
+	 * while Indices does.
+	 * 
+	 * @return
+	 */
+	@Override
+	public boolean atEndOfBlock() {
+		return getTripIndex() == getBlock().numTrips() - 1
+				&& getStopPathIndex() == 
+						getBlock().numStopPaths(getTripIndex()) - 1;
+	}
+
 }
