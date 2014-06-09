@@ -130,6 +130,20 @@ public class ConvertGtfsRtToCsvFile {
 		
 		// Read in GTFS-realtime data
 		for (String uri : uris) {
+			// This application can read in a great deal of data from multiple
+			// GTFS-realtime files. The protobuffer tools require the entire
+			// file to be read in as a FeedMessage and only then converted to
+			// AvlReports. This means that have two copies of the data in memory
+			// at once. If multiple files are read in and there is not enough
+			// heap space allocated then found that the memory for the previous
+			// GTFS-realtime file is sometimes not freed up before the next file
+			// is read in. And because the system is bogged down reading and 
+			// parsing files it means that the garbage collector might not run
+			// until system is already bogged down. To deal with this need to
+			// call the garbage collector manually between dealing with each
+			// GTFS-realtime file. 
+			System.gc();
+			
 			// For keeping track of all the AVL reports. Keyed on vehicleId
 			Map<String, List<AvlReport>> avlReportsByVehicle =
 					new HashMap<String, List<AvlReport>>();
