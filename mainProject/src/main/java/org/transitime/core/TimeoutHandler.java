@@ -31,6 +31,11 @@ import org.transitime.utils.Time;
 /**
  * For handling when a vehicle doesn't report its position for too long. Makes
  * the vehicle unpredictable if a timeout occurs.
+ * <p>
+ * Note: only predictable vehicles are timed out. This is because vehicles that
+ * are not in service are likely to get turned off and not report their position
+ * for a long period of time. Plus since they are already not predictable there
+ * is no need to be make them unpredictable when there is a timeout.
  * 
  * @author SkiBu Smith
  * 
@@ -64,8 +69,14 @@ public class TimeoutHandler {
 
 	/**
 	 * To be called every time a new AVL report is handled. This way can handle
-	 * vehicles timing out even when not running in real time due to running in
-	 * batch/playback mode.
+	 * predictable vehicles timing out even when not running in real time due to
+	 * running in batch/playback mode.
+	 * <p>
+	 * Note: only predictable vehicles are timed out. This is because vehicles
+	 * that are not in service are likely to get turned off and not report their
+	 * position for a long period of time. Plus since they are already not
+	 * predictable there is no need to be make them unpredictable when there is
+	 * a timeout.
 	 * <p>
 	 * This method is synchronized since the map itself is unsynced and need to
 	 * make sure that don't have concurrent access.
@@ -99,6 +110,21 @@ public class TimeoutHandler {
 				// necessarily report their positions for a long time.
 				VehicleState vehicleState = VehicleStateManager.getInstance()
 						.getVehicleState(avlReport.getVehicleId());
+				
+				// If vehicle not predictable then don't need to time it out.
+				// This shouldn't actually happen since shouldn't be checking
+				// vehicles that aren't predictable in the first place, but
+				// doing so just to be safe.
+				if (!vehicleState.isPredictable()) {
+					// Since vehicle can't timeout shouldn't have it be in
+					// the list of vehicles that we are checking for
+					// timeouts.
+					mapIterator.remove();
+					
+					// Continue to examine next vehicle for possible timeout
+					continue;
+				}
+				
 				if (vehicleState.atLayover()) {
 					// It is a layover so should not timeout the vehicle.
 					// Instead should put an updated AvlReport into the map
@@ -173,7 +199,10 @@ public class TimeoutHandler {
 		// Add the new AVL report to the map so can later check to see if has
 		// timed out. Since the map was created using accessOrder this one
 		// will end up at the end of the map.
-		orderedAvlReportsMap.put(newAvlReport.getVehicleId(), newAvlReport);
+		VehicleState vehicleState = VehicleStateManager.getInstance()
+				.getVehicleState(newAvlReport.getVehicleId());
+		if (vehicleState.isPredictable())
+			orderedAvlReportsMap.put(newAvlReport.getVehicleId(), newAvlReport);
 	}
 
 }
