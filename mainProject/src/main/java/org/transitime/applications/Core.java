@@ -300,7 +300,7 @@ public class Core {
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
 			if (optionalModuleNames.size() > 0)
 				logger.info("Starting up optional modules specified via " + 
-						"transitest.modules.optionalModulesList param:");
+						"transitime.modules.optionalModulesList param:");
 			else
 				logger.info("No optional modules to start up.");
 			for (String moduleName : optionalModuleNames) {
