@@ -75,7 +75,8 @@ public class VehicleState {
 	 * whether a vehicle is predictable or not.
 	 * 
 	 * @param block
-	 *            The current block assignment for the vehicle
+	 *            The current block assignment for the vehicle. Set to null if
+	 *            vehicle not assigned.
 	 * @param assignmentMethod
 	 *            How vehicle was assigned (AVL feed, auto assigner, etc)
 	 * @param predictable
@@ -307,10 +308,22 @@ public class VehicleState {
 		return Collections.unmodifiableList(temporalMatchHistory);
 	}
 	
+	/**
+	 * The current block assignment. But will be null if vehicle not currently
+	 * assigned.
+	 * 
+	 * @return
+	 */
 	public Block getBlock() {
 		return block;
 	}
 
+	/**
+	 * Indicates how the vehicle was assigned (via block assignment, route
+	 * assignment, auto assignment, etc).
+	 * 
+	 * @return
+	 */
 	public BlockAssignmentMethod getAssignmentMethod() {
 		return assignmentMethod;
 	}
