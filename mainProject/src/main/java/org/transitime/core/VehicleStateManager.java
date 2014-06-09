@@ -63,7 +63,9 @@ public class VehicleStateManager {
 	/**
 	 * Returns vehicle state for the specified vehicle. Vehicle state is
 	 * kept in a map. If VehicleState not yet created for the vehicle then
-	 * this method will create it. 
+	 * this method will create it. If there was no VehicleState already
+	 * created for the vehicle then it is created. This way this method
+	 * never returns null.
 	 * 
 	 * @param vehicleId
 	 * @return the VehicleState for the vehicle
