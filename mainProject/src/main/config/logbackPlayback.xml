@@ -128,7 +128,7 @@
   </appender>
 
   <!-- Separate file for VehicleEvents logging -->
-  <appender name="VEHICLE_EVENTS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="VEHICLE_EVENT" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>${LOG_FILE_ROOT}/vehicleEvents.log.gz</fileNamePattern>
     </rollingPolicy>
