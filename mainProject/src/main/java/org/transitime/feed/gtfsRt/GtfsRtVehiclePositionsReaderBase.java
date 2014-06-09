@@ -17,6 +17,7 @@
 
 package org.transitime.feed.gtfsRt;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import org.slf4j.Logger;
@@ -209,8 +210,9 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// Create a CodedInputStream instead of just a regular InputStream
 			// so that can change the size limit. Otherwise if file is greater
 			// than 64MB get an exception.
+			InputStream inputStream = url.openStream();
 			CodedInputStream codedStream = 
-					CodedInputStream.newInstance(url.openStream());
+					CodedInputStream.newInstance(inputStream);
 			// What to use instead of default 64MB limit
 			final int GTFS_SIZE_LIMIT = 200000000;
 			codedStream.setSizeLimit(GTFS_SIZE_LIMIT);	
