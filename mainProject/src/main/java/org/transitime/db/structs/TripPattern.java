@@ -436,6 +436,19 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	}
 	
 	/**
+	 * Returns length of the trip from the first terminal to the last.
+	 * 
+	 * @return
+	 */
+	public double getLength() {
+		double length = 0.0;
+		for (int i=1; i<stopPaths.size(); ++i) {
+			length += stopPaths.get(i).getLength();
+		}
+		return length;
+	}
+	
+	/**
 	 * @param index
 	 * @return The specified StopPath or null if index out of range
 	 */
