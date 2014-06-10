@@ -75,7 +75,8 @@ public class BatchCsvAvlFeedModule extends Module {
 	 */
 	@Override
 	public void run() {
-		List<AvlReport> avlReports = (new AvlCsvReader(getCsvAvlFeedFileName())).get();
+		List<AvlReport> avlReports = 
+				(new AvlCsvReader(getCsvAvlFeedFileName())).get();
 		
 		// Process the AVL Reports read in.
 		for (AvlReport avlReport : avlReports) {
