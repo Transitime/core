@@ -16,17 +16,20 @@
  */
 package org.transitime.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.transitime.applications.Core;
+import org.transitime.config.DoubleConfigValue;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
+import org.transitime.utils.Time;
 
 /**
  * Takes the AVL data and processes it. Matches vehicles to their assignments.
@@ -41,6 +44,15 @@ public class DataProcessor {
 	// Singleton class
 	private static DataProcessor singleton = new DataProcessor();
 	
+	/*********** Configurable Parameters for this module ***********/
+	private static double getTerminalDistanceForRouteMatching() {
+		return terminalDistanceForRouteMatching.getValue();
+	}
+	private static DoubleConfigValue terminalDistanceForRouteMatching =
+			new DoubleConfigValue("transitime.core.terminalDistanceForRouteMatching", 
+					100.0);
+	
+	/************ Logging *****************/
 	private static final Logger logger = 
 			LoggerFactory.getLogger(DataProcessor.class);
 
@@ -186,6 +198,257 @@ public class DataProcessor {
 	}
 
 	/**
+	 * When matching a vehicle to a route we are currently assuming that we
+	 * cannot make predictions or match a vehicle to a specific trip until after
+	 * vehicle has started on its trip. This is because there will be multiple
+	 * trips per route and we cannot tell which one the vehicle is on time wise
+	 * until the vehicle has started the trip.
+	 * 
+	 * @param match
+	 * @return True if the match can be used when matching vehicle to a route
+	 */
+	private static boolean matchOkForRouteMatching(SpatialMatch match) {
+		return match.awayFromTerminals(getTerminalDistanceForRouteMatching());
+	}
+	
+	/**
+	 * Attempts to match vehicle to the specified route by finding appropriate
+	 * block assignment. Updates the VehicleState with the new block assignment
+	 * and match. These will be null if vehicle could not successfully be
+	 * matched to block.
+	 * 
+	 * @param routeId
+	 * @param vehicleState
+	 * @return True if successfully matched vehicle to block assignment for
+	 *         specified route
+	 */
+	private boolean matchVehicleToRouteAssignment(String routeId, 
+			VehicleState vehicleState) {
+		// Make sure params are good
+		if (routeId == null) {
+			logger.error("matchVehicleToRouteAssignment() called with null " +
+					"routeId. {}", vehicleState);
+		}
+		
+		logger.debug("Matching unassigned vehicle to routeId={}. {}", 
+				routeId, vehicleState);
+
+		// Convenience variables
+		AvlReport avlReport = vehicleState.getAvlReport();
+
+		// Determine which blocks are currently active for the route.
+		// Multiple services can be active on a given day. Therefore need
+		// to look at all the active ones to find out what blocks are active...
+		List<Block> allBlocksForRoute = new ArrayList<Block>();
+		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+		List<String> serviceIds = 
+				serviceUtils.getServiceIds(avlReport.getDate());
+		for (String serviceId : serviceIds) {
+			List<Block> blocksForService = Core.getInstance().getDbConfig().
+					getBlocksForRoute(serviceId, routeId);
+			if (blocksForService != null) {
+				allBlocksForRoute.addAll(blocksForService);
+			}
+		}
+
+		List<SpatialMatch> allPotentialSpatialMatchesForRoute = 
+				new ArrayList<SpatialMatch>();
+		
+		// Go through each block and determine best spatial matches
+		for (Block block : allBlocksForRoute) {
+			// If the block isn't active at this time then ignore it. This way 
+			// don't look at each trip to see if it is active which is important
+			// because looking at each trip means all the trip data including
+			// travel times needs to be lazy loaded, which can be slow.
+			if (!block.isActive(avlReport.getDate())) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("For vehicleId={} ignoring block ID {} with " +
+							"start_time={} and end_time={} because not " +
+							"active for time {}",
+							avlReport.getVehicleId(), block.getId(),
+							Time.timeOfDayStr(block.getStartTime()),
+							Time.timeOfDayStr(block.getEndTime()),
+							Time.timeStr(avlReport.getDate()));
+				}
+				continue;
+			}
+			
+			// Determine which trips for the block are active. If none then
+			// continue to the next block
+			List<Trip> potentialTrips = 
+					block.getTripsCurrentlyActive(avlReport);			
+			if (potentialTrips.isEmpty()) 
+				continue;
+			
+			logger.debug("For vehicleId={} examining potential trips for " +
+					"match to block ID {}. {}",
+					avlReport.getVehicleId(), block.getId(), 
+					potentialTrips);
+			
+			// Get the potential spatial matches
+			List<SpatialMatch> spatialMatchesForBlock = 
+					SpatialMatcher.getSpatialMatches(avlReport, 
+							potentialTrips,	block);
+
+			// Add appropriate spatial matches to list
+			for (SpatialMatch spatialMatch : spatialMatchesForBlock) {
+				if (matchOkForRouteMatching(spatialMatch))
+					allPotentialSpatialMatchesForRoute.add(spatialMatch);
+			}
+		} // End of going through each block to determine spatial matches
+		
+		// For the spatial matches get the best temporal match
+		TemporalMatch bestMatch = TemporalMatcher.getInstance()
+				.getBestTemporalMatchComparedToSchedule(avlReport,
+						allPotentialSpatialMatchesForRoute);
+		logger.debug("For vehicleId={} best temporal match is {}", 
+				avlReport.getVehicleId(), bestMatch);
+
+		// If got a valid match then keep track of state
+		BlockAssignmentMethod blockAssignmentMethod = null;
+		boolean predictable = false;
+		Block block = null;
+		if (bestMatch != null) {
+			blockAssignmentMethod = BlockAssignmentMethod.AVL_FEED_ROUTE_ASSIGNMENT;
+			predictable = true;
+			block = bestMatch.getBlock();
+			logger.info("vehicleId={} matched to routeId={}. " +
+					"Vehicle is now predictable. Match={}",
+					avlReport.getVehicleId(), routeId, bestMatch);
+
+			// Record a corresponding VehicleEvent
+			String eventDescription = "Vehicle successfully matched to route " +
+					"assignment and is now predictable.";
+			VehicleEvent.create(avlReport, bestMatch,
+					VehicleEvent.PREDICTABLE,
+					eventDescription,
+					true,  // predictable
+					false, // becameUnpredictable
+					null); // supervisor
+		} else {
+			logger.debug("For vehicleId={} could not assign to routeId={}. " +
+					"Therefore vehicle is not being made predictable.",
+					avlReport.getVehicleId(), routeId);
+		}
+
+		// Update the vehicle state with the determined block assignment
+		// and match. Of course might not have been successful in 
+		// matching vehicle, but still should update VehicleState.
+		vehicleState.setMatch(bestMatch);
+		vehicleState.setBlock(block, blockAssignmentMethod, predictable);
+
+		return predictable;
+	}
+	
+	/**
+	 * Attempts to match the vehicle to the specified block assignment. Updates
+	 * the VehicleState with the new block assignment and match. These will be
+	 * null if vehicle could not successfully be matched to block.
+	 * 
+	 * @param block
+	 * @param vehicleState
+	 * @return True if successfully matched vehicle to block assignment
+	 */
+	private boolean matchVehicleToBlockAssignment(Block block, 
+			VehicleState vehicleState) {
+		// Make sure params are good
+		if (block == null) {
+			logger.error("matchVehicleToBlockAssignment() called with null " +
+					"block. {}", vehicleState);
+		}
+		
+		logger.debug("Matching unassigned vehicle to block assignment {}. {}", 
+				block.getId(), vehicleState);
+
+		// Convenience variables
+		AvlReport avlReport = vehicleState.getAvlReport();
+		BlockAssignmentMethod blockAssignmentMethod = null;
+		boolean predictable = false;
+
+		// Determine best spatial matches for trips that are currently
+		// active. Currently active means that the AVL time is within
+		// reasonable range of the start and end time of the trip.
+		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
+		List<SpatialMatch> spatialMatches = 
+				SpatialMatcher.getSpatialMatches(avlReport, potentialTrips, 
+						block);
+		logger.debug("For vehicleId={} and blockId={} spatial matches={}",
+				avlReport.getVehicleId(), block.getId(), spatialMatches);
+
+		// Determine the best temporal match
+		TemporalMatch bestMatch = TemporalMatcher.getInstance()
+				.getBestTemporalMatchComparedToSchedule(avlReport,
+						spatialMatches);
+		logger.debug("Best temporal match for vehicleId={} is {}",
+				avlReport.getVehicleId(), bestMatch);
+		
+		// If couldn't find an adequate spatial/temporal match then resort
+		// to matching to a wait stop at a terminal. 
+		if (bestMatch == null) {
+			logger.debug("For vehicleId={} could not find reasonable " +
+					"match so will try to match to wait stop.",
+					avlReport.getVehicleId());
+			
+			Trip trip = TemporalMatcher.getInstance().
+					matchToWaitStopEvenIfOffRoute(avlReport, potentialTrips);
+			if (trip != null) {
+				SpatialMatch beginningOfTrip = 
+						new SpatialMatch(vehicleState.getVehicleId(),
+						block, 
+						block.getTripIndex(trip.getId()),
+						0,    //  stopPathIndex 
+						0,    // segmentIndex 
+						0.0,  // distanceToSegment
+						0.0); // distanceAlongSegment
+
+				bestMatch = new TemporalMatch(beginningOfTrip, 
+						new TemporalDifference(0));
+				logger.debug("For vehicleId={} could not find reasonable " +
+						"match for blockId={} so had to match to layover. " +
+						"The match is {}",
+						avlReport.getVehicleId(), block.getId(), bestMatch);
+			} else {
+				logger.debug("For vehicleId={} couldn't find match for " +
+						"blockId={}", 
+						avlReport.getVehicleId(), block.getId());
+			}
+		}
+		
+		// If got a valid match then keep track of state
+		if (bestMatch != null) {
+			blockAssignmentMethod = BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT;
+			predictable = true;
+			logger.info("For vehicleId={} matched to blockId={}. " +
+					"Vehicle is now predictable. Match={}",
+					avlReport.getVehicleId(), block.getId(), bestMatch);
+
+			// Record a corresponding VehicleEvent
+			String eventDescription = "Vehicle successfully matched to block " +
+					"assignment and is now predictable.";
+			VehicleEvent.create(avlReport, bestMatch,
+					VehicleEvent.PREDICTABLE,
+					eventDescription,
+					true,  // predictable
+					false, // becameUnpredictable
+					null); // supervisor
+		} else {
+			logger.info("For vehicleId={} could not assign to blockId={}. " +
+					"Therefore vehicle is not being made predictable.",
+					avlReport.getVehicleId(), block.getId());
+		}
+
+		// Update the vehicle state with the determined block assignment
+		// and match. Of course might not have been successful in 
+		// matching vehicle, but still should update VehicleState.
+		vehicleState.setMatch(bestMatch);
+		vehicleState.setBlock(block, blockAssignmentMethod, predictable);
+
+		// Return whether successfully matched the vehicle
+		return predictable;
+
+	}
+	
+	/**
 	 * To be called when vehicle doesn't already have a block assignment or the
 	 * vehicle is being reassigned. Uses block assignment from the AvlReport to
 	 * try to match the vehicle to the assignment. If successful then the
@@ -199,137 +462,56 @@ public class DataProcessor {
 	 * @return true if successfully assigned vehicle
 	 */
 	public boolean matchVehicleToAssignment(VehicleState vehicleState) {
-		logger.debug("Matching unassigned vehicle to assignment. {}", vehicleState);
+		logger.debug("Matching unassigned vehicle to assignment. {}", 
+				vehicleState);
 		
 		// Initialize some variables
 		AvlReport avlReport = vehicleState.getAvlReport();
-		TemporalMatch bestMatch = null;
-		BlockAssignmentMethod blockAssignmentMethod = null;
-		boolean predictable = false;
 		
 		// If the vehicle has a block assignment from the AVLFeed
 		// then use it.
-		Block block = BlockAssigner.getInstance().getBlock(avlReport);
-		if (block == null) {
-			// FIXME experimenting with ROUTE_ID based assignments
-			String routeId = BlockAssigner.getInstance().getRouteId(avlReport);
-			if (routeId != null) {
-				Service service = Core.getInstance().getService();
-				List<String> serviceIds = service.getServiceIds(avlReport.getDate());
-				for (String serviceId : serviceIds) {
-					List<Block> blocks = Core.getInstance().getDbConfig().
-							getBlocksForRoute(serviceId, routeId);
-					// FIXME just for debugging
-					System.err.println(blocks);
-				}
-			}
-			
-			// There was no valid block assignment from AVL feed so can't
-			// do anything. But set the block assignment for the vehicle
-			// so it is up to date. This call also sets the vehicle state
-			// to be unpredictable.
-			vehicleState.setBlock(block, blockAssignmentMethod, predictable);
-			return false;
-		} else {
+		Block block = BlockAssigner.getInstance().getBlockAssignment(avlReport);
+		if (block != null) {
 			// There is a block assignment from AVL feed so use it
-			
-			// Determine best spatial matches for trips that are currently
-			// active. Currently active means that the AVL time is within
-			// reasonable range of the start and end time of the trip.
-			List<Trip> potentialTrips = TemporalMatcher.getInstance()
-					.getTripsCurrentlyActive(avlReport, block);
-			List<SpatialMatch> spatialMatches = 
-					SpatialMatcher.getSpatialMatches(avlReport, potentialTrips, 
-							block);
-			logger.debug("For vehicleId={} and blockId={} spatial matches={}",
-					avlReport.getVehicleId(), block.getId(), spatialMatches);
-
-			bestMatch = TemporalMatcher.getInstance()
-					.getBestTemporalMatchComparedToSchedule(avlReport,
-							spatialMatches);
-			logger.debug("Best temporal match for vehicleId={} is {}",
-					avlReport.getVehicleId(), bestMatch);
-			
-			// If couldn't find an adequate spatial/temporal match then resort
-			// to matching to a wait stop at a terminal. 
-			if (bestMatch == null) {
-				logger.debug("For vehicleId={} could not find reasonable " +
-						"match so will try to match to wait stop.",
-						avlReport.getVehicleId());
-				
-				Trip trip = TemporalMatcher.getInstance().
-						matchToWaitStopEvenIfOffRoute(avlReport, potentialTrips);
-				if (trip != null) {
-					SpatialMatch beginningOfTrip = 
-							new SpatialMatch(vehicleState.getVehicleId(),
-							block, 
-							block.getTripIndex(trip.getId()),
-							0,    //  stopPathIndex 
-							0,    // segmentIndex 
-							0.0,  // distanceToSegment
-							0.0); // distanceAlongSegment
-	
-					bestMatch = new TemporalMatch(beginningOfTrip, 
-							new TemporalDifference(0));
-					logger.debug("For vehicleId={} could not find reasonable " +
-							"match for blockId={} so had to match to layover. " +
-							"The match is {}",
-							avlReport.getVehicleId(), block.getId(), bestMatch);
-				} else {
-					logger.debug("For vehicleId={} couldn't find match for " +
-							"blockId={}", 
-							avlReport.getVehicleId(), block.getId());
-				}
+			return matchVehicleToBlockAssignment(block, vehicleState);			
+		} else {
+			String routeId = 
+					BlockAssigner.getInstance().getRouteIdAssignment(avlReport);
+			if (routeId != null) {
+				return matchVehicleToRouteAssignment(routeId, vehicleState);
 			}
-			
-			// If got a valid match then keep track of state
-			if (bestMatch != null) {
-				blockAssignmentMethod = BlockAssignmentMethod.AVL_FEED;
-				predictable = true;
-				logger.info("For vehicleId={} matched to blockId={}. " +
-						"Vehicle is now predictable. Match={}",
-						avlReport.getVehicleId(), block.getId(), bestMatch);
-
-				// Record a corresponding VehicleEvent
-				String eventDescription = "Vehicle successfully matched to block " +
-						"assignment and is now predictable.";
-				VehicleEvent.create(avlReport, bestMatch,
-						VehicleEvent.PREDICTABLE,
-						eventDescription,
-						true,  // predictable
-						false, // becameUnpredictable
-						null); // supervisor
-			} else {
-				logger.info("For vehicleId={} could not assign to blockId={}. " +
-						"Therefore vehicle is not predictable.",
-						avlReport.getVehicleId(), block.getId());
-			}
-
-			// Update the vehicle state with the determined block assignment
-			// and match. Of course might not have been successful in 
-			// matching vehicle, but still should update VehicleState.
-			vehicleState.setMatch(bestMatch);
-			vehicleState.setBlock(block, blockAssignmentMethod, predictable);
-
-			// Return whether successfully matched the vehicle
-			return predictable;
 		}
+		
+		// There was no valid block or route assignment from AVL feed so can't
+		// do anything. But set the block assignment for the vehicle
+		// so it is up to date. This call also sets the vehicle state
+		// to be unpredictable.
+		BlockAssignmentMethod blockAssignmentMethod = null;
+		boolean predictable = false;
+		vehicleState.setBlock(block, blockAssignmentMethod, predictable);
+		return false;
 	}
 	
 	/**
-	 * Looks at the last match in vehicleState to determine if at end of
-	 * block assignment. Note that this will not always work since might
-	 * not actually get an AVL report that matches to the last stop.
-	 *  
+	 * Looks at the last match in vehicleState to determine if at end of block
+	 * assignment. Note that this will not always work since might not actually
+	 * get an AVL report that matches to the last stop.
+	 * 
 	 * @param vehicleState
+	 * @return True if end of the block was reached with the last match.
 	 */
-	private void handlePossibleEndOfBlock(VehicleState vehicleState) {
+	private boolean handlePossibleEndOfBlock(VehicleState vehicleState) {
 		// Determine if at end of block assignment
 		TemporalMatch temporalMatch = vehicleState.getMatch();
 		if (temporalMatch != null) {
 			VehicleAtStopInfo atStopInfo = temporalMatch.getAtStop();
 			if (atStopInfo != null) {
 				if (atStopInfo.atEndOfBlock()) {
+					logger.info("For vehicleId={} the end of the block={} " +
+							"was reached so will make vehicle unpredictable", 
+							vehicleState.getVehicleId(), 
+							temporalMatch.getBlock().getId());
+					
 					// Log that vehicle is being made unpredictable as a VehicleEvent
 					String eventDescription = "Block assignment " 
 							+ vehicleState.getBlock().getId() 
@@ -346,9 +528,15 @@ public class DataProcessor {
 					// At end of block assignment so remove it
 					makeVehicleUnpredictableAndRemoveAssignment(
 							vehicleState.getVehicleId());
+					
+					// Return that end of block reached
+					return true;
 				}
 			}
 		}
+		
+		// End of block wasn't reached so return false
+		return false;
 	}
 	
 	/**
@@ -393,40 +581,7 @@ public class DataProcessor {
 		return scheduleAdherence;
 	}
 	
-	/**
-	 * Processes the AVL report by matching to the assignment and
-	 * generating predictions and such. Sets VehicleState for the
-	 * vehicle based on the results. Also stores AVL report into
-	 * the database (if not in playback mode).
-	 * 
-	 * @param avlReport
-	 */
-	public void processAvlReport(AvlReport avlReport) {
-		// The beginning of processing AVL data is an important milestone 
-		// in processing data so log it as info.
-		logger.info("====================================================" +
-				"DataProcessor processing {}", avlReport);		
-		
-		// Record when the AvlReport was actually processed. This is done here so
-		// that the value will be set when the avlReport is stored in the database
-		// using the DbLogger.
-		avlReport.setTimeProcessed();
-
-		// Store the AVL report into the database
-		Core.getInstance().getDbLogger().add(avlReport);
-		
-		// If any vehicles have timed out then handle them. This is done
-		// here instead of using a regular timer so that it will work
-		// even when in playback mode or when reading batch data.
-		TimeoutHandler.getInstance().handlePossibleTimeout(avlReport);
-		
-		// Logging to syserr just for debugging. This should eventually be removed
-		System.err.println("Processing avlReport for vehicleId=" + 
-				avlReport.getVehicleId() + 
-				//" AVL time=" + Time.timeStrMsec(avlReport.getTime()) +
-				" " + avlReport +
-				" ...");
-		
+	public void lowLevelProcessAvlReport(AvlReport avlReport) {
 		// Determine previous state of vehicle
 		String vehicleId = avlReport.getVehicleId();
 		VehicleState vehicleState =
@@ -471,7 +626,8 @@ public class DataProcessor {
 
 			// If the last match is actually valid then generate associated
 			// data like predictions and arrival/departure times.
-			if (vehicleState.lastMatchIsValid()) {
+			if (vehicleState.isPredictable() 
+					&& vehicleState.lastMatchIsValid()) {
 				// Determine and store the schedule adherence. If schedule 
 				// adherence is bad then try matching vehicle to assignment
 				// again.
@@ -479,13 +635,62 @@ public class DataProcessor {
 				
 				// Generates the corresponding data for the vehicle such as 
 				// predictions and arrival times
-				if (vehicleState.isPredictable())
-					MatchProcessor.getInstance().generateResultsOfMatch(vehicleState);
+				MatchProcessor.getInstance().
+					generateResultsOfMatch(vehicleState);
 				
 				// If finished block assignment then should remove assignment
-				handlePossibleEndOfBlock(vehicleState);
+				boolean endOfBlockReached = 
+						handlePossibleEndOfBlock(vehicleState);
+				
+				// If just reached the end of the block and took the block 
+				// assignment away and made the vehicle unpredictable then
+				// should see if the AVL report could be used to assign 
+				// vehicle to the next assignment. This is needed for agencies
+				// like Zhengzhou which is frequency based and where each block
+				// assignment is only a single trip and when vehicle finishes
+				// one trip/block it can go into the next block right away.
+				if (endOfBlockReached)
+					lowLevelProcessAvlReport(avlReport);
 			}
-		}  // End of synchronizing on vehicleState
+		}  // End of synchronizing on vehicleState	}
+	}
+	
+	/**
+	 * Processes the AVL report by matching to the assignment and
+	 * generating predictions and such. Sets VehicleState for the
+	 * vehicle based on the results. Also stores AVL report into
+	 * the database (if not in playback mode).
+	 * 
+	 * @param avlReport
+	 */
+	public void processAvlReport(AvlReport avlReport) {
+		// The beginning of processing AVL data is an important milestone 
+		// in processing data so log it as info.
+		logger.info("====================================================" +
+				"DataProcessor processing {}", avlReport);		
+		
+		// Record when the AvlReport was actually processed. This is done here so
+		// that the value will be set when the avlReport is stored in the database
+		// using the DbLogger.
+		avlReport.setTimeProcessed();
+
+		// Store the AVL report into the database
+		Core.getInstance().getDbLogger().add(avlReport);
+		
+		// If any vehicles have timed out then handle them. This is done
+		// here instead of using a regular timer so that it will work
+		// even when in playback mode or when reading batch data.
+		TimeoutHandler.getInstance().handlePossibleTimeout(avlReport);
+		
+		// Logging to syserr just for debugging. This should eventually be removed
+		System.err.println("Processing avlReport for vehicleId=" + 
+				avlReport.getVehicleId() + 
+				//" AVL time=" + Time.timeStrMsec(avlReport.getTime()) +
+				" " + avlReport +
+				" ...");
+		
+		// Do the low level work of matching vehicle and then generating results
+		lowLevelProcessAvlReport(avlReport);
 	}
 	
 }

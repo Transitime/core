@@ -361,9 +361,9 @@ public final class Block implements Serializable {
 	
 	/**
 	 * Returns true if the time of day of the date passed in is between the
-	 * startTime (minus allowable early time for layover) and the endTime (plus
-	 * the allowable late time) for the block. Note: does not look to see if the
-	 * service associated with the block is active. Only looks at time of day.
+	 * startTime and the endTime for the block. No leeway is provided. Note:
+	 * does not look to see if the service associated with the block is active.
+	 * Only looks at time of day.
 	 * 
 	 * @param date
 	 * @return True if the block is active.
@@ -372,8 +372,8 @@ public final class Block implements Serializable {
 		int secsInDayForAvlReport = 
 				Core.getInstance().getTime().getSecondsIntoDay(date);
 
-		return secsInDayForAvlReport > startTime - CoreConfig.getAllowableEarlyForLayoverSeconds() &&
-				secsInDayForAvlReport < endTime + CoreConfig.getAllowableLateSeconds();
+		return secsInDayForAvlReport > startTime 
+				&& secsInDayForAvlReport < endTime;
 	}
 
 	/**

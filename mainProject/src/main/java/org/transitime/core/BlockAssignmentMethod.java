@@ -23,7 +23,8 @@ package org.transitime.core;
  *
  */
 public enum BlockAssignmentMethod {
-	AVL_FEED,
+	AVL_FEED_BLOCK_ASSIGNMENT,
+	AVL_FEED_ROUTE_ASSIGNMENT,
 	BLOCK_FEED,
 	AUTO_ASSIGNER,
 	ASSIGNMENT_TERMINATED;

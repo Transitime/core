@@ -130,6 +130,77 @@ public class SpatialMatch {
 		this.distanceAlongSegment = toCopy.distanceAlongSegment;
 		this.atStop = toCopy.atStop;
 	}
+
+	/**
+	 * Returns distance of this match from the beginning of the trip.
+	 * 
+	 * @return
+	 */
+	private double distanceFromBeginningOfTrip() {
+		// Determine how far match is from terminal at beginning of trip
+		double distanceFromFirstTerminal = 0.0;
+		Trip trip = getTrip();
+		for (int index=1; index<stopPathIndex; ++index) {
+			distanceFromFirstTerminal += trip.getStopPath(index).getLength();		
+		}
+		if (stopPathIndex != 0)
+			distanceFromFirstTerminal += getDistanceAlongStopPath();
+		return distanceFromFirstTerminal;
+	}
+	
+	/**
+	 * Determines if this SpatialMatch is further away then the specified
+	 * distance from the terminal at the beginning and end of the trip. This can
+	 * be useful when doing things like matching a vehicle to a route where one
+	 * needs to first be sure that the vehicle is not at a terminal because at
+	 * the terminal one cannot determine appropriate spatial match.
+	 * 
+	 * @param distance
+	 * @return True if match is further away than distance away from terminals
+	 *         of trip
+	 */
+	public boolean awayFromTerminals(double distance) {
+		// Determine how far match is from terminal at beginning of trip
+		double distanceFromFirstTerminal = distanceFromBeginningOfTrip();
+		
+		// If too close to beginning of trip return false
+		if (distanceFromFirstTerminal < distance)
+			return false;
+		
+		// If too close to end of trip return false
+		double distanceFromLastTerminal = 
+				getTrip().getLength() - distanceFromFirstTerminal;
+		if (distanceFromLastTerminal < distance)
+			return false;
+		
+		// Somewhere in the middle of trip so return true
+		return true;
+	}
+	
+	/**
+	 * Returns whether this SpatialMatch is within the specified distance along
+	 * the path from the end of the trip.
+	 * 
+	 * @param distance
+	 * @return True if within distance of end of trip.
+	 */
+	public boolean withinDistanceOfEndOfTrip(double distance) {
+		// Determine how far match is from terminal at beginning of trip
+		double distanceFromFirstTerminal = distanceFromBeginningOfTrip();
+		
+		// Return if within specified distance of end of trip
+		double tripLength = getTrip().getLength();
+		double distanceFromLastTerminal = 
+				tripLength - distanceFromFirstTerminal;
+		return distanceFromLastTerminal < distance;
+	}
+	
+	/**
+	 * Returns whether the trip for this match is the last trip of the block.
+	 */
+	public boolean isLastTripOfBlock() {
+		return tripIndex == block.getTrips().size()-1;
+	}
 	
 	/**
 	 * Returns true if the match is to the stop at the end of the stop path.
@@ -468,13 +539,14 @@ public class SpatialMatch {
 	}
 	
 	/**
-	 * Returns true if this is before the other SpatialMatch passed in.
+	 * Returns true if this is before or equal to the other SpatialMatch passed
+	 * in.
 	 * 
 	 * @param other
 	 *            The Spatial Match to compare to
-	 * @return true if this is before the other SpatialMatch
+	 * @return true if this is before or equal to the other SpatialMatch
 	 */
-	public boolean lessThan(SpatialMatch other) {
+	public boolean lessThanOrEqualTo(SpatialMatch other) {
 		if (tripIndex > other.tripIndex)
 			return false;
 		if (tripIndex < other.tripIndex)
@@ -493,7 +565,7 @@ public class SpatialMatch {
 			return true;
 		
 		// segmentIndex == other.segmentIndex
-		return distanceAlongSegment < other.distanceAlongSegment;
+		return distanceAlongSegment <= other.distanceAlongSegment;
 	}
 
 	/**
@@ -571,6 +643,17 @@ public class SpatialMatch {
 		return block.getTrips().get(tripIndex);
 	}
 
+	/**
+	 * Returns the vector for the segment for this SpatialMatch.
+	 * @return
+	 */
+	public Vector getSegmentVector() {
+		int segmentIndex = block.numSegments(tripIndex, stopPathIndex) - 1;
+		Vector segmentVector = 
+				block.getSegmentVector(tripIndex, stopPathIndex, segmentIndex);
+		return segmentVector;
+	}
+	
 	/**
 	 * The index of which trip this is within the block.
 	 * 

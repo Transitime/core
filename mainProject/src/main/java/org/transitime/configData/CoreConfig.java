@@ -143,6 +143,22 @@ public class CoreConfig {
 			new FloatConfigValue("transitime.core.maxHeadingOffsetFromSegment", 135.0f);
 
 	/**
+	 * How close vehicle needs to be from the last stop of the block such that
+	 * the next AVL report should possibly be considered to match to the end of
+	 * the block. This is important for determining the arrival time at the last
+	 * stop of the block even if don't get an AVL report near that stop.
+	 * 
+	 * @return
+	 */
+	public static double getDistanceFromLastStopForEndMatching() {
+		return distanceFromLastStopForEndMatching.getValue();
+	}
+	private static DoubleConfigValue distanceFromLastStopForEndMatching = 
+			new DoubleConfigValue(
+					"transitime.core.distanceFromLastStopForEndMatching", 
+					250.0);
+	
+	/**
 	 * For determining if enough time to deadhead to beginning of a trip. If
 	 * vehicles are far away then they are more likely to be able to travel 
 	 * faster because they could take a freeway or other fast road. But when

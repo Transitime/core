@@ -653,6 +653,15 @@ public class Trip implements Serializable {
 	}
 	
 	/**
+	 * Returns length of the trip from the first terminal to the last.
+	 * 
+	 * @return
+	 */
+	public double getLength() {
+		return getTripPattern().getLength();
+	}
+	
+	/**
 	 * Returns the StopPath for the stopPathIndex specified
 	 * 
 	 * @param stopPathIndex

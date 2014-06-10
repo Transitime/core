@@ -29,6 +29,7 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Route;
+import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VectorWithHeading;
 import org.transitime.utils.Geo;
@@ -465,6 +466,39 @@ public class SpatialMatcher {
 							smallestDistanceSpatialMatch.getDistanceToSegment()),
 					spatialMatcher.smallestDistanceSpatialMatch);
 		}
+		
+		// Need to look at possibility that could match to end of the block if
+		// vehicle is near the end. The reason this is important is because 
+		// there is a significant chance that won't get a AVL report right at
+		// the last stop for the block. And since it is the end of the block
+		// there isn't a layover at the beginning of the next trip since there
+		// is no next trip. But don't want to always include the last stop of
+		// the block as a potential spatial match because need to avoid wrongly
+		// matching to it. So only add the final stop for the block as a 
+		// potential spatial match if the previous match was reasonably close to
+		// it.
+		if (previousMatch.isLastTripOfBlock()
+				&& previousMatch.withinDistanceOfEndOfTrip(
+						CoreConfig.getDistanceFromLastStopForEndMatching())) {
+			// Create a match that is at the end of the block
+			Block block = previousMatch.getBlock();
+			double segmentLength =  previousMatch.getSegmentVector().length();
+			int indexOfLastStopPath = previousMatch.getTrip().getNumberStopPaths()-1;
+			StopPath lastStopPath = previousMatch.getTrip().getStopPath(indexOfLastStopPath);
+			int indexOfLastSegment = lastStopPath.getNumberSegments()-1;
+			SpatialMatch matchAtEndOfBlock = new SpatialMatch(
+					vehicleState.getVehicleId(),
+					block, 
+					previousMatch.getTripIndex(),
+					indexOfLastStopPath,
+					indexOfLastSegment, 
+					Double.NaN, // distanceToSegment not set to a valid value
+					segmentLength);
+
+			// Add that match to list of possible SpatialMatches
+			spatialMatcher.spatialMatches.add(matchAtEndOfBlock);
+		}
+		
 		
 		// Return the list of local matches
 		return spatialMatcher.spatialMatches;
