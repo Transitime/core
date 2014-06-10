@@ -248,11 +248,13 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	}
 
 	/**
-	 * Stores the specified ArrivalDeparture object into the db.
+	 * Stores the specified ArrivalDeparture object into the db
+	 * and log to the ArrivalsDeparatures log file that the
+	 * object was created.
 	 * 
 	 * @param arrivalDeparture
 	 */
-	private void storeInDb(ArrivalDeparture arrivalDeparture) {
+	private void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
 		// Queue to store object into db
 		Core.getInstance().getDbLogger().add(arrivalDeparture);
 		
@@ -303,7 +305,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// Create departure time for first stop of trip if it has left that 
 			// stop
 			if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
-				storeInDb(createDepartureTime(vehicleState, departureTime,
+				storeInDbAndLog(createDepartureTime(vehicleState, departureTime,
 						block, tripIndex, stopPathIndex));
 			}
 			
@@ -315,14 +317,14 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				// Create the arrival
 				long arrivalTime = departureTime
 						+ block.getStopPathTravelTime(tripIndex, stopPathIndex);
-				storeInDb(createArrivalTime(vehicleState, arrivalTime, block,
+				storeInDbAndLog(createArrivalTime(vehicleState, arrivalTime, block,
 						tripIndex, stopPathIndex));
 
 				// If the vehicle has left this stop then create the departure
 				if (!newMatch.isAtStop(tripIndex, stopPathIndex)) {
 					int stopTime = block.getPathStopTime(tripIndex, stopPathIndex);
 					departureTime = arrivalTime + stopTime;
-					storeInDb(createDepartureTime(vehicleState, departureTime,
+					storeInDbAndLog(createDepartureTime(vehicleState, departureTime,
 							block, tripIndex, stopPathIndex));
 				}
 			}
@@ -330,7 +332,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// Need to add final arrival time if newMatch is at the
 			// stop for the match
 			if (newMatch.isAtStop(tripIndex, newMatch.getStopPathIndex())) {
-				storeInDb(createArrivalTime(vehicleState,
+				storeInDbAndLog(createArrivalTime(vehicleState,
 						avlReportTime.getTime(), block, tripIndex,
 						newMatch.getStopPathIndex()));
 			}
@@ -407,7 +409,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			
 			// Now that have the corrected arrival time store it in db
 			// and reset vehicleState to indicate that have dealt with it.
-			storeInDb(arrivalToStoreInDb);
+			storeInDbAndLog(arrivalToStoreInDb);
 			vehicleState.setArrivalToStoreToDb(null);
 		} else {
 			// Even though the last arrival time wasn't for sometime in
@@ -574,6 +576,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				oldVehicleAtStopInfo.getTripIndex(),
 				oldVehicleAtStopInfo.getStopPathIndex());
 		Core.getInstance().getDbLogger().add(departure);
+		storeInDbAndLog(departure);
 		
 		// The new beginTime to be used to determine arrival/departure
 		// times at intermediate stops
@@ -724,7 +727,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		} else {
 			// Not the complicated situation so store the arrival into db
 			vehicleState.setArrivalToStoreToDb(null);
-			storeInDb(arrival);
+			storeInDbAndLog(arrival);
 		}
 			
 		// The new endTime to be used to determine arrival/departure
@@ -859,7 +862,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					newMatch.getBlock(), 
 					indices.getTripIndex(),
 					indices.getStopPathIndex());
-			storeInDb(arrival);
+			storeInDbAndLog(arrival);
 			
 			// Determine departure time for current stop
 			double stopTime = block.getPathStopTime(indices.getTripIndex(), 
@@ -877,7 +880,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					newMatch.getBlock(), 
 					indices.getTripIndex(), 
 					indices.getStopPathIndex());
-			storeInDb(departure);
+			storeInDbAndLog(departure);
 			
 			// Determine travel time to next time for next time through 
 			// the while loop
