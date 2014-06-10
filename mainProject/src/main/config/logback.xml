@@ -290,7 +290,8 @@
   -->
 
   <!-- for debugging lazy loading -->
-  <logger name="org.transitime.db.structs" level="debug" additivity="true">
+  <logger name="org.transitime.db.structs" 
+   level="debug" additivity="true">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 
@@ -299,20 +300,17 @@
        though CORE and CORE_DEBUG have filters to only show
        proper info.
     -->
-  <logger name="org.transitime.gtfs"
-   level="debug" additivity="true">
-    <appender-ref ref="CORE_DEBUG" />
-  </logger>
-
   <logger name="org.transitime.core.DataProcessor"
    level="debug" additivity="true">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 
+<!--
   <logger name="org.transitime.core.MatchProcessor"
    level="debug" additivity="true">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
+-->
 
 <!--
   <logger name="org.transitime.core.TemporalMatcher"
@@ -321,10 +319,12 @@
   </logger>
 -->
 
+<!--
   <logger name="org.transitime.core.ArrivalDepartureGeneratorDefaultImpl"
    level="debug" additivity="true">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
+-->
 
   <!-- Set default level of root logger to "info" instead of to the
        the default of "debug". This way the default is to only see important
