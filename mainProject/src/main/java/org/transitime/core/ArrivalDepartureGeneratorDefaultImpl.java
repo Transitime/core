@@ -575,7 +575,6 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				departureTime, oldVehicleAtStopInfo.getBlock(),
 				oldVehicleAtStopInfo.getTripIndex(),
 				oldVehicleAtStopInfo.getStopPathIndex());
-		Core.getInstance().getDbLogger().add(departure);
 		storeInDbAndLog(departure);
 		
 		// The new beginTime to be used to determine arrival/departure
