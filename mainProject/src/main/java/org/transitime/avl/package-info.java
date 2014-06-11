@@ -29,14 +29,16 @@
  * Also, for large systems want to be able to use multiple threads for 
  * processing the data so get more throughput per machine.
  * <p>
- * To satisfy these goals for the live feeds JMS is usually used for them. This allows for
+ * To satisfy these goals for the live feeds JMS can be used so that the feed
+ * and the AVL clients can reside on different servers. This allows for
  * multiple subscribers so can easily have test projects using the same
  * AVL data. Also allows components of the feed to reside on different
  * servers so can easily have a pull feed on the predictor machine or a
  * push feed on a separate web server machine. Since JMS is a queue the
  * client can use multiple threads to read and process the AVL data.
  * But JMS doesn't need to be used
- * if the feed is polled and you don't want to run JMS server.
+ * if the feed is polled, such that the feed polling and the AVL client
+ * can reside on the same server, and you don't want to run JMS server.
  * <p>
  * The JMS topic name used for the AVL feed is the same of the projectId.
  * The topic names are dynamically configured in JMS so that one doesn't need
