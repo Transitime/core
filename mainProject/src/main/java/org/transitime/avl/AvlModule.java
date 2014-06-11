@@ -16,31 +16,42 @@
  */
 package org.transitime.avl;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import javax.jms.JMSException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.AvlConfig;
-import org.transitime.core.DataProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.jms.JMSWrapper;
 import org.transitime.ipc.jms.RestartableMessageProducer;
 import org.transitime.modules.Module;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
+import org.transitime.utils.threading.BoundedExecutor;
+import org.transitime.utils.threading.NamedThreadFactory;
 
 
 /**
- * Subclass of Module to be used when reading AVL data from a feed. 
- * Only functionality is that the module is only run if not in 
- * playback mode.
+ * Subclass of Module to be used when reading AVL data from a feed. Calls the
+ * abstract method getAndProcessData() for the subclass to actually get data
+ * from the feed. If in JMS mode then it outputs the data to the appropiate JMS
+ * topic so that it can be read from an AvlClient. If not in JMS mode then uses
+ * a BoundedExecutor with multiple threads to directly call AvlClient.run().
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public abstract class AvlModule extends Module {
 	// For writing the AVL data to the JMS topic
 	protected RestartableMessageProducer jmsMsgProducer = null; 
+
+	// For when using a direct queue instead of JMS for processing the AVL 
+	// reports
+	private final static int MAX_THREADS = 100;
+	private BoundedExecutor avlClientExecutor = null;
 
 	private static final Logger logger= 
 			LoggerFactory.getLogger(AvlModule.class);	
@@ -52,6 +63,44 @@ public abstract class AvlModule extends Module {
 	 */
 	protected AvlModule(String projectId) {
 		super(projectId);		
+		
+		if (!AvlConfig.shouldUseJms()) 
+			initForUsingQueueInsteadOfJms();
+	}
+	
+	/**
+	 * For when using a direct queue instead of JMS for handling
+	 * the AVL reports.
+	 */
+	private void initForUsingQueueInsteadOfJms() {
+		int maxAVLQueueSize = AvlConfig.getAvlQueueSize();
+		int numberThreads = AvlConfig.getNumAvlThreads();
+		
+		logger.info("Starting AvlModule for directly handling AVL reports " +
+				"via a queue instead of JMS. For projectId={} with "
+				+ "maxAVLQueueSize={} and numberThreads={}", projectId,
+				maxAVLQueueSize, numberThreads);
+
+		// Make sure that numberThreads is reasonable
+		if (numberThreads < 1) {
+			logger.error("Number of threads must be at least 1 but {} was "
+					+ "specified. Therefore using 1 thread.", numberThreads);
+			numberThreads = 1;
+		}
+		if (numberThreads > MAX_THREADS) {
+			logger.error("Number of threads must be no greater than {} but "
+					+ "{} was specified. Therefore using {} threads.",
+					MAX_THREADS, numberThreads, MAX_THREADS);
+			numberThreads = MAX_THREADS;
+		}
+
+		// Create the executor that actually processes the AVL data. The executor
+		// will be passed an AvlClient and then AvlClient.run() is called.
+		NamedThreadFactory avlClientThreadFactory = 
+				new NamedThreadFactory("avlClient"); 
+		Executor executor = Executors.newFixedThreadPool(numberThreads,
+				avlClientThreadFactory);
+		avlClientExecutor = new BoundedExecutor(executor, maxAVLQueueSize);
 	}
 	
 	/**
@@ -159,6 +208,15 @@ public abstract class AvlModule extends Module {
 	 * @param avlReport
 	 */
 	private void processAvlReportWithoutJms(AvlReport avlReport) {
-		DataProcessor.getInstance().processAvlReport(avlReport);
+		// Have another thread actually process the AVL data
+		// using the AvlClient class. Actually uses AvlClient.run() to
+		// do the processing. This way can use multiple
+		// threads to simultaneously process the data.
+		Runnable avlClient = new AvlClient(avlReport);
+		try {
+			avlClientExecutor.execute(avlClient);
+		} catch (InterruptedException e) {
+			logger.error("Exception when processing AVL data", e);
+		}								
 	}
 }
