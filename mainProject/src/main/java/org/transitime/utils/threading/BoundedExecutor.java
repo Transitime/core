@@ -17,7 +17,6 @@
 package org.transitime.utils.threading;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 
