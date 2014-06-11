@@ -17,6 +17,7 @@
 package org.transitime.utils.threading;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 
@@ -24,12 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An Executor but limits how many tasks can be queued. If queue is full
- * and attempt to execute an additional task then execute() will block.
+ * An Executor but limits how many tasks can be queued. If queue is full and
+ * attempt to execute an additional task then execute() will block.
+ * <p>
  * Based on code from the book "Java Concurrency in Practice" by Brian Goetz
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class BoundedExecutor {
 	private final Executor exec;
@@ -38,14 +40,34 @@ public class BoundedExecutor {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(BoundedExecutor.class);
 	
-	public BoundedExecutor(Executor exec, int bound) {
+	/**
+	 * Constructs an Executor that allows Runnables to be executed using
+	 * multiple threads. If try to execute more Runnables than there are
+	 * available threads then those are queued up. If queue fills up then adding
+	 * an additional Runnable will block.
+	 * 
+	 * @param exec
+	 *            The executor. Recommend using Executors.newFixedThreadPool()
+	 *            to get a fixed thread pool.
+	 * @param allowableNumberBeforeBlocking
+	 *            How many items that can be queued before execute() will block
+	 *            if another Runnable is added. Includes both Runnables that are
+	 *            currently running plus ones that have already been submitted
+	 *            but are still queued up. The value needs to be at least as
+	 *            large as the number of threads allowed by the Executor in
+	 *            order for all threads to be usable simultaneously.
+	 */
+	public BoundedExecutor(Executor exec, int allowableNumberBeforeBlocking) {
 		this.exec = exec;
-		this.semaphore = new Semaphore(bound);
+		this.semaphore = new Semaphore(allowableNumberBeforeBlocking);
 	}
 	
 	/**
-	 * Executes the task by running the Runnable.run() method. Blocks if all of
-	 * the threads are already being used.
+	 * Executes the task by running the Runnable.run() method. Blocks if queue
+	 * is already full. The queue includes tasks already being executed so if
+	 * Executor can use 5 threads and all 5 threads are executing a task and
+	 * allowableNumberBeforeBlocking is 8 then can only have 3 items queued up
+	 * and not yet started execution before this method will block.
 	 * 
 	 * @param command
 	 *            For which run() is to be called
