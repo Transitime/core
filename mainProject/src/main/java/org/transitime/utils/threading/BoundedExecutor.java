@@ -27,34 +27,48 @@ import org.slf4j.LoggerFactory;
  * An Executor but limits how many tasks can be queued. If queue is full
  * and attempt to execute an additional task then execute() will block.
  * Based on code from the book "Java Concurrency in Practice" by Brian Goetz
+ * 
  * @author SkiBu Smith
  *
  */
-//@ThreadSafe
 public class BoundedExecutor {
 	private final Executor exec;
 	private final Semaphore semaphore;
 	
-	private static final Logger logger = LoggerFactory
-			.getLogger(BoundedExecutor.class);
+	private static final Logger logger = 
+			LoggerFactory.getLogger(BoundedExecutor.class);
 	
 	public BoundedExecutor(Executor exec, int bound) {
 		this.exec = exec;
 		this.semaphore = new Semaphore(bound);
 	}
 	
+	/**
+	 * Executes the task by running the Runnable.run() method. Blocks if all of
+	 * the threads are already being used.
+	 * 
+	 * @param command
+	 *            For which run() is to be called
+	 * @throws InterruptedException
+	 *             if this task cannot be accepted for execution.
+	 */
 	public void execute(final Runnable command) 
 			throws InterruptedException {
+		// Only allow bound number of threads to run.
 		semaphore.acquire();
+		
 		try {
+			// Call the run() method for the command
 			exec.execute(new Runnable() {
 				public void run() {
 					try {
+						// Actually call the run() method for the command
 						command.run();
 					} catch(Exception e) {
-						// Need to catch (and log) exception. Otherwise exception
-						// would bubble upwards and get infinite number of threads,
-						// at least if have a breakpoint in Eclipse.
+						// Need to catch (and log) exception. Otherwise 
+						// exception would bubble upwards and get infinite 
+						// number of threads, at least if have a breakpoint
+						// in Eclipse.
 						logger.error("Exception occurred in thread. ", e);
 					} finally {
 						semaphore.release();
@@ -62,6 +76,7 @@ public class BoundedExecutor {
 				}
 			});
 		} catch (RejectedExecutionException e) {
+			logger.error("Exception occurred when running new thread. ", e);
 			semaphore.release();
 		}
 	}
