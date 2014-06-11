@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.SpatialMatch;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
@@ -378,7 +379,13 @@ public final class Block implements Serializable {
 
 	/**
 	 * If the trip is active at the secsInDayForAvlReport then it is
-	 * added to the tripsThatMatchTime list.
+	 * added to the tripsThatMatchTime list. Trip is considered active
+	 * if it is within start time of trip minus 
+	 * CoreConfig.getAllowableEarlyForLayoverSeconds() and within the end
+	 * time of the trip. No leniency is made for the end time since once
+	 * a trip is over really don't want to assign vehicle to that trip.
+	 * Yes, vehicles often run late, but that should only be taken account
+	 * when matching to already predictable vehicle.
 	 * 
 	 * @param vehicleId for logging messages
 	 * @param secsInDayForAvlReport
@@ -386,13 +393,16 @@ public final class Block implements Serializable {
 	 * @param tripsThatMatchTime
 	 * @return
 	 */
-	private static boolean addTripIfActive(String vehicleId, 
-			int secsInDayForAvlReport, Trip trip, List<Trip> tripsThatMatchTime) {
+	private static boolean addTripIfActive(String vehicleId,
+			int secsInDayForAvlReport, Trip trip, 
+			List<Trip> tripsThatMatchTime) {
 		int startTime = trip.getStartTime();
 		int endTime = trip.getEndTime();
 
-		if (secsInDayForAvlReport > startTime - CoreConfig.getAllowableEarlyForLayoverSeconds() &&
-				secsInDayForAvlReport < endTime + CoreConfig.getAllowableLateSeconds()) {
+		int allowableEarlyTimeSecs = 
+				CoreConfig.getAllowableEarlyForLayoverSeconds();
+		if (secsInDayForAvlReport > startTime - allowableEarlyTimeSecs 
+				&& secsInDayForAvlReport < endTime) {
 			tripsThatMatchTime.add(trip);
 
 			if (logger.isDebugEnabled()) {
@@ -422,7 +432,11 @@ public final class Block implements Serializable {
 	
 	/**
 	 * For this block determines which trips are currently active. Should work
-	 * even for trips that start before midnight or go till after midnight.
+	 * even for trips that start before midnight or go till after midnight. Trip
+	 * is considered active if it is within start time of trip minus
+	 * CoreConfig.getAllowableEarlyForLayoverSeconds() and within the end time
+	 * of the trip. No leniency is made for the end time since once a trip is
+	 * over really don't want to assign vehicle to that trip.
 	 * 
 	 * @param avlReport
 	 * @return List of Trips that are active. If none are active an empty list
@@ -437,8 +451,7 @@ public final class Block implements Serializable {
 		
 		// Go through trips and find ones 
 		List<Trip> trips = getTrips();
-		for (Trip trip : trips) {
-			
+		for (Trip trip : trips) {			
 			// If time of avlReport is within reasonable time of the trip
 			// time then this trip should be returned.  
 			int secsInDayForAvlReport = 
@@ -514,9 +527,9 @@ public final class Block implements Serializable {
 		// It appears that lazy initialization is problematic when have multiple 
 		// simultaneous threads. Get "org.hibernate.AssertionFailure: force 
 		// initialize loading collection". Therefore need to make sure that 
-		// only loading lazy subdata serially. Since it is desirable to have
+		// only loading lazy sub-data serially. Since it is desirable to have
 		// trips collection be lazy loaded so that app starts right away without
-		// loading all the subdata for every block assignment need to make
+		// loading all the sub-data for every block assignment need to make
 		// sure this is done in a serialized way. Having app not load all data
 		// at startup is especially important when debugging.
 		if (!Hibernate.isInitialized(trips)) {
@@ -820,6 +833,23 @@ public final class Block implements Serializable {
 	 */
 	public boolean isScheduleBased() {
 		return headwaySecs < 0;
+	}
+
+	/**
+	 * Returns true if on last trip of block and within the specified distance
+	 * of the end of that last trip.
+	 * 
+	 * @param match
+	 * @param distance
+	 * @return True if within distance of end of block
+	 */
+	public boolean nearEndOfBlock(SpatialMatch match, double distance) {
+		// If not last trip of block then not considered near end
+		// so return false.
+		if (match.getTripIndex() != trips.size()-1)
+			return false;
+		
+		return match.withinDistanceOfEndOfTrip(distance);
 	}
 	
 }

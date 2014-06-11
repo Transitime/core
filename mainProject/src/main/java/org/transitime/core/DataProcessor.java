@@ -32,9 +32,10 @@ import org.transitime.db.structs.VehicleEvent;
 import org.transitime.utils.Time;
 
 /**
- * Takes the AVL data and processes it. Matches vehicles to their assignments.
- * Once a match is made then MatchProcessor class is used to generate
- * predictions, arrival/departure times, headway, etc.
+ * This is a very important high-level class. It takes the AVL data and
+ * processes it. Matches vehicles to their assignments. Once a match is made
+ * then MatchProcessor class is used to generate predictions, arrival/departure
+ * times, headway, etc.
  * 
  * @author SkiBu Smith
  * 
@@ -367,7 +368,8 @@ public class DataProcessor {
 
 		// Determine best spatial matches for trips that are currently
 		// active. Currently active means that the AVL time is within
-		// reasonable range of the start and end time of the trip.
+		// reasonable range of the start time and within the end time of 
+		// the trip.
 		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
 		List<SpatialMatch> spatialMatches = 
 				SpatialMatcher.getSpatialMatches(avlReport, potentialTrips, 
@@ -581,7 +583,20 @@ public class DataProcessor {
 		return scheduleAdherence;
 	}
 	
-	public void lowLevelProcessAvlReport(AvlReport avlReport) {
+	/**
+	 * Processes the AVL report by matching to the assignment and generating
+	 * predictions and such. Sets VehicleState for the vehicle based on the
+	 * results. Also stores AVL report into the database (if not in playback
+	 * mode).
+	 * 
+	 * @param avlReport
+	 *            The new AVL report to be processed
+	 * @param rescursiveCall
+	 *            Set to true if this method is calling itself. Used to make
+	 *            sure that any bug can't cause infinite recursion.
+	 */
+	public void lowLevelProcessAvlReport(AvlReport avlReport,
+			boolean rescursiveCall) {
 		// Determine previous state of vehicle
 		String vehicleId = avlReport.getVehicleId();
 		VehicleState vehicleState =
@@ -649,19 +664,37 @@ public class DataProcessor {
 				// like Zhengzhou which is frequency based and where each block
 				// assignment is only a single trip and when vehicle finishes
 				// one trip/block it can go into the next block right away.
-				if (endOfBlockReached)
-					lowLevelProcessAvlReport(avlReport);
+				if (endOfBlockReached) {
+					if (rescursiveCall) {
+						// This method was already called recursively which 
+						// means unassigned vehicle at end of block but then
+						// it got assigned to end of block again. This
+						// indicates a bug since vehicles at end of block
+						// shouldn't be reassigned to the end of the block
+						// again. Therefore log problem and don't try to
+						// assign vehicle again.
+						logger.error("DataProcessor.lowLevelProcessAvlReport() " +
+								"called recursively, which is wrong. {}", 
+								vehicleState);
+					} else {
+						// Actually process AVL report again to see if can 
+						// assign to new assignment.
+						lowLevelProcessAvlReport(avlReport, true);
+					}					
+				} // End of if end of block reached
 			}
 		}  // End of synchronizing on vehicleState	}
 	}
 	
 	/**
-	 * Processes the AVL report by matching to the assignment and
-	 * generating predictions and such. Sets VehicleState for the
-	 * vehicle based on the results. Also stores AVL report into
-	 * the database (if not in playback mode).
+	 * First does housekeeping for the AvlReport (stores it in db, logs it,
+	 * etc). Processes the AVL report by matching to the assignment and
+	 * generating predictions and such. Sets VehicleState for the vehicle based
+	 * on the results. Also stores AVL report into the database (if not in
+	 * playback mode).
 	 * 
 	 * @param avlReport
+	 *            The new AVL report to be processed
 	 */
 	public void processAvlReport(AvlReport avlReport) {
 		// The beginning of processing AVL data is an important milestone 
@@ -690,7 +723,7 @@ public class DataProcessor {
 				" ...");
 		
 		// Do the low level work of matching vehicle and then generating results
-		lowLevelProcessAvlReport(avlReport);
+		lowLevelProcessAvlReport(avlReport, false);
 	}
 	
 }

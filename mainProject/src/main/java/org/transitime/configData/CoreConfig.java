@@ -143,6 +143,22 @@ public class CoreConfig {
 			new FloatConfigValue("transitime.core.maxHeadingOffsetFromSegment", 135.0f);
 
 	/**
+	 * For initial matching of vehicle to block assignment. If vehicle is closer
+	 * than this distance from the end of the block then the spatial match will
+	 * not be used. This is to prevent a vehicle that has already completed its
+	 * block from wrongly being assigned to that block again.
+	 * 
+	 * @return
+	 */
+	public static double getDistanceFromEndOfBlockForInitialMatching() {
+		return distanceFromEndOfBlockForInitialMatching.getValue();
+	}
+	private static DoubleConfigValue distanceFromEndOfBlockForInitialMatching = 
+			new DoubleConfigValue(
+					"transitime.core.distanceFromEndOfBlockForInitialMatching", 
+					250.0);
+
+	/**
 	 * How close vehicle needs to be from the last stop of the block such that
 	 * the next AVL report should possibly be considered to match to the end of
 	 * the block. This is important for determining the arrival time at the last
