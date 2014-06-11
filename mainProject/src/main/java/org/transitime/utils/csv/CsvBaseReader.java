@@ -208,8 +208,13 @@ public abstract class CsvBaseReader<T> {
 			// Close up the file reader
 			in.close();
 			
+			// Determine number of records for logging message
+			long numberRecords = 0;
+			if (record != null)
+				numberRecords = record.getRecordNumber();
+			
 			logger.info("Finished parsing {} records from file {} . Took {} msec.", 
-					record.getRecordNumber(), fileName, timer.elapsedMsec());
+					numberRecords, fileName, timer.elapsedMsec());
 		} catch (FileNotFoundException e) {
 			if (required)
 				logger.error("Required CSV file {} not found.", fileName);
