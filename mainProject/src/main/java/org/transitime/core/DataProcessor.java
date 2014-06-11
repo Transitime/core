@@ -566,6 +566,12 @@ public class DataProcessor {
 		// Make sure the schedule adherence is reasonable
 		if (scheduleAdherence != null 
 				&& !scheduleAdherence.isWithinBounds(vehicleState)) {
+			logger.warn("For vehicleId={} schedule adherence {} is not " +
+					"between the allowable bounds. Therefore trying to match " +
+					"the vehicle to its assignmet again to see if get better " +
+					"temporal match by matching to proper trip.",
+					vehicleState.getVehicleId(), scheduleAdherence);
+			
 			// Schedule adherence not reasonable so match vehicle to assignment
 			// again.
 			matchVehicleToAssignment(vehicleState);
@@ -645,43 +651,52 @@ public class DataProcessor {
 					&& vehicleState.lastMatchIsValid()) {
 				// Determine and store the schedule adherence. If schedule 
 				// adherence is bad then try matching vehicle to assignment
-				// again.
+				// again. This can make vehicle unpredictable if can't match
+				// vehicle to assignment.
 				checkScheduleAdherence(vehicleState);
 				
-				// Generates the corresponding data for the vehicle such as 
-				// predictions and arrival times
-				MatchProcessor.getInstance().
-					generateResultsOfMatch(vehicleState);
-				
-				// If finished block assignment then should remove assignment
-				boolean endOfBlockReached = 
-						handlePossibleEndOfBlock(vehicleState);
-				
-				// If just reached the end of the block and took the block 
-				// assignment away and made the vehicle unpredictable then
-				// should see if the AVL report could be used to assign 
-				// vehicle to the next assignment. This is needed for agencies
-				// like Zhengzhou which is frequency based and where each block
-				// assignment is only a single trip and when vehicle finishes
-				// one trip/block it can go into the next block right away.
-				if (endOfBlockReached) {
-					if (rescursiveCall) {
-						// This method was already called recursively which 
-						// means unassigned vehicle at end of block but then
-						// it got assigned to end of block again. This
-						// indicates a bug since vehicles at end of block
-						// shouldn't be reassigned to the end of the block
-						// again. Therefore log problem and don't try to
-						// assign vehicle again.
-						logger.error("DataProcessor.lowLevelProcessAvlReport() " +
-								"called recursively, which is wrong. {}", 
-								vehicleState);
-					} else {
-						// Actually process AVL report again to see if can 
-						// assign to new assignment.
-						lowLevelProcessAvlReport(avlReport, true);
-					}					
-				} // End of if end of block reached
+				// Only continue processing if vehicle is still predictable 
+				// since calling checkScheduleAdherence() can make it
+				// unpredictable if schedule adherence is really bad.
+				if (vehicleState.isPredictable()) {
+					// Generates the corresponding data for the vehicle such as 
+					// predictions and arrival times
+					MatchProcessor.getInstance().
+						generateResultsOfMatch(vehicleState);
+					
+					// If finished block assignment then should remove 
+					// assignment
+					boolean endOfBlockReached = 
+							handlePossibleEndOfBlock(vehicleState);
+					
+					// If just reached the end of the block and took the block 
+					// assignment away and made the vehicle unpredictable then
+					// should see if the AVL report could be used to assign 
+					// vehicle to the next assignment. This is needed for 
+					// agencies like Zhengzhou which is frequency based and 
+					// where each block assignment is only a single trip and
+					// when vehicle finishes one trip/block it can go into the 
+					// next block right away.
+					if (endOfBlockReached) {
+						if (rescursiveCall) {
+							// This method was already called recursively which 
+							// means unassigned vehicle at end of block but then
+							// it got assigned to end of block again. This
+							// indicates a bug since vehicles at end of block
+							// shouldn't be reassigned to the end of the block
+							// again. Therefore log problem and don't try to
+							// assign vehicle again.
+							logger.error(
+									"DataProcessor.lowLevelProcessAvlReport() " +
+									"called recursively, which is wrong. {}", 
+									vehicleState);
+						} else {
+							// Actually process AVL report again to see if can 
+							// assign to new assignment.
+							lowLevelProcessAvlReport(avlReport, true);
+						}					
+					} // End of if end of block reached
+				}
 			}
 		}  // End of synchronizing on vehicleState	}
 	}
