@@ -18,6 +18,7 @@ package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -198,6 +199,25 @@ public class SpatialMatcher {
 			}
 		}
 
+		// Don't want to match to just before end of block because that could
+		// cause a vehicle that has just finished its block to become reassigned
+		// again.
+		Iterator<SpatialMatch> iterator = spatialMatchesForAllTrips.iterator();
+		while (iterator.hasNext()) {
+			SpatialMatch match = iterator.next();
+			if (match.getBlock().nearEndOfBlock(match,
+					CoreConfig.getDistanceFromEndOfBlockForInitialMatching())) {
+				// The match is too close to end of block so don't use it
+				logger.debug("vehicleId={} match was within {}m of the end " +
+						"of the block so not using that spatial match.", 
+						match.getVehicleId(), 
+						CoreConfig.getDistanceFromEndOfBlockForInitialMatching(), 
+						match);
+				iterator.remove();
+			}
+		}
+		
+		// Return results
 		logger.debug("Finished determining spatial matches for vehicleId={} "
 				+ "location={} and blockId={}. The list of spatial "
 				+ "matches is {}", avlReport.getVehicleId(),
@@ -458,7 +478,7 @@ public class SpatialMatcher {
 					spatialMatcher.smallestDistanceSpatialMatch);
 		} else {
 			// There were no spatial matches so log this problem
-			logger.error("For vehicleId={} found no spatial matches within " +
+			logger.warn("For vehicleId={} found no spatial matches within " +
 					"allowable distance of segments. Best spatial match " +
 					"distance was {} for spatial match {}",
 					vehicleState.getVehicleId(),
@@ -482,20 +502,26 @@ public class SpatialMatcher {
 						CoreConfig.getDistanceFromLastStopForEndMatching())) {
 			// Create a match that is at the end of the block
 			Block block = previousMatch.getBlock();
-			double segmentLength =  previousMatch.getSegmentVector().length();
-			int indexOfLastStopPath = previousMatch.getTrip().getNumberStopPaths()-1;
-			StopPath lastStopPath = previousMatch.getTrip().getStopPath(indexOfLastStopPath);
+			Trip trip = previousMatch.getTrip();
+			int indexOfLastStopPath = trip.getNumberStopPaths()-1;
+			StopPath lastStopPath = trip.getStopPath(indexOfLastStopPath);
 			int indexOfLastSegment = lastStopPath.getNumberSegments()-1;
+			double segmentLength = 
+					lastStopPath.getSegmentVector(indexOfLastSegment).length();
 			SpatialMatch matchAtEndOfBlock = new SpatialMatch(
 					vehicleState.getVehicleId(),
 					block, 
 					previousMatch.getTripIndex(),
 					indexOfLastStopPath,
 					indexOfLastSegment, 
-					Double.NaN, // distanceToSegment not set to a valid value
+					Double.NaN, // distanceToSegment set to a non-valid value
 					segmentLength);
 
 			// Add that match to list of possible SpatialMatches
+			logger.debug("Because vehicleId={} within specified distance " +
+					"of end of trip adding the very end of the block as a " +
+					"potential spatial match. {}", 
+					vehicleState.getVehicleId(), matchAtEndOfBlock);
 			spatialMatcher.spatialMatches.add(matchAtEndOfBlock);
 		}
 		
