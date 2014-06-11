@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.logging.Markers;
 
 /**
  * Creates a Thread but sets the name of it and sets the 
@@ -93,7 +94,9 @@ public class NamedThread extends Thread {
 			super.run();
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Exception occurred which will cause thread {} to terminate",
+			logger.error(Markers.email(), 
+					"Exception occurred which will cause thread {} " +
+					"to terminate",
 					getName(), e);
 		} finally {
 			numAlive.decrementAndGet();
