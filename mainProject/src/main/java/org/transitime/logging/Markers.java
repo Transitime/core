@@ -20,10 +20,14 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 /**
- * For providing special logging markers that cause specific behavior.
+ * For providing special logging markers that cause specific behavior. Key
+ * addition to Transitime logging is that can easily generate an e-mail when
+ * there is an error by using an e-mail "marker". An example is: <code>
+ * logger.error(Markers.email(), message);
+ * </code>
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class Markers {
 	private static Marker emailMarker = 
