@@ -164,7 +164,7 @@ public class DataProcessor {
 			// that info.
 			if (bestTemporalMatch == null 
 					&& vehicleState.overLimitOfBadMatches()) {
-				logger.error("For vehicleId={} got {} bad matches which is " +
+				logger.warn("For vehicleId={} got {} bad matches which is " +
 						"over the allowable limit. Therefore setting vehicle " +
 						"state to null which will make it unpredictable.",
 						vehicleState.getVehicleId(), 
