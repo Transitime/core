@@ -249,7 +249,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue maxPredictionsTimeForDbSecs =
 			new IntegerConfigValue("transitime.core.maxPredictionTimeForDbSecs", 
-					1*Time.SEC_PER_MIN );
+					0*Time.SEC_PER_MIN );
 	
 	/**
 	 * How early a vehicle can be and still be matched to a layover. Needs to 
