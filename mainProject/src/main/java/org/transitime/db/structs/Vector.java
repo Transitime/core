@@ -26,8 +26,8 @@ import org.transitime.utils.Geo;
  */
 public class Vector {
 	
-	private Location l1;
-	private Location l2;
+	protected Location l1;
+	protected Location l2;
 	
 	/********************** Member Functions **************************/
 	
@@ -201,5 +201,10 @@ public class Vector {
 		System.err.println("\nname, lat, lon");
 		System.err.println("l, " + Geo.format(l.getLat()) + ", " + Geo.format(l.getLon()));
 		System.err.println("offset, " + Geo.format(offset.getLat()) + ", " + Geo.format(offset.getLon()));
+	}
+
+	@Override
+	public String toString() {
+		return "Vector [l1=" + l1 + ", l2=" + l2 + "]";
 	}
 }
