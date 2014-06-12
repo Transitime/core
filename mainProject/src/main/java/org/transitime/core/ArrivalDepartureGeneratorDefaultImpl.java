@@ -94,8 +94,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * improper match.
 	 * 
 	 * @param oldMatch
+	 *            For determining how many stops traversed. Can be null
 	 * @param newMatch
 	 * @param previousAvlReport
+	 *            For determining how long since last match. Can be null
 	 * @param avlReport
 	 * @return
 	 */
@@ -104,6 +106,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			AvlReport avlReport) {
 		// If there is no old match then we are fine
 		if (oldMatch == null)
+			return false;
+		
+		// If there is no old AVL report then we are fine
+		if (previousAvlReport == null)
 			return false;
 		
 		// Determine how much time elapsed
