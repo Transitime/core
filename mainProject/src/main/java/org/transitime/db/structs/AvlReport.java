@@ -81,7 +81,7 @@ public class AvlReport implements Serializable {
 	// There is a delay between the time an AVL report is first generated
 	// till the time it is actually processed. Therefore it is useful to 
 	// also keep track of the time it was processed so that can determine
-	// latency. Will be null if AV report not yet being processed.
+	// latency. Will be null if AVL report not yet being processed.
 	// Need to use columnDefinition to explicitly specify that should use 
 	// fractional seconds.
 	@Column(columnDefinition="datetime(3)")	
@@ -789,8 +789,8 @@ public class AvlReport implements Serializable {
 		return "AvlReport [" +
 				"vehicleId=" + vehicleId +
 				", time=" + Time.dateTimeStrMsec(time) +
-				", timeProcessed=" + 
-					(timeProcessed==null? null : Time.dateTimeStrMsec(timeProcessed)) +
+				(timeProcessed==null? "" : ", timeProcessed=" + 
+					Time.dateTimeStrMsec(timeProcessed)) +
 				", location=" + location +
 				", speed=" + Geo.speedFormat(getSpeed()) +
 				", heading=" + Geo.headingFormat(getHeading()) + 
