@@ -230,9 +230,18 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// Process each individual VehiclePostions message
 			processMessage(feed);
 		} catch (Exception e) {
-			logger.error("Exception when reading GTFS-realtime data from " + 
-					urlString + " . " + e.getMessage());
+			logger.error("Exception when reading GTFS-realtime data from " +
+					"URL {}", 
+					urlString, e);
 		}				
 	}
 	
+	/**
+	 * Returns the URL that this class is reading the GTFS-realtime data from.
+	 * 
+	 * @return The URL being used.
+	 */
+	public String getUrlString() {
+		return urlString;
+	}
 }
