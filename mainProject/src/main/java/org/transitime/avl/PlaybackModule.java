@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.StringConfigValue;
-import org.transitime.core.DataProcessor;
+import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
 import org.transitime.utils.Time;
@@ -167,7 +167,7 @@ public class PlaybackModule extends Module {
 				Core.getInstance().setSystemTime(avlReport.getTime());
 				
 				// Do the actual processing of the AVL data
-				DataProcessor.getInstance().processAvlReport(avlReport);
+				AvlProcessor.getInstance().processAvlReport(avlReport);
 			}
 		}
 		

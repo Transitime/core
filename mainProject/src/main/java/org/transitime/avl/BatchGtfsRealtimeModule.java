@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.StringListConfigValue;
-import org.transitime.core.DataProcessor;
+import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Location;
 import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
@@ -42,7 +42,7 @@ import org.transitime.utils.Time;
  * output more accurate schedule times for the GTFS stop_times.txt file.
  * <p>
  * The AVL data is processed directly by this class by it calling
- * DataProcessor.processAvlReport(avlReport). The messages do not go through
+ * AvlProcessor.processAvlReport(avlReport). The messages do not go through
  * the JMS server and JMS server does not need to be running.
  * <p>
  * Note: the URL for the GTFS-realtime feed is obtained in GtfsRealtimeModule
@@ -93,7 +93,7 @@ public class BatchGtfsRealtimeModule extends Module {
 			Core.getInstance().setSystemTime(avlReport.getTime());
 
 			// Actually process the AvlReport
-			DataProcessor.getInstance().processAvlReport(avlReport);
+			AvlProcessor.getInstance().processAvlReport(avlReport);
 		}
 		
 	}

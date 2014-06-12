@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.StringConfigValue;
-import org.transitime.core.DataProcessor;
+import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
 
@@ -34,7 +34,7 @@ import org.transitime.modules.Module;
  * create a plain text CSV file of AVL data and see what the code does.
  * <p>
  * The AVL data is processed directly by this class by it calling
- * DataProcessor.processAvlReport(avlReport). The messages do not go through
+ * AvlProcessor.processAvlReport(avlReport). The messages do not go through
  * the JMS server and JMS server does not need to be running.
  * <p>
  * Note: the URL for the GTFS-realtime feed is obtained in this module
@@ -85,7 +85,7 @@ public class BatchCsvAvlFeedModule extends Module {
 			// Update the Core SystemTime to use this AVL time
 			Core.getInstance().setSystemTime(avlReport.getTime());
 
-			DataProcessor.getInstance().processAvlReport(avlReport);
+			AvlProcessor.getInstance().processAvlReport(avlReport);
 		}
 
 		// Kill off the whole program because done processing the AVL data

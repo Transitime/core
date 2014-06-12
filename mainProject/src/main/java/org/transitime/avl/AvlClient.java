@@ -20,7 +20,7 @@ import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.core.DataProcessor;
+import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 
 /**
@@ -84,7 +84,7 @@ public class AvlClient implements Runnable {
 		// Process the report
 		logger.info("Thread={} AvlClient processing AVL data {}", 
 				Thread.currentThread().getName(), avlReport);		
-		DataProcessor.getInstance().processAvlReport(avlReport);
+		AvlProcessor.getInstance().processAvlReport(avlReport);
 	}
 	
 }

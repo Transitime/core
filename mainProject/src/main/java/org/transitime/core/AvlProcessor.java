@@ -40,10 +40,10 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class DataProcessor {
+public class AvlProcessor {
 
 	// Singleton class
-	private static DataProcessor singleton = new DataProcessor();
+	private static AvlProcessor singleton = new AvlProcessor();
 	
 	/*********** Configurable Parameters for this module ***********/
 	private static double getTerminalDistanceForRouteMatching() {
@@ -55,21 +55,21 @@ public class DataProcessor {
 	
 	/************ Logging *****************/
 	private static final Logger logger = 
-			LoggerFactory.getLogger(DataProcessor.class);
+			LoggerFactory.getLogger(AvlProcessor.class);
 
 	/********************** Member Functions **************************/
 
 	/*
 	 * Singleton class so shouldn't use constructor so declared private
 	 */
-	private DataProcessor() {		
+	private AvlProcessor() {		
 	}
 	
 	/**
-	 * Returns the singleton DataProcessor
+	 * Returns the singleton AvlProcessor
 	 * @return
 	 */
-	public static DataProcessor getInstance() {
+	public static AvlProcessor getInstance() {
 		return singleton;
 	}
 	
@@ -127,7 +127,7 @@ public class DataProcessor {
 		// Make sure state is coherent
 		if (!vehicleState.isPredictable() || 
 				vehicleState.getMatch() == null) {
-			throw new RuntimeException("Called DataProcessor.matchNewFix() " +
+			throw new RuntimeException("Called AvlProcessor.matchNewFix() " +
 					"for a vehicle that was not already predictable. " + 
 					vehicleState);
 		}
@@ -701,7 +701,7 @@ public class DataProcessor {
 							// again. Therefore log problem and don't try to
 							// assign vehicle again.
 							logger.error(
-									"DataProcessor.lowLevelProcessAvlReport() " +
+									"AvlProcessor.lowLevelProcessAvlReport() " +
 									"called recursively, which is wrong. {}", 
 									vehicleState);
 						} else {
@@ -729,7 +729,7 @@ public class DataProcessor {
 		// The beginning of processing AVL data is an important milestone 
 		// in processing data so log it as info.
 		logger.info("====================================================" +
-				"DataProcessor processing {}", avlReport);		
+				"AvlProcessor processing {}", avlReport);		
 		
 		// Record when the AvlReport was actually processed. This is done here so
 		// that the value will be set when the avlReport is stored in the database

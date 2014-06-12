@@ -169,7 +169,7 @@ public class TimeoutHandler {
 							null);  // supervisor
 
 					// Make vehicle unpredictable
-					DataProcessor.getInstance().
+					AvlProcessor.getInstance().
 							makeVehicleUnpredictable(avlReport.getVehicleId());
 
 					// Remove that AVL report from the map since it was handled

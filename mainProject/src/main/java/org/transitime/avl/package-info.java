@@ -18,7 +18,7 @@
 /**
  * Contains the classes associated with AVL feeds including reading data 
  * from an AVL feed and providing it to the main application usually via JMS for live feeds
- * but also by reading data and then directly calling DataProcessor.processAvlReport(avlReport) for
+ * but also by reading data and then directly calling AvlProcessor.processAvlReport(avlReport) for
  * other feeds, especially batch feeds used for debugging or testing.
  * <p>
  * Goal for the AVL module software was to be able to easily handle many
