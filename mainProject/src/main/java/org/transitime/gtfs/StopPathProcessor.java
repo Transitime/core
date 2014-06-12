@@ -64,6 +64,8 @@ public class StopPathProcessor {
 	 * @param offsetDistance How much to the right the stopPaths should
 	 * be offset. If negative then the stopPaths are offset to the left.
 	 * If 0.0 then of course the stopPaths are not offset at all.
+	 * @param maxStopToPathDistance
+	 * @param maxDistanceForEliminatingVertices For getting rid of really small segments
 	 */
 	public StopPathProcessor(List<GtfsShape> gtfsShapes, 
 			Map<String, Stop> stopsMap, 
@@ -201,16 +203,18 @@ public class StopPathProcessor {
 	}
 	
 	/**
-	 * For each trip pattern goes through the stops and matches them to 
-	 * the shapes from the shapes.txt file. StopPath segments are created for
-	 * each stop. 
+	 * For each trip pattern goes through the stops and matches them to the
+	 * shapes from the shapes.txt file. StopPath segments are created for each
+	 * stop.
 	 * 
-	 * @param shapeLocs List of Locations that represent the shapes that
-	 * matching the stops to.
-	 * @param stopIdsForTripPattern List of IDs of the stops that need
-	 * to match to shapes.
-	 * @param tripPattern so can get routeId, tripPatternId, and shapeId
-	 * when creating the actual StopPath objects.
+	 * @param shapeLocs
+	 *            List of Locations that represent the shapes that matching the
+	 *            stops to.
+	 * @param stopIdsForTripPattern
+	 *            List of IDs of the stops that need to match to shapes.
+	 * @param tripPattern
+	 *            so can get routeId, tripPatternId, and shapeId when creating
+	 *            the actual StopPath objects.
 	 */
 	private void determinePathSegmentsMatchingStopsToShapes(List<Location> shapeLocs,
 			TripPattern tripPattern) {	
@@ -288,12 +292,13 @@ public class StopPathProcessor {
 				if (bestStopToShapeDistance < 250.0) {
 					logger.warn("Stop {} (stop_id={}) at lat={} lon={} for " + 
 							"route_id={} stop_sequence={} is located {} away " +
-							"from the shapes for shape_id={}. This is further " +
-							"than allowed distance of {} and means that either " +
-							"the location of the stop needs to be improved, " +
-							"the stop is out of sequence, the stop should not be " +
-							"included for the trips in stop_times.txt or the shape " +
-							"needs to be improved. {}",
+							"from the shapes for shape_id={}. This is " +
+							"further than allowed distance of {} and means " +
+							"that either the location of the stop needs to " +
+							"be improved, the stop is out of sequence, the " +
+							"stop should not be included for the trips in " +
+							"stop_times.txt, or the shape needs to be " +
+							"improved. {}",
 							stop.getName(), 
 							stop.getId(),  
 							Geo.format(stop.getLoc().getLat()), 
@@ -309,12 +314,13 @@ public class StopPathProcessor {
 					// message
 					logger.error("Stop {} (stop_id={}) at lat={} lon={} for " + 
 							"route_id={} stop_sequence={} is located {} away " +
-							"from the shapes for shape_id={}. This is MUCH further " +
-							"than allowed distance of {} and means that either " +
-							"the location of the stop needs to be improved, " +
-							"the stop is out of sequence, the stop should not be " +
-							"included for the trips in stop_times.txt or the shape " +
-							"needs to be improved. {}",
+							"from the shapes for shape_id={}. This is MUCH " +
+							"further than allowed distance of {} and means " +
+							"that either the location of the stop needs to " +
+							"be improved, the stop is out of sequence, the " +
+							"stop should not be included for the trips in " +
+							"stop_times.txt, or the shape needs to be " +
+							"improved. {}",
 							stop.getName(), 
 							stop.getId(),  
 							Geo.format(stop.getLoc().getLat()), 
