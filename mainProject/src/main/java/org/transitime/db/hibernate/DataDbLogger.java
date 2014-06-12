@@ -92,6 +92,11 @@ public class DataDbLogger {
 	// shouldStoreToDb should be set to false.
 	private final boolean shouldStoreToDb;
 	
+	// Used by add(). If queue filling up to 25% and shouldPauseToReduceQueue is
+	// true then will pause the calling thread for a few seconds so that more
+	// objects can be written out and not have the queue fill up.
+	private final boolean shouldPauseToReduceQueue;
+	
 	// For keeping track of index into levels, which level of capacity of
 	// queue being used. When level changes then an e-mail is sent out warning
 	// the operators.
@@ -126,14 +131,19 @@ public class DataDbLogger {
 	 *            Specifies whether data should actually be written to db. If in
 	 *            playback mode and shouldn't write data to db then set to
 	 *            false.
+	 * @param shouldPauseToReduceQueue
+	 *            Specifies if should pause the thread calling add() if the
+	 *            queue is filling up. Useful for when in batch mode and dumping
+	 *            a whole bunch of data to the db really quickly.
 	 * @return The DataDbLogger for the specified projectId
 	 */
 	public static DataDbLogger getDataDbLogger(String projectId,
-			boolean shouldStoreToDb) {
+			boolean shouldStoreToDb, boolean shouldPauseToReduceQueue) {
 		synchronized (dataDbLoggerMap) {
 			DataDbLogger logger = dataDbLoggerMap.get(projectId);
 			if (logger == null) {
-				logger = new DataDbLogger(projectId, shouldStoreToDb);
+				logger = new DataDbLogger(projectId, shouldStoreToDb,
+						shouldPauseToReduceQueue);
 				dataDbLoggerMap.put(projectId, logger);
 			}
 			return logger;
@@ -151,10 +161,16 @@ public class DataDbLogger {
 	 *            Specifies whether data should actually be written to db. If in
 	 *            playback mode and shouldn't write data to db then set to
 	 *            false.
+	 * @param shouldPauseToReduceQueue
+	 *            Specifies if should pause the thread calling add() if the
+	 *            queue is filling up. Useful for when in batch mode and dumping
+	 *            a whole bunch of data to the db really quickly.
 	 */
-	private DataDbLogger(String projectId, boolean shouldStoreToDb) {
+	private DataDbLogger(String projectId, boolean shouldStoreToDb, 
+			boolean shouldPauseToReduceQueue) {
 		this.projectId = projectId;
 		this.shouldStoreToDb = shouldStoreToDb;
+		this.shouldPauseToReduceQueue = shouldPauseToReduceQueue;
 		
 		// Create the reusable heavy weight session factory
 		sessionFactory = HibernateUtils.getSessionFactory(projectId);
@@ -247,6 +263,17 @@ public class DataDbLogger {
 		// is decreasing again.
 		if (level > maxQueueLevel)
 			maxQueueLevel = level;
+		
+		// If shouldPauseToReduceQueue (because in batch mode or such) and
+		// if queue is starting to get more full then pause the calling
+		// thread for 10 seconds so that separate thread can clear out 
+		// queue a bit.
+		if (shouldPauseToReduceQueue && level > 0.2) {
+			logger.info("Pausing thread adding data to DataDbLogger queue " +
+					"so that queue can be cleared out. Level={}%", 
+					level*100.0);
+			Time.sleep(10 * Time.MS_PER_SEC);
+		}
 		
 		// Return whether was successful in adding object to queue
 		return success;
@@ -504,7 +531,7 @@ public class DataDbLogger {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DataDbLogger logger = getDataDbLogger("test", false);
+		DataDbLogger logger = getDataDbLogger("test", false, false);
 
 		long initialTime = (System.currentTimeMillis()  / 1000) * 1000;
 

@@ -88,8 +88,9 @@ public class Core {
 		// to database via a robust queue. But don't actually log data
 		// if in playback mode since then would be writing data again 
 		// that was first written when predictor was run in real time.
-		dataDbLogger = 
-				DataDbLogger.getDataDbLogger(projectId, CoreConfig.storeDataInDatabase());
+		dataDbLogger = DataDbLogger.getDataDbLogger(projectId,
+				CoreConfig.storeDataInDatabase(),
+				CoreConfig.pauseIfDbQueueFilling());
 		
 		// Read in all config data
 		configData = new DbConfig(projectId);

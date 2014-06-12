@@ -73,7 +73,21 @@ public class CoreConfig {
 	}
 	private static BooleanConfigValue storeDataInDatabase =
 			new BooleanConfigValue("transitime.core.storeDataInDatabase", true);
-
+	
+	/**
+	 * When in batch mode can flood db with lots of objects. If 
+	 * transitime.core.pauseIfDbQueueFilling is set to true then when objects
+	 * are put into the DataDbLogger queue the calling thread will be
+	 * temporarily suspended so that the separate thread can run to write
+	 * to the db and thereby empty out the queue.
+	 * @return
+	 */
+	public static boolean pauseIfDbQueueFilling() {
+		return pauseIfDbQueueFilling.getValue();
+	}
+	private static BooleanConfigValue pauseIfDbQueueFilling =
+			new BooleanConfigValue("transitime.core.pauseIfDbQueueFilling", false);
+	
 	/**
 	 * So that have flexibility with where the hibernate config file is.
 	 * This way can easily access it within Eclipse.
