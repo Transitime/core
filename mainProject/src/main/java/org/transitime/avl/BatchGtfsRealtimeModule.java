@@ -87,6 +87,8 @@ public class BatchGtfsRealtimeModule extends Module {
 		 */
 		@Override
 		protected void handleAvlReport(AvlReport avlReport) {
+			logger.info("Processing avlReport={}", avlReport);
+			
 			// Update the Core SystemTime to use this AVL time
 			Core.getInstance().setSystemTime(avlReport.getTime());
 
