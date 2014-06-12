@@ -27,10 +27,12 @@ import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Location;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.ipc.data.Prediction;
 import org.transitime.utils.StringUtils;
+import org.transitime.utils.Time;
 
 /**
  * Keeps track of vehicle state including its block assignment, where it
@@ -46,8 +48,10 @@ public class VehicleState {
 	private BlockAssignmentMethod assignmentMethod;
 	private Date assignmentTime;
 	private boolean predictable;
+	// First is most recent
 	private LinkedList<TemporalMatch> temporalMatchHistory = 
 			new LinkedList<TemporalMatch>();
+	// First is most recent
 	private LinkedList<AvlReport> avlReportHistory =
 			new LinkedList<AvlReport>();
 	private List<Prediction> predictions;
@@ -263,6 +267,37 @@ public class VehicleState {
 		}
 	}
 	
+	/**
+	 * Looks in the AvlReport history for the most recent AvlReport that is
+	 * at least minDistanceFromCurrentReport from the current AvlReport.
+	 * Also makes sure that previous report isn't too old.
+	 * 
+	 * @param minDistanceFromCurrentReport
+	 * @return The previous AvlReport, or null if there isn't one that far away
+	 */
+	public AvlReport getPreviousAvlReport(double minDistanceFromCurrentReport) {
+		// Go through history of AvlReports to find first one that is specified
+		// distance away from the current AVL location.
+		long currentTime = getAvlReport().getTime();
+		Location currentLoc = getAvlReport().getLocation();
+		for (AvlReport previousAvlReport : avlReportHistory) {
+			// If the previous report is too old then return null
+			if (currentTime - previousAvlReport.getTime() > 20 * Time.MS_PER_MIN)
+				return null;
+			
+			// If previous location far enough away from current location
+			// then return the previous AVL report.
+			Location previousLoc = previousAvlReport.getLocation();
+			if (previousLoc.distance(currentLoc) > minDistanceFromCurrentReport) {
+				return previousAvlReport;
+			}
+		}
+		
+		// Didn't find a previous AvlReport in history that was far enough away
+		// so return null
+		return null;
+	}
+
 	/**
 	 * Returns the next to last AvlReport where successfully matched the
 	 * vehicle. This isn't necessarily simply the previous AvlReport since that
