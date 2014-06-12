@@ -249,7 +249,7 @@
     <appender-ref ref="CORE_DEBUG" />
   </logger>
 
-  <logger name="org.transitime.core.DataProcessor" 
+  <logger name="org.transitime.core.AvlProcessor" 
    level="debug" additivity="true">
     <appender-ref ref="CORE_DEBUG" />
   </logger>
