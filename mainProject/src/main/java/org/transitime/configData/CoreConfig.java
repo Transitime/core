@@ -268,7 +268,11 @@ public class CoreConfig {
 					60 * Time.SEC_PER_MIN);
 
 	/**
-	 * How early a vehicle can be and still be matched to its block assignment
+	 * How early a vehicle can be and still be matched to its block assignment.
+	 * If when a new AVL report is received for a predictable vehicle and it is
+	 * found with respect to the real-time schedule adherence to be earlier than
+	 * this value the vehicle will be made unpredictable.
+	 * 
 	 * @return
 	 */
 	public static int getAllowableEarlySeconds() {
@@ -279,7 +283,11 @@ public class CoreConfig {
 					15 * Time.SEC_PER_MIN);
 
 	/**
-	 * How late a vehicle can be and still be matched to its block assignment
+	 * How late a vehicle can be and still be matched to its block assignment.
+	 * If when a new AVL report is received for a predictable vehicle and it is
+	 * found with respect to the real-time schedule adherence to be later than
+	 * this value the vehicle will be made unpredictable.
+	 * 
 	 * @return
 	 */
 	public static int getAllowableLateSeconds() {
@@ -328,6 +336,21 @@ public class CoreConfig {
 			new IntegerConfigValue("transitime.core.layoverBiasSecondsForInitialMatching", 
 					20 * Time.SEC_PER_MIN);
 	
+	/**
+	 * For initial matching vehicle to assignment when there isn't any heading
+	 * information. In that case also want to match to previous AVL report.
+	 * This parameter specifies how far, as the crow flies, the previous AVL
+	 * report to be used from the VehicleState AvlReport history is from the
+	 * current AvlReport.
+	 * @return
+	 */
+	public static double getDistanceBetweenAvlsForInitialMatchingWithoutHeading() {
+		return distanceBetweenAvlsForInitialMatchingWithoutHeading.getValue();
+	}
+	private static DoubleConfigValue distanceBetweenAvlsForInitialMatchingWithoutHeading =
+			new DoubleConfigValue("transitime.core.distanceBetweenAvlsForInitialMatchingWithoutHeading",
+					100.0);
+					
 	/**
 	 * How far along path past a layover a vehicle can spatially match but 
 	 * still be considered to be at that layover. Important for determining 

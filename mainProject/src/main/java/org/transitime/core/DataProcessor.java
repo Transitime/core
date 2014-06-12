@@ -180,8 +180,8 @@ public class DataProcessor {
 						VehicleEvent.NO_MATCH,
 						eventDescription,
 						false, // predictable,
-						false, // becameUnpredictable
-						null);  // supervisor 
+						true,  // becameUnpredictable
+						null); // supervisor 
 			}
 			
 			// Set the match of the vehicle. If null then it will make the vehicle
@@ -288,7 +288,7 @@ public class DataProcessor {
 			
 			// Get the potential spatial matches
 			List<SpatialMatch> spatialMatchesForBlock = 
-					SpatialMatcher.getSpatialMatches(avlReport, 
+					SpatialMatcher.getSpatialMatches(vehicleState, 
 							potentialTrips,	block);
 
 			// Add appropriate spatial matches to list
@@ -372,7 +372,7 @@ public class DataProcessor {
 		// the trip.
 		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
 		List<SpatialMatch> spatialMatches = 
-				SpatialMatcher.getSpatialMatches(avlReport, potentialTrips, 
+				SpatialMatcher.getSpatialMatches(vehicleState, potentialTrips, 
 						block);
 		logger.debug("For vehicleId={} and blockId={} spatial matches={}",
 				avlReport.getVehicleId(), block.getId(), spatialMatches);
@@ -477,9 +477,11 @@ public class DataProcessor {
 			// There is a block assignment from AVL feed so use it
 			return matchVehicleToBlockAssignment(block, vehicleState);			
 		} else {
+			// If there is a route assignment from AVL feed us it
 			String routeId = 
 					BlockAssigner.getInstance().getRouteIdAssignment(avlReport);
 			if (routeId != null) {
+				// There is a route assignment so use it
 				return matchVehicleToRouteAssignment(routeId, vehicleState);
 			}
 		}
@@ -571,6 +573,18 @@ public class DataProcessor {
 					"the vehicle to its assignmet again to see if get better " +
 					"temporal match by matching to proper trip.",
 					vehicleState.getVehicleId(), scheduleAdherence);
+			
+			// Log that vehicle is being made unpredictable as a VehicleEvent
+			String eventDescription = "Vehicle had schedule adherence of "
+					+ scheduleAdherence + " which is beyond acceptable "
+					+ "limits. Therefore vehicle made unpredictable.";
+			VehicleEvent.create(vehicleState.getAvlReport(), 
+					vehicleState.getMatch(),
+					VehicleEvent.NO_MATCH,
+					eventDescription,
+					false, // predictable,
+					true, // becameUnpredictable
+					null);  // supervisor 
 			
 			// Schedule adherence not reasonable so match vehicle to assignment
 			// again.
@@ -731,6 +745,7 @@ public class DataProcessor {
 		TimeoutHandler.getInstance().handlePossibleTimeout(avlReport);
 		
 		// Logging to syserr just for debugging. This should eventually be removed
+		// FIXME
 		System.err.println("Processing avlReport for vehicleId=" + 
 				avlReport.getVehicleId() + 
 				//" AVL time=" + Time.timeStrMsec(avlReport.getTime()) +

@@ -102,7 +102,8 @@ public class SpatialMatcher {
 	 * @param avlReport
 	 * @param block
 	 * @param trip
-	 * @return
+	 * @return List of potential SpatialMatches. Can be empty but will not be
+	 *         null.
 	 */
 	private List<SpatialMatch> getSpatialMatchesForTrip(AvlReport avlReport,
 			Block block, Trip trip) {
@@ -135,22 +136,116 @@ public class SpatialMatcher {
 	}
 
 	/**
+	 * For list of spatial matches passed in returns the first non-layover
+	 * one. This is needed because for a trip always get a layover match
+	 * in addition to the possible real spatial matches. But the layover
+	 * match doesn't need heading to be correct.
+	 * 
+	 * @param spatialMatchesForTrip
+	 * @return
+	 */
+	private static SpatialMatch getFirstNonLayoverSpatialMatch(
+			List<SpatialMatch> spatialMatchesForTrip) {
+		for (SpatialMatch match : spatialMatchesForTrip) {
+			if (!match.isLayover())
+				return match;
+		}
+		
+		return null;
+	}
+	/**
+	 * Checks to make sure that for the spatialMatchesForTrip that the vehicle
+	 * is really making forward progress. This is important so that don't match
+	 * to wrong trip when there isn't valid heading information from the
+	 * AvlReport.
+	 * 
+	 * @param spatialMatchesForTrip
+	 * @param vehicleState
+	 * @return
+	 */
+	private static boolean vehicleHeadingInDirectionOfTrip(
+			List<SpatialMatch> spatialMatchesForTrip,
+			VehicleState vehicleState) {
+		// Convenience variables
+		AvlReport avlReport = vehicleState.getAvlReport();
+		Block block = spatialMatchesForTrip.get(0).getBlock();
+		Trip trip = spatialMatchesForTrip.get(0).getTrip();
+
+		// If there are no spatial matches or if heading
+		// is valid then don't need to check previous AvlReport
+		// to see if it is valid so simply return true.
+		if (spatialMatchesForTrip.isEmpty()
+				|| !Float.isNaN(avlReport.getHeading())) {
+			return true;
+		}
+		
+		// Heading is not valid so set headingInProperDirection
+		// to false for now. If previous match shows that vehicle
+		// is making forward progress then will set 
+		// headingInProperDirection to true.
+		double minDistance = CoreConfig.
+				getDistanceBetweenAvlsForInitialMatchingWithoutHeading();
+		AvlReport previousAvlReport = 
+				vehicleState.getPreviousAvlReport(minDistance);
+		if (previousAvlReport != null) {
+			// Determine matches for the previous AvlReport
+			List<SpatialMatch> spatialMatchesForPreviousReport = 
+					(new SpatialMatcher())
+						.getSpatialMatchesForTrip(previousAvlReport,
+								block, trip);
+
+			// There can be multiple matches, but only look at first 
+			// non-layover ones
+			SpatialMatch previousNonLayoverSpatialMatch =
+					getFirstNonLayoverSpatialMatch(
+							spatialMatchesForPreviousReport);
+			// If no previous non-layover spatial matches then OK. This
+			// means that heading was OK for previous report or that only
+			// matched to layover, where heading doesn't matter. So return 
+			// true.
+			if (previousNonLayoverSpatialMatch == null)
+				return true;
+			
+			SpatialMatch currentNonLayoverSpatialMatch =
+					getFirstNonLayoverSpatialMatch(
+							spatialMatchesForTrip);
+			// If no non-layover matches then must be matching to layover.
+			// For this case heading doesn't matter so must be OK so
+			// return true.
+			if (currentNonLayoverSpatialMatch == null)
+				return true;
+			
+			// If vehicle heading in right direction then return true!
+			if (previousNonLayoverSpatialMatch
+					.lessThanOrEqualTo(currentNonLayoverSpatialMatch))
+				return true;
+		}
+
+		// Couldn't verify that vehicle making forward progress
+		// for the spatial matches for the trip so return false.
+		return false;
+	}
+		
+	/**
 	 * Goes through the Block assignment data and determines the closest spatial
 	 * matches. For first matching a vehicle to a block assignment. Matches must
 	 * be within getMaxAllowableDistanceFromSegment() except layovers are always
 	 * included since vehicle are allowed to be away from the route path during
 	 * layovers.
 	 * 
-	 * @param avlReport
+	 * @param vehicleState
+	 *            So can get AvlReports
 	 * @param tripPatternsToInvestigate
 	 * @param block
 	 *            So can get block ID for logging
 	 * @return
 	 */
-	public static List<SpatialMatch> getSpatialMatches(AvlReport avlReport,
+	public static List<SpatialMatch> getSpatialMatches(
+			VehicleState vehicleState,
 			List<Trip> tripsToInvestigate, Block block) {
 		List<SpatialMatch> spatialMatchesForAllTrips = 
 				new ArrayList<SpatialMatch>();
+		AvlReport avlReport = vehicleState.getAvlReport();
 
 		// So can reuse spatial matches if looking at same trip pattern
 		Set<String> tripPatternIdsCovered = new HashSet<String>();
@@ -194,8 +289,22 @@ public class SpatialMatcher {
 				// matches so do so now.
 				List<SpatialMatch> spatialMatchesForTrip = (new SpatialMatcher())
 						.getSpatialMatchesForTrip(avlReport, block, trip);
-				spatialMatchesForAllTrips.addAll(spatialMatchesForTrip);
-				tripPatternIdsCovered.add(trip.getTripPattern().getId());
+				
+				// If heading is not available then we can have a bad spatial 
+				// match. Could be for wrong trip. Therefore if heading not 
+				// valid need to look at previous AVL report to see if matches
+				// earlier in the trip, indicating that the vehicle really 
+				// could be traveling along the trip instead of going in the
+				// other direction. 
+				boolean headingInProperDirection = vehicleHeadingInDirectionOfTrip(
+						spatialMatchesForTrip, vehicleState);
+						
+				// Use these matches for the trip but only if the heading is OK
+				// or have verified that actually heading in proper direction.
+				if (headingInProperDirection) {
+					spatialMatchesForAllTrips.addAll(spatialMatchesForTrip);
+					tripPatternIdsCovered.add(trip.getTripPattern().getId());
+				}
 			}
 		}
 
