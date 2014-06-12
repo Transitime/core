@@ -586,6 +586,11 @@ public class AvlProcessor {
 					true, // becameUnpredictable
 					null);  // supervisor 
 			
+			// Clear out match because it is no good! This is especially
+			// important for when determining arrivals/departures because
+			// that looks at previous match and current match.
+			vehicleState.setMatch(null);
+			
 			// Schedule adherence not reasonable so match vehicle to assignment
 			// again.
 			matchVehicleToAssignment(vehicleState);
