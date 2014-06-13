@@ -228,9 +228,11 @@
   </logger>
   -->
 
-  <!-- 
-  <logger name="org.hibernate.type" level="trace" additivity="true">
-    <appender-ref ref="CORE_DEBUG" />
+ <!-- For logging the parameter values for the SQL -->
+  <!--
+  <logger name="org.hibernate.type.descriptor.sql.BasicBinder"
+          level="trace" additivity="false">
+    <appender-ref ref="SQL" />
   </logger>
   -->
 
