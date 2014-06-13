@@ -36,6 +36,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
 import org.transitime.gtfs.readers.GtfsStopTimesReader;
 import org.transitime.gtfs.writers.GtfsExtendedStopTimesWriter;
 import org.transitime.gtfs.writers.GtfsStopTimesWriter;
+import org.transitime.utils.MapKey;
 import org.transitime.utils.Statistics;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
@@ -128,16 +129,16 @@ public class ScheduleStatistics {
 	 * 
 	 * @return Ordered map of the GtfsStopTimes
 	 */
-	private Map<String, GtfsStopTime> getGtfsStopTimes() {
+	private Map<MapKey, GtfsStopTime> getGtfsStopTimes() {
 		GtfsStopTimesReader stopTimesReader = 
 				new GtfsStopTimesReader(gtfsDirectoryName);
 		List<GtfsStopTime> gtfsStopTimes = stopTimesReader.get(100000);
 		
 		// Create the ordered map to be returned
-		Map<String, GtfsStopTime> gtfsStopTimesMap = 
-				new LinkedHashMap<String, GtfsStopTime>(gtfsStopTimes.size());
+		Map<MapKey, GtfsStopTime> gtfsStopTimesMap = 
+				new LinkedHashMap<MapKey, GtfsStopTime>(gtfsStopTimes.size());
 		for (GtfsStopTime gtfsStopTime : gtfsStopTimes) {
-			String key = getTripStopKey(gtfsStopTime.getTripId(), gtfsStopTime.getStopId());
+			MapKey key = getTripStopKey(gtfsStopTime.getTripId(), gtfsStopTime.getStopId());
 			gtfsStopTimesMap.put(key, gtfsStopTime);
 		}
 		
@@ -145,7 +146,7 @@ public class ScheduleStatistics {
 	}
 
 	/**
-	 * For use in the submaps of arrivalTimesFromDbByRouteByTripStopMap and
+	 * For use in the sub-maps of arrivalTimesFromDbByRouteByTripStopMap and
 	 * departureTimesFromDbByRouteByTripStopMap.
 	 * 
 	 * The key is simply tripId + stopId. Previously used tripId + "=" + stopId
@@ -157,8 +158,8 @@ public class ScheduleStatistics {
 	 * @param stopId
 	 * @return
 	 */
-	private static String getTripStopKey(String tripId, String stopId) {
-		return tripId + stopId;
+	private static MapKey getTripStopKey(String tripId, String stopId) {
+		return new MapKey(tripId, stopId);
 	}
 
 	/**
@@ -167,19 +168,19 @@ public class ScheduleStatistics {
 	 * departureTimesFromDbByRouteByTripStopMap that is passed in.
 	 * 
 	 * @param timesByTripMap
-	 *            map keyed on routeId containing a submap
+	 *            map keyed on routeId containing a sub-map
 	 * @param ad
 	 */
 	private void addArrivalDepartureToMap(
-			Map<String, Map<String, List<Integer>>> timesByTripMap,
+			Map<String, Map<MapKey, List<Integer>>> timesByTripMap,
 			ArrivalDeparture ad) {
 		// Get the existing sub map for the routeId
 		String key = ad.getRouteId();
-		Map<String, List<Integer>> timesByTripSubMap = timesByTripMap.get(key);
+		Map<MapKey, List<Integer>> timesByTripSubMap = timesByTripMap.get(key);
 
 		// If the sub map for the routeId not created yet, then create it
 		if (timesByTripSubMap == null) {
-			timesByTripSubMap = new HashMap<String, List<Integer>>();
+			timesByTripSubMap = new HashMap<MapKey, List<Integer>>();
 			timesByTripMap.put(key, timesByTripSubMap);
 		}
 
@@ -195,9 +196,9 @@ public class ScheduleStatistics {
 	 * @param ad
 	 */
 	private void addArrivalDepartureToSubMap(
-			Map<String, List<Integer>> timesByTripMap, ArrivalDeparture ad) {
+			Map<MapKey, List<Integer>> timesByTripMap, ArrivalDeparture ad) {
 		// Get the existing list of times for the trip/stop
-		String key = getTripStopKey(ad.getTripId(), ad.getStopId());
+		MapKey key = getTripStopKey(ad.getTripId(), ad.getStopId());
 		int secsIntoDay = timeForUsingCalendar.getSecondsIntoDay(ad.getDate());
 
 		// If list of times for the trip/stop doesn't exist, yet create it
@@ -227,15 +228,15 @@ public class ScheduleStatistics {
 	 * query for each row. Found a batch size of 50k is much more efficient
 	 * than 10k by about a factor of 2.
 	 */
-	private Map<String, Map<String, List<Integer>>> readInArrivalsDeparturesFromDb(
+	private Map<String, Map<MapKey, List<Integer>>> readInArrivalsDeparturesFromDb(
 			ArrivalsOrDepartures arrivalOrDeparture) {
 		logger.info("Reading {} from db for projectId={} for beginDate={} " +
 				"and endDate={}", 
 				arrivalOrDeparture, projectId, beginTime, endTime);
 
-		Map<String, Map<String, List<Integer>>> 
+		Map<String, Map<MapKey, List<Integer>>> 
 			arrivalDeparatureTimesFromDbByRouteByTripStopMap = 
-				new HashMap<String, Map<String, List<Integer>>>();
+				new HashMap<String, Map<MapKey, List<Integer>>>();
 
 		// Go through all the arrival/departure data and put it into a map
 		// that just keeps track of arrival/departure times for trip/stops.		
@@ -259,12 +260,16 @@ public class ScheduleStatistics {
 				// For keeping track of which rows should be returned by the batch.
 				int firstResult = 0;
 				// Batch size of 50k found to be significantly faster than 10k,
-				// by about a factor of 2.
-				int batchSize = 50000;  // Also known as maxResults
+				// by about a factor of 2. So want to use as large a value as
+				// possible without running out of memory.
+				int batchSize = 500000;  // Also known as maxResults
 				// The temporary list for the loop that contains a batch of results
 				List<ArrivalDeparture> arrDepBatchList;
 				// Read in batch of 50k rows of data and process it
 				do {				
+					// Note: I tried adding a "ORDER BY time" clause to see
+					// if that would speed things up when doing multiple batches
+					// but it only served to slow things down.
 					arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
 							projectId, 
 							new Date(batchBeginTime), new Date(batchEndTime), 
@@ -279,7 +284,7 @@ public class ScheduleStatistics {
 								arrDep);
 					}
 					
-					logger.info("Read in {} {}", 
+					logger.info("Read in total of {} {}", 
 							firstResult+arrDepBatchList.size(), 
 							arrivalOrDeparture);
 					
@@ -503,9 +508,9 @@ public class ScheduleStatistics {
 	 * 			  specifies whether should handle as arrivals or departures
 	 */
 	private void determineStatsForRoute(
-			Map<String, GtfsStopTime> originalGtfsStopTimes,
-			Map<String, List<Integer>> timesFromDbByTripStopForRouteSubMap,
-			Map<String, Stats> statsResultsByTripStopMap, 
+			Map<MapKey, GtfsStopTime> originalGtfsStopTimes,
+			Map<MapKey, List<Integer>> timesFromDbByTripStopForRouteSubMap,
+			Map<MapKey, Stats> statsResultsByTripStopMap,  
 			String routeId,
 			ArrivalsOrDepartures arrivalsOrDepartures) {
 		logger.debug("Processing {} data for routeId={}", 
@@ -513,11 +518,11 @@ public class ScheduleStatistics {
 
 		// For the route get all of the statistics including the mean and
 		// standard deviation for each stop
-		Set<String> tripStopKeysForRouteFromDb = 
+		Set<MapKey> tripStopKeysForRouteFromDb = 
 				timesFromDbByTripStopForRouteSubMap.keySet();
-		Map<String, Stats> statsForRoute = new HashMap<String, Stats>(
+		Map<MapKey, Stats> statsForRoute = new HashMap<MapKey, Stats>(
 				tripStopKeysForRouteFromDb.size());
-		for (String tripStopKey : tripStopKeysForRouteFromDb) {
+		for (MapKey tripStopKey : tripStopKeysForRouteFromDb) {
 			List<Integer> timesFromDb = 
 					timesFromDbByTripStopForRouteSubMap.get(tripStopKey);
 			GtfsStopTime originalGtfsStopTime = 
@@ -563,7 +568,7 @@ public class ScheduleStatistics {
 		// approximately the desired fraction of early arrival/departures
 		// update the Stats object with the best time and put the Stats
 		// object into the results map.
-		for (String tripStopKey : tripStopKeysForRouteFromDb) {
+		for (MapKey tripStopKey : tripStopKeysForRouteFromDb) {
 			// The best arrival/departure time value to use is the mean 
 			// minus the desired standard deviation if the std dev is
 			// valid (there was more than 1 data point).
@@ -599,21 +604,21 @@ public class ScheduleStatistics {
 	 * 			  specifies whether should handle as arrivals or departures
 	 * @return map containing stats for each trip/stop for all routes
 	 */
-	private Map<String, Stats> determineStatsForRoutes(
-			Map<String, GtfsStopTime> originalGtfsStopTimes,
+	private Map<MapKey, Stats> determineStatsForRoutes(
+			Map<MapKey, GtfsStopTime> originalGtfsStopTimes,
 			ArrivalsOrDepartures arrivalsOrDepartures) {
 		// For returning results
-		Map<String, Stats> statsResultsByTripStopMap = 
-				new HashMap<String, Stats>();
+		Map<MapKey, Stats> statsResultsByTripStopMap = 
+				new HashMap<MapKey, Stats>();
 		
 		// Read the arrival/departure times from the db
-		Map<String, Map<String, List<Integer>>> timesFromDbByRoutesByTripStopMap = 
+		Map<String, Map<MapKey, List<Integer>>> timesFromDbByRoutesByTripStopMap = 
 				readInArrivalsDeparturesFromDb(arrivalsOrDepartures);
 		
 		// Handle the arrival/departure times for each route
 		Set<String> routeIds = timesFromDbByRoutesByTripStopMap.keySet();
 		for (String routeId : routeIds) {
-			Map<String, List<Integer>> timesByTripStopForRouteSubMap = 
+			Map<MapKey, List<Integer>> timesByTripStopForRouteSubMap = 
 					timesFromDbByRoutesByTripStopMap.get(routeId);
 			determineStatsForRoute(originalGtfsStopTimes,
 					timesByTripStopForRouteSubMap,
@@ -637,15 +642,15 @@ public class ScheduleStatistics {
 	 *            GtfsStopTimes. The values should be ordered as they are in the
 	 *            stop_times.txt GTFS file.
 	 */
-	private void processDbData(Map<String, GtfsStopTime> gtfsStopTimes) {
+	private void processDbData(Map<MapKey, GtfsStopTime> gtfsStopTimes) {
 		// Determine the arrival/departure times to use by
 		// doing statistical analysis. Puts results into
 		// arrivalStatsResultsByTripStopMap and
 		// departureStatsResultsByTripStopMap parameters.
-		Map<String, Stats> arrivalStatsResultsByTripStopMap = 
+		Map<MapKey, Stats> arrivalStatsResultsByTripStopMap = 
 				determineStatsForRoutes(gtfsStopTimes,
 						ArrivalsOrDepartures.ARRIVALS);
-		Map<String, Stats> departureStatsResultsByTripStopMap = 
+		Map<MapKey, Stats> departureStatsResultsByTripStopMap = 
 				determineStatsForRoutes(gtfsStopTimes,
 						ArrivalsOrDepartures.DEPARTURES);
 		
@@ -677,7 +682,7 @@ public class ScheduleStatistics {
 			// Determine values to use for both arrival and departure times. The
 			// Stats will be null if there was no data for the particular
 			// trip/stop.
-			String tripStopKey = getTripStopKey(gtfsStopTime.getTripId(),
+			MapKey tripStopKey = getTripStopKey(gtfsStopTime.getTripId(),
 					gtfsStopTime.getStopId());
 			Stats arrivalTimeResults = 
 					arrivalStatsResultsByTripStopMap.get(tripStopKey);
@@ -731,9 +736,9 @@ public class ScheduleStatistics {
 	 * @param departureStatsResultsByTripStopMap
 	 *            All the departure time results. Keyed on trip/stop.
 	 */
-	private void processScheduleAdherence(Map<String, GtfsStopTime> gtfsStopTimes,
-			Map<String, Stats> arrivalStatsResultsByTripStopMap,
-			Map<String, Stats> departureStatsResultsByTripStopMap) {
+	private void processScheduleAdherence(Map<MapKey, GtfsStopTime> gtfsStopTimes,
+			Map<MapKey, Stats> arrivalStatsResultsByTripStopMap,
+			Map<MapKey, Stats> departureStatsResultsByTripStopMap) {
 		logger.info("Processing schedule adherence information...");
 		
 		// For keeping track of schedule adherence results while iterating 
@@ -768,7 +773,7 @@ public class ScheduleStatistics {
 			// instead of departure time.
 			Stats stats;
 			Integer originalScheduleTime;
-			String tripStopKey = getTripStopKey(currentGtfsStopTime.getTripId(),
+			MapKey tripStopKey = getTripStopKey(currentGtfsStopTime.getTripId(),
 					currentGtfsStopTime.getStopId());
 			if (nextGtfsStopTime == null ||
 					!currentGtfsStopTime.getTripId().equals(
@@ -831,7 +836,7 @@ public class ScheduleStatistics {
 	public void process() {
 		// Read in stop_times.txt file
 		logger.info("Reading in original stop_times.txt file...");
-		Map<String, GtfsStopTime> gtfsStopTimesMap = getGtfsStopTimes();
+		Map<MapKey, GtfsStopTime> gtfsStopTimesMap = getGtfsStopTimes();
 
 		// Determine the more accurate schedule times
 		logger.info("Processing the arrival/departure times to determine " +
