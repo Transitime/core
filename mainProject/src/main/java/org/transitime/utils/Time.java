@@ -29,9 +29,14 @@ import org.transitime.gtfs.DbConfig;
 
 /**
  * Contains convenience methods for dealing with time issues.
+ * <p>
+ * Note: To use the proper timezone should set
+ * <code> TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr));</code> before
+ * this class is initialized. Otherwise the SimpleDateFormat objects will
+ * wrongly use the system default timezone.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class Time {
 	// Some handy constants for dealing with time
