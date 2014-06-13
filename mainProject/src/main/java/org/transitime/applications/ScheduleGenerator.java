@@ -18,6 +18,8 @@ package org.transitime.applications;
 
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.TimeZone;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -219,7 +221,15 @@ public class ScheduleGenerator {
 		// Set variables based on the command line args
 		gtfsDirectoryName = cmd.getOptionValue("gtfsDirectoryName");
 		projectId = cmd.getOptionValue("p");
+		
+		// Time zones are complicated. Need to create both timeForUsingCalendar
+		// and also set the system timezone so that times are processed 
+		// correctly when read from the database. NOTE: must set default
+		// timezone before calling Time() constructor so that when the
+		// SimpleDateFormat objects are created when the Time class is
+		// initialized they will get the correct timezone.
 		String timeZoneStr = cmd.getOptionValue("tz");
+		TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr)); 
 		timeForUsingCalendar = new Time(timeZoneStr);
 		
 		// Get the fraction early "e" command line option
