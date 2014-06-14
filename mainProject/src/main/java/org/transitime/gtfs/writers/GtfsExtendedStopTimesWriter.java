@@ -98,7 +98,7 @@ public class GtfsExtendedStopTimesWriter extends GtfsStopTimesWriter {
 	    	append(stopTime.getDepartureStdDev()).append(',');
 	    	String paddedNumDepDatapoints = StringUtils.padWithBlanks(
 					Integer.toString(stopTime.getDepartureNumberDatapoints()), 2);
-	    	append(paddedNumDepDatapoints).append(',');
+	    	append(paddedNumDepDatapoints).append('\n');
 		} catch(IOException e) {
 			// Only expect to run this in batch mode so don't really
 			// need to log an error using regular logging. Printing

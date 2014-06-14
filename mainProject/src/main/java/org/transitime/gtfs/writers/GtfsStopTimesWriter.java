@@ -71,8 +71,29 @@ public class GtfsStopTimesWriter extends CsvWriterBase {
 	}
 	
 	/**
+	 * Writes a single Double to the file. If the Double value is not null then
+	 * will use at least 6 characters in order to try to line up the results in
+	 * the stop_times.txt file.
+	 * 
+	 * @param i
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	protected Writer append(Double d) throws IOException {
+		if (d != null) {
+			String paddedStr = 
+					StringUtils.padWithBlanks(StringUtils.twoDigitFormat(d), 6);
+			writer.append(paddedStr);
+		}
+		return writer;
+	}
+
+	/**
 	 * Writing time values are is special case because need to convert the 
-	 * timeOfDay in seconds to a time of day string such as 11:53:01.
+	 * timeOfDay in seconds to a time of day string such as 11:53:01. If null
+	 * is passed in then will write out 8 blank characters so that the resulting
+	 * data in the stop_times.txt file will line up.
 	 * 
 	 * @param timeOfDay the object to be written
 	 * @return the Writer
@@ -80,7 +101,9 @@ public class GtfsStopTimesWriter extends CsvWriterBase {
 	 */
 	protected Writer appendTime(Integer timeOfDay) 
 			throws IOException {
-		if (timeOfDay != null)
+		if (timeOfDay == null)
+			writer.append("        ");
+		else
 			writer.append(Time.timeOfDayStr(timeOfDay));
 		return writer;
 	}
