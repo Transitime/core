@@ -28,7 +28,24 @@ import java.text.DecimalFormat;
  */
 public class StringUtils {
 	
-	private static final DecimalFormat twoDigitFormat = new DecimalFormat("0.00");
+	private static final DecimalFormat oneDigitFormat = 
+			new DecimalFormat("0.0");
+	private static final DecimalFormat twoDigitFormat = 
+			new DecimalFormat("0.00");
+
+	/**
+	 * For formatting double to 2 decimal places.
+	 * 
+	 * @param arg
+	 * @return the value as a string
+	 */
+	public static String oneDigitFormat(double arg) {
+		// Handle NaN specially
+		if (Double.isNaN(arg))
+			return "NaN";
+		
+		return oneDigitFormat.format(arg);
+	}
 
 	/**
 	 * For formatting double to 2 decimal places.
