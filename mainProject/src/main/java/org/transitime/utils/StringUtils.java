@@ -45,6 +45,29 @@ public class StringUtils {
 	}
 
 	/**
+	 * Returns original string padded with spaces so that it is
+	 * desiredCharacters long. If the original string is already at least as
+	 * long as desired then it is returned.
+	 * 
+	 * @param original
+	 * @param desiredCharacters
+	 * @return
+	 */
+	public static String padWithBlanks(String original, int desiredCharacters) {
+		if (original == null)
+			return null;
+		
+		if (original.length() >= desiredCharacters)
+			return original;
+		
+		String paddedStr = original;
+		for (int i=0; i<desiredCharacters-original.length(); ++i) {
+			paddedStr = " " + paddedStr;
+		}
+		return paddedStr;
+	}
+	
+	/**
 	 * Returns the route shortName, but the first number in the name
 	 * is padded with zeros so that the numbers have the same number
 	 * of digits. This way can sort the names properly even if have
