@@ -96,8 +96,12 @@ public class GtfsStopTimesWriter extends CsvWriterBase {
 			append(stopTime.getTripId()).append(',');
 	    	appendTime(stopTime.getArrivalTimeSecs()).append(',');
 	    	appendTime(stopTime.getDepartureTimeSecs()).append(',');
-	    	append(StringUtils.padWithBlanks(stopTime.getStopId(), 5)).append(',');
-	    	append(stopTime.getStopSequence()).append(',');
+	    	String paddedStopId = 
+	    			StringUtils.padWithBlanks(stopTime.getStopId(), 5);
+	    	append(paddedStopId).append(',');
+			String paddedStopSequence = StringUtils.padWithBlanks(
+					Integer.toString(stopTime.getStopSequence()), 2);
+	    	append(paddedStopSequence).append(',');
 	    	append(stopTime.getStopHeadsign()).append(',');
 	    	append(stopTime.getPickupType()).append(',');
 	    	append(stopTime.getDropOffType()).append(',');

@@ -68,8 +68,12 @@ public class GtfsExtendedStopTimesWriter extends GtfsStopTimesWriter {
 	    	append(stopTime.getTripId()).append(',');
 	    	appendTime(stopTime.getArrivalTimeSecs()).append(',');
 	    	appendTime(stopTime.getDepartureTimeSecs()).append(',');
-	    	append(StringUtils.padWithBlanks(stopTime.getStopId(), 5)).append(',');
-	    	append(stopTime.getStopSequence()).append(',');
+	    	String paddedStopId = 
+	    			StringUtils.padWithBlanks(stopTime.getStopId(), 5);
+	    	append(paddedStopId).append(',');
+			String paddedStopSequence = StringUtils.padWithBlanks(
+					Integer.toString(stopTime.getStopSequence()), 2);
+	    	append(paddedStopSequence).append(',');
 	    	append(stopTime.getStopHeadsign()).append(',');
 	    	append(stopTime.getPickupType()).append(',');
 	    	append(stopTime.getDropOffType()).append(',');
@@ -82,7 +86,9 @@ public class GtfsExtendedStopTimesWriter extends GtfsStopTimesWriter {
 	    	appendTime(stopTime.getArrivalMinTimeSecs()).append(',');
 	    	appendTime(stopTime.getArrivalMaxTimeSecs()).append(',');
 	    	append(stopTime.getArrivalStdDev()).append(',');
-	    	append(stopTime.getArrivalNumberDatapoints()).append(',');
+	    	String paddedNumArrDatapoints = StringUtils.padWithBlanks(
+					Integer.toString(stopTime.getArrivalNumberDatapoints()), 2);
+	    	append(paddedNumArrDatapoints).append(',');
 
 	    	// Add a space as a visual separator before outputting departure data
 	    	writer.append(' ');
@@ -90,7 +96,9 @@ public class GtfsExtendedStopTimesWriter extends GtfsStopTimesWriter {
 	    	appendTime(stopTime.getDepartureMinTimeSecs()).append(',');
 	    	appendTime(stopTime.getDepartureMaxTimeSecs()).append(',');
 	    	append(stopTime.getDepartureStdDev()).append(',');
-	    	append(stopTime.getDepartureNumberDatapoints()).append('\n');
+	    	String paddedNumDepDatapoints = StringUtils.padWithBlanks(
+					Integer.toString(stopTime.getDepartureNumberDatapoints()), 2);
+	    	append(paddedNumDepDatapoints).append(',');
 		} catch(IOException e) {
 			// Only expect to run this in batch mode so don't really
 			// need to log an error using regular logging. Printing
