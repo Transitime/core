@@ -32,9 +32,11 @@ public class StringUtils {
 			new DecimalFormat("0.0");
 	private static final DecimalFormat twoDigitFormat = 
 			new DecimalFormat("0.00");
+	private static final DecimalFormat threeDigitFormat = 
+			new DecimalFormat("0.000");
 
 	/**
-	 * For formatting double to 2 decimal places.
+	 * For formatting double to 1 decimal place.
 	 * 
 	 * @param arg
 	 * @return the value as a string
@@ -59,6 +61,20 @@ public class StringUtils {
 			return "NaN";
 		
 		return twoDigitFormat.format(arg);
+	}
+
+	/**
+	 * For formatting double to 3 decimal places.
+	 * 
+	 * @param arg
+	 * @return the value as a string
+	 */
+	public static String threeDigitFormat(double arg) {
+		// Handle NaN specially
+		if (Double.isNaN(arg))
+			return "NaN";
+		
+		return threeDigitFormat.format(arg);
 	}
 
 	/**
