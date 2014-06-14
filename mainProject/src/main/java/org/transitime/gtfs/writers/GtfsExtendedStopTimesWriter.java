@@ -18,6 +18,7 @@ package org.transitime.gtfs.writers;
 
 import java.io.IOException;
 import org.transitime.gtfs.gtfsStructs.GtfsExtendedStopTime;
+import org.transitime.utils.StringUtils;
 
 /**
  * For writing out extended GTFS stop_times.txt file that contains additional
@@ -48,9 +49,9 @@ public class GtfsExtendedStopTimesWriter extends GtfsStopTimesWriter {
 	    writer.append("trip_id,arrival_time,departure_time,stop_id," +
 	    		"stop_sequence,stop_headsign,pickup_type,drop_off_type," +
 	    		"shape_dist_traveled," + 
-	    		"original_arrival_time,min_arrival_time,max_arrival_time," +
+	    		" original_arrival_time,min_arrival_time,max_arrival_time," +
 	    		"arrivals_std_dev,number_arrivals," +
-	    		"original_departure_time,min_departure_time,max_departure_time," +
+	    		" original_departure_time,min_departure_time,max_departure_time," +
 	    		"departures_std_dev,number_departures" +
 	    		"\n");
 	}
@@ -67,7 +68,7 @@ public class GtfsExtendedStopTimesWriter extends GtfsStopTimesWriter {
 	    	append(stopTime.getTripId()).append(',');
 	    	appendTime(stopTime.getArrivalTimeSecs()).append(',');
 	    	appendTime(stopTime.getDepartureTimeSecs()).append(',');
-	    	append(stopTime.getStopId()).append(',');
+	    	append(StringUtils.padWithBlanks(stopTime.getStopId(), 5)).append(',');
 	    	append(stopTime.getStopSequence()).append(',');
 	    	append(stopTime.getStopHeadsign()).append(',');
 	    	append(stopTime.getPickupType()).append(',');

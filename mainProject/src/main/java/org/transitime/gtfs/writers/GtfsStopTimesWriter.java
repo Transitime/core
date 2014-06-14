@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
+import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 import org.transitime.utils.csv.CsvWriterBase;
 
@@ -95,7 +96,7 @@ public class GtfsStopTimesWriter extends CsvWriterBase {
 			append(stopTime.getTripId()).append(',');
 	    	appendTime(stopTime.getArrivalTimeSecs()).append(',');
 	    	appendTime(stopTime.getDepartureTimeSecs()).append(',');
-	    	append(stopTime.getStopId()).append(',');
+	    	append(StringUtils.padWithBlanks(stopTime.getStopId(), 5)).append(',');
 	    	append(stopTime.getStopSequence()).append(',');
 	    	append(stopTime.getStopHeadsign()).append(',');
 	    	append(stopTime.getPickupType()).append(',');
