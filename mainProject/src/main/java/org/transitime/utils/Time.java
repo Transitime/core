@@ -144,8 +144,21 @@ public class Time {
 	 * @param epochTime
 	 * @return seconds into the day
 	 */
-	public int getSecondsIntoDay(Date epochTime) {
-		return getSecondsIntoDay(epochTime.getTime());
+	public int getSecondsIntoDay(Date epochDate) {
+		return getSecondsIntoDay(epochDate.getTime());
+	}
+	
+	/**
+	 * Returns day of year. This method is not threadsafe in that it first sets
+	 * the time of the calendar and then gets the day of the year without
+	 * synchronizing the calendar. But this is a bit faster.
+	 * 
+	 * @param epochDate
+	 * @return
+	 */
+	public int getDayOfYear(Date epochDate) {
+		calendar.setTimeInMillis(epochDate.getTime());
+		return calendar.get(Calendar.DAY_OF_YEAR);
 	}
 	
 	/**
