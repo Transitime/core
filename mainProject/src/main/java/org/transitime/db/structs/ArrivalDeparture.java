@@ -99,9 +99,16 @@ public class ArrivalDeparture implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripId;
 	
+	// TOOD I believe that tripStartTime not actually used for 
+	// frequency based trips. The issue is that need actual departure
+	// time to determine elapsed time to each stop. The theoretical
+	// departure time based on tripStartTime simply isn't good enough.
+	//
 	// tripStartTime needs to be an Id because when using frequencies.txt 
 	// exact_times then a tripId alone cannot identify a Trip. Will have
 	// multiple Trip objects for the tripId, one for each start time.
+	// Time is in seconds into the day.
+	@Deprecated
 	@Id
 	@Column
 	private final Integer tripStartTime;
@@ -390,6 +397,7 @@ public class ArrivalDeparture implements Serializable {
 				+ ", avlTime=" + Time.timeStrMsec(avlTime)
 				+ ", trip=" + tripId 
 				+ ", tripIdx=" + tripIndex 
+				+ ", tripStartTime=" + Time.timeOfDayStr(tripStartTime)
 				+ ", block=" + blockId 
 				+ ", srv=" + serviceId
 				+ ", cfg=" + configRev
@@ -594,6 +602,16 @@ public class ArrivalDeparture implements Serializable {
 		return tripId;
 	}
 
+	/**
+	 * Returns the time that the trip was scheduled to start. Can be null.
+	 * 
+	 * @return
+	 */
+	@Deprecated
+	public Integer getTripStartTime() {
+		return tripStartTime;
+	}
+	
 	public String getBlockId() {
 		return blockId;
 	}
