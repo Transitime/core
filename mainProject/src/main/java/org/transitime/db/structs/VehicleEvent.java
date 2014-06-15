@@ -144,7 +144,7 @@ public class VehicleEvent implements Serializable {
 	public static final String PREDICTABLE = "Predictable";
 	public static final String TIMEOUT = "Timeout";
 	public static final String NO_MATCH = "No match";
-	public static final String END_OF_BLOCK = "End of nlock";
+	public static final String END_OF_BLOCK = "End of block";
 	
 	// Hibernate requires class to be Serializable
 	private static final long serialVersionUID = -763445348557811925L;
