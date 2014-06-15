@@ -169,10 +169,13 @@ public class MatchProcessor {
 		// matches. But only do this if shouldn't ignore because it is a 
 		// non-lead car in a consist.
 		if (!vehicleState.getAvlReport().ignoreBecauseInConsist()) {
-			processPredictions(vehicleState);
-			processHeadways(vehicleState);
+			// If don't need matches then don't store them
+			if (!CoreConfig.onlyNeedArrivalDepartures()) {
+				processPredictions(vehicleState);
+				processHeadways(vehicleState);
+				processSpatialMatch(vehicleState);
+			}
 			processArrivalDepartures(vehicleState);
-			processSpatialMatch(vehicleState);
 		}
 		
 		// Update the VehicleDataCache so that client can access vehicle data

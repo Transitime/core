@@ -75,6 +75,23 @@ public class CoreConfig {
 			new BooleanConfigValue("transitime.core.storeDataInDatabase", true);
 	
 	/**
+	 * When batching large amount of AVL data through system to generate
+	 * improved schedule time (as has been done for Zhengzhou) it takes huge
+	 * amount of time to process everything. To speed things up you can set
+	 * -Dtransitime.core.onlyNeedArrivalDepartures=true such that the system
+	 * will be sped up by not generating nor logging predictions, not logging
+	 * AVL data nor storing it in db, and not logging nor storing match data in
+	 * db.
+	 * 
+	 * @return
+	 */
+	public static boolean onlyNeedArrivalDepartures() {
+		return onlyNeedArrivalDepartures.getValue();
+	}
+	private static BooleanConfigValue onlyNeedArrivalDepartures =
+			new BooleanConfigValue("transitime.core.onlyNeedArrivalDepartures", false);
+
+	/**
 	 * When in batch mode can flood db with lots of objects. If 
 	 * transitime.core.pauseIfDbQueueFilling is set to true then when objects
 	 * are put into the DataDbLogger queue the calling thread will be

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.StringListConfigValue;
+import org.transitime.configData.CoreConfig;
 import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Location;
@@ -87,8 +88,10 @@ public class BatchGtfsRealtimeModule extends Module {
 		 */
 		@Override
 		protected void handleAvlReport(AvlReport avlReport) {
-			logger.info("Processing from URI {} avlReport={}", 
-					getUrlString(), avlReport);
+			if (!CoreConfig.onlyNeedArrivalDepartures()) {
+				logger.info("Processing from URI {} avlReport={}", 
+						getUrlString(), avlReport);
+			}
 			
 			// Update the Core SystemTime to use this AVL time
 			Core.getInstance().setSystemTime(avlReport.getTime());

@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import org.transitime.applications.Core;
 import org.transitime.config.DoubleConfigValue;
+import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
@@ -742,7 +743,8 @@ public class AvlProcessor {
 		avlReport.setTimeProcessed();
 
 		// Store the AVL report into the database
-		Core.getInstance().getDbLogger().add(avlReport);
+		if (!CoreConfig.onlyNeedArrivalDepartures())
+			Core.getInstance().getDbLogger().add(avlReport);
 		
 		// If any vehicles have timed out then handle them. This is done
 		// here instead of using a regular timer so that it will work
