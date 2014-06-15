@@ -195,15 +195,90 @@ public class ScheduleStatistics {
 		// Read in stop_times.txt file
 		logger.info("Reading in original stop_times.txt file...");
 
+		// Get list of stop_times, but these can be a bit out of
+		// order with respect to stop sequence within a trip.
 		GtfsStopTimesReader stopTimesReader = 
 				new GtfsStopTimesReader(gtfsDirectoryName);
-		List<GtfsStopTime> gtfsStopTimes = stopTimesReader.get(100000);
+		List<GtfsStopTime> gtfsStopTimesUnordered = stopTimesReader.get(100000);
+		
+		// Now need to order the stop_times. This is a real nuisance
+		// but some agencies like Zhengzhou have entries that are mostly
+		// sequential by stop sequence within a trip, but there are
+		// a few entries that are in really strange places. At the same time,
+		// want to keep the results in basically the same order, by trip,
+		// as with the original stop_times file. So this is rather tricky.
+		// First create a List and order it. Then create the LinkedHashMap,
+		// which allows fast retrieval, yet also will then be ordered
+		// correctly.
+		List<GtfsStopTime> gtfsStopTimesOrdered = 
+				new ArrayList<GtfsStopTime>(gtfsStopTimesUnordered.size());
+		Set<String> tripsEncountered = new HashSet<String>();
+		GtfsStopTime stopTimeAtEndOfOrderedList = null;
+		for (GtfsStopTime newStopTime : gtfsStopTimesUnordered) {
+			// FIXME
+			if (newStopTime.getTripId().equals("B11A4") && newStopTime.getStopSequence()==1) {
+				int xx=9;
+			}
+			
+			boolean tripEncountered = 
+					tripsEncountered.contains(newStopTime.getTripId());
+			if (!tripEncountered)
+				tripsEncountered.add(newStopTime.getTripId());
+			
+			boolean correctOrderWithRespectToPreviousEntry = 
+					stopTimeAtEndOfOrderedList==null 
+					|| (stopTimeAtEndOfOrderedList.getTripId().equals(newStopTime.getTripId())
+							&& stopTimeAtEndOfOrderedList.getStopSequence() < 
+								newStopTime.getStopSequence());
+
+			if (!tripEncountered || correctOrderWithRespectToPreviousEntry) {
+				// Add to end
+				gtfsStopTimesOrdered.add(newStopTime);
+				stopTimeAtEndOfOrderedList = newStopTime;
+			} else {
+				// FIXME
+				System.out.println("Out of order " + newStopTime);
+				
+				// Trip was encountered already but the new stop time is not in
+				// order. Therefore simply go through the list and insert it
+				// at proper place. This is just a linear search, which is slow,
+				// but that is OK because only a few stop times will not be in
+				// order. 
+				for (int i=0; i<gtfsStopTimesOrdered.size(); ++i) {
+					// Only need to look at existing stop time if it is for the
+					// same trip ID.
+					GtfsStopTime stopTime = gtfsStopTimesOrdered.get(i);
+					if (stopTime.getTripId().equals(newStopTime.getTripId())) {
+						// If the new one should be before the current one then
+						// insert it here.
+						if (newStopTime.getStopSequence() < 
+								stopTime.getStopSequence()) {
+							gtfsStopTimesOrdered.add(i, newStopTime);
+							break;
+						} else {
+							// If reached end of data for this trip, as indicated by
+							// the next stop time being for a different trip, then
+							// add it to the end of the data for this trip.
+							GtfsStopTime nextStopTime = gtfsStopTimesOrdered.get(i+1);
+							if (!nextStopTime.getTripId().equals(newStopTime)) {
+								gtfsStopTimesOrdered.add(i+1, newStopTime);
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		// FIXME just for debugging
+		for (GtfsStopTime newStopTime : gtfsStopTimesOrdered) {
+			System.err.println(newStopTime);
+		}
 		
 		// Create the ordered map to be returned
 		Map<TripStopKey, GtfsStopTime> gtfsStopTimesMap = 
 				new LinkedHashMap<TripStopKey, GtfsStopTime>(
-						gtfsStopTimes.size());
-		for (GtfsStopTime gtfsStopTime : gtfsStopTimes) {
+						gtfsStopTimesOrdered.size());
+		for (GtfsStopTime gtfsStopTime : gtfsStopTimesOrdered) {
 			TripStopKey key = getTripStopKey(gtfsStopTime.getTripId(), 
 					gtfsStopTime.getStopId());
 			gtfsStopTimesMap.put(key, gtfsStopTime);
