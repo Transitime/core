@@ -89,11 +89,12 @@ import org.transitime.utils.Time;
  * database. It batch reads the data 500,000 datapoints at a time, a value
  * chosen to make db reading quick (want a high number) without using too much
  * heap memory at once (want a low number). The arrivals and departures data is
- * read into maps <code>Map<String, Map<TripStopKey, List<Integer>>></code>
- * using <code>readInArrivalsOrDeparturesFromDb()</code>. The map is keyed on
- * routeId so that can handle each route separately (though this isn't truly
- * needed). The data is simply stored as Integers indicating the time of day of
- * the arrival or departure. Once this data is determined the ArrivalDeparture
+ * read into maps
+ * <code>Map&ltString, Map&ltTripStopKey, List&ltInteger&gt&gt&gt</code> using
+ * <code>readInArrivalsOrDeparturesFromDb()</code>. The map is keyed on routeId
+ * so that can handle each route separately (though this isn't truly needed).
+ * The data is simply stored as Integers indicating the time of day of the
+ * arrival or departure. Once this data is determined the ArrivalDeparture
  * object is not needed anymore and can be garbage collected. When reading in
  * departures it also puts the trip departure times into
  * departureTimesFromTerminalMap so that can determine elapsed time for when
