@@ -178,6 +178,11 @@ public class MatchProcessor {
 			processArrivalDepartures(vehicleState);
 		}
 		
+		// The current block assignment is valid and called 
+		// processArrivalDepartures(). Therefore can null out the
+		// previous block assignment.
+		vehicleState.nullPreviousBlock();
+		
 		// Update the VehicleDataCache so that client can access vehicle data
 		VehicleDataCache.getInstance().updateVehicle(vehicleState);
 	}

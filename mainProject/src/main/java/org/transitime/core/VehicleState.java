@@ -44,7 +44,7 @@ import org.transitime.utils.Time;
 public class VehicleState {
 
 	private final String vehicleId;
-	private Block  block;
+	private Block block;
 	private BlockAssignmentMethod assignmentMethod;
 	private Date assignmentTime;
 	private boolean predictable;
@@ -64,6 +64,10 @@ public class VehicleState {
 	// So can make sure that departure time is after the arrival time
 	private Arrival arrivalToStoreToDb;
 	private long lastArrivalTime = 0;
+	
+	// So can keep track of whether assigning vehicle to same block that
+	// just got unassigned for. 
+	private Block previousBlock;
 	
 	private static int MATCH_HISTORY_MAX_SIZE = 6;
 	private static int AVL_HISTORY_MAX_SIZE = 6;
@@ -92,6 +96,20 @@ public class VehicleState {
 		this.assignmentMethod = assignmentMethod;
 		this.predictable = predictable;
 		this.assignmentTime = new Date(System.currentTimeMillis());
+		
+		// When vehicle is made unpredictable remember the previous assignment
+		// so can tell if getting assigned to same block again (which could
+		// indicate a problem and arrival/departure times shouldn't be generated.
+		if (block == null)
+			this.previousBlock = this.block;
+	}
+	
+	public void nullPreviousBlock() {
+		previousBlock = null;
+	}
+	
+	public Block getPreviousBlock() {
+		return previousBlock;
 	}
 	
 	/**
