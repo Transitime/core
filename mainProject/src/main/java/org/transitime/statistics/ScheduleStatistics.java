@@ -48,7 +48,79 @@ import org.transitime.utils.Time;
 
 /**
  * For processing arrival/departure times based on AVL data in order to
- * determine more accurate schedule for GTFS.
+ * determine more accurate schedule information. The results are output into new
+ * stop_times GTFS files. Data is handled on a per trip basis. This means that
+ * for regular schedule based systems that run a trip only once per day you need
+ * several days of data to get multiple data points. But for frequency based
+ * configurations where a trip is run multiple times a day each run of that trip
+ * for the day is processed into a single value.
+ * <p>
+ * This class also processes schedule adherence information so one can determine
+ * what the schedule adherence was with the old stop_times and what it would be
+ * with the new ones. This allows one to see directly what kind of improvement
+ * using the new stop_times will provide. The schedule adherence information is
+ * included in the log file, not in the new stop_times files.
+ * <p>
+ * The results are output into the original GTFS directory as two new stop times
+ * files: stop_times.txt_new and stop_times.txt_extended. Note that the original
+ * stop_times.txt file will not be overwritten. If you want to use the new
+ * stop_times.txt_new file you need to change its name to stop_times.txt,
+ * thereby overwriting the old file.
+ * <p>
+ * The stop_times.txt_new file has exactly the same format as the standard
+ * stop_times.txt file. The stop_times.txt_extended file contains the standard
+ * data but also adds some very useful columns including the original stop time
+ * so you can see how much it is being changed, the min and max arrival &
+ * departure times, the standard deviation so you can see the distribution of
+ * times, and the number of data points so you can see how many trips were used
+ * to generate the values.
+ * <p>
+ * The order of the rows in the new stop_times files will not necessarily be the
+ * same as the original stop_times file. If the ordering of the original
+ * stop_times file is adequate such that trips are grouped together and that the
+ * stop_sequence increases within the trip, then the new stop_times files can
+ * have the same order. But if there are issues with the ordering of the data in
+ * the original stop_times file, which is somewhat common, then the data is
+ * first sorted so that can determine the first stops of trips, which is
+ * important for the GTFS data is frequency based. This leads to a different
+ * ordering for the stop_times.txt_new and stop_times.txt_extended files.
+ * <p>
+ * To process the data this class reads in arrival and departure data from the
+ * database. It batch reads the data 500,000 datapoints at a time, a value
+ * chosen to make db reading quick (want a high number) without using too much
+ * heap memory at once (want a low number). The arrivals and departures data is
+ * read into maps <code>Map<String, Map<TripStopKey, List<Integer>>></code>
+ * using <code>readInArrivalsOrDeparturesFromDb()</code>. The map is keyed on
+ * routeId so that can handle each route separately (though this isn't truly
+ * needed). The data is simply stored as Integers indicating the time of day of
+ * the arrival or departure. Once this data is determined the ArrivalDeparture
+ * object is not needed anymore and can be garbage collected. When reading in
+ * departures it also puts the trip departure times into
+ * departureTimesFromTerminalMap so that can determine elapsed time for when
+ * frequency based trips are used.
+ * <p>
+ * Once all of the arrival and departure times have been processed into a map
+ * statistics is used to determine which is the best arrival/departure for the
+ * stop_times output. The goal is to use a time such that only the a desired
+ * fraction of arrivals/departures will be early. For example, if you want only
+ * 20% of the vehicle to be early with respect to the schedule time, which is
+ * reasonable because for passengers it is better for vehicles to be late rather
+ * then early so they don't miss the vehicle, then the value should be 0.2. This
+ * desiredFractionEarly value is specified when the ScheduleStatistics object is
+ * constructed.
+ * <p>
+ * The way the software tries to achieve the desiredFractionEarly is by assuming
+ * there is a Gaussian distribution of the times. By using the standard
+ * deviation of a Gaussian distribution the software estimates the value to use
+ * to such that desiredFractionEarly will be attained. Of course the
+ * distribution is not truly Gaussian. Therefore several iterations are used to
+ * adjust the value in order to get the desired results.
+ * <p>
+ * The results are then output into the stop_times.txt_new and
+ * stop_times.txt_extended files described above.
+ * <p>
+ * TODO this class should really be split into creating the maps of data and
+ * then actually processing the stats.
  * 
  * @author SkiBu Smith
  * 
@@ -63,14 +135,14 @@ public class ScheduleStatistics {
 	private final Date endTime;
 	// So can convert from between epoch times and seconds into day
 	private final Time timeForUsingCalendar;
-	// Specifies the desired number of the arrival times that should be early 
+	// Specifies the desired number of the arrival times that should be early
 	private final double desiredFractionEarly;
 	// So can not use the more accurate time for the first stop of a trip.
 	// This can be important if there will be only one schedule for both
 	// drivers and passengers.
 	private final boolean doNotUpdateFirstStopOfTrip;
-	
-	// Number of iterations to use when determining how many standard deviations 
+
+	// Number of iterations to use when determining how many standard deviations
 	// are needed to achieve the desired desiredFractionEarly
 	private static final int NUMBER_ITERATIONS = 5;
 
@@ -82,38 +154,35 @@ public class ScheduleStatistics {
 	// For schedule adherence
 	private final int allowableEarlySecs;
 	private final int allowableLateSecs;
-	
+
 	// The GTFS stop_times.txt data. Keyed by trip/stop.
 	private final Map<TripStopKey, GtfsStopTime> gtfsStopTimes;
-	
+
 	// The GTFS frequencies.txt info. Keyed on tripId. For keeping track
 	// of which trips are configured to be frequency based such that the
-	// arrival/departure time has to be converted to seconds since 
+	// arrival/departure time has to be converted to seconds since
 	// configured beginning of trip.
 	private final Set<String> gtfsFrequencyBasedTrips;
-	
+
 	private final Map<TerminalDeparturesKey, Integer> 
 		departureTimesFromTerminalMap = 
 			new HashMap<TerminalDeparturesKey, Integer>();
-	
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ScheduleStatistics.class);
 
 	/**
 	 * Special MapKey class so that can make sure using the proper key for the
-	 * several maps in this class. 
+	 * several maps in this class.
 	 */
 	public static class TripStopKey extends MapKey {
 		private TripStopKey(String tripId, String stopId) {
 			super(tripId, stopId);
 		}
-		
+
 		@Override
 		public String toString() {
-			return "TripStopKey [" 
-					+ "tripId=" + o1 
-					+ ", stopId=" + o2 
-					+ "]";
+			return "TripStopKey [" + "tripId=" + o1 + ", stopId=" + o2 + "]";
 		}
 	}
 
@@ -124,22 +193,18 @@ public class ScheduleStatistics {
 	 * can handle arrival/departure data for multiple days.
 	 */
 	public static class TerminalDeparturesKey extends MapKey {
-		private TerminalDeparturesKey(String vehicleId, String blockId, 
+		private TerminalDeparturesKey(String vehicleId, String blockId,
 				int dayOfYear) {
 			super(vehicleId, blockId, dayOfYear);
 		}
-		
+
 		@Override
 		public String toString() {
-			return "TerminalDeparturesKey [" 
-					+ "vehicleId=" + o1 
-					+ ", blockId=" + o2 
-					+ ", dayOfYear=" + o3
-					+ "]";
+			return "TerminalDeparturesKey [" + "vehicleId=" + o1 + ", blockId="
+					+ o2 + ", dayOfYear=" + o3 + "]";
 		}
 	}
 
-	
 	/********************** Member Functions **************************/
 
 	/**
@@ -151,7 +216,7 @@ public class ScheduleStatistics {
 	 * @param timeForUsingCalendar
 	 * @param desiredFractionEarly
 	 *            how many arrival/departures should be early
-     * @param allowableDifferenceFromMeanSecs
+	 * @param allowableDifferenceFromMeanSecs
 	 * @param allowableDifferenceFromOriginalTimeSecs
 	 * @param doNotUpdateFirstStopOfTrip
 	 * @param allowableEarlySecs
@@ -159,11 +224,9 @@ public class ScheduleStatistics {
 	 */
 	public ScheduleStatistics(String projectId, String gtfsDirectoryName,
 			Date beginTime, Date endTime, Time timeForUsingCalendar,
-			double desiredFractionEarly,
-			int allowableDifferenceFromMeanSecs,
+			double desiredFractionEarly, int allowableDifferenceFromMeanSecs,
 			int allowableDifferenceFromOriginalTimeSecs,
-			boolean doNotUpdateFirstStopOfTrip,
-			int allowableEarlySecs,
+			boolean doNotUpdateFirstStopOfTrip, int allowableEarlySecs,
 			int allowableLateSecs) {
 		this.projectId = projectId;
 		this.gtfsDirectoryName = gtfsDirectoryName;
@@ -177,19 +240,21 @@ public class ScheduleStatistics {
 		this.doNotUpdateFirstStopOfTrip = doNotUpdateFirstStopOfTrip;
 		this.allowableEarlySecs = allowableEarlySecs;
 		this.allowableLateSecs = allowableLateSecs;
-		
+
 		this.gtfsStopTimes = getGtfsStopTimes(gtfsDirectoryName);
-		this.gtfsFrequencyBasedTrips = getFrequencyBasedTrips(gtfsDirectoryName);
+		this.gtfsFrequencyBasedTrips = 
+				getFrequencyBasedTrips(gtfsDirectoryName);
 	}
 
 	/**
 	 * Reads in GTFS stop_times.txt file from the GTFS directory specified by
-	 * the gtfsDirectoryName command line option. The map is actually an
-	 * ordered one so that can both look up gtfsStopTimes by trip & stop so
-	 * that can do proper filtered of data from db yet still output the
-	 * the stop_times.txt data in the same order as the original file.
+	 * the gtfsDirectoryName command line option. The map is actually an ordered
+	 * one so that can both look up gtfsStopTimes by trip & stop so that can do
+	 * proper filtered of data from db yet still output the the stop_times.txt
+	 * data in the same order as the original file.
 	 * 
-	 * @param gtfsDirectoryName Where to find the GTFS stop_times.txt file
+	 * @param gtfsDirectoryName
+	 *            Where to find the GTFS stop_times.txt file
 	 * @return Ordered map of the GtfsStopTimes. Keyed on tripId/stopId.
 	 */
 	private static Map<TripStopKey, GtfsStopTime> getGtfsStopTimes(
@@ -202,7 +267,7 @@ public class ScheduleStatistics {
 		GtfsStopTimesReader stopTimesReader = 
 				new GtfsStopTimesReader(gtfsDirectoryName);
 		List<GtfsStopTime> gtfsStopTimesList = stopTimesReader.get(100000);
-		
+
 		// Determine if any of the stop times are out of order. If any are
 		// then will sort the list. This is necessary because to know which
 		// is the first stop of a trip because it is treated differently.
@@ -214,17 +279,17 @@ public class ScheduleStatistics {
 		// as long as the original doesn't have problems with its order.
 		Set<String> tripIdsInvestigated = new HashSet<String>();
 		boolean orderProblem = false;
-		for (int i=1; i<gtfsStopTimesList.size(); ++i) {
+		for (int i = 1; i < gtfsStopTimesList.size(); ++i) {
 			GtfsStopTime current = gtfsStopTimesList.get(i);
-			GtfsStopTime previous = gtfsStopTimesList.get(i-1);
+			GtfsStopTime previous = gtfsStopTimesList.get(i - 1);
 			boolean tripAlreadyDealtWith = 
 					tripIdsInvestigated.contains(current.getTripId());
-			if (tripAlreadyDealtWith) { 
+			if (tripAlreadyDealtWith) {
 				// Already have encountered this trip so make sure the
-				// new stop time is in proper order. 
+				// new stop time is in proper order.
 				if (!current.getTripId().equals(previous.getTripId())
-						|| current.getStopSequence() < 
-							previous.getStopSequence()) {
+						|| current.getStopSequence() < previous
+								.getStopSequence()) {
 					orderProblem = true;
 					break;
 				}
@@ -234,7 +299,7 @@ public class ScheduleStatistics {
 				tripIdsInvestigated.add(current.getTripId());
 			}
 		}
-		
+
 		if (orderProblem) {
 			// Sort the list so that the trips are grouped together and so that
 			// the stop sequences for the trips are in order. This means that
@@ -257,17 +322,17 @@ public class ScheduleStatistics {
 				}
 			});
 		}
-		
+
 		// Create the ordered map to be returned
 		Map<TripStopKey, GtfsStopTime> gtfsStopTimesMap = 
 				new LinkedHashMap<TripStopKey, GtfsStopTime>(
 						gtfsStopTimesList.size());
 		for (GtfsStopTime gtfsStopTime : gtfsStopTimesList) {
-			TripStopKey key = getTripStopKey(gtfsStopTime.getTripId(), 
+			TripStopKey key = getTripStopKey(gtfsStopTime.getTripId(),
 					gtfsStopTime.getStopId());
 			gtfsStopTimesMap.put(key, gtfsStopTime);
 		}
-		
+
 		return gtfsStopTimesMap;
 	}
 
@@ -279,23 +344,22 @@ public class ScheduleStatistics {
 	 *            Where to find the GTFS frequencies.txt file
 	 * @return Set of all trips that are frequency based.
 	 */
-	private static Set<String> getFrequencyBasedTrips(
-			String gtfsDirectoryName) {
+	private static Set<String> getFrequencyBasedTrips(String gtfsDirectoryName) {
 		// Read in frequencies.txt file
 		logger.info("Reading in frequencies.txt file...");
 
-		GtfsFrequenciesReader frequenciesReader =
+		GtfsFrequenciesReader frequenciesReader = 
 				new GtfsFrequenciesReader(gtfsDirectoryName);
 		List<GtfsFrequency> gtfsFrequencies = frequenciesReader.get();
-		
+
 		Set<String> gtfsFrequencyTrips = new HashSet<String>();
 		for (GtfsFrequency gtfsFrequency : gtfsFrequencies) {
 			gtfsFrequencyTrips.add(gtfsFrequency.getTripId());
 		}
-		
+
 		return gtfsFrequencyTrips;
 	};
-	
+
 	/**
 	 * Returns trip if trip specified is frequency based as defined by the GTFS
 	 * frequencies.txt file.
@@ -306,7 +370,7 @@ public class ScheduleStatistics {
 	private boolean isTripFrequencyBased(String tripId) {
 		return gtfsFrequencyBasedTrips.contains(tripId);
 	}
-	
+
 	/**
 	 * For use in the sub-maps of arrivalTimesFromDbByRouteByTripStopMap and
 	 * departureTimesFromDbByRouteByTripStopMap.
@@ -321,7 +385,7 @@ public class ScheduleStatistics {
 	 * @return
 	 */
 	private static TripStopKey getTripStopKey(String tripId, String stopId) {
-		// Return the key. Use intern() on the strings because will be often 
+		// Return the key. Use intern() on the strings because will be often
 		// repeating trips and stops and don't need many copies of each one.
 		return new TripStopKey(tripId.intern(), stopId.intern());
 	}
@@ -365,7 +429,8 @@ public class ScheduleStatistics {
 	 * @param ad
 	 */
 	private void addArrivalDepartureToSubMap(
-			Map<TripStopKey, List<Integer>> timesByTripMap, ArrivalDeparture ad) {
+			Map<TripStopKey, List<Integer>> timesByTripMap, 
+			ArrivalDeparture ad) {
 		// Get the existing list of times for the trip/stop
 		TripStopKey key = getTripStopKey(ad.getTripId(), ad.getStopId());
 		int arrDepSecsIntoDay = 
@@ -377,37 +442,37 @@ public class ScheduleStatistics {
 			Integer terminalDepartureTimeSecs = getTerminalDepartureTime(ad);
 			if (terminalDepartureTimeSecs == null)
 				return;
-			
+
 			// If the trip start time is after the arrival/departure time
 			// then we definitely have a problem. It most likely means that
 			// got multiple arrival/departures for particular vehicle/trip/stop.
 			// Ignore such data since there is definitely a problem.
 			if (terminalDepartureTimeSecs > arrDepSecsIntoDay) {
-				logger.error("Got an arrival or departure before the start " +
-						"of the trip. This of course indicates a problem. " +
-						"Therefore this arrival/departure won't be used as " +
-						"part of the stats. Trip start time={}. {}", 
+				logger.error("Got an arrival or departure before the start "
+						+ "of the trip. This of course indicates a problem. "
+						+ "Therefore this arrival/departure won't be used as "
+						+ "part of the stats. Trip start time={}. {}",
 						Time.timeOfDayStr(terminalDepartureTimeSecs), ad);
 				// Ignore this data point
-				return; 
+				return;
 			}
 
-			// Subtract the terminal departure time. Initially simply used 
+			// Subtract the terminal departure time. Initially simply used
 			// ArrivalDeparture.getTripStartTime() but that is the time vehicle
-			// would leave if exactly following the frequency exact time of 
+			// would leave if exactly following the frequency exact time of
 			// departure. But that of course is not nearly as good as using the
 			// measured departure time for the terminal.
 			timeWithRespectToTripStart -= terminalDepartureTimeSecs;
-			
+
 		}
-		
+
 		// If list of times for the trip/stop doesn't exist, yet create it
 		List<Integer> times = timesByTripMap.get(key);
 		if (times == null) {
 			// Create the array that the times go into. Initialize size of list
-			// to 5 instead of the default of 10 so that it uses less memory. 
+			// to 5 instead of the default of 10 so that it uses less memory.
 			// 5 is ideal because it is smaller but if process two weeks of
-			// data then it will be expanded to 10 for the 10 weekdays. If 
+			// data then it will be expanded to 10 for the 10 weekdays. If
 			// would use 4 then it would be expanded to 8 and then 16, actually
 			// taking up more space than if the default size of 10 were used.
 			times = new ArrayList<Integer>(5);
@@ -421,21 +486,20 @@ public class ScheduleStatistics {
 	/**
 	 * Determines based on the ArrivalDeparture parameter the appropriate key to
 	 * use for the departureTimesFromTerminalMap.
-	 * <p> 
-	 * Note: this does not work if trip spans midnight. This isn't
-	 * important for now but could be if have frequencies based trips that do
-	 * span midnight.
+	 * <p>
+	 * Note: this does not work if trip spans midnight. This isn't important for
+	 * now but could be if have frequencies based trips that do span midnight.
 	 * 
 	 * @param arrDep
 	 * @return
 	 */
 	private TerminalDeparturesKey getTerminalDeparturesKey(
 			ArrivalDeparture arrDep) {
-		return new TerminalDeparturesKey(
-				arrDep.getVehicleId().intern(), 
-				arrDep.getBlockId().intern(),
+		return new TerminalDeparturesKey(arrDep.getVehicleId().intern(), arrDep
+				.getBlockId().intern(),
 				timeForUsingCalendar.getDayOfYear(arrDep.getDate()));
 	}
+
 	/**
 	 * If handling departures and this trip is defined as a frequency then need
 	 * store the departure time of the first stop in the trip in a map so can
@@ -445,9 +509,8 @@ public class ScheduleStatistics {
 	 * @param arrDep
 	 */
 	private void handleMapOfTerminalStartTimes(ArrivalDeparture arrDep) {
-		// If it is a departure from a terminal for a frequency based... 
-		if (arrDep.isDeparture()
-				&& arrDep.getStopPathIndex() == 0
+		// If it is a departure from a terminal for a frequency based...
+		if (arrDep.isDeparture() && arrDep.getStopPathIndex() == 0
 				&& isTripFrequencyBased(arrDep.getTripId())) {
 			// It is terminal departure time so add it to map
 			int departureTimeSecsIntoDay = 
@@ -456,7 +519,7 @@ public class ScheduleStatistics {
 			departureTimesFromTerminalMap.put(mapKey, departureTimeSecsIntoDay);
 		}
 	}
-	
+
 	/**
 	 * Returns the start time of the departure from the terminal for the trip
 	 * associated with the ArrivalDeparture.
@@ -470,7 +533,7 @@ public class ScheduleStatistics {
 		TerminalDeparturesKey mapKey = getTerminalDeparturesKey(arrDep);
 		return departureTimesFromTerminalMap.get(mapKey);
 	}
-	
+
 	/**
 	 * Reads in the arrival/departure times from the db and returns a map
 	 * containing just the arrival/departure times.
@@ -485,87 +548,88 @@ public class ScheduleStatistics {
 	 *            Specifies whether should read in arrivals or, instead,
 	 *            departures.
 	 * @return Big map keyed on route of data. The sub-map is keyed on on a
-	 *         TripStopKey using tripId+stopId and contains list of all of the times
-	 *         (arrivals or departures) for that trip/stop for the route. The
-	 *         times are seconds into the day. If frequencies are being used
+	 *         TripStopKey using tripId+stopId and contains list of all of the
+	 *         times (arrivals or departures) for that trip/stop for the route.
+	 *         The times are seconds into the day. If frequencies are being used
 	 *         then the times are relative to the trip start time, because that
 	 *         is how frequency based data is specified in the stop_times.txt
 	 *         file.
 	 */
-	private Map<String, Map<TripStopKey, List<Integer>>> readInArrivalsOrDeparturesFromDb(
+	private Map<String, Map<TripStopKey, List<Integer>>> 
+		readInArrivalsOrDeparturesFromDb(
 			ArrivalsOrDepartures arrivalOrDeparture) {
-		logger.info("Reading {} from db for projectId={} for beginDate={} " +
-				"and endDate={}", 
-				arrivalOrDeparture, projectId, beginTime, endTime);
+		logger.info("Reading {} from db for projectId={} for beginDate={} "
+				+ "and endDate={}", arrivalOrDeparture, projectId, beginTime,
+				endTime);
 
 		Map<String, Map<TripStopKey, List<Integer>>> 
 			arrivalDeparatureTimesFromDbByRouteByTripStopMap = 
 				new HashMap<String, Map<TripStopKey, List<Integer>>>();
 
 		// Go through all the arrival/departure data and put it into a map
-		// that just keeps track of arrival/departure times for trip/stops.		
+		// that just keeps track of arrival/departure times for trip/stops.
 		try {
 			// Use two levels of batching to be efficient. At the low level
 			// only read in 50k rows at a time so that never read in too much
-			// at once. This way won't run out of memory. But this type of 
+			// at once. This way won't run out of memory. But this type of
 			// batching where we specify a firstResult and a batchSize can be
 			// inefficient when firstResult becomes large because the database
 			// still has to process a huge amount of data in order to return
-			// the proper batch. So also just dealing with a day at a time by 
+			// the proper batch. So also just dealing with a day at a time by
 			// dividing the beginTime and endTime into 1 day chunks.
 			long batchBeginTime = beginTime.getTime();
 			long batchEndTime = beginTime.getTime() + Time.MS_PER_DAY;
 			while (batchBeginTime < endTime.getTime()) {
-				logger.info("Reading in a days worth of {} data " +
-						"for between {} and {}", 
-						arrivalOrDeparture,
+				logger.info("Reading in a days worth of {} data "
+						+ "for between {} and {}", arrivalOrDeparture,
 						new Date(batchBeginTime), new Date(batchEndTime));
-				
-				// For keeping track of which rows should be returned by the batch.
+
+				// For keeping track of which rows should be returned by the
+				// batch.
 				int firstResult = 0;
 				// Batch size of 50k found to be significantly faster than 10k,
 				// by about a factor of 2. So want to use as large a value as
-				// possible without running out of memory. Found that with 500,000
-				// can still read in all data with default heap size of 1G. 
+				// possible without running out of memory. Found that with
+				// 500,000
+				// can still read in all data with default heap size of 1G.
 				// Batch size of 650,000 seems to complete halt the process with
-				// only 1G of heap. 
-				int batchSize = 500000;  // Also known as maxResults
-				// The temporary list for the loop that contains a batch of results
+				// only 1G of heap.
+				int batchSize = 500000; // Also known as maxResults
+				// The temporary list for the loop that contains a batch of
+				// results
 				List<ArrivalDeparture> arrDepBatchList;
 				// Read in batch of 50k rows of data and process it
-				do {				
+				do {
 					// Note: I tried adding a "ORDER BY time" clause to see
 					// if that would speed things up when doing multiple batches
 					// but it only served to slow things down.
-					arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
-							projectId, 
-							new Date(batchBeginTime), new Date(batchEndTime), 
-							null, // SQL clause
-							firstResult, batchSize,
-							arrivalOrDeparture);
-					
+					arrDepBatchList = ArrivalDeparture
+							.getArrivalsDeparturesFromDb(projectId, new Date(
+									batchBeginTime), new Date(batchEndTime),
+									null, // SQL clause
+									firstResult, batchSize, arrivalOrDeparture);
+
 					for (ArrivalDeparture arrDep : arrDepBatchList) {
-						// If handling departures and this trip is defined as a 
-						// frequency then need store the departure time of the 
+						// If handling departures and this trip is defined as a
+						// frequency then need store the departure time of the
 						// first stop in the trip in a map so can use it for
 						// determine the arrival/departure times relative to the
 						// start of the trip.
 						handleMapOfTerminalStartTimes(arrDep);
-						
+
 						// Add arrival/departure time to appropriate map
 						addArrivalDepartureToMap(
 								arrivalDeparatureTimesFromDbByRouteByTripStopMap,
 								arrDep);
 					}
-					
-					logger.info("Read in total of {} {}", 
-							firstResult+arrDepBatchList.size(), 
-							arrivalOrDeparture);
-					
+
+					logger.info("Read in total of {} {}", firstResult
+							+ arrDepBatchList.size(), arrivalOrDeparture);
+
 					// Update firstResult for reading next batch of data
 					firstResult += batchSize;
 				} while (arrDepBatchList.size() == batchSize);
-				
+
 				// Get ready to read in chunk of data for the next day
 				batchBeginTime += Time.MS_PER_DAY;
 				batchEndTime += Time.MS_PER_DAY;
@@ -573,10 +637,10 @@ public class ScheduleStatistics {
 					batchEndTime = endTime.getTime();
 			}
 		} catch (Exception e) {
-			logger.error("Exception occurred when reading arrivals/departure " +
-					"from db", e);
-		} 	
-		
+			logger.error("Exception occurred when reading arrivals/departure "
+					+ "from db", e);
+		}
+
 		return arrivalDeparatureTimesFromDbByRouteByTripStopMap;
 	}
 
@@ -593,7 +657,7 @@ public class ScheduleStatistics {
 		public int filteredTimesArray[];
 		// The arrival/departure times from the db. Includes even the filtered
 		// times.
-		public int unfilteredTimesArray[];		
+		public int unfilteredTimesArray[];
 		// The average of the filtered times
 		public float mean;
 		// Will be NaN if there was only a single data point for the trip/stop
@@ -612,17 +676,16 @@ public class ScheduleStatistics {
 	 * 
 	 * @param timesFromDb
 	 *            data for particular trip/stop. This list will be modified by
-	 *            filtering out data that is too far from the schedule time
-	 *            or too far from the mean.
+	 *            filtering out data that is too far from the schedule time or
+	 *            too far from the mean.
 	 * @param originalGtfsStopTime
-	 * 			  The original data from stop_times.txt for this trip/stop. 
-	 *            Used for filtering out outliers. Can be null when using
-	 *            test data instead of data from stop_times.txt.
+	 *            The original data from stop_times.txt for this trip/stop. Used
+	 *            for filtering out outliers. Can be null when using test data
+	 *            instead of data from stop_times.txt.
 	 * @param arrivalsOrDepartures
-	 * 			  specifies whether should handle as arrivals or departures
-	 * @return
-	 *            Stats object containing the statistics for the trip/stop
-	 *            or null if there is no data.
+	 *            specifies whether should handle as arrivals or departures
+	 * @return Stats object containing the statistics for the trip/stop or null
+	 *         if there is no data.
 	 */
 	private Stats getStatisticsForTripStop(List<Integer> timesFromDb,
 			GtfsStopTime originalGtfsStopTime,
@@ -630,7 +693,7 @@ public class ScheduleStatistics {
 		// If no data for this trip/stop then return null
 		if (timesFromDb == null)
 			return null;
-	
+
 		// There is data for this trip/stop so process it. Create the Stats
 		// object and start filling it out.
 		Stats results = new Stats();
@@ -646,69 +709,71 @@ public class ScheduleStatistics {
 		Integer originalScheduleTime = 0;
 		if (originalGtfsStopTime != null) {
 			originalScheduleTime = 
-					arrivalsOrDepartures == ArrivalsOrDepartures.ARRIVALS ?
-						originalGtfsStopTime.getArrivalTimeSecs() : 
-							originalGtfsStopTime.getDepartureTimeSecs();
+					arrivalsOrDepartures == ArrivalsOrDepartures.ARRIVALS ? 
+							originalGtfsStopTime.getArrivalTimeSecs() : 
+								originalGtfsStopTime.getDepartureTimeSecs();
 		}
 		while (iterator.hasNext()) {
 			int time = iterator.next();
-			
+
 			// If time is too far away from mean then don't use it
 			if (Math.abs(time - mean) > allowableDifferenceFromMeanSecs) {
 				timeFilteredOut = true;
 				iterator.remove();
-				logger.debug("For trip={} stop={} filtering out {} time={} because " +
-						"it is {} seconds from the mean={} which is futher " +
-						"awat than the allowable={} secs.",
-						originalGtfsStopTime==null ?
-								"NA":originalGtfsStopTime.getTripId(),
-						originalGtfsStopTime==null ?
-								"NA":originalGtfsStopTime.getStopId(), 
-						arrivalsOrDepartures,
-						Time.timeOfDayStr(time), 
-						StringUtils.oneDigitFormat(Math.abs(time - mean)), 
-						Time.timeOfDayStr(Math.round(mean)), 
+				logger.debug(
+						"For trip={} stop={} filtering out {} time={} because "
+								+ "it is {} seconds from the mean={} which is futher "
+								+ "awat than the allowable={} secs.",
+						originalGtfsStopTime == null ? "NA"
+								: originalGtfsStopTime.getTripId(),
+						originalGtfsStopTime == null ? "NA"
+								: originalGtfsStopTime.getStopId(),
+						arrivalsOrDepartures, Time.timeOfDayStr(time),
+						StringUtils.oneDigitFormat(Math.abs(time - mean)), Time
+								.timeOfDayStr(Math.round(mean)),
 						allowableDifferenceFromMeanSecs);
 			}
-			
-			// If time is too far away from original time in stop_times.txt 
+
+			// If time is too far away from original time in stop_times.txt
 			// then don't use it.
-			else if (Math.abs(time - originalScheduleTime) > 
-						allowableDifferenceFromOriginalTimeSecs) {
+			else if (Math.abs(time - originalScheduleTime) > allowableDifferenceFromOriginalTimeSecs) {
 				timeFilteredOut = true;
 				iterator.remove();
-				logger.debug("For trip={} stop={} filtering out {} time={} because " +
-						"it is {} seconds from the original time={} which is " +
-						"further away than the allowable={} secs.",
-						originalGtfsStopTime==null ?
-								"NA":originalGtfsStopTime.getTripId(),
-						originalGtfsStopTime==null ?
-								"NA":originalGtfsStopTime.getStopId(), 
-						arrivalsOrDepartures,
-						Time.timeOfDayStr(time), 
-						time - originalScheduleTime, 
-						Time.timeOfDayStr(originalScheduleTime),
+				logger.debug(
+						"For trip={} stop={} filtering out {} time={} because "
+								+ "it is {} seconds from the original time={} which is "
+								+ "further away than the allowable={} secs.",
+						originalGtfsStopTime == null ? "NA"
+								: originalGtfsStopTime.getTripId(),
+						originalGtfsStopTime == null ? "NA"
+								: originalGtfsStopTime.getStopId(),
+						arrivalsOrDepartures, Time.timeOfDayStr(time), time
+								- originalScheduleTime, Time
+								.timeOfDayStr(originalScheduleTime),
 						allowableDifferenceFromOriginalTimeSecs);
 			}
 		}
-		
+
 		// If no data points left due to filtering then simply return null
 		if (filteredTimesFromDb.size() == 0)
 			return null;
-		
+
 		// If filtered out any times then need to update timesArray and the mean
 		if (timeFilteredOut) {
-			results.filteredTimesArray = Statistics.toArray(filteredTimesFromDb);
-			results.mean = (float) Statistics.getMean(results.filteredTimesArray);
+			results.filteredTimesArray = 
+					Statistics.toArray(filteredTimesFromDb);
+			results.mean = 
+					(float) Statistics.getMean(results.filteredTimesArray);
 		} else {
 			results.filteredTimesArray = results.unfilteredTimesArray;
 			results.mean = (float) mean;
 		}
-		
+
 		// Determine the standard deviation using the filtered times
-		double doubleArray[] = Statistics.toDoubleArray(results.filteredTimesArray);
-		results.standardDeviation = 
-				(float) Statistics.getSampleStandardDeviation(doubleArray, mean);
+		double doubleArray[] = Statistics
+				.toDoubleArray(results.filteredTimesArray);
+		results.standardDeviation = (float) Statistics
+				.getSampleStandardDeviation(doubleArray, mean);
 
 		// Determine min and max using the filtered times
 		for (int time : results.filteredTimesArray) {
@@ -730,8 +795,8 @@ public class ScheduleStatistics {
 	 * 
 	 * @param standardDeviations
 	 *            The number of standard of deviations to subtract from the mean
-	 *            time for determining fraction of arrivals/departures that
-	 *            are early.
+	 *            time for determining fraction of arrivals/departures that are
+	 *            early.
 	 * @param statistics
 	 *            Contains the times, the mean, and the standard deviation used
 	 *            for the calculations for all of the routes.
@@ -746,7 +811,7 @@ public class ScheduleStatistics {
 				totalTimes += stats.filteredTimesArray.length;
 				for (int time : stats.filteredTimesArray) {
 					double allowableTime = stats.mean - 
-							stats.standardDeviation * standardDeviations;
+							stats.standardDeviation	* standardDeviations;
 					if (time < allowableTime) {
 						++totalEarly;
 					}
@@ -761,17 +826,17 @@ public class ScheduleStatistics {
 	/**
 	 * For the route specified first determines the basic stats including the
 	 * mean and standard deviation. Then determines how many standard deviations
-	 * to use for this route such that get approximately the desired fraction
-	 * of times being earlier than the mean minus the number of standard
-	 * deviations for this trip/stop. Puts the resulting Stats objects that now
-	 * contain the best arrival/departure value to use into
-	 * statsResultsByTripStopMap. This is done on a per route basis since it is
-	 * expected that the distribution of the stats will vary between routes.
+	 * to use for this route such that get approximately the desired fraction of
+	 * times being earlier than the mean minus the number of standard deviations
+	 * for this trip/stop. Puts the resulting Stats objects that now contain the
+	 * best arrival/departure value to use into statsResultsByTripStopMap. This
+	 * is done on a per route basis since it is expected that the distribution
+	 * of the stats will vary between routes.
 	 * 
 	 * @param originalGtfsStopTimes
-	 *            original data from stop_times.txt file so that can filter 
-	 *            out outliers. Can be null for testing. Map is keyed on
-	 *            trip/stops and contains GtfsStopTimes.
+	 *            original data from stop_times.txt file so that can filter out
+	 *            outliers. Can be null for testing. Map is keyed on trip/stops
+	 *            and contains GtfsStopTimes.
 	 * @param timesFromDbByTripStopForRouteSubMap
 	 *            the arrival/departure times for the route
 	 * @param statsResultsByTripStopMap
@@ -779,16 +844,15 @@ public class ScheduleStatistics {
 	 * @param routeId
 	 *            for logging
 	 * @param arrivalsOrDepartures
-	 * 			  specifies whether should handle as arrivals or departures
+	 *            specifies whether should handle as arrivals or departures
 	 */
 	private void determineStatsForRoute(
 			Map<TripStopKey, GtfsStopTime> originalGtfsStopTimes,
 			Map<TripStopKey, List<Integer>> timesFromDbByTripStopForRouteSubMap,
-			Map<TripStopKey, Stats> statsResultsByTripStopMap,  
-			String routeId,
+			Map<TripStopKey, Stats> statsResultsByTripStopMap, String routeId,
 			ArrivalsOrDepartures arrivalsOrDepartures) {
-		logger.debug("Processing {} data for routeId={}", 
-				arrivalsOrDepartures, routeId);
+		logger.debug("Processing {} data for routeId={}", arrivalsOrDepartures,
+				routeId);
 
 		// For the route get all of the statistics including the mean and
 		// standard deviation for each stop
@@ -799,12 +863,10 @@ public class ScheduleStatistics {
 		for (TripStopKey tripStopKey : tripStopKeysForRouteFromDb) {
 			List<Integer> timesFromDb = 
 					timesFromDbByTripStopForRouteSubMap.get(tripStopKey);
-			GtfsStopTime originalGtfsStopTime = 
-					originalGtfsStopTimes == null ? 
-							null : originalGtfsStopTimes.get(tripStopKey);
-			Stats statsForTripStop = 
-					getStatisticsForTripStop(timesFromDb, originalGtfsStopTime,
-							arrivalsOrDepartures);
+			GtfsStopTime originalGtfsStopTime = originalGtfsStopTimes == null ? 
+					null : originalGtfsStopTimes.get(tripStopKey);
+			Stats statsForTripStop = getStatisticsForTripStop(timesFromDb,
+					originalGtfsStopTime, arrivalsOrDepartures);
 			if (statsForTripStop != null) {
 				statsForRoute.put(tripStopKey, statsForTripStop);
 			}
@@ -819,12 +881,11 @@ public class ScheduleStatistics {
 		double highStdDevs = 2.0;
 		double currentStdDevs = 1.0;
 		for (int iteration = 0; iteration < NUMBER_ITERATIONS; ++iteration) {
-			double fractionEarly = 
-					determineFractionEarly(currentStdDevs, 
-							statsForRoute.values());
-			logger.debug("For iteration={} currentStdDevs={} " +
-					"desiredFractionEarly={} fractionEarly={}",
-					iteration, currentStdDevs, desiredFractionEarly, 
+			double fractionEarly = determineFractionEarly(currentStdDevs,
+					statsForRoute.values());
+			logger.debug("For iteration={} currentStdDevs={} "
+					+ "desiredFractionEarly={} fractionEarly={}", iteration,
+					currentStdDevs, desiredFractionEarly,
 					StringUtils.threeDigitFormat(fractionEarly));
 			if (fractionEarly < desiredFractionEarly) {
 				// Need to use lower std dev to get desired results
@@ -843,17 +904,17 @@ public class ScheduleStatistics {
 		// update the Stats object with the best time and put the Stats
 		// object into the results map.
 		for (TripStopKey tripStopKey : tripStopKeysForRouteFromDb) {
-			// The best arrival/departure time value to use is the mean 
+			// The best arrival/departure time value to use is the mean
 			// minus the desired standard deviation if the std dev is
 			// valid (there was more than 1 data point).
 			Stats stats = statsForRoute.get(tripStopKey);
-			
+
 			// If there is no data for the trip/stop then can't process
 			// it. This can happen if all the data points were filtered
 			// out for the trip/stop.
 			if (stats == null)
 				continue;
-			
+
 			double bestValue = stats.mean;
 			if (!Float.isNaN(stats.standardDeviation))
 				bestValue -= stats.standardDeviation * standardDeviationsToUse;
@@ -866,16 +927,16 @@ public class ScheduleStatistics {
 	}
 
 	/**
-	 * Reads in times from database and fills in statsResultsByTripStopMap 
-	 * by determining the best arrival/departure time to use. Does this 
-	 * on a per route basis.
+	 * Reads in times from database and fills in statsResultsByTripStopMap by
+	 * determining the best arrival/departure time to use. Does this on a per
+	 * route basis.
 	 * 
 	 * @param originalGtfsStopTimes
-	 *            original data from stop_times.txt file so that can filter 
-	 *            out outliers. Can be null for testing. Map is keyed on
-	 *            trip/stops and contains GtfsStopTimes.
+	 *            original data from stop_times.txt file so that can filter out
+	 *            outliers. Can be null for testing. Map is keyed on trip/stops
+	 *            and contains GtfsStopTimes.
 	 * @param arrivalsOrDepartures
-	 * 			  specifies whether should handle as arrivals or departures
+	 *            specifies whether should handle as arrivals or departures
 	 * @return map containing stats for each trip/stop for all routes
 	 */
 	private Map<TripStopKey, Stats> determineStatsForRoutes(
@@ -884,21 +945,22 @@ public class ScheduleStatistics {
 		// For returning results
 		Map<TripStopKey, Stats> statsResultsByTripStopMap = 
 				new HashMap<TripStopKey, Stats>();
-		
+
 		// Read the arrival/departure times from the db
-		Map<String, Map<TripStopKey, List<Integer>>> timesFromDbByRoutesByTripStopMap = 
+		Map<String, Map<TripStopKey, List<Integer>>>
+			timesFromDbByRoutesByTripStopMap = 
 				readInArrivalsOrDeparturesFromDb(arrivalsOrDepartures);
-		
+
 		// Handle the arrival/departure times for each route
 		Set<String> routeIds = timesFromDbByRoutesByTripStopMap.keySet();
 		for (String routeId : routeIds) {
 			Map<TripStopKey, List<Integer>> timesByTripStopForRouteSubMap = 
 					timesFromDbByRoutesByTripStopMap.get(routeId);
 			determineStatsForRoute(originalGtfsStopTimes,
-					timesByTripStopForRouteSubMap,
-					statsResultsByTripStopMap, routeId, arrivalsOrDepartures);
+					timesByTripStopForRouteSubMap, statsResultsByTripStopMap,
+					routeId, arrivalsOrDepartures);
 		}
-		
+
 		return statsResultsByTripStopMap;
 	}
 
@@ -906,10 +968,10 @@ public class ScheduleStatistics {
 	 * For each trip/stop in the stop_times.txt file sees if there is AVL based
 	 * arrival/departure times. If there is then it is used when creating
 	 * GtfsExtendedStopTime object. If no data for the trip/stop then null
-	 * values will be used. The result GtfsExtendedStopTimes are then written
-	 * to two files: 
-	 *  - stop_times.txt_new which uses the standard GTFS format
-	 *  - stop_times.txt_extended which has additional info such as standard deviation.
+	 * values will be used. The result GtfsExtendedStopTimes are then written to
+	 * two files: - stop_times.txt_new which uses the standard GTFS format -
+	 * stop_times.txt_extended which has additional info such as standard
+	 * deviation.
 	 */
 	private void processDbData() {
 		// Determine the arrival/departure times to use by
@@ -920,46 +982,43 @@ public class ScheduleStatistics {
 		// used need to determine times relative to the start time
 		// of the trip, which is the departure from the terminal.
 		Map<TripStopKey, Stats> departureStatsResultsByTripStopMap = 
-				determineStatsForRoutes(gtfsStopTimes,
+				determineStatsForRoutes(gtfsStopTimes, 
 						ArrivalsOrDepartures.DEPARTURES);
 		Map<TripStopKey, Stats> arrivalStatsResultsByTripStopMap = 
-				determineStatsForRoutes(gtfsStopTimes,
+				determineStatsForRoutes(gtfsStopTimes, 
 						ArrivalsOrDepartures.ARRIVALS);
-		
+
 		// For writing the stop_times.txt_extended file with the additional data
 		String extendedFileName = gtfsDirectoryName + "/"
 				+ "stop_times.txt_extended";
-		logger.info("Creating the new GTFS stop_times file {} ...", 
+		logger.info("Creating the new GTFS stop_times file {} ...",
 				extendedFileName);
-		GtfsExtendedStopTimesWriter extendedWriter = 
-				new GtfsExtendedStopTimesWriter(extendedFileName);
+		GtfsExtendedStopTimesWriter extendedWriter = new GtfsExtendedStopTimesWriter(
+				extendedFileName);
 
 		// Write the new stop_times.txt_new data
 		String newFileName = gtfsDirectoryName + "/" + "stop_times.txt_new";
-		logger.info("Creating the new GTFS stop_times file {} ...", 
-				newFileName);
-		GtfsStopTimesWriter writer = 
-				new GtfsStopTimesWriter(newFileName);
+		logger.info("Creating the new GTFS stop_times file {} ...", newFileName);
+		GtfsStopTimesWriter writer = new GtfsStopTimesWriter(newFileName);
 
-		
 		// Go through list of stop times from the GTFS stop_times.txt file
 		// and create corresponding GtfsExtendedStopTimes. Need to determine
-		// if first stop of trip to know if should actually modify the schedule 
+		// if first stop of trip to know if should actually modify the schedule
 		// time. Therefore keeping track of previousTripId so can determine
 		// when iterating over a new trip.
-		logger.info("Creating GtfsExtendedStopTimes objects for all data " +
-				"from stop_times.txt file.");		
+		logger.info("Creating GtfsExtendedStopTimes objects for all data "
+				+ "from stop_times.txt file.");
 		String previousTripId = null;
-		for (GtfsStopTime gtfsStopTime : gtfsStopTimes.values()) {	
+		for (GtfsStopTime gtfsStopTime : gtfsStopTimes.values()) {
 			// Determine values to use for both arrival and departure times. The
 			// Stats will be null if there was no data for the particular
 			// trip/stop.
 			TripStopKey tripStopKey = getTripStopKey(gtfsStopTime.getTripId(),
 					gtfsStopTime.getStopId());
-			Stats arrivalTimeResults = 
-					arrivalStatsResultsByTripStopMap.get(tripStopKey);
-			Stats departureTimeResults = 
-					departureStatsResultsByTripStopMap.get(tripStopKey);
+			Stats arrivalTimeResults = arrivalStatsResultsByTripStopMap
+					.get(tripStopKey);
+			Stats departureTimeResults = departureStatsResultsByTripStopMap
+					.get(tripStopKey);
 
 			// Determine if should use original arrival/departure time for
 			// this stop/trip. This could be true for first stop of trip
@@ -973,15 +1032,15 @@ public class ScheduleStatistics {
 				}
 			}
 			previousTripId = gtfsStopTime.getTripId();
-			
+
 			// Create the GtfsExtendedStopTime that corresponds to the
 			// GtfsStopTime from the stop_times.txt file. These values are
 			// used to write the new version of the stop_times file with
 			// the more accurate schedule times.
-			GtfsExtendedStopTime extendedStopTime = 
-					new GtfsExtendedStopTime(gtfsStopTime, useOriginalSchedTimes,
-							arrivalTimeResults,	departureTimeResults);
-			
+			GtfsExtendedStopTime extendedStopTime = new GtfsExtendedStopTime(
+					gtfsStopTime, useOriginalSchedTimes, arrivalTimeResults,
+					departureTimeResults);
+
 			// Write the data to the stop_times files
 			extendedWriter.write(extendedStopTime);
 			writer.write(extendedStopTime);
@@ -990,10 +1049,11 @@ public class ScheduleStatistics {
 		// Finish up the writing of the stop_times files
 		extendedWriter.close();
 		writer.close();
-		
-		// Log schedule adherence results for both the original schedule and 
+
+		// Log schedule adherence results for both the original schedule and
 		// for the new more accurate schedule.
-		processScheduleAdherence(gtfsStopTimes, arrivalStatsResultsByTripStopMap,
+		processScheduleAdherence(gtfsStopTimes,
+				arrivalStatsResultsByTripStopMap,
 				departureStatsResultsByTripStopMap);
 	}
 
@@ -1008,12 +1068,13 @@ public class ScheduleStatistics {
 	 * @param departureStatsResultsByTripStopMap
 	 *            All the departure time results. Keyed on trip/stop.
 	 */
-	private void processScheduleAdherence(Map<TripStopKey, GtfsStopTime> gtfsStopTimes,
+	private void processScheduleAdherence(
+			Map<TripStopKey, GtfsStopTime> gtfsStopTimes,
 			Map<TripStopKey, Stats> arrivalStatsResultsByTripStopMap,
 			Map<TripStopKey, Stats> departureStatsResultsByTripStopMap) {
 		logger.info("Processing schedule adherence information...");
-		
-		// For keeping track of schedule adherence results while iterating 
+
+		// For keeping track of schedule adherence results while iterating
 		// through all of the data
 		int numberEarlyOrigSchedule = 0;
 		int numberLateOrigSchedule = 0;
@@ -1022,10 +1083,10 @@ public class ScheduleStatistics {
 		int totalDataPoints = 0;
 
 		// Go through list of stop times from the GTFS stop_times.txt file
-		// and create corresponding GtfsExtendedStopTimes. Need to know if 
-		// last stop of trip so that will use arrival time for schedule 
-		// adherence instead of departure time. Therefore when iterating 
-		// across all the GtfsStopTime data need to also keep track of the 
+		// and create corresponding GtfsExtendedStopTimes. Need to know if
+		// last stop of trip so that will use arrival time for schedule
+		// adherence instead of departure time. Therefore when iterating
+		// across all the GtfsStopTime data need to also keep track of the
 		// next ones. Therefore iteration is a bit more complicated than usual.
 		Iterator<GtfsStopTime> gtfsStopTimesIterator = 
 				gtfsStopTimes.values().iterator();
@@ -1041,14 +1102,15 @@ public class ScheduleStatistics {
 				nextGtfsStopTime = null;
 
 			// Determine the stats, the original schedule time, and the new
-			// schedule time. If last stop of trip then use arrival time  
+			// schedule time. If last stop of trip then use arrival time
 			// instead of departure time.
 			Stats stats;
 			Integer originalScheduleTime;
-			TripStopKey tripStopKey = getTripStopKey(currentGtfsStopTime.getTripId(),
+			TripStopKey tripStopKey = getTripStopKey(
+					currentGtfsStopTime.getTripId(),
 					currentGtfsStopTime.getStopId());
-			if (nextGtfsStopTime == null ||
-					!currentGtfsStopTime.getTripId().equals(
+			if (nextGtfsStopTime == null
+					|| !currentGtfsStopTime.getTripId().equals(
 							nextGtfsStopTime.getTripId())) {
 				// Use arrival time because last stop of trip
 				stats = arrivalStatsResultsByTripStopMap.get(tripStopKey);
@@ -1056,10 +1118,12 @@ public class ScheduleStatistics {
 			} else {
 				// Use normal departure time
 				stats = departureStatsResultsByTripStopMap.get(tripStopKey);
-				originalScheduleTime = currentGtfsStopTime.getDepartureTimeSecs();
-			} 
-			int newScheduleTime = stats != null ? stats.bestValue : originalScheduleTime;
-						
+				originalScheduleTime = currentGtfsStopTime
+						.getDepartureTimeSecs();
+			}
+			int newScheduleTime = stats != null ? stats.bestValue
+					: originalScheduleTime;
+
 			// Keep count of number vehicles early and late for both the
 			// old schedule and the new more accurate schedule so can log
 			// schedule adherence totals. This way can see how much
@@ -1076,27 +1140,25 @@ public class ScheduleStatistics {
 						++numberEarlyNewSchedule;
 					else if (time > newScheduleTime + allowableLateSecs)
 						++numberLateNewSchedule;
-				}				
-			}			
+				}
+			}
 		} while (nextGtfsStopTime != null);
-		
-		// Log schedule adherence results for both the original schedule and 
+
+		// Log schedule adherence results for both the original schedule and
 		// for the new more accurate schedule.
-		double percentageOnTimeOrigSched = 
-				100.0 * 
-				(totalDataPoints - numberEarlyOrigSchedule - numberLateOrigSchedule) 
-				/ totalDataPoints; 
-		logger.info("For original schedule time numDataPoints={} early={} " +
-				"late={} percentageOnTime={}", 
-				totalDataPoints, numberEarlyOrigSchedule, numberLateOrigSchedule,
+		double percentageOnTimeOrigSched = 100.0
+				* (totalDataPoints - numberEarlyOrigSchedule - numberLateOrigSchedule)
+				/ totalDataPoints;
+		logger.info("For original schedule time numDataPoints={} early={} "
+				+ "late={} percentageOnTime={}", totalDataPoints,
+				numberEarlyOrigSchedule, numberLateOrigSchedule,
 				StringUtils.twoDigitFormat(percentageOnTimeOrigSched));
-		double percentageOnTimeNewSched = 
-				100.0 * 
-				(totalDataPoints - numberEarlyNewSchedule - numberLateNewSchedule) 
-				/ totalDataPoints; 
-		logger.info("For new schedule time numDataPoints={} early={} " +
-				"late={} percentageOnTime={}", 
-				totalDataPoints, numberEarlyNewSchedule, numberLateNewSchedule,
+		double percentageOnTimeNewSched = 100.0
+				* (totalDataPoints - numberEarlyNewSchedule - numberLateNewSchedule)
+				/ totalDataPoints;
+		logger.info("For new schedule time numDataPoints={} early={} "
+				+ "late={} percentageOnTime={}", totalDataPoints,
+				numberEarlyNewSchedule, numberLateNewSchedule,
 				StringUtils.twoDigitFormat(percentageOnTimeNewSched));
 	}
 
@@ -1107,11 +1169,11 @@ public class ScheduleStatistics {
 	 */
 	public void process() {
 		// Determine the more accurate schedule times
-		logger.info("Processing the arrival/departure times to determine " +
-				"the more accurate schedule times and then writing the " +
-				"new stop_times files...");
+		logger.info("Processing the arrival/departure times to determine "
+				+ "the more accurate schedule times and then writing the "
+				+ "new stop_times files...");
 		processDbData();
-		
+
 		// Log that done so can see how long it took
 		logger.info("Done creating new GTFS stop_times files.");
 	}
@@ -1125,40 +1187,37 @@ public class ScheduleStatistics {
 	 * @param args
 	 */
 	@SuppressWarnings("unused")
-	public static void main(String args[]) {	
-		Map<String, Map<String, List<Integer>>> 
-			arrivalTimesFromDbByRouteByTripStopMap = 
-				new HashMap<String, Map<String, List<Integer>>>();
-		
-		Map<String, List<Integer>> timesByTripStopMap = 
-				new HashMap<String, List<Integer>>();
+	public static void main(String args[]) {
+		Map<String, Map<String, List<Integer>>> arrivalTimesFromDbByRouteByTripStopMap = new HashMap<String, Map<String, List<Integer>>>();
 
-		Integer array1[] = {2, 4, 4, 4, 4, 5, 5, 7, 9};
+		Map<String, List<Integer>> timesByTripStopMap = new HashMap<String, List<Integer>>();
+
+		Integer array1[] = { 2, 4, 4, 4, 4, 5, 5, 7, 9 };
 		List<Integer> times1 = Arrays.asList(array1);
 		timesByTripStopMap.put("tripStop1", times1);
-		
-		Integer array2[] = {21, 32, 43, 44, 50, 51, 50, 72, 91};
+
+		Integer array2[] = { 21, 32, 43, 44, 50, 51, 50, 72, 91 };
 		List<Integer> times2 = Arrays.asList(array2);
 		timesByTripStopMap.put("tripStop2", times2);
 
-		Integer array3[] = {11, 41, 42, 46, 51, 53, 52, 86, 97, 101};
+		Integer array3[] = { 11, 41, 42, 46, 51, 53, 52, 86, 97, 101 };
 		List<Integer> times3 = Arrays.asList(array3);
 		timesByTripStopMap.put("tripStop3", times3);
-		
-		arrivalTimesFromDbByRouteByTripStopMap.put("route1", timesByTripStopMap);
-		
-		ScheduleStatistics scheduleStats = new ScheduleStatistics(
-				null, null, null, null, null,
-				0.25,   // desiredFractionEarly
-				5,      // allowableDifferenceFromMeanSecs
-				5,      // allowableDifferenceFromOriginalTimeSecs
-				false,  // doNotUpdateFirstStopOfTrip
-				60,     // allowable early seconds for sched adherence
-				300);   // allowable late seconds for sched adherence
-		
-//		scheduleStats.determineStatsForRoutes(
-//				null, // originalGtfsStopTimes set to null for testing
-//				arrivalTimesFromDbByRouteByTripStopMap,
-//				ArrivalsOrDepartures.ARRIVALS);
+
+		arrivalTimesFromDbByRouteByTripStopMap
+				.put("route1", timesByTripStopMap);
+
+		ScheduleStatistics scheduleStats = new ScheduleStatistics(null, null,
+				null, null, null, 0.25, // desiredFractionEarly
+				5, // allowableDifferenceFromMeanSecs
+				5, // allowableDifferenceFromOriginalTimeSecs
+				false, // doNotUpdateFirstStopOfTrip
+				60, // allowable early seconds for sched adherence
+				300); // allowable late seconds for sched adherence
+
+		// scheduleStats.determineStatsForRoutes(
+		// null, // originalGtfsStopTimes set to null for testing
+		// arrivalTimesFromDbByRouteByTripStopMap,
+		// ArrivalsOrDepartures.ARRIVALS);
 	}
 }
