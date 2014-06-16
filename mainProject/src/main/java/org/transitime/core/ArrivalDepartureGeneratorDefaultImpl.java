@@ -20,6 +20,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -67,18 +68,34 @@ import org.transitime.utils.Time;
  */
 public class ArrivalDepartureGeneratorDefaultImpl 
 	implements ArrivalDepartureGenerator {
-
-	// If vehicle just became predictable as indicated by no previous match 
-	// then still want to determine arrival/departure times for earlier 
-	// stops so that won't miss recording data for them them. But only want to
-	// go so far. Otherwise could be generating fake arrival/departure times
-	// when vehicle did not actually traverse that stop.
-	private static final int MAX_STOPS_WHEN_NO_PREVIOUS_MATCH = 6;
-	
-	private static final int MAX_STOPS_BETWEEN_MATCHES = 12;
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ArrivalDepartureGeneratorDefaultImpl.class);
+
+	/********************** Config Params **************************/
+
+	/**
+	 * If vehicle just became predictable as indicated by no previous match then
+	 * still want to determine arrival/departure times for earlier stops so that
+	 * won't miss recording data for them them. But only want to go so far.
+	 * Otherwise could be generating fake arrival/departure times when vehicle
+	 * did not actually traverse that stop.
+	 */
+	private static int getMaxStopsWhenNoPreviousMatch() {
+		return maxStopsWhenNoPreviousMatch.getValue();
+	}
+	private static IntegerConfigValue maxStopsWhenNoPreviousMatch = 
+			new IntegerConfigValue(	
+					"transitime.arrivalsDepartures.maxStopsWhenNoPreviousMatch",
+					4);
+
+	private static int getMaxStopsBetweenMatches() {
+		return maxStopsBetweenMatches.getValue();
+	}
+	private static IntegerConfigValue maxStopsBetweenMatches = 
+			new IntegerConfigValue(	
+					"transitime.arrivalsDepartures.maxStopsBetweenMatches",
+					12);
 
 	/********************** Member Functions **************************/
 
@@ -170,12 +187,12 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// arrivals/departures for between the matches.
 		int stopsTraversed = 
 				SpatialMatch.numberStopsBetweenMatches(oldMatch, newMatch);
-		if (stopsTraversed > MAX_STOPS_BETWEEN_MATCHES) {
+		if (stopsTraversed > getMaxStopsBetweenMatches()) {
 			logger.error("Attempting to traverse {} stops between oldMatch " +
 					"and newMatch, which is more thanThere are more than " +
 					"MAX_STOPS_BETWEEN_MATCHES={}. Therefore not generating " +
 					"arrival/departure times. oldMatch={} newMatch={}",
-					stopsTraversed, MAX_STOPS_BETWEEN_MATCHES, 
+					stopsTraversed, getMaxStopsBetweenMatches(), 
 					oldMatch, newMatch);
 			return false;
 		}
@@ -292,7 +309,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		if (newMatch.getTripIndex() == 0 && 
 				newMatch.getStopPathIndex() > 0 &&
-				newMatch.getStopPathIndex() < MAX_STOPS_WHEN_NO_PREVIOUS_MATCH) {
+				newMatch.getStopPathIndex() < getMaxStopsWhenNoPreviousMatch()) {
 			// Couple more convenience variables
 			Date avlReportTime = vehicleState.getAvlReport().getDate();
 			Block block = newMatch.getBlock();
