@@ -179,47 +179,51 @@ public class SpatialMatcher {
 			return true;
 		}
 		
-		// Heading is not valid so set headingInProperDirection
-		// to false for now. If previous match shows that vehicle
-		// is making forward progress then will set 
-		// headingInProperDirection to true.
+		// If for current AVL report there are no non-layover matches then 
+		// must be matching to layover. For this case heading doesn't matter 
+		// so must be OK so return true.
+		SpatialMatch currentNonLayoverSpatialMatch =
+				getFirstNonLayoverSpatialMatch(spatialMatchesForTrip);
+		if (currentNonLayoverSpatialMatch == null)
+			return true;
+
+		// Heading for the current AVL report is not valid and the match for
+		// the current report is not a layover. So check the previous fix.
+		// If there was no valid previous AVL report then can't tell if
+		// heading in proper direction for the match so return false.
 		double minDistance = CoreConfig.
 				getDistanceBetweenAvlsForInitialMatchingWithoutHeading();
 		AvlReport previousAvlReport = 
 				vehicleState.getPreviousAvlReport(minDistance);
-		if (previousAvlReport != null) {
-			// Determine matches for the previous AvlReport
-			List<SpatialMatch> spatialMatchesForPreviousReport = 
-					(new SpatialMatcher())
-						.getSpatialMatchesForTrip(previousAvlReport,
-								block, trip);
+		if (previousAvlReport == null) 
+			return false;
+		
+		// Determine matches for the previous AvlReport
+		List<SpatialMatch> spatialMatchesForPreviousReport = 
+				(new SpatialMatcher())
+					.getSpatialMatchesForTrip(previousAvlReport,
+							block, trip);
 
-			// There can be multiple matches, but only look at first 
-			// non-layover ones
-			SpatialMatch previousNonLayoverSpatialMatch =
-					getFirstNonLayoverSpatialMatch(
-							spatialMatchesForPreviousReport);
-			// If no previous non-layover spatial matches then OK. This
-			// means that heading was OK for previous report or that only
-			// matched to layover, where heading doesn't matter. So return 
-			// true.
-			if (previousNonLayoverSpatialMatch == null)
-				return true;
-			
-			SpatialMatch currentNonLayoverSpatialMatch =
-					getFirstNonLayoverSpatialMatch(
-							spatialMatchesForTrip);
-			// If no non-layover matches then must be matching to layover.
-			// For this case heading doesn't matter so must be OK so
-			// return true.
-			if (currentNonLayoverSpatialMatch == null)
-				return true;
-			
-			// If vehicle heading in right direction then return true!
-			if (previousNonLayoverSpatialMatch
-					.lessThanOrEqualTo(currentNonLayoverSpatialMatch))
-				return true;
-		}
+		// There can be multiple matches, but only look at first 
+		// non-layover ones for the previous report
+		SpatialMatch previousNonLayoverSpatialMatch =
+				getFirstNonLayoverSpatialMatch(
+						spatialMatchesForPreviousReport);
+		
+		// If no previous non-layover spatial matches then can't tell if
+		// moving in proper direction so return false. Note: always can get
+		// a match to a layover since the distance to the layover doesn't 
+		// matter. That is why if only get a previous match to a layover
+		// then don't really know if the previous match is valid, and therefore
+		// can't tell if heading in proper direction.
+		if (previousNonLayoverSpatialMatch == null)
+			return false;
+		
+		
+		// If vehicle heading in right direction then return true!
+		if (previousNonLayoverSpatialMatch
+				.lessThanOrEqualTo(currentNonLayoverSpatialMatch))
+			return true;
 
 		// Couldn't verify that vehicle making forward progress
 		// for the spatial matches for the trip so return false.
