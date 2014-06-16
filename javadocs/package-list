@@ -5,6 +5,7 @@ org.transitime.config
 org.transitime.configData
 org.transitime.core
 org.transitime.core.dataCache
+org.transitime.core.travelTimes
 org.transitime.db
 org.transitime.db.hibernate
 org.transitime.db.structs
@@ -27,6 +28,7 @@ org.transitime.modules
 org.transitime.projectConfig
 org.transitime.statistics
 org.transitime.utils
+org.transitime.utils.csv
 org.transitime.utils.threading
 org.transitime.worldbank
 org.transitime.worldbank.gtfsRtExample
