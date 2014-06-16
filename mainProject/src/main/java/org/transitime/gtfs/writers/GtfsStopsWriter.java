@@ -24,7 +24,9 @@ import org.transitime.utils.csv.CsvWriterBase;
 
 
 /**
- * For writing out the stops.txt GTFS file.
+ * For writing out the stops.txt GTFS file. Useful for when need to modify the
+ * file, such as for processing the latitudes/longitudes so that data for China
+ * can be visualized correctly on a web based map.
  * 
  * @author SkiBu Smith
  *

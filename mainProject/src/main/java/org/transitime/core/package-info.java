@@ -1,4 +1,4 @@
-/**
+/*
  * 
  * This file is part of Transitime.org
  * 
@@ -17,7 +17,9 @@
  */
 /**
  * Contains the core classes that process the AVL data and create predictions,
- * arrival/departure times, headway, etc.
+ * arrival/departure times, headway, etc. Contains all the key algorithms that
+ * are part of generating the data. This is the core package of the prediction
+ * system.
  * 
  * @author SkiBu Smith
  *

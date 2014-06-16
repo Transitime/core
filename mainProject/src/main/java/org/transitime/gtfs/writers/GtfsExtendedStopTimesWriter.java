@@ -23,7 +23,10 @@ import org.transitime.utils.StringUtils;
 /**
  * For writing out extended GTFS stop_times.txt file that contains additional
  * info beyond the usual stop_times.txt file such as statistical info determined
- * when creating the schedule.
+ * when creating the schedule. This class is useful when updating the GTFS
+ * stop_times based on historic AVL data.
+ * <p>
+ * Since this is pretty simple not using a general CSV class to do the writing.
  * 
  * @author SkiBu Smith
  * 

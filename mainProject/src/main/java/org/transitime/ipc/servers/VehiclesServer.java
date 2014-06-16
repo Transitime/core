@@ -31,7 +31,8 @@ import org.transitime.ipc.rmi.AbstractServer;
 /**
  * Implements the VehiclesInterface interface on the server side such that a 
  * VehiclessClient can make RMI calls in order to obtain vehicle 
- * information.
+ * information. The vehicle information is provided using 
+ * org.transitime.ipc.data.Vehicle objects.
  *
  * @author SkiBu Smith
  *

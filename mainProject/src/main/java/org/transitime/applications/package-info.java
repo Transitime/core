@@ -16,8 +16,8 @@
  */
 
 /**
- * Contains the top level main() methods for the applications that constitute the 
- * Transitime system.
+ * Contains the top level static main() methods for the applications that 
+ * constitute the Transitime system.
  *  
  * @author SkiBu Smith
  *

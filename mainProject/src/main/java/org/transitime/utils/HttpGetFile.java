@@ -27,32 +27,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Copies a file from the specified URL and stores it locally.
+ * Copies a file from the specified URL and stores it locally. Useful
+ * for things such as reading a GTFS zip file and storing it on local
+ * machine for further processing.
  * 
  * @author SkiBu Smith
  *
  */
 public class HttpGetFile {
 
+	// UserAgenct info sent to web server when file is requested
 	private static final String USER_AGENT = "Transitime";
+	
+	// In case can't figure out file name to use to store the
+	// file from the URL
 	private static final String DEFAULT_FILE_NAME = "DEFAULT_FILE";
 	
-	private String urlStr;
-	private String dirNameForResult;
-	private String fullFileNameForResult;
+	private final String urlStr;
+	private final String dirNameForResult;
+	private final String fullFileNameForResult;
 	
-	protected static final Logger logger = LoggerFactory
-			.getLogger(HttpGetFile.class);
+	protected static final Logger logger = 
+			LoggerFactory.getLogger(HttpGetFile.class);
 
 	/********************** Member Functions **************************/
 
 	public HttpGetFile(String urlStr, String dirName) {
 		this.urlStr = urlStr;
-		this.dirNameForResult = dirName;
 		
-		// Make sure dir name ends with a "/"
-		if (!dirNameForResult.endsWith("/"))
-			dirNameForResult += "/";
+		// Make sure directory name ends with a "/"
+		if (!dirName.endsWith("/"))
+			dirName += "/";
+		this.dirNameForResult = dirName;
 		
 		fullFileNameForResult = dirNameForResult + getFileNameFromUrl(urlStr);
 	}

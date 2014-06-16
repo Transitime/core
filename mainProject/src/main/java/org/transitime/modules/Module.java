@@ -26,14 +26,15 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.utils.threading.NamedThreadFactory;
 
 /**
- * Modules are run in a separate thread and continuously
- * process data. They are initiated by core by configuring 
- * which modules should be started. Each module should inherit 
- * from this class and implement run() and a constructor
- * that takes the projectId as a string parameter.
+ * Modules are run in a separate thread and continuously process data. They are
+ * initiated by core prediction system by configuring which modules should be
+ * started.
+ * <p>
+ * Each module should inherit from this class and implement run() and a
+ * constructor that takes the projectId as a string parameter.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public abstract class Module implements Runnable {
 	protected static final Logger logger = 

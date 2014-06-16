@@ -16,7 +16,12 @@
  */
 
 /**
- * Contains the classes for the servers that provide data via RMI.
+ * Contains the classes for the servers, such as the core prediction system,
+ * that provide data via RMI. The core prediction system actually has several
+ * servers: the ConfigServer that can provide static configuration information,
+ * the VehiclesServer which provides vehicle status info such as vehicles 
+ * current location, and the PredictionsServer which provides prediction 
+ * information.
  * 
  * @author SkiBu Smith
  *

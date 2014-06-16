@@ -30,7 +30,10 @@ import org.transitime.ipc.rmi.AbstractServer;
 
 /**
  * Implements ConfigInterface to serve up configuration information to RMI
- * clients.
+ * clients. Currently only route information is provided, using
+ * org.transitime.ipc.data.Route objects. In the future this will be
+ * significantly expanded to provide other information as well. Currently this
+ * is only a proof of concept class.
  * 
  * @author SkiBu Smith
  * 

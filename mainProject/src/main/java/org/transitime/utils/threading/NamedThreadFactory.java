@@ -20,6 +20,7 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * A thread factory that names the threads. Eases debugging.
+ * <p>
  * Based on code from the book "Java Concurrency in Practice" by Brian Goetz
  * 
  * @author SkiBu Smith

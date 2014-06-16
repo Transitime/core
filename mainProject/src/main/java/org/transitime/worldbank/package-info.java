@@ -16,7 +16,10 @@
  */
 
 /**
- * Contains classes specifically for World Bank projects.
+ * Contains classes specifically for World Bank projects. There is also other
+ * code that was created for the World Bank that doesn't reside in this 
+ * package because it has been generalized and can be used for any
+ * agency. 
  * 
  * @author SkiBu Smith
  *

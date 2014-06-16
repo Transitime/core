@@ -25,11 +25,13 @@ import org.transitime.utils.Time;
 import org.transitime.utils.csv.CsvWriterBase;
 
 /**
- * For writing a GTFS stop_times.txt file. Since this is pretty simple
- * not using a general CSV class to do the writing.
+ * For writing a GTFS stop_times.txt file. This class is useful when updating
+ * the GTFS stop_times based on historic AVL data.
+ * <p>
+ * Since this is pretty simple not using a general CSV class to do the writing.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class GtfsStopTimesWriter extends CsvWriterBase {
 

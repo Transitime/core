@@ -1,4 +1,4 @@
-/**
+/*
  * 
  * This file is part of Transitime.org
  * 
@@ -19,6 +19,9 @@
  * Contains the declarations of the configuration parameters used for the
  * applications. The declarations include default values. The values can
  * be set through command line options or through a configuration file.
+ * <p>
+ * If a parameter is only for a specific implementation then it can be
+ * defined in that particular class instead of in this package.
  *  
  * @author SkiBu Smith
  *

@@ -23,10 +23,12 @@ import org.transitime.gtfs.gtfsStructs.GtfsShape;
 import org.transitime.utils.csv.CsvWriterBase;
 
 /**
- * Writes out a GTFS shapes.txt file
+ * Writes out a GTFS shapes.txt file. Useful for when need to modify the file,
+ * such as for processing the latitudes/longitudes so that data for China can be
+ * visualized correctly on a web based map.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class GtfsShapesWriter extends CsvWriterBase {
 	

@@ -32,14 +32,16 @@ import org.transitime.ipc.rmi.AbstractServer;
 import org.transitime.utils.Time;
 
 /**
- * Implements the PredictionsInterface interface on the server side such that a 
- * PredictionsInterfaceFactory can make RMI calls in order to obtain prediction 
- * information.
- *   
+ * Implements the PredictionsInterface interface on the server side such that a
+ * PredictionsInterfaceFactory can make RMI calls in order to obtain prediction
+ * information. The prediction information is provided using
+ * org.transitime.ipc.data.Prediction objects.
+ * 
  * @author SkiBu Smith
  * 
  */
-public class PredictionsServer extends AbstractServer implements PredictionsInterface {
+public class PredictionsServer 
+	extends AbstractServer implements PredictionsInterface {
 
 	// Should only be accessed as singleton class
 	private static PredictionsServer singleton;

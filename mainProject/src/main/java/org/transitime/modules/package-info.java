@@ -18,6 +18,15 @@
 /**
  * Contains the classes for running a module in a separate thread in order
  * to do processing, such as for an AVL feed that polls for the data.
+ * <p>
+ * For the core predictor application modules can be started simply 
+ * by configuring on the command line
+ * which ones should be run by using the VM argument 
+ * -Dtransitime.modules.optionalModulesList. Multiple modules can be specified
+ * by separating them with a semicolon. For example, to use one module to
+ * read AVL data and put it into JMS, and another module for reading the
+ * AVL data from JMS and processing it could use something like:
+ * -Dtransitime.modules.optionalModulesList=org.transitime.avl.MbtaNextBusAvlModule;org.transitime.avl.AvlJmsClientModule
  * 
  * @author SkiBu Smith
  *

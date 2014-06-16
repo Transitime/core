@@ -16,7 +16,9 @@
  */
 
 /**
- * Classes for helping to process CSV files.
+ * Classes for helping to process CSV files. Uses the package 
+ * org.apache.commons.csv for reading CSV files. Writing is rather
+ * simple so not using a library to do that.
  *
  * @author SkiBu Smith
  *

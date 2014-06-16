@@ -20,14 +20,29 @@ import net.jcip.annotations.Immutable;
 
 /**
  * This class is for having a key for a map that is made up of two or three
- * objects. Often for such keys a shortcut is taken where one simply appends 
+ * objects. Often for such keys a shortcut is taken where one simply appends
  * strings together along with a separator character so one gets a key such as
  * "string1|string2". But that is really clunky. Best to do it right and use
  * this class as the key for a map.
  * <p>
  * It is probably best to subclass this class for each type of map key so that
  * you can make sure that the proper type of key is used for the map. Otherwise
- * it could be confusing if one has multiple different MapKeys.
+ * it could be confusing if one has multiple different MapKeys. An example of
+ * such a subclass is: 
+ * <p>
+ * <code>
+ * 	public static class TripStopKey extends MapKey {
+ *		private TripStopKey(String tripId, String stopId) {
+ *			super(tripId, stopId);
+ *		}
+ * 
+ *      @Override 
+ *      public String toString() { 
+ *      	return "TripStopKey [" + "tripId=" + o1
+ *           + ", stopId=" + o2 + "]"; 
+ *      } 
+ *  } 
+ * </code>
  * 
  * @author SkiBu Smith
  * 

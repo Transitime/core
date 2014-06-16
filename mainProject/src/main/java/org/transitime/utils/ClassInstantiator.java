@@ -21,10 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utility class for instantiating a class by name.
- *
+ * Utility class for instantiating a class by name by using reflection. Handles
+ * exceptions and logging during the casting process.
+ * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class ClassInstantiator {
 

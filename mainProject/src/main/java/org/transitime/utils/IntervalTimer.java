@@ -17,10 +17,12 @@
 package org.transitime.utils;
 
 /**
- * Very simple class for timing duration of events.
+ * Very simple class for timing duration of events. Main use is at the beginning
+ * of the process to construct an IntervalTimer and then at the end to call
+ * <code>elapsedMsec()</code> to determine elapsed time.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class IntervalTimer {
 

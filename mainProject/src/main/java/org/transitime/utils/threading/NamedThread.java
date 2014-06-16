@@ -28,7 +28,7 @@ import org.transitime.logging.Markers;
  * UncaughtExceptionHandler so that uncaught exceptions are logged.
  * These features can make debugging of multiple threaded system
  * much easier.
- * 
+ * <p>
  * Based on code from the book "Java Concurrency in Practice" by Brian Goetz
  * 
  * @author SkiBu Smith

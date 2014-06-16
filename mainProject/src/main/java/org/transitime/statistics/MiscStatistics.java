@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Some miscellaneous statistics functions
+ * Some miscellaneous statistics functions such as determining average
+ * values from a list and for determining average after filtering out
+ * of outliers from a list.
  *
  * @author SkiBu Smith
  *

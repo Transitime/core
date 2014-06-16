@@ -17,6 +17,12 @@
 
 /**
  * Contains the classes for Interprocess Communication for both RMI and JMS.
+ * Key use of RMI is for the web servers to quickly get and send data to the core 
+ * prediction system. Key use of JMS is for handling AVL feeds such that the 
+ * data can be received on a web server and then forwarded via a queue to the
+ * core prediction system. Also, JMS enables multiple systems to use the same
+ * feed, which is useful if want to setup multiple test systems running off
+ * of a single AVL feed.
  * <p>
  * The data is serialized in order to be transmitted.
  * 

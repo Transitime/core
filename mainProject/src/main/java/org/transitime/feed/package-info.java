@@ -17,7 +17,7 @@
 
 /**
  * Contains the classes for providing feeds of the generated data. The feeds
- * include GTFS-realtime, SIRI, and a new RESTful format for information that
+ * will include GTFS-realtime, SIRI, and a new RESTful format for information that
  * SIRI does not fully cover.
  * 
  * @author SkiBu Smith

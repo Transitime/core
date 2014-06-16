@@ -18,6 +18,8 @@
 /**
  * Contains the classes for dealing with threads and making it easier
  * to use and debug them.
+ * <p>
+ * Based on code from the book "Java Concurrency in Practice" by Brian Goetz
  * 
  * @author SkiBu Smith
  *

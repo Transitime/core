@@ -23,14 +23,17 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides configuration information for multiple projects. Intended for
- * website, not the individual project applications since those can use
- * the regular per-project configurations. 
+ * website and the feeds, not the individual project applications since those
+ * can use the regular per-project configurations. The main feature this
+ * provides is it tells the webserver client which RMI host to get data from for
+ * a particular project ID. Currently the database info is not used but could be
+ * used in the future.
  * 
- * FIXME Should be dynamic so that if config is changed it can be
- * reloaded and have an effect.
+ * FIXME Should be dynamic so that if config is changed it can be reloaded and
+ * have an effect.
  * 
  * @author SkiBu Smith
- *
+ * 
  */
 public class ProjectConfig {
 	private final String rmiHost;
