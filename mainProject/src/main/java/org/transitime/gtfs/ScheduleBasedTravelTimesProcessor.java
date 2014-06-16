@@ -64,8 +64,8 @@ public class ScheduleBasedTravelTimesProcessor {
 	// For reading and writing to db
 	private final SessionFactory sessionFactory;
 	
-	// 0.036m/msec = 36.0m/s = 80mph
-	private static final double MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC = 0.036; 
+	// 0.036m/msec = 36.0m/s = 40mph
+	private static final double MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC = 0.018; 
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ScheduleBasedTravelTimesProcessor.class);
@@ -159,7 +159,8 @@ public class ScheduleBasedTravelTimesProcessor {
 		// Go through the schedule times for the trip pattern.
 		// Start at index 1 since the first stub path is a special case
 		int previousStopPathWithScheduleTimeIndex = 0;
-		ScheduleTime previousScheduleTime = trip.getScheduleTime(tripPattern.getStopId(0));
+		ScheduleTime previousScheduleTime = getGtfsScheduleTime(trip.getId(), 
+				tripPattern.getStopId(0), gtfsData);
 		int numberOfPaths = trip.getTripPattern().getNumberStopPaths();
 		for (int stopPathIndex = 1; stopPathIndex < numberOfPaths; ++stopPathIndex) {
 			// Determine the schedule time for the stop using the GTFS data directly.
