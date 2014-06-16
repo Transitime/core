@@ -73,6 +73,7 @@ public class VectorWithHeading extends Vector {
 				"l1=" + l1 +
 				", l2=" + l2 + 
 				", headingInDegrees=" + headingInDegrees + 
+				", length=" + length() +
 				"]";
 	}
 }

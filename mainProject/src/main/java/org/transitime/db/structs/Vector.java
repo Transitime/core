@@ -205,6 +205,10 @@ public class Vector {
 
 	@Override
 	public String toString() {
-		return "Vector [l1=" + l1 + ", l2=" + l2 + "]";
+		return "Vector [" +
+				"l1=" + l1 + 
+				", l2=" + l2 +
+				", length=" + length() +
+				"]";
 	}
 }
