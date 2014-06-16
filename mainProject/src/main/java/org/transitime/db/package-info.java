@@ -16,7 +16,7 @@
  */
 
 /**
- * Contains the classes for accessing the database via HSibernate and the
+ * Contains the classes for accessing the database via Hibernate and the
  * the classes that describe the objects that are store and retrieved to
  * and from the database.
  * 
