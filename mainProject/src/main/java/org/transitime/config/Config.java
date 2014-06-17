@@ -22,7 +22,6 @@ import javax.xml.parsers.DocumentBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.ConfigValue.ConfigParamException;
-import org.transitime.configData.CoreConfig;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
@@ -344,29 +343,4 @@ public class Config {
 		readLock.unlock();
 	}
 	
-	/**
-	 * For testing
-	 * @param args args[0] is name of file to be read in
-	 */
-	public static void main(String[] args) {
-		// Get name of config file to parse
-		String fileName = args[0];
-		
-		try {
-			// Read in the data from config file
-			processConfig(fileName);
-
-			// Output the test results
-			int i = CoreConfig.getIntTest();
-			float f = CoreConfig.getFloatTest();
-			String s = CoreConfig.getStringTest();
-			List<String> sList = CoreConfig.getStringListTest();
-			System.out.println("i=" + i + " f=" + f + " s=\"" + s + "\" sList=" + sList);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
 }

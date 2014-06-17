@@ -34,7 +34,9 @@ public class ArrivalDepartureGeneratorFactory {
 	// The name of the class to instantiate
 	private static StringConfigValue className = 
 			new StringConfigValue("transitime.core.arrivalDepartureGeneratorClass", 
-					"org.transitime.core.ArrivalDepartureGeneratorDefaultImpl");
+					"org.transitime.core.ArrivalDepartureGeneratorDefaultImpl",
+					"Specifies the name of the class used for generating " +
+					"arrival/departure data.");
 
 	private static ArrivalDepartureGenerator singleton = null;
 

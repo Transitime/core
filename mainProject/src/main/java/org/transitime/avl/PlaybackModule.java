@@ -56,13 +56,17 @@ public class PlaybackModule extends Module {
 		return playbackVehicleId.getValue();
 	}
 	private static StringConfigValue playbackVehicleId =
-			new StringConfigValue("transitime.avl.playbackVehicleId", "");
+			new StringConfigValue("transitime.avl.playbackVehicleId", 
+					"",
+					"ID of vehicle to playback.");
 
 	private static String getPlaybackStartTimeStr() {
 		return playbackStartTimeStr.getValue();
 	}
 	private static StringConfigValue playbackStartTimeStr =
-			new StringConfigValue("transitime.avl.playbackStartTime", "");
+			new StringConfigValue("transitime.avl.playbackStartTime", 
+					"",
+					"Date and time of when to start the playback.");
 
 	
 	/********************* Logging **************************/

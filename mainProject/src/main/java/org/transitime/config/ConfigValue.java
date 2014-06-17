@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ConfigValue<T> {
 	// Name of the param. Also used as Java property name 
-	// (e.g. -Dtransitime.limit 2)
+	// (e.g. -Dtransitime.limit=2)
 	protected final String id;
 	
 	// Value to use if not specified in config file. Null means no default is
@@ -46,6 +46,9 @@ public abstract class ConfigValue<T> {
 	// The current value
 	protected volatile T value;
 
+	// Description of the parameter that can be used in log files and such
+	protected final String description;
+	
 	// Separator used for when a parameter specified by a Java property
 	// has multiple elements.
 	private static final String LIST_SEPARATOR = ";";
@@ -70,7 +73,7 @@ public abstract class ConfigValue<T> {
 
 	/**
 	 * Stores info associated with ConfigValue. Outputs error message if
-	 * id param null or already used.
+	 * id param null or already used. The description is set to null.
 	 * 
 	 * @param id
 	 * @param defaultValue
@@ -79,7 +82,30 @@ public abstract class ConfigValue<T> {
 		// Store params
 		this.id = id;
 		this.defaultValue = defaultValue;
-		
+		this.description = null;
+		commonConstructor();
+	}
+
+	/**
+	 * Stores info associated with ConfigValue. Outputs error message if
+	 * id param null or already used. The description is set to null.
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 */
+	public ConfigValue(String id, T defaultValue, String description) {
+		// Store params
+		this.id = id;
+		this.defaultValue = defaultValue;
+		this.description = description;
+		commonConstructor();
+	}
+
+	/**
+	 * The common code used for the constructors.
+	 */
+	private void commonConstructor() {
 		ArrayList<ConfigValue<?>> configValuesList = 
 				Config.getConfigValuesList();
 
@@ -91,8 +117,9 @@ public abstract class ConfigValue<T> {
 					new Exception());
 			return;
 		}
-		// FIXME I think need to remove this check since could be rereading the
-		// config files so should expect to encounter params more once.
+		// FIXME I think need to remove this check since in future could be 
+		// rereading the config files so should expect to encounter params 
+		// more than once.
 		if (configValuesList.contains(id)) {
 			logger.error("For config parameter id \"{}\" is used more than " +
 					"once.", id);
@@ -113,14 +140,16 @@ public abstract class ConfigValue<T> {
 		// Log the information about the parameter so that users can see what 
 		// values are being used.
 		if (value.equals(defaultValue))
-			logger.info("Config param {} = \"{}\" (the default value)", 
-				id, value);
+			logger.info("Config param {}=\"{}\" (the default value). {}", 
+					id,	value, description == null ? "" : description);
 		else
-			logger.info("Config param {} = \"{}\" " +
-					"instead of the default of \"{}\"", 
-					id, value, defaultValue);
-	}
+			logger.info("Config param {}=\"{}\" instead of the default " +
+					"of \"{}\". {}", 
+					id, value,
+					defaultValue, description == null ? "" : description);
 
+	}
+	
 	/**
 	 * Gets the value. Intended to be fast because might be used in loops. 
 	 * Therefore there is no locking.
@@ -206,6 +235,15 @@ public abstract class ConfigValue<T> {
 		value = defaultValue;
 	}
 
+	/**
+	 * Returns the description of the parameter.
+	 * 
+	 * @return
+	 */
+	public String getDescription() {
+		return description;
+	}
+	
 	/**
 	 * So that the value is returned instead of the default toString() which
 	 * returns the object ID. This makes debugging easier.

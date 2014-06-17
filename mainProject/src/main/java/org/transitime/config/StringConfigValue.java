@@ -33,11 +33,27 @@ public class StringConfigValue extends ConfigValue<String> {
 		super(id, null);
 	}
 	
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 */
 	public StringConfigValue(String id, String defaultValue) {
 		super(id, defaultValue);
 	}
 	
-	@Override protected String convertFromString(List<String> dataList) {
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 */
+	public StringConfigValue(String id, String defaultValue, String description) {
+		super(id, defaultValue, description);
+	}
+
+	@Override 
+	protected String convertFromString(List<String> dataList) {
 		return dataList.get(0);
 	}
 }

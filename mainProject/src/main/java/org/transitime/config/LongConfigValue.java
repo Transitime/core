@@ -34,11 +34,27 @@ public class LongConfigValue extends ConfigValue<Long> {
 		super(id, null);
 	}
 	
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 */
 	public LongConfigValue(String id, Long defaultValue) {
 		super(id, defaultValue);
 	}
 	
-	@Override protected Long convertFromString(List<String> dataList) {
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 */
+	public LongConfigValue(String id, Long defaultValue, String description) {
+		super(id, defaultValue, description);
+	}
+	
+	@Override 
+	protected Long convertFromString(List<String> dataList) {
 		return Long.valueOf(dataList.get(0));
 	}	
 }

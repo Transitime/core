@@ -87,15 +87,32 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	private static IntegerConfigValue maxStopsWhenNoPreviousMatch = 
 			new IntegerConfigValue(	
 					"transitime.arrivalsDepartures.maxStopsWhenNoPreviousMatch",
-					4);
+					4,
+					"If vehicle just became predictable as indicated by no " +
+					"previous match then still want to determine " +
+					"arrival/departure times for earlier stops so that won't " +
+					"miss recording data for them them. But only want to go " +
+					"so far. Otherwise could be generating fake " +
+					"arrival/departure times when vehicle did not actually " +
+					"traverse that stop.");
 
+	/**
+	 * If between AVL reports the vehicle appears to traverse many stops then
+	 * something is likely wrong with the matching. So this parameter is used
+	 * to limit how many arrivals/departures are created between AVL reports.
+	 * @return
+	 */
 	private static int getMaxStopsBetweenMatches() {
 		return maxStopsBetweenMatches.getValue();
 	}
 	private static IntegerConfigValue maxStopsBetweenMatches = 
 			new IntegerConfigValue(	
 					"transitime.arrivalsDepartures.maxStopsBetweenMatches",
-					12);
+					12,
+					"If between AVL reports the vehicle appears to traverse " +
+					"many stops then something is likely wrong with the " +
+					"matching. So this parameter is used to limit how many " +
+					"arrivals/departures are created between AVL reports.");
 
 	/********************** Member Functions **************************/
 

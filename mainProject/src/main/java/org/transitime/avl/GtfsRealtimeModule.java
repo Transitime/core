@@ -37,7 +37,8 @@ public class GtfsRealtimeModule extends AvlModule {
 	}
 	private static StringConfigValue gtfsRealtimeURI =
 			new StringConfigValue("transitime.avl.gtfsRealtimeFeedURI", 
-					"file:///C:/Users/Mike/gtfsRealtimeData");
+					"file:///C:/Users/Mike/gtfsRealtimeData",
+					"The URI of the GTFS-realtime feed to use.");
 
 	/********************** Member Functions **************************/
 

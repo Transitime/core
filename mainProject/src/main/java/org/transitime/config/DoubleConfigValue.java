@@ -27,7 +27,7 @@ import java.util.List;
 public class DoubleConfigValue extends ConfigValue<Double> {
 	/**
 	 * No default is specified. If value not in config file then error occurs.
-	 * @param configValuesList
+	 * 
 	 * @param id
 	 */
 	public DoubleConfigValue(String id) {
@@ -36,7 +36,6 @@ public class DoubleConfigValue extends ConfigValue<Double> {
 	
 	/**
 	 * 
-	 * @param configValuesList
 	 * @param id
 	 * @param defaultValue
 	 */
@@ -44,6 +43,16 @@ public class DoubleConfigValue extends ConfigValue<Double> {
 		super(id, defaultValue);
 	}
 	
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 */
+	public DoubleConfigValue(String id, Double defaultValue, String description) {
+		super(id, defaultValue, description);
+	}
+
 	@Override protected Double convertFromString(List<String> dataList) {
 		return Double.valueOf(dataList.get(0));
 	}	

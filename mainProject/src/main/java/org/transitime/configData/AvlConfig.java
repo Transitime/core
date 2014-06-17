@@ -40,7 +40,10 @@ public class AvlConfig {
 		return shouldUseJms.getValue();
 	}
 	private static BooleanConfigValue shouldUseJms =
-			new BooleanConfigValue("transitime.avl.shouldUseJms", false);
+			new BooleanConfigValue("transitime.avl.shouldUseJms", false,
+					"Specifies whether should use JMS queue for handling " +
+					"AVL reports. Useful for if feed is read on one machine " +
+					"but processed on another.");
 	
 	/**
 	 * How frequently an AVL feed should be polled for new data.
@@ -50,7 +53,8 @@ public class AvlConfig {
 		return secondsBetweenAvlFeedPolling.getValue();
 	}
 	private static IntegerConfigValue secondsBetweenAvlFeedPolling =
-			new IntegerConfigValue("transitime.avl.feedPollingRateSecs", 5);
+			new IntegerConfigValue("transitime.avl.feedPollingRateSecs", 5,
+					"How frequently an AVL feed should be polled for new data.");
 	
 	/**
 	 * For when polling AVL XML feed.
@@ -60,7 +64,9 @@ public class AvlConfig {
 		return avlFeedTimeoutInMSecs.getValue();
 	}
 	private static IntegerConfigValue avlFeedTimeoutInMSecs =
-			new IntegerConfigValue("transitime.avl.feedTimeoutInMSecs", 10000);
+			new IntegerConfigValue("transitime.avl.feedTimeoutInMSecs", 10000,
+					"For when polling AVL XML feed. Feed logs error if the " +
+					"timeout value is exceeded.");
 	
 	/**
 	 * How many items to go into the blocking AVL queue before need to
@@ -71,7 +77,9 @@ public class AvlConfig {
 		return avlQueueSize.getValue();
 	}
 	private static IntegerConfigValue avlQueueSize = 
-			new IntegerConfigValue("transitime.avl.queueSize", 1000);
+			new IntegerConfigValue("transitime.avl.queueSize", 1000,
+					"How many items to go into the blocking AVL queue " +
+					"before need to wait for queue to have space.");
 
 	/**
 	 * How many threads to be used for processing the AVL data. For most
@@ -85,7 +93,14 @@ public class AvlConfig {
 		return numAvlThreads.getValue();
 	}
 	private static IntegerConfigValue numAvlThreads = 
-			new IntegerConfigValue("transitime.avl.numThreads", 1);
+			new IntegerConfigValue("transitime.avl.numThreads", 1,
+					"How many threads to be used for processing the AVL " +
+					"data. For most applications just using a single thread " +
+					"is probably sufficient and it makes the logging simpler " +
+					"since the messages will not be interleaved. But for " +
+					"large systems with lots of vehicles then should use " +
+					"multiple threads, such as 3-5 so that more of the cores " +
+					"are used.");
 	
 	/**
 	 * Max speed that an AVL report is allowed to have.
@@ -95,18 +110,31 @@ public class AvlConfig {
 		return maxAvlSpeed.getValue();
 	}
 	private static DoubleConfigValue maxAvlSpeed =
-			new DoubleConfigValue("transitime.avl.maxSpeed", 26.8); // 31m/s = 60mph
+			new DoubleConfigValue("transitime.avl.maxSpeed", 
+					26.8, // 31m/s = 60mph
+					"Max speed between AVL reports for a vehicle. If this " +
+					"value is exceeded then the AVL report is ignored.");
 	
+	/**
+	 * If AVL report speed is below this threshold then the heading is not
+	 * considered valid.
+	 * @return
+	 */
 	public static double minSpeedForValidHeading() {
 		return minSpeedForValidHeading.getValue();
 	}
 	private static DoubleConfigValue minSpeedForValidHeading =
-			new DoubleConfigValue("transitime.avl.minSpeedForValidHeading", 1.5); // 1.5m/s = .34mph
+			new DoubleConfigValue("transitime.avl.minSpeedForValidHeading", 
+					1.5, // 1.5m/s = .34mph
+					"If AVL report speed is below this threshold then the " +
+					"heading is not considered valid.");
 	
 	/**
-	 * For filtering out bad AVL reports. The default values of latitude 15.0 to 55.0 and
-	 * longitude of -135.0 to -60.0 are for North America, including Mexico and Canada.
-	 * Can see maps of lat/lon at http://www.mapsofworld.com/lat_long/north-america.html
+	 * For filtering out bad AVL reports. The default values of latitude 15.0 to
+	 * 55.0 and longitude of -135.0 to -60.0 are for North America, including
+	 * Mexico and Canada. Can see maps of lat/lon at
+	 * http://www.mapsofworld.com/lat_long/north-america.html
+	 * 
 	 * @return
 	 */
 	public static float getMinAvlLatitude() {
@@ -116,7 +144,12 @@ public class AvlConfig {
 		return minAvlLatitude.getID();
 	}
 	private static FloatConfigValue minAvlLatitude =
-			new FloatConfigValue("transitime.avl.minLatitude", 15.0f);
+			new FloatConfigValue("transitime.avl.minLatitude", 15.0f,
+					"For filtering out bad AVL reports. The default values " +
+					"of latitude 15.0 to 55.0 and longitude of -135.0 to " +
+					"-60.0 are for North America, including Mexico and " +
+					"Canada. Can see maps of lat/lon at " +
+					"http://www.mapsofworld.com/lat_long/north-america.html");
 	
 	public static float getMaxAvlLatitude() {
 		return maxAvlLatitude.getValue();
@@ -125,7 +158,12 @@ public class AvlConfig {
 		return maxAvlLatitude.getID();
 	}
 	private static FloatConfigValue maxAvlLatitude =
-			new FloatConfigValue("transitime.avl.maxLatitude", 55.0f);
+			new FloatConfigValue("transitime.avl.maxLatitude", 55.0f,
+					"For filtering out bad AVL reports. The default values " +
+					"of latitude 15.0 to 55.0 and longitude of -135.0 to " +
+					"-60.0 are for North America, including Mexico and " +
+					"Canada. Can see maps of lat/lon at " +
+					"http://www.mapsofworld.com/lat_long/north-america.html");
 	
 	public static float getMinAvlLongitude() {
 		return minAvlLongitude.getValue();
@@ -134,7 +172,12 @@ public class AvlConfig {
 		return minAvlLongitude.getID();
 	}
 	private static FloatConfigValue minAvlLongitude =
-			new FloatConfigValue("transitime.avl.minLongitude", -135.0f);
+			new FloatConfigValue("transitime.avl.minLongitude", -135.0f,
+					"For filtering out bad AVL reports. The default values " +
+					"of latitude 15.0 to 55.0 and longitude of -135.0 to " +
+					"-60.0 are for North America, including Mexico and " +
+					"Canada. Can see maps of lat/lon at " +
+					"http://www.mapsofworld.com/lat_long/north-america.html");
 	
 	public static float getMaxAvlLongitude() {
 		return maxAvlLongitude.getValue();
@@ -143,7 +186,12 @@ public class AvlConfig {
 		return maxAvlLongitude.getID();
 	}
 	private static FloatConfigValue maxAvlLongitude =
-			new FloatConfigValue("transitime.avl.maxLongitude", -60.0f);
+			new FloatConfigValue("transitime.avl.maxLongitude", -60.0f,
+					"For filtering out bad AVL reports. The default values " +
+					"of latitude 15.0 to 55.0 and longitude of -135.0 to " +
+					"-60.0 are for North America, including Mexico and " +
+					"Canada. Can see maps of lat/lon at " +
+					"http://www.mapsofworld.com/lat_long/north-america.html");
 
 	/**
 	 * So can filter out unpredictable assignments such as for training coaches,
@@ -156,7 +204,13 @@ public class AvlConfig {
 	}
 	private static StringConfigValue unpredictableAssignmentsRegEx =
 			new StringConfigValue("transitime.avl.unpredictableAssignmentsRegEx", 
-					"");
+					"", // default value
+					"So can filter out unpredictable assignments such as for " +
+					"training coaches, service vehicles, or simply vehicles " +
+					"that are not in service and should not be attempted to " +
+					"be made predictable. Returns empty string, the default " +
+					"value if transitime.avl.unpredictableAssignmentsRegEx " +
+					"is not set.");
 	
 	/**
 	 * For AVL timeouts. If don't get an AVL report for the vehicle in this
@@ -167,6 +221,9 @@ public class AvlConfig {
 		return timeoutSecs.getValue();
 	}
 	private static IntegerConfigValue timeoutSecs =
-			new IntegerConfigValue("transitime.avl.timeoutSecs", 6*Time.SEC_PER_MIN);
+			new IntegerConfigValue("transitime.avl.timeoutSecs", 6*Time.SEC_PER_MIN,
+					"For AVL timeouts. If don't get an AVL report for the " +
+					"vehicle in this amount of time then the vehicle will be " +
+					"made non-predictable.");
 
 }

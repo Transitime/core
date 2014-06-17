@@ -26,18 +26,33 @@ import java.util.List;
 public class IntegerConfigValue extends ConfigValue<Integer> {
 	/**
 	 * No default is specified. If value not in config file then error occurs.
-	 * @param configValuesList
+	 * \
 	 * @param id
 	 */
 	public IntegerConfigValue(String id) {
 		super(id, null);
 	}
 	
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 */
 	public IntegerConfigValue(String id, Integer defaultValue) {
 		super(id, defaultValue);
 	}
 	
-	@Override protected Integer convertFromString(List<String> dataList) {
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 */
+	public IntegerConfigValue(String id, Integer defaultValue, String description) {
+		super(id, defaultValue, description);
+	}
+	
+	@Override 
+	protected Integer convertFromString(List<String> dataList) {
 		return Integer.valueOf(dataList.get(0));
 	}	
 }

@@ -45,7 +45,8 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 
 	private static StringConfigValue nextBusFeedUrl = 
 			new StringConfigValue("transitime.avl.nextbusFeedUrl", 
-					"http://webservices.nextbus.com/s/xmlFeed");
+					"http://webservices.nextbus.com/s/xmlFeed",
+					"The URL of the NextBus feed to use.");
 	private static String getNextBusFeedUrl() {
 		return nextBusFeedUrl.getValue();
 	}

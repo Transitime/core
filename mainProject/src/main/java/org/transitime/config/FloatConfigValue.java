@@ -27,18 +27,34 @@ import java.util.List;
 public class FloatConfigValue extends ConfigValue<Float> {
 	/**
 	 * No default is specified. If value not in config file then error occurs.
-	 * @param configValuesList
+	 * 
 	 * @param id
 	 */
 	public FloatConfigValue(String id) {
 		super(id, null);
 	}
 	
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 */
 	public FloatConfigValue(String id, Float defaultValue) {
 		super(id, defaultValue);
 	}
 	
-	@Override protected Float convertFromString(List<String> dataList) {
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 */
+	public FloatConfigValue(String id, Float defaultValue, String description) {
+		super(id, defaultValue, description);
+	}
+	
+	@Override 
+	protected Float convertFromString(List<String> dataList) {
 		return Float.valueOf(dataList.get(0));
 	}	
 }

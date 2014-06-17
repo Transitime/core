@@ -33,7 +33,9 @@ public class PredictionGeneratorFactory {
 	// The name of the class to instantiate
 	private static StringConfigValue className = 
 			new StringConfigValue("transitime.core.predictionGeneratorClass", 
-					"org.transitime.core.PredictionGeneratorDefaultImpl");
+					"org.transitime.core.PredictionGeneratorDefaultImpl",
+					"Specifies the name of the class used for generating " +
+					"prediction data.");
 
 	private static PredictionGenerator singleton = null;
 	

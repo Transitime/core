@@ -52,7 +52,8 @@ public class BatchCsvAvlFeedModule extends Module {
 	}
 	private static StringConfigValue csvAvlFeedFileName =
 			new StringConfigValue("transitime.avl.csvAvlFeedFileName", 
-					"/Users/Mike/cvsAvlData/testAvlData.csv");
+					"/Users/Mike/cvsAvlData/testAvlData.csv",
+					"The name of the CSV file containing AVL data to process.");
 
 	/****************** Logging **************************************/
 	private static final Logger logger = LoggerFactory

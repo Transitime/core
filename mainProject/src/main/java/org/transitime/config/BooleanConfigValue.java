@@ -33,11 +33,30 @@ public class BooleanConfigValue extends ConfigValue<Boolean> {
 		super(id, null);
 	}
 	
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 */
 	public BooleanConfigValue(String id, Boolean defaultValue) {
 		super(id, defaultValue);
 	}
 	
-	@Override protected Boolean convertFromString(List<String> dataList) {
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 */
+	public BooleanConfigValue(String id, Boolean defaultValue, String description) {
+		super(id, defaultValue, description);
+	}
+	
+	/**
+	 * for converting string "true" or "false" into a boolean.
+	 */
+	@Override 
+	protected Boolean convertFromString(List<String> dataList) {
 		// Don't want to just use Boolean.valueOf() because that only returns
 		// true if "true" is specified. Want to also be able to use "t" or "1".
 		String s = dataList.get(0).toLowerCase();

@@ -33,7 +33,9 @@ public class HeadwayGeneratorFactory {
 	// The name of the class to instantiate
 	private static StringConfigValue className = 
 			new StringConfigValue("transitime.core.headwayGeneratorClass", 
-					"org.transitime.core.HeadwayGeneratorDefaultImpl");
+					"org.transitime.core.HeadwayGeneratorDefaultImpl",
+					"Specifies the name of the class used for generating " +
+					"headway data.");
 
 	private static HeadwayGenerator singleton = null;
 

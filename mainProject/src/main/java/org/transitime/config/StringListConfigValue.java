@@ -53,8 +53,23 @@ public class StringListConfigValue extends ConfigValue<List<String>> {
 	public StringListConfigValue(String id, List<String> defaultValue) {
 		super(id, defaultValue);
 	}
+
+	/**
+	 * When parameter set as a command line argument then the
+	 * ConfigValue.LIST_SEPARATOR is used (";") when need to specify multiple
+	 * items.
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 */
+	public StringListConfigValue(String id, List<String> defaultValue,
+			String description) {
+		super(id, defaultValue, description);
+	}
 	
-	@Override protected List<String> convertFromString(List<String> dataList) {
+	@Override 
+	protected List<String> convertFromString(List<String> dataList) {
 		return dataList;
 	}
 

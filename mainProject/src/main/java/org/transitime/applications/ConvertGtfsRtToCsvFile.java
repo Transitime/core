@@ -49,14 +49,17 @@ public class ConvertGtfsRtToCsvFile {
 		return gtfsRealtimeURIs.getValue();
 	}
 	private static StringListConfigValue gtfsRealtimeURIs =
-			new StringListConfigValue("transitime.avl.gtfsRealtimeFeedURIs");
+			new StringListConfigValue("transitime.avl.gtfsRealtimeFeedURIs",
+					null,
+					"Semicolon separated list of URIs of the GTFS-realtime data to read in");
 	
 	private static String getCsvFileOutputDir() {
 		return csvFileOutputDir.getValue();
 	}
 	private static StringConfigValue csvFileOutputDir =
 			new StringConfigValue("transitime.avl.csvFileOutputDir", 
-					"/Users/Mike/gtfsRealtimeData/csv");
+					"/Users/Mike/gtfsRealtimeData/csv",
+					"Name of directory where output will be written");
 
 	private static String getTimeZoneStr() {
 		if (timeZoneStr.getValue().isEmpty())
@@ -66,13 +69,19 @@ public class ConvertGtfsRtToCsvFile {
 	}
 	private static StringConfigValue timeZoneStr =
 			new StringConfigValue("transitime.avl.timeZoneStr", 
-					"");
+					"",
+					"The timezone for the agency. In the form " +
+					"\"America/New_York\"");
 
 	private static boolean shouldOffsetForMapOfChina() {
 		return offsetForMapOfChina.getValue();
 	}
 	private static BooleanConfigValue offsetForMapOfChina = 
-			new BooleanConfigValue("transitime.avl.offsetForMapOfChina", false);
+			new BooleanConfigValue("transitime.avl.offsetForMapOfChina", 
+					false,
+					"If set to true then the latitudes/longitudes stored " +
+					"will be adjusted for the China map offset so that the " +
+					"points will be displayed properly on a street map.");
 	
 	/********************** Member Functions **************************/
 
