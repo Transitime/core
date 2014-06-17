@@ -44,7 +44,8 @@ public class GtfsAgencyReader extends CsvBaseReader<GtfsAgency> {
 
 	/**
 	 * A convenience method for reading the timezone from the GTFS agency.txt
-	 * file. The agency.txt file is read every time this method is called.
+	 * file. If there are multiple agencies the timezone from the first agency
+	 * is used. The agency.txt file is read every time this method is called.
 	 * 
 	 * @param gtfsDirectoryName
 	 * @return The timezone for the agency, or null if not available
