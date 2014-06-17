@@ -29,6 +29,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.CoreConfig;
+import org.transitime.gtfs.readers.GtfsAgencyReader;
 import org.transitime.statistics.ScheduleStatistics;
 import org.transitime.utils.Time;
 
@@ -79,6 +81,8 @@ public class ScheduleGenerator {
 								2,             // spacesBeforeOptionDescription
 								null,          // footer
 								true);         // displayUsage
+		writer.write("Also need to set VM parameters: \n" + 
+							" -Dtransitime.core.projectId=<projectId>\n");
 		writer.close();
 	}
 
@@ -99,14 +103,6 @@ public class ScheduleGenerator {
 		
 		options.addOption("h", false, "Display usage and help info."); 
 		
-		options.addOption(
-				OptionBuilder.hasArg()
-				.withArgName("projectId")
-                .isRequired()
-                .withDescription("Specifies which projectId processing configuration for.")
-                .create("p")
-                );
-
 		options.addOption(
 				OptionBuilder.hasArg()
 				.withArgName("dirName")
@@ -135,14 +131,6 @@ public class ScheduleGenerator {
                 		"such as 9-20-2014. Will read up to current " +
                 		"time if this option is not set.")
                 .create("e")
-                );
-
-		options.addOption(
-				OptionBuilder.hasArg()
-				.withArgName("timeZone")
-                .isRequired()
-                .withDescription("Timezone for agency, such has \"America/Los_Angeles\"")
-                .create("tz")
                 );
 
 		options.addOption(
@@ -213,25 +201,21 @@ public class ScheduleGenerator {
 			displayCommandLineOptions(options);
 			System.exit(0);
 		}
-
+		
+		// Get project ID from VM param transitime.core.projectId
+		projectId = CoreConfig.getProjectId();
+		if (projectId == null) {
+			displayCommandLineOptions(options);
+			System.exit(0);
+		}
+		
 		// Determine if should update even the first stops of trips.
 		// Default is to no update the times for those stops.
 		doNotUpdateFirstStopOfTrip = !cmd.hasOption("updateFirstStopOfTrip");
 		
 		// Set variables based on the command line args
 		gtfsDirectoryName = cmd.getOptionValue("gtfsDirectoryName");
-		projectId = cmd.getOptionValue("p");
-		
-		// Time zones are complicated. Need to create both timeForUsingCalendar
-		// and also set the system timezone so that times are processed 
-		// correctly when read from the database. NOTE: must set default
-		// timezone before calling Time() constructor so that when the
-		// SimpleDateFormat objects are created when the Time class is
-		// initialized they will get the correct timezone.
-		String timeZoneStr = cmd.getOptionValue("tz");
-		TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr)); 
-		timeForUsingCalendar = new Time(timeZoneStr);
-		
+				
 		// Get the fraction early "e" command line option
 		String fractionEarlyStr = cmd.getOptionValue("f");
 		try {
@@ -349,6 +333,17 @@ public class ScheduleGenerator {
 	public static void main(String[] args) {
 		processCommandLineOptions(args);
 
+		// Time zones are complicated. Need to create both timeForUsingCalendar
+		// and also set the system timezone so that times are processed 
+		// correctly when read from the database. NOTE: must set default
+		// timezone before calling Time() constructor so that when the
+		// SimpleDateFormat objects are created when the Time class is
+		// initialized they will get the correct timezone.
+		String timeZoneStr = 
+				GtfsAgencyReader.readTimezoneString(gtfsDirectoryName);
+		TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr)); 
+		timeForUsingCalendar = new Time(timeZoneStr);
+		
 		// Use ScheduleStatistics class to actually process all the data
 		ScheduleStatistics stats = 
 				new ScheduleStatistics(projectId, gtfsDirectoryName, 
