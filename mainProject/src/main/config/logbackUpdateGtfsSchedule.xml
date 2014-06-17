@@ -14,7 +14,8 @@
     -->
   <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
 
-  <property name="LOG_FILE_ROOT" value="D:/Logs/${transitime.core.projectId:-DEFAULT}/updateSchedule/" />
+  <property name="LOG_FILE_ROOT" 
+            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/updateSchedule/%d{yyyy/MM/dd}/" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
@@ -25,12 +26,13 @@
        -Dlogback.timezone=America/New_York or such. Timezone formats are described
        at http://en.wikipedia.org/wiki/List_of_tz_zones .
     -->
-  <property name="DEFAULT_PATTERN" value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level [%file:%line] %msg%n" />
+  <property name="DEFAULT_PATTERN" 
+            value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level [%file:%line] %msg%n" />
 
   <!-- The main appender for the Core module. 
     -->
   <appender name="CORE" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/updateSchedule.log</file> 
+    <file>${LOG_FILE_ROOT}/updateSchedule.log</file> 
 
     <encoder>
       <pattern>${DEFAULT_PATTERN}</pattern> 
@@ -49,9 +51,20 @@
         from about 2.5 seconds to 10 seconds when the sql logging
         was enabled. So don't use all the time!-->
   <appender name="SQL" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/sql.log</file> 
+    <file>${LOG_FILE_ROOT}/sql.log</file> 
     <encoder>
       <pattern>${DEFAULT_PATTERN}</pattern> 
+    </encoder>
+  </appender>
+
+  <!-- Separate file for config parameters logging -->
+  <appender name="CONFIG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
     </encoder>
   </appender>
 
@@ -63,6 +76,11 @@
   <logger name="org.hibernate.type.descriptor.sql.BasicBinder" 
           level="trace" additivity="false">
     <appender-ref ref="SQL" />
+  </logger>
+
+  <logger name="org.transitime.config"
+          level="info" additivity="false">
+    <appender-ref ref="CONFIG" />
   </logger>
 
   <!-- For setting debug mode to Transitime code. Can't just set

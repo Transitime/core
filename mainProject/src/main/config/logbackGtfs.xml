@@ -6,6 +6,9 @@
        
 <configuration >
 
+  <property name="LOG_FILE_ROOT"
+            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/gtfsConfig/%d{yyyy/MM/dd}" />
+
   <!-- For writing log info to console.  -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
@@ -15,7 +18,7 @@
 
   <!-- For writing to logfile -->
   <appender name="LOGFILE" class="ch.qos.logback.core.FileAppender">
-    <file>D:/Logs/${transitime.core.projectId:-DEFAULT}/gtfsConfig.log</file>
+    <file>${LOG_FILE_ROOT}/${transitime.core.projectId:-DEFAULT}/gtfsConfig.log</file>
     <append>true</append>
     <encoder>
       <charset>UTF-8</charset>
@@ -23,7 +26,17 @@
     </encoder>
   </appender>
 
-  
+   <!-- Separate file for config parameters logging -->
+  <appender name="CONFIG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>%d{HH:mm:ss.SSS} %-5level - %msg%n<</pattern>
+    </encoder>
+  </appender>
+ 
   <!-- Special appender so that can log errors and warnings so they can be
        output at end of GTFS processing in a nice coherent way.
    -->
@@ -38,19 +51,28 @@
        level is specified for each class. 
     -->
 
-  <logger name="org.transitime" level="info" additivity="true">
+  <logger name="org.transitime" 
+          level="info" additivity="true">
     <appender-ref ref="GTFS_CUSTOM_APPENDER" />
   </logger>
 
-  <logger name="org.transitime.gtfs.PathProcessor" level="info" additivity="true">
+  <logger name="org.transitime.config"
+          level="info" additivity="false">
+    <appender-ref ref="CONFIG" />
+  </logger>
+
+  <logger name="org.transitime.gtfs.PathProcessor" 
+          level="info" additivity="true">
     <appender-ref ref="GTFS_CUSTOM_APPENDER" />
   </logger>
 
-  <logger name="org.transitime.gtfs.DbWriter" level="debug" additivity="true">
+  <logger name="org.transitime.gtfs.DbWriter" 
+          level="debug" additivity="true">
     <appender-ref ref="GTFS_CUSTOM_APPENDER" />
   </logger>
 
-  <logger name="org.transitime.gtfs.DbConfig" level="debug" additivity="true">
+  <logger name="org.transitime.gtfs.DbConfig" 
+          level="debug" additivity="true">
     <appender-ref ref="GTFS_CUSTOM_APPENDER" />
   </logger>
 <!--

@@ -12,9 +12,9 @@
        to something like -Dlogback.timezone=America/Los_Angeles . Valid 
        timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
     -->
-  <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
 
-  <property name="LOG_FILE_ROOT" value="D:/Logs/${transitime.core.projectId:-DEFAULT}/updateTravelTimes/" />
+  <property name="LOG_FILE_ROOT" 
+            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/updateTravelTimes/%d{yyyy/MM/dd}" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
@@ -30,7 +30,7 @@
   <!-- The main appender for the Core module. 
     -->
   <appender name="CORE" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/updateTravelTimes.log</file> 
+    <file>${LOG_FILE_ROOT}/updateTravelTimes.log</file> 
 
     <encoder>
       <pattern>${DEFAULT_PATTERN}</pattern> 
@@ -49,10 +49,21 @@
         from about 2.5 seconds to 10 seconds when the sql logging
         was enabled. So don't use all the time!-->
   <appender name="SQL" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/sql.log</file> 
+    <file>${LOG_FILE_ROOT}/sql.log</file> 
 
     <encoder>
       <pattern>${DEFAULT_PATTERN}</pattern> 
+    </encoder>
+  </appender>
+
+   <!-- Separate file for config parameters logging -->
+  <appender name="CONFIG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern>
     </encoder>
   </appender>
 
@@ -70,24 +81,32 @@
        level to debug for the root because then get a huge number
        of unuseful Hibernate messages.
     -->
-  <logger name="org.transitime" level="debug" additivity="false">
+  <logger name="org.transitime" 
+          level="debug" additivity="false">
     <appender-ref ref="CORE" />
   </logger>
 
   <!-- There are some Transitime classes don't want debug info for
        since that would just be too verbose.
     -->
-  <logger name="org.transitime.core.travelTimes" level="info" additivity="false">
+  <logger name="org.transitime.core.travelTimes" 
+          level="info" additivity="false">
     <appender-ref ref="CORE" />
   </logger>
 
-  <logger name="org.transitime.core.travelTimes.TravelTimesProcessor" level="debug" additivity="false">
+  <logger name="org.transitime.core.travelTimes.TravelTimesProcessor" 
+          level="debug" additivity="false">
     <appender-ref ref="CORE" />
   </logger>
 
-  <logger name="org.transitime.db.hibernate.HibernateUtils" level="info" 
-   additivity="false">
+  <logger name="org.transitime.db.hibernate.HibernateUtils" 
+          level="info" additivity="false">
     <appender-ref ref="CORE" />
+  </logger>
+
+  <logger name="org.transitime.config"
+          level="info" additivity="false">
+    <appender-ref ref="CONFIG" />
   </logger>
 
   <!--======================================================-->

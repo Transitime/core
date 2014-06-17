@@ -35,7 +35,8 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public abstract class ConfigValue<T> {
-	// Name of the param. Also used as Java property name (e.g. -Dtransitime.limit 2)
+	// Name of the param. Also used as Java property name 
+	// (e.g. -Dtransitime.limit 2)
 	protected final String id;
 	
 	// Value to use if not specified in config file. Null means no default is
@@ -58,7 +59,8 @@ public abstract class ConfigValue<T> {
 	 *
 	 */
 	public static class ConfigParamException extends Exception {
-		// Needed since subclass Exception is serializable. Otherwise get warning. 
+		// Needed since subclass Exception is serializable. Otherwise get 
+		// warning. 
 		private static final long serialVersionUID = 1L;
 
 		private ConfigParamException(String msg) {
@@ -78,23 +80,27 @@ public abstract class ConfigValue<T> {
 		this.id = id;
 		this.defaultValue = defaultValue;
 		
-		ArrayList<ConfigValue<?>> configValuesList = Config.getConfigValuesList();
+		ArrayList<ConfigValue<?>> configValuesList = 
+				Config.getConfigValuesList();
 
 		// Make sure params ok. Can't throw an exception in constructor because
-		// constructor called statically and it would be difficult to handle properly.
-		// So just output error messages if there is a problem.
+		// constructor called statically and it would be difficult to handle
+		// properly. So just output error messages if there is a problem.
 		if (id == null) {
-			logger.error("Using a null id when creating a ConfigValue.", new Exception());
+			logger.error("Using a null id when creating a ConfigValue.", 
+					new Exception());
 			return;
 		}
 		// FIXME I think need to remove this check since could be rereading the
 		// config files so should expect to encounter params more once.
 		if (configValuesList.contains(id)) {
-			logger.error("For config parameter id \"{}\" is used more than once.", id);
+			logger.error("For config parameter id \"{}\" is used more than " +
+					"once.", id);
 			return;
 		}
 		
-		// Add this new param to the config values list so have a record of all params
+		// Add this new param to the config values list so have a record of 
+		// all params
 		configValuesList.add(this);
 		
 		// Determine the value of this parameter
@@ -103,6 +109,16 @@ public abstract class ConfigValue<T> {
 		} catch (ConfigParamException e) {
 			logger.error("Exception when reading in parameter {}", id, e);
 		}
+		
+		// Log the information about the parameter so that users can see what 
+		// values are being used.
+		if (value.equals(defaultValue))
+			logger.info("Config param {} = \"{}\" (the default value)", 
+				id, value);
+		else
+			logger.info("Config param {} = \"{}\" " +
+					"instead of the default of \"{}\"", 
+					id, value, defaultValue);
 	}
 
 	/**

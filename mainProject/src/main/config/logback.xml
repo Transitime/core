@@ -16,7 +16,8 @@
        timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
     -->
 
-  <property name="LOG_FILE_ROOT" value="D:/Logs/${transitime.core.projectId:-DEFAULT}/%d{yyyy/MM/dd}" />
+  <property name="LOG_FILE_ROOT" 
+            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/%d{yyyy/MM/dd}" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
@@ -27,9 +28,11 @@
        -Dlogback.timezone=America/New_York or such. Timezone formats are described
        at http://en.wikipedia.org/wiki/List_of_tz_zones .
     -->
-  <property name="DEFAULT_PATTERN" value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level thread=%t [%logger{10}:%line] %msg%n" />
+  <property name="DEFAULT_PATTERN" 
+            value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level thread=%t [%logger{10}:%line] %msg%n" />
 
-  <property name="DEBUG_PATTERN"   value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level thread=%t [%logger{10}:%line] %msg%n" />
+  <property name="DEBUG_PATTERN"   
+            value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level thread=%t [%logger{10}:%line] %msg%n" />
 
   <property name="DATA_PATTERN" value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %msg%n" />
       
@@ -160,6 +163,17 @@
     </layout>
   </appender>
 
+  <!-- Separate file for config parameters logging -->
+  <appender name="CONFIG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DATA_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
   <!-- Separate file for AVL logging -->
   <appender name="AVL" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -241,28 +255,33 @@
        of also to the core logging file.
     -->
   <logger name="org.transitime.db.structs.ArrivalDeparture"
-   level="info" additivity="false">
+          level="info" additivity="false">
     <appender-ref ref="ARRIVAL_DEPARTURE" />
   </logger>
 
   <logger name="org.transitime.db.structs.VehicleEvent"
-   level="info" additivity="false">
+          level="info" additivity="false">
     <appender-ref ref="VEHICLE_EVENT" />
   </logger>
 
   <logger name="org.transitime.ipc.data.Prediction"
-   level="info" additivity="false">
+          level="info" additivity="false">
     <appender-ref ref="PREDICTION" />
   </logger>
 
   <logger name="org.transitime.db.structs.Match"
-   level="info" additivity="false">
+          level="info" additivity="false">
     <appender-ref ref="MATCH" />
   </logger>
 
   <logger name="org.transitime.avl"
-   level="info" additivity="false">
+          level="info" additivity="false">
     <appender-ref ref="AVL" />
+  </logger>
+
+  <logger name="org.transitime.config"
+          level="info" additivity="false">
+    <appender-ref ref="CONFIG" />
   </logger>
 
   <!--  In order to log the hibernate SQL queries need to set org.hibernate.SQL
