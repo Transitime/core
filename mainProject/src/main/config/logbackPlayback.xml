@@ -17,8 +17,12 @@
        timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
     -->
 
+  <!-- Need to use TIMESTAMP when using FileAppender instead of
+       RollingFileAppender -->
+  <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
+
   <property name="LOG_FILE_ROOT" 
-            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/playback/%d{yyyy/MM/dd}" />
+            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/playback/" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
@@ -48,12 +52,8 @@
        midnight since "dd" specify that logs should be dealt with daily. 
        Logs are compressed automatically since "gz" specified.
     -->
-  <appender name="CORE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <!-- daily rollover. Compress the file when rolling it over.
-        -->
-      <fileNamePattern>${LOG_FILE_ROOT}/core.log.gz</fileNamePattern> 
-    </rollingPolicy>
+  <appender name="CORE" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/core.log</file>
 
     <!-- Only want this appender to take effect if not DEBUG level. This
          way when DEBUG level the CORE_DEBUG can instead handle things
@@ -80,12 +80,8 @@
        pattern is enhanced. Otherwise it should be identical to 
        the CORE appender.
     -->
-  <appender name="CORE_DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <!-- daily rollover. Compress the file when rolling it over.
-        -->
-      <fileNamePattern>${LOG_FILE_ROOT}/core.log.gz</fileNamePattern>
-    </rollingPolicy>
+  <appender name="CORE_DEBUG" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/core.log</file>
 
     <!-- Only want this appender to take effect if DEBUG level. This
          way when DEBUG level this CORE_DEBUG appender can handle things
@@ -106,10 +102,8 @@
   </appender>
 
   <!-- Separate file for config parameters logging -->
-  <appender name="CONFIG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz</fileNamePattern>
-    </rollingPolicy>
+  <appender name="CONFIG" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/configParams.log</file>
     <encoder>
       <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
@@ -117,10 +111,8 @@
   </appender>
 
   <!-- Separate file for AVL logging -->
-  <appender name="AVL" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/avl.log.gz</fileNamePattern>
-    </rollingPolicy>
+  <appender name="AVL" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/avl.log</file>
     <encoder>
       <charset>UTF-8</charset>
       <pattern>${DEFAULT_PATTERN}</pattern>
@@ -128,10 +120,8 @@
   </appender>
 
   <!-- Separate file for ArrivalDeparture logging -->
-  <appender name="ARRIVAL_DEPARTURE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/arrivalDeparture.log.gz</fileNamePattern>
-    </rollingPolicy>
+  <appender name="ARRIVAL_DEPARTURE" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/arrivalDeparture.log</file>
     <encoder>
       <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
@@ -139,10 +129,8 @@
   </appender>
 
   <!-- Separate file for VehicleEvents logging -->
-  <appender name="VEHICLE_EVENT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/vehicleEvents.log.gz</fileNamePattern>
-    </rollingPolicy>
+  <appender name="VEHICLE_EVENT" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/vehicleEvents.log</file>
     <encoder>
       <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
@@ -150,10 +138,8 @@
   </appender>
 
   <!-- Separate file for Prediction logging -->
-  <appender name="PREDICTION" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/prediction.log.gz</fileNamePattern>
-    </rollingPolicy>
+  <appender name="PREDICTION" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/prediction.log</file>
     <encoder>
       <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>
@@ -161,10 +147,8 @@
   </appender>
 
   <!-- Separate file for Match logging -->
-  <appender name="MATCH" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/match.log.gz</fileNamePattern>
-    </rollingPolicy>
+  <appender name="MATCH" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/match.log</file>
     <encoder>
       <charset>UTF-8</charset>
       <pattern>${DATA_PATTERN}</pattern>

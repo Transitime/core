@@ -6,8 +6,12 @@
        
 <configuration >
 
+  <!-- Need to use TIMESTAMP when using FileAppender instead of
+       RollingFileAppender -->
+  <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
+
   <property name="LOG_FILE_ROOT"
-            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/gtfsConfig/%d{yyyy/MM/dd}" />
+            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/gtfsConfig/" />
 
   <!-- For writing log info to console.  -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -18,7 +22,7 @@
 
   <!-- For writing to logfile -->
   <appender name="LOGFILE" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/${transitime.core.projectId:-DEFAULT}/gtfsConfig.log</file>
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/gtfsConfig.log</file>
     <append>true</append>
     <encoder>
       <charset>UTF-8</charset>
@@ -27,10 +31,8 @@
   </appender>
 
    <!-- Separate file for config parameters logging -->
-  <appender name="CONFIG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz</fileNamePattern>
-    </rollingPolicy>
+  <appender name="CONFIG" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/configParams.log</file>
     <encoder>
       <charset>UTF-8</charset>
       <pattern>%d{HH:mm:ss.SSS} %-5level - %msg%n<</pattern>
