@@ -74,7 +74,6 @@
     create table ArrivalsDepartures (
         DTYPE varchar(31) not null,
         vehicleId varchar(60) not null,
-        tripStartTime integer not null,
         tripId varchar(60) not null,
         time datetime(3) not null,
         stopId varchar(60) not null,
@@ -90,7 +89,7 @@
         stopPathIndex integer,
         stopPathLength float,
         tripIndex integer,
-        primary key (vehicleId, tripStartTime, tripId, time, stopId, isArrival, gtfsStopSeq)
+        primary key (vehicleId, tripId, time, stopId, isArrival, gtfsStopSeq)
     );
 
     create table AvlReports (

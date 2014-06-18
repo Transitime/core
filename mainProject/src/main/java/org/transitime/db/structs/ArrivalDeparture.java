@@ -99,20 +99,6 @@ public class ArrivalDeparture implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripId;
 	
-	// TOOD I believe that tripStartTime not actually used for 
-	// frequency based trips. The issue is that need actual departure
-	// time to determine elapsed time to each stop. The theoretical
-	// departure time based on tripStartTime simply isn't good enough.
-	//
-	// tripStartTime needs to be an Id because when using frequencies.txt 
-	// exact_times then a tripId alone cannot identify a Trip. Will have
-	// multiple Trip objects for the tripId, one for each start time.
-	// Time is in seconds into the day.
-	@Deprecated
-	@Id
-	@Column
-	private final Integer tripStartTime;
-
 	// The revision of the configuration data that was being used
 	@Column 
 	final int configRev;
@@ -238,7 +224,6 @@ public class ArrivalDeparture implements Serializable {
 		
 		this.blockId = block.getId();
 		this.tripId = trip.getId();
-		this.tripStartTime = trip.getStartTime();
 		this.stopId = stopId;
 		this.gtfsStopSeq = stopPath.getGtfsStopSeq();
 		this.stopPathLength = (float) stopPath.getLength();
@@ -263,7 +248,6 @@ public class ArrivalDeparture implements Serializable {
 		this.scheduledTime = null;
 		this.blockId = null;
 		this.tripId = null;
-		this.tripStartTime = null;
 		this.stopId = null;
 		this.gtfsStopSeq = -1;
 		this.stopPathLength = Float.NaN;
@@ -301,8 +285,6 @@ public class ArrivalDeparture implements Serializable {
 		result = prime * result + ((time == null) ? 0 : time.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		result = prime * result + tripIndex;
-		result = prime * result
-				+ ((tripStartTime == null) ? 0 : tripStartTime.hashCode());
 		result = prime * result
 				+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
@@ -365,11 +347,6 @@ public class ArrivalDeparture implements Serializable {
 			return false;
 		if (tripIndex != other.tripIndex)
 			return false;
-		if (tripStartTime == null) {
-			if (other.tripStartTime != null)
-				return false;
-		} else if (!tripStartTime.equals(other.tripStartTime))
-			return false;
 		if (vehicleId == null) {
 			if (other.vehicleId != null)
 				return false;
@@ -392,7 +369,6 @@ public class ArrivalDeparture implements Serializable {
 				+ ", avlTime=" + Time.timeStrMsec(avlTime)
 				+ ", trip=" + tripId 
 				+ ", tripIdx=" + tripIndex 
-				+ ", tripStartTime=" + Time.timeOfDayStr(tripStartTime)
 				+ ", block=" + blockId 
 				+ ", srv=" + serviceId
 				+ ", cfg=" + configRev
@@ -602,16 +578,6 @@ public class ArrivalDeparture implements Serializable {
 		return tripId;
 	}
 
-	/**
-	 * Returns the time that the trip was scheduled to start. Can be null.
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Integer getTripStartTime() {
-		return tripStartTime;
-	}
-	
 	public String getBlockId() {
 		return blockId;
 	}
