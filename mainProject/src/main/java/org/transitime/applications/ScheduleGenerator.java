@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.CoreConfig;
 import org.transitime.gtfs.readers.GtfsAgencyReader;
-import org.transitime.statistics.ScheduleStatistics;
+import org.transitime.statistics.ScheduleDataProcessor;
 import org.transitime.utils.Time;
 
 /**
@@ -69,7 +69,7 @@ public class ScheduleGenerator {
 	 */
 	private static void displayCommandLineOptions(Options options) {
 		// Display help
-		final String commandLineSyntax = "java TransitimeCore.jar";
+		final String commandLineSyntax = "java transitime.jar";
 		final PrintWriter writer = new PrintWriter(System.out);
 		final HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.printHelp(writer,
@@ -344,9 +344,9 @@ public class ScheduleGenerator {
 		TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr)); 
 		timeForUsingCalendar = new Time(timeZoneStr);
 		
-		// Use ScheduleStatistics class to actually process all the data
-		ScheduleStatistics stats = 
-				new ScheduleStatistics(projectId, gtfsDirectoryName, 
+		// Use ScheduleDataProcessor class to actually process all the data
+		ScheduleDataProcessor stats = 
+				new ScheduleDataProcessor(projectId, gtfsDirectoryName, 
 						beginTime, endTime, timeForUsingCalendar,
 						desiredFractionEarly,
 						allowableDifferenceFromMeanSecs,
