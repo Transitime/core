@@ -216,6 +216,17 @@ public class ScheduleGenerator {
 		// Set variables based on the command line args
 		gtfsDirectoryName = cmd.getOptionValue("gtfsDirectoryName");
 				
+		// Time zones are complicated. Need to create both timeForUsingCalendar
+		// and also set the system timezone so that times are processed 
+		// correctly when read from the database. NOTE: must set default
+		// timezone before calling anything from Time.java so that when the
+		// SimpleDateFormat objects are created when the Time class is
+		// initialized they will get the correct timezone.
+		String timeZoneStr = 
+				GtfsAgencyReader.readTimezoneString(gtfsDirectoryName);
+		TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr)); 
+		timeForUsingCalendar = new Time(timeZoneStr);
+		
 		// Get the fraction early "e" command line option
 		String fractionEarlyStr = cmd.getOptionValue("f");
 		try {
@@ -333,17 +344,6 @@ public class ScheduleGenerator {
 	public static void main(String[] args) {
 		processCommandLineOptions(args);
 
-		// Time zones are complicated. Need to create both timeForUsingCalendar
-		// and also set the system timezone so that times are processed 
-		// correctly when read from the database. NOTE: must set default
-		// timezone before calling Time() constructor so that when the
-		// SimpleDateFormat objects are created when the Time class is
-		// initialized they will get the correct timezone.
-		String timeZoneStr = 
-				GtfsAgencyReader.readTimezoneString(gtfsDirectoryName);
-		TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr)); 
-		timeForUsingCalendar = new Time(timeZoneStr);
-		
 		// Use ScheduleDataProcessor class to actually process all the data
 		ScheduleDataProcessor stats = 
 				new ScheduleDataProcessor(projectId, gtfsDirectoryName, 
