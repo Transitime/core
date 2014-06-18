@@ -52,17 +52,18 @@ public class CoreConfig {
 	}
 	private static StringConfigValue dbHost = 
 			new StringConfigValue("transitime.core.dbHost", 
-					"localhost",
+					null, // Null as default so can get from hibernate config
 					"Specifies the name of the machine the database for the " +
 					"project resides on. Use null value to use values from " +
-					"hibernate config file.");
+					"hibernate config file. Set to \"localhost\" if database " +
+					"running on same machine as the core application.");
 	
 	public static String getDbUserName() {
 		return dbUserName.getValue();
 	}
 	private static StringConfigValue dbUserName = 
 			new StringConfigValue("transitime.core.dbUserName", 
-					"root",
+					null,
 					"Specifies login for the project database. Use null " +
 					"value to use values from hibernate config file.");
 	
@@ -71,9 +72,10 @@ public class CoreConfig {
 	}
 	private static StringConfigValue dbPassword = 
 			new StringConfigValue("transitime.core.dbPassword", 
-					"transitime",
+					null,
 					"Specifies password for the project database. Use null " +
-					"value to use values from hibernate config file.");
+					"value to use values from hibernate config file.",
+					false); // Don't log password in configParams log file
 	
 	/**
 	 * When in playback mode or some other situations don't want to store

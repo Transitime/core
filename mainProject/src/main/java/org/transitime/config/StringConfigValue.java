@@ -48,8 +48,23 @@ public class StringConfigValue extends ConfigValue<String> {
 	 * @param defaultValue
 	 * @param description
 	 */
-	public StringConfigValue(String id, String defaultValue, String description) {
+	public StringConfigValue(String id, String defaultValue, 
+			String description) {
 		super(id, defaultValue, description);
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 * @param okToLogValue
+	 *            If false then won't log value in log file. This is useful for
+	 *            passwords and such.
+	 */
+	public StringConfigValue(String id, String defaultValue, 
+			String description, boolean okToLogValue) {
+		super(id, defaultValue, description, okToLogValue);
 	}
 
 	@Override 

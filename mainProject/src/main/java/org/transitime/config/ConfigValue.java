@@ -49,12 +49,15 @@ public abstract class ConfigValue<T> {
 	// Description of the parameter that can be used in log files and such
 	protected final String description;
 	
+	// Don't want to log value if a password or such
+	protected final boolean okToLogValue;
+	
 	// Separator used for when a parameter specified by a Java property
 	// has multiple elements.
 	private static final String LIST_SEPARATOR = ";";
 	
 	// Use the main Config logger since don't to have two separate ones.
-	private static final Logger logger= LoggerFactory.getLogger(Config.class);
+	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 	
 	/**
 	 * An exception for when a parameter is being read in
@@ -83,12 +86,13 @@ public abstract class ConfigValue<T> {
 		this.id = id;
 		this.defaultValue = defaultValue;
 		this.description = null;
+		this.okToLogValue = true;
 		commonConstructor();
 	}
 
 	/**
 	 * Stores info associated with ConfigValue. Outputs error message if
-	 * id param null or already used. The description is set to null.
+	 * id param null or already used. 
 	 * 
 	 * @param id
 	 * @param defaultValue
@@ -99,6 +103,28 @@ public abstract class ConfigValue<T> {
 		this.id = id;
 		this.defaultValue = defaultValue;
 		this.description = description;
+		this.okToLogValue = true;
+		commonConstructor();
+	}
+
+	/**
+	 * Stores info associated with ConfigValue. Outputs error message if id
+	 * param null or already used.
+	 * 
+	 * @param id
+	 * @param defaultValue
+	 * @param description
+	 * @param okToLogValue
+	 *            If false then won't log value in log file. This is useful for
+	 *            passwords and such.
+	 */
+	public ConfigValue(String id, T defaultValue, String description,
+			boolean okToLogValue) {
+		// Store params
+		this.id = id;
+		this.defaultValue = defaultValue;
+		this.description = description;
+		this.okToLogValue = okToLogValue;
 		commonConstructor();
 	}
 
@@ -138,16 +164,20 @@ public abstract class ConfigValue<T> {
 		}
 		
 		// Log the information about the parameter so that users can see what 
-		// values are being used.
-		if (value.equals(defaultValue))
-			logger.info("Config param {}=\"{}\" (the default value). {}", 
-					id,	value, description == null ? "" : description);
-		else
-			logger.info("Config param {}=\"{}\" instead of the default " +
-					"of \"{}\". {}", 
-					id, value,
-					defaultValue, description == null ? "" : description);
-
+		// values are being used. But don't do so if configured to not log the
+		// value, which could be important for passwords and such.
+		if (okToLogValue) {
+			if ((value==null && defaultValue==null) 
+					|| value.equals(defaultValue)) {
+				logger.info("Config param {}=\"{}\" (the default value). {}", 
+						id,	value, description == null ? "" : description);
+			} else {
+				logger.info("Config param {}=\"{}\" instead of the default " +
+						"of \"{}\". {}", 
+						id, value,
+						defaultValue, description == null ? "" : description);
+			}
+		}
 	}
 	
 	/**
@@ -215,20 +245,22 @@ public abstract class ConfigValue<T> {
 				// or Float but couldn't get something to work such as T.class.getName().
 				// So getting class name such as IntegerConfigValue.
 				String className = this.getClass().getSimpleName(); 
-				logger.error("Exception " + e.getMessage() + 
-						" occurred when converting parameter \"" + id + "\"" +
-						" value of " + (dataList.size() == 1 ? dataList.get(0) : dataList) + 
-						" to a " + className);
+				logger.error("Exception {} occurred when converting parameter \"{}\"" +
+						" value of {} to a {}",
+						e.getMessage(), 
+						id,
+						(dataList.size() == 1 ? dataList.get(0) : dataList),
+						className);
 			}
 		} 
 	
 		// Param not properly defined in config file so use default.	
 		// If default value not defined then throw an error
 		if (defaultValue == null) {
-			String msg = "Error occurred when reading parameter \"" + id + "\"" +
-					". No valid value was set in config file and no default was specified.";
-			logger.error(msg);
-			throw new ConfigParamException(msg);
+			logger.info("When reading parameter \"{}\". No valid " +
+					"value was set in config file and no default was " +
+					"specified so value is null.",
+					id);
 		}
 		
 		// Use the default value.
@@ -250,6 +282,9 @@ public abstract class ConfigValue<T> {
 	 */
 	@Override
 	public String toString() {
+		if (value == null)
+			return null;
+		
 		return value.toString();
 	}
 

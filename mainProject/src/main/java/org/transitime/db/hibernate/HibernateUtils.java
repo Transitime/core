@@ -68,9 +68,9 @@ public class HibernateUtils {
 		logger.debug("Creating new Hibernate SessionFactory for projectId={}", 
 				projectId);
 		
-		// Create a Hibernate configuration based on the XML file we've put
-		// in the standard place
+		// Create a Hibernate configuration based on customized config file
 		Configuration config = new Configuration();
+		
 		// Want to be able to specify a configuration file for now
 		// since developing in Eclipse and want all config files
 		// to be in same place. But the Config.configure(String) 
@@ -87,25 +87,43 @@ public class HibernateUtils {
 		// Add the annotated classes so that they can be used
 		AnnotatedClassesList.addAnnotatedClasses(config);
 
-		// Set the db info
-		String dbUrl = "jdbc:mysql://" +
-				CoreConfig.getDbHost() +
-				"/" + projectId;
-		config.setProperty("hibernate.connection.url", dbUrl);
-		String username = CoreConfig.getDbUserName();
-		config.setProperty("hibernate.connection.username", username);
-		String password = CoreConfig.getDbPassword();
-		config.setProperty("hibernate.connection.password", password);
+		// Set the db info for the URL, user name, and password. Use values 
+		// from CoreConfig if set. If they are not set then the values will be 
+		// obtained from the hibernate.cfg.xml 
+		// config file.
+		String dbUrl = null;
+		if (CoreConfig.getDbHost() != null) {
+			dbUrl = "jdbc:mysql://" +
+					CoreConfig.getDbHost() +
+					"/" + projectId;
+			config.setProperty("hibernate.connection.url", dbUrl);			
+		} else {
+			dbUrl = config.getProperty("hibernate.connection.url");
+		}
 		
+		String dbUserName = CoreConfig.getDbUserName();
+		if (dbUserName != null) {
+			config.setProperty("hibernate.connection.username",	dbUserName);
+		} else {
+			dbUserName = config.getProperty("hibernate.connection.username");
+		}
+		
+		if (CoreConfig.getDbPassword() != null)
+			config.setProperty("hibernate.connection.password", 
+					CoreConfig.getDbPassword());
+		
+		// Log info, but don't log password. This can just be debug logging
+		// even though it is important because the C3P0 connector logs the info.
 		logger.debug("For Hibernate factory project projectId={} " +
 				"using url={} username={}, and configured password",
-				projectId, dbUrl, username);
+				projectId, dbUrl, dbUserName);
 		
 		// Get the session factory for persistence
 		Properties properties = config.getProperties();
-		ServiceRegistry serviceRegistry = 
-				new ServiceRegistryBuilder().applySettings(properties).buildServiceRegistry();
-		SessionFactory sessionFactory = config.buildSessionFactory(serviceRegistry);
+		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
+				.applySettings(properties).buildServiceRegistry();
+		SessionFactory sessionFactory = 
+				config.buildSessionFactory(serviceRegistry);
 
 		// Return the factory
 		return sessionFactory;
