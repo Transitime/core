@@ -234,7 +234,7 @@ public class Core {
 		// Handle help option
 		if (cmd.hasOption("h")) {
 			// Display help
-			final String commandLineSyntax = "java TransitimeCore.jar";
+			final String commandLineSyntax = "java transitime.jar";
 			final PrintWriter writer = new PrintWriter(System.out);
 			final HelpFormatter helpFormatter = new HelpFormatter();
 			helpFormatter.printHelp(writer,

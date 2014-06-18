@@ -206,7 +206,7 @@ public class GtfsFileProcessor {
 	 */
 	private static void displayCommandLineOptions(Options options) {
 		// Display help
-		final String commandLineSyntax = "java TransitimeCore.jar";
+		final String commandLineSyntax = "java transitime.jar";
 		final PrintWriter writer = new PrintWriter(System.out);
 		final HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.printHelp(writer,
