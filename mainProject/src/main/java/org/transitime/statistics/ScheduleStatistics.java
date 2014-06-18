@@ -116,7 +116,7 @@ public class ScheduleStatistics {
 	 * @return Stats object containing the statistics for the trip/stop or null
 	 *         if there is no data.
 	 */
-	public static Stats getStatisticsForTripStop(List<Integer> timesFromDb,
+	private static Stats getStatisticsForTripStop(List<Integer> timesFromDb,
 			GtfsStopTime originalGtfsStopTime,
 			int allowableDifferenceFromMeanSecs,
 			int allowableDifferenceFromOriginalTimeSecs,
