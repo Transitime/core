@@ -174,6 +174,14 @@ public class ScheduleDataProcessor {
 		public String toString() {
 			return "TripStopKey [" + "tripId=" + o1 + ", stopId=" + o2 + "]";
 		}
+		
+		public String getTripId() {
+			return (String) o1;
+		}
+		
+		public String getStopId() {
+			return (String) o2;
+		}
 	}
 
 	/**
