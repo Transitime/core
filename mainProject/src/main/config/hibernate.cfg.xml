@@ -57,19 +57,20 @@
         network traffic could bog down the thread that is writing. -->
    <property name="hibernate.jdbc.batch_size">25</property>  
  
-   <!-- Configure db settings. Commented out because this
-        is now done programmatically by HibernateUtils so
-        that some apps, like the website, can connect to
-        multiple project dbs. -->
+   <!-- Configure db settings. Currently commented out because this
+        can be done programmatically by HibernateUtils using
+        command line arguments so that some apps, like the 
+        website, can connect to multiple project dbs. But you can
+        uncomment this part and set the db parameters here. -->
 <!--
    <property name="hibernate.connection.url">
-      jdbc:mysql://localhost/test
+      jdbc:mysql://localhost/mbta
    </property>
    <property name="hibernate.connection.username">
       root
    </property>
    <property name="hibernate.connection.password">
-      transitime
+      PASSWORD
    </property>
 -->
 
