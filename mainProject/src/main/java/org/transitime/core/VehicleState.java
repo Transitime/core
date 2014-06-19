@@ -66,8 +66,10 @@ public class VehicleState {
 	private long lastArrivalTime = 0;
 	
 	// So can keep track of whether assigning vehicle to same block that
-	// just got unassigned for. 
-	private Block previousBlock;
+	// just got unassigned for. unassignedTime is the time when the
+	// vehicle was unassigned.
+	private Block previousBlockBeforeUnassigned = null;
+	private Date unassignedTime = null;
 	
 	private static int MATCH_HISTORY_MAX_SIZE = 6;
 	private static int AVL_HISTORY_MAX_SIZE = 6;
@@ -82,7 +84,7 @@ public class VehicleState {
 	 * Sets the block assignment for vehicle. Also, this is how it is specified
 	 * whether a vehicle is predictable or not.
 	 * 
-	 * @param block
+	 * @param newBlock
 	 *            The current block assignment for the vehicle. Set to null if
 	 *            vehicle not assigned.
 	 * @param assignmentMethod
@@ -90,26 +92,50 @@ public class VehicleState {
 	 * @param predictable
 	 *            Whether vehicle is predictable
 	 */
-	public void setBlock(Block block, BlockAssignmentMethod assignmentMethod, 
+	public void setBlock(Block newBlock, BlockAssignmentMethod assignmentMethod, 
 			boolean predictable) {
-		this.block = block;
-		this.assignmentMethod = assignmentMethod;
-		this.predictable = predictable;
-		this.assignmentTime = new Date(System.currentTimeMillis());
-		
 		// When vehicle is made unpredictable remember the previous assignment
 		// so can tell if getting assigned to same block again (which could
 		// indicate a problem and arrival/departure times shouldn't be generated.
-		if (block == null)
-			this.previousBlock = this.block;
+		if (this.block != null && newBlock == null) {
+			this.previousBlockBeforeUnassigned = this.block;
+			this.unassignedTime = getAvlReport().getDate();
+		}
+
+		this.block = newBlock;
+		this.assignmentMethod = assignmentMethod;
+		this.predictable = predictable;
+		this.assignmentTime = getAvlReport().getDate();		
 	}
 	
-	public void nullPreviousBlock() {
-		previousBlock = null;
-	}
-	
-	public Block getPreviousBlock() {
-		return previousBlock;
+	/**
+	 * Determines if vehicle is just getting assigned and it is getting assigned
+	 * back to the same block it was assigned to just a while ago. In other
+	 * words this tells if vehicle might have become unpredictable but then is
+	 * getting reassigned again. In this kind of situation don't want to for
+	 * example determine arrivals/departures back to the beginning of the block
+	 * because probably already did so when vehicle was previously assigned.
+	 * 
+	 * @return True if vehicle is being reassigned to the same block as before
+	 */
+	public boolean vehicleNewlyAssignedToSameBlock() {
+		// If previously wasn't assigned but it is now then it is 
+		// newly assigned...
+		if (getPreviousMatch() == null && getMatch() != null) {
+			// If being assigned to same block it had previously...
+			if (previousBlockBeforeUnassigned == getBlock()) {
+				// If didn't get unassigned that long ago
+				if (getAvlReport().getTime() <  
+						this.unassignedTime.getTime() + 20 * Time.MS_PER_MIN) {
+					// It is being newly assigned to the same block it was 
+					// recently unassigned from
+					return true;
+				}
+			}
+		}
+		
+		// Vehicle not newly assigned
+		return false;
 	}
 	
 	/**

@@ -324,7 +324,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// there is likely a problem. In this case don't want to 
 		// estimate arrivals/departures because that would likely
 		// create duplicates.
-		if (vehicleState.getPreviousBlock() == vehicleState.getBlock()) {
+		if (vehicleState.vehicleNewlyAssignedToSameBlock()) {
 			logger.info("For vehicleId={} There was no previous match so " +
 					"in theory could estimate arrivals/departures for the " +
 					"beginning of the assignment. But the vehicle is being " +

@@ -98,15 +98,15 @@ public class AvlProcessor {
 	 * Removes predictions and the match for the vehicle and marks
 	 * is as unpredictable. Also removes block assignment.
 	 * 
-	 * @param vehicleId
+	 * @param vehicleState
 	 *            The vehicle to be made unpredictable
 	 */
-	public void makeVehicleUnpredictableAndRemoveAssignment(String vehicleId) {
+	public void makeVehicleUnpredictableAndRemoveAssignment(
+			VehicleState vehicleState) {
+		String vehicleId = vehicleState.getVehicleId();
+		
 		makeVehicleUnpredictable(vehicleId);
 		
-		// Update the state of the vehicle
-		VehicleState vehicleState =
-				VehicleStateManager.getInstance().getVehicleState(vehicleId);
 		vehicleState.setBlock(null, 
 				BlockAssignmentMethod.ASSIGNMENT_TERMINATED, 
 				false /* predictable*/);
@@ -182,11 +182,15 @@ public class AvlProcessor {
 						eventDescription,
 						false, // predictable,
 						true,  // becameUnpredictable
-						null); // supervisor 
+						null); // supervisor
+				
+				// Remove block assignment from vehicle
+				vehicleState.setBlock(null, BlockAssignmentMethod.COULD_NOT_MATCH, 
+						false);
 			}
 			
-			// Set the match of the vehicle. If null then it will make the vehicle
-			// unpredictable.
+			// Set the match of the vehicle. If null then it will make the 
+			// vehicle unpredictable.
 			vehicleState.setMatch(bestTemporalMatch);
 		} else {
 			logger.info("For vehicleId={} got a bad match, {} in a row, so " +
@@ -467,10 +471,16 @@ public class AvlProcessor {
 	public boolean matchVehicleToAssignment(VehicleState vehicleState) {
 		logger.debug("Matching unassigned vehicle to assignment. {}", 
 				vehicleState);
-		
+
 		// Initialize some variables
 		AvlReport avlReport = vehicleState.getAvlReport();
 		
+		// Remove old block assignment if there was one
+		if (vehicleState.isPredictable() && 
+				vehicleState.hasNewBlockAssignment(avlReport)) {
+			makeVehicleUnpredictableAndRemoveAssignment(vehicleState);					
+		}
+
 		// If the vehicle has a block assignment from the AVLFeed
 		// then use it.
 		Block block = BlockAssigner.getInstance().getBlockAssignment(avlReport);
@@ -531,8 +541,7 @@ public class AvlProcessor {
 
 					
 					// At end of block assignment so remove it
-					makeVehicleUnpredictableAndRemoveAssignment(
-							vehicleState.getVehicleId());
+					makeVehicleUnpredictableAndRemoveAssignment(vehicleState);
 					
 					// Return that end of block reached
 					return true;
@@ -649,12 +658,6 @@ public class AvlProcessor {
 				// within the assignment.
 				matchNewFixForPredictableVehicle(vehicleState);								
 			} else if (matchToNewAssignment) {
-				// Remove old assignment if there was one
-				if (vehicleState.isPredictable() && 
-						vehicleState.hasNewBlockAssignment(avlReport)) {
-					makeVehicleUnpredictableAndRemoveAssignment(vehicleId);					
-				}
-
 				// New assignment so match the vehicle to it
 				matchVehicleToAssignment(vehicleState);
 			} else {
