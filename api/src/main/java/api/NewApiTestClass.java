@@ -15,24 +15,16 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.test;
+package api;
 
 /**
- * Just for testing working with Eclipse Dynamic web project and multiple
- * GitHub repos.
+ *
  *
  * @author SkiBu Smith
  *
  */
-public class TestClass {
+public class NewApiTestClass {
 
-     /**
-     * @param args
-     */
-    public static void main(String[] args) {
-	// TODO Auto-generated method stub
-
-    }
 
     /********************** Member Functions **************************/
 
