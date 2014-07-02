@@ -25,7 +25,7 @@ package org.transitime.utils;
  * http://www.sinosplice
  * .com/life/archives/2013/07/16/a-more-complete-ios-solution
  * -to-the-china-gps-offset-problem.
- * x4
+ * 
  * @author SkiBu Smith
  * 
  */
