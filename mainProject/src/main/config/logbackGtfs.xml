@@ -3,7 +3,7 @@
      logback.xml in the classpath) or if explicitly invoked using the 
      Java param -Dlogback.configurationFile=/DIR/src/main/config/logbackGtfs.xml
   -->
-       
+        
 <configuration >
 
   <!-- Need to use TIMESTAMP when using FileAppender instead of
