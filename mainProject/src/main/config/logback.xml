@@ -1,7 +1,8 @@
 <!-- This is the configuration file for the logback logging system. This file 
      will be used if it is in the classpath (because logback looks for the file
      logback.xml in the classpath) or if explicitly invoked using the 
-     Java param -Dlogback.configurationFile=/DIR/src/main/config/logback.xml
+     Java param -Dlogback.configurationFile=/DIR/src/main/config/logback.xml 
+     Testing...
   -->
        
 <!-- Note that scanPeriod is set to 30 seconds so that config file will

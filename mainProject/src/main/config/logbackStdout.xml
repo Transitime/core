@@ -1,7 +1,7 @@
 <!-- This is the configuration file for the logback logging system
      for when simply want to log to stdout. 
   -->
-       
+    
 <!-- Note that scanPeriod is set to 30 seconds so that config file will
      be automatically reloaded if needed and take effect every 30 seconds.
   -->
