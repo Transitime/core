@@ -35,7 +35,7 @@
     <file>${LOG_FILE_ROOT}/${TIMESTAMP}/configParams.log</file>
     <encoder>
       <charset>UTF-8</charset>
-      <pattern>%d{HH:mm:ss.SSS} %-5level - %msg%n<</pattern>
+      <pattern>%d{HH:mm:ss.SSS} %-5level - %msg%n</pattern>
     </encoder>
   </appender>
  
