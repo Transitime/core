@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -255,7 +256,7 @@ public class RmiQuery {
 			vehicles.add(vehicle);
 		} else if (vehicleIds != null && vehicleIds.length > 1) {
 			// Get multiple vehicles
-			vehicles = vehiclesInterface.get(vehicleIds);
+			vehicles = vehiclesInterface.get(Arrays.asList(vehicleIds));
 		} else if (routeShortNames != null && routeShortNames.length == 1) {
 			// Get vehicles for specified route
 			vehicles = vehiclesInterface.getForRoute(routeShortNames[0]);

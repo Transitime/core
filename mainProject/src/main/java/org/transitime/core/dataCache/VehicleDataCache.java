@@ -103,7 +103,7 @@ public class VehicleDataCache {
 	 * @param vehicleIds Specifies which vehicles should return.
 	 * @return
 	 */
-	public Collection<Vehicle> getVehicles(String[] vehicleIds) {
+	public Collection<Vehicle> getVehicles(Collection<String> vehicleIds) {
 		Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
 		for (String vehicleId : vehicleIds) {
 			Vehicle vehicle = vehiclesMap.get(vehicleId);

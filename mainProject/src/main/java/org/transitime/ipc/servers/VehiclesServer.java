@@ -127,8 +127,10 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.util.List)
 	 */
 	@Override
-	public Collection<Vehicle> get(String[] vehicleIds) throws RemoteException {
-		return getSerializableCollection(vehicleManager.getVehicles(vehicleIds));
+	public Collection<Vehicle> get(Collection<String> vehicleIds) 
+			throws RemoteException {
+		return getSerializableCollection(
+				vehicleManager.getVehicles(vehicleIds));
 	}
 
 	/*

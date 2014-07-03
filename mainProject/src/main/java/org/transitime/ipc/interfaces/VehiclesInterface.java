@@ -77,10 +77,10 @@ public interface VehiclesInterface extends Remote {
 	 * parameter.
 	 * 
 	 * @param vehicleIds
-	 *            Array of vehicle IDs to get Vehicle data for.
+	 *            CollectionS of vehicle IDs to get Vehicle data for.
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> get(String[] vehicleIds) 
+	public Collection<Vehicle> get(Collection<String> vehicleIds) 
 			throws RemoteException;
 }
