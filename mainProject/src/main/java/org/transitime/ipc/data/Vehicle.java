@@ -26,6 +26,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.transitime.core.TemporalDifference;
+import org.transitime.core.VehicleState;
+
 import net.jcip.annotations.Immutable;
 
 /**
@@ -54,7 +56,22 @@ public class Vehicle implements Serializable {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructors a Vehicle object.
+	 * Constructs a new Vehicle object from data in a VehicleState object.
+	 * 
+	 * @param vs
+	 */
+	public Vehicle(VehicleState vs) {
+		this.avl = new Avl(vs.getAvlReport());
+		this.pathHeading = vs.getPathHeading();
+		this.routeId = vs.getRouteId();
+		this.routeShortName = vs.getRouteShortName();
+		this.tripId = vs.getTrip().getId();
+		this.predictable = vs.isPredictable();
+		this.realTimeSchedAdh = vs.getRealTimeSchedAdh();	    
+	}
+	
+	/**
+	 * Constructs a Vehicle object.
 	 * 
 	 * @param avl
 	 * @param pathHeading

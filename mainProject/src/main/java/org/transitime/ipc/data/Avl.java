@@ -236,6 +236,10 @@ public class Avl implements Serializable {
 		return heading;
 	}
 
+	public String getAssignmentId() {
+	    return assignmentId;
+	}
+	
 	public String getDriverId() {
 		return driverId;
 	}
