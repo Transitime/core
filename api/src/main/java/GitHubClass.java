@@ -1,4 +1,4 @@
-package foo;
+//package foo;
 
 public class GitHubClass {
 }
