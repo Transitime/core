@@ -41,303 +41,296 @@ import net.jcip.annotations.Immutable;
 @Immutable
 public class Vehicle implements Serializable {
 
-    private final String blockId;
-    private final BlockAssignmentMethod blockAssignmentMethod;
-    private final Avl avl;
-    private final float pathHeading;
-    private final String routeId;
+	private final String blockId;
+	//private final BlockAssignmentMethod blockAssignmentMethod;
+	private final Avl avl;
+	private final float pathHeading;
+	private final String routeId;
 
-    // routeShortName needed because routeId is sometimes not consistent over
-    // schedule changes but routeShortName usually is.
-    private final String routeShortName;
-    private final String tripId;
-    private final boolean predictable;
-    private final TemporalDifference realTimeSchedAdh;
+	// routeShortName needed because routeId is sometimes not consistent over
+	// schedule changes but routeShortName usually is.
+	private final String routeShortName;
+	private final String tripId;
+	private final boolean predictable;
+	private final TemporalDifference realTimeSchedAdh;
 
-    private static final long serialVersionUID = -1744566765456572042L;
+	private static final long serialVersionUID = -1744566765456572042L;
 
-    /********************** Member Functions **************************/
+	/********************** Member Functions **************************/
 
-    /**
-     * Constructs a new Vehicle object from data in a VehicleState object.
-     * 
-     * @param vs
-     */
-    public Vehicle(VehicleState vs) {
-	this.blockId = vs.getBlock().getId();
-	this.blockAssignmentMethod = vs.getAssignmentMethod();
-	this.avl = new Avl(vs.getAvlReport());
-	this.pathHeading = vs.getPathHeading();
-	this.routeId = vs.getRouteId();
-	this.routeShortName = vs.getRouteShortName();
-	this.tripId = vs.getTrip().getId();
-	this.predictable = vs.isPredictable();
-	this.realTimeSchedAdh = vs.getRealTimeSchedAdh();
-    }
-
-    /**
-     * Constructs a Vehicle object.
-     * 
-     * @param blockId
-     * @param blockAssignmentMethod
-     * @param avl
-     * @param pathHeading
-     * @param routeId
-     * @param routeShortName
-     * @param tripId
-     * @param predictable
-     * @param realTimeSchdAdh
-     */
-    public Vehicle(String blockId, BlockAssignmentMethod blockAssignmentMethod,
-	    Avl avl, float pathHeading, String routeId, String routeShortName,
-	    String tripId, boolean predictable,
-	    TemporalDifference realTimeSchdAdh) {
-	this.blockId = blockId;
-	this.blockAssignmentMethod = blockAssignmentMethod;
-	this.avl = avl;
-	this.pathHeading = pathHeading;
-	this.routeId = routeId;
-	this.routeShortName = routeShortName;
-	this.tripId = tripId;
-	this.predictable = predictable;
-	this.realTimeSchedAdh = realTimeSchdAdh;
-    }
-
-    /*
-     * SerializationProxy is used so that this class can be immutable and so
-     * that can do versioning of objects.
-     */
-    private static class SerializationProxy implements Serializable {
-	// Exact copy of fields of Vehicle enclosing class object
-	private String blockId;
-	private BlockAssignmentMethod blockAssignmentMethod;
-	private Avl avl;
-	private float pathHeading;
-	private String routeId;
-	private String routeShortName;
-	private String tripId;
-	private boolean predictable;
-	private TemporalDifference realTimeSchdAdh;
-
-	private static final long serialVersionUID = -4996254752417270043L;
-	private static final short serializationVersion = 0;
-
-	/*
-	 * Only to be used within this class.
+	/**
+	 * Constructs a new Vehicle object from data in a VehicleState object.
+	 * 
+	 * @param vs
 	 */
-	private SerializationProxy(Vehicle v) {
-	    this.blockId = v.blockId;
-	    this.blockAssignmentMethod = v.blockAssignmentMethod;
-	    this.avl = v.avl;
-	    this.pathHeading = v.pathHeading;
-	    this.routeId = v.routeId;
-	    this.routeShortName = v.routeShortName;
-	    this.tripId = v.tripId;
-	    this.predictable = v.predictable;
-	    this.realTimeSchdAdh = v.realTimeSchedAdh;
+	public Vehicle(VehicleState vs) {
+		this.blockId = vs.getBlock().getId();
+		//this.blockAssignmentMethod = vs.getAssignmentMethod();
+		this.avl = new Avl(vs.getAvlReport());
+		this.pathHeading = vs.getPathHeading();
+		this.routeId = vs.getRouteId();
+		this.routeShortName = vs.getRouteShortName();
+		this.tripId = vs.getTrip().getId();
+		this.predictable = vs.isPredictable();
+		this.realTimeSchedAdh = vs.getRealTimeSchedAdh();
+	}
+
+	/**
+	 * Constructs a Vehicle object.
+	 * 
+	 * @param blockId
+	 * @param blockAssignmentMethod
+	 * @param avl
+	 * @param pathHeading
+	 * @param routeId
+	 * @param routeShortName
+	 * @param tripId
+	 * @param predictable
+	 * @param realTimeSchdAdh
+	 */
+	public Vehicle(String blockId, /* BlockAssignmentMethod blockAssignmentMethod, */
+			Avl avl, float pathHeading, String routeId, String routeShortName,
+			String tripId, boolean predictable,
+			TemporalDifference realTimeSchdAdh) {
+		this.blockId = blockId;
+		//this.blockAssignmentMethod = blockAssignmentMethod;
+		this.avl = avl;
+		this.pathHeading = pathHeading;
+		this.routeId = routeId;
+		this.routeShortName = routeShortName;
+		this.tripId = tripId;
+		this.predictable = predictable;
+		this.realTimeSchedAdh = realTimeSchdAdh;
 	}
 
 	/*
-	 * When object is serialized writeReplace() causes this
-	 * SerializationProxy object to be written. Write it in a custom way
-	 * that includes a version ID so that clients and servers can have two
-	 * different versions of code.
+	 * SerializationProxy is used so that this class can be immutable and so
+	 * that can do versioning of objects.
 	 */
-	private void writeObject(java.io.ObjectOutputStream stream)
-		throws IOException {
-	    stream.writeObject(blockId);
-	    stream.writeObject(blockAssignmentMethod);
-	    stream.writeShort(serializationVersion);
-	    stream.writeObject(avl);
-	    stream.writeFloat(pathHeading);
-	    stream.writeObject(routeId);
-	    stream.writeObject(routeShortName);
-	    stream.writeObject(tripId);
-	    stream.writeBoolean(predictable);
-	    stream.writeObject(realTimeSchdAdh);
+	private static class SerializationProxy implements Serializable {
+		// Exact copy of fields of Vehicle enclosing class object
+		private String blockId;
+		//private BlockAssignmentMethod blockAssignmentMethod;
+		private Avl avl;
+		private float pathHeading;
+		private String routeId;
+		private String routeShortName;
+		private String tripId;
+		private boolean predictable;
+		private TemporalDifference realTimeSchdAdh;
+
+		private static final long serialVersionUID = -4996254752417270043L;
+		private static final short serializationVersion = 0;
+
+		/*
+		 * Only to be used within this class.
+		 */
+		private SerializationProxy(Vehicle v) {
+			this.blockId = v.blockId;
+			//this.blockAssignmentMethod = v.blockAssignmentMethod;
+			this.avl = v.avl;
+			this.pathHeading = v.pathHeading;
+			this.routeId = v.routeId;
+			this.routeShortName = v.routeShortName;
+			this.tripId = v.tripId;
+			this.predictable = v.predictable;
+			this.realTimeSchdAdh = v.realTimeSchedAdh;
+		}
+
+		/*
+		 * When object is serialized writeReplace() causes this
+		 * SerializationProxy object to be written. Write it in a custom way
+		 * that includes a version ID so that clients and servers can have two
+		 * different versions of code.
+		 */
+		private void writeObject(java.io.ObjectOutputStream stream)
+				throws IOException {
+			stream.writeObject(blockId);
+			//stream.writeObject(blockAssignmentMethod);
+			stream.writeShort(serializationVersion);
+			stream.writeObject(avl);
+			stream.writeFloat(pathHeading);
+			stream.writeObject(routeId);
+			stream.writeObject(routeShortName);
+			stream.writeObject(tripId);
+			stream.writeBoolean(predictable);
+			stream.writeObject(realTimeSchdAdh);
+		}
+
+		/*
+		 * Custom method of deserializing a SerializationProy object.
+		 */
+		private void readObject(java.io.ObjectInputStream stream)
+				throws IOException, ClassNotFoundException {
+			short readVersion = stream.readShort();
+			if (serializationVersion != readVersion) {
+				throw new IOException("Serialization error when reading "
+						+ getClass().getSimpleName()
+						+ " object. Read serializationVersion=" + readVersion);
+			}
+
+			// serialization version is OK so read in object
+			blockId = (String) stream.readObject();
+			//blockAssignmentMethod = (BlockAssignmentMethod) stream.readObject();
+			avl = (Avl) stream.readObject();
+			pathHeading = stream.readFloat();
+			routeId = (String) stream.readObject();
+			routeShortName = (String) stream.readObject();
+			tripId = (String) stream.readObject();
+			predictable = stream.readBoolean();
+			realTimeSchdAdh = (TemporalDifference) stream.readObject();
+		}
+
+		/*
+		 * When an object is read in it will be a SerializatProxy object due to
+		 * writeReplace() being used by the enclosing class. When such an object
+		 * is deserialized this method will be called and the SerializationProxy
+		 * object is converted to an enclosing class object.
+		 */
+		private Object readResolve() {
+			return new Vehicle(blockId, /* blockAssignmentMethod, */ avl,
+					pathHeading, routeId, routeShortName, tripId, predictable,
+					realTimeSchdAdh);
+		}
+	} // End of SerializationProxy class
+
+	/*
+	 * Needed as part of using a SerializationProxy. When Vehicle object is
+	 * serialized the SerializationProxy will instead be used.
+	 */
+	private Object writeReplace() {
+		return new SerializationProxy(this);
 	}
 
 	/*
-	 * Custom method of deserializing a SerializationProy object.
+	 * Needed as part of using a SerializationProxy. Makes sure that Vehicle
+	 * object cannot be deserialized without using proxy, thereby eliminating
+	 * possibility of such an attack as described in "Effective Java".
 	 */
-	private void readObject(java.io.ObjectInputStream stream)
-		throws IOException, ClassNotFoundException {
-	    short readVersion = stream.readShort();
-	    if (serializationVersion != readVersion) {
-		throw new IOException("Serialization error when reading "
-			+ getClass().getSimpleName()
-			+ " object. Read serializationVersion=" + readVersion);
-	    }
+	private void readObject(ObjectInputStream stream)
+			throws InvalidObjectException {
+		throw new InvalidObjectException("Must use proxy instead");
+	}
 
-	    // serialization version is OK so read in object
-	    blockId = (String) stream.readObject();
-	    blockAssignmentMethod = (BlockAssignmentMethod) stream.readObject();
-	    avl = (Avl) stream.readObject();
-	    pathHeading = stream.readFloat();
-	    routeId = (String) stream.readObject();
-	    routeShortName = (String) stream.readObject();
-	    tripId = (String) stream.readObject();
-	    predictable = stream.readBoolean();
-	    realTimeSchdAdh = (TemporalDifference) stream.readObject();
+	public String getId() {
+		return avl.getVehicleId();
+	}
+
+	public String getBlockId() {
+		return blockId;
+	}
+
+//	public BlockAssignmentMethod getBlockAssignmentMethod() {
+//		return blockAssignmentMethod;
+//	}
+
+	public Avl getAvl() {
+		return avl;
+	}
+
+	/**
+	 * @return Heading of vehicle, or null if speed not defined.
+	 */
+	public float getHeading() {
+		return avl.getHeading();
+	}
+
+	/**
+	 * The path heading is determined from the segment that the vehicle has been
+	 * matched to. Useful for drawing vehicles on a map.
+	 * 
+	 * @return
+	 */
+	public float getPathHeading() {
+		return pathHeading;
+	}
+
+	/**
+	 * @return Speed of vehicle, or null if speed not defined.
+	 */
+	public float getSpeed() {
+		return avl.getSpeed();
+	}
+
+	public float getLatitude() {
+		return avl.getLatitude();
+	}
+
+	public float getLongitude() {
+		return avl.getLongitude();
+	}
+
+	public String getLicensePlate() {
+		return avl.getLicensePlate();
+	}
+
+	public long getGpsTime() {
+		return avl.getTime();
+	}
+
+	public String getRouteId() {
+		return routeId;
+	}
+
+	public String getRouteShortName() {
+		return routeShortName;
+	}
+
+	public String getTripId() {
+		return tripId;
+	}
+
+	public boolean isPredictable() {
+		return predictable;
+	}
+
+	public TemporalDifference getRealTimeSchedAdh() {
+		return realTimeSchedAdh;
+	}
+
+	@Override
+	public String toString() {
+		return "Vehicle [" + "vehicleId=" + avl.getVehicleId() + ", blockId="
+				+ blockId // + ", blockAssignmentMethod=" + blockAssignmentMethod
+				+ ", routeId=" + routeId + ", routeShortName=" + routeShortName
+				+ ", tripId=" + tripId + ", predictable=" + predictable
+				+ ", realTimeSchedAdh=" + realTimeSchedAdh + ", avl=" + avl
+				+ ", pathHeading=" + pathHeading + "]";
 	}
 
 	/*
-	 * When an object is read in it will be a SerializatProxy object due to
-	 * writeReplace() being used by the enclosing class. When such an object
-	 * is deserialized this method will be called and the SerializationProxy
-	 * object is converted to an enclosing class object.
+	 * Just for testing.
 	 */
-	private Object readResolve() {
-	    return new Vehicle(blockId, blockAssignmentMethod, avl,
-		    pathHeading, routeId, routeShortName, tripId, predictable,
-		    realTimeSchdAdh);
+	public static void main(String args[]) {
+		Avl avl = new Avl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f,
+				"block", "driver", "license", 0);
+		Vehicle v = new Vehicle("blockId",
+				/* BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, */ avl, 123.456f,
+				"routeId", "routeShortName", "tripId", true, null);
+		try {
+			FileOutputStream fileOut = new FileOutputStream("foo.ser");
+			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);
+			outStream.writeObject(v);
+			outStream.close();
+			fileOut.close();
+		} catch (IOException i) {
+			i.printStackTrace();
+		}
+
+		try {
+			FileInputStream fileIn = new FileInputStream("foo.ser");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			@SuppressWarnings("unused")
+			Vehicle newVehicle = (Vehicle) in.readObject();
+			in.close();
+			fileIn.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
-    } // End of SerializationProxy class
-
-    /*
-     * Needed as part of using a SerializationProxy. When Vehicle object is
-     * serialized the SerializationProxy will instead be used.
-     */
-    private Object writeReplace() {
-	return new SerializationProxy(this);
-    }
-
-    /*
-     * Needed as part of using a SerializationProxy. Makes sure that Vehicle
-     * object cannot be deserialized without using proxy, thereby eliminating
-     * possibility of such an attack as described in "Effective Java".
-     */
-    private void readObject(ObjectInputStream stream)
-	    throws InvalidObjectException {
-	throw new InvalidObjectException("Must use proxy instead");
-    }
-
-    public String getId() {
-	return avl.getVehicleId();
-    }
-
-    public String getBlockId() {
-	return blockId;
-    }
-
-    public BlockAssignmentMethod getBlockAssignmentMethod() {
-	return blockAssignmentMethod;
-    }
-    
-    
-    public Avl getAvl() {
-	return avl;
-    }
-
-    /**
-     * @return Heading of vehicle, or null if speed not defined.
-     */
-    public float getHeading() {
-	return avl.getHeading();
-    }
-
-    /**
-     * The path heading is determined from the segment that the vehicle has been
-     * matched to. Useful for drawing vehicles on a map.
-     * 
-     * @return
-     */
-    public float getPathHeading() {
-	return pathHeading;
-    }
-
-    /**
-     * @return Speed of vehicle, or null if speed not defined.
-     */
-    public float getSpeed() {
-	return avl.getSpeed();
-    }
-
-    public float getLatitude() {
-	return avl.getLatitude();
-    }
-
-    public float getLongitude() {
-	return avl.getLongitude();
-    }
-
-    public String getLicensePlate() {
-	return avl.getLicensePlate();
-    }
-
-    public long getGpsTime() {
-	return avl.getTime();
-    }
-
-    public String getRouteId() {
-	return routeId;
-    }
-
-    public String getRouteShortName() {
-	return routeShortName;
-    }
-
-    public String getTripId() {
-	return tripId;
-    }
-
-    public boolean isPredictable() {
-	return predictable;
-    }
-
-    public TemporalDifference getRealTimeSchedAdh() {
-	return realTimeSchedAdh;
-    }
-
-    @Override
-    public String toString() {
-	return "Vehicle [" + 
-		"vehicleId=" + avl.getVehicleId() +
-		", blockId=" + blockId +
-		", blockAssignmentMethod=" + blockAssignmentMethod +
-		", routeId=" + routeId + 
-		", routeShortName=" + routeShortName + 
-		", tripId=" + tripId + 
-		", predictable=" + predictable +
-		", realTimeSchedAdh=" + realTimeSchedAdh + 
-		", avl=" + avl
-		+ ", pathHeading=" + pathHeading + 
-		"]";
-    }
-
-    /*
-     * Just for testing.
-     */
-    public static void main(String args[]) {
-	Avl avl = new Avl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f,
-		"block", "driver", "license", 0);
-	Vehicle v = new Vehicle("blockId",
-		BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl, 123.456f,
-		"routeId", "routeShortName", "tripId", true, null);
-	try {
-	    FileOutputStream fileOut = new FileOutputStream("foo.ser");
-	    ObjectOutputStream outStream = new ObjectOutputStream(fileOut);
-	    outStream.writeObject(v);
-	    outStream.close();
-	    fileOut.close();
-	} catch (IOException i) {
-	    i.printStackTrace();
-	}
-
-	try {
-	    FileInputStream fileIn = new FileInputStream("foo.ser");
-	    ObjectInputStream in = new ObjectInputStream(fileIn);
-	    @SuppressWarnings("unused")
-	    Vehicle newVehicle = (Vehicle) in.readObject();
-	    in.close();
-	    fileIn.close();
-	} catch (FileNotFoundException e) {
-	    e.printStackTrace();
-	} catch (IOException e) {
-	    e.printStackTrace();
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
-	}
-    }
 
 }
