@@ -42,7 +42,7 @@ import net.jcip.annotations.Immutable;
 public class Vehicle implements Serializable {
 
 	private final String blockId;
-	//private final BlockAssignmentMethod blockAssignmentMethod;
+	private final BlockAssignmentMethod blockAssignmentMethod;
 	private final Avl avl;
 	private final float pathHeading;
 	private final String routeId;
@@ -65,7 +65,7 @@ public class Vehicle implements Serializable {
 	 */
 	public Vehicle(VehicleState vs) {
 		this.blockId = vs.getBlock().getId();
-		//this.blockAssignmentMethod = vs.getAssignmentMethod();
+		this.blockAssignmentMethod = vs.getAssignmentMethod();
 		this.avl = new Avl(vs.getAvlReport());
 		this.pathHeading = vs.getPathHeading();
 		this.routeId = vs.getRouteId();
@@ -88,12 +88,12 @@ public class Vehicle implements Serializable {
 	 * @param predictable
 	 * @param realTimeSchdAdh
 	 */
-	public Vehicle(String blockId, /* BlockAssignmentMethod blockAssignmentMethod, */
+	public Vehicle(String blockId, BlockAssignmentMethod blockAssignmentMethod, 
 			Avl avl, float pathHeading, String routeId, String routeShortName,
 			String tripId, boolean predictable,
 			TemporalDifference realTimeSchdAdh) {
 		this.blockId = blockId;
-		//this.blockAssignmentMethod = blockAssignmentMethod;
+		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
 		this.pathHeading = pathHeading;
 		this.routeId = routeId;
@@ -110,7 +110,7 @@ public class Vehicle implements Serializable {
 	private static class SerializationProxy implements Serializable {
 		// Exact copy of fields of Vehicle enclosing class object
 		private String blockId;
-		//private BlockAssignmentMethod blockAssignmentMethod;
+		private BlockAssignmentMethod blockAssignmentMethod;
 		private Avl avl;
 		private float pathHeading;
 		private String routeId;
@@ -127,7 +127,7 @@ public class Vehicle implements Serializable {
 		 */
 		private SerializationProxy(Vehicle v) {
 			this.blockId = v.blockId;
-			//this.blockAssignmentMethod = v.blockAssignmentMethod;
+			this.blockAssignmentMethod = v.blockAssignmentMethod;
 			this.avl = v.avl;
 			this.pathHeading = v.pathHeading;
 			this.routeId = v.routeId;
@@ -145,9 +145,9 @@ public class Vehicle implements Serializable {
 		 */
 		private void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
+		    	stream.writeShort(serializationVersion);
 			stream.writeObject(blockId);
-			//stream.writeObject(blockAssignmentMethod);
-			stream.writeShort(serializationVersion);
+			stream.writeObject(blockAssignmentMethod);
 			stream.writeObject(avl);
 			stream.writeFloat(pathHeading);
 			stream.writeObject(routeId);
@@ -171,7 +171,7 @@ public class Vehicle implements Serializable {
 
 			// serialization version is OK so read in object
 			blockId = (String) stream.readObject();
-			//blockAssignmentMethod = (BlockAssignmentMethod) stream.readObject();
+			blockAssignmentMethod = (BlockAssignmentMethod) stream.readObject();
 			avl = (Avl) stream.readObject();
 			pathHeading = stream.readFloat();
 			routeId = (String) stream.readObject();
@@ -188,7 +188,7 @@ public class Vehicle implements Serializable {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new Vehicle(blockId, /* blockAssignmentMethod, */ avl,
+			return new Vehicle(blockId, blockAssignmentMethod, avl,
 					pathHeading, routeId, routeShortName, tripId, predictable,
 					realTimeSchdAdh);
 		}
@@ -220,9 +220,9 @@ public class Vehicle implements Serializable {
 		return blockId;
 	}
 
-//	public BlockAssignmentMethod getBlockAssignmentMethod() {
-//		return blockAssignmentMethod;
-//	}
+	public BlockAssignmentMethod getBlockAssignmentMethod() {
+		return blockAssignmentMethod;
+	}
 
 	public Avl getAvl() {
 		return avl;
@@ -291,7 +291,7 @@ public class Vehicle implements Serializable {
 	@Override
 	public String toString() {
 		return "Vehicle [" + "vehicleId=" + avl.getVehicleId() + ", blockId="
-				+ blockId // + ", blockAssignmentMethod=" + blockAssignmentMethod
+				+ blockId + ", blockAssignmentMethod=" + blockAssignmentMethod
 				+ ", routeId=" + routeId + ", routeShortName=" + routeShortName
 				+ ", tripId=" + tripId + ", predictable=" + predictable
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh + ", avl=" + avl
@@ -305,7 +305,7 @@ public class Vehicle implements Serializable {
 		Avl avl = new Avl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f,
 				"block", "driver", "license", 0);
 		Vehicle v = new Vehicle("blockId",
-				/* BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, */ avl, 123.456f,
+				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl, 123.456f,
 				"routeId", "routeShortName", "tripId", true, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
