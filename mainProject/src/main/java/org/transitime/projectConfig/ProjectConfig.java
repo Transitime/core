@@ -36,81 +36,83 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class ProjectConfig {
-	private final String rmiHost;
-	private final String dbHost;
-	private final String dbUsername;
-	private final String dbPassword;
-	
-	// Contains all the ProjectConfig info
-	private static HashMap<String, ProjectConfig> configs =
-			new HashMap<String, ProjectConfig>();
+    private final String rmiHost;
+    private final String dbHost;
+    private final String dbUsername;
+    private final String dbPassword;
 
-	// This needs to be after the configs HashMap is declared
-	// so that initialization works properly.
-	// FIXME Shouldn't have to add each db manually!
-	static {
-		new ProjectConfig("testProjectId", null, "localhost", "root", "transitime");		
-		new ProjectConfig("mbta", null, "localhost", "root", "transitime");		
-		new ProjectConfig("sf-muni", null, "localhost", "root", "transitime");		
-		new ProjectConfig("zhengzhou", null, "localhost", "root", "transitime");		
-	}
-	
-	private static final Logger logger = 
-			LoggerFactory.getLogger(ProjectConfig.class);
+    // Contains all the ProjectConfig info
+    private static HashMap<String, ProjectConfig> configs = new HashMap<String, ProjectConfig>();
 
-	/********************** Member Functions **************************/
+    // This needs to be after the configs HashMap is declared
+    // so that initialization works properly.
+    // FIXME Shouldn't have to add each db manually!
+    static {
+	new ProjectConfig("testProjectId", null, "localhost", "root",
+		"transitime");
+	new ProjectConfig("mbta", null, "localhost", "root", "transitime");
+	new ProjectConfig("sf-muni", null, "localhost", "root", "transitime");
+	new ProjectConfig("zhengzhou", null, "localhost", "root", "transitime");
+    }
 
-	private ProjectConfig(String projectId, String rmiHost, String dbHost, 
-			String dbUsername, String dbPassword) {
-		this.rmiHost = rmiHost;
-		this.dbHost = dbHost;
-		this.dbUsername = dbUsername;
-		this.dbPassword = dbPassword;
-		
-		configs.put(projectId, this);
+    private static final Logger logger = LoggerFactory
+	    .getLogger(ProjectConfig.class);
+
+    /********************** Member Functions **************************/
+
+    private ProjectConfig(String projectId, String rmiHost, String dbHost,
+	    String dbUsername, String dbPassword) {
+	this.rmiHost = rmiHost;
+	this.dbHost = dbHost;
+	this.dbUsername = dbUsername;
+	this.dbPassword = dbPassword;
+
+	configs.put(projectId, this);
+    }
+
+    /**
+     * Gets the ProjectConfig object for the projectId specified.
+     * 
+     * @param projectId
+     * @return
+     */
+    private static ProjectConfig get(String projectId) {
+	ProjectConfig projectConfig = configs.get(projectId);
+
+	if (projectConfig == null) {
+	    logger.error("Trying to access ProjectConfig information for "
+		    + "projectId={} but that project is not configured in "
+		    + "org.transitime.projectConfig.ProjectConfig", projectId);
 	}
-	
-	/**
-	 * Gets the ProjectConfig object for the projectId specified.
-	 * 
-	 * @param projectId
-	 * @return
-	 */
-	private static ProjectConfig get(String projectId) {
-		ProjectConfig projectConfig = configs.get(projectId);
-		
-		if (projectConfig == null) {
-			logger.error("Trying to access ProjectConfig information for " +
-					"projectId={} but that project is not configured in " +
-					"org.transitime.projectConfig.ProjectConfig",
-					projectId);
-		}
-		
-		return projectConfig;
-	}
-	
-	/**
-	 * Each project should have an associated hostname so that RMI
-	 * calls can go to the right host. This info should come from
-	 * a config file or database.
-	 * 
-	 * @param projectId
-	 * @return
-	 */
-	public static String getRmiHost(String projectId) {
-		return get(projectId).rmiHost;		
-	}
-	
-	public static String getDbHost(String projectId) {
-		return get(projectId).dbHost;		
-	}
-	
-	public static String getDbUsername(String projectId) {
-		return get(projectId).dbUsername;
-	}
-	
-	public static String getDbPassword(String projectId) {
-		return get(projectId).dbPassword;
-	}
-	
+
+	return projectConfig;
+    }
+
+    /**
+     * Each project should have an associated hostname so that RMI calls can go
+     * to the right host. This info should come from a config file or database.
+     * 
+     * @param projectId
+     * @return The RMI hostname for the agency, or null if agency doesn't exist.
+     */
+    public static String getRmiHost(String projectId) {
+	ProjectConfig projectConfig = get(projectId);
+	if (projectConfig == null)
+	    return null;
+	else
+	    return projectConfig.rmiHost;
+    }
+
+    public static String getDbHost(String projectId) {
+	return get(projectId).dbHost;
+    }
+
+    public static String getDbUsername(String projectId) {
+	return get(projectId).dbUsername;
+    }
+
+    public static String getDbPassword(String projectId) {
+	return get(projectId).dbPassword;
+    }
+
 }
