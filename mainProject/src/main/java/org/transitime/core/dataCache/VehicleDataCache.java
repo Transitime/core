@@ -95,7 +95,9 @@ public class VehicleDataCache {
 	
 	Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
 	for (String routeShortName : routeShortNames) {
-	    vehicles.addAll(getVehiclesForRoute(routeShortName));
+		Collection<Vehicle> vehiclesForRoute = getVehiclesForRoute(routeShortName);
+		if (vehiclesForRoute != null)
+			vehicles.addAll(vehiclesForRoute);
 	}
 	return vehicles;
     }
@@ -127,10 +129,13 @@ public class VehicleDataCache {
 	
 	Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
 	for (String routeId : routeIds) {
-	    vehicles.addAll(getVehiclesForRouteUsingRouteId(routeId));
+		Collection<Vehicle> vehiclesForRoute = getVehiclesForRouteUsingRouteId(routeId);
+		if (vehiclesForRoute != null)
+			vehicles.addAll(vehiclesForRoute);
 	}
 	return vehicles;
     }
+   
    /**
      * Returns Collection of VehiclesInterface whose vehicleIds were specified
      * using the vehiclesIds parameter.
