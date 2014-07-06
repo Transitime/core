@@ -19,7 +19,9 @@ package org.transitime.core.dataCache;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -81,6 +83,24 @@ public class VehicleDataCache {
     }
 
     /**
+     * Returns Collection of Vehicles currently associated with specified routes.
+     * 
+     * @param routeShortNames
+     * @return
+     */
+   public Collection<Vehicle> getVehiclesForRoute(List<String> routeShortNames) {
+	// If there is just a single route specified then use a shortcut
+	if (routeShortNames.size() == 1)
+	    return getVehiclesForRoute(routeShortNames.get(0));
+	
+	Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
+	for (String routeShortName : routeShortNames) {
+	    vehicles.addAll(getVehiclesForRoute(routeShortName));
+	}
+	return vehicles;
+    }
+    
+    /**
      * Returns Collection of Vehicles currently associated with specified route.
      * 
      * @param routeId
@@ -95,6 +115,23 @@ public class VehicleDataCache {
     }
 
     /**
+     * Returns Collection of Vehicles currently associated with specified routes.
+     * 
+     * @param routeShortNames
+     * @return
+     */
+   public Collection<Vehicle> getVehiclesForRouteUsingRouteId(List<String> routeIds) {
+	// If there is just a single route specified then use a shortcut
+	if (routeIds.size() == 1)
+	    return getVehiclesForRouteUsingRouteId(routeIds.get(0));
+	
+	Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
+	for (String routeId : routeIds) {
+	    vehicles.addAll(getVehiclesForRouteUsingRouteId(routeId));
+	}
+	return vehicles;
+    }
+   /**
      * Returns Collection of VehiclesInterface whose vehicleIds were specified
      * using the vehiclesIds parameter.
      * 
@@ -102,7 +139,7 @@ public class VehicleDataCache {
      *            Specifies which vehicles should return.
      * @return
      */
-    public Collection<Vehicle> getVehicles(Collection<String> vehicleIds) {
+    public Collection<Vehicle> getVehicles(List<String> vehicleIds) {
 	Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
 	for (String vehicleId : vehicleIds) {
 	    Vehicle vehicle = vehiclesMap.get(vehicleId);

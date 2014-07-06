@@ -20,6 +20,8 @@ package org.transitime.ipc.interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.List;
+
 import org.transitime.ipc.data.Vehicle;
 
 /**
@@ -29,6 +31,14 @@ import org.transitime.ipc.data.Vehicle;
  * 
  */
 public interface VehiclesInterface extends Remote {
+
+	/**
+	 * Gets from server Vehicle info for all vehicles.
+	 * 
+	 * @return Collection of Vehicle objects
+	 * @throws RemoteException
+	 */
+	public Collection<Vehicle> get() throws RemoteException;
 
 	/**
 	 * Gets from server Vehicle info for specified vehicle.
@@ -41,12 +51,16 @@ public interface VehiclesInterface extends Remote {
 	public Vehicle get(String vehicleId) throws RemoteException;
 
 	/**
-	 * Gets from server Vehicle info for all vehicles.
+	 * Gets from server Vehicle info for vehicles specified by vehicles
+	 * parameter.
 	 * 
+	 * @param vehicleIds
+	 *            Collection of vehicle IDs to get Vehicle data for.
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> get() throws RemoteException;
+	public Collection<Vehicle> get(List<String> vehicleIds) 
+			throws RemoteException;
 
 	/**
 	 * Gets from server Vehicle info for all vehicles currently. associated with
@@ -64,6 +78,18 @@ public interface VehiclesInterface extends Remote {
 	 * Gets from server Vehicle info for all vehicles currently. associated with
 	 * route.
 	 * 
+	 * @param routeShortNames
+	 *            Specifies which routes to get Vehicle data for
+	 * @return Collection of Vehicle objects
+	 * @throws RemoteException
+	 */
+	public Collection<Vehicle> getForRoute(List<String> routeShortNames) 
+			throws RemoteException;
+
+	/**
+	 * Gets from server Vehicle info for all vehicles currently. associated with
+	 * route.
+	 * 
 	 * @param routeId
 	 *            Specifies which route to get Vehicle data for
 	 * @return Collection of Vehicle objects
@@ -73,14 +99,14 @@ public interface VehiclesInterface extends Remote {
 			throws RemoteException;
 
 	/**
-	 * Gets from server Vehicle info for vehicles specified by vehicles
-	 * parameter.
+	 * Gets from server Vehicle info for all vehicles currently. associated with
+	 * route.
 	 * 
-	 * @param vehicleIds
-	 *            CollectionS of vehicle IDs to get Vehicle data for.
+	 * @param routeIds
+	 *            Specifies which route to get Vehicle data for
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> get(Collection<String> vehicleIds) 
+	public Collection<Vehicle> getForRouteUsingRouteId(List<String> routeIds) 
 			throws RemoteException;
 }
