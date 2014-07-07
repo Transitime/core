@@ -87,9 +87,9 @@ public abstract class AbstractServer {
 	 * seconds so that if the rmiregistry gets restarted the RMI object will
 	 * then automatically become available again. Sends an e-mail alert when
 	 * rebinding if the rmiregistry is not available.
-	 * 
+	 * <p>
 	 * Protected because should only be instantiated by a superclass factory.
-	 * 
+	 * <p>
 	 * This constructor "leaks" a reference to the object before the constructor
 	 * has completed via UnicastRemoteObject.exportObject(). This normally
 	 * should not be done because the function could cause the object to be used
@@ -150,12 +150,14 @@ public abstract class AbstractServer {
 			// rebind() is called immediately and then again every 
 			// REBIND_RATE_SEC seconds.
 			rebindTimer.scheduleAtFixedRate(
-					new Runnable() {public void run() { rebind(); }	}, // Call rebind() using anonymous class
+					// Call rebind() using anonymous class
+					new Runnable() {public void run() { rebind(); }	}, 
 					0, REBIND_RATE_SEC, TimeUnit.SECONDS);
 			
 			constructed = true;
 		} catch (Exception e) {
-			logger.error("Error occurred when constructing a " + getClass().getSimpleName(), 
+			logger.error("Error occurred when constructing a " + 
+					getClass().getSimpleName(), 
 					e);
 		}
 	}
@@ -178,8 +180,9 @@ public abstract class AbstractServer {
 				// can happen if a process started the RMI registry internally but
 				// then the process died.
 				logger.warn("Error occurred when trying to rebind RMI to {}. " +
-						"Therefore trying to automatically restart the rmiregistry", 
-						bindName);
+						"Therefore trying to automatically restart the " +
+						"rmiregistry. {}", 
+						bindName, e.getMessage());
 				LocateRegistry.createRegistry(RmiParams.getRmiPort());
 				// Now that registry has restarted try rebinding again
 				registry.rebind(bindName, stub);
@@ -214,19 +217,25 @@ public abstract class AbstractServer {
 				// Log error. This is an important one because someone needs to
 				// start up the rmiregistry for the host. Therefore send out
 				// an e-mail alerting appropriate people.
-				String msg = logRebindErrorMessage(e);
-				logger.error(Markers.email(), msg);
+				String msg = rebindErrorMessage(e);
+				logger.error(Markers.email(), msg, e);
 								
 				errorEmailedSoAlsoNotifyWhenSuccessful = true;
 			} else {
 				// Have already logged and sent out e-mail so this time
 				// just log it as a warning (and don't send e-mail).
-				logger.warn(logRebindErrorMessage(e));
+				logger.warn(rebindErrorMessage(e));
 			}
 		}
 	}
     
-    private String logRebindErrorMessage(Exception e) {
+	/**
+	 * Returns appropriate error message for when rebind error occurs.
+	 * 
+	 * @param e
+	 * @return
+	 */
+    private String rebindErrorMessage(Exception e) {
 		String hostname = null;
 		try {
 			hostname = java.net.InetAddress.getLocalHost().getHostName();
