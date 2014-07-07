@@ -713,9 +713,15 @@ public class GtfsData {
 					"GtfsData.createTripsAndTripPatterns() is. Exiting.");
 			System.exit(-1);
 		}
-		if (validServiceIds == null || validServiceIds.isEmpty()) {
+		if (validServiceIds == null) {
 			logger.error("GtfsData.processServiceIds() must be called before " +
 					"GtfsData.createTripsAndTripPatterns() is. Exiting.");
+			System.exit(-1);
+		}
+		if (validServiceIds.isEmpty()) {
+			logger.error("There are no services that are still active. Make "
+					+ "sure you are processing the most up to date GTFS data "
+					+ "that includes service that will be active. Exiting.");
 			System.exit(-1);
 		}
 
