@@ -117,8 +117,7 @@
          Note that gmail seems to filter out messages sometimes. Therefore
          make sure using non-gmail accounts. 
       -->
-    <to>msmithtransit@gmail.com</to> 
-    <to>skibu@smith.net</to>
+    <to>${logback.errorEmail:-skibu@smith.net}</to>
 
     <!-- Only send e-mail if special "EMAIL" marker is specified for an
          ERROR level message. 
