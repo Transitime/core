@@ -66,13 +66,13 @@ public class UpdateTravelTimes {
 	 * be stored.
 	 * 
 	 * @param session
-	 * @param projectId
+	 * @param agencyId
 	 * @param tripMap
 	 *            Map of all of the trips. Keyed on tripId.
 	 * @param travelTimeInfoMap
 	 *            Contains travel times that are available by trip pattern ID
 	 */
-	private static void setTravelTimesForAllTrips(Session session, String projectId,
+	private static void setTravelTimesForAllTrips(Session session, String agencyId,
 			Map<String, Trip> tripMap, TravelTimeInfoMap travelTimeInfoMap) {
 		// For caching TravelTimesForTrip and TravelTimesForStopPaths that are
 		// created. This way won't store duplicate objects. Caching both 
@@ -88,7 +88,7 @@ public class UpdateTravelTimes {
 		
 		// Determine which travel times rev is currently being used and which
 		// rev should be used for the new travel times.
-		ActiveRevisions activeRevisions = ActiveRevisions.get(projectId);
+		ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId);
 		int currentTravelTimesRev = activeRevisions.getTravelTimesRev();
 		int newTravelTimesRev = currentTravelTimesRev + 1;
 		
@@ -215,12 +215,12 @@ public class UpdateTravelTimes {
 	 * configuration. This should be done after the historical data is read in
 	 * so that less memory is used at once.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @param session
 	 * @return
 	 */
-	private static Map<String, Trip> readTripsFromDb(String projectId, Session session) {
-		ActiveRevisions activeRevisions = ActiveRevisions.get(projectId);
+	private static Map<String, Trip> readTripsFromDb(String agencyId, Session session) {
+		ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId);
 		IntervalTimer timer = new IntervalTimer();
 		logger.info("Reading in trips from db...");
 		Map<String, Trip> tripMap = 
@@ -235,35 +235,35 @@ public class UpdateTravelTimes {
 	 * Reads historic data from db and processes it, putting it all into a
 	 * TravelTimeInfoMap. Then stores the travel times for all of the trips.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @param maxTravelTimeSegmentLength
 	 * @param specialDaysOfWeek
 	 * @param beginTime
 	 * @param endTime
 	 */
-	private static void processTravelTimes(String projectId,
+	private static void processTravelTimes(String agencyId,
 			double maxTravelTimeSegmentLength, List<Integer> specialDaysOfWeek,
 			Date beginTime, Date endTime) {
 		// Get a database session
-		Session session = HibernateUtils.getSession(projectId);
+		Session session = HibernateUtils.getSession(agencyId);
 
 		// Read in historic data from db and put it into maps so that it can
 		// be processed.
 		TravelTimesProcessor processor = 
 				new TravelTimesProcessor(maxTravelTimeSegmentLength);
-		processor.readAndProcessHistoricData(projectId, specialDaysOfWeek,
+		processor.readAndProcessHistoricData(agencyId, specialDaysOfWeek,
 				beginTime, endTime);
 
 		// Read in the current Trips. This is done after the historical data
 		// is read in so that less memory is used at once.
-		Map<String, Trip> tripMap = readTripsFromDb(projectId, session);
+		Map<String, Trip> tripMap = readTripsFromDb(agencyId, session);
 		
 		// Process the historic data into a simple TravelTimeInfoMap
 		TravelTimeInfoMap travelTimeInfoMap = 
 				processor.createTravelTimesFromMaps(tripMap);
 		
 		// Update also the Trip objects with the new travel times
-		setTravelTimesForAllTrips(session, projectId, tripMap, travelTimeInfoMap);
+		setTravelTimesForAllTrips(session, agencyId, tripMap, travelTimeInfoMap);
 		
 		// Write out the trip objects, which also writes out the travel times
 		writeNewTripDataToDb(session, tripMap);
@@ -278,7 +278,7 @@ public class UpdateTravelTimes {
 	 */
 	public static void main(String[] args) {
 		// Determine the parameters
-		String projectId = CoreConfig.getProjectId();
+		String agencyId = CoreConfig.getAgencyId();
 		
 		String startDateStr = args[0];
 		String endDateStr = args[0];
@@ -300,7 +300,7 @@ public class UpdateTravelTimes {
 		}
 
 		// Do all the work...
-		processTravelTimes(projectId, maxTravelTimeSegmentLength,
+		processTravelTimes(agencyId, maxTravelTimeSegmentLength,
 				specialDaysOfWeek, beginTime, endTime);
 		
 //		// this is just for debugging

@@ -7,7 +7,7 @@
 <configuration>
 
   <!-- Set properties here. NOTE: it is expected that the property
-       -Dtransitime.core.projectId=xx will be set. Also, if want logging
+       -Dtransitime.core.agencyId=xx will be set. Also, if want logging
        to use the proper timezone then need to set the timezone property
        to something like -Dlogback.timezone=America/Los_Angeles . Valid 
        timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
@@ -18,7 +18,7 @@
   <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
 
   <property name="LOG_FILE_ROOT" 
-            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/updateTravelTimes/" />
+            value="D:/Logs/${transitime.core.agencyId:-DEFAULT}/updateTravelTimes/" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between

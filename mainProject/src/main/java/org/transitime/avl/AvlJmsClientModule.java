@@ -55,21 +55,22 @@ public class AvlJmsClientModule extends Module {
 	/**
 	 * Constructor. start() needs to be run to actually start the thing.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Specifies name of JMS topic to read AVL data from. Topic name
 	 *            is clientName + "-AVLTopic".
 	 * 
 	 * @throws NamingException
 	 * @throws JMSException
 	 */
-	public AvlJmsClientModule(String projectId) throws JMSException, NamingException {
-		super(projectId);
+	public AvlJmsClientModule(String agencyId) throws JMSException,
+			NamingException {
+		super(agencyId);
 		
 		int maxAVLQueueSize = AvlConfig.getAvlQueueSize();
 		int numberThreads = AvlConfig.getNumAvlThreads();
 		
-		logger.info("Starting AvlClient for projectId={} with "
-				+ "maxAVLQueueSize={} and numberThreads={}", projectId,
+		logger.info("Starting AvlClient for agencyId={} with "
+				+ "maxAVLQueueSize={} and numberThreads={}", agencyId,
 				maxAVLQueueSize, numberThreads);
 
 		// Make sure that numberThreads is reasonable
@@ -95,11 +96,11 @@ public class AvlJmsClientModule extends Module {
 		
 	/**
 	 * Returns the name of the JMS topic to be used for the AVL feed.
-	 * @param projectId Topic name is clientName + "-AVLTopic".
+	 * @param agencyId Topic name is clientName + "-AVLTopic".
 	 * @return the topic name for the AVL feed
 	 */
-	public static String getTopicName(String projectId) {
-		return projectId + "-AVLTopic";
+	public static String getTopicName(String agencyId) {
+		return agencyId + "-AVLTopic";
 	}		
 	
 	/**
@@ -108,7 +109,7 @@ public class AvlJmsClientModule extends Module {
 	 */
 	private void createMessageConsumer() {
 		// Establish the AVL message consumer. 
-		String jmsTopicName = getTopicName(projectId);		
+		String jmsTopicName = getTopicName(agencyId);		
 		JMSWrapper jmsWrapper = null;
 		try {
 			jmsWrapper = JMSWrapper.getJMSWrapper();

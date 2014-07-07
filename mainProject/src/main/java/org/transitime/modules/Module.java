@@ -31,7 +31,7 @@ import org.transitime.utils.threading.NamedThreadFactory;
  * started.
  * <p>
  * Each module should inherit from this class and implement run() and a
- * constructor that takes the projectId as a string parameter.
+ * constructor that takes the agencyId as a string parameter.
  * 
  * @author SkiBu Smith
  * 
@@ -40,24 +40,24 @@ public abstract class Module implements Runnable {
 	protected static final Logger logger = 
 			LoggerFactory.getLogger(Module.class);	
 
-	protected final String projectId;
+	protected final String agencyId;
 	
 	/**
 	 * Constructor. Subclasses must implement a constructor that takes
-	 * in projectId and calls this constructor via super(projectId).
-	 * @param projectId
+	 * in agencyId and calls this constructor via super(agencyId).
+	 * @param agencyId
 	 */
-	protected Module(String projectId) {
-		this.projectId = projectId;
+	protected Module(String agencyId) {
+		this.agencyId = agencyId;
 	}
 	
 	/**
-	 * Returns the projectId that was set when the module was created.
+	 * Returns the agencyId that was set when the module was created.
 	 * To be used by subclasses.
 	 * @return
 	 */
-	protected String getProjectId() {
-		return projectId;
+	protected String getAgencyId() {
+		return agencyId;
 	}
 	
 	/**
@@ -75,22 +75,23 @@ public abstract class Module implements Runnable {
 	 */
 	public void start() {
 		NamedThreadFactory threadFactory = new NamedThreadFactory(threadName());
-		ExecutorService executor = Executors.newSingleThreadExecutor(threadFactory);
+		ExecutorService executor = 
+				Executors.newSingleThreadExecutor(threadFactory);
 		executor.execute(this);
 	}
 	
 	/**
-	 * Runs the named module in a separate thread using the default projectId.
+	 * Runs the named module in a separate thread using the default agencyId.
 	 * 
 	 * @param classname
 	 * @return
 	 */
 	public static boolean start(String classname) {
-		// Determine the default projectId
-		String projectId = CoreConfig.getProjectId();
+		// Determine the default agencyId
+		String agencyId = CoreConfig.getAgencyId();
 		
 		// start the module
-		return start(classname, projectId);
+		return start(classname, agencyId);
 	}
 	
 	/**
@@ -99,15 +100,17 @@ public abstract class Module implements Runnable {
 	 * 
 	 * @param classname
 	 *            Full classname of the Module subclass to instantiate
+	 * @param agencyId
+	 *            ID of the agency
 	 * @return true if successful. Otherwise false.
 	 */
-	public static boolean start(String classname, String projectId) {
+	public static boolean start(String classname, String agencyId) {
 		try {
 			// Create the module object using reflection by calling the constructor
-			// and passing in projectId
+			// and passing in agencyId
 			Class<?> theClass = Class.forName(classname);
 			Constructor<?> constructor = theClass.getConstructor(String.class);
-			Module module = (Module) constructor.newInstance(projectId);
+			Module module = (Module) constructor.newInstance(agencyId);
 			
 			// Start the separate thread that allows the module to do all the work
 			module.start();

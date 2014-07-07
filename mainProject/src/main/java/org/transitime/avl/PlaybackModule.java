@@ -29,16 +29,15 @@ import org.transitime.modules.Module;
 import org.transitime.utils.Time;
 
 /**
- * For running the system in "playback mode" where AVL data is read from
- * the database instead of from a realtime AVL feed. Useful for debugging
- * the system software because can easily debug what is happening for a 
- * particular vehicle at a particular time.
+ * For running the system in "playback mode" where AVL data is read from the
+ * database instead of from a realtime AVL feed. Useful for debugging the system
+ * software because can easily debug what is happening for a particular vehicle
+ * at a particular time.
  * <p>
  * This module is different from others because it is not intended to be
  * configured to run as an optional module via CoreConfig.getOptionalModules().
- * Instead, it is called explicitly. This is necessary since the constructor
- * has different parameters from most modules, which just have a projectId
- * parameter.
+ * Instead, it is called explicitly. This is necessary since the constructor has
+ * different parameters from most modules, which just have a agencyId parameter.
  * 
  * @author SkiBu Smith
  *
@@ -77,10 +76,10 @@ public class PlaybackModule extends Module {
 	/********************** Member Functions **************************/
 
 	/**
-	 * @param projectId
+	 * @param agencyId
 	 */
-	public PlaybackModule(String projectId) {
-		super(projectId);
+	public PlaybackModule(String agencyId) {
+		super(agencyId);
 		
 		// Make sure params are set
 		if (getPlaybackVehicleId() == null 
@@ -139,7 +138,7 @@ public class PlaybackModule extends Module {
 				playbackVehicleId);
 		
 		List<AvlReport> avlReports = 
-				AvlReport.getAvlReportsFromDb(getProjectId(),
+				AvlReport.getAvlReportsFromDb(getAgencyId(),
 						new Date(start), 
 						new Date(end), 
 						getPlaybackVehicleId());

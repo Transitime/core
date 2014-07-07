@@ -36,13 +36,13 @@ import org.transitime.utils.Time;
  * 
  */
 public class CoreConfig {
-	public static String getProjectId() {
+	public static String getAgencyId() {
 		return projectId.getValue();
 	}
 	private static StringConfigValue projectId = 
-			new StringConfigValue("transitime.core.projectId", 
+			new StringConfigValue("transitime.core.agencyId", 
 					null,
-					"Specifies the ID of the project. Used for the database " +
+					"Specifies the ID of the agency. Used for the database " +
 					"name and in the logback configuration to specify the " +
 					"directory where to put the log files.");
 	

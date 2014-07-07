@@ -81,19 +81,19 @@ public class Core {
 	 * Construct the Core object and read in the config data. This is private
 	 * so that the createCore() factory method must be used.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 */
-	private Core(String projectId) {
+	private Core(String agencyId) {
 		// Create the DataDBLogger so that generated data can be stored
 		// to database via a robust queue. But don't actually log data
 		// if in playback mode since then would be writing data again 
 		// that was first written when predictor was run in real time.
-		dataDbLogger = DataDbLogger.getDataDbLogger(projectId,
+		dataDbLogger = DataDbLogger.getDataDbLogger(agencyId,
 				CoreConfig.storeDataInDatabase(),
 				CoreConfig.pauseIfDbQueueFilling());
 		
 		// Read in all config data
-		configData = new DbConfig(projectId);
+		configData = new DbConfig(agencyId);
 		// FIXME Use rev 0 for now but should be using current rev
 		int configRev = 0;
 		configData.read(configRev);
@@ -112,17 +112,17 @@ public class Core {
 	 * Creates the Core object for the application. There can only be one Core
 	 * object per application.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @return
 	 */
-	public static Core createCore(String projectId) {
+	public static Core createCore(String agencyId) {
 		// Make sure only can have a single Core object
 		if (Core.singleton != null) {
 			logger.error("Core singleton already created. Cannot create another one.");
 			return null;
 		}
 		
-		Core core = new Core(projectId);
+		Core core = new Core(agencyId);
 		Core.singleton = core;
 		return core;
 	}
@@ -255,13 +255,13 @@ public class Core {
 	 * Start the RMI Servers so that clients can obtain data
 	 * on predictions, vehicles locations, etc.
 	 *  
-	 * @param projectId
+	 * @param agencyId
 	 */
-	private static void startRmiServers(String projectId) {
+	private static void startRmiServers(String agencyId) {
 		// Start up all of the RMI servers
-		PredictionsServer.start(projectId, PredictionDataCache.getInstance());
-		VehiclesServer.start(projectId, VehicleDataCache.getInstance());
-		ConfigServer.start(projectId);
+		PredictionsServer.start(agencyId, PredictionDataCache.getInstance());
+		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());
+		ConfigServer.start(agencyId);
 	}
 	
 	/**
@@ -291,12 +291,12 @@ public class Core {
 				System.exit(-1);
 			}
 			
-			String projectId = CoreConfig.getProjectId();
-			createCore(projectId);
+			String agencyId = CoreConfig.getAgencyId();
+			createCore(agencyId);
 			
 			// Start any optional modules. 
 			// For how CoreConfig default modules includes the NextBus AVL feed
-			// module and the default projectId is sf-muni. So will automatically
+			// module and the default agencyId is sf-muni. So will automatically
 			// start reading data for sf-muni.
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
 			if (optionalModuleNames.size() > 0)
@@ -311,7 +311,7 @@ public class Core {
 			
 			// Start the RMI Servers so that clients can obtain data
 			// on predictions, vehicles locations, etc.
-			startRmiServers(projectId);
+			startRmiServers(agencyId);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

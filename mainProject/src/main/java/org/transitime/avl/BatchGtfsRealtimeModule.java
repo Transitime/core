@@ -107,10 +107,10 @@ public class BatchGtfsRealtimeModule extends Module {
 	/********************** Member Functions **************************/
 
 	/**
-	 * @param projectId
+	 * @param agencyId
 	 */
-	public BatchGtfsRealtimeModule(String projectId) {
-		super(projectId);
+	public BatchGtfsRealtimeModule(String agencyId) {
+		super(agencyId);
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class BatchGtfsRealtimeModule extends Module {
 		// Zhengzhou had trouble providing valid GPS reports so this method
 		// can be used to log debugging info and to filter out reports that
 		// are not actually in Zhengzhou
-		if (projectId.equals("zhengzhouXX")) {
+		if (agencyId.equals("zhengzhouXX")) {
 			debugZhengzhou();
 		}
 		

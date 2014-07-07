@@ -44,7 +44,7 @@ import org.transitime.utils.Time;
 public class ScheduleGenerator {
 
 	// Command line args
-	private static String projectId;
+	private static String agencyId;
 	private static String gtfsDirectoryName;
 	private static Date beginTime;
 	private static Date endTime;
@@ -82,7 +82,7 @@ public class ScheduleGenerator {
 								null,          // footer
 								true);         // displayUsage
 		writer.write("Also need to set VM parameters: \n" + 
-							" -Dtransitime.core.projectId=<projectId>\n");
+							" -Dtransitime.core.agencyId=<agencyId>\n");
 		writer.close();
 	}
 
@@ -202,9 +202,9 @@ public class ScheduleGenerator {
 			System.exit(0);
 		}
 		
-		// Get project ID from VM param transitime.core.projectId
-		projectId = CoreConfig.getProjectId();
-		if (projectId == null) {
+		// Get project ID from VM param transitime.core.agencyId
+		agencyId = CoreConfig.getAgencyId();
+		if (agencyId == null) {
 			displayCommandLineOptions(options);
 			System.exit(0);
 		}
@@ -346,7 +346,7 @@ public class ScheduleGenerator {
 
 		// Use ScheduleDataProcessor class to actually process all the data
 		ScheduleDataProcessor stats = 
-				new ScheduleDataProcessor(projectId, gtfsDirectoryName, 
+				new ScheduleDataProcessor(agencyId, gtfsDirectoryName, 
 						beginTime, endTime, timeForUsingCalendar,
 						desiredFractionEarly,
 						allowableDifferenceFromMeanSecs,

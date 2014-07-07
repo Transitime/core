@@ -63,10 +63,10 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	
 	/**
 	 * Constructor
-	 * @param projectId
+	 * @param agencyId
 	 */
-	public NextBusAvlModule(String projectId) {
-		super(projectId);
+	public NextBusAvlModule(String agencyId) {
+		super(agencyId);
 	}
 	
 	/**
@@ -77,7 +77,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 		// Determine the URL to use.
 		String url = getNextBusFeedUrl();
 		String queryStr= "?command=vehicleLocations" + 
-				"&a=" + getProjectId() + 
+				"&a=" + getAgencyId() + 
 				"&details=true" +        // So get the more detailed info
 				"&t=" + previousTime;
 		return url + queryStr;

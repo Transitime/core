@@ -11,7 +11,7 @@
   <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
 
   <property name="LOG_FILE_ROOT"
-            value="D:/Logs/${transitime.core.projectId:-DEFAULT}/gtfsConfig/" />
+            value="D:/Logs/${transitime.core.agencyId:-DEFAULT}/gtfsConfig/" />
 
   <!-- For writing log info to console.  -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

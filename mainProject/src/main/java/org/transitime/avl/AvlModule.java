@@ -53,16 +53,16 @@ public abstract class AvlModule extends Module {
 	private final static int MAX_THREADS = 100;
 	private BoundedExecutor avlClientExecutor = null;
 
-	private static final Logger logger= 
+	private static final Logger logger = 
 			LoggerFactory.getLogger(AvlModule.class);	
 
 	/********************** Member Functions **************************/
 
 	/**
-	 * @param projectId
+	 * @param agencyId
 	 */
-	protected AvlModule(String projectId) {
-		super(projectId);		
+	protected AvlModule(String agencyId) {
+		super(agencyId);		
 		
 		if (!AvlConfig.shouldUseJms()) 
 			initForUsingQueueInsteadOfJms();
@@ -77,8 +77,8 @@ public abstract class AvlModule extends Module {
 		int numberThreads = AvlConfig.getNumAvlThreads();
 		
 		logger.info("Starting AvlModule for directly handling AVL reports " +
-				"via a queue instead of JMS. For projectId={} with "
-				+ "maxAVLQueueSize={} and numberThreads={}", projectId,
+				"via a queue instead of JMS. For agencyId={} with "
+				+ "maxAVLQueueSize={} and numberThreads={}", agencyId,
 				maxAVLQueueSize, numberThreads);
 
 		// Make sure that numberThreads is reasonable
@@ -115,7 +115,7 @@ public abstract class AvlModule extends Module {
 		// JMS not already initialized so create the MessageProducer 
 		// that the AVL data can be written to
 		try {
-			String jmsTopicName = AvlJmsClientModule.getTopicName(projectId);
+			String jmsTopicName = AvlJmsClientModule.getTopicName(agencyId);
 			JMSWrapper jmsWrapper = JMSWrapper.getJMSWrapper();
 			jmsMsgProducer = jmsWrapper.createTopicProducer(jmsTopicName);
 		} catch (Exception e) {
@@ -138,8 +138,8 @@ public abstract class AvlModule extends Module {
 	@Override
 	public void run() {
 		// Log that module successfully started
-		logger.info("Started module {} for projectId={}", 
-				getClass().getName(), getProjectId());
+		logger.info("Started module {} for agencyId={}", 
+				getClass().getName(), getAgencyId());
 		
 		// Run forever
 		while (true) {
