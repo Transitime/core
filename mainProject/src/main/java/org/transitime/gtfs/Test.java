@@ -67,7 +67,7 @@ public class Test {
 		
 		// Create a title formatter
 		TitleFormatter titleFormatter = 
-				new TitleFormatter("/GTFS/sf-muni/titlesReplacements.txt", true);
+				new TitleFormatter("/GTFS/sfmta/titlesReplacements.txt", true);
 		
 		GtfsRoutesSupplementReader routesSupplementReader = new GtfsRoutesSupplementReader(gtfsSupplementDir);
 		List<GtfsRoute> gtfsRoutesSupplement = routesSupplementReader.get();
@@ -81,7 +81,7 @@ public class Test {
 		System.out.println("\nRoutes:");
 		for (GtfsRoute r : gtfsRoutes) {
 			String routeName;
-			if (gtfsDir.contains("sf-muni")) {
+			if (gtfsDir.contains("sfmta")) {
 				routeName = r.getRouteShortName();
 				if (r.getRouteLongName() != null && !r.getRouteLongName().isEmpty())
 					routeName += "-" + titleFormatter.processTitle(r.getRouteLongName());

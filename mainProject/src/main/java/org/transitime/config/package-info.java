@@ -28,7 +28,7 @@
  *    return projectId.getValue();
  *  }
  *  private static StringConfigValue projectId = 
- *    new StringConfigValue("transitime.core.projectId", "sf-muni");
+ *    new StringConfigValue("transitime.core.projectId", "sfmta");
  * }
  * </pre>
  * 
@@ -45,7 +45,7 @@
  * <transitime>
  *   <core>
  *     <projectId>
- *       sf-muni
+ *       sfmta
  *     </projectId>
  *     <defaultBreakTimeSec>
  *       120

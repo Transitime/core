@@ -675,7 +675,7 @@ public class AvlReport implements Serializable {
 	 * Returns whether assignment information was set in the AVL data and that
 	 * assignment is valid. An assignment is not valid if it is configured to be
 	 * invalid. Examples of such include training vehicles, support vehicles,
-	 * and simply vehicles set to a special assignment such as 9999 for sf-muni.
+	 * and simply vehicles set to a special assignment such as 9999 for sfmta.
 	 * 
 	 * @return true if has assignment and it is valid. Otherwise false.
 	 */

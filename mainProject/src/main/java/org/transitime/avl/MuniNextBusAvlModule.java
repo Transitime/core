@@ -18,9 +18,9 @@
 package org.transitime.avl;
 
 /**
- * For sf-muni SFMTA the block assignments from the feed don't
+ * For sfmta agency the block assignments from the feed don't
  * match to the GTFS data. Therefore this module must be used
- * for the sf-muni AVL feed.
+ * for the sfmta AVL feed.
  *
  * @author SkiBu Smith
  * 
@@ -35,7 +35,7 @@ public class MuniNextBusAvlModule extends NextBusAvlModule {
 	}
 	
 	/**
-	 * At least for sf-muni SFMTA they don't use a leading 0 in the block ID in
+	 * At least for sfmta agency they don't use a leading 0 in the block ID in
 	 * the GTFS data. Therefore to match strip out leading zeros from the block
 	 * ID here.
 	 * 

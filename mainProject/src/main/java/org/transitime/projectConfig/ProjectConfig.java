@@ -51,7 +51,7 @@ public class ProjectConfig {
 	new ProjectConfig("testProjectId", null, "localhost", "root",
 		"transitime");
 	new ProjectConfig("mbta", null, "localhost", "root", "transitime");
-	new ProjectConfig("sf-muni", null, "localhost", "root", "transitime");
+	new ProjectConfig("sfmta", null, "localhost", "root", "transitime");
 	new ProjectConfig("zhengzhou", null, "localhost", "root", "transitime");
     }
 

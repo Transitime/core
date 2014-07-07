@@ -34,7 +34,7 @@ public class ConfigurableParameters {
 	// Parameters that specify how the database is accessed
 	public static final String DB_USER = "root";
 	public static final String DB_PASSWORD = "transitime";
-	public static final String DB_CONNECTION_URL = "jdbc:mysql://localhost/sf-muni";
+	public static final String DB_CONNECTION_URL = "jdbc:mysql://localhost/sfmta";
 
 	// The database queries used. The two queries provide data for different
 	// time ranges. DATABASE_QUERY should return data writing large amount of

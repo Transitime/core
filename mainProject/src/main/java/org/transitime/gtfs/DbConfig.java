@@ -454,7 +454,7 @@ public class DbConfig {
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		String projectId = "sf-muni";
+		String projectId = "sfmta";
 		
 		// FIXME Use the sandbox config rev for now but this should be configurable!
 		int configRev = DbConfig.SANDBOX_REV;

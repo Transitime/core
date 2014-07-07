@@ -296,8 +296,8 @@ public class Core {
 			
 			// Start any optional modules. 
 			// For how CoreConfig default modules includes the NextBus AVL feed
-			// module and the default agencyId is sf-muni. So will automatically
-			// start reading data for sf-muni.
+			// module and the default agencyId is sfmta. So will automatically
+			// start reading data for sfmta.
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
 			if (optionalModuleNames.size() > 0)
 				logger.info("Starting up optional modules specified via " + 

@@ -103,7 +103,7 @@ public class Unzip {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		unzip("/GTFS/sf-muni/09-13-2013/latest.zip", "subdir");
+		unzip("/GTFS/sfmta/09-13-2013/latest.zip", "subdir");
 
 	}
 }
