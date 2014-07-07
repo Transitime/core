@@ -51,6 +51,18 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 		return nextBusFeedUrl.getValue();
 	}
 	
+	// Config param that specifies the agency name to use as part
+	// of the NextBus feed URL.
+	private static StringConfigValue agencyNameForFeed =
+			new StringConfigValue("transitime.avl.agencyNameForFeed",
+					null,
+					"If set then specifies the agency name to use for the "
+					+ "feed. If not set then the transitime.core.agencyId "
+					+ "is used.");
+	private static String getAgencyNameForFeed() {
+		return agencyNameForFeed.getValue();
+	}
+	
 	// So can just get data since last query. Initialize so when first called
 	// get data for last 10 minutes. Definitely don't want to use t=0 because
 	// then can end up with some really old reports.
@@ -76,8 +88,10 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	protected String getUrl() {
 		// Determine the URL to use.
 		String url = getNextBusFeedUrl();
+		String agencyStr = getAgencyNameForFeed()!=null ? 
+				getAgencyNameForFeed() : getAgencyId();
 		String queryStr= "?command=vehicleLocations" + 
-				"&a=" + getAgencyId() + 
+				"&a=" + agencyStr + 
 				"&details=true" +        // So get the more detailed info
 				"&t=" + previousTime;
 		return url + queryStr;
