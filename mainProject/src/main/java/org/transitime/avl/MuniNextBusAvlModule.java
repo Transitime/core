@@ -28,10 +28,10 @@ package org.transitime.avl;
 public class MuniNextBusAvlModule extends NextBusAvlModule {
 
 	/**
-	 * @param projectId
+	 * @param agencyId
 	 */
-	public MuniNextBusAvlModule(String projectId) {
-		super(projectId);
+	public MuniNextBusAvlModule(String agencyId) {
+		super(agencyId);
 	}
 	
 	/**
