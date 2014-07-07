@@ -89,15 +89,18 @@ public interface PredictionsInterface extends Remote {
 	
 	/**
 	 * For each route/stop specified returns a list of predictions for that
-	 * stop. Since expensive RMI calls are being done this method is much
-	 * more efficient for obtaining multiple predictions then if a separate
-	 * get() call is done for each route/stop.
+	 * stop. Since expensive RMI calls are being done this method is much more
+	 * efficient for obtaining multiple predictions then if a separate get()
+	 * call is done for each route/stop.
 	 * 
 	 * @param routeStops
-	 *            List of route/stops to return predictions for
+	 *            List of route/stops to return predictions for. Uses route
+	 *            short name instead of route ID since that is consistent.
 	 * @param predictionsPerStop
 	 *            Max number of predictions to return per route/stop
-	 * @return List of List of PredictionsInterface for the route/stop.
+	 * @return List of List of Prediction objects for the route/stop. The outer
+	 *         list is for each route/stop. The inner list is for each
+	 *         prediction for the route/stop.
 	 * @throws RemoteException
 	 */
 	public List<List<Prediction>> get(
