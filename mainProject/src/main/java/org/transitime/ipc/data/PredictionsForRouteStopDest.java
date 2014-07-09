@@ -71,7 +71,7 @@ public class PredictionsForRouteStopDest implements Serializable {
 	public PredictionsForRouteStopDest(Trip trip, String stopId) {
 		this.routeId = trip != null ? trip.getRouteId() : null;
 		this.routeShortName = trip != null ? trip.getRouteShortName() : null;
-		this.routeName = trip != null ? trip.getName() : null;
+		this.routeName = trip != null ? trip.getRouteName() : null;
 		this.stopId = stopId;
 		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
 		this.destination = trip != null ? trip.getName() : null;
