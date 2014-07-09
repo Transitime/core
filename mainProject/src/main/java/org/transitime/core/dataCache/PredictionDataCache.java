@@ -481,8 +481,8 @@ public class PredictionDataCache {
 		// From the list of predictions return the one that is for the
 		// specified destination.
 		for (PredictionsForRouteStopDest preds : predictionsForRouteStop) {
-			if (preds.getTripHeadsign() == null 
-					|| preds.getTripHeadsign().equals(trip.getName()))
+			if (preds.getDestination() == null 
+					|| preds.getDestination().equals(trip.getName()))
 				return preds;
 		}
 
