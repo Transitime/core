@@ -40,9 +40,9 @@ public class PredictionsForRouteStopDest implements Serializable {
 	// routeShortName needed because routeId is sometimes not consistent over
 	// schedule changes but routeShortName usually is.
 	private final String routeShortName;
+	private final String routeName;
+	
 	private final String stopId;
-	// stopName isn't truly needed but it can make debugging much simpler
-	// so it has been added. 
 	private final String stopName;
 	
 	private final String destination;
@@ -69,10 +69,11 @@ public class PredictionsForRouteStopDest implements Serializable {
 	 * @param stopId
 	 */
 	public PredictionsForRouteStopDest(Trip trip, String stopId) {
-		this.stopId = stopId;
-		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
 		this.routeId = trip != null ? trip.getRouteId() : null;
 		this.routeShortName = trip != null ? trip.getRouteShortName() : null;
+		this.routeName = trip != null ? trip.getName() : null;
+		this.stopId = stopId;
+		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
 		this.destination = trip != null ? trip.getName() : null;
 		this.directionId = trip != null ? trip.getDirectionId() : null;
 		
@@ -90,13 +91,16 @@ public class PredictionsForRouteStopDest implements Serializable {
 	 */
 	private PredictionsForRouteStopDest(PredictionsForRouteStopDest toClone,
 			int maxPredictionsPerStop, long maxSystemTimeForPrediction) {
-		this.stopId = toClone.stopId;
-		this.stopName = toClone.stopName;
 		this.routeId = toClone.routeId;
 		this.routeShortName = toClone.routeShortName;
+		this.routeName = toClone.routeName;
+		this.stopId = toClone.stopId;
+		this.stopName = toClone.stopName;
 		this.destination = toClone.destination;
 		this.directionId = toClone.directionId;
 		
+		// Copy all the prediction info. Do while synchronized since another
+		// thread could otherwise be changing the data.
 		synchronized (toClone) {	
 			int size = Math.min(toClone.predictionsForRouteStop.size(),
 					maxPredictionsPerStop);
@@ -115,21 +119,23 @@ public class PredictionsForRouteStopDest implements Serializable {
 	 * Constructor used for when deserializing a proxy object. Declared private
 	 * because only used internally by the proxy class.
 	 * 
-	 * @param stopId
-	 * @param stopName
 	 * @param routeId
 	 * @param routeShortName
+	 * @param routeName
+	 * @param stopId
+	 * @param stopName
 	 * @param destination
 	 * @param directionId
 	 * @param predictions
 	 */
-	private PredictionsForRouteStopDest(String stopId, String stopName,
-			String routeId, String routeShortName, String destination,
-			String directionId, List<Prediction> predictions) {
-		this.stopId = stopId;
-		this.stopName = stopName;
+	private PredictionsForRouteStopDest(String routeId, String routeShortName,
+			String routeName, String stopId, String stopName,
+			String destination, String directionId, List<Prediction> predictions) {
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
+		this.routeName = routeName;
+		this.stopId = stopId;
+		this.stopName = stopName;
 		this.destination = destination;
 		this.directionId = directionId;
 		
@@ -143,6 +149,7 @@ public class PredictionsForRouteStopDest implements Serializable {
 	private static class SerializationProxy implements Serializable {
 		private String routeId;
 		private String routeShortName;
+		private String routeName;
 		private String stopId;
 		private String stopName;
 		private String destination;
@@ -158,6 +165,7 @@ public class PredictionsForRouteStopDest implements Serializable {
 		private SerializationProxy(PredictionsForRouteStopDest p) {
 			this.routeId = p.routeId;
 			this.routeShortName = p.routeShortName;
+			this.routeName = p.routeName;
 			this.stopId = p.stopId;
 			this.stopName = p.stopName;
 			this.destination = p.destination;
@@ -177,6 +185,7 @@ public class PredictionsForRouteStopDest implements Serializable {
 			
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
+			stream.writeObject(routeName);
 			stream.writeObject(stopId);
 			stream.writeObject(stopName);
 			stream.writeObject(destination);
@@ -200,6 +209,7 @@ public class PredictionsForRouteStopDest implements Serializable {
 			// serialization version is OK so read in object
 			routeId = (String) stream.readObject();
 			routeShortName = (String) stream.readObject();
+			routeName = (String) stream.readObject();
 			stopId = (String) stream.readObject();
 			stopName = (String) stream.readObject();
 			destination = (String) stream.readObject();
@@ -214,8 +224,9 @@ public class PredictionsForRouteStopDest implements Serializable {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new PredictionsForRouteStopDest(stopId, stopName, routeId,
-					routeShortName, destination, directionId, predictionsForRouteStop);
+			return new PredictionsForRouteStopDest(routeId, routeShortName,
+					routeName, stopId, stopName, destination, directionId,
+					predictionsForRouteStop);
 		}
 	} /* End of SerializationProxy inner class */
 	
@@ -384,6 +395,7 @@ public class PredictionsForRouteStopDest implements Serializable {
 		return "PredictionsForRouteStopDest [" 
 				+ "routeId=" + routeId
 				+ ", routeShortName=" + routeShortName 
+				+ ", routeName=" + routeName 
 				+ ", stopId=" + stopId
 				+ ", stopName=" + stopName 
 				+ ", destination=" + destination
@@ -400,6 +412,10 @@ public class PredictionsForRouteStopDest implements Serializable {
 		return routeShortName;
 	}
 
+	public String getRouteName() {
+		return routeName;
+	}
+	
 	public String getStopId() {
 		return stopId;
 	}
