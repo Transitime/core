@@ -23,7 +23,6 @@ import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.applications.Core;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
@@ -31,8 +30,8 @@ import org.transitime.utils.Time;
 /**
  * Contains information on a single prediction. For providing info to client.
  * <p>
- * Declared serializable since using RMI to pass back Prediction objects and
- * RMI uses serialization.
+ * Declared serializable since using RMI to pass back Prediction objects and RMI
+ * uses serialization.
  * 
  * @author SkiBu Smith
  * 
@@ -40,19 +39,15 @@ import org.transitime.utils.Time;
 public class Prediction implements Serializable {
 
 	private final String vehicleId;
+	// Ideally routeId and stopId wouldn't need to be here since they are
+	// are already in PredictionsForRouteStopDest but for GTFS-realtime feed
+	// need to provide all predictions by trip, not by stop. This means that
+	// don't have the PredictionsForRouteStopDest. But still need routeId and
+	// stopId so they are stored here as well.
+	private final String routeId;
 	private final String stopId;
-	// stopName isn't truly needed but it can make debugging much simpler
-	// so it has been added. It is only available on the server side since
-	// want to send as little info as possible to client side, especially
-	// when GTFS-RT feed is provided, which is really data intensive.
-	@SuppressWarnings("unused")
-	private final String stopName;
 	
 	private final int gtfsStopSeq;
-	private final String routeId;
-	// routeShortName needed because routeId is sometimes not consistent over
-	// schedule changes but routeShortName usually is.
-	private final String routeShortName;
 	private final String tripId;
 	private final String blockId;
 	private final long predictionTime;
@@ -65,16 +60,20 @@ public class Prediction implements Serializable {
 	private final short passengerCount;
 	private final float passengerFullness;
 	private final boolean isArrival;
-	
-	private static final Logger logger = 
-			LoggerFactory.getLogger(Prediction.class);
+
+	// Want to store trip on server side so that can determine route info
+	// when creating PredictionsForRouteStop object.
+	private final Trip trip;
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(Prediction.class);
 
 	private static final long serialVersionUID = 7264507678733060173L;
 
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructs a Prediction object.
+	 * Constructs a Prediction object. For use on server side.
 	 * 
 	 * @param vehicleId
 	 * @param stopId
@@ -96,15 +95,14 @@ public class Prediction implements Serializable {
 			boolean predictionAffectedByWaitStop, String driverId,
 			int passengerCount, float passengerFullness, boolean isArrival) {
 		this.vehicleId = vehicleId;
+		this.routeId = trip.getRouteId();
 		this.stopId = stopId;
-		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
 		this.gtfsStopSeq = gtfsStopSeq;
-		this.routeId = trip != null ? trip.getRouteId() : null;
-		this.routeShortName = trip != null ? trip.getRouteShortName() : null;
+		this.trip = trip;
 		// For when trip is null use "" instead of null for the tripId
-		// so that when getting all predictions code for telling when 
-		// tripId changes will still work when debugging. 
-		this.tripId = trip != null ? trip.getId() : ""; 
+		// so that when getting all predictions code for telling when
+		// tripId changes will still work when debugging.
+		this.tripId = trip != null ? trip.getId() : "";
 		this.blockId = trip != null ? trip.getBlockId() : null;
 		this.predictionTime = predictionTime;
 		this.avlTime = avlTime;
@@ -114,28 +112,26 @@ public class Prediction implements Serializable {
 		this.passengerCount = (short) passengerCount;
 		this.passengerFullness = passengerFullness;
 		this.isArrival = isArrival;
-		
+
 		// Log each creation of a Prediction
 		logger.info(this.toString());
 	}
 
 	/**
-	 * Constructor used for when deserializing a proxy object. Declared
-	 * private because only used internally by the proxy class.
+	 * Constructor used for when deserializing a proxy object. Declared private
+	 * because only used internally by the proxy class.
 	 */
-	private Prediction(String vehicleId, String stopId, int gtfsStopSeq,
-			String routeId, String routeShortName, String tripId,
-			String blockId, long predictionTime, long avlTime,
-			long creationTime, boolean affectedByWaitStop, 
-			String driverId, short passengerCount, float passengerFullness,
-			boolean isArrival) {
+	private Prediction(String vehicleId, String routeId, String stopId,
+			int gtfsStopSeq, String tripId, String blockId,
+			long predictionTime, long avlTime, long creationTime,
+			boolean affectedByWaitStop, String driverId, short passengerCount,
+			float passengerFullness, boolean isArrival) {
 		this.vehicleId = vehicleId;
-		this.stopId = stopId;
-		// stopName is only for debugging so not made available on client side
-		this.stopName = null;
-		this.gtfsStopSeq = gtfsStopSeq;
 		this.routeId = routeId;
-		this.routeShortName = routeShortName;
+		this.stopId = stopId;
+		this.gtfsStopSeq = gtfsStopSeq;
+		// trip is only for client side
+		this.trip = null;
 		this.tripId = tripId;
 		this.blockId = blockId;
 		this.predictionTime = predictionTime;
@@ -147,18 +143,17 @@ public class Prediction implements Serializable {
 		this.passengerFullness = passengerFullness;
 		this.isArrival = isArrival;
 	}
-	
+
 	/**
-	 * SerializationProxy is used so that this class can be immutable
-	 * and so that can do versioning of objects.
+	 * SerializationProxy is used so that this class can be immutable and so
+	 * that can do versioning of objects.
 	 */
 	private static class SerializationProxy implements Serializable {
 		// Exact copy of fields of Prediction enclosing class object
 		private String vehicleId;
+		private String routeId;
 		private String stopId;
 		private int gtfsStopSeq;
-		private String routeId;
-		private String routeShortName;
 		private String tripId;
 		private String blockId;
 		private long predictionTime;
@@ -169,7 +164,7 @@ public class Prediction implements Serializable {
 		private short passengerCount;
 		private float passengerFullness;
 		private boolean isArrival;
-		
+
 		private static final long serialVersionUID = -8585283691951746718L;
 		private static final short serializationVersion = 0;
 
@@ -178,10 +173,9 @@ public class Prediction implements Serializable {
 		 */
 		private SerializationProxy(Prediction p) {
 			this.vehicleId = p.vehicleId;
+			this.routeId = p.routeId;
 			this.stopId = p.stopId;
 			this.gtfsStopSeq = p.gtfsStopSeq;
-			this.routeId = p.routeId;
-			this.routeShortName =p.routeShortName;
 			this.tripId = p.tripId;
 			this.blockId = p.blockId;
 			this.predictionTime = p.predictionTime;
@@ -193,21 +187,21 @@ public class Prediction implements Serializable {
 			this.passengerFullness = p.passengerFullness;
 			this.isArrival = p.isArrival;
 		}
-		
-		/**
+
+		/*
 		 * When object is serialized writeReplace() causes this
-		 * SerializationProxy object to be written. Write it in a
-		 * custom way that includes a version ID so that clients
-		 * and servers can have two different versions of code.
+		 * SerializationProxy object to be written. Write it in a custom way
+		 * that includes a version ID so that clients and servers can have two
+		 * different versions of code.
 		 */
 		private void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
 			stream.writeShort(serializationVersion);
+			
 			stream.writeObject(vehicleId);
+			stream.writeObject(routeId);
 			stream.writeObject(stopId);
 			stream.writeInt(gtfsStopSeq);
-			stream.writeObject(routeId);
-			stream.writeObject(routeShortName);
 			stream.writeObject(tripId);
 			stream.writeObject(blockId);
 			stream.writeLong(predictionTime);
@@ -220,7 +214,7 @@ public class Prediction implements Serializable {
 			stream.writeBoolean(isArrival);
 		}
 
-		/**
+		/*
 		 * Custom method of deserializing a SerializationProy object.
 		 */
 		private void readObject(java.io.ObjectInputStream stream)
@@ -234,10 +228,9 @@ public class Prediction implements Serializable {
 
 			// serialization version is OK so read in object
 			vehicleId = (String) stream.readObject();
+			routeId = (String) stream.readObject();
 			stopId = (String) stream.readObject();
 			gtfsStopSeq = stream.readInt();
-			routeId = (String) stream.readObject();
-			routeShortName = (String) stream.readObject();
 			tripId = (String) stream.readObject();
 			blockId = (String) stream.readObject();
 			predictionTime = stream.readLong();
@@ -249,25 +242,24 @@ public class Prediction implements Serializable {
 			passengerFullness = stream.readFloat();
 			isArrival = stream.readBoolean();
 		}
-		
-		/**
-		 * When an object is read in it will be a SerializatProxy object
-		 * due to writeReplace() being used by the enclosing class. When
-		 * such an object is deserialized this method will be called and
-		 * the SerializationProxy object is converted to an enclosing
-		 * class object.
+
+		/*
+		 * When an object is read in it will be a SerializatProxy object due to
+		 * writeReplace() being used by the enclosing class. When such an object
+		 * is deserialized this method will be called and the SerializationProxy
+		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new Prediction(vehicleId, stopId, gtfsStopSeq, routeId,
-					routeShortName, tripId, blockId, predictionTime, avlTime,
-					creationTime, affectedByWaitStop, driverId, passengerCount, 
+			return new Prediction(vehicleId, routeId, stopId, gtfsStopSeq,
+					tripId, blockId, predictionTime, avlTime, creationTime,
+					affectedByWaitStop, driverId, passengerCount,
 					passengerFullness, isArrival);
 		}
 	}
 
 	/*
-	 * Needed as part of using a SerializationProxy. When Vehicle object
-	 * is serialized the SerializationProxy will instead be used.
+	 * Needed as part of using a SerializationProxy. When Vehicle object is
+	 * serialized the SerializationProxy will instead be used.
 	 */
 	private Object writeReplace() {
 		return new SerializationProxy(this);
@@ -278,36 +270,36 @@ public class Prediction implements Serializable {
 	 * object cannot be deserialized without using proxy, thereby eliminating
 	 * possibility of such an attack as described in "Effective Java".
 	 */
-	private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+	private void readObject(ObjectInputStream stream)
+			throws InvalidObjectException {
 		throw new InvalidObjectException("Must use proxy instead");
 	}
-	    	
+
 	@Override
 	public String toString() {
 		return "Prediction [" 
 				+ "vehicleId=" + vehicleId
-				+ ", route=" + routeId
-				+ ", rteName=" + routeShortName
-				+ ", stop=" + stopId
-				// stop name taken out because it is too verbose in the  
+				+ ", routeId=" + routeId
+				+ (trip != null ? ", rteName=" + trip.getRouteShortName() : "")
+				+ ", stop="	+ stopId
+				// stop name taken out because it is too verbose in the
 				// predictions log file
-//				+ (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "") 
+				// + (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "")
 				+ ", gtfsStopSeq=" + gtfsStopSeq
-				+ ", trip=" + tripId 
-				+ ", block=" + blockId 
-				+ ", predTime=" + Time.timeStrMsecNoTimeZone(predictionTime) 
+				+ ", trip="	+ tripId
+				+ ", block=" + blockId
+				+ ", predTime="	+ Time.timeStrMsecNoTimeZone(predictionTime)
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
 				+ ", creatTime=" + Time.timeStrMsecNoTimeZone(creationTime)
-				+ ", waitStop=" + (affectedByWaitStop?"t":"f")
-				+ (driverId!=null ? ", driver=" + driverId : "")
-				+ (isPassengerCountValid() ? ", psngrCnt=" + passengerCount : "")
-				+ (!Float.isNaN(passengerFullness) ? 
-						", psngrFullness=" + 
-						StringUtils.twoDigitFormat(passengerFullness) : "")
-				+ ", arrival=" + (isArrival?"t":"f")
+				+ ", waitStop="	+ (affectedByWaitStop ? "t" : "f")
+				+ (driverId != null ? ", driver=" + driverId : "")
+				+ (isPassengerCountValid() ? ", psngrCnt=" + passengerCount
+						: "")
+				+ (!Float.isNaN(passengerFullness) ? ", psngrFullness="
+						+ StringUtils.twoDigitFormat(passengerFullness) : "")
+				+ ", arrival=" + (isArrival ? "t" : "f") 
 				+ "]";
 	}
-
 
 	public String getVehicleId() {
 		return vehicleId;
@@ -315,10 +307,6 @@ public class Prediction implements Serializable {
 
 	public String getRouteId() {
 		return routeId;
-	}
-	
-	public String getRouteShortName() {
-		return routeShortName;
 	}
 	
 	public String getStopId() {
@@ -331,15 +319,15 @@ public class Prediction implements Serializable {
 	public int getGtfsStopSeq() {
 		return gtfsStopSeq;
 	}
-	
+
 	public String getTripId() {
 		return tripId;
 	}
-	
+
 	public String getBlockId() {
 		return blockId;
 	}
-	
+
 	public long getTime() {
 		return predictionTime;
 	}
@@ -347,15 +335,15 @@ public class Prediction implements Serializable {
 	public boolean isAffectedByWaitStop() {
 		return affectedByWaitStop;
 	}
-	
+
 	public long getAvlTime() {
 		return avlTime;
 	}
-	
+
 	public long getCreationTime() {
 		return creationTime;
 	}
-	
+
 	/**
 	 * Returns the driver ID if it is available. Otherwise returns null.
 	 * 
@@ -364,19 +352,19 @@ public class Prediction implements Serializable {
 	public String getDriverId() {
 		return driverId;
 	}
-	
+
 	/**
-	 * Returns the passenger count as obtained from the AVL feed. The value
-	 * will not be valid for systems that do not have passenger counting
-	 * sensors. Therefore should use isPassengerCountValid() to determine
-	 * if the value is valid.
+	 * Returns the passenger count as obtained from the AVL feed. The value will
+	 * not be valid for systems that do not have passenger counting sensors.
+	 * Therefore should use isPassengerCountValid() to determine if the value is
+	 * valid.
 	 * 
 	 * @return Passenger count from the AVL feed
 	 */
 	public short getPassengerCount() {
 		return passengerCount;
 	}
-	
+
 	/**
 	 * Passenger counts only valid for systems where there actually are
 	 * passenger counting sensors.
@@ -384,10 +372,33 @@ public class Prediction implements Serializable {
 	 * @return True if getPassengerCount() returns a valid value
 	 */
 	public boolean isPassengerCountValid() {
-		return passengerCount  >= 0;
+		return passengerCount >= 0;
 	}
-	
+
 	public boolean isArrival() {
 		return isArrival;
+	}
+	
+	/**
+	 * Returns the trip associated with the prediction. Only valid on server
+	 * side since trip is not passed to client.
+	 * 
+	 * @return
+	 */
+	public Trip getTrip() {
+		return trip;
+	}
+	
+	/**
+	 * Returns the short name for the route associated with the prediction. Only
+	 * valid on server side since uses the trip member and the trip is not
+	 * passed to client.
+	 * 
+	 * @return
+	 */
+	public String getRouteShortName() {
+		if (trip == null)
+			return null;
+		return trip.getRouteShortName();
 	}
 }

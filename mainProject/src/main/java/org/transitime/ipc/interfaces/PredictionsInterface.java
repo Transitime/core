@@ -21,7 +21,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.PredictionsForRouteStopDest;
 
 /**
  * Defines the RMI interface used for obtaining predictions. 
@@ -66,10 +66,11 @@ public interface PredictionsInterface extends Remote {
 	 * @param stopId
 	 * @param predictionsPerStop
 	 *            Max number of predictions to return for route/stop
-	 * @return List of predictions for the route/stop
+	 * @return List of PredictionsForRouteStop objects for the route/stop, one
+	 *         for each destination
 	 * @throws RemoteException
 	 */
-	public List<Prediction> get(
+	public List<PredictionsForRouteStopDest> get(
 			String routeShortName, String stopId, int predictionsPerStop) 
 				throws RemoteException;
 	
@@ -80,10 +81,11 @@ public interface PredictionsInterface extends Remote {
 	 * @param stopId
 	 * @param predictionsPerStop
 	 *            Max number of predictions to return for route/stop
-	 * @return List of predictions for the route/stop
+	 * @return List of PredictionsForRouteStop objects for the route/stop, one
+	 *         for each destination
 	 * @throws RemoteException
 	 */
-	public List<Prediction> getUsingRouteId(
+	public List<PredictionsForRouteStopDest> getUsingRouteId(
 			String routeId, String stopId, int predictionsPerStop) 
 				throws RemoteException;
 	
@@ -98,39 +100,43 @@ public interface PredictionsInterface extends Remote {
 	 *            short name instead of route ID since that is consistent.
 	 * @param predictionsPerStop
 	 *            Max number of predictions to return per route/stop
-	 * @return List of List of Prediction objects for the route/stop. The outer
-	 *         list is for each route/stop. The inner list is for each
-	 *         prediction for the route/stop.
+	 * @return List of PredictionsForRouteStop objects for the
+	 *         route/stop. There is a separate one for each destination
+	 *         for each route/stop.
 	 * @throws RemoteException
 	 */
-	public List<List<Prediction>> get(
+	public List<PredictionsForRouteStopDest> get(
 			List<RouteStop> routeStops,	int predictionsPerStop)
 				throws RemoteException;
 	
 	/**
 	 * For each route/stop specified returns a list of predictions for that
-	 * stop. Since expensive RMI calls are being done this method is much
-	 * more efficient for obtaining multiple predictions then if a separate
-	 * get() call is done for each route/stop.
+	 * stop. Since expensive RMI calls are being done this method is much more
+	 * efficient for obtaining multiple predictions then if a separate get()
+	 * call is done for each route/stop.
 	 * 
 	 * @param routeStops
 	 *            List of route/stops to return predictions for
 	 * @param predictionsPerStop
 	 *            Max number of predictions to return per route/stop
-	 * @return List of List of PredictionsInterface for the route/stop.
+	 * @return List of PredictionsForRouteStop objects for the
+	 *         route/stop. There is a separate one for each destination
+	 *         for each route/stop.
 	 * @throws RemoteException
 	 */
-	public List<List<Prediction>> getUsingRouteId(
+	public List<PredictionsForRouteStopDest> getUsingRouteId(
 			List<RouteStop> routeStops,	int predictionsPerStop)
 				throws RemoteException;
 	
 	/**
-	 * Returns all predictions, grouped by vehicle. This is intended for
-	 * clients such as the GTFS-RT vehicle update feed that outputs all
-	 * predictions by trip.
+	 * Returns all predictions. This is intended for clients such as the GTFS-RT
+	 * vehicle update feed that outputs all predictions by trip.
 	 * 
-	 * @return
+	 * @param predictionMaxFutureSecs
+	 * @return List of all PredictionsForRouteStop objects for system. There is
+	 *         a separate one for every route/stop/destination.
 	 * @throws RemoteException
 	 */
-	public List<List<Prediction>> getPredictionsByVehicle(int predictionMaxFutureSecs) throws RemoteException;
+	public List<PredictionsForRouteStopDest> getAllPredictions(
+			int predictionMaxFutureSecs) throws RemoteException;
 }

@@ -119,7 +119,7 @@ public class DbPrediction implements Serializable {
 		this.vehicleId = prediction.getVehicleId();
 		this.stopId = prediction.getStopId();
 		this.tripId = prediction.getTripId();
-		this.routeId = prediction.getRouteId();
+		this.routeId = prediction.getTrip().getRouteId();
 		this.affectedByWaitStop = prediction.isAffectedByWaitStop();
 		this.isArrival = prediction.isArrival();	
 	}

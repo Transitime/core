@@ -19,13 +19,15 @@ package org.transitime.feed.gtfsRt;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.data.Prediction;
-import org.transitime.ipc.interfaces.PredictionsInterface;
+import org.transitime.ipc.data.PredictionsForRouteStopDest;
 import org.transitime.utils.IntervalTimer;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
@@ -38,7 +40,7 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.Schedu
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
-
+ 
 /**
  * For creating GTFS-realtime trip feed.
  *
@@ -47,7 +49,7 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
  */
 public class GtfsRtTripFeed {
 
-	private final String projectId;
+	private final String agencyId;
 	
 	private static final int PREDICTION_MAX_FUTURE_SECS = 25 * 60; // 25 minutes
 	
@@ -56,8 +58,8 @@ public class GtfsRtTripFeed {
 
 	/********************** Member Functions **************************/
 
-	public GtfsRtTripFeed(String projectId) {
-		this.projectId = projectId;				
+	public GtfsRtTripFeed(String agencyId) {
+		this.agencyId = agencyId;				
 	}
 
 	private TripUpdate createTripUpdate(List<Prediction> predsForTrip) {
@@ -95,9 +97,6 @@ public class GtfsRtTripFeed {
 			tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 		}
 		
-		// FIXME
-		//also need way to more limit prediction, such as to only 20 minutes into future
-		
 		// Add timestamp
 		tripUpdate.setTimestamp(firstPred.getAvlTime());
 		
@@ -108,11 +107,11 @@ public class GtfsRtTripFeed {
 	/**
 	 * Creates a GTFS-realtime message for the predictions by trip passed in.
 	 * 
-	 * @param predsByTrip
+	 * @param predsByTripMap
 	 *            the data to be put into the GTFS-realtime message
 	 * @return the GTFS-realtime FeedMessage
 	 */
-	private FeedMessage createMessage(List<List<Prediction>> predsByTrip) {
+	private FeedMessage createMessage(Map<String, List<Prediction>> predsByTripMap) {
 		FeedMessage.Builder message = FeedMessage.newBuilder();
 		
 		FeedHeader.Builder feedheader = FeedHeader.newBuilder()
@@ -122,7 +121,7 @@ public class GtfsRtTripFeed {
 		message.setHeader(feedheader);
 		  
 		// For each trip...
-		for (List<Prediction> predsForTrip : predsByTrip) {				
+		for (List<Prediction> predsForTrip : predsByTripMap.values()) {				
 			// Create feed entity for each trip
 			FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
 					.setId(predsForTrip.get(0).getTripId());
@@ -143,44 +142,40 @@ public class GtfsRtTripFeed {
 	}
 
 	/**
-	 * Returns lists of list of all predictions for the project. Returns null if
-	 * there was a problem getting the data via RMI. There is a separate list of
-	 * predictions for each trip.
+	 * Returns map of all predictions for the project. Returns null if there was
+	 * a problem getting the data via RMI. There is a separate list of
+	 * predictions for each trip. The map is keyed by tripId.
 	 * 
-	 * @return List of List of Prediction objects, or null if not available.
+	 * @return Map keyed on tripId of List of Predictions for the trip, or null
+	 *         if could not get data from server.
 	 */
-	private List<List<Prediction>> getPredictionsPerTrip() {
+	private Map<String, List<Prediction>> getPredictionsPerTrip() {
 		// Get all the predictions, grouped by vehicle, from the server
-		PredictionsInterface predictionsInterface = 
-				PredictionsInterfaceFactory.get(projectId);
-		List<List<Prediction>> predictionsByVehicle;
+		List<PredictionsForRouteStopDest> allPredictionsByStop;
 		try {
-			predictionsByVehicle = predictionsInterface.getPredictionsByVehicle(
-					PREDICTION_MAX_FUTURE_SECS);
+			allPredictionsByStop = PredictionsInterfaceFactory.get(agencyId)
+					.getAllPredictions(PREDICTION_MAX_FUTURE_SECS);
 		} catch (RemoteException e) {
 			logger.error("Exception when getting vehicles from RMI", e);
 			return null;
 		}
 		
 		// Group the predictions by trip instead of by vehicle
-		List<List<Prediction>> predictionsByTrip = 
-				new ArrayList<List<Prediction>>();
-		for (List<Prediction> predictionsForVehicle : predictionsByVehicle) {
-			List<Prediction> predictionsForTrip = null;
-			
-			String previousTripIdForVehicle = null;
-			for (Prediction pred : predictionsForVehicle) {
-				// If new trip then need a new predictionsForTrip list
-				if (!pred.getTripId().equals(previousTripIdForVehicle)) {
+		Map<String, List<Prediction>> predictionsByTrip = 
+				new HashMap<String, List<Prediction>>();
+		for (PredictionsForRouteStopDest predictionsForStop : 
+				allPredictionsByStop) {
+			for (Prediction prediction : 
+					predictionsForStop.getPredictionsForRouteStop()) {
+				String tripId = prediction.getTripId();
+				List<Prediction> predsForTrip = predictionsByTrip.get(tripId);
+				if (predsForTrip == null) {
 					// A new trip so need to use a new trip list
-					predictionsForTrip = new ArrayList<Prediction>();
-					predictionsByTrip.add(predictionsForTrip);
+					predsForTrip = new ArrayList<Prediction>();
+					predictionsByTrip.put(tripId, predsForTrip);					
 				}
-				previousTripIdForVehicle = pred.getTripId();
 				
-				// Add this prediction to the proper list of predictions for 
-				// the trip.
-				predictionsForTrip.add(pred);
+				predsForTrip.add(prediction);
 			}
 		}
 		
@@ -197,7 +192,7 @@ public class GtfsRtTripFeed {
 	public FeedMessage createMessage() {
 		// Get prediction data from server
 		IntervalTimer timer = new IntervalTimer();
-		List<List<Prediction>> predsByTrip = getPredictionsPerTrip();
+		Map<String, List<Prediction>> predsByTrip = getPredictionsPerTrip();
 		logger.debug("Getting predictions via RMI for " +
 				"GtfsRtTripFeed.createMessage() took {} msec", 
 				timer.elapsedMsec());

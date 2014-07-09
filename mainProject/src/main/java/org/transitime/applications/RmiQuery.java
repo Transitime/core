@@ -39,7 +39,7 @@ import org.transitime.feed.gtfsRt.OctalDecoder;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.PredictionsForRouteStopDest;
 import org.transitime.ipc.data.Route;
 import org.transitime.ipc.data.Vehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
@@ -215,10 +215,10 @@ public class RmiQuery {
 			String stopId = stopIds[0];
 			String routeId = routeShortNames == null ? null : routeShortNames[0];
 			
-			List<Prediction> predictionList = 
+			List<PredictionsForRouteStopDest> predictionList = 
 					predsInterface.get(routeId, stopId, 3);
 			
-			System.out.println("PredictionsInterface for projectId=" + 
+			System.out.println("Predictions for projectId=" + 
 					projectId +	" routeId=" + routeId + " stopId=" + 
 					stopId + " are " + predictionList);
 		} else {
@@ -231,7 +231,7 @@ public class RmiQuery {
 				routeStops.add(routeStop);
 			}
 			
-			List<List<Prediction>> predictionListList = 
+			List<PredictionsForRouteStopDest> predictionListList = 
 					predsInterface.get(routeStops, 3);
 			
 			System.out.println("PredictionsInterface for projectId=" + 
