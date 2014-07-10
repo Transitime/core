@@ -37,21 +37,35 @@ public class Route implements Serializable {
 	private final String shortName;
 	private final String name;
 	private final Extent extent;
+	private final String type;
+	private final String color;
+	private final String textColor;
 	
 	private static final long serialVersionUID = -3670639103802632389L;
 
 	/********************** Member Functions **************************/
 
 	/**
+	 * Constructor used for when deserializing a proxy object. Declared private
+	 * because only used internally by the proxy class.
+	 * 
 	 * @param id
 	 * @param shortName
-	 * @param name
+	 * @param longName
+	 * @param extent
+	 * @param type
+	 * @param color
+	 * @param textColor
 	 */
-	private Route(String id, String shortName, String longName, Extent extent) {
+    private Route(String id, String shortName, String longName, Extent extent,
+	    String type, String color, String textColor) {
 		this.id = id;
 		this.shortName = shortName;
 		this.name = longName;
 		this.extent = extent;
+		this.type = type;
+		this.color = color;
+		this.textColor = textColor;
 	}
 
 	public Route(org.transitime.db.structs.Route dbRoute) {
@@ -59,6 +73,9 @@ public class Route implements Serializable {
 		this.shortName = dbRoute.getShortName();
 		this.name = dbRoute.getName();
 		this.extent = dbRoute.getExtent();
+		this.type = dbRoute.getTextColor();
+		this.color = dbRoute.getColor();
+		this.textColor = dbRoute.getTextColor();
 	}
 	/*
 	 * SerializationProxy is used so that this class can be immutable
@@ -70,6 +87,9 @@ public class Route implements Serializable {
 		private String shortName;
 		private String name;
 		private Extent extent;
+		private String type;
+		private String color;
+		private String textColor;
 		
 		private static final long serialVersionUID = 5940164509337028725L;
 		private static final short serializationVersion = 0;
@@ -82,6 +102,9 @@ public class Route implements Serializable {
 			this.shortName = r.shortName;
 			this.name = r.name;
 			this.extent = r.extent;
+			this.type = r.type;
+			this.color = r.color;
+			this.textColor = r.textColor;
 		}
 		
 		/*
@@ -93,10 +116,14 @@ public class Route implements Serializable {
 		private void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
 			stream.writeShort(serializationVersion);
+			
 			stream.writeObject(id);
 			stream.writeObject(shortName);
 			stream.writeObject(name);
 			stream.writeObject(extent);
+			stream.writeObject(type);
+			stream.writeObject(color);
+			stream.writeObject(textColor);
 		}
 
 		/*
@@ -116,6 +143,9 @@ public class Route implements Serializable {
 			shortName = (String) stream.readObject();
 			name = (String) stream.readObject();
 			extent = (Extent) stream.readObject();
+			type = (String) stream.readObject();
+			color = (String) stream.readObject();
+			textColor = (String) stream.readObject();
 		}
 		
 		/*
@@ -126,7 +156,7 @@ public class Route implements Serializable {
 		 * class object.
 		 */
 		private Object readResolve() {
-			return new Route(id, shortName, name, extent);
+			return new Route(id, shortName, name, extent, type, color, textColor);
 		}
 	} // End of SerializationProxy class
 
@@ -163,6 +193,18 @@ public class Route implements Serializable {
 		return extent;
 	}
 	
+	public String getType() {
+	    return type;
+	}
+
+	public String getColor() {
+	    return color;
+	}
+
+	public String getTextColor() {
+	    return textColor;
+	}
+
 	@Override
 	public String toString() {
 		return "Route [" 
@@ -170,6 +212,9 @@ public class Route implements Serializable {
 				+ ", shortName=" + shortName 
 				+ ", name="	+ name
 				+ ", extent=" + extent
+				+ ", type=" + type
+				+ ", color=" + color
+				+ ", textColor=" + textColor
 				+ "]";
 	}
 
