@@ -17,6 +17,8 @@
 
 package org.transitime.api.data;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.core.BlockAssignmentMethod;
@@ -31,11 +33,22 @@ import org.transitime.ipc.data.Vehicle;
 @XmlRootElement(name="vehicle")
 public class VehicleDetailsData extends VehicleData {
 
+    @XmlElement(name="schAdh")
     private int scheduleAdherence;
+ 
+    @XmlElement(name="schAdhStr")
     private String scheduleAdherenceStr;
+
+    @XmlAttribute(name="block")
     private String blockId;
+ 
+    @XmlAttribute(name="blockMthd")
     private BlockAssignmentMethod blockAssignmentMethod;
+    
+    @XmlAttribute(name="trip")
     private String tripId;
+    
+    @XmlElement(name="driver")
     private String driverId;
     
     /**
@@ -62,53 +75,5 @@ public class VehicleDetailsData extends VehicleData {
 	driverId = vehicle.getAvl().getDriverId();
     }	
 
-    public int getScheduleAdherence() {
-        return scheduleAdherence;
-    }
-
-    public void setScheduleAdherence(int scheduleAdherence) {
-	this.scheduleAdherence = scheduleAdherence;
-    }
-    
-    public String getScheduleAdherenceStr() {
-        return scheduleAdherenceStr;
-    }
-
-    public void setScheduleAdherenceStr(String scheduleAdherenceStr) {
-	this.scheduleAdherenceStr = scheduleAdherenceStr;
-    }
-    
-    public String getBlockId() {
-        return blockId;
-    }
-
-    public void setBlockId(String blockId) {
-	this.blockId = blockId;
-    }
-    
-    public BlockAssignmentMethod getBlockAssignmentMethod() {
-	return blockAssignmentMethod;
-    }
-    
-    public void setBlockAssignmentMethod(
-	    BlockAssignmentMethod blockAssignmentMethod) {
-	this.blockAssignmentMethod = blockAssignmentMethod;
-    }
-
-    public String getTripId() {
-	return tripId;
-    }
-
-    public void setTripId(String tripId) {
-	this.tripId = tripId;
-    }
-    
-    public String getDriverId() {
-        return driverId;
-    }
-
-    public void setDriverId(String driverId) {
-	this.driverId = driverId;
-    }
     
 }

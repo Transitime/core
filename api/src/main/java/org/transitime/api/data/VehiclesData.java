@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.Vehicle;
@@ -38,7 +38,7 @@ public class VehiclesData {
 
     // Need to use @XmlElementRef so that the element name used for each
     // VehicleData object will be what is specified in the VehicleData class.
-    @XmlElementRef
+    @XmlElement(name="vehicle")
     private List<VehicleData> vehiclesData;
     
     /********************** Member Functions **************************/
