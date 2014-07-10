@@ -478,21 +478,27 @@ public class PredictionDataCache {
 		List<PredictionsForRouteStopDest> predictionsForRouteStop = 
 				getPredictionsForRouteStop(trip.getRouteShortName(), stopId);
 		
-		// From the list of predictions return the one that is for the
-		// specified destination.
-		for (PredictionsForRouteStopDest preds : predictionsForRouteStop) {
-			if (preds.getDestination() == null 
-					|| preds.getDestination().equals(trip.getName()))
-				return preds;
+		// Sync on the array so that it can't change between when check to
+		// find out if the PredictionsForRouteStopDest already exists for
+		// the destination till the time insert new one.
+		synchronized (predictionsForRouteStop) {
+			// From the list of predictions return the one that is for the
+			// specified destination.
+			for (PredictionsForRouteStopDest preds : predictionsForRouteStop) {
+				if (preds.getDestination() == null
+						|| preds.getDestination().equals(trip.getName()))
+					return preds;
+			}
+
+			// The PredictionsForRouteStopDest was not yet created for the
+			// route/stop/destination so create it now and add it to list
+			// of PredictionsForRouteStopDest objects for the route/stop.
+			PredictionsForRouteStopDest preds = 
+					new PredictionsForRouteStopDest(trip, stopId);
+			predictionsForRouteStop.add(preds);
+			return preds;
 		}
 
-		// The PredictionsForRouteStopDest was not yet created for the
-		// route/stop/destination so create it now and add it to list
-		// of PredictionsForRouteStopDest objects for the route/stop.
-		PredictionsForRouteStopDest preds = 
-				new PredictionsForRouteStopDest(trip, stopId);
-		predictionsForRouteStop.add(preds);
-		return preds;
 	}
 	
 	/**
