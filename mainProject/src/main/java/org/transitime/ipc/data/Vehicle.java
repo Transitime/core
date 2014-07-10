@@ -76,7 +76,8 @@ public class Vehicle implements Serializable {
 	}
 
 	/**
-	 * Constructs a Vehicle object.
+	 * Constructor used for when deserializing a proxy object. Declared private
+	 * because only used internally by the proxy class.
 	 * 
 	 * @param blockId
 	 * @param blockAssignmentMethod
@@ -88,7 +89,7 @@ public class Vehicle implements Serializable {
 	 * @param predictable
 	 * @param realTimeSchdAdh
 	 */
-	public Vehicle(String blockId, BlockAssignmentMethod blockAssignmentMethod, 
+	private Vehicle(String blockId, BlockAssignmentMethod blockAssignmentMethod, 
 			Avl avl, float pathHeading, String routeId, String routeShortName,
 			String tripId, boolean predictable,
 			TemporalDifference realTimeSchdAdh) {
