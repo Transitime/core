@@ -58,7 +58,7 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
  */
 public class RmiQuery {
 
-	private static String projectId;
+	private static String agencyId;
 	private static Command command;
 	private static String routeShortNames[];
 	private static String stopIds[];
@@ -86,7 +86,7 @@ public class RmiQuery {
 		
 		options.addOption("h", false, "Display usage and help info."); 
 		
-		options.addOption(OptionBuilder.withArgName("projectId")
+		options.addOption(OptionBuilder.withArgName("agencyId")
                 .hasArg()
                 .isRequired()
                 .withDescription("Project name.")
@@ -136,7 +136,7 @@ public class RmiQuery {
 			displayCommandLineOptionsAndExit(options);
 		}
 
-		projectId = cmd.getOptionValue("p");
+		agencyId = cmd.getOptionValue("p");
 		
 		// Process the command
 		String commandStr = cmd.getOptionValue("c");
@@ -198,7 +198,7 @@ public class RmiQuery {
 	 */
 	private static void getPredictions() throws RemoteException {
 		// FIXME just for debugging
-		System.err.println("Getting predictions for projectId=" + projectId + 
+		System.err.println("Getting predictions for agencyId=" + agencyId + 
 				" routeShortNames=" + routeShortNames + " stopIds=" + stopIds);
 
 		// Make sure stops specified
@@ -208,7 +208,7 @@ public class RmiQuery {
 		}
 		
 		PredictionsInterface predsInterface = 
-				PredictionsInterfaceFactory.get(projectId);
+				PredictionsInterfaceFactory.get(agencyId);
 
 		// If getting prediction for single stop...
 		if (stopIds.length == 1) {
@@ -218,8 +218,8 @@ public class RmiQuery {
 			List<PredictionsForRouteStopDest> predictionList = 
 					predsInterface.get(routeId, stopId, 3);
 			
-			System.out.println("Predictions for projectId=" + 
-					projectId +	" routeId=" + routeId + " stopId=" + 
+			System.out.println("Predictions for agencyId=" + 
+					agencyId +	" routeId=" + routeId + " stopId=" + 
 					stopId + " are " + predictionList);
 		} else {
 			// Getting predictions for multiple stops
@@ -234,19 +234,19 @@ public class RmiQuery {
 			List<PredictionsForRouteStopDest> predictionListList = 
 					predsInterface.get(routeStops, 3);
 			
-			System.out.println("PredictionsInterface for projectId=" + 
-					projectId +	" routeStops=" + routeStops + "\nare " + 
+			System.out.println("PredictionsInterface for agencyId=" + 
+					agencyId +	" routeStops=" + routeStops + "\nare " + 
 					predictionListList);
 		}
 	}
 	
 	private static void getVehicles() throws RemoteException {
 		// FIXME just for debugging
-		System.err.println("Getting vehicles for projectId=" + projectId + 
+		System.err.println("Getting vehicles for agencyId=" + agencyId + 
 				" routeShortNames=" + routeShortNames + " vehicleIds=" + vehicleIds);
 		
 		VehiclesInterface vehiclesInterface = 
-				VehiclesInterfaceFactory.get(projectId);
+				VehiclesInterfaceFactory.get(agencyId);
 		
 		Collection<Vehicle> vehicles = null;
 		if (vehicleIds != null && vehicleIds.length == 1) {
@@ -277,7 +277,7 @@ public class RmiQuery {
 	
 	private static void getRouteConfig() throws RemoteException {
 		ConfigInterface configInterface = 
-				ConfigInterfaceFactory.get(projectId);
+				ConfigInterfaceFactory.get(agencyId);
 		Collection<Route> routes = configInterface.getRoutes();
 		System.out.println("Routes are:");
 		for (Route route : routes) {
@@ -289,7 +289,7 @@ public class RmiQuery {
 	 * Outputs in human readable format current snapshot of vehicle positions.
 	 */
 	private static void getGtfsRtVehiclesPositions() {
-		GtfsRtVehicleFeed feed = new GtfsRtVehicleFeed(projectId);
+		GtfsRtVehicleFeed feed = new GtfsRtVehicleFeed(agencyId);
 		FeedMessage message = feed.createMessage();
 		
 		// Output data in human readable format. First, convert
@@ -316,7 +316,7 @@ public class RmiQuery {
 	 * which contains all the prediction information.
 	 */
 	private static void getGtfsRtTripUpdates() {
-		GtfsRtTripFeed feed = new GtfsRtTripFeed(projectId);
+		GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
 		FeedMessage message = feed.createMessage();
 		
 		// Output data in human readable format. First, convert

@@ -41,15 +41,15 @@ import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
  */
 public class GtfsRtVehicleFeed {
 
-	private final String projectId;
+	private final String agencyId;
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(GtfsRtVehicleFeed.class);
 
 	/********************** Member Functions **************************/
 
-	public GtfsRtVehicleFeed(String projectId) {
-		this.projectId = projectId;				
+	public GtfsRtVehicleFeed(String agencyId) {
+		this.agencyId = agencyId;				
 	}
 	
 	/**
@@ -148,7 +148,7 @@ public class GtfsRtVehicleFeed {
 	 */
 	private Collection<Vehicle> getVehicles() {
 		VehiclesInterface vehiclesInterface = 
-				VehiclesInterfaceFactory.get(projectId);
+				VehiclesInterfaceFactory.get(agencyId);
 		Collection<Vehicle> vehicles = null;
 		try {
 			vehicles = vehiclesInterface.get();
@@ -167,5 +167,26 @@ public class GtfsRtVehicleFeed {
 	public FeedMessage createMessage() {
 		Collection<Vehicle> vehicles = getVehicles();
 		return createMessage(vehicles);
+	}
+	
+	// For getPossiblyCachedMessage()
+	private static final DataCache vehicleFeedDataCache = new DataCache();
+	
+	/**
+	 * For caching Vehicle Positions feed messages.
+	 * 
+	 * @param agencyId
+	 * @param cacheTime
+	 * @return
+	 */
+	public static FeedMessage getPossiblyCachedMessage(String agencyId, int cacheTime) {
+	    FeedMessage feedMessage = vehicleFeedDataCache.get(agencyId, cacheTime);
+	    if (feedMessage != null)
+		return feedMessage;
+	    
+	    GtfsRtVehicleFeed feed = new GtfsRtVehicleFeed(agencyId);
+	    feedMessage = feed.createMessage();
+	    vehicleFeedDataCache.put(agencyId, feedMessage);
+	    return feedMessage;
 	}
 }

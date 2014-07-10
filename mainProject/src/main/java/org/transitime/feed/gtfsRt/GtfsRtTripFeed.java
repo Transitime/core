@@ -201,4 +201,25 @@ public class GtfsRtTripFeed {
 		return createMessage(predsByTrip);
 	}
 
+	// For getPossiblyCachedMessage()
+	private static final DataCache tripFeedDataCache = new DataCache();
+	
+	/**
+	 * For caching Vehicle Positions feed messages.
+	 * 
+	 * @param agencyId
+	 * @param cacheTime
+	 * @return
+	 */
+	public static FeedMessage getPossiblyCachedMessage(String agencyId, int cacheTime) {
+	    FeedMessage feedMessage = tripFeedDataCache.get(agencyId, cacheTime);
+	    if (feedMessage != null)
+		return feedMessage;
+	    
+	    GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
+	    feedMessage = feed.createMessage();
+	    tripFeedDataCache.put(agencyId, feedMessage);
+	    return feedMessage;
+	}
+
 }

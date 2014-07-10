@@ -18,49 +18,52 @@
 package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
+
+import org.transitime.ipc.data.Vehicle;
 import org.transitime.utils.Geo;
+import org.transitime.utils.StringUtils;
 
 public class LocationData {
 
+    @XmlAttribute
     private String lat;
+    
+    @XmlAttribute
     private String lon;
+    
+    @XmlAttribute(name="t")
+    private long time;
+    
+    @XmlAttribute(name="spd")
+    private String speed;
+    
+    @XmlAttribute(name="hd")
+    private String heading;
+    
+    @XmlAttribute(name="pathHd")
+    private String pathHeading;
 
+    /********************** Member Functions **************************/
+
+    /**
+     * Need a no-arg constructor for Jersey. Otherwise get really 
+     * obtuse "MessageBodyWriter not found for media type=application/json"
+     * exception.
+     */
     protected LocationData() {}
 
     /**
      * @param lat
      * @param lon
      */
-    public LocationData(double lat, double lon) {
-	this.lat = Geo.format(lat);
-	this.lon = Geo.format(lon);
-    }
+    public LocationData(Vehicle vehicle) {
+	this.lat = Geo.format(vehicle.getLatitude());
+	this.lon = Geo.format(vehicle.getLongitude());
+	this.time = vehicle.getGpsTime();
+	this.speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
+	this.heading = StringUtils.oneDigitFormat(vehicle.getHeading());
+	this.pathHeading = StringUtils.oneDigitFormat(vehicle.getPathHeading());
 
-    /**
-     * Made an attribute so that the XML is a bit cleaner.
-     * @return
-     */
-    @XmlAttribute
-    public String getLat() {
-        return lat;
     }
-
-    public void setLat(String lat) {
-        this.lat = lat;
-    }
-
-    /**
-     * Made an attribute so that the XML is a bit cleaner.
-     * @return
-     */
-    @XmlAttribute
-    public String getLon() {
-        return lon;
-    }
-
-    public void setLon(String lon) {
-        this.lon = lon;
-    };
-    
     
 }

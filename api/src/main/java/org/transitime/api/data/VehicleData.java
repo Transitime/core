@@ -17,14 +17,16 @@
 
 package org.transitime.api.data;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.transitime.ipc.data.Vehicle;
-import org.transitime.utils.StringUtils;
 
 /**
- * 
+ * Contains the data for a single vehicle. 
+ * <p>
  * Note: @XmlType(propOrder=""...) is used to get the elements to be output in
  * desired order instead of the default of alphabetical. This makes the resulting
  * JSON/XML more readable.
@@ -32,19 +34,27 @@ import org.transitime.utils.StringUtils;
  * @author SkiBu Smith
  * 
  */
-@XmlRootElement(name="vehicle")
-@XmlType(propOrder = { "id", "gpsTime", "loc", "speed", "heading",
-	"pathHeading", "routeId", "routeShortName" })
+@XmlRootElement
+@XmlType(propOrder = { "id", "routeId", "routeShortName", "loc" })
 public class VehicleData {
     
+    @XmlAttribute
     private String id;
-    private long gpsTime;
+    
+    @XmlElement
     private LocationData loc;
-    private String speed;
-    private String heading;
-    private String pathHeading;
+    
+    @XmlAttribute(name="rId")
     private String routeId;
+    
+    @XmlAttribute(name="rShrtNm")
     private String routeShortName;
+    
+    @XmlAttribute(name="trip")
+    private String tripId;
+    
+    @XmlAttribute(name="block")
+    private String blockId;
     
     /**
      * Need a no-arg constructor for Jersey. Otherwise get really 
@@ -61,77 +71,11 @@ public class VehicleData {
      */
     public VehicleData(Vehicle vehicle) {
 	id = vehicle.getId();
-	gpsTime = vehicle.getGpsTime();
-	loc = new LocationData(vehicle.getLatitude(), vehicle.getLongitude());
-	speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
-	heading = StringUtils.oneDigitFormat(vehicle.getHeading());
-	pathHeading = StringUtils.oneDigitFormat(vehicle.getPathHeading());
+	loc = new LocationData(vehicle);
 	routeId = vehicle.getRouteId();
 	routeShortName = vehicle.getRouteShortName();
+	tripId = vehicle.getTripId();
+	blockId = vehicle.getBlockId();
     }
 
-    public String getId() {
-        return id;
-    }
-    
-    public void setId(String id) {
-        this.id = id;
-    }
-    
-    public long getGpsTime() {
-	return gpsTime;
-    }
-    
-    public void setGpsTime(long gpsTime) {
-	this.gpsTime = gpsTime;
-    }
-    
-    public LocationData getLoc() {
-        return loc;
-    }
-
-    public void setLoc(LocationData loc) {
-        this.loc = loc;
-    }
-
-    public String getSpeed() {
-        return speed;
-    }
-    
-    public void setSpeed(String speed) {
-        this.speed = speed;
-    }
-    
-    public String getHeading() {
-        return heading;
-    }
-    
-    public void setHeading(String heading) {
-        this.heading = heading;
-    }
-    
-    public String getPathHeading() {
-	return pathHeading;
-    }
-    
-    public void setPathHeading(String pathHeading) {
-	this.pathHeading = pathHeading;
-    }
-
-    public String getRouteId() {
-        return routeId;
-    }
-
-    public void setRouteId(String routeId) {
-        this.routeId = routeId;
-    }
-
-    public String getRouteShortName() {
-        return routeShortName;
-    }
-
-    public void setRouteShortName(String routeShortName) {
-        this.routeShortName = routeShortName;
-    }
-    
 }

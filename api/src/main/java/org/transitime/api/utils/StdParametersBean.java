@@ -96,6 +96,8 @@ public class StdParametersBean {
 		mediaType = MediaType.APPLICATION_JSON;
 	    else if (formatOverride.equals("xml"))
 		mediaType = MediaType.APPLICATION_XML;
+	    else if (formatOverride.equals("human"))
+		mediaType = MediaType.TEXT_PLAIN;
 	    else
 		throw WebUtils.badRequestException("Format \"format=" + 
 			formatOverride + "\" from query string not valid. " +
