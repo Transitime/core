@@ -39,22 +39,16 @@ import org.transitime.ipc.data.Vehicle;
 public class VehicleData {
     
     @XmlAttribute
-    private String id;
+    protected String id;
     
     @XmlElement
-    private LocationData loc;
+    protected LocationData loc;
     
-    @XmlAttribute(name="rId")
-    private String routeId;
+    @XmlAttribute
+    protected String routeId;
     
-    @XmlAttribute(name="rShrtNm")
-    private String routeShortName;
-    
-    @XmlAttribute(name="trip")
-    private String tripId;
-    
-    @XmlAttribute(name="block")
-    private String blockId;
+    @XmlAttribute(name="routeShrtNm")
+    protected String routeShortName;
     
     /**
      * Need a no-arg constructor for Jersey. Otherwise get really 
@@ -74,8 +68,6 @@ public class VehicleData {
 	loc = new LocationData(vehicle);
 	routeId = vehicle.getRouteId();
 	routeShortName = vehicle.getRouteShortName();
-	tripId = vehicle.getTripId();
-	blockId = vehicle.getBlockId();
     }
 
 }

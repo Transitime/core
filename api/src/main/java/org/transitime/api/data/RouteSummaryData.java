@@ -31,10 +31,10 @@ public class RouteSummaryData {
     @XmlAttribute
     private String id;
     
-    @XmlAttribute(name="rShrtNm")
+    @XmlAttribute(name="routeShrtNm")
     private String shortName;
     
-    @XmlAttribute(name="rName")
+    @XmlAttribute(name="routeName")
     private String name;
     
     /********************** Member Functions **************************/

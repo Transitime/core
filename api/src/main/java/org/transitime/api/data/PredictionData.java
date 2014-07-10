@@ -31,7 +31,7 @@ import org.transitime.ipc.data.Prediction;
 @XmlRootElement
 public class PredictionData {
 
-    @XmlAttribute(name="t")
+    @XmlAttribute(name="time")
     private long time;
     
     @XmlAttribute(name="sec")
@@ -43,21 +43,21 @@ public class PredictionData {
     // Most of the time will be predicting arrival predictions. Therefore
     // isDeparture will only be displayed for the more rare times that
     // departure prediction is being provided.
-    @XmlAttribute(name="dep")
+    @XmlAttribute(name="departure")
     private String isDeparture;
     
     @XmlAttribute(name="trip")
     private String tripId;
     
-    @XmlAttribute(name="v")
+    @XmlAttribute(name="vehicle")
     private String vehicleId;
     
     // Only output if true
-    @XmlAttribute(name="sch")
+    @XmlAttribute(name="notYetStarted")
     private String basedOnScheduledDeparture;
     
     // Only output if passenger count is valid
-    @XmlAttribute(name="psngCnt")
+    @XmlAttribute(name="passengerCount")
     private String passengerCount;
     
     /********************** Member Functions **************************/

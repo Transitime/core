@@ -20,23 +20,31 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.ipc.data.Vehicle;
 
 /**
- *
+ * Contains data for a single vehicle with additional info that is meant more
+ * for management than for passengers.
+ * <p>
+ * Note: unfortunately cannot put the attributes in this class after the
+ *  attributes of the parent class.
  *
  * @author SkiBu Smith
  *
  */
 @XmlRootElement(name="vehicle")
+@XmlType(propOrder = { "scheduleAdherence",
+	"scheduleAdherenceStr", "blockId", "blockAssignmentMethod", "tripId",
+	"driverId"})
 public class VehicleDetailsData extends VehicleData {
 
-    @XmlElement(name="schAdh")
+    @XmlAttribute(name="schAdh")
     private int scheduleAdherence;
  
-    @XmlElement(name="schAdhStr")
+    @XmlAttribute(name="schAdhStr")
     private String scheduleAdherenceStr;
 
     @XmlAttribute(name="block")
