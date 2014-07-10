@@ -22,13 +22,15 @@
  * <p>
  * <ul>
  * <li>Must have a no-args constructor</li>
- * <li>Must have a getter and a setter for every member. Oddly, the setters are 
- * not called when serializing the objects but they still need to exist for 
- * every member that is not transient. Otherwise get a Internal Server error
- * without any explanation of what is going on</li>
+ * <li>Each member or getter, but not both, must be labeled with either 
+ * @XmlElement or @XmlAttribute.</li>
  * <li>If you specify the order that the members of the class should be
  * serialized then you need to specify every single member. Otherwise you
  * get a cryptic Internal Server error with an further explanation.</li>
+ * <li>Can rename each element to give it a consistent, clear, and short
+ * name. But don't need to make them too short because will be using 
+ * compression when sending the data and long element/attribute names
+ * compress really well when they are frequently repeated. 
  * </ul>
  * <p>
  * At first thought that could simply handle lists of objects, such as 
