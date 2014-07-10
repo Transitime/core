@@ -148,7 +148,8 @@ public class HibernateUtils {
 					factory = createSessionFactory(projectId);
 					sessionFactoryCache.put(projectId, factory);
 				} catch (Exception e) {
-					logger.error("Could not create SessionFactor for projectId={}", projectId, e);
+					logger.error("Could not create SessionFactory for "
+							+ "projectId={}", projectId, e);
 				}
 			}						
 		}
