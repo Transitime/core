@@ -20,6 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import org.transitime.ipc.data.Vehicle;
+import org.transitime.utils.ChinaGpsOffset;
 import org.transitime.utils.Geo;
 import org.transitime.utils.StringUtils;
 
@@ -31,16 +32,16 @@ public class LocationData {
     @XmlAttribute
     private String lon;
     
-    @XmlAttribute(name="t")
+    @XmlAttribute
     private long time;
     
-    @XmlAttribute(name="spd")
+    @XmlAttribute
     private String speed;
     
-    @XmlAttribute(name="hd")
+    @XmlAttribute
     private String heading;
     
-    @XmlAttribute(name="pathHd")
+    @XmlAttribute
     private String pathHeading;
 
     /********************** Member Functions **************************/
@@ -57,8 +58,13 @@ public class LocationData {
      * @param lon
      */
     public LocationData(Vehicle vehicle) {
-	this.lat = Geo.format(vehicle.getLatitude());
-	this.lon = Geo.format(vehicle.getLongitude());
+	// If location is in China (approximately) then adjust lat & lon so 
+	// that will be displayed properly on map. 
+	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(
+		vehicle.getLatitude(), vehicle.getLongitude());
+	
+	this.lat = Geo.format(latLon.getLat());
+	this.lon = Geo.format(latLon.getLon());
 	this.time = vehicle.getGpsTime();
 	this.speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
 	this.heading = StringUtils.oneDigitFormat(vehicle.getHeading());
