@@ -530,6 +530,15 @@ public class Trip implements Serializable {
 	}
 	
 	/**
+	 * Returns route name. Gets it from the database configuration.
+	 * @return
+	 */
+	public String getRouteName() {
+		Route route = Core.getInstance().getDbConfig().getRoute(routeId);
+		return route.getName();
+	}
+	
+	/**
 	 * @return the directionId
 	 */
 	public String getDirectionId() {
