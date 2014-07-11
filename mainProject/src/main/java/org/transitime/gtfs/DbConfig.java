@@ -48,9 +48,14 @@ import org.transitime.utils.MapKey;
 
 /**
  * Reads all the configuration data from the database. The data is based on GTFS
- * but is heavily processed into things like TripPatterns and better Paths to 
+ * but is heavily processed into things like TripPatterns and better Paths to
  * make the data far easier to use.
- *  
+ * <p>
+ * DbConfig is intended for the core application such that the necessary top
+ * level data can be read in at system startup. This doesn't read in all the
+ * low-level data such as paths and travel times. Those items are very
+ * voluminous and are therefore lazy loaded.
+ * 
  * @author SkiBu Smith
  *
  */
@@ -72,7 +77,11 @@ public class DbConfig {
 	
 	private List<Route> routes;
 	// Keyed on routeId
-	private Map<String, Route> routesMap;
+	private Map<String, Route> routesByRouteIdMap;
+	// Keyed on routeShortName
+	private Map<String, Route> routesByRouteShortNameMap;
+	// Keyed on routeId
+	private Map<String, List<TripPattern>> tripPatternsByRouteMap;
 	
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
@@ -85,6 +94,11 @@ public class DbConfig {
 	// Seems that stops not really needed because already in stopPaths. Unless 
 	// trying to determine nearest stops.
 	private Map<String, Stop> stopsMap;
+
+	// Remember the session. This is a bit odd because usually
+	// close sessions but want to keep it open so can do lazy loading
+	// and so that can read in TripPatterns later using the same session.
+	private Session globalSession;
 
 	// Database revision is the configuration being modified. Once finished then
 	// it will be copied to a working revision.
@@ -103,7 +117,7 @@ public class DbConfig {
 	public DbConfig(String projectId) {
 		this.projectId = projectId;
 	}
-	
+		
 	/**
 	 * Initiates the reading of the configuration data from the database.
 	 * Calls actuallyReadData() which does all the work.
@@ -120,13 +134,10 @@ public class DbConfig {
 
 		// Remember which revision of data is being used
 		this.configRev = configRev;
-		
-		// Open up Hibernate session so can read in data
-		Session session = HibernateUtils.getSession(projectId);		
-		
+				
 		// Do the low-level processing
 		try {
-			actuallyReadData(session, configRev);
+			actuallyReadData(configRev);
 		} catch (HibernateException e) {
 			logger.error("Error reading configuration data from db for " +
 					"configRev={}.", configRev);
@@ -268,14 +279,75 @@ public class DbConfig {
 		return map;
 	}
 	
-	/*
+	/**
+	 * Converts trip patterns into map keyed on route ID
+	 * @param tripPatterns
+	 * @return
+	 */
+	private static Map<String, List<TripPattern>> putTripPatternsInfoMap(
+			List<TripPattern> tripPatterns) {
+		Map<String, List<TripPattern>> map = 
+				new HashMap<String, List<TripPattern>>();
+		for (TripPattern tripPattern : tripPatterns) {
+			String routeId = tripPattern.getRouteId();
+			List<TripPattern> tripPatternsForRoute = map.get(routeId);
+			if (tripPatternsForRoute == null) {
+				tripPatternsForRoute = new ArrayList<TripPattern>();
+				map.put(routeId, tripPatternsForRoute);
+			}
+			tripPatternsForRoute.add(tripPattern);
+		}
+		
+		return map;
+	}
+	
+	/**
+	 * Returns the list of trip patterns associated with the specified route.
+	 * Reads the trip patterns from the database and stores them in cache
+	 * so that subsequent calls get them directly from the cache. The first
+	 * time this is called it can take a few seconds. Therefore this is not
+	 * done at startup since want startup to be quick.
+	 * 
+	 * @param routeId
+	 * @return
+	 */
+	public List<TripPattern> getTripPatternsForRoute(String routeId) {
+		// If haven't read in the trip pattern data yet, do so now and cache it
+		if (tripPatternsByRouteMap == null) {
+			IntervalTimer timer = new IntervalTimer();
+
+			// Need to sync such that block data, which includes trip
+			// pattern data, is only read serially (not read simultaneously
+			// by multiple threads). Otherwise get a "force initialize loading
+			// collection" error. 
+			synchronized (Block.getLazyLoadingSyncObject()) {
+				logger.debug("About to load trip patterns...");
+				
+				// Use the global session so that don't need to read in any
+				// trip patterns that have already been read in as part of
+				// reading in block assignments. This makes reading of the
+				// trip pattern data much faster.
+				List<TripPattern> tripPatterns = TripPattern.getTripPatterns(
+						globalSession, configRev);
+				tripPatternsByRouteMap = putTripPatternsInfoMap(tripPatterns);
+			}
+			logger.debug("Reading trip patterns took {} msec", 
+					timer.elapsedMsec());
+		}
+		
+		// Return cached trip pattern data
+		return tripPatternsByRouteMap.get(routeId);
+	}
+	
+	/**
 	 * Creates a map of routes keyed by route ID so that can easily find a 
 	 * route using its ID.
 	 *  
 	 * @param routes
 	 * @return
 	 */
-	private static Map<String, Route> putRoutesIntoMap(List<Route> routes) {
+	private static Map<String, Route> putRoutesIntoMapByRouteId(
+			List<Route> routes) {
 		// Convert list of routes to a map keyed on routeId
 		Map<String, Route> routesMap = new HashMap<String, Route>();
 		for (Route route : routes) {
@@ -285,13 +357,34 @@ public class DbConfig {
 	}
 	
 	/**
+	 * Creates a map of routes keyed by route short name so that can easily find
+	 * a route.
+	 * 
+	 * @param routes
+	 * @return
+	 */
+	private static Map<String, Route> putRoutesIntoMapByRouteShortName(List<Route> routes) {
+		// Convert list of routes to a map keyed on routeId
+		Map<String, Route> routesMap = new HashMap<String, Route>();
+		for (Route route : routes) {
+			routesMap.put(route.getShortName(), route);
+		}
+		return routesMap;	
+	}
+	
+	/**
 	 * Reads the individual data structures from the database.
 	 * 
-	 * @param session
 	 * @param configRev
 	 */
-	private void actuallyReadData(Session session, int configRev) {
+	private void actuallyReadData(int configRev) {
 		IntervalTimer timer;
+
+		// Open up Hibernate session so can read in data. Remember this
+		// session as a member variable. This is a bit odd because usually
+		// close sessions but want to keep it open so can do lazy loading
+		// and so that can read in TripPatterns later using the same session.
+		globalSession = HibernateUtils.getSession(projectId);			
 
 //		// NOTE. Thought that it might speed things up if would read in
 //		// trips, trip patterns, and stopPaths all at once so that can use a single 
@@ -318,28 +411,29 @@ public class DbConfig {
 
 		
 		timer = new IntervalTimer();
-		blocks = Block.getBlocks(session, configRev);
+		blocks = Block.getBlocks(globalSession, configRev);
 		blocksByServiceMap = putBlocksIntoMap(blocks);
 		logger.debug("Reading blocks took {} msec", timer.elapsedMsec());
 		
 		timer = new IntervalTimer();
-		routes = Route.getRoutes(session, configRev);
-		routesMap = putRoutesIntoMap(routes);
+		routes = Route.getRoutes(globalSession, configRev);
+		routesByRouteIdMap = putRoutesIntoMapByRouteId(routes);
+		routesByRouteShortNameMap = putRoutesIntoMapByRouteShortName(routes);
 		logger.debug("Reading routes took {} msec", timer.elapsedMsec());
 
 		timer = new IntervalTimer();
-		List<Stop> stopsList = Stop.getStops(session, configRev);
+		List<Stop> stopsList = Stop.getStops(globalSession, configRev);
 		stopsMap = putStopsIntoMap(stopsList);
 		logger.debug("Reading stops took {} msec", timer.elapsedMsec());
 
 		timer = new IntervalTimer();
-		agencies = Agency.getAgencies(session, configRev);
-		calendars = Calendar.getCalendars(session, configRev);
-		calendarDates = CalendarDate.getCalendarDates(session, configRev);
-		fareAttributes= FareAttribute.getFareAttributes(session, configRev);
-		fareRules = FareRule.getFareRules(session, configRev);
-		frequencies = Frequency.getFrequencies(session, configRev);
-		transfers = Transfer.getTransfers(session, configRev);
+		agencies = Agency.getAgencies(globalSession, configRev);
+		calendars = Calendar.getCalendars(globalSession, configRev);
+		calendarDates = CalendarDate.getCalendarDates(globalSession, configRev);
+		fareAttributes= FareAttribute.getFareAttributes(globalSession, configRev);
+		fareRules = FareRule.getFareRules(globalSession, configRev);
+		frequencies = Frequency.getFrequencies(globalSession, configRev);
+		transfers = Transfer.getTransfers(globalSession, configRev);
 		
 		logger.debug("Reading everything else took {} msec", 
 				timer.elapsedMsec());
@@ -367,8 +461,8 @@ public class DbConfig {
 	 * 
 	 * @return
 	 */
-	public Map<String, Route> getRoutesMap() {
-		return Collections.unmodifiableMap(routesMap);
+	public Map<String, Route> getRoutesByRouteIdMap() {
+		return Collections.unmodifiableMap(routesByRouteIdMap);
 	}
 	
 	/**
@@ -386,8 +480,18 @@ public class DbConfig {
 	 * @param routeId
 	 * @return
 	 */
-	public Route getRoute(String routeId) {
-		return routesMap.get(routeId);
+	public Route getRouteById(String routeId) {
+		return routesByRouteIdMap.get(routeId);
+	}
+	
+	/**
+	 * Returns the Route with the specified routeShortName
+	 * 
+	 * @param routeShortName
+	 * @return
+	 */
+	public Route getRouteByShortName(String routeShortName) {
+		return routesByRouteShortNameMap.get(routeShortName);
 	}
 	
 	/**
@@ -472,7 +576,7 @@ public class DbConfig {
 		StopPath path0 = tp.getStopPath(0);
 		
 		outputCollection("Blocks", dbConfig.blocks);
-		outputCollection("Routes", dbConfig.routesMap.values());
+		outputCollection("Routes", dbConfig.routesByRouteIdMap.values());
 		outputCollection("Stops", dbConfig.stopsMap.values());
 		outputCollection("Agencies", dbConfig.agencies);
 		outputCollection("Calendars", dbConfig.calendars);

@@ -169,7 +169,7 @@ public class PredictionDataCache {
 		// Determine the routeShortName
 		String routeShortName = null;
 		if (routeId != null) {
-			Route route = Core.getInstance().getDbConfig().getRoute(routeId);
+			Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
 			if (route != null)
 				routeShortName = route.getShortName();
 		}

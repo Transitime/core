@@ -29,7 +29,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.transitime.config.Config;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
@@ -292,7 +291,7 @@ public class Core {
 			}
 			
 			String agencyId = CoreConfig.getAgencyId();
-			createCore(agencyId);
+			Core core = createCore(agencyId);
 			
 			// Start any optional modules. 
 			// For how CoreConfig default modules includes the NextBus AVL feed

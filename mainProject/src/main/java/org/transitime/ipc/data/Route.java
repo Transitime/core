@@ -17,205 +17,61 @@
 
 package org.transitime.ipc.data;
 
-import java.io.IOException;
-import java.io.InvalidObjectException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
-import org.transitime.db.structs.Extent;
+import org.transitime.db.structs.Vector;
 
 /**
- * Contains configuration information for a single route. For providing info to
- * client. This class is Immutable so that it is threadsafe.
- * 
+ *
+ *
  * @author SkiBu Smith
- * 
+ *
  */
-public class Route implements Serializable {
+public class Route extends RouteSummary {
 
-	private final String id;
-	private final String shortName;
-	private final String name;
-	private final Extent extent;
-	private final String type;
-	private final String color;
-	private final String textColor;
+	private Collection<Stop> stops;
+	private Collection<Vector> segments;
 	
-	private static final long serialVersionUID = -3670639103802632389L;
+	private static final long serialVersionUID = -227901807027962547L;
 
 	/********************** Member Functions **************************/
 
-	/**
-	 * Constructor used for when deserializing a proxy object. Declared private
-	 * because only used internally by the proxy class.
-	 * 
-	 * @param id
-	 * @param shortName
-	 * @param longName
-	 * @param extent
-	 * @param type
-	 * @param color
-	 * @param textColor
-	 */
-    private Route(String id, String shortName, String longName, Extent extent,
-	    String type, String color, String textColor) {
-		this.id = id;
-		this.shortName = shortName;
-		this.name = longName;
-		this.extent = extent;
-		this.type = type;
-		this.color = color;
-		this.textColor = textColor;
-	}
-
 	public Route(org.transitime.db.structs.Route dbRoute) {
-		this.id = dbRoute.getId();
-		this.shortName = dbRoute.getShortName();
-		this.name = dbRoute.getName();
-		this.extent = dbRoute.getExtent();
-		this.type = dbRoute.getTextColor();
-		this.color = dbRoute.getColor();
-		this.textColor = dbRoute.getTextColor();
-	}
-	/*
-	 * SerializationProxy is used so that this class can be immutable
-	 * and so that can do versioning of objects.
-	 */
-	private static class SerializationProxy implements Serializable {
-		// Exact copy of fields of Route enclosing class object
-		private String id;
-		private String shortName;
-		private String name;
-		private Extent extent;
-		private String type;
-		private String color;
-		private String textColor;
+		super(dbRoute);
 		
-		private static final long serialVersionUID = 5940164509337028725L;
-		private static final short serializationVersion = 0;
-
-		/*
-		 * Only to be used within this class.
-		 */
-		private SerializationProxy(Route r) {
-			this.id = r.id;
-			this.shortName = r.shortName;
-			this.name = r.name;
-			this.extent = r.extent;
-			this.type = r.type;
-			this.color = r.color;
-			this.textColor = r.textColor;
+		// Create Collection of Stop objects
+		Collection<org.transitime.db.structs.Stop> dbStops = dbRoute.getStops();
+		stops = new ArrayList<Stop>(dbStops.size());
+		for (org.transitime.db.structs.Stop dbStop : dbStops) {
+			stops.add(new Stop(dbStop));
 		}
 		
-		/*
-		 * When object is serialized writeReplace() causes this
-		 * SerializationProxy object to be written. Write it in a
-		 * custom way that includes a version ID so that clients
-		 * and servers can have two different versions of code.
-		 */
-		private void writeObject(java.io.ObjectOutputStream stream)
-				throws IOException {
-			stream.writeShort(serializationVersion);
-			
-			stream.writeObject(id);
-			stream.writeObject(shortName);
-			stream.writeObject(name);
-			stream.writeObject(extent);
-			stream.writeObject(type);
-			stream.writeObject(color);
-			stream.writeObject(textColor);
-		}
-
-		/*
-		 * Custom method of deserializing a SerializationProy object.
-		 */
-		private void readObject(java.io.ObjectInputStream stream)
-				throws IOException, ClassNotFoundException {
-			short readVersion = stream.readShort();
-			if (serializationVersion != readVersion) {
-				throw new IOException("Serialization error when reading "
-						+ getClass().getSimpleName()
-						+ " object. Read serializationVersion=" + readVersion);
-			}
-
-			// serialization version is OK so read in object
-			id = (String) stream.readObject();
-			shortName = (String) stream.readObject();
-			name = (String) stream.readObject();
-			extent = (Extent) stream.readObject();
-			type = (String) stream.readObject();
-			color = (String) stream.readObject();
-			textColor = (String) stream.readObject();
-		}
-		
-		/*
-		 * When an object is read in it will be a SerializatProxy object
-		 * due to writeReplace() being used by the enclosing class. When
-		 * such an object is deserialized this method will be called and
-		 * the SerializationProxy object is converted to an enclosing
-		 * class object.
-		 */
-		private Object readResolve() {
-			return new Route(id, shortName, name, extent, type, color, textColor);
-		}
-	} // End of SerializationProxy class
-
-	/*
-	 * Needed as part of using a SerializationProxy. When Vehicle object
-	 * is serialized the SerializationProxy will instead be used.
-	 */
-	private Object writeReplace() {
-		return new SerializationProxy(this);
-	}
-
-	/*
-	 * Needed as part of using a SerializationProxy. Makes sure that Vehicle
-	 * object cannot be deserialized without using proxy, thereby eliminating
-	 * possibility of such an attack as described in "Effective Java".
-	 */
-	private void readObject(ObjectInputStream stream) throws InvalidObjectException {
-		throw new InvalidObjectException("Must use proxy instead");
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getShortName() {
-		return shortName;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public Extent getExtent() {
-		return extent;
-	}
-	
-	public String getType() {
-	    return type;
-	}
-
-	public String getColor() {
-	    return color;
-	}
-
-	public String getTextColor() {
-	    return textColor;
+		// Create Collection of path segment vector objects
+		segments = dbRoute.getPathSegments();
 	}
 
 	@Override
 	public String toString() {
 		return "Route [" 
-				+ "id=" + id 
+				+ "stops=" + stops 
+				+ ", id=" + id 
 				+ ", shortName=" + shortName 
-				+ ", name="	+ name
+				+ ", name=" + name 
 				+ ", extent=" + extent
-				+ ", type=" + type
-				+ ", color=" + color
-				+ ", textColor=" + textColor
+				+ ", type=" + type 
+				+ ", color=" + color 
+				+ ", textColor=" + textColor 
+				+ ", stops=" + stops
+				+ ", segments=" + segments
 				+ "]";
 	}
 
+	public Collection<Stop> getStops() {
+		return stops;
+	}
+
+	public Collection<Vector> getSegments() {
+		return segments;
+	}
 }

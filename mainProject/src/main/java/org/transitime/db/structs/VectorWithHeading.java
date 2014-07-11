@@ -32,6 +32,8 @@ public class VectorWithHeading extends Vector {
 	// equator.
 	private final float headingInDegrees;
 	
+	private static final long serialVersionUID = -1505569199887453928L;
+
 	/********************** Member Functions **************************/
 
 	/**

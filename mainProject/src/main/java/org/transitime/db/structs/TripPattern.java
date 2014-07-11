@@ -235,7 +235,8 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<TripPattern> getTripPatterns(Session session, int configRev) 
+	public static List<TripPattern> getTripPatterns(Session session, 
+			int configRev) 
 			throws HibernateException {
 		String hql = "FROM TripPattern " +
 				"    WHERE configRev = :configRev";

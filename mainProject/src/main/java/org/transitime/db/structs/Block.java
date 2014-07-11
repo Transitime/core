@@ -554,6 +554,11 @@ public final class Block implements Serializable {
 		return Collections.unmodifiableList(trips);
 	}
 	
+	// FIXME
+	public static Object getLazyLoadingSyncObject() {
+		return lazyLoadingSyncObject;
+	}
+	
 	/**
 	 * Returns the trip specified by the tripIndex
 	 * @param tripIndex

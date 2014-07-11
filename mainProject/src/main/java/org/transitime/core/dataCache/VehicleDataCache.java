@@ -110,7 +110,7 @@ public class VehicleDataCache {
      */
     public Collection<Vehicle> getVehiclesForRouteUsingRouteId(String routeId) {
 	String routeShortName = null;
-	Route route = Core.getInstance().getDbConfig().getRoute(routeId);
+	Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
 	if (route != null)
 	    routeShortName = route.getShortName();
 	return getVehiclesForRoute(routeShortName);

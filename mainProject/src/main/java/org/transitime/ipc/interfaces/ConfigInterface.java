@@ -22,6 +22,7 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 
 import org.transitime.ipc.data.Route;
+import org.transitime.ipc.data.RouteSummary;
 
 /**
  *
@@ -37,5 +38,7 @@ public interface ConfigInterface extends Remote {
 	 * @return
 	 * @throws RemoteException
 	 */
-	public Collection<Route> getRoutes() throws RemoteException;
+	public Collection<RouteSummary> getRoutes() throws RemoteException;
+	
+	public Route getRoute(String routeShartName) throws RemoteException;
 }

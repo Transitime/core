@@ -534,7 +534,7 @@ public class Trip implements Serializable {
 	 * @return
 	 */
 	public String getRouteName() {
-		Route route = Core.getInstance().getDbConfig().getRoute(routeId);
+		Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
 		return route.getName();
 	}
 	

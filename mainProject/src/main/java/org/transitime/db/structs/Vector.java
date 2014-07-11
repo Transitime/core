@@ -16,6 +16,8 @@
  */
 package org.transitime.db.structs;
 
+import java.io.Serializable;
+
 import org.transitime.utils.Geo;
 
 /**
@@ -24,11 +26,13 @@ import org.transitime.utils.Geo;
  * @author SkiBu Smith
  *
  */
-public class Vector {
+public class Vector implements Serializable {
 	
 	protected Location l1;
 	protected Location l2;
 	
+	private static final long serialVersionUID = -3504110880635334536L;
+
 	/********************** Member Functions **************************/
 	
 	public Vector(Location l1, Location l2) {

@@ -17,9 +17,14 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -31,6 +36,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.TitleFormatter;
@@ -88,16 +94,26 @@ public class Route implements Serializable {
 	@Column
 	private final Double maxDistance;
 	
-	@Transient // Later will probably want to store this in database, but not sure
+	@Transient // Later will probably want to store this in database, 
+	           // but not yet sure. This means it is not available to application!
 	private final List<TripPattern> tripPatternsForRoute;
 
+	// For getStops()
+	@Transient
+	private Collection<Stop> stops = null;
+	
+	// for getPathSegments()
+	@Transient
+	private Collection<Vector> stopPaths = null;
+	
 	// Because Hibernate requires objects with composite Ids to be Serializable
 	private static final long serialVersionUID = 9037023420649883860L;
 
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructor
+	 * Constructor. Used for when processing GTFS data. Creates a 
+	 * Route object that can be written to database.
 	 * 
 	 * @param gtfsRoute
 	 * @param tripPatternsForRoute
@@ -387,6 +403,89 @@ public class Route implements Serializable {
 		return true;
 	}
 
+	/**
+	 * Returns unordered collection of stops associated with route
+	 * 
+	 * @return
+	 */
+	public synchronized Collection<Stop> getStops() {
+		// If stop collection already determined then simply return it
+		if (stops != null)
+			return stops;
+		
+		// Get the trip patterns for the route. Can't use the member
+		// variable tripPatternsForRoute since it is only set when the
+		// GTFS data is processed and stored in the db. Since this member
+		// is transient it is not stored in the db and therefore not
+		// available to this client application. But it can be obtained
+		// from the DbConfig.
+		List<TripPattern> tripPatternsForRoute = 
+				Core.getInstance().getDbConfig().getTripPatternsForRoute(id);
+
+		// Stop list not yet determined so determine it now using
+		// trip patterns.
+		Map<String, Stop> stopMap = new HashMap<String, Stop>();
+		for (TripPattern tripPattern : tripPatternsForRoute) {
+			for (StopPath stopPath : tripPattern.getStopPaths()) {
+				String stopId = stopPath.getStopId();
+				
+				// If already added this stop then continue to next one
+				if (stopMap.containsKey(stopId))
+					continue;
+				
+				Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+				stopMap.put(stopId, stop);
+			}
+		}
+		stops = stopMap.values();
+		
+		// Return the newly created collection of stops
+		return stops;
+	}
+	
+	/**
+	 * Returns unordered collection of path vectors associated with route
+	 * @return
+	 */
+	public synchronized Collection<Vector> getPathSegments() {
+		// If stop paths collection already determined then simply return it
+		if (stopPaths != null)
+			return stopPaths;
+		
+		// Get the trip patterns for the route. Can't use the member
+		// variable tripPatternsForRoute since it is only set when the
+		// GTFS data is processed and stored in the db. Since this member
+		// is transient it is not stored in the db and therefore not
+		// available to this client application. But it can be obtained
+		// from the DbConfig.
+		List<TripPattern> tripPatternsForRoute = 
+				Core.getInstance().getDbConfig().getTripPatternsForRoute(id);
+		
+		Map<String, StopPath> stopPathMap = new HashMap<String, StopPath>();
+		for (TripPattern tripPattern : tripPatternsForRoute) {
+			for (StopPath stopPath : tripPattern.getStopPaths()) {
+				String stopPathId = stopPath.getId();
+				
+				// If already added this stop then continue to next one
+				if (stopPathMap.containsKey(stopPathId))
+					continue;
+				
+				stopPathMap.put(stopPathId, stopPath);
+			}
+		}
+		
+		// For each of the unique stop paths add the vectors to the collection
+		stopPaths = new ArrayList<Vector>(stopPathMap.values().size());
+		for (StopPath stopPath : stopPathMap.values()) {
+			for (Vector vector : stopPath.getSegmentVectors()) {
+				stopPaths.add(vector);
+			}
+		}
+		
+		// Return the newly created collection of stop paths
+		return stopPaths;
+	}
+	
 	/********************** Getter Methods **************************/
 
 	/**
@@ -470,13 +569,6 @@ public class Route implements Serializable {
 		return description;
 	}
 
-	/**
-	 * @return the tripPatternsForRoute
-	 */
-	public List<TripPattern> getTripPatternsForRoute() {
-		return tripPatternsForRoute;
-	}
-	
 	/**
 	 * @return the extent of the stops for the route
 	 */

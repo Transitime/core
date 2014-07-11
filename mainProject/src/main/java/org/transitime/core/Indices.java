@@ -456,7 +456,7 @@ class Indices {
 	 */
 	public Route getRoute() {
 		String routeId = getTrip().getRouteId();
-		return Core.getInstance().getDbConfig().getRoute(routeId);
+		return Core.getInstance().getDbConfig().getRouteById(routeId);
 	}
 	
 	public int getSegmentIndex() {

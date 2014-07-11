@@ -41,6 +41,7 @@ import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.data.PredictionsForRouteStopDest;
 import org.transitime.ipc.data.Route;
+import org.transitime.ipc.data.RouteSummary;
 import org.transitime.ipc.data.Vehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
@@ -278,9 +279,12 @@ public class RmiQuery {
 	private static void getRouteConfig() throws RemoteException {
 		ConfigInterface configInterface = 
 				ConfigInterfaceFactory.get(agencyId);
-		Collection<Route> routes = configInterface.getRoutes();
+		Collection<RouteSummary> routes = configInterface.getRoutes();
 		System.out.println("Routes are:");
-		for (Route route : routes) {
+		for (RouteSummary routeSummary : routes) {
+			System.out.println(routeSummary);
+			
+			Route route = configInterface.getRoute(routeSummary.getShortName());
 			System.out.println(route);
 		}
 	}
