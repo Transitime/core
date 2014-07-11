@@ -113,11 +113,11 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRoute(java.lang.String)
 	 */
 	@Override
-	public Route getRoute(String routeShartName) throws RemoteException {
+	public Route getRoute(String routeShortName) throws RemoteException {
 		// Get the db route info 
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		org.transitime.db.structs.Route dbRoute = 
-				dbConfig.getRouteByShortName(routeShartName);
+				dbConfig.getRouteByShortName(routeShortName);
 		
 		// Convert db route into an ipc route
 		Route ipcRoute = new Route(dbRoute);

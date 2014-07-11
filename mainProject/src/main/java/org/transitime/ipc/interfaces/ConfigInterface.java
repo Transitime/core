@@ -40,5 +40,5 @@ public interface ConfigInterface extends Remote {
 	 */
 	public Collection<RouteSummary> getRoutes() throws RemoteException;
 	
-	public Route getRoute(String routeShartName) throws RemoteException;
+	public Route getRoute(String routeShortName) throws RemoteException;
 }
