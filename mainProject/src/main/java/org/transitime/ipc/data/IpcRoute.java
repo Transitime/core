@@ -77,14 +77,15 @@ public class IpcRoute extends IpcRouteSummary {
 			if (tripPattern.getName().equals(destinationName)) {
 				// Create a special UI shape for the part of this trip pattern
 				// that is after the specified stop.
-				IpcShape ipcShapeForUi = new IpcShape(true /* isUiShape */);
+				IpcShape ipcShapeForUi = 
+						new IpcShape(tripPattern.getId(), true /* isUiShape */);
 				shapes.add(ipcShapeForUi);
 				
 				boolean stopFound = false;
 				// Go through each stop for the UI trip pattern
 				for (StopPath stopPath : tripPattern.getStopPaths()) {
 					// If found desired start of UI portion of trip pattern
-					if (stopPath.getId().equals(stopId)) {
+					if (stopPath.getStopId().equals(stopId)) {
 						stopFound = true;
 					}
 					
@@ -92,7 +93,8 @@ public class IpcRoute extends IpcRouteSummary {
 					// trip pattern then remember it as such
 					if (stopFound) {
 						uiStopsIds.add(stopPath.getId());
-						Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+						Stop stop = Core.getInstance().getDbConfig()
+								.getStop(stopPath.getStopId());
 						stops.add(new IpcStop(stop, true /* isUiStop */));
 						
 						// Add the segments for this path if it is beyond the
@@ -144,7 +146,7 @@ public class IpcRoute extends IpcRouteSummary {
 					// shape and record the beginning point of the stop path.
 					if (begginingOfSpan) {
 						// Create a new ipc shape
-						ipcShape = new IpcShape(false /* isUiShape */);
+						ipcShape = new IpcShape(tripPattern.getId(), false /* isUiShape */);
 						shapes.add(ipcShape);
 						
 						// Add start of path

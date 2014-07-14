@@ -31,6 +31,7 @@ import org.transitime.db.structs.Location;
  */
 public class IpcShape implements Serializable {
 
+	private String tripPatternId;
 	private List<Location> locations;
 	private boolean isUiShape;
 	
@@ -38,21 +39,27 @@ public class IpcShape implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	IpcShape(boolean isUiShape) {
+	IpcShape(String tripPatternId, boolean isUiShape) {
+		this.tripPatternId = tripPatternId;
 		this.locations = new ArrayList<Location>();
 		this.isUiShape = isUiShape;
 	}
 	
 	@Override
 	public String toString() {
-		return "IpcShape [" 
-				+ "locations=" + locations 
+		return "IpcShape ["
+				+ "tripPatternId=" + tripPatternId
+				+ ", locations=" + locations 
 				+ ", isUiShape=" + isUiShape
 				+ "]";
 	}
 
 	public void add(Location loc) {
 		locations.add(loc);
+	}
+	
+	public String getTripPatternId() {
+		return tripPatternId;
 	}
 	
 	public boolean isUiShape() {
