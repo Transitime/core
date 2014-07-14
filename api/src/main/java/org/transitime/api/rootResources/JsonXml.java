@@ -36,10 +36,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.transitime.api.data.PredictionsData;
-import org.transitime.api.data.RoutesData;
-import org.transitime.api.data.VehiclesData;
-import org.transitime.api.data.VehiclesDetailsData;
+import org.transitime.api.data.ApiPredictions;
+import org.transitime.api.data.ApiRoute;
+import org.transitime.api.data.ApiRouteSummaries;
+import org.transitime.api.data.ApiVehicles;
+import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.utils.KeyValidator;
 import org.transitime.api.utils.StdParametersBean;
 import org.transitime.api.utils.UsageValidator;
@@ -50,9 +51,10 @@ import org.transitime.feed.gtfsRt.OctalDecoder;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
-import org.transitime.ipc.data.Route;
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcRoute;
+import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.VehiclesInterface;
@@ -106,7 +108,7 @@ public class JsonXml {
 	    VehiclesInterface inter = 
 		    getVehiclesInterface(stdParameters.getAgencyId());
 	    
-	    Collection<Vehicle> vehicles;
+	    Collection<IpcVehicle> vehicles;
 	    if (!routeIds.isEmpty()) {
 		vehicles = inter.getForRouteUsingRouteId(routeIds);
 	    } else if (!routeShortNames.isEmpty()) {
@@ -117,8 +119,8 @@ public class JsonXml {
 		vehicles = inter.get();
 	    }
 
-	    // return VehiclesData response
-	    return createResponse(new VehiclesData(vehicles), stdParameters);
+	    // return ApiVehicles response
+	    return createResponse(new ApiVehicles(vehicles), stdParameters);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
@@ -164,7 +166,7 @@ public class JsonXml {
 	    VehiclesInterface inter = 
 		    getVehiclesInterface(stdParameters.getAgencyId());
 	    
-	    Collection<Vehicle> vehicles;
+	    Collection<IpcVehicle> vehicles;
 	    if (!routeIds.isEmpty()) {
 		vehicles = inter.getForRouteUsingRouteId(routeIds);
 	    } else if (!routeShortNames.isEmpty()) {
@@ -175,8 +177,8 @@ public class JsonXml {
 		vehicles = inter.get();
 	    }
 
-	    // return VehiclesDetailsData response
-	    return createResponse(new VehiclesDetailsData(vehicles),
+	    // return ApiVehiclesDetails response
+	    return createResponse(new ApiVehiclesDetails(vehicles),
 		    stdParameters);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
@@ -230,11 +232,11 @@ public class JsonXml {
 		RouteStop routeStop = new RouteStop(routeStopParams[0], routeStopParams[1]);
 		routeStopsList.add(routeStop);
 	    }
-	    List<PredictionsForRouteStopDest> predsForRouteStopDestinations = 
+	    List<IpcPredictionsForRouteStopDest> predsForRouteStopDestinations = 
 		    inter.get(routeStopsList, numberPredictions);
 
-	    // return PredictionsData response
-	    PredictionsData predictionsData = new PredictionsData(predsForRouteStopDestinations);
+	    // return ApiPredictions response
+	    ApiPredictions predictionsData = new ApiPredictions(predsForRouteStopDestinations);
 	    return createResponse(predictionsData, stdParameters);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
@@ -254,10 +256,10 @@ public class JsonXml {
 	    // Get Vehicle data from server
 	    ConfigInterface inter = 
 		    getConfigInterface(stdParameters.getAgencyId());	    
-	    Collection<Route> routes = inter.getRoutes();
+	    Collection<IpcRouteSummary> routes = inter.getRoutes();
 
-	    // return VehiclesDetailsData response
-	    RoutesData routesData = new RoutesData(routes);
+	    // Create and return @QueryParam(value="s") String stopId response
+	    ApiRouteSummaries routesData = new ApiRouteSummaries(routes);
 	    return createResponse(routesData, stdParameters);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
@@ -265,6 +267,33 @@ public class JsonXml {
 	}
     }
 
+    @Path("/command/route")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getRoute(@BeanParam StdParametersBean stdParameters,
+	    @QueryParam(value="r") String routeShrtNm,
+	    @QueryParam(value="s") String stopId,
+	    @QueryParam(value="dest") String destinationName) 
+		    throws WebApplicationException {
+	// Make sure request is valid
+	validate(stdParameters);
+	
+	try {
+	    // Get Vehicle data from server
+	    ConfigInterface inter = 
+		    getConfigInterface(stdParameters.getAgencyId());	    
+	    IpcRoute route = inter.getRoute(routeShrtNm, stopId, destinationName);
+
+	    // Create and return ApiRoute response
+	    ApiRoute routeData = new ApiRoute(route);
+	    return createResponse(routeData, stdParameters);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+    }
+    
+    
     private final int MAX_GTFS_RT_CACHE_SECS = 15;
 
     /**
@@ -501,15 +530,15 @@ public class JsonXml {
 //     *            For specifying media type.
 //     * @return The created response in the proper media type.
 //     */
-//    private static Response createListResponse(Collection<VehicleData> collection,
+//    private static Response createListResponse(Collection<ApiVehicle> collection,
 //	    StdParametersBean stdParameters) {
 //	// Must be ArrayList so can use GenericEntity to create Response.
-//	ArrayList<VehicleData> arrayList = (ArrayList<VehicleData>) collection;
+//	ArrayList<ApiVehicle> arrayList = (ArrayList<ApiVehicle>) collection;
 //	
 //	// Create a GenericEntity that can handle list of the appropriate
 //	// type.
-//	GenericEntity<List<VehicleData>> entity = 
-//	            new GenericEntity<List<VehicleData>>(arrayList) {};
+//	GenericEntity<List<ApiVehicle>> entity = 
+//	            new GenericEntity<List<ApiVehicle>>(arrayList) {};
 //	            
 //	// Return the response using the generic entity
 //	return createResponse(entity, stdParameters);

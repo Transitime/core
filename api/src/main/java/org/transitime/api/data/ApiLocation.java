@@ -19,12 +19,12 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.utils.ChinaGpsOffset;
 import org.transitime.utils.Geo;
 import org.transitime.utils.StringUtils;
 
-public class LocationData {
+public class ApiLocation {
 
     @XmlAttribute
     private String lat;
@@ -51,13 +51,13 @@ public class LocationData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected LocationData() {}
+    protected ApiLocation() {}
 
     /**
      * @param lat
      * @param lon
      */
-    public LocationData(Vehicle vehicle) {
+    public ApiLocation(IpcVehicle vehicle) {
 	// If location is in China (approximately) then adjust lat & lon so 
 	// that will be displayed properly on map. 
 	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(

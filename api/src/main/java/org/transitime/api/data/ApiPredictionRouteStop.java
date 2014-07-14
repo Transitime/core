@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
  *
@@ -33,7 +33,7 @@ import org.transitime.ipc.data.PredictionsForRouteStopDest;
  *
  */
 @XmlRootElement
-public class PredictionRouteStopData {
+public class ApiPredictionRouteStop {
 
     @XmlAttribute(name="rShrtNm")
     private String routeShortName;
@@ -51,7 +51,7 @@ public class PredictionRouteStopData {
     private String stopName;
 
     @XmlElement(name="dest")
-    private List<PredictionDestinationData> destinations;
+    private List<ApiPredictionDestination> destinations;
     
     /********************** Member Functions **************************/
 
@@ -60,23 +60,23 @@ public class PredictionRouteStopData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected PredictionRouteStopData() {}
+    protected ApiPredictionRouteStop() {}
 
-    public PredictionRouteStopData(
-	    List<PredictionsForRouteStopDest> predictionsForRouteStop) {
+    public ApiPredictionRouteStop(
+	    List<IpcPredictionsForRouteStopDest> predictionsForRouteStop) {
 	if (predictionsForRouteStop == null || predictionsForRouteStop.isEmpty())
 	    return;
 	
-	PredictionsForRouteStopDest routeStopInfo = predictionsForRouteStop.get(0);
+	IpcPredictionsForRouteStopDest routeStopInfo = predictionsForRouteStop.get(0);
 	routeShortName = routeStopInfo.getRouteShortName();
 	routeName = routeStopInfo.getRouteName();
 	routeId = routeStopInfo.getRouteId();
 	stopId = routeStopInfo.getStopId();
 	stopName = routeStopInfo.getStopName();
 	
-	destinations = new ArrayList<PredictionDestinationData>();
-	for (PredictionsForRouteStopDest destinationInfo : predictionsForRouteStop) {
-	    destinations.add(new PredictionDestinationData(destinationInfo));
+	destinations = new ArrayList<ApiPredictionDestination>();
+	for (IpcPredictionsForRouteStopDest destinationInfo : predictionsForRouteStop) {
+	    destinations.add(new ApiPredictionDestination(destinationInfo));
 	}
     }
 

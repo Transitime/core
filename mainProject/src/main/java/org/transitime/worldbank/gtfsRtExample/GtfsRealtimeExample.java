@@ -80,7 +80,7 @@ public class GtfsRealtimeExample {
 	}
 	
 	/**
-	 * Takes in VehicleData and puts it into a GTFS-realtime 
+	 * Takes in ApiVehicle and puts it into a GTFS-realtime 
 	 * VehiclePosition object.
 	 *  
 	 * @param vehicleData
@@ -132,7 +132,7 @@ public class GtfsRealtimeExample {
 	}
 	
 	/**
-	 * Creates a GTFS-realtime message for the list of VehicleData
+	 * Creates a GTFS-realtime message for the list of ApiVehicle
 	 * passed in.
 	 * @param vehicleDataList the data to be put into the GTFS-realtime message
 	 * @return the GTFS-realtime FeedMessage

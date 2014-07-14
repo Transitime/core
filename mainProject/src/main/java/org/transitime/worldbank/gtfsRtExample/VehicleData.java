@@ -61,7 +61,7 @@ public class VehicleData {
 	 */
 	@Override
 	public String toString() {
-		return "VehicleData [" 
+		return "ApiVehicle [" 
 				+ "vehicleId=" + vehicleId 
 				+ ", licensePlate="	+ licensePlate 
 				+ ", latitude=" + latitude 

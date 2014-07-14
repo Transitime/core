@@ -18,14 +18,13 @@
 package org.transitime.api.data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.Prediction;
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcRouteSummary;
 
 /**
  *
@@ -33,18 +32,12 @@ import org.transitime.ipc.data.PredictionsForRouteStopDest;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement
-public class PredictionDestinationData {
+@XmlRootElement(name="routes")
+public class ApiRouteSummaries {
 
-    @XmlAttribute(name="dir")
-    private String directionId;
-    
-    @XmlAttribute(name="name")
-    private String destination;
-    
-    @XmlElement(name="pred")
-    private List<PredictionData> predictions;
-    
+    @XmlElement(name="route")
+    private List<ApiRouteSummary> routeSummariesData;
+
     /********************** Member Functions **************************/
 
     /**
@@ -52,17 +45,13 @@ public class PredictionDestinationData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected PredictionDestinationData() {}
+    protected ApiRouteSummaries() {}
     
-    public PredictionDestinationData(
-	    PredictionsForRouteStopDest predictionsForRouteStop) {
-	directionId = predictionsForRouteStop.getDirectionId();
-	destination = predictionsForRouteStop.getDestination();
-	
-	predictions = new ArrayList<PredictionData>();
-	for (Prediction prediction : 
-	    predictionsForRouteStop.getPredictionsForRouteStop()) {
-	    predictions.add(new PredictionData(prediction));
+    public ApiRouteSummaries(Collection<IpcRouteSummary> routes) {
+	routeSummariesData = new ArrayList<ApiRouteSummary>();
+	for (IpcRouteSummary route : routes) {
+	    ApiRouteSummary routeSummary = new ApiRouteSummary(route);
+	    routeSummariesData.add(routeSummary);
 	}
     }
 }

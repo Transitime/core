@@ -20,7 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * Contains data for a single prediction.
@@ -29,7 +29,7 @@ import org.transitime.ipc.data.Prediction;
  *
  */
 @XmlRootElement
-public class PredictionData {
+public class ApiPrediction {
 
     @XmlAttribute(name="time")
     private long time;
@@ -67,9 +67,9 @@ public class PredictionData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    public PredictionData() {}
+    public ApiPrediction() {}
 
-    public PredictionData(Prediction prediction) {
+    public ApiPrediction(IpcPrediction prediction) {
 	time = prediction.getTime();
 	seconds = (int) (time - System.currentTimeMillis()) / 1000;
 	// Always round down minutes to be conservative and so that user

@@ -24,7 +24,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * For when have list of VehicleDetails. By using this class can control
@@ -34,12 +34,12 @@ import org.transitime.ipc.data.Vehicle;
  *
  */
 @XmlRootElement(name="vehicles")
-public class VehiclesDetailsData {
+public class ApiVehiclesDetails {
 
     // Need to use @XmlElementRef so that the element name used for each
-    // VehicleData object will be what is specified in the VehicleData class.
+    // ApiVehicle object will be what is specified in the ApiVehicle class.
     @XmlElementRef
-    private List<VehicleDetailsData> vehiclesData;
+    private List<ApiVehicleDetails> vehiclesData;
     
     /********************** Member Functions **************************/
 
@@ -48,18 +48,18 @@ public class VehiclesDetailsData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected VehiclesDetailsData() {}
+    protected ApiVehiclesDetails() {}
 
     /**
-     * For constructing a VehiclesDetailsData object from a Collection of
+     * For constructing a ApiVehiclesDetails object from a Collection of
      * Vehicle objects.
      * 
      * @param vehicles
      */
-    public VehiclesDetailsData(Collection<Vehicle> vehicles) {
-	vehiclesData = new ArrayList<VehicleDetailsData>();
-	for (Vehicle vehicle : vehicles) {
-	    vehiclesData.add(new VehicleDetailsData(vehicle));
+    public ApiVehiclesDetails(Collection<IpcVehicle> vehicles) {
+	vehiclesData = new ArrayList<ApiVehicleDetails>();
+	for (IpcVehicle vehicle : vehicles) {
+	    vehiclesData.add(new ApiVehicleDetails(vehicle));
 	}
     }
 

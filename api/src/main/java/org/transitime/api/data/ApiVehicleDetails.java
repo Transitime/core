@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.transitime.core.BlockAssignmentMethod;
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * Contains data for a single vehicle with additional info that is meant more
@@ -39,7 +39,7 @@ import org.transitime.ipc.data.Vehicle;
 @XmlType(propOrder = { "scheduleAdherence",
 	"scheduleAdherenceStr", "blockId", "blockAssignmentMethod", "tripId",
 	"driverId"})
-public class VehicleDetailsData extends VehicleData {
+public class ApiVehicleDetails extends ApiVehicle {
 
     @XmlAttribute(name="schAdh")
     private int scheduleAdherence;
@@ -64,15 +64,15 @@ public class VehicleDetailsData extends VehicleData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected VehicleDetailsData() {}
+    protected ApiVehicleDetails() {}
 
     /**
      * Takes a Vehicle object for client/server communication and constructs a
-     * VehicleData object for the API.
+     * ApiVehicle object for the API.
      * 
      * @param vehicle
      */
-    public VehicleDetailsData(Vehicle vehicle) {
+    public ApiVehicleDetails(IpcVehicle vehicle) {
 	super(vehicle);
 	
 	scheduleAdherence = vehicle.getRealTimeSchedAdh().getTemporalDifference();

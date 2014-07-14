@@ -24,7 +24,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * For when have list of Vehicles. By using this class can control
@@ -34,12 +34,12 @@ import org.transitime.ipc.data.Vehicle;
  *
  */
 @XmlRootElement(name="vehicles")
-public class VehiclesData {
+public class ApiVehicles {
 
     // Need to use @XmlElementRef so that the element name used for each
-    // VehicleData object will be what is specified in the VehicleData class.
+    // ApiVehicle object will be what is specified in the ApiVehicle class.
     @XmlElement(name="vehicle")
-    private List<VehicleData> vehiclesData;
+    private List<ApiVehicle> vehiclesData;
     
     /********************** Member Functions **************************/
 
@@ -48,18 +48,18 @@ public class VehiclesData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    public VehiclesData() {}
+    public ApiVehicles() {}
 
     /**
-     * For constructing a VehiclesData object from a Collection of Vehicle
+     * For constructing a ApiVehicles object from a Collection of Vehicle
      * objects.
      * 
      * @param vehicles
      */
-    public VehiclesData(Collection<Vehicle> vehicles) {
-	vehiclesData = new ArrayList<VehicleData>();
-	for (Vehicle vehicle : vehicles) {
-	    vehiclesData.add(new VehicleData(vehicle));
+    public ApiVehicles(Collection<IpcVehicle> vehicles) {
+	vehiclesData = new ArrayList<ApiVehicle>();
+	for (IpcVehicle vehicle : vehicles) {
+	    vehiclesData.add(new ApiVehicle(vehicle));
 	}
     }
         

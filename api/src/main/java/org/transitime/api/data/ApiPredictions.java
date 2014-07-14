@@ -23,7 +23,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
  *
@@ -32,10 +32,10 @@ import org.transitime.ipc.data.PredictionsForRouteStopDest;
  *
  */
 @XmlRootElement(name="preds")
-public class PredictionsData {
+public class ApiPredictions {
 
     @XmlElement(name="routeStop")
-    private List<PredictionRouteStopData> predictionsForRouteStop;
+    private List<ApiPredictionRouteStop> predictionsForRouteStop;
       
     /********************** Member Functions **************************/
 
@@ -44,26 +44,26 @@ public class PredictionsData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    public PredictionsData() {}
+    public ApiPredictions() {}
 
     /**
-     * For constructing a VehiclesData object from a Collection of Vehicle
+     * For constructing a ApiVehicles object from a Collection of Vehicle
      * objects.
      * 
      * @param vehicles 
      * 	
      */
-    public PredictionsData(
-	    List<PredictionsForRouteStopDest> predsForRouteStopDestinations) {
+    public ApiPredictions(
+	    List<IpcPredictionsForRouteStopDest> predsForRouteStopDestinations) {
 	predictionsForRouteStop = 
-		new ArrayList<PredictionRouteStopData>();
+		new ArrayList<ApiPredictionRouteStop>();
 	
 	// Get all the PredictionsForRouteStopDest that are for the same 
 	// route/stop and create a PredictionsRouteStopData object for each 
 	// route/stop.
-	List<PredictionsForRouteStopDest> predsForRouteStop = null;
+	List<IpcPredictionsForRouteStopDest> predsForRouteStop = null;
 	String previousRouteStopStr = "";		
-	for (PredictionsForRouteStopDest predsForRouteStopDest : 
+	for (IpcPredictionsForRouteStopDest predsForRouteStopDest : 
 	    predsForRouteStopDestinations) {
 	    // If this is a new route/stop...
 	    String currentRouteStopStr = predsForRouteStopDest.getRouteId()
@@ -73,20 +73,20 @@ public class PredictionsData {
 		if (predsForRouteStop != null && !predsForRouteStop.isEmpty()) {
 		    // create PredictionsRouteStopData object for this
 		    // route/stop
-		    PredictionRouteStopData predictionsForRouteStopData = 
-			    new PredictionRouteStopData(predsForRouteStop);
+		    ApiPredictionRouteStop predictionsForRouteStopData = 
+			    new ApiPredictionRouteStop(predsForRouteStop);
 		    predictionsForRouteStop.add(predictionsForRouteStopData);
 		}
 		predsForRouteStop = 
-			new ArrayList<PredictionsForRouteStopDest>();
+			new ArrayList<IpcPredictionsForRouteStopDest>();
 		previousRouteStopStr = currentRouteStopStr;
 	    }
 	    predsForRouteStop.add(predsForRouteStopDest);
 	}
 	
 	// Add the last set of route/stop data
-	PredictionRouteStopData predictionsForRouteStopData = 
-	    new PredictionRouteStopData(predsForRouteStop);
+	ApiPredictionRouteStop predictionsForRouteStopData = 
+	    new ApiPredictionRouteStop(predsForRouteStop);
 	predictionsForRouteStop.add(predictionsForRouteStopData);
     }
 
