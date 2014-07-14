@@ -53,7 +53,7 @@ public class GtfsRtVehicleFeed {
 	}
 	
 	/**
-	 * Takes in VehicleData and puts it into a GTFS-realtime 
+	 * Takes in ApiVehicle and puts it into a GTFS-realtime 
 	 * VehiclePosition object.
 	 *  
 	 * @param vehicleData
@@ -106,7 +106,7 @@ public class GtfsRtVehicleFeed {
 	}
 
 	/**
-	 * Creates a GTFS-realtime message for the list of VehicleData passed in.
+	 * Creates a GTFS-realtime message for the list of ApiVehicle passed in.
 	 * 
 	 * @param vehicles
 	 *            the data to be put into the GTFS-realtime message

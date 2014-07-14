@@ -19,23 +19,12 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.IpcStop;
+import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.utils.ChinaGpsOffset;
 import org.transitime.utils.Geo;
+import org.transitime.utils.StringUtils;
 
-/**
- *
- *
- * @author SkiBu Smith
- *
- */
-public class StopData {
-
-    @XmlAttribute
-    private String id;
-       
-    @XmlAttribute
-    private String name;
+public class ApiLocation {
 
     @XmlAttribute
     private String lat;
@@ -44,22 +33,43 @@ public class StopData {
     private String lon;
     
     @XmlAttribute
-    private Integer code;
+    private long time;
     
-     /********************** Member Functions **************************/
-
-    protected StopData() {}
+    @XmlAttribute
+    private String speed;
     
-    public StopData(IpcStop stop) {
-	this.id = stop.getId();
-	this.name = stop.getName();
+    @XmlAttribute
+    private String heading;
+    
+    @XmlAttribute
+    private String pathHeading;
 
+    /********************** Member Functions **************************/
+
+    /**
+     * Need a no-arg constructor for Jersey. Otherwise get really 
+     * obtuse "MessageBodyWriter not found for media type=application/json"
+     * exception.
+     */
+    protected ApiLocation() {}
+
+    /**
+     * @param lat
+     * @param lon
+     */
+    public ApiLocation(IpcVehicle vehicle) {
+	// If location is in China (approximately) then adjust lat & lon so 
+	// that will be displayed properly on map. 
 	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(
-		stop.getLoc().getLat(), stop.getLoc().getLon());	
+		vehicle.getLatitude(), vehicle.getLongitude());
+	
 	this.lat = Geo.format(latLon.getLat());
 	this.lon = Geo.format(latLon.getLon());
+	this.time = vehicle.getGpsTime();
+	this.speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
+	this.heading = StringUtils.oneDigitFormat(vehicle.getHeading());
+	this.pathHeading = StringUtils.oneDigitFormat(vehicle.getPathHeading());
 
-	this.code = stop.getCode();
     }
-
+    
 }

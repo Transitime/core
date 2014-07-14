@@ -18,32 +18,28 @@
 package org.transitime.api.data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
- *
+ * For when have list of Vehicles. By using this class can control
+ * the element name when data is output.
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement
-public class PredictionDestinationData {
+@XmlRootElement(name="vehicles")
+public class ApiVehicles {
 
-    @XmlAttribute(name="dir")
-    private String directionId;
-    
-    @XmlAttribute(name="name")
-    private String destination;
-    
-    @XmlElement(name="pred")
-    private List<PredictionData> predictions;
+    // Need to use @XmlElementRef so that the element name used for each
+    // ApiVehicle object will be what is specified in the ApiVehicle class.
+    @XmlElement(name="vehicle")
+    private List<ApiVehicle> vehiclesData;
     
     /********************** Member Functions **************************/
 
@@ -52,17 +48,19 @@ public class PredictionDestinationData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected PredictionDestinationData() {}
-    
-    public PredictionDestinationData(
-	    IpcPredictionsForRouteStopDest predictionsForRouteStop) {
-	directionId = predictionsForRouteStop.getDirectionId();
-	destination = predictionsForRouteStop.getDestination();
-	
-	predictions = new ArrayList<PredictionData>();
-	for (IpcPrediction prediction : 
-	    predictionsForRouteStop.getPredictionsForRouteStop()) {
-	    predictions.add(new PredictionData(prediction));
+    public ApiVehicles() {}
+
+    /**
+     * For constructing a ApiVehicles object from a Collection of Vehicle
+     * objects.
+     * 
+     * @param vehicles
+     */
+    public ApiVehicles(Collection<IpcVehicle> vehicles) {
+	vehiclesData = new ArrayList<ApiVehicle>();
+	for (IpcVehicle vehicle : vehicles) {
+	    vehiclesData.add(new ApiVehicle(vehicle));
 	}
     }
+        
 }

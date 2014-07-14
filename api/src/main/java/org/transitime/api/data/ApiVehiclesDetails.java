@@ -34,12 +34,12 @@ import org.transitime.ipc.data.IpcVehicle;
  *
  */
 @XmlRootElement(name="vehicles")
-public class VehiclesDetailsData {
+public class ApiVehiclesDetails {
 
     // Need to use @XmlElementRef so that the element name used for each
-    // VehicleData object will be what is specified in the VehicleData class.
+    // ApiVehicle object will be what is specified in the ApiVehicle class.
     @XmlElementRef
-    private List<VehicleDetailsData> vehiclesData;
+    private List<ApiVehicleDetails> vehiclesData;
     
     /********************** Member Functions **************************/
 
@@ -48,18 +48,18 @@ public class VehiclesDetailsData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected VehiclesDetailsData() {}
+    protected ApiVehiclesDetails() {}
 
     /**
-     * For constructing a VehiclesDetailsData object from a Collection of
+     * For constructing a ApiVehiclesDetails object from a Collection of
      * Vehicle objects.
      * 
      * @param vehicles
      */
-    public VehiclesDetailsData(Collection<IpcVehicle> vehicles) {
-	vehiclesData = new ArrayList<VehicleDetailsData>();
+    public ApiVehiclesDetails(Collection<IpcVehicle> vehicles) {
+	vehiclesData = new ArrayList<ApiVehicleDetails>();
 	for (IpcVehicle vehicle : vehicles) {
-	    vehiclesData.add(new VehicleDetailsData(vehicle));
+	    vehiclesData.add(new ApiVehicleDetails(vehicle));
 	}
     }
 

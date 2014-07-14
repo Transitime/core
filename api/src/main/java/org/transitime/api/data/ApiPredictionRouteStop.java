@@ -33,7 +33,7 @@ import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
  *
  */
 @XmlRootElement
-public class PredictionRouteStopData {
+public class ApiPredictionRouteStop {
 
     @XmlAttribute(name="rShrtNm")
     private String routeShortName;
@@ -51,7 +51,7 @@ public class PredictionRouteStopData {
     private String stopName;
 
     @XmlElement(name="dest")
-    private List<PredictionDestinationData> destinations;
+    private List<ApiPredictionDestination> destinations;
     
     /********************** Member Functions **************************/
 
@@ -60,9 +60,9 @@ public class PredictionRouteStopData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected PredictionRouteStopData() {}
+    protected ApiPredictionRouteStop() {}
 
-    public PredictionRouteStopData(
+    public ApiPredictionRouteStop(
 	    List<IpcPredictionsForRouteStopDest> predictionsForRouteStop) {
 	if (predictionsForRouteStop == null || predictionsForRouteStop.isEmpty())
 	    return;
@@ -74,9 +74,9 @@ public class PredictionRouteStopData {
 	stopId = routeStopInfo.getStopId();
 	stopName = routeStopInfo.getStopName();
 	
-	destinations = new ArrayList<PredictionDestinationData>();
+	destinations = new ArrayList<ApiPredictionDestination>();
 	for (IpcPredictionsForRouteStopDest destinationInfo : predictionsForRouteStop) {
-	    destinations.add(new PredictionDestinationData(destinationInfo));
+	    destinations.add(new ApiPredictionDestination(destinationInfo));
 	}
     }
 

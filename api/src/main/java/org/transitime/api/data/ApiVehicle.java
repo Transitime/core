@@ -36,13 +36,13 @@ import org.transitime.ipc.data.IpcVehicle;
  */
 @XmlRootElement
 @XmlType(propOrder = { "id", "routeId", "routeShortName", "loc" })
-public class VehicleData {
+public class ApiVehicle {
     
     @XmlAttribute
     protected String id;
     
     @XmlElement
-    protected LocationData loc;
+    protected ApiLocation loc;
     
     @XmlAttribute
     protected String routeId;
@@ -55,17 +55,17 @@ public class VehicleData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected VehicleData() {}
+    protected ApiVehicle() {}
         
     /**
      * Takes a Vehicle object for client/server communication and constructs a
-     * VehicleData object for the API.
+     * ApiVehicle object for the API.
      * 
      * @param vehicle
      */
-    public VehicleData(IpcVehicle vehicle) {
+    public ApiVehicle(IpcVehicle vehicle) {
 	id = vehicle.getId();
-	loc = new LocationData(vehicle);
+	loc = new ApiLocation(vehicle);
 	routeId = vehicle.getRouteId();
 	routeShortName = vehicle.getRouteShortName();
     }

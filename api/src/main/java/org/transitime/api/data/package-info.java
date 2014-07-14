@@ -34,7 +34,7 @@
  * </ul>
  * <p>
  * At first thought that could simply handle lists of objects, such as 
- * VehicleData, using a regular list. But then the XML element name cannot
+ * ApiVehicle, using a regular list. But then the XML element name cannot
  * be overridden using something like @XmlRootElement(name="vehicle") because
  * will still get <vehicleDatas> for the list instead of <vehicles>. This
  * apparently could be dealt with setting the parameter 

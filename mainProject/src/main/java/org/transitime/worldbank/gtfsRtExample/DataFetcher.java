@@ -31,7 +31,7 @@ import java.util.Set;
 
 /**
  *
- * For retrieving VehicleData from the database
+ * For retrieving ApiVehicle from the database
  *
  */
 public class DataFetcher {
@@ -40,7 +40,7 @@ public class DataFetcher {
 	
 	
 	/**
-	 * Get the VehicleData from the database
+	 * Get the ApiVehicle from the database
 	 * @return
 	 */
 	private static List<VehicleData> queryDatabase(Connection connection) {
@@ -89,7 +89,7 @@ public class DataFetcher {
 				}
 		}
 		
-		// Return the resulting list of VehicleData objects
+		// Return the resulting list of ApiVehicle objects
 		return vehicleDataList;
 	}
 
@@ -123,9 +123,9 @@ public class DataFetcher {
 	
 	/**
 	 * Gets a database connection, queries the database for the GPS data,
-	 * and puts the resulting data into a List of VehicleData objects.
+	 * and puts the resulting data into a List of ApiVehicle objects.
 	 *  
-	 * @return List of VehicleData read from database
+	 * @return List of ApiVehicle read from database
 	 */
 	public static List<VehicleData> queryDatabase() {
 		Connection connection = getConnection();
@@ -134,12 +134,12 @@ public class DataFetcher {
 	}
 	
 	/**
-	 * Gets the VehicleData from the database but only returns the last
+	 * Gets the ApiVehicle from the database but only returns the last
 	 * record for each vehicle. This is useful for when doing polling 
 	 * because then don't want or need multiple GPS reports for a vehicle.
 	 * Only the most recent one is actually useful.
 	 * 
-	 * @return List of VehicleData, with only one entry per vehicle
+	 * @return List of ApiVehicle, with only one entry per vehicle
 	 */
 	public static List<VehicleData> queryDatabaseFilteringDuplicates() {
 		// Get the full data set from the database
@@ -169,7 +169,7 @@ public class DataFetcher {
 	}
 	
 	/**
-	 * Create test VehicleData without accessing database
+	 * Create test ApiVehicle without accessing database
 	 * @return
 	 */
 	public static List<VehicleData> createTestData() {

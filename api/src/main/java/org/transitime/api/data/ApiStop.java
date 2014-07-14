@@ -17,15 +17,11 @@
 
 package org.transitime.api.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcStop;
+import org.transitime.utils.ChinaGpsOffset;
+import org.transitime.utils.Geo;
 
 /**
  *
@@ -33,49 +29,37 @@ import org.transitime.ipc.data.IpcStop;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="route")
-public class RouteData {
+public class ApiStop {
 
     @XmlAttribute
     private String id;
-    
-    @XmlAttribute(name="routeShrtNm")
-    private String shortName;
-    
+       
     @XmlAttribute
     private String name;
 
     @XmlAttribute
-    private String color;
-
-    @XmlAttribute
-    private String textColor;
-
-    @XmlAttribute
-    private String type;
-
-    @XmlElement
-    private List<StopData> stops;
+    private String lat;
     
-    /********************** Member Functions **************************/
-
-    protected RouteData() {}
+    @XmlAttribute
+    private String lon;
     
-    public RouteData(IpcRoute route) {
-	this.id = route.getId();
-	this.shortName = route.getShortName();
-	this.name = route.getName();
-	this.color = route.getColor();
-	this.textColor = route.getTextColor();
-	this.type = route.getType();
-	
-	this.stops = new ArrayList<StopData>();
-	for (IpcStop stop : route.getStops()) {
-	    this.stops.add(new StopData(stop));
-	}
-	
-//	route.getExtent();	
-//	route.getSegments();
+    @XmlAttribute
+    private Integer code;
+    
+     /********************** Member Functions **************************/
+
+    protected ApiStop() {}
+    
+    public ApiStop(IpcStop stop) {
+	this.id = stop.getId();
+	this.name = stop.getName();
+
+	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(
+		stop.getLoc().getLat(), stop.getLoc().getLon());	
+	this.lat = Geo.format(latLon.getLat());
+	this.lon = Geo.format(latLon.getLon());
+
+	this.code = stop.getCode();
     }
 
 }
