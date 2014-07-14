@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.gtfs.DbConfig;
-import org.transitime.ipc.data.Route;
-import org.transitime.ipc.data.RouteSummary;
+import org.transitime.ipc.data.IpcRoute;
+import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 
@@ -91,17 +91,17 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRoutes()
 	 */
 	@Override
-	public Collection<RouteSummary> getRoutes() throws RemoteException {
+	public Collection<IpcRouteSummary> getRoutes() throws RemoteException {
 		// Get the db route info
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		Collection<org.transitime.db.structs.Route> dbRoutes = 
 				dbConfig.getRoutes();
 		
 		// Convert the db routes into ipc routes
-		Collection<RouteSummary> ipcRoutes = 
-				new ArrayList<RouteSummary>(dbRoutes.size());
+		Collection<IpcRouteSummary> ipcRoutes = 
+				new ArrayList<IpcRouteSummary>(dbRoutes.size());
 		for (org.transitime.db.structs.Route dbRoute : dbRoutes) {
-			RouteSummary ipcRoute = new RouteSummary(dbRoute);
+			IpcRouteSummary ipcRoute = new IpcRouteSummary(dbRoute);
 			ipcRoutes.add(ipcRoute);
 		}
 		
@@ -113,14 +113,15 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRoute(java.lang.String)
 	 */
 	@Override
-	public Route getRoute(String routeShortName) throws RemoteException {
+	public IpcRoute getRoute(String routeShortName, String stopId,
+			String destinationName) throws RemoteException {
 		// Get the db route info 
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		org.transitime.db.structs.Route dbRoute = 
 				dbConfig.getRouteByShortName(routeShortName);
 		
 		// Convert db route into an ipc route
-		Route ipcRoute = new Route(dbRoute);
+		IpcRoute ipcRoute = new IpcRoute(dbRoute, stopId, destinationName);
 		
 		// Return the ipc route
 		return ipcRoute;

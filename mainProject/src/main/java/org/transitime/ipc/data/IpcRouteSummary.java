@@ -28,7 +28,7 @@ import org.transitime.db.structs.Extent;
  * @author SkiBu Smith
  * 
  */
-public class RouteSummary implements Serializable {
+public class IpcRouteSummary implements Serializable {
 
 	protected final String id;
 	protected final String shortName;
@@ -72,7 +72,7 @@ public class RouteSummary implements Serializable {
      * 
      * @param dbRoute
      */
-	public RouteSummary(org.transitime.db.structs.Route dbRoute) {
+	public IpcRouteSummary(org.transitime.db.structs.Route dbRoute) {
 		this.id = dbRoute.getId();
 		this.shortName = dbRoute.getShortName();
 		this.name = dbRoute.getName();
@@ -212,7 +212,7 @@ public class RouteSummary implements Serializable {
 
 	@Override
 	public String toString() {
-		return "RouteSummary [" 
+		return "IpcRouteSummary [" 
 				+ "id=" + id 
 				+ ", shortName=" + shortName 
 				+ ", name="	+ name

@@ -30,7 +30,7 @@ import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
@@ -54,7 +54,7 @@ public class VehicleState {
 	// First is most recent
 	private LinkedList<AvlReport> avlReportHistory =
 			new LinkedList<AvlReport>();
-	private List<Prediction> predictions;
+	private List<IpcPrediction> predictions;
 	private TemporalDifference realTimeSchedAdh;
 	
 	// For keeping track of how many bad matches have been encountered.
@@ -441,7 +441,7 @@ public class VehicleState {
 	 * 
 	 * @param predictions
 	 */
-	public void setPredictions(List<Prediction> predictions) {
+	public void setPredictions(List<IpcPrediction> predictions) {
 		this.predictions = predictions;
 	}
 	
@@ -449,7 +449,7 @@ public class VehicleState {
 	 * Gets the current list of predictions for the vehicle. Can be null.
 	 * @return
 	 */
-	public List<Prediction> getPredictions() {
+	public List<IpcPrediction> getPredictions() {
 		return predictions;
 	}
 	

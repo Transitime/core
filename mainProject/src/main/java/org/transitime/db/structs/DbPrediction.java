@@ -32,7 +32,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * For persisting a prediction.
@@ -112,7 +112,7 @@ public class DbPrediction implements Serializable {
 		this.isArrival = isArrival;
 	}
 	
-	public DbPrediction(Prediction prediction) {
+	public DbPrediction(IpcPrediction prediction) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.predictionTime = new Date(prediction.getTime());
 		this.creationTime = new Date(prediction.getCreationTime());

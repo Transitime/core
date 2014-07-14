@@ -20,6 +20,7 @@ package org.transitime.ipc.data;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Vector;
 
 /**
@@ -28,23 +29,24 @@ import org.transitime.db.structs.Vector;
  * @author SkiBu Smith
  *
  */
-public class Route extends RouteSummary {
+public class IpcRoute extends IpcRouteSummary {
 
-	private Collection<Stop> stops;
+	private Collection<IpcStop> stops;
 	private Collection<Vector> segments;
 	
 	private static final long serialVersionUID = -227901807027962547L;
 
 	/********************** Member Functions **************************/
 
-	public Route(org.transitime.db.structs.Route dbRoute) {
+	public IpcRoute(Route dbRoute, String stopId,
+			String destinationName) {
 		super(dbRoute);
 		
 		// Create Collection of Stop objects
 		Collection<org.transitime.db.structs.Stop> dbStops = dbRoute.getStops();
-		stops = new ArrayList<Stop>(dbStops.size());
+		stops = new ArrayList<IpcStop>(dbStops.size());
 		for (org.transitime.db.structs.Stop dbStop : dbStops) {
-			stops.add(new Stop(dbStop));
+			stops.add(new IpcStop(dbStop));
 		}
 		
 		// Create Collection of path segment vector objects
@@ -53,7 +55,7 @@ public class Route extends RouteSummary {
 
 	@Override
 	public String toString() {
-		return "Route [" 
+		return "IpcRoute [" 
 				+ "stops=" + stops 
 				+ ", id=" + id 
 				+ ", shortName=" + shortName 
@@ -67,7 +69,7 @@ public class Route extends RouteSummary {
 				+ "]";
 	}
 
-	public Collection<Stop> getStops() {
+	public Collection<IpcStop> getStops() {
 		return stops;
 	}
 

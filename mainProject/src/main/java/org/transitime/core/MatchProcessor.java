@@ -26,7 +26,7 @@ import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.DbPrediction;
 import org.transitime.db.structs.Match;
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.Time;
 
 /**
@@ -72,12 +72,12 @@ public class MatchProcessor {
 				vehicleState.getVehicleId());
 
 		// Generate the new predictions for the vehicle
-		List<Prediction> newPredictions = 
+		List<IpcPrediction> newPredictions = 
 				PredictionGeneratorFactory.getInstance().generate(vehicleState);
 
 		// Store the predictions in database if so configured
 		if (CoreConfig.getMaxPredictionsTimeForDbSecs() > 0) {
-			for (Prediction prediction : newPredictions) {
+			for (IpcPrediction prediction : newPredictions) {
 				// If prediction not too far into the future then ...
 				if (prediction.getTime() - prediction.getAvlTime() < CoreConfig
 						.getMaxPredictionsTimeForDbSecs() * Time.MS_PER_SEC) {
@@ -90,7 +90,7 @@ public class MatchProcessor {
 
 		// Update the predictions cache to use the new predictions for the
 		// vehicle
-		List<Prediction> oldPredictions = vehicleState.getPredictions();
+		List<IpcPrediction> oldPredictions = vehicleState.getPredictions();
 		PredictionDataCache.getInstance().updatePredictions(oldPredictions,
 				newPredictions);
 

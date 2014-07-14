@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * For storing and retrieving Vehicle information that can be used by clients.
@@ -40,11 +40,11 @@ public class VehicleDataCache {
     private static VehicleDataCache singleton = new VehicleDataCache();
 
     // Keyed by vehicle ID
-    private Map<String, Vehicle> vehiclesMap = new HashMap<String, Vehicle>();
+    private Map<String, IpcVehicle> vehiclesMap = new HashMap<String, IpcVehicle>();
 
     // Keyed by route_short_name. For each route there is a submap
     // that is keyed by vehicle.
-    private Map<String, Map<String, Vehicle>> vehiclesByRouteMap = new HashMap<String, Map<String, Vehicle>>();
+    private Map<String, Map<String, IpcVehicle>> vehiclesByRouteMap = new HashMap<String, Map<String, IpcVehicle>>();
 
     private static final Logger logger = LoggerFactory
 	    .getLogger(VehicleDataCache.class);
@@ -73,8 +73,8 @@ public class VehicleDataCache {
      * @param routeShortName
      * @return
      */
-    public Collection<Vehicle> getVehiclesForRoute(String routeShortName) {
-	Map<String, Vehicle> vehicleMapForRoute = vehiclesByRouteMap
+    public Collection<IpcVehicle> getVehiclesForRoute(String routeShortName) {
+	Map<String, IpcVehicle> vehicleMapForRoute = vehiclesByRouteMap
 		.get(routeShortName);
 	if (vehicleMapForRoute != null)
 	    return vehicleMapForRoute.values();
@@ -88,14 +88,14 @@ public class VehicleDataCache {
      * @param routeShortNames
      * @return
      */
-   public Collection<Vehicle> getVehiclesForRoute(List<String> routeShortNames) {
+   public Collection<IpcVehicle> getVehiclesForRoute(List<String> routeShortNames) {
 	// If there is just a single route specified then use a shortcut
 	if (routeShortNames.size() == 1)
 	    return getVehiclesForRoute(routeShortNames.get(0));
 	
-	Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
+	Collection<IpcVehicle> vehicles = new ArrayList<IpcVehicle>();
 	for (String routeShortName : routeShortNames) {
-		Collection<Vehicle> vehiclesForRoute = getVehiclesForRoute(routeShortName);
+		Collection<IpcVehicle> vehiclesForRoute = getVehiclesForRoute(routeShortName);
 		if (vehiclesForRoute != null)
 			vehicles.addAll(vehiclesForRoute);
 	}
@@ -108,7 +108,7 @@ public class VehicleDataCache {
      * @param routeId
      * @return
      */
-    public Collection<Vehicle> getVehiclesForRouteUsingRouteId(String routeId) {
+    public Collection<IpcVehicle> getVehiclesForRouteUsingRouteId(String routeId) {
 	String routeShortName = null;
 	Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
 	if (route != null)
@@ -122,14 +122,14 @@ public class VehicleDataCache {
      * @param routeShortNames
      * @return
      */
-   public Collection<Vehicle> getVehiclesForRouteUsingRouteId(List<String> routeIds) {
+   public Collection<IpcVehicle> getVehiclesForRouteUsingRouteId(List<String> routeIds) {
 	// If there is just a single route specified then use a shortcut
 	if (routeIds.size() == 1)
 	    return getVehiclesForRouteUsingRouteId(routeIds.get(0));
 	
-	Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
+	Collection<IpcVehicle> vehicles = new ArrayList<IpcVehicle>();
 	for (String routeId : routeIds) {
-		Collection<Vehicle> vehiclesForRoute = getVehiclesForRouteUsingRouteId(routeId);
+		Collection<IpcVehicle> vehiclesForRoute = getVehiclesForRouteUsingRouteId(routeId);
 		if (vehiclesForRoute != null)
 			vehicles.addAll(vehiclesForRoute);
 	}
@@ -144,10 +144,10 @@ public class VehicleDataCache {
      *            Specifies which vehicles should return.
      * @return
      */
-    public Collection<Vehicle> getVehicles(List<String> vehicleIds) {
-	Collection<Vehicle> vehicles = new ArrayList<Vehicle>();
+    public Collection<IpcVehicle> getVehicles(List<String> vehicleIds) {
+	Collection<IpcVehicle> vehicles = new ArrayList<IpcVehicle>();
 	for (String vehicleId : vehicleIds) {
-	    Vehicle vehicle = vehiclesMap.get(vehicleId);
+	    IpcVehicle vehicle = vehiclesMap.get(vehicleId);
 	    if (vehicle != null)
 		vehicles.add(vehicle);
 	}
@@ -160,7 +160,7 @@ public class VehicleDataCache {
      * @param vehicleId
      * @return
      */
-    public Vehicle getVehicle(String vehicleId) {
+    public IpcVehicle getVehicle(String vehicleId) {
 	return vehiclesMap.get(vehicleId);
     }
 
@@ -169,7 +169,7 @@ public class VehicleDataCache {
      * 
      * @return
      */
-    public Collection<Vehicle> getVehicles() {
+    public Collection<IpcVehicle> getVehicles() {
 	return vehiclesMap.values();
     }
 
@@ -178,10 +178,10 @@ public class VehicleDataCache {
      * 
      * @param vehicle
      */
-    private void updateVehicle(Vehicle vehicle) {
+    private void updateVehicle(IpcVehicle vehicle) {
 	logger.debug("Adding to VehicleDataCache vehicle={}", vehicle);
 
-	Vehicle originalVehicle = vehiclesMap.get(vehicle.getId());
+	IpcVehicle originalVehicle = vehiclesMap.get(vehicle.getId());
 
 	// If the route has changed then remove the vehicle from the old map
 	// for that route.
@@ -190,16 +190,16 @@ public class VehicleDataCache {
 			.getRouteShortName()
 		&& !originalVehicle.getRouteShortName().equals(
 			vehicle.getRouteShortName())) {
-	    Map<String, Vehicle> vehicleMapForRoute = vehiclesByRouteMap
+	    Map<String, IpcVehicle> vehicleMapForRoute = vehiclesByRouteMap
 		    .get(originalVehicle.getRouteShortName());
 	    vehicleMapForRoute.remove(vehicle.getId());
 	}
 
 	// Add Vehicle to the vehiclesByRouteMap
-	Map<String, Vehicle> vehicleMapForRoute = vehiclesByRouteMap
+	Map<String, IpcVehicle> vehicleMapForRoute = vehiclesByRouteMap
 		.get(vehicle.getRouteShortName());
 	if (vehicleMapForRoute == null) {
-	    vehicleMapForRoute = new HashMap<String, Vehicle>();
+	    vehicleMapForRoute = new HashMap<String, IpcVehicle>();
 	    vehiclesByRouteMap.put(vehicle.getRouteShortName(),
 		    vehicleMapForRoute);
 	}
@@ -216,7 +216,7 @@ public class VehicleDataCache {
      *            The current VehicleState
      */
     public void updateVehicle(VehicleState vs) {
-	Vehicle vehicle = new Vehicle(vs);
+	IpcVehicle vehicle = new IpcVehicle(vs);
 	updateVehicle(vehicle);
     }
 }

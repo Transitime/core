@@ -29,8 +29,8 @@ import org.transitime.applications.Core;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
-import org.transitime.ipc.data.Prediction;
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcPrediction;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
 import org.transitime.utils.MapKey;
 import org.transitime.utils.SystemCurrentTime;
@@ -79,9 +79,9 @@ public class PredictionDataCache {
 	// PredictionsForRouteStop for a route/stop and synchronize any changes and 
 	// access to it so if multiple threads are making changes on a route/stop 
 	// those changes will be coherent and information will not be lost.
-	private final ConcurrentHashMap<MapKey, List<PredictionsForRouteStopDest>> 
+	private final ConcurrentHashMap<MapKey, List<IpcPredictionsForRouteStopDest>> 
 		predictionsMap =
-			new ConcurrentHashMap<MapKey, List<PredictionsForRouteStopDest>>(1000);
+			new ConcurrentHashMap<MapKey, List<IpcPredictionsForRouteStopDest>>(1000);
 	
 	// For determining when prediction is obsolete (it is for before the
 	// current system time)
@@ -135,19 +135,19 @@ public class PredictionDataCache {
 	 * @param maxPredictionsPerStop
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getPredictions(String routeShortName,
+	public List<IpcPredictionsForRouteStopDest> getPredictions(String routeShortName,
 			String stopId, int maxPredictionsPerStop) {
 		// Get the predictions from the map
-		List<PredictionsForRouteStopDest> predictionsForRouteStop = 
+		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
 				getPredictionsForRouteStop(routeShortName, stopId);
 		
 		// Make a copy of the prediction objects so that they cannot be
 		// modified by another thread while they are being accessed. This
 		// is important because when the predictions are modified they are
 		// temporarily not coherent. 
-		List<PredictionsForRouteStopDest> clonedPredictions = 
-				new ArrayList<PredictionsForRouteStopDest>(predictionsForRouteStop.size());
-		for (PredictionsForRouteStopDest predictions : predictionsForRouteStop) {
+		List<IpcPredictionsForRouteStopDest> clonedPredictions = 
+				new ArrayList<IpcPredictionsForRouteStopDest>(predictionsForRouteStop.size());
+		for (IpcPredictionsForRouteStopDest predictions : predictionsForRouteStop) {
 			clonedPredictions.add(predictions.getClone(maxPredictionsPerStop));
 		}
 		
@@ -164,7 +164,7 @@ public class PredictionDataCache {
 	 * @param maxPredictionsPerStop
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getPredictionsUsingRouteId(String routeId, 
+	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(String routeId, 
 			String stopId, int maxPredictionsPerStop) {
 		// Determine the routeShortName
 		String routeShortName = null;
@@ -186,7 +186,7 @@ public class PredictionDataCache {
 	 * @param stopId
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getPredictions(String routeShortName,
+	public List<IpcPredictionsForRouteStopDest> getPredictions(String routeShortName,
 			String stopId) {
 		return getPredictions(routeShortName, stopId, Integer.MAX_VALUE);
 	}
@@ -199,7 +199,7 @@ public class PredictionDataCache {
 	 * @param stopId
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getPredictionsUsingRouteId(
+	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(
 			String routeId, String stopId) {
 		return getPredictionsUsingRouteId(routeId, stopId, Integer.MAX_VALUE);
 	}
@@ -213,15 +213,15 @@ public class PredictionDataCache {
 	 * @param predictionsPerStop
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getPredictions(List<RouteStop> routeStops,
+	public List<IpcPredictionsForRouteStopDest> getPredictions(List<RouteStop> routeStops,
 			int predictionsPerStop) {
-		List<PredictionsForRouteStopDest> listOfPredictions = 
-				new ArrayList<PredictionsForRouteStopDest>();
+		List<IpcPredictionsForRouteStopDest> listOfPredictions = 
+				new ArrayList<IpcPredictionsForRouteStopDest>();
 		for (RouteStop routeStop : routeStops) {
-			List<PredictionsForRouteStopDest> predsForStop = getPredictions(
+			List<IpcPredictionsForRouteStopDest> predsForStop = getPredictions(
 					routeStop.getRouteIdOrShortName(), routeStop.getStopId(),
 					predictionsPerStop);
-			for (PredictionsForRouteStopDest predictions : predsForStop)
+			for (IpcPredictionsForRouteStopDest predictions : predsForStop)
 				listOfPredictions.add(predictions);
 		}
 		return listOfPredictions;
@@ -236,15 +236,15 @@ public class PredictionDataCache {
 	 * @param predictionsPerStop
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getPredictionsUsingRouteId(
+	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(
 			List<RouteStop> routeStops, int predictionsPerStop) {
-		List<PredictionsForRouteStopDest> listOfPredictions = 
-				new ArrayList<PredictionsForRouteStopDest>();
+		List<IpcPredictionsForRouteStopDest> listOfPredictions = 
+				new ArrayList<IpcPredictionsForRouteStopDest>();
 		for (RouteStop routeStop : routeStops) {
-			List<PredictionsForRouteStopDest> predsForStop = getPredictionsUsingRouteId(
+			List<IpcPredictionsForRouteStopDest> predsForStop = getPredictionsUsingRouteId(
 					routeStop.getRouteIdOrShortName(), routeStop.getStopId(),
 					predictionsPerStop);
-			for (PredictionsForRouteStopDest predictions : predsForStop)
+			for (IpcPredictionsForRouteStopDest predictions : predsForStop)
 				listOfPredictions.add(predictions);
 		}
 		return listOfPredictions;
@@ -256,7 +256,7 @@ public class PredictionDataCache {
 	 * @param routeStops
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getPredictions(
+	public List<IpcPredictionsForRouteStopDest> getPredictions(
 			List<RouteStop> routeStops) {
 		return getPredictions(routeStops, Integer.MAX_VALUE);
 	}
@@ -269,7 +269,7 @@ public class PredictionDataCache {
 	 * @param routeStops
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getPredictionsUsingRouteId(
+	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(
 			List<RouteStop> routeStops) {
 		return getPredictionsUsingRouteId(routeStops, Integer.MAX_VALUE);
 	}
@@ -286,17 +286,17 @@ public class PredictionDataCache {
 	 *            predictions when requesting a large number of them.
 	 * @return
 	 */
-	public List<PredictionsForRouteStopDest> getAllPredictions(
+	public List<IpcPredictionsForRouteStopDest> getAllPredictions(
 			int maxPredictionsPerStop, long maxSystemTimeForPrediction) {
-		List<PredictionsForRouteStopDest> allPredictions = 
-				new ArrayList<PredictionsForRouteStopDest>(5000);
+		List<IpcPredictionsForRouteStopDest> allPredictions = 
+				new ArrayList<IpcPredictionsForRouteStopDest>(5000);
 		
 		// Go through all PredictionsForRouteStop objects
-		Collection<List<PredictionsForRouteStopDest>> predictionsByRouteStop = 
+		Collection<List<IpcPredictionsForRouteStopDest>> predictionsByRouteStop = 
 				predictionsMap.values();		
-		for (List<PredictionsForRouteStopDest> predictionsForRouteStop : predictionsByRouteStop) {
-			for (PredictionsForRouteStopDest predictionForRouteStopDest : predictionsForRouteStop) {
-				PredictionsForRouteStopDest clonedPrediction = 
+		for (List<IpcPredictionsForRouteStopDest> predictionsForRouteStop : predictionsByRouteStop) {
+			for (IpcPredictionsForRouteStopDest predictionForRouteStopDest : predictionsForRouteStop) {
+				IpcPredictionsForRouteStopDest clonedPrediction = 
 						predictionForRouteStopDest.getClone(
 								maxPredictionsPerStop, maxSystemTimeForPrediction);
 				// If there were valid predictions then include it in array to
@@ -320,11 +320,11 @@ public class PredictionDataCache {
 	 *            The new predictions. Can be null if only removing old
 	 *            predictions
 	 */
-	public void updatePredictions(List<Prediction> oldPredictionsForVehicle,
-			List<Prediction> newPredictionsForVehicle) {
+	public void updatePredictions(List<IpcPrediction> oldPredictionsForVehicle,
+			List<IpcPrediction> newPredictionsForVehicle) {
 		// Handle null being passed in for newPredictionsForVehicle
 		if (newPredictionsForVehicle == null)
-			newPredictionsForVehicle = new ArrayList<Prediction>();
+			newPredictionsForVehicle = new ArrayList<IpcPrediction>();
 		
 		// Can have several predictions for a route/stop for a vehicle if
 		// the route is a relatively short loop. And if have unscheduled
@@ -335,17 +335,17 @@ public class PredictionDataCache {
 		// First step is to group the new predictions by route/stop so
 		// can deal with them all at once. Those are put into
 		// newPredictionsByRouteStop.
-		Map<MapKey, List<Prediction>> newPredsForVehicleByRouteStopMap =
-				new HashMap<MapKey, List<Prediction>>();
+		Map<MapKey, List<IpcPrediction>> newPredsForVehicleByRouteStopMap =
+				new HashMap<MapKey, List<IpcPrediction>>();
 		
-		for (Prediction newPrediction : newPredictionsForVehicle) {
+		for (IpcPrediction newPrediction : newPredictionsForVehicle) {
 			MapKey key = new MapKey(newPrediction.getRouteShortName(),
 					newPrediction.getStopId(), newPrediction.getTrip()
 							.getName());
-			List<Prediction> predsForRouteStopList = 
+			List<IpcPrediction> predsForRouteStopList = 
 					newPredsForVehicleByRouteStopMap.get(key);
 			if (predsForRouteStopList == null) {
-				predsForRouteStopList = new ArrayList<Prediction>();
+				predsForRouteStopList = new ArrayList<IpcPrediction>();
 				newPredsForVehicleByRouteStopMap
 						.put(key, predsForRouteStopList);
 			}
@@ -354,14 +354,14 @@ public class PredictionDataCache {
 		
 		// Go through the new predictions grouped by route/stop/destination and
 		// process them.
-		for (List<Prediction> newPredsForVehicleForRouteStop : 
+		for (List<IpcPrediction> newPredsForVehicleForRouteStop : 
 				newPredsForVehicleByRouteStopMap.values()) {
 			updatePredictionsForVehicle(newPredsForVehicleForRouteStop);
 		}
 		
 		// Remove old predictions that are not in newPredictionsForVehicle 
 		if (oldPredictionsForVehicle != null) {
-			for (Prediction oldPrediction : oldPredictionsForVehicle) {
+			for (IpcPrediction oldPrediction : oldPredictionsForVehicle) {
 				// If there is no new prediction for the old prediction 
 				// route/stop...
 				MapKey key = new MapKey(oldPrediction.getRouteShortName(),
@@ -384,7 +384,7 @@ public class PredictionDataCache {
 	public void removePredictions(VehicleState vehicleState) {
 		logger.info("Removing predictions for vehicleId={}", 
 				vehicleState.getVehicleId());
-		List<Prediction> oldPredictions = vehicleState.getPredictions();
+		List<IpcPrediction> oldPredictions = vehicleState.getPredictions();
 		
 		updatePredictions(oldPredictions, null);
 	}
@@ -395,11 +395,11 @@ public class PredictionDataCache {
 	 * 
 	 * @param oldPrediction
 	 */
-	private void removePrediction(Prediction oldPrediction) {
+	private void removePrediction(IpcPrediction oldPrediction) {
 		logger.debug("Removing prediction={}", oldPrediction);
 		
 		// Get the prediction list from the map
-		PredictionsForRouteStopDest predictions = 
+		IpcPredictionsForRouteStopDest predictions = 
 				getPredictionsForRouteStopDestination(oldPrediction);
 		predictions.removePrediction(oldPrediction);
 	}
@@ -416,7 +416,7 @@ public class PredictionDataCache {
 	 *            the new predictions to be set for the route/stop/destination.
 	 */
 	private void updatePredictionsForVehicle(
-			List<Prediction> newPredsForVehicleForRouteStopDest) {
+			List<IpcPrediction> newPredsForVehicleForRouteStopDest) {
 		// If no predictions then nothing to do so return.
 		if (newPredsForVehicleForRouteStopDest == null || 
 				newPredsForVehicleForRouteStopDest.isEmpty())
@@ -426,8 +426,8 @@ public class PredictionDataCache {
 				newPredsForVehicleForRouteStopDest);
 
 		// Get the current predictions for the route/stop/destination
-		Prediction pred = newPredsForVehicleForRouteStopDest.get(0);
-		PredictionsForRouteStopDest currentPredsForRouteStopDest = 
+		IpcPrediction pred = newPredsForVehicleForRouteStopDest.get(0);
+		IpcPredictionsForRouteStopDest currentPredsForRouteStopDest = 
 				getPredictionsForRouteStopDestination(pred);
 		
 		// Update the predictions for the route/stop/destination
@@ -445,14 +445,14 @@ public class PredictionDataCache {
 	 * @param stopId
 	 * @return
 	 */
-	private List<PredictionsForRouteStopDest> getPredictionsForRouteStop(
+	private List<IpcPredictionsForRouteStopDest> getPredictionsForRouteStop(
 			String routeShortName, String stopId) {
 		// Determine the predictions for all destinations for the route/stop
 		MapKey key = MapKey.create(routeShortName, stopId);
-		List<PredictionsForRouteStopDest> predictionsForRouteStop = 
+		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
 				predictionsMap.get(key);
 		if (predictionsForRouteStop == null) {
-			predictionsForRouteStop = new ArrayList<PredictionsForRouteStopDest>(1);
+			predictionsForRouteStop = new ArrayList<IpcPredictionsForRouteStopDest>(1);
 			predictionsMap.putIfAbsent(key, predictionsForRouteStop);
 		} 
 
@@ -472,10 +472,10 @@ public class PredictionDataCache {
 	 * @return The PredictionsForRouteStop for the specified
 	 *         route/stop/destination
 	 */
-	private PredictionsForRouteStopDest getPredictionsForRouteStopDestination(
+	private IpcPredictionsForRouteStopDest getPredictionsForRouteStopDestination(
 			Trip trip, String stopId) {
 		// Determine the predictions for all destinations for the route/stop
-		List<PredictionsForRouteStopDest> predictionsForRouteStop = 
+		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
 				getPredictionsForRouteStop(trip.getRouteShortName(), stopId);
 		
 		// Sync on the array so that it can't change between when check to
@@ -484,7 +484,7 @@ public class PredictionDataCache {
 		synchronized (predictionsForRouteStop) {
 			// From the list of predictions return the one that is for the
 			// specified destination.
-			for (PredictionsForRouteStopDest preds : predictionsForRouteStop) {
+			for (IpcPredictionsForRouteStopDest preds : predictionsForRouteStop) {
 				if (preds.getDestination() == null
 						|| preds.getDestination().equals(trip.getName()))
 					return preds;
@@ -493,8 +493,8 @@ public class PredictionDataCache {
 			// The PredictionsForRouteStopDest was not yet created for the
 			// route/stop/destination so create it now and add it to list
 			// of PredictionsForRouteStopDest objects for the route/stop.
-			PredictionsForRouteStopDest preds = 
-					new PredictionsForRouteStopDest(trip, stopId);
+			IpcPredictionsForRouteStopDest preds = 
+					new IpcPredictionsForRouteStopDest(trip, stopId);
 			predictionsForRouteStop.add(preds);
 			return preds;
 		}
@@ -510,8 +510,8 @@ public class PredictionDataCache {
 	 *            list for.
 	 * @return The PredictionsForRouteStop for the specified route/stop/destination
 	 */
-	private PredictionsForRouteStopDest getPredictionsForRouteStopDestination(
-			Prediction prediction) {
+	private IpcPredictionsForRouteStopDest getPredictionsForRouteStopDestination(
+			IpcPrediction prediction) {
 		return getPredictionsForRouteStopDestination(prediction.getTrip(),
 				prediction.getStopId());
 	}

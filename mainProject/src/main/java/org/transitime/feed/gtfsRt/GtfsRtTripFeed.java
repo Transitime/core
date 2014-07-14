@@ -26,8 +26,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
-import org.transitime.ipc.data.Prediction;
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcPrediction;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.utils.IntervalTimer;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
@@ -62,13 +62,13 @@ public class GtfsRtTripFeed {
 		this.agencyId = agencyId;				
 	}
 
-	private TripUpdate createTripUpdate(List<Prediction> predsForTrip) {
+	private TripUpdate createTripUpdate(List<IpcPrediction> predsForTrip) {
 		// Create the parent TripUpdate object that is returned.
 		TripUpdate.Builder tripUpdate =
 				TripUpdate.newBuilder();
 				  
 		// Add the trip descriptor information
-		Prediction firstPred = predsForTrip.get(0);
+		IpcPrediction firstPred = predsForTrip.get(0);
 		TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
 		if (firstPred.getRouteId() != null)
 			tripDescriptor.setRouteId(firstPred.getRouteId());
@@ -82,7 +82,7 @@ public class GtfsRtTripFeed {
 		tripUpdate.setVehicle(vehicleDescriptor);
 
 		// Add the StopTimeUpdate information for each prediction
-		for (Prediction pred : predsForTrip) {
+		for (IpcPrediction pred : predsForTrip) {
 			StopTimeUpdate.Builder stopTimeUpdate =	StopTimeUpdate.newBuilder()
 					.setStopSequence(pred.getGtfsStopSeq())
 					.setStopId(pred.getStopId());
@@ -111,7 +111,7 @@ public class GtfsRtTripFeed {
 	 *            the data to be put into the GTFS-realtime message
 	 * @return the GTFS-realtime FeedMessage
 	 */
-	private FeedMessage createMessage(Map<String, List<Prediction>> predsByTripMap) {
+	private FeedMessage createMessage(Map<String, List<IpcPrediction>> predsByTripMap) {
 		FeedMessage.Builder message = FeedMessage.newBuilder();
 		
 		FeedHeader.Builder feedheader = FeedHeader.newBuilder()
@@ -121,7 +121,7 @@ public class GtfsRtTripFeed {
 		message.setHeader(feedheader);
 		  
 		// For each trip...
-		for (List<Prediction> predsForTrip : predsByTripMap.values()) {				
+		for (List<IpcPrediction> predsForTrip : predsByTripMap.values()) {				
 			// Create feed entity for each trip
 			FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
 					.setId(predsForTrip.get(0).getTripId());
@@ -149,9 +149,9 @@ public class GtfsRtTripFeed {
 	 * @return Map keyed on tripId of List of Predictions for the trip, or null
 	 *         if could not get data from server.
 	 */
-	private Map<String, List<Prediction>> getPredictionsPerTrip() {
+	private Map<String, List<IpcPrediction>> getPredictionsPerTrip() {
 		// Get all the predictions, grouped by vehicle, from the server
-		List<PredictionsForRouteStopDest> allPredictionsByStop;
+		List<IpcPredictionsForRouteStopDest> allPredictionsByStop;
 		try {
 			allPredictionsByStop = PredictionsInterfaceFactory.get(agencyId)
 					.getAllPredictions(PREDICTION_MAX_FUTURE_SECS);
@@ -161,17 +161,17 @@ public class GtfsRtTripFeed {
 		}
 		
 		// Group the predictions by trip instead of by vehicle
-		Map<String, List<Prediction>> predictionsByTrip = 
-				new HashMap<String, List<Prediction>>();
-		for (PredictionsForRouteStopDest predictionsForStop : 
+		Map<String, List<IpcPrediction>> predictionsByTrip = 
+				new HashMap<String, List<IpcPrediction>>();
+		for (IpcPredictionsForRouteStopDest predictionsForStop : 
 				allPredictionsByStop) {
-			for (Prediction prediction : 
+			for (IpcPrediction prediction : 
 					predictionsForStop.getPredictionsForRouteStop()) {
 				String tripId = prediction.getTripId();
-				List<Prediction> predsForTrip = predictionsByTrip.get(tripId);
+				List<IpcPrediction> predsForTrip = predictionsByTrip.get(tripId);
 				if (predsForTrip == null) {
 					// A new trip so need to use a new trip list
-					predsForTrip = new ArrayList<Prediction>();
+					predsForTrip = new ArrayList<IpcPrediction>();
 					predictionsByTrip.put(tripId, predsForTrip);					
 				}
 				
@@ -192,7 +192,7 @@ public class GtfsRtTripFeed {
 	public FeedMessage createMessage() {
 		// Get prediction data from server
 		IntervalTimer timer = new IntervalTimer();
-		Map<String, List<Prediction>> predsByTrip = getPredictionsPerTrip();
+		Map<String, List<IpcPrediction>> predsByTrip = getPredictionsPerTrip();
 		logger.debug("Getting predictions via RMI for " +
 				"GtfsRtTripFeed.createMessage() took {} msec", 
 				timer.elapsedMsec());

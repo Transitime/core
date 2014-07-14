@@ -32,7 +32,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-public class Avl implements Serializable {
+public class IpcAvl implements Serializable {
 
 	private final String vehicleId;
 	private final long time;
@@ -61,7 +61,7 @@ public class Avl implements Serializable {
 	 * @param licensePlate
 	 * @param passengerCount
 	 */
-	public Avl(String vehicleId, long time, float latitude, float longitude,
+	public IpcAvl(String vehicleId, long time, float latitude, float longitude,
 			float speed, float heading, String assignmentId, String driverId,
 			String licensePlate, int passengerCount) {
 		this.vehicleId = vehicleId;
@@ -79,7 +79,7 @@ public class Avl implements Serializable {
 	/**
 	 * @param lastAvlReport
 	 */
-	public Avl(AvlReport a) {
+	public IpcAvl(AvlReport a) {
 		this.vehicleId = a.getVehicleId();
 		this.time = a.getTime();
 		this.latitude = (float) a.getLat();
@@ -116,7 +116,7 @@ public class Avl implements Serializable {
 		/*
 		 * Only to be used within this class.
 		 */
-		private SerializationProxy(Avl avl) {
+		private SerializationProxy(IpcAvl avl) {
 			this.vehicleId = avl.vehicleId;
 			this.time = avl.time;
 			this.latitude = avl.latitude;
@@ -158,7 +158,7 @@ public class Avl implements Serializable {
 		 * class object.
 		 */
 		private Object readResolve() {
-			return new Avl(vehicleId, time, latitude, longitude, speed,
+			return new IpcAvl(vehicleId, time, latitude, longitude, speed,
 					heading, assignmentId, driverId, licensePlate,
 					passengerCount);
 		}
@@ -254,7 +254,7 @@ public class Avl implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Avl [vehicleId=" + vehicleId 
+		return "IpcAvl [vehicleId=" + vehicleId 
 				+ ", time=" + Time.dateTimeStr(time) 
 				+ ", latitude=" + latitude 
 				+ ", longitude=" + longitude 

@@ -26,7 +26,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.core.dataCache.VehicleDataCache;
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 
@@ -94,7 +94,7 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get()
 	 */
 	@Override
-	public Collection<Vehicle> get() throws RemoteException {
+	public Collection<IpcVehicle> get() throws RemoteException {
 		return getSerializableCollection(vehicleManager.getVehicles());
 	}
 
@@ -102,7 +102,7 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.lang.String)
 	 */
 	@Override
-	public Vehicle get(String vehicleId) throws RemoteException {
+	public IpcVehicle get(String vehicleId) throws RemoteException {
 		return vehicleManager.getVehicle(vehicleId);
 	}
 
@@ -110,7 +110,7 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.util.List)
 	 */
 	@Override
-	public Collection<Vehicle> get(List<String> vehicleIds) 
+	public Collection<IpcVehicle> get(List<String> vehicleIds) 
 			throws RemoteException {
 		return getSerializableCollection(
 				vehicleManager.getVehicles(vehicleIds));
@@ -120,7 +120,7 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getForRoute(java.lang.String)
 	 */
 	@Override
-	public Collection<Vehicle> getForRoute(String routeShortName) throws RemoteException {
+	public Collection<IpcVehicle> getForRoute(String routeShortName) throws RemoteException {
 		return getSerializableCollection(
 				vehicleManager.getVehiclesForRoute(routeShortName));
 	}
@@ -129,7 +129,7 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getForRoute(java.util.Collection)
 	 */
 	@Override
-	public Collection<Vehicle> getForRoute(
+	public Collection<IpcVehicle> getForRoute(
 		List<String> routeShortNames) throws RemoteException {
 	    return getSerializableCollection(
 			vehicleManager.getVehiclesForRoute(routeShortNames));
@@ -139,7 +139,7 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getForRouteUsingRouteId(java.lang.String)
 	 */
 	@Override
-	public Collection<Vehicle> getForRouteUsingRouteId(String routeId)
+	public Collection<IpcVehicle> getForRouteUsingRouteId(String routeId)
 			throws RemoteException {
 		return getSerializableCollection(
 				vehicleManager.getVehiclesForRouteUsingRouteId(routeId));
@@ -149,7 +149,7 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getForRouteUsingRouteId(java.util.Collection)
 	 */
 	@Override
-	public Collection<Vehicle> getForRouteUsingRouteId(
+	public Collection<IpcVehicle> getForRouteUsingRouteId(
 		List<String> routeIds) throws RemoteException {
 		return getSerializableCollection(
 			vehicleManager.getVehiclesForRouteUsingRouteId(routeIds));
@@ -161,11 +161,11 @@ public class VehiclesServer extends AbstractServer implements VehiclesInterface 
 	 * is a Collection that is not serializable. For such non-serializable
 	 * collections this method returns a serializable version.
 	 */
-	private Collection<Vehicle> getSerializableCollection(Collection<Vehicle> vehicles) {
+	private Collection<IpcVehicle> getSerializableCollection(Collection<IpcVehicle> vehicles) {
 		if (vehicles instanceof Serializable) { 
 			return vehicles;
 		} else {
-			return new ArrayList<Vehicle>(vehicles);
+			return new ArrayList<IpcVehicle>(vehicles);
 		}			
 	}
 

@@ -39,10 +39,10 @@ import org.transitime.feed.gtfsRt.OctalDecoder;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
-import org.transitime.ipc.data.Route;
-import org.transitime.ipc.data.RouteSummary;
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcRoute;
+import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
@@ -216,7 +216,7 @@ public class RmiQuery {
 			String stopId = stopIds[0];
 			String routeId = routeShortNames == null ? null : routeShortNames[0];
 			
-			List<PredictionsForRouteStopDest> predictionList = 
+			List<IpcPredictionsForRouteStopDest> predictionList = 
 					predsInterface.get(routeId, stopId, 3);
 			
 			System.out.println("Predictions for agencyId=" + 
@@ -232,7 +232,7 @@ public class RmiQuery {
 				routeStops.add(routeStop);
 			}
 			
-			List<PredictionsForRouteStopDest> predictionListList = 
+			List<IpcPredictionsForRouteStopDest> predictionListList = 
 					predsInterface.get(routeStops, 3);
 			
 			System.out.println("PredictionsInterface for agencyId=" + 
@@ -249,11 +249,11 @@ public class RmiQuery {
 		VehiclesInterface vehiclesInterface = 
 				VehiclesInterfaceFactory.get(agencyId);
 		
-		Collection<Vehicle> vehicles = null;
+		Collection<IpcVehicle> vehicles = null;
 		if (vehicleIds != null && vehicleIds.length == 1) {
 			// Get single vehicle
-			Vehicle vehicle = vehiclesInterface.get(vehicleIds[0]);
-			vehicles = new ArrayList<Vehicle>();
+			IpcVehicle vehicle = vehiclesInterface.get(vehicleIds[0]);
+			vehicles = new ArrayList<IpcVehicle>();
 			vehicles.add(vehicle);
 		} else if (vehicleIds != null && vehicleIds.length > 1) {
 			// Get multiple vehicles
@@ -268,7 +268,7 @@ public class RmiQuery {
 		
 		if (vehicles.size() > 0) {
 			System.out.println("Vehicles are:");
-			for (Vehicle vehicle : vehicles) {
+			for (IpcVehicle vehicle : vehicles) {
 				System.out.println("  " + vehicle);
 			}
 		} else {
@@ -279,12 +279,13 @@ public class RmiQuery {
 	private static void getRouteConfig() throws RemoteException {
 		ConfigInterface configInterface = 
 				ConfigInterfaceFactory.get(agencyId);
-		Collection<RouteSummary> routes = configInterface.getRoutes();
+		Collection<IpcRouteSummary> routes = configInterface.getRoutes();
 		System.out.println("Routes are:");
-		for (RouteSummary routeSummary : routes) {
+		for (IpcRouteSummary routeSummary : routes) {
 			System.out.println(routeSummary);
 			
-			Route route = configInterface.getRoute(routeSummary.getShortName());
+			IpcRoute route = configInterface.getRoute(routeSummary.getShortName(),
+					null, null);
 			System.out.println(route);
 		}
 	}

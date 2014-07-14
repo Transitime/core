@@ -23,7 +23,7 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
@@ -60,7 +60,7 @@ public class GtfsRtVehicleFeed {
 	 * @return the resulting VehiclePosition
 	 * @throws ParseException
 	 */
-	private static VehiclePosition createVehiclePosition(Vehicle vehicleData) 
+	private static VehiclePosition createVehiclePosition(IpcVehicle vehicleData) 
 			throws ParseException {
 		// Create the parent VehiclePosition object that is returned.
 		VehiclePosition.Builder vehiclePosition =
@@ -112,7 +112,7 @@ public class GtfsRtVehicleFeed {
 	 *            the data to be put into the GTFS-realtime message
 	 * @return the GTFS-realtime FeedMessage
 	 */
-	private FeedMessage createMessage(Collection<Vehicle> vehicles) {
+	private FeedMessage createMessage(Collection<IpcVehicle> vehicles) {
 		FeedMessage.Builder message = FeedMessage.newBuilder();
 		
 		FeedHeader.Builder feedheader = FeedHeader.newBuilder()
@@ -120,7 +120,7 @@ public class GtfsRtVehicleFeed {
 				.setTimestamp(System.currentTimeMillis());
 		message.setHeader(feedheader);
 		  
-		for (Vehicle vehicle : vehicles) {
+		for (IpcVehicle vehicle : vehicles) {
 			FeedEntity.Builder vehiclePositionEntity = FeedEntity.newBuilder()
 					.setId(vehicle.getId());
 
@@ -146,10 +146,10 @@ public class GtfsRtVehicleFeed {
 	 * 
 	 * @return Collection of Vehicle objects, or null if not available.
 	 */
-	private Collection<Vehicle> getVehicles() {
+	private Collection<IpcVehicle> getVehicles() {
 		VehiclesInterface vehiclesInterface = 
 				VehiclesInterfaceFactory.get(agencyId);
-		Collection<Vehicle> vehicles = null;
+		Collection<IpcVehicle> vehicles = null;
 		try {
 			vehicles = vehiclesInterface.get();
 		} catch (RemoteException e) {
@@ -165,7 +165,7 @@ public class GtfsRtVehicleFeed {
 	 * @return GTFS-RT FeedMessage for vehicle positions
 	 */
 	public FeedMessage createMessage() {
-		Collection<Vehicle> vehicles = getVehicles();
+		Collection<IpcVehicle> vehicles = getVehicles();
 		return createMessage(vehicles);
 	}
 	

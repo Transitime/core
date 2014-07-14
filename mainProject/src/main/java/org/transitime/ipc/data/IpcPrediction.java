@@ -36,7 +36,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class Prediction implements Serializable {
+public class IpcPrediction implements Serializable {
 
 	private final String vehicleId;
 	// Ideally routeId and stopId wouldn't need to be here since they are
@@ -66,7 +66,7 @@ public class Prediction implements Serializable {
 	private final Trip trip;
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(Prediction.class);
+			.getLogger(IpcPrediction.class);
 
 	private static final long serialVersionUID = 7264507678733060173L;
 
@@ -90,7 +90,7 @@ public class Prediction implements Serializable {
 	 * @param passengerFullness
 	 * @param isArrival
 	 */
-	public Prediction(String vehicleId, String stopId, int gtfsStopSeq,
+	public IpcPrediction(String vehicleId, String stopId, int gtfsStopSeq,
 			Trip trip, long predictionTime, long avlTime, long creationTime,
 			boolean predictionAffectedByWaitStop, String driverId,
 			int passengerCount, float passengerFullness, boolean isArrival) {
@@ -121,7 +121,7 @@ public class Prediction implements Serializable {
 	 * Constructor used for when deserializing a proxy object. Declared private
 	 * because only used internally by the proxy class.
 	 */
-	private Prediction(String vehicleId, String routeId, String stopId,
+	private IpcPrediction(String vehicleId, String routeId, String stopId,
 			int gtfsStopSeq, String tripId, String blockId,
 			long predictionTime, long avlTime, long creationTime,
 			boolean affectedByWaitStop, String driverId, short passengerCount,
@@ -171,7 +171,7 @@ public class Prediction implements Serializable {
 		/*
 		 * Only to be used within this class.
 		 */
-		private SerializationProxy(Prediction p) {
+		private SerializationProxy(IpcPrediction p) {
 			this.vehicleId = p.vehicleId;
 			this.routeId = p.routeId;
 			this.stopId = p.stopId;
@@ -250,7 +250,7 @@ public class Prediction implements Serializable {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new Prediction(vehicleId, routeId, stopId, gtfsStopSeq,
+			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
 					tripId, blockId, predictionTime, avlTime, creationTime,
 					affectedByWaitStop, driverId, passengerCount,
 					passengerFullness, isArrival);
@@ -277,7 +277,7 @@ public class Prediction implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Prediction [" 
+		return "IpcPrediction [" 
 				+ "vehicleId=" + vehicleId
 				+ ", routeId=" + routeId
 				+ (trip != null ? ", rteName=" + trip.getRouteShortName() : "")

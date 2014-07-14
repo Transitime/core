@@ -25,7 +25,7 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
@@ -86,7 +86,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	 *            depends on driver leaving waitStop according to schedule.
 	 * @return The generated Prediction
 	 */
-	private Prediction generatePredictionForStop(AvlReport avlReport,
+	private IpcPrediction generatePredictionForStop(AvlReport avlReport,
 			Indices indices, long predictionTime, boolean useArrivalTimes, 
 			boolean affectedByWaitStop) {
 		// Determine additional parameters for the prediction to be generated
@@ -100,7 +100,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		// If should generate arrival time...
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
-			return new Prediction(avlReport.getVehicleId(), stopId,
+			return new IpcPrediction(avlReport.getVehicleId(), stopId,
 					gtfsStopSeq, trip, predictionTime, 
 					avlReport.getTime(), avlReport.getTimeProcessed(), 
 					affectedByWaitStop, avlReport.getDriverId(),
@@ -173,7 +173,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				// Create and return the departure prediction for this layover.
 				// Add in expected stop time since vehicles often don't depart
 				// on time.
-				return new Prediction(avlReport.getVehicleId(), stopId,
+				return new IpcPrediction(avlReport.getVehicleId(), stopId,
 						gtfsStopSeq, trip, 
 						adjustedDeparatureTime + expectedStopTimeMsec,
 						avlReport.getTime(), avlReport.getTimeProcessed(),
@@ -184,7 +184,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			} else {
 				// Create and return the departure prediction for this 
 				// non-layover stop
-				return new Prediction(avlReport.getVehicleId(), stopId,
+				return new IpcPrediction(avlReport.getVehicleId(), stopId,
 						gtfsStopSeq, trip, 
 						predictionTime + expectedStopTimeMsec,
 						avlReport.getTime(), avlReport.getTimeProcessed(),
@@ -206,7 +206,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	 * @return List of Predictions. Can be empty but will not be null.
 	 */
 	@Override
-	public List<Prediction> generate(VehicleState vehicleState) {	
+	public List<IpcPrediction> generate(VehicleState vehicleState) {	
 		// For layovers always use arrival time for end of trip and
 		// departure time for anything else. But for non-layover stops
 		// can use either arrival or departure times, depending on what
@@ -220,7 +220,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		boolean affectedByWaitStop = false;
 		
 		// For storing the new predictions
-		List<Prediction> newPredictions = new ArrayList<Prediction>();
+		List<IpcPrediction> newPredictions = new ArrayList<IpcPrediction>();
 
 		// Get the new match for the vehicle that predictions are to be based on
 		TemporalMatch match = vehicleState.getMatch();
@@ -248,7 +248,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				affectedByWaitStop = true;
 			
 			// Determine the new prediction
-			Prediction predictionForStop = generatePredictionForStop(avlReport,
+			IpcPrediction predictionForStop = generatePredictionForStop(avlReport,
 					indices, predictionTime,
 					useArrivalPredictionsForNormalStops, affectedByWaitStop);
 			logger.debug("For vehicleId={} generated prediction {}",

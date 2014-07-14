@@ -19,7 +19,7 @@ package org.transitime.core;
 
 import java.util.List;
 
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * Defines the interface for generating predictions. To create predictions using
@@ -39,6 +39,6 @@ public interface PredictionGenerator {
 	 *            Contains the new match for the vehicle that the predictions
 	 *            are to be based on.
 	 */
-	public List<Prediction> generate(VehicleState vehicleState);
+	public List<IpcPrediction> generate(VehicleState vehicleState);
 	
 }

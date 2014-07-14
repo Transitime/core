@@ -22,7 +22,7 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.List;
 
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * Defines the RMI interface used for obtaining vehicle information.
@@ -38,7 +38,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> get() throws RemoteException;
+	public Collection<IpcVehicle> get() throws RemoteException;
 
 	/**
 	 * Gets from server Vehicle info for specified vehicle.
@@ -48,7 +48,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return info for specified vehicle
 	 * @throws RemoteException
 	 */
-	public Vehicle get(String vehicleId) throws RemoteException;
+	public IpcVehicle get(String vehicleId) throws RemoteException;
 
 	/**
 	 * Gets from server Vehicle info for vehicles specified by vehicles
@@ -59,7 +59,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> get(List<String> vehicleIds) 
+	public Collection<IpcVehicle> get(List<String> vehicleIds) 
 			throws RemoteException;
 
 	/**
@@ -71,7 +71,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> getForRoute(String routeShortName) 
+	public Collection<IpcVehicle> getForRoute(String routeShortName) 
 			throws RemoteException;
 
 	/**
@@ -83,7 +83,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> getForRoute(List<String> routeShortNames) 
+	public Collection<IpcVehicle> getForRoute(List<String> routeShortNames) 
 			throws RemoteException;
 
 	/**
@@ -95,7 +95,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> getForRouteUsingRouteId(String routeId) 
+	public Collection<IpcVehicle> getForRouteUsingRouteId(String routeId) 
 			throws RemoteException;
 
 	/**
@@ -107,6 +107,6 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<Vehicle> getForRouteUsingRouteId(List<String> routeIds) 
+	public Collection<IpcVehicle> getForRouteUsingRouteId(List<String> routeIds) 
 			throws RemoteException;
 }

@@ -21,8 +21,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Collection;
 
-import org.transitime.ipc.data.Route;
-import org.transitime.ipc.data.RouteSummary;
+import org.transitime.ipc.data.IpcRoute;
+import org.transitime.ipc.data.IpcRouteSummary;
 
 /**
  *
@@ -38,7 +38,28 @@ public interface ConfigInterface extends Remote {
 	 * @return
 	 * @throws RemoteException
 	 */
-	public Collection<RouteSummary> getRoutes() throws RemoteException;
-	
-	public Route getRoute(String routeShortName) throws RemoteException;
+	public Collection<IpcRouteSummary> getRoutes() throws RemoteException;
+
+	/**
+	 * Obtains data for single route.
+	 * 
+	 * @param routeShortName
+	 *            Specifies which route to provide data for. routeShortName is
+	 *            used instead of routeId since routeIds unfortunately often
+	 *            change when there is a schedule change.
+	 * @param stopId
+	 *            If want UI to highlight the remaining stops and paths left in
+	 *            trip then stopId is used to return which stops remain in trip.
+	 *            If this additional info not needed for UI then null can be
+	 *            specified.
+	 * @param destinationName
+	 *            If want UI to highlight the remaining stops and paths left in
+	 *            trip then stopId is used to determine which trip pattern to
+	 *            highlight. If this additional info not needed for UI then null
+	 *            can be specified.
+	 * @return
+	 * @throws RemoteException
+	 */
+	public IpcRoute getRoute(String routeShortName, String stopId,
+			String destinationName) throws RemoteException;
 }

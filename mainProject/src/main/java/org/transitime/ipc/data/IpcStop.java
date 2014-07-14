@@ -29,7 +29,7 @@ import org.transitime.db.structs.Location;
  * @author SkiBu Smith
  *
  */
-public class Stop implements Serializable {
+public class IpcStop implements Serializable {
 
 	private String id;
 	private String name;
@@ -40,7 +40,7 @@ public class Stop implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	public Stop(org.transitime.db.structs.Stop dbStop) {
+	public IpcStop(org.transitime.db.structs.Stop dbStop) {
 		id = dbStop.getId();
 		name = dbStop.getName();
 		code = dbStop.getCode();
@@ -49,7 +49,7 @@ public class Stop implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "Stop [" 
+		return "IpcStop [" 
 				+ "id=" + id 
 				+ ", name=" + name 
 				+ ", code=" + code

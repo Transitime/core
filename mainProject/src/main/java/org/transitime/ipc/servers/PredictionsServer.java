@@ -22,7 +22,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 import org.transitime.utils.Time;
@@ -93,7 +93,7 @@ public class PredictionsServer
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#get(java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public List<PredictionsForRouteStopDest> get(String routeShortName, String stopId,
+	public List<IpcPredictionsForRouteStopDest> get(String routeShortName, String stopId,
 			int predictionsPerStop) throws RemoteException {
 		return predictionManager.getPredictions(routeShortName, stopId,
 				predictionsPerStop);
@@ -103,7 +103,7 @@ public class PredictionsServer
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#getUsingRouteId(java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public List<PredictionsForRouteStopDest> getUsingRouteId(String routeId, String stopId,
+	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(String routeId, String stopId,
 			int predictionsPerStop) throws RemoteException {
 		return predictionManager.getPredictionsUsingRouteId(routeId, stopId,
 				predictionsPerStop);
@@ -113,7 +113,7 @@ public class PredictionsServer
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#get(java.util.List, int)
 	 */
 	@Override
-	public List<PredictionsForRouteStopDest> get(List<RouteStop> routeStops,
+	public List<IpcPredictionsForRouteStopDest> get(List<RouteStop> routeStops,
 			int predictionsPerStop) throws RemoteException {
 		return predictionManager.getPredictions(routeStops, predictionsPerStop);
 	}
@@ -122,7 +122,7 @@ public class PredictionsServer
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#getUsingRouteId(java.util.List, int)
 	 */
 	@Override
-	public List<PredictionsForRouteStopDest> getUsingRouteId(List<RouteStop> routeStops,
+	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(List<RouteStop> routeStops,
 			int predictionsPerStop) throws RemoteException {
 		return predictionManager.getPredictionsUsingRouteId(routeStops, 
 				predictionsPerStop);
@@ -132,7 +132,7 @@ public class PredictionsServer
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#getPredictionsByVehicle()
 	 */
 	@Override
-	public List<PredictionsForRouteStopDest> getAllPredictions(int predictionMaxFutureSecs) {
+	public List<IpcPredictionsForRouteStopDest> getAllPredictions(int predictionMaxFutureSecs) {
 		// How far in future in absolute time should get predictions for
 		long maxSystemTimeForPrediction = predictionManager.getSystemTime() + 
 				predictionMaxFutureSecs*Time.MS_PER_SEC;

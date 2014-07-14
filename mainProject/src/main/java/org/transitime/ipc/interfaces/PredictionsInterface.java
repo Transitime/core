@@ -21,7 +21,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
  * Defines the RMI interface used for obtaining predictions. 
@@ -70,7 +70,7 @@ public interface PredictionsInterface extends Remote {
 	 *         for each destination
 	 * @throws RemoteException
 	 */
-	public List<PredictionsForRouteStopDest> get(
+	public List<IpcPredictionsForRouteStopDest> get(
 			String routeShortName, String stopId, int predictionsPerStop) 
 				throws RemoteException;
 	
@@ -85,7 +85,7 @@ public interface PredictionsInterface extends Remote {
 	 *         for each destination
 	 * @throws RemoteException
 	 */
-	public List<PredictionsForRouteStopDest> getUsingRouteId(
+	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(
 			String routeId, String stopId, int predictionsPerStop) 
 				throws RemoteException;
 	
@@ -105,7 +105,7 @@ public interface PredictionsInterface extends Remote {
 	 *         for each route/stop.
 	 * @throws RemoteException
 	 */
-	public List<PredictionsForRouteStopDest> get(
+	public List<IpcPredictionsForRouteStopDest> get(
 			List<RouteStop> routeStops,	int predictionsPerStop)
 				throws RemoteException;
 	
@@ -124,7 +124,7 @@ public interface PredictionsInterface extends Remote {
 	 *         for each route/stop.
 	 * @throws RemoteException
 	 */
-	public List<PredictionsForRouteStopDest> getUsingRouteId(
+	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(
 			List<RouteStop> routeStops,	int predictionsPerStop)
 				throws RemoteException;
 	
@@ -137,6 +137,6 @@ public interface PredictionsInterface extends Remote {
 	 *         a separate one for every route/stop/destination.
 	 * @throws RemoteException
 	 */
-	public List<PredictionsForRouteStopDest> getAllPredictions(
+	public List<IpcPredictionsForRouteStopDest> getAllPredictions(
 			int predictionMaxFutureSecs) throws RemoteException;
 }
