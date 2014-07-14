@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * Contains the data for a single vehicle. 
@@ -63,7 +63,7 @@ public class VehicleData {
      * 
      * @param vehicle
      */
-    public VehicleData(Vehicle vehicle) {
+    public VehicleData(IpcVehicle vehicle) {
 	id = vehicle.getId();
 	loc = new LocationData(vehicle);
 	routeId = vehicle.getRouteId();

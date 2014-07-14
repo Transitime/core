@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.transitime.core.BlockAssignmentMethod;
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * Contains data for a single vehicle with additional info that is meant more
@@ -72,7 +72,7 @@ public class VehicleDetailsData extends VehicleData {
      * 
      * @param vehicle
      */
-    public VehicleDetailsData(Vehicle vehicle) {
+    public VehicleDetailsData(IpcVehicle vehicle) {
 	super(vehicle);
 	
 	scheduleAdherence = vehicle.getRealTimeSchedAdh().getTemporalDifference();

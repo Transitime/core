@@ -24,23 +24,20 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.ipc.data.IpcRouteSummary;
 
 /**
- * For when have list of Vehicles. By using this class can control
- * the element name when data is output.
+ *
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="vehicles")
-public class VehiclesData {
+@XmlRootElement(name="routes")
+public class RouteSummariesData {
 
-    // Need to use @XmlElementRef so that the element name used for each
-    // VehicleData object will be what is specified in the VehicleData class.
-    @XmlElement(name="vehicle")
-    private List<VehicleData> vehiclesData;
-    
+    @XmlElement(name="route")
+    private List<RouteSummaryData> routeSummariesData;
+
     /********************** Member Functions **************************/
 
     /**
@@ -48,19 +45,13 @@ public class VehiclesData {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    public VehiclesData() {}
-
-    /**
-     * For constructing a VehiclesData object from a Collection of Vehicle
-     * objects.
-     * 
-     * @param vehicles
-     */
-    public VehiclesData(Collection<IpcVehicle> vehicles) {
-	vehiclesData = new ArrayList<VehicleData>();
-	for (IpcVehicle vehicle : vehicles) {
-	    vehiclesData.add(new VehicleData(vehicle));
+    protected RouteSummariesData() {}
+    
+    public RouteSummariesData(Collection<IpcRouteSummary> routes) {
+	routeSummariesData = new ArrayList<RouteSummaryData>();
+	for (IpcRouteSummary route : routes) {
+	    RouteSummaryData routeSummary = new RouteSummaryData(route);
+	    routeSummariesData.add(routeSummary);
 	}
     }
-        
 }

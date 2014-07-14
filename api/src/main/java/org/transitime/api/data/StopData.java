@@ -19,7 +19,9 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcStop;
+import org.transitime.utils.ChinaGpsOffset;
+import org.transitime.utils.Geo;
 
 /**
  *
@@ -27,25 +29,37 @@ import org.transitime.ipc.data.IpcRouteSummary;
  * @author SkiBu Smith
  *
  */
-public class RouteSummaryData {
+public class StopData {
 
     @XmlAttribute
     private String id;
-    
-    @XmlAttribute(name="routeShrtNm")
-    private String shortName;
-    
+       
     @XmlAttribute
     private String name;
-    
-    /********************** Member Functions **************************/
 
-    protected RouteSummaryData() {}
+    @XmlAttribute
+    private String lat;
     
-    public RouteSummaryData(IpcRouteSummary route) {
-	this.id = route.getId();
-	this.shortName = route.getShortName();
-	this.name = route.getName();
+    @XmlAttribute
+    private String lon;
+    
+    @XmlAttribute
+    private Integer code;
+    
+     /********************** Member Functions **************************/
+
+    protected StopData() {}
+    
+    public StopData(IpcStop stop) {
+	this.id = stop.getId();
+	this.name = stop.getName();
+
+	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(
+		stop.getLoc().getLat(), stop.getLoc().getLon());	
+	this.lat = Geo.format(latLon.getLat());
+	this.lon = Geo.format(latLon.getLon());
+
+	this.code = stop.getCode();
     }
 
 }

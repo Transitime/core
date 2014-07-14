@@ -18,13 +18,14 @@
 package org.transitime.api.data;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.Route;
+import org.transitime.ipc.data.IpcRoute;
+import org.transitime.ipc.data.IpcStop;
 
 /**
  *
@@ -32,26 +33,49 @@ import org.transitime.ipc.data.Route;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="routes")
-public class RoutesData {
+@XmlRootElement(name="route")
+public class RouteData {
 
-    @XmlElement(name="route")
-    private List<RouteSummaryData> routeSummariesData;
+    @XmlAttribute
+    private String id;
+    
+    @XmlAttribute(name="routeShrtNm")
+    private String shortName;
+    
+    @XmlAttribute
+    private String name;
 
+    @XmlAttribute
+    private String color;
+
+    @XmlAttribute
+    private String textColor;
+
+    @XmlAttribute
+    private String type;
+
+    @XmlElement
+    private List<StopData> stops;
+    
     /********************** Member Functions **************************/
 
-    /**
-     * Need a no-arg constructor for Jersey. Otherwise get really 
-     * obtuse "MessageBodyWriter not found for media type=application/json"
-     * exception.
-     */
-    protected RoutesData() {}
+    protected RouteData() {}
     
-    public RoutesData(Collection<Route> routes) {
-	routeSummariesData = new ArrayList<RouteSummaryData>();
-	for (Route route : routes) {
-	    RouteSummaryData routeSummary = new RouteSummaryData(route);
-	    routeSummariesData.add(routeSummary);
+    public RouteData(IpcRoute route) {
+	this.id = route.getId();
+	this.shortName = route.getShortName();
+	this.name = route.getName();
+	this.color = route.getColor();
+	this.textColor = route.getTextColor();
+	this.type = route.getType();
+	
+	this.stops = new ArrayList<StopData>();
+	for (IpcStop stop : route.getStops()) {
+	    this.stops.add(new StopData(stop));
 	}
+	
+//	route.getExtent();	
+//	route.getSegments();
     }
+
 }

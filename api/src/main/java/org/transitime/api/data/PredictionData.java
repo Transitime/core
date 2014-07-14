@@ -20,7 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.Prediction;
+import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * Contains data for a single prediction.
@@ -69,7 +69,7 @@ public class PredictionData {
      */
     public PredictionData() {}
 
-    public PredictionData(Prediction prediction) {
+    public PredictionData(IpcPrediction prediction) {
 	time = prediction.getTime();
 	seconds = (int) (time - System.currentTimeMillis()) / 1000;
 	// Always round down minutes to be conservative and so that user

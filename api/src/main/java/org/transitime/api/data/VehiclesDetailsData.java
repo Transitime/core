@@ -24,7 +24,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * For when have list of VehicleDetails. By using this class can control
@@ -56,9 +56,9 @@ public class VehiclesDetailsData {
      * 
      * @param vehicles
      */
-    public VehiclesDetailsData(Collection<Vehicle> vehicles) {
+    public VehiclesDetailsData(Collection<IpcVehicle> vehicles) {
 	vehiclesData = new ArrayList<VehicleDetailsData>();
-	for (Vehicle vehicle : vehicles) {
+	for (IpcVehicle vehicle : vehicles) {
 	    vehiclesData.add(new VehicleDetailsData(vehicle));
 	}
     }

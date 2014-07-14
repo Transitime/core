@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.PredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
  *
@@ -63,11 +63,11 @@ public class PredictionRouteStopData {
     protected PredictionRouteStopData() {}
 
     public PredictionRouteStopData(
-	    List<PredictionsForRouteStopDest> predictionsForRouteStop) {
+	    List<IpcPredictionsForRouteStopDest> predictionsForRouteStop) {
 	if (predictionsForRouteStop == null || predictionsForRouteStop.isEmpty())
 	    return;
 	
-	PredictionsForRouteStopDest routeStopInfo = predictionsForRouteStop.get(0);
+	IpcPredictionsForRouteStopDest routeStopInfo = predictionsForRouteStop.get(0);
 	routeShortName = routeStopInfo.getRouteShortName();
 	routeName = routeStopInfo.getRouteName();
 	routeId = routeStopInfo.getRouteId();
@@ -75,7 +75,7 @@ public class PredictionRouteStopData {
 	stopName = routeStopInfo.getStopName();
 	
 	destinations = new ArrayList<PredictionDestinationData>();
-	for (PredictionsForRouteStopDest destinationInfo : predictionsForRouteStop) {
+	for (IpcPredictionsForRouteStopDest destinationInfo : predictionsForRouteStop) {
 	    destinations.add(new PredictionDestinationData(destinationInfo));
 	}
     }

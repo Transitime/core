@@ -19,7 +19,7 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.Vehicle;
+import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.utils.ChinaGpsOffset;
 import org.transitime.utils.Geo;
 import org.transitime.utils.StringUtils;
@@ -57,7 +57,7 @@ public class LocationData {
      * @param lat
      * @param lon
      */
-    public LocationData(Vehicle vehicle) {
+    public LocationData(IpcVehicle vehicle) {
 	// If location is in China (approximately) then adjust lat & lon so 
 	// that will be displayed properly on map. 
 	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(
