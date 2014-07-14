@@ -20,6 +20,7 @@ package org.transitime.ipc.data;
 import java.io.Serializable;
 
 import org.transitime.db.structs.Location;
+import org.transitime.db.structs.Stop;
 
 /**
  * Contains information for a single route. Since Stop objects do 
@@ -35,16 +36,18 @@ public class IpcStop implements Serializable {
 	private String name;
 	private Integer code;
 	private Location loc;
-
+	private boolean isUiStop;
+	
 	private static final long serialVersionUID = 8964112532327897125L;
 
 	/********************** Member Functions **************************/
 
-	public IpcStop(org.transitime.db.structs.Stop dbStop) {
-		id = dbStop.getId();
-		name = dbStop.getName();
-		code = dbStop.getCode();
-		loc = dbStop.getLoc();
+	public IpcStop(Stop dbStop, boolean aUiStop) {
+		this.id = dbStop.getId();
+		this.name = dbStop.getName();
+		this.code = dbStop.getCode();
+		this.loc = dbStop.getLoc();
+		this.isUiStop = aUiStop;
 	}
 	
 	@Override
@@ -53,7 +56,8 @@ public class IpcStop implements Serializable {
 				+ "id=" + id 
 				+ ", name=" + name 
 				+ ", code=" + code
-				+ ", loc=" + loc 
+				+ ", loc=" + loc
+				+ ", isUiStop" + isUiStop
 				+ "]";
 	}
 
@@ -73,4 +77,7 @@ public class IpcStop implements Serializable {
 		return loc;
 	}
 
+	public boolean isUiStop() {
+		return isUiStop;
+	}
 }

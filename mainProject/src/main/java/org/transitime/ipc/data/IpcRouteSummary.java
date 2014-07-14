@@ -20,6 +20,7 @@ package org.transitime.ipc.data;
 import java.io.Serializable;
 
 import org.transitime.db.structs.Extent;
+import org.transitime.db.structs.Route;
 
 /**
  * Contains configuration information for a single route. For providing info to
@@ -72,7 +73,7 @@ public class IpcRouteSummary implements Serializable {
      * 
      * @param dbRoute
      */
-	public IpcRouteSummary(org.transitime.db.structs.Route dbRoute) {
+	public IpcRouteSummary(Route dbRoute) {
 		this.id = dbRoute.getId();
 		this.shortName = dbRoute.getShortName();
 		this.name = dbRoute.getName();

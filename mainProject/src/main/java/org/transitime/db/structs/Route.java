@@ -404,7 +404,9 @@ public class Route implements Serializable {
 	}
 
 	/**
-	 * Returns unordered collection of stops associated with route
+	 * Returns unordered collection of stops associated with route.
+	 * <p>
+	 * Synchronized because caching stops.
 	 * 
 	 * @return
 	 */
