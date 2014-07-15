@@ -341,7 +341,7 @@ public class PredictionDataCache {
 		for (IpcPrediction newPrediction : newPredictionsForVehicle) {
 			MapKey key = new MapKey(newPrediction.getRouteShortName(),
 					newPrediction.getStopId(), newPrediction.getTrip()
-							.getName());
+							.getHeadsign());
 			List<IpcPrediction> predsForRouteStopList = 
 					newPredsForVehicleByRouteStopMap.get(key);
 			if (predsForRouteStopList == null) {
@@ -366,7 +366,7 @@ public class PredictionDataCache {
 				// route/stop...
 				MapKey key = new MapKey(oldPrediction.getRouteShortName(),
 						oldPrediction.getStopId(), oldPrediction.getTrip()
-								.getName());
+								.getHeadsign());
 				if (newPredsForVehicleByRouteStopMap.get(key) == null) {
 					// Remove the old prediction
 					removePrediction(oldPrediction);
@@ -486,7 +486,7 @@ public class PredictionDataCache {
 			// specified destination.
 			for (IpcPredictionsForRouteStopDest preds : predictionsForRouteStop) {
 				if (preds.getDestination() == null
-						|| preds.getDestination().equals(trip.getName()))
+						|| preds.getDestination().equals(trip.getHeadsign()))
 					return preds;
 			}
 

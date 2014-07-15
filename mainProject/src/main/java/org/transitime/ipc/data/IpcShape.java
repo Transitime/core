@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.transitime.db.structs.Location;
+import org.transitime.db.structs.TripPattern;
 
 /**
  *
@@ -32,6 +33,7 @@ import org.transitime.db.structs.Location;
 public class IpcShape implements Serializable {
 
 	private String tripPatternId;
+	private String headsign;
 	private List<Location> locations;
 	private boolean isUiShape;
 	
@@ -39,8 +41,9 @@ public class IpcShape implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	IpcShape(String tripPatternId, boolean isUiShape) {
-		this.tripPatternId = tripPatternId;
+	IpcShape(TripPattern tripPattern, boolean isUiShape) {
+		this.tripPatternId = tripPattern.getId();
+		this.headsign = tripPattern.getHeadsign();
 		this.locations = new ArrayList<Location>();
 		this.isUiShape = isUiShape;
 	}
@@ -49,6 +52,7 @@ public class IpcShape implements Serializable {
 	public String toString() {
 		return "IpcShape ["
 				+ "tripPatternId=" + tripPatternId
+				+ ", headsign=" + headsign
 				+ ", locations=" + locations 
 				+ ", isUiShape=" + isUiShape
 				+ "]";

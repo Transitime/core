@@ -56,7 +56,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	private final String id;
 	
 	@Column
-	private final String name;
+	private final String headsign;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String directionId;
@@ -111,15 +111,15 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		
 		// The trip_headsign in trips.txt and therefore the the trip name can be
 		// null. For these cases use the last stop as a destination.
-		if (trip.getName() != null) {
-			name = trip.getName();
+		if (trip.getHeadsign() != null) {
+			headsign = trip.getHeadsign();
 		} else {
 			// trip_headsign was null so try using final stop name as the destination
 			// as a fallback.
 			StopPath lastPath = stopPaths.get(stopPaths.size()-1);
 			String lastStopIdForTrip = lastPath.getStopId();
 			Stop lastStopForTrip = gtfsData.getStop(lastStopIdForTrip);
-			name = lastStopForTrip.getName();
+			headsign = lastStopForTrip.getName();
 		}
 		
 		// Store additional info from this trip
@@ -148,7 +148,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		
 		configRev = -1;
 		id = null;
-		name = null;
+		headsign = null;
 		directionId = null;
 		routeId = null;
 		extent = null;
@@ -327,7 +327,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		return "TripPattern ["
 				+ "configRev=" + configRev
 				+ ", id=" + id
-				+ ", name=" + name
+				+ ", name=" + headsign
 				+ ", routeId=" + routeId
 				+ ", shapeId=" + shapeId
 				+ ", extent=" + extent
@@ -342,7 +342,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	 * @return A short version of the TripPattern object
 	 */
 	public String toShortString() {
-		return name 
+		return headsign 
 				+ " from stop " + stopPaths.get(0).getStopId() 
 				+ " to stop " + stopPaths.get(stopPaths.size()-1).getStopId(); 
 	}
@@ -353,7 +353,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	 * @return
 	 */
 	public String toStringListingTripIds() {
-		String s = "Trip Pattern [id=" + id + ", name=" + name + ", trips=[";
+		String s = "Trip Pattern [id=" + id + ", name=" + headsign + ", trips=[";
 		for (Trip trip : trips) {
 			s += trip.getId() + ",";
 		}
@@ -370,7 +370,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 				+ ((directionId == null) ? 0 : directionId.hashCode());
 		result = prime * result + ((extent == null) ? 0 : extent.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((headsign == null) ? 0 : headsign.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime * result + ((trips == null) ? 0 : trips.hashCode());
 		return result;
@@ -402,10 +402,10 @@ public class TripPattern extends TripPatternBase implements Serializable {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		if (name == null) {
-			if (other.name != null)
+		if (headsign == null) {
+			if (other.headsign != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!headsign.equals(other.headsign))
 			return false;
 		if (routeId == null) {
 			if (other.routeId != null)
@@ -513,8 +513,8 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	 * Usually from the trip_headsign from the trips.txt file
 	 * @return name, the title of the trip pattern
 	 */
-	public String getName() {
-		return name;
+	public String getHeadsign() {
+		return headsign;
 	}
 	
 	/**

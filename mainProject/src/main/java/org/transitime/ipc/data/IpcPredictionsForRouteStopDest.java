@@ -74,7 +74,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeName = trip != null ? trip.getRouteName() : null;
 		this.stopId = stopId;
 		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
-		this.destination = trip != null ? trip.getName() : null;
+		this.destination = trip != null ? trip.getHeadsign() : null;
 		this.directionId = trip != null ? trip.getDirectionId() : null;
 		
 		this.predictionsForRouteStop = new ArrayList<IpcPrediction>(MAX_PREDICTIONS);

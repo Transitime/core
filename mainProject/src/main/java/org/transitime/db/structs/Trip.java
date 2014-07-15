@@ -116,7 +116,7 @@ public class Trip implements Serializable {
 	
 	// The GTFS trips.txt trip_headsign if set. Otherwise null.
 	@Column
-	private final String name;
+	private final String headsign;
 	
 	// From GTFS trips.txt block_id if set. Otherwise the trip_id.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -160,7 +160,7 @@ public class Trip implements Serializable {
 		this.routeId = properRouteId!=null? properRouteId : gtfsTrip.getRouteId();
 		this.routeShortName = routeShortName;
 		this.serviceId = gtfsTrip.getServiceId();
-		this.name = gtfsTrip.getTripHeadsign();
+		this.headsign = gtfsTrip.getTripHeadsign();
 		// block column is optional in GTFS trips.txt file. Best can do for
 		// this situation is to use the tripId as the block.
 		this.blockId = gtfsTrip.getBlockId() != null ? 
@@ -183,7 +183,7 @@ public class Trip implements Serializable {
 		this.routeId = tripFromStopTimes.routeId;
 		this.routeShortName = tripFromStopTimes.routeShortName;
 		this.serviceId = tripFromStopTimes.serviceId;
-		this.name = tripFromStopTimes.name;
+		this.headsign = tripFromStopTimes.headsign;
 		this.shapeId = tripFromStopTimes.shapeId;
 		this.tripPattern = tripFromStopTimes.tripPattern;
 		this.travelTimes = tripFromStopTimes.travelTimes;
@@ -230,7 +230,7 @@ public class Trip implements Serializable {
 		routeId = null;
 		routeShortName = null;
 		serviceId = null;
-		name = null;
+		headsign = null;
 		blockId = null;
 		shapeId = null;
 	}
@@ -333,7 +333,7 @@ public class Trip implements Serializable {
 				+ ", tripIndex=" + getIndex()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
-				+ ", name=\"" + name + "\""
+				+ ", name=\"" + headsign + "\""
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
 				+ ", routeShortName=" + routeShortName
@@ -357,7 +357,7 @@ public class Trip implements Serializable {
 				+ ", tripIndex=" + getIndex()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
-				+ ", name=\"" + name + "\""
+				+ ", name=\"" + headsign + "\""
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
 				+ ", routeShortName=" + routeShortName
@@ -379,7 +379,7 @@ public class Trip implements Serializable {
 		result = prime * result
 				+ ((directionId == null) ? 0 : directionId.hashCode());
 		result = prime * result + ((endTime == null) ? 0 : endTime.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((headsign == null) ? 0 : headsign.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime
 				* result
@@ -427,10 +427,10 @@ public class Trip implements Serializable {
 				return false;
 		} else if (!endTime.equals(other.endTime))
 			return false;
-		if (name == null) {
-			if (other.name != null)
+		if (headsign == null) {
+			if (other.headsign != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!headsign.equals(other.headsign))
 			return false;
 		if (routeId == null) {
 			if (other.routeId != null)
@@ -558,8 +558,8 @@ public class Trip implements Serializable {
 	 * capitalization and such.
 	 * @return the name
 	 */
-	public String getName() {
-		return name;
+	public String getHeadsign() {
+		return headsign;
 	}
 
 	/**
