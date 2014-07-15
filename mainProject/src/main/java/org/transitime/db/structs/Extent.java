@@ -153,4 +153,20 @@ public class Extent implements Serializable {
 				+ "]";					
 	}
 
+	public double getMinLat() {
+	    return minLat;
+	}
+
+	public double getMaxLat() {
+	    return maxLat;
+	}
+
+	public double getMinLon() {
+	    return minLon;
+	}
+
+	public double getMaxLon() {
+	    return maxLon;
+	}
+
 }
