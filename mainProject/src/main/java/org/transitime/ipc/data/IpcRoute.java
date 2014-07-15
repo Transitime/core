@@ -47,18 +47,18 @@ public class IpcRoute extends IpcRouteSummary {
 	/********************** Member Functions **************************/
 
 	public IpcRoute(Route dbRoute, String stopId,
-			String destinationName) {
+			String tripPatternId) {
 		// Construct the core part of the route, everything but
 		// the stops and paths.
 		super(dbRoute);
 		
 		// Create Collections of stops and paths
 		createStopsAndPaths(dbRoute, stopId,
-				destinationName);
+				tripPatternId);
 	}
 
 	private void createStopsAndPaths(Route dbRoute, String stopId,
-			String destinationName) {
+			String tripPatternId) {
 		// Create the stops and shapes arrays for this object
 		stops = new ArrayList<IpcStop>(100);
 		shapes = new ArrayList<IpcShape>();
@@ -74,7 +74,7 @@ public class IpcRoute extends IpcRouteSummary {
 				.getDbConfig().getTripPatternsForRoute(dbRoute.getId());
 		for (TripPattern tripPattern : tripPatternsForRoute) {
 			// If this is the UI trip pattern...
-			if (tripPattern.getHeadsign().equals(destinationName)) {
+			if (tripPattern.getId().equals(tripPatternId)) {
 				// Create a special UI shape for the part of this trip pattern
 				// that is after the specified stop.
 				IpcShape ipcShapeForUi = 

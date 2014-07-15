@@ -52,7 +52,7 @@ public interface ConfigInterface extends Remote {
 	 *            trip then stopId is used to return which stops remain in trip.
 	 *            If this additional info not needed for UI then null can be
 	 *            specified.
-	 * @param destinationName
+	 * @param tripPatternId
 	 *            If want UI to highlight the remaining stops and paths left in
 	 *            trip then stopId is used to determine which trip pattern to
 	 *            highlight. If this additional info not needed for UI then null
@@ -61,5 +61,5 @@ public interface ConfigInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public IpcRoute getRoute(String routeShortName, String stopId,
-			String destinationName) throws RemoteException;
+			String tripPatternId) throws RemoteException;
 }
