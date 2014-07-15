@@ -318,7 +318,7 @@
         maxLon double precision,
         minLat double precision,
         minLon double precision,
-        name varchar(255),
+        headsign varchar(255),
         routeId varchar(60),
         primary key (id, configRev)
     );
@@ -330,7 +330,7 @@
         blockId varchar(60),
         directionId varchar(60),
         endTime integer,
-        name varchar(255),
+        headsign varchar(255),
         routeId varchar(60),
         routeShortName varchar(60),
         scheduledTimesMap blob,
