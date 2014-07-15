@@ -66,6 +66,10 @@ public class IpcShape implements Serializable {
 		return tripPatternId;
 	}
 	
+	public String getHeadsign() {
+		return headsign;
+	}
+	
 	public boolean isUiShape() {
 		return isUiShape;
 	}
