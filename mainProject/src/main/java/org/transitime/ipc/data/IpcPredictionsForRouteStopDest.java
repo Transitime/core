@@ -45,7 +45,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	private final String stopId;
 	private final String stopName;
 	
-	private final String destination;
+	private final String headsign;
 	private final String directionId;
 	
 	// The predictions associated with the route/stop
@@ -74,7 +74,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeName = trip != null ? trip.getRouteName() : null;
 		this.stopId = stopId;
 		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
-		this.destination = trip != null ? trip.getHeadsign() : null;
+		this.headsign = trip != null ? trip.getHeadsign() : null;
 		this.directionId = trip != null ? trip.getDirectionId() : null;
 		
 		this.predictionsForRouteStop = new ArrayList<IpcPrediction>(MAX_PREDICTIONS);
@@ -96,7 +96,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeName = toClone.routeName;
 		this.stopId = toClone.stopId;
 		this.stopName = toClone.stopName;
-		this.destination = toClone.destination;
+		this.headsign = toClone.headsign;
 		this.directionId = toClone.directionId;
 		
 		// Copy all the prediction info. Do while synchronized since another
@@ -136,7 +136,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeName = routeName;
 		this.stopId = stopId;
 		this.stopName = stopName;
-		this.destination = destination;
+		this.headsign = destination;
 		this.directionId = directionId;
 		
 		this.predictionsForRouteStop = predictions;
@@ -152,7 +152,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private String routeName;
 		private String stopId;
 		private String stopName;
-		private String destination;
+		private String headsign;
 		private String directionId;
 		private List<IpcPrediction> predictionsForRouteStop;
 
@@ -168,7 +168,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			this.routeName = p.routeName;
 			this.stopId = p.stopId;
 			this.stopName = p.stopName;
-			this.destination = p.destination;
+			this.headsign = p.headsign;
 			this.directionId = p.directionId;
 			this.predictionsForRouteStop = p.predictionsForRouteStop;
 		}
@@ -188,7 +188,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			stream.writeObject(routeName);
 			stream.writeObject(stopId);
 			stream.writeObject(stopName);
-			stream.writeObject(destination);
+			stream.writeObject(headsign);
 			stream.writeObject(directionId);
 			stream.writeObject(predictionsForRouteStop);
 		}
@@ -212,7 +212,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			routeName = (String) stream.readObject();
 			stopId = (String) stream.readObject();
 			stopName = (String) stream.readObject();
-			destination = (String) stream.readObject();
+			headsign = (String) stream.readObject();
 			directionId = (String) stream.readObject();
 			predictionsForRouteStop = (List<IpcPrediction>) stream.readObject();
 		}
@@ -225,7 +225,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcPredictionsForRouteStopDest(routeId, routeShortName,
-					routeName, stopId, stopName, destination, directionId,
+					routeName, stopId, stopName, headsign, directionId,
 					predictionsForRouteStop);
 		}
 	} /* End of SerializationProxy inner class */
@@ -398,7 +398,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				+ ", routeName=" + routeName 
 				+ ", stopId=" + stopId
 				+ ", stopName=" + stopName 
-				+ ", destination=" + destination
+				+ ", headsign=" + headsign
 				+ ", directionId=" + directionId 
 				+ ", predictionsForRouteStop=" + predictionsForRouteStop 
 				+ "]";
@@ -424,8 +424,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		return stopName;
 	}
 
-	public String getDestination() {
-		return destination;
+	public String getHeadsign() {
+		return headsign;
 	}
 
 	public String getDirectionId() {
