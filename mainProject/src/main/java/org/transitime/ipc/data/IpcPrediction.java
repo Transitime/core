@@ -49,6 +49,7 @@ public class IpcPrediction implements Serializable {
 	
 	private final int gtfsStopSeq;
 	private final String tripId;
+	private final String tripPatternId;
 	private final String blockId;
 	private final long predictionTime;
 	// The time of the fix so can tell how stale prediction is
@@ -103,6 +104,7 @@ public class IpcPrediction implements Serializable {
 		// so that when getting all predictions code for telling when
 		// tripId changes will still work when debugging.
 		this.tripId = trip != null ? trip.getId() : "";
+		this.tripPatternId = trip != null ? trip.getTripPattern().getId() : "";
 		this.blockId = trip != null ? trip.getBlockId() : null;
 		this.predictionTime = predictionTime;
 		this.avlTime = avlTime;
@@ -122,7 +124,7 @@ public class IpcPrediction implements Serializable {
 	 * because only used internally by the proxy class.
 	 */
 	private IpcPrediction(String vehicleId, String routeId, String stopId,
-			int gtfsStopSeq, String tripId, String blockId,
+			int gtfsStopSeq, String tripId, String tripPatternId, String blockId,
 			long predictionTime, long avlTime, long creationTime,
 			boolean affectedByWaitStop, String driverId, short passengerCount,
 			float passengerFullness, boolean isArrival) {
@@ -133,6 +135,7 @@ public class IpcPrediction implements Serializable {
 		// trip is only for client side
 		this.trip = null;
 		this.tripId = tripId;
+		this.tripPatternId = tripPatternId;
 		this.blockId = blockId;
 		this.predictionTime = predictionTime;
 		this.avlTime = avlTime;
@@ -155,6 +158,7 @@ public class IpcPrediction implements Serializable {
 		private String stopId;
 		private int gtfsStopSeq;
 		private String tripId;
+		private String tripPatternId;
 		private String blockId;
 		private long predictionTime;
 		private long avlTime;
@@ -177,6 +181,7 @@ public class IpcPrediction implements Serializable {
 			this.stopId = p.stopId;
 			this.gtfsStopSeq = p.gtfsStopSeq;
 			this.tripId = p.tripId;
+			this.tripPatternId = p.tripPatternId;
 			this.blockId = p.blockId;
 			this.predictionTime = p.predictionTime;
 			this.avlTime = p.avlTime;
@@ -203,6 +208,7 @@ public class IpcPrediction implements Serializable {
 			stream.writeObject(stopId);
 			stream.writeInt(gtfsStopSeq);
 			stream.writeObject(tripId);
+			stream.writeObject(tripPatternId);
 			stream.writeObject(blockId);
 			stream.writeLong(predictionTime);
 			stream.writeLong(avlTime);
@@ -232,6 +238,7 @@ public class IpcPrediction implements Serializable {
 			stopId = (String) stream.readObject();
 			gtfsStopSeq = stream.readInt();
 			tripId = (String) stream.readObject();
+			tripPatternId = (String) stream.readObject();
 			blockId = (String) stream.readObject();
 			predictionTime = stream.readLong();
 			avlTime = stream.readLong();
@@ -251,8 +258,8 @@ public class IpcPrediction implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
-					tripId, blockId, predictionTime, avlTime, creationTime,
-					affectedByWaitStop, driverId, passengerCount,
+					tripId, tripPatternId, blockId, predictionTime, avlTime,
+					creationTime, affectedByWaitStop, driverId, passengerCount,
 					passengerFullness, isArrival);
 		}
 	}
@@ -287,6 +294,7 @@ public class IpcPrediction implements Serializable {
 				// + (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "")
 				+ ", gtfsStopSeq=" + gtfsStopSeq
 				+ ", trip="	+ tripId
+				+ ", tripPatternId=" + tripPatternId
 				+ ", block=" + blockId
 				+ ", predTime="	+ Time.timeStrMsecNoTimeZone(predictionTime)
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
@@ -324,6 +332,10 @@ public class IpcPrediction implements Serializable {
 		return tripId;
 	}
 
+	public String getTripPatternId() {
+		return tripPatternId;
+	}
+	
 	public String getBlockId() {
 		return blockId;
 	}
