@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcStopsForRoute;
 
 /**
  *
@@ -62,4 +63,17 @@ public interface ConfigInterface extends Remote {
 	 */
 	public IpcRoute getRoute(String routeShortName, String stopId,
 			String tripPatternId) throws RemoteException;
+	
+	/**
+	 * Returns stops for each direction for a route.
+	 * 
+	 * @param routeShortName
+	 *            Specifies which route to provide data for. routeShortName is
+	 *            used instead of routeId since routeIds unfortunately often
+	 *            change when there is a schedule change.
+	 * @return
+	 * @throws RemoteException
+	 */
+	public IpcStopsForRoute getStops(String routeShortName)  
+			throws RemoteException;
 }

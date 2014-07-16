@@ -437,6 +437,18 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	}
 	
 	/**
+	 * Returns list of stop IDs for the stop paths for this trip pattern.
+	 * 
+	 * @return
+	 */
+	public List<String> getStopIds() {
+		List<String> list = new ArrayList<String>(stopPaths.size());
+		for (StopPath stopPath : stopPaths)
+			list.add(stopPath.getStopId());
+		return list;
+	}
+	
+	/**
 	 * Returns length of the trip from the first terminal to the last.
 	 * 
 	 * @return

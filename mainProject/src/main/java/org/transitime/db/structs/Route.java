@@ -444,7 +444,66 @@ public class Route implements Serializable {
 		// Return the newly created collection of stops
 		return stops;
 	}
+
+	/**
+	 * Returns longest trip pattern for the directionId specified.
+	 * Note: gets trip patterns from Core, which means it works
+	 * in the core application, not just when processing GTFS data.
+	 * 
+	 * @param directionId
+	 * @return
+	 */
+	public TripPattern getLongestTripPatternForDirection(String directionId) {
+		List<TripPattern> tripPatternsForRoute = Core.getInstance()
+				.getDbConfig().getTripPatternsForRoute(getId());
+		TripPattern longestTripPatternForDir = null;
+		for (TripPattern tripPattern : tripPatternsForRoute) {
+			if (tripPattern.getDirectionId().equals(directionId)) {
+				if (longestTripPatternForDir == null
+						|| tripPattern.getNumberStopPaths() > longestTripPatternForDir
+								.getNumberStopPaths())
+					longestTripPatternForDir = tripPattern;
+			}
+		}
+		
+		return longestTripPatternForDir;
+	}
 	
+	/**
+	 * Returns list of trip patterns for the directionId specified.
+	 * 
+	 * @param directionId
+	 * @return
+	 */
+	public List<TripPattern> getTripPatterns(String directionId) {
+		List<TripPattern> tripPatternsForRoute = Core.getInstance()
+				.getDbConfig().getTripPatternsForRoute(getId());
+		List<TripPattern> tripPatternsForDir = new ArrayList<TripPattern>();
+		for (TripPattern tripPattern : tripPatternsForRoute) {
+			if (tripPattern.getDirectionId().equals(directionId))
+				tripPatternsForDir.add(tripPattern);
+		}
+		
+		return tripPatternsForDir;
+	}
+	
+	/**
+	 * Returns list of direction IDs for the route.
+	 * 
+	 * @return
+	 */
+	public List<String> getDirectionIds() {
+		List<String> directionIds = new ArrayList<String>();
+		List<TripPattern> tripPatternsForRoute = Core.getInstance()
+				.getDbConfig().getTripPatternsForRoute(getId());
+		for (TripPattern tripPattern : tripPatternsForRoute) {
+			String directionId = tripPattern.getDirectionId();
+			if (!directionIds.contains(directionId))
+				directionIds.add(directionId);	
+		}
+		return directionIds;
+	}
+
 	/**
 	 * Returns unordered collection of path vectors associated with route
 	 * @return
