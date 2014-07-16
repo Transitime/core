@@ -103,4 +103,16 @@ public class IpcDirection implements Serializable {
 				+ ", stops=" + stops 
 				+ "]";
 	}
+
+	public String getDirectionId() {
+		return directionId;
+	}
+
+	public String getDirectionTitle() {
+		return directionTitle;
+	}
+
+	public Collection<IpcStop> getStops() {
+		return stops;
+	}
 }
