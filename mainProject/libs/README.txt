@@ -81,3 +81,5 @@ instead of using the standard hibernate one.
   http://mvnrepository.com/artifact/org.hibernate/hibernate-c3p0
     hibernate-c3p0-4.2.4.Final.jar
 
+For many Java utilities, such as StringEscapeUtils
+  commons-lang3-3.3.2.jar
