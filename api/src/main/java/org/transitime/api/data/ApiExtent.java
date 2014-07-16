@@ -17,33 +17,30 @@
 
 package org.transitime.api.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.db.structs.Extent;
+import org.transitime.utils.Geo;
 
 /**
- * Contains list of predictions for a particular headsign.
+ * Describes the extent of a route or agency via a min & max lat & lon.
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement
-public class ApiPredictionDestination {
+public class ApiExtent {
 
-    @XmlAttribute(name="dir")
-    private String directionId;
+    @XmlAttribute
+    private String minLat;
     
     @XmlAttribute
-    private String headsign;
+    private String minLon;
     
-    @XmlElement(name="pred")
-    private List<ApiPrediction> predictions;
+    @XmlAttribute
+    private String maxLat;
+    
+    @XmlAttribute
+    private String maxLon;
     
     /********************** Member Functions **************************/
 
@@ -52,17 +49,13 @@ public class ApiPredictionDestination {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected ApiPredictionDestination() {}
-    
-    public ApiPredictionDestination(
-	    IpcPredictionsForRouteStopDest predictionsForRouteStop) {
-	directionId = predictionsForRouteStop.getDirectionId();
-	headsign = predictionsForRouteStop.getHeadsign();
-	
-	predictions = new ArrayList<ApiPrediction>();
-	for (IpcPrediction prediction : 
-	    predictionsForRouteStop.getPredictionsForRouteStop()) {
-	    predictions.add(new ApiPrediction(prediction));
-	}
+    protected ApiExtent() {}
+
+    public ApiExtent(Extent extent) {
+	this.minLat = Geo.format(extent.getMinLat());
+	this.minLon = Geo.format(extent.getMinLon());
+	this.maxLat = Geo.format(extent.getMaxLat());
+	this.maxLon = Geo.format(extent.getMaxLon());
     }
+
 }

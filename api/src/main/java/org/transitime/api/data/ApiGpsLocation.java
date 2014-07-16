@@ -17,34 +17,35 @@
 
 package org.transitime.api.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.utils.StringUtils;
 
 /**
- * Contains list of predictions for a particular headsign.
+ * Extends a location by including GPS information including time, speed,
+ * heading, and pathHeading.
+ * 
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement
-public class ApiPredictionDestination {
+@XmlType(propOrder = { "lat", "lon", "time", "speed", "heading", "pathHeading" })
+public class ApiGpsLocation extends ApiTransientLocation {
 
-    @XmlAttribute(name="dir")
-    private String directionId;
+    @XmlAttribute
+    private long time;
     
     @XmlAttribute
-    private String headsign;
+    private String speed;
     
-    @XmlElement(name="pred")
-    private List<ApiPrediction> predictions;
+    @XmlAttribute
+    private String heading;
     
+    @XmlAttribute
+    private String pathHeading;
+
     /********************** Member Functions **************************/
 
     /**
@@ -52,17 +53,20 @@ public class ApiPredictionDestination {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected ApiPredictionDestination() {}
-    
-    public ApiPredictionDestination(
-	    IpcPredictionsForRouteStopDest predictionsForRouteStop) {
-	directionId = predictionsForRouteStop.getDirectionId();
-	headsign = predictionsForRouteStop.getHeadsign();
-	
-	predictions = new ArrayList<ApiPrediction>();
-	for (IpcPrediction prediction : 
-	    predictionsForRouteStop.getPredictionsForRouteStop()) {
-	    predictions.add(new ApiPrediction(prediction));
-	}
+    protected ApiGpsLocation() {}
+
+    /**
+     * @param lat
+     * @param lon
+     */
+    public ApiGpsLocation(IpcVehicle vehicle) {
+	super(vehicle.getLatitude(), vehicle.getLongitude());
+
+	this.time = vehicle.getGpsTime();
+	this.speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
+	this.heading = StringUtils.oneDigitFormat(vehicle.getHeading());
+	this.pathHeading = StringUtils.oneDigitFormat(vehicle.getPathHeading());
+
     }
+    
 }

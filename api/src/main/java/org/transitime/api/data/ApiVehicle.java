@@ -42,7 +42,7 @@ public class ApiVehicle {
     protected String id;
     
     @XmlElement
-    protected ApiLocation loc;
+    protected ApiGpsLocation loc;
     
     @XmlAttribute
     protected String routeId;
@@ -65,7 +65,7 @@ public class ApiVehicle {
      */
     public ApiVehicle(IpcVehicle vehicle) {
 	id = vehicle.getId();
-	loc = new ApiLocation(vehicle);
+	loc = new ApiGpsLocation(vehicle);
 	routeId = vehicle.getRouteId();
 	routeShortName = vehicle.getRouteShortName();
     }

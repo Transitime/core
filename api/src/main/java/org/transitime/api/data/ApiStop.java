@@ -18,48 +18,46 @@
 package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 import org.transitime.ipc.data.IpcStop;
-import org.transitime.utils.ChinaGpsOffset;
-import org.transitime.utils.Geo;
 
 /**
- *
+ * Full description of a stop.
+ * <p>
+ * Note: extending from ApiLocation since have a lat & lon. Would be nice to
+ * have ApiLocation as a member but when try this get a internal server 500 error.
  *
  * @author SkiBu Smith
  *
  */
-public class ApiStop {
+@XmlType(propOrder = { "id", "lat", "lon", "name", "code", "isUiStop" })
+public class ApiStop extends ApiTransientLocation {
 
     @XmlAttribute
     private String id;
        
     @XmlAttribute
     private String name;
-
-    @XmlAttribute
-    private String lat;
-    
-    @XmlAttribute
-    private String lon;
-    
+  
     @XmlAttribute
     private Integer code;
+    
+    @XmlAttribute(name="forRemainingTrip")
+    private Boolean isUiStop;
     
      /********************** Member Functions **************************/
 
     protected ApiStop() {}
     
     public ApiStop(IpcStop stop) {
+	super(stop.getLoc().getLat(), stop.getLoc().getLon());
 	this.id = stop.getId();
 	this.name = stop.getName();
-
-	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(
-		stop.getLoc().getLat(), stop.getLoc().getLon());	
-	this.lat = Geo.format(latLon.getLat());
-	this.lon = Geo.format(latLon.getLon());
-
 	this.code = stop.getCode();
+	// If false then set to null so that this attribute won't then be
+	// output as XML/JSON, therefore making output a bit more compact.
+	this.isUiStop = stop.isUiStop() ? true : null;
     }
 
 }

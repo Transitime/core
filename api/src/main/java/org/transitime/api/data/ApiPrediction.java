@@ -49,11 +49,14 @@ public class ApiPrediction {
     @XmlAttribute(name="trip")
     private String tripId;
     
+    @XmlAttribute(name="tripPattern")
+    private String tripPatternId;
+    
     @XmlAttribute(name="vehicle")
     private String vehicleId;
     
     // Only output if true
-    @XmlAttribute(name="notYetStarted")
+    @XmlAttribute(name="notYetDeparted")
     private String basedOnScheduledDeparture;
     
     // Only output if passenger count is valid
@@ -80,6 +83,7 @@ public class ApiPrediction {
 	    isDeparture = "t";
 	
 	tripId = prediction.getTripId();
+	tripPatternId = prediction.getTripPatternId();
 	
 	vehicleId = prediction.getVehicleId();
 	

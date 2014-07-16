@@ -25,10 +25,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcRoute;
+import org.transitime.ipc.data.IpcShape;
 import org.transitime.ipc.data.IpcStop;
 
 /**
- *
+ * Provides detailed information for a route include stops and shape info.
  *
  * @author SkiBu Smith
  *
@@ -54,8 +55,14 @@ public class ApiRoute {
     @XmlAttribute
     private String type;
 
-    @XmlElement
+    @XmlElement(name="stop")
     private List<ApiStop> stops;
+    
+    @XmlElement(name="shape")
+    private List<ApiShape> shapes;
+    
+    @XmlElement
+    private ApiExtent extent;
     
     /********************** Member Functions **************************/
 
@@ -74,8 +81,12 @@ public class ApiRoute {
 	    this.stops.add(new ApiStop(stop));
 	}
 	
-//	route.getExtent();	
-//	route.getSegments();
+	this.shapes = new ArrayList<ApiShape>();
+	for (IpcShape shape : route.getShapes()) {
+	    this.shapes.add(new ApiShape(shape));
+	}
+	
+	this.extent = new ApiExtent(route.getExtent());	
     }
 
 }

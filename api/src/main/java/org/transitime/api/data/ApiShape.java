@@ -22,47 +22,47 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.db.structs.Location;
+import org.transitime.ipc.data.IpcShape;
 
 /**
- * Contains list of predictions for a particular headsign.
+ * A portion of a shape that defines a trip pattern. A List of ApiLocation
+ * objects.
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement
-public class ApiPredictionDestination {
+public class ApiShape {
 
-    @XmlAttribute(name="dir")
-    private String directionId;
+    @XmlAttribute(name="tripPattern")
+    private String tripPatternId;
     
     @XmlAttribute
     private String headsign;
     
-    @XmlElement(name="pred")
-    private List<ApiPrediction> predictions;
+    @XmlAttribute(name="forRemainingTrip")
+    private Boolean isUiShape;
+
+    @XmlElement(name="loc")
+    private List<ApiLocation> locations;
     
     /********************** Member Functions **************************/
 
-    /**
-     * Need a no-arg constructor for Jersey. Otherwise get really 
-     * obtuse "MessageBodyWriter not found for media type=application/json"
-     * exception.
-     */
-    protected ApiPredictionDestination() {}
+    protected ApiShape() {}
     
-    public ApiPredictionDestination(
-	    IpcPredictionsForRouteStopDest predictionsForRouteStop) {
-	directionId = predictionsForRouteStop.getDirectionId();
-	headsign = predictionsForRouteStop.getHeadsign();
+    public ApiShape(IpcShape shape) {
+	this.tripPatternId = shape.getTripPatternId();
+	this.headsign = shape.getHeadsign();
 	
-	predictions = new ArrayList<ApiPrediction>();
-	for (IpcPrediction prediction : 
-	    predictionsForRouteStop.getPredictionsForRouteStop()) {
-	    predictions.add(new ApiPrediction(prediction));
+	// If false then set to null so that this attribute won't then be
+	// output as XML/JSON, therefore making output a bit more compact.
+	this.isUiShape = shape.isUiShape() ? true : null;
+
+	this.locations = new ArrayList<ApiLocation>(); 
+	for (Location loc : shape.getLocations()) {
+	    this.locations.add(new ApiLocation(loc.getLat(), loc.getLon()));
 	}
     }
+    
 }

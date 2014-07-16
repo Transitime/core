@@ -17,32 +17,18 @@
 
 package org.transitime.api.data;
 
-import javax.xml.bind.annotation.XmlAttribute;
-
-import org.transitime.ipc.data.IpcVehicle;
-import org.transitime.utils.ChinaGpsOffset;
-import org.transitime.utils.Geo;
-import org.transitime.utils.StringUtils;
-
-public class ApiLocation {
-
-    @XmlAttribute
-    private String lat;
-    
-    @XmlAttribute
-    private String lon;
-    
-    @XmlAttribute
-    private long time;
-    
-    @XmlAttribute
-    private String speed;
-    
-    @XmlAttribute
-    private String heading;
-    
-    @XmlAttribute
-    private String pathHeading;
+/**
+ * A simple latitude/longitude.
+ * <p>
+ * This is a non-transient implementation of ApiTransientLocation. By not being
+ * transient this class can be used to output a location as an element (as
+ * opposed to an attribute). By inheriting from ApiTransientLocation don't need
+ * to duplicate any code.
+ *
+ * @author SkiBu Smith
+ *
+ */
+public class ApiLocation extends ApiTransientLocation {
 
     /********************** Member Functions **************************/
 
@@ -52,24 +38,9 @@ public class ApiLocation {
      * exception.
      */
     protected ApiLocation() {}
-
-    /**
-     * @param lat
-     * @param lon
-     */
-    public ApiLocation(IpcVehicle vehicle) {
-	// If location is in China (approximately) then adjust lat & lon so 
-	// that will be displayed properly on map. 
-	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(
-		vehicle.getLatitude(), vehicle.getLongitude());
-	
-	this.lat = Geo.format(latLon.getLat());
-	this.lon = Geo.format(latLon.getLon());
-	this.time = vehicle.getGpsTime();
-	this.speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
-	this.heading = StringUtils.oneDigitFormat(vehicle.getHeading());
-	this.pathHeading = StringUtils.oneDigitFormat(vehicle.getPathHeading());
-
+    
+    public ApiLocation(double lat, double lon) {
+	super(lat, lon);
     }
     
 }

@@ -17,33 +17,32 @@
 
 package org.transitime.api.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.utils.ChinaGpsOffset;
+import org.transitime.utils.Geo;
 
 /**
- * Contains list of predictions for a particular headsign.
+ * A simple latitude/longitude:
+ * <p>
+ * Note: this class marked as @XmlTransient so that ApiLocations are not part of
+ * the domain model. This means that can't instantiate as an element. The reason
+ * doing this is so that the subclass can set propOrder for all elements in the
+ * subclass, including lat & lon. Explanation of this is in 
+ * http://blog.bdoughan.com/2011/06/ignoring-inheritance-with-xmltransient.html
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement
-public class ApiPredictionDestination {
+@XmlTransient
+public class ApiTransientLocation {
 
-    @XmlAttribute(name="dir")
-    private String directionId;
+    @XmlAttribute
+    private String lat;
     
     @XmlAttribute
-    private String headsign;
-    
-    @XmlElement(name="pred")
-    private List<ApiPrediction> predictions;
+    private String lon;
     
     /********************** Member Functions **************************/
 
@@ -52,17 +51,14 @@ public class ApiPredictionDestination {
      * obtuse "MessageBodyWriter not found for media type=application/json"
      * exception.
      */
-    protected ApiPredictionDestination() {}
-    
-    public ApiPredictionDestination(
-	    IpcPredictionsForRouteStopDest predictionsForRouteStop) {
-	directionId = predictionsForRouteStop.getDirectionId();
-	headsign = predictionsForRouteStop.getHeadsign();
+    protected ApiTransientLocation() {}
+
+    public ApiTransientLocation(double lat, double lon) {
+	// If location is in China (approximately) then adjust lat & lon so 
+	// that will be displayed properly on map. 
+	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(lat, lon);
 	
-	predictions = new ArrayList<ApiPrediction>();
-	for (IpcPrediction prediction : 
-	    predictionsForRouteStop.getPredictionsForRouteStop()) {
-	    predictions.add(new ApiPrediction(prediction));
-	}
+	this.lat = Geo.format(latLon.getLat());
+	this.lon = Geo.format(latLon.getLon());
     }
 }
