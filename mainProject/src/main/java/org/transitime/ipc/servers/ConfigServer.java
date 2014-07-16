@@ -27,6 +27,7 @@ import org.transitime.applications.Core;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcStopsForRoute;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 
@@ -125,6 +126,24 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 		
 		// Return the ipc route
 		return ipcRoute;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getStops(java.lang.String)
+	 */
+	@Override
+	public IpcStopsForRoute getStops(String routeShortName)
+			throws RemoteException {
+		// Get the db route info 
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		org.transitime.db.structs.Route dbRoute = 
+				dbConfig.getRouteByShortName(routeShortName);
+		
+		// Convert db route into an ipc route
+		IpcStopsForRoute ipcStopsForRoute = new IpcStopsForRoute(dbRoute);
+		
+		// Return the ipc route
+		return ipcStopsForRoute;
 	}
 
 }

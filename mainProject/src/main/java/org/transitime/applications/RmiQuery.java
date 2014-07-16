@@ -42,6 +42,7 @@ import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcStopsForRoute;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
@@ -287,6 +288,10 @@ public class RmiQuery {
 			IpcRoute route = configInterface.getRoute(routeSummary.getShortName(),
 					null, null);
 			System.out.println(route);
+			
+			IpcStopsForRoute stopsForRoute = 
+					configInterface.getStops(routeSummary.getShortName());
+			System.out.println(stopsForRoute);
 		}
 	}
 	

@@ -134,8 +134,7 @@ public class StopPathProcessor {
 			
 			// Filter the segments since some might be longer than desired
 			StopPath path = tripPattern.getStopPath(stopIndex+1);
-			filterSegments(locList, path.getId(), tripPattern.getId(), 
-					tripPattern.getRouteId());
+			filterShortSegments(locList, maxDistanceForEliminatingVertices);
 			
 			path.setLocations(locList);
 		}
@@ -226,7 +225,6 @@ public class StopPathProcessor {
 		
 		// For each stop for trip pattern...
 		for (int stopIndex=0; stopIndex<tripPattern.getStopPaths().size(); ++stopIndex) {
-			String pathId = tripPattern.getStopPathId(stopIndex);
 			String stopId = tripPattern.getStopId(stopIndex);
 			Stop stop = stopsMap.get(stopId);
 			
@@ -404,8 +402,7 @@ public class StopPathProcessor {
 			}
 			
 			// Filter the segments and then associate them with the path 
-			filterSegments(locList, pathId, tripPattern.getId(), 
-					tripPattern.getRouteId());
+			filterShortSegments(locList, maxDistanceForEliminatingVertices);
 			StopPath path = tripPattern.getStopPath(stopIndex);
 			path.setLocations(locList);
 			
@@ -430,28 +427,19 @@ public class StopPathProcessor {
 	
 	/**
 	 * Goes through the locations for the StopPath and filters them to make sure
-	 * that they are not too short or too long. Don't want lots of tiny segments
-	 * for curves cluttering up the database and mucking travel times more
-	 * complicated.
+	 * that they are not too short. Don't want lots of tiny segments for curves
+	 * cluttering up the database and mucking travel times more complicated.
 	 * 
-	 * Previously also made sure that the segments are not too long because the
-	 * travel speeds were on a per path segment basis and wanted to account for
-	 * variations in travel speeds along a long stretch of road. But now the
-	 * travel speed segments are independent from the path segments so this is
-	 * not necessary anymore.
-	 * 
-	 * @param path
-	 *            the StopPath that locations are to be filtered for.
-	 * @param pathId
-	 *            for logging statements
-	 * @param tripPatternId
-	 *            for logging statements
-	 * @param routeId
-	 *            for logging statements
+	 * @param locations
+	 *            the locations that are to be filtered
+	 * @param maxDistanceForEliminatingVertices
+	 *            If a vertex is off by less this distance from the line
+	 *            connecting the previous and next vertex then this one can be
+	 *            filtered out.
 	 */
-	private void filterSegments(List<Location> locations, String pathId, 
-			String tripPatternId, String routeId) {	
-		// Combine short stopPaths that are don't include significant distance
+	private void filterShortSegments(List<Location> locations, 
+			double maxDistanceForEliminatingVertices) {	
+		// Combine short stopPaths that don't include significant distance
 		// orthogonal to travel. Ideally would like to look at just two
 		// line segments at a time and filter out those whose vertex is
 		// not significantly out of line. But if look at just two segments
@@ -459,7 +447,7 @@ public class StopPathProcessor {
 		// and some more since each two segments wouldn't make much of
 		// a difference. But this could lead to some vertexes being taken
 		// out even though they would be greater than the max distance
-		// away. So instead of how to repeatedly go through the segments
+		// away. So instead repeatedly go through the segments
 		// to find out which ones can be taken out without any vertex 
 		// ending up too far away from the resulting segments.
 		for (int beginIndex = 0; beginIndex <locations.size()-2; ++beginIndex) {
@@ -480,7 +468,7 @@ public class StopPathProcessor {
 					if (distanceOfVertexToNewVector >= maxDistanceForEliminatingVertices ||
 							vertexIndex == locations.size() - 2) {
 						// Things bit complicated here because can be here for two
-						// different reasons: 1) because distance violated meaning
+						// different reasons: 1) because distance violated, meaning
 						// have to remove previous vertices; or 2) distance not 
 						// violated but got to end locations so need to erase some.
 						// The difference is with the last vertex that should be
@@ -498,16 +486,11 @@ public class StopPathProcessor {
 						// current vertex would be too far away. But this means that
 						// can eliminate previous vertices that were within range.
 						for (int eraseIndex = beginIndex + 1; eraseIndex <= indexToEraseUpTo; ++eraseIndex) {
-							logger.debug("Removing vertex #{} {} from pathId={} " + 
-									"tripPatternId={} routeId={}",
-									eraseIndex,
-									locations.get(beginIndex + 1),
-									pathId,
-									tripPatternId,
-									routeId);
+							logger.debug("Removing vertex #{} {}",
+									eraseIndex,	locations.get(beginIndex + 1));
 
 							// Erase the vertex. Since all subsequent elements in 
-							// _locations array then shift over should keep removing
+							// locations array then shift over should keep removing
 							// the element beginIndex + 1.
 							locations.remove(beginIndex + 1);							
 						}
@@ -519,39 +502,7 @@ public class StopPathProcessor {
 					}
 				}
 			}
-		}
-		
-// NOTE: this taken out because separated out travel time segments from path segments.
-//
-//		// Don't want stopPaths that are too long. If they are too long then
-//		// cut them down to max size.
-//		for (int i=0; i<locations.size()-1; ++i) {
-//			Vector v = new Vector(locations.get(i), locations.get(i+1));
-//			double segmentLength = v.length();
-//			if (segmentLength  > maxSegmentLength) {
-//				// Segment length is too long so divide it
-//				int numberSubsegments = 1 + (int) (segmentLength/maxSegmentLength);
-//				double newSegmentLength = segmentLength / numberSubsegments;
-//				for (int j=1; j<numberSubsegments; ++j) {
-//					// Determine the new vertex to divide the segment into 
-//					// acceptable lengths
-//					Location intermediateLoc = v.locAlongVector(j*newSegmentLength);
-//
-//					logger.debug("Adding vertex #{} {} from pathId={} " + 
-//							"tripPatternId={} routeId={}",
-//							i + j,
-//							intermediateLoc,
-//							pathId,
-//							tripPatternId,
-//							routeId);
-//					
-//					// Insert the additional location into _locations
-//					locations.add(i+j, intermediateLoc);
-//				}				
-//				// Increment i since added elements to _locations array
-//				i += numberSubsegments-1;
-//			}
-//		}
+		}		
 	}
 
 	/**

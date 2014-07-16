@@ -50,6 +50,19 @@ public class IpcStop implements Serializable {
 		this.isUiStop = aUiStop;
 	}
 	
+	/**
+	 * Constructs a stop and sets isUiStop to false.
+	 * 
+	 * @param dbStop
+	 */
+	public IpcStop(Stop dbStop) {
+		this.id = dbStop.getId();
+		this.name = dbStop.getName();
+		this.code = dbStop.getCode();
+		this.loc = dbStop.getLoc();
+		this.isUiStop = false;
+	}
+	
 	@Override
 	public String toString() {
 		return "IpcStop [" 
