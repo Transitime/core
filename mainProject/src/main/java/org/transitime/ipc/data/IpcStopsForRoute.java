@@ -57,4 +57,8 @@ public class IpcStopsForRoute implements Serializable {
 				+ "]";
 	}
 
+	public List<IpcDirection> getDirections() {
+		return directions;
+	}
+
 }
