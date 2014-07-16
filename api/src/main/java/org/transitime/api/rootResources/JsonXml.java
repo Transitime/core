@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRoute;
 import org.transitime.api.data.ApiRouteSummaries;
@@ -51,9 +52,11 @@ import org.transitime.feed.gtfsRt.OctalDecoder;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
+import org.transitime.ipc.data.IpcDirection;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcStopsForRoute;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
@@ -293,6 +296,31 @@ public class JsonXml {
 	}
     }
     
+    @Path("/command/stops")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getStops(@BeanParam StdParametersBean stdParameters,
+	    @QueryParam(value="r") String routeShrtNm) 
+		    throws WebApplicationException {
+
+	// Make sure request is valid
+	validate(stdParameters);
+	
+	try {
+	    // Get Vehicle data from server
+	    ConfigInterface inter = 
+		    getConfigInterface(stdParameters.getAgencyId());	    
+	    IpcStopsForRoute stopsForRoute = inter.getStops(routeShrtNm);
+
+	    // Create and return ApiRoute response
+	    ApiDirections directionsData = new ApiDirections(stopsForRoute);
+	    return createResponse(directionsData, stdParameters);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+
+    }
     
     private final int MAX_GTFS_RT_CACHE_SECS = 15;
 

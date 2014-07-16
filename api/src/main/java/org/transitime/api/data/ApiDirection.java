@@ -18,46 +18,51 @@
 package org.transitime.api.data;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcDirection;
+import org.transitime.ipc.data.IpcStop;
 
 /**
- * A list of routes.
+ * A single direction, containing stops
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="routes")
-public class ApiRouteSummaries {
+public class ApiDirection {
+    
+    @XmlAttribute
+    private String id;
 
-    @XmlElement(name="route")
-    private List<ApiRouteSummary> routeSummariesData;
-
+    @XmlAttribute
+    private String title;
+    
+    @XmlElement(name="stop")
+    private List<ApiStop> stops;
+    
     /********************** Member Functions **************************/
 
     /**
-     * Need a no-arg constructor for Jersey. Otherwise get really 
-     * obtuse "MessageBodyWriter not found for media type=application/json"
-     * exception.
+     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+     * "MessageBodyWriter not found for media type=application/json" exception.
      */
-    protected ApiRouteSummaries() {}
+    protected ApiDirection() {}
     
     /**
-     * Constructs an ApiRouteSummaries using a collection of IpcRouteSummary
-     * objects.
+     * Constructs a ApiDirection using an IpcDirection
      * 
-     * @param routes
+     * @param direction
      */
-    public ApiRouteSummaries(Collection<IpcRouteSummary> routes) {
-	routeSummariesData = new ArrayList<ApiRouteSummary>();
-	for (IpcRouteSummary route : routes) {
-	    ApiRouteSummary routeSummary = new ApiRouteSummary(route);
-	    routeSummariesData.add(routeSummary);
+    public ApiDirection(IpcDirection direction) {
+	this.id = direction.getDirectionId();
+	this.title = direction.getDirectionTitle();
+	
+	this.stops = new ArrayList<ApiStop>(direction.getStops().size());
+	for (IpcStop stop : direction.getStops()) {
+	    this.stops.add(new ApiStop(stop));
 	}
     }
 }

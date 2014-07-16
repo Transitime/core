@@ -24,40 +24,34 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcDirection;
+import org.transitime.ipc.data.IpcStopsForRoute;
 
 /**
- * A list of routes.
+ * A list of directions.
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="routes")
-public class ApiRouteSummaries {
+@XmlRootElement(name="directions")
+public class ApiDirections {
 
-    @XmlElement(name="route")
-    private List<ApiRouteSummary> routeSummariesData;
+    @XmlElement(name="direction")
+    private List<ApiDirection> directionsData;
 
-    /********************** Member Functions **************************/
+     /********************** Member Functions **************************/
 
     /**
-     * Need a no-arg constructor for Jersey. Otherwise get really 
-     * obtuse "MessageBodyWriter not found for media type=application/json"
-     * exception.
+     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+     * "MessageBodyWriter not found for media type=application/json" exception.
      */
-    protected ApiRouteSummaries() {}
+    protected ApiDirections() {}
     
-    /**
-     * Constructs an ApiRouteSummaries using a collection of IpcRouteSummary
-     * objects.
-     * 
-     * @param routes
-     */
-    public ApiRouteSummaries(Collection<IpcRouteSummary> routes) {
-	routeSummariesData = new ArrayList<ApiRouteSummary>();
-	for (IpcRouteSummary route : routes) {
-	    ApiRouteSummary routeSummary = new ApiRouteSummary(route);
-	    routeSummariesData.add(routeSummary);
+    public ApiDirections(IpcStopsForRoute stopsForRoute) {
+	Collection<IpcDirection> directions = stopsForRoute.getDirections();
+	directionsData = new ArrayList<ApiDirection>(directions.size());
+	for (IpcDirection direction : directions) {
+	    directionsData.add(new ApiDirection(direction));
 	}
     }
 }
