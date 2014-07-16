@@ -27,7 +27,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
- *
+ * List of ApiPredictionDestination objects along with supporting information.
+ * Used to output predictions for a particular stop where the predictions are
+ * grouped by headsign.
  *
  * @author SkiBu Smith
  *

@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
- *
+ * Contains predictions for multiple stops.
  *
  * @author SkiBu Smith
  *
@@ -47,11 +47,11 @@ public class ApiPredictions {
     public ApiPredictions() {}
 
     /**
-     * For constructing a ApiVehicles object from a Collection of Vehicle
-     * objects.
+     * For constructing a ApiPredictions object from a List of
+     * IpcPredictionsForRouteStopDest objects.
      * 
-     * @param vehicles 
-     * 	
+     * @param vehicles
+     * 
      */
     public ApiPredictions(
 	    List<IpcPredictionsForRouteStopDest> predsForRouteStopDestinations) {

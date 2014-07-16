@@ -273,7 +273,7 @@ public class JsonXml {
     public Response getRoute(@BeanParam StdParametersBean stdParameters,
 	    @QueryParam(value="r") String routeShrtNm,
 	    @QueryParam(value="s") String stopId,
-	    @QueryParam(value="dest") String destinationName) 
+	    @QueryParam(value="tripPattern") String destinationName) 
 		    throws WebApplicationException {
 	// Make sure request is valid
 	validate(stdParameters);
