@@ -33,6 +33,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.transitime.db.structs.Location;
 import org.transitime.feed.gtfsRt.GtfsRtTripFeed;
 import org.transitime.feed.gtfsRt.GtfsRtVehicleFeed;
 import org.transitime.feed.gtfsRt.OctalDecoder;
@@ -65,6 +66,8 @@ public class RmiQuery {
 	private static String routeShortNames[];
 	private static String stopIds[];
 	private static String vehicleIds[];
+	private static double latitude = Double.NaN;
+	private static double longitude = Double.NaN;
 	
 	private static enum Command {NOT_SPECIFIED, GET_PREDICTIONS, GET_VEHICLES, 
 		GET_ROUTE_CONFIG, GET_GTFS_RT_VEHICLES, GET_GTFS_RT_TRIPS};
@@ -108,6 +111,18 @@ public class RmiQuery {
                 .hasArg()
                 .withDescription("Route short name (not the route_id).")
                 .create("r")
+                );
+		
+		options.addOption(OptionBuilder.withArgName("lat")
+                .hasArg()
+                .withDescription("Latitude, for getting predictions by location.")
+                .create("lat")
+                );
+
+		options.addOption(OptionBuilder.withArgName("lon")
+                .hasArg()
+                .withDescription("Longitude, for getting predictions by location.")
+                .create("lon")
                 );
 		
 		options.addOption(OptionBuilder.withArgName("stopId")
@@ -163,6 +178,14 @@ public class RmiQuery {
 		
 		vehicleIds = cmd.getOptionValues("v");
 		
+		String latStr = cmd.getOptionValue("lat");
+		if (latStr != null) 
+			latitude = Double.parseDouble(latStr);
+		
+		String lonStr = cmd.getOptionValue("lon");
+		if (lonStr != null) 
+			longitude = Double.parseDouble(lonStr);
+		
 		// Return the CommandLine so that arguments can be accessed
 		return cmd;
 	}
@@ -201,10 +224,12 @@ public class RmiQuery {
 	private static void getPredictions() throws RemoteException {
 		// FIXME just for debugging
 		System.err.println("Getting predictions for agencyId=" + agencyId + 
+				" lat=" + latitude + " lon=" + longitude +
 				" routeShortNames=" + routeShortNames + " stopIds=" + stopIds);
 
 		// Make sure stops specified
-		if (stopIds == null) {
+		if (stopIds == null 
+				&& (Double.isNaN(latitude) || Double.isNaN(longitude))) {
 			System.err.println("Error: must specify stop(s) to get predictions.");
 			return;
 		}
@@ -212,8 +237,19 @@ public class RmiQuery {
 		PredictionsInterface predsInterface = 
 				PredictionsInterfaceFactory.get(agencyId);
 
-		// If getting prediction for single stop...
-		if (stopIds.length == 1) {
+		// Get predictions depending on the command line options
+		if (!Double.isNaN(latitude) && !Double.isNaN(longitude)) {
+			Location loc = new Location(latitude, longitude);
+			
+			// Getting predictions based on location
+			List<IpcPredictionsForRouteStopDest> predictionList = 
+					predsInterface.get(loc, 1000.0, 3);
+			
+			System.out.println("Predictions for agencyId=" + 
+					agencyId +	" " + loc + " are " + predictionList);
+
+		} else if (stopIds.length == 1) {
+			// Getting prediction for single stop...
 			String stopId = stopIds[0];
 			String routeId = routeShortNames == null ? null : routeShortNames[0];
 			

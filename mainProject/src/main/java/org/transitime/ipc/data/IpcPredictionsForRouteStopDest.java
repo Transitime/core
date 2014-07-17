@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.transitime.applications.Core;
 import org.transitime.db.structs.Trip;
+import org.transitime.utils.Geo;
 
 /**
  * Contains list of predictions for a route/stop/destination. 
@@ -48,6 +49,9 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	private final String headsign;
 	private final String directionId;
 	
+	// For when providing predictions based on location
+	private final double distanceToStop;
+	
 	// The predictions associated with the route/stop
 	private final List<IpcPrediction> predictionsForRouteStop;
 
@@ -67,8 +71,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * 
 	 * @param trip
 	 * @param stopId
+	 * @param distanceToStop
+	 *            How far stop is away from user. If predictions are not
+	 *            location based then use value of Double.NaN.
 	 */
-	public IpcPredictionsForRouteStopDest(Trip trip, String stopId) {
+	public IpcPredictionsForRouteStopDest(Trip trip, String stopId, double distanceToStop) {
 		this.routeId = trip != null ? trip.getRouteId() : null;
 		this.routeShortName = trip != null ? trip.getRouteShortName() : null;
 		this.routeName = trip != null ? trip.getRouteName() : null;
@@ -76,7 +83,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
 		this.headsign = trip != null ? trip.getHeadsign() : null;
 		this.directionId = trip != null ? trip.getDirectionId() : null;
-		
+		this.distanceToStop = distanceToStop;
 		this.predictionsForRouteStop = new ArrayList<IpcPrediction>(MAX_PREDICTIONS);
 	}
 	
@@ -88,9 +95,12 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param maxSystemTimeForPrediction
 	 *            Max point in future want predictions for. This way can limit
 	 *            predictions when requesting a large number of them.
+	 * @param distanceFromStop
+	 *            For when getting predictions by location
 	 */
 	private IpcPredictionsForRouteStopDest(IpcPredictionsForRouteStopDest toClone,
-			int maxPredictionsPerStop, long maxSystemTimeForPrediction) {
+			int maxPredictionsPerStop, long maxSystemTimeForPrediction, 
+			double distanceToStop) {
 		this.routeId = toClone.routeId;
 		this.routeShortName = toClone.routeShortName;
 		this.routeName = toClone.routeName;
@@ -98,6 +108,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.stopName = toClone.stopName;
 		this.headsign = toClone.headsign;
 		this.directionId = toClone.directionId;
+		this.distanceToStop = distanceToStop;
 		
 		// Copy all the prediction info. Do while synchronized since another
 		// thread could otherwise be changing the data.
@@ -126,11 +137,13 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param stopName
 	 * @param destination
 	 * @param directionId
+	 * @param distanceToStop
 	 * @param predictions
 	 */
-	private IpcPredictionsForRouteStopDest(String routeId, String routeShortName,
-			String routeName, String stopId, String stopName,
-			String destination, String directionId, List<IpcPrediction> predictions) {
+	private IpcPredictionsForRouteStopDest(String routeId,
+			String routeShortName, String routeName, String stopId,
+			String stopName, String destination, String directionId,
+			double distanceToStop, List<IpcPrediction> predictions) {
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.routeName = routeName;
@@ -138,7 +151,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.stopName = stopName;
 		this.headsign = destination;
 		this.directionId = directionId;
-		
+		this.distanceToStop = distanceToStop;
 		this.predictionsForRouteStop = predictions;
 	}
 	
@@ -154,6 +167,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private String stopName;
 		private String headsign;
 		private String directionId;
+		private double distanceToStop;
 		private List<IpcPrediction> predictionsForRouteStop;
 
 		private static final short serializationVersion = 0;
@@ -170,6 +184,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			this.stopName = p.stopName;
 			this.headsign = p.headsign;
 			this.directionId = p.directionId;
+			this.distanceToStop = p.distanceToStop;
 			this.predictionsForRouteStop = p.predictionsForRouteStop;
 		}
 
@@ -190,6 +205,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			stream.writeObject(stopName);
 			stream.writeObject(headsign);
 			stream.writeObject(directionId);
+			stream.writeDouble(distanceToStop);
 			stream.writeObject(predictionsForRouteStop);
 		}
 		
@@ -214,6 +230,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			stopName = (String) stream.readObject();
 			headsign = (String) stream.readObject();
 			directionId = (String) stream.readObject();
+			distanceToStop = stream.readDouble();
 			predictionsForRouteStop = (List<IpcPrediction>) stream.readObject();
 		}
 
@@ -226,7 +243,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private Object readResolve() {
 			return new IpcPredictionsForRouteStopDest(routeId, routeShortName,
 					routeName, stopId, stopName, headsign, directionId,
-					predictionsForRouteStop);
+					distanceToStop, predictionsForRouteStop);
 		}
 	} /* End of SerializationProxy inner class */
 	
@@ -254,15 +271,18 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * number of predictions to maxPredictionsPerStop.
 	 * 
 	 * @param maxPredictionsPerStop
+	 * @param distanceFromStop
+	 *            For when getting predictions by location
 	 * @return
 	 */
-	public IpcPredictionsForRouteStopDest getClone(int maxPredictionsPerStop) {
+	public IpcPredictionsForRouteStopDest getClone(int maxPredictionsPerStop,
+			double distanceToStop) {
 		// Get copy of predictions. Don't limit by how far predictions
 		// are into the future. Therefore maxPredictionTime set to
 		// Integer.MAX_VALUE and currentTime set to 0L because it 
 		// doesn't matter.
 		IpcPredictionsForRouteStopDest clone = new IpcPredictionsForRouteStopDest(this,
-				maxPredictionsPerStop, Long.MAX_VALUE);
+				maxPredictionsPerStop, Long.MAX_VALUE, distanceToStop);
 		return clone;
 	}
 	
@@ -276,12 +296,14 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param maxSystemTimeForPrediction
 	 *            Max point in future want predictions for. This way can limit
 	 *            predictions when requesting a large number of them.
+	 * @param distanceToStop
+	 *            For when getting predictions by location
 	 * @return
 	 */
 	public IpcPredictionsForRouteStopDest getClone(int maxPredictionsPerStop,
-			long maxSystemTimeForPrediction) {
+			long maxSystemTimeForPrediction, double distanceToStop) {
 		IpcPredictionsForRouteStopDest clone = new IpcPredictionsForRouteStopDest(
-				this, maxPredictionsPerStop, maxSystemTimeForPrediction);
+				this, maxPredictionsPerStop, maxSystemTimeForPrediction, distanceToStop);
 		return clone;
 	}
 	
@@ -400,6 +422,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				+ ", stopName=" + stopName 
 				+ ", headsign=" + headsign
 				+ ", directionId=" + directionId 
+				+ ", distanceToStop=" + Geo.distanceFormat(distanceToStop)
 				+ ", predictionsForRouteStop=" + predictionsForRouteStop 
 				+ "]";
 	}
@@ -432,6 +455,10 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		return directionId;
 	}
 
+	public double getDistanceToStop() {
+		return distanceToStop;
+	}
+	
 	public List<IpcPrediction> getPredictionsForRouteStop() {
 		return predictionsForRouteStop;
 	}

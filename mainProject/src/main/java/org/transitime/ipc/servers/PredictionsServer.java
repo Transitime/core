@@ -17,11 +17,15 @@
 package org.transitime.ipc.servers;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.db.structs.Location;
+import org.transitime.gtfs.StopsByLoc;
+import org.transitime.gtfs.StopsByLoc.StopInfo;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.rmi.AbstractServer;
@@ -139,5 +143,32 @@ public class PredictionsServer
 
 		return predictionManager.getAllPredictions(Integer.MAX_VALUE, maxSystemTimeForPrediction);
 	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.PredictionsInterface#get(org.transitime.db.structs.Location, double, int)
+	 */
+	@Override
+	public List<IpcPredictionsForRouteStopDest> get(Location loc,
+			double maxDistance, int predictionsPerStop) throws RemoteException {
+		// For returning the results
+		List<IpcPredictionsForRouteStopDest> results = 
+				new ArrayList<IpcPredictionsForRouteStopDest>();
+		
+		// Determine which stops are near the location
+		List<StopInfo> stopInfos = StopsByLoc.getStops(loc, maxDistance);
+		
+		// Gather predictions for all of those stops
+		for (StopInfo stopInfo : stopInfos) {
+			List<IpcPredictionsForRouteStopDest> predictionsForStop = 
+					predictionManager.getPredictions(stopInfo.routeShortName, stopInfo.stopId,
+							predictionsPerStop, stopInfo.distanceToStop);
+			
+			results.addAll(predictionsForStop);
+		}
+		
+		// Return all of the predictions
+		return results;
+	}
+	
 	
 }

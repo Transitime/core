@@ -124,19 +124,23 @@ public class PredictionDataCache {
 	}
 	
 	/**
-	 * Returns copy of the PredictionsForRouteStop object. A clone is used so that it
-	 * can be accessed as needed without worrying about another thread writing
-	 * to it. The list of predictions should be relatively small so cloning is
-	 * not very costly. And this way the caller of this method doesn't have to
-	 * synchronize or such.
+	 * Returns copy of the PredictionsForRouteStop object. A clone is used so
+	 * that it can be accessed as needed without worrying about another thread
+	 * writing to it. The list of predictions should be relatively small so
+	 * cloning is not very costly. And this way the caller of this method
+	 * doesn't have to synchronize or such.
 	 * 
 	 * @param routeShortName
 	 * @param stopId
 	 * @param maxPredictionsPerStop
-	 * @return
+	 * @param distanceToStop
+	 *            For when getting predictions by location
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
 	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictions(String routeShortName,
-			String stopId, int maxPredictionsPerStop) {
+	public List<IpcPredictionsForRouteStopDest> getPredictions(
+			String routeShortName, String stopId, int maxPredictionsPerStop,
+			double distanceToStop) {
 		// Get the predictions from the map
 		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
 				getPredictionsForRouteStop(routeShortName, stopId);
@@ -146,13 +150,36 @@ public class PredictionDataCache {
 		// is important because when the predictions are modified they are
 		// temporarily not coherent. 
 		List<IpcPredictionsForRouteStopDest> clonedPredictions = 
-				new ArrayList<IpcPredictionsForRouteStopDest>(predictionsForRouteStop.size());
+				new ArrayList<IpcPredictionsForRouteStopDest>(
+						predictionsForRouteStop.size());
 		for (IpcPredictionsForRouteStopDest predictions : predictionsForRouteStop) {
-			clonedPredictions.add(predictions.getClone(maxPredictionsPerStop));
+			IpcPredictionsForRouteStopDest clone = 
+					predictions.getClone(maxPredictionsPerStop, distanceToStop);
+			clonedPredictions.add(clone);
 		}
 		
 		// Return the safe cloned predictions
 		return clonedPredictions;
+	}
+
+	
+	/**
+	 * Returns copy of the PredictionsForRouteStop object. A clone is used so
+	 * that it can be accessed as needed without worrying about another thread
+	 * writing to it. The list of predictions should be relatively small so
+	 * cloning is not very costly. And this way the caller of this method
+	 * doesn't have to synchronize or such.
+	 * 
+	 * @param routeShortName
+	 * @param stopId
+	 * @param maxPredictionsPerStop
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
+	 */
+	public List<IpcPredictionsForRouteStopDest> getPredictions(
+			String routeShortName, String stopId, int maxPredictionsPerStop) {
+		return getPredictions(routeShortName, stopId, maxPredictionsPerStop,
+				Double.NaN);
 	}
 	
 	/**
@@ -162,7 +189,8 @@ public class PredictionDataCache {
 	 * @param routeId
 	 * @param stopId
 	 * @param maxPredictionsPerStop
-	 * @return
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(String routeId, 
 			String stopId, int maxPredictionsPerStop) {
@@ -184,7 +212,8 @@ public class PredictionDataCache {
 	 * 
 	 * @param routeShortName
 	 * @param stopId
-	 * @return
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(String routeShortName,
 			String stopId) {
@@ -211,7 +240,8 @@ public class PredictionDataCache {
 	 * @param routeStops
 	 *            Specified using route_short_name instead of route_id
 	 * @param predictionsPerStop
-	 * @return
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(List<RouteStop> routeStops,
 			int predictionsPerStop) {
@@ -234,7 +264,8 @@ public class PredictionDataCache {
 	 * 
 	 * @param routeStops Specified using route_id instead of route_short_name
 	 * @param predictionsPerStop
-	 * @return
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(
 			List<RouteStop> routeStops, int predictionsPerStop) {
@@ -254,7 +285,8 @@ public class PredictionDataCache {
 	 * Returns copy of all predictions currently associated for each route/stop specified.
 	 * 
 	 * @param routeStops
-	 * @return
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
 			List<RouteStop> routeStops) {
@@ -267,7 +299,8 @@ public class PredictionDataCache {
 	 * to return.
 	 * 
 	 * @param routeStops
-	 * @return
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(
 			List<RouteStop> routeStops) {
@@ -284,7 +317,8 @@ public class PredictionDataCache {
 	 * @param maxSystemTimeForPrediction
 	 *            Max point in future want predictions for. This way can limit
 	 *            predictions when requesting a large number of them.
-	 * @return
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getAllPredictions(
 			int maxPredictionsPerStop, long maxSystemTimeForPrediction) {
@@ -494,7 +528,7 @@ public class PredictionDataCache {
 			// route/stop/destination so create it now and add it to list
 			// of PredictionsForRouteStopDest objects for the route/stop.
 			IpcPredictionsForRouteStopDest preds = 
-					new IpcPredictionsForRouteStopDest(trip, stopId);
+					new IpcPredictionsForRouteStopDest(trip, stopId, Double.NaN);
 			predictionsForRouteStop.add(preds);
 			return preds;
 		}

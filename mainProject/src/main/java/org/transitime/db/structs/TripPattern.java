@@ -64,6 +64,9 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String routeId;
 	
+	@Column(length=80)
+	private final String routeShortName;
+	
 	// So know lat lon range of the trip pattern 
 	@Embedded
 	private final Extent extent;
@@ -125,6 +128,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		// Store additional info from this trip
 		directionId = trip.getDirectionId();
 		routeId = trip.getRouteId();
+		routeShortName = trip.getRouteShortName();
 		
 		// Remember that this trip pattern refers to this particular 
 		// trip. Additional trips will be added as they are processed.
@@ -151,6 +155,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		headsign = null;
 		directionId = null;
 		routeId = null;
+		routeShortName = null;
 		extent = null;
 		
 	}
@@ -521,6 +526,14 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		return routeId;
 	}
 
+	/**
+	 * @return routeShortName, which varies less across schedule changes than
+	 *         the routeId
+	 */
+	public String getRouteShortName() {
+		return routeShortName;
+	}
+	
 	/**
 	 * Usually from the trip_headsign from the trips.txt file
 	 * @return name, the title of the trip pattern

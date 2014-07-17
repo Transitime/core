@@ -21,6 +21,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
@@ -127,6 +128,21 @@ public interface PredictionsInterface extends Remote {
 	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(
 			List<RouteStop> routeStops,	int predictionsPerStop)
 				throws RemoteException;
+	
+	/**
+	 * Returns predictions based on the specified location.
+	 * 
+	 * @param loc
+	 *            The user's location
+	 * @param maxDistance
+	 *            How far a stop can be away from the loc
+	 * @param predictionsPerStop
+	 * @return List of PredictionsForRouteStop objects for the location. There
+	 *         is a separate one for each destination for each route/stop.
+	 * @throws RemoteException
+	 */
+	public List<IpcPredictionsForRouteStopDest> get(Location loc,
+			double maxDistance, int predictionsPerStop) throws RemoteException;
 	
 	/**
 	 * Returns all predictions. This is intended for clients such as the GTFS-RT
