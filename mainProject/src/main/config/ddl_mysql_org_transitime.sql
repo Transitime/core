@@ -350,6 +350,7 @@
         minLon double precision,
         headsign varchar(255),
         routeId varchar(60),
+        routeShortName varchar(80),
         primary key (id, configRev)
     );
 
