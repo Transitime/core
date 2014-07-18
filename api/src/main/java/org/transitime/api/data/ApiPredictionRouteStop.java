@@ -25,6 +25,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.utils.Geo;
+import org.transitime.utils.StringUtils;
 
 /**
  * List of ApiPredictionDestination objects along with supporting information.
@@ -52,6 +54,12 @@ public class ApiPredictionRouteStop {
     @XmlAttribute(name="sName")
     private String stopName;
 
+    // Using String so that it will not be output if not showing predictions
+    // by location because then this value will be null. Also, can this way
+    // format it to desired number of digits of precision.
+    @XmlAttribute
+    private String distanceToStop;
+    
     @XmlElement(name="dest")
     private List<ApiPredictionDestination> destinations;
     
@@ -75,6 +83,8 @@ public class ApiPredictionRouteStop {
 	routeId = routeStopInfo.getRouteId();
 	stopId = routeStopInfo.getStopId();
 	stopName = routeStopInfo.getStopName();
+	distanceToStop = Double.isNaN(routeStopInfo.getDistanceToStop()) ? 
+		null : StringUtils.oneDigitFormat(routeStopInfo.getDistanceToStop());
 	
 	destinations = new ArrayList<ApiPredictionDestination>();
 	for (IpcPredictionsForRouteStopDest destinationInfo : predictionsForRouteStop) {
