@@ -81,7 +81,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeId = trip != null ? trip.getRouteId() : null;
 		this.routeShortName = trip != null ? trip.getRouteShortName() : null;
 		this.routeName = trip != null ? trip.getRouteName() : null;
-		this.routeOrder = trip != null ? trip.getRoute().getRouteOrder() : null;
+		this.routeOrder = trip != null ? trip.getRoute().getRouteOrder() : -1;
 		this.stopId = stopId;
 		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
 		this.headsign = trip != null ? trip.getHeadsign() : null;
@@ -211,7 +211,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
 			stream.writeObject(routeName);
-			stream.writeObject(routeOrder);
+			stream.writeInt(routeOrder);
 			stream.writeObject(stopId);
 			stream.writeObject(stopName);
 			stream.writeObject(headsign);
@@ -430,6 +430,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				+ "routeId=" + routeId
 				+ ", routeShortName=" + routeShortName 
 				+ ", routeName=" + routeName 
+				+ ", routeOrder=" + routeOrder
 				+ ", stopId=" + stopId
 				+ ", stopName=" + stopName 
 				+ ", headsign=" + headsign
@@ -446,7 +447,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	public String toShortString() {
 		return "IpcPredictionsForRouteStopDest [" 
 				+ "routeId=" + routeId
-				+ ", routeShortName=" + routeShortName 
+				+ ", routeShortName=" + routeShortName
+				+ ", routeOrder=" + routeOrder
 				+ ", stopId=" + stopId
 				+ ", stopName=" + stopName 
 				+ ", headsign=" + headsign
