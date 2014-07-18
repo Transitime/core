@@ -46,13 +46,13 @@ import org.transitime.api.utils.KeyValidator;
 import org.transitime.api.utils.StdParametersBean;
 import org.transitime.api.utils.UsageValidator;
 import org.transitime.api.utils.WebUtils;
+import org.transitime.db.structs.Location;
 import org.transitime.feed.gtfsRt.GtfsRtTripFeed;
 import org.transitime.feed.gtfsRt.GtfsRtVehicleFeed;
 import org.transitime.feed.gtfsRt.OctalDecoder;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.data.IpcDirection;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
@@ -208,7 +208,7 @@ public class JsonXml {
      *            separated by the "|" character so for example the query string
      *            could have "rs=43|2029&rs=43|3029"
      * @param numberPredictions
-     *            Maximum number of predictions to return
+     *            Maximum number of predictions to return. Default value is 3.
      * @return
      * @throws WebApplicationException
      */
@@ -227,19 +227,21 @@ public class JsonXml {
 	    PredictionsInterface inter = 
 		    getPredictionsInterface(stdParameters.getAgencyId());
 	    
+	    // Get predictions by route/stops
 	    List<RouteStop> routeStopsList = new ArrayList<RouteStop>();
 	    for (String routeStopStr : routeStopStrs) {
 		// Each route/stop is specified as a single string using "\"
 		// as a divider (e.g. "routeId|stopId")
 		String routeStopParams[] = routeStopStr.split("\\|");
-		RouteStop routeStop = new RouteStop(routeStopParams[0], routeStopParams[1]);
+		RouteStop routeStop = new RouteStop(routeStopParams[0],
+			routeStopParams[1]);
 		routeStopsList.add(routeStop);
 	    }
-	    List<IpcPredictionsForRouteStopDest> predsForRouteStopDestinations = 
-		    inter.get(routeStopsList, numberPredictions);
-
+	    List<IpcPredictionsForRouteStopDest> predictions = inter.get(
+		    routeStopsList, numberPredictions);
+	    
 	    // return ApiPredictions response
-	    ApiPredictions predictionsData = new ApiPredictions(predsForRouteStopDestinations);
+	    ApiPredictions predictionsData = new ApiPredictions(predictions);
 	    return createResponse(predictionsData, stdParameters);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
@@ -247,6 +249,57 @@ public class JsonXml {
 	}
     }
 
+    /**
+     * Handles "predictionsByLoc" command. Gets predictions from server and
+     * returns the corresponding response.
+     * <p>
+     * A Response object is returned instead of a regular object so that can
+     * have one method for the both XML and JSON yet always return the proper
+     * media type even if it is configured via the query string "format"
+     * parameter as opposed to the accept header.
+     * 
+     * @param stdParameters
+     *            StdParametersBean that gets the standard parameters from the
+     *            URI, query string, and headers.
+     * @param lat
+     * @param lon
+     * @param maxDistance
+     *            How far away a stop can be from the lat/lon. Default is 2,000 m.
+     * @param numberPredictions
+     *            Maximum number of predictions to return. Default value is 3.
+     * @return
+     * @throws WebApplicationException
+     */
+    @Path("/command/predictionsByLoc")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getPredictions(@BeanParam StdParametersBean stdParameters,
+	    @QueryParam(value="lat") Double lat,
+	    @QueryParam(value="lon") Double lon,
+	    @QueryParam(value="maxDistance") @DefaultValue("2000.0") double maxDistance,
+	    @QueryParam(value="numPreds") @DefaultValue("3") int numberPredictions) 
+		    throws WebApplicationException {
+	// Make sure request is valid
+	validate(stdParameters);
+	
+	try {
+	    // Get Prediction data from server
+	    PredictionsInterface inter = 
+		    getPredictionsInterface(stdParameters.getAgencyId());
+	    
+		// Get predictions by location
+	    List<IpcPredictionsForRouteStopDest> predictions = 
+		    inter.get(new Location(lat, lon), maxDistance, numberPredictions);
+	    
+	    // return ApiPredictions response
+	    ApiPredictions predictionsData = new ApiPredictions(predictions);
+	    return createResponse(predictionsData, stdParameters);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+    }
+    
     @Path("/command/routes")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -336,7 +389,7 @@ public class JsonXml {
      */
     @Path("/command/gtfs-rt/vehiclePositions")
     @GET
-    @Produces({MediaType.TEXT_PLAIN})
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM})
     public Response getGtfsRealtimeVehiclePositionsFeed(
 	    final @BeanParam StdParametersBean stdParameters,
 	    @QueryParam(value="format") String format) 
@@ -399,7 +452,7 @@ public class JsonXml {
      */
     @Path("/command/gtfs-rt/tripUpdates")
     @GET
-    @Produces({MediaType.TEXT_PLAIN})
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM})
     public Response getGtfsRealtimeTripFeed(
 	    final @BeanParam StdParametersBean stdParameters,
 	    @QueryParam(value="format") String format) 
