@@ -31,6 +31,7 @@ import org.transitime.gtfs.StopsByLoc.StopInfo;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.rmi.AbstractServer;
+import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 /**
@@ -195,6 +196,8 @@ public class PredictionsServer
 	@Override
 	public List<IpcPredictionsForRouteStopDest> get(Location loc,
 			double maxDistance, int predictionsPerStop) throws RemoteException {
+		IntervalTimer timer = new IntervalTimer();
+		
 		// For returning the results
 		List<IpcPredictionsForRouteStopDest> results = 
 				new ArrayList<IpcPredictionsForRouteStopDest>();
@@ -204,24 +207,20 @@ public class PredictionsServer
 		
 		// Gather predictions for all of those stops
 		for (StopInfo stopInfo : stopInfos) {
-			List<IpcPredictionsForRouteStopDest> predictionsForStop = 
-					predictionManager.getPredictions(stopInfo.routeShortName, stopInfo.stopId,
+			List<IpcPredictionsForRouteStopDest> predictionsForStop = predictionManager
+					.getPredictions(stopInfo.routeShortName, stopInfo.stopId,
 							predictionsPerStop, stopInfo.distanceToStop);
 			
 			results.addAll(predictionsForStop);
 		}
 		
-		// FIXME For debugging
-		logger.info("Before sorting:");
-		for (IpcPredictionsForRouteStopDest preds : results)
-			logger.info("  " + preds.toShortString());
-		
+		// Sort the predictions so that nearby stops output first, stops of 
+		// similar distance are output in route order, and direction "0"
+		// is output first for each route.
 		Collections.sort(results, predsByLocComparator);
 		
-		// FIXME For debugging
-		logger.info("After sorting:");
-		for (IpcPredictionsForRouteStopDest preds : results)
-			logger.info("  " + preds.toShortString());
+		logger.info("Determined predictions for stops near {}. Took {} msec",
+				loc, timer.elapsedMsec());
 		
 		// Return all of the predictions
 		return results;
