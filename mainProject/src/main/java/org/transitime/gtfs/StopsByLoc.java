@@ -37,8 +37,17 @@ import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
  */
 public class StopsByLoc {
 
+	// When looking for nearest stop should bias a bit to the next one
+	// in the trip pattern. This way if a user is in between two stops
+	// it will match to the second one, giving the passenger a bit more
+	// time to get there plus less travel time on the bus. 
+	private final static double BIAS_TO_NEXT_STOP_OFFSET = 40.0;
+	
 	/********************** Member Functions **************************/
 
+	/**
+	 * For describing a stop. Can be used to look up corresponding predictions.
+	 */
 	public static class StopInfo {
 		public String routeShortName;
 		public String stopId;
@@ -75,7 +84,10 @@ public class StopsByLoc {
 		for (int i=0; i<stopPaths.size()-1; ++i) {
 			StopPath stopPath = stopPaths.get(i);
 			double distanceToStop = stopPath.getStopLocation().distance(loc);
-			if (distanceToStop < bestDistance) {
+			// If this is the closest stop for the trip pattern remember it
+			// as such. Bias to the later stop since then passenger will have
+			// more time to get there and a shorter transit ride.
+			if (distanceToStop < bestDistance + BIAS_TO_NEXT_STOP_OFFSET) {
 				bestDistance = distanceToStop;
 				bestStopPath = stopPath;
 			}
