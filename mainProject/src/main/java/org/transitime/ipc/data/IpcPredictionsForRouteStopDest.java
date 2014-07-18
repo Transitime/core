@@ -42,6 +42,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	// schedule changes but routeShortName usually is.
 	private final String routeShortName;
 	private final String routeName;
+	private final int routeOrder;
 	
 	private final String stopId;
 	private final String stopName;
@@ -75,10 +76,12 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 *            How far stop is away from user. If predictions are not
 	 *            location based then use value of Double.NaN.
 	 */
-	public IpcPredictionsForRouteStopDest(Trip trip, String stopId, double distanceToStop) {
+	public IpcPredictionsForRouteStopDest(Trip trip, String stopId, 
+			double distanceToStop) {
 		this.routeId = trip != null ? trip.getRouteId() : null;
 		this.routeShortName = trip != null ? trip.getRouteShortName() : null;
 		this.routeName = trip != null ? trip.getRouteName() : null;
+		this.routeOrder = trip != null ? trip.getRoute().getRouteOrder() : null;
 		this.stopId = stopId;
 		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
 		this.headsign = trip != null ? trip.getHeadsign() : null;
@@ -98,12 +101,14 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param distanceFromStop
 	 *            For when getting predictions by location
 	 */
-	private IpcPredictionsForRouteStopDest(IpcPredictionsForRouteStopDest toClone,
+	private IpcPredictionsForRouteStopDest(
+			IpcPredictionsForRouteStopDest toClone,
 			int maxPredictionsPerStop, long maxSystemTimeForPrediction, 
 			double distanceToStop) {
 		this.routeId = toClone.routeId;
 		this.routeShortName = toClone.routeShortName;
 		this.routeName = toClone.routeName;
+		this.routeOrder = toClone.routeOrder;
 		this.stopId = toClone.stopId;
 		this.stopName = toClone.stopName;
 		this.headsign = toClone.headsign;
@@ -133,6 +138,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param routeId
 	 * @param routeShortName
 	 * @param routeName
+	 * @param routeOrder
 	 * @param stopId
 	 * @param stopName
 	 * @param destination
@@ -141,12 +147,14 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param predictions
 	 */
 	private IpcPredictionsForRouteStopDest(String routeId,
-			String routeShortName, String routeName, String stopId,
-			String stopName, String destination, String directionId,
-			double distanceToStop, List<IpcPrediction> predictions) {
+			String routeShortName, String routeName, int routeOrder,
+			String stopId, String stopName, String destination,
+			String directionId, double distanceToStop,
+			List<IpcPrediction> predictions) {
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.routeName = routeName;
+		this.routeOrder = routeOrder;
 		this.stopId = stopId;
 		this.stopName = stopName;
 		this.headsign = destination;
@@ -163,6 +171,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private String routeId;
 		private String routeShortName;
 		private String routeName;
+		private int routeOrder;
 		private String stopId;
 		private String stopName;
 		private String headsign;
@@ -180,6 +189,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			this.routeId = p.routeId;
 			this.routeShortName = p.routeShortName;
 			this.routeName = p.routeName;
+			this.routeOrder = p.routeOrder;
 			this.stopId = p.stopId;
 			this.stopName = p.stopName;
 			this.headsign = p.headsign;
@@ -201,6 +211,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
 			stream.writeObject(routeName);
+			stream.writeObject(routeOrder);
 			stream.writeObject(stopId);
 			stream.writeObject(stopName);
 			stream.writeObject(headsign);
@@ -226,6 +237,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			routeId = (String) stream.readObject();
 			routeShortName = (String) stream.readObject();
 			routeName = (String) stream.readObject();
+			routeOrder = stream.readInt();
 			stopId = (String) stream.readObject();
 			stopName = (String) stream.readObject();
 			headsign = (String) stream.readObject();
@@ -242,8 +254,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcPredictionsForRouteStopDest(routeId, routeShortName,
-					routeName, stopId, stopName, headsign, directionId,
-					distanceToStop, predictionsForRouteStop);
+					routeName, routeOrder, stopId, stopName, headsign,
+					directionId, distanceToStop, predictionsForRouteStop);
 		}
 	} /* End of SerializationProxy inner class */
 	
@@ -427,6 +439,22 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				+ "]";
 	}
 
+	/**
+	 * Intended for debugging
+	 * @return
+	 */
+	public String toShortString() {
+		return "IpcPredictionsForRouteStopDest [" 
+				+ "routeId=" + routeId
+				+ ", routeShortName=" + routeShortName 
+				+ ", stopId=" + stopId
+				+ ", stopName=" + stopName 
+				+ ", headsign=" + headsign
+				+ ", directionId=" + directionId 
+				+ ", distanceToStop=" + Geo.distanceFormat(distanceToStop)
+				+ "]";
+	}
+	
 	public String getRouteId() {
 		return routeId;
 	}
@@ -455,11 +483,21 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		return directionId;
 	}
 
+	/**
+	 * Distance from location to the stop if getting predictions
+	 * by location. Otherwise will return Double.NaN.
+	 * 
+	 * @return
+	 */
 	public double getDistanceToStop() {
 		return distanceToStop;
 	}
 	
 	public List<IpcPrediction> getPredictionsForRouteStop() {
 		return predictionsForRouteStop;
+	}
+
+	public int getRouteOrder() {
+		return routeOrder;
 	}
 }

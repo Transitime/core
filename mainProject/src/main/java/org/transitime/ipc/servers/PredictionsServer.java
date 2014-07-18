@@ -18,6 +18,8 @@ package org.transitime.ipc.servers;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -136,13 +138,56 @@ public class PredictionsServer
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#getPredictionsByVehicle()
 	 */
 	@Override
-	public List<IpcPredictionsForRouteStopDest> getAllPredictions(int predictionMaxFutureSecs) {
+	public List<IpcPredictionsForRouteStopDest> getAllPredictions(
+			int predictionMaxFutureSecs) {
 		// How far in future in absolute time should get predictions for
 		long maxSystemTimeForPrediction = predictionManager.getSystemTime() + 
 				predictionMaxFutureSecs*Time.MS_PER_SEC;
 
-		return predictionManager.getAllPredictions(Integer.MAX_VALUE, maxSystemTimeForPrediction);
+		return predictionManager.getAllPredictions(Integer.MAX_VALUE, 
+				maxSystemTimeForPrediction);
 	}
+
+	// If stops are relatively close then should order routes based on route
+	// order instead of distance.
+	private static double DISTANCE_AT_WHICH_ROUTES_GROUPED = 150.0;
+	
+	/**
+	 * For sorting resulting predictions so that they are by how close
+	 * the stop is away, and then by route order, and then by direction.
+	 * This way the most likely useful stops are displayed first.
+	 */
+	private static Comparator<IpcPredictionsForRouteStopDest> predsByLocComparator =
+			new Comparator<IpcPredictionsForRouteStopDest>() {
+		
+		public int compare(IpcPredictionsForRouteStopDest pred1, 
+				IpcPredictionsForRouteStopDest pred2) {
+			// If route order indicates pred1 before pred2...
+			int routeOrderDifference = 
+					pred1.getRouteOrder() - pred2.getRouteOrder();
+			if (routeOrderDifference < 0) {
+				// route order indicates pred1 before pred2.
+				// Pred1 should be before pred2 unless much closer to pred2
+				if (pred1.getDistanceToStop() > pred2.getDistanceToStop()
+						+ DISTANCE_AT_WHICH_ROUTES_GROUPED)
+					return 1; // pred2 is much closer
+				else
+					return -1; // pred2 not much closer so use route order
+			} else if (routeOrderDifference == 0) {
+				// Route order indicates that pred1 order same as pred2
+				return pred1.getDirectionId().compareTo(pred2.getDirectionId());
+			} else {
+				// Route order indicates pred1 after pred2.
+				// Pred2 should be before pred1 unless much closer to pred1
+				if (pred2.getDistanceToStop() > pred1.getDistanceToStop()
+						+ DISTANCE_AT_WHICH_ROUTES_GROUPED)
+					return -1; // pred1 is much closer
+				else
+					return 1; // pred1 not much closer so use route order
+			}
+		}
+		
+	};
 
 	/* (non-Javadoc)
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#get(org.transitime.db.structs.Location, double, int)
@@ -166,9 +211,20 @@ public class PredictionsServer
 			results.addAll(predictionsForStop);
 		}
 		
+		// FIXME For debugging
+		logger.info("Before sorting:");
+		for (IpcPredictionsForRouteStopDest preds : results)
+			logger.info("  " + preds.toShortString());
+		
+		Collections.sort(results, predsByLocComparator);
+		
+		// FIXME For debugging
+		logger.info("After sorting:");
+		for (IpcPredictionsForRouteStopDest preds : results)
+			logger.info("  " + preds.toShortString());
+		
 		// Return all of the predictions
 		return results;
 	}
-	
 	
 }

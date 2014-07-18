@@ -28,6 +28,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -126,6 +127,9 @@ public class Trip implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String shapeId;
 
+	@Transient
+	private Route route;
+	
 	// Note: though trip_short_name and wheelchair_accessible are available
 	// as part of the GTFS spec and in a GtfsTrip object, they are not
 	// included here because currently don't understand how best to use them
@@ -528,14 +532,24 @@ public class Trip implements Serializable {
 	public String getRouteShortName() {
 		return routeShortName;
 	}
+
+	/**
+	 * Returns the Route object for this trip. This object is determined
+	 * and cached when first accessed.
+	 * @return
+	 */
+	public Route getRoute() {
+		if (route == null)
+			route = Core.getInstance().getDbConfig().getRouteById(routeId);
+		return route;
+	}
 	
 	/**
 	 * Returns route name. Gets it from the database configuration.
 	 * @return
 	 */
 	public String getRouteName() {
-		Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
-		return route.getName();
+		return getRoute().getName();
 	}
 	
 	/**

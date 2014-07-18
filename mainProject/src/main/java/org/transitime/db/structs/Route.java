@@ -68,8 +68,11 @@ public class Route implements Serializable {
 	@Column(length=10)
 	private final String textColor;
 	
+	// Not declared final because need to set route order for all
+	// routes that did not have the order configured in the db,
+	// but can only do so once all routes read in and sorted.
 	@Column
-	private final Integer routeOrder;
+	private Integer routeOrder;
 	
 	@Column
 	private final boolean hidden;
@@ -271,6 +274,17 @@ public class Route implements Serializable {
 	
 		// Put the routes into proper order
 		Collections.sort(routesList, routeComparator);
+		
+		// Need to set the route order for each route so that can sort
+		// predictions based on distance from stop and route order. For
+		// the routes that didn't have route ordered configured in db
+		// start with 1000 and count on up.
+		int routeOrderForWhenNotConfigured = 1000;
+		for (Route route: routesList) {
+			if (!route.atBeginning() && !route.atEnd()) {
+				route.setRouteOrder(routeOrderForWhenNotConfigured++);
+			}
+		}
 		
 		// Return the list of routes
 		return routesList;
@@ -594,13 +608,21 @@ public class Route implements Serializable {
 	}
 
 	/**
-	 * Declared private because just for internal use.
 	 * @return the routeOrder or null if not set
 	 */
-	private Integer getRouteOrder() {
+	public Integer getRouteOrder() {
 		return routeOrder;
 	}
 
+	/**
+	 * Declared private because just for internal use. For setting
+	 * route order once all routes read in and sorted.
+	 * @param routeOrder
+	 */
+	private void setRouteOrder(int routeOrder) {
+		this.routeOrder = routeOrder;
+	}
+	
 	private boolean atBeginning() {
 		return routeOrder != null && routeOrder < 1000;
 	}
