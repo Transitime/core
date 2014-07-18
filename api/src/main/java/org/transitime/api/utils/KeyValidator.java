@@ -70,7 +70,7 @@ public class KeyValidator {
      * @param stdParameters
      * @throws WebApplicationException
      */
-    public void validateKey(StdParametersBean stdParameters) 
+    public void validateKey(StandardParameters stdParameters) 
 	    throws WebApplicationException {
 	String key = stdParameters.getKey();
 	if (!keyIsValid(key)) {	

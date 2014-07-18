@@ -67,7 +67,7 @@ public class UsageValidator {
 	return singleton;
     }
     
-    public void validateUsage(StdParametersBean stdParameters) 
+    public void validateUsage(StandardParameters stdParameters) 
 	    throws WebApplicationException {
 	String requestIpAddress = stdParameters.getRequest().getRemoteAddr();
 	long currentTime = System.currentTimeMillis();

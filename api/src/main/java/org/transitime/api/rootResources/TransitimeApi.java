@@ -17,8 +17,6 @@
 
 package org.transitime.api.rootResources;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,23 +31,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.StreamingOutput;
-
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRoute;
 import org.transitime.api.data.ApiRouteSummaries;
 import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
-import org.transitime.api.utils.KeyValidator;
-import org.transitime.api.utils.StdParametersBean;
-import org.transitime.api.utils.UsageValidator;
+import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
 import org.transitime.db.structs.Location;
-import org.transitime.feed.gtfsRt.GtfsRtTripFeed;
-import org.transitime.feed.gtfsRt.GtfsRtVehicleFeed;
-import org.transitime.feed.gtfsRt.OctalDecoder;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
@@ -63,16 +53,21 @@ import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
 
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-
 /**
- *
+ * Contains the API commands for the Transitime API for getting real-time
+ * vehicle and prediction information plus the static configuration information.
+ * The intent of this feed is to provide what is needed for creating a user
+ * interface application, such as a smartphone application.
+ * <p>
+ * The data output can be in either JSON or XML. The output format is specified
+ * by the accept header or by using the query string parameter "format=json" or
+ * "format=xml".
  *
  * @author SkiBu Smith
  *
  */
 @Path("/key/{key}/agency/{agency}")
-public class JsonXml {
+public class TransitimeApi {
 
     /**
      * Handles the "vehicles" command. Returns data for all vehicles or for the
@@ -98,13 +93,13 @@ public class JsonXml {
     @Path("/command/vehicles")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getVehicles(@BeanParam StdParametersBean stdParameters,
+    public Response getVehicles(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value = "v") List<String> vehicleIds,
 	    @QueryParam(value = "r") List<String> routeIds,
 	    @QueryParam(value = "rShortName") List<String> routeShortNames) 
 		    throws WebApplicationException {
 	// Make sure request is valid
-	validate(stdParameters);
+	stdParameters.validate();
 	
 	try {
 	    // Get Vehicle data from server
@@ -123,7 +118,7 @@ public class JsonXml {
 	    }
 
 	    // return ApiVehicles response
-	    return createResponse(new ApiVehicles(vehicles), stdParameters);
+	    return stdParameters.createResponse(new ApiVehicles(vehicles));
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
@@ -156,13 +151,13 @@ public class JsonXml {
     @Path("/command/vehiclesDetails")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getVehiclesDetails(@BeanParam StdParametersBean stdParameters,
+    public Response getVehiclesDetails(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value = "v") List<String> vehicleIds,
 	    @QueryParam(value = "r") List<String> routeIds,
 	    @QueryParam(value = "rShortName") List<String> routeShortNames) 
 		    throws WebApplicationException {
 	// Make sure request is valid
-	validate(stdParameters);
+	stdParameters.validate();
 	
 	try {
 	    // Get Vehicle data from server
@@ -181,8 +176,9 @@ public class JsonXml {
 	    }
 
 	    // return ApiVehiclesDetails response
-	    return createResponse(new ApiVehiclesDetails(vehicles),
-		    stdParameters);
+	    ApiVehiclesDetails apiVehiclesDetails = 
+		    new ApiVehiclesDetails(vehicles);
+	    return stdParameters.createResponse(apiVehiclesDetails);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
@@ -215,12 +211,12 @@ public class JsonXml {
     @Path("/command/predictions")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getPredictions(@BeanParam StdParametersBean stdParameters,
+    public Response getPredictions(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value="rs") List<String> routeStopStrs,
 	    @QueryParam(value="numPreds") @DefaultValue("3") int numberPredictions) 
 		    throws WebApplicationException {
 	// Make sure request is valid
-	validate(stdParameters);
+	stdParameters.validate();
 	
 	try {
 	    // Get Prediction data from server
@@ -242,13 +238,16 @@ public class JsonXml {
 	    
 	    // return ApiPredictions response
 	    ApiPredictions predictionsData = new ApiPredictions(predictions);
-	    return createResponse(predictionsData, stdParameters);
+	    return stdParameters.createResponse(predictionsData);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
 	}
     }
 
+    // The maximum allowable maxDistance for getting predictions by location
+    private final static double MAX_MAX_DISTANCE = 2000.0;
+    
     /**
      * Handles "predictionsByLoc" command. Gets predictions from server and
      * returns the corresponding response.
@@ -273,14 +272,19 @@ public class JsonXml {
     @Path("/command/predictionsByLoc")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getPredictions(@BeanParam StdParametersBean stdParameters,
+    public Response getPredictions(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value="lat") Double lat,
 	    @QueryParam(value="lon") Double lon,
-	    @QueryParam(value="maxDistance") @DefaultValue("2000.0") double maxDistance,
+	    @QueryParam(value="maxDistance") @DefaultValue("1500.0") double maxDistance,
 	    @QueryParam(value="numPreds") @DefaultValue("3") int numberPredictions) 
 		    throws WebApplicationException {
 	// Make sure request is valid
-	validate(stdParameters);
+	stdParameters.validate();
+	
+	if (maxDistance > MAX_MAX_DISTANCE)
+	    throw WebUtils.badRequestException("Maximum maxDistance parameter "
+	    	+ "is " + MAX_MAX_DISTANCE + "m but " + maxDistance 
+	    	+ "m was specified in the request.");
 	
 	try {
 	    // Get Prediction data from server
@@ -288,12 +292,12 @@ public class JsonXml {
 		    getPredictionsInterface(stdParameters.getAgencyId());
 	    
 		// Get predictions by location
-	    List<IpcPredictionsForRouteStopDest> predictions = 
-		    inter.get(new Location(lat, lon), maxDistance, numberPredictions);
+	    List<IpcPredictionsForRouteStopDest> predictions = inter.get(
+		    new Location(lat, lon), maxDistance, numberPredictions);
 	    
 	    // return ApiPredictions response
 	    ApiPredictions predictionsData = new ApiPredictions(predictions);
-	    return createResponse(predictionsData, stdParameters);
+	    return stdParameters.createResponse(predictionsData);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
@@ -303,10 +307,10 @@ public class JsonXml {
     @Path("/command/routes")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getRoutes(@BeanParam StdParametersBean stdParameters) 
+    public Response getRoutes(@BeanParam StandardParameters stdParameters) 
 		    throws WebApplicationException {
 	// Make sure request is valid
-	validate(stdParameters);
+	stdParameters.validate();
 	
 	try {
 	    // Get Vehicle data from server
@@ -316,7 +320,7 @@ public class JsonXml {
 
 	    // Create and return @QueryParam(value="s") String stopId response
 	    ApiRouteSummaries routesData = new ApiRouteSummaries(routes);
-	    return createResponse(routesData, stdParameters);
+	    return stdParameters.createResponse(routesData);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
@@ -326,13 +330,13 @@ public class JsonXml {
     @Path("/command/route")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getRoute(@BeanParam StdParametersBean stdParameters,
+    public Response getRoute(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value="r") String routeShrtNm,
 	    @QueryParam(value="s") String stopId,
 	    @QueryParam(value="tripPattern") String destinationName) 
 		    throws WebApplicationException {
 	// Make sure request is valid
-	validate(stdParameters);
+	stdParameters.validate();
 	
 	try {
 	    // Get Vehicle data from server
@@ -342,7 +346,7 @@ public class JsonXml {
 
 	    // Create and return ApiRoute response
 	    ApiRoute routeData = new ApiRoute(route);
-	    return createResponse(routeData, stdParameters);
+	    return stdParameters.createResponse(routeData);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
@@ -352,12 +356,12 @@ public class JsonXml {
     @Path("/command/stops")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getStops(@BeanParam StdParametersBean stdParameters,
+    public Response getStops(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value="r") String routeShrtNm) 
 		    throws WebApplicationException {
 
 	// Make sure request is valid
-	validate(stdParameters);
+	stdParameters.validate();
 	
 	try {
 	    // Get Vehicle data from server
@@ -367,7 +371,7 @@ public class JsonXml {
 
 	    // Create and return ApiRoute response
 	    ApiDirections directionsData = new ApiDirections(stopsForRoute);
-	    return createResponse(directionsData, stdParameters);
+	    return stdParameters.createResponse(directionsData);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
@@ -375,179 +379,7 @@ public class JsonXml {
 
     }
     
-    private final int MAX_GTFS_RT_CACHE_SECS = 15;
-
-    /**
-     * For getting GTFS-realtime Vehicle Positions data for all vehicles.
-     * 
-     * @param stdParameters
-     * @param format
-     *            if set to "human" then will output GTFS-rt data in human
-     *            readable format. Otherwise will output data in binary format.
-     * @return
-     * @throws WebApplicationException
-     */
-    @Path("/command/gtfs-rt/vehiclePositions")
-    @GET
-    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM})
-    public Response getGtfsRealtimeVehiclePositionsFeed(
-	    final @BeanParam StdParametersBean stdParameters,
-	    @QueryParam(value="format") String format) 
-	    throws WebApplicationException {
-	
-	// Make sure request is valid
-	validate(stdParameters);
-	
-	// Determine if output should be in human readable format or in 
-	// standard binary GTFS-realtime format.
-	final boolean humanFormatOutput = "human".equals(format);
-	
-	// Determine the appropriate output format. For plain text best to use
-	// MediaType.TEXT_PLAIN so that output is formatted properly in web 
-	// browser instead of newlines being removed. For binary output should
-	// use MediaType.APPLICATION_OCTET_STREAM.
-	String mediaType = humanFormatOutput ? 
-		MediaType.TEXT_PLAIN : MediaType.APPLICATION_OCTET_STREAM;
-	
-	// Prepare a StreamingOutput object so can write using it
-	StreamingOutput stream = new StreamingOutput() {
-	    public void write(OutputStream outputStream) 
-		    throws IOException, WebApplicationException {
-		try {
-		    FeedMessage message = 
-			    GtfsRtVehicleFeed.getPossiblyCachedMessage(
-				    stdParameters.getAgencyId(),
-				    MAX_GTFS_RT_CACHE_SECS);
-		    
-		    // Output in human readable format or in standard binary format
-		    if (humanFormatOutput) {
-			// Output data in human readable format. First, convert
-			// the octal escaped message to regular UTF encoding.
-			String decodedMessage = OctalDecoder
-				.convertOctalEscapedString(message.toString());
-			outputStream.write(decodedMessage.getBytes());
-		    } else {
-			// Standard binary output
-			message.writeTo(outputStream);
-		    }
-		} catch (Exception e) {
-		    throw new WebApplicationException(e);
-		}
-	    }
-	};
-
-	// Write out the data using the output stream 
-	return Response.ok(stream).type(mediaType).build();
-    }
-
-    /**
-     * For getting GTFS-realtime Vehicle Positions data for all vehicles.
-     * 
-     * @param stdParameters
-     * @param format
-     *            if set to "human" then will output GTFS-rt data in human
-     *            readable format. Otherwise will output data in binary format.
-     * @return
-     * @throws WebApplicationException
-     */
-    @Path("/command/gtfs-rt/tripUpdates")
-    @GET
-    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM})
-    public Response getGtfsRealtimeTripFeed(
-	    final @BeanParam StdParametersBean stdParameters,
-	    @QueryParam(value="format") String format) 
-	    throws WebApplicationException {
-	
-	// Make sure request is valid
-	validate(stdParameters);
-	
-	// Determine if output should be in human readable format or in 
-	// standard binary GTFS-realtime format.
-	final boolean humanFormatOutput = "human".equals(format);
-	
-	// Determine the appropriate output format. For plain text best to use
-	// MediaType.TEXT_PLAIN so that output is formatted properly in web 
-	// browser instead of newlines being removed. For binary output should
-	// use MediaType.APPLICATION_OCTET_STREAM.
-	String mediaType = humanFormatOutput ? 
-		MediaType.TEXT_PLAIN : MediaType.APPLICATION_OCTET_STREAM;
-	
-	// Prepare a StreamingOutput object so can write using it
-	StreamingOutput stream = new StreamingOutput() {
-	    public void write(OutputStream outputStream) 
-		    throws IOException, WebApplicationException {
-		try {
-		    FeedMessage message = 
-			    GtfsRtTripFeed.getPossiblyCachedMessage(
-				    stdParameters.getAgencyId(),
-				    MAX_GTFS_RT_CACHE_SECS);
-		    
-		    // Output in human readable format or in standard binary format
-		    if (humanFormatOutput) {
-			// Output data in human readable format. First, convert
-			// the octal escaped message to regular UTF encoding.
-			String decodedMessage = OctalDecoder
-				.convertOctalEscapedString(message.toString());
-			outputStream.write(decodedMessage.getBytes());
-		    } else {
-			// Standard binary output
-			message.writeTo(outputStream);
-		    }
-		} catch (Exception e) {
-		    throw new WebApplicationException(e);
-		}
-	    }
-	};
-
-	// Write out the data using the output stream 
-	return Response.ok(stream).type(mediaType).build();
-    }
-
-    /**
-     * Makes sure not access feed too much and that the key is valid.
-     * 
-     * @param stdParameters
-     * @throws WebApplicationException
-     */
-    private static void validate(StdParametersBean stdParameters) 
-    		throws WebApplicationException {
-	// Make sure not accessing feed too much. This needs to be done
-	// early in the handling of the request so can stop processing
-	// bad requests before too much effort is expended. Throw exception 
-	// if usage limits exceeded.
-	UsageValidator.getInstance().validateUsage(stdParameters);
-	
-	// Make sure the application key is valid
-	KeyValidator.getInstance().validateKey(stdParameters);
-    }
-    
-    /**
-     * For creating a Response of a single object of the appropriate media type.
-     * For List<> of object need to use createListResponse() instead.
-     * 
-     * @param object
-     *            Object to be returned in XML or JSON
-     * @param parameters
-     *            For specifying media type.
-     * @return The created response in the proper media type.
-     */
-    private static Response createResponse(Object object,
-	    StdParametersBean stdParameters) {
-	// Start building the response
-	ResponseBuilder responseBuilder = Response.ok(object); 
-	
-	// Since this is a truly open API intended to be used by
-	// other web pages allow cross-origin requests.
-	responseBuilder.header("Access-Control-Allow-Origin", "*");
-	
-	// Specify media type of XML or JSON
-	responseBuilder.type(stdParameters.getMediaType());
-	
-	// Return the response
-	return responseBuilder.build();
-    }
-
-    /**
+     /**
      * Gets the VehiclesInterface for the specified agencyId. If not valid then
      * throws WebApplicationException.
      * 

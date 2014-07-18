@@ -24,6 +24,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 /**
  * For getting the standard parameters from the URI used to access the feed.
@@ -33,7 +35,7 @@ import javax.ws.rs.core.MediaType;
  * @author SkiBu Smith
  * 
  */
-public class StdParametersBean {
+public class StandardParameters {
     @PathParam("key")
     private String key;
     
@@ -105,6 +107,44 @@ public class StdParametersBean {
 	}
 
 	return mediaType;
+    }
+
+    /**
+     * Makes sure not access feed too much and that the key is valid.
+     * 
+     * @throws WebApplicationException
+     */
+    public void validate() throws WebApplicationException {
+	// Make sure not accessing feed too much. This needs to be done
+	// early in the handling of the request so can stop processing
+	// bad requests before too much effort is expended. Throw exception 
+	// if usage limits exceeded.
+	UsageValidator.getInstance().validateUsage(this);
+	
+	// Make sure the application key is valid
+	KeyValidator.getInstance().validateKey(this);
+    }
+    
+    /**
+     * For creating a Response of a single object of the appropriate media type.
+     * 
+     * @param object
+     *            Object to be returned in XML or JSON
+     * @return The created response in the proper media type.
+     */
+    public Response createResponse(Object object) {
+	// Start building the response
+	ResponseBuilder responseBuilder = Response.ok(object); 
+	
+	// Since this is a truly open API intended to be used by
+	// other web pages allow cross-origin requests.
+	responseBuilder.header("Access-Control-Allow-Origin", "*");
+	
+	// Specify media type of XML or JSON
+	responseBuilder.type(getMediaType());
+	
+	// Return the response
+	return responseBuilder.build();
     }
 
     /**

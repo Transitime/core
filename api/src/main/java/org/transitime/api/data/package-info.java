@@ -49,4 +49,3 @@
  *
  */
 package org.transitime.api.data;
-import javax.xml.bind.annotation.XmlRootElement;
