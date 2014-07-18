@@ -26,7 +26,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.transitime.applications.Core;
+import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.Geo;
 
 /**
@@ -78,16 +80,50 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 */
 	public IpcPredictionsForRouteStopDest(Trip trip, String stopId, 
 			double distanceToStop) {
-		this.routeId = trip != null ? trip.getRouteId() : null;
-		this.routeShortName = trip != null ? trip.getRouteShortName() : null;
-		this.routeName = trip != null ? trip.getRouteName() : null;
-		this.routeOrder = trip != null ? trip.getRoute().getRouteOrder() : -1;
+		this.routeId = 
+				trip != null ? trip.getRouteId() : null;
+		this.routeShortName = 
+				trip != null ? trip.getRouteShortName() : null;
+		this.routeName = 
+				trip != null ? trip.getRouteName() : null;
+		this.routeOrder = 
+				trip != null ? trip.getRoute().getRouteOrder() : -1;
 		this.stopId = stopId;
-		this.stopName = Core.getInstance().getDbConfig().getStop(stopId).getName();
-		this.headsign = trip != null ? trip.getHeadsign() : null;
-		this.directionId = trip != null ? trip.getDirectionId() : null;
+		this.stopName = 
+				Core.getInstance().getDbConfig().getStop(stopId).getName();
+		this.headsign = 
+				trip != null ? trip.getHeadsign() : null;
+		this.directionId = 
+				trip != null ? trip.getDirectionId() : null;
 		this.distanceToStop = distanceToStop;
-		this.predictionsForRouteStop = new ArrayList<IpcPrediction>(MAX_PREDICTIONS);
+		this.predictionsForRouteStop = 
+				new ArrayList<IpcPrediction>(MAX_PREDICTIONS);
+	}
+	
+	/**
+	 * For constructing an IpcPredictionsForRouteStopDest for when there aren't 
+	 * any predictions. 
+	 * 
+	 * @param tripPattern Must not be null
+	 * @param stopId
+	 * @param distanceToStop
+	 */
+	public IpcPredictionsForRouteStopDest(TripPattern tripPattern,  String stopId,
+			double distanceToStop) {
+		this.routeId = tripPattern.getRouteId();
+		this.routeShortName = tripPattern.getRouteShortName();		
+		Route route = Core.getInstance().getDbConfig()
+				.getRouteById(tripPattern.getRouteId());
+		this.routeName = route.getName();
+		this.routeOrder = route.getRouteOrder();
+		this.stopId = stopId;
+		this.stopName = Core.getInstance().getDbConfig().getStop(stopId)
+				.getName();
+		this.headsign = tripPattern.getHeadsign();
+		this.directionId = tripPattern.getDirectionId();
+		this.distanceToStop = distanceToStop;
+		this.predictionsForRouteStop = new ArrayList<IpcPrediction>(0);
+
 	}
 	
 	/**
