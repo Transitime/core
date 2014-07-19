@@ -155,9 +155,16 @@ public class BusTimeSiriAvlModule extends XmlPollingAvlModule {
 				
 				// Heading
 				float heading = Float.NaN;
-				Element bearing = monitoredVehicleJourney.getChild("Bearing", ns);
-				if (bearing != null) {
-					heading = Float.parseFloat(bearing.getTextNormalize());
+				Element bearingElement = monitoredVehicleJourney.getChild("Bearing", ns);
+				if (bearingElement != null) {
+					float bearing = Float.parseFloat(bearingElement.getTextNormalize());
+					
+					// For bearing: 0 is East, increments counter-clockwise. 
+					// But GPS heading: 0 is North, increments clockwise. So 
+					// need to convert.
+					heading = 90.0f - bearing;
+					if (heading < 0.0f)
+						heading += 360.0f;
 				}
 
 				// Speed is not available
