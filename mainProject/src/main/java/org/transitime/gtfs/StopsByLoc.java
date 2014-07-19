@@ -49,12 +49,14 @@ public class StopsByLoc {
 	 * For describing a stop. Can be used to look up corresponding predictions.
 	 */
 	public static class StopInfo {
+		public TripPattern tripPattern;
 		public String routeShortName;
 		public String stopId;
 		public double distanceToStop;
 		
-		public StopInfo(String routeShortName, String stopId,
-				double distanceToStop) {
+		public StopInfo(TripPattern tripPattern, String routeShortName,
+				String stopId, double distanceToStop) {
+			this.tripPattern = tripPattern;
 			this.routeShortName = routeShortName;
 			this.stopId = stopId;
 			this.distanceToStop = distanceToStop;
@@ -98,7 +100,7 @@ public class StopsByLoc {
 			return null;
 		
 		// Found the best stop so return the info
-		return new StopInfo(tripPattern.getRouteShortName(),
+		return new StopInfo(tripPattern, tripPattern.getRouteShortName(),
 				bestStopPath.getStopId(), bestDistance);
 	}
 	

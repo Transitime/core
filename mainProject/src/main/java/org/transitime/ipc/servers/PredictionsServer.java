@@ -207,11 +207,27 @@ public class PredictionsServer
 		
 		// Gather predictions for all of those stops
 		for (StopInfo stopInfo : stopInfos) {
+			// Get the predictions for the stop
 			List<IpcPredictionsForRouteStopDest> predictionsForStop = predictionManager
 					.getPredictions(stopInfo.routeShortName, stopInfo.stopId,
 							predictionsPerStop, stopInfo.distanceToStop);
 			
-			results.addAll(predictionsForStop);
+			// Add info from this stop to the results
+			if (predictionsForStop.isEmpty()) {
+				// No predictions for this stop but should still add it to 
+				// results in case the user interface wants to show nearby stops
+				// for routes that are not currently in service. This could be
+				// useful to show messages, such as there being no service for
+				// the route due to a parade.
+				IpcPredictionsForRouteStopDest emptyPredsForStop = 
+						new IpcPredictionsForRouteStopDest(
+								stopInfo.tripPattern, stopInfo.stopId,
+								stopInfo.distanceToStop);
+				results.add(emptyPredsForStop);
+			} else {
+				// There are predictions for this stop so add them to the results
+				results.addAll(predictionsForStop);
+			}
 		}
 		
 		// Sort the predictions so that nearby stops output first, stops of 

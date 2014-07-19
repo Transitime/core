@@ -51,6 +51,7 @@ public class IpcVehicle implements Serializable {
 	// schedule changes but routeShortName usually is.
 	private final String routeShortName;
 	private final String tripId;
+	private final String directionId;
 	private final boolean predictable;
 	private final TemporalDifference realTimeSchedAdh;
 
@@ -71,6 +72,7 @@ public class IpcVehicle implements Serializable {
 		this.routeId = vs.getRouteId();
 		this.routeShortName = vs.getRouteShortName();
 		this.tripId = vs.getTrip().getId();
+		this.directionId = vs.getTrip().getDirectionId();
 		this.predictable = vs.isPredictable();
 		this.realTimeSchedAdh = vs.getRealTimeSchedAdh();
 	}
@@ -91,7 +93,7 @@ public class IpcVehicle implements Serializable {
 	 */
 	private IpcVehicle(String blockId, BlockAssignmentMethod blockAssignmentMethod, 
 			IpcAvl avl, float pathHeading, String routeId, String routeShortName,
-			String tripId, boolean predictable,
+			String tripId, String directionId, boolean predictable,
 			TemporalDifference realTimeSchdAdh) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
@@ -100,6 +102,7 @@ public class IpcVehicle implements Serializable {
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.tripId = tripId;
+		this.directionId = directionId;
 		this.predictable = predictable;
 		this.realTimeSchedAdh = realTimeSchdAdh;
 	}
@@ -117,6 +120,7 @@ public class IpcVehicle implements Serializable {
 		private String routeId;
 		private String routeShortName;
 		private String tripId;
+		private String directionId;
 		private boolean predictable;
 		private TemporalDifference realTimeSchdAdh;
 
@@ -134,6 +138,7 @@ public class IpcVehicle implements Serializable {
 			this.routeId = v.routeId;
 			this.routeShortName = v.routeShortName;
 			this.tripId = v.tripId;
+			this.directionId = v.directionId;
 			this.predictable = v.predictable;
 			this.realTimeSchdAdh = v.realTimeSchedAdh;
 		}
@@ -154,6 +159,7 @@ public class IpcVehicle implements Serializable {
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
 			stream.writeObject(tripId);
+			stream.writeObject(directionId);
 			stream.writeBoolean(predictable);
 			stream.writeObject(realTimeSchdAdh);
 		}
@@ -178,6 +184,7 @@ public class IpcVehicle implements Serializable {
 			routeId = (String) stream.readObject();
 			routeShortName = (String) stream.readObject();
 			tripId = (String) stream.readObject();
+			directionId = (String) stream.readObject();
 			predictable = stream.readBoolean();
 			realTimeSchdAdh = (TemporalDifference) stream.readObject();
 		}
@@ -190,8 +197,8 @@ public class IpcVehicle implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcVehicle(blockId, blockAssignmentMethod, avl,
-					pathHeading, routeId, routeShortName, tripId, predictable,
-					realTimeSchdAdh);
+					pathHeading, routeId, routeShortName, tripId, directionId, 
+					predictable, realTimeSchdAdh);
 		}
 	} // End of SerializationProxy class
 
@@ -281,6 +288,10 @@ public class IpcVehicle implements Serializable {
 		return tripId;
 	}
 
+	public String getDirectionId() {
+		return directionId;
+	}
+	
 	public boolean isPredictable() {
 		return predictable;
 	}
@@ -313,7 +324,7 @@ public class IpcVehicle implements Serializable {
 				"block", "driver", "license", 0);
 		IpcVehicle v = new IpcVehicle("blockId",
 				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl, 123.456f,
-				"routeId", "routeShortName", "tripId", true, null);
+				"routeId", "routeShortName", "tripId", "dirId", true, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);
