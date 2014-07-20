@@ -78,8 +78,9 @@ public class IpcVehicle implements Serializable {
 	}
 
 	/**
-	 * Constructor used for when deserializing a proxy object. Declared private
-	 * because only used internally by the proxy class.
+	 * Constructor used for when deserializing a proxy object. Declared
+	 * protected because only used internally by the proxy class but also for
+	 * sub class.
 	 * 
 	 * @param blockId
 	 * @param blockAssignmentMethod
@@ -91,8 +92,9 @@ public class IpcVehicle implements Serializable {
 	 * @param predictable
 	 * @param realTimeSchdAdh
 	 */
-	private IpcVehicle(String blockId, BlockAssignmentMethod blockAssignmentMethod, 
-			IpcAvl avl, float pathHeading, String routeId, String routeShortName,
+	protected IpcVehicle(String blockId,
+			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
+			float pathHeading, String routeId, String routeShortName,
 			String tripId, String directionId, boolean predictable,
 			TemporalDifference realTimeSchdAdh) {
 		this.blockId = blockId;
@@ -111,18 +113,18 @@ public class IpcVehicle implements Serializable {
 	 * SerializationProxy is used so that this class can be immutable and so
 	 * that can do versioning of objects.
 	 */
-	private static class SerializationProxy implements Serializable {
-		// Exact copy of fields of Vehicle enclosing class object
-		private String blockId;
-		private BlockAssignmentMethod blockAssignmentMethod;
-		private IpcAvl avl;
-		private float pathHeading;
-		private String routeId;
-		private String routeShortName;
-		private String tripId;
-		private String directionId;
-		private boolean predictable;
-		private TemporalDifference realTimeSchdAdh;
+	protected static class SerializationProxy implements Serializable {
+		// Exact copy of fields of IpcVehicle enclosing class object
+		protected String blockId;
+		protected BlockAssignmentMethod blockAssignmentMethod;
+		protected IpcAvl avl;
+		protected float pathHeading;
+		protected String routeId;
+		protected String routeShortName;
+		protected String tripId;
+		protected String directionId;
+		protected boolean predictable;
+		protected TemporalDifference realTimeSchdAdh;
 
 		private static final long serialVersionUID = -4996254752417270043L;
 		private static final short serializationVersion = 0;
@@ -130,7 +132,7 @@ public class IpcVehicle implements Serializable {
 		/*
 		 * Only to be used within this class.
 		 */
-		private SerializationProxy(IpcVehicle v) {
+		protected SerializationProxy(IpcVehicle v) {
 			this.blockId = v.blockId;
 			this.blockAssignmentMethod = v.blockAssignmentMethod;
 			this.avl = v.avl;
@@ -149,9 +151,10 @@ public class IpcVehicle implements Serializable {
 		 * that includes a version ID so that clients and servers can have two
 		 * different versions of code.
 		 */
-		private void writeObject(java.io.ObjectOutputStream stream)
+		protected void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
-		    	stream.writeShort(serializationVersion);
+		    stream.writeShort(serializationVersion);
+		    
 			stream.writeObject(blockId);
 			stream.writeObject(blockAssignmentMethod);
 			stream.writeObject(avl);
@@ -167,7 +170,7 @@ public class IpcVehicle implements Serializable {
 		/*
 		 * Custom method of deserializing a SerializationProy object.
 		 */
-		private void readObject(java.io.ObjectInputStream stream)
+		protected void readObject(java.io.ObjectInputStream stream)
 				throws IOException, ClassNotFoundException {
 			short readVersion = stream.readShort();
 			if (serializationVersion != readVersion) {
@@ -203,7 +206,7 @@ public class IpcVehicle implements Serializable {
 	} // End of SerializationProxy class
 
 	/*
-	 * Needed as part of using a SerializationProxy. When Vehicle object is
+	 * Needed as part of using a SerializationProxy. When IpcVehicle object is
 	 * serialized the SerializationProxy will instead be used.
 	 */
 	private Object writeReplace() {
@@ -237,6 +240,9 @@ public class IpcVehicle implements Serializable {
 	}
 
 	/**
+	 * Returns number of degrees clockwise from due North. Note that this is
+	 * very different from angle().
+	 * 
 	 * @return Heading of vehicle, or null if speed not defined.
 	 */
 	public float getHeading() {

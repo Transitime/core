@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
+import org.transitime.ipc.data.IpcExtVehicle;
 import org.transitime.ipc.data.IpcVehicle;
 
 /**
@@ -40,11 +41,13 @@ public class VehicleDataCache {
     private static VehicleDataCache singleton = new VehicleDataCache();
 
     // Keyed by vehicle ID
-    private Map<String, IpcVehicle> vehiclesMap = new HashMap<String, IpcVehicle>();
+    private Map<String, IpcExtVehicle> vehiclesMap = 
+    		new HashMap<String, IpcExtVehicle>();
 
     // Keyed by route_short_name. For each route there is a submap
     // that is keyed by vehicle.
-    private Map<String, Map<String, IpcVehicle>> vehiclesByRouteMap = new HashMap<String, Map<String, IpcVehicle>>();
+    private Map<String, Map<String, IpcExtVehicle>> vehiclesByRouteMap = 
+    		new HashMap<String, Map<String, IpcExtVehicle>>();
 
     private static final Logger logger = LoggerFactory
 	    .getLogger(VehicleDataCache.class);
@@ -73,8 +76,8 @@ public class VehicleDataCache {
      * @param routeShortName
      * @return
      */
-    public Collection<IpcVehicle> getVehiclesForRoute(String routeShortName) {
-	Map<String, IpcVehicle> vehicleMapForRoute = vehiclesByRouteMap
+    public Collection<IpcExtVehicle> getVehiclesForRoute(String routeShortName) {
+	Map<String, IpcExtVehicle> vehicleMapForRoute = vehiclesByRouteMap
 		.get(routeShortName);
 	if (vehicleMapForRoute != null)
 	    return vehicleMapForRoute.values();
@@ -82,141 +85,147 @@ public class VehicleDataCache {
 	    return null;
     }
 
-    /**
-     * Returns Collection of Vehicles currently associated with specified routes.
-     * 
-     * @param routeShortNames
-     * @return
-     */
-   public Collection<IpcVehicle> getVehiclesForRoute(List<String> routeShortNames) {
-	// If there is just a single route specified then use a shortcut
-	if (routeShortNames.size() == 1)
-	    return getVehiclesForRoute(routeShortNames.get(0));
-	
-	Collection<IpcVehicle> vehicles = new ArrayList<IpcVehicle>();
-	for (String routeShortName : routeShortNames) {
-		Collection<IpcVehicle> vehiclesForRoute = getVehiclesForRoute(routeShortName);
-		if (vehiclesForRoute != null)
-			vehicles.addAll(vehiclesForRoute);
+	/**
+	 * Returns Collection of Vehicles currently associated with specified
+	 * routes.
+	 * 
+	 * @param routeShortNames
+	 * @return
+	 */
+	public Collection<IpcExtVehicle> getVehiclesForRoute(
+			List<String> routeShortNames) {
+		// If there is just a single route specified then use a shortcut
+		if (routeShortNames.size() == 1)
+			return getVehiclesForRoute(routeShortNames.get(0));
+
+		Collection<IpcExtVehicle> vehicles = new ArrayList<IpcExtVehicle>();
+		for (String routeShortName : routeShortNames) {
+			Collection<IpcExtVehicle> vehiclesForRoute = 
+					getVehiclesForRoute(routeShortName);
+			if (vehiclesForRoute != null)
+				vehicles.addAll(vehiclesForRoute);
+		}
+		return vehicles;
 	}
-	return vehicles;
-    }
     
-    /**
-     * Returns Collection of Vehicles currently associated with specified route.
-     * 
-     * @param routeId
-     * @return
-     */
-    public Collection<IpcVehicle> getVehiclesForRouteUsingRouteId(String routeId) {
-	String routeShortName = null;
-	Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
-	if (route != null)
-	    routeShortName = route.getShortName();
-	return getVehiclesForRoute(routeShortName);
-    }
-
-    /**
-     * Returns Collection of Vehicles currently associated with specified routes.
-     * 
-     * @param routeShortNames
-     * @return
-     */
-   public Collection<IpcVehicle> getVehiclesForRouteUsingRouteId(List<String> routeIds) {
-	// If there is just a single route specified then use a shortcut
-	if (routeIds.size() == 1)
-	    return getVehiclesForRouteUsingRouteId(routeIds.get(0));
-	
-	Collection<IpcVehicle> vehicles = new ArrayList<IpcVehicle>();
-	for (String routeId : routeIds) {
-		Collection<IpcVehicle> vehiclesForRoute = getVehiclesForRouteUsingRouteId(routeId);
-		if (vehiclesForRoute != null)
-			vehicles.addAll(vehiclesForRoute);
+	/**
+	 * Returns Collection of Vehicles currently associated with specified route.
+	 * 
+	 * @param routeId
+	 * @return
+	 */
+	public Collection<IpcExtVehicle> getVehiclesForRouteUsingRouteId(
+			String routeId) {
+		String routeShortName = null;
+		Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
+		if (route != null)
+			routeShortName = route.getShortName();
+		return getVehiclesForRoute(routeShortName);
 	}
-	return vehicles;
-    }
+
+	/**
+	 * Returns Collection of Vehicles currently associated with specified
+	 * routes.
+	 * 
+	 * @param routeShortNames
+	 * @return
+	 */
+	public Collection<IpcExtVehicle> getVehiclesForRouteUsingRouteId(
+			List<String> routeIds) {
+		// If there is just a single route specified then use a shortcut
+		if (routeIds.size() == 1)
+			return getVehiclesForRouteUsingRouteId(routeIds.get(0));
+
+		Collection<IpcExtVehicle> vehicles = new ArrayList<IpcExtVehicle>();
+		for (String routeId : routeIds) {
+			Collection<IpcExtVehicle> vehiclesForRoute = getVehiclesForRouteUsingRouteId(routeId);
+			if (vehiclesForRoute != null)
+				vehicles.addAll(vehiclesForRoute);
+		}
+		return vehicles;
+	}
    
-   /**
-     * Returns Collection of VehiclesInterface whose vehicleIds were specified
-     * using the vehiclesIds parameter.
-     * 
-     * @param vehicleIds
-     *            Specifies which vehicles should return.
-     * @return
-     */
-    public Collection<IpcVehicle> getVehicles(List<String> vehicleIds) {
-	Collection<IpcVehicle> vehicles = new ArrayList<IpcVehicle>();
-	for (String vehicleId : vehicleIds) {
-	    IpcVehicle vehicle = vehiclesMap.get(vehicleId);
-	    if (vehicle != null)
-		vehicles.add(vehicle);
-	}
-	return vehicles;
-    }
-
-    /**
-     * Returns Vehicle info for the vehicleId specified.
-     * 
-     * @param vehicleId
-     * @return
-     */
-    public IpcVehicle getVehicle(String vehicleId) {
-	return vehiclesMap.get(vehicleId);
-    }
-
-    /**
-     * Returns Vehicle info for all vehicles.
-     * 
-     * @return
-     */
-    public Collection<IpcVehicle> getVehicles() {
-	return vehiclesMap.values();
-    }
-
-    /*
-     * Updates the maps containing the vehicle info.
-     * 
-     * @param vehicle
-     */
-    private void updateVehicle(IpcVehicle vehicle) {
-	logger.debug("Adding to VehicleDataCache vehicle={}", vehicle);
-
-	IpcVehicle originalVehicle = vehiclesMap.get(vehicle.getId());
-
-	// If the route has changed then remove the vehicle from the old map
-	// for that route.
-	if (originalVehicle != null
-		&& originalVehicle.getRouteShortName() != vehicle
-			.getRouteShortName()
-		&& !originalVehicle.getRouteShortName().equals(
-			vehicle.getRouteShortName())) {
-	    Map<String, IpcVehicle> vehicleMapForRoute = vehiclesByRouteMap
-		    .get(originalVehicle.getRouteShortName());
-	    vehicleMapForRoute.remove(vehicle.getId());
+	/**
+	 * Returns Collection of VehiclesInterface whose vehicleIds were specified
+	 * using the vehiclesIds parameter.
+	 * 
+	 * @param vehicleIds
+	 *            Specifies which vehicles should return.
+	 * @return
+	 */
+	public Collection<IpcExtVehicle> getVehicles(List<String> vehicleIds) {
+		Collection<IpcExtVehicle> vehicles = new ArrayList<IpcExtVehicle>();
+		for (String vehicleId : vehicleIds) {
+			IpcExtVehicle vehicle = vehiclesMap.get(vehicleId);
+			if (vehicle != null)
+				vehicles.add(vehicle);
+		}
+		return vehicles;
 	}
 
-	// Add Vehicle to the vehiclesByRouteMap
-	Map<String, IpcVehicle> vehicleMapForRoute = vehiclesByRouteMap
-		.get(vehicle.getRouteShortName());
-	if (vehicleMapForRoute == null) {
-	    vehicleMapForRoute = new HashMap<String, IpcVehicle>();
-	    vehiclesByRouteMap.put(vehicle.getRouteShortName(),
-		    vehicleMapForRoute);
+	/**
+	 * Returns Vehicle info for the vehicleId specified.
+	 * 
+	 * @param vehicleId
+	 * @return
+	 */
+	public IpcExtVehicle getVehicle(String vehicleId) {
+		return vehiclesMap.get(vehicleId);
 	}
-	vehicleMapForRoute.put(vehicle.getId(), vehicle);
 
-	// Add vehicle to vehiclesMap
-	vehiclesMap.put(vehicle.getId(), vehicle);
-    }
+	/**
+	 * Returns Vehicle info for all vehicles.
+	 * 
+	 * @return
+	 */
+	public Collection<IpcExtVehicle> getVehicles() {
+		return vehiclesMap.values();
+	}
 
-    /**
-     * Updates the maps containing the vehicle info.
-     * 
-     * @param vs
-     *            The current VehicleState
-     */
-    public void updateVehicle(VehicleState vs) {
-	IpcVehicle vehicle = new IpcVehicle(vs);
-	updateVehicle(vehicle);
-    }
+	/**
+	 * Updates the maps containing the vehicle info.
+	 * 
+	 * @param vehicle
+	 */
+	private void updateVehicle(IpcExtVehicle vehicle) {
+		logger.debug("Adding to VehicleDataCache vehicle={}", vehicle);
+
+		IpcVehicle originalVehicle = vehiclesMap.get(vehicle.getId());
+
+		// If the route has changed then remove the vehicle from the old map
+		// for that route.
+		if (originalVehicle != null
+				&& originalVehicle.getRouteShortName() != vehicle
+						.getRouteShortName()
+				&& !originalVehicle.getRouteShortName().equals(
+						vehicle.getRouteShortName())) {
+			Map<String, IpcExtVehicle> vehicleMapForRoute = vehiclesByRouteMap
+					.get(originalVehicle.getRouteShortName());
+			vehicleMapForRoute.remove(vehicle.getId());
+		}
+
+		// Add Vehicle to the vehiclesByRouteMap
+		Map<String, IpcExtVehicle> vehicleMapForRoute = vehiclesByRouteMap
+				.get(vehicle.getRouteShortName());
+		if (vehicleMapForRoute == null) {
+			vehicleMapForRoute = new HashMap<String, IpcExtVehicle>();
+			vehiclesByRouteMap.put(vehicle.getRouteShortName(),
+					vehicleMapForRoute);
+		}
+		vehicleMapForRoute.put(vehicle.getId(), vehicle);
+
+		// Add vehicle to vehiclesMap
+		vehiclesMap.put(vehicle.getId(), vehicle);
+	}
+
+	/**
+	 * Updates the maps containing the vehicle info.
+	 * 
+	 * @param vs
+	 *            The current VehicleState
+	 */
+	public void updateVehicle(VehicleState vs) {
+		IpcExtVehicle vehicle = new IpcExtVehicle(vs);
+		updateVehicle(vehicle);
+	}
 }

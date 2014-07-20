@@ -435,7 +435,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	}
 	
 	/**
-	 * @return the List of stop IDs
+	 * @return the List of the stop paths for the trip pattern
 	 */
 	public List<StopPath> getStopPaths() {
 		return stopPaths;
