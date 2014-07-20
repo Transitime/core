@@ -685,6 +685,15 @@ public class Trip implements Serializable {
 	}
 	
 	/**
+	 * Returns the List of the stop paths for the trip pattern
+	 * 
+	 * @return
+	 */
+	public List<StopPath> getStopPaths() {
+		return tripPattern.getStopPaths();
+	}
+	
+	/**
 	 * Returns the StopPath for the stopPathIndex specified
 	 * 
 	 * @param stopPathIndex

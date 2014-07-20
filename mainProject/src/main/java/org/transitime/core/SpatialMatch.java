@@ -369,7 +369,7 @@ public class SpatialMatch {
 	 * 
 	 * @return This match or one before the stop if at beginning of stop path
 	 */
-	private SpatialMatch getMatchBeforeStopIfAtStop() {
+	public SpatialMatch getMatchBeforeStopIfAtStop() {
 		// If the spatialMatch is not just after a stop then return
 		// spatialMatch. 
 		if (!atBeginningOfPathStop())
