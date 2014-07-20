@@ -286,6 +286,14 @@ public class IpcExtVehicle extends IpcVehicle {
 		return distanceAlongPath;
 	}
 
+	public boolean isLayover() {
+		return isLayover;
+	}
+
+	public long getTripStartEpochTime() {
+		return tripStartEpochTime;
+	}
+
 	@Override
 	public String toString() {
 		return "IpcExtVehicle [" 
