@@ -20,6 +20,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
@@ -37,6 +38,7 @@ public class SchemaGenerator {
 	private final String packageName;
 	private final String outputDirectory;
 	
+	@SuppressWarnings("unchecked")
 	public SchemaGenerator(String packageName, String outputDirectory) throws Exception {
 		this.cfg = new Configuration();
 		this.cfg.setProperty("hibernate.hbm2ddl.auto", "create");
@@ -61,18 +63,17 @@ public class SchemaGenerator {
 		export.setDelimiter(";");
 		
 		// Determine file name. Use "ddl_" plus dialect name such as mysql or
-		// oracle plus the first two components of the package name such as
-		// org_transitime.
-		int secondDotPos = packageName.indexOf('.', packageName.indexOf('.')+1);
+		// oracle plus the package name with "_" replacing "." such as
+		// org_transitime_db_structs .
 		String packeNameSuffix = 
-				packageName.substring(0, secondDotPos).replace(".", "_");
+				packageName.replace(".", "_");
 		String outputFilename = (outputDirectory!=null?outputDirectory+"/" : "") + 
 				"ddl_" + dialect.name().toLowerCase() + 
 				"_" + packeNameSuffix + ".sql";
 		
 		export.setOutputFile(outputFilename);
 		
-		// Export, but only to an sql file. Don't actually modify the database
+		// Export, but only to an SQL file. Don't actually modify the database
 		System.out.println("Writing file " + outputFilename);
 		export.execute(true, false, false, false);
 	}
@@ -120,7 +121,7 @@ public class SchemaGenerator {
 	}
 
 	/**
-	 * Holds the classnames of hibernate dialects for easy reference.
+	 * Holds the class names of hibernate dialects for easy reference.
 	 */
 	private static enum Dialect {
 		ORACLE("org.hibernate.dialect.Oracle10gDialect"), 
