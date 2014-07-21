@@ -45,7 +45,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	private final String destinationName;
 	private final String nextStopId;
 	private final double distanceToNextStop;
-	private final double distanceAlongPath;
+	private final double distanceAlongTrip;
 	private final boolean isLayover;
 	private final long tripStartEpochTime;
 	
@@ -82,7 +82,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			for (int spIdx=0; spIdx < match.getStopPathIndex(); ++ spIdx) {
 				distanceForPreviousStopPaths += trip.getStopPath(spIdx).length();
 			}
-			this.distanceAlongPath = 
+			this.distanceAlongTrip = 
 					distanceForPreviousStopPaths + this.distanceToNextStop;
 			
 			this.isLayover = match.isLayover();
@@ -96,7 +96,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			this.destinationName = null;
 			this.nextStopId = null;
 			this.distanceToNextStop = Double.NaN;
-			this.distanceAlongPath = Double.NaN;
+			this.distanceAlongTrip = Double.NaN;
 			this.isLayover = false;
 			this.tripStartEpochTime = 0;
 		}
@@ -111,7 +111,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	 * @param destinationName
 	 * @param nextStopId
 	 * @param distanceToNextStop
-	 * @param distanceAlongPath
+	 * @param distanceAlongTrip
 	 * @param isLayover
 	 * @param tripStartEpochTime
 	 * @param blockId
@@ -128,7 +128,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	private IpcExtVehicle(String routeName, String originStopId,
 			String destinationId, String destinationName,
 			String nextStopId, double distanceToNextStop,
-			double distanceAlongPath, boolean isLayover, long tripStartEpochTime,
+			double distanceAlongTrip, boolean isLayover, long tripStartEpochTime,
 			String blockId, BlockAssignmentMethod blockAssignmentMethod, 
 			IpcAvl avl, float pathHeading, String routeId, String routeShortName,
 			String tripId, String directionId, boolean predictable,
@@ -143,7 +143,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		this.destinationName = destinationName;
 		this.nextStopId = nextStopId;
 		this.distanceToNextStop = distanceToNextStop;
-		this.distanceAlongPath = distanceAlongPath;
+		this.distanceAlongTrip = distanceAlongTrip;
 		this.isLayover = isLayover;
 		this.tripStartEpochTime = tripStartEpochTime;
 	}
@@ -161,7 +161,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		private String destinationName;
 		private String nextStopId;
 		private double distanceToNextStop;
-		private double distanceAlongPath;
+		private double distanceAlongTrip;
 		private boolean isLayover;
 		private long tripStartEpochTime;
 
@@ -175,7 +175,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			this.destinationName = v.destinationName;
 			this.nextStopId = v.nextStopId;
 			this.distanceToNextStop = v.distanceToNextStop;
-			this.distanceAlongPath = v.distanceAlongPath;
+			this.distanceAlongTrip = v.distanceAlongTrip;
 			this.isLayover = v.isLayover;
 			this.tripStartEpochTime = v.tripStartEpochTime;
 		}
@@ -198,7 +198,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		    stream.writeObject(destinationName);
 		    stream.writeObject(nextStopId);
 		    stream.writeDouble(distanceToNextStop);
-		    stream.writeDouble(distanceAlongPath);
+		    stream.writeDouble(distanceAlongTrip);
 		    stream.writeBoolean(isLayover);
 		    stream.writeLong(tripStartEpochTime);
 		}
@@ -218,7 +218,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			destinationName = (String) stream.readObject();
 			nextStopId = (String) stream.readObject();
 			distanceToNextStop = stream.readDouble();
-			distanceAlongPath = stream.readDouble();
+			distanceAlongTrip = stream.readDouble();
 			isLayover = stream.readBoolean();
 			tripStartEpochTime = stream.readLong();
 		}
@@ -232,7 +232,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		private Object readResolve() {
 			return new IpcExtVehicle(routeName, originStopId, destinationId,
 					destinationName, nextStopId, distanceToNextStop,
-					distanceAlongPath, isLayover, tripStartEpochTime, blockId,
+					distanceAlongTrip, isLayover, tripStartEpochTime, blockId,
 					blockAssignmentMethod, avl, pathHeading, routeId,
 					routeShortName, tripId, directionId, predictable,
 					realTimeSchdAdh);
@@ -282,8 +282,8 @@ public class IpcExtVehicle extends IpcVehicle {
 		return distanceToNextStop;
 	}
 
-	public double getDistanceAlongPath() {
-		return distanceAlongPath;
+	public double getDistanceAlongTrip() {
+		return distanceAlongTrip;
 	}
 
 	public boolean isLayover() {
@@ -313,7 +313,7 @@ public class IpcExtVehicle extends IpcVehicle {
 				+ ", destinationName=" + destinationName 
 				+ ", nextStopId=" + nextStopId 
 				+ ", distanceToNextStop=" + distanceToNextStop
-				+ ", distanceAlongPath=" + distanceAlongPath 
+				+ ", distanceAlongTrip=" + distanceAlongTrip 
 				+ ", isLayover=" + isLayover
 				+ ", tripStartEpochTime=" + new Date(tripStartEpochTime)
 				+ "]";
