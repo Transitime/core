@@ -86,6 +86,12 @@ public class Agency implements Serializable {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * For creating object to be written to db.
+	 * 
+	 * @param gtfsAgency
+	 * @param routes
+	 */
 	public Agency(GtfsAgency gtfsAgency, List<Route> routes) {
 		configRev = DbConfig.SANDBOX_REV;
 		agencyId = gtfsAgency.getAgencyId();
@@ -104,7 +110,7 @@ public class Agency implements Serializable {
 	}
 
 	/**
-	 * Needed because Hibernate requires no-arg constructor
+	 * Needed because Hibernate requires no-arg constructor for reading in data
 	 */
 	@SuppressWarnings("unused")
 	private Agency() {
