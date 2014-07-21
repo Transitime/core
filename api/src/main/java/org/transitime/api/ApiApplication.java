@@ -26,14 +26,12 @@ import org.glassfish.jersey.server.ResourceConfig;
  * be searched for being a root-resource class with methods annotated
  * with @Path indicating that it handles requests. 
  *
- * Uses "" for the @ApplicationPath so that this class does not actually
- * affect the URI. Instead, the URI is the application name plus what
- * is defined in the root-resource class.
+ * Uses "v1" for the @ApplicationPath to specify the version of the feed.
  * 
  * @author SkiBu Smith
  *
  */
-@ApplicationPath("")
+@ApplicationPath("v1")
 public class ApiApplication extends ResourceConfig {
 
     public ApiApplication() {
