@@ -40,9 +40,6 @@ import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
 import org.transitime.db.structs.Location;
-import org.transitime.ipc.clients.ConfigInterfaceFactory;
-import org.transitime.ipc.clients.PredictionsInterfaceFactory;
-import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
@@ -103,8 +100,7 @@ public class TransitimeApi {
 	
 	try {
 	    // Get Vehicle data from server
-	    VehiclesInterface inter = 
-		    getVehiclesInterface(stdParameters.getAgencyId());
+	    VehiclesInterface inter = stdParameters.getVehiclesInterface();
 	    
 	    Collection<IpcVehicle> vehicles;
 	    if (!routeIds.isEmpty()) {
@@ -161,8 +157,7 @@ public class TransitimeApi {
 	
 	try {
 	    // Get Vehicle data from server
-	    VehiclesInterface inter = 
-		    getVehiclesInterface(stdParameters.getAgencyId());
+	    VehiclesInterface inter = stdParameters.getVehiclesInterface();
 	    
 	    Collection<IpcVehicle> vehicles;
 	    if (!routeIds.isEmpty()) {
@@ -220,8 +215,7 @@ public class TransitimeApi {
 	
 	try {
 	    // Get Prediction data from server
-	    PredictionsInterface inter = 
-		    getPredictionsInterface(stdParameters.getAgencyId());
+	    PredictionsInterface inter = stdParameters.getPredictionsInterface();
 	    
 	    // Get predictions by route/stops
 	    List<RouteStop> routeStopsList = new ArrayList<RouteStop>();
@@ -289,7 +283,7 @@ public class TransitimeApi {
 	try {
 	    // Get Prediction data from server
 	    PredictionsInterface inter = 
-		    getPredictionsInterface(stdParameters.getAgencyId());
+		    stdParameters.getPredictionsInterface();
 	    
 		// Get predictions by location
 	    List<IpcPredictionsForRouteStopDest> predictions = inter.get(
@@ -304,6 +298,14 @@ public class TransitimeApi {
 	}
     }
     
+    /**
+     * Handles the "routes" command. Returns data describing all of the routes.
+     * Useful for creating a route selector as part of a UI.
+     * 
+     * @param stdParameters
+     * @return
+     * @throws WebApplicationException
+     */
     @Path("/command/routes")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -314,8 +316,7 @@ public class TransitimeApi {
 	
 	try {
 	    // Get Vehicle data from server
-	    ConfigInterface inter = 
-		    getConfigInterface(stdParameters.getAgencyId());	    
+	    ConfigInterface inter = stdParameters.getConfigInterface();	    
 	    Collection<IpcRouteSummary> routes = inter.getRoutes();
 
 	    // Create and return @QueryParam(value="s") String stopId response
@@ -327,6 +328,17 @@ public class TransitimeApi {
 	}
     }
 
+    /**
+     * Handles the "route" command. Provides detailed information for a route
+     * includes all stops and paths such that it can be drawn in a map.
+     * 
+     * @param stdParameters
+     * @param routeShrtNm
+     * @param stopId
+     * @param destinationName
+     * @return
+     * @throws WebApplicationException
+     */
     @Path("/command/route")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -340,9 +352,9 @@ public class TransitimeApi {
 	
 	try {
 	    // Get Vehicle data from server
-	    ConfigInterface inter = 
-		    getConfigInterface(stdParameters.getAgencyId());	    
-	    IpcRoute route = inter.getRoute(routeShrtNm, stopId, destinationName);
+	    ConfigInterface inter = stdParameters.getConfigInterface();	    
+	    IpcRoute route = 
+		    inter.getRoute(routeShrtNm, stopId, destinationName);
 
 	    // Create and return ApiRoute response
 	    ApiRoute routeData = new ApiRoute(route);
@@ -353,6 +365,16 @@ public class TransitimeApi {
 	}
     }
     
+    /**
+     * Handles the "stops" command. Returns all stops associated with a route,
+     * grouped by direction. Useful for creating a UI where user needs to select
+     * a stop from a list.
+     * 
+     * @param stdParameters
+     * @param routeShrtNm
+     * @return
+     * @throws WebApplicationException
+     */
     @Path("/command/stops")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -365,8 +387,7 @@ public class TransitimeApi {
 	
 	try {
 	    // Get Vehicle data from server
-	    ConfigInterface inter = 
-		    getConfigInterface(stdParameters.getAgencyId());	    
+	    ConfigInterface inter = stdParameters.getConfigInterface();	    
 	    IpcStopsForRoute stopsForRoute = inter.getStops(routeShrtNm);
 
 	    // Create and return ApiRoute response
@@ -379,54 +400,6 @@ public class TransitimeApi {
 
     }
     
-     /**
-     * Gets the VehiclesInterface for the specified agencyId. If not valid then
-     * throws WebApplicationException.
-     * 
-     * @param agencyId
-     * @return The VehiclesInterface
-     */
-    private static VehiclesInterface getVehiclesInterface(String agencyId) 
-	    throws WebApplicationException {
-	VehiclesInterface vehiclesInterface = VehiclesInterfaceFactory.get(agencyId);
-	if (vehiclesInterface == null)
-	    throw WebUtils.badRequestException("Agency ID " + agencyId + " is not valid");
-	
-	return vehiclesInterface;
-    }
-
-    /**
-     * Gets the PredictionsInterface for the specified agencyId. If not valid then
-     * throws WebApplicationException.
-     * 
-     * @param agencyId
-     * @return The VehiclesInterface
-     */
-    private static PredictionsInterface getPredictionsInterface(String agencyId) 
-	    throws WebApplicationException {
-	PredictionsInterface predictionsInterface = PredictionsInterfaceFactory.get(agencyId);
-	if (predictionsInterface == null)
-	    throw WebUtils.badRequestException("Agency ID " + agencyId + " is not valid");
-	
-	return predictionsInterface;
-    }
-
-    /**
-     * Gets the ConfigInterface for the specified agencyId. If not valid then
-     * throws WebApplicationException.
-     * 
-     * @param agencyId
-     * @return The VehiclesInterface
-     */
-    private static ConfigInterface getConfigInterface(String agencyId) 
-	    throws WebApplicationException {
-	ConfigInterface configInterface = ConfigInterfaceFactory.get(agencyId);
-	if (configInterface == null)
-	    throw WebUtils.badRequestException("Agency ID " + agencyId + " is not valid");
-	
-	return configInterface;
-    }
-
 //    /**
 //     * For creating response of list of vehicles. Would like to make this a
 //     * generic type but due to type erasure cannot do so since GenericEntity

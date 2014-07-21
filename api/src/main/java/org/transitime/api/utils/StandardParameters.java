@@ -27,6 +27,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.transitime.ipc.clients.ConfigInterfaceFactory;
+import org.transitime.ipc.clients.PredictionsInterfaceFactory;
+import org.transitime.ipc.clients.VehiclesInterfaceFactory;
+import org.transitime.ipc.interfaces.ConfigInterface;
+import org.transitime.ipc.interfaces.PredictionsInterface;
+import org.transitime.ipc.interfaces.VehiclesInterface;
+
 /**
  * For getting the standard parameters from the URI used to access the feed.
  * Includes the key, agency, and the media type (JSON or XML). Does not include
@@ -146,6 +153,56 @@ public class StandardParameters {
 	// Return the response
 	return responseBuilder.build();
     }
+
+    /**
+    * Gets the VehiclesInterface for the specified agencyId. If not valid then
+    * throws WebApplicationException.
+    * 
+    * @return The VehiclesInterface
+    */
+   public VehiclesInterface getVehiclesInterface() 
+	    throws WebApplicationException {
+	VehiclesInterface vehiclesInterface = VehiclesInterfaceFactory
+		.get(agencyId);
+	if (vehiclesInterface == null)
+	    throw WebUtils.badRequestException("Agency ID " + agencyId
+		    + " is not valid");
+	
+	return vehiclesInterface;
+   }
+
+   /**
+    * Gets the PredictionsInterface for the specified agencyId. If not valid then
+    * throws WebApplicationException.
+    * 
+    * @return The VehiclesInterface
+    */
+   public PredictionsInterface getPredictionsInterface() 
+	    throws WebApplicationException {
+	PredictionsInterface predictionsInterface = PredictionsInterfaceFactory
+		.get(agencyId);
+	if (predictionsInterface == null)
+	    throw WebUtils.badRequestException("Agency ID " + agencyId
+		    + " is not valid");
+	
+	return predictionsInterface;
+   }
+
+   /**
+    * Gets the ConfigInterface for the specified agencyId. If not valid then
+    * throws WebApplicationException.
+    * 
+    * @return The VehiclesInterface
+    */
+   public ConfigInterface getConfigInterface() 
+	    throws WebApplicationException {
+	ConfigInterface configInterface = ConfigInterfaceFactory.get(agencyId);
+	if (configInterface == null)
+	    throw WebUtils.badRequestException("Agency ID " + agencyId
+		    + " is not valid");
+	
+	return configInterface;
+   }
 
     /**
      * Simple getter for the key
