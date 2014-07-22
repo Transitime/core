@@ -19,16 +19,19 @@ package org.transitime.api.utils;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.transitime.api.ApiKeyManager;
+
 /**
  * For making sure that the application key is valid.
  * <p>
- * Currently not implemented. Simply checks for key "TEST_KEY".
  *
  * @author SkiBu Smith
  *
  */
 public class KeyValidator {
 
+    private ApiKeyManager apiKeyManager = new ApiKeyManager();
+    
     // This is a singleton class
     private static KeyValidator singleton = new KeyValidator();
 
@@ -55,13 +58,7 @@ public class KeyValidator {
      * @return
      */
     private boolean keyIsValid(String key) {
-	// Determine if key is valid
-	// FIXME Of course need a real check
-	if (key.equals("TEST_KEY"))
-	    return true;
-	
-	// Key not valid
-	return false;
+	return apiKeyManager.isKeyValid(key);
     }
     
     /**
