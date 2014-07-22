@@ -2,11 +2,11 @@
     drop table ApiKeys cascade constraints;
 
     create table ApiKeys (
-        applicationName varchar(255) not null,
-        applicationKey varchar(255),
-        applicationUrl varchar(255),
-        description varchar(255),
-        email varchar(255),
-        phone varchar(255),
+        applicationName varchar(80) not null,
+        applicationKey varchar(20),
+        applicationUrl varchar(80),
+        description longtext,
+        email varchar(80),
+        phone varchar(80),
         primary key (applicationName)
     );
