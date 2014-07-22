@@ -129,7 +129,7 @@ public class StandardParameters {
 	UsageValidator.getInstance().validateUsage(this);
 	
 	// Make sure the application key is valid
-	KeyValidator.getInstance().validateKey(this);
+	ApiKeyManager.getInstance().validateKey(this);
     }
     
     /**
