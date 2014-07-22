@@ -112,65 +112,6 @@ public class ApiKey implements Serializable {
 		return query.list();
 	}
 
-	// FIXME taken out because I believe this is only needed if table has composite ID
-//	@Override
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result
-//				+ ((applicationName == null) ? 0 : applicationName.hashCode());
-//		result = prime * result
-//				+ ((applicationUrl == null) ? 0 : applicationUrl.hashCode());
-//		result = prime * result
-//				+ ((description == null) ? 0 : description.hashCode());
-//		result = prime * result + ((email == null) ? 0 : email.hashCode());
-//		result = prime * result + ((key == null) ? 0 : key.hashCode());
-//		result = prime * result + ((phone == null) ? 0 : phone.hashCode());
-//		return result;
-//	}
-//
-//	@Override
-//	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-//		ApiKey other = (ApiKey) obj;
-//		if (applicationName == null) {
-//			if (other.applicationName != null)
-//				return false;
-//		} else if (!applicationName.equals(other.applicationName))
-//			return false;
-//		if (applicationUrl == null) {
-//			if (other.applicationUrl != null)
-//				return false;
-//		} else if (!applicationUrl.equals(other.applicationUrl))
-//			return false;
-//		if (description == null) {
-//			if (other.description != null)
-//				return false;
-//		} else if (!description.equals(other.description))
-//			return false;
-//		if (email == null) {
-//			if (other.email != null)
-//				return false;
-//		} else if (!email.equals(other.email))
-//			return false;
-//		if (key == null) {
-//			if (other.key != null)
-//				return false;
-//		} else if (!key.equals(other.key))
-//			return false;
-//		if (phone == null) {
-//			if (other.phone != null)
-//				return false;
-//		} else if (!phone.equals(other.phone))
-//			return false;
-//		return true;
-//	}
-
 	@Override
 	public String toString() {
 		return "ApiKey [" 
