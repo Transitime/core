@@ -48,7 +48,7 @@ public class ApiKey implements Serializable {
 	private final String applicationName;
 
 	@Column
-	private final String key;
+	private final String applicationKey;
 
 	@Column
 	private final String applicationUrl;
@@ -77,7 +77,7 @@ public class ApiKey implements Serializable {
 	public ApiKey(String applicationName, String key, String applicationUrl,
 			String email, String phone, String description) {
 		this.applicationName = applicationName;
-		this.key = key;
+		this.applicationKey = key;
 		this.applicationUrl = applicationUrl;
 		this.email = email;
 		this.phone = phone;
@@ -90,7 +90,7 @@ public class ApiKey implements Serializable {
 	@SuppressWarnings("unused")
 	private ApiKey() {
 		this.applicationName = null;
-		this.key = null;
+		this.applicationKey = null;
 		this.applicationUrl = null;
 		this.email = null;
 		this.phone = null;
@@ -175,7 +175,7 @@ public class ApiKey implements Serializable {
 	public String toString() {
 		return "ApiKey [" 
 				+ "applicationName=" + applicationName 
-				+ ", key=" + key
+				+ ", key=" + applicationKey
 				+ ", applicationUrl=" + applicationUrl 
 				+ ", email=" + email
 				+ ", phone=" + phone 
@@ -188,7 +188,7 @@ public class ApiKey implements Serializable {
 	}
 
 	public String getKey() {
-		return key;
+		return applicationKey;
 	}
 
 	public String getApplicationUrl() {
