@@ -28,9 +28,11 @@ import javax.persistence.Table;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.db.hibernate.HibernateUtils;
 
 /**
  * Database class for storing keys and related info for the API.
@@ -112,6 +114,46 @@ public class ApiKey implements Serializable {
 		return query.list();
 	}
 
+	/**
+	 * Stores the ApiKey in the database
+	 * 
+	 * @param dbName name of database
+	 */
+	public void storeApiKey(String dbName) {
+		Session session = HibernateUtils.getSession(dbName);
+		try {
+		    Transaction transaction = session.beginTransaction();
+		    session.save(this);
+		    transaction.commit();
+		} catch (Exception e) {
+		    throw e;
+		} finally {
+			// Make sure that the session always gets closed, even if 
+			// exception occurs
+		    session.close();
+		}
+	}
+
+	/**
+	 * Deletes this ApiKey from specified database
+	 * 
+	 * @param dbName name of database
+	 */
+	public void deleteApiKey(String dbName) {
+		Session session = HibernateUtils.getSession(dbName);
+		try {
+		    Transaction transaction = session.beginTransaction();
+		    session.delete(this);
+		    transaction.commit();
+		} catch (Exception e) {
+		    throw e;
+		} finally {
+			// Make sure that the session always gets closed, even if 
+			// exception occurs
+		    session.close();
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return "ApiKey [" 
