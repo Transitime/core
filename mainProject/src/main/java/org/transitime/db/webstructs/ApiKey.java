@@ -45,26 +45,26 @@ import org.transitime.db.hibernate.HibernateUtils;
 @Table(name = "ApiKeys")
 public class ApiKey implements Serializable {
 
-	@Column
+	@Column(length=80)
 	@Id
 	private final String applicationName;
 
-	@Column
+	@Column(length=20)
 	private final String applicationKey;
 
-	@Column
+	@Column(length=80)
 	private final String applicationUrl;
 
-	@Column
+	@Column(length=80)
 	private final String email;
 
-	@Column
+	@Column(length=80)
 	private final String phone;
 
-	@Column
+	@Column(length=1000)
 	private final String description;
 
-	// Because Hibernate requires objects with composite Ids to be Serializable
+	// Because Hibernate requires objects with composite IDs to be Serializable
 	private static final long serialVersionUID = 903194461306815545L;
 
 	public static final Logger logger = LoggerFactory.getLogger(ApiKey.class);
