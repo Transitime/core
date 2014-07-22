@@ -84,7 +84,9 @@ public class UsageValidator {
 	if (accessTimes.size() == MAX_REQUESTS) {
 	    Long oldestAccessTime = accessTimes.getLast();
 	    if (oldestAccessTime > currentTime - MAX_REQUESTS_TIME_MSEC) {
-		throw WebUtils.badRequestException("Exceeded " + MAX_REQUESTS + 
+		// Note that using special HTTP response 429, which is for
+		// Too Many Requests. See http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+		throw WebUtils.badRequestException(429, "Exceeded " + MAX_REQUESTS + 
 			" requests within " + MAX_REQUESTS_TIME_MSEC + 
 			" msec for IP address " + requestIpAddress);
 	    }

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -225,10 +226,11 @@ public class ApiKeyManager {
      public void validateKey(StandardParameters stdParameters) 
  	    throws WebApplicationException {
  	String key = stdParameters.getKey();
- 	if (!isKeyValid(key)) {	
-         	throw WebUtils.badRequestException("Application key \"" + key +
-         		"\" is not valid.");
- 	}
+	if (!isKeyValid(key)) {
+	    throw WebUtils.badRequestException(
+		    Status.UNAUTHORIZED.getStatusCode(), "Application key \""
+			    + key + "\" is not valid.");
+	}
      }
 
      /**
