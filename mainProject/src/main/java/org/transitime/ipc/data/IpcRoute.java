@@ -103,7 +103,7 @@ public class IpcRoute extends IpcRouteSummary {
 					// If this stop path is part of the UI portion of the
 					// trip pattern then remember it as such
 					if (stopFound) {
-						uiStopsIds.add(stopPath.getId());
+						uiStopsIds.add(stopPath.getStopId());
 						Stop stop = Core.getInstance().getDbConfig()
 								.getStop(stopPath.getStopId());
 						stops.add(new IpcStop(stop, true /* isUiStop */));
