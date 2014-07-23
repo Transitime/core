@@ -15,20 +15,23 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.api;
+package org.transitime.api.utils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.webstructs.ApiKey;
+import org.transitime.utils.Time;
 
 /**
  * Manages the ApiKeys. Caches them so API can quickly determine if key is
@@ -39,25 +42,52 @@ import org.transitime.db.webstructs.ApiKey;
  */
 public class ApiKeyManager {
 
+    // Cache of the ApiKeys loaded from database.
+    // Map is keyed on the API key.
     private final Map<String, ApiKey> apiKeyCache;
     
+    // Name of the database containing the keys
+    private final String dbName;
+    
+    // For preventing too frequent db reads
+    private long lastTimeKeysReadIntoCache = 0;
+    
+    // This is a singleton class
+    private static ApiKeyManager singleton = new ApiKeyManager();
+
     private static final Logger logger = LoggerFactory
 	    .getLogger(ApiKeyManager.class);
 
     /********************** Member Functions **************************/
     
-    public ApiKeyManager() {
-	// Create the cache
-	apiKeyCache = new HashMap<String, ApiKey>();
+    /**
+     * Constructor private because singleton class
+     */
+    private ApiKeyManager() {
+	// Set the name of the db to get the data from.
+	// Use the agency ID, such as "web".
+	dbName = CoreConfig.getAgencyId();
 	
-	// Add all keys to map cache
-	for (ApiKey apiKey : getApiKeys()) {
-	    apiKeyCache.put(apiKey.getKey(), apiKey);
-	}
+	// Create the cache. Cache will actually be populated when first
+	// checking if key is valid. This way don't do a db read at startup.
+	apiKeyCache = new HashMap<String, ApiKey>();
     }
     
     /**
-     * Returns true if key is valid. 
+     * Get singleton instance.
+     * 
+     * @return
+     */
+    public static ApiKeyManager getInstance() {
+	return singleton;
+    }
+
+    /**
+     * Returns true if key is valid. Uses cache of keys so doesn't have to
+     * access database each time. If key not in cache then will reread keys from
+     * database in case it was just added. But won't do so more than every few
+     * seconds since more frequent access could allow an app with a bad key to
+     * cause the db to be queried to often putting an unneeded burden on the db.
      * 
      * @param key
      * @return
@@ -67,6 +97,15 @@ public class ApiKeyManager {
 	    // If key is already in cache return true
 	    if (apiKeyCache.get(key) != null) 
 	        return true;
+	    
+	    // Want to make sure a user doesn't overwhelm the system by 
+	    // repeatedly trying to use an invalid key. So if the cache was
+	    // just updated a few (3) seconds ago then don't update it again
+	    // right now. Simply return false. 
+	    if (System.currentTimeMillis() < 
+		    lastTimeKeysReadIntoCache + 3 * Time.MS_PER_SEC)
+		return false;
+	    lastTimeKeysReadIntoCache = System.currentTimeMillis();
 	    
 	    // Key wasn't in cache so update the cache in case it was added
 	    apiKeyCache.clear();
@@ -80,17 +119,19 @@ public class ApiKeyManager {
 	    return false;
 	}
     }
+
     /**
-     * Gets the session for db access. The session is specified by parameters in
-     * CoreConfig including CoreConfig.getAgencyId() for the name of the
-     * database (such as "web") and CoreConfig.getDbHost(),
-     * CoreConfig.getDbUserName(), and CoreConfig.getDbPassword(). The db host,
-     * user name, and password can also be set in the hibernate.cfg.xml file if
-     * the parameter transitime.hibernate.configFile in the CoreConfig is set.
+     * Gets the API keys from the database. Gets the session for db access. The
+     * session is specified by parameters in CoreConfig including
+     * CoreConfig.getAgencyId() for the name of the database (such as "web") and
+     * CoreConfig.getDbHost(), CoreConfig.getDbUserName(), and
+     * CoreConfig.getDbPassword(). The db host, user name, and password can also
+     * be set in the hibernate.cfg.xml file if the parameter
+     * transitime.hibernate.configFile in the CoreConfig is set.
      * 
      * @return
      */
-    public static List<ApiKey> getApiKeys() {
+    public List<ApiKey> getApiKeys() {
 	Session session = HibernateUtils.getSession(CoreConfig.getAgencyId());
 	return ApiKey.getApiKeys(session);
     }
@@ -99,14 +140,15 @@ public class ApiKeyManager {
 
     /**
      * Generates the key based on the application name. This isn't intended to
-     * be secure so simply use hashCode() to generate a key.
+     * be secure so simply use hashCode() to generate a key and use hex form of
+     * it for consistency and compactness.
      * 
      * @param applicationName
      * @return
      */
-    private static String generateKey(String applicationName) {
+    private String generateKey(String applicationName) {
 	String saltedApplicationName = applicationName + KEY_SALT;
-	return Integer.toString(saltedApplicationName.hashCode());
+	return Integer.toHexString(saltedApplicationName.hashCode());
     }
 
     /**
@@ -121,7 +163,7 @@ public class ApiKeyManager {
      * @throws IllegalArgumentException
      * @throws HibernateException
      */
-     public static ApiKey generateApiKey(String applicationName,
+     public ApiKey generateApiKey(String applicationName,
 	    String applicationUrl, String email, String phone,
 	    String description) 
     	throws IllegalArgumentException, HibernateException {
@@ -145,20 +187,51 @@ public class ApiKeyManager {
 		email, phone, description);
 
 	// Store new ApiKey in database
-	Session session = HibernateUtils.getSession(CoreConfig.getAgencyId());
-	try {
-	    Transaction transaction = session.beginTransaction();
-	    session.save(newApiKey);
-	    transaction.commit();
-	} catch (Exception e) {
-	    throw e;
-	} finally {
-	    session.close();
-	}
-
+	newApiKey.storeApiKey(dbName);
+	
 	// Return the new key
 	return newApiKey;
-    }
+     }
+
+     /**
+      * Deletes the ApiKey from the database
+      * @param key
+      */
+     public void deleteKey(String key) {
+	 List<ApiKey> apiKeys = getApiKeys();
+	 for (ApiKey apiKey : apiKeys) {
+	     if (apiKey.getKey().equals(key)) {
+		 // Found the right key. Delete from database
+		 apiKey.deleteApiKey(dbName);
+		 
+		 // Also delete key from the cache
+		 apiKeyCache.remove(key);
+		 
+		 // Found the key so done here
+		 return;
+	     }
+	 }
+	 
+	 // That key not found in database so report error
+	 logger.error("Could not delete key {} because it was not in database", 
+		 key);
+     }
+     
+     /**
+      * Throws exception if the specified application key is not valid.
+      * 
+      * @param stdParameters
+      * @throws WebApplicationException
+      */
+     public void validateKey(StandardParameters stdParameters) 
+ 	    throws WebApplicationException {
+ 	String key = stdParameters.getKey();
+	if (!isKeyValid(key)) {
+	    throw WebUtils.badRequestException(
+		    Status.UNAUTHORIZED.getStatusCode(), "Application key \""
+			    + key + "\" is not valid.");
+	}
+     }
 
      /**
       * For testing and debugging. Currently creates a new key for an application.
@@ -171,7 +244,8 @@ public class ApiKeyManager {
 		    + "applicationUrl, email, phone, and description");
 	    System.exit(-1);
 	}
-	ApiKey apiKey = generateApiKey(args[0], args[1], args[2], args[3],
+	ApiKeyManager manager = ApiKeyManager.getInstance();
+	ApiKey apiKey = manager.generateApiKey(args[0], args[1], args[2], args[3],
 		args[4]);
 	System.out.println(apiKey);
 	 
