@@ -22,7 +22,7 @@
   <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
 
   <property name="LOG_FILE_ROOT" 
-            value="D:/Logs/${transitime.core.agencyId:-DEFAULT}/playback/" />
+            value="${transitime.logging.dir:-/Logs}/${transitime.core.agencyId:-DEFAULT}/playback/" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between

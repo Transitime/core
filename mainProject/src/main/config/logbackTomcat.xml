@@ -1,10 +1,10 @@
 <!-- This is the configuration file for the logback logging system. This file 
      will be used if it is in the classpath (because logback looks for the file
      logback.xml in the classpath) or if explicitly invoked using the 
-     Java param -Dlogback.configurationFile=/DIR/src/main/config/logbackUpdateGtfsSchedule.xml
+     Java param -Dlogback.configurationFile=/DIR/src/main/config/logbackUpdateTravelTimes.xml
   -->
        
-<configuration>
+<configuration scan="true" scanPeriod="30 seconds">
 
   <!-- Set properties here. NOTE: it is expected that the property
        -Dtransitime.core.agencyId=xx will be set. Also, if want logging
@@ -13,12 +13,8 @@
        timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
     -->
 
-  <!-- Need to use TIMESTAMP when using FileAppender instead of 
-       RollingFileAppender -->
-  <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
-
   <property name="LOG_FILE_ROOT" 
-            value="${transitime.logging.dir:-/Logs}/${transitime.core.agencyId:-DEFAULT}/updateSchedule/" />
+            value="${transitime.logging.dir:-/Logs}/tomcat/%d{yyyy/MM/dd}" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
@@ -29,15 +25,16 @@
        -Dlogback.timezone=America/New_York or such. Timezone formats are described
        at http://en.wikipedia.org/wiki/List_of_tz_zones .
     -->
-  <property name="DEFAULT_PATTERN" 
-            value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level [%file:%line] %msg%n" />
+  <property name="DEFAULT_PATTERN" value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level [%file:%line] %msg%n" />
 
   <!-- The main appender for the Core module. 
     -->
-  <appender name="CORE" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/updateSchedule.log</file> 
+  <appender name="CORE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/tomcat.log.gz</fileNamePattern> 
+    </rollingPolicy>
+
     <encoder>
-      <charset>UTF-8</charset>
       <pattern>${DEFAULT_PATTERN}</pattern> 
     </encoder>
   </appender>
@@ -53,50 +50,53 @@
         When inserting 10000 rows of AVLReports the time increated
         from about 2.5 seconds to 10 seconds when the sql logging
         was enabled. So don't use all the time!-->
-  <appender name="SQL" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/sql.log</file> 
+  <appender name="SQL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/sql.log.gz</fileNamePattern> 
+    </rollingPolicy>
+
     <encoder>
       <pattern>${DEFAULT_PATTERN}</pattern> 
     </encoder>
   </appender>
 
-  <!-- Separate file for config parameters logging -->
-  <appender name="CONFIG" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/configParams.log</file> 
+   <!-- Separate file for config parameters logging -->
+  <appender name="CONFIG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/configParams.log.gz</fileNamePattern>
+    </rollingPolicy>
+
     <encoder>
       <charset>UTF-8</charset>
-      <pattern>${DATA_PATTERN}</pattern>
+      <pattern>${DEFAULT_PATTERN}</pattern>
     </encoder>
   </appender>
 
+  <!-- Loggers -->
+
+  <!-- For logging all the configuration parameters -->
+  <logger name="org.transitime.config"
+          level="info" additivity="false">
+    <appender-ref ref="CONFIG" />
+  </logger>
+
+ <!-- For logging SQL   -->
   <logger name="org.hibernate.SQL" level="debug" additivity="false">
     <appender-ref ref="SQL" />
   </logger>
 
-  <!-- For logging the parameter values for the SQL -->
-  <logger name="org.hibernate.type.descriptor.sql.BasicBinder" 
+ <!-- For logging the parameter values for the SQL -->
+  <logger name="org.hibernate.type.descriptor.sql.BasicBinder"
           level="trace" additivity="false">
     <appender-ref ref="SQL" />
-  </logger>
-
-  <logger name="org.transitime.config"
-          level="info" additivity="false">
-    <appender-ref ref="CONFIG" />
   </logger>
 
   <!-- For setting debug mode to Transitime code. Can't just set
        level to debug for the root because then get a huge number
        of unuseful Hibernate messages.
     -->
-  <logger name="org.transitime" level="debug" additivity="false">
-    <appender-ref ref="CORE" />
-  </logger>
-
-  <!-- There are some Transitime classes don't want debug info for
-       since that would just be too verbose.
-    -->
-  <logger name="org.transitime.db.hibernate.HibernateUtils" level="info" 
-   additivity="false">
+  <logger name="org.transitime" 
+          level="debug" additivity="false">
     <appender-ref ref="CORE" />
   </logger>
 

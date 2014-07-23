@@ -18,7 +18,7 @@
     -->
 
   <property name="LOG_FILE_ROOT" 
-            value="D:/Logs/${transitime.core.agencyId:-DEFAULT}/core/%d{yyyy/MM/dd}" />
+            value="${transitime.logging.dir:-/Logs}/${transitime.core.agencyId:-DEFAULT}/core/%d{yyyy/MM/dd}" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between

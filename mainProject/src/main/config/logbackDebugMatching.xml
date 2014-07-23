@@ -12,7 +12,7 @@
   <!-- Set properties here. NOTE: it is expected that the property
        -Dtransitest.core.agencyId=xx will be set. -->
 
-  <property name="LOG_FILE_ROOT" value="/Logs/${transitest.core.agencyId:-DEFAULT}/%d{yyyy/MM/dd}" />
+  <property name="LOG_FILE_ROOT" value="${transitime.logging.dir:-/Logs}/${transitest.core.agencyId:-DEFAULT}/%d{yyyy/MM/dd}" />
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
        each entry. Newline needs to be at beginning so stack traces for exceptions
