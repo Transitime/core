@@ -116,6 +116,10 @@ public class IpcTripPattern implements Serializable {
 		return shapeId;
 	}
 
+	public List<IpcStopPath> getStopPaths() {
+		return stopPaths;
+	}
+	
 	public List<String> getTripIds() {
 		return tripIds;
 	}
