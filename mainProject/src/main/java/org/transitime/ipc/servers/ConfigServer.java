@@ -170,7 +170,7 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public IpcTrip getTrip(String tripId) throws RemoteException {
-		Trip dbTrip = Core.getInstance().getDbConfig().getTrips().get(tripId);
+		Trip dbTrip = Core.getInstance().getDbConfig().getTrip(tripId);
 		return new IpcTrip(dbTrip);
 	}
 

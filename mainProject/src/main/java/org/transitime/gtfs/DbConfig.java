@@ -82,8 +82,10 @@ public class DbConfig {
 	private Map<String, Route> routesByRouteShortNameMap;
 	// Keyed on routeId
 	private Map<String, List<TripPattern>> tripPatternsByRouteMap;
-	// Keyed on tripId
+	// For when reading in all trips from db. Keyed on tripId
 	private Map<String, Trip> tripsMap;
+	// For trips that have been read in individually. Keyed on tripId.
+	private Map<String, Trip> individualTripsMap = new HashMap<String, Trip>();
 	
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
@@ -342,7 +344,8 @@ public class DbConfig {
 	}
 	
 	/**
-	 * Returns cached map of all Trips.
+	 * Returns cached map of all Trips. Can be slow first time accessed because
+	 * it can take a while to read in all trips including all sub-data.
 	 * 
 	 * @return
 	 */
@@ -368,6 +371,31 @@ public class DbConfig {
 		
 		// Return cached trip data
 		return tripsMap;
+	}
+	
+	/**
+	 * For more quickly getting a trip. If trip not already read in yet it only
+	 * reads in the specific trip from the db, not all trips like getTrips().
+	 * 
+	 * @param tripId
+	 * @return
+	 */
+	public Trip getTrip(String tripId) {
+		Trip trip = individualTripsMap.get(tripId);
+		
+		// If trip not read in yet, do so now
+		if (trip == null) {
+			// Need to sync such that block data, which includes trip
+			// pattern data, is only read serially (not read simultaneously
+			// by multiple threads). Otherwise get a "force initialize loading
+			// collection" error. 
+			synchronized (Block.getLazyLoadingSyncObject()) {
+				trip = Trip.getTrip(globalSession, configRev, tripId);
+			}
+			individualTripsMap.put(tripId, trip);
+		}
+		
+		return trip;
 	}
 	
 	/**

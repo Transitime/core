@@ -308,6 +308,31 @@ public class Trip implements Serializable {
 	}
 
 	/**
+	 * Returns specified Trip object for the specified configRev. 
+	 * 
+	 * @param session
+	 * @param configRev
+	 * @param tripId
+	 * @return
+	 * @throws HibernateException
+	 */
+	public static Trip getTrip(Session session, int configRev, String tripId) 
+			throws HibernateException {
+		// Setup the query
+		String hql = "FROM Trip " +
+				"    WHERE configRev = :configRev" +
+				"      AND tripId = :tripId";
+		Query query = session.createQuery(hql);
+		query.setInteger("configRev", configRev);
+		query.setString("tripId", tripId);
+		
+		// Actually perform the query
+		Trip trip = (Trip) query.uniqueResult();
+
+		return trip;
+	}
+
+	/**
 	 * Deletes rev 0 from the Trips table
 	 * 
 	 * @param session
