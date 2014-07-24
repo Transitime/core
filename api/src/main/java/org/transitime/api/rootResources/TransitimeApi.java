@@ -31,19 +31,26 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRoute;
 import org.transitime.api.data.ApiRouteSummaries;
+import org.transitime.api.data.ApiTrip;
+import org.transitime.api.data.ApiTripPatterns;
 import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
 import org.transitime.db.structs.Location;
+import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcStopsForRoute;
+import org.transitime.ipc.data.IpcTrip;
+import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
@@ -333,9 +340,9 @@ public class TransitimeApi {
      * includes all stops and paths such that it can be drawn in a map.
      * 
      * @param stdParameters
-     * @param routeShrtNm
+     * @param routeShortName
      * @param stopId
-     * @param destinationName
+     * @param tripPatternId
      * @return
      * @throws WebApplicationException
      */
@@ -343,9 +350,9 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getRoute(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value="r") String routeShrtNm,
+	    @QueryParam(value="r") String routeShortName,
 	    @QueryParam(value="s") String stopId,
-	    @QueryParam(value="tripPattern") String destinationName) 
+	    @QueryParam(value="tripPattern") String tripPatternId) 
 		    throws WebApplicationException {
 	// Make sure request is valid
 	stdParameters.validate();
@@ -354,7 +361,7 @@ public class TransitimeApi {
 	    // Get Vehicle data from server
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
 	    IpcRoute route = 
-		    inter.getRoute(routeShrtNm, stopId, destinationName);
+		    inter.getRoute(routeShortName, stopId, tripPatternId);
 
 	    // Create and return ApiRoute response
 	    ApiRoute routeData = new ApiRoute(route);
@@ -371,7 +378,7 @@ public class TransitimeApi {
      * a stop from a list.
      * 
      * @param stdParameters
-     * @param routeShrtNm
+     * @param routeShortName
      * @return
      * @throws WebApplicationException
      */
@@ -379,28 +386,134 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getStops(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value="r") String routeShrtNm) 
+	    @QueryParam(value="r") String routeShortName) 
 		    throws WebApplicationException {
 
 	// Make sure request is valid
 	stdParameters.validate();
 	
 	try {
-	    // Get Vehicle data from server
+	    // Get stops data from server
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
-	    IpcStopsForRoute stopsForRoute = inter.getStops(routeShrtNm);
+	    IpcStopsForRoute stopsForRoute = inter.getStops(routeShortName);
 
-	    // Create and return ApiRoute response
+	    // Create and return ApiDirections response
 	    ApiDirections directionsData = new ApiDirections(stopsForRoute);
 	    return stdParameters.createResponse(directionsData);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
 	}
-
     }
     
-//    /**
+    /**
+     * Handles the "block" command which outputs configuration data for
+     * the specified block. Includes all sub-data such as trips
+     * and trip patterns. 
+     * 
+     * @param stdParameters
+     * @param blockId
+     * @param serviceId
+     * @return
+     * @throws WebApplicationException
+     */
+    @Path("/command/block")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getBlock(@BeanParam StandardParameters stdParameters,
+	    @QueryParam(value="blockId") String blockId,
+	    @QueryParam(value="serviceId") String serviceId) 
+		    throws WebApplicationException {
+
+	// Make sure request is valid
+	stdParameters.validate();
+	
+	try {
+	    // Get block data from server
+	    ConfigInterface inter = stdParameters.getConfigInterface();	    
+	    IpcBlock ipcBlock = inter.getBlock(blockId, serviceId);
+
+	    // Create and return ApiBlock response
+	    ApiBlock apiBlock = new ApiBlock(ipcBlock);
+	    return stdParameters.createResponse(apiBlock);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+    }
+
+    /**
+     * Handles the "trip" command which outputs configuration data for
+     * the specified trip. Includes all sub-data such as trip patterns. 
+     * 
+     * @param stdParameters
+     * @param tripId
+     * @return
+     * @throws WebApplicationException
+     */
+    @Path("/command/trip")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getTrip(@BeanParam StandardParameters stdParameters,
+	    @QueryParam(value="tripId") String tripId) 
+		    throws WebApplicationException {
+
+	// Make sure request is valid
+	stdParameters.validate();
+	
+	try {
+	    // Get block data from server
+	    ConfigInterface inter = stdParameters.getConfigInterface();	    
+	    IpcTrip ipcTrip = inter.getTrip(tripId);
+
+	    // Create and return ApiBlock response.
+	    // Include stop path info since just outputting single trip.
+	    ApiTrip apiTrip = new ApiTrip(ipcTrip, true);
+	    return stdParameters.createResponse(apiTrip);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+    }
+
+    /**
+     * Handles the "tripPattern" command which outputs configuration data for
+     * the specified trip pattern.
+     * 
+     * @param stdParameters
+     * @param blockId
+     * @param serviceId
+     * @return
+     * @throws WebApplicationException
+     */
+    @Path("/command/trippatterns")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getTripPatterns(@BeanParam StandardParameters stdParameters,
+	    @QueryParam(value="r") String routeShortName) 
+		    throws WebApplicationException {
+
+	// Make sure request is valid
+	stdParameters.validate();
+	
+	try {
+	    // Get block data from server
+	    ConfigInterface inter = stdParameters.getConfigInterface();	    
+	    List<IpcTripPattern> ipcTripPatterns = 
+		    inter.getTripPatterns(routeShortName);
+
+	    // Create and return ApiBlock response
+	    ApiTripPatterns apiTripPatterns = 
+		    new ApiTripPatterns(ipcTripPatterns);
+	    return stdParameters.createResponse(apiTripPatterns);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+    }
+
+    
+    //    /**
 //     * For creating response of list of vehicles. Would like to make this a
 //     * generic type but due to type erasure cannot do so since GenericEntity
 //     * somehow works differently with generic types.
