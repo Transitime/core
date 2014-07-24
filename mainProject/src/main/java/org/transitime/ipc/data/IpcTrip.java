@@ -89,4 +89,56 @@ public class IpcTrip implements Serializable {
 				+ ", scheduleTimes=" + scheduleTimes 
 				+ "]";
 	}
+
+	public int getConfigRev() {
+		return configRev;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public Integer getStartTime() {
+		return startTime;
+	}
+
+	public Integer getEndTime() {
+		return endTime;
+	}
+
+	public String getDirectionId() {
+		return directionId;
+	}
+
+	public String getRouteId() {
+		return routeId;
+	}
+
+	public String getRouteShortName() {
+		return routeShortName;
+	}
+
+	public IpcTripPattern getTripPattern() {
+		return tripPattern;
+	}
+
+	public String getServiceId() {
+		return serviceId;
+	}
+
+	public String getHeadsign() {
+		return headsign;
+	}
+
+	public String getBlockId() {
+		return blockId;
+	}
+
+	public String getShapeId() {
+		return shapeId;
+	}
+
+	public List<IpcScheduleTimes> getScheduleTimes() {
+		return scheduleTimes;
+	}
 }
