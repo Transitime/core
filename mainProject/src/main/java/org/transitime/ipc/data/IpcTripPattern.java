@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.transitime.db.structs.Extent;
 import org.transitime.db.structs.StopPath;
-import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 
 /**
@@ -43,7 +42,6 @@ public class IpcTripPattern implements Serializable {
 	private final Extent extent;
 	private final String shapeId;
 	private final List<IpcStopPath> stopPaths;
-	private List<String> tripIds;
 
 	private static final long serialVersionUID = 5631162916487757340L;
 
@@ -62,10 +60,6 @@ public class IpcTripPattern implements Serializable {
 		this.stopPaths = new ArrayList<IpcStopPath>();
 		for (StopPath stopPath : dbTripPattern.getStopPaths())
 			this.stopPaths.add(new IpcStopPath(stopPath));
-			
-		this.tripIds = new ArrayList<String>();
-		for (Trip trip : dbTripPattern.getTrips())
-			this.tripIds.add(trip.getId());
 	}
 
 	@Override
@@ -80,7 +74,6 @@ public class IpcTripPattern implements Serializable {
 				+ ", extent=" + extent 
 				+ ", shapeId=" + shapeId
 				+ ", stopPaths=" + stopPaths 
-				+ ", tripIds=" + tripIds 
 				+ "]";
 	}
 
@@ -120,7 +113,4 @@ public class IpcTripPattern implements Serializable {
 		return stopPaths;
 	}
 	
-	public List<String> getTripIds() {
-		return tripIds;
-	}
 }
