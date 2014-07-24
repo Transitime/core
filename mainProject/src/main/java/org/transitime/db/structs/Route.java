@@ -24,7 +24,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -458,6 +457,25 @@ public class Route implements Serializable {
 		// Return the newly created collection of stops
 		return stops;
 	}
+	
+	/**
+	 * Returns the specified trip pattern, or null if that trip pattern doesn't
+	 * exist for the route.
+	 * 
+	 * @param tripPatternId
+	 * @return
+	 */
+	public TripPattern getTripPattern(String tripPatternId) {
+		List<TripPattern> tripPatternsForRoute = Core.getInstance()
+				.getDbConfig().getTripPatternsForRoute(getId());
+		for (TripPattern tripPattern : tripPatternsForRoute) {
+			if (tripPattern.getId().equals(tripPatternId))
+				return tripPattern;
+		}
+		
+		// Never found the specified trip pattern
+		return null;
+	}
 
 	/**
 	 * Returns longest trip pattern for the directionId specified.
@@ -481,6 +499,23 @@ public class Route implements Serializable {
 		}
 		
 		return longestTripPatternForDir;
+	}
+	
+	/**
+	 * Returns the longest trip pattern for each direction ID for the route.
+	 * Will typically be two trip patterns since there are usually two
+	 * directions per route.
+	 * 
+	 * @return
+	 */
+	public List<TripPattern> getLongestTripPatternForEachDirection() {
+		List<TripPattern> tripPatterns = new ArrayList<TripPattern>();
+		
+		List<String> directionIds = getDirectionIds();
+		for (String directionId : directionIds)
+			tripPatterns.add(getLongestTripPatternForDirection(directionId));
+		
+		return tripPatterns;
 	}
 	
 	/**

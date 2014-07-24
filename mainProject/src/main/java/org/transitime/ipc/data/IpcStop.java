@@ -51,7 +51,7 @@ public class IpcStop implements Serializable {
 	}
 	
 	/**
-	 * Constructs a stop and sets isUiStop to false.
+	 * Constructs a stop and sets isUiStop to true.
 	 * 
 	 * @param dbStop
 	 */
@@ -60,7 +60,7 @@ public class IpcStop implements Serializable {
 		this.name = dbStop.getName();
 		this.code = dbStop.getCode();
 		this.loc = dbStop.getLoc();
-		this.isUiStop = false;
+		this.isUiStop = true;
 	}
 	
 	@Override
