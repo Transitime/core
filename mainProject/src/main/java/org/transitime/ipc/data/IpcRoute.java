@@ -165,8 +165,13 @@ public class IpcRoute extends IpcRouteSummary {
 				// Go through each stop for the UI trip pattern
 				for (StopPath stopPath : tripPattern.getStopPaths()) {
 					// If found desired start of UI portion of trip pattern
-					if (stopPath.getStopId().equals(stopId))
+					if (stopPath.getStopId().equals(stopId)) {
 						stopFound = true;
+						// Don't want to actually include this stop path since
+						// the passenger wouldn't be taking it since it only leads
+						// up to the stop simply continue to next stop path
+						continue;
+					}
 					
 					// If this stop path is part of the UI portion of the
 					// trip pattern then remember it as such

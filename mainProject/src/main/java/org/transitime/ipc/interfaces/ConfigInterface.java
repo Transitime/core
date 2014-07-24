@@ -20,10 +20,14 @@ package org.transitime.ipc.interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.List;
 
+import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcStopsForRoute;
+import org.transitime.ipc.data.IpcTrip;
+import org.transitime.ipc.data.IpcTripPattern;
 
 /**
  *
@@ -76,4 +80,48 @@ public interface ConfigInterface extends Remote {
 	 */
 	public IpcStopsForRoute getStops(String routeShortName)  
 			throws RemoteException;
+	
+	/**
+	 * Returns block info for specified blockId and serviceId. Includes all trip
+	 * and trip pattern info associated with the block.
+	 * 
+	 * @param blockId
+	 * @param serviceId
+	 * @return
+	 * @throws RemoteException
+	 */
+	public IpcBlock getBlock(String blockId, String serviceId) 
+			throws RemoteException;
+	
+	/**
+	 * Returns trip info for specified tripId. Includes all trip pattern info
+	 * associated with the trip.
+	 * 
+	 * @param tripId
+	 * @return
+	 * @throws RemoteException
+	 */
+	public IpcTrip getTrip(String tripId) 
+			throws RemoteException;
+	
+	/**
+	 * Returns trip patterns for specified routeShortName.
+	 * 
+	 * @param routeShortName
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<IpcTripPattern> getTripPatterns(String routeShortName) 
+			throws RemoteException;
+
+	/**
+	 * Returns trip patterns for specified routeId.
+	 * 
+	 * @param routeId
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<IpcTripPattern> getTripPatternsByRouteId(String routeId) 
+			throws RemoteException;
+
 }

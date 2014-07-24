@@ -40,11 +40,14 @@ import org.transitime.feed.gtfsRt.OctalDecoder;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
+import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcExtVehicle;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcStopsForRoute;
+import org.transitime.ipc.data.IpcTrip;
+import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
@@ -69,9 +72,13 @@ public class RmiQuery {
 	private static String vehicleIds[];
 	private static double latitude = Double.NaN;
 	private static double longitude = Double.NaN;
+	// For the config command for getting block, trip, & trip pattern info:
+	private static String blockId;
+	private static String serviceId;
+	private static String tripId;
 	
 	private static enum Command {NOT_SPECIFIED, GET_PREDICTIONS, GET_VEHICLES, 
-		GET_ROUTE_CONFIG, GET_GTFS_RT_VEHICLES, GET_GTFS_RT_TRIPS};
+		GET_ROUTE_CONFIG, GET_CONFIG, GET_GTFS_RT_VEHICLES, GET_GTFS_RT_TRIPS};
 
 	/********************** Member Functions **************************/
 
@@ -103,7 +110,7 @@ public class RmiQuery {
                 .hasArg()
                 .isRequired()
                 .withDescription("Name of command to execute. Can be " +
-                		"\"preds\", \"vehicles\", \"routeConfig\", " + 
+                		"\"preds\", \"vehicles\", \"routeConfig\", \"config\", " + 
                 		"\"gtfsRtVehiclePositions\", or \"gtfsRtTripUpdates\" .")
                 .create("c")
                 );
@@ -138,6 +145,24 @@ public class RmiQuery {
                 .create("v")
                 );
 		
+		options.addOption(OptionBuilder.withArgName("blockId")
+                .hasArg()
+                .withDescription("block ID.")
+                .create("blockId")
+                );
+
+		options.addOption(OptionBuilder.withArgName("serviceId")
+                .hasArg()
+                .withDescription("service ID.")
+                .create("serviceId")
+                );
+
+		options.addOption(OptionBuilder.withArgName("tripId")
+                .hasArg()
+                .withDescription("trip ID.")
+                .create("tripId")
+                );
+		
 		// Parse the options
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = null;
@@ -164,6 +189,8 @@ public class RmiQuery {
 			command = Command.GET_VEHICLES;
 		else if ("routeConfig".equals(commandStr))
 			command = Command.GET_ROUTE_CONFIG;
+		else if ("config".equals(commandStr))
+			command = Command.GET_CONFIG;
 		else if ("gtfsRtVehiclePositions".equals(commandStr))
 			command = Command.GET_GTFS_RT_VEHICLES;
 		else if ("gtfsRtTripUpdates".equals(commandStr))
@@ -186,6 +213,10 @@ public class RmiQuery {
 		String lonStr = cmd.getOptionValue("lon");
 		if (lonStr != null) 
 			longitude = Double.parseDouble(lonStr);
+		
+		blockId = cmd.getOptionValue("blockId");
+		serviceId = cmd.getOptionValue("serviceId");
+		tripId = cmd.getOptionValue("tripId");
 		
 		// Return the CommandLine so that arguments can be accessed
 		return cmd;
@@ -223,10 +254,10 @@ public class RmiQuery {
 	 * @throws RemoteException 
 	 */
 	private static void getPredictions() throws RemoteException {
-		// FIXME just for debugging
-		System.err.println("Getting predictions for agencyId=" + agencyId + 
-				" lat=" + latitude + " lon=" + longitude +
-				" routeShortNames=" + routeShortNames + " stopIds=" + stopIds);
+		// just for debugging
+//		System.err.println("Getting predictions for agencyId=" + agencyId + 
+//				" lat=" + latitude + " lon=" + longitude +
+//				" routeShortNames=" + routeShortNames + " stopIds=" + stopIds);
 
 		// Make sure stops specified
 		if (stopIds == null 
@@ -273,16 +304,16 @@ public class RmiQuery {
 			List<IpcPredictionsForRouteStopDest> predictionListList = 
 					predsInterface.get(routeStops, 3);
 			
-			System.out.println("PredictionsInterface for agencyId=" + 
+			System.out.println("Predictions for agencyId=" + 
 					agencyId +	" routeStops=" + routeStops + "\nare " + 
 					predictionListList);
 		}
 	}
 	
 	private static void getVehicles() throws RemoteException {
-		// FIXME just for debugging
-		System.err.println("Getting vehicles for agencyId=" + agencyId + 
-				" routeShortNames=" + routeShortNames + " vehicleIds=" + vehicleIds);
+		// just for debugging
+//		System.err.println("Getting vehicles for agencyId=" + agencyId + 
+//				" routeShortNames=" + routeShortNames + " vehicleIds=" + vehicleIds);
 		
 		VehiclesInterface vehiclesInterface = 
 				VehiclesInterfaceFactory.get(agencyId);
@@ -314,6 +345,11 @@ public class RmiQuery {
 		}
 	}
 	
+	/**
+	 * Outputs route config info.
+	 * 
+	 * @throws RemoteException
+	 */
 	private static void getRouteConfig() throws RemoteException {
 		ConfigInterface configInterface = 
 				ConfigInterfaceFactory.get(agencyId);
@@ -329,6 +365,36 @@ public class RmiQuery {
 			IpcStopsForRoute stopsForRoute = 
 					configInterface.getStops(routeSummary.getShortName());
 			System.out.println(stopsForRoute);
+		}
+	}
+	
+	/**
+	 * Outputs block, trip, or trip pattern info, depending on the
+	 * other command line options.
+	 * 
+	 * @throws RemoteException
+	 */
+	private static void getConfig() throws RemoteException {
+		ConfigInterface configInterface = 
+				ConfigInterfaceFactory.get(agencyId);
+		if (blockId != null && serviceId != null) {
+			System.out.println("Outputting block for blockId=" + blockId + 
+					" serviceId=" + serviceId);
+			IpcBlock ipcBlock = configInterface.getBlock(blockId, serviceId);
+			System.out.println(ipcBlock);
+		} else if (tripId != null) {
+			System.out.println("Outputting trip for tripId=" + tripId );
+			IpcTrip ipcTrip = configInterface.getTrip(tripId);
+			System.out.println(ipcTrip);
+		} else if (routeShortNames.length > 0) {
+			System.out.println("Outputting trip pattern for routeShortName=" + 
+		routeShortNames[0] );
+			List<IpcTripPattern> ipcTripPatterns =
+					configInterface.getTripPatterns(routeShortNames[0]);
+			System.out.println(ipcTripPatterns);
+		} else {
+			System.err.println("For \"config\" command need to specify " +
+					"blockId & serviceId, or tripId, or a route");
 		}
 	}
 	
@@ -398,6 +464,8 @@ public class RmiQuery {
 				getVehicles();
 			} else if (command == Command.GET_ROUTE_CONFIG) {
 				getRouteConfig();
+			} else if (command == Command.GET_CONFIG) {
+				getConfig();
 			} else if (command == Command.GET_GTFS_RT_VEHICLES) {
 				getGtfsRtVehiclesPositions();
 			} else if (command == Command.GET_GTFS_RT_TRIPS) {

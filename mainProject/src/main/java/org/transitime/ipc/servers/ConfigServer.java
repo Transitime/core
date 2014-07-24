@@ -20,14 +20,22 @@ package org.transitime.ipc.servers;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Route;
+import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.TripPattern;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcStopsForRoute;
+import org.transitime.ipc.data.IpcTrip;
+import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 
@@ -146,4 +154,51 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 		return ipcStopsForRoute;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getBlock(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public IpcBlock getBlock(String blockId, String serviceId)
+			throws RemoteException {
+		Block dbBlock = 
+				Core.getInstance().getDbConfig().getBlock(serviceId, blockId);
+		return new IpcBlock(dbBlock);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTrip(java.lang.String)
+	 */
+	@Override
+	public IpcTrip getTrip(String tripId) throws RemoteException {
+		Trip dbTrip = Core.getInstance().getDbConfig().getTrips().get(tripId);
+		return new IpcTrip(dbTrip);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTripPattern(java.lang.String)
+	 */
+	@Override
+	public List<IpcTripPattern> getTripPatternsByRouteId(String routeId)
+			throws RemoteException {
+		List<TripPattern> dbTripPatterns = 
+				Core.getInstance().getDbConfig().getTripPatternsForRoute(routeId);
+
+		List<IpcTripPattern> tripPatterns = new ArrayList<IpcTripPattern>();
+		for (TripPattern dbTripPattern : dbTripPatterns) {
+			tripPatterns.add(new IpcTripPattern(dbTripPattern));
+		}
+		return tripPatterns;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTripPatterns(java.lang.String)
+	 */
+	@Override
+	public List<IpcTripPattern> getTripPatterns(String routeShortName)
+			throws RemoteException {
+		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);
+		return getTripPatternsByRouteId(route.getId());
+	}
+
+	
 }

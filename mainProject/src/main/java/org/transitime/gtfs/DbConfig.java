@@ -61,7 +61,7 @@ import org.transitime.utils.MapKey;
  */
 public class DbConfig {
 
-	private final String projectId;
+	private final String agencyId;
 
 	// Keeps track of which revision of config data was read in
 	private int configRev;
@@ -82,6 +82,8 @@ public class DbConfig {
 	private Map<String, Route> routesByRouteShortNameMap;
 	// Keyed on routeId
 	private Map<String, List<TripPattern>> tripPatternsByRouteMap;
+	// Keyed on tripId
+	private Map<String, Trip> tripsMap;
 	
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
@@ -112,10 +114,10 @@ public class DbConfig {
 	/**
 	 * Constructor
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 */
-	public DbConfig(String projectId) {
-		this.projectId = projectId;
+	public DbConfig(String agencyId) {
+		this.agencyId = agencyId;
 	}
 		
 	/**
@@ -284,7 +286,7 @@ public class DbConfig {
 	 * @param tripPatterns
 	 * @return
 	 */
-	private static Map<String, List<TripPattern>> putTripPatternsInfoMap(
+	private static Map<String, List<TripPattern>> putTripPatternsIntoMap(
 			List<TripPattern> tripPatterns) {
 		Map<String, List<TripPattern>> map = 
 				new HashMap<String, List<TripPattern>>();
@@ -329,7 +331,7 @@ public class DbConfig {
 				// trip pattern data much faster.
 				List<TripPattern> tripPatterns = TripPattern.getTripPatterns(
 						globalSession, configRev);
-				tripPatternsByRouteMap = putTripPatternsInfoMap(tripPatterns);
+				tripPatternsByRouteMap = putTripPatternsIntoMap(tripPatterns);
 			}
 			logger.debug("Reading trip patterns took {} msec", 
 					timer.elapsedMsec());
@@ -337,6 +339,35 @@ public class DbConfig {
 		
 		// Return cached trip pattern data
 		return tripPatternsByRouteMap.get(routeId);
+	}
+	
+	/**
+	 * Returns cached map of all Trips.
+	 * 
+	 * @return
+	 */
+	public Map<String, Trip> getTrips() {
+		if (tripsMap == null) {
+			IntervalTimer timer = new IntervalTimer();
+			
+			// Need to sync such that block data, which includes trip
+			// pattern data, is only read serially (not read simultaneously
+			// by multiple threads). Otherwise get a "force initialize loading
+			// collection" error. 
+			synchronized (Block.getLazyLoadingSyncObject()) {
+				logger.debug("About to load trips...");
+				
+				// Use the global session so that don't need to read in any
+				// trip patterns that have already been read in as part of
+				// reading in block assignments. This makes reading of the
+				// trip pattern data much faster.
+				tripsMap = Trip.getTrips(globalSession, configRev);				
+			}
+			logger.debug("Reading trips took {} msec", timer.elapsedMsec());
+		}
+		
+		// Return cached trip data
+		return tripsMap;
 	}
 	
 	/**
@@ -384,7 +415,7 @@ public class DbConfig {
 		// session as a member variable. This is a bit odd because usually
 		// close sessions but want to keep it open so can do lazy loading
 		// and so that can read in TripPatterns later using the same session.
-		globalSession = HibernateUtils.getSession(projectId);			
+		globalSession = HibernateUtils.getSession(agencyId);			
 
 //		// NOTE. Thought that it might speed things up if would read in
 //		// trips, trip patterns, and stopPaths all at once so that can use a single 

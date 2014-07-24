@@ -640,4 +640,13 @@ public class StopPath implements Serializable {
 	public double getAfterStopDistance() {
 		return CoreConfig.getAfterStopDistance();
 	}
+
+	/**
+	 * The length of the path segments.
+	 * @return
+	 */
+	public double getPathLength() {
+		return pathLength;
+	}
+
 }
