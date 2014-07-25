@@ -425,6 +425,23 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		return true;
 	}
 
+	/**
+	 * Returns true if this trip pattern includes the specified stopId.
+	 * 
+	 * @param stopId
+	 * @return
+	 */
+	public boolean servesStop(String stopId) {
+		// Look through this trip pattern to see if it includes specified stop
+		for (StopPath stopPath : stopPaths) {
+			if (stopPath.getStopId().equals(stopId))
+				return true;
+		}
+		
+		// That stop is not in the trip pattern
+		return false;
+	}
+	
 	/************** Getter Methods ****************/
 	
 	/**

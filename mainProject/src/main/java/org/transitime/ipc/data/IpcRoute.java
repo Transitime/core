@@ -72,21 +72,47 @@ public class IpcRoute extends IpcRouteSummary {
 	 * then returns the longest trip pattern for each direction.
 	 * 
 	 * @param dbRoute
+	 *            The route to get the trip patterns for
+	 * @param stopId
+	 *            Used only when tripPatternId is null. In that case determines
+	 *            which trip patterns are appropriate.
 	 * @param tripPatternId
+	 *            The specified trip pattern to get. If null then will use
+	 *            longest trip pattern for each direction.
 	 * @return
 	 */
-	private static List<TripPattern> getUiTripPatterns(Route dbRoute, String tripPatternId) {
+	private static List<TripPattern> getUiTripPatterns(Route dbRoute,
+			String stopId, String tripPatternId) {
+		// For returning results
+		List<TripPattern> tripPatterns = new ArrayList<TripPattern>();
+
 		// If tripPatternId specified then return that trip pattern
 		if (tripPatternId != null) {
 			TripPattern tripPattern = dbRoute.getTripPattern(tripPatternId);
-			List<TripPattern> tripPatterns = new ArrayList<TripPattern>();
 			if (tripPattern != null)
 				tripPatterns.add(tripPattern);
 			return tripPatterns;
 		} else {
-			// tripPatternId not specified so return longest trip pattern per direction ID
-			return dbRoute.getLongestTripPatternForEachDirection();
+			// tripPatternId not specified
+			if (stopId != null) {
+				// Determine longest trip pattern that serves the stop
+				List<TripPattern> longestTripPatterns = 
+						dbRoute.getLongestTripPatternForEachDirection();
+				for (TripPattern tripPattern : longestTripPatterns) {
+					if (tripPattern.servesStop(stopId)) {
+						tripPatterns.add(tripPattern);
+						return tripPatterns;
+					}
+				}
+			} else {
+				// so return longest trip pattern per direction ID
+				return dbRoute.getLongestTripPatternForEachDirection();
+			}
 		}
+		
+		// Couldn't find the proper trip pattern specified by the stopId
+		// and tripPatternId so return empty array
+		return tripPatterns;
 	}
 
 	/**
@@ -109,8 +135,10 @@ public class IpcRoute extends IpcRouteSummary {
 		Set<String> uiStopsIds = new HashSet<String>();
 		
 		// First determine the stops remaining in the specified trip
-		// pattern.	Add these as UI stops and paths.	
-		for (TripPattern tripPattern : getUiTripPatterns(dbRoute, tripPatternId)) {
+		// pattern.	Add these as UI stops and paths.
+		List<TripPattern> uiTripPatterns = 
+				getUiTripPatterns(dbRoute, stopId, tripPatternId);
+		for (TripPattern tripPattern : uiTripPatterns) {
 			boolean stopFound = false;
 			// Go through each stop path for the UI trip pattern
 			for (StopPath stopPath : tripPattern.getStopPaths()) {
@@ -166,7 +194,9 @@ public class IpcRoute extends IpcRouteSummary {
 		// pattern.	Add these as UI stops and paths. If tripPatternId not 
 		// specified then use the longest trip pattern for each direction
 		// as a UI trip pattern.
-		for (TripPattern tripPattern : getUiTripPatterns(dbRoute, tripPatternId)) {
+		List<TripPattern> uiTripPatterns = 
+				getUiTripPatterns(dbRoute, stopId, tripPatternId);
+		for (TripPattern tripPattern : uiTripPatterns) {
 			// Create a special UI shape for the part of this trip pattern
 			// that is after the specified stop.
 			IpcShape ipcShapeForUi = 
