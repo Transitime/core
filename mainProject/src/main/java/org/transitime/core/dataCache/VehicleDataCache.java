@@ -29,9 +29,16 @@ import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
 import org.transitime.ipc.data.IpcExtVehicle;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.utils.Time;
 
 /**
- * For storing and retrieving Vehicle information that can be used by clients.
+ * For storing and retrieving vehicle information that can be used by clients.
+ * Is updated every time VehicleState is changed. The info is stored in an
+ * immutable IpcExtVehicle object since VehicleState changes dynamically and is
+ * therefore not always coherent. This way the info transmitted to clients will
+ * always be coherent without having to synchronize VehicleState for when
+ * converting to a IpcExtVehicle. Organizes vehicles info by vehicle ID but also
+ * by route so can easily determine which vehicles are associated with a route.
  * 
  * @author SkiBu Smith
  */
@@ -49,19 +56,23 @@ public class VehicleDataCache {
     private Map<String, Map<String, IpcExtVehicle>> vehiclesByRouteMap = 
     		new HashMap<String, Map<String, IpcExtVehicle>>();
 
+	// For filtering out info more than MAX_AGE since it means that the info is
+	// obsolete and shouldn't be displayed.
+    private static final int MAX_AGE_MSEC = 15 * Time.MS_PER_MIN;
+    
     private static final Logger logger = LoggerFactory
 	    .getLogger(VehicleDataCache.class);
 
     /********************** Member Functions **************************/
 
-    /**
-     * Gets the singleton instance of this class.
-     * 
-     * @return
-     */
-    public static VehicleDataCache getInstance() {
-	return singleton;
-    }
+	/**
+	 * Gets the singleton instance of this class.
+	 * 
+	 * @return
+	 */
+	public static VehicleDataCache getInstance() {
+		return singleton;
+	}
 
     /*
      * Constructor declared private to enforce only access to this singleton
@@ -71,23 +82,47 @@ public class VehicleDataCache {
     }
 
     /**
-     * Returns Collection of Vehicles currently associated with specified route.
-     * 
-     * @param routeShortName
+     * Filters out vehicle info if it is too old.
+     * @param vehicles
      * @return
      */
-    public Collection<IpcExtVehicle> getVehiclesForRoute(String routeShortName) {
-	Map<String, IpcExtVehicle> vehicleMapForRoute = vehiclesByRouteMap
-		.get(routeShortName);
-	if (vehicleMapForRoute != null)
-	    return vehicleMapForRoute.values();
-	else
-	    return null;
+    private Collection<IpcExtVehicle> filtered(
+    		Collection<IpcExtVehicle> vehicles) {
+    	Collection<IpcExtVehicle> filteredVehicles = 
+				new ArrayList<IpcExtVehicle>(vehicles.size());
+    	
+    	long timeCutoff = System.currentTimeMillis() - MAX_AGE_MSEC;
+    	for (IpcExtVehicle vehicle : vehicles) {
+    		if (vehicle.getAvl().getTime() > timeCutoff) {
+    			filteredVehicles.add(vehicle);
+    		}
+    	}
+    	
+    	// Return only vehicles whose AVL report not too old.
+    	return filteredVehicles;
     }
+    
+	/**
+	 * Returns Collection of Vehicles currently associated with specified route.
+	 * Filters out info more than MAX_AGE_MSEC since it means that the info is
+	 * obsolete and shouldn't be displayed.
+	 * 
+	 * @param routeShortName
+	 * @return
+	 */
+	public Collection<IpcExtVehicle> getVehiclesForRoute(String routeShortName) {
+		Map<String, IpcExtVehicle> vehicleMapForRoute = 
+				vehiclesByRouteMap.get(routeShortName);
+		if (vehicleMapForRoute != null)
+			return filtered(vehicleMapForRoute.values());
+		else
+			return null;
+	}
 
 	/**
 	 * Returns Collection of Vehicles currently associated with specified
-	 * routes.
+	 * routes. Filters out info more than MAX_AGE_MSEC since it means that the
+	 * info is obsolete and shouldn't be displayed.
 	 * 
 	 * @param routeShortNames
 	 * @return
@@ -110,6 +145,8 @@ public class VehicleDataCache {
     
 	/**
 	 * Returns Collection of Vehicles currently associated with specified route.
+	 * Filters out info more than MAX_AGE_MSEC since it means that the info is
+	 * obsolete and shouldn't be displayed.
 	 * 
 	 * @param routeId
 	 * @return
@@ -125,7 +162,8 @@ public class VehicleDataCache {
 
 	/**
 	 * Returns Collection of Vehicles currently associated with specified
-	 * routes.
+	 * routes. Filters out info more than MAX_AGE_MSEC since it means that the
+	 * info is obsolete and shouldn't be displayed.
 	 * 
 	 * @param routeShortNames
 	 * @return
@@ -192,8 +230,8 @@ public class VehicleDataCache {
 
 		IpcVehicle originalVehicle = vehiclesMap.get(vehicle.getId());
 
-		// If the route has changed then remove the vehicle from the old map
-		// for that route.
+		// If the route has changed then remove the vehicle from the old map for
+		// that route. Watch out for getRouteShortName() sometimes being null
 		if (originalVehicle != null
 				&& originalVehicle.getRouteShortName() != vehicle
 						.getRouteShortName()
@@ -204,9 +242,9 @@ public class VehicleDataCache {
 			vehicleMapForRoute.remove(vehicle.getId());
 		}
 
-		// Add Vehicle to the vehiclesByRouteMap
-		Map<String, IpcExtVehicle> vehicleMapForRoute = vehiclesByRouteMap
-				.get(vehicle.getRouteShortName());
+		// Add IpcExtVehicle to the vehiclesByRouteMap
+		Map<String, IpcExtVehicle> vehicleMapForRoute = 
+				vehiclesByRouteMap.get(vehicle.getRouteShortName());
 		if (vehicleMapForRoute == null) {
 			vehicleMapForRoute = new HashMap<String, IpcExtVehicle>();
 			vehiclesByRouteMap.put(vehicle.getRouteShortName(),
@@ -219,7 +257,8 @@ public class VehicleDataCache {
 	}
 
 	/**
-	 * Updates the maps containing the vehicle info.
+	 * Updates the maps containing the vehicle info. Should be called every time
+	 * vehicle state changes.
 	 * 
 	 * @param vs
 	 *            The current VehicleState
