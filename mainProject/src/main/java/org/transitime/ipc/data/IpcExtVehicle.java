@@ -42,7 +42,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	private final String routeName;
 	private final String originStopId;
 	private final String destinationId;
-	private final String destinationName;
+	private final String headsign;
 	private final String nextStopId;
 	private final double distanceToNextStop;
 	private final double distanceOfNextStopFromTripStart;
@@ -67,7 +67,7 @@ public class IpcExtVehicle extends IpcVehicle {
 					vs.getTrip().getTripPattern().getStopIds();
 			this.originStopId = stopIdsForTrip.get(0);
 			this.destinationId = stopIdsForTrip.get(stopIdsForTrip.size()-1);
-			this.destinationName = vs.getTrip().getHeadsign();
+			this.headsign = vs.getTrip().getHeadsign();
 			
 			// Get the match. If match is just after a stop then adjust
 			// it to just before the stop so that can determine proper 
@@ -95,7 +95,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			// Vehicle not assigned to trip so null out parameters
 			this.originStopId = null;
 			this.destinationId = null;
-			this.destinationName = null;
+			this.headsign = null;
 			this.nextStopId = null;
 			this.distanceToNextStop = Double.NaN;
 			this.distanceOfNextStopFromTripStart = Double.NaN;
@@ -111,7 +111,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	 * @param routeName
 	 * @param originStopId
 	 * @param destinationId
-	 * @param destinationName
+	 * @param headsign
 	 * @param nextStopId
 	 * @param distanceToNextStop
 	 * @param distanceOfNextStopFromTripStart
@@ -130,7 +130,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	 * @param realTimeSchdAdh
 	 */
 	private IpcExtVehicle(String routeName, String originStopId,
-			String destinationId, String destinationName, String nextStopId,
+			String destinationId, String headsign, String nextStopId,
 			double distanceToNextStop, double distanceOfNextStopFromTripStart,
 			double distanceAlongTrip, boolean isLayover,
 			long tripStartEpochTime, String blockId,
@@ -145,7 +145,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		this.routeName = routeName;
 		this.originStopId = originStopId;
 		this.destinationId = destinationId;
-		this.destinationName = destinationName;
+		this.headsign = headsign;
 		this.nextStopId = nextStopId;
 		this.distanceToNextStop = distanceToNextStop;
 		this.distanceOfNextStopFromTripStart = distanceOfNextStopFromTripStart;
@@ -164,7 +164,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		private String routeName;
 		private String originStopId;
 		private String destinationId;
-		private String destinationName;
+		private String headsign;
 		private String nextStopId;
 		private double distanceToNextStop;
 		private double distanceOfNextStopFromTripStart;
@@ -179,7 +179,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			this.routeName = v.routeName;
 			this.originStopId = v.originStopId;
 			this.destinationId = v.destinationId;
-			this.destinationName = v.destinationName;
+			this.headsign = v.headsign;
 			this.nextStopId = v.nextStopId;
 			this.distanceToNextStop = v.distanceToNextStop;
 			this.distanceOfNextStopFromTripStart = v.distanceOfNextStopFromTripStart;
@@ -203,7 +203,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		    stream.writeObject(routeName);
 		    stream.writeObject(originStopId);
 		    stream.writeObject(destinationId);
-		    stream.writeObject(destinationName);
+		    stream.writeObject(headsign);
 		    stream.writeObject(nextStopId);
 		    stream.writeDouble(distanceToNextStop);
 		    stream.writeDouble(distanceOfNextStopFromTripStart);
@@ -224,7 +224,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			routeName = (String) stream.readObject();
 			originStopId = (String) stream.readObject();
 			destinationId = (String) stream.readObject();
-			destinationName = (String) stream.readObject();
+			headsign = (String) stream.readObject();
 			nextStopId = (String) stream.readObject();
 			distanceToNextStop = stream.readDouble();
 			distanceOfNextStopFromTripStart = stream.readDouble();
@@ -241,7 +241,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		 */
 		private Object readResolve() {
 			return new IpcExtVehicle(routeName, originStopId, destinationId,
-					destinationName, nextStopId, distanceToNextStop,
+					headsign, nextStopId, distanceToNextStop,
 					distanceOfNextStopFromTripStart, distanceAlongTrip,
 					isLayover, tripStartEpochTime, blockId,
 					blockAssignmentMethod, avl, pathHeading, routeId,
@@ -281,8 +281,8 @@ public class IpcExtVehicle extends IpcVehicle {
 		return destinationId;
 	}
 
-	public String getDestinationName() {
-		return destinationName;
+	public String getHeadsign() {
+		return headsign;
 	}
 
 	public String getNextStopId() {
@@ -325,7 +325,7 @@ public class IpcExtVehicle extends IpcVehicle {
 				+ ", routeName=" + routeName 
 				+ ", originStopId="	+ originStopId 
 				+ ", destinationId=" + destinationId
-				+ ", destinationName=" + destinationName 
+				+ ", headsign=" + headsign 
 				+ ", nextStopId=" + nextStopId 
 				+ ", distanceToNextStop=" + distanceToNextStop
 				+ ", distanceOfNextStopFromTripStart=" + distanceOfNextStopFromTripStart
