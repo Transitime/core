@@ -20,6 +20,7 @@ package org.transitime.api.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -55,11 +56,17 @@ public class ApiVehicles {
      * objects.
      * 
      * @param vehicles
+     * @param vehiclesGeneratingPreds
+     *            So can determine which ones are to be labeled as minor. Set to
+     *            null if this feature is not being used.
      */
-    public ApiVehicles(Collection<IpcVehicle> vehicles) {
+    public ApiVehicles(Collection<IpcVehicle> vehicles,
+	    Set<String> vehiclesGeneratingPreds) {
 	vehiclesData = new ArrayList<ApiVehicle>();
 	for (IpcVehicle vehicle : vehicles) {
-	    vehiclesData.add(new ApiVehicle(vehicle));
+	    boolean minorVehicle = vehiclesGeneratingPreds != null
+		    && !vehiclesGeneratingPreds.contains(vehicle.getId());
+	    vehiclesData.add(new ApiVehicle(vehicle, minorVehicle));
 	}
     }
         

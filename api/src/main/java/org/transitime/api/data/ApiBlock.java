@@ -56,7 +56,7 @@ public class ApiBlock {
     @XmlAttribute
     private String headwaySecs;
 
-    @XmlElement
+    @XmlElement(name="trip")
     private List<ApiTrip> trips;
 
     @XmlElement(name="route")

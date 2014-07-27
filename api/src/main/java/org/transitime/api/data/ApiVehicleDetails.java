@@ -71,9 +71,11 @@ public class ApiVehicleDetails extends ApiVehicle {
      * ApiVehicle object for the API.
      * 
      * @param vehicle
+     * @param minor
+     *            If should be labeled as "minor" in output for UI.
      */
-    public ApiVehicleDetails(IpcVehicle vehicle) {
-	super(vehicle);
+    public ApiVehicleDetails(IpcVehicle vehicle, boolean minor) {
+	super(vehicle, minor);
 	
 	scheduleAdherence = vehicle.getRealTimeSchedAdh().getTemporalDifference();
 	scheduleAdherenceStr = vehicle.getRealTimeSchedAdh().toString();

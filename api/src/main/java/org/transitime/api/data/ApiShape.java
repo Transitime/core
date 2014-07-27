@@ -41,8 +41,10 @@ public class ApiShape {
     @XmlAttribute
     private String headsign;
     
-    @XmlAttribute(name="forRemainingTrip")
-    private Boolean isUiShape;
+    // For indicating that in UI should deemphasize this shape because it
+    // is not on a main trip pattern.
+    @XmlAttribute(name="minor")
+    private Boolean minor;
 
     @XmlElement(name="loc")
     private List<ApiLocation> locations;
@@ -55,9 +57,9 @@ public class ApiShape {
 	this.tripPatternId = shape.getTripPatternId();
 	this.headsign = shape.getHeadsign();
 	
-	// If false then set to null so that this attribute won't then be
+	// If true then set to null so that this attribute won't then be
 	// output as XML/JSON, therefore making output a bit more compact.
-	this.isUiShape = shape.isUiShape() ? true : null;
+	this.minor = shape.isUiShape() ? null : true;
 
 	this.locations = new ArrayList<ApiLocation>(); 
 	for (Location loc : shape.getLocations()) {

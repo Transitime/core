@@ -20,7 +20,9 @@ package org.transitime.api.rootResources;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DefaultValue;
@@ -45,6 +47,7 @@ import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcBlock;
+import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
@@ -91,6 +94,14 @@ public class TransitimeApi {
      *            Optional way of specifying which routes to get data for
      * @param routeShortNames
      *            Optional way of specifying which routes to get data for
+     * @param stopId
+     *            Optional way of specifying a stop so can get predictions for
+     *            routes and determine which vehicles are the ones generating
+     *            the predictions. The other vehicles are labeled as minor so
+     *            they can be drawn specially in the UI.
+     * @param numberPredictions
+     *            For when determining which vehicles are generating the
+     *            predictions so can label minor vehicles
      * @return The Response object already configured for the specified media
      *         type.
      */
@@ -100,7 +111,9 @@ public class TransitimeApi {
     public Response getVehicles(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value = "v") List<String> vehicleIds,
 	    @QueryParam(value = "r") List<String> routeIds,
-	    @QueryParam(value = "rShortName") List<String> routeShortNames) 
+	    @QueryParam(value = "rShortName") List<String> routeShortNames,
+	    @QueryParam(value = "s") String stopId,
+	    @QueryParam(value="numPreds") @DefaultValue("3") int numberPredictions) 
 		    throws WebApplicationException {
 	// Make sure request is valid
 	stdParameters.validate();
@@ -120,8 +133,18 @@ public class TransitimeApi {
 		vehicles = inter.get();
 	    }
 
+	    // If stop specified then also get predictions for the stop to 
+	    // determine which vehicles are generating the predictions.
+	    // If vehicle is not one of the ones generating a prediction
+	    // then it is labeled as a minor vehicle for the UI.
+	    Set<String> vehiclesGeneratingPreds = determineVehiclesGeneratingPreds(
+		    stdParameters, routeShortNames, stopId, numberPredictions);
+
+	    ApiVehicles apiVehicles = 
+		    new ApiVehicles(vehicles, vehiclesGeneratingPreds);
+	    
 	    // return ApiVehicles response
-	    return stdParameters.createResponse(new ApiVehicles(vehicles));
+	    return stdParameters.createResponse(apiVehicles);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
 	    throw WebUtils.badRequestException(e.getMessage());
@@ -148,6 +171,14 @@ public class TransitimeApi {
      *            Optional way of specifying which routes to get data for
      * @param routeShortNames
      *            Optional way of specifying which routes to get data for
+     * @param stopId
+     *            Optional way of specifying a stop so can get predictions for
+     *            routes and determine which vehicles are the ones generating
+     *            the predictions. The other vehicles are labeled as minor so
+     *            they can be drawn specially in the UI.
+     * @param numberPredictions
+     *            For when determining which vehicles are generating the
+     *            predictions so can label minor vehicles
      * @return The Response object already configured for the specified media
      *         type.
      */
@@ -157,7 +188,9 @@ public class TransitimeApi {
     public Response getVehiclesDetails(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value = "v") List<String> vehicleIds,
 	    @QueryParam(value = "r") List<String> routeIds,
-	    @QueryParam(value = "rShortName") List<String> routeShortNames) 
+	    @QueryParam(value = "rShortName") List<String> routeShortNames,
+	    @QueryParam(value = "s") String stopId,
+	    @QueryParam(value="numPreds") @DefaultValue("3") int numberPredictions) 
 		    throws WebApplicationException {
 	// Make sure request is valid
 	stdParameters.validate();
@@ -177,9 +210,18 @@ public class TransitimeApi {
 		vehicles = inter.get();
 	    }
 
-	    // return ApiVehiclesDetails response
+	    // If stop specified then also get predictions for the stop to 
+	    // determine which vehicles are generating the predictions.
+	    // If vehicle is not one of the ones generating a prediction
+	    // then it is labeled as a minor vehicle for the UI.
+	    Set<String> vehiclesGeneratingPreds = determineVehiclesGeneratingPreds(
+		    stdParameters, routeShortNames, stopId, numberPredictions);
+	    
+	    // Convert IpcVehiclesDetails to ApiVehiclesDetails
 	    ApiVehiclesDetails apiVehiclesDetails = 
-		    new ApiVehiclesDetails(vehicles);
+		    new ApiVehiclesDetails(vehicles, vehiclesGeneratingPreds);
+
+	    // return ApiVehiclesDetails response
 	    return stdParameters.createResponse(apiVehiclesDetails);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
@@ -187,6 +229,33 @@ public class TransitimeApi {
 	}
     }
 
+    private static Set<String> determineVehiclesGeneratingPreds(
+	    StandardParameters stdParameters, List<String> routeShortNames,
+	    String stopId, int numberPredictions) throws RemoteException {
+	// If stop specified then also get predictions for the stop to
+	// determine which vehicles are generating the predictions.
+	// If vehicle is not one of the ones generating a prediction
+	// then it is labeled as a minor vehicle for the UI.
+	Set<String> vehiclesGeneratingPreds = null;
+	if (!routeShortNames.isEmpty() && stopId != null) {
+	    PredictionsInterface predsInter = stdParameters
+		    .getPredictionsInterface();
+	    List<IpcPredictionsForRouteStopDest> predictions = predsInter.get(
+		    routeShortNames.get(0), stopId, numberPredictions);
+
+	    // Determine set of which vehicles predictions generated for
+	    vehiclesGeneratingPreds = new HashSet<String>();
+	    for (IpcPredictionsForRouteStopDest predsForRouteStop : predictions) {
+		for (IpcPrediction ipcPrediction : predsForRouteStop
+			.getPredictionsForRouteStop()) {
+		    vehiclesGeneratingPreds.add(ipcPrediction.getVehicleId());
+		}
+	    }
+	}
+
+	return vehiclesGeneratingPreds;
+    }
+    
     /**
      * Handles "predictions" command. Gets predictions from server and returns
      * the corresponding response.
@@ -350,7 +419,7 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getRoute(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value="r") String routeShortName,
+	    @QueryParam(value="rShortName") String routeShortName,
 	    @QueryParam(value="s") String stopId,
 	    @QueryParam(value="tripPattern") String tripPatternId) 
 		    throws WebApplicationException {
@@ -386,7 +455,7 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getStops(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value="r") String routeShortName) 
+	    @QueryParam(value="rShortName") String routeShortName) 
 		    throws WebApplicationException {
 
 	// Make sure request is valid
@@ -490,7 +559,7 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getTripPatterns(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value="r") String routeShortName) 
+	    @QueryParam(value="rShortName") String routeShortName) 
 		    throws WebApplicationException {
 
 	// Make sure request is valid

@@ -35,7 +35,7 @@ import org.transitime.ipc.data.IpcVehicle;
  * 
  */
 @XmlRootElement
-@XmlType(propOrder = { "id", "routeId", "routeShortName", "loc" })
+@XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign", "loc" })
 public class ApiVehicle {
     
     @XmlAttribute
@@ -50,6 +50,15 @@ public class ApiVehicle {
     @XmlAttribute(name="routeShrtNm")
     protected String routeShortName;
     
+    @XmlAttribute
+    protected String headsign;
+    
+    @XmlAttribute(name="direction")
+    protected String directionId;
+    
+    @XmlAttribute
+    protected String minor;
+    
     /**
      * Need a no-arg constructor for Jersey. Otherwise get really 
      * obtuse "MessageBodyWriter not found for media type=application/json"
@@ -62,12 +71,17 @@ public class ApiVehicle {
      * ApiVehicle object for the API.
      * 
      * @param vehicle
+     * @param minor
+     *            If should be labeled as "minor" in output for UI.
      */
-    public ApiVehicle(IpcVehicle vehicle) {
+    public ApiVehicle(IpcVehicle vehicle, boolean minor) {
 	id = vehicle.getId();
 	loc = new ApiGpsLocation(vehicle);
 	routeId = vehicle.getRouteId();
 	routeShortName = vehicle.getRouteShortName();
+	headsign = vehicle.getHeadsign();
+	directionId = vehicle.getDirectionId();
+	this.minor = minor ? "true" : null;
     }
 
 }
