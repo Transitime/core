@@ -52,6 +52,7 @@ public class IpcVehicle implements Serializable {
 	private final String routeShortName;
 	private final String tripId;
 	private final String directionId;
+	private final String headsign;
 	private final boolean predictable;
 	private final TemporalDifference realTimeSchedAdh;
 
@@ -71,8 +72,16 @@ public class IpcVehicle implements Serializable {
 		this.pathHeading = vs.getPathHeading();
 		this.routeId = vs.getRouteId();
 		this.routeShortName = vs.getRouteShortName();
-		this.tripId = vs.getTrip().getId();
-		this.directionId = vs.getTrip().getDirectionId();
+		if (vs.getTrip() != null) {
+			this.tripId = vs.getTrip().getId();
+			this.directionId = vs.getTrip().getDirectionId();
+			this.headsign = vs.getTrip().getHeadsign();
+		} else {
+			// Vehicle not assigned to trip so null out parameters
+			this.tripId = null;
+			this.directionId = null;
+			this.headsign = null;	
+		}
 		this.predictable = vs.isPredictable();
 		this.realTimeSchedAdh = vs.getRealTimeSchedAdh();
 	}
@@ -89,14 +98,16 @@ public class IpcVehicle implements Serializable {
 	 * @param routeId
 	 * @param routeShortName
 	 * @param tripId
+	 * @param directionId
+	 * @param headsign
 	 * @param predictable
 	 * @param realTimeSchdAdh
 	 */
 	protected IpcVehicle(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
-			String tripId, String directionId, boolean predictable,
-			TemporalDifference realTimeSchdAdh) {
+			String tripId, String directionId, String headsign,
+			boolean predictable, TemporalDifference realTimeSchdAdh) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
@@ -105,6 +116,7 @@ public class IpcVehicle implements Serializable {
 		this.routeShortName = routeShortName;
 		this.tripId = tripId;
 		this.directionId = directionId;
+		this.headsign = headsign;
 		this.predictable = predictable;
 		this.realTimeSchedAdh = realTimeSchdAdh;
 	}
@@ -123,6 +135,7 @@ public class IpcVehicle implements Serializable {
 		protected String routeShortName;
 		protected String tripId;
 		protected String directionId;
+		protected String headsign;
 		protected boolean predictable;
 		protected TemporalDifference realTimeSchdAdh;
 
@@ -141,6 +154,7 @@ public class IpcVehicle implements Serializable {
 			this.routeShortName = v.routeShortName;
 			this.tripId = v.tripId;
 			this.directionId = v.directionId;
+			this.headsign = v.headsign;
 			this.predictable = v.predictable;
 			this.realTimeSchdAdh = v.realTimeSchedAdh;
 		}
@@ -163,6 +177,7 @@ public class IpcVehicle implements Serializable {
 			stream.writeObject(routeShortName);
 			stream.writeObject(tripId);
 			stream.writeObject(directionId);
+		    stream.writeObject(headsign);
 			stream.writeBoolean(predictable);
 			stream.writeObject(realTimeSchdAdh);
 		}
@@ -188,6 +203,7 @@ public class IpcVehicle implements Serializable {
 			routeShortName = (String) stream.readObject();
 			tripId = (String) stream.readObject();
 			directionId = (String) stream.readObject();
+			headsign = (String) stream.readObject();
 			predictable = stream.readBoolean();
 			realTimeSchdAdh = (TemporalDifference) stream.readObject();
 		}
@@ -200,8 +216,8 @@ public class IpcVehicle implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcVehicle(blockId, blockAssignmentMethod, avl,
-					pathHeading, routeId, routeShortName, tripId, directionId, 
-					predictable, realTimeSchdAdh);
+					pathHeading, routeId, routeShortName, tripId, directionId,
+					headsign, predictable, realTimeSchdAdh);
 		}
 	} // End of SerializationProxy class
 
@@ -298,6 +314,10 @@ public class IpcVehicle implements Serializable {
 		return directionId;
 	}
 	
+	public String getHeadsign() {
+		return headsign;
+	}
+
 	public boolean isPredictable() {
 		return predictable;
 	}
@@ -315,6 +335,8 @@ public class IpcVehicle implements Serializable {
 				+ ", routeId=" + routeId 
 				+ ", routeShortName=" + routeShortName
 				+ ", tripId=" + tripId 
+				+ ", directionId=" + directionId
+				+ ", headsign=" + headsign
 				+ ", predictable=" + predictable
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh 
 				+ ", avl=" + avl
@@ -330,7 +352,7 @@ public class IpcVehicle implements Serializable {
 				"block", "driver", "license", 0);
 		IpcVehicle v = new IpcVehicle("blockId",
 				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl, 123.456f,
-				"routeId", "routeShortName", "tripId", "dirId", true, null);
+				"routeId", "routeShortName", "tripId", "dirId", "headsign", true, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);
