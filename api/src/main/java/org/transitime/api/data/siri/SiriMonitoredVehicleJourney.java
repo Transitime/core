@@ -127,7 +127,7 @@ public class SiriMonitoredVehicleJourney {
 	operatorRef = agencyId;
 	originRef = ipcExtVehicle.getOriginStopId();
 	destinationRef = ipcExtVehicle.getDestinationId();
-	destinationName = ipcExtVehicle.getDestinationName();
+	destinationName = ipcExtVehicle.getHeadsign();
 	originAimedDepartureTime = 
 		Utils.formattedTime(ipcExtVehicle.getTripStartEpochTime());
 	monitored = "true";

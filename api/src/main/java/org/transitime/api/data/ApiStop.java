@@ -31,7 +31,7 @@ import org.transitime.ipc.data.IpcStop;
  * @author SkiBu Smith
  *
  */
-@XmlType(propOrder = { "id", "lat", "lon", "name", "code", "isUiStop" })
+@XmlType(propOrder = { "id", "lat", "lon", "name", "code", "minor" })
 public class ApiStop extends ApiTransientLocation {
 
     @XmlAttribute
@@ -43,8 +43,10 @@ public class ApiStop extends ApiTransientLocation {
     @XmlAttribute
     private Integer code;
     
-    @XmlAttribute(name="forRemainingTrip")
-    private Boolean isUiStop;
+    // For indicating that in UI should deemphasize this stop because it
+    // is not on a main trip pattern.
+    @XmlAttribute(name="minor")
+    private Boolean minor;
     
      /********************** Member Functions **************************/
 
@@ -55,9 +57,9 @@ public class ApiStop extends ApiTransientLocation {
 	this.id = stop.getId();
 	this.name = stop.getName();
 	this.code = stop.getCode();
-	// If false then set to null so that this attribute won't then be
+	// If true then set to null so that this attribute won't then be
 	// output as XML/JSON, therefore making output a bit more compact.
-	this.isUiStop = stop.isUiStop() ? true : null;
+	this.minor = stop.isUiStop() ? null : true;
     }
 
 }
