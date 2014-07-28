@@ -484,28 +484,54 @@ public class VehicleState {
 	 *         currently matched or there is no heading for that segment.
 	 */
 	public float getPathHeading() {
+		// If vehicle not currently matched then there is no path heading
 		SpatialMatch match = getMatch();
 		if (match == null)
 			return Float.NaN;
-		
+				
+		// If layover stop then the heading of the path isn't really valid
+		// since the vehicle might be deadheading to the stop.
 		StopPath stopPath = getTrip().getStopPath(match.getStopPathIndex());
+		if (stopPath.isLayoverStop())
+			return Float.NaN;
+		
+		// Vehicle on non-layover path so return heading of that path.
 		return stopPath.getSegmentVector(match.getSegmentIndex()).getHeading();
 	}
 	
 	/**
 	 * Normally uses the heading from getPathHeading(). But if that returns NaN
-	 * then uses heading from last AVL report, though that might be NaN as well.
-	 * This can be better then always using heading from AVL report since that 
-	 * often won't line up with the path.
+	 * then uses recent valid heading from last AVL report, though that might be
+	 * NaN as well. This can be better then always using heading from AVL report
+	 * since that often won't line up with the path and can make vehicles be
+	 * oriented in noticeably peculiar ways when drawn on an map.
 	 * 
 	 * @return The best heading for a vehicle
 	 */
 	public float getHeading() {
 		float heading = getPathHeading();
 		if (Float.isNaN(heading))
-			return getAvlReport().getHeading();
+			return recentValidHeading();
 		else
 			return heading;
+	}
+
+	/**
+	 * Looks in avlReportHistory and returns last valid heading. Will still
+	 * return null in certain situations such as there not being a history,
+	 * never have valid heading info, etc.
+	 * 
+	 * @return
+	 */
+	private float recentValidHeading() {
+		for (AvlReport avlReport : avlReportHistory) {
+			if (!Float.isNaN(avlReport.getHeading())) {
+				return avlReport.getHeading();
+			}
+		}
+		
+		// No reports have a valid heading so return NaN
+		return Float.NaN;
 	}
 	
 	@Override
