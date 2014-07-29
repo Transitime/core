@@ -288,10 +288,9 @@ public class IpcVehicle implements Serializable {
 
 	/**
 	 * Returns number of degrees clockwise from due North. Note that this is
-	 * very different from angle(). If GPS heading not available (either
-	 * because AVL system doesn't provide it or speed is too low such that
-	 * the heading is not currently valid) then the path heading where the
-	 * vehicle matches is used.
+	 * very different from angle(). The path heading that the vehicle matched to
+	 * is used when it is available. When path heading not available then uses
+	 * the AVL heading. That can be NaN as well though.
 	 * 
 	 * @return Heading of vehicle, or null if speed not defined.
 	 */
