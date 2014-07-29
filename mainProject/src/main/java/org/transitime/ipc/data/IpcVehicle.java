@@ -45,7 +45,7 @@ public class IpcVehicle implements Serializable {
 	private final String blockId;
 	private final BlockAssignmentMethod blockAssignmentMethod;
 	private final IpcAvl avl;
-	private final float pathHeading;
+	private final float heading;
 	private final String routeId;
 
 	// routeShortName needed because routeId is sometimes not consistent over
@@ -72,7 +72,7 @@ public class IpcVehicle implements Serializable {
 		this.blockId = vs.getBlock().getId();
 		this.blockAssignmentMethod = vs.getAssignmentMethod();
 		this.avl = new IpcAvl(vs.getAvlReport());
-		this.pathHeading = vs.getPathHeading();
+		this.heading = vs.getHeading();
 		this.routeId = vs.getRouteId();
 		this.routeShortName = vs.getRouteShortName();
 		if (vs.getTrip() != null) {
@@ -124,14 +124,14 @@ public class IpcVehicle implements Serializable {
 	 */
 	protected IpcVehicle(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
-			float pathHeading, String routeId, String routeShortName,
+			float heading, String routeId, String routeShortName,
 			String tripId, String directionId, String headsign,
 			boolean predictable, TemporalDifference realTimeSchdAdh,
 			boolean isLayover, String nextStopId) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
-		this.pathHeading = pathHeading;
+		this.heading = heading;
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.tripId = tripId;
@@ -152,7 +152,7 @@ public class IpcVehicle implements Serializable {
 		protected String blockId;
 		protected BlockAssignmentMethod blockAssignmentMethod;
 		protected IpcAvl avl;
-		protected float pathHeading;
+		protected float heading;
 		protected String routeId;
 		protected String routeShortName;
 		protected String tripId;
@@ -173,7 +173,7 @@ public class IpcVehicle implements Serializable {
 			this.blockId = v.blockId;
 			this.blockAssignmentMethod = v.blockAssignmentMethod;
 			this.avl = v.avl;
-			this.pathHeading = v.pathHeading;
+			this.heading = v.heading;
 			this.routeId = v.routeId;
 			this.routeShortName = v.routeShortName;
 			this.tripId = v.tripId;
@@ -198,7 +198,7 @@ public class IpcVehicle implements Serializable {
 			stream.writeObject(blockId);
 			stream.writeObject(blockAssignmentMethod);
 			stream.writeObject(avl);
-			stream.writeFloat(pathHeading);
+			stream.writeFloat(heading);
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
 			stream.writeObject(tripId);
@@ -226,7 +226,7 @@ public class IpcVehicle implements Serializable {
 			blockId = (String) stream.readObject();
 			blockAssignmentMethod = (BlockAssignmentMethod) stream.readObject();
 			avl = (IpcAvl) stream.readObject();
-			pathHeading = stream.readFloat();
+			heading = stream.readFloat();
 			routeId = (String) stream.readObject();
 			routeShortName = (String) stream.readObject();
 			tripId = (String) stream.readObject();
@@ -246,7 +246,7 @@ public class IpcVehicle implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcVehicle(blockId, blockAssignmentMethod, avl,
-					pathHeading, routeId, routeShortName, tripId, directionId,
+					heading, routeId, routeShortName, tripId, directionId,
 					headsign, predictable, realTimeSchdAdh, isLayover,
 					nextStopId);
 		}
@@ -288,22 +288,15 @@ public class IpcVehicle implements Serializable {
 
 	/**
 	 * Returns number of degrees clockwise from due North. Note that this is
-	 * very different from angle().
+	 * very different from angle(). If GPS heading not available (either
+	 * because AVL system doesn't provide it or speed is too low such that
+	 * the heading is not currently valid) then the path heading where the
+	 * vehicle matches is used.
 	 * 
 	 * @return Heading of vehicle, or null if speed not defined.
 	 */
 	public float getHeading() {
-		return avl.getHeading();
-	}
-
-	/**
-	 * The path heading is determined from the segment that the vehicle has been
-	 * matched to. Useful for drawing vehicles on a map.
-	 * 
-	 * @return
-	 */
-	public float getPathHeading() {
-		return pathHeading;
+		return heading;
 	}
 
 	/**
@@ -379,7 +372,7 @@ public class IpcVehicle implements Serializable {
 				+ ", predictable=" + predictable
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh 
 				+ ", avl=" + avl
-				+ ", pathHeading=" + pathHeading 
+				+ ", heading=" + heading 
 				+ ", isLayover=" + isLayover
 				+ ", nextStopId=" + nextStopId 
 				+ "]";

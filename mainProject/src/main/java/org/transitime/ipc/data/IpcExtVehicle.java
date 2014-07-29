@@ -219,7 +219,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			return new IpcExtVehicle(routeName, originStopId, destinationId,
 					distanceToNextStop, distanceOfNextStopFromTripStart,
 					distanceAlongTrip, tripStartEpochTime, blockId,
-					blockAssignmentMethod, avl, pathHeading, routeId,
+					blockAssignmentMethod, avl, heading, routeId,
 					routeShortName, tripId, directionId, headsign, predictable,
 					realTimeSchdAdh, isLayover, nextStopId);
 		}
@@ -288,7 +288,7 @@ public class IpcExtVehicle extends IpcVehicle {
 				+ ", isLayover=" + isLayover()
 				+ ", nextStopId=" + getNextStopId() 
 				+ ", avl=" + getAvl()
-				+ ", pathHeading=" + getPathHeading() 
+				+ ", heading=" + getHeading() 
 				+ ", routeName=" + routeName 
 				+ ", originStopId="	+ originStopId 
 				+ ", destinationId=" + destinationId
