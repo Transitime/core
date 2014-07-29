@@ -176,6 +176,11 @@ public class SpatialMatcher {
 	public static boolean problemMatchDueToLackOfHeadingInfo(
 			SpatialMatch spatialMatch,
 			VehicleState vehicleState) {
+		// If there was no spatial match then there can't be a problem
+		// with the heading.
+		if (spatialMatch == null)
+			return false;
+		
 		// Convenience variables
 		AvlReport avlReport = vehicleState.getAvlReport();
 		Block block = spatialMatch.getBlock();
