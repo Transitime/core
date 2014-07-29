@@ -403,7 +403,7 @@ public class TemporalMatcher {
 	 *            specifies which trips to examine
 	 * @return
 	 */
-	public Trip matchToWaitStopEvenIfOffRoute(
+	public Trip matchToLayoverStopEvenIfOffRoute(
 			AvlReport avlReport, List<Trip> potentialTrips) {
 		// Determine upcoming wait stop
 		for (Trip trip : potentialTrips) {

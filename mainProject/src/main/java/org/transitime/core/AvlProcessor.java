@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.transitime.applications.Core;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.configData.CoreConfig;
@@ -298,7 +297,9 @@ public class AvlProcessor {
 
 			// Add appropriate spatial matches to list
 			for (SpatialMatch spatialMatch : spatialMatchesForBlock) {
-				if (matchOkForRouteMatching(spatialMatch))
+				if (!SpatialMatcher.problemMatchDueToLackOfHeadingInfo(
+						spatialMatch, vehicleState) 
+						&& matchOkForRouteMatching(spatialMatch))
 					allPotentialSpatialMatchesForRoute.add(spatialMatch);
 			}
 		} // End of going through each block to determine spatial matches
@@ -389,15 +390,27 @@ public class AvlProcessor {
 		logger.debug("Best temporal match for vehicleId={} is {}",
 				avlReport.getVehicleId(), bestMatch);
 		
+		// If best match is a non-layover but cannot confirm that the heading
+		// is acceptable then don't consider this a match. Instead, wait till
+		// get another AVL report at a different location so can see if making 
+		// progress along route in proper direction.
+		if (SpatialMatcher.problemMatchDueToLackOfHeadingInfo(bestMatch, 
+				vehicleState)) {
+			logger.debug("Found match but could not confirm that heading is "
+					+ "proper. Therefore not matching vehicle to block. {}", 
+					bestMatch);
+			return false;
+		}
+		
 		// If couldn't find an adequate spatial/temporal match then resort
-		// to matching to a wait stop at a terminal. 
+		// to matching to a layover stop at a terminal. 
 		if (bestMatch == null) {
 			logger.debug("For vehicleId={} could not find reasonable " +
-					"match so will try to match to wait stop.",
+					"match so will try to match to layover stop.",
 					avlReport.getVehicleId());
 			
 			Trip trip = TemporalMatcher.getInstance().
-					matchToWaitStopEvenIfOffRoute(avlReport, potentialTrips);
+					matchToLayoverStopEvenIfOffRoute(avlReport, potentialTrips);
 			if (trip != null) {
 				SpatialMatch beginningOfTrip = 
 						new SpatialMatch(vehicleState.getVehicleId(),
