@@ -24,11 +24,12 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
+import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.utils.Time;
 
 import net.jcip.annotations.Immutable;
 
@@ -57,7 +58,9 @@ public class IpcVehicle implements Serializable {
 	private final boolean predictable;
 	private final TemporalDifference realTimeSchedAdh;
 	private final boolean isLayover;
+	private final long layoverDepartureTime;
 	private final String nextStopId;
+	private final String vehicleType;
 
 	private static final long serialVersionUID = -1744566765456572042L;
 
@@ -85,19 +88,39 @@ public class IpcVehicle implements Serializable {
 			// stop ID and such.
 			SpatialMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();
 
+			// Determine if vehicle is at layover, and if so, what time it 
+			// should depart. The departure time isn't necessarily the 
+			// scheduled trip start time since if vehicle is late or if
+			// driver supposed to get a break then vehicle will leave after
+			// the scheduled time. Therefore use the predicted departure time
+			// for layover.
 			this.isLayover = match.isLayover();
-
+			if (this.isLayover) {
+				IpcPrediction predsForVehicle = PredictionDataCache
+						.getInstance().getPredictionForVehicle(
+								vs.getAvlReport().getVehicleId(),
+								vs.getRouteShortName(),
+								match.getStopPath().getStopId());
+				this.layoverDepartureTime = predsForVehicle.getTime();
+			} else {
+				// Not a layover so departure time not provided
+				this.layoverDepartureTime = 0;
+			}
+			
 			// If vehicle is at a stop then "next" stop will actually be
 			// the current stop.
 			this.nextStopId = match.getStopPath().getStopId();
 
+			this.vehicleType = match.getRoute().getType();
 		} else {
 			// Vehicle not assigned to trip so null out parameters
 			this.tripId = null;
 			this.directionId = null;
 			this.headsign = null;
 			this.isLayover = false;
+			this.layoverDepartureTime = 0;
 			this.nextStopId = null;
+			this.vehicleType = null;
 		}
 		this.predictable = vs.isPredictable();
 		this.realTimeSchedAdh = vs.getRealTimeSchedAdh();
@@ -120,14 +143,17 @@ public class IpcVehicle implements Serializable {
 	 * @param predictable
 	 * @param realTimeSchdAdh
 	 * @param isLayover
+	 * @param layoverDepartureTime
 	 * @param nextStopId
+	 * @param vehicleType
 	 */
 	protected IpcVehicle(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float heading, String routeId, String routeShortName,
 			String tripId, String directionId, String headsign,
 			boolean predictable, TemporalDifference realTimeSchdAdh,
-			boolean isLayover, String nextStopId) {
+			boolean isLayover, long layoverDepartureTime, String nextStopId,
+			String vehicleType) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
@@ -140,7 +166,9 @@ public class IpcVehicle implements Serializable {
 		this.predictable = predictable;
 		this.realTimeSchedAdh = realTimeSchdAdh;
 		this.isLayover = isLayover;
+		this.layoverDepartureTime = layoverDepartureTime;
 		this.nextStopId = nextStopId;
+		this.vehicleType = vehicleType;
 	}
 
 	/*
@@ -161,7 +189,9 @@ public class IpcVehicle implements Serializable {
 		protected boolean predictable;
 		protected TemporalDifference realTimeSchdAdh;
 		protected boolean isLayover;
+		protected long layoverDepartureTime;
 		protected String nextStopId;
+		protected String vehicleType;
 
 		private static final long serialVersionUID = -4996254752417270043L;
 		private static final short serializationVersion = 0;
@@ -182,7 +212,9 @@ public class IpcVehicle implements Serializable {
 			this.predictable = v.predictable;
 			this.realTimeSchdAdh = v.realTimeSchedAdh;
 			this.isLayover = v.isLayover;
+			this.layoverDepartureTime = v.layoverDepartureTime;
 			this.nextStopId = v.nextStopId;
+			this.vehicleType = v.vehicleType;
 		}
 
 		/*
@@ -207,7 +239,9 @@ public class IpcVehicle implements Serializable {
 			stream.writeBoolean(predictable);
 			stream.writeObject(realTimeSchdAdh);
 		    stream.writeBoolean(isLayover);
+		    stream.writeLong(layoverDepartureTime);
 		    stream.writeObject(nextStopId);
+		    stream.writeObject(vehicleType);
 		}
 
 		/*
@@ -235,7 +269,9 @@ public class IpcVehicle implements Serializable {
 			predictable = stream.readBoolean();
 			realTimeSchdAdh = (TemporalDifference) stream.readObject();
 			isLayover = stream.readBoolean();
+			layoverDepartureTime = stream.readLong();
 			nextStopId = (String) stream.readObject();
+			vehicleType = (String) stream.readObject();
 		}
 
 		/*
@@ -248,7 +284,7 @@ public class IpcVehicle implements Serializable {
 			return new IpcVehicle(blockId, blockAssignmentMethod, avl,
 					heading, routeId, routeShortName, tripId, directionId,
 					headsign, predictable, realTimeSchdAdh, isLayover,
-					nextStopId);
+					layoverDepartureTime, nextStopId, vehicleType);
 		}
 	} // End of SerializationProxy class
 
@@ -353,10 +389,18 @@ public class IpcVehicle implements Serializable {
 		return isLayover;
 	}
 
+	public long getLayoverDepartureTime() {
+		return layoverDepartureTime;
+	}
+	
 	public String getNextStopId() {
 		return nextStopId;
 	}
 
+	public String getVehicleType() {
+		return vehicleType;		
+	}
+	
 	@Override
 	public String toString() {
 		return "IpcVehicle [" 
@@ -373,7 +417,10 @@ public class IpcVehicle implements Serializable {
 				+ ", avl=" + avl
 				+ ", heading=" + heading 
 				+ ", isLayover=" + isLayover
-				+ ", nextStopId=" + nextStopId 
+				+ ", layoverDepartureTime=" 
+					+ Time.timeStrNoTimeZone(layoverDepartureTime)
+				+ ", nextStopId=" + nextStopId
+				+ ", vehicleType=" + vehicleType
 				+ "]";
 	}
 
@@ -386,7 +433,7 @@ public class IpcVehicle implements Serializable {
 		IpcVehicle v = new IpcVehicle("blockId",
 				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl, 123.456f,
 				"routeId", "routeShortName", "tripId", "dirId", "headsign",
-				true, null, false, null);
+				true, null, false, 0, null, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);

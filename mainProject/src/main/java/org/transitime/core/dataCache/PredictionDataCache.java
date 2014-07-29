@@ -183,6 +183,38 @@ public class PredictionDataCache {
 	}
 	
 	/**
+	 * Gets predictions for specified route/stop and returns the first one for
+	 * the specified vehicle.
+	 * 
+	 * @param vehicleId
+	 * @param routeShortName
+	 * @param stopId
+	 * @return IpcPrediction for the specified vehicle/route/stop or null if
+	 *         there are no such predictions
+	 */
+	public IpcPrediction getPredictionForVehicle(String vehicleId,
+			String routeShortName, String stopId) {
+		// Get all the predictions for the specified stop. Get a bunch (5) 
+		// of predictions in case there are a bunch of vehicles that will be
+		// leaving the stop.
+		List<IpcPredictionsForRouteStopDest> predsList = getPredictions(
+				routeShortName, stopId, 5 /* maxPredictionsPerStop */);
+		
+		// Go through all the predictions and find the ones for the specified vehicle
+		for (IpcPredictionsForRouteStopDest predsForRouteStop : predsList) {
+			for (IpcPrediction preds : predsForRouteStop.getPredictionsForRouteStop()) {
+				if (preds.getVehicleId().equals(vehicleId)) {
+					// Found prediction for specified vehicle so return it
+					return preds;
+				}
+			}
+		}
+		
+		// Couldn't find predictions for the vehicle at the route/stop
+		return null;
+	}
+	
+	/**
 	 * Returns copy of the predictions associated with the route/stop specified.
 	 * Note that this method uses the routeId instead of the routeShortName.
 	 * 

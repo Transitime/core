@@ -47,7 +47,7 @@ public class VehiclesServer extends AbstractServer
 	private static VehiclesServer singleton;
 	
 	// The VehicleDataCache associated with the singleton.
-	private VehicleDataCache vehicleDataCach;
+	private VehicleDataCache vehicleDataCache;
 
 	private static final Logger logger = 
 			LoggerFactory.getLogger(VehiclesServer.class);
@@ -67,7 +67,7 @@ public class VehiclesServer extends AbstractServer
 			String projectId, VehicleDataCache vehicleManager) {
 		if (singleton == null) {
 			singleton = new VehiclesServer(projectId);
-			singleton.vehicleDataCach = vehicleManager;
+			singleton.vehicleDataCache = vehicleManager;
 		}
 		
 		if (!singleton.getProjectId().equals(projectId)) {
@@ -97,7 +97,7 @@ public class VehiclesServer extends AbstractServer
 	 */
 	@Override
 	public Collection<IpcVehicle> get() throws RemoteException {
-		return getSerializableCollection(vehicleDataCach.getVehicles());
+		return getSerializableCollection(vehicleDataCache.getVehicles());
 	}
 
 	/* (non-Javadoc)
@@ -105,7 +105,7 @@ public class VehiclesServer extends AbstractServer
 	 */
 	@Override
 	public Collection<IpcExtVehicle> getExt() throws RemoteException {
-		return getExtSerializableCollection(vehicleDataCach.getVehicles());
+		return getExtSerializableCollection(vehicleDataCache.getVehicles());
 	}
 
 	/* (non-Javadoc)
@@ -113,7 +113,7 @@ public class VehiclesServer extends AbstractServer
 	 */
 	@Override
 	public IpcVehicle get(String vehicleId) throws RemoteException {
-		return vehicleDataCach.getVehicle(vehicleId);
+		return vehicleDataCache.getVehicle(vehicleId);
 	}
 
 	/* (non-Javadoc)
@@ -121,7 +121,7 @@ public class VehiclesServer extends AbstractServer
 	 */
 	@Override
 	public IpcExtVehicle getExt(String vehicleId) throws RemoteException {
-		return vehicleDataCach.getVehicle(vehicleId);
+		return vehicleDataCache.getVehicle(vehicleId);
 	}
 
 	/* (non-Javadoc)
@@ -131,7 +131,7 @@ public class VehiclesServer extends AbstractServer
 	public Collection<IpcVehicle> get(List<String> vehicleIds) 
 			throws RemoteException {
 		return getSerializableCollection(
-				vehicleDataCach.getVehicles(vehicleIds));
+				vehicleDataCache.getVehicles(vehicleIds));
 	}
 
 	/* (non-Javadoc)
@@ -141,7 +141,7 @@ public class VehiclesServer extends AbstractServer
 	public Collection<IpcExtVehicle> getExt(List<String> vehicleIds) 
 			throws RemoteException {
 		return getExtSerializableCollection(
-				vehicleDataCach.getVehicles(vehicleIds));
+				vehicleDataCache.getVehicles(vehicleIds));
 	}
 
 	/* (non-Javadoc)
@@ -150,7 +150,7 @@ public class VehiclesServer extends AbstractServer
 	@Override
 	public Collection<IpcVehicle> getForRoute(String routeShortName) throws RemoteException {
 		return getSerializableCollection(
-				vehicleDataCach.getVehiclesForRoute(routeShortName));
+				vehicleDataCache.getVehiclesForRoute(routeShortName));
 	}
 
 	/* (non-Javadoc)
@@ -159,7 +159,7 @@ public class VehiclesServer extends AbstractServer
 	@Override
 	public Collection<IpcExtVehicle> getExtForRoute(String routeShortName) throws RemoteException {
 		return getExtSerializableCollection(
-				vehicleDataCach.getVehiclesForRoute(routeShortName));
+				vehicleDataCache.getVehiclesForRoute(routeShortName));
 	}
 
 	/* (non-Javadoc)
@@ -169,7 +169,7 @@ public class VehiclesServer extends AbstractServer
 	public Collection<IpcVehicle> getForRoute(
 		List<String> routeShortNames) throws RemoteException {
 	    return getSerializableCollection(
-			vehicleDataCach.getVehiclesForRoute(routeShortNames));
+			vehicleDataCache.getVehiclesForRoute(routeShortNames));
 	}
 
 	/* (non-Javadoc)
@@ -179,7 +179,7 @@ public class VehiclesServer extends AbstractServer
 	public Collection<IpcExtVehicle> getExtForRoute(
 		List<String> routeShortNames) throws RemoteException {
 	    return getExtSerializableCollection(
-			vehicleDataCach.getVehiclesForRoute(routeShortNames));
+			vehicleDataCache.getVehiclesForRoute(routeShortNames));
 	}
 
 	/* (non-Javadoc)
@@ -189,7 +189,7 @@ public class VehiclesServer extends AbstractServer
 	public Collection<IpcVehicle> getForRouteUsingRouteId(String routeId)
 			throws RemoteException {
 		return getSerializableCollection(
-				vehicleDataCach.getVehiclesForRouteUsingRouteId(routeId));
+				vehicleDataCache.getVehiclesForRouteUsingRouteId(routeId));
 	}
 	
 	/* (non-Javadoc)
@@ -199,7 +199,7 @@ public class VehiclesServer extends AbstractServer
 	public Collection<IpcVehicle> getForRouteUsingRouteId(
 		List<String> routeIds) throws RemoteException {
 		return getSerializableCollection(
-			vehicleDataCach.getVehiclesForRouteUsingRouteId(routeIds));
+			vehicleDataCache.getVehiclesForRouteUsingRouteId(routeIds));
 	}
 
 	/* (non-Javadoc)
@@ -209,7 +209,7 @@ public class VehiclesServer extends AbstractServer
 	public Collection<IpcExtVehicle> getExtForRouteUsingRouteId(
 		List<String> routeIds) throws RemoteException {
 		return getExtSerializableCollection(
-			vehicleDataCach.getVehiclesForRouteUsingRouteId(routeIds));
+			vehicleDataCache.getVehiclesForRouteUsingRouteId(routeIds));
 	}
 
 	/*

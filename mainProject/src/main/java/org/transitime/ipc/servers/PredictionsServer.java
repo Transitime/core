@@ -50,7 +50,7 @@ public class PredictionsServer
 	private static PredictionsServer singleton;
 	
 	// The PredictionDataCache associated with the singleton.
-	private PredictionDataCache predictionManager;
+	private PredictionDataCache predictionDataCache;
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionsServer.class);
@@ -63,15 +63,15 @@ public class PredictionsServer
 	 * and serve requests.
 	 * 
 	 * @param projectId
-	 * @param predictionManager
+	 * @param predictionDataCache
 	 * @return the singleton PredictionsServer object. Usually does not need to
 	 *         used since the server will be fully running.
 	 */
 	public static PredictionsServer start(
-			String projectId, PredictionDataCache predictionManager) {
+			String projectId, PredictionDataCache predictionDataCache) {
 		if (singleton == null) {
 			singleton = new PredictionsServer(projectId);
-			singleton.predictionManager = predictionManager;
+			singleton.predictionDataCache = predictionDataCache;
 		}
 		
 		if (!singleton.getProjectId().equals(projectId)) {
@@ -102,7 +102,7 @@ public class PredictionsServer
 	@Override
 	public List<IpcPredictionsForRouteStopDest> get(String routeShortName, String stopId,
 			int predictionsPerStop) throws RemoteException {
-		return predictionManager.getPredictions(routeShortName, stopId,
+		return predictionDataCache.getPredictions(routeShortName, stopId,
 				predictionsPerStop);
 	}
 
@@ -112,7 +112,7 @@ public class PredictionsServer
 	@Override
 	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(String routeId, String stopId,
 			int predictionsPerStop) throws RemoteException {
-		return predictionManager.getPredictionsUsingRouteId(routeId, stopId,
+		return predictionDataCache.getPredictionsUsingRouteId(routeId, stopId,
 				predictionsPerStop);
 	}
 
@@ -122,7 +122,7 @@ public class PredictionsServer
 	@Override
 	public List<IpcPredictionsForRouteStopDest> get(List<RouteStop> routeStops,
 			int predictionsPerStop) throws RemoteException {
-		return predictionManager.getPredictions(routeStops, predictionsPerStop);
+		return predictionDataCache.getPredictions(routeStops, predictionsPerStop);
 	}
 
 	/* (non-Javadoc)
@@ -131,7 +131,7 @@ public class PredictionsServer
 	@Override
 	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(List<RouteStop> routeStops,
 			int predictionsPerStop) throws RemoteException {
-		return predictionManager.getPredictionsUsingRouteId(routeStops, 
+		return predictionDataCache.getPredictionsUsingRouteId(routeStops, 
 				predictionsPerStop);
 	}
 
@@ -142,10 +142,10 @@ public class PredictionsServer
 	public List<IpcPredictionsForRouteStopDest> getAllPredictions(
 			int predictionMaxFutureSecs) {
 		// How far in future in absolute time should get predictions for
-		long maxSystemTimeForPrediction = predictionManager.getSystemTime() + 
+		long maxSystemTimeForPrediction = predictionDataCache.getSystemTime() + 
 				predictionMaxFutureSecs*Time.MS_PER_SEC;
 
-		return predictionManager.getAllPredictions(Integer.MAX_VALUE, 
+		return predictionDataCache.getAllPredictions(Integer.MAX_VALUE, 
 				maxSystemTimeForPrediction);
 	}
 
@@ -208,7 +208,7 @@ public class PredictionsServer
 		// Gather predictions for all of those stops
 		for (StopInfo stopInfo : stopInfos) {
 			// Get the predictions for the stop
-			List<IpcPredictionsForRouteStopDest> predictionsForStop = predictionManager
+			List<IpcPredictionsForRouteStopDest> predictionsForStop = predictionDataCache
 					.getPredictions(stopInfo.routeShortName, stopInfo.stopId,
 							predictionsPerStop, stopInfo.distanceToStop);
 			
