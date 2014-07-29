@@ -78,6 +78,9 @@ public class Time {
 	private static final DateFormat timeFormat24 =
 			new SimpleDateFormat("HH:mm:ss z");
 
+	private static final DateFormat timeFormat24NoTimezone =
+			new SimpleDateFormat("HH:mm:ss");
+	
 	private static final DateFormat timeFormat24Msec =
 			new SimpleDateFormat("HH:mm:ss.SSS z");
 
@@ -531,7 +534,7 @@ public class Time {
 	}	
 	
 	/**
-	 * Returns just the time string
+	 * Returns just the time string in format "HH:mm:ss z"
 	 * 
 	 * @param epochTime
 	 * @return
@@ -541,7 +544,7 @@ public class Time {
 	}
 
 	/**
-	 * Returns just the time string
+	 * Returns just the time string in format "HH:mm:ss z"
 	 * 
 	 * @param epochTime
 	 * @return
@@ -550,6 +553,26 @@ public class Time {
 		return timeStr(epochTime.getTime());
 	}
 	
+	/**
+	 * Returns just the time string in format "HH:mm:ss"
+	 * 
+	 * @param epochTime
+	 * @return
+	 */
+	public static String timeStrNoTimeZone(long epochTime) {
+		return timeFormat24NoTimezone.format(epochTime);
+	}
+	
+	/**
+	 * Returns just the time string in format "HH:mm:ss"
+	 * 
+	 * @param epochTime
+	 * @return
+	 */
+	public static String timeStrNoTimeZone(Date epochTime) {
+		return timeStrNoTimeZone(epochTime.getTime());
+	}
+
 	/**
 	 * Returns just the time string. Includes msec.
 	 * 
