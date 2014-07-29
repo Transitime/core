@@ -37,7 +37,9 @@ public class VectorWithHeading extends Vector {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Construct a vector and determine its heading.
+	 * Construct a vector and determine its heading. Heading will be between
+	 * -180 and 180 degrees.
+	 * 
 	 * @param l1
 	 * @param l2
 	 */

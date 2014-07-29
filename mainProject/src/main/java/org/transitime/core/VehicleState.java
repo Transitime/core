@@ -478,7 +478,8 @@ public class VehicleState {
 	
 	/**
 	 * Determines the heading of the vector that defines the stop path segment
-	 * that the vehicle is currently on.
+	 * that the vehicle is currently on. The heading will be between 0.0 and
+	 * 360.0 degrees.
 	 * 
 	 * @return Heading of vehicle according to path segment. NaN if not
 	 *         currently matched or there is no heading for that segment.
@@ -496,7 +497,10 @@ public class VehicleState {
 			return Float.NaN;
 		
 		// Vehicle on non-layover path so return heading of that path.
-		return stopPath.getSegmentVector(match.getSegmentIndex()).getHeading();
+		float heading = stopPath.getSegmentVector(match.getSegmentIndex()).getHeading();
+		if (heading < 0.0f)
+			heading += 360.f;
+		return heading;
 	}
 	
 	/**
