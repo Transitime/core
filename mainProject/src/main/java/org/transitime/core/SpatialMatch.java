@@ -18,8 +18,8 @@ package org.transitime.core;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Route;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.ScheduleTime;
 import org.transitime.db.structs.Trip;
@@ -643,6 +643,10 @@ public class SpatialMatch {
 		return block.getTrips().get(tripIndex);
 	}
 
+	public Route getRoute() {
+		return getTrip().getRoute();
+	}
+	
 	/**
 	 * Returns the vector for the segment for this SpatialMatch.
 	 * @return
