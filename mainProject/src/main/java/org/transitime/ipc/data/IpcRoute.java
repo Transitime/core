@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.transitime.applications.Core;
+import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
@@ -42,6 +44,7 @@ public class IpcRoute extends IpcRouteSummary {
 	// Note that there are additional members in IpcRouteSummary superclass
 	private Collection<IpcStop> stops;
 	private Collection<IpcShape> shapes;
+	private Location locationOfNextPredictedVehicle;
 	
 	private static final long serialVersionUID = -227901807027962547L;
 
@@ -54,7 +57,11 @@ public class IpcRoute extends IpcRouteSummary {
 	 * 
 	 * @param dbRoute
 	 * @param stopId
+	 *            Set if want to know which part of route is major and which is
+	 *            minor. Otherwise set to null.
 	 * @param tripPatternId
+	 *            Set if want to know which part of route is major and which is
+	 *            minor. Otherwise set to null.
 	 */
 	public IpcRoute(Route dbRoute, String stopId,
 			String tripPatternId) {
@@ -65,8 +72,42 @@ public class IpcRoute extends IpcRouteSummary {
 		// Create Collections of stops and paths
 		stops = createStops(dbRoute, stopId, tripPatternId);
 		shapes = createShapes(dbRoute, stopId, tripPatternId);
+		locationOfNextPredictedVehicle = 
+				getLocationOfNextPredictedVehicle(dbRoute, stopId);
 	}
 
+	/**
+	 * If stop specified then returns the location of the next predicted vehicle
+	 * for that stop. Returns null if stop not specified or no predictions for
+	 * stop.
+	 * 
+	 * @param dbRoute
+	 * @param stopId
+	 * @return
+	 */
+	private static Location getLocationOfNextPredictedVehicle(Route dbRoute, String stopId) {
+		// If no stop specified then can't determine next predicted vehicle
+		if (stopId == null)
+			return null;
+		
+		// Determine the first IpcPrediction for the stop
+		List<IpcPredictionsForRouteStopDest> predsList = 
+				PredictionDataCache.getInstance().getPredictions(dbRoute.getShortName(), stopId);
+		if (predsList.isEmpty())
+			return null;
+		
+		List<IpcPrediction> ipcPreds = predsList.get(0).getPredictionsForRouteStop();
+		if (ipcPreds.isEmpty())
+			return null;
+		
+		// Based on the first prediction determine the current IpcVehicle info
+		String vehicleId = ipcPreds.get(0).getVehicleId();
+		
+		IpcExtVehicle vehicle = VehicleDataCache.getInstance().getVehicle(vehicleId);
+		
+		return new Location(vehicle.getLatitude(), vehicle.getLongitude());
+	}
+	
 	/**
 	 * Returns trip pattern specified by tripPatternId. If tripPatternId is null
 	 * then returns the longest trip pattern for each direction.
@@ -282,6 +323,8 @@ public class IpcRoute extends IpcRouteSummary {
 				+ ", textColor=" + textColor 
 				+ ", stops=" + stops
 				+ ", shapes=" + shapes
+				+ ", locationOfNextPredictedVehicle=" 
+					+ locationOfNextPredictedVehicle
 				+ "]";
 	}
 
@@ -292,4 +335,9 @@ public class IpcRoute extends IpcRouteSummary {
 	public Collection<IpcShape> getShapes() {
 		return shapes;
 	}
+
+	public Location getLocationOfNextPredictedVehicle() {
+		return locationOfNextPredictedVehicle;
+	}
+	
 }
