@@ -139,8 +139,13 @@ public class Location implements Serializable {
 		return Geo.matchDistanceAlongVector(this, v);
 	}
 	
+	/**
+	 * Outputs only "[lat, lon]". This is a bit different from all the
+	 * other toString() methods but the nice thing is that then one can
+	 * just cut & paste a location into a map in order to visualize it.
+	 */
 	public String toString() {
-		return "[lat=" + Geo.format(lat) + ", lon=" + Geo.format(lon) + "]";
+		return "[" + Geo.format(lat) + ", " + Geo.format(lon) + "]";
 	}
 	
 }
