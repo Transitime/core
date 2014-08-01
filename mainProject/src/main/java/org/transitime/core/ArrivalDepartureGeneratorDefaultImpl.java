@@ -327,6 +327,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		// If vehicle left too early then record an event
 		if (schAdh.isEarlierThan(CoreConfig.getAllowableEarlyDepartureTimeForLoggingEvent())) {
+			// Create description for VehicleEvent
 			Stop stop = Core.getInstance().getDbConfig().getStop(departure.getStopId());
 			Route route = Core.getInstance().getDbConfig().getRouteById(departure.getRouteId());
 			String description = "Vehicle " + departure.getVehicleId() 
@@ -334,6 +335,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					+ " \"" + stop.getName() + "\" for route \"" + route.getName() 
 					+ "\" " + schAdh.toString() + ". Scheduled departure time was " 
 					+ Time.timeStr(departure.getScheduledTime());
+
+			// Create, store in db, and log the VehicleEvent
 			VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
 					VehicleEvent.LEFT_TERMINAL_EARLY, 
 					description, 
@@ -344,6 +347,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		// If vehicle left too late then record an event
 		if (schAdh.isLaterThan(CoreConfig.getAllowableLateDepartureTimeForLoggingEvent())) {
+			// Create description for VehicleEvent
 			Stop stop = Core.getInstance().getDbConfig().getStop(departure.getStopId());
 			Route route = Core.getInstance().getDbConfig().getRouteById(departure.getRouteId());
 			String description = "Vehicle " + departure.getVehicleId() 
@@ -351,6 +355,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					+ " \"" + stop.getName() + "\" for route \"" + route.getName() 
 					+ "\" " + schAdh.toString() + ". Scheduled departure time was " 
 					+ Time.timeStr(departure.getScheduledTime());
+			
+			// Create, store in db, and log the VehicleEvent
 			VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
 					VehicleEvent.LEFT_TERMINAL_LATE, 
 					description, 
