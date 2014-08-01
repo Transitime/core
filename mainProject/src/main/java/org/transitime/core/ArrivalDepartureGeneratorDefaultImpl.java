@@ -17,6 +17,7 @@
 package org.transitime.core;
 
 import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -27,6 +28,9 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Departure;
+import org.transitime.db.structs.Route;
+import org.transitime.db.structs.Stop;
+import org.transitime.db.structs.VehicleEvent;
 import org.transitime.utils.Time;
 
 /**
@@ -300,6 +304,60 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		// Log creation of ArrivalDeparture in ArrivalsDepartures.log file
 		arrivalDeparture.logCreation();
+	}
+	
+	/**
+	 * If vehicle departs terminal too early or too late then log an event
+	 * so that the problem is made more obvious.
+	 * 
+	 * @param vehicleState
+	 * @param arrivalDeparture
+	 */
+	private void logEventIfVehicleDepartedEarlyOrLate(VehicleState vehicleState, 
+			Departure departure) {
+		// If departure not for terminal then can ignore
+		if (departure.getStopPathIndex() != 0) 
+			return;
+		
+		// Determine schedule adherence. If no schedule adherence info available
+		// then can ignore.
+		TemporalDifference schAdh = departure.getScheduleAdherence();
+		if (schAdh == null)
+			return;
+		
+		// If vehicle left too early then record an event
+		if (schAdh.isEarlierThan(CoreConfig.getAllowableEarlyDepartureTimeForLoggingEvent())) {
+			Stop stop = Core.getInstance().getDbConfig().getStop(departure.getStopId());
+			Route route = Core.getInstance().getDbConfig().getRouteById(departure.getRouteId());
+			String description = "Vehicle " + departure.getVehicleId() 
+					+ " left stop " + departure.getStopId()
+					+ " \"" + stop.getName() + "\" for route \"" + route.getName() 
+					+ "\" " + schAdh.toString() + ". Scheduled departure time was " 
+					+ Time.timeStr(departure.getScheduledTime());
+			VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
+					VehicleEvent.LEFT_TERMINAL_EARLY, 
+					description, 
+					true,  // predictable
+					false, // becameUnpredictable 
+					null); // supervisor
+		} 
+		
+		// If vehicle left too late then record an event
+		if (schAdh.isLaterThan(CoreConfig.getAllowableLateDepartureTimeForLoggingEvent())) {
+			Stop stop = Core.getInstance().getDbConfig().getStop(departure.getStopId());
+			Route route = Core.getInstance().getDbConfig().getRouteById(departure.getRouteId());
+			String description = "Vehicle " + departure.getVehicleId() 
+					+ " left stop " + departure.getStopId()
+					+ " \"" + stop.getName() + "\" for route \"" + route.getName() 
+					+ "\" " + schAdh.toString() + ". Scheduled departure time was " 
+					+ Time.timeStr(departure.getScheduledTime());
+			VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
+					VehicleEvent.LEFT_TERMINAL_LATE, 
+					description, 
+					true,  // predictable
+					false, // becameUnpredictable 
+					null); // supervisor			
+		}
 	}
 	
 	/**
@@ -633,6 +691,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				oldVehicleAtStopInfo.getTripIndex(),
 				oldVehicleAtStopInfo.getStopPathIndex());
 		storeInDbAndLog(departure);
+		
+		// Log event if vehicle left a terminal too early or too late
+		logEventIfVehicleDepartedEarlyOrLate(vehicleState, departure);
 		
 		// The new beginTime to be used to determine arrival/departure
 		// times at intermediate stops

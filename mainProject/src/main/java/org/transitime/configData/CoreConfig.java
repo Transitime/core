@@ -508,7 +508,7 @@ public class CoreConfig {
 					+ "locations are not always accurate.");
 	
 	/**
-	 * How early a vehicle can have left terminal and have it be considered an
+	 * How early in msec a vehicle can have left terminal and have it be considered an
 	 * early departure instead of just moving around within the layover. Don't want
 	 * to mistakingly think that vehicles moving around during layover have started
 	 * their trip early. Therefore this value should be limited to just a few minutes
@@ -524,12 +524,42 @@ public class CoreConfig {
 	private static IntegerConfigValue allowableEarlyTimeForEarlyDeparture = 
 			new IntegerConfigValue("transitime.core.allowableEarlyTimeForEarlyDeparture", 
 			5*Time.MS_PER_MIN,
-			"How early a vehicle can have left terminal and have it be considered "
+			"How early in msec a vehicle can have left terminal and have it be considered "
 					+ "an early departure instead of just moving around within "
 					+ "the layover. Don't want to mistakingly think that vehicles "
 					+ "moving around during layover have started their trip early. "
 					+ "Therefore this value should be limited to just a few minutes "
 					+ "since vehicles usually don't leave early.");
+	
+	/**
+	 * How early in seconds a vehicle can departure a terminal before it registers
+	 * a VehicleEvent indicating a problem.
+	 * 
+	 * @return
+	 */
+	public static int getAllowableEarlyDepartureTimeForLoggingEvent() {
+		return allowableEarlyDepartureTimeForLoggingEvent.getValue();
+	}
+	private static IntegerConfigValue allowableEarlyDepartureTimeForLoggingEvent =
+			new IntegerConfigValue("transitime.core.allowableEarlyDepartureTimeForLoggingEvent",
+					60,
+					"How early in seconds a vehicle can departure a terminal "
+					+ "before it registers a VehicleEvent indicating a problem.");
+	
+	/**
+	 * How late in seconds a vehicle can departure a terminal before it registers
+	 * a VehicleEvent indicating a problem.
+	 * 
+	 * @return
+	 */
+	public static int getAllowableLateDepartureTimeForLoggingEvent() {
+		return allowableLateDepartureTimeForLoggingEvent.getValue();
+	}
+	private static IntegerConfigValue allowableLateDepartureTimeForLoggingEvent =
+			new IntegerConfigValue("transitime.core.allowableEarlyDepartureTimeForLoggingEvent",
+					4*Time.SEC_PER_MIN,
+					"How early in seconds a vehicle can departure a terminal "
+					+ "before it registers a VehicleEvent indicating a problem.");
 	
 	/**
 	 * How far a vehicle can be before a stop in meters and be considered to

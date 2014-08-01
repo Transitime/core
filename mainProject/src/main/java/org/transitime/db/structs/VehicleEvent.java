@@ -145,6 +145,8 @@ public class VehicleEvent implements Serializable {
 	public static final String TIMEOUT = "Timeout";
 	public static final String NO_MATCH = "No match";
 	public static final String END_OF_BLOCK = "End of block";
+	public static final String LEFT_TERMINAL_EARLY = "Left terminal early";
+	public static final String LEFT_TERMINAL_LATE = "Left terminal late";
 	
 	// Hibernate requires class to be Serializable
 	private static final long serialVersionUID = -763445348557811925L;
@@ -235,7 +237,8 @@ public class VehicleEvent implements Serializable {
 
 	/**
 	 * A simpler way to create a VehicleEvent that gets a lot of its info from
-	 * the avlReport and match params. The match param can be null.
+	 * the avlReport and match params. This also logs it and queues it to be
+	 * stored in database. The match param can be null.
 	 * 
 	 * @param avlReport
 	 * @param match
