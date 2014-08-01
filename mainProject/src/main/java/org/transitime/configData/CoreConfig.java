@@ -562,6 +562,24 @@ public class CoreConfig {
 					+ "before it registers a VehicleEvent indicating a problem.");
 	
 	/**
+	 * If a vehicle is sitting at a terminal and provides another GPS report
+	 * indicating that it is more than this much later than the configured
+	 * departure time then a VehicleEvent is created to record the problem.
+	 * 
+	 * @return
+	 */
+	public static int getAllowableLateAtTerminalForLoggingEvent() {
+		return allowableLateAtTerminalForLoggingEvent.getValue();
+	}
+	private static IntegerConfigValue allowableLateAtTerminalForLoggingEvent =
+			new IntegerConfigValue("transitime.core.allowableLateAtTerminalForLoggingEvent",
+					60,
+					"If a vehicle is sitting at a terminal and provides another "
+					+ "GPS report indicating that it is more than this much "
+					+ "later than the configured departure time then a "
+					+ "VehicleEvent is created to record the problem.");
+	
+	/**
 	 * How far a vehicle can be before a stop in meters and be considered to
 	 * have arrived.
 	 * 

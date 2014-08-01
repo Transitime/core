@@ -147,6 +147,7 @@ public class VehicleEvent implements Serializable {
 	public static final String END_OF_BLOCK = "End of block";
 	public static final String LEFT_TERMINAL_EARLY = "Left terminal early";
 	public static final String LEFT_TERMINAL_LATE = "Left terminal late";
+	public static final String NOT_LEAVING_TERMINAL = "Not leaving terminal";
 	
 	// Hibernate requires class to be Serializable
 	private static final long serialVersionUID = -763445348557811925L;

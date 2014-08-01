@@ -27,6 +27,8 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Route;
+import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.utils.Time;
@@ -588,6 +590,35 @@ public class AvlProcessor {
 		TemporalDifference scheduleAdherence = 
 				RealTimeSchedAdhProcessor.generate(vehicleState);
 				
+		// If vehicle is just sitting at terminal past its scheduled departure
+		// time then indicate such as an event.
+		if (vehicleState.getMatch().isWaitStop() 
+				&& scheduleAdherence != null
+				&& scheduleAdherence.isLaterThan(CoreConfig.getAllowableLateAtTerminalForLoggingEvent())
+				&& vehicleState.getMatch().getAtStop() != null) {
+			// Create description for VehicleEvent
+			String stopId = vehicleState.getMatch().getStopPath().getStopId();
+			Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+			Route route = vehicleState.getMatch().getRoute();
+			VehicleAtStopInfo stopInfo = vehicleState.getMatch().getAtStop();
+			Integer scheduledDepartureTime = stopInfo.getScheduleTime().getDepartureTime();	
+
+			String description = "Vehicle " + vehicleState.getVehicleId() 
+					+ " still at stop " + stopId
+					+ " \"" + stop.getName() + "\" for route \"" + route.getName() 
+					+ "\" " + scheduleAdherence.toString() + ". Scheduled departure time was " 
+					+ Time.timeOfDayStr(scheduledDepartureTime);
+			
+			// Create, store in db, and log the VehicleEvent
+			VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
+					VehicleEvent.NOT_LEAVING_TERMINAL, 
+					description, 
+					true,  // predictable
+					false, // becameUnpredictable 
+					null); // supervisor			
+
+		}
+		
 		// Make sure the schedule adherence is reasonable
 		if (scheduleAdherence != null 
 				&& !scheduleAdherence.isWithinBounds(vehicleState)) {
