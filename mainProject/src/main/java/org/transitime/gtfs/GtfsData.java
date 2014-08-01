@@ -115,6 +115,7 @@ public class GtfsData {
 			new HashMap<String, String>();
 	
 	// From main and supplement stops.txt files. Key is stop_id.
+	private Map<String, GtfsStop> gtfsStopsMap;
 	private Map<String, Stop> stopsMap;
 	
 	// From trips.txt file. Key is trip_id.
@@ -420,7 +421,7 @@ public class GtfsData {
 		List<GtfsStop> gtfsStops = stopsReader.get();		
 
 		// Put GtfsStop objects in Map so easy to find the right ones
-		Map<String, GtfsStop> gtfsStopsMap = new HashMap<String, GtfsStop>(gtfsStops.size());
+		gtfsStopsMap = new HashMap<String, GtfsStop>(gtfsStops.size());
 		for (GtfsStop gtfsStop : gtfsStops)
 			gtfsStopsMap.put(gtfsStop.getStopId(), gtfsStop);
 		
@@ -624,6 +625,11 @@ public class GtfsData {
 		// stops.txt file must be read in first. Also, need to know which route
 		// is associated with a trip determined in stop_time.txt file. This
 		// info is in trips.txt so it needs to be processed first.
+		if (gtfsStopsMap == null || gtfsStopsMap.isEmpty()) {
+			logger.error("processStopData() must be called before " + 
+					"GtfsData.processStopTimesData() is. Exiting.");
+			System.exit(-1);
+		}
 		if (stopsMap == null || stopsMap.isEmpty()) {
 			logger.error("processStopData() must be called before " + 
 					"GtfsData.processStopTimesData() is. Exiting.");
@@ -644,8 +650,10 @@ public class GtfsData {
 		// Read in the stop_times.txt GTFS data from file. Use a large initial
 		// array size so when reading in data won't have to constantly increase
 		// array size and do array copying. SFMTA for example has 1,100,000
-		// stop times so starting with a value of 500,000 certainly should be reasonable.
-		GtfsStopTimesReader stopTimesReader = new GtfsStopTimesReader(gtfsDirectoryName);
+		// stop times so starting with a value of 500,000 certainly should be 
+		// reasonable.
+		GtfsStopTimesReader stopTimesReader = 
+				new GtfsStopTimesReader(gtfsDirectoryName);
 		List<GtfsStopTime> gtfsStopTimes = stopTimesReader.get(500000);
 
 		// The GtfsStopTimes are put into this map and then can create Trips
@@ -654,10 +662,26 @@ public class GtfsData {
 
 		// Put the GtfsStopTimes into the map
 		for (GtfsStopTime gtfsStopTime : gtfsStopTimes) {
+			// There can be a situation where the agency defines a stop as the
+			// start terminal of a trip but where the vehicle actually starts
+			// the trip at a subsequent stop. Yes, the agency should fix this
+			// data but they won't. An example is sfmta 21-Hayes route 
+			// downtown where the first stop defined in config is wrong. 
+			// Therefore filter out such stops.
+			GtfsStop gtfsStop = getGtfsStop(gtfsStopTime.getStopId());
+			if (gtfsStop.deleteFromRoutesStr() != null) {
+				GtfsTrip gtfsTrip = getGtfsTrip(gtfsStopTime.getTripId());
+				GtfsRoute gtfsRoute = getGtfsRoute(gtfsTrip.getRouteId());
+				String routeShortName = gtfsRoute.getRouteShortName();
+				if (gtfsStop.shouldDeleteFromRoute(routeShortName))
+					continue;
+			}
+			
+			// Add the GtfsStopTime to the map so later can create Trips and 
+			// TripPatterns
 			String tripId = gtfsStopTime.getTripId();
-						
-			// Add the GtfsStopTime to the map so later can create Trips and TripPatterns
-			List<GtfsStopTime> gtfsStopTimesForTrip = gtfsStopTimesForTripMap.get(tripId);
+			List<GtfsStopTime> gtfsStopTimesForTrip = 
+					gtfsStopTimesForTripMap.get(tripId);
 			if (gtfsStopTimesForTrip == null) {
 				gtfsStopTimesForTrip = new ArrayList<GtfsStopTime>();
 				gtfsStopTimesForTripMap.put(tripId, gtfsStopTimesForTrip);
@@ -708,6 +732,11 @@ public class GtfsData {
 	 */
 	private void createTripsAndTripPatterns(
 			Map<String, List<GtfsStopTime>> gtfsStopTimesForTripMap) {
+		if (stopsMap == null || stopsMap.isEmpty()) {
+			logger.error("processStopData() must be called before " + 
+					"GtfsData.processStopTimesData() is. Exiting.");
+			System.exit(-1);
+		}
 		if (frequencyMap == null) {
 			logger.error("processFrequencies() must be called before " + 
 					"GtfsData.createTripsAndTripPatterns() is. Exiting.");
@@ -1407,10 +1436,17 @@ public class GtfsData {
 		return tripsCollection != null && !tripsCollection.isEmpty();
 	}
 	
+	public GtfsStop getGtfsStop(String stopId) {
+		return gtfsStopsMap.get(stopId);		
+	}
+	
 	public Collection<Stop> getStops() {
 		return stopsMap.values();
 	}
+	
 	/**
+	 * Gets the Stop from the stopsMap.
+	 * 
 	 * @param stopId
 	 * @return The Stop for the specified stopId
 	 */

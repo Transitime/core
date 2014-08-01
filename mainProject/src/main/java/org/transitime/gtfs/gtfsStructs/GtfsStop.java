@@ -56,7 +56,9 @@ public class GtfsStop extends CsvBase {
 	private final Boolean waitStop;
 	// Indicates if stop should be hidden from public
 	private final Boolean hidden;
-
+	// Indicates ":" separated list of routes that stop should not be used for
+	private final String deleteFromRoutesStr;
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -107,6 +109,9 @@ public class GtfsStop extends CsvBase {
 		// Useful for supplemental files because allows one to hide
 		// a particular stop from the public.
 		hidden = getOptionalBooleanValue(record, "hidden");
+		
+		// So can delete a stop from the trips for a route
+		deleteFromRoutesStr = getOptionalValue(record, "deleteFromRoutes");
 	}
 	
 	/**
@@ -137,6 +142,7 @@ public class GtfsStop extends CsvBase {
 		this.layoverStop = original.layoverStop;
 		this.waitStop = original.waitStop;
 		this.hidden = original.hidden;
+		this.deleteFromRoutesStr = original.deleteFromRoutesStr;
 		
 		// Set the new location
 		this.stopLat = lat;
@@ -173,6 +179,7 @@ public class GtfsStop extends CsvBase {
 		layoverStop = s.layoverStop == null ? o.layoverStop : s.layoverStop;
 		waitStop = s.waitStop == null ? o.waitStop : s.waitStop;
 		hidden = s.hidden == null ? o.hidden : s.hidden;
+		deleteFromRoutesStr = s.deleteFromRoutesStr == null ? o.deleteFromRoutesStr : s.deleteFromRoutesStr;
 	}
 
 	public String getStopId() {
@@ -264,6 +271,34 @@ public class GtfsStop extends CsvBase {
 		return hidden;
 	}
 
+	/**
+	 * Returns ":" separated string indicate route short names where this
+	 * stop should not be included in the trips. Returns null if not defined.
+	 * @return
+	 */
+	public String deleteFromRoutesStr() {
+		return deleteFromRoutesStr;
+	}
+	
+	/**
+	 * Returns true if the routeShortNameToDeleteFrom specified is defined in
+	 * deleteFromRoutes.
+	 *  
+	 * @param routeShortNameToDeleteFrom
+	 * @return
+	 */
+	public boolean shouldDeleteFromRoute(String routeShortNameToDeleteFrom) {
+		if (deleteFromRoutesStr == null)
+			return false;
+		String[] routeShortNames = deleteFromRoutesStr.split(":");
+		for (String routeShortName : routeShortNames) {
+			if (routeShortName.equals(routeShortNameToDeleteFrom))
+				return true;
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public String toString() {
 		return "GtfsStop ["
@@ -284,6 +319,7 @@ public class GtfsStop extends CsvBase {
 				+ ", layoverStop=" + layoverStop
 				+ ", waitStop=" + waitStop
 				+ ", hidden=" + hidden
+				+ ", deleteFromRoutes=" + deleteFromRoutesStr
 				+ "]";
 	}
 	
