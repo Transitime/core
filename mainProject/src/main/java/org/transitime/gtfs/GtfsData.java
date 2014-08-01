@@ -531,6 +531,24 @@ public class GtfsData {
 			// Convenience variable
 			String tripId = gtfsStopTime.getTripId();
 			
+			// There can be a situation where the agency defines a stop as the
+			// start terminal of a trip but where the vehicle actually starts
+			// the trip at a subsequent stop. Yes, the agency should fix this
+			// data but they won't. An example is sfmta 21-Hayes route 
+			// downtown where the first stop defined in config is wrong. 
+			// Therefore filter out such stops. Note that only filtering
+			// out such stops if they are the first stops in the trip.
+			GtfsStop gtfsStop = getGtfsStop(gtfsStopTime.getStopId());
+			if (firstStopInTrip && gtfsStop.deleteFromRoutesStr() != null) {
+				GtfsTrip gtfsTrip = getGtfsTrip(gtfsStopTime.getTripId());
+				GtfsRoute gtfsRoute = getGtfsRoute(gtfsTrip.getRouteId());
+				String routeShortName = gtfsRoute.getRouteShortName();
+				if (gtfsStop.shouldDeleteFromRoute(routeShortName)) {
+					iterator.remove();
+					continue;
+				}
+			}
+			
 			// If the GtfsStopTime refers to a non-existent stop than log an error
 			if (getStop(gtfsStopTime.getStopId()) == null) {
 				logger.error("In stop_times.txt line {} refers to stop_id {} but " + 
@@ -662,21 +680,6 @@ public class GtfsData {
 
 		// Put the GtfsStopTimes into the map
 		for (GtfsStopTime gtfsStopTime : gtfsStopTimes) {
-			// There can be a situation where the agency defines a stop as the
-			// start terminal of a trip but where the vehicle actually starts
-			// the trip at a subsequent stop. Yes, the agency should fix this
-			// data but they won't. An example is sfmta 21-Hayes route 
-			// downtown where the first stop defined in config is wrong. 
-			// Therefore filter out such stops.
-			GtfsStop gtfsStop = getGtfsStop(gtfsStopTime.getStopId());
-			if (gtfsStop.deleteFromRoutesStr() != null) {
-				GtfsTrip gtfsTrip = getGtfsTrip(gtfsStopTime.getTripId());
-				GtfsRoute gtfsRoute = getGtfsRoute(gtfsTrip.getRouteId());
-				String routeShortName = gtfsRoute.getRouteShortName();
-				if (gtfsStop.shouldDeleteFromRoute(routeShortName))
-					continue;
-			}
-			
 			// Add the GtfsStopTime to the map so later can create Trips and 
 			// TripPatterns
 			String tripId = gtfsStopTime.getTripId();
