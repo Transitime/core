@@ -404,7 +404,7 @@ public class VehicleEvent implements Serializable {
 		return "VehicleEvent [" 
 				+ "time=" + Time.dateTimeStrMsec(time)
 				+ ", vehicleId=" + vehicleId
-				+ ", eventType=" + eventType 
+				+ ", eventType=\"" + eventType + "\"" 
 				+ ", description=\"" + description + "\""
 				+ ", predictable=" + predictable 
 				+ ", becameUnpredictable=" + becameUnpredictable 
