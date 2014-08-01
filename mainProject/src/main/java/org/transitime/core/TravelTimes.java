@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
+import org.transitime.db.structs.Location;
 import org.transitime.db.structs.ScheduleTime;
 import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.utils.Time;
@@ -99,6 +100,28 @@ public class TravelTimes {
 		return (int) (veryRoughTravelTimeSecs * Time.MS_PER_SEC);
 	}
 	
+	/**
+	 * Determines how long it should take as the crow flies from the the end of
+	 * the previous trip to the new location.
+	 * 
+	 * @param spatialMatch
+	 * @param newLoc
+	 * @return Msec of travel time from end of previous trip to the new location
+	 */
+	public static int travelTimeFromLayoverArrivalToNewLoc(
+			SpatialMatch spatialMatch, Location newLoc) {
+		if (!spatialMatch.isLayover())
+			return 0;
+		
+		SpatialMatch matchAtPreviousStop = spatialMatch
+				.getMatchAtPreviousStop();
+		Location endOfTripLocation = matchAtPreviousStop.getStopPath()
+				.getEndOfPathLocation();
+		
+		double distance = endOfTripLocation.distance(newLoc);
+		
+		return travelTimeAsTheCrowFlies(distance);
+	}
 
 	/**
 	 * If at a waitStop then the travel time should be adjusted to this amount.
@@ -427,7 +450,7 @@ public class TravelTimes {
 			// If layover then take that into account. For such a case the 
 			// travel time will then be the scheduled departure time minus 
 			// the start time.
-			if (indices.isLayover()) {
+			if (indices.isWaitStop()) {
 				travelTimeMsec = 
 						adjustTravelTimeForWaitStop(timeOfDaySecs, 
 								travelTimeMsec, indices);
@@ -442,8 +465,10 @@ public class TravelTimes {
 				expectedTravelTimeFromBeginningOfStopPathToMatch(match2);
 		travelTimeMsec += travelTimeForPartialLastStopPath;
 		logger.debug("For vehicleId={} added travel time for last " +
-				"partial stop path of {} msec so now travel time is {} msec", 
-				vehicleId, travelTimeForPartialLastStopPath, travelTimeMsec);
+				"partial stop path of {} msec so now travel time is {} msec." +
+				"match2 indices={}", 
+				vehicleId, travelTimeForPartialLastStopPath, travelTimeMsec, 
+				endIndices);
 		
 		// Return the results
 		logger.debug("For vehicleId={} returning total travel time={} msec. {}" , 

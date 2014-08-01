@@ -136,7 +136,7 @@ public class SpatialMatch {
 	 * 
 	 * @return
 	 */
-	private double distanceFromBeginningOfTrip() {
+	public double distanceFromBeginningOfTrip() {
 		// Determine how far match is from terminal at beginning of trip
 		double distanceFromFirstTerminal = 0.0;
 		Trip trip = getTrip();

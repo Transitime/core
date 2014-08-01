@@ -465,26 +465,6 @@ public class CoreConfig {
 					"matched to its block assignment.");
 
 	/**
-	 * For initial matching. If the spatial match is for a layover then the
-	 * temporal match is biased by this amount in order to make match to
-	 * non-layover more likely. This prevents wrongly matching vehicles to 
-	 * layovers when they are running late.
-	 * 
-	 * @return layover bias in seconds
-	 */
-	public static int getLayoverBiasForInitialMatching() {
-		return layoverBiasSecondsForInitialMatching.getValue();
-	}
-	private static IntegerConfigValue layoverBiasSecondsForInitialMatching = 
-			new IntegerConfigValue("transitime.core.layoverBiasSecondsForInitialMatching", 
-					20 * Time.SEC_PER_MIN,
-					"For initial matching. If the spatial match is for a " +
-					"layover then the temporal match is biased by this " +
-					"amount in order to make match to non-layover more " +
-					"likely. This prevents wrongly matching vehicles to " +
-					"layovers when they are running late.");
-	
-	/**
 	 * For initial matching vehicle to assignment when there isn't any heading
 	 * information. In that case also want to match to previous AVL report.
 	 * This parameter specifies how far, as the crow flies, the previous AVL
@@ -506,24 +486,53 @@ public class CoreConfig {
 					"history is from the current AvlReport.");
 					
 	/**
-	 * How far along path past a layover a vehicle can spatially match but still
-	 * be considered to be at that layover. Important for determining
-	 * predictions and such.
+	 * How far along path past a layover stop a vehicle needs to be in order for
+	 * it to be considered an early departure instead of just moving around
+	 * within the layover. Needs to be a decent distance since the stop
+	 * locations are not always accurate.
+	 * <p>
+	 * Related to getAllowableEarlyTimeForEarlyDeparture().
 	 * 
 	 * @return
 	 */
-	public static double getDistanceAtWhichStillAtLayover() {
-		return distanceAtWhichStillAtLayover.getValue();
+	public static double getDistanceFromLayoverForEarlyDeparture() {
+		return distanceFromLayoverForEarlyDeparture.getValue();
 	}
-	private static DoubleConfigValue distanceAtWhichStillAtLayover =
-			new DoubleConfigValue("transitime.core.distanceAtWhichStillAtLayover", 
+	private static DoubleConfigValue distanceFromLayoverForEarlyDeparture =
+			new DoubleConfigValue("transitime.core.distanceFromLayoverForEarlyDeparture", 
 					100.0,
-					"How far along path past a layover a vehicle can " +
-					"spatially match but still be considered to be at that " +
-					"layover. Important for determining predictions and such.");
+					"How far along path past a layover stop a vehicle needs "
+					+ "to be in order for it to be considered an early "
+					+ "departure instead of just moving around within the "
+					+ "layover. Needs to be a decent distance since the stop "
+					+ "locations are not always accurate.");
 	
 	/**
-	 * How far a vehicle can be ahead of a stop in meters and be considered to
+	 * How early a vehicle can have left terminal and have it be considered an
+	 * early departure instead of just moving around within the layover. Don't want
+	 * to mistakingly think that vehicles moving around during layover have started
+	 * their trip early. Therefore this value should be limited to just a few minutes
+	 * since vehicles usually don't leave early.
+	 * <p>
+	 * Related to getDistanceFromLayoverForEarlyDeparture()
+	 * 
+	 * @return Time in msec
+	 */
+	public static int getAllowableEarlyTimeForEarlyDeparture() {
+		return allowableEarlyTimeForEarlyDeparture.getValue();		
+	}	
+	private static IntegerConfigValue allowableEarlyTimeForEarlyDeparture = 
+			new IntegerConfigValue("transitime.core.allowableEarlyTimeForEarlyDeparture", 
+			5*Time.MS_PER_MIN,
+			"How early a vehicle can have left terminal and have it be considered "
+					+ "an early departure instead of just moving around within "
+					+ "the layover. Don't want to mistakingly think that vehicles "
+					+ "moving around during layover have started their trip early. "
+					+ "Therefore this value should be limited to just a few minutes "
+					+ "since vehicles usually don't leave early.");
+	
+	/**
+	 * How far a vehicle can be before a stop in meters and be considered to
 	 * have arrived.
 	 * 
 	 * @return

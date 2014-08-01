@@ -154,11 +154,24 @@ public class TemporalDifference implements Serializable {
 	 * @return
 	 */
 	private int temporalDifferenceAbsoluteValue() {
+		// Early or late?
 		if (temporalDifferenceMsec > 0)
+			// Early, so multiply by early to late ratio
 			return (int) Math.round(temporalDifferenceMsec * 
 					CoreConfig.getEarlyToLateRatio());
 		else 
+			// Late or on time, so return positive version of temporal different
 			return -temporalDifferenceMsec;
+	}
+	
+	/**
+	 * If early then returns positive value indicating how many msec early. If
+	 * late then returns negative value indicating how many msec late.
+	 * 
+	 * @return
+	 */
+	public int early() {
+		return temporalDifferenceMsec;
 	}
 	
 	/**
