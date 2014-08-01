@@ -45,7 +45,10 @@ public class VectorWithHeading extends Vector {
 	 */
 	public VectorWithHeading(Location l1, Location l2) {
 		super(l1, l2);
-		headingInDegrees = (float) heading();
+		float heading = (float) heading();
+		if (heading < 0.0)
+			heading += 360.0;
+		headingInDegrees = heading;
 	}
 
 	/**
