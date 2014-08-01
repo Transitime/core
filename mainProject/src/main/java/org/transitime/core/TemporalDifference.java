@@ -121,12 +121,37 @@ public class TemporalDifference implements Serializable {
 	 */
 	public boolean isWithinBounds(int allowableEarlySeconds,
 			int allowableLateSeconds) {
+		// Return whether it is not beyond the bounds
+		return !isEarlierThan(allowableEarlySeconds) 
+				&& !isLaterThan(allowableLateSeconds);
+	}
+	
+	/**
+	 * Returns true if vehicle is earlier than allowableEarlySeconds
+	 * 
+	 * @param allowableEarlySeconds
+	 * @return
+	 */
+	public boolean isEarlierThan(int allowableEarlySeconds) {
 		// Note: casting allowable seconds to a long since if use MAX_INTEGER
 		// and then multiple by Time.MS_PER_SEC could end up exceeding what
 		// an integer can handle.
-		return temporalDifferenceMsec < (long) allowableEarlySeconds * Time.MS_PER_SEC
-				&& -temporalDifferenceMsec < (long) allowableLateSeconds
-						* Time.MS_PER_SEC;
+		return temporalDifferenceMsec > 
+				(long) allowableEarlySeconds * Time.MS_PER_SEC;
+	}
+	
+	/**
+	 * Returns true if vehicle is later than allowableLateSeconds
+	 * 
+	 * @param allowableLateSeconds
+	 * @return
+	 */
+	public boolean isLaterThan(int allowableLateSeconds) {
+		// Note: casting allowable seconds to a long since if use MAX_INTEGER
+		// and then multiple by Time.MS_PER_SEC could end up exceeding what
+		// an integer can handle.
+		return -temporalDifferenceMsec > 
+				(long) allowableLateSeconds * Time.MS_PER_SEC;
 	}
 	
 	/**
