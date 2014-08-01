@@ -30,6 +30,7 @@ import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.VectorWithHeading;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
@@ -497,29 +498,38 @@ public class VehicleState {
 			return Float.NaN;
 		
 		// Vehicle on non-layover path so return heading of that path.
-		float heading = stopPath.getSegmentVector(match.getSegmentIndex()).getHeading();
-		if (heading < 0.0f)
-			heading += 360.f;
-		return heading;
-	}
-	
-	/**
-	 * Normally uses the heading from getPathHeading(). But if that returns NaN
-	 * then uses recent valid heading from last AVL report, though that might be
-	 * NaN as well. This can be better then always using heading from AVL report
-	 * since that often won't line up with the path and can make vehicles be
-	 * oriented in noticeably peculiar ways when drawn on an map.
-	 * 
-	 * @return The best heading for a vehicle
-	 */
-	public float getHeading() {
-		float heading = getPathHeading();
-		if (Float.isNaN(heading))
-			return recentValidHeading();
-		else
-			return heading;
+		VectorWithHeading vector = 
+				stopPath.getSegmentVector(match.getSegmentIndex());
+		return vector.getHeading();
 	}
 
+	/**
+	 * For when trying to get heading but vehicle is at a layover. Can't use
+	 * heading of layover because vehicle might be deadheading and therefore
+	 * heading in a different direction of the layover segment. Plus the layover
+	 * segment is usually just a stub segment that might not have valid
+	 * direction at all. This method can be used to get the heading of the next
+	 * path segment, which should be valid.
+	 * 
+	 * @return
+	 */
+	private float getNextPathHeading() {
+		// If vehicle not currently matched then there is no path heading
+		SpatialMatch match = getMatch();
+		if (match == null)
+			return Float.NaN;
+
+		// If already at end of trip can't go on to next stop path
+		if (getTrip().getNumberStopPaths() <= match.getStopPathIndex()+1)
+			return Float.NaN;
+
+		// Determine the next first segment vector of the next path
+		StopPath stopPath = getTrip().getStopPath(match.getStopPathIndex()+1);
+		VectorWithHeading vector = stopPath.getSegmentVector(0);
+		
+		return vector.getHeading();
+	}
+	
 	/**
 	 * Looks in avlReportHistory and returns last valid heading. Will still
 	 * return null in certain situations such as there not being a history,
@@ -538,6 +548,35 @@ public class VehicleState {
 		return Float.NaN;
 	}
 	
+	/**
+	 * Normally uses the heading from getPathHeading(). But if that returns NaN
+	 * then uses recent valid heading from last AVL report, though that might be
+	 * NaN as well. This can be better then always using heading from AVL report
+	 * since that often won't line up with the path and can make vehicles be
+	 * oriented in noticeably peculiar ways when drawn on an map.
+	 * 
+	 * @return The best heading for a vehicle
+	 */
+	public float getHeading() {
+		// Try using path heading so that direction of vehicle will really 
+		// follow path. This make the maps look good.
+		float heading = getPathHeading();
+		if (!Float.isNaN(heading))
+			return heading;
+	
+		// If vehicle not matched to path or if matched to layover then the
+		// heading from getPathHeading() is NaN. For this situation use the
+		// most recent valid GPS heading.
+		heading = recentValidHeading();
+		if (!Float.isNaN(heading))
+			return heading;
+		
+		// Most recent heading wasn't valid either so as last shot try using
+		// path segment of next segment past layover.
+		heading = getNextPathHeading();
+		return heading;
+	}
+
 	@Override
 	public String toString() {
 		return "VehicleState [" 
