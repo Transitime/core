@@ -259,7 +259,7 @@ public class VehicleEvent implements Serializable {
 				match==null ? null : match.getTrip().getRouteShortName();
 		String blockId = match==null ? null : match.getBlock().getId();
 		String tripId = match==null ? null : match.getTrip().getId();
-		String stopId = null;
+		String stopId = match==null ? null : match.getStopPath().getStopId();
 		
 		// Create and return the VehicleEvent
 		return create(avlReport.getDate(), avlReport.getVehicleId(),
@@ -403,18 +403,19 @@ public class VehicleEvent implements Serializable {
 	@Override
 	public String toString() {
 		return "VehicleEvent [" 
-				+ "time=" + Time.dateTimeStrMsec(time)
+				+ "routeShrtNm=" + routeShortName
+				+ ", stopId=" + stopId 
 				+ ", vehicleId=" + vehicleId
 				+ ", eventType=\"" + eventType + "\"" 
 				+ ", description=\"" + description + "\""
+				+ ", location=" + location 
+				+ ", blockId=" + blockId 
+				+ ", tripId=" + tripId 
+				+ ", routeId=" + routeId
 				+ ", predictable=" + predictable 
 				+ ", becameUnpredictable=" + becameUnpredictable 
 				+ ", supervisor=" + supervisor
-				+ ", location=" + location 
-				+ ", routeId=" + routeId
-				+ ", blockId=" + blockId 
-				+ ", tripId=" + tripId 
-				+ ", stopId=" + stopId 
+				+ ", time=" + Time.dateTimeStrMsec(time)
 				+ "]";
 	}
 
