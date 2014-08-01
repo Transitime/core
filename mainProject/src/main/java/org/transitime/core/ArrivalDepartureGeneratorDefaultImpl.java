@@ -245,14 +245,14 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param stopPathIndex
 	 */
 	private Departure createDepartureTime(VehicleState vehicleState,
-			long departureTime, Block block, int tripIndex, int pathIndex) {		
+			long departureTime, Block block, int tripIndex, int stopPathIndex) {		
 		// Store the departure in the database via the db logger
 		Departure departure = new Departure(vehicleState.getVehicleId(), 
 				new Date(departureTime),
 				vehicleState.getAvlReport().getDate(),
 				block,
 				tripIndex,
-				pathIndex);
+				stopPathIndex);
 		logger.debug("Creating departure: {}", departure);
 		return departure;
 	}

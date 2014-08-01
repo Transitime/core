@@ -48,8 +48,8 @@ public class Departure extends ArrivalDeparture {
 	 * @param stopPathIndex
 	 */
 	public Departure(String vehicleId, Date time, Date avlTime, Block block,
-			int tripIndex, int pathIndex) {
-		super(vehicleId, time, avlTime, block, tripIndex, pathIndex, 
+			int tripIndex, int stopPathIndex) {
+		super(vehicleId, time, avlTime, block, tripIndex, stopPathIndex, 
 				false); // isArrival
 	}
 	
