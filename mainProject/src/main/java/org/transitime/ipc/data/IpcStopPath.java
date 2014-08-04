@@ -20,7 +20,9 @@ package org.transitime.ipc.data;
 import java.io.Serializable;
 import java.util.List;
 
+import org.transitime.applications.Core;
 import org.transitime.db.structs.Location;
+import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.StopPath;
 import org.transitime.utils.Geo;
 
@@ -35,6 +37,7 @@ public class IpcStopPath implements Serializable {
 	private final int configRev;
 	private final String stopPathId;
 	private final String stopId;
+	private final String stopName;
 	private final int gtfsStopSeq;
 	private final boolean layoverStop;
 	private final boolean waitStop;
@@ -51,6 +54,9 @@ public class IpcStopPath implements Serializable {
 		this.configRev = dbStopPath.getConfigRev();
 		this.stopPathId = dbStopPath.getStopPathId();
 		this.stopId = dbStopPath.getStopId();
+		Stop stop = Core.getInstance().getDbConfig()
+				.getStop(dbStopPath.getStopId());
+		this.stopName = stop.getName();
 		this.gtfsStopSeq = dbStopPath.getGtfsStopSeq();
 		this.layoverStop = dbStopPath.isLayoverStop();
 		this.waitStop = dbStopPath.isWaitStop();
@@ -66,6 +72,7 @@ public class IpcStopPath implements Serializable {
 				+ "configRev=" + configRev 
 				+ ", stopPathId=" + stopPathId 
 				+ ", stopId=" + stopId 
+				+ ", stopName=" + stopName
 				+ ", gtfsStopSeq=" + gtfsStopSeq 
 				+ ", layoverStop=" + layoverStop 
 				+ ", waitStop="	+ waitStop 
@@ -88,6 +95,10 @@ public class IpcStopPath implements Serializable {
 		return stopId;
 	}
 
+	public String getStopName() {
+		return stopName;
+	}
+	
 	public int getGtfsStopSeq() {
 		return gtfsStopSeq;
 	}
