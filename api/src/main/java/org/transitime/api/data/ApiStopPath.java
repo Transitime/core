@@ -45,6 +45,9 @@ public class ApiStopPath {
     private final String stopId;
 
     @XmlAttribute
+    private final String stopName;
+    
+    @XmlAttribute
     private final int gtfsStopSeq;
 
     @XmlAttribute
@@ -71,6 +74,7 @@ public class ApiStopPath {
 	configRev = ipcStopPath.getConfigRev();
 	stopPathId = ipcStopPath.getStopPathId();
 	stopId = ipcStopPath.getStopId();
+	stopName = ipcStopPath.getStopName();
 	gtfsStopSeq = ipcStopPath.getGtfsStopSeq();
 	layoverStop = ipcStopPath.isLayoverStop() ? "true" : null;
 	waitStop = ipcStopPath.isWaitStop() ? "true" : null;

@@ -38,6 +38,9 @@ public class ApiScheduleTimes {
 
     @XmlAttribute
     private final String stopId;
+    
+    @XmlAttribute
+    private final String stopName;
 
     /********************** Member Functions **************************/
 
@@ -51,5 +54,6 @@ public class ApiScheduleTimes {
 		null : Time.timeOfDayStr(departureInt);
 	
 	stopId = ipcScheduleTimes.getStopId();
+	stopName = ipcScheduleTimes.getStopName();
     }
 }
