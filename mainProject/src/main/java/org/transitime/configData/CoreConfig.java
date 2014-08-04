@@ -508,6 +508,21 @@ public class CoreConfig {
 					+ "locations are not always accurate.");
 	
 	/**
+	 * How far vehicle can be away from layover stop and still match to it. For
+	 * when not deadheading to a trip.
+	 * 
+	 * @return
+	 */
+	public static double getLayoverDistance() {
+		return layoverDistance.getValue();
+	}
+	private static DoubleConfigValue layoverDistance =
+			new DoubleConfigValue("transitime.core.layoverDistance", 
+					200.0,
+					"How far vehicle can be away from layover stop and still "
+					+ "match to it. For when not deadheading to a trip. ");
+	
+	/**
 	 * How early in msec a vehicle can have left terminal and have it be considered an
 	 * early departure instead of just moving around within the layover. Don't want
 	 * to mistakingly think that vehicles moving around during layover have started

@@ -24,11 +24,11 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
@@ -356,6 +356,66 @@ public class SpatialMatcher {
 	}
 	
 	/**
+	 * Don't want to always be able to match to a layover because that would
+	 * cause vehicles to be wrongly matched and vehicles that are actually still
+	 * on the route wouldn't be predicted for. Therefore want to only match to a
+	 * layover if reasonable.
+	 * <p>
+	 * Therefore only match to layover if deadheading, if within 150% of the
+	 * distance between the last stop of the previous trip and the layover stop,
+	 * or within the configured layover distance.
+	 * 
+	 * @param avlLoc
+	 * @param potentialMatchIndices
+	 * @return
+	 */
+	private boolean withinAllowableDistanceOfLayover(Location avlLoc,
+			Indices potentialMatchIndices) {
+		// If match not at layover then can't be within allowable distance of 
+		// layover
+		if (!potentialMatchIndices.isLayover())
+			return false;
+		
+		// Need to treat differently depending on whether vehicle is 
+		// deadheading or simply going from one trip to another.
+		StopPath previousStopPath = potentialMatchIndices.getPreviousStopPath();
+		
+		// If first layover of block then deadheading. For this case the vehicle
+		// is always considered to spatially match the layover.
+		if (previousStopPath == null) {
+			logger.debug("Layover at {} is within allowable distance because "
+					+ "it is first trip, meaning that it is deadheading", 
+					potentialMatchIndices);
+			return true;
+		}
+		
+		// Determine how far vehicle is from layover
+		Location layoverLoc = 
+				potentialMatchIndices.getStopPath().getEndOfPathLocation();
+		double distanceToLayover = avlLoc.distance(layoverLoc);
+		
+		// Not first layover so determine how far vehicle needs to travel from 
+		// the end of the previous trip to the layover. The allowable distance
+		// is 50% greater than this travel distance or the configured layover
+		// distance, whichever is greater.
+		Location previousStopLoc = previousStopPath.getEndOfPathLocation();
+		double distanceBtwnStops = layoverLoc.distance(previousStopLoc);
+		double allowableDistance = 
+				Math.max(distanceBtwnStops*1.5, CoreConfig.getLayoverDistance());
+		
+		logger.debug("Determining if layover within allowable distance. "
+				+ "distanceToLayover={} distanceBtwnStops={} "
+				+ "CoreConfig.getLayoverDistance()={} allowableDistance={} "
+				+ "distanceToLayover < allowableDistance={}", 
+				distanceToLayover, distanceBtwnStops, 
+				CoreConfig.getLayoverDistance(), allowableDistance, 
+				distanceToLayover < allowableDistance);
+		
+		// Return true if within allowable distance to layover
+		return distanceToLayover < allowableDistance;
+	}
+	
+	/**
 	 * For determining possible spatial matches. A spatial match is when the AVL
 	 * report location is within allowable distance of the path segment and the
 	 * heading is OK and the distance to the segment is a local minimum (it is a
@@ -506,7 +566,9 @@ public class SpatialMatcher {
 		// A layover is always a spatial match since the vehicle is allowed to
 		// be off of the route there. So always add layovers to the list of
 		// spatial matches.
-		if (atLayover) {
+		if (atLayover
+				&& withinAllowableDistanceOfLayover(avlReport.getLocation(),
+						potentialMatchIndices)) {
 			logger.debug("For vehicleId={} segment is at a layover so adding " +
 					"it to list of spatial matches. {}",
 					avlReport.getVehicleId(), spatialMatch);
