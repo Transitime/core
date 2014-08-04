@@ -113,6 +113,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	 * @param routeId
 	 * @param routeShortName
 	 * @param tripId
+	 * @param tripPatternId
 	 * @param directionId
 	 * @param headsign
 	 * @param predictable
@@ -128,13 +129,14 @@ public class IpcExtVehicle extends IpcVehicle {
 			long tripStartEpochTime, String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
-			String tripId, String directionId, String headsign,
-			boolean predictable, TemporalDifference realTimeSchdAdh,
-			boolean isLayover, long layoverDepartureTime, String nextStopId,
-			String vehicleType) {
+			String tripId, String tripPatternId, String directionId,
+			String headsign, boolean predictable,
+			TemporalDifference realTimeSchdAdh, boolean isLayover,
+			long layoverDepartureTime, String nextStopId, String vehicleType) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
-				routeShortName, tripId, directionId, headsign, predictable,
-				realTimeSchdAdh, isLayover, layoverDepartureTime, nextStopId, vehicleType);
+				routeShortName, tripId, tripPatternId, directionId, headsign,
+				predictable, realTimeSchdAdh, isLayover, layoverDepartureTime,
+				nextStopId, vehicleType);
 		
 		this.routeName = routeName;
 		this.originStopId = originStopId;
@@ -223,9 +225,9 @@ public class IpcExtVehicle extends IpcVehicle {
 					distanceToNextStop, distanceOfNextStopFromTripStart,
 					distanceAlongTrip, tripStartEpochTime, blockId,
 					blockAssignmentMethod, avl, heading, routeId,
-					routeShortName, tripId, directionId, headsign, predictable,
-					realTimeSchdAdh, isLayover, layoverDepartureTime,
-					nextStopId, vehicleType);
+					routeShortName, tripId, tripPatternId, directionId,
+					headsign, predictable, realTimeSchdAdh, isLayover,
+					layoverDepartureTime, nextStopId, vehicleType);
 		}
 
 	} // End of class SiriVehicleSerializationProxy
@@ -285,6 +287,7 @@ public class IpcExtVehicle extends IpcVehicle {
 				+ ", routeId=" + getRouteId()
 				+ ", routeShortName=" + getRouteShortName()
 				+ ", tripId=" + getTripId()
+				+ ", tripPatternId=" + getTripPatternId()
 				+ ", directionId=" + getDirectionId()
 				+ ", headsign=" + getHeadsign()
 				+ ", predictable=" + isPredictable()
