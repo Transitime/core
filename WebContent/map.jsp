@@ -81,7 +81,7 @@ var shapeOptions = {
 		
 var minorShapeOptions = {
 	color: '#00ee00',
-	weight: 2,
+	weight: 1,
 	opacity: 0.4,
 };
 		
@@ -359,6 +359,116 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 	return vehicleIcon;
 }
 
+/**
+ * Removes the specified marker from the map
+ */
+function removeVehicleMarker(vehicleMarker) {
+	map.removeLayer(vehicleMarker.background);
+	map.removeLayer(vehicleMarker.headingArrow);
+	map.removeLayer(vehicleMarker);
+}
+
+/**
+ * Creates a new marker for the vehicle. The marker actually consists of
+ * the main icon marker, a background circle, and an arrow marker to indicate
+ * heading. 
+ */
+function createVehicleMarker(vehicleData) {
+	var vehicleLoc = L.latLng(vehicleData.loc.lat, vehicleData.loc.lon);
+	
+	// Create new icon. First create the background marker as
+	// a simple colored circle.
+	var vehicleBackground = L.circleMarker(vehicleLoc,
+			getVehicleMarkerBackgroundOptions(vehicleData)).addTo(
+			map);
+
+	// Add a arrow to indicate the heading of the vehicle
+	var headingArrow = L.rotatedMarker(vehicleLoc,
+			getVehicleMarkerOptions(vehicleData))
+			.setIcon(arrowIcon).addTo(map);
+	headingArrow.options.angle = vehicleData.loc.heading;
+	headingArrow.setLatLng(vehicleLoc);
+	// If heading is NaN then don't show arrow at all
+	if (isNaN(parseFloat(vehicleData.loc.heading))) {
+		headingArrow.setOpacity(0.0);
+	}
+
+	// Create the actual vehicle marker. This needs to be created
+	// last and on top since the popup callback for the vehicle is
+	// attached to this marker. Otherwise won't get click events.
+	var vehicleMarker = L.marker(vehicleLoc,
+			getVehicleMarkerOptions(vehicleData))
+			.setIcon(getIconForVehicle(vehicleData))
+			.addTo(map);
+
+	// Add the background and the heading arrow markers to 
+	// vehicleIcon so they can all be updated when the vehicle moves.
+	vehicleMarker.background = vehicleBackground;
+	vehicleMarker.headingArrow = headingArrow;
+
+	// When user clicks on vehicle popup shows additional info
+	vehicleMarker.on('click', function(e) {
+		var content = getVehiclePopupContent(this.vehicleData);
+		var latlng = L.latLng(this.vehicleData.loc.lat,
+				this.vehicleData.loc.lon);
+		this.popup = L.popup(vehiclePopupOptions, this)
+			.setLatLng(latlng)
+			.setContent(content).openOn(map);
+	});	
+	
+	// Return the new marker
+	return vehicleMarker;
+}
+
+/**
+ * Updates the vehicle markers plus the popup based on the vehicleData read
+ * in from the API.
+ */
+function updateVehicleMarker(vehicleMarker, vehicleData) {
+	// If changing its minor status then need to redraw it with new options.
+	if (vehicleMarker.vehicleData.uiType != vehicleData.Type) {
+		// Change from minor to non-minor, or visa versa so update icon
+		vehicleMarker
+				.setOpacity(getVehicleMarkerOptions(vehicleData).opacity);
+		vehicleMarker.background
+				.setStyle(getVehicleMarkerBackgroundOptions(vehicleData));
+	}
+
+	// Set to proper icon, which changes depending not just on vehicle
+	// type but also on whether currently on layover.
+	vehicleMarker.setIcon(getIconForVehicle(vehicleData));
+	
+	// Update orientation of the arrow for when setLatLng() is called
+	vehicleMarker.headingArrow.options.angle = vehicleData.loc.heading;
+
+	// Set opacity of arrow icon depending on state and on whether
+	// the heading is valid
+	if (isNaN(parseFloat(vehicleData.loc.heading))) {
+		vehicleMarker.headingArrow.setOpacity(0.0);
+	} else {
+		vehicleMarker.headingArrow
+				.setOpacity(getVehicleMarkerOptions(vehicleData).opacity);
+	}
+
+	// Update content in vehicle popup, if it has changed, in case it 
+	// is actually popped up
+	if (vehicleMarker.popup) {
+		var content = getVehiclePopupContent(vehicleData);
+		// If the content has actually changed then update the popup
+		if (content != vehicleMarker.popup.getContent())
+			vehicleMarker.popup.setContent(content).update();
+	}
+
+	// Update markers location on the map if vehicle has actually moved.
+	if (vehicleMarker.vehicleData.loc.lat != vehicleData.loc.lat
+			|| vehicleMarker.vehicleData.loc.lon != vehicleData.loc.lon) {
+		animateVehicle(vehicleMarker, 1,
+				vehicleMarker.vehicleData.loc.lat, 
+				vehicleMarker.vehicleData.loc.lon, 
+				vehicleData.loc.lat, vehicleData.loc.lon);
+	}
+}
+
 	/**
 	 * Reads in vehicle data obtained via AJAX. Called for each vehicle in API
 	 * whether vehicle changed or not.
@@ -381,9 +491,8 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 
 			// If no data from the API for the vehicle associated with the icon...
 			if (!haveDataForVehicle) {
-				// Delete the icon
-				map.removeLayer(vehicleMarker.background);
-				map.removeLayer(vehicleMarker);
+				// Delete the marker from the map
+				removeVehicleMarker(vehicleMarker);
 
 				// Remove the vehicleIcon from the vehiclesIcon array
 				vehicleMarkers.splice(i, 1);
@@ -398,92 +507,14 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 			// If vehicle icon wasn't already created then create it now
 			var vehicleMarker = getVehicleMarker(vehicleData.id);
 			if (vehicleMarker == null) {
-				// Create new icon. First create the background marker as
-				// a simple colored circle.
-				var vehicleBackground = L.circleMarker(vehicleLoc,
-						getVehicleMarkerBackgroundOptions(vehicleData)).addTo(
-						map);
-
-				// Add a arrow to indicate the heading of the vehicle
-				var headingArrow = L.rotatedMarker(vehicleLoc,
-						getVehicleMarkerOptions(vehicleData))
-						.setIcon(arrowIcon).addTo(map);
-				headingArrow.options.angle = vehicleData.loc.heading;
-				headingArrow.setLatLng(vehicleLoc);
-				// If heading is NaN then don't show arrow at all
-				if (isNaN(parseFloat(vehicleData.loc.heading))) {
-					headingArrow.setOpacity(0.0);
-				}
-
-				// Create the actual vehicle marker. This needs to be created
-				// last and on top since the popup callback for the vehicle is
-				// attached to this marker. Otherwise won't get click events.
-				vehicleMarker = L.marker(vehicleLoc,
-						getVehicleMarkerOptions(vehicleData))
-						.setIcon(getIconForVehicle(vehicleData))
-						.addTo(map);
-
-				// Add the background and the heading arrow markers to 
-				// vehicleIcon so they can all be updated when the vehicle moves.
-				vehicleMarker.background = vehicleBackground;
-				vehicleMarker.headingArrow = headingArrow;
-
-				// Keep track of all the vehicle icons so they can be moved
-				vehicleMarkers.push(vehicleMarker);
-
-				// When user clicks on vehicle popup shows additional info
-				vehicleMarker.on('click', function(e) {
-					var content = getVehiclePopupContent(this.vehicleData);
-					var latlng = L.latLng(this.vehicleData.loc.lat,
-							this.vehicleData.loc.lon);
-					this.popup = L.popup(vehiclePopupOptions, this)
-						.setLatLng(latlng)
-						.setContent(content).openOn(map);
-				});
-			} else {
-				// Vehicle icon already exists. If changing its minor status then need to
-				// redraw it with new options.
-				if (vehicleMarker.vehicleData.uiType != vehicleData.Type) {
-					// Change from minor to non-minor, or visa versa so update icon
-					vehicleMarker
-							.setOpacity(getVehicleMarkerOptions(vehicleData).opacity);
-					vehicleMarker.background
-							.setStyle(getVehicleMarkerBackgroundOptions(vehicleData));
-				}
-
-				// Set to proper icon, which changes depending not just on vehicle
-				// type but also on whether currently on layover.
-				vehicleMarker.setIcon(getIconForVehicle(vehicleData));
+				// Create the new marker
+				vehicleMarker = createVehicleMarker(vehicleData);
 				
-				// Update orientation of the arrow for when setLatLng() is called
-				vehicleMarker.headingArrow.options.angle = vehicleData.loc.heading;
-
-				// Set opacity of arrow icon depending on state and on whether
-				// the heading is valid
-				if (isNaN(parseFloat(vehicleData.loc.heading))) {
-					vehicleMarker.headingArrow.setOpacity(0.0);
-				} else {
-					vehicleMarker.headingArrow
-							.setOpacity(getVehicleMarkerOptions(vehicleData).opacity);
-				}
-
-				// Update content, if it has changed, in vehicle popup in case it 
-				// is popped up
-				if (vehicleMarker.popup) {
-					var content = getVehiclePopupContent(vehicleData);
-					// If the content has actually changed then update the popup
-					if (content != vehicleIcon.popup.getContent())
-						vehicleIcon.popup.setContent(content).update();
-				}
-
-				// Update it's location on the map if it is actually changing.
-				if (vehicleMarker.vehicleData.loc.lat != vehicleLoc.lat
-						|| vehicleMarker.vehicleData.loc.lon != vehicleLoc.lng) {
-					animateVehicle(vehicleMarker, 1,
-							vehicleMarker.vehicleData.loc.lat,
-							vehicleMarker.vehicleData.loc.lon, 
-							vehicleLoc.lat,	vehicleLoc.lng);
-				}
+				// Keep track of vehicle marker so it can be updated
+				vehicleMarkers.push(vehicleMarker);
+			} else {
+				// Vehicle icon already exists, so update it
+				updateVehicleMarker(vehicleMarker, vehicleData);
 			}
 
 			// Store vehicle data obtained via AJAX with vehicle so it can be used in popup
@@ -499,6 +530,7 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 	 * the animation until finished.
 	 */
 	function animateVehicle(vehicleMarker, cnt, origLat, origLon, newLat, newLon) {
+		// Determine the interpolated location
 		var interpolatedLat = parseFloat(origLat) + (newLat - origLat) * cnt
 				/ ANIMATION_STEPS;
 		var interpolatedLon = parseFloat(origLon) + (newLon - origLon) * cnt
@@ -508,6 +540,7 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 		//console.log("animating vehicleId=" + vehicleIcon.vehicleData.id + " cnt=" + cnt + 
 		//		" interpolatedLat=" + interpolatedLat + " interpolatedLoc=" + interpolatedLoc);
 
+		// Update all markers sto have interpolated location
 		vehicleMarker.setLatLng(interpolatedLoc);
 		vehicleMarker.background.setLatLng(interpolatedLoc);
 		vehicleMarker.headingArrow.setLatLng(interpolatedLoc);
@@ -522,9 +555,10 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 		}
 	}
 
-	// Should actually read in new vehicle positions and adjust
-	// all vehicle icons.
-	function updateVehicles() {
+	/**
+	 * Should actually read in new vehicle positions and adjust all vehicle icons.
+	 */
+	function updateVehiclesUsingApiData() {
 		var url = urlPrefix + "/command/vehiclesDetails?rShortName="
 				+ getQueryVariable("rShortName");
 		// If stop specified as query str param to this page pass it to the 
@@ -545,8 +579,8 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 		url += "&tripPattern=" + getQueryVariable("tripPattern");
 	$.getJSON(url, routeConfigCallback);
 
-	// Read in vehicle locations
-	updateVehicles();
-	setInterval(updateVehicles, 10000);
+	// Read in vehicle locations now and every 10 seconds
+	updateVehiclesUsingApiData();
+	setInterval(updateVehiclesUsingApiData, 10000);
 </script>
 </html>
