@@ -20,9 +20,9 @@ package org.transitime.api.rootResources;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DefaultValue;
@@ -113,7 +113,7 @@ public class TransitimeApi {
 	    @QueryParam(value = "r") List<String> routeIds,
 	    @QueryParam(value = "rShortName") List<String> routeShortNames,
 	    @QueryParam(value = "s") String stopId,
-	    @QueryParam(value="numPreds") @DefaultValue("3") int numberPredictions) 
+	    @QueryParam(value="numPreds") @DefaultValue("2") int numberPredictions) 
 		    throws WebApplicationException {
 	// Make sure request is valid
 	stdParameters.validate();
@@ -133,15 +133,14 @@ public class TransitimeApi {
 		vehicles = inter.get();
 	    }
 
-	    // If stop specified then also get predictions for the stop to 
-	    // determine which vehicles are generating the predictions.
-	    // If vehicle is not one of the ones generating a prediction
-	    // then it is labeled as a minor vehicle for the UI.
-	    Set<String> vehiclesGeneratingPreds = determineVehiclesGeneratingPreds(
-		    stdParameters, routeShortNames, stopId, numberPredictions);
+	    // To determine how vehicles should be drawn in UI. If stop specified
+	    // when getting vehicle info then only the vehicles being predicted
+	    // for, should be highlighted. The others should be dimmed.
+	    Map<String, UiMode> uiTypesForVehicles = determineUiModesForVehicles(
+		    vehicles, stdParameters, routeShortNames, stopId, numberPredictions);
 
 	    ApiVehicles apiVehicles = 
-		    new ApiVehicles(vehicles, vehiclesGeneratingPreds);
+		    new ApiVehicles(vehicles, uiTypesForVehicles);
 	    
 	    // return ApiVehicles response
 	    return stdParameters.createResponse(apiVehicles);
@@ -210,16 +209,15 @@ public class TransitimeApi {
 		vehicles = inter.get();
 	    }
 
-	    // If stop specified then also get predictions for the stop to 
-	    // determine which vehicles are generating the predictions.
-	    // If vehicle is not one of the ones generating a prediction
-	    // then it is labeled as a minor vehicle for the UI.
-	    Set<String> vehiclesGeneratingPreds = determineVehiclesGeneratingPreds(
-		    stdParameters, routeShortNames, stopId, numberPredictions);
+	    // To determine how vehicles should be drawn in UI. If stop specified
+	    // when getting vehicle info then only the vehicles being predicted
+	    // for, should be highlighted. The others should be dimmed.
+	    Map<String, UiMode> uiTypesForVehicles = determineUiModesForVehicles(
+		    vehicles, stdParameters, routeShortNames, stopId, numberPredictions);
 	    
 	    // Convert IpcVehiclesDetails to ApiVehiclesDetails
 	    ApiVehiclesDetails apiVehiclesDetails = 
-		    new ApiVehiclesDetails(vehicles, vehiclesGeneratingPreds);
+		    new ApiVehiclesDetails(vehicles, uiTypesForVehicles);
 
 	    // return ApiVehiclesDetails response
 	    return stdParameters.createResponse(apiVehiclesDetails);
@@ -229,14 +227,85 @@ public class TransitimeApi {
 	}
     }
 
-    private static Set<String> determineVehiclesGeneratingPreds(
+    // For specifying how vehicles should be drawn in the UI. 
+    public enum UiMode {NORMAL, SECONDARY, MINOR};   
+
+    /**
+     * Determines Map of UiTypes for vehicles so that the vehicles can be drawn
+     * correctly in the UI. If when getting vehicles no specific route and stop
+     * were specified then want to highlight all vehicles. Therefore for this
+     * situation all vehicle IDs will be mapped to UiType.NORMAL.
+     * <p>
+     * But if route and stop were specified then the first vehicle predicted for
+     * at the specified stop should be UiType.NORMAL, the subsequent ones are
+     * set to UiType.SECONDARY, and the remaining vehicles are set to
+     * UiType.MINOR.
+     * 
+     * @param vehicles
+     * @param stdParameters
+     * @param routeShortNames
+     * @param stopId
+     * @param numberPredictions
+     * @return
+     * @throws RemoteException
+     */
+    private static Map<String, UiMode> determineUiModesForVehicles(
+	    Collection<IpcVehicle> vehicles, StandardParameters stdParameters,
+	    List<String> routeShortNames, String stopId, int numberPredictions)
+	    throws RemoteException {
+	// Create map and initialize all vehicles to NORMAL UI mode
+	Map<String, UiMode> modeMap = new HashMap<String, UiMode>();
+
+	if (routeShortNames.isEmpty() || stopId == null) {
+	    // Stop not specified so simply return NORMAL type for all vehicles
+	    for (IpcVehicle ipcVehicle : vehicles) {
+		modeMap.put(ipcVehicle.getId(), UiMode.NORMAL);
+	    }
+	} else {
+	    // Stop specified so get predictions and set UI type accordingly
+	    List<String> vehiclesGeneratingPreds = determineVehiclesGeneratingPreds(
+		    stdParameters, routeShortNames, stopId, numberPredictions);
+	    for (IpcVehicle ipcVehicle : vehicles) {
+		UiMode uiType = UiMode.MINOR;
+		if (!vehiclesGeneratingPreds.isEmpty()
+			&& ipcVehicle.getId().equals(
+				vehiclesGeneratingPreds.get(0)))
+		    uiType = UiMode.NORMAL;
+		else if (vehiclesGeneratingPreds.contains(ipcVehicle.getId()))
+		    uiType = UiMode.SECONDARY;
+
+		modeMap.put(ipcVehicle.getId(), uiType);
+	    }
+
+	}
+
+	// Return results
+	return modeMap;
+    }
+    
+    /**
+     * Provides just a list of vehicle IDs of the vehicles generating
+     * predictions for the specified stop. The list of vehicle IDs will be in
+     * time order such that the first one will be the next predicted vehicle
+     * etc. If routeShortNames or stopId not specified then will return empty array.
+     * 
+     * @param stdParameters
+     * @param routeShortNames
+     * @param stopId
+     * @param numberPredictions
+     * @return List of vehicle IDs
+     * @throws RemoteException
+     */
+    private static List<String> determineVehiclesGeneratingPreds(
 	    StandardParameters stdParameters, List<String> routeShortNames,
 	    String stopId, int numberPredictions) throws RemoteException {
+	// The array of vehicle IDs to be returned
+	List<String> vehiclesGeneratingPreds = new ArrayList<String>();
+
 	// If stop specified then also get predictions for the stop to
 	// determine which vehicles are generating the predictions.
 	// If vehicle is not one of the ones generating a prediction
 	// then it is labeled as a minor vehicle for the UI.
-	Set<String> vehiclesGeneratingPreds = null;
 	if (!routeShortNames.isEmpty() && stopId != null) {
 	    PredictionsInterface predsInter = stdParameters
 		    .getPredictionsInterface();
@@ -244,7 +313,6 @@ public class TransitimeApi {
 		    routeShortNames.get(0), stopId, numberPredictions);
 
 	    // Determine set of which vehicles predictions generated for
-	    vehiclesGeneratingPreds = new HashSet<String>();
 	    for (IpcPredictionsForRouteStopDest predsForRouteStop : predictions) {
 		for (IpcPrediction ipcPrediction : predsForRouteStop
 			.getPredictionsForRouteStop()) {

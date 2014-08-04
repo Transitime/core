@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.transitime.api.rootResources.TransitimeApi.UiMode;
 import org.transitime.ipc.data.IpcVehicle;
 
 /**
@@ -35,7 +36,8 @@ import org.transitime.ipc.data.IpcVehicle;
  * 
  */
 @XmlRootElement
-@XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign", "loc" })
+@XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
+	"directionId", "vehicleType", "uiType", "loc" })
 public class ApiVehicle {
     
     @XmlAttribute
@@ -57,7 +59,12 @@ public class ApiVehicle {
     protected String directionId;
     
     @XmlAttribute
-    protected String minor;
+    protected String vehicleType;
+    
+    // Whether NORMAL, SECONDARY, or MINOR. Specifies how vehicle should
+    // be drawn in the UI
+    @XmlAttribute
+    protected String uiType;
     
     /**
      * Need a no-arg constructor for Jersey. Otherwise get really 
@@ -71,17 +78,30 @@ public class ApiVehicle {
      * ApiVehicle object for the API.
      * 
      * @param vehicle
-     * @param minor
+     * @param uiType
      *            If should be labeled as "minor" in output for UI.
      */
-    public ApiVehicle(IpcVehicle vehicle, boolean minor) {
+    public ApiVehicle(IpcVehicle vehicle, UiMode uiType) {
 	id = vehicle.getId();
 	loc = new ApiGpsLocation(vehicle);
 	routeId = vehicle.getRouteId();
 	routeShortName = vehicle.getRouteShortName();
 	headsign = vehicle.getHeadsign();
 	directionId = vehicle.getDirectionId();
-	this.minor = minor ? "true" : null;
+
+	// Set GTFS vehicle type. If it was not set in the config then use
+	// default value of "3" which is for buses.
+	vehicleType = vehicle.getVehicleType();
+	if (vehicleType == null)
+	    vehicleType = "3";
+	
+	// Determine UI type. Usually will be displaying vehicles
+	// as NORMAL. To simplify API use null for this case. 
+	this.uiType = null;
+	if (uiType == UiMode.SECONDARY)
+	    this.uiType = "secondary";
+	else if (uiType == UiMode.MINOR)
+	    this.uiType = "minor";
     }
 
 }

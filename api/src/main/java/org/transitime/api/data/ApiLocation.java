@@ -17,6 +17,8 @@
 
 package org.transitime.api.data;
 
+import org.transitime.db.structs.Location;
+
 /**
  * A simple latitude/longitude.
  * <p>
@@ -43,4 +45,7 @@ public class ApiLocation extends ApiTransientLocation {
 	super(lat, lon);
     }
     
+    public ApiLocation(Location loc) {
+	super(loc.getLat(), loc.getLon());
+    }
 }

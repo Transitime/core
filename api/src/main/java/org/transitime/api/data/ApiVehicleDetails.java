@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.transitime.api.rootResources.TransitimeApi.UiMode;
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.ipc.data.IpcVehicle;
 
@@ -36,9 +37,9 @@ import org.transitime.ipc.data.IpcVehicle;
  *
  */
 @XmlRootElement(name="vehicle")
-@XmlType(propOrder = { "scheduleAdherence",
-	"scheduleAdherenceStr", "blockId", "blockAssignmentMethod", "tripId",
-	"driverId"})
+@XmlType(propOrder = { "scheduleAdherence", "scheduleAdherenceStr", "blockId",
+	"blockAssignmentMethod", "tripId", "tripPatternId", "isLayover",
+	"layoverDepartureTime", "nextStopId", "driverId" })
 public class ApiVehicleDetails extends ApiVehicle {
 
     @XmlAttribute(name="schAdh")
@@ -56,6 +57,18 @@ public class ApiVehicleDetails extends ApiVehicle {
     @XmlAttribute(name="trip")
     private String tripId;
     
+    @XmlAttribute(name="tripPattern")
+    private String tripPatternId;
+    
+    @XmlAttribute(name="layover")
+    private String isLayover;
+    
+    @XmlAttribute
+    private String layoverDepartureTime;
+    
+    @XmlAttribute
+    private String nextStopId;
+    
     @XmlElement(name="driver")
     private String driverId;
     
@@ -71,17 +84,22 @@ public class ApiVehicleDetails extends ApiVehicle {
      * ApiVehicle object for the API.
      * 
      * @param vehicle
-     * @param minor
+     * @param uiType
      *            If should be labeled as "minor" in output for UI.
      */
-    public ApiVehicleDetails(IpcVehicle vehicle, boolean minor) {
-	super(vehicle, minor);
+    public ApiVehicleDetails(IpcVehicle vehicle, UiMode uiType) {
+	super(vehicle, uiType);
 	
 	scheduleAdherence = vehicle.getRealTimeSchedAdh().getTemporalDifference();
 	scheduleAdherenceStr = vehicle.getRealTimeSchedAdh().toString();
 	blockId = vehicle.getBlockId();
 	blockAssignmentMethod = vehicle.getBlockAssignmentMethod();
 	tripId = vehicle.getTripId();
+	tripPatternId = vehicle.getTripPatternId();
+	isLayover = vehicle.isLayover() ? "true" : null;
+	layoverDepartureTime = vehicle.isLayover() ? 
+		Long.toString(vehicle.getLayoverDepartureTime()) : null;
+	nextStopId = vehicle.getNextStopId()!=null ? vehicle.getNextStopId() : null;
 	driverId = vehicle.getAvl().getDriverId();
     }	
 

@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcShape;
 import org.transitime.ipc.data.IpcStop;
@@ -64,6 +65,9 @@ public class ApiRoute {
     @XmlElement
     private ApiExtent extent;
     
+    @XmlElement
+    private ApiLocation locationOfNextPredictedVehicle;
+    
     /********************** Member Functions **************************/
 
     protected ApiRoute() {}
@@ -87,6 +91,12 @@ public class ApiRoute {
 	}
 	
 	this.extent = new ApiExtent(route.getExtent());	
+	
+	Location vehicleLoc = route.getLocationOfNextPredictedVehicle();
+	if (vehicleLoc == null)
+	    this.locationOfNextPredictedVehicle = null;
+	else
+	    this.locationOfNextPredictedVehicle = new ApiLocation(vehicleLoc);
     }
 
 }

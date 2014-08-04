@@ -31,7 +31,7 @@ import org.transitime.utils.StringUtils;
  * @author SkiBu Smith
  *
  */
-@XmlType(propOrder = { "lat", "lon", "time", "speed", "heading", "pathHeading" })
+@XmlType(propOrder = { "lat", "lon", "time", "speed", "heading" })
 public class ApiGpsLocation extends ApiTransientLocation {
 
     @XmlAttribute
@@ -43,9 +43,6 @@ public class ApiGpsLocation extends ApiTransientLocation {
     @XmlAttribute
     private String heading;
     
-    @XmlAttribute
-    private String pathHeading;
-
     /********************** Member Functions **************************/
 
     /**
@@ -65,7 +62,6 @@ public class ApiGpsLocation extends ApiTransientLocation {
 	this.time = vehicle.getGpsTime();
 	this.speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
 	this.heading = StringUtils.oneDigitFormat(vehicle.getHeading());
-	this.pathHeading = StringUtils.oneDigitFormat(vehicle.getPathHeading());
 
     }
     

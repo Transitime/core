@@ -20,11 +20,12 @@ package org.transitime.api.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.transitime.api.rootResources.TransitimeApi.UiMode;
 import org.transitime.ipc.data.IpcVehicle;
 
 /**
@@ -56,17 +57,18 @@ public class ApiVehiclesDetails {
      * objects.
      * 
      * @param vehicles
-     * @param vehiclesGeneratingPreds
-     *            So can determine which ones are to be labeled as minor. Set to
-     *            null if this feature is not being used.
+     * @param uiTypesForVehicles
+     *            Specifies how vehicles should be drawn in UI. Can be NORMAL, SECONDARY, or MINOR
      */
-    public ApiVehiclesDetails(Collection<IpcVehicle> vehicles, 
-	    Set<String> vehiclesGeneratingPreds) {
+    public ApiVehiclesDetails(Collection<IpcVehicle> vehicles,
+	    Map<String, UiMode> uiTypesForVehicles) {
 	vehiclesData = new ArrayList<ApiVehicleDetails>();
 	for (IpcVehicle vehicle : vehicles) {
-	    boolean minorVehicle = vehiclesGeneratingPreds != null
-		    && !vehiclesGeneratingPreds.contains(vehicle.getId());
-	    vehiclesData.add(new ApiVehicleDetails(vehicle, minorVehicle));
+	    // Determine UI type for vehicle 
+	    // Determine UI type for vehicle 
+	    UiMode uiType = uiTypesForVehicles.get(vehicle.getId());
+
+	    vehiclesData.add(new ApiVehicleDetails(vehicle, uiType));
 	}
     }
 
