@@ -509,16 +509,33 @@ public class VehicleState {
 	 * heading in a different direction of the layover segment. Plus the layover
 	 * segment is usually just a stub segment that might not have valid
 	 * direction at all. This method can be used to get the heading of the next
-	 * path segment, which should be valid.
+	 * path segment, which should be valid. But only uses next path heading
+	 * if vehicle is actually within 200m of the layover. Otherwise the
+	 * vehicle is deadheading and don't want to use the next path heading
+	 * if vehicle is actually reasonably far away from the layover.
 	 * 
 	 * @return
 	 */
-	private float getNextPathHeading() {
+	private float getNextPathHeadingIfAtLayover() {
 		// If vehicle not currently matched then there is no path heading
 		SpatialMatch match = getMatch();
 		if (match == null)
 			return Float.NaN;
 
+		// This is only for layovers so if not at layover return NaN
+		if (!match.isLayover())
+			return Float.NaN;
+		
+		// Determine if actually at the layover instead of deadheading. If more
+		// than 200m away then don't use the next path heading. Instead 
+		// return NaN.
+		double distanceToLayoverStop = match.getStopPath()
+				.getEndOfPathLocation().distance(getAvlReport().getLocation());
+		if (distanceToLayoverStop > 200.0) 
+			return Float.NaN;
+		
+		// Vehicle is reasonably close to the layover stop so determine the
+		// heading of the segment just after the layover.
 		// If already at end of trip can't go on to next stop path
 		if (getTrip().getNumberStopPaths() <= match.getStopPathIndex()+1)
 			return Float.NaN;
@@ -532,13 +549,26 @@ public class VehicleState {
 	
 	/**
 	 * Looks in avlReportHistory and returns last valid heading. Will still
-	 * return null in certain situations such as there not being a history,
-	 * never have valid heading info, etc.
+	 * return null in certain situations such as there not being a history, the
+	 * AVL report is old, never have valid heading info, etc.
+	 * <p>
+	 * Reports are considered too old if they are more than 2 minutes old. This
+	 * is useful distinction because if report is too old then don't really know
+	 * if the heading is valid. At layovers it is likely that a vehicle turned a
+	 * corner a bit before the layover point and don't want to show the old
+	 * heading before the turn.
 	 * 
 	 * @return
 	 */
 	private float recentValidHeading() {
+		long maxAge = System.currentTimeMillis() - 2 * Time.MS_PER_MIN;
+		
 		for (AvlReport avlReport : avlReportHistory) {
+			// If report is too old then don't use it
+			if (avlReport.getTime() < maxAge)
+				return Float.NaN;
+			
+			// If AVL has valid heading then use it
 			if (!Float.isNaN(avlReport.getHeading())) {
 				return avlReport.getHeading();
 			}
@@ -573,7 +603,7 @@ public class VehicleState {
 		
 		// Most recent heading wasn't valid either so as last shot try using
 		// path segment of next segment past layover.
-		heading = getNextPathHeading();
+		heading = getNextPathHeadingIfAtLayover();
 		return heading;
 	}
 
