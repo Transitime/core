@@ -19,7 +19,9 @@ package org.transitime.ipc.data;
 
 import java.io.Serializable;
 
+import org.transitime.applications.Core;
 import org.transitime.db.structs.ScheduleTime;
+import org.transitime.db.structs.Stop;
 import org.transitime.utils.Time;
 
 /**
@@ -33,6 +35,7 @@ public class IpcScheduleTimes implements Serializable {
 	private final Integer arrivalTime;
 	private final Integer departureTime;
 	private final String stopId;
+	private final String stopName;
 
 	private static final long serialVersionUID = 2469869322769172736L;
 
@@ -42,6 +45,8 @@ public class IpcScheduleTimes implements Serializable {
 		this.arrivalTime = dbScheduleTime.getArrivalTime();
 		this.departureTime = dbScheduleTime.getDepartureTime();
 		this.stopId = stopId;
+		Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+		this.stopName = stop.getName();
 	}
 
 	@Override
@@ -50,6 +55,7 @@ public class IpcScheduleTimes implements Serializable {
 				+ "arrivalTime=" + Time.timeOfDayStr(arrivalTime)
 				+ ", departureTime=" + Time.timeOfDayStr(departureTime)
 				+ ", stopId=" + stopId
+				+ ", stopName=" + stopName
 				+ "]";
 	}
 
@@ -63,6 +69,10 @@ public class IpcScheduleTimes implements Serializable {
 
 	public String getStopId() {
 		return stopId;
+	}
+	
+	public String getStopName() {
+		return stopName;
 	}
 	
 }
