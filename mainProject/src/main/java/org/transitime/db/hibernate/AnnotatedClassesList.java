@@ -40,6 +40,7 @@ import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.db.webstructs.ApiKey;
+import org.transitime.db.webstructs.WebAgency;
 
 /**
  * 
@@ -87,6 +88,7 @@ public class AnnotatedClassesList {
 		
 		// For website
 		ApiKey.class,
+		WebAgency.class,
 	};
 	
 	/********************** Member Functions **************************/
