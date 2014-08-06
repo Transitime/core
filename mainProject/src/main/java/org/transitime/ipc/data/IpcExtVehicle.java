@@ -29,6 +29,7 @@ import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Trip;
+import org.transitime.utils.Geo;
 
 /**
  * Extension of IpcVehicle class so that additional info can be
@@ -299,9 +300,12 @@ public class IpcExtVehicle extends IpcVehicle {
 				+ ", routeName=" + routeName 
 				+ ", originStopId="	+ originStopId 
 				+ ", destinationId=" + destinationId
-				+ ", distanceToNextStop=" + distanceToNextStop
-				+ ", distanceOfNextStopFromTripStart=" + distanceOfNextStopFromTripStart
-				+ ", distanceAlongTrip=" + distanceAlongTrip 
+				+ ", distanceToNextStop=" 
+					+ Geo.distanceFormat(distanceToNextStop)
+				+ ", distanceOfNextStopFromTripStart=" 
+					+ Geo.distanceFormat(distanceOfNextStopFromTripStart)
+				+ ", distanceAlongTrip=" 
+					+ Geo.distanceFormat(distanceAlongTrip) 
 				+ ", tripStartEpochTime=" + new Date(tripStartEpochTime)
 				+ "]";
 	}
