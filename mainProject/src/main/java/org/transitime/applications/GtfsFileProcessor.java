@@ -496,5 +496,10 @@ public class GtfsFileProcessor {
 		} catch (IllegalArgumentException e) {
 			logger.error(e.getMessage());
 		}
+		
+		// Found that when running on AWS that program never terminates,
+		// probably because still have db threads running. Therefore
+		// using exit() to definitely end the process.
+		System.exit(0);
 	}
 }
