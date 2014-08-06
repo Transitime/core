@@ -57,14 +57,14 @@ import org.transitime.utils.Time;
 @Entity @DynamicUpdate 
 @Table(name="VehicleEvents")
 @org.hibernate.annotations.Table(appliesTo = "VehicleEvents", 
-indexes = { @Index(name="timeIndex", 
+indexes = { @Index(name="VehicleEventsTimeIndex", 
                    columnNames={"time"} ) } )
 public class VehicleEvent implements Serializable {
 
 	// Time of the event. Should correspond to last AVL report time so that
 	// can join with AVL report to get more info if necessary.
 	@Id
-	@Column(columnDefinition="datetime(3)")	
+	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date time;
 

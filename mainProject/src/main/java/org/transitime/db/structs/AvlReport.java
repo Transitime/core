@@ -60,7 +60,7 @@ import net.jcip.annotations.Immutable;
 @Entity @DynamicUpdate 
 @Table(name="AvlReports") 
 @org.hibernate.annotations.Table(appliesTo = "AvlReports", 
-                                 indexes = { @Index(name="timeIndex", 
+                                 indexes = { @Index(name="AvlReportsTimeIndex", 
                                                     columnNames={"time"} ) })
 public class AvlReport implements Serializable {
 	// vehicleId is an @Id since might get multiple AVL reports
@@ -74,7 +74,7 @@ public class AvlReport implements Serializable {
 	// fractional seconds. This column is an Id since shouldn't get two
 	// AVL reports for the same vehicle for the same time.
 	@Id
-	@Column(columnDefinition="datetime(3)")	
+	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date time;
 	
@@ -84,7 +84,7 @@ public class AvlReport implements Serializable {
 	// latency. Will be null if AVL report not yet being processed.
 	// Need to use columnDefinition to explicitly specify that should use 
 	// fractional seconds.
-	@Column(columnDefinition="datetime(3)")	
+	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date timeProcessed;
 	

@@ -93,7 +93,7 @@ public class HibernateUtils {
 		// config file.
 		String dbUrl = null;
 		if (CoreConfig.getDbHost() != null) {
-			dbUrl = "jdbc:mysql://" +
+			dbUrl = "jdbc:" + CoreConfig.getDbType() + "://" +
 					CoreConfig.getDbHost() +
 					"/" + projectId;
 			config.setProperty("hibernate.connection.url", dbUrl);			

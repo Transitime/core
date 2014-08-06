@@ -1,4 +1,4 @@
-JAR Files
+AR Files
 =========
 
 Logging using logback:
@@ -72,6 +72,9 @@ database is being used.
   put the jar file into some place I could not find. Note: need at least
   version 5.1.23 for fractional seconds to work.
     mysql-connector-java-5.1.26-bin.jar
+
+  Postgres driver obtained from http://jdbc.postgresql.org/download.html
+    postgresql-9.3-1102.jdbc41.jar
 
 For hibernate also need a production worthy connection pooler
 instead of using the standard hibernate one. 

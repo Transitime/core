@@ -18,10 +18,12 @@ package org.transitime.applications;
 
 import java.io.File;
 import java.net.URL;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.cfg.Configuration;
+import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 /**
@@ -38,6 +40,25 @@ public class SchemaGenerator {
 	private final String packageName;
 	private final String outputDirectory;
 	
+	/**
+	 * MySQL handles fractional seconds differently from PostGRES and other
+	 * DBs. Need to use "datetime(3)" for fractional seconds whereas with 
+	 * PostGRES can use the default "timestamp" type. In order to handle
+	 * this properly in the generated ddl schema files need to not use
+	 * @Column(columnDefinition="datetime(3)") in the Java class that defines
+	 * the db object. Instead need to use this special ImprovedMySQLDialect
+	 * as the Dialect.
+	 */
+	public static class ImprovedMySQLDialect extends MySQLDialect {
+		public ImprovedMySQLDialect() {
+			super();
+			// Specify special SQL type for MySQL for timestamps so that get
+			// fractions seconds.
+			registerColumnType(Types.TIMESTAMP, "datetime(3)");
+		}
+	}
+
+
 	@SuppressWarnings("unchecked")
 	public SchemaGenerator(String packageName, String outputDirectory) throws Exception {
 		this.cfg = new Configuration();
@@ -125,7 +146,8 @@ public class SchemaGenerator {
 	 */
 	private static enum Dialect {
 		ORACLE("org.hibernate.dialect.Oracle10gDialect"), 
-		MYSQL("org.hibernate.dialect.MySQLDialect"), 
+		// Note that using special ImprovedMySqlDialect
+		MYSQL("org.transitime.applications.SchemaGenerator$ImprovedMySQLDialect"),
 		POSTGRES("org.hibernate.dialect.PostgreSQLDialect"),
 		HSQL("org.hibernate.dialect.HSQLDialect");
 
@@ -155,9 +177,13 @@ public class SchemaGenerator {
 		final String outputDirectory = args.length > 1 ? args[1] : null;
 		
 		SchemaGenerator gen = new SchemaGenerator(packageName, outputDirectory);
-		gen.generate(Dialect.MYSQL);
+		// Note: need to generate MYSQL last because using special 
+		// ImprovedMySQLDialect Dialect for MySQL but for some reason when
+		// it calls registerColumnType() in the constructor it affects the 
+		// other dialects as well. So need to do MySQL last.
 		gen.generate(Dialect.POSTGRES);
 		gen.generate(Dialect.ORACLE);
+		gen.generate(Dialect.MYSQL);
 	}
 
 }

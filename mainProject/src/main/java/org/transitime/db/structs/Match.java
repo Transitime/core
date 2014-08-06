@@ -74,7 +74,7 @@ public class Match implements Serializable {
 	// Need to use columnDefinition to explicitly specify that should use 
 	// fractional seconds. This column is an Id since shouldn't get two
 	// AVL reports for the same vehicle for the same avlTime.
-	@Column(columnDefinition="datetime(3)")	
+	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Id
 	private final Date avlTime;

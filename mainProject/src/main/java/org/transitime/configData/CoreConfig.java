@@ -58,6 +58,16 @@ public class CoreConfig {
 					"hibernate config file. Set to \"localhost\" if database " +
 					"running on same machine as the core application.");
 	
+	public static String getDbType() {
+		return dbType.getValue();
+	}
+	private static StringConfigValue dbType =
+			new StringConfigValue("transitime.core.dbType",
+					"mysql",
+					"Specifies type of database when creating the URL to "
+					+ "connect to the database. Can be mysql or postgresql. "
+					+ "Should work for other dbs as well. Default is mysql.");
+	
 	public static String getDbUserName() {
 		return dbUserName.getValue();
 	}

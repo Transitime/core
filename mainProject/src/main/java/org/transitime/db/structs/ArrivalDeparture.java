@@ -52,7 +52,7 @@ import org.transitime.utils.Time;
 @Entity @DynamicUpdate 
 @Table(name="ArrivalsDepartures") 
 @org.hibernate.annotations.Table(appliesTo = "ArrivalsDepartures", 
-   indexes = { @Index(name="timeIndex", 
+   indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
                       columnNames={"time"} ) } )
 public class ArrivalDeparture implements Serializable {
 	
@@ -73,7 +73,7 @@ public class ArrivalDeparture implements Serializable {
 	// when most likely it zoomed by the stop. It looks better to add
 	// only a msec to make the departure after the arrival.
 	@Id 
-	@Column(columnDefinition="datetime(3)")
+	@Column
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date time;
 
@@ -105,7 +105,7 @@ public class ArrivalDeparture implements Serializable {
 	
 	// So can match the ArrivalDeparture time to the AvlReport that
 	// generated it by using vehicleId and avlTime.
-	@Column(columnDefinition="datetime(3)")	
+	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date avlTime;
 	
