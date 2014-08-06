@@ -22,9 +22,9 @@ import javax.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
- * Declares that all classes in package com.gontuseries.university will
- * be searched for being a root-resource class with methods annotated
- * with @Path indicating that it handles requests. 
+ * Declares that all classes in package org.transitime.api.rootResources will be
+ * searched for being a root-resource class with methods annotated with @Path
+ * indicating that it handles requests.
  *
  * Uses "v1" for the @ApplicationPath to specify the version of the feed.
  * 
