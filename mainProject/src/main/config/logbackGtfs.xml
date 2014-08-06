@@ -4,7 +4,7 @@
      Java param -Dlogback.configurationFile=/DIR/src/main/config/logbackGtfs.xml
   -->
 
-<configuration >
+<configuration scan="true" scanPeriod="30 seconds">
 
   <!-- Need to use TIMESTAMP when using FileAppender instead of
        RollingFileAppender -->
@@ -87,7 +87,7 @@
         to true so that the output of the SQL looks nice and includes the
         SQL comments.
 
-        NOTE: Turning on this logging can greaty slow things down.
+        NOTE: Turning on this logging can greatly slow things down.
         When inserting 10000 rows of AVLReports the time increated
         from about 2.5 seconds to 10 seconds when the sql logging
         was enabled. So don't use all the time! -->
