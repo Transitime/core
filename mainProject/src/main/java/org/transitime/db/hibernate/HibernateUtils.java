@@ -46,8 +46,7 @@ public class HibernateUtils {
 	// 255 characters. Therefore can use shorter fields. 
 	public static final int DEFAULT_ID_SIZE = 60;
 	
-	//public static final 
-	
+	// Cache. Keyed on database name
 	private static HashMap<String, SessionFactory> sessionFactoryCache =
 			new HashMap<String, SessionFactory>();
 
@@ -60,13 +59,13 @@ public class HibernateUtils {
 	 * Creates a new session factory. This is to be cached and only access
 	 * internally since creating one is expensive.
 	 * 
-	 * @param projectId
+	 * @param dbName
 	 * @return
 	 */
-	private static SessionFactory createSessionFactory(String projectId) 
+	private static SessionFactory createSessionFactory(String dbName) 
 			throws HibernateException {
-		logger.debug("Creating new Hibernate SessionFactory for projectId={}", 
-				projectId);
+		logger.debug("Creating new Hibernate SessionFactory for dbName={}", 
+				dbName);
 		
 		// Create a Hibernate configuration based on customized config file
 		Configuration config = new Configuration();
@@ -79,8 +78,8 @@ public class HibernateUtils {
 		// a File object for that file name and pass in the File object
 		// to configure().
 		String fileName = CoreConfig.getHibernateConfigFileName();
-		logger.info("Configuring Hibernate for projectId={} using config file={}",
-				projectId, fileName);
+		logger.info("Configuring Hibernate for dbName={} using config file={}",
+				dbName, fileName);
 		File f = new File(fileName);
 		config.configure(f);
 
@@ -95,7 +94,7 @@ public class HibernateUtils {
 		if (CoreConfig.getDbHost() != null) {
 			dbUrl = "jdbc:" + CoreConfig.getDbType() + "://" +
 					CoreConfig.getDbHost() +
-					"/" + projectId;
+					"/" + dbName;
 			config.setProperty("hibernate.connection.url", dbUrl);			
 		} else {
 			dbUrl = config.getProperty("hibernate.connection.url");
@@ -114,9 +113,9 @@ public class HibernateUtils {
 		
 		// Log info, but don't log password. This can just be debug logging
 		// even though it is important because the C3P0 connector logs the info.
-		logger.debug("For Hibernate factory project projectId={} " +
+		logger.debug("For Hibernate factory project dbName={} " +
 				"using url={} username={}, and configured password",
-				projectId, dbUrl, dbUserName);
+				dbName, dbUrl, dbUserName);
 		
 		// Get the session factory for persistence
 		Properties properties = config.getProperties();
@@ -130,26 +129,35 @@ public class HibernateUtils {
 	}
 	
 	/**
-	 * Returns a cached Hibernate SessionFactory. Returns null if there is
-	 * a problem.
+	 * Returns a cached Hibernate SessionFactory. Returns null if there is a
+	 * problem.
 	 * 
 	 * @param projectId
+	 *            Used as the database name if the property
+	 *            transitime.core.dbName is not set
 	 * @return
 	 */
 	public static SessionFactory getSessionFactory(String projectId) 
 			throws HibernateException{
+		// Determine the database name to use. Will usually use the
+		// projectId since each project has a database. But this might
+		// be overridden by the transitime.core.dbName property.
+		String dbName = CoreConfig.getDbName();
+		if (dbName == null)
+			dbName = projectId;
+		
 		SessionFactory factory;
 		
 		synchronized(sessionFactoryCache) {
-			factory = sessionFactoryCache.get(projectId);
+			factory = sessionFactoryCache.get(dbName);
 			// If factory not yet created for this projectId then create it
 			if (factory == null) {
 				try {
-					factory = createSessionFactory(projectId);
-					sessionFactoryCache.put(projectId, factory);
+					factory = createSessionFactory(dbName);
+					sessionFactoryCache.put(dbName, factory);
 				} catch (Exception e) {
 					logger.error("Could not create SessionFactory for "
-							+ "projectId={}", projectId, e);
+							+ "dbName={}", dbName, e);
 				}
 			}						
 		}
@@ -161,6 +169,8 @@ public class HibernateUtils {
 	 * Returns session for the specified projectId.
 	 * 
 	 * @param projectId
+	 *            Used as the database name if the property
+	 *            transitime.core.dbName is not set
 	 * @return The Session
 	 */
 	public static Session getSession(String projectId) {

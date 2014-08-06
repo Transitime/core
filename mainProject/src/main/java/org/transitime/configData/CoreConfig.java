@@ -47,12 +47,22 @@ public class CoreConfig {
 					"directory where to put the log files.");
 	
 	// Database params
+	public static String getDbName() {
+		return dbName.getValue();
+	}
+	private static StringConfigValue dbName = 
+			new StringConfigValue("transitime.core.dbName", 
+					null, // Null as default to use the projectId
+					"Specifies the name of the database. If not set then the "
+					+ "transitime.core.agencyId will be used.");
+
+	
 	public static String getDbHost() {
 		return dbHost.getValue();
 	}
 	private static StringConfigValue dbHost = 
 			new StringConfigValue("transitime.core.dbHost", 
-					null, // Null as default so can get from hibernate config
+					null, // Null as default so can get it from hibernate config
 					"Specifies the name of the machine the database for the " +
 					"project resides on. Use null value to use values from " +
 					"hibernate config file. Set to \"localhost\" if database " +
