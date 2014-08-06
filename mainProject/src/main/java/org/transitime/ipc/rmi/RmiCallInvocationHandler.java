@@ -177,7 +177,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				if (debug) {
 					logger.debug("About to call remote method " + 
 							info.getClassName() + "." + method.getName() + "()" +		
-							" for project " + info.getProjectId());
+							" for project " + info.getAgencyId());
 				}
 				
 				// Do the actual invocation of the method!
@@ -187,7 +187,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				if (debug) {
 					logger.debug("Remote method " + 
 							info.getClassName() + "." + method.getName() + "()" +
-							" for project " + info.getProjectId() +
+							" for project " + info.getAgencyId() +
 							" took " + 
 							t.elapsedMsec() + " msec.");
 				}
@@ -242,7 +242,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 		// collecting, denial of service attack, etc) don't want to
 		// burden the project even more with additional calls. 
 		// Therefore when behind want to return as quickly as possible.
-		AtomicInteger accessCounter = getAccessCounter(info.getProjectId());
+		AtomicInteger accessCounter = getAccessCounter(info.getAgencyId());
 		if (accessCounter.get() >= getMaxConcurrentCallsPerProject()) {
 			// Currently too many RMI calls is progress so log error
 			// and throw exception
@@ -251,7 +251,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 					+ " of concurrent RMI calls when calling remote "
 					+ "method " + info.getClassName() + "."
 					+ method.getName() + "() for project "
-					+ info.getProjectId() + " so throwing exception.";
+					+ info.getAgencyId() + " so throwing exception.";
 			logger.error(message);
 			throw new ConcurrentAccessException(message);
 		} else {
@@ -299,7 +299,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				// even though the object was registered.
 				logger.error("When calling remote method " + 
 						info.getClassName() + "." + method.getName() + "()" +
-						" for project " + info.getProjectId() +
+						" for project " + info.getAgencyId() +
 						" encountered exception " + causeException.getMessage() + "." +
 						" This is most likely due to the project not currently running.");
 				// No point in just retrying again since the server isn't 
@@ -319,7 +319,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				// caller.
 				logger.debug("When calling remote method " + 
 						info.getClassName() + "." + method.getName() + "()" +
-						" for project " + info.getProjectId() +
+						" for project " + info.getAgencyId() +
 						" encountered exception " +	causeException.getMessage());
 				throw causeException;
 			}

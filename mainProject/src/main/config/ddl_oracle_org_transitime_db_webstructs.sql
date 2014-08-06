@@ -1,6 +1,8 @@
 
     drop table ApiKeys cascade constraints;
 
+    drop table WebAgencies cascade constraints;
+
     create table ApiKeys (
         applicationName varchar(80) not null,
         applicationKey varchar(20),
@@ -9,4 +11,10 @@
         email varchar(80),
         phone varchar(80),
         primary key (applicationName)
+    );
+
+    create table WebAgencies (
+        agencyId varchar(60) not null,
+        hostName varchar(120),
+        primary key (agencyId)
     );

@@ -16,7 +16,7 @@
  */
 package org.transitime.ipc.rmi;
 
-import org.transitime.projectConfig.ProjectConfig;
+import org.transitime.db.webstructs.WebAgency;
 
 /**
  * Contains the info needed for creating an RMI stub.
@@ -27,18 +27,18 @@ import org.transitime.projectConfig.ProjectConfig;
  */
 public class RmiStubInfo {
 
-	final String projectId;	
+	final String agencyId;	
 	final String className;
 	
 	/********************** Member Functions **************************/
 
-	public RmiStubInfo(String projectId, String className) {
-		this.projectId = projectId;
+	public RmiStubInfo(String agencyId, String className) {
+		this.agencyId = agencyId;
 		this.className = className;
 	}
 	
-	public String getProjectId() {
-		return projectId;
+	public String getAgencyId() {
+		return agencyId;
 	}
 	
 	public String getClassName() {
@@ -46,6 +46,7 @@ public class RmiStubInfo {
 	}
 	
 	public String getHostName() {
-		return ProjectConfig.getRmiHost(projectId);
+		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
+		return webAgency!=null ? webAgency.getHostName() : null;
 	}
 }

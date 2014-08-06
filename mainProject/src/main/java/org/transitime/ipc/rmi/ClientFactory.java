@@ -102,7 +102,7 @@ public class ClientFactory<T extends Remote> {
 		
 		// Get the remote object's bind name
 		String bindName = 
-				AbstractServer.getBindName(info.getProjectId(), info.getClassName());
+				AbstractServer.getBindName(info.getAgencyId(), info.getClassName());
 				
 		// Get the RMI stub object from the registry 
 		@SuppressWarnings("unchecked")
