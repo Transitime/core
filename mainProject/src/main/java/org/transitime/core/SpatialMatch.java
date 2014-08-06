@@ -398,13 +398,15 @@ public class SpatialMatch {
 		Vector segmentVector = indices.getBlock().getSegmentVector(
 				indices.getTripIndex(), indices.getStopPathIndex(),
 				indices.getSegmentIndex());
+		double segmentVectorLength = segmentVector!=null ? 
+				segmentVector.length() : Double.NaN;
 		return new SpatialMatch(vehicleId,
 				block, 
 				indices.getTripIndex(),
 				indices.getStopPathIndex(),
 				indices.getSegmentIndex(),
 				Double.NaN,       // distanceToSegment not set to a valid value
-				segmentVector.length()); 
+				segmentVectorLength); 
 	}
 	
 	/**
