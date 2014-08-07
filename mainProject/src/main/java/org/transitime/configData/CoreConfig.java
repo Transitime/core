@@ -116,6 +116,26 @@ public class CoreConfig {
 					"only debugging.");
 	
 	/**
+	 * For a client that needs to connect to an agency server. Usually would get
+	 * RMI host name from the WebAgencies table in the web database. But when
+	 * doing simple calls using this parameter eliminates the need to connect to
+	 * the web database, speeding up testing.
+	 * 
+	 * @return
+	 */
+	public static String rmiHost() {
+		return rmiHost.getValue();
+	}
+	private static StringConfigValue rmiHost =
+			new StringConfigValue("transitime.core.rmiHost",
+					null,
+					"For a client that needs to connect to an agency server. "
+					+ "Usually would get RMI host name from the WebAgencies "
+					+ "table in the web database. But when doing simple calls "
+					+ "using this parameter eliminates the need to connect to "
+					+ "the web database, speeding up testing.");
+	
+	/**
 	 * When batching large amount of AVL data through system to generate
 	 * improved schedule time (as has been done for Zhengzhou) it takes huge
 	 * amount of time to process everything. To speed things up you can set
