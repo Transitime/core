@@ -17,6 +17,17 @@
     </encoder>
   </appender>
 
+  <!-- Don't need all the config params to be logged -->
+  <logger name="org.transitime.config"
+          level="warn" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
+
+  <!-- Don't need all the hibernate info to be logged -->
+  <logger name="org.hibernate"
+          level="warn" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
   
   <!-- Set default level of root logger to "info" instead of to the
        the default of "debug". This way the default is to only see important
