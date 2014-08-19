@@ -101,14 +101,16 @@ public class VehicleDataCache {
     	// Return only vehicles whose AVL report not too old.
     	return filteredVehicles;
     }
-    
+
 	/**
 	 * Returns Collection of Vehicles currently associated with specified route.
 	 * Filters out info more than MAX_AGE_MSEC since it means that the info is
-	 * obsolete and shouldn't be displayed.
+	 * obsolete and shouldn't be displayed. Returns null if no vehicles for
+	 * specified route.
 	 * 
 	 * @param routeShortName
-	 * @return
+	 * @return Collection of IpcExtVehicle for vehicles on route, or null if no
+	 *         vehicles for the route.
 	 */
 	public Collection<IpcExtVehicle> getVehiclesForRoute(String routeShortName) {
 		Map<String, IpcExtVehicle> vehicleMapForRoute = 
