@@ -223,14 +223,24 @@ public class VehiclesServer extends AbstractServer
 		return new ArrayList<IpcVehicle>(vehicles);
 	}
 
-	/*
-	 * This class returns Collections of Vehicles that are to be serialized.
-	 * But sometimes these collections come from Map<K, T>.values(), which
-	 * is a Collection that is not serializable. For such non-serializable
-	 * collections this method returns a serializable version.
+	/**
+	 * This class returns Collection of Vehicles that are to be serialized. But
+	 * sometimes these collections come from Map<K, T>.values(), which is a
+	 * Collection that is not serializable. For such non-serializable
+	 * collections this method returns a serializable version. If vehicles
+	 * parameter is null then an empty array is returned.
+	 * 
+	 * @param vehicles
+	 *            Original, possible not serializable, collection of vehicles.
+	 *            Can be null.
+	 * @return Serializable Collection if IcExtVehicle.
 	 */
 	private Collection<IpcExtVehicle> getExtSerializableCollection(
 			Collection<IpcExtVehicle> vehicles) {
+		// If vehicles is null then return empty array.
+		if (vehicles == null)
+			return new ArrayList<IpcExtVehicle>();
+		
 		if (vehicles instanceof Serializable) { 
 			return vehicles;
 		} else {
