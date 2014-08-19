@@ -43,18 +43,21 @@ public class ClientFactory<T extends Remote> {
 	/********************** Member Functions **************************/
 
 	/**
-	 * This serves as a factory class For a Remote object. It is 
-	 * expected that a new instance is created every time getInstance()
-	 * is called. This is reasonable because usually will only be
-	 * creating a single such object and if there are a few
-	 * that is fine as well since they are not that expensive.
+	 * This serves as a factory class For a Remote object. It is expected that a
+	 * new instance is created every time getInstance() is called. This is
+	 * reasonable because usually will only be creating a single such object and
+	 * if there are a few that is fine as well since they are not that
+	 * expensive.
 	 * 
-	 * @param host Where remote object lives
-	 * @param projectId For creating bind name for remote object
-	 * @param clazz Because this is a static method the only way to get the class name
-	 * is to pass in the class.
+	 * @param host
+	 *            Where remote object lives
+	 * @param projectId
+	 *            For creating bind name for remote object
+	 * @param clazz
+	 *            Because this is a static method the only way to get the class
+	 *            name is to pass in the class.
 	 * @return Proxy to the RMI object on the server. If there is a problem
-	 * accessing the object then null is returned.
+	 *         accessing the object then null is returned.
 	 */
 	public static <T extends Remote> T getInstance(String projectId, Class<T> clazz) {
 		try {
@@ -67,6 +70,8 @@ public class ClientFactory<T extends Remote> {
 			// Get the RMI stub
 			T rmiStub = getRmiStub(info);
 			
+			logger.debug("Getting proxy instance...");
+			
 			// Create proxy for the RMI stub so that the special 
 			// RmiCallInvocationHandler can be used to instrument
 			// remote method calls.
@@ -75,6 +80,8 @@ public class ClientFactory<T extends Remote> {
                     new Class<?>[] {clazz},
                     new RmiCallInvocationHandler(rmiStub, info));
 
+			logger.debug("Got proxy instance. proxiedStub={}", proxiedStub);
+			
 			// Return the object that the client can use
 			return (T) proxiedStub;
 		} catch (Exception e) {
@@ -96,17 +103,25 @@ public class ClientFactory<T extends Remote> {
 	 */
 	public static <T extends Remote> T getRmiStub(RmiStubInfo info) 
 			throws RemoteException, NotBoundException {
+		logger.debug("Getting RMI registry for hostname={} port={} ...", 
+				info.getHostName(), RmiParams.getRmiPort());
+		
 		// Get the registry
-		Registry registry = 
-				LocateRegistry.getRegistry(info.getHostName(), RmiParams.getRmiPort());
+		Registry registry = LocateRegistry.getRegistry(info.getHostName(),
+				RmiParams.getRmiPort());
 		
 		// Get the remote object's bind name
-		String bindName = 
-				AbstractServer.getBindName(info.getAgencyId(), info.getClassName());
+		String bindName = AbstractServer.getBindName(info.getAgencyId(),
+				info.getClassName());
 				
+		logger.debug("Got RMI registry. Getting RMI stub from registry for "
+				+ "bindName={} ...", bindName);
+		
 		// Get the RMI stub object from the registry 
 		@SuppressWarnings("unchecked")
 		T rmiStub = (T) registry.lookup(bindName);
+		
+		logger.debug("Got RMI stub from registry for bindName={}", bindName);
 		
 		return rmiStub;
 	}
