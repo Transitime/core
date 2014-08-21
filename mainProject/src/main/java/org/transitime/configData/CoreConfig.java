@@ -164,7 +164,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue secondaryRmiPort =
 			new IntegerConfigValue("transitime.core.secondaryRmiPort",
-					2099,
+					3099,
 					"Which secondary port to use for RMI calls, for once "
 					+ "initial communication has been established. Usually "
 					+ "RMI uses port 0 which means any port. But then can't "
