@@ -25,7 +25,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
-import org.transitime.utils.Geo;
 import org.transitime.utils.StringUtils;
 
 /**
