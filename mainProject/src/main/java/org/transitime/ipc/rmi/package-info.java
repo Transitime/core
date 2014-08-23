@@ -30,7 +30,21 @@
  C:/Program Files/Java/jdk1.7.0_25/bin/rmiregistry.exe . With changes to the
  RMI system with version 1.7_20 of Java you need to specify the codebase
  if you run the rmiregistry manually. It would be started using something like:
- <code>./rmiregistry.exe -J-Djava.rmi.server.codebase=file:/Users/Mike/git/testProject/testProject/bin/ 2099</code>
+ <code>/usr/lib/jvm/jre/bin/rmiregistry -J-Djava.rmi.server.codebase=file:/he/ec2-user/jars/transitime.jar 2099</code>
+ <p>
+ AbstractServer configures RMI to not use port 0, basically a random port, when
+ establishing communication. Instead, RMI is configured to use a custom socket
+ factory that always uses port 3099. In this way the firewalls for the servers
+ can be configured to only allow traffic on the two ports 2099 & 3099 for RMI,
+ which is much safer than having to completely open up network traffic.  
+ <p>
+ An important issue is that when running on AWS the RMI server needs to be run 
+ using Java property -Djava.rmi.server.hostname=PUBLIC_DOMAIN.amazonaws.com .
+ Otherwise RMI server will tell the client to use an internal IP address,
+ resulting in the client simply timing out. This was a particularly difficult
+ issue to resolve. The key documentation on this issue was found in the
+ "Java Remote Method Invocation" document in the section 
+ 3.5 RMI Through Firewalls Via Proxies. 
  <p>
  The purpose of these classes is to make the system robust and easy to use.
  The server not only initializes the object but also will reconnect if the
@@ -65,7 +79,7 @@
  <li>If get a ConnectException then likely the RMI registry is not running.</li>
  <li>If get NotBoundException then the server object hasn't been created</li>
  </ul>
- 
-  @author SkiBu Smith
+
+ @author SkiBu Smith
  */
 package org.transitime.ipc.rmi;
