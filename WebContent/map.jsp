@@ -1,4 +1,3 @@
-<%@page import="org.transitime.utils.StringUtils"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -14,7 +13,7 @@
 </style>
 
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>apiTestFile</title>
+<title>Transitime Map</title>
 </head>
 <body>
 <div id="map"></div>
@@ -58,10 +57,21 @@ L.rotatedMarker = function(pos, options) {
 };
 
 var verbose = getQueryVariable("verbose");
-var urlPrefix = "http://localhost:8080/api/v1/key/TEST/agency/" + getQueryVariable("a");
+var agencyId = getQueryVariable("a");
+if (!agencyId)
+	alert("You must specify agency in URL using a=agencyId parameter");
+if (!getQueryVariable("rShortName"))
+	alert("You must specify route in URL using rShortName=21 parameter")
+var urlPrefix = "/api/v1/key/TEST/agency/" + getQueryVariable("a");
 
 // Create the map with a scale and specify which map tiles to use
 var map = L.map('map');
+
+// Set the CLIP_PADDING to a higher value so that when user pans on map
+// the route path doesn't need to be redrawn. Note: leaflet documentation
+// says that thisi could decrease drawing performance. But hey, it looks
+// better.
+L.Path.CLIP_PADDING = 0.8;
 
 L.control.scale({metric: false}).addTo(map);
 
@@ -234,7 +244,7 @@ function routeConfigCallback(route, status) {
 			var loc = shape.loc[j];			
 			latLngs.push(L.latLng(loc.lat, loc.lon));
 		}
-		var polyline = L.polyline(latLngs, options);//.addTo(map);
+		var polyline = L.polyline(latLngs, options).addTo(map);
 		
 		featureGroup.addLayer(polyline);
 		
@@ -244,7 +254,7 @@ function routeConfigCallback(route, status) {
 		polyline.on('click', function(e) {
 			var content = "TripPattern=" + this.shape.tripPattern + "<br/>Headsign=" + this.shape.headsign;
 			L.popup().setLatLng(e.latlng).setContent(content).openOn(map);}
-					 ).addTo(map);
+					 );
 
 	}
 
@@ -572,7 +582,7 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 
 	//Read in route info and draw it on map
 	var url = urlPrefix + "/command/route?rShortName="
-			+ getQueryVariable('rShortName');
+			+ getQueryVariable("rShortName");
 	if (getQueryVariable("s"))
 		url += "&s=" + getQueryVariable("s");
 	if (getQueryVariable("tripPattern"))
