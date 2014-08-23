@@ -291,7 +291,7 @@ public class Core {
 			}
 			
 			String agencyId = CoreConfig.getAgencyId();
-			Core core = createCore(agencyId);
+			createCore(agencyId);
 			
 			// Start any optional modules. 
 			// For how CoreConfig default modules includes the NextBus AVL feed
