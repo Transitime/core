@@ -47,55 +47,6 @@ public class CoreConfig {
 					"directory where to put the log files.");
 	
 	// Database params
-	public static String getDbName() {
-		return dbName.getValue();
-	}
-	private static StringConfigValue dbName = 
-			new StringConfigValue("transitime.core.dbName", 
-					null, // Null as default to use the projectId
-					"Specifies the name of the database. If not set then the "
-					+ "transitime.core.agencyId will be used.");
-
-	
-	public static String getDbHost() {
-		return dbHost.getValue();
-	}
-	private static StringConfigValue dbHost = 
-			new StringConfigValue("transitime.core.dbHost", 
-					null, // Null as default so can get it from hibernate config
-					"Specifies the name of the machine the database for the " +
-					"project resides on. Use null value to use values from " +
-					"hibernate config file. Set to \"localhost\" if database " +
-					"running on same machine as the core application.");
-	
-	public static String getDbType() {
-		return dbType.getValue();
-	}
-	private static StringConfigValue dbType =
-			new StringConfigValue("transitime.core.dbType",
-					"mysql",
-					"Specifies type of database when creating the URL to "
-					+ "connect to the database. Can be mysql or postgresql. "
-					+ "Should work for other dbs as well. Default is mysql.");
-	
-	public static String getDbUserName() {
-		return dbUserName.getValue();
-	}
-	private static StringConfigValue dbUserName = 
-			new StringConfigValue("transitime.core.dbUserName", 
-					null,
-					"Specifies login for the project database. Use null " +
-					"value to use values from hibernate config file.");
-	
-	public static String getDbPassword() {
-		return dbPassword.getValue();
-	}
-	private static StringConfigValue dbPassword = 
-			new StringConfigValue("transitime.core.dbPassword", 
-					null,
-					"Specifies password for the project database. Use null " +
-					"value to use values from hibernate config file.",
-					false); // Don't log password in configParams log file
 	
 	/**
 	 * When in playback mode or some other situations don't want to store
@@ -115,62 +66,7 @@ public class CoreConfig {
 					"departures, events, and such to the database because " +
 					"only debugging.");
 	
-	/**
-	 * For a client that needs to connect to an agency server. Usually would get
-	 * RMI host name from the WebAgencies table in the web database. But when
-	 * doing simple calls using this parameter eliminates the need to connect to
-	 * the web database, speeding up testing.
-	 * 
-	 * @return
-	 */
-	public static String rmiHost() {
-		return rmiHost.getValue();
-	}
-	private static StringConfigValue rmiHost =
-			new StringConfigValue("transitime.core.rmiHost",
-					null,
-					"For a client that needs to connect to an agency server. "
-					+ "Usually would get RMI host name from the WebAgencies "
-					+ "table in the web database. But when doing simple calls "
-					+ "using this parameter eliminates the need to connect to "
-					+ "the web database, speeding up testing.");
 	
-	/**
-	 * Which port to use for RMI calls. Usually RMI uses port 1099 but using
-	 * default of 2099 to not interfere with other RMI based applications
-	 * 
-	 * @return
-	 */
-	public static int rmiPort() {
-		return rmiPort.getValue();
-	}
-	private static IntegerConfigValue rmiPort =
-			new IntegerConfigValue("transitime.core.rmiPort",
-					2099,
-					"Which port to use for RMI calls. Usually RMI uses port "
-					+ "1099 but using default of 2099 to not interfere with "
-					+ "other RMI based applications.");
-
-	/**
-	 * Which secondary port to use for RMI calls, for once initial communication
-	 * has been established. Usually RMI uses port 0 which means any port. But
-	 * then can't configure firewall to limit access to specific ports.
-	 * Therefore using default value of 3099 so that the port is consistent.
-	 * 
-	 * @return
-	 */
-	public static int secondaryRmiPort() {
-		return secondaryRmiPort.getValue();
-	}
-	private static IntegerConfigValue secondaryRmiPort =
-			new IntegerConfigValue("transitime.core.secondaryRmiPort",
-					3099,
-					"Which secondary port to use for RMI calls, for once "
-					+ "initial communication has been established. Usually "
-					+ "RMI uses port 0 which means any port. But then can't "
-					+ "configure firewall to limit access to specific ports. "
-					+ "Therefore using default value of 3099 so that the port " 
-					+ "is consistent.");
 	/**
 	 * When batching large amount of AVL data through system to generate
 	 * improved schedule time (as has been done for Zhengzhou) it takes huge
@@ -217,21 +113,6 @@ public class CoreConfig {
 					"the calling thread will be temporarily suspended so " +
 					"that the separate thread can run to write to the db and " +
 					"thereby empty out the queue.");
-	
-	/**
-	 * So that have flexibility with where the hibernate config file is.
-	 * This way can easily access it within Eclipse.
-	 * @return
-	 */
-	public static String getHibernateConfigFileName() {
-		return hibernateConfigFileName.getValue();
-	}
-	private static StringConfigValue hibernateConfigFileName = 
-			new StringConfigValue("transitime.hibernate.configFile", 
-					"/REPOSITORY/PROJECT/src/main/config/hibernate.cfg.xml",
-					"So that have flexibility with where the hibernate " +
-					"config file is. This way can easily access it within " +
-					"Eclipse.");
 	
 	/**
 	 * The semicolon separated list of names of all of the modules that should

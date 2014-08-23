@@ -16,7 +16,7 @@
  */
 package org.transitime.ipc.rmi;
 
-import org.transitime.configData.CoreConfig;
+import org.transitime.configData.RmiConfig;
 import org.transitime.db.webstructs.WebAgency;
 
 /**
@@ -56,7 +56,7 @@ public class RmiStubInfo {
 	public String getHostName() {
 		// If RMI host is configured in CoreConfig via command line
 		// option then use it.
-		String configuredRmiHost = CoreConfig.rmiHost();
+		String configuredRmiHost = RmiConfig.rmiHost();
 		if (configuredRmiHost != null)
 			return configuredRmiHost;
 		
