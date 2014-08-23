@@ -226,4 +226,17 @@ public class AvlConfig {
 					"vehicle in this amount of time then the vehicle will be " +
 					"made non-predictable.");
 
+	/**
+	 * For debugging. Logs each AVL report to stdout if set to true.
+	 * Default is false.
+	 * 
+	 * @return
+	 */
+	public static boolean shouldLogToStdOut() {
+		return shouldLogToStdOut.getValue();
+	}
+	private static BooleanConfigValue shouldLogToStdOut =
+			new BooleanConfigValue("transitime.avl.shouldLogToStdOut", false,
+					"For debugging. Logs each AVL report to stdout if set "
+					+ "to true. Default is false.");
 }

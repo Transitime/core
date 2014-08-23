@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.DoubleConfigValue;
+import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport;
@@ -798,13 +799,14 @@ public class AvlProcessor {
 		// even when in playback mode or when reading batch data.
 		TimeoutHandler.getInstance().handlePossibleTimeout(avlReport);
 		
-		// Logging to syserr just for debugging. This should eventually be removed
-		// FIXME
-		System.err.println("Processing avlReport for vehicleId=" + 
-				avlReport.getVehicleId() + 
-				//" AVL time=" + Time.timeStrMsec(avlReport.getTime()) +
-				" " + avlReport +
-				" ...");
+		// Logging to syserr just for debugging.
+		if (AvlConfig.shouldLogToStdOut()) {
+			System.err.println("Processing avlReport for vehicleId=" + 
+					avlReport.getVehicleId() + 
+					//" AVL time=" + Time.timeStrMsec(avlReport.getTime()) +
+					" " + avlReport +
+					" ...");
+		}
 		
 		// Do the low level work of matching vehicle and then generating results
 		lowLevelProcessAvlReport(avlReport, false);
