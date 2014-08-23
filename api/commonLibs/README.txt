@@ -115,3 +115,8 @@ instead of using the standard hibernate one.
 
 For many Java utilities, such as StringEscapeUtils
   commons-lang3-3.3.2.jar
+
+For command line args. Not used for Tomcat but used in main app so
+included here so can be added to Eclipse project and won't have
+compile errors.
+    commons-cli-1.2.jar
