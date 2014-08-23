@@ -554,7 +554,12 @@ public final class Block implements Serializable {
 		return Collections.unmodifiableList(trips);
 	}
 	
-	// FIXME
+	/**
+	 * So can sync up loading of trip and trip pattern data when trips are all
+	 * read at once in another class as opposed to through Block.getTrips().
+	 * 
+	 * @return
+	 */
 	public static Object getLazyLoadingSyncObject() {
 		return lazyLoadingSyncObject;
 	}
