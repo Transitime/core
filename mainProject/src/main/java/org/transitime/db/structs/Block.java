@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,6 +38,7 @@ import javax.persistence.Table;
 
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
+import org.hibernate.JDBCException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
@@ -542,9 +544,17 @@ public final class Block implements Serializable {
 						blockId, serviceId);
 				IntervalTimer timer = new IntervalTimer();
 				
-				// Access the collection so that it is lazy loaded
-				trips.get(0);
-				
+				// Access the collection so that it is lazy loaded.
+				// Problems can be difficult to debug so log error along
+				// with the SQL.
+				try {
+					trips.get(0);
+				} catch (JDBCException e) {
+					logger.error("In Block.getTrips() got JDBCException. "
+							+ "SQL=\"{}\" msg={}", 
+							e.getSQL(), e.getSQLException().getMessage());
+					throw e;
+				}
 				logger.debug("Finished lazy load for trips data for " + 
 						"blockId={} serviceId={}. Took {} msec",
 						blockId, serviceId, timer.elapsedMsec());
