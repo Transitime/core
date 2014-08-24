@@ -53,6 +53,18 @@ public class SiriApi {
 
     /********************** Member Functions **************************/
 
+    /**
+     * Returns vehicleMonitoring vehicle information in SIRI format. Can
+     * specify vehicleIds, routeIds, or routeShortNames to get subset of data.
+     * If not specified then vehicle information for entire agency is returned.
+     *  
+     * @param stdParameters
+     * @param vehicleIds List of vehicle IDs
+     * @param routeIds List of route IDs
+     * @param routeShortNames List of routeShortNames
+     * @return The response
+     * @throws WebApplicationException
+     */
     @Path("/command/siri/vehicleMonitoring")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -89,6 +101,19 @@ public class SiriApi {
 	}
     }
 
+    /**
+     * Returns stopMonitoring vehicle information in SIRI format. Can specify
+     * routeId or routeShortName. Need to also specify stopId. Can optionally
+     * specify how many max number of predictions per stop to return.
+     * 
+     * @param stdParameters
+     * @param routeId
+     * @param routeShortName
+     * @param stopId
+     * @param numberPredictions
+     * @return
+     * @throws WebApplicationException
+     */
     @Path("/command/siri/stopMonitoring")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
