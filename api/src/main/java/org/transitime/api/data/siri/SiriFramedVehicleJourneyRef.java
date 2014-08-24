@@ -39,6 +39,11 @@ public class SiriFramedVehicleJourneyRef {
     
     /********************** Member Functions **************************/
 
+    /**
+     * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+     * obtuse "MessageBodyWriter not found for media type=application/json"
+     * exception.
+     */
     protected SiriFramedVehicleJourneyRef() {}
     
     public SiriFramedVehicleJourneyRef(IpcVehicle vehicle) {

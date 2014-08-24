@@ -44,20 +44,28 @@ public class SiriVehiclesMonitoring {
     
     @XmlAttribute
     private String xmlns = "http://www.siri.org.uk/siri";
-    
+      
     @XmlElement(name="ServiceDelivery")
     private SiriServiceDelivery delivery;
     
     /**
      * Simple sub-element so using internal class.
      */
-    private static class SiriServiceDelivery {
+     private static class SiriServiceDelivery {
 	@XmlElement(name="ResponseTimestamp")
 	private String responseTimestamp;
 	    
 	@XmlElement(name="VehicleMonitoringDelivery ") 
 	private SiriVehicleMonitoringDelivery vehicleMonitoringDelivery;
-	    
+
+	/**
+	 * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+	 * obtuse "MessageBodyWriter not found for media type=application/json"
+	 * exception.
+	 */
+	@SuppressWarnings("unused")
+	protected SiriServiceDelivery() {}	
+
 	public SiriServiceDelivery(Collection<IpcExtVehicle> vehicles, 
 		String agencyId) {
 	    responseTimestamp = Utils.formattedTime(System.currentTimeMillis());
@@ -81,10 +89,18 @@ public class SiriVehiclesMonitoring {
 	// Required by SIRI spec
 	@XmlElement(name="ValidUntil")
 	private String validUntil;
-	    
+	  
 	@XmlElement(name="VehicleActivity")
 	private List<SiriVehicleActivity> vehicleActivityList;
-	    
+
+	/**
+	 * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+	 * obtuse "MessageBodyWriter not found for media type=application/json"
+	 * exception.
+	 */
+	@SuppressWarnings("unused")
+	protected SiriVehicleMonitoringDelivery() {}
+	
 	public SiriVehicleMonitoringDelivery(Collection<IpcExtVehicle> vehicles, 
 		String agencyId) {
 	    long currentTime = System.currentTimeMillis();
@@ -110,6 +126,14 @@ public class SiriVehiclesMonitoring {
 	@XmlElement(name = "MonitoredVehicleJourney")
 	private SiriMonitoredVehicleJourney monitoredVehicleJourney;
 
+	/**
+	 * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+	 * obtuse "MessageBodyWriter not found for media type=application/json"
+	 * exception.
+	 */
+	@SuppressWarnings("unused")
+	protected SiriVehicleActivity() {}
+
 	public SiriVehicleActivity(IpcExtVehicle ipcExtVehicle, String agencyId) {
 	    recordedAtTime = Utils.formattedTime(ipcExtVehicle.getGpsTime());
 	    monitoredVehicleJourney = new SiriMonitoredVehicleJourney(
@@ -120,7 +144,7 @@ public class SiriVehiclesMonitoring {
     /********************** Member Functions **************************/
     
     // No-args needed because this class is an XML root element
-    public SiriVehiclesMonitoring() {}
+    protected SiriVehiclesMonitoring() {}
     
     public SiriVehiclesMonitoring(Collection<IpcExtVehicle> vehicles, String agencyId) {
 	delivery = new SiriServiceDelivery(vehicles, agencyId);

@@ -67,6 +67,13 @@ public class SiriMonitoredCall {
 	@XmlElement(name="Distances")
 	private Distances distances;
 	
+	/**
+	 * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+	 * obtuse "MessageBodyWriter not found for media type=application/json"
+	 * exception.
+	 */
+	protected Extensions() {}
+	
 	public Extensions(IpcExtVehicle ipcExtVehicle) {
 	    distances = new Distances(ipcExtVehicle);
 	}
@@ -84,6 +91,13 @@ public class SiriMonitoredCall {
 	@XmlElement(name="DistanceFromCall")
 	private String distanceFromCall;
 	
+	/**
+	 * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+	 * obtuse "MessageBodyWriter not found for media type=application/json"
+	 * exception.
+	 */
+	protected Distances() {}
+
 	public Distances(IpcExtVehicle ipcExtVehicle) {
 	    callDistanceAlongRoute = StringUtils.oneDigitFormat(ipcExtVehicle
 		    .getDistanceOfNextStopFromTripStart());
@@ -95,6 +109,13 @@ public class SiriMonitoredCall {
     
     /********************** Member Functions **************************/
 
+    /**
+     * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+     * obtuse "MessageBodyWriter not found for media type=application/json"
+     * exception.
+     */
+    protected SiriMonitoredCall() {}
+    
     /**
      * Constructs a MonitoredCall element.
      * 

@@ -37,6 +37,11 @@ public class SiriLocation {
     
     /********************** Member Functions **************************/
 
+    /**
+     * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+     * obtuse "MessageBodyWriter not found for media type=application/json"
+     * exception.
+     */
     protected SiriLocation() {}
     
     public SiriLocation(double latitude, double longitude) {
