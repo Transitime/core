@@ -16,7 +16,7 @@
  */
 
 /**
- *
+ * Database classes used for the website.
  *
  * @author SkiBu Smith
  *

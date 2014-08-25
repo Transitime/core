@@ -59,6 +59,15 @@ public class SiriStopMonitoring {
 	@XmlElement(name="StopMonitoringDelivery ") 
 	private SiriStopMonitoringDelivery stopMonitoringDelivery;
 	    
+	
+	/**
+	 * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+	 * obtuse "MessageBodyWriter not found for media type=application/json"
+	 * exception.
+	 */
+	@SuppressWarnings("unused")
+	protected SiriServiceDelivery() {}
+	
 	public SiriServiceDelivery(List<IpcPredictionsForRouteStopDest> preds, 
 		Collection<IpcExtVehicle> vehicles, String agencyId) {
 	    responseTimestamp = Utils.formattedTime(System.currentTimeMillis());
@@ -87,6 +96,15 @@ public class SiriStopMonitoring {
 	@XmlElement(name="MonitoredStopVisit")
 	private List<SiriMonitoredStopVisit> monitoredStopVisitList;
 	    
+	
+	/**
+	 * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+	 * obtuse "MessageBodyWriter not found for media type=application/json"
+	 * exception.
+	 */
+	@SuppressWarnings("unused")
+	protected SiriStopMonitoringDelivery() {}
+	
 	public SiriStopMonitoringDelivery(
 		List<IpcPredictionsForRouteStopDest> preds, 
 		Collection<IpcExtVehicle> vehicles, String agencyId) {
@@ -139,6 +157,14 @@ public class SiriStopMonitoring {
 	
 	@XmlElement(name = "MonitoredVehicleJourney")
 	SiriMonitoredVehicleJourney monitoredVehicleJourney;
+	
+	/**
+	 * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+	 * obtuse "MessageBodyWriter not found for media type=application/json"
+	 * exception.
+	 */
+	@SuppressWarnings("unused")
+	protected SiriMonitoredStopVisit() {}
 	
 	public SiriMonitoredStopVisit(IpcExtVehicle ipcExtVehicle, IpcPrediction prediction, 
 		String agencyId) {

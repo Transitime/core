@@ -102,6 +102,13 @@ public class SiriMonitoredVehicleJourney {
     /********************** Member Functions **************************/
 
     /**
+     * Need a no-arg constructor for Jersey for JSON. Otherwise get really
+     * obtuse "MessageBodyWriter not found for media type=application/json"
+     * exception.
+     */
+    protected SiriMonitoredVehicleJourney() {}
+    
+    /**
      * Constructs that massive MonitoredVehicleJourney element.
      * 
      * @param ipcExtVehicle
