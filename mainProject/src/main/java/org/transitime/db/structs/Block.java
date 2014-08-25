@@ -576,14 +576,18 @@ public final class Block implements Serializable {
 	
 	/**
 	 * Returns the trip specified by the tripIndex
+	 * 
 	 * @param tripIndex
-	 * @return the Trip specified by tripIndex. If index out of range 
-	 * returns null
+	 * @return the Trip specified by tripIndex. If index out of range returns
+	 *         null
 	 */
 	public Trip getTrip(int tripIndex) {
 		// If index out of range return null
-		if (tripIndex < 0 || tripIndex >= getTrips().size())
+		if (tripIndex < 0 || tripIndex >= getTrips().size())  {
+			logger.error("In Block.getTrip() trip index {} is out of range "
+					+ "for block {}", tripIndex, this.toShortString());
 			return null;
+		}
 		
 		// Return the specified trip
 		return getTrips().get(tripIndex);
@@ -792,10 +796,31 @@ public final class Block implements Serializable {
 	 * 
 	 * @param tripIndex
 	 * @param stopPathIndex
-	 * @return the StopPath
+	 * @return the StopPath or null if tripIndex or stopPathIndex are out of
+	 *         range.
 	 */
 	public StopPath getStopPath(int tripIndex, int stopPathIndex) {
-		return getTrip(tripIndex).getTripPattern().getStopPath(stopPathIndex);
+		// Get the trip
+		Trip trip = getTrip(tripIndex);
+		if (trip == null) {
+			logger.error("In Block.getStopPath() tripIndex={} is out of range "
+					+ "(stopPathIndex={}) for block={}", 
+					tripIndex, stopPathIndex, this.toShortString());
+			return null;
+		}
+			
+		// Get the stop path
+		StopPath stopPath = trip.getStopPath(stopPathIndex);
+		if (stopPath == null) {
+			logger.error("In Block.getStopPath() stopPathIndex={} is out of "
+					+ "range for tripIndex={} trip={} of block={}",
+					stopPathIndex, tripIndex, trip.toShortString(),
+					this.toShortString());
+			return null;
+		}
+		
+		// Return the stop path
+		return stopPath;
 	}
 	
 	/**
