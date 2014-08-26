@@ -614,12 +614,11 @@ public class TransitimeApi {
     }
 
     /**
-     * Handles the "tripPattern" command which outputs configuration data for
-     * the specified trip pattern.
+     * Handles the "tripPattern" command which outputs trip pattern configuration data for
+     * the specified route.
      * 
      * @param stdParameters
-     * @param blockId
-     * @param serviceId
+     * @param routeShortName
      * @return
      * @throws WebApplicationException
      */
