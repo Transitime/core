@@ -106,18 +106,27 @@ public class TravelTimes {
 	 * 
 	 * @param spatialMatch
 	 * @param newLoc
-	 * @return Msec of travel time from end of previous trip to the new location
+	 * @return Msec of travel time from end of previous trip to the new
+	 *         location. If there is no previous trip then returns 0.
 	 */
 	public static int travelTimeFromLayoverArrivalToNewLoc(
 			SpatialMatch spatialMatch, Location newLoc) {
 		if (!spatialMatch.isLayover())
 			return 0;
 		
-		SpatialMatch matchAtPreviousStop = spatialMatch
-				.getMatchAtPreviousStop();
-		Location endOfTripLocation = matchAtPreviousStop.getStopPath()
-				.getEndOfPathLocation();
+		// Determine the stop at the end of the previous trip
+		SpatialMatch matchAtPreviousStop = 
+				spatialMatch.getMatchAtPreviousStop();
 		
+		// If there was no previous trip then return 0
+		if (matchAtPreviousStop == null) {
+			return 0;
+		}
+		
+		// Determine distance as crow flies between the end of the previous
+		// trip to the new location.
+		Location endOfTripLocation = 
+				matchAtPreviousStop.getStopPath().getEndOfPathLocation();		
 		double distance = endOfTripLocation.distance(newLoc);
 		
 		return travelTimeAsTheCrowFlies(distance);

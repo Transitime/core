@@ -383,16 +383,24 @@ public class SpatialMatch {
 	}
 
 	/**
-	 * Returns a SpatialMatch that corresponds to the previous stop. The 
-	 * returned match will be just before the previous stop. Useful
-	 * if need to determine travel time from previous stop.
-	 * @return
+	 * Returns a SpatialMatch that corresponds to the previous stop. The
+	 * returned match will be just before the previous stop. Useful if need to
+	 * determine travel time from previous stop.
+	 * 
+	 * @return The SpatialMatch for the previous stop, or null if there is no
+	 *         previous stop (the current match is for the beginning of the
+	 *         block).
 	 */
 	public SpatialMatch getMatchAtPreviousStop() {
 		// First need to get on the proper path. If just before a stop
 		// then need to get a match just after that stop.
 		Indices indices = 
 				getMatchBeforeStopIfAtStop().getIndices().decrementStopPath();
+		
+		// If at beginning of block such that the match before the stop
+		// is invalid then simply return null
+		if (indices.beforeBeginningOfBlock())
+			return null;
 		
 		// Return a match that is at the end of the path
 		Vector segmentVector = indices.getBlock().getSegmentVector(
