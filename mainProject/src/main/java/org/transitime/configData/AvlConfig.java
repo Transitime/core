@@ -111,7 +111,7 @@ public class AvlConfig {
 	}
 	private static DoubleConfigValue maxAvlSpeed =
 			new DoubleConfigValue("transitime.avl.maxSpeed", 
-					26.8, // 31m/s = 60mph
+					31.3, // 31.3m/s = 70mph
 					"Max speed between AVL reports for a vehicle. If this " +
 					"value is exceeded then the AVL report is ignored.");
 	
