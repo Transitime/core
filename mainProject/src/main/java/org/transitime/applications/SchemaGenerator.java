@@ -176,13 +176,16 @@ public class SchemaGenerator {
 		final String packageName = args[0];
 		final String outputDirectory = args.length > 1 ? args[1] : null;
 		
+		// Note: need to use separate SchemaGenerator objects for each
+		// dialect because for some reason they otherwise interfere
+		// with each other.
 		SchemaGenerator gen = new SchemaGenerator(packageName, outputDirectory);
-		// Note: need to generate MYSQL last because using special 
-		// ImprovedMySQLDialect Dialect for MySQL but for some reason when
-		// it calls registerColumnType() in the constructor it affects the 
-		// other dialects as well. So need to do MySQL last.
 		gen.generate(Dialect.POSTGRES);
+		
+		gen = new SchemaGenerator(packageName, outputDirectory);
 		gen.generate(Dialect.ORACLE);
+
+		gen = new SchemaGenerator(packageName, outputDirectory);
 		gen.generate(Dialect.MYSQL);
 	}
 

@@ -122,6 +122,8 @@
         assignmentId varchar(60),
         assignmentType varchar(40),
         driverId varchar(60),
+        field1Name varchar(60),
+        field1Value varchar(255),
         heading float4,
         licensePlate varchar(10),
         lat float8,

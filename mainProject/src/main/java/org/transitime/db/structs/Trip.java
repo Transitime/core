@@ -165,10 +165,17 @@ public class Trip implements Serializable {
 		this.routeShortName = routeShortName;
 		this.serviceId = gtfsTrip.getServiceId();
 		this.headsign = gtfsTrip.getTripHeadsign();
-		// block column is optional in GTFS trips.txt file. Best can do for
-		// this situation is to use the tripId as the block.
-		this.blockId = gtfsTrip.getBlockId() != null ? 
-				gtfsTrip.getBlockId() : gtfsTrip.getTripId();
+		// block column is optional in GTFS trips.txt file. Best can do when
+		// block ID is not set is to use the trip short name or the trip id 
+		// as the block. MBTA uses trip short name in the feed so start with
+		// that.
+		String theBlockId = gtfsTrip.getBlockId();
+		if (theBlockId == null) {
+			theBlockId = gtfsTrip.getTripShortName();
+			if (theBlockId == null)
+				theBlockId = gtfsTrip.getTripId();
+		}
+		this.blockId = theBlockId;
 		this.shapeId = gtfsTrip.getShapeId();
 	}
 	

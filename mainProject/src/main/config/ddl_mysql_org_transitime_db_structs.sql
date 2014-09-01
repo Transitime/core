@@ -80,13 +80,13 @@
     drop table if exists VehicleEvents;
 
     create table ActiveRevisions (
-        configRev int4 not null,
-        travelTimesRev int4,
+        configRev integer not null,
+        travelTimesRev integer,
         primary key (configRev)
     );
 
     create table Agencies (
-        configRev int4 not null,
+        configRev integer not null,
         agencyId varchar(60) not null,
         agencyFareUrl varchar(255),
         agencyLang varchar(15),
@@ -94,10 +94,10 @@
         agencyPhone varchar(15),
         agencyTimezone varchar(40),
         agencyUrl varchar(255),
-        maxLat float8,
-        maxLon float8,
-        minLat float8,
-        minLon float8,
+        maxLat double precision,
+        maxLon double precision,
+        minLat double precision,
+        minLon double precision,
         primary key (configRev, agencyId)
     );
 
@@ -105,66 +105,68 @@
         DTYPE varchar(31) not null,
         vehicleId varchar(60) not null,
         tripId varchar(60) not null,
-        time timestamp not null,
+        time datetime(3) not null,
         stopId varchar(60) not null,
         isArrival boolean not null,
-        gtfsStopSeq int4 not null,
-        avlTime timestamp,
+        gtfsStopSeq integer not null,
+        avlTime datetime(3),
         blockId varchar(60),
-        configRev int4,
+        configRev integer,
         routeId varchar(60),
         routeShortName varchar(60),
-        scheduledTime timestamp,
+        scheduledTime datetime(3),
         serviceId varchar(60),
-        stopPathIndex int4,
-        stopPathLength float4,
-        tripIndex int4,
+        stopPathIndex integer,
+        stopPathLength float,
+        tripIndex integer,
         primary key (vehicleId, tripId, time, stopId, isArrival, gtfsStopSeq)
     );
 
     create table AvlReports (
         vehicleId varchar(60) not null,
-        time timestamp not null,
+        time datetime(3) not null,
         assignmentId varchar(60),
         assignmentType varchar(40),
         driverId varchar(60),
-        heading float4,
+        field1Name varchar(60),
+        field1Value varchar(255),
+        heading float,
         licensePlate varchar(10),
-        lat float8,
-        lon float8,
-        passengerCount int4,
-        passengerFullness float4,
-        speed float4,
-        timeProcessed timestamp,
+        lat double precision,
+        lon double precision,
+        passengerCount integer,
+        passengerFullness float,
+        speed float,
+        timeProcessed datetime(3),
         primary key (vehicleId, time)
     );
 
     create table Block_to_Trip_joinTable (
         Blocks_serviceId varchar(60) not null,
-        Blocks_configRev int4 not null,
+        Blocks_configRev integer not null,
         Blocks_blockId varchar(60) not null,
         trips_tripId varchar(60) not null,
-        trips_startTime int4 not null,
-        trips_configRev int4 not null,
-        listIndex int4 not null,
+        trips_startTime integer not null,
+        trips_configRev integer not null,
+        listIndex integer not null,
         primary key (Blocks_serviceId, Blocks_configRev, Blocks_blockId, listIndex)
     );
 
     create table Blocks (
         serviceId varchar(60) not null,
-        configRev int4 not null,
+        configRev integer not null,
         blockId varchar(60) not null,
-        endTime int4,
-        headwaySecs int4,
-        routeIds bytea,
-        startTime int4,
+        endTime integer,
+        headwaySecs integer,
+        routeIds blob,
+        startTime integer,
         primary key (serviceId, configRev, blockId)
     );
 
     create table CalendarDates (
         serviceId varchar(60) not null,
         date date not null,
-        configRev int4 not null,
+        configRev integer not null,
         exceptionType varchar(2),
         primary key (serviceId, date, configRev)
     );
@@ -180,17 +182,17 @@
         monday boolean not null,
         friday boolean not null,
         endDate date not null,
-        configRev int4 not null,
+        configRev integer not null,
         primary key (wednesday, tuesday, thursday, sunday, startDate, serviceId, saturday, monday, friday, endDate, configRev)
     );
 
     create table FareAttributes (
         fareId varchar(60) not null,
-        configRev int4 not null,
+        configRev integer not null,
         currencyType varchar(3),
         paymentMethod varchar(255),
-        price float4,
-        transferDuration int4,
+        price float,
+        transferDuration integer,
         transfers varchar(255),
         primary key (fareId, configRev)
     );
@@ -200,42 +202,42 @@
         originId varchar(60) not null,
         fareId varchar(60) not null,
         destinationId varchar(60) not null,
-        configRev int4 not null,
+        configRev integer not null,
         containsId varchar(60),
         primary key (routeId, originId, fareId, destinationId, configRev)
     );
 
     create table Frequencies (
         tripId varchar(60) not null,
-        startTime int4 not null,
-        configRev int4 not null,
-        endTime int4,
+        startTime integer not null,
+        configRev integer not null,
+        endTime integer,
         exactTimes boolean,
-        headwaySecs int4,
+        headwaySecs integer,
         primary key (tripId, startTime, configRev)
     );
 
     create table Matches (
         vehicleId varchar(60) not null,
-        avlTime timestamp not null,
+        avlTime datetime(3) not null,
         blockId varchar(60),
-        configRev int4,
-        distanceAlongSegment float4,
-        distanceAlongStopPath float4,
-        segmentIndex int4,
+        configRev integer,
+        distanceAlongSegment float,
+        distanceAlongStopPath float,
+        segmentIndex integer,
         serviceId varchar(255),
-        stopPathIndex int4,
+        stopPathIndex integer,
         tripId varchar(60),
         primary key (vehicleId, avlTime)
     );
 
     create table Predictions (
-        id int8 not null auto_increment,
+        id bigint not null auto_increment,
         affectedByWaitStop boolean,
-        configRev int4,
-        creationTime timestamp,
+        configRev integer,
+        creationTime datetime(3),
         isArrival boolean,
-        predictionTime timestamp,
+        predictionTime datetime(3),
         routeId varchar(60),
         stopId varchar(60),
         tripId varchar(60),
@@ -245,17 +247,17 @@
 
     create table Routes (
         id varchar(60) not null,
-        configRev int4 not null,
+        configRev integer not null,
         color varchar(10),
         description varchar(255),
-        maxLat float8,
-        maxLon float8,
-        minLat float8,
-        minLon float8,
+        maxLat double precision,
+        maxLon double precision,
+        minLat double precision,
+        minLon double precision,
         hidden boolean,
-        maxDistance float8,
+        maxDistance double precision,
         name varchar(255),
-        routeOrder int4,
+        routeOrder integer,
         shortName varchar(80),
         textColor varchar(10),
         type varchar(2),
@@ -265,13 +267,13 @@
     create table StopPaths (
         tripPatternId varchar(60) not null,
         stopPathId varchar(60) not null,
-        configRev int4 not null,
-        breakTime int4,
-        gtfsStopSeq int4,
+        configRev integer not null,
+        breakTime integer,
+        gtfsStopSeq integer,
         lastStopInTrip boolean,
         layoverStop boolean,
-        locations bytea,
-        pathLength float8,
+        locations blob,
+        pathLength double precision,
         routeId varchar(60),
         scheduleAdherenceStop boolean,
         stopId varchar(60),
@@ -281,12 +283,12 @@
 
     create table Stops (
         id varchar(60) not null,
-        configRev int4 not null,
-        code int4,
+        configRev integer not null,
+        code integer,
         hidden boolean,
         layoverStop boolean,
-        lat float8,
-        lon float8,
+        lat double precision,
+        lon double precision,
         name varchar(255),
         timepointStop boolean,
         waitStop boolean,
@@ -296,34 +298,34 @@
     create table Transfers (
         toStopId varchar(60) not null,
         fromStopId varchar(60) not null,
-        configRev int4 not null,
-        minTransferTime int4,
+        configRev integer not null,
+        minTransferTime integer,
         transferType varchar(1),
         primary key (toStopId, fromStopId, configRev)
     );
 
     create table TravelTimesForStopPath (
-        id int4 not null auto_increment,
-        daysOfWeekOverride int2,
+        id integer not null auto_increment,
+        daysOfWeekOverride smallint,
         howSet varchar(5),
         stopPathId varchar(60),
-        stopTimeMsec int4,
-        travelTimeSegmentLength float4,
-        travelTimesMsec bytea,
+        stopTimeMsec integer,
+        travelTimeSegmentLength float,
+        travelTimesMsec blob,
         primary key (id)
     );
 
     create table TravelTimesForTrip_to_TravelTimesForPath_joinTable (
-        TravelTimesForTrips_id int4 not null,
-        travelTimesForStopPaths_id int4 not null,
-        listIndex int4 not null,
+        TravelTimesForTrips_id integer not null,
+        travelTimesForStopPaths_id integer not null,
+        listIndex integer not null,
         primary key (TravelTimesForTrips_id, listIndex)
     );
 
     create table TravelTimesForTrips (
-        id int4 not null auto_increment,
-        configRev int4,
-        travelTimesRev int4,
+        id integer not null auto_increment,
+        configRev integer,
+        travelTimesRev integer,
         tripCreatedForId varchar(60),
         tripPatternId varchar(60),
         primary key (id)
@@ -331,23 +333,23 @@
 
     create table TripPattern_to_Path_joinTable (
         TripPatterns_id varchar(60) not null,
-        TripPatterns_configRev int4 not null,
+        TripPatterns_configRev integer not null,
         stopPaths_tripPatternId varchar(60) not null,
         stopPaths_stopPathId varchar(60) not null,
-        stopPaths_configRev int4 not null,
-        listIndex int4 not null,
+        stopPaths_configRev integer not null,
+        listIndex integer not null,
         primary key (TripPatterns_id, TripPatterns_configRev, listIndex)
     );
 
     create table TripPatterns (
         id varchar(60) not null,
-        configRev int4 not null,
+        configRev integer not null,
         shapeId varchar(60),
         directionId varchar(60),
-        maxLat float8,
-        maxLon float8,
-        minLat float8,
-        minLon float8,
+        maxLat double precision,
+        maxLon double precision,
+        minLat double precision,
+        minLon double precision,
         headsign varchar(255),
         routeId varchar(60),
         routeShortName varchar(80),
@@ -356,32 +358,32 @@
 
     create table Trips (
         tripId varchar(60) not null,
-        startTime int4 not null,
-        configRev int4 not null,
+        startTime integer not null,
+        configRev integer not null,
         blockId varchar(60),
         directionId varchar(60),
-        endTime int4,
+        endTime integer,
         headsign varchar(255),
         routeId varchar(60),
         routeShortName varchar(60),
-        scheduledTimesMap bytea,
+        scheduledTimesMap blob,
         serviceId varchar(60),
         shapeId varchar(60),
-        travelTimes_id int4,
+        travelTimes_id integer,
         tripPattern_id varchar(60),
-        tripPattern_configRev int4,
+        tripPattern_configRev integer,
         primary key (tripId, startTime, configRev)
     );
 
     create table VehicleEvents (
         vehicleId varchar(60) not null,
-        time timestamp not null,
+        time datetime(3) not null,
         eventType varchar(60) not null,
         becameUnpredictable boolean,
         blockId varchar(60),
-        description varchar(500),
-        lat float8,
-        lon float8,
+        description longtext,
+        lat double precision,
+        lon double precision,
         predictable boolean,
         routeId varchar(60),
         routeShortName varchar(60),

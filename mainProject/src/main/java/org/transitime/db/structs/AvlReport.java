@@ -114,6 +114,7 @@ public class AvlReport implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String assignmentId;  // optional
 	
+	// Note: handling TRIP_ID has not yet been implemented
 	public enum AssignmentType {UNSET, BLOCK_ID, ROUTE_ID, TRIP_ID};
 	
 	@Column(length=40)
@@ -140,9 +141,18 @@ public class AvlReport implements Serializable {
 	
 	// Optional. How full a bus is as a fraction. 0.0=empty, 1.0=at capacity.
 	// This parameter is optional. Set to null if data not available.
-	@Column
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final Float passengerFullness;
 		
+	// Optional. For containing additional info for a particular feed.
+	// Not declared final because setField1() is used to set values.
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private String field1Name;
+	
+	// Optional. For containing additional info for a particular feed.
+	// Not declared final because setField1() is used to set values.
+	@Column String field1Value;
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(AvlReport.class);	
 
@@ -177,6 +187,8 @@ public class AvlReport implements Serializable {
 		timeProcessed = null;
 		passengerCount = null;
 		passengerFullness = null;
+		field1Name = null;
+		field1Value = null;
 	}
 	
 	/**
@@ -207,6 +219,8 @@ public class AvlReport implements Serializable {
 		this.licensePlate = null;
 		this.passengerCount = null;
 		this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
 		
 		// Don't yet know when processed so set timeProcessed to null
 		this.timeProcessed = null;
@@ -257,6 +271,8 @@ public class AvlReport implements Serializable {
 			this.passengerFullness = passengerFullness;
 		else
 			this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
 		
 		// Don't yet know when processed so set timeProcessed to null
 		this.timeProcessed = null;
@@ -287,6 +303,8 @@ public class AvlReport implements Serializable {
 		this.licensePlate = null;
 		this.passengerCount = null;
 		this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
 		
 		// Don't yet know when processed so set timeProcessed to null
 		this.timeProcessed = null;
@@ -315,7 +333,9 @@ public class AvlReport implements Serializable {
 		this.licensePlate = toCopy.licensePlate;
 		this.timeProcessed = toCopy.timeProcessed;
 		this.passengerCount = toCopy.passengerCount;
-		this.passengerFullness = null;
+		this.passengerFullness = toCopy.passengerFullness;
+		this.field1Name = toCopy.field1Name;
+		this.field1Value = toCopy.field1Value;
 	}
 	
 	/**
@@ -341,7 +361,9 @@ public class AvlReport implements Serializable {
 		this.licensePlate = null;
 		this.passengerCount = null;
 		this.passengerFullness = null;
-		
+		this.field1Name = null;
+		this.field1Value = null;
+
 		// Don't yet know when processed so set timeProcessed to null
 		this.timeProcessed = null;
 	}
@@ -368,6 +390,8 @@ public class AvlReport implements Serializable {
 		this.licensePlate = null;
 		this.passengerCount = null;
 		this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
 		
 		// Don't yet know when processed so set timeProcessed to null
 		timeProcessed = null;
@@ -716,6 +740,18 @@ public class AvlReport implements Serializable {
 	}
 	
 	/**
+	 * For containing additional info as part of AVL feed that is
+	 * specific to a particular feed or a new element.
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	public void setField1(String name, String value) {
+		field1Name = name;
+		field1Value = value;
+	}
+	
+	/**
 	 * If this is a vehicle in a multi-car consist and it is not the lead
 	 * vehicle then shouldn't generate redundant arrival/departure times,
 	 * predictions etc.
@@ -801,6 +837,8 @@ public class AvlReport implements Serializable {
 				(licensePlate==null? "" : ", licensePlate=" + licensePlate) +	
 				(passengerCount==null? "" : ", passengerCount=" + passengerCount) +
 				(passengerFullness==null? "" : ", passengerFullness=" + passengerFullness) +
+				(field1Name==null? "" : ", field1Name=" + field1Name) +
+				(field1Value==null? "" : ", field1Value=" + field1Value) +
 				"]";
 	}
 

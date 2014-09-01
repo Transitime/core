@@ -35,8 +35,8 @@ public class TaipGpsLocation {
 	private final long fixEpochTime;
 	private final double latitude;
 	private final double longitude;
-	private final double heading;
-	private final double speedMetersPerSecond;
+	private final float heading;
+	private final float speedMetersPerSecond;
 	private final String gpsSourceStr;
 	private final String ageStr;
 	
@@ -58,7 +58,7 @@ public class TaipGpsLocation {
 	 * @param ageStr
 	 */
 	private TaipGpsLocation(long fixEpochTime, double latitude,
-			double longitude, double heading, double speedMetersPerSecond,
+			double longitude, float heading, float speedMetersPerSecond,
 			String gpsSourceStr, String ageStr) {
 		this.fixEpochTime = fixEpochTime;
 		this.latitude = latitude;
@@ -117,7 +117,8 @@ public class TaipGpsLocation {
 	 * 
 	 * @param s
 	 *            The TAIP string
-	 * @return
+	 * @return A TaipGpsLocation object containing all the processed info from
+	 *         the TAIP string, or null if there is a problem
 	 */
 	public static TaipGpsLocation get(String s) {
 		// If the string is not valid give up
@@ -153,15 +154,23 @@ public class TaipGpsLocation {
 		
 		String latStr = trimmed.substring(8,16);
 		double latitude = Double.parseDouble(latStr) / 100000.0;
-		
+		if (latitude == 0.0) {
+			logger.error("TAIP string has bad latitude of 0.0. {}", s);
+			return null;
+		}
+
 		String lonStr = trimmed.substring(16,25);
 		double longitude = Double.parseDouble(lonStr) / 100000.0;
+		if (longitude == 0.0) {
+			logger.error("TAIP string has bad longitude of 0.0. {}", s);
+			return null;
+		}
 		
 		String speedMphStr = trimmed.substring(25,28);
-		double speedMetersPerSecond = Double.parseDouble(speedMphStr) * 0.44704;
+		float speedMetersPerSecond = Float.parseFloat(speedMphStr) * 0.44704f;
 		
 		String headingStr = trimmed.substring(28,31);
-		double heading = Double.parseDouble(headingStr);
+		float heading = Float.parseFloat(headingStr);
 		
 		String gpsSourceStr = trimmed.substring(31,32);
 		String ageStr = trimmed.substring(32,33);
@@ -196,11 +205,11 @@ public class TaipGpsLocation {
 		return longitude;
 	}
 
-	public double getHeading() {
+	public float getHeading() {
 		return heading;
 	}
 
-	public double getSpeedMetersPerSecond() {
+	public float getSpeedMetersPerSecond() {
 		return speedMetersPerSecond;
 	}
 

@@ -16,6 +16,7 @@
  */
 package org.transitime.avl;
 
+import java.io.InputStream;
 import java.util.List;
 
 import org.transitime.config.StringConfigValue;
@@ -51,6 +52,8 @@ public class GtfsRealtimeModule extends AvlModule {
 
 	/**
 	 * Reads and processes the data. Called by AvlModule.run().
+	 * Reading GTFS-realtime doesn't use InputSteram so overriding
+	 * getAndProcessData().
 	 */
 	@Override
 	protected void getAndProcessData() {
@@ -59,6 +62,23 @@ public class GtfsRealtimeModule extends AvlModule {
 		for (AvlReport avlReport : avlReports) {
 			processAvlReport(avlReport);
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.avl.AvlModule#getUrl()
+	 */
+	@Override
+	protected String getUrl() {
+		return getGtfsRealtimeURI();
+	}
+
+	/* Not needed since all processing for this class is done in
+	 * the overridden getAndProcessData().
+	 * (non-Javadoc)
+	 * @see org.transitime.avl.AvlModule#processData(java.io.InputStream)
+	 */
+	@Override
+	protected void processData(InputStream in) throws Exception {
 	}
 
 }
