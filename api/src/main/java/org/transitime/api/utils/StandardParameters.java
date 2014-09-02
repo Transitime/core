@@ -18,6 +18,7 @@
 package org.transitime.api.utils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -52,7 +53,12 @@ public class StandardParameters {
     @QueryParam("format")
     private String formatOverride;
     
+    // Note: Specifying a default value so that don't get a 
+    // 400 bad request when using wget and headers not set. But
+    // this isn't enough. Still getting Bad Request. But leaving
+    // this in as documentation that it was tried.
     @HeaderParam("accept") 
+    @DefaultValue("application/xml")
     String acceptHeader;
     
     @Context 
