@@ -499,15 +499,25 @@ public class DbConfig {
 	}
 	
 	/************************** Getter Methods ***************************/
+
 	/**
 	 * Returns the block specified by the service and block ID parameters.
 	 * 
 	 * @param serviceId
 	 * @param blockId
-	 * @return
+	 * @return The block for the service and block IDs specified, or null if no
+	 *         such block.
 	 */
 	public Block getBlock(String serviceId, String blockId) {
 		Map<String, Block> blocksMap = blocksByServiceMap.get(serviceId);
+		
+		// If no such service class defined for the blocks then return
+		// null. This can happen if service classes are defined that
+		// even though no blocks use that service class, such as when
+		// working with a partial configuration.
+		if (blocksMap == null)
+			return null;
+		
 		return blocksMap.get(blockId);
 	}
 	
