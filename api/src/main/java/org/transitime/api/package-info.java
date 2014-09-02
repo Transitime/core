@@ -39,9 +39,15 @@
  * vehicle IDs via v=123&v=456&etc. Can specify route via route IDs or route short
  * names. For route IDs use r=2341&r=9382&etc or for route short names use
  * rShortName=A1&rShortName=B2&etc . If vehicles or routes not specified then data
- * for all vehicles for agency is returned. 
+ * for all vehicles for agency is returned.
+ * <p> 
  * Default output is in XML. Can specify JSON by setting the accept header in
- * the request or by adding format=json to the query string.
+ * the request to "application/json" or by adding format=json to the query string.
+ * <p>
+ * Note: you must set the Accept: header in the request. Otherwise the API will
+ * return Error 400 Bad Request. This is true even if you set the format
+ * query string parameter to json or xml. Browsers automatically set the Accept
+ * header but wget does not so you have to use wget --header='Accept: application/xml' URL.
  * <p>
  * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/vehicles?OPTIONS
  * <p>
