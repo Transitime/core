@@ -49,7 +49,7 @@ public class ApiVehicle {
     @XmlAttribute
     protected String routeId;
     
-    @XmlAttribute(name="routeShrtNm")
+    @XmlAttribute(name="rShortName")
     protected String routeShortName;
     
     @XmlAttribute

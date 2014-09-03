@@ -41,7 +41,7 @@ public class ApiRoute {
     @XmlAttribute
     private String id;
     
-    @XmlAttribute(name="routeShrtNm")
+    @XmlAttribute(name="rShortName")
     private String shortName;
     
     @XmlAttribute

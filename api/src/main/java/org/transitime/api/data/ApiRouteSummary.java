@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import org.transitime.ipc.data.IpcRouteSummary;
 
 /**
- * A short description of a route. For when outputing list of routes for agency.
+ * A short description of a route. For when outputting list of routes for agency.
  *
  * @author SkiBu Smith
  *
@@ -32,7 +32,7 @@ public class ApiRouteSummary {
     @XmlAttribute
     private String id;
     
-    @XmlAttribute(name="routeShrtNm")
+    @XmlAttribute(name="rShortName")
     private String shortName;
     
     @XmlAttribute
