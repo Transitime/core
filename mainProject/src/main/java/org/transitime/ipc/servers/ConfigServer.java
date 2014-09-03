@@ -41,10 +41,7 @@ import org.transitime.ipc.rmi.AbstractServer;
 
 /**
  * Implements ConfigInterface to serve up configuration information to RMI
- * clients. Currently only route information is provided, using
- * org.transitime.ipc.data.Route objects. In the future this will be
- * significantly expanded to provide other information as well. Currently this
- * is only a proof of concept class.
+ * clients. 
  * 
  * @author SkiBu Smith
  * 
@@ -147,6 +144,10 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 		org.transitime.db.structs.Route dbRoute = 
 				dbConfig.getRouteByShortName(routeShortName);
 		
+		// If no such route then return null since can't create a IpcStopsForRoute
+		if (dbRoute == null)
+			return null;
+		
 		// Convert db route into an ipc route
 		IpcStopsForRoute ipcStopsForRoute = new IpcStopsForRoute(dbRoute);
 		
@@ -162,6 +163,11 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 			throws RemoteException {
 		Block dbBlock = 
 				Core.getInstance().getDbConfig().getBlock(serviceId, blockId);
+		
+		// If no such block then return null since can't create a IpcBlock
+		if (dbBlock == null)
+			return null;
+		
 		return new IpcBlock(dbBlock);
 	}
 
@@ -171,6 +177,11 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 	@Override
 	public IpcTrip getTrip(String tripId) throws RemoteException {
 		Trip dbTrip = Core.getInstance().getDbConfig().getTrip(tripId);
+
+		// If no such trip then return null since can't create a IpcTrip
+		if (dbTrip == null)
+			return null;
+		
 		return new IpcTrip(dbTrip);
 	}
 
@@ -183,6 +194,9 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 		List<TripPattern> dbTripPatterns = 
 				Core.getInstance().getDbConfig().getTripPatternsForRoute(routeId);
 
+		if (dbTripPatterns == null)
+			return null;
+		
 		List<IpcTripPattern> tripPatterns = new ArrayList<IpcTripPattern>();
 		for (TripPattern dbTripPattern : dbTripPatterns) {
 			tripPatterns.add(new IpcTripPattern(dbTripPattern));
@@ -197,6 +211,10 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 	public List<IpcTripPattern> getTripPatterns(String routeShortName)
 			throws RemoteException {
 		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);
+		
+		if (route == null)
+			return null;
+		
 		return getTripPatternsByRouteId(route.getId());
 	}
 

@@ -307,13 +307,13 @@ public class DbConfig {
 	
 	/**
 	 * Returns the list of trip patterns associated with the specified route.
-	 * Reads the trip patterns from the database and stores them in cache
-	 * so that subsequent calls get them directly from the cache. The first
-	 * time this is called it can take a few seconds. Therefore this is not
-	 * done at startup since want startup to be quick.
+	 * Reads the trip patterns from the database and stores them in cache so
+	 * that subsequent calls get them directly from the cache. The first time
+	 * this is called it can take a few seconds. Therefore this is not done at
+	 * startup since want startup to be quick.
 	 * 
 	 * @param routeId
-	 * @return
+	 * @return List of TripPatterns for the route, or null if no such route
 	 */
 	public List<TripPattern> getTripPatternsForRoute(String routeId) {
 		// If haven't read in the trip pattern data yet, do so now and cache it
@@ -557,7 +557,7 @@ public class DbConfig {
 	 * Returns the Route with the specified routeShortName
 	 * 
 	 * @param routeShortName
-	 * @return
+	 * @return The route, or null if route doesn't exist
 	 */
 	public Route getRouteByShortName(String routeShortName) {
 		return routesByRouteShortNameMap.get(routeShortName);
