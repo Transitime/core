@@ -559,10 +559,13 @@ public class Trip implements Serializable {
 	}
 	
 	/**
+	 * Returns the routeShortName. If it is null then returns the full route
+	 * name.
+	 * 
 	 * @return the routeShortName
 	 */
 	public String getRouteShortName() {
-		return routeShortName;
+		return routeShortName != null ? routeShortName : getRouteName();
 	}
 
 	/**
