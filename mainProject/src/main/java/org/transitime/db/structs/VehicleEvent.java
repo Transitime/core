@@ -403,7 +403,7 @@ public class VehicleEvent implements Serializable {
 	@Override
 	public String toString() {
 		return "VehicleEvent [" 
-				+ "routeShrtNm=" + routeShortName
+				+ "rShortName=" + routeShortName
 				+ ", stopId=" + stopId 
 				+ ", vehicleId=" + vehicleId
 				+ ", eventType=\"" + eventType + "\"" 
