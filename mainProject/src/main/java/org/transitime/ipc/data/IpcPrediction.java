@@ -298,7 +298,7 @@ public class IpcPrediction implements Serializable {
 				+ ", block=" + blockId
 				+ ", predTime="	+ Time.timeStrMsecNoTimeZone(predictionTime)
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
-				+ ", creatTime=" + Time.timeStrMsecNoTimeZone(creationTime)
+				+ ", createTime=" + Time.timeStrMsecNoTimeZone(creationTime)
 				+ ", waitStop="	+ (affectedByWaitStop ? "t" : "f")
 				+ (driverId != null ? ", driver=" + driverId : "")
 				+ (isPassengerCountValid() ? ", psngrCnt=" + passengerCount

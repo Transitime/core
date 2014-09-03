@@ -126,6 +126,10 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 		org.transitime.db.structs.Route dbRoute = 
 				dbConfig.getRouteByShortName(routeShortName);
 		
+		// If no such route then return null since can't create a IpcRoute
+		if (dbRoute == null)
+			return null;
+		
 		// Convert db route into an ipc route
 		IpcRoute ipcRoute = new IpcRoute(dbRoute, stopId, tripPatternId);
 		
@@ -144,7 +148,8 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 		org.transitime.db.structs.Route dbRoute = 
 				dbConfig.getRouteByShortName(routeShortName);
 		
-		// If no such route then return null since can't create a IpcStopsForRoute
+		// If no such route then return null since can't create 
+		// a IpcStopsForRoute
 		if (dbRoute == null)
 			return null;
 		
