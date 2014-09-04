@@ -18,7 +18,12 @@
 <body>
 <div id="map"></div>
 </body>
+
 <script>
+
+/**
+ * For getting parameters from query string 
+ */
 function getQueryVariable(variable)
 {
        var query = window.location.search.substring(1);
@@ -28,6 +33,23 @@ function getQueryVariable(variable)
                if(pair[0] == variable){return pair[1];}
        }
        return(false);
+}
+
+// For converting epoch time to a human readable string. 
+// Allows timezone to be offset by query string parameter timezoneOffsetHours.
+var timeZoneOffsetMsec = 0;
+var timeZoneOffsetHoursStr = getQueryVariable('timezoneOffsetHours');
+if (timeZoneOffsetHoursStr) {
+	timeZoneOffsetMsec = parseInt(timeZoneOffsetHoursStr) * 60*60*1000;
+}
+
+/**
+ * For format epoch times to human readable times, possibly including
+ * a timezone offest.
+ */
+function dateFormat(time) {
+	// Use jquery-dateFormat javascript library
+	return $.format.date(new Date(time + timeZoneOffsetMsec), 'HH:mm:ss');
 }
 
 // Class for creating marker with an orientation. Found at
@@ -60,9 +82,21 @@ var verbose = getQueryVariable("verbose");
 var agencyId = getQueryVariable("a");
 if (!agencyId)
 	alert("You must specify agency in URL using a=agencyId parameter");
-if (!getQueryVariable("rShortName"))
-	alert("You must specify route in URL using rShortName=21 parameter")
+if (!getQueryVariable("rShortName") && !getQueryVariable("r"))
+	alert("You must specify route in URL using rShortName=XX or r=XX parameter")
 var urlPrefix = "/api/v1/key/TEST/agency/" + getQueryVariable("a");
+
+/**
+ * Returns query string param to be used for API for specifying the route.
+ * It can be either "r=XX" or "rShortName=XX" depending on whether route
+ * ID or route short name were used when bringing up the page.
+ */
+function getRouteQueryStrParam() {
+	if (getQueryVariable("r"))
+		return "r=" + getQueryVariable("r");
+	else
+		return "rShortName=" + getQueryVariable("rShortName");
+}
 
 // Create the map with a scale and specify which map tiles to use
 var map = L.map('map');
@@ -321,13 +355,13 @@ function getVehiclePopupContent(vehicleData) {
 			 ("<br/><b>Layover:</b> " + vehicleData.layover) : "";
     var layoverDepartureStr = vehicleData.layover ? 
     		 ("<br/><b>Departure:</b> " + 
-    				 $.format.date(new Date(parseInt(vehicleData.layoverDepartureTime)), 'HH:mm:ss')) : "";
+    				 dateFormat(vehicleData.layoverDepartureTime)) : "";
     var nextStopIdStr = vehicleData.nextStopId ? 
     		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopId) : "";
     var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat
     			+ "<br/><b>Lon:</b> " + vehicleData.loc.lon 
     			+ "<br/><b>Heading:</b> " + vehicleData.loc.heading : "";
-	var gpsTimeStr = $.format.date(new Date(vehicleData.loc.time), 'HH:mm:ss');
+	var gpsTimeStr = dateFormat(vehicleData.loc.time);
     var directionStr = verbose ? "<br/><b>Direction:</b> " + vehicleData.direction : ""; 
     var tripPatternStr = verbose ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
     
@@ -594,8 +628,7 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 	 * Should actually read in new vehicle positions and adjust all vehicle icons.
 	 */
 	function updateVehiclesUsingApiData() {
-		var url = urlPrefix + "/command/vehiclesDetails?rShortName="
-				+ getQueryVariable("rShortName");
+		var url = urlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
 		// If stop specified as query str param to this page pass it to the 
 		// vehicles request such that all but the next 2 predicted vehicles
 		// will be labled as minor ones and can therefore be drawn in UI to not
@@ -606,8 +639,7 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 	}
 
 	//Read in route info and draw it on map
-	var url = urlPrefix + "/command/route?rShortName="
-			+ getQueryVariable("rShortName");
+	var url = urlPrefix + "/command/route?" + getRouteQueryStrParam();
 	if (getQueryVariable("s"))
 		url += "&s=" + getQueryVariable("s");
 	if (getQueryVariable("tripPattern"))
