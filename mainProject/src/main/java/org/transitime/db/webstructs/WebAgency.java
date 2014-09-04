@@ -136,8 +136,9 @@ public class WebAgency {
 				map.put(webAgency.getAgencyId(), webAgency);
 			}
 
-			logger.info("Done reading WebAgencies from database. Took {} msec",
-					timer.elapsedMsec());
+			logger.info("Done reading WebAgencies from database. Took {} msec. "
+					+ "They are {}",
+					timer.elapsedMsec(), map.values());
 			return map;
 		} catch (Exception e) {
 			throw e;
