@@ -98,7 +98,8 @@
  * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/routes?OPTIONS
  * <p>
  * The route command for outputting detailed information for specified routes.
- * Specify the route short name for the desired route using rShortName=38.
+ * Specify the route short name for the desired route using the route short name
+ * via rShortName=XX or the route ID via r=XX.
  * Default output is in XML. Can specify JSON by setting the accept header in
  * the request or by adding format=json to the query string.
  * <p>

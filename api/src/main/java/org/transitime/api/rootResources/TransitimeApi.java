@@ -489,6 +489,7 @@ public class TransitimeApi {
      * includes all stops and paths such that it can be drawn in a map.
      * 
      * @param stdParameters
+     * @param routeId
      * @param routeShortName
      * @param stopId
      * @param tripPatternId
@@ -499,6 +500,7 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getRoute(@BeanParam StandardParameters stdParameters,
+	    @QueryParam(value="r") String routeId,
 	    @QueryParam(value="rShortName") String routeShortName,
 	    @QueryParam(value="s") String stopId,
 	    @QueryParam(value="tripPattern") String tripPatternId) 
@@ -509,14 +511,25 @@ public class TransitimeApi {
 	try {
 	    // Get Vehicle data from server
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
-	    IpcRoute route = 
-		    inter.getRoute(routeShortName, stopId, tripPatternId);
-
-	    // If the route doesn't exist then throw exception such that
-	    // Bad Request with an appropriate message is returned.
-	    if (route == null)
-		throw WebUtils.badRequestException("Route for routeShortName=" 
-			+ routeShortName + " does not exist.");
+	    IpcRoute route;
+	    
+	    if (routeId != null) {
+		route = inter.getRoute(routeShortName, stopId, tripPatternId);
+		// If the route doesn't exist then throw exception such that
+		// Bad Request with an appropriate message is returned.
+		if (route == null)
+		    throw WebUtils.badRequestException("Route for "
+			    + "routeShortName=" + routeShortName
+			    + " does not exist.");
+	    } else {
+		route = inter.getRouteUsingRouteId(routeId, stopId,
+			tripPatternId);
+		// If the route doesn't exist then throw exception such that
+		// Bad Request with an appropriate message is returned.
+		if (route == null)
+		    throw WebUtils.badRequestException("Route for routeId="
+			    + routeId + " does not exist.");
+	    }				    
 	    
 	    // Create and return ApiRoute response
 	    ApiRoute routeData = new ApiRoute(route);
