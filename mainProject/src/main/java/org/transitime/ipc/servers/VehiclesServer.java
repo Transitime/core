@@ -220,6 +220,10 @@ public class VehiclesServer extends AbstractServer
 	 */
 	private Collection<IpcVehicle> getSerializableCollection(
 			Collection<IpcExtVehicle> vehicles) {
+		// If vehicles is null then return empty array
+		if (vehicles == null)
+			return new ArrayList<IpcVehicle>();
+		
 		return new ArrayList<IpcVehicle>(vehicles);
 	}
 

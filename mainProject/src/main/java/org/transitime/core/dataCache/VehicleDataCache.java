@@ -127,7 +127,8 @@ public class VehicleDataCache {
 	 * info is obsolete and shouldn't be displayed.
 	 * 
 	 * @param routeShortNames
-	 * @return
+	 * @return Collection of vehicles for the route. Empty collection if there
+	 *         are none.
 	 */
 	public Collection<IpcExtVehicle> getVehiclesForRoute(
 			List<String> routeShortNames) {
@@ -151,7 +152,7 @@ public class VehicleDataCache {
 	 * obsolete and shouldn't be displayed.
 	 * 
 	 * @param routeId
-	 * @return
+	 * @return Vehicles for the route, or null if there are none.
 	 */
 	public Collection<IpcExtVehicle> getVehiclesForRouteUsingRouteId(
 			String routeId) {
@@ -168,7 +169,7 @@ public class VehicleDataCache {
 	 * info is obsolete and shouldn't be displayed.
 	 * 
 	 * @param routeShortNames
-	 * @return
+	 * @return Vehicles for the route, or null if there are none.
 	 */
 	public Collection<IpcExtVehicle> getVehiclesForRouteUsingRouteId(
 			List<String> routeIds) {
