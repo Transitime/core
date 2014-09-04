@@ -514,14 +514,6 @@ public class TransitimeApi {
 	    IpcRoute route;
 	    
 	    if (routeId != null) {
-		route = inter.getRoute(routeShortName, stopId, tripPatternId);
-		// If the route doesn't exist then throw exception such that
-		// Bad Request with an appropriate message is returned.
-		if (route == null)
-		    throw WebUtils.badRequestException("Route for "
-			    + "routeShortName=" + routeShortName
-			    + " does not exist.");
-	    } else {
 		route = inter.getRouteUsingRouteId(routeId, stopId,
 			tripPatternId);
 		// If the route doesn't exist then throw exception such that
@@ -529,6 +521,14 @@ public class TransitimeApi {
 		if (route == null)
 		    throw WebUtils.badRequestException("Route for routeId="
 			    + routeId + " does not exist.");
+	    } else {
+		route = inter.getRoute(routeShortName, stopId, tripPatternId);
+		// If the route doesn't exist then throw exception such that
+		// Bad Request with an appropriate message is returned.
+		if (route == null)
+		    throw WebUtils.badRequestException("Route for "
+			    + "routeShortName=" + routeShortName
+			    + " does not exist.");
 	    }				    
 	    
 	    // Create and return ApiRoute response
