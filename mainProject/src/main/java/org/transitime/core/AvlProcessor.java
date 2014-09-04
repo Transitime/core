@@ -26,6 +26,7 @@ import org.transitime.config.DoubleConfigValue;
 import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Route;
@@ -98,7 +99,8 @@ public class AvlProcessor {
 	
 	/**
 	 * Removes predictions and the match for the vehicle and marks
-	 * is as unpredictable. Also removes block assignment.
+	 * is as unpredictable. Also removes block assignment from the
+	 * vehicleState.
 	 * 
 	 * @param vehicleState
 	 *            The vehicle to be made unpredictable
@@ -525,8 +527,9 @@ public class AvlProcessor {
 	
 	/**
 	 * Looks at the last match in vehicleState to determine if at end of block
-	 * assignment. Note that this will not always work since might not actually
-	 * get an AVL report that matches to the last stop.
+	 * assignment. Updates vehicleState if at end of block. Note that this will
+	 * not always work since might not actually get an AVL report that matches
+	 * to the last stop.
 	 * 
 	 * @param vehicleState
 	 * @return True if end of the block was reached with the last match.
@@ -579,6 +582,8 @@ public class AvlProcessor {
 	 * continue to match to the pre-paused match, but by then the vehicle might
 	 * be on a whole different trip, causing schedule adherence to be really far
 	 * off. To prevent this the vehicle is re-matched to the assignment.
+	 * <p>
+	 * Updates vehicleState accordingly.
 	 * 
 	 * @param vehicleState
 	 * @return
@@ -766,6 +771,11 @@ public class AvlProcessor {
 					} // End of if end of block reached
 				}
 			}
+			
+			// Now that VehicleState has been updated need to update the
+			// VehicleDataCache so that when data queried for API the proper
+			// info is provided.
+			VehicleDataCache.getInstance().updateVehicle(vehicleState);
 		}  // End of synchronizing on vehicleState	}
 	}
 	

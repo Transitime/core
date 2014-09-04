@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.DbPrediction;
 import org.transitime.db.structs.Match;
 import org.transitime.ipc.data.IpcPrediction;
@@ -177,8 +176,5 @@ public class MatchProcessor {
 			}
 			processArrivalDepartures(vehicleState);
 		}
-		
-		// Update the VehicleDataCache so that client can access vehicle data
-		VehicleDataCache.getInstance().updateVehicle(vehicleState);
 	}
 }
