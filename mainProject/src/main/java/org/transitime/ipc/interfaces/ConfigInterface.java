@@ -69,6 +69,27 @@ public interface ConfigInterface extends Remote {
 			String tripPatternId) throws RemoteException;
 	
 	/**
+	 * Obtains data for single route.
+	 * 
+	 * @param routeId
+	 *            Specifies which route to provide data for. 
+	 * @param stopId
+	 *            If want UI to highlight the remaining stops and paths left in
+	 *            trip then stopId is used to return which stops remain in trip.
+	 *            If this additional info not needed for UI then null can be
+	 *            specified.
+	 * @param tripPatternId
+	 *            If want UI to highlight the remaining stops and paths left in
+	 *            trip then stopId is used to determine which trip pattern to
+	 *            highlight. If this additional info not needed for UI then null
+	 *            can be specified.
+	 * @return
+	 * @throws RemoteException
+	 */
+	public IpcRoute getRouteUsingRouteId(String routeId, String stopId,
+			String tripPatternId) throws RemoteException;
+	
+	/**
 	 * Returns stops for each direction for a route.
 	 * 
 	 * @param routeShortName

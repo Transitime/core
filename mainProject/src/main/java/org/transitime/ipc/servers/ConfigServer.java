@@ -138,6 +138,28 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRouteUsingRouteId(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public IpcRoute getRouteUsingRouteId(String routeId, String stopId,
+			String tripPatternId) throws RemoteException {
+		// Get the db route info 
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		org.transitime.db.structs.Route dbRoute = 
+				dbConfig.getRouteById(routeId);
+
+		// If no such route then return null since can't create a IpcRoute
+		if (dbRoute == null)
+			return null;
+		
+		// Convert db route into an ipc route
+		IpcRoute ipcRoute = new IpcRoute(dbRoute, stopId, tripPatternId);
+		
+		// Return the ipc route
+		return ipcRoute;
+	}
+
+	/* (non-Javadoc)
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getStops(java.lang.String)
 	 */
 	@Override
@@ -222,6 +244,5 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 		
 		return getTripPatternsByRouteId(route.getId());
 	}
-
 	
 }
