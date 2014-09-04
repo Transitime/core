@@ -133,6 +133,12 @@ public class TransitimeApi {
 		vehicles = inter.get();
 	    }
 
+	    // If the vehicles doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (vehicles == null)
+		throw WebUtils.badRequestException("Invalid specifier for "
+			+ "vehicles");
+
 	    // To determine how vehicles should be drawn in UI. If stop specified
 	    // when getting vehicle info then only the vehicles being predicted
 	    // for, should be highlighted. The others should be dimmed.
@@ -209,6 +215,12 @@ public class TransitimeApi {
 		vehicles = inter.get();
 	    }
 
+	    // If the vehicles doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (vehicles == null)
+		throw WebUtils.badRequestException("Invalid specifier for "
+			+ "vehicles");
+	    
 	    // To determine how vehicles should be drawn in UI. If stop specified
 	    // when getting vehicle info then only the vehicles being predicted
 	    // for, should be highlighted. The others should be dimmed.
@@ -500,6 +512,12 @@ public class TransitimeApi {
 	    IpcRoute route = 
 		    inter.getRoute(routeShortName, stopId, tripPatternId);
 
+	    // If the route doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (route == null)
+		throw WebUtils.badRequestException("Route for routeShortName=" 
+			+ routeShortName + " does not exist.");
+	    
 	    // Create and return ApiRoute response
 	    ApiRoute routeData = new ApiRoute(route);
 	    return stdParameters.createResponse(routeData);
@@ -534,6 +552,12 @@ public class TransitimeApi {
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
 	    IpcStopsForRoute stopsForRoute = inter.getStops(routeShortName);
 
+	    // If the route doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (stopsForRoute == null)
+		throw WebUtils.badRequestException("routeShortName=" + routeShortName 
+			+ " does not exist.");
+	    
 	    // Create and return ApiDirections response
 	    ApiDirections directionsData = new ApiDirections(stopsForRoute);
 	    return stdParameters.createResponse(directionsData);
@@ -570,6 +594,12 @@ public class TransitimeApi {
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
 	    IpcBlock ipcBlock = inter.getBlock(blockId, serviceId);
 
+	    // If the block doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (ipcBlock == null)
+		throw WebUtils.badRequestException("BlockId=" + blockId 
+			+ " for serviceId=" + serviceId + " does not exist.");
+	    
 	    // Create and return ApiBlock response
 	    ApiBlock apiBlock = new ApiBlock(ipcBlock);
 	    return stdParameters.createResponse(apiBlock);
@@ -603,6 +633,12 @@ public class TransitimeApi {
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
 	    IpcTrip ipcTrip = inter.getTrip(tripId);
 
+	    // If the trip doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (ipcTrip == null)
+		throw WebUtils.badRequestException("TripId=" + tripId 
+			+ " does not exist.");
+	    
 	    // Create and return ApiBlock response.
 	    // Include stop path info since just outputting single trip.
 	    ApiTrip apiTrip = new ApiTrip(ipcTrip, true);
@@ -638,6 +674,12 @@ public class TransitimeApi {
 	    List<IpcTripPattern> ipcTripPatterns = 
 		    inter.getTripPatterns(routeShortName);
 
+	    // If the trip doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (ipcTripPatterns == null)
+		throw WebUtils.badRequestException("routeShortName=" + routeShortName 
+			+ " does not exist.");
+	    
 	    // Create and return ApiBlock response
 	    ApiTripPatterns apiTripPatterns = 
 		    new ApiTripPatterns(ipcTripPatterns);

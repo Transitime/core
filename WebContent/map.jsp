@@ -138,6 +138,22 @@ var streetcarIcon = L.icon({
     popupAnchor: [0, -12],
 });
 
+var railIcon = L.icon({
+    iconUrl: 'images/rail-24.png',
+    iconRetinaUrl: 'images/rail-24@2x.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
+});
+
+var ferryIcon = L.icon({
+    iconUrl: 'images/ferry-24.png',
+    iconRetinaUrl: 'images/ferry-24@2x.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
+});
+
 var layoverIcon = L.icon({
     iconUrl: 'images/cafe-24.png',
     iconRetinaUrl: 'images/cafe-24@2x.png',
@@ -360,12 +376,21 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
  * a bus icon, or an icon to represent a layover.
  */
  function getIconForVehicle(vehicleData) {
-	// Determine which icon to use
+	// Determine which icon to use. Vehicles types defined per route
+	// as indicated in the GTFS spec at https://developers.google.com/transit/gtfs/reference#routes_fields
 	var vehicleIcon = busIcon;
 	if (vehicleData.vehicleType == "0")
 		vehicleIcon = streetcarIcon;
+	else if (vehicleData.vehicleType == "2")
+		vehicleIcon = railIcon;
+	else if (vehicleData.vehicleType == "4")
+		vehicleIcon = ferryIcon;
+
+	// Indicate layovers specially
 	if (vehicleData.layover)
 		vehicleIcon = layoverIcon;
+	
+	// Return the result
 	return vehicleIcon;
 }
 
