@@ -151,7 +151,8 @@ public class AvlReport implements Serializable {
 	
 	// Optional. For containing additional info for a particular feed.
 	// Not declared final because setField1() is used to set values.
-	@Column String field1Value;
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	String field1Value;
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(AvlReport.class);	
