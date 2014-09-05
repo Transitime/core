@@ -42,8 +42,10 @@ import org.transitime.ipc.data.IpcVehicle;
 	"layoverDepartureTime", "nextStopId", "driverId" })
 public class ApiVehicleDetails extends ApiVehicle {
 
+    // Note: needs to be Integer instead of an int because it can be null
+    // (for vehicles that are not predictable)
     @XmlAttribute(name="schAdh")
-    private int scheduleAdherence;
+    private Integer scheduleAdherence;
  
     @XmlAttribute(name="schAdhStr")
     private String scheduleAdherenceStr;
@@ -90,8 +92,10 @@ public class ApiVehicleDetails extends ApiVehicle {
     public ApiVehicleDetails(IpcVehicle vehicle, UiMode uiType) {
 	super(vehicle, uiType);
 	
-	scheduleAdherence = vehicle.getRealTimeSchedAdh().getTemporalDifference();
-	scheduleAdherenceStr = vehicle.getRealTimeSchedAdh().toString();
+	scheduleAdherence = vehicle.getRealTimeSchedAdh()!=null ?
+		vehicle.getRealTimeSchedAdh().getTemporalDifference() : null;
+	scheduleAdherenceStr = vehicle.getRealTimeSchedAdh()!=null ? 
+		vehicle.getRealTimeSchedAdh().toString() : null;
 	blockId = vehicle.getBlockId();
 	blockAssignmentMethod = vehicle.getBlockAssignmentMethod();
 	tripId = vehicle.getTripId();
