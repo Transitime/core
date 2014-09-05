@@ -606,7 +606,7 @@ public class Route implements Serializable {
 	}
 
 	/**
-	 * @return the name
+	 * @return the name of the route
 	 */
 	public String getName() {
 		return name;
