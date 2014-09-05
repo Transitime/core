@@ -547,7 +547,7 @@ public class DbConfig {
 	 * Returns the Route with the specified routeId.
 	 * 
 	 * @param routeId
-	 * @return
+	 * @return The Route specified by the ID, or null if no such route
 	 */
 	public Route getRouteById(String routeId) {
 		return routesByRouteIdMap.get(routeId);
