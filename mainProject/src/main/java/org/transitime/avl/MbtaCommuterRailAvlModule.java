@@ -95,6 +95,7 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 			
 			AvlReport avlReport = parseAvlReport(line);
 			if (avlReport != null) {
+				// TODO Take out these printlns. Only for debugging!
 				System.out.println("line=" + line);
 				System.out.println(avlReport);
 				
@@ -108,6 +109,31 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 				processAvlReport(avlReport);
 			}
 		}
+	}
+	
+	/**
+	 * Turns out that trip IDs are always 3 characters long in the GTFS data so
+	 * need assignments from AVL feed to match. Therefore if assignment from
+	 * feed is too short pad it with zeros.
+	 * 
+	 * @param assignmentFromFeed
+	 * @return The assignment, padded to be 3 characters long if the original
+	 *         was just 1 or 2 characters.
+	 */
+	private String padAssignment(String assignmentFromFeed) {
+		// If assignment not too short then it is OK so simply return it.
+		if (assignmentFromFeed == null 
+				|| assignmentFromFeed.length() >= 3)
+			return assignmentFromFeed;
+		
+		// Assignment is too short so pad it
+		if (assignmentFromFeed.length() == 1)
+			return "00" + assignmentFromFeed;
+		else if (assignmentFromFeed.length() == 2)
+			return "0" + assignmentFromFeed;
+		
+		// Must be empty string. Simply return it
+		return assignmentFromFeed;
 	}
 	
 	// The following are determining the proper place in the
@@ -138,8 +164,10 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 		String vehicleId = getValue(line, vehicleIdMarker + "(\\d+)");
 		
 		// Get the vehicle location
-		String workpiece = getValue(line, workpieceMarker + "(\\d+)");
-		String pattern = getValue(line, patternMarker + "(\\d+)");
+		String workpiece = 
+				padAssignment(getValue(line, workpieceMarker + "(\\d+)"));
+		String pattern = 
+				padAssignment(getValue(line, patternMarker + "(\\d+)"));
 		
 		// Get GPS data from TAIP formatted string
 		String gpsTaipStr = getValue(line, gpsMarker + "(\\>.+\\<)");
