@@ -19,6 +19,7 @@ package org.transitime.gtfs;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
@@ -504,21 +506,43 @@ public class DbConfig {
 	 * Returns the block specified by the service and block ID parameters.
 	 * 
 	 * @param serviceId
+	 *            Specified which service class to look for block. If null then
+	 *            will use the first service class for the current time that has
+	 *            the specified block.
 	 * @param blockId
+	 *            Specifies which block to return
 	 * @return The block for the service and block IDs specified, or null if no
 	 *         such block.
 	 */
 	public Block getBlock(String serviceId, String blockId) {
-		Map<String, Block> blocksMap = blocksByServiceMap.get(serviceId);
-		
-		// If no such service class defined for the blocks then return
-		// null. This can happen if service classes are defined that
-		// even though no blocks use that service class, such as when
-		// working with a partial configuration.
-		if (blocksMap == null)
+		// If service ID not specified then use today's. This way
+		// makes it easier to find block info
+		if (serviceId != null) {
+			// For determining blocks for the service
+			Map<String, Block> blocksMap = blocksByServiceMap.get(serviceId);
+			
+			// If no such service class defined for the blocks then return
+			// null. This can happen if service classes are defined that
+			// even though no blocks use that service class, such as when
+			// working with a partial configuration.
+			if (blocksMap == null)
+				return null;
+			
+			return blocksMap.get(blockId);
+		} else {
+			// Service ID was not specified so determine current ones for now
+			List<String> currentServiceIds = 
+					Core.getInstance().getServiceUtils().getServiceIds(new Date());
+			for (String currentServiceId : currentServiceIds) {
+				Block block = getBlock(currentServiceId, blockId);
+				if (block != null)
+					return block;				
+			}
+			
+			// Couldn't find that block ID for any of the current service IDs
 			return null;
+		}
 		
-		return blocksMap.get(blockId);
 	}
 	
 	public List<Block> getBlocks() {
