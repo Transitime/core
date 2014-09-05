@@ -95,10 +95,6 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 			
 			AvlReport avlReport = parseAvlReport(line);
 			if (avlReport != null) {
-				// TODO Take out these printlns. Only for debugging!
-				System.out.println("line=" + line);
-				System.out.println(avlReport);
-				
 				avlReports.put(avlReport.getVehicleId(), avlReport);
 			}
 		}
