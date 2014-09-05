@@ -73,13 +73,13 @@ public class IpcVehicle implements Serializable {
 	 * @param vs
 	 */
 	public IpcVehicle(VehicleState vs) {
-		this.blockId = vs.getBlock().getId();
 		this.blockAssignmentMethod = vs.getAssignmentMethod();
 		this.avl = new IpcAvl(vs.getAvlReport());
 		this.heading = vs.getHeading();
 		this.routeId = vs.getRouteId();
 		this.routeShortName = vs.getRouteShortName();
 		if (vs.getTrip() != null) {
+			this.blockId = vs.getBlock().getId();
 			this.tripId = vs.getTrip().getId();
 			this.tripPatternId = vs.getTrip().getTripPattern().getId();
 			this.directionId = vs.getTrip().getDirectionId();
@@ -117,6 +117,7 @@ public class IpcVehicle implements Serializable {
 			this.vehicleType = match.getRoute().getType();
 		} else {
 			// Vehicle not assigned to trip so null out parameters
+			this.blockId = null;
 			this.tripId = null;
 			this.tripPatternId = null;
 			this.directionId = null;

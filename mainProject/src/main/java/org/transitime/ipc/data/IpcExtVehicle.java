@@ -28,6 +28,7 @@ import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
+import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.Geo;
 
@@ -52,11 +53,18 @@ public class IpcExtVehicle extends IpcVehicle {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * The constructor.
+	 * 
+	 * @param vs The current vehicle state. Must not be null.
+	 */
 	public IpcExtVehicle(VehicleState vs) {
 		super(vs);
 		
-		this.routeName = Core.getInstance().getDbConfig()
-				.getRouteById(vs.getRouteId()).getName();
+		// Determine the route name. Can be null.
+		Route route = Core.getInstance().getDbConfig()
+				.getRouteById(vs.getRouteId());
+		this.routeName = route!=null ? route.getName() : null;
 		
 		// If vehicle assigned then can set the parameters
 		Trip trip = vs.getTrip();

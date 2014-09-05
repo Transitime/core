@@ -236,10 +236,11 @@ public class VehicleDataCache {
 		// If the route has changed then remove the vehicle from the old map for
 		// that route. Watch out for getRouteShortName() sometimes being null
 		if (originalVehicle != null
-				&& originalVehicle.getRouteShortName() != vehicle
-						.getRouteShortName()
-				&& !originalVehicle.getRouteShortName().equals(
-						vehicle.getRouteShortName())) {
+				&& originalVehicle.getRouteShortName() != 
+						vehicle.getRouteShortName()
+				&& (originalVehicle.getRouteShortName() == null 
+					|| !originalVehicle.getRouteShortName().equals(
+						vehicle.getRouteShortName()))) {
 			Map<String, IpcExtVehicle> vehicleMapForRoute = vehiclesByRouteMap
 					.get(originalVehicle.getRouteShortName());
 			vehicleMapForRoute.remove(vehicle.getId());
