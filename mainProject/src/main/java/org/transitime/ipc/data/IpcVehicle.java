@@ -396,6 +396,11 @@ public class IpcVehicle implements Serializable {
 		return predictable;
 	}
 
+	/**
+	 * 
+	 * @return The real-time schedule adherence for the vehicle, or null if
+	 *         vehicle no predictable.
+	 */
 	public TemporalDifference getRealTimeSchedAdh() {
 		return realTimeSchedAdh;
 	}

@@ -464,11 +464,12 @@ public class VehicleState {
 	}
 	
 	/**
-	 * Returns the current real-time schedule adherence for the vehicle,
-	 * or null if schedule adherence not currently valid (vehicle is
-	 * not predictable or running a non-schedule based assignment).
+	 * Returns the current real-time schedule adherence for the vehicle, or null
+	 * if schedule adherence not currently valid (vehicle is not predictable or
+	 * running a non-schedule based assignment).
 	 * 
-	 * @return
+	 * @return The TemporalDifference representing schedule adherence, or null
+	 *         if vehicle not currently predictable.
 	 */
 	public TemporalDifference getRealTimeSchedAdh() {
 		if (isPredictable())
