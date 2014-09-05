@@ -68,7 +68,9 @@ public class RmiConfig {
 	 * Which secondary port to use for RMI calls, for once initial communication
 	 * has been established. Usually RMI uses port 0 which means any port. But
 	 * then can't configure firewall to limit access to specific ports.
-	 * Therefore using default value of 3099 so that the port is consistent.
+	 * Therefore using default value of 2098 so that the port is consistent.
+	 * Every server on a machine must use a different secondary port for
+	 * communication.
 	 * 
 	 * @return
 	 */
@@ -77,12 +79,13 @@ public class RmiConfig {
 	}
 	private static IntegerConfigValue secondaryRmiPort =
 			new IntegerConfigValue("transitime.rmi.secondaryRmiPort",
-					3099,
+					2098,
 					"Which secondary port to use for RMI calls, for once "
 					+ "initial communication has been established. Usually "
 					+ "RMI uses port 0 which means any port. But then can't "
 					+ "configure firewall to limit access to specific ports. "
-					+ "Therefore using default value of 3099 so that the port " 
-					+ "is consistent.");
+					+ "Therefore using default value of 2098 so that the port " 
+					+ "is consistent. Every server on a machine must use a "
+					+ "different secondary port for communication.");
 
 }

@@ -16,14 +16,10 @@
  */
 package org.transitime.ipc.rmi;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,11 +40,13 @@ import org.transitime.utils.Timer;
  * Once a AbstractServer superclass object is created it will continue to exist.
  * <p>
  * AbstractServer configures RMI to not use port 0, basically a random port,
- * when establishing communication. Instead, RMI is configured to use a custom
- * socket factory that always uses port 3099. In this way the firewalls for the
- * servers can be configured to only allow traffic on the two ports 2099 & 3099
- * for RMI, which is much safer than having to completely open up network
- * traffic.
+ * when establishing secondary communication. Instead, RMI is configured to use
+ * port 2098. In this way the firewalls for the servers can be configured to
+ * only allow traffic on the two ports 2099 & 2098 for RMI. If there are
+ * multiple systems running on a single server then need to use a separate
+ * secondary port for each system (such as 2097, 2096, etc). Using a specific
+ * port for secondary communication is much safer than having to completely open
+ * up network traffic.
  * 
  * @author SkiBu Smith
  *
@@ -88,40 +86,6 @@ public abstract class AbstractServer {
 			LoggerFactory.getLogger(AbstractServer.class);
 
 	/********************** Member Functions **************************/
-
-	/**
-	 * Usually RMI accepts requests on port 1099 and then hands them
-	 * off to port 0, which means any random. But the can't really deal
-	 * with firewalls then. By using this class for creating the sockets
-	 * the ports can be restricted to predefined values and can thereby
-	 * be configured for in the firewalls. 
-	 *
-	 * Based on http://www.netcluesoft.com/rmi-through-a-firewall.html
-	 */
-	private static class FixedPortRMISocketFactor extends RMISocketFactory {
-
-		/* (non-Javadoc)
-		 * @see java.rmi.server.RMISocketFactory#createServerSocket(int)
-		 */
-		@Override
-		public ServerSocket createServerSocket(int port) throws IOException {
-			int fixedPort = 
-					(port == 0 ? RmiParams.getSecondaryRmiPort() : port);
-			logger.info("Creating RMI ServerSocket on port {}. Originally "
-					+ "specified port was {}", fixedPort, port);
-			return new ServerSocket(fixedPort);
-		}
-
-		/* (non-Javadoc)
-		 * @see java.rmi.server.RMISocketFactory#createSocket(java.lang.String, int)
-		 */
-		@Override
-		public Socket createSocket(String host, int port) throws IOException {
-			logger.info("Creating RMI Socket to host {} on port {}", host, port);
-			return new Socket(host, port);
-		}
-		
-	}
 	
 	/**
 	 * Binds the RMI implementation object to the registry so that it can be
@@ -151,18 +115,6 @@ public abstract class AbstractServer {
 	 */
 	protected AbstractServer(String projectId, String objectName) {
 		this.projectId = projectId;
-		
-		// Want to use a specific port instead of port 0 (which indicates a
-		// random port) when communicating back to the client.
-		if (RMISocketFactory.getSocketFactory() == null) {
-			try {
-				RMISocketFactory
-						.setSocketFactory(new FixedPortRMISocketFactor());
-			} catch (IOException e1) {
-				logger.error("Could not successfully switch to using "
-						+ "FixedPortRMISocketFactor for RMI socket calls", e1);
-			}
-		}
 	
 		try {
 			// First make sure that this object is a subclass of Remote
@@ -176,8 +128,10 @@ public abstract class AbstractServer {
 			}
 			Remote remoteThis = (Remote) this;
 			
-			// Export the RMI stub
-			stub = UnicastRemoteObject.exportObject(remoteThis, 0);
+			// Export the RMI stub. Specify that should use special port for
+			// secondary RMI communication.
+			stub = UnicastRemoteObject.exportObject(remoteThis,
+					RmiParams.getSecondaryRmiPort());
 
 			// Make sure the registry exists
 			if (registry == null) {
