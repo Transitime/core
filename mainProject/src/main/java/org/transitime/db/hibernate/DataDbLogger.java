@@ -200,6 +200,14 @@ public class DataDbLogger {
 	}
 	
 	/**
+	 * Returns how many items are in queue to be processed
+	 * @return items in queue
+	 */
+	public int queueSize() {
+		return queue.size();
+	}
+	
+	/**
 	 * Returns the index into levels that the queue capacity is at.
 	 * For determining if should send e-mail warning message.
 	 * 

@@ -62,22 +62,22 @@ public class PredictionsServer
 	 * predictions. This will automatically cause the object to continue to run
 	 * and serve requests.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @param predictionDataCache
 	 * @return the singleton PredictionsServer object. Usually does not need to
 	 *         used since the server will be fully running.
 	 */
 	public static PredictionsServer start(
-			String projectId, PredictionDataCache predictionDataCache) {
+			String agencyId, PredictionDataCache predictionDataCache) {
 		if (singleton == null) {
-			singleton = new PredictionsServer(projectId);
+			singleton = new PredictionsServer(agencyId);
 			singleton.predictionDataCache = predictionDataCache;
 		}
 		
-		if (!singleton.getProjectId().equals(projectId)) {
-			logger.error("Tried calling PredictionsServer.getInstance() for " +
-					"projectId={} but the singleton was created for projectId={}", 
-					projectId, singleton.getProjectId());
+		if (!singleton.getProjectId().equals(agencyId)) {
+			logger.error("Tried calling PredictionsServer.start() for " +
+					"agencyId={} but the singleton was created for agencyId={}", 
+					agencyId, singleton.getProjectId());
 			return null;
 		}
 		

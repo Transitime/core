@@ -26,7 +26,7 @@ import org.transitime.db.structs.TripPattern;
 import org.transitime.db.structs.Vector;
 
 /**
- *
+ * Represents a shape for Inter Process Communication (IPC)
  *
  * @author SkiBu Smith
  *
