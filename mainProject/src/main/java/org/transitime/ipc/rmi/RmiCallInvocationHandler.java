@@ -59,8 +59,8 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	// keep on creating new connections.
 	private static final ConcurrentHashMap<String, AtomicInteger> currentCallsByProjectMap =
 			new ConcurrentHashMap<String, AtomicInteger>();
-	// Set default value to 100 
-	private static int maxConcurrentCallsPerProject = 100;
+	// Set default value to 25 
+	private static int maxConcurrentCallsPerProject = 25;
 	
 	// Logging
 	private static final Logger logger = 
