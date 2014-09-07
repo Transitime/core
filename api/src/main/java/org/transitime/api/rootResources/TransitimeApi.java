@@ -34,6 +34,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
@@ -45,6 +46,7 @@ import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
+import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcPrediction;
@@ -703,6 +705,36 @@ public class TransitimeApi {
 	}
     }
 
+    /**
+     * For getting Agency data.
+     * 
+     * @param stdParameters
+     * @return
+     * @throws WebApplicationException
+     */
+    @Path("/command/agencies")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getAgencies(@BeanParam StandardParameters stdParameters) 
+		    throws WebApplicationException {
+
+	// Make sure request is valid
+	stdParameters.validate();
+	
+	try {
+	    // Get block data from server
+	    ConfigInterface inter = stdParameters.getConfigInterface();	
+	    List<Agency> agencies = inter.getAgencies();
+	    
+	    // Create and return ApiAgencies response
+	    ApiAgencies apiAgencies = 
+		    new ApiAgencies(agencies);
+	    return stdParameters.createResponse(apiAgencies);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+    }
     
     //    /**
 //     * For creating response of list of vehicles. Would like to make this a
