@@ -25,6 +25,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
@@ -46,7 +47,7 @@ import org.transitime.ipc.rmi.AbstractServer;
  * @author SkiBu Smith
  * 
  */
-public class ConfigServer  extends AbstractServer implements ConfigInterface {
+public class ConfigServer extends AbstractServer implements ConfigInterface {
 
 	// Should only be accessed as singleton class
 	private static ConfigServer singleton;
@@ -243,6 +244,14 @@ public class ConfigServer  extends AbstractServer implements ConfigInterface {
 			return null;
 		
 		return getTripPatternsByRouteId(route.getId());
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getAgencies()
+	 */
+	@Override
+	public List<Agency> getAgencies() throws RemoteException {
+		return Core.getInstance().getDbConfig().getAgencies();
 	}
 	
 }
