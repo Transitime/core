@@ -38,7 +38,7 @@ import org.transitime.utils.StringUtils;
 @XmlRootElement
 public class ApiPredictionRouteStop {
 
-    @XmlAttribute(name="rShrtNm")
+    @XmlAttribute(name="rShortName")
     private String routeShortName;
     
     @XmlAttribute(name="rName")
@@ -47,7 +47,7 @@ public class ApiPredictionRouteStop {
     @XmlAttribute(name="rId")
     private String routeId;
     
-    @XmlAttribute(name="s")
+    @XmlAttribute(name="sId")
     private String stopId;
     
     @XmlAttribute(name="sName")
