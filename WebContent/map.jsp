@@ -421,15 +421,17 @@ function routeConfigCallback(route, status) {
 		polyline.shape = shape;
 		
 		// Popup trip pattern info when user clicks on path
-		polyline.on('click', function(e) {
-			var content = "<b>TripPattern:</b> " + this.shape.tripPattern 
-				+ "<br/><b>Headsign:</b> " + this.shape.headsign;
-			L.popup(tripPatternPopupOptions)
-				.setLatLng(e.latlng)
-				.setContent(content)
-				.openOn(map);}
-					 );
-
+		if (verbose) {
+			polyline.on('click', function(e) {
+				var content = "<b>TripPattern:</b> " + this.shape.tripPattern 
+					+ "<br/><b>Headsign:</b> " + this.shape.headsign;
+				L.popup(tripPatternPopupOptions)
+					.setLatLng(e.latlng)
+					.setContent(content)
+					.openOn(map);}
+						 );
+		}
+		
 	}
 
 	
