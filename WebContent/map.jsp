@@ -1,6 +1,15 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- 
+ Query String parameters:
+   a=AGENCY (required)
+   r=ROUTE (required, though can also use rShortName=SHORT_NAME)
+   s=STOP_ID (optional, for specifying which stop interested in)
+   tripPattern=TRIP_PATTERN (optional, for specifying which stop interested in).
+   verbose=true (for getting additional info in vehicle popup window)
+   timezoneOffsetHours=3 (for displaying EDT times when running on PDT computer)
+-->
 <html>
 <head>
 <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
@@ -10,6 +19,8 @@
 
 <style type="text/css">
 #map { height: 660px; }
+.vehicle { font-size: x-small; font-weight: normal;}
+.prediction {font-size: large; font-weight: bold;}
 </style>
 
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -48,8 +59,9 @@ if (timeZoneOffsetHoursStr) {
  * a timezone offest.
  */
 function dateFormat(time) {
+	var offsetDate = new Date(parseInt(time) + timeZoneOffsetMsec);
 	// Use jquery-dateFormat javascript library
-	return $.format.date(new Date(time + timeZoneOffsetMsec), 'HH:mm:ss');
+	return $.format.date(offsetDate, 'HH:mm:ss');
 }
 
 // Class for creating marker with an orientation. Found at
@@ -160,7 +172,7 @@ var busIcon = L.icon({
     iconUrl: 'images/bus-24.png',
     iconRetinaUrl: 'images/bus-24@2x.png',
     iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    iconAnchor: [13, 12],
     popupAnchor: [0, -12],
 });
 
@@ -176,7 +188,7 @@ var railIcon = L.icon({
     iconUrl: 'images/rail-24.png',
     iconRetinaUrl: 'images/rail-24@2x.png',
     iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    iconAnchor: [13, 12],
     popupAnchor: [0, -12],
 });
 
@@ -241,6 +253,110 @@ var vehiclePopupOptions = {
 	closeButton: false
 };
 
+var stopPopupOptions = {
+	offset: L.point(0, -0),
+	closeButton: false
+}
+
+var tripPatternPopupOptions = {
+	closeButton: false
+}
+
+// For keeping track the predictions popup so can update content
+var predictionsPopup = null;
+var predictionsTimeout = null;
+
+/**
+ * Called when prediction read from API. Updates the content of the
+ * predictionsPopup with the new prediction info.
+ */
+function predictionCallback(preds, status) {
+	// If predictions popup was closed then don't do anything
+	if (predictionsPopup == null) 
+		return;
+	
+	// There will be predictions for just a single route/stop
+	var routeStop = preds.routeStop[0];
+	
+	// Set timeout to update predictions again in few seconds
+	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStop.rShortName, routeStop.sId);
+
+	// Add route and stop info
+	var content = '<b>Route:</b> ' + routeStop.rName + '<br/>' 
+		+ '<b>Stop:</b> ' + routeStop.sName + '<br/>';
+
+	// For each destination add predictions
+	for (var i in routeStop.dest) {
+		// If there are several destinations then add a horizontal rule
+		// to break predictions up by destination
+		if (routeStop.dest.length > 1)
+			content += '<hr/>';
+		
+		// Add the destination/headsign info
+		content += '<b>Destination:</b> ' + routeStop.dest[i].headsign + '<br/>';
+		
+		// Add each prediction for the current destination
+		if (routeStop.dest[i].pred.length > 0) {
+			content += '<span class="prediction">';
+			
+			for (var j in routeStop.dest[i].pred) {
+				if (j == 1)
+					content += ', ';
+				else if (j ==2)
+					content += ' & '
+				var pred = routeStop.dest[i].pred[j];
+				content += pred.min;
+				
+				// If in verbose mode add vehicle info
+				if (verbose)
+					content += ' <span class="vehicle">(vehicle ' + pred.vehicle + ')</span>';
+			}
+			content += ' minutes';
+			
+			content += '</span>';
+		} else {
+			// There are no predictions so let user know
+			content += "No predictions";
+		}
+	}
+	
+	// Now update popup with the wonderful prediction info
+	predictionsPopup.setContent(content);
+}
+
+/**
+ * Initiates API call to get prediction data.
+ */
+function getPredictionsJson(rShortName, stopId) {
+	// JSON request of predicton data
+	var url = urlPrefix + "/command/predictions?rs=" + rShortName 
+			+ "|" + stopId;
+	$.getJSON(url, predictionCallback);	
+}
+
+/**
+ * Called when user clicks on stop. Request predictions from API and calls
+ * predictionCallback() when data received.
+ */
+function showStopPopup(stopMarker) {
+	// JSON request of predicton data
+	getPredictionsJson(stopMarker.rShortName, stopMarker.stop.id);
+    
+	// Create popup in proper place but content will be added in predictionCallback()
+	predictionsPopup = L.popup(stopPopupOptions)
+		.setLatLng(stopMarker.getLatLng())
+		.openOn(map);
+}
+
+/**
+ * Initiate event handler to be called when a popup is closed. Sets 
+ * predictionsPopup to null to indicate that don't need to update predictions 
+ * anymore since stop popup not displayed anymore.
+ */
+map.on('popupclose', function(e) {
+	predictionsPopup = null;
+	clearTimeout(predictionsTimeout);
+});
 
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
@@ -277,11 +393,14 @@ function routeConfigCallback(route, status) {
 		// Store stop data obtained via AJAX with stopMarker so it can be used in popup
 		stopMarker.stop = stop;
 		
+		// Store routeShortName obtained via AJAX with stopMarker so can be 
+		// used to get predictions for stop/route
+		stopMarker.rShortName = route.rShortName;
+		
 		// When user clicks on stop popup information box
 		stopMarker.on('click', function(e) {
-			var content = this.stop.name + '<br/><b>Stop Id:</b> ' + this.stop.id;
-			L.popup().setLatLng(e.latlng).setContent(content).openOn(map);}
-					 ).addTo(map);
+			showStopPopup(this);
+		}).addTo(map);
 	}
 
 	// Draw the paths for the route
@@ -299,11 +418,16 @@ function routeConfigCallback(route, status) {
 		featureGroup.addLayer(polyline);
 		
 		// Store shape data obtained via AJAX with polyline so it can be used in popup
-		polyline.shapeData = shape;
+		polyline.shape = shape;
 		
+		// Popup trip pattern info when user clicks on path
 		polyline.on('click', function(e) {
-			var content = "TripPattern=" + this.shape.tripPattern + "<br/>Headsign=" + this.shape.headsign;
-			L.popup().setLatLng(e.latlng).setContent(content).openOn(map);}
+			var content = "<b>TripPattern:</b> " + this.shape.tripPattern 
+				+ "<br/><b>Headsign:</b> " + this.shape.headsign;
+			L.popup(tripPatternPopupOptions)
+				.setLatLng(e.latlng)
+				.setContent(content)
+				.openOn(map);}
 					 );
 
 	}
@@ -347,6 +471,19 @@ function getVehicleMarker(vehicleId) {
 }
 
 /**
+ * So that can easily output speed in km/hr instead of m/s
+ */
+function formatSpeed(speedInMetersPerSec) {
+	// If not a number then just return blank string
+	if (speedInMetersPerSec == "NaN")
+		return "";
+	
+	// Convert m/s to km/hr and truncate to 1 decimal place to make
+	// output pretty
+	return (parseFloat(speedInMetersPerSec) * 3.6).toFixed(1) + " km/hr";
+}
+
+/**
  * Takes in vehicleData info from API and determines the content
  * to be displayed for the vehicles popup.
  */
@@ -360,17 +497,20 @@ function getVehiclePopupContent(vehicleData) {
     		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopId) : "";
     var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat
     			+ "<br/><b>Lon:</b> " + vehicleData.loc.lon 
-    			+ "<br/><b>Heading:</b> " + vehicleData.loc.heading : "";
+    			+ "<br/><b>Heading:</b> " + vehicleData.loc.heading 
+    			+ "<br/><b>Speed:</b> " + formatSpeed(vehicleData.loc.speed)
+    			: "";
 	var gpsTimeStr = dateFormat(vehicleData.loc.time);
     var directionStr = verbose ? "<br/><b>Direction:</b> " + vehicleData.direction : ""; 
     var tripPatternStr = verbose ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
     
     var content = "<b>Vehicle:</b> " + vehicleData.id 
+    	+ "<br/><b>Route: </b> " + vehicleData.rShortName
 		+ latLonHeadingStr
 		+ "<br/><b>GPS Time:</b> " + gpsTimeStr
 		+ "<br/><b>Headsign:</b> " + vehicleData.headsign
 		+ directionStr 
-		+ "<br/><b>SchAhd:</b> " + vehicleData.schAdhStr 
+		+ "<br/><b>SchAdh:</b> " + vehicleData.schAdhStr 
 		+ "<br/><b>Block:</b> " + vehicleData.block
 		+ "<br/><b>Trip:</b> " + vehicleData.trip
 		+ tripPatternStr
@@ -480,6 +620,8 @@ function createVehicleMarker(vehicleData) {
 		var content = getVehiclePopupContent(this.vehicleData);
 		var latlng = L.latLng(this.vehicleData.loc.lat,
 				this.vehicleData.loc.lon);
+		// Create popup and associate it with the vehicleMarker
+		// so can later update the content.
 		this.popup = L.popup(vehiclePopupOptions, this)
 			.setLatLng(latlng)
 			.setContent(content).openOn(map);
@@ -495,7 +637,7 @@ function createVehicleMarker(vehicleData) {
  */
 function updateVehicleMarker(vehicleMarker, vehicleData) {
 	// If changing its minor status then need to redraw it with new options.
-	if (vehicleMarker.vehicleData.uiType != vehicleData.Type) {
+	if (vehicleMarker.vehicleData.uiType != vehicleData.uiType) {
 		// Change from minor to non-minor, or visa versa so update icon
 		vehicleMarker
 				.setOpacity(getVehicleMarkerOptions(vehicleData).opacity);
@@ -635,7 +777,15 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 		// attract as much attention.
 		if (getQueryVariable("s"))
 			url += "&s=" + getQueryVariable("s") + "&numPreds=2";
-		$.getJSON(url, vehicleLocationsCallback);
+
+		// Use ajaz() instead of getJSON() so that can set timeout since
+		// will be polling vehicle info every 10 seconds and don't want there
+		// to be many simultaneous requests.
+		$.ajax(url, {
+			  dataType: 'json',
+			  success: vehicleLocationsCallback,
+			  timeout: 4000 //4 second timeout
+			});
 	}
 
 	//Read in route info and draw it on map
@@ -646,8 +796,9 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 		url += "&tripPattern=" + getQueryVariable("tripPattern");
 	$.getJSON(url, routeConfigCallback);
 
-	// Read in vehicle locations now and every 10 seconds
+	// Read in vehicle locations now (and every 10 seconds)
 	updateVehiclesUsingApiData();
 	setInterval(updateVehiclesUsingApiData, 10000);
+	 
 </script>
 </html>
