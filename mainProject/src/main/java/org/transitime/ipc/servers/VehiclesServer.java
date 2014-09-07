@@ -55,25 +55,25 @@ public class VehiclesServer extends AbstractServer
 	/********************** Member Functions **************************/
 
 	/**
-	 * Starts up the PredictionsServer so that RMI calls can query for
-	 * predictions. This will automatically cause the object to continue to run
-	 * and serve requests.
+	 * Starts up the VehiclesServer so that RMI calls can query for predictions.
+	 * This will automatically cause the object to continue to run and serve
+	 * requests.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @param predictionManager
 	 * @return the singleton PredictionsServer object
 	 */
 	public static VehiclesServer start(
-			String projectId, VehicleDataCache vehicleManager) {
+			String agencyId, VehicleDataCache vehicleManager) {
 		if (singleton == null) {
-			singleton = new VehiclesServer(projectId);
+			singleton = new VehiclesServer(agencyId);
 			singleton.vehicleDataCache = vehicleManager;
 		}
 		
-		if (!singleton.getProjectId().equals(projectId)) {
-			logger.error("Tried calling PredictionsServer.getInstance() for " +
-					"projectId={} but the singleton was created for projectId={}", 
-					projectId, singleton.getProjectId());
+		if (!singleton.getProjectId().equals(agencyId)) {
+			logger.error("Tried calling VehiclesServer.start() for " +
+					"agencyId={} but the singleton was created for agencyId={}", 
+					agencyId, singleton.getProjectId());
 			return null;
 		}
 		

@@ -59,23 +59,23 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Starts up the ConfigServer so that RMI calls can query for
-	 * configuration data. This will automatically cause the object to continue to run
-	 * and serve requests.
+	 * Starts up the ConfigServer so that RMI calls can query for configuration
+	 * data. This will automatically cause the object to continue to run and
+	 * serve requests.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @return the singleton PredictionsServer object. Usually does not need to
 	 *         used since the server will be fully running.
 	 */
-	public static ConfigServer start(String projectId) {
+	public static ConfigServer start(String agencyId) {
 		if (singleton == null) {
-			singleton = new ConfigServer(projectId);
+			singleton = new ConfigServer(agencyId);
 		}
 		
-		if (!singleton.getProjectId().equals(projectId)) {
-			logger.error("Tried calling PredictionsServer.getInstance() for " +
-					"projectId={} but the singleton was created for projectId={}", 
-					projectId, singleton.getProjectId());
+		if (!singleton.getProjectId().equals(agencyId)) {
+			logger.error("Tried calling ConfigServer.start() for " +
+					"agencyId={} but the singleton was created for agencyId={}", 
+					agencyId, singleton.getProjectId());
 			return null;
 		}
 		
