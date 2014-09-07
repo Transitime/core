@@ -38,6 +38,7 @@ import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.servers.ConfigServer;
 import org.transitime.ipc.servers.PredictionsServer;
+import org.transitime.ipc.servers.ServerStatusServer;
 import org.transitime.ipc.servers.VehiclesServer;
 import org.transitime.modules.Module;
 import org.transitime.utils.SettableSystemTime;
@@ -261,6 +262,7 @@ public class Core {
 		PredictionsServer.start(agencyId, PredictionDataCache.getInstance());
 		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());
 		ConfigServer.start(agencyId);
+		ServerStatusServer.start(agencyId);
 	}
 	
 	/**
