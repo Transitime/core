@@ -22,6 +22,7 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.List;
 
+import org.transitime.db.structs.Agency;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
@@ -145,4 +146,11 @@ public interface ConfigInterface extends Remote {
 	public List<IpcTripPattern> getTripPatternsByRouteId(String routeId) 
 			throws RemoteException;
 
+	/**
+	 * Returns list of Agency objects containing data from GTFS agency.txt file
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<Agency> getAgencies() throws RemoteException;
+	
 }
