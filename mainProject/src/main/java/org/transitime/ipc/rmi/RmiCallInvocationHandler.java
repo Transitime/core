@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-import java.util.Enumeration;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -107,8 +107,8 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	 * 
 	 * @return Enumeration of agency IDs
 	 */
-	public static Enumeration<String> getAgencies() {
-		return currentCallsByProjectMap.keys();
+	public static Set<String> getAgencies() {
+		return currentCallsByProjectMap.keySet();
 	}
 	
 	/**
