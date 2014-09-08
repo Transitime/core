@@ -31,7 +31,7 @@ import org.transitime.ipc.rmi.ClientFactory;
  */
 public class PredictionsInterfaceFactory {
 
-	// Keyed by projectId
+	// Keyed by agencyId
 	private static Map<String, PredictionsInterface> predictionsInterfaceMap =
 			new HashMap<String, PredictionsInterface>();
 
@@ -39,18 +39,18 @@ public class PredictionsInterfaceFactory {
 
 	/**
 	 * Gets the PredictionsInterface for the specified projectId. There is one
-	 * interface per projectId.
+	 * interface per agencyId.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @return
 	 */
-	public static PredictionsInterface get(String projectId) {
+	public static PredictionsInterface get(String agencyId) {
 		PredictionsInterface predictionsInterface =
-				predictionsInterfaceMap.get(projectId);
+				predictionsInterfaceMap.get(agencyId);
 		if (predictionsInterface == null) {
 			predictionsInterface = 
-					ClientFactory.getInstance(projectId, PredictionsInterface.class);
-			predictionsInterfaceMap.put(projectId, predictionsInterface);
+					ClientFactory.getInstance(agencyId, PredictionsInterface.class);
+			predictionsInterfaceMap.put(agencyId, predictionsInterface);
 		}
 
 		return predictionsInterface;
