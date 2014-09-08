@@ -52,8 +52,8 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	private final RmiStubInfo info;
 	
 	// For keeping track of number of total and current RMI calls.
-	// Probably don't actually need to use Atomic variables since
-	// not doing a change & get, but it makes it safer to do so.
+	// Don't actually need to use Atomic variables since
+	// not doing a change & get.
 	private static class Counts {
 		long total = 0L;
 		int current = 0;
