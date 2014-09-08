@@ -32,7 +32,7 @@ import org.transitime.ipc.rmi.ClientFactory;
  */
 public class ConfigInterfaceFactory {
 
-	// Keyed by projectId
+	// Keyed by agencyId
 	private static Map<String, ConfigInterface> configInterfaceMap =
 			new HashMap<String, ConfigInterface>();
 
@@ -41,16 +41,16 @@ public class ConfigInterfaceFactory {
 	/**
 	 * Gets the singleton instance.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @return
 	 */
-	public static ConfigInterface get(String projectId) {
+	public static ConfigInterface get(String agencyId) {
 		ConfigInterface configInterface =
-				configInterfaceMap.get(projectId);
+				configInterfaceMap.get(agencyId);
 		if (configInterface == null) {
 			configInterface = 
-					ClientFactory.getInstance(projectId, ConfigInterface.class);
-			configInterfaceMap.put(projectId, configInterface);
+					ClientFactory.getInstance(agencyId, ConfigInterface.class);
+			configInterfaceMap.put(agencyId, configInterface);
 		}
 
 		return configInterface;
