@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,9 +57,10 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	// host. Don't want too many calls at once because if the server
 	// gets stops or slows due to something like a stop the world 
 	// garbage collection want to make sure that a web server doesn't
-	// keep on creating new connections.
+	// keep on creating new connections. Keyed on agencyId.
 	private static final ConcurrentHashMap<String, AtomicInteger> currentCallsByProjectMap =
 			new ConcurrentHashMap<String, AtomicInteger>();
+	
 	// Set default value to 25 
 	private static int maxConcurrentCallsPerProject = 25;
 	
@@ -100,11 +102,31 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 		maxConcurrentCallsPerProject = maxConcurrentCalls;
 	}
 	
-	private static AtomicInteger getAccessCounter(String projectId) {
-		AtomicInteger counter = currentCallsByProjectMap.get(projectId);
+	/**
+	 * Returns which agencies have processed RMI calls for.
+	 * 
+	 * @return Enumeration of agency IDs
+	 */
+	public static Enumeration<String> getAgencies() {
+		return currentCallsByProjectMap.keys();
+	}
+	
+	/**
+	 * For specified agency returns how many outstanding RMI calls are currently
+	 * being processed by the agency server.
+	 * 
+	 * @param agencyId
+	 * @return
+	 */
+	public static int getCount(String agencyId) {
+		return getAccessCounter(agencyId).get();
+	}
+	
+	private static AtomicInteger getAccessCounter(String agencyId) {
+		AtomicInteger counter = currentCallsByProjectMap.get(agencyId);
 		if (counter == null) {
-			currentCallsByProjectMap.putIfAbsent(projectId, new AtomicInteger());
-			counter = currentCallsByProjectMap.get(projectId);
+			currentCallsByProjectMap.putIfAbsent(agencyId, new AtomicInteger());
+			counter = currentCallsByProjectMap.get(agencyId);
 		}
 		return counter;
 	}
