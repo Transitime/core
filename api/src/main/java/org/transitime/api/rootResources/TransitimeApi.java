@@ -38,8 +38,10 @@ import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
+import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoute;
 import org.transitime.api.data.ApiRouteSummaries;
+import org.transitime.api.data.ApiServerStatus;
 import org.transitime.api.data.ApiTrip;
 import org.transitime.api.data.ApiTripPatterns;
 import org.transitime.api.data.ApiVehicles;
@@ -53,12 +55,14 @@ import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.data.IpcStopsForRoute;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
+import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
 
@@ -673,7 +677,7 @@ public class TransitimeApi {
      * @return
      * @throws WebApplicationException
      */
-    @Path("/command/trippatterns")
+    @Path("/command/tripPatterns")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getTripPatterns(@BeanParam StandardParameters stdParameters,
@@ -736,6 +740,59 @@ public class TransitimeApi {
 	}
     }
     
+    /**
+     * Returns status about the specified agency server. Currently
+     * provides info on the DbLogger queue.
+     * 
+     * @param stdParameters
+     * @return
+     * @throws WebApplicationException
+     */
+    @Path("/command/serverStatus")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getServerStatus(@BeanParam StandardParameters stdParameters) 
+		    throws WebApplicationException {
+
+	// Make sure request is valid
+	stdParameters.validate();
+	
+	try {
+	    // Get block data from server
+	    ServerStatusInterface inter = stdParameters.getServerStatusInterface();	
+	    IpcServerStatus ipcServerStatus = inter.get();
+	    
+	    // Create and return ApiServerStatus response
+	    ApiServerStatus apiServerStatus = new ApiServerStatus(
+		    stdParameters.getAgencyId(), ipcServerStatus);
+	    return stdParameters.createResponse(apiServerStatus);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+    }
+    
+    /**
+     * Returns info for this particular web server for each agency on how
+     * many outstanding RMI calls there are.
+     * 
+     * @param stdParameters
+     * @return
+     * @throws WebApplicationException
+     */
+    @Path("/command/rmiStatus")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getRmiStatus(@BeanParam StandardParameters stdParameters) 
+		    throws WebApplicationException {
+
+	// Make sure request is valid
+	stdParameters.validate();
+	
+	ApiRmiServerStatus apiRmiServerStatus = new ApiRmiServerStatus();
+	return stdParameters.createResponse(apiRmiServerStatus);
+    }
+ 
     //    /**
 //     * For creating response of list of vehicles. Would like to make this a
 //     * generic type but due to type erasure cannot do so since GenericEntity

@@ -135,7 +135,7 @@
  * Default output is in XML. Can specify JSON by setting the accept header in
  * the request or by adding format=json to the query string.
  * <p>
- * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/trippatterns?OPTIONS
+ * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/tripPatterns?OPTIONS
  * <p>
  * The agencies command for outputting GTFS information for the agency. Note that
  * with each GTFS based system can actually be for multiple agencies.
