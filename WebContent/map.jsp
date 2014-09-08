@@ -8,7 +8,6 @@
    s=STOP_ID (optional, for specifying which stop interested in)
    tripPattern=TRIP_PATTERN (optional, for specifying which stop interested in).
    verbose=true (for getting additional info in vehicle popup window)
-   timezoneOffsetHours=3 (for displaying EDT times when running on PDT computer)
 -->
 <html>
 <head>
@@ -16,13 +15,9 @@
 <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="/api/javascript/jquery-dateFormat.min.js"></script>
-
-<style type="text/css">
-#map { height: 660px; }
-.vehicle { font-size: x-small; font-weight: normal;}
-.prediction {font-size: large; font-weight: bold;}
-</style>
-
+<script src="/api/javascript/mapUiOptions.js"></script>
+<link rel="stylesheet" href="/api/css/mapUi.css" />
+ 
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Transitime Map</title>
 </head>
@@ -46,20 +41,15 @@ function getQueryVariable(variable)
        return(false);
 }
 
-// For converting epoch time to a human readable string. 
-// Allows timezone to be offset by query string parameter timezoneOffsetHours.
-var timeZoneOffsetMsec = 0;
-var timeZoneOffsetHoursStr = getQueryVariable('timezoneOffsetHours');
-if (timeZoneOffsetHoursStr) {
-	timeZoneOffsetMsec = parseInt(timeZoneOffsetHoursStr) * 60*60*1000;
-}
-
 /**
  * For format epoch times to human readable times, possibly including
  * a timezone offest.
  */
 function dateFormat(time) {
-	var offsetDate = new Date(parseInt(time) + timeZoneOffsetMsec);
+	var localTimezoneOffset = (new Date()).getTimezoneOffset();
+	var timezoneDiffMinutes = localTimezoneOffset - agencyTimezoneOffset;
+	
+	var offsetDate = new Date(parseInt(time) + timezoneDiffMinutes*60*1000);
 	// Use jquery-dateFormat javascript library
 	return $.format.date(offsetDate, 'HH:mm:ss');
 }
@@ -127,140 +117,11 @@ L.tileLayer('http://{s}.tiles.mapbox.com/v3/examples.map-i86knfo3/{z}/{x}/{y}.pn
 }).addTo(map);
 
 
-// Options that effect how routes, stops, and vehicles are drawn
-var shapeOptions = {
-	color: '#00ee00',
-	weight: 8,
-	opacity: 0.8,
-	lineJoin: 'round'
-};
-		
-var minorShapeOptions = {
-	color: '#00ee00',
-	weight: 1,
-	opacity: 0.4,
-};
-		
-var stopOptions = {
-    color: '#006600',
-    opacity: 1.0,
-    radius: 4,
-    weight: 2,
-    fillColor: '#006600',
-    fillOpacity: 0.6,
-};
-
-var firstStopOptions = {
-    color: '#006600',
-    opacity: 1.0,
-    radius: 7,
-    weight: 2,
-    fillColor: '#ccffcc',
-    fillOpacity: 0.9,		
-}
-
-var minorStopOptions = {
-    color: '#006600',
-    opacity: 0.2,
-    radius: 3,
-    weight: 2,
-    fillColor: '#006600',
-    fillOpacity: 0.2,
-};
-
-var busIcon = L.icon({
-    iconUrl: 'images/bus-24.png',
-    iconRetinaUrl: 'images/bus-24@2x.png',
-    iconSize: [24, 24],
-    iconAnchor: [13, 12],
-    popupAnchor: [0, -12],
-});
-
-var streetcarIcon = L.icon({
-    iconUrl: 'images/rail-light-24.png',
-    iconRetinaUrl: 'images/rail-light-24@2x.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
-});
-
-var railIcon = L.icon({
-    iconUrl: 'images/rail-24.png',
-    iconRetinaUrl: 'images/rail-24@2x.png',
-    iconSize: [24, 24],
-    iconAnchor: [13, 12],
-    popupAnchor: [0, -12],
-});
-
-var ferryIcon = L.icon({
-    iconUrl: 'images/ferry-24.png',
-    iconRetinaUrl: 'images/ferry-24@2x.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
-});
-
-var layoverIcon = L.icon({
-    iconUrl: 'images/cafe-24.png',
-    iconRetinaUrl: 'images/cafe-24@2x.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
-	
-});
-
-var arrowIcon = L.icon({
-	iconUrl: 'images/arrow.png',
-	iconSize: [30, 30],
-	iconAnchor: [15,15],
-});
-
-var vehicleMarkerOptions = {
-	opacity: 1.0,
-};
-
-var secondaryVehicleMarkerOptions = {
-	opacity: 0.7,		
-};
-
-var minorVehicleMarkerOptions = {
-	opacity: 0.4,		
-};
-
-var vehicleMarkerBackgroundOptions = {
-    radius: 12,
-    weight: 0,
-    fillColor: '#ffffff',
-    fillOpacity: 1.0,				
-};
-
-var secondaryVehicleMarkerBackgroundOptions = {
-    radius: 12,
-    weight: 0,
-    fillColor: '#ffffff',
-    fillOpacity: 0.75,				
-};
-
-var minorVehicleMarkerBackgroundOptions = {
-    radius: 12,
-    weight: 0,
-    fillColor: '#ffffff',
-    fillOpacity: 0.5,				
-};
-
-var vehiclePopupOptions = {
-	offset: L.point(0,-2), 
-	closeButton: false
-};
-
-var stopPopupOptions = {
-	offset: L.point(0, -0),
-	closeButton: false
-}
-
-var tripPatternPopupOptions = {
-	closeButton: false
-}
+// Get timezone offset and put it into global agencyTimezoneOffset variable
+$.getJSON(urlPrefix + "/command/agencies", 
+		function(agencies) {
+			agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
+});	
 
 // For keeping track the predictions popup so can update content
 var predictionsPopup = null;
@@ -284,7 +145,9 @@ function predictionCallback(preds, status) {
 	// Add route and stop info
 	var content = '<b>Route:</b> ' + routeStop.rName + '<br/>' 
 		+ '<b>Stop:</b> ' + routeStop.sName + '<br/>';
-
+	if (verbose)
+		content += '<b>Stop Id:</b> ' + routeStop.sId + '<br/>';
+		
 	// For each destination add predictions
 	for (var i in routeStop.dest) {
 		// If there are several destinations then add a horizontal rule
@@ -293,7 +156,8 @@ function predictionCallback(preds, status) {
 			content += '<hr/>';
 		
 		// Add the destination/headsign info
-		content += '<b>Destination:</b> ' + routeStop.dest[i].headsign + '<br/>';
+		if (routeStop.dest[i].headsign)
+			content += '<b>Destination:</b> ' + routeStop.dest[i].headsign + '<br/>';
 		
 		// Add each prediction for the current destination
 		if (routeStop.dest[i].pred.length > 0) {
@@ -356,6 +220,9 @@ function showStopPopup(stopMarker) {
 map.on('popupclose', function(e) {
 	predictionsPopup = null;
 	clearTimeout(predictionsTimeout);
+	
+	if (e.popup.parent)
+		e.popup.parent.popup = null;
 });
 
 /**

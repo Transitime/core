@@ -1,0 +1,5 @@
+@CHARSET "ISO-8859-1";
+
+html, body, #map { height: 100%; width: 100%; padding: 0px; margin: 0px;}
+.vehicle { font-size: x-small; font-weight: normal;}
+.prediction {font-size: large; font-weight: bold;}
