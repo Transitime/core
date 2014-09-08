@@ -23,8 +23,6 @@ import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.utils.IntervalTimer;
@@ -53,13 +51,21 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	// for a proxied object.
 	private final RmiStubInfo info;
 	
+	// For keeping track of number of total and current RMI calls.
+	// Probably don't actually need to use Atomic variables since
+	// not doing a change & get, but it makes it safer to do so.
+	private static class Counts {
+		long total = 0L;
+		int current = 0;
+	}
+	
 	// For limiting how many RMI calls are in process for a particular
 	// host. Don't want too many calls at once because if the server
 	// gets stops or slows due to something like a stop the world 
 	// garbage collection want to make sure that a web server doesn't
 	// keep on creating new connections. Keyed on agencyId.
-	private static final ConcurrentHashMap<String, AtomicInteger> currentCallsByProjectMap =
-			new ConcurrentHashMap<String, AtomicInteger>();
+	private static final ConcurrentHashMap<String, Counts> currentCallsByAgencyMap =
+			new ConcurrentHashMap<String, Counts>();
 	
 	// Set default value to 25 
 	private static int maxConcurrentCallsPerProject = 25;
@@ -108,7 +114,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	 * @return Enumeration of agency IDs
 	 */
 	public static Set<String> getAgencies() {
-		return currentCallsByProjectMap.keySet();
+		return currentCallsByAgencyMap.keySet();
 	}
 	
 	/**
@@ -119,14 +125,32 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	 * @return
 	 */
 	public static int getCount(String agencyId) {
-		return getAccessCounter(agencyId).get();
+		return getAccessCounter(agencyId).current;
 	}
 	
-	private static AtomicInteger getAccessCounter(String agencyId) {
-		AtomicInteger counter = currentCallsByProjectMap.get(agencyId);
+	/**
+	 * Total number of RMI requests sent by this web server to a 
+	 * particular agency server.
+	 * 
+	 * @param agencyId
+	 * @return
+	 */
+	public static long getTotalCount(String agencyId) {
+		return getAccessCounter(agencyId).total;
+	}
+	
+	/**
+	 * For keeping track of how many outstanding RMI calls there are per
+	 * agency. Also keeps track of total RMI calls per agency.
+	 * 
+	 * @param agencyId
+	 * @return
+	 */
+	private static Counts getAccessCounter(String agencyId) {
+		Counts counter = currentCallsByAgencyMap.get(agencyId);
 		if (counter == null) {
-			currentCallsByProjectMap.putIfAbsent(agencyId, new AtomicInteger());
-			counter = currentCallsByProjectMap.get(agencyId);
+			currentCallsByAgencyMap.putIfAbsent(agencyId, new Counts());
+			counter = currentCallsByAgencyMap.get(agencyId);
 		}
 		return counter;
 	}
@@ -264,8 +288,9 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 		// collecting, denial of service attack, etc) don't want to
 		// burden the project even more with additional calls. 
 		// Therefore when behind want to return as quickly as possible.
-		AtomicInteger accessCounter = getAccessCounter(info.getAgencyId());
-		if (accessCounter.get() >= getMaxConcurrentCallsPerProject()) {
+		Counts accessCounter = getAccessCounter(info.getAgencyId());
+		accessCounter.total++;
+		if (accessCounter.current >= getMaxConcurrentCallsPerProject()) {
 			// Currently too many RMI calls is progress so log error
 			// and throw exception
 			String message = "Reached MAX_CURRENT_CALLS_PER_PROJECT="
@@ -279,14 +304,14 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 		} else {
 			try {
 				// Keep track that another RMI call is being initiated
-				accessCounter.incrementAndGet();
+				accessCounter.current++;
 				
 				// Actually make the RMI call
 				Object result = lowLevelInvoke(method, args);
 				return result;
 			} finally {
 				// Make sure that access counter decrement no matter what
-				accessCounter.decrementAndGet();
+				accessCounter.current--;
 			}
 		}
 	}
