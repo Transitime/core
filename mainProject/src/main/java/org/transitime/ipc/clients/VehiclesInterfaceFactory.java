@@ -32,7 +32,7 @@ import org.transitime.ipc.rmi.ClientFactory;
  */
 public class VehiclesInterfaceFactory {
 
-	// Keyed by projectId
+	// Keyed by agencyId
 	private static Map<String, VehiclesInterface> vehiclesInterfaceMap =
 			new HashMap<String, VehiclesInterface>();
 
@@ -41,16 +41,16 @@ public class VehiclesInterfaceFactory {
 	/**
 	 * Gets the singleton instance.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 * @return
 	 */
-	public static VehiclesInterface get(String projectId) {
+	public static VehiclesInterface get(String agencyId) {
 		VehiclesInterface vehiclesInterface =
-				vehiclesInterfaceMap.get(projectId);
+				vehiclesInterfaceMap.get(agencyId);
 		if (vehiclesInterface == null) {
 			vehiclesInterface = 
-					ClientFactory.getInstance(projectId, VehiclesInterface.class);
-			vehiclesInterfaceMap.put(projectId, vehiclesInterface);
+					ClientFactory.getInstance(agencyId, VehiclesInterface.class);
+			vehiclesInterfaceMap.put(agencyId, vehiclesInterface);
 		}
 
 		return vehiclesInterface;

@@ -20,21 +20,21 @@ package org.transitime.ipc.clients;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.transitime.ipc.interfaces.ConfigInterface;
+import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.rmi.ClientFactory;
 
 /**
- * Provides a ConfigInterface client that can be queried for 
- * configuration info.
+ * Provides a ServerStatusInterface client that can be queried for 
+ * server status info.
  *
  * @author SkiBu Smith
  *
  */
-public class ConfigInterfaceFactory {
+public class ServerStatusInterfaceFactory {
 
 	// Keyed by agencyId
-	private static Map<String, ConfigInterface> configInterfaceMap =
-			new HashMap<String, ConfigInterface>();
+	private static Map<String, ServerStatusInterface> serverStatusInterfaceMap =
+			new HashMap<String, ServerStatusInterface>();
 
 	/********************** Member Functions **************************/
 
@@ -44,16 +44,15 @@ public class ConfigInterfaceFactory {
 	 * @param agencyId
 	 * @return
 	 */
-	public static ConfigInterface get(String agencyId) {
-		ConfigInterface configInterface =
-				configInterfaceMap.get(agencyId);
-		if (configInterface == null) {
-			configInterface = 
-					ClientFactory.getInstance(agencyId, ConfigInterface.class);
-			configInterfaceMap.put(agencyId, configInterface);
+	public static ServerStatusInterface get(String agencyId) {
+		ServerStatusInterface serverStatusInterface =
+				serverStatusInterfaceMap.get(agencyId);
+		if (serverStatusInterface == null) {
+			serverStatusInterface = 
+					ClientFactory.getInstance(agencyId, ServerStatusInterface.class);
+			serverStatusInterfaceMap.put(agencyId, serverStatusInterface);
 		}
 
-		return configInterface;
+		return serverStatusInterface;
 	}
-
 }
