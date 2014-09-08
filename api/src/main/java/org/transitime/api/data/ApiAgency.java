@@ -17,6 +17,8 @@
 
 package org.transitime.api.data;
 
+import java.util.TimeZone;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -41,6 +43,9 @@ public class ApiAgency {
     
     @XmlAttribute
     private String timezone;
+    
+    @XmlAttribute
+    private int timezoneOffsetMinutes;
     
     @XmlAttribute
     private String lang;
@@ -75,5 +80,11 @@ public class ApiAgency {
 	this.fareUrl = agency.getFareUrl();
 	this.extent = new ApiExtent(agency.getExtent());
 	this.configRev = agency.getConfigRev();
+	
+	// Return timezone offset in minutes since that is what Javascript uses.
+	// Need to negate so it works with Javascript Date().getTimezoneOffset().
+	TimeZone timezone = TimeZone.getTimeZone(this.timezone);
+	this.timezoneOffsetMinutes = 
+		-timezone.getOffset(System.currentTimeMillis())/(60*1000);
     }
 }

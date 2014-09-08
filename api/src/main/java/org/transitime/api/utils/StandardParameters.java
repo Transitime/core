@@ -30,9 +30,11 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
+import org.transitime.ipc.clients.ServerStatusInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
+import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 
 /**
@@ -208,6 +210,22 @@ public class StandardParameters {
 		    + " is not valid");
 	
 	return configInterface;
+   }
+
+   /**
+    * Gets the ServerStatusInterface for the specified agencyId. If not valid then
+    * throws WebApplicationException.
+    * 
+    * @return The VehiclesInterface
+    */
+   public ServerStatusInterface getServerStatusInterface() 
+	    throws WebApplicationException {
+       ServerStatusInterface serverStatusInterface = ServerStatusInterfaceFactory.get(agencyId);
+	if (serverStatusInterface == null)
+	    throw WebUtils.badRequestException("Agency ID " + agencyId
+		    + " is not valid");
+	
+	return serverStatusInterface;
    }
 
     /**
