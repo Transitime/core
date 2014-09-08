@@ -46,5 +46,13 @@ public class IpcServerStatus implements Serializable {
 				+ ", dbLoggerQueueLevel=" + dbLoggerQueueLevel
 				+ "]";
 	}
+
+	public int getDbLoggerQueueSize() {
+		return dbLoggerQueueSize;
+	}
+
+	public double getDbLoggerQueueLevel() {
+		return dbLoggerQueueLevel;
+	}
 	
 }
