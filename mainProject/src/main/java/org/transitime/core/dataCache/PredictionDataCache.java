@@ -158,6 +158,15 @@ public class PredictionDataCache {
 			clonedPredictions.add(clone);
 		}
 		
+		// If no predictions should still return a IpcPredictionsForRouteStopDest
+		// object so that the client can get route, stop, and direction info to
+		// display in the UI.
+		if (clonedPredictions.size() == 0) {
+			IpcPredictionsForRouteStopDest pred = 
+					new IpcPredictionsForRouteStopDest(routeShortName, stopId);
+			clonedPredictions.add(pred);
+		}
+		
 		// Return the safe cloned predictions
 		return clonedPredictions;
 	}
@@ -180,6 +189,30 @@ public class PredictionDataCache {
 			String routeShortName, String stopId, int maxPredictionsPerStop) {
 		return getPredictions(routeShortName, stopId, maxPredictionsPerStop,
 				Double.NaN);
+	}
+	
+	/**
+	 * Returns copy of the predictions associated with the route/stop specified.
+	 * Note that this method uses the routeId instead of the routeShortName.
+	 * 
+	 * @param routeId
+	 * @param stopId
+	 * @param maxPredictionsPerStop
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
+	 */
+	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(String routeId, 
+			String stopId, int maxPredictionsPerStop) {
+		// Determine the routeShortName
+		String routeShortName = null;
+		if (routeId != null) {
+			Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
+			if (route != null)
+				routeShortName = route.getShortName();
+		}
+		
+		// Get and return the associated predictions
+		return getPredictions(routeShortName, stopId, maxPredictionsPerStop);
 	}
 	
 	/**
@@ -212,30 +245,6 @@ public class PredictionDataCache {
 		
 		// Couldn't find predictions for the vehicle at the route/stop
 		return null;
-	}
-	
-	/**
-	 * Returns copy of the predictions associated with the route/stop specified.
-	 * Note that this method uses the routeId instead of the routeShortName.
-	 * 
-	 * @param routeId
-	 * @param stopId
-	 * @param maxPredictionsPerStop
-	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
-	 *         be null.
-	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(String routeId, 
-			String stopId, int maxPredictionsPerStop) {
-		// Determine the routeShortName
-		String routeShortName = null;
-		if (routeId != null) {
-			Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
-			if (route != null)
-				routeShortName = route.getShortName();
-		}
-		
-		// Get and return the associated predictions
-		return getPredictions(routeShortName, stopId, maxPredictionsPerStop);
 	}
 	
 	/**

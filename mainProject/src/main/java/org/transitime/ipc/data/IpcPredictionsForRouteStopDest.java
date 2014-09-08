@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.transitime.applications.Core;
 import org.transitime.db.structs.Route;
+import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.Geo;
@@ -197,6 +198,29 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.directionId = directionId;
 		this.distanceToStop = distanceToStop;
 		this.predictionsForRouteStop = predictions;
+	}
+	
+	/**
+	 * For constructing IpcPredictionsForRouteStopDest object when there are no
+	 * current predictions.
+	 * 
+	 * @param routeShortName
+	 * @param stopId
+	 */
+	public IpcPredictionsForRouteStopDest(String routeShortName, String stopId) {
+		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);	
+		Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+		
+		this.routeId = route.getId();
+		this.routeShortName = routeShortName;
+		this.routeName = route.getName();
+		this.routeOrder = route.getRouteOrder();
+		this.stopId = stopId;
+		this.stopName = stop.getName();
+		this.headsign = null;
+		this.directionId = null;
+		this.distanceToStop = Double.NaN;
+		this.predictionsForRouteStop = new ArrayList<IpcPrediction>();
 	}
 	
 	/**
