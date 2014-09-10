@@ -124,13 +124,14 @@ public class PredictionDataCache {
 	}
 	
 	/**
-	 * Returns copy of the PredictionsForRouteStop object. A clone is used so
+	 * Returns copy of the PredictionsForRouteStop object. This is the low-level
+	 * method that actually gets the appropriate predictions. A clone is used so
 	 * that it can be accessed as needed without worrying about another thread
 	 * writing to it. The list of predictions should be relatively small so
 	 * cloning is not very costly. And this way the caller of this method
 	 * doesn't have to synchronize or such.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 * @param stopId
 	 * @param maxPredictionsPerStop
 	 * @param distanceToStop
@@ -139,8 +140,19 @@ public class PredictionDataCache {
 	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			String routeShortName, String stopId, int maxPredictionsPerStop,
+			String routeIdOrShortName, String stopId, int maxPredictionsPerStop,
 			double distanceToStop) {
+		// Determine the routeShortName so can be used for maps in
+		// the low-level methods of this class
+		String routeShortName;
+		Route route = Core.getInstance().getDbConfig()
+				.getRouteById(routeIdOrShortName);
+		if (route != null)
+			routeShortName = route.getShortName();
+		else {
+			routeShortName = routeIdOrShortName;
+		}
+		
 		// Get the predictions from the map
 		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
 				getPredictionsForRouteStop(routeShortName, stopId);
@@ -179,40 +191,66 @@ public class PredictionDataCache {
 	 * cloning is not very costly. And this way the caller of this method
 	 * doesn't have to synchronize or such.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 * @param stopId
 	 * @param maxPredictionsPerStop
 	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
 	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			String routeShortName, String stopId, int maxPredictionsPerStop) {
-		return getPredictions(routeShortName, stopId, maxPredictionsPerStop,
-				Double.NaN);
+			String routeIdOrShortName, String stopId, int maxPredictionsPerStop) {
+		return getPredictions(routeIdOrShortName, stopId,
+				maxPredictionsPerStop, Double.NaN);
 	}
 	
 	/**
-	 * Returns copy of the predictions associated with the route/stop specified.
-	 * Note that this method uses the routeId instead of the routeShortName.
+	 * Returns copy of all predictions currently associated with the stop. Uses
+	 * routeShortName instead of the GTFS routeId to identify the stop.
 	 * 
-	 * @param routeId
+	 * @param routeIdOrShortName
 	 * @param stopId
-	 * @param maxPredictionsPerStop
 	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
 	 *         be null.
 	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(String routeId, 
-			String stopId, int maxPredictionsPerStop) {
-		// Determine the routeShortName
-		String routeShortName = null;
-		if (routeId != null) {
-			Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
-			if (route != null)
-				routeShortName = route.getShortName();
+	public List<IpcPredictionsForRouteStopDest> getPredictions(
+			String routeIdOrShortName, String stopId) {
+		return getPredictions(routeIdOrShortName, stopId, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Returns copy of List<PredictionsForRouteStop> objects for each route/stop
+	 * specified.
+	 * 
+	 * @param routeStops
+	 *            Specified using route_short_name instead of route_id
+	 * @param predictionsPerStop
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
+	 */
+	public List<IpcPredictionsForRouteStopDest> getPredictions(List<RouteStop> routeStops,
+			int predictionsPerStop) {
+		List<IpcPredictionsForRouteStopDest> listOfPredictions = 
+				new ArrayList<IpcPredictionsForRouteStopDest>();
+		for (RouteStop routeStop : routeStops) {
+			List<IpcPredictionsForRouteStopDest> predsForStop = getPredictions(
+					routeStop.getRouteIdOrShortName(), routeStop.getStopId(),
+					predictionsPerStop);
+			for (IpcPredictionsForRouteStopDest predictions : predsForStop)
+				listOfPredictions.add(predictions);
 		}
-		
-		// Get and return the associated predictions
-		return getPredictions(routeShortName, stopId, maxPredictionsPerStop);
+		return listOfPredictions;
+	}
+	
+	/**
+	 * Returns copy of all predictions currently associated for each route/stop specified.
+	 * 
+	 * @param routeStops
+	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
+	 *         be null.
+	 */
+	public List<IpcPredictionsForRouteStopDest> getPredictions(
+			List<RouteStop> routeStops) {
+		return getPredictions(routeStops, Integer.MAX_VALUE);
 	}
 	
 	/**
@@ -245,107 +283,6 @@ public class PredictionDataCache {
 		
 		// Couldn't find predictions for the vehicle at the route/stop
 		return null;
-	}
-	
-	/**
-	 * Returns copy of all predictions currently associated with the stop. Uses
-	 * routeShortName instead of the GTFS routeId to identify the stop.
-	 * 
-	 * @param routeShortName
-	 * @param stopId
-	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
-	 *         be null.
-	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictions(String routeShortName,
-			String stopId) {
-		return getPredictions(routeShortName, stopId, Integer.MAX_VALUE);
-	}
-
-	/**
-	 * Returns copy of all predictions currently associated with the stop. Uses
-	 * GTFS routeId instead of the routeShortName to identify the stop.
-	 * 
-	 * @param routeId
-	 * @param stopId
-	 * @return
-	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(
-			String routeId, String stopId) {
-		return getPredictionsUsingRouteId(routeId, stopId, Integer.MAX_VALUE);
-	}
-
-	/**
-	 * Returns copy of List<PredictionsForRouteStop> objects for each route/stop
-	 * specified.
-	 * 
-	 * @param routeStops
-	 *            Specified using route_short_name instead of route_id
-	 * @param predictionsPerStop
-	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
-	 *         be null.
-	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictions(List<RouteStop> routeStops,
-			int predictionsPerStop) {
-		List<IpcPredictionsForRouteStopDest> listOfPredictions = 
-				new ArrayList<IpcPredictionsForRouteStopDest>();
-		for (RouteStop routeStop : routeStops) {
-			List<IpcPredictionsForRouteStopDest> predsForStop = getPredictions(
-					routeStop.getRouteIdOrShortName(), routeStop.getStopId(),
-					predictionsPerStop);
-			for (IpcPredictionsForRouteStopDest predictions : predsForStop)
-				listOfPredictions.add(predictions);
-		}
-		return listOfPredictions;
-	}
-	
-	/**
-	 * Returns copy of List<Prediction> objects for each route/stop specified.
-	 * Uses route_id instead of route_short_name to identify which predictions
-	 * to return.
-	 * 
-	 * @param routeStops Specified using route_id instead of route_short_name
-	 * @param predictionsPerStop
-	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
-	 *         be null.
-	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(
-			List<RouteStop> routeStops, int predictionsPerStop) {
-		List<IpcPredictionsForRouteStopDest> listOfPredictions = 
-				new ArrayList<IpcPredictionsForRouteStopDest>();
-		for (RouteStop routeStop : routeStops) {
-			List<IpcPredictionsForRouteStopDest> predsForStop = getPredictionsUsingRouteId(
-					routeStop.getRouteIdOrShortName(), routeStop.getStopId(),
-					predictionsPerStop);
-			for (IpcPredictionsForRouteStopDest predictions : predsForStop)
-				listOfPredictions.add(predictions);
-		}
-		return listOfPredictions;
-	}
-	
-	/**
-	 * Returns copy of all predictions currently associated for each route/stop specified.
-	 * 
-	 * @param routeStops
-	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
-	 *         be null.
-	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			List<RouteStop> routeStops) {
-		return getPredictions(routeStops, Integer.MAX_VALUE);
-	}
-	
-	/**
-	 * Returns copy of all predictions currently associated for each route/stop specified.
-	 * Uses route_id instead of route_short_name to identify which predictions
-	 * to return.
-	 * 
-	 * @param routeStops
-	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
-	 *         be null.
-	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictionsUsingRouteId(
-			List<RouteStop> routeStops) {
-		return getPredictionsUsingRouteId(routeStops, Integer.MAX_VALUE);
 	}
 	
 	/**
