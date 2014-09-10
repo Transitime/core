@@ -82,16 +82,16 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		return singleton;
 	}
 
-	/*
+	/**
 	 * Constructor. Made private so that can only be instantiated by
 	 * get(). Doesn't actually do anything since all the work is done in
 	 * the superclass constructor.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            for registering this object with the rmiregistry
 	 */
-	private ConfigServer(String projectId) {
-		super(projectId, ConfigInterface.class.getSimpleName());
+	private ConfigServer(String agencyId) {
+		super(agencyId, ConfigInterface.class.getSimpleName());
 	}
 
 	/* (non-Javadoc)
@@ -120,35 +120,15 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRoute(java.lang.String)
 	 */
 	@Override
-	public IpcRoute getRoute(String routeShortName, String stopId,
+	public IpcRoute getRoute(String routeIdOrShortName, String stopId,
 			String tripPatternId) throws RemoteException {
 		// Get the db route info 
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		org.transitime.db.structs.Route dbRoute = 
-				dbConfig.getRouteByShortName(routeShortName);
-		
-		// If no such route then return null since can't create a IpcRoute
+				dbConfig.getRouteByShortName(routeIdOrShortName);
 		if (dbRoute == null)
-			return null;
+			dbRoute = dbConfig.getRouteById(routeIdOrShortName);
 		
-		// Convert db route into an ipc route
-		IpcRoute ipcRoute = new IpcRoute(dbRoute, stopId, tripPatternId);
-		
-		// Return the ipc route
-		return ipcRoute;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRouteUsingRouteId(java.lang.String, java.lang.String, java.lang.String)
-	 */
-	@Override
-	public IpcRoute getRouteUsingRouteId(String routeId, String stopId,
-			String tripPatternId) throws RemoteException {
-		// Get the db route info 
-		DbConfig dbConfig = Core.getInstance().getDbConfig();
-		org.transitime.db.structs.Route dbRoute = 
-				dbConfig.getRouteById(routeId);
-
 		// If no such route then return null since can't create a IpcRoute
 		if (dbRoute == null)
 			return null;
@@ -164,13 +144,15 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getStops(java.lang.String)
 	 */
 	@Override
-	public IpcStopsForRoute getStops(String routeShortName)
+	public IpcStopsForRoute getStops(String routeIdOrShortName)
 			throws RemoteException {
 		// Get the db route info 
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		org.transitime.db.structs.Route dbRoute = 
-				dbConfig.getRouteByShortName(routeShortName);
-		
+				dbConfig.getRouteByShortName(routeIdOrShortName);
+		if (dbRoute == null)
+			dbRoute = dbConfig.getRouteById(routeIdOrShortName);
+
 		// If no such route then return null since can't create 
 		// a IpcStopsForRoute
 		if (dbRoute == null)
@@ -217,11 +199,20 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTripPattern(java.lang.String)
 	 */
 	@Override
-	public List<IpcTripPattern> getTripPatternsByRouteId(String routeId)
+	public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName)
 			throws RemoteException {
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		String routeId = routeIdOrShortName;
 		List<TripPattern> dbTripPatterns = 
-				Core.getInstance().getDbConfig().getTripPatternsForRoute(routeId);
-
+				dbConfig.getTripPatternsForRoute(routeId);
+		if (dbTripPatterns == null) {
+			// Couldn't find by assuming that routeIdOrShortName is the route
+			// ID so assume it is the route short name and try again
+			Route route = dbConfig.getRouteByShortName(routeIdOrShortName);
+			if (route != null)
+				dbTripPatterns = dbConfig.getTripPatternsForRoute(route.getId());
+		}
+		
 		if (dbTripPatterns == null)
 			return null;
 		
@@ -230,20 +221,6 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 			tripPatterns.add(new IpcTripPattern(dbTripPattern));
 		}
 		return tripPatterns;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTripPatterns(java.lang.String)
-	 */
-	@Override
-	public List<IpcTripPattern> getTripPatterns(String routeShortName)
-			throws RemoteException {
-		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);
-		
-		if (route == null)
-			return null;
-		
-		return getTripPatternsByRouteId(route.getId());
 	}
 
 	/* (non-Javadoc)
