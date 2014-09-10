@@ -54,10 +54,10 @@ public class ServerStatusServer extends AbstractServer
 			singleton = new ServerStatusServer(agencyId);
 		}
 		
-		if (!singleton.getProjectId().equals(agencyId)) {
+		if (!singleton.getAgencyId().equals(agencyId)) {
 			logger.error("Tried calling ServerStatusServer.start() for " +
 					"agencyId={} but the singleton was created for projectId={}", 
-					agencyId, singleton.getProjectId());
+					agencyId, singleton.getAgencyId());
 			return null;
 		}
 		

@@ -58,7 +58,7 @@ public abstract class AbstractServer {
 	// Need to store this so can rebind
 	private String bindName;
 	
-	private final String projectId;
+	private final String agencyId;
 	
 	// Need to store this so can rebind
 	private Remote stub;
@@ -105,7 +105,7 @@ public abstract class AbstractServer {
 	 * fine as long as the Server object constructor doesn't do any further
 	 * initialization.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            For registering object with rmiregistry. Can have several
 	 *            different projects running on a server so need to specify the
 	 *            project name.
@@ -113,8 +113,8 @@ public abstract class AbstractServer {
 	 *            For registering object with rmiregistry. Will usually use
 	 *            something like ClassName.class.getSimpleName()
 	 */
-	protected AbstractServer(String projectId, String objectName) {
-		this.projectId = projectId;
+	protected AbstractServer(String agencyId, String objectName) {
+		this.agencyId = agencyId;
 	
 		try {
 			// First make sure that this object is a subclass of Remote
@@ -151,7 +151,7 @@ public abstract class AbstractServer {
 			
 			// Bind the stub to the RMI registry so that it can be accessed by
 			// name by the client.
-			bindName = getBindName(projectId, objectName);
+			bindName = getBindName(agencyId, objectName);
 			
 			// Bind the stub to the RMI registry in a loop so that even if 
 			// rmiregistry is restarted the stub will quickly get bound to it.
@@ -260,18 +260,18 @@ public abstract class AbstractServer {
     
 	/**
 	 * The name that the server object is bound to needs both the classname
-	 * to identify the object but also the projectId since multiple 
+	 * to identify the object but also the agencyId since multiple 
 	 * projects can be running on a machine that uses a single RMI registry.
-	 * @param projectId
+	 * @param agencyId
 	 * @param className
 	 * @return
 	 */
-	public static String getBindName(String projectId, String className) {
-		return projectId + "-" + className;
+	public static String getBindName(String agencyId, String className) {
+		return agencyId + "-" + className;
 	}
 	
-	public String getProjectId() {
-		return projectId;
+	public String getAgencyId() {
+		return agencyId;
 	}
 	
 	/**

@@ -30,7 +30,7 @@ import org.transitime.ipc.rmi.Hello;
 /**
  * For clients to access RMI based method calls for a remote
  * object simply need to call something like:
- *   Hello hello = ClientFactory.getInstance(projectId, Hello.class);
+ *   Hello hello = ClientFactory.getInstance(agencyId, Hello.class);
  *   
  * @author SkiBu Smith
  *
@@ -51,7 +51,7 @@ public class ClientFactory<T extends Remote> {
 	 * 
 	 * @param host
 	 *            Where remote object lives
-	 * @param projectId
+	 * @param agencyId
 	 *            For creating bind name for remote object
 	 * @param clazz
 	 *            Because this is a static method the only way to get the class
@@ -59,13 +59,13 @@ public class ClientFactory<T extends Remote> {
 	 * @return Proxy to the RMI object on the server. If there is a problem
 	 *         accessing the object then null is returned.
 	 */
-	public static <T extends Remote> T getInstance(String projectId, Class<T> clazz) {
+	public static <T extends Remote> T getInstance(String agencyId, Class<T> clazz) {
 		try {
 			// Create the info object that contains what is needed to
 			// create the RMI stub. This info will also be used if the
 			// stub needs to be recreated by the Invoker if there is
 			// an error.
-			RmiStubInfo info = new RmiStubInfo(projectId, clazz.getSimpleName());
+			RmiStubInfo info = new RmiStubInfo(agencyId, clazz.getSimpleName());
 			
 			// Get the RMI stub
 			T rmiStub = getRmiStub(info);
@@ -87,7 +87,7 @@ public class ClientFactory<T extends Remote> {
 		} catch (Exception e) {
 			logger.error("Exception occurred when creating the RMI client " + 
 					"object for class=" + clazz.getName() + 
-					" and projectId=" + projectId,
+					" and agencyId=" + agencyId,
 					e);			
 			return null;
 		}		
@@ -131,9 +131,9 @@ public class ClientFactory<T extends Remote> {
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		String projectId = "testProjectId";
+		String agencyId = "testProjectId";
 		
-		Hello hello = ClientFactory.getInstance(projectId, Hello.class);
+		Hello hello = ClientFactory.getInstance(agencyId, Hello.class);
 		try {
 			String result = hello.concat("s1", "s2");
 			System.err.println("result=" + result);

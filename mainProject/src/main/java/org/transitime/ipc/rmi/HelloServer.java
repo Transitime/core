@@ -58,7 +58,7 @@ public class HelloServer extends AbstractServer implements Hello {
 		// Sleep for a bit to simulate server getting bogged down
 		Time.sleep(2000);
 		
-		return getProjectId() + ": " + s1 + s2;
+		return getAgencyId() + ": " + s1 + s2;
 	}
 	
 	public static void main(String args[]) {

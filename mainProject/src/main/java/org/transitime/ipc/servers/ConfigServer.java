@@ -72,10 +72,10 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 			singleton = new ConfigServer(agencyId);
 		}
 		
-		if (!singleton.getProjectId().equals(agencyId)) {
+		if (!singleton.getAgencyId().equals(agencyId)) {
 			logger.error("Tried calling ConfigServer.start() for " +
 					"agencyId={} but the singleton was created for agencyId={}", 
-					agencyId, singleton.getProjectId());
+					agencyId, singleton.getAgencyId());
 			return null;
 		}
 		
