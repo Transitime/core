@@ -97,83 +97,48 @@ public interface VehiclesInterface extends Remote {
 	 * Gets from server IpcVehicle info for all vehicles currently. associated
 	 * with route.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 *            Specifies which route to get Vehicle data for
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcVehicle> getForRoute(String routeShortName) 
+	public Collection<IpcVehicle> getForRoute(String routeIdOrShortName) 
 			throws RemoteException;
 
 	/**
 	 * Gets from server IpcExtVehicle info for all vehicles currently. associated
 	 * with route.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 *            Specifies which route to get Vehicle data for
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcExtVehicle> getExtForRoute(String routeShortName) 
+	public Collection<IpcExtVehicle> getExtForRoute(String routeIdOrShortName) 
 			throws RemoteException;
 
 	/**
 	 * Gets from server IpcVehicle info for all vehicles currently. associated
 	 * with route.
 	 * 
-	 * @param routeShortNames
+	 * @param routeIdsOrShortNames
 	 *            Specifies which routes to get Vehicle data for
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcVehicle> getForRoute(List<String> routeShortNames)
+	public Collection<IpcVehicle> getForRoute(List<String> routeIdsOrShortNames)
 			throws RemoteException;
 
 	/**
 	 * Gets from server IpcSiriVehicle info for all vehicles currently. associated
 	 * with route.
 	 * 
-	 * @param routeShortNames
+	 * @param routeIdsOrShortNames
 	 *            Specifies which routes to get Vehicle data for
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcExtVehicle> getExtForRoute(List<String> routeShortNames) 
+	public Collection<IpcExtVehicle> getExtForRoute(List<String> routeIdsOrShortNames) 
 			throws RemoteException;
 
-	/**
-	 * Gets from server IpcVehicle info for all vehicles currently. associated
-	 * with route.
-	 * 
-	 * @param routeId
-	 *            Specifies which route to get Vehicle data for
-	 * @return Collection of Vehicle objects
-	 * @throws RemoteException
-	 */
-	public Collection<IpcVehicle> getForRouteUsingRouteId(String routeId) 
-			throws RemoteException;
-
-	/**
-	 * Gets from server IpcVehicle info for all vehicles currently. associated
-	 * with route.
-	 * 
-	 * @param routeIds
-	 *            Specifies which route to get Vehicle data for
-	 * @return Collection of Vehicle objects
-	 * @throws RemoteException
-	 */
-	public Collection<IpcVehicle> getForRouteUsingRouteId(List<String> routeIds) 
-			throws RemoteException;
-
-	/**
-	 * Gets from server IpcSiriVehicle info for all vehicles currently.
-	 * associated with route.
-	 * 
-	 * @param routeIds
-	 *            Specifies which route to get Vehicle data for
-	 * @return Collection of Vehicle objects
-	 * @throws RemoteException
-	 */
-	public Collection<IpcExtVehicle> getExtForRouteUsingRouteId(List<String> routeIds) 
-			throws RemoteException;
 }

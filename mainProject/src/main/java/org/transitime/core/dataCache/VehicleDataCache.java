@@ -108,13 +108,24 @@ public class VehicleDataCache {
 	 * obsolete and shouldn't be displayed. Returns null if no vehicles for
 	 * specified route.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 * @return Collection of IpcExtVehicle for vehicles on route, or null if no
 	 *         vehicles for the route.
 	 */
-	public Collection<IpcExtVehicle> getVehiclesForRoute(String routeShortName) {
-		Map<String, IpcExtVehicle> vehicleMapForRoute = 
-				vehiclesByRouteMap.get(routeShortName);
+	public Collection<IpcExtVehicle> getVehiclesForRoute(
+			String routeIdOrShortName) {
+		// Try getting vehicles using routeShortName
+		String routeShortName = routeIdOrShortName;
+		Map<String, IpcExtVehicle> vehicleMapForRoute = vehiclesByRouteMap
+				.get(routeShortName);
+		// If couldn't get vehicles by route short name try using
+		// the route ID.
+		if (vehicleMapForRoute == null) {
+			Route route = Core.getInstance().getDbConfig()
+					.getRouteById(routeIdOrShortName);
+			vehicleMapForRoute = vehiclesByRouteMap.get(route.getShortName());
+		}
+
 		if (vehicleMapForRoute != null)
 			return filtered(vehicleMapForRoute.values());
 		else
@@ -126,66 +137,26 @@ public class VehicleDataCache {
 	 * routes. Filters out info more than MAX_AGE_MSEC since it means that the
 	 * info is obsolete and shouldn't be displayed.
 	 * 
-	 * @param routeShortNames
+	 * @param routeIdsOrShortNames
 	 * @return Collection of vehicles for the route. Empty collection if there
 	 *         are none.
 	 */
 	public Collection<IpcExtVehicle> getVehiclesForRoute(
-			List<String> routeShortNames) {
+			List<String> routeIdsOrShortNames) {
 		// If there is just a single route specified then use a shortcut
-		if (routeShortNames.size() == 1)
-			return getVehiclesForRoute(routeShortNames.get(0));
+		if (routeIdsOrShortNames.size() == 1)
+			return getVehiclesForRoute(routeIdsOrShortNames.get(0));
 
 		Collection<IpcExtVehicle> vehicles = new ArrayList<IpcExtVehicle>();
-		for (String routeShortName : routeShortNames) {
+		for (String routeIdOrShortName : routeIdsOrShortNames) {
 			Collection<IpcExtVehicle> vehiclesForRoute = 
-					getVehiclesForRoute(routeShortName);
+					getVehiclesForRoute(routeIdOrShortName);
 			if (vehiclesForRoute != null)
 				vehicles.addAll(vehiclesForRoute);
 		}
 		return vehicles;
 	}
-    
-	/**
-	 * Returns Collection of Vehicles currently associated with specified route.
-	 * Filters out info more than MAX_AGE_MSEC since it means that the info is
-	 * obsolete and shouldn't be displayed.
-	 * 
-	 * @param routeId
-	 * @return Vehicles for the route, or null if there are none.
-	 */
-	public Collection<IpcExtVehicle> getVehiclesForRouteUsingRouteId(
-			String routeId) {
-		String routeShortName = null;
-		Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
-		if (route != null)
-			routeShortName = route.getShortName();
-		return getVehiclesForRoute(routeShortName);
-	}
-
-	/**
-	 * Returns Collection of Vehicles currently associated with specified
-	 * routes. Filters out info more than MAX_AGE_MSEC since it means that the
-	 * info is obsolete and shouldn't be displayed.
-	 * 
-	 * @param routeShortNames
-	 * @return Vehicles for the route, or null if there are none.
-	 */
-	public Collection<IpcExtVehicle> getVehiclesForRouteUsingRouteId(
-			List<String> routeIds) {
-		// If there is just a single route specified then use a shortcut
-		if (routeIds.size() == 1)
-			return getVehiclesForRouteUsingRouteId(routeIds.get(0));
-
-		Collection<IpcExtVehicle> vehicles = new ArrayList<IpcExtVehicle>();
-		for (String routeId : routeIds) {
-			Collection<IpcExtVehicle> vehiclesForRoute = getVehiclesForRouteUsingRouteId(routeId);
-			if (vehiclesForRoute != null)
-				vehicles.addAll(vehiclesForRoute);
-		}
-		return vehicles;
-	}
-   
+      
 	/**
 	 * Returns Collection of VehiclesInterface whose vehicleIds were specified
 	 * using the vehiclesIds parameter.
