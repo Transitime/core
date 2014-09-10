@@ -393,6 +393,35 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	}
 
 	/**
+	 * Removes predictions that are older than the current time. Useful for when
+	 * getting predictions. Synchronized because don't want predictions list to
+	 * be changing by another thread when removing predictions.
+	 * 
+	 * @param currentTime
+	 *            Should use PredictionDataCache.systemTime.get() so that works
+	 *            even when in playback mode.
+	 */
+	public synchronized void removeExpiredPredictions(long currentTime) {
+		Iterator<IpcPrediction> iterator = predictionsForRouteStop.iterator();
+		while (iterator.hasNext()) {
+			IpcPrediction currentPrediction = iterator.next();
+
+			// Remove predictions that are expired. It makes sense to do this 
+			// here when adding predictions since only need to take out 
+			// predictions if more are being added.
+			if (currentPrediction.getTime() < currentTime) {
+				iterator.remove();
+			} else {
+				// The subsequent predictions are later so if this one is
+				// into the future then the remaining ones are too. 
+				// Therefore done.
+				return;
+			}
+		}
+		
+	}
+	
+	/**
 	 * Updates the predictions for this object with the new predictions for a
 	 * vehicle.
 	 * <p>

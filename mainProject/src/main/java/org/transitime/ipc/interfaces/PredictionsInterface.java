@@ -63,7 +63,8 @@ public interface PredictionsInterface extends Remote {
 	/**
 	 * Returns list of current predictions for the specified route/stop.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
+	 *            Can be either the GTFS route_id or the route_short_name.
 	 * @param stopId
 	 * @param predictionsPerStop
 	 *            Max number of predictions to return for route/stop
@@ -76,21 +77,6 @@ public interface PredictionsInterface extends Remote {
 				throws RemoteException;
 	
 	/**
-	 * Returns list of current predictions for the specified route/stop.
-	 * 
-	 * @param routeId
-	 * @param stopId
-	 * @param predictionsPerStop
-	 *            Max number of predictions to return for route/stop
-	 * @return List of PredictionsForRouteStop objects for the route/stop, one
-	 *         for each destination
-	 * @throws RemoteException
-	 */
-	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(
-			String routeId, String stopId, int predictionsPerStop) 
-				throws RemoteException;
-	
-	/**
 	 * For each route/stop specified returns a list of predictions for that
 	 * stop. Since expensive RMI calls are being done this method is much more
 	 * efficient for obtaining multiple predictions then if a separate get()
@@ -98,7 +84,7 @@ public interface PredictionsInterface extends Remote {
 	 * 
 	 * @param routeStops
 	 *            List of route/stops to return predictions for. Uses route
-	 *            short name instead of route ID since that is consistent.
+	 *            short name or route ID
 	 * @param predictionsPerStop
 	 *            Max number of predictions to return per route/stop
 	 * @return List of PredictionsForRouteStop objects for the
@@ -107,25 +93,6 @@ public interface PredictionsInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public List<IpcPredictionsForRouteStopDest> get(
-			List<RouteStop> routeStops,	int predictionsPerStop)
-				throws RemoteException;
-	
-	/**
-	 * For each route/stop specified returns a list of predictions for that
-	 * stop. Since expensive RMI calls are being done this method is much more
-	 * efficient for obtaining multiple predictions then if a separate get()
-	 * call is done for each route/stop.
-	 * 
-	 * @param routeStops
-	 *            List of route/stops to return predictions for
-	 * @param predictionsPerStop
-	 *            Max number of predictions to return per route/stop
-	 * @return List of PredictionsForRouteStop objects for the
-	 *         route/stop. There is a separate one for each destination
-	 *         for each route/stop.
-	 * @throws RemoteException
-	 */
-	public List<IpcPredictionsForRouteStopDest> getUsingRouteId(
 			List<RouteStop> routeStops,	int predictionsPerStop)
 				throws RemoteException;
 	
