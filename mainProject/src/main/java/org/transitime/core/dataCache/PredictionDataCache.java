@@ -527,10 +527,17 @@ public class PredictionDataCache {
 		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
 				predictionsMap.get(key);
 		if (predictionsForRouteStop == null) {
-			predictionsForRouteStop = new ArrayList<IpcPredictionsForRouteStopDest>(1);
+			predictionsForRouteStop = 
+					new ArrayList<IpcPredictionsForRouteStopDest>(1);
 			predictionsMap.putIfAbsent(key, predictionsForRouteStop);
 		} 
 
+		// Remove old predictions so that they are not provided through the 
+		// API and such
+		for (IpcPredictionsForRouteStopDest preds : predictionsForRouteStop) {
+			preds.removeExpiredPredictions(systemTime.get());
+		}
+		
 		return predictionsForRouteStop;
 	}
 	
