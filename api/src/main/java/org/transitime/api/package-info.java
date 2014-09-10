@@ -37,8 +37,8 @@
  * The vehicle command for outputting location and other information for vehicles.
  * In query string can optionally specify list of vehicles or of routes. Can specify
  * vehicle IDs via v=123&v=456&etc. Can specify route via route IDs or route short
- * names. For route IDs use r=2341&r=9382&etc or for route short names use
- * rShortName=A1&rShortName=B2&etc . If vehicles or routes not specified then data
+ * names using for example r=2341&r=9382 etc . 
+ * If vehicles or routes not specified then data
  * for all vehicles for agency is returned.
  * <p> 
  * Default output is in XML. Can specify JSON by setting the accept header in
@@ -55,8 +55,7 @@
  * Includes additional information such as block assignment information.
  * In query string can optionally specify list of vehicles or of routes. Can specify
  * vehicle IDs via v=123&v=456&etc. Can specify route via route IDs or route short
- * names. For route IDs use r=2341&r=9382&etc or for route short names use
- * rShortName=A1&rShortName=B2&etc . If vehicles or routes not specified then data
+ * names using for example r=2341&r=9382 etc. If vehicles or routes not specified then data
  * for all vehicles for agency is returned. 
  * Default output is in XML. Can specify JSON by setting the accept header in
  * the request or by adding format=json to the query string.
@@ -65,9 +64,7 @@
  * <p>
  * The predictions command for outputting prediction information for a set of stops.
  * Need to specify list of route/stops to get predictions for.
- * The route specifier is the route short
- * name for consistency across configuration changes (route ID is
- * not consistent for many agencies). Each route/stop is
+ * Can specify route via route IDs or the route short name. Each route/stop is
  * separated by the "|" character so for example the query string
  * could have "rs=43|2029&rs=43|3029"
  * Can optionally specify
@@ -98,8 +95,8 @@
  * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/routes?OPTIONS
  * <p>
  * The route command for outputting detailed information for specified routes.
- * Specify the route short name for the desired route using the route short name
- * via rShortName=XX or the route ID via r=XX.
+ * You can specify the route using either the route ID or the route short
+ * name as in r=XX.
  * Default output is in XML. Can specify JSON by setting the accept header in
  * the request or by adding format=json to the query string.
  * <p>
@@ -131,7 +128,7 @@
  * <p>
  * The trip patterns command for outputting trip pattern information
  * for specified route.
- * Specify the route short name for the desired route using rShortName=38.
+ * Specify the route via route ID or the route short name, such as r=38.
  * Default output is in XML. Can specify JSON by setting the accept header in
  * the request or by adding format=json to the query string.
  * <p>
@@ -163,8 +160,8 @@
  * <p>
  * VehicleMonitoring command for outputting vehicle information in
  * SIRI format. In query string can optionally specify vehicle 
- * IDs via v=123&v=456&etc. and 
- * route via r=2341&r=9382&etc or rShortName=A1&rShortName=B2&etc . If vehicles
+ * IDs via v=123&v=456 etc  and 
+ * route via the route ID or the route short name using r=2341&r=9382 etc . If vehicles
  * nor routes specified then data is returned for all vehicles for agency.
  * Default output is in XML. Can specify JSON by setting the accept header in
  * the request or by adding format=json to the query string.

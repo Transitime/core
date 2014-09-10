@@ -96,9 +96,7 @@ public class TransitimeApi {
      *            URI, query string, and headers.
      * @param vehicleIds
      *            Optional way of specifying which vehicles to get data for
-     * @param routeIds
-     *            Optional way of specifying which routes to get data for
-     * @param routeShortNames
+     * @param routesIdOrShortNames
      *            Optional way of specifying which routes to get data for
      * @param stopId
      *            Optional way of specifying a stop so can get predictions for
@@ -116,8 +114,7 @@ public class TransitimeApi {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getVehicles(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value = "v") List<String> vehicleIds,
-	    @QueryParam(value = "r") List<String> routeIds,
-	    @QueryParam(value = "rShortName") List<String> routeShortNames,
+	    @QueryParam(value = "r") List<String> routesIdOrShortNames,
 	    @QueryParam(value = "s") String stopId,
 	    @QueryParam(value="numPreds") @DefaultValue("2") int numberPredictions) 
 		    throws WebApplicationException {
@@ -129,10 +126,8 @@ public class TransitimeApi {
 	    VehiclesInterface inter = stdParameters.getVehiclesInterface();
 	    
 	    Collection<IpcVehicle> vehicles;
-	    if (!routeIds.isEmpty()) {
-		vehicles = inter.getForRouteUsingRouteId(routeIds);
-	    } else if (!routeShortNames.isEmpty()) {
-		vehicles = inter.getForRoute(routeShortNames);
+	    if (!routesIdOrShortNames.isEmpty()) {
+		vehicles = inter.getForRoute(routesIdOrShortNames);
 	    } else if (!vehicleIds.isEmpty()) {
 		vehicles = inter.get(vehicleIds);
 	    } else {
@@ -149,7 +144,8 @@ public class TransitimeApi {
 	    // when getting vehicle info then only the vehicles being predicted
 	    // for, should be highlighted. The others should be dimmed.
 	    Map<String, UiMode> uiTypesForVehicles = determineUiModesForVehicles(
-		    vehicles, stdParameters, routeShortNames, stopId, numberPredictions);
+		    vehicles, stdParameters, routesIdOrShortNames, stopId,
+		    numberPredictions);
 
 	    ApiVehicles apiVehicles = 
 		    new ApiVehicles(vehicles, uiTypesForVehicles);
@@ -178,9 +174,7 @@ public class TransitimeApi {
      *            URI, query string, and headers.
      * @param vehicleIds
      *            Optional way of specifying which vehicles to get data for
-     * @param routeIds
-     *            Optional way of specifying which routes to get data for
-     * @param routeShortNames
+     * @param routesIdOrShortNames
      *            Optional way of specifying which routes to get data for
      * @param stopId
      *            Optional way of specifying a stop so can get predictions for
@@ -198,8 +192,7 @@ public class TransitimeApi {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getVehiclesDetails(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value = "v") List<String> vehicleIds,
-	    @QueryParam(value = "r") List<String> routeIds,
-	    @QueryParam(value = "rShortName") List<String> routeShortNames,
+	    @QueryParam(value = "r") List<String> routesIdOrShortNames,
 	    @QueryParam(value = "s") String stopId,
 	    @QueryParam(value="numPreds") @DefaultValue("3") int numberPredictions) 
 		    throws WebApplicationException {
@@ -211,10 +204,8 @@ public class TransitimeApi {
 	    VehiclesInterface inter = stdParameters.getVehiclesInterface();
 	    
 	    Collection<IpcVehicle> vehicles;
-	    if (!routeIds.isEmpty()) {
-		vehicles = inter.getForRouteUsingRouteId(routeIds);
-	    } else if (!routeShortNames.isEmpty()) {
-		vehicles = inter.getForRoute(routeShortNames);
+	    if (!routesIdOrShortNames.isEmpty()) {
+		vehicles = inter.getForRoute(routesIdOrShortNames);
 	    } else if (!vehicleIds.isEmpty()) {
 		vehicles = inter.get(vehicleIds);
 	    } else {
@@ -231,7 +222,8 @@ public class TransitimeApi {
 	    // when getting vehicle info then only the vehicles being predicted
 	    // for, should be highlighted. The others should be dimmed.
 	    Map<String, UiMode> uiTypesForVehicles = determineUiModesForVehicles(
-		    vehicles, stdParameters, routeShortNames, stopId, numberPredictions);
+		    vehicles, stdParameters, routesIdOrShortNames, stopId,
+		    numberPredictions);
 	    
 	    // Convert IpcVehiclesDetails to ApiVehiclesDetails
 	    ApiVehiclesDetails apiVehiclesDetails = 
@@ -261,7 +253,7 @@ public class TransitimeApi {
      * 
      * @param vehicles
      * @param stdParameters
-     * @param routeShortNames
+     * @param routesIdOrShortNames
      * @param stopId
      * @param numberPredictions
      * @return
@@ -269,12 +261,12 @@ public class TransitimeApi {
      */
     private static Map<String, UiMode> determineUiModesForVehicles(
 	    Collection<IpcVehicle> vehicles, StandardParameters stdParameters,
-	    List<String> routeShortNames, String stopId, int numberPredictions)
-	    throws RemoteException {
+	    List<String> routesIdOrShortNames, String stopId,
+	    int numberPredictions) throws RemoteException {
 	// Create map and initialize all vehicles to NORMAL UI mode
 	Map<String, UiMode> modeMap = new HashMap<String, UiMode>();
 
-	if (routeShortNames.isEmpty() || stopId == null) {
+	if (routesIdOrShortNames.isEmpty() || stopId == null) {
 	    // Stop not specified so simply return NORMAL type for all vehicles
 	    for (IpcVehicle ipcVehicle : vehicles) {
 		modeMap.put(ipcVehicle.getId(), UiMode.NORMAL);
@@ -282,7 +274,8 @@ public class TransitimeApi {
 	} else {
 	    // Stop specified so get predictions and set UI type accordingly
 	    List<String> vehiclesGeneratingPreds = determineVehiclesGeneratingPreds(
-		    stdParameters, routeShortNames, stopId, numberPredictions);
+		    stdParameters, routesIdOrShortNames, stopId,
+		    numberPredictions);
 	    for (IpcVehicle ipcVehicle : vehicles) {
 		UiMode uiType = UiMode.MINOR;
 		if (!vehiclesGeneratingPreds.isEmpty()
@@ -308,14 +301,14 @@ public class TransitimeApi {
      * etc. If routeShortNames or stopId not specified then will return empty array.
      * 
      * @param stdParameters
-     * @param routeShortNames
+     * @param routesIdOrShortNames
      * @param stopId
      * @param numberPredictions
      * @return List of vehicle IDs
      * @throws RemoteException
      */
     private static List<String> determineVehiclesGeneratingPreds(
-	    StandardParameters stdParameters, List<String> routeShortNames,
+	    StandardParameters stdParameters, List<String> routesIdOrShortNames,
 	    String stopId, int numberPredictions) throws RemoteException {
 	// The array of vehicle IDs to be returned
 	List<String> vehiclesGeneratingPreds = new ArrayList<String>();
@@ -324,11 +317,11 @@ public class TransitimeApi {
 	// determine which vehicles are generating the predictions.
 	// If vehicle is not one of the ones generating a prediction
 	// then it is labeled as a minor vehicle for the UI.
-	if (!routeShortNames.isEmpty() && stopId != null) {
+	if (!routesIdOrShortNames.isEmpty() && stopId != null) {
 	    PredictionsInterface predsInter = stdParameters
 		    .getPredictionsInterface();
 	    List<IpcPredictionsForRouteStopDest> predictions = predsInter.get(
-		    routeShortNames.get(0), stopId, numberPredictions);
+		    routesIdOrShortNames.get(0), stopId, numberPredictions);
 
 	    // Determine set of which vehicles predictions generated for
 	    for (IpcPredictionsForRouteStopDest predsForRouteStop : predictions) {
@@ -355,11 +348,12 @@ public class TransitimeApi {
      *            StdParametersBean that gets the standard parameters from the
      *            URI, query string, and headers.
      * @param routeStopStrs
-     *            List of route/stops. The route specifier is the route short
-     *            name for consistency across configuration changes (route ID is
-     *            not consistent for many agencies). Each route/stop is
-     *            separated by the "|" character so for example the query string
-     *            could have "rs=43|2029&rs=43|3029"
+     *            List of route/stops. The route specifier is the route id or
+     *            the route short name. It is often best to use route short name
+     *            for consistency across configuration changes (route ID is not
+     *            consistent for many agencies). Each route/stop is separated by
+     *            the "|" character so for example the query string could have
+     *            "rs=43|2029&rs=43|3029"
      * @param numberPredictions
      *            Maximum number of predictions to return. Default value is 3.
      * @return
@@ -506,8 +500,7 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getRoute(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value="r") String routeId,
-	    @QueryParam(value="rShortName") String routeShortName,
+	    @QueryParam(value="r") String routeIdOrShortName,
 	    @QueryParam(value="s") String stopId,
 	    @QueryParam(value="tripPattern") String tripPatternId) 
 		    throws WebApplicationException {
@@ -517,25 +510,14 @@ public class TransitimeApi {
 	try {
 	    // Get Vehicle data from server
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
-	    IpcRoute route;
-	    
-	    if (routeId != null) {
-		route = inter.getRouteUsingRouteId(routeId, stopId,
+	    IpcRoute route = inter.getRoute(routeIdOrShortName, stopId,
 			tripPatternId);
-		// If the route doesn't exist then throw exception such that
-		// Bad Request with an appropriate message is returned.
-		if (route == null)
-		    throw WebUtils.badRequestException("Route for routeId="
-			    + routeId + " does not exist.");
-	    } else {
-		route = inter.getRoute(routeShortName, stopId, tripPatternId);
-		// If the route doesn't exist then throw exception such that
-		// Bad Request with an appropriate message is returned.
-		if (route == null)
-		    throw WebUtils.badRequestException("Route for "
-			    + "routeShortName=" + routeShortName
-			    + " does not exist.");
-	    }				    
+
+	    // If the route doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (route == null)
+		throw WebUtils.badRequestException("Route for route="
+			+ routeIdOrShortName + " does not exist.");
 	    
 	    // Create and return ApiRoute response
 	    ApiRoute routeData = new ApiRoute(route);
@@ -560,7 +542,7 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getStops(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value="rShortName") String routeShortName) 
+	    @QueryParam(value="r") String routesIdOrShortNames) 
 		    throws WebApplicationException {
 
 	// Make sure request is valid
@@ -569,13 +551,14 @@ public class TransitimeApi {
 	try {
 	    // Get stops data from server
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
-	    IpcStopsForRoute stopsForRoute = inter.getStops(routeShortName);
+	    IpcStopsForRoute stopsForRoute = 
+		    inter.getStops(routesIdOrShortNames);
 
 	    // If the route doesn't exist then throw exception such that
 	    // Bad Request with an appropriate message is returned.
 	    if (stopsForRoute == null)
-		throw WebUtils.badRequestException("routeShortName=" + routeShortName 
-			+ " does not exist.");
+		throw WebUtils.badRequestException("route=" + 
+			routesIdOrShortNames + " does not exist.");
 	    
 	    // Create and return ApiDirections response
 	    ApiDirections directionsData = new ApiDirections(stopsForRoute);
@@ -673,7 +656,7 @@ public class TransitimeApi {
      * the specified route.
      * 
      * @param stdParameters
-     * @param routeShortName
+     * @param routesIdOrShortNames
      * @return
      * @throws WebApplicationException
      */
@@ -681,7 +664,7 @@ public class TransitimeApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getTripPatterns(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value="rShortName") String routeShortName) 
+	    @QueryParam(value="r") String routesIdOrShortNames) 
 		    throws WebApplicationException {
 
 	// Make sure request is valid
@@ -691,12 +674,12 @@ public class TransitimeApi {
 	    // Get block data from server
 	    ConfigInterface inter = stdParameters.getConfigInterface();	    
 	    List<IpcTripPattern> ipcTripPatterns = 
-		    inter.getTripPatterns(routeShortName);
+		    inter.getTripPatterns(routesIdOrShortNames);
 
 	    // If the trip doesn't exist then throw exception such that
 	    // Bad Request with an appropriate message is returned.
 	    if (ipcTripPatterns == null)
-		throw WebUtils.badRequestException("routeShortName=" + routeShortName 
+		throw WebUtils.badRequestException("route=" + routesIdOrShortNames 
 			+ " does not exist.");
 	    
 	    // Create and return ApiBlock response

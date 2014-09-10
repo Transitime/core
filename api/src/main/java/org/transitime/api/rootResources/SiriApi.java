@@ -60,8 +60,7 @@ public class SiriApi {
      *  
      * @param stdParameters
      * @param vehicleIds List of vehicle IDs
-     * @param routeIds List of route IDs
-     * @param routeShortNames List of routeShortNames
+     * @param routesIdOrShortNames List of routes
      * @return The response
      * @throws WebApplicationException
      */
@@ -70,8 +69,7 @@ public class SiriApi {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getVehicles(@BeanParam StandardParameters stdParameters,
 	    @QueryParam(value = "v") List<String> vehicleIds,
-	    @QueryParam(value = "r") List<String> routeIds,
-	    @QueryParam(value = "rShortName") List<String> routeShortNames) 
+	    @QueryParam(value = "r") List<String> routesIdOrShortNames) 
 		    throws WebApplicationException {
 	// Make sure request is valid
 	stdParameters.validate();
@@ -81,10 +79,8 @@ public class SiriApi {
 	    VehiclesInterface inter = stdParameters.getVehiclesInterface();
 	    
 	    Collection<IpcExtVehicle> vehicles;
-	    if (!routeIds.isEmpty()) {
-		vehicles = inter.getExtForRouteUsingRouteId(routeIds);
-	    } else if (!routeShortNames.isEmpty()) {
-		vehicles = inter.getExtForRoute(routeShortNames);
+	    if (!routesIdOrShortNames.isEmpty()) {
+		vehicles = inter.getExtForRoute(routesIdOrShortNames);
 	    } else if (!vehicleIds.isEmpty()) {
 		vehicles = inter.getExt(vehicleIds);
 	    } else {
@@ -107,8 +103,7 @@ public class SiriApi {
      * specify how many max number of predictions per stop to return.
      * 
      * @param stdParameters
-     * @param routeId
-     * @param routeShortName
+     * @param routeIdOrShortName
      * @param stopId
      * @param numberPredictions
      * @return
@@ -118,8 +113,7 @@ public class SiriApi {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getVehicles(@BeanParam StandardParameters stdParameters,
-	    @QueryParam(value = "r") String routeId,
-	    @QueryParam(value = "rShortName") String routeShortName,
+	    @QueryParam(value = "r") String routeIdOrShortName,
 	    @QueryParam(value = "s") String stopId,
 	    @QueryParam(value="numPreds") @DefaultValue("3") int numberPredictions) 
 		    throws WebApplicationException {
@@ -130,11 +124,8 @@ public class SiriApi {
 	    // Get prediction data from server
 	    PredictionsInterface inter = stdParameters.getPredictionsInterface();
 	    
-	    List<IpcPredictionsForRouteStopDest> preds;
-	    if (routeId != null)
-		preds = inter.getUsingRouteId(routeId, stopId, numberPredictions);
-	    else
-		preds = inter.get(routeShortName, stopId, numberPredictions);
+	    List<IpcPredictionsForRouteStopDest> preds = 
+		    inter.get(routeIdOrShortName, stopId, numberPredictions);
 
 	    // For each prediction also need corresponding vehicle so can create
 	    // the absurdly large MonitoredVehicleJourney element.
