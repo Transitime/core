@@ -70,10 +70,10 @@ public class VehiclesServer extends AbstractServer
 			singleton.vehicleDataCache = vehicleManager;
 		}
 		
-		if (!singleton.getProjectId().equals(agencyId)) {
+		if (!singleton.getAgencyId().equals(agencyId)) {
 			logger.error("Tried calling VehiclesServer.start() for " +
 					"agencyId={} but the singleton was created for agencyId={}", 
-					agencyId, singleton.getProjectId());
+					agencyId, singleton.getAgencyId());
 			return null;
 		}
 		
