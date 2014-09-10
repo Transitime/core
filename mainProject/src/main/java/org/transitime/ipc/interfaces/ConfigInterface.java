@@ -49,10 +49,10 @@ public interface ConfigInterface extends Remote {
 	/**
 	 * Obtains data for single route.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 *            Specifies which route to provide data for. routeShortName is
-	 *            used instead of routeId since routeIds unfortunately often
-	 *            change when there is a schedule change.
+	 *            often used instead of routeId since routeIds unfortunately
+	 *            often change when there is a schedule change.
 	 * @param stopId
 	 *            If want UI to highlight the remaining stops and paths left in
 	 *            trip then stopId is used to return which stops remain in trip.
@@ -66,41 +66,20 @@ public interface ConfigInterface extends Remote {
 	 * @return
 	 * @throws RemoteException
 	 */
-	public IpcRoute getRoute(String routeShortName, String stopId,
-			String tripPatternId) throws RemoteException;
-	
-	/**
-	 * Obtains data for single route.
-	 * 
-	 * @param routeId
-	 *            Specifies which route to provide data for. 
-	 * @param stopId
-	 *            If want UI to highlight the remaining stops and paths left in
-	 *            trip then stopId is used to return which stops remain in trip.
-	 *            If this additional info not needed for UI then null can be
-	 *            specified.
-	 * @param tripPatternId
-	 *            If want UI to highlight the remaining stops and paths left in
-	 *            trip then stopId is used to determine which trip pattern to
-	 *            highlight. If this additional info not needed for UI then null
-	 *            can be specified.
-	 * @return
-	 * @throws RemoteException
-	 */
-	public IpcRoute getRouteUsingRouteId(String routeId, String stopId,
+	public IpcRoute getRoute(String routeIdOrShortName, String stopId,
 			String tripPatternId) throws RemoteException;
 	
 	/**
 	 * Returns stops for each direction for a route.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 *            Specifies which route to provide data for. routeShortName is
-	 *            used instead of routeId since routeIds unfortunately often
-	 *            change when there is a schedule change.
+	 *            often used instead of routeId since routeIds unfortunately
+	 *            often change when there is a schedule change.
 	 * @return
 	 * @throws RemoteException
 	 */
-	public IpcStopsForRoute getStops(String routeShortName)  
+	public IpcStopsForRoute getStops(String routeIdOrShortName)  
 			throws RemoteException;
 	
 	/**
@@ -133,17 +112,7 @@ public interface ConfigInterface extends Remote {
 	 * @return
 	 * @throws RemoteException
 	 */
-	public List<IpcTripPattern> getTripPatterns(String routeShortName) 
-			throws RemoteException;
-
-	/**
-	 * Returns trip patterns for specified routeId.
-	 * 
-	 * @param routeId
-	 * @return
-	 * @throws RemoteException
-	 */
-	public List<IpcTripPattern> getTripPatternsByRouteId(String routeId) 
+	public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName) 
 			throws RemoteException;
 
 	/**
