@@ -4,28 +4,55 @@
 <!-- 
  Query String parameters:
    a=AGENCY (required)
-   r=ROUTE (required, though can also use rShortName=SHORT_NAME)
+   r=ROUTE (optional, if not specified then a route selector is created)
    s=STOP_ID (optional, for specifying which stop interested in)
    tripPattern=TRIP_PATTERN (optional, for specifying which stop interested in).
    verbose=true (for getting additional info in vehicle popup window)
 -->
 <html>
 <head>
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="/api/javascript/jquery-dateFormat.min.js"></script>
-<script src="/api/javascript/mapUiOptions.js"></script>
-<link rel="stylesheet" href="/api/css/mapUi.css" />
+  <!-- So that get proper sized map on iOS mobile device -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
+  <link rel="stylesheet" href="/api/css/mapUi.css" />
  
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Transitime Map</title>
+  <!-- Load javascript and css files -->
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="/api/javascript/jquery-dateFormat.min.js"></script>
+  <script src="/api/javascript/mapUiOptions.js"></script>
+
+  <%-- MBTA wants some color customization. Load in options file if mbta --%>
+  <% if (request.getParameter("a").equals("mbta")) { %>
+    <link rel="stylesheet" href="/api/css/mbtaMapUi.css" />
+    <script src="/api/javascript/mbtaMapUiOptions.js"></script>
+  <% } %>
+  
+  <!--  Load in JQueryUI files for special effects -->
+  <script src="/api/javascript/jquery-ui.js"></script>
+   
+  <!-- Load in Select2 files so can create fancy selectors -->
+  <link href="/api/select2/select2.css" rel="stylesheet"/>
+  <script src="/api/select2/select2.min.js"></script>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  
+  <title>Transitime Map</title>
 </head>
+
 <body>
-<div id="map"></div>
+  <div id="map"></div>
+  <!--  The title text is set in css so that it is easily configurable -->
+  <div id="title"></div>
+  <div id="routesDiv">
+     <input type="hidden" id="routes" style="width:300px" />
+  </div>
+  
 </body>
 
 <script>
+
 
 /**
  * For getting parameters from query string 
@@ -84,20 +111,42 @@ var verbose = getQueryVariable("verbose");
 var agencyId = getQueryVariable("a");
 if (!agencyId)
 	alert("You must specify agency in URL using a=agencyId parameter");
-if (!getQueryVariable("rShortName") && !getQueryVariable("r"))
-	alert("You must specify route in URL using rShortName=XX or r=XX parameter")
 var urlPrefix = "/api/v1/key/TEST/agency/" + getQueryVariable("a");
 
 /**
+ * Fade out the Transitime.org title
+ */
+setTimeout(function () {
+	$('#title').hide('fade', 1000);
+ }, 800);
+
+/**
+ * Handle the route specification
+ */
+var routeQueryStrParam;
+
+function getRouteQueryStrParam() {
+	return routeQueryStrParam;
+}
+
+function setRouteQueryStrParam(param) {
+	routeQueryStrParam = param;
+}
+
+/**
  * Returns query string param to be used for API for specifying the route.
- * It can be either "r=XX" or "rShortName=XX" depending on whether route
+ * It can be either "r=routeId" or "r=rShortName" depending on whether route
  * ID or route short name were used when bringing up the page.
  */
-function getRouteQueryStrParam() {
+function setRouteQueryStrParamViaQueryStr() {
+	// If route not set in query string then return null
+	if (!getQueryVariable("r")) {
+	 	routeQueryStrParam =  null;
+		return;
+	}
+	 
 	if (getQueryVariable("r"))
-		return "r=" + getQueryVariable("r");
-	else
-		return "rShortName=" + getQueryVariable("rShortName");
+		routeQueryStrParam = "r=" + getQueryVariable("r");
 }
 
 // Create the map with a scale and specify which map tiles to use
@@ -112,7 +161,8 @@ L.Path.CLIP_PADDING = 0.8;
 L.control.scale({metric: false}).addTo(map);
 
 L.tileLayer('http://{s}.tiles.mapbox.com/v3/examples.map-i86knfo3/{z}/{x}/{y}.png', {
-    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
     maxZoom: 19
 }).addTo(map);
 
@@ -120,8 +170,16 @@ L.tileLayer('http://{s}.tiles.mapbox.com/v3/examples.map-i86knfo3/{z}/{x}/{y}.pn
 // Get timezone offset and put it into global agencyTimezoneOffset variable
 $.getJSON(urlPrefix + "/command/agencies", 
 		function(agencies) {
-			agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
-});	
+	        agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
+			
+	        // Fit the map initially to the agency, but only if route not
+	        // specified in query string. If route specified in query string
+	        // then the map will be fit to that route once it is loaded in.
+	        if (!getQueryVariable("r")) {
+				var e = agencies.agency[0].extent;
+				map.fitBounds([[e.minLat, e.minLon], [e.maxLat, e.maxLon]]);
+	        }
+	});	
 
 // For keeping track the predictions popup so can update content
 var predictionsPopup = null;
@@ -225,15 +283,21 @@ map.on('popupclose', function(e) {
 		e.popup.parent.popup = null;
 });
 
+var routeFeatureGroup = null;
+
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
  */
 function routeConfigCallback(route, status) {
+	// If there is an old route then remove it
+	if (routeFeatureGroup) {
+		map.removeLayer(routeFeatureGroup);
+	}
 	// Use a FeatureGroup to contain all paths and stops so that can use
 	// bringToBack() on the whole group at once in  order to make sure that
 	// the paths & stops are drawn below the vehicles even if the vehicles
 	// happen to be drawn first.
-	var featureGroup = L.featureGroup();
+	routeFeatureGroup = L.featureGroup();
 
 	// Draw stops for the route. Do stops before paths so that when call  
 	// bringToBack() the stops will end up being on top.
@@ -255,7 +319,7 @@ function routeConfigCallback(route, status) {
 		// Create the stop Marker
 		var stopMarker = L.circleMarker([stop.lat,stop.lon], options).addTo(map);
 		
-		featureGroup.addLayer(stopMarker);
+		routeFeatureGroup.addLayer(stopMarker);
 		
 		// Store stop data obtained via AJAX with stopMarker so it can be used in popup
 		stopMarker.stop = stop;
@@ -282,7 +346,7 @@ function routeConfigCallback(route, status) {
 		}
 		var polyline = L.polyline(latLngs, options).addTo(map);
 		
-		featureGroup.addLayer(polyline);
+		routeFeatureGroup.addLayer(polyline);
 		
 		// Store shape data obtained via AJAX with polyline so it can be used in popup
 		polyline.shape = shape;
@@ -300,10 +364,9 @@ function routeConfigCallback(route, status) {
 		}
 		
 	}
-
 	
 	// Add all of the paths and stops to the map at once via the FeatureGroup
-	featureGroup.addTo(map);
+	routeFeatureGroup.addTo(map);
 
 	// If stop was specified for getting route then locationOfNextPredictedVehicle
 	// is also returned. Use this vehicle location when fitting bounds of map
@@ -321,7 +384,7 @@ function routeConfigCallback(route, status) {
 	// the vehicles will be drawn on top.
 	// Note: bringToBack() must be called after map is first specified 
 	// via fitBounds() or other such method.
-	featureGroup.bringToBack();
+	routeFeatureGroup.bringToBack();
 }
 
 var vehicleMarkers = [];
@@ -444,6 +507,16 @@ function removeVehicleMarker(vehicleMarker) {
 	map.removeLayer(vehicleMarker.background);
 	map.removeLayer(vehicleMarker.headingArrow);
 	map.removeLayer(vehicleMarker);
+}
+
+/**
+ * Removes all vehicles from map
+ */
+function removeAllVehicles() {
+	for (var i in vehicleMarkers) {
+		var vehicleMarker = vehicleMarkers[i];
+		removeVehicleMarker(vehicleMarker);
+	}
 }
 
 /**
@@ -639,6 +712,11 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 	 * Should actually read in new vehicle positions and adjust all vehicle icons.
 	 */
 	function updateVehiclesUsingApiData() {
+		// If route not yet configured then simply return. Don't want to read
+		// in all vehicles for agency!
+		if (!getRouteQueryStrParam())
+			return;
+		
 		var url = urlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
 		// If stop specified as query str param to this page pass it to the 
 		// vehicles request such that all but the next 2 predicted vehicles
@@ -653,20 +731,66 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 		$.ajax(url, {
 			  dataType: 'json',
 			  success: vehicleLocationsCallback,
-			  timeout: 4000 //4 second timeout
+			  timeout: 6000 // 6 second timeout
 			});
 	}
 
-	//Read in route info and draw it on map
-	var url = urlPrefix + "/command/route?" + getRouteQueryStrParam();
-	if (getQueryVariable("s"))
-		url += "&s=" + getQueryVariable("s");
-	if (getQueryVariable("tripPattern"))
-		url += "&tripPattern=" + getQueryVariable("tripPattern");
-	$.getJSON(url, routeConfigCallback);
+	// Determine if route specified by query string
+	setRouteQueryStrParamViaQueryStr();
+	
+	if (!getRouteQueryStrParam()) {
+  	  // Populate the route select if route not specified in query string
+	  $.getJSON(urlPrefix + "/command/routes", 
+	 		function(routes) {
+		        // Generate list of routes for the selector
+		 		var selectorData = [];
+		 		for (var i in routes.route) {
+		 			var route = routes.route[i];
+		 			selectorData.push({id: route.id, text: route.name})
+		 		}
+		 		
+		 		// Configure the selector to be a select2 one that has
+		 		// search capability
+	 			$("#routes").select2({
+	 				placeholder: "Select Route", 				
+	 				data : selectorData})
+	 				.on("change", function(e) {
+	 					// First remove all old vehicles so that they don't
+	 					// get moved around when zooming to new route
+	 					removeAllVehicles();
+	 					
+	 					// Configure map for new route	
+	 					var url = urlPrefix + "/command/route?r=" + e.val;
+	 					$.getJSON(url, routeConfigCallback);;
 
-	// Read in vehicle locations now (and every 10 seconds)
-	updateVehiclesUsingApiData();
+	 					// Read in vehicle locations now
+	 					setRouteQueryStrParam("r=" + e.val);
+	 					updateVehiclesUsingApiData();
+					});
+	 			
+	 			// Make route selector visible
+	  			$("#routesDiv").css({"visibility":"visible"});
+	 			
+	 			// Set focus to selector so that user can simply start
+	 			// typing to select a route. Can't use something like
+	 			// '#routes' since select2 changes  the input element to a
+	 			// bunch of elements with peculiar and sometimes autogenerated
+	 			// ids. Therefore simply set focus to the "inpu" element.	 			
+	  			$("input").focus();
+	 	});	 
+	} else {
+		//Read in route info and draw it on map
+		var url = urlPrefix + "/command/route?" + getRouteQueryStrParam();
+		if (getQueryVariable("s"))
+			url += "&s=" + getQueryVariable("s");
+		if (getQueryVariable("tripPattern"))
+			url += "&tripPattern=" + getQueryVariable("tripPattern");
+		$.getJSON(url, routeConfigCallback);		
+		
+		// Read in vehicle locations now (and every 10 seconds)
+		updateVehiclesUsingApiData();
+	}
+
 	setInterval(updateVehiclesUsingApiData, 10000);
 	 
 </script>
