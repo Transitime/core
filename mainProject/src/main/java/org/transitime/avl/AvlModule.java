@@ -238,7 +238,6 @@ public abstract class AvlModule extends Module {
 				logger.error("Error accessing AVL feed using URL={} with a " +
 						"timeout of {} msec.", 
 						getUrl(), AvlConfig.getAvlFeedTimeoutInMSecs(), e);
-				return;
 			} catch (Exception e) {
 				logger.error("Error accessing AVL feed using URL={}.", 
 						getUrl(), e);
