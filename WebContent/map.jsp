@@ -43,10 +43,17 @@
 
 <body>
   <div id="map"></div>
-  <!--  The title text is set in css so that it is easily configurable -->
-  <div id="title"></div>
-  <div id="routesDiv">
-     <input type="hidden" id="routes" style="width:300px" />
+  <!-- To center successfully in all situations need to use a div within a div.
+       The title text is set in css so that it is easily configurable -->
+  <div id="titleContainer">
+    <div id="title"></div>
+  </div>
+  
+  <!--  To center successfully in all situations use div within a div trick -->  
+  <div id="routesContainer">
+    <div id="routesDiv">
+      <input type="hidden" id="routes" style="width:300px" />
+    </div>
   </div>
   
 </body>
@@ -57,8 +64,7 @@
 /**
  * For getting parameters from query string 
  */
-function getQueryVariable(variable)
-{
+function getQueryVariable(variable) {
        var query = window.location.search.substring(1);
        var vars = query.split("&");
        for (var i=0;i<vars.length;i++) {
