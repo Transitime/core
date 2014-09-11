@@ -1,0 +1,15 @@
+@CHARSET "ISO-8859-1";
+/*
+ * This file contains css customizations for MBTA
+ */
+
+#title { 
+	/* Special semi-transparent color */
+	background: rgba(210,20,210,0.5);
+}
+
+/* Set the title text here in css */
+#title:before {
+	content: "MBTA";
+}
+	
