@@ -205,19 +205,6 @@ function showStopPopup(stopMarker) {
 		.openOn(map);
 }
 
-/**
- * Initiate event handler to be called when a popup is closed. Sets 
- * predictionsPopup to null to indicate that don't need to update predictions 
- * anymore since stop popup not displayed anymore.
- */
-map.on('popupclose', function(e) {
-	predictionsPopup = null;
-	clearTimeout(predictionsTimeout);
-	
-	if (e.popup.parent)
-		e.popup.parent.popup = null;
-});
-
 var routeFeatureGroup = null;
 
 /**
@@ -445,7 +432,7 @@ function removeVehicleMarker(vehicleMarker) {
 }
 
 /**
- * Removes all vehicles from map
+ * Removes all vehicle markers from map
  */
 function removeAllVehicles() {
 	for (var i in vehicleMarkers) {
@@ -468,6 +455,8 @@ function hideThingsIfStale() {
 		// predictions as well but that would be more work
 		// to implement.
 		removeAllVehicles();
+		
+		console.log("Removing all vehicle because no update in a while.");
 		
 		// Update lastVehiclesUpdateTime so that don't keep
 		// calling removeAlVehicles().
@@ -715,11 +704,22 @@ L.tileLayer('http://{s}.tiles.mapbox.com/v3/examples.map-i86knfo3/{z}/{x}/{y}.pn
     maxZoom: 19
 }).addTo(map);
 
-//Set the CLIP_PADDING to a higher value so that when user pans on map
-//the route path doesn't need to be redrawn. Note: leaflet documentation
-//says that this could decrease drawing performance. But hey, it looks
-//better.
+// Set the CLIP_PADDING to a higher value so that when user pans on map
+// the route path doesn't need to be redrawn. Note: leaflet documentation
+// says that this could decrease drawing performance. But hey, it looks
+// better.
 L.Path.CLIP_PADDING = 0.8;
+
+// Initiate event handler to be called when a popup is closed. Sets 
+// predictionsPopup to null to indicate that don't need to update predictions 
+// anymore since stop popup not displayed anymore.
+map.on('popupclose', function(e) {
+	predictionsPopup = null;
+	clearTimeout(predictionsTimeout);
+	
+	if (e.popup.parent)
+		e.popup.parent.popup = null;
+});
 
 // Get timezone offset and put it into global agencyTimezoneOffset variable
 // and set map bounds to the agency extent if route not specified in query string
