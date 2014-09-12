@@ -84,15 +84,7 @@ public class Core {
 	 * @param agencyId
 	 */
 	private Core(String agencyId) {
-		// Create the DataDBLogger so that generated data can be stored
-		// to database via a robust queue. But don't actually log data
-		// if in playback mode since then would be writing data again 
-		// that was first written when predictor was run in real time.
-		dataDbLogger = DataDbLogger.getDataDbLogger(agencyId,
-				CoreConfig.storeDataInDatabase(),
-				CoreConfig.pauseIfDbQueueFilling());
-		
-		// Read in all config data
+		// Read in all GTFS based config data from the database
 		configData = new DbConfig(agencyId);
 		// FIXME Use rev 0 for now but should be using current rev
 		int configRev = 0;
@@ -104,6 +96,20 @@ public class Core {
 		String timezoneStr = configData.getFirstAgency().getTimeZoneStr();
 		TimeZone.setDefault(TimeZone.getTimeZone(timezoneStr));
 
+		// Create the DataDBLogger so that generated data can be stored
+		// to database via a robust queue. But don't actually log data
+		// if in playback mode since then would be writing data again 
+		// that was first written when predictor was run in real time.
+		// Note: DataDbLogger needs to be started after the timezone is set.
+		// Otherwise when running for a different timezone than what the
+		// computer is setup for then can log data using the wrong time!
+		// This is strange since setting TimeZone.setDefault() is supposed
+		// to work across all threads it appears that sometimes it wouldn't
+		// work if Db logger started first.
+		dataDbLogger = DataDbLogger.getDataDbLogger(agencyId,
+				CoreConfig.storeDataInDatabase(),
+				CoreConfig.pauseIfDbQueueFilling());
+		
 		service = new ServiceUtils(configData);
 		time = new Time(configData);
 	}
