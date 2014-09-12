@@ -40,6 +40,8 @@ public class TaipGpsLocation {
 	private final String gpsSourceStr;
 	private final String ageStr;
 	
+	private static TimeZone gmtTimeZone = TimeZone.getTimeZone("GMT");
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(TaipGpsLocation.class);
  
@@ -146,7 +148,6 @@ public class TaipGpsLocation {
 		// that handling midnight properly. If fix epoch time ends up being 
 		// far in the future (more than 30 minutes) then subtract a day to
 		// get it right.
-		TimeZone gmtTimeZone = TimeZone.getTimeZone("GMT");
 		long fixEpochTime = Time.getStartOfDay(gmtTimeZone) + secondsIntoDay*Time.MS_PER_SEC;
 		long currentEpochTime = System.currentTimeMillis();
 		if (fixEpochTime - currentEpochTime > 30 * Time.MS_PER_MIN)
