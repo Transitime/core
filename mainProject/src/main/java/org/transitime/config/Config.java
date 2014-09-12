@@ -283,12 +283,17 @@ public class Config {
 	
 	
 	/**
-	 * Processes config files. Reads in data and stores it in the config
-	 * objects so that it is programmatically accessible. Does a write
-	 * lock so that readers will only execute when data is not being
-	 * modified.
-	 * @param fileName Name of the config file. If null then default
-	 * values will be used for each parameter.
+	 * Processes specified config file and overrides the config parameters
+	 * accordingly. This way can use an XML config file instead of -D Java
+	 * properties to set configuration parameters.
+	 * <p>
+	 * Reads in data and stores it in the config objects so that it is
+	 * programmatically accessible. Does a write lock so that readers will only
+	 * execute when data is not being modified.
+	 * 
+	 * @param fileName
+	 *            Name of the config file. If null then default values will be
+	 *            used for each parameter.
 	 * @throws ConfigException
 	 * @throws ConfigParamException
 	 */
