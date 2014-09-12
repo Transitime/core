@@ -19,6 +19,7 @@
   <!-- Load javascript and css files -->
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script src="/api/javascript/leafletRotatedMarker.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="/api/javascript/jquery-dateFormat.min.js"></script>
   <script src="/api/javascript/mapUiOptions.js"></script>
@@ -43,22 +44,27 @@
 
 <body>
   <div id="map"></div>
-  <!--  The title text is set in css so that it is easily configurable -->
-  <div id="title"></div>
-  <div id="routesDiv">
-     <input type="hidden" id="routes" style="width:300px" />
+  <!-- To center successfully in all situations need to use a div within a div.
+       The title text is set in css so that it is easily configurable -->
+  <div id="titleContainer">
+    <div id="title"></div>
+  </div>
+  
+  <!--  To center successfully in all situations use div within a div trick -->  
+  <div id="routesContainer">
+    <div id="routesDiv">
+      <input type="hidden" id="routes" style="width:300px" />
+    </div>
   </div>
   
 </body>
 
 <script>
 
-
 /**
  * For getting parameters from query string 
  */
-function getQueryVariable(variable)
-{
+function getQueryVariable(variable) {
        var query = window.location.search.substring(1);
        var vars = query.split("&");
        for (var i=0;i<vars.length;i++) {
@@ -80,45 +86,6 @@ function dateFormat(time) {
 	// Use jquery-dateFormat javascript library
 	return $.format.date(offsetDate, 'HH:mm:ss');
 }
-
-// Class for creating marker with an orientation. Found at
-// https://www.mapbox.com/mapbox.js/example/v1.0.0/rotating-controlling-marker/
-// Orients the icon to marker.options.angle when setLatLng() is called. 
-// MIT-licensed code by Benjamin Becquet
-// https://github.com/bbecquet/Leaflet.PolylineDecorator
-L.RotatedMarker = L.Marker.extend({
-options: { angle: 0 },
-_setPos: function(pos) {
- L.Marker.prototype._setPos.call(this, pos);
- if (L.DomUtil.TRANSFORM) {
-   // use the CSS transform rule if available
-   this._icon.style[L.DomUtil.TRANSFORM] += ' rotate(' + this.options.angle + 'deg)';
- } else if (L.Browser.ie) {
-   // fallback for IE6, IE7, IE8
-   var rad = this.options.angle * L.LatLng.DEG_TO_RAD,
-   costheta = Math.cos(rad),
-   sintheta = Math.sin(rad);
-   this._icon.style.filter += ' progid:DXImageTransform.Microsoft.Matrix(sizingMethod=\'auto expand\', M11=' +
-     costheta + ', M12=' + (-sintheta) + ', M21=' + sintheta + ', M22=' + costheta + ')';
- }
-}
-});
-L.rotatedMarker = function(pos, options) {
- return new L.RotatedMarker(pos, options);
-};
-
-var verbose = getQueryVariable("verbose");
-var agencyId = getQueryVariable("a");
-if (!agencyId)
-	alert("You must specify agency in URL using a=agencyId parameter");
-var urlPrefix = "/api/v1/key/TEST/agency/" + getQueryVariable("a");
-
-/**
- * Fade out the Transitime.org title
- */
-setTimeout(function () {
-	$('#title').hide('fade', 1000);
- }, 800);
 
 /**
  * Handle the route specification
@@ -148,38 +115,6 @@ function setRouteQueryStrParamViaQueryStr() {
 	if (getQueryVariable("r"))
 		routeQueryStrParam = "r=" + getQueryVariable("r");
 }
-
-// Create the map with a scale and specify which map tiles to use
-var map = L.map('map');
-
-// Set the CLIP_PADDING to a higher value so that when user pans on map
-// the route path doesn't need to be redrawn. Note: leaflet documentation
-// says that thisi could decrease drawing performance. But hey, it looks
-// better.
-L.Path.CLIP_PADDING = 0.8;
-
-L.control.scale({metric: false}).addTo(map);
-
-L.tileLayer('http://{s}.tiles.mapbox.com/v3/examples.map-i86knfo3/{z}/{x}/{y}.png', {
-    //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-    maxZoom: 19
-}).addTo(map);
-
-
-// Get timezone offset and put it into global agencyTimezoneOffset variable
-$.getJSON(urlPrefix + "/command/agencies", 
-		function(agencies) {
-	        agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
-			
-	        // Fit the map initially to the agency, but only if route not
-	        // specified in query string. If route specified in query string
-	        // then the map will be fit to that route once it is loaded in.
-	        if (!getQueryVariable("r")) {
-				var e = agencies.agency[0].extent;
-				map.fitBounds([[e.minLat, e.minLon], [e.maxLat, e.maxLon]]);
-	        }
-	});	
 
 // For keeping track the predictions popup so can update content
 var predictionsPopup = null;
@@ -269,19 +204,6 @@ function showStopPopup(stopMarker) {
 		.setLatLng(stopMarker.getLatLng())
 		.openOn(map);
 }
-
-/**
- * Initiate event handler to be called when a popup is closed. Sets 
- * predictionsPopup to null to indicate that don't need to update predictions 
- * anymore since stop popup not displayed anymore.
- */
-map.on('popupclose', function(e) {
-	predictionsPopup = null;
-	clearTimeout(predictionsTimeout);
-	
-	if (e.popup.parent)
-		e.popup.parent.popup = null;
-});
 
 var routeFeatureGroup = null;
 
@@ -510,13 +432,36 @@ function removeVehicleMarker(vehicleMarker) {
 }
 
 /**
- * Removes all vehicles from map
+ * Removes all vehicle markers from map
  */
 function removeAllVehicles() {
 	for (var i in vehicleMarkers) {
 		var vehicleMarker = vehicleMarkers[i];
 		removeVehicleMarker(vehicleMarker);
 	}
+}
+
+/*
+ * For determining if vehicles and other markers are stale.
+ * This can happen if laptop or tablet with map already running
+ * is turned on again. 
+ */
+var lastVehiclesUpdateTime = new Date();
+
+function hideThingsIfStale() {
+	// If no vehicle update for 30 seconds then...
+	if (new Date() - lastVehiclesUpdateTime > 30000) {
+		// Remove all the vehicle icons. Should also remove
+		// predictions as well but that would be more work
+		// to implement.
+		removeAllVehicles();
+		
+		console.log("Removing all vehicle because no update in a while.");
+		
+		// Update lastVehiclesUpdateTime so that don't keep
+		// calling removeAlVehicles().
+		lastVehiclesUpdateTime = new Date();
+	}	
 }
 
 /**
@@ -622,176 +567,257 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 	}
 }
 
-	/**
-	 * Reads in vehicle data obtained via AJAX. Called for each vehicle in API
-	 * whether vehicle changed or not.
-	 */
-	function vehicleLocationsCallback(vehicles, status) {
-		// If no data from the API for vehicle where have created an icon
-		// then remove that icon. Count down in for loop since might
-		// be deleting some elements.
-		for (var i = vehicleMarkers.length - 1; i >= 0; --i) {
-			var haveDataForVehicle = false;
-			var vehicleMarker = vehicleMarkers[i];
-			var markerVehicleId = vehicleMarker.vehicleData.id;
-			for (var j = 0; j < vehicles.vehicle.length; ++j) {
-				var dataVehicleId = vehicles.vehicle[j].id;
-				if (markerVehicleId == dataVehicleId) {
-					haveDataForVehicle = true;
-					break;
-				}
-			}
-
-			// If no data from the API for the vehicle associated with the icon...
-			if (!haveDataForVehicle) {
-				// Delete the marker from the map
-				removeVehicleMarker(vehicleMarker);
-
-				// Remove the vehicleIcon from the vehiclesIcon array
-				vehicleMarkers.splice(i, 1);
+/**
+ * Reads in vehicle data obtained via AJAX. Called for each vehicle in API
+ * whether vehicle changed or not.
+ */
+function vehicleLocationsCallback(vehicles, status) {
+	// If no data from the API for vehicle where have created an icon
+	// then remove that icon. Count down in for loop since might
+	// be deleting some elements.
+	for (var i = vehicleMarkers.length - 1; i >= 0; --i) {
+		var haveDataForVehicle = false;
+		var vehicleMarker = vehicleMarkers[i];
+		var markerVehicleId = vehicleMarker.vehicleData.id;
+		for (var j = 0; j < vehicles.vehicle.length; ++j) {
+			var dataVehicleId = vehicles.vehicle[j].id;
+			if (markerVehicleId == dataVehicleId) {
+				haveDataForVehicle = true;
+				break;
 			}
 		}
 
-		// Go through vehicle data read in for route...
-		for (var i = 0; i < vehicles.vehicle.length; ++i) {
-			var vehicleData = vehicles.vehicle[i];
-			var vehicleLoc = L.latLng(vehicleData.loc.lat, vehicleData.loc.lon);
+		// If no data from the API for the vehicle associated with the icon...
+		if (!haveDataForVehicle) {
+			// Delete the marker from the map
+			removeVehicleMarker(vehicleMarker);
 
-			// If vehicle icon wasn't already created then create it now
-			var vehicleMarker = getVehicleMarker(vehicleData.id);
-			if (vehicleMarker == null) {
-				// Create the new marker
-				vehicleMarker = createVehicleMarker(vehicleData);
-				
-				// Keep track of vehicle marker so it can be updated
-				vehicleMarkers.push(vehicleMarker);
-			} else {
-				// Vehicle icon already exists, so update it
-				updateVehicleMarker(vehicleMarker, vehicleData);
-			}
-
-			// Store vehicle data obtained via AJAX with vehicle so it can be used in popup
-			vehicleMarker.vehicleData = vehicleData;
+			// Remove the vehicleIcon from the vehiclesIcon array
+			vehicleMarkers.splice(i, 1);
 		}
 	}
 
-	var ANIMATION_STEPS = 15;
+	// Go through vehicle data read in for route...
+	for (var i = 0; i < vehicles.vehicle.length; ++i) {
+		var vehicleData = vehicles.vehicle[i];
+		var vehicleLoc = L.latLng(vehicleData.loc.lat, vehicleData.loc.lon);
 
-	/**
-	 * Moves the vehicle an increment between its original and new locations.
-	 * Calls setTimeout() to call this function again in order to continue
-	 * the animation until finished.
-	 */
-	function animateVehicle(vehicleMarker, cnt, origLat, origLon, newLat, newLon) {
-		// Determine the interpolated location
-		var interpolatedLat = parseFloat(origLat) + (newLat - origLat) * cnt
-				/ ANIMATION_STEPS;
-		var interpolatedLon = parseFloat(origLon) + (newLon - origLon) * cnt
-				/ ANIMATION_STEPS;
-		var interpolatedLoc = [ interpolatedLat, interpolatedLon ];
-
-		//console.log("animating vehicleId=" + vehicleIcon.vehicleData.id + " cnt=" + cnt + 
-		//		" interpolatedLat=" + interpolatedLat + " interpolatedLoc=" + interpolatedLoc);
-
-		// Update all markers sto have interpolated location
-		vehicleMarker.setLatLng(interpolatedLoc);
-		vehicleMarker.background.setLatLng(interpolatedLoc);
-		vehicleMarker.headingArrow.setLatLng(interpolatedLoc);
-
-		// If there is a popup for the vehicle then need to move it too
-		if (vehicleMarker.popup)
-			vehicleMarker.popup.setLatLng(interpolatedLoc);
-
-		if (++cnt <= ANIMATION_STEPS) {
-			setTimeout(animateVehicle, 50, vehicleMarker, cnt, origLat, origLon,
-					newLat, newLon);
+		// If vehicle icon wasn't already created then create it now
+		var vehicleMarker = getVehicleMarker(vehicleData.id);
+		if (vehicleMarker == null) {
+			// Create the new marker
+			vehicleMarker = createVehicleMarker(vehicleData);
+			
+			// Keep track of vehicle marker so it can be updated
+			vehicleMarkers.push(vehicleMarker);
+		} else {
+			// Vehicle icon already exists, so update it
+			updateVehicleMarker(vehicleMarker, vehicleData);
 		}
+
+		// Store vehicle data obtained via AJAX with vehicle so it can be used in popup
+		vehicleMarker.vehicleData = vehicleData;
 	}
-
-	/**
-	 * Should actually read in new vehicle positions and adjust all vehicle icons.
-	 */
-	function updateVehiclesUsingApiData() {
-		// If route not yet configured then simply return. Don't want to read
-		// in all vehicles for agency!
-		if (!getRouteQueryStrParam())
-			return;
-		
-		var url = urlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
-		// If stop specified as query str param to this page pass it to the 
-		// vehicles request such that all but the next 2 predicted vehicles
-		// will be labled as minor ones and can therefore be drawn in UI to not
-		// attract as much attention.
-		if (getQueryVariable("s"))
-			url += "&s=" + getQueryVariable("s") + "&numPreds=2";
-
-		// Use ajaz() instead of getJSON() so that can set timeout since
-		// will be polling vehicle info every 10 seconds and don't want there
-		// to be many simultaneous requests.
-		$.ajax(url, {
-			  dataType: 'json',
-			  success: vehicleLocationsCallback,
-			  timeout: 6000 // 6 second timeout
-			});
-	}
-
-	// Determine if route specified by query string
-	setRouteQueryStrParamViaQueryStr();
 	
-	if (!getRouteQueryStrParam()) {
-  	  // Populate the route select if route not specified in query string
-	  $.getJSON(urlPrefix + "/command/routes", 
-	 		function(routes) {
-		        // Generate list of routes for the selector
-		 		var selectorData = [];
-		 		for (var i in routes.route) {
-		 			var route = routes.route[i];
-		 			selectorData.push({id: route.id, text: route.name})
-		 		}
-		 		
-		 		// Configure the selector to be a select2 one that has
-		 		// search capability
-	 			$("#routes").select2({
-	 				placeholder: "Select Route", 				
-	 				data : selectorData})
-	 				.on("change", function(e) {
-	 					// First remove all old vehicles so that they don't
-	 					// get moved around when zooming to new route
-	 					removeAllVehicles();
-	 					
-	 					// Configure map for new route	
-	 					var url = urlPrefix + "/command/route?r=" + e.val;
-	 					$.getJSON(url, routeConfigCallback);;
+	// Update when vehicles last updated so can determine if update
+	// hasn't happened in a long time
+	lastVehiclesUpdateTime = new Date();
+}
 
-	 					// Read in vehicle locations now
-	 					setRouteQueryStrParam("r=" + e.val);
-	 					updateVehiclesUsingApiData();
-					});
-	 			
-	 			// Make route selector visible
-	  			$("#routesDiv").css({"visibility":"visible"});
-	 			
-	 			// Set focus to selector so that user can simply start
-	 			// typing to select a route. Can't use something like
-	 			// '#routes' since select2 changes  the input element to a
-	 			// bunch of elements with peculiar and sometimes autogenerated
-	 			// ids. Therefore simply set focus to the "inpu" element.	 			
-	  			$("input").focus();
-	 	});	 
-	} else {
-		//Read in route info and draw it on map
-		var url = urlPrefix + "/command/route?" + getRouteQueryStrParam();
-		if (getQueryVariable("s"))
-			url += "&s=" + getQueryVariable("s");
-		if (getQueryVariable("tripPattern"))
-			url += "&tripPattern=" + getQueryVariable("tripPattern");
-		$.getJSON(url, routeConfigCallback);		
-		
-		// Read in vehicle locations now (and every 10 seconds)
-		updateVehiclesUsingApiData();
+var ANIMATION_STEPS = 15;
+
+/**
+ * Moves the vehicle an increment between its original and new locations.
+ * Calls setTimeout() to call this function again in order to continue
+ * the animation until finished.
+ */
+function animateVehicle(vehicleMarker, cnt, origLat, origLon, newLat, newLon) {
+	// Determine the interpolated location
+	var interpolatedLat = parseFloat(origLat) + (newLat - origLat) * cnt
+			/ ANIMATION_STEPS;
+	var interpolatedLon = parseFloat(origLon) + (newLon - origLon) * cnt
+			/ ANIMATION_STEPS;
+	var interpolatedLoc = [ interpolatedLat, interpolatedLon ];
+
+	//console.log("animating vehicleId=" + vehicleIcon.vehicleData.id + " cnt=" + cnt + 
+	//		" interpolatedLat=" + interpolatedLat + " interpolatedLoc=" + interpolatedLoc);
+
+	// Update all markers sto have interpolated location
+	vehicleMarker.setLatLng(interpolatedLoc);
+	vehicleMarker.background.setLatLng(interpolatedLoc);
+	vehicleMarker.headingArrow.setLatLng(interpolatedLoc);
+
+	// If there is a popup for the vehicle then need to move it too
+	if (vehicleMarker.popup)
+		vehicleMarker.popup.setLatLng(interpolatedLoc);
+
+	if (++cnt <= ANIMATION_STEPS) {
+		setTimeout(animateVehicle, 50, vehicleMarker, cnt, origLat, origLon,
+				newLat, newLon);
 	}
+}
 
-	setInterval(updateVehiclesUsingApiData, 10000);
+/**
+ * Should actually read in new vehicle positions and adjust all vehicle icons.
+ */
+function updateVehiclesUsingApiData() {
+	// If route not yet configured then simply return. Don't want to read
+	// in all vehicles for agency!
+	if (!getRouteQueryStrParam())
+		return;
+	
+	var url = urlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
+	// If stop specified as query str param to this page pass it to the 
+	// vehicles request such that all but the next 2 predicted vehicles
+	// will be labled as minor ones and can therefore be drawn in UI to not
+	// attract as much attention.
+	if (getQueryVariable("s"))
+		url += "&s=" + getQueryVariable("s") + "&numPreds=2";
+
+	// Use ajaz() instead of getJSON() so that can set timeout since
+	// will be polling vehicle info every 10 seconds and don't want there
+	// to be many simultaneous requests.
+	$.ajax(url, {
+		  dataType: 'json',
+		  success: vehicleLocationsCallback,
+		  timeout: 6000 // 6 second timeout
+		});
+}
+
+/************** Executable statements **************/
+
+// Setup some global parameters
+var verbose = getQueryVariable("verbose");
+var agencyId = getQueryVariable("a");
+if (!agencyId)
+	alert("You must specify agency in URL using a=agencyId parameter");
+var urlPrefix = "/api/v1/key/TEST/agency/" + getQueryVariable("a");
+
+ 
+// Create the map with a scale and specify which map tiles to use
+var map = L.map('map');
+L.control.scale({metric: false}).addTo(map);
+L.tileLayer('http://{s}.tiles.mapbox.com/v3/examples.map-i86knfo3/{z}/{x}/{y}.png', {
+	// Specifying a shorter version of attribution. Original really too long.
+    //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    maxZoom: 19
+}).addTo(map);
+
+// Set the CLIP_PADDING to a higher value so that when user pans on map
+// the route path doesn't need to be redrawn. Note: leaflet documentation
+// says that this could decrease drawing performance. But hey, it looks
+// better.
+L.Path.CLIP_PADDING = 0.8;
+
+// Initiate event handler to be called when a popup is closed. Sets 
+// predictionsPopup to null to indicate that don't need to update predictions 
+// anymore since stop popup not displayed anymore.
+map.on('popupclose', function(e) {
+	predictionsPopup = null;
+	clearTimeout(predictionsTimeout);
+	
+	if (e.popup.parent)
+		e.popup.parent.popup = null;
+});
+
+// Get timezone offset and put it into global agencyTimezoneOffset variable
+// and set map bounds to the agency extent if route not specified in query string
+$.getJSON(urlPrefix + "/command/agencies", 
+		function(agencies) {
+	        agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
+			
+	        // Fit the map initially to the agency, but only if route not
+	        // specified in query string. If route specified in query string
+	        // then the map will be fit to that route once it is loaded in.
+	        if (!getQueryVariable("r")) {
+				var e = agencies.agency[0].extent;
+				map.fitBounds([[e.minLat, e.minLon], [e.maxLat, e.maxLon]]);
+	        }
+	});	
+
+// Deal with routes. First determine if route specified by query string
+setRouteQueryStrParamViaQueryStr();
+
+// If route not specified in query string then create route selector.
+// Otherwise configure for the specified route.
+if (!getRouteQueryStrParam()) {
+  // Route not specified in query string. Therefore populate the route 
+  // selector if route not specified in query string.
+  $.getJSON(urlPrefix + "/command/routes", 
+ 		function(routes) {
+	        // Generate list of routes for the selector
+	 		var selectorData = [];
+	 		for (var i in routes.route) {
+	 			var route = routes.route[i];
+	 			selectorData.push({id: route.id, text: route.name})
+	 		}
+	 		
+	 		// Configure the selector to be a select2 one that has
+	 		// search capability
+ 			$("#routes").select2({
+ 				placeholder: "Select Route", 				
+ 				data : selectorData})
+ 				.on("change", function(e) {
+ 					// First remove all old vehicles so that they don't
+ 					// get moved around when zooming to new route
+ 					removeAllVehicles();
+ 					
+ 					// Configure map for new route	
+ 					var url = urlPrefix + "/command/route?r=" + e.val;
+ 					$.getJSON(url, routeConfigCallback);;
+
+ 					// Read in vehicle locations now
+ 					setRouteQueryStrParam("r=" + e.val);
+ 					updateVehiclesUsingApiData();
+				});
+ 			
+ 			// Make route selector visible
+  			$("#routesDiv").css({"visibility":"visible"});
+ 			
+ 			// Set focus to selector so that user can simply start
+ 			// typing to select a route. Can't use something like
+ 			// '#routes' since select2 changes  the input element to a
+ 			// bunch of elements with peculiar and sometimes autogenerated
+ 			// ids. Therefore simply set focus to the "inpu" element.	 			
+  			$("input").focus();
+ 	});	 
+} else {
+	// Route was specified in query string. 
+	// Read in the route info and draw it on map.
+	var url = urlPrefix + "/command/route?" + getRouteQueryStrParam();
+	if (getQueryVariable("s"))
+		url += "&s=" + getQueryVariable("s");
+	if (getQueryVariable("tripPattern"))
+		url += "&tripPattern=" + getQueryVariable("tripPattern");
+	$.getJSON(url, routeConfigCallback);		
+	
+	// Read in vehicle locations now (and every 10 seconds)
+	updateVehiclesUsingApiData();
+}
+
+/**
+ * Initiate timerloop that constantly updates vehicle positions
+ */
+setInterval(updateVehiclesUsingApiData, 10000);
+
+/**
+ * Setup timer to determine if haven't updated vehicles in a while.
+ * This happens when open up a laptop or tablet that was already
+ * displaying the map. For this situation should get rid of the
+ * old predictions and vehicles so that they don't scoot around
+ * wildly once actually do a vehicle update. This should happen
+ * pretty frequently (every 300ms) so that stale vehicles and
+ * such are removed as quickly as possible.
+ */
+setInterval(hideThingsIfStale, 300);
+ 
+/**
+ * Fade out the Transitime.org title
+ */
+setTimeout(function () {
+	$('#title').hide('fade', 1000);
+ }, 1000);
 	 
 </script>
 </html>

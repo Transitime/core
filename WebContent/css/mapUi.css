@@ -4,9 +4,17 @@ html, body, #map {
 	height: 100%; width: 100%; padding: 0px; margin: 0px;
 }
 
+/* Center the title. 
+ * Need to use the one div inside the other trick to do this so that
+ * it works in both iOS and elsewhere. Sheesh! 
+ */
+#titleContainer {
+	position:absolute; top: 40%; left: 50%;
+}
+
 #title { 
 	/* Center in page */
-	position:absolute; top: 50%; left: 50%; margin-right: -50%; transform: translate(-50%, -50%); 
+	position: relative; left: -50%; 
 	padding: 0.5em; border-radius: 0.5em; 
 	/* Special semi-transparent color */
 	background: rgba(0,255,0,0.5);
@@ -14,22 +22,32 @@ html, body, #map {
 	font-family: sans-serif; font-size: 42pt; font-weight: bold;
 }
 
-/* Set the title text here in css */
+/* Set the title text here in css 
+ */
 #title:before {
 	content: "Transitime.org";
 }
 	
-/* Center the route selector */
+/* Center the route selector.
+ * Need to use the one div inside the other trick to do this so that
+ * it works in both iOS and elsewhere. Sheesh!
+ */
+#routesContainer {
+	position:absolute; top: 2%; left: 50%;
+}
 #routesDiv {
-	 visibility: hidden; position:absolute; top: 2%; left: 50%; margin-right: -50%; transform: translate(-50%, -2%);
+	 visibility: hidden; 
+	 position: relative; left: -50%;
 }
 
 /* Set font for route selector. Need to use #select2-drop because of 
-   extra elements that select2 adds */
+ * extra elements that select2 adds 
+ */
 #select2-drop, #routesDiv {
   font-family: sans-serif; font-size: large;
 }
 
-/* For the vehicle and prediction popups */
+/* For the vehicle and prediction popups 
+ */
 .vehicle { font-size: x-small; font-weight: normal;}
 .prediction {font-size: large; font-weight: bold;}

@@ -104,7 +104,8 @@
  * <p>
  * The stops command for outputting list of stops for each direction
  * for a route.
- * Specify the route short name for the desired route using rShortName=38.
+ * Specify the route ID or the route short name for the desired route using 
+ * an option in the form r=XX.
  * Default output is in XML. Can specify JSON by setting the accept header in
  * the request or by adding format=json to the query string.
  * <p>
@@ -170,8 +171,8 @@
  * <p>
  * StopMonitoring command for outputting prediction information
  * in SIRI format. In query string need to specify route and stop.
- * Can specify route via route ID via r=2341 or route short name via
- * rShortName=A1. Specify stop ID via s=1234. Can optionally specify
+ * Can specify route via route ID or the route short name via an option such as r=2341 . 
+ * Specify stop ID via s=1234. Can optionally specify
  * maximum number of predictions via numPreds=2 command. Default 
  * numPreds is 3.
  * Default output is in XML. Can specify JSON by setting the accept header in
