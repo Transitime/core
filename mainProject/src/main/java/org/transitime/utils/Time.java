@@ -93,6 +93,8 @@ public class Time {
 			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
 	private final DateFormat readableTimeFormatForTimeZone =
 			new SimpleDateFormat("HH:mm:ss");
+	private final DateFormat readableDateFormatForTimeZone =
+			new SimpleDateFormat("MM-dd-yyyy");
 	
 	// So can output headings and such with a consistent number of decimal places
 	private static final DecimalFormat oneDigitFormat = new DecimalFormat("0.0");
@@ -121,6 +123,7 @@ public class Time {
 		
 		readableDateFormat24MsecForTimeZone.setCalendar(this.calendar);
 		readableTimeFormatForTimeZone.setCalendar(this.calendar);
+		readableDateFormatForTimeZone.setCalendar(this.calendar);
 	}
 	
 	/**
@@ -288,6 +291,16 @@ public class Time {
 			return timeIntoDay + (int)Time.MS_PER_DAY;
 		
 		return timeIntoDay;
+	}
+	
+	/**
+	 * Parses the dateStr into a Date using the timezone for this Time object.
+	 * @param dateStr
+	 * @return
+	 * @throws ParseException
+	 */
+	public Date parseUsingTimezone(String dateStr) throws ParseException {
+		return readableDateFormatForTimeZone.parse(dateStr);
 	}
 	
 	/**
