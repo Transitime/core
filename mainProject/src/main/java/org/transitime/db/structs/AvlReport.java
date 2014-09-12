@@ -821,6 +821,14 @@ public class AvlReport implements Serializable {
 		timeProcessed = new Date(System.currentTimeMillis());
 	}
 	
+	public String getField1Name() {
+		return field1Name;
+	}
+
+	public String getField1Value() {
+		return field1Value;
+	}
+
 	@Override
 	public String toString() {
 		return "AvlReport [" +
