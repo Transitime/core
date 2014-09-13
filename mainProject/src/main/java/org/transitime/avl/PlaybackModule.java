@@ -141,7 +141,8 @@ public class PlaybackModule extends Module {
 				AvlReport.getAvlReportsFromDb(getAgencyId(),
 						new Date(start), 
 						new Date(end), 
-						getPlaybackVehicleId());
+						getPlaybackVehicleId(),
+						"ORDER BY time");
 		
 		logger.info("PlaybackModule read {} AVLReports.", avlReports.size());
 
