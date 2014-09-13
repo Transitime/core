@@ -36,5 +36,6 @@
 	<classpathentry kind="lib" path="C:/Users/Mike/git/mainProjectLocalRepository/mainProject/libs/paranamer-2.3.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Mike/git/mainProjectLocalRepository/mainProject/libs/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Mike/git/mainProjectLocalRepository/mainProject/libs/snappy-java-1.0.4.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mike/git/mainProjectLocalRepository/mainProject/libs/postgresql-9.3-1102.jdbc41.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
