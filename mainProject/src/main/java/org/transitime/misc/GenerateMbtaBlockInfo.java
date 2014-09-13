@@ -78,17 +78,19 @@ public class GenerateMbtaBlockInfo {
 				+ time.dateTimeStrMsecForTimezone(endDate.getTime()));
 		
 		// Get days worth of data from db
-		List<AvlReport> avlReports = 
-				AvlReport.getAvlReportsFromDb("mbta", beginDate, endDate, null);
+		List<AvlReport> avlReports = AvlReport.getAvlReportsFromDb("mbta",
+				beginDate, endDate, null, "ORDER BY time");
 		System.out.println("Read in " + avlReports.size() 
-				+ " AVL reports for " + time.dateTimeStrMsecForTimezone(beginDate.getTime()));
+				+ " AVL reports for " 
+				+ time.dateTimeStrMsecForTimezone(beginDate.getTime()));
 		
 		// Put data into a list for each vehicle
 		Map<String, List<AvlReport>> reportsByVehicle = 
 				new HashMap<String, List<AvlReport>>(avlReports.size());
 		for (AvlReport avlReport : avlReports) {
 			// If avlReport is for a bad trip then simply ignore it.
-			// Keep trip 9999 for now since it seems to indicate an end of a trip
+			// Keep trip 9999 for now since it seems to indicate an end of 
+			// a trip
 			String tripId = avlReport.getAssignmentId();
 			if (tripId.equals("000"))
 				continue;
