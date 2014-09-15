@@ -71,4 +71,13 @@ public class StringConfigValue extends ConfigValue<String> {
 	protected String convertFromString(List<String> dataList) {
 		return dataList.get(0);
 	}
+	
+	/**
+	 * So that can use the StringConfigValue directly as a String without
+	 * explicitly calling getValue().
+	 */
+	public String toString() {
+		return getValue();
+	}
+	
 }
