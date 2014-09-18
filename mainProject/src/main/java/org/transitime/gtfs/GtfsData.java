@@ -435,6 +435,13 @@ public class GtfsData {
 			// Modify the main GtfsStop objects using the supplemental data
 			for (GtfsStop supplementStop : gtfsStopsSupplement) {
 				GtfsStop gtfsStop = gtfsStopsMap.get(supplementStop.getStopId());
+				if (gtfsStop == null) {
+					logger.error("Found supplemental stop data for stopId={] "
+							+ "but that stop did not exist in the main "
+							+ "stops.txt file. {}", 
+							supplementStop.getStopId(), supplementStop);
+					continue;
+				}
 				
 				// Create a new GtfsStop object that combines the original
 				// data with the supplemental data
