@@ -569,22 +569,35 @@ public class Trip implements Serializable {
 	}
 
 	/**
-	 * Returns the Route object for this trip. This object is determined
-	 * and cached when first accessed.
-	 * @return
+	 * Returns the Route object for this trip. This object is determined and
+	 * cached when first accessed. Uses value read in from database using Core,
+	 * which means that it won't be available when processing GTFS data since
+	 * that doesn't have core object.
+	 * 
+	 * @return The route or null if no Core object available
 	 */
 	public Route getRoute() {
-		if (route == null)
-			route = Core.getInstance().getDbConfig().getRouteById(routeId);
+		if (route == null) {
+			DbConfig dbConfig = Core.getInstance().getDbConfig();
+			if (dbConfig == null)
+				return null;
+			route = dbConfig.getRouteById(routeId);
+		}
 		return route;
 	}
 	
 	/**
-	 * Returns route name. Gets it from the database configuration.
-	 * @return
+	 * Returns route name. Gets it from the Core database configuration. If Core
+	 * database configuration not available such as when processing GTFS data
+	 * then will return null.
+	 * 
+	 * @return The route name or null if Core object not available
 	 */
 	public String getRouteName() {
-		return getRoute().getName();
+		Route route = getRoute();
+		if (route == null)
+			return null;
+		return route.getName();
 	}
 	
 	/**
@@ -736,6 +749,17 @@ public class Trip implements Serializable {
 	 */
 	public StopPath getStopPath(int stopPathIndex) {
 		return tripPattern.getStopPath(stopPathIndex);
+	}
+	
+	/**
+	 * Returns the StopPath specified by the stopId.
+	 * 
+	 * @param stopId
+	 * @return The specified StopPath, or null if the stop is not part of this
+	 *         trip pattern.
+	 */
+	public StopPath getStopPath(String stopId) {
+		return tripPattern.getStopPath(stopId);
 	}
 	
 	/**

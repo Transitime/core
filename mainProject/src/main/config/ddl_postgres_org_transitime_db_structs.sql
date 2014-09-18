@@ -47,6 +47,8 @@
 
     drop table if exists Matches cascade;
 
+    drop table if exists PredictionAccuracy cascade;
+
     drop table if exists Predictions cascade;
 
     drop table if exists Routes cascade;
@@ -106,6 +108,7 @@
         avlTime timestamp,
         blockId varchar(60),
         configRev int4,
+        directionId varchar(60),
         routeId varchar(60),
         routeShortName varchar(60),
         scheduledTime timestamp,
@@ -123,7 +126,7 @@
         assignmentType varchar(40),
         driverId varchar(60),
         field1Name varchar(60),
-        field1Value varchar(255),
+        field1Value varchar(60),
         heading float4,
         licensePlate varchar(10),
         lat float8,
@@ -223,6 +226,20 @@
         stopPathIndex int4,
         tripId varchar(60),
         primary key (vehicleId, avlTime)
+    );
+
+    create table PredictionAccuracy (
+        id int8 not null,
+        arrivalDepartureTime timestamp,
+        directionId varchar(60),
+        predictedTime timestamp,
+        predictionAccuracyMsecs int4,
+        predictionReadTime timestamp,
+        predictionSource varchar(60),
+        routeId varchar(60),
+        stopId varchar(60),
+        vehicleId varchar(60),
+        primary key (id)
     );
 
     create table Predictions (
@@ -402,6 +419,8 @@
         references Blocks;
 
     create index avlTimeIndex on Matches (avlTime);
+
+    create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 

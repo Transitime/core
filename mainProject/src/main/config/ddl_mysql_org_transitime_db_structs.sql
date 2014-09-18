@@ -55,6 +55,8 @@
 
     drop table if exists Matches;
 
+    drop table if exists PredictionAccuracy;
+
     drop table if exists Predictions;
 
     drop table if exists Routes;
@@ -112,6 +114,7 @@
         avlTime datetime(3),
         blockId varchar(60),
         configRev integer,
+        directionId varchar(60),
         routeId varchar(60),
         routeShortName varchar(60),
         scheduledTime datetime(3),
@@ -129,7 +132,7 @@
         assignmentType varchar(40),
         driverId varchar(60),
         field1Name varchar(60),
-        field1Value varchar(255),
+        field1Value varchar(60),
         heading float,
         licensePlate varchar(10),
         lat double precision,
@@ -229,6 +232,20 @@
         stopPathIndex integer,
         tripId varchar(60),
         primary key (vehicleId, avlTime)
+    );
+
+    create table PredictionAccuracy (
+        id bigint not null auto_increment,
+        arrivalDepartureTime datetime(3),
+        directionId varchar(60),
+        predictedTime datetime(3),
+        predictionAccuracyMsecs integer,
+        predictionReadTime datetime(3),
+        predictionSource varchar(60),
+        routeId varchar(60),
+        stopId varchar(60),
+        vehicleId varchar(60),
+        primary key (id)
     );
 
     create table Predictions (
@@ -410,6 +427,8 @@
         references Blocks (serviceId, configRev, blockId);
 
     create index avlTimeIndex on Matches (avlTime);
+
+    create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add index FK_hh5uepurijcqj0pyc6e3h5mqw (travelTimesForStopPaths_id), 

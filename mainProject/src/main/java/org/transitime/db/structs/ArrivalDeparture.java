@@ -136,6 +136,9 @@ public class ArrivalDeparture implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String serviceId;
 		
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private final String directionId;
+	
 	// The index of which trip this is within the block.
 	@Column 
 	private final int tripIndex;
@@ -224,6 +227,7 @@ public class ArrivalDeparture implements Serializable {
 		
 		this.blockId = block.getId();
 		this.tripId = trip.getId();
+		this.directionId = trip.getDirectionId();
 		this.stopId = stopId;
 		this.gtfsStopSeq = stopPath.getGtfsStopSeq();
 		this.stopPathLength = (float) stopPath.getLength();
@@ -241,6 +245,7 @@ public class ArrivalDeparture implements Serializable {
 		this.time = null;
 		this.avlTime = null;
 		this.block = null;
+		this.directionId = null;
 		this.tripIndex = -1;
 		this.stopPathIndex = -1;
 		this.isArrival = false;
@@ -363,6 +368,7 @@ public class ArrivalDeparture implements Serializable {
 				+ ", time=" + Time.dateTimeStrMsec(time)
 				+ ", route="	+ routeId 
 				+ ", rteName=" + routeShortName
+				+ ", directionId=" + directionId
 				+ ", stop=" + stopId 
 				+ ", gtfsStopSeq=" + gtfsStopSeq
 				+ ", stopIdx=" + stopPathIndex 
@@ -590,6 +596,10 @@ public class ArrivalDeparture implements Serializable {
 		return serviceId;
 	}
 
+	public String getDirectionId() {
+		return directionId;
+	}
+	
 	public int getConfigRev() {
 		return configRev;
 	}

@@ -102,7 +102,7 @@ public class PredictionsServer
 	@Override
 	public List<IpcPredictionsForRouteStopDest> get(String routeIdOrShortName, String stopId,
 			int predictionsPerStop) throws RemoteException {
-		return predictionDataCache.getPredictions(routeIdOrShortName, stopId,
+		return predictionDataCache.getPredictions(routeIdOrShortName, stopId, null,
 				predictionsPerStop);
 	}
 
@@ -190,7 +190,7 @@ public class PredictionsServer
 			// Get the predictions for the stop
 			List<IpcPredictionsForRouteStopDest> predictionsForStop = predictionDataCache
 					.getPredictions(stopInfo.routeShortName, stopInfo.stopId,
-							predictionsPerStop, stopInfo.distanceToStop);
+							null, predictionsPerStop, stopInfo.distanceToStop);
 			
 			// Add info from this stop to the results
 			if (predictionsForStop.isEmpty()) {

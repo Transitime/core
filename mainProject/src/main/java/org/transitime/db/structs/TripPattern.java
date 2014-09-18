@@ -34,6 +34,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.GtfsData;
+import org.transitime.gtfs.gtfsStructs.GtfsRoute;
 
 
 /**
@@ -82,7 +83,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	/********************** Member Functions **************************/
 	
 	/**
-	 * Create a TripPattern. 
+	 * Create a TripPattern. For when processing GTFS data.
 	 * 
 	 * Note: The name comes from the trip trip_headsign
 	 * data. If not set then uses name of last stop for trip.
@@ -128,7 +129,7 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		// Store additional info from this trip
 		directionId = trip.getDirectionId();
 		routeId = trip.getRouteId();
-		routeShortName = trip.getRouteShortName();
+		routeShortName = getRouteShortName(routeId, gtfsData);
 		
 		// Remember that this trip pattern refers to this particular 
 		// trip. Additional trips will be added as they are processed.
@@ -160,6 +161,25 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		
 	}
 
+	/**
+	 * Gets the route_short_name from the GTFS data. If the route_short_name was
+	 * not specified in the GTFS data then will use the full route_name. This
+	 * way the route short name will always be set to something appropriate.
+	 * 
+	 * @param routeId
+	 * @param gtfsData
+	 * @return The route short name. Will not be null even if it was in the GTFS
+	 *         data
+	 */
+	private static String getRouteShortName(String routeId, GtfsData gtfsData) {
+		GtfsRoute gtfsRoute = gtfsData.getGtfsRoute(routeId);
+		
+		if (gtfsRoute == null)
+			return null;
+		
+		return gtfsRoute.getRouteLongName();
+	}
+	
 	/**
 	 * Deletes rev 0 from the TripPattern_to_Path_joinTable, Paths, 
 	 * and TripPatterns tables.

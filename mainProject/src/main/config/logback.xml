@@ -218,6 +218,17 @@
     </encoder>
   </appender>
 
+  <!-- Separate file for PRED_ACCURACY logging -->
+  <appender name="PRED_ACCURACY" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/predAccuracy.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
   <!-- Separate file for Match logging -->
   <appender name="MATCH" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -283,6 +294,11 @@
   <logger name="org.transitime.config"
           level="info" additivity="false">
     <appender-ref ref="CONFIG" />
+  </logger>
+
+  <logger name="org.transitime.core.predAccuracy"
+   level="debug" additivity="true">
+    <appender-ref ref="PRED_ACCURACY" />
   </logger>
 
   <!--  In order to log the hibernate SQL queries need to set org.hibernate.SQL

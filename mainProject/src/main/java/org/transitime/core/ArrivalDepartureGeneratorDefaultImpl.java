@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
@@ -294,7 +295,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	/**
 	 * Stores the specified ArrivalDeparture object into the db
 	 * and log to the ArrivalsDeparatures log file that the
-	 * object was created.
+	 * object was created. 
+	 * <p>
+	 * Also generates corresponding prediction accuracy information 
+	 * if a corresponding prediction was found in memory.
 	 * 
 	 * @param arrivalDeparture
 	 */
@@ -304,6 +308,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		// Log creation of ArrivalDeparture in ArrivalsDepartures.log file
 		arrivalDeparture.logCreation();
+		
+		// Generate prediction accuracy info as appropriate
+		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);
 	}
 	
 	/**

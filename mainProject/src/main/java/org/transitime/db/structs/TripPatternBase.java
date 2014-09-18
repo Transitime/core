@@ -16,7 +16,9 @@
  */
 package org.transitime.db.structs;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,6 +27,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
+import javax.persistence.Transient;
 
 import org.transitime.db.hibernate.HibernateUtils;
 
@@ -53,6 +56,11 @@ public class TripPatternBase {
 	@OrderColumn( name="listIndex")
 	final protected List<StopPath> stopPaths;
 	
+	// For quickly finding a StopPath using a stop ID.
+	// Keyed on stop ID.
+	@Transient
+	final protected Map<String, StopPath> stopPathsMap;
+	
 	/********************** Member Functions **************************/
 	
 	/**
@@ -70,6 +78,12 @@ public class TripPatternBase {
 		
 		this.shapeId = shapeId;
 		this.stopPaths = paths;
+		
+		// Fill in the map for quick StopPath retrievals by stop ID
+		stopPathsMap = new HashMap<String, StopPath>();
+		for (StopPath stopPath : paths) {
+			stopPathsMap.put(stopPath.getStopId(), stopPath);
+		}
 	}
 
 	/**
@@ -83,6 +97,7 @@ public class TripPatternBase {
 	protected TripPatternBase(TripPatternBase alreadyExistingBase) {
 		shapeId = alreadyExistingBase.shapeId;
 		stopPaths = alreadyExistingBase.stopPaths;
+		stopPathsMap = alreadyExistingBase.stopPathsMap;
 	}
 	
 	/**
@@ -91,6 +106,30 @@ public class TripPatternBase {
 	protected TripPatternBase() {
 		shapeId = null;
 		stopPaths = null;
+		stopPathsMap = new HashMap<String, StopPath>();
+	}
+	
+	/**
+	 * Returns the StopPath for this TripPattern as specified by the stopId
+	 * parameter. Uses a map so is reasonably fast. Synchronized to make sure
+	 * that only a single thread can initialize the transient map.
+	 * 
+	 * @param stopId
+	 * @return The StopPath specified by the stop ID, or null if this
+	 *         TripPattern does not contain that stop.
+	 */
+	protected synchronized StopPath getStopPath(String stopId) {
+		// Since using Hibernate to read in object the usual constructor
+		// might not be called to fill in the transient stopPathsMap object.
+		// Therefore if it is empty fill it in now.
+		if (stopPathsMap.isEmpty()) {
+			for (StopPath stopPath : stopPaths) {
+				stopPathsMap.put(stopPath.getStopId(), stopPath);
+			}
+		}
+		
+		// Return the StopPath specified by the stop ID
+		return stopPathsMap.get(stopId);
 	}
 	
 	/**
