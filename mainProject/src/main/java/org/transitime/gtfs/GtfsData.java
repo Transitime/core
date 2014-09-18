@@ -436,7 +436,7 @@ public class GtfsData {
 			for (GtfsStop supplementStop : gtfsStopsSupplement) {
 				GtfsStop gtfsStop = gtfsStopsMap.get(supplementStop.getStopId());
 				
-				// Create a new GTFSStop object that combines the original
+				// Create a new GtfsStop object that combines the original
 				// data with the supplemental data
 				GtfsStop combinedStop = new GtfsStop(gtfsStop, supplementStop);
 				
