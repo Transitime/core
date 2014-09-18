@@ -470,7 +470,6 @@ public class AvlProcessor {
 
 		// Return whether successfully matched the vehicle
 		return predictable;
-
 	}
 	
 	/**
