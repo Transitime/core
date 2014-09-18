@@ -167,8 +167,8 @@ public class GtfsStop extends CsvBase {
 		stopCode = s.stopCode == null ? o.stopCode : s.stopCode;
 		stopName = s.stopName == null ? o.stopName : s.stopName;
 		stopDesc = s.stopDesc == null ? o.stopDesc : s.stopDesc;
-		stopLat = o.stopLat; // Not optional so for now can't be null and can't be overriden
-		stopLon = o.stopLon; // Not optional so for now can't be null and can't be overriden
+		stopLat = Double.isNaN(s.stopLat) ? o.stopLat : s.stopLat;
+		stopLon = Double.isNaN(s.stopLon) ? o.stopLon : s.stopLon;
 		zoneId = s.zoneId == null ? o.zoneId : s.zoneId;
 		stopUrl = s.stopUrl == null ? o.stopUrl : s.stopUrl;
 		locationType = s.locationType == null ? o.locationType : s.locationType;
