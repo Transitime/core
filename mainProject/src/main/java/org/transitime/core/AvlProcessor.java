@@ -353,7 +353,7 @@ public class AvlProcessor {
 	}
 	
 	/**
-	 * Attempts to match the vehicle to the specified block assignment. Updates
+	 * Attempts to match the vehicle to the new block assignment. Updates
 	 * the VehicleState with the new block assignment and match. These will be
 	 * null if vehicle could not successfully be matched to block.
 	 * 
