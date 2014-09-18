@@ -68,12 +68,21 @@ public class TemporalMatcher {
 	 * @param for logging messages
 	 * @param date
 	 * @param spatialMatch
+	 * @param isFirstSpatialMatch
+	 *            Set to true if this is the first of the spatial matches. This
+	 *            is needed because for layovers want to make them less likely
+	 *            to match, but only if not the first spatial match. This way if
+	 *            matching a vehicle to middle of trip then will more likely
+	 *            match to the middle instead of the layover at the end of the
+	 *            trip. This is important when starting up the system while
+	 *            vehicles are already running.
 	 * @return The TemporalDifference between the AVL time and when the vehicle
 	 *         is expected to be at that match. Returns null if the temporal
 	 *         difference is beyond the allowable bounds.
 	 */
 	private static TemporalDifference determineHowFarOffScheduledTime(
-			String vehicleId, Date date, SpatialMatch spatialMatch) {
+			String vehicleId, Date date, SpatialMatch spatialMatch,
+			boolean isFirstSpatialMatch) {
 		// Determine how long it should take to travel along trip to the match. 
 		// Can add this time to the trip scheduled start time to determine
 		// when the vehicle is predicted to be at the match. 
@@ -112,11 +121,16 @@ public class TemporalMatcher {
 			
 		// Return adherence but return null if adherence is beyond limits
 		if (deltaFromSchedule.isWithinBoundsForInitialMatching()) {
-			// Want to favor regular matches over layovers. So if layover
-			// add getAllowableLateSecondsForInitialMatching() (20 minutes) 
-			// to the deltaFromSchedule so that it is less likely to end up 
-			// being the best match.
-			if (spatialMatch.isLayover()) {
+			// Want to favor regular matches over layovers when can
+			// match a vehicle both to a middle to the trip and to a layover. 
+			// This is important when starting up the system while vehicles 
+			// are already running, which is pretty much always true when
+			// system is restarted. The regular matches are favored by
+			// adding time to layover matches, but only if the layover match
+			// is not the very first match. Otherwise wouldn't correctly
+			// match to the layover at the beginning of the trip if vehicle
+			// is getting assigned before actually starting that trip.
+			if (spatialMatch.isLayover() && !isFirstSpatialMatch) {
 				deltaFromSchedule.addTime(CoreConfig
 						.getAllowableLateSecondsForInitialMatching()
 						* Time.MS_PER_SEC);
@@ -385,13 +399,16 @@ public class TemporalMatcher {
 		TemporalDifference bestDifferenceFromExpectedTime = null;
 		SpatialMatch bestSpatialMatch = null;
 		
-		for (SpatialMatch spatialMatch : spatialMatches) {	
+		for (int i=0; i<spatialMatches.size(); ++i) {	
+			SpatialMatch spatialMatch = spatialMatches.get(i);
+			
 			// If not at wait stop then determine temporal match based on 
 			// how long it should take vehicle to travel from the beginning
 			// of the trip to the spatial match.
+			boolean isFirstSpatialMatch = i==0;
 			TemporalDifference differenceFromExpectedTime = 
 					determineHowFarOffScheduledTime(avlReport.getVehicleId(), 
-							avlReport.getDate(), spatialMatch);			
+							avlReport.getDate(), spatialMatch, isFirstSpatialMatch);			
 			
 			// If this is the best differenceFromExpectedTime so far then use it.
 			if (differenceFromExpectedTime != null && 
