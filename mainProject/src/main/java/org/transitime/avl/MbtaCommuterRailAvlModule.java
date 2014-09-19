@@ -109,18 +109,20 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 	}
 	
 	/**
-	 * Turns out that trip IDs are always 3 characters long in the GTFS data so
-	 * need assignments from AVL feed to match. Therefore if assignment from
-	 * feed is too short pad it with zeros.
+	 * Turns out that trip IDs in the AVL feed sometimes don't match the trip
+	 * short names in the trips.txt GTFS file. If an ID from the feed is only 1
+	 * or 2 characters long then it needs to be padded with zeros. But there is
+	 * also another case where the IDs from the feed are 4 digits long with two
+	 * trailing zeroes. For these need to take of the trailing zeroes. Specific
+	 * examples of these are 61, 62, 63, 64, 67, 68, 69, 72, 94, 95, 97, 98.
 	 * 
 	 * @param assignmentFromFeed
-	 * @return The assignment, padded to be 3 characters long if the original
-	 *         was just 1 or 2 characters.
+	 * @return The assignment, adjusted to be proper number of characters so
+	 *         that matches trip short names in the trips.txt GTFS file
 	 */
-	private String padAssignment(String assignmentFromFeed) {
-		// If assignment not too short then it is OK so simply return it.
-		if (assignmentFromFeed == null 
-				|| assignmentFromFeed.length() >= 3)
+	private String adjustAssignment(String assignmentFromFeed) {
+		// Handle special null case
+		if (assignmentFromFeed == null)
 			return assignmentFromFeed;
 		
 		// Assignment is too short so pad it
@@ -128,8 +130,10 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 			return "00" + assignmentFromFeed;
 		else if (assignmentFromFeed.length() == 2)
 			return "0" + assignmentFromFeed;
+		else if (assignmentFromFeed.length() == 4 && assignmentFromFeed.endsWith("00"))
+			return assignmentFromFeed.substring(0, 2);
 		
-		// Must be empty string. Simply return it
+		// Assignment is OK as is so return it
 		return assignmentFromFeed;
 	}
 	
@@ -162,9 +166,9 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 		
 		// Get the vehicle location
 		String workpiece = 
-				padAssignment(getValue(line, workpieceMarker + "(\\d+)"));
+				adjustAssignment(getValue(line, workpieceMarker + "(\\d+)"));
 		String pattern = 
-				padAssignment(getValue(line, patternMarker + "(\\d+)"));
+				adjustAssignment(getValue(line, patternMarker + "(\\d+)"));
 		
 		// Get GPS data from TAIP formatted string
 		String gpsTaipStr = getValue(line, gpsMarker + "(\\>.+\\<)");
