@@ -74,6 +74,7 @@ import org.transitime.gtfs.readers.GtfsStopsReader;
 import org.transitime.gtfs.readers.GtfsStopsSupplementReader;
 import org.transitime.gtfs.readers.GtfsTransfersReader;
 import org.transitime.gtfs.readers.GtfsTripsReader;
+import org.transitime.gtfs.readers.GtfsTripsSupplementReader;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
@@ -489,6 +490,33 @@ public class GtfsData {
 		GtfsTripsReader tripsReader = new GtfsTripsReader(gtfsDirectoryName);
 		List<GtfsTrip> gtfsTrips = tripsReader.get();
 		
+		// Read in supplemental trips data
+		if (supplementDir != null) {
+			// Read in the supplemental stop data
+			GtfsTripsSupplementReader tripsSupplementReader = 
+					new GtfsTripsSupplementReader(supplementDir);
+			List<GtfsTrip> gtfsTripsSupplement = tripsSupplementReader.get();
+			
+			// Modify the main GtfsStop objects using the supplemental data
+			for (GtfsTrip supplementTrip : gtfsTripsSupplement) {
+				GtfsTrip gtfsTrip = gtfsTripsMap.get(supplementTrip.getTripId());
+				if (gtfsTrip == null) {
+					logger.error("Found supplemental trip data for tripId={] "
+							+ "but that trip did not exist in the main "
+							+ "trips.txt file. {}", 
+							supplementTrip.getTripId(), supplementTrip);
+					continue;
+				}
+				
+				// Create a new GtfsStop object that combines the original
+				// data with the supplemental data
+				GtfsTrip combinedTrip = new GtfsTrip(gtfsTrip, supplementTrip);
+				
+				// Store that combined data stop in the map 
+				gtfsTripsMap.put(combinedTrip.getTripId(), combinedTrip);
+			}
+		}
+
 		for (GtfsTrip gtfsTrip : gtfsTrips) {	
 			// Make sure that each trip references a valid route. If it does
 			// not then something is fishy with the data so output a warning.

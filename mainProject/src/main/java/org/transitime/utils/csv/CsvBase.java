@@ -72,6 +72,16 @@ public class CsvBase {
 	}
 	
 	/**
+	 * Only for when creating a supplemental file. Sets the members to
+	 * special values. 
+	 */
+	protected CsvBase() {
+		this.lineNumber = -1;
+		this.supplementalFileSoSomeRequiredItemsCanBeMissing = true;
+		this.fileName = null;	
+	}
+	
+	/**
 	 * The line number in CSV file that the record came from. Useful for
 	 * debugging.
 	 * 

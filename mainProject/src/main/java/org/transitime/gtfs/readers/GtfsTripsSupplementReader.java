@@ -1,4 +1,4 @@
-/* 
+/*
  * This file is part of Transitime.org
  * 
  * Transitime.org is free software: you can redistribute it and/or modify
@@ -14,32 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.transitime.gtfs.readers;
 
 import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
-import org.transitime.gtfs.gtfsStructs.GtfsStop;
+import org.transitime.gtfs.gtfsStructs.GtfsTrip;
 import org.transitime.utils.csv.CsvBaseReader;
 
-
 /**
- * GTFS reader for supplemental stops.txt file
- * 
+ * GTFS reader for supplemental trips.txt file
+ *
  * @author SkiBu Smith
  *
  */
-public class GtfsStopsSupplementReader extends CsvBaseReader<GtfsStop> {
+public class GtfsTripsSupplementReader extends CsvBaseReader<GtfsTrip> {
 
-	public GtfsStopsSupplementReader(String dirName) {
+	public GtfsTripsSupplementReader(String dirName) {
 		super(dirName, "stops.txt", false, true);
 	}
 	
 	@Override
-	public GtfsStop handleRecord(CSVRecord record, boolean supplemental) 
+	public GtfsTrip handleRecord(CSVRecord record, boolean supplemental) 
 			throws ParseException {
-		return new GtfsStop(record, supplemental, getFileName());
+		return new GtfsTrip(record, supplemental, getFileName());
 	}
 
 }
-

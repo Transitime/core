@@ -41,11 +41,12 @@ public class GtfsTrip extends CsvBase {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Creates a GtfsTrip object by reading the data
-	 * from the CSVRecord.
+	 * Creates a GtfsTrip object by reading the data from the CSVRecord.
+	 * 
 	 * @param record
 	 * @param supplemental
-	 * @param fileName for logging errors
+	 * @param fileName
+	 *            for logging errors
 	 */
 	public GtfsTrip(CSVRecord record, boolean supplemental, String fileName) {
 		super(record, supplemental, fileName);
@@ -64,6 +65,58 @@ public class GtfsTrip extends CsvBase {
 		String bikesAllowedStr = getOptionalValue(record, "bikes_allowed");
 		bikesAllowed = bikesAllowedStr == null ? 
 				null : Integer.parseInt(bikesAllowedStr);
+	}
+	
+	/**
+	 * When combining a regular trip with a supplemental trip need to create a
+	 * whole new object since this class is Immutable to make it safer to use.
+	 * 
+	 * @param originalTrip
+	 * @param supplementTrip
+	 */
+	public GtfsTrip(GtfsTrip originalTrip, GtfsTrip supplementTrip) {
+		super(originalTrip);
+		
+		// Use short variable names
+		GtfsTrip o = originalTrip;
+		GtfsTrip s = supplementTrip;
+		
+		tripId = originalTrip.tripId;
+		
+		routeId = s.routeId == null ? o.routeId : s.routeId;
+		serviceId = s.serviceId == null ? o.serviceId : s.serviceId;
+		tripHeadsign = s.tripHeadsign == null ? o.tripHeadsign : s.tripHeadsign;
+		tripShortName = s.tripShortName == null ? o.tripShortName : s.tripShortName;
+		directionId = s.directionId == null ? o.directionId : s.directionId;
+		blockId = s.blockId == null ? o.blockId : s.blockId;
+		shapeId = s.shapeId == null ? o.shapeId : s.shapeId;
+		wheelchairAccessible = s.wheelchairAccessible == null ? o.wheelchairAccessible : s.wheelchairAccessible;
+		bikesAllowed = s.bikesAllowed == null ? o.bikesAllowed : s.bikesAllowed;
+	}
+	
+	/**
+	 * Creates a GtfsTrip object but only with the tripId and blockId set. This
+	 * is useful for creating a supplemental trips.txt file that contains only
+	 * block ID information.
+	 * 
+	 * @param tripId
+	 * @param blockId
+	 */
+	public GtfsTrip(String tripId, String blockId) {
+		// Creating supplemental data so can call default constructor
+		// since line number, filename, etc are not valid.
+		super();
+		
+		this.routeId = null;
+		this.serviceId = null;
+		this.tripId = tripId;;
+		this.tripHeadsign = null;
+		this.tripShortName = null;
+		this.directionId = null;
+		this.blockId = blockId;
+		this.shapeId = null;
+		this.wheelchairAccessible = null;
+		this.bikesAllowed = null;
 	}
 	
 	public String getRouteId() {

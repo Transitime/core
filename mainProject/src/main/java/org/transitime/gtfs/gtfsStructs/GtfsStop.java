@@ -150,9 +150,9 @@ public class GtfsStop extends CsvBase {
 	}
 	
 	/**
-	 * When combining a regular stop with a supplemental stop need to
-	 * create a whole new object since this class is Immutable to make
-	 * it safer to use.
+	 * When combining a regular stop with a supplemental stop need to create a
+	 * whole new object since this class is Immutable to make it safer to use.
+	 * 
 	 * @param originalStop
 	 * @param supplementStop
 	 */

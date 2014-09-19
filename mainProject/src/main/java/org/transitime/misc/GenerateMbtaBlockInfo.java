@@ -19,6 +19,7 @@ package org.transitime.misc;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,11 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
+import org.transitime.gtfs.gtfsStructs.GtfsTrip;
+import org.transitime.gtfs.readers.GtfsStopTimesReader;
+import org.transitime.gtfs.readers.GtfsTripsReader;
+import org.transitime.gtfs.writers.GtfsTripsWriter;
 import org.transitime.utils.Time;
 
 /**
@@ -38,8 +44,14 @@ import org.transitime.utils.Time;
  */
 public class GenerateMbtaBlockInfo {
 
-	private static Time time = new Time("America/New_York");
+	private static String timeZoneStr = "America/New_York";
 
+	private static Time time = new Time(timeZoneStr);
+
+	// Keyed on tripId, value is blockId
+	private static Map<String, String> tripToBlockMap = 
+			new HashMap<String, String>();
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(GenerateMbtaBlockInfo.class);
 
@@ -62,15 +74,32 @@ public class GenerateMbtaBlockInfo {
 	}
 	
 	/**
-	 * @param args
+	 * Writes the supplemental trips file that includes block IDs.
+	 * 
+	 * @param supplementTripsFileName
 	 */
-	public static void main(String[] args) {
-		// Need to set timezone so that when dates are read in they
-		// will be correct.
-		TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"));
+	private static void writeSupplementalTripsFile(
+			String supplementTripsFileName) {
+		GtfsTripsWriter writer = new GtfsTripsWriter(supplementTripsFileName);
 		
-		// Determine the parameters
-		Date beginDate = getDate(args[0]);
+		Collection<String> tripIds = tripToBlockMap.keySet();
+		for (String tripId : tripIds) {
+			String blockIdForTrip = tripToBlockMap.get(tripId);
+			GtfsTrip gtfsTrip = new GtfsTrip(tripId, blockIdForTrip);
+			writer.write(gtfsTrip);
+		}
+		
+		writer.close();		
+	}
+	
+	/**
+	 * Processes days worth of AVL data to determine the block assignments
+	 * for each trip. Updates the static tripToBlockMap with the block 
+	 * assignment for each trip.
+	 * 
+	 * @param beginDate
+	 */
+	private static void processDayOfData(Date beginDate) {
 		Date endDate = new Date(beginDate.getTime() + Time.MS_PER_DAY);
 		System.out.println("Processing data for beginDate=" 
 				+ time.dateTimeStrMsecForTimezone(beginDate.getTime())
@@ -109,26 +138,124 @@ public class GenerateMbtaBlockInfo {
 			System.out.println("\nFor vehicleId=" + vehicleId);
 			List<AvlReport> avlReportsForVehicle = reportsByVehicle.get(vehicleId);
 			
-			String previousTripId = "";
+			String previousTripShortName = "";
 			String previousBlockId = "";
 			
 			for (AvlReport avlReport : avlReportsForVehicle) {
-				String tripId = avlReport.getAssignmentId();
+				String tripShortName = avlReport.getAssignmentId();
 				String blockId = avlReport.getField1Value();
 				
 				// If no change in trip or block ID then don't need to output it
-				if (tripId.equals(previousTripId) && blockId.equals(previousBlockId))
+				if (tripShortName.equals(previousTripShortName) && blockId.equals(previousBlockId))
 					continue;
-				previousTripId = tripId;
+				previousTripShortName = tripShortName;
 				previousBlockId = blockId;
+				
+				Integer start = tripStartTimeMap.get(tripShortName);
+				String tripStartStr = start!=null ? Time.timeOfDayStr(start) : "--:--:--";
+				
+				Integer end = tripEndTimeMap.get(tripShortName);
+				String tripEndStr = end!=null ? Time.timeOfDayStr(end) : "--:--:--";
 				
 				// Output the new trip & block info
 				System.out.println("  " 
-						+ time.dateTimeStrMsecForTimezone(avlReport.getTime()) 
-						+ " tripId=" + tripId + " blockId=" + blockId 
-						+ " lat=" + avlReport.getLat() + " lon=" + avlReport.getLon());				
-			}
+						+ " avlTime=" + time.dateTimeStrMsecForTimezone(avlReport.getTime())
+						+ " tripShortName(pattern)=" + tripShortName + " blockId(workpiece)=" + blockId 
+						+ " tripStart=" + tripStartStr
+						+ " tripEnd=" + tripEndStr
+						+ " lat=" + avlReport.getLat() + " lon=" + avlReport.getLon());	
+				
+				
+				time.getSecondsIntoDay(avlReport.getTime());
+				
+				// Add trip/block relationship to map. But only do so if not a special
+				// trip 9999 or block 000.
+				if (tripShortName.equals("9999") || blockId.equals("000"))
+					continue;
+				String previousBlockForTrip = tripToBlockMap.get(tripShortName);
+				if (previousBlockForTrip != null 
+						&& !previousBlockForTrip.equals(blockId)) {
+					System.out.println("Got missmatch between block assignment "
+							+ "for tripId="	+ tripShortName 
+							+ ". Block for that trip was " + previousBlockForTrip 
+							+ " but for begin date " + beginDate + " it is " 
+							+ blockId);
+				} else {
+					// The block ID does not contradict a previous one for this 
+					// trip ID. Therefore remember this block assignment for 
+					// the trip.
+					tripToBlockMap.put(tripShortName, blockId);
+				}
+					
+			} // End of for each AVL report for the vehicle
+		} // End of for each vehicle
+		
+	}
+	
+	// Keyed on trip ID
+	private static Map<String, String> tripIdToTripShortNameMap = new HashMap<String, String>();
+	
+	// Keyed on trip short name
+	private static Map<String, Integer> tripStartTimeMap = new HashMap<String, Integer>();
+	private static Map<String, Integer> tripEndTimeMap = new HashMap<String, Integer>();
+	
+	/**
+	 * Determines start and end times of trips using GTFS stop_times.txt data and puts them
+	 * into tripStartTimeMap and tripEndTimeMap.
+	 * 
+	 * @param gtfsDir
+	 */
+	private static void readTripTimes(String gtfsDir) {
+		GtfsTripsReader gtfsTripsReader = new GtfsTripsReader(gtfsDir);
+		for (GtfsTrip gtfsTrip : gtfsTripsReader.get()) {
+			tripIdToTripShortNameMap.put(gtfsTrip.getTripId(), gtfsTrip.getTripShortName());
 		}
+		
+		GtfsStopTimesReader gtfsStopTimesReader = new GtfsStopTimesReader(gtfsDir);
+		for (GtfsStopTime gtfsStopTime : gtfsStopTimesReader.get()) {
+			String tripId = gtfsStopTime.getTripId();
+			String tripShortName = tripIdToTripShortNameMap.get(tripId);
+			Integer arrivalTimeForTrip = gtfsStopTime.getArrivalTimeSecs();
+			
+			Integer previousStartForTrip = tripStartTimeMap.get(tripShortName);
+			if (previousStartForTrip == null || arrivalTimeForTrip < previousStartForTrip)
+				tripStartTimeMap.put(tripShortName, arrivalTimeForTrip);
+
+			Integer previousEndForTrip = tripEndTimeMap.get(tripShortName);
+			if (previousEndForTrip == null || arrivalTimeForTrip > previousEndForTrip)
+				tripEndTimeMap.put(tripShortName, arrivalTimeForTrip);
+		}
+	}
+	
+	/**
+	 * @param args
+	 *            args[0] is the date to run program for, args[1] is number of
+	 *            days of data to use, args[2] is the directory name where
+	 *            the GTFS files reside and where the supplement/trips.txt file
+	 *            is written.
+	 */
+	public static void main(String[] args) {
+		// Need to set timezone so that when dates are read in they
+		// will be correct.
+		TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr));
+		
+		// Determine the parameters
+		Date beginDate = getDate(args[0]);
+		int numberOfDays = Integer.parseInt(args[1]);
+		String gtfsDir = args[2];
+		
+		// Initialize trip times maps
+		readTripTimes(gtfsDir);
+		
+		// Process the AVL data to determine block assignment associated with
+		// each trip
+		for (int day=0; day < numberOfDays; ++day) {
+			Date date = new Date(beginDate.getTime() + day*Time.MS_PER_DAY);
+			processDayOfData(date);
+		}
+		
+		// Write out the supplemental trips file
+		writeSupplementalTripsFile(gtfsDir + "/supplement/trips.txt");
 	}
 
 }
