@@ -25,7 +25,7 @@ import java.io.Writer;
 import org.transitime.utils.StringUtils;
 
 /**
- * A base class for writing out a CSV file
+ * A base class for writing out a CSV file. A subclass needs 
  * 
  * @author SkiBu Smith
  *
@@ -38,6 +38,12 @@ public abstract class CsvWriterBase {
 
 	/**
 	 * Creates file writer and writes the header.
+	 * <p>
+	 * To write a file one uses a subclass that specifies how to write the
+	 * header and a line to the file for each GTFS object. One simply constructs
+	 * the subclass (which creates the file and writes the header), then calls
+	 * the subclass write(GtfsObject gtfsObject) method for each object, and the
+	 * close() to finish things up.
 	 * 
 	 * @param fileName
 	 * @param append
@@ -125,7 +131,8 @@ public abstract class CsvWriterBase {
 	}
 	
 	/**
-	 * For writing strings and other objects
+	 * For writing strings and other objects. If the object is null then nothing
+	 * is written out.
 	 * 
 	 * @param o
 	 * @return
