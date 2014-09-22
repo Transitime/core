@@ -54,7 +54,7 @@ public abstract class ConfigValue<T> {
 	
 	// Separator used for when a parameter specified by a Java property
 	// has multiple elements.
-	private static final String LIST_SEPARATOR = ";";
+	private static final String LIST_SEPARATOR = ":";
 	
 	// Use the main Config logger since don't to have two separate ones.
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
