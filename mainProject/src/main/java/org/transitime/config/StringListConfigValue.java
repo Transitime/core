@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * For specifying a List of Strings parameter that can be read in from xml
  * config file. When parameter set as a command line argument then the
- * ConfigValue.LIST_SEPARATOR is used (":") when need to specify multiple
+ * ConfigValue.LIST_SEPARATOR is used (";") when need to specify multiple
  * items. 
  * 
  * @author SkiBu Smith
@@ -32,7 +32,7 @@ public class StringListConfigValue extends ConfigValue<List<String>> {
 	/**
 	 * No default is specified. If value not in config file then error occurs.
 	 * When parameter set as a command line argument then the
-	 * ConfigValue.LIST_SEPARATOR is used (":") when need to specify multiple
+	 * ConfigValue.LIST_SEPARATOR is used (";") when need to specify multiple
 	 * items.
 	 * 
 	 * @param configValuesList
@@ -44,7 +44,7 @@ public class StringListConfigValue extends ConfigValue<List<String>> {
 	
 	/**
 	 * When parameter set as a command line argument then the
-	 * ConfigValue.LIST_SEPARATOR is used (":") when need to specify multiple
+	 * ConfigValue.LIST_SEPARATOR is used (";") when need to specify multiple
 	 * items.
 	 * 
 	 * @param id
@@ -56,7 +56,7 @@ public class StringListConfigValue extends ConfigValue<List<String>> {
 
 	/**
 	 * When parameter set as a command line argument then the
-	 * ConfigValue.LIST_SEPARATOR is used (":") when need to specify multiple
+	 * ConfigValue.LIST_SEPARATOR is used (";") when need to specify multiple
 	 * items.
 	 * 
 	 * @param id
