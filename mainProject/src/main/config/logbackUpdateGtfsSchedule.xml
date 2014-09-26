@@ -32,6 +32,9 @@
   <property name="DEFAULT_PATTERN" 
             value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %-5level [%file:%line] %msg%n" />
 
+  <property name="DATA_PATTERN" 
+	    value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-America/Los_Angeles}} %msg%n" />
+
   <!-- The main appender for the Core module. 
     -->
   <appender name="CORE" class="ch.qos.logback.core.FileAppender">
