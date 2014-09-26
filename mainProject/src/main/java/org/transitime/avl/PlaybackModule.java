@@ -138,7 +138,7 @@ public class PlaybackModule extends Module {
 				playbackVehicleId);
 		
 		List<AvlReport> avlReports = 
-				AvlReport.getAvlReportsFromDb(getAgencyId(),
+				AvlReport.getAvlReportsFromDb(
 						new Date(start), 
 						new Date(end), 
 						getPlaybackVehicleId(),

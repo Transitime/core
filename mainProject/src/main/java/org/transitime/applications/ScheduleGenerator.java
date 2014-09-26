@@ -346,7 +346,7 @@ public class ScheduleGenerator {
 
 		// Use ScheduleDataProcessor class to actually process all the data
 		ScheduleDataProcessor stats = 
-				new ScheduleDataProcessor(agencyId, gtfsDirectoryName, 
+				new ScheduleDataProcessor(gtfsDirectoryName, 
 						beginTime, endTime, timeForUsingCalendar,
 						desiredFractionEarly,
 						allowableDifferenceFromMeanSecs,

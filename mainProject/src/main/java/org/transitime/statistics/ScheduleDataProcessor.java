@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.DbConfig;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.ArrivalDeparture.ArrivalsOrDepartures;
 import org.transitime.gtfs.gtfsStructs.GtfsExtendedStopTime;
@@ -121,7 +122,6 @@ import org.transitime.utils.Time;
  */
 public class ScheduleDataProcessor {
 
-	private final String projectId;
 	// To specify where to read and write the GTFS data
 	private final String gtfsDirectoryName;
 	// Tells the db query the time range to use
@@ -207,7 +207,6 @@ public class ScheduleDataProcessor {
 
 	/**
 	 * 
-	 * @param projectId
 	 * @param gtfsDirectoryName
 	 * @param beginTime
 	 * @param endTime
@@ -220,13 +219,12 @@ public class ScheduleDataProcessor {
 	 * @param allowableEarlySecs
 	 * @param allowableLateSecs
 	 */
-	public ScheduleDataProcessor(String projectId, String gtfsDirectoryName,
+	public ScheduleDataProcessor(String gtfsDirectoryName,
 			Date beginTime, Date endTime, Time timeForUsingCalendar,
 			double desiredFractionEarly, int allowableDifferenceFromMeanSecs,
 			int allowableDifferenceFromOriginalTimeSecs,
 			boolean doNotUpdateFirstStopOfTrip, int allowableEarlySecs,
 			int allowableLateSecs) {
-		this.projectId = projectId;
 		this.gtfsDirectoryName = gtfsDirectoryName;
 		this.beginTime = beginTime;
 		this.endTime = endTime;
@@ -556,9 +554,9 @@ public class ScheduleDataProcessor {
 	private Map<String, Map<TripStopKey, List<Integer>>> 
 		readInArrivalsOrDeparturesFromDb(
 			ArrivalsOrDepartures arrivalOrDeparture) {
-		logger.info("Reading {} from db for projectId={} for beginDate={} "
-				+ "and endDate={}", arrivalOrDeparture, projectId, beginTime,
-				endTime);
+		logger.info("Reading {} from db for dbName={} for beginDate={} "
+				+ "and endDate={}", arrivalOrDeparture, DbConfig.getDbName(), 
+				beginTime, endTime);
 
 		Map<String, Map<TripStopKey, List<Integer>>> 
 			arrivalDeparatureTimesFromDbByRouteByTripStopMap = 
@@ -602,7 +600,7 @@ public class ScheduleDataProcessor {
 					// if that would speed things up when doing multiple batches
 					// but it only served to slow things down.
 					arrDepBatchList = ArrivalDeparture
-							.getArrivalsDeparturesFromDb(projectId, new Date(
+							.getArrivalsDeparturesFromDb(new Date(
 									batchBeginTime), new Date(batchEndTime),
 									null, // SQL clause
 									firstResult, batchSize, arrivalOrDeparture);
