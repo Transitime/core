@@ -166,16 +166,29 @@ public class HibernateUtils {
 	}
 
 	/**
-	 * Returns session for the specified projectId.
+	 * Returns session for the specified agencyId.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Used as the database name if the property
 	 *            transitime.core.dbName is not set
 	 * @return The Session
 	 */
-	public static Session getSession(String projectId) {
+	public static Session getSession(String agencyId) {
 		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(projectId);
+				HibernateUtils.getSessionFactory(agencyId);
+		Session session = sessionFactory.openSession();
+		return session;
+	}
+	
+	/**
+	 * Returns the session for the database name specified by the
+	 * transitime.db.dbName Java property.
+	 * 
+	 * @return
+	 */
+	public static Session getSession() {
+		SessionFactory sessionFactory = 
+				HibernateUtils.getSessionFactory(DbConfig.getDbName());
 		Session session = sessionFactory.openSession();
 		return session;
 	}
