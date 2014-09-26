@@ -130,7 +130,8 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 			return "00" + assignmentFromFeed;
 		else if (assignmentFromFeed.length() == 2)
 			return "0" + assignmentFromFeed;
-		else if (assignmentFromFeed.length() == 4 && assignmentFromFeed.endsWith("00"))
+		else if (assignmentFromFeed.length() == 4 
+				&& assignmentFromFeed.endsWith("00"))
 			return assignmentFromFeed.substring(0, 2);
 		
 		// Assignment is OK as is so return it
@@ -184,10 +185,35 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 		float heading = taipGpsLoc.getHeading();
 		float speed = taipGpsLoc.getSpeedMetersPerSecond();
 		
+		// Create the AVL report
 		AvlReport avlReport = new AvlReport(vehicleId, gpsTime, lat, lon,
 				speed, heading);
-		avlReport.setAssignment(pattern, AssignmentType.BLOCK_ID);
-		avlReport.setField1("workpiece", workpiece);
+		
+		// Determine the assignment to use. usingTripsAssignments should be
+		// true if using trips assignments instead regular block assignments.
+		// If using block assignments but the block is "000" then should
+		// instead use the trip ID since it will be valid. This is due to the
+		// feed being peculiar and sometimes setting the trip/pattern right
+		// away but not setting the block/workpiece for a while.
+		// TODO need to determine whether going to use trip IDs or block IDs.
+		// Seems that could always use trip assignments since they are always
+		// provided (with blocks/workpieces sometimes get a "000" assignment).
+		// And with trip assignment the block assigner simply converts the 
+		// trip to the block anyways. So only need the block/workpiece
+		// assignment to determine the trip to block mapping in order to
+		// generate the supplemental GTFS trips.txt file. Don't need 
+		// blocks/workpieces when actually running the core predictor software.
+		boolean usingTripAssignment = true;
+		
+		if (usingTripAssignment || workpiece.equals("000")) {
+			avlReport.setAssignment(pattern, AssignmentType.TRIP_ID);
+			avlReport.setField1("workpiece", workpiece);
+		} else {
+			// Using block assignment  that is not "000"
+			avlReport.setAssignment(workpiece, AssignmentType.BLOCK_ID);
+			avlReport.setField1("pattern", pattern);
+		}
+				
 		return avlReport;
 	}
 	
