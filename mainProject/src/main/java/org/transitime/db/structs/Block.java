@@ -897,4 +897,18 @@ public final class Block implements Serializable {
 		return match.withinDistanceOfEndOfTrip(distance);
 	}
 	
+	/**
+	 * Returns true if this block assignment should be exclusive, such that when
+	 * a vehicle is assigned to this block any other vehicles assigned to this
+	 * block will have their assignments removed.
+	 * <p>
+	 * Current it is configured using Java property instead of in the database.
+	 * 
+	 * @return True if this block assignment should be exclusively assigned to
+	 *         only a single vehicle at a time
+	 */
+	public boolean shouldBeExclusive() {
+		return CoreConfig.exclusiveBlockAssignments();
+	}
+	
 }

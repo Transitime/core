@@ -619,4 +619,25 @@ public class CoreConfig {
 					"How much worse it is for a vehicle to be early as " +
 					"opposed to late when determining schedule adherence.");
 
+	/**
+	 * True if block assignments should be exclusive. If set to true then when a
+	 * vehicle is assigned to a block the system will unassign any other
+	 * vehicles that were assigned to the block. Important for when AVL system
+	 * doesn't always provide logout info.
+	 * 
+	 * @return
+	 */
+	public static boolean exclusiveBlockAssignments() {
+		return exclusiveBlockAssignments.getValue();
+	}
+	private static BooleanConfigValue exclusiveBlockAssignments =
+			new BooleanConfigValue("transitime.core.exclusiveBlockAssignments", 
+					true,
+					"True if block assignments should be exclusive. If set to "
+					+ "true then when a vehicle is assigned to a block the "
+					+ "system will unassign any other vehicles that were "
+					+ "assigned to the block. Important for when AVL system "
+					+ "doesn't always provide logout info.");
+
+
 }

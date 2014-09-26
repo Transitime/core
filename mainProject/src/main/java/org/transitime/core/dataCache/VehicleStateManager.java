@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.core;
+package org.transitime.core.dataCache;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.transitime.core.VehicleState;
 
 /**
  * For keeping track of vehicle state. This is used by the main predictor code,

@@ -24,6 +24,7 @@ import org.transitime.applications.Core;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
 
 /**
@@ -67,32 +68,56 @@ public class BlockAssigner {
 	 * @return Block corresponding to the time and blockId from AVL report.
 	 */
 	public Block getBlockAssignment(AvlReport avlReport) {
-		if (avlReport != null &&
-				avlReport.getAssignmentId() != null && 
-				avlReport.getAssignmentType()==AssignmentType.BLOCK_ID) {
+		// If vehicle has assignment...
+		if (avlReport != null && avlReport.getAssignmentId() != null) {
 			DbConfig config = Core.getInstance().getDbConfig();
-			ServiceUtils service = Core.getInstance().getServiceUtils();
-			List<String> serviceIds = service.getServiceIds(avlReport.getDate());
-			boolean blockFoundForServiceId = false;
-			for (String serviceId : serviceIds) {
-				Block block = config.getBlock(serviceId, avlReport.getAssignmentId());
-				if (block != null) {
-					blockFoundForServiceId = true;
-					logger.info("For vehicleId={} the block from the AVL feed is blockId={}", 
+
+			// If using block assignment...
+			if (avlReport.getAssignmentType()==AssignmentType.BLOCK_ID) {
+				ServiceUtils service = Core.getInstance().getServiceUtils();
+				List<String> serviceIds = 
+						service.getServiceIds(avlReport.getDate());
+				boolean blockFoundForServiceId = false;
+				for (String serviceId : serviceIds) {
+					Block block = config.getBlock(serviceId,
+							avlReport.getAssignmentId());
+					if (block != null) {
+						blockFoundForServiceId = true;
+						logger.info("For vehicleId={} the block assignment from "
+								+ "the AVL feed is blockId={}", 
+								avlReport.getVehicleId(), 
+								block.getId());
+						return block;
+					}
+				}
+				if (!blockFoundForServiceId) {
+					logger.error("For vehicleId={} AVL report specifies " 
+							+ "blockId={} but block is not valid for "
+							+ "serviceIds={}",
 							avlReport.getVehicleId(), 
-							block.getId());
-					return block;
+							avlReport.getAssignmentId(), 
+							serviceIds);
+				}
+			} else if (avlReport.getAssignmentType()==AssignmentType.TRIP_ID) {
+				// Using trip assignment
+				Trip trip = config.getTrip(avlReport.getAssignmentId());
+				if (trip != null) {
+					Block block = trip.getBlock();
+					logger.info("For vehicleId={} the trip assignment from "
+							+ "the AVL feed is tripId={} which corresponds to "
+							+ "blockId={}", 
+							avlReport.getVehicleId(), 
+							avlReport.getAssignmentId(), block.getId());
+					return block;					
+				} else {
+					logger.error("For vehicleId={} AVL report specifies " + 
+							"assignment tripId={} but that trip is not valid.",
+							avlReport.getVehicleId(), 
+							avlReport.getAssignmentId());
 				}
 			}
-			if (!blockFoundForServiceId) {
-				logger.error("For vehicleId={} AVL report specifies blockId={} " + 
-						"but block is not valid for serviceIds={}",
-						avlReport.getVehicleId(), 
-						avlReport.getAssignmentId(), 
-						serviceIds);
-			}
 		}
-
+				
 		// No valid block so return null
 		return null;
 	}

@@ -67,7 +67,7 @@ public class VehicleState {
 	private long lastArrivalTime = 0;
 	
 	// So can keep track of whether assigning vehicle to same block that
-	// just got unassigned for. unassignedTime is the time when the
+	// just got unassigned for. The unassignedTime member is the time when the
 	// vehicle was unassigned.
 	private Block previousBlockBeforeUnassigned = null;
 	private Date unassignedTime = null;
@@ -110,7 +110,7 @@ public class VehicleState {
 	}
 	
 	/**
-	 * Determines if vehicle is just getting assigned and it is getting assigned
+	 * Determines if vehicle is currently getting assigned and it is getting assigned
 	 * back to the same block it was assigned to just a while ago. In other
 	 * words this tells if vehicle might have become unpredictable but then is
 	 * getting reassigned again. In this kind of situation don't want to for
@@ -362,9 +362,9 @@ public class VehicleState {
 	}
 
 	/**
-	 * Returns true if the AVL report has a different block assignment
-	 * than what is in the VehicleState. For when reassigning a vehicle
-	 * via the AVL feed.
+	 * Returns true if the AVL report has a different block assignment than what
+	 * is in the VehicleState. For when reassigning a vehicle via the AVL feed.
+	 * 
 	 * @param avlReport
 	 * @return
 	 */
@@ -376,7 +376,31 @@ public class VehicleState {
 				 (previousBlockId == null || !avlReport.getAssignmentId().equals(previousBlockId));
 	}
 	
+	/**
+	 * Returns true if the previously the vehicle had the same assignment as
+	 * specified by the block but that assignment was recently removed due to
+	 * such a problem that the vehicle shouldn't be assigned to that assignment
+	 * again. Specifically, this happens if an exclusive assignment is grabbed
+	 * by another vehicle. Even though the original vehicle with the assignment
+	 * might continue to get that assignment via the AVL feed don't want to
+	 * reassign it to the problem assignment again.
+	 * <p>
+	 * An old assignment is considered recent if the unassignment happened
+	 * within the last 2 hours.
+	 * 
+	 * @param avlReport
+	 * @return
+	 */
+	public boolean previousAssignmentProblematic(AvlReport avlReport) {
+		// TODO fix this!
+//		previousBlockBeforeUnassigned;
+//		unassignedTime
+//		assignmentMethod
+		return false;
+	}
+	
 	/********************** Getter methods ************************/
+	
 	/**
 	 * Returns an unmodifiable list of the match history. The most recent
 	 * one is first. The size of the list will be not greater than
