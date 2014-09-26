@@ -114,7 +114,7 @@ public class AvlReport implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String assignmentId;  // optional
 	
-	// Note: handling TRIP_ID has not yet been implemented
+	// The type of the assignment received in the AVL feed
 	public enum AssignmentType {UNSET, BLOCK_ID, ROUTE_ID, TRIP_ID};
 	
 	@Column(length=40)
@@ -718,14 +718,21 @@ public class AvlReport implements Serializable {
 				!matchesUnpredictableAssignment(assignmentId);
 	}
 	
-	public void setAssignment(String assignmentId, AssignmentType assignmentType) {
+	/**
+	 * Stores the assignment information as part of this AvlReport.
+	 * 
+	 * @param assignmentId
+	 * @param assignmentType
+	 */
+	public void setAssignment(String assignmentId, 
+			AssignmentType assignmentType) {
 		// Make sure don't set to invalid values
 		if (assignmentId == null && assignmentType != AssignmentType.UNSET) {
-			logger.error("Tried to use setAssignment() to set assignment to " +
-					"null with setting assignmentType to UNSET");
+			logger.error("Tried to use setAssignment() to set assignment to "
+					+ "null without also setting assignmentType to UNSET");
 			return;
 		}
-		
+
 		this.assignmentId = assignmentId;
 		this.assignmentType = assignmentType;
 	}
@@ -854,8 +861,6 @@ public class AvlReport implements Serializable {
 	/**
 	 * Gets list of AvlReports from database for the time span specified.
 	 * 
-	 * @param projectId
-	 *            Specifies which db to get data from
 	 * @param beginTime
 	 * @param endTime
 	 * @param vehicleId
@@ -864,16 +869,16 @@ public class AvlReport implements Serializable {
 	 * @param clause
 	 * 				Optional. If not null then the clause, such as "ORDER BY time"
 	 * will be added to the hql statement.
-	 * @return
+	 * @return List of AvlReports or null if an exception is thrown
 	 */
-	public static List<AvlReport> getAvlReportsFromDb(String projectId,
+	public static List<AvlReport> getAvlReportsFromDb(
 			Date beginTime, 
 			Date endTime, 
 			String vehicleId,
 			String clause) {
 		// Sessions are not threadsafe so need to create a new one each time.
 		// They are supposed to be lightweight so this should be OK.
-		Session session = HibernateUtils.getSession(projectId);
+		Session session = HibernateUtils.getSession();
 		
 		// Create the query. Table name is case sensitive!
 		String hql = "FROM AvlReport " +

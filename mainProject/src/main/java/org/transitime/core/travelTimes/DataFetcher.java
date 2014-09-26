@@ -189,13 +189,13 @@ public class DataFetcher {
 	/**
 	 * Reads arrivals/departures from db into so can be processed.
 	 * 
-	 * @param projectId
+	 * @param dbName
 	 * @param beginTime
 	 * @param endTime
 	 * @return
 	 */
 	public Map<DbDataMapKey, List<ArrivalDeparture>> readArrivalsDepartures(
-			String projectId, Date beginTime, Date endTime) {
+			String dbName, Date beginTime, Date endTime) {
 		IntervalTimer timer = new IntervalTimer();
 
 		// For returning the results
@@ -212,7 +212,7 @@ public class DataFetcher {
 		// Read in batch of 50k rows of data and process it
 		do {				
 			arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
-					projectId, 
+					dbName, 
 					beginTime, endTime, 
 					// Order results by time so that process them in the same
 					// way that a vehicle travels.

@@ -37,6 +37,7 @@ import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.configData.DbConfig;
 import org.transitime.core.TemporalDifference;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
@@ -483,7 +484,8 @@ public class ArrivalDeparture implements Serializable {
 	 * size of 50k found it to run in under 1/4 the time as with the iterator
 	 * method.
 	 * 
-	 * @param projectId
+	 * @param dbName
+	 *            Name of the database to retrieve data from
 	 * @param beginTime
 	 * @param endTime
 	 * @param sqlClause
@@ -498,14 +500,14 @@ public class ArrivalDeparture implements Serializable {
 	 * @return
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
-			String projectId, Date beginTime, Date endTime, 
+			String dbName, Date beginTime, Date endTime, 
 			String sqlClause,
 			final int firstResult, final int maxResults,
 			ArrivalsOrDepartures arrivalOrDeparture) {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(projectId);
+		Session session = HibernateUtils.getSession(dbName);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
@@ -548,6 +550,26 @@ public class ArrivalDeparture implements Serializable {
 		
 	}
 
+	/**
+	 * Same as other getArrivalsDeparturesFromDb() but uses
+	 * -Dtransitime.db.dbName Java property to specify the name of the database.
+	 * 
+	 * @param beginTime
+	 * @param endTime
+	 * @param sqlClause
+	 * @param firstResult
+	 * @param maxResults
+	 * @param arrivalOrDeparture
+	 * @return
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
+			Date beginTime, Date endTime, String sqlClause,
+			final int firstResult, final int maxResults,
+			ArrivalsOrDepartures arrivalOrDeparture) {
+		return getArrivalsDeparturesFromDb(DbConfig.getDbName(), beginTime,
+				endTime, sqlClause, firstResult, maxResults, arrivalOrDeparture);
+	}
+	
 	public String getVehicleId() {
 		return vehicleId;
 	}
