@@ -57,11 +57,11 @@ public class VehicleDataCache {
     		new HashMap<String, Map<String, IpcExtVehicle>>();
 
     // So can determine vehicles associated with a block ID. Keyed on
-    // block ID. Each block can have a list of vehicles. Though rare
+    // block ID. Each block can have a list of vehicle IDs. Though rare
     // there are situations where multiple vehicles might have the
     // same assignment, such as for unscheduled assignments. 
-    private Map<String, List<IpcExtVehicle>> vehiclesByBlockMap =
-    		new HashMap<String, List<IpcExtVehicle>>();
+    private Map<String, List<String>> vehicleIdsByBlockMap =
+    		new HashMap<String, List<String>>();
     
 	// For filtering out info more than MAX_AGE since it means that the AVL info is
 	// obsolete and shouldn't be displayed.
@@ -195,7 +195,7 @@ public class VehicleDataCache {
 	}
 
 	/**
-	 * Returns list of vehicles that are currently assigned to the specified
+	 * Returns list of vehicle IDs that are currently assigned to the specified
 	 * block. Will return empty list if no vehicles assigned to that block
 	 * (won't return null). Usually there will only be a single vehicle
 	 * associated with a block assignment but there are cases, such as
@@ -203,16 +203,16 @@ public class VehicleDataCache {
 	 * Therefore this method returns a List.
 	 * 
 	 * @param blockId
-	 * @return List of vehicles associated with the specified block Id. Returns
-	 *         empty list instead of null if no vehicles associated with the
-	 *         block ID.
+	 * @return List of vehicle IDs associated with the specified block Id.
+	 *         Returns empty list instead of null if no vehicles associated with
+	 *         the block ID.
 	 */
-	public List<IpcExtVehicle> getVehiclesByBlockId(String blockId) {
-		List<IpcExtVehicle> vehicles = vehiclesByBlockMap.get(blockId);
-		if (vehicles != null)
-			return vehicles;
+	public List<String> getVehiclesByBlockId(String blockId) {
+		List<String> vehicleIds = vehicleIdsByBlockMap.get(blockId);
+		if (vehicleIds != null)
+			return vehicleIds;
 		else
-			return new ArrayList<IpcExtVehicle>(0);
+			return new ArrayList<String>(0);
 	}
 	
 	/**
@@ -233,7 +233,7 @@ public class VehicleDataCache {
 	 * @param vehicle
 	 *            For getting the current block ID for the vehicle.
 	 */
-	private void updateVehiclesByBlockMap(IpcExtVehicle originalVehicle,
+	private void updateVehicleIdsByBlockMap(IpcExtVehicle originalVehicle,
 			IpcExtVehicle vehicle) {
 		// Handle old assignment		
 		if (originalVehicle != null) {
@@ -245,20 +245,20 @@ public class VehicleDataCache {
 				
 			// Block assignment has changed for vehicle so remove the old one 
 			// from the map
-			List<IpcExtVehicle> vehiclesForOldBlock = 
-					vehiclesByBlockMap.get(originalVehicle.getBlockId());
-			if (vehiclesForOldBlock != null)
-				vehiclesForOldBlock.remove(originalVehicle);
+			List<String> vehicleIdsForOldBlock = 
+					vehicleIdsByBlockMap.get(originalVehicle.getBlockId());
+			if (vehicleIdsForOldBlock != null)
+				vehicleIdsForOldBlock.remove(originalVehicle.getId());
 		}
 		
 		// Add the new block assignment to the map
-		List<IpcExtVehicle> vehiclesForNewBlock = 
-				vehiclesByBlockMap.get(vehicle.getBlockId());
+		List<String> vehiclesForNewBlock = 
+				vehicleIdsByBlockMap.get(vehicle.getBlockId());
 		if (vehiclesForNewBlock == null) {
-			vehiclesForNewBlock = new ArrayList<IpcExtVehicle>();
-			vehiclesByBlockMap.put(vehicle.getBlockId(), vehiclesForNewBlock);
+			vehiclesForNewBlock = new ArrayList<String>(1);
+			vehicleIdsByBlockMap.put(vehicle.getBlockId(), vehiclesForNewBlock);
 		}
-		vehiclesForNewBlock.add(vehicle);
+		vehiclesForNewBlock.add(vehicle.getId());
 	}
 	
 	/**
@@ -316,7 +316,7 @@ public class VehicleDataCache {
 		logger.debug("Adding to VehicleDataCache vehicle={}", vehicle);
 
 		updateVehiclesByRouteMap(originalVehicle, vehicle);
-		updateVehiclesByBlockMap(originalVehicle, vehicle);
+		updateVehicleIdsByBlockMap(originalVehicle, vehicle);
 		updateVehiclesMap(vehicle);
 	}
 }

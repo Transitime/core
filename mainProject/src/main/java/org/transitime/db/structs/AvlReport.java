@@ -115,7 +115,7 @@ public class AvlReport implements Serializable {
 	private String assignmentId;  // optional
 	
 	// The type of the assignment received in the AVL feed
-	public enum AssignmentType {UNSET, BLOCK_ID, ROUTE_ID, TRIP_ID};
+	public enum AssignmentType {UNSET, BLOCK_ID, ROUTE_ID, TRIP_ID, TRIP_SHORT_NAME};
 	
 	@Column(length=40)
 	@Enumerated(EnumType.STRING)
