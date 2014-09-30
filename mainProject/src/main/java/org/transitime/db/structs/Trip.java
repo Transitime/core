@@ -66,6 +66,10 @@ public class Trip implements Serializable {
 	@Id 
 	private Integer startTime;
 	
+	// Used by some agencies to identify the trip in the AVL feed
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
+	private final String tripShortName;
+	
 	// Number of seconds into the day.
 	// Not final because only used for frequency based trips.
 	@Column
@@ -160,6 +164,7 @@ public class Trip implements Serializable {
 		this.configRev = DbConfig.SANDBOX_REV;
 
 		this.tripId = gtfsTrip.getTripId();
+		this.tripShortName = gtfsTrip.getTripShortName();
 		this.directionId = gtfsTrip.getDirectionId();
 		this.routeId = properRouteId!=null? properRouteId : gtfsTrip.getRouteId();
 		this.routeShortName = routeShortName;
@@ -190,6 +195,7 @@ public class Trip implements Serializable {
 	public Trip(Trip tripFromStopTimes, int frequenciesBasedStartTime) {
 		this.configRev = tripFromStopTimes.configRev;
 		this.tripId = tripFromStopTimes.tripId;
+		this.tripShortName = tripFromStopTimes.tripShortName;
 		this.directionId = tripFromStopTimes.directionId;
 		this.routeId = tripFromStopTimes.routeId;
 		this.routeShortName = tripFromStopTimes.routeShortName;
@@ -237,6 +243,7 @@ public class Trip implements Serializable {
 	private Trip() {
 		configRev = -1;
 		tripId = null;
+		tripShortName = null;
 		directionId = null;
 		routeId = null;
 		routeShortName = null;
@@ -315,7 +322,7 @@ public class Trip implements Serializable {
 	}
 
 	/**
-	 * Returns specified Trip object for the specified configRev. 
+	 * Returns specified Trip object for the specified configRev and tripId.
 	 * 
 	 * @param session
 	 * @param configRev
@@ -339,6 +346,31 @@ public class Trip implements Serializable {
 		return trip;
 	}
 
+	/**
+	 * Returns specified Trip object for the specified configRev and
+	 * tripShortName.
+	 * 
+	 * @param session
+	 * @param configRev
+	 * @param tripShortName
+	 * @return
+	 * @throws HibernateException
+	 */
+	public static Trip getTripByShortName(Session session, int configRev,
+			String tripShortName) throws HibernateException {
+		// Setup the query
+		String hql = "FROM Trip " +
+				"    WHERE configRev = :configRev" +
+				"      AND tripShortName = :tripShortName";
+		Query query = session.createQuery(hql);
+		query.setInteger("configRev", configRev);
+		query.setString("tripShortName", tripShortName);
+		
+		// Actually perform the query
+		Trip trip = (Trip) query.uniqueResult();
+
+		return trip;
+	}
 	/**
 	 * Deletes rev 0 from the Trips table
 	 * 
@@ -364,6 +396,7 @@ public class Trip implements Serializable {
 		return "\n    Trip [" 
 				+ "configRev=" + configRev
 				+ ", tripId=" + tripId 
+				+ ", tripShortName=" + tripShortName
 				+ ", tripPatternId=" 
 					+ (tripPattern != null ? tripPattern.getId() : "null")
 				+ ", tripIndex=" + getIndex()
@@ -388,6 +421,7 @@ public class Trip implements Serializable {
 	public String toShortString() {
 		return "Trip ["
 				+ "tripId=" + tripId 
+				+ ", tripShortName=" + tripShortName
 				+ ", tripPatternId=" 
 					+ (tripPattern != null ? tripPattern.getId() : "null")
 				+ ", tripIndex=" + getIndex()
@@ -429,6 +463,7 @@ public class Trip implements Serializable {
 		result = prime * result
 				+ ((travelTimes == null) ? 0 : travelTimes.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
+		result = prime * result + ((tripShortName == null) ? 0 : tripShortName.hashCode());
 		result = prime * result
 				+ ((tripPattern == null) ? 0 : tripPattern.hashCode());
 		return result;
@@ -503,6 +538,11 @@ public class Trip implements Serializable {
 				return false;
 		} else if (!tripId.equals(other.tripId))
 			return false;
+		if (tripShortName == null) {
+			if (other.tripShortName != null)
+				return false;
+		} else if (!tripShortName.equals(other.tripShortName))
+			return false;
 		if (tripPattern == null) {
 			if (other.tripPattern != null)
 				return false;
@@ -549,6 +589,13 @@ public class Trip implements Serializable {
 	 */
 	public String getId() {
 		return tripId;
+	}
+	
+	/**
+	 * @return the tripShortName
+	 */
+	public String getShortName() {
+		return tripShortName;
 	}
 	
 	/**

@@ -380,6 +380,7 @@
         scheduledTimesMap bytea,
         serviceId varchar(60),
         shapeId varchar(60),
+        tripShortName varchar(60),
         travelTimes_id int4,
         tripPattern_id varchar(60),
         tripPattern_configRev int4,

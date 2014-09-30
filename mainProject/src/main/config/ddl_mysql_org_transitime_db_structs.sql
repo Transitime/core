@@ -386,6 +386,7 @@
         scheduledTimesMap blob,
         serviceId varchar(60),
         shapeId varchar(60),
+        tripShortName varchar(60),
         travelTimes_id integer,
         tripPattern_id varchar(60),
         tripPattern_configRev integer,

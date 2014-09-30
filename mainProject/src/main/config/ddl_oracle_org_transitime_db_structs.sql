@@ -356,6 +356,7 @@
         scheduledTimesMap raw(2000),
         serviceId varchar2(60 char),
         shapeId varchar2(60 char),
+        tripShortName varchar2(60 char),
         travelTimes_id number(10,0),
         tripPattern_id varchar2(60 char),
         tripPattern_configRev number(10,0),
