@@ -206,7 +206,7 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 		boolean usingTripAssignment = true;
 		
 		if (usingTripAssignment || workpiece.equals("000")) {
-			avlReport.setAssignment(pattern, AssignmentType.TRIP_ID);
+			avlReport.setAssignment(pattern, AssignmentType.TRIP_SHORT_NAME);
 			avlReport.setField1("workpiece", workpiece);
 		} else {
 			// Using block assignment  that is not "000"
