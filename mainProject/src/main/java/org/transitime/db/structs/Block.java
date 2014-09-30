@@ -584,8 +584,6 @@ public final class Block implements Serializable {
 	public Trip getTrip(int tripIndex) {
 		// If index out of range return null
 		if (tripIndex < 0 || tripIndex >= getTrips().size())  {
-			logger.error("In Block.getTrip() trip index {} is out of range "
-					+ "for block {}", tripIndex, this.toShortString());
 			return null;
 		}
 		
