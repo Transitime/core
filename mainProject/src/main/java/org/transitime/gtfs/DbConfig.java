@@ -88,6 +88,9 @@ public class DbConfig {
 	private Map<String, Trip> tripsMap;
 	// For trips that have been read in individually. Keyed on tripId.
 	private Map<String, Trip> individualTripsMap = new HashMap<String, Trip>();
+	// For trips that have been read in individually. Keyed on trip short name
+	private Map<String, Trip> individualTripsByShortNameMap = 
+			new HashMap<String, Trip>();
 	
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
@@ -398,6 +401,31 @@ public class DbConfig {
 		}
 		
 		return trip;
+	}
+	
+	/**
+	 * For more quickly getting a trip. If trip not already read in yet it only
+	 * reads in the specific trip from the db, not all trips like getTrips().
+	 * 
+	 * @param tripShortName
+	 * @return
+	 */
+	public Trip getTripUsingTripShortName(String tripShortName) {
+		Trip trip = individualTripsByShortNameMap.get(tripShortName);
+		
+		// If trip not read in yet, do so now
+		if (trip == null) {
+			// Need to sync such that block data, which includes trip
+			// pattern data, is only read serially (not read simultaneously
+			// by multiple threads). Otherwise get a "force initialize loading
+			// collection" error. 
+			synchronized (Block.getLazyLoadingSyncObject()) {
+				trip = Trip.getTripByShortName(globalSession, configRev, tripShortName);
+			}
+			individualTripsByShortNameMap.put(tripShortName, trip);
+		}
+		
+		return trip;		
 	}
 	
 	/**
