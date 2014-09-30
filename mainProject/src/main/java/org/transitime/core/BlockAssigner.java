@@ -99,7 +99,7 @@ public class BlockAssigner {
 							serviceIds);
 				}
 			} else if (avlReport.getAssignmentType()==AssignmentType.TRIP_ID) {
-				// Using trip assignment
+				// Using trip ID
 				Trip trip = config.getTrip(avlReport.getAssignmentId());
 				if (trip != null) {
 					Block block = trip.getBlock();
@@ -114,6 +114,24 @@ public class BlockAssigner {
 							"assignment tripId={} but that trip is not valid.",
 							avlReport.getVehicleId(), 
 							avlReport.getAssignmentId());
+				}
+			} else if (avlReport.getAssignmentType()==AssignmentType.TRIP_SHORT_NAME) {
+				// Using trip short name
+				String tripShortName = avlReport.getAssignmentId();
+				Trip trip = config.getTripUsingTripShortName(tripShortName);
+				if (trip != null) {
+					Block block = trip.getBlock();
+					logger.info("For vehicleId={} the trip assignment from "
+							+ "the AVL feed is tripShortName={} which "
+							+ "corresponds to blockId={}", 
+							avlReport.getVehicleId(), tripShortName, 
+							block.getId());
+					return block;					
+				} else {
+					logger.error("For vehicleId={} AVL report specifies "
+							+ "assignment tripShortName={} but that trip is not "
+							+ "valid.",
+							avlReport.getVehicleId(), tripShortName);
 				}
 			}
 		}
