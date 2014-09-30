@@ -21,11 +21,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.AvlReport;
-import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.StopPath;
@@ -47,6 +47,7 @@ public class VehicleState {
 	private final String vehicleId;
 	private Block block;
 	private BlockAssignmentMethod assignmentMethod;
+	private String assignmentId;
 	private Date assignmentTime;
 	private boolean predictable;
 	// First is most recent
@@ -89,12 +90,16 @@ public class VehicleState {
 	 *            The current block assignment for the vehicle. Set to null if
 	 *            vehicle not assigned.
 	 * @param assignmentMethod
-	 *            How vehicle was assigned (AVL feed, auto assigner, etc)
+	 *            How vehicle was assigned (AVL feed, auto assigner, etc). Set
+	 *            to null if vehicle not assigned.
+	 * @param assignmentId
+	 *            Can be blockId, tripId, or tripShortName. Depends on type of
+	 *            assignment received from AVL feed. Can be null.
 	 * @param predictable
 	 *            Whether vehicle is predictable
 	 */
 	public void setBlock(Block newBlock, BlockAssignmentMethod assignmentMethod, 
-			boolean predictable) {
+			String assignmentId, boolean predictable) {
 		// When vehicle is made unpredictable remember the previous assignment
 		// so can tell if getting assigned to same block again (which could
 		// indicate a problem and arrival/departure times shouldn't be generated.
@@ -105,8 +110,24 @@ public class VehicleState {
 
 		this.block = newBlock;
 		this.assignmentMethod = assignmentMethod;
+		this.assignmentId = assignmentId;
 		this.predictable = predictable;
 		this.assignmentTime = getAvlReport().getDate();		
+	}
+	
+	/**
+	 * Sets the block for this VehicleState to null. Also sets assignmentId
+	 * to null and predictable to false.
+	 * 
+	 * @param assignmentMethod
+	 *            How vehicle was assigned (AVL feed, auto assigner, etc). Set
+	 *            to null if vehicle not assigned.
+	 */
+	public void unsetBlock(BlockAssignmentMethod assignmentMethod) {
+		setBlock(null, // newBlock
+				assignmentMethod, 
+				null,   // assignmentId
+				false); // predictable
 	}
 	
 	/**
@@ -362,41 +383,53 @@ public class VehicleState {
 	}
 
 	/**
-	 * Returns true if the AVL report has a different block assignment than what
-	 * is in the VehicleState. For when reassigning a vehicle via the AVL feed.
+	 * Returns true if the AVL report has a different assignment than what is in
+	 * the VehicleState. For when reassigning a vehicle via the AVL feed.
 	 * 
 	 * @param avlReport
 	 * @return
 	 */
-	public boolean hasNewBlockAssignment(AvlReport avlReport) {		
-		// Return true if assignment being changed
-		String previousBlockId = getBlock()==null ? null : getBlock().getId();
-		return avlReport.getAssignmentId() != null &&
-				 avlReport.getAssignmentType() == AssignmentType.BLOCK_ID &&
-				 (previousBlockId == null || !avlReport.getAssignmentId().equals(previousBlockId));
+	public boolean hasNewAssignment(AvlReport avlReport) {		
+		return  !Objects.equals(assignmentId, avlReport.getAssignmentId());
 	}
 	
 	/**
-	 * Returns true if the previously the vehicle had the same assignment as
-	 * specified by the block but that assignment was recently removed due to
-	 * such a problem that the vehicle shouldn't be assigned to that assignment
-	 * again. Specifically, this happens if an exclusive assignment is grabbed
-	 * by another vehicle. Even though the original vehicle with the assignment
-	 * might continue to get that assignment via the AVL feed don't want to
-	 * reassign it to the problem assignment again.
+	 * Returns true if previously the vehicle had the same assignment but that
+	 * assignment was recently removed due to a problem where the vehicle
+	 * shouldn't be assigned to that assignment again. A specific example is
+	 * that this happens if an exclusive block assignment is grabbed by another
+	 * vehicle. Even though the original vehicle with the assignment might
+	 * continue to get that assignment via the AVL feed don't want to reassign
+	 * it to the problem assignment again.
+	 * <p>
+	 * BUT WHAT ABOUT A VEHICLE SIMPLY BECOMING UNPREDICTABLE BECAUSE IT 
+	 * TEMPORARILY WENT OFF ROUTE FOR 3 AVL REPORTS?? IN THAT CASE WANT VEHICLE
+	 * TO MATCH ASSIGNMENT AGAIN. OR WHAT IF BLOCK SIMPLY ENDED??
+	 * SEEMS THAT NEED TO REMEMBER IF VEHICLE WAS UNASSIGNED IN SUCH A WAY
+	 * THAT SHOULDN'T TAKE THAT ASSIGNMENT AGAIN FOR A WHILE.
 	 * <p>
 	 * An old assignment is considered recent if the unassignment happened
 	 * within the last 2 hours.
 	 * 
 	 * @param avlReport
-	 * @return
+	 * @return True if vehicle already had the assignment but it was problematic
 	 */
 	public boolean previousAssignmentProblematic(AvlReport avlReport) {
-		// TODO fix this!
-//		previousBlockBeforeUnassigned;
-//		unassignedTime
-//		assignmentMethod
-		return false;
+		// If the previous assignment is not problematic because it wasn't
+		// grabbed or terminated then it is definitely not problematic.
+		if (assignmentMethod != BlockAssignmentMethod.ASSIGNMENT_GRABBED
+				&& assignmentMethod != BlockAssignmentMethod.ASSIGNMENT_TERMINATED)
+			return false;
+		
+		// If the AVL report indicates a new assignment then don't have to
+		// worry about the old one being problematic
+		if (hasNewAssignment(avlReport))
+			return false;
+		
+		// Got same assignment from AVL feed that was previously problematic.
+		// If the old problem assignment was somewhat recent then return true.
+		return avlReport.getTime() - unassignedTime.getTime() < 
+				2 * Time.MS_PER_HOUR;  
 	}
 	
 	/********************** Getter methods ************************/
@@ -422,6 +455,16 @@ public class VehicleState {
 		return block;
 	}
 
+	/**
+	 * Can be the blockId, tripId, or tripShortName depending on the type of
+	 * assignment received from the AVL feed.
+	 * 
+	 * @return blockId, tripId, or tripShortName or null if not assigned
+	 */
+	public String getAssignmentId() {
+		return assignmentId;
+	}
+	
 	/**
 	 * Indicates how the vehicle was assigned (via block assignment, route
 	 * assignment, auto assignment, etc).
@@ -637,6 +680,7 @@ public class VehicleState {
 		return "VehicleState [" 
 				+ "vehicleId=" + vehicleId 
 				+ ", blockId=" + (block==null? null : block.getId())
+				+ ", assignmentId=" + assignmentId
 				+ ", assignmentMethod=" + assignmentMethod
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
@@ -655,6 +699,7 @@ public class VehicleState {
 		return "VehicleState [" 
 				+ "vehicleId=" + vehicleId 
 				+ ", blockId=" + (block==null? null : block.getId())
+				+ ", assignmentId=" + assignmentId
 				+ ", assignmentMethod=" + assignmentMethod
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
