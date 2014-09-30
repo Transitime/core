@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.DbConfig;
+import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.structs.AvlReport;
 
 /**
@@ -49,7 +49,7 @@ public class DbTest {
 				logger.info("Successfully connected to the database!");
 		} catch (Exception e) {
 			logger.error("Error occurred when trying to access database for "
-					+ "dbName={}. {}", DbConfig.getDbName(), e.getMessage(), e);
+					+ "dbName={}. {}", DbSetupConfig.getDbName(), e.getMessage(), e);
 		}
 
 	}

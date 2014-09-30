@@ -37,7 +37,7 @@ import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
-import org.transitime.configData.DbConfig;
+import org.transitime.configData.DbSetupConfig;
 import org.transitime.core.TemporalDifference;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
@@ -566,7 +566,7 @@ public class ArrivalDeparture implements Serializable {
 			Date beginTime, Date endTime, String sqlClause,
 			final int firstResult, final int maxResults,
 			ArrivalsOrDepartures arrivalOrDeparture) {
-		return getArrivalsDeparturesFromDb(DbConfig.getDbName(), beginTime,
+		return getArrivalsDeparturesFromDb(DbSetupConfig.getDbName(), beginTime,
 				endTime, sqlClause, firstResult, maxResults, arrivalOrDeparture);
 	}
 	

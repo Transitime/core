@@ -25,7 +25,7 @@ import org.transitime.config.StringConfigValue;
  * @author SkiBu Smith
  *
  */
-public class DbConfig {
+public class DbSetupConfig {
 
 	public static String getDbName() {
 		return dbName.getValue();

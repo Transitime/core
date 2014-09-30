@@ -29,7 +29,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.DbConfig;
+import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.ArrivalDeparture.ArrivalsOrDepartures;
 import org.transitime.gtfs.gtfsStructs.GtfsExtendedStopTime;
@@ -555,7 +555,7 @@ public class ScheduleDataProcessor {
 		readInArrivalsOrDeparturesFromDb(
 			ArrivalsOrDepartures arrivalOrDeparture) {
 		logger.info("Reading {} from db for dbName={} for beginDate={} "
-				+ "and endDate={}", arrivalOrDeparture, DbConfig.getDbName(), 
+				+ "and endDate={}", arrivalOrDeparture, DbSetupConfig.getDbName(), 
 				beginTime, endTime);
 
 		Map<String, Map<TripStopKey, List<Integer>>> 

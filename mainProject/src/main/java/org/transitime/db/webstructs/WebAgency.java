@@ -33,7 +33,7 @@ import org.hibernate.Transaction;
 import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.DbConfig;
+import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.IntervalTimer;
 
@@ -109,7 +109,7 @@ public class WebAgency {
 	 * @return
 	 */
 	static private String getDbName() {
-		return DbConfig.getDbName();
+		return DbSetupConfig.getDbName();
 	}
 
 	/**

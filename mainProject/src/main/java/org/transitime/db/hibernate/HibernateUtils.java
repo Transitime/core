@@ -28,7 +28,7 @@ import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.DbConfig;
+import org.transitime.configData.DbSetupConfig;
 
 /**
  * Utilities for dealing with Hibernate issues such as sessions.
@@ -77,7 +77,7 @@ public class HibernateUtils {
 		// as C:/users/Mike/software/hibernate.cfg.xml . Therefore create
 		// a File object for that file name and pass in the File object
 		// to configure().
-		String fileName = DbConfig.getHibernateConfigFileName();
+		String fileName = DbSetupConfig.getHibernateConfigFileName();
 		logger.info("Configuring Hibernate for dbName={} using config file={}",
 				dbName, fileName);
 		File f = new File(fileName);
@@ -91,25 +91,25 @@ public class HibernateUtils {
 		// obtained from the hibernate.cfg.xml 
 		// config file.
 		String dbUrl = null;
-		if (DbConfig.getDbHost() != null) {
-			dbUrl = "jdbc:" + DbConfig.getDbType() + "://" +
-					DbConfig.getDbHost() +
+		if (DbSetupConfig.getDbHost() != null) {
+			dbUrl = "jdbc:" + DbSetupConfig.getDbType() + "://" +
+					DbSetupConfig.getDbHost() +
 					"/" + dbName;
 			config.setProperty("hibernate.connection.url", dbUrl);			
 		} else {
 			dbUrl = config.getProperty("hibernate.connection.url");
 		}
 		
-		String dbUserName = DbConfig.getDbUserName();
+		String dbUserName = DbSetupConfig.getDbUserName();
 		if (dbUserName != null) {
 			config.setProperty("hibernate.connection.username",	dbUserName);
 		} else {
 			dbUserName = config.getProperty("hibernate.connection.username");
 		}
 		
-		if (DbConfig.getDbPassword() != null)
+		if (DbSetupConfig.getDbPassword() != null)
 			config.setProperty("hibernate.connection.password", 
-					DbConfig.getDbPassword());
+					DbSetupConfig.getDbPassword());
 		
 		// Log info, but don't log password. This can just be debug logging
 		// even though it is important because the C3P0 connector logs the info.
@@ -142,7 +142,7 @@ public class HibernateUtils {
 		// Determine the database name to use. Will usually use the
 		// projectId since each project has a database. But this might
 		// be overridden by the transitime.core.dbName property.
-		String dbName = DbConfig.getDbName();
+		String dbName = DbSetupConfig.getDbName();
 		if (dbName == null)
 			dbName = projectId;
 		
@@ -188,7 +188,7 @@ public class HibernateUtils {
 	 */
 	public static Session getSession() {
 		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(DbConfig.getDbName());
+				HibernateUtils.getSessionFactory(DbSetupConfig.getDbName());
 		Session session = sessionFactory.openSession();
 		return session;
 	}
