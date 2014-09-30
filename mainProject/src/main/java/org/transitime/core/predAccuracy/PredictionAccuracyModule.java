@@ -70,7 +70,7 @@ public class PredictionAccuracyModule extends Module {
 	
 	private static final IntegerConfigValue timeBetweenPollingPredictionsMsec = 
 			new IntegerConfigValue("transitime.predAccuracy.pollingRateMsec", 
-					3 * Time.MS_PER_MIN,
+					4 * Time.MS_PER_MIN,
 					"How frequently to query predictions for determining "
 					+ "prediction accuracy.");
 	
