@@ -167,11 +167,12 @@ public class Core {
 	}
 	
 	/**
-	 * For when need system time but might be in playback mode
-	 * @return
+	 * For when need system time but might be in playback mode. If in playback
+	 * mode then will be using a SettableSystemTime. 
+	 * @return The system epoch time
 	 */
-	public SystemTime getSystemTime() {
-		return systemTime;
+	public long getSystemTime() {
+		return systemTime.get();
 	}
 	
 	/**

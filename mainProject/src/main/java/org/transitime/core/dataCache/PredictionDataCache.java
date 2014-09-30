@@ -33,8 +33,6 @@ import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
 import org.transitime.utils.MapKey;
-import org.transitime.utils.SystemCurrentTime;
-import org.transitime.utils.SystemTime;
 
 /**
  * For storing and retrieving predictions by stop.
@@ -61,7 +59,7 @@ public class PredictionDataCache {
 
 	// This is a singleton class
 	private static PredictionDataCache singleton = 
-			new PredictionDataCache(new SystemCurrentTime());
+			new PredictionDataCache();
 	
 	// Contains lists of predictions per route/stop. Also want to group
 	// predictions by destination/trip head sign together so that can
@@ -83,10 +81,6 @@ public class PredictionDataCache {
 		predictionsMap =
 			new ConcurrentHashMap<MapKey, List<IpcPredictionsForRouteStopDest>>(1000);
 	
-	// For determining when prediction is obsolete (it is for before the
-	// current system time)
-	private final SystemTime systemTime;
-	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionDataCache.class);
 
@@ -103,24 +97,13 @@ public class PredictionDataCache {
 		return singleton;		
 	}
 	
-	/*
-	 * Can pass in either a regular SystemCurrentTime object or a 
-	 * SettableSystemTime if debugging or doing unit testing. Declared
-	 * private since this is a singleton class.
-	 * 
-	 * @param systemTime
-	 */
-	private PredictionDataCache(SystemTime systemTime) {
-		this.systemTime = systemTime;
-	}
-		
 	/**
 	 * Returns the current time. Can be based on the systems clock
 	 * but when in playback mode will be based on last AVL report.
 	 * @return
 	 */
-	public long getSystemTime() {
-		return systemTime.get();
+	private long getSystemTime() {
+		return Core.getInstance().getSystemTime();
 	}
 	
 	/**
@@ -474,7 +457,7 @@ public class PredictionDataCache {
 		
 		// Update the predictions for the route/stop/destination
 		currentPredsForRouteStopDest.updatePredictionsForVehicle(
-				newPredsForVehicleForRouteStopDest, systemTime.get());
+				newPredsForVehicleForRouteStopDest, getSystemTime());
 	}
 	
 	/**
@@ -502,7 +485,7 @@ public class PredictionDataCache {
 		// Remove old predictions so that they are not provided through the 
 		// API and such
 		for (IpcPredictionsForRouteStopDest preds : predictionsForRouteStop) {
-			preds.removeExpiredPredictions(systemTime.get());
+			preds.removeExpiredPredictions(getSystemTime());
 		}
 		
 		return predictionsForRouteStop;

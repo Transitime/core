@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.Location;
 import org.transitime.gtfs.StopsByLoc;
@@ -122,7 +123,7 @@ public class PredictionsServer
 	public List<IpcPredictionsForRouteStopDest> getAllPredictions(
 			int predictionMaxFutureSecs) {
 		// How far in future in absolute time should get predictions for
-		long maxSystemTimeForPrediction = predictionDataCache.getSystemTime() + 
+		long maxSystemTimeForPrediction = Core.getInstance().getSystemTime() + 
 				predictionMaxFutureSecs*Time.MS_PER_SEC;
 
 		return predictionDataCache.getAllPredictions(Integer.MAX_VALUE, 
