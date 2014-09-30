@@ -299,13 +299,14 @@ public class TemporalMatcher {
 			
 			// If looking at layover match and the match is different from 
 			// the previous one then it means we expect that the vehicle has
-			// arrived at the layover and gone beyond that. For this situation
+			// arrived at layover and perhaps gone beyond. For this situation
 			// need to add in the travel time as the crow flies from the last
 			// stop of the previous trip to the new location to determine how
 			// long it should really have taken for vehicle to get to the new
 			// location.
-			if (!previousMatch.getIndices().equals(spatialMatch.getIndices())
-					&& spatialMatch.isLayover()) {
+			if (spatialMatch.isLayover()
+					&& !previousMatch.getIndices().equalStopPath(
+							spatialMatch.getIndices())) {
 				expectedTravelTimeMsec += TravelTimes
 						.travelTimeFromLayoverArrivalToNewLoc(spatialMatch,
 								avlReport.getLocation());
