@@ -139,13 +139,13 @@ public class IpcExtVehicle extends IpcVehicle {
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
 			String tripId, String tripPatternId, String directionId,
-			String headsign, boolean predictable,
+			String headsign, boolean predictable, boolean schedBasedPred,
 			TemporalDifference realTimeSchdAdh, boolean isLayover,
 			long layoverDepartureTime, String nextStopId, String vehicleType) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
-				predictable, realTimeSchdAdh, isLayover, layoverDepartureTime,
-				nextStopId, vehicleType);
+				predictable, schedBasedPred, realTimeSchdAdh, isLayover,
+				layoverDepartureTime, nextStopId, vehicleType);
 		
 		this.routeName = routeName;
 		this.originStopId = originStopId;
@@ -235,8 +235,8 @@ public class IpcExtVehicle extends IpcVehicle {
 					distanceAlongTrip, tripStartEpochTime, blockId,
 					blockAssignmentMethod, avl, heading, routeId,
 					routeShortName, tripId, tripPatternId, directionId,
-					headsign, predictable, realTimeSchdAdh, isLayover,
-					layoverDepartureTime, nextStopId, vehicleType);
+					headsign, predictable, schedBasedPred, realTimeSchdAdh,
+					isLayover, layoverDepartureTime, nextStopId, vehicleType);
 		}
 
 	} // End of class SiriVehicleSerializationProxy
@@ -300,6 +300,7 @@ public class IpcExtVehicle extends IpcVehicle {
 				+ ", directionId=" + getDirectionId()
 				+ ", headsign=" + getHeadsign()
 				+ ", predictable=" + isPredictable()
+				+ ", schedBasedPred=" + isForSchedBasedPred()
 				+ ", realTimeSchedAdh=" + getRealTimeSchedAdh() 
 				+ ", isLayover=" + isLayover()
 				+ ", nextStopId=" + getNextStopId() 

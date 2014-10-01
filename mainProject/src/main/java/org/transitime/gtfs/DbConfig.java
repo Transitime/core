@@ -559,8 +559,10 @@ public class DbConfig {
 			return blocksMap.get(blockId);
 		} else {
 			// Service ID was not specified so determine current ones for now
+			Date now = Core.getInstance().getSystemDate();
+			
 			List<String> currentServiceIds = 
-					Core.getInstance().getServiceUtils().getServiceIds(new Date());
+					Core.getInstance().getServiceUtils().getServiceIds(now);
 			for (String currentServiceId : currentServiceIds) {
 				Block block = getBlock(currentServiceId, blockId);
 				if (block != null)
@@ -573,6 +575,30 @@ public class DbConfig {
 		
 	}
 	
+	/**
+	 * Returns unmodifiable collection of blocks associated with the specified
+	 * serviceId.
+	 * 
+	 * @param serviceId
+	 * @return Blocks associated with service ID. If no blocks then an empty
+	 *         collection is returned instead of null.
+	 */
+	public Collection<Block> getBlocks(String serviceId) {
+		Map<String, Block> blocksForServiceMap = 
+				blocksByServiceMap.get(serviceId);
+		if (blocksForServiceMap != null) {
+			Collection<Block> blocksForService = blocksForServiceMap.values();
+			return Collections.unmodifiableCollection(blocksForService);
+		} else {
+			return new ArrayList<Block>(0);
+		}
+	}
+	
+	/**
+	 * Returns unmodifiable list of blocks for the agency.
+	 * 
+	 * @return blocks for the agency
+	 */
 	public List<Block> getBlocks() {
 		return Collections.unmodifiableList(blocks);
 	}

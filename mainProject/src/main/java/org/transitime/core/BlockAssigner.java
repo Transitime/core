@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.structs.AvlReport;
-import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
@@ -73,7 +72,7 @@ public class BlockAssigner {
 			DbConfig config = Core.getInstance().getDbConfig();
 
 			// If using block assignment...
-			if (avlReport.getAssignmentType()==AssignmentType.BLOCK_ID) {
+			if (avlReport.isBlockIdAssignmentType()) {
 				ServiceUtils service = Core.getInstance().getServiceUtils();
 				List<String> serviceIds = 
 						service.getServiceIds(avlReport.getDate());
@@ -98,7 +97,7 @@ public class BlockAssigner {
 							avlReport.getAssignmentId(), 
 							serviceIds);
 				}
-			} else if (avlReport.getAssignmentType()==AssignmentType.TRIP_ID) {
+			} else if (avlReport.isTripIdAssignmentType()) {
 				// Using trip ID
 				Trip trip = config.getTrip(avlReport.getAssignmentId());
 				if (trip != null) {
@@ -115,7 +114,7 @@ public class BlockAssigner {
 							avlReport.getVehicleId(), 
 							avlReport.getAssignmentId());
 				}
-			} else if (avlReport.getAssignmentType()==AssignmentType.TRIP_SHORT_NAME) {
+			} else if (avlReport.isTripShortNameAssignmentType()) {
 				// Using trip short name
 				String tripShortName = avlReport.getAssignmentId();
 				Trip trip = config.getTripUsingTripShortName(tripShortName);
@@ -150,7 +149,7 @@ public class BlockAssigner {
 	public String getRouteIdAssignment(AvlReport avlReport) {
 		if (avlReport != null
 				&& avlReport.getAssignmentId() != null
-				&& avlReport.getAssignmentType() == AssignmentType.ROUTE_ID) {
+				&& avlReport.isRouteIdAssignmentType()) {
 			// Route ID specified so return it
 			return avlReport.getAssignmentId();
 		} else {

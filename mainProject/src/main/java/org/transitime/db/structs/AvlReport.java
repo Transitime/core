@@ -115,7 +115,15 @@ public class AvlReport implements Serializable {
 	private String assignmentId;  // optional
 	
 	// The type of the assignment received in the AVL feed
-	public enum AssignmentType {UNSET, BLOCK_ID, ROUTE_ID, TRIP_ID, TRIP_SHORT_NAME};
+	public enum AssignmentType {
+		UNSET, 
+		BLOCK_ID,
+		// For when creating schedule based predictions
+		BLOCK_FOR_SCHED_BASED_PREDS, 
+		ROUTE_ID, 
+		TRIP_ID, 
+		TRIP_SHORT_NAME
+	};
 	
 	@Column(length=40)
 	@Enumerated(EnumType.STRING)
@@ -671,6 +679,30 @@ public class AvlReport implements Serializable {
 		return assignmentType;
 	}
 	
+	/**
+	 * Returns true if AVL report indicates that assignment is a block
+	 * assignment type such as AssignmentType.BLOCK_ID or
+	 * AssignmentType.BLOCK_FOR_SCHED_BASED_PREDS.
+	 * 
+	 * @return true if block assignment
+	 */
+	public boolean isBlockIdAssignmentType() {
+		return assignmentType == AssignmentType.BLOCK_ID 
+				|| assignmentType == AssignmentType.BLOCK_FOR_SCHED_BASED_PREDS;
+	}
+	
+	public boolean isTripIdAssignmentType() {
+		return assignmentType == AssignmentType.TRIP_ID;
+	}
+	
+	public boolean isTripShortNameAssignmentType() {
+		return assignmentType == AssignmentType.TRIP_SHORT_NAME;
+	}
+	
+	public boolean isRouteIdAssignmentType() {
+		return assignmentType == AssignmentType.ROUTE_ID;
+	}
+	
 	private static boolean unpredictableAssignmentsPatternInitialized = false;
 	private static Pattern regExPattern = null;
 	
@@ -836,6 +868,16 @@ public class AvlReport implements Serializable {
 		return field1Value;
 	}
 
+	/**
+	 * Returns true if the AVL report is configured to indicate that it was
+	 * created to generate schedule based predictions.
+	 * 
+	 * @return true if for schedule based predictions
+	 */
+	public boolean isForSchedBasedPreds() {
+		return assignmentType == AssignmentType.BLOCK_FOR_SCHED_BASED_PREDS;
+	}
+	
 	@Override
 	public String toString() {
 		return "AvlReport [" +

@@ -488,6 +488,17 @@ public class VehicleState {
 	}
 	
 	/**
+	 * Returns true if not a real vehicle but instead was created to produce
+	 * schedule based predictions.
+	 * 
+	 * @return true if for schedule based predictions
+	 */
+	public boolean isForSchedBasedPreds() {
+		AvlReport avlReport = getAvlReport();
+		return avlReport != null && avlReport.isForSchedBasedPreds();
+	}
+	
+	/**
 	 * Records the specified arrival as one that still needs to be stored to the
 	 * db. This is important because can generate arrivals into the future but
 	 * need to make sure that the arrival is before the subsequent departure and

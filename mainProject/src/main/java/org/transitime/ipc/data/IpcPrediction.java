@@ -23,6 +23,7 @@ import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
@@ -52,6 +53,7 @@ public class IpcPrediction implements Serializable {
 	private final String tripPatternId;
 	private final String blockId;
 	private final long predictionTime;
+	private final boolean schedBasedPred;
 	// The time of the fix so can tell how stale prediction is
 	private final long avlTime;
 	// The time the AVL data was processed and the prediction was created.
@@ -76,26 +78,20 @@ public class IpcPrediction implements Serializable {
 	/**
 	 * Constructs a Prediction object. For use on server side.
 	 * 
-	 * @param vehicleId
+	 * @param avlReport
 	 * @param stopId
 	 * @param gtfsStopSeq
 	 * @param trip
 	 *            Can be set to null for testing but usually will be a valid
 	 *            trip
 	 * @param predictionTime
-	 * @param avlTime
-	 * @param creationTime
 	 * @param predictionAffectedByWaitStop
-	 * @param driverId
-	 * @param passengerCount
-	 * @param passengerFullness
 	 * @param isArrival
 	 */
-	public IpcPrediction(String vehicleId, String stopId, int gtfsStopSeq,
-			Trip trip, long predictionTime, long avlTime, long creationTime,
-			boolean predictionAffectedByWaitStop, String driverId,
-			int passengerCount, float passengerFullness, boolean isArrival) {
-		this.vehicleId = vehicleId;
+	public IpcPrediction(AvlReport avlReport, String stopId, int gtfsStopSeq,
+			Trip trip, long predictionTime,
+			boolean predictionAffectedByWaitStop, boolean isArrival) {
+		this.vehicleId = avlReport.getVehicleId();
 		this.routeId = trip.getRouteId();
 		this.stopId = stopId;
 		this.gtfsStopSeq = gtfsStopSeq;
@@ -107,12 +103,13 @@ public class IpcPrediction implements Serializable {
 		this.tripPatternId = trip != null ? trip.getTripPattern().getId() : "";
 		this.blockId = trip != null ? trip.getBlockId() : null;
 		this.predictionTime = predictionTime;
-		this.avlTime = avlTime;
-		this.creationTime = creationTime;
+		this.schedBasedPred = avlReport.isForSchedBasedPreds();
+		this.avlTime = avlReport.getTime();
+		this.creationTime = avlReport.getTimeProcessed();
 		this.affectedByWaitStop = predictionAffectedByWaitStop;
-		this.driverId = driverId;
-		this.passengerCount = (short) passengerCount;
-		this.passengerFullness = passengerFullness;
+		this.driverId = avlReport.getDriverId();
+		this.passengerCount = (short) avlReport.getPassengerCount();
+		this.passengerFullness = avlReport.getPassengerFullness();
 		this.isArrival = isArrival;
 
 		// Log each creation of a Prediction
@@ -124,10 +121,11 @@ public class IpcPrediction implements Serializable {
 	 * because only used internally by the proxy class.
 	 */
 	private IpcPrediction(String vehicleId, String routeId, String stopId,
-			int gtfsStopSeq, String tripId, String tripPatternId, String blockId,
-			long predictionTime, long avlTime, long creationTime,
-			boolean affectedByWaitStop, String driverId, short passengerCount,
-			float passengerFullness, boolean isArrival) {
+			int gtfsStopSeq, String tripId, String tripPatternId,
+			String blockId, long predictionTime, boolean schedBasedPred,
+			long avlTime, long creationTime, boolean affectedByWaitStop,
+			String driverId, short passengerCount, float passengerFullness,
+			boolean isArrival) {
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
 		this.stopId = stopId;
@@ -138,6 +136,7 @@ public class IpcPrediction implements Serializable {
 		this.tripPatternId = tripPatternId;
 		this.blockId = blockId;
 		this.predictionTime = predictionTime;
+		this.schedBasedPred = schedBasedPred;
 		this.avlTime = avlTime;
 		this.creationTime = creationTime;
 		this.affectedByWaitStop = affectedByWaitStop;
@@ -161,6 +160,7 @@ public class IpcPrediction implements Serializable {
 		private String tripPatternId;
 		private String blockId;
 		private long predictionTime;
+		private boolean schedBasedPred;
 		private long avlTime;
 		private long creationTime;
 		private boolean affectedByWaitStop;
@@ -184,6 +184,7 @@ public class IpcPrediction implements Serializable {
 			this.tripPatternId = p.tripPatternId;
 			this.blockId = p.blockId;
 			this.predictionTime = p.predictionTime;
+			this.schedBasedPred = p.schedBasedPred;
 			this.avlTime = p.avlTime;
 			this.creationTime = p.creationTime;
 			this.affectedByWaitStop = p.affectedByWaitStop;
@@ -211,6 +212,7 @@ public class IpcPrediction implements Serializable {
 			stream.writeObject(tripPatternId);
 			stream.writeObject(blockId);
 			stream.writeLong(predictionTime);
+			stream.writeBoolean(schedBasedPred);
 			stream.writeLong(avlTime);
 			stream.writeLong(creationTime);
 			stream.writeBoolean(affectedByWaitStop);
@@ -241,6 +243,7 @@ public class IpcPrediction implements Serializable {
 			tripPatternId = (String) stream.readObject();
 			blockId = (String) stream.readObject();
 			predictionTime = stream.readLong();
+			schedBasedPred = stream.readBoolean();
 			avlTime = stream.readLong();
 			creationTime = stream.readLong();
 			affectedByWaitStop = stream.readBoolean();
@@ -258,9 +261,9 @@ public class IpcPrediction implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
-					tripId, tripPatternId, blockId, predictionTime, avlTime,
-					creationTime, affectedByWaitStop, driverId, passengerCount,
-					passengerFullness, isArrival);
+					tripId, tripPatternId, blockId, predictionTime,
+					schedBasedPred, avlTime, creationTime, affectedByWaitStop,
+					driverId, passengerCount, passengerFullness, isArrival);
 		}
 	}
 
@@ -297,6 +300,7 @@ public class IpcPrediction implements Serializable {
 				+ ", tripPatternId=" + tripPatternId
 				+ ", block=" + blockId
 				+ ", predTime="	+ Time.timeStrMsecNoTimeZone(predictionTime)
+				+ ", schedBasedPred=" + schedBasedPred
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
 				+ ", createTime=" + Time.timeStrMsecNoTimeZone(creationTime)
 				+ ", waitStop="	+ (affectedByWaitStop ? "t" : "f")
@@ -344,6 +348,10 @@ public class IpcPrediction implements Serializable {
 		return predictionTime;
 	}
 
+	public boolean isSchedBasedPred() {
+		return schedBasedPred;
+	}
+	
 	public boolean isAffectedByWaitStop() {
 		return affectedByWaitStop;
 	}

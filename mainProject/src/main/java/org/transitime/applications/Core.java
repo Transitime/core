@@ -17,6 +17,7 @@
 package org.transitime.applications;
 
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -168,11 +169,21 @@ public class Core {
 	
 	/**
 	 * For when need system time but might be in playback mode. If in playback
-	 * mode then will be using a SettableSystemTime. 
+	 * mode then will be using a SettableSystemTime.
+	 * 
 	 * @return The system epoch time
 	 */
 	public long getSystemTime() {
 		return systemTime.get();
+	}
+	
+	/**
+	 * For when need system time but might be in playback mode. If in playback
+	 * mode then will be using a SettableSystemTime.
+	 * 
+	 * @return The system epoch time
+	 */	public Date getSystemDate() {
+		return new Date(getSystemTime());
 	}
 	
 	/**

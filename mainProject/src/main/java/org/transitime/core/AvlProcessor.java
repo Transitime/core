@@ -859,7 +859,8 @@ public class AvlProcessor {
 		avlReport.setTimeProcessed();
 
 		// Store the AVL report into the database
-		if (!CoreConfig.onlyNeedArrivalDepartures())
+		if (!CoreConfig.onlyNeedArrivalDepartures() 
+				&& !avlReport.isForSchedBasedPreds())
 			Core.getInstance().getDbLogger().add(avlReport);
 		
 		// If any vehicles have timed out then handle them. This is done

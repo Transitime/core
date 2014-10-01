@@ -363,6 +363,27 @@ public final class Block implements Serializable {
 	}
 	
 	/**
+	 * Returns true if the time of day of the date passed in is between
+	 * allowableBeforeTimeSecs before the startTime and the endTime for the
+	 * block. No leeway is provided for the end time. Note: does not look to see
+	 * if the service associated with the block is active. Only looks at time of
+	 * day.
+	 * 
+	 * @param date
+	 * @return True if the block is active.
+	 */
+	public boolean isActive(Date date, int allowableBeforeTimeSecs) {
+		int secsInDayForAvlReport = 
+				Core.getInstance().getTime().getSecondsIntoDay(date);
+
+		return (secsInDayForAvlReport > startTime - allowableBeforeTimeSecs
+						&& secsInDayForAvlReport < endTime)
+				// also handle where date before midnight but start time is after
+				|| (secsInDayForAvlReport > startTime+Time.SEC_PER_DAY - allowableBeforeTimeSecs
+						&& secsInDayForAvlReport < endTime+Time.SEC_PER_DAY);		
+	}
+
+	/**
 	 * Returns true if the time of day of the date passed in is between the
 	 * startTime and the endTime for the block. No leeway is provided. Note:
 	 * does not look to see if the service associated with the block is active.
@@ -372,13 +393,29 @@ public final class Block implements Serializable {
 	 * @return True if the block is active.
 	 */
 	public boolean isActive(Date date) {
+		return isActive(date, 0);
+	}
+	
+	/**
+	 * Returns true if the time of day of the date passed in is between
+	 * allowableBeforeTimeSecs before the start time and the start time.
+	 * 
+	 * @param date
+	 * @param allowableBeforeTimeSecs
+	 * @return true if within allowableBeforeTimeSecs before the start time of
+	 *         the block
+	 */
+	public boolean isBeforeStartTime(Date date, int allowableBeforeTimeSecs) {
 		int secsInDayForAvlReport = 
 				Core.getInstance().getTime().getSecondsIntoDay(date);
 
-		return secsInDayForAvlReport > startTime 
-				&& secsInDayForAvlReport < endTime;
+		return (secsInDayForAvlReport > startTime - allowableBeforeTimeSecs
+						&& secsInDayForAvlReport < startTime)
+				// also handle where date before midnight but start time is after
+				|| (secsInDayForAvlReport > startTime+Time.SEC_PER_DAY - allowableBeforeTimeSecs
+						&& secsInDayForAvlReport < startTime+Time.SEC_PER_DAY);
 	}
-
+	
 	/**
 	 * If the trip is active at the secsInDayForAvlReport then it is
 	 * added to the tripsThatMatchTime list. Trip is considered active
@@ -822,6 +859,16 @@ public final class Block implements Serializable {
 	}
 	
 	/**
+	 * Returns the location of the first stop of the block.
+	 * 
+	 * @return
+	 */
+	public Location getStartLoc() {
+		StopPath firstStopPath = getStopPath(0, 0);
+		return firstStopPath.getEndOfPathLocation();
+	}
+	
+	/**
 	 * Returns the previous path specified by tripIndex and stopPathIndex
 	 * params. If wrapping back past beginning of block (where
 	 * tripIndex becomes negative) then returns null.
@@ -872,7 +919,7 @@ public final class Block implements Serializable {
 	}
 	
 	/**
-	 * @return true if block is schedule based
+	 * @return true if block is schedule based as opposed to headway based
 	 */
 	public boolean isScheduleBased() {
 		return headwaySecs < 0;
