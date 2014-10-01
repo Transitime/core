@@ -28,7 +28,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.DbConfig;
+import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.webstructs.ApiKey;
 import org.transitime.utils.Time;
@@ -66,7 +66,7 @@ public class ApiKeyManager {
     private ApiKeyManager() {
 	// Set the name of the db to get the data from.
 	// Use the db name, such as "web".
-	dbName = DbConfig.getDbName();
+	dbName = DbSetupConfig.getDbName();
 	
 	// Create the cache. Cache will actually be populated when first
 	// checking if key is valid. This way don't do a db read at startup.
@@ -132,7 +132,7 @@ public class ApiKeyManager {
      * @return
      */
     public List<ApiKey> getApiKeys() {
-	Session session = HibernateUtils.getSession(DbConfig.getDbName());
+	Session session = HibernateUtils.getSession(DbSetupConfig.getDbName());
 	return ApiKey.getApiKeys(session);
     }
 
