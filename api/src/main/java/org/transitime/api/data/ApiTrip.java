@@ -43,6 +43,9 @@ public class ApiTrip {
     private String id;
 
     @XmlAttribute
+    private String shortName;
+
+    @XmlAttribute
     private Integer startTime;
 
     @XmlAttribute
@@ -89,6 +92,7 @@ public class ApiTrip {
     public ApiTrip(IpcTrip ipcTrip, boolean includeStopPaths) {
 	configRev = ipcTrip.getConfigRev();
 	id = ipcTrip.getId();
+	shortName = ipcTrip.getShortName();
 	startTime = ipcTrip.getStartTime();
 	endTime = ipcTrip.getEndTime();
 	directionId = ipcTrip.getDirectionId();
