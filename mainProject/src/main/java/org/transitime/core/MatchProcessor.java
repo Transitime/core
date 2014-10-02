@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.db.structs.DbPrediction;
+import org.transitime.db.structs.Prediction;
 import org.transitime.db.structs.Match;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.Time;
@@ -81,7 +81,7 @@ public class MatchProcessor {
 				if (prediction.getTime() - prediction.getAvlTime() < CoreConfig
 						.getMaxPredictionsTimeForDbSecs() * Time.MS_PER_SEC) {
 					// Store the prediction into db
-					DbPrediction dbPrediction = new DbPrediction(prediction);
+					Prediction dbPrediction = new Prediction(prediction);
 					Core.getInstance().getDbLogger().add(dbPrediction);
 				}
 			}

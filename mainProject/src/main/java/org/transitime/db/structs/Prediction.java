@@ -35,14 +35,14 @@ import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.ipc.data.IpcPrediction;
 
 /**
- * For persisting a prediction.
+ * For persisting a prediction. 
  *
  * @author SkiBu Smith
  *
  */
 @Entity @DynamicUpdate 
 @Table(name="Predictions") 
-public class DbPrediction implements Serializable {
+public class Prediction implements Serializable {
 		
 	// Need an ID but using a regular column doesn't really make
 	// sense. So use an auto generated one. Not final since 
@@ -81,6 +81,9 @@ public class DbPrediction implements Serializable {
 	@Column
 	private final boolean isArrival;
 
+	@Column
+	private final boolean schedBasedPred;
+	
 	// Needed because Hibernate objects must be serializable
 	private static final long serialVersionUID = 3966430062434375435L;
 
@@ -99,9 +102,9 @@ public class DbPrediction implements Serializable {
 	 * @param affectedByWaitStop
 	 * @param isArrival
 	 */
-	public DbPrediction(long predictionTime, long creationTime, 
+	public Prediction(long predictionTime, long creationTime, 
 			String vehicleId, String stopId, String tripId, String routeId, 
-			boolean affectedByWaitStop, boolean isArrival) {
+			boolean affectedByWaitStop, boolean isArrival, boolean schedBasedPred) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.predictionTime = new Date(predictionTime);
 		this.creationTime = new Date(creationTime);
@@ -111,9 +114,10 @@ public class DbPrediction implements Serializable {
 		this.routeId = routeId;
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.isArrival = isArrival;
+		this.schedBasedPred = schedBasedPred;
 	}
 	
-	public DbPrediction(IpcPrediction prediction) {
+	public Prediction(IpcPrediction prediction) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.predictionTime = new Date(prediction.getTime());
 		this.creationTime = new Date(prediction.getCreationTime());
@@ -122,14 +126,15 @@ public class DbPrediction implements Serializable {
 		this.tripId = prediction.getTripId();
 		this.routeId = prediction.getTrip().getRouteId();
 		this.affectedByWaitStop = prediction.isAffectedByWaitStop();
-		this.isArrival = prediction.isArrival();	
+		this.isArrival = prediction.isArrival();
+		this.schedBasedPred = prediction.isSchedBasedPred();
 	}
 	
 	/**
 	 * Hibernate requires a no-arg constructor for reading objects
 	 * from database.
 	 */
-	protected DbPrediction() {
+	protected Prediction() {
 		this.configRev = -1;
 		this.predictionTime = null;
 		this.creationTime = null;
@@ -139,6 +144,7 @@ public class DbPrediction implements Serializable {
 		this.routeId = null;
 		this.affectedByWaitStop = false;
 		this.isArrival = false;
+		this.schedBasedPred= false;
 	}
 
 	/**
@@ -149,14 +155,15 @@ public class DbPrediction implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (affectedByWaitStop ? 1231 : 1237);
+		result = prime * result + configRev;
 		result = prime * result
 				+ ((creationTime == null) ? 0 : creationTime.hashCode());
-		result = prime * result + configRev;
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + (isArrival ? 1231 : 1237);
 		result = prime * result
 				+ ((predictionTime == null) ? 0 : predictionTime.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
+		result = prime * result + (schedBasedPred ? 1231 : 1237);
 		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		result = prime * result
@@ -175,15 +182,15 @@ public class DbPrediction implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DbPrediction other = (DbPrediction) obj;
+		Prediction other = (Prediction) obj;
 		if (affectedByWaitStop != other.affectedByWaitStop)
+			return false;
+		if (configRev != other.configRev)
 			return false;
 		if (creationTime == null) {
 			if (other.creationTime != null)
 				return false;
 		} else if (!creationTime.equals(other.creationTime))
-			return false;
-		if (configRev != other.configRev)
 			return false;
 		if (id != other.id)
 			return false;
@@ -198,6 +205,8 @@ public class DbPrediction implements Serializable {
 			if (other.routeId != null)
 				return false;
 		} else if (!routeId.equals(other.routeId))
+			return false;
+		if (schedBasedPred != other.schedBasedPred)
 			return false;
 		if (stopId == null) {
 			if (other.stopId != null)
@@ -219,7 +228,7 @@ public class DbPrediction implements Serializable {
 
 	@Override
 	public String toString() {
-		return "DbPrediction [" 
+		return "Prediction [" 
 				+ "predictionTime=" + predictionTime
 				+ ", creationTime=" + creationTime 
 				+ ", vehicleId=" + vehicleId
@@ -227,7 +236,8 @@ public class DbPrediction implements Serializable {
 				+ ", tripId=" + tripId 
 				+ ", routeId=" + routeId 
 				+ ", affectedByWaitStop=" + affectedByWaitStop
-				+ ", isArrival=" + isArrival 
+				+ ", isArrival=" + isArrival
+				+ ", schedBasedPred=" + schedBasedPred
 				+ "]";
 	}
 
@@ -261,5 +271,9 @@ public class DbPrediction implements Serializable {
 
 	public boolean isArrival() {
 		return isArrival;
+	}
+	
+	public boolean isSchedBasedPred() {
+		return schedBasedPred;
 	}
 }

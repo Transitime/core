@@ -250,6 +250,7 @@
         isArrival boolean,
         predictionTime timestamp,
         routeId varchar(60),
+        schedBasedPred boolean,
         stopId varchar(60),
         tripId varchar(60),
         vehicleId varchar(60),
