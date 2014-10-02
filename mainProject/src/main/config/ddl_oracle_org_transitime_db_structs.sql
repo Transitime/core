@@ -226,6 +226,7 @@
         isArrival number(1,0),
         predictionTime timestamp,
         routeId varchar2(60 char),
+        schedBasedPred number(1,0),
         stopId varchar2(60 char),
         tripId varchar2(60 char),
         vehicleId varchar2(60 char),
