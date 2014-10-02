@@ -29,18 +29,17 @@ import org.transitime.ipc.data.IpcVehicle;
 /**
  * Contains data for a single vehicle with additional info that is meant more
  * for management than for passengers.
- * <p>
- * Note: unfortunately cannot put the attributes in this class after the
- *  attributes of the parent class.
  *
  * @author SkiBu Smith
  *
  */
 @XmlRootElement(name="vehicle")
-@XmlType(propOrder = { "scheduleAdherence", "scheduleAdherenceStr", "blockId",
+@XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
+	"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc",
+	"scheduleAdherence", "scheduleAdherenceStr", "blockId",
 	"blockAssignmentMethod", "tripId", "tripPatternId", "isLayover",
-	"layoverDepartureTime", "nextStopId", "driverId" })
-public class ApiVehicleDetails extends ApiVehicle {
+	"layoverDepartureTime", "nextStopId", "driverId"})
+public class ApiVehicleDetails extends ApiVehicleAbstract {
 
     // Note: needs to be Integer instead of an int because it can be null
     // (for vehicles that are not predictable)

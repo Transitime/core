@@ -17,8 +17,6 @@
 
 package org.transitime.api.data;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -38,36 +36,7 @@ import org.transitime.ipc.data.IpcVehicle;
 @XmlRootElement
 @XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
 	"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc" })
-public class ApiVehicle {
-    
-    @XmlAttribute
-    protected String id;
-    
-    @XmlElement
-    protected ApiGpsLocation loc;
-    
-    @XmlAttribute
-    protected String routeId;
-    
-    @XmlAttribute(name="rShortName")
-    protected String routeShortName;
-    
-    @XmlAttribute
-    protected String headsign;
-    
-    @XmlAttribute(name="direction")
-    protected String directionId;
-    
-    @XmlAttribute
-    protected String vehicleType;
-    
-    // Whether NORMAL, SECONDARY, or MINOR. Specifies how vehicle should
-    // be drawn in the UI
-    @XmlAttribute
-    protected String uiType;
-    
-    @XmlAttribute(name="scheduleBased")
-    protected Boolean schedBasedPreds;
+public class ApiVehicle extends ApiVehicleAbstract {
     
     /**
      * Need a no-arg constructor for Jersey. Otherwise get really 
@@ -85,28 +54,7 @@ public class ApiVehicle {
      *            If should be labeled as "minor" in output for UI.
      */
     public ApiVehicle(IpcVehicle vehicle, UiMode uiType) {
-	id = vehicle.getId();
-	loc = new ApiGpsLocation(vehicle);
-	routeId = vehicle.getRouteId();
-	routeShortName = vehicle.getRouteShortName();
-	headsign = vehicle.getHeadsign();
-	directionId = vehicle.getDirectionId();
-
-	// Set GTFS vehicle type. If it was not set in the config then use
-	// default value of "3" which is for buses.
-	vehicleType = vehicle.getVehicleType();
-	if (vehicleType == null)
-	    vehicleType = "3";
-	
-	// Determine UI type. Usually will be displaying vehicles
-	// as NORMAL. To simplify API use null for this case. 
-	this.uiType = null;
-	if (uiType == UiMode.SECONDARY)
-	    this.uiType = "secondary";
-	else if (uiType == UiMode.MINOR)
-	    this.uiType = "minor";
-	
-	this.schedBasedPreds = vehicle.isForSchedBasedPred() ? true : null;
+	super(vehicle, uiType);
     }
 
 }
