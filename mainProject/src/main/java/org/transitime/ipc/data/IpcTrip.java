@@ -33,6 +33,7 @@ public class IpcTrip implements Serializable {
 
 	private final int configRev;
 	private final String id;
+	private final String shortName;
 	private Integer startTime;
 	private Integer endTime;
 	private final String directionId;
@@ -53,6 +54,7 @@ public class IpcTrip implements Serializable {
 	public IpcTrip(Trip dbTrip) {
 		configRev = dbTrip.getConfigRev();
 		id = dbTrip.getId();
+		shortName = dbTrip.getShortName();
 		startTime = dbTrip.getStartTime();
 		endTime = dbTrip.getEndTime();
 		directionId = dbTrip.getDirectionId();
@@ -76,6 +78,7 @@ public class IpcTrip implements Serializable {
 		return "IpcTrip [" 
 				+ "configRev=" + configRev 
 				+ ", id=" + id
+				+ ", shortName=" + shortName
 				+ ", startTime=" + startTime 
 				+ ", endTime=" + endTime
 				+ ", directionId=" + directionId 
@@ -98,6 +101,10 @@ public class IpcTrip implements Serializable {
 		return id;
 	}
 
+	public String getShortName() {
+		return shortName;
+	}
+	
 	public Integer getStartTime() {
 		return startTime;
 	}
