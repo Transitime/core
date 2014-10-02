@@ -37,7 +37,7 @@ import org.transitime.ipc.data.IpcVehicle;
  */
 @XmlRootElement
 @XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
-	"directionId", "vehicleType", "uiType", "loc" })
+	"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc" })
 public class ApiVehicle {
     
     @XmlAttribute
@@ -65,6 +65,9 @@ public class ApiVehicle {
     // be drawn in the UI
     @XmlAttribute
     protected String uiType;
+    
+    @XmlAttribute(name="scheduleBased")
+    protected Boolean schedBasedPreds;
     
     /**
      * Need a no-arg constructor for Jersey. Otherwise get really 
@@ -102,6 +105,8 @@ public class ApiVehicle {
 	    this.uiType = "secondary";
 	else if (uiType == UiMode.MINOR)
 	    this.uiType = "minor";
+	
+	this.schedBasedPreds = vehicle.isForSchedBasedPred() ? true : null;
     }
 
 }

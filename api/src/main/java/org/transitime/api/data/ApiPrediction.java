@@ -40,6 +40,9 @@ public class ApiPrediction {
     @XmlAttribute(name="min")
     private int minutes;
     
+    @XmlAttribute(name="scheduleBased")
+    protected Boolean schedBasedPreds;
+
     // Most of the time will be predicting arrival predictions. Therefore
     // isDeparture will only be displayed for the more rare times that
     // departure prediction is being provided.
@@ -78,6 +81,11 @@ public class ApiPrediction {
 	// Always round down minutes to be conservative and so that user
 	// doesn't miss bus.
 	minutes = seconds / 60;
+	
+	// Only set schedBasedPreds if it is schedule based so that the 
+	// attribute is not output for the majority of the times that it 
+	// is not schedule based.
+	schedBasedPreds = prediction.isSchedBasedPred() ? true : null;	
 	
 	if (!prediction.isArrival())
 	    isDeparture = "t";
