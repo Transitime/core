@@ -584,6 +584,21 @@ public class AvlProcessor {
 	}
 	
 	/**
+	 * For when don't have valid assignment for vehicle. Sets the match to null
+	 * for the VehicleState.
+	 * 
+	 * @param vehicleState
+	 */
+	private void nullOutMatch(VehicleState vehicleState) {
+		logger.info("For vehicleId={} the assignmentId={} is not valid "
+				+ "assignment so setting match to null.", 
+				vehicleState.getVehicleId(), 
+				vehicleState.getAvlReport().getAssignmentId());
+		
+		vehicleState.setMatch(null);
+	}
+
+	/**
 	 * Looks at the last match in vehicleState to determine if at end of block
 	 * assignment. Updates vehicleState if at end of block. Note that this will
 	 * not always work since might not actually get an AVL report that matches
@@ -774,7 +789,7 @@ public class AvlProcessor {
 				// specifies that the vehicle is not predictable. In the 
 				// future might want to change code to try to auto assign 
 				// vehicle.
-				vehicleState.setMatch(null);
+				nullOutMatch(vehicleState);
 			}
 
 			// If the last match is actually valid then generate associated
