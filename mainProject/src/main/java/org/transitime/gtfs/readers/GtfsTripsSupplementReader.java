@@ -32,7 +32,7 @@ import org.transitime.utils.csv.CsvBaseReader;
 public class GtfsTripsSupplementReader extends CsvBaseReader<GtfsTrip> {
 
 	public GtfsTripsSupplementReader(String dirName) {
-		super(dirName, "stops.txt", false, true);
+		super(dirName, "trips.txt", false, true);
 	}
 	
 	@Override
