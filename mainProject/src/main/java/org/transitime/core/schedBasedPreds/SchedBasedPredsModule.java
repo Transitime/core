@@ -138,7 +138,7 @@ public class SchedBasedPredsModule extends Module {
 		// For each active block see if no associated vehicle
 		for (Block block : activeBlocks) {
 			// Is there a vehicle associated with the block?
-			List<String> vehiclesForBlock = VehicleDataCache.getInstance()
+			Collection<String> vehiclesForBlock = VehicleDataCache.getInstance()
 					.getVehiclesByBlockId(block.getId());
 			if (vehiclesForBlock == null || vehiclesForBlock.isEmpty()) {
 				// No vehicle associated with the active block so create a
