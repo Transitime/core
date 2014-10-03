@@ -115,8 +115,8 @@ public class PredictionAccuracy implements Serializable {
 		this.arrivalDepartureTime = arrivalDepartureTime;
 		this.predictedTime = predictedTime;
 		this.predictionReadTime = predictionReadTime;
-		this.predictionAccuracyMsecs = (int) (arrivalDepartureTime.getTime() 
-				- predictedTime.getTime());
+		this.predictionAccuracyMsecs = arrivalDepartureTime!= null ? 
+				(int) (arrivalDepartureTime.getTime() - predictedTime.getTime()) : 0;
 		this.predictionSource = predictionSource;
 		this.vehicleId = vehicleId;
 	}
