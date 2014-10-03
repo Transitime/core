@@ -17,6 +17,7 @@
 package org.transitime.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -82,7 +83,7 @@ public class AvlProcessor {
 	
 	/**
 	 * Removes predictions and the match for the vehicle and marks
-	 * it as unpredictable.
+	 * it as unpredictable. Updates VehicleDataCache.
 	 * 
 	 * @param vehicleId
 	 *            The vehicle to be made unpredictable
@@ -120,7 +121,10 @@ public class AvlProcessor {
 	}
 
 	/**
+	 * Marks the vehicle as not being predictable and that the assignment has
+	 * been grabbed. Updates VehicleDataCache.
 	 * 
+	 * @param vehicleState
 	 */
 	public void makeVehicleUnpredictableAndGrabAssignment(
 			VehicleState vehicleState) {
@@ -506,25 +510,22 @@ public class AvlProcessor {
 	 */
 	private void unassignOtherVehiclesFromBlock(Block block, 
 			String newVehicleId) {
-		// If block doesn't need to be exclusive then don't need to 
-		// unassign any other vehicle.
-		if (!block.shouldBeExclusive())
-			return;
-		
 		// Determine vehicles assigned to block
-		List<String> vehiclesAssignedToBlock = 
+		Collection<String> vehiclesAssignedToBlock = 
 				VehicleDataCache.getInstance().getVehiclesByBlockId(block.getId());
 		
 		// For each vehicle assigned to the block unassign it
 		VehicleStateManager stateManager = VehicleStateManager.getInstance();
 		for (String vehicleId : vehiclesAssignedToBlock) {
-			logger.info("Assigning vehicleId={} to blockId={} but vehicleId={} "
-					+ "already assigned to that block so removing assignment "
-					+ "from that vehicle.",
-					newVehicleId, block.getId(), vehicleId);
 			VehicleState vehicleState =
 					stateManager.getVehicleState(vehicleId);
-			makeVehicleUnpredictableAndGrabAssignment(vehicleState);
+			if (block.shouldBeExclusive() || vehicleState.isForSchedBasedPreds()) {
+				logger.info("Assigning vehicleId={} to blockId={} but "
+						+ "vehicleId={} already assigned to that block so "
+						+ "removing assignment from that vehicle.",
+						newVehicleId, block.getId(), vehicleId);
+				makeVehicleUnpredictableAndGrabAssignment(vehicleState);
+			}
 		}
 	}
 	

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.transitime.applications.Core;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
 import org.transitime.ipc.data.IpcExtVehicle;
+import org.transitime.utils.ConcurrentHashMapNullKeyOk;
 import org.transitime.utils.Time;
 
 /**
@@ -49,19 +51,19 @@ public class VehicleDataCache {
 
     // Keyed by vehicle ID
     private Map<String, IpcExtVehicle> vehiclesMap = 
-    		new HashMap<String, IpcExtVehicle>();
+    		new ConcurrentHashMap<String, IpcExtVehicle>();
 
     // Keyed by route_short_name. For each route there is a submap
     // that is keyed by vehicle.
     private Map<String, Map<String, IpcExtVehicle>> vehiclesByRouteMap = 
-    		new HashMap<String, Map<String, IpcExtVehicle>>();
+    		new ConcurrentHashMapNullKeyOk<String, Map<String, IpcExtVehicle>>();
 
     // So can determine vehicles associated with a block ID. Keyed on
     // block ID. Each block can have a list of vehicle IDs. Though rare
     // there are situations where multiple vehicles might have the
     // same assignment, such as for unscheduled assignments. 
     private Map<String, List<String>> vehicleIdsByBlockMap =
-    		new HashMap<String, List<String>>();
+    		new ConcurrentHashMapNullKeyOk<String, List<String>>();
     
 	// For filtering out info more than MAX_AGE since it means that the AVL info is
 	// obsolete and shouldn't be displayed.
@@ -88,19 +90,24 @@ public class VehicleDataCache {
     private VehicleDataCache() {
     }
 
-    /**
-     * Filters out vehicle info if it is too old.
-     * @param vehicles
-     * @return
-     */
-    private Collection<IpcExtVehicle> filtered(
+	/**
+	 * Filters out vehicle info if last GPS report is too old. Doesn't
+	 * filter out vehicles at layovers though because for those won't
+	 * get another report for a long time. This includes schedule based
+	 * vehicles.
+	 * 
+	 * @param vehicles
+	 * @return
+	 */
+    private Collection<IpcExtVehicle> filterOldAvlReports(
     		Collection<IpcExtVehicle> vehicles) {
     	Collection<IpcExtVehicle> filteredVehicles = 
 				new ArrayList<IpcExtVehicle>(vehicles.size());
     	
-    	long timeCutoff = System.currentTimeMillis() - MAX_AGE_MSEC;
+    	long timeCutoff = Core.getInstance().getSystemTime() - MAX_AGE_MSEC;
     	for (IpcExtVehicle vehicle : vehicles) {
-    		if (vehicle.getAvl().getTime() > timeCutoff) {
+    		if (vehicle.isLayover() 
+    				|| vehicle.getAvl().getTime() > timeCutoff) {
     			filteredVehicles.add(vehicle);
     		}
     	}
@@ -109,6 +116,55 @@ public class VehicleDataCache {
     	return filteredVehicles;
     }
 
+	/**
+	 * If the vehicle passed in is a schedule based vehicle whose trip has
+	 * already started then the vehicle is removed from the VehicleDataCache
+	 * maps and true is returned. This is intended to be used, when the vehicle
+	 * maps are read, in order to remove schedule based vehicles that are no
+	 * longer important. This way can show schedule based vehicles on the map
+	 * before a trip starts but once the trip has started they will be removed
+	 * since showing them at the start of the trip would then most likely be
+	 * incorrect.
+	 * 
+	 * @param vehicles
+	 *            collection of vehicles to investigate
+	 * @return filtered collection of vehicles
+	 */
+	private Collection<IpcExtVehicle> filterSchedBasedVehicleIfPastStart(
+			Collection<IpcExtVehicle> vehicles) {
+    	Collection<IpcExtVehicle> filteredVehicles = 
+				new ArrayList<IpcExtVehicle>(vehicles.size());
+
+    	for (IpcExtVehicle vehicle : vehicles) {
+			// If past the start time of the trip/block by more than a minute
+			// then should remove the vehicle from the maps
+			if (vehicle.isForSchedBasedPred()
+					&& Core.getInstance().getSystemTime() > vehicle
+							.getTripStartEpochTime() + 1 * Time.MS_PER_MIN) {
+				// Remove vehicle from vehiclesMap
+				vehiclesMap.remove(vehicle.getId());
+
+				// Remove vehicle from vehiclesByRouteMap
+				Map<String, IpcExtVehicle> vehicleMapForRoute = 
+						vehiclesByRouteMap.get(vehicle.getRouteShortName());
+				if (vehicleMapForRoute != null)
+					vehicleMapForRoute.remove(vehicle.getId());
+
+				// Remove vehicle from vehicleIdsByBlockMap
+				List<String> vehicleIdsForOldBlock = 
+						vehicleIdsByBlockMap.get(vehicle.getBlockId());
+				if (vehicleIdsForOldBlock != null)
+					vehicleIdsForOldBlock.remove(vehicle.getId());
+			} else {
+				// Not to be filtered so add it to result
+				filteredVehicles.add(vehicle);
+			}
+    	}
+    	
+    	// Return results
+    	return filteredVehicles;
+	}
+	
 	/**
 	 * Returns Collection of Vehicles currently associated with specified route.
 	 * Filters out info more than MAX_AGE_MSEC since it means that the info is
@@ -134,13 +190,14 @@ public class VehicleDataCache {
 		}
 
 		if (vehicleMapForRoute != null)
-			return filtered(vehicleMapForRoute.values());
+			return filterSchedBasedVehicleIfPastStart(
+					filterOldAvlReports(vehicleMapForRoute.values()));
 		else
 			return null;
 	}
 
 	/**
-	 * Returns Collection of Vehicles currently associated with specified
+	 * Returns Collection of vehicles currently associated with specified
 	 * routes. Filters out info more than MAX_AGE_MSEC since it means that the
 	 * info is obsolete and shouldn't be displayed. Needs to return a collection
 	 * because there are situations, such as unscheduled assignments, where
@@ -167,8 +224,9 @@ public class VehicleDataCache {
 	}
       
 	/**
-	 * Returns Collection of VehiclesInterface whose vehicleIds were specified
-	 * using the vehiclesIds parameter.
+	 * Returns collection of vehicles whose vehicleIds were specified using the
+	 * vehiclesIds parameter. No filtering of old vehicles is done since
+	 * requesting info on specific vehicles.
 	 * 
 	 * @param vehicleIds
 	 *            Specifies which vehicles should return.
@@ -181,11 +239,15 @@ public class VehicleDataCache {
 			if (vehicle != null)
 				vehicles.add(vehicle);
 		}
+		
+		// Return results but filter out schedule based vehicles if past
+		// trip start time
 		return vehicles;
 	}
 
 	/**
-	 * Returns Vehicle info for the vehicleId specified.
+	 * Returns Vehicle info for the vehicleId specified. No filtering of old
+	 * vehicles is done since requesting info on specific vehicle.
 	 * 
 	 * @param vehicleId
 	 * @return
@@ -195,35 +257,45 @@ public class VehicleDataCache {
 	}
 
 	/**
-	 * Returns list of vehicle IDs that are currently assigned to the specified
-	 * block. Will return empty list if no vehicles assigned to that block
-	 * (won't return null). Usually there will only be a single vehicle
-	 * associated with a block assignment but there are cases, such as
-	 * unscheduled assignments, where there could be multiple vehicles.
-	 * Therefore this method returns a List.
-	 * 
-	 * @param blockId
-	 * @return List of vehicle IDs associated with the specified block Id.
-	 *         Returns empty list instead of null if no vehicles associated with
-	 *         the block ID.
-	 */
-	public List<String> getVehiclesByBlockId(String blockId) {
-		List<String> vehicleIds = vehicleIdsByBlockMap.get(blockId);
-		if (vehicleIds != null)
-			return vehicleIds;
-		else
-			return new ArrayList<String>(0);
-	}
-	
-	/**
-	 * Returns Vehicle info for all vehicles.
+	 * Returns Vehicle info for all vehicles. Filter out schedule based
+	 * predictions if trip time has already passed since should always filter
+	 * out such vehicles. But don't filter out stale vehicles since this command
+	 * could be useful to see all vehicles, including ones in the bus yard that
+	 * have been turned off for a while.
 	 * 
 	 * @return
 	 */
 	public Collection<IpcExtVehicle> getVehicles() {
-		return vehiclesMap.values();
+		return filterSchedBasedVehicleIfPastStart(vehiclesMap.values());
 	}
 
+	/**
+	 * Returns copy of list of vehicle IDs that are currently assigned to the
+	 * specified block. A copy is returned since the list is quite small and
+	 * will often need to iterate over it while calling methods that modify the
+	 * underlying list. Using a copy makes sure that don't get a
+	 * ConcurrentModificationException. Will return empty list if no vehicles
+	 * assigned to that block (won't return null). Usually there will only be a
+	 * single vehicle associated with a block assignment but there are cases,
+	 * such as unscheduled assignments, where there could be multiple vehicles.
+	 * Therefore this method returns a List. No filtering of vehicles is done
+	 * since dealing with vehicle IDs, not IpcExtVehicle objects, and therefore
+	 * harder to tell if vehicle is stale.
+	 * 
+	 * @param blockId
+	 * @return Copy of list of vehicle IDs associated with the specified block
+	 *         Id. Returns empty list instead of null if no vehicles associated
+	 *         with the block ID.
+	 */
+	public Collection<String> getVehiclesByBlockId(String blockId) {
+		List<String> vehicleIds = vehicleIdsByBlockMap.get(blockId);
+		if (vehicleIds != null)
+			// Return copy of collection 
+			return new ArrayList<String>(vehicleIds);
+		else
+			return new ArrayList<String>(0);
+	}
+	
 	/**
 	 * Updates the vehiclesByBlockMap
 	 * 
@@ -293,13 +365,25 @@ public class VehicleDataCache {
 	}
 
 	/**
-	 * Updates vehiclesMap
+	 * Updates vehiclesMap. Usually will add the IpcExtVehicle to the
+	 * vehiclesMap. But there is a special case where a schedule based
+	 * vehicle is being made unpredictable. For this situation actually
+	 * need to remove the vehicle from the vehicles map so that it won't
+	 * show up requesting vehicles for the API. 
 	 * 
 	 * @param vehicle
 	 */
 	private void updateVehiclesMap(IpcExtVehicle vehicle) {
-		// Add vehicle to vehiclesMap
-		vehiclesMap.put(vehicle.getId(), vehicle);
+		if (!vehicle.isForSchedBasedPred() || vehicle.isPredictable()) {
+			// Normal situation. Add vehicle to vehiclesMap
+			vehiclesMap.put(vehicle.getId(), vehicle);			
+		} else {
+			// Special case where vehicle is schedule based and it is not 
+			// predictable. This means that should get rid of the vehicle
+			// from the vehiclesMap since it was just a temporary fake
+			// vehicle.
+			vehiclesMap.remove(vehicle.getId());
+		}
 	}
 	
 	/**
