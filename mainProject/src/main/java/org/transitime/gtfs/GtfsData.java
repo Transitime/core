@@ -501,7 +501,7 @@ public class GtfsData {
 			for (GtfsTrip supplementTrip : gtfsTripsSupplement) {
 				GtfsTrip gtfsTrip = gtfsTripsMap.get(supplementTrip.getTripId());
 				if (gtfsTrip == null) {
-					logger.error("Found supplemental trip data for tripId={] "
+					logger.error("Found supplemental trip data for tripId={} "
 							+ "but that trip did not exist in the main "
 							+ "trips.txt file. {}", 
 							supplementTrip.getTripId(), supplementTrip);
