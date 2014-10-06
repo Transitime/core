@@ -217,6 +217,13 @@ public class GtfsData {
 		// Read in the agency.txt GTFS data from file
 		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
 		List<GtfsAgency> gtfsAgencies = agencyReader.get();
+		
+		if (gtfsAgencies.isEmpty()) {
+			logger.error("Could not read in {}/agency.txt file, which is "
+					+ "needed for createDateFormatter()", gtfsDirectoryName);
+			System.exit(-1);
+		}
+		
 		String timezoneName = gtfsAgencies.get(0).getAgencyTimezone();
 		
 		TimeZone timezone = TimeZone.getTimeZone(timezoneName);
@@ -1198,6 +1205,7 @@ public class GtfsData {
 	private void processAgencies() {
 		// Make sure necessary data read in
 		if (getRoutes() == null || getRoutes().isEmpty()) {
+			// Route data first needed so can determine extent of agency 
 			logger.error("GtfsData.processRoutesData() must be called before " + 
 					"GtfsData.processAgencies() is. Exiting.");
 			System.exit(-1);
