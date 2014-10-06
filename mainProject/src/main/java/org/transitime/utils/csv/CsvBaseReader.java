@@ -231,7 +231,7 @@ public abstract class CsvBaseReader<T> {
 	 * The way one gets the list of CSV objects. Uses default size for creating
 	 * ArrayList of 100.
 	 * 
-	 * @return List of CSV objects
+	 * @return List of CSV objects. Can be empty but not null.
 	 */
 	public List<T> get() {
 		return get(100);
@@ -244,7 +244,7 @@ public abstract class CsvBaseReader<T> {
 	 *            Initial size of array that returns the objects. For when
 	 *            expect a really large array, such as for stop_times then can
 	 *            initialize to large value.
-	 * @return List of CSV objects
+	 * @return List of CSV objects. Can be empty but not null.
 	 */
 	public List<T> get(int initialSize) {
 		gtfsObjects = new ArrayList<T>(initialSize);
