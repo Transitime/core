@@ -426,6 +426,10 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
  * Removes the specified marker from the map
  */
 function removeVehicleMarker(vehicleMarker) {
+	// Close stop predictions popup if there is one
+	if (vehicleMarker.popup)
+		map.closePopup(vehicleMarker.popup);
+	
 	map.removeLayer(vehicleMarker.background);
 	map.removeLayer(vehicleMarker.headingArrow);
 	map.removeLayer(vehicleMarker);
@@ -762,6 +766,10 @@ if (!getRouteQueryStrParam()) {
  					// First remove all old vehicles so that they don't
  					// get moved around when zooming to new route
  					removeAllVehicles();
+ 					
+ 					// Remove old predictions popup if there is one
+ 					if (predictionsPopup) 
+ 						map.closePopup(predictionsPopup);
  					
  					// Configure map for new route	
  					var url = urlPrefix + "/command/route?r=" + e.val;
