@@ -51,9 +51,9 @@ public class GtfsTrip extends CsvBase {
 	public GtfsTrip(CSVRecord record, boolean supplemental, String fileName) {
 		super(record, supplemental, fileName);
 		
-		routeId = getRequiredValue(record, "route_id");
-		serviceId = getRequiredValue(record, "service_id");
-		tripId = getRequiredValue(record, "trip_id");
+		routeId = getRequiredUnlessSupplementalValue(record, "route_id");
+		serviceId = getRequiredUnlessSupplementalValue(record, "service_id");
+		tripId = getRequiredUnlessSupplementalValue(record, "trip_id");
 		tripHeadsign = getOptionalValue(record, "trip_headsign");
 		tripShortName = getOptionalValue(record, "trip_short_name");
 		directionId = getOptionalValue(record, "direction_id");
@@ -65,6 +65,35 @@ public class GtfsTrip extends CsvBase {
 		String bikesAllowedStr = getOptionalValue(record, "bikes_allowed");
 		bikesAllowed = bikesAllowedStr == null ? 
 				null : Integer.parseInt(bikesAllowedStr);
+	}	
+
+	/**
+	 * @param routeId
+	 * @param serviceId
+	 * @param tripId
+	 * @param tripHeadsign
+	 * @param tripShortName
+	 * @param directionId
+	 * @param blockId
+	 * @param shapeId
+	 * @param wheelchairAccessible
+	 * @param bikesAllowed
+	 */
+	public GtfsTrip(String routeId, String serviceId, String tripId,
+			String tripHeadsign, String tripShortName, String directionId,
+			String blockId, String shapeId, Integer wheelchairAccessible,
+			Integer bikesAllowed) {
+		super();
+		this.routeId = routeId;
+		this.serviceId = serviceId;
+		this.tripId = tripId;
+		this.tripHeadsign = tripHeadsign;
+		this.tripShortName = tripShortName;
+		this.directionId = directionId;
+		this.blockId = blockId;
+		this.shapeId = shapeId;
+		this.wheelchairAccessible = wheelchairAccessible;
+		this.bikesAllowed = bikesAllowed;
 	}
 	
 	/**
@@ -81,8 +110,7 @@ public class GtfsTrip extends CsvBase {
 		GtfsTrip o = originalTrip;
 		GtfsTrip s = supplementTrip;
 		
-		tripId = originalTrip.tripId;
-		
+		tripId = s.tripId == null ? o.tripId : s.tripId;		
 		routeId = s.routeId == null ? o.routeId : s.routeId;
 		serviceId = s.serviceId == null ? o.serviceId : s.serviceId;
 		tripHeadsign = s.tripHeadsign == null ? o.tripHeadsign : s.tripHeadsign;
@@ -95,23 +123,23 @@ public class GtfsTrip extends CsvBase {
 	}
 	
 	/**
-	 * Creates a GtfsTrip object but only with the tripId and blockId set. This
-	 * is useful for creating a supplemental trips.txt file that contains only
-	 * block ID information.
+	 * Creates a GtfsTrip object but only with the tripShortName and blockId
+	 * set. This is useful for creating a supplemental trips.txt file that
+	 * contains only block ID information.
 	 * 
-	 * @param tripId
+	 * @param tripShortName
 	 * @param blockId
 	 */
-	public GtfsTrip(String tripId, String blockId) {
+	public GtfsTrip(String tripShortName, String blockId) {
 		// Creating supplemental data so can call default constructor
 		// since line number, filename, etc are not valid.
 		super();
 		
 		this.routeId = null;
 		this.serviceId = null;
-		this.tripId = tripId;;
+		this.tripId = null;
 		this.tripHeadsign = null;
-		this.tripShortName = null;
+		this.tripShortName = tripShortName;
 		this.directionId = null;
 		this.blockId = blockId;
 		this.shapeId = null;
@@ -176,5 +204,6 @@ public class GtfsTrip extends CsvBase {
 						"bikesAllowed="	+ bikesAllowed : "") 
 				+ "]";
 	}
+
 	
 }
