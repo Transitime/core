@@ -496,34 +496,9 @@ public class GtfsData {
 		// Read in the trips.txt GTFS data from file
 		GtfsTripsReader tripsReader = new GtfsTripsReader(gtfsDirectoryName);
 		List<GtfsTrip> gtfsTrips = tripsReader.get();
-		
-		// Read in supplemental trips data
-		if (supplementDir != null) {
-			// Read in the supplemental stop data
-			GtfsTripsSupplementReader tripsSupplementReader = 
-					new GtfsTripsSupplementReader(supplementDir);
-			List<GtfsTrip> gtfsTripsSupplement = tripsSupplementReader.get();
-			
-			// Modify the main GtfsStop objects using the supplemental data
-			for (GtfsTrip supplementTrip : gtfsTripsSupplement) {
-				GtfsTrip gtfsTrip = gtfsTripsMap.get(supplementTrip.getTripId());
-				if (gtfsTrip == null) {
-					logger.error("Found supplemental trip data for tripId={} "
-							+ "but that trip did not exist in the main "
-							+ "trips.txt file. {}", 
-							supplementTrip.getTripId(), supplementTrip);
-					continue;
-				}
-				
-				// Create a new GtfsStop object that combines the original
-				// data with the supplemental data
-				GtfsTrip combinedTrip = new GtfsTrip(gtfsTrip, supplementTrip);
-				
-				// Store that combined data stop in the map 
-				gtfsTripsMap.put(combinedTrip.getTripId(), combinedTrip);
-			}
-		}
 
+		// For each GTFS trip make sure route is OK and and the trip to the
+		// gtfsTripsMap. 
 		for (GtfsTrip gtfsTrip : gtfsTrips) {	
 			// Make sure that each trip references a valid route. If it does
 			// not then something is fishy with the data so output a warning.
@@ -541,6 +516,72 @@ public class GtfsData {
 			}
 		}		
 					
+		// Read in supplemental trips data
+		if (supplementDir != null) {
+			// Read in the supplemental stop data
+			GtfsTripsSupplementReader tripsSupplementReader = 
+					new GtfsTripsSupplementReader(supplementDir);
+			List<GtfsTrip> gtfsTripsSupplement = tripsSupplementReader.get();
+			
+			// Modify the main GtfsStop objects using the supplemental data
+			for (GtfsTrip supplementTrip : gtfsTripsSupplement) {
+				// First try matching supplemental trip to the regular trip 
+				// using trip ID
+				String supplementTripId = supplementTrip.getTripId();
+				GtfsTrip gtfsTrip = null;
+				if (supplementTripId != null) {
+					// Determine the GTFS trip that has the same trip id 
+					// as the supplemental GTFS trip
+					gtfsTrip = gtfsTripsMap.get(supplementTripId);
+					if (gtfsTrip == null) {
+						logger.error("Found supplemental trip data for "
+								+ "tripId={} on line {} but that trip did not "
+								+ "exist in the main trips.txt file. {}", 
+								supplementTripId, supplementTrip.getLineNumber(), 
+								supplementTrip);
+						continue;
+					}
+				} else {
+					// trip ID wasn't specified in supplemental trips.txt so try
+					// identifying trip using the trip short name
+					String supplementTripShortName = supplementTrip.getTripShortName();
+					
+					if (supplementTripShortName != null) {
+						// Determine the GTFS trip that has the same trip short 
+						// name as the supplemental GTFS trip
+						for (GtfsTrip gTrip : gtfsTrips) {
+							if (supplementTripShortName.equals(gTrip.getTripShortName())) {
+								gtfsTrip = gTrip;
+								break;
+							}
+						}						
+						if (gtfsTrip == null) {
+							logger.error("Found supplemental trip data for "
+									+ "tripShortName={} on line {} but that "
+									+ "trip did not exist in "
+									+ "the main trips.txt file. {}", 
+									supplementTripShortName, 
+									supplementTrip.getLineNumber(),
+									supplementTrip);
+							continue;
+						}						
+					} else {
+						logger.error("Neither trip_id nor trip_short_name "
+								+ "specified for supplemental trip data on "
+								+ "line {}. ", supplementTrip.getLineNumber());
+						continue;
+					}
+				}
+				
+				// Create a new GtfsStop object that combines the original
+				// data with the supplemental data
+				GtfsTrip combinedTrip = new GtfsTrip(gtfsTrip, supplementTrip);
+				
+				// Store that combined data stop in the map 
+				gtfsTripsMap.put(combinedTrip.getTripId(), combinedTrip);
+			}
+		}
+
 		// Let user know what is going on
 		logger.info("Finished processing trips.txt data. Took {} msec.", 
 				timer.elapsedMsec());
