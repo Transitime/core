@@ -82,9 +82,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	/**
 	 * If vehicle just became predictable as indicated by no previous match then
 	 * still want to determine arrival/departure times for earlier stops so that
-	 * won't miss recording data for them them. But only want to go so far.
-	 * Otherwise could be generating fake arrival/departure times when vehicle
-	 * did not actually traverse that stop.
+	 * won't miss recording data for them. But only want to go so far. Otherwise
+	 * could be generating fake arrival/departure times when vehicle did not
+	 * actually traverse that stop.
 	 */
 	private static int getMaxStopsWhenNoPreviousMatch() {
 		return maxStopsWhenNoPreviousMatch.getValue();
