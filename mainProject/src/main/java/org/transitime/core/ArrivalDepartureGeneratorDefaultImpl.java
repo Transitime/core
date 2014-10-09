@@ -92,7 +92,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	private static IntegerConfigValue maxStopsWhenNoPreviousMatch = 
 			new IntegerConfigValue(	
 					"transitime.arrivalsDepartures.maxStopsWhenNoPreviousMatch",
-					4,
+					1,
 					"If vehicle just became predictable as indicated by no " +
 					"previous match then still want to determine " +
 					"arrival/departure times for earlier stops so that won't " +
