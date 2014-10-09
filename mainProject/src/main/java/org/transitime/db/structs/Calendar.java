@@ -187,15 +187,16 @@ public class Calendar implements Serializable {
 	 * Opens up a new db session and returns Map of Calendar objects for the
 	 * specified database revision. The map is keyed on the serviceId.
 	 * 
-	 * @param projectId
+	 * @param dbName
+	 *            Specified name of database
 	 * @param configRev
 	 * @return Map of Calendar objects keyed on serviceId
 	 * @throws HibernateException
 	 */
-	public static Map<String, Calendar> getCalendars(String projectId, int configRev) 
+	public static Map<String, Calendar> getCalendars(String dbName, int configRev) 
 			throws HibernateException {
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(projectId);
+		Session session = HibernateUtils.getSession(dbName);
 		
 		// Get list of calendars
 		List<Calendar> calendarList = getCalendars(session, configRev);
