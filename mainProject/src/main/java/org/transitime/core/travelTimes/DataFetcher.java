@@ -23,15 +23,17 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.Match;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
+import org.transitime.utils.Time;
 
 /**
  * For retrieving historic AVL based data from database so that travel times can
@@ -49,9 +51,11 @@ public class DataFetcher {
 	private Map<DbDataMapKey, List<ArrivalDeparture>> arrivalDepartureMap;
 	private Map<DbDataMapKey, List<Match>> matchesMap;
 
-	private Map<String, Calendar> gtfsCalendars = null;
+//	private Map<String, Calendar> gtfsCalendars = null;
 	
-	private List<Integer> specialDaysOfWeek = null;
+	private java.util.Calendar calendar = null;
+	
+//	private List<Integer> specialDaysOfWeek = null;
 
 	private static final Logger logger = 
 			LoggerFactory.getLogger(DataFetcher.class);
@@ -62,83 +66,111 @@ public class DataFetcher {
 	 * Sets up needed calendar information if separating out data for special
 	 * days of the week, such as Fridays for weekday service.
 	 * 
-	 * @param projectId
+	 * @param dbName
 	 * @param newSpecialDaysOfWeek
 	 *            List of Integers indicating day of week. Uses
 	 *            java.util.Calendar values such as java.util.Calendar.MONDAY .
+	 *            Set to null if not going to use.
 	 */
-	public DataFetcher(String projectId, List<Integer> newSpecialDaysOfWeek) {
+	public DataFetcher(String dbName, List<Integer> newSpecialDaysOfWeek) {
 		// Read calendar configuration from db
-		gtfsCalendars = Calendar.getCalendars(projectId, DbConfig.SANDBOX_REV);
+//		gtfsCalendars = Calendar.getCalendars(dbName, DbConfig.SANDBOX_REV);
 		
-		specialDaysOfWeek = newSpecialDaysOfWeek;
+//		specialDaysOfWeek = newSpecialDaysOfWeek;
+		
+		// Create the member calendar using timezone specified in db for the 
+		// agency
+		List<Agency> agencies = Agency.getAgencies(dbName, DbConfig.SANDBOX_REV);
+		TimeZone timezone = agencies.get(0).getTimeZone();
+		calendar = new GregorianCalendar(timezone);		
 	}
 	
 	/**
-	 * Gets the day of the week string for use with the keys for the maps. If
-	 * special days of the week were specified using initializeServiceInfo() and
-	 * the day of the week as specified by the data parameter is for a day of
-	 * the week for the calendar specified by the service ID then a string
-	 * representing the day of the week is returned.
+	 * Takes the date and returns the day into the year. Useful for keeping
+	 * track of trip data one day at a time.
 	 * 
-	 * @param serviceId
-	 *            the service ID
 	 * @param date
-	 *            for determining day of the week
-	 * @return string indicating day of the week if there is a match, otherwise
-	 *         null
+	 * @return
 	 */
-	private String getMatchingDayOfWeek(String serviceId, Date date) {
-		if (specialDaysOfWeek != null && gtfsCalendars != null) {
-			// Determine the day of the week for the data
-			java.util.Calendar cal = new GregorianCalendar();
-			cal.setTime(date);
-			int dayOfWeek = cal.get(java.util.Calendar.DAY_OF_WEEK);
-			
-			// If the day of the week is not one of the special days of the week
-			// then it doesn't need special treatment so return null.
-			if (!specialDaysOfWeek.contains(dayOfWeek))
-				return null;
-			
-			// The day of the week is a special day. Therefore see if it is included
-			// in the calendar specified by the service ID. If it is then return
-			// string indicating that the data for the day should be treated special.
-			Calendar gtfsCalendar = gtfsCalendars.get(serviceId);
-			if (dayOfWeek== java.util.Calendar.MONDAY && gtfsCalendar.getMonday())
-				return "Monday";
-			else if (dayOfWeek== java.util.Calendar.TUESDAY && gtfsCalendar.getTuesday())
-				return "Tuesday";
-			else if (dayOfWeek== java.util.Calendar.WEDNESDAY && gtfsCalendar.getWednesday())
-				return "Wednesday";
-			else if (dayOfWeek== java.util.Calendar.THURSDAY && gtfsCalendar.getThursday())
-				return "Thursday";
-			else if (dayOfWeek== java.util.Calendar.FRIDAY && gtfsCalendar.getFriday())
-				return "Friday";
-			else if (dayOfWeek== java.util.Calendar.SATURDAY && gtfsCalendar.getSaturday())
-				return "Saturday";
-			else if (dayOfWeek== java.util.Calendar.SUNDAY && gtfsCalendar.getSunday())
-				return "Sunday";
-		}
-		
-		// Not a match so return null
-		return null;		
+	private int dayOfYear(Date date) {
+		// Adjust date by three hours so if get a time such as 2:30 am
+		// it will be adjusted back to the previous day. This way can handle
+		// trips that span midnight. But this doesn't work for trips that
+		// span 3am.
+		Date adjustedDate = new Date(date.getTime()-3*Time.MS_PER_HOUR);
+		calendar.setTime(adjustedDate);
+		return calendar.get(java.util.Calendar.DAY_OF_YEAR);
 	}
+	
+//	/**
+//	 * NOTE: Deprecated because haven't yet figured out how to deal with special
+//	 * days of the week.
+//	 * <p>
+//	 * Gets the day of the week string for use with the keys for the maps. If
+//	 * special days of the week were specified using initializeServiceInfo() and
+//	 * the day of the week as specified by the data parameter is for a day of
+//	 * the week for the calendar specified by the service ID then a string
+//	 * representing the day of the week is returned.
+//	 * 
+//	 * @param serviceId
+//	 *            the service ID
+//	 * @param date
+//	 *            for determining day of the week
+//	 * @return string indicating day of the week if there is a match, otherwise
+//	 *         null
+//	 */
+//	@Deprecated
+//	private String getMatchingDayOfWeek(String serviceId, Date date) {
+//		if (specialDaysOfWeek != null && gtfsCalendars != null) {
+//			// Determine the day of the week for the data
+//			java.util.Calendar cal = new GregorianCalendar();
+//			cal.setTime(date);
+//			int dayOfWeek = cal.get(java.util.Calendar.DAY_OF_WEEK);
+//			
+//			// If the day of the week is not one of the special days of the week
+//			// then it doesn't need special treatment so return null.
+//			if (!specialDaysOfWeek.contains(dayOfWeek))
+//				return null;
+//			
+//			// The day of the week is a special day. Therefore see if it is included
+//			// in the calendar specified by the service ID. If it is then return
+//			// string indicating that the data for the day should be treated special.
+//			Calendar gtfsCalendar = gtfsCalendars.get(serviceId);
+//			if (dayOfWeek== java.util.Calendar.MONDAY && gtfsCalendar.getMonday())
+//				return "Monday";
+//			else if (dayOfWeek== java.util.Calendar.TUESDAY && gtfsCalendar.getTuesday())
+//				return "Tuesday";
+//			else if (dayOfWeek== java.util.Calendar.WEDNESDAY && gtfsCalendar.getWednesday())
+//				return "Wednesday";
+//			else if (dayOfWeek== java.util.Calendar.THURSDAY && gtfsCalendar.getThursday())
+//				return "Thursday";
+//			else if (dayOfWeek== java.util.Calendar.FRIDAY && gtfsCalendar.getFriday())
+//				return "Friday";
+//			else if (dayOfWeek== java.util.Calendar.SATURDAY && gtfsCalendar.getSaturday())
+//				return "Saturday";
+//			else if (dayOfWeek== java.util.Calendar.SUNDAY && gtfsCalendar.getSunday())
+//				return "Sunday";
+//		}
+//		
+//		// Not a match so return null
+//		return null;		
+//	}
 
 	/**
 	 * Special MapKey class so that can make sure using the proper key for the
 	 * associated maps in this class. 
 	 */
 	public static class DbDataMapKey extends MapKey {
-		private DbDataMapKey(String serviceId, String dayOfWeek, String tripId,
+		private DbDataMapKey(String serviceId, Integer dayOfYear, String tripId,
 				String vehicleId) {
-			super(serviceId, dayOfWeek, tripId, vehicleId);
+			super(serviceId, dayOfYear, tripId, vehicleId);
 		}
 		
 		@Override
 		public String toString() {
 			return "DbDataMapKey [" 
 					+ "serviceId=" + o1 
-					+ ", dayOfWeek=" + o2 
+					+ ", dayOfYear=" + o2 
 					+ ", tripId=" + o3 
 					+ ", vehicleId=" + o4 
 					+ "]";
@@ -163,8 +195,7 @@ public class DataFetcher {
 	 */
 	public DbDataMapKey getKey(String serviceId, Date date, String tripId,
 			String vehicleId) {
-		String dayOfWeek = getMatchingDayOfWeek(serviceId, date);
-		return new DbDataMapKey(serviceId, dayOfWeek, tripId, vehicleId);
+		return new DbDataMapKey(serviceId, dayOfYear(date), tripId, vehicleId);
 	}
 	
 	/**
@@ -310,17 +341,18 @@ public class DataFetcher {
 	/**
 	 * Reads arrival/departure times and matches from the db and puts the
 	 * data into the arrivalDepartureMap and matchesMap members.
-	 * @param projectId
+	 * 
+	 * @param agencyId
 	 * @param beginTime
 	 * @param endTime
 	 */
-	public void readData(String projectId, Date beginTime, 
+	public void readData(String agencyId, Date beginTime, 
 			Date endTime) {
 		// Read in arrival/departure times and matches from db
 		logger.info("Reading historic data from db...");
-		matchesMap = readMatches(projectId, beginTime, endTime);
+		matchesMap = readMatches(agencyId, beginTime, endTime);
 		arrivalDepartureMap = 
-				readArrivalsDepartures(projectId, beginTime, endTime);
+				readArrivalsDepartures(agencyId, beginTime, endTime);
 	}
 
 	/**
@@ -331,6 +363,11 @@ public class DataFetcher {
 	 * @return arrival/departure data
 	 */
 	public Map<DbDataMapKey, List<ArrivalDeparture>> getArrivalDepartureMap() {
+		// Make sure data was read in
+		if (arrivalDepartureMap == null)
+			throw new RuntimeException("Called getArrivalDepartureMap() before "
+					+ "data was read in using readData().");
+		
 		return arrivalDepartureMap;
 	}
 
@@ -341,6 +378,11 @@ public class DataFetcher {
 	 * @return match data
 	 */
 	public Map<DbDataMapKey, List<Match>> getMatchesMap() {
+		// Make sure data was read in
+		if (matchesMap == null)
+			throw new RuntimeException("Called getMatchesMap() before "
+					+ "data was read in using readData().");
+
 		return matchesMap;
 	}
 

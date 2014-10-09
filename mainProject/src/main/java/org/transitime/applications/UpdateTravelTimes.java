@@ -18,7 +18,6 @@
 package org.transitime.applications;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -238,6 +237,7 @@ public class UpdateTravelTimes {
 	 * @param agencyId
 	 * @param maxTravelTimeSegmentLength
 	 * @param specialDaysOfWeek
+	 *            Not fully implemented. Should therefore be null for now.
 	 * @param beginTime
 	 * @param endTime
 	 */
@@ -273,7 +273,10 @@ public class UpdateTravelTimes {
 	}
 	
 	/**
-	 * First arg specifies both the start and end date.
+	 * First arg specifies both the start date. If a second argument is
+	 * specified it is used as the end date. Otherwise the data is processed for
+	 * just a single day.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -281,12 +284,13 @@ public class UpdateTravelTimes {
 		String agencyId = CoreConfig.getAgencyId();
 		
 		String startDateStr = args[0];
-		String endDateStr = args[0];
+		String endDateStr = args.length > 1 ? args[1] : startDateStr;
 		
 		// FIXME These couple of params are hard coded simply to get things going
-		double maxTravelTimeSegmentLength = 120.0;		
-		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();
-		specialDaysOfWeek.add(java.util.Calendar.FRIDAY);
+		double maxTravelTimeSegmentLength = 400.0;		
+//		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();
+//		specialDaysOfWeek.add(java.util.Calendar.FRIDAY);
+		List<Integer> specialDaysOfWeek = null;
 		
 		Date beginTime = null;
 		Date endTime = null;
