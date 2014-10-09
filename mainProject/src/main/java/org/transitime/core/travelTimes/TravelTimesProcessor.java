@@ -38,9 +38,17 @@ import org.transitime.utils.MapKey;
 import org.transitime.utils.Time;
 
 /**
- * Takes arrival/departure times read from db and processes them into 
- * average travel and dwell times and stores the data into maps. The
- * travel times can then be written to the database. 
+ * Takes arrival/departure times plus the matches (where vehicle is matched to a
+ * route between stops) that are read from db and processes the data into
+ * average travel and dwell times and stores the data into maps. The travel
+ * times can then be written to the database.
+ * <p>
+ * The data is processed on a per tripId basis. With GTFS trips are unique
+ * across service IDs and days of the week so this is adequate. But at some
+ * point really might want to divide up the data by day of the week in order to
+ * get greater accuracy (assuming that buses might consistently travel
+ * differently on Monday compared to Friday even though they have the same
+ * service ID.
  *
  * @author SkiBu Smith
  *
@@ -60,14 +68,14 @@ public class TravelTimesProcessor {
 	private double maxTravelTimeSegmentLength;
 		
 	// The aggregate data processed from the historic db data.
-	// MapKey combines String serviceId, String tripId, int stopIndex in 
-	// order to combine data for a particular serviceId, tripId, and stopIndex.
+	// ProcessedDataMapKey combines tripId and stopPathIndex in 
+	// order to combine data for a particular tripId and stopPathIndex.
 	// stopTimesMap contains data for each trip on how long vehicle was stopped
 	// for at a particular stop. It is obtained by comparing the arrival time
 	// with the departure time for each stop for each trip.
 	private static Map<ProcessedDataMapKey, List<Integer>> stopTimesMap = 
 			new HashMap<ProcessedDataMapKey, List<Integer>>();	
-	private static Map<ProcessedDataMapKey, List<List<Integer>>> travelTimesMap = 
+	private static Map<ProcessedDataMapKey, List<List<Integer>>> travelTimesMap =
 			new HashMap<ProcessedDataMapKey, List<List<Integer>>>();
 
 	private static final Logger logger = 
@@ -319,9 +327,10 @@ public class TravelTimesProcessor {
 	
 	/**
 	 * Gets the Matches that are associated with the stop path specified by
-	 * arrDep2 (the path leading up to that stop). The returned matches will
-	 * include the departure time from the first stop (arrDep1), in between
-	 * matches, and the arrival time as the second stop (arrDep2).
+	 * arrDep2 (the path leading up to that stop) for the same trip (makes sure
+	 * it is for the same tripId for the same day of the year). The returned
+	 * matches will include the departure time from the first stop (arrDep1), in
+	 * between matches, and the arrival time as the second stop (arrDep2).
 	 * 
 	 * @param dataFetcher
 	 * @param arrDep1
@@ -451,7 +460,7 @@ public class TravelTimesProcessor {
 		vertexTimes.add(arrDep2.getTime());
 		
 		// Now that we have all the vertex times for the stop path determine the
-		// travel times and add them to the travel time map.
+		// travel times and add them to the list of times to be returned.
 		List<Integer> travelTimesForStopPath = new ArrayList<Integer>();
 		for (int i=0; i<vertexTimes.size()-1; ++i) {
 			long vertexTime1 = vertexTimes.get(i);
@@ -548,7 +557,7 @@ public class TravelTimesProcessor {
 	 * @param arrDepList
 	 *            List of ArrivalDepartures for vehicle for a trip
 	 */
-	private void aggregateTripDataInfoMaps(DataFetcher dataFetcher,
+	private void aggregateTripDataIntoMaps(DataFetcher dataFetcher,
 			List<ArrivalDeparture> arrDepList) {
 		
 		for (int i=0; i<arrDepList.size()-1; ++i) {
@@ -715,7 +724,7 @@ public class TravelTimesProcessor {
 				dataFetcher.getArrivalDepartureMap().values();
 		for (List<ArrivalDeparture> arrDepList : arrivalDepartures) {
 			debugLogTrip(arrDepList);
-			aggregateTripDataInfoMaps(dataFetcher, arrDepList);
+			aggregateTripDataIntoMaps(dataFetcher, arrDepList);
 		}
 		
 		// Nice to log how long things took so can see progress and bottle necks
