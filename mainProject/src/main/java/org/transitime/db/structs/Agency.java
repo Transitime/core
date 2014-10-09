@@ -168,7 +168,11 @@ public class Agency implements Serializable {
 	public static List<Agency> getAgencies(String dbName, int configRev) {
 		// Get the database session. This is supposed to be pretty light weight
 		Session session = HibernateUtils.getSession(dbName);
-		return getAgencies(session, configRev);
+		try {
+			return getAgencies(session, configRev);
+		} finally {
+			session.close();
+		}
 	}
 	
 	/**
