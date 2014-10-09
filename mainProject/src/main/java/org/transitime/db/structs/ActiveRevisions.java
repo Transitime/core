@@ -61,11 +61,11 @@ public class ActiveRevisions {
 
 	/**
 	 * Constructor made private so that have to use getActiveRevisions() to get
-	 * object. Sets the revisions to -1 so that when incremented they will be 0.
+	 * object. Sets the revisions to default value of 0.
 	 */
 	private ActiveRevisions() {
-		configRev = -1;
-		travelTimesRev = -1;
+		configRev = 0;
+		travelTimesRev = 0;
 	}
 	
 	/**
@@ -83,8 +83,7 @@ public class ActiveRevisions {
 		Query query = session.createQuery(hql);
 		ActiveRevisions activeRevisions = null;
 		try {
-			activeRevisions = 
-					(ActiveRevisions) query.uniqueResult();
+			activeRevisions = (ActiveRevisions) query.uniqueResult();
 		} catch (Exception e) {
 			System.err.println("Exception when reading ActiveRevisions object " +
 					"from database so will create it");
