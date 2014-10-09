@@ -158,6 +158,20 @@ public class Agency implements Serializable {
 	}
 
 	/**
+	 * Returns the list of agencies for the specified project ID.
+	 * 
+	 * @param dbName
+	 *            Specifies name of database
+	 * @param configRev
+	 * @return
+	 */
+	public static List<Agency> getAgencies(String dbName, int configRev) {
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(dbName);
+		return getAgencies(session, configRev);
+	}
+	
+	/**
 	 * Returns TimeZone object for agency. Useful for creating
 	 * Calendar objects and such.
 	 * 
