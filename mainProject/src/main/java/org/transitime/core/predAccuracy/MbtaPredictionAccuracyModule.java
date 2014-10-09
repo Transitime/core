@@ -95,7 +95,8 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 	private String getUrl(String routeId) {
 		return getExternalPredictionApiUrl() 
 				+ "api_key=" + getApiKey() 
-				+ "&format=xml" + "&route=" + routeId;
+				+ "&format=xml" 
+				+ "&route=" + routeId;
 	}
 	
 	/**
