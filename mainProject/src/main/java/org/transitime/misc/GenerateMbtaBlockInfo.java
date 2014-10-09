@@ -20,6 +20,7 @@ package org.transitime.misc;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +40,9 @@ import org.transitime.gtfs.writers.GtfsTripsWriter;
 import org.transitime.utils.Time;
 
 /**
- *
+ * Processes MBTA AVL feed data one day at a time to determine the which block a
+ * trip is associated with. Writes out results to a supplemental trips.txt GTFS
+ * file so that blocks can be used as part of the MBTA configuration.
  *
  * @author SkiBu Smith
  *
@@ -50,7 +53,7 @@ public class GenerateMbtaBlockInfo {
 
 	private static Time time = new Time(timeZoneStr);
 
-	// Keyed on tripId, value is blockId
+	// Keyed on tripShortName, value is blockId
 	private static Map<String, String> tripToBlockMap = 
 			new HashMap<String, String>();
 	
@@ -59,6 +62,27 @@ public class GenerateMbtaBlockInfo {
 	// with the trip.
 	private static Map<String, Set<String>> mismatchedAssignments = 
 			new HashMap<String, Set<String>>();
+	
+	// Keyed on trip ID
+	private static Map<String, String> tripIdToTripShortNameMap = 
+			new HashMap<String, String>();
+	
+	// Keyed on trip short name. Value is the corresponding GtfsTrip
+	private static Map<String, GtfsTrip> gtfsTripsMap = 
+			new HashMap<String, GtfsTrip>();
+	
+	// Keyed on trip short name. Values are times in seconds into day
+	private static Map<String, Integer> tripStartTimeMap = 
+			new HashMap<String, Integer>();
+	private static Map<String, Integer> tripEndTimeMap = 
+			new HashMap<String, Integer>();
+	
+	// For keeping track of which trips need to change service ID for 
+	// due to associate block interlining between multiple trips with
+	// differently configured service IDs. Keyed on tripShortName
+	// and contains values of service IDs.
+	private static Map<String, String> tripToModifiedServiceIdMap =
+			new HashMap<String, String>();
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(GenerateMbtaBlockInfo.class);
@@ -90,11 +114,23 @@ public class GenerateMbtaBlockInfo {
 			String supplementTripsFileName) {
 		GtfsTripsWriter writer = new GtfsTripsWriter(supplementTripsFileName);
 		
-		Collection<String> tripIds = tripToBlockMap.keySet();
-		for (String tripId : tripIds) {
-			String blockIdForTrip = tripToBlockMap.get(tripId);
-			GtfsTrip gtfsTrip = new GtfsTrip(tripId, blockIdForTrip);
-			writer.write(gtfsTrip);
+		// Sort by trip short name so that order is at least a bit better
+		Collection<String> tripShortNames = tripToBlockMap.keySet();
+		List<String> sortedTripNames = new ArrayList<String>(tripShortNames);
+		Collections.sort(sortedTripNames);
+		
+		for (String tripShortName : sortedTripNames) {
+			// If a trip was associated with more than a single block then 
+			// don't know which block to use. 
+			if (mismatchedAssignments.get(tripShortName) != null)
+				continue;
+			
+			String blockIdForTrip = tripToBlockMap.get(tripShortName);
+			String serviceIdForTrip = tripToModifiedServiceIdMap.get(tripShortName);
+			GtfsTrip supplementGtfsTrip = new GtfsTrip(null, serviceIdForTrip,
+					null, null, tripShortName, null, blockIdForTrip, null,
+					null, null);
+			writer.write(supplementGtfsTrip);
 		}
 		
 		writer.close();		
@@ -185,7 +221,8 @@ public class GenerateMbtaBlockInfo {
 				String blockId = adjustAssignment(avlReport.getField1Value());
 				
 				// If no change in trip or block ID then don't need to output it
-				if (tripShortName.equals(previousTripShortName) && blockId.equals(previousBlockId))
+				if (tripShortName.equals(previousTripShortName) 
+						&& blockId.equals(previousBlockId))
 					continue;
 				previousTripShortName = tripShortName;
 				previousBlockId = blockId;
@@ -239,7 +276,9 @@ public class GenerateMbtaBlockInfo {
 						&& !previousBlockId.equals("000")) 
 					continue;
 				
-				// The assignment is OK so indeed add it to the map
+				// The assignment is OK so indeed add it to the map.
+				// But first make sure the associated block is consistent
+				// for the trip. If it changes day by day we have a problem.
 				String previousBlockForTrip = tripToBlockMap.get(tripShortName);
 				if (previousBlockForTrip != null 
 						&& !previousBlockForTrip.equals(blockId)) {
@@ -260,23 +299,32 @@ public class GenerateMbtaBlockInfo {
 							+ " but for begin date " + beginDate + " it is " 
 							+ blockId);
 				} 
+				
+				GtfsTrip gtfsTrip = gtfsTripsMap.get(tripShortName);
+				String serviceIdForTrip = gtfsTrip.getServiceId(); 
+				GtfsTrip gtfsTripForBlock = gtfsTripsMap.get(blockId); 
+				String serviceIdForBlock = gtfsTripForBlock==null ? 
+						serviceIdForTrip : gtfsTripForBlock.getServiceId();
+
+				// Service ID already specified for block. If this trip has
+				// different service ID then the block then need to remember 
+				// to modify the service ID for the trip to be that of the 
+				// block. This way all trips for a block will have the correct 
+				// service when supplemental trips.txt file written out.
+				if (!serviceIdForBlock.equals(serviceIdForTrip)) {
+					tripToModifiedServiceIdMap.put(gtfsTrip.getTripShortName(),
+							serviceIdForBlock);
+				}
+				
 				// Remember this block assignment for the trip.
 				// Note: sometimes temporarily get the wrong block. Therefore 
 				// need to use the last trip associated with a block. 
-				tripToBlockMap.put(tripShortName, blockId);
-			
-					
+				tripToBlockMap.put(tripShortName, blockId);	
+				
 			} // End of for each AVL report for the vehicle
 		} // End of for each vehicle
 		
 	}
-	
-	// Keyed on trip ID
-	private static Map<String, String> tripIdToTripShortNameMap = new HashMap<String, String>();
-	
-	// Keyed on trip short name. Values are times in seconds into day
-	private static Map<String, Integer> tripStartTimeMap = new HashMap<String, Integer>();
-	private static Map<String, Integer> tripEndTimeMap = new HashMap<String, Integer>();
 	
 	/**
 	 * Determines start and end times of trips using GTFS stop_times.txt data and puts them
@@ -284,10 +332,11 @@ public class GenerateMbtaBlockInfo {
 	 * 
 	 * @param gtfsDir
 	 */
-	private static void readTripTimes(String gtfsDir) {
+	private static void readTripData(String gtfsDir) {
 		GtfsTripsReader gtfsTripsReader = new GtfsTripsReader(gtfsDir);
 		for (GtfsTrip gtfsTrip : gtfsTripsReader.get()) {
 			tripIdToTripShortNameMap.put(gtfsTrip.getTripId(), gtfsTrip.getTripShortName());
+			gtfsTripsMap.put(gtfsTrip.getTripShortName(), gtfsTrip);
 		}
 		
 		GtfsStopTimesReader gtfsStopTimesReader = new GtfsStopTimesReader(gtfsDir);
@@ -324,7 +373,7 @@ public class GenerateMbtaBlockInfo {
 		String gtfsDir = args[2];
 		
 		// Initialize trip times maps
-		readTripTimes(gtfsDir);
+		readTripData(gtfsDir);
 		
 		// Process the AVL data to determine block assignment associated with
 		// each trip
