@@ -59,7 +59,7 @@
 
     drop table if exists Transfers cascade;
 
-    drop table if exists TravelTimesForStopPath cascade;
+    drop table if exists TravelTimesForStopPaths cascade;
 
     drop table if exists TravelTimesForTrip_to_TravelTimesForPath_joinTable cascade;
 
@@ -316,14 +316,16 @@
         primary key (toStopId, fromStopId, configRev)
     );
 
-    create table TravelTimesForStopPath (
+    create table TravelTimesForStopPaths (
         id int4 not null,
+        configRev int4,
         daysOfWeekOverride int2,
         howSet varchar(5),
         stopPathId varchar(60),
         stopTimeMsec int4,
         travelTimeSegmentLength float4,
         travelTimesMsec bytea,
+        travelTimesRev int4,
         primary key (id)
     );
 
@@ -356,7 +358,6 @@
     create table TripPatterns (
         id varchar(60) not null,
         configRev int4 not null,
-        shapeId varchar(60),
         directionId varchar(60),
         maxLat float8,
         maxLon float8,
@@ -365,6 +366,7 @@
         headsign varchar(255),
         routeId varchar(60),
         routeShortName varchar(80),
+        shapeId varchar(60),
         primary key (id, configRev)
     );
 
@@ -427,7 +429,7 @@
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 
         foreign key (travelTimesForStopPaths_id) 
-        references TravelTimesForStopPath;
+        references TravelTimesForStopPaths;
 
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add constraint FK_9j1s8ewsmokqg4m35wrr29na7 

@@ -150,6 +150,7 @@ public class ScheduleBasedTravelTimesProcessor {
 		String firstPathId = tripPattern.getStopPathId(0);
 		TravelTimesForStopPath firstPathTravelTimesForPath = 
 				new TravelTimesForStopPath(
+						DbConfig.SANDBOX_REV, travelTimeRevToUse,
 						firstPathId, firstPath.length(), firstPathTravelTimesMsec, 
 						0,   // stopTimeMsec
 						-1,  // daysOfWeekOverride
@@ -257,6 +258,7 @@ public class ScheduleBasedTravelTimesProcessor {
 					// Create and add the travel time for this stop path
 					TravelTimesForStopPath travelTimesForStopPath = 
 							new TravelTimesForStopPath(
+									DbConfig.SANDBOX_REV, travelTimeRevToUse,
 									stopPathId, 
 									travelTimeSegmentsLength,
 									travelTimesMsec, 

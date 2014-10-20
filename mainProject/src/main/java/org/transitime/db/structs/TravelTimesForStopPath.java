@@ -26,6 +26,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -37,16 +38,18 @@ import org.transitime.db.hibernate.HibernateUtils;
 
 
 /**
- * Contains the expected time it takes to travel along the specified
- * path, which is for one stop to another. There can be a different
- * list of TravelTimesForStopPath for each trip. The idea is to share travel times 
- * when possible, when they are relatively the same for a trip pattern.
- * But if a trip needs separate travel times then it can have it.
+ * Contains the expected time it takes to travel along the specified path, which
+ * is for one stop to another. There can be a different list of
+ * TravelTimesForStopPath for each trip. The idea is to share travel times when
+ * possible, when they are relatively the same for a trip pattern. But if a trip
+ * needs separate travel times then it can have it.
  * 
  * @author SkiBu Smith
  * 
  */
-@Entity @DynamicUpdate
+@Entity 
+@DynamicUpdate
+@Table(name="TravelTimesForStopPaths")
 public class TravelTimesForStopPath implements Serializable {
 
 	// Need a generated ID because trying to share TravelTimesForStopPath objects because
@@ -57,6 +60,19 @@ public class TravelTimesForStopPath implements Serializable {
 	@Column 
 	@GeneratedValue 
 	private Integer id;
+	
+	// Need configRev for the configuration so that when old configurations 
+	// cleaned out can also get rid of old travel times.
+	@Column
+	private final int configRev;
+	
+	// Each time update travel times it gets a new travel time rev. This
+	// way can compare travel times with previous revisions. Probably only need
+	// to keep the previous travel time rev around for comparison but by
+	// using an integer for the rev all of the revs can be kept in the db 
+	// if desired.
+	@Column
+	private final int travelTimesRev;
 	
 	// Which stop on the trip the travel times are for
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -158,6 +174,8 @@ public class TravelTimesForStopPath implements Serializable {
 	/**
 	 * Constructs a new TravelTimesForStopPath object.
 	 * 
+	 * @param configRev
+	 * @param travelTimesRev
 	 * @param stopPathId
 	 * @param travelTimesMsec
 	 *            The travel times for the travel time segments. 
@@ -165,10 +183,12 @@ public class TravelTimesForStopPath implements Serializable {
 	 * @param howSet
 	 * @param daysOfWeekOverride
 	 */
-	public TravelTimesForStopPath(String stopPathId,
-			double travelTimeSegmentDistance,
+	public TravelTimesForStopPath(int configRev, int travelTimesRev,
+			String stopPathId, double travelTimeSegmentDistance,
 			List<Integer> travelTimesMsec, int stopTimeMsec,
 			int daysOfWeekOverride, HowSet howSet) {
+		this.configRev = configRev;
+		this.travelTimesRev = travelTimesRev;
 		this.stopPathId = stopPathId;
 		this.travelTimeSegmentLength = (float) travelTimeSegmentDistance;
 		this.travelTimesMsec = (ArrayList<Integer>) travelTimesMsec;
@@ -182,6 +202,8 @@ public class TravelTimesForStopPath implements Serializable {
 	 */
 	@SuppressWarnings("unused")
 	private TravelTimesForStopPath() {
+		this.configRev = -1;
+		this.travelTimesRev = -1;
 		this.stopPathId = null;
 		this.travelTimeSegmentLength = Float.NaN;
 		this.travelTimesMsec = null;
@@ -193,14 +215,15 @@ public class TravelTimesForStopPath implements Serializable {
 	/**
 	 * Creates a new object. Useful for when need to copy a schedule based
 	 * travel time. By having a copy can erase the original one when done with
-	 * the rev, without deleting this new one. 
+	 * the travel time rev, without deleting this new one.
 	 * 
-	 * @param original
+	 * @param newTravelTimesRev
+	 *            The new travel times rev to use for the clone
 	 * @return
 	 */
-	public TravelTimesForStopPath clone() {
-		return new TravelTimesForStopPath(stopPathId,
-				travelTimeSegmentLength, travelTimesMsec,
+	public TravelTimesForStopPath clone(int newTravelTimesRev) {
+		return new TravelTimesForStopPath(configRev, newTravelTimesRev,
+				stopPathId, travelTimeSegmentLength, travelTimesMsec,
 				stopTimeMsec, daysOfWeekOverride, howSet);
 	}
 	
@@ -210,7 +233,9 @@ public class TravelTimesForStopPath implements Serializable {
 	@Override
 	public String toString() {
 		return "TravelTimesForStopPath [" 
-				+ "id=" + id 
+				+ "id=" + id
+				+ ", configRev=" + configRev
+				+ ", travelTimesRev=" + travelTimesRev
 				+ ", stopPathId=" + stopPathId 
 				+ ", travelTimeSegmentLength=" + travelTimeSegmentLength
 				+ ", travelTimesMsec=" + travelTimesMsec 
@@ -222,6 +247,14 @@ public class TravelTimesForStopPath implements Serializable {
 
 	/************************ Getter Methods *************************/	
 
+	public int getConfigRev() {
+		return configRev;		
+	}
+	
+	public int getTravelTimesRev() {
+		return travelTimesRev;
+	}
+	
 	/**
 	 * @return the stopPathId
 	 */
@@ -344,17 +377,17 @@ public class TravelTimesForStopPath implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + configRev;
 		result = prime * result + daysOfWeekOverride;
 		result = prime * result + ((howSet == null) ? 0 : howSet.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result
 				+ ((stopPathId == null) ? 0 : stopPathId.hashCode());
 		result = prime * result + stopTimeMsec;
-		long temp;
-		temp = Double.doubleToLongBits(travelTimeSegmentLength);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + Float.floatToIntBits(travelTimeSegmentLength);
 		result = prime * result
 				+ ((travelTimesMsec == null) ? 0 : travelTimesMsec.hashCode());
+		result = prime * result + travelTimesRev;
 		return result;
 	}
 
@@ -370,6 +403,8 @@ public class TravelTimesForStopPath implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		TravelTimesForStopPath other = (TravelTimesForStopPath) obj;
+		if (configRev != other.configRev)
+			return false;
 		if (daysOfWeekOverride != other.daysOfWeekOverride)
 			return false;
 		if (howSet != other.howSet)
@@ -386,13 +421,15 @@ public class TravelTimesForStopPath implements Serializable {
 			return false;
 		if (stopTimeMsec != other.stopTimeMsec)
 			return false;
-		if (Double.doubleToLongBits(travelTimeSegmentLength) != Double
-				.doubleToLongBits(other.travelTimeSegmentLength))
+		if (Float.floatToIntBits(travelTimeSegmentLength) != Float
+				.floatToIntBits(other.travelTimeSegmentLength))
 			return false;
 		if (travelTimesMsec == null) {
 			if (other.travelTimesMsec != null)
 				return false;
 		} else if (!travelTimesMsec.equals(other.travelTimesMsec))
+			return false;
+		if (travelTimesRev != other.travelTimesRev)
 			return false;
 		return true;
 	}
