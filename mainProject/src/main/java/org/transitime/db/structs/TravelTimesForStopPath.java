@@ -104,7 +104,8 @@ public class TravelTimesForStopPath implements Serializable {
 	// it can make things so much more efficient want to try using it.
 	// NOTE: since trying to use serialization need to use ArrayList<> instead
 	// of List<> since List<> doesn't implement Serializable.
-	@Column(length=1000)// @ElementCollection @OrderColumn
+	private static final int travelTimesMaxBytes = 2000;
+	@Column(length=travelTimesMaxBytes)
 	private final ArrayList<Integer> travelTimesMsec;
 
 	// There is a separate time for travel and for actually stopping. For
@@ -187,10 +188,22 @@ public class TravelTimesForStopPath implements Serializable {
 			String stopPathId, double travelTimeSegmentDistance,
 			List<Integer> travelTimesMsec, int stopTimeMsec,
 			int daysOfWeekOverride, HowSet howSet) {
+		// First make sure that travelTimesMsec isn't bigger than
+		// the space allocated for it.
+		int serializedSize = HibernateUtils.sizeof(travelTimesMsec);
+		if (serializedSize > travelTimesMaxBytes) {
+			throw new ArrayIndexOutOfBoundsException("To many elements in "
+					+ "travelTimesMsec when constructing a "
+					+ "TravelTimesForStopPath. Have " + travelTimesMsec.size()
+					+ " stop paths taking up " + serializedSize 
+					+ " bytes but only have " + travelTimesMaxBytes 
+					+ " bytes allocated for the data.");
+		}
+		
 		this.configRev = configRev;
 		this.travelTimesRev = travelTimesRev;
 		this.stopPathId = stopPathId;
-		this.travelTimeSegmentLength = (float) travelTimeSegmentDistance;
+		this.travelTimeSegmentLength = (float) travelTimeSegmentDistance;		
 		this.travelTimesMsec = (ArrayList<Integer>) travelTimesMsec;
 		this.stopTimeMsec = stopTimeMsec;
 		this.daysOfWeekOverride = (short) daysOfWeekOverride;

@@ -915,6 +915,8 @@ public class GtfsData {
 			}
 			
 			// For each stop time for the trip...
+			HashMap<String, ScheduleTime> newScheduledTimesMap = 
+					new HashMap<String, ScheduleTime>();
 			String previousStopId = null;			
 			for (int i=0; i<gtfsStopTimesForTrip.size(); ++i) {
 				// The current gtfsStopTime
@@ -941,7 +943,7 @@ public class GtfsData {
 						filteredArr = null;
 				}
 				ScheduleTime scheduleTime = new ScheduleTime(filteredArr, filteredDep);
-				trip.addScheduleTime(stopId, scheduleTime);
+				newScheduledTimesMap.put(stopId, scheduleTime);
 				
 				// Create StopPath so it can be used to create TripPattern. 
 				// First determine attributes layoverStop, 
@@ -1001,6 +1003,10 @@ public class GtfsData {
 				
 				previousStopId = stopId;
 			} // End of for each stop_time for trip
+					
+			// Now that all the schedule times have been added to the map, add 
+			// them all at once to the Trip. 
+			trip.addScheduleTimes(newScheduledTimesMap);
 			
 			// Now that have Paths defined for the trip, if need to, 
 			// also create new trip pattern

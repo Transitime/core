@@ -115,7 +115,8 @@ public class Trip implements Serializable {
 	// that don't need separate table and the data can be read and written
 	// much faster.
 	// Keyed on stopId
-	@Column(length=2000)// @ElementCollection
+	private static final int scheduleTimesMaxBytes = 2000;
+	@Column(length=scheduleTimesMaxBytes)
 	private final HashMap<String, ScheduleTime> scheduledTimesMap = 
 			new HashMap<String, ScheduleTime>(); 
 	
@@ -257,26 +258,41 @@ public class Trip implements Serializable {
 	}
 
 	/**
-	 * For adding a ScheduleTime for a stop to Trip. Updates scheduledTimesMap,
+	 * For adding ScheduleTimes for stops to a Trip. Updates scheduledTimesMap,
 	 * startTime, and endTime.
 	 * 
-	 * @param stopId
-	 * @param scheduleTime
+	 * @param newScheduledTimesMap
 	 */
-	public void addScheduleTime(String stopId, ScheduleTime scheduleTime) {
-		scheduledTimesMap.put(stopId, scheduleTime);
+	public void addScheduleTimes(HashMap<String, ScheduleTime> newScheduledTimesMap) {
+		// For each schedule time (one per stop path)
+		for (String stopId : newScheduledTimesMap.keySet()) {
+			// Add the schedule time to the map
+			ScheduleTime scheduleTime = newScheduledTimesMap.get(stopId);
+			scheduledTimesMap.put(stopId, scheduleTime);
+			
+			// Determine the begin and end time. Assumes that times are added in order
+			if (startTime == null || 
+					(scheduleTime.getDepartureTime() != null && 
+					 scheduleTime.getDepartureTime() < startTime))
+				startTime = scheduleTime.getDepartureTime();
+			if (endTime == null || 
+					(scheduleTime.getArrivalTime() != null &&  
+					 scheduleTime.getArrivalTime() > endTime))
+				endTime = scheduleTime.getArrivalTime();
+		}
 		
-		// Determine the begin and end time. Assumes that times are added in order
-		if (startTime == null || 
-				(scheduleTime.getDepartureTime() != null && 
-				 scheduleTime.getDepartureTime() < startTime))
-			startTime = scheduleTime.getDepartureTime();
-		if (endTime == null || 
-				(scheduleTime.getArrivalTime() != null &&  
-				 scheduleTime.getArrivalTime() > endTime))
-			endTime = scheduleTime.getArrivalTime();
+		// If resulting map takes up too much memory throw an exception
+		int serializedSize = HibernateUtils.sizeof(scheduledTimesMap);
+		if (serializedSize > scheduleTimesMaxBytes) {
+			throw new ArrayIndexOutOfBoundsException("To many elements in "
+					+ "scheduledTimesMap when constructing a "
+					+ "Trip. Have " + scheduledTimesMap.size()
+					+ " schedule times taking up " + serializedSize 
+					+ " bytes but only have " + scheduleTimesMaxBytes 
+					+ " bytes allocated for the data.");
+		}
 	}
-
+	
 	/**
 	 * TripPattern is created after the Trip. Therefore it cannot
 	 * be set in constructor and instead needs this set method.

@@ -16,7 +16,10 @@
  */
 package org.transitime.db.hibernate;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -191,5 +194,30 @@ public class HibernateUtils {
 				HibernateUtils.getSessionFactory(DbSetupConfig.getDbName());
 		Session session = sessionFactory.openSession();
 		return session;
+	}
+	
+	/**
+	 * Determines the size of a serializable object by serializing it in memory
+	 * and then measuring the resulting size in bytes.
+	 * 
+	 * @param obj
+	 *            Object to be serialized
+	 * @return Size of serialized object in bytes or -1 if object cannot be
+	 *         serialized
+	 */
+	public static int sizeof(Object obj) {
+
+	    ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+	    try {
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteOutputStream);
+
+			objectOutputStream.writeObject(obj);
+			objectOutputStream.flush();
+			objectOutputStream.close();
+		} catch (IOException e) {
+			return -1;
+		}
+
+	    return byteOutputStream.toByteArray().length;
 	}
 }
