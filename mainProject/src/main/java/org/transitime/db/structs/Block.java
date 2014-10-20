@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -41,6 +40,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,16 +93,17 @@ public final class Block implements Serializable {
 	// try to store the same trip twice because then would get a uniqueness
 	// violation.
 	//
-	// Use CascadeType.ALL so that when the TripPattern is stored the Paths 
-	// are automatically stored.
+	// Use CascadeType.SAVE_UPDATE so that when the TripPattern is stored   
+	// the Paths are automatically stored.
 	//
 	// Use FetchType.LAZY so that don't read in all trip data at once since
 	// that in turn reads in trip pattern and travel time info, which can
 	// be voluminous and therefore slow. The trips will be read in when
 	// getTrips() is called.
-	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	@ManyToMany(fetch=FetchType.LAZY)
 	@JoinTable(name="Block_to_Trip_joinTable")
 	@OrderColumn(name="listIndex")
+	@Cascade({CascadeType.SAVE_UPDATE})
 	private final List<Trip> trips;
 	
 	@Column

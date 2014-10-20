@@ -17,7 +17,6 @@
  */
 package org.transitime.gtfs;
 
-import java.util.Collection;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -100,7 +99,7 @@ public class DbWriter {
 		// Now write the data to the database.
 		// First write the Blocks. This will also write the Trips, TripPatterns,
 		// Paths, and TravelTimes since those all have been configured to be
-		// cascade=CascadeType.ALL .
+		// cascade=CascadeType.SAVE_UPDATE .
 		logger.info("Saving {} blocks (plus associated trips) to database...", 
 				gtfsData.getBlocks().size());
 		int c = 0;
@@ -163,55 +162,6 @@ public class DbWriter {
 		for (Transfer transfer : gtfsData.getTransfers()) {
 			writeObject(transfer);
 		}
-	}
-	
-	/**
-	 * Writes the list of Trips to the database. Useful for when updating trip
-	 * data, such as the associated travel times.
-	 * 
-	 * @param sessionFactory
-	 * @param trips
-	 */
-	public static void writeTrips(Session session, Collection<Trip> trips) {
-		// For logging how long things take
-		IntervalTimer timer = new IntervalTimer();
-
-		// Let user know what is going on
-		logger.info("Writing Trip data to database...");
-
-		Transaction tx = session.beginTransaction();
-		
-		// Write each of the Trips to the database
-		int counter = 0;
-		try {
-			for (Trip trip : trips) {
-				session.saveOrUpdate(trip);
-
-				// Since can writing large amount of data should use Hibernate 
-				// batching to make sure don't run out memory.
-				counter++;
-				if (counter % HibernateUtils.BATCH_SIZE == 0) {
-					IntervalTimer flushTimer = new IntervalTimer();
-					logger.debug("Flushing and clearing {} Trips", HibernateUtils.BATCH_SIZE);
-					
-					session.flush();
-					session.clear();
-					
-					logger.debug("Flushing and clearing {} Trips took {}msec", 
-							HibernateUtils.BATCH_SIZE, flushTimer.elapsedMsec());					
-				}
-			}
-			
-			// Done writing data so commit it
-			tx.commit();
-		} catch (HibernateException e) {
-			logger.error("Error writing Trip data to db.", e);
-		}
-
-		// Let user know what is going on
-		logger.info("Finished writing Trip data to database. Wrote {} Trips. " +
-				"Took {} msec.",
-				counter, timer.elapsedMsec());		
 	}
 	
 	/**

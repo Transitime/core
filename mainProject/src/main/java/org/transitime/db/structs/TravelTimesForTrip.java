@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,6 +35,8 @@ import javax.persistence.Table;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Index;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -49,16 +50,20 @@ import org.transitime.db.hibernate.HibernateUtils;
  * @author SkiBu Smith
  *
  */
-@Entity @DynamicUpdate @Table(name="TravelTimesForTrips")
-@org.hibernate.annotations.Table(appliesTo = "TravelTimesForTrips", 
-indexes = { @Index(name="travelTimesRevIndex", 
-                   columnNames={"travelTimesRev"} ) } )
+@Entity 
+@DynamicUpdate 
+@Table(name="TravelTimesForTrips")
+@org.hibernate.annotations.Table(
+		appliesTo = "TravelTimesForTrips", 
+		indexes = { @Index(	name="travelTimesRevIndex", 
+                   			columnNames={"travelTimesRev"} ) } )
 public class TravelTimesForTrip implements Serializable {
 
 	// Need a generated ID because trying to share TravelTimesForStopPath 
 	// objects because having a separate set for each trip would be too much. 
-	// But will usually still have a few per path and trip pattern. Therefore 
-	// also need the generated ID.
+	// But can still have a few per path and trip pattern. Therefore 
+	// also need the generated ID since the other columns are not adequate
+	// as an ID.
 	@Column 
 	@Id 
 	@GeneratedValue 
@@ -72,7 +77,8 @@ public class TravelTimesForTrip implements Serializable {
 	// Each time update travel times it gets a new travel time rev. This
 	// way can compare travel times with previous revisions. Probably only need
 	// to keep the previous travel time rev around for comparison but by
-	// using an integer for the rev all of the can be kept. 
+	// using an integer for the rev all of the revs can be kept in the db 
+	// if desired.
 	@Column
 	private final int travelTimesRev;
 	
@@ -85,8 +91,9 @@ public class TravelTimesForTrip implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripCreatedForId;
 	
-	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@ManyToMany(fetch=FetchType.EAGER)
 	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable")
+	@Cascade({CascadeType.SAVE_UPDATE})
 	@OrderColumn(name="listIndex")
 	private final List<TravelTimesForStopPath> travelTimesForStopPaths = 
 			new ArrayList<TravelTimesForStopPath>();

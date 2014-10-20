@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,6 +32,8 @@ import javax.persistence.Transient;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -93,7 +94,8 @@ public class Trip implements Serializable {
 	// So can determine all the stops and stopPaths associated with trip
 	// Note that needs to be FetchType.EAGER because otherwise get a 
 	// Javassist HibernateException.
-	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.EAGER)
+	@Cascade({CascadeType.SAVE_UPDATE})
 	private TripPattern tripPattern;
 
 	// Use FetchType.EAGER so that all travel times are efficiently read in
@@ -102,7 +104,8 @@ public class Trip implements Serializable {
 	// HibernateException.
 	//
 	// We are sharing travel times so need a ManyToOne mapping
-	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.EAGER)
+	@Cascade({CascadeType.SAVE_UPDATE})
 	private TravelTimesForTrip travelTimes;
 	
 	// Contains schedule time for each stop as obtained from GTFS 
@@ -413,6 +416,34 @@ public class Trip implements Serializable {
 				+ "]";
 	}
 	
+	/**
+	 * Similar to toString() but also includes full TripPattern and travelTimes
+	 * 
+	 * @return
+	 */
+	public String toLongString() {
+		return "Trip [" 
+				+ "configRev=" + configRev
+				+ ", tripId=" + tripId 
+				+ ", tripShortName=" + tripShortName
+				+ ", tripPatternId=" 
+					+ (tripPattern != null ? tripPattern.getId() : "null")
+				+ ", tripPattern=" + tripPattern
+				+ ", tripIndex=" + getIndex()
+				+ ", startTime=" + Time.timeOfDayStr(startTime)
+				+ ", endTime=" + Time.timeOfDayStr(endTime)
+				+ ", name=\"" + headsign + "\""
+				+ ", directionId=" + directionId
+				+ ", routeId=" + routeId
+				+ ", routeShortName=" + routeShortName
+				+ ", serviceId=" + serviceId
+				+ ", blockId=" + blockId
+				+ ", shapeId=" + shapeId
+				+ ", scheduledTimesMap=" + scheduledTimesMap
+				+ ", travelTimes=" + travelTimes
+				+ "]";
+	}
+
 	/**
 	 * Similar to toString() but doesn't include scheduledTimesMap which
 	 * can be quite verbose since it often contains times for many stops.

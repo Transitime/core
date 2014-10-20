@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +33,11 @@ import org.transitime.core.travelTimes.TravelTimeInfoWithHowSet;
 import org.transitime.core.travelTimes.TravelTimesProcessor;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
+import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
-import org.transitime.gtfs.DbWriter;
+import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -135,6 +138,8 @@ public class UpdateTravelTimes {
 					// Create and add the travel time for this stop path
 					ttForStopPathToUse = 
 							new TravelTimesForStopPath(
+									trip.getConfigRev(),
+									newTravelTimesRev,
 									trip.getStopPath(stopIdx).getId(), 
 									travelTimeInfo.getTravelTimeSegLength(),
 									travelTimeInfo.getTravelTimes(),
@@ -151,7 +156,7 @@ public class UpdateTravelTimes {
 					// Create copy of the original travel times but update the 
 					// travel time rev.
 					ttForStopPathToUse = 
-							(TravelTimesForStopPath) originalTravelTimes.clone();
+							originalTravelTimes.clone(newTravelTimesRev);
 				}
 
 				// FIXME test this!
@@ -196,17 +201,27 @@ public class UpdateTravelTimes {
 	}
 	
 	/**
-	 * Writes the trips to the session so that they will be stored when
-	 * the session is committed.
+	 * Writes the trips to the database.
 	 * 
 	 * @param session
 	 * @param tripMap
 	 */
 	private static void writeNewTripDataToDb(Session session,
 			Map<String, Trip> tripMap) {
+		// Log the trips. Only do this if debug enabled because the
+		// trip info along with travel times is really verbose.
+		if (logger.isDebugEnabled()) {
+			logger.debug("The trips with trip times are:");
+			for (Trip trip : tripMap.values()) {
+				logger.debug(trip.toLongString());
+			}
+		}
+		
 		// Write out the trips to the database. This also writes out the
 		// cascading data which includes the new travel times.
-		DbWriter.writeTrips(session, tripMap.values());		
+		logger.info("Flushing data to database...");
+		session.flush();
+		logger.info("Done flushing");
 	}
 	
 	/**
@@ -219,7 +234,7 @@ public class UpdateTravelTimes {
 	 * @return
 	 */
 	private static Map<String, Trip> readTripsFromDb(String agencyId, Session session) {
-		ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId);
+		ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId); 
 		IntervalTimer timer = new IntervalTimer();
 		logger.info("Reading in trips from db...");
 		Map<String, Trip> tripMap = 
@@ -303,6 +318,11 @@ public class UpdateTravelTimes {
 			System.exit(-1);
 		}
 
+		// Set the timezone for the application
+		TimeZone timezone = 
+				Agency.getAgencies(agencyId, DbConfig.SANDBOX_REV).get(0).getTimeZone();
+		TimeZone.setDefault(timezone);
+		
 		// Do all the work...
 		processTravelTimes(agencyId, maxTravelTimeSegmentLength,
 				specialDaysOfWeek, beginTime, endTime);
