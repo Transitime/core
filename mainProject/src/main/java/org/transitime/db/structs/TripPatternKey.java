@@ -16,50 +16,21 @@
  */
 package org.transitime.db.structs;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinTable;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
-import javax.persistence.Transient;
-
-import org.transitime.db.hibernate.HibernateUtils;
 
 
 /**
- * This class is the base part of a TripPattern. It can be
- * used as the key such for identifying TripPatterns in a 
- * Map. Any additional members not needed for hashCode()
- * or equals() should go in the TripPattern class.
+ * This class is to be used as a key for a TripPattern map. It contains just
+ * enough information, the shapeId and the stopPaths list, needed to uniquely
+ * identify a TripPattern.
  *
  * @author SkiBu Smith
  */
-@MappedSuperclass
-public class TripPatternBase {
+public class TripPatternKey {
 
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	final protected String shapeId;
+	final private String shapeId;
 	
-	// For the List of Paths want to use FetchType.EAGER
-	// because otherwise need to keep the session open till the Paths
-	// are accessed with the default LAZY loading. And use CascadeType.ALL
-	// so that when the TripPattern is stored the Paths are
-	// automatically stored.
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
-	@JoinTable(name="TripPattern_to_Path_joinTable")
-	@OrderColumn( name="listIndex")
-	final protected List<StopPath> stopPaths;
-	
-	// For quickly finding a StopPath using a stop ID.
-	// Keyed on stop ID.
-	@Transient
-	final protected Map<String, StopPath> stopPathsMap;
+	final private List<StopPath> stopPaths;
 	
 	/********************** Member Functions **************************/
 	
@@ -71,19 +42,13 @@ public class TripPatternBase {
 	 * @param stopPaths Specifies the stops for the trip pattern. Must
 	 * not be null.
 	 */
-	public TripPatternBase(String shapeId, List<StopPath> paths) {
+	public TripPatternKey(String shapeId, List<StopPath> paths) {
 		if (paths == null)
 			throw new RuntimeException("stopPaths param must be " + 
 					"non-null for TripPatternBase() constructor");
 		
 		this.shapeId = shapeId;
 		this.stopPaths = paths;
-		
-		// Fill in the map for quick StopPath retrievals by stop ID
-		stopPathsMap = new HashMap<String, StopPath>();
-		for (StopPath stopPath : paths) {
-			stopPathsMap.put(stopPath.getStopId(), stopPath);
-		}
 	}
 
 	/**
@@ -94,42 +59,17 @@ public class TripPatternBase {
 	 * 
 	 * @param alreadyExistingBase
 	 */
-	protected TripPatternBase(TripPatternBase alreadyExistingBase) {
+	protected TripPatternKey(TripPatternKey alreadyExistingBase) {
 		shapeId = alreadyExistingBase.shapeId;
 		stopPaths = alreadyExistingBase.stopPaths;
-		stopPathsMap = alreadyExistingBase.stopPathsMap;
 	}
 	
 	/**
 	 * Hibernate requires a no-arg constructor
 	 */
-	protected TripPatternBase() {
+	protected TripPatternKey() {
 		shapeId = null;
 		stopPaths = null;
-		stopPathsMap = new HashMap<String, StopPath>();
-	}
-	
-	/**
-	 * Returns the StopPath for this TripPattern as specified by the stopId
-	 * parameter. Uses a map so is reasonably fast. Synchronized to make sure
-	 * that only a single thread can initialize the transient map.
-	 * 
-	 * @param stopId
-	 * @return The StopPath specified by the stop ID, or null if this
-	 *         TripPattern does not contain that stop.
-	 */
-	protected synchronized StopPath getStopPath(String stopId) {
-		// Since using Hibernate to read in object the usual constructor
-		// might not be called to fill in the transient stopPathsMap object.
-		// Therefore if it is empty fill it in now.
-		if (stopPathsMap.isEmpty()) {
-			for (StopPath stopPath : stopPaths) {
-				stopPathsMap.put(stopPath.getStopId(), stopPath);
-			}
-		}
-		
-		// Return the StopPath specified by the stop ID
-		return stopPathsMap.get(stopId);
 	}
 	
 	/**
@@ -171,11 +111,11 @@ public class TripPatternBase {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof TripPatternBase))
+		if (!(obj instanceof TripPatternKey))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TripPatternBase other = (TripPatternBase) obj;
+		TripPatternKey other = (TripPatternKey) obj;
 		if (shapeId == null) {
 			if (other.shapeId != null)
 				return false;
@@ -195,6 +135,14 @@ public class TripPatternBase {
 			}
 		}
 		return true;
+	}
+
+	public String getShapeId() {
+		return shapeId;
+	}
+
+	public List<StopPath> getStopPaths() {
+		return stopPaths;
 	}
 
 }

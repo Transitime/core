@@ -18,18 +18,26 @@ package org.transitime.db.structs;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
@@ -46,15 +54,31 @@ import org.transitime.gtfs.gtfsStructs.GtfsRoute;
  * @author SkiBu Smith
  */
 @Entity @DynamicUpdate @Table(name="TripPatterns")
-public class TripPattern extends TripPatternBase implements Serializable {
+public class TripPattern implements Serializable {
 
+	// Which configuration revision used
 	@Column 
 	@Id
 	private final int configRev;
 	
+	// The ID of the trip pattern
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
 	@Id
 	private final String id;
+	
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	final protected String shapeId;
+	
+	// For the List of Paths want to use FetchType.EAGER
+	// because otherwise need to keep the session open till the Paths
+	// are accessed with the default LAZY loading. And use 
+	// CascadeType.SAVE_UPDATE so that when the TripPattern is stored the 
+	// Paths are automatically stored.
+	@OneToMany(fetch=FetchType.EAGER)
+	@Cascade({CascadeType.SAVE_UPDATE})
+	@JoinTable(name="TripPattern_to_Path_joinTable")
+	@OrderColumn( name="listIndex")
+	final protected List<StopPath> stopPaths;
 	
 	@Column
 	private final String headsign;
@@ -76,6 +100,12 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	@Transient
 	private List<Trip> trips = new ArrayList<Trip>();
 	
+	// For quickly finding a StopPath using a stop ID.
+	// Keyed on stop ID.
+	@Transient
+	final protected Map<String, StopPath> stopPathsMap;
+	
+
 	// Hibernate requires this class to be serializable because it uses multiple
 	// columns for the Id.
 	private static final long serialVersionUID = 8002349177548788550L;
@@ -85,23 +115,29 @@ public class TripPattern extends TripPatternBase implements Serializable {
 	/**
 	 * Create a TripPattern. For when processing GTFS data.
 	 * 
-	 * Note: The name comes from the trip trip_headsign
-	 * data. If not set then uses name of last stop for trip.
+	 * Note: The name comes from the trip trip_headsign data. If not set then
+	 * uses name of last stop for trip.
 	 * 
-	 * @param tripPatternBase Already have the TripPatternBase info so
-	 * pass that in. That way it doesn't need to be recreated from Trip.
-	 * @param trip For supplying additional info
-	 * @param gtfsData So can access stop data for determining extent of 
-	 * trip pattern.
+	 * @param shapeId
+	 *            Part of what identifies the trip pattern
+	 * @param stopPaths
+	 *            Part of what identifies the trip pattern
+	 * @param trip
+	 *            For supplying additional info
+	 * @param gtfsData
+	 *            So can access stop data for determining extent of trip
+	 *            pattern.
 	 */
-	public TripPattern(TripPatternBase tripPatternBase, Trip trip, GtfsData gtfsData) {
-		super(tripPatternBase);
+	public TripPattern(String shapeId, List<StopPath> stopPaths, Trip trip, GtfsData gtfsData) {
 
+		this.shapeId = shapeId;
+		this.stopPaths = stopPaths;
+		
 		// Because will be writing data to the sandbox rev in the db
-		configRev = DbConfig.SANDBOX_REV;
+		this.configRev = DbConfig.SANDBOX_REV;
 
 		// Generate the id . 
-		id = generateTripPatternId(
+		this.id = generateTripPatternId(
 				shapeId,
 				stopPaths.get(0),
 				stopPaths.get(stopPaths.size()-1),
@@ -116,31 +152,34 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		// The trip_headsign in trips.txt and therefore the the trip name can be
 		// null. For these cases use the last stop as a destination.
 		if (trip.getHeadsign() != null) {
-			headsign = trip.getHeadsign();
+			this.headsign = trip.getHeadsign();
 		} else {
 			// trip_headsign was null so try using final stop name as the destination
 			// as a fallback.
 			StopPath lastPath = stopPaths.get(stopPaths.size()-1);
 			String lastStopIdForTrip = lastPath.getStopId();
 			Stop lastStopForTrip = gtfsData.getStop(lastStopIdForTrip);
-			headsign = lastStopForTrip.getName();
+			this.headsign = lastStopForTrip.getName();
 		}
 		
 		// Store additional info from this trip
-		directionId = trip.getDirectionId();
-		routeId = trip.getRouteId();
-		routeShortName = getRouteShortName(routeId, gtfsData);
+		this.directionId = trip.getDirectionId();
+		this.routeId = trip.getRouteId();
+		this.routeShortName = getRouteShortName(routeId, gtfsData);
 		
 		// Remember that this trip pattern refers to this particular 
 		// trip. Additional trips will be added as they are processed.
-		trips.add(trip);
+		this.trips.add(trip);
 		
-		// Determine extent of trip pattern and store it within
-		extent = new Extent();
-		for (StopPath path : stopPaths) {
+		// Determine extent of trip pattern and store it. Also, create
+		// the stopPathsMap and fill it in.
+		this.extent = new Extent();
+		this.stopPathsMap = new HashMap<String, StopPath>();
+		for (StopPath stopPath : stopPaths) {
 			// Determine the stop
-			Stop stop = gtfsData.getStop(path.getStopId());
-			extent.add(stop.getLoc());
+			Stop stop = gtfsData.getStop(stopPath.getStopId());
+			this.extent.add(stop.getLoc());
+			this.stopPathsMap.put(stopPath.getStopId(), stopPath);
 		}
 	}
 	
@@ -153,12 +192,14 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		
 		configRev = -1;
 		id = null;
+		shapeId = null;
+		stopPaths = null;
 		headsign = null;
 		directionId = null;
 		routeId = null;
 		routeShortName = null;
 		extent = null;
-		
+		stopPathsMap = null;
 	}
 
 	/**
@@ -461,6 +502,30 @@ public class TripPattern extends TripPatternBase implements Serializable {
 		// That stop is not in the trip pattern
 		return false;
 	}
+	
+	/**
+	 * Returns the StopPath for this TripPattern as specified by the stopId
+	 * parameter. Uses a map so is reasonably fast. Synchronized to make sure
+	 * that only a single thread can initialize the transient map.
+	 * 
+	 * @param stopId
+	 * @return The StopPath specified by the stop ID, or null if this
+	 *         TripPattern does not contain that stop.
+	 */
+	protected synchronized StopPath getStopPath(String stopId) {
+		// Since using Hibernate to read in object the usual constructor
+		// might not be called to fill in the transient stopPathsMap object.
+		// Therefore if it is empty fill it in now.
+		if (stopPathsMap.isEmpty()) {
+			for (StopPath stopPath : stopPaths) {
+				stopPathsMap.put(stopPath.getStopId(), stopPath);
+			}
+		}
+		
+		// Return the StopPath specified by the stop ID
+		return stopPathsMap.get(stopId);
+	}
+	
 	
 	/************** Getter Methods ****************/
 	

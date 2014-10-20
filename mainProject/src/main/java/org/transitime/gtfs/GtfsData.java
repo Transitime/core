@@ -47,7 +47,7 @@ import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Transfer;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
-import org.transitime.db.structs.TripPatternBase;
+import org.transitime.db.structs.TripPatternKey;
 import org.transitime.gtfs.gtfsStructs.GtfsAgency;
 import org.transitime.gtfs.gtfsStructs.GtfsCalendar;
 import org.transitime.gtfs.gtfsStructs.GtfsCalendarDate;
@@ -130,12 +130,12 @@ public class GtfsData {
 	// unique ones. Also, want to have each trip pattern
 	// know which trips use it. This means that TripPattern 
 	// needs list of GTFS trips. To do all of this need to
-	// use a map. The key needs to be a TripPatternBase so can
-	// make sure they are unique. But then need to also
-	// contain TripPatterns as the values so that can update
-	// the _trips list when another Trip is found to
+	// use a map. The key needs to be a TripPatternKey so 
+	// make sure the patterns are unique. The map contains
+	// TripPatterns as the values so that can update
+	// the trips list when another Trip is found to
 	// use that TripPattern.
-    private Map<TripPatternBase, TripPattern> tripPatternMap;
+    private Map<TripPatternKey, TripPattern> tripPatternMap;
 	
 	// Also need to be able to get trip patterns associated
 	// with a route so can be included in Route object.
@@ -841,7 +841,7 @@ public class GtfsData {
 		}
 
 		// Create the necessary collections for trips
-		tripPatternMap = new HashMap<TripPatternBase, TripPattern>();
+		tripPatternMap = new HashMap<TripPatternKey, TripPattern>();
 		tripPatternsByTripIdMap = new HashMap<String, TripPattern>();
 		tripPatternsByRouteIdMap = new HashMap<String, List<TripPattern>>();
 		tripPatternIdSet = new HashSet<String>();
@@ -1080,19 +1080,21 @@ public class GtfsData {
 	 * @param trip 
 	 * @param stopPaths List of StopPath objects that define the trip pattern
 	 */
-	private void updateTripPatterns(Trip trip, List<StopPath> paths) {
+	private void updateTripPatterns(Trip trip, List<StopPath> stopPaths) {
 		// Create a TripPatternBase from the Trip object
-		TripPatternBase tripPatternBase = new TripPatternBase(trip.getShapeId(), paths);
+		TripPatternKey tripPatternKey = 
+				new TripPatternKey(trip.getShapeId(), stopPaths);
 		
 		// Determine if the TripPattern is already stored. 
-		TripPattern tripPatternFromMap = tripPatternMap.get(tripPatternBase);
+		TripPattern tripPatternFromMap = tripPatternMap.get(tripPatternKey);
 		// If not already stored then create and store the trip pattern.
 		if (tripPatternFromMap == null) {
 			// Create the trip pattern
-			TripPattern tripPattern = new TripPattern(tripPatternBase, trip, this);
+			TripPattern tripPattern = 
+					new TripPattern(trip.getShapeId(), stopPaths, trip, this);
 			
 			// Add the new trip pattern to the maps
-			tripPatternMap.put(tripPatternBase, tripPattern);
+			tripPatternMap.put(tripPatternKey, tripPattern);
 			tripPatternsByTripIdMap.put(trip.getId(), tripPattern);
 			tripPatternIdSet.add(tripPattern.getId());
 
@@ -1568,7 +1570,7 @@ public class GtfsData {
 		return tripPatternIdSet.contains(tripPatternId);
 	}
 	
-	public Map<TripPatternBase, TripPattern> getTripPatternMap() {
+	public Map<TripPatternKey, TripPattern> getTripPatternMap() {
 		return tripPatternMap;
 	}
 	
