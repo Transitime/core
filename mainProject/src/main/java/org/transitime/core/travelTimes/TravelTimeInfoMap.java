@@ -120,10 +120,10 @@ public class TravelTimeInfoMap {
 	}
 	
 	/**
-	 * For when don't have historic data for a trip. This method determines the
-	 * trip with historic data for the same service class that has the nearest
-	 * time. If no historic data for a trip with the same service ID then will
-	 * look at trips with other service IDs.
+	 * For when don't have historic data for a trip. This method first
+	 * determines the trip with historic data for the same service ID that has
+	 * the nearest time. If no historic data for a trip with the same service ID
+	 * then will look at trips with other service IDs.
 	 * 
 	 * @param trip
 	 *            The Trip that needs travel time info
@@ -166,6 +166,8 @@ public class TravelTimeInfoMap {
 						// trip pattern, so continue.
 						continue;
 					} else {
+						// Found a reasonable match, but for another trip.
+						// Remember this by setting howSet to TRIP.
 						howSet = HowSet.TRIP;
 					}
 				}
