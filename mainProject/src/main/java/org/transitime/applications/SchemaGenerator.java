@@ -28,9 +28,17 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 /**
  * For generating SQL schema files based on classes to be stored in database
- * that were annotated for Hibernate. This is much nicer than trying to
- * figure out what the schema really should be by hand. This code was copied from
- * http://jandrewthompson.blogspot.nl/2009/10/how-to-generate-ddl-scripts-from.html
+ * that were annotated for Hibernate. This is much nicer than trying to figure
+ * out what the schema really should be by hand. This code was copied from
+ * http:/
+ * /jandrewthompson.blogspot.nl/2009/10/how-to-generate-ddl-scripts-from.html
+ * <p>
+ * Note that unfortunately there does not appear to be a way to specify the
+ * order of the columns in the resulting create table SQL statements. Though
+ * this has been asked for, it appears to still be a limitation of Hibernate.
+ * The default ordering appears to be first the @Id columns in reverse
+ * alphabetical order, and then the non @Id columns in alphabetical order. Yes,
+ * quite peculiar.
  * 
  * @author john.thompson and Skibu Smith
  *
