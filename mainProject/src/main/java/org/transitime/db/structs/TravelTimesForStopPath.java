@@ -33,8 +33,10 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.annotations.DynamicUpdate;
-import org.transitime.applications.Core;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.utils.Geo;
 
 
 /**
@@ -134,6 +136,9 @@ public class TravelTimesForStopPath implements Serializable {
 	// Needed because class is serializable
 	private static final long serialVersionUID = -5136757109373446841L;
 
+	private static final Logger logger = 
+			LoggerFactory.getLogger(TravelTimesForStopPath.class);
+
 	/**
 	 * This enumeration is for keeping track of how the travel times were  
 	 * determined. This way can tell of they should be overridden or not.  
@@ -178,26 +183,41 @@ public class TravelTimesForStopPath implements Serializable {
 	 * @param configRev
 	 * @param travelTimesRev
 	 * @param stopPathId
+	 * @param travelTimeSegmentDistance
 	 * @param travelTimesMsec
-	 *            The travel times for the travel time segments. 
+	 *            The travel times for the travel time segments.
 	 * @param stopTimeMsec
 	 * @param howSet
 	 * @param daysOfWeekOverride
+	 * @throws ArrayIndexOutOfBoundsException
+	 *             Thrown if not enough memory allocated for column
+	 *             travelTimesMsec for serializing the object.
 	 */
 	public TravelTimesForStopPath(int configRev, int travelTimesRev,
 			String stopPathId, double travelTimeSegmentDistance,
 			List<Integer> travelTimesMsec, int stopTimeMsec,
-			int daysOfWeekOverride, HowSet howSet) {
+			int daysOfWeekOverride, HowSet howSet) 
+					throws ArrayIndexOutOfBoundsException {
 		// First make sure that travelTimesMsec isn't bigger than
-		// the space allocated for it.
-		int serializedSize = HibernateUtils.sizeof(travelTimesMsec);
-		if (serializedSize > travelTimesMaxBytes) {
-			throw new ArrayIndexOutOfBoundsException("To many elements in "
-					+ "travelTimesMsec when constructing a "
-					+ "TravelTimesForStopPath. Have " + travelTimesMsec.size()
-					+ " stop paths taking up " + serializedSize 
-					+ " bytes but only have " + travelTimesMaxBytes 
-					+ " bytes allocated for the data.");
+		// the space allocated for it. Only bother checking if have
+		// at least a few travel times for the path.
+		if (travelTimesMsec.size() > 5) {
+			int serializedSize = HibernateUtils.sizeof(travelTimesMsec);
+			if (serializedSize > travelTimesMaxBytes) {
+				String msg = "Too many elements in "
+						+ "travelTimesMsec when constructing a "
+						+ "TravelTimesForStopPath for stopPathId=" + stopPathId 
+						+ " and travelTimeSegmentDistance=" 
+						+ Geo.distanceFormat(travelTimeSegmentDistance)
+						+ " . Have " + travelTimesMsec.size()
+						+ " travel time segments taking up " + serializedSize 
+						+ " bytes but only have " + travelTimesMaxBytes 
+						+ " bytes allocated for the data.";
+				logger.error(msg);
+				
+				// Since this could be a really problematic issue, throw an error
+				throw new ArrayIndexOutOfBoundsException(msg);
+			}
 		}
 		
 		this.configRev = configRev;
@@ -374,7 +394,7 @@ public class TravelTimesForStopPath implements Serializable {
 			return travelTimes;
 		} catch (HibernateException e) {
 			// Log error to the Core logger
-			Core.getLogger().error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 			return null;
 		} finally {
 			// Clean things up. Not sure if this absolutely needed nor if

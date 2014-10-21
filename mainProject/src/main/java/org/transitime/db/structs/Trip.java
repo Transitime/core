@@ -35,6 +35,8 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
@@ -114,8 +116,10 @@ public class Trip implements Serializable {
 	// makes the data not readable in the db using regular SQL but it means
 	// that don't need separate table and the data can be read and written
 	// much faster.
+	// scheduleTimesMaxBytes set to 4000 because for sfmta route 91 there
+	// is a trip with 91 schedule times.
 	// Keyed on stopId
-	private static final int scheduleTimesMaxBytes = 2000;
+	private static final int scheduleTimesMaxBytes = 4000;
 	@Column(length=scheduleTimesMaxBytes)
 	private final HashMap<String, ScheduleTime> scheduledTimesMap = 
 			new HashMap<String, ScheduleTime>(); 
@@ -146,6 +150,9 @@ public class Trip implements Serializable {
 	
 	// Hibernate requires class to be serializable because has composite Id
 	private static final long serialVersionUID = -23135771144135812L;
+
+	private static final Logger logger = 
+			LoggerFactory.getLogger(Trip.class);
 
 	/********************** Member Functions **************************/
 
@@ -262,6 +269,9 @@ public class Trip implements Serializable {
 	 * startTime, and endTime.
 	 * 
 	 * @param newScheduledTimesMap
+	 * @throws ArrayIndexOutOfBoundsException
+	 *             If not enough space allocated for serialized schedule times
+	 *             in scheduledTimesMap column
 	 */
 	public void addScheduleTimes(HashMap<String, ScheduleTime> newScheduledTimesMap) {
 		// For each schedule time (one per stop path)
@@ -281,15 +291,23 @@ public class Trip implements Serializable {
 				endTime = scheduleTime.getArrivalTime();
 		}
 		
-		// If resulting map takes up too much memory throw an exception
-		int serializedSize = HibernateUtils.sizeof(scheduledTimesMap);
-		if (serializedSize > scheduleTimesMaxBytes) {
-			throw new ArrayIndexOutOfBoundsException("To many elements in "
-					+ "scheduledTimesMap when constructing a "
-					+ "Trip. Have " + scheduledTimesMap.size()
-					+ " schedule times taking up " + serializedSize 
-					+ " bytes but only have " + scheduleTimesMaxBytes 
-					+ " bytes allocated for the data.");
+		// If resulting map takes up too much memory throw an exception.
+		// Only bother checking if have at least a few schedule times.
+		if (scheduledTimesMap.size() > 5) {
+			int serializedSize = HibernateUtils.sizeof(scheduledTimesMap);
+			if (serializedSize > scheduleTimesMaxBytes) {
+				String msg = "Too many elements in "
+						+ "scheduledTimesMap when constructing a "
+						+ "Trip. Have " + scheduledTimesMap.size()
+						+ " schedule times taking up " + serializedSize 
+						+ " bytes but only have " + scheduleTimesMaxBytes 
+						+ " bytes allocated for the data. Trip=" 
+						+ this.toShortString();
+				logger.error(msg);
+				
+				// Since this could be a really problematic issue, throw an error
+				throw new ArrayIndexOutOfBoundsException(msg);
+			}
 		}
 	}
 	
