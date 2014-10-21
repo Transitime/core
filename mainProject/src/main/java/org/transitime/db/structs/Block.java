@@ -793,7 +793,11 @@ public final class Block implements Serializable {
 		Trip trip = getTrip(tripIndex);
 		if (trip == null)
 			return -1;
-		return trip.getTravelTimes().getTravelTimesForStopPaths().size();		
+		
+		TravelTimesForTrip travelTimesForTrip = trip.getTravelTimes();
+		List<TravelTimesForStopPath> travelTimesForStopPaths = 
+				travelTimesForTrip.getTravelTimesForStopPaths();
+		return travelTimesForStopPaths.size();		
 	}
 
 	/**
