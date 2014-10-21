@@ -182,9 +182,8 @@ public class UpdateTravelTimes {
 			
 			// FIXME test this!!
 			// If already created the exact same TravelTimesForTrip 
-			// then use the existing one so don't generate too many db 
-			TravelTimesForTrip cachedTTForTrip =
-					ttForTripCache.get(ttForTrip);
+			// then use the existing one so don't generate too many db objects
+			TravelTimesForTrip cachedTTForTrip = ttForTripCache.get(ttForTrip);
 			if (cachedTTForTrip == null) {
 				// Haven't encountered this TravelTimesForStopPath so add it
 				// to the cache. Will end up storing this in db.
@@ -288,7 +287,7 @@ public class UpdateTravelTimes {
 	}
 	
 	/**
-	 * First arg specifies both the start date. If a second argument is
+	 * arg[1] specifies both the start date. If an addition argument is
 	 * specified it is used as the end date. Otherwise the data is processed for
 	 * just a single day.
 	 * 
@@ -298,11 +297,13 @@ public class UpdateTravelTimes {
 		// Determine the parameters
 		String agencyId = CoreConfig.getAgencyId();
 		
-		String startDateStr = args[0];
-		String endDateStr = args.length > 1 ? args[1] : startDateStr;
+		String maxTravelTimeSegmentLengthStr = args[0];
+		double maxTravelTimeSegmentLength = 
+				Double.parseDouble(maxTravelTimeSegmentLengthStr);
+		String startDateStr = args[1];
+		String endDateStr = args.length > 2 ? args[2] : startDateStr;
 		
-		// FIXME These couple of params are hard coded simply to get things going
-		double maxTravelTimeSegmentLength = 400.0;		
+		// Some params are hard coded simply to get things going
 //		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();
 //		specialDaysOfWeek.add(java.util.Calendar.FRIDAY);
 		List<Integer> specialDaysOfWeek = null;
