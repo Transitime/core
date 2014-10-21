@@ -143,15 +143,14 @@ public class ScheduleBasedTravelTimesProcessor {
 		// Handle first path specially since it is a special case where it is
 		// simply a stub path. It therefore has no travel or stop time.
 		ArrayList<Integer> firstPathTravelTimesMsec = new ArrayList<Integer>();
+		firstPathTravelTimesMsec.add(0);
+
 		StopPath firstPath = trip.getStopPath(0);
-		for (int i=0; i<firstPath.getLocations().size()-1; ++i) { 
-			firstPathTravelTimesMsec.add(0);
-		}
-		String firstPathId = tripPattern.getStopPathId(0);
 		TravelTimesForStopPath firstPathTravelTimesForPath = 
 				new TravelTimesForStopPath(
 						DbConfig.SANDBOX_REV, travelTimeRevToUse,
-						firstPathId, firstPath.length(), firstPathTravelTimesMsec, 
+						firstPath.getId(), firstPath.length(), 
+						firstPathTravelTimesMsec, 
 						0,   // stopTimeMsec
 						-1,  // daysOfWeekOverride
 						HowSet.SCHED); 
