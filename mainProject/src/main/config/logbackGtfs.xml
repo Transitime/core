@@ -95,7 +95,7 @@
   <logger name="org.hibernate.SQL" level="debug" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
-  <logger name="org.hibernate.type" level="trace" additivity="true">
+  <logger name="org.hibernate.type" level="trace" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
 -->
