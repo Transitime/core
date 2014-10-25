@@ -71,11 +71,13 @@ public class BlocksProcessor {
 	 * have an unscheduled stop at beginning so that system knows not to make 
 	 * predictions until vehicle has left the terminal.
 	 * 
+	 * @param configRev
 	 * @param blocks List of blocks that the unscheduled assignments should be added
 	 * @param serviceIdsUsed The service IDs that the unscheduled blocks should 
 	 * be created for.
 	 */
-	private void addUnscheduledBlocks(List<Block> blocks, Set<String> serviceIdsUsed) {
+	private void addUnscheduledBlocks(int configRev, List<Block> blocks,
+			Set<String> serviceIdsUsed) {
 		// Create unscheduled blocks for the routes that have 
 		// create_unschedule_block set in GTFS route.txt file
 		Collection<GtfsRoute> gtfsRoutes = gtfsData.getGtfsRoutesMap().values();
@@ -134,10 +136,9 @@ public class BlocksProcessor {
 					// a route is defined for weekdays want the unscheduled blocks to be
 					// available for any day.
 					for (String serviceId : serviceIdsUsed) {
-						Block block = new Block(blockId,
-									serviceId,
-									startTimeForBlock, endTimeForBlock, 
-									tripsListForBlock, headwaySecs);
+						Block block = new Block(configRev, blockId, serviceId,
+								startTimeForBlock, endTimeForBlock,
+								tripsListForBlock, headwaySecs);
 						
 						// Add the new block to the list of blocks
 						blocks.add(block);					
@@ -151,9 +152,10 @@ public class BlocksProcessor {
 	 * Actually processes the trips into block assignments. Includes "unscheduled"
 	 * block assignments for the routes that have been configured for such.
 	 * 
+	 * @param configRev
 	 * @return List of Block assignments.
 	 */
-	public List<Block> process() {
+	public List<Block> process(int configRev) {
 		// Create list for blocks
 		List<Block> blocks = new ArrayList<Block>();
 		
@@ -252,10 +254,9 @@ public class BlocksProcessor {
 				endTimeForBlock = lastTripForBlock.getEndTime();
 
 				// Create the Block
-				Block block = new Block(blockId,
-							serviceId,
-							startTimeForBlock, endTimeForBlock, 
-							tripsListForBlock, headwaySecs);
+				Block block = new Block(configRev, blockId, serviceId,
+						startTimeForBlock, endTimeForBlock, tripsListForBlock,
+						headwaySecs);
 				
 				// Add the new block to the list of blocks
 				blocks.add(block);
@@ -266,7 +267,7 @@ public class BlocksProcessor {
 		// the unscheduled blocks for routes that have been configured
 		// such that they should be generated.
 		Set<String> serviceIdsUsed = tripListByBlocksByServiceMap.keySet();
-		addUnscheduledBlocks(blocks, serviceIdsUsed);
+		addUnscheduledBlocks(configRev, blocks, serviceIdsUsed);
 
 		// Return the results
 		return blocks;

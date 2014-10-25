@@ -27,9 +27,9 @@ import org.transitime.db.structs.Trip;
 import org.transitime.utils.Time;
 
 /**
- * For keeping track of the historic data such that if no data is
- * available for a trip then can find closest trip. Keyed by trip pattern
- * and stop path index.
+ * For keeping track of the historic data such that if no data is available for
+ * a trip then can find closest trip. Keyed by stop path index.
+ * 
  * @author SkiBu Smith
  *
  */

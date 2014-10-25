@@ -36,6 +36,7 @@ import org.transitime.core.ServiceUtils;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.DataDbLogger;
+import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.servers.ConfigServer;
 import org.transitime.ipc.servers.PredictionsServer;
@@ -73,6 +74,9 @@ public class Core {
 	// Set by command line option. Specifies which config file to read in. 
 	private static String configFile = null;
 		
+	// Set by command line option. Specifies config rev to use if set
+	private static String configRevStr = null;
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(Core.class);
 	
@@ -85,10 +89,28 @@ public class Core {
 	 * @param agencyId
 	 */
 	private Core(String agencyId) {
+		// Determine configuration rev to use. If one specified on command
+		// line, use it. If not, then use revision stored in db.
+		int configRev;
+		if (configRevStr != null) {
+			// Use config rev from command line
+			configRev = Integer.parseInt(configRevStr);
+		} else {
+			// Read in config rev from ActiveRevisions table in db
+			ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId);
+			
+			// If config rev not set properly then can't do anything so exit
+			if (!activeRevisions.isValid()) {
+				logger.error("ActiveRevisions in database is not valid. The "
+						+ "configuration revs must be set to proper values. {}", 
+						activeRevisions);
+				System.exit(-1);
+			}
+			configRev = activeRevisions.getConfigRev();
+		}
+
 		// Read in all GTFS based config data from the database
 		configData = new DbConfig(agencyId);
-		// FIXME Use rev 0 for now but should be using current rev
-		int configRev = 0;
 		configData.read(configRev);
 		
 		// Set the timezone so that when dates are logged the time
@@ -235,9 +257,17 @@ public class Core {
 		
 		options.addOption(OptionBuilder.withArgName("configFile")
                 .hasArg()
-                .withDescription("Specifies configuration file to read in.")
+                .withDescription("Specifies optional configuration file to read in.")
                 .withLongOpt("config")
                 .create("c")
+                );
+		
+		options.addOption(OptionBuilder.withArgName("configRev")
+                .hasArg()
+                .withDescription("Specifies optional configuration revision. "
+                		+ "If not set then the configuration rev will be read "
+                		+ "from the ActiveRevisions table in the database.")
+                .create("configRev")
                 );
 		
 		// Parse the options
@@ -248,7 +278,12 @@ public class Core {
 		if (cmd.hasOption("c")) {
 			configFile = cmd.getOptionValue("c");
 		}
-								
+				
+		// Handle optional config rev
+		if (cmd.hasOption("configRev")) {
+			configRevStr = cmd.getOptionValue("configRev");
+		}
+
 		// Handle help option
 		if (cmd.hasOption("h")) {
 			// Display help

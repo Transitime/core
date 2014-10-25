@@ -63,6 +63,8 @@ public class GtfsFileProcessor {
 	private final int defaultWaitTimeAtStopMsec;
 	private final double maxTravelTimeSegmentLength;
 	private final boolean shouldCombineShortAndLongNamesForRoutes;
+	private final int configRev;
+	private final boolean shouldStoreNewRevs;
 	
 	// Logging important in this class
 	private static final Logger logger = 
@@ -87,6 +89,12 @@ public class GtfsFileProcessor {
 	 * @param defaultWaitTimeAtStopMsec
 	 * @param maxTravelTimeSegmentLength
 	 * @param shouldCombineShortAndLongNamesForRoutes
+	 * @param configRev
+	 *            If not -1 then will use this config rev instead of
+	 *            incrementing from the current config rev from the db
+	 * @param shouldStoreNewRevs
+	 *            If true then will store the new config and travel times revs
+	 *            into ActiveRevisions table in db
 	 */
 	private GtfsFileProcessor(String configFile,
 			String gtfsUrl,
@@ -100,7 +108,9 @@ public class GtfsFileProcessor {
 			double maxDistanceForEliminatingVertices,
 			int defaultWaitTimeAtStopMsec,
 			double maxTravelTimeSegmentLength,
-			boolean shouldCombineShortAndLongNamesForRoutes) {
+			boolean shouldCombineShortAndLongNamesForRoutes,
+			int configRev,
+			boolean shouldStoreNewRevs) {
 		// Read in config params
 		try {
 			// Read in the data from config file
@@ -119,10 +129,14 @@ public class GtfsFileProcessor {
 		this.regexReplaceListFileName = regexReplaceListFileName;
 		this.pathOffsetDistance = pathOffsetDistance;
 		this.maxStopToPathDistance = maxStopToPathDistance;
-		this.maxDistanceForEliminatingVertices = maxDistanceForEliminatingVertices;
+		this.maxDistanceForEliminatingVertices = 
+				maxDistanceForEliminatingVertices;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
-		this.shouldCombineShortAndLongNamesForRoutes = shouldCombineShortAndLongNamesForRoutes;
+		this.shouldCombineShortAndLongNamesForRoutes = 
+				shouldCombineShortAndLongNamesForRoutes;
+		this.configRev = configRev;
+		this.shouldStoreNewRevs = shouldStoreNewRevs;
 	}
 	
 		
@@ -184,7 +198,8 @@ public class GtfsFileProcessor {
 
 		// Process the GTFS data
 		GtfsData gtfsData = 
-				new GtfsData(CoreConfig.getAgencyId(),
+				new GtfsData(configRev, shouldStoreNewRevs,
+						CoreConfig.getAgencyId(),
 						gtfsDirectoryName, 
 						supplementDir, 
 						shouldCombineShortAndLongNamesForRoutes,
@@ -281,13 +296,20 @@ public class GtfsFileProcessor {
 	 * @return Fully configured GtfsFileProcessor object
 	 */
 	private static GtfsFileProcessor createGtfsFileProcessor(CommandLine commandLineArgs) {
-		String configFile = commandLineArgs.getOptionValue("c");
-		String gtfsUrl = commandLineArgs.getOptionValue("gtfsUrl");
-		String gtfsZipFileName = commandLineArgs.getOptionValue("gtfsZipFileName");
-		String unzipSubdirectory = commandLineArgs.getOptionValue("unzipSubdirectory");
-		String gtfsDirectoryName = commandLineArgs.getOptionValue("gtfsDirectoryName");
-		String supplementDir = commandLineArgs.getOptionValue("supplementDir");
-		String regexReplaceFile = commandLineArgs.getOptionValue("regexReplaceFile");
+		String configFile = 
+				commandLineArgs.getOptionValue("c");
+		String gtfsUrl = 
+				commandLineArgs.getOptionValue("gtfsUrl");
+		String gtfsZipFileName = 
+				commandLineArgs.getOptionValue("gtfsZipFileName");
+		String unzipSubdirectory = 
+				commandLineArgs.getOptionValue("unzipSubdirectory");
+		String gtfsDirectoryName = 
+				commandLineArgs.getOptionValue("gtfsDirectoryName");
+		String supplementDir = 
+				commandLineArgs.getOptionValue("supplementDir");
+		String regexReplaceFile = 
+				commandLineArgs.getOptionValue("regexReplaceFile");
 
 		// Handle the parameters that have a floating point, double or int value
 		double pathOffsetDistance = getDoubleCommandLineOption(
@@ -297,13 +319,18 @@ public class GtfsFileProcessor {
 		double maxDistanceForEliminatingVertices = getDoubleCommandLineOption(
 				"maxDistanceForEliminatingVertices", 0.0, commandLineArgs);
 		int defaultWaitTimeAtStopMsec = getIntegerCommandLineOption(
-				"defaultWaitTimeAtStopMsec", 10*Time.MS_PER_SEC, commandLineArgs);
+				"defaultWaitTimeAtStopMsec", 10 * Time.MS_PER_SEC,
+				commandLineArgs);
 		double maxTravelTimeSegmentLength = getDoubleCommandLineOption(
 				"maxTravelTimeSegmentLength", 200.0, commandLineArgs);
-
+		int configRev = getIntegerCommandLineOption("configRev", -1,
+				commandLineArgs);
+		
 		// Handle boolean command line options
 		boolean shouldCombineShortAndLongNamesForRoutes = 
 				commandLineArgs.hasOption("combineRouteNames");
+		boolean shouldStoreNewRevs = 
+				commandLineArgs.hasOption("storeNewRevs");
 		
 		// Create the processor and set all the options
 		GtfsFileProcessor processor = 
@@ -319,7 +346,9 @@ public class GtfsFileProcessor {
 						maxDistanceForEliminatingVertices,
 						defaultWaitTimeAtStopMsec,
 						maxTravelTimeSegmentLength,
-						shouldCombineShortAndLongNamesForRoutes);		
+						shouldCombineShortAndLongNamesForRoutes,
+						configRev,
+						shouldStoreNewRevs);		
 		
 		return processor;
 	}
@@ -452,6 +481,11 @@ public class GtfsFileProcessor {
 		options.addOption("combineRouteNames", 
 				false, 
 				"Combines short and long route names to create full name."); 
+		
+		options.addOption("storeNewRevs", 
+				false, 
+				"Stores the config and travel time revs into ActiveRevisions "
+				+ "in database.");
 		
 		// Parse the options
 		CommandLineParser parser = new BasicParser();

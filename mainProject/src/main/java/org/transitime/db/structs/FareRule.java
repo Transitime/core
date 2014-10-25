@@ -29,7 +29,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsFareRule;
 
 /**
@@ -73,14 +72,15 @@ public class FareRule implements Serializable {
 	/**
 	 * For constructing FareRule object using GTFS data.
 	 * 
+	 * @param configRev
 	 * @param gfr
 	 *            The GTFS data for the fare rule
 	 * @param properRouteId
 	 *            If the routeId should be changed to use parent route ID
 	 */
-	public FareRule(GtfsFareRule gfr, String properRouteId) {
-		configRev = DbConfig.SANDBOX_REV;
-		fareId = gfr.getFareId();
+	public FareRule(int configRev, GtfsFareRule gfr, String properRouteId) {
+		this.configRev = configRev;
+		this.fareId = gfr.getFareId();
 		// routeId, originId and destinationId are primary keys, which means they 
 		// cannot be null. But they can be null from the GTFS fare_rules.txt
 		// file since fare rule could apply to entire system. Therefore if
@@ -90,10 +90,10 @@ public class FareRule implements Serializable {
 			routeIdToUse = gfr.getRouteId()==null?"":gfr.getRouteId();
 		else
 			routeIdToUse = properRouteId;
-		routeId = routeIdToUse;
-		originId = gfr.getOriginId()==null?"":gfr.getOriginId();
-		destinationId = gfr.getDestinationId()==null?"":gfr.getDestinationId();
-		containsId = gfr.getContainsId();
+		this.routeId = routeIdToUse;
+		this.originId = gfr.getOriginId()==null?"":gfr.getOriginId();
+		this.destinationId = gfr.getDestinationId()==null?"":gfr.getDestinationId();
+		this.containsId = gfr.getContainsId();
 	}
 
 	/**
@@ -110,15 +110,17 @@ public class FareRule implements Serializable {
 	}
 	
 	/**
-	 * Deletes rev 0 from the FareRules table
+	 * Deletes rev from the FareRules table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE FareRule WHERE configRev=0";
+		String hql = "DELETE FareRule WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}

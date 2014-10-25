@@ -49,7 +49,6 @@ import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatch;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -139,6 +138,7 @@ public final class Block implements Serializable {
 	 * of error checking because it does other error checking and can log issues
 	 * appropriately.
 	 * 
+	 * @param configRev
 	 * @param blockId
 	 * @param startTime
 	 * @param endTime
@@ -148,9 +148,9 @@ public final class Block implements Serializable {
 	 *            is unscheduled block where vehicles run whenever. If greater
 	 *            than 0 then vehicles are to run on this specified headway
 	 */
-	public Block (String blockId, String serviceId, int startTime, int endTime, 
-			List<Trip> trips, int headwaySecs) {
-		this.configRev = DbConfig.SANDBOX_REV;
+	public Block(int configRev, String blockId, String serviceId,
+			int startTime, int endTime, List<Trip> trips, int headwaySecs) {
+		this.configRev = configRev;
 		this.blockId = blockId;
 		this.serviceId = serviceId;
 		this.startTime = startTime;
@@ -199,13 +199,15 @@ public final class Block implements Serializable {
 	}
 
 	/**
-	 * Deletes rev 0 from the Blocks, Trips, and Block_to_Trip_joinTable
+	 * Deletes rev from the Blocks, Trips, and Block_to_Trip_joinTable
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// In a perfect Hibernate world one would simply call on session.delete()
 		// for each block and the block to trip join table and the associated
 		// trips would be automatically deleted by using the magic of Hibernate.
@@ -222,36 +224,36 @@ public final class Block implements Serializable {
 		// appropriate Blocks and have the join table and the trips table
 		// be automatically updated. I doubt this would work but would be
 		// interesting to try if had the time.
-		int rowsUpdated = 0;
-		rowsUpdated += 
-				session.createSQLQuery("DELETE FROM Block_to_Trip_joinTable " + 
-						               "WHERE Blocks_configRev=0").
+		int totalRowsUpdated = 0;
+
+		// Delete configRev data from Block_to_Trip_joinTable
+		int rowsUpdated = session.
+				createSQLQuery("DELETE FROM Block_to_Trip_joinTable "
+						+ "WHERE Blocks_configRev=" + configRev).
 				executeUpdate();
-		rowsUpdated += 
-				session.createSQLQuery("DELETE FROM Trips WHERE configRev=0").
+		logger.info("Deleted {} rows from Block_to_Trip_joinTable for "
+				+ "configRev={}", rowsUpdated, configRev);
+		totalRowsUpdated += rowsUpdated;
+
+		// Delete configRev data from Trips
+		rowsUpdated = session.
+				createSQLQuery("DELETE FROM Trips WHERE configRev=" 
+						+ configRev).
 				executeUpdate();
-		rowsUpdated += 
-				session.createSQLQuery("DELETE FROM Blocks WHERE configRev=0").
+		logger.info("Deleted {} rows from Trips for configRev={}",
+				rowsUpdated, configRev);
+		totalRowsUpdated += rowsUpdated;
+
+		// Delete configRev data from Blocks
+		rowsUpdated = session.
+				createSQLQuery("DELETE FROM Blocks WHERE configRev=" 
+						+ configRev).
 				executeUpdate();
-		return rowsUpdated;
+		logger.info("Deleted {} rows from Blocks for configRev={}",
+				rowsUpdated, configRev);
+		totalRowsUpdated += rowsUpdated;
 		
-//		// Because Block uses a List of Trips things are
-//		// complicated because there are multiple tables with foreign keys.
-//		// And the join table is not a regular Hibernate table so I don't
-//		// believe can use hql to empty it out. Therefore it is best to
-//		// read in the objects and then delete them and let Hibernate make
-//		// sure it is all done correctly.
-//		// NOTE: Unfortunately this is quite slow since have to read in
-//		// all the objects first. Might just want to use regular SQL to
-//		// delete the items in the TripPattern_to_Path_joinTable
-//		List<Block> blocksFromDb = getBlocks(session, 0);
-//		for (Block block : blocksFromDb)
-//			session.delete(block);
-//		// Need to flush. Otherwise when writing new TripPatterns will get
-//		// a uniqueness violation even though already told the session to
-//		// delete those objects.
-//		session.flush();
-//		return blocksFromDb.size();
+		return totalRowsUpdated;
 	}
 	
 	/* (non-Javadoc)

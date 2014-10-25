@@ -29,7 +29,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsTransfer;
 
 /**
@@ -65,12 +64,18 @@ public class Transfer implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	public Transfer(GtfsTransfer gt) {
-		configRev = DbConfig.SANDBOX_REV;
-		fromStopId = gt.getFromStopId();
-		toStopId = gt.getToStopId();
-		transferType = gt.getTransferType();
-		minTransferTime = gt.getMinTransferTime();
+	/**
+	 * Constructor
+	 * 
+	 * @param configRev
+	 * @param gt
+	 */
+	public Transfer(int configRev, GtfsTransfer gt) {
+		this.configRev = configRev;
+		this.fromStopId = gt.getFromStopId();
+		this.toStopId = gt.getToStopId();
+		this.transferType = gt.getTransferType();
+		this.minTransferTime = gt.getMinTransferTime();
 	}
 
 	/**
@@ -89,12 +94,14 @@ public class Transfer implements Serializable {
 	 * Deletes rev 0 from the Transfers table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE Transfer WHERE configRev=0";
+		String hql = "DELETE Transfer WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}

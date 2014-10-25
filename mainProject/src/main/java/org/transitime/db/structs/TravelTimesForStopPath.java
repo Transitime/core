@@ -277,6 +277,23 @@ public class TravelTimesForStopPath implements Serializable {
 				+ ", howSet=" + howSet 
 				+ "]";
 	}
+	
+	/**
+	 * For when the travelTimesMsec are most important element. Lists the
+	 * travelTimesMsec first.
+	 * 
+	 * @return
+	 */
+	public String toStringEmphasizeTravelTimes() {
+		return "TTForStopPath ["
+				+ "stopTimeMsec=" + stopTimeMsec
+				+ ",travelTimesMsec=" + travelTimesMsec 
+				+ ", stopPathId=" + stopPathId
+				+ ", ttSegLen=" + Geo.distanceFormat(travelTimeSegmentLength)
+				+ ", howSet=" + howSet 
+				+ ", ttRev=" + travelTimesRev
+				+ "]"; 
+	}
 
 	/************************ Getter Methods *************************/	
 

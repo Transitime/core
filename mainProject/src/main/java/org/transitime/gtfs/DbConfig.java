@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Calendar;
@@ -109,10 +110,6 @@ public class DbConfig {
 	// and so that can read in TripPatterns later using the same session.
 	private Session globalSession;
 
-	// Database revision is the configuration being modified. Once finished then
-	// it will be copied to a working revision.
-	public static final int SANDBOX_REV = 0;
-		
 	private static final Logger logger = 
 			LoggerFactory.getLogger(DbConfig.class);
 
@@ -707,8 +704,7 @@ public class DbConfig {
 	public static void main(String args[]) {
 		String projectId = "sfmta";
 		
-		// FIXME Use the sandbox config rev for now but this should be configurable!
-		int configRev = DbConfig.SANDBOX_REV;
+		int configRev = ActiveRevisions.get(projectId).getConfigRev();
 		
 		DbConfig dbConfig = new DbConfig(projectId);
 		dbConfig.read(configRev);

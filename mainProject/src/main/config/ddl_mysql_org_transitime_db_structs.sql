@@ -82,9 +82,10 @@
     drop table if exists VehicleEvents;
 
     create table ActiveRevisions (
-        configRev integer not null,
+        id integer not null auto_increment,
+        configRev integer,
         travelTimesRev integer,
-        primary key (configRev)
+        primary key (id)
     );
 
     create table Agencies (

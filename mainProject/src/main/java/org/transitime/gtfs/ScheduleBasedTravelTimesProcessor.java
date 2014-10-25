@@ -22,11 +22,8 @@ import java.util.Map;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.ScheduleTime;
@@ -52,17 +49,14 @@ import org.transitime.utils.Time;
  */
 public class ScheduleBasedTravelTimesProcessor {
 
+	// Which config and travel times revs to write data for
+	private final ActiveRevisions activeRevisions;
+	
+	// The original active travel time revision, as read from db
+	private final int originalTravelTimesRev;
+	
 	private final int defaultWaitTimeAtStopMsec; 
 	private final double maxTravelTimeSegmentLength;
-	
-	// For keeping track of which project working with
-	private final String projectId;
-	
-	// So know what the current travel time rev is
-	private final int travelTimeRevToUse;
-	
-	// For reading and writing to db
-	private final SessionFactory sessionFactory;
 	
 	// 0.036m/msec = 36.0m/s = 40mph
 	private static final double MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC = 0.018; 
@@ -73,18 +67,21 @@ public class ScheduleBasedTravelTimesProcessor {
 
 	/********************** Member Functions **************************/
 
-	public ScheduleBasedTravelTimesProcessor(String projectId,
-			double maxTravelTimeSegmentLength, int defaultWaitTimeAtStopMsec) {
-		this.projectId = projectId;
-		this.sessionFactory = HibernateUtils.getSessionFactory(projectId);
+	/**
+	 * Constructor
+	 * 
+	 * @param activeRevisions
+	 * @param originalTravelTimesRev
+	 * @param maxTravelTimeSegmentLength
+	 * @param defaultWaitTimeAtStopMsec
+	 */
+	public ScheduleBasedTravelTimesProcessor(ActiveRevisions activeRevisions,
+			int originalTravelTimesRev, double maxTravelTimeSegmentLength,
+			int defaultWaitTimeAtStopMsec) {
+		this.activeRevisions = activeRevisions;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
-		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
-		
-		ActiveRevisions activeRevs = ActiveRevisions.get(projectId);
-		
-		// Use the next travel times rev so that any existing travel time data
-		// is left alone.
-		this.travelTimeRevToUse = activeRevs.getTravelTimesRev() + 1;
+		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;	
+		this.originalTravelTimesRev = originalTravelTimesRev;
 	}
 	
 	/**
@@ -138,7 +135,8 @@ public class ScheduleBasedTravelTimesProcessor {
 		
 		// Create the TravelTimesForTrip object to be returned
 		TravelTimesForTrip travelTimes = new TravelTimesForTrip(
-				DbConfig.SANDBOX_REV, travelTimeRevToUse, trip);
+				activeRevisions.getConfigRev(),
+				activeRevisions.getTravelTimesRev(), trip);
 		
 		// Handle first path specially since it is a special case where it is
 		// simply a stub path. It therefore has no travel or stop time.
@@ -148,7 +146,8 @@ public class ScheduleBasedTravelTimesProcessor {
 		StopPath firstPath = trip.getStopPath(0);
 		TravelTimesForStopPath firstPathTravelTimesForPath = 
 				new TravelTimesForStopPath(
-						DbConfig.SANDBOX_REV, travelTimeRevToUse,
+						activeRevisions.getConfigRev(), 
+						activeRevisions.getTravelTimesRev(),
 						firstPath.getId(), firstPath.length(), 
 						firstPathTravelTimesMsec, 
 						0,   // stopTimeMsec
@@ -257,7 +256,8 @@ public class ScheduleBasedTravelTimesProcessor {
 					// Create and add the travel time for this stop path
 					TravelTimesForStopPath travelTimesForStopPath = 
 							new TravelTimesForStopPath(
-									DbConfig.SANDBOX_REV, travelTimeRevToUse,
+									activeRevisions.getConfigRev(), 
+									activeRevisions.getTravelTimesRev(),
 									stopPathId, 
 									travelTimeSegmentsLength,
 									travelTimesMsec, 
@@ -367,17 +367,16 @@ public class ScheduleBasedTravelTimesProcessor {
 	}
 	
 	/**
-	 * Goes through every trip and writes out TravelTimesForStopPath object to
-	 * db if don't have GPS data for it.
+	 * Goes through every trip and and associates schedule based travel times
+	 * with trip if don't have GPS data for it.
 	 * 
 	 * @param gtfsData
-	 * @param travelTimesFromDbMap Map keyed by tripPatternId of Lists of TripPatterns
+	 * @param travelTimesFromDbMap
+	 *            Map keyed by tripPatternId of Lists of TripPatterns
 	 * @throws HibernateException
 	 */
-	private void processTrips(GtfsData gtfsData,
-			Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap, 
-			Session session)
-					throws HibernateException {
+	private void processTrips(GtfsData gtfsData, 
+			Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
 		// For trip read from GTFS data..
 		for (Trip trip : gtfsData.getTrips()) {
 			TripPattern tripPattern = trip.getTripPattern();
@@ -440,13 +439,27 @@ public class ScheduleBasedTravelTimesProcessor {
 	}
 	
 	/**
+	 * For determining how many travel times generated.
+	 * @param travelTimesFromDbMap
+	 * @return
+	 */
+	private static int numberOfTravelTimes(
+			Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
+		int count = 0;
+		for (List<TravelTimesForTrip> travelTimes : travelTimesFromDbMap.values()) {
+			count += travelTimes.size();
+		}
+		return count;
+	}
+	
+	/**
 	 * For trips where travel times not set in database via GPS data
 	 * default travel times are created by looking at the schedule
 	 * times and interpolating.
 	 * 
 	 * @param gtfsData
 	 */
-	public void process(GtfsData gtfsData) {
+	public void process(Session session, GtfsData gtfsData) {
 		if (!gtfsData.isTripsReadIn()) {
 			logger.error("tripsMap not yet read in by GtfsData before " + 
 					"ScheduleBasedTravelTimesProcessor.process() called. Software " +
@@ -466,39 +479,16 @@ public class ScheduleBasedTravelTimesProcessor {
 		// Let user know what is going on
 		logger.info("Processing travel time data...");
 
-		// Determine the currently used travel times rev so can read in 
-		// that data
-		ActiveRevisions activeRevisions = ActiveRevisions.get(projectId);
-		
 		// Read existing data from db and put into travelTimesFromDbMap member
 		Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap = 
-				TravelTimesForTrip.getTravelTimesForTrips(projectId, 
-						activeRevisions.getTravelTimesRev());
+				TravelTimesForTrip.getTravelTimesForTrips(session, 
+						originalTravelTimesRev);
 
 		int originalNumberTravelTimes = numberOfTravelTimes(travelTimesFromDbMap);
 		
-		// Will likely be storing data in db so start transaction
-		Session session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-		
 		// Do the low-level processing
-		try {
-			processTrips(gtfsData, travelTimesFromDbMap, session);
-			
-			// Done writing data so commit it
-			tx.commit();
-		} catch (HibernateException e) {
-			logger.error("Error writing TravelTimesForTrip to db. " + 
-					e.getMessage(), e);
-		} 
-		catch (Exception e) {
-			logger.error("Exception occurred when processing travel times", e);
-		}
-		finally {
-			// Always make sure session gets closed
-			session.close();
-		}
-				
+		processTrips(gtfsData, travelTimesFromDbMap);
+							
 		// Let user know what is going on
 		logger.info("Finished processing travel time data. " + 
 				"Number of travel times read from db={}. " + 
@@ -509,17 +499,5 @@ public class ScheduleBasedTravelTimesProcessor {
 				gtfsData.getTrips().size(),
 				timer.elapsedMsec());
 	}
-	
-	/**
-	 * For determining how many travel times generated.
-	 * @param travelTimesFromDbMap
-	 * @return
-	 */
-	private static int numberOfTravelTimes(Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
-		int count = 0;
-		for (List<TravelTimesForTrip> travelTimes : travelTimesFromDbMap.values()) {
-			count += travelTimes.size();
-		}
-		return count;
-	}
+
 }

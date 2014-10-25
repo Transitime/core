@@ -32,7 +32,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsAgency;
 
 /**
@@ -89,18 +88,19 @@ public class Agency implements Serializable {
 	/**
 	 * For creating object to be written to db.
 	 * 
+	 * @param configRev
 	 * @param gtfsAgency
 	 * @param routes
 	 */
-	public Agency(GtfsAgency gtfsAgency, List<Route> routes) {
-		configRev = DbConfig.SANDBOX_REV;
-		agencyId = gtfsAgency.getAgencyId();
-		agencyName = gtfsAgency.getAgencyName();
-		agencyUrl = gtfsAgency.getAgencyUrl();
-		agencyTimezone = gtfsAgency.getAgencyTimezone();
-		agencyLang = gtfsAgency.getAgencyLang();
-		agencyPhone = gtfsAgency.getAgencyPhone();
-		agencyFareUrl = gtfsAgency.getAgencyFareUrl();
+	public Agency(int configRev, GtfsAgency gtfsAgency, List<Route> routes) {
+		this.configRev = configRev;
+		this.agencyId = gtfsAgency.getAgencyId();
+		this.agencyName = gtfsAgency.getAgencyName();
+		this.agencyUrl = gtfsAgency.getAgencyUrl();
+		this.agencyTimezone = gtfsAgency.getAgencyTimezone();
+		this.agencyLang = gtfsAgency.getAgencyLang();
+		this.agencyPhone = gtfsAgency.getAgencyPhone();
+		this.agencyFareUrl = gtfsAgency.getAgencyFareUrl();
 		
 		Extent extent = new Extent();
 		for (Route route : routes) {
@@ -126,15 +126,17 @@ public class Agency implements Serializable {
 	}
 
 	/**
-	 * Deletes rev 0 from the Agencies table
+	 * Deletes rev from the Agencies table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE Agency WHERE configRev=0";
+		String hql = "DELETE Agency WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}

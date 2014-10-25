@@ -19,13 +19,12 @@ package org.transitime.db.structs;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
 
@@ -40,9 +39,19 @@ import org.transitime.db.hibernate.HibernateUtils;
 @Entity @DynamicUpdate
 public class ActiveRevisions {
 
+	// Need a generated ID since Hibernate required some type
+	// of ID. Both configRev and travelTimesRev
+	// might get updated and with Hibernate you can't read in an
+	// object, modify an ID and then write it out again. Therefore
+	// configRev and travelTimesRev can't be an ID. This means
+	// that need a separate ID. Yes, somewhat peculiar.
+	@Id 
+	@Column 
+	@GeneratedValue 
+	private Integer id;
+
 	// For the configuration data for routes, stops, schedule, etc.
 	@Column
-	@Id
 	private int configRev;
 	
 	// For the travel time configuration data. Updated independently of
@@ -50,36 +59,25 @@ public class ActiveRevisions {
 	@Column
 	private int travelTimesRev;
 
-	// Not from database. Instead, specified which db to use. Useful for
-	// when calling setConfigRev(int) or setTravelTimesRev(int) because
-	// can then automatically open a new session using the project ID
-	// and then store the object.
-	@Transient
-	private String projectId;
-	
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructor made private so that have to use getActiveRevisions() to get
-	 * object. Sets the revisions to default value of 0.
+	 * Constructor. Sets the revisions to default values of -1.
 	 */
-	private ActiveRevisions() {
-		configRev = 0;
-		travelTimesRev = 0;
+	public ActiveRevisions() {
+		configRev = -1;
+		travelTimesRev = -1;
 	}
 	
 	/**
-	 * Reads revisions from database.
+	 * Gets the ActiveRevisions object using the passed in database session.
 	 * 
-	 * @param projectId
+	 * @param session
 	 * @return
-	 * @throws HibernateException
 	 */
-	public static ActiveRevisions get(String projectId) 
-			throws HibernateException {	
+	public static ActiveRevisions get(Session session) {
 		// There should only be a single object so don't need a WHERE clause
 		String hql = "FROM ActiveRevisions";
-		Session session = HibernateUtils.getSession(projectId);
 		Query query = session.createQuery(hql);
 		ActiveRevisions activeRevisions = null;
 		try {
@@ -92,17 +90,27 @@ public class ActiveRevisions {
 			// object to the database.
 			if (activeRevisions == null) {
 				activeRevisions = new ActiveRevisions();
-				Transaction transaction = session.beginTransaction();
 				session.persist(activeRevisions);
-				transaction.commit();
 			}
-
-			// Always close the session
-			session.close();
 		}
 		
-		// Always make sure the project ID is set
-		activeRevisions.projectId = projectId;
+		// Return the object
+		return activeRevisions;		
+	}
+	
+	/**
+	 * Reads revisions from database.
+	 * 
+	 * @param agencyId
+	 * @return
+	 * @throws HibernateException
+	 */
+	public static ActiveRevisions get(String agencyId) 
+			throws HibernateException {
+		// Get from db
+		Session session = HibernateUtils.getSession(agencyId);
+		ActiveRevisions activeRevisions = get(session);
+		session.close();
 		
 		// Return the object
 		return activeRevisions;
@@ -135,39 +143,23 @@ public class ActiveRevisions {
 	}
 	
 	/**
-	 * Creates new db session and writes the new value to the db.
+	 * Sets the travel time rev. Doesn't write it to db though. To write to db
+	 * should flush the session that the object was read in by.
 	 * 
 	 * @param travelTimeRev
 	 */
 	public void setTravelTimesRev(int travelTimeRev) {
-		Session session = HibernateUtils.getSession(projectId);
 		this.travelTimesRev = travelTimeRev;
-		try {
-			Transaction transaction = session.beginTransaction();
-			session.saveOrUpdate(this);
-			transaction.commit();
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			session.close();
-		}
 	}
 	
 	/**
-	 * Creates new db session and writes the new value to the db.
+	 * Sets the config rev. Doesn't write it to db though. To write to db
+	 * should flush the session that the object was read in by.
 	 * 
 	 * @param configRev
 	 */
 	public void setConfigRev(int configRev) {
-		Session session = HibernateUtils.getSession(projectId);
 		this.configRev = configRev;
-		try {
-			session.saveOrUpdate(this);
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			session.close();
-		}	
 	}
 
 	public int getConfigRev() {
@@ -178,21 +170,19 @@ public class ActiveRevisions {
 		return travelTimesRev;
 	}
 	
+	/**
+	 * @return True if both the configRev and travelTimesRev are both valid.
+	 */
+	public boolean isValid() {
+		return configRev >= 0 && travelTimesRev >= 0;
+	}
+
 	@Override
 	public String toString() {
 		return "ActiveRevisions [" 
-				+ "projectId=" + projectId 
-				+ ", configRev=" + configRev 
+				+ "configRev=" + configRev 
 				+ ", travelTimesRev=" + travelTimesRev 
 				+ "]";
-	}
-
-	/*
-	 * Just for debugging
-	 */
-	public static void main(String[] args) {
-		ActiveRevisions activeRevisions = get("mbta");
-		activeRevisions.setTravelTimesRev(1);
 	}
 
 }

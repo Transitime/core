@@ -36,7 +36,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsCalendarDate;
 
 /**
@@ -70,10 +69,17 @@ public class CalendarDate implements Serializable{
 
 	/********************** Member Functions **************************/
 
-	public CalendarDate(GtfsCalendarDate gtfsCalendarDate, 
+	/**
+	 * Constructor
+	 * 
+	 * @param configRev
+	 * @param gtfsCalendarDate
+	 * @param dateFormat
+	 */
+	public CalendarDate(int configRev, GtfsCalendarDate gtfsCalendarDate, 
 			DateFormat dateFormat) {
-		configRev = DbConfig.SANDBOX_REV;
-		serviceId = gtfsCalendarDate.getServiceId();
+		this.configRev = configRev;
+		this.serviceId = gtfsCalendarDate.getServiceId();
 		
 		// Dealing with date is complicated because must parse
 		Date tempDate;
@@ -87,9 +93,9 @@ public class CalendarDate implements Serializable{
 					gtfsCalendarDate.getFileName());
 			tempDate = new Date();
 		}
-		date = tempDate;
+		this.date = tempDate;
 		
-		exceptionType = gtfsCalendarDate.getExceptionType();
+		this.exceptionType = gtfsCalendarDate.getExceptionType();
 	}
 
 	/**
@@ -104,15 +110,17 @@ public class CalendarDate implements Serializable{
 	}
 	
 	/**
-	 * Deletes rev 0 from the CalendarDates table
+	 * Deletes rev from the CalendarDates table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE CalendarDate WHERE configRev=0";
+		String hql = "DELETE CalendarDate WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}

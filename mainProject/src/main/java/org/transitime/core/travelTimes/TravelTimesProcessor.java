@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -633,9 +635,16 @@ public class TravelTimesProcessor {
 
 		TravelTimeInfoMap travelTimeInfoMap = new TravelTimeInfoMap();
 		
+		// Need to look at all trips that have data for. Therefore need
+		// to combine keys from both stopTimesMap and travelTimesMap.
+		Set<ProcessedDataMapKey> combinedKeySet = 
+				new HashSet<ProcessedDataMapKey>();
+		combinedKeySet.addAll(travelTimesMap.keySet());
+		combinedKeySet.addAll(stopTimesMap.keySet());
+		
 		// For each trip that had historical arrivals/departures and or 
 		// matches in the database...
-		for (ProcessedDataMapKey mapKey : travelTimesMap.keySet()) {
+		for (ProcessedDataMapKey mapKey : combinedKeySet) {
 			// Determine the associated Trip object for the data
 			Trip trip = tripMap.get(mapKey.getTripId());
 			if (trip == null) {
@@ -649,23 +658,25 @@ public class TravelTimesProcessor {
 			// Determine average travel times for this trip/stop path
 			List<List<Integer>> travelTimesForStopPathForTrip =
 					travelTimesMap.get(mapKey);
-			List<List<Integer>> travelTimesBySegment = 
-				bySegment(travelTimesForStopPathForTrip);
 			List<Integer> averageTravelTimes = new ArrayList<Integer>();
-			for (List<Integer> travelTimesByTripForSegment : 
-					travelTimesBySegment) {
-				int averageTravelTimeForSegment = 
-						MiscStatistics.filteredAverage(travelTimesByTripForSegment, 0.7);
-				averageTravelTimes.add(averageTravelTimeForSegment);
-			}
+			if (travelTimesForStopPathForTrip != null) {
+				List<List<Integer>> travelTimesBySegment = 
+					bySegment(travelTimesForStopPathForTrip);
+				for (List<Integer> travelTimesByTripForSegment : 
+						travelTimesBySegment) {
+					int averageTravelTimeForSegment = MiscStatistics
+							.filteredAverage(travelTimesByTripForSegment, 0.7);
+					averageTravelTimes.add(averageTravelTimeForSegment);
+				}
+			} // FIXME should averageTravelTimes be set to 0?
 			
 			// Determine average stop time for this trip/stop
 			int averageStopTime;
 			List<Integer> stopTimesForStopPathForTrip = 
 					stopTimesMap.get(mapKey);
 			if (stopTimesForStopPathForTrip != null) { 
-				averageStopTime = 
-						MiscStatistics.filteredAverage(stopTimesForStopPathForTrip, 0.7);				
+				averageStopTime = MiscStatistics.filteredAverage(
+						stopTimesForStopPathForTrip, 0.7);
 			} else {
 				// No arrival and corresponding departure time for the stop. 
 				averageStopTime = TravelTimeInfo.STOP_TIME_NOT_VALID;

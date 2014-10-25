@@ -52,9 +52,10 @@
     drop sequence hibernate_sequence;
 
     create table ActiveRevisions (
-        configRev number(10,0) not null,
+        id number(10,0) not null,
+        configRev number(10,0),
         travelTimesRev number(10,0),
-        primary key (configRev)
+        primary key (id)
     );
 
     create table Agencies (
@@ -300,7 +301,7 @@
         stopPathId varchar2(60 char),
         stopTimeMsec number(10,0),
         travelTimeSegmentLength float,
-        travelTimesMsec raw(1000),
+        travelTimesMsec raw(2000),
         travelTimesRev number(10,0),
         primary key (id)
     );
@@ -356,7 +357,7 @@
         headsign varchar2(255 char),
         routeId varchar2(60 char),
         routeShortName varchar2(60 char),
-        scheduledTimesMap raw(2000),
+        scheduledTimesMap long raw,
         serviceId varchar2(60 char),
         shapeId varchar2(60 char),
         tripShortName varchar2(60 char),

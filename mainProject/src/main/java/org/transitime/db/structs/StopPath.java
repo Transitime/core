@@ -23,19 +23,19 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.Geo;
 
 
@@ -48,8 +48,10 @@ import org.transitime.utils.Geo;
  * @author SkiBu Smith
  * 
  */
-@Entity @DynamicUpdate @Table(name="StopPaths")
-public class StopPath implements Serializable {
+@Entity 
+@DynamicUpdate 
+@Table(name="StopPaths")
+public class StopPath implements Serializable, Lifecycle {
 
 	@Column 
 	@Id
@@ -131,6 +133,7 @@ public class StopPath implements Serializable {
 	/**
 	 * Simple constructor
 	 * 
+	 * @param configRev
 	 * @param pathId
 	 * @param stopId
 	 * @param gtfsStopSeq
@@ -141,7 +144,8 @@ public class StopPath implements Serializable {
 	 * @param scheduleAdherenceStop
 	 * @param breakTime
 	 */
-	public StopPath(String pathId, 
+	public StopPath(int configRev,
+			String pathId, 
 			String stopId,
 			int gtfsStopSeq,
 			boolean lastStopInTrip,
@@ -150,7 +154,7 @@ public class StopPath implements Serializable {
 			boolean waitStop,
 			boolean scheduleAdherenceStop,
 			Integer breakTime) {
-		this.configRev = DbConfig.SANDBOX_REV;
+		this.configRev = configRev;
 		this.stopPathId = pathId;
 		this.stopId = stopId;
 		this.gtfsStopSeq = gtfsStopSeq;
@@ -535,33 +539,9 @@ public class StopPath implements Serializable {
 	}
 	
 	/**
-	 * When the vector is read in from db this method is automatically called
-	 * to set the transient vector array. This way it is simpler to go through
-	 * the path segments to determine matches.
-	 */
-	@PostLoad
-	public void determineVectorsAndHeadings() {
-		vectors = new ArrayList<VectorWithHeading>(locations.size()-1);
-		for (int segmentIndex=0; segmentIndex<locations.size()-1; ++segmentIndex) {
-			VectorWithHeading v = 
-					new VectorWithHeading(locations.get(segmentIndex), 
-					              		  locations.get(segmentIndex+1));
-			vectors.add(v);
-		}
-		
-	}
-
-	/**
 	 * @return List of VectorWithHeadings of the segments that make up the path
 	 */
 	public List<VectorWithHeading> getSegmentVectors() {
-		// Argh. @PostLoad apparently still not working for version
-		// 4.2.2 of Hibernate that is currently being used. Therefore
-		// need to make sure manually that the @PostLoad 
-		// determineVectorsAndHeadings() is called.
-		if (vectors == null)
-			determineVectorsAndHeadings();
-		
 		return vectors;
 	}
 	
@@ -647,6 +627,54 @@ public class StopPath implements Serializable {
 	 */
 	public double getPathLength() {
 		return pathLength;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.hibernate.classic.Lifecycle#onDelete(org.hibernate.Session)
+	 */
+	@Override
+	public boolean onDelete(Session arg0) throws CallbackException {
+		// Don't veto delete
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.hibernate.classic.Lifecycle#onLoad(org.hibernate.Session,
+	 * java.io.Serializable)
+	 * 
+	 * When the vector is read in from db this method is automatically called to
+	 * set the transient vector array. This way it is simpler to go through the
+	 * path segments to determine matches.
+	 */
+	@Override
+	public void onLoad(Session arg0, Serializable arg1) {
+		vectors = new ArrayList<VectorWithHeading>(locations.size()-1);
+		for (int segmentIndex=0; segmentIndex<locations.size()-1; ++segmentIndex) {
+			VectorWithHeading v = 
+					new VectorWithHeading(locations.get(segmentIndex), 
+					              		  locations.get(segmentIndex+1));
+			vectors.add(v);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.hibernate.classic.Lifecycle#onSave(org.hibernate.Session)
+	 */
+	@Override
+	public boolean onSave(Session arg0) throws CallbackException {
+		// Don't veto save
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.hibernate.classic.Lifecycle#onUpdate(org.hibernate.Session)
+	 */
+	@Override
+	public boolean onUpdate(Session arg0) throws CallbackException {
+		// Don't veto update
+		return false;
 	}
 
 }

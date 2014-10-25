@@ -159,6 +159,7 @@ public class Trip implements Serializable {
 	/**
 	 * Constructs Trip object from GTFS data.
 	 * 
+	 * @param configRev
 	 * @param gtfsTrip
 	 *            The GTFS data describing the trip
 	 * @param properRouteId
@@ -169,11 +170,9 @@ public class Trip implements Serializable {
 	 * @param titleFormatter
 	 *            So can fix titles associated with trip
 	 */
-	public Trip(GtfsTrip gtfsTrip, String properRouteId, String routeShortName, 
-			TitleFormatter titleFormatter) {
-		// Because will be writing data to the sandbox rev in the db
-		this.configRev = DbConfig.SANDBOX_REV;
-
+	public Trip(int configRev, GtfsTrip gtfsTrip, String properRouteId,
+			String routeShortName, TitleFormatter titleFormatter) {
+		this.configRev = configRev;
 		this.tripId = gtfsTrip.getTripId();
 		this.tripShortName = gtfsTrip.getTripShortName();
 		this.directionId = gtfsTrip.getDirectionId();
@@ -409,17 +408,19 @@ public class Trip implements Serializable {
 		return trip;
 	}
 	/**
-	 * Deletes rev 0 from the Trips table
+	 * Deletes rev from the Trips table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		int rowsUpdated = 0;
-		rowsUpdated += 
-				session.createSQLQuery("DELETE FROM Trips " + 
-									   "WHERE configRev=0").
+		rowsUpdated += session.
+				createSQLQuery("DELETE FROM Trips WHERE configRev=" 
+						+ configRev).
 				executeUpdate();
 		return rowsUpdated;
 	}
@@ -429,7 +430,8 @@ public class Trip implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		// Note: the '\n' at beginning is so that when output list of trips each will be on new line
+		// Note: the '\n' at beginning is so that when output list of trips 
+		// each will be on new line
 		return "\n    Trip [" 
 				+ "configRev=" + configRev
 				+ ", tripId=" + tripId 

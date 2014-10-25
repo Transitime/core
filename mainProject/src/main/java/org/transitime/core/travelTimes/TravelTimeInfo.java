@@ -18,7 +18,9 @@
 package org.transitime.core.travelTimes;
 
 import java.util.List;
+
 import org.transitime.db.structs.Trip;
+import org.transitime.utils.Geo;
 
 /**
  * For holding the GPS based travel times for each trip/stop path. Contains
@@ -65,7 +67,8 @@ public class TravelTimeInfo {
 				+ ", stopPathIndex=" + stopPathIndex 
 				+ ", travelTimes=" + travelTimes
 				+ ", stopTime=" + stopTime 
-				+ ", travelTimeSegLength=" + travelTimeSegLength 
+				+ ", travelTimeSegLength=" + 
+					Geo.distanceFormat(travelTimeSegLength) 
 				+ "]";
 	}
 
@@ -87,6 +90,10 @@ public class TravelTimeInfo {
 
 	public boolean isStopTimeValid() {
 		return stopTime != STOP_TIME_NOT_VALID;
+	}
+	
+	public boolean areTravelTimesValid() {
+		return travelTimes != null && !travelTimes.isEmpty();
 	}
 	
 	public double getTravelTimeSegLength() {

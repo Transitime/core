@@ -33,14 +33,15 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.classic.Lifecycle;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.gtfsStructs.GtfsRoute;
 
@@ -53,8 +54,10 @@ import org.transitime.gtfs.gtfsStructs.GtfsRoute;
  * 
  * @author SkiBu Smith
  */
-@Entity @DynamicUpdate @Table(name="TripPatterns")
-public class TripPattern implements Serializable {
+@Entity 
+@DynamicUpdate 
+@Table(name="TripPatterns")
+public class TripPattern implements Serializable, Lifecycle {
 
 	// Which configuration revision used
 	@Column 
@@ -101,9 +104,14 @@ public class TripPattern implements Serializable {
 	private List<Trip> trips = new ArrayList<Trip>();
 	
 	// For quickly finding a StopPath using a stop ID.
-	// Keyed on stop ID.
+	// Keyed on stop ID. Since this member is transient this
+	// class implements LifeCycle interface so that the
+	// member can be initialized using onLoad(). Can't use
+	// @PostLoad annotation because that only works when using
+	// EntityManager but we are using regular Hibernate sessions.
 	@Transient
-	final protected Map<String, StopPath> stopPathsMap;
+	final protected Map<String, StopPath> stopPathsMap =
+		new HashMap<String, StopPath>();
 	
 
 	// Hibernate requires this class to be serializable because it uses multiple
@@ -118,6 +126,7 @@ public class TripPattern implements Serializable {
 	 * Note: The name comes from the trip trip_headsign data. If not set then
 	 * uses name of last stop for trip.
 	 * 
+	 * @param configRev
 	 * @param shapeId
 	 *            Part of what identifies the trip pattern
 	 * @param stopPaths
@@ -128,13 +137,14 @@ public class TripPattern implements Serializable {
 	 *            So can access stop data for determining extent of trip
 	 *            pattern.
 	 */
-	public TripPattern(String shapeId, List<StopPath> stopPaths, Trip trip, GtfsData gtfsData) {
+	public TripPattern(int configRev, String shapeId, List<StopPath> stopPaths,
+			Trip trip, GtfsData gtfsData) {
 
 		this.shapeId = shapeId;
 		this.stopPaths = stopPaths;
 		
 		// Because will be writing data to the sandbox rev in the db
-		this.configRev = DbConfig.SANDBOX_REV;
+		this.configRev = configRev;
 
 		// Generate the id . 
 		this.id = generateTripPatternId(
@@ -174,7 +184,6 @@ public class TripPattern implements Serializable {
 		// Determine extent of trip pattern and store it. Also, create
 		// the stopPathsMap and fill it in.
 		this.extent = new Extent();
-		this.stopPathsMap = new HashMap<String, StopPath>();
 		for (StopPath stopPath : stopPaths) {
 			// Determine the stop
 			Stop stop = gtfsData.getStop(stopPath.getStopId());
@@ -199,7 +208,6 @@ public class TripPattern implements Serializable {
 		routeId = null;
 		routeShortName = null;
 		extent = null;
-		stopPathsMap = null;
 	}
 
 	/**
@@ -222,14 +230,16 @@ public class TripPattern implements Serializable {
 	}
 	
 	/**
-	 * Deletes rev 0 from the TripPattern_to_Path_joinTable, Paths, 
+	 * Deletes rev from the TripPattern_to_Path_joinTable, StopPaths, 
 	 * and TripPatterns tables.
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// In a perfect Hibernate world one would simply call on session.delete()
 		// for each trip pattern and the join table and the associated trip pattern
 		// elements would be automatically deleted by using the magic of Hibernate.
@@ -239,7 +249,7 @@ public class TripPattern implements Serializable {
 		// using the much, much faster solution of direct SQL calls. Can't use
 		// HQL on the join table since it is not a regularly defined table. 
 		//
-		// TODO Would be great to see if can actually use HQL and delete the 
+		// Would be great to see if can actually use HQL and delete the 
 		// appropriate TripPatterns and have the join table and the trip pattern
 		// elements table be automatically updated. I doubt this would work but
 		// would be interesting to try if had the time.
@@ -247,15 +257,17 @@ public class TripPattern implements Serializable {
 		// Delete from TripPattern_to_Path_joinTable first since it has a foreign
 		// key to the StopPath table, 
 		int rowsUpdated = 0;
-		rowsUpdated += 
-				session.createSQLQuery("DELETE FROM TripPattern_to_Path_joinTable " + 
-									   "WHERE TripPatterns_configRev=0").
+		rowsUpdated += session.
+				createSQLQuery("DELETE FROM TripPattern_to_Path_joinTable "
+						+ "WHERE TripPatterns_configRev=" + configRev).
 				executeUpdate();
-		rowsUpdated += 
-				session.createSQLQuery("DELETE FROM StopPaths WHERE configRev=0").
+		rowsUpdated += session.
+				createSQLQuery("DELETE FROM StopPaths WHERE configRev=" 
+						+ configRev).
 				executeUpdate();
-		rowsUpdated += 
-				session.createSQLQuery("DELETE FROM TripPatterns WHERE configRev=0").
+		rowsUpdated += session.
+				createSQLQuery("DELETE FROM TripPatterns WHERE configRev=" 
+						+ configRev).
 				executeUpdate();
 		return rowsUpdated;
 		
@@ -345,9 +357,12 @@ public class TripPattern implements Serializable {
 		// SFMTA defines a trip using the same shape but defines a different
 		// number of stops. For this situation make the ID unique and
 		// warn the user that there likely is a problem with the data.
+		// A modified trip pattern will be something like "shapeId_var3".
 		boolean problemWithTripPatternId = false;
+		int variationCounter = 1;
+		String originalTripPatternId = tripPatternId;
 		while (gtfsData.isTripPatternIdAlreadyUsed(tripPatternId)) {
-			tripPatternId += "_var";
+			tripPatternId = originalTripPatternId + "_variation" + variationCounter++;
 			problemWithTripPatternId = true;
 		}
 		
@@ -361,8 +376,7 @@ public class TripPattern implements Serializable {
 					"with different stop list indicating the trips are not " +
 					"consistently defined. Therefore using the special " +
 					"tripPatternId={}.",
-					trip.getId(), trip.getRouteId(),
-					tripPatternId);
+					trip.getId(), trip.getRouteId(), tripPatternId);
 		
 		return tripPatternId;
 	}
@@ -513,19 +527,9 @@ public class TripPattern implements Serializable {
 	 *         TripPattern does not contain that stop.
 	 */
 	protected synchronized StopPath getStopPath(String stopId) {
-		// Since using Hibernate to read in object the usual constructor
-		// might not be called to fill in the transient stopPathsMap object.
-		// Therefore if it is empty fill it in now.
-		if (stopPathsMap.isEmpty()) {
-			for (StopPath stopPath : stopPaths) {
-				stopPathsMap.put(stopPath.getStopId(), stopPath);
-			}
-		}
-		
 		// Return the StopPath specified by the stop ID
 		return stopPathsMap.get(stopId);
 	}
-	
 	
 	/************** Getter Methods ****************/
 	
@@ -669,5 +673,53 @@ public class TripPattern implements Serializable {
 	public Extent getExtent() {
 		return extent;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.hibernate.classic.Lifecycle#onDelete(org.hibernate.Session)
+	 */
+	@Override
+	public boolean onDelete(Session arg0) throws CallbackException {
+		// Don't veto delete
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.hibernate.classic.Lifecycle#onLoad(org.hibernate.Session,
+	 * java.io.Serializable) 
+	 * <p>
+	 * Needed in order to initialize the transient member
+	 * stopPathsMap. Can't use @PostLoad since using classic Hibernate sessions
+	 * instead of an EntityManager.
+	 */
+	@Override
+	public void onLoad(Session arg0, Serializable arg1) {
+		// Initialize the transient member stopPathsMaps
+		for (StopPath stopPath : stopPaths) {
+			stopPathsMap.put(stopPath.getStopId(), stopPath);
+		}
+
+	}
+
+	/* (non-Javadoc)
+	 * @see org.hibernate.classic.Lifecycle#onSave(org.hibernate.Session)
+	 */
+	@Override
+	public boolean onSave(Session arg0) throws CallbackException {
+		// Don't veto save
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.hibernate.classic.Lifecycle#onUpdate(org.hibernate.Session)
+	 */
+	@Override
+	public boolean onUpdate(Session arg0) throws CallbackException {
+		// Don't veto update
+		return false;
+	}
 	
 }
+
+

@@ -27,10 +27,10 @@ import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Match;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
 import org.transitime.utils.Time;
@@ -73,14 +73,10 @@ public class DataFetcher {
 	 *            Set to null if not going to use.
 	 */
 	public DataFetcher(String dbName, List<Integer> newSpecialDaysOfWeek) {
-		// Read calendar configuration from db
-//		gtfsCalendars = Calendar.getCalendars(dbName, DbConfig.SANDBOX_REV);
-		
-//		specialDaysOfWeek = newSpecialDaysOfWeek;
-		
 		// Create the member calendar using timezone specified in db for the 
-		// agency
-		List<Agency> agencies = Agency.getAgencies(dbName, DbConfig.SANDBOX_REV);
+		// agency. Use the currently active config rev.
+		int configRev = ActiveRevisions.get(dbName).getConfigRev();
+		List<Agency> agencies = Agency.getAgencies(dbName, configRev);
 		TimeZone timezone = agencies.get(0).getTimeZone();
 		calendar = new GregorianCalendar(timezone);		
 	}

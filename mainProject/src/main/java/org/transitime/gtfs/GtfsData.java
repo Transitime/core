@@ -28,10 +28,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Calendar;
@@ -92,7 +94,12 @@ public class GtfsData {
 	private final String gtfsDirectoryName;
 	private final String supplementDir;
 
+	// The session used throughout the class
+	private final Session session;
+	
 	// Various params set by constructor
+	private final ActiveRevisions revs;
+	private final int originalTravelTimesRev;
 	private final String projectId;
 	private final boolean shouldCombineShortAndLongNamesForRoutes;
 	private final double pathOffsetDistance;
@@ -185,7 +192,24 @@ public class GtfsData {
 
 	/********************** Member Functions **************************/
 
-	public GtfsData(String projectId,
+	/**
+	 * Constructor
+	 * 
+	 * @param configRev
+	 * @param shouldStoreNewRevs
+	 * @param projectId
+	 * @param gtfsDirectoryName
+	 * @param supplementDir
+	 * @param shouldCombineShortAndLongNamesForRoutes
+	 * @param pathOffsetDistance
+	 * @param maxStopToPathDistance
+	 * @param maxDistanceForEliminatingVertices
+	 * @param defaultWaitTimeAtStopMsec
+	 * @param maxTravelTimeSegmentLength
+	 * @param titleFormatter
+	 */
+	public GtfsData(int configRev, boolean shouldStoreNewRevs,
+			String projectId,
 			String gtfsDirectoryName, 
 			String supplementDir, 
 			boolean shouldCombineShortAndLongNamesForRoutes,
@@ -198,13 +222,53 @@ public class GtfsData {
 		this.projectId = projectId;
 		this.gtfsDirectoryName = gtfsDirectoryName;
 		this.supplementDir = supplementDir;
-		this.shouldCombineShortAndLongNamesForRoutes = shouldCombineShortAndLongNamesForRoutes;
+		this.shouldCombineShortAndLongNamesForRoutes = 
+				shouldCombineShortAndLongNamesForRoutes;
 		this.pathOffsetDistance = pathOffsetDistance;
 		this.maxStopToPathDistance = maxStopToPathDistance;
-		this.maxDistanceForEliminatingVertices = maxDistanceForEliminatingVertices;
+		this.maxDistanceForEliminatingVertices = 
+				maxDistanceForEliminatingVertices;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
 		this.titleFormatter = titleFormatter;
+		
+		// Get the database session. Using one session for the whole process.
+		SessionFactory sessionFactory = 
+				HibernateUtils.getSessionFactory(getProjectId());
+		session = sessionFactory.openSession();
+		
+		// Deal with the ActiveRevisions. First, store the original travel times
+		// rev since need it to read in old travel time data. 		
+		ActiveRevisions originalRevs = ActiveRevisions.get(session); 
+		originalTravelTimesRev = originalRevs.getTravelTimesRev();
+		
+		// If should store the new revs in database (make them active)
+		// then use the originalRevs read from db since they will be
+		// written out when session is closed
+		if (shouldStoreNewRevs) {
+			// Use the originalRevs object which was read from the db.
+			// When revs is updated then originalRevs is updated and
+			// Hibernate will store the changes to originalRevs to
+			// the db when the session is closed.
+			revs = originalRevs;
+		} else {
+			// Don't need to store new revs in db so use a transient object
+			revs = new ActiveRevisions();
+		}
+		
+		// If particular configuration rev specified then use it. This way
+		// can write over existing configuration revisions.
+		if (configRev >= 0) {
+			revs.setConfigRev(configRev);
+		} else {
+			revs.setConfigRev(revs.getConfigRev() + 1);
+		}
+					
+		// Increment the travel times rev
+		revs.setTravelTimesRev(originalTravelTimesRev + 1);
+		
+		// Log which revisions are being used
+		logger.info("Will be writing data to revisions {}", revs);
 	}
 	
 	/**
@@ -392,7 +456,7 @@ public class GtfsData {
 			}
 			
 			// Create the route object and add it to the container
-			Route route = new Route(gtfsRoute,
+			Route route = new Route(revs.getConfigRev(), gtfsRoute,
 									tripPatternsForRoute,
 									titleFormatter, 
 									shouldCombineShortAndLongNamesForRoutes);
@@ -463,7 +527,7 @@ public class GtfsData {
 		// Create the map of the Stop objects
 		stopsMap = new HashMap<String, Stop>(gtfsStops.size());
 		for (GtfsStop gtfsStop : gtfsStopsMap.values()) {
-			Stop stop = new Stop(gtfsStop, titleFormatter);
+			Stop stop = new Stop(revs.getConfigRev(), gtfsStop, titleFormatter);
 			stopsMap.put(stop.getId(), stop);
 		}
 		
@@ -909,8 +973,8 @@ public class GtfsData {
 				// Create the Trip and store the stop times into associated map
 				GtfsRoute gtfsRoute = gtfsRoutesMap.get(gtfsTrip.getRouteId());
 				String routeShortName = gtfsRoute.getRouteShortName();
-				trip = new Trip(gtfsTrip, properRouteId, routeShortName,
-						titleFormatter);
+				trip = new Trip(revs.getConfigRev(), gtfsTrip, properRouteId,
+						routeShortName, titleFormatter);
 				tripsInStopTimesFileMap.put(tripId, trip);
 			}
 			
@@ -995,8 +1059,8 @@ public class GtfsData {
 				
 				// Create the new StopPath and add it to the list
 				// for this trip.
-				StopPath path = new StopPath(pathId, stopId,
-						gtfsStopTime.getStopSequence(), lastStopInTrip,
+				StopPath path = new StopPath(revs.getConfigRev(), pathId,
+						stopId, gtfsStopTime.getStopSequence(), lastStopInTrip,
 						trip.getRouteId(), layoverStop, waitStop,
 						scheduleAdherenceStop, gtfsRoute.getBreakTime());
 				paths.add(path);
@@ -1096,8 +1160,8 @@ public class GtfsData {
 		// If not already stored then create and store the trip pattern.
 		if (tripPatternFromMap == null) {
 			// Create the trip pattern
-			TripPattern tripPattern = 
-					new TripPattern(trip.getShapeId(), stopPaths, trip, this);
+			TripPattern tripPattern = new TripPattern(revs.getConfigRev(),
+					trip.getShapeId(), stopPaths, trip, this);
 			
 			// Add the new trip pattern to the maps
 			tripPatternMap.put(tripPatternKey, tripPattern);
@@ -1148,7 +1212,7 @@ public class GtfsData {
 		logger.info("Processing blocks...");
 
 		// Actually process the block info and get back list of blocks
-		blocks = new BlocksProcessor(this).process();
+		blocks = new BlocksProcessor(this).process(revs.getConfigRev());
 		
 		// Let user know what is going on
 		logger.info("Finished processing blocks. Took {} msec.", 
@@ -1183,16 +1247,18 @@ public class GtfsData {
 			// Make sure this Frequency is in trips.txt
 			GtfsTrip gtfsTrip = gtfsTripsMap.get(gtfsFrequency.getTripId());
 			if (gtfsTrip == null) {
-				logger.error("The frequency from line # {} of frequencies.txt" + 
-						"refers to trip_id={} but that trip is not in the trips.txt " + 
-						"file. Therefore this frequency will be ignored.",
+				logger.error("The frequency from line # {} of frequencies.txt" 
+						+ "refers to trip_id={} but that trip is not in the " 
+						+ "trips.txt file. Therefore this frequency will be "
+						+ "ignored.",
 						gtfsFrequency.getLineNumber(),
 						gtfsFrequency.getTripId());
 				continue;
 			}
 			
 			// Create the Frequency object and put it into the frequenctMap
-			Frequency frequency = new Frequency(gtfsFrequency);
+			Frequency frequency = new Frequency(revs.getConfigRev(),
+					gtfsFrequency);
 			String key = frequency.getTripId();
 			List<Frequency> frequenciesForTripId = frequencyMap.get(key);
 			if (frequenciesForTripId == null) {
@@ -1272,7 +1338,7 @@ public class GtfsData {
 		
 		for (GtfsAgency gtfsAgency : gtfsAgencies) {
 			// Create the Agency object and put it into the array
-			Agency agency = new Agency(gtfsAgency, getRoutes());
+			Agency agency = new Agency(revs.getConfigRev(), gtfsAgency, getRoutes());
 			agencies.add(agency);
 		}		
 					
@@ -1328,7 +1394,8 @@ public class GtfsData {
 		
 		for (GtfsCalendar gtfsCalendar : gtfsCalendars) {
 			// Create the Calendar object and put it into the array
-			Calendar calendar = new Calendar(gtfsCalendar, dateFormatter);
+			Calendar calendar = new Calendar(revs.getConfigRev(), gtfsCalendar,
+					dateFormatter);
 			calendars.add(calendar);
 		}		
 					
@@ -1353,8 +1420,8 @@ public class GtfsData {
 		
 		for (GtfsCalendarDate gtfsCalendarDate : gtfsCalendarDates) {
 			// Create the CalendarDate object and put it into the array
-			CalendarDate calendarDate = 
-					new CalendarDate(gtfsCalendarDate, dateFormatter);
+			CalendarDate calendarDate = new CalendarDate(revs.getConfigRev(),
+					gtfsCalendarDate, dateFormatter);
 			calendarDates.add(calendarDate);
 		}		
 					
@@ -1401,12 +1468,14 @@ public class GtfsData {
 		fareAttributes = new ArrayList<FareAttribute>();
 
 		// Read in the fare_attributes.txt GTFS data from file
-		GtfsFareAttributesReader fareAttributesReader = new GtfsFareAttributesReader(gtfsDirectoryName);
+		GtfsFareAttributesReader fareAttributesReader = 
+				new GtfsFareAttributesReader(gtfsDirectoryName);
 		List<GtfsFareAttribute> gtfsFareAttributes = fareAttributesReader.get();
 		
 		for (GtfsFareAttribute gtfsFareAttribute : gtfsFareAttributes) {
 			// Create the FareAttribute object and put it into the array
-			FareAttribute FareAttribute = new FareAttribute(gtfsFareAttribute);
+			FareAttribute FareAttribute = 
+					new FareAttribute(revs.getConfigRev(), gtfsFareAttribute);
 			fareAttributes.add(FareAttribute);
 		}		
 					
@@ -1425,16 +1494,19 @@ public class GtfsData {
 		fareRules = new ArrayList<FareRule>();
 
 		// Read in the fare_rules.txt GTFS data from file
-		GtfsFareRulesReader fareRulesReader = new GtfsFareRulesReader(gtfsDirectoryName);
+		GtfsFareRulesReader fareRulesReader = 
+				new GtfsFareRulesReader(gtfsDirectoryName);
 		List<GtfsFareRule> gtfsFareRules = fareRulesReader.get();
 		
 		for (GtfsFareRule gtfsFareRule : gtfsFareRules) {
 			// If this route is actually a sub-route of a parent then use the
 			// parent ID.
-			String parentRouteId = getProperIdOfRoute(gtfsFareRule.getRouteId());
+			String parentRouteId = 
+					getProperIdOfRoute(gtfsFareRule.getRouteId());
 			
 			// Create the CalendarDate object and put it into the array
-			FareRule fareRule = new FareRule(gtfsFareRule, parentRouteId);
+			FareRule fareRule = new FareRule(revs.getConfigRev(), gtfsFareRule,
+					parentRouteId);
 			fareRules.add(fareRule);
 		}		
 					
@@ -1453,12 +1525,13 @@ public class GtfsData {
 		transfers = new ArrayList<Transfer>();
 
 		// Read in the transfers.txt GTFS data from file
-		GtfsTransfersReader transfersReader = new GtfsTransfersReader(gtfsDirectoryName);
+		GtfsTransfersReader transfersReader = 
+				new GtfsTransfersReader(gtfsDirectoryName);
 		List<GtfsTransfer> gtfsTransfers = transfersReader.get();
 		
 		for (GtfsTransfer gtfsTransfer : gtfsTransfers) {
 			// Create the CalendarDate object and put it into the array
-			Transfer transfer = new Transfer(gtfsTransfer);
+			Transfer transfer = new Transfer(revs.getConfigRev(), gtfsTransfer);
 			transfers.add(transfer);
 		}		
 					
@@ -1831,14 +1904,12 @@ public class GtfsData {
 		// debugging
 		//outputPathsAndStopsForGraphing("8699");
 		
-		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(getProjectId());
-
 		// Now process travel times and update the Trip objects. 
 		ScheduleBasedTravelTimesProcessor travelTimesProcesssor = 
-				new ScheduleBasedTravelTimesProcessor(getProjectId(),  
-						maxTravelTimeSegmentLength,	defaultWaitTimeAtStopMsec);
-		travelTimesProcesssor.process(this);
+				new ScheduleBasedTravelTimesProcessor(
+						revs, originalTravelTimesRev,
+						maxTravelTimeSegmentLength, defaultWaitTimeAtStopMsec);
+		travelTimesProcesssor.process(session, this);
 		
 		// Try allowing garbage collector to free up some memory since
 		// don't need the GTFS structures anymore.
@@ -1849,7 +1920,10 @@ public class GtfsData {
 		// Now that have read in all the data into collections can output it
 		// to database.
 		DbWriter dbWriter = new DbWriter(this);
-		dbWriter.write(sessionFactory);		
+		dbWriter.write(session, revs.getConfigRev());		
+		
+		// Finish things up by closing the session
+		session.close();
 		
 		// Let user know what is going on
 		logger.info("Finished processing GTFS data from {} . Took {} msec.",

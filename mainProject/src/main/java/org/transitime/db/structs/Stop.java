@@ -30,7 +30,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.TitleFormatter;
 import org.transitime.gtfs.gtfsStructs.GtfsStop;
 
@@ -88,11 +87,18 @@ public class Stop implements Serializable {
 
 	/********************** Member Functions **************************/
 	
-	public Stop(GtfsStop gtfsStop, TitleFormatter titleFormatter) {
+	/**
+	 * Constructor
+	 * 
+	 * @param configRev
+	 * @param gtfsStop
+	 * @param titleFormatter
+	 */
+	public Stop(int configRev, GtfsStop gtfsStop, TitleFormatter titleFormatter) {
 		// Because will be writing data to sandbox rev in the db
-		configRev = DbConfig.SANDBOX_REV;
+		this.configRev = configRev;
 		
-		id = gtfsStop.getStopId();
+		this.id = gtfsStop.getStopId();
 		
 		// Some agencies like SFMTA don't bother to fill in the stop_code field
 		// in the GTFS data. But if they use a numeric stopId can use that.
@@ -106,19 +112,19 @@ public class Stop implements Serializable {
 				// Therefore the stopCode will simply be null.
 			}
 		}
-		code = stopCode;
+		this.code = stopCode;
 		
-		name = titleFormatter.processTitle(gtfsStop.getStopName());
-		loc = new Location(gtfsStop.getStopLat(), gtfsStop.getStopLon());
+		this.name = titleFormatter.processTitle(gtfsStop.getStopName());
+		this.loc = new Location(gtfsStop.getStopLat(), gtfsStop.getStopLon());
 		// If adherence_stop not set then the default is false
-		timepointStop = (gtfsStop.getTimepointStop() != null ?  
+		this.timepointStop = (gtfsStop.getTimepointStop() != null ?  
 				gtfsStop.getTimepointStop() : false); 
 		// If layover_stop not set then the default is false
-		layoverStop = gtfsStop.getlayoverStop(); 
+		this.layoverStop = gtfsStop.getlayoverStop(); 
 		// If wait_stop not set then the default is false
-		waitStop = gtfsStop.getWaitStop(); 
+		this.waitStop = gtfsStop.getWaitStop(); 
 		// If hidden not set then the default is false
-		hidden = (gtfsStop.getHidden() != null ?  gtfsStop.getHidden() : false); 
+		this.hidden = (gtfsStop.getHidden() != null ?  gtfsStop.getHidden() : false); 
 	}
 
 	/**
@@ -156,15 +162,17 @@ public class Stop implements Serializable {
 	}
 	
 	/**
-	 * Deletes rev 0 from the Stops table
+	 * Deletes rev from the Stops table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE Stop WHERE configRev=0";
+		String hql = "DELETE Stop WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}

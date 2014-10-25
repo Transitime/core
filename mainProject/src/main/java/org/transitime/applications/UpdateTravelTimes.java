@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.CoreConfig;
@@ -37,7 +38,6 @@ import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -66,15 +66,17 @@ public class UpdateTravelTimes {
 	 * For each trip it finds and sets the best travel times. Then the Trip
 	 * objects can be stored in db and the corresponding travel times will also
 	 * be stored.
+	 * <p>
+	 * Also updates ActiveRevisions so that new value will be written to db
+	 * when the session is closed.
 	 * 
 	 * @param session
-	 * @param agencyId
 	 * @param tripMap
 	 *            Map of all of the trips. Keyed on tripId.
 	 * @param travelTimeInfoMap
 	 *            Contains travel times that are available by trip pattern ID
 	 */
-	private static void setTravelTimesForAllTrips(Session session, String agencyId,
+	private static void setTravelTimesForAllTrips(Session session, 
 			Map<String, Trip> tripMap, TravelTimeInfoMap travelTimeInfoMap) {
 		// For caching TravelTimesForTrip and TravelTimesForStopPaths that are
 		// created. This way won't store duplicate objects. Caching both 
@@ -90,16 +92,17 @@ public class UpdateTravelTimes {
 		
 		// Determine which travel times rev is currently being used and which
 		// rev should be used for the new travel times.
-		ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId);
+		ActiveRevisions activeRevisions = ActiveRevisions.get(session);
 		int currentTravelTimesRev = activeRevisions.getTravelTimesRev();
 		int newTravelTimesRev = currentTravelTimesRev + 1;
 		
-		// Store the new travelTimesRev but don't actually do so until
-		// the session is committed.
-		activeRevisions.setTravelTimesRev(session, newTravelTimesRev);
-		
+		// Update travel time rev in activeRevisions so that will be written
+		// to db when session is flushed.
+		activeRevisions.setTravelTimesRev(newTravelTimesRev);
+		logger.info("Revisions being set in database to {}", activeRevisions);
+				
 		// For every single trip that is configured...
-		for (Trip trip : tripMap.values()) {			
+		for (Trip trip : tripMap.values()) {
 			// Create a new TravelTimesForTrip object to be used since the
 			// old one will have different travel time rev and different
 			// values. 
@@ -120,6 +123,20 @@ public class UpdateTravelTimes {
 				// based on the schedule.
 				TravelTimesForStopPath ttForStopPathToUse;
 				if (travelTimeInfo != null) {
+					// Determine travel times to use. There are situations 
+					// where won't determine proper travel times, such as
+					// for first stop of trip. For this case should use
+					// previous value.
+					List<Integer> travelTimes;
+					if (travelTimeInfo.areTravelTimesValid()) {
+						travelTimes = travelTimeInfo.getTravelTimes();
+					} else {
+						// Travel times not valid so use old values
+						TravelTimesForStopPath originalTravelTimes =
+								trip.getTravelTimesForStopPath(stopIdx);
+						travelTimes = originalTravelTimes.getTravelTimesMsec();
+					}
+					
 					// Determine stop time to use. There are situations where
 					// only get an arrival time and no departure time for a stop
 					// so don't get stop time. This can happen at end of 
@@ -142,7 +159,7 @@ public class UpdateTravelTimes {
 									newTravelTimesRev,
 									trip.getStopPath(stopIdx).getId(), 
 									travelTimeInfo.getTravelTimeSegLength(),
-									travelTimeInfo.getTravelTimes(),
+									travelTimes,
 									stopTime,
 									-1,  // daysOfWeekOverride
 									travelTimeInfo.howSet());
@@ -159,7 +176,6 @@ public class UpdateTravelTimes {
 							originalTravelTimes.clone(newTravelTimesRev);
 				}
 
-				// FIXME test this!
 				// If already have created the exact same TravelTimesForStopPath 
 				// then use the existing one so don't generate too many db 
 				// objects.
@@ -180,7 +196,6 @@ public class UpdateTravelTimes {
 				ttForTrip.add(ttForStopPathToUse);
 			}
 			
-			// FIXME test this!!
 			// If already created the exact same TravelTimesForTrip 
 			// then use the existing one so don't generate too many db objects
 			TravelTimesForTrip cachedTTForTrip = ttForTripCache.get(ttForTrip);
@@ -193,6 +208,16 @@ public class UpdateTravelTimes {
 				ttForTrip = cachedTTForTrip;
 			}
 			
+			// Log old and new travel times so can compare them
+			if (logger.isDebugEnabled()) {
+				TravelTimesForTrip originalTravelTimes = trip.getTravelTimes();
+				logger.debug("For tripId={} \n" 
+						+ "originalTravelTimes={}\n\n"
+						+ "newTravelTimes={}", 
+						trip.getId(), 
+						originalTravelTimes.toStringWithNewlines(), 
+						ttForTrip.toStringWithNewlines());
+			}
 			
 			// Store the new travel times as part of the trip
 			trip.setTravelTimes(ttForTrip);
@@ -210,7 +235,7 @@ public class UpdateTravelTimes {
 		// Log the trips. Only do this if debug enabled because the
 		// trip info along with travel times is really verbose.
 		if (logger.isDebugEnabled()) {
-			logger.debug("The trips with trip times are:");
+			logger.debug("The trips with the new trip times are:");
 			for (Trip trip : tripMap.values()) {
 				logger.debug(trip.toLongString());
 			}
@@ -232,8 +257,9 @@ public class UpdateTravelTimes {
 	 * @param session
 	 * @return
 	 */
-	private static Map<String, Trip> readTripsFromDb(String agencyId, Session session) {
-		ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId); 
+	private static Map<String, Trip> readTripsFromDb(String agencyId,
+			Session session) {
+		ActiveRevisions activeRevisions = ActiveRevisions.get(session); 
 		IntervalTimer timer = new IntervalTimer();
 		logger.info("Reading in trips from db...");
 		Map<String, Trip> tripMap = 
@@ -247,7 +273,11 @@ public class UpdateTravelTimes {
 	/**
 	 * Reads historic data from db and processes it, putting it all into a
 	 * TravelTimeInfoMap. Then stores the travel times for all of the trips.
+	 * <p>
+	 * Also updates ActiveRevisions so that new value will be written to db when
+	 * the session is closed.
 	 * 
+	 * @param session
 	 * @param agencyId
 	 * @param maxTravelTimeSegmentLength
 	 * @param specialDaysOfWeek
@@ -255,12 +285,9 @@ public class UpdateTravelTimes {
 	 * @param beginTime
 	 * @param endTime
 	 */
-	private static void processTravelTimes(String agencyId,
+	private static void processTravelTimes(Session session, String agencyId,
 			double maxTravelTimeSegmentLength, List<Integer> specialDaysOfWeek,
 			Date beginTime, Date endTime) {
-		// Get a database session
-		Session session = HibernateUtils.getSession(agencyId);
-
 		// Read in historic data from db and put it into maps so that it can
 		// be processed.
 		TravelTimesProcessor processor = 
@@ -276,14 +303,52 @@ public class UpdateTravelTimes {
 		TravelTimeInfoMap travelTimeInfoMap = 
 				processor.createTravelTimesFromMaps(tripMap);
 		
-		// Update also the Trip objects with the new travel times
-		setTravelTimesForAllTrips(session, agencyId, tripMap, travelTimeInfoMap);
+		// Update all the Trip objects with the new travel times
+		setTravelTimesForAllTrips(session, tripMap, travelTimeInfoMap);
 		
 		// Write out the trip objects, which also writes out the travel times
-		writeNewTripDataToDb(session, tripMap);
-		
-		// Close up db connection
-		session.close();
+		writeNewTripDataToDb(session, tripMap);		
+	}
+
+	/**
+	 * Creates a session and reads historic data from db and processes it,
+	 * putting it all into a TravelTimeInfoMap. Then stores the travel times for
+	 * all of the trips.
+	 * <p>
+	 * Also updates ActiveRevisions so that new value will be written to db when
+	 * the session is closed.
+	 * 
+	 * @param agencyId
+	 * @param maxTravelTimeSegmentLength
+	 * @param specialDaysOfWeek
+	 *            Not fully implemented. Should therefore be null for now.
+	 * @param beginTime
+	 * @param endTime
+	 */
+	private static void manageSessionAndProcessTravelTimes(String agencyId,
+			double maxTravelTimeSegmentLength, List<Integer> specialDaysOfWeek,
+			Date beginTime, Date endTime) {
+		// Get a database session
+		Session session = HibernateUtils.getSession(agencyId);
+		Transaction tx = null;
+		try {
+			// Put db access into a transaction 
+			tx = session.beginTransaction();
+
+			// Actually do all the data processing
+			processTravelTimes(session, agencyId, maxTravelTimeSegmentLength,
+					specialDaysOfWeek, beginTime, endTime);
+			
+			// Make sure that everything actually written out to db
+			tx.commit();
+		} catch (Exception e) {
+			if (tx != null)
+				tx.rollback();
+			throw e;
+		} finally {
+			// Close up db connection
+			session.close();
+		}
 	}
 	
 	/**
@@ -320,13 +385,15 @@ public class UpdateTravelTimes {
 		}
 
 		// Set the timezone for the application
+		int configRev = ActiveRevisions.get(agencyId).getConfigRev();
 		TimeZone timezone = 
-				Agency.getAgencies(agencyId, DbConfig.SANDBOX_REV).get(0).getTimeZone();
+				Agency.getAgencies(agencyId, configRev).get(0).getTimeZone();
 		TimeZone.setDefault(timezone);
 		
 		// Do all the work...
-		processTravelTimes(agencyId, maxTravelTimeSegmentLength,
-				specialDaysOfWeek, beginTime, endTime);
+		manageSessionAndProcessTravelTimes(agencyId,
+				maxTravelTimeSegmentLength, specialDaysOfWeek, beginTime,
+				endTime);
 		
 //		// this is just for debugging
 //		Trip trip5889634 = tripMap.get("5889634");

@@ -30,7 +30,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsFareAttribute;
 
 /**
@@ -71,14 +70,20 @@ public class FareAttribute implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	public FareAttribute(GtfsFareAttribute gf) {
-		configRev = DbConfig.SANDBOX_REV;
-		fareId = gf.getFareId();
-		price = gf.getPrice();
-		currencyType = gf.getCurrencyType();
-		paymentMethod = gf.getPaymentMethod();
-		transfers = gf.getTransfers();
-		transferDuration = gf.getTransferDuration();
+	/**
+	 * Constructor
+	 * 
+	 * @param configRev
+	 * @param gf
+	 */
+	public FareAttribute(int configRev, GtfsFareAttribute gf) {
+		this.configRev = configRev;
+		this.fareId = gf.getFareId();
+		this.price = gf.getPrice();
+		this.currencyType = gf.getCurrencyType();
+		this.paymentMethod = gf.getPaymentMethod();
+		this.transfers = gf.getTransfers();
+		this.transferDuration = gf.getTransferDuration();
 	}
 	
 	/**
@@ -96,15 +101,17 @@ public class FareAttribute implements Serializable {
 	}
 	
 	/**
-	 * Deletes rev 0 from the FareAttributes table
+	 * Deletes rev from the FareAttributes table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE FareAttribute WHERE configRev=0";
+		String hql = "DELETE FareAttribute WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}

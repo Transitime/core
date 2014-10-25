@@ -29,7 +29,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsFrequency;
 
 
@@ -69,13 +68,19 @@ public class Frequency implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	public Frequency(GtfsFrequency gtfsFrequency) {
-		configRev = DbConfig.SANDBOX_REV;
-		tripId = gtfsFrequency.getTripId();
-		startTime = gtfsFrequency.getStartTime();
-		endTime = gtfsFrequency.getEndTime();
-		headwaySecs = gtfsFrequency.getHeadwaySecs();
-		exactTimes = (gtfsFrequency.getExactTimes() != null ?  gtfsFrequency.getExactTimes() : false); 
+	/**
+	 * Constructor
+	 * 
+	 * @param configRev
+	 * @param gtfsFrequency
+	 */
+	public Frequency(int configRev, GtfsFrequency gtfsFrequency) {
+		this.configRev = configRev;
+		this.tripId = gtfsFrequency.getTripId();
+		this.startTime = gtfsFrequency.getStartTime();
+		this.endTime = gtfsFrequency.getEndTime();
+		this.headwaySecs = gtfsFrequency.getHeadwaySecs();
+		this.exactTimes = (gtfsFrequency.getExactTimes() != null ?  gtfsFrequency.getExactTimes() : false); 
 	}
 	
 	/**
@@ -92,15 +97,17 @@ public class Frequency implements Serializable {
 	}
 	
 	/**
-	 * Deletes rev 0 from the Frequencies table
+	 * Deletes rev from the Frequencies table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE Frequency WHERE configRev=0";
+		String hql = "DELETE Frequency WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}

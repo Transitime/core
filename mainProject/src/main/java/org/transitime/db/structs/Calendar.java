@@ -40,7 +40,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.gtfsStructs.GtfsCalendar;
 import org.transitime.utils.Time;
 
@@ -109,17 +108,23 @@ public class Calendar implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	public Calendar(GtfsCalendar gc, 
-			DateFormat dateFormat) {
-		configRev = DbConfig.SANDBOX_REV;
-		serviceId = gc.getServiceId();
-		monday = isSetToTrue(gc.getMonday());
-		tuesday = isSetToTrue(gc.getTuesday());
-		wednesday = isSetToTrue(gc.getWednesday());
-		thursday = isSetToTrue(gc.getThursday());
-		friday = isSetToTrue(gc.getFriday());
-		saturday = isSetToTrue(gc.getSaturday());
-		sunday = isSetToTrue(gc.getSunday());
+	/**
+	 * Constructor
+	 * 
+	 * @param configRev
+	 * @param gc
+	 * @param dateFormat
+	 */
+	public Calendar(int configRev, GtfsCalendar gc,	DateFormat dateFormat) {
+		this.configRev = configRev;
+		this.serviceId = gc.getServiceId();
+		this.monday = isSetToTrue(gc.getMonday());
+		this.tuesday = isSetToTrue(gc.getTuesday());
+		this.wednesday = isSetToTrue(gc.getWednesday());
+		this.thursday = isSetToTrue(gc.getThursday());
+		this.friday = isSetToTrue(gc.getFriday());
+		this.saturday = isSetToTrue(gc.getSaturday());
+		this.sunday = isSetToTrue(gc.getSunday());
 		
 		// Dealing with dates is complicated because must parse
 		Date tempDate;
@@ -133,7 +138,7 @@ public class Calendar implements Serializable {
 					gc.getFileName());
 			tempDate = new Date();
 		}
-		startDate = tempDate;
+		this.startDate = tempDate;
 
 		// For end date parse the specified date and add a day so that
 		// the end date will be midnight of the date specified.
@@ -147,19 +152,21 @@ public class Calendar implements Serializable {
 					gc.getFileName());
 			tempDate = new Date();
 		}
-		endDate = new Date(tempDate.getTime() + Time.MS_PER_DAY);
+		this.endDate = new Date(tempDate.getTime() + Time.MS_PER_DAY);
 	}
 	
 	/**
-	 * Deletes rev 0 from the Calendars table
+	 * Deletes rev from the Calendars table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE Calendar WHERE configRev=0";
+		String hql = "DELETE Calendar WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}

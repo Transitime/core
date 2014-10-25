@@ -19,7 +19,6 @@ package org.transitime.gtfs;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +33,7 @@ import org.transitime.db.structs.Frequency;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Transfer;
+import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.IntervalTimer;
@@ -47,8 +47,6 @@ import org.transitime.utils.IntervalTimer;
 public class DbWriter {
 
 	private final GtfsData gtfsData;
-	// The session is a member so don't have to pass it in to all the methods
-	private Session session;
 	private int counter = 0;
 	private static final Logger logger = LoggerFactory
 			.getLogger(DbWriter.class);
@@ -64,7 +62,7 @@ public class DbWriter {
 	 * Uses Hibernate batching so don't use as much memory.
 	 * @param object
 	 */
-	private void writeObject(Object object) {
+	private void writeObject(Session session, Object object) {
 		session.saveOrUpdate(object);
 
 		// Since can writing large amount of data should use Hibernate 
@@ -79,22 +77,33 @@ public class DbWriter {
 	/**
 	 * Goes through the collections in GtfsData and writes the objects
 	 * to the database.
+	 * 
+	 * @param configRev
 	 */
-	private void actuallyWriteData() {
+	private void actuallyWriteData(Session session, int configRev) {
 		// Get rid of old data. Getting rid of trips, trip patterns, and blocks
 		// is a bit complicated. Need to delete them in proper order because
 		// of the foreign keys. Because appear to need to use plain SQL
 		// to do so successfully (without reading in objects and then
 		// deleting them, which takes too much time and memory). Therefore
 		// deleting of this data is done here before writing the data.
-		logger.info("Deleting old blocks and associated trips from database...");
-		Block.deleteFromSandboxRev(session);
+		logger.info("Deleting old blocks and associated trips from rev {} of "
+				+ "database...", configRev);
+		Block.deleteFromRev(session, configRev);
 
-		logger.info("Deleting old trips from database...");
-		Trip.deleteFromSandboxRev(session);
+		logger.info("Deleting old trips from rev {} of database...", 
+				configRev);
+		Trip.deleteFromRev(session, configRev);
 
-		logger.info("Deleting old trip patterns from database...");
-		TripPattern.deleteFromSandboxRev(session);
+		logger.info("Deleting old trip patterns from rev {} of database...", 
+				configRev);
+		TripPattern.deleteFromRev(session, configRev);
+		
+		// Get rid of travel times that are associated with the rev being 
+		// deleted
+		logger.info("Deleting old travel times from rev {} of database...", 
+				configRev);
+		TravelTimesForTrip.deleteFromRev(session, configRev);
 		
 		// Now write the data to the database.
 		// First write the Blocks. This will also write the Trips, TripPatterns,
@@ -106,61 +115,61 @@ public class DbWriter {
 		for (Block block : gtfsData.getBlocks()) {
 			logger.debug("Saving block #{} with blockId={} serviceId={} blockId={}",
 					++c, block.getId(), block.getServiceId(), block.getId());
-			writeObject(block);
+			writeObject(session, block);
 		}
 		
 		logger.info("Saving routes to database...");
-		Route.deleteFromSandboxRev(session);
+		Route.deleteFromRev(session, configRev);
 		for (Route route : gtfsData.getRoutes()) {
-			writeObject(route);
+			writeObject(session, route);
 		}
 		
 		logger.info("Saving stops to database...");
-		Stop.deleteFromSandboxRev(session);
+		Stop.deleteFromRev(session, configRev);
 		for (Stop stop : gtfsData.getStops()) {
-			writeObject(stop);
+			writeObject(session, stop);
 		}
 		
 		logger.info("Saving agencies to database...");
-		Agency.deleteFromSandboxRev(session);
+		Agency.deleteFromRev(session, configRev);
 		for (Agency agency : gtfsData.getAgencies()) {
-			writeObject(agency);
+			writeObject(session, agency);
 		}
 
 		logger.info("Saving calendars to database...");
-		Calendar.deleteFromSandboxRev(session);
+		Calendar.deleteFromRev(session, configRev);
 		for (Calendar calendar : gtfsData.getCalendars()) {
-			writeObject(calendar);
+			writeObject(session, calendar);
 		}
 		
 		logger.info("Saving calendar dates to database...");
-		CalendarDate.deleteFromSandboxRev(session);
+		CalendarDate.deleteFromRev(session, configRev);
 		for (CalendarDate calendarDate : gtfsData.getCalendarDates()) {
-			writeObject(calendarDate);
+			writeObject(session, calendarDate);
 		}
 		
 		logger.info("Saving fare rules to database...");
-		FareRule.deleteFromSandboxRev(session);
+		FareRule.deleteFromRev(session, configRev);
 		for (FareRule fareRule : gtfsData.getFareRules()) {
-			writeObject(fareRule);
+			writeObject(session, fareRule);
 		}
 		
 		logger.info("Saving fare attributes to database...");
-		FareAttribute.deleteFromSandboxRev(session);
+		FareAttribute.deleteFromRev(session, configRev);
 		for (FareAttribute fareAttribute : gtfsData.getFareAttributes()) {
-			writeObject(fareAttribute);
+			writeObject(session, fareAttribute);
 		}
 		
 		logger.info("Saving frequencies to database...");
-		Frequency.deleteFromSandboxRev(session);
+		Frequency.deleteFromRev(session, configRev);
 		for (Frequency frequency : gtfsData.getFrequencies()) {
-			writeObject(frequency);
+			writeObject(session, frequency);
 		}
 		
 		logger.info("Saving transfers to database...");
-		Transfer.deleteFromSandboxRev(session);
+		Transfer.deleteFromRev(session, configRev);
 		for (Transfer transfer : gtfsData.getTransfers()) {
-			writeObject(transfer);
+			writeObject(session, transfer);
 		}
 	}
 	
@@ -168,30 +177,27 @@ public class DbWriter {
 	 * Writes the data for the collections that are part of the GtfsData
 	 * object passed in to the constructor.
      *
-	 * @param sessionFactory
+	 * @param session
+	 * @param configRev So can delete old data for the rev
 	 */
-	public void write(SessionFactory sessionFactory) {
+	public void write(Session session, int configRev) {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
 
 		// Let user know what is going on
 		logger.info("Writing GTFS data to database...");
 
-		session = sessionFactory.openSession();		
 		Transaction tx = session.beginTransaction();
 		
 		// Do the low-level processing
 		try {
-			actuallyWriteData();
+			actuallyWriteData(session, configRev);
 			
 			// Done writing data so commit it
 			tx.commit();
 		} catch (HibernateException e) {
 			logger.error("Error writing configuration data to db.", e);
-		} finally {
-			// Always make sure session gets closed
-			session.close();
-		}
+		} 
 
 		// Let user know what is going on
 		logger.info("Finished writing GTFS data to database . Took {} msec.",

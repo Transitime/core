@@ -39,6 +39,8 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Index;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
 
 
@@ -70,7 +72,14 @@ public class TravelTimesForTrip implements Serializable {
 	private Integer id;
 
 	// Need configRev for the configuration so that when old configurations 
-	// cleaned out can also get rid of old travel times.
+	// cleaned out can also easily get rid of old travel times. Note: at one
+	// point tried making configRevan @Id so that the config rev is part of 
+	// the join table so that it would be easier to delete old config data
+	// from the join table. But this cause the id member to not be declared
+	// as auto_increment in the SQL for creating the table, which in turn
+	// caused a strange PropertyAccessException when trying to save travel
+	// times. Therefore cannot make this member an @Id and have to use fancy 
+	// delete with a join to clear out the join table of old data.
 	@Column
 	private final int configRev;
 	
@@ -102,6 +111,8 @@ public class TravelTimesForTrip implements Serializable {
 	// column IDs so doing it in case have multiple ID columns in future.
 	private static final long serialVersionUID = -5208608077900300605L;
 
+	private static final Logger logger = 
+			LoggerFactory.getLogger(TravelTimesForTrip.class);
 
 	/********************** Member Functions **************************/
 
@@ -143,22 +154,72 @@ public class TravelTimesForTrip implements Serializable {
 	}
 
 	/**
+	 * Deletes data from the TravelTimesForTrip and the
+	 * TravelTimesForTrip_to_TravelTimesForPath_jointable.
+	 * 
+	 * @param session
+	 * @param configRev
+	 * @return
+	 * @throws HibernateException
+	 */
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
+		int totalRowsUpdated = 0;
+
+		// Delete configRev data from TravelTimesForTrip_to_TravelTimesForPath_jointable.
+		// This needs to work with at least mySQL and PostgreSQL but they are different.
+		// This means that cannot use an INNER JOIN as part of the delete since the 
+		// syntax for inner joins is different for the two databases. Therefore need to
+		// use the IN statement with a SELECT clause.
+		int rowsUpdated = session.
+				createSQLQuery("DELETE "
+						+ " FROM TravelTimesForTrip_to_TravelTimesForPath_jointable "
+						+ "WHERE TravelTimesForTrips_id IN "
+						+ "  (SELECT id " 
+                        + "     FROM TravelTimesForTrips "
+                        + "    WHERE configRev=" + configRev 
+                        + "  )" ).
+				executeUpdate();
+		logger.info("Deleted {} rows from "
+				+ "TravelTimesForTrip_to_TravelTimesForPath_jointable for "
+				+ "configRev={}", rowsUpdated, configRev);
+		totalRowsUpdated += rowsUpdated;
+		
+		// Delete configRev data from TravelTimesForStopPaths
+		rowsUpdated = session.
+				createSQLQuery("DELETE FROM TravelTimesForStopPaths WHERE configRev=" 
+						+ configRev).
+				executeUpdate();
+		logger.info("Deleted {} rows from TravelTimesForStopPaths for "
+				+ "configRev={}", rowsUpdated, configRev);
+		totalRowsUpdated += rowsUpdated;
+		
+		// Delete configRev data from TravelTimesForTrips
+		rowsUpdated = session.
+				createSQLQuery("DELETE FROM TravelTimesForTrips WHERE configRev=" 
+						+ configRev).
+				executeUpdate();
+		logger.info("Deleted {} rows from TravelTimesForTrips for configRev={}",
+				rowsUpdated, configRev);
+		totalRowsUpdated += rowsUpdated;
+		
+		return totalRowsUpdated;
+	}
+	
+	/**
 	 * Returns Map keyed by tripPatternId of Lists of TravelTimesForTrip. Since
 	 * there are usually multiple trips per trip pattern the Map contains a List
 	 * of TravelTimesForTrip instead of just a single one.
 	 * 
-	 * @param projectId
+	 * @param session
 	 * @param travelTimesRev
 	 * @return Map keyed by tripPatternId of Lists of TripPatterns
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, List<TravelTimesForTrip>> getTravelTimesForTrips(
-			String projectId, int travelTimesRev) 
+			Session session, int travelTimesRev) 
 			throws HibernateException {
-		// Create the db session
-		Session session = HibernateUtils.getSession(projectId);
-
 		// Get List of all TravelTimesForTrip for the specified rev
 		String hql = "FROM TravelTimesForTrip " +
 				"    WHERE travelTimesRev = :travelTimesRev";
@@ -169,9 +230,6 @@ public class TravelTimesForTrip implements Serializable {
 			allTravelTimes = query.list();
 		} catch (Exception e) {
 			throw e;
-		} finally {
-			// Always close the session
-			session.close();
 		}
 		
 		// Now create the map and return it
@@ -180,7 +238,8 @@ public class TravelTimesForTrip implements Serializable {
 		for (TravelTimesForTrip travelTimes : allTravelTimes) {
 			// Get the List to add the travelTimes to
 			String tripPatternId = travelTimes.getTripPatternId();
-			List<TravelTimesForTrip> listForTripPattern = map.get(tripPatternId);
+			List<TravelTimesForTrip> listForTripPattern = 
+					map.get(tripPatternId);
 			if (listForTripPattern == null) {
 				listForTripPattern = new ArrayList<TravelTimesForTrip>();
 				map.put(tripPatternId, listForTripPattern);				
@@ -281,6 +340,39 @@ public class TravelTimesForTrip implements Serializable {
 				+ "]";
 	}
 
+	/**
+	 * For output list of travel times for stop paths. Uses newlines to
+	 * put each one on separate line so that easier to read.
+	 * @param travelTimesForStopPaths
+	 * @return
+	 */
+	private static String travelTimesToStringWithNewlines(
+			List<TravelTimesForStopPath> travelTimesForStopPaths) {
+		String results = "";
+		for (TravelTimesForStopPath travelTimesForSP : travelTimesForStopPaths) {
+			results += "     " 
+					+ travelTimesForSP.toStringEmphasizeTravelTimes() + "\n";
+		}
+		return results;
+	}
+	
+	/**
+	 * Similar to toString() but puts each travelTimesForStopPath on a separate
+	 * line to try to make the output more readable.
+	 * 
+	 * @return
+	 */
+	public String toStringWithNewlines() {
+		return "TravelTimesForTrip ["
+				+ "configRev=" + configRev
+				+ ", travelTimesRev=" + travelTimesRev
+				+ ", tripPatternId=" + tripPatternId 
+				+ ", tripCreatedForId=" + tripCreatedForId
+				+ ", travelTimesForStopPaths=\n" + 
+					travelTimesToStringWithNewlines(travelTimesForStopPaths) 
+				+ "]"; 
+	}
+	
 	/**************************** Getter Methods ******************************/
 	
 	public int getConfigRev() {

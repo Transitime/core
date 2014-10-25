@@ -37,7 +37,6 @@ import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.TitleFormatter;
 import org.transitime.gtfs.gtfsStructs.GtfsRoute;
 import org.transitime.utils.StringUtils;
@@ -117,17 +116,18 @@ public class Route implements Serializable {
 	 * Constructor. Used for when processing GTFS data. Creates a 
 	 * Route object that can be written to database.
 	 * 
+	 * @param configRev
 	 * @param gtfsRoute
 	 * @param tripPatternsForRoute
 	 * @param titleFormatter
 	 * @param shouldCombineShortAndLongNamesForRoutes
 	 */
-	public Route(GtfsRoute gtfsRoute, 
+	public Route(int configRev, GtfsRoute gtfsRoute, 
 			List<TripPattern> tripPatternsForRoute,
 			TitleFormatter titleFormatter, 
 			boolean shouldCombineShortAndLongNamesForRoutes) {
 		// Because will be writing data to the sandbox in the db
-		this.configRev = DbConfig.SANDBOX_REV;
+		this.configRev = configRev;
 		
 		// Here are most of the params from GtfsRoute
 		this.id = gtfsRoute.getRouteId();
@@ -190,15 +190,17 @@ public class Route implements Serializable {
 	}
 	
 	/**
-	 * Deletes rev 0 from the Routes table
+	 * Deletes rev from the Routes table
 	 * 
 	 * @param session
+	 * @param configRev
 	 * @return Number of rows deleted
 	 * @throws HibernateException
 	 */
-	public static int deleteFromSandboxRev(Session session) throws HibernateException {
+	public static int deleteFromRev(Session session, int configRev) 
+			throws HibernateException {
 		// Note that hql uses class name, not the table name
-		String hql = "DELETE Route WHERE configRev=0";
+		String hql = "DELETE Route WHERE configRev=" + configRev;
 		int numUpdates = session.createQuery(hql).executeUpdate();
 		return numUpdates;
 	}	
