@@ -65,6 +65,7 @@ public class GtfsFileProcessor {
 	private final boolean shouldCombineShortAndLongNamesForRoutes;
 	private final int configRev;
 	private final boolean shouldStoreNewRevs;
+	private final boolean trimPathBeforeFirstStopOfTrip;
 	
 	// Logging important in this class
 	private static final Logger logger = 
@@ -110,7 +111,8 @@ public class GtfsFileProcessor {
 			double maxTravelTimeSegmentLength,
 			boolean shouldCombineShortAndLongNamesForRoutes,
 			int configRev,
-			boolean shouldStoreNewRevs) {
+			boolean shouldStoreNewRevs,
+			boolean trimPathBeforeFirstStopOfTrip) {
 		// Read in config params
 		try {
 			// Read in the data from config file
@@ -137,6 +139,7 @@ public class GtfsFileProcessor {
 				shouldCombineShortAndLongNamesForRoutes;
 		this.configRev = configRev;
 		this.shouldStoreNewRevs = shouldStoreNewRevs;
+		this.trimPathBeforeFirstStopOfTrip = trimPathBeforeFirstStopOfTrip;
 	}
 	
 		
@@ -208,6 +211,7 @@ public class GtfsFileProcessor {
 						maxDistanceForEliminatingVertices, 
 						defaultWaitTimeAtStopMsec,
 						maxTravelTimeSegmentLength,
+						trimPathBeforeFirstStopOfTrip,
 						titleFormatter);
 		gtfsData.processData();
 			
@@ -331,6 +335,8 @@ public class GtfsFileProcessor {
 				commandLineArgs.hasOption("combineRouteNames");
 		boolean shouldStoreNewRevs = 
 				commandLineArgs.hasOption("storeNewRevs");
+		boolean trimPathBeforeFirstStopOfTrip =
+				commandLineArgs.hasOption("trimPathBeforeFirstStopOfTrip");
 		
 		// Create the processor and set all the options
 		GtfsFileProcessor processor = 
@@ -348,7 +354,8 @@ public class GtfsFileProcessor {
 						maxTravelTimeSegmentLength,
 						shouldCombineShortAndLongNamesForRoutes,
 						configRev,
-						shouldStoreNewRevs);		
+						shouldStoreNewRevs,
+						trimPathBeforeFirstStopOfTrip);		
 		
 		return processor;
 	}
@@ -487,6 +494,12 @@ public class GtfsFileProcessor {
 				"Stores the config and travel time revs into ActiveRevisions "
 				+ "in database.");
 		
+		options.addOption("trimPathBeforeFirstStopOfTrip", 
+				false, 
+				"For trimming off path from shapes.txt for before the first "
+				+ "stops of trips. Useful for when the shapes have problems "
+				+ "at the beginning, which is suprisingly common.");
+
 		// Parse the options
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = null;

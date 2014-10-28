@@ -58,6 +58,9 @@ public class GtfsStop extends CsvBase {
 	private final Boolean hidden;
 	// Indicates ":" separated list of routes that stop should not be used for
 	private final String deleteFromRoutesStr;
+	// Indicates ":" separated list of routes that stop should not be used for
+	// if it is first stop for the trip
+	private final String deleteFirstStopFromRoutesStr;
 	
 	/********************** Member Functions **************************/
 
@@ -110,8 +113,12 @@ public class GtfsStop extends CsvBase {
 		// a particular stop from the public.
 		hidden = getOptionalBooleanValue(record, "hidden");
 		
-		// So can delete a stop from the trips for a route
+		// So can completely delete a stop for a set of routes
 		deleteFromRoutesStr = getOptionalValue(record, "deleteFromRoutes");
+		
+		// So can delete a stop that is first stop for trips for a set of routes
+		deleteFirstStopFromRoutesStr = 
+				getOptionalValue(record, "deleteFirstStopFromRoutes");
 	}
 	
 	/**
@@ -143,7 +150,8 @@ public class GtfsStop extends CsvBase {
 		this.waitStop = original.waitStop;
 		this.hidden = original.hidden;
 		this.deleteFromRoutesStr = original.deleteFromRoutesStr;
-		
+		this.deleteFirstStopFromRoutesStr = 
+				original.deleteFirstStopFromRoutesStr;
 		// Set the new location
 		this.stopLat = lat;
 		this.stopLon = lon;
@@ -179,7 +187,10 @@ public class GtfsStop extends CsvBase {
 		layoverStop = s.layoverStop == null ? o.layoverStop : s.layoverStop;
 		waitStop = s.waitStop == null ? o.waitStop : s.waitStop;
 		hidden = s.hidden == null ? o.hidden : s.hidden;
-		deleteFromRoutesStr = s.deleteFromRoutesStr == null ? o.deleteFromRoutesStr : s.deleteFromRoutesStr;
+		deleteFromRoutesStr = s.deleteFromRoutesStr == null ? 
+				o.deleteFromRoutesStr : s.deleteFromRoutesStr;
+		deleteFirstStopFromRoutesStr = s.deleteFirstStopFromRoutesStr == null ? 
+				o.deleteFirstStopFromRoutesStr : s.deleteFirstStopFromRoutesStr;
 	}
 
 	public String getStopId() {
@@ -276,21 +287,37 @@ public class GtfsStop extends CsvBase {
 	 * stop should not be included in the trips. Returns null if not defined.
 	 * @return
 	 */
-	public String deleteFromRoutesStr() {
+	public String getDeleteFromRoutesStr() {
 		return deleteFromRoutesStr;
 	}
 	
 	/**
-	 * Returns true if the routeShortNameToDeleteFrom specified is defined in
-	 * deleteFromRoutes.
-	 *  
-	 * @param routeShortNameToDeleteFrom
+	 * Returns ":" separated string indicate route short names where this
+	 * stop should not be included in the trips if it is the first stop
+	 * of a trip. Returns null if not defined.
 	 * @return
 	 */
-	public boolean shouldDeleteFromRoute(String routeShortNameToDeleteFrom) {
-		if (deleteFromRoutesStr == null)
+	public String getDeleteFirstStopFromRoutesStr() {
+		return deleteFirstStopFromRoutesStr;
+	}
+		
+	/**
+	 * Returns true if the routeShortNameToDeleteFrom specified is defined in
+	 * deleteFromRoutes.
+	 * 
+	 * @param routeShortNameToDeleteFrom
+	 *            The short name of the route currently working on. Used to
+	 *            determine if the stop really should be deleted.
+	 * @param routesStr
+	 *            Should be deleteFromRoutesStr or deleteFirstStopFromRoutesStr,
+	 *            depending on type of stop deletion.
+	 * @return True if stop deleted
+	 */
+	public boolean shouldDeleteFromRoute(String routeShortNameToDeleteFrom,
+			String routesStr) {
+		if (routesStr == null)
 			return false;
-		String[] routeShortNames = deleteFromRoutesStr.split(":");
+		String[] routeShortNames = routesStr.split(":");
 		for (String routeShortName : routeShortNames) {
 			if (routeShortName.equals(routeShortNameToDeleteFrom))
 				return true;
@@ -320,6 +347,7 @@ public class GtfsStop extends CsvBase {
 				+ ", waitStop=" + waitStop
 				+ ", hidden=" + hidden
 				+ ", deleteFromRoutes=" + deleteFromRoutesStr
+				+ ", deleteFirstStopFromRoutesStr=" + deleteFirstStopFromRoutesStr
 				+ "]";
 	}
 	

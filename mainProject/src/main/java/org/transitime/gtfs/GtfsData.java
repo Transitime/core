@@ -107,6 +107,7 @@ public class GtfsData {
 	private final double maxDistanceForEliminatingVertices;
 	private final int defaultWaitTimeAtStopMsec;
 	private final double maxTravelTimeSegmentLength;
+	private final boolean trimPathBeforeFirstStopOfTrip;
 	
 	// So can make the titles more readable
 	private final TitleFormatter titleFormatter;
@@ -206,6 +207,7 @@ public class GtfsData {
 	 * @param maxDistanceForEliminatingVertices
 	 * @param defaultWaitTimeAtStopMsec
 	 * @param maxTravelTimeSegmentLength
+	 * @param trimPathBeforeFirstStopOfTrip
 	 * @param titleFormatter
 	 */
 	public GtfsData(int configRev, boolean shouldStoreNewRevs,
@@ -218,6 +220,7 @@ public class GtfsData {
 			double maxDistanceForEliminatingVertices,
 			int defaultWaitTimeAtStopMsec,
 			double maxTravelTimeSegmentLength,
+			boolean trimPathBeforeFirstStopOfTrip,
 			TitleFormatter titleFormatter) {
 		this.projectId = projectId;
 		this.gtfsDirectoryName = gtfsDirectoryName;
@@ -230,6 +233,7 @@ public class GtfsData {
 				maxDistanceForEliminatingVertices;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
+		this.trimPathBeforeFirstStopOfTrip = trimPathBeforeFirstStopOfTrip;
 		this.titleFormatter = titleFormatter;
 		
 		// Get the database session. Using one session for the whole process.
@@ -686,11 +690,18 @@ public class GtfsData {
 			// Therefore filter out such stops. Note that only filtering
 			// out such stops if they are the first stops in the trip.
 			GtfsStop gtfsStop = getGtfsStop(gtfsStopTime.getStopId());
-			if (firstStopInTrip && gtfsStop.deleteFromRoutesStr() != null) {
+			if (gtfsStop.getDeleteFromRoutesStr() != null
+					|| (firstStopInTrip && gtfsStop
+							.getDeleteFirstStopFromRoutesStr() != null)) {
 				GtfsTrip gtfsTrip = getGtfsTrip(gtfsStopTime.getTripId());
 				GtfsRoute gtfsRoute = getGtfsRoute(gtfsTrip.getRouteId());
 				String routeShortName = gtfsRoute.getRouteShortName();
-				if (gtfsStop.shouldDeleteFromRoute(routeShortName)) {
+				String deleteFromRoutesStr = 
+						gtfsStop.getDeleteFromRoutesStr() != null ? 
+								gtfsStop.getDeleteFromRoutesStr() : 
+								gtfsStop.getDeleteFirstStopFromRoutesStr();
+				if (gtfsStop.shouldDeleteFromRoute(routeShortName,
+						deleteFromRoutesStr)) {
 					iterator.remove();
 					continue;
 				}
@@ -1306,7 +1317,8 @@ public class GtfsData {
 						Collections.unmodifiableCollection(tripPatternMap.values()),
 						pathOffsetDistance,
 						maxStopToPathDistance, 
-						maxDistanceForEliminatingVertices);
+						maxDistanceForEliminatingVertices,
+						trimPathBeforeFirstStopOfTrip);
 		pathProcessor.processPathSegments();
 						
 		// Let user know what is going on
