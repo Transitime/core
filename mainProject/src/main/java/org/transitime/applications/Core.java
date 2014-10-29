@@ -139,12 +139,20 @@ public class Core {
 	
 	/**
 	 * Creates the Core object for the application. There can only be one Core
-	 * object per application.
+	 * object per application. Uses CoreConfig.getAgencyId() to determine the
+	 * agencyId. This means it typically uses the agency ID specified by the
+	 * Java property -Dtransitime.core.agencyId .
+	 * <p>
+	 * Usually doesn't need to be called directly because can simply use
+	 * Core.getInstance().
+	 * <p>
+	 * Synchronized to ensure that don't create more than a single Core.
 	 * 
-	 * @param agencyId
-	 * @return
+	 * @return The Core singleton
 	 */
-	public static Core createCore(String agencyId) {
+	synchronized public static Core createCore() {
+		String agencyId = CoreConfig.getAgencyId();
+
 		// Make sure only can have a single Core object
 		if (Core.singleton != null) {
 			logger.error("Core singleton already created. Cannot create another one.");
@@ -160,6 +168,9 @@ public class Core {
 	 * @returns the Core singleton object for this application.
 	 */ 
 	public static Core getInstance() {
+		if (Core.singleton == null)
+			createCore();
+		
 		return singleton;
 	}
 	
@@ -345,8 +356,8 @@ public class Core {
 				System.exit(-1);
 			}
 			
-			String agencyId = CoreConfig.getAgencyId();
-			createCore(agencyId);
+			// Initialize the core now
+			createCore();
 			
 			// Start any optional modules. 
 			// For how CoreConfig default modules includes the NextBus AVL feed
@@ -365,6 +376,7 @@ public class Core {
 			
 			// Start the RMI Servers so that clients can obtain data
 			// on predictions, vehicles locations, etc.
+			String agencyId = CoreConfig.getAgencyId();			
 			startRmiServers(agencyId);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
