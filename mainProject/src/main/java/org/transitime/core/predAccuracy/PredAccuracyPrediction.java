@@ -45,8 +45,12 @@ public class PredAccuracyPrediction {
 	/********************** Member Functions **************************/
 
 	/**
+	 * Constructor
+	 * 
 	 * @param routeId
 	 * @param directionId
+	 *            Might not always be available from prediction API so can be
+	 *            set to null.
 	 * @param stopId
 	 * @param tripId
 	 *            Might not always be available from prediction API so can be
@@ -55,8 +59,9 @@ public class PredAccuracyPrediction {
 	 * @param predictedTime
 	 * @param predictionReadTime
 	 * @param isArrival
-	 * @param sourcen
-	 *            Description of the feed
+	 * @param source
+	 *            Description of the feed, especially useful if have couple of
+	 *            sources. Can be a value such as "MBTA_epoch" or "NextBus".
 	 */
 	public PredAccuracyPrediction(String routeId, String directionId,
 			String stopId, String tripId, String vehicleId, Date predictedTime,
