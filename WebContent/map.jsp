@@ -439,10 +439,14 @@ function removeVehicleMarker(vehicleMarker) {
  * Removes all vehicle markers from map
  */
 function removeAllVehicles() {
+	// Remove each vehicleMarker
 	for (var i in vehicleMarkers) {
 		var vehicleMarker = vehicleMarkers[i];
 		removeVehicleMarker(vehicleMarker);
 	}
+	
+	// Clear out the vehicleMarkers array
+	vehicleMarkers.length = 0;
 }
 
 /*
