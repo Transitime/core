@@ -1,4 +1,4 @@
-﻿
+
     alter table Block_to_Trip_joinTable 
         drop constraint FK_abaj8ke6oh4imbbgnaercsowo;
 
@@ -465,38 +465,3 @@
     create index VehicleEventsTimeIndex on VehicleEvents (time);
 
     create sequence hibernate_sequence;
-
-
-    DELETE -- joinTable 
- FROM TravelTimesForTrip_to_TravelTimesForPath_jointable -- joinTable 
-INNER JOIN TravelTimesForTrips 
-   ON TravelTimesForTrips.id = joinTable.TravelTimesForTrips_id 
-WHERE TravelTimesForTrips.travelTimesRev=-1;
-
--- 
-DELETE
-FROM TravelTimesForTrip_to_TravelTimesForPath_jointable jointable
-  USING TravelTimesForTrips ttft
-WHERE jointable.TravelTimesForTrips_id = ttft.id
-  AND ttft.configRev=-1;
-
-  DELETE
-FROM TravelTimesForTrip_to_TravelTimesForPath_jointable
-WHERE TravelTimesForTrips_id IN (SELECT id 
-                                    FROM TravelTimesForTrips
-                                   WHERE configRev=-1);
-
-
-select * from activerevisions ;
-
-select * from traveltimesforstoppaths 
-where stopPathId='Needham Heights_to_Needham Center';
-
-select * from traveltimesforstoppaths 
-where traveltimesrev=1;
-
-select * from traveltimesfortrips 
-where traveltimesrev=1;
-
-
-
