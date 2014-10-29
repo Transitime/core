@@ -25,6 +25,7 @@ import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -40,9 +41,9 @@ import org.transitime.modules.Module;
 import org.transitime.utils.Time;
 
 /**
- * Reads in external prediction data from MBTA feed and stores in memory. Then
- * when arrivals/departures occur the prediction accuracy can be determined and
- * stored.
+ * Reads in external prediction data from MBTA feed and stores the data in
+ * memory. Then when arrivals/departures occur the prediction accuracy can be
+ * determined and stored.
  *
  * @author SkiBu Smith
  *
@@ -149,8 +150,16 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 			// Create appropriate input stream depending on whether content is 
 			// compressed or not
 			InputStream in = con.getInputStream();
+			if ("gzip".equals(con.getContentEncoding())) {
+			    in = new GZIPInputStream(in);
+			    logger.debug("Returned XML data is compressed");
+			} else {
+			    logger.debug("Returned XML data is NOT compressed");			
+			}
+
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build(in);
+			
 			return doc;
 		} catch (IOException | JDOMException e) {
 			logger.error("Problem when getting data for route for URL={}", 
@@ -189,9 +198,10 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 	}
 	
 	/**
-	 * Takes data from XML Document object and processes it
+	 * Takes data from XML Document object and processes it and
+	 * calls storePrediction() on the predictions.
 	 * 
-	 * @param routeId
+	 * @param routeAndStops
 	 * @param doc
 	 * @param predictionsReadTime
 	 */
@@ -311,7 +321,7 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 	 * Just for debugging
 	 */
 	public static void main(String[] args) {
-		// Create a NextBusAvlModue for testing
+		// Create a MbtaPredictionReaderModule for testing
 		Module.start("org.transitime.core.predAccuracy.MbtaPredictionReaderModule");
 	}
 
