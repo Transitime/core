@@ -314,7 +314,7 @@
   </logger>
 
   <logger name="org.transitime.core.predAccuracy"
-   level="debug" additivity="true">
+          level="info" additivity="false">
     <appender-ref ref="PRED_ACCURACY" />
   </logger>
 
