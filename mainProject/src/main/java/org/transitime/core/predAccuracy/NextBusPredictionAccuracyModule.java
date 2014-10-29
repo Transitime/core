@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.Route;
+import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.modules.Module;
 
@@ -199,19 +200,32 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 				List<Element> predictions = direction.getChildren("prediction");
 				for (Element prediction : predictions) {
 					// Determine prediction time
-					String epochTimeStr = prediction.getAttributeValue("epochTime");
+					String epochTimeStr = prediction
+							.getAttributeValue("epochTime");
 					Date predictedTime = new Date(Long.parseLong(epochTimeStr));
 
 					// Determine other parameters
 					String vehicleId = prediction.getAttributeValue("vehicle");
-					String routeId = predictionsForStop.getAttributeValue("routeTag");
-					String stopId = predictionsForStop.getAttributeValue("stopTag");
-					String tripId = predictionsForStop.getAttributeValue("tripTag");
-					boolean isArrival = "false".equals(prediction.getAttributeValue("isDeparture"));
+					String routeId = predictionsForStop
+							.getAttributeValue("routeTag");
+					String stopId = predictionsForStop
+							.getAttributeValue("stopTag");
+					String tripId = prediction.getAttributeValue("tripTag");
+					boolean isArrival = "false".equals(prediction
+							.getAttributeValue("isDeparture"));
 					
 					// Direction ID is not available from NextBus API so determine it
 					// from the trip ID.
-					String directionId = dbConfig.getTrip(tripId).getDirectionId();
+					String directionId = null;
+					if (tripId != null) {
+						Trip trip = dbConfig.getTrip(tripId);
+						if (trip != null) {
+							directionId = trip.getDirectionId();
+						} else {
+							logger.error("Got tripTag={} but no such trip in "
+									+ "the configuration.", tripId);
+						}
+					}
 					
 					logger.debug("Storing external prediction routeId={}, "
 							+ "directionId={}, tripId={}, vehicleId={}, "
