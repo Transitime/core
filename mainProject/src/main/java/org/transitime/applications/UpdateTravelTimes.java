@@ -341,6 +341,9 @@ public class UpdateTravelTimes {
 			
 			// Make sure that everything actually written out to db
 			tx.commit();
+			
+			logger.info("Done processing travel times. Changes successfully "
+					+ "committed to database");
 		} catch (Exception e) {
 			if (tx != null)
 				tx.rollback();
@@ -394,6 +397,11 @@ public class UpdateTravelTimes {
 		manageSessionAndProcessTravelTimes(agencyId,
 				maxTravelTimeSegmentLength, specialDaysOfWeek, beginTime,
 				endTime);
+		
+		// program won't just exit on its own, probably due to their being
+		// another thread still running. Not sure why. Probably has to do
+		// with changes to how Core is constructed. For now simply exit.
+		System.exit(0);
 		
 //		// this is just for debugging
 //		Trip trip5889634 = tripMap.get("5889634");
