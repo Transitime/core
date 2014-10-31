@@ -191,7 +191,7 @@ public class TravelTimesProcessor {
 		// First stop in trip so just deal with departure time.
 		// Don't need to deal with travel time.
 		int lateTimeMsec = 
-				(int) (arrDep.getScheduledTime() - arrDep.getTime());
+				(int) (arrDep.getTime() - arrDep.getScheduledTime());
 
 		// If schedule adherence is really far off then ignore the data
 		// point because it would skew the results.
@@ -668,7 +668,7 @@ public class TravelTimesProcessor {
 							.filteredAverage(travelTimesByTripForSegment, 0.7);
 					averageTravelTimes.add(averageTravelTimeForSegment);
 				}
-			} // FIXME should averageTravelTimes be set to 0?
+			}
 			
 			// Determine average stop time for this trip/stop
 			int averageStopTime;
