@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
 
 /**
@@ -46,7 +47,8 @@ public class IpcTrip implements Serializable {
 	private final String shapeId;
 	
 	private final List<IpcScheduleTimes> scheduleTimes;
-
+	private final TravelTimesForTrip travelTimes;
+	
 	private static final long serialVersionUID = 6369021345710182247L;
 
 	/********************** Member Functions **************************/
@@ -71,6 +73,7 @@ public class IpcTrip implements Serializable {
 			String stopId = dbTrip.getTripPattern().getStopId(i);
 			scheduleTimes.add(new IpcScheduleTimes(dbTrip.getScheduleTime(stopId), stopId));
 		}
+		travelTimes = dbTrip.getTravelTimes();
 	}
 
 	@Override
@@ -89,7 +92,8 @@ public class IpcTrip implements Serializable {
 				+ ", headsign="	+ headsign 
 				+ ", blockId=" + blockId 
 				+ ", shapeId=" + shapeId
-				+ ", scheduleTimes=" + scheduleTimes 
+				+ ", scheduleTimes=" + scheduleTimes
+				+ ", travelTimes=" + travelTimes
 				+ "]";
 	}
 
@@ -148,4 +152,9 @@ public class IpcTrip implements Serializable {
 	public List<IpcScheduleTimes> getScheduleTimes() {
 		return scheduleTimes;
 	}
+	
+	public TravelTimesForTrip getTravelTimes() {
+	    return travelTimes;
+	}
+	
 }
