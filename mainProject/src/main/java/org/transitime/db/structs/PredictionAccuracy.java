@@ -63,6 +63,11 @@ public class PredictionAccuracy implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String stopId;
 	
+	// So can see which trip predictions for so can easily determine
+	// what the travel times are and see if they appear to be correct.
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private final String tripId;
+	
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date arrivalDepartureTime;
@@ -98,6 +103,7 @@ public class PredictionAccuracy implements Serializable {
 	 * @param routeId
 	 * @param directionId
 	 * @param stopId
+	 * @param tripId
 	 * @param arrivalDepartureTime
 	 * @param predictedTime
 	 *            The time the vehicle was predicted to arrive at the stop
@@ -106,12 +112,14 @@ public class PredictionAccuracy implements Serializable {
 	 * @param vehicleId
 	 */
 	public PredictionAccuracy(String routeId, String directionId,
-			String stopId, Date arrivalDepartureTime, Date predictedTime,
-			Date predictionReadTime, String predictionSource, String vehicleId) {
+			String stopId, String tripId, Date arrivalDepartureTime,
+			Date predictedTime, Date predictionReadTime,
+			String predictionSource, String vehicleId) {
 		super();
 		this.routeId = routeId;
 		this.directionId = directionId;
 		this.stopId = stopId;
+		this.tripId = tripId;
 		this.arrivalDepartureTime = arrivalDepartureTime;
 		this.predictedTime = predictedTime;
 		this.predictionReadTime = predictionReadTime;
@@ -130,6 +138,7 @@ public class PredictionAccuracy implements Serializable {
 		this.routeId = null;
 		this.directionId = null;
 		this.stopId = null;
+		this.tripId = null;
 		this.arrivalDepartureTime = null;
 		this.predictedTime = null;
 		this.predictionReadTime = null;
@@ -161,6 +170,7 @@ public class PredictionAccuracy implements Serializable {
 				+ ((predictionSource == null) ? 0 : predictionSource.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
+		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		result = prime * result
 				+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
@@ -215,6 +225,11 @@ public class PredictionAccuracy implements Serializable {
 				return false;
 		} else if (!stopId.equals(other.stopId))
 			return false;
+		if (tripId == null) {
+			if (other.tripId != null)
+				return false;
+		} else if (!tripId.equals(other.tripId))
+			return false;
 		if (vehicleId == null) {
 			if (other.vehicleId != null)
 				return false;
@@ -230,6 +245,7 @@ public class PredictionAccuracy implements Serializable {
 				+ "routeId=" + routeId
 				+ ", directionId=" + directionId 
 				+ ", stopId=" + stopId
+				+ ", tripId=" + tripId
 				+ ", arrivalDepartureTime=" + arrivalDepartureTime
 				+ ", predictedTime=" + predictedTime
 				+ ", predictionReadTime=" + predictionReadTime
@@ -252,6 +268,10 @@ public class PredictionAccuracy implements Serializable {
 		return stopId;
 	}
 
+	public String getTripId() {
+		return tripId;
+	}
+	
 	public Date getArrivalDepartureTime() {
 		return arrivalDepartureTime;
 	}

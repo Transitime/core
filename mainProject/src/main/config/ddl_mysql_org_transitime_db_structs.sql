@@ -245,6 +245,7 @@
         predictionSource varchar(60),
         routeId varchar(60),
         stopId varchar(60),
+        tripId varchar(60),
         vehicleId varchar(60),
         primary key (id)
     );

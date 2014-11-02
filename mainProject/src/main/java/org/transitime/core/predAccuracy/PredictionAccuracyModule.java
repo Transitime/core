@@ -466,11 +466,10 @@ public class PredictionAccuracyModule extends Module {
 		// Combine the arrival/departure with the corresponding prediction
 		// and create PredictionAccuracy object
 		PredictionAccuracy predAccuracy = new PredictionAccuracy(
-				pred.getRouteId(), pred.getDirectionId(),
-				pred.getStopId(), arrivalDepartureTime,
-				pred.getPredictedTime(),
-				pred.getPredictionReadTime(), 
-				pred.getSource(), pred.getVehicleId());		
+				pred.getRouteId(), pred.getDirectionId(), pred.getStopId(),
+				pred.getTripId(), arrivalDepartureTime,
+				pred.getPredictedTime(), pred.getPredictionReadTime(),
+				pred.getSource(), pred.getVehicleId());
 		
 		// Add the prediction accuracy object to the db logger so that
 		// it gets written to database
