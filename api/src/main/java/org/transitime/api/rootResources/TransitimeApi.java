@@ -44,6 +44,7 @@ import org.transitime.api.data.ApiRouteSummaries;
 import org.transitime.api.data.ApiServerStatus;
 import org.transitime.api.data.ApiTrip;
 import org.transitime.api.data.ApiTripPatterns;
+import org.transitime.api.data.ApiTripWithTravelTimes;
 import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.utils.StandardParameters;
@@ -644,6 +645,47 @@ public class TransitimeApi {
 	    // Create and return ApiBlock response.
 	    // Include stop path info since just outputting single trip.
 	    ApiTrip apiTrip = new ApiTrip(ipcTrip, true);
+	    return stdParameters.createResponse(apiTrip);
+	} catch (RemoteException e) {
+	    // If problem getting data then return a Bad Request
+	    throw WebUtils.badRequestException(e.getMessage());
+	}
+    }
+
+    /**
+     * Handles the "tripWithTravelTimes" command which outputs configuration
+     * data for the specified trip. Includes all sub-data such as trip patterns.
+     * 
+     * @param stdParameters
+     * @param tripId
+     * @return
+     * @throws WebApplicationException
+     */
+    @Path("/command/tripWithTravelTimes")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getTripWithTravelTimes(@BeanParam StandardParameters stdParameters,
+	    @QueryParam(value="tripId") String tripId) 
+		    throws WebApplicationException {
+
+	// Make sure request is valid
+	stdParameters.validate();
+	
+	try {
+	    // Get block data from server
+	    ConfigInterface inter = stdParameters.getConfigInterface();	    
+	    IpcTrip ipcTrip = inter.getTrip(tripId);
+
+	    // If the trip doesn't exist then throw exception such that
+	    // Bad Request with an appropriate message is returned.
+	    if (ipcTrip == null)
+		throw WebUtils.badRequestException("TripId=" + tripId 
+			+ " does not exist.");
+	    
+	    // Create and return ApiBlock response.
+	    // Include stop path info since just outputting single trip.
+	    ApiTripWithTravelTimes apiTrip = 
+		    new ApiTripWithTravelTimes(ipcTrip, true);
 	    return stdParameters.createResponse(apiTrip);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request

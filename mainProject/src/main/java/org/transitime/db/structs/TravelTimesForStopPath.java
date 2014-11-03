@@ -338,9 +338,12 @@ public class TravelTimesForStopPath implements Serializable {
 		return travelTimesMsec.size();
 	}
 	
-	/**
-	 * @return total travel time for the stop path in msec
-	 */
+    /**
+     * Returns total travel time for the stop path. Does not include the stop
+     * time.
+     * 
+     * @return total travel time for the stop path in msec
+     */
 	public int getStopPathTravelTimeMsec() {
 		int totalTravelTimeMsec = 0;
 		for (Integer timeMsec : travelTimesMsec)
