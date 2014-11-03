@@ -19,6 +19,10 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
+import org.transitime.utils.Geo;
+import org.transitime.utils.StringUtils;
+import org.transitime.utils.Time;
+
 /**
  * For representing travel time for a single segment.
  *
@@ -33,10 +37,36 @@ public class ApiTravelTimeForSegment {
     @XmlAttribute
     private int segmentTimeMsec;
     
+    // Use String so can output speed with desired digits past decimal point
+    @XmlAttribute 
+    private String speedInMph;
+    
+    // Use String so can output speed with desired digits past decimal point
+    @XmlAttribute
+    private String speedInKph;
+    
+    // Use String so can output speed with desired digits past decimal point
+    @XmlAttribute
+    private String speedInMetersPerSec;
+    
     /********************** Member Functions **************************/
 
-    public ApiTravelTimeForSegment(int segmentIndex, int segmentTimeMsec) {
+    /**
+     * Constructor
+     * 
+     * @param segmentIndex
+     * @param segmentTimeMsec
+     * @param segmentLength
+     */
+    public ApiTravelTimeForSegment(int segmentIndex, int segmentTimeMsec,
+	    double segmentLength) {
 	this.segmentIndex = segmentIndex;
 	this.segmentTimeMsec = segmentTimeMsec;
+	
+	double speedInMetersPerSec = segmentLength * Time.MS_PER_SEC / 
+		segmentTimeMsec;
+	this.speedInMph = StringUtils.oneDigitFormat(speedInMetersPerSec / Geo.MPH_TO_MPS);
+	this.speedInKph = StringUtils.oneDigitFormat(speedInMetersPerSec / Geo.KPH_TO_MPS);
+	this.speedInMetersPerSec = StringUtils.oneDigitFormat(speedInMetersPerSec);
     }
 }
