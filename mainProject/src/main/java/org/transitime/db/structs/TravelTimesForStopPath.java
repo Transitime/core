@@ -273,6 +273,7 @@ public class TravelTimesForStopPath implements Serializable {
 				+ ", travelTimeSegmentLength=" + travelTimeSegmentLength
 				+ ", travelTimesMsec=" + travelTimesMsec 
 				+ ", stopTimeMsec=" + stopTimeMsec
+				+ ", travelTimeMsec=" + getStopPathTravelTimeMsec()
 				+ ", daysOfWeekOverride=" + daysOfWeekOverride
 				+ ", howSet=" + howSet 
 				+ "]";
@@ -287,7 +288,8 @@ public class TravelTimesForStopPath implements Serializable {
 	public String toStringEmphasizeTravelTimes() {
 		return "TTForStopPath ["
 				+ "stopTimeMsec=" + stopTimeMsec
-				+ ",travelTimesMsec=" + travelTimesMsec 
+				+ ", travelTimeMsec=" + getStopPathTravelTimeMsec()
+				+ ", travelTimesMsec=" + travelTimesMsec 
 				+ ", stopPathId=" + stopPathId
 				+ ", ttSegLen=" + Geo.distanceFormat(travelTimeSegmentLength)
 				+ ", howSet=" + howSet 
@@ -338,12 +340,12 @@ public class TravelTimesForStopPath implements Serializable {
 		return travelTimesMsec.size();
 	}
 	
-    /**
+	/**
      * Returns total travel time for the stop path. Does not include the stop
      * time.
-     * 
-     * @return total travel time for the stop path in msec
-     */
+     *
+	 * @return total travel time for the stop path in msec
+	 */
 	public int getStopPathTravelTimeMsec() {
 		int totalTravelTimeMsec = 0;
 		for (Integer timeMsec : travelTimesMsec)
