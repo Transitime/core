@@ -145,7 +145,7 @@
  * 
  * <b>GTFS-realtime commands.</b> 
  * <p>
- * VehiclePositions command for outputting vehicle location information
+ * The vehiclePositions command is for outputting vehicle location information
  * in GTFS-realtime format. Can use query string option "format=human" for human readable output.
  * <p>
  * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/gtfs-rt/vehiclePositions?OPTIONS
@@ -159,7 +159,7 @@
  *
  * <b>SIRI commands.</b>
  * <p>
- * VehicleMonitoring command for outputting vehicle information in
+ * The vehicleMonitoring command is for outputting vehicle information in
  * SIRI format. In query string can optionally specify vehicle 
  * IDs via v=123&v=456 etc  and 
  * route via the route ID or the route short name using r=2341&r=9382 etc . If vehicles
@@ -169,7 +169,7 @@
  * <p>
  * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/siri/vehicleMonitoring?OPTIONS
  * <p>
- * StopMonitoring command for outputting prediction information
+ * The stopMonitoring command is for outputting prediction information
  * in SIRI format. In query string need to specify route and stop.
  * Can specify route via route ID or the route short name via an option such as r=2341 . 
  * Specify stop ID via s=1234. Can optionally specify
