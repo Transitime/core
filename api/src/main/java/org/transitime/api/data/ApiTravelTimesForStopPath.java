@@ -76,10 +76,14 @@ public class ApiTravelTimesForStopPath {
 	this.howSet = travelTimesForStopPath.getHowSet();
 	
 	this.travelTimesForSegments = new ArrayList<ApiTravelTimeForSegment>();
-	for (int segmentIndex=0; segmentIndex<travelTimesForStopPath.getNumberTravelTimeSegments(); ++segmentIndex) {
-	    int travelTimeForSegment = travelTimesForStopPath.getTravelTimeSegmentMsec(segmentIndex);
-	    ApiTravelTimeForSegment travelTime = 
-		    new ApiTravelTimeForSegment(segmentIndex, travelTimeForSegment);
+	for (int segmentIndex = 0; 
+		segmentIndex < travelTimesForStopPath.getNumberTravelTimeSegments(); 
+		++segmentIndex) {
+	    int travelTimeForSegment = travelTimesForStopPath
+		    .getTravelTimeSegmentMsec(segmentIndex);
+	    ApiTravelTimeForSegment travelTime = new ApiTravelTimeForSegment(
+		    segmentIndex, travelTimeForSegment,
+		    travelTimesForStopPath.getTravelTimeSegmentLength());
 	    this.travelTimesForSegments.add(travelTime);
 	}
     }
