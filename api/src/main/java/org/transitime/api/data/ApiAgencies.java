@@ -17,13 +17,10 @@
 
 package org.transitime.api.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.transitime.db.structs.Agency;
 
 /**
  * A list of Agencies
@@ -46,10 +43,7 @@ public class ApiAgencies {
      */
     protected ApiAgencies() {}
     
-    public ApiAgencies(List<Agency> agencies) {
-	agenciesData = new ArrayList<ApiAgency>(agencies.size());
-	for (Agency agency : agencies) {
-	    agenciesData.add(new ApiAgency(agency));
-	}
+    public ApiAgencies(List<ApiAgency> apiAgencies) {
+	agenciesData = apiAgencies;
     }
 }

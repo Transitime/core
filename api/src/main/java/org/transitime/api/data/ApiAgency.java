@@ -33,6 +33,11 @@ import org.transitime.db.structs.Agency;
 public class ApiAgency {
 
     @XmlAttribute
+    private String agencyId;
+    
+    // Note that this is the GTFS agency_id, which is often different
+    // from the Transitime agencyId.
+    @XmlAttribute
     private String id;
     
     @XmlAttribute
@@ -70,7 +75,8 @@ public class ApiAgency {
      */
     protected ApiAgency() {}
 
-    public ApiAgency(Agency agency) {
+    public ApiAgency(String agencyId, Agency agency) {
+	this.agencyId = agencyId;
 	this.id = agency.getId();
 	this.name = agency.getName();
 	this.url = agency.getUrl();
