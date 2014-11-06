@@ -33,6 +33,12 @@
  *  
  * <p>
  * <b>Transitime commands.</b>  
+ * The agencies command for outputting information for all agencies
+ * served by the web server. 
+ * Default output is in XML. Can specify JSON by setting the accept header in
+ * the request or by adding format=json to the query string.
+ * <p>
+ * http://DOMAIN/api/v1/key/TEST_KEY/command/agencies?OPTIONS
  * <p>
  * The vehicle command for outputting location and other information for vehicles.
  * In query string can optionally specify list of vehicles or of routes. Can specify
@@ -140,7 +146,7 @@
  * Default output is in XML. Can specify JSON by setting the accept header in
  * the request or by adding format=json to the query string.
  * <p>
- * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/agencies?OPTIONS
+ * http://DOMAIN/api/v1/key/TEST_KEY/agency/sfmta/command/agencyGroup?OPTIONS
  * <p>
  * 
  * <b>GTFS-realtime commands.</b> 

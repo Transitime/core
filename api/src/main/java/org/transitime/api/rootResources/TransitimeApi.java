@@ -35,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.transitime.api.data.ApiAgencies;
+import org.transitime.api.data.ApiAgency;
 import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
@@ -735,16 +736,16 @@ public class TransitimeApi {
     }
 
     /**
-     * For getting Agency data.
+     * For getting Agency data for a specific agencyId. 
      * 
      * @param stdParameters
      * @return
      * @throws WebApplicationException
      */
-    @Path("/command/agencies")
+    @Path("/command/agencyGroup")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getAgencies(@BeanParam StandardParameters stdParameters) 
+    public Response getAgencyGroup(@BeanParam StandardParameters stdParameters) 
 		    throws WebApplicationException {
 
 	// Make sure request is valid
@@ -756,8 +757,12 @@ public class TransitimeApi {
 	    List<Agency> agencies = inter.getAgencies();
 	    
 	    // Create and return ApiAgencies response
-	    ApiAgencies apiAgencies = 
-		    new ApiAgencies(agencies);
+	    List<ApiAgency> apiAgencyList = new ArrayList<ApiAgency>();
+	    for (Agency agency : agencies) {
+		apiAgencyList.add(new ApiAgency(stdParameters.getAgencyId(),
+			agency));
+	    }
+	    ApiAgencies apiAgencies = new ApiAgencies(apiAgencyList);
 	    return stdParameters.createResponse(apiAgencies);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request

@@ -48,6 +48,8 @@ public class Agency implements Serializable {
 	@Id
 	private final int configRev;
 	
+	// Note: this is the GTFS agency_id, not the usual
+	// Transitime agencyId.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
 	@Id
 	private final String agencyId;
@@ -301,6 +303,9 @@ public class Agency implements Serializable {
 	}
 
 	/**
+	 * Note that this method returns the GTFS agency_id which is usually
+	 * different from the Transitime agencyId
+	 * 
 	 * @return the agencyId
 	 */
 	public String getId() {

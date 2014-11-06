@@ -17,6 +17,7 @@
 
 package org.transitime.db.webstructs;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -176,6 +177,19 @@ public class WebAgency {
 		return webAgency;
 	}
 
+	/**
+	 * Returns collection of all agencies as read from database.
+	 * 
+	 * @return
+	 */
+	static public Collection<WebAgency> getWebAgencies() {
+		// If haven't read in web agencies yet, do so now
+		if (map == null)
+			map = getMapFromDb();
+
+		return map.values();
+	}
+	
 	@Override
 	public String toString() {
 		return "WebAgency [" + "agencyId=" + agencyId + ", hostName="
