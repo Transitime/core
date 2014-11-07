@@ -72,9 +72,9 @@ public class AvlClient implements Runnable {
 					avlReports.get(avlReport.getVehicleId());
 			if (previousReportForVehicle != null &&
 					avlReport.getTime() <= previousReportForVehicle.getTime()) {
-				logger.warn("Throwing away AVL report because it is older " +
-						"than the previous AVL report for the vehicle. New " +
-						"AVL report is {}. Old AVL report is{}", 
+				logger.warn("Throwing away AVL report because it is same time "
+						+ "or older than the previous AVL report for the "
+						+ "vehicle. New AVL report is {}. Old AVL report is{}", 
 						avlReport, previousReportForVehicle);
 				return;
 			}
