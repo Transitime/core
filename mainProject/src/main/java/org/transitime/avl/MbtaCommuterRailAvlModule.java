@@ -90,9 +90,9 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String line;
 		while ((line = reader.readLine()) != null) {
-			// Log each non-blank line
+			// Log each non-blank line. Use debug logging since pretty verbose
 			if (!line.trim().isEmpty())
-				logger.info(line);
+				logger.debug(line);
 			
 			AvlReport avlReport = parseAvlReport(line);
 			if (avlReport != null) {
