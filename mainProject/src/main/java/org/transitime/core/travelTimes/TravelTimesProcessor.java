@@ -33,7 +33,7 @@ import org.transitime.core.travelTimes.DataFetcher.DbDataMapKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Match;
 import org.transitime.db.structs.Trip;
-import org.transitime.statistics.MiscStatistics;
+import org.transitime.statistics.Statistics;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
@@ -664,7 +664,7 @@ public class TravelTimesProcessor {
 					bySegment(travelTimesForStopPathForTrip);
 				for (List<Integer> travelTimesByTripForSegment : 
 						travelTimesBySegment) {
-					int averageTravelTimeForSegment = MiscStatistics
+					int averageTravelTimeForSegment = Statistics
 							.filteredAverage(travelTimesByTripForSegment, 0.7);
 					averageTravelTimes.add(averageTravelTimeForSegment);
 				}
@@ -675,7 +675,7 @@ public class TravelTimesProcessor {
 			List<Integer> stopTimesForStopPathForTrip = 
 					stopTimesMap.get(mapKey);
 			if (stopTimesForStopPathForTrip != null) { 
-				averageStopTime = MiscStatistics.filteredAverage(
+				averageStopTime = Statistics.filteredAverage(
 						stopTimesForStopPathForTrip, 0.7);
 			} else {
 				// No arrival and corresponding departure time for the stop. 

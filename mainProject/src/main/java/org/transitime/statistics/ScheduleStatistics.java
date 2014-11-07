@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.ArrivalDeparture.ArrivalsOrDepartures;
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
 import org.transitime.statistics.ScheduleDataProcessor.TripStopKey;
-import org.transitime.utils.Statistics;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
