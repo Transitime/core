@@ -34,6 +34,8 @@ public class StringUtils {
 			new DecimalFormat("0.00");
 	private static final DecimalFormat threeDigitFormat = 
 			new DecimalFormat("0.000");
+	private static final DecimalFormat sixDigitFormat = 
+			new DecimalFormat("0.000000");
 
 	/**
 	 * For formatting double to 1 decimal place.
@@ -75,6 +77,20 @@ public class StringUtils {
 			return "NaN";
 		
 		return threeDigitFormat.format(arg);
+	}
+
+	/**
+	 * For formatting double to 6 decimal places.
+	 * 
+	 * @param arg
+	 * @return the value as a string
+	 */
+	public static String sixDigitFormat(double arg) {
+		// Handle NaN specially
+		if (Double.isNaN(arg))
+			return "NaN";
+		
+		return sixDigitFormat.format(arg);
 	}
 
 	/**

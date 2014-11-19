@@ -43,6 +43,7 @@ public class Geo {
 	
 	// For converting miles per hour to meters per second
 	public static final float MPH_TO_MPS = 0.44704f;
+	public static final float MPS_TO_MPH = 1.0f/MPH_TO_MPS;
 	
 	public static final double RADIUS_OF_EARTH_IN_METERS = 6371000;
 	
@@ -228,7 +229,7 @@ public class Geo {
 		if (v == 0.0)
 			return d1;
 
-		// v1 is the distance from the first loc of the vector to where the
+		// v1 is the distance from the vector to where the
 		// distance to the location is the shortest. It is where a line to
 		// the location will be at a right angle to the vector.
 		// we get two right angle triangles that split the vector into two 
@@ -272,6 +273,72 @@ public class Geo {
 	}
 	
 	/**
+	 * Same as distance() but returns NaN if the location is not along the vector.
+	 * In other words, if closest match to the vector is beyond the beginning
+	 * or end of the vector then it is not considered along the vector and NaN
+	 * is returned.
+	 * 
+	 * @param loc
+	 * @param vector
+	 * @return Distance from loc to vector if loc matches to vector. Otherwise, NaN.
+	 */
+	public static double distanceIfMatch(Location loc, Vector vector) {
+		// d1 is distance from the location l to the first location of the vector v
+		double d1 = distance(loc, vector.getL1());
+		// d2 is distance from the location l to the second location of the vector v
+		double d2 = distance(loc, vector.getL2());
+		// v is length of the vector
+		double v = distance(vector.getL1(), vector.getL2());
+		
+		// Handle v==0 where we have a zero length vector as a special case
+		// so that don't divide by zero and end up with a NaN.
+		if (v == 0.0)
+			return Double.NaN;
+
+		// v1 is the distance from the vector to where the
+		// distance to the location is the shortest. It is where a line to
+		// the location will be at a right angle to the vector.
+		// we get two right angle triangles that split the vector into two 
+		// distances, v1 and v2. Because these are right angle triangles we know that
+		// a^2 + b^2 = c^2, where c is the longer diagonal side of the triangle.
+		// This means that we have the following formulas:
+		//   v1^2 + d^2 = d1^2
+		//   v2^2 + d^2 = d2^2
+		//   v1 + v2 = v;
+		// If you solve for v1 you will find that it is
+		double v1 = (sqrd(v) + sqrd(d1) - sqrd(d2)) / (2 * v);
+		
+		// We can now determine if the shortest distance
+		// from the Location to the Vector is d1, d2, or a right angle line 
+		// intersecting middle of the Vector. If v1 is negative then the
+		// intersection is before the Vector starts and the shortest distance
+		// is d1. If v1 is greater than length of v then intersection is
+		// beyond the vector and the shortest distance is d2. Otherwise
+		// the intersection is in the middle of the vector and can use
+		// Pythagorean theorem that a^2 + b^2 = c^2. 
+		if (v1 <= 0.0)
+			return Double.NaN;
+		if (v1 > v)
+			return Double.NaN;
+		
+		// The shortest distance isn't to one of the end points of the vector.
+		// This means that the shortest distance, let's call it d, is a right 
+		// angle line to somewhere in the middle of the vector. For this situation 
+		// we get two right angle triangles and can use a^2 + b^2 = c^2.		
+		double dSquared = sqrd(d1) - sqrd(v1);
+		// If started out with a right angle then sqrd(d1) - sqrd(v1) can
+		// be slightly negative due to rounding error. If take sqrt() of
+		// negative number get NaN when actually want 0.0. Therefore make
+		// sure that dSquared not negative.
+		if (dSquared < 0.0)
+			dSquared = 0.0;
+		
+		// Determine and return the shortest distance
+		double d = Math.sqrt(dSquared);		
+		return d;		
+	}
+	
+	/**
 	 * Determines best match of location to the vector. Returns the distance
 	 * along the vector to that match. Uses same basic algorithm as distance().
 	 * @param loc
@@ -291,7 +358,7 @@ public class Geo {
 		if (v == 0.0)
 			return 0.0;
 		
-		// v1 is the distance from the first loc of the vector to where the
+		// v1 is the distance from the vector to where the
 		// distance to the location is the shortest. It is where a line to
 		// the location will be at a right angle to the vector.
 		// we get two right angle triangles that split the vector into two 
