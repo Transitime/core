@@ -66,6 +66,9 @@ public class Time {
 	private static final DateFormat readableDateFormat24 = 
 			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss z");
 	
+	private static final DateFormat readableDateFormat24NoSecs = 
+		new SimpleDateFormat("MM-dd-yyyy HH:mm");
+
 	private static final DateFormat readableDateFormat24Msec = 
 			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
 	
@@ -331,10 +334,24 @@ public class Time {
 			return date;
 		} catch (ParseException e) {}
 		
-		// Still not working so try without seconds and without timezone
+		// Still not working so try without msecs and without timezone
 		try {
 			Date date = readableDateFormat24NoTimeZoneNoMsec.parse(datetimeStr);
 			return date;
+		} catch (ParseException e) {}
+		
+		// Still not working so try without seconds and without timezone
+		try {
+			Date date = readableDateFormat24NoSecs.parse(datetimeStr);
+			return date;
+		} catch (ParseException e) {}
+		
+		// Still not working so try date alone. This will ignore any time
+		// specification so this attempt needs to be done after trying all
+		// the other formats.
+		try {
+		    Date date = readableDateFormat.parse(datetimeStr);
+		    return date;
 		} catch (ParseException e) {}
 		
 		// As last resort try the default syntax. Will throw a ParseException
