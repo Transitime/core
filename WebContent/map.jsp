@@ -78,6 +78,8 @@ function getQueryVariable(variable) {
  * For format epoch times to human readable times, possibly including
  * a timezone offest.
  */
+var agencyTimezoneOffset;
+
 function dateFormat(time) {
 	var localTimezoneOffset = (new Date()).getTimezoneOffset();
 	var timezoneDiffMinutes = localTimezoneOffset - agencyTimezoneOffset;
@@ -731,7 +733,7 @@ map.on('popupclose', function(e) {
 
 // Get timezone offset and put it into global agencyTimezoneOffset variable
 // and set map bounds to the agency extent if route not specified in query string
-$.getJSON(urlPrefix + "/command/agencies", 
+$.getJSON(urlPrefix + "/command/agencyGroup", 
 		function(agencies) {
 	        agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
 			
