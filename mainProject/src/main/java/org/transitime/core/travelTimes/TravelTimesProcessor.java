@@ -57,6 +57,23 @@ import org.transitime.utils.Time;
  */
 public class TravelTimesProcessor {
 
+	// For when determining travel times for segments. Throws out
+	// outliers if they are less than 0.7 or greater than 1/0.7
+	// of the average.
+	private final static double FRACTION_LIMIT_FOR_SEGMENT_TIMES = 0.7;
+	
+	// For when determining stop times. Throws out
+	// outliers if they are less than 0.7 or greater than 1/0.7
+	// of the average.	
+	private final static double FRACTION_LIMIT_FOR_STOP_TIMES = 0.7;
+	
+	// Used when determining stop time for first stop of trip. A value
+	// of 1.0 means that will use a stop time that is within 1.0 
+	// standard deviation of the mean or higher, which is,
+	// 68% + (100% - 68%)/2 = 84%, meaning that 84% of the time the 
+	// vehicle would leave after the calculated stop time.
+	private final static double STD_DEV_BIAS_FOR_FIRST_STOP = 1.0;
+	
 	// For determining stop time for first stop in trip. Need to limit it 
 	// because if vehicle is really late then perhaps it is matched to
 	// wrong trip or such. At the very minimum it is an anomaly. In such a 
@@ -665,21 +682,25 @@ public class TravelTimesProcessor {
 				for (List<Integer> travelTimesByTripForSegment : 
 						travelTimesBySegment) {
 					int averageTravelTimeForSegment = Statistics
-							.filteredAverage(travelTimesByTripForSegment, 0.7);
+							.filteredAverage(travelTimesByTripForSegment, 
+									FRACTION_LIMIT_FOR_SEGMENT_TIMES);
 					averageTravelTimes.add(averageTravelTimeForSegment);
 				}
 			}
 			
 			// Determine average stop time for this trip/stop
-			int averageStopTime;
+			int averagedStopTime;
 			List<Integer> stopTimesForStopPathForTrip = 
 					stopTimesMap.get(mapKey);
 			if (stopTimesForStopPathForTrip != null) { 
-				averageStopTime = Statistics.filteredAverage(
-						stopTimesForStopPathForTrip, 0.7);
+				double stdDevBias = mapKey.getStopPathIndex() == 0 ? 
+						STD_DEV_BIAS_FOR_FIRST_STOP : 0.0; 
+				averagedStopTime = Statistics.biasedFilteredMean(
+						stopTimesForStopPathForTrip,
+						FRACTION_LIMIT_FOR_STOP_TIMES, stdDevBias);
 			} else {
 				// No arrival and corresponding departure time for the stop. 
-				averageStopTime = TravelTimeInfo.STOP_TIME_NOT_VALID;
+				averagedStopTime = TravelTimeInfo.STOP_TIME_NOT_VALID;
 
 				// Not having stop time indicates possible problem unless it 
 				// is the last stop path for the trip. So if not the last stop  
@@ -698,7 +719,7 @@ public class TravelTimesProcessor {
 			// TravelTimeInfo map so can be used to find best travel times 
 			// when there is no data for particular trip.
 			TravelTimeInfo travelTimeInfo = new TravelTimeInfo(trip,
-					mapKey.getStopPathIndex(), averageStopTime,
+					mapKey.getStopPathIndex(), averagedStopTime,
 					averageTravelTimes, travelTimeSegLength);
 			travelTimeInfoMap.add(travelTimeInfo);
 		}

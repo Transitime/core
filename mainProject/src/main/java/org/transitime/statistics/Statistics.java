@@ -74,9 +74,12 @@ public class Statistics {
 	 *            If value is further away than fractionalLimit of average it is
 	 *            filtered out if there are more than 2 data points. Expressed
 	 *            as a fractional value between 0.0 and 1.0 such that a value of
-	 *            1.0 means 100%. Therefore if one uses a value of 0.5 than
-	 *            values below 50% or above 200% of the average are filtered
-	 *            out.
+	 *            0.0 means no data points are filtered out and a value of 1.0
+	 *            means 100% of the datapoints are filtered out. Therefore if
+	 *            one uses a value of 0.5 than values below 50% or above 200% of
+	 *            the average are filtered out. A value of 0.7 is likely
+	 *            reasonable since that would filter out values below 70% or
+	 *            above 143% (1/0.7) of the average.
 	 * @return List of values but with the worst outlier filtered out
 	 */
 	private static List<Integer> filteredList(List<Integer> values,
@@ -101,7 +104,8 @@ public class Statistics {
 			
 			// If the value is beyond the acceptable limit and it is the worst
 			// one then remember it so it can be filtered out.
-			if (fraction < fractionalLimit && fraction < worstOffenderFraction) {
+			if (fraction < fractionalLimit 
+					&& fraction < worstOffenderFraction) {
 				worstOffenderFraction = fraction;
 				worstOffenderIndex = index;
 			}
@@ -136,9 +140,12 @@ public class Statistics {
 	 *            If value is further away than fractionalLimit of average it is
 	 *            filtered out if there are more than 2 data points. Expressed
 	 *            as a fractional value between 0.0 and 1.0 such that a value of
-	 *            1.0 means 100%. Therefore if one uses a value of 0.5 than
-	 *            values below 50% or above 200% of the average are filtered
-	 *            out.
+	 *            0.0 means no data points are filtered out and a value of 1.0
+	 *            means 100% of the datapoints are filtered out. Therefore if
+	 *            one uses a value of 0.5 than values below 50% or above 200% of
+	 *            the average are filtered out. A value of 0.7 is likely
+	 *            reasonable since that would filter out values below 70% or
+	 *            above 143% (1/0.7) of the average.
 	 * @return The average value, after outliers have been filtered
 	 */
 	public static int filteredAverage(List<Integer> values,
@@ -151,14 +158,88 @@ public class Statistics {
 			List<Integer> filteredList = 
 					filteredList(values, average, fractionalLimit);
 			if (filteredList == values) {
+				// Didn't filter out any outliers this time so return average
 				return average;
 			} else {
+				// Filtered out a value so get new average and try again
 				values = filteredList;
 				average = average(values);
 			}
 		}		
 	}
 	
+	/**
+	 * Returns a filtered mean that is biased to be conservative. First, loops
+	 * through the data to determine the average and to throw out any data
+	 * points that are outliers. This is important since outliers are not part
+	 * of a normal distribution since they represent non-stochastic data (such
+	 * as a breakdown, accident, etc). Then instead of just returning the
+	 * average, the remaining datapoints, as long as there are at least data
+	 * points remaining, are considered to be of a normal distribution and the
+	 * value that is returned is mean - stdDevBias * standardDeviation. If
+	 * stdDevBias is set to 0.0 then the average is returned. If stdDevBias is
+	 * 1.0 then the value returned is 1.0 standard deviations below the average,
+	 * which means that 68% + (100% - 68%)/2 = 84% of the time the actual value
+	 * would be at least as large as the value returned by this method.
+	 * <p>
+	 * This method is useful for when need to be somewhat conservative, such as
+	 * when determine expected stop time at a terminal. For such a situation
+	 * want to take into account when vehicle really leaves the terminal so want
+	 * to determine the average time. But it is really problematic if the time
+	 * varies which could mean that the passenger misses the vehicle.
+	 *
+	 * @param values
+	 *            The values to be averaged
+	 * @param fractionalLimit
+	 *            If value is further away than fractionalLimit of average it is
+	 *            filtered out if there are more than 2 data points. Expressed
+	 *            as a fractional value between 0.0 and 1.0 such that a value of
+	 *            0.0 means no data points are filtered out and a value of 1.0
+	 *            means 100% of the datapoints are filtered out. Therefore if
+	 *            one uses a value of 0.5 than values below 50% or above 200% of
+	 *            the average are filtered out. A value of 0.7 is likely
+	 *            reasonable since that would filter out values below 70% or
+	 *            above 143% (1/0.7) of the average.
+	 * @param stdDevBias
+	 *            How much to bias the mean. For a normal distribution (after
+	 *            outliers filtered out) using a value of 1.0 standard deviation
+	 *            means that will return mean - stdDevation. A value of 0.0 would
+	 *            return the mean.
+	 * @return The mean value, after outliers have been filtered and the average
+	 *         is biased down by specified stdDevBias with respect to the
+	 *         standard deviation.
+	 */
+	public static int biasedFilteredMean(List<Integer> values,
+			double fractionalLimit, double stdDevBias) {
+		// First determine average without any filtering
+		int average = average(values);
+		
+		// Filter out outliers in case there were more than 2 data points 
+		while (true) {
+			List<Integer> filteredList = 
+					filteredList(values, average, fractionalLimit);
+			if (filteredList == values) {
+				if (filteredList.size() <= 2)
+					// Only 1 or 2 data points left after filtering so simply
+					// return the average.
+					return average(filteredList);
+				else {
+					// Done filtering outliers. Now determine standard deviation
+					double[] doubleValues = toDoubleArray(toArray(filteredList));
+					double mean = getMean(doubleValues);
+					double stdDev = 
+							getSampleStandardDeviation(doubleValues, mean);
+					double biasedMean = mean - stdDevBias * stdDev;
+					return (int) Math.round(biasedMean);
+				}
+			} else {
+				// Filtered out a value so get new average and try again
+				values = filteredList;
+				average = average(values);
+			}
+		}		
+	}
+		
 	/**
 	 * Converts the List<Integer> to a array of ints. This can be useful
 	 * when amount of memory used is critical.
