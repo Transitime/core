@@ -289,6 +289,7 @@ public class IpcPrediction implements Serializable {
 	public String toString() {
 		return "IpcPrediction [" 
 				+ "vehicleId=" + vehicleId
+				+ ", predTime="	+ Time.timeStrMsecNoTimeZone(predictionTime)
 				+ ", routeId=" + routeId
 				+ (trip != null ? ", rteName=" + trip.getRouteShortName() : "")
 				+ ", stop="	+ stopId
@@ -299,7 +300,6 @@ public class IpcPrediction implements Serializable {
 				+ ", trip="	+ tripId
 				+ ", tripPatternId=" + tripPatternId
 				+ ", block=" + blockId
-				+ ", predTime="	+ Time.timeStrMsecNoTimeZone(predictionTime)
 				+ ", schedBasedPred=" + schedBasedPred
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
 				+ ", createTime=" + Time.timeStrMsecNoTimeZone(creationTime)
