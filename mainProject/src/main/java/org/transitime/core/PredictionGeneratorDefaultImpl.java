@@ -141,14 +141,14 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				// If it is currently before the scheduled departure time then use
 				// the schedule time. But if after the scheduled time then use
 				// the prediction time.
-				long adjustedDeparatureTime = TravelTimes
+				long adjustedDepartureTime = TravelTimes
 						.adjustTimeAccordingToSchedule(arrivalTime, indices) + 
 						expectedStopTimeMsec;
-				if (logger.isDebugEnabled() && adjustedDeparatureTime>arrivalTime)
+				if (logger.isDebugEnabled() && adjustedDepartureTime>arrivalTime)
 					logger.debug("For vehicleId={} adjusted departure time for " +
 							"layover stopId={} to adjustedDeparatureTime={}", 
 							avlReport.getVehicleId(), path.getStopId(), 
-							Time.dateTimeStrMsec(adjustedDeparatureTime));
+							Time.dateTimeStrMsec(adjustedDepartureTime));
 				
 				// Make sure there is enough break time for the driver to get
 				// their break. But only giving drivers a break if vehicle not
@@ -156,14 +156,14 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				// then driver just starting assignment or already got break
 				// elsewhere, so won't take a break at this layover.
 				if (!deadheadingSoNoDriverBreak &&
-						adjustedDeparatureTime < 
+						adjustedDepartureTime < 
 							predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC) {
-					adjustedDeparatureTime = predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC;
+					adjustedDepartureTime = predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC;
 					logger.debug("For vehicleId={} adjusted departure time for " +
 							"layover stopId={} to adjustedDeparatureTime={} to " +
 							"to ensure driver gets break of path.getBreakTimeSec()={}",
 							avlReport.getVehicleId(), path.getStopId(),
-							Time.dateTimeStrMsec(adjustedDeparatureTime), 
+							Time.dateTimeStrMsec(adjustedDepartureTime), 
 							path.getBreakTimeSec());
 				}
 								
@@ -171,8 +171,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				// Add in expected stop time since vehicles often don't depart
 				// on time.
 				return new IpcPrediction(avlReport, stopId,	gtfsStopSeq, trip, 
-						adjustedDeparatureTime + expectedStopTimeMsec,
-						affectedByWaitStop,
+						adjustedDepartureTime,	affectedByWaitStop,
 						false);  // isArrival. False to indicate departure			
 			} else {
 				// Create and return the departure prediction for this 
