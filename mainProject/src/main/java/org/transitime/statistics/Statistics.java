@@ -270,12 +270,29 @@ public class Statistics {
 			result[i] = array[i];
 		return result;
 	}
+
+	/**
+	 * For converting List of Integers into array of doubles so that it can
+	 * be used in the statistics functions.
+	 * 
+	 * @param list
+	 * @return
+	 */
+	public static double[] toDoubleArray(List<Integer> list) {
+		if (list == null)
+			return new double[0];
+		
+		double result[] = new double[list.size()];
+		for (int i=0; i<list.size(); ++i)
+			result[i] = list.get(i);
+		return result;	    
+	}
 	
 	/**
 	 * Returns the mean of the array of doubles
 	 * 
 	 * @param values
-	 * @return the mean
+	 * @return the mean, or NaN if there is no data
 	 */
 	public static double getMean(double[] values) {
 		double sum = 0.0;
