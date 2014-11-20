@@ -74,6 +74,11 @@ public class TravelTimesProcessor {
 	// vehicle would leave after the calculated stop time.
 	private final static double STD_DEV_BIAS_FOR_FIRST_STOP = 1.0;
 	
+	// For first stop of trip should add a bit of a bias since passengers 
+	// have to get on a few seconds before doors shut and vehicle starts 
+	// moving. Time is in msec.
+	private final static int STOP_TIME_BIAS_FOR_FIRST_STOP = 10000;
+	
 	// For determining stop time for first stop in trip. Need to limit it 
 	// because if vehicle is really late then perhaps it is matched to
 	// wrong trip or such. At the very minimum it is an anomaly. In such a 
@@ -693,11 +698,25 @@ public class TravelTimesProcessor {
 			List<Integer> stopTimesForStopPathForTrip = 
 					stopTimesMap.get(mapKey);
 			if (stopTimesForStopPathForTrip != null) { 
-				double stdDevBias = mapKey.getStopPathIndex() == 0 ? 
-						STD_DEV_BIAS_FOR_FIRST_STOP : 0.0; 
-				averagedStopTime = Statistics.biasedFilteredMean(
-						stopTimesForStopPathForTrip,
-						FRACTION_LIMIT_FOR_STOP_TIMES, stdDevBias);
+				// For first stops of trip will be providing departure
+				// times so need to be conservative and bias the stop time
+				if (mapKey.getStopPathIndex() == 0) {
+					// First stop of trip so be extra conservative.
+					// Determine best stop time to use
+					averagedStopTime = Statistics.biasedFilteredMean(
+							stopTimesForStopPathForTrip,
+							FRACTION_LIMIT_FOR_STOP_TIMES, STD_DEV_BIAS_FOR_FIRST_STOP);
+					
+					// So far have determine when vehicle has departed. But should add
+					// a bit of a bias since passengers have to get on a few seconds
+					// before doors shut and vehicle starts moving.
+					averagedStopTime -= STOP_TIME_BIAS_FOR_FIRST_STOP;
+				} else {
+					// Not first stop of trip
+					averagedStopTime = Statistics.filteredAverage(
+							stopTimesForStopPathForTrip,
+							FRACTION_LIMIT_FOR_STOP_TIMES);
+				}
 			} else {
 				// No arrival and corresponding departure time for the stop. 
 				averagedStopTime = TravelTimeInfo.STOP_TIME_NOT_VALID;
