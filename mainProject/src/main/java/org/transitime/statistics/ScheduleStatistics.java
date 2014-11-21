@@ -130,7 +130,7 @@ public class ScheduleStatistics {
 		results.unfilteredTimesArray = Statistics.toArray(timesFromDb);
 
 		// Determine mean before filtering out data
-		double mean = Statistics.getMean(results.unfilteredTimesArray);
+		double mean = Statistics.mean(results.unfilteredTimesArray);
 
 		// Filter out outliers from timesFromDb and put into filteredTimesFromDb
 		List<Integer> filteredTimesFromDb = new ArrayList<Integer>(timesFromDb);
@@ -193,7 +193,7 @@ public class ScheduleStatistics {
 			results.filteredTimesArray = 
 					Statistics.toArray(filteredTimesFromDb);
 			results.mean = 
-					(float) Statistics.getMean(results.filteredTimesArray);
+					(float) Statistics.mean(results.filteredTimesArray);
 		} else {
 			results.filteredTimesArray = results.unfilteredTimesArray;
 			results.mean = (float) mean;
