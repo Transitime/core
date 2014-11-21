@@ -55,9 +55,9 @@ if (showTooltips)
 		+         "vehicleId=%s source=%s', "
 		+ "   CAST(predictionAccuracyMsecs || ' msec' AS INTERVAL), predictedTime-predictionReadTime,"
 		+ "   stopId, routeId, tripId, "
-		+ "   to_char(arrivalDepartureTime, 'HH:MI:SS.MS MM/DD/YYYY'),"
-		+ "   to_char(predictedTime, 'HH:MI:SS.MS'),"
-		+ "   to_char(predictionReadTime, 'HH:MI:SS.MS'),"
+		+ "   to_char(arrivalDepartureTime, 'HH24:MI:SS.MS MM/DD/YYYY'),"
+		+ "   to_char(predictedTime, 'HH24:MI:SS.MS'),"
+		+ "   to_char(predictionReadTime, 'HH24:MI:SS.MS'),"
 		+ "   vehicleId,"
 		+ "   predictionSource) AS tooltip ";
     
