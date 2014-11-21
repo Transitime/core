@@ -682,12 +682,15 @@ public class TravelTimesProcessor {
 					travelTimesMap.get(mapKey);
 			List<Integer> averageTravelTimes = new ArrayList<Integer>();
 			if (travelTimesForStopPathForTrip != null) {
+				// Get the travel times, grouped by segment
 				List<List<Integer>> travelTimesBySegment = 
 					bySegment(travelTimesForStopPathForTrip);
+				
+				// For each segment, process travel times...
 				for (List<Integer> travelTimesByTripForSegment : 
 						travelTimesBySegment) {
 					int averageTravelTimeForSegment = Statistics
-							.filteredAverage(travelTimesByTripForSegment, 
+							.filteredMean(travelTimesByTripForSegment, 
 									FRACTION_LIMIT_FOR_SEGMENT_TIMES);
 					averageTravelTimes.add(averageTravelTimeForSegment);
 				}
@@ -713,7 +716,7 @@ public class TravelTimesProcessor {
 					averagedStopTime -= STOP_TIME_BIAS_FOR_FIRST_STOP;
 				} else {
 					// Not first stop of trip
-					averagedStopTime = Statistics.filteredAverage(
+					averagedStopTime = Statistics.filteredMean(
 							stopTimesForStopPathForTrip,
 							FRACTION_LIMIT_FOR_STOP_TIMES);
 				}

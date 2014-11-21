@@ -37,29 +37,6 @@ public class Statistics {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Gets the average values of the values passed in, without doing any
-	 * filtering.
-	 * 
-	 * @param values
-	 *            The values to be averaged
-	 * @return The average
-	 */
-	public static int average(List<Integer> values) {
-		// If only a single value then return it
-		if (values.size() == 1) 
-			return values.get(0);
-
-		// There are multiple values so determine average
-		int sum = 0;
-		for (int value : values) 
-			sum += value;
-		int average = sum / values.size();
-		
-		// Return result
-		return average;
-	}
-	
-	/**
 	 * Returns a list of values that was passed in but with the worst outlier
 	 * filtered out. If there were no outliers then returns the original list.
 	 * If there are only 2 elements in the values list then can't really have
@@ -91,22 +68,25 @@ public class Statistics {
 		
 		// Find the worst value that is beyond the fractionalLimit
 		// of the target.
-		double worstOffenderFraction = 1.0;
+		int worstOffenderDeltaFromTarget = 0;
 		int worstOffenderIndex = -1;
 		for (int index=0; index<values.size(); ++index) {
 			int value = values.get(index);
+			int deltaFromTarget = Math.abs(value - target);
+
+			// Only want to filter a value if it is at least the fraction away
+			// from the mean. Use fraction value between 0.0 and 1.0. So if 
+			// value greater than 1.0 use the reciprocal.
 			double fraction = (double) value/target;
-			
-			// Use fraction value between 0.0 and 1.0. So if value greater
-			// than 1.0 use the reciprocal.
 			if (fraction > 1.0)
 				fraction = 1.0/fraction;
 			
-			// If the value is beyond the acceptable limit and it is the worst
-			// one then remember it so it can be filtered out.
-			if (fraction < fractionalLimit 
-					&& fraction < worstOffenderFraction) {
-				worstOffenderFraction = fraction;
+			// If this is the worst value with respect to the mean and it is
+			// bigger or smaller than allowed by fractionalLimit then keep
+			// track of this value as the worst offender.
+			if (deltaFromTarget > worstOffenderDeltaFromTarget 
+					&& fraction < fractionalLimit) {
+				worstOffenderDeltaFromTarget = deltaFromTarget;
 				worstOffenderIndex = index;
 			}
 		}
@@ -130,7 +110,7 @@ public class Statistics {
 	}
 	
 	/**
-	 * Gets the average value of the values passed in. Filters outliers that are
+	 * Gets the mean value of the values passed in. Filters outliers that are
 	 * less than minPercentage or greater than maxPercentage of the average of
 	 * all values.
 	 * 
@@ -148,22 +128,22 @@ public class Statistics {
 	 *            above 143% (1/0.7) of the average.
 	 * @return The average value, after outliers have been filtered
 	 */
-	public static int filteredAverage(List<Integer> values,
+	public static int filteredMean(List<Integer> values,
 			double fractionalLimit) {
 		// First determine average without any filtering
-		int average = average(values);
+		int mean = mean(values);
 		
 		// Filter out outliers in case there were more than 2 data points 
 		while (true) {
 			List<Integer> filteredList = 
-					filteredList(values, average, fractionalLimit);
+					filteredList(values, mean, fractionalLimit);
 			if (filteredList == values) {
 				// Didn't filter out any outliers this time so return average
-				return average;
+				return mean;
 			} else {
 				// Filtered out a value so get new average and try again
 				values = filteredList;
-				average = average(values);
+				mean = mean(values);
 			}
 		}		
 	}
@@ -212,7 +192,7 @@ public class Statistics {
 	public static int biasedFilteredMean(List<Integer> values,
 			double fractionalLimit, double stdDevBias) {
 		// First determine average without any filtering
-		int average = average(values);
+		int average = mean(values);
 		
 		// Filter out outliers in case there were more than 2 data points 
 		while (true) {
@@ -222,11 +202,11 @@ public class Statistics {
 				if (filteredList.size() <= 2)
 					// Only 1 or 2 data points left after filtering so simply
 					// return the average.
-					return average(filteredList);
+					return mean(filteredList);
 				else {
 					// Done filtering outliers. Now determine standard deviation
+					double mean = mean(filteredList);
 					double[] doubleValues = toDoubleArray(toArray(filteredList));
-					double mean = getMean(doubleValues);
 					double stdDev = 
 							getSampleStandardDeviation(doubleValues, mean);
 					double biasedMean = mean - stdDevBias * stdDev;
@@ -235,7 +215,7 @@ public class Statistics {
 			} else {
 				// Filtered out a value so get new average and try again
 				values = filteredList;
-				average = average(values);
+				average = mean(values);
 			}
 		}		
 	}
@@ -289,12 +269,32 @@ public class Statistics {
 	}
 	
 	/**
+	 * Gets the mean values of the values passed in, without doing any
+	 * filtering.
+	 * 
+	 * @param values
+	 *            The values to be averaged
+	 * @return The average
+	 */
+	public static int mean(List<Integer> values) {
+		// If only a single value then return it
+		if (values.size() == 1) 
+			return values.get(0);
+
+		// There are multiple values so determine average
+		int sum = 0;
+		for (int value : values) 
+			sum += value;
+		return sum / values.size();
+	}
+	
+	/**
 	 * Returns the mean of the array of doubles
 	 * 
 	 * @param values
 	 * @return the mean, or NaN if there is no data
 	 */
-	public static double getMean(double[] values) {
+	public static double mean(double[] values) {
 		double sum = 0.0;
 		for (int i=0; i<values.length; ++i) 
 			sum += values[i];
@@ -307,7 +307,7 @@ public class Statistics {
 	 * @param values
 	 * @return
 	 */
-	public static double getMean(int[] values) {
+	public static double mean(int[] values) {
 		int sum = 0;
 		for (int i=0; i<values.length; ++i) 
 			sum += values[i];
@@ -351,11 +351,14 @@ public class Statistics {
 	 * Just for testing
 	 */
 	public static void main(String args[]) {
+		Integer a[] = {56449, 45916, 33983, 1237582, 32739};
+		Statistics.filteredMean(Arrays.asList(a), 0.7);
+		
 		Integer array[] = {2,4, 3};//, 4, 4, 4, 5, 5, 7, 9};
 		List<Integer> values = Arrays.asList(array); 
 		
 		double[] doubleValues = toDoubleArray(toArray(values));
-		double mean = getMean(doubleValues);
+		double mean = mean(doubleValues);
 		double stdDev = getSampleStandardDeviation(doubleValues, mean);
 		System.out.println("mean=" + mean + " stdDev=" + stdDev);
 	}
