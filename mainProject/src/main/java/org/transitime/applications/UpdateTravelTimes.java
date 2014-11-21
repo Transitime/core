@@ -38,6 +38,7 @@ import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
+import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -341,9 +342,6 @@ public class UpdateTravelTimes {
 			
 			// Make sure that everything actually written out to db
 			tx.commit();
-			
-			logger.info("Done processing travel times. Changes successfully "
-					+ "committed to database");
 		} catch (Exception e) {
 			if (tx != null)
 				tx.rollback();
@@ -352,6 +350,9 @@ public class UpdateTravelTimes {
 			// Close up db connection
 			session.close();
 		}
+		
+		logger.info("Done processing travel times. Changes successfully "
+				+ "committed to database");
 	}
 	
 	/**
@@ -387,6 +388,12 @@ public class UpdateTravelTimes {
 			System.exit(-1);
 		}
 
+		// Log params used right at top of log file
+		logger.info("Processing travel times for beginTime={} endTime={} "
+				+ "maxTravelTimeSegmentLength={}",
+				beginTime, endTime, 
+				Geo.distanceFormat(maxTravelTimeSegmentLength));
+		
 		// Set the timezone for the application
 		int configRev = ActiveRevisions.get(agencyId).getConfigRev();
 		TimeZone timezone = 
