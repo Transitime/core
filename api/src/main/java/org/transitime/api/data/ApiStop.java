@@ -48,6 +48,9 @@ public class ApiStop extends ApiTransientLocation {
     @XmlAttribute(name="minor")
     private Boolean minor;
     
+    @XmlAttribute
+    private String directionId;
+    
      /********************** Member Functions **************************/
 
     protected ApiStop() {}
@@ -60,6 +63,7 @@ public class ApiStop extends ApiTransientLocation {
 	// If true then set to null so that this attribute won't then be
 	// output as XML/JSON, therefore making output a bit more compact.
 	this.minor = stop.isUiStop() ? null : true;
+	this.directionId = stop.getDirectionId();
     }
 
 }
