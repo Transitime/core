@@ -32,22 +32,24 @@ import org.transitime.db.structs.Stop;
  */
 public class IpcStop implements Serializable {
 
-	private String id;
-	private String name;
-	private Integer code;
-	private Location loc;
-	private boolean isUiStop;
+	private final String id;
+	private final String name;
+	private final Integer code;
+	private final Location loc;
+	private final boolean isUiStop;
+	private final String directionId;
 	
 	private static final long serialVersionUID = 8964112532327897125L;
 
 	/********************** Member Functions **************************/
 
-	public IpcStop(Stop dbStop, boolean aUiStop) {
+	public IpcStop(Stop dbStop, boolean aUiStop, String directionId) {
 		this.id = dbStop.getId();
 		this.name = dbStop.getName();
 		this.code = dbStop.getCode();
 		this.loc = dbStop.getLoc();
 		this.isUiStop = aUiStop;
+		this.directionId = directionId;
 	}
 	
 	/**
@@ -55,12 +57,13 @@ public class IpcStop implements Serializable {
 	 * 
 	 * @param dbStop
 	 */
-	public IpcStop(Stop dbStop) {
+	public IpcStop(Stop dbStop, String directionId) {
 		this.id = dbStop.getId();
 		this.name = dbStop.getName();
 		this.code = dbStop.getCode();
 		this.loc = dbStop.getLoc();
 		this.isUiStop = true;
+		this.directionId = directionId;
 	}
 	
 	@Override
@@ -71,6 +74,7 @@ public class IpcStop implements Serializable {
 				+ ", code=" + code
 				+ ", loc=" + loc
 				+ ", isUiStop" + isUiStop
+				+ ", directionId" + directionId
 				+ "]";
 	}
 
@@ -92,5 +96,9 @@ public class IpcStop implements Serializable {
 
 	public boolean isUiStop() {
 		return isUiStop;
+	}
+	
+	public String getDirectionId() {
+		return directionId;
 	}
 }

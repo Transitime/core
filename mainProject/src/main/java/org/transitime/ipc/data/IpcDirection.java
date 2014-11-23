@@ -88,7 +88,7 @@ public class IpcDirection implements Serializable {
 		for (String stopId : orderedCollection.get()) {
 			Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
 			if (!stop.isHidden())
-				stops.add(new IpcStop(stop));
+				stops.add(new IpcStop(stop, directionId));
 		}
 		
 		// Return result

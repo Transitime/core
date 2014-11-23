@@ -194,17 +194,19 @@ public class IpcRoute extends IpcRouteSummary {
 					uiStopsIds.add(stopPath.getStopId());
 					Stop stop = Core.getInstance().getDbConfig()
 							.getStop(stopPath.getStopId());
-					stops.add(new IpcStop(stop, true /* isUiStop */));
+					stops.add(new IpcStop(stop, true /* isUiStop */, 
+							tripPattern.getDirectionId()));
 				}
 			}
 		}
 		
-		// Add all of the non-UI stops for the route
+		// Add all of the non-UI stops for the route		
 		Collection<Stop> allStopsForRoute = dbRoute.getStops();
 		for (Stop dbStop : allStopsForRoute) {
 			// If not already added as a UI stop...
 			if (!uiStopsIds.contains(dbStop.getId())) {
-				stops.add(new IpcStop(dbStop, false /* isUiStop */));
+				stops.add(new IpcStop(dbStop, false /* isUiStop */,
+						uiTripPatterns.get(0).getDirectionId()));
 			}
 		}
 		
