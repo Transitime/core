@@ -40,6 +40,8 @@ public class PredAccuracyPrediction {
 	// how far out into the future the prediction is for.
 	private final Date predictionReadTime;
 	private final boolean isArrival;
+	// affectedByWaitStop is a Boolean so that null can represent "don't know"
+	private final Boolean affectedByWaitStop;
 	private final String source;
 
 	/********************** Member Functions **************************/
@@ -59,13 +61,16 @@ public class PredAccuracyPrediction {
 	 * @param predictedTime
 	 * @param predictionReadTime
 	 * @param isArrival
+	 * @param affectedByWaitStop
+	 *            Set to null if this information not available
 	 * @param source
 	 *            Description of the feed, especially useful if have couple of
 	 *            sources. Can be a value such as "MBTA_epoch" or "NextBus".
 	 */
 	public PredAccuracyPrediction(String routeId, String directionId,
 			String stopId, String tripId, String vehicleId, Date predictedTime,
-			Date predictionReadTime, boolean isArrival, String source) {
+			Date predictionReadTime, boolean isArrival,
+			Boolean affectedByWaitStop, String source) {
 		super();
 		this.routeId = routeId;
 		this.directionId = directionId;
@@ -75,6 +80,7 @@ public class PredAccuracyPrediction {
 		this.predictedTime = predictedTime;
 		this.predictionReadTime = predictionReadTime;
 		this.isArrival = isArrival;
+		this.affectedByWaitStop = affectedByWaitStop;
 		this.source = source;
 	}
 	
@@ -114,6 +120,10 @@ public class PredAccuracyPrediction {
 		return isArrival;
 	}
 	
+	public Boolean isAffectedByWaitStop() {
+		return affectedByWaitStop;
+	}
+	
 	@Override
 	public String toString() {
 		return "PredAccuracyPrediction [" 
@@ -127,6 +137,7 @@ public class PredAccuracyPrediction {
 				+ ", predictionLengthMsec=" + 
 					(predictedTime.getTime() - predictionReadTime.getTime())
 				+ ", isArrival=" + isArrival
+				+ ", affectedByWaitStop=" + affectedByWaitStop
 				+ ", source=" + source 
 				+ "]";
 	}

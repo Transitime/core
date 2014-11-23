@@ -341,8 +341,9 @@ public class PredictionAccuracyModule extends Module {
 	}
 	
 	/**
-	 * To be called every polling cycle to process internal predictions. To be
-	 * overridden if getting predictions from external feed.
+	 * Gets and processes predictions from Transitime system. To be called every
+	 * polling cycle to process internal predictions. To be overridden if
+	 * getting predictions from external feed.
 	 * 
 	 * @param routesAndStops
 	 * @param predictionsReadTime
@@ -382,6 +383,7 @@ public class PredictionAccuracyModule extends Module {
 											new Date(pred.getTime()),
 											predictionsReadTime,
 											pred.isArrival(),
+											pred.isAffectedByWaitStop(),
 											"Transitime");
 							storePrediction(accuracyPred);
 							predictionsFound = true;
@@ -469,7 +471,7 @@ public class PredictionAccuracyModule extends Module {
 				pred.getRouteId(), pred.getDirectionId(), pred.getStopId(),
 				pred.getTripId(), arrivalDepartureTime,
 				pred.getPredictedTime(), pred.getPredictionReadTime(),
-				pred.getSource(), pred.getVehicleId());
+				pred.getSource(), pred.getVehicleId(), pred.isAffectedByWaitStop());
 		
 		// Add the prediction accuracy object to the db logger so that
 		// it gets written to database

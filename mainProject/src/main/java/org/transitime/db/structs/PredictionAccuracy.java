@@ -92,6 +92,8 @@ public class PredictionAccuracy implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String vehicleId;
 
+	@Column
+	private final Boolean affectedByWaitStop;
 	
 	private static final long serialVersionUID = -6900411351649946446L;
 
@@ -114,7 +116,8 @@ public class PredictionAccuracy implements Serializable {
 	public PredictionAccuracy(String routeId, String directionId,
 			String stopId, String tripId, Date arrivalDepartureTime,
 			Date predictedTime, Date predictionReadTime,
-			String predictionSource, String vehicleId) {
+			String predictionSource, String vehicleId, 
+			Boolean affectedByWaitStop) {
 		super();
 		this.routeId = routeId;
 		this.directionId = directionId;
@@ -127,6 +130,7 @@ public class PredictionAccuracy implements Serializable {
 				(int) (arrivalDepartureTime.getTime() - predictedTime.getTime()) : 0;
 		this.predictionSource = predictionSource;
 		this.vehicleId = vehicleId;
+		this.affectedByWaitStop = affectedByWaitStop;
 	}
 
 	/**
@@ -145,12 +149,17 @@ public class PredictionAccuracy implements Serializable {
 		this.predictionAccuracyMsecs = -1;
 		this.predictionSource = null;
 		this.vehicleId = null;
+		this.affectedByWaitStop = null;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime
+				* result
+				+ ((affectedByWaitStop == null) ? 0 : affectedByWaitStop
+						.hashCode());
 		result = prime
 				* result
 				+ ((arrivalDepartureTime == null) ? 0 : arrivalDepartureTime
@@ -186,6 +195,11 @@ public class PredictionAccuracy implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		PredictionAccuracy other = (PredictionAccuracy) obj;
+		if (affectedByWaitStop == null) {
+			if (other.affectedByWaitStop != null)
+				return false;
+		} else if (!affectedByWaitStop.equals(other.affectedByWaitStop))
+			return false;
 		if (arrivalDepartureTime == null) {
 			if (other.arrivalDepartureTime != null)
 				return false;
@@ -253,6 +267,7 @@ public class PredictionAccuracy implements Serializable {
 				+ ", predictionAccuracyMsecs=" + predictionAccuracyMsecs
 				+ ", predictionSource=" + predictionSource 
 				+ ", vehicleId=" + vehicleId 
+				+ ", affectedByWaitStop=" + affectedByWaitStop
 				+ "]";
 	}
 
@@ -300,4 +315,13 @@ public class PredictionAccuracy implements Serializable {
 		return vehicleId;
 	}
 
+	/**
+	 * True if the prediction is based on scheduled departure time, false if
+	 * not. Null if feed of predictions doesn't provide that information.
+	 * 
+	 * @return
+	 */
+	public Boolean isAffectedByWaitStop() {
+		return affectedByWaitStop;
+	}
 }

@@ -231,6 +231,7 @@
 
     create table PredictionAccuracy (
         id int8 not null,
+        affectedByWaitStop boolean,
         arrivalDepartureTime timestamp,
         directionId varchar(60),
         predictedTime timestamp,

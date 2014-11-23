@@ -237,6 +237,7 @@
 
     create table PredictionAccuracy (
         id bigint not null auto_increment,
+        affectedByWaitStop boolean,
         arrivalDepartureTime datetime(3),
         directionId varchar(60),
         predictedTime datetime(3),

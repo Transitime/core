@@ -213,6 +213,8 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 					String tripId = prediction.getAttributeValue("tripTag");
 					boolean isArrival = "false".equals(prediction
 							.getAttributeValue("isDeparture"));
+					boolean affectedByWaitStop = "true".equals(prediction
+							.getAttributeValue("affectedByLayover"));
 					
 					// Direction ID is not available from NextBus API so determine it
 					// from the trip ID.
@@ -237,7 +239,7 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 					PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							routeId, directionId, stopId, tripId, vehicleId,
 							predictedTime, predictionsReadTime, isArrival,
-							"NextBus");
+							affectedByWaitStop, "NextBus");
 					storePrediction(pred);
 				}
 			}
