@@ -40,12 +40,12 @@ import org.transitime.gtfs.DbConfig;
  */
 public class Time {
 	// Some handy constants for dealing with time
-	public static final int MS_PER_SEC = 1000;
-	public static final int MS_PER_MIN = 60 * MS_PER_SEC;
-	public static final int MS_PER_HOUR = 60 * MS_PER_MIN;
-	public static final int MS_PER_DAY = 24 * MS_PER_HOUR;
-	public static final int MS_PER_WEEK = 7 * MS_PER_DAY;
-	public static final int MS_PER_YEAR = 365 * MS_PER_DAY;
+	public static final long MS_PER_SEC = 1000;
+	public static final long MS_PER_MIN = 60 * MS_PER_SEC;
+	public static final long MS_PER_HOUR = 60 * MS_PER_MIN;
+	public static final long MS_PER_DAY = 24 * MS_PER_HOUR;
+	public static final long MS_PER_WEEK = 7 * MS_PER_DAY;
+	public static final long MS_PER_YEAR = 365 * MS_PER_DAY;
 	
 	public static final int SEC_PER_MIN = 60;
 	public static final int SEC_PER_HOUR = 60 * SEC_PER_MIN;
