@@ -125,6 +125,13 @@ String chartTitle = "Prediction Accuracy for " + agencyId
             lineWidth: 4,
             intervals: { 'style':'area' },
             legend: 'bottom',
+            // Usually will first be displaying Transitime predictions and 
+            // those will get the first color. If both Transitime and Tther
+            // predictions shown then the Other ones will get the second color.
+            // But want color for the Other predictions to be consistent 
+            // whether only Other predictions or both Other and Transitime ones
+            // are shown. Therefore do something fancy here for consistency.
+            series: [{'color': '<%= (sourceParam==null || !sourceParam.equals("Other")) ? "blue" : "red" %>'},{'color': 'red'}],
             chartArea: {
                 // Use most of available area. But need to not use 100% or else 
                 // labels won't appear
@@ -139,12 +146,23 @@ String chartTitle = "Prediction Accuracy for " + agencyId
             	// Want a gridline for every minute, not just the default of 5 gridlines
        	        gridlines: {count: 15},
        	        // Nice to show a faint line for every 30 seconds as well
-            	minorGridlines: {count: 1}},
-            	// Sometimes won't have data in a prediction bucket. For this
-            	// case want chart to interpolate instead of displaying nothing.
-            	interpolateNulls: true,
-            vAxis: {title: 'Prediction Accuracy (secs) (postive means vehicle later than predicted)', 
-            	minValue: -350, maxValue: 350},
+            	minorGridlines: {count: 1}
+       	    },
+            vAxis: {title: 'Prediction Accuracy (secs) (postive means vehicle later than predicted)',
+            	// Try to show accuracy on a consistent vertical axis and 
+            	// divide into minutes. This unfortunately won't work well
+            	// if values are greater than 360 because then chart will
+            	// autoscale but will still be using 11 gridlines
+            	minValue: -180, 
+            	maxValue: 360,
+            	gridlines: {count: 10},
+       	        // Nice to show a faint line for every 30 seconds as well
+            	minorGridlines: {count: 1}
+             },
+         	// Sometimes won't have data in a prediction bucket. For this
+         	// case want chart to interpolate instead of displaying nothing.
+         	interpolateNulls: true,
+         	
 			lineWidth: 1.0
         };
   
