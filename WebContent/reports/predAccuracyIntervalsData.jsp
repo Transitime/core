@@ -1,5 +1,5 @@
 <%@ page import="org.transitime.reports.PredictionAccuracyQuery.IntervalsType" %>
-<%@ page import="org.transitime.reports.PredictionAccuracyQuery" %>
+<%@ page import="org.transitime.reports.PredAccuracyIntervalQuery" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.text.ParseException" %>
 
@@ -59,7 +59,7 @@
 
     try {
 		// Perform the query.
-		PredictionAccuracyQuery query = new PredictionAccuracyQuery(
+		PredAccuracyIntervalQuery query = new PredAccuracyIntervalQuery(
 			dbType, dbHost, dbName, dbUserName, dbPassword);
 
 		// Convert results of query to a JSON string
