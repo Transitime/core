@@ -73,7 +73,8 @@ String currentDateStr = org.transitime.utils.Time.dateStr(new java.util.Date());
   <div class="param">
     <label for="beginTime">Begin Time:</label>
     <input id="beginTime" name="beginTime"
-    	title="Optional begin time of day to limit query to. Leave blank 
+    	title="Optional begin time of day to limit query to. Useful if
+    	    want to see result just for rush hour, for example. Leave blank 
     		if want data for entire day. 
     		<br/><br/>Format: hh:mm, as in '07:00' for 7AM." 
     	size="3"
@@ -83,7 +84,8 @@ String currentDateStr = org.transitime.utils.Time.dateStr(new java.util.Date());
   <div class="param">
     <label for="endTime">End Time:</label>
     <input id="endTime" name="endTime" 
-    	title="Optional end time of day to limit query to. Leave blank 
+    	title="Optional end time of day to limit query to. Useful if
+    	    want to see result just for rush hour, for example. Leave blank 
     		if want data for entire day. 
     		<br/><br/>Format: hh:mm, as in '09:00' for 9AM. 
     		Use '23:59' for midnight."
