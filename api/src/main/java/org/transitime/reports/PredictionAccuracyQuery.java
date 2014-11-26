@@ -57,8 +57,8 @@ public class PredictionAccuracyQuery {
     // Keyed on source (so can show data for multiple sources at
     // once in order to compare prediction accuracy. Contains a array,
     // with an element for each prediction bucket, containing an array
-    // of the predictions for that bucket. Each bucket is for a 
-    // certain prediction range, specified by predictionLengthBucketSize.
+    // of the prediction accuracy values for that bucket. Each bucket is for 
+    // a certain prediction range, specified by predictionLengthBucketSize.
     private final Map<String, List<List<Integer>>> map = 
 	    new HashMap<String, List<List<Integer>>>();
     
@@ -67,7 +67,7 @@ public class PredictionAccuracyQuery {
     // Can iterate over the enumerated type using:
     //  for (IntervalsType type : IntervalsType.values()) {}
     public enum IntervalsType {
-	FRACTION("FRACTION"),
+	PERCENTAGE("PERCENTAGE"),
 	STD_DEV("STD_DEV"),
 	BOTH("BOTH");
 	
@@ -97,7 +97,7 @@ public class PredictionAccuracyQuery {
 		logger.error("\"{}\" is not a valid IntervalsType", text);
 	    
 	    // Couldn't match so use default value
-	    return IntervalsType.FRACTION;
+	    return IntervalsType.PERCENTAGE;
 	}
 	
 	@Override
@@ -162,102 +162,6 @@ public class PredictionAccuracyQuery {
     }
     
     /**
-     * Performs the SQL query and puts the resulting data into the map.
-     * 
-     * @param beginTimeStr
-     * @param endTimeStr
-     * @param routeIds
-     * @param source
-     *            The source of the predictions. Can be null or "" (for all),
-     *            "Transitime", or "Other"
-     * @throws SQLException
-     */
-    private void doQuery(String beginTimeStr, String endTimeStr,
-	    String routeIds[], String source) throws SQLException {
-	PreparedStatement statement = null;
-	
-	// Determine route portion of SQL
-	String routeSql = "";
-	if (routeIds != null) {
-	    routeSql = " AND (routeId=?";
-	    for (int i=1; i<routeIds.length; ++i)
-		routeSql += " OR routeId=?"; 
-	    routeSql += ")";
-	}
-	
-	// Determine the source portion of the SQL. Default is to provide
-	// predictions for all sources
-	String sourceSql = "";
-	if (source != null && !source.isEmpty()) {
-	    if (source.equals("Transitime")) {
-		// Only "Transitime" predictions
-		sourceSql = " AND predictionSource='Transitime'";
-	    } else {
-		// Anything but "Transitime"
-		sourceSql = " AND predictionSource<>'Transitime'";
-	    }
-	}
-	
-	// Put the entire SQL query together
-	String sql = "SELECT "
-		+ "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
-		+ "     predictionAccuracyMsecs/1000 as predAccuracy, "
-		+ "     predictionSource as source "
-		+ " FROM predictionaccuracy "
-		+ "WHERE arrivaldeparturetime BETWEEN ? AND ? "
-		+ "  AND predictedTime-predictionReadTime < '00:15:00' "
-		// Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch. 
-		// TODO should clean this up by not having MBTA_seconds source at all
-		// in the prediction accuracy module for MBTA.
-		+ "  AND predictionSource <> 'MBTA_seconds' "
-		+ routeSql
-		+ sourceSql;
-	try {
-	    statement = connection.prepareStatement(sql);
-	    
-	    Timestamp beginTime = null;
-	    Timestamp endTime = null;
-	    try {
-		java.util.Date date = Time.parse(beginTimeStr);
-		beginTime = new Timestamp(date.getTime());
-		
-		date = Time.parse(endTimeStr);
-		endTime = new Timestamp(date.getTime());
-	    } catch (ParseException e) {
-		logger.error("Problem parsing time. ", e);
-	    }
-	     
-	    // Set the parameters for the query
-	    int i=1;
-	    statement.setTimestamp(i++, beginTime);
-	    statement.setTimestamp(i++, endTime);
-	    if (routeIds != null) {
-		for (String routeId : routeIds)
-		    statement.setString(i++, routeId);
-	    }
-	    
-	    // Actually execute the query
-	    ResultSet rs = statement.executeQuery();
-
-	    // Process results of query
-	    while (rs.next()) {
-		int predLength = rs.getInt("predLength");
-		int predAccuracy = rs.getInt("predAccuracy");
-		String sourceResult = rs.getString("source");
-		
-		addDataToMap(predLength, predAccuracy, sourceResult);
-		logger.info("predLength={} predAccuracy={}", 
-			predLength, predAccuracy);
-	    }
-	} catch (SQLException e) {
-	    throw e;
-	} finally {
-	    if (statement != null)
-		statement.close();
-	}	
-    }
-
-    /**
      * Goes through data array (must already be sorted!) and determines the
      * index of the array that corresponds to the minimum element. For example,
      * if the fraction is specified as 0.70 which means that want to know the
@@ -267,14 +171,16 @@ public class PredictionAccuracyQuery {
      * 
      * @param data
      *            Sorted list of data
-     * @param fraction
-     *            The fraction (0.0 - 1.0) of prediction accuracy data that
+     * @param percentage
+     *            The percentage (0.0 - 100.0%) of prediction accuracy data that
      *            should be between the min and the max
      * @return Value of the desired element or null if fraction not valid
      */
-    private Long getMin(List<Integer> data, double fraction) {
-	if (fraction == 0.0 || Double.isNaN(fraction))
+    private Long getMin(List<Integer> data, double percentage) {
+	if (percentage == 0.0 || Double.isNaN(percentage))
 	    return null;
+	
+	double fraction = percentage / 100.0;
 	
 	int index = (int) (data.size() * (1-fraction) / 2);
 	return (long) data.get(index);    
@@ -290,15 +196,17 @@ public class PredictionAccuracyQuery {
      * 
      * @param data
      *            Sorted list of data
-     * @param fraction
-     *            The fraction (0.0 - 1.0) of prediction accuracy data that
+     * @param percentage
+     *            The percentage (0.0 - 100.0%) of prediction accuracy data that
      *            should be between the min and the max
      * @return Value of the desired element or null if fraction not valid
      */
-    private Long getMax(List<Integer> data, double fraction) {
-	if (fraction == 0.0 || Double.isNaN(fraction))
+    private Long getMax(List<Integer> data, double percentage) {
+	if (percentage == 0.0 || Double.isNaN(percentage))
 	    return null;
 	
+	double fraction = percentage / 100.0;
+
 	int index = (int) (data.size() * (fraction + (1-fraction) / 2));
 	return (long) data.get(index);    
     }
@@ -308,10 +216,13 @@ public class PredictionAccuracyQuery {
      * using Google charts. The column definition describes the contents of each
      * column but doesn't actually contain the data itself.
      * 
+     * @param intervalsType
+     * @param intervalPercentage1
+     * @param intervalPercentage2
      * @return The column portion of the JSON string
      */
     private String getCols(IntervalsType intervalsType,
-	    double intervalFraction1, double intervalFraction2) {
+	    double intervalPercentage1, double intervalPercentage2) {
 	if (map.isEmpty())
 	    return null;
 	
@@ -333,9 +244,9 @@ public class PredictionAccuracyQuery {
 	    // The second interval. But only want to output it if there actually
 	    // should be a second interval. Otherwise if use nulls for the second
 	    // interval Google chart doesn't draw even the first interval.
-	    if (intervalsType != IntervalsType.FRACTION
-		    || (!Double.isNaN(intervalFraction2) 
-			    && intervalFraction2 != 0.0)) {
+	    if (intervalsType != IntervalsType.PERCENTAGE
+		    || (!Double.isNaN(intervalPercentage2) 
+			    && intervalPercentage2 != 0.0)) {
 		result.append(",\n    {\"type\": \"number\", \"p\":{\"role\":\"interval\"} }");
 		result.append(",\n    {\"type\": \"number\", \"p\":{\"role\":\"interval\"} }");
 	    }
@@ -355,16 +266,16 @@ public class PredictionAccuracyQuery {
      * @param intervalsType
      *            Specifies whether should output for intervals standard
      *            deviation info, percentage info, or both.
-     * @param intervalFraction1
+     * @param intervalPercentage1
      *            For when outputting intervals as fractions. Not used if
      *            intervalsType is STD_DEV.
-     * @param intervalFraction2
+     * @param intervalPercentage2
      *            For when outputting intervals as fractions. Only used if
      *            intervalsType is PERCENTAGE.
      * @return The row portion of the JSON string
      */
     private String getRows(IntervalsType intervalsType,
-	    double intervalFraction1, double intervalFraction2) {
+	    double intervalPercentage1, double intervalPercentage2) {
 	// If something is really wrong then complain
 	if (map.isEmpty()) {
 	    logger.error("Called PredictionAccuracyQuery.getRows() but there "
@@ -419,7 +330,7 @@ public class PredictionAccuracyQuery {
 		    // Determine the mean
 		    double dataForPredBucket[] = 
 			    Statistics.toDoubleArray(listForPredBucket);
-		    double mean = Statistics.getMean(dataForPredBucket);
+		    double mean = Statistics.mean(dataForPredBucket);
 		    
 		    // Determine the standard deviation and handle special case
 		    // of when there is only a single data point such that the
@@ -437,9 +348,9 @@ public class PredictionAccuracyQuery {
 		    // tooltip info looks lot better. 
 		    Long intervalMin;
 		    Long intervalMax;
-		    if (intervalsType == IntervalsType.FRACTION) {
-			intervalMin = getMin(listForPredBucket, intervalFraction1);
-			intervalMax = getMax(listForPredBucket, intervalFraction1);
+		    if (intervalsType == IntervalsType.PERCENTAGE) {
+			intervalMin = getMin(listForPredBucket, intervalPercentage1);
+			intervalMax = getMax(listForPredBucket, intervalPercentage1);
 		    } else {
 			// Use single standard deviation
 			intervalMin = Math.round(mean-stdDev);
@@ -450,15 +361,15 @@ public class PredictionAccuracyQuery {
 		    result.append(",{\"v\": " + intervalMax + "}");
 
 		    // Output the second interval values
-		    if (intervalsType == IntervalsType.FRACTION) {
+		    if (intervalsType == IntervalsType.PERCENTAGE) {
 			// Chart can't seem to handle null values for an interval
 			// so if intervalFraction2 is not set then don't put
 			// out this interval info.
-			if (intervalFraction2 == 0.0 || Double.isNaN(intervalFraction2))
+			if (intervalPercentage2 == 0.0 || Double.isNaN(intervalPercentage2))
 				continue;
 			
-			intervalMin = getMin(listForPredBucket, intervalFraction2);
-			intervalMax = getMax(listForPredBucket, intervalFraction2);			
+			intervalMin = getMin(listForPredBucket, intervalPercentage2);
+			intervalMax = getMax(listForPredBucket, intervalPercentage2);			
 		    } else if (intervalsType == IntervalsType.BOTH) {
 			// Use percentage but since also displaying results 
 			// for a single deviation use a fraction that 
@@ -489,36 +400,228 @@ public class PredictionAccuracyQuery {
     }
     
     /**
+     * Performs the SQL query and puts the resulting data into the map.
+     * 
+     * @param beginDateStr
+     *            Begin date for date range of data to use.
+     * @param endDateStr
+     *            End date for date range of data to use. Since want to include
+     *            data for the end date, 1 day is added to the end date for the
+     *            query.
+     * @param beginTimeStr
+     *            For specifying time of day between the begin and end date to
+     *            use data for. Can thereby specify a date range of a week but
+     *            then just look at data for particular time of day, such as 7am
+     *            to 9am, for those days. Set to null or empty string to use
+     *            data for entire day.
+     * @param endTimeStr
+     *            For specifying time of day between the begin and end date to
+     *            use data for. Can thereby specify a date range of a week but
+     *            then just look at data for particular time of day, such as 7am
+     *            to 9am, for those days. Set to null or empty string to use
+     *            data for entire day.
+     * @param routeIds
+     *            Array of IDs of routes to get data for
+     * @param predSource
+     *            The source of the predictions. Can be null or "" (for all),
+     *            "Transitime", or "Other"
+     * @param predType
+     *            Whether predictions are affected by wait stop. Can be "" (for
+     *            all), "AffectedByWaitStop", or "NotAffectedByWaitStop".
+     * @throws SQLException
+     * @throws ParseException 
+     */
+    private void doQuery(String beginDateStr, String endDateStr,
+	    String beginTimeStr, String endTimeStr, String routeIds[],
+	    String predSource, String predType) throws SQLException, ParseException {
+	// Make sure not trying to get data for too long of a time span since
+	// that could bog down the database.
+	long timespan = Time.parseDate(endDateStr).getTime() - 
+		Time.parseDate(beginDateStr).getTime() + 1*Time.MS_PER_DAY;
+	if (timespan > 31*Time.MS_PER_DAY) {
+	    throw new ParseException("Begin date to end date spans more than a month", 0);
+	}
+
+	// Determine the time of day portion of the SQL
+	String timeSql = "";
+	if ((beginTimeStr != null && !beginTimeStr.isEmpty())
+		|| (endTimeStr != null && !endTimeStr.isEmpty())) {
+	    timeSql = " AND arrivalDepartureTime::time BETWEEN ? AND ? ";
+	}
+	
+	// Determine route portion of SQL
+	String routeSql = "";
+	if (routeIds != null) {
+	    routeSql = " AND (routeId=?";
+	    for (int i=1; i<routeIds.length; ++i)
+		routeSql += " OR routeId=?"; 
+	    routeSql += ")";
+	}
+	
+	// Determine the source portion of the SQL. Default is to provide
+	// predictions for all sources
+	String sourceSql = "";
+	if (predSource != null && !predSource.isEmpty()) {
+	    if (predSource.equals("Transitime")) {
+		// Only "Transitime" predictions
+		sourceSql = " AND predictionSource='Transitime'";
+	    } else {
+		// Anything but "Transitime"
+		sourceSql = " AND predictionSource<>'Transitime'";
+	    }
+	}
+	
+	// Determine SQL for prediction type. Can be "" (for
+	// all), "AffectedByWaitStop", or "NotAffectedByWaitStop".
+	String predTypeSql = "";
+	if (predType != null && !predType.isEmpty()) {
+	    if (predSource.equals("AffectedByWaitStop")) {
+		// Only "AffectedByLayover" predictions
+		predTypeSql = " AND affectedByWaitStop = true ";
+	    } else {
+		// Only "NotAffectedByLayover" predictions
+		predTypeSql = " AND affectedByWaitStop = false ";
+	    }
+	}
+
+	// Put the entire SQL query together
+	String sql = "SELECT "
+		+ "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
+		+ "     predictionAccuracyMsecs/1000 as predAccuracy, "
+		+ "     predictionSource as source "
+		+ " FROM predictionAccuracy "
+		+ "WHERE arrivalDepartureTime BETWEEN ? AND ? "
+		+ timeSql
+		+ "  AND predictedTime-predictionReadTime < '00:15:00' "
+		// Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch. 
+		// TODO should clean this up by not having MBTA_seconds source at all
+		// in the prediction accuracy module for MBTA.
+		+ "  AND predictionSource <> 'MBTA_seconds' "
+		+ routeSql
+		+ sourceSql
+		+ predTypeSql;
+
+	PreparedStatement statement = null;	
+	try {
+	    statement = connection.prepareStatement(sql);
+	    
+	    // Determine the date parameters for the query
+	    Timestamp beginDate = null;
+	    Timestamp endDate = null;
+	    java.util.Date date = Time.parseDate(beginDateStr);
+	    beginDate = new Timestamp(date.getTime());
+
+	    date = Time.parseDate(endDateStr);
+	    endDate = new Timestamp(date.getTime() + Time.MS_PER_DAY);
+	    
+	    // Determine the time parameters for the query
+	    // If begin time not set but end time is then use midnight as begin time
+	    if ((beginTimeStr == null || beginTimeStr.isEmpty()) 
+		    && endTimeStr != null && !endTimeStr.isEmpty()) {
+		beginTimeStr = "00:00:00";
+	    }
+	    // If end time not set but begin time is then use midnight as end time
+	    if ((endTimeStr == null || endTimeStr.isEmpty()) 
+		    && beginTimeStr != null && !beginTimeStr.isEmpty()) {
+		endTimeStr = "23:59:59";
+	    }
+	    
+	    java.sql.Time beginTime = null;
+	    java.sql.Time endTime = null;
+	    if (beginTimeStr != null && !beginTimeStr.isEmpty()) {
+		beginTime = new java.sql.Time(Time.parseTimeOfDay(beginTimeStr) * Time.MS_PER_SEC);
+	    }
+	    if (endTimeStr != null && !endTimeStr.isEmpty()) {
+		endTime = new java.sql.Time(Time.parseTimeOfDay(endTimeStr) * Time.MS_PER_SEC);
+	    }
+	    
+	    // Set the parameters for the query
+	    int i=1;
+	    statement.setTimestamp(i++, beginDate);
+	    statement.setTimestamp(i++, endDate);
+	    if (beginTime != null)
+		statement.setTime(i++, beginTime);
+	    if (endTime != null)
+		statement.setTime(i++, endTime);
+	    if (routeIds != null) {
+		for (String routeId : routeIds)
+		    statement.setString(i++, routeId);
+	    }
+	    
+	    // Actually execute the query
+	    ResultSet rs = statement.executeQuery();
+
+	    // Process results of query
+	    while (rs.next()) {
+		int predLength = rs.getInt("predLength");
+		int predAccuracy = rs.getInt("predAccuracy");
+		String sourceResult = rs.getString("source");
+		
+		addDataToMap(predLength, predAccuracy, sourceResult);
+		logger.info("predLength={} predAccuracy={}", 
+			predLength, predAccuracy);
+	    }
+	} catch (SQLException e) {
+	    throw e;
+	} finally {
+	    if (statement != null)
+		statement.close();
+	}	
+    }
+
+    /**
      * Performs the query and returns the data in an JSON string so that it can
      * be used for a chart.
-     * 
+     *
+     * @param beginDateStr
+     *            Begin date for date range of data to use.
+     * @param endDateStr
+     *            End date for date range of data to use. Since want to include
+     *            data for the end date, 1 day is added to the end date for the
+     *            query.
      * @param beginTimeStr
+     *            For specifying time of day between the begin and end date to
+     *            use data for. Can thereby specify a date range of a week but
+     *            then just look at data for particular time of day, such as 7am
+     *            to 9am, for those days. Set to null or empty string to use
+     *            data for entire day.
      * @param endTimeStr
+     *            For specifying time of day between the begin and end date to
+     *            use data for. Can thereby specify a date range of a week but
+     *            then just look at data for particular time of day, such as 7am
+     *            to 9am, for those days. Set to null or empty string to use
+     *            data for entire day.
      * @param routeIds
      *            Specifies which routes to do the query for. Can be null for
      *            all routes or an array of route IDs.
-     * @param source
+     * @param predSource
      *            The source of the predictions. Can be null or "" (for all),
      *            "Transitime", or "Other"
+     * @param predType
+     *            Whether predictions are affected by wait stop. Can be "" (for
+     *            all), "AffectedByWaitStop", or "NotAffectedByWaitStop".
      * @param intervalsType
      *            Specifies whether should output for intervals standard
      *            deviation info, percentage info, or both.
-     * @param intervalFraction1
-     *            For when outputting intervals as fractions. Not used if
+     * @param intervalPercentage1
+     *            For when outputting intervals as percentages. Not used if
      *            intervalsType is STD_DEV.
-     * @param intervalFraction2
-     *            For when outputting intervals as fractions. Only used if
+     * @param intervalPercentage2
+     *            For when outputting intervals as percentages. Only used if
      *            intervalsType is PERCENTAGE.
      * @return the full JSON string contain both cols and rows info, or null if
      *         no data returned from query
      * @throws SQLException
+     * @throws ParseException 
      */
-    public String getJson(String beginTimeStr, String endTimeStr,
-	    String routeIds[], String source, IntervalsType intervalsType,
-	    double intervalFraction1, double intervalFraction2)
-	    throws SQLException {
+    public String getJson(String beginDateStr, String endDateStr,
+	    String beginTimeStr, String endTimeStr, String routeIds[],
+	    String predSource, String predType, IntervalsType intervalsType,
+	    double intervalPercentage1, double intervalPercentage2)
+	    throws SQLException, ParseException {
 	// Actually perform the query
-	doQuery(beginTimeStr, endTimeStr, routeIds, source);
+	doQuery(beginDateStr, endDateStr, beginTimeStr, endTimeStr, routeIds,
+		predSource, predType);
 	
 	// If query returned no data then simply return null so that
 	// can easily see that there is a problem
@@ -527,8 +630,8 @@ public class PredictionAccuracyQuery {
 	}
 	
 	return "{" 
-		+ getCols(intervalsType, intervalFraction1, intervalFraction2) + "," 
-		+ getRows(intervalsType, intervalFraction1, intervalFraction2) 
+		+ getCols(intervalsType, intervalPercentage1, intervalPercentage2) + "," 
+		+ getRows(intervalsType, intervalPercentage1, intervalPercentage2) 
 		+ "\n}";
     }
     
@@ -537,9 +640,11 @@ public class PredictionAccuracyQuery {
      * 
      * @param args
      */
-    public static void main(String args[]) {	
-	String beginTime = "11-03-2014";
-	String endTime = "11-06-2014";
+    public static void main(String args[]) {
+	String beginDate = "11-03-2014";
+	String endDate = "11-06-2014";
+	String beginTime = "00:00:00";
+	String endTime = "23:59:59";
 	String routeIds[] = {"CR-Providence"};
 	String source = "Transitime";
 	
@@ -552,10 +657,11 @@ public class PredictionAccuracyQuery {
 	try {
 	    PredictionAccuracyQuery query = new PredictionAccuracyQuery(dbType,
 		    dbHost, dbName, dbUserName, dbPassword);
-	    String jsonString = query.getJson(beginTime, endTime, routeIds,
-		    source, IntervalsType.BOTH, 0.68, 0.80);
+	    String jsonString = query.getJson(beginDate, endDate, beginTime,
+		    endTime, routeIds, source, null, IntervalsType.BOTH, 0.68,
+		    0.80);
 	    System.out.println(jsonString);
-	} catch (SQLException e) {
+	} catch (Exception e) {
 	    e.printStackTrace();
 	}
     }

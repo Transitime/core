@@ -10,7 +10,26 @@ if (agencyId == null || agencyId.isEmpty()) {
 %>
 <html>
 <head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
 
+  <!-- Load in JQuery UI javascript and css to set general look and feel -->
+  <script src="/api/jquery-ui/jquery-ui.js"></script>
+  <link rel="stylesheet" href="/api/jquery-ui/jquery-ui.css">
+
+  <script>
+  // Enable JQuery tooltips. In order to use html in tooltip need to 
+  // specify content function. Turning off 'focusin' events is important
+  // so that tooltip doesn't popup again if previous or next month
+  // buttons are clicked in a datepicker.
+  $(function() {
+	  $( document ).tooltip({
+          content: function () {
+              return $(this).prop('title');
+          }
+      }).off('focusin');
+	  });
+  </script>
+  
   <style>
     body {
     	font-family: sans-serif; 
@@ -37,6 +56,14 @@ if (agencyId == null || agencyId.isEmpty()) {
     a:link {
     	text-decoration: none;
     }
+    
+  .ui-tooltip {
+	/* Change background color of tooltips a bit and use a reasonable font size */
+  	background: #F7EEAB;
+	font-size: small;
+	padding: 4px;
+  }
+    
 }
   </style>
   
@@ -47,8 +74,16 @@ if (agencyId == null || agencyId.isEmpty()) {
 <div id="mainDiv">
 <div id="title">Transitime Reports</div>
 <ul>
-  <li><a href="predAccuracyScatterParams.jsp?a=<%= agencyId %>">Prediction Accuracy Scatter Plot</a></li>
-  <li><a href="predAccuracyIntervalsParams.jsp?a=<%= agencyId %>">Prediction Accuracy Interval Plot</a></li>
+  <li><a href="predAccuracyScatterParams.jsp?a=<%= agencyId %>" 
+    title="Shows each individual datapoint for prediction accuracy. Useful for 
+finding specific issues with predictions.">
+      Prediction Accuracy Scatter Plot</a></li>
+  <li><a href="predAccuracyIntervalsParams.jsp?a=<%= agencyId %>"
+    title="Shows average prediction accuracy for each prediction length. Also 
+hows upper and lower bounds. Allows one to see for a specified percentage 
+what the prediction accuracy is for predictions that lie between the 
+specified accuracy range.">
+      Prediction Accuracy Interval Plot</a></li>
 </ul>
 </div>
 </body>

@@ -1,35 +1,57 @@
 <%@ page import="org.transitime.reports.JsonDataFeed" %>
+<%@ page import="org.transitime.utils.Time" %>
+<%@ page import="java.text.ParseException" %>
 <%
 // Parameters from request
 String dbName = request.getParameter("a");
-String routeId =  request.getParameter("r");
 String beginDate = request.getParameter("beginDate");
-String beginTime = request.getParameter("beginTime");
 String endDate = request.getParameter("endDate");
+String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
+String routeId =  request.getParameter("r");
 String source = request.getParameter("source");
+String predictionType = request.getParameter("predictionType");
 
 boolean showTooltips = true;
 String showTooltipsStr = request.getParameter("tooltips");
 if (showTooltipsStr != null && showTooltipsStr.toLowerCase().equals("false"))
     showTooltips = false;
     
-if (dbName == null || beginDate == null || beginTime == null 
-	|| endDate == null || endTime == null) {
+if (dbName == null || beginDate == null || endDate == null) {
 		response.getWriter().write("For predAccuracyScatterData.jsp must "
 			+ "specify parameters 'a' (agency dbName), " 
-			+ "'beginDate', 'beginTime', 'endDate', and 'endTime'."); 
+			+ "'beginDate', and 'endDate'."); 
 		return;
 }
 
-String beginTimeStr = beginDate + " " + beginTime;
-String endTimeStr = endDate + " " + endTime;
+// Make sure not trying to get data for too long of a time span since
+// that could bog down the database.
+long timespan = Time.parseDate(endDate).getTime() - 
+	Time.parseDate(beginDate).getTime() + 1*Time.MS_PER_DAY;
+if (timespan > 31*Time.MS_PER_DAY) {
+    throw new ParseException("Begin date to end date spans more than a month", 0);
+}
 
 // Hardcoded parameters for database
 String dbType = "postgresql";// "mysql";
 String dbHost = "sfmta.c3zbap9ppyby.us-west-2.rds.amazonaws.com";// "localhost";
 String dbUserName = "transitime";// "root";
 String dbPassword = "transitime";
+
+// Determine the time portion of the SQL
+String timeSql = "";
+if (beginTime != null && !beginTime.isEmpty() 
+		&& endTime != null && !endTime.isEmpty()) {
+    timeSql = " AND arrivalDepartureTime::time BETWEEN '" 
+		+ beginTime + "' AND '" + endTime + "' ";
+}
+
+// Determine route portion of SQL. Default is to provide info for
+// all routes.
+String routeSql = "";
+if (routeId!=null && !routeId.isEmpty()) {
+    routeSql = "  AND routeId='" + routeId + "' ";
+}
 
 // Determine the source portion of the SQL. Default is to provide
 // predictions for all sources
@@ -41,6 +63,18 @@ if (source != null && !source.isEmpty()) {
     } else {
 		// Anything but "Transitime"
 		sourceSql = " AND predictionSource<>'Transitime'";
+    }
+}
+
+// Determine SQL for prediction type ()
+String predTypeSql = "";
+if (predictionType != null && !predictionType.isEmpty()) {
+    if (source.equals("AffectedByWaitStop")) {
+		// Only "AffectedByLayover" predictions
+		predTypeSql = " AND affectedByWaitStop = true ";
+    } else {
+		// Only "NotAffectedByLayover" predictions
+		predTypeSql = " AND affectedByWaitStop = false ";
     }
 }
 
@@ -65,11 +99,13 @@ String sql = "SELECT "
 	+ "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
 	+ "     predictionAccuracyMsecs/1000 as predAccuracy "
 	+ tooltipsSql
-	+ " FROM predictionaccuracy "
-	+ "WHERE arrivaldeparturetime BETWEEN '" + beginTimeStr + "' AND '" + endTimeStr + "' "
+	+ " FROM predictionAccuracy "
+	+ "WHERE arrivalDepartureTime BETWEEN '" + beginDate + "' AND '" + endDate + "' "
+	+ timeSql
 	+ "  AND predictedTime-predictionReadTime < '00:15:00' "
-	+ ((routeId!=null && !routeId.isEmpty())? "  AND routeId='" + routeId + "' " : "")
+	+ routeSql
 	+ sourceSql
+	+ predTypeSql
 	// Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch. 
 	// TODO should clean this up by not having MBTA_seconds source at all
 	// in the prediction accuracy module for MBTA.
@@ -81,10 +117,13 @@ String jsonString = JsonDataFeed.getJsonData(sql, dbType, dbHost, dbName,
 
 // If no data then return error status with an error message
 if (jsonString == null || jsonString.isEmpty()) {
-    String message = "No data for beginTime=" + beginTimeStr
-	    + " endTime=" + endTimeStr 
+    String message = "No data for beginDate=" + beginDate
+	    + " endDate=" + endDate 
+	    + " beginTime=" + beginTime
+	    + " endTime=" + endTime 
 	    + " routeId=" + routeId
-	    + " source=" + source;
+	    + " source=" + source
+	    + " predictionType=" + predictionType;
     response.sendError(416 /* Requested Range Not Satisfiable */, 
 	    message);
 	return;

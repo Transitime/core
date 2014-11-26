@@ -1,43 +1,55 @@
 <%@ page import="org.transitime.reports.PredictionAccuracyQuery.IntervalsType" %>
 <%@ page import="org.transitime.reports.PredictionAccuracyQuery" %>
 <%@ page import="java.util.Arrays" %>
+<%@ page import="java.text.ParseException" %>
 
 <%
     // Get params from the query string
-    String routeIds[] = request.getParameterValues("r");
     String dbName = request.getParameter("a");
+
+	String beginDate = request.getParameter("beginDate");
+    String endDate = request.getParameter("endDate");
+    String beginTime = request.getParameter("beginTime");
+    String endTime = request.getParameter("endTime");
+
+    String routeIds[] = request.getParameterValues("r");
     // source can be "" (for all), "Transitime", or "Other";
 	String source = request.getParameter("source");
+	
+	String predictionType = request.getParameter("predictionType");
 	
     IntervalsType intervalsType = IntervalsType
 		    .createIntervalsType(request.getParameter("intervalsType"));
 	
-    double intervalFraction1 = 0.68; // Default value
-    String intervalFraction1Str = request.getParameter("intervalFraction1");
-    if (intervalFraction1Str != null)
-		intervalFraction1 = Double.parseDouble(intervalFraction1Str);
-    
-    double intervalFraction2 = Double.NaN; // Default value
-    String intervalFraction2Str = request.getParameter("intervalFraction2");
-    if (intervalFraction2Str != null)
-		intervalFraction2 = Double.parseDouble(intervalFraction2Str);
+    double intervalPercentage1 = 0.68; // Default value
+	String intervalPercentage1Str = request.getParameter("intervalPercentage1");
+    try {
+    	if (intervalPercentage1Str != null && !intervalPercentage1Str.isEmpty())
+			intervalPercentage1 = Double.parseDouble(intervalPercentage1Str);
+    } catch (NumberFormatException e) {
+	    response.sendError(416 /* Requested Range Not Satisfiable */, 
+		    "Could not parse Interval Percentage 1 of " + intervalPercentage1Str);
+	    return;	    
+    }
 
-    String beginDate = request.getParameter("beginDate");
-    String beginTime = request.getParameter("beginTime");
-    String endDate = request.getParameter("endDate");
-    String endTime = request.getParameter("endTime");
+    double intervalPercentage2 = Double.NaN; // Default value
+	String intervalPercentage2Str = request.getParameter("intervalPercentage2");
+    try {
+    	if (intervalPercentage2Str != null && !intervalPercentage2Str.isEmpty())
+			intervalPercentage2 = Double.parseDouble(intervalPercentage2Str);
+    } catch (NumberFormatException e) {
+	    response.sendError(416 /* Requested Range Not Satisfiable */, 
+		    "Could not parse Interval Percentage 2 of " + intervalPercentage2Str);
+	    return;	    
+    }
 
-    if (dbName == null || beginDate == null || beginTime == null 
-	    || endDate == null || endTime == null) {
+    if (dbName == null || beginDate == null || endDate == null ) {
 		response.getWriter().write("For predAccuracyIntervalsData.jsp must "
-			+ "specify parameters 'a' (agency dbName), 'beginDate', 'beginTime', "
-			+ "'endDate', and 'endTime'."); 
+			+ "specify parameters 'a' (agency dbName), 'beginDate', "
+			+ "and 'endDate'."); 
 		return;
     }
 	
-    String beginTimeStr = beginDate + " " + beginTime;
-    String endTimeStr = endDate + " " + endTime;
-
     // FIXME These db params are hardcoded for now but they need
     // to come from database
     String dbType = "postgresql";// "mysql";
@@ -51,22 +63,27 @@
 			dbType, dbHost, dbName, dbUserName, dbPassword);
 
 		// Convert results of query to a JSON string
-		String jsonString = query.getJson(beginTimeStr, endTimeStr, routeIds,
-			source, intervalsType, intervalFraction1,
-			intervalFraction2);
+		String jsonString = query
+			.getJson(beginDate, endDate, beginTime, endTime,
+				routeIds, source, predictionType,
+				intervalsType, intervalPercentage1,
+				intervalPercentage2);
 
 		// If no data then return error status with an error message
 		if (jsonString == null || jsonString.isEmpty()) {
-		    String message = "No data for beginTime=" + beginTimeStr
-			    + " endTime=" + endTimeStr 
-			    + " routeIds=" + Arrays.asList(routeIds)
+		    String message = "No data for beginDate=" + beginDate 
+			    + " endDate=" + endDate 
+			    + " beginTime=" + beginTime
+			    + " endTime=" + endTime 
+			    + " routeIds=" + Arrays.asList(routeIds) 
 			    + " source=" + source
+			    + " predictionType=" + predictionType
 			    + " intervalsType=" + intervalsType;
-		    response.sendError(416 /* Requested Range Not Satisfiable */, 
-			    message);
-			return;
+		    response.sendError(
+			    416 /* Requested Range Not Satisfiable */, message);
+		    return;
 		}
-		
+
 		// Respond with the JSON string
 		response.getWriter().write(jsonString);
     } catch (java.sql.SQLException e) {

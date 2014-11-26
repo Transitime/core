@@ -27,11 +27,28 @@ $.getJSON(urlPrefix + "/command/routes",
  			$("#route").select2({
  				placeholder: "All Routes", 				
  				data : selectorData});
+	 		
+	 		// Tooltips for a select2 widget don't automatically go away when 
+	 		// item selected so remove the tooltip manually. This is a really 
+	 		// complicated interaction between select2 and jquery UI tooltips.
+	 		// First need to set the tooltip title content but getting the
+	 		// originally configured title for the element.
+ 			var modifiedRouteElement = $( "#s2id_route" );
+	 		var configuredTitle = modifiedRouteElement.attr("title");
+	 		$( "#s2id_route" ).tooltip({ content: configuredTitle });
+ 			
+	 		// Now that the title has set need to manually remove the tooltip
+	 		// when a select2 item is selected. Sheesh!
+ 		 	$("#route").on("change", function(e) { $("#s2id_route").tooltip("close") }); 		 	
  	});
+ 	
 </script>
 
     <div id="routesDiv"  class="param">
       <label for="route">Route:</label>
-      <input id="route" name="r" style="width: 300px" />
+      <input id="route" name="r" style="width: 300px" 
+      	title="Select which route you want data for. Note: selecting all routes
+      		   indeed reads in data for all routes which means it could be 
+      		   somewhat slow."/>
     </div>
     
