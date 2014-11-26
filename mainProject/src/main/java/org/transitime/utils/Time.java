@@ -39,9 +39,17 @@ import org.transitime.gtfs.DbConfig;
  * 
  */
 public class Time {
-	// Some handy constants for dealing with time
-	public static final long MS_PER_SEC = 1000;
-	public static final long MS_PER_MIN = 60 * MS_PER_SEC;
+	// Some handy constants for dealing with time.
+	// MS_PER_SEC and MS_PER_MIN are declared as integers since they after
+	// often used where just interested in a few minutes, which easily
+	// fits within an int. By being an int instead of a long don't need
+	// to cast to an int when using these values for things like config
+	// parameters which are typically a IntegerConfigValue. But for the
+	// big values, such as MS_PER_HOUR and longer then risk wrapping
+	// around if just using an int. For example a month of 31 days *
+	// MS_PER_DAY would wrap if MS_PER_DAY was an integer instead of a long.
+	public static final int MS_PER_SEC = 1000;
+	public static final int MS_PER_MIN = 60 * MS_PER_SEC;
 	public static final long MS_PER_HOUR = 60 * MS_PER_MIN;
 	public static final long MS_PER_DAY = 24 * MS_PER_HOUR;
 	public static final long MS_PER_WEEK = 7 * MS_PER_DAY;
