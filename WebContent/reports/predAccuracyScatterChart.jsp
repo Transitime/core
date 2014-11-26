@@ -5,16 +5,16 @@ String agencyId = request.getParameter("a");
 String routeId = request.getParameter("r");
 String routeTitle = (routeId != null && !routeId.isEmpty()) ? 
 	" for " + routeId : "";
-String sourceParam = request.getParameter("source");
-String source = (sourceParam != null && !sourceParam.isEmpty()) ? 
-	" for " + sourceParam + " predictions" : ""; 
+String source = request.getParameter("source");
+String sourceForTitle = (source != null && !source.isEmpty()) ? 
+	" for " + source + " predictions" : ""; 
 String beginDate = request.getParameter("beginDate");
 String beginTime = request.getParameter("beginTime");
 String endDate = request.getParameter("endDate");
 String endTime = request.getParameter("endTime");
 
 String chartTitle = "Prediction Accuracy for " + agencyId   
-	+ routeTitle + source 
+	+ routeTitle + sourceForTitle 
 	+ " for " + beginDate + " " + beginTime + " to " + endDate + " " + endTime;
 %>
 <html>
@@ -120,7 +120,24 @@ String chartTitle = "Prediction Accuracy for " + agencyId
         	          {v:840, f:'14'},
         	          {v:900, f:'15'}]
                },
-          vAxis: {title: 'Absolute Prediction Accuracy (secs)', minValue: 0, maxValue: 500},
+          vAxis: {title: 'Prediction Accuracy (secs) (postive means vehicle later than predicted)', 
+          	  // Try to show accuracy on a consistent vertical axis and 
+          	  // divide into minutes. This unfortunately won't work well
+          	  // if values are greater than 360 because then chart will
+          	  // autoscale but will still be using 11 gridlines
+        	  minValue: -420, 
+        	  maxValue: 420,
+          	gridlines: {count: 15},
+   	        // Nice to show a faint line for every 30 seconds as well
+        	minorGridlines: {count: 1}
+          },
+          // Usually will first be displaying Transitime predictions and 
+          // those will get the first color. If both Transitime and Tther
+          // predictions shown then the Other ones will get the second color.
+          // But want color for the Other predictions to be consistent 
+          // whether only Other predictions or both Other and Transitime ones
+          // are shown. Therefore do something fancy here for consistency.
+          series: [{'color': '<%= (source==null || !source.equals("Other")) ? "blue" : "red" %>'},{'color': 'red'}],
           legend: 'none',
           // Use small points since have lots of them
           pointSize: 2,
