@@ -1,5 +1,5 @@
-<%@ page import="org.transitime.reports.PredictionAccuracyQuery.IntervalsType" %>
-<%@ page import="org.transitime.reports.PredAccuracyIntervalQuery" %>
+<%@ page import="org.transitime.reports.PredAccuracyRangeQuery" %>
+<%@ page import="org.transitime.utils.Time" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.text.ParseException" %>
 
@@ -18,33 +18,32 @@
 	
 	String predictionType = request.getParameter("predictionType");
 	
-    IntervalsType intervalsType = IntervalsType
-		    .createIntervalsType(request.getParameter("intervalsType"));
-	
-    double intervalPercentage1 = 0.68; // Default value
-	String intervalPercentage1Str = request.getParameter("intervalPercentage1");
+    int allowableEarlySec = (int) -1.5 * Time.SEC_PER_MIN; // Default value
+	String allowableEarlyStr = request.getParameter("allowableEarly");
     try {
-    	if (intervalPercentage1Str != null && !intervalPercentage1Str.isEmpty())
-			intervalPercentage1 = Double.parseDouble(intervalPercentage1Str);
+    	if (allowableEarlyStr != null && !allowableEarlyStr.isEmpty())
+    	allowableEarlySec = 
+    		(int) Double.parseDouble(allowableEarlyStr) * Time.SEC_PER_MIN;
     } catch (NumberFormatException e) {
 	    response.sendError(416 /* Requested Range Not Satisfiable */, 
-		    "Could not parse Interval Percentage 1 of " + intervalPercentage1Str);
+		    "Could not parse Allowable Early value of " + allowableEarlyStr);
 	    return;	    
     }
 
-    double intervalPercentage2 = Double.NaN; // Default value
-	String intervalPercentage2Str = request.getParameter("intervalPercentage2");
+    int allowableLateSec = (int) 4.0 * Time.SEC_PER_MIN; // Default value
+	String allowableLateStr = request.getParameter("allowableLate");
     try {
-    	if (intervalPercentage2Str != null && !intervalPercentage2Str.isEmpty())
-			intervalPercentage2 = Double.parseDouble(intervalPercentage2Str);
+    	if (allowableLateStr != null && !allowableLateStr.isEmpty())
+    	allowableLateSec = 
+    		(int) Double.parseDouble(allowableLateStr) * Time.SEC_PER_MIN;
     } catch (NumberFormatException e) {
 	    response.sendError(416 /* Requested Range Not Satisfiable */, 
-		    "Could not parse Interval Percentage 2 of " + intervalPercentage2Str);
+		    "Could not parse Allowable Late value of " + allowableLateStr);
 	    return;	    
     }
 
     if (dbName == null || beginDate == null || endDate == null ) {
-		response.getWriter().write("For predAccuracyIntervalsData.jsp must "
+		response.getWriter().write("For predAccuracyRangeData.jsp must "
 			+ "specify parameters 'a' (agency dbName), 'beginDate', "
 			+ "and 'endDate'."); 
 		return;
@@ -59,15 +58,14 @@
 
     try {
 		// Perform the query.
-		PredAccuracyIntervalQuery query = new PredAccuracyIntervalQuery(
+		PredAccuracyRangeQuery query = new PredAccuracyRangeQuery(
 			dbType, dbHost, dbName, dbUserName, dbPassword);
 
 		// Convert results of query to a JSON string
 		String jsonString = query
 			.getJson(beginDate, endDate, beginTime, endTime,
 				routeIds, source, predictionType,
-				intervalsType, intervalPercentage1,
-				intervalPercentage2);
+				allowableEarlySec, allowableLateSec);
 
 		// If no data then return error status with an error message
 		if (jsonString == null || jsonString.isEmpty()) {
@@ -77,8 +75,8 @@
 			    + " endTime=" + endTime 
 			    + " routeIds=" + Arrays.asList(routeIds) 
 			    + " source=" + source
-			    + " predictionType=" + predictionType
-			    + " intervalsType=" + intervalsType;
+			    + " allowableEarlyMsec=" + allowableEarlySec
+			    + " allowableLateMsec=" + allowableLateSec;
 		    response.sendError(
 			    416 /* Requested Range Not Satisfiable */, message);
 		    return;

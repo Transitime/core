@@ -81,26 +81,33 @@ if (predictionType != null && !predictionType.isEmpty()) {
 String tooltipsSql = "";
 if (showTooltips)
     tooltipsSql = 	
-    	", format(E'predAccuracy= %s prediction=%s\\\\n"
-		+         "stop=%s routeId=%s\\\\n"
+    	", format(E'predAccuracy= %s\\\\n"
+    	+         "prediction=%s\\\\n"
+		+         "stopId=%s\\\\n"
+		+         "routeId=%s\\\\n"
 		+         "tripId=%s\\\\n"
 		+         "arrDepTime=%s\\\\n"
-		+         "predTime=%s predReadTime=%s\\\\n"
-		+         "vehicleId=%s source=%s', "
+		+         "predTime=%s\\\\n"
+		+         "predReadTime=%s\\\\n"
+		+         "vehicleId=%s\\\\n"
+		+         "source=%s\\\\n"
+		+         "affectedByLayover=%s', "
 		+ "   CAST(predictionAccuracyMsecs || ' msec' AS INTERVAL), predictedTime-predictionReadTime,"
 		+ "   stopId, routeId, tripId, "
 		+ "   to_char(arrivalDepartureTime, 'HH24:MI:SS.MS MM/DD/YYYY'),"
 		+ "   to_char(predictedTime, 'HH24:MI:SS.MS'),"
 		+ "   to_char(predictionReadTime, 'HH24:MI:SS.MS'),"
 		+ "   vehicleId,"
-		+ "   predictionSource) AS tooltip ";
+		+ "   predictionSource," 
+		+ "   CASE WHEN affectedbywaitstop THEN 'True' ELSE 'False' END) AS tooltip ";
     
 String sql = "SELECT "
 	+ "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
 	+ "     predictionAccuracyMsecs/1000 as predAccuracy "
 	+ tooltipsSql
 	+ " FROM predictionAccuracy "
-	+ "WHERE arrivalDepartureTime BETWEEN '" + beginDate + "' AND '" + endDate + "' "
+	+ "WHERE arrivalDepartureTime BETWEEN '" + beginDate 
+	+     "' AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' "
 	+ timeSql
 	+ "  AND predictedTime-predictionReadTime < '00:15:00' "
 	+ routeSql
