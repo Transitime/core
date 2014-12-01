@@ -53,8 +53,17 @@ if (agencyId == null || agencyId.isEmpty()) {
     	width: 300px; margin-left: auto; margin-right: auto;
     }
     
+    /* Make links look better. No underlining, keep colors consistent,
+       but bold when hovered over. */
     a:link {
     	text-decoration: none;
+    	color: #0000FF;
+    }
+    a:visited {
+    	color: #0000FF;
+    }
+    a:hover {
+    	font-weight: bold;
     }
     
   .ui-tooltip {
@@ -74,16 +83,20 @@ if (agencyId == null || agencyId.isEmpty()) {
 <div id="mainDiv">
 <div id="title">Transitime Reports</div>
 <ul>
-  <li><a href="predAccuracyScatterParams.jsp?a=<%= agencyId %>" 
-    title="Shows each individual datapoint for prediction accuracy. Useful for 
-finding specific issues with predictions.">
-      Prediction Accuracy Scatter Plot</a></li>
+  <li><a href="predAccuracyRangeParams.jsp?a=<%= agencyId %>"
+    title="Shows percentage of predictions that were accurate
+    to within the specified limits.">
+      Prediction Accuracy Range Chart</a></li>
   <li><a href="predAccuracyIntervalsParams.jsp?a=<%= agencyId %>"
     title="Shows average prediction accuracy for each prediction length. Also 
 hows upper and lower bounds. Allows one to see for a specified percentage 
 what the prediction accuracy is for predictions that lie between the 
 specified accuracy range.">
-      Prediction Accuracy Interval Plot</a></li>
+      Prediction Accuracy Interval Chart</a></li>
+  <li><a href="predAccuracyScatterParams.jsp?a=<%= agencyId %>" 
+    title="Shows each individual datapoint for prediction accuracy. Useful for 
+finding specific issues with predictions.">
+      Prediction Accuracy Scatter Plot</a></li>
 </ul>
 </div>
 </body>

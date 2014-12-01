@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.GenericQuery;
 import org.transitime.db.GenericQuery.GenericResult;
+import org.transitime.reports.ChartJsonBuilder.RowBuilder;
 import org.transitime.utils.IntervalTimer;
 
 /**
@@ -40,88 +41,63 @@ public class JsonDataFeed {
     /********************** Member Functions **************************/
 
     /**
-     * Returns the JSON columns definition for a Google chart.
+     * Adds the JSON columns definition for a Google chart.
      * 
+     * @param builder
      * @param results
-     * @return JSON string
      */
-    private static String getCols(List<GenericResult> results) {
-	if (results == null || results.isEmpty())
-	    return null;
-	
-	// Start column definition
-	StringBuilder result = new StringBuilder("\n  \"cols\": [");
+    private static void addCols(ChartJsonBuilder builder,
+	    List<GenericResult> results) {
+	if (results == null || results.isEmpty()) {
+	    logger.error("Called JsonDataFeed.getCols() but results is empty");
+	    return;
+	}
 	
 	// Add required type:"number" for each column of data
 	GenericResult firstResult = results.get(0);
 	for (int i=0; i<firstResult.numbers.size(); ++i) {
-	    result.append("\n    {\"type\": \"number\"}");
-	    if (i != firstResult.numbers.size()-1 || firstResult.text != null)
-		result.append(",");
+	    builder.addNumberColumn();
 	}
 	
 	// If there is text associated with the GenericResult then add tooltip 
 	// column
 	if (firstResult.text != null) {
-	    result.append("\n    {\"type\":\"string\", \"p\":{\"role\":\"tooltip\"" + /*, \"html\": true*/ "} }");
+	    builder.addTooltipColumn();
 	}
-	
-	// Finish up column definition
-	result.append("\n  ]");
-	
-	// Return column definition
-	return result.toString();
     }
     
     /**
-     * Returns the JSON rows definition for a Google chart.
+     * Adds the JSON rows definition for a Google chart.
      * 
+     * @param builder
      * @param results
-     * @return JSON string
      */
-    private static String getRows(List<GenericResult> results) {
-	if (results == null || results.isEmpty())
-	    return null;
-	
+    private static void addRows(ChartJsonBuilder builder,
+	    List<GenericResult> results) {
+	if (results == null || results.isEmpty()) {
+	    logger.error("Called JsonDataFeed.getRows() but results is empty");
+	    return;
+    	}
+    
 	IntervalTimer timer = new IntervalTimer();
 	
-	StringBuilder result = new StringBuilder(100000);
-	result.append("\n  \"rows\": [");
-
-	boolean firstRow = true;
 	for (GenericResult row : results) {
-	    if (!firstRow)
-		result.append(",");
-	    firstRow = false;
-
-	    // Start the row
-	    result.append("\n    {\"c\": [");
+	    // Start building up the row
+	    RowBuilder rowBuilder = builder.newRow();
 	    
 	    // Add each cell for the row
-	    boolean firstNumber = true;
 	    for (Number number : row.numbers) {
-		if (!firstNumber)
-		    result.append(",");
-		firstNumber = false;
-		
-		result.append("{\"v\": " + number + "}");
+		rowBuilder.addRowElement(number);
 	    }
 	    
 	    // Add tooltip text if there is any
 	    if (row.text != null) {
-		result.append(", {\"v\":\"" + row.text + "\"}");
+		rowBuilder.addRowElement(row.text);
 	    }
-	    
-	    // Finish up the row
-	    result.append("]}");
 	}
 	  
-	logger.info("JsonDataFeed query took {}msec rows={}", 
+	logger.debug("JsonDataFeed query took {}msec rows={}", 
 		timer.elapsedMsec(), results);
-	
-	// Finish up rows section
-	result.append(" \n ]");
-	return result.toString();
     }
     
     /**
@@ -135,7 +111,12 @@ public class JsonDataFeed {
 	if (results == null || results.isEmpty())
 	    return null;
 	
-	return "{" + getCols(results) + "," + getRows(results) + "\n}";
+	ChartJsonBuilder builder = new ChartJsonBuilder();
+	addCols(builder, results);
+	addRows(builder, results);
+	
+	String jsonString = builder.getJson();
+	return jsonString;
     }
     
     /**
@@ -194,12 +175,6 @@ public class JsonDataFeed {
 		    dbUserName, dbPassword);
 
 	    List<GenericResult> results = query.doQuery(sql);
-
-//	    // Output results
-//	    for (GenericResult result : results) {
-//		System.out.println("numbers=" + result.numbers + " text="
-//			+ result.text);
-//	    }
 	    
 	    String resultsStr = getJsonData(results);
 	    System.out.println("Results:\n" + resultsStr);

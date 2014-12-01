@@ -18,15 +18,18 @@
 package org.transitime.reports;
 
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.reports.ChartJsonBuilder.RowBuilder;
 import org.transitime.statistics.Statistics;
 
 /**
- *
+ * For doing SQL query and generating JSON data for a prediction accuracy
+ * intervals chart. 
  *
  * @author SkiBu Smith
  *
@@ -110,35 +113,31 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
     }
     
     /**
-     * Gets the column definition in JSON string format so that chart the data
+     * Adds the column definition in JSON string format so that chart the data
      * using Google charts. The column definition describes the contents of each
      * column but doesn't actually contain the data itself.
      * 
+     * @param builder
      * @param intervalsType
      * @param intervalPercentage1
      * @param intervalPercentage2
-     * @return The column portion of the JSON string
      */
-    @Override
-    protected String getCols(IntervalsType intervalsType,
+    private void addCols(ChartJsonBuilder builder, IntervalsType intervalsType,
 	    double intervalPercentage1, double intervalPercentage2) {
-	if (map.isEmpty())
-	    return null;
+	if (map.isEmpty()) {
+	    logger.error("Called PredAccuracyIntervalQuery.getCols() but there "
+		    	+ "is no data in the map.");
+	    return;
+	}
 	
-	// Start column definition
-	StringBuilder result = new StringBuilder();
-	result.append("\n  \"cols\": [");
-
-	// Column for x axis, which is prediction length bucket
-	result.append("\n    {\"type\": \"number\"}");
-
+	builder.addNumberColumn();
 	for (String source : map.keySet()) {
 	    // The average result for the source
-	    result.append(",\n    {\"type\": \"number\", \"label\":\"" + source + "\"}");
+	    builder.addNumberColumn(source);
 	    
 	    // The first interval
-	    result.append(",\n    {\"type\": \"number\", \"p\":{\"role\":\"interval\"} }");
-	    result.append(",\n    {\"type\": \"number\", \"p\":{\"role\":\"interval\"} }");
+	    builder.addIntervalColumn();
+	    builder.addIntervalColumn();
 
 	    // The second interval. But only want to output it if there actually
 	    // should be a second interval. Otherwise if use nulls for the second
@@ -146,22 +145,17 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 	    if (intervalsType != IntervalsType.PERCENTAGE
 		    || (!Double.isNaN(intervalPercentage2) 
 			    && intervalPercentage2 != 0.0)) {
-		result.append(",\n    {\"type\": \"number\", \"p\":{\"role\":\"interval\"} }");
-		result.append(",\n    {\"type\": \"number\", \"p\":{\"role\":\"interval\"} }");
+		builder.addIntervalColumn();
+		builder.addIntervalColumn();
 	    }
 	}
-	
-	// Finish up column definition
-	result.append("\n  ]");
-	
-	// Return column definition
-	return result.toString();
     }
     
     /**
-     * Gets the row definition in JSON string format so that chart the data
+     * Adds the row definition in JSON string format so that chart the data
      * using Google charts. The row definition contains the actual data.
      * 
+     * @param builder
      * @param intervalsType
      *            Specifies whether should output for intervals standard
      *            deviation info, percentage info, or both.
@@ -171,35 +165,26 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
      * @param intervalPercentage2
      *            For when outputting intervals as fractions. Only used if
      *            intervalsType is PERCENTAGE.
-     * @return The row portion of the JSON string
      */
-    @Override
-    protected String getRows(IntervalsType intervalsType,
+    private void addRows(ChartJsonBuilder builder, IntervalsType intervalsType,
 	    double intervalPercentage1, double intervalPercentage2) {
 	// If something is really wrong then complain
 	if (map.isEmpty()) {
-	    logger.error("Called PredictionAccuracyQuery.getRows() but there "
+	    logger.error("Called PredAccuracyIntervalQuery.getRows() but there "
 	    	+ "is no data in the map.");
-	    return null;
+	    return;
 	}
 	
-	StringBuilder result = new StringBuilder();
-	result.append("\n  \"rows\": [");
-
 	// For each prediction length bucket...
-	boolean firstRow = true;
 	for (int predBucketIdx=0; 
 		predBucketIdx<=MAX_PRED_LENGTH/PREDICTION_LENGTH_BUCKET_SIZE; 
-		++predBucketIdx) {
-	    // Deal with comma for end of previous row
-	    if (!firstRow)
-		result.append(",");
-	    firstRow = false;
-	    
-	    double horizontalValue = 
+		++predBucketIdx) {	    
+	    // Start building up the row
+	    RowBuilder rowBuilder = builder.newRow();
+	    double predBucketSecs = 
 		    predBucketIdx * PREDICTION_LENGTH_BUCKET_SIZE/60.0;
-	    result.append("\n    {\"c\": [{\"v\": " + horizontalValue + "}");
-	    
+	    rowBuilder.addRowElement(predBucketSecs);
+
 	    // Add prediction mean and intervals data for each source
 	    for (String source : map.keySet()) {
 		// Determine mean and standard deviation for this source
@@ -215,7 +200,7 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 
 		// Log some info for debugging
 		logger.info("For source {} for prediction bucket minute {} "
-			+ "sorted datapoints={}", source, horizontalValue,
+			+ "sorted datapoints={}", source, predBucketSecs,
 			listForPredBucket);
 		    
 		// If there is enough data then handle stats for this prediction
@@ -241,7 +226,7 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 			stdDev = 0.0;
 		    
 		    // Output the mean value
-		    result.append(",{\"v\": " + Math.round(mean) + "}");
+		    rowBuilder.addRowElement(Math.round(mean));
 		    
 		    // Output the first interval values. Using int instead of 
 		    // double because that is enough precision and then the 
@@ -257,8 +242,8 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 		    	intervalMax = Math.round(mean+stdDev);
 		    }
 		    
-		    result.append(",{\"v\": " + intervalMin + "}");
-		    result.append(",{\"v\": " + intervalMax + "}");
+		    rowBuilder.addRowElement(intervalMin);
+		    rowBuilder.addRowElement(intervalMax);
 
 		    // Output the second interval values
 		    if (intervalsType == IntervalsType.PERCENTAGE) {
@@ -282,21 +267,87 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 			intervalMin = Math.round(mean - 1.5*stdDev);
 		    	intervalMax = Math.round(mean + 1.5*stdDev);
 		    }
-		    result.append(",{\"v\": " + intervalMin + "}");
-		    result.append(",{\"v\": " + intervalMax + "}");
+		    rowBuilder.addRowElement(intervalMin);
+		    rowBuilder.addRowElement(intervalMax);
 		} else {
 		    // Handle situation when there isn't enough data in the 
 		    // prediction bucket.
-		    result.append(",{\"v\": null},{\"v\": null},{\"v\": null}");
+		    rowBuilder.addRowNullElement();
+		    rowBuilder.addRowNullElement();
+		    rowBuilder.addRowNullElement();
 		}
 	    } // End of for each source
-	    
-	    // Finish up row
-	    result.append("]}");
 	}
-	// Finish up rows section
-	result.append(" \n ]");
-	return result.toString();
+    }
+    
+    /**
+     * Performs the query and returns the data in an JSON string so that it can
+     * be used for a chart.
+     *
+     * @param beginDateStr
+     *            Begin date for date range of data to use.
+     * @param endDateStr
+     *            End date for date range of data to use. Since want to include
+     *            data for the end date, 1 day is added to the end date for the
+     *            query.
+     * @param beginTimeStr
+     *            For specifying time of day between the begin and end date to
+     *            use data for. Can thereby specify a date range of a week but
+     *            then just look at data for particular time of day, such as 7am
+     *            to 9am, for those days. Set to null or empty string to use
+     *            data for entire day.
+     * @param endTimeStr
+     *            For specifying time of day between the begin and end date to
+     *            use data for. Can thereby specify a date range of a week but
+     *            then just look at data for particular time of day, such as 7am
+     *            to 9am, for those days. Set to null or empty string to use
+     *            data for entire day.
+     * @param routeIds
+     *            Specifies which routes to do the query for. Can be null for
+     *            all routes or an array of route IDs.
+     * @param predSource
+     *            The source of the predictions. Can be null or "" (for all),
+     *            "Transitime", or "Other"
+     * @param predType
+     *            Whether predictions are affected by wait stop. Can be "" (for
+     *            all), "AffectedByWaitStop", or "NotAffectedByWaitStop".
+     * @param intervalsType
+     *            Specifies whether should output for intervals standard
+     *            deviation info, percentage info, or both.
+     * @param intervalPercentage1
+     *            For when outputting intervals as percentages. Not used if
+     *            intervalsType is STD_DEV.
+     * @param intervalPercentage2
+     *            For when outputting intervals as percentages. Only used if
+     *            intervalsType is PERCENTAGE.
+     * @return the full JSON string contain both columns and rows info, or null
+     *         if no data returned from query
+     * @throws SQLException
+     * @throws ParseException
+     */
+    public String getJson(String beginDateStr, String endDateStr,
+	    String beginTimeStr, String endTimeStr, String routeIds[],
+	    String predSource, String predType, IntervalsType intervalsType,
+	    double intervalPercentage1, double intervalPercentage2)
+	    throws SQLException, ParseException {
+	// Actually perform the query
+	doQuery(beginDateStr, endDateStr, beginTimeStr, endTimeStr, routeIds,
+		predSource, predType);
+	
+	// If query returned no data then simply return null so that
+	// can easily see that there is a problem
+	if (map.isEmpty()) {
+	    return null;
+	}
+	
+	ChartJsonBuilder builder = new ChartJsonBuilder();
+	addCols(builder, intervalsType, intervalPercentage1,
+		intervalPercentage2);
+	addRows(builder, intervalsType, intervalPercentage1,
+		intervalPercentage2);
+
+	String jsonString = builder.getJson();
+	return jsonString;
     }
     
     /**
@@ -307,8 +358,8 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
     public static void main(String args[]) {
 	String beginDate = "11-03-2014";
 	String endDate = "11-06-2014";
-	String beginTime = "00:00:00";
-	String endTime = "23:59:59";
+	String beginTime = null;
+	String endTime = null;
 	String routeIds[] = {"CR-Providence"};
 	String source = "Transitime";
 	
@@ -319,7 +370,7 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 	String dbPassword = "transitime";
 
 	try {
-	    PredictionAccuracyQuery query = new PredAccuracyIntervalQuery(dbType,
+	    PredAccuracyIntervalQuery query = new PredAccuracyIntervalQuery(dbType,
 		    dbHost, dbName, dbUserName, dbPassword);
 	    String jsonString = query.getJson(beginDate, endDate, beginTime,
 		    endTime, routeIds, source, null, IntervalsType.BOTH, 0.68,

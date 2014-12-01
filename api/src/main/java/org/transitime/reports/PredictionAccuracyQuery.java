@@ -35,7 +35,7 @@ import org.transitime.utils.Time;
 
 /**
  * For doing SQL query and generating JSON data for a prediction accuracy
- * intervals chart. This abstract class does the SQL query and puts data into a
+ * chart. This abstract class does the SQL query and puts data into a
  * map. Then a subclass must be used to convert the data to JSON rows and
  * columns for Google chart.
  *
@@ -52,7 +52,7 @@ abstract public class PredictionAccuracyQuery {
     // Keyed on source (so can show data for multiple sources at
     // once in order to compare prediction accuracy. Contains a array,
     // with an element for each prediction bucket, containing an array
-    // of the prediction accuracy values for that bucket. Each bucket is for 
+    // of the prediction accuracy values in seconds for that bucket. Each bucket is for 
     // a certain prediction range, specified by predictionLengthBucketSize.
     protected final Map<String, List<List<Integer>>> map = 
 	    new HashMap<String, List<List<Integer>>>();
@@ -167,36 +167,6 @@ abstract public class PredictionAccuracyQuery {
     }
     
     /**
-     * Gets the column definition in JSON string format so that chart the data
-     * using Google charts. The column definition describes the contents of each
-     * column but doesn't actually contain the data itself.
-     * 
-     * @param intervalsType
-     * @param intervalPercentage1
-     * @param intervalPercentage2
-     * @return The column portion of the JSON string
-     */
-    abstract protected String getCols(IntervalsType intervalsType,
-	    double intervalPercentage1, double intervalPercentage2);
-    
-    /**
-     * Gets the row definition in JSON string format so that chart the data
-     * using Google charts. The row definition contains the actual data.
-     * 
-     * @param intervalsType
-     *            Specifies whether should output for intervals standard
-     *            deviation info, percentage info, or both.
-     * @param intervalPercentage1
-     *            For when outputting intervals as fractions. Not used if
-     *            intervalsType is STD_DEV.
-     * @param intervalPercentage2
-     *            For when outputting intervals as fractions. Only used if
-     *            intervalsType is PERCENTAGE.
-     * @return The row portion of the JSON string
-     */
-    abstract protected String getRows(IntervalsType intervalsType,
-	    double intervalPercentage1, double intervalPercentage2);
-    /**
      * Performs the SQL query and puts the resulting data into the map.
      * 
      * @param beginDateStr
@@ -228,7 +198,7 @@ abstract public class PredictionAccuracyQuery {
      * @throws SQLException
      * @throws ParseException 
      */
-    private void doQuery(String beginDateStr, String endDateStr,
+    protected void doQuery(String beginDateStr, String endDateStr,
 	    String beginTimeStr, String endTimeStr, String routeIds[],
 	    String predSource, String predType) throws SQLException, ParseException {
 	// Make sure not trying to get data for too long of a time span since
@@ -248,7 +218,7 @@ abstract public class PredictionAccuracyQuery {
 	
 	// Determine route portion of SQL
 	String routeSql = "";
-	if (routeIds != null) {
+	if (routeIds != null && routeIds.length > 0 && !routeIds[0].isEmpty()) {
 	    routeSql = " AND (routeId=?";
 	    for (int i=1; i<routeIds.length; ++i)
 		routeSql += " OR routeId=?"; 
@@ -342,7 +312,8 @@ abstract public class PredictionAccuracyQuery {
 		statement.setTime(i++, endTime);
 	    if (routeIds != null) {
 		for (String routeId : routeIds)
-		    statement.setString(i++, routeId);
+		    if (!routeId.isEmpty())
+			statement.setString(i++, routeId);
 	    }
 	    
 	    // Actually execute the query
@@ -355,8 +326,8 @@ abstract public class PredictionAccuracyQuery {
 		String sourceResult = rs.getString("source");
 		
 		addDataToMap(predLength, predAccuracy, sourceResult);
-		logger.info("predLength={} predAccuracy={}", 
-			predLength, predAccuracy);
+		logger.debug("predLength={} predAccuracy={} source={}", 
+			predLength, predAccuracy, sourceResult);
 	    }
 	} catch (SQLException e) {
 	    throw e;
@@ -366,70 +337,4 @@ abstract public class PredictionAccuracyQuery {
 	}	
     }
 
-    /**
-     * Performs the query and returns the data in an JSON string so that it can
-     * be used for a chart.
-     *
-     * @param beginDateStr
-     *            Begin date for date range of data to use.
-     * @param endDateStr
-     *            End date for date range of data to use. Since want to include
-     *            data for the end date, 1 day is added to the end date for the
-     *            query.
-     * @param beginTimeStr
-     *            For specifying time of day between the begin and end date to
-     *            use data for. Can thereby specify a date range of a week but
-     *            then just look at data for particular time of day, such as 7am
-     *            to 9am, for those days. Set to null or empty string to use
-     *            data for entire day.
-     * @param endTimeStr
-     *            For specifying time of day between the begin and end date to
-     *            use data for. Can thereby specify a date range of a week but
-     *            then just look at data for particular time of day, such as 7am
-     *            to 9am, for those days. Set to null or empty string to use
-     *            data for entire day.
-     * @param routeIds
-     *            Specifies which routes to do the query for. Can be null for
-     *            all routes or an array of route IDs.
-     * @param predSource
-     *            The source of the predictions. Can be null or "" (for all),
-     *            "Transitime", or "Other"
-     * @param predType
-     *            Whether predictions are affected by wait stop. Can be "" (for
-     *            all), "AffectedByWaitStop", or "NotAffectedByWaitStop".
-     * @param intervalsType
-     *            Specifies whether should output for intervals standard
-     *            deviation info, percentage info, or both.
-     * @param intervalPercentage1
-     *            For when outputting intervals as percentages. Not used if
-     *            intervalsType is STD_DEV.
-     * @param intervalPercentage2
-     *            For when outputting intervals as percentages. Only used if
-     *            intervalsType is PERCENTAGE.
-     * @return the full JSON string contain both cols and rows info, or null if
-     *         no data returned from query
-     * @throws SQLException
-     * @throws ParseException 
-     */
-    public String getJson(String beginDateStr, String endDateStr,
-	    String beginTimeStr, String endTimeStr, String routeIds[],
-	    String predSource, String predType, IntervalsType intervalsType,
-	    double intervalPercentage1, double intervalPercentage2)
-	    throws SQLException, ParseException {
-	// Actually perform the query
-	doQuery(beginDateStr, endDateStr, beginTimeStr, endTimeStr, routeIds,
-		predSource, predType);
-	
-	// If query returned no data then simply return null so that
-	// can easily see that there is a problem
-	if (map.isEmpty()) {
-	    return null;
-	}
-	
-	return "{" 
-		+ getCols(intervalsType, intervalPercentage1, intervalPercentage2) + "," 
-		+ getRows(intervalsType, intervalPercentage1, intervalPercentage2) 
-		+ "\n}";
-    }
-    
 }

@@ -96,7 +96,7 @@ String chartTitle = "Prediction Accuracy for " + agencyId
 
         var chartOptions = {
           title: '<%= chartTitle %>',
-          titleTextStyle: {fontSize: 32},
+          titleTextStyle: {fontSize: 28},
           // Could use html tooltips so can format them but for now using regular ones
           // FIXME tooltip: {isHtml: false},
           hAxis: {
