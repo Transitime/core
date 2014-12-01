@@ -465,7 +465,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue distanceFromLayoverForEarlyDeparture =
 			new DoubleConfigValue("transitime.core.distanceFromLayoverForEarlyDeparture", 
-					150.0,
+					180.0,
 					"How far along path past a layover stop a vehicle needs "
 					+ "to be in order for it to be considered an early "
 					+ "departure instead of just moving around within the "
