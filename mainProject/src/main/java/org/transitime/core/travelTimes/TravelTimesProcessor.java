@@ -664,8 +664,8 @@ public class TravelTimesProcessor {
 		combinedKeySet.addAll(travelTimesMap.keySet());
 		combinedKeySet.addAll(stopTimesMap.keySet());
 		
-		// For each trip that had historical arrivals/departures and or 
-		// matches in the database...
+		// For each trip/stop path that had historical arrivals/departures and 
+		// or matches in the database...
 		for (ProcessedDataMapKey mapKey : combinedKeySet) {
 			// Determine the associated Trip object for the data
 			Trip trip = tripMap.get(mapKey.getTripId());
