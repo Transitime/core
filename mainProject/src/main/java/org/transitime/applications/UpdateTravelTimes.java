@@ -391,7 +391,7 @@ public class UpdateTravelTimes {
 		// Log params used right at top of log file
 		logger.info("Processing travel times for beginTime={} endTime={} "
 				+ "maxTravelTimeSegmentLength={}",
-				beginTime, endTime, 
+				startDateStr, endDateStr, 
 				Geo.distanceFormat(maxTravelTimeSegmentLength));
 		
 		// Set the timezone for the application
