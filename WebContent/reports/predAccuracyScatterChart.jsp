@@ -124,10 +124,10 @@ String chartTitle = "Prediction Accuracy for " + agencyId
           	  // Try to show accuracy on a consistent vertical axis and 
           	  // divide into minutes. This unfortunately won't work well
           	  // if values are greater than 360 because then chart will
-          	  // autoscale but will still be using 11 gridlines
-        	  minValue: -420, 
-        	  maxValue: 420,
-          	gridlines: {count: 15},
+          	  // autoscale but will still be using 13 gridlines
+        	  minValue: -360, 
+        	  maxValue: 360,
+          	gridlines: {count: 13},
    	        // Nice to show a faint line for every 30 seconds as well
         	minorGridlines: {count: 1}
           },
