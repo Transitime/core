@@ -127,7 +127,11 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 			++tooLate;
 		}
 		
+		// If no data for this prediction bucket then continue to next one
 		int numPreds = listForPredBucket.size();
+		if (numPreds == 0)
+		    continue;
+		
 		double tooEarlyPercentage = 100.0 * tooEarly / numPreds;
 		double okPercentage = 100.0 * ok / numPreds;
 		double tooLatePercentage = 100.0 * tooLate / numPreds;
@@ -136,13 +140,16 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 		rowBuilder.addRowElement(predBucketSecs);
 		
 		rowBuilder.addRowElement(tooEarlyPercentage);
-		rowBuilder.addRowElement("Too Early: " + tooEarly + " points, " + StringUtils.oneDigitFormat(tooEarlyPercentage) + "%");
+		rowBuilder.addRowElement("Too Early: " + tooEarly + " points, " 
+			+ StringUtils.oneDigitFormat(tooEarlyPercentage) + "%");
 		
 		rowBuilder.addRowElement(okPercentage);
-		rowBuilder.addRowElement("Within Bounds: " + ok + " points, " + StringUtils.oneDigitFormat(okPercentage) + "%");
+		rowBuilder.addRowElement("Within Bounds: " + ok + " points, " 
+			+ StringUtils.oneDigitFormat(okPercentage) + "%");
 
 		rowBuilder.addRowElement(tooLatePercentage);
-		rowBuilder.addRowElement("Too Late: " + tooEarly + " points, " + StringUtils.oneDigitFormat(tooLatePercentage) + "%");
+		rowBuilder.addRowElement("Too Late: " + tooEarly + " points, " 
+			+ StringUtils.oneDigitFormat(tooLatePercentage) + "%");
 	    }
 	}	
     }
