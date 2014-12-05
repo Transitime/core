@@ -44,6 +44,35 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 
 	/********************** Member Functions **************************/
 
+
+	/**
+	 * For creating a GtfsStopTime object from scratch
+	 * 
+	 * @param tripId
+	 * @param arrivalTimeStr
+	 * @param departureTimeStr
+	 * @param stopId
+	 * @param stopSequence
+	 * @param timepointStop
+	 * @param shapeDistTraveled
+	 */
+	public GtfsStopTime(String tripId, String arrivalTimeStr,
+			String departureTimeStr, String stopId, int stopSequence,
+			Boolean timepointStop) {
+		this.tripId = tripId;
+		this.arrivalTimeSecs = Time.parseTimeOfDay(arrivalTimeStr);
+		this.departureTimeSecs = Time.parseTimeOfDay(departureTimeStr);
+		this.stopId = stopId;
+		this.stopSequence = stopSequence;
+		this.timepointStop = timepointStop;
+
+		// Following values are usually not used so simply using null for them
+		this.stopHeadsign = null;
+		this.pickupType = null;
+		this.dropOffType = null;
+		this.shapeDistTraveled = null;
+}
+	
 	/**
 	 * @param record
 	 * @param supplemental
