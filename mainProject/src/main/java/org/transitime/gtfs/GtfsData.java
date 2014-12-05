@@ -969,7 +969,7 @@ public class GtfsData {
 				if (!validServiceIds.contains(gtfsTrip.getServiceId())) {
 					// ServiceUtils ID not valid for this trip so log warning message
 					// and continue on to next trip ID
-					logger.warn("For trip ID={} and service ID={} the " +
+					logger.warn("For tripId={} and serviceId={} the " +
 							"service is not valid in the future so the trip " +
 							"is being filtered out.", 
 							gtfsTrip.getTripId(), gtfsTrip.getServiceId());
