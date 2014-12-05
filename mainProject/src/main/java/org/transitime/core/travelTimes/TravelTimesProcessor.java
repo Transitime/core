@@ -37,6 +37,7 @@ import org.transitime.statistics.Statistics;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
+import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
 /**
@@ -91,6 +92,8 @@ public class TravelTimesProcessor {
 	
 	private double maxTravelTimeSegmentLength;
 		
+	private double minSegmentSpeedMps;
+	
 	// The aggregate data processed from the historic db data.
 	// ProcessedDataMapKey combines tripId and stopPathIndex in 
 	// order to combine data for a particular tripId and stopPathIndex.
@@ -113,9 +116,14 @@ public class TravelTimesProcessor {
 	 * @param maxTravelTimeSegmentLength
 	 *            For determining how many travel time segments there should be
 	 *            in a stop path.
+	 * @param minSegmentSpeedMps
+	 *            Specifies the lowest speed a segment can represent. Makes sure
+	 *            that don't have absurdly slow travel times.
 	 */
-	public TravelTimesProcessor(double maxTravelTimeSegmentLength) {
+	public TravelTimesProcessor(double maxTravelTimeSegmentLength,
+			double minSegmentSpeedMps) {
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
+		this.minSegmentSpeedMps = minSegmentSpeedMps;
 	}
 	
 	/**
@@ -487,9 +495,29 @@ public class TravelTimesProcessor {
 		// travel times and add them to the list of times to be returned.
 		List<Integer> travelTimesForStopPath = new ArrayList<Integer>();
 		for (int i=0; i<vertexTimes.size()-1; ++i) {
+			// The segment time is the time between two vertices
 			long vertexTime1 = vertexTimes.get(i);
 			long vertexTime2 = vertexTimes.get(i+1);
-			travelTimesForStopPath.add((int) (vertexTime2 - vertexTime1));
+			int segmentTime = (int) (vertexTime2 - vertexTime1);
+			
+			// Make sure value isn't ridiculously low. For MBTA commuter
+			// rail for example vehicles don't travel below a certain speed.
+			// A low speed indicates a problem with the data.
+			double segmentSpeedMps = 
+					travelTimeSegmentLength * Time.MS_PER_SEC / segmentTime;
+			if (segmentSpeedMps < minSegmentSpeedMps) {
+				logger.error("For segmentIdx={} segment speed of {}mps is "
+						+ "below the limit of minSegmentSpeedMps={}mps. Therefore "
+						+ "it is being reset to min segment speed. arrDep1={} "
+						+ "arrDep2={}",
+						i, StringUtils.twoDigitFormat(segmentSpeedMps), 
+						minSegmentSpeedMps, arrDep1, arrDep2);
+				segmentTime = (int) (travelTimeSegmentLength * Time.MS_PER_SEC / 
+						minSegmentSpeedMps);
+			}
+			
+			// Keep track of this segment time for this segment
+			travelTimesForStopPath.add(segmentTime);
 		}
 		return travelTimesForStopPath;
 	}

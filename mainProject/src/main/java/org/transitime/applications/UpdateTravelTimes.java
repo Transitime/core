@@ -281,18 +281,19 @@ public class UpdateTravelTimes {
 	 * @param session
 	 * @param agencyId
 	 * @param maxTravelTimeSegmentLength
+	 * @param minSegmentSpeedMps
 	 * @param specialDaysOfWeek
 	 *            Not fully implemented. Should therefore be null for now.
 	 * @param beginTime
 	 * @param endTime
 	 */
 	private static void processTravelTimes(Session session, String agencyId,
-			double maxTravelTimeSegmentLength, List<Integer> specialDaysOfWeek,
-			Date beginTime, Date endTime) {
+			double maxTravelTimeSegmentLength, double minSegmentSpeedMps,
+			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
 		// Read in historic data from db and put it into maps so that it can
 		// be processed.
 		TravelTimesProcessor processor = 
-				new TravelTimesProcessor(maxTravelTimeSegmentLength);
+				new TravelTimesProcessor(maxTravelTimeSegmentLength, minSegmentSpeedMps);
 		processor.readAndProcessHistoricData(agencyId, specialDaysOfWeek,
 				beginTime, endTime);
 
@@ -321,14 +322,15 @@ public class UpdateTravelTimes {
 	 * 
 	 * @param agencyId
 	 * @param maxTravelTimeSegmentLength
+	 * @param minSegmentSpeedMps
 	 * @param specialDaysOfWeek
 	 *            Not fully implemented. Should therefore be null for now.
 	 * @param beginTime
 	 * @param endTime
 	 */
 	private static void manageSessionAndProcessTravelTimes(String agencyId,
-			double maxTravelTimeSegmentLength, List<Integer> specialDaysOfWeek,
-			Date beginTime, Date endTime) {
+			double maxTravelTimeSegmentLength, double minSegmentSpeedMps,
+			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
 		// Get a database session
 		Session session = HibernateUtils.getSession(agencyId);
 		Transaction tx = null;
@@ -338,7 +340,7 @@ public class UpdateTravelTimes {
 
 			// Actually do all the data processing
 			processTravelTimes(session, agencyId, maxTravelTimeSegmentLength,
-					specialDaysOfWeek, beginTime, endTime);
+					minSegmentSpeedMps, specialDaysOfWeek, beginTime, endTime);
 			
 			// Make sure that everything actually written out to db
 			tx.commit();
@@ -356,9 +358,11 @@ public class UpdateTravelTimes {
 	}
 	
 	/**
-	 * arg[1] specifies both the start date. If an addition argument is
-	 * specified it is used as the end date. Otherwise the data is processed for
-	 * just a single day.
+	 * arg[0] specifies maxTravelTimeSegmentLength. arg[1] specifies
+	 * minSegmentSpeedMps and a value of 2.7m/s is 6mph. arg[2] specifies both
+	 * the start date and end date. If an addition argument is specified it is
+	 * used as the end date. Otherwise the data is processed for just a single
+	 * day.
 	 * 
 	 * @param args
 	 */
@@ -369,8 +373,12 @@ public class UpdateTravelTimes {
 		String maxTravelTimeSegmentLengthStr = args[0];
 		double maxTravelTimeSegmentLength = 
 				Double.parseDouble(maxTravelTimeSegmentLengthStr);
-		String startDateStr = args[1];
-		String endDateStr = args.length > 2 ? args[2] : startDateStr;
+		
+		String minSegmentSpeedMpsStr = args[1];
+		double minSegmentSpeedMps = Double.parseDouble(minSegmentSpeedMpsStr);
+		
+		String startDateStr = args[2];
+		String endDateStr = args.length > 3 ? args[3] : startDateStr;
 		
 		// Some params are hard coded simply to get things going
 //		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();
@@ -402,8 +410,8 @@ public class UpdateTravelTimes {
 		
 		// Do all the work...
 		manageSessionAndProcessTravelTimes(agencyId,
-				maxTravelTimeSegmentLength, specialDaysOfWeek, beginTime,
-				endTime);
+				maxTravelTimeSegmentLength, minSegmentSpeedMps,
+				specialDaysOfWeek, beginTime, endTime);
 		
 		// program won't just exit on its own, probably due to their being
 		// another thread still running. Not sure why. Probably has to do
