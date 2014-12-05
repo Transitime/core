@@ -50,8 +50,8 @@ public class GtfsRoutesWriter extends CsvWriterBase {
 	@Override
 	protected void writeHeader() throws IOException {
 	    // Write the header
-	    writer.append("route_id, agency_id, route_short_name, route_long_name, "
-	    		+ "route_type, route_color, route_text_color\n");
+	    writer.append("route_id,agency_id,route_short_name,route_long_name,"
+	    		+ "route_type,route_color,route_text_color\n");
 	}
 
 	/**
