@@ -52,7 +52,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 	 * @param arrivalTimeStr
 	 * @param departureTimeStr
 	 * @param stopId
-	 * @param stopSequence
+	 * @param stopSequence Index of stop in trip
 	 * @param timepointStop
 	 * @param shapeDistTraveled
 	 */
