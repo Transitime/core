@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.avl;
+package org.transitime.custom.mbta;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.avl.AvlModule;
+import org.transitime.avl.TaipGpsLocation;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;

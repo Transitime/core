@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.gtfs.generator;
+package org.transitime.custom.missionBay;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,8 +23,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.jdom2.Document;
@@ -45,6 +47,7 @@ import org.transitime.gtfs.writers.GtfsShapesWriter;
 import org.transitime.gtfs.writers.GtfsStopTimesWriter;
 import org.transitime.gtfs.writers.GtfsStopsWriter;
 import org.transitime.gtfs.writers.GtfsTripsWriter;
+import org.transitime.utils.Time;
 
 /**
  * For generating some of the GTFS files for an agency by reading data from the
@@ -94,6 +97,10 @@ public class GtfsFromNextBus {
 	// Contains all stops. Keyed on stopId
 	private static Map<String, GtfsStop> gtfsStopsMap = 
 			new HashMap<String, GtfsStop>();
+	
+	// Contains list of paths IDs for every trip pattern.
+	// Keyed on shape ID.
+	private static Map<String, List<String>> shapeIdsMap;
 	
 	/******************* Logging ************************/
 	
@@ -289,8 +296,9 @@ public class GtfsFromNextBus {
 	/**
 	 * A direction from the NextBus API
 	 */
-	private static class Dir {
+	public static class Dir {
 		String tag;
+		String shapeId;
 		List<String> stopIds = new ArrayList<String>();
 	}
 	
@@ -298,51 +306,20 @@ public class GtfsFromNextBus {
 	 * A path from the NextBus API
 	 */
 	private static class Path {
-		String tag;
 		List<String> lats = new ArrayList<String>();
 		List<String> lons = new ArrayList<String>();
 	}
-	
+
 	/**
-	 * Gets list of directions that specify which stops are for a trip.
-	 * 
-	 * @param doc
-	 * @return
-	 */
-	private static List<Dir> getDirections(Document doc) {
-		List<Dir> dirList = new ArrayList<Dir>();
-		
-		// Get the params from the XML doc
-		Element rootNode = doc.getRootElement();
-		Element route = rootNode.getChild("route");
-		List<Element> directions = route.getChildren("direction");
-		for (Element direction : directions) {
-			Dir dir = new Dir();
-			dir.tag = direction.getAttributeValue("tag");
-			
-			// Get the stop IDs
-			List<Element> stops = direction.getChildren("stop");
-			for (Element stop : stops) {
-				String stopTag = stop.getAttributeValue("tag");
-				dir.stopIds.add(stopTag);
-			}
-			
-			// Add the new Dir to the list to be returned
-			dirList.add(dir);
-		}
-		
-		return dirList;
-	}
-	
-	/**
-	 * Gets list of all the paths (except for the stub paths) for
+	 * Gets list of all the paths for
 	 * the route document.
 	 * 
 	 * @param doc
-	 * @return
+	 * @return Map of Path objects, keyed on the NextBus path ID
 	 */
-	private static List<Path> getPaths(Document doc) {
-		List<Path> pathList = new ArrayList<Path>();
+	private static Map<String, Path> getPaths(Document doc) {
+		// Keyed on path ID
+		Map<String, Path> pathMap = new HashMap<String, Path>();
 		
 		// Get the paths from the XML doc
 		Element rootNode = doc.getRootElement();
@@ -352,17 +329,8 @@ public class GtfsFromNextBus {
 			Element pathTag = path.getChild("tag");		
 			String pathId = pathTag.getAttributeValue("id");
 			
-			// Ignore stub paths since those locations are also 
-			// provided by the regular paths
-			if (pathId.endsWith("_d"))
-				continue;
-			
 			// Create new Path and add to list
 			Path p = new Path();
-			pathList.add(p);
-			String stopSpanName = pathId.substring(pathId.indexOf("_") + 1);
-			p.tag = stopSpanName;
-
 			List<Element> points = path.getChildren("point");
 			for (Element point : points) {
 				String lat = point.getAttributeValue("lat");
@@ -371,9 +339,10 @@ public class GtfsFromNextBus {
 				p.lats.add(lat);
 				p.lons.add(lon);
 			}			
+			pathMap.put(pathId, p);
 		}
 		
-		return pathList;
+		return pathMap;
 	}
 
 	/**
@@ -390,34 +359,28 @@ public class GtfsFromNextBus {
 			String timeStr) {
 		return routeId + "_" + blockId + "_" + timeStr;
 	}
-
+	
 	/**
-	 * Returns the shapeId to use based on routeId and directionId.
-	 * 
-	 * @param routeId
-	 * @param directionId
-	 * @return
+	 * Generates headsign info. Previously used "To " + name of last stop but the
+	 * last stop for trip is not available via the NextBus API.
+	 *  
+	 * @return The headsign to use for the trip.
 	 */
-	private static String getShapeId(String routeId, String directionId) {
-		return routeId + "_" + directionId;
+	private static String getTripHeadsign() {
+		return "BART to Mission Bay Loop";
 	}
 	
 	/**
-	 * Generates headsign using "To " + name of last stop. Requires that stops
-	 * are processed first.
+	 * Gets the list of path IDs associated with the route and direction ID.
 	 * 
-	 * @param lastStopTag
-	 *            Specifies the last stop of trip that is to be used as part of
-	 *            the headsign.
-	 * @return The headsign to use for the trip.
+	 * @param shapeId
+	 * @return
 	 */
-	private static String getTripHeadsign(String lastStopTag) {
-		if (gtfsStopsMap.isEmpty()) {
-			logger.error("Trying to create trip headsign before stops were processed.");
-			return null;
-		}
+	private static List<String> getPathIds(String shapeId) {
+		if (shapeIdsMap == null)
+			shapeIdsMap = MissionBayConfig.getPathData();
 		
-		return "To " + gtfsStopsMap.get(lastStopTag).getStopName();
+		return shapeIdsMap.get(shapeId);
 	}
 	
 	/**
@@ -433,42 +396,45 @@ public class GtfsFromNextBus {
 		Element route = rootNode.getChild("route");
 		String routeId = route.getAttributeValue("tag");
 		
-		// Get the NextBus directions, which specify list of stops for a trip
-		List<Dir> directions = getDirections(routeDoc);
-		
 		// Get the paths that are used for the directions
-		List<Path> paths = getPaths(routeDoc);
+		Map<String, Path> pathsForRoute = getPaths(routeDoc);
 		
-		// Now go through directions and determine the shapes associated
+		// Get the NextBus directions, which specify list of stops for a trip
+		List<Dir> directions = MissionBayConfig.getSpecialCaseDirections(routeId);
+
+		// A shape can be for multiple directions but only want to process
+		// a shape once.
+		Set<String> shapesProcessed = new HashSet<String>();
+		
+		// Go through all the directions to get all the shapes
 		for (Dir dir : directions) {
-			int shapePtSequence = 0;
-			String shapeId = getShapeId(routeId, dir.tag);
 			double shapeDistTraveled = 0.0;
 			Location previousLoc = null;
+			int shapePtSequence = 0;
+			String shapeId = dir.shapeId;
 			
-			// For each stop for the current direction add corresponding 
-			// locations
-			for (String stopId : dir.stopIds) {
-				// Find the corresponding path
-				Path foundPath = null;
-				for (Path path : paths) {
-					if (path.tag.startsWith(stopId)) {
-						// Found the appropriate path for this stop
-						foundPath = path;
-						break;
-					}										
+			// If already handled this shape, then continue to the next
+			// direction
+			if (shapesProcessed.contains(shapeId))
+				continue;
+			shapesProcessed.add(shapeId);
+			
+			List<String> nextBusPathIds = getPathIds(shapeId);
+			for (String nextBusPathId : nextBusPathIds) {
+				Path path = pathsForRoute.get(nextBusPathId);
+				if (path == null) {
+					logger.error("The nextBusPathId={} was not found for "
+							+ "routeId={}. Therefore skipping this path.",	
+							nextBusPathId, routeId);
+					continue;
 				}
 				
-				// If no valid path found then just continue to next one
-				if (foundPath == null) 
-					continue;
-				
-				// Write info about path
-				for (int i=0; i<foundPath.lats.size(); ++i) {
-					String latStr = foundPath.lats.get(i);
+				// For each point in the path
+				for (int i=0; i<path.lats.size(); ++i) {
+					String latStr = path.lats.get(i);
 					double shapePtLat = Double.parseDouble(latStr);
 					
-					String lonStr = foundPath.lons.get(i);
+					String lonStr = path.lons.get(i);
 					double shapePtLon = Double.parseDouble(lonStr);
 					
 					// Determine shape distance traveled
@@ -477,16 +443,18 @@ public class GtfsFromNextBus {
 						shapeDistTraveled += previousLoc.distance(newLoc);
 					}
 					previousLoc = newLoc;
-					
+
+					// For each path for the direction
 					// Create and write the GTFS shape
 					GtfsShape gtfsShape = new GtfsShape(shapeId,
 							shapePtLat, shapePtLon, shapePtSequence++,
 							shapeDistTraveled);
-					shapesWriter.write(gtfsShape);									
+					shapesWriter.write(gtfsShape);			
 				}
 			}
 		}
-	}
+
+  }	
 	
 	/**
 	 * Processes shape data for all routes
@@ -522,64 +490,351 @@ public class GtfsFromNextBus {
 	}
 	
 	/**
-	 * Generates the trip and stop times data using XML document from NextBus
-	 * API schedule command.
+	 * Determines the direction for the route that best matches the stops
+	 * specified in the schedule for the trip. All stops from schedule must be
+	 * listed in the direction. If there are multiple matches uses the direction
+	 * with the fewest stops so that can handle case where a schedule trip could
+	 * match both a direction and a direction that contains additional stops
+	 * that are not in the schedule.
+	 * 
+	 * @param stopIdsInSchedForTrip
+	 *            So can determine if trip goes to calt4th stop
+	 * @param directionsForRoute
+	 * @param routeId
+	 * @param tripStartTimeStr
+	 *            Needed so can differentiate between morning and afternoon
+	 *            trips, which an be different for Mission Bay west route.
+	 * @return
+	 */
+	private static Dir determineDirection(
+			List<String> stopIdsInSchedForTrip, List<Dir> directionsForRoute,
+			String routeId, String tripStartTimeStr) {
+		Dir bestDir = null;
+		
+		// This is a terrible hack to deal with the Mission Bay west route
+		// where there is a different trip pattern in the morning and the
+		// afternoon, but can determine the trip pattern from the stops
+		// alone. Need to look at the schedule time as well.
+		int tripStartTimeSecs = Time.parseTimeOfDay(tripStartTimeStr);
+		String directionNameComponent = null;
+		if (routeId.equals("west")) {
+			if (tripStartTimeSecs < 12 * Time.SEC_PER_HOUR)
+				directionNameComponent = "morning";
+			else
+				directionNameComponent = "afternoon";
+		}
+			
+		boolean schedContainsCalt4thStop = 
+				stopIdsInSchedForTrip.contains("calt4th");
+		
+		for (Dir dir : directionsForRoute) {
+			// See if all stops in the schedule are in the current direction
+			boolean allStopsAreInDirection = true;
+			for (String stopIdFromSched : stopIdsInSchedForTrip) {
+				// If stop from schedule is not in the direction
+				// then skip to the next direction
+				if (!dir.stopIds.contains(stopIdFromSched)) {
+					allStopsAreInDirection = false;
+					break;
+				}
+			}
+			
+			// If all the steps in schedule were in the direction then remember
+			// this direction as the best if it is the direction with the
+			// fewest stops
+			if (allStopsAreInDirection) {
+				// If need to deal with special "morning"/"afternoon" name in
+				// direction, check it
+				if (directionNameComponent == null 
+						|| dir.tag.contains(directionNameComponent)) {
+					// Need to get proper direction depending on whether calt4th is
+					// a stop or not
+					if ((schedContainsCalt4thStop && dir.tag.contains("calt4th"))
+							|| (!schedContainsCalt4thStop && !dir.tag.contains("calt4th"))) {
+						// If this is best match with respect to number of stops 
+						// then remember it as such
+						if (bestDir == null || 
+							dir.stopIds.size() < bestDir.stopIds.size()) {
+							bestDir = dir;
+						}
+					}
+				}
+			}
+		}
+		
+		// Return direction that matches the best
+		return bestDir;
+	}
+	
+	/**
+	 * Actually writes a trip to the GTFS trips file.
+	 * 
+	 * @param tripsWriter
+	 * @param tripId
+	 * @param routeId
+	 * @param blockId
+	 * @param tripStartTimeStr
+	 * @param directionsForRoute
+	 * @param stopIdsInSchedForTrip
+	 */
+	private static void writeGtfsTrip(GtfsTripsWriter tripsWriter,
+			String tripId, String routeId, String blockId, 
+			String tripStartTimeStr, List<Dir> directionsForRoute,
+			List<String> stopIdsInSchedForTrip) {
+		// Determine which direction to use that best corresponds to
+		// the stops specified in the schedule.
+		Dir dir = determineDirection(stopIdsInSchedForTrip,
+				directionsForRoute, routeId, tripStartTimeStr);
+		
+		// For the trip there is no headsign info available from NextBus
+		// API. Therefore just use "To " + lastStopName.
+		String tripHeadsign = getTripHeadsign();
+		
+		// Create the trip info
+		String tripShortName = null;
+		GtfsTrip gtfsTrip = new GtfsTrip(routeId, serviceId.getValue(),
+				tripId, tripHeadsign, tripShortName, dir.tag, blockId,
+				dir.shapeId);
+		tripsWriter.write(gtfsTrip);			
+	}
+	
+	private static class StopTime {
+		String stopId;
+		String stopTimeStr;
+		int stopTime;
+		
+		private StopTime(String stopId, String stopTimeStr) {
+			this.stopId = stopId; 
+			this.stopTimeStr = stopTimeStr;
+			this.stopTime = Time.parseTimeOfDay(stopTimeStr);
+		}
+	}
+	
+	/**
+	 * For the route that the scheduleDoc is for reads in all stop times and
+	 * puts them into map so that can determine trips.
+	 * 
+	 * @param scheduleDoc
+	 * @return map of stop times, keyed on block ID
+	 */
+	private static Map<String, List<StopTime>> getStopTimesMap(
+			Document scheduleDoc) {
+		Map<String, List<StopTime>> stopTimesMap = 
+				new HashMap<String, List<StopTime>>();
+		
+		Element rootNode = scheduleDoc.getRootElement();
+		Element route = rootNode.getChild("route");
+
+		List<Element> scheduleRows = route.getChildren("tr");
+		for (Element scheduleRow : scheduleRows) {
+			String blockId = scheduleRow.getAttributeValue("blockID");
+			
+			// Get list of stops times for this block
+			List<StopTime> stopTimesForBlock = stopTimesMap.get(blockId);
+			if (stopTimesForBlock == null) {
+				stopTimesForBlock = new ArrayList<StopTime>();
+				stopTimesMap.put(blockId, stopTimesForBlock);
+			}
+			
+			List<Element> stopsForScheduleRow = scheduleRow.getChildren("stop");
+			for (Element stop : stopsForScheduleRow) {
+				String stopTag = stop.getAttributeValue("tag");
+				String timeStr = stop.getText();
+				
+				// If stop doesn't have valid time then it is not 
+				// considered to be part of trip
+				if (!timeStr.contains(":"))
+					continue;
+
+				// KLUDGE! Need west route to start with 1500owen stop instead of
+				// the 1650owen one so that the stop at beginning of trip is only
+				// once in trip. This way can successfully figure out when trip ends.
+				// But the schedule API data only deals with 1650owen stop. So
+				// if encountering stop berr5th_s stop, which is after the owen
+				// stops, then use schedule time for the 1500owen stop instead
+				// of the 1650owen 1500owen one.
+				String routeId = route.getAttributeValue("tag");
+				if (routeId.equals("west")) {
+					if (stopTag.equals("berr5th_s")) {
+						StopTime previousStopTime = 
+								stopTimesForBlock.get(stopTimesForBlock.size()-1);
+						if (previousStopTime.stopId.equals("1650owen")) {
+							// Encountered schedule times for 1650owen and then
+							// berr5th_s so replace the stopId for the 1650owen
+							// schedule time with 1500owen so that it is for the
+							// stop for the beginning of the trip
+							previousStopTime.stopId = "1500owen";
+						}
+					}
+				}
+				
+				// Add this stop time to the map
+				StopTime stopTime = new StopTime(stopTag, timeStr);
+				stopTimesForBlock.add(stopTime);
+			}
+		}
+		
+		return stopTimesMap;
+	}
+	
+	/**
+	 * Returns true if this specified stop is the first one of a trip.
+	 * 
+	 * @param i
+	 *            Index into stopTimesForBlock
+	 * @param stopTimesForBlock
+	 *            The stop times for the block
+	 * @param dirsForRoute
+	 *            All of the Dirs for the route
+	 * @return True if first stop of trip
+	 */
+	private static boolean firstStopInNextTrip(int i,
+			List<StopTime> stopTimesForBlock, List<Dir> dirsForRoute) {
+		// If first stop of block then first stop in trip
+		if (i == 0)
+			return true;
+		
+		// Assuming all Dirs have same first stop. So just use first stop of 
+		// first Dir.
+		String firstStopForDirs = dirsForRoute.get(0).stopIds.get(0);
+		
+		// If the current stop is a first stop then return true
+		String currentStopInBlock = stopTimesForBlock.get(i).stopId;
+		if (currentStopInBlock.equals(firstStopForDirs))
+			return true;
+		
+		// If gap between times is greater than 2 hours then true
+		if (stopTimesForBlock.get(i).stopTime > 
+				stopTimesForBlock.get(i-1).stopTime + 2*Time.SEC_PER_HOUR)
+			return true;
+		
+		// Not one of the special cases so return false
+		return false;
+	}
+	
+	/**
+	 * Does really complicated merger of directions and schedule times and
+	 * determines both the GTFS trips and the GTFS stop times.
+	 * <p>
+	 * Note: in the configuration of the stops for directions and for the paths
+	 * need to make sure that don't have same first stop of trip twice in the
+	 * trip. Otherwise it is impossible to determine where a trip starts. So for
+	 * the west route need to have the other Owens MBCC stop be the first stop
+	 * of the trip.
 	 * 
 	 * @param tripsWriter
 	 * @param stopTimesWriter
+	 * @param routeId
 	 * @param scheduleDoc
 	 */
 	private static void processTripsAndStopTimesForRoute(
 			GtfsTripsWriter tripsWriter, GtfsStopTimesWriter stopTimesWriter,
-			Document scheduleDoc) {
-		Element rootNode = scheduleDoc.getRootElement();
-		Element route = rootNode.getChild("route");
-		String routeId = route.getAttributeValue("tag");
-		String directionId = route.getAttributeValue("direction");
+			String routeId, Document scheduleDoc) {
+		List<Dir> dirsForRoute = 
+				MissionBayConfig.getSpecialCaseDirections(routeId);
 		
-		List<Element> trips = route.getChildren("tr");
-		for (Element trip : trips) {
-			String blockId = trip.getAttributeValue("blockID");
-			
-			String tripId = null;
-			String lastStopTag = null;
-			List<Element> stops = trip.getChildren("stop");
-			int stopSequence = 0;
-			for (Element stop : stops) {
-				String stopTag = stop.getAttributeValue("tag");
-				lastStopTag = stopTag;
-				String timeStr = stop.getText();
-				
-				// For now if stop doesn't have valid time then it is not considered
-				// to be part of trip
-				if (!timeStr.contains(":"))
-					continue;
-				
-				// Use route + block + time of first stop for the trip ID
-				if (tripId == null)
-					tripId = getTripId(routeId, blockId, timeStr);
-				
-				// Create the GtfsStopTime
-				Boolean timepointStop = null;
-				GtfsStopTime gtfsStopTime = new GtfsStopTime(tripId, timeStr,
-						timeStr, stopTag, stopSequence++,
-						timepointStop);
-				stopTimesWriter.write(gtfsStopTime);				
-			}
+		Map<String, List<StopTime>> stopTimesByBlock = getStopTimesMap(scheduleDoc);
 
-			// For the trip there is no headsign info available from NextBus
-			// API. Therefore just use "To " + lastStopName.
-			String tripHeadsign = getTripHeadsign(lastStopTag);
-			
-			// Create the trip info
-			String tripShortName = null;
-			String shapeId = getShapeId(routeId, directionId);
-			GtfsTrip gtfsTrip = new GtfsTrip(routeId, serviceId.getValue(),
-					tripId, tripHeadsign, tripShortName, directionId, blockId,
-					shapeId);
-			tripsWriter.write(gtfsTrip);			
+		// For every block in route...
+		for (String blockId : stopTimesByBlock.keySet()) {
+			List<StopTime> stopTimesForBlock = stopTimesByBlock.get(blockId);
+			// For every trip in block...
+			int beginIdx=0; // Index into stopTimesForBlock
+			do {
+				// Determine endIdx, the last stop of the trip. It will 
+				// usually be the first stop of the next trip, but it
+				// can also simply be the end of the trip if there is a
+				// time gap or if the end of the block has been reached.
+				int endIdx;  // Index into stopTimesForBlock
+				for (endIdx = beginIdx+1; 
+						endIdx < stopTimesForBlock.size() 
+							&& !firstStopInNextTrip(endIdx, stopTimesForBlock, dirsForRoute); 
+						++endIdx) {}
+				// Handle end of block properly
+				if (endIdx >= stopTimesForBlock.size())
+					endIdx = stopTimesForBlock.size()-1;
+				// Handle timegap between trips properly
+				boolean endedWithTimegap = false;
+				if (stopTimesForBlock.get(endIdx).stopTime > 
+					stopTimesForBlock.get(endIdx-1).stopTime + 2*Time.SEC_PER_HOUR) {
+					--endIdx;
+					endedWithTimegap = true;
+				}
+
+				
+				// Get list of stops in schedule for the current trip
+				List<String> scheduledStopIdsForTrip = new ArrayList<String>();
+				for (int i = beginIdx; i <= endIdx; ++i) {
+					scheduledStopIdsForTrip.add(stopTimesForBlock.get(i).stopId);
+				}
+				
+				// Create the GTFS trip
+				String tripStartTimeStr = 
+						stopTimesForBlock.get(beginIdx).stopTimeStr;
+				String tripId = getTripId(routeId, blockId, tripStartTimeStr);				
+				writeGtfsTrip(tripsWriter, tripId, routeId, blockId,
+						tripStartTimeStr, dirsForRoute, scheduledStopIdsForTrip);
+								
+				// Determine the Dir that matches to the scheduled times for 
+				// the current trip in the schedule
+				Dir matchingDir = determineDirection(scheduledStopIdsForTrip,
+						dirsForRoute, routeId, tripStartTimeStr);
+				
+				// Find stop in the Dir that matches the first
+				// schedule time for the trip, since might be looking at a
+				// partial trip that doesn't start at beginning of the Dir.
+				int dirIdx; // Index into matchingDir
+				String firstScheduleStopForTrip = 
+						stopTimesForBlock.get(beginIdx).stopId;
+				for (dirIdx = 0; dirIdx < matchingDir.stopIds.size(); ++dirIdx) {
+					if (matchingDir.stopIds.get(dirIdx).equals(firstScheduleStopForTrip)) {
+						break;
+					}
+				}
+				
+				// Go through stops in the matching Dir and add all of them
+				// to the trip.				
+				int prevStopTimeIdx = beginIdx;
+				while (dirIdx < matchingDir.stopIds.size() && prevStopTimeIdx < endIdx) {
+					String stopId = matchingDir.stopIds.get(dirIdx);
+					
+					// Find scheduled time for the stop if there is one. If there
+					// isn't one then timeStr will be null. Need to be careful here
+					// because a trip will often have a stop defined twice. For 
+					// example, if the trip loops around then the same stop will
+					// be at beginning and end of trip. And sometimes a trip
+					// covers the same stop twice due to a figure-8 configuration.
+					String timeStr = null;
+					for (int stopTimeIdx = prevStopTimeIdx; 
+							stopTimeIdx <= endIdx; 
+							++stopTimeIdx) {
+						StopTime stopTime = stopTimesForBlock.get(stopTimeIdx);
+						if (stopTime.stopId.equals(stopId)) {
+							timeStr = stopTime.stopTimeStr;
+							prevStopTimeIdx = stopTimeIdx;
+							break;
+						}
+					}
+					
+					// First stop of trip is a timepoint stop, though of course
+					// that is automatically done anyways by the core system.
+					Boolean timepointStop = dirIdx==0;
+					GtfsStopTime gtfsStopTime = new GtfsStopTime(tripId,
+							timeStr, timeStr, stopId, dirIdx,
+							timepointStop);
+					stopTimesWriter.write(gtfsStopTime);
+					
+					++dirIdx;
+				}
+				
+				// Continue on to next trip. If trip ended with timegap then
+				// need to go to the next stop. If reached end of block then
+				// done endIdx will point to last stop for block
+				beginIdx = endIdx;
+				if (endedWithTimegap)
+					beginIdx++;
+			} while (beginIdx < stopTimesForBlock.size()-1);
 		}
-
 	}
 	
 	/**
@@ -607,7 +862,7 @@ public class GtfsFromNextBus {
 
 				// Process trips and stop_times for route
 				processTripsAndStopTimesForRoute(tripsWriter, stopTimesWriter,
-						scheduleDoc);
+						routeId, scheduleDoc);
 			} catch (IOException | JDOMException e) {
 				logger.error("Problem processing data for route {}", 
 						routeId, e);
@@ -616,6 +871,7 @@ public class GtfsFromNextBus {
 
 		// Close the files
 		tripsWriter.close();
+		stopTimesWriter.close();
 	}
 	
 	/**

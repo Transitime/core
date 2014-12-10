@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.core.predAccuracy;
+package org.transitime.custom.mbta;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.StringConfigValue;
+import org.transitime.core.predAccuracy.PredAccuracyPrediction;
+import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.modules.Module;

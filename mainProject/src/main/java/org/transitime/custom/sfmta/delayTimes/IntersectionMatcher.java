@@ -15,14 +15,10 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.misc.sfmta;
+package org.transitime.custom.sfmta.delayTimes;
 
 import java.util.List;
 
-import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Vector;
 import org.transitime.utils.Geo;
@@ -34,9 +30,6 @@ import org.transitime.utils.Geo;
  *
  */
 public class IntersectionMatcher {
-
-	private static final Logger logger = LoggerFactory
-			.getLogger(IntersectionMatcher.class);
 
 	/********************** Member Functions **************************/
 

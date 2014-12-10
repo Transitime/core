@@ -16,9 +16,9 @@
  */
 
 /**
- * For generating some of the GTFS files by reading data from NextBus API.
+ * Custom classes specifically for SFMTA
  *
  * @author SkiBu Smith
  *
  */
-package org.transitime.gtfs.generator;
+package org.transitime.custom.sfmta;

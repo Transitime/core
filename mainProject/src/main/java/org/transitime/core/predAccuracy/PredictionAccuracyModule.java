@@ -136,10 +136,10 @@ public class PredictionAccuracyModule extends Module {
 	/**
 	 * For keeping track of which routes and stops to get predictions for.
 	 */
-	protected static class RouteAndStops {
-		protected String routeId;
+	public static class RouteAndStops {
+		public String routeId;
 		// Keyed on direction ID
-		protected Map<String, Collection<String>> stopIds = 
+		public Map<String, Collection<String>> stopIds = 
 				new HashMap<String, Collection<String>>();
 		
 		@Override

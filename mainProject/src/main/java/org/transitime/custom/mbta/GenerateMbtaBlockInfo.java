@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.misc;
+package org.transitime.custom.mbta;
 
 import java.text.ParseException;
 import java.util.ArrayList;
