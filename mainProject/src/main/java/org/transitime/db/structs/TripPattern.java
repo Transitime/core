@@ -367,7 +367,7 @@ public class TripPattern implements Serializable, Lifecycle {
 		}
 		
 		if (problemWithTripPatternId)
-			GtfsData.logger.warn("There was a problem with creating trip " + 
+			GtfsData.logger.warn("There was an issue with creating trip " + 
 					"pattern for tripId={} for routeId={} in " +
 					"TripPattern.generateTripPatternId(). " + 
 					"There already was a trip pattern with the desired name. " + 
