@@ -60,8 +60,12 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 			String departureTimeStr, String stopId, int stopSequence,
 			Boolean timepointStop) {
 		this.tripId = tripId;
-		this.arrivalTimeSecs = Time.parseTimeOfDay(arrivalTimeStr);
-		this.departureTimeSecs = Time.parseTimeOfDay(departureTimeStr);
+		this.arrivalTimeSecs = 
+				(arrivalTimeStr != null && !arrivalTimeStr.isEmpty()) ? 
+						Time.parseTimeOfDay(arrivalTimeStr) : null;
+		this.departureTimeSecs = 
+				(departureTimeStr != null && !departureTimeStr.isEmpty()) ?
+						Time.parseTimeOfDay(departureTimeStr) : null;
 		this.stopId = stopId;
 		this.stopSequence = stopSequence;
 		this.timepointStop = timepointStop;
@@ -86,14 +90,14 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		tripId = getRequiredValue(record, "trip_id");
 
 		// Convert arrival_time to seconds in day
-		String arrivalTimeStr = getRequiredValue(record, "arrival_time");
+		String arrivalTimeStr = getOptionalValue(record, "arrival_time");
 		if (arrivalTimeStr != null)
 			arrivalTimeSecs = Time.parseTimeOfDay(arrivalTimeStr);
 		else
 			arrivalTimeSecs = null;
 
 		// Convert departure_time to seconds in day
-		String deparatureTimeStr = getRequiredValue(record, "departure_time");
+		String deparatureTimeStr = getOptionalValue(record, "departure_time");
 		if (deparatureTimeStr != null)
 			departureTimeSecs = Time.parseTimeOfDay(deparatureTimeStr);
 		else
