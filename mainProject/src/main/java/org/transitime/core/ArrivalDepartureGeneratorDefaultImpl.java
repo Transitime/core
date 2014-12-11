@@ -249,7 +249,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param tripIndex
 	 * @param stopPathIndex
 	 */
-	private Departure createDepartureTime(VehicleState vehicleState,
+	protected Departure createDepartureTime(VehicleState vehicleState,
 			long departureTime, Block block, int tripIndex, int stopPathIndex) {		
 		// Store the departure in the database via the db logger
 		Departure departure = new Departure(vehicleState.getVehicleId(), 
@@ -273,7 +273,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param tripIndex
 	 * @param stopPathIndex
 	 */
-	private Arrival createArrivalTime(VehicleState vehicleState,
+	protected Arrival createArrivalTime(VehicleState vehicleState,
 			long arrivalTime, Block block, int tripIndex, int stopPathIndex) {
 		// Store the arrival in the database via the db logger
 		Arrival arrival = new Arrival(vehicleState.getVehicleId(), 
@@ -302,7 +302,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * 
 	 * @param arrivalDeparture
 	 */
-	private void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
+	protected void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
 		// Queue to store object into db
 		Core.getInstance().getDbLogger().add(arrivalDeparture);
 		
