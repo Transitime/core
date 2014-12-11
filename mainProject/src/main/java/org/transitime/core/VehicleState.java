@@ -389,7 +389,9 @@ public class VehicleState {
 	 * @param avlReport
 	 * @return
 	 */
-	public boolean hasNewAssignment(AvlReport avlReport) {		
+	public boolean hasNewAssignment(AvlReport avlReport) {
+		// Use Objects.equals() since either the existing assignment or 
+		// the AVL report assignment can be null
 		return  !Objects.equals(assignmentId, avlReport.getAssignmentId());
 	}
 	
