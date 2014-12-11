@@ -802,13 +802,6 @@ public class Trip implements Serializable {
 	}
 	
 	/**
-	 * @return the getScheduleTimesMap
-	 */
-	public Map<String, ScheduleTime> getScheduleTimesMap() {
-		return scheduledTimesMap;
-	}
-	
-	/**
 	 * Returns the ScheduleTime object for the stopId. Will return null if there
 	 * are no schedule times associated with that stop for this trip. Useful for
 	 * determining schedule adherence.
