@@ -30,6 +30,7 @@ import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Departure;
+import org.transitime.db.structs.Location;
 import org.transitime.utils.Time;
 
 /**
@@ -122,13 +123,27 @@ public class ArrDepGeneratorMissionBayImpl
 				}
 			}
 			
-			// Find the corresponding arrival for the departure
+			// Find the corresponding arrival for the departure and push it 
+			// to the SFMTA API
 			for (Arrival arrival : arrivals) {
 				if (arrival.getVehicleId().equals(departure.getVehicleId())
 						&& arrival.getStopId().equals(departure.getStopId())) {
 					// For the departure found the matching arrival
 					logger.info("Found arrival/departure pair for SFMTA stop. "
 							+ "{} {} ",	arrival, departure);
+					
+					// Post the stop report to the SFMTA API
+					String vehicleId = departure.getVehicleId();
+					int stopId = sfmtaStopMap.get(departure.getStopId());
+					Location stopLoc = departure.getStop().getLoc();					
+					SfmtaApiCaller.postStopReport(vehicleId, stopId,
+							stopLoc.getLat(), stopLoc.getLon(),
+							arrival.getDate(), departure.getDate());
+					
+					// Matched this arrival so remove it from the list
+					arrivals.remove(arrival);
+					
+					// Push it to the API
 					break;
 				}
 			}

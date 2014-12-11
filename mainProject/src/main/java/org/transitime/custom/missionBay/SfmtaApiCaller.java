@@ -85,15 +85,38 @@ public class SfmtaApiCaller {
 	private static final Logger logger = LoggerFactory
 			.getLogger(SfmtaApiCaller.class);
 
-	/********************** Member class *******************************/
+	/********************** Member classes *******************************/
 	
+	/**
+	 * Contains the data for a SFMTA API stop report
+	 */
 	private static class StopInfo {
-		String vehicleId;
-		int stopId;
-		double lat;
-		double lon;
-		Date arrivalTime;
-		Date departureTime;
+		private String vehicleId;
+		private int stopId;
+		private double stopLat;
+		private double stopLon;
+		private Date arrivalTime;
+		private Date departureTime;
+		
+		/**
+		 * Constructor
+		 * 
+		 * @param vehicleId
+		 * @param stopId Numeric SFMTA stop ID
+		 * @param stopLat
+		 * @param stopLon
+		 * @param arrivalTime
+		 * @param departureTime
+		 */
+		public StopInfo(String vehicleId, int stopId, double stopLat,
+			double stopLon, Date arrivalTime, Date departureTime) {
+			this.vehicleId = vehicleId;
+			this.stopId = stopId;
+			this.stopLat = stopLat;
+			this.stopLon = stopLon;
+			this.arrivalTime = arrivalTime;
+			this.departureTime = departureTime;
+		}
 	}
 	
 	/********************** Member Functions  **************************/
@@ -157,8 +180,8 @@ public class SfmtaApiCaller {
 			sb.append("\"ProviderId\": " + providerId.getValue() + ",\n");
 			sb.append("\"VehicleId\": \"" + stopInfo.vehicleId + "\",\n");
 			sb.append("\"StopId\": " + stopInfo.stopId + ",\n");
-			sb.append("\"StopLocationLatitude\": " + stopInfo.lat + ",\n");
-			sb.append("\"StopLocationLongitude\": " + stopInfo.lon + ",\n");
+			sb.append("\"StopLocationLatitude\": " + stopInfo.stopLat + ",\n");
+			sb.append("\"StopLocationLongitude\": " + stopInfo.stopLon + ",\n");
 			sb.append("\"StopTimeStart\": \"" + formattedTime(stopInfo.arrivalTime) + "\",\n"); 
 			sb.append("\"StopTimeEnd\": \"" + formattedTime(stopInfo.departureTime) + "\"\n"); 
 			sb.append("}");
@@ -177,8 +200,7 @@ public class SfmtaApiCaller {
 	 * @return True if successfully posted the data
 	 */
 	private static boolean post(String baseUrl, String jsonStr) {
-		String fullUrl = baseUrl + "?" + "key=" + key.getValue()
-				/* + "&tname=geo-bus" */; // FIXME tname doesn't seem to be needed. Should confirm
+		String fullUrl = baseUrl + "?" + "key=" + key.getValue();
 
 		try {
 			// Create the connection
@@ -274,7 +296,7 @@ public class SfmtaApiCaller {
 	 * 
 	 * @param avlReports
 	 */
-	private static void postStopReports(List<StopInfo> stopInfos) {
+	public static void postStopReports(List<StopInfo> stopInfos) {
 		// Convert AVL data to a JSON string
 		String jsonStr = getStopJson(stopInfos);
 		
@@ -287,13 +309,40 @@ public class SfmtaApiCaller {
 	}
 	
 	/**
+	 * Posts a single stop report to the SFMTA API.
+	 * 
+	 * @param vehicleId
+	 * @param stopId
+	 * @param lat
+	 * @param lon
+	 * @param arrivalTime
+	 * @param departureTime
+	 */
+	public static void postStopReport(String vehicleId, int stopId, double lat,
+			double lon, Date arrivalTime, Date departureTime) {
+		StopInfo stopInfo = new StopInfo(vehicleId, stopId, lat, lon,
+				arrivalTime, departureTime);
+ 
+		// Put the StopInfo into a list so can call postStopReports()
+		List<StopInfo> stopInfos = new ArrayList<StopInfo>();
+		stopInfos.add(stopInfo);
+		
+		// Actually post the data
+		postStopReports(stopInfos);
+	}
+	
+	/**
 	 * To be called when system has a new AVL report. Batches the reports
 	 * together. If have enough reports (as specified by avlReportsBatchSize)
 	 * then actually writes them to the API.
+	 * <p>
+	 * Synchronized in case multiple threads used when accessing the avlReports
+	 * cache
 	 * 
 	 * @param avlReport
 	 */
-	public synchronized static void postAvlReportWhenAppropriate(AvlReport avlReport) {
+	public synchronized static void postAvlReportWhenAppropriate(
+			AvlReport avlReport) {
 		avlReports.add(avlReport);
 		if (avlReports.size() >= avlReportsBatchSize.getValue()) {
 			postAvlReports(avlReports);
@@ -301,34 +350,31 @@ public class SfmtaApiCaller {
 		}
 	}
 	
+	/**
+	 * For debugging.
+	 * 
+	 * @param args
+	 */
 	public static void main(String args[]) {
-		AvlReport avlReport1 = new AvlReport("vehicleId1", System.currentTimeMillis(), 37.12345, -122.4567);
-		AvlReport avlReport2 = new AvlReport("vehicleId2", System.currentTimeMillis(), 37.12345, -122.4567);
+		AvlReport avlReport1 = new AvlReport("vehicleId1",
+				System.currentTimeMillis(), 37.12345, -122.4567);
+		AvlReport avlReport2 = new AvlReport("vehicleId2",
+				System.currentTimeMillis(), 37.12345, -122.4567);
 		List<AvlReport> avlReports = new ArrayList<AvlReport>();
 		avlReports.add(avlReport1);
 		avlReports.add(avlReport2);
-		
+
 		postAvlReports(avlReports);
-		
-		StopInfo s1 = new StopInfo();
-		s1.vehicleId = "vehicleId1";
-		s1.stopId = 1324;
-		s1.lat = 37.12345;
-		s1.lon = -122.4567;
-		s1.arrivalTime = new Date();
-		s1.departureTime = new Date();
-		StopInfo s2 = new StopInfo();
-		s2.vehicleId = "vehicleId2";
-		s2.stopId = 4321;
-		s2.lat = 37.12345;
-		s2.lon = -122.4567;
-		s2.arrivalTime = new Date();
-		s2.departureTime = new Date();
+
+		StopInfo s1 = new StopInfo("vehicleId1", 3124, 37.12345, -122.4567,
+				new Date(), new Date());
+		StopInfo s2 = new StopInfo("vehicleId2", 4321, 37.12346, -122.4667,
+				new Date(), new Date());
+
 		List<StopInfo> stopInfos = new ArrayList<StopInfo>();
 		stopInfos.add(s1);
 		stopInfos.add(s2);
 		
-		postStopReports(stopInfos);
-		
+		postStopReports(stopInfos);		
 	}
 }
