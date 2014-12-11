@@ -389,7 +389,7 @@
         headsign varchar(255),
         routeId varchar(60),
         routeShortName varchar(60),
-        scheduledTimesMap blob,
+        scheduledTimesList blob,
         serviceId varchar(60),
         shapeId varchar(60),
         tripShortName varchar(60),

@@ -911,8 +911,7 @@ public final class Block implements Serializable {
 	 */
 	public ScheduleTime getScheduleTime(int tripIndex, int stopPathIndex) {
 		Trip trip = getTrip(tripIndex);
-		StopPath stopPath = trip.getTripPattern().getStopPath(stopPathIndex);
-		return trip.getScheduleTime(stopPath.getStopId());
+		return trip.getScheduleTime(stopPathIndex);
 	}
 	
 	/**

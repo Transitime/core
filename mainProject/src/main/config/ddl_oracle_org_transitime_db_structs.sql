@@ -359,7 +359,7 @@
         headsign varchar2(255 char),
         routeId varchar2(60 char),
         routeShortName varchar2(60 char),
-        scheduledTimesMap long raw,
+        scheduledTimesList long raw,
         serviceId varchar2(60 char),
         shapeId varchar2(60 char),
         tripShortName varchar2(60 char),

@@ -140,8 +140,7 @@ public class RealTimeSchedAdhProcessor {
 		int stopPathIndex = 0;
 		for (int i=match.getStopPathIndex(); i<stopPaths.size(); ++i) {
 			StopPath stopPath = stopPaths.get(i);
-			ScheduleTime scheduleTime = 
-					trip.getScheduleTime(stopPath.getStopId());
+			ScheduleTime scheduleTime = trip.getScheduleTime(i);
 			if (scheduleTime.getTime() != null) {
 				stopPathWithScheduleTime = stopPath;
 				stopPathIndex = i;
@@ -167,11 +166,11 @@ public class RealTimeSchedAdhProcessor {
 						match, matchAtStopWithScheduleTime);
 		
 		// If using departure time then add in expected stop wait time
-		ScheduleTime scheduleTime = 
-				trip.getScheduleTime(stopPathWithScheduleTime.getStopId());
+		ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
 		if (scheduleTime.getDepartureTime() != null) {
 			//TravelTimesForStopPath 
-			int stopTime = trip.getTravelTimesForStopPath(stopPathIndex).getStopTimeMsec();
+			int stopTime = trip.getTravelTimesForStopPath(stopPathIndex)
+					.getStopTimeMsec();
 			travelTimeToStopMsec += stopTime;
 		}
 		

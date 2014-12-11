@@ -71,7 +71,7 @@ public class IpcTrip implements Serializable {
 		scheduleTimes = new ArrayList<IpcScheduleTimes>();
 		for (int i=0; i<dbTrip.getNumberStopPaths(); ++i) {
 			String stopId = dbTrip.getTripPattern().getStopId(i);
-			scheduleTimes.add(new IpcScheduleTimes(dbTrip.getScheduleTime(stopId), stopId));
+			scheduleTimes.add(new IpcScheduleTimes(dbTrip.getScheduleTime(i), stopId));
 		}
 		travelTimes = dbTrip.getTravelTimes();
 	}

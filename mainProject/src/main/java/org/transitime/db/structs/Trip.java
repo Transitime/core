@@ -17,6 +17,7 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,11 +119,10 @@ public class Trip implements Serializable {
 	// much faster.
 	// scheduleTimesMaxBytes set to 4000 because for sfmta route 91 there
 	// is a trip with 91 schedule times.
-	// Keyed on stopId
 	private static final int scheduleTimesMaxBytes = 4000;
 	@Column(length=scheduleTimesMaxBytes)
-	private final HashMap<String, ScheduleTime> scheduledTimesMap = 
-			new HashMap<String, ScheduleTime>(); 
+	private final ArrayList<ScheduleTime> scheduledTimesList = 
+			new ArrayList<ScheduleTime>(); 
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String serviceId;
@@ -228,9 +228,7 @@ public class Trip implements Serializable {
 				Time.timeOfDayStr(this.startTime);
 
 		// Set the scheduledTimesMap by using the frequencies based start time
-		for (String stopIdKey : tripFromStopTimes.scheduledTimesMap.keySet()) {
-			ScheduleTime schedTimeFromStopTimes = 
-					tripFromStopTimes.scheduledTimesMap.get(stopIdKey);
+		for (ScheduleTime schedTimeFromStopTimes: tripFromStopTimes.scheduledTimesList) {
 			Integer arrivalTime = null;
 			if (schedTimeFromStopTimes.getArrivalTime() != null)
 				arrivalTime = schedTimeFromStopTimes.getArrivalTime() + 
@@ -242,7 +240,7 @@ public class Trip implements Serializable {
 			
 			ScheduleTime schedTimeFromFrequency = 
 					new ScheduleTime(arrivalTime, departureTime); 
-			this.scheduledTimesMap.put(stopIdKey, schedTimeFromFrequency);
+			this.scheduledTimesList.add(schedTimeFromFrequency);
 		}
 	}
 	
@@ -267,17 +265,16 @@ public class Trip implements Serializable {
 	 * For adding ScheduleTimes for stops to a Trip. Updates scheduledTimesMap,
 	 * startTime, and endTime.
 	 * 
-	 * @param newScheduledTimesMap
+	 * @param newScheduledTimesList
 	 * @throws ArrayIndexOutOfBoundsException
 	 *             If not enough space allocated for serialized schedule times
 	 *             in scheduledTimesMap column
 	 */
-	public void addScheduleTimes(HashMap<String, ScheduleTime> newScheduledTimesMap) {
+	public void addScheduleTimes(List<ScheduleTime> newScheduledTimesList) {
 		// For each schedule time (one per stop path)
-		for (String stopId : newScheduledTimesMap.keySet()) {
+		for (ScheduleTime scheduleTime : newScheduledTimesList) {
 			// Add the schedule time to the map
-			ScheduleTime scheduleTime = newScheduledTimesMap.get(stopId);
-			scheduledTimesMap.put(stopId, scheduleTime);
+			scheduledTimesList.add(scheduleTime);
 			
 			// Determine the begin and end time. Assumes that times are added in order
 			if (startTime == null || 
@@ -292,12 +289,12 @@ public class Trip implements Serializable {
 		
 		// If resulting map takes up too much memory throw an exception.
 		// Only bother checking if have at least a few schedule times.
-		if (scheduledTimesMap.size() > 5) {
-			int serializedSize = HibernateUtils.sizeof(scheduledTimesMap);
+		if (scheduledTimesList.size() > 5) {
+			int serializedSize = HibernateUtils.sizeof(scheduledTimesList);
 			if (serializedSize > scheduleTimesMaxBytes) {
 				String msg = "Too many elements in "
 						+ "scheduledTimesMap when constructing a "
-						+ "Trip. Have " + scheduledTimesMap.size()
+						+ "Trip. Have " + scheduledTimesList.size()
 						+ " schedule times taking up " + serializedSize 
 						+ " bytes but only have " + scheduleTimesMaxBytes 
 						+ " bytes allocated for the data. Trip=" 
@@ -448,7 +445,7 @@ public class Trip implements Serializable {
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
-				+ ", scheduledTimesMap=" + scheduledTimesMap 
+				+ ", scheduledTimesList=" + scheduledTimesList 
 				+ "]";
 	}
 	
@@ -475,7 +472,7 @@ public class Trip implements Serializable {
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
-				+ ", scheduledTimesMap=" + scheduledTimesMap
+				+ ", scheduledTimesList=" + scheduledTimesList
 				+ ", travelTimes=" + travelTimes
 				+ "]";
 	}
@@ -520,7 +517,7 @@ public class Trip implements Serializable {
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime
 				* result
-				+ ((scheduledTimesMap == null) ? 0 : scheduledTimesMap
+				+ ((scheduledTimesList == null) ? 0 : scheduledTimesList
 						.hashCode());
 		result = prime * result
 				+ ((serviceId == null) ? 0 : serviceId.hashCode());
@@ -575,10 +572,10 @@ public class Trip implements Serializable {
 				return false;
 		} else if (!routeId.equals(other.routeId))
 			return false;
-		if (scheduledTimesMap == null) {
-			if (other.scheduledTimesMap != null)
+		if (scheduledTimesList == null) {
+			if (other.scheduledTimesList != null)
 				return false;
-		} else if (!scheduledTimesMap.equals(other.scheduledTimesMap))
+		} else if (!scheduledTimesList.equals(other.scheduledTimesList))
 			return false;
 		if (serviceId == null) {
 			if (other.serviceId != null)
@@ -802,15 +799,15 @@ public class Trip implements Serializable {
 	}
 	
 	/**
-	 * Returns the ScheduleTime object for the stopId. Will return null if there
-	 * are no schedule times associated with that stop for this trip. Useful for
-	 * determining schedule adherence.
+	 * Returns the ScheduleTime object for the stopPathIndex. Will return null
+	 * if there are no schedule times associated with that stop for this trip.
+	 * Useful for determining schedule adherence.
 	 * 
-	 * @param stopId
+	 * @param stopPathIndex
 	 * @return
 	 */
-	public ScheduleTime getScheduleTime(String stopId) {
-		return scheduledTimesMap.get(stopId);
+	public ScheduleTime getScheduleTime(int stopPathIndex) {
+		return scheduledTimesList.get(stopPathIndex);
 	}
 	
 	/**
