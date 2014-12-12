@@ -285,7 +285,7 @@ public class SfmtaApiCaller {
 		// Post data to the API
 		if (post(telemetryUrl.getValue(), jsonStr)) {
 			logger.info("Successfully pushed out {} telemetry data points to "
-					+ "API", avlReports.size());
+					+ "SFMTA API", avlReports.size());
 			logger.debug("Successfully pushed telemetry data json=\n{}", 
 					jsonStr);
 		};
@@ -302,7 +302,7 @@ public class SfmtaApiCaller {
 		
 		// Post data to the API
 		if (post(stopsUrl.getValue(), jsonStr)) {
-			logger.info("Successfully pushed out stop data to API");
+			logger.info("Successfully pushed out stop data to SFMTA API");
 			logger.debug("Successfully pushed stop data json=\n{}", 
 					jsonStr);
 		};
