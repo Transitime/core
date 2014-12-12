@@ -115,7 +115,7 @@ public class ArrDepGeneratorMissionBayImpl
 			while (it.hasNext()) {
 				Arrival arrival = it.next();			
 				if (arrival.getTime() < 
-						System.currentTimeMillis() - 10*Time.MS_PER_MIN) {
+						departure.getTime() - 10*Time.MS_PER_MIN) {
 					it.remove();
 					logger.error("Arrival was more than 10 minutes old without "
 							+ "finding corresponding departure. Therefore "

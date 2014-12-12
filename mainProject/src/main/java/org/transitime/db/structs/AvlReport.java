@@ -119,10 +119,13 @@ public class AvlReport implements Serializable {
 		UNSET, 
 		BLOCK_ID,
 		// For when creating schedule based predictions
-		BLOCK_FOR_SCHED_BASED_PREDS, 
+		BLOCK_FOR_SCHED_BASED_PREDS,
+		
 		ROUTE_ID, 
 		TRIP_ID, 
-		TRIP_SHORT_NAME
+		TRIP_SHORT_NAME,
+		// For when get bad assignment info from AVL feed
+		PREVIOUS
 	};
 	
 	@Column(length=40)
@@ -337,6 +340,37 @@ public class AvlReport implements Serializable {
 		this.heading = toCopy.heading;
 		this.assignmentId = toCopy.assignmentId;
 		this.assignmentType = toCopy.assignmentType;
+		this.leadVehicleId = toCopy.leadVehicleId;
+		this.driverId = toCopy.driverId;
+		this.licensePlate = toCopy.licensePlate;
+		this.timeProcessed = toCopy.timeProcessed;
+		this.passengerCount = toCopy.passengerCount;
+		this.passengerFullness = toCopy.passengerFullness;
+		this.field1Name = toCopy.field1Name;
+		this.field1Value = toCopy.field1Value;
+	}
+	
+	/**
+	 * Makes a copy of the AvlReport but uses the new assignment info passed in.
+	 * Useful for creating a new AvlReport when a bad assignment is received
+	 * since one can simply create a new AvlReport with the new assignment info.
+	 * 
+	 * @param toCopy
+	 *            The AvlReport to copy (except for the AVL time)
+	 * @param assignmentId
+	 *            The assignment to use
+	 * @param assignmentType
+	 *            How the assignment was done
+	 */
+	public AvlReport(AvlReport toCopy, String assignmentId,
+			AssignmentType assignmentType) {
+		this.vehicleId = toCopy.vehicleId;
+		this.time = toCopy.time;
+		this.location = toCopy.location;
+		this.speed = toCopy.speed;
+		this.heading = toCopy.heading;
+		this.assignmentId = assignmentId;
+		this.assignmentType = assignmentType;
 		this.leadVehicleId = toCopy.leadVehicleId;
 		this.driverId = toCopy.driverId;
 		this.licensePlate = toCopy.licensePlate;

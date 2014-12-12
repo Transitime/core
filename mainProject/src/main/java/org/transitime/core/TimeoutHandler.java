@@ -156,22 +156,15 @@ public class TimeoutHandler {
 							Time.elapsedTimeStr(AvlConfig.getAvlTimeoutSecs()
 									* Time.MS_PER_SEC), avlReport);
 					
-					TemporalMatch lastMatch = vehicleState.getMatch();
+					// Make vehicle unpredictable
 					String eventDescription = "Vehicle timed out because it "
 							+ "has not reported in " 
 							+ Time.elapsedTimeStr(newAvlReport.getTime() - 
 									avlReport.getTime()) 
 							+ " and so was made unpredictable.";
-					VehicleEvent.create(avlReport, lastMatch,
-							VehicleEvent.TIMEOUT,
-							eventDescription,
-							false, // predictable,
-							false, // becameUnpredictable
-							null);  // supervisor
-
-					// Make vehicle unpredictable
-					AvlProcessor.getInstance().
-							makeVehicleUnpredictable(avlReport.getVehicleId());
+					AvlProcessor.getInstance().makeVehicleUnpredictable(
+							avlReport.getVehicleId(), eventDescription,
+							VehicleEvent.TIMEOUT);
 
 					// Remove that AVL report from the map since it was handled
 					mapIterator.remove();

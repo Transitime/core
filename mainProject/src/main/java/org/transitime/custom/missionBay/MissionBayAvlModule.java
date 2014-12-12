@@ -51,7 +51,8 @@ public class MissionBayAvlModule extends NextBusAvlModule {
 		super.processAvlReport(avlReport);
 		
 		// Send the data to the SFMTA API
-		logger.info("Sending avlReport to SFMTA API {}", avlReport);
+		logger.info("Batching avlReport to send to SFMTA API when have "
+				+ "enough reports. {}", avlReport);
 		SfmtaApiCaller.postAvlReportWhenAppropriate(avlReport);
 	}
 }
