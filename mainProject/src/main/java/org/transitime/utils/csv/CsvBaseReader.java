@@ -165,16 +165,18 @@ public abstract class CsvBaseReader<T> {
 				try {
 					gtfsObject = handleRecord(record, supplemental);
 				} catch (ParseException e) {
-					logger.error("ParseException occurred on line {} for " +
-							"filename {} . {}", 
+					logger.error("ParseException occurred for record {} "
+							+ "(comment lines not included when determing record #) for "
+							+ "filename {} . {}",  
 							record.getRecordNumber(), fileName, e.getMessage());
 
 					// Continue even though there was an error so that all errors 
 					// logged at once.					
 					continue;
 				} catch (NumberFormatException e) {
-					logger.error("NumberFormatException occurred on line {} " +
-							"for filename {} . {}", 
+					logger.error("NumberFormatException occurred for record {} "
+							+ "(comment lines not included when determing record #) "
+							+ "for filename {} . {}", 
 							record.getRecordNumber(), fileName, e.getMessage());
 
 					// Continue even though there was an error so that all errors 
