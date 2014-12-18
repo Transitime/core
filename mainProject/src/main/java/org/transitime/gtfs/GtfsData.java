@@ -512,7 +512,7 @@ public class GtfsData {
 			for (GtfsStop supplementStop : gtfsStopsSupplement) {
 				GtfsStop gtfsStop = gtfsStopsMap.get(supplementStop.getStopId());
 				if (gtfsStop == null) {
-					logger.error("Found supplemental stop data for stopId={] "
+					logger.error("Found supplemental stop data for stopId={} "
 							+ "but that stop did not exist in the main "
 							+ "stops.txt file. {}", 
 							supplementStop.getStopId(), supplementStop);
