@@ -645,10 +645,11 @@ public class AvlProcessor {
 	 */
 	private void handleProblemAssignment(VehicleState vehicleState) {
 		String oldAssignment = vehicleState.getAssignmentId();
+		boolean wasPredictable = vehicleState.isPredictable();
 		
-		// Only need to do anything if the vehicle previously did not have 
-		// an assignment
-		if (oldAssignment != null) {
+		// Only need to do anything if the vehicle previously was predictable and
+		// had an assignment
+		if (wasPredictable && oldAssignment != null) {
 			// Had a valid old assignment. If haven't had too many bad assignments
 			// in a row then use the old assignment. 
 			if (vehicleState.getBadAssignmentsInARow() < allowableBadAssignments.getValue()) {
@@ -672,6 +673,15 @@ public class AvlProcessor {
 				// Increment the bad assignments count
 				vehicleState.setBadAssignmentsInARow(
 						vehicleState.getBadAssignmentsInARow() + 1);
+			} else {
+				// Vehicle was predictable but now have encountered too many problem
+				// assignments. Therefore make vehicle unpredictable.
+				String eventDescription = "VehicleId=" + vehicleState.getVehicleId() 
+						+ " was assigned to blockId=" + oldAssignment 
+						+ " but received too many null assignments so making "
+						+ "vehicle unpredictable.";
+				makeVehicleUnpredictable(vehicleState.getVehicleId(),
+						eventDescription, VehicleEvent.ASSIGNMENT_CHANGED);
 			}
 		}
 	}
