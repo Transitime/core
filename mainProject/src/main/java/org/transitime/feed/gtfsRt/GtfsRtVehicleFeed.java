@@ -20,11 +20,13 @@ package org.transitime.feed.gtfsRt;
 import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.VehiclesInterface;
+
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
@@ -32,6 +34,7 @@ import com.google.transit.realtime.GtfsRealtime.Position;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
+import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
 
 /**
  * For creating GTFS-realtime Vehicle feed.
@@ -117,6 +120,7 @@ public class GtfsRtVehicleFeed {
 		
 		FeedHeader.Builder feedheader = FeedHeader.newBuilder()
 				.setGtfsRealtimeVersion("1.0")
+				.setIncrementality(Incrementality.FULL_DATASET)
 				.setTimestamp(System.currentTimeMillis());
 		message.setHeader(feedheader);
 		  
