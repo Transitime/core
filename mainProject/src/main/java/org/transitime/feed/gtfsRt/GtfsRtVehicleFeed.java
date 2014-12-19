@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.interfaces.VehiclesInterface;
+import org.transitime.utils.Time;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
@@ -102,7 +103,7 @@ public class GtfsRtVehicleFeed {
 		// Convert the GPS timestamp information to an epoch time as
 		// number of milliseconds since 1970.
 		long gpsTime = vehicleData.getGpsTime();
-		vehiclePosition.setTimestamp(gpsTime);
+		vehiclePosition.setTimestamp(gpsTime / Time.MS_PER_SEC);
 		
 		// Return the results
 		return vehiclePosition.build();
@@ -121,7 +122,7 @@ public class GtfsRtVehicleFeed {
 		FeedHeader.Builder feedheader = FeedHeader.newBuilder()
 				.setGtfsRealtimeVersion("1.0")
 				.setIncrementality(Incrementality.FULL_DATASET)
-				.setTimestamp(System.currentTimeMillis());
+				.setTimestamp(System.currentTimeMillis() / Time.MS_PER_SEC);
 		message.setHeader(feedheader);
 		  
 		for (IpcVehicle vehicle : vehicles) {

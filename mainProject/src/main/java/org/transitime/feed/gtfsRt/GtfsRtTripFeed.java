@@ -29,6 +29,7 @@ import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.Time;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
@@ -98,7 +99,7 @@ public class GtfsRtTripFeed {
 		}
 		
 		// Add timestamp
-		tripUpdate.setTimestamp(firstPred.getAvlTime());
+		tripUpdate.setTimestamp(firstPred.getAvlTime() / Time.MS_PER_SEC);
 		
 		// Return the results
 		return tripUpdate.build();
@@ -117,7 +118,7 @@ public class GtfsRtTripFeed {
 		FeedHeader.Builder feedheader = FeedHeader.newBuilder()
 				.setGtfsRealtimeVersion("1.0")
 				.setIncrementality(Incrementality.FULL_DATASET)
-				.setTimestamp(System.currentTimeMillis());
+				.setTimestamp(System.currentTimeMillis() / Time.MS_PER_SEC);
 		message.setHeader(feedheader);
 		  
 		// For each trip...
