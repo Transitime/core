@@ -479,9 +479,10 @@ public class StopPathProcessor {
 		// log total number of such errors so person responsible for GTFS
 		// can see how much work they have to do.
 		if (numberOfStopsTooFarAway > 0) {
-			logger.warn("Found {} stops that {} further than the allowable " +
+			logger.warn("Found {} stop{} that {} further than the allowable " +
 					"distance of {}m from the shape for shape_id={}", 
 					numberOfStopsTooFarAway, 
+					numberOfStopsTooFarAway == 1 ? "" : "s",
 					numberOfStopsTooFarAway == 1 ? "is" : "are",
 					maxStopToPathDistance, 
 					tripPattern.getShapeId());
