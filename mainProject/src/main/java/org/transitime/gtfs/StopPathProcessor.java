@@ -404,14 +404,43 @@ public class StopPathProcessor {
 			// The list of locations defining the segments for the stop path
 			ArrayList<Location> locList = new ArrayList<Location>();
 
-			// Handle the stop path from the beginning, all except for the
-			// last point.
-			// If special case where at first stop of trip and should trim
-			// beginning of path then handle specially.
-			if (previousLocation == null && trimPathBeforeFirstStopOfTrip) {
-				// Special case where should not use path before first stop
+			// Determine the locations for the stop path
+			if (previousLocation == null 
+					&& bestMatch.stopToShapeDistance > maxStopToPathDistance) {
+				// First stop of trip and stop is away from path so use
+				// the stop location.
+				locList.add(stop.getLoc());
+				locList.add(stop.getLoc());
+			} else if (previousLocation == null 
+					&& trimPathBeforeFirstStopOfTrip) {
+				// The stop is not too far away from the shapes and should trim
+				// the shape before the stop so simply use the best match 
+				// location.
+				locList.add(bestMatch.matchLocation);
+				locList.add(bestMatch.matchLocation);
+			} else {
+				// Add in shape segments from the last match to the current 
+				// match.
 				
-				// If the stop was too far away from the shapes then
+				// Add the previous location as the beginning of the stop path
+				Location beginLoc = previousLocation != null ? 
+						previousLocation : shapeLocs.get(0);					
+				locList.add(beginLoc);
+	
+				// Now gather together the segments that go from the  
+				// previous path to the current one. 
+				// If on different shape segment from previous one...
+				if (bestMatch.shapeIndex != previousShapeIndex) {
+					// Add the intermediate shapes points
+					for (int shapeIndex = previousShapeIndex + 1; 
+							shapeIndex <= bestMatch.shapeIndex; 
+							++shapeIndex) {
+						locList.add(shapeLocs.get(shapeIndex));
+					}
+				}								
+
+				// Handle the end of the stop path, where the stop is closest to
+				// the shape. If the stop was too far away from the shapes then
 				// also add the stop location to the location list
 				// for the path. This way will have hopefully a
 				// reasonable path that goes by the stop even if the
@@ -423,45 +452,8 @@ public class StopPathProcessor {
 					// add the match location as the end of the locList.
 					locList.add(bestMatch.matchLocation);
 				}
-			} else {
-				// Add in shape segments from the beginning to the match
-				
-				// If first stop for trip then set previous loc to beginning
-				// of the shape.
-				if (previousLocation == null)
-					previousLocation = shapeLocs.get(0);
-				
-				// Not the first stop of trip so start location is the end 
-				// of the match for the previous stop.
-				locList.add(previousLocation);
-	
-				// Now gather together the segments that go from the previous 
-				// path to the current one. 
-				// If on different shape segment from previous one...
-				if (bestMatch.shapeIndex != previousShapeIndex) {
-					// Add the intermediate shapes points
-					for (int shapeIndex = previousShapeIndex + 1; 
-							shapeIndex <= bestMatch.shapeIndex; 
-							++shapeIndex) {
-						locList.add(shapeLocs.get(shapeIndex));
-					}
-				}
 			}
 			
-			// Handle the end of the stop path, where the stop is closest to
-			// the shape. If the stop was too far away from the shapes then
-			// also add the stop location to the location list
-			// for the path. This way will have hopefully a
-			// reasonable path that goes by the stop even if the
-			// traces are not adequate.
-			if (bestMatch.stopToShapeDistance > maxStopToPathDistance) {
-				locList.add(stop.getLoc());
-			} else {
-				// The stop is not too far away from the shapes so
-				// add the match location as the end of the locList.
-				locList.add(bestMatch.matchLocation);
-			}
-
 			// Remember location for when looking at next shape
 			previousLocation = locList.get(locList.size() - 1);
 			
