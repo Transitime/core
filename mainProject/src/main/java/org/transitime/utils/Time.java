@@ -388,7 +388,7 @@ public class Time {
 	
 	/**
 	 * Parses a time such as HH:MM:SS into seconds into the day.
-	 * Instead of using SimipleDateFormat or such this function 
+	 * Instead of using SimpleDateFormat or such this function 
 	 * does the conversion directly and simply in order to be quicker.
 	 * This is useful for reading in large volumes of GTFS data and
 	 * such. 
