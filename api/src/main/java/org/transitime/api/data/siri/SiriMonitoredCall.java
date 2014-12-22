@@ -19,7 +19,7 @@ package org.transitime.api.data.siri;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcExtVehicle;
+import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.StringUtils;
 
@@ -74,8 +74,8 @@ public class SiriMonitoredCall {
 	 */
 	protected Extensions() {}
 	
-	public Extensions(IpcExtVehicle ipcExtVehicle) {
-	    distances = new Distances(ipcExtVehicle);
+	public Extensions(IpcCompleteVehicle ipcCompleteVehicle) {
+	    distances = new Distances(ipcCompleteVehicle);
 	}
     }
     
@@ -98,11 +98,11 @@ public class SiriMonitoredCall {
 	 */
 	protected Distances() {}
 
-	public Distances(IpcExtVehicle ipcExtVehicle) {
-	    callDistanceAlongRoute = StringUtils.oneDigitFormat(ipcExtVehicle
+	public Distances(IpcCompleteVehicle ipcCompleteVehicle) {
+	    callDistanceAlongRoute = StringUtils.oneDigitFormat(ipcCompleteVehicle
 		    .getDistanceOfNextStopFromTripStart());
 	    
-	    distanceFromCall = StringUtils.oneDigitFormat(ipcExtVehicle
+	    distanceFromCall = StringUtils.oneDigitFormat(ipcCompleteVehicle
 		    .getDistanceToNextStop());
 	}
     }
@@ -119,14 +119,14 @@ public class SiriMonitoredCall {
     /**
      * Constructs a MonitoredCall element.
      * 
-     * @param ipcExtVehicle
+     * @param ipcCompleteVehicle
      * @param prediction
      *            The prediction for when doing stop monitoring. When doing
      *            vehicle monitoring should be set to null.
      */
-    public SiriMonitoredCall(IpcExtVehicle ipcExtVehicle,
+    public SiriMonitoredCall(IpcCompleteVehicle ipcCompleteVehicle,
 	    IpcPrediction prediction) {
-	stopPointRef = ipcExtVehicle.getNextStopId();
+	stopPointRef = ipcCompleteVehicle.getNextStopId();
 	// Always using value of 1 for now
 	visitNumber = 1;
 	
@@ -141,6 +141,6 @@ public class SiriMonitoredCall {
 	}
 
 	// Deal with NYC MTA extensions
-	extensions = new Extensions(ipcExtVehicle);
+	extensions = new Extensions(ipcCompleteVehicle);
     }
 }

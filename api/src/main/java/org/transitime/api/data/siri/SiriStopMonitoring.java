@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.transitime.ipc.data.IpcExtVehicle;
+import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.utils.Time;
@@ -69,7 +69,7 @@ public class SiriStopMonitoring {
 	protected SiriServiceDelivery() {}
 	
 	public SiriServiceDelivery(List<IpcPredictionsForRouteStopDest> preds, 
-		Collection<IpcExtVehicle> vehicles, String agencyId) {
+		Collection<IpcCompleteVehicle> vehicles, String agencyId) {
 	    responseTimestamp = Utils.formattedTime(System.currentTimeMillis());
 	    stopMonitoringDelivery = 
 		new SiriStopMonitoringDelivery(preds, vehicles, agencyId);
@@ -107,7 +107,7 @@ public class SiriStopMonitoring {
 	
 	public SiriStopMonitoringDelivery(
 		List<IpcPredictionsForRouteStopDest> preds, 
-		Collection<IpcExtVehicle> vehicles, String agencyId) {
+		Collection<IpcCompleteVehicle> vehicles, String agencyId) {
 	    long currentTime = System.currentTimeMillis();
 	    responseTimestamp = Utils.formattedTime(currentTime);
 	    validUntil = Utils.formattedTime(currentTime + 2*Time.MS_PER_MIN);
@@ -118,7 +118,7 @@ public class SiriStopMonitoring {
 		for (IpcPrediction pred : predForRouteStopDest
 			.getPredictionsForRouteStop()) {
 		    // Determine vehicle info associated with prediction
-		    IpcExtVehicle vehicle = getVehicle(pred, vehicles);
+		    IpcCompleteVehicle vehicle = getVehicle(pred, vehicles);
 		    
 		    // Created the MonitoredStopVisit for the prediction
 		    monitoredStopVisitList.add(new SiriMonitoredStopVisit(
@@ -134,10 +134,10 @@ public class SiriStopMonitoring {
 	 * @param vehicleId
 	 * @return
 	 */
-	private IpcExtVehicle getVehicle(IpcPrediction pred,
-		Collection<IpcExtVehicle> vehicles) {
+	private IpcCompleteVehicle getVehicle(IpcPrediction pred,
+		Collection<IpcCompleteVehicle> vehicles) {
 	    String vehicleId = pred.getVehicleId();
-	    for (IpcExtVehicle vehicle : vehicles) {
+	    for (IpcCompleteVehicle vehicle : vehicles) {
 		if (vehicle.getId().equals(vehicleId))
 		    return vehicle;
 	    }
@@ -166,11 +166,11 @@ public class SiriStopMonitoring {
 	@SuppressWarnings("unused")
 	protected SiriMonitoredStopVisit() {}
 	
-	public SiriMonitoredStopVisit(IpcExtVehicle ipcExtVehicle, IpcPrediction prediction, 
-		String agencyId) {
-	    recordedAtTime = Utils.formattedTime(ipcExtVehicle.getGpsTime());
+	public SiriMonitoredStopVisit(IpcCompleteVehicle ipcCompleteVehicle,
+		IpcPrediction prediction, String agencyId) {
+	    recordedAtTime = Utils.formattedTime(ipcCompleteVehicle.getGpsTime());
 	    monitoredVehicleJourney = new SiriMonitoredVehicleJourney(
-		    ipcExtVehicle, prediction, agencyId);
+		    ipcCompleteVehicle, prediction, agencyId);
 	}
 
     }
@@ -181,7 +181,7 @@ public class SiriStopMonitoring {
     protected SiriStopMonitoring() {}
     
     public SiriStopMonitoring(List<IpcPredictionsForRouteStopDest> preds, 
-	    Collection<IpcExtVehicle> vehicles, String agencyId) {
+	    Collection<IpcCompleteVehicle> vehicles, String agencyId) {
 	delivery = new SiriServiceDelivery(preds, vehicles, agencyId);
     }
 }

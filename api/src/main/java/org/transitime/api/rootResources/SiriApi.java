@@ -36,7 +36,7 @@ import org.transitime.api.data.siri.SiriStopMonitoring;
 import org.transitime.api.data.siri.SiriVehiclesMonitoring;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
-import org.transitime.ipc.data.IpcExtVehicle;
+import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.PredictionsInterface;
@@ -78,18 +78,18 @@ public class SiriApi {
 	    // Get Vehicle data from server
 	    VehiclesInterface inter = stdParameters.getVehiclesInterface();
 	    
-	    Collection<IpcExtVehicle> vehicles;
+	    Collection<IpcCompleteVehicle> vehicles;
 	    if (!routesIdOrShortNames.isEmpty()) {
-		vehicles = inter.getExtForRoute(routesIdOrShortNames);
+		vehicles = inter.getCompleteForRoute(routesIdOrShortNames);
 	    } else if (!vehicleIds.isEmpty()) {
-		vehicles = inter.getExt(vehicleIds);
+		vehicles = inter.getComplete(vehicleIds);
 	    } else {
-		vehicles = inter.getExt();
+		vehicles = inter.getComplete();
 	    }
 
 	    // Determine and return SiriStopMonitoring response
-	    SiriVehiclesMonitoring siriVehicles = 
-		    new SiriVehiclesMonitoring(vehicles, stdParameters.getAgencyId());
+	    SiriVehiclesMonitoring siriVehicles = new SiriVehiclesMonitoring(
+		    vehicles, stdParameters.getAgencyId());
 	    return stdParameters.createResponse(siriVehicles);
 	} catch (RemoteException e) {
 	    // If problem getting data then return a Bad Request
@@ -122,7 +122,8 @@ public class SiriApi {
 	
 	try {
 	    // Get prediction data from server
-	    PredictionsInterface inter = stdParameters.getPredictionsInterface();
+	    PredictionsInterface inter = 
+		    stdParameters.getPredictionsInterface();
 	    
 	    List<IpcPredictionsForRouteStopDest> preds = 
 		    inter.get(routeIdOrShortName, stopId, numberPredictions);
@@ -131,16 +132,19 @@ public class SiriApi {
 	    // the absurdly large MonitoredVehicleJourney element.
 	    List<String> vehicleIds = new ArrayList<String>();
 	    for (IpcPredictionsForRouteStopDest predsForDest : preds) {
-		for (IpcPrediction individualPred : predsForDest.getPredictionsForRouteStop()) {
+		for (IpcPrediction individualPred : 
+		    	predsForDest.getPredictionsForRouteStop()) {
 		    vehicleIds.add(individualPred.getVehicleId());
 		}
 	    }
-	    VehiclesInterface vehicleInter = stdParameters.getVehiclesInterface();
-	    Collection<IpcExtVehicle> vehicles = vehicleInter.getExt(vehicleIds);
+	    VehiclesInterface vehicleInter = 
+		    stdParameters.getVehiclesInterface();
+	    Collection<IpcCompleteVehicle> vehicles = 
+		    vehicleInter.getComplete(vehicleIds);
 	    
 	    // Determine SiriStopMonitoring response
-	    SiriStopMonitoring siriStopMonitoring = 
-		    new SiriStopMonitoring(preds, vehicles, stdParameters.getAgencyId());
+	    SiriStopMonitoring siriStopMonitoring = new SiriStopMonitoring(
+		    preds, vehicles, stdParameters.getAgencyId());
 	    
 	    // Return SiriStopMonitoring response
 	    return stdParameters.createResponse(siriStopMonitoring);

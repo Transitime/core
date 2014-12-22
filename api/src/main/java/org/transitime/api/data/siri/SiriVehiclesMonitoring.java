@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.transitime.ipc.data.IpcExtVehicle;
+import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.utils.Time;
 
 /**
@@ -66,7 +66,7 @@ public class SiriVehiclesMonitoring {
 	@SuppressWarnings("unused")
 	protected SiriServiceDelivery() {}	
 
-	public SiriServiceDelivery(Collection<IpcExtVehicle> vehicles, 
+	public SiriServiceDelivery(Collection<IpcCompleteVehicle> vehicles, 
 		String agencyId) {
 	    responseTimestamp = Utils.formattedTime(System.currentTimeMillis());
 	    vehicleMonitoringDelivery = 
@@ -101,14 +101,14 @@ public class SiriVehiclesMonitoring {
 	@SuppressWarnings("unused")
 	protected SiriVehicleMonitoringDelivery() {}
 	
-	public SiriVehicleMonitoringDelivery(Collection<IpcExtVehicle> vehicles, 
+	public SiriVehicleMonitoringDelivery(Collection<IpcCompleteVehicle> vehicles, 
 		String agencyId) {
 	    long currentTime = System.currentTimeMillis();
 	    responseTimestamp = Utils.formattedTime(currentTime);
 	    validUntil = Utils.formattedTime(currentTime + 2*Time.MS_PER_MIN);
 		
 	    vehicleActivityList = new ArrayList<SiriVehicleActivity>();
-	    for (IpcExtVehicle vehicle : vehicles) {
+	    for (IpcCompleteVehicle vehicle : vehicles) {
 		vehicleActivityList.add(new SiriVehicleActivity(vehicle, agencyId));
 	    }
 	}
@@ -134,10 +134,10 @@ public class SiriVehiclesMonitoring {
 	@SuppressWarnings("unused")
 	protected SiriVehicleActivity() {}
 
-	public SiriVehicleActivity(IpcExtVehicle ipcExtVehicle, String agencyId) {
-	    recordedAtTime = Utils.formattedTime(ipcExtVehicle.getGpsTime());
+	public SiriVehicleActivity(IpcCompleteVehicle ipcCompleteVehicle, String agencyId) {
+	    recordedAtTime = Utils.formattedTime(ipcCompleteVehicle.getGpsTime());
 	    monitoredVehicleJourney = new SiriMonitoredVehicleJourney(
-		    ipcExtVehicle, null, agencyId);
+		    ipcCompleteVehicle, null, agencyId);
 	}
     }
 
@@ -146,7 +146,7 @@ public class SiriVehiclesMonitoring {
     // No-args needed because this class is an XML root element
     protected SiriVehiclesMonitoring() {}
     
-    public SiriVehiclesMonitoring(Collection<IpcExtVehicle> vehicles, String agencyId) {
+    public SiriVehiclesMonitoring(Collection<IpcCompleteVehicle> vehicles, String agencyId) {
 	delivery = new SiriServiceDelivery(vehicles, agencyId);
     }
 }

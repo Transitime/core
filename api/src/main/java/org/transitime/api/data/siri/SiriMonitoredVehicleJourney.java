@@ -19,7 +19,7 @@ package org.transitime.api.data.siri;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcExtVehicle;
+import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcPrediction;
 
 /**
@@ -111,37 +111,37 @@ public class SiriMonitoredVehicleJourney {
     /**
      * Constructs that massive MonitoredVehicleJourney element.
      * 
-     * @param ipcExtVehicle
+     * @param ipcCompleteVehicle
      * @param prediction
      *            For when doing stop monitoring. If doing vehicle monitoring
      *            then should be set to null.
      * @param agencyId
      */
-    public SiriMonitoredVehicleJourney(IpcExtVehicle ipcExtVehicle,
+    public SiriMonitoredVehicleJourney(IpcCompleteVehicle ipcCompleteVehicle,
 	    IpcPrediction prediction, String agencyId) {
-	vehicleRef = ipcExtVehicle.getId();
+	vehicleRef = ipcCompleteVehicle.getId();
 	vehicleLocation = 
-		new SiriLocation(ipcExtVehicle.getLatitude(), ipcExtVehicle.getLongitude());
-	double bearing = 90-ipcExtVehicle.getHeading();
+		new SiriLocation(ipcCompleteVehicle.getLatitude(), ipcCompleteVehicle.getLongitude());
+	double bearing = 90-ipcCompleteVehicle.getHeading();
 	if (bearing < 0)
 	    bearing += 360.0;
 	bearingStr = Double.toString(bearing);
-	blockRef = ipcExtVehicle.getBlockId();
-	lineRef = ipcExtVehicle.getRouteShortName();
-	directionRef = ipcExtVehicle.getDirectionId();
-	framedVehicleJourneyRef = new SiriFramedVehicleJourneyRef(ipcExtVehicle);
-	publishedLineName = ipcExtVehicle.getRouteName();
+	blockRef = ipcCompleteVehicle.getBlockId();
+	lineRef = ipcCompleteVehicle.getRouteShortName();
+	directionRef = ipcCompleteVehicle.getDirectionId();
+	framedVehicleJourneyRef = new SiriFramedVehicleJourneyRef(ipcCompleteVehicle);
+	publishedLineName = ipcCompleteVehicle.getRouteName();
 	operatorRef = agencyId;
-	originRef = ipcExtVehicle.getOriginStopId();
-	destinationRef = ipcExtVehicle.getDestinationId();
-	destinationName = ipcExtVehicle.getHeadsign();
+	originRef = ipcCompleteVehicle.getOriginStopId();
+	destinationRef = ipcCompleteVehicle.getDestinationId();
+	destinationName = ipcCompleteVehicle.getHeadsign();
 	originAimedDepartureTime = 
-		Utils.formattedTime(ipcExtVehicle.getTripStartEpochTime());
+		Utils.formattedTime(ipcCompleteVehicle.getTripStartEpochTime());
 	monitored = "true";
 	progressRate = "normalProgress";
-	progressStatus = ipcExtVehicle.isLayover() ? "true" : null;
+	progressStatus = ipcCompleteVehicle.isLayover() ? "true" : null;
 	
-	monitoredCall = new SiriMonitoredCall(ipcExtVehicle, prediction);
+	monitoredCall = new SiriMonitoredCall(ipcCompleteVehicle, prediction);
 	
 	// Not currently implemented but outputting it for completeness
 	onwardCalls = "";
