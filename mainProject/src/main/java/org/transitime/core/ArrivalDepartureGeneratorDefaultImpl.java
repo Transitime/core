@@ -249,7 +249,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param tripIndex
 	 * @param stopPathIndex
 	 */
-	private Departure createDepartureTime(VehicleState vehicleState,
+	protected Departure createDepartureTime(VehicleState vehicleState,
 			long departureTime, Block block, int tripIndex, int stopPathIndex) {		
 		// Store the departure in the database via the db logger
 		Departure departure = new Departure(vehicleState.getVehicleId(), 
@@ -273,7 +273,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param tripIndex
 	 * @param stopPathIndex
 	 */
-	private Arrival createArrivalTime(VehicleState vehicleState,
+	protected Arrival createArrivalTime(VehicleState vehicleState,
 			long arrivalTime, Block block, int tripIndex, int stopPathIndex) {
 		// Store the arrival in the database via the db logger
 		Arrival arrival = new Arrival(vehicleState.getVehicleId(), 
@@ -302,7 +302,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * 
 	 * @param arrivalDeparture
 	 */
-	private void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
+	protected void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
 		// Queue to store object into db
 		Core.getInstance().getDbLogger().add(arrivalDeparture);
 		
@@ -1078,20 +1078,24 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// actually at the layover. This can happen because sometimes
 		// can jump the match ahead to the layover even though the
 		// vehicle isn't actually there. Can't just use 
-		// CpreConfig.getMaxDistanceFromSegment() since often for agencies
+		// CoreConfig.getMaxDistanceFromSegment() since often for agencies
 		// like mbta the stops are not on the path which means that a layover
 		// match is likely to be greater than getMaxDistanceFromSegment() but
 		// still want to record the departure time.
-		if (oldMatch.getDistanceToSegment() > 
-						CoreConfig.getLayoverDistance()
-				|| newMatch.getDistanceToSegment() > 
-						CoreConfig.getLayoverDistance()) {
-			logger.debug("For vehicleId={} the old or the new match had a " +
+		boolean oldMatchIsProblematic = oldMatch.isLayover() 
+				&& (oldMatch.getDistanceToSegment() > 
+						CoreConfig.getLayoverDistance());
+		boolean newMatchIsProblematic = newMatch.isLayover() 
+				&& (newMatch.getDistanceToSegment() > 
+						CoreConfig.getLayoverDistance());
+		
+		if (oldMatchIsProblematic || newMatchIsProblematic) {
+			logger.warn("For vehicleId={} the old or the new match had a " +
 					"match distance greater than allowed. Therefore not " +
 					"generating arrival/departure times. " +
-					"maxDistanceFromSegment={}. oldMatch={} newMatch={}",
+					"Max allowed layoverDistance={}. oldMatch={} newMatch={}",
 					vehicleState.getVehicleId(), 
-					CoreConfig.getMaxDistanceFromSegment(), oldMatch, newMatch);
+					CoreConfig.getLayoverDistance(), oldMatch, newMatch);
 			return;
 		}
 		

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.avl;
+package org.transitime.custom.nyc;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,6 +26,7 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.avl.XmlPollingAvlModule;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.modules.Module;

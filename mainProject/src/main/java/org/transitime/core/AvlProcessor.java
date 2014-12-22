@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.DoubleConfigValue;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
@@ -35,6 +36,7 @@ import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
+import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.utils.Time;
 
 /**
@@ -60,6 +62,14 @@ public class AvlProcessor {
 			new DoubleConfigValue("transitime.core.terminalDistanceForRouteMatching", 
 					100.0);
 	
+	private static IntegerConfigValue allowableBadAssignments =
+			new IntegerConfigValue("transitime.core.allowableBadAssignments", 
+					0, 
+					"If get a bad assignment, such as no assignment, but no "
+					+ "more than allowableBadAssignments then will use the "
+					+ "previous assignment. Useful for when assignment part "
+					+ "of AVL feed doesn't always provide a valid assignment.");
+	
 	/************************** Logging *******************************/
 	
 	private static final Logger logger = 
@@ -82,17 +92,35 @@ public class AvlProcessor {
 	}
 	
 	/**
-	 * Removes predictions and the match for the vehicle and marks
-	 * it as unpredictable. Updates VehicleDataCache.
+	 * Removes predictions and the match for the vehicle and marks it as
+	 * unpredictable. Updates VehicleDataCache. Creates and logs a VehicleEvent
+	 * explaining the situation.
 	 * 
 	 * @param vehicleId
 	 *            The vehicle to be made unpredictable
+	 * @param eventDescription
+	 *            A longer description of why vehicle being made unpredictable
+	 * @param vehicleEvent
+	 *            A short description from VehicleEvent class for labeling the
+	 *            event.
 	 */
-	public void makeVehicleUnpredictable(String vehicleId) {
+	public void makeVehicleUnpredictable(String vehicleId,
+			String eventDescription, String vehicleEvent) {
 		logger.info("Making vehicleId={} unpredictable", vehicleId);
 		
 		VehicleState vehicleState =
 				VehicleStateManager.getInstance().getVehicleState(vehicleId);
+		
+		// Create a VehicleEvent to record what happened
+		AvlReport avlReport = vehicleState.getAvlReport();		
+		TemporalMatch lastMatch = vehicleState.getMatch();
+		boolean wasPredictable = vehicleState.isPredictable();
+		VehicleEvent.create(avlReport, lastMatch,
+				vehicleEvent,
+				eventDescription,
+				false,          // predictable
+				wasPredictable, // becameUnpredictable
+				null);          // supervisor
 
 		// Update the state of the vehicle
 		vehicleState.setMatch(null);
@@ -105,31 +133,47 @@ public class AvlProcessor {
 	}
 	
 	/**
-	 * Removes predictions and the match for the vehicle and marks
-	 * is as unpredictable. Also removes block assignment from the
-	 * vehicleState. To be used for situations such as assignment
-	 * ended or vehicle was reassigned.
+	 * Removes predictions and the match for the vehicle and marks is as
+	 * unpredictable. Also removes block assignment from the vehicleState. To be
+	 * used for situations such as assignment ended or vehicle was reassigned.
+	 * Creates and logs a VehicleEvent explaining the situation.
 	 * 
 	 * @param vehicleState
 	 *            The vehicle to be made unpredictable
+	 * @param eventDescription
+	 *            A longer description of why vehicle being made unpredictable
+	 * @param vehicleEvent
+	 *            A short description from VehicleEvent class for labeling the
+	 *            event.
 	 */
 	public void makeVehicleUnpredictableAndTerminateAssignment(
-			VehicleState vehicleState) {
-		makeVehicleUnpredictable(vehicleState.getVehicleId());
-		
+			VehicleState vehicleState, String eventDescription,
+			String vehicleEvent) {
+		makeVehicleUnpredictable(vehicleState.getVehicleId(), eventDescription,
+				vehicleEvent);
+
 		vehicleState.unsetBlock(BlockAssignmentMethod.ASSIGNMENT_TERMINATED);
 	}
 
 	/**
 	 * Marks the vehicle as not being predictable and that the assignment has
-	 * been grabbed. Updates VehicleDataCache.
+	 * been grabbed. Updates VehicleDataCache. Creates and logs a VehicleEvent
+	 * explaining the situation.
 	 * 
 	 * @param vehicleState
+	 *            The vehicle to be made unpredictable
+	 * @param eventDescription
+	 *            A longer description of why vehicle being made unpredictable
+	 * @param vehicleEvent
+	 *            A short description from VehicleEvent class for labeling the
+	 *            event.
 	 */
 	public void makeVehicleUnpredictableAndGrabAssignment(
-			VehicleState vehicleState) {
-		makeVehicleUnpredictable(vehicleState.getVehicleId());
-		
+			VehicleState vehicleState, String eventDescription,
+			String vehicleEvent) {
+		makeVehicleUnpredictable(vehicleState.getVehicleId(), eventDescription,
+				vehicleEvent);
+
 		vehicleState.unsetBlock(BlockAssignmentMethod.ASSIGNMENT_GRABBED);
 	}
 	
@@ -520,11 +564,14 @@ public class AvlProcessor {
 			VehicleState vehicleState =
 					stateManager.getVehicleState(vehicleId);
 			if (block.shouldBeExclusive() || vehicleState.isForSchedBasedPreds()) {
-				logger.info("Assigning vehicleId={} to blockId={} but "
-						+ "vehicleId={} already assigned to that block so "
-						+ "removing assignment from that vehicle.",
-						newVehicleId, block.getId(), vehicleId);
-				makeVehicleUnpredictableAndGrabAssignment(vehicleState);
+				String description = "Assigning vehicleId=" + newVehicleId
+						+ " to blockId=" + block.getId() + " but "
+						+ "vehicleId=" + vehicleId
+						+ " already assigned to that block so "
+						+ "removing assignment from that vehicle.";
+				logger.info(description);
+				makeVehicleUnpredictableAndGrabAssignment(vehicleState,
+						description, VehicleEvent.ASSIGNMENT_GRABBED);
 			}
 		}
 	}
@@ -552,10 +599,13 @@ public class AvlProcessor {
 		// Remove old block assignment if there was one
 		if (vehicleState.isPredictable() && 
 				vehicleState.hasNewAssignment(avlReport)) {
-			logger.info("For vehicleId={} the vehicle assignment is being "
-					+ "changed to assignmentId={}", 
-					vehicleState.getVehicleId(), vehicleState.getAssignmentId());
-			makeVehicleUnpredictableAndTerminateAssignment(vehicleState);					
+			String eventDescription = "For vehicleId="
+					+ vehicleState.getVehicleId()
+					+ " the vehicle assignment is being "
+					+ "changed to assignmentId="
+					+ vehicleState.getAssignmentId();
+			makeVehicleUnpredictableAndTerminateAssignment(vehicleState,
+					eventDescription, VehicleEvent.ASSIGNMENT_CHANGED);
 		}
 
 		// If the vehicle has a block assignment from the AVLFeed
@@ -584,18 +634,56 @@ public class AvlProcessor {
 	}
 	
 	/**
-	 * For when don't have valid assignment for vehicle. Sets the match to null
-	 * for the VehicleState.
+	 * For when don't have valid assignment for vehicle. If have a valid old
+	 * assignment and haven't gotten too many bad assignments in a row then
+	 * simply use the old assignment. This is handy for when the assignment
+	 * portion of the AVL feed does not send assignment data for every report.
+	 * <p>
+	 * In the future might want to change code to try to auto assign vehicle.
 	 * 
 	 * @param vehicleState
 	 */
-	private void nullOutMatch(VehicleState vehicleState) {
-		logger.info("For vehicleId={} the assignmentId={} is not valid "
-				+ "assignment so setting match to null.", 
-				vehicleState.getVehicleId(), 
-				vehicleState.getAvlReport().getAssignmentId());
+	private void handleProblemAssignment(VehicleState vehicleState) {
+		String oldAssignment = vehicleState.getAssignmentId();
+		boolean wasPredictable = vehicleState.isPredictable();
 		
-		vehicleState.setMatch(null);
+		// Only need to do anything if the vehicle previously was predictable and
+		// had an assignment
+		if (wasPredictable && oldAssignment != null) {
+			// Had a valid old assignment. If haven't had too many bad assignments
+			// in a row then use the old assignment. 
+			if (vehicleState.getBadAssignmentsInARow() < allowableBadAssignments.getValue()) {
+				logger.warn("AVL report did not include an assignment for "
+						+ "vehicleId={} but badAssignmentsInARow={} which "
+						+ "is less than allowableBadAssignments={} so using "
+						+ "the old assignment={}",
+						vehicleState.getVehicleId(),
+						vehicleState.getBadAssignmentsInARow(),
+						allowableBadAssignments.getValue(),
+						vehicleState.getAssignmentId());
+				
+				// Create AVL report with the old assignment and then use it 
+				// to update the vehicle state
+				AvlReport modifiedAvlReport = new AvlReport(
+						vehicleState.getAvlReport(), oldAssignment,
+						AssignmentType.PREVIOUS);
+				vehicleState.setAvlReport(modifiedAvlReport);
+				matchNewFixForPredictableVehicle(vehicleState);
+				
+				// Increment the bad assignments count
+				vehicleState.setBadAssignmentsInARow(
+						vehicleState.getBadAssignmentsInARow() + 1);
+			} else {
+				// Vehicle was predictable but now have encountered too many problem
+				// assignments. Therefore make vehicle unpredictable.
+				String eventDescription = "VehicleId=" + vehicleState.getVehicleId() 
+						+ " was assigned to blockId=" + oldAssignment 
+						+ " but received too many null assignments so making "
+						+ "vehicle unpredictable.";
+				makeVehicleUnpredictable(vehicleState.getVehicleId(),
+						eventDescription, VehicleEvent.ASSIGNMENT_CHANGED);
+			}
+		}
 	}
 
 	/**
@@ -618,22 +706,14 @@ public class AvlProcessor {
 							"was reached so will make vehicle unpredictable", 
 							vehicleState.getVehicleId(), 
 							temporalMatch.getBlock().getId());
-					
-					// Log that vehicle is being made unpredictable as a VehicleEvent
+										
+					// At end of block assignment so remove it
 					String eventDescription = "Block assignment " 
 							+ vehicleState.getBlock().getId() 
 							+ " ended for vehicle so it was made unpredictable.";
-					VehicleEvent.create(vehicleState.getAvlReport(), 
-							vehicleState.getMatch(),
-							VehicleEvent.END_OF_BLOCK,
-							eventDescription,
-							false,  // predictable,
-							true,   // becameUnpredictable
-							null);  // supervisor 
-
-					
-					// At end of block assignment so remove it
-					makeVehicleUnpredictableAndTerminateAssignment(vehicleState);
+					makeVehicleUnpredictableAndTerminateAssignment(
+							vehicleState, eventDescription,
+							VehicleEvent.END_OF_BLOCK);
 					
 					// Return that end of block reached
 					return true;
@@ -785,17 +865,17 @@ public class AvlProcessor {
 				// New assignment so match the vehicle to it
 				matchVehicleToAssignment(vehicleState);
 			} else {
-				// Can't do anything so set the match to null, which also
-				// specifies that the vehicle is not predictable. In the 
-				// future might want to change code to try to auto assign 
-				// vehicle.
-				nullOutMatch(vehicleState);
+				// Handle bad assignment where don't have assignment or such
+				handleProblemAssignment(vehicleState);
 			}
 
 			// If the last match is actually valid then generate associated
 			// data like predictions and arrival/departure times.
 			if (vehicleState.isPredictable() 
 					&& vehicleState.lastMatchIsValid()) {
+				// Reset the counter
+				vehicleState.setBadAssignmentsInARow(0);
+				
 				// Determine and store the schedule adherence. If schedule 
 				// adherence is bad then try matching vehicle to assignment
 				// again. This can make vehicle unpredictable if can't match

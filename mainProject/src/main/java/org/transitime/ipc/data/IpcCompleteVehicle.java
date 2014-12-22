@@ -20,7 +20,6 @@ package org.transitime.ipc.data;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
-import java.util.Date;
 import java.util.List;
 
 import org.transitime.applications.Core;
@@ -31,15 +30,21 @@ import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.Geo;
+import org.transitime.utils.Time;
 
 /**
- * Extension of IpcVehicle class so that additional info can be
- * provided for SIRI feed.
+ * Extension of IpcVehicle class so that all info describing vehicle is
+ * included. All this info is put into the VehicleDataCache so that can get
+ * whatever data is needed be the remote clients. In particular, includes
+ * additional info for SIRI feed. Made a separate class from IpcVehicle since
+ * the SIRI feed is not expected to get significant use (it is a poor interface)
+ * and don't want to bog down all the other IpcVehicle requests with extraneous
+ * data.
  *
  * @author SkiBu Smith
  *
  */
-public class IpcExtVehicle extends IpcVehicle {
+public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 
 	private final String routeName;
 	private final String originStopId;
@@ -47,7 +52,6 @@ public class IpcExtVehicle extends IpcVehicle {
 	private final double distanceToNextStop;
 	private final double distanceOfNextStopFromTripStart;
 	private final double distanceAlongTrip;
-	private final long tripStartEpochTime;
 	
 	private static final long serialVersionUID = 8154105842499551461L;
 
@@ -58,7 +62,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	 * 
 	 * @param vs The current vehicle state. Must not be null.
 	 */
-	public IpcExtVehicle(VehicleState vs) {
+	public IpcCompleteVehicle(VehicleState vs) {
 		super(vs);
 		
 		// Determine the route name. Can be null.
@@ -89,11 +93,7 @@ public class IpcExtVehicle extends IpcVehicle {
 			}
 			this.distanceOfNextStopFromTripStart = sumOfStopPathLengths;
 			this.distanceAlongTrip = 
-					sumOfStopPathLengths - this.distanceToNextStop;
-			
-			this.tripStartEpochTime = Core.getInstance().getTime()
-					.getEpochTime(trip.getStartTime(), new Date());
-			
+					sumOfStopPathLengths - this.distanceToNextStop;			
 		} else {
 			// Vehicle not assigned to trip so null out parameters
 			this.originStopId = null;
@@ -101,20 +101,12 @@ public class IpcExtVehicle extends IpcVehicle {
 			this.distanceToNextStop = Double.NaN;
 			this.distanceOfNextStopFromTripStart = Double.NaN;
 			this.distanceAlongTrip = Double.NaN;
-			this.tripStartEpochTime = 0;
 		}
 	}
 	
 	/**
 	 * Constructor used for when deserializing a proxy object. 
 	 *
-	 * @param routeName
-	 * @param originStopId
-	 * @param destinationId
-	 * @param distanceToNextStop
-	 * @param distanceOfNextStopFromTripStart
-	 * @param distanceAlongTrip
-	 * @param tripStartEpochTime
 	 * @param blockId
 	 * @param blockAssignmentMethod
 	 * @param avl
@@ -131,21 +123,31 @@ public class IpcExtVehicle extends IpcVehicle {
 	 * @param layoverDepartureTime
 	 * @param nextStopId
 	 * @param vehicleType
+	 * @param tripStartDateStr
+	 * @param atStopId
+	 * @param routeName
+	 * @param originStopId
+	 * @param destinationId
+	 * @param distanceToNextStop
+	 * @param distanceOfNextStopFromTripStart
+	 * @param distanceAlongTrip
 	 */
-	private IpcExtVehicle(String routeName, String originStopId,
-			String destinationId, double distanceToNextStop,
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip,
-			long tripStartEpochTime, String blockId,
+	private IpcCompleteVehicle(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
 			String tripId, String tripPatternId, String directionId,
 			String headsign, boolean predictable, boolean schedBasedPred,
 			TemporalDifference realTimeSchdAdh, boolean isLayover,
-			long layoverDepartureTime, String nextStopId, String vehicleType) {
+			long layoverDepartureTime, String nextStopId, String vehicleType,
+			String tripStartDateStr, String atStopId, String routeName,
+			String originStopId, String destinationId,
+			double distanceToNextStop, double distanceOfNextStopFromTripStart,
+			double distanceAlongTrip) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isLayover,
-				layoverDepartureTime, nextStopId, vehicleType);
+				layoverDepartureTime, nextStopId, vehicleType,
+				tripStartDateStr, atStopId);
 		
 		this.routeName = routeName;
 		this.originStopId = originStopId;
@@ -153,27 +155,25 @@ public class IpcExtVehicle extends IpcVehicle {
 		this.distanceToNextStop = distanceToNextStop;
 		this.distanceOfNextStopFromTripStart = distanceOfNextStopFromTripStart;
 		this.distanceAlongTrip = distanceAlongTrip;
-		this.tripStartEpochTime = tripStartEpochTime;
 	}
 	
 	/*
 	 * SerializationProxy is used so that this class can be immutable and so
 	 * that can do versioning of objects.
 	 */
-	protected static class SiriVehicleSerializationProxy 
-		extends SerializationProxy {
-		// Exact copy of fields of IpcSiriVehicle enclosing class object
+	protected static class CompleteVehicleSerializationProxy 
+		extends GtfsRealtimeVehicleSerializationProxy {
+		// Exact copy of fields of IpcCompleteVehicle enclosing class object
 		private String routeName;
 		private String originStopId;
 		private String destinationId;
 		private double distanceToNextStop;
 		private double distanceOfNextStopFromTripStart;
 		private double distanceAlongTrip;
-		private long tripStartEpochTime;
 
 		private static final long serialVersionUID = 6982458672576764027L;
 
-		private SiriVehicleSerializationProxy(IpcExtVehicle v) {
+		private CompleteVehicleSerializationProxy(IpcCompleteVehicle v) {
 			super(v);
 			this.routeName = v.routeName;
 			this.originStopId = v.originStopId;
@@ -181,7 +181,6 @@ public class IpcExtVehicle extends IpcVehicle {
 			this.distanceToNextStop = v.distanceToNextStop;
 			this.distanceOfNextStopFromTripStart = v.distanceOfNextStopFromTripStart;
 			this.distanceAlongTrip = v.distanceAlongTrip;
-			this.tripStartEpochTime = v.tripStartEpochTime;
 		}
 		
 		/*
@@ -192,7 +191,7 @@ public class IpcExtVehicle extends IpcVehicle {
 		 */
 		protected void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
-			// Write the data for IpcVehicle super class
+			// Write the data for IpcGtfsRealtimeVehicle super class
 			super.writeObject(stream);
 			
 			// Write the data for this class
@@ -202,7 +201,6 @@ public class IpcExtVehicle extends IpcVehicle {
 		    stream.writeDouble(distanceToNextStop);
 		    stream.writeDouble(distanceOfNextStopFromTripStart);
 		    stream.writeDouble(distanceAlongTrip);
-		    stream.writeLong(tripStartEpochTime);
 		}
 
 		/*
@@ -220,7 +218,6 @@ public class IpcExtVehicle extends IpcVehicle {
 			distanceToNextStop = stream.readDouble();
 			distanceOfNextStopFromTripStart = stream.readDouble();
 			distanceAlongTrip = stream.readDouble();
-			tripStartEpochTime = stream.readLong();
 		}
 		
 		/*
@@ -230,13 +227,14 @@ public class IpcExtVehicle extends IpcVehicle {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new IpcExtVehicle(routeName, originStopId, destinationId,
-					distanceToNextStop, distanceOfNextStopFromTripStart,
-					distanceAlongTrip, tripStartEpochTime, blockId,
-					blockAssignmentMethod, avl, heading, routeId,
+			return new IpcCompleteVehicle(
+					blockId, blockAssignmentMethod, avl, heading, routeId,
 					routeShortName, tripId, tripPatternId, directionId,
 					headsign, predictable, schedBasedPred, realTimeSchdAdh,
-					isLayover, layoverDepartureTime, nextStopId, vehicleType);
+					isLayover, layoverDepartureTime, nextStopId, vehicleType,
+					tripStartDateStr, atStopId, routeName, originStopId,
+					destinationId, distanceToNextStop,
+					distanceOfNextStopFromTripStart, distanceAlongTrip);
 		}
 
 	} // End of class SiriVehicleSerializationProxy
@@ -246,7 +244,7 @@ public class IpcExtVehicle extends IpcVehicle {
 	 * object is serialized the SerializationProxy will instead be used.
 	 */
 	private Object writeReplace() {
-		return new SiriVehicleSerializationProxy(this);
+		return new CompleteVehicleSerializationProxy(this);
 	}
 
 	/*
@@ -283,10 +281,6 @@ public class IpcExtVehicle extends IpcVehicle {
 		return distanceAlongTrip;
 	}
 
-	public long getTripStartEpochTime() {
-		return tripStartEpochTime;
-	}
-
 	@Override
 	public String toString() {
 		return "IpcExtVehicle [" 
@@ -303,9 +297,14 @@ public class IpcExtVehicle extends IpcVehicle {
 				+ ", schedBasedPred=" + isForSchedBasedPred()
 				+ ", realTimeSchedAdh=" + getRealTimeSchedAdh() 
 				+ ", isLayover=" + isLayover()
+				+ ", layoverDepartureTime=" 
+					+ Time.timeStrNoTimeZone(getLayoverDepartureTime())
 				+ ", nextStopId=" + getNextStopId() 
 				+ ", avl=" + getAvl()
 				+ ", heading=" + getHeading() 
+				+ ", vehicleType=" + getVehicleType()
+				+ ", atStopId=" + getAtStopId()
+				+ ", tripStartDateStr=" + getTripStartDateStr() 
 				+ ", routeName=" + routeName 
 				+ ", originStopId="	+ originStopId 
 				+ ", destinationId=" + destinationId
@@ -315,7 +314,6 @@ public class IpcExtVehicle extends IpcVehicle {
 					+ Geo.distanceFormat(distanceOfNextStopFromTripStart)
 				+ ", distanceAlongTrip=" 
 					+ Geo.distanceFormat(distanceAlongTrip) 
-				+ ", tripStartEpochTime=" + new Date(tripStartEpochTime)
 				+ "]";
 	}
 

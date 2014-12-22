@@ -44,6 +44,39 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 
 	/********************** Member Functions **************************/
 
+
+	/**
+	 * For creating a GtfsStopTime object from scratch
+	 * 
+	 * @param tripId
+	 * @param arrivalTimeStr
+	 * @param departureTimeStr
+	 * @param stopId
+	 * @param stopSequence Index of stop in trip
+	 * @param timepointStop
+	 * @param shapeDistTraveled
+	 */
+	public GtfsStopTime(String tripId, String arrivalTimeStr,
+			String departureTimeStr, String stopId, int stopSequence,
+			Boolean timepointStop) {
+		this.tripId = tripId;
+		this.arrivalTimeSecs = 
+				(arrivalTimeStr != null && !arrivalTimeStr.isEmpty()) ? 
+						Time.parseTimeOfDay(arrivalTimeStr) : null;
+		this.departureTimeSecs = 
+				(departureTimeStr != null && !departureTimeStr.isEmpty()) ?
+						Time.parseTimeOfDay(departureTimeStr) : null;
+		this.stopId = stopId;
+		this.stopSequence = stopSequence;
+		this.timepointStop = timepointStop;
+
+		// Following values are usually not used so simply using null for them
+		this.stopHeadsign = null;
+		this.pickupType = null;
+		this.dropOffType = null;
+		this.shapeDistTraveled = null;
+}
+	
 	/**
 	 * @param record
 	 * @param supplemental
@@ -57,14 +90,14 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		tripId = getRequiredValue(record, "trip_id");
 
 		// Convert arrival_time to seconds in day
-		String arrivalTimeStr = getRequiredValue(record, "arrival_time");
+		String arrivalTimeStr = getOptionalValue(record, "arrival_time");
 		if (arrivalTimeStr != null)
 			arrivalTimeSecs = Time.parseTimeOfDay(arrivalTimeStr);
 		else
 			arrivalTimeSecs = null;
 
 		// Convert departure_time to seconds in day
-		String deparatureTimeStr = getRequiredValue(record, "departure_time");
+		String deparatureTimeStr = getOptionalValue(record, "departure_time");
 		if (deparatureTimeStr != null)
 			departureTimeSecs = Time.parseTimeOfDay(deparatureTimeStr);
 		else

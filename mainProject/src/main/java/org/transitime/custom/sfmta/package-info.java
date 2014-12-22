@@ -16,10 +16,9 @@
  */
 
 /**
- * An experiment in determining dwell times using smartphone as a tracker
- * with a high reporting rate.
+ * Custom classes specifically for SFMTA
  *
  * @author SkiBu Smith
  *
  */
-package org.transitime.misc.sfmta;
+package org.transitime.custom.sfmta;

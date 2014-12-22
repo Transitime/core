@@ -512,7 +512,7 @@ public class GtfsData {
 			for (GtfsStop supplementStop : gtfsStopsSupplement) {
 				GtfsStop gtfsStop = gtfsStopsMap.get(supplementStop.getStopId());
 				if (gtfsStop == null) {
-					logger.error("Found supplemental stop data for stopId={] "
+					logger.error("Found supplemental stop data for stopId={} "
 							+ "but that stop did not exist in the main "
 							+ "stops.txt file. {}", 
 							supplementStop.getStopId(), supplementStop);
@@ -969,7 +969,7 @@ public class GtfsData {
 				if (!validServiceIds.contains(gtfsTrip.getServiceId())) {
 					// ServiceUtils ID not valid for this trip so log warning message
 					// and continue on to next trip ID
-					logger.warn("For trip ID={} and service ID={} the " +
+					logger.warn("For tripId={} and serviceId={} the " +
 							"service is not valid in the future so the trip " +
 							"is being filtered out.", 
 							gtfsTrip.getTripId(), gtfsTrip.getServiceId());
@@ -990,8 +990,8 @@ public class GtfsData {
 			}
 			
 			// For each stop time for the trip...
-			HashMap<String, ScheduleTime> newScheduledTimesMap = 
-					new HashMap<String, ScheduleTime>();
+			List<ScheduleTime> newScheduleTimesList = 
+					new ArrayList<ScheduleTime>();
 			String previousStopId = null;			
 			for (int i=0; i<gtfsStopTimesForTrip.size(); ++i) {
 				// The current gtfsStopTime
@@ -1018,7 +1018,7 @@ public class GtfsData {
 						filteredArr = null;
 				}
 				ScheduleTime scheduleTime = new ScheduleTime(filteredArr, filteredDep);
-				newScheduledTimesMap.put(stopId, scheduleTime);
+				newScheduleTimesList.add(scheduleTime);
 				
 				// Create StopPath so it can be used to create TripPattern. 
 				// First determine attributes layoverStop, 
@@ -1081,7 +1081,7 @@ public class GtfsData {
 					
 			// Now that all the schedule times have been added to the map, add 
 			// them all at once to the Trip. 
-			trip.addScheduleTimes(newScheduledTimesMap);
+			trip.addScheduleTimes(newScheduleTimesList);
 			
 			// Now that have Paths defined for the trip, if need to, 
 			// also create new trip pattern

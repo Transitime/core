@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.applications;
+package org.transitime.custom.sfmta.delayTimes;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,14 +24,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.Location;
-import org.transitime.misc.sfmta.Intersection;
-import org.transitime.misc.sfmta.Loc;
 import org.transitime.utils.Geo;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
 /**
- *
+ * An experiment for determining using GPS how much time is lost
+ * when a bus has to stop at 4-way stop. Used to better understand
+ * planned changes for the 71-Haight.
  *
  * @author SkiBu Smith
  *

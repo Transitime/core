@@ -24,11 +24,15 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Date;
+
+import org.transitime.applications.Core;
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.db.structs.Trip;
 import org.transitime.utils.Time;
 
 import net.jcip.annotations.Immutable;
@@ -52,7 +56,7 @@ public class IpcVehicle implements Serializable {
 	// routeShortName needed because routeId is sometimes not consistent over
 	// schedule changes but routeShortName usually is.
 	private final String routeShortName;
-	private final String tripId;
+	private final String tripId;	
 	private final String tripPatternId;
 	private final String directionId;
 	private final String headsign;
@@ -64,7 +68,7 @@ public class IpcVehicle implements Serializable {
 	private final long layoverDepartureTime;
 	private final String nextStopId;
 	private final String vehicleType;
-
+	
 	private static final long serialVersionUID = -1744566765456572042L;
 
 	/********************** Member Functions **************************/
@@ -80,12 +84,13 @@ public class IpcVehicle implements Serializable {
 		this.heading = vs.getHeading();
 		this.routeId = vs.getRouteId();
 		this.routeShortName = vs.getRouteShortName();
-		if (vs.getTrip() != null) {
+		Trip trip = vs.getTrip();
+		if (trip != null) {
 			this.blockId = vs.getBlock().getId();
-			this.tripId = vs.getTrip().getId();
-			this.tripPatternId = vs.getTrip().getTripPattern().getId();
-			this.directionId = vs.getTrip().getDirectionId();
-			this.headsign = vs.getTrip().getHeadsign();
+			this.tripId = trip.getId();
+			this.tripPatternId = trip.getTripPattern().getId();
+			this.directionId = trip.getDirectionId();
+			this.headsign = trip.getHeadsign();
 			
 			// Get the match. If match is just after a stop then adjust
 			// it to just before the stop so that can determine proper 
@@ -435,6 +440,23 @@ public class IpcVehicle implements Serializable {
 		return vehicleType;		
 	}
 	
+	/**
+	 * Determines the scheduled start time of the trip. Slightly expensive
+	 * method since it has to determine the trip start time
+	 * 
+	 * @return Scheduled start time of trip in epoch time or null if not
+	 *         assigned to a valid trip
+	 */
+	public long getTripStartEpochTime() {
+		Trip trip = Core.getInstance().getDbConfig().getTrip(tripId);
+		if (trip == null)
+			return 0;
+		
+		long tripStartEpochTime = Core.getInstance().getTime()
+				.getEpochTime(trip.getStartTime(), new Date());
+		return tripStartEpochTime;
+	}
+
 	@Override
 	public String toString() {
 		return "IpcVehicle [" 
@@ -450,12 +472,12 @@ public class IpcVehicle implements Serializable {
 				+ ", predictable=" + predictable
 				+ ", schedBasedPred=" + schedBasedPred
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh 
-				+ ", avl=" + avl
-				+ ", heading=" + heading 
 				+ ", isLayover=" + isLayover
 				+ ", layoverDepartureTime=" 
 					+ Time.timeStrNoTimeZone(layoverDepartureTime)
 				+ ", nextStopId=" + nextStopId
+				+ ", avl=" + avl
+				+ ", heading=" + heading 
 				+ ", vehicleType=" + vehicleType
 				+ "]";
 	}

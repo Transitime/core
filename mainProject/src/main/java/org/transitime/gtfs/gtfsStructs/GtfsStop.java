@@ -65,11 +65,40 @@ public class GtfsStop extends CsvBase {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Creates a GtfsRoute object by reading the data
-	 * from the CSVRecord.
+	 * For creating a GtfsStop object from scratch.
+	 * 
+	 */
+	public GtfsStop(String stopId, Integer stopCode, String stopName,
+			double lat, double lon) {
+		this.stopId = stopId;
+		this.stopCode = stopCode;
+		this.stopName = stopName;
+		this.stopLat = lat;
+		this.stopLon = lon;		
+
+		// Bunch of optional parameters are simply set to null 
+		this.stopDesc = null;
+		this.zoneId = null;
+		this.stopUrl = null;
+		this.locationType = null;
+		this.parentStation = null;
+		this.stopTimezone = null;
+		this.wheelchairBoarding = null;
+		this.timepointStop = null;
+		this.layoverStop = null;
+		this.waitStop = null;
+		this.hidden = null;
+		this.deleteFromRoutesStr = null;
+		this.deleteFirstStopFromRoutesStr = null;
+	}
+	
+	/**
+	 * Creates a GtfsStop object by reading the data from the CSVRecord.
+	 * 
 	 * @param record
 	 * @param supplemental
-	 * @param fileName for logging errors
+	 * @param fileName
+	 *            for logging errors
 	 */
 	public GtfsStop(CSVRecord record, boolean supplemental, String fileName) {
 		super(record, supplemental, fileName);
@@ -98,12 +127,12 @@ public class GtfsStop extends CsvBase {
 		// which stops should show schedule adherence in reports for.
 		timepointStop = getOptionalBooleanValue(record, "timepoint");
 
-		// layove.stop indicates that the driver is supposed to wait 
+		// layoverStop indicates that the driver is supposed to wait 
 		// until the scheduled departure time before continuing and
 		// can go off of the path since it is a layover.
 		layoverStop = getOptionalBooleanValue(record, "layover_stop");
 		
-		// A wai.stop is when driver is supposed to wait until the
+		// A waitStop is when driver is supposed to wait until the
 		// scheduled time before proceeding. Vehicle is expected
 		// to stay on path.
 		waitStop = getOptionalBooleanValue(record, "wait_stop");
@@ -120,7 +149,7 @@ public class GtfsStop extends CsvBase {
 		deleteFirstStopFromRoutesStr = 
 				getOptionalValue(record, "deleteFirstStopFromRoutes");
 	}
-	
+
 	/**
 	 * Creates a copy of the GtfsStop but updates the latitude and longitude.
 	 * Useful for transforming coordinates in China so that locations are

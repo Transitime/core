@@ -60,6 +60,33 @@ public class GtfsRoute extends CsvBase {
 	/********************** Member Functions **************************/
 
 	/**
+	 * For creating a GtfsStop object from scratch.
+	 * 
+	 */
+	public GtfsRoute(String routeId, String agencyId, String routeShortName,
+			String routeLongName, String routeType, String routeColor,
+			String routeTextColor) {
+		this.routeId = routeId;
+		this.agencyId = agencyId;
+		this.routeShortName = routeShortName;
+		this.routeLongName = routeLongName;
+		this.routeType = routeType;
+		this.routeColor = routeColor;
+		this.routeTextColor = routeTextColor;
+
+		// Bunch of optional parameters are simply set to null 
+		this.routeDesc = null;
+		this.routeURL = null;
+		this.routeOrder = null;
+		this.hidden = null;
+		this.remove = null;
+		this.unscheduledBlockSuffix = null;
+		this.parentRouteId = null;
+		this.breakTime = null;
+		this.maxDistance = null;
+	}
+	
+	/**
 	 * Creates a GtfsRoute object by reading the data
 	 * from the CSVRecord.
 	 * @param record

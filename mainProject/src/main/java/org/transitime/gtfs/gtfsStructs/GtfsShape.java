@@ -38,8 +38,21 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 	/********************** Member Functions **************************/
 
 	/**
+	 * Creates a GtfsShape object from scratch
+	 */
+	public GtfsShape(String shapeId, double shapePtLat, double shapePtLon,
+			int shapePtSequence, double shapeDistTraveled) {
+		this.shapeId = shapeId;
+		this.shapePtLat = shapePtLat;
+		this.shapePtLon = shapePtLon;
+		this.shapePtSequence = shapePtSequence;
+		this.shapeDistTraveled = shapeDistTraveled;
+	}
+
+	/**
 	 * Creates a GtfsShape object by reading the data
 	 * from the CSVRecord.
+	 * 
 	 * @param record
 	 * @param supplemental
 	 * @param fileName for logging errors

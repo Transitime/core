@@ -51,13 +51,22 @@ public class VehicleAtStopInfo extends Indices {
 				0); // segment index
 	}
 	
+	/**
+	 * Returns the stop ID of the stop
+	 * 
+	 * @return
+	 */
+	public String getStopId() { 
+		return getStopPath().getStopId();
+	}
+	
 	@Override
 	public String toString() {
 		return "Indices [" 
 				+ "blockId=" + getBlock().getId() 
 				+ ", tripIndex=" + getTripIndex()
 				+ ", stopPathIndex=" + getStopPathIndex() 
-				+ ", stopId=" + getStopPath().getStopId()
+				+ ", stopId=" + getStopId()
 				+ "]";
 	}
 

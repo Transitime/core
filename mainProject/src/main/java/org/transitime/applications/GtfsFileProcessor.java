@@ -461,7 +461,7 @@ public class GtfsFileProcessor {
                 		"them. If a vertex is off the rest of the path by only " +
                 		"the distance specified then the vertex will be removed, " +
                 		"thereby simplifying the path. Value is in meters. " +
-                		"Default is 0.0m, which means that not vertices will be " +
+                		"Default is 0.0m, which means that no vertices will be " +
                 		"eliminated.")
                 .create("maxDistanceForEliminatingVertices")
                 );

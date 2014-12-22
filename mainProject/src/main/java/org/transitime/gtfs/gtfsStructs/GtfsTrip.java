@@ -41,6 +41,25 @@ public class GtfsTrip extends CsvBase {
 	/********************** Member Functions **************************/
 
 	/**
+	 * Creates a GtfsTrip object from scratch
+	 */
+	public GtfsTrip(String routeId, String serviceId, String tripId,
+			String tripHeadsign, String tripShortName, String directionId,
+			String blockId, String shapeId) {
+		this.routeId = routeId;
+		this.serviceId = serviceId;
+		this.tripId = tripId;
+		this.tripHeadsign = tripHeadsign;
+		this.tripShortName = tripShortName;
+		this.directionId = directionId;
+		this.blockId = blockId;
+		this.shapeId = shapeId;
+
+		this.wheelchairAccessible = null;
+		this.bikesAllowed = null;
+	}	
+
+	/**
 	 * Creates a GtfsTrip object by reading the data from the CSVRecord.
 	 * 
 	 * @param record

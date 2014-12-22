@@ -41,7 +41,7 @@ import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.data.IpcBlock;
-import org.transitime.ipc.data.IpcExtVehicle;
+import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
@@ -318,21 +318,21 @@ public class RmiQuery {
 		VehiclesInterface vehiclesInterface = 
 				VehiclesInterfaceFactory.get(agencyId);
 		
-		Collection<IpcExtVehicle> vehicles = null;
+		Collection<IpcCompleteVehicle> vehicles = null;
 		if (vehicleIds != null && vehicleIds.length == 1) {
 			// Get single vehicle
-			IpcExtVehicle vehicle = vehiclesInterface.getExt(vehicleIds[0]);
-			vehicles = new ArrayList<IpcExtVehicle>();
+			IpcCompleteVehicle vehicle = vehiclesInterface.getComplete(vehicleIds[0]);
+			vehicles = new ArrayList<IpcCompleteVehicle>();
 			vehicles.add(vehicle);
 		} else if (vehicleIds != null && vehicleIds.length > 1) {
 			// Get multiple vehicles
-			vehicles = vehiclesInterface.getExt(Arrays.asList(vehicleIds));
+			vehicles = vehiclesInterface.getComplete(Arrays.asList(vehicleIds));
 		} else if (routeShortNames != null && routeShortNames.length == 1) {
 			// Get vehicles for specified route
-			vehicles = vehiclesInterface.getExtForRoute(routeShortNames[0]);
+			vehicles = vehiclesInterface.getCompleteForRoute(routeShortNames[0]);
 		} else {
 			// Get all vehicles
-			vehicles = vehiclesInterface.getExt();
+			vehicles = vehiclesInterface.getComplete();
 		}
 		
 		if (vehicles.size() > 0) {

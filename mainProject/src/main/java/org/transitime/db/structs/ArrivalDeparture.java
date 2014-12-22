@@ -211,7 +211,7 @@ public class ArrivalDeparture implements Serializable {
 		// a trip and and this is an arrival time OR there is a departure schedule
 		// time and this is not the last stop for a trip and this is a departure 
 		// time.
-		ScheduleTime scheduleTime = trip.getScheduleTime(stopId);
+		ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
 		Date scheduledEpochTime = null;
 		if (stopPath.isLastStopInTrip() && scheduleTime.getArrivalTime() != null
 				&& isArrival) {
@@ -684,5 +684,15 @@ public class ArrivalDeparture implements Serializable {
 		
 		// Return the schedule adherence
 		return new TemporalDifference(scheduledTime.getTime() - time.getTime());
+	}
+	
+	/**
+	 * Returns the Stop object associated with the arrival/departure. Will only
+	 * be valid for the Core system where the configuration has been read in.
+	 * 
+	 * @return The Stop associated with the arrival/departure
+	 */
+	public Stop getStop() {
+		return Core.getInstance().getDbConfig().getStop(stopId);
 	}
 }

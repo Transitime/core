@@ -15,29 +15,31 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.avl;
+package org.transitime.custom.mbta;
+
+import org.transitime.avl.NextBusAvlModule;
 
 /**
- * For sfmta agency the block assignments from the feed don't
+ * For mbta the block assignments from the feed don't
  * match to the GTFS data. Therefore this module must be used
- * for the sfmta AVL feed.
+ * for the mbta feed.
  *
  * @author SkiBu Smith
- * 
+ *
  */
-public class MuniNextBusAvlModule extends NextBusAvlModule {
+public class MbtaNextBusAvlModule extends NextBusAvlModule {
 
 	/**
-	 * @param agencyId
+	 * @param projectId
 	 */
-	public MuniNextBusAvlModule(String agencyId) {
-		super(agencyId);
+	public MbtaNextBusAvlModule(String projectId) {
+		super(projectId);
 	}
 	
 	/**
-	 * At least for sfmta agency they don't use a leading 0 in the block ID in
-	 * the GTFS data. Therefore to match strip out leading zeros from the block
-	 * ID here.
+	 * At least for mbta the feed uses '_' characters in the block
+	 * assignment but the GTFS data instead uses '-' characters.
+	 * Therefore need to process the block IDs.
 	 * 
 	 * @param originalBlockIdFromFeed
 	 *            the block ID to be modified
@@ -45,10 +47,10 @@ public class MuniNextBusAvlModule extends NextBusAvlModule {
 	 */
 	@Override
 	protected String processBlockId(String originalBlockIdFromFeed) {
-		String block = originalBlockIdFromFeed;
-		while (block != null && block.startsWith("0"))
-			block = block.substring(1);
-		return block;
+		if (originalBlockIdFromFeed == null)
+			return null;
+		else
+			return originalBlockIdFromFeed.replace('_', '-');
 	}
 
 }

@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.misc.sfmta;
+package org.transitime.custom.sfmta.delayTimes;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

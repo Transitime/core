@@ -49,6 +49,7 @@ public class VehicleState {
 	private BlockAssignmentMethod assignmentMethod;
 	private String assignmentId;
 	private Date assignmentTime;
+	
 	private boolean predictable;
 	// First is most recent
 	private LinkedList<TemporalMatch> temporalMatchHistory = 
@@ -72,6 +73,10 @@ public class VehicleState {
 	// vehicle was unassigned.
 	private Block previousBlockBeforeUnassigned = null;
 	private Date unassignedTime = null;
+	
+	// For determining if should use a previous assignment if the current 
+	// assignment is not valid.
+	private int badAssignmentsInARow = 0;
 	
 	private static int MATCH_HISTORY_MAX_SIZE = 6;
 	private static int AVL_HISTORY_MAX_SIZE = 6;
@@ -389,7 +394,9 @@ public class VehicleState {
 	 * @param avlReport
 	 * @return
 	 */
-	public boolean hasNewAssignment(AvlReport avlReport) {		
+	public boolean hasNewAssignment(AvlReport avlReport) {
+		// Use Objects.equals() since either the existing assignment or 
+		// the AVL report assignment can be null
 		return  !Objects.equals(assignmentId, avlReport.getAssignmentId());
 	}
 	
@@ -742,5 +749,13 @@ public class VehicleState {
 	 */
 	public long getLastArrivalTime() {
 		return lastArrivalTime;
+	}
+
+	public int getBadAssignmentsInARow() {
+		return badAssignmentsInARow;
+	}
+
+	public void setBadAssignmentsInARow(int badAssignmentsInARow) {
+		this.badAssignmentsInARow = badAssignmentsInARow;
 	}
 }
