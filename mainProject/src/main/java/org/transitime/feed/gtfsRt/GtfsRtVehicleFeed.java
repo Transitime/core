@@ -108,10 +108,14 @@ public class GtfsRtVehicleFeed {
 		long gpsTime = vehicleData.getGpsTime();
 		vehiclePosition.setTimestamp(gpsTime / Time.MS_PER_SEC);
 		
-		// Set current_status part of vehiclePosition
-		VehicleStopStatus currentStatus = vehicleData.getAtStopId() != null ? 
-				VehicleStopStatus.STOPPED_AT : VehicleStopStatus.IN_TRANSIT_TO;
-		vehiclePosition.setCurrentStatus(currentStatus);
+		// Set current_status part of vehiclePosition if vehicle is actually
+		// predictable.
+		if (vehicleData.isPredictable()) {
+			VehicleStopStatus currentStatus = 
+					vehicleData.getAtStopId() != null ? 
+					VehicleStopStatus.STOPPED_AT : VehicleStopStatus.IN_TRANSIT_TO;
+			vehiclePosition.setCurrentStatus(currentStatus);
+		}
 		
 		// Return the results
 		return vehiclePosition.build();
