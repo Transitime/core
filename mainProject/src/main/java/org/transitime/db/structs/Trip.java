@@ -18,6 +18,7 @@ package org.transitime.db.structs;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -386,7 +387,7 @@ public class Trip implements Serializable {
 	 * @param session
 	 * @param configRev
 	 * @param tripShortName
-	 * @return
+	 * @return The Trip or null if no such trip
 	 * @throws HibernateException
 	 */
 	public static Trip getTripByShortName(Session session, int configRev,
@@ -400,10 +401,38 @@ public class Trip implements Serializable {
 		query.setString("tripShortName", tripShortName);
 		
 		// Actually perform the query
-		Trip trip = (Trip) query.uniqueResult();
+		@SuppressWarnings("unchecked")
+		List<Trip> trips = query.list();
+		
+		// If no results return null
+		if (trips.size() == 0)
+			return null;
 
-		return trip;
+		// If only a single trip matched then assume that the service ID is 
+		// correct so return it. This should usually be fine, and it means
+		// then don't need to determine current service IDs, which is
+		// somewhat expensive.
+		if (trips.size() == 1) 
+			return trips.get(0);
+		
+		// There are results so use the Trip that corresponds to the current 
+		// service ID.
+		Date now = Core.getInstance().getSystemDate();
+		List<String> currentServiceIds = 
+				Core.getInstance().getServiceUtils().getServiceIds(now);
+		for (Trip trip : trips) {
+			for (String serviceId : currentServiceIds) {
+				if (trip.getServiceId().equals(serviceId)) {
+					// Found a service ID match so return this trip 
+					return trip;
+				}
+			}
+		}
+		
+		// Didn't find a trip that matched a current service ID so return null
+		return null;
 	}
+	
 	/**
 	 * Deletes rev from the Trips table
 	 * 
@@ -616,24 +645,26 @@ public class Trip implements Serializable {
 	}
 
 	/**
-	 * Returns departure time of first stop of trip. 
-	 * Gtfs requires departure time of first stop of trip and
-	 * arrival time of last stop of trip to be set, even
-	 * for unscheduled blocks. That way they can determine
-	 * running time of trip.
-	 * @return departure time of first stop of trip. Time is seconds into the day.
+	 * Returns departure time of first stop of trip. Gtfs requires departure
+	 * time of first stop of trip and arrival time of last stop of trip to be
+	 * set, even for unscheduled blocks. That way they can determine running
+	 * time of trip.
+	 * 
+	 * @return departure time of first stop of trip. Time is seconds into the
+	 *         day. Can be null.
 	 */
 	public Integer getStartTime() {
 		return startTime;
 	}
 	
 	/**
-	 * Returns arrival time of last stop of trip. 
-	 * Gtfs requires departure time of first stop of trip and
-	 * arrival time of last stop of trip to be set, even
-	 * for unscheduled blocks. That way they can determine
-	 * running time of trip.
+	 * Returns arrival time of last stop of trip. Gtfs requires departure time
+	 * of first stop of trip and arrival time of last stop of trip to be set,
+	 * even for unscheduled blocks. That way they can determine running time of
+	 * trip.
+	 * 
 	 * @return arrival time of last stop of trip. Time is seconds into the day.
+	 *         Can be null.
 	 */
 	public Integer getEndTime() {
 		return endTime;
