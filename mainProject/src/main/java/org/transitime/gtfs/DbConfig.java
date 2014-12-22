@@ -380,7 +380,7 @@ public class DbConfig {
 	 * reads in the specific trip from the db, not all trips like getTrips().
 	 * 
 	 * @param tripId
-	 * @return
+	 * @return The trip, or null if no such trip
 	 */
 	public Trip getTrip(String tripId) {
 		Trip trip = individualTripsMap.get(tripId);

@@ -22,7 +22,8 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.List;
 
-import org.transitime.ipc.data.IpcExtVehicle;
+import org.transitime.ipc.data.IpcCompleteVehicle;
+import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
 import org.transitime.ipc.data.IpcVehicle;
 
 /**
@@ -42,12 +43,21 @@ public interface VehiclesInterface extends Remote {
 	public Collection<IpcVehicle> get() throws RemoteException;
 
 	/**
-	 * Gets from server IpcSiriVehicle info for all vehicles.
+	 * Gets from server IpcCompleteVehicle info for all vehicles.
 	 * 
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcExtVehicle> getExt() throws RemoteException;
+	public Collection<IpcCompleteVehicle> getComplete() throws RemoteException;
+
+	/**
+	 * Gets from server IpcCompleteVehicle info for all vehicles.
+	 * 
+	 * @return Collection of Vehicle objects
+	 * @throws RemoteException
+	 */
+	public Collection<IpcGtfsRealtimeVehicle> getGtfsRealtime()
+			throws RemoteException;
 
 	/**
 	 * Gets from server IpcVehicle info for specified vehicle.
@@ -60,14 +70,15 @@ public interface VehiclesInterface extends Remote {
 	public IpcVehicle get(String vehicleId) throws RemoteException;
 
 	/**
-	 * Gets from server IpcExtVehicle info for specified vehicle.
+	 * Gets from server IpcCompleteVehicle info for specified vehicle.
 	 * 
 	 * @param vehicleId
 	 *            ID of vehicle to get data for
 	 * @return info for specified vehicle
 	 * @throws RemoteException
 	 */
-	public IpcExtVehicle getExt(String vehicleId) throws RemoteException;
+	public IpcCompleteVehicle getComplete(String vehicleId)
+			throws RemoteException;
 
 	/**
 	 * Gets from server IpcVehicle info for vehicles specified by vehicles
@@ -78,19 +89,19 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcVehicle> get(List<String> vehicleIds) 
+	public Collection<IpcVehicle> get(List<String> vehicleIds)
 			throws RemoteException;
 
 	/**
-	 * Gets from server IpcSiriVehicle info for vehicles specified by vehicles
-	 * parameter.
+	 * Gets from server IpcCompleteVehicle info for vehicles specified by
+	 * vehicles parameter.
 	 * 
 	 * @param vehicleIds
 	 *            Collection of vehicle IDs to get Vehicle data for.
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcExtVehicle> getExt(List<String> vehicleIds) 
+	public Collection<IpcCompleteVehicle> getComplete(List<String> vehicleIds)
 			throws RemoteException;
 
 	/**
@@ -102,20 +113,20 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcVehicle> getForRoute(String routeIdOrShortName) 
+	public Collection<IpcVehicle> getForRoute(String routeIdOrShortName)
 			throws RemoteException;
 
 	/**
-	 * Gets from server IpcExtVehicle info for all vehicles currently. associated
-	 * with route.
+	 * Gets from server IpcCompleteVehicle info for all vehicles currently.
+	 * associated with route.
 	 * 
 	 * @param routeIdOrShortName
 	 *            Specifies which route to get Vehicle data for
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcExtVehicle> getExtForRoute(String routeIdOrShortName) 
-			throws RemoteException;
+	public Collection<IpcCompleteVehicle> getCompleteForRoute(
+			String routeIdOrShortName) throws RemoteException;
 
 	/**
 	 * Gets from server IpcVehicle info for all vehicles currently. associated
@@ -130,15 +141,15 @@ public interface VehiclesInterface extends Remote {
 			throws RemoteException;
 
 	/**
-	 * Gets from server IpcSiriVehicle info for all vehicles currently. associated
-	 * with route.
+	 * Gets from server IpcCompleteVehicle info for all vehicles currently.
+	 * associated with route.
 	 * 
 	 * @param routeIdsOrShortNames
 	 *            Specifies which routes to get Vehicle data for
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcExtVehicle> getExtForRoute(List<String> routeIdsOrShortNames) 
-			throws RemoteException;
+	public Collection<IpcCompleteVehicle> getCompleteForRoute(
+			List<String> routeIdsOrShortNames) throws RemoteException;
 
 }

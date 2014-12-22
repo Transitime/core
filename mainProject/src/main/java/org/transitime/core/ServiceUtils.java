@@ -80,6 +80,9 @@ public class ServiceUtils {
 	 * process the latest GTFS data in time, the system will still run using the
 	 * old Calendars. This is very important because it is unfortunately
 	 * somewhat common for the Calendars to expire.
+	 * <p>
+	 * Uses already read in calendars, but does a good number of calculations so
+	 * still a bit expensive.
 	 * 
 	 * @param epochTime
 	 *            For determining which Calendars are currently active
@@ -129,6 +132,9 @@ public class ServiceUtils {
 	 * Determines list of current service IDs for the specified time.
 	 * These service IDs designate which block assignments are currently
 	 * active.
+	 * <p>
+	 * Uses already read in calendars, but does a good number of calculations so
+	 * still a bit expensive.
 	 * 
 	 * @param epochTime The current time that determining service IDs for
 	 * @param calendars List of calendar.txt GTFS data

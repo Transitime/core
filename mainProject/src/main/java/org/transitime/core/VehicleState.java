@@ -49,6 +49,7 @@ public class VehicleState {
 	private BlockAssignmentMethod assignmentMethod;
 	private String assignmentId;
 	private Date assignmentTime;
+	
 	private boolean predictable;
 	// First is most recent
 	private LinkedList<TemporalMatch> temporalMatchHistory = 

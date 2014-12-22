@@ -103,7 +103,7 @@ public class IpcRoute extends IpcRouteSummary {
 		// Based on the first prediction determine the current IpcVehicle info
 		String vehicleId = ipcPreds.get(0).getVehicleId();
 		
-		IpcExtVehicle vehicle = VehicleDataCache.getInstance().getVehicle(vehicleId);
+		IpcCompleteVehicle vehicle = VehicleDataCache.getInstance().getVehicle(vehicleId);
 		
 		return new Location(vehicle.getLatitude(), vehicle.getLongitude());
 	}
