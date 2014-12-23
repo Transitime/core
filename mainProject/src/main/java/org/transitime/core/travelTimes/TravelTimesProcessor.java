@@ -28,6 +28,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.DoubleConfigValue;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.travelTimes.DataFetcher.DbDataMapKey;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -90,9 +92,37 @@ public class TravelTimesProcessor {
 	private final static int MAX_SCHED_ADH_SECS =
 			30*Time.SEC_PER_MIN;
 	
-	private double maxTravelTimeSegmentLength;
-		
-	private double minSegmentSpeedMps;
+	private static boolean shouldResetEarlyTerminalDepartures() {
+		return resetEarlyTerminalDepartures.getValue();
+	}
+	private static BooleanConfigValue resetEarlyTerminalDepartures =
+			new BooleanConfigValue("transitime.travelTimes.resetEarlyTerminalDepartures",
+					true,
+					"For some agencies vehicles won't be departing terminal "
+					+ "early. If an early departure is detected for such an "
+					+ "agency then will use the schedule time since the "
+					+ "arrival time is likely a mistake.");
+	
+	private static double getMaxTravelTimeSegmentLength() {
+		return maxTravelTimeSegmentLength.getValue();
+	}
+	private static DoubleConfigValue maxTravelTimeSegmentLength =
+			new DoubleConfigValue("transitime.traveltimes.maxTravelTimeSegmentLength",
+					250.0,
+					"The longest a travel time segment can be. If a stop path "
+					+ "is longer than this distance then it will be divided "
+					+ "into multiple travel time segments of even length.");
+
+	private static double getMinSegmentSpeedMps() {
+		return minSegmentSpeedMps.getValue();
+	}
+	private static DoubleConfigValue minSegmentSpeedMps =
+			new DoubleConfigValue("transitime.traveltimes.minSegmentSpeedMps",
+					0.0,
+					"If a a travel time segment is determined to have a lower "
+					+ "speed than this value then the travel time will be "
+					+ "decreased to meet this limit. Purpose is to make sure "
+					+ "that don't get invalid travel times due to bad data.");
 	
 	// The aggregate data processed from the historic db data.
 	// ProcessedDataMapKey combines tripId and stopPathIndex in 
@@ -110,22 +140,6 @@ public class TravelTimesProcessor {
 
 	/********************** Member Functions **************************/
 
-	/**
-	 * Constructor
-	 * 
-	 * @param maxTravelTimeSegmentLength
-	 *            For determining how many travel time segments there should be
-	 *            in a stop path.
-	 * @param minSegmentSpeedMps
-	 *            Specifies the lowest speed a segment can represent. Makes sure
-	 *            that don't have absurdly slow travel times.
-	 */
-	public TravelTimesProcessor(double maxTravelTimeSegmentLength,
-			double minSegmentSpeedMps) {
-		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
-		this.minSegmentSpeedMps = minSegmentSpeedMps;
-	}
-	
 	/**
 	 * Special MapKey class so that can make sure using the proper one for the
 	 * associated maps in this class. The key is made up of the tripId and the
@@ -228,6 +242,13 @@ public class TravelTimesProcessor {
 		if (Math.abs(lateTimeMsec) > MAX_SCHED_ADH_FOR_FIRST_STOP_TIME) 
 			return;
 		
+		// If configured to not use early departures then reset lateTimeMsec
+		// to 0 if it is negative. This is useful for agencies like commuter
+		// rail since trains really aren't going to leave early and early
+		// departures indicates a problem with travel times.
+		if (shouldResetEarlyTerminalDepartures() && lateTimeMsec < 0)
+			lateTimeMsec = 0;
+		
 		// Get the MapKey so can put stop time into map
 		ProcessedDataMapKey mapKeyForTravelTimes = 
 				getKey(arrDep.getTripId(), arrDep.getStopPathIndex());
@@ -321,7 +342,7 @@ public class TravelTimesProcessor {
 	 */
 	private int getNumTravelTimeSegments(double pathLength) {
 		int numberTravelTimeSegments = 
-				(int) (pathLength / maxTravelTimeSegmentLength + 1.0);		
+				(int) (pathLength / getMaxTravelTimeSegmentLength() + 1.0);		
 		return numberTravelTimeSegments;
 	}
 
@@ -403,8 +424,11 @@ public class TravelTimesProcessor {
 	}
 
 	/**
-	 * For when the path between stops is long enough such that there are
-	 * multiple travel time segments. For the particular stop path, as specified
+	 * Determines the travel times. If stop path is short enough such that it is
+	 * only a single travel time segment then returns single travel time set to
+	 * the difference between the departure time for arrDep1 and the arrival
+	 * time for arrDep2. For when stop path is long enough such that there are
+	 * multiple travel time segments, for the particular stop path, as specified
 	 * by the arrival stop, looks up the associated Matches in order to
 	 * determine how the vehicle travels along the stop path. Determines when
 	 * the travel time segment vertices are crossed and uses the vertices, along
@@ -421,9 +445,41 @@ public class TravelTimesProcessor {
 	 *         each travel time segment. If the match points are garbled and go
 	 *         backwards in time then null is returned.
 	 */
-	private List<Integer> addTravelTimesForMultiSegments(
+	private List<Integer> determineTravelTimesForStopPath(
 			DataFetcher dataFetcher, ArrivalDeparture arrDep1,
 			ArrivalDeparture arrDep2) {
+		// Determine departure time. If shouldn't use departures times
+		// for terminal departure that are earlier then schedule time
+		// then use the scheduled departure time. This prevents creating
+		// bad predictions due to incorrectly determined travel times. 
+		long departureTime = arrDep1.getTime();
+		if (shouldResetEarlyTerminalDepartures() 
+				&& arrDep1.getStopPathIndex() == 0 
+				&& arrDep1.getTime() < arrDep1.getScheduledTime()) {
+			logger.debug("Note: for {} using scheduled departure time instead "
+					+ "of the calculated departure time since "
+					+ "transitime.travelTimes.resetEarlyTerminalDepartures is "
+					+ "true and the departure time was (likely incorrectly) "
+					+ "calculated to be before the scheduled departure time",
+					arrDep1);
+			departureTime = arrDep1.getScheduledTime();
+		}
+
+		// If this stop path is short enough such that it is just a signal 
+		// travel times segment then handle specially since don't need
+		// to look at matches.
+		if (arrDep2.getStopPathLength() < getMaxTravelTimeSegmentLength()) {
+			// Determine and return the travel time between the stops
+			int travelTimeBetweenStopsMsec = 
+					(int) (arrDep2.getTime() - departureTime);
+			List<Integer> travelTimesForStopPath = new ArrayList<Integer>();
+			travelTimesForStopPath.add(travelTimeBetweenStopsMsec);
+			return travelTimesForStopPath;
+		}
+
+		// Stop path is longer than a single travel time segment so need to
+		// look at matches to determine travel times for each travel time
+		// segment.
 		double travelTimeSegmentLength = getTravelTimeSegmentLength(arrDep2);
 
 		List<MatchPoint> matchPoints = 
@@ -435,7 +491,7 @@ public class TravelTimesProcessor {
 		List<Long> vertexTimes = new ArrayList<Long>();
 		
 		// Add departure time from first stop
-		vertexTimes.add(arrDep1.getTime());
+		vertexTimes.add(departureTime);
 		
 		for (int i=0; i<matchPoints.size()-1; ++i) {
 			MatchPoint pt1 = matchPoints.get(i);
@@ -505,7 +561,7 @@ public class TravelTimesProcessor {
 			// A low speed indicates a problem with the data.
 			double segmentSpeedMps = 
 					travelTimeSegmentLength * Time.MS_PER_SEC / segmentTime;
-			if (segmentSpeedMps < minSegmentSpeedMps) {
+			if (segmentSpeedMps < getMinSegmentSpeedMps()) {
 				logger.error("For segmentIdx={} segment speed of {}mps is "
 						+ "below the limit of minSegmentSpeedMps={}mps. Therefore "
 						+ "it is being reset to min segment speed. arrDep1={} "
@@ -513,7 +569,7 @@ public class TravelTimesProcessor {
 						i, StringUtils.twoDigitFormat(segmentSpeedMps), 
 						minSegmentSpeedMps, arrDep1, arrDep2);
 				segmentTime = (int) (travelTimeSegmentLength * Time.MS_PER_SEC / 
-						minSegmentSpeedMps);
+						getMinSegmentSpeedMps());
 			}
 			
 			// Keep track of this segment time for this segment
@@ -576,25 +632,11 @@ public class TravelTimesProcessor {
 		if (arrDep1.getStopPathIndex() - arrDep2.getStopPathIndex() != 1
 				&& arrDep1.isDeparture()
 				&& arrDep2.isArrival()) {
-			// If the stopPath is short enough such that there will be
-			// only a single travel segment...
-			if (arrDep2.getStopPathLength() < maxTravelTimeSegmentLength) {
-				// Determine the travel time between the stops
-				int travelTimeBetweenStopsMsec = 
-						(int) (arrDep2.getTime() - arrDep1.getTime());
-				List<Integer> travelTimesForStopPath = new ArrayList<Integer>();
-				travelTimesForStopPath.add(travelTimeBetweenStopsMsec);
-				addTravelTimesToMap(mapKeyForTravelTimes, travelTimesForStopPath);
-			} else {
-				// The stop path is long enough such that there will be more
-				// than a single travel time segment.
-				//
-				// Go through the matches for this stop path and use them to
-				// determine the travel times for each travel time segment
-				List<Integer> travelTimesForStopPath = addTravelTimesForMultiSegments(
-						dataFetcher, arrDep1, arrDep2);
-				addTravelTimesToMap(mapKeyForTravelTimes, travelTimesForStopPath);
-			}
+			// Determine the travel times and add them to the map
+			List<Integer> travelTimesForStopPath = 
+					determineTravelTimesForStopPath(dataFetcher, arrDep1, 
+							arrDep2);
+			addTravelTimesToMap(mapKeyForTravelTimes, travelTimesForStopPath);
 				
 			return;
 		}

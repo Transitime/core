@@ -38,7 +38,6 @@ import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
-import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -280,20 +279,16 @@ public class UpdateTravelTimes {
 	 * 
 	 * @param session
 	 * @param agencyId
-	 * @param maxTravelTimeSegmentLength
-	 * @param minSegmentSpeedMps
 	 * @param specialDaysOfWeek
 	 *            Not fully implemented. Should therefore be null for now.
 	 * @param beginTime
 	 * @param endTime
 	 */
 	private static void processTravelTimes(Session session, String agencyId,
-			double maxTravelTimeSegmentLength, double minSegmentSpeedMps,
 			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
 		// Read in historic data from db and put it into maps so that it can
 		// be processed.
-		TravelTimesProcessor processor = 
-				new TravelTimesProcessor(maxTravelTimeSegmentLength, minSegmentSpeedMps);
+		TravelTimesProcessor processor = new TravelTimesProcessor();
 		processor.readAndProcessHistoricData(agencyId, specialDaysOfWeek,
 				beginTime, endTime);
 
@@ -321,15 +316,12 @@ public class UpdateTravelTimes {
 	 * the session is closed.
 	 * 
 	 * @param agencyId
-	 * @param maxTravelTimeSegmentLength
-	 * @param minSegmentSpeedMps
 	 * @param specialDaysOfWeek
 	 *            Not fully implemented. Should therefore be null for now.
 	 * @param beginTime
 	 * @param endTime
 	 */
 	private static void manageSessionAndProcessTravelTimes(String agencyId,
-			double maxTravelTimeSegmentLength, double minSegmentSpeedMps,
 			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
 		// Get a database session
 		Session session = HibernateUtils.getSession(agencyId);
@@ -339,8 +331,8 @@ public class UpdateTravelTimes {
 			tx = session.beginTransaction();
 
 			// Actually do all the data processing
-			processTravelTimes(session, agencyId, maxTravelTimeSegmentLength,
-					minSegmentSpeedMps, specialDaysOfWeek, beginTime, endTime);
+			processTravelTimes(session, agencyId, specialDaysOfWeek, beginTime,
+					endTime);
 			
 			// Make sure that everything actually written out to db
 			tx.commit();
@@ -358,11 +350,9 @@ public class UpdateTravelTimes {
 	}
 	
 	/**
-	 * arg[0] specifies maxTravelTimeSegmentLength. arg[1] specifies
-	 * minSegmentSpeedMps and a value of 2.7m/s is 6mph. arg[2] specifies both
-	 * the start date and end date. If an addition argument is specified it is
-	 * used as the end date. Otherwise the data is processed for just a single
-	 * day.
+	 * arg[0] specifies both the start date and end date. If an addition
+	 * argument is specified it is used as the end date. Otherwise the data is
+	 * processed for just a single day.
 	 * 
 	 * @param args
 	 */
@@ -370,15 +360,8 @@ public class UpdateTravelTimes {
 		// Determine the parameters
 		String agencyId = CoreConfig.getAgencyId();
 		
-		String maxTravelTimeSegmentLengthStr = args[0];
-		double maxTravelTimeSegmentLength = 
-				Double.parseDouble(maxTravelTimeSegmentLengthStr);
-		
-		String minSegmentSpeedMpsStr = args[1];
-		double minSegmentSpeedMps = Double.parseDouble(minSegmentSpeedMpsStr);
-		
-		String startDateStr = args[2];
-		String endDateStr = args.length > 3 ? args[3] : startDateStr;
+		String startDateStr = args[0];
+		String endDateStr = args.length > 1 ? args[1] : startDateStr;
 		
 		// Some params are hard coded simply to get things going
 //		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();
@@ -399,8 +382,7 @@ public class UpdateTravelTimes {
 		// Log params used right at top of log file
 		logger.info("Processing travel times for beginTime={} endTime={} "
 				+ "maxTravelTimeSegmentLength={}",
-				startDateStr, endDateStr, 
-				Geo.distanceFormat(maxTravelTimeSegmentLength));
+				startDateStr, endDateStr);
 		
 		// Set the timezone for the application
 		int configRev = ActiveRevisions.get(agencyId).getConfigRev();
@@ -409,9 +391,8 @@ public class UpdateTravelTimes {
 		TimeZone.setDefault(timezone);
 		
 		// Do all the work...
-		manageSessionAndProcessTravelTimes(agencyId,
-				maxTravelTimeSegmentLength, minSegmentSpeedMps,
-				specialDaysOfWeek, beginTime, endTime);
+		manageSessionAndProcessTravelTimes(agencyId, specialDaysOfWeek,
+				beginTime, endTime);
 		
 		// program won't just exit on its own, probably due to their being
 		// another thread still running. Not sure why. Probably has to do
