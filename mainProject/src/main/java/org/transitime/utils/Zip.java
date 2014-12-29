@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +30,10 @@ import org.slf4j.LoggerFactory;
  * @author SkiBu Smith
  *
  */
-public class Unzip {
+public class Zip {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(Unzip.class);
+			.getLogger(Zip.class);
 
 
 	/********************** Member Functions **************************/
