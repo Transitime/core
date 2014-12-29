@@ -32,7 +32,7 @@ import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.HttpGetGtfsFile;
 import org.transitime.gtfs.TitleFormatter;
 import org.transitime.utils.Time;
-import org.transitime.utils.Unzip;
+import org.transitime.utils.Zip;
 
 /**
  * Reads GTFS files, validates and cleans up the data, stores the
@@ -183,7 +183,7 @@ public class GtfsFileProcessor {
 		
 		// Uncompress the GTFS zip file if need to
 		if (gtfsZipFileName != null) {
-			gtfsDirectoryName = Unzip.unzip(gtfsZipFileName, unzipSubdirectory);
+			gtfsDirectoryName = Zip.unzip(gtfsZipFileName, unzipSubdirectory);
 		}
 	}
 		
