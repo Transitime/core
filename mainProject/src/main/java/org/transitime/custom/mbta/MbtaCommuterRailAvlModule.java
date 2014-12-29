@@ -177,7 +177,7 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 		String gpsTaipStr = getValue(line, gpsMarker + "(\\>.+\\<)");
 		TaipGpsLocation taipGpsLoc = TaipGpsLocation.get(gpsTaipStr);
 		if (taipGpsLoc == null) {
-			logger.error("Could not parse TAIP string \"{}\" for line {}", 
+			logger.warn("Could not parse TAIP string \"{}\" for line {}", 
 					gpsTaipStr, line);
 			return null;
 		}
