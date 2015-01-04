@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 import com.amazonaws.AmazonClientException;
@@ -315,10 +316,15 @@ public class AwsGlacierInventoryRetriever {
 	 * Retrieves vault inventory and puts it into a file.
 	 * 
 	 * @param vaultName
+	 *            Name of the AWS vault
 	 * @param outputFileName
+	 *            Name of inventory json file to store data in
 	 */
 	public void getVaultInventory(String vaultName, String outputFileName) {
-		logger.info("Getting vault inventory for vaultName={}", vaultName);
+		logger.info("Getting vault inventory for vaultName={} and storing "
+				+ "it into file {}", vaultName, outputFileName);
+		IntervalTimer timer = new IntervalTimer();
+		
 		String jobId = initiateVaultInventoryJobRequest(vaultName);
 
 		try {
@@ -331,6 +337,10 @@ public class AwsGlacierInventoryRetriever {
 
 			downloadJobOutput(vaultName, jobId, outputFileName);
 			cleanUp();
+			
+			logger.info("Successfully downloaded vault inventory for "
+					+ "vaultName={} and stored it into file {} . It took {} "
+					+ "msec", vaultName, outputFileName, timer.elapsedMsec());
 		} catch (Exception e) {
 			logger.error("Exception getting vault inventory for vaultName={}"
 					+ "jobId=",	vaultName, jobId);
@@ -344,7 +354,7 @@ public class AwsGlacierInventoryRetriever {
 		AwsGlacierInventoryRetriever inventoryRetriever = 
 				new AwsGlacierInventoryRetriever(AwsGlacier.OREGON_REGION);
 		String vaultName = "mbta-core";		
-		String inventoryOutputFileName = "D:/Logs/mbta/mbta-core_inventory.txt";
+		String inventoryOutputFileName = "D:/Logs/mbta/mbta-core_inventory.json";
 		inventoryRetriever.getVaultInventory(vaultName, inventoryOutputFileName);
 	}
 
