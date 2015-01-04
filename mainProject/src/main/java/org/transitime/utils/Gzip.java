@@ -41,12 +41,12 @@ public class Gzip {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Decompresses .gz file. Deletes the original .gz file.
+	 * Uncompresses .gz file. Deletes the original .gz file.
 	 * 
 	 * @param gzipFileName
 	 *            Name of the compressed file. Should end with .gz
 	 */
-    public static void decompressGzipFile(String gzipFileName) {
+    public static void uncompress(String gzipFileName) {
         try {
             FileInputStream fis = new FileInputStream(gzipFileName);
             GZIPInputStream gis = new GZIPInputStream(fis);
@@ -78,7 +78,7 @@ public class Gzip {
 	 * @param fileName
 	 * @return name of compressed file
 	 */
-    public static String compressGzipFile(String fileName) {
+    public static String compress(String fileName) {
         try {
             FileInputStream fis = new FileInputStream(fileName);
             String outputFileName = fileName + ".gz";
