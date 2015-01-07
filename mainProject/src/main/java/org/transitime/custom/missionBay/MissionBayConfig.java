@@ -59,6 +59,7 @@ public class MissionBayConfig {
 			Dir d1 = new Dir();
 			d1.tag = "loop";
 			d1.shapeId = "east_loop";
+			d1.gtfsDirection = "0";
 			String stops1[] = { "powell", "library", "miss4th_s", "nektar",
 					"miss4th_n", "chinbas", "calttown", "powell" };
 			d1.stopIds = Arrays.asList(stops1);
@@ -67,6 +68,7 @@ public class MissionBayConfig {
 			Dir d1c = new Dir();
 			d1c.tag = "loop_calt4th";
 			d1c.shapeId = "east_loop";
+			d1c.gtfsDirection = "0";
 			String stops1c[] = { "powell", "calt4th", "library", "miss4th_s",
 					"nektar", "miss4th_n", "chinbas", "calttown", "powell" };
 			d1c.stopIds = Arrays.asList(stops1c);
@@ -76,6 +78,7 @@ public class MissionBayConfig {
 			Dir d1 = new Dir();
 			d1.tag = "morning_loop";
 			d1.shapeId = "west_morning_loop";
+			d1.gtfsDirection = "0";
 			String stops1[] = { "1500owen", "crescent_s", "berr5th_s",
 					"calttown", "powell", "berr5th_n", "crescent_n",
 					"1650owen", "409illi_w", "1650owen", "1500owen" };
@@ -85,6 +88,7 @@ public class MissionBayConfig {
 			Dir d1c = new Dir();
 			d1c.tag = "morning_loop_calt4th";
 			d1c.shapeId = "west_morning_loop";
+			d1c.gtfsDirection = "0";
 			String stops1c[] = { "1500owen", "crescent_s", "berr5th_s",
 					"calttown", "powell", "calt4th", "berr5th_n", "crescent_n",
 					"1650owen", "409illi_w", "1650owen", "1500owen" };
@@ -95,6 +99,7 @@ public class MissionBayConfig {
 			Dir d2 = new Dir();
 			d2.tag = "morning_loop_nektar";
 			d2.shapeId = "west_morning_loop_nektar";
+			d2.gtfsDirection = "0";
 			String stops2[] = { "1500owen", "crescent_s", "berr5th_s",
 					"calttown", "powell", "berr5th_n", "crescent_n",
 					"1650owen", "409illi_w", "nektar", "1650owen", "1500owen" };
@@ -104,6 +109,7 @@ public class MissionBayConfig {
 			Dir d2c = new Dir();
 			d2c.tag = "morning_loop_nektar_calt4th";
 			d2c.shapeId = "west_morning_loop_nektar";
+			d2c.gtfsDirection = "0";
 			String stops2c[] = { "1500owen", "crescent_s", "berr5th_s",
 					"calttown", "powell", "calt4th", "berr5th_n", "crescent_n",
 					"1650owen", "409illi_w", "nektar", "1650owen", "1500owen" };
@@ -114,6 +120,7 @@ public class MissionBayConfig {
 			Dir d3 = new Dir();
 			d3.tag = "afternoon_loop";
 			d3.shapeId = "west_afternoon_loop";
+			d3.gtfsDirection = "0";
 			String stops3[] = { "1500owen", "crescent_s", "berr5th_s",
 					"calttown", "powell", "calt4th", "berr5th_n", "crescent_n",
 					"409illi_e", "1650owen", "1500owen", };
@@ -123,6 +130,7 @@ public class MissionBayConfig {
 			Dir d3c = new Dir();
 			d3c.tag = "afternoon_loop_calt4th";
 			d3c.shapeId = "west_afternoon_loop";
+			d3c.gtfsDirection = "0";
 			String stops3c[] = { "1500owen", "crescent_s", "berr5th_s",
 					"calttown", "powell", "berr5th_n", "crescent_n",
 					"409illi_e", "1650owen", "1500owen" };
@@ -133,6 +141,7 @@ public class MissionBayConfig {
 			Dir d4 = new Dir();
 			d4.tag = "afternoon_loop_nektar";
 			d4.shapeId = "west_afternoon_loop_nektar";
+			d4.gtfsDirection = "0";
 			String stops4[] = { "1500owen", "crescent_s", "berr5th_s",
 					"calttown", "powell", "berr5th_n", "crescent_n",
 					"409illi_e", "nektar", "1650owen", "1500owen" };
@@ -142,6 +151,7 @@ public class MissionBayConfig {
 			Dir d4c = new Dir();
 			d4c.tag = "afternoon_loop_nektar_calt4th";
 			d4c.shapeId = "west_afternoon_loop_nektar";
+			d4c.gtfsDirection = "0";
 			String stops4c[] = { "1500owen", "crescent_s", "berr5th_s",
 					"calttown", "powell", "calt4th", "berr5th_n", "crescent_n",
 					"409illi_e", "nektar", "1650owen", "1500owen" };
@@ -152,6 +162,7 @@ public class MissionBayConfig {
 			Dir d1 = new Dir();
 			d1.tag = "loop";
 			d1.shapeId = "loop_loop";
+			d1.gtfsDirection = "0";
 			String stops1[] = { "1650owen", "1400owen", "crescent_s",
 					"berr5th_s", "calttown", "powell", "library",
 					"miss4th", "nektar", "409illi_e", "1650owen" };
@@ -161,6 +172,7 @@ public class MissionBayConfig {
 			Dir d1c = new Dir();
 			d1c.tag = "loop_calt4th";
 			d1c.shapeId = "loop_loop";
+			d1c.gtfsDirection = "0";
 			String stops1c[] = { "1650owen", "1400owen", "crescent_s",
 					"berr5th_s", "calttown", "powell", "calt4th", "library",
 					"miss4th", "nektar", "409illi_e", "1650owen" };

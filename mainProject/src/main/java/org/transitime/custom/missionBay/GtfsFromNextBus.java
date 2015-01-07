@@ -233,7 +233,7 @@ public class GtfsFromNextBus {
 		
 		// Create and return the GtfsRoute
 		GtfsRoute gtfsRoute = new GtfsRoute(routeId, 
-				agencyId.getValue(), title, title, 
+				agencyId.getValue(), null, title, 
 				gtfsRouteType.getValue(), color, oppositeColor);
 		return gtfsRoute;
 	}
@@ -299,6 +299,7 @@ public class GtfsFromNextBus {
 	public static class Dir {
 		String tag;
 		String shapeId;
+		String gtfsDirection; // Either "0" or "1"
 		List<String> stopIds = new ArrayList<String>();
 	}
 	
@@ -592,8 +593,8 @@ public class GtfsFromNextBus {
 		
 		// Create the trip info
 		String tripShortName = null;
-		GtfsTrip gtfsTrip = new GtfsTrip(routeId, serviceId.getValue(),
-				tripId, tripHeadsign, tripShortName, dir.tag, blockId,
+		GtfsTrip gtfsTrip = new GtfsTrip(routeId, serviceId.getValue(), tripId,
+				tripHeadsign, tripShortName, dir.gtfsDirection, blockId,
 				dir.shapeId);
 		tripsWriter.write(gtfsTrip);			
 	}
