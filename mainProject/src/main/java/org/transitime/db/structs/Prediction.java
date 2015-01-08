@@ -30,6 +30,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Index;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.ipc.data.IpcPrediction;
@@ -42,6 +43,9 @@ import org.transitime.ipc.data.IpcPrediction;
  */
 @Entity @DynamicUpdate 
 @Table(name="Predictions") 
+@org.hibernate.annotations.Table(appliesTo = "Prediction", 
+indexes = { @Index(name="PredictionTimeIndex", 
+                   columnNames={"creationTime"} ) } )
 public class Prediction implements Serializable {
 		
 	// Need an ID but using a regular column doesn't really make
