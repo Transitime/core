@@ -17,6 +17,7 @@
 
 package org.transitime.maintenance;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -68,8 +69,12 @@ public class AwsGlacierArchiver implements ArchiverInterface {
 	private void addToArchiveLog(String description, String archiveId) {
 		String logFile = logDirectory + "/" + vaultName + "_vault_log.txt";
 		try {
+			// Create sub directories if need to
+			File file = new File(logFile);
+			file.getParentFile().mkdirs();
+
 			// Open up log file in append mode
-			FileWriter fw = new FileWriter(logFile, true);
+			FileWriter fw = new FileWriter(file, true);
 			fw.write(vaultName + ", " + description + ", " + archiveId + "\n");
 			fw.close();
 		} catch (IOException e) {
@@ -104,4 +109,22 @@ public class AwsGlacierArchiver implements ArchiverInterface {
 		return archiveId;
 	}
 
+	/**
+	 * Uploads file to Amazon AWS Glacier for long term cheap storage.
+	 * 
+	 * @param args
+	 *            The command line arguments are fileName, description, region,
+	 *            vaultName, logDirectory.
+	 */
+	public static void main(String[] args) {
+		String fileName = args[0];
+		String description = args[1];
+		String region = args[2];
+		String vaultName = args[3];
+		String logDirectory = args[4];
+				
+		AwsGlacierArchiver archiver = new AwsGlacierArchiver(region, vaultName,
+				logDirectory);
+		archiver.upload(fileName, description);
+	}
 }
