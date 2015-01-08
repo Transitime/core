@@ -348,13 +348,20 @@ public class AwsGlacierInventoryRetriever {
 	}
 
 	/**
+	 * Gets the inventory file for the specified vault and writes it to a file
+	 * in the output directory.
+	 * 
 	 * @param args
+	 *            args[0] specifies vaultName. args[1] specifies the directory
+	 *            where the output file should be written.
 	 */
 	public static void main(String[] args) {
+		String vaultName = args[0];
+		String outputDir = args[1];
+		
 		AwsGlacierInventoryRetriever inventoryRetriever = 
 				new AwsGlacierInventoryRetriever(AwsGlacier.OREGON_REGION);
-		String vaultName = "mbta-core";		
-		String inventoryOutputFileName = "D:/Logs/mbta/mbta-core_inventory.json";
+		String inventoryOutputFileName = outputDir + "/" + vaultName + "_inventory.json";
 		inventoryRetriever.getVaultInventory(vaultName, inventoryOutputFileName);
 	}
 
