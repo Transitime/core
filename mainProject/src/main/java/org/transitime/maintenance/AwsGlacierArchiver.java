@@ -68,6 +68,9 @@ public class AwsGlacierArchiver implements ArchiverInterface {
 	 */
 	private void addToArchiveLog(String description, String archiveId) {
 		String logFile = logDirectory + "/" + vaultName + "_vault_log.txt";
+		logger.info("Logging for vaultName \"{}\" the description \"{}\" and "
+				+ "archiveId \"{}\" to logfile \"{}\"",
+				vaultName, archiveId, logFile);
 		try {
 			// Create sub directories if need to
 			File file = new File(logFile);
