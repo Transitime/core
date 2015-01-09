@@ -48,8 +48,9 @@ the downloaded hibernate dir hibernate-search-4.3.0.Final/dist/lib/required/:
     dom4j-1.6.1
     hibernate-commons-annotations-4.0.2.Final.jar
     hibernate-core-4.2.2.Final.jar
-    jackson-core-asl-1.9.2.jar
-    jackson-mapper-asl-1.9.2.jar
+    # NOTE: now using newer jackson jars due to AWS dependencies
+    #jackson-core-asl-1.9.2.jar
+    #jackson-mapper-asl-1.9.2.jar
     javassist-3.14.0-GA.jar
     jboss-logging-3.1.0.GA
     lucerne-core-3.6.2.jar
@@ -83,6 +84,23 @@ instead of using the standard hibernate one.
     mchange-commons-java-0.2.3.4.jar
   http://mvnrepository.com/artifact/org.hibernate/hibernate-c3p0
     hibernate-c3p0-4.2.4.Final.jar
+
+For Amazon AWS SDK
+  http://aws.amazon.com/releasenotes/Java?browse=1
+  Note that there are many jars needed from the third-party directory
+  from the downloaded zip file.
+    aws-java-sdk-1.9.13.jar
+    httpclient-4.3.jar  
+    httpcore-4.3.jar  
+    joda-time-2.2.jar
+  For AWS logging to work, from http://www.slf4j.org/download.html
+    jcl-over-slf4j-1.7.9.jar
+  For JSON processing to work the following can be gotten from
+  http://wiki.fasterxml.com/JacksonDownload or from the third-party
+  directory from the aws sdk download:
+    jackson-core-2.4.2.jar
+    jackson-databind-2.4.2.jar
+    jackson-annotations-2.4.2.jar
 
 For many Java utilities, such as StringEscapeUtils
   commons-lang3-3.3.2.jar
