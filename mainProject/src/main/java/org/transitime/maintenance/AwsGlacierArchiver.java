@@ -125,6 +125,8 @@ public class AwsGlacierArchiver implements ArchiverInterface {
 				
 		AwsGlacierArchiver archiver = new AwsGlacierArchiver(region, vaultName,
 				logDirectory);
-		archiver.upload(fileName, description);
+		String archiveId = archiver.upload(fileName, description);
+		if (archiveId == null)
+			System.exit(-1);
 	}
 }
