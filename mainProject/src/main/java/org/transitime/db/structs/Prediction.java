@@ -43,7 +43,7 @@ import org.transitime.ipc.data.IpcPrediction;
  */
 @Entity @DynamicUpdate 
 @Table(name="Predictions") 
-@org.hibernate.annotations.Table(appliesTo = "Prediction", 
+@org.hibernate.annotations.Table(appliesTo = "Predictions", 
 indexes = { @Index(name="PredictionTimeIndex", 
                    columnNames={"creationTime"} ) } )
 public class Prediction implements Serializable {
