@@ -437,6 +437,8 @@
 
     create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 
+    create index PredictionTimeIndex on Predictions (creationTime);
+
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add index FK_hh5uepurijcqj0pyc6e3h5mqw (travelTimesForStopPaths_id), 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 
