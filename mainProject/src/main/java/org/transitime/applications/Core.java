@@ -148,7 +148,7 @@ public class Core {
 	 * <p>
 	 * Synchronized to ensure that don't create more than a single Core.
 	 * 
-	 * @return The Core singleton
+	 * @return The Core singleton, or null if could not create it
 	 */
 	synchronized public static Core createCore() {
 		String agencyId = CoreConfig.getAgencyId();
@@ -172,8 +172,11 @@ public class Core {
 	}
 	
 	/**
-	 * @returns the Core singleton object for this application.
-	 */ 
+	 * For obtaining singleton Core object
+	 * 
+	 * @returns the Core singleton object for this application, or null if it
+	 *          could not be created
+	 */
 	public static Core getInstance() {
 		if (Core.singleton == null)
 			createCore();
