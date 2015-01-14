@@ -17,9 +17,7 @@
 
 package org.transitime.core.schedBasedPreds;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -27,12 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.AvlProcessor;
+import org.transitime.core.BlocksInfo;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.AvlReport.AssignmentType;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.modules.Module;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
@@ -91,40 +89,6 @@ public class SchedBasedPredsModule extends Module {
 	public SchedBasedPredsModule(String agencyId) {
 		super(agencyId);
 	}
-
-	/**
-	 * Looks at all blocks that are for the current service ID and returns list
-	 * of ones that will be or currently are active.
-	 * 
-	 * @return blocks that will be or are currently active
-	 */
-	private List<Block> getCurrentlyActiveBlocks() {
-		// The list to be returned
-		List<Block> activeBlocks = new ArrayList<Block>(1000);
-		
-		// Determine which service IDs are currently active.
-		// Yes, there can be multiple ones active at once.
-		Date now = Core.getInstance().getSystemDate();
-		List<String> currentServiceIds = 
-				Core.getInstance().getServiceUtils().getServiceIds(now);
-	
-		// For each service ID ...
-		for (String serviceId : currentServiceIds) {
-			DbConfig dbConfig = Core.getInstance().getDbConfig();
-			Collection<Block> blocks = dbConfig.getBlocks(serviceId);
-			
-			// If the block is about to be or currently active then
-			// add it to the list to be returned
-			for (Block block : blocks) {
-				if (block.isBeforeStartTime(now, 
-						getBeforeStartTimeMins() * Time.SEC_PER_MIN))
-					activeBlocks.add(block);
-			}
-		}
-		
-		// Done!
-		return activeBlocks;
-	}
 	
 	/**
 	 * Goes through all the blocks to find which ones don't have vehicles.
@@ -133,7 +97,8 @@ public class SchedBasedPredsModule extends Module {
 	 */
 	private void createSchedBasedPredsAsNecessary() {
 		// Determine which blocks are coming up or currently active
-		List<Block> activeBlocks = getCurrentlyActiveBlocks();
+		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks(
+				getBeforeStartTimeMins() * Time.SEC_PER_MIN);
 		
 		// For each active block see if no associated vehicle
 		for (Block block : activeBlocks) {

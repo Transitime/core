@@ -153,6 +153,13 @@ public class Core {
 	synchronized public static Core createCore() {
 		String agencyId = CoreConfig.getAgencyId();
 
+		// If agencyId not set then can't create a Core. This can happen
+		// when doing testing.
+		if (agencyId == null) {
+			logger.error("No agencyId specified for when creating Core.");
+			return null;
+		}
+		
 		// Make sure only can have a single Core object
 		if (Core.singleton != null) {
 			logger.error("Core singleton already created. Cannot create another one.");

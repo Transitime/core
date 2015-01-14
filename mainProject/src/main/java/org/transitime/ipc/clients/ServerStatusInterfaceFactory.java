@@ -25,7 +25,7 @@ import org.transitime.ipc.rmi.ClientFactory;
 
 /**
  * Provides a ServerStatusInterface client that can be queried for 
- * server status info.
+ * server status info via IPC.
  *
  * @author SkiBu Smith
  *
@@ -55,4 +55,5 @@ public class ServerStatusInterfaceFactory {
 
 		return serverStatusInterface;
 	}
+	
 }

@@ -26,9 +26,10 @@ import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.rmi.AbstractServer;
+import org.transitime.monitoring.AgencyMonitor;
 
 /**
- *
+ * Runs on the server side and receives IPC calls and returns results.
  *
  * @author SkiBu Smith
  *
@@ -82,6 +83,20 @@ public class ServerStatusServer extends AbstractServer
 		DataDbLogger dbLogger = Core.getInstance().getDbLogger();
 		return new IpcServerStatus(dbLogger.queueSize(), 
 				dbLogger.queueLevel());
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ServerStatusInterface#monitor()
+	 */
+	@Override
+	public String monitor() throws RemoteException {
+		// Monitor everything having to do with an agency server. Send
+		// out any notifications if necessary. Return any resulting
+		// error message.
+		AgencyMonitor agencyMonitor = new AgencyMonitor(getAgencyId());
+		String resultStr = agencyMonitor.checkAllAndLog();
+
+		return resultStr;
 	}
 
 }

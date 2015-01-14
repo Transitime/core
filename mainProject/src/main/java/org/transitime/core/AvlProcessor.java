@@ -50,6 +50,10 @@ import org.transitime.utils.Time;
  */
 public class AvlProcessor {
 
+	// For keeping track of how long since received an AVL report so
+	// can determine if AVL feed is up.
+	private AvlReport lastReportProcessed;
+	
 	// Singleton class
 	private static AvlProcessor singleton = new AvlProcessor();
 	
@@ -934,6 +938,21 @@ public class AvlProcessor {
 	}
 	
 	/**
+	 * Returns the GPS time of the last GPS report processed. Since AvlClient
+	 * filters out reports that are for a previous time for a vehicle even if
+	 * the AVL feed continues to feed old data that data will be ignored. In
+	 * other words, the last AVL time will be for that last valid AVL report.
+	 * 
+	 * @return The GPS time of last AVL report, or 0 if no last AVL report
+	 */
+	public long lastAvlReportTime() {
+		if (lastReportProcessed == null)
+			return 0;
+		
+		return lastReportProcessed.getTime();
+	}
+	
+	/**
 	 * First does housekeeping for the AvlReport (stores it in db, logs it,
 	 * etc). Processes the AVL report by matching to the assignment and
 	 * generating predictions and such. Sets VehicleState for the vehicle based
@@ -954,6 +973,10 @@ public class AvlProcessor {
 		// using the DbLogger.
 		avlReport.setTimeProcessed();
 
+		// Keep track of last AVL report processed so can determine if AVL
+		// feed is up
+		lastReportProcessed = avlReport;
+		
 		// Store the AVL report into the database
 		if (!CoreConfig.onlyNeedArrivalDepartures() 
 				&& !avlReport.isForSchedBasedPreds())

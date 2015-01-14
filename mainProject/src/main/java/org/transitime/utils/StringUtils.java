@@ -36,7 +36,38 @@ public class StringUtils {
 			new DecimalFormat("0.000");
 	private static final DecimalFormat sixDigitFormat = 
 			new DecimalFormat("0.000000");
-
+	private static final DecimalFormat commasFormat =
+			new DecimalFormat("###,###");
+	
+	/**
+	 * Returns formatted string indicating number of bytes.
+	 * Uses highest possible units, up to 4 digits. will get
+	 * a result such as 4,231MB
+	 * @param arg
+	 * @return
+	 */
+	public static String memoryFormat(long arg) {
+		String units = " bytes";
+		if (arg >= 10000) {
+			arg /= 1024;
+			units = "KB";
+			if (arg >= 10000) {
+				arg /= 1024;
+				units = "MB";
+				if (arg >= 10000) {
+					arg /= 1024;
+					units = "GB";
+					if (arg >= 10000) {
+						arg /= 1024;
+						units = "TB";
+					}
+				}
+			}
+		}
+			
+		return commasFormat.format(arg) + units;
+	}
+	
 	/**
 	 * For formatting double to 1 decimal place.
 	 * 

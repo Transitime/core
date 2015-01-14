@@ -39,4 +39,14 @@ public interface ServerStatusInterface extends Remote {
 	 */
 	public IpcServerStatus get() throws RemoteException;
 	
+	/**
+	 * Monitors the agency server for problems. If there is a problem then a
+	 * message indicating such is returned. Sending out notifications is done by
+	 * the server side.
+	 * 
+	 * @return Error message if there is one, otherwise null
+	 * @throws RemoteException
+	 */
+	public String monitor() throws RemoteException;
+	
 }
