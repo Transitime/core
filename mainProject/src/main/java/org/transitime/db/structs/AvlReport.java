@@ -607,6 +607,9 @@ public class AvlReport implements Serializable {
 		return vehicleId;
 	}
 	
+	/**
+	 * @return The GPS time of the AVL report
+	 */
 	public long getTime() {
 		return time.getTime();
 	}
@@ -618,6 +621,9 @@ public class AvlReport implements Serializable {
 		return time;
 	}
 	
+	/**
+	 * @return The time that the AVL report was received and processed.
+	 */
 	public long getTimeProcessed() {
 		return timeProcessed.getTime();
 	}
