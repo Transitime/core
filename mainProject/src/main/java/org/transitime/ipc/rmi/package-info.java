@@ -73,8 +73,10 @@
  <p>
  To create a RMI object do the following:
  <ul>
- <li> Create an interface class that inherits from java.rmi.Remote class. Each
- method that should be accessible remotely should throw java.rmi.RemoteException.</li>
+ <li> Create an interface class that inherits from java.rmi.Remote class. The
+ interface class defines the methods that are used to read or write info to
+ a server. Each method that should be accessible remotely should throw 
+ java.rmi.RemoteException.</li>
  <li> Create a server class that extends AbstractServer and implements the interface class.</li>
  <li> The server class needs a constructor that calls super(projectId, objectName)</li>
  <li> The server class should implement the remote methods defined in the interface.</li>
