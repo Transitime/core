@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
 
 /**
- *
+ * Makes the ServerStatusInterface.monitor() RMI call easy to access.
  *
  * @author SkiBu Smith
  *

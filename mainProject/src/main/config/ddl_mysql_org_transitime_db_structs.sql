@@ -47,6 +47,8 @@
 
     drop table if exists Calendars;
 
+    drop table if exists DbTest;
+
     drop table if exists FareAttributes;
 
     drop table if exists FareRules;
@@ -188,6 +190,11 @@
         endDate date not null,
         configRev integer not null,
         primary key (wednesday, tuesday, thursday, sunday, startDate, serviceId, saturday, monday, friday, endDate, configRev)
+    );
+
+    create table DbTest (
+        id integer not null,
+        primary key (id)
     );
 
     create table FareAttributes (

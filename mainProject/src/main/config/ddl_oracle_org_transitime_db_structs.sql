@@ -15,6 +15,8 @@
 
     drop table Calendars cascade constraints;
 
+    drop table DbTest cascade constraints;
+
     drop table FareAttributes cascade constraints;
 
     drop table FareRules cascade constraints;
@@ -158,6 +160,11 @@
         endDate date not null,
         configRev number(10,0) not null,
         primary key (wednesday, tuesday, thursday, sunday, startDate, serviceId, saturday, monday, friday, endDate, configRev)
+    );
+
+    create table DbTest (
+        id number(10,0) not null,
+        primary key (id)
     );
 
     create table FareAttributes (

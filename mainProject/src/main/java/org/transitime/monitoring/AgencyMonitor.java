@@ -35,7 +35,9 @@ public class AgencyMonitor {
 	
 	// All the types of monitoring to do
 	private final AvlFeedMonitor avlFeedMonitor;
+	private final PredictabilityMonitor predictabilityMonitor;
 	private final SystemMonitor systemMonitor;
+	private final DatabaseMonitoring databaseMonitor;
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(AgencyMonitor.class);
@@ -46,7 +48,9 @@ public class AgencyMonitor {
 		emailSender = new EmailSender();
 		
 		avlFeedMonitor = new AvlFeedMonitor(emailSender, agencyId);
+		predictabilityMonitor = new PredictabilityMonitor(emailSender, agencyId);
 		systemMonitor = new SystemMonitor(emailSender, agencyId);
+		databaseMonitor = new DatabaseMonitoring(emailSender, agencyId);
 	}
 	
 	/**
@@ -59,11 +63,17 @@ public class AgencyMonitor {
 	 */
 	private String checkAll() {
 		// Check all the monitors
-		if (avlFeedMonitor.checkAndNotify())
-			return avlFeedMonitor.getMessage();
+		if (databaseMonitor.checkAndNotify())
+			return databaseMonitor.getMessage();
 		
 		if (systemMonitor.checkAndNotify())
 			return systemMonitor.getMessage();
+		
+		if (avlFeedMonitor.checkAndNotify())
+			return avlFeedMonitor.getMessage();
+
+		if (predictabilityMonitor.checkAndNotify())
+			return predictabilityMonitor.getMessage();
 		
 		// No issue so return OK
 		return null;
@@ -88,7 +98,7 @@ public class AgencyMonitor {
 	}
 	
 	public static void main(String[] args) {
-		String agencyId = "foo";
+		String agencyId = "mbta";
 		AgencyMonitor agencyMonitor = new AgencyMonitor(agencyId);
 		String resultStr = agencyMonitor.checkAllAndLog();
 		System.out.println("resultStr=" + resultStr);

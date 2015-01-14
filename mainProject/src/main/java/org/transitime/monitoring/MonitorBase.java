@@ -33,7 +33,7 @@ import org.transitime.utils.Time;
 public abstract class MonitorBase {
 
 	private final EmailSender emailSender;
-	private final String agencyId;
+	protected final String agencyId;
 	private boolean wasTriggered = false;
 	private String message;
 	
@@ -73,8 +73,9 @@ public abstract class MonitorBase {
 		// indicating that there is a problem
 		boolean isTriggered = triggered();
 		
-		logger.debug("For agencyId={} monitoring type={} triggered={} message=\"{}\"", 
-				agencyId, type(), wasTriggered, getMessage());
+		logger.debug("For agencyId={} monitoring type={} isTriggered={} "
+				+ "wasTriggered={} message=\"{}\"", 
+				agencyId, type(), isTriggered, wasTriggered, getMessage());
 		
 		// Handle notifications according to change of monitoring state. If 
 		// state hasn't changed then don't need to send out notification.

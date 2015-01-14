@@ -161,6 +161,7 @@ public class HibernateUtils {
 				} catch (Exception e) {
 					logger.error("Could not create SessionFactory for "
 							+ "dbName={}", dbName, e);
+					throw e;
 				}
 			}						
 		}
@@ -175,8 +176,10 @@ public class HibernateUtils {
 	 *            Used as the database name if the property
 	 *            transitime.core.dbName is not set
 	 * @return The Session
+	 * @throws HibernateException
 	 */
-	public static Session getSession(String agencyId) {
+	public static Session getSession(String agencyId) 
+		throws HibernateException {
 		SessionFactory sessionFactory = 
 				HibernateUtils.getSessionFactory(agencyId);
 		Session session = sessionFactory.openSession();

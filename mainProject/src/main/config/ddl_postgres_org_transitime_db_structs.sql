@@ -39,6 +39,8 @@
 
     drop table if exists Calendars cascade;
 
+    drop table if exists DbTest cascade;
+
     drop table if exists FareAttributes cascade;
 
     drop table if exists FareRules cascade;
@@ -182,6 +184,11 @@
         endDate date not null,
         configRev int4 not null,
         primary key (wednesday, tuesday, thursday, sunday, startDate, serviceId, saturday, monday, friday, endDate, configRev)
+    );
+
+    create table DbTest (
+        id int4 not null,
+        primary key (id)
     );
 
     create table FareAttributes (
