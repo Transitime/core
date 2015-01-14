@@ -788,7 +788,7 @@ public class TransitimeApi {
 	stdParameters.validate();
 	
 	try {
-	    // Get block data from server
+	    // Get status information from server
 	    ServerStatusInterface inter = stdParameters.getServerStatusInterface();	
 	    IpcServerStatus ipcServerStatus = inter.get();
 	    
