@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -480,10 +481,9 @@ public class GtfsData {
 	}
 	
 	/**
-	 * Reads routes.txt files from both gtfsDirectoryName and supplementDir
-	 * and combines them together. Processes all of the titles to make them
-	 * more readable. Creates corresponding Route objects and stores them
-	 * into the database.
+	 * Reads stops.txt files from both gtfsDirectoryName and supplementDir and
+	 * combines them together. Processes all of the titles to make them more
+	 * readable. Puts the stops into the gtfsStopsMap and stopsMap members.
 	 */
 	private void processStopData() {
 		// For logging how long things take
@@ -528,8 +528,10 @@ public class GtfsData {
 			}
 		}
 		
-		// Create the map of the Stop objects
-		stopsMap = new HashMap<String, Stop>(gtfsStops.size());
+		// Create the map of the Stop objects. Use a ConcurrentHashMap instead
+		// of a regular HashMap so that trimStops() can delete unused stops
+		// while iterating across the hash map.
+		stopsMap = new ConcurrentHashMap<String, Stop>(gtfsStops.size());
 		for (GtfsStop gtfsStop : gtfsStopsMap.values()) {
 			Stop stop = new Stop(revs.getConfigRev(), gtfsStop, titleFormatter);
 			stopsMap.put(stop.getId(), stop);
@@ -539,7 +541,46 @@ public class GtfsData {
 		logger.info("Finished processing stops.txt data. Took {} msec.", 
 				timer.elapsedMsec());
 	}
-				
+		
+	/**
+	 * Sometimes will be using a partial configuration. For example, for MBTA
+	 * commuter rail only want to use the trips defined for commuter rail even
+	 * though the GTFS data can have trips for other modes defined. This can
+	 * mean that the data includes many stops that are actually not used by the
+	 * subset of trips. Therefore trim out the unused stops from the stopsMap
+	 * member.
+	 */
+	private void trimStops() {
+		// Make sure needed data is already read in. T
+		if (stopsMap == null || stopsMap.isEmpty()) {
+			logger.error("processStopData() must be called before " + 
+					"GtfsData.trimStops() is. Exiting.");
+			System.exit(-1);
+		}
+
+		if (tripPatternMap == null || tripPatternMap.isEmpty()) {
+			logger.error("createTripsAndTripPatterns() must be called before " +
+					"GtfsData.trimStops() is. Exiting.");
+			System.exit(-1);
+		}
+		
+		// Determine all the stops used in the trip patterns
+		Set<String> stopIdsUsed = new HashSet<String>();
+		for (TripPattern tripPattern : tripPatternMap.values()) {
+			for (String stopIdInTripPattern : tripPattern.getStopIds()) {
+				stopIdsUsed.add(stopIdInTripPattern);
+			}
+		}
+
+		// Remove any stops not in trip patterns from the stopsMap
+		for (String stopId : stopsMap.keySet()) {
+			if (!stopIdsUsed.contains(stopId)) {
+				// The stop is not actually used so remove it from stopsMap
+				stopsMap.remove(stopId);
+			}
+		}
+	}
+	
 	/**
 	 * Reads data from trips.txt and puts it into gtfsTripsMap.
 	 */
@@ -1151,15 +1192,14 @@ public class GtfsData {
 	}
 	
 	/**
-	 * This method is called for each trip. Determines if
-	 * the corresponding trip pattern is already in 
-	 * tripPatternMap. If it is then it updates the trip
-	 * pattern to include this trip as a member. If this
-	 * trip pattern not already encountered then it
-	 * adds it to the tripPatternMap.
+	 * This method is called for each trip. Determines if the corresponding trip
+	 * pattern is already in tripPatternMap. If it is then it updates the trip
+	 * pattern to include this trip as a member. If this trip pattern not
+	 * already encountered then it adds it to the tripPatternMap.
 	 * 
-	 * @param trip 
-	 * @param stopPaths List of StopPath objects that define the trip pattern
+	 * @param trip
+	 * @param stopPaths
+	 *            List of StopPath objects that define the trip pattern
 	 */
 	private void updateTripPatterns(Trip trip, List<StopPath> stopPaths) {
 		// Create a TripPatternBase from the Trip object
@@ -1913,6 +1953,14 @@ public class GtfsData {
 		processFareRules();
 		processTransfers();
 		
+		// Sometimes will be using a partial configuration. For example, for 
+		// MBTA commuter rail only want to use the trips defined for 
+		// commuter rail even though the GTFS data can have trips for
+		// other modes defined. This can mean that the data includes many
+		// stops that are actually not used by the subset of trips. 
+		// Therefore trim out the unused stops.
+		trimStops();
+		
 		// debugging
 		//outputPathsAndStopsForGraphing("8699");
 		
@@ -1929,7 +1977,7 @@ public class GtfsData {
 		gtfsTripsMap = null;
 		gtfsStopTimesForTripMap = null;
 		
-		// Now that have read in all the data into collections can output it
+		// Now that have read in all the data into collections output it
 		// to database.
 		DbWriter dbWriter = new DbWriter(this);
 		dbWriter.write(session, revs.getConfigRev());		
