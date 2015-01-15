@@ -113,7 +113,7 @@ public class DbTest {
 		// Store the object
 		Transaction tx = null;
 		try {
-			// Put db access into a transaction 
+			// Put db access into a transaction because modifying data
 			tx = session.beginTransaction();
 
 			session.save(dbTest);
@@ -155,7 +155,14 @@ public class DbTest {
 		// Note that hql uses class name, not the table name
 		String hql = "DELETE DbTest";
 		try {
+			// Put db access into a transaction because modifying data
+			Transaction tx = session.beginTransaction();
+
 			int numUpdates = session.createQuery(hql).executeUpdate();
+			
+			// Make sure that everything actually written out to db
+			tx.commit();
+
 			return numUpdates;
 		} catch (HibernateException e) {
 			logger.error("Could not delete DbTest objects. {}. {}", 
