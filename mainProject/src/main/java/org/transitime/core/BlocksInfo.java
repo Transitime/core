@@ -39,15 +39,51 @@ public class BlocksInfo {
 
 	/**
 	 * Looks at all blocks that are for the current service ID and returns list
-	 * of ones that will be or currently are active.
+	 * of ones that will start within beforeStartTimeSecs.
 	 * 
 	 * @param beforeStartTimeSecs
 	 *            Specifies in seconds how much before the block start time that
 	 *            the block is considered to be active.
-	 * @return blocks that will be or are currently active. Can be empty list
-	 *         but will not be null.
+	 * @return blocks that are about to start. Can be empty list but will not be
+	 *         null.
 	 */
-	public static List<Block> getCurrentlyActiveBlocks(int beforeStartTimeSecs) {
+	public static List<Block> getBlocksAboutToStart(int beforeStartTimeSecs) {
+		// The list to be returned
+		List<Block> aboutToStartBlocks = new ArrayList<Block>(1000);
+		
+		Core core = Core.getInstance();
+		if (core == null)
+			return aboutToStartBlocks;
+		
+		// Determine which service IDs are currently active.
+		// Yes, there can be multiple ones active at once.
+		Date now = core.getSystemDate();
+		List<String> currentServiceIds = 
+				core.getServiceUtils().getServiceIds(now);
+	
+		// For each service ID ...
+		for (String serviceId : currentServiceIds) {
+			DbConfig dbConfig = core.getDbConfig();
+			Collection<Block> blocks = dbConfig.getBlocks(serviceId);
+			
+			// If the block is about to be or currently active then
+			// add it to the list to be returned
+			for (Block block : blocks) {
+				if (block.isBeforeStartTime(now, beforeStartTimeSecs))
+					aboutToStartBlocks.add(block);
+			}
+		}
+		
+		// Done!
+		return aboutToStartBlocks;
+	}
+
+	/**
+	 * Returns list of blocks that are currently active.
+	 * 
+	 * @return List of currently active blocks. Will not be null.
+	 */
+	public static List<Block> getCurrentlyActiveBlocks() {
 		// The list to be returned
 		List<Block> activeBlocks = new ArrayList<Block>(1000);
 		
@@ -69,7 +105,7 @@ public class BlocksInfo {
 			// If the block is about to be or currently active then
 			// add it to the list to be returned
 			for (Block block : blocks) {
-				if (block.isBeforeStartTime(now, beforeStartTimeSecs))
+				if (block.isActive(now))
 					activeBlocks.add(block);
 			}
 		}
@@ -77,5 +113,4 @@ public class BlocksInfo {
 		// Done!
 		return activeBlocks;
 	}
-
 }

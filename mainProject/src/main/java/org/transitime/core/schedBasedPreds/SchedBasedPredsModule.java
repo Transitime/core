@@ -97,11 +97,11 @@ public class SchedBasedPredsModule extends Module {
 	 */
 	private void createSchedBasedPredsAsNecessary() {
 		// Determine which blocks are coming up or currently active
-		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks(
+		List<Block> blocksAboutToStart = BlocksInfo.getBlocksAboutToStart(
 				getBeforeStartTimeMins() * Time.SEC_PER_MIN);
 		
-		// For each active block see if no associated vehicle
-		for (Block block : activeBlocks) {
+		// For each block about to start see if no associated vehicle
+		for (Block block : blocksAboutToStart) {
 			// Is there a vehicle associated with the block?
 			Collection<String> vehiclesForBlock = VehicleDataCache.getInstance()
 					.getVehiclesByBlockId(block.getId());

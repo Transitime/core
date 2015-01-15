@@ -74,7 +74,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		// Determine number of currently active blocks.
 		// If there are no currently active blocks then don't need to be
 		// getting AVL data so return 0
-		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks(0);
+		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks();
 		if (activeBlocks.size() == 0) {
 			logger.debug("No currently active blocks so predictability "
 					+ "considered to be OK");
@@ -92,18 +92,18 @@ public class PredictabilityMonitor extends MonitorBase {
 		}
 		
 		// Determine fraction of active blocks that have a predictable vehicle 
-		double fraction = Math.min(predictableVehicleCount,
-				minimumPredictableVehicles.getValue()) / activeBlocks.size();
+		double fraction = ((double) Math.max(predictableVehicleCount,
+				minimumPredictableVehicles.getValue())) / activeBlocks.size();
 		
 		// Provide simple message explaining the situation
-		String message = "Predictable blocks=" 
+		String message = "Predictable blocks fraction=" 
 				+ StringUtils.twoDigitFormat(fraction) 
-				+ " minimumPredictableBlocks=" 
+				+ ", minimum allowed fraction=" 
 				+ StringUtils.twoDigitFormat(minimumPredictableBlocks.getValue())
-				+ " active blocks=" + activeBlocks.size()
-				+ " predictable vehicles=" + predictableVehicleCount
-				+ " predictable vehicles using min=" 
-				+ Math.min(predictableVehicleCount,
+				+ ", active blocks=" + activeBlocks.size()
+				+ ", predictable vehicles=" + predictableVehicleCount
+				+ ", predictable vehicles using max=" 
+				+ Math.max(predictableVehicleCount,
 						minimumPredictableVehicles.getValue());
 		setMessage(message);
 		

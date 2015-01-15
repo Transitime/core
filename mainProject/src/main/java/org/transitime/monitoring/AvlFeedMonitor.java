@@ -79,10 +79,10 @@ public class AvlFeedMonitor extends MonitorBase {
 	 * @return 0 if have recent valid GPS data or age of last AVL report in
 	 *         seconds.
 	 */
-	private static int avlFeedOutageSecs() {
+	private int avlFeedOutageSecs() {
 		// If there are no currently active blocks then don't need to be
 		// getting AVL data so return 0
-		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks(0);
+		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks();
 		if (activeBlocks.size() == 0) {
 			logger.debug("No currently active blocks so AVL feed considered to "
 					+ "be OK");
@@ -94,17 +94,19 @@ public class AvlFeedMonitor extends MonitorBase {
 		long allowableTime = System.currentTimeMillis()
 				- allowableAvlFeedTimeNoDataSecs.getValue() * Time.MS_PER_SEC;
 		long ageOfAvlReport = System.currentTimeMillis() - lastAvlReportTime;
+		
+		setMessage("Last valid AVL report was " 
+				+ ageOfAvlReport / Time.MS_PER_SEC 
+				+ " secs old. Allowable age is " 
+				+ allowableAvlFeedTimeNoDataSecs.getValue()
+				+ " secs. Number of currently active blocks is " 
+				+ activeBlocks.size() + ".");
+		
 		if (ageOfAvlReport > allowableTime) {
 			// last AVL report is too old
-			logger.error("Last valid AVL report is {} secs old which is not "
-					+ "acceptable, indicating AVL feed is down.",
-					ageOfAvlReport / Time.MS_PER_SEC);
 			return (int) (ageOfAvlReport / Time.MS_PER_SEC);
 		} else {
 			// Last AVL report is not too old
-			logger.debug(
-					"Last valid AVL report is only {} secs old so AVL feed is "
-					+ "OK.", ageOfAvlReport / Time.MS_PER_SEC);
 			return 0;
 		}
 	}
@@ -115,17 +117,8 @@ public class AvlFeedMonitor extends MonitorBase {
 	@Override
 	protected boolean triggered() {
 		// Check AVL feed
-		int avlFeedOutageSecs = AvlFeedMonitor.avlFeedOutageSecs();
-		if (avlFeedOutageSecs != 0) {
-			setMessage("No AVL data from feed in " + avlFeedOutageSecs 
-					+ " secs");
-			return true;
-		} else {
-			// Feed OK
-			setMessage("Received AVL data from " + avlFeedOutageSecs 
-					+ " secs ago");
-			return false;
-		}
+		int avlFeedOutageSecs = avlFeedOutageSecs();
+		return avlFeedOutageSecs != 0;
 	}
 
 	/* (non-Javadoc)
