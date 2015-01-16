@@ -57,6 +57,9 @@ public class WebAgency {
 	@Column(length = 120)
 	private final String hostName;
 
+	@Column
+	private final boolean active;
+	
 	// Cache
 	static private Map<String, WebAgency> map;
 
@@ -69,9 +72,10 @@ public class WebAgency {
 	 * @param agencyId
 	 * @param hostName
 	 */
-	public WebAgency(String agencyId, String hostName) {
+	public WebAgency(String agencyId, String hostName, boolean active) {
 		this.agencyId = agencyId;
 		this.hostName = hostName;
+		this.active = active;
 	}
 
 	/**
@@ -81,6 +85,7 @@ public class WebAgency {
 	private WebAgency() {
 		this.agencyId = null;
 		this.hostName = null;
+		this.active = false;
 	}
 
 	/**
@@ -192,8 +197,11 @@ public class WebAgency {
 	
 	@Override
 	public String toString() {
-		return "WebAgency [" + "agencyId=" + agencyId + ", hostName="
-				+ hostName + "]";
+		return "WebAgency [" 
+				+ "agencyId=" + agencyId 
+				+ ", hostName="	+ hostName
+				+ ", active=" + active
+				+ "]";
 	}
 
 	public String getAgencyId() {
@@ -204,4 +212,7 @@ public class WebAgency {
 		return hostName;
 	}
 
+	public boolean isActive() {
+		return active;
+	}
 }
