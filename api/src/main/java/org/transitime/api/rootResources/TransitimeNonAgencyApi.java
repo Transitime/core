@@ -73,6 +73,17 @@ public class TransitimeNonAgencyApi {
 	    for (WebAgency webAgency : webAgencies) {
 		String agencyId = webAgency.getAgencyId();
 		ConfigInterface inter = ConfigInterfaceFactory.get(agencyId);
+		
+		// If can't communicate with IPC with that agency then move on
+		// to the next one. This is important because some agencies 
+		// might be declared in the web db but they might not actually
+		// be running.
+		if (inter == null) {
+		    // Should really log something here to explain that skipping agency
+		    
+		    continue;
+		}
+		
 		List<Agency> agencies = inter.getAgencies();
 		for (Agency agency : agencies) {
 		    apiAgencyList.add(new ApiAgency(agencyId, agency));
