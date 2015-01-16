@@ -42,7 +42,7 @@ public abstract class MonitorBase {
 					"transitime.monitoring.emailRecipients", 
 					"monitoring@transitime.org", 
 					"Comma separated list of e-mail addresses indicating who "
-					+ "should be e-mail when monitor state changes.");
+					+ "should be e-mailed when monitor state changes.");
 
 	private static IntegerConfigValue retryTimeoutSecs =
 			new IntegerConfigValue(
