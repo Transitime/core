@@ -28,7 +28,9 @@ import org.transitime.reports.ChartJsonBuilder.RowBuilder;
 import org.transitime.utils.IntervalTimer;
 
 /**
- *
+ * For providing data to a Google scatter chart when need to specify specific
+ * SQL for retrieving data from the database. Since any SQL statement can be
+ * used this feed can be used for generating a variety of scatter charts.
  *
  * @author SkiBu Smith
  *

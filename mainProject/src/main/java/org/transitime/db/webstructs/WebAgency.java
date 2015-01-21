@@ -61,7 +61,7 @@ public class WebAgency {
 	private final boolean active;
 	
 	// Cache
-	static private Map<String, WebAgency> map;
+	static private Map<String, WebAgency> cacheMap;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(WebAgency.class);
@@ -156,26 +156,29 @@ public class WebAgency {
 	}
 
 	/**
-	 * Gets specified WebAgency from the cache. Updates the cache if necessary.
+	 * Gets specified WebAgency from the cache. If the agency is not defined in
+	 * the cache then will reread the agencies from the database. In this way
+	 * can add an agency to the database and the system will automatically pick
+	 * up the new agency.
 	 * 
 	 * @param agencyId
 	 * @return The specified WebAgency, or null if it doesn't exist.
 	 */
 	static public WebAgency getCachedWebAgency(String agencyId) {
 		// If haven't read in web agencies yet, do so now
-		if (map == null)
-			map = getMapFromDb();
+		if (cacheMap == null)
+			cacheMap = getMapFromDb();
 
 		// Get the web agency from the cache
-		WebAgency webAgency = map.get(agencyId);
+		WebAgency webAgency = cacheMap.get(agencyId);
 
 		// If web agency was not in cache update the cache and try again
 		if (webAgency == null) {
 			logger.error("Did not find agencyId={} in WebAgencies table for "
 					+ "database {}. Will reload data from database.", 
 					agencyId, getDbName());
-			map = getMapFromDb();
-			webAgency = map.get(agencyId);
+			cacheMap = getMapFromDb();
+			webAgency = cacheMap.get(agencyId);
 		}
 
 		// Return the possibly null web agency
@@ -183,16 +186,28 @@ public class WebAgency {
 	}
 
 	/**
-	 * Returns collection of all agencies as read from database.
+	 * Returns collection of all agencies. Values are cached so won't be
+	 * automatically updated when agencies are changed in the database.
+	 * 
+	 * @return
+	 */
+	static public Collection<WebAgency> getCachedWebAgencies() {
+		// If haven't read in web agencies yet, do so now
+		if (cacheMap == null)
+			cacheMap = getMapFromDb();
+
+		return cacheMap.values();
+	}
+	
+	/**
+	 * Returns collection of all agencies as read from database. No caching is
+	 * done. The database is read each time this method is called, so it should
+	 * not be used for every API call for example.
 	 * 
 	 * @return
 	 */
 	static public Collection<WebAgency> getWebAgencies() {
-		// If haven't read in web agencies yet, do so now
-		if (map == null)
-			map = getMapFromDb();
-
-		return map.values();
+		return getMapFromDb().values();
 	}
 	
 	@Override

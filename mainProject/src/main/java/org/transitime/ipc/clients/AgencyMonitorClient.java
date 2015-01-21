@@ -75,9 +75,10 @@ public class AgencyMonitorClient {
 				// Actually do the low-level monitoring on the core system
 				String errorMessage = pingAgency(webAgency.getAgencyId());
 				if (errorMessage != null)
-					errorMessageForAllAgencies += "AgencyId "
-							+ webAgency.getAgencyId() + ": " + errorMessage 
-							+ "; ";
+					errorMessageForAllAgencies += "agencyId="
+							+ webAgency.getAgencyId() 
+							+ " NOT AVAILABLE but marked as active. " 
+							+ errorMessage + "; ";
 			}
 		}
 		
