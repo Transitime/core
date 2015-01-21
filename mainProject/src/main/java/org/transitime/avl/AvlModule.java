@@ -215,25 +215,11 @@ public abstract class AvlModule extends Module {
 		
 		// Run forever
 		while (true) {
+			IntervalTimer timer = new IntervalTimer();
+			
 			try {
-				IntervalTimer timer = new IntervalTimer();
-								
 				// Process data
 				getAndProcessData();
-				
-				// Wait appropriate amount of time till poll again
-				long elapsedMsec = timer.elapsedMsec();
-				long sleepTime = 
-						AvlConfig.getSecondsBetweenAvlFeedPolling()*Time.MS_PER_SEC - 
-						elapsedMsec;
-				if (sleepTime < 0) {
-					logger.warn("Supposed to have a polling rate of " + 
-							AvlConfig.getSecondsBetweenAvlFeedPolling()*Time.MS_PER_SEC +
-							" msec but processing previous data took " +
-							elapsedMsec + " msec so polling again immediately.");
-				} else {
-					Time.sleep(sleepTime);
-				}
 			} catch (SocketTimeoutException e) {
 				logger.error("Error accessing AVL feed using URL={} with a " +
 						"timeout of {} msec.", 
@@ -241,6 +227,20 @@ public abstract class AvlModule extends Module {
 			} catch (Exception e) {
 				logger.error("Error accessing AVL feed using URL={}.", 
 						getUrl(), e);
+			}
+			
+			// Wait appropriate amount of time till poll again
+			long elapsedMsec = timer.elapsedMsec();
+			long sleepTime = 
+					AvlConfig.getSecondsBetweenAvlFeedPolling()*Time.MS_PER_SEC - 
+					elapsedMsec;
+			if (sleepTime < 0) {
+				logger.warn("Supposed to have a polling rate of " + 
+						AvlConfig.getSecondsBetweenAvlFeedPolling()*Time.MS_PER_SEC +
+						" msec but processing previous data took " +
+						elapsedMsec + " msec so polling again immediately.");
+			} else {
+				Time.sleep(sleepTime);
 			}
 		}
 	}
