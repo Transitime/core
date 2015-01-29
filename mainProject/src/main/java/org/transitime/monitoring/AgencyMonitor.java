@@ -55,33 +55,37 @@ public class AgencyMonitor {
 	
 	/**
 	 * Checks the core system to make sure it is working properly. If it is then
-	 * null is returned. If there is a problem then returns an error message.
-	 * Sends out notification e-mails if there is an issue via MonitorBase
-	 * class. To be called periodically via Inter Process Communication.
+	 * null is returned. If there are any problems then returns the
+	 * concatenation of all the error messages. Sends out notification e-mails
+	 * if there is an issue via MonitorBase class. To be called periodically via
+	 * a MonitoringModule or via Inter Process Communication.
 	 * 
-	 * @return Null if system OK, or the last error message for all the
-	 *         monitoring if there is a problem.
+	 * @return Null if system OK, or the concatenation of the error message for
+	 *         all the monitoring if there are any problems.
 	 */
 	public String checkAll() {
 		logger.info("Monitoring agency for problems...");
 		
-		String errorMessage = null;
+		String errorMessage = "";
 		
 		// Check all the monitors. 
 		if (databaseMonitor.checkAndNotify())
-			errorMessage = databaseMonitor.getMessage();
+			errorMessage += " " + databaseMonitor.getMessage();
 		
 		if (avlFeedMonitor.checkAndNotify())
-			errorMessage = avlFeedMonitor.getMessage();
+			errorMessage += " " + avlFeedMonitor.getMessage();
 
 		if (systemMonitor.checkAndNotify())
-			errorMessage = systemMonitor.getMessage();
+			errorMessage += " " + systemMonitor.getMessage();
 		
 		if (predictabilityMonitor.checkAndNotify())
-			errorMessage = predictabilityMonitor.getMessage();
+			errorMessage += " " + predictabilityMonitor.getMessage();
 		
 		// Return the last error message if there was one
-		return errorMessage;
+		if (errorMessage.length() > 0)
+			return errorMessage;
+		else
+			return null;
 	}
 	
 	public static void main(String[] args) {
