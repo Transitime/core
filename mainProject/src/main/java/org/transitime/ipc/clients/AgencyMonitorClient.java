@@ -139,7 +139,7 @@ public class AgencyMonitorClient {
 				// Actually do the low-level monitoring on the core system
 				String errorMessage = monitor(webAgency.getAgencyId());
 				if (errorMessage != null)
-					errorMessageForAllAgencies += "AgencyId "
+					errorMessageForAllAgencies += "For agencyId="
 							+ webAgency.getAgencyId() + ": " + errorMessage 
 							+ "; ";
 			}
