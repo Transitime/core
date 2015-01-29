@@ -88,7 +88,7 @@ public class MonitoringModule extends Module {
 			timer.resetTimer();
 			
 			// Actually do the monitoring
-			String resultStr = agencyMonitor.checkAllAndLog();
+			String resultStr = agencyMonitor.checkAll();
 			
 			if (resultStr != null) {
 				logger.error("MonitoringModule detected problem. {}", 

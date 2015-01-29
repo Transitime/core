@@ -25,7 +25,8 @@ import org.transitime.utils.EmailSender;
 import org.transitime.utils.Time;
 
 /**
- *
+ * Base class for doing monitoring. If event is first triggered then an ERROR
+ * email is sent out. If not triggered anymore then an OK email is sent.
  *
  * @author SkiBu Smith
  *
@@ -63,8 +64,8 @@ public abstract class MonitorBase {
 	}
 	
 	/**
-	 * Checks the monitor object to see if state has changed. If it has then
-	 * sends out notification e-mail.
+	 * Checks the monitor object to see if state has changed currently
+	 * triggered. If state changes then sends out notification e-mail.
 	 * 
 	 * @return True if monitor currently triggered
 	 */
@@ -102,6 +103,8 @@ public abstract class MonitorBase {
 
 			// Notify recipients
 			String subject = "ERROR - " + type() + " - " + agencyId;
+			logger.info("Sending ERROR e-mail \"{}\" to {}", 
+					message, recipients());
 			emailSender.send(recipients(), subject, message);			
 		} else if (wasTriggered && !isTriggered) {
 			// Changed from being triggered to not being triggered.
@@ -109,6 +112,8 @@ public abstract class MonitorBase {
 			
 			// Notify recipients
 			String subject = "OK - " + type() + " - " + agencyId;
+			logger.info("Sending OK e-mail \"{}\" to {}", 
+					message, recipients());
 			emailSender.send(recipients(), subject, message);			
 		}
 		

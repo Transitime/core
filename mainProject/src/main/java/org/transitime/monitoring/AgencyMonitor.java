@@ -56,51 +56,38 @@ public class AgencyMonitor {
 	/**
 	 * Checks the core system to make sure it is working properly. If it is then
 	 * null is returned. If there is a problem then returns an error message.
-	 * Sends out notification e-mails if there is an issue. To be called
-	 * periodically via Inter Process Communication.
+	 * Sends out notification e-mails if there is an issue via MonitorBase
+	 * class. To be called periodically via Inter Process Communication.
 	 * 
-	 * @return Null if system OK, or error message if there is a problem.
+	 * @return Null if system OK, or the last error message for all the
+	 *         monitoring if there is a problem.
 	 */
-	private String checkAll() {
-		// Check all the monitors
-		if (databaseMonitor.checkAndNotify())
-			return databaseMonitor.getMessage();
-		
-		if (systemMonitor.checkAndNotify())
-			return systemMonitor.getMessage();
-		
-		if (avlFeedMonitor.checkAndNotify())
-			return avlFeedMonitor.getMessage();
-
-		if (predictabilityMonitor.checkAndNotify())
-			return predictabilityMonitor.getMessage();
-		
-		// No issue so return OK
-		return null;
-	}
-	
-	/**
-	 * Checks the core system to make sure it is working properly and logs any
-	 * problems. If it is then null is returned. If there is a problem then
-	 * returns an error message. Sends out notification e-mails if there is an
-	 * issue. To be called periodically via Inter Process Communication.
-	 * 
-	 * @return Null if system OK, or error message if there is a problem.
-	 */
-	public String checkAllAndLog() {
+	public String checkAll() {
 		logger.info("Monitoring agency for problems...");
 		
-		String errorMessage = checkAll();
-		if (errorMessage != null)
-			logger.error(errorMessage);
+		String errorMessage = null;
 		
+		// Check all the monitors. 
+		if (databaseMonitor.checkAndNotify())
+			errorMessage = databaseMonitor.getMessage();
+		
+		if (avlFeedMonitor.checkAndNotify())
+			errorMessage = avlFeedMonitor.getMessage();
+
+		if (systemMonitor.checkAndNotify())
+			errorMessage = systemMonitor.getMessage();
+		
+		if (predictabilityMonitor.checkAndNotify())
+			errorMessage = predictabilityMonitor.getMessage();
+		
+		// Return the last error message if there was one
 		return errorMessage;
 	}
 	
 	public static void main(String[] args) {
 		String agencyId = "mbta";
 		AgencyMonitor agencyMonitor = new AgencyMonitor(agencyId);
-		String resultStr = agencyMonitor.checkAllAndLog();
+		String resultStr = agencyMonitor.checkAll();
 		System.out.println("resultStr=" + resultStr);
 	}
 }
