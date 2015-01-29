@@ -91,9 +91,10 @@ public class AvlFeedMonitor extends MonitorBase {
 		
 		// Determine age of AVL report
 		long lastAvlReportTime = AvlProcessor.getInstance().lastAvlReportTime();
-		long allowableTime = System.currentTimeMillis()
-				- allowableAvlFeedTimeNoDataSecs.getValue() * Time.MS_PER_SEC;
 		long ageOfAvlReport = System.currentTimeMillis() - lastAvlReportTime;
+		
+		logger.debug("When monitoring AVL feed last AVL report={}", 
+				AvlProcessor.getInstance().getLastAvlReport());
 		
 		setMessage("Last valid AVL report was " 
 				+ ageOfAvlReport / Time.MS_PER_SEC 
@@ -102,7 +103,8 @@ public class AvlFeedMonitor extends MonitorBase {
 				+ " secs. Number of currently active blocks is " 
 				+ activeBlocks.size() + ".");
 		
-		if (ageOfAvlReport > allowableTime) {
+		if (ageOfAvlReport > 
+				allowableAvlFeedTimeNoDataSecs.getValue() * Time.MS_PER_SEC) {
 			// last AVL report is too old
 			return (int) (ageOfAvlReport / Time.MS_PER_SEC);
 		} else {
