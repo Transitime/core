@@ -69,6 +69,22 @@ public class StringUtils {
 	}
 	
 	/**
+	 * Outputs distance string along with units. If value below 3,000 then uses
+	 * meters as in 392.2m . If greater than 3,000 then uses km as in 3.1km .
+	 * 
+	 * @param distance
+	 * @return The distance as a string
+	 */
+	public static String distanceFormat(double distance) {
+		String units = "m";
+		if (distance > 3000.0) {
+			distance /= 1000.0;
+			units = "km";
+		}
+		return oneDigitFormat(distance) + units;
+	}
+	
+	/**
 	 * For formatting double to 1 decimal place.
 	 * 
 	 * @param arg
