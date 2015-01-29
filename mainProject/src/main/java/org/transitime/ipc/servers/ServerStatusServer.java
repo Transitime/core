@@ -93,7 +93,7 @@ public class ServerStatusServer extends AbstractServer
 		// Monitor everything having to do with an agency server. Send
 		// out any notifications if necessary. Return any resulting
 		// error message.
-		AgencyMonitor agencyMonitor = new AgencyMonitor(getAgencyId());
+		AgencyMonitor agencyMonitor = AgencyMonitor.getInstance(getAgencyId());
 		String resultStr = agencyMonitor.checkAll();
 
 		return resultStr;

@@ -17,6 +17,9 @@
 
 package org.transitime.monitoring;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.utils.EmailSender;
@@ -39,18 +42,51 @@ public class AgencyMonitor {
 	private final SystemMonitor systemMonitor;
 	private final DatabaseMonitoring databaseMonitor;
 	
+	// For being able to reuse AgencyMonitors. This is important because
+	// each monitor maintains state, such as if notification e-mail sent out.
+	private static final Map<String, AgencyMonitor> agencyMonitorMap = 
+			new HashMap<String, AgencyMonitor>();
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(AgencyMonitor.class);
 
 	/********************** Member Functions **************************/
 
-	public AgencyMonitor(String agencyId) {
+	/**
+	 * Constructor declared private so have to use getInstance() to get an
+	 * AgencyMonitor. Like a singleton, but one AgencyMonitor for every
+	 * agencyId.
+	 * 
+	 * @param agencyId
+	 */
+	private AgencyMonitor(String agencyId) {
 		emailSender = new EmailSender();
 		
 		avlFeedMonitor = new AvlFeedMonitor(emailSender, agencyId);
 		predictabilityMonitor = new PredictabilityMonitor(emailSender, agencyId);
 		systemMonitor = new SystemMonitor(emailSender, agencyId);
 		databaseMonitor = new DatabaseMonitoring(emailSender, agencyId);
+	}
+	
+	/**
+	 * Returns the AgencyMonitor for the specified agencyId. If the
+	 * AgencyMonitor for that agency hasn't been created yet it is created. This
+	 * is important because each monitor maintains state, such as if
+	 * notification e-mail sent out.
+	 * 
+	 * @param agencyId
+	 *            Which agency get AgencyMonitor for
+	 * @return The AgencyMonitor for the agencyId
+	 */
+	public static AgencyMonitor getInstance(String agencyId) {
+		synchronized (agencyMonitorMap) {
+			AgencyMonitor agencyMonitor = agencyMonitorMap.get(agencyId);
+			if (agencyMonitor == null) {
+				agencyMonitor = new AgencyMonitor(agencyId);
+				agencyMonitorMap.put(agencyId, agencyMonitor);
+			}
+			return agencyMonitor;
+		}
 	}
 	
 	/**
@@ -90,7 +126,7 @@ public class AgencyMonitor {
 	
 	public static void main(String[] args) {
 		String agencyId = "mbta";
-		AgencyMonitor agencyMonitor = new AgencyMonitor(agencyId);
+		AgencyMonitor agencyMonitor = AgencyMonitor.getInstance(agencyId);
 		String resultStr = agencyMonitor.checkAll();
 		System.out.println("resultStr=" + resultStr);
 	}

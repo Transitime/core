@@ -65,7 +65,7 @@ public class MonitoringModule extends Module {
 		logger.info("Started module {} for agencyId={}", 
 				getClass().getName(), getAgencyId());
 
-		AgencyMonitor agencyMonitor = new AgencyMonitor(agencyId);
+		AgencyMonitor agencyMonitor = AgencyMonitor.getInstance(agencyId);
 
 		// Run forever. Sleep before monitoring since don't want to monitor 
 		// immediately at startup
