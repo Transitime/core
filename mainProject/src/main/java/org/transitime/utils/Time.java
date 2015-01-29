@@ -225,7 +225,7 @@ public class Time {
 	 * @param referenceDate
 	 *            The approximate epoch time so that can handle times before and
 	 *            after midnight.
-	 * @return
+	 * @return epoch time
 	 */
 	public long getEpochTime(int secondsIntoDay, Date referenceDate) {
 		// Need to sync the calendar since reusing it.
@@ -273,6 +273,20 @@ public class Time {
 			// Get the results
 			return epochTime;
 		}
+	}
+	
+	/**
+	 * Converts secondsIntoDay into an epoch time.
+	 * 
+	 * @param secondsIntoDay
+	 *            To be converted into epoch time
+	 * @param referenceTime
+	 *            The approximate epoch time so that can handle times before and
+	 *            after midnight.
+	 * @return epoch time
+	 */
+	public long getEpochTime(int secondsIntoDay, long referenceTime) {
+		return getEpochTime(secondsIntoDay, new Date(referenceTime));
 	}
 	
 	/**
