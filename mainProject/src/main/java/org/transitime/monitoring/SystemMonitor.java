@@ -54,7 +54,7 @@ public class SystemMonitor extends MonitorBase {
 
 	LongConfigValue availableFreePhysicalMemoryThreshold = new LongConfigValue(
 			"transitime.monitoring.availableFreePhysicalMemoryThreshold", 
-			200 * 1024 * 1024L, // ~200 MB 
+			100 * 1024 * 1024L, // ~100 MB 
 			"If available free physical memory is less than this "
 			+ "value then free memory monitoring is triggered.");
 
