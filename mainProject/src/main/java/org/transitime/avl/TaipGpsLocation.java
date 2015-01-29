@@ -26,6 +26,11 @@ import org.transitime.utils.Time;
 /**
  * For parsing Trimble TAIP format GPS commands into a Java object. It only
  * deals with simple RPC commands.
+ * <p>
+ * It should be noted that TAIP only provides seconds into the day. The epoch
+ * time is determined by using the current system time to determine the day.
+ * This means that if processing old data for a different day that could bet an
+ * epoch time for the wrong day.
  * 
  * @author SkiBu Smith
  * 
@@ -79,33 +84,33 @@ public class TaipGpsLocation {
 	 */
 	private static boolean validate(String s) {
 		if (s == null) {
-			logger.error("TAIP string is null");
+			logger.warn("TAIP string is null");
 			return false;
 		}
 		
 		if (s.isEmpty()) {
-			logger.error("TAIP string is empty");
+			logger.warn("TAIP string is empty");
 			return false;
 		}
 		
 		if (!s.startsWith(">")) {
-			logger.error("TAIP string \"{}\" doesn't start with '>'", s);
+			logger.warn("TAIP string \"{}\" doesn't start with '>'", s);
 			return false;
 		}
 		
 		if (!s.endsWith("<")) {
-			logger.error("TAIP string \"{}\" doesn't start with '>'", s);
+			logger.warn("TAIP string \"{}\" doesn't start with '>'", s);
 			return false;	
 		}
 		
 		if (!s.startsWith(">RPV")) {
-			logger.error("TAIP string \"{}\" isn't for RPV command", s);
+			logger.warn("TAIP string \"{}\" isn't for RPV command", s);
 			return false;				
 		}
 		
 		if (s.length() < 35) {
-			logger.error("TAIP string \"{}\" isn't for RPV commandless " +
-					"than 35 characters long", s);
+			logger.warn("TAIP string \"{}\" isn't for RPV command since " +
+					"less than 35 characters long", s);
 			return false;	
 		}
 		
