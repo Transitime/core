@@ -107,7 +107,7 @@ public class SchedBasedPredsModule extends Module {
 					.getVehiclesByBlockId(block.getId());
 			if (vehiclesForBlock == null || vehiclesForBlock.isEmpty()) {
 				// No vehicle associated with the active block so create a
-				// schedule based one. First create the AVL report that
+				// schedule based one. First create a fake AVL report that
 				// corresponds to the first stop of the block.
 				logger.info("Creating a schedule based vehicle for blockId={}",
 						block.getId());
@@ -134,7 +134,7 @@ public class SchedBasedPredsModule extends Module {
 	@Override
 	public void run() {
 		// Log that module successfully started
-		logger.info("Started module {} for agencyId={}", 
+		logger.info("Starting module {} for agencyId={}", 
 				getClass().getName(), getAgencyId());
 		
 		// No need to run at startup since haven't yet had change to assign 

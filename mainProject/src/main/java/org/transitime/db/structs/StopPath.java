@@ -621,14 +621,6 @@ public class StopPath implements Serializable, Lifecycle {
 		return CoreConfig.getAfterStopDistance();
 	}
 
-	/**
-	 * The length of the path segments.
-	 * @return
-	 */
-	public double getPathLength() {
-		return pathLength;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.hibernate.classic.Lifecycle#onDelete(org.hibernate.Session)
 	 */

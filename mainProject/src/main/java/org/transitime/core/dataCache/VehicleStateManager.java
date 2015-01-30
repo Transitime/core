@@ -44,6 +44,13 @@ public class VehicleStateManager {
 	/********************** Member Functions **************************/
 
 	/**
+	 * Constructor made private because this is singleton class where
+	 * getInstance() should be used to get the VehicleStateManager.
+	 */
+	private VehicleStateManager() {	
+	}
+	
+	/**
 	 * Returns the singleton VehicleStateManager
 	 * @return
 	 */

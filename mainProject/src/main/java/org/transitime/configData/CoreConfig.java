@@ -521,9 +521,10 @@ public class CoreConfig {
 		return allowableEarlyDepartureTimeForLoggingEvent.getValue();
 	}
 	private static IntegerConfigValue allowableEarlyDepartureTimeForLoggingEvent =
-			new IntegerConfigValue("transitime.core.allowableEarlyDepartureTimeForLoggingEvent",
+			new IntegerConfigValue(
+					"transitime.core.allowableEarlyDepartureTimeForLoggingEvent",
 					60,
-					"How early in seconds a vehicle can departure a terminal "
+					"How early in seconds a vehicle can depart a terminal "
 					+ "before it registers a VehicleEvent indicating a problem.");
 	
 	/**
@@ -536,15 +537,17 @@ public class CoreConfig {
 		return allowableLateDepartureTimeForLoggingEvent.getValue();
 	}
 	private static IntegerConfigValue allowableLateDepartureTimeForLoggingEvent =
-			new IntegerConfigValue("transitime.core.allowableEarlyDepartureTimeForLoggingEvent",
+			new IntegerConfigValue(
+					"transitime.core.allowableLateDepartureTimeForLoggingEvent",
 					4*Time.SEC_PER_MIN,
-					"How early in seconds a vehicle can departure a terminal "
+					"How late in seconds a vehicle can depart a terminal "
 					+ "before it registers a VehicleEvent indicating a problem.");
 	
 	/**
-	 * If a vehicle is sitting at a terminal and provides another GPS report
-	 * indicating that it is more than this much later than the configured
-	 * departure time then a VehicleEvent is created to record the problem.
+	 * If a vehicle is just sitting at a terminal and provides another GPS
+	 * report indicating that it is more than this much later, in seconds, than
+	 * the configured departure time then a VehicleEvent is created to record
+	 * the problem.
 	 * 
 	 * @return
 	 */
@@ -552,13 +555,15 @@ public class CoreConfig {
 		return allowableLateAtTerminalForLoggingEvent.getValue();
 	}
 	private static IntegerConfigValue allowableLateAtTerminalForLoggingEvent =
-			new IntegerConfigValue("transitime.core.allowableLateAtTerminalForLoggingEvent",
-					60,
-					"If a vehicle is sitting at a terminal and provides another "
-					+ "GPS report indicating that it is more than this much "
-					+ "later than the configured departure time then a "
-					+ "VehicleEvent is created to record the problem.");
-	
+			new IntegerConfigValue(
+					"transitime.core.allowableLateAtTerminalForLoggingEvent",
+					1*Time.SEC_PER_MIN,
+					"If a vehicle is sitting at a terminal and provides "
+					+ "another GPS report indicating that it is more than this "
+					+ "much later, in seconds, than the configured departure "
+					+ "time then a VehicleEvent is created to record the "
+					+ "problem.");
+					
 	/**
 	 * How far a vehicle can be before a stop in meters and be considered to
 	 * have arrived.
@@ -569,7 +574,8 @@ public class CoreConfig {
 		return beforeStopDistance.getValue();
 	}
 	private static DoubleConfigValue beforeStopDistance =
-			new DoubleConfigValue("transitime.core.beforeStopDistance", 
+			new DoubleConfigValue(
+					"transitime.core.beforeStopDistance", 
 					50.0,
 					"How far a vehicle can be ahead of a stop in meters and " +
 					"be considered to have arrived.");
@@ -584,7 +590,8 @@ public class CoreConfig {
 		return afterStopDistance.getValue();
 	}
 	private static DoubleConfigValue afterStopDistance =
-			new DoubleConfigValue("transitime.core.afterStopDistance", 
+			new DoubleConfigValue(
+					"transitime.core.afterStopDistance", 
 					50.0,
 					"How far a vehicle can be past a stop in meters and " +
 					"still be considered at the stop.");
@@ -599,7 +606,8 @@ public class CoreConfig {
 		return defaultBreakTimeSec.getValue();
 	}
 	private static IntegerConfigValue defaultBreakTimeSec =
-			new IntegerConfigValue("transitime.core.defaultBreakTimeSec", 
+			new IntegerConfigValue(
+					"transitime.core.defaultBreakTimeSec", 
 					0,
 					"How far a vehicle can be past a stop in meters and " +
 					"still be considered at the stop.");
@@ -614,7 +622,8 @@ public class CoreConfig {
 		return earlyToLateRatio.getValue();
 	}
 	private static DoubleConfigValue earlyToLateRatio =
-			new DoubleConfigValue("transitime.core.earlyToLateRatio", 
+			new DoubleConfigValue(
+					"transitime.core.earlyToLateRatio", 
 					3.0,
 					"How much worse it is for a vehicle to be early as " +
 					"opposed to late when determining schedule adherence.");
@@ -631,7 +640,8 @@ public class CoreConfig {
 		return exclusiveBlockAssignments.getValue();
 	}
 	private static BooleanConfigValue exclusiveBlockAssignments =
-			new BooleanConfigValue("transitime.core.exclusiveBlockAssignments", 
+			new BooleanConfigValue(
+					"transitime.core.exclusiveBlockAssignments", 
 					true,
 					"True if block assignments should be exclusive. If set to "
 					+ "true then when a vehicle is assigned to a block the "
@@ -639,5 +649,52 @@ public class CoreConfig {
 					+ "assigned to the block. Important for when AVL system "
 					+ "doesn't always provide logout info.");
 
-
+	public static int getTimeForDeterminingNoProgress() {
+		return timeForDeterminingNoProgress.getValue();
+	}
+	private static IntegerConfigValue timeForDeterminingNoProgress =
+			new IntegerConfigValue(
+					"transitime.core.timeForDeterminingNoProgress", 
+					7 * Time.MS_PER_MIN, 
+					"The interval in msec at which look at vehicle's history "
+					+ "to determine if it is not making any progress.");
+			
+	public static double getMinDistanceForNoProgress() {
+		return minDistanceForNoProgress.getValue();
+	}
+	private static DoubleConfigValue minDistanceForNoProgress =
+			new DoubleConfigValue(
+					"transitime.core.minDistanceForNoProgress",
+					60.0,
+					"Minimum distance vehicle is expected to travel over "
+					+ "timeForDeterminingNoProgress to indicate vehicle is "
+					+ "making progress.");
+	
+	public static int getMatchHistoryMaxSize() {
+		return matchHistoryMaxSize.getValue();
+	}
+	private static IntegerConfigValue matchHistoryMaxSize =
+			new IntegerConfigValue(
+					"transitime.core.matchHistoryMaxSize",
+					20,
+					"How many matches are kept in history for vehicle so that "
+					+ "can can do things such as look back at history to "
+					+ "determine if vehicle has broken down. Should be large "
+					+ "enough so can store all matchets generated over "
+					+ "timeForDeterminingNoProgress. If GPS rate is high then "
+					+ "this value will need to be high as well.");
+	
+	public static int getAvlHistoryMaxSize() {
+		return avlHistoryMaxSize.getValue();
+	}
+	private static IntegerConfigValue avlHistoryMaxSize =
+			new IntegerConfigValue(
+					"transitime.core.avlHistoryMaxSize",
+					20,
+					"How many AVL reports are kept in history for vehicle so "
+					+ "that can can do things such as look back at history to "
+					+ "determine if vehicle has broken down. Should be large "
+					+ "enough so can store all AVL reports received over "
+					+ "timeForDeterminingNoProgress. If GPS rate is high then "
+					+ "this value will need to be high as well.");
 }

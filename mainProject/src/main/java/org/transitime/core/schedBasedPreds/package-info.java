@@ -18,8 +18,9 @@
 /**
  * The schedule based predictions module runs in the background. Every few
  * minutes it looks for blocks that do not have an associated vehicle. For
- * these blocks the module creates a schedule based vehicle at the location
- * of the beginning of the block and generates predictions for the entire 
+ * these blocks the module creates a fake AVL report at the location
+ * of the beginning of the block. This in turn creates a schedule based 
+ * vehicle and generates predictions for the entire 
  * block that are based on the scheduled departure time. The purpose of this
  * module is to generate predictions well in advance even if vehicles are 
  * assigned just a few minutes before a vehicle is scheduled to start a

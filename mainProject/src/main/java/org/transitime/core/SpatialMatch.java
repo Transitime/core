@@ -18,6 +18,7 @@ package org.transitime.core;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.transitime.applications.Core;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.StopPath;
@@ -25,6 +26,7 @@ import org.transitime.db.structs.ScheduleTime;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.Vector;
 import org.transitime.utils.Geo;
+import org.transitime.utils.Time;
 
 /**
  * Describes where an AVL report matches to an assignment spatially.
@@ -35,6 +37,7 @@ import org.transitime.utils.Geo;
 public class SpatialMatch {
 
 	protected final String vehicleId;
+	protected final long avlTime;
 	protected final Block block;
 	protected final int tripIndex;
 	protected final int stopPathIndex;
@@ -49,10 +52,11 @@ public class SpatialMatch {
 
 	/********************** Member Functions **************************/
 
-	public SpatialMatch(String vehicleId, Block block, int tripIndex,
-			int stopPathIndex, int segmentIndex, double distanceToSegment,
-			double distanceAlongSegment) {
+	public SpatialMatch(String vehicleId, long avlTime, Block block,
+			int tripIndex, int stopPathIndex, int segmentIndex,
+			double distanceToSegment, double distanceAlongSegment) {
 		this.vehicleId = vehicleId;
+		this.avlTime = avlTime;
 		this.block = block;
 		this.tripIndex = tripIndex;
 		this.stopPathIndex = stopPathIndex;
@@ -75,6 +79,7 @@ public class SpatialMatch {
 	 */
 	public SpatialMatch(SpatialMatch toCopy, Trip newTrip) {
 		this.vehicleId = toCopy.vehicleId;
+		this.avlTime = toCopy.avlTime;
 		this.block = toCopy.block;
 		this.tripIndex = toCopy.block.getTripIndex(newTrip.getId());
 		this.stopPathIndex = toCopy.stopPathIndex;
@@ -106,6 +111,7 @@ public class SpatialMatch {
 	public SpatialMatch(SpatialMatch toCopy, Indices newIndices, 
 			double distanceAlongSegment) {
 		this.vehicleId = toCopy.vehicleId;
+		this.avlTime = toCopy.avlTime;
 		this.block = toCopy.block;
 		this.tripIndex = newIndices.getTripIndex();
 		this.stopPathIndex = newIndices.getStopPathIndex();
@@ -122,6 +128,7 @@ public class SpatialMatch {
 	 */
 	protected SpatialMatch(SpatialMatch toCopy) {
 		this.vehicleId = toCopy.vehicleId;
+		this.avlTime = toCopy.avlTime;
 		this.block = toCopy.block;
 		this.tripIndex = toCopy.tripIndex;
 		this.stopPathIndex = toCopy.stopPathIndex;
@@ -351,6 +358,7 @@ public class SpatialMatch {
 		
 		// Return a match that is at the end of the path
 		return new SpatialMatch(vehicleId,
+				0, // Don't worry about avlTime for this special case
 				block, 
 				m.getTripIndex(),
 				m.getStopPathIndex(),
@@ -409,6 +417,7 @@ public class SpatialMatch {
 		double segmentVectorLength = segmentVector!=null ? 
 				segmentVector.length() : Double.NaN;
 		return new SpatialMatch(vehicleId,
+				0, // Don't worry about avlTime for this special case
 				block, 
 				indices.getTripIndex(),
 				indices.getStopPathIndex(),
@@ -483,29 +492,49 @@ public class SpatialMatch {
 	/**
 	 * Returns the scheduled time vehicle is to leave the stop.
 	 * 
-	 * @return the scheduled time vehicle is to leave the stop. Time
-	 * is seconds into day.
+	 * @return the scheduled time vehicle is to leave the stop. Time is seconds
+	 *         into day. Returns -1 if not at a stop or the stop doesn't have a
+	 *         scheduled departure time.
 	 */
-	public int getScheduledWaitStopTime() { 
+	public int getScheduledWaitStopTimeSecs() { 
 		try {
-			ScheduleTime scheduleTime = block.getScheduleTime(tripIndex, stopPathIndex);
+			ScheduleTime scheduleTime = 
+					block.getScheduleTime(tripIndex, stopPathIndex);
 			return scheduleTime.getDepartureTime();
 		} catch (Exception e) {
-			logger.error("Tried to get wait stop time for a stop that didn't have one. {}", 
-					this);
+			logger.error("Tried to get wait stop time for a stop that didn't "
+					+ "have one. {}", this);
 			return -1; 
 		}
 	}
 	
 	/**
+	 * Returns the scheduled time vehicle is to leave the stop.
+	 * 
+	 * @return the scheduled epoch time vehicle is to leave the stop. Returns -1
+	 *         if not at a stop or the stop doesn't have a scheduled departure
+	 *         time.
+	 */
+	public long getScheduledWaitStopTime() {
+		int secondsIntoDay = getScheduledWaitStopTimeSecs();
+		if (secondsIntoDay < 0)
+			return -1;
+		
+		long scheduledDepartureTime = Core.getInstance().getTime()
+				.getEpochTime(secondsIntoDay, avlTime);
+		return scheduledDepartureTime;
+	}
+	
+	/**
 	 * Travel distance along current path.
 	 * 
-	 * @return
+	 * @return Distance in meters
 	 */
 	public double getDistanceAlongStopPath() {
 		double distance = 0.0;
 		for (int segIndex=0; segIndex<segmentIndex; ++segIndex) {
-			Vector v = block.getSegmentVector(tripIndex, stopPathIndex, segIndex);
+			Vector v = block.getSegmentVector(tripIndex, stopPathIndex,
+					segIndex);
 			distance += v.length();
 		}
 		distance += distanceAlongSegment;
@@ -515,7 +544,7 @@ public class SpatialMatch {
 	/**
 	 * How far still to travel to end of path.
 	 * 
-	 * @return
+	 * @return Distance in meters
 	 */
 	public double getDistanceRemainingInStopPath() {
 		double distance = -distanceAlongSegment;
@@ -527,6 +556,72 @@ public class SpatialMatch {
 		return distance;
 	}
 	
+	/**
+	 * Determines how far it is from this match to otherSpatialMatch.
+	 * 
+	 * @param otherSpatialMatch
+	 * @return Distance in meters between the matches
+	 */
+	public double distanceBetweenMatches(SpatialMatch otherSpatialMatch) {
+		// Determine the distances from the beginning of the stop paths
+		// and the matches
+		double distanceAlongFirstPath = 
+				getDistanceAlongStopPath();
+		double distanceAlongLastPath = 
+				otherSpatialMatch.getDistanceAlongStopPath();
+		
+		// Determine the lengths of the stop paths. Should include the
+		// first one and any intermediate stop paths, but should not include
+		// the last one.
+		Indices indices = getIndices();
+		Indices endIndices = otherSpatialMatch.getIndices();
+		double totalStopPathDistances = 0.0;
+		while (indices.isEarlierStopPathThan(endIndices)) {
+			totalStopPathDistances += indices.getStopPath().getLength();		
+			indices.incrementStopPath();
+		}
+
+		// Now determine total distance between matches. Note that for
+		// the first path the distance is the length of the stop path
+		// minus the distance of the first match along the path.
+		double distanceBetweenMatches = totalStopPathDistances
+				- distanceAlongFirstPath + distanceAlongLastPath;
+		return distanceBetweenMatches;
+	}
+	
+	/**
+	 * Determines if when going from this spatial match to the otherSpatialMatch
+	 * whether a wait stop is traversed. Also returns true if just sitting at a
+	 * wait stop.
+	 * 
+	 * @param otherSpatialMatch
+	 * @return true if there is a wait stop between this match and the other
+	 *         match
+	 */
+	public boolean traversedWaitStop(SpatialMatch otherSpatialMatch) {
+		// If either this match or the other match are at a wait stop then
+		// indeed a wait stop is in effect
+		VehicleAtStopInfo atStop = getAtStop();
+		if (atStop != null && atStop.isWaitStop())
+			return true;
+		VehicleAtStopInfo endAtStop = otherSpatialMatch.getAtStop();
+		if (endAtStop != null && endAtStop.isWaitStop())
+			return true;
+		
+		
+		Indices indices = getIndices();
+		Indices endIndices = otherSpatialMatch.getIndices();
+		
+		while (indices.isEarlierStopPathThan(endIndices)) {
+			if (indices.isWaitStop())
+				return true;
+			
+			indices.incrementStopPath();
+		}
+		
+		return false;
+	}
+
 	/**
 	 * Determines the indices for the position the specified distance before
 	 * this match. Useful for seeing if looking how far past a stop the match
@@ -614,6 +709,7 @@ public class SpatialMatch {
 	public String toString() {
 		return "SpatialMatch [" 
 				+ "vehicleId=" + vehicleId
+				+ ", avlTime=" + Time.dateTimeStrMsec(avlTime)
 				// + ", block=" + block.toShortString() too verbose!
 				+ ", blockId=" + block.getId()
 				+ ", tripIndex=" + tripIndex
@@ -777,6 +873,15 @@ public class SpatialMatch {
 				&& atStop.equals(atStop.getBlock().getId(), tripIndex, 
 						stopPathIndex);
 	}
-	
+
+	/**
+	 * Returns the epoch time of the AVL report for which this match was
+	 * created.
+	 * 
+	 * @return Time of the associated AVL report
+	 */
+	public long getAvlTime() {
+		return avlTime;
+	}
 }
 

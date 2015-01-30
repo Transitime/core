@@ -22,7 +22,6 @@ import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.FloatConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
-import org.transitime.utils.Time;
 
 /**
  * Handles the AVL configuration data. 
@@ -212,20 +211,6 @@ public class AvlConfig {
 					"value if transitime.avl.unpredictableAssignmentsRegEx " +
 					"is not set.");
 	
-	/**
-	 * For AVL timeouts. If don't get an AVL report for the vehicle in this
-	 * amount of time then the vehicle will be made non-predictable.
-	 * @return
-	 */
-	public static int getAvlTimeoutSecs() {
-		return timeoutSecs.getValue();
-	}
-	private static IntegerConfigValue timeoutSecs =
-			new IntegerConfigValue("transitime.avl.timeoutSecs", 6*Time.SEC_PER_MIN,
-					"For AVL timeouts. If don't get an AVL report for the " +
-					"vehicle in this amount of time then the vehicle will be " +
-					"made non-predictable.");
-
 	/**
 	 * For debugging. Logs each AVL report to stdout if set to true.
 	 * Default is false.

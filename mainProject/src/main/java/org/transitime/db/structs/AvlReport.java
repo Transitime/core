@@ -791,7 +791,9 @@ public class AvlReport implements Serializable {
 	}
 	
 	/**
-	 * Stores the assignment information as part of this AvlReport.
+	 * Stores the assignment information as part of this AvlReport. If vehicle
+	 * is to not have an assignment need to set assignmentId to null and set
+	 * assignmentType to AssignmentType.UNSET.
 	 * 
 	 * @param assignmentId
 	 * @param assignmentType

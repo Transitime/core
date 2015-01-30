@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.config.Config;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
+import org.transitime.core.TimeoutHandlerModule;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.DataDbLogger;
@@ -65,6 +66,8 @@ public class Core {
 	// For logging data such as AVL reports and arrival times to database
 	private final DataDbLogger dataDbLogger;
 
+	private final TimeoutHandlerModule timeoutHandlerModule;
+	
 	private final ServiceUtils service;
 	private final Time time;
 
@@ -132,6 +135,10 @@ public class Core {
 		dataDbLogger = DataDbLogger.getDataDbLogger(agencyId,
 				CoreConfig.storeDataInDatabase(),
 				CoreConfig.pauseIfDbQueueFilling());
+		
+		// Start mandatory modules
+		timeoutHandlerModule = new TimeoutHandlerModule(CoreConfig.getAgencyId());
+		timeoutHandlerModule.start();
 		
 		service = new ServiceUtils(configData);
 		time = new Time(configData);
@@ -267,6 +274,14 @@ public class Core {
 	}
 	
 	/**
+	 * Returns the timeout handler module
+	 * @return
+	 */
+	public TimeoutHandlerModule getTimeoutHandlerModule() {
+		return timeoutHandlerModule;
+	}
+	
+	/**
 	 * Processes all command line options using Apache CLI.
 	 * Further info at http://commons.apache.org/proper/commons-cli/usage.html
 	 */
@@ -368,11 +383,8 @@ public class Core {
 			
 			// Initialize the core now
 			createCore();
-			
+						
 			// Start any optional modules. 
-			// For how CoreConfig default modules includes the NextBus AVL feed
-			// module and the default agencyId is sfmta. So will automatically
-			// start reading data for sfmta.
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
 			if (optionalModuleNames.size() > 0)
 				logger.info("Starting up optional modules specified via " + 

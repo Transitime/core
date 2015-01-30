@@ -87,6 +87,7 @@ public class TemporalMatcher {
 		// Can add this time to the trip scheduled start time to determine
 		// when the vehicle is predicted to be at the match. 
 		SpatialMatch beginningOfTrip = new SpatialMatch(vehicleId,
+				0,    // AVL time doesn't matter
 				spatialMatch.getBlock(), 
 				spatialMatch.getTripIndex(), 
 				0,    // stopPathIndex 
@@ -180,7 +181,7 @@ public class TemporalMatcher {
 			// difference should be 0. But if it is after the departure
 			// time then the vehicle is behind where it should be.
 			int departureTimeSecs = 
-					spatialMatch.getScheduledWaitStopTime();
+					spatialMatch.getScheduledWaitStopTimeSecs();
 			long scheduledDepartureTime =	
 					Core.getInstance().getTime().getEpochTime(
 							departureTimeSecs, avlTime);
@@ -388,7 +389,9 @@ public class TemporalMatcher {
 	
 	/**
 	 * From the list of spatial matches passed in, determines which one has the
-	 * best valid temporal match.
+	 * best valid temporal match. Intended to be used when first matching a
+	 * vehicle to an assignment. Does not use previous AVL report to determine
+	 * if there is a match.
 	 * 
 	 * @param spatialMatches
 	 *            The spatial matches to examine

@@ -144,6 +144,7 @@ public class VehicleEvent implements Serializable {
 	public static final String PREDICTABLE = "Predictable";
 	public static final String TIMEOUT = "Timeout";
 	public static final String NO_MATCH = "No match";
+	public static final String NO_PROGRESS = "No progress";
 	public static final String END_OF_BLOCK = "End of block";
 	public static final String LEFT_TERMINAL_EARLY = "Left terminal early";
 	public static final String LEFT_TERMINAL_LATE = "Left terminal late";

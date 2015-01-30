@@ -63,7 +63,7 @@ public class IpcStopPath implements Serializable {
 		this.scheduleAdherenceStop = dbStopPath.isScheduleAdherenceStop();
 		this.breakTime = dbStopPath.getBreakTimeSec();
 		this.locations = dbStopPath.getLocations();
-		this.pathLength = dbStopPath.getPathLength();		
+		this.pathLength = dbStopPath.getLength();		
 	}
 
 	@Override

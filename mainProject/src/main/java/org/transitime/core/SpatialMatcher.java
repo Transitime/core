@@ -247,19 +247,18 @@ public class SpatialMatcher {
 	 * included since vehicle are allowed to be away from the route path during
 	 * layovers.
 	 * 
-	 * @param vehicleState
-	 *            So can get AvlReports
+	 * @param avlReport
+	 *            The AVL report to match to the block
 	 * @param tripPatternsToInvestigate
 	 * @param block
 	 *            So can get block ID for logging
-	 * @return
+	 * @return non-null possibly empty list of spatial matches
 	 */
 	public static List<SpatialMatch> getSpatialMatches(
-			VehicleState vehicleState,
+			AvlReport avlReport,
 			List<Trip> tripsToInvestigate, Block block) {
 		List<SpatialMatch> spatialMatchesForAllTrips = 
 				new ArrayList<SpatialMatch>();
-		AvlReport avlReport = vehicleState.getAvlReport();
 
 		// So can reuse spatial matches if looking at same trip pattern
 		Set<String> tripPatternIdsCovered = new HashSet<String>();
@@ -338,6 +337,38 @@ public class SpatialMatcher {
 		return spatialMatchesForAllTrips;
 	}
 
+	/**
+	 * Goes through the Block assignment data and determines the closest spatial
+	 * matches that are not for layovers. For first matching a vehicle to a
+	 * block assignment. Matches must be within
+	 * getMaxAllowableDistanceFromSegment() except layovers are always included
+	 * since vehicle are allowed to be away from the route path during layovers.
+	 * 
+	 * @param avlReport
+	 *            The AVL report to match to the block
+	 * @param tripPatternsToInvestigate
+	 * @param block
+	 *            So can get block ID for logging
+	 * @return non-null possibly empty list of spatial matches
+	 */
+	public static List<SpatialMatch> getSpatialMatchesIgnoringLayovers(
+			AvlReport avlReport, List<Trip> tripsToInvestigate,
+			Block block) {
+		// Get all the spatial matches
+		List<SpatialMatch> allSpatialMatches = 
+				getSpatialMatches(avlReport, tripsToInvestigate, block);
+
+		// Filter out the ones that are layovers
+		List<SpatialMatch> spatialMatchesWithoutLayovers = 
+				new ArrayList<SpatialMatch>();
+		for (SpatialMatch spatialMatch : allSpatialMatches) {
+			if (!spatialMatch.isLayover())
+				spatialMatchesWithoutLayovers.add(spatialMatch);
+		}
+
+		return spatialMatchesWithoutLayovers;
+	}
+	
 	/**
 	 * Returns the max distance that an AVL report can be from the segment.
 	 * Currently uses the max distance for the route if it is set. If max
@@ -485,6 +516,7 @@ public class SpatialMatcher {
 		// Create the SpatialMatch object for the specified indices
 		SpatialMatch spatialMatch = new SpatialMatch(
 				avlReport.getVehicleId(), 
+				avlReport.getTime(),
 				potentialMatchIndices.getBlock(),
 				potentialMatchIndices.getTripIndex(),
 				potentialMatchIndices.getStopPathIndex(),
@@ -683,6 +715,7 @@ public class SpatialMatcher {
 					lastStopPath.getSegmentVector(indexOfLastSegment).length();
 			SpatialMatch matchAtEndOfBlock = new SpatialMatch(
 					vehicleState.getVehicleId(),
+					vehicleState.getAvlReport().getTime(),
 					block, 
 					previousMatch.getTripIndex(),
 					indexOfLastStopPath,

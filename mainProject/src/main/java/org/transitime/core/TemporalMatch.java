@@ -17,6 +17,7 @@
 package org.transitime.core;
 
 import org.transitime.utils.Geo;
+import org.transitime.utils.Time;
 
 /**
  * Describes where an AVL report matches to an assignment temporally. It is a
@@ -47,6 +48,7 @@ public class TemporalMatch extends SpatialMatch {
 		return "TemporalMatch [" 
 				+ "temporalDifference=" + temporalDifference
 				+ ", vehicleId=" + vehicleId
+				+ ", avlTime=" + Time.dateTimeStrMsec(avlTime)
 				+ ", blockId=" + block.getId()
 				+ ", tripIndex=" + tripIndex
 				+ ", gtfsStopSeq=" + getStopPath().getGtfsStopSeq()

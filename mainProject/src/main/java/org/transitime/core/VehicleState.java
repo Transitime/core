@@ -23,9 +23,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.StopPath;
@@ -78,9 +81,9 @@ public class VehicleState {
 	// assignment is not valid.
 	private int badAssignmentsInARow = 0;
 	
-	private static int MATCH_HISTORY_MAX_SIZE = 6;
-	private static int AVL_HISTORY_MAX_SIZE = 6;
-	
+	private static final Logger logger = 
+			LoggerFactory.getLogger(VehicleState.class);
+
 	/********************** Member Functions **************************/
 
 	public VehicleState(String vehicleId) {
@@ -190,7 +193,8 @@ public class VehicleState {
 		numberOfBadMatches = 0;
 		
 		// Truncate list if it has gotten too long
-		while (temporalMatchHistory.size() > MATCH_HISTORY_MAX_SIZE) {
+		while (temporalMatchHistory.size() > 
+				CoreConfig.getMatchHistoryMaxSize()) {
 			temporalMatchHistory.removeLast();
 		}
 	}
@@ -207,6 +211,41 @@ public class VehicleState {
 		}
 	}
 
+	/**
+	 * Goes through the match history for the vehicle and returns match that is
+	 * at least minimumAge old. If there isn't a match that old then returns
+	 * null.
+	 * 
+	 * @param minimumAgeMsec
+	 *            The minimum age in msec of the match to be returned
+	 * @return TemporalMatch for vehicle that is at least minimumAge old, or
+	 *         null if there isn't such a match.
+	 */
+	public TemporalMatch getPreviousMatch(int minimumAgeMsec) {
+		for (TemporalMatch match : temporalMatchHistory) {
+			if (match.getAvlTime() < getAvlReport().getTime() - minimumAgeMsec)
+				return match;
+		}
+		
+		// Went through all matches in history and didn't find one old enough.
+		// If the history wasn't full then simply don't have enough matches yet.
+		// But if history was full then it shows that the GPS reporting is so
+		// high that need to store more matches in order to get one as old as
+		// desired.
+		if (temporalMatchHistory.size() >= CoreConfig.getMatchHistoryMaxSize()) {
+			logger.error("For vehicleId={} tried to retrieve match "
+					+ "at least {} msec old but match history in VehicleState "
+					+ "had only {} entries which was not large enough. Likely "
+					+ "should increase transitime.core.matchHistoryMaxSize "
+					+ "parameter to store more history.",
+					vehicleId,
+					minimumAgeMsec,
+					temporalMatchHistory.size());
+		}
+		// Didn't have an old enough matches in history
+		return null;
+	}
+	
 	/**
 	 * To be called when predictable vehicle has no valid spatial/temporal
 	 * match. Only allowed so many of these before vehicle is made
@@ -258,7 +297,7 @@ public class VehicleState {
 		avlReportHistory.addFirst(avlReport);
 		
 		// Truncate list if it is too long or data in it is too old
-		while (avlReportHistory.size() > AVL_HISTORY_MAX_SIZE) {
+		while (avlReportHistory.size() > CoreConfig.getAvlHistoryMaxSize()) {
 			avlReportHistory.removeLast();
 		}
 	}
@@ -298,17 +337,34 @@ public class VehicleState {
 	
 	/**
 	 * Returns true if last temporal match for vehicle indicates that it is at a
-	 * layover. A layover stop is when a vehicle can leave route path before
-	 * departing this stop since the driver is taking a break.
+	 * layover. A layover stop is a wait stop where a vehicle can leave route path before
+	 * departing this stop at the scheduled time since the driver is taking a break. 
 	 * 
 	 * @return true if at a layover
 	 */
-	public boolean atLayover() {
+	public boolean isLayover() {
 		TemporalMatch temporalMatch = getMatch();
 		if (temporalMatch == null)
 			return false;
 		else
 			return temporalMatch.isLayover();
+	}
+	
+	/**
+	 * Returns true if last temporal match for vehicle indicates that it is at a
+	 * wait stop. A wait stop is when a vehicle is supposed to depart at a
+	 * scheduled time. A layover is always a wait stop but you can have a wait
+	 * stop that is not a layover due to the vehicle not being allowed to go
+	 * away from the stop. 
+	 * 
+	 * @return true if at a wait stop
+	 */
+	public boolean isWaitStop() {
+		TemporalMatch temporalMatch = getMatch();
+		if (temporalMatch == null)
+			return false;
+		else
+			return temporalMatch.isWaitStop();
 	}
 	
 	/**
@@ -339,12 +395,14 @@ public class VehicleState {
 	}
 	
 	/**
-	 * Looks in the AvlReport history for the most recent AvlReport that is
-	 * at least minDistanceFromCurrentReport from the current AvlReport.
-	 * Also makes sure that previous report isn't too old.
+	 * Looks in the AvlReport history for the most recent AvlReport that is at
+	 * least minDistanceFromCurrentReport from the current AvlReport. Also makes
+	 * sure that previous report isn't too old (more than 20 minutes old).
 	 * 
 	 * @param minDistanceFromCurrentReport
+	 *            Distance in meters
 	 * @return The previous AvlReport, or null if there isn't one that far away
+	 *         within the last 20 minutes.
 	 */
 	public AvlReport getPreviousAvlReport(double minDistanceFromCurrentReport) {
 		// Go through history of AvlReports to find first one that is specified
@@ -369,6 +427,41 @@ public class VehicleState {
 		return null;
 	}
 
+	/**
+	 * Goes through the AVL history for the vehicle and returns AVL report that
+	 * is at least minimumAge old. If there isn't a match that old then returns
+	 * null.
+	 * 
+	 * @param minimumAgeMsec
+	 *            The minimum age in msec of the AVL report to be returned
+	 * @return AvlReport for vehicle that is at least minimumAge old, or null if
+	 *         there isn't an old enough AVL report in the history.
+	 */
+	public AvlReport getPreviousAvlReport(int minimumAgeMsec) {
+		for (AvlReport avlReport : avlReportHistory) {
+			if (avlReport.getTime() < getAvlReport().getTime() - minimumAgeMsec)
+				return avlReport;
+		}
+		
+		// Went through all AVL reports in history and didn't find one old enough.
+		// If the history wasn't full then simply don't have enough matches yet.
+		// But if history was full then it shows that the GPS reporting is so
+		// high that need to store more matches in order to get one as old as
+		// desired.
+		if (avlReportHistory.size() >= CoreConfig.getAvlHistoryMaxSize()) {
+			logger.error("For vehicleId={} tried to retrieve AVL "
+					+ "at least {} msec old but AVL history in VehicleState "
+					+ "had only {} entries which was not large enough. Likely "
+					+ "should increase transitime.core.avlHistoryMaxSize "
+					+ "parameter to store more history.",
+					vehicleId,
+					minimumAgeMsec,
+					avlReportHistory.size());
+		}
+		// Didn't have an old enough AVL reports in history
+		return null;
+	}
+		
 	/**
 	 * Returns the next to last AvlReport where successfully matched the
 	 * vehicle. This isn't necessarily simply the previous AvlReport since that
@@ -395,9 +488,16 @@ public class VehicleState {
 	 * @return
 	 */
 	public boolean hasNewAssignment(AvlReport avlReport) {
+		// Assignment only considered to be different if there actually
+		// is an assignment from the AVL feed. This way a null assignment,
+		// such as for testing the auto assigner, doesn't cause system
+		// to think vehicle has a new null assignment which would cause
+		// a predictable vehicle to not continue to be considered
+		// predictable.
 		// Use Objects.equals() since either the existing assignment or 
 		// the AVL report assignment can be null
-		return  !Objects.equals(assignmentId, avlReport.getAssignmentId());
+		return  avlReport.getAssignmentType() != AssignmentType.UNSET 
+				&& !Objects.equals(assignmentId, avlReport.getAssignmentId());
 	}
 	
 	/**
