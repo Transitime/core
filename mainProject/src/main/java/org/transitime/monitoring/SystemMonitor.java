@@ -138,7 +138,8 @@ public class SystemMonitor extends MonitorBase {
 			setMessage("CPU load is " 
 					+ StringUtils.twoDigitFormat(cpuLoad) 
 					+ " while limit is " 
-					+ StringUtils.twoDigitFormat(cpuThreshold.getValue()));
+					+ StringUtils.twoDigitFormat(cpuThreshold.getValue()) 
+					+ ".");
 						
 			// Return true if CPU problem found
 			return cpuLoad >= cpuThreshold.getValue();
@@ -165,7 +166,8 @@ public class SystemMonitor extends MonitorBase {
 			setMessage("Free physical memory is " 
 					+ StringUtils.memoryFormat(freePhysicalMemory) 
 					+ " while the limit is " 
-					+ StringUtils.memoryFormat(availableFreePhysicalMemoryThreshold.getValue()));
+					+ StringUtils.memoryFormat(availableFreePhysicalMemoryThreshold.getValue())
+					+ ".");
 			
 			// Return true if problem detected
 			return freePhysicalMemory < availableFreePhysicalMemoryThreshold.getValue();
@@ -221,7 +223,8 @@ public class SystemMonitor extends MonitorBase {
 		setMessage("Usable disk space is " 
 				+ StringUtils.memoryFormat(usableSpace) 
 				+ " while the minimum limit is " 
-				+ StringUtils.memoryFormat(usableDiskSpaceThreshold.getValue()));
+				+ StringUtils.memoryFormat(usableDiskSpaceThreshold.getValue())
+				+ ".");
 		
 		// Return true if usable disk space problem found
 		return usableSpace < usableDiskSpaceThreshold.getValue();

@@ -70,7 +70,8 @@ public class DatabaseMonitoring extends MonitorBase {
 				+ StringUtils.twoDigitFormat(dbLogger.queueLevel())
 				+ " while max allowed fraction=" 
 				+ StringUtils.twoDigitFormat(maxQueueFraction.getValue()) 
-				+ ". Items in queue=" + dbLogger.queueSize());
+				+ ", and items in queue=" + dbLogger.queueSize()
+				+ ".");
 		
 		return dbLogger.queueLevel() > maxQueueFraction.getValue(); 
 	}

@@ -98,9 +98,9 @@ public class AvlFeedMonitor extends MonitorBase {
 		
 		setMessage("Last valid AVL report was " 
 				+ ageOfAvlReport / Time.MS_PER_SEC 
-				+ " secs old. Allowable age is " 
+				+ " secs old while allowable age is " 
 				+ allowableAvlFeedTimeNoDataSecs.getValue()
-				+ " secs. Number of currently active blocks is " 
+				+ " secs and mumber of currently active blocks is " 
 				+ activeBlocks.size() + ".");
 		
 		if (ageOfAvlReport > 

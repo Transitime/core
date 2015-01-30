@@ -20,8 +20,6 @@ package org.transitime.monitoring;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.BlocksInfo;
@@ -55,9 +53,6 @@ public class PredictabilityMonitor extends MonitorBase {
 					+ "predictable vehicles is increased to this amount if "
 					+ "below when determining the fraction.");
 	
-	private static final Logger logger = LoggerFactory
-			.getLogger(PredictabilityMonitor.class);
-
 	/********************** Member Functions **************************/
 
 	/**
@@ -70,14 +65,20 @@ public class PredictabilityMonitor extends MonitorBase {
 		super(emailSender, agencyId);
 	}
 
-	private double percentageBlocksPredictable() {
+	/**
+	 * Returns the fraction (0.0 - 1.0) of the blocks that currently have a
+	 * predictable vehicle associated.
+	 * 
+	 * @return Fraction of blocks that have a predictable vehicle
+	 */
+	private double fractionBlocksPredictable() {
 		// Determine number of currently active blocks.
 		// If there are no currently active blocks then don't need to be
 		// getting AVL data so return 0
 		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks();
 		if (activeBlocks.size() == 0) {
-			logger.debug("No currently active blocks so predictability "
-					+ "considered to be OK");
+			setMessage("No currently active blocks so predictability "
+					+ "considered to be OK.");
 			return 1.0;
 		}
 
@@ -102,9 +103,10 @@ public class PredictabilityMonitor extends MonitorBase {
 				+ StringUtils.twoDigitFormat(minimumPredictableBlocks.getValue())
 				+ ", active blocks=" + activeBlocks.size()
 				+ ", predictable vehicles=" + predictableVehicleCount
-				+ ", predictable vehicles using max=" 
+				+ ", vehicles using minimumPredictableVehicles=" 
 				+ Math.max(predictableVehicleCount,
-						minimumPredictableVehicles.getValue());
+						minimumPredictableVehicles.getValue())
+				+ ".";
 		setMessage(message);
 		
 		// Return fraction of blocks that have a predictable vehicle
@@ -116,8 +118,8 @@ public class PredictabilityMonitor extends MonitorBase {
 	 */
 	@Override
 	protected boolean triggered() {
-		double percentage = percentageBlocksPredictable();
-		return percentage < minimumPredictableBlocks.getValue();
+		double fraction = fractionBlocksPredictable();
+		return fraction < minimumPredictableBlocks.getValue();
 	}
 
 	/* (non-Javadoc)
