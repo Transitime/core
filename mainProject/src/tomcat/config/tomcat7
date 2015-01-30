@@ -1,0 +1,94 @@
+#!/bin/bash
+
+if [ -r /usr/share/java-utils/java-functions ]; then
+  . /usr/share/java-utils/java-functions
+else
+  echo "Can't read Java functions library, aborting"
+  exit 1
+fi
+
+# Get the tomcat config (use this for environment specific settings)
+if [ -z "${TOMCAT_CFG}" ]; then
+  TOMCAT_CFG="/etc/tomcat7/tomcat7.conf"
+fi
+
+if [ -r "$TOMCAT_CFG" ]; then
+  . $TOMCAT_CFG
+fi
+
+# MODIFIED! For some reason the AWS provided script doesn't load in the setenv.sh file
+# so this part has been added
+if [ -r "${CATALINA_HOME}/bin/setenv.sh" ]; then
+    echo "Reading in user config file ${CATALINA_HOME}/bin/setenv.sh"
+
+    . ${CATALINA_HOME}/bin/setenv.sh
+
+    echo "CATALINA_OPTS=${CATALINA_OPTS}"
+fi
+
+# Only source the sysconfig file if TOMCAT_NAME or NAME is defined
+# This prevents issues when defining NAME in the config file while
+# still allowing the NAME environment variable to be set when executing
+# this script
+# By default the init script exports TOMCAT_NAME
+if [ -n "${TOMCAT_NAME}" -a -r "/etc/sysconfig/${TOMCAT_NAME}" ]; then
+    . /etc/sysconfig/${TOMCAT_NAME}
+elif [ -n "${NAME}" -a -r "/etc/sysconfig/${NAME}" ]; then
+    . /etc/sysconfig/${NAME}
+fi
+
+set_javacmd
+# CLASSPATH munging
+if [ -n "$JSSE_HOME" ]; then
+  CLASSPATH="${CLASSPATH}:$(build-classpath jcert jnet jsse 2>/dev/null)"
+fi
+CLASSPATH="${CLASSPATH}:${CATALINA_HOME}/bin/bootstrap.jar"
+CLASSPATH="${CLASSPATH}:${CATALINA_HOME}/bin/tomcat-juli.jar"
+CLASSPATH="${CLASSPATH}:$(build-classpath commons-daemon 2>/dev/null)"
+
+if [ "$1" = "start" ]; then
+  ${JAVACMD} $JAVA_OPTS $CATALINA_OPTS \
+    -classpath "$CLASSPATH" \
+    -Dcatalina.base="$CATALINA_BASE" \
+    -Dcatalina.home="$CATALINA_HOME" \
+    -Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
+    -Djava.io.tmpdir="$CATALINA_TMPDIR" \
+    -Djava.util.logging.config.file="${CATALINA_BASE}/conf/logging.properties" \
+    -Djava.util.logging.manager="org.apache.juli.ClassLoaderLogManager" \
+    org.apache.catalina.startup.Bootstrap start \
+    >> ${CATALINA_BASE}/logs/catalina.out 2>&1 &
+    if [ ! -z "$CATALINA_PID" ]; then
+      echo $! > $CATALINA_PID
+    fi
+elif [ "$1" = "start-security" ]; then
+  ${JAVACMD} $JAVA_OPTS $CATALINA_OPTS \
+    -classpath "$CLASSPATH" \
+    -Dcatalina.base="$CATALINA_BASE" \
+    -Dcatalina.home="$CATALINA_HOME" \
+    -Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
+    -Djava.io.tmpdir="$CATALINA_TMPDIR" \
+    -Djava.security.manager \
+    -Djava.security.policy=="${CATALINA_BASE}/conf/catalina.policy" \
+    -Djava.util.logging.config.file="${CATALINA_BASE}/conf/logging.properties" \
+    -Djava.util.logging.manager="org.apache.juli.ClassLoaderLogManager" \
+    org.apache.catalina.startup.Bootstrap start \
+    >> ${CATALINA_BASE}/logs/catalina.out 2>&1 &
+    if [ ! -z "$CATALINA_PID" ]; then
+      echo $! > $CATALINA_PID
+    fi
+elif [ "$1" = "stop" ]; then
+  ${JAVACMD} $JAVA_OPTS \
+    -classpath "$CLASSPATH" \
+    -Dcatalina.base="$CATALINA_BASE" \
+    -Dcatalina.home="$CATALINA_HOME" \
+    -Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
+    -Djava.io.tmpdir="$CATALINA_TMPDIR" \
+    org.apache.catalina.startup.Bootstrap stop \
+    >> ${CATALINA_BASE}/logs/catalina.out 2>&1
+elif [ "$1" = "version" ]; then
+  ${JAVACMD} -classpath ${CATALINA_HOME}/lib/catalina.jar \
+    org.apache.catalina.util.ServerInfo
+else
+  echo "Usage: $0 {start|start-security|stop|version}"
+  exit 1
+fi
