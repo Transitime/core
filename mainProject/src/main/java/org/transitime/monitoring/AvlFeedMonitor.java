@@ -100,7 +100,7 @@ public class AvlFeedMonitor extends MonitorBase {
 				+ ageOfAvlReport / Time.MS_PER_SEC 
 				+ " secs old while allowable age is " 
 				+ allowableAvlFeedTimeNoDataSecs.getValue()
-				+ " secs and mumber of currently active blocks is " 
+				+ " secs and number of currently active blocks is " 
 				+ activeBlocks.size() + ".");
 		
 		if (ageOfAvlReport > 
