@@ -17,7 +17,9 @@
 
 package org.transitime.monitoring;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -36,14 +38,12 @@ public class AgencyMonitor {
 	// So can send out notification email if monitor triggered
 	private final EmailSender emailSender;
 	
-	// All the types of monitoring to do
-	private final AvlFeedMonitor avlFeedMonitor;
-	private final PredictabilityMonitor predictabilityMonitor;
-	private final SystemMonitor systemMonitor;
-	private final DatabaseMonitoring databaseMonitor;
+	// List of all the monitoring to do
+	private final List<MonitorBase> monitors;
 	
 	// For being able to reuse AgencyMonitors. This is important because
 	// each monitor maintains state, such as if notification e-mail sent out.
+	// Keyed on agencyId.
 	private static final Map<String, AgencyMonitor> agencyMonitorMap = 
 			new HashMap<String, AgencyMonitor>();
 	
@@ -61,11 +61,18 @@ public class AgencyMonitor {
 	 */
 	private AgencyMonitor(String agencyId) {
 		emailSender = new EmailSender();
-		
-		avlFeedMonitor = new AvlFeedMonitor(emailSender, agencyId);
-		predictabilityMonitor = new PredictabilityMonitor(emailSender, agencyId);
-		systemMonitor = new SystemMonitor(emailSender, agencyId);
-		databaseMonitor = new DatabaseMonitoring(emailSender, agencyId);
+
+		// Create all the monitors and add them to the monitors list
+		monitors = new ArrayList<MonitorBase>();
+		monitors.add(new AvlFeedMonitor(emailSender, agencyId));
+		monitors.add(new PredictabilityMonitor(emailSender, agencyId));
+		monitors.add(new SystemMemoryMonitor(emailSender, agencyId));
+		monitors.add(new SystemCpuMonitor(emailSender, agencyId));
+		monitors.add(new SystemDiskSpaceMonitor(emailSender,
+				agencyId));
+		monitors.add(new DatabaseMonitoring(emailSender, agencyId));
+		monitors.add(new DatabaseQueueMonitoring(emailSender,
+				agencyId));
 	}
 	
 	/**
@@ -105,19 +112,12 @@ public class AgencyMonitor {
 		String errorMessage = "";
 		
 		// Check all the monitors. 
-		if (databaseMonitor.checkAndNotify())
-			errorMessage += " " + databaseMonitor.getMessage();
-		
-		if (avlFeedMonitor.checkAndNotify())
-			errorMessage += " " + avlFeedMonitor.getMessage();
-
-		if (systemMonitor.checkAndNotify())
-			errorMessage += " " + systemMonitor.getMessage();
-		
-		if (predictabilityMonitor.checkAndNotify())
-			errorMessage += " " + predictabilityMonitor.getMessage();
-		
-		// Return the last error message if there was one
+		for (MonitorBase monitor : monitors) {
+			if (monitor.checkAndNotify())
+				errorMessage += " " + monitor.getMessage();			
+		}
+				
+		// Return the concatenated error message if there were any
 		if (errorMessage.length() > 0)
 			return errorMessage;
 		else

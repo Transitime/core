@@ -17,19 +17,25 @@
 
 package org.transitime.monitoring;
 
-import java.util.List;
+import java.io.File;
 
-import org.hibernate.HibernateException;
-import org.transitime.db.structs.DbTest;
+import org.transitime.config.LongConfigValue;
 import org.transitime.utils.EmailSender;
+import org.transitime.utils.StringUtils;
 
 /**
- * For monitoring access to database. Makes sure can read and write to database.
+ * Monitors to make sure there is sufficient disk space.
  *
  * @author SkiBu Smith
  *
  */
-public class DatabaseMonitoring extends MonitorBase {
+public class SystemDiskSpaceMonitor extends MonitorBase {
+
+	LongConfigValue usableDiskSpaceThreshold = new LongConfigValue(
+			"transitime.monitoring.usableDiskSpaceThreshold", 
+			500 * 1024 * 1024L, // ~500 MB 
+			"If usable disk space is less than this "
+			+ "value then file space monitoring is triggered.");
 
 	/********************** Member Functions **************************/
 
@@ -39,38 +45,32 @@ public class DatabaseMonitoring extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public DatabaseMonitoring(EmailSender emailSender, String agencyId) {
+	public SystemDiskSpaceMonitor(EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.transitime.monitoring.MonitorBase#triggered()
 	 */
+	/**
+	 * Checks whether file system getting too full, beyond
+	 * usableDiskSpaceThreshold.
+	 * 
+	 * @return True if file system getting too full
+	 */
 	@Override
 	protected boolean triggered() {
-		try {
-			// Clear out old data from db
-			DbTest.deleteAll(agencyId);
-			
-			// See if can write an object to database
-			if (!DbTest.write(agencyId, 999)) {
-				setMessage("Could not write DbTest object to database.");
-				return true;
-			}
-
-			// See if can read object from database
-			List<DbTest> dbTests = DbTest.readAll(agencyId);
-			if (dbTests.size() == 0) {
-				setMessage("Could not read DbTest objects from database.");
-				return true;
-			}
-		} catch (HibernateException e) {
-			setMessage("Problem accessing database. " + e.getMessage());
-			return true;
-		}
-
-		// Everything OK
-		return false;
+		long usableSpace = new File("/").getUsableSpace();
+		
+		// Provide message explaining situation
+		setMessage("Usable disk space is " 
+				+ StringUtils.memoryFormat(usableSpace) 
+				+ " while the minimum limit is " 
+				+ StringUtils.memoryFormat(usableDiskSpaceThreshold.getValue())
+				+ ".");
+		
+		// Return true if usable disk space problem found
+		return usableSpace < usableDiskSpaceThreshold.getValue();
 	}
 
 	/* (non-Javadoc)
@@ -78,7 +78,7 @@ public class DatabaseMonitoring extends MonitorBase {
 	 */
 	@Override
 	protected String type() {
-		return "Database";
+		return "System Disk Space";
 	}
 
 }

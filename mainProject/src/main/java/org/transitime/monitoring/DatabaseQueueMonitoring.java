@@ -17,20 +17,27 @@
 
 package org.transitime.monitoring;
 
-import java.util.List;
-
-import org.hibernate.HibernateException;
-import org.transitime.db.structs.DbTest;
+import org.transitime.applications.Core;
+import org.transitime.config.DoubleConfigValue;
+import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.utils.EmailSender;
+import org.transitime.utils.StringUtils;
 
 /**
- * For monitoring access to database. Makes sure can read and write to database.
+ * For monitoring access to database. Examines size of the db logging queue
+ * to make sure that writes are not getting backed up.
  *
  * @author SkiBu Smith
  *
  */
-public class DatabaseMonitoring extends MonitorBase {
+public class DatabaseQueueMonitoring extends MonitorBase {
 
+	DoubleConfigValue maxQueueFraction = new DoubleConfigValue(
+			"transitime.monitoring.maxQueueFraction", 
+			0.4, 
+			"If database queue fills up by more than this 0.0 - 1.0 "
+			+ "fraction then database monitoring is triggered.");
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -39,7 +46,7 @@ public class DatabaseMonitoring extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public DatabaseMonitoring(EmailSender emailSender, String agencyId) {
+	public DatabaseQueueMonitoring(EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
 	}
 
@@ -48,29 +55,20 @@ public class DatabaseMonitoring extends MonitorBase {
 	 */
 	@Override
 	protected boolean triggered() {
-		try {
-			// Clear out old data from db
-			DbTest.deleteAll(agencyId);
-			
-			// See if can write an object to database
-			if (!DbTest.write(agencyId, 999)) {
-				setMessage("Could not write DbTest object to database.");
-				return true;
-			}
-
-			// See if can read object from database
-			List<DbTest> dbTests = DbTest.readAll(agencyId);
-			if (dbTests.size() == 0) {
-				setMessage("Could not read DbTest objects from database.");
-				return true;
-			}
-		} catch (HibernateException e) {
-			setMessage("Problem accessing database. " + e.getMessage());
-			return true;
-		}
-
-		// Everything OK
-		return false;
+		Core core = Core.getInstance();
+		if (core == null)
+			return false;
+		
+		DataDbLogger dbLogger = core.getDbLogger();
+		
+		setMessage("Database queue fraction=" 
+				+ StringUtils.twoDigitFormat(dbLogger.queueLevel())
+				+ " while max allowed fraction=" 
+				+ StringUtils.twoDigitFormat(maxQueueFraction.getValue()) 
+				+ ", and items in queue=" + dbLogger.queueSize()
+				+ ".");
+		
+		return dbLogger.queueLevel() > maxQueueFraction.getValue(); 
 	}
 
 	/* (non-Javadoc)
@@ -78,7 +76,6 @@ public class DatabaseMonitoring extends MonitorBase {
 	 */
 	@Override
 	protected String type() {
-		return "Database";
+		return "Database Queue";
 	}
-
 }

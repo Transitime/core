@@ -122,9 +122,9 @@ public abstract class MonitorBase {
 	}
 	
 	/**
-	 * When triggered is called the super class should set the message. This
-	 * needs to be done whether monitor is triggered or not since also want to
-	 * send a message when was triggered but isn't anymore.
+	 * When triggered() is called the super class should set the message. This
+	 * needs to be done whether or not monitor is triggered since monitoring also 
+	 * sends an OK message when was triggered but isn't anymore.
 	 * 
 	 * @param message
 	 */
