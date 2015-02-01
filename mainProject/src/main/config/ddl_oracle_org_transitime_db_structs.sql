@@ -25,6 +25,8 @@
 
     drop table Matches cascade constraints;
 
+    drop table MonitoringEvents cascade constraints;
+
     drop table PredictionAccuracy cascade constraints;
 
     drop table Predictions cascade constraints;
@@ -210,6 +212,15 @@
         stopPathIndex number(10,0),
         tripId varchar2(60 char),
         primary key (vehicleId, avlTime)
+    );
+
+    create table MonitoringEvents (
+        type varchar2(40 char) not null,
+        time timestamp not null,
+        message varchar2(350 char),
+        triggered number(1,0),
+        value double precision,
+        primary key (type, time)
     );
 
     create table PredictionAccuracy (
@@ -409,6 +420,8 @@
         references Blocks;
 
     create index avlTimeIndex on Matches (avlTime);
+
+    create index MonitoringEventsTimeIndex on MonitoringEvents (time);
 
     create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 

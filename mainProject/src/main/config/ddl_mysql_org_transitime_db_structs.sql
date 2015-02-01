@@ -57,6 +57,8 @@
 
     drop table if exists Matches;
 
+    drop table if exists MonitoringEvents;
+
     drop table if exists PredictionAccuracy;
 
     drop table if exists Predictions;
@@ -240,6 +242,15 @@
         stopPathIndex integer,
         tripId varchar(60),
         primary key (vehicleId, avlTime)
+    );
+
+    create table MonitoringEvents (
+        type varchar(40) not null,
+        time datetime(3) not null,
+        message longtext,
+        triggered boolean,
+        value double precision,
+        primary key (type, time)
     );
 
     create table PredictionAccuracy (
@@ -441,6 +452,8 @@
         references Blocks (serviceId, configRev, blockId);
 
     create index avlTimeIndex on Matches (avlTime);
+
+    create index MonitoringEventsTimeIndex on MonitoringEvents (time);
 
     create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 

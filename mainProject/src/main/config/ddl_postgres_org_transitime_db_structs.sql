@@ -49,6 +49,8 @@
 
     drop table if exists Matches cascade;
 
+    drop table if exists MonitoringEvents cascade;
+
     drop table if exists PredictionAccuracy cascade;
 
     drop table if exists Predictions cascade;
@@ -234,6 +236,15 @@
         stopPathIndex int4,
         tripId varchar(60),
         primary key (vehicleId, avlTime)
+    );
+
+    create table MonitoringEvents (
+        type varchar(40) not null,
+        time timestamp not null,
+        message varchar(350),
+        triggered boolean,
+        value float8,
+        primary key (type, time)
     );
 
     create table PredictionAccuracy (
@@ -433,6 +444,8 @@
         references Blocks;
 
     create index avlTimeIndex on Matches (avlTime);
+
+    create index MonitoringEventsTimeIndex on MonitoringEvents (time);
 
     create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 
