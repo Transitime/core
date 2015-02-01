@@ -426,19 +426,19 @@ public class VehicleEvent implements Serializable {
 	 * Reads in all VehicleEvents from the database that were between the
 	 * beginTime and endTime.
 	 * 
-	 * @param projectId Which project getting data for
+	 * @param agencyId Which project getting data for
 	 * @param beginTime Specifies time range for query
 	 * @param endTime Specifies time range for query
 	 * @param sqlClause Optional. Can specify an SQL clause to winnow down
 	 * the data, such as "AND routeId='71'".
 	 * @return
 	 */
-	public static List<VehicleEvent> getVehicleEvents(String projectId,
+	public static List<VehicleEvent> getVehicleEvents(String agencyId,
 			Date beginTime, Date endTime, String sqlClause) {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(projectId);
+		Session session = HibernateUtils.getSession(agencyId);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
