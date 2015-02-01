@@ -426,11 +426,15 @@ public class VehicleEvent implements Serializable {
 	 * Reads in all VehicleEvents from the database that were between the
 	 * beginTime and endTime.
 	 * 
-	 * @param agencyId Which project getting data for
-	 * @param beginTime Specifies time range for query
-	 * @param endTime Specifies time range for query
-	 * @param sqlClause Optional. Can specify an SQL clause to winnow down
-	 * the data, such as "AND routeId='71'".
+	 * @param agencyId
+	 *            Which project getting data for
+	 * @param beginTime
+	 *            Specifies time range for query
+	 * @param endTime
+	 *            Specifies time range for query
+	 * @param sqlClause
+	 *            Optional. Can specify an SQL clause to winnow down the data,
+	 *            such as "AND routeId='71'".
 	 * @return
 	 */
 	public static List<VehicleEvent> getVehicleEvents(String agencyId,
@@ -460,8 +464,7 @@ public class VehicleEvent implements Serializable {
 					timer.elapsedMsec());
 			return vehicleEvents;
 		} catch (HibernateException e) {
-			// Log error to the Core logger
-			Core.getLogger().error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 			return null;
 		} finally {
 			// Clean things up. Not sure if this absolutely needed nor if
