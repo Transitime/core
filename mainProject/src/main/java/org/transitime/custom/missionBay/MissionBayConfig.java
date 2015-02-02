@@ -29,8 +29,8 @@ import org.transitime.custom.missionBay.GtfsFromNextBus.Dir;
  * Contains GTFS config information of stop and paths for the directions. Wanted
  * this info to be automatically generated from the NextBus API but there simply
  * is not sufficient information in the API. This is especially true given the
- * many different trip patterns there are for Mission Bay. For example, the west
- * route has 8 variations (morning/afternoon, nektar stop, caltrain stop.
+ * many different trip patterns there are for Mission Bay. For example, the caltrain
+ * route has many variations.
  *
  * @author SkiBu Smith
  *
@@ -45,6 +45,10 @@ public class MissionBayConfig {
 	 * different patterns that are not specified via the NextBus API. So need to
 	 * hard code it. Also, for all of the routes, some trips stop at Caltrain &
 	 * 4th and some do not. Need to define every possibility.
+	 * <p>
+	 * Good way to determne which stops are part of a direction/trip is to look
+	 * at the schedule API such as
+	 * http://webservices.nextbus.com/s/xmlFeed?command=schedule&a=sf-mission-bay&r=west
 	 * 
 	 * @param routeId
 	 * @return
@@ -60,124 +64,71 @@ public class MissionBayConfig {
 			d1.tag = "loop";
 			d1.shapeId = "east_loop";
 			d1.gtfsDirection = "0";
-			String stops1[] = { "powell", "library", "miss4th_s", "nektar",
-					"miss4th_n", "chinbas", "calttown", "powell" };
+			String stops1[] = { "powell", "library", "chinbas", "nektar",
+					"409illi_e", "powell" };
 			d1.stopIds = Arrays.asList(stops1);
 			dirList.add(d1);
-
-			Dir d1c = new Dir();
-			d1c.tag = "loop_calt4th";
-			d1c.shapeId = "east_loop";
-			d1c.gtfsDirection = "0";
-			String stops1c[] = { "powell", "calt4th", "library", "miss4th_s",
-					"nektar", "miss4th_n", "chinbas", "calttown", "powell" };
-			d1c.stopIds = Arrays.asList(stops1c);
-			dirList.add(d1c);
 		} else if (routeId.equals("west")) {
 			// The morning loop without nektar
 			Dir d1 = new Dir();
-			d1.tag = "morning_loop";
-			d1.shapeId = "west_morning_loop";
+			d1.tag = "west_loop";
+			d1.shapeId = "west_loop";
 			d1.gtfsDirection = "0";
-			String stops1[] = { "1500owen", "crescent_s", "berr5th_s",
-					"calttown", "powell", "berr5th_n", "crescent_n",
-					"1650owen", "409illi_w", "1650owen", "1500owen" };
+			String stops1[] = { "1650owen", "berr5th_s", "chinb185",
+					"calcream", "powell", "calttown", "berr5th_n", "1650owen" };
 			d1.stopIds = Arrays.asList(stops1);
 			dirList.add(d1);
-
-			Dir d1c = new Dir();
-			d1c.tag = "morning_loop_calt4th";
-			d1c.shapeId = "west_morning_loop";
-			d1c.gtfsDirection = "0";
-			String stops1c[] = { "1500owen", "crescent_s", "berr5th_s",
-					"calttown", "powell", "calt4th", "berr5th_n", "crescent_n",
-					"1650owen", "409illi_w", "1650owen", "1500owen" };
-			d1c.stopIds = Arrays.asList(stops1c);
-			dirList.add(d1c);
-
-			// The morning loop with nektar
-			Dir d2 = new Dir();
-			d2.tag = "morning_loop_nektar";
-			d2.shapeId = "west_morning_loop_nektar";
-			d2.gtfsDirection = "0";
-			String stops2[] = { "1500owen", "crescent_s", "berr5th_s",
-					"calttown", "powell", "berr5th_n", "crescent_n",
-					"1650owen", "409illi_w", "nektar", "1650owen", "1500owen" };
-			d2.stopIds = Arrays.asList(stops2);
-			dirList.add(d2);
-
-			Dir d2c = new Dir();
-			d2c.tag = "morning_loop_nektar_calt4th";
-			d2c.shapeId = "west_morning_loop_nektar";
-			d2c.gtfsDirection = "0";
-			String stops2c[] = { "1500owen", "crescent_s", "berr5th_s",
-					"calttown", "powell", "calt4th", "berr5th_n", "crescent_n",
-					"1650owen", "409illi_w", "nektar", "1650owen", "1500owen" };
-			d2c.stopIds = Arrays.asList(stops2c);
-			dirList.add(d2c);
-
-			// The afternoon loop without nektar
-			Dir d3 = new Dir();
-			d3.tag = "afternoon_loop";
-			d3.shapeId = "west_afternoon_loop";
-			d3.gtfsDirection = "0";
-			String stops3[] = { "1500owen", "crescent_s", "berr5th_s",
-					"calttown", "powell", "calt4th", "berr5th_n", "crescent_n",
-					"409illi_e", "1650owen", "1500owen", };
-			d3.stopIds = Arrays.asList(stops3);
-			dirList.add(d3);
-
-			Dir d3c = new Dir();
-			d3c.tag = "afternoon_loop_calt4th";
-			d3c.shapeId = "west_afternoon_loop";
-			d3c.gtfsDirection = "0";
-			String stops3c[] = { "1500owen", "crescent_s", "berr5th_s",
-					"calttown", "powell", "berr5th_n", "crescent_n",
-					"409illi_e", "1650owen", "1500owen" };
-			d3c.stopIds = Arrays.asList(stops3c);
-			dirList.add(d3c);
-
-			// The afternoon loop with nektar
-			Dir d4 = new Dir();
-			d4.tag = "afternoon_loop_nektar";
-			d4.shapeId = "west_afternoon_loop_nektar";
-			d4.gtfsDirection = "0";
-			String stops4[] = { "1500owen", "crescent_s", "berr5th_s",
-					"calttown", "powell", "berr5th_n", "crescent_n",
-					"409illi_e", "nektar", "1650owen", "1500owen" };
-			d4.stopIds = Arrays.asList(stops4);
-			dirList.add(d4);
-
-			Dir d4c = new Dir();
-			d4c.tag = "afternoon_loop_nektar_calt4th";
-			d4c.shapeId = "west_afternoon_loop_nektar";
-			d4c.gtfsDirection = "0";
-			String stops4c[] = { "1500owen", "crescent_s", "berr5th_s",
-					"calttown", "powell", "calt4th", "berr5th_n", "crescent_n",
-					"409illi_e", "nektar", "1650owen", "1500owen" };
-			d4c.stopIds = Arrays.asList(stops4c);
-			dirList.add(d4c);		
 		} else if (routeId.equals("loop")) {
 			// For the loop route, the loop directions
 			Dir d1 = new Dir();
 			d1.tag = "loop";
 			d1.shapeId = "loop_loop";
 			d1.gtfsDirection = "0";
-			String stops1[] = { "1650owen", "1400owen", "crescent_s",
-					"berr5th_s", "calttown", "powell", "library",
-					"miss4th", "nektar", "409illi_e", "1650owen" };
+			String stops1[] = { "1650owen", "berr5th_s", "calcream",
+					"powell", "calttown", "library", "nektar",
+					"409illi_e", "1650owen" };
+			d1.stopIds = Arrays.asList(stops1);
+			dirList.add(d1);
+		} else if (routeId.equals("caltrans")) {
+			// For the morning caltrain route, not going to Transbay
+			Dir d1 = new Dir();
+			d1.tag = "caltrain_am";
+			d1.shapeId = "caltrain_am_loop";
+			d1.gtfsDirection = "0";
+			String stops1[] = { "calttown", "library", "chinbas",
+					"nektar", "409illi_e", "1650owen", "calttown" };
 			d1.stopIds = Arrays.asList(stops1);
 			dirList.add(d1);
 
-			Dir d1c = new Dir();
-			d1c.tag = "loop_calt4th";
-			d1c.shapeId = "loop_loop";
-			d1c.gtfsDirection = "0";
-			String stops1c[] = { "1650owen", "1400owen", "crescent_s",
-					"berr5th_s", "calttown", "powell", "calt4th", "library",
-					"miss4th", "nektar", "409illi_e", "1650owen" };
-			d1c.stopIds = Arrays.asList(stops1c);
-			dirList.add(d1c);
+			// For the morning caltrain route, going to Transbay
+			Dir d2 = new Dir();
+			d2.tag = "caltrain_am_transbay";
+			d2.shapeId = "caltrain_am_transbay_loop";
+			d2.gtfsDirection = "0";
+			String stops2[] = { "trans390", "130towns", "library", "chinbas",
+					"nektar", "409illi_e", "1650owen", "calttown" };
+			d2.stopIds = Arrays.asList(stops2);
+			dirList.add(d2);
+
+			// For the afternoon caltrain route, not going to Transbay
+			Dir d3 = new Dir();
+			d3.tag = "caltrain_pm";
+			d3.shapeId = "caltrain_pm_loop";
+			d3.gtfsDirection = "0";
+			String stops3[] = { "nektar", "409illi_e", "1650owen", "calttown",
+					"library", "chinbas", "nektar" };
+			d3.stopIds = Arrays.asList(stops3);
+			dirList.add(d3);
+
+			// For the afternoon caltrain route, going to Transbay
+			Dir d4 = new Dir();
+			d4.tag = "caltrain_pm_transbay";
+			d4.shapeId = "caltrain_pm_transbay_loop";
+			d4.gtfsDirection = "0";
+			String stops4[] = { "nektar", "409illi_e", "1650owen", "calttown",
+					"ances153", "trans390", "library", "chinbas", "nektar" };
+			d4.stopIds = Arrays.asList(stops4);
+			dirList.add(d4);
 		} else 
 			return null;
 		
@@ -189,7 +140,7 @@ public class MissionBayConfig {
 	 * Defines the path data for all routes and puts it into the shapeIdsMap. Of
 	 * course would have preferred to automatically determine the paths for each
 	 * trip pattern using only the NextBus API but the naming conventions were
-	 * far to haphazard. Only way to really make it work is to list the path IDs
+	 * far too haphazard. Only way to really make it work is to list the path IDs
 	 * here manually by looking at data in (for route west for example)
 	 * http://webservices
 	 * .nextbus.com/service/publicXMLFeed?command=routeConfig&a
@@ -202,78 +153,80 @@ public class MissionBayConfig {
 		
 		// Route east, direction loop
 		String pathIds_array_east_loop[] = { "east_powell_d",
-				"east_powell_calt4th", "east_calt4th_d",
-				"east_calt4th_library", "east_library_nektar", "east_nektar_d",
-				"east_nektar_chinbas", "east_chinbas_d",
-				"east_chinbas_calttown", "east_calttown_d",
-				"east_calttown_powell" };
+				"east_powell_library", "east_library_chinbas",
+				"east_chinbas_nektar", "east_nektar_d",
+				"east_nektar_409illi_e", "east_409illi_e_d",
+				"east_409illi_e_powell" };
 		List<String> pathIds_east_loop = Arrays.asList(pathIds_array_east_loop);
 		shapeIdsMap.put("east_loop", pathIds_east_loop);
 
-		// Route west, direction morning loop without nektar stop
-		String pathIds_array_west_morning_loop[] = { 
-				"west_1500owen_crescent_s", "west_crescent_s_berr5th_s",
-				"west_berr5th_s_calttown", "west_calttown_powell",
-				"west_powell_d", "west_powell_x_calt4th",
-				"west_calt4th_berr5th_n", "west_berr5th_n_crescent_n",
-				"west_crescent_1650owen", "west_1650owen_d",
-				"west_1650owen_409illi_w", "west_409illi_w_d",
-				"west_409illi_w_1650owen", "west_1500owen_d", };
-		List<String> pathIds_west_morning_loop = Arrays
-				.asList(pathIds_array_west_morning_loop);
-		shapeIdsMap.put("west_morning_loop", pathIds_west_morning_loop);
-
-		// Route west, direction morning loop with nektar stop
-		String pathIds_array_west_morning_nektar_loop[] = { 
-				"west_1500owen_crescent_s", "west_crescent_s_berr5th_s",
-				"west_berr5th_s_calttown", "west_calttown_powell",
-				"west_powell_d", "west_powell_x_calt4th",
-				"west_calt4th_berr5th_n", "west_berr5th_n_crescent_n",
-				"west_crescent_1650owen", "west_1650owen_d",
-				"west_1650owen_409illi_w", "west_409illi_w_d",
-				"west_409illi_w_nektar", "west_nektar_d",
-				"west_nektar_1650owen", "west_1500owen_d", };
-		List<String> pathIds_west_morning_nektar_loop = Arrays
-				.asList(pathIds_array_west_morning_nektar_loop);
-		shapeIdsMap.put("west_morning_loop_nektar",
-				pathIds_west_morning_nektar_loop);
-
-		// Route west, direction afternoon loop without nektar stop
-		String pathIds_array_west_afternoon_loop[] = {
-				"west_1500owen_crescent_s", "west_crescent_s_berr5th_s",
-				"west_berr5th_s_calttown", "west_calttown_powell",
-				"west_powell_d", "west_powell_x_calt4th",
-				"west_calt4th_berr5th_n", "west_berr5th_n_crescent_n",
-				"west_crescent_409illi_e", "west_409illi_e_d",
-				"west_409illi_e_1650owen", "west_1500owen_d", };
-		List<String> pathIds_west_afternoon_loop = Arrays
-				.asList(pathIds_array_west_afternoon_loop);
-		shapeIdsMap.put("west_afternoon_loop", pathIds_west_afternoon_loop);
-
-		// Route west, direction afternoon loop with nektar stop
-		String pathIds_array_west_afternoon_nektar_loop[] = {
-				"west_1500owen_crescent_s", "west_crescent_s_berr5th_s",
-				"west_berr5th_s_calttown", "west_calttown_powell",
-				"west_powell_d", "west_powell_x_calt4th",
-				"west_calt4th_berr5th_n", "west_berr5th_n_crescent_n",
-				"west_crescent_409illi_e", "west_409illi_e_d",
-				"west_409illi_e_nektar", "west_nektar_d",
-				"west_nektar_1650owen", "west_1500owen_d", };
-		List<String> pathIds_west_afternoon_nektar_loop = Arrays
-				.asList(pathIds_array_west_afternoon_nektar_loop);
-		shapeIdsMap.put("west_afternoon_loop_nektar",
-				pathIds_west_afternoon_nektar_loop);
+		// Route west, direction loop
+		String pathIds_array_west_loop[] = { 
+				"west_1650owen_d", "west_1650owen_berr5th_s",
+				"west_berr5th_s_chinb185", "west_chinb185_calcream",
+				"west_calcream_powell", "west_powell_d",
+				"west_powell_calttown", "west_calttown_berr5th_n",
+				"west_berr5th_n_d", "west_berr5th_n_1650owen"};
+		List<String> pathIds_west_loop = Arrays
+				.asList(pathIds_array_west_loop);
+		shapeIdsMap.put("west_loop", pathIds_west_loop);
 		
 		// Route loop, direction loop
 		String pathIds_array_loop_loop[] = { "loop_1650owen_d",
-				"loop_1650owen_crescent_s", "loop_crescent_s_berr5th_s",
-				"loop_berr5th_s_calttown", "loop_calttown_powell",
-				"loop_powell_d", "loop_powell_calt4th", "loop_calt4th_library",
-				"loop_library_nektar", "loop_nektar_d",
-				"loop_nektar_409illi_e", "loop_409illi_e_d",
-				"loop_409illi_e_1650owen" };
+				"loop_1650owen_berr5th_s", "loop_berr5th_s_calcream",
+				"loop_calcream_powell", "loop_powell_d",
+				"loop_powell_calttown", "loop_calttown_library",
+				"loop_library_nektar", "loop_nektar_409illi_e",
+				"loop_409illi_e_d", "loop_409illi_e_1650owen"};
 		List<String> pathIds_loop_loop = Arrays.asList(pathIds_array_loop_loop);
 		shapeIdsMap.put("loop_loop", pathIds_loop_loop);
+		
+		// Route caltrain, direction caltrain_am
+		String pathIds_array_caltrain_am_loop[] = { "caltrans_calttown_d",
+				"caltrans_calttown_library", "caltrans_library_d",
+				"caltrans_library_chinbas", "caltrans_chinbas_nektar",
+				"caltrans_nektar_d", "caltrans_nektar_409illi_e",
+				"caltrans_409illi_e_1650owen", "caltrans_1650owen_d",
+				"caltrans_1650owen_calttown"};
+		List<String> pathIds_caltrain_am_loop = 
+				Arrays.asList(pathIds_array_caltrain_am_loop);
+		shapeIdsMap.put("caltrain_am_loop", pathIds_caltrain_am_loop);
+		
+		// Route caltrain, direction caltrain_am_transbay
+		String pathIds_array_caltrain_am_transbay_loop[] = { "caltrans_trans390_d",
+				"caltrans_trans390_130towns", "caltrans_130towns_library",
+				 "caltrans_library_d",
+				"caltrans_library_chinbas", "caltrans_chinbas_nektar",
+				"caltrans_nektar_d", "caltrans_nektar_409illi_e",
+				"caltrans_409illi_e_1650owen", "caltrans_1650owen_d",
+				"caltrans_1650owen_calttown"};
+		List<String> pathIds_caltrain_am_transbay_loop = 
+				Arrays.asList(pathIds_array_caltrain_am_transbay_loop);
+		shapeIdsMap.put("caltrain_am_transbay_loop", pathIds_caltrain_am_transbay_loop);
+		
+		// Route caltrain, direction caltrain_pm
+		String pathIds_array_caltrain_pm_loop[] = { 
+				"caltrans_nektar_d", "caltrans_nektar_409illi_e",
+				"caltrans_409illi_e_1650owen", "caltrans_1650owen_d",
+				"caltrans_1650owen_calttown", "caltrans_calttown_d",
+				"caltrans_calttown_library", "caltrans_library_d",
+				"caltrans_library_chinbas", "caltrans_chinbas_nektar"};
+		List<String> pathIds_caltrain_pm_loop = 
+				Arrays.asList(pathIds_array_caltrain_pm_loop);
+		shapeIdsMap.put("caltrain_pm_loop", pathIds_caltrain_pm_loop);
+		
+		// Route caltrain, direction caltrain_pm_transbay
+		String pathIds_array_caltrain_pm_transbay_loop[] = { 
+				"caltrans_nektar_d", "caltrans_nektar_409illi_e",
+				"caltrans_409illi_e_1650owen", "caltrans_1650owen_d",
+				"caltrans_1650owen_calttown", "caltrans_calttown_d",
+				"caltrans_calttown_ances153", "caltrans_ances153_trans390",
+				"caltrans_trans390_d", "caltrans_trans390_library",				
+				"caltrans_library_d",
+				"caltrans_library_chinbas", "caltrans_chinbas_nektar"};
+		List<String> pathIds_caltrain_pm_transbay_loop = 
+				Arrays.asList(pathIds_array_caltrain_pm_transbay_loop);
+		shapeIdsMap.put("caltrain_pm_transbay_loop", pathIds_caltrain_pm_transbay_loop);
 		
 		return shapeIdsMap;
 	}

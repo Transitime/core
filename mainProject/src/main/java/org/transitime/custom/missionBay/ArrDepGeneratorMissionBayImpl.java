@@ -69,7 +69,7 @@ public class ArrDepGeneratorMissionBayImpl
 		
 		// Specify the missionBay stopID and the SFMTA stopID of the
 		// stops that need to be tracked.
-		sfmtaStopMap.put("calt4th", 3164);
+		sfmtaStopMap.put("calcream", 6694);
 	}
 	
 	/**
