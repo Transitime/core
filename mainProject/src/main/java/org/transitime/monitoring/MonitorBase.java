@@ -17,10 +17,13 @@
 
 package org.transitime.monitoring;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.db.structs.MonitoringEvent;
 import org.transitime.utils.EmailSender;
 import org.transitime.utils.Time;
 
@@ -37,6 +40,7 @@ public abstract class MonitorBase {
 	protected final String agencyId;
 	private boolean wasTriggered = false;
 	private String message;
+	private double value;
 	
 	private static StringConfigValue emailRecipients =
 			new StringConfigValue(
@@ -78,6 +82,15 @@ public abstract class MonitorBase {
 				+ "wasTriggered={} message=\"{}\"", 
 				agencyId, type(), isTriggered, wasTriggered, getMessage());
 		
+		// Store MonitorEvent into database if monitor is now triggered or
+		// was previously triggered. This way store event for when first
+		// triggered, when untriggered, and all of the monitoring info
+		// in between.
+		if (isTriggered || wasTriggered) {
+			MonitoringEvent.create(new Date(), type(), isTriggered, message,
+					value);
+		}
+
 		// Handle notifications according to change of monitoring state. If 
 		// state hasn't changed then don't need to send out notification.
 		if (!wasTriggered && isTriggered) {
@@ -128,12 +141,26 @@ public abstract class MonitorBase {
 	 * 
 	 * @param message
 	 */
-	protected void setMessage(String message) {
+	protected void setMessage(String message, double value) {
 		// Log the message for debugging
 		logger.debug(message);
 		
 		// Save the message so can be retrieved later for notifying users
 		this.message = message;
+		
+		// Save the new value so can log it to database
+		this.value = value;
+	}
+	
+	/**
+	 * For when there is no value associated with the monitoring, such
+	 * as for monitoring db when it is either up or down. The value
+	 * is set to Double.NaN.
+	 * 
+	 * @param message
+	 */
+	protected void setMessage(String message) {
+		setMessage(message, Double.NaN);
 	}
 	
 	/**

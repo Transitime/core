@@ -67,7 +67,8 @@ public class SystemDiskSpaceMonitor extends MonitorBase {
 				+ StringUtils.memoryFormat(usableSpace) 
 				+ " while the minimum limit is " 
 				+ StringUtils.memoryFormat(usableDiskSpaceThreshold.getValue())
-				+ ".");
+				+ ".",
+				usableSpace);
 		
 		// Return true if usable disk space problem found
 		return usableSpace < usableDiskSpaceThreshold.getValue();

@@ -107,7 +107,7 @@ public class PredictabilityMonitor extends MonitorBase {
 				+ Math.max(predictableVehicleCount,
 						minimumPredictableVehicles.getValue())
 				+ ".";
-		setMessage(message);
+		setMessage(message, fraction);
 		
 		// Return fraction of blocks that have a predictable vehicle
 		return fraction;

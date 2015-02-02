@@ -109,7 +109,8 @@ public class SystemMemoryMonitor extends MonitorBase {
 					+ StringUtils.memoryFormat(freePhysicalMemory) 
 					+ " while the limit is " 
 					+ StringUtils.memoryFormat(availableFreePhysicalMemoryThreshold.getValue())
-					+ ".");
+					+ ".",
+					freePhysicalMemory);
 			
 			// Return true if problem detected
 			return freePhysicalMemory < availableFreePhysicalMemoryThreshold.getValue();

@@ -93,7 +93,8 @@ public class SystemCpuMonitor extends MonitorBase {
 					+ StringUtils.twoDigitFormat(cpuLoad) 
 					+ " while limit is " 
 					+ StringUtils.twoDigitFormat(cpuThreshold.getValue()) 
-					+ ".");
+					+ ".",
+					cpuLoad);
 						
 			// Return true if CPU problem found
 			return cpuLoad >= cpuThreshold.getValue();
