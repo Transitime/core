@@ -549,9 +549,14 @@ public class StopPath implements Serializable, Lifecycle {
 	 * Returns the vector for the specified segment.
 	 * 
 	 * @param segmentIndex
-	 * @return
+	 * @return The vector, or null if segmentIndex not valid
 	 */
 	public VectorWithHeading getSegmentVector(int segmentIndex) {
+		// If index out of range return null
+		if (segmentIndex < 0 || segmentIndex >= getSegmentVectors().size())  {
+			return null;
+		}
+
 		return getSegmentVectors().get(segmentIndex);
 	}
 	

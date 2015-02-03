@@ -43,16 +43,38 @@ class Indices {
 	
 	/**
 	 * Simple constructor
+	 * 
 	 * @param block
 	 * @param tripIndex
 	 * @param stopPathIndex
 	 * @param segmentIndex
+	 * @throws IndexOutOfBoundsException
+	 *             If any of the parameters are not valid for the block
 	 */
-	public Indices(Block block, int tripIndex, int stopPathIndex, int segmentIndex) {
+	public Indices(Block block, int tripIndex, int stopPathIndex, int segmentIndex) 
+		throws IndexOutOfBoundsException {
 		this.block = block;
 		this.tripIndex = tripIndex;
 		this.stopPathIndex = stopPathIndex;
 		this.segmentIndex = segmentIndex;
+		
+		// Make sure parameters are valid to avoid bugs. This could be
+		// considered a bit wasteful though.
+		Trip trip = block.getTrip(tripIndex);
+		if (trip == null)
+			throw new IndexOutOfBoundsException("tripIndex " + tripIndex 
+					+ " invalid for block " + block);
+		StopPath stopPath = trip.getStopPath(stopPathIndex);
+		if (stopPath == null)
+			throw new IndexOutOfBoundsException("stopPathIndex " + stopPathIndex 
+					+ " invalid for tripIndex " + tripIndex 
+					+ " and block " + block);
+		VectorWithHeading vector = stopPath.getSegmentVector(segmentIndex);
+		if (vector == null)
+		throw new IndexOutOfBoundsException("segmentIndex " + segmentIndex 
+				+ " invalid for stopPathIndex " + stopPathIndex 
+				+ " tripIndex " + tripIndex 
+				+ " and block " + block);
 	}
 	
 	/**
