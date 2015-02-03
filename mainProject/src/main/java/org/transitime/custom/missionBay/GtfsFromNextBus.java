@@ -684,6 +684,13 @@ public class GtfsFromNextBus {
 //					}
 //				}
 				
+				// Arrival stops are a nuisance. Don't really want them because
+				// they are not GTFS, but if defined then still need the stop
+				// to define the very end of a block. To do that need to use
+				// the regular stop tag instead of the arrival one.
+				if (stopTag.endsWith("_a"))
+					stopTag = stopTag.substring(0, stopTag.length()-2);
+
 				// Add this stop time to the map
 				StopTime stopTime = new StopTime(stopTag, timeStr);
 				stopTimesForBlock.add(stopTime);
@@ -733,7 +740,14 @@ public class GtfsFromNextBus {
 			}
 		}
 
-			
+		// For simple route with only single direction look for first stop
+		// of that direction
+		if (dirsForRoute.size() == 1) {
+			String firstStopId = dirsForRoute.get(0).stopIds.get(0);
+			if (currentStopId.equals(firstStopId))
+				return true;
+		}
+		
 		// If wrapped around to first stop of trip then return true
 		String firstStopId = stopTimesForBlock.get(beginIdx).stopId;
 		if (currentStopId.equals(firstStopId))
@@ -782,9 +796,11 @@ public class GtfsFromNextBus {
 								stopTimesForBlock, dirsForRoute); 
 						++endIdx) {
 				}
+				
 				// Handle end of block properly
 				if (endIdx >= stopTimesForBlock.size())
 					endIdx = stopTimesForBlock.size()-1;
+				
 				// Handle timegap between trips properly
 				boolean deadheading = false;
 				if (stopTimesForBlock.get(endIdx).stopTime > 
@@ -792,6 +808,7 @@ public class GtfsFromNextBus {
 					--endIdx;
 					deadheading = true;
 				}
+				
 				// Handle special case where deadheading
 				if (routeId.equals("caltrans")
 						&& stopTimesForBlock.get(endIdx).stopId.equals("trans390")

@@ -64,8 +64,8 @@ public class MissionBayConfig {
 			d1.tag = "loop";
 			d1.shapeId = "east_loop";
 			d1.gtfsDirection = "0";
-			String stops1[] = { "powell", "library", "chinbas", "nektar",
-					"409illi_e", "powell" };
+			String stops1[] = { "nektar", "409illi_e", "powell", "library",
+					"chinbas", "nektar" };
 			d1.stopIds = Arrays.asList(stops1);
 			dirList.add(d1);
 		} else if (routeId.equals("west")) {
@@ -152,11 +152,11 @@ public class MissionBayConfig {
 		Map<String, List<String>> shapeIdsMap = new HashMap<String, List<String>>();
 		
 		// Route east, direction loop
-		String pathIds_array_east_loop[] = { "east_powell_d",
-				"east_powell_library", "east_library_chinbas",
-				"east_chinbas_nektar", "east_nektar_d",
+		String pathIds_array_east_loop[] = { "east_nektar_d",
 				"east_nektar_409illi_e", "east_409illi_e_d",
-				"east_409illi_e_powell" };
+				"east_409illi_e_powell", "east_powell_d",
+				"east_powell_library", "east_library_chinbas",
+				"east_chinbas_nektar",  };
 		List<String> pathIds_east_loop = Arrays.asList(pathIds_array_east_loop);
 		shapeIdsMap.put("east_loop", pathIds_east_loop);
 
