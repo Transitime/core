@@ -18,13 +18,10 @@
 package org.transitime.core;
 
 import java.util.Date;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.structs.ScheduleTime;
-import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 
 /**
@@ -130,35 +127,14 @@ public class RealTimeSchedAdhProcessor {
 		
 		// Vehicle wasn't at a stop with a schedule time so determine the
 		// schedule adherence by looking at when it is expected to arrive
-		// at the next stop with a scheduled time.
-		
-		// Determine next stop with a schedule time (arrival or departure)		
-		// If there is no such stop then return null. 
-		List<StopPath> stopPaths = 
-				match.getTrip().getTripPattern().getStopPaths();
-		StopPath stopPathWithScheduleTime = null;
-		int stopPathIndex = 0;
-		for (int i=match.getStopPathIndex(); i<stopPaths.size(); ++i) {
-			StopPath stopPath = stopPaths.get(i);
-			ScheduleTime scheduleTime = trip.getScheduleTime(i);
-			if (scheduleTime.getTime() != null) {
-				stopPathWithScheduleTime = stopPath;
-				stopPathIndex = i;
-				break;
-			}
-		}
-		if (stopPathWithScheduleTime == null) 
+		// at the next stop with a scheduled time. Determine the 
+		// appropriate match to use for the upcoming stop where there is a 
+		// schedule time.		
+		SpatialMatch matchAtStopWithScheduleTime = 
+				match.getMatchAtNextStopWithScheduleTime();
+		if (matchAtStopWithScheduleTime == null)
 			return null;
-
-		// Determine the appropriate match to use for the upcoming stop where
-		// there is a schedule time.		
-		Indices indicesAtStopWithScheduleTime = new Indices(match.getBlock(),
-				match.getTripIndex(), stopPathIndex, 
-				stopPathWithScheduleTime.getNumberSegments());
-		SpatialMatch matchAtStopWithScheduleTime = new SpatialMatch(match, 
-				indicesAtStopWithScheduleTime,
-				stopPathWithScheduleTime.getLength());
-
+		
 		// Determine how long it is expected to take for vehicle to get to 
 		// that stop
 		int travelTimeToStopMsec = TravelTimes.getInstance()
@@ -166,6 +142,7 @@ public class RealTimeSchedAdhProcessor {
 						match, matchAtStopWithScheduleTime);
 		
 		// If using departure time then add in expected stop wait time
+		int stopPathIndex = matchAtStopWithScheduleTime.getStopPathIndex();
 		ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
 		if (scheduleTime.getDepartureTime() != null) {
 			//TravelTimesForStopPath 

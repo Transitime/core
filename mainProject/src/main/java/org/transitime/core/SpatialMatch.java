@@ -16,6 +16,8 @@
  */
 package org.transitime.core;
 
+import java.util.List;
+
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.transitime.applications.Core;
@@ -276,6 +278,48 @@ public class SpatialMatch {
 				segmentIndex);
 		return new SpatialMatch(this, endOfStopPathIndices,
 				distanceAlongSegment);
+	}
+	
+	/**
+	 * Determines the next StopPath after this match that has a schedule time.
+	 * Useful for determining things such as real-time schedule adherence.
+	 * 
+	 * @return
+	 */
+	public SpatialMatch getMatchAtNextStopWithScheduleTime() {
+		// Determine next stop with a schedule time (arrival or departure)		
+		// If there is no such stop then return null. 
+		List<StopPath> stopPaths = 
+				getTrip().getTripPattern().getStopPaths();
+		StopPath stopPathWithScheduleTime = null;
+		int stopPathIndex = 0;
+		for (int i=getStopPathIndex(); i<stopPaths.size(); ++i) {
+			StopPath stopPath = stopPaths.get(i);
+			ScheduleTime scheduleTime = getTrip().getScheduleTime(i);
+			if (scheduleTime.getTime() != null) {
+				stopPathWithScheduleTime = stopPath;
+				stopPathIndex = i;
+				break;
+			}
+		}
+		if (stopPathWithScheduleTime == null) 
+			return null;
+
+		// Determine the appropriate match to use for the upcoming stop where
+		// there is a schedule time.		
+		Indices indicesAtStopWithScheduleTime = new Indices(getBlock(),
+				getTripIndex(), stopPathIndex, 
+				stopPathWithScheduleTime.getNumberSegments()-1);		
+		StopPath stopPath = indicesAtStopWithScheduleTime.getStopPath();
+		int segmentIndex = stopPath.getNumberSegments()-1;
+		Vector segmentVector = stopPath.getSegmentVector(segmentIndex);
+		double distanceAlongSegment = segmentVector.length();
+		SpatialMatch matchAtStopWithScheduleTime = new SpatialMatch(this, 
+				indicesAtStopWithScheduleTime,
+				distanceAlongSegment);
+
+		// Return the spatial match at the next stop with a schedule time
+		return matchAtStopWithScheduleTime;
 	}
 	
 	/**
