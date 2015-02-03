@@ -79,11 +79,19 @@ public final class Block implements Serializable {
 	@Id
 	private final String serviceId;
 
+	// Start time of block assignment. In seconds from midnight. Can be less
+	// than 0 to indicate that block starts before midnight of the current
+	// day. Can be greater than one day to indicate that block starts after 
+	// midnight of the current day.
 	@Column
-	private final int startTime; // In seconds from midnight
+	private final int startTime; 
 	
+	// End time of block assignment. In seconds from midnight. Can be less
+	// than 0 to indicate that block ends before midnight of the current
+	// day. Can be greater than one day to indicate that block ends after 
+	// midnight of the current day.
 	@Column
-	private final int endTime;   // In seconds from midnight
+	private final int endTime; 
 
 	// Need to have a ManyToMany instead of OneToMany relationship
 	// for the List of Trips because several Blocks can refer to the 
@@ -380,11 +388,30 @@ public final class Block implements Serializable {
 		int secsInDayForAvlReport = 
 				Core.getInstance().getTime().getSecondsIntoDay(date);
 
-		return (secsInDayForAvlReport > startTime - allowableBeforeTimeSecs
-						&& secsInDayForAvlReport < endTime)
-				// also handle where date before midnight but start time is after
-				|| (secsInDayForAvlReport > startTime+Time.SEC_PER_DAY - allowableBeforeTimeSecs
-						&& secsInDayForAvlReport < endTime+Time.SEC_PER_DAY);		
+		// Handle normal situation where times are between midnight in the 
+		// morning and midnight in the evening
+		boolean active = secsInDayForAvlReport > startTime - allowableBeforeTimeSecs
+				&& secsInDayForAvlReport < endTime;
+		if (active)
+			return true;
+		
+		// Also handle where date is late in the evening before midnight but 
+		// the start time is really early in the morning, just after midnight.
+		int secsInDayBeforeMidnight = secsInDayForAvlReport - Time.SEC_PER_DAY;
+		active = secsInDayBeforeMidnight > startTime - allowableBeforeTimeSecs
+				&& secsInDayBeforeMidnight < endTime;
+		if (active)
+			return true;
+		
+		// And lastly, handle where start time or end time is past midnight
+		int secsInDayPastMidnight = secsInDayForAvlReport + Time.SEC_PER_DAY;
+		active = secsInDayPastMidnight > startTime - allowableBeforeTimeSecs
+				&& secsInDayPastMidnight < endTime;
+		if (active)
+			return true;
+		
+		// It simply ain't active
+		return false;
 	}
 
 	/**
