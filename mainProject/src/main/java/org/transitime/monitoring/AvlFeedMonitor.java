@@ -84,8 +84,8 @@ public class AvlFeedMonitor extends MonitorBase {
 		// getting AVL data so return 0
 		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks();
 		if (activeBlocks.size() == 0) {
-			logger.debug("No currently active blocks so AVL feed considered to "
-					+ "be OK");
+			setMessage("No currently active blocks so AVL feed "
+					+ "considered to be OK.");
 			return 0;
 		}
 		
