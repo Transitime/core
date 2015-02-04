@@ -36,9 +36,13 @@ public class SystemMemoryMonitor extends MonitorBase {
 
 	LongConfigValue availableFreePhysicalMemoryThreshold = new LongConfigValue(
 			"transitime.monitoring.availableFreePhysicalMemoryThreshold", 
-			100 * 1024 * 1024L, // ~100 MB 
+			80 * 1024 * 1024L, // ~80 MB 
 			"If available free physical memory is less than this "
-			+ "value then free memory monitoring is triggered.");
+			+ "value then free memory monitoring is triggered. This should be "
+			+ "relatively small since on Linux the operating system will use "
+			+ "most of the memory for buffers and such when it is available. "
+			+ "Therefore even when only a small amount of memory is available "
+			+ "the system is still OK.");
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(SystemMemoryMonitor.class);
