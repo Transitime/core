@@ -62,6 +62,9 @@ public class WebAgency {
 	private final boolean active;
 	
 	@Column(length = 60)
+	private final String dbName;
+	
+	@Column(length = 60)
 	private final String dbType;
 	
 	@Column(length = 120)
@@ -84,20 +87,23 @@ public class WebAgency {
 	/********************** Member Functions **************************/
 
 	/**
+	 * Simple constructor.
 	 * 
 	 * @param agencyId
 	 * @param hostName
 	 * @param active
+	 * @param dbName
 	 * @param dbType
 	 * @param dbHost
 	 * @param dbUserName
 	 * @param dbPassword The non-encrypted password
 	 */
-	public WebAgency(String agencyId, String hostName, boolean active,
+	public WebAgency(String agencyId, String hostName, boolean active, String dbName,
 			String dbType, String dbHost, String dbUserName, String dbPassword) {
 		this.agencyId = agencyId;
 		this.hostName = hostName;
 		this.active = active;
+		this.dbName = dbName;
 		this.dbType = dbType;
 		this.dbHost = dbHost;
 		this.dbUserName = dbUserName;
@@ -112,6 +118,7 @@ public class WebAgency {
 		this.agencyId = null;
 		this.hostName = null;
 		this.active = false;
+		this.dbName = null;
 		this.dbType = null;
 		this.dbHost = null;
 		this.dbUserName = null;
@@ -122,6 +129,7 @@ public class WebAgency {
 	 * Stores this WebAgency object in the specified db.
 	 * 
 	 * @param dbName
+	 *            Name of the db that the WebAgency object is stored in
 	 */
 	public void store(String dbName) {
 		Session session = HibernateUtils.getSession(dbName);
@@ -144,7 +152,7 @@ public class WebAgency {
 	 * 
 	 * @return Name of db to retrieve WebAgency objects from
 	 */
-	static private String getDbName() {
+	static private String getWebAgencyDbName() {
 		return DbSetupConfig.getDbName();
 	}
 
@@ -157,11 +165,11 @@ public class WebAgency {
 	 */
 	static private Map<String, WebAgency> getMapFromDb()
 			throws HibernateException {
-		String dbName = getDbName();
-		logger.info("Reading WebAgencies data from database \"{}\"...", dbName);
+		String webAgencyDbName = getWebAgencyDbName();
+		logger.info("Reading WebAgencies data from database \"{}\"...", webAgencyDbName);
 		IntervalTimer timer = new IntervalTimer();
 
-		Session session = HibernateUtils.getSession(dbName);
+		Session session = HibernateUtils.getSession(webAgencyDbName);
 		try {
 			String hql = "FROM WebAgency";
 			Query query = session.createQuery(hql);
@@ -206,7 +214,7 @@ public class WebAgency {
 		if (webAgency == null) {
 			logger.error("Did not find agencyId={} in WebAgencies table for "
 					+ "database {}. Will reload data from database.", 
-					agencyId, getDbName());
+					agencyId, getWebAgencyDbName());
 			cacheMap = getMapFromDb();
 			webAgency = cacheMap.get(agencyId);
 		}
@@ -246,6 +254,7 @@ public class WebAgency {
 				+ "agencyId=" + agencyId 
 				+ ", hostName="	+ hostName
 				+ ", active=" + active
+				+ ", dbName=" + dbName
 				+ ", dbType=" + dbType
 				+ ", dbHost=" + dbHost
 				+ ", dbUserName=" + dbUserName
@@ -265,6 +274,15 @@ public class WebAgency {
 		return active;
 	}
 
+	/**
+	 * Returns name of the db for the agency
+	 * 
+	 * @return
+	 */
+	public String getDbName() {
+		return dbName;
+	}
+	
 	public String getDbType() {
 		return dbType;
 	}
@@ -293,8 +311,9 @@ public class WebAgency {
 	 * For storing a web agency in the web database
 	 * 
 	 * @param args
-	 *            agencyId = args[0]; hostName = args[1]; dbType = args[2];
-	 *            dbHost = args[3]; dbUserName = args[4]; dbPassword = args[5];
+	 *            agencyId = args[0]; hostName = args[1]; dbName = args[2];
+	 *            dbType = args[3]; dbHost = args[4]; dbUserName = args[5];
+	 *            dbPassword = args[6];
 	 */
 	public static void main(String args[]) {
 		// Determine all the params
@@ -305,19 +324,20 @@ public class WebAgency {
 		String agencyId = args[0];
 		String hostName = args[1];
 		boolean active = true;
-		String dbType = args[2];
-		String dbHost = args[3];
-		String dbUserName = args[4];
-		String dbPassword = args[5];
+		String dbName = args[2];
+		String dbType = args[3];
+		String dbHost = args[4];
+		String dbUserName = args[5];
+		String dbPassword = args[6];
 		// Name of database where to store the WebAgency object
-		String dbName = "web";
+		String webAgencyDbName = "web";
 		
 		// Create the WebAgency object
-		WebAgency webAgency = new WebAgency(agencyId, hostName, active, dbType,
-				dbHost, dbUserName, dbPassword);
+		WebAgency webAgency = new WebAgency(agencyId, hostName, active, dbName,
+				dbType, dbHost, dbUserName, dbPassword);
 		System.out.println("Storing " + webAgency);
 		
 		// Store the WebAgency
-		webAgency.store(dbName);
+		webAgency.store(webAgencyDbName);
 	}
 }
