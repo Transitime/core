@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.utils.Encryption;
 import org.transitime.utils.IntervalTimer;
 
 /**
@@ -60,6 +61,20 @@ public class WebAgency {
 	@Column
 	private final boolean active;
 	
+	@Column(length = 60)
+	private final String dbType;
+	
+	@Column(length = 120)
+	private final String dbHost;
+	
+	@Column(length = 60)
+	private final String dbUserName;
+	
+	// Passwords should be stored encrypted since multiple people might have
+	// access to the database containing the WebAgency objects.
+	@Column(length = 60)
+	private final String dbEncryptedPassword;
+	
 	// Cache
 	static private Map<String, WebAgency> cacheMap;
 
@@ -69,13 +84,24 @@ public class WebAgency {
 	/********************** Member Functions **************************/
 
 	/**
+	 * 
 	 * @param agencyId
 	 * @param hostName
+	 * @param active
+	 * @param dbType
+	 * @param dbHost
+	 * @param dbUserName
+	 * @param dbPassword The non-encrypted password
 	 */
-	public WebAgency(String agencyId, String hostName, boolean active) {
+	public WebAgency(String agencyId, String hostName, boolean active,
+			String dbType, String dbHost, String dbUserName, String dbPassword) {
 		this.agencyId = agencyId;
 		this.hostName = hostName;
 		this.active = active;
+		this.dbType = dbType;
+		this.dbHost = dbHost;
+		this.dbUserName = dbUserName;
+		this.dbEncryptedPassword = Encryption.encrypt(dbPassword);
 	}
 
 	/**
@@ -86,6 +112,10 @@ public class WebAgency {
 		this.agencyId = null;
 		this.hostName = null;
 		this.active = false;
+		this.dbType = null;
+		this.dbHost = null;
+		this.dbUserName = null;
+		this.dbEncryptedPassword = null;
 	}
 
 	/**
@@ -109,10 +139,10 @@ public class WebAgency {
 	}
 
 	/**
-	 * Specifies name of database to use. Currently using the command line
-	 * option transitime.core.agencyId .
+	 * Specifies name of database to use for reading in the WebAgency objects.
+	 * Currently using the command line option transitime.core.agencyId .
 	 * 
-	 * @return
+	 * @return Name of db to retrieve WebAgency objects from
 	 */
 	static private String getDbName() {
 		return DbSetupConfig.getDbName();
@@ -216,6 +246,10 @@ public class WebAgency {
 				+ "agencyId=" + agencyId 
 				+ ", hostName="	+ hostName
 				+ ", active=" + active
+				+ ", dbType=" + dbType
+				+ ", dbHost=" + dbHost
+				+ ", dbUserName=" + dbUserName
+				+ ", dbEncryptedPassword=" + dbEncryptedPassword
 				+ "]";
 	}
 
@@ -229,5 +263,29 @@ public class WebAgency {
 
 	public boolean isActive() {
 		return active;
+	}
+
+	public String getDbType() {
+		return dbType;
+	}
+
+	public String getDbHost() {
+		return dbHost;
+	}
+
+	public String getDbUserName() {
+		return dbUserName;
+	}
+
+	public String getDbEncryptedPassword() {
+		return dbEncryptedPassword;
+	}
+
+	public String getDbPassword() {
+		return Encryption.decrypt(dbEncryptedPassword);
+	}
+	
+	public static Map<String, WebAgency> getCacheMap() {
+		return cacheMap;
 	}
 }
