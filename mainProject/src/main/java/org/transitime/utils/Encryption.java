@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.reports;
+package org.transitime.utils;
 
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.jasypt.util.text.BasicTextEncryptor;
