@@ -102,5 +102,9 @@ For Amazon AWS SDK
     jackson-databind-2.4.2.jar
     jackson-annotations-2.4.2.jar
 
+For encryption/decryption
+  http://jasypt.org/download.html
+    jasypt-1.9.2.jar
+
 For many Java utilities, such as StringEscapeUtils
   commons-lang3-3.3.2.jar
