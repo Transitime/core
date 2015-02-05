@@ -31,11 +31,21 @@ import org.transitime.utils.StringUtils;
  */
 public class SystemDiskSpaceMonitor extends MonitorBase {
 
-	LongConfigValue usableDiskSpaceThreshold = new LongConfigValue(
+	private LongConfigValue usableDiskSpaceThreshold = new LongConfigValue(
 			"transitime.monitoring.usableDiskSpaceThreshold", 
 			500 * 1024 * 1024L, // ~500 MB 
 			"If usable disk space is less than this "
 			+ "value then file space monitoring is triggered.");
+
+	private static LongConfigValue usableDiskSpaceThresholdGap =
+			new LongConfigValue(
+					"transitime.monitoring.usableDiskSpaceThresholdGap", 
+					100 * 1024 * 1024L, // ~100 MB 
+					"When transitioning from triggered to untriggered don't "
+					+ "want to send out an e-mail right away if actually "
+					+ "dithering. Therefore will only send out OK e-mail if the "
+					+ "value is now above usableDiskSpaceThreshold + "
+					+ "usableDiskSpaceThresholdGap ");
 
 	/********************** Member Functions **************************/
 
@@ -70,8 +80,16 @@ public class SystemDiskSpaceMonitor extends MonitorBase {
 				+ ".",
 				usableSpace);
 		
+		// Determine the threshold for triggering. If already triggered
+		// then raise the threshold by usableDiskSpaceThresholdGap in order
+		// to prevent lots of e-mail being sent out if the value is
+		// dithering around usableDiskSpaceThreshold.
+		long threshold = usableDiskSpaceThreshold.getValue();
+		if (wasTriggered())
+			threshold += usableDiskSpaceThresholdGap.getValue();
+
 		// Return true if usable disk space problem found
-		return usableSpace < usableDiskSpaceThreshold.getValue();
+		return usableSpace < threshold;
 	}
 
 	/* (non-Javadoc)

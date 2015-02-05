@@ -200,4 +200,13 @@ public abstract class MonitorBase {
 	protected String recipients() {
 		return emailRecipients.getValue();
 	}
+	
+	/**
+	 * Returns true if the monitor previously was triggered.
+	 * 
+	 * @return true if was triggered
+	 */
+	protected boolean wasTriggered() {
+		return wasTriggered;
+	}
 }

@@ -44,6 +44,16 @@ public class SystemMemoryMonitor extends MonitorBase {
 			+ "Therefore even when only a small amount of memory is available "
 			+ "the system is still OK.");
 
+	private static LongConfigValue availableFreePhysicalMemoryThresholdGap =
+			new LongConfigValue(
+					"transitime.monitoring.availableFreePhysicalMemoryThresholdGap", 
+					20 * 1024 * 1024L, // ~20 MB 
+					"When transitioning from triggered to untriggered don't "
+					+ "want to send out an e-mail right away if actually "
+					+ "dithering. Therefore will only send out OK e-mail if the "
+					+ "value is now above availableFreePhysicalMemoryThreshold + "
+					+ "availableFreePhysicalMemoryThresholdGap ");
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(SystemMemoryMonitor.class);
 
@@ -104,7 +114,8 @@ public class SystemMemoryMonitor extends MonitorBase {
 	 */
 	@Override
 	protected boolean triggered() {
-		Object resultObject = getOperatingSystemValue("getFreePhysicalMemorySize");
+		Object resultObject = 
+				getOperatingSystemValue("getFreePhysicalMemorySize");
 		if (resultObject != null) {
 			long freePhysicalMemory = (Long) resultObject;
 				
@@ -112,12 +123,21 @@ public class SystemMemoryMonitor extends MonitorBase {
 			setMessage("Free physical memory is " 
 					+ StringUtils.memoryFormat(freePhysicalMemory) 
 					+ " while the limit is " 
-					+ StringUtils.memoryFormat(availableFreePhysicalMemoryThreshold.getValue())
+					+ StringUtils.memoryFormat(
+							availableFreePhysicalMemoryThreshold.getValue())
 					+ ".",
 					freePhysicalMemory);
 			
+			// Determine the threshold for triggering. If already triggered
+			// then raise the threshold by availableFreePhysicalMemoryThresholdGap
+			// in order to prevent lots of e-mail being sent out if the value
+			// is dithering around availableFreePhysicalMemoryThreshold.
+			long threshold = availableFreePhysicalMemoryThreshold.getValue();
+			if (wasTriggered())
+				threshold += availableFreePhysicalMemoryThresholdGap.getValue();
+
 			// Return true if problem detected
-			return freePhysicalMemory < availableFreePhysicalMemoryThreshold.getValue();
+			return freePhysicalMemory < threshold;
 		} 
 		
 		// Could not determine available memory so have to return false

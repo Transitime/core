@@ -38,6 +38,16 @@ public class SystemCpuMonitor extends MonitorBase {
 			"If CPU load averaged over a minute exceeds this 0.0 - 1.0 "
 			+ "value then CPU monitoring is triggered.");
 	
+	private static DoubleConfigValue cpuThresholdGap =
+			new DoubleConfigValue(
+					"transitime.monitoring.cpuThresholdGap", 
+					0.1, 
+					"When transitioning from triggered to untriggered don't "
+					+ "want to send out an e-mail right away if actually "
+					+ "dithering. Therefore will only send out OK e-mail if the "
+					+ "value is now below cpuThreshold - "
+					+ "cpuThresholdGap ");
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(SystemCpuMonitor.class);
 
@@ -96,8 +106,16 @@ public class SystemCpuMonitor extends MonitorBase {
 					+ ".",
 					cpuLoad);
 						
+			// Determine the threshold for triggering. If already triggered
+			// then lower the threshold by cpuThresholdGap in order
+			// to prevent lots of e-mail being sent out if the value is
+			// dithering around cpuThreshold.
+			double threshold = cpuThreshold.getValue();
+			if (wasTriggered())
+				threshold -= cpuThresholdGap.getValue();
+
 			// Return true if CPU problem found
-			return cpuLoad >= cpuThreshold.getValue();
+			return cpuLoad >= threshold;
 		} 
 
 		// Could not determine CPU load so have to return false

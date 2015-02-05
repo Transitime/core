@@ -38,6 +38,16 @@ public class DatabaseQueueMonitoring extends MonitorBase {
 			"If database queue fills up by more than this 0.0 - 1.0 "
 			+ "fraction then database monitoring is triggered.");
 	
+	private static DoubleConfigValue maxQueueFractionGap =
+			new DoubleConfigValue(
+					"transitime.monitoring.maxQueueFractionGap", 
+					0.1, 
+					"When transitioning from triggered to untriggered don't "
+					+ "want to send out an e-mail right away if actually "
+					+ "dithering. Therefore will only send out OK e-mail if the "
+					+ "value is now below maxQueueFraction - "
+					+ "maxQueueFractionGap ");
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -69,7 +79,15 @@ public class DatabaseQueueMonitoring extends MonitorBase {
 				+ ".",
 				dbLogger.queueLevel());
 		
-		return dbLogger.queueLevel() > maxQueueFraction.getValue(); 
+		// Determine the threshold for triggering. If already triggered
+		// then lower the threshold by maxQueueFractionGap in order
+		// to prevent lots of e-mail being sent out if the value is
+		// dithering around maxQueueFraction.
+		double threshold = maxQueueFraction.getValue();
+		if (wasTriggered())
+			threshold -= maxQueueFractionGap.getValue();
+		
+		return dbLogger.queueLevel() > threshold; 
 	}
 
 	/* (non-Javadoc)

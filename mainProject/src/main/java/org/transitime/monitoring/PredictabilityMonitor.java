@@ -30,20 +30,31 @@ import org.transitime.utils.EmailSender;
 import org.transitime.utils.StringUtils;
 
 /**
- *
+ * Monitors how many vehicles are predictable compared to how many active blocks
+ * there currently are.
  *
  * @author SkiBu Smith
  *
  */
 public class PredictabilityMonitor extends MonitorBase {
 
-	private static DoubleConfigValue minimumPredictableBlocks =
+	private static DoubleConfigValue minPredictableBlocks =
 			new DoubleConfigValue(
-					"transitime.monitoring.minimumPredictableBlocks", 
-					0.7, 
+					"transitime.monitoring.minPredictableBlocks", 
+					0.65, 
 					"The minimum fraction of currently active blocks that "
 					+ "should have a predictable vehicle");
-	
+
+	private static DoubleConfigValue minPredictableBlocksGap =
+			new DoubleConfigValue(
+					"transitime.monitoring.minPredictableBlocksGap", 
+					0.1, 
+					"When transitioning from triggered to untriggered don't "
+					+ "want to send out an e-mail right away if actually "
+					+ "dithering. Therefore will only send out OK e-mail if the "
+					+ "value is now above minPredictableBlocks + "
+					+ "minPredictableBlocksGap ");
+
 	private static IntegerConfigValue minimumPredictableVehicles =
 			new IntegerConfigValue(
 					"transitime.monitoring.minimumPredictableVehicles", 
@@ -100,7 +111,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		String message = "Predictable blocks fraction=" 
 				+ StringUtils.twoDigitFormat(fraction) 
 				+ ", minimum allowed fraction=" 
-				+ StringUtils.twoDigitFormat(minimumPredictableBlocks.getValue())
+				+ StringUtils.twoDigitFormat(minPredictableBlocks.getValue())
 				+ ", active blocks=" + activeBlocks.size()
 				+ ", predictable vehicles=" + predictableVehicleCount
 				+ ", vehicles using minimumPredictableVehicles=" 
@@ -119,7 +130,16 @@ public class PredictabilityMonitor extends MonitorBase {
 	@Override
 	protected boolean triggered() {
 		double fraction = fractionBlocksPredictable();
-		return fraction < minimumPredictableBlocks.getValue();
+		
+		// Determine the threshold for triggering. If already triggered
+		// then raise the threshold by minPredictableBlocksGap in order
+		// to prevent lots of e-mail being sent out if the value is
+		// dithering around minPredictableBlocks.
+		double threshold = minPredictableBlocks.getValue();
+		if (wasTriggered())
+			threshold += minPredictableBlocksGap.getValue();
+		
+		return fraction < threshold;
 	}
 
 	/* (non-Javadoc)
