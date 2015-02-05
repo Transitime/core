@@ -17,6 +17,7 @@
 
 package org.transitime.db.webstructs;
 
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -36,6 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.db.structs.Agency;
+import org.transitime.ipc.clients.ConfigInterfaceFactory;
+import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.utils.Encryption;
 import org.transitime.utils.IntervalTimer;
 
@@ -77,7 +82,11 @@ public class WebAgency {
 	// access to the database containing the WebAgency objects.
 	@Column(length = 60)
 	private final String dbEncryptedPassword;
-	
+
+	// For getting GTFS data about agency
+	@Transient
+	private Agency agency;
+
 	// Cache
 	static private Map<String, WebAgency> cacheMap;
 
@@ -146,6 +155,42 @@ public class WebAgency {
 		}
 	}
 
+	/**
+	 * Uses RMI to return the first (there can be multiple) GTFS agency object
+	 * for the specified agencyId.
+	 * 
+	 * @return The Agency object, or null if can't access the agency via RMI
+	 */
+	private Agency getAgency() {
+		// If agency hasn't been accessed yet do so now...
+		if (agency == null) {
+			ConfigInterface inter = ConfigInterfaceFactory.get(agencyId);
+			try {
+				// Get the agencies via RMI
+				List<Agency> agencies = inter.getAgencies();
+				
+				// Use the first agency if there are multiple ones
+				agency = agencies.get(0);
+			} catch (RemoteException e) {
+				logger.error("Could not get Agency object for agencyId={}. {}", 
+						agencyId, e.getMessage());
+			}
+		}
+		
+		// Return the RMI based agency object
+		return agency;
+	}
+	
+	/**
+	 * Returns the GTFS agency name. It is obtained via RMI as necessary.
+	 * 
+	 * @return The GTFS agency name
+	 */
+	public String getAgencyName() {
+		Agency agency = getAgency();
+		return agency != null ? agency.getName() : null;
+	}
+	
 	/**
 	 * Specifies name of database to use for reading in the WebAgency objects.
 	 * Currently using the command line option transitime.core.agencyId .
