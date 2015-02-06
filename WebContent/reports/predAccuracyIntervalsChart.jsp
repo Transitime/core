@@ -71,6 +71,7 @@ String chartTitle = "Prediction Accuracy for " + agencyId
  </head>
  
   <body>
+    <%@include file="/template/header.jsp" %>
     <!--  There seems to be a bug with a chart_lines chart where it
           doesn't properly handle a height specified as a percentage.
           Therefore need to use pixels for the height. -->

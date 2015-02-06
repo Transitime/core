@@ -165,15 +165,21 @@ public class WebAgency {
 		// If agency hasn't been accessed yet do so now...
 		if (agency == null) {
 			ConfigInterface inter = ConfigInterfaceFactory.get(agencyId);
-			try {
-				// Get the agencies via RMI
-				List<Agency> agencies = inter.getAgencies();
-				
-				// Use the first agency if there are multiple ones
-				agency = agencies.get(0);
-			} catch (RemoteException e) {
-				logger.error("Could not get Agency object for agencyId={}. {}", 
-						agencyId, e.getMessage());
+			
+			if (inter == null) {
+				logger.error("Could not access via RMI agencyId={}", agencyId);
+			} else {
+				try {
+					// Get the agencies via RMI
+					List<Agency> agencies = inter.getAgencies();
+
+					// Use the first agency if there are multiple ones
+					agency = agencies.get(0);
+				} catch (RemoteException e) {
+					logger.error(
+							"Could not get Agency object for agencyId={}. {}",
+							agencyId, e.getMessage());
+				}
 			}
 		}
 		

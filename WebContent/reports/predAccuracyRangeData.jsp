@@ -5,7 +5,7 @@
 
 <%
     // Get params from the query string
-    String dbName = request.getParameter("a");
+    String agencyId = request.getParameter("a");
 
 	String beginDate = request.getParameter("beginDate");
     String endDate = request.getParameter("endDate");
@@ -42,24 +42,16 @@
 	    return;	    
     }
 
-    if (dbName == null || beginDate == null || endDate == null ) {
+    if (agencyId == null || beginDate == null || endDate == null ) {
 		response.getWriter().write("For predAccuracyRangeData.jsp must "
-			+ "specify parameters 'a' (agency dbName), 'beginDate', "
+			+ "specify parameters 'a' (agencyId), 'beginDate', "
 			+ "and 'endDate'."); 
 		return;
     }
 	
-    // FIXME These db params are hardcoded for now but they need
-    // to come from database
-    String dbType = "postgresql";// "mysql";
-    String dbHost = "sfmta.c3zbap9ppyby.us-west-2.rds.amazonaws.com";// "localhost";
-    String dbUserName = "transitime";// "root";
-    String dbPassword = "transitime";
-
     try {
 		// Perform the query.
-		PredAccuracyRangeQuery query = new PredAccuracyRangeQuery(
-			dbType, dbHost, dbName, dbUserName, dbPassword);
+		PredAccuracyRangeQuery query = new PredAccuracyRangeQuery(agencyId);
 
 		// Convert results of query to a JSON string
 		String jsonString = query

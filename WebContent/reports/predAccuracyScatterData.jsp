@@ -3,7 +3,7 @@
 <%@ page import="java.text.ParseException" %>
 <%
 // Parameters from request
-String dbName = request.getParameter("a");
+String agencyId = request.getParameter("a");
 String beginDate = request.getParameter("beginDate");
 String endDate = request.getParameter("endDate");
 String beginTime = request.getParameter("beginTime");
@@ -17,9 +17,9 @@ String showTooltipsStr = request.getParameter("tooltips");
 if (showTooltipsStr != null && showTooltipsStr.toLowerCase().equals("false"))
     showTooltips = false;
     
-if (dbName == null || beginDate == null || endDate == null) {
+if (agencyId == null || beginDate == null || endDate == null) {
 		response.getWriter().write("For predAccuracyScatterData.jsp must "
-			+ "specify parameters 'a' (agency dbName), " 
+			+ "specify parameters 'a' (agencyId), " 
 			+ "'beginDate', and 'endDate'."); 
 		return;
 }
@@ -31,12 +31,6 @@ long timespan = Time.parseDate(endDate).getTime() -
 if (timespan > 31*Time.MS_PER_DAY) {
     throw new ParseException("Begin date to end date spans more than a month", 0);
 }
-
-// Hardcoded parameters for database
-String dbType = "postgresql";// "mysql";
-String dbHost = "sfmta.c3zbap9ppyby.us-west-2.rds.amazonaws.com";// "localhost";
-String dbUserName = "transitime";// "root";
-String dbPassword = "transitime";
 
 // Determine the time portion of the SQL
 String timeSql = "";
@@ -119,8 +113,7 @@ String sql = "SELECT "
 	+ "  AND predictionSource <> 'MBTA_seconds' ";
 
 // Determine the json data by running the query
-String jsonString = JsonDataFeed.getJsonData(sql, dbType, dbHost, dbName,
-	    dbUserName, dbPassword);
+String jsonString = JsonDataFeed.getJsonData(sql, agencyId);
 
 // If no data then return error status with an error message
 if (jsonString == null || jsonString.isEmpty()) {

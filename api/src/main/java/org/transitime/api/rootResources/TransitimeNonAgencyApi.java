@@ -55,46 +55,47 @@ import org.transitime.ipc.interfaces.ConfigInterface;
 @Path("/key/{key}")
 public class TransitimeNonAgencyApi {
 
-    /********************** Member Functions **************************/
+	/********************** Member Functions **************************/
 
-    @Path("/command/agencies")
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getAgencies(@BeanParam StandardParameters stdParameters) 
-		    throws WebApplicationException {
-	// Make sure request is valid
-	stdParameters.validate();
-	
-	// For each agency handled by this server create an ApiAgencies
-	// and return the list.
-	try {
-	    List<ApiAgency> apiAgencyList = new ArrayList<ApiAgency>();
-	    Collection<WebAgency> webAgencies = WebAgency.getWebAgencies();
-	    for (WebAgency webAgency : webAgencies) {
-		String agencyId = webAgency.getAgencyId();
-		ConfigInterface inter = ConfigInterfaceFactory.get(agencyId);
-		
-		// If can't communicate with IPC with that agency then move on
-		// to the next one. This is important because some agencies 
-		// might be declared in the web db but they might not actually
-		// be running.
-		if (inter == null) {
-		    // Should really log something here to explain that skipping agency
-		    
-		    continue;
+	@Path("/command/agencies")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getAgencies(@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		// For each agency handled by this server create an ApiAgencies
+		// and return the list.
+		try {
+			List<ApiAgency> apiAgencyList = new ArrayList<ApiAgency>();
+			Collection<WebAgency> webAgencies = WebAgency.getWebAgencies();
+			for (WebAgency webAgency : webAgencies) {
+				String agencyId = webAgency.getAgencyId();
+				ConfigInterface inter = ConfigInterfaceFactory.get(agencyId);
+
+				// If can't communicate with IPC with that agency then move on
+				// to the next one. This is important because some agencies
+				// might be declared in the web db but they might not actually
+				// be running.
+				if (inter == null) {
+					// Should really log something here to explain that skipping
+					// agency
+
+					continue;
+				}
+
+				List<Agency> agencies = inter.getAgencies();
+				for (Agency agency : agencies) {
+					apiAgencyList.add(new ApiAgency(agencyId, agency));
+				}
+			}
+			ApiAgencies apiAgencies = new ApiAgencies(apiAgencyList);
+			return stdParameters.createResponse(apiAgencies);
+		} catch (RemoteException e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
 		}
-		
-		List<Agency> agencies = inter.getAgencies();
-		for (Agency agency : agencies) {
-		    apiAgencyList.add(new ApiAgency(agencyId, agency));
-		}		
-	    }
-	    ApiAgencies apiAgencies = new ApiAgencies(apiAgencyList);
-	    return stdParameters.createResponse(apiAgencies);
-	} catch (RemoteException e) {
-	    // If problem getting data then return a Bad Request
-	    throw WebUtils.badRequestException(e.getMessage());
 	}
-    }
-    
+
 }

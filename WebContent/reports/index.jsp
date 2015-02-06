@@ -16,6 +16,8 @@ if (agencyId == null || agencyId.isEmpty()) {
   <script src="/api/jquery-ui/jquery-ui.js"></script>
   <link rel="stylesheet" href="/api/jquery-ui/jquery-ui.css">
 
+  <link rel="stylesheet" href="/api/css/general.css">
+  
   <script>
   // Enable JQuery tooltips. In order to use html in tooltip need to 
   // specify content function. Turning off 'focusin' events is important
@@ -29,57 +31,12 @@ if (agencyId == null || agencyId.isEmpty()) {
       }).off('focusin');
   });
   </script>
-  
-  <style>
-    body {
-    	font-family: sans-serif; 
-    	font-size: large;
-    }
     
-    #mainDiv {
-    	margin-left: auto; 
-    	margin-right: auto; 
-    	width: 500px; 
-    }
-    
-    #title {
-    	margin-top:50px;
-    	font-weight: bold; 
-    	font-size: x-large;
-    	text-align: center;
-    }
-    
-    ul {
-    	width: 300px; margin-left: auto; margin-right: auto;
-    }
-    
-    /* Make links look better. No underlining, keep colors consistent,
-       but bold when hovered over. */
-    a:link {
-    	text-decoration: none;
-    	color: #0000FF;
-    }
-    a:visited {
-    	color: #0000FF;
-    }
-    a:hover {
-    	font-weight: bold;
-    }
-    
-  .ui-tooltip {
-	/* Change background color of tooltips a bit and use a reasonable font size */
-  	background: #F7EEAB;
-	font-size: small;
-	padding: 4px;
-  }
-    
-}
-  </style>
-  
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Reports</title>
 </head>
 <body>
+<%@include file="/template/header.jsp" %>
 <div id="mainDiv">
 <div id="title">Transitime Reports</div>
 <ul>
@@ -97,6 +54,9 @@ specified accuracy range.">
     title="Shows each individual datapoint for prediction accuracy. Useful for 
 finding specific issues with predictions.">
       Prediction Accuracy Scatter Plot</a></li>
+  <li><a href="predAccuracyCsvParams.jsp?a=<%= agencyId %>"
+    title="For downloading prediction accuracy data in CSV format.">
+      Prediction Accuracy CSV Download</a></li>
 </ul>
 </div>
 </body>

@@ -72,6 +72,7 @@ String chartTitle = "Prediction Accuracy Range for " + agencyId
 </head>
 
 <body>
+  <%@include file="/template/header.jsp" %>
   <div id="chart_div" style="width: 100%; height: 600px;"></div>
   <div id="loading"></div>
   <div id="errorMessage"></div>

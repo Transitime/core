@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.db.webstructs.WebAgency;
 
 /**
  * For doing a query without using Hibernate. By using regular JDBC and avoiding
@@ -70,6 +71,19 @@ public class GenericQuery {
 	}
 
 	/**
+	 * Constructor
+	 * 
+	 * @param agencyId
+	 * @throws SQLException
+	 */
+	public GenericQuery(String agencyId) throws SQLException {
+		WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+		connection = getConnection(agency.getDbType(), agency.getDbHost(),
+				agency.getDbName(), agency.getDbUserName(),
+				agency.getDbPassword());
+	}
+	
+	/**
 	 * Gets a database connection to be used for the query
 	 * 
 	 * @param dbType
@@ -88,6 +102,22 @@ public class GenericQuery {
 		connectionProps.put("user", dbUserName);
 		connectionProps.put("password", dbPassword);
 
+		// GenericQuery will likely be used by a web server. A web server
+		// uses Hibernate to load web server related data and Hibernate
+		// will be configured for the type of db being used (postGres or mySQL).
+		// But when doing a query on an agency might be using any kind of
+		// database. To get a connection the proper driver needs to first be
+		// loaded. If the database for the agency happens to be different than
+		// that used for the web server then need to load in the driver for
+		// the agency database manually by using Class.forName().
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			logger.error("Could not load in db driver for GenericQuery. {}", 
+					e.getMessage());
+		}
+		
 		String url = "jdbc:" + dbType + "://" + dbHost + "/" + dbName;
 		conn = DriverManager.getConnection(url, connectionProps);
 		return conn;
@@ -149,4 +179,61 @@ public class GenericQuery {
 		return results;
 	}
 
+	public String getCsvString(String sql) throws SQLException {
+		// For putting in the CSV data
+		StringBuilder sb = new StringBuilder();
+
+		Statement statement = null;
+		
+		try {
+			// Do the query
+			statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery(sql);
+			ResultSetMetaData metaData = rs.getMetaData();
+			
+			// Handle the CSV file header
+			for (int i = 1; i <= metaData.getColumnCount(); ++i) {
+				if (i > 1)
+					sb.append(',');
+				sb.append(metaData.getColumnLabel(i));
+			}
+			sb.append('\n');
+			
+			// Handle each row of data
+			while (rs.next()) {
+				for (int i = 1; i <= metaData.getColumnCount(); ++i) {
+					if (i > 1)
+						sb.append(',');
+					sb.append(rs.getObject(i));
+				}
+				sb.append('\n');
+			}
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			if (statement != null)
+				statement.close();
+		}
+
+		return sb.toString();
+	}
+	
+	/**
+	 * For debugging.
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		String agencyId = "mbta";
+		
+		String sql = "SELECT * FROM routes WHERE configRev=0;";
+		GenericQuery query;
+		try {
+			query = new GenericQuery(agencyId);
+			String str = query.getCsvString(sql);
+			System.out.println(str);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }

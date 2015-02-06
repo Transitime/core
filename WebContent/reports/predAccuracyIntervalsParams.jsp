@@ -16,6 +16,8 @@
   <link href="/api/select2/select2.css" rel="stylesheet"/>
   <script src="/api/select2/select2.min.js"></script>
   
+  <link rel="stylesheet" href="/api/css/general.css">
+  
   <script>
   // Enable JQuery tooltips. In order to use html in tooltip need to 
   // specify content function. Turning off 'focusin' events is important
@@ -31,33 +33,17 @@
   </script>
   
   <style>
-  #mainDiv {margin-left: auto; margin-right: auto; width: 600px; }
-  body {font-family: sans-serif; font-size: large;}
-  #title {font-weight: bold; font-size: x-large; 
-          margin-top: 40px; margin-bottom: 20px;
-          margin-left: auto; margin-right: auto; width: 70%; text-align: center;}
-  input, select {font-size: large;}
   label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
   .param {margin-top: 10px;}
   #route {width:300px;}
   #submit {margin-top: 40px; margin-left: 200px;}
   .note {font-size: small;}
   
-  /* Make input widgets different color */
-  input, select {
-  	background-color: #f8f8f8;
-  }
-
-  .ui-tooltip {
-	/* Change background color of tooltips a bit and use a reasonable font size */
-  	background: #F7EEAB;
-	font-size: small;
-	padding: 4px;
-  }
-  
   </style>
 </head>
 <body>
+
+<%@include file="/template/header.jsp" %>
 
 <div id="title">
    Select Parameters for Prediction Accuracy Intervals Chart

@@ -1,0 +1,74 @@
+@CHARSET "ISO-8859-1";
+/*
+ * This file contains general CSS config for Transitime pages
+ */
+body {
+	font-family: sans-serif;
+	font-size: large;
+	margin: 0px;
+}
+
+#header {
+	/* Use fancy gradient background */
+	background: -webkit-linear-gradient(left top, #8DC5EB , blue); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(bottom right, #8DC5EB, blue); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(bottom right, #8DC5EB, blue); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to bottom right, #8DC5EB , blue); /* Standard syntax */
+    
+	margin-left: 0px;
+	margin-right: 0px;
+	padding: 8px;	
+	font-weight: normal;
+	font-size: x-large;
+}
+
+#mainDiv {
+	margin-left: auto;
+	margin-right: auto;
+	width: 600px;
+}
+
+#title {
+	margin-top: 40px;
+	margin-bottom: 20px;
+	margin-left: auto; 
+	margin-right: auto; 
+	width: 70%; 
+	font-weight: bold;
+	font-size: x-large;
+	text-align: center;
+}
+
+ul {
+	width: 350px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Make links look better. No underlining, keep colors consistent,
+   but bold when hovered over. */
+a:link {
+	text-decoration: none;
+	color: #0000FF;
+}
+
+a:visited {
+	color: #0000FF;
+}
+
+a:hover {
+	font-weight: bold;
+}
+
+.ui-tooltip {
+	/* Change background color of tooltips a bit and use a reasonable font size */
+	background: #F7EEAB;
+	font-size: small;
+	padding: 4px;
+}
+
+/* Make input widgets use different color and larger font */
+input, select {
+	background-color: #f8f8f8;
+	font-size: large;
+}
