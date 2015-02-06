@@ -5,7 +5,7 @@ $(function() {
   var calendarIconTooltip = "Popup calendar to select date";
   
   $( "#beginDate" ).datepicker({
-	dateFormat: "yy-mm-dd",
+	dateFormat: "mm-dd-yy",
     showOtherMonths: true,
     selectOtherMonths: true,
     // Show button for calendar
@@ -24,7 +24,7 @@ $(function() {
     }
   });
   $( "#endDate" ).datepicker({
-	dateFormat: "yy-mm-dd",
+	dateFormat: "mm-dd-yy",
     showOtherMonths: true,
     selectOtherMonths: true,
     // Show button for calendar
