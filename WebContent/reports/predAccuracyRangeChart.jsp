@@ -41,6 +41,8 @@ String chartTitle = "Prediction Accuracy Range for " + agencyId
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   <title>Prediction Accuracy</title>
 
+  <link rel="stylesheet" href="/api/css/general.css">
+
     <style>
       .google-visualization-tooltip {
         font-family: arial, sans-serif;
@@ -73,6 +75,7 @@ String chartTitle = "Prediction Accuracy Range for " + agencyId
 
 <body>
   <%@include file="/template/header.jsp" %>
+  
   <div id="chart_div" style="width: 100%; height: 600px;"></div>
   <div id="loading"></div>
   <div id="errorMessage"></div>

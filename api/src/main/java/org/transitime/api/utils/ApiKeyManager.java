@@ -88,11 +88,14 @@ public class ApiKeyManager {
 	 * database in case it was just added. But won't do so more than every few
 	 * seconds since more frequent access could allow an app with a bad key to
 	 * cause the db to be queried to often putting an unneeded burden on the db.
+	 * <p>
+	 * Synchronized because can have simultaneous access and using a cache.
 	 * 
 	 * @param key
-	 * @return
+	 *            The key to investigate
+	 * @return True if key is valid
 	 */
-	public boolean isKeyValid(String key) {
+	public synchronized boolean isKeyValid(String key) {
 		try {
 			// If key is already in cache return true
 			if (apiKeyCache.get(key) != null)

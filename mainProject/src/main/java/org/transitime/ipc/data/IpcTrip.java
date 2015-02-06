@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
+import org.transitime.utils.Time;
 
 /**
  * Configuration information for a Trip for IPC.
@@ -82,8 +83,8 @@ public class IpcTrip implements Serializable {
 				+ "configRev=" + configRev 
 				+ ", id=" + id
 				+ ", shortName=" + shortName
-				+ ", startTime=" + startTime 
-				+ ", endTime=" + endTime
+				+ ", startTime=" + Time.timeOfDayStr(startTime) 
+				+ ", endTime=" + Time.timeOfDayStr(endTime)
 				+ ", directionId=" + directionId 
 				+ ", routeId=" + routeId
 				+ ", routeShortName=" + routeShortName 
