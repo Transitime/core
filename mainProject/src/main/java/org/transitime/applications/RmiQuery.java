@@ -41,6 +41,7 @@ import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.data.IpcBlock;
+import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
@@ -78,7 +79,8 @@ public class RmiQuery {
 	private static String tripId;
 	
 	private static enum Command {NOT_SPECIFIED, GET_PREDICTIONS, GET_VEHICLES, 
-		GET_ROUTE_CONFIG, GET_CONFIG, GET_GTFS_RT_VEHICLES, GET_GTFS_RT_TRIPS};
+		GET_ROUTE_CONFIG, GET_CONFIG, GET_GTFS_RT_VEHICLES, GET_GTFS_RT_TRIPS,
+		GET_ACTIVE_BLOCKS};
 
 	/********************** Member Functions **************************/
 
@@ -109,9 +111,10 @@ public class RmiQuery {
 		options.addOption(OptionBuilder.withArgName("command")
                 .hasArg()
                 .isRequired()
-                .withDescription("Name of command to execute. Can be " +
-                		"\"preds\", \"vehicles\", \"routeConfig\", \"config\", " + 
-                		"\"gtfsRtVehiclePositions\", or \"gtfsRtTripUpdates\" .")
+                .withDescription("Name of command to execute. Can be "
+                		+ "\"preds\", \"vehicles\", \"routeConfig\", \"config\", " 
+                		+ "\"gtfsRtVehiclePositions\", \"gtfsRtTripUpdates\", "
+                		+ "or \"activeBlocks\" .")
                 .create("c")
                 );
 
@@ -195,6 +198,8 @@ public class RmiQuery {
 			command = Command.GET_GTFS_RT_VEHICLES;
 		else if ("gtfsRtTripUpdates".equals(commandStr))
 			command = Command.GET_GTFS_RT_TRIPS;
+		else if ("activeBlocks".equals(commandStr))
+			command = Command.GET_ACTIVE_BLOCKS;
 		else {
 			System.out.println("Command \"" + commandStr + "\" is not valid.\n");
 			displayCommandLineOptionsAndExit(options);
@@ -387,14 +392,40 @@ public class RmiQuery {
 			IpcTrip ipcTrip = configInterface.getTrip(tripId);
 			System.out.println(ipcTrip);
 		} else if (routeShortNames.length > 0) {
-			System.out.println("Outputting trip pattern for routeShortName=" + 
-		routeShortNames[0] );
+			System.out.println("Outputting trip pattern for routeShortName=" 
+					+ routeShortNames[0] );
 			List<IpcTripPattern> ipcTripPatterns =
 					configInterface.getTripPatterns(routeShortNames[0]);
 			System.out.println(ipcTripPatterns);
 		} else {
 			System.err.println("For \"config\" command need to specify " +
 					"blockId & serviceId, or tripId, or a route");
+		}
+	}
+	
+	/**
+	 * Outputs the active blocks, depending on the the routeIds/routeShortNames
+	 * specified.
+	 * 
+	 * @throws RemoteException
+	 */
+	private static void getActiveBlocks() throws RemoteException {
+		Collection<String> routeIds = routeShortNames != null ?
+				Arrays.asList(routeShortNames) : null;
+		
+		VehiclesInterface vehiclesInterface = 
+				VehiclesInterfaceFactory.get(agencyId);
+		Collection<IpcActiveBlock> activeBlocks = 
+				vehiclesInterface.getActiveBlocks(routeIds);
+		
+		System.out.println("Outputting active blocks for routeIds=" + routeIds);
+		for (IpcActiveBlock activeBlock : activeBlocks) {
+			IpcTrip activeTrip = activeBlock.getBlock().getTrips().get(activeBlock.getActiveTripIndex());
+			System.out.println("\nrouteId=" + activeTrip.getRouteId());
+			System.out.println(activeBlock.getBlock().toString());
+			System.out.println("activeTrip=" + activeTrip);
+			System.out.println("vehicle=" + activeBlock.getVehicles());
+			System.out.println(activeBlock);
 		}
 	}
 	
@@ -470,6 +501,8 @@ public class RmiQuery {
 				getGtfsRtVehiclesPositions();
 			} else if (command == Command.GET_GTFS_RT_TRIPS) {
 				getGtfsRtTripUpdates();
+			} else if (command == Command.GET_ACTIVE_BLOCKS) {
+				getActiveBlocks();
 			}
 		} catch (RemoteException e) {
 			// Output stack trace as error message

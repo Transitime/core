@@ -20,8 +20,7 @@ package org.transitime.ipc.interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Collection;
-import java.util.List;
-
+import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
 import org.transitime.ipc.data.IpcVehicle;
@@ -89,7 +88,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcVehicle> get(List<String> vehicleIds)
+	public Collection<IpcVehicle> get(Collection<String> vehicleIds)
 			throws RemoteException;
 
 	/**
@@ -101,8 +100,8 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getComplete(List<String> vehicleIds)
-			throws RemoteException;
+	public Collection<IpcCompleteVehicle> getComplete(
+			Collection<String> vehicleIds) throws RemoteException;
 
 	/**
 	 * Gets from server IpcVehicle info for all vehicles currently. associated
@@ -137,8 +136,8 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcVehicle> getForRoute(List<String> routeIdsOrShortNames)
-			throws RemoteException;
+	public Collection<IpcVehicle> getForRoute(
+			Collection<String> routeIdsOrShortNames) throws RemoteException;
 
 	/**
 	 * Gets from server IpcCompleteVehicle info for all vehicles currently.
@@ -150,6 +149,17 @@ public interface VehiclesInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public Collection<IpcCompleteVehicle> getCompleteForRoute(
-			List<String> routeIdsOrShortNames) throws RemoteException;
+			Collection<String> routeIdsOrShortNames) throws RemoteException;
 
+	/**
+	 * Gets from the server IpcActiveBlocks for blocks that are currently
+	 * active.
+	 * 
+	 * @param routeIds
+	 *            List of routes that want data for. Can also be null or empty.
+	 * @return Collection of blocks that are active
+	 * @throws RemoteException
+	 */
+	public Collection<IpcActiveBlock> getActiveBlocks(
+			Collection<String> routeIds) throws RemoteException;
 }

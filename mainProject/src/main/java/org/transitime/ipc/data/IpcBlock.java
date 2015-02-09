@@ -63,7 +63,7 @@ public class IpcBlock implements Serializable {
 		}
 		
 		routeSummaries = new ArrayList<IpcRouteSummary>();
-		for (String routeId : dbBlock.getRoutes()) {
+		for (String routeId : dbBlock.getRouteIds()) {
 			Route dbRoute = 
 					Core.getInstance().getDbConfig().getRouteById(routeId);
 			routeSummaries.add(new IpcRouteSummary(dbRoute));

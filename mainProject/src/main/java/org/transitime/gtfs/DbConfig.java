@@ -238,7 +238,7 @@ public class DbConfig {
 		for (Block block : blocks) {
 			String serviceId = block.getServiceId();
 			
-			Collection<String> routeIdsForBlock = block.getRoutes();
+			Collection<String> routeIdsForBlock = block.getRouteIds();
 			for (String routeId : routeIdsForBlock)
 				addBlockToMapByRouteMap(blocksByRouteMap, serviceId, routeId,
 						block);
