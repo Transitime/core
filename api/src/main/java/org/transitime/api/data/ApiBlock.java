@@ -79,7 +79,7 @@ public class ApiBlock {
 		trips = new ArrayList<ApiTrip>();
 		for (IpcTrip ipcTrip : ipcBlock.getTrips()) {
 			// Note: not including stop paths in trip pattern output
-			// because that can bve really voluminous.
+			// because that can be really voluminous.
 			trips.add(new ApiTrip(ipcTrip, false));
 		}
 
