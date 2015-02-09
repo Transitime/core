@@ -223,7 +223,9 @@ public class VehicleState {
 	 */
 	public TemporalMatch getPreviousMatch(int minimumAgeMsec) {
 		for (TemporalMatch match : temporalMatchHistory) {
-			if (match.getAvlTime() < getAvlReport().getTime() - minimumAgeMsec)
+			if (getAvlReport() != null
+					&& match.getAvlTime() < getAvlReport().getTime()
+							- minimumAgeMsec)
 				return match;
 		}
 		

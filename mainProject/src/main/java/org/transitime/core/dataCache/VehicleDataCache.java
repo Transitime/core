@@ -207,11 +207,13 @@ public class VehicleDataCache {
 	 *         are none.
 	 */
 	public Collection<IpcCompleteVehicle> getVehiclesForRoute(
-			List<String> routeIdsOrShortNames) {
+			Collection<String> routeIdsOrShortNames) {
 		// If there is just a single route specified then use a shortcut
-		if (routeIdsOrShortNames.size() == 1)
-			return getVehiclesForRoute(routeIdsOrShortNames.get(0));
-
+		if (routeIdsOrShortNames.size() == 1) {
+			String routeIdOrShortName = routeIdsOrShortNames.iterator().next();
+			return getVehiclesForRoute(routeIdOrShortName);
+		}
+		
 		Collection<IpcCompleteVehicle> vehicles = new ArrayList<IpcCompleteVehicle>();
 		for (String routeIdOrShortName : routeIdsOrShortNames) {
 			Collection<IpcCompleteVehicle> vehiclesForRoute = 
@@ -231,7 +233,7 @@ public class VehicleDataCache {
 	 *            Specifies which vehicles should return.
 	 * @return
 	 */
-	public Collection<IpcCompleteVehicle> getVehicles(List<String> vehicleIds) {
+	public Collection<IpcCompleteVehicle> getVehicles(Collection<String> vehicleIds) {
 		Collection<IpcCompleteVehicle> vehicles = new ArrayList<IpcCompleteVehicle>();
 		for (String vehicleId : vehicleIds) {
 			IpcCompleteVehicle vehicle = vehiclesMap.get(vehicleId);

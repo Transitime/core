@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -375,6 +376,53 @@ public final class Block implements Serializable {
 	}
 	
 	/**
+	 * Finds the trip for the block where secondsIntoDay lies between
+	 * the end time of the previous trip and the end time of the current
+	 * trip. Does not take into account wrapping around midnight.
+	 * 
+	 * @param secondsIntoDay
+	 * @return index of trip, or -1 if no match
+	 */
+	private int activeTripIndex(int secondsIntoDay) {
+		List<Trip> trips = getTrips();
+		int previousTripEndTimeSecs = trips.get(0).getStartTime();
+		for (int i=0; i<trips.size(); ++i) {
+			Trip trip = trips.get(i);
+			int tripEndTimeSecs = trip.getEndTime();
+			if (secondsIntoDay > previousTripEndTimeSecs 
+					&& secondsIntoDay < tripEndTimeSecs) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+	
+	/**
+	 * Determines which trip is currently active and returns the associated
+	 * index of that trip such that getTrip(int) can be called to get the trip.
+	 * Trip is active if the date lies between the end time of the previous trip and the end time of the current
+	 * trip. To handle wrapping around midnight if there isn't a match initially
+	 * then will check past midnight and before midnight as well.
+	 * 
+	 * @param date
+	 * @return index of trip, or -1 if no match
+	 */
+	public int activeTripIndex(Date date) {
+		int secondsIntoDay = 
+				Core.getInstance().getTime().getSecondsIntoDay(date);
+		
+		int index = activeTripIndex(secondsIntoDay);
+		if (index < 0) {
+			index = activeTripIndex(secondsIntoDay + Time.SEC_PER_DAY);
+			if (index < 0)
+				index = activeTripIndex(secondsIntoDay - Time.SEC_PER_DAY);
+		}
+
+		return index;
+	}
+	
+	/**
 	 * Returns true if the time of day of the date passed in is between
 	 * allowableBeforeTimeSecs before the startTime and the endTime for the
 	 * block. No leeway is provided for the end time. Note: does not look to see
@@ -591,6 +639,8 @@ public final class Block implements Serializable {
 	}
 
 	/**
+	 * Uses lazy initialization to determine the trips for the block.
+	 * 
 	 * @return the trips
 	 */
 	public List<Trip> getTrips() {
@@ -707,7 +757,7 @@ public final class Block implements Serializable {
 	 * Each route ID will only be included once.
 	 * @return
 	 */
-	public Collection<String> getRoutes() {
+	public Set<String> getRouteIds() {
 		return routeIds;
 //      Note: previously was getting them from trips but this requires a call
 //      to getTrips() which loads in all the data from db for the trips for

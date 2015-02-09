@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
 import org.transitime.applications.Core;
 import org.transitime.db.structs.Block;
 import org.transitime.gtfs.DbConfig;
@@ -84,6 +83,19 @@ public class BlocksInfo {
 	 * @return List of currently active blocks. Will not be null.
 	 */
 	public static List<Block> getCurrentlyActiveBlocks() {
+		return getCurrentlyActiveBlocks(null);
+	}
+	
+	/**
+	 * Returns list of blocks that are currently active for the specified
+	 * routes.
+	 * 
+	 * @param routeIds
+	 *            Collection of routes IDs that want blocks for
+	 * @return List of currently active blocks. Will not be null.
+	 */
+	public static List<Block> getCurrentlyActiveBlocks(
+			Collection<String> routeIds) {
 		// The list to be returned
 		List<Block> activeBlocks = new ArrayList<Block>(1000);
 		
@@ -96,7 +108,7 @@ public class BlocksInfo {
 		Date now = core.getSystemDate();
 		List<String> currentServiceIds = 
 				core.getServiceUtils().getServiceIds(now);
-	
+
 		// For each service ID ...
 		for (String serviceId : currentServiceIds) {
 			DbConfig dbConfig = core.getDbConfig();
@@ -105,7 +117,21 @@ public class BlocksInfo {
 			// If the block is about to be or currently active then
 			// add it to the list to be returned
 			for (Block block : blocks) {
-				if (block.isActive(now))
+				// Determine if block is for specified route
+				boolean forSpecifiedRoute = true;
+				if (routeIds != null && !routeIds.isEmpty()) {
+					forSpecifiedRoute = false;
+					for (String routeId : routeIds) {
+						if (block.getRouteIds().contains(routeId)) {
+							forSpecifiedRoute = true;
+							break;
+						}
+					}
+				}
+				
+				// If block currently active and is for specified route then
+				// add it to the list
+				if (block.isActive(now) && forSpecifiedRoute)
 					activeBlocks.add(block);
 			}
 		}

@@ -23,7 +23,7 @@ import java.rmi.RemoteException;
 import org.transitime.ipc.data.IpcServerStatus;
 
 /**
- *
+ * RMI interface for determining the status of the server.
  *
  * @author SkiBu Smith
  *

@@ -21,14 +21,19 @@ import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.core.BlocksInfo;
 import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.db.structs.Block;
+import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 
@@ -139,7 +144,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.util.List)
 	 */
 	@Override
-	public Collection<IpcVehicle> get(List<String> vehicleIds) 
+	public Collection<IpcVehicle> get(Collection<String> vehicleIds) 
 			throws RemoteException {
 		return getSerializableCollection(
 				vehicleDataCache.getVehicles(vehicleIds));
@@ -149,7 +154,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.util.List)
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getComplete(List<String> vehicleIds) 
+	public Collection<IpcCompleteVehicle> getComplete(Collection<String> vehicleIds) 
 			throws RemoteException {
 		return getCompleteSerializableCollection(
 				vehicleDataCache.getVehicles(vehicleIds));
@@ -180,7 +185,7 @@ public class VehiclesServer extends AbstractServer
 	 */
 	@Override
 	public Collection<IpcVehicle> getForRoute(
-		List<String> routeIdsOrShortNames) throws RemoteException {
+			Collection<String> routeIdsOrShortNames) throws RemoteException {
 	    return getSerializableCollection(
 			vehicleDataCache.getVehiclesForRoute(routeIdsOrShortNames));
 	}
@@ -190,7 +195,7 @@ public class VehiclesServer extends AbstractServer
 	 */
 	@Override
 	public Collection<IpcCompleteVehicle> getCompleteForRoute(
-		List<String> routeIdsOrShortNames) throws RemoteException {
+			Collection<String> routeIdsOrShortNames) throws RemoteException {
 	    return getCompleteSerializableCollection(
 			vehicleDataCache.getVehiclesForRoute(routeIdsOrShortNames));
 	}
@@ -254,6 +259,45 @@ public class VehiclesServer extends AbstractServer
 		} else {
 			return new ArrayList<IpcCompleteVehicle>(vehicles);
 		}			
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
+	 */
+	@Override
+	public Collection<IpcActiveBlock> getActiveBlocks(
+			Collection<String> routeIds) throws RemoteException {
+		// List of data to be returned
+		Collection<IpcActiveBlock> results = 
+				new ArrayList<IpcActiveBlock>();
+		
+		// Determine all the active blocks
+		List<Block> blocks = BlocksInfo.getCurrentlyActiveBlocks(routeIds);
+		
+		// For each active block determine associated vehicle
+		for (Block block : blocks) {
+			IpcBlock ipcBlock = new IpcBlock(block);
+			
+			// If a block doesn't have a vehicle associated with it need
+			// to determine which route a block is currently associated with
+			// since can't get that info from the vehicle. This way the block
+			// can be properly grouped with the associated route even when it
+			// doesn't have a vehicle assigned.
+			int activeTripIndex = block.activeTripIndex(new Date());
+			
+			// Determine vehicles associated with the block if there are any
+			Collection<String> vehicleIdsForBlock = VehicleDataCache
+					.getInstance().getVehiclesByBlockId(block.getId());
+			Collection<IpcVehicle> ipcVehiclesForBlock = get(vehicleIdsForBlock);
+			
+			// Create and add the IpcBlockAndVehicle
+			IpcActiveBlock ipcBlockAndVehicle = new IpcActiveBlock(
+					ipcBlock, activeTripIndex, ipcVehiclesForBlock);
+			results.add(ipcBlockAndVehicle);
+		}
+		
+		// Return results
+		return results;
 	}
 
 }
