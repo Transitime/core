@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcTrip;
+import org.transitime.utils.Time;
 
 /**
  * Specifies how trip data is formatted for the API.
@@ -29,78 +30,79 @@ import org.transitime.ipc.data.IpcTrip;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="trip")
+@XmlRootElement(name = "trip")
 public class ApiTrip {
 
-    @XmlAttribute
-    private int configRev;
-    
-    @XmlAttribute
-    private String id;
+	@XmlAttribute
+	private int configRev;
 
-    @XmlAttribute
-    private String shortName;
+	@XmlAttribute
+	private String id;
 
-    @XmlAttribute
-    private Integer startTime;
+	@XmlAttribute
+	private String shortName;
 
-    @XmlAttribute
-    private Integer endTime;
+	@XmlAttribute
+	private String startTime;
 
-    @XmlAttribute
-    private String directionId;
+	@XmlAttribute
+	private String endTime;
 
-    @XmlAttribute
-    private String routeId;
+	@XmlAttribute
+	private String directionId;
 
-    @XmlAttribute
-    private String routeShortName;
+	@XmlAttribute
+	private String routeId;
 
-    @XmlElement
-    private ApiTripPattern tripPattern;
+	@XmlAttribute
+	private String routeShortName;
 
-    @XmlAttribute
-    private String serviceId;
+	@XmlElement
+	private ApiTripPattern tripPattern;
 
-    @XmlAttribute
-    private String headsign;
+	@XmlAttribute
+	private String serviceId;
 
-    @XmlAttribute
-    private String blockId;
+	@XmlAttribute
+	private String headsign;
 
-    @XmlAttribute
-    private String shapeId;
+	@XmlAttribute
+	private String blockId;
 
-    @XmlElement
-    private ApiScheduleTimes scheduleTimes;
+	@XmlAttribute
+	private String shapeId;
 
-    /********************** Member Functions **************************/
+	@XmlElement
+	private ApiScheduleTimes scheduleTimes;
 
-    protected ApiTrip() {}
-    
-    /**
-     * 
-     * @param ipcTrip
-     * @param includeStopPaths
-     *            Stop paths are only included in output if this param set to
-     *            true.
-     */
-    public ApiTrip(IpcTrip ipcTrip, boolean includeStopPaths) {
-	configRev = ipcTrip.getConfigRev();
-	id = ipcTrip.getId();
-	shortName = ipcTrip.getShortName();
-	startTime = ipcTrip.getStartTime();
-	endTime = ipcTrip.getEndTime();
-	directionId = ipcTrip.getDirectionId();
-	routeId = ipcTrip.getRouteId();
-	routeShortName = ipcTrip.getRouteShortName();
-	tripPattern = 
-		new ApiTripPattern(ipcTrip.getTripPattern(), includeStopPaths);
-	serviceId = ipcTrip.getServiceId();
-	headsign = ipcTrip.getHeadsign();
-	blockId = ipcTrip.getBlockId();
-	shapeId = ipcTrip.getShapeId();
-	
-	scheduleTimes = new ApiScheduleTimes(ipcTrip);
-    }
+	/********************** Member Functions **************************/
+
+	protected ApiTrip() {
+	}
+
+	/**
+	 * 
+	 * @param ipcTrip
+	 * @param includeStopPaths
+	 *            Stop paths are only included in output if this param set to
+	 *            true.
+	 */
+	public ApiTrip(IpcTrip ipcTrip, boolean includeStopPaths) {
+		configRev = ipcTrip.getConfigRev();
+		id = ipcTrip.getId();
+		shortName = ipcTrip.getShortName();
+		startTime = Time.timeOfDayStr(ipcTrip.getStartTime());
+		endTime = Time.timeOfDayStr(ipcTrip.getEndTime());
+		directionId = ipcTrip.getDirectionId();
+		routeId = ipcTrip.getRouteId();
+		routeShortName = ipcTrip.getRouteShortName();
+		tripPattern = new ApiTripPattern(ipcTrip.getTripPattern(),
+				includeStopPaths);
+		serviceId = ipcTrip.getServiceId();
+		headsign = ipcTrip.getHeadsign();
+		blockId = ipcTrip.getBlockId();
+		shapeId = ipcTrip.getShapeId();
+
+		scheduleTimes = new ApiScheduleTimes(ipcTrip);
+	}
 }
