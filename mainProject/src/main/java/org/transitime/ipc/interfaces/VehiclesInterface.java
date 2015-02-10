@@ -157,9 +157,13 @@ public interface VehiclesInterface extends Remote {
 	 * 
 	 * @param routeIds
 	 *            List of routes that want data for. Can also be null or empty.
+	 * @param allowableBeforeTimeSecs
+	 *            How much before the block time the block is considered to be
+	 *            active
 	 * @return Collection of blocks that are active
 	 * @throws RemoteException
 	 */
 	public Collection<IpcActiveBlock> getActiveBlocks(
-			Collection<String> routeIds) throws RemoteException;
+			Collection<String> routeIds, int allowableBeforeTimeSecs) 
+					throws RemoteException;
 }
