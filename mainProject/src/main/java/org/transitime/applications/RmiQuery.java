@@ -416,7 +416,7 @@ public class RmiQuery {
 		VehiclesInterface vehiclesInterface = 
 				VehiclesInterfaceFactory.get(agencyId);
 		Collection<IpcActiveBlock> activeBlocks = 
-				vehiclesInterface.getActiveBlocks(routeIds);
+				vehiclesInterface.getActiveBlocks(routeIds, 0);
 		
 		System.out.println("Outputting active blocks for routeIds=" + routeIds);
 		for (IpcActiveBlock activeBlock : activeBlocks) {

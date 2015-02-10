@@ -78,12 +78,12 @@ public class BlocksInfo {
 	}
 
 	/**
-	 * Returns list of blocks that are currently active.
+	 * Returns list of blocks that are currently active. 
 	 * 
 	 * @return List of currently active blocks. Will not be null.
 	 */
 	public static List<Block> getCurrentlyActiveBlocks() {
-		return getCurrentlyActiveBlocks(null);
+		return getCurrentlyActiveBlocks(null, 0);
 	}
 	
 	/**
@@ -92,10 +92,13 @@ public class BlocksInfo {
 	 * 
 	 * @param routeIds
 	 *            Collection of routes IDs that want blocks for
+	 * @param allowableBeforeTimeSecs
+	 *            How much before the block time the block is considered to be
+	 *            active
 	 * @return List of currently active blocks. Will not be null.
 	 */
 	public static List<Block> getCurrentlyActiveBlocks(
-			Collection<String> routeIds) {
+			Collection<String> routeIds, int allowableBeforeTimeSecs) {
 		// The list to be returned
 		List<Block> activeBlocks = new ArrayList<Block>(1000);
 		

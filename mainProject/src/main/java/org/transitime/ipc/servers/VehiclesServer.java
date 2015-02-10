@@ -266,13 +266,15 @@ public class VehiclesServer extends AbstractServer
 	 */
 	@Override
 	public Collection<IpcActiveBlock> getActiveBlocks(
-			Collection<String> routeIds) throws RemoteException {
+			Collection<String> routeIds, int allowableBeforeTimeSecs)
+			throws RemoteException {
 		// List of data to be returned
 		Collection<IpcActiveBlock> results = 
 				new ArrayList<IpcActiveBlock>();
 		
 		// Determine all the active blocks
-		List<Block> blocks = BlocksInfo.getCurrentlyActiveBlocks(routeIds);
+		List<Block> blocks = BlocksInfo.getCurrentlyActiveBlocks(routeIds,
+				allowableBeforeTimeSecs);
 		
 		// For each active block determine associated vehicle
 		for (Block block : blocks) {
