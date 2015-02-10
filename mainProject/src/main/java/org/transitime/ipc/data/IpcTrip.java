@@ -41,6 +41,7 @@ public class IpcTrip implements Serializable {
 	private final String directionId;
 	private final String routeId;
 	private final String routeShortName;
+	private final String routeName;
 	private final IpcTripPattern tripPattern;
 	private final String serviceId;
 	private final String headsign;
@@ -62,7 +63,8 @@ public class IpcTrip implements Serializable {
 		endTime = dbTrip.getEndTime();
 		directionId = dbTrip.getDirectionId();
 		routeId = dbTrip.getRouteId();
-		routeShortName = dbTrip.getRouteName();
+		routeShortName = dbTrip.getRouteShortName();
+		routeName = dbTrip.getRouteName();
 		tripPattern = new IpcTripPattern(dbTrip.getTripPattern());
 		serviceId = dbTrip.getServiceId();
 		headsign = dbTrip.getHeadsign();
@@ -87,7 +89,8 @@ public class IpcTrip implements Serializable {
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
 				+ ", directionId=" + directionId 
 				+ ", routeId=" + routeId
-				+ ", routeShortName=" + routeShortName 
+				+ ", routeShortName=" + routeShortName
+				+ ", routeName=" + routeName 
 				+ ", tripPattern=" + tripPattern.getId() 
 				+ ", serviceId=" + serviceId 
 				+ ", headsign="	+ headsign 
@@ -128,6 +131,10 @@ public class IpcTrip implements Serializable {
 
 	public String getRouteShortName() {
 		return routeShortName;
+	}
+	
+	public String getRouteName() {
+		return routeName;
 	}
 
 	public IpcTripPattern getTripPattern() {
