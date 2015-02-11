@@ -684,7 +684,7 @@ function updateVehiclesUsingApiData() {
 	if (getQueryVariable("s"))
 		url += "&s=" + getQueryVariable("s") + "&numPreds=2";
 
-	// Use ajaz() instead of getJSON() so that can set timeout since
+	// Use ajax() instead of getJSON() so that can set timeout since
 	// will be polling vehicle info every 10 seconds and don't want there
 	// to be many simultaneous requests.
 	$.ajax(url, {
