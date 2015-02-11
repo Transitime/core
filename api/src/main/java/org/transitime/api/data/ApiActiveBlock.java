@@ -17,6 +17,7 @@
 
 package org.transitime.api.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,9 +52,9 @@ public class ApiActiveBlock {
 	@XmlElement(name = "trip")
 	private ApiTripSummary apiTripSummary;
 	
-	@XmlElement(name = "vehicles")
-	private ApiVehicles apiVehicles;
-	
+	@XmlElement(name = "vehicle")
+	private Collection<ApiVehicle> vehicles;
+
 	/********************** Member Functions **************************/
 
 	protected ApiActiveBlock() {}
@@ -68,8 +69,10 @@ public class ApiActiveBlock {
 		IpcTrip ipcTrip = trips.get(ipcActiveBlock.getActiveTripIndex());
 		apiTripSummary = new ApiTripSummary(ipcTrip);
 		
-		Collection<IpcVehicle> vehicles = ipcActiveBlock.getVehicles();
-		apiVehicles = new ApiVehicles(vehicles);
+		vehicles = new ArrayList<ApiVehicle>();
+		for (IpcVehicle ipcVehicles : ipcActiveBlock.getVehicles()) {
+			vehicles.add(new ApiVehicle(ipcVehicles));
+		}
 	}
 	
 	public String getId() {
