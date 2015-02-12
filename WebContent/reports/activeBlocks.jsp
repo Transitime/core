@@ -16,9 +16,7 @@ if (agencyId == null || agencyId.isEmpty()) {
   <!-- Load in JQuery UI javascript and css to set general look and feel -->
   <script src="/api/jquery-ui/jquery-ui.js"></script>
   <link rel="stylesheet" href="/api/jquery-ui/jquery-ui.css">
-  
-  <!-- So can fit long names into div -->
-  <script src="/api/javascript/jquery.quickfit.js"></script>
+
 <style>
 #accordion {
   margin-left: 20px;
@@ -61,57 +59,31 @@ if (agencyId == null || agencyId.isEmpty()) {
 	font-size: 18px;
 }
 
-#blocksInfo {
+#blocksDiv {
 	background: #ccc;
 	line-height: 1.0;
 	font-size: large;
-	padding: 0.2em 2.2em;
-}
-
-/* Put spacing between block listings */	
-.blockInfo:not(:first-child) {
-	margin-top:12px;
-}
-
-/* So columns after block & trip can line up */
-#block, #trip {
-	display: inline-block;
-	width: 70px;
-	/* background: yellow; */
-}
-
-/* For all the labels in the block display */
-/*
-.blockLabel {
-	display: inline-block;
-	width: 60px;
-	text-align: right;
-	padding-right: 0.2em;
-	font-size: medium;
-	color: graytext;
-}
-*/
-
-/* Want the first column to line up */
-#blockLabel, #tripLabel, #vehiclesForBlockLabel {
-	display: inline-block;
-	width: 60px;
-	text-align: right;
-	padding-left: 0em;
+	padding: 0.0em 0.1em 0.6em;
 }
 
 /* Make all the labels similar */
 .blockLabel {
-	padding-left: 1.5em;
-	padding-right: 0.2em;
+	padding-left: 2.0em;
+	text-align: right;
 	font-size: medium;
 	color: graytext;
-	/* background: cyan; */
 }
 
-#blockServiceLabel {
-	width: 75px;
+/* Separate each block by a bit of space */
+#block {
+	padding-top: 0.6em;
 }
+
+/* Since using padding to separate each block need to align text in cells to bottom */
+#blocksTable td {
+	vertical-align: text-bottom;
+}
+
 </style>
 
 <script>
@@ -124,7 +96,7 @@ function removeUnneededBlockAndRouteElements(routes) {
 		var routeInAjaxData = false;
 		// Go through ajax route data
 		for (var j=0; j<routes.route.length; ++j) {
-			if (routeElementId == routes.route[j].id) {
+			if (routeElementId == "routeId-" + routes.route[j].id) {
 				routeInAjaxData = true;
 				break;
 			}
@@ -136,7 +108,7 @@ function removeUnneededBlockAndRouteElements(routes) {
 	}
 	
 	// Get rid of block elements that are not needed anymore
-	var blockElements = $("[id|='blockId']");
+	var blockElements = $("[id|='blockId']"); // Get all elements having id starting with blockId
 	for (var i=0; i<blockElements.length; ++i) {
 		var blockElementId = blockElements[i].id;
 		var blockInAjaxData = false;
@@ -144,7 +116,7 @@ function removeUnneededBlockAndRouteElements(routes) {
 		for (var j=0; j<routes.route.length; ++j) {
 			var routeData = routes.route[j];
 			for (var k=0; k<routeData.block.length; ++k) {
-				if (blockElementId == routeData.block[k].id) {
+				if (blockElementId == "blockId=" + routeData.block[k].id) {
 					blockInAjaxData = true;
 					break;
 				}
@@ -171,13 +143,14 @@ function handleAjaxData(routes) {
 		var routeElementId = "routeId-" + routeData.id;
 		var routeElement = $("#" + routeElementId);
 		if (routeElement.length == 0) {
+			// Note: the outer div with class='group' is needed so user can reorder the routes
  			$("#accordion").append(
  					"<div class='group' id='" + routeElementId + "'>" +
- 					 "<h3>" + routeData.name + 
- 				     "<span id='vehicles'></span><span id='vehiclesLabel'>Vehicles:</span>" +
- 				     "<span id='blocks'></span><span id='blocksLabel'>Blocks:</span>" +
-					 "</h3>" +
- 					 "<div id='blocksInfo'></div>" +
+ 					 " <h3>" + routeData.name + 
+ 				     "  <span id='vehicles'></span><span id='vehiclesLabel'>Vehicles:</span>" +
+ 				     "  <span id='blocks'></span><span id='blocksLabel'>Blocks:</span>" +
+					 " </h3>" +
+ 					 " <div id='blocksDiv'><table id='blocksTable'></table></div>" +
  					 "</div>");	
  		}
 		
@@ -195,27 +168,29 @@ function handleAjaxData(routes) {
 		vehiclesValueElement.text(numberOfVehicles);
 
 		// Update all the block information for this route
-		var blocksInfoDiv = $("#" + routeElementId + " #blocksInfo");
+		var blocksTable = $("#" + routeElementId + " #blocksTable");
 		for (var i=0; i<routeData.block.length; ++i) {
 			// If block element doesn't yet exist then create it
 			var blockData = routeData.block[i];
 			var blockElementId = "blockId-" + blockData.id;
 			var blockElement = $("#" + routeElementId + " #" + blockElementId);
 			if (blockElement.length == 0) {
-				blocksInfoDiv.append(
-						"<div id='" + blockElementId + "' class='blockInfo'>" + 
-						"<span id='blockLabel' class='blockLabel'>Block:</span><span id='block'></span>" + 
-						"<span id='blockStartLabel' class='blockLabel'>Start:</span><span id='blockStart'></span>" + 
-						"<span id='blockEndLabel' class='blockLabel'>End:</span><span id='blockEnd'></span>" + 
-						"<span id='blockServiceLabel' class='blockLabel'>Service:</span><span id='blockService'></span>" +
-						"<br/>" +
-						"<span id='tripLabel' class='blockLabel'>Trip:</span><span id='trip'></span>" + 
-						"<span id='tripStartLabel' class='blockLabel'>Start:</span><span id='tripStart'></span>" + 
-						"<span id='tripEndLabel' class='blockLabel'>End:</span><span id='tripEnd'></span>" + 
-						"<br/>" +
-						"<span id='vehiclesForBlockLabel' class='blockLabel'>Vehicle:</span><span id='vehiclesForBlock'></span>" +
-						"<span id='vehiclesSchedAdhLabel' class='blockLabel'>Adh:</span><span id='vehicleSchedAdh'></span>" +
-						"</div>");
+				blocksTable.append(
+						"<tr id='" + blockElementId + "'>" +
+						" <td class='blockLabel'>Block:</td><td id='block'></td>" +
+						" <td class='blockLabel'>Start:</td><td id='blockStart'></td>" + 
+						" <td class='blockLabel'>End:</td><td id='blockEnd'></td>" + 
+						" <td class='blockLabel'>Service:</td><td id='blockService'></td>" +
+						"</tr>" +
+						"<tr id='" + blockElementId + "'>" +
+						" <td class='blockLabel'>Trip:</td><td id='trip'></td>" + 
+						" <td class='blockLabel'>Start:</td><td id='tripStart'></td>" + 
+						" <td class='blockLabel'>End:</td><td id='tripEnd'></td>" + 
+						"</tr>" +
+						"<tr id='" + blockElementId + "'>" +
+						" <td class='blockLabel'>Vehicle:</td><td id='vehiclesForBlock'></td>" +
+						" <td class='blockLabel'>Adh:</td><td id='vehicleSchedAdh'></td>" +
+						"</tr>");
 			}
 			
 			// Update the information for the block 
@@ -235,26 +210,13 @@ function handleAjaxData(routes) {
 			var tripId = blockData.trip.shortName != null ? 
 					blockData.trip.shortName : blockData.trip.id;
 			tripValueElement.text(tripId);
-	
-			// Sometimes trip names are long. For this situation need to not
-			// have the values in first column overlap with the next labels.
-			// For this situation need to make the elements wider.
-			if (tripId.length > 10) {
-				tripValueElement.css("width", "140px");
-				blockValueElement.css("width", "140px");
-				
-				// And reduce trip ID font so that it fits.
-				// Max size of 18px seems to correspond to "large" font size.
-				tripValueElement.quickfit({max: 18, min: 10});
-			}
-		
+			
 			var tripStartValueElement = $("#" + routeElementId + " #" + blockElementId + " #tripStart");
 			tripStartValueElement.text(blockData.trip.startTime);
 
 			var tripEndValueElement = $("#" + routeElementId + " #" + blockElementId + " #tripEnd");
 			tripEndValueElement.text(blockData.trip.endTime);
 			
-			var vehiclesValueElement = $("#" + routeElementId + " #" + blockElementId + " #vehiclesForBlock");
 			var vehiclesValue = "none";
 			if (blockData.vehicle.length != 0) {
 				vehiclesValue = "";
@@ -266,12 +228,32 @@ function handleAjaxData(routes) {
 					
 				}
 			}
+			var vehiclesValueElement = $("#" + routeElementId + " #" + blockElementId + " #vehiclesForBlock");
 			vehiclesValueElement.text(vehiclesValue);
+			
+			var schAdhStr = "-";
+			if (blockData.vehicle.length > 0) {
+				schAdhStr = blockData.vehicle[0].schAdhStr;
+			}
+			var vehiclesSchedAdhElement = $("#" + routeElementId + " #" + blockElementId + " #vehicleSchedAdh");
+			vehiclesSchedAdhElement.text(schAdhStr);
+			
 		}
 	}
 	
 	// Since route widgets might have changed need to call refresh
 	$( "#accordion" ).accordion("refresh");	
+}
+
+/*
+ * Get active block data via AJAX
+ */
+function getAndProcessData() {
+	var urlPrefix = "/api/v1/key/TEST/agency/<%= request.getParameter("a") %>";
+	$.getJSON(urlPrefix + "/command/activeBlocksByRoute", handleAjaxData)
+		.fail(function() {
+	 		console.log( "Could not access /command/activeBlocksByRoute" );
+	 	});	
 }
 
 // Called when page is ready
@@ -295,13 +277,10 @@ $(function() {
 			}
 		});
 	
-	// Get active block data via AJAX
-	var urlPrefix = "/api/v1/key/TEST/agency/<%= request.getParameter("a") %>";
-	$.getJSON(urlPrefix + "/command/activeBlocksByRoute", handleAjaxData)
-		.fail(function() {
-	 		console.log( "Could not access /command/activeBlocksByRoute" );
-	 	});
-
+	// Start getting the active blocks data and processing it.
+	// Update every 30 seconds.
+	getAndProcessData();
+	setInterval(getAndProcessData, 30000);
 });
 
 
