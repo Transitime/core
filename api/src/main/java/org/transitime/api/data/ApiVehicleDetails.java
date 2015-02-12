@@ -33,78 +33,79 @@ import org.transitime.ipc.data.IpcVehicle;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="vehicle")
+@XmlRootElement(name = "vehicle")
 @XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
-	"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc",
-	"scheduleAdherence", "scheduleAdherenceStr", "blockId",
-	"blockAssignmentMethod", "tripId", "tripPatternId", "isLayover",
-	"layoverDepartureTime", "nextStopId", "driverId"})
+		"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc",
+		"scheduleAdherence", "scheduleAdherenceStr", "blockId",
+		"blockAssignmentMethod", "tripId", "tripPatternId", "isLayover",
+		"layoverDepartureTime", "nextStopId", "driverId" })
 public class ApiVehicleDetails extends ApiVehicleAbstract {
 
-    // Note: needs to be Integer instead of an int because it can be null
-    // (for vehicles that are not predictable)
-    @XmlAttribute(name="schAdh")
-    private Integer scheduleAdherence;
- 
-    @XmlAttribute(name="schAdhStr")
-    private String scheduleAdherenceStr;
+	// Note: needs to be Integer instead of an int because it can be null
+	// (for vehicles that are not predictable)
+	@XmlAttribute(name = "schAdh")
+	private Integer scheduleAdherence;
 
-    @XmlAttribute(name="block")
-    private String blockId;
- 
-    @XmlAttribute(name="blockMthd")
-    private BlockAssignmentMethod blockAssignmentMethod;
-    
-    @XmlAttribute(name="trip")
-    private String tripId;
-    
-    @XmlAttribute(name="tripPattern")
-    private String tripPatternId;
-    
-    @XmlAttribute(name="layover")
-    private String isLayover;
-    
-    @XmlAttribute
-    private String layoverDepartureTime;
-    
-    @XmlAttribute
-    private String nextStopId;
-    
-    @XmlElement(name="driver")
-    private String driverId;
-    
-    /**
-     * Need a no-arg constructor for Jersey. Otherwise get really
-     * obtuse "MessageBodyWriter not found for media type=application/json"
-     * exception.
-     */
-    protected ApiVehicleDetails() {}
+	@XmlAttribute(name = "schAdhStr")
+	private String scheduleAdherenceStr;
 
-    /**
-     * Takes a Vehicle object for client/server communication and constructs a
-     * ApiVehicle object for the API.
-     * 
-     * @param vehicle
-     * @param uiType
-     *            If should be labeled as "minor" in output for UI.
-     */
-    public ApiVehicleDetails(IpcVehicle vehicle, UiMode uiType) {
-	super(vehicle, uiType);
-	
-	scheduleAdherence = vehicle.getRealTimeSchedAdh()!=null ?
-		vehicle.getRealTimeSchedAdh().getTemporalDifference() : null;
-	scheduleAdherenceStr = vehicle.getRealTimeSchedAdh()!=null ? 
-		vehicle.getRealTimeSchedAdh().toString() : null;
-	blockId = vehicle.getBlockId();
-	blockAssignmentMethod = vehicle.getBlockAssignmentMethod();
-	tripId = vehicle.getTripId();
-	tripPatternId = vehicle.getTripPatternId();
-	isLayover = vehicle.isLayover() ? "true" : null;
-	layoverDepartureTime = vehicle.isLayover() ? 
-		Long.toString(vehicle.getLayoverDepartureTime()) : null;
-	nextStopId = vehicle.getNextStopId()!=null ? vehicle.getNextStopId() : null;
-	driverId = vehicle.getAvl().getDriverId();
-    }	
+	@XmlAttribute(name = "block")
+	private String blockId;
 
-    
+	@XmlAttribute(name = "blockMthd")
+	private BlockAssignmentMethod blockAssignmentMethod;
+
+	@XmlAttribute(name = "trip")
+	private String tripId;
+
+	@XmlAttribute(name = "tripPattern")
+	private String tripPatternId;
+
+	@XmlAttribute(name = "layover")
+	private String isLayover;
+
+	@XmlAttribute
+	private String layoverDepartureTime;
+
+	@XmlAttribute
+	private String nextStopId;
+
+	@XmlElement(name = "driver")
+	private String driverId;
+
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiVehicleDetails() {
+	}
+
+	/**
+	 * Takes a Vehicle object for client/server communication and constructs a
+	 * ApiVehicle object for the API.
+	 * 
+	 * @param vehicle
+	 * @param uiType
+	 *            Optional parameter. If should be labeled as "minor" in output
+	 *            for UI. Default is UiMode.NORMAL.
+	 */
+	public ApiVehicleDetails(IpcVehicle vehicle, UiMode... uiType) {
+		super(vehicle, uiType.length > 0 ? uiType[0] : UiMode.NORMAL);
+		
+		scheduleAdherence = vehicle.getRealTimeSchedAdh() != null ? vehicle
+				.getRealTimeSchedAdh().getTemporalDifference() : null;
+		scheduleAdherenceStr = vehicle.getRealTimeSchedAdh() != null ? vehicle
+				.getRealTimeSchedAdh().toString() : null;
+		blockId = vehicle.getBlockId();
+		blockAssignmentMethod = vehicle.getBlockAssignmentMethod();
+		tripId = vehicle.getTripId();
+		tripPatternId = vehicle.getTripPatternId();
+		isLayover = vehicle.isLayover() ? "true" : null;
+		layoverDepartureTime = vehicle.isLayover() ? Long.toString(vehicle
+				.getLayoverDepartureTime()) : null;
+		nextStopId = vehicle.getNextStopId() != null ? vehicle.getNextStopId()
+				: null;
+		driverId = vehicle.getAvl().getDriverId();		
+	}
+
 }

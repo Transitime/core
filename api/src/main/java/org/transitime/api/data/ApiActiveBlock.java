@@ -53,7 +53,7 @@ public class ApiActiveBlock {
 	private ApiTripSummary apiTripSummary;
 	
 	@XmlElement(name = "vehicle")
-	private Collection<ApiVehicle> vehicles;
+	private Collection<ApiVehicleDetails> vehicles;
 
 	/********************** Member Functions **************************/
 
@@ -69,9 +69,9 @@ public class ApiActiveBlock {
 		IpcTrip ipcTrip = trips.get(ipcActiveBlock.getActiveTripIndex());
 		apiTripSummary = new ApiTripSummary(ipcTrip);
 		
-		vehicles = new ArrayList<ApiVehicle>();
+		vehicles = new ArrayList<ApiVehicleDetails>();
 		for (IpcVehicle ipcVehicles : ipcActiveBlock.getVehicles()) {
-			vehicles.add(new ApiVehicle(ipcVehicles));
+			vehicles.add(new ApiVehicleDetails(ipcVehicles));
 		}
 	}
 	
