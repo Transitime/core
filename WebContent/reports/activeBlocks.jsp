@@ -24,39 +24,24 @@ if (agencyId == null || agencyId.isEmpty()) {
   line-height: 1.0; /* Reduce vertical height from 1.3 so can fit more on page */
 }
 
-/* For display number of vehicles for route */
-#vehicles {
+.routeLabel, .routeValue {
 	float: right; 
-	padding-left: 6px;
+	font-size: 18px;
+}
+
+.routeLabel {
+	color: graytext;
+}
+
+.routeValue {
+	padding-left: 3px;
+	padding-right: 12px;
+	width: 1.2em; /* enough for two digits */
+}
+
+/* Separate Blocks: & Vehicles: from the schedule adherence labels */
+#routeVehicles {
 	margin-right: 50px;
-	width: 2em; 
-	font-size: 18px;
-	/* background-color: #EDABC6; */
-}
-
-/* For display number of vehicles for route */
-#vehiclesLabel {
-	float: right; 
-	text-align: right; 
-	width: 100px; 
-	font-size: 18px;
-}
-
-/* For displaying number of blocks for route */
-#blocks {
-	float: right; 
-	padding-left: 6px;
-	margin-right: 50px;
-	width: 2em; 
-	font-size: 18px;
-}
-
-/* For displaying number of blocks for route */
-#blocksLabel {
-	float: right; 
-	text-align: right; 
-	width: 70px; 
-	font-size: 18px;
 }
 
 #blocksDiv {
@@ -66,7 +51,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 	padding: 0.0em 0.1em 0.6em;
 }
 
-/* Make all the labels similar */
+/* Make all the labels in the detailed block info window similar */
 .blockLabel {
 	padding-left: 2.0em;
 	text-align: right;
@@ -87,6 +72,9 @@ if (agencyId == null || agencyId.isEmpty()) {
 </style>
 
 <script>
+var ALLOWABLE_EARLY_MSEC = 1 * 60*1000; // 1 minute
+var ALLOWABLE_LATE_MSEC  = 4 * 60*1000; // 4 minutes
+
 function removeUnneededBlockAndRouteElements(routes) {
 	// First get rid of route elements that are not needed anymore because they
 	// are not in the ajax data.
@@ -143,29 +131,64 @@ function handleAjaxData(routes) {
 		var routeElementId = "routeId-" + routeData.id;
 		var routeElement = $("#" + routeElementId);
 		if (routeElement.length == 0) {
-			// Note: the outer div with class='group' is needed so user can reorder the routes
+			// Note: the outer div with class='group' is needed so user can 
+			// reorder the routes
  			$("#accordion").append(
  					"<div class='group' id='" + routeElementId + "'>" +
  					 " <h3>" + routeData.name + 
- 				     "  <span id='vehicles'></span><span id='vehiclesLabel'>Vehicles:</span>" +
- 				     "  <span id='blocks'></span><span id='blocksLabel'>Blocks:</span>" +
+ 					 // Need to use span instead of div since accordion requires 
+ 					 // using an h3 element and h3 can't have a div in it.
+ 					 // And the spans need to be created in reverse order since
+ 					 // using css float: right to get spans displayed on the right.
+ 				     "  <span class='routeValue' id='routeEarlyVehicles'></span>" + 
+ 				     "  <span class='routeLabel' id='routeEarlyVehiclesLabel'>Early:</span>" +
+ 				     "  <span class='routeValue' id='routeOnTimeVehicles'></span>" + 
+ 				     "  <span class='routeLabel' id='routeOnTimeVehiclesLabel'>On Time:</span>" +
+ 				     "  <span class='routeValue' id='routeLateVehicles'></span>" + 
+ 				     "  <span class='routeLabel' id='routeLateVehiclesLabel'>Late:</span>" +
+ 				     "  <span class='routeValue' id='routeVehicles'></span>" + 
+ 				     "  <span class='routeLabel' id='routeVehiclesLabel'>Vehicles:</span>" +
+ 				     "  <span class='routeValue' id='routeBlocks'></span>" + 
+ 				     "  <span class='routeLabel' id='routeBlocksLabel'>Blocks:</span>" +
 					 " </h3>" +
  					 " <div id='blocksDiv'><table id='blocksTable'></table></div>" +
  					 "</div>");	
  		}
 		
 		// Update the route info by setting number of blocks
-		var blocksValueElement = $("#" + routeElementId + " #blocks");
+		var blocksValueElement = $("#" + routeElementId + " #routeBlocks");
 		blocksValueElement.text(routeData.block.length);
 
-		// Update the route info by setting number of vehicles
-		var vehiclesValueElement = $("#" + routeElementId + " #vehicles");
+		// Update the route info by setting number of vehicles and how many
+		// are late, on time, or early.
 		var numberOfVehicles = 0;
+		var vehiclesLate = 0;
+		var vehiclesOnTime = 0;
+		var vehiclesEarly = 0;
 		for (var k=0; k<routeData.block.length; ++k) {
 			var blockData = routeData.block[k];
 			numberOfVehicles += blockData.vehicle.length;
+			for (var l=0; l<blockData.vehicle.length; ++l) {
+				var schAdh = parseInt(blockData.vehicle[l].schAdh);
+				if (schAdh < -ALLOWABLE_LATE_MSEC)
+					++vehiclesLate;
+				else if (schAdh > ALLOWABLE_EARLY_MSEC)
+					++vehiclesEarly;
+				else
+					++vehiclesOnTime;
+			}
 		}
+		var vehiclesValueElement = $("#" + routeElementId + " #routeVehicles");
 		vehiclesValueElement.text(numberOfVehicles);
+
+		var vehiclesLateValueElement = $("#" + routeElementId + " #routeLateVehicles");
+		vehiclesLateValueElement.text(vehiclesLate);
+
+		var vehiclesOnTimeValueElement = $("#" + routeElementId + " #routeOnTimeVehicles");
+		vehiclesOnTimeValueElement.text(vehiclesOnTime);
+
+		var vehiclesEarlyValueElement = $("#" + routeElementId + " #routeEarlyVehicles");
+		vehiclesEarlyValueElement.text(vehiclesEarly);
 
 		// Update all the block information for this route
 		var blocksTable = $("#" + routeElementId + " #blocksTable");
