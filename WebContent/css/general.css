@@ -14,6 +14,9 @@ body {
     background: -o-linear-gradient(bottom right, #8DC5EB, blue); /* For Opera 11.1 to 12.0 */
     background: -moz-linear-gradient(bottom right, #8DC5EB, blue); /* For Firefox 3.6 to 15 */
     background: linear-gradient(to bottom right, #8DC5EB , blue); /* Standard syntax */
+
+    /* Experiment with this top to bottom gradient which might look better */
+    background: linear-gradient(blue, white); /* Standard syntax */
     
 	margin-left: 0px;
 	margin-right: 0px;
@@ -34,8 +37,8 @@ body {
 	margin-left: auto; 
 	margin-right: auto; 
 	width: 70%; 
-	font-weight: bold;
-	font-size: x-large;
+	font-weight: normal;
+	font-size: xx-large;
 	text-align: center;
 }
 
