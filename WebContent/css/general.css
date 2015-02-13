@@ -42,6 +42,9 @@ body {
 	text-align: center;
 }
 
+/* Note: this one should probably go on the pages where it actually is used. 
+   It is probably for where have lists of reports or such.
+ */
 ul {
 	width: 350px;
 	margin-left: auto;
@@ -75,3 +78,16 @@ input, select {
 	background-color: #f8f8f8;
 	font-size: large;
 }
+
+.earlyColor {
+	background: #f9dbe6; 
+}
+
+.lateColor {
+	background: #fcf5c9;
+}
+
+.problemColor {
+	background: #f9dbe6; 
+}
+
