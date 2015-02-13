@@ -390,7 +390,7 @@ public class AvlProcessor {
 
 			// Record a corresponding VehicleEvent
 			String eventDescription = "Vehicle successfully matched to "
-					+ assignmentType + "assignment and is now predictable.";
+					+ assignmentType + " assignment and is now predictable.";
 			VehicleEvent.create(avlReport, bestMatch, VehicleEvent.PREDICTABLE,
 					eventDescription, true, // predictable
 					false, // becameUnpredictable
