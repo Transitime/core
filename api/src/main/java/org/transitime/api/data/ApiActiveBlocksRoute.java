@@ -18,46 +18,51 @@
 package org.transitime.api.data;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcActiveBlock;
 
 /**
- * A list of routes.
+ * A route for when outputting active blocks
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "routes")
-public class ApiRouteSummaries {
+public class ApiActiveBlocksRoute {
 
-	@XmlElement(name = "route")
-	private List<ApiRouteSummary> routeSummariesData;
+	@XmlAttribute
+	private String id;
 
+	@XmlAttribute(name = "rShortName")
+	private String shortName;
+
+	@XmlAttribute
+	private String name;
+
+	@XmlElement(name = "block")
+	private List<ApiActiveBlock> activeBlocks;
+	
 	/********************** Member Functions **************************/
-
-	/**
-	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
-	 * "MessageBodyWriter not found for media type=application/json" exception.
-	 */
-	protected ApiRouteSummaries() {
+	
+	protected ApiActiveBlocksRoute() {
 	}
 
-	/**
-	 * Constructs an ApiRouteSummaries using a collection of IpcRouteSummary
-	 * objects.
-	 * 
-	 * @param routes
-	 */
-	public ApiRouteSummaries(Collection<IpcRouteSummary> routes) {
-		routeSummariesData = new ArrayList<ApiRouteSummary>();
-		for (IpcRouteSummary route : routes) {
-			ApiRouteSummary routeSummary = new ApiRouteSummary(route);
-			routeSummariesData.add(routeSummary);
-		}
+	public ApiActiveBlocksRoute(String id, String shortName, String name) {
+		this.id = id;
+		this.shortName = shortName;
+		this.name = name;
+		
+		activeBlocks = new ArrayList<ApiActiveBlock>();
+	}
+
+	public void add(IpcActiveBlock ipcActiveBlock) {
+		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock));
+	}
+	
+	public String getName() {
+		return name;
 	}
 }

@@ -29,47 +29,62 @@ import org.transitime.api.rootResources.TransitimeApi.UiMode;
 import org.transitime.ipc.data.IpcVehicle;
 
 /**
- * For when have list of Vehicles. By using this class can control
- * the element name when data is output.
+ * For when have list of Vehicles. By using this class can control the element
+ * name when data is output.
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="vehicles")
+@XmlRootElement(name = "vehicles")
 public class ApiVehicles {
 
-    // Need to use @XmlElementRef so that the element name used for each
-    // ApiVehicle object will be what is specified in the ApiVehicle class.
-    @XmlElement(name="vehicle")
-    private List<ApiVehicle> vehiclesData;
-    
-    /********************** Member Functions **************************/
+	// Need to use @XmlElementRef so that the element name used for each
+	// ApiVehicle object will be what is specified in the ApiVehicle class.
+	@XmlElement(name = "vehicle")
+	private List<ApiVehicle> vehiclesData;
 
-    /**
-     * Need a no-arg constructor for Jersey. Otherwise get really 
-     * obtuse "MessageBodyWriter not found for media type=application/json"
-     * exception.
-     */
-    public ApiVehicles() {}
+	/********************** Member Functions **************************/
 
-    /**
-     * For constructing a ApiVehicles object from a Collection of Vehicle
-     * objects.
-     * 
-     * @param vehicles
-     * @param uiTypesForVehicles
-     *            Specifies how vehicles should be drawn in UI. Can be NORMAL, SECONDARY, or MINOR
-     */
-    public ApiVehicles(Collection<IpcVehicle> vehicles,
-	    Map<String, UiMode> uiTypesForVehicles) {
-	vehiclesData = new ArrayList<ApiVehicle>();
-	for (IpcVehicle vehicle : vehicles) {
-	    // Determine UI type for vehicle 
-	    UiMode uiType = uiTypesForVehicles.get(vehicle.getId());
-	    
-	    // Add this vehicle to the ApiVehicle list
-	    vehiclesData.add(new ApiVehicle(vehicle, uiType));
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	public ApiVehicles() {
 	}
-    }
+
+	/**
+	 * For constructing a ApiVehicles object from a Collection of Vehicle
+	 * objects.
+	 * 
+	 * @param vehicles
+	 * @param uiTypesForVehicles
+	 *            Specifies how vehicles should be drawn in UI. Can be NORMAL,
+	 *            SECONDARY, or MINOR
+	 */
+	public ApiVehicles(Collection<IpcVehicle> vehicles,
+			Map<String, UiMode> uiTypesForVehicles) {
+		vehiclesData = new ArrayList<ApiVehicle>();
+		for (IpcVehicle vehicle : vehicles) {
+			// Determine UI type for vehicle
+			UiMode uiType = uiTypesForVehicles.get(vehicle.getId());
+
+			// Add this vehicle to the ApiVehicle list
+			vehiclesData.add(new ApiVehicle(vehicle, uiType));
+		}
+	}
+	
+	/**
+	 * For constructing a ApiVehicles object from a Collection of Vehicle
+	 * objects. Sets UiMode to UiMode.NORMAL.
+	 * 
+	 * @param vehicles
+	 */
+	public ApiVehicles(Collection<IpcVehicle> vehicles) {
+		vehiclesData = new ArrayList<ApiVehicle>();
+		for (IpcVehicle vehicle : vehicles) {
+			// Add this vehicle to the ApiVehicle list
+			vehiclesData.add(new ApiVehicle(vehicle, UiMode.NORMAL));
+		}
+	}
 
 }

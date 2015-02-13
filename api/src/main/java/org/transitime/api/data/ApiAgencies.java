@@ -28,22 +28,22 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="agencies")
+@XmlRootElement(name = "agencies")
 public class ApiAgencies {
 
-    @XmlElement(name="agency")
-    private List<ApiAgency> agenciesData;
+	@XmlElement(name = "agency")
+	private List<ApiAgency> agenciesData;
 
-    
-    /********************** Member Functions **************************/
+	/********************** Member Functions **************************/
 
-    /**
-     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
-     * "MessageBodyWriter not found for media type=application/json" exception.
-     */
-    protected ApiAgencies() {}
-    
-    public ApiAgencies(List<ApiAgency> apiAgencies) {
-	agenciesData = apiAgencies;
-    }
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiAgencies() {
+	}
+
+	public ApiAgencies(List<ApiAgency> apiAgencies) {
+		agenciesData = apiAgencies;
+	}
 }

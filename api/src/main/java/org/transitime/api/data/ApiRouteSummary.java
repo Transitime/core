@@ -22,30 +22,32 @@ import javax.xml.bind.annotation.XmlAttribute;
 import org.transitime.ipc.data.IpcRouteSummary;
 
 /**
- * A short description of a route. For when outputting list of routes for agency.
+ * A short description of a route. For when outputting list of routes for
+ * agency.
  *
  * @author SkiBu Smith
  *
  */
 public class ApiRouteSummary {
 
-    @XmlAttribute
-    private String id;
-    
-    @XmlAttribute(name="rShortName")
-    private String shortName;
-    
-    @XmlAttribute
-    private String name;
-    
-    /********************** Member Functions **************************/
+	@XmlAttribute
+	private String id;
 
-    protected ApiRouteSummary() {}
-    
-    public ApiRouteSummary(IpcRouteSummary route) {
-	this.id = route.getId();
-	this.shortName = route.getShortName();
-	this.name = route.getName();
-    }
+	@XmlAttribute(name = "rShortName")
+	private String shortName;
+
+	@XmlAttribute
+	private String name;
+
+	/********************** Member Functions **************************/
+
+	protected ApiRouteSummary() {
+	}
+
+	public ApiRouteSummary(IpcRouteSummary route) {
+		this.id = route.getId();
+		this.shortName = route.getShortName();
+		this.name = route.getName();
+	}
 
 }

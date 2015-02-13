@@ -33,25 +33,26 @@ import org.transitime.ipc.data.IpcStopsForRoute;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="directions")
+@XmlRootElement(name = "directions")
 public class ApiDirections {
 
-    @XmlElement(name="direction")
-    private List<ApiDirection> directionsData;
+	@XmlElement(name = "direction")
+	private List<ApiDirection> directionsData;
 
-     /********************** Member Functions **************************/
+	/********************** Member Functions **************************/
 
-    /**
-     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
-     * "MessageBodyWriter not found for media type=application/json" exception.
-     */
-    protected ApiDirections() {}
-    
-    public ApiDirections(IpcStopsForRoute stopsForRoute) {
-	Collection<IpcDirection> directions = stopsForRoute.getDirections();
-	directionsData = new ArrayList<ApiDirection>(directions.size());
-	for (IpcDirection direction : directions) {
-	    directionsData.add(new ApiDirection(direction));
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiDirections() {
 	}
-    }
+
+	public ApiDirections(IpcStopsForRoute stopsForRoute) {
+		Collection<IpcDirection> directions = stopsForRoute.getDirections();
+		directionsData = new ArrayList<ApiDirection>(directions.size());
+		for (IpcDirection direction : directions) {
+			directionsData.add(new ApiDirection(direction));
+		}
+	}
 }

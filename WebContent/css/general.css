@@ -14,6 +14,9 @@ body {
     background: -o-linear-gradient(bottom right, #8DC5EB, blue); /* For Opera 11.1 to 12.0 */
     background: -moz-linear-gradient(bottom right, #8DC5EB, blue); /* For Firefox 3.6 to 15 */
     background: linear-gradient(to bottom right, #8DC5EB , blue); /* Standard syntax */
+
+    /* Experiment with this top to bottom gradient which might look better */
+    background: linear-gradient(blue, white); /* Standard syntax */
     
 	margin-left: 0px;
 	margin-right: 0px;
@@ -34,11 +37,14 @@ body {
 	margin-left: auto; 
 	margin-right: auto; 
 	width: 70%; 
-	font-weight: bold;
-	font-size: x-large;
+	font-weight: normal;
+	font-size: xx-large;
 	text-align: center;
 }
 
+/* Note: this one should probably go on the pages where it actually is used. 
+   It is probably for where have lists of reports or such.
+ */
 ul {
 	width: 350px;
 	margin-left: auto;
@@ -72,3 +78,16 @@ input, select {
 	background-color: #f8f8f8;
 	font-size: large;
 }
+
+.earlyColor {
+	background: #f9dbe6; 
+}
+
+.lateColor {
+	background: #fcf5c9;
+}
+
+.problemColor {
+	background: #f9dbe6; 
+}
+
