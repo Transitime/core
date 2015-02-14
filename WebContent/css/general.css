@@ -9,18 +9,12 @@ body {
 }
 
 #header {
-	/* Use fancy gradient background */
-	background: -webkit-linear-gradient(left top, #8DC5EB , blue); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(bottom right, #8DC5EB, blue); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(bottom right, #8DC5EB, blue); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(to bottom right, #8DC5EB , blue); /* Standard syntax */
-
     /* Experiment with this top to bottom gradient which might look better */
-    background: linear-gradient(blue, white); /* Standard syntax */
+    background: linear-gradient(#0055aa, white); /* Standard syntax */
     
 	margin-left: 0px;
 	margin-right: 0px;
-	padding: 8px;	
+	padding: 10px;	
 	font-weight: normal;
 	font-size: x-large;
 }
