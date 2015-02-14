@@ -256,6 +256,7 @@ function handleAjaxData(routes) {
 						" <td class='blockLabel'>Trip:</td><td id='trip'></td>" + 
 						" <td class='blockLabel'>Start:</td><td id='tripStart'></td>" + 
 						" <td class='blockLabel'>End:</td><td id='tripEnd'></td>" + 
+						" <td class='blockLabel'>Headsign:</td><td id='tripHeadsign'></td>" + 
 						"</tr>" +
 						"<tr id='" + blockElementId + "'>" +
 						" <td class='blockLabel'>Vehicle:</td><td id='vehiclesForBlock'></td>" +
@@ -291,6 +292,9 @@ function handleAjaxData(routes) {
 
 			var tripEndValueElement = $("#" + routeElementId + " #" + blockElementId + " #tripEnd");
 			tripEndValueElement.text(blockData.trip.endTime);
+			
+			var tripHeadsignValueElement = $("#" + routeElementId + " #" + blockElementId + " #tripHeadsign");
+			tripHeadsignValueElement.text(blockData.trip.headsign);
 			
 			var vehiclesValue = "none";
 			if (blockData.vehicle.length != 0) {
