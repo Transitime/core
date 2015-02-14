@@ -80,14 +80,17 @@ input, select {
 }
 
 .earlyColor {
-	background: #f9dbe6; 
+	background: #f2b7cd;
+	border-radius: 4px; 
 }
 
 .lateColor {
-	background: #fcf5c9;
+	background: #fbfd97;
+	border-radius: 4px; 
 }
 
 .problemColor {
-	background: #f9dbe6; 
+	background: #f2b7cd;
+	border-radius: 4px;
 }
 
