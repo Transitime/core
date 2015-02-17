@@ -53,8 +53,9 @@ public class VehicleDataCache {
     private Map<String, IpcCompleteVehicle> vehiclesMap = 
     		new ConcurrentHashMap<String, IpcCompleteVehicle>();
 
-    // Keyed by route_short_name. For each route there is a submap
-    // that is keyed by vehicle.
+    // Keyed by route_short_name. Key is null for vehicles that have not
+    // been successfully associated with a route. For each route there is a 
+    // submap that is keyed by vehicle.
     private Map<String, Map<String, IpcCompleteVehicle>> vehiclesByRouteMap = 
     		new ConcurrentHashMapNullKeyOk<String, Map<String, IpcCompleteVehicle>>();
 
@@ -171,6 +172,9 @@ public class VehicleDataCache {
 	 * specified route.
 	 * 
 	 * @param routeIdOrShortName
+	 *            Specifies which route to return vehicle data for. Can be a
+	 *            route_short_name or a route_id. Can also be null or empty
+	 *            string to retrieve vehicles that are not assigned to a route.
 	 * @return Collection of IpcExtVehicle for vehicles on route, or null if no
 	 *         vehicles for the route.
 	 */
@@ -178,14 +182,22 @@ public class VehicleDataCache {
 			String routeIdOrShortName) {
 		// Try getting vehicles using routeShortName
 		String routeShortName = routeIdOrShortName;
+		// If want vehicles not associated with route then need to use null
+		// as the route short name instead of an empty string.
+		if (routeShortName != null && routeShortName.isEmpty())
+			routeShortName = null;
 		Map<String, IpcCompleteVehicle> vehicleMapForRoute = vehiclesByRouteMap
 				.get(routeShortName);
+		
 		// If couldn't get vehicles by route short name try using
 		// the route ID.
 		if (vehicleMapForRoute == null) {
 			Route route = Core.getInstance().getDbConfig()
 					.getRouteById(routeIdOrShortName);
-			vehicleMapForRoute = vehiclesByRouteMap.get(route.getShortName());
+			if (route != null) {
+				vehicleMapForRoute = 
+						vehiclesByRouteMap.get(route.getShortName());
+			}
 		}
 
 		if (vehicleMapForRoute != null)
@@ -359,8 +371,8 @@ public class VehicleDataCache {
 				vehiclesByRouteMap.get(vehicle.getRouteShortName());
 		if (vehicleMapForRoute == null) {
 			vehicleMapForRoute = new HashMap<String, IpcCompleteVehicle>();
-			vehiclesByRouteMap.put(vehicle.getRouteShortName(),
-					vehicleMapForRoute);
+			String routeMapKey = vehicle.getRouteShortName();
+			vehiclesByRouteMap.put(routeMapKey, vehicleMapForRoute);
 		}
 		vehicleMapForRoute.put(vehicle.getId(), vehicle);				
 	}
