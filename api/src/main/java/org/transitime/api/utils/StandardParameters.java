@@ -46,214 +46,212 @@ import org.transitime.ipc.interfaces.VehiclesInterface;
  * 
  */
 public class StandardParameters {
-    @PathParam("key")
-    private String key;
-    
-    @PathParam("agency")
-    private String agencyId;
-    
-    @QueryParam("format")
-    private String formatOverride;
-    
-    // Note: Specifying a default value so that don't get a 
-    // 400 bad request when using wget and headers not set. But
-    // this isn't enough. Still getting Bad Request. But leaving
-    // this in as documentation that it was tried.
-    @HeaderParam("accept") 
-    @DefaultValue("application/xml")
-    String acceptHeader;
-    
-    @Context 
-    HttpServletRequest request;
-    
-    /********************** Member Functions **************************/
+	@PathParam("key")
+	private String key;
 
-    /**
-     * Returns the media type to use for the response based on optional accept
-     * header and the optional format specification in the query string of the
-     * URL. Setting format in query string overrides what is set in accept
-     * header. This way it is always simple to generate a http get for
-     * particular format simply by setting query string.
-     * <p>
-     * If format specification is incorrect then BadRequest
-     * WebApplicationException is thrown.
-     * <p>
-     * The media type is not determined in the constructor because then an
-     * exception would cause an ugly error message because it would be handled
-     * before the root-resource class get method is being called.
-     * 
-     * @return The resulting media type
-     */
-    public String getMediaType() 
-	    throws WebApplicationException {
-	// Use default of APPLICATION_XML
-	String mediaType = MediaType.APPLICATION_XML;
-	
-	// If mediaType specified in accept header then start with it
-	if (acceptHeader != null) {
-	    if (acceptHeader.contains(MediaType.APPLICATION_JSON))
-		mediaType = MediaType.APPLICATION_JSON;
-	    else if (acceptHeader.contains(MediaType.APPLICATION_XML))
-		mediaType = MediaType.APPLICATION_XML;
-	    else
-		throw WebUtils.badRequestException("Accept header \"Accept: " + 
-			acceptHeader + "\" is not valid. Must be \"" + 
-			MediaType.APPLICATION_JSON + "\" or \"" + 
-			MediaType.APPLICATION_XML + "\"");
+	@PathParam("agency")
+	private String agencyId;
+
+	@QueryParam("format")
+	private String formatOverride;
+
+	// Note: Specifying a default value so that don't get a
+	// 400 bad request when using wget and headers not set. But
+	// this isn't enough. Still getting Bad Request. But leaving
+	// this in as documentation that it was tried.
+	@HeaderParam("accept")
+	@DefaultValue("application/xml")
+	String acceptHeader;
+
+	@Context
+	HttpServletRequest request;
+
+	/********************** Member Functions **************************/
+
+	/**
+	 * Returns the media type to use for the response based on optional accept
+	 * header and the optional format specification in the query string of the
+	 * URL. Setting format in query string overrides what is set in accept
+	 * header. This way it is always simple to generate a http get for
+	 * particular format simply by setting query string.
+	 * <p>
+	 * If format specification is incorrect then BadRequest
+	 * WebApplicationException is thrown.
+	 * <p>
+	 * The media type is not determined in the constructor because then an
+	 * exception would cause an ugly error message because it would be handled
+	 * before the root-resource class get method is being called.
+	 * 
+	 * @return The resulting media type
+	 */
+	public String getMediaType() throws WebApplicationException {
+		// Use default of APPLICATION_XML
+		String mediaType = MediaType.APPLICATION_XML;
+
+		// If mediaType specified in accept header then start with it
+		if (acceptHeader != null) {
+			if (acceptHeader.contains(MediaType.APPLICATION_JSON))
+				mediaType = MediaType.APPLICATION_JSON;
+			else if (acceptHeader.contains(MediaType.APPLICATION_XML))
+				mediaType = MediaType.APPLICATION_XML;
+			else
+				throw WebUtils.badRequestException("Accept header \"Accept: "
+						+ acceptHeader + "\" is not valid. Must be \""
+						+ MediaType.APPLICATION_JSON + "\" or \""
+						+ MediaType.APPLICATION_XML + "\"");
+		}
+
+		// If mediaType format is overridden using the query string format
+		// parameter then use it.
+		if (formatOverride != null) {
+			// Always use lower case
+			formatOverride = formatOverride.toLowerCase();
+
+			// If mediaType override set properly then use it
+			if (formatOverride.equals("json"))
+				mediaType = MediaType.APPLICATION_JSON;
+			else if (formatOverride.equals("xml"))
+				mediaType = MediaType.APPLICATION_XML;
+			else if (formatOverride.equals("human"))
+				mediaType = MediaType.TEXT_PLAIN;
+			else
+				throw WebUtils.badRequestException("Format \"format="
+						+ formatOverride + "\" from query string not valid. "
+						+ "Format must be \"json\" or \"xml\"");
+		}
+
+		return mediaType;
 	}
-	
-	// If mediaType format is overridden using the query string format
-	// parameter then use it.
-	if (formatOverride != null) {
-	    // Always use lower case
-	    formatOverride = formatOverride.toLowerCase();
-	        
-	    // If mediaType override set properly then use it 
-	    if (formatOverride.equals("json"))
-		mediaType = MediaType.APPLICATION_JSON;
-	    else if (formatOverride.equals("xml"))
-		mediaType = MediaType.APPLICATION_XML;
-	    else if (formatOverride.equals("human"))
-		mediaType = MediaType.TEXT_PLAIN;
-	    else
-		throw WebUtils.badRequestException("Format \"format=" + 
-			formatOverride + "\" from query string not valid. " +
-			"Format must be \"json\" or \"xml\"");
+
+	/**
+	 * Makes sure not access feed too much and that the key is valid.
+	 * 
+	 * @throws WebApplicationException
+	 */
+	public void validate() throws WebApplicationException {
+		// Make sure not accessing feed too much. This needs to be done
+		// early in the handling of the request so can stop processing
+		// bad requests before too much effort is expended. Throw exception
+		// if usage limits exceeded.
+		UsageValidator.getInstance().validateUsage(this);
+
+		// Make sure the application key is valid
+		ApiKeyManager.getInstance().validateKey(this);
 	}
 
-	return mediaType;
-    }
+	/**
+	 * For creating a Response of a single object of the appropriate media type.
+	 * 
+	 * @param object
+	 *            Object to be returned in XML or JSON
+	 * @return The created response in the proper media type.
+	 */
+	public Response createResponse(Object object) {
+		// Start building the response
+		ResponseBuilder responseBuilder = Response.ok(object);
 
-    /**
-     * Makes sure not access feed too much and that the key is valid.
-     * 
-     * @throws WebApplicationException
-     */
-    public void validate() throws WebApplicationException {
-	// Make sure not accessing feed too much. This needs to be done
-	// early in the handling of the request so can stop processing
-	// bad requests before too much effort is expended. Throw exception 
-	// if usage limits exceeded.
-	UsageValidator.getInstance().validateUsage(this);
-	
-	// Make sure the application key is valid
-	ApiKeyManager.getInstance().validateKey(this);
-    }
-    
-    /**
-     * For creating a Response of a single object of the appropriate media type.
-     * 
-     * @param object
-     *            Object to be returned in XML or JSON
-     * @return The created response in the proper media type.
-     */
-    public Response createResponse(Object object) {
-	// Start building the response
-	ResponseBuilder responseBuilder = Response.ok(object); 
-	
-	// Since this is a truly open API intended to be used by
-	// other web pages allow cross-origin requests.
-	responseBuilder.header("Access-Control-Allow-Origin", "*");
-	
-	// Specify media type of XML or JSON
-	responseBuilder.type(getMediaType());
-	
-	// Return the response
-	return responseBuilder.build();
-    }
+		// Since this is a truly open API intended to be used by
+		// other web pages allow cross-origin requests.
+		responseBuilder.header("Access-Control-Allow-Origin", "*");
 
-    /**
-    * Gets the VehiclesInterface for the specified agencyId. If not valid then
-    * throws WebApplicationException.
-    * 
-    * @return The VehiclesInterface
-    */
-   public VehiclesInterface getVehiclesInterface() 
-	    throws WebApplicationException {
-	VehiclesInterface vehiclesInterface = VehiclesInterfaceFactory
-		.get(agencyId);
-	if (vehiclesInterface == null)
-	    throw WebUtils.badRequestException("Agency ID " + agencyId
-		    + " is not valid");
-	
-	return vehiclesInterface;
-   }
+		// Specify media type of XML or JSON
+		responseBuilder.type(getMediaType());
 
-   /**
-    * Gets the PredictionsInterface for the specified agencyId. If not valid then
-    * throws WebApplicationException.
-    * 
-    * @return The VehiclesInterface
-    */
-   public PredictionsInterface getPredictionsInterface() 
-	    throws WebApplicationException {
-	PredictionsInterface predictionsInterface = PredictionsInterfaceFactory
-		.get(agencyId);
-	if (predictionsInterface == null)
-	    throw WebUtils.badRequestException("Agency ID " + agencyId
-		    + " is not valid");
-	
-	return predictionsInterface;
-   }
+		// Return the response
+		return responseBuilder.build();
+	}
 
-   /**
-    * Gets the ConfigInterface for the specified agencyId. If not valid then
-    * throws WebApplicationException.
-    * 
-    * @return The VehiclesInterface
-    */
-   public ConfigInterface getConfigInterface() 
-	    throws WebApplicationException {
-	ConfigInterface configInterface = ConfigInterfaceFactory.get(agencyId);
-	if (configInterface == null)
-	    throw WebUtils.badRequestException("Agency ID " + agencyId
-		    + " is not valid");
-	
-	return configInterface;
-   }
+	/**
+	 * Gets the VehiclesInterface for the specified agencyId. If not valid then
+	 * throws WebApplicationException.
+	 * 
+	 * @return The VehiclesInterface
+	 */
+	public VehiclesInterface getVehiclesInterface()
+			throws WebApplicationException {
+		VehiclesInterface vehiclesInterface = VehiclesInterfaceFactory
+				.get(agencyId);
+		if (vehiclesInterface == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
 
-   /**
-    * Gets the ServerStatusInterface for the specified agencyId. If not valid then
-    * throws WebApplicationException.
-    * 
-    * @return The VehiclesInterface
-    */
-   public ServerStatusInterface getServerStatusInterface() 
-	    throws WebApplicationException {
-       ServerStatusInterface serverStatusInterface = ServerStatusInterfaceFactory.get(agencyId);
-	if (serverStatusInterface == null)
-	    throw WebUtils.badRequestException("Agency ID " + agencyId
-		    + " is not valid");
-	
-	return serverStatusInterface;
-   }
+		return vehiclesInterface;
+	}
 
-    /**
-     * Simple getter for the key
-     * 
-     * @return
-     */
-    public String getKey() {
-        return key;
-    }
+	/**
+	 * Gets the PredictionsInterface for the specified agencyId. If not valid
+	 * then throws WebApplicationException.
+	 * 
+	 * @return The VehiclesInterface
+	 */
+	public PredictionsInterface getPredictionsInterface()
+			throws WebApplicationException {
+		PredictionsInterface predictionsInterface = PredictionsInterfaceFactory
+				.get(agencyId);
+		if (predictionsInterface == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
 
-    /**
-     * Simple getter for the agency ID
-     * 
-     * @return
-     */
-    public String getAgencyId() {
-        return agencyId;
-    }
+		return predictionsInterface;
+	}
 
-    /**
-     * Returns the HttpServletRequest.
-     * 
-     * @return
-     */
-    public HttpServletRequest getRequest() {
-	return request;
-    }
-    
+	/**
+	 * Gets the ConfigInterface for the specified agencyId. If not valid then
+	 * throws WebApplicationException.
+	 * 
+	 * @return The VehiclesInterface
+	 */
+	public ConfigInterface getConfigInterface() throws WebApplicationException {
+		ConfigInterface configInterface = ConfigInterfaceFactory.get(agencyId);
+		if (configInterface == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
+
+		return configInterface;
+	}
+
+	/**
+	 * Gets the ServerStatusInterface for the specified agencyId. If not valid
+	 * then throws WebApplicationException.
+	 * 
+	 * @return The VehiclesInterface
+	 */
+	public ServerStatusInterface getServerStatusInterface()
+			throws WebApplicationException {
+		ServerStatusInterface serverStatusInterface = 
+				ServerStatusInterfaceFactory.get(agencyId);
+		if (serverStatusInterface == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
+
+		return serverStatusInterface;
+	}
+
+	/**
+	 * Simple getter for the key
+	 * 
+	 * @return
+	 */
+	public String getKey() {
+		return key;
+	}
+
+	/**
+	 * Simple getter for the agency ID
+	 * 
+	 * @return
+	 */
+	public String getAgencyId() {
+		return agencyId;
+	}
+
+	/**
+	 * Returns the HttpServletRequest.
+	 * 
+	 * @return
+	 */
+	public HttpServletRequest getRequest() {
+		return request;
+	}
+
 }
-
