@@ -15,40 +15,42 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.ipc.data;
+package org.transitime.monitoring;
 
 import java.io.Serializable;
-import java.util.List;
-
-import org.transitime.monitoring.MonitorResult;
 
 /**
- * Represents server status for Inter Process Communication (IPC)
+ * Contains status for an individual monitor. To be based
+ * via IPC to client.
  *
  * @author SkiBu Smith
  *
  */
-public class IpcServerStatus implements Serializable {
+public class MonitorResult implements Serializable {
 
-	private final List<MonitorResult> monitorResults;
+	private final String type;
+	private final String message;
 
-	private static final long serialVersionUID = 4167038313695279486L;
+	private static final long serialVersionUID = 8865389000445125279L;
 
 	/********************** Member Functions **************************/
 
-	public IpcServerStatus(List<MonitorResult> monitorResults) {
-		this.monitorResults = monitorResults;
-	}
-
-	@Override
-	public String toString() {
-		return "IpcServerStatus [" 
-				+ "monitorResults=" + monitorResults
-				+ "]";
-	}
-
-	public List<MonitorResult> getMonitorResults() {
-		return monitorResults;
+	public MonitorResult(String type, String message) {
+		this.type = type;
+		this.message = message;
 	}
 	
+	@Override
+	public String toString() {
+		return "MonitorResult [type=" + type + ", message=" + message + "]";
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
 }

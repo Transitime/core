@@ -97,27 +97,6 @@ public class AgencyMonitor {
 	}
 	
 	/**
-	 * Contains status for an individual monitor
-	 */
-	public static class MonitorResult {
-		private String type;
-		private String message;
-		
-		@Override
-		public String toString() {
-			return "MonitorResult [type=" + type + ", message=" + message + "]";
-		}
-
-		public String getType() {
-			return type;
-		}
-
-		public String getMessage() {
-			return message;
-		}
-	}
-	
-	/**
 	 * Checks all the monitors for the agency and returns all resulting messages
 	 * whether a monitor is triggered or not. Useful for showing current status
 	 * of system.
@@ -127,9 +106,8 @@ public class AgencyMonitor {
 	public List<MonitorResult> getMonitorResults() {
 		List<MonitorResult> monitorResults = new ArrayList<MonitorResult>();
 		for (MonitorBase monitor : monitors) {
-			MonitorResult monitorResult = new MonitorResult();
-			monitorResult.type = monitor.type();
-			monitorResult.message = monitor.getMessage();
+			MonitorResult monitorResult = 
+					new MonitorResult(monitor.type(), monitor.getMessage());
 			monitorResults.add(monitorResult);
 		}
 		return monitorResults;
