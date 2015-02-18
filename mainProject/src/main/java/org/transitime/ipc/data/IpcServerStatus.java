@@ -18,41 +18,37 @@
 package org.transitime.ipc.data;
 
 import java.io.Serializable;
+import java.util.List;
+
+import org.transitime.monitoring.AgencyMonitor.MonitorResult;
 
 /**
- * Represents server stats for Inter Process Communication (IPC)
+ * Represents server status for Inter Process Communication (IPC)
  *
  * @author SkiBu Smith
  *
  */
 public class IpcServerStatus implements Serializable {
 
-	private final int dbLoggerQueueSize;
-	private final double dbLoggerQueueLevel;
+	private final List<MonitorResult> monitorResults;
 
-	private static final long serialVersionUID = 1548817311193140609L;
+	private static final long serialVersionUID = 4167038313695279486L;
 
 	/********************** Member Functions **************************/
 
-	public IpcServerStatus(int dbLoggerQueueSize, double dbLoggerQueueLevel) {
-		this.dbLoggerQueueSize = dbLoggerQueueSize;
-		this.dbLoggerQueueLevel = dbLoggerQueueLevel;
+	public IpcServerStatus(List<MonitorResult> monitorResults) {
+		this.monitorResults = monitorResults;
 	}
 
 	@Override
 	public String toString() {
 		return "IpcServerStatus [" 
-				+ "dbLoggerQueueSize=" + dbLoggerQueueSize
-				+ ", dbLoggerQueueLevel=" + dbLoggerQueueLevel
+				+ "monitorResults=" + monitorResults
 				+ "]";
 	}
 
-	public int getDbLoggerQueueSize() {
-		return dbLoggerQueueSize;
-	}
-
-	public double getDbLoggerQueueLevel() {
-		return dbLoggerQueueLevel;
+	public List<MonitorResult> getMonitorResults() {
+		return monitorResults;
 	}
 	
 }

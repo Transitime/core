@@ -21,8 +21,6 @@ import java.rmi.RemoteException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.applications.Core;
-import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.rmi.AbstractServer;
@@ -80,9 +78,8 @@ public class ServerStatusServer extends AbstractServer
 	 */
 	@Override
 	public IpcServerStatus get() throws RemoteException {
-		DataDbLogger dbLogger = Core.getInstance().getDbLogger();
-		return new IpcServerStatus(dbLogger.queueSize(), 
-				dbLogger.queueLevel());
+		AgencyMonitor agencyMonitor = AgencyMonitor.getInstance(getAgencyId());
+		return new IpcServerStatus(agencyMonitor.getMonitorResults());
 	}
 
 	/* (non-Javadoc)

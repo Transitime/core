@@ -62,6 +62,14 @@ public abstract class MonitorBase {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param emailSender
+	 *            For sending out e-mails when monitor triggered or untriggered
+	 * @param agencyId
+	 *            Identifies agency
+	 */
 	public MonitorBase(EmailSender emailSender, String agencyId) {
 		this.emailSender = emailSender;
 		this.agencyId = agencyId;
@@ -166,7 +174,8 @@ public abstract class MonitorBase {
 	/**
 	 * Returns any message from the last time monitoring was checked.
 	 * 
-	 * @return Message describing situation, or null if no issue
+	 * @return Message describing situation. Should be set whether or not
+	 *         monitor is currently triggered so can also provide an OK message.
 	 */
 	public String getMessage() {
 		return message;
