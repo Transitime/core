@@ -104,6 +104,10 @@ public class AgencyMonitor {
 	 * @return List of results of monitoring
 	 */
 	public List<MonitorResult> getMonitorResults() {
+		// Check all the monitors, which will set their message
+		checkAll();
+		
+		// For all the monitors return the results
 		List<MonitorResult> monitorResults = new ArrayList<MonitorResult>();
 		for (MonitorBase monitor : monitors) {
 			MonitorResult monitorResult = 
