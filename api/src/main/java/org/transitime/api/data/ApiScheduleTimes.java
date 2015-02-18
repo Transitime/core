@@ -33,16 +33,16 @@ import org.transitime.ipc.data.IpcTrip;
  */
 public class ApiScheduleTimes {
 
-    @XmlElement(name="scheduleTime")
-    private List<ApiScheduleTime> scheduleTimes;
+	@XmlElement(name = "scheduleTime")
+	private List<ApiScheduleTime> scheduleTimes;
 
-    /********************** Member Functions **************************/
+	/********************** Member Functions **************************/
 
-    public ApiScheduleTimes(IpcTrip ipcTrip) {
-	scheduleTimes = new ArrayList<ApiScheduleTime>();
-	for (IpcScheduleTimes ipcScheduleTimes : ipcTrip.getScheduleTimes()) {
-	    scheduleTimes.add(new ApiScheduleTime(ipcScheduleTimes));
+	public ApiScheduleTimes(IpcTrip ipcTrip) {
+		scheduleTimes = new ArrayList<ApiScheduleTime>();
+		for (IpcScheduleTimes ipcScheduleTimes : ipcTrip.getScheduleTimes()) {
+			scheduleTimes.add(new ApiScheduleTime(ipcScheduleTimes));
+		}
+
 	}
-
-    }
 }
