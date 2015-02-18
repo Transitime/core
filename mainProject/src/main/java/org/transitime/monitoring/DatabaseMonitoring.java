@@ -70,6 +70,7 @@ public class DatabaseMonitoring extends MonitorBase {
 		}
 
 		// Everything OK
+		setMessage("Successfully read and wrote to database.");
 		return false;
 	}
 
