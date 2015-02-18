@@ -17,10 +17,15 @@
 
 package org.transitime.api.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcServerStatus;
+import org.transitime.monitoring.MonitorResult;
 
 /**
  * Server status for an agency server
@@ -28,37 +33,38 @@ import org.transitime.ipc.data.IpcServerStatus;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="serverStatus")
+@XmlRootElement(name = "serverStatus")
 public class ApiServerStatus {
 
-    @XmlAttribute
-    private String agencyId;
-    
-    @XmlAttribute
-    private int dbLoggerQueueSize;
+	@XmlAttribute
+	private String agencyId;
 
-    @XmlAttribute
-    private double dbLoggerQueueLevel;
+	@XmlElement(name = "serverMonitor")
+	private List<ApiServerMonitor> serverMonitors;
 
-    /********************** Member Functions **************************/
+	/********************** Member Functions **************************/
 
-    /**
-     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
-     * "MessageBodyWriter not found for media type=application/json" exception.
-     */
-    protected ApiServerStatus() {}
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiServerStatus() {
+	}
 
-    /**
-     * Constructors a ApiServerStatus object from agencyId and IpcServerStatus
-     * objects.
-     * 
-     * @param agencyId
-     * @param ipcServerStatus
-     */
-    public ApiServerStatus(String agencyId, IpcServerStatus ipcServerStatus) {
-	this.agencyId = agencyId;
-	this.dbLoggerQueueSize = ipcServerStatus.getDbLoggerQueueSize();
-	this.dbLoggerQueueLevel = ipcServerStatus.getDbLoggerQueueLevel();
-    }
+	/**
+	 * Constructors a ApiServerStatus object from agencyId and IpcServerStatus
+	 * objects.
+	 * 
+	 * @param agencyId
+	 * @param ipcServerStatus
+	 */
+	public ApiServerStatus(String agencyId, IpcServerStatus ipcServerStatus) {
+		this.agencyId = agencyId;
+		
+		serverMonitors = new ArrayList<ApiServerMonitor>();
+		for (MonitorResult monitorResult : ipcServerStatus.getMonitorResults()) {
+			this.serverMonitors.add(new ApiServerMonitor(monitorResult));
+		}
+	}
 
 }
