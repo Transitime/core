@@ -122,6 +122,13 @@ var minorVehicleMarkerBackgroundOptions = {
     fillOpacity: 0.5,				
 };
 
+var unassignedVehicleMarkerBackgroundOptions = {
+	    radius: 10,
+	    weight: 0,
+	    fillColor: '#F0FA39',
+	    fillOpacity: 0.6,				
+};
+
 var vehiclePopupOptions = {
 	offset: L.point(0,-2), 
 	closeButton: false

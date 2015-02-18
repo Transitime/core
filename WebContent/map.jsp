@@ -8,6 +8,7 @@
    s=STOP_ID (optional, for specifying which stop interested in)
    tripPattern=TRIP_PATTERN (optional, for specifying which stop interested in).
    verbose=true (for getting additional info in vehicle popup window)
+   showUnassignedVehicles=true (for showing unassigned vehicles)
 -->
 <html>
 <head>
@@ -115,7 +116,7 @@ function setRouteQueryStrParamViaQueryStr() {
 	}
 	 
 	if (getQueryVariable("r"))
-		routeQueryStrParam = "r=" + getQueryVariable("r");
+		routeQueryStrParam = "r=" + getQueryVariable("r");	
 }
 
 // For keeping track the predictions popup so can update content
@@ -393,7 +394,10 @@ function getVehicleMarkerOptions(vehicleData) {
  * Determines options for drawing the vehicle background circle based on uiType
  */
 function getVehicleMarkerBackgroundOptions(vehicleData) {
-	if (!vehicleData.uiType || vehicleData.uiType == "normal")
+	// Handle unassigned vehicles
+	if (!vehicleData.block)
+		return unassignedVehicleMarkerBackgroundOptions;
+	else if (!vehicleData.uiType || vehicleData.uiType == "normal")
 		return vehicleMarkerBackgroundOptions;
 	else if (vehicleData.uiType == "secondary")
 		return secondaryVehicleMarkerBackgroundOptions;
@@ -683,6 +687,10 @@ function updateVehiclesUsingApiData() {
 	// attract as much attention.
 	if (getQueryVariable("s"))
 		url += "&s=" + getQueryVariable("s") + "&numPreds=2";
+
+	// Handle being able to show unassigned vehicles
+	if (getQueryVariable("showUnassignedVehicles"))
+		url += "&r=";
 
 	// Use ajax() instead of getJSON() so that can set timeout since
 	// will be polling vehicle info every 10 seconds and don't want there

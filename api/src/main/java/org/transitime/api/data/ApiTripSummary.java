@@ -49,6 +49,9 @@ public class ApiTripSummary {
 	private String directionId;
 
 	@XmlAttribute
+	private String headsign;
+
+	@XmlAttribute
 	private String routeId;
 
 	@XmlAttribute
@@ -68,6 +71,7 @@ public class ApiTripSummary {
 		startTime = Time.timeOfDayStr(ipcTrip.getStartTime());
 		endTime = Time.timeOfDayStr(ipcTrip.getEndTime());
 		directionId = ipcTrip.getDirectionId();
+		headsign = ipcTrip.getHeadsign();
 		routeId = ipcTrip.getRouteId();
 		routeShortName = ipcTrip.getRouteShortName();
 	}
