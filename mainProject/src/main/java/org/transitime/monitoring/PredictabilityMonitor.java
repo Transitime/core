@@ -25,7 +25,6 @@ import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.BlocksInfo;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.Block;
-import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.utils.EmailSender;
 import org.transitime.utils.StringUtils;
 
@@ -94,13 +93,12 @@ public class PredictabilityMonitor extends MonitorBase {
 		}
 
 		// Determine number of currently active vehicles
-		Collection<IpcCompleteVehicle> vehicles = 
-				VehicleDataCache.getInstance().getVehicles();
-		
 		int predictableVehicleCount = 0;
-		for (IpcCompleteVehicle vehicle : vehicles) {
-			if (vehicle.isPredictable())
-				++predictableVehicleCount;
+		for (Block block : activeBlocks) {
+			// Determine vehicles associated with the block if there are any
+			Collection<String> vehicleIdsForBlock = VehicleDataCache
+					.getInstance().getVehiclesByBlockId(block.getId());
+			predictableVehicleCount += vehicleIdsForBlock.size();
 		}
 		
 		// Determine fraction of active blocks that have a predictable vehicle 
