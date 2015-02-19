@@ -156,12 +156,13 @@ public class WebAgency {
 	}
 
 	/**
-	 * Uses RMI to return the first (there can be multiple) GTFS agency object
-	 * for the specified agencyId.
+	 * Returns the first (there can be multiple) GTFS agency object for the
+	 * specified agencyId. The GTFS agency object is cached. First time it is
+	 * accessed it is read from server via RMI.
 	 * 
 	 * @return The Agency object, or null if can't access the agency via RMI
 	 */
-	private Agency getAgency() {
+	public Agency getAgency() {
 		// If agency hasn't been accessed yet do so now...
 		if (agency == null) {
 			ConfigInterface inter = ConfigInterfaceFactory.get(agencyId);

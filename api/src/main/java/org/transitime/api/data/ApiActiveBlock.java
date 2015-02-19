@@ -59,7 +59,7 @@ public class ApiActiveBlock {
 
 	protected ApiActiveBlock() {}
 	
-	public ApiActiveBlock(IpcActiveBlock ipcActiveBlock) {
+	public ApiActiveBlock(IpcActiveBlock ipcActiveBlock, String agencyId) {
 		id = ipcActiveBlock.getBlock().getId();
 		serviceId = ipcActiveBlock.getBlock().getServiceId();
 		startTime = Time.timeOfDayStr(ipcActiveBlock.getBlock().getStartTime());
@@ -71,7 +71,7 @@ public class ApiActiveBlock {
 		
 		vehicles = new ArrayList<ApiVehicleDetails>();
 		for (IpcVehicle ipcVehicles : ipcActiveBlock.getVehicles()) {
-			vehicles.add(new ApiVehicleDetails(ipcVehicles));
+			vehicles.add(new ApiVehicleDetails(ipcVehicles, agencyId));
 		}
 	}
 	

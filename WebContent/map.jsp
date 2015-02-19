@@ -349,7 +349,7 @@ function getVehiclePopupContent(vehicleData) {
 			 ("<br/><b>Layover:</b> " + vehicleData.layover) : "";
     var layoverDepartureStr = vehicleData.layover ? 
     		 ("<br/><b>Departure:</b> " + 
-    				 dateFormat(vehicleData.layoverDepartureTime)) : "";
+    				 dateFormat(vehicleData.layoverDepTime)) : "";
     var nextStopIdStr = vehicleData.nextStopId ? 
     		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopId) : "";
     var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat

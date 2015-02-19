@@ -48,10 +48,11 @@ public class ApiActiveBlocks {
      */
     protected ApiActiveBlocks() {}
 
-    public ApiActiveBlocks(Collection<IpcActiveBlock> ipcActiveBlocks) {
+	public ApiActiveBlocks(Collection<IpcActiveBlock> ipcActiveBlocks,
+			String agencyId) {
     	activeBlocks = new ArrayList<ApiActiveBlock>();
     	for (IpcActiveBlock ipcActiveBlock : ipcActiveBlocks) {
-    		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock));
+    		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock, agencyId));
     	}
     	
     	// Sort the active blocks by routeId so that can more easily display

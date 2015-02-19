@@ -56,7 +56,8 @@ public class ApiActiveBlocksRoutes {
 	 * 
 	 * @param routes
 	 */
-	public ApiActiveBlocksRoutes(Collection<IpcActiveBlock> activeBlocks) {
+	public ApiActiveBlocksRoutes(Collection<IpcActiveBlock> activeBlocks,
+			String agencyId) {
 		HashMap<String, ApiActiveBlocksRoute> routesMap = 
 				new HashMap<String, ApiActiveBlocksRoute>();
 		
@@ -75,7 +76,7 @@ public class ApiActiveBlocksRoutes {
 			}
 			
 			// Add the new activeBlock to the ApiActiveBlocksRoute
-			apiRoute.add(activeBlock);
+			apiRoute.add(activeBlock, agencyId);
 		}
 
 		// Put sorted results into routeData member

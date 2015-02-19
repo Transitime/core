@@ -428,6 +428,10 @@ public class IpcVehicle implements Serializable {
 		return isLayover;
 	}
 
+	/**
+	 * Epoch time of scheduled departure. Only valid if vehicle at layover.
+	 * @return
+	 */
 	public long getLayoverDepartureTime() {
 		return layoverDepartureTime;
 	}

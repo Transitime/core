@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.gtfsStructs.GtfsAgency;
+import org.transitime.utils.Time;
 
 /**
  * Contains data from the agency.txt GTFS file. This class is
@@ -81,6 +82,9 @@ public class Agency implements Serializable {
 
 	@Transient
 	private TimeZone timezone = null;
+	
+	@Transient
+	private Time time = null;
 	
 	// Because Hibernate requires objects with composite Ids to be Serializable
 	private static final long serialVersionUID = -3381456129303325040L;
@@ -180,7 +184,7 @@ public class Agency implements Serializable {
 	}
 	
 	/**
-	 * Returns TimeZone object for agency. Useful for creating
+	 * Returns cached TimeZone object for agency. Useful for creating
 	 * Calendar objects and such.
 	 * 
 	 * @return The TimeZone object for this agency
@@ -189,6 +193,18 @@ public class Agency implements Serializable {
 		if (timezone == null)
 			timezone = TimeZone.getTimeZone(agencyTimezone); 
 		return timezone;
+	}
+	
+	/**
+	 * Returns cached Time object which allows one to easly convert epoch time
+	 * to time of day and such.
+	 * 
+	 * @return Time object
+	 */
+	public Time getTime() {
+		if (time == null)
+			time = new Time(agencyTimezone);
+		return time;
 	}
 	
 	/* (non-Javadoc)

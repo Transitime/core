@@ -24,7 +24,9 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
 import org.transitime.core.BlockAssignmentMethod;
+import org.transitime.db.webstructs.WebAgency;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.utils.Time;
 
 /**
  * Contains data for a single vehicle with additional info that is meant more
@@ -38,7 +40,7 @@ import org.transitime.ipc.data.IpcVehicle;
 		"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc",
 		"scheduleAdherence", "scheduleAdherenceStr", "blockId",
 		"blockAssignmentMethod", "tripId", "tripPatternId", "isLayover",
-		"layoverDepartureTime", "nextStopId", "driverId" })
+		"layoverDepTime", "layoverDepTimeStr", "nextStopId", "driverId" })
 public class ApiVehicleDetails extends ApiVehicleAbstract {
 
 	// Note: needs to be Integer instead of an int because it can be null
@@ -65,7 +67,10 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	private String isLayover;
 
 	@XmlAttribute
-	private String layoverDepartureTime;
+	private String layoverDepTime;
+
+	@XmlAttribute
+	private String layoverDepTimeStr;
 
 	@XmlAttribute
 	private String nextStopId;
@@ -85,11 +90,12 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	 * ApiVehicle object for the API.
 	 * 
 	 * @param vehicle
+	 * @param agencyId So can output times in proper timezone
 	 * @param uiType
 	 *            Optional parameter. If should be labeled as "minor" in output
 	 *            for UI. Default is UiMode.NORMAL.
 	 */
-	public ApiVehicleDetails(IpcVehicle vehicle, UiMode... uiType) {
+	public ApiVehicleDetails(IpcVehicle vehicle, String agencyId, UiMode... uiType) {
 		super(vehicle, uiType.length > 0 ? uiType[0] : UiMode.NORMAL);
 		
 		scheduleAdherence = vehicle.getRealTimeSchedAdh() != null ? vehicle
@@ -101,8 +107,16 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		tripId = vehicle.getTripId();
 		tripPatternId = vehicle.getTripPatternId();
 		isLayover = vehicle.isLayover() ? "true" : null;
-		layoverDepartureTime = vehicle.isLayover() ? Long.toString(vehicle
-				.getLayoverDepartureTime()) : null;
+		layoverDepTime = vehicle.isLayover() ? 
+				Long.toString(vehicle.getLayoverDepartureTime()) : null;
+				
+		// Get Time object based on timezone for agency
+		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
+		Time timeForAgency = webAgency.getAgency().getTime();				
+
+		layoverDepTimeStr = vehicle.isLayover() ?
+				timeForAgency.timeStrForTimezone(vehicle.getLayoverDepartureTime()) : null;
+				
 		nextStopId = vehicle.getNextStopId() != null ? vehicle.getNextStopId()
 				: null;
 		driverId = vehicle.getAvl().getDriverId();		

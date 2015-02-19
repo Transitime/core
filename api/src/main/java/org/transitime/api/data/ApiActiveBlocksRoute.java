@@ -33,15 +33,19 @@ import org.transitime.ipc.data.IpcActiveBlock;
  */
 public class ApiActiveBlocksRoute {
 
+	// ID of route
 	@XmlAttribute
 	private String id;
 
+	// Route short name
 	@XmlAttribute(name = "rShortName")
 	private String shortName;
 
+	// Name of route
 	@XmlAttribute
 	private String name;
 
+	// The active blocks for the route
 	@XmlElement(name = "block")
 	private List<ApiActiveBlock> activeBlocks;
 	
@@ -58,8 +62,8 @@ public class ApiActiveBlocksRoute {
 		activeBlocks = new ArrayList<ApiActiveBlock>();
 	}
 
-	public void add(IpcActiveBlock ipcActiveBlock) {
-		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock));
+	public void add(IpcActiveBlock ipcActiveBlock, String agencyId) {
+		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock, agencyId));
 	}
 	
 	public String getName() {

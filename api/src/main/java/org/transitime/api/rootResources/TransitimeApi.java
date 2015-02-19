@@ -236,7 +236,7 @@ public class TransitimeApi {
 
 			// Convert IpcVehiclesDetails to ApiVehiclesDetails
 			ApiVehiclesDetails apiVehiclesDetails = new ApiVehiclesDetails(
-					vehicles, uiTypesForVehicles);
+					vehicles, stdParameters.getAgencyId(), uiTypesForVehicles);
 
 			// return ApiVehiclesDetails response
 			return stdParameters.createResponse(apiVehiclesDetails);
@@ -664,7 +664,8 @@ public class TransitimeApi {
 							allowableBeforeTimeSecs);
 
 			// Create and return ApiBlock response
-			ApiActiveBlocks apiActiveBlocks = new ApiActiveBlocks(activeBlocks);
+			ApiActiveBlocks apiActiveBlocks = 
+					new ApiActiveBlocks(activeBlocks, stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocks);
 		} catch (RemoteException e) {
 			// If problem getting data then return a Bad Request
@@ -675,7 +676,8 @@ public class TransitimeApi {
 	@Path("/command/activeBlocksByRoute")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getActiveBlocksByRoute(@BeanParam StandardParameters stdParameters,
+	public Response getActiveBlocksByRoute(
+			@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "r") List<String> routesIdOrShortNames,
 			@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
 			throws WebApplicationException {
@@ -692,8 +694,8 @@ public class TransitimeApi {
 							allowableBeforeTimeSecs);
 
 			// Create and return ApiBlock response
-			ApiActiveBlocksRoutes apiActiveBlocksRoutes = 
-					new ApiActiveBlocksRoutes(activeBlocks);
+			ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
+					activeBlocks, stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocksRoutes);
 		} catch (RemoteException e) {
 			// If problem getting data then return a Bad Request
