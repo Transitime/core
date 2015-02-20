@@ -709,7 +709,7 @@ var verbose = getQueryVariable("verbose");
 var agencyId = getQueryVariable("a");
 if (!agencyId)
 	alert("You must specify agency in URL using a=agencyId parameter");
-var urlPrefix = "/api/v1/key/TEST/agency/" + getQueryVariable("a");
+var urlPrefix = "/api/v1/key/<%= org.transitime.api.utils.WebUtils.apiKey() %>/agency/" + getQueryVariable("a");
 
  
 // Create the map with a scale and specify which map tiles to use

@@ -11,7 +11,7 @@
 </style>
 
 <script>
-var urlPrefix = "/api/v1/key/TEST/agency/<%= request.getParameter("a") %>";
+var urlPrefix = "/api/v1/key/<%= org.transitime.api.utils.WebUtils.apiKey() %>/agency/<%= request.getParameter("a") %>";
 
 $.getJSON(urlPrefix + "/command/routes", 
  		function(routes) {
