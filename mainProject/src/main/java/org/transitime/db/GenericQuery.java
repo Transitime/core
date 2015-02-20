@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -31,6 +30,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.webstructs.WebAgency;
+import org.transitime.utils.IntervalTimer;
 
 /**
  * For doing a query without using Hibernate. By using regular JDBC and avoiding
@@ -39,18 +39,16 @@ import org.transitime.db.webstructs.WebAgency;
  * @author SkiBu Smith
  *
  */
-public class GenericQuery {
+public abstract class GenericQuery {
 
+	// Number of rows read in
+	private int rows;
+	
+	// For caching db connection
 	private static Connection connection;
 
-	private static final Logger logger = LoggerFactory
+	protected static final Logger logger = LoggerFactory
 			.getLogger(GenericQuery.class);
-
-	public static class GenericResult {
-		// One long per column. Using a Long so that can handle longs
-		public List<Number> numbers;
-		public String text;
-	}
 
 	/********************** Member Functions **************************/
 
@@ -134,41 +132,35 @@ public class GenericQuery {
 	 *         (instead of null)
 	 * @throws SQLException
 	 */
-	public List<GenericResult> doQuery(String sql) throws SQLException {
-		List<GenericResult> results = new ArrayList<GenericResult>();
+	protected void doQuery(String sql) throws SQLException {
 		Statement statement = null;
+		IntervalTimer timer = new IntervalTimer();
 
 		try {
 			statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(sql);
 			ResultSetMetaData metaData = rs.getMetaData();
-			// One result per row
-			while (rs.next()) {
-				List<Number> numbers = new ArrayList<Number>();
-				String text = null;
-
-				for (int i = 1; i <= metaData.getColumnCount(); ++i) {
-					int columnType = metaData.getColumnType(i);
-					if (columnType == Types.INTEGER
-							|| columnType == Types.SMALLINT
-							|| columnType == Types.BIGINT) {
-						numbers.add(rs.getLong(i));
-					} else if (columnType == Types.DOUBLE
-							|| columnType == Types.FLOAT) {
-						numbers.add(rs.getDouble(i));
-					} else if (columnType == Types.VARCHAR) {
-						text = rs.getString(i);
-					} else {
-						logger.warn("Encountered unknown result type {} "
-								+ "for columne {}", columnType, i);
-					}
-				}
-
-				GenericResult result = new GenericResult();
-				result.numbers = numbers;
-				result.text = text;
-				results.add(result);
+			
+			// Add all the columns by calling subclass addColumn()
+			for (int i = 1; i <= metaData.getColumnCount(); ++i) {
+				addColumn(metaData.getColumnLabel(i), metaData.getColumnType(i));
 			}
+			doneWithColumns();
+			
+			// Process each row of data
+			rows = 0;
+			while (rs.next()) {
+				++rows;
+				
+				List<Object> row = new ArrayList<Object>();
+				for (int i = 1; i <= metaData.getColumnCount(); ++i) {
+					row.add(rs.getObject(i));
+				}
+				addRow(row);
+			}
+			
+			logger.debug("GenericQuery query took {}msec rows={}",
+					timer.elapsedMsec(), rows);
 		} catch (SQLException e) {
 			throw e;
 		} finally {
@@ -176,64 +168,38 @@ public class GenericQuery {
 				statement.close();
 		}
 
-		return results;
 	}
 
-	public String getCsvString(String sql) throws SQLException {
-		// For putting in the CSV data
-		StringBuilder sb = new StringBuilder();
-
-		Statement statement = null;
-		
-		try {
-			// Do the query
-			statement = connection.createStatement();
-			ResultSet rs = statement.executeQuery(sql);
-			ResultSetMetaData metaData = rs.getMetaData();
-			
-			// Handle the CSV file header
-			for (int i = 1; i <= metaData.getColumnCount(); ++i) {
-				if (i > 1)
-					sb.append(',');
-				sb.append(metaData.getColumnLabel(i));
-			}
-			sb.append('\n');
-			
-			// Handle each row of data
-			while (rs.next()) {
-				for (int i = 1; i <= metaData.getColumnCount(); ++i) {
-					if (i > 1)
-						sb.append(',');
-					sb.append(rs.getObject(i));
-				}
-				sb.append('\n');
-			}
-		} catch (SQLException e) {
-			throw e;
-		} finally {
-			if (statement != null)
-				statement.close();
-		}
-
-		return sb.toString();
+	/**
+	 * Returns number of rows read in.
+	 * 
+	 * @return
+	 */
+	protected int getNumberOfRows() {
+		return rows;
 	}
 	
 	/**
-	 * For debugging.
+	 * Called for each column when processing query data
 	 * 
-	 * @param args
+	 * @param columnName
+	 * @param type
+	 *            java.sql.Types such as Types.DOUBLE
 	 */
-	public static void main(String[] args) {
-		String agencyId = "mbta";
-		
-		String sql = "SELECT * FROM routes WHERE configRev=0;";
-		GenericQuery query;
-		try {
-			query = new GenericQuery(agencyId);
-			String str = query.getCsvString(sql);
-			System.out.println(str);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+	protected abstract void addColumn(String columnName, int type);
+	
+	/**
+	 * When done processing columns. Allows subclass to insert separator
+	 * between column definitions and the row data
+	 */
+	protected void doneWithColumns() {};
+	
+	/**
+	 * Called for each row when processing query data.
+	 * 
+	 * @param values
+	 *            The values for the row.
+	 */
+	protected abstract void addRow(List<Object> values);
+	
 }

@@ -1,6 +1,8 @@
 <%@ page import="org.transitime.utils.Time" %>
-<%@ page import="org.transitime.db.GenericQuery" %>
+<%@ page import="org.transitime.db.GenericCsvQuery" %>
 <%@ page import="java.text.ParseException" %>
+<%-- This file is for outputting prediction accuracy data in CSV format. 
+  --%>
 <%
 // In order to make at least Windows based systems treat the file as
 // a CSV file need to change the file name suffix to csv and also
@@ -71,9 +73,7 @@ String sql = "SELECT "
 		// in the prediction accuracy module for MBTA.
 		+ "  AND predictionSource <> 'MBTA_seconds' ";
 		
-// Do the actual query				
-GenericQuery query = new GenericQuery(agencyId);
-String csvStr = query.getCsvString(sql);
-
+// Do the actual query	
+String csvStr = GenericCsvQuery.getCsvString(agencyId, sql);
 response.getWriter().write(csvStr);
 %>

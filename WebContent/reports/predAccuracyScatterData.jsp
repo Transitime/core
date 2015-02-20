@@ -1,8 +1,8 @@
-<%@ page import="org.transitime.reports.JsonDataFeed" %>
+<%@ page import="org.transitime.reports.GenericJsonQuery" %>
 <%@ page import="org.transitime.utils.Time" %>
 <%@ page import="java.text.ParseException" %>
 <%
-// Parameters from request
+	// Parameters from request
 String agencyId = request.getParameter("a");
 String beginDate = request.getParameter("beginDate");
 String endDate = request.getParameter("endDate");
@@ -19,8 +19,8 @@ if (showTooltipsStr != null && showTooltipsStr.toLowerCase().equals("false"))
     
 if (agencyId == null || beginDate == null || endDate == null) {
 		response.getWriter().write("For predAccuracyScatterData.jsp must "
-			+ "specify parameters 'a' (agencyId), " 
-			+ "'beginDate', and 'endDate'."); 
+	+ "specify parameters 'a' (agencyId), " 
+	+ "'beginDate', and 'endDate'."); 
 		return;
 }
 
@@ -75,16 +75,16 @@ if (predictionType != null && !predictionType.isEmpty()) {
 String tooltipsSql = "";
 if (showTooltips)
     tooltipsSql = 	
-    	", format(E'predAccuracy= %s\\\\n"
-    	+         "prediction=%s\\\\n"
-		+         "stopId=%s\\\\n"
-		+         "routeId=%s\\\\n"
-		+         "tripId=%s\\\\n"
-		+         "arrDepTime=%s\\\\n"
-		+         "predTime=%s\\\\n"
-		+         "predReadTime=%s\\\\n"
-		+         "vehicleId=%s\\\\n"
-		+         "source=%s\\\\n"
+    	", format(E'predAccuracy= %s\\n"
+    	+         "prediction=%s\\n"
+		+         "stopId=%s\\n"
+		+         "routeId=%s\\n"
+		+         "tripId=%s\\n"
+		+         "arrDepTime=%s\\n"
+		+         "predTime=%s\\n"
+		+         "predReadTime=%s\\n"
+		+         "vehicleId=%s\\n"
+		+         "source=%s\\n"
 		+         "affectedByLayover=%s', "
 		+ "   CAST(predictionAccuracyMsecs || ' msec' AS INTERVAL), predictedTime-predictionReadTime,"
 		+ "   stopId, routeId, tripId, "
@@ -113,7 +113,7 @@ String sql = "SELECT "
 	+ "  AND predictionSource <> 'MBTA_seconds' ";
 
 // Determine the json data by running the query
-String jsonString = JsonDataFeed.getJsonData(sql, agencyId);
+String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
 
 // If no data then return error status with an error message
 if (jsonString == null || jsonString.isEmpty()) {
