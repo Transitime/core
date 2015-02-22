@@ -46,6 +46,9 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="serverStatus.jsp?a=<%= agencyId %>"
     title="Shows how well system is running, including the AVL feed">
       Server Status</a></li>
+  <li><a href="dbDiskSpace.jsp?a=<%= agencyId %>"
+    title="Shows how much disk space is being used by the database.">
+      Database Disk Space Utilization</a></li>
 </ul>
 </div>
 </body>
