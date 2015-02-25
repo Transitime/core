@@ -22,7 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +50,22 @@ public class HttpGetFile {
 	private final String dirNameForResult;
 	private final String fullFileNameForResult;
 	
+	private final List<String> headerKeys = new ArrayList<String>();
+	private final List<String> headerValues = new ArrayList<String>();
+	
 	protected static final Logger logger = 
 			LoggerFactory.getLogger(HttpGetFile.class);
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * Constructor
+	 * 
+	 * @param urlStr
+	 *            URL of file to get
+	 * @param dirName
+	 *            Directory where gotten file is to be written
+	 */
 	public HttpGetFile(String urlStr, String dirName) {
 		this.urlStr = urlStr;
 		
@@ -61,6 +75,18 @@ public class HttpGetFile {
 		this.dirNameForResult = dirName;
 		
 		fullFileNameForResult = dirNameForResult + getFileNameFromUrl(urlStr);
+	}
+	
+	/**
+	 * Adds specified header key/value to the request. Useful if need to set
+	 * If-Modified-Since or such.
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	public void addRequestHeader(String key, String value) {
+		headerKeys.add(key);
+		headerValues.add(value);
 	}
 	
 	/**
@@ -88,29 +114,80 @@ public class HttpGetFile {
 		return urlStr.substring(lastSlashPos + 1);
 	}
 	
-	public void getFile() throws IOException {
+	/**
+	 * Actually gets and stores the file. The User-Agency property is always set
+	 * to USER_AGENT.
+	 * 
+	 * @return The http response code such as HttpStatus.SC_OK
+	 * @throws IOException
+	 */
+	public int getFile() throws IOException {
 		IntervalTimer timer = new IntervalTimer();
 		
-		logger.info("Getting URL={}", urlStr);
+		logger.debug("Getting URL={}", urlStr);
 		URL url = new URL(urlStr);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestProperty("User-Agency", USER_AGENT);
 		
+		// Set request properties
+		for (int i=0; i<headerKeys.size(); ++i) {
+			connection.setRequestProperty(headerKeys.get(i), headerValues.get(i));
+		}
+		
 		// Get and log response code
-		int expectedContentLength = connection.getContentLength();
-		logger.info("Response code for getting file is {} and file size is {} bytes", 
-				connection.getResponseCode(),
-				expectedContentLength);
+		int responseCode = connection.getResponseCode();
+		long expectedContentLength = connection.getContentLengthLong();
+		long remoteFileLastModified = connection.getLastModified();
+		logger.debug("Response code for getting file {} is {} and file size "
+				+ "is {} bytes and remote file lastModified=\"{}\" or {} msec",
+				urlStr, responseCode, expectedContentLength, 
+				Time.httpDate(remoteFileLastModified), remoteFileLastModified);
+
+		// Open file for where results are to be written
+		File file = new File(fullFileNameForResult);
+		
+		// If file could not be read in or is not newer that lastModified time
+		// of the existing file on the server then don't need to continue
+		// reading it in.
+		if (responseCode != HttpStatus.SC_OK) {
+			logger.debug("Response code was {} so not reading in file", 
+					responseCode);
+			return responseCode;
+		}
+		
+		// Sometimes a web server will return http status OK (200) even
+		// when the remote file is older than the time set for If-Modified-Since
+		// header. For this situation still don't want to read in the file
+		// so simply return http status NO_MODIFIED (304).
+		if (file.lastModified() > 0 
+				&& remoteFileLastModified < file.lastModified()) {
+			logger.warn("Response code was {} but the local file was modified "
+					+ "after the remote file so it must be up to date. "
+					+ "Therefore remote file not read in.",
+					responseCode);
+			return HttpStatus.SC_NOT_MODIFIED;
+		}
+		
+		logger.debug("Actually reading data from URL {} . Local file "
+				+ "lastModified={} or {} msec and remoteFileLastModified={} "
+				+ "or {} msec.", 
+				urlStr, 
+				Time.httpDate(file.lastModified()), 
+				file.lastModified(),
+				Time.httpDate(remoteFileLastModified),
+				remoteFileLastModified);
+		
+		// Make sure output directory exists
+		file.getParentFile().mkdirs();
 
 		// Open input stream for reading data
 		InputStream in = connection.getInputStream();
 		
-		// Open file for where results are to be written
-		File file = new File(fullFileNameForResult);
-		// Make sure output directory exists
-		file.getParentFile().mkdirs();
 		// Open the stream
 		FileOutputStream fos = new FileOutputStream(file);
+		
+		IntervalTimer loopTimer = new IntervalTimer();
+		long lengthSinceLoggingMsg = 0;
 		
 		// Copy contents to file
 		byte[] buffer = new byte[4096];
@@ -119,17 +196,43 @@ public class HttpGetFile {
 		while ((length = in.read(buffer)) > 0) {
 			fos.write(buffer, 0, length);
 			totalLength += length;
+			lengthSinceLoggingMsg += length;
+			
+			// Every once in a while log progress. Don't want to
+			// check timer every loop since that would be expensive.
+			// So only check timer for every MB downloaded.
+			if (lengthSinceLoggingMsg > 1024*1024) {
+				lengthSinceLoggingMsg = 0;
+				if (loopTimer.elapsedMsec() > 10 * Time.MS_PER_SEC) {
+					loopTimer.resetTimer();
+					logger.debug("Read in {} bytes or {}% of file {}",
+							totalLength,
+							StringUtils.oneDigitFormat(100.0 * totalLength
+									/ expectedContentLength), 
+							urlStr);
+				}
+			}
 		}
 		
 		// Close things up
 		fos.close();
 		
+		// Set the last modified time so that it is the same as on the 
+		// web server. 
+		file.setLastModified(connection.getLastModified());
+		
 		if (totalLength == expectedContentLength)
-			logger.info("Successfully copied file to {}. Length was {} bytes. Took {} msec.", 
-				fullFileNameForResult, totalLength, timer.elapsedMsec());
+			logger.debug("Successfully copied {} to file {}. Length was {} "
+					+ "bytes. Took {} msec.", urlStr, fullFileNameForResult,
+					totalLength, timer.elapsedMsec());
 		else
-			logger.error("When copying file {} the expected length was {} but only copied {} bytes",
+			logger.error("When copying {} to file {} the expected length was "
+							+ "{} but only copied {} bytes", urlStr,
 					fullFileNameForResult, expectedContentLength, totalLength);
+		
+		// Return the http response code such as 200 for OK or 304 for 
+		// Not Modified
+		return connection.getResponseCode();
 	}
 		
 }

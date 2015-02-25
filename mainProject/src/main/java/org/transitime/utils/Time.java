@@ -98,6 +98,10 @@ public class Time {
 	private static final DateFormat timeFormat24MsecNoTimeZone =
 			new SimpleDateFormat("HH:mm:ss.SSS");
 
+	// Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
+	private static final DateFormat httpFormat =
+			new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+	
 	// Note that this one is not static. It is for when need to include
 	// timezone via a Time object.
 	private final DateFormat readableDateFormat24MsecForTimeZone =
@@ -666,6 +670,18 @@ public class Time {
 	 */
 	public static String timeStrMsecNoTimeZone(Date epochTime) {
 		return timeFormat24MsecNoTimeZone.format(epochTime);
+	}
+
+	/**
+	 * For when sending date as part of http request.
+	 * Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
+	 * 
+	 * @param epochTime
+	 * @return
+	 */
+	public static String httpDate(long epochTime) {
+		httpFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return httpFormat.format(epochTime);
 	}
 	
 	/**

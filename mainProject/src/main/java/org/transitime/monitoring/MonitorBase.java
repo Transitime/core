@@ -211,6 +211,18 @@ public abstract class MonitorBase {
 	}
 	
 	/**
+	 * Returns comma separated list of who should be notified via e-mail when
+	 * trigger state changes for the monitor. Specified by the Java property
+	 * transitime.monitoring.emailRecipients . A static class so cannot be
+	 * overwritten.
+	 * 
+	 * @return E-mail addresses of who to notify
+	 */
+	public static String recipientsGlobal() {
+		return emailRecipients.getValue();
+	}
+	
+	/**
 	 * Returns true if the monitor previously was triggered.
 	 * 
 	 * @return true if was triggered
