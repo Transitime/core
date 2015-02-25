@@ -18,19 +18,8 @@
   
   <link rel="stylesheet" href="/api/css/general.css">
   
-  <script>
-  // Enable JQuery tooltips. In order to use html in tooltip need to 
-  // specify content function. Turning off 'focusin' events is important
-  // so that tooltip doesn't popup again if previous or next month
-  // buttons are clicked in a datepicker.
-  $(function() {
-	  $( document ).tooltip({
-          content: function () {
-              return $(this).prop('title');
-          }
-      }).off('focusin');
-	  });
-  </script>
+  <!-- Load in general transitime javascript library -->
+  <script src="/api/javascript/transitime.js"></script>
   
   <style>
   label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}

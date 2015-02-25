@@ -17,6 +17,9 @@ if (agencyId == null || agencyId.isEmpty()) {
   <script src="/api/jquery-ui/jquery-ui.js"></script>
   <link rel="stylesheet" href="/api/jquery-ui/jquery-ui.css">
 
+  <!-- Load in general transitime javascript library -->
+  <script src="/api/javascript/transitime.js"></script>
+
 <style>
 #accordion {
   margin-left: 20px;
@@ -375,8 +378,7 @@ function handleAjaxData(routes) {
  * Get active block data via AJAX
  */
 function getAndProcessData() {
-	var urlPrefix = "/api/v1/key/<%= org.transitime.api.utils.WebUtils.apiKey() %>/agency/<%= request.getParameter("a") %>";
-	$.getJSON(urlPrefix + "/command/activeBlocksByRoute", handleAjaxData)
+	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRoute", handleAjaxData)
 		.fail(function() {
 	 		console.log( "Could not access /command/activeBlocksByRoute" );
 	 	});	
@@ -384,12 +386,6 @@ function getAndProcessData() {
 
 // Called when page is ready
 $(function() {
-	// Enable JQuery tooltips
-	$( document ).tooltip({
-          content: function () {
-              return $(this).prop('title');
-          }
-    }).off('focusin');
 
 	// Make the data a JQuery UI accordion that is sortable
 	$( "#accordion" ).accordion({

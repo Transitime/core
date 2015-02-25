@@ -16,29 +16,23 @@
   <link href="/api/select2/select2.css" rel="stylesheet"/>
   <script src="/api/select2/select2.min.js"></script>
   
-  <link rel="stylesheet" href="/api/css/general.css">
+  <!-- Load in general transitime javascript library -->
+  <script src="/api/javascript/transitime.js"></script>
   
-  <script>
-  // Enable JQuery tooltips. In order to use html in tooltip need to 
-  // specify content function. Turning off 'focusin' events is important
-  // so that tooltip doesn't popup again if previous or next month
-  // buttons are clicked in a datepicker.
-  $(function() {
-	  $( document ).tooltip({
-          content: function () {
-              return $(this).prop('title');
-          }
-      }).off('focusin');
-	  });
-  </script>
+  <link rel="stylesheet" href="/api/css/general.css">
 
   <style>
-  label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
-  .param {margin-top: 10px;}
-  #route {width:300px;}
-  #submit {margin-top: 40px; margin-left: 200px;}
-  .note {font-size: small;}
+    label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
+    
+    .param {margin-top: 10px;}
+    
+    #route {width:300px;}
+    
+    #submit {margin-top: 40px; margin-left: 200px;}
+    
+    .note {font-size: small;}
   </style>
+  
 </head>
 <body>
 
