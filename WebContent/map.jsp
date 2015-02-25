@@ -38,6 +38,9 @@
   <link href="/api/select2/select2.css" rel="stylesheet"/>
   <script src="/api/select2/select2.min.js"></script>
 
+  <!-- Load in general transitime javascript library -->
+  <script src="/api/javascript/transitime.js"></script>
+  
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   
   <title>Transitime Map</title>
@@ -62,18 +65,7 @@
 
 <script>
 
-/**
- * For getting parameters from query string 
- */
-function getQueryVariable(variable) {
-       var query = window.location.search.substring(1);
-       var vars = query.split("&");
-       for (var i=0;i<vars.length;i++) {
-               var pair = vars[i].split("=");
-               if(pair[0] == variable){return pair[1];}
-       }
-       return(false);
-}
+
 
 /**
  * For format epoch times to human readable times, possibly including
@@ -189,7 +181,7 @@ function predictionCallback(preds, status) {
  */
 function getPredictionsJson(rShortName, stopId) {
 	// JSON request of predicton data
-	var url = urlPrefix + "/command/predictions?rs=" + rShortName 
+	var url = apiUrlPrefix + "/command/predictions?rs=" + rShortName 
 			+ "|" + stopId;
 	$.getJSON(url, predictionCallback);	
 }
@@ -680,7 +672,7 @@ function updateVehiclesUsingApiData() {
 	if (!getRouteQueryStrParam())
 		return;
 	
-	var url = urlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
+	var url = apiUrlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
 	// If stop specified as query str param to this page pass it to the 
 	// vehicles request such that all but the next 2 predicted vehicles
 	// will be labled as minor ones and can therefore be drawn in UI to not
@@ -709,8 +701,6 @@ var verbose = getQueryVariable("verbose");
 var agencyId = getQueryVariable("a");
 if (!agencyId)
 	alert("You must specify agency in URL using a=agencyId parameter");
-var urlPrefix = "/api/v1/key/<%= org.transitime.api.utils.WebUtils.apiKey() %>/agency/" + getQueryVariable("a");
-
  
 // Create the map with a scale and specify which map tiles to use
 var map = L.map('map');
@@ -741,7 +731,7 @@ map.on('popupclose', function(e) {
 
 // Get timezone offset and put it into global agencyTimezoneOffset variable
 // and set map bounds to the agency extent if route not specified in query string
-$.getJSON(urlPrefix + "/command/agencyGroup", 
+$.getJSON(apiUrlPrefix + "/command/agencyGroup", 
 		function(agencies) {
 	        agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
 			
@@ -762,7 +752,7 @@ setRouteQueryStrParamViaQueryStr();
 if (!getRouteQueryStrParam()) {
   // Route not specified in query string. Therefore populate the route 
   // selector if route not specified in query string.
-  $.getJSON(urlPrefix + "/command/routes", 
+  $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
 	        // Generate list of routes for the selector
 	 		var selectorData = [];
@@ -786,7 +776,7 @@ if (!getRouteQueryStrParam()) {
  						map.closePopup(predictionsPopup);
  					
  					// Configure map for new route	
- 					var url = urlPrefix + "/command/route?r=" + e.val;
+ 					var url = apiUrlPrefix + "/command/route?r=" + e.val;
  					$.getJSON(url, routeConfigCallback);;
 
  					// Read in vehicle locations now
@@ -807,7 +797,7 @@ if (!getRouteQueryStrParam()) {
 } else {
 	// Route was specified in query string. 
 	// Read in the route info and draw it on map.
-	var url = urlPrefix + "/command/route?" + getRouteQueryStrParam();
+	var url = apiUrlPrefix + "/command/route?" + getRouteQueryStrParam();
 	if (getQueryVariable("s"))
 		url += "&s=" + getQueryVariable("s");
 	if (getQueryVariable("tripPattern"))

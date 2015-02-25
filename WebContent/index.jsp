@@ -11,6 +11,9 @@
   <script src="/api/jquery-ui/jquery-ui.js"></script>
   <link rel="stylesheet" href="/api/jquery-ui/jquery-ui.css">
 
+  <!-- Load in general transitime javascript library -->
+  <script src="/api/javascript/transitime.js"></script>
+
   <link rel="stylesheet" href="/api/css/general.css">
 
   <style>
@@ -28,20 +31,6 @@
   	text-align: left;
   }
   </style>
-    
-  <script>
-  // Enable JQuery tooltips. In order to use html in tooltip need to 
-  // specify content function. Turning off 'focusin' events is important
-  // so that tooltip doesn't popup again if previous or next month
-  // buttons are clicked in a datepicker.
-  $(function() {
-	  $( document ).tooltip({
-          content: function () {
-              return $(this).prop('title');
-          }
-      }).off('focusin');
-  });
-  </script>
     
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Agencies</title>
