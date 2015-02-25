@@ -48,6 +48,7 @@ import org.transitime.api.data.ApiServerStatus;
 import org.transitime.api.data.ApiTrip;
 import org.transitime.api.data.ApiTripPatterns;
 import org.transitime.api.data.ApiTripWithTravelTimes;
+import org.transitime.api.data.ApiVehicleConfigs;
 import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.utils.StandardParameters;
@@ -65,6 +66,7 @@ import org.transitime.ipc.data.IpcStopsForRoute;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
@@ -251,6 +253,31 @@ public class TransitimeApi {
 		NORMAL, SECONDARY, MINOR
 	};
 
+	@Path("/command/vehicleConfigs")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getVehicleConfigs(
+			@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get Vehicle data from server
+			VehiclesInterface inter = stdParameters.getVehiclesInterface();
+			Collection<IpcVehicleConfig> ipcVehicleConfigs = 
+					inter.getVehicleConfigs();
+			ApiVehicleConfigs apiVehicleConfigs = 
+					new ApiVehicleConfigs(ipcVehicleConfigs);
+			
+			// return ApiVehiclesDetails response
+			return stdParameters.createResponse(apiVehicleConfigs);
+		} catch (RemoteException e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+	
 	/**
 	 * Determines Map of UiTypes for vehicles so that the vehicles can be drawn
 	 * correctly in the UI. If when getting vehicles no specific route and stop
