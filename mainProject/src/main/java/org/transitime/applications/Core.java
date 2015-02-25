@@ -31,6 +31,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.Config;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
 import org.transitime.core.TimeoutHandlerModule;
@@ -137,7 +138,7 @@ public class Core {
 				CoreConfig.pauseIfDbQueueFilling());
 		
 		// Start mandatory modules
-		timeoutHandlerModule = new TimeoutHandlerModule(CoreConfig.getAgencyId());
+		timeoutHandlerModule = new TimeoutHandlerModule(AgencyConfig.getAgencyId());
 		timeoutHandlerModule.start();
 		
 		service = new ServiceUtils(configData);
@@ -158,7 +159,7 @@ public class Core {
 	 * @return The Core singleton, or null if could not create it
 	 */
 	synchronized public static Core createCore() {
-		String agencyId = CoreConfig.getAgencyId();
+		String agencyId = AgencyConfig.getAgencyId();
 
 		// If agencyId not set then can't create a Core. This can happen
 		// when doing testing.
@@ -398,7 +399,7 @@ public class Core {
 			
 			// Start the RMI Servers so that clients can obtain data
 			// on predictions, vehicles locations, etc.
-			String agencyId = CoreConfig.getAgencyId();			
+			String agencyId = AgencyConfig.getAgencyId();			
 			startRmiServers(agencyId);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

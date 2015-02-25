@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.CoreConfig;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.utils.threading.NamedThreadFactory;
 
 /**
@@ -88,7 +88,7 @@ public abstract class Module implements Runnable {
 	 */
 	public static boolean start(String classname) {
 		// Determine the default agencyId
-		String agencyId = CoreConfig.getAgencyId();
+		String agencyId = AgencyConfig.getAgencyId();
 		
 		// start the module
 		return start(classname, agencyId);

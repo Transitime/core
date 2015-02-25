@@ -29,7 +29,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.CoreConfig;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.gtfs.readers.GtfsAgencyReader;
 import org.transitime.statistics.ScheduleDataProcessor;
 import org.transitime.utils.Time;
@@ -203,7 +203,7 @@ public class ScheduleGenerator {
 		}
 		
 		// Get project ID from VM param transitime.core.agencyId
-		agencyId = CoreConfig.getAgencyId();
+		agencyId = AgencyConfig.getAgencyId();
 		if (agencyId == null) {
 			displayCommandLineOptions(options);
 			System.exit(0);

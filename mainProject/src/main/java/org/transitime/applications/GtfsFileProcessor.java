@@ -17,6 +17,7 @@
 package org.transitime.applications;
 
 import java.io.PrintWriter;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -27,7 +28,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.Config;
-import org.transitime.configData.CoreConfig;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.HttpGetGtfsFile;
 import org.transitime.gtfs.TitleFormatter;
@@ -178,7 +179,7 @@ public class GtfsFileProcessor {
 		// First need access to the zip file.
 		// If URL set then should the file from web and store it
 		if (gtfsUrl != null) {
-			gtfsZipFileName = HttpGetGtfsFile.getFile(CoreConfig.getAgencyId(), gtfsUrl);
+			gtfsZipFileName = HttpGetGtfsFile.getFile(AgencyConfig.getAgencyId(), gtfsUrl);
 		}
 		
 		// Uncompress the GTFS zip file if need to
@@ -202,7 +203,7 @@ public class GtfsFileProcessor {
 		// Process the GTFS data
 		GtfsData gtfsData = 
 				new GtfsData(configRev, shouldStoreNewRevs,
-						CoreConfig.getAgencyId(),
+						AgencyConfig.getAgencyId(),
 						gtfsDirectoryName, 
 						supplementDir, 
 						shouldCombineShortAndLongNamesForRoutes,

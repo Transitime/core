@@ -21,7 +21,6 @@ import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.FloatConfigValue;
 import org.transitime.config.IntegerConfigValue;
-import org.transitime.config.StringConfigValue;
 import org.transitime.config.StringListConfigValue;
 import org.transitime.utils.Time;
 
@@ -36,23 +35,6 @@ import org.transitime.utils.Time;
  * 
  */
 public class CoreConfig {
-	
-	/**
-	 * Specifies the ID of the agency. Used for the database name and in the
-	 * logback configuration to specify the directory where to put the log
-	 * files.
-	 * 
-	 * @return
-	 */
-	public static String getAgencyId() {
-		return projectId.getValue();
-	}
-	private static StringConfigValue projectId = 
-			new StringConfigValue("transitime.core.agencyId", 
-					null,
-					"Specifies the ID of the agency. Used for the database " +
-					"name and in the logback configuration to specify the " +
-					"directory where to put the log files.");
 	
 	// Database params
 	

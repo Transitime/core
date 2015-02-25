@@ -28,7 +28,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.CoreConfig;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.core.travelTimes.TravelTimeInfoMap;
 import org.transitime.core.travelTimes.TravelTimeInfoWithHowSet;
 import org.transitime.core.travelTimes.TravelTimesProcessor;
@@ -358,7 +358,7 @@ public class UpdateTravelTimes {
 	 */
 	public static void main(String[] args) {
 		// Determine the parameters
-		String agencyId = CoreConfig.getAgencyId();
+		String agencyId = AgencyConfig.getAgencyId();
 		
 		String startDateStr = args[0];
 		String endDateStr = args.length > 1 ? args[1] : startDateStr;
