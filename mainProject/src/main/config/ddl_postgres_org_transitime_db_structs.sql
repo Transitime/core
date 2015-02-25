@@ -75,6 +75,8 @@
 
     drop table if exists Trips cascade;
 
+    drop table if exists VehicleConfigs cascade;
+
     drop table if exists VehicleEvents cascade;
 
     drop sequence hibernate_sequence;
@@ -409,6 +411,16 @@
         tripPattern_id varchar(60),
         tripPattern_configRev int4,
         primary key (tripId, startTime, configRev)
+    );
+
+    create table VehicleConfigs (
+        id varchar(60) not null,
+        capacity int4,
+        crushCapacity int4,
+        description varchar(255),
+        passengerVehicle boolean,
+        type int4,
+        primary key (id)
     );
 
     create table VehicleEvents (

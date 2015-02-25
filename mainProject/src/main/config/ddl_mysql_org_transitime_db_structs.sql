@@ -83,6 +83,8 @@
 
     drop table if exists Trips;
 
+    drop table if exists VehicleConfigs;
+
     drop table if exists VehicleEvents;
 
     create table ActiveRevisions (
@@ -415,6 +417,16 @@
         tripPattern_id varchar(60),
         tripPattern_configRev integer,
         primary key (tripId, startTime, configRev)
+    );
+
+    create table VehicleConfigs (
+        id varchar(60) not null,
+        capacity integer,
+        crushCapacity integer,
+        description varchar(255),
+        passengerVehicle boolean,
+        type integer,
+        primary key (id)
     );
 
     create table VehicleEvents (

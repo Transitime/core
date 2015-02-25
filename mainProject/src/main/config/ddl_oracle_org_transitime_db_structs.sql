@@ -51,6 +51,8 @@
 
     drop table Trips cascade constraints;
 
+    drop table VehicleConfigs cascade constraints;
+
     drop table VehicleEvents cascade constraints;
 
     drop sequence hibernate_sequence;
@@ -385,6 +387,16 @@
         tripPattern_id varchar2(60 char),
         tripPattern_configRev number(10,0),
         primary key (tripId, startTime, configRev)
+    );
+
+    create table VehicleConfigs (
+        id varchar2(60 char) not null,
+        capacity number(10,0),
+        crushCapacity number(10,0),
+        description varchar2(255 char),
+        passengerVehicle number(1,0),
+        type number(10,0),
+        primary key (id)
     );
 
     create table VehicleEvents (
