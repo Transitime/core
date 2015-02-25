@@ -1130,6 +1130,9 @@ public class AvlProcessor {
 		// feed is up
 		setLastAvlReport(avlReport);
 
+		// Make sure that vehicle configuration is in cache and database
+		VehicleDataCache.getInstance().cacheVehicleConfig(avlReport);
+		
 		// Store the AVL report into the database
 		if (!CoreConfig.onlyNeedArrivalDepartures()
 				&& !avlReport.isForSchedBasedPreds())

@@ -41,6 +41,7 @@ import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
+import org.transitime.db.structs.VehicleConfig;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.db.webstructs.ApiKey;
 import org.transitime.db.webstructs.WebAgency;
@@ -91,6 +92,7 @@ public class AnnotatedClassesList {
 		Trip.class,
 		TripPattern.class,
 		VehicleEvent.class,
+		VehicleConfig.class,
 		
 		// For website
 		ApiKey.class,

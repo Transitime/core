@@ -29,11 +29,13 @@ import org.slf4j.LoggerFactory;
 import org.transitime.core.BlocksInfo;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.VehicleConfig;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.data.IpcActiveBlock;
+import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 
@@ -300,6 +302,21 @@ public class VehiclesServer extends AbstractServer
 		
 		// Return results
 		return results;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getVehicleConfigs()
+	 */
+	@Override
+	public Collection<IpcVehicleConfig> getVehicleConfigs()
+			throws RemoteException {
+		Collection<IpcVehicleConfig> result = new ArrayList<IpcVehicleConfig>();
+		for (VehicleConfig vehicleConfig : 
+				VehicleDataCache.getInstance().getVehicleConfigs()) {
+			result.add(new IpcVehicleConfig(vehicleConfig));
+		}
+
+		return result;
 	}
 
 }

@@ -18,17 +18,23 @@ package org.transitime.core.dataCache;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.core.VehicleState;
+import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Route;
+import org.transitime.db.structs.VehicleConfig;
 import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.utils.ConcurrentHashMapNullKeyOk;
 import org.transitime.utils.Time;
@@ -66,6 +72,12 @@ public class VehicleDataCache {
     private Map<String, List<String>> vehicleIdsByBlockMap =
     		new ConcurrentHashMapNullKeyOk<String, List<String>>();
     
+    // Keeps track of vehicle static config info. If new vehicle encountered
+    // in AVL feed then this map is updated and the new VehicleConfig is also
+    // written to the database.
+    private Map<String, VehicleConfig> vehicleConfigsMap =
+    		new HashMap<String, VehicleConfig>();
+    
 	// For filtering out info more than MAX_AGE since it means that the AVL info is
 	// obsolete and shouldn't be displayed.
     private static final int MAX_AGE_MSEC = 15 * Time.MS_PER_MIN;
@@ -91,6 +103,71 @@ public class VehicleDataCache {
     private VehicleDataCache() {
     }
 
+    /**
+     * Reads in vehicle config data from db if haven't done so yet.
+     */
+	private void readVehicleConfigFromDbIfNeedTo() {
+		synchronized (vehicleConfigsMap) {
+			if (vehicleConfigsMap.isEmpty()) {
+				// Read VehicleConfig data from database
+				Session session = 
+						HibernateUtils.getSession(AgencyConfig.getAgencyId());
+				List<VehicleConfig> vehicleConfigs = 
+						VehicleConfig.getVehicleConfigs(session);
+				
+				// Convert list to the map
+				for (VehicleConfig vehicleConfig : vehicleConfigs) {
+					vehicleConfigsMap.put(vehicleConfig.getId(), vehicleConfig);
+				}
+			}
+		}
+	}
+    
+	/**
+	 * To be called when vehicle encountered in AVL feed. Adds the vehicle to
+	 * the cache and stores in database if haven't done so yet.
+	 * 
+	 * @param avlReport
+	 */
+	public void cacheVehicleConfig(AvlReport avlReport) {
+		// If a schedule based vehicle then don't need it to be
+		// part of the cache
+		if (avlReport.isForSchedBasedPreds())
+			return;
+		
+		// Make sure go initial data from database
+		readVehicleConfigFromDbIfNeedTo();
+		
+		// Synchronize on the map since separately testing for object
+		// and adding object
+		synchronized (vehicleConfigsMap) {
+			// If new vehicle...
+			String vehicleId = avlReport.getVehicleId();
+			if (!vehicleConfigsMap.containsKey(vehicleId)) {
+				logger.info("Encountered new vehicle where vehicleId={} so "
+						+ "updating vehicle cache and writing the "
+						+ "VehicleConfig to database.", vehicleId);
+
+				// Add vehicle to cache and update database
+				VehicleConfig vehicleConfig = new VehicleConfig(vehicleId);
+				vehicleConfigsMap.put(vehicleId, vehicleConfig);
+
+				// Write the vehicle to the database
+				Core.getInstance().getDbLogger().add(vehicleConfig);
+			}
+		}
+	}
+    
+	/**
+	 * Returns an unmodifiable collection of the static vehicle configurations.
+	 * 
+	 * @return Unmodifiable collection of VehicleConfig objects
+	 */
+    public Collection<VehicleConfig> getVehicleConfigs() {
+    	readVehicleConfigFromDbIfNeedTo();
+    	return Collections.unmodifiableCollection(vehicleConfigsMap.values());
+    }
+    
 	/**
 	 * Filters out vehicle info if last GPS report is too old. Doesn't
 	 * filter out vehicles at layovers though because for those won't

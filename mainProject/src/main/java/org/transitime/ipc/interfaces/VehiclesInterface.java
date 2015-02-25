@@ -20,10 +20,12 @@ package org.transitime.ipc.interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Collection;
+
 import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcCompleteVehicle;
 import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.ipc.data.IpcVehicleConfig;
 
 /**
  * Defines the RMI interface used for obtaining vehicle information.
@@ -34,9 +36,19 @@ import org.transitime.ipc.data.IpcVehicle;
 public interface VehiclesInterface extends Remote {
 
 	/**
+	 * For getting configuration information for all vehicles. Useful for
+	 * determining IDs of all vehicles in system
+	 * 
+	 * @return Collection of IpcVehicleConfig objects
+	 * @throws RemoteException
+	 */
+	public Collection<IpcVehicleConfig> getVehicleConfigs() 
+			throws RemoteException;
+	
+	/**
 	 * Gets from server IpcVehicle info for all vehicles.
 	 * 
-	 * @return Collection of Vehicle objects
+	 * @return Collection of IpcVehicle objects
 	 * @throws RemoteException
 	 */
 	public Collection<IpcVehicle> get() throws RemoteException;
