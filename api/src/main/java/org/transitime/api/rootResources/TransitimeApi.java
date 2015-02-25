@@ -253,6 +253,14 @@ public class TransitimeApi {
 		NORMAL, SECONDARY, MINOR
 	};
 
+	/**
+	 * Gets information including vehicle IDs for all vehicles that have been
+	 * configured. Useful for creating a vehicle selector.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
 	@Path("/command/vehicleConfigs")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
