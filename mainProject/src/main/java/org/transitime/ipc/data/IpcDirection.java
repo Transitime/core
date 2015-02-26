@@ -43,6 +43,12 @@ public class IpcDirection implements Serializable {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * Constructor. All IpcStops are marked as being a normal UiMode stop.
+	 * 
+	 * @param dbRoute
+	 * @param directionId
+	 */
 	public IpcDirection(Route dbRoute, String directionId) {
 		this.directionId = directionId;
 
@@ -61,6 +67,27 @@ public class IpcDirection implements Serializable {
 			Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
 			this.stops.add(new IpcStop(stop, directionId));
 		}
+	}
+	
+	/**
+	 * Constructor for when already have list of IpcStops. Useful for when have
+	 * already determined whether an IpcStop is for UiMode or note.
+	 * 
+	 * @param dbRoute
+	 * @param directionId
+	 * @param ipcStops
+	 */
+	public IpcDirection(Route dbRoute, String directionId, List<IpcStop> ipcStops) {
+		this.directionId = directionId;
+
+		// Use the headsign name for the longest trip pattern for the 
+		// specified direction. Note: this isn't necessarily the best thing
+		// to use but there is no human readable direction name specified in 
+		// GTFS.
+		TripPattern longestTripPattern = 
+				dbRoute.getLongestTripPatternForDirection(directionId);
+		this.directionTitle = "To " + longestTripPattern.getHeadsign();
+		this.stops = ipcStops;
 	}
 	
 	@Override

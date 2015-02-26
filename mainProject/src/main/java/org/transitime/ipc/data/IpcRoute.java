@@ -19,7 +19,6 @@ package org.transitime.ipc.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +43,7 @@ import org.transitime.db.structs.TripPattern;
 public class IpcRoute extends IpcRouteSummary {
 
 	// Note that there are additional members in IpcRouteSummary superclass.
-	
-	// stopsPerDirectionMap is keyed on direction ID and contains list of
-	// stops for each direction.
-	private Map<String, List<IpcStop>> stopsPerDirectionMap;
+	private IpcStopsForRoute stops;
 	private Collection<IpcShape> shapes;
 	private Location locationOfNextPredictedVehicle;
 	
@@ -75,7 +71,7 @@ public class IpcRoute extends IpcRouteSummary {
 		super(dbRoute);
 		
 		// Create Collections of stops and paths
-		stopsPerDirectionMap = createStops(dbRoute, stopId, tripPatternId);
+		stops = createStops(dbRoute, stopId, tripPatternId);
 		shapes = createShapes(dbRoute, stopId, tripPatternId);
 		locationOfNextPredictedVehicle = 
 				getLocationOfNextPredictedVehicle(dbRoute, stopId);
@@ -171,7 +167,7 @@ public class IpcRoute extends IpcRouteSummary {
 	 * @param tripPatternId
 	 * @return
 	 */
-	private static Map<String, List<IpcStop>> createStops(Route dbRoute, String stopId,
+	private static IpcStopsForRoute createStops(Route dbRoute, String stopId,
 			String tripPatternId) {
 		// Get the ordered stop IDs per direction for the route
 		Map<String, List<String>> orderedStopsByDirection =
@@ -182,12 +178,10 @@ public class IpcRoute extends IpcRouteSummary {
 				getUiTripPatterns(dbRoute, stopId, tripPatternId);
 
 		// Go through all the stops for the route and put corresponding IpcStops
-		// into orderedIpcStopsByDirection.
-		Map<String, List<IpcStop>> orderedIpcStopsByDirection =
-				new HashMap<String, List<IpcStop>>();
+		// into IpcDirections.
+		List<IpcDirection> ipcDirections = new ArrayList<IpcDirection>();
 		for (String directionId : orderedStopsByDirection.keySet()) {
-			List<IpcStop> ipcStopsForDirection = new ArrayList<IpcStop>();
-			orderedIpcStopsByDirection.put(directionId, ipcStopsForDirection);
+			List<IpcStop> ipcStopsForDirection = new ArrayList<IpcStop>();			
 			for (String currentStopId : orderedStopsByDirection.get(directionId)) {
 				// Determine if UI stop. It is a UI stop if the stopId parameter
 				// specified and the current stop is after the stopId for a UI
@@ -209,11 +203,16 @@ public class IpcRoute extends IpcRouteSummary {
 						Core.getInstance().getDbConfig().getStop(currentStopId);
 				IpcStop ipcStop = new IpcStop(stop, isUiStop, directionId);
 				ipcStopsForDirection.add(ipcStop);
+				
+				ipcDirections.add(new IpcDirection(dbRoute, directionId,
+						ipcStopsForDirection));
 			}
+			
+			
 		}
 		
 		// Returns results
-		return orderedIpcStopsByDirection;
+		return new IpcStopsForRoute(ipcDirections);
 	}
 
 	/**
@@ -325,15 +324,15 @@ public class IpcRoute extends IpcRouteSummary {
 				+ ", type=" + type 
 				+ ", color=" + color 
 				+ ", textColor=" + textColor 
-				+ ", stops=" + stopsPerDirectionMap
+				+ ", stops=" + stops
 				+ ", shapes=" + shapes
 				+ ", locationOfNextPredictedVehicle=" 
 					+ locationOfNextPredictedVehicle
 				+ "]";
 	}
 
-	public Map<String, List<IpcStop>> getStops() {
-		return stopsPerDirectionMap;
+	public IpcStopsForRoute getStops() {
+		return stops;
 	}
 
 	public Collection<IpcShape> getShapes() {

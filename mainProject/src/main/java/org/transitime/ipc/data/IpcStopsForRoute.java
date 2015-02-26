@@ -49,7 +49,11 @@ public class IpcStopsForRoute implements Serializable {
 			directions.add(ipcDirection);
 		}
 	}
-
+	
+	public IpcStopsForRoute(List<IpcDirection> directions) {
+		this.directions = directions;
+	}
+	
 	@Override
 	public String toString() {
 		return "IpcStopsForRoute [" 
