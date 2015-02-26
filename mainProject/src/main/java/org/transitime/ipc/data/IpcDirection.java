@@ -26,7 +26,6 @@ import org.transitime.applications.Core;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.TripPattern;
-import org.transitime.utils.OrderedCollection;
 
 /**
  *
@@ -45,56 +44,25 @@ public class IpcDirection implements Serializable {
 	/********************** Member Functions **************************/
 
 	public IpcDirection(Route dbRoute, String directionId) {
-		TripPattern longestTripPattern = 
-				dbRoute.getLongestTripPatternForDirection(directionId);
-
 		this.directionId = directionId;
+
 		// Use the headsign name for the longest trip pattern for the 
 		// specified direction. Note: this isn't necessarily the best thing
 		// to use but there is no human readable direction name specified in 
 		// GTFS.
-		this.directionTitle = "To " + longestTripPattern.getHeadsign(); 
-		this.stops = 
-				getOrderedStopList(dbRoute, directionId, longestTripPattern);
+		TripPattern longestTripPattern = 
+				dbRoute.getLongestTripPatternForDirection(directionId);
+		this.directionTitle = "To " + longestTripPattern.getHeadsign();
+		
+		// Determine ordered list of stops
+		this.stops = new ArrayList<IpcStop>();
+		List<String> stopIds = dbRoute.getOrderedStopsByDirection().get(directionId);
+		for (String stopId : stopIds) {
+			Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+			this.stops.add(new IpcStop(stop, directionId));
+		}
 	}
 	
-	/**
-	 * Goes through all the trip patterns for the specified direction and
-	 * returns list of IpcStops in the proper order. 
-	 * 
-	 * @param dbRoute
-	 * @param directionId
-	 * @param longestTripPattern
-	 * @return
-	 */
-	private List<IpcStop> getOrderedStopList(Route dbRoute,
-			String directionId, TripPattern longestTripPattern) {
-		OrderedCollection orderedCollection = new OrderedCollection();
-		
-		// Start with the stops for the longest trip pattern
-		orderedCollection.addOriginal(longestTripPattern.getStopIds());
-		
-		// For other trip patterns for the direction that are not the longest
-		// add any missing stops.
-		for (TripPattern tripPattern : dbRoute.getTripPatterns(directionId)) {
-			// If this isn't the longest trip pattern then add any new stops
-			if (tripPattern.getId() != longestTripPattern.getId()) {
-				orderedCollection.add(tripPattern.getStopIds());
-			}
-		}
-
-		// Convert list of stop IDs to list of IpcStops	
-		List<IpcStop> stops = new ArrayList<IpcStop>(); 
-		for (String stopId : orderedCollection.get()) {
-			Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
-			if (!stop.isHidden())
-				stops.add(new IpcStop(stop, directionId));
-		}
-		
-		// Return result
-		return stops;
-	}
-
 	@Override
 	public String toString() {
 		return "IpcDirection [" 
