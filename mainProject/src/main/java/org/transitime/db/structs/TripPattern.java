@@ -526,9 +526,33 @@ public class TripPattern implements Serializable, Lifecycle {
 	 * @return The StopPath specified by the stop ID, or null if this
 	 *         TripPattern does not contain that stop.
 	 */
-	protected synchronized StopPath getStopPath(String stopId) {
+	public synchronized StopPath getStopPath(String stopId) {
 		// Return the StopPath specified by the stop ID
 		return stopPathsMap.get(stopId);
+	}
+	
+	/**
+	 * Returns true if for this TripPattern that stopId2 is after stopId1. If
+	 * either stopId1 or stopId2 are not in the trip pattern then false is
+	 * returned.
+	 * 
+	 * @param stopId1
+	 * @param stopId2
+	 * @return True if stopId2 is after stopId1
+	 */
+	public boolean isStopAfterStop(String stopId1, String stopId2) {
+		boolean stopId1Found = false;
+		for (StopPath stopPath : stopPaths) {
+			if (stopPath.getId().equals(stopId1)) {
+				stopId1Found = true;
+			}
+			
+			if (stopId1Found && stopPath.getId().equals(stopId2)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/************** Getter Methods ****************/
