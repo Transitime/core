@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -39,6 +40,7 @@ import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.TitleFormatter;
 import org.transitime.gtfs.gtfsStructs.GtfsRoute;
+import org.transitime.utils.OrderedCollection;
 import org.transitime.utils.StringUtils;
 
 
@@ -103,9 +105,13 @@ public class Route implements Serializable {
 	@Transient
 	private Collection<Stop> stops = null;
 	
-	// for getPathSegments()
+	// For getPathSegments()
 	@Transient
 	private Collection<Vector> stopPaths = null;
+
+	// For getOrderedStopsByDirection()
+	@Transient
+	private Map<String, List<String>> orderedStopsPerDirectionMap = null;
 	
 	// Because Hibernate requires objects with composite Ids to be Serializable
 	private static final long serialVersionUID = 9037023420649883860L;
@@ -596,6 +602,38 @@ public class Route implements Serializable {
 		
 		// Return the newly created collection of stop paths
 		return stopPaths;
+	}
+	
+	/**
+	 * For each GTFS direction ID returns list of stops that in the appropriate
+	 * order for the direction. The appropriate order means that when there are
+	 * different trip patterns that the stops that are different will be
+	 * inserted appropriately into the list
+	 * 
+	 * @return Map keyed by direction ID and value of List of ordered stop IDs.
+	 */
+	public Map<String, List<String>> getOrderedStopsByDirection() {
+		// If already determined the stops return the cached map
+		if (orderedStopsPerDirectionMap != null)
+			return orderedStopsPerDirectionMap;
+		
+		// Haven't yet determined ordered stops so do so now
+		orderedStopsPerDirectionMap = new HashMap<String, List<String>>();
+		
+		// For each direction
+		for (String directionId : getDirectionIds()) {
+			// Determine ordered collection of stops for direction
+			OrderedCollection orderedCollection = new OrderedCollection();			
+			List<TripPattern> tripPatternsForDir = getTripPatterns(directionId);
+			for (TripPattern tripPattern : tripPatternsForDir) {
+				List<String> stopIdsForTripPattern = tripPattern.getStopIds();
+				orderedCollection.add(stopIdsForTripPattern);
+			}
+			
+			orderedStopsPerDirectionMap.put(directionId, orderedCollection.get());
+		}
+		
+		return orderedStopsPerDirectionMap;
 	}
 	
 	/********************** Getter Methods **************************/
