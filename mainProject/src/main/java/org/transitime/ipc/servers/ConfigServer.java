@@ -35,6 +35,7 @@ import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
+import org.transitime.ipc.data.IpcSchedule;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.interfaces.ConfigInterface;
@@ -94,6 +95,25 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		super(agencyId, ConfigInterface.class.getSimpleName());
 	}
 
+	/**
+	 * For getting route from routeIdOrShortName. Tries using
+	 * routeIdOrShortName as first a route short name to see if there is such a
+	 * route. If not, then uses routeIdOrShortName as a routeId.
+	 * 
+	 * @param routeIdOrShortName
+	 * @return The Route, or null if no such route
+	 */
+	private Route getRoute(String routeIdOrShortName) {
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		Route dbRoute = 
+				dbConfig.getRouteByShortName(routeIdOrShortName);
+		if (dbRoute == null)
+			dbRoute = dbConfig.getRouteById(routeIdOrShortName);
+		if (dbRoute != null)
+			return dbRoute;
+		else return null;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRoutes()
 	 */
@@ -122,21 +142,13 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	@Override
 	public IpcRoute getRoute(String routeIdOrShortName, String stopId,
 			String tripPatternId) throws RemoteException {
-		// Get the db route info 
-		DbConfig dbConfig = Core.getInstance().getDbConfig();
-		org.transitime.db.structs.Route dbRoute = 
-				dbConfig.getRouteByShortName(routeIdOrShortName);
-		if (dbRoute == null)
-			dbRoute = dbConfig.getRouteById(routeIdOrShortName);
-		
-		// If no such route then return null since can't create a IpcRoute
+		// Determine the route
+		Route dbRoute = getRoute(routeIdOrShortName);		
 		if (dbRoute == null)
 			return null;
 		
-		// Convert db route into an ipc route
+		// Convert db route into an ipc route and return it
 		IpcRoute ipcRoute = new IpcRoute(dbRoute, stopId, tripPatternId);
-		
-		// Return the ipc route
 		return ipcRoute;
 	}
 
@@ -147,14 +159,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	public IpcDirectionsForRoute getStops(String routeIdOrShortName)
 			throws RemoteException {
 		// Get the db route info 
-		DbConfig dbConfig = Core.getInstance().getDbConfig();
-		org.transitime.db.structs.Route dbRoute = 
-				dbConfig.getRouteByShortName(routeIdOrShortName);
-		if (dbRoute == null)
-			dbRoute = dbConfig.getRouteById(routeIdOrShortName);
-
-		// If no such route then return null since can't create 
-		// a IpcStopsForRoute
+		Route dbRoute = getRoute(routeIdOrShortName);		
 		if (dbRoute == null)
 			return null;
 		
@@ -202,17 +207,13 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName)
 			throws RemoteException {
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
-		String routeId = routeIdOrShortName;
-		List<TripPattern> dbTripPatterns = 
-				dbConfig.getTripPatternsForRoute(routeId);
-		if (dbTripPatterns == null) {
-			// Couldn't find by assuming that routeIdOrShortName is the route
-			// ID so assume it is the route short name and try again
-			Route route = dbConfig.getRouteByShortName(routeIdOrShortName);
-			if (route != null)
-				dbTripPatterns = dbConfig.getTripPatternsForRoute(route.getId());
-		}
 		
+		Route dbRoute = getRoute(routeIdOrShortName);		
+		if (dbRoute == null)
+			return null;
+
+		List<TripPattern> dbTripPatterns = 
+				dbConfig.getTripPatternsForRoute(dbRoute.getId());
 		if (dbTripPatterns == null)
 			return null;
 		
@@ -228,7 +229,30 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<Agency> getAgencies() throws RemoteException {
+		// FIXME for debugging
+		Collection<IpcSchedule> foo = getSchedules("CR-Haverhill");
+		
 		return Core.getInstance().getDbConfig().getAgencies();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getSchedules(java.lang.String)
+	 */
+	@Override
+	public Collection<IpcSchedule> getSchedules(String routeIdOrShortName) {
+		// Determine the route
+		Route dbRoute = getRoute(routeIdOrShortName);		
+		if (dbRoute == null)
+			return null;
+
+		// Determine the blocks for the route for all service IDs
+		List<Block> blocksForRoute = Core.getInstance().getDbConfig()
+				.getBlocksForRoute(dbRoute.getId());
+		
+		// Convert blocks to list of IpcSchedule objects and return
+		Collection<IpcSchedule> ipcSchedules = 
+				IpcSchedule.createSchedules(dbRoute, blocksForRoute);
+		return ipcSchedules;
 	}
 	
 }

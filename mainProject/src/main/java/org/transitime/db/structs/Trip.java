@@ -842,6 +842,13 @@ public class Trip implements Serializable {
 	}
 	
 	/**
+	 * @return list of schedule times for the trip
+	 */
+	public List<ScheduleTime> getScheduleTimes() {
+		return scheduledTimesList;
+	}
+	
+	/**
 	 * @return the travelTimes
 	 */
 	public TravelTimesForTrip getTravelTimes() {

@@ -34,6 +34,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
@@ -452,6 +453,13 @@ public class StopPath implements Serializable, Lifecycle {
 	 */
 	public String getStopPathId() {
 		return stopPathId;
+	}
+	
+	/**
+	 * @return the name of the stop
+	 */
+	public String getStopName() {
+		return Core.getInstance().getDbConfig().getStop(stopId).getName();
 	}
 	
 	/**

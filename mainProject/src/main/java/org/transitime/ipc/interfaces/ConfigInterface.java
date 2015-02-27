@@ -27,6 +27,7 @@ import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
+import org.transitime.ipc.data.IpcSchedule;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 
@@ -115,6 +116,8 @@ public interface ConfigInterface extends Remote {
 	public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName) 
 			throws RemoteException;
 
+	public Collection<IpcSchedule> getSchedules(String routeIdOrShortName);
+	
 	/**
 	 * Returns list of Agency objects containing data from GTFS agency.txt file
 	 * @return
