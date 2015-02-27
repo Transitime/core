@@ -229,9 +229,6 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<Agency> getAgencies() throws RemoteException {
-		// FIXME for debugging
-		Collection<IpcSchedule> foo = getSchedules("CR-Haverhill");
-		
 		return Core.getInstance().getDbConfig().getAgencies();
 	}
 
@@ -239,7 +236,8 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getSchedules(java.lang.String)
 	 */
 	@Override
-	public Collection<IpcSchedule> getSchedules(String routeIdOrShortName) {
+	public List<IpcSchedule> getSchedules(String routeIdOrShortName)
+			throws RemoteException {
 		// Determine the route
 		Route dbRoute = getRoute(routeIdOrShortName);		
 		if (dbRoute == null)
@@ -250,7 +248,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 				.getBlocksForRoute(dbRoute.getId());
 		
 		// Convert blocks to list of IpcSchedule objects and return
-		Collection<IpcSchedule> ipcSchedules = 
+		List<IpcSchedule> ipcSchedules = 
 				IpcSchedule.createSchedules(dbRoute, blocksForRoute);
 		return ipcSchedules;
 	}

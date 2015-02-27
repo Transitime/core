@@ -22,7 +22,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -207,7 +206,7 @@ public class IpcSchedule implements Serializable {
 	 * @param blocksForRoute
 	 * @return
 	 */
-	public static Collection<IpcSchedule> createSchedules(Route route,
+	public static List<IpcSchedule> createSchedules(Route route,
 			List<Block> blocksForRoute) {
 		Map<ServiceDirectionKey, IpcSchedule> schedulesMap = 
 				new HashMap<ServiceDirectionKey, IpcSchedule>();
@@ -249,7 +248,7 @@ public class IpcSchedule implements Serializable {
 		}
 		
 		// Return the collection of IpcSchedules
-		return schedulesMap.values();
+		return new ArrayList<IpcSchedule>(schedulesMap.values());
 	}
 	
 	@Override

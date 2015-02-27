@@ -107,16 +107,23 @@ public interface ConfigInterface extends Remote {
 			throws RemoteException;
 	
 	/**
-	 * Returns trip patterns for specified routeShortName.
+	 * Returns trip patterns for specified routeIdOrShortName.
 	 * 
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 * @return
 	 * @throws RemoteException
 	 */
 	public List<IpcTripPattern> getTripPatterns(String routeIdOrShortName) 
 			throws RemoteException;
 
-	public Collection<IpcSchedule> getSchedules(String routeIdOrShortName);
+	/**
+	 * Returns list of IpcSchedule objects for the specified routeIdOrShortName
+	 * @param routeIdOrShortName
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<IpcSchedule> getSchedules(String routeIdOrShortName)
+			throws RemoteException;
 	
 	/**
 	 * Returns list of Agency objects containing data from GTFS agency.txt file
