@@ -26,7 +26,9 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
+import org.transitime.db.webstructs.WebAgency;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.utils.Time;
 
 /**
  * For when have list of VehicleDetails. By using this class can control the
@@ -64,13 +66,18 @@ public class ApiVehiclesDetails {
 	 */
 	public ApiVehiclesDetails(Collection<IpcVehicle> vehicles,
 			String agencyId, Map<String, UiMode> uiTypesForVehicles) {
+		// Get Time object based on timezone for agency
+		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
+		Time timeForAgency = webAgency.getAgency().getTime();				
+		
 		// Process each vehicle
 		vehiclesData = new ArrayList<ApiVehicleDetails>();
 		for (IpcVehicle vehicle : vehicles) {
 			// Determine UI type for vehicle
 			UiMode uiType = uiTypesForVehicles.get(vehicle.getId());
 
-			vehiclesData.add(new ApiVehicleDetails(vehicle, agencyId, uiType));
+			vehiclesData.add(new ApiVehicleDetails(vehicle, timeForAgency,
+					uiType));
 		}
 	}
 

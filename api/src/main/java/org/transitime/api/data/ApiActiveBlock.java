@@ -24,6 +24,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
+import org.transitime.db.webstructs.WebAgency;
 import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcVehicle;
@@ -69,9 +70,13 @@ public class ApiActiveBlock {
 		IpcTrip ipcTrip = trips.get(ipcActiveBlock.getActiveTripIndex());
 		apiTripSummary = new ApiTripSummary(ipcTrip);
 		
+		// Get Time object based on timezone for agency
+		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
+		Time timeForAgency = webAgency.getAgency().getTime();				
+
 		vehicles = new ArrayList<ApiVehicleDetails>();
 		for (IpcVehicle ipcVehicles : ipcActiveBlock.getVehicles()) {
-			vehicles.add(new ApiVehicleDetails(ipcVehicles, agencyId));
+			vehicles.add(new ApiVehicleDetails(ipcVehicles, timeForAgency));
 		}
 	}
 	
