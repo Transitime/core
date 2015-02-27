@@ -62,7 +62,7 @@ import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcServerStatus;
-import org.transitime.ipc.data.IpcStopsForRoute;
+import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
@@ -603,7 +603,7 @@ public class TransitimeApi {
 		try {
 			// Get stops data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			IpcStopsForRoute stopsForRoute = inter
+			IpcDirectionsForRoute stopsForRoute = inter
 					.getStops(routesIdOrShortNames);
 
 			// If the route doesn't exist then throw exception such that

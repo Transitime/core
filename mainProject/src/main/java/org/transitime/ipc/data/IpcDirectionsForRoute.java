@@ -24,12 +24,12 @@ import java.util.List;
 import org.transitime.db.structs.Route;
 
 /**
- *
+ * Contains each direction for route, along with each stop for each direction.
  *
  * @author SkiBu Smith
  *
  */
-public class IpcStopsForRoute implements Serializable {
+public class IpcDirectionsForRoute implements Serializable {
 
 	private List<IpcDirection> directions;
 	
@@ -37,7 +37,7 @@ public class IpcStopsForRoute implements Serializable {
 
 	/********************** Member Functions **************************/
 
-	public IpcStopsForRoute(Route dbRoute) {
+	public IpcDirectionsForRoute(Route dbRoute) {
 		directions = new ArrayList<IpcDirection>();
 		
 		// Determine the directions
@@ -50,13 +50,13 @@ public class IpcStopsForRoute implements Serializable {
 		}
 	}
 	
-	public IpcStopsForRoute(List<IpcDirection> directions) {
+	public IpcDirectionsForRoute(List<IpcDirection> directions) {
 		this.directions = directions;
 	}
 	
 	@Override
 	public String toString() {
-		return "IpcStopsForRoute [" 
+		return "IpcDirectionsForRoute [" 
 				+ "directions=" + directions 
 				+ "]";
 	}

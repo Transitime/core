@@ -19,15 +19,15 @@ package org.transitime.api.data;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.db.structs.Location;
+import org.transitime.ipc.data.IpcDirection;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcShape;
-import org.transitime.ipc.data.IpcStop;
+import org.transitime.ipc.data.IpcDirectionsForRoute;
 
 /**
  * Provides detailed information for a route include stops and shape info.
@@ -35,68 +35,70 @@ import org.transitime.ipc.data.IpcStop;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="route")
+@XmlRootElement(name = "route")
 public class ApiRoute {
 
-    @XmlAttribute
-    private String id;
-    
-    @XmlAttribute(name="rShortName")
-    private String shortName;
-    
-    @XmlAttribute
-    private String name;
+	@XmlAttribute
+	private String id;
 
-    @XmlAttribute
-    private String color;
+	@XmlAttribute(name = "rShortName")
+	private String shortName;
 
-    @XmlAttribute
-    private String textColor;
+	@XmlAttribute
+	private String name;
 
-    @XmlAttribute
-    private String type;
+	@XmlAttribute
+	private String color;
 
-    @XmlElement(name="stop")
-    private List<ApiStop> stops;
-    
-    @XmlElement(name="shape")
-    private List<ApiShape> shapes;
-    
-    @XmlElement
-    private ApiExtent extent;
-    
-    @XmlElement
-    private ApiLocation locationOfNextPredictedVehicle;
-    
-    /********************** Member Functions **************************/
+	@XmlAttribute
+	private String textColor;
 
-    protected ApiRoute() {}
-    
-    public ApiRoute(IpcRoute route) {
-	this.id = route.getId();
-	this.shortName = route.getShortName();
-	this.name = route.getName();
-	this.color = route.getColor();
-	this.textColor = route.getTextColor();
-	this.type = route.getType();
-	
-	this.stops = new ArrayList<ApiStop>();
-	for (IpcStop stop : route.getStops()) {
-	    this.stops.add(new ApiStop(stop));
+	@XmlAttribute
+	private String type;
+
+	@XmlElement(name = "direction")
+	private List<ApiDirection> directions;
+
+	@XmlElement(name = "shape")
+	private List<ApiShape> shapes;
+
+	@XmlElement
+	private ApiExtent extent;
+
+	@XmlElement
+	private ApiLocation locationOfNextPredictedVehicle;
+
+	/********************** Member Functions **************************/
+
+	protected ApiRoute() {
 	}
-	
-	this.shapes = new ArrayList<ApiShape>();
-	for (IpcShape shape : route.getShapes()) {
-	    this.shapes.add(new ApiShape(shape));
+
+	public ApiRoute(IpcRoute ipcRoute) {
+		this.id = ipcRoute.getId();
+		this.shortName = ipcRoute.getShortName();
+		this.name = ipcRoute.getName();
+		this.color = ipcRoute.getColor();
+		this.textColor = ipcRoute.getTextColor();
+		this.type = ipcRoute.getType();
+
+		IpcDirectionsForRoute stops = ipcRoute.getStops();
+		this.directions = new ArrayList<ApiDirection>();
+		for (IpcDirection ipcDirection : stops.getDirections()) {
+			this.directions.add(new ApiDirection(ipcDirection));
+		}
+
+		this.shapes = new ArrayList<ApiShape>();
+		for (IpcShape shape : ipcRoute.getShapes()) {
+			this.shapes.add(new ApiShape(shape));
+		}
+
+		this.extent = new ApiExtent(ipcRoute.getExtent());
+
+		Location vehicleLoc = ipcRoute.getLocationOfNextPredictedVehicle();
+		if (vehicleLoc == null)
+			this.locationOfNextPredictedVehicle = null;
+		else
+			this.locationOfNextPredictedVehicle = new ApiLocation(vehicleLoc);
 	}
-	
-	this.extent = new ApiExtent(route.getExtent());	
-	
-	Location vehicleLoc = route.getLocationOfNextPredictedVehicle();
-	if (vehicleLoc == null)
-	    this.locationOfNextPredictedVehicle = null;
-	else
-	    this.locationOfNextPredictedVehicle = new ApiLocation(vehicleLoc);
-    }
 
 }

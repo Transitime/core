@@ -43,7 +43,7 @@ import org.transitime.db.structs.TripPattern;
 public class IpcRoute extends IpcRouteSummary {
 
 	// Note that there are additional members in IpcRouteSummary superclass.
-	private IpcStopsForRoute stops;
+	private IpcDirectionsForRoute stops;
 	private Collection<IpcShape> shapes;
 	private Location locationOfNextPredictedVehicle;
 	
@@ -167,7 +167,7 @@ public class IpcRoute extends IpcRouteSummary {
 	 * @param tripPatternId
 	 * @return
 	 */
-	private static IpcStopsForRoute createStops(Route dbRoute, String stopId,
+	private static IpcDirectionsForRoute createStops(Route dbRoute, String stopId,
 			String tripPatternId) {
 		// Get the ordered stop IDs per direction for the route
 		Map<String, List<String>> orderedStopsByDirection =
@@ -212,7 +212,7 @@ public class IpcRoute extends IpcRouteSummary {
 		}
 		
 		// Returns results
-		return new IpcStopsForRoute(ipcDirections);
+		return new IpcDirectionsForRoute(ipcDirections);
 	}
 
 	/**
@@ -331,7 +331,7 @@ public class IpcRoute extends IpcRouteSummary {
 				+ "]";
 	}
 
-	public IpcStopsForRoute getStops() {
+	public IpcDirectionsForRoute getStops() {
 		return stops;
 	}
 

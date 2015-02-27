@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcDirection;
-import org.transitime.ipc.data.IpcStopsForRoute;
+import org.transitime.ipc.data.IpcDirectionsForRoute;
 
 /**
  * A list of directions.
@@ -48,7 +48,7 @@ public class ApiDirections {
 	protected ApiDirections() {
 	}
 
-	public ApiDirections(IpcStopsForRoute stopsForRoute) {
+	public ApiDirections(IpcDirectionsForRoute stopsForRoute) {
 		Collection<IpcDirection> directions = stopsForRoute.getDirections();
 		directionsData = new ArrayList<ApiDirection>(directions.size());
 		for (IpcDirection direction : directions) {

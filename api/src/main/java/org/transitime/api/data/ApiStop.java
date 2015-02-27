@@ -26,7 +26,8 @@ import org.transitime.ipc.data.IpcStop;
  * Full description of a stop.
  * <p>
  * Note: extending from ApiLocation since have a lat & lon. Would be nice to
- * have ApiLocation as a member but when try this get a internal server 500 error.
+ * have ApiLocation as a member but when try this get a internal server 500
+ * error.
  *
  * @author SkiBu Smith
  *
@@ -34,36 +35,33 @@ import org.transitime.ipc.data.IpcStop;
 @XmlType(propOrder = { "id", "lat", "lon", "name", "code", "minor" })
 public class ApiStop extends ApiTransientLocation {
 
-    @XmlAttribute
-    private String id;
-       
-    @XmlAttribute
-    private String name;
-  
-    @XmlAttribute
-    private Integer code;
-    
-    // For indicating that in UI should deemphasize this stop because it
-    // is not on a main trip pattern.
-    @XmlAttribute(name="minor")
-    private Boolean minor;
-    
-    @XmlAttribute
-    private String directionId;
-    
-     /********************** Member Functions **************************/
+	@XmlAttribute
+	private String id;
 
-    protected ApiStop() {}
-    
-    public ApiStop(IpcStop stop) {
-	super(stop.getLoc().getLat(), stop.getLoc().getLon());
-	this.id = stop.getId();
-	this.name = stop.getName();
-	this.code = stop.getCode();
-	// If true then set to null so that this attribute won't then be
-	// output as XML/JSON, therefore making output a bit more compact.
-	this.minor = stop.isUiStop() ? null : true;
-	this.directionId = stop.getDirectionId();
-    }
+	@XmlAttribute
+	private String name;
+
+	@XmlAttribute
+	private Integer code;
+
+	// For indicating that in UI should deemphasize this stop because it
+	// is not on a main trip pattern.
+	@XmlAttribute(name = "minor")
+	private Boolean minor;
+
+	/********************** Member Functions **************************/
+
+	protected ApiStop() {
+	}
+
+	public ApiStop(IpcStop stop) {
+		super(stop.getLoc().getLat(), stop.getLoc().getLon());
+		this.id = stop.getId();
+		this.name = stop.getName();
+		this.code = stop.getCode();
+		// If true then set to null so that this attribute won't then be
+		// output as XML/JSON, therefore making output a bit more compact.
+		this.minor = stop.isUiStop() ? null : true;
+	}
 
 }

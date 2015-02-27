@@ -26,7 +26,7 @@ import org.transitime.db.structs.Agency;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
-import org.transitime.ipc.data.IpcStopsForRoute;
+import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 
@@ -79,7 +79,7 @@ public interface ConfigInterface extends Remote {
 	 * @return
 	 * @throws RemoteException
 	 */
-	public IpcStopsForRoute getStops(String routeIdOrShortName)  
+	public IpcDirectionsForRoute getStops(String routeIdOrShortName)  
 			throws RemoteException;
 	
 	/**

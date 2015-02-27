@@ -220,35 +220,38 @@ function routeConfigCallback(route, status) {
 	// bringToBack() the stops will end up being on top.
 	var locsToFit = [];
 	var firstNonMinorStop = true;
-	for (var i=0; i<route.stop.length; ++i) {
-		var stop = route.stop[i];
-		var options = stop.minor ? minorStopOptions : stopOptions;
-		// Draw first non-minor stop differently to highlight it
-		if (!stop.minor && firstNonMinorStop) {
-			options = firstStopOptions;
-			firstNonMinorStop = false;
+	for (var i=0; i<route.direction.length; ++i) {
+		var direction = route.direction[i];
+		for (var j=0; j<direction.stop.length; ++j) {
+			var stop = direction.stop[i];
+			var options = stop.minor ? minorStopOptions : stopOptions;
+			// Draw first non-minor stop differently to highlight it
+			if (!stop.minor && firstNonMinorStop) {
+				options = firstStopOptions;
+				firstNonMinorStop = false;
+			}
+			
+			// Keep track of non-minor stop locations so can fit map to show them all
+			if (!stop.minor)
+				locsToFit.push(L.latLng(stop.lat, stop.lon));
+			
+			// Create the stop Marker
+			var stopMarker = L.circleMarker([stop.lat,stop.lon], options).addTo(map);
+			
+			routeFeatureGroup.addLayer(stopMarker);
+			
+			// Store stop data obtained via AJAX with stopMarker so it can be used in popup
+			stopMarker.stop = stop;
+			
+			// Store routeShortName obtained via AJAX with stopMarker so can be 
+			// used to get predictions for stop/route
+			stopMarker.rShortName = route.rShortName;
+			
+			// When user clicks on stop popup information box
+			stopMarker.on('click', function(e) {
+				showStopPopup(this);
+			}).addTo(map);
 		}
-		
-		// Keep track of non-minor stop locations so can fit map to show them all
-		if (!stop.minor)
-			locsToFit.push(L.latLng(stop.lat, stop.lon));
-		
-		// Create the stop Marker
-		var stopMarker = L.circleMarker([stop.lat,stop.lon], options).addTo(map);
-		
-		routeFeatureGroup.addLayer(stopMarker);
-		
-		// Store stop data obtained via AJAX with stopMarker so it can be used in popup
-		stopMarker.stop = stop;
-		
-		// Store routeShortName obtained via AJAX with stopMarker so can be 
-		// used to get predictions for stop/route
-		stopMarker.rShortName = route.rShortName;
-		
-		// When user clicks on stop popup information box
-		stopMarker.on('click', function(e) {
-			showStopPopup(this);
-		}).addTo(map);
 	}
 
 	// Draw the paths for the route
