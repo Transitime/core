@@ -203,12 +203,9 @@ public class IpcRoute extends IpcRouteSummary {
 						Core.getInstance().getDbConfig().getStop(currentStopId);
 				IpcStop ipcStop = new IpcStop(stop, isUiStop, directionId);
 				ipcStopsForDirection.add(ipcStop);
-				
-				ipcDirections.add(new IpcDirection(dbRoute, directionId,
-						ipcStopsForDirection));
 			}
-			
-			
+			ipcDirections.add(new IpcDirection(dbRoute, directionId,
+					ipcStopsForDirection));			
 		}
 		
 		// Returns results
