@@ -239,9 +239,16 @@ public class DbConfig {
 			String serviceId = block.getServiceId();
 			
 			Collection<String> routeIdsForBlock = block.getRouteIds();
-			for (String routeId : routeIdsForBlock)
+			for (String routeId : routeIdsForBlock) {
+				// Add the block to the map by keyed serviceId and routeId
 				addBlockToMapByRouteMap(blocksByRouteMap, serviceId, routeId,
 						block);
+				
+				// Also add block to map using serviceId of null so that
+				// can retrieve blocks for all service classes for a route
+				// by using a service ID of null.
+				addBlockToMapByRouteMap(blocksByRouteMap, null, routeId, block);
+			}
 		}
 		
 		return blocksByRouteMap;
@@ -250,24 +257,25 @@ public class DbConfig {
 	/**
 	 * Returns List of Blocks associated with the serviceId and routeId.
 	 * 
-	 * @param serviceId
+	 * @param serviceId Specified service ID that want blocks for. Can set 
+	 * to null to blocks for all service IDs for the route.
 	 * @param routeId
 	 * @return List of Blocks. Null of no blocks for the serviceId and routeId
 	 */
 	public List<Block> getBlocksForRoute(String serviceId, String routeId) {
-		// Read in data if it hasn't been read in yet. This isn't done at 
-		// startup since it causes all trips and travel times to be read in,
-		// which of course takes a while. Therefore only want to do this
-		// if the blocksByRouteMap is actually being used, which is probably
-		// only for situations where AVL feed provides route IDs instead
-		// block assignments.
-		if (blocksByRouteMap == null) {
-			blocksByRouteMap = putBlocksIntoMapByRoute(blocks);
-		}
-
 		RouteServiceMapKey key = new RouteServiceMapKey(serviceId, routeId);
 		List<Block> blocksList = blocksByRouteMap.get(key);
 		return blocksList;
+	}
+
+	/**
+	 * Returns List of Blocks associated with the routeId for all service IDs.
+	 * 
+	 * @param routeId
+	 * @return
+	 */
+	public List<Block> getBlocksForRoute(String routeId) {
+		return getBlocksForRoute(null, routeId);
 	}
 	
 	/**
@@ -499,6 +507,7 @@ public class DbConfig {
 		timer = new IntervalTimer();
 		blocks = Block.getBlocks(globalSession, configRev);
 		blocksByServiceMap = putBlocksIntoMap(blocks);
+		blocksByRouteMap = putBlocksIntoMapByRoute(blocks);
 		logger.debug("Reading blocks took {} msec", timer.elapsedMsec());
 		
 		timer = new IntervalTimer();
