@@ -223,7 +223,7 @@ function routeConfigCallback(route, status) {
 	for (var i=0; i<route.direction.length; ++i) {
 		var direction = route.direction[i];
 		for (var j=0; j<direction.stop.length; ++j) {
-			var stop = direction.stop[i];
+			var stop = direction.stop[j];
 			var options = stop.minor ? minorStopOptions : stopOptions;
 			// Draw first non-minor stop differently to highlight it
 			if (!stop.minor && firstNonMinorStop) {
