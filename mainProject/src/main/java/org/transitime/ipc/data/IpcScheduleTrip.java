@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.transitime.applications.Core;
 import org.transitime.db.structs.ScheduleTime;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
@@ -85,6 +86,19 @@ public class IpcScheduleTrip implements Serializable {
 					// direction for the route.
 					break;
 				}
+			}
+			
+			// If the stop from the ordered stops from the route/direction
+			// didn't have a corresponding stop in the trip then still add
+			// add a IpcScheduleTime to the trip, but with a null time.
+			// This way all trips for a schedule will have the same stops.
+			// Just some will have a null time.
+			if (ipcScheduleTime == null) {
+				// Create a IpcScheduleTime with a time of null so can still
+				// be added to the schedule trip.
+				String stopName = Core.getInstance().getDbConfig()
+						.getStop(stopId).getName();
+				ipcScheduleTime = new IpcScheduleTime(stopId, stopName, null);
 			}
 			
 			// Add the (possibly null) schedule time
