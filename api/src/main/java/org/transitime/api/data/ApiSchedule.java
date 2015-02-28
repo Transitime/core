@@ -38,6 +38,9 @@ public class ApiSchedule {
 	private String serviceId;
 
 	@XmlAttribute
+	private String serviceName;
+
+	@XmlAttribute
 	private String directionId;
 
 	@XmlAttribute
@@ -51,8 +54,16 @@ public class ApiSchedule {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiSchedule() {
+	}
+	
 	public ApiSchedule(IpcSchedule ipcSchedule) {
 		serviceId = ipcSchedule.getServiceId();
+		serviceName = ipcSchedule.getServiceName();
 		directionId = ipcSchedule.getDirectionId();
 		routeId = ipcSchedule.getRouteId();
 		routeName = ipcSchedule.getRouteName();

@@ -35,6 +35,9 @@ import org.transitime.ipc.data.IpcScheduleTrip;
 public class ApiScheduleTrip {
 
 	@XmlAttribute
+	private String tripShortName;
+
+	@XmlAttribute
 	private String tripId;
 
 	@XmlAttribute
@@ -45,7 +48,15 @@ public class ApiScheduleTrip {
 	
 	/********************** Member Functions **************************/
 
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiScheduleTrip() {
+	}
+
 	public ApiScheduleTrip(IpcScheduleTrip ipcScheduleTrip) {
+		this.tripShortName = ipcScheduleTrip.getTripShortName();
 		this.tripId = ipcScheduleTrip.getTripId();
 		this.blockId = ipcScheduleTrip.getBlockId();
 		
