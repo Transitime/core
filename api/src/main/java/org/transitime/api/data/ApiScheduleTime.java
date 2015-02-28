@@ -19,11 +19,12 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.IpcScheduleTimes;
+import org.transitime.ipc.data.IpcScheduleTime;
 import org.transitime.utils.Time;
 
 /**
- * Represents a schedule time for a stop.
+ * Represents a schedule time for a stop. Intended to be used for displaying a
+ * schedule for a route.
  *
  * @author SkiBu Smith
  *
@@ -31,10 +32,10 @@ import org.transitime.utils.Time;
 public class ApiScheduleTime {
 
     @XmlAttribute
-    private final String arrivalTime;
+    private final String time;
 
     @XmlAttribute
-    private final String departureTime;
+    private final Integer timeSecs;
 
     @XmlAttribute
     private final String stopId;
@@ -42,18 +43,14 @@ public class ApiScheduleTime {
     @XmlAttribute
     private final String stopName;
 
-    /********************** Member Functions **************************/
+	/********************** Member Functions **************************/
 
-    public ApiScheduleTime(IpcScheduleTimes ipcScheduleTimes) {
-	Integer arrivalInt = ipcScheduleTimes.getArrivalTime();
-	arrivalTime = arrivalInt == null ? 
-		null : Time.timeOfDayStr(arrivalInt);
-	
-	Integer departureInt = ipcScheduleTimes.getDepartureTime();
-	departureTime = departureInt == null ? 
-		null : Time.timeOfDayStr(departureInt);
-	
-	stopId = ipcScheduleTimes.getStopId();
-	stopName = ipcScheduleTimes.getStopName();
-    }
+	public ApiScheduleTime(IpcScheduleTime ipcScheduleTime) {
+		Integer timeInt = ipcScheduleTime.getTimeOfDay();
+		time = timeInt == null ? null : Time.timeOfDayStr(timeInt);
+		timeSecs = timeInt;
+		stopId = ipcScheduleTime.getStopId();
+		stopName = ipcScheduleTime.getStopName();
+	}
+
 }

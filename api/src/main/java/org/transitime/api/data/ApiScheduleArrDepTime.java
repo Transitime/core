@@ -17,32 +17,43 @@
 
 package org.transitime.api.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 
 import org.transitime.ipc.data.IpcScheduleTimes;
-import org.transitime.ipc.data.IpcTrip;
+import org.transitime.utils.Time;
 
 /**
- * Represents a collection of schedule times for a trip
+ * Represents a schedule time for a stop. Contains both arrival and departure
+ * time and is intended to be used for displaying the details of a trip.
  *
  * @author SkiBu Smith
  *
  */
-public class ApiScheduleTimes {
+public class ApiScheduleArrDepTime {
 
-	@XmlElement(name = "scheduleTime")
-	private List<ApiScheduleArrDepTime> scheduleTimes;
+	@XmlAttribute
+	private final String arrivalTime;
+
+	@XmlAttribute
+	private final String departureTime;
+
+	@XmlAttribute
+	private final String stopId;
+
+	@XmlAttribute
+	private final String stopName;
 
 	/********************** Member Functions **************************/
 
-	public ApiScheduleTimes(IpcTrip ipcTrip) {
-		scheduleTimes = new ArrayList<ApiScheduleArrDepTime>();
-		for (IpcScheduleTimes ipcScheduleTimes : ipcTrip.getScheduleTimes()) {
-			scheduleTimes.add(new ApiScheduleArrDepTime(ipcScheduleTimes));
-		}
+	public ApiScheduleArrDepTime(IpcScheduleTimes ipcScheduleTimes) {
+		Integer arrivalInt = ipcScheduleTimes.getArrivalTime();
+		arrivalTime = arrivalInt == null ? null : Time.timeOfDayStr(arrivalInt);
 
+		Integer departureInt = ipcScheduleTimes.getDepartureTime();
+		departureTime = departureInt == null ? null : Time
+				.timeOfDayStr(departureInt);
+
+		stopId = ipcScheduleTimes.getStopId();
+		stopName = ipcScheduleTimes.getStopName();
 	}
 }

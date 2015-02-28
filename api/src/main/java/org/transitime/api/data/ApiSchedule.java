@@ -20,29 +20,46 @@ package org.transitime.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcScheduleTimes;
-import org.transitime.ipc.data.IpcTrip;
+import org.transitime.ipc.data.IpcSchedule;
+import org.transitime.ipc.data.IpcScheduleTrip;
 
 /**
- * Represents a collection of schedule times for a trip
+ * Represents a schedule for a route for a specific direction and service class.
  *
  * @author SkiBu Smith
  *
  */
-public class ApiScheduleTimes {
+public class ApiSchedule {
 
-	@XmlElement(name = "scheduleTime")
-	private List<ApiScheduleArrDepTime> scheduleTimes;
+	@XmlAttribute
+	private String serviceId;
+
+	@XmlAttribute
+	private String directionId;
+
+	@XmlAttribute
+	private String routeId;
+
+	@XmlAttribute
+	private String routeName;
+
+	@XmlElement(name = "trip")
+	private List<ApiScheduleTrip> trips;
 
 	/********************** Member Functions **************************/
 
-	public ApiScheduleTimes(IpcTrip ipcTrip) {
-		scheduleTimes = new ArrayList<ApiScheduleArrDepTime>();
-		for (IpcScheduleTimes ipcScheduleTimes : ipcTrip.getScheduleTimes()) {
-			scheduleTimes.add(new ApiScheduleArrDepTime(ipcScheduleTimes));
+	public ApiSchedule(IpcSchedule ipcSchedule) {
+		serviceId = ipcSchedule.getServiceId();
+		directionId = ipcSchedule.getDirectionId();
+		routeId = ipcSchedule.getRouteId();
+		routeName = ipcSchedule.getRouteName();
+		
+		trips = new ArrayList<ApiScheduleTrip>();
+		for (IpcScheduleTrip ipcScheduleTrip : ipcSchedule.getIpcScheduleTrips()) {
+			trips.add(new ApiScheduleTrip(ipcScheduleTrip));
 		}
-
 	}
 }

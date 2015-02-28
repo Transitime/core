@@ -20,29 +20,38 @@ package org.transitime.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcScheduleTimes;
-import org.transitime.ipc.data.IpcTrip;
+import org.transitime.ipc.data.IpcScheduleTime;
+import org.transitime.ipc.data.IpcScheduleTrip;
 
 /**
- * Represents a collection of schedule times for a trip
+ * Represents a single trip for an ApiSchedule
  *
  * @author SkiBu Smith
  *
  */
-public class ApiScheduleTimes {
+public class ApiScheduleTrip {
 
-	@XmlElement(name = "scheduleTime")
-	private List<ApiScheduleArrDepTime> scheduleTimes;
+	@XmlAttribute
+	private String tripId;
 
+	@XmlAttribute
+	private String blockId;
+
+	@XmlElement(name = "time")
+	private List<ApiScheduleTime> times;
+	
 	/********************** Member Functions **************************/
 
-	public ApiScheduleTimes(IpcTrip ipcTrip) {
-		scheduleTimes = new ArrayList<ApiScheduleArrDepTime>();
-		for (IpcScheduleTimes ipcScheduleTimes : ipcTrip.getScheduleTimes()) {
-			scheduleTimes.add(new ApiScheduleArrDepTime(ipcScheduleTimes));
+	public ApiScheduleTrip(IpcScheduleTrip ipcScheduleTrip) {
+		this.tripId = ipcScheduleTrip.getTripId();
+		this.blockId = ipcScheduleTrip.getBlockId();
+		
+		this.times = new ArrayList<ApiScheduleTime>();
+		for (IpcScheduleTime ipcScheduleTime : ipcScheduleTrip.getScheduleTimes()) {
+			this.times.add(new ApiScheduleTime(ipcScheduleTime));
 		}
-
 	}
 }

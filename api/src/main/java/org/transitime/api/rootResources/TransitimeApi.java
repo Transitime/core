@@ -44,6 +44,7 @@ import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoute;
 import org.transitime.api.data.ApiRouteSummaries;
+import org.transitime.api.data.ApiSchedules;
 import org.transitime.api.data.ApiServerStatus;
 import org.transitime.api.data.ApiTrip;
 import org.transitime.api.data.ApiTripPatterns;
@@ -61,6 +62,7 @@ import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitime.ipc.data.IpcSchedule;
 import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcTrip;
@@ -851,10 +853,52 @@ public class TransitimeApi {
 				throw WebUtils.badRequestException("route="
 						+ routesIdOrShortNames + " does not exist.");
 
-			// Create and return ApiBlock response
+			// Create and return ApiTripPatterns response
 			ApiTripPatterns apiTripPatterns = new ApiTripPatterns(
 					ipcTripPatterns);
 			return stdParameters.createResponse(apiTripPatterns);
+		} catch (RemoteException e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Handles the "tripPattern" command which outputs trip pattern
+	 * configuration data for the specified route.
+	 * 
+	 * @param stdParameters
+	 * @param routesIdOrShortNames
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/schedule")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getSchedule(
+			@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "r") String routesIdOrShortNames)
+			throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcSchedule> ipcSchedules = inter
+					.getSchedules(routesIdOrShortNames);
+
+			// If the trip doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcSchedules == null)
+				throw WebUtils.badRequestException("route="
+						+ routesIdOrShortNames + " does not exist.");
+
+			// Create and return ApiSchedules response
+			ApiSchedules apiSchedules = new ApiSchedules(
+					ipcSchedules);
+			return stdParameters.createResponse(apiSchedules);
 		} catch (RemoteException e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());

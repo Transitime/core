@@ -21,28 +21,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcScheduleTimes;
-import org.transitime.ipc.data.IpcTrip;
+import org.transitime.ipc.data.IpcSchedule;
 
 /**
- * Represents a collection of schedule times for a trip
+ * Represents a collection of ApiSchedule objects for a route
  *
  * @author SkiBu Smith
  *
  */
-public class ApiScheduleTimes {
+@XmlRootElement(name = "schedules")
+public class ApiSchedules {
 
-	@XmlElement(name = "scheduleTime")
-	private List<ApiScheduleArrDepTime> scheduleTimes;
-
+	@XmlElement(name = "schedule")
+	private List<ApiSchedule> schedules;
+	
 	/********************** Member Functions **************************/
 
-	public ApiScheduleTimes(IpcTrip ipcTrip) {
-		scheduleTimes = new ArrayList<ApiScheduleArrDepTime>();
-		for (IpcScheduleTimes ipcScheduleTimes : ipcTrip.getScheduleTimes()) {
-			scheduleTimes.add(new ApiScheduleArrDepTime(ipcScheduleTimes));
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiSchedules() {
+	}
+	
+	public ApiSchedules(List<IpcSchedule> schedules) {
+		this.schedules = new ArrayList<ApiSchedule>(schedules.size());
+		for (IpcSchedule ipcSchedule : schedules) {
+			this.schedules.add(new ApiSchedule(ipcSchedule));
 		}
-
 	}
 }
