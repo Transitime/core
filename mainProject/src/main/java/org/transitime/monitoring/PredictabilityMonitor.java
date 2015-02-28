@@ -40,14 +40,14 @@ public class PredictabilityMonitor extends MonitorBase {
 	private static DoubleConfigValue minPredictableBlocks =
 			new DoubleConfigValue(
 					"transitime.monitoring.minPredictableBlocks", 
-					0.65, 
+					0.50, 
 					"The minimum fraction of currently active blocks that "
 					+ "should have a predictable vehicle");
 
 	private static DoubleConfigValue minPredictableBlocksGap =
 			new DoubleConfigValue(
 					"transitime.monitoring.minPredictableBlocksGap", 
-					0.1, 
+					0.25, 
 					"When transitioning from triggered to untriggered don't "
 					+ "want to send out an e-mail right away if actually "
 					+ "dithering. Therefore will only send out OK e-mail if the "
