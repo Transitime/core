@@ -114,7 +114,7 @@ public class ArchiveOldFilesModule extends Module {
 	/**
 	 * @param agencyId
 	 */
-	protected ArchiveOldFilesModule(String agencyId) {
+	public ArchiveOldFilesModule(String agencyId) {
 		super(agencyId);
 	}
 
