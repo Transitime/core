@@ -61,6 +61,16 @@ public class IpcSchedule implements Serializable {
 	/********************** Member Functions **************************/
 
 	/**
+	 * Constructor made private because need to use createSchedules() to
+	 * construct the objects.
+	 */
+	private IpcSchedule() {
+		trips = null;
+	}
+	
+	/**
+	 * Constructor
+	 * 
 	 * @param route
 	 * @param directionId
 	 * @param directionName
@@ -199,6 +209,48 @@ public class IpcSchedule implements Serializable {
 	}
 	
 	/**
+	 * Sorts the list of IpcSchedule objects. Puts the service classes with more
+	 * trips first. This should put weekday before Saturday before Sunday. Also
+	 * sorts by direction ID when service class is the same. And if number of
+	 * trips is the same then tries to put Sunday last by looking at the
+	 * serviceId.
+	 * 
+	 * @param scheduleList
+	 *            List to be sorted
+	 */
+	private static void sortSchedules(List<IpcSchedule> scheduleList) {
+		Collections.sort(scheduleList, new Comparator<IpcSchedule>() {
+			@Override
+			public int compare(IpcSchedule o1, IpcSchedule o2) {
+				if (o1.getServiceId().equals(o2.getServiceId())) {
+					return o1.getDirectionId().compareTo(o2.getDirectionId());					
+				} else {
+					// Different service IDs so order by number of trips per 
+					// service ID, putting the one with the most trips first
+					// since that is likely the more important weekday service
+					// and then Saturday, and then finally Sunday service.
+					if (o1.getIpcScheduleTrips().size() < 
+							o2.getIpcScheduleTrips().size())
+						return 1;
+					else if (o1.getIpcScheduleTrips().size() > 
+					o2.getIpcScheduleTrips().size())
+						return -1;
+					else {
+						// Number of trips for the different service IDs are 
+						// the same. For this situation need to resort to a
+						// guess, such as putting a service class with "Sunday"
+						// after "Saturday"
+						if (o2.getServiceId().toLowerCase().contains("sun"))
+							return -1;
+						else
+							return 0;
+					}
+				}			
+			}
+		});
+	}
+	
+	/**
 	 * Creates a IpcSchedule for each service ID and each direction for the
 	 * blocks for the route.
 	 * 
@@ -247,8 +299,13 @@ public class IpcSchedule implements Serializable {
 			ipcSchedule.processTrips();
 		}
 		
-		// Return the collection of IpcSchedules
-		return new ArrayList<IpcSchedule>(schedulesMap.values());
+		// Convert to a list of IpcSchedules and sort them
+		List<IpcSchedule> scheduleList = 
+				new ArrayList<IpcSchedule>(schedulesMap.values());
+		sortSchedules(scheduleList);
+		
+		// Return the sorted schedules
+		return scheduleList;
 	}
 	
 	@Override
