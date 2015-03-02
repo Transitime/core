@@ -36,10 +36,13 @@ import org.transitime.logging.Markers;
  */
 public class NamedThread extends Thread {
 	public static final String DEFALT_NAME = "UnnamedThread";
-	private static final HashMap<String, Integer> threadNameCountMap = new HashMap<String, Integer>();
+	private static final HashMap<String, Integer> threadNameCountMap = 
+			new HashMap<String, Integer>();
 	// Number of live threads isn't currently used but was in Brian Goetz book
 	private static final AtomicInteger numAlive = new AtomicInteger();
-	private static final Logger logger= LoggerFactory.getLogger(NamedThread.class);
+	
+	private static final Logger logger = 
+			LoggerFactory.getLogger(NamedThread.class);
 	
 	/**
 	 * Creates the named thread using a default name.
