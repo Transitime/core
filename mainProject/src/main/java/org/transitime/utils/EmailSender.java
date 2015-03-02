@@ -128,12 +128,12 @@ public class EmailSender {
 			Transport.send(message);
  
 			logger.info("Successfully sent e-mail to {} . The e-mail "
-					+ "message was: {}", 
-					recipients, message);
+					+ "message subject was: \"{}\", and body was: \"{}\"", 
+					recipients, subject, messageBody);
 		} catch (MessagingException e) {
 			logger.error("Failed sending e-mail. Exception message: {}. "
-					+ "The e-mail message was: {}", 
-					e.getMessage(), message);
+					+ "The e-mail message subject was: \"{}\", and body was: \"{}\"", 
+					e.getMessage(), subject, messageBody);
 		}
 	}
 	
