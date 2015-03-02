@@ -177,21 +177,7 @@ public class ArchiveOldFilesModule extends Module {
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
-	public void run() {
-		// Make sure parameters with no default value are set
-		if (logDirForInventoryFile.getValue() == null) 
-			logger.error("Must set transitime.maintenance.logDirForInventoryFile"
-					+ " parameter.");
-		if (logFileBaseDir.getValue() == null)
-			logger.error("Must set transitime.maintenance.logFileBaseDir "
-					+ "parameter.");
-		if (awsVaultName.getValue() == null)
-			logger.error("Must set transitime.maintenance.awsVaultName "
-					+ "parameter.");
-		if (logFileSubDirectory.getValue() == null)
-			logger.error("Must set transitime.maintenance.logFileSubDir "
-					+ "parameter.");
-		
+	public void run() {		
 		while (true) {
 			// Sleep until the time of day specified by secondsIntoDay member
 			sleepTillAppropriateTime();
