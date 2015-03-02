@@ -107,9 +107,9 @@
   </appender>
 
 
-  <!-- For sending out e-mails when there is an logging message that is marked
+  <!-- For sending out e-mails when there is a logging message that is marked
        for notification. Usually, but not necessarily always, this will be
-       and ERROR level message.
+       an ERROR level message.
     -->
   <appender name="ERROR_SMTP" class="ch.qos.logback.classic.net.SMTPAppender">
 
@@ -330,9 +330,17 @@
     <appender-ref ref="AVL" />
   </logger>
 
+  <!-- For config params it is more complicated because want to both have
+       config params logged in separate file but also want some errors
+       to send out an e-mail. Need to use ERROR_SMTP and additivity=true
+       to make sure the e-mail is sent out. -->
   <logger name="org.transitime.config"
           level="info" additivity="false">
     <appender-ref ref="CONFIG" />
+  </logger>
+  <logger name="org.transitime.config"
+          level="error" additivity="true">
+    <appender-ref ref="ERROR_SMTP" />
   </logger>
 
   <logger name="org.transitime.core.predAccuracy"
