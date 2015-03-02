@@ -25,25 +25,19 @@ import java.util.List;
  *
  */
 public class DoubleConfigValue extends ConfigValue<Double> {
+	
 	/**
-	 * No default is specified. If value not in config file then error occurs.
+	 * Constructor for when there is no default value.
 	 * 
 	 * @param id
+	 * @param description
 	 */
-	public DoubleConfigValue(String id) {
-		super(id, null);
+	public DoubleConfigValue(String id, String description) {
+		super(id, description);
 	}
 	
 	/**
-	 * 
-	 * @param id
-	 * @param defaultValue
-	 */
-	public DoubleConfigValue(String id, Double defaultValue) {
-		super(id, defaultValue);
-	}
-	
-	/**
+	 * Constructor.
 	 * 
 	 * @param id
 	 * @param defaultValue

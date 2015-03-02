@@ -23,13 +23,14 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.logging.Markers;
 
 /**
- * Abstract class for storing a single param. These params are read from an
- * XML file at both startup and when data needs to be reread. Goal is to make
- * the accessing of the data fast, since it might be accessed in loops. Yet
- * also want to be able to reread the data when needed. Also works when need
- * a list of data.
+ * Abstract class for storing a single param. These params are read from the
+ * command line as Java properties or from an XML file at startup. Goal is to
+ * make the accessing of the data fast, since it might be accessed in loops. Yet
+ * also want to be able to reread the data when needed. Also works when need a
+ * list of data.
  * 
  * @author SkiBu Smith
  * 
@@ -39,9 +40,10 @@ public abstract class ConfigValue<T> {
 	// (e.g. -Dtransitime.limit=2)
 	protected final String id;
 	
-	// Value to use if not specified in config file. Null means no default is
-	// available, which means that null can't be used as a default.
+	// Value to use if not specified in config file. Can be null.
 	protected final T defaultValue;
+	
+	protected final boolean defaultValueConfigured;
 	
 	// The current value
 	protected volatile T value;
@@ -76,16 +78,17 @@ public abstract class ConfigValue<T> {
 
 	/**
 	 * Stores info associated with ConfigValue. Outputs error message if
-	 * id param null or already used. The description is set to null.
+	 * id param null or already used. 
 	 * 
 	 * @param id
-	 * @param defaultValue
+	 * @param description
 	 */
-	public ConfigValue(String id, T defaultValue) {
+	public ConfigValue(String id, String description) {
 		// Store params
 		this.id = id;
-		this.defaultValue = defaultValue;
-		this.description = null;
+		this.defaultValue = null;
+		this.defaultValueConfigured = false;
+		this.description = description;
 		this.okToLogValue = true;
 		commonConstructor();
 	}
@@ -102,6 +105,7 @@ public abstract class ConfigValue<T> {
 		// Store params
 		this.id = id;
 		this.defaultValue = defaultValue;
+		this.defaultValueConfigured = true;
 		this.description = description;
 		this.okToLogValue = true;
 		commonConstructor();
@@ -123,6 +127,7 @@ public abstract class ConfigValue<T> {
 		// Store params
 		this.id = id;
 		this.defaultValue = defaultValue;
+		this.defaultValueConfigured = true;
 		this.description = description;
 		this.okToLogValue = okToLogValue;
 		commonConstructor();
@@ -143,6 +148,7 @@ public abstract class ConfigValue<T> {
 					new Exception());
 			return;
 		}
+		
 		// FIXME I think need to remove this check since in future could be 
 		// rereading the config files so should expect to encounter params 
 		// more than once.
@@ -210,13 +216,15 @@ public abstract class ConfigValue<T> {
 	abstract protected T convertFromString(List<String> dataStr);
 
 	/**
-	 * Reads value from the config file data and stores it
-	 * @param configData HashMap of data read in from config file. The
-	 * key is the name of the param. The value is a List so that
-	 * can better handle params that have multiple elements. If null
-	 * then default values will be used.
+	 * Reads value from the config data and stores it
+	 * 
+	 * @param configData
+	 *            HashMap of data read in from config file. The key is the name
+	 *            of the param. The value is a List so that can better handle
+	 *            params that have multiple elements. If null then default
+	 *            values will be used.
 	 */
-	public void readValue(HashMap<String, List<String>> configData) 
+	private void readValue(HashMap<String, List<String>> configData) 
 			throws ConfigParamException {
 		List<String> dataList = null;
 		
@@ -255,12 +263,13 @@ public abstract class ConfigValue<T> {
 		} 
 	
 		// Param not properly defined in config file so use default.	
-		// If default value not defined then throw an error
-		if (defaultValue == null) {
-			logger.info("When reading parameter \"{}\". No valid " +
-					"value was set in config file and no default was " +
-					"specified so value is null.",
-					id);
+		// If default value not defined then log an error and send
+		// out e-mail since this is a serious problem.
+		if (defaultValue == null && !defaultValueConfigured) {
+			logger.error(Markers.email(),
+					"When reading parameter \"{}\" no valid "
+							+ "value was configured and no default was "
+							+ "specified so resulting value is null.", id);
 		}
 		
 		// Use the default value.

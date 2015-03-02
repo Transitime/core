@@ -24,31 +24,26 @@ import java.util.List;
  * @author SkiBu Smith
  */
 public class BooleanConfigValue extends ConfigValue<Boolean> {
+	
 	/**
-	 * No default is specified. If value not in config file then error occurs.
-	 * @param configValuesList
+	 * Constructor for when there is no default value.
+	 *  
 	 * @param id
+	 * @param description
 	 */
-	public BooleanConfigValue(String id) {
-		super(id, null);
+	public BooleanConfigValue(String id,  String description) {
+		super(id, description);
 	}
 	
 	/**
-	 * 
-	 * @param id
-	 * @param defaultValue
-	 */
-	public BooleanConfigValue(String id, Boolean defaultValue) {
-		super(id, defaultValue);
-	}
-	
-	/**
+	 * Constructor.
 	 * 
 	 * @param id
 	 * @param defaultValue
 	 * @param description
 	 */
-	public BooleanConfigValue(String id, Boolean defaultValue, String description) {
+	public BooleanConfigValue(String id, Boolean defaultValue,
+			String description) {
 		super(id, defaultValue, description);
 	}
 	

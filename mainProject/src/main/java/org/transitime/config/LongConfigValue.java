@@ -25,25 +25,19 @@ import java.util.List;
  * @author SkiBu Smith
  */
 public class LongConfigValue extends ConfigValue<Long> {
-	/**
-	 * No default is specified. If value not in config file then error occurs.
-	 * @param configValuesList
-	 * @param id
-	 */
-	public LongConfigValue(String id) {
-		super(id, null);
-	}
 	
 	/**
+	 * Constructor. For when no default value.
 	 * 
 	 * @param id
-	 * @param defaultValue
+	 * @param description
 	 */
-	public LongConfigValue(String id, Long defaultValue) {
-		super(id, defaultValue);
+	public LongConfigValue(String id, String description) {
+		super(id, description);
 	}
 	
 	/**
+	 * Constructor.
 	 * 
 	 * @param id
 	 * @param defaultValue

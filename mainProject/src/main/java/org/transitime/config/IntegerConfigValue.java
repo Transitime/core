@@ -24,25 +24,19 @@ import java.util.List;
  * @author SkiBu Smith
  */
 public class IntegerConfigValue extends ConfigValue<Integer> {
-	/**
-	 * No default is specified. If value not in config file then error occurs.
-	 * \
-	 * @param id
-	 */
-	public IntegerConfigValue(String id) {
-		super(id, null);
-	}
 	
 	/**
+	 * Constructor for when there is no default value.
 	 * 
 	 * @param id
-	 * @param defaultValue
+	 * @param description
 	 */
-	public IntegerConfigValue(String id, Integer defaultValue) {
-		super(id, defaultValue);
+	public IntegerConfigValue(String id, String description) {
+		super(id, description);
 	}
 	
 	/**
+	 * Constructor.
 	 * 
 	 * @param id
 	 * @param defaultValue

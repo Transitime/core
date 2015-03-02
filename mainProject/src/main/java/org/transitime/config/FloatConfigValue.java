@@ -25,25 +25,19 @@ import java.util.List;
  * @author SkiBu Smith
  */
 public class FloatConfigValue extends ConfigValue<Float> {
+	
 	/**
-	 * No default is specified. If value not in config file then error occurs.
+	 * Constructor for when there is no default value.
 	 * 
 	 * @param id
+	 * @param description
 	 */
-	public FloatConfigValue(String id) {
-		super(id, null);
+	public FloatConfigValue(String id, String description) {
+		super(id, description);
 	}
 	
 	/**
-	 * 
-	 * @param id
-	 * @param defaultValue
-	 */
-	public FloatConfigValue(String id, Float defaultValue) {
-		super(id, defaultValue);
-	}
-	
-	/**
+	 * Constructor.
 	 * 
 	 * @param id
 	 * @param defaultValue

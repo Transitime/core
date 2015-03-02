@@ -24,25 +24,20 @@ import java.util.List;
  * @author SkiBu Smith
  */
 public class StringConfigValue extends ConfigValue<String> {
-	/**
-	 * No default is specified. If value not in config file then error occurs.
-	 * @param configValuesList
-	 * @param id
-	 */
-	public StringConfigValue(String id) {
-		super(id, null);
-	}
 	
 	/**
+	 * Constructor. For when there is no default value. Error will occur when
+	 * parameter is initialized if it is not configured.
 	 * 
 	 * @param id
-	 * @param defaultValue
+	 * @param description
 	 */
-	public StringConfigValue(String id, String defaultValue) {
-		super(id, defaultValue);
+	public StringConfigValue(String id, String description) {
+		super(id, description);
 	}
 	
 	/**
+	 * Constructor.
 	 * 
 	 * @param id
 	 * @param defaultValue
@@ -54,6 +49,7 @@ public class StringConfigValue extends ConfigValue<String> {
 	}
 
 	/**
+	 * Constructor.
 	 * 
 	 * @param id
 	 * @param defaultValue
