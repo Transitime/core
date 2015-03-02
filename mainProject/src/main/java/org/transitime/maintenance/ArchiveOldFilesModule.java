@@ -79,7 +79,9 @@ public class ArchiveOldFilesModule extends Module {
 	private static StringConfigValue awsVaultName2 =
 			new StringConfigValue("transitime.maintenance.awsVaultName2",
 					null,
-					"For when making two separate archives.");
+					"For when making two separate archives. Can use two "
+					+ "archives if some files should be archived sooner "
+					+ "that others. Null means not using second archive.");
 
 	private static StringConfigValue logFileSubDirectory =
 			new StringConfigValue("transitime.maintenance.logFileSubDir",
@@ -92,7 +94,9 @@ public class ArchiveOldFilesModule extends Module {
 	private static StringConfigValue logFileSubDirectory2 =
 			new StringConfigValue("transitime.maintenance.logFileSubDir2",
 					null,
-					"For when making two separate archives.");
+					"For when making two separate archives. Can use two "
+					+ "archives if some files should be archived sooner "
+					+ "that others. Null means not using second archive.");
 	
 	private static IntegerConfigValue daysTillFilesArchived =
 			new IntegerConfigValue("transitime.maintenance.daysTillFilesArchived",
@@ -102,7 +106,9 @@ public class ArchiveOldFilesModule extends Module {
 	private static IntegerConfigValue daysTillFilesArchived2 =
 			new IntegerConfigValue("transitime.maintenance.daysTillFilesArchived2",
 					90,
-					"For when making two separate archives.");
+					"For when making two separate archives. Can use two "
+					+ "archives if some files should be archived sooner "
+					+ "that others. Null means not using second archive.");
 	
 	/******************** Logging **************************************/
 	
@@ -176,6 +182,20 @@ public class ArchiveOldFilesModule extends Module {
 	 */
 	@Override
 	public void run() {
+		// Make sure parameters with no default value are set
+		if (logDirForInventoryFile.getValue() == null) 
+			logger.error("Must set transitime.maintenance.logDirForInventoryFile"
+					+ " parameter.");
+		if (logFileBaseDir.getValue() == null)
+			logger.error("Must set transitime.maintenance.logFileBaseDir "
+					+ "parameter.");
+		if (awsVaultName.getValue() == null)
+			logger.error("Must set transitime.maintenance.awsVaultName "
+					+ "parameter.");
+		if (logFileSubDirectory.getValue() == null)
+			logger.error("Must set transitime.maintenance.logFileSubDir "
+					+ "parameter.");
+		
 		while (true) {
 			// Sleep until the time of day specified by secondsIntoDay member
 			sleepTillAppropriateTime();
