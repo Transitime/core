@@ -65,10 +65,17 @@ public class AvlProcessor {
 		return terminalDistanceForRouteMatching.getValue();
 	}
 
-	private static DoubleConfigValue terminalDistanceForRouteMatching = new DoubleConfigValue(
-			"transitime.core.terminalDistanceForRouteMatching", 100.0);
+	private static DoubleConfigValue terminalDistanceForRouteMatching = 
+			new DoubleConfigValue(
+			"transitime.core.terminalDistanceForRouteMatching", 
+			100.0,
+			"How far vehicle must be away from the terminal before doing "
+			+ "initial matching. This is important because when vehicle is at "
+			+ "terminal don't know which trip it it should be matched to until "
+			+ "vehicle has left the terminal.");
 
-	private static IntegerConfigValue allowableBadAssignments = new IntegerConfigValue(
+	private static IntegerConfigValue allowableBadAssignments = 
+			new IntegerConfigValue(
 			"transitime.core.allowableBadAssignments", 0,
 			"If get a bad assignment, such as no assignment, but no "
 					+ "more than allowableBadAssignments then will use the "
