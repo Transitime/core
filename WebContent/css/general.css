@@ -33,10 +33,9 @@ body {
 	text-align: center;
 }
 
-/* Note: this one should probably go on the pages where it actually is used. 
-   It is probably for where have lists of reports or such.
+/* For list of choices to be centered in page, e.g. list of reports
  */
-ul {
+.choicesList {
 	width: 350px;
 	margin-left: auto;
 	margin-right: auto;

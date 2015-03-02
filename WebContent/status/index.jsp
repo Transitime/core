@@ -28,7 +28,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
 <div id="title">Status Reports</div>
-<ul>
+<ul class="choicesList">
   <li><a href="activeBlocks.jsp?a=<%= agencyId %>"
     title="Shows how many block assignments are currently active and if they have assigned vehicles">
       Active Blocks</a></li>
