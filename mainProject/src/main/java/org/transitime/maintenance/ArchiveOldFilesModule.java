@@ -53,7 +53,6 @@ public class ArchiveOldFilesModule extends Module {
 
 	private static StringConfigValue logDirForInventoryFile =
 			new StringConfigValue("transitime.maintenance.logDirForInventoryFile",
-					null,
 					"Directory where to write the inventory file that lists "
 					+ "the archiveIds and other info for the data written "
 					+ "to the specified vault. Should be something like "
@@ -61,7 +60,6 @@ public class ArchiveOldFilesModule extends Module {
 	
 	private static StringConfigValue logFileBaseDir =
 			new StringConfigValue("transitime.maintenance.logFileBaseDir",
-					null,
 					"Where to find the log files. This part of the directory "
 					+ "name is not included in the file description for each "
 					+ "file in the archived zip file. This way the file names "
@@ -71,7 +69,6 @@ public class ArchiveOldFilesModule extends Module {
 	
 	private static StringConfigValue awsVaultName =
 			new StringConfigValue("transitime.maintenance.awsVaultName",
-					null,
 					"For creating the vault name for archiving files to AWS "
 					+ "Glacier. Should contain the agency name such that will "
 					+ "be something like mbta-core");
@@ -85,7 +82,6 @@ public class ArchiveOldFilesModule extends Module {
 
 	private static StringConfigValue logFileSubDirectory =
 			new StringConfigValue("transitime.maintenance.logFileSubDir",
-					null,
 					"The subdirectory beyond the base directory. Specifies "
 					+ "where to find the log files to be archived. This part "
 					+ "of the file names is included in the file descriptions "
