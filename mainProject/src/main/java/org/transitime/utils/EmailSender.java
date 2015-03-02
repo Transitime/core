@@ -127,9 +127,13 @@ public class EmailSender {
  
 			Transport.send(message);
  
-			logger.info("Successfully sent e-mail to {}", recipients);
+			logger.info("Successfully sent e-mail to {} . The e-mail "
+					+ "message was: {}", 
+					recipients, message);
 		} catch (MessagingException e) {
-			logger.error("Failed sending e-mail. Message: {}", e.getMessage());
+			logger.error("Failed sending e-mail. Exception message: {}. "
+					+ "The e-mail message was: {}", 
+					e.getMessage(), message);
 		}
 	}
 	
