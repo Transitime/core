@@ -269,7 +269,8 @@ public abstract class ConfigValue<T> {
 			logger.error(Markers.email(),
 					"When reading parameter \"{}\" no valid "
 							+ "value was configured and no default was "
-							+ "specified so resulting value is null.", id);
+							+ "specified so resulting value is null.", 
+					id);
 		}
 		
 		// Use the default value.
