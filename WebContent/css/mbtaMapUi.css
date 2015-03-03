@@ -3,13 +3,13 @@
  * This file contains css customizations for MBTA
  */
 
-#title { 
+#mapTitle { 
 	/* Special semi-transparent color */
 	background: rgba(210,20,210,0.5);
 }
 
 /* Set the title text here in css */
-#title:before {
+#mapTitle:before {
 	content: "MBTA";
 }
 	

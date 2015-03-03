@@ -1,6 +1,5 @@
-<%-- For creating a route selector parameter via a jsp include.
-     User can select all routes or a single route (but not an
-     arbitrary multiple of routes). 
+<%-- For creating a route selector parameter via a jsp include. 
+     User can select a single route (not all routes).
      Reads in routes via API for the agency specified by the "a" param. --%>
 
 <style type="text/css">
@@ -17,7 +16,7 @@
 $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
 	        // Generate list of routes for the selector
-	 		var selectorData = [{id: '', text: 'All Routes'}];
+	 		var selectorData = [];
 	 		for (var i in routes.route) {
 	 			var route = routes.route[i];
 	 			selectorData.push({id: route.id, text: route.name})
@@ -26,7 +25,7 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#route").select2({
- 				placeholder: "All Routes", 				
+ 				placeholder: "Select Route", 				
  				data : selectorData});
 	 		
 	 		// Tooltips for a select2 widget don't automatically go away when 
@@ -48,8 +47,6 @@ $.getJSON(apiUrlPrefix + "/command/routes",
     <div id="routesDiv"  class="param">
       <label for="route">Route:</label>
       <input id="route" name="r" style="width: 300px" 
-      	title="Select which route you want data for. Note: selecting all routes
-      		   indeed reads in data for all routes which means it could be 
-      		   somewhat slow."/>
+      	title="Select which route you want data for. "/>
     </div>
     

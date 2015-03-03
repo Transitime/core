@@ -5,17 +5,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
-
-  <!-- Load in JQuery UI javascript and css to set general look and feel -->
-  <script src="/api/jquery-ui/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/api/jquery-ui/jquery-ui.css">
-
-  <!-- Load in general transitime javascript library -->
-  <script src="/api/javascript/transitime.js"></script>
-
-  <link rel="stylesheet" href="/api/css/general.css">
-
+  <%@include file="/template/includes.jsp" %>
+  
   <style>
   /* center the table */
   #agencyList {

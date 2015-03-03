@@ -11,9 +11,8 @@ if (agencyId == null || agencyId.isEmpty()) {
 %>
 <html>
 <head>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
-  
-  <link rel="stylesheet" href="/api/css/general.css">
+  <%@include file="/template/includes.jsp" %>
+
   
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">

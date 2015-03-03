@@ -19,8 +19,8 @@ String chartTitle = "Prediction Accuracy for " + agencyId
 %>
 <html>
   <head>
-    <link rel="stylesheet" href="/api/css/general.css">
-  
+    <%@include file="/template/includes.jsp" %>
+    
     <style>
       .google-visualization-tooltip {
         font-family: arial, sans-serif;
@@ -59,7 +59,6 @@ String chartTitle = "Prediction Accuracy for " + agencyId
     <div id="errorMessage"></div>
   </body>
 
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     
     <script type="text/javascript">

@@ -12,7 +12,7 @@ html, body, #map {
 	position:absolute; top: 40%; left: 50%;
 }
 
-#title { 
+#mapTitle { 
 	/* Center in page */
 	position: relative; left: -50%; 
 	padding: 0.5em; border-radius: 0.5em; 
@@ -24,7 +24,7 @@ html, body, #map {
 
 /* Set the title text here in css 
  */
-#title:before {
+#mapTitle:before {
 	content: "Transitime.org";
 }
 	

@@ -10,17 +10,8 @@ if (agencyId == null || agencyId.isEmpty()) {
 %>
 <html>
 <head>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
-
-  <!-- Load in JQuery UI javascript and css to set general look and feel -->
-  <script src="/api/jquery-ui/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/api/jquery-ui/jquery-ui.css">
-
-  <link rel="stylesheet" href="/api/css/general.css">
-  
-  <!-- Load in general transitime javascript library -->
-  <script src="/api/javascript/transitime.js"></script>
-  
+  <%@include file="/template/includes.jsp" %>
+    
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Historical Reports</title>
 </head>
@@ -28,7 +19,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
 <div id="title">Historical Reports</div>
-<ul>
+<ul class="choicesList">
   <li><a href="predAccuracyRangeParams.jsp?a=<%= agencyId %>"
     title="Shows percentage of predictions that were accurate
     to within the specified limits.">
@@ -46,6 +37,9 @@ finding specific issues with predictions.">
   <li><a href="predAccuracyCsvParams.jsp?a=<%= agencyId %>"
     title="For downloading prediction accuracy data in CSV format.">
       Prediction Accuracy CSV Download</a></li>
+  <li><a href="scheduleParams.jsp?a=<%= agencyId %>"
+    title="Displays in a table the schedule for a specified route.">
+      Schedule for Route</a></li>
 </ul>
 </div>
 </body>

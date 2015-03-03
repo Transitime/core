@@ -18,10 +18,10 @@
   <link rel="stylesheet" href="/api/css/mapUi.css" />
  
   <!-- Load javascript and css files -->
+  <%@include file="/template/includes.jsp" %>
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   <script src="/api/javascript/leafletRotatedMarker.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="/api/javascript/jquery-dateFormat.min.js"></script>
   <script src="/api/javascript/mapUiOptions.js"></script>
 
@@ -31,16 +31,10 @@
     <script src="/api/javascript/mbtaMapUiOptions.js"></script>
   <% } %>
   
-  <!--  Load in JQueryUI files for special effects -->
-  <script src="/api/javascript/jquery-ui.js"></script>
-   
   <!-- Load in Select2 files so can create fancy selectors -->
   <link href="/api/select2/select2.css" rel="stylesheet"/>
   <script src="/api/select2/select2.min.js"></script>
 
-  <!-- Load in general transitime javascript library -->
-  <script src="/api/javascript/transitime.js"></script>
-  
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   
   <title>Transitime Map</title>
@@ -51,7 +45,7 @@
   <!-- To center successfully in all situations need to use a div within a div.
        The title text is set in css so that it is easily configurable -->
   <div id="titleContainer">
-    <div id="title"></div>
+    <div id="mapTitle"></div>
   </div>
   
   <!--  To center successfully in all situations use div within a div trick -->  
@@ -831,7 +825,7 @@ setInterval(hideThingsIfStale, 300);
  * Fade out the Transitime.org title
  */
 setTimeout(function () {
-	$('#title').hide('fade', 1000);
+	$('#mapTitle').hide('fade', 1000);
  }, 1000);
 	 
 </script>

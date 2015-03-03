@@ -38,10 +38,9 @@ String chartTitle = "Prediction Accuracy Range for " + agencyId
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+  <%@include file="/template/includes.jsp" %>
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   <title>Prediction Accuracy</title>
-
-  <link rel="stylesheet" href="/api/css/general.css">
 
     <style>
       .google-visualization-tooltip {
@@ -81,7 +80,6 @@ String chartTitle = "Prediction Accuracy Range for " + agencyId
   <div id="errorMessage"></div>
 </body>
 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
 <script type="text/javascript">

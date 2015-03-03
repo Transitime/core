@@ -35,7 +35,4 @@ $(function() {
 });
 
 
-// This needs to match the API key in the database
-var apiKey = "5ec0de94";
-var apiUrlPrefix = "/api/v1/key/" + apiKey + "/agency/" + getQueryVariable("a");
 

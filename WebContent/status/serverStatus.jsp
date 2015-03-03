@@ -16,13 +16,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 %>
 <html>
 <head>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
-
-  <!-- Load in JQuery UI javascript and css to set general look and feel -->
-  <script src="/api/jquery-ui/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/api/jquery-ui/jquery-ui.css">
-  
-  <link rel="stylesheet" href="/api/css/general.css">
+  <%@include file="/template/includes.jsp" %>
   
   <style>
   	h3, .content {
