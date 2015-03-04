@@ -55,7 +55,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 	      var tableOptions = {showRowNumber: false, allowHtml: true, sort: 'disable'};
 
 	      // Set the title now that have the route name from the API
-	      $('#title').html(jsonData.schedule[0].routeName);
+	      $('#title').html(jsonData.routeName);
 	      
 	      // Go through all service classes and directions for route
     	  for (var i=0; i<jsonData.schedule.length; ++i) {
@@ -81,13 +81,19 @@ if (agencyId == null || agencyId.isEmpty()) {
     		  // Add data for each row for the schedule. This is a bit complicated
     		  // because the API provides data per trip but want each row in the
     		  // schedule to be for a particular stop for all trips.
-    		  for (var stopIdx=0; stopIdx<schedule.trip[0].time.length; ++stopIdx) {
+    		  for (var stopIdx=0; stopIdx<schedule.timesForStop.length; ++stopIdx) {
         		  var rowArray = [];
-        		  rowArray.push(schedule.trip[0].time[stopIdx].stopName);
-    			  for (var tripIdx=0; tripIdx<schedule.trip.length; ++tripIdx) {
-    				  var time = schedule.trip[tripIdx].time[stopIdx];
-    				  rowArray.push(time.time);
+        		  // Add stop name to row
+        		  rowArray.push(schedule.timesForStop[stopIdx].stopName);
+        		  
+        		  // Add the times for the stop to the row
+        		  var timesForStop = schedule.timesForStop[stopIdx];
+    			  for (var tripIdx=0; tripIdx<timesForStop.time.length; ++tripIdx) {    				  
+    				  var time = timesForStop.time[tripIdx];
+    				  rowArray.push(time.timeStr);
     			  }
+        		  
+        		  // Add row of data to the data table
         		  data.addRow(rowArray);
     		  }    		  
 
