@@ -15,7 +15,7 @@
   label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
   .param {margin-top: 10px;}
   #route {width:300px;}
-  #submit {margin-top: 40px; margin-left: 200px;}
+  #submit {margin-top: 40px; margin-left: 250px;}
   .note {font-size: small;}
   
   </style>
