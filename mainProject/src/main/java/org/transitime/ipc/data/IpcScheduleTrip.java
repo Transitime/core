@@ -37,6 +37,7 @@ public class IpcScheduleTrip implements Serializable {
 	private final String blockId;
 	private final String tripId;
 	private final String tripShortName;
+	private final String tripHeadsign;
 	private final List<IpcScheduleTime> scheduleTimes;
 	
 	private static final long serialVersionUID = 4410014384520957092L;
@@ -54,6 +55,7 @@ public class IpcScheduleTrip implements Serializable {
 		this.blockId = trip.getBlockId();
 		this.tripId = trip.getId();
 		this.tripShortName = trip.getShortName();
+		this.tripHeadsign = trip.getHeadsign();
 		this.scheduleTimes = new ArrayList<IpcScheduleTime>();
 
 		// Actually fill in the schedule times		
@@ -128,6 +130,10 @@ public class IpcScheduleTrip implements Serializable {
 
 	public String getTripShortName() {
 		return tripShortName;
+	}
+	
+	public String getTripHeadsign() {
+		return tripHeadsign;
 	}
 	
 	public List<IpcScheduleTime> getScheduleTimes() {
