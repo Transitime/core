@@ -37,10 +37,17 @@ public class ApiScheduleTimesForStop {
 	@XmlAttribute
 	private String stopName;
 
-	@XmlElement(name = "times")
+	@XmlElement(name = "time")
 	private List<ApiScheduleTime> times;
 
 	/********************** Member Functions **************************/
+
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiScheduleTimesForStop() {
+	}
 
 	public ApiScheduleTimesForStop(String stopId, String stopName) {
 		this.stopId = stopId;

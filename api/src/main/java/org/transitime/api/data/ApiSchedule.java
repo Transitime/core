@@ -52,7 +52,7 @@ public class ApiSchedule {
 	@XmlElement(name = "trip")
 	private List<ApiScheduleTrip> trips;
 
-	@XmlElement(name = "time")
+	@XmlElement
 	private List<ApiScheduleTimesForStop> timesForStop;
 	
 	/********************** Member Functions **************************/
