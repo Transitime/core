@@ -1,3 +1,4 @@
+<%-- Displays the schedule for a route--%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@ page import="org.transitime.utils.web.WebUtils" %>
@@ -16,7 +17,8 @@ if (agencyId == null || agencyId.isEmpty()) {
   <style>
   #scheduleTitle {
   	font-size: x-large;
-  	margin-top: 20px;
+  	margin-top: 30px;
+  	margin-bottom: 6px;
   	text-align: center;
   }
 
@@ -52,13 +54,16 @@ if (agencyId == null || agencyId.isEmpty()) {
       function dataReadCallback(jsonData) {
 	      var tableOptions = {showRowNumber: false, allowHtml: true, sort: 'disable'};
 
+	      // Set the title now that have the route name from the API
+	      $('#title').html(jsonData.schedule[0].routeName);
+	      
 	      // Go through all service classes and directions for route
     	  for (var i=0; i<jsonData.schedule.length; ++i) {
     		  var schedule = jsonData.schedule[i];
     		  
     		  // Create title for schedule
-    		  $('body').append("<div id='scheduleTitle'>" + schedule.routeName 
-    				  + "<br/>Direction " + schedule.directionId 
+    		  $('body').append("<div id='scheduleTitle'>" 
+    				  + "Direction " + schedule.directionId 
     				  + ", " + schedule.serviceName
     				  + "</div>");
     		  
@@ -129,7 +134,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
-<div id="title">Schedule Report</div>
+<div id="title"></div>
 
 </body>
 </html>
