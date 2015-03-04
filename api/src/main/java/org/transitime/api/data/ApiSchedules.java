@@ -20,6 +20,7 @@ package org.transitime.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -34,6 +35,12 @@ import org.transitime.ipc.data.IpcSchedule;
 @XmlRootElement(name = "schedules")
 public class ApiSchedules {
 
+	@XmlAttribute
+	private String routeId;
+
+	@XmlAttribute
+	private String routeName;
+
 	@XmlElement(name = "schedule")
 	private List<ApiSchedule> schedules;
 	
@@ -47,6 +54,9 @@ public class ApiSchedules {
 	}
 	
 	public ApiSchedules(List<IpcSchedule> schedules) {
+		this.routeId = schedules.get(0).getRouteId();
+		this.routeName = schedules.get(0).getRouteName();
+		
 		this.schedules = new ArrayList<ApiSchedule>(schedules.size());
 		for (IpcSchedule ipcSchedule : schedules) {
 			this.schedules.add(new ApiSchedule(ipcSchedule));

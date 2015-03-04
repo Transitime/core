@@ -17,14 +17,8 @@
 
 package org.transitime.api.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-
-import org.transitime.ipc.data.IpcScheduleTime;
-import org.transitime.ipc.data.IpcScheduleTrip;
+import org.transitime.ipc.data.IpcSchedTrip;
 
 /**
  * Represents a single trip for an ApiSchedule
@@ -41,10 +35,10 @@ public class ApiScheduleTrip {
 	private String tripId;
 
 	@XmlAttribute
+	private String tripHeadsign;
+	
+	@XmlAttribute
 	private String blockId;
-
-	@XmlElement(name = "time")
-	private List<ApiScheduleTime> times;
 	
 	/********************** Member Functions **************************/
 
@@ -55,14 +49,10 @@ public class ApiScheduleTrip {
 	protected ApiScheduleTrip() {
 	}
 
-	public ApiScheduleTrip(IpcScheduleTrip ipcScheduleTrip) {
+	public ApiScheduleTrip(IpcSchedTrip ipcScheduleTrip) {
 		this.tripShortName = ipcScheduleTrip.getTripShortName();
 		this.tripId = ipcScheduleTrip.getTripId();
+		this.tripHeadsign = ipcScheduleTrip.getTripHeadsign();
 		this.blockId = ipcScheduleTrip.getBlockId();
-		
-		this.times = new ArrayList<ApiScheduleTime>();
-		for (IpcScheduleTime ipcScheduleTime : ipcScheduleTrip.getScheduleTimes()) {
-			this.times.add(new ApiScheduleTime(ipcScheduleTime));
-		}
 	}
 }

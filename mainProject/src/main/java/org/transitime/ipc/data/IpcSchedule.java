@@ -51,7 +51,7 @@ public class IpcSchedule implements Serializable {
 	private String directionName;
 	private String serviceId;
 	private String serviceName;
-	private List<IpcScheduleTrip> ipcScheduleTrips;
+	private List<IpcSchedTrip> ipcScheduleTrips;
 	
 	// Additional members that are transient and not to be serialized
 	private final List<Trip> trips;
@@ -125,7 +125,7 @@ public class IpcSchedule implements Serializable {
 		directionName = (String) ois.readObject();
 		serviceId = (String) ois.readObject();
 		serviceName = (String) ois.readObject();
-		ipcScheduleTrips = (List<IpcScheduleTrip>) ois.readObject();
+		ipcScheduleTrips = (List<IpcSchedTrip>) ois.readObject();
 	}
 	
 	/**
@@ -201,9 +201,9 @@ public class IpcSchedule implements Serializable {
 		sortTrips();
 				
 		// Store the sorted trips as a list of IpcScheduleTrips
-		ipcScheduleTrips = new ArrayList<IpcScheduleTrip>();
+		ipcScheduleTrips = new ArrayList<IpcSchedTrip>();
 		for (Trip trip : trips) {
-			IpcScheduleTrip ipcScheduleTrip = new IpcScheduleTrip(trip);
+			IpcSchedTrip ipcScheduleTrip = new IpcSchedTrip(trip);
 			ipcScheduleTrips.add(ipcScheduleTrip);
 		}
 	}
@@ -229,11 +229,11 @@ public class IpcSchedule implements Serializable {
 					// service ID, putting the one with the most trips first
 					// since that is likely the more important weekday service
 					// and then Saturday, and then finally Sunday service.
-					if (o1.getIpcScheduleTrips().size() < 
-							o2.getIpcScheduleTrips().size())
+					if (o1.getIpcSchedTrips().size() < 
+							o2.getIpcSchedTrips().size())
 						return 1;
-					else if (o1.getIpcScheduleTrips().size() > 
-					o2.getIpcScheduleTrips().size())
+					else if (o1.getIpcSchedTrips().size() > 
+					o2.getIpcSchedTrips().size())
 						return -1;
 					else {
 						// Number of trips for the different service IDs are 
@@ -345,7 +345,7 @@ public class IpcSchedule implements Serializable {
 		return serviceName;
 	}
 
-	public List<IpcScheduleTrip> getIpcScheduleTrips() {
+	public List<IpcSchedTrip> getIpcSchedTrips() {
 		return ipcScheduleTrips;
 	}
 }

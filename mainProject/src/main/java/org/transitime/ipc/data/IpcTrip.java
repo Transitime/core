@@ -48,7 +48,7 @@ public class IpcTrip implements Serializable {
 	private final String blockId;
 	private final String shapeId;
 	
-	private final List<IpcScheduleTimes> scheduleTimes;
+	private final List<IpcSchedTimes> scheduleTimes;
 	private final TravelTimesForTrip travelTimes;
 	
 	private static final long serialVersionUID = 6369021345710182247L;
@@ -71,10 +71,10 @@ public class IpcTrip implements Serializable {
 		blockId = dbTrip.getBlockId();
 		shapeId = dbTrip.getShapeId();
 		
-		scheduleTimes = new ArrayList<IpcScheduleTimes>();
+		scheduleTimes = new ArrayList<IpcSchedTimes>();
 		for (int i=0; i<dbTrip.getNumberStopPaths(); ++i) {
 			String stopId = dbTrip.getTripPattern().getStopId(i);
-			scheduleTimes.add(new IpcScheduleTimes(dbTrip.getScheduleTime(i), stopId));
+			scheduleTimes.add(new IpcSchedTimes(dbTrip.getScheduleTime(i), stopId));
 		}
 		travelTimes = dbTrip.getTravelTimes();
 	}
@@ -157,7 +157,7 @@ public class IpcTrip implements Serializable {
 		return shapeId;
 	}
 
-	public List<IpcScheduleTimes> getScheduleTimes() {
+	public List<IpcSchedTimes> getScheduleTimes() {
 		return scheduleTimes;
 	}
 	

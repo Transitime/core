@@ -19,7 +19,6 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.IpcScheduleTime;
 import org.transitime.utils.Time;
 
 /**
@@ -32,16 +31,10 @@ import org.transitime.utils.Time;
 public class ApiScheduleTime {
 
     @XmlAttribute
-    private String time;
+    private String timeStr;
 
     @XmlAttribute
     private Integer timeSecs;
-
-    @XmlAttribute
-    private String stopId;
-    
-    @XmlAttribute
-    private String stopName;
 
 	/********************** Member Functions **************************/
 
@@ -52,12 +45,9 @@ public class ApiScheduleTime {
 	protected ApiScheduleTime() {
 	}
 	
-	public ApiScheduleTime(IpcScheduleTime ipcScheduleTime) {
-		Integer timeInt = ipcScheduleTime.getTimeOfDay();
-		time = timeInt == null ? null : Time.timeOfDayAmPmStr(timeInt);
-		timeSecs = timeInt;
-		stopId = ipcScheduleTime.getStopId();
-		stopName = ipcScheduleTime.getStopName();
+	public ApiScheduleTime(Integer time) {
+		this.timeStr = time == null ? null : Time.timeOfDayAmPmStr(time);
+		this.timeSecs = time;
 	}
 
 }

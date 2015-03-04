@@ -32,13 +32,13 @@ import org.transitime.db.structs.Trip;
  * @author SkiBu Smith
  *
  */
-public class IpcScheduleTrip implements Serializable {
+public class IpcSchedTrip implements Serializable {
 
 	private final String blockId;
 	private final String tripId;
 	private final String tripShortName;
 	private final String tripHeadsign;
-	private final List<IpcScheduleTime> scheduleTimes;
+	private final List<IpcSchedTime> scheduleTimes;
 	
 	private static final long serialVersionUID = 4410014384520957092L;
 
@@ -49,14 +49,14 @@ public class IpcScheduleTrip implements Serializable {
 	 * @param tripId
 	 * @param scheduleTimes
 	 */
-	public IpcScheduleTrip(Trip trip) {
+	public IpcSchedTrip(Trip trip) {
 		super();
 		
 		this.blockId = trip.getBlockId();
 		this.tripId = trip.getId();
 		this.tripShortName = trip.getShortName();
 		this.tripHeadsign = trip.getHeadsign();
-		this.scheduleTimes = new ArrayList<IpcScheduleTime>();
+		this.scheduleTimes = new ArrayList<IpcSchedTime>();
 
 		// Actually fill in the schedule times		
 		// First, get list of ordered stop IDs for the direction
@@ -69,7 +69,7 @@ public class IpcScheduleTrip implements Serializable {
 			// Find stop in schedule for trip that corresponds to the
 			// current stop from the ordered stops by direction. If
 			// no corresponding stop then ipcScheduleTime will be null.
-			IpcScheduleTime ipcScheduleTime = null;
+			IpcSchedTime ipcScheduleTime = null;
 			// Go through stops in trip to find corresponding one to get schedule time
 			for (int i=0; i<trip.getNumberStopPaths(); ++i) {
 				StopPath stopPathInTrip = trip.getStopPath(i);
@@ -80,7 +80,7 @@ public class IpcScheduleTrip implements Serializable {
 					// If corresponding stop in schedule actually has a time...
 					ScheduleTime scheduleTime = trip.getScheduleTime(i);
 					if (scheduleTime != null) {
-						ipcScheduleTime = new IpcScheduleTime(stopId,
+						ipcScheduleTime = new IpcSchedTime(stopId,
 								stopPathInTrip.getStopName(),
 								scheduleTime.getTime());
 					}
@@ -102,7 +102,7 @@ public class IpcScheduleTrip implements Serializable {
 				// be added to the schedule trip.
 				String stopName = Core.getInstance().getDbConfig()
 						.getStop(stopId).getName();
-				ipcScheduleTime = new IpcScheduleTime(stopId, stopName, null);
+				ipcScheduleTime = new IpcSchedTime(stopId, stopName, null);
 			}
 			
 			// Add the (possibly null) schedule time
@@ -136,7 +136,7 @@ public class IpcScheduleTrip implements Serializable {
 		return tripHeadsign;
 	}
 	
-	public List<IpcScheduleTime> getScheduleTimes() {
+	public List<IpcSchedTime> getSchedTimes() {
 		return scheduleTimes;
 	}
 

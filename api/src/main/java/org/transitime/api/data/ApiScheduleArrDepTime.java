@@ -19,7 +19,7 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.IpcScheduleTimes;
+import org.transitime.ipc.data.IpcSchedTimes;
 import org.transitime.utils.Time;
 
 /**
@@ -45,7 +45,7 @@ public class ApiScheduleArrDepTime {
 
 	/********************** Member Functions **************************/
 
-	public ApiScheduleArrDepTime(IpcScheduleTimes ipcScheduleTimes) {
+	public ApiScheduleArrDepTime(IpcSchedTimes ipcScheduleTimes) {
 		Integer arrivalInt = ipcScheduleTimes.getArrivalTime();
 		arrivalTime = arrivalInt == null ? null : Time.timeOfDayStr(arrivalInt);
 
