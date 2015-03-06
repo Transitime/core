@@ -26,6 +26,7 @@ if (agencyId == null || agencyId.isEmpty()) {
   	font-weight: bold;
   	background-color: #F2F5F7;
   }
+  
   </style>
   
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -75,7 +76,13 @@ if (agencyId == null || agencyId.isEmpty()) {
     		  data.addColumn('string', 'Stop', 'stopColumn');
     		  for (var j=0; j<schedule.trip.length; ++j) {
     			  var trip = schedule.trip[j];
-        		  data.addColumn('string', 'Trip<br/>' + trip.tripShortName);    			  
+    			  var tripName = trip.tripShortName;
+    			  if (tripName == null)
+    				  tripName = trip.tripId;
+    			  var tripNameTooLong = tripName.length > 8;
+    			  var html = tripNameTooLong ?
+    					  "Block<br/>" + trip.blockId : "Trip<br/>" + tripName;
+        		  data.addColumn("string", html);    			  
     		  }
 
     		  // Add data for each row for the schedule. This is a bit complicated
