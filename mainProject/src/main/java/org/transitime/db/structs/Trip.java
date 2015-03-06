@@ -48,7 +48,8 @@ import org.transitime.utils.Time;
 
 
 /**
- *
+ * Describes a GTFS trip but also includes travel time information.
+ * 
  * @author SkiBu Smith
  *
  */
