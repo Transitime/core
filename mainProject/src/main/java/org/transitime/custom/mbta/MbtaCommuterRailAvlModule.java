@@ -35,7 +35,8 @@ import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.modules.Module;
 
 /**
- * Gets GPS data from the MBTA Commuter Rail AVL feed.
+ * Gets GPS data from the MBTA Commuter Rail AVL feed. The data comes from a 
+ * URL and is in TAIP format.
  *
  * @author SkiBu Smith
  *
