@@ -111,8 +111,9 @@ public class ArchiveOldFiles extends OldFileFinder {
 	 */
 	private File gzipFile(File file) {
 		logger.info("Compressing old file={}", file.getAbsoluteFile());
-		String compressedFileName = 
-				Gzip.compress(file.getAbsolutePath());
+		
+		// Compress the file, deleting the original
+		String compressedFileName = Gzip.compress(file.getAbsolutePath());
 		
 		// Set last modified time of file to that of the original file for
 		// consistency.
@@ -230,9 +231,7 @@ public class ArchiveOldFiles extends OldFileFinder {
 			}
 			
 			// Delete this file or directory
-			// FIXME Erase all files, not just the zip file!!
-			if (fileOrDir.getName().endsWith(".zip"))
-				fileOrDir.delete();
+			fileOrDir.delete();
 		}
 	}
 	
@@ -289,8 +288,8 @@ public class ArchiveOldFiles extends OldFileFinder {
 	 */
 	public static void main(String[] args) {
 		// Create an archiver that can write the files to Amazon AWS Glacier
-		AwsGlacierArchiver archiver = 
-				new AwsGlacierArchiver(AwsGlacier.OREGON_REGION, "mbta-core", "D:/Logs/mbta");
+		AwsGlacierArchiver archiver = new AwsGlacierArchiver(
+				AwsGlacier.OREGON_REGION, "mbta-core", "D:/Logs/mbta");
 		
 		// Archive the files in the specified directory 
 		archive(archiver, "D:/Logs/", "mbta/core/2014/08", 120);
