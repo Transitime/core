@@ -142,7 +142,7 @@ public abstract class CsvBaseReader<T> {
 			// comment out line that starts with "--", which is what is 
 			// used for SQL. 
 			CSVFormat formatter = 
-					CSVFormat.DEFAULT.withHeader().withCommentStart('-');
+					CSVFormat.DEFAULT.withHeader().withCommentMarker('-');
 			
 			// Parse the file
 			Iterable<CSVRecord> records = formatter.parse(in);

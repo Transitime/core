@@ -1,4 +1,4 @@
-AR Files
+JAR Files
 =========
 
 Logging using logback:

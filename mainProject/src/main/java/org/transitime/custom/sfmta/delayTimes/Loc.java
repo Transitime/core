@@ -89,7 +89,7 @@ public class Loc {
 			Reader in = new BufferedReader(new InputStreamReader(
 					new FileInputStream(fileName), "UTF-8"));
 			CSVFormat formatter = 
-					CSVFormat.DEFAULT.withHeader().withCommentStart('-');
+					CSVFormat.DEFAULT.withHeader().withCommentMarker('-');
 			
 			// Parse the file
 			Iterable<CSVRecord> records = formatter.parse(in);
