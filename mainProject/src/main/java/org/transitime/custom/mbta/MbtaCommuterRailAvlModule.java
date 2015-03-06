@@ -55,7 +55,6 @@ public class MbtaCommuterRailAvlModule extends AvlModule {
 	
 	private static StringConfigValue mbtaCommuterRailFeedUrl = 
 			new StringConfigValue("transitime.avl.mbtaCommuterRailFeedUrl", 
-					null,
 					"The URL of the MBTA commuter rail feed to use.");
 	private static String getMbtaCommuterRailFeedUrl() {
 		return mbtaCommuterRailFeedUrl.getValue();
