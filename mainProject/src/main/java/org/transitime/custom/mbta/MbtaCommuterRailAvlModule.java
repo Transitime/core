@@ -35,7 +35,7 @@ import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.modules.Module;
 
 /**
- *
+ * Gets GPS data from the MBTA Commuter Rail AVL feed.
  *
  * @author SkiBu Smith
  *
