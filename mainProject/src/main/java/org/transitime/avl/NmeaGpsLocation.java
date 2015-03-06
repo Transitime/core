@@ -31,6 +31,9 @@ import org.transitime.db.structs.Location;
  * For parsing a NMEA command into a GPS location.
  * <p>
  * Based on code at https://github.com/ktuukkan/marine-api
+ * <p>
+ * Useful documentation on NMEA format is available at 
+ * http://www.gpsinformation.org/dale/nmea.htm
  * 
  * @author SkiBu Smith
  *
