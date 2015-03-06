@@ -24,7 +24,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
 /**
- *
+ * This class contains the schedule times for a stop for each trip for the
+ * route/direction/service.
  *
  * @author SkiBu Smith
  *
@@ -37,10 +38,17 @@ public class ApiScheduleTimesForStop {
 	@XmlAttribute
 	private String stopName;
 
-	@XmlElement(name = "times")
+	@XmlElement(name = "time")
 	private List<ApiScheduleTime> times;
 
 	/********************** Member Functions **************************/
+
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiScheduleTimesForStop() {
+	}
 
 	public ApiScheduleTimesForStop(String stopId, String stopName) {
 		this.stopId = stopId;

@@ -27,7 +27,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.transitime.ipc.data.IpcSchedule;
 
 /**
- * Represents a collection of ApiSchedule objects for a route
+ * Represents a collection of ApiSchedule objects for a route. There is one
+ * ApiSchedule for each direction/service for a route.
  *
  * @author SkiBu Smith
  *
