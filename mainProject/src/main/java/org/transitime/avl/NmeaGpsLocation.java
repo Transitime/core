@@ -28,8 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.Location;
 
 /**
- *
- *
+ * For parsing a NMEA command into a GPS location.
+ * <p>
+ * Based on code at https://github.com/ktuukkan/marine-api
+ * 
  * @author SkiBu Smith
  *
  */
@@ -197,8 +199,7 @@ public class NmeaGpsLocation {
 	}
 	
 	/**
-	 * Returns heading in degrees.
-	 * FIXME not sure if angle != heading
+	 * Returns heading in degrees measured clockwise from north.
 	 * 
 	 * @param nmeaComponents
 	 * @return Heading in degrees
