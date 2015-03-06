@@ -4,12 +4,6 @@
 	<groupId>mainProject</groupId>
 	<artifactId>mainProject</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<properties>
-
-		<version.org.hibernate.commons.annotations>4.0.2</version.org.hibernate.commons.annotations>
-
-		<version.org.hibernate>4.2.2</version.org.hibernate>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>com.amazonaws</groupId>
