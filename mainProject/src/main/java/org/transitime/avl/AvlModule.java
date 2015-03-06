@@ -42,9 +42,14 @@ import org.transitime.utils.threading.NamedThreadFactory;
 /**
  * Subclass of Module to be used when reading AVL data from a feed. Calls the
  * abstract method getAndProcessData() for the subclass to actually get data
- * from the feed. If in JMS mode then it outputs the data to the appropriate JMS
- * topic so that it can be read from an AvlClient. If not in JMS mode then uses
- * a BoundedExecutor with multiple threads to directly call AvlClient.run().
+ * from the feed. The getAndProcessData() should call
+ * processAvlReport(avlReport) for each AVL report read in. If in JMS mode then
+ * it outputs the data to the appropriate JMS topic so that it can be read from
+ * an AvlClient. If not in JMS mode then uses a BoundedExecutor with multiple
+ * threads to directly call AvlClient.run().
+ * <p>
+ * This class is for reading data from a URL. If another type of feed is
+ * subclassed then should override processData().
  * 
  * @author SkiBu Smith
  * 
@@ -80,7 +85,10 @@ public abstract class AvlModule extends Module {
 	protected abstract String getUrl();
 	
 	/**
-	 * Actually processes the data from the InputStream
+	 * Actually processes the data from the InputStream. Called by
+	 * getAndProcessData(). Should be overwritten unless getAndProcessData() is
+	 * overwritten by superclass.
+	 * 
 	 * 
 	 * @param in
 	 *            The input stream containing the AVL data
@@ -90,10 +98,15 @@ public abstract class AvlModule extends Module {
 	 *             of exception since we don't really know how the AVL feed will
 	 *             be processed.
 	 */
-	protected abstract void processData(InputStream in) throws Exception;
+	protected void processData(InputStream in) throws Exception {		
+	};
 	
 	/**
-	 * Actually reads data from feed and processes it.
+	 * Actually reads data from feed and processes it by opening up a URL
+	 * specified by getUrl() and then reading the contents. Calls the abstract
+	 * method processData() to actually process the input stream.
+	 * <p>
+	 * This method needs to be overwritten if not real data from a URL
 	 * 
 	 * @throws Exception
 	 *             Throws a generic exception since the processing is done in
@@ -101,8 +114,7 @@ public abstract class AvlModule extends Module {
 	 *             of exception since we don't really know how the AVL feed will
 	 *             be processed.
 	 */
-	protected void getAndProcessData() 
-		throws Exception {
+	protected void getAndProcessData() throws Exception {
 		// For logging
 		IntervalTimer timer = new IntervalTimer(); 
 
