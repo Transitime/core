@@ -30,7 +30,7 @@ import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
  * @author SkiBu Smith
  * 
  */
-public class GtfsRealtimeModule extends AvlModule {
+public class GtfsRealtimeModule extends PollUrlAvlModule {
 
 	/*********** Configurable Parameters for this module ***********/
 	public static String getGtfsRealtimeURI() {

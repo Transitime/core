@@ -31,7 +31,7 @@ import org.jdom2.input.SAXBuilder;
  * @author SkiBu Smith
  * 
  */
-public abstract class XmlPollingAvlModule extends AvlModule {
+public abstract class XmlPollingAvlModule extends PollUrlAvlModule {
 	
 	/**
 	 * Constructor
