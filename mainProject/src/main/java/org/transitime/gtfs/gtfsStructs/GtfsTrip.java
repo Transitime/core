@@ -16,7 +16,11 @@
  */
 package org.transitime.gtfs.gtfsStructs;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.config.StringConfigValue;
 import org.transitime.utils.csv.CsvBase;
 
 /**
@@ -38,6 +42,16 @@ public class GtfsTrip extends CsvBase {
 	private final Integer wheelchairAccessible;
 	private final Integer bikesAllowed;
 		
+	private static StringConfigValue tripShortNameRegEx = new StringConfigValue(
+			"transitime.gtfs.tripShortNameRegEx", 
+			null, 
+			"For agencies where trip short name not specified can use this "
+			+ "regular expression to determine the short name from the trip "
+			+ "ID by specifying a grouping. For example, to get name before "
+			+ "a \"-\" would use something like \"(.*?)-\"");
+	
+	private static Pattern tripShortNameRegExPattern = null;
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -60,6 +74,47 @@ public class GtfsTrip extends CsvBase {
 	}	
 
 	/**
+	 * Many agencies don't specify a trip_short_name. For these use the trip_id
+	 * or if the transitime.gtfs.tripShortNameRegEx is set to determine a group
+	 * then use that group in the tripId. For example, if tripId is
+	 * "345-long unneeded description" and the regex is set to "(.*?)-" then
+	 * returned trip short name will be 345.
+	 * 
+	 * @param tripShortName
+	 * @param tripId
+	 * @return The tripShortName if it is not null. Other returns a the first
+	 *         group specified by the regex on tripId, or the tripId if no regex
+	 *         defined or if no match.
+	 */
+	private static String getTripShortName(String tripShortName, String tripId) {
+		// If tripShortName provided then use sit
+		if (tripShortName != null)
+			return tripShortName;
+		
+		// The tripShortName wasn't provided. If a regular expression specified
+		// then use it. If regex not specified then return tripId.
+		if (tripShortNameRegEx.getValue() == null)
+			return tripId;
+		
+		// Initialize the pattern if need to, but do so just once
+		if (tripShortNameRegExPattern == null)
+			tripShortNameRegExPattern = Pattern.compile(tripShortNameRegEx.getValue());
+		
+		// Create the matcher
+		Matcher m = tripShortNameRegExPattern.matcher(tripId);
+		
+		// If insufficient match then return tripId
+		if (!m.find())
+			return tripId;
+		if (m.groupCount() < 1)
+			return tripId;
+		
+		// Return the first group. Note: group #0 is the entire string. Need to 
+		// use group #1 for the group match.
+		return m.group(1);
+	}
+	
+	/**
 	 * Creates a GtfsTrip object by reading the data from the CSVRecord.
 	 * 
 	 * @param record
@@ -74,7 +129,8 @@ public class GtfsTrip extends CsvBase {
 		serviceId = getRequiredUnlessSupplementalValue(record, "service_id");
 		tripId = getRequiredUnlessSupplementalValue(record, "trip_id");
 		tripHeadsign = getOptionalValue(record, "trip_headsign");
-		tripShortName = getOptionalValue(record, "trip_short_name");
+		tripShortName = getTripShortName(
+				getOptionalValue(record, "trip_short_name"), tripId);
 		directionId = getOptionalValue(record, "direction_id");
 		blockId = getOptionalValue(record, "block_id");
 		shapeId = getOptionalValue(record, "shape_id");
