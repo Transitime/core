@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
+import org.transitime.gtfs.gtfsStructs.GtfsTrip;
 import org.transitime.utils.csv.CsvBaseReader;
 
 /**
@@ -37,7 +38,10 @@ public class GtfsStopTimesReader extends CsvBaseReader<GtfsStopTime> {
 	@Override
 	public GtfsStopTime handleRecord(CSVRecord record, boolean supplemental) 
 			throws ParseException {
-		return new GtfsStopTime(record, supplemental, getFileName());
+		if (GtfsTrip.tripNotFiltered(record) )
+			return new GtfsStopTime(record, supplemental, getFileName());
+		else
+			return null;
 	}
 	
 }

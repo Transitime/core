@@ -42,15 +42,27 @@ public class GtfsTrip extends CsvBase {
 	private final Integer wheelchairAccessible;
 	private final Integer bikesAllowed;
 		
+	// For determining a trip_short_name from the trip_id if the 
+	// trip_short_name is not specified in GTFS file.
 	private static StringConfigValue tripShortNameRegEx = new StringConfigValue(
 			"transitime.gtfs.tripShortNameRegEx", 
-			null, 
+			null, // Default of null means simply use trip_id without any modification
 			"For agencies where trip short name not specified can use this "
 			+ "regular expression to determine the short name from the trip "
 			+ "ID by specifying a grouping. For example, to get name before "
 			+ "a \"-\" would use something like \"(.*?)-\"");
-	
 	private static Pattern tripShortNameRegExPattern = null;
+	
+	// So can process only trips that match a regular expression
+	private static StringConfigValue tripIdFilterRegEx = new StringConfigValue(
+			"transitime.gtfs.tripIdFilterRegEx", 
+			null,  // Default of null means don't do any filtering
+			"Trip is included only if trip_id matches the this regular "
+			+ "expression. If only want trips with \"SPECIAL\" in the id then "
+			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
+			+ "would instead use \"^((?!SPECIAL).)*$\". The default value "
+			+ "of null causes all trips to be included.");
+	private static Pattern tripIdFilterRegExPattern = null;
 	
 	/********************** Member Functions **************************/
 
@@ -73,47 +85,6 @@ public class GtfsTrip extends CsvBase {
 		this.bikesAllowed = null;
 	}	
 
-	/**
-	 * Many agencies don't specify a trip_short_name. For these use the trip_id
-	 * or if the transitime.gtfs.tripShortNameRegEx is set to determine a group
-	 * then use that group in the tripId. For example, if tripId is
-	 * "345-long unneeded description" and the regex is set to "(.*?)-" then
-	 * returned trip short name will be 345.
-	 * 
-	 * @param tripShortName
-	 * @param tripId
-	 * @return The tripShortName if it is not null. Other returns a the first
-	 *         group specified by the regex on tripId, or the tripId if no regex
-	 *         defined or if no match.
-	 */
-	private static String getTripShortName(String tripShortName, String tripId) {
-		// If tripShortName provided then use sit
-		if (tripShortName != null)
-			return tripShortName;
-		
-		// The tripShortName wasn't provided. If a regular expression specified
-		// then use it. If regex not specified then return tripId.
-		if (tripShortNameRegEx.getValue() == null)
-			return tripId;
-		
-		// Initialize the pattern if need to, but do so just once
-		if (tripShortNameRegExPattern == null)
-			tripShortNameRegExPattern = Pattern.compile(tripShortNameRegEx.getValue());
-		
-		// Create the matcher
-		Matcher m = tripShortNameRegExPattern.matcher(tripId);
-		
-		// If insufficient match then return tripId
-		if (!m.find())
-			return tripId;
-		if (m.groupCount() < 1)
-			return tripId;
-		
-		// Return the first group. Note: group #0 is the entire string. Need to 
-		// use group #1 for the group match.
-		return m.group(1);
-	}
-	
 	/**
 	 * Creates a GtfsTrip object by reading the data from the CSVRecord.
 	 * 
@@ -220,6 +191,69 @@ public class GtfsTrip extends CsvBase {
 		this.shapeId = null;
 		this.wheelchairAccessible = null;
 		this.bikesAllowed = null;
+	}
+	
+	/**
+	 * Many agencies don't specify a trip_short_name. For these use the trip_id
+	 * or if the transitime.gtfs.tripShortNameRegEx is set to determine a group
+	 * then use that group in the tripId. For example, if tripId is
+	 * "345-long unneeded description" and the regex is set to "(.*?)-" then
+	 * returned trip short name will be 345.
+	 * 
+	 * @param tripShortName
+	 * @param tripId
+	 * @return The tripShortName if it is not null. Other returns a the first
+	 *         group specified by the regex on tripId, or the tripId if no regex
+	 *         defined or if no match.
+	 */
+	private static String getTripShortName(String tripShortName, String tripId) {
+		// If tripShortName provided then use sit
+		if (tripShortName != null)
+			return tripShortName;
+		
+		// The tripShortName wasn't provided. If a regular expression specified
+		// then use it. If regex not specified then return tripId.
+		if (tripShortNameRegEx.getValue() == null)
+			return tripId;
+		
+		// Initialize the pattern if need to, but do so just once
+		if (tripShortNameRegExPattern == null)
+			tripShortNameRegExPattern = Pattern.compile(tripShortNameRegEx.getValue());
+		
+		// Create the matcher
+		Matcher m = tripShortNameRegExPattern.matcher(tripId);
+		
+		// If insufficient match then return tripId
+		if (!m.find())
+			return tripId;
+		if (m.groupCount() < 1)
+			return tripId;
+		
+		// Return the first group. Note: group #0 is the entire string. Need to 
+		// use group #1 for the group match.
+		return m.group(1);
+	}
+	
+	/**
+	 * Returns true if the trip_id from the CSVRecord record isn't supposed to
+	 * be filtered out, as specified by the
+	 * transitime.gtfs.tripIdRegExPattern property.
+	 * 
+	 * @param record
+	 *            Record from CSV file. Contains the trip_id
+	 * @return True if trip not to be filtered out
+	 */
+	public static boolean tripNotFiltered(CSVRecord record) {
+		if (tripIdFilterRegEx.getValue() == null)
+			return true;
+		
+		// Create pattern if haven't done so yet, but only do so once.
+		if (tripIdFilterRegExPattern == null)
+			tripIdFilterRegExPattern = Pattern.compile(tripIdFilterRegEx.getValue());
+		
+		String tripId = record.get("trip_id").trim();
+		boolean matches = tripIdFilterRegExPattern.matcher(tripId).matches();
+		return matches;
 	}
 	
 	public String getRouteId() {

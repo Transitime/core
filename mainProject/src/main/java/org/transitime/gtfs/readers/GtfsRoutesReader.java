@@ -37,7 +37,10 @@ public class GtfsRoutesReader extends CsvBaseReader<GtfsRoute> {
 	@Override
 	public GtfsRoute handleRecord(CSVRecord record, boolean supplemental) 
 			throws ParseException {
-		return new GtfsRoute(record, supplemental, getFileName());
+		if (GtfsRoute.routeNotFiltered(record))
+			return new GtfsRoute(record, supplemental, getFileName());
+		else
+			return null;
 	}
 	
 }
