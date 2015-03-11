@@ -12,8 +12,11 @@ The core fucntionality is in the transiTime project. The REST api is in transiTi
 They should be built in this order.
 
 transitTime
+
 transitTimeApi
+
 transitTimeWebApp
+
 Each module can be built by change to the related directory and running "mvn install".
 
 eg.
