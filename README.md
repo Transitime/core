@@ -14,7 +14,7 @@ They should be built in this order.
 
 transitTime
 
-<transitTimeApi
+transitTimeApi
 
 transitTimeWebApp
 
