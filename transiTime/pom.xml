@@ -146,8 +146,12 @@
 			<artifactId>mail</artifactId>
 			<version>1.4.7</version>
 		</dependency>
-
-
+		<!-- Will depend on database being used -->
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.1-901.jdbc4</version>
+		</dependency>
 
 	</dependencies>
 	<build>
@@ -235,6 +239,33 @@
 								</goals>
 								<configuration>
 									<mainClass>org.transitime.applications.Core</mainClass>
+									<arguments>
+										<argument>arg0</argument>
+										<argument>arg1</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>	
+		<profile>
+			<id>dbTest</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.1.1</version>
+						<executions>
+							<execution>
+								<phase>test</phase>
+								<goals>
+									<goal>java</goal>
+								</goals>
+								<configuration>
+									<mainClass>org.transitime.applications.DbTest</mainClass>
 									<arguments>
 										<argument>arg0</argument>
 										<argument>arg1</argument>

@@ -4,14 +4,11 @@
 
 <hibernate-configuration>
  <session-factory>
-   <!-- Specify where database being used -->
-   <property name="hibernate.dialect">
-      org.hibernate.dialect.PostgreSQLDialect
-   </property>
-   <property name="hibernate.connection.driver_class">
-      org.postgresql.Driver
-   </property>
-
+   
+		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+						
+		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+		<property name="show_sql">true</property>
    <!-- Enable full SQL logging that also shows the
         parameters being used. show_sql is not really
         useful since it duplicates the output of the SQL.
@@ -73,7 +70,8 @@
       PASSWORD
    </property>
 -->
-
+		
+		
    <!-- List of XML mapping files. Commented out because adding
         the classes programatically via AnnoatedClassesList so
         that when the classes change don't need to modify all

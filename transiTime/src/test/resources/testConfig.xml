@@ -6,5 +6,17 @@
     <avl>
         <!-- URL for GTFS realtime vechicle location stream -->
         <gtfsRealtimeFeedURI>testVechicleLocationUrlGTFS-RT</gtfsRealtimeFeedURI>        
-    </avl>        
+    </avl>   
+    
+    <db>
+        <dbName>transiTime</dbName>
+        <dbHost>localhost:5432</dbHost>
+        <dbType>postgresql</dbType>
+        <dbUserName>transiTime</dbUserName>
+        <dbPassword>welcome</dbPassword>
+    </db>     
+    <hibernate>
+        <configFile>hibernate_postgres_cfg.xml</configFile>        
+    </hibernate>
+    
 </transitime>

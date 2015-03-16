@@ -985,6 +985,7 @@ public class AvlReport implements Serializable {
 			List<AvlReport> avlReports = query.list();
 			return avlReports;
 		} catch (HibernateException e) {
+			e.printStackTrace();
 			// Log error to the Core logger
 			Core.getLogger().error(e.getMessage(), e);
 			return null;
