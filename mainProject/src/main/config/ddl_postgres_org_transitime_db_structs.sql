@@ -39,6 +39,8 @@
 
     drop table if exists Calendars cascade;
 
+    drop table if exists ConfigRevision cascade;
+
     drop table if exists DbTest cascade;
 
     drop table if exists FareAttributes cascade;
@@ -188,6 +190,14 @@
         endDate date not null,
         configRev int4 not null,
         primary key (wednesday, tuesday, thursday, sunday, startDate, serviceId, saturday, monday, friday, endDate, configRev)
+    );
+
+    create table ConfigRevision (
+        configRev int4 not null,
+        notes varchar(512),
+        processedTime timestamp,
+        zipFileLastModifiedTime timestamp,
+        primary key (configRev)
     );
 
     create table DbTest (

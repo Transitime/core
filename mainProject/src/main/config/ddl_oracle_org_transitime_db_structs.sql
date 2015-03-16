@@ -15,6 +15,8 @@
 
     drop table Calendars cascade constraints;
 
+    drop table ConfigRevision cascade constraints;
+
     drop table DbTest cascade constraints;
 
     drop table FareAttributes cascade constraints;
@@ -164,6 +166,14 @@
         endDate date not null,
         configRev number(10,0) not null,
         primary key (wednesday, tuesday, thursday, sunday, startDate, serviceId, saturday, monday, friday, endDate, configRev)
+    );
+
+    create table ConfigRevision (
+        configRev number(10,0) not null,
+        notes varchar2(512 char),
+        processedTime timestamp,
+        zipFileLastModifiedTime timestamp,
+        primary key (configRev)
     );
 
     create table DbTest (

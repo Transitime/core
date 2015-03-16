@@ -47,6 +47,8 @@
 
     drop table if exists Calendars;
 
+    drop table if exists ConfigRevision;
+
     drop table if exists DbTest;
 
     drop table if exists FareAttributes;
@@ -194,6 +196,14 @@
         endDate date not null,
         configRev integer not null,
         primary key (wednesday, tuesday, thursday, sunday, startDate, serviceId, saturday, monday, friday, endDate, configRev)
+    );
+
+    create table ConfigRevision (
+        configRev integer not null,
+        notes longtext,
+        processedTime datetime(3),
+        zipFileLastModifiedTime datetime(3),
+        primary key (configRev)
     );
 
     create table DbTest (
