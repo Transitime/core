@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.CalendarDate;
+import org.transitime.db.structs.ConfigRevision;
 import org.transitime.db.structs.FareAttribute;
 import org.transitime.db.structs.FareRule;
 import org.transitime.db.structs.Frequency;
@@ -100,8 +102,11 @@ public class GtfsData {
 	
 	// Various params set by constructor
 	private final ActiveRevisions revs;
+	private final String notes;
+	// For when zip file used. Null otherwise
+	private final Date zipFileLastModifiedTime;
 	private final int originalTravelTimesRev;
-	private final String projectId;
+	private final String agencyId;
 	private final boolean shouldCombineShortAndLongNamesForRoutes;
 	private final double pathOffsetDistance;
 	private final double maxStopToPathDistance;
@@ -198,6 +203,8 @@ public class GtfsData {
 	 * Constructor
 	 * 
 	 * @param configRev
+	 * @param notes
+	 * @param zipFileLastModifiedTime
 	 * @param shouldStoreNewRevs
 	 * @param projectId
 	 * @param gtfsDirectoryName
@@ -211,7 +218,10 @@ public class GtfsData {
 	 * @param trimPathBeforeFirstStopOfTrip
 	 * @param titleFormatter
 	 */
-	public GtfsData(int configRev, boolean shouldStoreNewRevs,
+	public GtfsData(int configRev, 
+			String notes,
+			Date zipFileLastModifiedTime,
+			boolean shouldStoreNewRevs,
 			String projectId,
 			String gtfsDirectoryName, 
 			String supplementDir, 
@@ -223,7 +233,9 @@ public class GtfsData {
 			double maxTravelTimeSegmentLength,
 			boolean trimPathBeforeFirstStopOfTrip,
 			TitleFormatter titleFormatter) {
-		this.projectId = projectId;
+		this.agencyId = projectId;
+		this.notes = notes;
+		this.zipFileLastModifiedTime = zipFileLastModifiedTime;
 		this.gtfsDirectoryName = gtfsDirectoryName;
 		this.supplementDir = supplementDir;
 		this.shouldCombineShortAndLongNamesForRoutes = 
@@ -239,7 +251,7 @@ public class GtfsData {
 		
 		// Get the database session. Using one session for the whole process.
 		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(getProjectId());
+				HibernateUtils.getSessionFactory(getAgencyId());
 		session = sessionFactory.openSession();
 		
 		// Deal with the ActiveRevisions. First, store the original travel times
@@ -1596,8 +1608,8 @@ public class GtfsData {
 	/**
 	 * @return projectId
 	 */
-	public String getProjectId() {
-		return projectId;		
+	public String getAgencyId() {
+		return agencyId;		
 	}
 	
 	public Map<String, GtfsRoute> getGtfsRoutesMap() {
@@ -1842,6 +1854,16 @@ public class GtfsData {
 	
 	public List<Transfer> getTransfers() {
 		return transfers;
+	}
+	
+	/**
+	 * Returns information about the current revision.
+	 * 
+	 * @return
+	 */
+	public ConfigRevision getConfigRevision() {
+		return new ConfigRevision(revs.getConfigRev(), new Date(), 
+				zipFileLastModifiedTime, notes);
 	}
 	
 	/*************************** Main Public Methods **********************/

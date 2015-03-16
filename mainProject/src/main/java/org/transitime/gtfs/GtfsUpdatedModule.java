@@ -23,8 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.http.HttpStatus;
@@ -188,11 +186,11 @@ public class GtfsUpdatedModule extends Module {
 	 *            The full name of the file to be copied
 	 */
 	private static void archive(String fullFileName) {
-		// Determine name of directory to archive file into
+		// Determine name of directory to archive file into. Use date of
+		// lastModified time of file e.g. MM-dd-yyyy.
 		File file = new File(fullFileName);
 		Date lastModified = new Date(file.lastModified());
-		DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-		String dirName = dateFormat.format(lastModified);
+		String dirName = Time.dateStr(lastModified);
 		
 		// Copy the file to the sibling directory with the name that is the
 		// last modified date (e.g. 03-28-2015)
