@@ -33,11 +33,11 @@ mvn install
 
 The main module is transitTime. This has several standalone programs in the org.transitime.applications package.
 
-SchemaGenerator.java will generate the SQL to create the database structures you need to run on.
-DBTest.java can be used to test that the database can be connected to.
-GTFSFileProcessor.java will read a GTFS file into this database structure.
-Core.java is as the name implies is the workhorse of the system. 
-RmiQuery.java allows you make queries to the server run in core from the command line.
+SchemaGenerator.java will generate the SQL to create the database structures you need to run on.<br/>
+DBTest.java can be used to test that the database can be connected to.<br/>
+GTFSFileProcessor.java will read a GTFS file into this database structure.<br/>
+Core.java is as the name implies is the workhorse of the system. <br/>
+RmiQuery.java allows you make queries to the server run in core from the command line.<br/>
 
 Details on how to run each of these and their respective parameters are in the README for the transiTime module.
 
