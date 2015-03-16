@@ -87,7 +87,7 @@ public class DbSetupConfig {
 	}
 	private static StringConfigValue hibernateConfigFileName = 
 			new StringConfigValue("transitime.hibernate.configFile", 
-					"/REPOSITORY/PROJECT/src/main/config/hibernate.cfg.xml",
+					"hibernate.cfg.xml",
 					"So that have flexibility with where the hibernate " +
 					"config file is. This way can easily access it within " +
 					"Eclipse.");
