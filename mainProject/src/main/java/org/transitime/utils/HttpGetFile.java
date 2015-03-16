@@ -90,16 +90,19 @@ public class HttpGetFile {
 	}
 	
 	/**
-	 * Simply a getter. Returns the full name where the file is stored. 
-	 * @return
+	 * Simply a getter. Returns the full name where the file is stored on the
+	 * local file system.
+	 * 
+	 * @return full file name
 	 */
 	public String getFullFileName() {
 		return fullFileNameForResult;
 	}
 	
 	/**
-	 * Gets the file name from the URL so it can be used as part
-	 * of the file name for storing the results.
+	 * Gets the file name from the URL so it can be used as part of the file
+	 * name for storing the results.
+	 * 
 	 * @param urlStr
 	 * @return the file name to use for storing the results
 	 */
