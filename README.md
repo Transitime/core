@@ -29,7 +29,7 @@ mvn install
 
 Setup
 
-The main module is transitTime. This has the several tools in the org.transitime.applications package.
+The main module is transitTime. This has several standalone programs in the org.transitime.applications package.
 
 SchemaGenerator.java will generate the SQL to create the database structures you need to run on.
 DBTest.java can be used to test that the database can be connected to.
@@ -38,6 +38,8 @@ Core.java is as the name implies is the workhorse of the system.
 RmiQuery.java allows you make queries to the server run in core from the command line.
 
 Details on how to run each of these and their respective parameters are in the README for the transiTime module.
+
+Once this is set up the next step is to set up the transiTimeApi which is a RESTFul service which provides and API. This API is supported by making RMI calls to the RMI Servers started by Core.java. This is a war file which can be deployed into Tomcat. 
 
 
 
