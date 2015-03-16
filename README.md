@@ -39,7 +39,9 @@ RmiQuery.java allows you make queries to the server run in core from the command
 
 Details on how to run each of these and their respective parameters are in the README for the transiTime module.
 
-Once this is set up the next step is to set up the transiTimeApi which is a RESTFul service which provides and API. This API is supported by making RMI calls to the RMI Servers started by Core.java. This is a war file which can be deployed into Tomcat. 
+Once this is set up the next step is to set up the transiTimeApi which is a RESTful API. This API makes RMI calls to the RMI Server started by Core.java to provide results. This is a war file which can be deployed into Tomcat. 
+
+The transiTimeWebApp in turn is a web application which uses the transitTimeAPI to provided a user interface.
 
 
 
