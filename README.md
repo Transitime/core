@@ -5,6 +5,8 @@ The complete core Java software for the Transitime real-time transit information
 
 The software is checked in and made public only so that it can be viewed. While it has been used in a test environment it still is lacking significant features and is not ready for deployment.
 
+<b>Build</b>
+
 The software is made up of three modules which can each be built with maven.
 
 The core fucntionality is in the transiTime project. The REST api is in transiTimeApi and the user Web applicaton is in transiTimeWebapp.
@@ -27,7 +29,7 @@ cd transitTime
 
 mvn install
 
-Setup
+<b>Setup</b>
 
 The main module is transitTime. This has several standalone programs in the org.transitime.applications package.
 
