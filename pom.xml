@@ -5,8 +5,8 @@
   <artifactId>transitTime</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>OpenTripPlanner</name>
-  <url>http://opentripplanner.org/</url>
+  <name>transiTime</name>
+  <url>http://www.transitime.org//</url>
   <modules>
     <module>transiTime</module>
     <module>transiTimeApi</module>
