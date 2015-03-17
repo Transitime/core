@@ -86,9 +86,11 @@ public class HibernateUtils {
 		
 		ClassLoader classLoader = HibernateUtils.class.getClassLoader();
 		
-		File f = new File(classLoader.getResource(fileName).getFile());
-				
-		config.configure(f);
+		if(classLoader.getResource(fileName)!=null)
+		{
+			File f = new File(classLoader.getResource(fileName).getFile());			
+			config.configure(f);
+		}
 
 		// Add the annotated classes so that they can be used
 		AnnotatedClassesList.addAnnotatedClasses(config);
