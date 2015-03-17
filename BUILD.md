@@ -8,9 +8,4 @@ They should be built in this order.
 2. transitTimeApi
 3. transitTimeWebApp
 
-Each module can be built by change to the related directory and running "mvn install".
-
-eg. 
-
-cd transitTime
-mvn install
+The project can be built for the root directory by running "mvn install".
