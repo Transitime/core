@@ -7,27 +7,9 @@ The software is checked in and made public only so that it can be viewed. While 
 
 <b>Build</b>
 
-The software is made up of three modules which can each be built with maven.
+The software is made up of three modules which can each be built with maven. See BUILD.md
 
 The core fucntionality is in the transiTime project. The REST api is in transiTimeApi and the user Web applicaton is in transiTimeWebapp.
-
-They should be built in this order.
-
-
-transitTime
-
-transitTimeApi
-
-transitTimeWebApp
-
-
-Each module can be built by change to the related directory and running "mvn install".
-
-eg.
-
-cd transitTime
-
-mvn install
 
 <b>Setup</b>
 
