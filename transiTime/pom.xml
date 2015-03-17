@@ -217,6 +217,18 @@
 							<goal>one-jar</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>build-fifth</id>
+						<configuration>
+							<mainClass>org.transitime.applications.RmiQuery</mainClass>
+							<attachToBuild>true</attachToBuild>
+							<classifier>onejar</classifier>
+							<filename>RmiQeury.jar</filename>
+						</configuration>
+						<goals>
+							<goal>one-jar</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
