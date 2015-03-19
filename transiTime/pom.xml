@@ -91,16 +91,8 @@
 			<artifactId>hornetq-jms-client</artifactId>
 			<version>2.3.25.Final</version>
 		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>javax.mail-api</artifactId>
-			<version>1.5.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.javaee</groupId>
-			<artifactId>jboss-jms-api-1.1_spec</artifactId>
-			<version>5.0.2.GA</version>
-		</dependency>
+		
+		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
