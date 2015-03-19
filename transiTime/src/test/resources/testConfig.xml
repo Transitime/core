@@ -3,11 +3,18 @@
     <modules>
         <optionalModulesList>org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
     </modules>
+    <core>
+	<agencyId>02</agencyId>
+    </core>	
     <avl>
         <!-- URL for GTFS realtime vechicle location stream -->
-        <gtfsRealtimeFeedURI>testVechicleLocationUrlGTFS-RT</gtfsRealtimeFeedURI>        
+        <gtfsRealtimeFeedURI>http://127.0.0.1:8092/vehiclePositions</gtfsRealtimeFeedURI>        
+        <minLongitude>-10.725</minLongitude>
+        <maxLongitude>-5.35</maxLongitude>             
+        <minLatitude>51.35</minLatitude>
+        <maxLatitude>55.45</maxLatitude>        
     </avl>   
-    
+    transitime.core.agencyId
     <db>
         <dbName>transiTime</dbName>
         <dbHost>localhost:5432</dbHost>
@@ -18,5 +25,5 @@
     <hibernate>
         <configFile>hibernate_postgres_cfg.xml</configFile>        
     </hibernate>
-    
+
 </transitime>
