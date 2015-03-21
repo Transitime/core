@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transitime>
     <modules>
-        <optionalModulesList>org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
+		<optionalModulesList>org.transitime.core.schedBasedPreds.SchedBasedPredsModule;org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
     </modules>
     <core>
 	<agencyId>02</agencyId>
@@ -13,8 +13,7 @@
         <maxLongitude>-5.35</maxLongitude>             
         <minLatitude>51.35</minLatitude>
         <maxLatitude>55.45</maxLatitude>        
-    </avl>   
-    transitime.core.agencyId
+    </avl>       
     <db>
         <dbName>transiTime</dbName>
         <dbHost>localhost:5432</dbHost>

@@ -4,4 +4,4 @@
 #header a:visited { color: #000000;}
 #header a:hover { font-weight: normal;}
 </style>
-<div id="header"><a href="www.transitime.org">Transitime</a></div>
+<div id="header"><a href="http://www.transitime.org">Transitime</a></div>

@@ -69,34 +69,39 @@ public class UsageValidator {
     
     public void validateUsage(StandardParameters stdParameters) 
 	    throws WebApplicationException {
-	String requestIpAddress = stdParameters.getRequest().getRemoteAddr();
-	long currentTime = System.currentTimeMillis();
-	
-	// Get the list of access times for the IP address. Can be empty.
-	LinkedList<Long> accessTimes = requestTimesPerIp.get(requestIpAddress);
-	if (accessTimes == null) {
-	    accessTimes = new LinkedList<Long>();
-	    requestTimesPerIp.put(requestIpAddress, accessTimes);
-	}
-	
-	// If number of requests already reached see if got too many
-	// within the time limit.
-	if (accessTimes.size() == MAX_REQUESTS) {
-	    Long oldestAccessTime = accessTimes.getLast();
-	    if (oldestAccessTime > currentTime - MAX_REQUESTS_TIME_MSEC) {
-		// Note that using special HTTP response 429, which is for
-		// Too Many Requests. See http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-		throw WebUtils.badRequestException(429, "Exceeded " + MAX_REQUESTS + 
-			" requests within " + MAX_REQUESTS_TIME_MSEC + 
-			" msec for IP address " + requestIpAddress);
+    	
+    if(stdParameters.getRequest()!=null)	
+    {
+		String requestIpAddress = stdParameters.getRequest().getRemoteAddr();
+		
+		long currentTime = System.currentTimeMillis();
+		
+		// Get the list of access times for the IP address. Can be empty.
+		LinkedList<Long> accessTimes = requestTimesPerIp.get(requestIpAddress);
+		if (accessTimes == null) {
+		    accessTimes = new LinkedList<Long>();
+		    requestTimesPerIp.put(requestIpAddress, accessTimes);
+		}
+		
+		// If number of requests already reached see if got too many
+		// within the time limit.
+		if (accessTimes.size() == MAX_REQUESTS) {
+		    Long oldestAccessTime = accessTimes.getLast();
+		    if (oldestAccessTime > currentTime - MAX_REQUESTS_TIME_MSEC) {
+			// Note that using special HTTP response 429, which is for
+			// Too Many Requests. See http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+			throw WebUtils.badRequestException(429, "Exceeded " + MAX_REQUESTS + 
+				" requests within " + MAX_REQUESTS_TIME_MSEC + 
+				" msec for IP address " + requestIpAddress);
+		    }
+		}
+		
+		// Add the current request time to the queue
+		accessTimes.addFirst(currentTime);
+		
+		// Clean up queue of old requests that are beyond the time limit
+		while (accessTimes.getLast() < currentTime - MAX_REQUESTS_TIME_MSEC)
+		    accessTimes.removeLast();
 	    }
-	}
-	
-	// Add the current request time to the queue
-	accessTimes.addFirst(currentTime);
-	
-	// Clean up queue of old requests that are beyond the time limit
-	while (accessTimes.getLast() < currentTime - MAX_REQUESTS_TIME_MSEC)
-	    accessTimes.removeLast();
     }
 }

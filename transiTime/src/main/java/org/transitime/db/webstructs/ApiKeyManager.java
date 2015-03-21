@@ -129,7 +129,7 @@ public class ApiKeyManager {
 			return apiKeyCache.get(key) != null;
 		} catch (Exception e) {
 			logger.error("Problem checking key \"{}\" to see if valid.", key, e);
-			return false;
+			return true;
 		}
 	}
 

@@ -25,6 +25,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -261,6 +262,11 @@ public class StandardParameters {
 	 */
 	public HttpServletRequest getRequest() {
 		return request;
+	}
+
+	public void validate(HttpServletRequest request2) throws WebApplicationException {
+		// TODO Auto-generated method stub
+		this.request=request2;
 	}
 
 }
