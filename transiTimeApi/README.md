@@ -13,7 +13,7 @@ This server talks to core using RMI calls to get the information to support the 
 
 TODO: Need go figure out how to configure the location of the RMI host and port.
 
-To access the service a key is required to be provided in the URL. This key is compared against a key in the database.
+To access the service a key is required to be provided in the URL. This key is compared against a key in the database. You can use the CreateAPIKey applcation in transiTime to create a test/demo key.
 
 The tables that store this information are create by running the ddl_xxxx_org_transitime_db_webstructs.sql in the database.(Where xxxx is the type of datbase you are using)
 
