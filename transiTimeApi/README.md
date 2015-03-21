@@ -16,3 +16,6 @@ TODO: Need go figure out how to configure the location of the RMI host and port.
 To access the service a key is required to be provided in the URL. This key is compared against a key in the database.
 
 The tables that store this information are create by running the ddl_xxxx_org_transitime_db_webstructs.sql in the database.(Where xxxx is the type of datbase you are using)
+
+org.transitime.api.utils.ApiKeyManger can be run to create a key to be used. The paramaters required are 
+applicationUrl, email, phone, and description in that order. (TODO This needs to be changed to use commons-cli)
