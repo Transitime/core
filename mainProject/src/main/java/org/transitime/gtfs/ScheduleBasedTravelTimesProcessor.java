@@ -300,10 +300,11 @@ public class ScheduleBasedTravelTimesProcessor {
 		// First check if trip patterns have same number of stops.
 		if (tripPattern.getStopPaths().size() != 
 				alreadyExistingTravelTimes.numberOfStopPaths()) {
-			logger.error("In ScheduleBasedTravelTimesProcessor.adequateMatch(), for tripId={} " + 
-					"using tripPatternId={} has different number of stops than " +
-					"for another tripId={} even though it is associated with the " + 
-					"same trip pattern.", 
+			logger.warn("In ScheduleBasedTravelTimesProcessor.adequateMatch(), "
+					+ "for tripId={} using tripPatternId={} has different "
+					+ "number of stops than for another tripId={} even though "
+					+ "it is associated with the same trip pattern. Therefore "
+					+ "the old travel times cannot be reused for this trip.", 
 					trip.getId(), 
 					tripPattern.getId(), 
 					alreadyExistingTravelTimes.getTripCreatedForId()); 
