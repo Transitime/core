@@ -69,6 +69,10 @@
                 </executions>
                 <configuration>
                     <mainClass>org.transitime.api.Main</mainClass>
+                    <arguments>
+                    	<argument>-u</argument>
+                    	<argument>http://127.0.0.1:8093/transitime/</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>

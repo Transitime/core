@@ -213,6 +213,18 @@
 							<goal>one-jar</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>build-sixth</id>
+						<configuration>
+							<mainClass>org.transitime.applications.CreateAPIKey</mainClass>
+							<attachToBuild>true</attachToBuild>
+							<classifier>onejar</classifier>
+							<filename>createAPIKey.jar</filename>
+						</configuration>
+						<goals>
+							<goal>one-jar</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
