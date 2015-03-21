@@ -20,12 +20,13 @@ DBTest.java can be used to test that the database can be connected to.<br/>
 GTFSFileProcessor.java will read a GTFS file into this database structure.<br/>
 Core.java is as the name implies is the workhorse of the system. <br/>
 RmiQuery.java allows you make queries to the server run in core from the command line.<br/>
+CreateAPIKey.java a test app to allow you create test/demo key to access REST api webapp.<br/>
 
 Details on how to run each of these and their respective parameters are in the README for the transiTime module.
 
-Once this is set up the next step is to set up the transiTimeApi which is a RESTful API. This API makes RMI calls to the RMI Server started by Core.java to provide results. This is a war file which can be deployed into Tomcat.  (I haven't got here yet but will fill in the details on setup in its README)
+Once this is set up the next step is to set up the transiTimeApi which is a RESTful API. This API makes RMI calls to the RMI Server started by Core.java to provide results. This is a war file which can be deployed into Tomcat or can be run from maven which starts up a Grizzly server.  
 
-The transiTimeWebapp in turn is a web application which uses the transitTimeAPI to provided a user interface. This is a war file which can be deployed into tomcat. (I haven't got here yet but will fill in the details on setup in its README)
+The transiTimeWebapp in turn is a web application which uses the transitTimeAPI to provided a user interface. This is a war file which can be deployed into tomcat. This connects to the database and the connection information is configured in hibernate.cfg.xml in the src/main/resources directory.
 
 
 
