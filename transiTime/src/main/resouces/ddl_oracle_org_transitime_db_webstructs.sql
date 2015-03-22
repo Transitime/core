@@ -18,6 +18,7 @@
         active number(1,0),
         dbEncryptedPassword varchar2(60 char),
         dbHost varchar2(120 char),
+        dbName varchar2(60 char),
         dbType varchar2(60 char),
         dbUserName varchar2(60 char),
         hostName varchar2(120 char),

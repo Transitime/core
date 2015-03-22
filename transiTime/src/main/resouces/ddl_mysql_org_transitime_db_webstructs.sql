@@ -18,6 +18,7 @@
         active boolean,
         dbEncryptedPassword varchar(60),
         dbHost varchar(120),
+        dbName varchar(60),
         dbType varchar(60),
         dbUserName varchar(60),
         hostName varchar(120),
