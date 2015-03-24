@@ -46,7 +46,7 @@ public class ApiScheduleTime {
 	}
 	
 	public ApiScheduleTime(Integer time) {
-		this.timeStr = time == null ? null : Time.timeOfDayAmPmStr(time);
+		this.timeStr = time == null ? null : Time.timeOfDayShortStr(time);
 		this.timeSecs = time;
 	}
 
