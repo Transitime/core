@@ -896,8 +896,7 @@ public class TransitimeApi {
 						+ routesIdOrShortNames + " does not exist.");
 
 			// Create and return ApiSchedules response
-			ApiSchedules apiSchedules = new ApiSchedules(
-					ipcSchedules);
+			ApiSchedules apiSchedules = new ApiSchedules(ipcSchedules);
 			return stdParameters.createResponse(apiSchedules);
 		} catch (RemoteException e) {
 			// If problem getting data then return a Bad Request
