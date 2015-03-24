@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.BooleanConfigValue;
 
 
 /**
@@ -96,6 +97,15 @@ public class TitleFormatter {
 	
 	private List<RegexInfo> regexReplaceList = 
 			new ArrayList<RegexInfo>();
+	
+	private static final BooleanConfigValue capitalize = 
+			new BooleanConfigValue("transitime.gtfs.capitalize", 
+					false, 
+					"Sometimes GTFS titles have all capital letters or other "
+					+ "capitalization issues. If set to true then will properly "
+					+ "capitalie titles when process GTFS data. But note that "
+					+ "this can require using regular expressions to fix things "
+					+ "like acronyms that actually should be all caps.");
 	
 	private static final Logger logger= 
 			LoggerFactory.getLogger(TitleFormatter.class);	
@@ -274,13 +284,14 @@ public class TitleFormatter {
 			return original;
 		
 		// First, properly capitalize the title
-		String capitalized = capitalize(original);
+		String capitalizedStr = capitalize.getValue() ? 
+				capitalize(original) : original;
 
 		// Now that capitalization should mostly be correct, use
 		// regexs configured in file to make other adjustments.
 		// By doing the regexs after capitalization the regexs can
 		// also be used to fixed complicated capitalization problems.
-		String processed = processRegexReplacements(capitalized);
+		String processed = processRegexReplacements(capitalizedStr);
 		
 		// Log any changes made
 		if (!processed.equals(original)) {
