@@ -45,6 +45,12 @@ public class ScheduleTime implements Serializable {
 		this.departureTime = departureTime;
 	}
 	
+	/**
+	 * Returns departure time if there is one. Otherwise returns arrival time if
+	 * there is one. Otherwise returns null.
+	 * 
+	 * @return
+	 */
 	public Integer getTime() { 
 		if (departureTime != null)
 			return departureTime;
