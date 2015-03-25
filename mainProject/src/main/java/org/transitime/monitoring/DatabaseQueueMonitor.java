@@ -30,7 +30,7 @@ import org.transitime.utils.StringUtils;
  * @author SkiBu Smith
  *
  */
-public class DatabaseQueueMonitoring extends MonitorBase {
+public class DatabaseQueueMonitor extends MonitorBase {
 
 	DoubleConfigValue maxQueueFraction = new DoubleConfigValue(
 			"transitime.monitoring.maxQueueFraction", 
@@ -56,7 +56,7 @@ public class DatabaseQueueMonitoring extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public DatabaseQueueMonitoring(EmailSender emailSender, String agencyId) {
+	public DatabaseQueueMonitor(EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
 	}
 

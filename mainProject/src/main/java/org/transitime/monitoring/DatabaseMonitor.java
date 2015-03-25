@@ -29,7 +29,7 @@ import org.transitime.utils.EmailSender;
  * @author SkiBu Smith
  *
  */
-public class DatabaseMonitoring extends MonitorBase {
+public class DatabaseMonitor extends MonitorBase {
 
 	/********************** Member Functions **************************/
 
@@ -39,7 +39,7 @@ public class DatabaseMonitoring extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public DatabaseMonitoring(EmailSender emailSender, String agencyId) {
+	public DatabaseMonitor(EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
 	}
 

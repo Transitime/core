@@ -70,8 +70,8 @@ public class AgencyMonitor {
 		monitors.add(new SystemCpuMonitor(emailSender, agencyId));
 		monitors.add(new SystemDiskSpaceMonitor(emailSender,
 				agencyId));
-		monitors.add(new DatabaseMonitoring(emailSender, agencyId));
-		monitors.add(new DatabaseQueueMonitoring(emailSender,
+		monitors.add(new DatabaseMonitor(emailSender, agencyId));
+		monitors.add(new DatabaseQueueMonitor(emailSender,
 				agencyId));
 	}
 	
