@@ -11,7 +11,7 @@ var shapeOptions = {
 		
 var minorShapeOptions = {
 	color: '#00ee00',
-	weight: 1,
+	weight: 2,
 	opacity: 0.4,
 };
 		
