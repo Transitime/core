@@ -105,9 +105,10 @@ public class BlocksProcessor {
 				for (TripPattern tripPattern : tripPatternsForRoute) {
 					// Find longest tripPattern for each direction. 
 					// According to the GTFS spec the direction_id in the
-					// trips.txt file is either a "0" or a "1". So just look
-					// for those values.
-					if ("0".equals(tripPattern.getDirectionId())) {
+					// trips.txt file is either a "0", "1", or null (since it
+					// is optional). So just look for those values.
+					if ("0".equals(tripPattern.getDirectionId()) 
+							|| tripPattern.getDirectionId() == null) {
 						// It is direction "0"
 						if (tripPattern.getStopPaths().size() > maxStopsForDirection0) {
 							maxStopsForDirection0 = tripPattern.getStopPaths().size();
