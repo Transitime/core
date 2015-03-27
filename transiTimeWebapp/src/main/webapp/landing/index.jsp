@@ -42,9 +42,9 @@ for (WebAgency webAgency : webAgencies) {
 	%>
 	<tr>
 	  <th><%= webAgency.getAgencyName() %></th>
-	  <th><a href="map.jsp?a=<%= webAgency.getAgencyId() %>" title="Real-time map">Map</a></th>
-	  <th><a href="reports/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Reports on historic information">Reports</a></th>
-	  <th><a href="status/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Pages showing current status of system">Status</a></th>
+	  <th><a href="../map/map.jsp?a=<%= webAgency.getAgencyId() %>" title="Real-time map">Map</a></th>
+	  <th><a href="../reports/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Reports on historic information">Reports</a></th>
+	  <th><a href="../status/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Pages showing current status of system">Status</a></th>
 	</tr>
 	<%
 }

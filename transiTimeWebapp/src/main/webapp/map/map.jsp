@@ -15,25 +15,25 @@
   <!-- So that get proper sized map on iOS mobile device -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   
-  <link rel="stylesheet" href="/api/css/mapUi.css" />
+  <link rel="stylesheet" href="../css/mapUi.css" />
  
   <!-- Load javascript and css files -->
-  <%@include file="/template/includes.jsp" %>
+  <%@include file="../template/includes.jsp" %>
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-  <script src="/api/javascript/leafletRotatedMarker.js"></script>
-  <script src="/api/javascript/jquery-dateFormat.min.js"></script>
-  <script src="/api/javascript/mapUiOptions.js"></script>
+  <script src="../javascript/leafletRotatedMarker.js"></script>
+  <script src="../javascript/jquery-dateFormat.min.js"></script>
+  <script src="../javascript/mapUiOptions.js"></script>
 
   <%-- MBTA wants some color customization. Load in options file if mbta --%>
   <% if (request.getParameter("a").equals("mbta")) { %>
-    <link rel="stylesheet" href="/api/css/mbtaMapUi.css" />
-    <script src="/api/javascript/mbtaMapUiOptions.js"></script>
+    <link rel="stylesheet" href="../css/mbtaMapUi.css" />
+    <script src="../javascript/mbtaMapUiOptions.js"></script>
   <% } %>
   
   <!-- Load in Select2 files so can create fancy selectors -->
-  <link href="/api/select2/select2.css" rel="stylesheet"/>
-  <script src="/api/select2/select2.min.js"></script>
+  <link href="../select2/select2.css" rel="stylesheet"/>
+  <script src="../select2/select2.min.js"></script>
 
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   

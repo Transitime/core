@@ -45,7 +45,7 @@ function storePosition(position) {
 		// Send dataStr to web server for it to store the data
 	    $.ajax({
 	    	type: "POST",
-	    	url: "/api/tracker/store.jsp",
+	    	url: "./tracker/store.jsp",
 	    	data: dataStr,
 	    	success: function(data) {
 	    		//alert(data);
@@ -79,7 +79,7 @@ function showError(error) {
         	$("#output").html("Location information is unavailable.");
     	    $.ajax({
     	    	type: "POST",
-    	    	url: "/api/tracker/store.jsp",
+    	    	url: "./tracker/store.jsp",
     	    	data: "--Location information is unavailable.",
     	    });
 

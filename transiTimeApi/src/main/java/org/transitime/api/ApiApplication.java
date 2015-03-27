@@ -20,6 +20,7 @@ package org.transitime.api;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.transitime.config.Config;
 
 /**
  * Declares that all classes in package org.transitime.api.rootResources will be
@@ -37,7 +38,13 @@ public class ApiApplication extends ResourceConfig {
     public ApiApplication() {
  	// Register all root-resource classes in package that handle @Path 
 	// requests
-         packages("org.transitime.api.rootResources");   
+    	try 
+    	{			
+			packages("org.transitime.api.rootResources");
+		} 
+    	catch (Exception e) 
+		{		
+			e.printStackTrace();
+		}            
      }
-
 }

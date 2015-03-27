@@ -54,6 +54,9 @@ import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
+import org.transitime.config.Config;
+import org.transitime.config.Config.ConfigException;
+import org.transitime.config.ConfigValue.ConfigParamException;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcActiveBlock;
@@ -580,6 +583,17 @@ public class TransitimeApi {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
+	}
+
+	public TransitimeApi() {
+		super();
+		try {
+			Config.processConfig(this.getClass().getClassLoader().getResource("transiTimeConfig.xml").getFile());
+		} catch ( Exception e) {
+			e.printStackTrace();
+		}
+		
+		// TODO Auto-generated constructor stub
 	}
 
 	/**
