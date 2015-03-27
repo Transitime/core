@@ -47,6 +47,9 @@ import org.transitime.utils.Timer;
  * secondary port for each system (such as 2097, 2096, etc). Using a specific
  * port for secondary communication is much safer than having to completely open
  * up network traffic.
+ * <p>
+ * If another agency is already using the secondary RMI port on the server then
+ * will get an exception and e-mail notification is sent out.
  * 
  * @author SkiBu Smith
  *
@@ -164,8 +167,11 @@ public abstract class AbstractServer {
 			
 			constructed = true;
 		} catch (Exception e) {
-			logger.error("Error occurred when constructing a " + 
-					getClass().getSimpleName(), 
+			// Log the error. Since RMI is critical send out e-mail as well so
+			// that the issue is taken care of.
+			logger.error(Markers.email(), 
+					"Error occurred when constructing a " 
+							+	getClass().getSimpleName(), 
 					e);
 		}
 	}
