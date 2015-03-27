@@ -5,11 +5,7 @@ This can be built on its own by
 cd transitTimeApi<br/>
 mvn install
 
-A grizzly server can be started with the API running by running
-
-mvn exec:java
-
-If started this way the URL and port that this server starts on are are configured in transitTimeApi/pom.xml.
+This will produce a war file which can be deployed on Tomcat. 
 
 This server talks to core using RMI calls to get the information to support the REST service calls.
 
@@ -21,8 +17,8 @@ The tables that store this information are create by running the ddl_xxxx_org_tr
 
 Example URLs
 
-http://[server]:[port]/transitime/key/[Key from CreateAPIKey]/agency/[agency id]/command/gtfs-rt/tripUpdates?format=human
+http://[server]:[port]/v1/transitime/key/[Key from CreateAPIKey]/agency/[agency id]/command/gtfs-rt/tripUpdates?format=human
 
-http://127.0.0.1:8093/transitime/key/8a3273b0/agency/02/command/gtfs-rt/tripUpdates?format=human
+http://127.0.0.1:8093/v1/transitime/key/8a3273b0/agency/02/command/gtfs-rt/tripUpdates?format=human
 
-When the server starts it provides a url to the full specification (WADL) for the API. The comments in the supporting classes are the best source of information.
+The comments in the supporting classes are the best source of information for RESTFul calls.

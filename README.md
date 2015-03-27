@@ -24,9 +24,9 @@ CreateAPIKey.java a test app to allow you create test/demo key to access REST ap
 
 Details on how to run each of these and their respective parameters are in the README for the transiTime module.
 
-Once this is set up the next step is to set up the transiTimeApi which is a RESTful API. This API makes RMI calls to the RMI Server started by Core.java to provide results. This is a war file which can be deployed into Tomcat or can be run from maven which starts up a Grizzly server.  
+Once this is set up the next step is to set up the transiTimeApi which is a RESTful API. This API makes RMI calls to the RMI Server started by Core.java to provide results. This is a war file which can be deployed into Tomcat.  
 
-The transiTimeWebapp in turn is a web application which uses the transitTimeAPI to provided a user interface. This is a war file which can be deployed into tomcat. This connects to the database and the connection information is configured in hibernate.cfg.xml in the src/main/resources directory.
+The transiTimeWebapp in turn is a web application which uses the transitTimeAPI to provided a user interface. This is a war file which can be deployed into tomcat. This connects to the database and the connection information is configured in hibernate.cfg.xml in the src/main/resources directory. Currently this needs to be deployed on the same server as the API.
 
 
 
