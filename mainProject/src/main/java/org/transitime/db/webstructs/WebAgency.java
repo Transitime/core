@@ -168,8 +168,12 @@ public class WebAgency {
 			ConfigInterface inter = ConfigInterfaceFactory.get(agencyId);
 			
 			if (inter == null) {
-				logger.error("Could not access via RMI agencyId={}", agencyId);
+				logger.error("Could not access via RMI agencyId={}. The "
+						+ "ConfigInterfaceFactory returned null for the "
+						+ "agency ID.", agencyId);
 			} else {
+				IntervalTimer timer = new IntervalTimer();
+				
 				try {
 					// Get the agencies via RMI
 					List<Agency> agencies = inter.getAgencies();
@@ -178,8 +182,9 @@ public class WebAgency {
 					agency = agencies.get(0);
 				} catch (RemoteException e) {
 					logger.error(
-							"Could not get Agency object for agencyId={}. {}",
-							agencyId, e.getMessage());
+							"Could not get Agency object for agencyId={}. "
+							+ "Exception occurred after {} msec. {}",
+							agencyId, timer.elapsedMsec(), e.getMessage());
 				}
 			}
 		}
