@@ -43,6 +43,7 @@ import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.utils.Encryption;
 import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.Time;
 
 /**
  * For keeping track of agency data for a website. Contains info such as the
@@ -88,8 +89,9 @@ public class WebAgency {
 	private Agency agency;
 
 	// Cache
-	static private Map<String, WebAgency> cacheMap;
-
+	static private Map<String, WebAgency> webAgencyMapCache;
+	static private long webAgencyMapCacheReadTime = 0;
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(WebAgency.class);
 
@@ -251,49 +253,67 @@ public class WebAgency {
 	}
 
 	/**
+	 * Returns map of all agencies. Values are cached so won't be automatically
+	 * updated when agencies are changed in the database. Will update cache if
+	 * haven't done so in 5 minutes. This way will automatically get new
+	 * agencies that are added yet will not be reading from the database for
+	 * every page hit that needs list of agencies. Also, agencies automatically
+	 * removed.
+	 * 
+	 * @return the cached map of WebAgency objects
+	 */
+	static private Map<String, WebAgency> getWebAgencyMapCache() {
+		// If haven't read in web agencies yet or in a while, do so now
+		if (webAgencyMapCache == null
+				|| System.currentTimeMillis() - webAgencyMapCacheReadTime > 5 * Time.MS_PER_MIN) {
+			webAgencyMapCache = getMapFromDb();
+			webAgencyMapCacheReadTime = System.currentTimeMillis();
+		}
+
+		return webAgencyMapCache;
+	}
+	
+	/**
+	 * Returns collection of all agencies. Values are cached so won't be
+	 * automatically updated when agencies are changed in the database. Will
+	 * update cache if haven't done so in 5 minutes. This way will automatically
+	 * get new agencies that are added yet will not be reading from the database
+	 * for every page hit that needs list of agencies.
+	 * 
+	 * @return Collection of the WebAgency objects configured in db
+	 */
+	static public Collection<WebAgency> getCachedWebAgencies() {
+		return getWebAgencyMapCache().values();
+	}
+	
+	/**
 	 * Gets specified WebAgency from the cache. If the agency is not defined in
 	 * the cache then will reread the agencies from the database. In this way
 	 * can add an agency to the database and the system will automatically pick
-	 * up the new agency.
+	 * up the new agency. 
 	 * 
 	 * @param agencyId
 	 * @return The specified WebAgency, or null if it doesn't exist.
 	 */
 	static public WebAgency getCachedWebAgency(String agencyId) {
-		// If haven't read in web agencies yet, do so now
-		if (cacheMap == null)
-			cacheMap = getMapFromDb();
-
 		// Get the web agency from the cache
-		WebAgency webAgency = cacheMap.get(agencyId);
+		WebAgency webAgency = getWebAgencyMapCache().get(agencyId);
 
 		// If web agency was not in cache update the cache and try again
 		if (webAgency == null) {
 			logger.error("Did not find agencyId={} in WebAgencies table for "
-					+ "database {}. Will reload data from database.", 
+					+ "database {}. Will reload data from database to see if "
+					+ "agency only recently added.", 
 					agencyId, getWebAgencyDbName());
-			cacheMap = getMapFromDb();
-			webAgency = cacheMap.get(agencyId);
+			webAgencyMapCache = getMapFromDb();
+			webAgencyMapCacheReadTime = System.currentTimeMillis();
+			webAgency = webAgencyMapCache.get(agencyId);
 		}
 
 		// Return the possibly null web agency
 		return webAgency;
 	}
 
-	/**
-	 * Returns collection of all agencies. Values are cached so won't be
-	 * automatically updated when agencies are changed in the database.
-	 * 
-	 * @return
-	 */
-	static public Collection<WebAgency> getCachedWebAgencies() {
-		// If haven't read in web agencies yet, do so now
-		if (cacheMap == null)
-			cacheMap = getMapFromDb();
-
-		return cacheMap.values();
-	}
-	
 	/**
 	 * Returns collection of all agencies as read from database. No caching is
 	 * done. The database is read each time this method is called, so it should
@@ -359,11 +379,7 @@ public class WebAgency {
 	public String getDbPassword() {
 		return Encryption.decrypt(dbEncryptedPassword);
 	}
-	
-	public static Map<String, WebAgency> getCacheMap() {
-		return cacheMap;
-	}
-	
+		
 	/**
 	 * For storing a web agency in the web database
 	 * 
