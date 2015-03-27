@@ -219,11 +219,13 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				// handle it normally. But instrument it with a timer and logging
 				// and also handle RemoteExceptions.
 				IntervalTimer t = new IntervalTimer();
+				// Checking debug so only call methods to generate logging if
+				// actually necessary
 				boolean debug = logger.isDebugEnabled();
 				if (debug) {
-					logger.debug("About to call remote method " + 
-							info.getClassName() + "." + method.getName() + "()" +		
-							" for project " + info.getAgencyId());
+					logger.debug("About to call remote method {}.{}() for "
+							+ "project {}.", info.getClassName(),
+							method.getName(), info.getAgencyId());
 				}
 				
 				// Do the actual invocation of the method!
@@ -231,11 +233,10 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 							
 				// If debug, log how long remote method took
 				if (debug) {
-					logger.debug("Remote method " + 
-							info.getClassName() + "." + method.getName() + "()" +
-							" for project " + info.getAgencyId() +
-							" took " + 
-							t.elapsedMsec() + " msec.");
+					logger.debug("Remote method {}.{}() for project {} took "
+							+ "{} msec.", 
+							info.getClassName(), method.getName(), 
+							info.getAgencyId(),	t.elapsedMsec());
 				}
 				
 				// Finally done so return results of method call
@@ -252,7 +253,11 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				// right away is most likely not going to help with a networking
 				// problem or the server not running.
 				if (tryNumber >= 2)
-					throw new RemoteException(e.getMessage() + 
+					logger.error("Remote method {}.{}() for project {} "
+							+ "encountered exception. {}",
+							info.getClassName(), method.getName(), 
+							info.getAgencyId(), e.getMessage());
+					throw new RemoteException(e.getMessage() +  
 							". Gave up after second attempt.");
 			} catch (ConcurrentAccessException e) {
 				// Encountered a ConcurrentAccessException which means the RMI
@@ -344,11 +349,11 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 			if (causeException instanceof ConnectException) {
 				// ConnectException means the server was not available
 				// even though the object was registered.
-				logger.error("When calling remote method " + 
-						info.getClassName() + "." + method.getName() + "()" +
-						" for project " + info.getAgencyId() +
-						" encountered exception " + causeException.getMessage() + "." +
-						" This is most likely due to the project not currently running.");
+				logger.error("When calling remote method {}.{}() for agency {}" 
+						+ " encountered exception {}. This is most likely due "
+						+ "to the project not currently running.",
+						info.getClassName(), method.getName(), 
+						info.getAgencyId(), causeException.getMessage());
 				// No point in just retrying again since the server isn't 
 				// going to happen to start up again right away and don't
 				// want to wait here before retrying since because if web
@@ -357,17 +362,18 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				// Therefore simply throw an exception. Throw RemoteException
 				// since the class already declares that such exceptions
 				// should be expected.
-				throw new RemoteException(causeException.getMessage(), causeException);
+				throw new RemoteException(causeException.getMessage(), 
+						causeException);
 			} else {
 				// Got an unchecked exception such as one declared with the
 				// method or an unnamed one such as NullPointerException.
 				// Just debug log this since it will be logged in full on 
 				// the server side. Then pass the cause exception to the
 				// caller.
-				logger.debug("When calling remote method " + 
-						info.getClassName() + "." + method.getName() + "()" +
-						" for project " + info.getAgencyId() +
-						" encountered exception " +	causeException.getMessage());
+				logger.debug("When calling remote method {}.{}() for agency {} "
+						+ "encountered exception {}.",
+						info.getClassName(), method.getName(), 
+						info.getAgencyId(), causeException.getMessage());
 				throw causeException;
 			}
 		}		
