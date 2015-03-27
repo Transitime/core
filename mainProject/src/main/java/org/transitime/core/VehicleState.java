@@ -222,15 +222,22 @@ public class VehicleState {
 	 *         null if there isn't such a match.
 	 */
 	public TemporalMatch getPreviousMatch(int minimumAgeMsec) {
+		// If no current AVL report then don't need to find old one
+		AvlReport currentAvlReport = getAvlReport();
+		if (currentAvlReport == null)
+			return null;
+		
+		// Go through math history to find one that is old enough
 		for (TemporalMatch match : temporalMatchHistory) {
 			// If the previous match was null then don't keep on
-			// looking. Simply return null.
+			// looking because vehicle was not predictable at some
+			// point. Simply return null.
 			if (match == null) 
 				return null;
 			
-			if (getAvlReport() != null
-					&& match.getAvlTime() < getAvlReport().getTime()
-							- minimumAgeMsec)
+			// If found match in history that is old enough then use it
+			if (match.getAvlTime() < 
+					currentAvlReport.getTime() - minimumAgeMsec)
 				return match;
 		}
 		
@@ -240,14 +247,20 @@ public class VehicleState {
 		// high that need to store more matches in order to get one as old as
 		// desired.
 		if (temporalMatchHistory.size() >= CoreConfig.getMatchHistoryMaxSize()) {
+			TemporalMatch oldestMatch = temporalMatchHistory
+					.get(temporalMatchHistory.size() - 1);
 			logger.error("For vehicleId={} tried to retrieve match "
 					+ "at least {} msec old but match history in VehicleState "
-					+ "had only {} entries which was not large enough. Likely "
+					+ "had only {} entries which was not large enough. The oldest "
+					+ "match in history was for {} msec old. Likely "
 					+ "should increase transitime.core.matchHistoryMaxSize "
-					+ "parameter to store more history.",
+					+ "parameter to store more history or reduce "
+					+ "transitime.core.timeForDeterminingNoProgress to look "
+					+ "back less far.",
 					vehicleId,
 					minimumAgeMsec,
-					temporalMatchHistory.size());
+					temporalMatchHistory.size(),
+					currentAvlReport.getTime() - oldestMatch.getAvlTime());
 		}
 		// Didn't have an old enough matches in history
 		return null;
