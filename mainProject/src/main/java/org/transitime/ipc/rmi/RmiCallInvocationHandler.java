@@ -254,7 +254,8 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				// problem or the server not running.
 				if (tryNumber >= 2)
 					logger.error("Remote method {}.{}() for project {} "
-							+ "encountered exception. {}",
+							+ "encountered exception. {}. Gave up after "
+							+ "second attempt.",
 							info.getClassName(), method.getName(), 
 							info.getAgencyId(), e.getMessage());
 					throw new RemoteException(e.getMessage() +  
