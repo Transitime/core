@@ -24,15 +24,24 @@
 		</dependency>
 		<!-- jersey implementation library -->
 		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+			<version>2.11</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet</artifactId>
 			<version>2.11</version>
 		</dependency>
+		
+		<!-- 
 		<dependency>
 			<groupId>com.owlike</groupId>
 			<artifactId>genson</artifactId>
 			<version>1.2</version>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>transitime.org</groupId>
 			<artifactId>transiTime</artifactId>

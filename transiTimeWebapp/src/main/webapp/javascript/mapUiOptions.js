@@ -43,40 +43,40 @@ var minorStopOptions = {
 };
 
 var busIcon = L.icon({
-    iconUrl: 'images/bus-24.png',
-    iconRetinaUrl: 'images/bus-24@2x.png',
+    iconUrl: '../images/bus-24.png',
+    iconRetinaUrl: '../images/bus-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [13, 12],
     popupAnchor: [0, -12],
 });
 
 var streetcarIcon = L.icon({
-    iconUrl: 'images/rail-light-24.png',
-    iconRetinaUrl: 'images/rail-light-24@2x.png',
+    iconUrl: '../images/rail-light-24.png',
+    iconRetinaUrl: '../images/rail-light-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
     popupAnchor: [0, -12],
 });
 
 var railIcon = L.icon({
-    iconUrl: 'images/rail-24.png',
-    iconRetinaUrl: 'images/rail-24@2x.png',
+    iconUrl: '../images/rail-24.png',
+    iconRetinaUrl: '../images/rail-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [13, 12],
     popupAnchor: [0, -12],
 });
 
 var ferryIcon = L.icon({
-    iconUrl: 'images/ferry-24.png',
-    iconRetinaUrl: 'images/ferry-24@2x.png',
+    iconUrl: '../images/ferry-24.png',
+    iconRetinaUrl: '../images/ferry-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
     popupAnchor: [0, -12],
 });
 
 var layoverIcon = L.icon({
-    iconUrl: 'images/cafe-24.png',
-    iconRetinaUrl: 'images/cafe-24@2x.png',
+    iconUrl: '../images/cafe-24.png',
+    iconRetinaUrl: '../images/cafe-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
     popupAnchor: [0, -12],
@@ -84,7 +84,7 @@ var layoverIcon = L.icon({
 });
 
 var arrowIcon = L.icon({
-	iconUrl: 'images/arrow.png',
+	iconUrl: '../images/arrow.png',
 	iconSize: [30, 30],
 	iconAnchor: [15,15],
 });
