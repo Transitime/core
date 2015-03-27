@@ -16,16 +16,23 @@
  */
 package org.transitime.ipc.rmi;
 
+import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMISocketFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.ipc.rmi.Hello;
+import org.transitime.utils.Time;
 
 /**
  * For clients to access RMI based method calls for a remote
@@ -37,6 +44,17 @@ import org.transitime.ipc.rmi.Hello;
  */
 public class ClientFactory<T extends Remote> {
 
+	// So that only need to setup RMI timeout once
+	private static boolean rmiTimeoutEnabled = false;
+
+	private static IntegerConfigValue timeoutSec = 
+			new IntegerConfigValue(
+					"transitime.rmi.timeoutSec", 
+					2,
+					"Specifies the timeout time in seconds for RMI calls. Note "
+					+ "that when an RMI failure occurs a second try is done "
+					+ "so total timeout time is twice what is specified here.");
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ClientFactory.class);
 
@@ -60,6 +78,9 @@ public class ClientFactory<T extends Remote> {
 	 *         accessing the object then null is returned.
 	 */
 	public static <T extends Remote> T getInstance(String agencyId, Class<T> clazz) {
+		// Set RMI timeout if need to
+		enableRmiTimeout();
+		
 		try {
 			// Create the info object that contains what is needed to
 			// create the RMI stub. This info will also be used if the
@@ -124,6 +145,43 @@ public class ClientFactory<T extends Remote> {
 		logger.debug("Got RMI stub from registry for bindName={}", bindName);
 		
 		return rmiStub;
+	}
+	
+	/**
+	 * Sets the RMI timeout if haven't done so yet.
+	 */
+	private static void enableRmiTimeout() {
+		// If already enabled for process then don't need to enable it again
+		if (rmiTimeoutEnabled)
+			return;
+		
+		try {
+			// Enable the RMI timeout by creating a new RMI socket factory for
+			// a socket with a timeout.
+			RMISocketFactory.setSocketFactory(new RMISocketFactory() {
+				public Socket createSocket(String host, int port)
+						throws IOException {
+					// Need to do quite a bit to get a timeout to work with RMI
+					Socket socket = new Socket();
+					int timeoutMillis = timeoutSec.getValue() * Time.MS_PER_SEC;
+					socket.setSoTimeout(timeoutMillis);
+					socket.setSoLinger(false, 0);
+					socket.connect(new InetSocketAddress(host, port), timeoutMillis);
+					return socket;
+				}
+
+				public ServerSocket createServerSocket(int port)
+						throws IOException {
+					return new ServerSocket(port);
+				}
+			});
+			
+			// Remember that successfully enabled so don't have to enable again
+			rmiTimeoutEnabled = true;
+		} catch (IOException e) {
+			logger.error("Couldn't set RMI timeout to {} seconds.", 
+					timeoutSec.getValue(), e);
+		}
 	}
 	
 	/**
