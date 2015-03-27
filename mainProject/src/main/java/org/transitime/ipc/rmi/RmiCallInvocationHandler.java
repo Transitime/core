@@ -255,11 +255,13 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				if (tryNumber >= 2)
 					logger.error("Remote method {}.{}() for project {} "
 							+ "encountered exception. {}. Gave up after "
-							+ "second attempt.",
+							+ "second attempt. Does security allow access "
+							+ "to the secondary RMI port?",
 							info.getClassName(), method.getName(), 
 							info.getAgencyId(), e.getMessage());
 					throw new RemoteException(e.getMessage() +  
-							". Gave up after second attempt.");
+							". Gave up after second attempt. Does security "
+							+ "allow access to the secondary RMI port?");
 			} catch (ConcurrentAccessException e) {
 				// Encountered a ConcurrentAccessException which means the RMI
 				// call could not be done. Throw a RemoteException since that is
