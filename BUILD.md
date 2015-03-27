@@ -6,4 +6,4 @@ The core fucntionality is in the transiTime project. The REST api is in transiTi
 2. transitTimeApi
 3. transitTimeWebApp
 
-The project can be built for the root directory by running "mvn install".
+The project can be built from the root "core" directory by running "mvn install -skipTests".
