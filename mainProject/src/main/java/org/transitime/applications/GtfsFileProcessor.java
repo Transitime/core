@@ -31,7 +31,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.Config;
+import org.transitime.config.ConfigFileReader;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.HttpGetGtfsFile;
@@ -73,6 +73,13 @@ public class GtfsFileProcessor {
 	private final String notes;
 	private final boolean trimPathBeforeFirstStopOfTrip;
 
+	// Read in configuration files. This should be done statically before 
+	// the logback LoggerFactory.getLogger() is called so that logback can
+	// also be configured using a transitime config file.
+	static {
+		ConfigFileReader.processConfig();
+	}
+	
 	// Logging important in this class
 	private static final Logger logger = LoggerFactory
 			.getLogger(GtfsFileProcessor.class);
@@ -113,16 +120,18 @@ public class GtfsFileProcessor {
 			int defaultWaitTimeAtStopMsec, double maxTravelTimeSegmentLength,
 			boolean shouldCombineShortAndLongNamesForRoutes, int configRev,
 			boolean shouldStoreNewRevs, boolean trimPathBeforeFirstStopOfTrip) {
-		// Read in config params
-		try {
-			// Read in the data from config file
-			Config.processConfig(configFile);
-		} catch (Exception e) {
-			logger.error("Error reading in config file \"" + configFile
-					+ "\". Exiting program.", e);
-			System.exit(-1);
+		// Read in config params if command line option specified
+		if (configFile != null) {
+			try {
+				// Read in the data from config file
+				ConfigFileReader.processConfig(configFile);
+			} catch (Exception e) {
+				logger.error("Error reading in config file \"" + configFile
+						+ "\". Exiting program.", e);
+				System.exit(-1);
+			}
 		}
-
+		
 		this.gtfsUrl = gtfsUrl;
 		this.gtfsZipFileName = gtfsZipFileName;
 		this.unzipSubdirectory = unzipSubdirectory;
