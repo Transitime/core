@@ -35,10 +35,10 @@ public abstract class XmlPollingAvlModule extends PollUrlAvlModule {
 	
 	/**
 	 * Constructor
-	 * @param projectId
+	 * @param agencyId
 	 */
-	public XmlPollingAvlModule(String projectId) {
-		super(projectId);		
+	public XmlPollingAvlModule(String agencyId) {
+		super(agencyId);		
 	}
 	
 	/**
