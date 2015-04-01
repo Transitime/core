@@ -311,7 +311,7 @@
   <!-- Taken out (by setting level to warn instead of info) for now because 
        so verbose -->
   <logger name="org.transitime.ipc.data.IpcPrediction"
-          level="info" additivity="false">
+          level="warn" additivity="false">
     <appender-ref ref="PREDICTION" />
   </logger>
 
