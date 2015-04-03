@@ -17,10 +17,12 @@
 package org.transitime.avl;
 
 import java.util.List;
+
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
@@ -30,8 +32,9 @@ import org.transitime.utils.MathUtils;
 import org.transitime.utils.Time;
 
 /**
- * Reads AVL data from a NextBus AVL feed and publishes it to
- * appropriate JMS topic so that it can be read by AVL clients.
+ * Reads AVL data from a NextBus AVL feed and publishes it to appropriate JMS
+ * topic so that it can be read by AVL clients.
+ * 
  * @author SkiBu Smith
  *
  */
@@ -44,7 +47,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	// /service/xmlFeed .
 
 	private static StringConfigValue nextBusFeedUrl = 
-			new StringConfigValue("transitime.avl.nextbusFeedUrl", 
+			new StringConfigValue("transitime.avl.nextbus.url", 
 					"http://webservices.nextbus.com/s/xmlFeed",
 					"The URL of the NextBus feed to use.");
 	private static String getNextBusFeedUrl() {
@@ -54,14 +57,21 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	// Config param that specifies the agency name to use as part
 	// of the NextBus feed URL.
 	private static StringConfigValue agencyNameForFeed =
-			new StringConfigValue("transitime.avl.agencyNameForFeed",
-					null,
+			new StringConfigValue("transitime.avl.nextbus.agencyNameForFeed",
 					"If set then specifies the agency name to use for the "
 					+ "feed. If not set then the transitime.core.agencyId "
 					+ "is used.");
 	private static String getAgencyNameForFeed() {
 		return agencyNameForFeed.getValue();
 	}
+	
+	private static BooleanConfigValue useTripShortNameForAssignment =
+			new BooleanConfigValue(
+					"transitime.avl.nextbus.useTripShortNameForAssignment",
+					false,
+					"For some agencies the block info in the feed doesn't "
+					+ "match the GTFS data. For these can sometimes use the "
+					+ "trip short name instead.");
 	
 	// So can just get data since last query. Initialize so when first called
 	// get data for last 10 minutes. Definitely don't want to use t=0 because
@@ -162,7 +172,9 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			
 			// Get block ID. Since for some feeds the block ID from the feed
 			// doesn't match the GTFS data need to process the block ID.
-			String block = processBlockId(vehicle.getAttributeValue("block"));
+			String blockId = processBlockId(vehicle.getAttributeValue("block"));
+			
+			String tripId = vehicle.getAttributeValue("tripTag");
 			
 			// Determine if part of consist
 			String leadingVehicleId = vehicle.getAttributeValue("leadingVehicleId");
@@ -186,7 +198,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			logger.debug("vehicleId={} time={} lat={} lon={} spd={} head={} " +
 					"blk={} leadVeh={} drvr={} psngCnt={}", 
 					vehicleId, Time.timeStrMsec(gpsEpochTime), lat, lon, speed, 
-					heading, block, leadingVehicleId, driverId, passengerCount);
+					heading, blockId, leadingVehicleId, driverId, passengerCount);
 				
 			// Create the AVL object and send it to the JMS topic.
 			// The NextBus feed provides silly amount of precision so 
@@ -197,8 +209,12 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 					null,       // license plate
 					passengerCount,
 					Float.NaN); // passengerFullness
-			if (block != null)
-				avlReport.setAssignment(block, AssignmentType.BLOCK_ID);
+			
+			// Record the assignment for the vehicle if it is available
+			if (blockId != null && !useTripShortNameForAssignment.getValue())
+				avlReport.setAssignment(blockId, AssignmentType.BLOCK_ID);
+			else if (tripId != null && useTripShortNameForAssignment.getValue())
+				avlReport.setAssignment(tripId, AssignmentType.TRIP_SHORT_NAME);
 			else
 				avlReport.setAssignment(null, AssignmentType.UNSET);
 			
