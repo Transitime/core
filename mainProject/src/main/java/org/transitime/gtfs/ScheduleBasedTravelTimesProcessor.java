@@ -152,7 +152,8 @@ public class ScheduleBasedTravelTimesProcessor {
 						firstPathTravelTimesMsec, 
 						0,   // stopTimeMsec
 						-1,  // daysOfWeekOverride
-						HowSet.SCHED); 
+						HowSet.SCHED,
+						trip); 
 		travelTimes.add(firstPathTravelTimesForPath);
 		
 		// Go through the schedule times for the trip pattern.
@@ -263,7 +264,8 @@ public class ScheduleBasedTravelTimesProcessor {
 									travelTimesMsec, 
 									stopTimeMsec,
 									-1,  // daysOfWeekOverride
-									HowSet.SCHED);
+									HowSet.SCHED,
+									trip);
 					travelTimes.add(travelTimesForStopPath);
 				}
 				

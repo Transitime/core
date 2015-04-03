@@ -189,6 +189,7 @@ public class TravelTimesForStopPath implements Serializable {
 	 * @param stopTimeMsec
 	 * @param howSet
 	 * @param daysOfWeekOverride
+	 * @param trip for logging useful error message. OK if null.
 	 * @throws ArrayIndexOutOfBoundsException
 	 *             Thrown if not enough memory allocated for column
 	 *             travelTimesMsec for serializing the object.
@@ -196,7 +197,7 @@ public class TravelTimesForStopPath implements Serializable {
 	public TravelTimesForStopPath(int configRev, int travelTimesRev,
 			String stopPathId, double travelTimeSegmentDistance,
 			List<Integer> travelTimesMsec, int stopTimeMsec,
-			int daysOfWeekOverride, HowSet howSet) 
+			int daysOfWeekOverride, HowSet howSet, Trip trip) 
 					throws ArrayIndexOutOfBoundsException {
 		// First make sure that travelTimesMsec isn't bigger than
 		// the space allocated for it. Only bother checking if have
@@ -212,7 +213,11 @@ public class TravelTimesForStopPath implements Serializable {
 						+ " . Have " + travelTimesMsec.size()
 						+ " travel time segments taking up " + serializedSize 
 						+ " bytes but only have " + travelTimesMaxBytes 
-						+ " bytes allocated for the data.";
+						+ " bytes allocated for the data. TripId=" 
+						+ (trip!=null ? trip.getId() : "") 
+						+ " routeId=" + (trip!=null ? trip.getRouteId() : "")
+						+ " routeShortName=" 
+						+ (trip!=null ? trip.getRouteShortName() : "");
 				logger.error(msg);
 				
 				// Since this could be a really problematic issue, throw an error
@@ -257,7 +262,7 @@ public class TravelTimesForStopPath implements Serializable {
 	public TravelTimesForStopPath clone(int newTravelTimesRev) {
 		return new TravelTimesForStopPath(configRev, newTravelTimesRev,
 				stopPathId, travelTimeSegmentLength, travelTimesMsec,
-				stopTimeMsec, daysOfWeekOverride, howSet);
+				stopTimeMsec, daysOfWeekOverride, howSet, null);
 	}
 	
 	/* (non-Javadoc)
