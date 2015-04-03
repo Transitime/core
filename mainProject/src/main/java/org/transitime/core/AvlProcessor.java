@@ -420,7 +420,7 @@ public class AvlProcessor {
 	 * Attempts to match vehicle to the specified route by finding appropriate
 	 * block assignment. Updates the VehicleState with the new block assignment
 	 * and match. These will be null if vehicle could not successfully be
-	 * matched to block.
+	 * matched to route.
 	 * 
 	 * @param routeId
 	 * @param vehicleState

@@ -502,10 +502,13 @@ public class VehicleState {
 
 	/**
 	 * Returns true if the AVL report has a different assignment than what is in
-	 * the VehicleState. For when reassigning a vehicle via the AVL feed.
+	 * the VehicleState. Uses the block assignment or the route assignment from
+	 * the AVL feed. If using trip assignment in AVL feed then the trip is
+	 * converted to a block assignment for doing the comparison. For when
+	 * reassigning a vehicle via the AVL feed.
 	 * 
 	 * @param avlReport
-	 * @return
+	 * @return True if new assignment
 	 */
 	public boolean hasNewAssignment(AvlReport avlReport) {
 		// Assignment only considered to be different if there actually
@@ -514,10 +517,24 @@ public class VehicleState {
 		// to think vehicle has a new null assignment which would cause
 		// a predictable vehicle to not continue to be considered
 		// predictable.
-		// Use Objects.equals() since either the existing assignment or 
-		// the AVL report assignment can be null
-		return  avlReport.getAssignmentType() != AssignmentType.UNSET 
-				&& !Objects.equals(assignmentId, avlReport.getAssignmentId());
+		if (avlReport.getAssignmentType() != AssignmentType.UNSET) {
+			String newAssignment = null;
+			Block block = BlockAssigner.getInstance().getBlockAssignment(
+					avlReport);
+			if (block != null)
+				newAssignment = block.getId();
+			else {
+				String routeId = BlockAssigner.getInstance()
+						.getRouteIdAssignment(avlReport);
+				if (routeId != null)
+					newAssignment = routeId;
+			}
+			// Use Objects.equals() since either the existing assignment or
+			// the AVL report assignment can be null
+			if (!Objects.equals(assignmentId, newAssignment))
+				return true;
+		}
+		return false;
 	}
 	
 	/**
