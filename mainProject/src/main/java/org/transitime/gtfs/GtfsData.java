@@ -194,7 +194,10 @@ public class GtfsData {
 	// read in and createDateFormatter() is called.
 	protected SimpleDateFormat dateFormatter = null;
 
-	// So can process only routes that match a regular expression
+	// So can process only routes that match a regular expression.
+	// Note, see http://stackoverflow.com/questions/406230/regular-expression-to-match-text-that-doesnt-contain-a-word
+	// for details on how to filter out matches as opposed to specifying
+	// which ones want to keep.
 	private static StringConfigValue routeIdFilterRegEx = new StringConfigValue(
 			"transitime.gtfs.routeIdFilterRegEx", 
 			null, // Default of null means don't do any filtering
