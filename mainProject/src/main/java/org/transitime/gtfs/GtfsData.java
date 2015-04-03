@@ -29,11 +29,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.StringConfigValue;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
@@ -192,7 +194,28 @@ public class GtfsData {
 	// read in and createDateFormatter() is called.
 	protected SimpleDateFormat dateFormatter = null;
 
+	// So can process only routes that match a regular expression
+	private static StringConfigValue routeIdFilterRegEx = new StringConfigValue(
+			"transitime.gtfs.routeIdFilterRegEx", 
+			null, // Default of null means don't do any filtering
+			"Route is included only if route_id matches the this regular "
+			+ "expression. If only want routes with \"SPECIAL\" in the id then "
+			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
+			+ "would instead use \"^((?!SPECIAL).)*$\". The default value "
+			+ "of null causes all routes to be included.");
+	private static Pattern routeIdFilterRegExPattern = null;
 
+	// So can process only trips that match a regular expression.
+	// Default of null means don't do any filtering
+	private static StringConfigValue tripIdFilterRegEx = new StringConfigValue(
+			"transitime.gtfs.tripIdFilterRegEx", 
+			"Trip is included only if trip_id matches the this regular "
+			+ "expression. If only want trips with \"SPECIAL\" in the id then "
+			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
+			+ "would instead use \"^((?!SPECIAL).)*$\". The default value "
+			+ "of null causes all trips to be included.");
+	private static Pattern tripIdFilterRegExPattern = null;
+	
 	// Logging
 	public static final Logger logger = 
 			LoggerFactory.getLogger(GtfsData.class);
@@ -1936,6 +1959,44 @@ public class GtfsData {
 				}							
 			}
 		}
+	}
+	
+	/**
+	 * Returns true if the tripId isn't supposed to be filtered out, as
+	 * specified by the transitime.gtfs.tripIdRegExPattern property.
+	 * 
+	 * @param tripId
+	 * @return True if trip not to be filtered out
+	 */
+	public static boolean tripNotFiltered(String tripId) {
+		if (tripIdFilterRegEx.getValue() == null)
+			return true;
+		
+		// Create pattern if haven't done so yet, but only do so once.
+		if (tripIdFilterRegExPattern == null)
+			tripIdFilterRegExPattern = Pattern.compile(tripIdFilterRegEx.getValue());
+		
+		boolean matches = tripIdFilterRegExPattern.matcher(tripId.trim()).matches();
+		return matches;
+	}
+	
+	/**
+	 * Returns true if the routeId isn't supposed to be filtered out, as
+	 * specified by the transitime.gtfs.routeIdRegExPattern property.
+	 * 
+	 * @param routeId
+	 * @return True if route not to be filtered out
+	 */
+	public static boolean routeNotFiltered(String routeId) {
+		if (routeIdFilterRegEx.getValue() == null)
+			return true;
+		
+		// Create pattern if haven't done so yet, but only do so once.
+		if (routeIdFilterRegExPattern == null)
+			routeIdFilterRegExPattern = Pattern.compile(routeIdFilterRegEx.getValue());
+		
+		boolean matches = routeIdFilterRegExPattern.matcher(routeId.trim()).matches();
+		return matches;
 	}
 	
 	/**

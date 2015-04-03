@@ -44,25 +44,14 @@ public class GtfsTrip extends CsvBase {
 		
 	// For determining a trip_short_name from the trip_id if the 
 	// trip_short_name is not specified in GTFS file.
+	// Default of null means simply use trip_id without any modification.
 	private static StringConfigValue tripShortNameRegEx = new StringConfigValue(
 			"transitime.gtfs.tripShortNameRegEx", 
-			null, // Default of null means simply use trip_id without any modification
 			"For agencies where trip short name not specified can use this "
 			+ "regular expression to determine the short name from the trip "
 			+ "ID by specifying a grouping. For example, to get name before "
 			+ "a \"-\" would use something like \"(.*?)-\"");
 	private static Pattern tripShortNameRegExPattern = null;
-	
-	// So can process only trips that match a regular expression
-	private static StringConfigValue tripIdFilterRegEx = new StringConfigValue(
-			"transitime.gtfs.tripIdFilterRegEx", 
-			null,  // Default of null means don't do any filtering
-			"Trip is included only if trip_id matches the this regular "
-			+ "expression. If only want trips with \"SPECIAL\" in the id then "
-			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
-			+ "would instead use \"^((?!SPECIAL).)*$\". The default value "
-			+ "of null causes all trips to be included.");
-	private static Pattern tripIdFilterRegExPattern = null;
 	
 	/********************** Member Functions **************************/
 
@@ -232,28 +221,6 @@ public class GtfsTrip extends CsvBase {
 		// Return the first group. Note: group #0 is the entire string. Need to 
 		// use group #1 for the group match.
 		return m.group(1);
-	}
-	
-	/**
-	 * Returns true if the trip_id from the CSVRecord record isn't supposed to
-	 * be filtered out, as specified by the
-	 * transitime.gtfs.tripIdRegExPattern property.
-	 * 
-	 * @param record
-	 *            Record from CSV file. Contains the trip_id
-	 * @return True if trip not to be filtered out
-	 */
-	public static boolean tripNotFiltered(CSVRecord record) {
-		if (tripIdFilterRegEx.getValue() == null)
-			return true;
-		
-		// Create pattern if haven't done so yet, but only do so once.
-		if (tripIdFilterRegExPattern == null)
-			tripIdFilterRegExPattern = Pattern.compile(tripIdFilterRegEx.getValue());
-		
-		String tripId = record.get("trip_id").trim();
-		boolean matches = tripIdFilterRegExPattern.matcher(tripId).matches();
-		return matches;
 	}
 	
 	public String getRouteId() {

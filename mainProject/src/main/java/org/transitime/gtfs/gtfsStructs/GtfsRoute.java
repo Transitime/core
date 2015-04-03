@@ -16,12 +16,9 @@
  */
 package org.transitime.gtfs.gtfsStructs;
 
-import java.util.regex.Pattern;
-
 import net.jcip.annotations.Immutable;
 
 import org.apache.commons.csv.CSVRecord;
-import org.transitime.config.StringConfigValue;
 import org.transitime.utils.csv.CsvBase;
 
 
@@ -60,17 +57,6 @@ public class GtfsRoute extends CsvBase {
 	private final Integer breakTime;
 	private final Double maxDistance;
 	
-	// So can process only routes that match a regular expression
-	private static StringConfigValue routeIdFilterRegEx = new StringConfigValue(
-			"transitime.gtfs.routeIdFilterRegEx", 
-			null, // Default of null means don't do any filtering
-			"Route is included only if route_id matches the this regular "
-			+ "expression. If only want routes with \"SPECIAL\" in the id then "
-			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
-			+ "would instead use \"^((?!SPECIAL).)*$\". The default value "
-			+ "of null causes all routes to be included.");
-	private static Pattern routeIdFilterRegExPattern = null;
-
 	/********************** Member Functions **************************/
 
 	/**
@@ -173,29 +159,6 @@ public class GtfsRoute extends CsvBase {
 		parentRouteId = s.parentRouteId == null ? o.parentRouteId : s.parentRouteId;
 		breakTime = s.breakTime == null ? o.breakTime : s.breakTime;
 		maxDistance = s.maxDistance == null ? o.maxDistance : s.maxDistance;
-	}
-	
-	/**
-	 * Returns true if the route_id from the CSVRecord record isn't supposed to
-	 * be filtered out, as specified by the
-	 * transitime.gtfs.routeFilterRegExPattern property.
-	 * 
-	 * @param record
-	 *            Record from CSV file. Contains the route_id
-	 * @return True if route not to be filtered out
-	 */
-	public static boolean routeNotFiltered(CSVRecord record) {
-		if (routeIdFilterRegEx.getValue() == null)
-			return true;
-		
-		// Create pattern if haven't done so yet, but only do so once.
-		if (routeIdFilterRegExPattern == null)
-			routeIdFilterRegExPattern = Pattern.compile(routeIdFilterRegEx
-					.getValue());
-		
-		String routeId = record.get("route_id").trim();
-		boolean matches = routeIdFilterRegExPattern.matcher(routeId).matches();
-		return matches;
 	}
 
 	public String getRouteId() {
