@@ -44,7 +44,12 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
  
 /**
  * For creating GTFS-realtime trip feed.
- *
+ * <p>
+ * Note: for the trip feed predictions that are schedule based instead of GPS
+ * based the StopTimeEvent uncertainty is set to
+ * SCHED_BASED_PRED_UNCERTAINTY_VALUE so that the client can treat the
+ * prediction differently.
+ * 
  * @author SkiBu Smith
  *
  */
@@ -52,7 +57,13 @@ public class GtfsRtTripFeed {
 
 	private final String agencyId;
 	
-	private static final int PREDICTION_MAX_FUTURE_SECS = 25 * 60; // 25 minutes
+	// 25 minutes
+	private static final int PREDICTION_MAX_FUTURE_SECS = 25 * 60; 
+	
+	// For when creating StopTimeEvent for schedule based prediction  
+	// 5 minutes (300 seconds)
+	private static final int SCHED_BASED_PRED_UNCERTAINTY_VALUE = 5 * 60; 
+	
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(GtfsRtTripFeed.class);
@@ -87,8 +98,14 @@ public class GtfsRtTripFeed {
 			StopTimeUpdate.Builder stopTimeUpdate =	StopTimeUpdate.newBuilder()
 					.setStopSequence(pred.getGtfsStopSeq())
 					.setStopId(pred.getStopId());
+			
 			StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
 			stopTimeEvent.setTime(pred.getTime());
+			// If schedule based prediction then set the uncertainty to special
+			// value so that client can tell
+			if (pred.isSchedBasedPred())
+				stopTimeEvent.setUncertainty(SCHED_BASED_PRED_UNCERTAINTY_VALUE);
+			
 			if (pred.isArrival())
 				stopTimeUpdate.setArrival(stopTimeEvent);
 			else
