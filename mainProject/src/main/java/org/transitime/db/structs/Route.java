@@ -153,7 +153,7 @@ public class Route implements Serializable {
 			if (gtfsRoute.getRouteLongName() != null && !gtfsRoute.getRouteLongName().isEmpty()) {
 				String shortName = "";
 				if (gtfsRoute.getRouteShortName() != null)
-					shortName = gtfsRoute.getRouteShortName() + "-";
+					shortName = gtfsRoute.getRouteShortName() + " - ";
 				this.name = shortName + titleFormatter.processTitle(gtfsRoute.getRouteLongName());
 			} else
 				this.name = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
