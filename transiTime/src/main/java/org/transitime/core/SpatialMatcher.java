@@ -365,6 +365,7 @@ public class SpatialMatcher {
 			if (!spatialMatch.isLayover())
 				spatialMatchesWithoutLayovers.add(spatialMatch);
 		}
+		
 
 		return spatialMatchesWithoutLayovers;
 	}

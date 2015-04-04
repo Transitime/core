@@ -24,6 +24,7 @@ import org.transitime.utils.Time;
 import org.transitime.utils.csv.CsvBase;
 
 import java.text.ParseException;
+import java.util.Date;
 
 /**
  * Represents a single record in a CSV file containing AVL data.
@@ -54,8 +55,17 @@ public class AvlCsvRecord extends CsvBase {
 		String vehicleId = avlCsvRecord.getRequiredValue(record, "vehicleId");
 
 		String timeStr = avlCsvRecord.getRequiredValue(record, "time");
-		long time = Time.parse(timeStr).getTime();
 
+		long time = 0L;
+		if(timeStr.contains(":"))
+			time=Time.parse(timeStr).getTime();
+		else
+		{
+			time=Long.parseLong(timeStr.substring(0, timeStr.length()-3));
+			Date d = new Date(time);
+			logger.debug("Date:"+d);
+		}
+								
 		String latStr = avlCsvRecord.getRequiredValue(record, "latitude");
 		double lat = Double.parseDouble(latStr);
 

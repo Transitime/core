@@ -22,6 +22,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
@@ -54,6 +55,12 @@ public class BatchCsvAvlFeedModule extends Module {
 			new StringConfigValue("transitime.avl.csvAvlFeedFileName", 
 					"/Users/Mike/cvsAvlData/testAvlData.csv",
 					"The name of the CSV file containing AVL data to process.");
+	
+	
+	private static BooleanConfigValue realTime =
+			new BooleanConfigValue("transitime.avl.realTime",
+					true,
+					"When reading in do at the same speed as when the AVL was created. Set to false it you just want to read in as fast as possible.");
 
 	/****************** Logging **************************************/
 	private static final Logger logger = LoggerFactory
@@ -76,16 +83,39 @@ public class BatchCsvAvlFeedModule extends Module {
 	 */
 	@Override
 	public void run() {
+		long lastAvlReportTimestamp=-1;
 		List<AvlReport> avlReports = 
 				(new AvlCsvReader(getCsvAvlFeedFileName())).get();
 		
 		// Process the AVL Reports read in.
 		for (AvlReport avlReport : avlReports) {
+			
 			logger.info("Processing avlReport={}", avlReport);
 			
-			// Update the Core SystemTime to use this AVL time
-			Core.getInstance().setSystemTime(avlReport.getTime());
-
+			if(realTime.getValue())			
+			{				
+				try {
+					long delayLength=0;
+					
+					if(lastAvlReportTimestamp>0)
+					{					
+						delayLength=avlReport.getTime()-lastAvlReportTimestamp;
+						lastAvlReportTimestamp=avlReport.getTime();
+					}else
+					{
+						lastAvlReportTimestamp=avlReport.getTime();
+					}
+					
+					if(delayLength<0)
+						delayLength=0;
+					Thread.sleep(delayLength);
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+				}						
+			}
+			
+			Core.getInstance().setSystemTime(avlReport.getTime());			
 			AvlProcessor.getInstance().processAvlReport(avlReport);
 		}
 

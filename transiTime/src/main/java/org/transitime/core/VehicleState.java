@@ -223,10 +223,12 @@ public class VehicleState {
 	 */
 	public TemporalMatch getPreviousMatch(int minimumAgeMsec) {
 		for (TemporalMatch match : temporalMatchHistory) {
-			if (getAvlReport() != null
+			
+			if (getAvlReport() != null && match!=null
 					&& match.getAvlTime() < getAvlReport().getTime()
 							- minimumAgeMsec)
 				return match;
+			
 		}
 		
 		// Went through all matches in history and didn't find one old enough.
