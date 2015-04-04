@@ -57,6 +57,29 @@ public class GtfsAgency extends CsvBase {
 		agencyFareUrl = getOptionalValue(record, "agency_fare_url");
 	}
 
+	/**
+	 * When combining a regular agency with a supplemental agency need to create a
+	 * whole new object since this class is Immutable to make it safer to use.
+	 * 
+	 * @param originalStop
+	 * @param supplementStop
+	 */
+	public GtfsAgency(GtfsAgency originalAgency, GtfsAgency supplementAgency) {
+		super(originalAgency);
+		
+		// Use short variable names
+		GtfsAgency o = originalAgency;
+		GtfsAgency s = supplementAgency;
+		
+		agencyId = originalAgency.agencyId;
+		agencyName = s.agencyName == null ? o.agencyName : s.agencyName;
+		agencyUrl = s.agencyUrl == null ? o.agencyUrl : s.agencyUrl;
+		agencyTimezone = s.agencyTimezone == null ? o.agencyTimezone : s.agencyTimezone;
+		agencyLang = s.agencyLang == null ? o.agencyLang : s.agencyLang;
+		agencyPhone = s.agencyPhone == null ? o.agencyPhone : s.agencyPhone;
+		agencyFareUrl = s.agencyFareUrl == null ? o.agencyFareUrl : s.agencyFareUrl;
+	}
+	
 	public String getAgencyId() {
 		return agencyId;
 	}

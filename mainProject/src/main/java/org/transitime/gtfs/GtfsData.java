@@ -67,6 +67,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsStop;
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
 import org.transitime.gtfs.gtfsStructs.GtfsTransfer;
 import org.transitime.gtfs.gtfsStructs.GtfsTrip;
+import org.transitime.gtfs.readers.GtfsAgenciesSupplementReader;
 import org.transitime.gtfs.readers.GtfsAgencyReader;
 import org.transitime.gtfs.readers.GtfsCalendarDatesReader;
 import org.transitime.gtfs.readers.GtfsCalendarReader;
@@ -348,7 +349,7 @@ public class GtfsData {
 	 * and combines them together. End result is that gtfsRoutesMap is created
 	 * and filled in.
 	 */
-	private void processGtfsRouteData() {
+	private void processRouteData() {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
 
@@ -433,7 +434,7 @@ public class GtfsData {
 		}
 		
 		// Let user know what is going on
-		logger.info("processGtfsRouteData() finished processing routes.txt " +
+		logger.info("processRouteData() finished processing routes.txt " +
 				"data. Took {} msec.", 
 				timer.elapsedMsec());
 	}
@@ -442,15 +443,15 @@ public class GtfsData {
 	 * Takes data from gtfsRoutesMap and creates corresponding Route map.
 	 * Processes all of the titles to make them more readable. Creates 
 	 * corresponding Route objects and stores them into the database.
-	 * This method is separated out from processGtfsRouteData() since reading
+	 * This method is separated out from processRouteData() since reading
 	 * trips needs the gtfs route info but reading Routes requires trips.
 	 */
-	private void processRouteData() {
+	private void processRouteMaps() {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Let user know what is going on
-		logger.info("Processing Routes objects data in processRouteData()...");
+		logger.info("Processing Routes objects data in processRouteMaps()...");
 		
 		// Make sure needed data is already read in. This method uses
 		// trips and trip patterns from the stop_time.txt file. This objects
@@ -458,12 +459,12 @@ public class GtfsData {
 		// stops.txt file must be read in first. 
 		if (gtfsTripsMap == null || gtfsTripsMap.isEmpty()) {
 			logger.error("processTripsData() must be called before " + 
-					"GtfsData.processRouteData() is. Exiting.");
+					"GtfsData.processRouteMaps() is. Exiting.");
 			System.exit(-1);
 		}
 		if (gtfsRoutesMap == null || gtfsRoutesMap.isEmpty()) {
-			logger.error("processGtfsRouteData() must be called before " + 
-					"GtfsData.processRouteData() is. Exiting.");
+			logger.error("processRouteData() must be called before " + 
+					"GtfsData.processRouteMaps() is. Exiting.");
 			System.exit(-1);
 		}
 
@@ -633,7 +634,7 @@ public class GtfsData {
 		// Make sure needed data is already read in. This method uses
 		// GtfsRoutes info to make sure all trips reference a route.
 		if (gtfsRoutesMap == null || gtfsRoutesMap.isEmpty()) {
-			logger.error("processGtfsRouteData() must be called before " + 
+			logger.error("processGtfsRouteMap() must be called before " + 
 					"GtfsData.processTripsData() is. Exiting.");
 			System.exit(-1);
 		}
@@ -1411,12 +1412,12 @@ public class GtfsData {
 	/**
 	 * Reads agency.txt file and puts data into agencies list.
 	 */
-	private void processAgencies() {
+	private void processAgencyData() {
 		// Make sure necessary data read in
 		if (getRoutes() == null || getRoutes().isEmpty()) {
 			// Route data first needed so can determine extent of agency 
 			logger.error("GtfsData.processRoutesData() must be called before " + 
-					"GtfsData.processAgencies() is. Exiting.");
+					"GtfsData.processAgencyData() is. Exiting.");
 			System.exit(-1);
 		}
 		
@@ -1429,8 +1430,38 @@ public class GtfsData {
 		// Read in the agency.txt GTFS data from file
 		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
 		List<GtfsAgency> gtfsAgencies = agencyReader.get();
+		HashMap<String, GtfsAgency> gtfsAgenciesMap = 
+				new HashMap<String, GtfsAgency>(gtfsAgencies.size());
+		for (GtfsAgency gtfsAgency : gtfsAgencies)
+			gtfsAgenciesMap.put(gtfsAgency.getAgencyId(), gtfsAgency);
 		
-		for (GtfsAgency gtfsAgency : gtfsAgencies) {
+		// Read in supplemental stop data
+		if (supplementDir != null) {
+			// Read in the supplemental stop data
+			GtfsAgenciesSupplementReader agenciesSupplementReader = 
+					new GtfsAgenciesSupplementReader(supplementDir);
+			List<GtfsAgency> gtfsAgenciesSupplement = agenciesSupplementReader.get();
+			for (GtfsAgency gtfsAgencySupplement : gtfsAgenciesSupplement) {
+				GtfsAgency gtfsAgency = gtfsAgenciesMap.get(gtfsAgencySupplement.getAgencyId());
+				if (gtfsAgency == null) {
+					logger.error("Found supplemental agency data for agencyId={} "
+							+ "but that agency did not exist in the main "
+							+ "agency.txt file. {}", 
+							gtfsAgencySupplement.getAgencyId(), gtfsAgencySupplement);
+					continue;
+				}
+				
+				// Create a new GtfsAgency object that combines the original
+				// data with the supplemental data
+				GtfsAgency combinedAgency = new GtfsAgency(gtfsAgency, gtfsAgencySupplement);
+				
+				// Store that combined data agency in the map 
+				gtfsAgenciesMap.put(combinedAgency.getAgencyId(), combinedAgency);
+
+			}
+		}
+		
+		for (GtfsAgency gtfsAgency : gtfsAgenciesMap.values()) {
 			// Create the Agency object and put it into the array
 			Agency agency = new Agency(revs.getConfigRev(), gtfsAgency, getRoutes());
 			agencies.add(agency);
@@ -2022,10 +2053,10 @@ public class GtfsData {
 		createDateFormatter();
 		
 		// Note. The order of how these are processed in important because
-		// some datasets rely on others in order to be fully processed.
+		// some data sets rely on others in order to be fully processed.
 		// If the order is wrong then the methods below will log an error and
 		// exit.
-		processGtfsRouteData();
+		processRouteData();
 		processStopData();		
 		processCalendarDates();
 		processCalendars();
@@ -2033,10 +2064,10 @@ public class GtfsData {
 		processTripsData();	
 		processFrequencies();
 		processStopTimesData();		
-		processRouteData(); 
+		processRouteMaps(); 
 		processBlocks();
 		processPaths();
-		processAgencies();
+		processAgencyData();
 		
 		// Following are simple objects that don't require combining tables
 		processFareAttributes();
