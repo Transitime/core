@@ -204,7 +204,9 @@ public class GtfsData {
 			"Route is included only if route_id matches the this regular "
 			+ "expression. If only want routes with \"SPECIAL\" in the id then "
 			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
-			+ "would instead use \"^((?!SPECIAL).)*$\". The default value "
+			+ "would instead use the complicated \"^((?!SPECIAL).)*$\" or " 
+			+ "\"^((?!(SPECIAL1|SPECIAL2)).)*$\" "
+			+ "if want to filter out two names. The default value "
 			+ "of null causes all routes to be included.");
 	private static Pattern routeIdFilterRegExPattern = null;
 
@@ -215,7 +217,9 @@ public class GtfsData {
 			"Trip is included only if trip_id matches the this regular "
 			+ "expression. If only want trips with \"SPECIAL\" in the id then "
 			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
-			+ "would instead use \"^((?!SPECIAL).)*$\". The default value "
+			+ "would instead use the complicated \"^((?!SPECIAL).)*$\" or " 
+			+ "\"^((?!(SPECIAL1|SPECIAL2)).)*$\" "
+			+ "if want to filter out two names. The default value "
 			+ "of null causes all trips to be included.");
 	private static Pattern tripIdFilterRegExPattern = null;
 	
