@@ -18,7 +18,10 @@
 package org.transitime.db.webstructs;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +94,7 @@ public class WebAgency {
 	// Cache
 	static private Map<String, WebAgency> webAgencyMapCache;
 	static private long webAgencyMapCacheReadTime = 0;
+	static private List<WebAgency> webAgencyOrderedList;
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(WebAgency.class);
@@ -253,37 +257,64 @@ public class WebAgency {
 	}
 
 	/**
+	 * If the cache of WebAgency objects not read in for a few minutes then
+	 * reads the WebAgency objects from the db. Synchronized since doing
+	 * multiple operations. Methods that call this method therefore also need to
+	 * be synchronized.
+	 */
+	static synchronized private void updateCacheIfShould() {
+		// If haven't read in web agencies yet or in a while, do so now
+		if (webAgencyMapCache == null
+				|| webAgencyOrderedList == null
+				|| System.currentTimeMillis() - webAgencyMapCacheReadTime > 5 * Time.MS_PER_MIN) {
+			webAgencyMapCache = getMapFromDb();
+			webAgencyMapCacheReadTime = System.currentTimeMillis();
+			
+			webAgencyOrderedList = new ArrayList<WebAgency>(webAgencyMapCache.values());
+			Collections.sort(webAgencyOrderedList, new Comparator<WebAgency>() {
+	            @Override
+	            public int compare(WebAgency o1, WebAgency o2) {
+	                return o1.getAgencyName().compareTo(o2.getAgencyName());
+	            }
+	        });			
+		}
+	}
+	
+	/**
 	 * Returns map of all agencies. Values are cached so won't be automatically
 	 * updated when agencies are changed in the database. Will update cache if
 	 * haven't done so in 5 minutes. This way will automatically get new
 	 * agencies that are added yet will not be reading from the database for
 	 * every page hit that needs list of agencies. Also, agencies automatically
 	 * removed.
+	 * <p>
+	 * Synchronized because calling updateCacheIfShould() which needs to be 
+	 * synchronized.
 	 * 
 	 * @return the cached map of WebAgency objects
 	 */
-	static private Map<String, WebAgency> getWebAgencyMapCache() {
-		// If haven't read in web agencies yet or in a while, do so now
-		if (webAgencyMapCache == null
-				|| System.currentTimeMillis() - webAgencyMapCacheReadTime > 5 * Time.MS_PER_MIN) {
-			webAgencyMapCache = getMapFromDb();
-			webAgencyMapCacheReadTime = System.currentTimeMillis();
-		}
+	static synchronized private Map<String, WebAgency> getWebAgencyMapCache() {
+		updateCacheIfShould();
 
 		return webAgencyMapCache;
 	}
 	
 	/**
-	 * Returns collection of all agencies. Values are cached so won't be
-	 * automatically updated when agencies are changed in the database. Will
-	 * update cache if haven't done so in 5 minutes. This way will automatically
-	 * get new agencies that are added yet will not be reading from the database
-	 * for every page hit that needs list of agencies.
+	 * Returns collection of all agencies sorted by agency name. Values are
+	 * cached so won't be automatically updated when agencies are changed in the
+	 * database. Will update cache if haven't done so in 5 minutes. This way
+	 * will automatically get new agencies that are added yet will not be
+	 * reading from the database for every page hit that needs list of agencies.
+	 * <p>
+	 * Synchronized because calling updateCacheIfShould() which needs to be 
+	 * synchronized.
 	 * 
 	 * @return Collection of the WebAgency objects configured in db
 	 */
-	static public Collection<WebAgency> getCachedWebAgencies() {
-		return getWebAgencyMapCache().values();
+	static synchronized public List<WebAgency> getCachedWebAgencies() {
+		updateCacheIfShould();
+
+		return webAgencyOrderedList;
 	}
 	
 	/**
