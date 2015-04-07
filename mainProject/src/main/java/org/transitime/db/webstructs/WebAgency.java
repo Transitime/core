@@ -274,7 +274,15 @@ public class WebAgency {
 			Collections.sort(webAgencyOrderedList, new Comparator<WebAgency>() {
 	            @Override
 	            public int compare(WebAgency o1, WebAgency o2) {
-	                return o1.getAgencyName().compareTo(o2.getAgencyName());
+	            	// Handle possibility of null agency name
+	            	String agencyName1 = o1.getAgencyName();
+	            	if (agencyName1 == null)
+	            		agencyName1 = "";
+	            	String agencyName2 = o2.getAgencyName();
+	            	if (agencyName2 == null)
+	            		agencyName2 = "";  
+
+	                return agencyName1.compareTo(agencyName2);
 	            }
 	        });			
 		}
