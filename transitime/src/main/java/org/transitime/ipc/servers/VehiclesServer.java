@@ -26,9 +26,14 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.LongConfigValue;
+import org.transitime.config.StringConfigValue;
 import org.transitime.core.BlocksInfo;
 import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Location;
+import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.VehicleConfig;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcCompleteVehicle;
@@ -50,6 +55,14 @@ import org.transitime.ipc.rmi.AbstractServer;
  */
 public class VehiclesServer extends AbstractServer 
 	implements VehiclesInterface {
+
+	private static LongConfigValue dwelltime =
+			new LongConfigValue("transitime.find.dwelltime", 	new Long("30000"),				
+					"This is the max you would expect a bus to be at a stop while moving normally.");
+	
+	private static LongConfigValue fuzzytime =
+			new LongConfigValue("transitime.find.fuzzytime", 	new Long("180000"),				
+					"This is the amount around a time that we look for an arrival or a departure.");
 
 	// Should only be accessed as singleton class
 	private static VehiclesServer singleton;
@@ -317,6 +330,64 @@ public class VehiclesServer extends AbstractServer
 		}
 
 		return result;
+	}
+	
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getVechicleLocation(java.lang.String, long)
+	 */
+	@Override
+	public Location getVechicleLocation(String vehicleId, long time)
+			throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getLastStopOnRoute(java.lang.String, long)
+	 */
+	@Override
+	public Stop getLastStopOnRoute(String vehicleId, long time)
+			throws RemoteException {
+		
+		Long timeToFind=new Long(time);
+		
+		Long fuzzySize=new Long(fuzzytime.getValue());
+		
+		Long stopDwellTime=new Long(dwelltime.getValue());								
+		
+		List<ArrivalDeparture> results = ArrivalDeparture.getArrivalsDeparturesFromDb(new Date(timeToFind-fuzzySize), new Date(timeToFind+fuzzySize), vehicleId);
+						
+		ArrivalDeparture closest=null;
+		
+		long closestInMilliseconds=fuzzySize;
+		/*
+		 * TODO speed up this search as when loads of calls will be a bottleneck 
+		 * */
+		for(ArrivalDeparture result:results)
+		{
+			if(result.isDeparture())
+			{
+				if(result.getDate().getTime()<timeToFind+stopDwellTime)
+				{
+					if(closest==null)
+					{
+						closest=result;
+					}
+					else if(result.getDate().getTime()-timeToFind<closestInMilliseconds) {
+						closestInMilliseconds=result.getDate().getTime()-timeToFind;
+						closest=result;
+					}
+				}
+			}				
+		}
+		logger.debug("Looking for departure closet to : "+new Date(timeToFind));
+		logger.debug("Closest departure : "+ closest);
+		if(closest!=null)
+			return closest.getStop();
+		else
+			return null;
+		
 	}
 
 }

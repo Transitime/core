@@ -425,7 +425,51 @@ public class ArrivalDeparture implements Serializable {
 		Iterator<ArrivalDeparture> iterator = query.iterate(); 
 		return iterator;
 	}
-	
+	/**
+	 * Read in arrivals and departures for a vechicle, over a time range
+	 * @param projectId
+	 * @param beginTime
+	 * @param endTime
+	 * @param vehicleId
+	 * @return
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
+			Date beginTime, Date endTime, String vehicleId)
+	{
+		IntervalTimer timer = new IntervalTimer();
+		// 	Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession();
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+		String hql = "FROM ArrivalDeparture " +
+				"    WHERE time >= :beginDate " +
+				"      AND time < :endDate" +
+				" AND vehicleId = :vehicleId"; 
+		Query query = session.createQuery(hql);
+		
+		// Set the parameters
+		query.setTimestamp("beginDate", beginTime);
+		query.setTimestamp("endDate", endTime);
+		query.setString("vehicleId", vehicleId);
+		
+		try {
+			@SuppressWarnings("unchecked")
+			List<ArrivalDeparture> arrivalsDeparatures = query.list();
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
+			return arrivalsDeparatures;
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error(e.getMessage(), e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+		
+	}
 	/**
 	 * Reads the arrivals/departures for the timespan specified. All of the 
 	 * data is read in at once so could present memory issue if reading
