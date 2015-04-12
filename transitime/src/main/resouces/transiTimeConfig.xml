@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transitime>
+    <modules>
+        <optionalModulesList>transitime.core.schedBasedPreds.SchedBasedPredsModule;org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
+    </modules>
+    <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
+    <core>
+	<agencyId>02</agencyId>
+    </core>	
+    <avl>
+        <!-- URL for GTFS realtime vechicle location stream -->
+        <gtfsRealtimeFeedURI>http://127.0.0.1:8092/vehiclePositions</gtfsRealtimeFeedURI>        
+        <minLongitude>-10.725</minLongitude>
+        <maxLongitude>-5.35</maxLongitude>             
+        <minLatitude>51.35</minLatitude>
+        <maxLatitude>55.45</maxLatitude>        
+    </avl>   
+    <db>
+        <dbName>transiTime</dbName>
+        <dbHost>localhost:5432</dbHost>
+        <dbType>postgresql</dbType>
+        <dbUserName>transiTime</dbUserName>
+        <dbPassword>welcome</dbPassword>
+    </db>     
+    <hibernate>
+        <configFile>hibernate_postgres_cfg.xml</configFile>        
+    </hibernate>
+</transitime>
