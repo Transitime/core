@@ -1,19 +1,19 @@
 /* 
- * This file is part of Transitime.org
- * 
- * Transitime.org is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License (GPL) as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Transitime.org is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
- */
+* This file is part of Transitime.org
+* 
+* Transitime.org is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License (GPL) as published by
+* the Free Software Foundation, either version 3 of the License, or
+* any later version.
+*
+* Transitime.org is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
+*/
 package org.transitime.applications;
 
 import java.io.File;
@@ -40,22 +40,22 @@ import org.transitime.utils.Time;
 import org.transitime.utils.Zip;
 
 /**
- * Reads GTFS files, validates and cleans up the data, stores the data into Java
- * objects, and then stores those objects into the database.
- * 
- * There are a good number of options. Therefore there are addOption methods so
- * don't have a constructor with a large number of parameters.
- * 
- * @author SkiBu Smith
- *
- */
+* Reads GTFS files, validates and cleans up the data, stores the data into Java
+* objects, and then stores those objects into the database.
+* 
+* There are a good number of options. Therefore there are addOption methods so
+* don't have a constructor with a large number of parameters.
+* 
+* @author SkiBu Smith
+*
+*/
 public class GtfsFileProcessor {
 
-	// Optional command line info used within this class
-	private final String gtfsUrl;
-	private String gtfsZipFileName;
-	// Last modified time of GTFS zip file. Null if zip file not used.
-	private Date zipFileLastModifiedTime;
+// Optional command line info used within this class
+private final String gtfsUrl;
+private String gtfsZipFileName;
+// Last modified time of GTFS zip file. Null if zip file not used.
+private Date zipFileLastModifiedTime;
 	private final String unzipSubdirectory;
 	private String gtfsDirectoryName;
 

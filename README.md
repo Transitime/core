@@ -9,7 +9,7 @@ The software is currently being tested in a production environment.
 
 The software is made up of three modules which can each be built with maven. See BUILD.md
 
-The core fucntionality is in the transiTime project. The REST api is in transiTimeApi and the user Web applicaton is in transiTimeWebapp.
+The core fucntionality is in the transitime project. The REST api is in transitimeApi and the user Web applicaton is in transitimeWebapp.
 
 <b>Setup</b>
 
@@ -22,11 +22,9 @@ Core.java is as the name implies is the workhorse of the system. <br/>
 RmiQuery.java allows you make queries to the server run in core from the command line.<br/>
 CreateAPIKey.java a test app to allow you create test/demo key to access REST api webapp.<br/>
 
-Details on how to run each of these and their respective parameters are in the README for the transiTime module.
+Details on how to run each of these and their respective parameters are in the README for the transitime module.
 
-Once this is set up the next step is to set up the transiTimeApi which is a RESTful API. This API makes RMI calls to the RMI Server started by Core.java to provide results. This is a war file which can be deployed into Tomcat.  
+Once this is set up the next step is to set up the transitimeApi which is a RESTful API. This API makes RMI calls to the RMI Server started by Core.java to provide results. This is a war file which can be deployed into Tomcat.  
 
-The transiTimeWebapp in turn is a web application which uses the transitTimeAPI to provided a user interface. This is a war file which can be deployed into tomcat. This connects to the database and the connection information is configured in hibernate.cfg.xml in the src/main/resources directory. Currently this needs to be deployed on the same server as the API.
-
-
+The transitimeWebapp in turn is a web application which uses the transitTimeAPI to provided a user interface. This is a war file which can be deployed into tomcat. This connects to the database and the connection information is configured in hibernate.cfg.xml in the src/main/resources directory. Currently this needs to be deployed on the same server as the API.
 
