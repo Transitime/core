@@ -18,5 +18,5 @@ var apiKey = "8a3273b0";
 //Note: the agency is not included because sometimes it this
 //script is called due to a form getting posted and then
 //the form parameters are not available.
-var apiUrlPrefix = "http://127.0.0.1:8080/transiTimeApi/v1/key/" + apiKey + "/agency/<%= request.getParameter("a") %>";
+var apiUrlPrefix = "http://127.0.0.1:8080/api/v1/key/" + apiKey + "/agency/<%= request.getParameter("a") %>";
 </script>
