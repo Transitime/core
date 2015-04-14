@@ -21,7 +21,7 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>transitime.org</groupId>
+			<groupId>transitime</groupId>
 			<artifactId>transitime</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
