@@ -4,7 +4,7 @@
 	<groupId>transitime</groupId>
 	<artifactId>api</artifactId>
 	<packaging>war</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>transitimeApi</name>
 	<dependencies>
 
@@ -33,13 +33,6 @@
 			<version>2.11</version>
 		</dependency>
 		
-		<!-- 
-		<dependency>
-			<groupId>com.owlike</groupId>
-			<artifactId>genson</artifactId>
-			<version>1.2</version>
-		</dependency>
-		 -->
 		<dependency>
 			<groupId>transitime.org</groupId>
 			<artifactId>transitime</artifactId>
