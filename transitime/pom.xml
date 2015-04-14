@@ -132,10 +132,16 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.3-1103.jdbc41</version>
+			<version>9.3-1103-jdbc41</version>
 		</dependency>
-
+                <dependency>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>javax.servlet-api</artifactId>
+                        <version>3.0.1</version>
+                        <scope>provided</scope>
+                </dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
