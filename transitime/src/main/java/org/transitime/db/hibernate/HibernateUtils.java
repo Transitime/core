@@ -83,14 +83,8 @@ public class HibernateUtils {
 		String fileName = DbSetupConfig.getHibernateConfigFileName();
 		logger.info("Configuring Hibernate for dbName={} using config file={}",
 				dbName, fileName);
-		
-		ClassLoader classLoader = HibernateUtils.class.getClassLoader();
-		
-		if(classLoader.getResource(fileName)!=null)
-		{
-			File f = new File(classLoader.getResource(fileName).getFile());			
-			config.configure(f);
-		}
+		File f = new File(fileName);
+		config.configure(f);
 
 		// Add the annotated classes so that they can be used
 		AnnotatedClassesList.addAnnotatedClasses(config);
