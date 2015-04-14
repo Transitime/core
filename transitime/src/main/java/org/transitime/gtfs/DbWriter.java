@@ -171,6 +171,9 @@ public class DbWriter {
 		for (Transfer transfer : gtfsData.getTransfers()) {
 			writeObject(session, transfer);
 		}
+		
+		// Write out the ConfigRevision data
+		writeObject(session, gtfsData.getConfigRevision());
 	}
 	
 	/**

@@ -41,12 +41,10 @@ public class MissionBayConfig {
 
 	/**
 	 * Provides list of stops for each possible direction/trip pattern. Turns
-	 * out the "west" loop for Mission Bay is completely screwy and has 4
-	 * different patterns that are not specified via the NextBus API. So need to
-	 * hard code it. Also, for all of the routes, some trips stop at Caltrain &
-	 * 4th and some do not. Need to define every possibility.
+	 * out this is rather complicated because of the variations in the trips
+	 * so resorted to hard coding the stops.
 	 * <p>
-	 * Good way to determne which stops are part of a direction/trip is to look
+	 * Good way to determine which stops are part of a direction/trip is to look
 	 * at the schedule API such as
 	 * http://webservices.nextbus.com/s/xmlFeed?command=schedule&a=sf-mission-bay&r=west
 	 * 
@@ -61,13 +59,22 @@ public class MissionBayConfig {
 		if (routeId.equals("east")) {
 			// For east route, the loop directions
 			Dir d1 = new Dir();
-			d1.tag = "loop";
-			d1.shapeId = "east_loop";
+			d1.tag = "loop_am";
+			d1.shapeId = "east_loop_am";
 			d1.gtfsDirection = "0";
-			String stops1[] = { "nektar", "409illi_e", "powell", "library",
-					"chinbas", "nektar" };
+			String stops1[] = { "powell", "library",
+					"chinbas", "nektar", "409illi_e", "powell" };
 			d1.stopIds = Arrays.asList(stops1);
 			dirList.add(d1);
+
+			Dir d2 = new Dir();
+			d2.tag = "loop_pm";
+			d2.shapeId = "east_loop_pm";
+			d2.gtfsDirection = "0";
+			String stops2[] = { "nektar", "409illi_e", "powell", "library",
+					"chinbas", "nektar" };
+			d2.stopIds = Arrays.asList(stops2);
+			dirList.add(d2);
 		} else if (routeId.equals("west")) {
 			// The morning loop without nektar
 			Dir d1 = new Dir();
@@ -152,13 +159,21 @@ public class MissionBayConfig {
 		Map<String, List<String>> shapeIdsMap = new HashMap<String, List<String>>();
 		
 		// Route east, direction loop
-		String pathIds_array_east_loop[] = { "east_nektar_d",
+		String pathIds_array_east_loop_am[] = { "east_powell_d",
+				"east_powell_library", "east_library_chinbas",
+				"east_chinbas_nektar",  "east_nektar_d",
+				"east_nektar_409illi_e", "east_409illi_e_d",
+				"east_409illi_e_powell", };
+		List<String> pathIds_east_loop_am = Arrays.asList(pathIds_array_east_loop_am);
+		shapeIdsMap.put("east_loop_am", pathIds_east_loop_am);
+
+		String pathIds_array_east_loop_pm[] = { "east_nektar_d",
 				"east_nektar_409illi_e", "east_409illi_e_d",
 				"east_409illi_e_powell", "east_powell_d",
 				"east_powell_library", "east_library_chinbas",
 				"east_chinbas_nektar",  };
-		List<String> pathIds_east_loop = Arrays.asList(pathIds_array_east_loop);
-		shapeIdsMap.put("east_loop", pathIds_east_loop);
+		List<String> pathIds_east_loop_pm = Arrays.asList(pathIds_array_east_loop_pm);
+		shapeIdsMap.put("east_loop_pm", pathIds_east_loop_pm);
 
 		// Route west, direction loop
 		String pathIds_array_west_loop[] = { 

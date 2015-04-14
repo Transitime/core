@@ -19,6 +19,11 @@ package org.transitime.gtfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Date;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -49,13 +54,11 @@ public class GtfsUpdatedModule extends Module {
 	private static StringConfigValue url =
 			new StringConfigValue(
 					"transitime.gtfs.url", 
-					null, 
 					"URL where to retrieve the GTFS file.");
 
 	private static StringConfigValue dirName =
 			new StringConfigValue(
 					"transitime.gtfs.dirName", 
-					null, 
 					"Directory on agency server where to place the GTFS file.");
 
 	private static LongConfigValue intervalMsec =
@@ -105,7 +108,8 @@ public class GtfsUpdatedModule extends Module {
 		// downloaded file and use If-Modified-Since to only actually
 		// get the file if it is newer on the web server
 		File file = new File(httpGetFile.getFullFileName());
-		if (file.exists()) {
+		boolean fileAlreadyExists = file.exists();
+		if (fileAlreadyExists) {
 			// Get the last modified time of the local file. Add 10 minutes
 			// since the web server might be load balanced and the files
 			// on the different servers might have slightly different last 
@@ -133,12 +137,14 @@ public class GtfsUpdatedModule extends Module {
 			// response) then send message to those monitoring so that
 			// the GTFS file can be processed.
 			if (httpResponseCode == HttpStatus.SC_OK) {
-				if (file.exists())
-					logger.debug("Got remote file because version on web server "
-							+ "is newer.");
+				if (fileAlreadyExists)
+					logger.info("Got remote file because version on web server "
+							+ "is newer. Url={} dir={}", 
+							httpGetFile.getFullFileName(), dirName.getValue());
 				else
-					logger.debug("Got remote file because don't have a local "
-							+ "copy of it.");
+					logger.info("Got remote file because didn't have a local "
+							+ "copy of it. Url={} dir={}",
+							httpGetFile.getFullFileName(), dirName.getValue());
 				
 				// Email message
 				String subject = "GTFS file was updated for " 
@@ -149,16 +155,62 @@ public class GtfsUpdatedModule extends Module {
 						+ httpGetFile.getFullFileName();
 				emailSender.send(MonitorBase.recipientsGlobal(), subject, 
 						message);
+				
+				// Make copy of GTFS zip file in separate directory for archival
+				archive(httpGetFile.getFullFileName());
 			} else if (httpResponseCode == HttpStatus.SC_NOT_MODIFIED) {
 				// If not modified then don't need to do anything
+				logger.info("Remote GTFS file {} not updated (got "
+						+ "HTTP NOT_MODIFIED status 304) since the local "
+						+ "one  at {} has last modified date of {}",
+						url.getValue(), httpGetFile.getFullFileName(), 
+						new Date(file.lastModified()));
 			} else {
 				// Got unexpected response so log issue
-				logger.error("Error retrieving {} . Http response code={}", 
+				logger.error("Error retrieving remote GTFS file {} . Http "
+						+ "response code={}", 
 						url.getValue(), httpResponseCode);
 			}
 		} catch (IOException e) {
 			logger.error("Error retrieving {} . {}", 
 					url.getValue(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Copies the specified file to a directory at the same directory level but
+	 * with the directory name that is the last modified date of the file (e.g.
+	 * 03-28-2015).
+	 * 
+	 * @param fullFileName
+	 *            The full name of the file to be copied
+	 */
+	private static void archive(String fullFileName) {
+		// Determine name of directory to archive file into. Use date of
+		// lastModified time of file e.g. MM-dd-yyyy.
+		File file = new File(fullFileName);
+		Date lastModified = new Date(file.lastModified());
+		String dirName = Time.dateStr(lastModified);
+		
+		// Copy the file to the sibling directory with the name that is the
+		// last modified date (e.g. 03-28-2015)
+		Path source = Paths.get(fullFileName);
+		Path target = source.getParent().getParent().resolve(dirName)
+				.resolve(source.getFileName());
+		
+		logger.info("Archiving file {} to {}", 
+				source.toString(), target.toString());
+		
+		try {
+			// Create the directory where file is to go
+			String fullDirName = target.getParent().toString();
+			new File(fullDirName).mkdir();
+			
+			// Copy the file to the directory
+			Files.copy(source, target, StandardCopyOption.COPY_ATTRIBUTES);
+		} catch (IOException e) {
+			logger.error("Was not able to archive GTFS file {} to {}", 
+					source.toString(), target);
 		}
 	}
 

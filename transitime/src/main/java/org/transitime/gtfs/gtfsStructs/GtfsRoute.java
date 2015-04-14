@@ -160,7 +160,7 @@ public class GtfsRoute extends CsvBase {
 		breakTime = s.breakTime == null ? o.breakTime : s.breakTime;
 		maxDistance = s.maxDistance == null ? o.maxDistance : s.maxDistance;
 	}
-	
+
 	public String getRouteId() {
 		return routeId;
 	}

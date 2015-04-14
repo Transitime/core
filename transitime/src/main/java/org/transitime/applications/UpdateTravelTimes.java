@@ -162,7 +162,8 @@ public class UpdateTravelTimes {
 									travelTimes,
 									stopTime,
 									-1,  // daysOfWeekOverride
-									travelTimeInfo.howSet());
+									travelTimeInfo.howSet(),
+									trip);
 				} else {
 					// No historic data so use old travel time info based on
 					// schedule. Therefore need to use old travel times.

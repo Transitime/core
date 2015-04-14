@@ -479,6 +479,49 @@ public class Time {
 	}
 
 	/**
+	 * Converts seconds in day to a string HH:MM.
+	 * Note: secInDay can be negative.
+	 * 
+	 * @param secInDay
+	 * @return
+	 */
+	public static String timeOfDayShortStr(long secInDay) {
+		String timeStr = "";
+		if (secInDay < 0) {
+			timeStr="-";
+			secInDay = -secInDay;
+		}
+		long hours = secInDay / (60*60);
+		long minutes = (secInDay % (60*60)) / 60;
+		
+		// Use StringBuilder instead of just concatenating strings since it
+		// indeed is faster. Actually measured it and when writing out
+		// GTFS stop_times file it was about 10% faster when using
+		// StringBuilder.
+		StringBuilder b = new StringBuilder(8);
+		b.append(timeStr);
+		if (hours<10) b.append("0");
+		b.append(hours).append(":");
+		if (minutes < 10) b.append("0");
+		b.append(minutes);
+		return b.toString();
+	}
+	
+	/**
+	 * Converts seconds in day to a string HH:MM.
+	 * If secInDay null then returns null.
+	 * Note: secInDay can be negative.
+	 * 
+	 * @param secInDay
+	 * @return Can be null
+	 */
+	public static String timeOfDayShortStr(Integer secInDay) {
+		if (secInDay == null)
+			return null;
+		return timeOfDayShortStr(secInDay.intValue());
+	}
+
+	/**
 	 * Converts seconds in day to a string HH:MM AM/PM.
 	 * Note: secInDay can be negative.
 	 * 

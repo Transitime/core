@@ -26,6 +26,7 @@ if (agencyId == null || agencyId.isEmpty()) {
   	font-weight: bold;
   	background-color: #F2F5F7;
   }
+  
   </style>
   
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -52,7 +53,11 @@ if (agencyId == null || agencyId.isEmpty()) {
       }
       
       function dataReadCallback(jsonData) {
-	      var tableOptions = {showRowNumber: false, allowHtml: true, sort: 'disable'};
+	      var tableOptions = {
+	    		  showRowNumber: false, 
+	    		  allowHtml: true, 
+	    		  sort: 'disable'
+	      };
 
 	      // Set the title now that have the route name from the API
 	      $('#title').html(jsonData.routeName);
@@ -75,7 +80,13 @@ if (agencyId == null || agencyId.isEmpty()) {
     		  data.addColumn('string', 'Stop', 'stopColumn');
     		  for (var j=0; j<schedule.trip.length; ++j) {
     			  var trip = schedule.trip[j];
-        		  data.addColumn('string', 'Trip<br/>' + trip.tripShortName);    			  
+    			  var tripName = trip.tripShortName;
+    			  if (tripName == null)
+    				  tripName = trip.tripId;
+    			  var tripNameTooLong = tripName.length > 6;
+    			  var html = tripNameTooLong ?
+    					  "Blck<br/>" + trip.blockId : "Trip<br/>" + tripName;
+        		  data.addColumn("string", html);    			  
     		  }
 
     		  // Add data for each row for the schedule. This is a bit complicated
@@ -97,6 +108,13 @@ if (agencyId == null || agencyId.isEmpty()) {
         		  data.addRow(rowArray);
     		  }    		  
 
+    		  // Reduce horizontal padding so can fit in more trips per page.
+    		  // Tried by setting class for the cells but that didn't work because
+    		  // apparently google charts overrides the padding for the class. But
+    		  // setting the style works.
+    		  for (var tripIdx=0; tripIdx<schedule.timesForStop[0].time.length; ++tripIdx)
+    		  	setColumnProperty(data, tripIdx, 'style', 'padding: 2px 1px;');
+    		  
     	      // Make stop cells bold. When setting to class
     	      // stopColumnClass also need to set to google-visualization-table-td
     	      // because otherwise the default properties for those cells are erased.
@@ -143,4 +161,3 @@ if (agencyId == null || agencyId.isEmpty()) {
 <div id="title"></div>
 
 </body>
-</html>

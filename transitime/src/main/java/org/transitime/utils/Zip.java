@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Unzips a zip file
+ * For zipping and unzipping files.
  * 
  * @author SkiBu Smith
  *
@@ -117,13 +117,16 @@ public class Zip {
 	 * @param inputFileNames
 	 *            List of files to be put into the zip file. File names should
 	 *            be relative to the inputDirectory.
-	 * @param zipFileName
-	 *            The name of the resulting zip file
+	 * @param fullZipFileName
+	 *            The full name of the resulting zip file
 	 * @return Name of the resulting zip file that was created, or null if there
 	 *         was a problem
 	 */
 	public static String zip(String inputDirectory,
-			List<String> inputFileNames, String zipFileName) {
+			List<String> inputFileNames, String fullZipFileName) {
+		logger.info("Writing specified files in directory {} into zip file {}",
+				inputDirectory, fullZipFileName);
+		
 		ZipOutputStream out = null;
 		
 		if (inputDirectory == null) 
@@ -131,15 +134,28 @@ public class Zip {
 		
 		try {
 			// Create the output file
-			out = new ZipOutputStream(new FileOutputStream(zipFileName));
+			out = new ZipOutputStream(new FileOutputStream(fullZipFileName));
 
 			byte[] buffer = new byte[BUFFER_SIZE];
 
 			// For every input file to be put into the zip file...
 			for (String fileName : inputFileNames) {
+				String fullInputFileName = inputDirectory + "/" + fileName;
+				
+				// Make sure not trying to add the zip file to the zip file
+				// recursively! Skip such a file.
+				if (fullInputFileName.equals(fullZipFileName)) {
+					logger.info("Not writing file {} to zip file {} because "
+							+ "that would cause infinite recursion!", 
+							fileName, fullZipFileName);
+					continue;
+				}
+				
+				logger.info("Writing file {} to zip file {}", 
+						fullInputFileName, fullZipFileName );
+				
 				// Open up the file
-				FileInputStream in = 
-						new FileInputStream(inputDirectory + "/" + fileName);
+				FileInputStream in = new FileInputStream(fullInputFileName);
 				BufferedInputStream bufIn = new BufferedInputStream(in);
 
 				// Add entry for input file to the zip file
@@ -159,8 +175,8 @@ public class Zip {
 			out.close();
 
 			// Return that was successful
-			logger.info("Successfully wrote zip file \"{}\"", zipFileName);			
-			return zipFileName;
+			logger.info("Successfully wrote zip file \"{}\"", fullZipFileName);			
+			return fullZipFileName;
 		} catch (IOException e) {
 			logger.error("Exception occurred when zipping files. {}",
 					e.getMessage(), e);
@@ -182,9 +198,12 @@ public class Zip {
 	 *            be added to the fileNames array.
 	 * @param fileNames
 	 *            The resulting list of file names.
+	 * @param outputFileName
+	 *            Name of resulting zip file. The file will be put into the
+	 *            directory inputDirectory + "/" subDirectory.
 	 */
 	private static void addFileOrDir(String inputDirectory, String fileOrDirName,
-			List<String> fileNames) {
+			List<String> fileNames, String outputFileName) {
 		String fullFileOrDirName = inputDirectory + "/" + fileOrDirName;
 		File file = new File(fullFileOrDirName);
 		if (file.isDirectory()) {
@@ -193,11 +212,16 @@ public class Zip {
 			// For each file in the directory...
 			for (String subDirFileName : fileNamesForDir) {
 				// Call this method recursively
-				String fileNameRelativeToInputDir = fileOrDirName + "/" + subDirFileName;
-				addFileOrDir(inputDirectory, fileNameRelativeToInputDir, fileNames);
+				String fileNameRelativeToInputDir = 
+						fileOrDirName + "/" + subDirFileName;
+				addFileOrDir(inputDirectory, fileNameRelativeToInputDir,
+						fileNames, outputFileName);
 			}
 		} else {
 			// It is a file, not a directory, so add it to list
+			logger.info("Adding file {} to list of files to store in "
+					+ "zip file {}", 
+					fileOrDirName, outputFileName);
 			fileNames.add(fileOrDirName);
 		}
 	}
@@ -223,9 +247,10 @@ public class Zip {
 			String outputFileName) {
 		List<String> fileNames = new ArrayList<String>();
 
-		addFileOrDir(inputDirectory, subDirectory, fileNames);
+		addFileOrDir(inputDirectory, subDirectory, fileNames, outputFileName);
 
-		String fullOutputFileName = inputDirectory + "/" + subDirectory + "/" + outputFileName;
+		String fullOutputFileName = 
+				inputDirectory + "/" + subDirectory + "/" + outputFileName;
 		return zip(inputDirectory, fileNames, fullOutputFileName);
 	}
 	

@@ -674,7 +674,7 @@ public class TripPattern implements Serializable, Lifecycle {
 	
 	/**
 	 * Optional element direction_id specified in trips.txt GTFS file.
-	 * @return
+	 * @return direction_id. Will be null if not specified in GTFS data
 	 */
 	public String getDirectionId() {
 		return directionId;

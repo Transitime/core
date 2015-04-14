@@ -16,14 +16,8 @@
  */
 package org.transitime.avl;
 
-import java.io.InputStream;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.zip.GZIPInputStream;
-
 import javax.jms.JMSException;
 
 import org.slf4j.Logger;
@@ -33,23 +27,13 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.jms.JMSWrapper;
 import org.transitime.ipc.jms.RestartableMessageProducer;
 import org.transitime.modules.Module;
-import org.transitime.utils.IntervalTimer;
-import org.transitime.utils.Time;
 import org.transitime.utils.threading.BoundedExecutor;
 import org.transitime.utils.threading.NamedThreadFactory;
 
 
 /**
- * Subclass of Module to be used when reading AVL data from a feed. Calls the
- * abstract method getAndProcessData() for the subclass to actually get data
- * from the feed. The getAndProcessData() should call
- * processAvlReport(avlReport) for each AVL report read in. If in JMS mode then
- * it outputs the data to the appropriate JMS topic so that it can be read from
- * an AvlClient. If not in JMS mode then uses a BoundedExecutor with multiple
- * threads to directly call AvlClient.run().
- * <p>
- * This class is for reading data from a URL. If another type of feed is
- * subclassed then should override processData().
+ * Low-level abstract AVL module class that handles the processing
+ * of the data. Uses JMS to queue the data if JMS enabled.
  * 
  * @author SkiBu Smith
  * 
@@ -69,6 +53,8 @@ public abstract class AvlModule extends Module {
 	/********************** Member Functions **************************/
 
 	/**
+	 * Constructor
+	 * 
 	 * @param agencyId
 	 */
 	protected AvlModule(String agencyId) {
@@ -76,85 +62,6 @@ public abstract class AvlModule extends Module {
 		
 		if (!AvlConfig.shouldUseJms()) 
 			initForUsingQueueInsteadOfJms();
-	}
-	
-	/**
-	 * Feed specific URL to use when accessing data.
-	 * @return
-	 */
-	protected abstract String getUrl();
-	
-	/**
-	 * Actually processes the data from the InputStream. Called by
-	 * getAndProcessData(). Should be overwritten unless getAndProcessData() is
-	 * overwritten by superclass.
-	 * 
-	 * 
-	 * @param in
-	 *            The input stream containing the AVL data
-	 * @throws Exception
-	 *             Throws a generic exception since the processing is done in
-	 *             the abstract method processData() and it could throw any type
-	 *             of exception since we don't really know how the AVL feed will
-	 *             be processed.
-	 */
-	protected void processData(InputStream in) throws Exception {		
-	};
-	
-	/**
-	 * Actually reads data from feed and processes it by opening up a URL
-	 * specified by getUrl() and then reading the contents. Calls the abstract
-	 * method processData() to actually process the input stream.
-	 * <p>
-	 * This method needs to be overwritten if not real data from a URL
-	 * 
-	 * @throws Exception
-	 *             Throws a generic exception since the processing is done in
-	 *             the abstract method processData() and it could throw any type
-	 *             of exception since we don't really know how the AVL feed will
-	 *             be processed.
-	 */
-	protected void getAndProcessData() throws Exception {
-		// For logging
-		IntervalTimer timer = new IntervalTimer(); 
-
-		// Get from the AVL feed subclass the URL to use for this feed
-		String fullUrl = getUrl();
-		
-		// Log what is happening
-		logger.info("Getting data from feed using url=" + fullUrl);
-	
-		// Create the connection
-		URL url = new URL(fullUrl);
-		URLConnection con = url.openConnection();
-		
-		// Set the timeout so don't wait forever
-		int timeoutMsec = AvlConfig.getAvlFeedTimeoutInMSecs();
-		con.setConnectTimeout(timeoutMsec);
-		con.setReadTimeout(timeoutMsec);
-		
-		// Request compressed data to reduce bandwidth used
-		con.setRequestProperty("Accept-Encoding", "gzip,deflate");
-		
-		// Create appropriate input stream depending on whether content is 
-		// compressed or not
-		InputStream in = con.getInputStream();
-		if ("gzip".equals(con.getContentEncoding())) {
-		    in = new GZIPInputStream(in);
-		    logger.debug("Returned XML data is compressed");
-		} else {
-		    logger.debug("Returned XML data is NOT compressed");			
-		}
-
-		// For debugging
-		logger.debug("Time to access inputstream {} msec", 
-				timer.elapsedMsec());
-				
-		// Call the abstract method to actually process the data
-		timer.resetTimer();
-		processData(in);		
-		in.close();
-		logger.debug("Time to parse XML document {} msec", timer.elapsedMsec());
 	}
 	
 	/**
@@ -211,50 +118,6 @@ public abstract class AvlModule extends Module {
 			logger.error("Problem when setting up JMSWrapper for the AVL feed", e);			
 		}
 
-	}
-	
-	/** 
-	 * Does all of the work for the class. Runs forever and reads in 
-	 * AVL data from feed and writes it to the appropriate JMS topic
-	 * so that AVL clients can access it.
-	 * @see java.lang.Runnable#run()
-	 */
-	@Override
-	public void run() {
-		// Log that module successfully started
-		logger.info("Started module {} for agencyId={}", 
-				getClass().getName(), getAgencyId());
-		
-		// Run forever
-		while (true) {
-			IntervalTimer timer = new IntervalTimer();
-			
-			try {
-				// Process data
-				getAndProcessData();
-			} catch (SocketTimeoutException e) {
-				logger.error("Error accessing AVL feed using URL={} with a " +
-						"timeout of {} msec.", 
-						getUrl(), AvlConfig.getAvlFeedTimeoutInMSecs(), e);
-			} catch (Exception e) {
-				logger.error("Error accessing AVL feed using URL={}.", 
-						getUrl(), e);
-			}
-			
-			// Wait appropriate amount of time till poll again
-			long elapsedMsec = timer.elapsedMsec();
-			long sleepTime = 
-					AvlConfig.getSecondsBetweenAvlFeedPolling()*Time.MS_PER_SEC - 
-					elapsedMsec;
-			if (sleepTime < 0) {
-				logger.warn("Supposed to have a polling rate of " + 
-						AvlConfig.getSecondsBetweenAvlFeedPolling()*Time.MS_PER_SEC +
-						" msec but processing previous data took " +
-						elapsedMsec + " msec so polling again immediately.");
-			} else {
-				Time.sleep(sleepTime);
-			}
-		}
 	}
 	
 	/**

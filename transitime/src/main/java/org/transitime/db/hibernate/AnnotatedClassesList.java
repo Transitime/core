@@ -24,6 +24,7 @@ import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.CalendarDate;
+import org.transitime.db.structs.ConfigRevision;
 import org.transitime.db.structs.DbTest;
 import org.transitime.db.structs.Prediction;
 import org.transitime.db.structs.Departure;
@@ -74,6 +75,7 @@ public class AnnotatedClassesList {
 		Block.class,
 		Calendar.class,
 		CalendarDate.class,
+		ConfigRevision.class,
 		DbTest.class,
 		Prediction.class,
 		Departure.class,

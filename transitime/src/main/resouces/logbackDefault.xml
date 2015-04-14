@@ -311,7 +311,7 @@
   <!-- Taken out (by setting level to warn instead of info) for now because 
        so verbose -->
   <logger name="org.transitime.ipc.data.IpcPrediction"
-          level="info" additivity="false">
+          level="warn" additivity="false">
     <appender-ref ref="PREDICTION" />
   </logger>
 
@@ -333,15 +333,19 @@
   <!-- For config params it is more complicated because want to both have
        config params logged in separate file but also want some errors
        to send out an e-mail. Need to use ERROR_SMTP and additivity=true
-       to make sure the e-mail is sent out. -->
+       to make sure the e-mail is sent out. But unfortunately when I did
+       this the regular info logging for org.transitime.config stopped
+       working. So not sending out e-mail error messages for now.  -->
   <logger name="org.transitime.config"
           level="info" additivity="false">
     <appender-ref ref="CONFIG" />
   </logger>
+<!--
   <logger name="org.transitime.config"
-          level="error" additivity="true">
+          level="error" additivity="false">
     <appender-ref ref="ERROR_SMTP" />
   </logger>
+-->
 
   <logger name="org.transitime.core.predAccuracy"
           level="info" additivity="false">

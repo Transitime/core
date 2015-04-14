@@ -16,9 +16,7 @@
  */
 package org.transitime.config;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -59,7 +57,7 @@ public abstract class ConfigValue<T> {
 	private static final String LIST_SEPARATOR = ";";
 	
 	// Use the main Config logger since don't to have two separate ones.
-	private static final Logger logger = LoggerFactory.getLogger(Config.class);
+	private static final Logger logger = LoggerFactory.getLogger(ConfigFileReader.class);
 	
 	/**
 	 * An exception for when a parameter is being read in
@@ -137,9 +135,6 @@ public abstract class ConfigValue<T> {
 	 * The common code used for the constructors.
 	 */
 	private void commonConstructor() {
-		ArrayList<ConfigValue<?>> configValuesList = 
-				Config.getConfigValuesList();
-
 		// Make sure params ok. Can't throw an exception in constructor because
 		// constructor called statically and it would be difficult to handle
 		// properly. So just output error messages if there is a problem.
@@ -149,22 +144,9 @@ public abstract class ConfigValue<T> {
 			return;
 		}
 		
-		// FIXME I think need to remove this check since in future could be 
-		// rereading the config files so should expect to encounter params 
-		// more than once.
-		if (configValuesList.contains(id)) {
-			logger.error("For config parameter id \"{}\" is used more than " +
-					"once.", id);
-			return;
-		}
-		
-		// Add this new param to the config values list so have a record of 
-		// all params
-		configValuesList.add(this);
-		
 		// Determine the value of this parameter
 		try {
-			readValue(Config.getConfigFileData());
+			readValue();
 		} catch (ConfigParamException e) {
 			logger.error("Exception when reading in parameter {}", id, e);
 		}
@@ -217,14 +199,8 @@ public abstract class ConfigValue<T> {
 
 	/**
 	 * Reads value from the config data and stores it
-	 * 
-	 * @param configData
-	 *            HashMap of data read in from config file. The key is the name
-	 *            of the param. The value is a List so that can better handle
-	 *            params that have multiple elements. If null then default
-	 *            values will be used.
 	 */
-	private void readValue(HashMap<String, List<String>> configData) 
+	private void readValue() 
 			throws ConfigParamException {
 		List<String> dataList = null;
 		
@@ -233,12 +209,6 @@ public abstract class ConfigValue<T> {
 		if (systemPropertyStr != null) {
 			String dataArray[] = systemPropertyStr.split(LIST_SEPARATOR);
 			dataList = Arrays.asList(dataArray);
-		}
-		
-		// If system property not set then see if set via configData
-		if (dataList == null && configData != null) {
-			// Get the string data from the config file
-			dataList = configData.get(id);
 		}
 		
 		// If string data exists then convert it to proper type.

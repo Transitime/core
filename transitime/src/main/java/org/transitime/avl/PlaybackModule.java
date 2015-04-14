@@ -33,11 +33,6 @@ import org.transitime.utils.Time;
  * database instead of from a realtime AVL feed. Useful for debugging the system
  * software because can easily debug what is happening for a particular vehicle
  * at a particular time.
- * <p>
- * This module is different from others because it is not intended to be
- * configured to run as an optional module via CoreConfig.getOptionalModules().
- * Instead, it is called explicitly. This is necessary since the constructor has
- * different parameters from most modules, which just have a agencyId parameter.
  * 
  * @author SkiBu Smith
  *

@@ -22,7 +22,7 @@ body {
 #mainDiv {
 	margin-left: auto;
 	margin-right: auto;
-	width: 600px;
+	width: 700px;
 }
 
 #title {
@@ -45,20 +45,20 @@ body {
    but bold when hovered over. */
 a:link {
 	text-decoration: none;
-	color: #0000FF;
+	color: #0000a6;
 }
 
 a:visited {
-	color: #0000FF;
+	color: #0000a6;
 }
 
 a:hover {
-	font-weight: bold;
+	color: #0000FF;
 }
 
 .ui-tooltip {
 	/* Change background color of tooltips a bit and use a reasonable font size */
-	background: #f0e8db;
+	background: #faf7f1;
 	font-size: small;
 	padding: 4px;
 }

@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,17 +29,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.StringConfigValue;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.CalendarDate;
+import org.transitime.db.structs.ConfigRevision;
 import org.transitime.db.structs.FareAttribute;
 import org.transitime.db.structs.FareRule;
 import org.transitime.db.structs.Frequency;
@@ -63,6 +67,7 @@ import org.transitime.gtfs.gtfsStructs.GtfsStop;
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
 import org.transitime.gtfs.gtfsStructs.GtfsTransfer;
 import org.transitime.gtfs.gtfsStructs.GtfsTrip;
+import org.transitime.gtfs.readers.GtfsAgenciesSupplementReader;
 import org.transitime.gtfs.readers.GtfsAgencyReader;
 import org.transitime.gtfs.readers.GtfsCalendarDatesReader;
 import org.transitime.gtfs.readers.GtfsCalendarReader;
@@ -100,8 +105,11 @@ public class GtfsData {
 	
 	// Various params set by constructor
 	private final ActiveRevisions revs;
+	private final String notes;
+	// For when zip file used. Null otherwise
+	private final Date zipFileLastModifiedTime;
 	private final int originalTravelTimesRev;
-	private final String projectId;
+	private final String agencyId;
 	private final boolean shouldCombineShortAndLongNamesForRoutes;
 	private final double pathOffsetDistance;
 	private final double maxStopToPathDistance;
@@ -187,7 +195,35 @@ public class GtfsData {
 	// read in and createDateFormatter() is called.
 	protected SimpleDateFormat dateFormatter = null;
 
+	// So can process only routes that match a regular expression.
+	// Note, see http://stackoverflow.com/questions/406230/regular-expression-to-match-text-that-doesnt-contain-a-word
+	// for details on how to filter out matches as opposed to specifying
+	// which ones want to keep.
+	private static StringConfigValue routeIdFilterRegEx = new StringConfigValue(
+			"transitime.gtfs.routeIdFilterRegEx", 
+			null, // Default of null means don't do any filtering
+			"Route is included only if route_id matches the this regular "
+			+ "expression. If only want routes with \"SPECIAL\" in the id then "
+			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
+			+ "would instead use the complicated \"^((?!SPECIAL).)*$\" or " 
+			+ "\"^((?!(SPECIAL1|SPECIAL2)).)*$\" "
+			+ "if want to filter out two names. The default value "
+			+ "of null causes all routes to be included.");
+	private static Pattern routeIdFilterRegExPattern = null;
 
+	// So can process only trips that match a regular expression.
+	// Default of null means don't do any filtering
+	private static StringConfigValue tripIdFilterRegEx = new StringConfigValue(
+			"transitime.gtfs.tripIdFilterRegEx", 
+			"Trip is included only if trip_id matches the this regular "
+			+ "expression. If only want trips with \"SPECIAL\" in the id then "
+			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
+			+ "would instead use the complicated \"^((?!SPECIAL).)*$\" or " 
+			+ "\"^((?!(SPECIAL1|SPECIAL2)).)*$\" "
+			+ "if want to filter out two names. The default value "
+			+ "of null causes all trips to be included.");
+	private static Pattern tripIdFilterRegExPattern = null;
+	
 	// Logging
 	public static final Logger logger = 
 			LoggerFactory.getLogger(GtfsData.class);
@@ -198,6 +234,8 @@ public class GtfsData {
 	 * Constructor
 	 * 
 	 * @param configRev
+	 * @param notes
+	 * @param zipFileLastModifiedTime
 	 * @param shouldStoreNewRevs
 	 * @param projectId
 	 * @param gtfsDirectoryName
@@ -211,7 +249,10 @@ public class GtfsData {
 	 * @param trimPathBeforeFirstStopOfTrip
 	 * @param titleFormatter
 	 */
-	public GtfsData(int configRev, boolean shouldStoreNewRevs,
+	public GtfsData(int configRev, 
+			String notes,
+			Date zipFileLastModifiedTime,
+			boolean shouldStoreNewRevs,
 			String projectId,
 			String gtfsDirectoryName, 
 			String supplementDir, 
@@ -223,7 +264,9 @@ public class GtfsData {
 			double maxTravelTimeSegmentLength,
 			boolean trimPathBeforeFirstStopOfTrip,
 			TitleFormatter titleFormatter) {
-		this.projectId = projectId;
+		this.agencyId = projectId;
+		this.notes = notes;
+		this.zipFileLastModifiedTime = zipFileLastModifiedTime;
 		this.gtfsDirectoryName = gtfsDirectoryName;
 		this.supplementDir = supplementDir;
 		this.shouldCombineShortAndLongNamesForRoutes = 
@@ -239,7 +282,7 @@ public class GtfsData {
 		
 		// Get the database session. Using one session for the whole process.
 		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(getProjectId());
+				HibernateUtils.getSessionFactory(getAgencyId());
 		session = sessionFactory.openSession();
 		
 		// Deal with the ActiveRevisions. First, store the original travel times
@@ -306,7 +349,7 @@ public class GtfsData {
 	 * and combines them together. End result is that gtfsRoutesMap is created
 	 * and filled in.
 	 */
-	private void processGtfsRouteData() {
+	private void processRouteData() {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
 
@@ -391,7 +434,7 @@ public class GtfsData {
 		}
 		
 		// Let user know what is going on
-		logger.info("processGtfsRouteData() finished processing routes.txt " +
+		logger.info("processRouteData() finished processing routes.txt " +
 				"data. Took {} msec.", 
 				timer.elapsedMsec());
 	}
@@ -400,15 +443,15 @@ public class GtfsData {
 	 * Takes data from gtfsRoutesMap and creates corresponding Route map.
 	 * Processes all of the titles to make them more readable. Creates 
 	 * corresponding Route objects and stores them into the database.
-	 * This method is separated out from processGtfsRouteData() since reading
+	 * This method is separated out from processRouteData() since reading
 	 * trips needs the gtfs route info but reading Routes requires trips.
 	 */
-	private void processRouteData() {
+	private void processRouteMaps() {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Let user know what is going on
-		logger.info("Processing Routes objects data in processRouteData()...");
+		logger.info("Processing Routes objects data in processRouteMaps()...");
 		
 		// Make sure needed data is already read in. This method uses
 		// trips and trip patterns from the stop_time.txt file. This objects
@@ -416,12 +459,12 @@ public class GtfsData {
 		// stops.txt file must be read in first. 
 		if (gtfsTripsMap == null || gtfsTripsMap.isEmpty()) {
 			logger.error("processTripsData() must be called before " + 
-					"GtfsData.processRouteData() is. Exiting.");
+					"GtfsData.processRouteMaps() is. Exiting.");
 			System.exit(-1);
 		}
 		if (gtfsRoutesMap == null || gtfsRoutesMap.isEmpty()) {
-			logger.error("processGtfsRouteData() must be called before " + 
-					"GtfsData.processRouteData() is. Exiting.");
+			logger.error("processRouteData() must be called before " + 
+					"GtfsData.processRouteMaps() is. Exiting.");
 			System.exit(-1);
 		}
 
@@ -591,7 +634,7 @@ public class GtfsData {
 		// Make sure needed data is already read in. This method uses
 		// GtfsRoutes info to make sure all trips reference a route.
 		if (gtfsRoutesMap == null || gtfsRoutesMap.isEmpty()) {
-			logger.error("processGtfsRouteData() must be called before " + 
+			logger.error("processGtfsRouteMap() must be called before " + 
 					"GtfsData.processTripsData() is. Exiting.");
 			System.exit(-1);
 		}
@@ -1369,12 +1412,12 @@ public class GtfsData {
 	/**
 	 * Reads agency.txt file and puts data into agencies list.
 	 */
-	private void processAgencies() {
+	private void processAgencyData() {
 		// Make sure necessary data read in
 		if (getRoutes() == null || getRoutes().isEmpty()) {
 			// Route data first needed so can determine extent of agency 
 			logger.error("GtfsData.processRoutesData() must be called before " + 
-					"GtfsData.processAgencies() is. Exiting.");
+					"GtfsData.processAgencyData() is. Exiting.");
 			System.exit(-1);
 		}
 		
@@ -1387,8 +1430,38 @@ public class GtfsData {
 		// Read in the agency.txt GTFS data from file
 		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
 		List<GtfsAgency> gtfsAgencies = agencyReader.get();
+		HashMap<String, GtfsAgency> gtfsAgenciesMap = 
+				new HashMap<String, GtfsAgency>(gtfsAgencies.size());
+		for (GtfsAgency gtfsAgency : gtfsAgencies)
+			gtfsAgenciesMap.put(gtfsAgency.getAgencyId(), gtfsAgency);
 		
-		for (GtfsAgency gtfsAgency : gtfsAgencies) {
+		// Read in supplemental stop data
+		if (supplementDir != null) {
+			// Read in the supplemental stop data
+			GtfsAgenciesSupplementReader agenciesSupplementReader = 
+					new GtfsAgenciesSupplementReader(supplementDir);
+			List<GtfsAgency> gtfsAgenciesSupplement = agenciesSupplementReader.get();
+			for (GtfsAgency gtfsAgencySupplement : gtfsAgenciesSupplement) {
+				GtfsAgency gtfsAgency = gtfsAgenciesMap.get(gtfsAgencySupplement.getAgencyId());
+				if (gtfsAgency == null) {
+					logger.error("Found supplemental agency data for agencyId={} "
+							+ "but that agency did not exist in the main "
+							+ "agency.txt file. {}", 
+							gtfsAgencySupplement.getAgencyId(), gtfsAgencySupplement);
+					continue;
+				}
+				
+				// Create a new GtfsAgency object that combines the original
+				// data with the supplemental data
+				GtfsAgency combinedAgency = new GtfsAgency(gtfsAgency, gtfsAgencySupplement);
+				
+				// Store that combined data agency in the map 
+				gtfsAgenciesMap.put(combinedAgency.getAgencyId(), combinedAgency);
+
+			}
+		}
+		
+		for (GtfsAgency gtfsAgency : gtfsAgenciesMap.values()) {
 			// Create the Agency object and put it into the array
 			Agency agency = new Agency(revs.getConfigRev(), gtfsAgency, getRoutes());
 			agencies.add(agency);
@@ -1596,8 +1669,8 @@ public class GtfsData {
 	/**
 	 * @return projectId
 	 */
-	public String getProjectId() {
-		return projectId;		
+	public String getAgencyId() {
+		return agencyId;		
 	}
 	
 	public Map<String, GtfsRoute> getGtfsRoutesMap() {
@@ -1844,6 +1917,16 @@ public class GtfsData {
 		return transfers;
 	}
 	
+	/**
+	 * Returns information about the current revision.
+	 * 
+	 * @return
+	 */
+	public ConfigRevision getConfigRevision() {
+		return new ConfigRevision(revs.getConfigRev(), new Date(), 
+				zipFileLastModifiedTime, notes);
+	}
+	
 	/*************************** Main Public Methods **********************/
 	
 	/**
@@ -1917,6 +2000,44 @@ public class GtfsData {
 	}
 	
 	/**
+	 * Returns true if the tripId isn't supposed to be filtered out, as
+	 * specified by the transitime.gtfs.tripIdRegExPattern property.
+	 * 
+	 * @param tripId
+	 * @return True if trip not to be filtered out
+	 */
+	public static boolean tripNotFiltered(String tripId) {
+		if (tripIdFilterRegEx.getValue() == null)
+			return true;
+		
+		// Create pattern if haven't done so yet, but only do so once.
+		if (tripIdFilterRegExPattern == null)
+			tripIdFilterRegExPattern = Pattern.compile(tripIdFilterRegEx.getValue());
+		
+		boolean matches = tripIdFilterRegExPattern.matcher(tripId.trim()).matches();
+		return matches;
+	}
+	
+	/**
+	 * Returns true if the routeId isn't supposed to be filtered out, as
+	 * specified by the transitime.gtfs.routeIdRegExPattern property.
+	 * 
+	 * @param routeId
+	 * @return True if route not to be filtered out
+	 */
+	public static boolean routeNotFiltered(String routeId) {
+		if (routeIdFilterRegEx.getValue() == null)
+			return true;
+		
+		// Create pattern if haven't done so yet, but only do so once.
+		if (routeIdFilterRegExPattern == null)
+			routeIdFilterRegExPattern = Pattern.compile(routeIdFilterRegEx.getValue());
+		
+		boolean matches = routeIdFilterRegExPattern.matcher(routeId.trim()).matches();
+		return matches;
+	}
+	
+	/**
 	 * Does all the work. Processes the data and store it in internal structures
 	 */
 	public void processData() {
@@ -1932,10 +2053,10 @@ public class GtfsData {
 		createDateFormatter();
 		
 		// Note. The order of how these are processed in important because
-		// some datasets rely on others in order to be fully processed.
+		// some data sets rely on others in order to be fully processed.
 		// If the order is wrong then the methods below will log an error and
 		// exit.
-		processGtfsRouteData();
+		processRouteData();
 		processStopData();		
 		processCalendarDates();
 		processCalendars();
@@ -1943,10 +2064,10 @@ public class GtfsData {
 		processTripsData();	
 		processFrequencies();
 		processStopTimesData();		
-		processRouteData(); 
+		processRouteMaps(); 
 		processBlocks();
 		processPaths();
-		processAgencies();
+		processAgencyData();
 		
 		// Following are simple objects that don't require combining tables
 		processFareAttributes();

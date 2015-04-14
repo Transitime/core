@@ -97,6 +97,7 @@ public abstract class CsvBaseReader<T> {
 	 * object of the appropriate type needs to be created.
 	 * 
 	 * @param record
+	 * @return The created GTFS object, or null if object filtered out
 	 */
 	abstract protected T handleRecord(CSVRecord record, boolean supplemental)
 		throws ParseException, NumberFormatException;
@@ -142,7 +143,7 @@ public abstract class CsvBaseReader<T> {
 			// comment out line that starts with "--", which is what is 
 			// used for SQL. 
 			CSVFormat formatter = 
-					CSVFormat.DEFAULT.withHeader().withCommentMarker('-');
+					CSVFormat.DEFAULT.withHeader().withCommentStart('-');
 			
 			// Parse the file
 			Iterable<CSVRecord> records = formatter.parse(in);
@@ -185,7 +186,8 @@ public abstract class CsvBaseReader<T> {
 				}
 				
 				// Add the newly created CSV object to the object list
-				gtfsObjects.add(gtfsObject);		
+				if (gtfsObject != null)
+					gtfsObjects.add(gtfsObject);		
 				
 				// Log info if it has been a while. Check only every 20,000
 				// lines to see if the 10 seconds has gone by. If so, then log

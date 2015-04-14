@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.StringConfigValue;
+import org.transitime.config.StringListConfigValue;
 import org.transitime.db.structs.Location;
 import org.transitime.gtfs.gtfsStructs.GtfsRoute;
 import org.transitime.gtfs.gtfsStructs.GtfsShape;
@@ -91,6 +93,12 @@ public class GtfsFromNextBus {
 					"wkd",
 					"The service_id to use for the trips.txt file. Currently "
 					+ "only can handle a single service ID.");
+	
+	private static StringListConfigValue validBlockIds =
+			new StringListConfigValue("transitime.gtfs.validBlockIds", 
+					"Only the block IDs from this list will be process from "
+					+ "the schedule from the NextBus API. Useful since NextBus "
+					+ "doesn't always clean out obsolete blocks");;
 	
 	/******************* Members ************************/
 	
@@ -542,11 +550,11 @@ public class GtfsFromNextBus {
 			
 			if (allStopsAreInDirection) {
 				// Handle caltrans route specially
-				if (routeId.equals("caltrans")) {
-					// For caltrans route have two different directions with the
+				if (routeId.equals("caltrans") || routeId.equals("east")) {
+					// For caltrans and east routes have two different directions with the
 					// same stops, but with a different start of the trip. One
 					// direction is for mornings and the other for afternoons.
-					// for special caltrans route therefore make sure that first
+					// for special caltrans and east routes therefore make sure that first
 					// stop of the trip matches the first stop of the direction
 					// for the direction to be used.
 					if (dir.stopIds.get(0).equals(stopIdsInSchedForTrip.get(0)))
@@ -614,7 +622,7 @@ public class GtfsFromNextBus {
 		tripsWriter.write(gtfsTrip);			
 	}
 	
-	private static class StopTime {
+	private static class StopTime implements Comparable<StopTime> {
 		String stopId;
 		String stopTimeStr;
 		int stopTime;
@@ -623,6 +631,14 @@ public class GtfsFromNextBus {
 			this.stopId = stopId; 
 			this.stopTimeStr = stopTimeStr;
 			this.stopTime = Time.parseTimeOfDay(stopTimeStr);
+		}
+
+		/* (non-Javadoc)
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
+		@Override
+		public int compareTo(StopTime o) {
+			return new Integer(stopTime).compareTo(o.stopTime);
 		}
 	}
 	
@@ -637,6 +653,8 @@ public class GtfsFromNextBus {
 			Document scheduleDoc) {
 		Map<String, List<StopTime>> stopTimesMap = 
 				new HashMap<String, List<StopTime>>();
+
+		List<String> validBlockIdsList = validBlockIds.getValue();
 		
 		Element rootNode = scheduleDoc.getRootElement();
 		Element route = rootNode.getChild("route");
@@ -644,6 +662,12 @@ public class GtfsFromNextBus {
 		List<Element> scheduleRows = route.getChildren("tr");
 		for (Element scheduleRow : scheduleRows) {
 			String blockId = scheduleRow.getAttributeValue("blockID");
+			
+			// If not one of the configured block IDs then ignore. This is 
+			// important because sometimes NextBus leaves old block definitions
+			// in the config.
+			if (!validBlockIdsList.contains(blockId))
+				continue;
 			
 			// Get list of stops times for this block
 			List<StopTime> stopTimesForBlock = stopTimesMap.get(blockId);
@@ -694,6 +718,11 @@ public class GtfsFromNextBus {
 				// Add this stop time to the map
 				StopTime stopTime = new StopTime(stopTag, timeStr);
 				stopTimesForBlock.add(stopTime);
+				
+				// Turn out the schedule times from the NextBus API can be out 
+				// of order so sort them. Yes, it is inefficient to sort every
+				// time adding a new time but easier to do it this way.	
+				Collections.sort(stopTimesForBlock);
 			}
 		}
 		
@@ -726,7 +755,7 @@ public class GtfsFromNextBus {
 		// KLUDGE
 		// For caltrans route can't determine first stop in trip effectively
 		// for the morning routes. Therefore handle special case.
-		// This is a terrible hack to deal with the Mission Bay west route
+		// This is a terrible hack to deal with the routes
 		// where there is a different trip pattern in the morning and the
 		// afternoon, but cannot determine the trip pattern from the stops
 		// alone. Need to look at the schedule time as well.

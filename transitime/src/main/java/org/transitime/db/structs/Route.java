@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -152,7 +153,7 @@ public class Route implements Serializable {
 			if (gtfsRoute.getRouteLongName() != null && !gtfsRoute.getRouteLongName().isEmpty()) {
 				String shortName = "";
 				if (gtfsRoute.getRouteShortName() != null)
-					shortName = gtfsRoute.getRouteShortName() + "-";
+					shortName = gtfsRoute.getRouteShortName() + " - ";
 				this.name = shortName + titleFormatter.processTitle(gtfsRoute.getRouteLongName());
 			} else
 				this.name = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
@@ -498,7 +499,7 @@ public class Route implements Serializable {
 				.getDbConfig().getTripPatternsForRoute(getId());
 		TripPattern longestTripPatternForDir = null;
 		for (TripPattern tripPattern : tripPatternsForRoute) {
-			if (tripPattern.getDirectionId().equals(directionId)) {
+			if (Objects.equals(tripPattern.getDirectionId(), directionId)) {
 				if (longestTripPatternForDir == null
 						|| tripPattern.getNumberStopPaths() > longestTripPatternForDir
 								.getNumberStopPaths())
@@ -537,7 +538,7 @@ public class Route implements Serializable {
 				.getDbConfig().getTripPatternsForRoute(getId());
 		List<TripPattern> tripPatternsForDir = new ArrayList<TripPattern>();
 		for (TripPattern tripPattern : tripPatternsForRoute) {
-			if (tripPattern.getDirectionId().equals(directionId))
+			if (Objects.equals(tripPattern.getDirectionId(), directionId))
 				tripPatternsForDir.add(tripPattern);
 		}
 		

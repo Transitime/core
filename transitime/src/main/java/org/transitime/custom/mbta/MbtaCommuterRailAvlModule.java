@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.avl.AvlModule;
+import org.transitime.avl.PollUrlAvlModule;
 import org.transitime.avl.TaipGpsLocation;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
@@ -41,7 +41,7 @@ import org.transitime.modules.Module;
  * @author SkiBu Smith
  *
  */
-public class MbtaCommuterRailAvlModule extends AvlModule {
+public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 
 	// If debugging feed and want to not actually process
 	// AVL reports to generate predictions and such then

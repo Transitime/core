@@ -28,6 +28,12 @@ import org.transitime.utils.StringUtils;
 
 /**
  * For monitoring CPU, available memory, and available disk space.
+ * <p>
+ * Note: Linux will use a great deal of RAM for caching and such when memory is
+ * available. Therefore most of the time the free memory will be quite low. But
+ * this is OK since the operating system will give up the RAM being used for
+ * caching and such if a process needs it. Therefore the allowable free memory
+ * should be set to quite a low value.
  *
  * @author SkiBu Smith
  *
@@ -36,7 +42,7 @@ public class SystemMemoryMonitor extends MonitorBase {
 
 	LongConfigValue availableFreePhysicalMemoryThreshold = new LongConfigValue(
 			"transitime.monitoring.availableFreePhysicalMemoryThreshold", 
-			80 * 1024 * 1024L, // ~80 MB 
+			50 * 1024 * 1024L, // ~50 MB 
 			"If available free physical memory is less than this "
 			+ "value then free memory monitoring is triggered. This should be "
 			+ "relatively small since on Linux the operating system will use "
@@ -47,7 +53,7 @@ public class SystemMemoryMonitor extends MonitorBase {
 	private static LongConfigValue availableFreePhysicalMemoryThresholdGap =
 			new LongConfigValue(
 					"transitime.monitoring.availableFreePhysicalMemoryThresholdGap", 
-					20 * 1024 * 1024L, // ~20 MB 
+					150 * 1024 * 1024L, // ~150 MB 
 					"When transitioning from triggered to untriggered don't "
 					+ "want to send out an e-mail right away if actually "
 					+ "dithering. Therefore will only send out OK e-mail if the "

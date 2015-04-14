@@ -19,6 +19,7 @@ package org.transitime.gtfs.readers;
 import java.text.ParseException;
 
 import org.apache.commons.csv.CSVRecord;
+import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.gtfsStructs.GtfsTrip;
 import org.transitime.utils.csv.CsvBaseReader;
 
@@ -37,7 +38,11 @@ public class GtfsTripsReader extends CsvBaseReader<GtfsTrip> {
 	@Override
 	public GtfsTrip handleRecord(CSVRecord record, boolean supplemental) 
 			throws ParseException {
-		return new GtfsTrip(record, supplemental, getFileName());
+		if (GtfsData.tripNotFiltered(record.get("trip_id")) 
+				&& GtfsData.routeNotFiltered(record.get("route_id")))
+			return new GtfsTrip(record, supplemental, getFileName());
+		else
+			return null;
 	}
 
 }

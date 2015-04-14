@@ -83,9 +83,14 @@ public class ApiSchedule {
 		// Use first trip to determine which stops are covered
 		List<IpcSchedTime> schedTimesForFirstTrip = 
 				ipcSched.getIpcSchedTrips().get(0).getSchedTimes();
-		// For each stop. Use schedule times for first trip to determine
-		// list of stops...
-		for (IpcSchedTime firstTripSchedTime : schedTimesForFirstTrip) {
+		// For each stop. Uses schedule times for first trip to determine
+		// the list of stops since each trip has same number of stops
+		// in IpcSchedule (not every stop is actually visited though).
+		for (int stopIndexInTrip = 0; 
+				stopIndexInTrip < schedTimesForFirstTrip.size(); 
+				++stopIndexInTrip) {
+			IpcSchedTime firstTripSchedTime = schedTimesForFirstTrip
+					.get(stopIndexInTrip);
 			String stopId = firstTripSchedTime.getStopId();
 			String stopName = firstTripSchedTime.getStopName();
 			ApiScheduleTimesForStop apiSchedTimesForStop = 
@@ -94,15 +99,9 @@ public class ApiSchedule {
 			// For each trip find the time for the current stop...
 			for (IpcSchedTrip ipcSchedTrip : ipcSched.getIpcSchedTrips()) {
 				// For the current trip find the time for the current stop...
-				for (IpcSchedTime ipcSchedTime : ipcSchedTrip.getSchedTimes()) {
-					if (ipcSchedTime.getStopId().equals(
-							firstTripSchedTime.getStopId())) {
-						// Found the time for the stop so add it to list for 
-						// the stop
-						apiSchedTimesForStop.add(ipcSchedTime.getTimeOfDay());						
-						break;
-					}
-				}
+				IpcSchedTime ipcSchedTime = ipcSchedTrip.getSchedTimes().get(
+						stopIndexInTrip);
+				apiSchedTimesForStop.add(ipcSchedTime.getTimeOfDay());
 			}
 		}
 	}

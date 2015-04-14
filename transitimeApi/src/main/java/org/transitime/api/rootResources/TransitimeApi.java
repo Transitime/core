@@ -54,9 +54,6 @@ import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
-import org.transitime.config.Config;
-import org.transitime.config.Config.ConfigException;
-import org.transitime.config.ConfigValue.ConfigParamException;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcActiveBlock;
@@ -585,17 +582,6 @@ public class TransitimeApi {
 		}
 	}
 
-	public TransitimeApi() {
-		super();
-		try {
-			Config.processConfig(this.getClass().getClassLoader().getResource("transiTimeConfig.xml").getFile());
-		} catch ( Exception e) {
-			e.printStackTrace();
-		}
-		
-		// TODO Auto-generated constructor stub
-	}
-
 	/**
 	 * Handles the "stops" command. Returns all stops associated with a route,
 	 * grouped by direction. Useful for creating a UI where user needs to select
@@ -910,8 +896,7 @@ public class TransitimeApi {
 						+ routesIdOrShortNames + " does not exist.");
 
 			// Create and return ApiSchedules response
-			ApiSchedules apiSchedules = new ApiSchedules(
-					ipcSchedules);
+			ApiSchedules apiSchedules = new ApiSchedules(ipcSchedules);
 			return stdParameters.createResponse(apiSchedules);
 		} catch (RemoteException e) {
 			// If problem getting data then return a Bad Request

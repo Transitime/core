@@ -37,10 +37,12 @@ public class StringConfigValue extends ConfigValue<String> {
 	}
 	
 	/**
-	 * Constructor.
+	 * Constructor for when there is a default value.
 	 * 
 	 * @param id
 	 * @param defaultValue
+	 *            Default value, but can be set to null for if null is a
+	 *            reasonable default.
 	 * @param description
 	 */
 	public StringConfigValue(String id, String defaultValue, 

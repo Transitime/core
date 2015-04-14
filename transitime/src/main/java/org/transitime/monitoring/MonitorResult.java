@@ -20,8 +20,7 @@ package org.transitime.monitoring;
 import java.io.Serializable;
 
 /**
- * Contains status for an individual monitor. To be based
- * via IPC to client.
+ * Contains status for an individual monitor. To be passed via IPC to client.
  *
  * @author SkiBu Smith
  *

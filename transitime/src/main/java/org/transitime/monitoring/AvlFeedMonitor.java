@@ -76,19 +76,10 @@ public class AvlFeedMonitor extends MonitorBase {
 	 * this method returns 0. If no GPS data or the data is too old then returns
 	 * age of last AVL report in seconds.
 	 * 
-	 * @return 0 if have recent valid GPS data or age of last AVL report in
+	 * @return 0 if have recent valid GPS data or age of last AVL report, in
 	 *         seconds.
 	 */
 	private int avlFeedOutageSecs() {
-		// If there are no currently active blocks then don't need to be
-		// getting AVL data so return 0
-		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks();
-		if (activeBlocks.size() == 0) {
-			setMessage("No currently active blocks so AVL feed "
-					+ "considered to be OK.");
-			return 0;
-		}
-		
 		// Determine age of AVL report
 		long lastAvlReportTime = AvlProcessor.getInstance().lastAvlReportTime();
 		long ageOfAvlReport = System.currentTimeMillis() - lastAvlReportTime;
@@ -99,9 +90,7 @@ public class AvlFeedMonitor extends MonitorBase {
 		setMessage("Last valid AVL report was " 
 				+ ageOfAvlReport / Time.MS_PER_SEC 
 				+ " secs old while allowable age is " 
-				+ allowableAvlFeedTimeNoDataSecs.getValue()
-				+ " secs and number of currently active blocks is " 
-				+ activeBlocks.size() + ".",
+				+ allowableAvlFeedTimeNoDataSecs.getValue()	+ " secs.",
 				ageOfAvlReport / Time.MS_PER_SEC);
 		
 		if (ageOfAvlReport > 
@@ -124,6 +113,23 @@ public class AvlFeedMonitor extends MonitorBase {
 		return avlFeedOutageSecs != 0;
 	}
 
+	/**
+	 * Returns true if there are no currently active blocks indicating that it
+	 * doesn't matter if not getting AVL data.
+	 * 
+	 * @return true if no currently active blocks
+	 */
+	@Override
+	protected boolean acceptableEvenIfTriggered() {
+		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks();
+		if (activeBlocks.size() == 0) {
+			setAcceptableEvenIfTriggeredMessage("No currently active blocks "
+					+ "so AVL feed considered to be OK.");
+			return true;
+		}
+		return false;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.transitime.monitoring.MonitorBase#type()
 	 */

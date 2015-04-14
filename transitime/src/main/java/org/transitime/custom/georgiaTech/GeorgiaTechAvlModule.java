@@ -80,23 +80,6 @@ public class GeorgiaTechAvlModule extends AvlModule {
 		super(agencyId);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.transitime.avl.AvlModule#getUrl()
-	 */
-	@Override
-	protected String getUrl() {
-		return georgiaTechFeedDomainName.getValue();
-	}
-
-	/**
-	 * Called by subclass run() to process the data. Continually reads
-	 * data from socket.
-	 */
-	@Override
-	protected void getAndProcessData() throws Exception {
-		readLoop();
-	}
-
 	/**
 	 * So that can debug log every read.
 	 * 
@@ -182,7 +165,8 @@ public class GeorgiaTechAvlModule extends AvlModule {
 	}
 
 	/**
-	 * Reads data from socket forever and processes it.
+	 * Reads data from socket forever and processes it. Catches exceptions so
+	 * really will run forever.
 	 */
 	private void readLoop() {
 		// Loop forever. Exceptions should all be caught so will
@@ -193,7 +177,8 @@ public class GeorgiaTechAvlModule extends AvlModule {
 			BufferedReader reader = null;
 			try {
 				// Open up the socket connection
-				soc = new Socket(getUrl(), georgiaTechFeedPort.getValue());
+				soc = new Socket(georgiaTechFeedDomainName.getValue(),
+						georgiaTechFeedPort.getValue());
 				din = new DataInputStream(soc.getInputStream());
 				reader = new BufferedReader(new InputStreamReader(din));
 				
@@ -225,6 +210,19 @@ public class GeorgiaTechAvlModule extends AvlModule {
 
 			}
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
+	@Override
+	public void run() {
+		// Log that module successfully started
+		logger.info("Started module {} for agencyId={}", 
+				getClass().getName(), getAgencyId());
+		
+		// Actually process all the data
+		readLoop();
 	}
 
 	/**

@@ -30,7 +30,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.Config;
+import org.transitime.config.ConfigFileReader;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
@@ -80,6 +80,13 @@ public class Core {
 		
 	// Set by command line option. Specifies config rev to use if set
 	private static String configRevStr = null;
+
+	// Read in configuration files. This should be done statically before
+	// the logback LoggerFactory.getLogger() is called so that logback can
+	// also be configured using a transitime config file.
+	static {
+		ConfigFileReader.processConfig();
+	}
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(Core.class);
@@ -287,14 +294,19 @@ public class Core {
 	 * Further info at http://commons.apache.org/proper/commons-cli/usage.html
 	 */
 	@SuppressWarnings("static-access")  // Needed for using OptionBuilder
-	private static void processCommandLineOptions(String[] args) throws ParseException {
+	private static void processCommandLineOptions(String[] args) 
+			throws ParseException {
 		// Specify the options
 		Options options = new Options();
 		options.addOption("h", "help", false, "Display usage and help info."); 
 		
 		options.addOption(OptionBuilder.withArgName("configFile")
                 .hasArg()
-                .withDescription("Specifies optional configuration file to read in.")
+                .withDescription("Specifies optional configuration file to "
+			+ "read in. This option is deprecated and instead the "
+			+ "Java system property transitime.configFiles should"
+			+ "be used so that even logback can be configured using "
+			+ "a config file.")
                 .withLongOpt("config")
                 .create("c")
                 );
@@ -375,7 +387,7 @@ public class Core {
 			// Read in config params
 			try {
 				// Read in the data from config file
-				Config.processConfig(configFile);
+				ConfigFileReader.processConfig(configFile);
 			} catch (Exception e) {
 				logger.error("Error reading in config file \"" + configFile + 
 						"\". Exiting program.", e);
