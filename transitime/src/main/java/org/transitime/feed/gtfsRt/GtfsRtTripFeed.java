@@ -43,7 +43,8 @@ import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
  
 /**
- * For creating GTFS-realtime trip feed.
+ * For creating GTFS-realtime trip feed. The data is obtained from the server
+ * via RMI.
  * <p>
  * Note: for the trip feed predictions that are schedule based instead of GPS
  * based the StopTimeEvent uncertainty is set to
