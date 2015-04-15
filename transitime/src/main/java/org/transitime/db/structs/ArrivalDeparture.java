@@ -425,8 +425,10 @@ public class ArrivalDeparture implements Serializable {
 		Iterator<ArrivalDeparture> iterator = query.iterate(); 
 		return iterator;
 	}
+	
 	/**
-	 * Read in arrivals and departures for a vechicle, over a time range
+	 * Read in arrivals and departures for a vehicle, over a time range.
+	 * 
 	 * @param projectId
 	 * @param beginTime
 	 * @param endTime
@@ -434,42 +436,17 @@ public class ArrivalDeparture implements Serializable {
 	 * @return
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
-			Date beginTime, Date endTime, String vehicleId)
-	{
-		IntervalTimer timer = new IntervalTimer();
-		// 	Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession();
-
-		// Create the query. Table name is case sensitive and needs to be the
-		// class name instead of the name of the db table.
-		String hql = "FROM ArrivalDeparture " +
-				"    WHERE time >= :beginDate " +
-				"      AND time < :endDate" +
-				" AND vehicleId = :vehicleId"; 
-		Query query = session.createQuery(hql);
-		
-		// Set the parameters
-		query.setTimestamp("beginDate", beginTime);
-		query.setTimestamp("endDate", endTime);
-		query.setString("vehicleId", vehicleId);
-		
-		try {
-			@SuppressWarnings("unchecked")
-			List<ArrivalDeparture> arrivalsDeparatures = query.list();
-			logger.debug("Getting arrival/departures from database took {} msec",
-					timer.elapsedMsec());
-			return arrivalsDeparatures;
-		} catch (HibernateException e) {
-			// Log error to the Core logger
-			Core.getLogger().error(e.getMessage(), e);
-			return null;
-		} finally {
-			// Clean things up. Not sure if this absolutely needed nor if
-			// it might actually be detrimental and slow things down.
-			session.close();
-		}
-		
+			Date beginTime, Date endTime, String vehicleId) {
+		// Call in standard getArrivalsDeparturesFromDb() but pass in
+		// sql clause
+		return getArrivalsDeparturesFromDb(
+				null,  // Use db specified by transitime.db.dbName
+				beginTime, endTime,
+				"AND vehicleId='" + vehicleId + "'", 
+				0, 0,  // Don't use batching 
+				null); // Read both arrivals and departures
 	}
+	
 	/**
 	 * Reads the arrivals/departures for the timespan specified. All of the 
 	 * data is read in at once so could present memory issue if reading
@@ -529,7 +506,9 @@ public class ArrivalDeparture implements Serializable {
 	 * method.
 	 * 
 	 * @param dbName
-	 *            Name of the database to retrieve data from
+	 *            Name of the database to retrieve data from. If set to null
+	 *            then will use db name configured by Java property
+	 *            transitime.db.dbName
 	 * @param beginTime
 	 * @param endTime
 	 * @param sqlClause
@@ -537,7 +516,10 @@ public class ArrivalDeparture implements Serializable {
 	 *            arrival/departures. Useful for ordering the results. Can be
 	 *            null.
 	 * @param firstResult
+	 *            For when reading in batch of data at a time.
 	 * @param maxResults
+	 *            For when reading in batch of data at a time. If set to 0 then
+	 *            will read in all data at once.
 	 * @param arrivalOrDeparture
 	 *            Enumeration specifying whether to read in just arrivals or
 	 *            just departures. Set to null to read in both.
@@ -551,7 +533,7 @@ public class ArrivalDeparture implements Serializable {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(dbName);
+		Session session = dbName != null ? HibernateUtils.getSession(dbName) : HibernateUtils.getSession();
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
@@ -572,9 +554,10 @@ public class ArrivalDeparture implements Serializable {
 		query.setTimestamp("beginDate", beginTime);
 		query.setTimestamp("endDate", endTime);
 		
-		// Only get a batch of data at a time
+		// Only get a batch of data at a time if maxResults specified
 		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
+		if (maxResults > 0)
+			query.setMaxResults(maxResults);
 		
 		try {
 			@SuppressWarnings("unchecked")
