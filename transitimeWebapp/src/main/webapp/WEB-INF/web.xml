@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
-  <display-name>api</display-name>
+  <display-name>Transitime webapp</display-name>
+
   <context-param>
       <param-name>transitime_config_file_location</param-name>
-      <param-value>d:/transiTime/transiTimeConfigWebapp.xml</param-value>      
+      <param-value>/DIRECTORY_SET_IN_web.xml/transitimeConfigWebapp.xml</param-value>      
   </context-param>
+
   <welcome-file-list>
+    <welcome-file>welcome/index.jsp</welcome-file>
     <welcome-file>index.html</welcome-file>
     <welcome-file>index.htm</welcome-file>
     <welcome-file>index.jsp</welcome-file>
@@ -14,18 +17,9 @@
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
 
-  <!-- For special Http response 416 "Requested Range Not Satisfiable" which
-       is used for when there is no data for a request, use special error
-       page that only returns the message instead of a bunch of ugly
-       html. This way the page that requested the data page via AJAX can
-       read the resulting message and display it without lots of ugly
-       error page html. -->  
-  <error-page> 
-    <error-code>416</error-code>
-    <location>/error/messageOnlyError.jsp</location>
-</error-page>
-<listener>
-    <listener-class>org.transitime.setup.ReadConfigListener</listener-class>
-</listener>
+  <!-- So that configuration parameters can be read in from file -->
+  <listener>
+    <listener-class>org.transitime.web.ReadConfigListener</listener-class>
+  </listener>
 
 </web-app>
