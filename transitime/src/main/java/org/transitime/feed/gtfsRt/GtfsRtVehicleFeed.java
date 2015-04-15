@@ -39,7 +39,7 @@ import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition.VehicleStopStatus;
 
 /**
- * For creating GTFS-realtime Vehicle feed.
+ * For creating GTFS-realtime Vehicle feed. The data is obtained via RMI.
  *
  * @author SkiBu Smith
  *
@@ -58,7 +58,7 @@ public class GtfsRtVehicleFeed {
 	}
 	
 	/**
-	 * Takes in ApiVehicle and puts it into a GTFS-realtime 
+	 * Takes in IpcGtfsRealtimeVehicle and puts it into a GTFS-realtime 
 	 * VehiclePosition object.
 	 *  
 	 * @param vehicleData
@@ -107,6 +107,12 @@ public class GtfsRtVehicleFeed {
 		// number of milliseconds since 1970.
 		long gpsTime = vehicleData.getGpsTime();
 		vehiclePosition.setTimestamp(gpsTime / Time.MS_PER_SEC);
+		
+		// Set the stop_id if at a stop or going to a stop
+		String stopId =	vehicleData.getAtStopId() != null ? 
+				vehicleData.getAtStopId() : vehicleData.getNextStopId();
+		if (stopId != null)
+			vehiclePosition.setStopId(stopId);
 		
 		// Set current_status part of vehiclePosition if vehicle is actually
 		// predictable.
@@ -158,8 +164,8 @@ public class GtfsRtVehicleFeed {
 	}
 
 	/**
-	 * Returns collection of all vehicles for the project. Returns
-	 * null if there was a problem getting the data via RMI
+	 * Returns collection of all vehicles for the project obtained via RMI.
+	 * Returns null if there was a problem getting the data via RMI
 	 * 
 	 * @return Collection of Vehicle objects, or null if not available.
 	 */
@@ -196,14 +202,15 @@ public class GtfsRtVehicleFeed {
 	 * @param cacheTime
 	 * @return
 	 */
-	public static FeedMessage getPossiblyCachedMessage(String agencyId, int cacheTime) {
-	    FeedMessage feedMessage = vehicleFeedDataCache.get(agencyId, cacheTime);
-	    if (feedMessage != null)
+	public static FeedMessage getPossiblyCachedMessage(String agencyId,
+			int cacheTime) {
+		FeedMessage feedMessage = vehicleFeedDataCache.get(agencyId, cacheTime);
+		if (feedMessage != null)
+			return feedMessage;
+
+		GtfsRtVehicleFeed feed = new GtfsRtVehicleFeed(agencyId);
+		feedMessage = feed.createMessage();
+		vehicleFeedDataCache.put(agencyId, feedMessage);
 		return feedMessage;
-	    
-	    GtfsRtVehicleFeed feed = new GtfsRtVehicleFeed(agencyId);
-	    feedMessage = feed.createMessage();
-	    vehicleFeedDataCache.put(agencyId, feedMessage);
-	    return feedMessage;
 	}
 }
