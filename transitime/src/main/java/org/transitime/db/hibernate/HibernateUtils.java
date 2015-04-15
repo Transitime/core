@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -84,8 +85,19 @@ public class HibernateUtils {
 		logger.info("Configuring Hibernate for dbName={} using config file={}",
 				dbName, fileName);
 		File f = new File(fileName);
-		config.configure(f);
-
+		if (!f.exists()) {
+			// Couldn't find file directly so look in classpath for it
+			ClassLoader classLoader = HibernateUtils.class.getClassLoader();
+			URL url = classLoader.getResource(fileName);
+			if (url != null)
+				f = new File(classLoader.getResource(fileName).getFile());
+		}
+		if (f.exists())
+			config.configure(f);
+		else {
+			logger.error("Could not load in hibernate config file {}", fileName);
+		}
+		
 		// Add the annotated classes so that they can be used
 		AnnotatedClassesList.addAnnotatedClasses(config);
 
