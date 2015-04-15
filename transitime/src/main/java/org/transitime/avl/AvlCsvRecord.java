@@ -24,7 +24,6 @@ import org.transitime.utils.Time;
 import org.transitime.utils.csv.CsvBase;
 
 import java.text.ParseException;
-import java.util.Date;
 
 /**
  * Represents a single record in a CSV file containing AVL data.
