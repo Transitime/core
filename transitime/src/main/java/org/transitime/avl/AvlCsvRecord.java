@@ -56,14 +56,14 @@ public class AvlCsvRecord extends CsvBase {
 
 		String timeStr = avlCsvRecord.getRequiredValue(record, "time");
 
+		// Process time
 		long time = 0L;
-		if(timeStr.contains(":"))
-			time=Time.parse(timeStr).getTime();
-		else
-		{
-			time=Long.parseLong(timeStr.substring(0, timeStr.length()-3));
-			Date d = new Date(time);
-			logger.debug("Date:"+d);
+		if (timeStr.contains(":")) {
+			// Time is in the format "MM-dd-yyyy HH:mm:ss z" then use Time.parse()
+			time = Time.parse(timeStr).getTime();
+		} else {
+			// Time is already an epoch time long
+			time = Long.parseLong(timeStr);
 		}
 								
 		String latStr = avlCsvRecord.getRequiredValue(record, "latitude");
