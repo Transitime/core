@@ -4,11 +4,10 @@
 
 <hibernate-configuration>
  <session-factory>
-   
-		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-						
-		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
-		<property name="show_sql">true</property>
+   <!-- Specify which database being used -->
+   <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>						
+   <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+		
    <!-- Enable full SQL logging that also shows the
         parameters being used. show_sql is not really
         useful since it duplicates the output of the SQL.
@@ -28,14 +27,17 @@
         command line arguments so that some apps, like the 
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
-
-   <property name="hibernate.connection.url">jdbc:postgresql://127.0.0.1:5432/transiTime</property>
-   <property name="hibernate.connection.username">transiTime</property>   
-   <property name="hibernate.connection.password">welcome</property>
-      
-   
-
-		
+<!--
+   <property name="hibernate.connection.url">
+      jdbc:mysql://localhost/mbta
+   </property>
+   <property name="hibernate.connection.username">
+      root
+   </property>
+   <property name="hibernate.connection.password">
+      PASSWORD
+   </property>
+-->
 		
    <!-- List of XML mapping files. Commented out because adding
         the classes programatically via AnnoatedClassesList so
