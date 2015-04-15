@@ -21,7 +21,6 @@ import java.text.ParseException;
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
-import org.transitime.gtfs.gtfsStructs.GtfsTrip;
 import org.transitime.utils.csv.CsvBaseReader;
 
 /**
