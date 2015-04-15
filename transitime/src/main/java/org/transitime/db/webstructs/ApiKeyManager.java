@@ -15,14 +15,11 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.api.utils;
+package org.transitime.db.webstructs;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -218,22 +215,6 @@ public class ApiKeyManager {
 		// That key not found in database so report error
 		logger.error("Could not delete key {} because it was not in database",
 				key);
-	}
-
-	/**
-	 * Throws exception if the specified application key is not valid.
-	 * 
-	 * @param stdParameters
-	 * @throws WebApplicationException
-	 */
-	public void validateKey(StandardParameters stdParameters)
-			throws WebApplicationException {
-		String key = stdParameters.getKey();
-		if (!isKeyValid(key)) {
-			throw WebUtils.badRequestException(
-					Status.UNAUTHORIZED.getStatusCode(), "Application key \""
-							+ key + "\" is not valid.");
-		}
 	}
 
 	/**
