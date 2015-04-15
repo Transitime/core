@@ -51,11 +51,11 @@ import org.transitime.utils.Zip;
 */
 public class GtfsFileProcessor {
 
-// Optional command line info used within this class
-private final String gtfsUrl;
-private String gtfsZipFileName;
-// Last modified time of GTFS zip file. Null if zip file not used.
-private Date zipFileLastModifiedTime;
+	// Optional command line info used within this class
+	private final String gtfsUrl;
+	private String gtfsZipFileName;
+	// Last modified time of GTFS zip file. Null if zip file not used.
+	private Date zipFileLastModifiedTime;
 	private final String unzipSubdirectory;
 	private String gtfsDirectoryName;
 
