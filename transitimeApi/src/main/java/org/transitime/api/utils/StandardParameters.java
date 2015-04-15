@@ -25,12 +25,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
 
-import org.transitime.db.webstructs.ApiKeyManager;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.ServerStatusInterfaceFactory;
@@ -139,14 +136,7 @@ public class StandardParameters {
 		UsageValidator.getInstance().validateUsage(this);
 
 		// Make sure the application key is valid
-		// I have decoupled the manager from the web api.
-		try {
-			ApiKeyManager.getInstance().validateKey(key);
-		} catch (Exception e) {						
-			throw WebUtils.badRequestException(
-					Status.UNAUTHORIZED.getStatusCode(), "Application key \""
-							+ key + "\" is not valid.");
-		}
+		ApiKeyManager.getInstance().validateKey(this);
 	}
 
 	/**
@@ -262,11 +252,6 @@ public class StandardParameters {
 	 */
 	public HttpServletRequest getRequest() {
 		return request;
-	}
-
-	public void validate(HttpServletRequest request2) throws WebApplicationException {
-		// TODO Auto-generated method stub
-		this.request=request2;
 	}
 
 }
