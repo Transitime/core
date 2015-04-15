@@ -27,7 +27,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
+import org.transitime.db.webstructs.ApiKeyManager;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.ServerStatusInterfaceFactory;
@@ -136,7 +138,11 @@ public class StandardParameters {
 		UsageValidator.getInstance().validateUsage(this);
 
 		// Make sure the application key is valid
-		ApiKeyManager.getInstance().validateKey(this);
+		if (!ApiKeyManager.getInstance().isKeyValid(getKey())) {
+			throw WebUtils.badRequestException(
+					Status.UNAUTHORIZED.getStatusCode(), "Application key \""
+							+ getKey() + "\" is not valid.");			
+		}
 	}
 
 	/**
