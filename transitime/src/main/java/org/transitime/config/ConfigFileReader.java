@@ -20,6 +20,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
 import org.transitime.config.ConfigValue.ConfigParamException;
+import org.transitime.db.hibernate.HibernateUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -251,6 +253,25 @@ public class ConfigFileReader {
 				// If property not set yet then set it now
 				if (System.getProperty(propertyName) == null) {
 					String value = properties.getProperty(propertyName);
+
+					// Handle any property with a name ending with "File" 
+					// specially by seeing if it if a file in the class path.
+					// If it is then use the file name of the file that is 
+					// found in the classpath.
+					// NOTE: this might be confusing and therefore not a good idea.
+					if (propertyName.endsWith("File")) {
+						File f = new File(value);
+						if (!f.exists()) {
+							// Couldn't find file directly so look in classpath for it
+							ClassLoader classLoader = HibernateUtils.class.getClassLoader();
+							URL url = classLoader.getResource(value);
+							if (url != null)
+								value = url.toString();
+						}
+
+					}
+					
+					// Set the system property with the value
 					System.setProperty(propertyName, value);
 				}
 			}
