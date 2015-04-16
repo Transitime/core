@@ -120,7 +120,7 @@ public class Geo {
 	}
 	
 	/**
-	 * Returns the distance between two locations. Uses the ‘haversine’ 
+	 * Returns the distance between two locations. Uses the "haversine" 
 	 * formula to calculate the great-circle distance between two points. 
 	 * Therefore it is quite accurate, even over longer distances. But it
 	 * requires more trigonometric calculations so runs slower than
@@ -149,7 +149,7 @@ public class Geo {
 	
 	/**
 	 * Returns the distance between two locations. This method is quicker
-	 * than distanceHaversine() because it just uses Pythagoras’ theorem
+	 * than distanceHaversine() because it just uses Pythagoras theorem
 	 * and assumes a equirectangular projection. But it should be fine 
 	 * for relatively small distances, such as would get with a city.
 	 * 
