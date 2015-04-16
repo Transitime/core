@@ -6,4 +6,4 @@ The core fucntionality is in the transitime project. The REST api is in transiti
 2. transitimeApi
 3. transitimeWebapp
 
-The project can be built from the root "core" directory by running "mvn install -skipTests".
+The project can be built from the root "core" directory by running "mvn install -DskipTests".
