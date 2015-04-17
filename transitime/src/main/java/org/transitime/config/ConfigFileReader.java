@@ -266,7 +266,7 @@ public class ConfigFileReader {
 							ClassLoader classLoader = HibernateUtils.class.getClassLoader();
 							URL url = classLoader.getResource(value);
 							if (url != null)
-								value = url.toString();
+								value = url.getPath();
 						}
 
 					}
