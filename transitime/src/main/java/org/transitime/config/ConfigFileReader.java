@@ -254,32 +254,31 @@ public class ConfigFileReader {
 				if (System.getProperty(propertyName) == null) {
 					String value = properties.getProperty(propertyName);
 
-					// Handle any property with a name ending with "File" 
-					// specially by seeing if it if a file in the class path.
-					// If it is then use the file name of the file that is 
-					// found in the classpath.
-					// NOTE: this might be confusing and therefore not a good idea.
-					if (propertyName.endsWith("File")) {
-						File f = new File(value);
-						if (!f.exists()) {
-							// Couldn't find file directly so look in classpath for it
-							ClassLoader classLoader = HibernateUtils.class.getClassLoader();
-							URL url = classLoader.getResource(value);
-							if (url != null) {
-								value = url.getFile();
-								System.out.println("url.getFile()=" + url.getFile());
-								System.out.println("url.getPath()=" + url.getPath());
-								System.out.println("url.getQuery()=" + url.getQuery());
-								System.out.println("url.toString()=" + url.toString());
-
-								System.out.println("url.getRef()=" + url.getRef());
-								System.out.println("url.getProtocol()=" + url.getProtocol());
-								System.out.println("url.toString()=" + url.toString());
-
-							}
-						}
-
-					}
+//					// Handle any property with a name ending with "File" 
+//					// specially by seeing if it if a file in the class path.
+//					// If it is then use the file name of the file that is 
+//					// found in the classpath.
+//					// NOTE: this might be confusing and therefore not a good idea.
+//					if (propertyName.endsWith("File")) {
+//						File f = new File(value);
+//						if (!f.exists()) {
+//							// Couldn't find file directly so look in classpath for it
+//							ClassLoader classLoader = HibernateUtils.class.getClassLoader();
+//							URL url = classLoader.getResource(value);
+//							if (url != null) {
+//								value = url.getFile();
+//								System.out.println("url.getFile()=" + url.getFile());
+//								System.out.println("url.getPath()=" + url.getPath());
+//								System.out.println("url.getQuery()=" + url.getQuery());
+//								System.out.println("url.toString()=" + url.toString());
+//
+//								System.out.println("url.getRef()=" + url.getRef());
+//								System.out.println("url.getProtocol()=" + url.getProtocol());
+//								System.out.println("url.toString()=" + url.toString());
+//
+//							}
+//						}
+//					}
 					
 					// Set the system property with the value
 					System.setProperty(propertyName, value);
