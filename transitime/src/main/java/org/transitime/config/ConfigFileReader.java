@@ -265,8 +265,18 @@ public class ConfigFileReader {
 							// Couldn't find file directly so look in classpath for it
 							ClassLoader classLoader = HibernateUtils.class.getClassLoader();
 							URL url = classLoader.getResource(value);
-							if (url != null)
-								value = url.getPath();
+							if (url != null) {
+								value = url.getFile();
+								System.out.println("url.getFile()=" + url.getFile());
+								System.out.println("url.getPath()=" + url.getPath());
+								System.out.println("url.getQuery()=" + url.getQuery());
+								System.out.println("url.toString()=" + url.toString());
+
+								System.out.println("url.getRef()=" + url.getRef());
+								System.out.println("url.getProtocol()=" + url.getProtocol());
+								System.out.println("url.toString()=" + url.toString());
+
+							}
 						}
 
 					}

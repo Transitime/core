@@ -86,11 +86,14 @@ public class HibernateUtils {
 				dbName, fileName);
 		File f = new File(fileName);
 		if (!f.exists()) {
+			logger.info("The Hibername file {} doesn't exist as a regular file "
+					+ "so seeing if it is in classpath.", fileName);
+			
 			// Couldn't find file directly so look in classpath for it
 			ClassLoader classLoader = HibernateUtils.class.getClassLoader();
 			URL url = classLoader.getResource(fileName);
 			if (url != null)
-				f = new File(classLoader.getResource(fileName).getFile());
+				f = new File(url.getFile());
 		}
 		if (f.exists())
 			config.configure(f);
