@@ -32,7 +32,9 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>transitimeWebapp</finalName>
+		<!-- Set the name of the war file -->
+		<finalName>web</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

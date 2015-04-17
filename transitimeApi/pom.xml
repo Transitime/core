@@ -45,6 +45,9 @@
 	</dependencies>
 
 	<build>
+		<!-- Set the name of the war file -->
+		<finalName>api</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
