@@ -4,7 +4,8 @@
 
   <context-param>
       <param-name>transitime_config_file_location</param-name>
-      <param-value>/DIRECTORY_SET_IN_web.xml/transitimeConfigWebapp.xml</param-value>      
+      <!-- Set to customized properties file with db config info and such -->
+      <param-value>~/transitimeTomcatConfig/transitime.properties</param-value>      
   </context-param>
 
   <welcome-file-list>
