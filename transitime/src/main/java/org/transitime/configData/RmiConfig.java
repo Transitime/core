@@ -41,7 +41,7 @@ public class RmiConfig {
 	}
 	private static StringConfigValue rmiHost =
 			new StringConfigValue("transitime.rmi.rmiHost",
-					"127.0.0.1",
+					null,
 					"For a client that needs to connect to an agency server. "
 					+ "Usually would get RMI host name from the WebAgencies "
 					+ "table in the web database. But when doing simple calls "
