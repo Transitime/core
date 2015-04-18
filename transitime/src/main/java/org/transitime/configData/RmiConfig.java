@@ -43,7 +43,7 @@ public class RmiConfig {
 			new StringConfigValue("transitime.rmi.rmiHost",
 					null,
 					"For a client that needs to connect to an agency server. "
-					+ "Usually would get RMI host name from the WebAgencies "
+					+ "When null system gets RMI host name from the WebAgencies "
 					+ "table in the web database. But when doing simple calls "
 					+ "using this parameter eliminates the need to connect to "
 					+ "the web database, speeding up testing.");
