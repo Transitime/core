@@ -361,6 +361,8 @@ public class ConfigFileReader {
 		// Don't want reading while writing so lock access
 		writeLock.lock();
 		
+		System.out.println("Processing configuration file " + fileName);
+		
 		try {
 			// Read in the data from config file
 			if (fileName != null)
