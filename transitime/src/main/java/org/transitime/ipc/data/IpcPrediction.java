@@ -112,8 +112,8 @@ public class IpcPrediction implements Serializable {
 		this.passengerFullness = avlReport.getPassengerFullness();
 		this.isArrival = isArrival;
 
-		// Log each creation of a Prediction
-		logger.info(this.toString());
+		// Debug log each creation of a Prediction
+		logger.debug("Creating {}", this);
 	}
 
 	/**
