@@ -282,6 +282,9 @@ public class ConfigFileReader {
 					
 					// Set the system property with the value
 					System.setProperty(propertyName, value);
+					
+					System.out.println("Setting property name " + propertyName 
+							+ " to value " + value);
 				}
 			}
 		} catch (IOException e) {
