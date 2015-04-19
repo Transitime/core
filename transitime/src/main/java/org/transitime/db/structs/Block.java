@@ -401,24 +401,45 @@ public final class Block implements Serializable {
 	/**
 	 * Determines which trip is currently active and returns the associated
 	 * index of that trip such that getTrip(int) can be called to get the trip.
-	 * Trip is active if the date lies between the end time of the previous trip and the end time of the current
-	 * trip. To handle wrapping around midnight if there isn't a match initially
-	 * then will check past midnight and before midnight as well.
+	 * Trip is active if the date lies between the end time of the previous trip
+	 * and the end time of the current trip. To handle wrapping around midnight
+	 * if there isn't a match initially then will check past midnight and before
+	 * midnight as well.
+	 * <p>
+	 * Often consider a block to be active before its scheduled start time. For
+	 * this situation the first trip is returned if it is within
+	 * allowableBeforeTimeSecs before the block is supposed to start.
 	 * 
 	 * @param date
+	 *            The current time, to be used for determining if trip active.
+	 * @param allowableBeforeTimeSecs
+	 *            How much before the block time the block is considered to be
+	 *            active. Needed because often consider a block to be active
+	 *            before its scheduled start time. For this situation need to
+	 *            return first trip.
 	 * @return index of trip, or -1 if no match
 	 */
-	public int activeTripIndex(Date date) {
+	public int activeTripIndex(Date date, int allowableBeforeTimeSecs) {
+		// Find matching trip
 		int secondsIntoDay = 
-				Core.getInstance().getTime().getSecondsIntoDay(date);
-		
+				Core.getInstance().getTime().getSecondsIntoDay(date);		
 		int index = activeTripIndex(secondsIntoDay);
+
+		// If match not found check a day into future and day into past
 		if (index < 0) {
 			index = activeTripIndex(secondsIntoDay + Time.SEC_PER_DAY);
 			if (index < 0)
 				index = activeTripIndex(secondsIntoDay - Time.SEC_PER_DAY);
 		}
 
+		// Date is not when trip is supposed to be active. But since blocks 
+		// are considered to be active allowableBeforeTimeSecs before their
+		// scheduled start time if the block is active then must be matching
+		// to the first trip, so return 0.
+		if (index < 0 && isActive(date, allowableBeforeTimeSecs))
+			return 0;
+				
+		// Return result
 		return index;
 	}
 	

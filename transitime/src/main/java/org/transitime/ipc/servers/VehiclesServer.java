@@ -287,7 +287,8 @@ public class VehiclesServer extends AbstractServer
 			// since can't get that info from the vehicle. This way the block
 			// can be properly grouped with the associated route even when it
 			// doesn't have a vehicle assigned.
-			int activeTripIndex = block.activeTripIndex(new Date());
+			int activeTripIndex = block.activeTripIndex(new Date(), 
+					allowableBeforeTimeSecs);
 			
 			// Determine vehicles associated with the block if there are any
 			Collection<String> vehicleIdsForBlock = VehicleDataCache
