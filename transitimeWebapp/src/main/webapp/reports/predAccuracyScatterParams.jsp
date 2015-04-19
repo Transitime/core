@@ -8,8 +8,8 @@
 <title>Specify Parameters</title>
 
   <!-- Load in Select2 files so can create fancy selectors -->
-  <link href="./select2/select2.css" rel="stylesheet"/>
-  <script src="./select2/select2.min.js"></script>
+  <link href="../select2/select2.css" rel="stylesheet"/>
+  <script src="../select2/select2.min.js"></script>
   
   <style>
     label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
