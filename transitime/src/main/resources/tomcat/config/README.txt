@@ -7,6 +7,4 @@ that can load in new version of Tomcat along with config files.
 The files, and where they go, are:
 /usr/share/tomcat7/conf/server.xml - for enabling compression
 /usr/share/tomcat7/conf/catalina.properties - for speeding startup and for setting the shared lib directory
-/usr/sbin/tomcat7 - for loading in the setenv.sh file to set Transitime Java properties
-/usr/share/tomcat7/bin/setenv.sh - for setting the Transitime Java properties
 
