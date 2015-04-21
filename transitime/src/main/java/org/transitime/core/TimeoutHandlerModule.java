@@ -43,9 +43,11 @@ import org.transitime.utils.Time;
  */
 public class TimeoutHandlerModule extends Module {
 
-	// For keeping track of the last AVL report for each vehicle.
-	// Keyed on vehicle ID.
-	private HashMap<String, AvlReport> avlReportsMap = new HashMap<String, AvlReport>();
+	// For keeping track of the last AVL report for each vehicle. Keyed on 
+	// vehicle ID. Synchronize map modifications since elsewhere the elements 
+	// can be removed from the map.
+	private HashMap<String, AvlReport> avlReportsMap = 
+			new HashMap<String, AvlReport>();
 
 	/********************* Parameters *********************************/
 
@@ -119,7 +121,11 @@ public class TimeoutHandlerModule extends Module {
 	 *            AVL report to store
 	 */
 	public void storeAvlReport(AvlReport avlReport) {
-		avlReportsMap.put(avlReport.getVehicleId(), avlReport);
+		// Synchronize map modifications since elsewhere the elements can be removed
+		// from the map.
+		synchronized (avlReportsMap) {
+			avlReportsMap.put(avlReport.getVehicleId(), avlReport);
+		}
 	}
 	
 	/**
@@ -131,7 +137,7 @@ public class TimeoutHandlerModule extends Module {
 	 * @param now
 	 * @param mapIterator
 	 */
-	private void handlePredictable(VehicleState vehicleState, long now, Iterator<AvlReport> mapIterator) {
+	private void handlePredictablePossibleTimeout(VehicleState vehicleState, long now, Iterator<AvlReport> mapIterator) {
 		// If haven't reported in too long...
 		long maxNoAvl = allowableNoAvl.getValue() * Time.MS_PER_SEC;
 		if (now > vehicleState.getAvlReport().getTime() + maxNoAvl) {
@@ -165,7 +171,7 @@ public class TimeoutHandlerModule extends Module {
 	 * @param mapIterator
 	 *            So can remove AVL report from map
 	 */
-	private void handleNotPredictable(Iterator<AvlReport> mapIterator) {
+	private void handleNotPredictablePossibleTimeout(Iterator<AvlReport> mapIterator) {
 		mapIterator.remove();
 	}
 
@@ -180,7 +186,7 @@ public class TimeoutHandlerModule extends Module {
 	 * @param now
 	 * @param mapIterator
 	 */
-	private void handleSchedBasedPreds(VehicleState vehicleState, long now,
+	private void handleSchedBasedPredsPossibleTimeout(VehicleState vehicleState, long now,
 			Iterator<AvlReport> mapIterator) {
 		long scheduledDepartureTime = vehicleState.getMatch()
 				.getScheduledWaitStopTime();
@@ -224,7 +230,7 @@ public class TimeoutHandlerModule extends Module {
 	 * @param now
 	 * @param mapIterator
 	 */
-	private void handleWaitStop(VehicleState vehicleState, long now,
+	private void handleWaitStopPossibleTimeout(VehicleState vehicleState, long now,
 			Iterator<AvlReport> mapIterator) {
 		long scheduledDepartureTime = vehicleState.getMatch()
 				.getScheduledWaitStopTime();
@@ -268,30 +274,38 @@ public class TimeoutHandlerModule extends Module {
 		// that doesn't work for playback.
 		long now = Core.getInstance().getSystemTime();
 
-		// Using an Iterator instead of for(AvlReport a : map.values()) because
-		// removing elements while iterating. Way to do this without
-		// getting concurrent access exception is to use an Iterator.
-		Iterator<AvlReport> mapIterator = avlReportsMap.values().iterator();
-		while (mapIterator.hasNext()) {
-			AvlReport avlReport = mapIterator.next();
-
-			// Get state of vehicle and handle based on it
-			VehicleState vehicleState = VehicleStateManager.getInstance()
-					.getVehicleState(avlReport.getVehicleId());
-
-			synchronized (vehicleState) {
-				if (!vehicleState.isPredictable()) {
-					// Vehicle is not predictable
-					handleNotPredictable(mapIterator);
-				} else if (vehicleState.isForSchedBasedPreds()) {
-					// Handle schedule based predictions vehicle
-					handleSchedBasedPreds(vehicleState, now, mapIterator);
-				} else if (vehicleState.isWaitStop()) {
-					// Handle where vehicle is at a wait stop
-					handleWaitStop(vehicleState, now, mapIterator);
-				} else {
-					// Not a special case. Simply determine if vehicle timed out
-					handlePredictable(vehicleState, now, mapIterator);
+		// Sync access to avlReportsMap since it can be simultaneously 
+		// modified elsewhere
+		synchronized (avlReportsMap) {				
+			// Using an Iterator instead of for(AvlReport a : map.values()) 
+			// because removing elements while iterating. Way to do this without
+			// getting concurrent access exception is to use an Iterator.
+			Iterator<AvlReport> mapIterator = avlReportsMap.values().iterator();
+			while (mapIterator.hasNext()) {
+				AvlReport avlReport = mapIterator.next();
+	
+				// Get state of vehicle and handle based on it
+				VehicleState vehicleState = VehicleStateManager.getInstance()
+						.getVehicleState(avlReport.getVehicleId());
+	
+				synchronized (vehicleState) {
+					if (!vehicleState.isPredictable()) {
+						// Vehicle is not predictable
+						handleNotPredictablePossibleTimeout(mapIterator);
+					} else if (vehicleState.isForSchedBasedPreds()) {
+						// Handle schedule based predictions vehicle
+						handleSchedBasedPredsPossibleTimeout(vehicleState, now,
+								mapIterator);
+					} else if (vehicleState.isWaitStop()) {
+						// Handle where vehicle is at a wait stop
+						handleWaitStopPossibleTimeout(vehicleState, now,
+								mapIterator);
+					} else {
+						// Not a special case. Simply determine if vehicle 
+						// timed out
+						handlePredictablePossibleTimeout(vehicleState, now,
+								mapIterator);
+					}
 				}
 			}
 		}
