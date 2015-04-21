@@ -48,7 +48,7 @@ public class ClientFactory<T extends Remote> {
 	private static Boolean rmiTimeoutEnabled = false;
 
 	private static IntegerConfigValue timeoutSec = new IntegerConfigValue(
-			"transitime.rmi.timeoutSec", 2,
+			"transitime.rmi.timeoutSec", 4,
 			"Specifies the timeout time in seconds for RMI calls. Note "
 					+ "that when an RMI failure occurs a second try is done "
 					+ "so total timeout time is twice what is specified here.");
@@ -193,6 +193,15 @@ public class ClientFactory<T extends Remote> {
 		}
 	}
 
+	/**
+	 * Returns the timeout time. Useful for error messages.
+	 * 
+	 * @return Timeout time in seconds
+	 */
+	public static int getTimeoutSec() {
+		return timeoutSec.getValue();
+	}
+	
 	/**
 	 * Just for debugging.
 	 * 

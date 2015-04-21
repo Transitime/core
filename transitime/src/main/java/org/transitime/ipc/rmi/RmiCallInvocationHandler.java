@@ -261,7 +261,11 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 							info.getAgencyId(), e.getMessage());
 					throw new RemoteException(e.getMessage() +  
 							". Gave up after second attempt. Does security "
-							+ "allow access to the secondary RMI port?");
+							+ "allow access to the secondary RMI port? "
+							+ "Is the Java system property "
+							+ "transitime.rmi.timeoutSec timeout time of " 
+							+ ClientFactory.getTimeoutSec() 
+							+ " seconds adequate?");
 			} catch (ConcurrentAccessException e) {
 				// Encountered a ConcurrentAccessException which means the RMI
 				// call could not be done. Throw a RemoteException since that is
