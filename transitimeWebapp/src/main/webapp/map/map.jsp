@@ -26,7 +26,7 @@
   <script src="<%= request.getContextPath() %>/javascript/jquery-dateFormat.min.js"></script>
 
   <%-- MBTA wants some color customization. Load in options file if mbta --%>
-  <% if (request.getParameter("a").equals("mbta")) { %>
+  <% if (request.getParameter("a").startsWith("mbta")) { %>
     <link rel="stylesheet" href="css/mbtaMapUi.css" />
     <script src="javascript/mbtaMapUiOptions.js"></script>
   <% } %>
