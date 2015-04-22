@@ -46,6 +46,15 @@
 			<version>4.3.9.Final</version>
 		</dependency>		
 
+		<!-- hibernate-core loads in really old version of xml-apis so
+                     load in newer version explicitly. Otherwise get problems
+		     with the Node class. -->
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<version>1.4.01</version>
+		</dependency>		
+
 		<!-- For logging -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
