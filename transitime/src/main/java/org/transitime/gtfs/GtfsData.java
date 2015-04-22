@@ -1490,7 +1490,7 @@ public class GtfsData {
 		// End date is not in the future so see if it is being added as an
 		// exception via the calendar_dates.txt file.
 		for (CalendarDate calendarDate : calendarDates) {
-			if (calendarDate.getServiceId().equals(calendarDate.getServiceId())
+			if (calendar.getServiceId().equals(calendarDate.getServiceId())
 					&& calendarDate.addService() 
 					&& calendarDate.getDate().getTime() > System.currentTimeMillis()) {
 				return true;
