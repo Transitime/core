@@ -90,8 +90,23 @@ public class GtfsTrip extends CsvBase {
 		serviceId = getRequiredUnlessSupplementalValue(record, "service_id");
 		tripId = getRequiredUnlessSupplementalValue(record, "trip_id");
 		tripHeadsign = getOptionalValue(record, "trip_headsign");
-		tripShortName = getTripShortName(
-				getOptionalValue(record, "trip_short_name"), tripId);
+		
+		// Trip short name is a bit more complicated. For a regular 
+		// non-supplemental trips.txt file want to use the trip_short_name
+		// if it is specified but otherwise use the trip_name or use a 
+		// regular expression on the trip_id to determine it. Hence,
+		// getTripShortName() is called to determine the trip short name
+		// for a non-supplemental file. But for a supplemental file only
+		// want to use a trip_short_name if it is specified. This way won't
+		// overwrite the trip short name from the regular trips.txt file
+		// unless the trip_short_name is explicitly specified in the 
+		// supplemental trips.txt file.
+		tripShortName =
+				supplemental ? getOptionalValue(record, "trip_short_name")
+						: getTripShortName(
+								getOptionalValue(record, "trip_short_name"),
+								tripId);
+		
 		directionId = getOptionalValue(record, "direction_id");
 		blockId = getOptionalValue(record, "block_id");
 		shapeId = getOptionalValue(record, "shape_id");
