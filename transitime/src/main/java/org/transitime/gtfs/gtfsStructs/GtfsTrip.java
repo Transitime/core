@@ -46,6 +46,7 @@ public class GtfsTrip extends CsvBase {
 	// trip_short_name is not specified in GTFS file.
 	// Default of null means simply use trip_id without any modification.
 	private static StringConfigValue tripShortNameRegEx = new StringConfigValue(
+			null,
 			"transitime.gtfs.tripShortNameRegEx", 
 			"For agencies where trip short name not specified can use this "
 			+ "regular expression to determine the short name from the trip "
