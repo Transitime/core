@@ -1,8 +1,4 @@
 
-    drop table if exists ApiKeys cascade;
-
-    drop table if exists WebAgencies cascade;
-
     create table ApiKeys (
         applicationName varchar(80) not null,
         applicationKey varchar(20),
@@ -19,7 +15,7 @@
         dbEncryptedPassword varchar(60),
         dbHost varchar(120),
         dbName varchar(60),
-        dbType varchar(60),        
+        dbType varchar(60),
         dbUserName varchar(60),
         hostName varchar(120),
         primary key (agencyId)

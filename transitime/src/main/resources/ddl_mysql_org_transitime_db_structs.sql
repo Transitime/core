@@ -28,7 +28,7 @@
         tripId varchar(60) not null,
         time datetime(3) not null,
         stopId varchar(60) not null,
-        isArrival boolean not null,
+        isArrival bit not null,
         gtfsStopSeq integer not null,
         avlTime datetime(3),
         blockId varchar(60),
@@ -94,15 +94,15 @@
     );
 
     create table Calendars (
-        wednesday boolean not null,
-        tuesday boolean not null,
-        thursday boolean not null,
-        sunday boolean not null,
+        wednesday bit not null,
+        tuesday bit not null,
+        thursday bit not null,
+        sunday bit not null,
         startDate date not null,
         serviceId varchar(60) not null,
-        saturday boolean not null,
-        monday boolean not null,
-        friday boolean not null,
+        saturday bit not null,
+        monday bit not null,
+        friday bit not null,
         endDate date not null,
         configRev integer not null,
         primary key (wednesday, tuesday, thursday, sunday, startDate, serviceId, saturday, monday, friday, endDate, configRev)
@@ -147,7 +147,7 @@
         startTime integer not null,
         configRev integer not null,
         endTime integer,
-        exactTimes boolean,
+        exactTimes bit,
         headwaySecs integer,
         primary key (tripId, startTime, configRev)
     );
@@ -170,14 +170,14 @@
         type varchar(40) not null,
         time datetime(3) not null,
         message longtext,
-        triggered boolean,
+        triggered bit,
         value double precision,
         primary key (type, time)
     );
 
     create table PredictionAccuracy (
         id bigint not null auto_increment,
-        affectedByWaitStop boolean,
+        affectedByWaitStop bit,
         arrivalDepartureTime datetime(3),
         directionId varchar(60),
         predictedTime datetime(3),
@@ -193,13 +193,13 @@
 
     create table Predictions (
         id bigint not null auto_increment,
-        affectedByWaitStop boolean,
+        affectedByWaitStop bit,
         configRev integer,
         creationTime datetime(3),
-        isArrival boolean,
+        isArrival bit,
         predictionTime datetime(3),
         routeId varchar(60),
-        schedBasedPred boolean,
+        schedBasedPred bit,
         stopId varchar(60),
         tripId varchar(60),
         vehicleId varchar(60),
@@ -215,7 +215,7 @@
         maxLon double precision,
         minLat double precision,
         minLon double precision,
-        hidden boolean,
+        hidden bit,
         maxDistance double precision,
         name varchar(255),
         routeOrder integer,
@@ -231,14 +231,14 @@
         configRev integer not null,
         breakTime integer,
         gtfsStopSeq integer,
-        lastStopInTrip boolean,
-        layoverStop boolean,
+        lastStopInTrip bit,
+        layoverStop bit,
         locations blob,
         pathLength double precision,
         routeId varchar(60),
-        scheduleAdherenceStop boolean,
+        scheduleAdherenceStop bit,
         stopId varchar(60),
-        waitStop boolean,
+        waitStop bit,
         primary key (tripPatternId, stopPathId, configRev)
     );
 
@@ -246,13 +246,13 @@
         id varchar(60) not null,
         configRev integer not null,
         code integer,
-        hidden boolean,
-        layoverStop boolean,
+        hidden bit,
+        layoverStop bit,
         lat double precision,
         lon double precision,
         name varchar(255),
-        timepointStop boolean,
-        waitStop boolean,
+        timepointStop bit,
+        waitStop bit,
         primary key (id, configRev)
     );
 
@@ -344,7 +344,7 @@
         capacity integer,
         crushCapacity integer,
         description varchar(255),
-        passengerVehicle boolean,
+        passengerVehicle bit,
         type integer,
         primary key (id)
     );
@@ -353,12 +353,12 @@
         vehicleId varchar(60) not null,
         time datetime(3) not null,
         eventType varchar(60) not null,
-        becameUnpredictable boolean,
+        becameUnpredictable bit,
         blockId varchar(60),
         description longtext,
         lat double precision,
         lon double precision,
-        predictable boolean,
+        predictable bit,
         routeId varchar(60),
         routeShortName varchar(60),
         stopId varchar(60),
@@ -371,18 +371,6 @@
 
     create index AvlReportsTimeIndex on AvlReports (time);
 
-    alter table Block_to_Trip_joinTable 
-        add index FK_abaj8ke6oh4imbbgnaercsowo (trips_tripId, trips_startTime, trips_configRev), 
-        add constraint FK_abaj8ke6oh4imbbgnaercsowo 
-        foreign key (trips_tripId, trips_startTime, trips_configRev) 
-        references Trips (tripId, startTime, configRev);
-
-    alter table Block_to_Trip_joinTable 
-        add index FK_1c1e1twdap19vq0xkav0amvm (Blocks_serviceId, Blocks_configRev, Blocks_blockId), 
-        add constraint FK_1c1e1twdap19vq0xkav0amvm 
-        foreign key (Blocks_serviceId, Blocks_configRev, Blocks_blockId) 
-        references Blocks (serviceId, configRev, blockId);
-
     create index avlTimeIndex on Matches (avlTime);
 
     create index MonitoringEventsTimeIndex on MonitoringEvents (time);
@@ -391,45 +379,49 @@
 
     create index PredictionTimeIndex on Predictions (creationTime);
 
+    create index travelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
+
+    alter table TripPattern_to_Path_joinTable 
+        add constraint UK_s0gaw8iv60vc17a5ltryqwg27  unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
+
+    create index VehicleEventsTimeIndex on VehicleEvents (time);
+
+    alter table Block_to_Trip_joinTable 
+        add constraint FK_abaj8ke6oh4imbbgnaercsowo 
+        foreign key (trips_tripId, trips_startTime, trips_configRev) 
+        references Trips (tripId, startTime, configRev);
+
+    alter table Block_to_Trip_joinTable 
+        add constraint FK_1c1e1twdap19vq0xkav0amvm 
+        foreign key (Blocks_serviceId, Blocks_configRev, Blocks_blockId) 
+        references Blocks (serviceId, configRev, blockId);
+
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
-        add index FK_hh5uepurijcqj0pyc6e3h5mqw (travelTimesForStopPaths_id), 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 
         foreign key (travelTimesForStopPaths_id) 
         references TravelTimesForStopPaths (id);
 
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
-        add index FK_9j1s8ewsmokqg4m35wrr29na7 (TravelTimesForTrips_id), 
         add constraint FK_9j1s8ewsmokqg4m35wrr29na7 
         foreign key (TravelTimesForTrips_id) 
         references TravelTimesForTrips (id);
 
-    create index travelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
-
     alter table TripPattern_to_Path_joinTable 
-        add constraint UK_s0gaw8iv60vc17a5ltryqwg27 unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
-
-    alter table TripPattern_to_Path_joinTable 
-        add index FK_s0gaw8iv60vc17a5ltryqwg27 (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev), 
         add constraint FK_s0gaw8iv60vc17a5ltryqwg27 
         foreign key (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev) 
         references StopPaths (tripPatternId, stopPathId, configRev);
 
     alter table TripPattern_to_Path_joinTable 
-        add index FK_qsr8l6u1nelb5pt8rlnei08sy (TripPatterns_id, TripPatterns_configRev), 
         add constraint FK_qsr8l6u1nelb5pt8rlnei08sy 
         foreign key (TripPatterns_id, TripPatterns_configRev) 
         references TripPatterns (id, configRev);
 
     alter table Trips 
-        add index FK_p1er53449kkfsca6mbnxkdyst (travelTimes_id), 
         add constraint FK_p1er53449kkfsca6mbnxkdyst 
         foreign key (travelTimes_id) 
         references TravelTimesForTrips (id);
 
     alter table Trips 
-        add index FK_676npp7h4bxh8sjcnugnxt5wb (tripPattern_id, tripPattern_configRev), 
         add constraint FK_676npp7h4bxh8sjcnugnxt5wb 
         foreign key (tripPattern_id, tripPattern_configRev) 
         references TripPatterns (id, configRev);
-
-    create index VehicleEventsTimeIndex on VehicleEvents (time);

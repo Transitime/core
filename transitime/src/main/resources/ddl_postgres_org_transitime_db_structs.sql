@@ -371,6 +371,21 @@
 
     create index AvlReportsTimeIndex on AvlReports (time);
 
+    create index avlTimeIndex on Matches (avlTime);
+
+    create index MonitoringEventsTimeIndex on MonitoringEvents (time);
+
+    create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
+
+    create index PredictionTimeIndex on Predictions (creationTime);
+
+    create index travelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
+
+    alter table TripPattern_to_Path_joinTable 
+        add constraint UK_s0gaw8iv60vc17a5ltryqwg27  unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
+
+    create index VehicleEventsTimeIndex on VehicleEvents (time);
+
     alter table Block_to_Trip_joinTable 
         add constraint FK_abaj8ke6oh4imbbgnaercsowo 
         foreign key (trips_tripId, trips_startTime, trips_configRev) 
@@ -381,14 +396,6 @@
         foreign key (Blocks_serviceId, Blocks_configRev, Blocks_blockId) 
         references Blocks;
 
-    create index avlTimeIndex on Matches (avlTime);
-
-    create index MonitoringEventsTimeIndex on MonitoringEvents (time);
-
-    create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
-
-    create index PredictionTimeIndex on Predictions (creationTime);
-
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 
         foreign key (travelTimesForStopPaths_id) 
@@ -398,11 +405,6 @@
         add constraint FK_9j1s8ewsmokqg4m35wrr29na7 
         foreign key (TravelTimesForTrips_id) 
         references TravelTimesForTrips;
-
-    create index travelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
-
-    alter table TripPattern_to_Path_joinTable 
-        add constraint UK_s0gaw8iv60vc17a5ltryqwg27 unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
 
     alter table TripPattern_to_Path_joinTable 
         add constraint FK_s0gaw8iv60vc17a5ltryqwg27 
@@ -423,7 +425,5 @@
         add constraint FK_676npp7h4bxh8sjcnugnxt5wb 
         foreign key (tripPattern_id, tripPattern_configRev) 
         references TripPatterns;
-
-    create index VehicleEventsTimeIndex on VehicleEvents (time);
 
     create sequence hibernate_sequence;

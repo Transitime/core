@@ -1,8 +1,4 @@
 
-    drop table ApiKeys cascade constraints;
-
-    drop table WebAgencies cascade constraints;
-
     create table ApiKeys (
         applicationName varchar2(80 char) not null,
         applicationKey varchar2(20 char),

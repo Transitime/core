@@ -1,8 +1,4 @@
 
-    drop table if exists ApiKeys;
-
-    drop table if exists WebAgencies;
-
     create table ApiKeys (
         applicationName varchar(80) not null,
         applicationKey varchar(20),
@@ -15,7 +11,7 @@
 
     create table WebAgencies (
         agencyId varchar(60) not null,
-        active boolean,
+        active bit,
         dbEncryptedPassword varchar(60),
         dbHost varchar(120),
         dbName varchar(60),
