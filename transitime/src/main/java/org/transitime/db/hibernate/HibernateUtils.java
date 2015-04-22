@@ -86,7 +86,7 @@ public class HibernateUtils {
 				dbName, fileName);
 		File f = new File(fileName);
 		if (!f.exists()) {
-			logger.info("The Hibername file {} doesn't exist as a regular file "
+			logger.info("The Hibernate file {} doesn't exist as a regular file "
 					+ "so seeing if it is in classpath.", fileName);
 			
 			// Couldn't find file directly so look in classpath for it
