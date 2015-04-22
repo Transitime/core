@@ -167,7 +167,9 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 		// Get vehicle ID
 		String vehicleId = getValue(line, vehicleIdMarker + "(\\d+)");
 		
-		// Get the vehicle location
+		// Get the vehicle assignment. The "workpiece" is the block assignment
+		// and the "pattern" is the trip ID. Given that block assignments are
+		// a bit iffy for MBTA Commuter Rail it is best to use trip assignments.
 		String workpiece = 
 				adjustAssignment(getValue(line, workpieceMarker + "(\\d+)"));
 		String pattern = 
