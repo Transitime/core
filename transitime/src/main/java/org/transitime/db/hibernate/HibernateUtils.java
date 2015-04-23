@@ -27,9 +27,9 @@ import java.util.Properties;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.DbSetupConfig;
@@ -137,8 +137,8 @@ public class HibernateUtils {
 		
 		// Get the session factory for persistence
 		Properties properties = config.getProperties();
-		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
-				.applySettings(properties).buildServiceRegistry();
+		ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+				.applySettings(properties).build();
 		SessionFactory sessionFactory = 
 				config.buildSessionFactory(serviceRegistry);
 
