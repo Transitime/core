@@ -371,7 +371,7 @@
 
     create index AvlReportsTimeIndex on AvlReports (time);
 
-    create index avlTimeIndex on Matches (avlTime);
+    create index AvlTimeIndex on Matches (avlTime);
 
     create index MonitoringEventsTimeIndex on MonitoringEvents (time);
 
@@ -379,7 +379,7 @@
 
     create index PredictionTimeIndex on Predictions (creationTime);
 
-    create index travelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
+    create index TravelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
 
     alter table TripPattern_to_Path_joinTable 
         add constraint UK_s0gaw8iv60vc17a5ltryqwg27  unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);

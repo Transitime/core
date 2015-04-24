@@ -27,6 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -36,7 +37,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -58,10 +58,9 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable // From jcip.annoations
 @Entity @DynamicUpdate 
-@Table(name="AvlReports") 
-@org.hibernate.annotations.Table(appliesTo = "AvlReports", 
-                                 indexes = { @Index(name="AvlReportsTimeIndex", 
-                                                    columnNames={"time"} ) })
+@Table(name="AvlReports",  
+       indexes = { @Index(name="AvlReportsTimeIndex", 
+                          columnList="time" ) })
 public class AvlReport implements Serializable {
 	// vehicleId is an @Id since might get multiple AVL reports
 	// for different vehicles with the same time but need a unique

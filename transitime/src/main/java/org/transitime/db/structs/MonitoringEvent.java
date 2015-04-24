@@ -24,6 +24,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -34,7 +35,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -51,10 +51,9 @@ import org.transitime.utils.IntervalTimer;
  */
 @Immutable // From jcip.annoations
 @Entity @DynamicUpdate 
-@Table(name="MonitoringEvents")
-@org.hibernate.annotations.Table(appliesTo = "MonitoringEvents", 
-indexes = { @Index(name="MonitoringEventsTimeIndex", 
-                   columnNames={"time"} ) } )
+@Table(name="MonitoringEvents",
+       indexes = { @Index(name="MonitoringEventsTimeIndex", 
+                   columnList="time" ) } )
 public class MonitoringEvent implements Serializable {
 	// The time the event occurred
 	@Id

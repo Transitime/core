@@ -24,6 +24,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -33,7 +34,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -51,10 +51,9 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  */
 @Entity @DynamicUpdate 
-@Table(name="ArrivalsDepartures") 
-@org.hibernate.annotations.Table(appliesTo = "ArrivalsDepartures", 
-   indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
-                      columnNames={"time"} ) } )
+@Table(name="ArrivalsDepartures",
+       indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
+                      columnList="time" ) } )
 public class ArrivalDeparture implements Serializable {
 	
 	@Id 

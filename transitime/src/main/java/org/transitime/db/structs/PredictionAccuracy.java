@@ -25,12 +25,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.transitime.db.hibernate.HibernateUtils;
 
 /**
@@ -41,10 +41,9 @@ import org.transitime.db.hibernate.HibernateUtils;
  *
  */
 @Entity @DynamicUpdate 
-@Table(name="PredictionAccuracy") 
-@org.hibernate.annotations.Table(appliesTo = "PredictionAccuracy", 
-indexes = { @Index(name="PredictionAccuracyTimeIndex", 
-                   columnNames={"arrivalDepartureTime"} ) } )
+@Table(name="PredictionAccuracy",
+       indexes = { @Index(name="PredictionAccuracyTimeIndex", 
+                   columnList="arrivalDepartureTime" ) } )
 public class PredictionAccuracy implements Serializable {
 
 	// Need an ID but using regular columns doesn't really make

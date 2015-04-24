@@ -27,6 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OrderColumn;
@@ -38,7 +39,6 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -54,11 +54,9 @@ import org.transitime.db.hibernate.HibernateUtils;
  */
 @Entity 
 @DynamicUpdate 
-@Table(name="TravelTimesForTrips")
-@org.hibernate.annotations.Table(
-		appliesTo = "TravelTimesForTrips", 
-		indexes = { @Index(	name="travelTimesRevIndex", 
-                   			columnNames={"travelTimesRev"} ) } )
+@Table(name="TravelTimesForTrips",
+       indexes = { @Index(	name="TravelTimesRevIndex", 
+                   			columnList="travelTimesRev" ) } )
 public class TravelTimesForTrip implements Serializable {
 
 	// Need a generated ID because trying to share TravelTimesForStopPath 
