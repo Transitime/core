@@ -25,6 +25,7 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,7 +36,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -55,10 +55,9 @@ import org.transitime.utils.Time;
  */
 @Immutable // From jcip.annoations
 @Entity @DynamicUpdate 
-@Table(name="VehicleEvents")
-@org.hibernate.annotations.Table(appliesTo = "VehicleEvents", 
-indexes = { @Index(name="VehicleEventsTimeIndex", 
-                   columnNames={"time"} ) } )
+@Table(name="VehicleEvents",
+       indexes = { @Index(name="VehicleEventsTimeIndex", 
+                   columnList="time" ) } )
 public class VehicleEvent implements Serializable {
 
 	// Time of the event. Should correspond to last AVL report time so that
