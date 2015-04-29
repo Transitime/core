@@ -116,10 +116,12 @@ public class GtfsRtTripFeed {
 			tripDescriptor.setRouteId(firstPred.getRouteId());
 		if (firstPred.getTripId() != null) {
 			tripDescriptor.setTripId(firstPred.getTripId());
+			
 			long tripStartEpochTime = firstPred.getTripStartEpochTime();
 			String tripStartDateStr =
 					gtfsRealtimeDateFormatter.format(new Date(
 							tripStartEpochTime));
+			tripDescriptor.setStartDate(tripStartDateStr);
 		}
 		tripUpdate.setTrip(tripDescriptor);
 		
