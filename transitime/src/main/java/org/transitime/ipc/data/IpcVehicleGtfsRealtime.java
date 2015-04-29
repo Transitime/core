@@ -27,7 +27,6 @@ import org.transitime.core.TemporalDifference;
 import org.transitime.core.TemporalMatch;
 import org.transitime.core.VehicleAtStopInfo;
 import org.transitime.core.VehicleState;
-import org.transitime.db.structs.Trip;
 import org.transitime.utils.Time;
 
 
