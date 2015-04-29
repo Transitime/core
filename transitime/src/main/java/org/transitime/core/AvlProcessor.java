@@ -274,7 +274,11 @@ public class AvlProcessor {
 	 *         doesn't currently match or if there is not enough history for the
 	 *         vehicle then false is returned.
 	 */
-	private boolean isVehicleDelayed(VehicleState vehicleState) {
+	private boolean handlePossibleVehicleDelay(VehicleState vehicleState) {
+		// Assume vehicle is not delayed
+		boolean wasDelayed = vehicleState.isDelayed();
+		vehicleState.setIsDelayed(false);
+		
 		// Determine the new match
 		TemporalMatch currentMatch = vehicleState.getMatch();
 		
@@ -306,17 +310,39 @@ public class AvlProcessor {
 			boolean traversedWaitStop = previousMatch
 					.traversedWaitStop(currentMatch);
 			if (!traversedWaitStop) {
-				// Determine how much time elapsed between AVL reports
+				// Mark vehicle as being delayed
+				vehicleState.setIsDelayed(true);
+
+				// Create description of event
 				long timeBetweenAvlReports = vehicleState.getAvlReport().getTime()
 						- previousMatch.getAvlTime();
-
-				logger.info("Vehicle vehicleId={} is delayed. Over {} msec it "
-						+ "traveled only {} while "
-						+ "transitime.core.timeForDeterminingDelayedSecs={} and "
-						+ "transitime.core.minDistanceForDelayed={}",
-						vehicleState.getVehicleId(), timeBetweenAvlReports,
-						Geo.distanceFormat(distanceTraveled), maxDelayedSecs,
-						Geo.distanceFormat(minDistance));
+				String description =
+						"Vehicle vehicleId="
+								+ vehicleState.getVehicleId()
+								+ " is delayed. Over "
+								+ timeBetweenAvlReports
+								+ " msec it "
+								+ "traveled only "
+								+ Geo.distanceFormat(distanceTraveled)
+								+ " while "
+								+ "transitime.core.timeForDeterminingDelayedSecs="
+								+ maxDelayedSecs + " and "
+								+ "transitime.core.minDistanceForDelayed="
+								+ Geo.distanceFormat(minDistance);
+				
+				// Log the event
+				logger.info(description);
+				
+				// If vehicle newly delayed then also create a VehicleEvent 
+				// indicating such
+				if (!wasDelayed) {
+					VehicleEvent.create(vehicleState.getAvlReport(), 
+							vehicleState.getMatch(), VehicleEvent.DELAYED,
+							description, 
+							true, // predictable
+							false, // becameUnpredictable
+							null); // supervisor
+				}
 				
 				// Return that vehicle indeed delayed
 				return true;
@@ -326,7 +352,7 @@ public class AvlProcessor {
 		// Vehicle was making progress so return such
 		return false;
 	}
-
+	
 	/**
 	 * For vehicles that were already predictable but then got a new AvlReport.
 	 * Determines where in the block assignment the vehicle now matches to.
@@ -1084,7 +1110,7 @@ public class AvlProcessor {
 
 				// If vehicle is delayed as indicated by not making forward 
 				// progress then store that in the vehicle state
-				vehicleState.setIsDelayed(isVehicleDelayed(vehicleState));
+				handlePossibleVehicleDelay(vehicleState);
 				
 				// Determine and store the schedule adherence. If schedule
 				// adherence is bad then try matching vehicle to assignment
