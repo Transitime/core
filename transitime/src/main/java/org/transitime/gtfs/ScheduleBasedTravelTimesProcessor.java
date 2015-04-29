@@ -58,8 +58,8 @@ public class ScheduleBasedTravelTimesProcessor {
 	private final int defaultWaitTimeAtStopMsec; 
 	private final double maxTravelTimeSegmentLength;
 	
-	// 0.036m/msec = 36.0m/s = 40mph
-	private static final double MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC = 0.018; 
+	// 0.036m/msec = 36.0m/s = 80mph
+	private static final double MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC = 0.036; 
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ScheduleBasedTravelTimesProcessor.class);
@@ -202,6 +202,11 @@ public class ScheduleBasedTravelTimesProcessor {
 				if (msecForTravelBetweenScheduleTimes == 0 || 
 						distanceBetweenScheduleStops / msecForTravelBetweenScheduleTimes > 
 						MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC) {
+					logger.warn("Clamping schedule based travel speed to "
+							+ "MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC={} for "
+							+ "tripId={} stopPathIndex={}", 
+							MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC, trip.getId(), 
+							stopPathIndex);
 					msecForTravelBetweenScheduleTimes = 
 							(int) (distanceBetweenScheduleStops / 
 									MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC);
