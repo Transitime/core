@@ -31,8 +31,8 @@ import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.VehicleConfig;
 import org.transitime.ipc.data.IpcBlock;
-import org.transitime.ipc.data.IpcCompleteVehicle;
-import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
+import org.transitime.ipc.data.IpcVehicleGtfsRealtime;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcVehicleConfig;
@@ -112,7 +112,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getComplete()
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getComplete() throws RemoteException {
+	public Collection<IpcVehicleComplete> getComplete() throws RemoteException {
 		return getCompleteSerializableCollection(vehicleDataCache.getVehicles());
 	}
 
@@ -120,7 +120,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getGtfsRealtime()
 	 */
 	@Override
-	public Collection<IpcGtfsRealtimeVehicle> getGtfsRealtime()
+	public Collection<IpcVehicleGtfsRealtime> getGtfsRealtime()
 			throws RemoteException {
 		return getGtfsRealtimeSerializableCollection(vehicleDataCache.getVehicles());
 	}
@@ -138,7 +138,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.lang.String)
 	 */
 	@Override
-	public IpcCompleteVehicle getComplete(String vehicleId) throws RemoteException {
+	public IpcVehicleComplete getComplete(String vehicleId) throws RemoteException {
 		return vehicleDataCache.getVehicle(vehicleId);
 	}
 
@@ -156,7 +156,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.util.List)
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getComplete(Collection<String> vehicleIds) 
+	public Collection<IpcVehicleComplete> getComplete(Collection<String> vehicleIds) 
 			throws RemoteException {
 		return getCompleteSerializableCollection(
 				vehicleDataCache.getVehicles(vehicleIds));
@@ -176,7 +176,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getForRoute(java.lang.String)
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getCompleteForRoute(String routeIdOrShortName) 
+	public Collection<IpcVehicleComplete> getCompleteForRoute(String routeIdOrShortName) 
 			throws RemoteException {
 		return getCompleteSerializableCollection(
 				vehicleDataCache.getVehiclesForRoute(routeIdOrShortName));
@@ -196,7 +196,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getForRoute(java.util.Collection)
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getCompleteForRoute(
+	public Collection<IpcVehicleComplete> getCompleteForRoute(
 			Collection<String> routeIdsOrShortNames) throws RemoteException {
 	    return getCompleteSerializableCollection(
 			vehicleDataCache.getVehiclesForRoute(routeIdsOrShortNames));
@@ -209,7 +209,7 @@ public class VehiclesServer extends AbstractServer
 	 * collections this method returns a serializable version.
 	 */
 	private Collection<IpcVehicle> getSerializableCollection(
-			Collection<IpcCompleteVehicle> vehicles) {
+			Collection<IpcVehicleComplete> vehicles) {
 		// If vehicles is null then return empty array
 		if (vehicles == null)
 			return new ArrayList<IpcVehicle>();
@@ -229,13 +229,13 @@ public class VehiclesServer extends AbstractServer
 	 *            Can be null.
 	 * @return Serializable Collection if IpcGtfsRealtimeVehicle objects.
 	 */
-	private Collection<IpcGtfsRealtimeVehicle> getGtfsRealtimeSerializableCollection(
-			Collection<IpcCompleteVehicle> vehicles) {
+	private Collection<IpcVehicleGtfsRealtime> getGtfsRealtimeSerializableCollection(
+			Collection<IpcVehicleComplete> vehicles) {
 		// If vehicles is null then return empty array.
 		if (vehicles == null)
-			return new ArrayList<IpcGtfsRealtimeVehicle>();
+			return new ArrayList<IpcVehicleGtfsRealtime>();
 		
-		return new ArrayList<IpcGtfsRealtimeVehicle>(vehicles);
+		return new ArrayList<IpcVehicleGtfsRealtime>(vehicles);
 	}
 
 	/**
@@ -250,16 +250,16 @@ public class VehiclesServer extends AbstractServer
 	 *            Can be null.
 	 * @return Serializable Collection if IpcCompleteVehicle objects.
 	 */
-	private Collection<IpcCompleteVehicle> getCompleteSerializableCollection(
-			Collection<IpcCompleteVehicle> vehicles) {
+	private Collection<IpcVehicleComplete> getCompleteSerializableCollection(
+			Collection<IpcVehicleComplete> vehicles) {
 		// If vehicles is null then return empty array.
 		if (vehicles == null)
-			return new ArrayList<IpcCompleteVehicle>();
+			return new ArrayList<IpcVehicleComplete>();
 		
 		if (vehicles instanceof Serializable) { 
 			return vehicles;
 		} else {
-			return new ArrayList<IpcCompleteVehicle>(vehicles);
+			return new ArrayList<IpcVehicleComplete>(vehicles);
 		}			
 	}
 

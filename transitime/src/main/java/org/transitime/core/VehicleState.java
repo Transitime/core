@@ -81,6 +81,9 @@ public class VehicleState {
 	// assignment is not valid.
 	private int badAssignmentsInARow = 0;
 	
+	// For keeping track if vehicle delayed
+	private boolean isDelayed = false;
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(VehicleState.class);
 
@@ -840,6 +843,7 @@ public class VehicleState {
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
+				+ (isDelayed() ? ", isDelayed=true" : "")
 				+ ", pathHeading=" + StringUtils.twoDigitFormat(getHeading())
 				+ ", getMatch()=" + getMatch()
 				+ ", getAvlReport()=" + getAvlReport()
@@ -859,6 +863,7 @@ public class VehicleState {
 				+ ", assignmentTime=" + assignmentTime 
 				+ ", predictable=" + predictable 
 				+ ", realTimeSchedAdh=" + realTimeSchedAdh
+				+ (isDelayed() ? ", isDelayed=true" : "")
 				+ ", pathHeading=" + StringUtils.twoDigitFormat(getHeading())
 				+ ", getMatch()=" + getMatch()
 				+ ", getAvlReport()=" + getAvlReport()
@@ -894,5 +899,13 @@ public class VehicleState {
 
 	public void setBadAssignmentsInARow(int badAssignmentsInARow) {
 		this.badAssignmentsInARow = badAssignmentsInARow;
+	}
+	
+	public void setIsDelayed(boolean isDelayed) {
+		this.isDelayed = isDelayed;
+	}
+	
+	public boolean isDelayed() {
+		return isDelayed;
 	}
 }

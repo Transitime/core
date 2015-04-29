@@ -238,7 +238,8 @@ public class Core {
 	 * mode then will be using a SettableSystemTime.
 	 * 
 	 * @return The system epoch time
-	 */	public Date getSystemDate() {
+	 */	
+	public Date getSystemDate() {
 		return new Date(getSystemTime());
 	}
 	

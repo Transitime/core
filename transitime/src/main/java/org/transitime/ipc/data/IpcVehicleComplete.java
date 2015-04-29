@@ -20,6 +20,7 @@ package org.transitime.ipc.data;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
+import java.util.Date;
 import java.util.List;
 
 import org.transitime.applications.Core;
@@ -44,7 +45,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
+public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 
 	private final String routeName;
 	private final String originStopId;
@@ -62,7 +63,7 @@ public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 	 * 
 	 * @param vs The current vehicle state. Must not be null.
 	 */
-	public IpcCompleteVehicle(VehicleState vs) {
+	public IpcVehicleComplete(VehicleState vs) {
 		super(vs);
 		
 		// Determine the route name. Can be null.
@@ -119,6 +120,7 @@ public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 	 * @param headsign
 	 * @param predictable
 	 * @param realTimeSchdAdh
+	 * @param isDelayed
 	 * @param isLayover
 	 * @param layoverDepartureTime
 	 * @param nextStopId
@@ -132,23 +134,23 @@ public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 	 * @param distanceOfNextStopFromTripStart
 	 * @param distanceAlongTrip
 	 */
-	private IpcCompleteVehicle(String blockId,
+	private IpcVehicleComplete(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
 			String tripId, String tripPatternId, String directionId,
 			String headsign, boolean predictable, boolean schedBasedPred,
-			TemporalDifference realTimeSchdAdh, boolean isLayover,
-			long layoverDepartureTime, String nextStopId, String vehicleType,
-			String tripStartDateStr, String atStopId, String routeName,
-			String originStopId, String destinationId,
+			TemporalDifference realTimeSchdAdh, boolean isDelayed,
+			boolean isLayover, long layoverDepartureTime, String nextStopId,
+			String vehicleType, long tripStartEpochTime, String atStopId,
+			String routeName, String originStopId, String destinationId,
 			double distanceToNextStop, double distanceOfNextStopFromTripStart,
 			double distanceAlongTrip) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
-				predictable, schedBasedPred, realTimeSchdAdh, isLayover,
-				layoverDepartureTime, nextStopId, vehicleType,
-				tripStartDateStr, atStopId);
-		
+				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
+				isLayover, layoverDepartureTime, nextStopId, vehicleType,
+				tripStartEpochTime, atStopId);
+
 		this.routeName = routeName;
 		this.originStopId = originStopId;
 		this.destinationId = destinationId;
@@ -171,9 +173,11 @@ public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 		private double distanceOfNextStopFromTripStart;
 		private double distanceAlongTrip;
 
+		private static final short currentSerializationVersion = 0;
+		
 		private static final long serialVersionUID = 6982458672576764027L;
 
-		private CompleteVehicleSerializationProxy(IpcCompleteVehicle v) {
+		private CompleteVehicleSerializationProxy(IpcVehicleComplete v) {
 			super(v);
 			this.routeName = v.routeName;
 			this.originStopId = v.originStopId;
@@ -195,6 +199,8 @@ public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 			super.writeObject(stream);
 			
 			// Write the data for this class
+			stream.writeShort(currentSerializationVersion);
+			
 		    stream.writeObject(routeName);
 		    stream.writeObject(originStopId);
 		    stream.writeObject(destinationId);
@@ -210,6 +216,17 @@ public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 				throws IOException, ClassNotFoundException {
 			// Read the data for IpcVehicle super class
 			super.readObject(stream);
+
+			// If reading from a newer version of protocol then don't
+			// know how to handle it so throw exception
+			short readVersion = stream.readShort();			
+			if (currentSerializationVersion < readVersion) {
+				throw new IOException("Serialization error when reading "
+						+ getClass().getSimpleName()
+						+ " object. Read version=" + readVersion 
+						+ " but currently using software version=" 
+						+ currentSerializationVersion);
+			}
 
 			// Read in data for this class
 			routeName = (String) stream.readObject();
@@ -227,12 +244,12 @@ public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new IpcCompleteVehicle(
-					blockId, blockAssignmentMethod, avl, heading, routeId,
-					routeShortName, tripId, tripPatternId, directionId,
-					headsign, predictable, schedBasedPred, realTimeSchdAdh,
-					isLayover, layoverDepartureTime, nextStopId, vehicleType,
-					tripStartDateStr, atStopId, routeName, originStopId,
+			return new IpcVehicleComplete(blockId, blockAssignmentMethod, avl,
+					heading, routeId, routeShortName, tripId, tripPatternId,
+					directionId, headsign, predictable, schedBasedPred,
+					realTimeSchdAdh, isDelayed, isLayover,
+					layoverDepartureTime, nextStopId, vehicleType,
+					tripStartEpochTime, atStopId, routeName, originStopId,
 					destinationId, distanceToNextStop,
 					distanceOfNextStopFromTripStart, distanceAlongTrip);
 		}
@@ -304,7 +321,8 @@ public class IpcCompleteVehicle extends IpcGtfsRealtimeVehicle {
 				+ ", heading=" + getHeading() 
 				+ ", vehicleType=" + getVehicleType()
 				+ ", atStopId=" + getAtStopId()
-				+ ", tripStartDateStr=" + getTripStartDateStr() 
+				+ ", tripStartEpochTime=" + getTripStartEpochTime()
+				+ ", tripStartEpochTime=" + new Date(getTripStartEpochTime())
 				+ ", routeName=" + routeName 
 				+ ", originStopId="	+ originStopId 
 				+ ", destinationId=" + destinationId

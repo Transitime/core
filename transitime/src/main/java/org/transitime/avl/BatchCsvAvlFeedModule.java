@@ -48,6 +48,9 @@ import org.transitime.utils.Time;
  */
 public class BatchCsvAvlFeedModule extends Module {
 
+	// For running in real time
+	private long lastAvlReportTimestamp = -1;
+			
 	/*********** Configurable Parameters for this module ***********/
 	private static String getCsvAvlFeedFileName() {
 		return csvAvlFeedFileName.getValue();
@@ -58,10 +61,11 @@ public class BatchCsvAvlFeedModule extends Module {
 					"The name of the CSV file containing AVL data to process.");
 	
 	
-	private static BooleanConfigValue csvProcessInRealTime =
-			new BooleanConfigValue("transitime.avl.csvProcessInRealTime",
+	private static BooleanConfigValue processInRealTime =
+			new BooleanConfigValue("transitime.avl.processInRealTime",
 					false,
-					"When true then when reading in do at the same speed as "
+					"For when getting batch of AVL data from a CSV file. "
+					+ "When true then when reading in do at the same speed as "
 					+ "when the AVL was created. Set to false it you just want "
 					+ "to read in as fast as possible.");
 
@@ -79,6 +83,28 @@ public class BatchCsvAvlFeedModule extends Module {
 		super(projectId);
 	}
 
+	/**
+	 * If configured to process data in real time them delay the appropriate
+	 * amount of time
+	 * 
+	 * @param avlReport
+	 */
+	private void delayIfRunningInRealTime(AvlReport avlReport) {
+		if (processInRealTime.getValue()) {
+			long delayLength = 0;
+
+			if (lastAvlReportTimestamp > 0) {
+				delayLength = avlReport.getTime() - lastAvlReportTimestamp;
+				lastAvlReportTimestamp = avlReport.getTime();
+			} else {
+				lastAvlReportTimestamp = avlReport.getTime();
+			}
+
+			if (delayLength > 0)
+				Time.sleep(delayLength);
+		}		
+	}
+	
 	/* 
 	 * Reads in AVL reports from CSV file and processes them.
 	 * 
@@ -87,7 +113,6 @@ public class BatchCsvAvlFeedModule extends Module {
 	 */
 	@Override
 	public void run() {
-		long lastAvlReportTimestamp=-1;
 		List<AvlReport> avlReports = 
 				(new AvlCsvReader(getCsvAvlFeedFileName())).get();
 		
@@ -98,22 +123,12 @@ public class BatchCsvAvlFeedModule extends Module {
 			
 			// If configured to process data in real time them delay
 			// the appropriate amount of time
-			if (csvProcessInRealTime.getValue()) {
-				long delayLength = 0;
-
-				if (lastAvlReportTimestamp > 0) {
-					delayLength = avlReport.getTime() - lastAvlReportTimestamp;
-					lastAvlReportTimestamp = avlReport.getTime();
-				} else {
-					lastAvlReportTimestamp = avlReport.getTime();
-				}
-
-				if (delayLength > 0)
-					Time.sleep(delayLength);
-			}
+			delayIfRunningInRealTime(avlReport);
 			
-			// Actually process the AVL report
+			// Use the AVL report time as the current system time
 			Core.getInstance().setSystemTime(avlReport.getTime());			
+
+			// Actually process the AVL report
 			AvlProcessor.getInstance().processAvlReport(avlReport);
 		}
 

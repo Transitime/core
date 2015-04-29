@@ -114,6 +114,8 @@ public class AvlCsvRecord extends CsvBase {
 				assignmentType = AssignmentType.ROUTE_ID;
 			else if (assignmentTypeStr.equals("TRIP_ID"))
 				assignmentType = AssignmentType.TRIP_ID;
+			else if (assignmentTypeStr.equals("TRIP_SHORT_NAME"))
+				assignmentType = AssignmentType.TRIP_SHORT_NAME;
 			else
 				assignmentType = AssignmentType.UNSET;
 			avlReport.setAssignment(assignmentId, assignmentType);			

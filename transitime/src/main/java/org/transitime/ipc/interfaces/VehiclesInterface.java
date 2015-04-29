@@ -22,8 +22,8 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 
 import org.transitime.ipc.data.IpcActiveBlock;
-import org.transitime.ipc.data.IpcCompleteVehicle;
-import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
+import org.transitime.ipc.data.IpcVehicleGtfsRealtime;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.data.IpcVehicleConfig;
 
@@ -59,7 +59,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getComplete() throws RemoteException;
+	public Collection<IpcVehicleComplete> getComplete() throws RemoteException;
 
 	/**
 	 * Gets from server IpcCompleteVehicle info for all vehicles.
@@ -67,7 +67,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcGtfsRealtimeVehicle> getGtfsRealtime()
+	public Collection<IpcVehicleGtfsRealtime> getGtfsRealtime()
 			throws RemoteException;
 
 	/**
@@ -88,7 +88,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return info for specified vehicle
 	 * @throws RemoteException
 	 */
-	public IpcCompleteVehicle getComplete(String vehicleId)
+	public IpcVehicleComplete getComplete(String vehicleId)
 			throws RemoteException;
 
 	/**
@@ -112,7 +112,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getComplete(
+	public Collection<IpcVehicleComplete> getComplete(
 			Collection<String> vehicleIds) throws RemoteException;
 
 	/**
@@ -136,7 +136,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getCompleteForRoute(
+	public Collection<IpcVehicleComplete> getCompleteForRoute(
 			String routeIdOrShortName) throws RemoteException;
 
 	/**
@@ -160,7 +160,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getCompleteForRoute(
+	public Collection<IpcVehicleComplete> getCompleteForRoute(
 			Collection<String> routeIdsOrShortNames) throws RemoteException;
 
 	/**

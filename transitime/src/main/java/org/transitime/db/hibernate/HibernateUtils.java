@@ -23,7 +23,6 @@ import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

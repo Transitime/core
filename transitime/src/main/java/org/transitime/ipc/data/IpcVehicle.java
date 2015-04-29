@@ -24,9 +24,6 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Date;
-
-import org.transitime.applications.Core;
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
@@ -64,6 +61,7 @@ public class IpcVehicle implements Serializable {
 	// True if vehicle created to generate schedule based predictions
 	private final boolean schedBasedPred;
 	private final TemporalDifference realTimeSchedAdh;
+	private final boolean isDelayed;
 	private final boolean isLayover;
 	private final long layoverDepartureTime;
 	private final String nextStopId;
@@ -137,6 +135,7 @@ public class IpcVehicle implements Serializable {
 		this.predictable = vs.isPredictable();
 		this.schedBasedPred = vs.isForSchedBasedPreds();
 		this.realTimeSchedAdh = vs.getRealTimeSchedAdh();
+		this.isDelayed = vs.isDelayed();
 	}
 
 	/**
@@ -157,6 +156,7 @@ public class IpcVehicle implements Serializable {
 	 * @param predictable
 	 * @param schedBasedPred
 	 * @param realTimeSchdAdh
+	 * @param isDelayed
 	 * @param isLayover
 	 * @param layoverDepartureTime
 	 * @param nextStopId
@@ -167,8 +167,9 @@ public class IpcVehicle implements Serializable {
 			float heading, String routeId, String routeShortName,
 			String tripId, String tripPatternId, String directionId,
 			String headsign, boolean predictable, boolean schedBasedPred,
-			TemporalDifference realTimeSchdAdh, boolean isLayover,
-			long layoverDepartureTime, String nextStopId, String vehicleType) {
+			TemporalDifference realTimeSchdAdh, boolean isDelayed,
+			boolean isLayover, long layoverDepartureTime, String nextStopId,
+			String vehicleType) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
@@ -182,6 +183,7 @@ public class IpcVehicle implements Serializable {
 		this.predictable = predictable;
 		this.schedBasedPred = schedBasedPred;
 		this.realTimeSchedAdh = realTimeSchdAdh;
+		this.isDelayed = isDelayed;
 		this.isLayover = isLayover;
 		this.layoverDepartureTime = layoverDepartureTime;
 		this.nextStopId = nextStopId;
@@ -207,13 +209,14 @@ public class IpcVehicle implements Serializable {
 		protected boolean predictable;
 		protected boolean schedBasedPred;
 		protected TemporalDifference realTimeSchdAdh;
+		protected boolean isDelayed;
 		protected boolean isLayover;
 		protected long layoverDepartureTime;
 		protected String nextStopId;
 		protected String vehicleType;
 
 		private static final long serialVersionUID = -4996254752417270043L;
-		private static final short serializationVersion = 0;
+		private static final short currentSerializationVersion = 0;
 
 		/*
 		 * Only to be used within this class.
@@ -232,6 +235,7 @@ public class IpcVehicle implements Serializable {
 			this.predictable = v.predictable;
 			this.schedBasedPred = v.schedBasedPred;
 			this.realTimeSchdAdh = v.realTimeSchedAdh;
+			this.isDelayed = v.isDelayed;
 			this.isLayover = v.isLayover;
 			this.layoverDepartureTime = v.layoverDepartureTime;
 			this.nextStopId = v.nextStopId;
@@ -246,7 +250,7 @@ public class IpcVehicle implements Serializable {
 		 */
 		protected void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
-		    stream.writeShort(serializationVersion);
+		    stream.writeShort(currentSerializationVersion);
 		    
 			stream.writeObject(blockId);
 			stream.writeObject(blockAssignmentMethod);
@@ -261,6 +265,7 @@ public class IpcVehicle implements Serializable {
 			stream.writeBoolean(predictable);
 			stream.writeBoolean(schedBasedPred);
 			stream.writeObject(realTimeSchdAdh);
+			stream.writeBoolean(isDelayed);
 		    stream.writeBoolean(isLayover);
 		    stream.writeLong(layoverDepartureTime);
 		    stream.writeObject(nextStopId);
@@ -272,11 +277,15 @@ public class IpcVehicle implements Serializable {
 		 */
 		protected void readObject(java.io.ObjectInputStream stream)
 				throws IOException, ClassNotFoundException {
+			// If reading from a newer version of protocol then don't
+			// know how to handle it so throw exception
 			short readVersion = stream.readShort();
-			if (serializationVersion != readVersion) {
+			if (currentSerializationVersion < readVersion) {
 				throw new IOException("Serialization error when reading "
 						+ getClass().getSimpleName()
-						+ " object. Read serializationVersion=" + readVersion);
+						+ " object. Read version=" + readVersion 
+						+ " but currently using software version=" 
+						+ currentSerializationVersion);
 			}
 
 			// serialization version is OK so read in object
@@ -293,6 +302,7 @@ public class IpcVehicle implements Serializable {
 			predictable = stream.readBoolean();
 			schedBasedPred = stream.readBoolean();
 			realTimeSchdAdh = (TemporalDifference) stream.readObject();
+			isDelayed = stream.readBoolean();
 			isLayover = stream.readBoolean();
 			layoverDepartureTime = stream.readLong();
 			nextStopId = (String) stream.readObject();
@@ -309,7 +319,7 @@ public class IpcVehicle implements Serializable {
 			return new IpcVehicle(blockId, blockAssignmentMethod, avl, heading,
 					routeId, routeShortName, tripId, tripPatternId,
 					directionId, headsign, predictable, schedBasedPred,
-					realTimeSchdAdh, isLayover, layoverDepartureTime,
+					realTimeSchdAdh, isDelayed, isLayover, layoverDepartureTime,
 					nextStopId, vehicleType);
 		}
 	} // End of SerializationProxy class
@@ -424,6 +434,10 @@ public class IpcVehicle implements Serializable {
 		return realTimeSchedAdh;
 	}
 
+	public boolean isDelayed() {
+		return isDelayed;
+	}
+	
 	public boolean isLayover() {
 		return isLayover;
 	}
@@ -443,23 +457,6 @@ public class IpcVehicle implements Serializable {
 	public String getVehicleType() {
 		return vehicleType;		
 	}
-	
-	/**
-	 * Determines the scheduled start time of the trip. Slightly expensive
-	 * method since it has to determine the trip start time
-	 * 
-	 * @return Scheduled start time of trip in epoch time or null if not
-	 *         assigned to a valid trip
-	 */
-	public long getTripStartEpochTime() {
-		Trip trip = Core.getInstance().getDbConfig().getTrip(tripId);
-		if (trip == null)
-			return 0;
-		
-		long tripStartEpochTime = Core.getInstance().getTime()
-				.getEpochTime(trip.getStartTime(), new Date());
-		return tripStartEpochTime;
-	}
 
 	@Override
 	public String toString() {
@@ -475,7 +472,8 @@ public class IpcVehicle implements Serializable {
 				+ ", headsign=" + headsign
 				+ ", predictable=" + predictable
 				+ ", schedBasedPred=" + schedBasedPred
-				+ ", realTimeSchedAdh=" + realTimeSchedAdh 
+				+ ", realTimeSchedAdh=" + realTimeSchedAdh
+				+ ", isDelayed=" + isDelayed
 				+ ", isLayover=" + isLayover
 				+ ", layoverDepartureTime=" 
 					+ Time.timeStrNoTimeZone(layoverDepartureTime)
@@ -495,7 +493,7 @@ public class IpcVehicle implements Serializable {
 		IpcVehicle v = new IpcVehicle("blockId",
 				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl, 123.456f,
 				"routeId", "routeShortName", "tripId", "tripPatternId",
-				"dirId", "headsign", true, false, null, false, 0, null, null);
+				"dirId", "headsign", true, false, null, false, false, 0, null, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);

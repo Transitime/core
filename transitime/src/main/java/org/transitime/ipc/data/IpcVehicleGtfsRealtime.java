@@ -18,15 +18,16 @@
 package org.transitime.ipc.data;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.transitime.applications.Core;
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.TemporalMatch;
 import org.transitime.core.VehicleAtStopInfo;
 import org.transitime.core.VehicleState;
+import org.transitime.db.structs.Trip;
 import org.transitime.utils.Time;
 
 
@@ -39,17 +40,13 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-public class IpcGtfsRealtimeVehicle extends IpcVehicle {
+public class IpcVehicleGtfsRealtime extends IpcVehicle {
 
 	// Null if not at stop
 	private final String atStopId; 
 	// For GTFS-rt to disambiguate trips
-	private final String tripStartDateStr; 
+	private final long tripStartEpochTime; 
 
-	// For outputting date in GTFS-realtime format
-	private static SimpleDateFormat gtfsRealtimeDateFormatter = 
-			new SimpleDateFormat("yyyyMMdd");
-	
 	private static final long serialVersionUID = -6611046660260490100L;
 
 	/********************** Member Functions **************************/
@@ -59,7 +56,7 @@ public class IpcGtfsRealtimeVehicle extends IpcVehicle {
 	 * 
 	 * @param vs
 	 */
-	public IpcGtfsRealtimeVehicle(VehicleState vs) {
+	public IpcVehicleGtfsRealtime(VehicleState vs) {
 		super(vs);
 
 		// Get the match. If match is just after a stop then adjust
@@ -72,11 +69,16 @@ public class IpcGtfsRealtimeVehicle extends IpcVehicle {
 			VehicleAtStopInfo stopInfo = match.getAtStop();
 			this.atStopId = stopInfo != null ? stopInfo.getStopId() : null;
 	
-			this.tripStartDateStr = gtfsRealtimeDateFormatter.format(
-					new Date(getTripStartEpochTime()));
+			// Note: the trip start date is created on server side so that
+			// proper timezone is used. This unfortunately is a bit expensive.
+			int time = vs.getTrip().getStartTime();
+			Date currentTime = Core.getInstance().getSystemDate();
+			this.tripStartEpochTime =
+					Core.getInstance().getTime()
+							.getEpochTime(time, currentTime);
 		} else {
 			this.atStopId = null;
-			this.tripStartDateStr = null;
+			this.tripStartEpochTime = 0;
 		}
 	}
 
@@ -97,26 +99,26 @@ public class IpcGtfsRealtimeVehicle extends IpcVehicle {
 	 * @param predictable
 	 * @param schedBasedPred
 	 * @param realTimeSchdAdh
+	 * @param isDelayed
 	 * @param isLayover
 	 * @param layoverDepartureTime
 	 * @param nextStopId
 	 * @param vehicleType
 	 * @param atStopId
 	 */
-	protected IpcGtfsRealtimeVehicle(String blockId,
+	protected IpcVehicleGtfsRealtime(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
-			String tripId, String tripPatternId,
-			String directionId, String headsign, boolean predictable,
-			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
+			String tripId, String tripPatternId, String directionId,
+			String headsign, boolean predictable, boolean schedBasedPred,
+			TemporalDifference realTimeSchdAdh, boolean isDelayed,
 			boolean isLayover, long layoverDepartureTime, String nextStopId,
-			String vehicleType, String tripStartDateStr, String atStopId) {
+			String vehicleType, long tripStartEpochTime, String atStopId) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
-				routeShortName, tripId, tripPatternId,
-				directionId, headsign, predictable, schedBasedPred,
-				realTimeSchdAdh, isLayover, layoverDepartureTime, nextStopId,
-				vehicleType);
-		this.tripStartDateStr = tripStartDateStr;
+				routeShortName, tripId, tripPatternId, directionId, headsign,
+				predictable, schedBasedPred, realTimeSchdAdh, isLayover,
+				isDelayed, layoverDepartureTime, nextStopId, vehicleType);
+		this.tripStartEpochTime = tripStartEpochTime;
 		this.atStopId = atStopId;
 	}
 	
@@ -127,14 +129,15 @@ public class IpcGtfsRealtimeVehicle extends IpcVehicle {
 	protected static class GtfsRealtimeVehicleSerializationProxy 
 			extends SerializationProxy {
 		protected String atStopId; 
-		protected String tripStartDateStr; 
+		protected long tripStartEpochTime; 
 
+		private static final short currentSerializationVersion = 0;
 		private static final long serialVersionUID = 5804716921925188073L;
 
-		protected GtfsRealtimeVehicleSerializationProxy(IpcGtfsRealtimeVehicle v) {
+		protected GtfsRealtimeVehicleSerializationProxy(IpcVehicleGtfsRealtime v) {
 			super(v);
 			this.atStopId = v.atStopId;
-			this.tripStartDateStr = v.tripStartDateStr;
+			this.tripStartEpochTime = v.tripStartEpochTime;
 		}
 		
 		/*
@@ -149,8 +152,10 @@ public class IpcGtfsRealtimeVehicle extends IpcVehicle {
 			super.writeObject(stream);
 			
 			// Write the data for this class
-		    stream.writeObject(atStopId);
-		    stream.writeObject(tripStartDateStr);
+			stream.writeShort(currentSerializationVersion);
+			
+			stream.writeObject(atStopId);
+		    stream.writeLong(tripStartEpochTime);
 		}
 
 		/*
@@ -161,9 +166,20 @@ public class IpcGtfsRealtimeVehicle extends IpcVehicle {
 			// Read the data for IpcVehicle super class
 			super.readObject(stream);
 
+			// If reading from a newer version of protocol then don't
+			// know how to handle it so throw exception
+			short readVersion = stream.readShort();
+			if (currentSerializationVersion < readVersion) {
+				throw new IOException("Serialization error when reading "
+						+ getClass().getSimpleName()
+						+ " object. Read version=" + readVersion 
+						+ " but currently using software version=" 
+						+ currentSerializationVersion);
+			}
+
 			// Read in data for this class
 			atStopId = (String) stream.readObject();
-			tripStartDateStr = (String) stream.readObject();
+			tripStartEpochTime = stream.readLong();
 		}
 		
 		/*
@@ -173,18 +189,18 @@ public class IpcGtfsRealtimeVehicle extends IpcVehicle {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new IpcGtfsRealtimeVehicle(blockId, blockAssignmentMethod,
+			return new IpcVehicleGtfsRealtime(blockId, blockAssignmentMethod,
 					avl, heading, routeId, routeShortName, tripId,
 					tripPatternId, directionId, headsign, predictable,
-					schedBasedPred, realTimeSchdAdh, isLayover,
+					schedBasedPred, realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, vehicleType,
-					tripStartDateStr, atStopId);
+					tripStartEpochTime, atStopId);
 		}
 
 	} // End of class GtfsRealtimeVehicleSerializationProxy
 	
-	public String getTripStartDateStr() {
-		return tripStartDateStr;
+	public long getTripStartEpochTime() {
+		return tripStartEpochTime;
 	}
 	
 	/**
@@ -220,7 +236,8 @@ public class IpcGtfsRealtimeVehicle extends IpcVehicle {
 				+ ", heading=" + getHeading() 
 				+ ", vehicleType=" + getVehicleType()
 				+ ", atStopId=" + atStopId
-				+ ", tripStartDateStr=" + tripStartDateStr 
+				+ ", tripStartEpochTime=" + tripStartEpochTime 
+				+ ", tripStartEpochTime=" + new Date(tripStartEpochTime) 
 				+ "]";
 	}
 	

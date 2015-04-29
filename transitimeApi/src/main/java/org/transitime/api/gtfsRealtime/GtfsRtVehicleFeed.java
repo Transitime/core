@@ -1,30 +1,33 @@
 /*
  * This file is part of Transitime.org
  * 
- * Transitime.org is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License (GPL) as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Transitime.org is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
+ * Transitime.org is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (GPL) as published by the
+ * Free Software Foundation, either version 3 of the License, or any later
+ * version.
+ * 
+ * Transitime.org is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Transitime.org . If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.feed.gtfsRt;
+package org.transitime.api.gtfsRealtime;
 
 import java.rmi.RemoteException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.api.utils.AgencyTimezoneCache;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
+import org.transitime.ipc.data.IpcVehicleGtfsRealtime;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import org.transitime.utils.Time;
 
@@ -47,6 +50,10 @@ import com.google.transit.realtime.GtfsRealtime.VehiclePosition.VehicleStopStatu
 public class GtfsRtVehicleFeed {
 
 	private final String agencyId;
+
+	// For outputting date in GTFS-realtime format
+	private SimpleDateFormat gtfsRealtimeDateFormatter = 
+			new SimpleDateFormat("yyyyMMdd");
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(GtfsRtVehicleFeed.class);
@@ -54,46 +61,52 @@ public class GtfsRtVehicleFeed {
 	/********************** Member Functions **************************/
 
 	public GtfsRtVehicleFeed(String agencyId) {
-		this.agencyId = agencyId;				
+		this.agencyId = agencyId;
+		
+		this.gtfsRealtimeDateFormatter.setTimeZone(AgencyTimezoneCache
+				.get(agencyId));
 	}
-	
+
 	/**
-	 * Takes in IpcGtfsRealtimeVehicle and puts it into a GTFS-realtime 
+	 * Takes in IpcGtfsRealtimeVehicle and puts it into a GTFS-realtime
 	 * VehiclePosition object.
-	 *  
+	 * 
 	 * @param vehicleData
 	 * @return the resulting VehiclePosition
 	 * @throws ParseException
 	 */
-	private static VehiclePosition createVehiclePosition(
-			IpcGtfsRealtimeVehicle vehicleData) 
-			throws ParseException {
+	private VehiclePosition createVehiclePosition(
+			IpcVehicleGtfsRealtime vehicleData) throws ParseException {
 		// Create the parent VehiclePosition object that is returned.
-		VehiclePosition.Builder vehiclePosition =
-				  VehiclePosition.newBuilder();
-				  
+		VehiclePosition.Builder vehiclePosition = VehiclePosition.newBuilder();
+
 		// If there is route information then add it via the TripDescriptor
-		if (vehicleData.getRouteId() != null && vehicleData.getRouteId().length() > 0) {
-			TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder()
-					.setRouteId(vehicleData.getRouteId())
-					.setTripId(vehicleData.getTripId())
-					.setStartDate(vehicleData.getTripStartDateStr());
+		if (vehicleData.getRouteId() != null
+				&& vehicleData.getRouteId().length() > 0) {
+			String tripStartDateStr =
+					gtfsRealtimeDateFormatter.format(new Date(vehicleData
+							.getTripStartEpochTime()));
+			TripDescriptor.Builder tripDescriptor =					
+					TripDescriptor.newBuilder()
+							.setRouteId(vehicleData.getRouteId())
+							.setTripId(vehicleData.getTripId())
+							.setStartDate(tripStartDateStr);
 			vehiclePosition.setTrip(tripDescriptor);
 		}
-		
+
 		// Add the VehicleDescriptor information
-		VehicleDescriptor.Builder vehicleDescriptor = 
-			VehicleDescriptor.newBuilder().setId(vehicleData.getId());
+		VehicleDescriptor.Builder vehicleDescriptor =
+				VehicleDescriptor.newBuilder().setId(vehicleData.getId());
 		// License plate information is optional so only add it if not null
 		if (vehicleData.getLicensePlate() != null)
 			vehicleDescriptor.setLicensePlate(vehicleData.getLicensePlate());
 		vehiclePosition.setVehicle(vehicleDescriptor);
-		
+
 		// Add the Position information
-		Position.Builder position = Position.newBuilder()
-				.setLatitude(vehicleData.getLatitude())
-				.setLongitude(vehicleData.getLongitude());
-		// Heading and speed are optional so only add them if actually a 
+		Position.Builder position =
+				Position.newBuilder().setLatitude(vehicleData.getLatitude())
+						.setLongitude(vehicleData.getLongitude());
+		// Heading and speed are optional so only add them if actually a
 		// valid number.
 		if (!Float.isNaN(vehicleData.getHeading())) {
 			position.setBearing(vehicleData.getHeading());
@@ -102,27 +115,28 @@ public class GtfsRtVehicleFeed {
 			position.setSpeed(vehicleData.getSpeed());
 		}
 		vehiclePosition.setPosition(position);
-		
+
 		// Convert the GPS timestamp information to an epoch time as
 		// number of milliseconds since 1970.
 		long gpsTime = vehicleData.getGpsTime();
 		vehiclePosition.setTimestamp(gpsTime / Time.MS_PER_SEC);
-		
+
 		// Set the stop_id if at a stop or going to a stop
-		String stopId =	vehicleData.getAtStopId() != null ? 
-				vehicleData.getAtStopId() : vehicleData.getNextStopId();
+		String stopId =
+				vehicleData.getAtStopId() != null ? vehicleData.getAtStopId()
+						: vehicleData.getNextStopId();
 		if (stopId != null)
 			vehiclePosition.setStopId(stopId);
-		
+
 		// Set current_status part of vehiclePosition if vehicle is actually
 		// predictable.
 		if (vehicleData.isPredictable()) {
-			VehicleStopStatus currentStatus = 
-					vehicleData.getAtStopId() != null ? 
-					VehicleStopStatus.STOPPED_AT : VehicleStopStatus.IN_TRANSIT_TO;
+			VehicleStopStatus currentStatus =
+					vehicleData.getAtStopId() != null ? VehicleStopStatus.STOPPED_AT
+							: VehicleStopStatus.IN_TRANSIT_TO;
 			vehiclePosition.setCurrentStatus(currentStatus);
 		}
-		
+
 		// Return the results
 		return vehiclePosition.build();
 	}
@@ -134,32 +148,36 @@ public class GtfsRtVehicleFeed {
 	 *            the data to be put into the GTFS-realtime message
 	 * @return the GTFS-realtime FeedMessage
 	 */
-	private FeedMessage createMessage(Collection<IpcGtfsRealtimeVehicle> vehicles) {
+	private FeedMessage createMessage(
+			Collection<IpcVehicleGtfsRealtime> vehicles) {
 		FeedMessage.Builder message = FeedMessage.newBuilder();
-		
-		FeedHeader.Builder feedheader = FeedHeader.newBuilder()
-				.setGtfsRealtimeVersion("1.0")
-				.setIncrementality(Incrementality.FULL_DATASET)
-				.setTimestamp(System.currentTimeMillis() / Time.MS_PER_SEC);
+
+		FeedHeader.Builder feedheader =
+				FeedHeader
+						.newBuilder()
+						.setGtfsRealtimeVersion("1.0")
+						.setIncrementality(Incrementality.FULL_DATASET)
+						.setTimestamp(
+								System.currentTimeMillis() / Time.MS_PER_SEC);
 		message.setHeader(feedheader);
-		  
-		for (IpcGtfsRealtimeVehicle vehicle : vehicles) {
-			FeedEntity.Builder vehiclePositionEntity = FeedEntity.newBuilder()
-					.setId(vehicle.getId());
+
+		for (IpcVehicleGtfsRealtime vehicle : vehicles) {
+			FeedEntity.Builder vehiclePositionEntity =
+					FeedEntity.newBuilder().setId(vehicle.getId());
 
 			try {
-				VehiclePosition vehiclePosition = createVehiclePosition(vehicle);
-	    		vehiclePositionEntity.setVehicle(vehiclePosition);	    		
-	    		message.addEntity(vehiclePositionEntity);
+				VehiclePosition vehiclePosition =
+						createVehiclePosition(vehicle);
+				vehiclePositionEntity.setVehicle(vehiclePosition);
+				message.addEntity(vehiclePositionEntity);
 			} catch (Exception e) {
 				// Output error message
-				System.err.println("Error parsing vehicle data. " + 
-						e.getMessage() + ".\n" + 
-						vehicle);
+				System.err.println("Error parsing vehicle data. "
+						+ e.getMessage() + ".\n" + vehicle);
 				e.printStackTrace();
 			}
-		}		
-		
+		}
+
 		return message.build();
 	}
 
@@ -169,10 +187,10 @@ public class GtfsRtVehicleFeed {
 	 * 
 	 * @return Collection of Vehicle objects, or null if not available.
 	 */
-	private Collection<IpcGtfsRealtimeVehicle> getVehicles() {
-		VehiclesInterface vehiclesInterface = 
+	private Collection<IpcVehicleGtfsRealtime> getVehicles() {
+		VehiclesInterface vehiclesInterface =
 				VehiclesInterfaceFactory.get(agencyId);
-		Collection<IpcGtfsRealtimeVehicle> vehicles = null;
+		Collection<IpcVehicleGtfsRealtime> vehicles = null;
 		try {
 			vehicles = vehiclesInterface.getGtfsRealtime();
 		} catch (RemoteException e) {
@@ -180,21 +198,21 @@ public class GtfsRtVehicleFeed {
 		}
 		return vehicles;
 	}
-	
+
 	/**
-	 * Gets the Vehicle data from RMI and creates corresponding
-	 * GTFS-RT vehicle feed.
+	 * Gets the Vehicle data from RMI and creates corresponding GTFS-RT vehicle
+	 * feed.
 	 * 
 	 * @return GTFS-RT FeedMessage for vehicle positions
 	 */
 	public FeedMessage createMessage() {
-		Collection<IpcGtfsRealtimeVehicle> vehicles = getVehicles();
+		Collection<IpcVehicleGtfsRealtime> vehicles = getVehicles();
 		return createMessage(vehicles);
 	}
-	
+
 	// For getPossiblyCachedMessage()
 	private static final DataCache vehicleFeedDataCache = new DataCache();
-	
+
 	/**
 	 * For caching Vehicle Positions feed messages.
 	 * 

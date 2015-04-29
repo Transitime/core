@@ -241,7 +241,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private double distanceToStop;
 		private List<IpcPrediction> predictionsForRouteStop;
 
-		private static final short serializationVersion = 0;
+		private static final short currentSerializationVersion = 0;
 		private static final long serialVersionUID = -2312925771271829358L;
 
 		/*
@@ -268,7 +268,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		 */
 		private void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
-			stream.writeShort(serializationVersion);
+			stream.writeShort(currentSerializationVersion);
 			
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
@@ -289,10 +289,12 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private void readObject(java.io.ObjectInputStream stream)
 				throws IOException, ClassNotFoundException {
 			short readVersion = stream.readShort();
-			if (serializationVersion != readVersion) {
+			if (currentSerializationVersion < readVersion) {
 				throw new IOException("Serialization error when reading "
 						+ getClass().getSimpleName()
-						+ " object. Read serializationVersion=" + readVersion);
+						+ " object. Read version=" + readVersion 
+						+ " but currently using software version=" 
+						+ currentSerializationVersion);
 			}
 
 			// serialization version is OK so read in object

@@ -130,9 +130,14 @@ public class Time {
 	 * 
 	 * @param timeZoneStr
 	 *            Such as "America/Los_Angeles" . List of time zones can be found
-	 *            at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+	 *            at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones . 
+	 *            If null then local timezone is used
 	 */
 	public Time(String timeZoneStr) {
+		// If no time zone string specified then use local timezone
+		if (timeZoneStr == null)
+			return;
+		
 		TimeZone timeZone = TimeZone.getTimeZone(timeZoneStr);
 		this.calendar = new GregorianCalendar(timeZone);
 		

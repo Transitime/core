@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.StringUtils;
@@ -58,12 +60,15 @@ public class IpcPrediction implements Serializable {
 	private final long avlTime;
 	// The time the AVL data was processed and the prediction was created.
 	private final long creationTime;
+	private final long tripStartEpochTime;
 	private final boolean affectedByWaitStop;
 	private final String driverId;
 	private final short passengerCount;
 	private final float passengerFullness;
+	private final boolean isDelayed;
+	private final boolean lateAndSubsequentTripSoMarkAsUncertain;
 	private final boolean isArrival;
-
+	
 	// Want to store trip on server side so that can determine route info
 	// when creating PredictionsForRouteStop object.
 	private final Trip trip;
@@ -86,11 +91,14 @@ public class IpcPrediction implements Serializable {
 	 *            trip
 	 * @param predictionTime
 	 * @param predictionAffectedByWaitStop
+	 * @param isDelayed
+	 * @param lateAndSubsequentTripSoMarkAsUncertain
 	 * @param isArrival
 	 */
 	public IpcPrediction(AvlReport avlReport, String stopId, int gtfsStopSeq,
 			Trip trip, long predictionTime,
-			boolean predictionAffectedByWaitStop, boolean isArrival) {
+			boolean predictionAffectedByWaitStop, boolean isDelayed,
+			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival) {
 		this.vehicleId = avlReport.getVehicleId();
 		this.routeId = trip.getRouteId();
 		this.stopId = stopId;
@@ -106,14 +114,23 @@ public class IpcPrediction implements Serializable {
 		this.schedBasedPred = avlReport.isForSchedBasedPreds();
 		this.avlTime = avlReport.getTime();
 		this.creationTime = avlReport.getTimeProcessed();
+
+		Date currentTime = Core.getInstance().getSystemDate();
+		this.tripStartEpochTime =
+				Core.getInstance().getTime()
+						.getEpochTime(trip.getStartTime(), currentTime);
+		
 		this.affectedByWaitStop = predictionAffectedByWaitStop;
 		this.driverId = avlReport.getDriverId();
 		this.passengerCount = (short) avlReport.getPassengerCount();
 		this.passengerFullness = avlReport.getPassengerFullness();
+		this.isDelayed = isDelayed;
+		this.lateAndSubsequentTripSoMarkAsUncertain = 
+				lateAndSubsequentTripSoMarkAsUncertain;
 		this.isArrival = isArrival;
 
 		// Debug log each creation of a Prediction
-		logger.debug("Creating {}", this);
+		logger.info("Creating {}", this);
 	}
 
 	/**
@@ -123,9 +140,10 @@ public class IpcPrediction implements Serializable {
 	private IpcPrediction(String vehicleId, String routeId, String stopId,
 			int gtfsStopSeq, String tripId, String tripPatternId,
 			String blockId, long predictionTime, boolean schedBasedPred,
-			long avlTime, long creationTime, boolean affectedByWaitStop,
-			String driverId, short passengerCount, float passengerFullness,
-			boolean isArrival) {
+			long avlTime, long creationTime, long tripStartEpochTime,
+			boolean affectedByWaitStop, String driverId, short passengerCount,
+			float passengerFullness, boolean isDelayed,
+			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival) {
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
 		this.stopId = stopId;
@@ -139,10 +157,14 @@ public class IpcPrediction implements Serializable {
 		this.schedBasedPred = schedBasedPred;
 		this.avlTime = avlTime;
 		this.creationTime = creationTime;
+		this.tripStartEpochTime = tripStartEpochTime;
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.driverId = driverId;
 		this.passengerCount = passengerCount;
 		this.passengerFullness = passengerFullness;
+		this.isDelayed = isDelayed;
+		this.lateAndSubsequentTripSoMarkAsUncertain = 
+				lateAndSubsequentTripSoMarkAsUncertain;
 		this.isArrival = isArrival;
 	}
 
@@ -163,14 +185,17 @@ public class IpcPrediction implements Serializable {
 		private boolean schedBasedPred;
 		private long avlTime;
 		private long creationTime;
+		private long tripStartEpochTime;
 		private boolean affectedByWaitStop;
 		private String driverId;
 		private short passengerCount;
 		private float passengerFullness;
+		private boolean isDelayed;
+		private boolean lateAndSubsequentTripSoMarkAsUncertain;
 		private boolean isArrival;
 
 		private static final long serialVersionUID = -8585283691951746718L;
-		private static final short serializationVersion = 0;
+		private static final short currentSerializationVersion = 0;
 
 		/*
 		 * Only to be used within this class.
@@ -187,10 +212,14 @@ public class IpcPrediction implements Serializable {
 			this.schedBasedPred = p.schedBasedPred;
 			this.avlTime = p.avlTime;
 			this.creationTime = p.creationTime;
+			this.tripStartEpochTime = p.tripStartEpochTime;
 			this.affectedByWaitStop = p.affectedByWaitStop;
 			this.driverId = p.driverId;
 			this.passengerCount = p.passengerCount;
 			this.passengerFullness = p.passengerFullness;
+			this.isDelayed = p.isDelayed;
+			this.lateAndSubsequentTripSoMarkAsUncertain = 
+					p.lateAndSubsequentTripSoMarkAsUncertain;
 			this.isArrival = p.isArrival;
 		}
 
@@ -202,7 +231,7 @@ public class IpcPrediction implements Serializable {
 		 */
 		private void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
-			stream.writeShort(serializationVersion);
+			stream.writeShort(currentSerializationVersion);
 			
 			stream.writeObject(vehicleId);
 			stream.writeObject(routeId);
@@ -215,23 +244,30 @@ public class IpcPrediction implements Serializable {
 			stream.writeBoolean(schedBasedPred);
 			stream.writeLong(avlTime);
 			stream.writeLong(creationTime);
+			stream.writeLong(tripStartEpochTime);
 			stream.writeBoolean(affectedByWaitStop);
 			stream.writeObject(driverId);
 			stream.writeShort(passengerCount);
 			stream.writeFloat(passengerFullness);
 			stream.writeBoolean(isArrival);
+			stream.writeBoolean(isDelayed);
+			stream.writeBoolean(lateAndSubsequentTripSoMarkAsUncertain);
 		}
 
 		/*
 		 * Custom method of deserializing a SerializationProy object.
 		 */
 		private void readObject(java.io.ObjectInputStream stream)
-				throws IOException, ClassNotFoundException {
+				throws IOException, ClassNotFoundException {			
+			// If reading from a newer version of protocol then don't
+			// know how to handle it so throw exception
 			short readVersion = stream.readShort();
-			if (serializationVersion != readVersion) {
+			if (currentSerializationVersion < readVersion) {
 				throw new IOException("Serialization error when reading "
 						+ getClass().getSimpleName()
-						+ " object. Read serializationVersion=" + readVersion);
+						+ " object. Read version=" + readVersion 
+						+ " but currently using software version=" 
+						+ currentSerializationVersion);
 			}
 
 			// serialization version is OK so read in object
@@ -246,11 +282,14 @@ public class IpcPrediction implements Serializable {
 			schedBasedPred = stream.readBoolean();
 			avlTime = stream.readLong();
 			creationTime = stream.readLong();
+			tripStartEpochTime = stream.readLong();
 			affectedByWaitStop = stream.readBoolean();
 			driverId = (String) stream.readObject();
 			passengerCount = stream.readShort();
 			passengerFullness = stream.readFloat();
 			isArrival = stream.readBoolean();
+			isDelayed = stream.readBoolean();
+			lateAndSubsequentTripSoMarkAsUncertain = stream.readBoolean();
 		}
 
 		/*
@@ -262,8 +301,10 @@ public class IpcPrediction implements Serializable {
 		private Object readResolve() {
 			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
 					tripId, tripPatternId, blockId, predictionTime,
-					schedBasedPred, avlTime, creationTime, affectedByWaitStop,
-					driverId, passengerCount, passengerFullness, isArrival);
+					schedBasedPred, avlTime, creationTime, tripStartEpochTime,
+					affectedByWaitStop, driverId, passengerCount,
+					passengerFullness, isDelayed,
+					lateAndSubsequentTripSoMarkAsUncertain, isArrival);
 		}
 	}
 
@@ -300,16 +341,19 @@ public class IpcPrediction implements Serializable {
 				+ ", trip="	+ tripId
 				+ ", tripPatternId=" + tripPatternId
 				+ ", block=" + blockId
-				+ ", schedBasedPred=" + schedBasedPred
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
 				+ ", createTime=" + Time.timeStrMsecNoTimeZone(creationTime)
+				+ ", tripStartEpochTime=" + Time.timeStr(tripStartEpochTime)
 				+ ", waitStop="	+ (affectedByWaitStop ? "t" : "f")
+				+ (schedBasedPred ? ", schedBasedPred=t" : "")
+				+ (isDelayed ? ", delayed=t" : "")
+				+ (lateAndSubsequentTripSoMarkAsUncertain ? ", lateAndSubsequentTripSoMarkAsUncertain=t" : "")
+				+ ", arrival=" + (isArrival ? "t" : "f") 
 				+ (driverId != null ? ", driver=" + driverId : "")
 				+ (isPassengerCountValid() ? ", psngrCnt=" + passengerCount
 						: "")
 				+ (!Float.isNaN(passengerFullness) ? ", psngrFullness="
 						+ StringUtils.twoDigitFormat(passengerFullness) : "")
-				+ ", arrival=" + (isArrival ? "t" : "f") 
 				+ "]";
 	}
 
@@ -364,6 +408,10 @@ public class IpcPrediction implements Serializable {
 		return creationTime;
 	}
 
+	public long getTripStartEpochTime() {
+		return tripStartEpochTime;
+	}
+	
 	/**
 	 * Returns the driver ID if it is available. Otherwise returns null.
 	 * 
@@ -395,6 +443,19 @@ public class IpcPrediction implements Serializable {
 		return passengerCount >= 0;
 	}
 
+	public boolean isDelayed() {
+		return isDelayed;
+	}
+	
+	/**
+	 * For when vehicle is quite late and prediction is for a subsequent trip.
+	 * 
+	 * @return
+	 */
+	public boolean isLateAndSubsequentTripSoMarkAsUncertain() {
+		return lateAndSubsequentTripSoMarkAsUncertain;
+	}
+	
 	public boolean isArrival() {
 		return isArrival;
 	}

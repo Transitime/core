@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.feed.gtfsRt;
+package org.transitime.api.gtfsRealtime;
 
 import java.util.HashMap;
 import java.util.Map;

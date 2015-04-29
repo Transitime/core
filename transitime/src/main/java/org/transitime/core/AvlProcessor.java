@@ -38,6 +38,7 @@ import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.utils.Geo;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
@@ -190,6 +191,10 @@ public class AvlProcessor {
 	}
 
 	/**
+	 * Looks at the previous AVL reports to determine if vehicle is actually
+	 * moving. If it is not moving then the vehicle is made unpredictable. Uses
+	 * the system properties transitime.core.timeForDeterminingNoProgress and
+	 * transitime.core.minDistanceForNoProgress
 	 * 
 	 * @param bestTemporalMatch
 	 * @param vehicleState
@@ -204,16 +209,15 @@ public class AvlProcessor {
 		if (bestTemporalMatch == null)
 			return false;
 
-		TemporalMatch previousMatch = vehicleState.getPreviousMatch(CoreConfig
-				.getTimeForDeterminingNoProgress());
-
+		// If this feature disabled then return false 
+		int noProgressMsec = CoreConfig.getTimeForDeterminingNoProgress();
+		if (noProgressMsec <= 0)
+			return false;
+		
 		// If no previous match then cannot determine if not making progress
+		TemporalMatch previousMatch = vehicleState.getPreviousMatch(noProgressMsec);
 		if (previousMatch == null)
 			return false;
-
-		// Determine how much time elapsed between AVL reports
-		long timeBetweenAvlReports = vehicleState.getAvlReport().getTime()
-				- previousMatch.getAvlTime();
 
 		// Determine distance traveled between the matches
 		double distanceTraveled = previousMatch
@@ -227,6 +231,11 @@ public class AvlProcessor {
 			boolean traversedWaitStop = previousMatch
 					.traversedWaitStop(bestTemporalMatch);
 			if (!traversedWaitStop) {
+				// Determine how much time elapsed between AVL reports
+				long timeBetweenAvlReports =
+						vehicleState.getAvlReport().getTime()
+								- previousMatch.getAvlTime();
+
 				// Create message indicating why vehicle being made
 				// unpredictable because vehicle not making forward progress.
 				String eventDescription = "Vehicle only traveled "
@@ -243,6 +252,73 @@ public class AvlProcessor {
 						VehicleEvent.NO_PROGRESS);
 
 				// Return that vehicle indeed not making progress
+				return true;
+			}
+		}
+
+		// Vehicle was making progress so return such
+		return false;
+	}
+
+	/**
+	 * Looks at the previous AVL reports to determine if vehicle is actually
+	 * moving. If it is not moving then the vehicle should be marked as being
+	 * delayed. Uses the system properties
+	 * transitime.core.timeForDeterminingDelayed and
+	 * transitime.core.minDistanceForDelayed
+	 * 
+	 * @param vehicleState
+	 *            For providing the temporal match and the AVL history. It is
+	 *            expected that the new match has already been set.
+	 * @return True if vehicle not making progress, otherwise false. If vehicle
+	 *         doesn't currently match or if there is not enough history for the
+	 *         vehicle then false is returned.
+	 */
+	private boolean isVehicleDelayed(VehicleState vehicleState) {
+		// Determine the new match
+		TemporalMatch currentMatch = vehicleState.getMatch();
+		
+		// If there is no current match anyways then don't need to do anything
+		// here.
+		if (currentMatch == null)
+			return false;
+
+		// If this feature disabled then return false 
+		int maxDelayedSecs = CoreConfig.getTimeForDeterminingDelayedSecs();
+		if (maxDelayedSecs <= 0)
+			return false;
+		
+		// If no previous match then cannot determine if not making progress
+		TemporalMatch previousMatch =
+				vehicleState.getPreviousMatch(maxDelayedSecs * Time.MS_PER_SEC);
+		if (previousMatch == null)
+			return false;
+
+		// Determine distance traveled between the matches
+		double distanceTraveled = previousMatch
+				.distanceBetweenMatches(currentMatch);
+
+		double minDistance = CoreConfig.getMinDistanceForDelayed();
+		if (distanceTraveled < minDistance) {
+			// Determine if went through any wait stops since if did then
+			// vehicle wasn't stuck in traffic. It was simply stopped at
+			// layover.
+			boolean traversedWaitStop = previousMatch
+					.traversedWaitStop(currentMatch);
+			if (!traversedWaitStop) {
+				// Determine how much time elapsed between AVL reports
+				long timeBetweenAvlReports = vehicleState.getAvlReport().getTime()
+						- previousMatch.getAvlTime();
+
+				logger.info("Vehicle vehicleId={} is delayed. Over {} msec it "
+						+ "traveled only {} while "
+						+ "transitime.core.timeForDeterminingDelayedSecs={} and "
+						+ "transitime.core.minDistanceForDelayed={}",
+						vehicleState.getVehicleId(), timeBetweenAvlReports,
+						Geo.distanceFormat(distanceTraveled), maxDelayedSecs,
+						Geo.distanceFormat(minDistance));
+				
+				// Return that vehicle indeed delayed
 				return true;
 			}
 		}
@@ -1006,6 +1082,10 @@ public class AvlProcessor {
 				// Reset the counter
 				vehicleState.setBadAssignmentsInARow(0);
 
+				// If vehicle is delayed as indicated by not making forward 
+				// progress then store that in the vehicle state
+				vehicleState.setIsDelayed(isVehicleDelayed(vehicleState));
+				
 				// Determine and store the schedule adherence. If schedule
 				// adherence is bad then try matching vehicle to assignment
 				// again. This can make vehicle unpredictable if can't match
@@ -1127,10 +1207,8 @@ public class AvlProcessor {
 				+ "AvlProcessor processing {}", avlReport);
 
 		// Record when the AvlReport was actually processed. This is done here
-		// so
-		// that the value will be set when the avlReport is stored in the
-		// database
-		// using the DbLogger.
+		// so that the value will be set when the avlReport is stored in the
+		// database using the DbLogger.
 		avlReport.setTimeProcessed();
 
 		// Keep track of last AVL report processed so can determine if AVL

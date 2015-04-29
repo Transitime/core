@@ -21,7 +21,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.CoreConfig;
+import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
@@ -57,6 +58,27 @@ import org.transitime.utils.Time;
  */
 public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 
+	private static IntegerConfigValue maxPredictionsTimeSecs =
+			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
+					45 * Time.SEC_PER_MIN,
+					"How far forward into the future should generate " +
+					"predictions for.");
+	
+	private static BooleanConfigValue useArrivalPredictionsForNormalStops =
+			new BooleanConfigValue("transitime.core.useArrivalPredictionsForNormalStops", 
+					true,
+					"For specifying whether to use arrival predictions or " +
+					"departure predictions for normal, non-wait time, stops.");
+	
+	private static IntegerConfigValue maxLateCutoffPredsForNextTripsSecs =
+			new IntegerConfigValue("transitime.core.maxLateCutoffPredsForNextTripsSecs",
+					Integer.MAX_VALUE,
+					"If a vehicle is further behind schedule than this amount "
+					+ "then predictions for subsequent trips will be marked as "
+					+ "being uncertain. This is useful for when another vehicle "
+					+ "might take over the next trip for the block due to "
+					+ "vehicle being late.");
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionGeneratorDefaultImpl.class);
 
@@ -84,11 +106,18 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	 * @param affectedByWaitStop
 	 *            to indicate if prediction is not as accurate because it
 	 *            depends on driver leaving waitStop according to schedule.
+	 * @param isDelayed
+	 *            The vehicle has not been making forward progress
+	 * @param lateSoMarkAsUncertain
+	 *            Indicates that vehicle is late and now generating predictions
+	 *            for a subsequent trip. Use to indicate that the predictions
+	 *            are less certain.
 	 * @return The generated Prediction
 	 */
 	private IpcPrediction generatePredictionForStop(AvlReport avlReport,
-			Indices indices, long predictionTime, boolean useArrivalTimes, 
-			boolean affectedByWaitStop) {
+			Indices indices, long predictionTime, boolean useArrivalTimes,
+			boolean affectedByWaitStop, boolean isDelayed,
+			boolean lateSoMarkAsUncertain) {
 		// Determine additional parameters for the prediction to be generated
 		StopPath path = indices.getStopPath();
 		String stopId = path.getStopId();
@@ -101,7 +130,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
-					predictionTime,	affectedByWaitStop, 
+					predictionTime,	affectedByWaitStop, isDelayed, 
+					lateSoMarkAsUncertain,
 					true);  // isArrival. True to indicate arrival
 		} else {
 			// Generate a departure time
@@ -171,14 +201,15 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				// Add in expected stop time since vehicles often don't depart
 				// on time.
 				return new IpcPrediction(avlReport, stopId,	gtfsStopSeq, trip, 
-						adjustedDepartureTime,	affectedByWaitStop,
+						adjustedDepartureTime,	affectedByWaitStop, isDelayed,
+						lateSoMarkAsUncertain,
 						false);  // isArrival. False to indicate departure			
 			} else {
 				// Create and return the departure prediction for this 
 				// non-layover stop
 				return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
 						predictionTime + expectedStopTimeMsec,
-						affectedByWaitStop, 
+						affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
 						false); // isArrival. False to indicate departure
 			}
 		}			
@@ -199,8 +230,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		// departure time for anything else. But for non-layover stops
 		// can use either arrival or departure times, depending on what
 		// the agency wants. Therefore make this configurable.
-		boolean useArrivalPredictionsForNormalStops = 
-				CoreConfig.getUseArrivalPredictionsForNormalStops();
+		boolean useArrivalPreds = useArrivalPredictionsForNormalStops.getValue();
 		
 		// If prediction is based on scheduled departure time for a layover
 		// then the predictions are likely not as accurate. Therefore this
@@ -222,14 +252,25 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		// Get time to end of first path and thereby determine prediction for 
 		// first stop.
 		TravelTimes travelTimes = TravelTimes.getInstance();
-		long predictionTime = 
-				avlTime + travelTimes.expectedTravelTimeFromMatchToEndOfStopPath(match);
+		long predictionTime = avlTime + 
+				travelTimes.expectedTravelTimeFromMatchToEndOfStopPath(match);
+		
+		// Determine if vehicle is so late that predictions for subsequent 
+		// trips should be marked as uncertain given that another vehicle
+		// might substitute in for that block.
+		TemporalDifference lateness = vehicleState.getRealTimeSchedAdh();
+		boolean lateSoMarkSubsequentTripsAsUncertain =
+				lateness.isLaterThan(maxLateCutoffPredsForNextTripsSecs.getValue());
+		if (lateSoMarkSubsequentTripsAsUncertain)
+			logger.info("Vehicle late so marking predictions for subsequent "
+					+ "trips as being uncertain. {}", vehicleState);
+		int currentTripIndex = indices.getTripIndex();
 		
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
 		while (schedBasedPreds
 				|| predictionTime < 
-					avlTime + CoreConfig.getMaxPredictionsTimeMsecs()) {
+					avlTime + maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC) {
 			// Keep track of whether prediction is affected by layover 
 			// scheduled departure time since those predictions might not
 			// be a accurate. Once a layover encountered then all subsequent
@@ -237,10 +278,15 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			if (indices.isWaitStop())
 				affectedByWaitStop = true;
 			
+			boolean lateSoMarkAsUncertain =
+					lateSoMarkSubsequentTripsAsUncertain
+							&& indices.getTripIndex() > currentTripIndex;
+			
 			// Determine the new prediction
 			IpcPrediction predictionForStop = generatePredictionForStop(avlReport,
 					indices, predictionTime,
-					useArrivalPredictionsForNormalStops, affectedByWaitStop);
+					useArrivalPreds, affectedByWaitStop, 
+					vehicleState.isDelayed(), lateSoMarkAsUncertain);
 			logger.debug("For vehicleId={} generated prediction {}",
 					vehicleState.getVehicleId(), predictionForStop);
 			
@@ -250,7 +296,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			// and break out of the loop.
 			if (!schedBasedPreds
 					&& predictionForStop.getTime() > avlTime
-							+ CoreConfig.getMaxPredictionsTimeMsecs())
+							+ maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC)
 				break;
 			
 			// The prediction is not too far into the future so add it to the list

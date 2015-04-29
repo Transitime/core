@@ -184,6 +184,22 @@ public class Agency implements Serializable {
 	}
 	
 	/**
+	 * Reads the current timezone for the agency from the agencies database
+	 * 
+	 * @param dbName
+	 * @return The TimeZone, or null if not successful
+	 */
+	public static TimeZone getTimeZoneFromDb(String dbName) {
+		int configRev = ActiveRevisions.get(dbName).getConfigRev();
+		
+		List<Agency> agencies = getAgencies(dbName, configRev);
+		if (agencies.size() != 0)
+			return agencies.get(0).getTimeZone();
+		else
+			return null;
+	}
+	
+	/**
 	 * Returns cached TimeZone object for agency. Useful for creating
 	 * Calendar objects and such.
 	 * 

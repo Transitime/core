@@ -34,15 +34,15 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.transitime.db.structs.Location;
-import org.transitime.feed.gtfsRt.GtfsRtTripFeed;
-import org.transitime.feed.gtfsRt.GtfsRtVehicleFeed;
+import org.transitime.api.gtfsRealtime.GtfsRtTripFeed;
+import org.transitime.api.gtfsRealtime.GtfsRtVehicleFeed;
 import org.transitime.feed.gtfsRt.OctalDecoder;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcActiveBlock;
-import org.transitime.ipc.data.IpcCompleteVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
@@ -323,11 +323,11 @@ public class RmiQuery {
 		VehiclesInterface vehiclesInterface = 
 				VehiclesInterfaceFactory.get(agencyId);
 		
-		Collection<IpcCompleteVehicle> vehicles = null;
+		Collection<IpcVehicleComplete> vehicles = null;
 		if (vehicleIds != null && vehicleIds.length == 1) {
 			// Get single vehicle
-			IpcCompleteVehicle vehicle = vehiclesInterface.getComplete(vehicleIds[0]);
-			vehicles = new ArrayList<IpcCompleteVehicle>();
+			IpcVehicleComplete vehicle = vehiclesInterface.getComplete(vehicleIds[0]);
+			vehicles = new ArrayList<IpcVehicleComplete>();
 			vehicles.add(vehicle);
 		} else if (vehicleIds != null && vehicleIds.length > 1) {
 			// Get multiple vehicles
