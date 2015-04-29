@@ -106,28 +106,34 @@ public class GtfsRtTripFeed {
 	 */
 	private TripUpdate createTripUpdate(List<IpcPrediction> predsForTrip) {
 		// Create the parent TripUpdate object that is returned.
-		TripUpdate.Builder tripUpdate =
-				TripUpdate.newBuilder();
-				  
+		TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
+
 		// Add the trip descriptor information
 		IpcPrediction firstPred = predsForTrip.get(0);
+		// FIXME logging just for debug
+		logger.info("In createTripUpdate() firstPred={}", firstPred);
 		TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
 		if (firstPred.getRouteId() != null)
 			tripDescriptor.setRouteId(firstPred.getRouteId());
 		if (firstPred.getTripId() != null) {
 			tripDescriptor.setTripId(firstPred.getTripId());
-			
+
 			long tripStartEpochTime = firstPred.getTripStartEpochTime();
 			String tripStartDateStr =
 					gtfsRealtimeDateFormatter.format(new Date(
 							tripStartEpochTime));
+
+			// FIXME logging just for debug
+			logger.info("tripStartEpochTime={} and tripStartDateStr={}",
+					tripStartEpochTime, tripStartDateStr);
+
 			tripDescriptor.setStartDate(tripStartDateStr);
 		}
 		tripUpdate.setTrip(tripDescriptor);
-		
+
 		// Add the VehicleDescriptor information
-		VehicleDescriptor.Builder vehicleDescriptor = 
-			VehicleDescriptor.newBuilder().setId(firstPred.getVehicleId());
+		VehicleDescriptor.Builder vehicleDescriptor =
+				VehicleDescriptor.newBuilder().setId(firstPred.getVehicleId());
 		tripUpdate.setVehicle(vehicleDescriptor);
 
 		// Add the StopTimeUpdate information for each prediction
@@ -199,11 +205,8 @@ public class GtfsRtTripFeed {
 				feedEntity.setTripUpdate(tripUpdate);		
 	    		message.addEntity(feedEntity);
 			} catch (Exception e) {
-				// Output error message
-				System.err.println("Error parsing trip update data. " + 
-						e.getMessage() + ".\n" + 
-						predsForTrip);
-				e.printStackTrace();
+				logger.error("Error parsing trip update data. {}",
+						predsForTrip, e);
 			}
 		}		
 		
@@ -283,7 +286,7 @@ public class GtfsRtTripFeed {
 	public static FeedMessage getPossiblyCachedMessage(String agencyId, int cacheTime) {
 	    FeedMessage feedMessage = tripFeedDataCache.get(agencyId, cacheTime);
 	    if (feedMessage != null)
-		return feedMessage;
+	    	return feedMessage;
 	    
 	    GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
 	    feedMessage = feed.createMessage();
