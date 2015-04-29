@@ -171,10 +171,8 @@ public class GtfsRtVehicleFeed {
 				vehiclePositionEntity.setVehicle(vehiclePosition);
 				message.addEntity(vehiclePositionEntity);
 			} catch (Exception e) {
-				// Output error message
-				System.err.println("Error parsing vehicle data. "
-						+ e.getMessage() + ".\n" + vehicle);
-				e.printStackTrace();
+				logger.error("Error parsing vehicle data for vehicle={}",
+						vehicle, e);
 			}
 		}
 
