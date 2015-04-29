@@ -215,6 +215,7 @@ public class GtfsData {
 	// Default of null means don't do any filtering
 	private static StringConfigValue tripIdFilterRegEx = new StringConfigValue(
 			"transitime.gtfs.tripIdFilterRegEx", 
+			null, // Default of null means don't do any filtering
 			"Trip is included only if trip_id matches the this regular "
 			+ "expression. If only want trips with \"SPECIAL\" in the id then "
 			+ "would use \".*SPECIAL.*\". If want to filter out such trips "
