@@ -110,8 +110,6 @@ public class GtfsRtTripFeed {
 
 		// Add the trip descriptor information
 		IpcPrediction firstPred = predsForTrip.get(0);
-		// FIXME logging just for debug
-		logger.info("In createTripUpdate() firstPred={}", firstPred);
 		TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
 		if (firstPred.getRouteId() != null)
 			tripDescriptor.setRouteId(firstPred.getRouteId());
@@ -122,11 +120,6 @@ public class GtfsRtTripFeed {
 			String tripStartDateStr =
 					gtfsRealtimeDateFormatter.format(new Date(
 							tripStartEpochTime));
-
-			// FIXME logging just for debug
-			logger.info("tripStartEpochTime={} and tripStartDateStr={}",
-					tripStartEpochTime, tripStartDateStr);
-
 			tripDescriptor.setStartDate(tripStartDateStr);
 		}
 		tripUpdate.setTrip(tripDescriptor);
