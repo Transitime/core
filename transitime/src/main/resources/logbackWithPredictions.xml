@@ -353,7 +353,7 @@
   </logger>
 
   <logger name="org.transitime.monitoring"
-          level="debug" additivity="false">
+          level="info" additivity="false">
     <appender-ref ref="MONITORING" />
   </logger>
 
