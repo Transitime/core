@@ -112,7 +112,7 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		isDelayed = vehicle.isDelayed() ? "true" : null;
 		isLayover = vehicle.isLayover() ? "true" : null;
 		layoverDepTime = vehicle.isLayover() ? 
-				Long.toString(vehicle.getLayoverDepartureTime()) : null;
+				Long.toString(vehicle.getLayoverDepartureTime()/Time.MS_PER_SEC) : null;
 				
 		layoverDepTimeStr = vehicle.isLayover() ?
 				timeForAgency.timeStrForTimezone(vehicle.getLayoverDepartureTime()) : null;

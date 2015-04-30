@@ -61,17 +61,16 @@
 
 
 
-/**
- * For format epoch times to human readable times, possibly including
- * a timezone offest.
- */
 var agencyTimezoneOffset;
-
+/**
+ * For formating epoch times to human readable times, possibly including
+ * a timezone offest. The time param in epoch time in seconds (not msec).
+ */
 function dateFormat(time) {
 	var localTimezoneOffset = (new Date()).getTimezoneOffset();
 	var timezoneDiffMinutes = localTimezoneOffset - agencyTimezoneOffset;
 	
-	var offsetDate = new Date(parseInt(time) + timezoneDiffMinutes*60*1000);
+	var offsetDate = new Date(parseInt(time*1000) + timezoneDiffMinutes*60*1000);
 	// Use jquery-dateFormat javascript library
 	return $.format.date(offsetDate, 'HH:mm:ss');
 }

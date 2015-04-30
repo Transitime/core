@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcPrediction;
+import org.transitime.utils.Time;
 
 /**
  * Contains data for a single prediction.
@@ -31,6 +32,7 @@ import org.transitime.ipc.data.IpcPrediction;
 @XmlRootElement
 public class ApiPrediction {
 
+	// Epoch time in seconds (not msec, so shorter)
 	@XmlAttribute(name = "time")
 	private long time;
 
@@ -84,8 +86,9 @@ public class ApiPrediction {
 	}
 
 	public ApiPrediction(IpcPrediction prediction) {
-		time = prediction.getTime();
-		seconds = (int) (time - System.currentTimeMillis()) / 1000;
+		time = prediction.getTime() / Time.MS_PER_SEC;
+		seconds = (int) (prediction.getTime() - System.currentTimeMillis()) /
+				Time.MS_PER_SEC;
 		// Always round down minutes to be conservative and so that user
 		// doesn't miss bus.
 		minutes = seconds / 60;
