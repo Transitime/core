@@ -389,6 +389,11 @@ public class IpcVehicle implements Serializable {
 		return avl.getLicensePlate();
 	}
 
+	/**
+	 * GPS epoch time in msec.
+	 * 
+	 * @return
+	 */
 	public long getGpsTime() {
 		return avl.getTime();
 	}
