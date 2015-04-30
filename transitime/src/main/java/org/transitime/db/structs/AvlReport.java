@@ -90,6 +90,7 @@ public class AvlReport implements Serializable {
 	@Embedded
 	private final Location location;
 	
+	// Speed of vehicle in m/s.
 	// Speed is an optional element since not always available
 	// in an AVL feed. Internally it needs to be a Float and
 	// bet set to null when the value is not valid so that it can be stored
@@ -99,6 +100,7 @@ public class AvlReport implements Serializable {
 	@Column
 	private final Float speed;   // optional
 	
+	// Heading in degrees clockwise from north.
 	// Heading is an optional element since not always available
 	// in an AVL feed. It is in number of degrees clockwise from 
 	// north. Internally it needs to be a Float and
@@ -211,9 +213,11 @@ public class AvlReport implements Serializable {
 	 * @param lat
 	 * @param lon
 	 * @param speed
-	 *            should be set to Float.NaN if speed not available
+	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
+	 *            not available
 	 * @param heading
-	 *            should be set to Float.NaN if speed not available
+	 *            Heading of vehicle in degrees clockwise from north. Should be
+	 *            set to Float.NaN if speed not available
 	 */
 	public AvlReport(String vehicleId, long time, double lat, double lon, 
 			float speed, float heading) {
@@ -246,9 +250,11 @@ public class AvlReport implements Serializable {
 	 * @param lat
 	 * @param lon
 	 * @param speed
-	 *            should be set to Float.NaN if speed not available
+	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
+	 *            not available
 	 * @param heading
-	 *            should be set to Float.NaN if speed not available
+	 *            Heading of vehicle in degrees clockwise from north. Should be
+	 *            set to Float.NaN if speed not available
 	 * @param leadVehicleId
 	 *            Optional value. Set to null if not available.
 	 * @param driverId
@@ -297,7 +303,11 @@ public class AvlReport implements Serializable {
 	 * @param time
 	 * @param location
 	 * @param speed
+	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
+	 *            not available
 	 * @param heading
+	 *            Heading of vehicle in degrees clockwise from north. Should be
+	 *            set to Float.NaN if speed not available
 	 */
 	public AvlReport(String vehicleId, long time, Location location, 
 			float speed, float heading) {
