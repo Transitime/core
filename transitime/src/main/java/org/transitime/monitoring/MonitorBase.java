@@ -106,7 +106,7 @@ public abstract class MonitorBase {
 			acceptableEvenIfTriggered = acceptableEvenIfTriggered();
 		}
 		
-		logger.error("For agencyId={} monitoring type={} isTriggered={} "
+		logger.info("For agencyId={} monitoring type={} isTriggered={} "
 				+ "wasTriggered={} message=\"{}\" acceptableEvenIfTriggered={} "
 				+ "acceptableEvenIfTriggeredMessage=\"{}\"", 
 				agencyId, type(), isTriggered, wasTriggered, message,
