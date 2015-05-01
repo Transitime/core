@@ -31,6 +31,7 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
@@ -155,8 +156,9 @@ public class SchedBasedPredsModule extends Module {
 						getTimeBetweenPollingMsec() - timer.elapsedMsec();
 				if (sleepTime > 0)
 					Time.sleep(sleepTime);
-			} catch (Exception e) {
-				logger.error("Error with SchedBasedPredsModule", e);
+			} catch (Throwable e) {
+				logger.error(Markers.email(),
+						"Error with SchedBasedPredsModule", e);
 			}
 		}
 	}

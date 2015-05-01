@@ -85,7 +85,7 @@ public class BoundedExecutor {
 					try {
 						// Actually call the run() method for the command
 						command.run();
-					} catch(Exception e) {
+					} catch (Throwable e) {
 						// Need to catch (and log) exception. Otherwise 
 						// exception would bubble upwards and get infinite 
 						// number of threads, at least if have a breakpoint

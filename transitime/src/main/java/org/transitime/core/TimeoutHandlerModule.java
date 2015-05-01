@@ -18,6 +18,7 @@ package org.transitime.core;
 
 import java.util.HashMap;
 import java.util.Iterator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -25,6 +26,7 @@ import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.VehicleEvent;
+import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
@@ -338,8 +340,9 @@ public class TimeoutHandlerModule extends Module {
 						- timer.elapsedMsec();
 				if (sleepTime > 0)
 					Time.sleep(sleepTime);
-			} catch (Exception e) {
-				logger.error("Error with TimeoutHandlerModule", e);
+			} catch (Throwable e) {
+				logger.error(Markers.email(),
+						"Error with TimeoutHandlerModule", e);
 			}
 
 		}

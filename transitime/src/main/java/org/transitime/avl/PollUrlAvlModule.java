@@ -26,6 +26,7 @@ import java.util.zip.GZIPInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.AvlConfig;
+import org.transitime.logging.Markers;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -155,10 +156,11 @@ public abstract class PollUrlAvlModule extends AvlModule {
 				// Process data
 				getAndProcessData();
 			} catch (SocketTimeoutException e) {
-				logger.error("Error accessing AVL feed using URL={} with a " +
+				logger.error(Markers.email(),
+						"Error accessing AVL feed using URL={} with a " +
 						"timeout of {} msec.", 
 						getUrl(), AvlConfig.getAvlFeedTimeoutInMSecs(), e);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error accessing AVL feed using URL={}.", 
 						getUrl(), e);
 			}

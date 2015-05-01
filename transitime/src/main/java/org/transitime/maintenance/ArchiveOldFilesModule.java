@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.Time;
 
@@ -179,11 +180,16 @@ public class ArchiveOldFilesModule extends Module {
 	@Override
 	public void run() {		
 		while (true) {
-			// Sleep until the time of day specified by secondsIntoDay member
-			sleepTillAppropriateTime();
-			
-			// Actually archive the logs
-			archiveLogFiles();
+			try {
+				// Sleep until the time of day specified by secondsIntoDay member
+				sleepTillAppropriateTime();
+				
+				// Actually archive the logs
+				archiveLogFiles();
+			} catch (Throwable e) {
+				logger.error(Markers.email(), 
+						"Error when archiving old files.", e);
+			}
 		}
 
 	}

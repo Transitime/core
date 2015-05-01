@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.config.LongConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.configData.AgencyConfig;
+import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.monitoring.MonitorBase;
 import org.transitime.utils.EmailSender;
@@ -229,8 +230,9 @@ public class GtfsUpdatedModule extends Module {
 			// to run even if there is an unexpected problem.
 			try {
 				get();
-			} catch (RuntimeException e) {
-				logger.error("Exception in GtfsUpdatedModule", e);
+			} catch (Throwable e) {
+				logger.error(Markers.email(),
+						"Exception in GtfsUpdatedModule", e);
 			}
 		}
 	}

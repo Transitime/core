@@ -208,7 +208,7 @@ public class PredictionAccuracyModule extends Module {
 						getTimeBetweenPollingPredictionsMsec() - elapsedMsec;
 				if (sleepTime > 0)
 					Time.sleep(sleepTime);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error accessing predictions feed", e);
 			}
 		}

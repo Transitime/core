@@ -46,7 +46,7 @@ public class ThreadTest implements Runnable {
 				} catch (InterruptedException e) {}
 				
 				System.err.println("Name=" + name);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}

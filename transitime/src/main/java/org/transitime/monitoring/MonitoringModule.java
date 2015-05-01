@@ -20,6 +20,7 @@ package org.transitime.monitoring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
@@ -71,28 +72,32 @@ public class MonitoringModule extends Module {
 		// immediately at startup
 		IntervalTimer timer = new IntervalTimer();
 		while (true) {
-			// Wait appropriate amount of time till poll again
-			long elapsedMsec = timer.elapsedMsec();
-			long sleepTime = 
-					secondsBetweenMonitorinPolling.getValue()*Time.MS_PER_SEC - 
-					elapsedMsec;
-			if (sleepTime < 0) {
-				logger.warn("For monitoring module upposed to have a polling "
-						+ "rate of " 
-						+ secondsBetweenMonitorinPolling.getValue()*Time.MS_PER_SEC 
-						+ " msec but processing previous data took " 
-						+ elapsedMsec + " msec so polling again immediately.");
-			} else {
-				Time.sleep(sleepTime);
-			}
-			timer.resetTimer();
-			
-			// Actually do the monitoring
-			String resultStr = agencyMonitor.checkAll();
-			
-			if (resultStr != null) {
-				logger.error("MonitoringModule detected problem. {}", 
-						resultStr);
+			try {
+				// Wait appropriate amount of time till poll again
+				long elapsedMsec = timer.elapsedMsec();
+				long sleepTime = 
+						secondsBetweenMonitorinPolling.getValue()*Time.MS_PER_SEC - 
+						elapsedMsec;
+				if (sleepTime < 0) {
+					logger.warn("For monitoring module upposed to have a polling "
+							+ "rate of " 
+							+ secondsBetweenMonitorinPolling.getValue()*Time.MS_PER_SEC 
+							+ " msec but processing previous data took " 
+							+ elapsedMsec + " msec so polling again immediately.");
+				} else {
+					Time.sleep(sleepTime);
+				}
+				timer.resetTimer();
+				
+				// Actually do the monitoring
+				String resultStr = agencyMonitor.checkAll();
+				
+				if (resultStr != null) {
+					logger.error("MonitoringModule detected problem. {}", 
+							resultStr);
+				}
+			} catch (Throwable e) {
+				logger.error(Markers.email(), "Errror in MonitoringModule", e);
 			}
 		}
 
