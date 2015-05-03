@@ -20,7 +20,11 @@ import org.transitime.configData.RmiConfig;
 import org.transitime.db.webstructs.WebAgency;
 
 /**
- * Contains the info needed for creating an RMI stub.
+ * Contains the info needed for creating an RMI stub, including the agency ID
+ * and the agency host name. The hostname is obtained from the Java property
+ * transitime.rmi.rmiHost if set. Otherwise gets the host names from the
+ * WebAgency database.
+ * <p>
  * This information exists on the client side.
  * 
  * @author SkiBu Smith
