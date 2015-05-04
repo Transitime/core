@@ -69,14 +69,15 @@ public class CreateAPIKey {
 		try {
 			CommandLine cmd = parser.parse(options, args);
 
-			if (cmd.hasOption("c") && cmd.hasOption("n") && cmd.hasOption("u")
+			if (cmd.hasOption("n") && cmd.hasOption("u")
 					&& cmd.hasOption("e") && cmd.hasOption("p")
 					&& cmd.hasOption("d")) {
 				String configFile = null;
 
-				configFile = cmd.getOptionValue("c");
 				// Read in the data from config file
-				ConfigFileReader.processConfig(configFile);
+				configFile = cmd.getOptionValue("c");
+				if (configFile != null)
+					ConfigFileReader.processConfig(configFile);
 
 				ApiKeyManager manager = ApiKeyManager.getInstance();
 				ApiKey apiKey = manager.generateApiKey(cmd.getOptionValue("n"),
@@ -93,24 +94,6 @@ public class CreateAPIKey {
 			e.printStackTrace(System.out);
 			printHelp(options);
 		}
-
-		// try {
-		// ApiKey apiKey = generateApiKey("applicationName",
-		// "applicationUrl", "email", "phone",
-		// "description");
-		// System.out.println(apiKey);
-		//
-		// } catch (IllegalArgumentException e) {
-		// e.printStackTrace();
-		// } catch (HibernateException e) {
-		// e.printStackTrace();
-		// }
-		//
-		//
-		// ApiKeyManager manager = new ApiKeyManager();
-		// boolean valid = manager.isKeyValid("1852453479"/* "sldkfj" */);
-		// int xx = 9;
-
 	}
 
 	static void printHelp(Options options) {
