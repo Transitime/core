@@ -115,6 +115,10 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeShortName = tripPattern.getRouteShortName();		
 		Route route = Core.getInstance().getDbConfig()
 				.getRouteById(tripPattern.getRouteId());
+		if (route == null) {
+			throw new IllegalArgumentException("RouteId="
+					+ tripPattern.getRouteId() + " does not exist.");
+		}
 		this.routeName = route.getName();
 		this.routeOrder = route.getRouteOrder();
 		this.stopId = stopId;
@@ -210,8 +214,16 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 */
 	public IpcPredictionsForRouteStopDest(String routeShortName, String stopId, 
 			String directionId) {
-		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);	
+		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);
+		if (route == null) {
+			throw new IllegalArgumentException("routeShortName="
+					+ routeShortName + " does not exist.");
+		}
 		Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+		if (stop == null) {
+			throw new IllegalArgumentException("stopId="
+					+ stopId + " does not exist.");
+		}
 		
 		this.routeId = route.getId();
 		this.routeShortName = routeShortName;
