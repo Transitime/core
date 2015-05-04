@@ -218,6 +218,17 @@ public class StopPathProcessor {
 		double distanceAlongShape;
 		Location matchLocation;
 		
+		@Override
+		public String toString() {
+			return "BestMatch [" 
+					+ "shapeIndex=" + shapeIndex
+					+ ", stopToShapeDistance=" 
+						+ Geo.distanceFormat(stopToShapeDistance)
+					+ ", distanceAlongShape=" 
+						+ Geo.distanceFormat(distanceAlongShape)
+					+ ", matchLocation=" + matchLocation
+					+ "]";
+		}
 	}
 	/**
 	 * Determines and returns the best match of the stop to a shape.
@@ -250,7 +261,7 @@ public class StopPathProcessor {
 		// looked far enough along shapes. If first stop then use MAX_VALUE 
 		// so that look through entire shape. This is needed because sometimes 
 		// the shapes include really long path before the first stop. 
-		double distanceBetweenStops = 
+		double distanceBetweenStopsAsCrowFlies = 
 				previousStop==null? 
 						Double.MAX_VALUE :
 						(new Vector(previousStop.getLoc(), stop.getLoc())).length();
@@ -304,7 +315,7 @@ public class StopPathProcessor {
 			// the distance along the shape is 760m. Therefore need to be 
 			// pretty generous to correctly find the 43rd Ave & Clement stop.
 			distanceAlongShapesExamined += shapeVector.length();
-			if (distanceAlongShapesExamined > 3.0 * distanceBetweenStops + 600.0)
+			if (distanceAlongShapesExamined > 3.0 * distanceBetweenStopsAsCrowFlies + 600.0)
 				break;				
 		} // End of for each shape (finding best match)
 		
