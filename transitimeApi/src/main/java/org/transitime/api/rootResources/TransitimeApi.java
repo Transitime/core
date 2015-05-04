@@ -163,7 +163,7 @@ public class TransitimeApi {
 
 			// return ApiVehicles response
 			return stdParameters.createResponse(apiVehicles);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -244,7 +244,7 @@ public class TransitimeApi {
 
 			// return ApiVehiclesDetails response
 			return stdParameters.createResponse(apiVehiclesDetails);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -282,7 +282,7 @@ public class TransitimeApi {
 			
 			// return ApiVehiclesDetails response
 			return stdParameters.createResponse(apiVehicleConfigs);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -441,7 +441,7 @@ public class TransitimeApi {
 			// return ApiPredictions response
 			ApiPredictions predictionsData = new ApiPredictions(predictions);
 			return stdParameters.createResponse(predictionsData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -502,7 +502,7 @@ public class TransitimeApi {
 			// return ApiPredictions response
 			ApiPredictions predictionsData = new ApiPredictions(predictions);
 			return stdParameters.createResponse(predictionsData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -532,7 +532,7 @@ public class TransitimeApi {
 			// Create and return @QueryParam(value="s") String stopId response
 			ApiRouteSummaries routesData = new ApiRouteSummaries(routes);
 			return stdParameters.createResponse(routesData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -576,7 +576,7 @@ public class TransitimeApi {
 			// Create and return ApiRoute response
 			ApiRoute routeData = new ApiRoute(route);
 			return stdParameters.createResponse(routeData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -617,7 +617,7 @@ public class TransitimeApi {
 			// Create and return ApiDirections response
 			ApiDirections directionsData = new ApiDirections(stopsForRoute);
 			return stdParameters.createResponse(directionsData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -658,7 +658,7 @@ public class TransitimeApi {
 			// Create and return ApiBlock response
 			ApiBlock apiBlock = new ApiBlock(ipcBlock);
 			return stdParameters.createResponse(apiBlock);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -704,7 +704,7 @@ public class TransitimeApi {
 			ApiActiveBlocks apiActiveBlocks = 
 					new ApiActiveBlocks(activeBlocks, stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocks);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -734,7 +734,7 @@ public class TransitimeApi {
 			ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
 					activeBlocks, stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocksRoutes);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -773,7 +773,7 @@ public class TransitimeApi {
 			// Include stop path info since just outputting single trip.
 			ApiTrip apiTrip = new ApiTrip(ipcTrip, true);
 			return stdParameters.createResponse(apiTrip);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -815,7 +815,7 @@ public class TransitimeApi {
 			ApiTripWithTravelTimes apiTrip = new ApiTripWithTravelTimes(
 					ipcTrip, true);
 			return stdParameters.createResponse(apiTrip);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -857,7 +857,7 @@ public class TransitimeApi {
 			ApiTripPatterns apiTripPatterns = new ApiTripPatterns(
 					ipcTripPatterns);
 			return stdParameters.createResponse(apiTripPatterns);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -898,7 +898,7 @@ public class TransitimeApi {
 			// Create and return ApiSchedules response
 			ApiSchedules apiSchedules = new ApiSchedules(ipcSchedules);
 			return stdParameters.createResponse(apiSchedules);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -933,7 +933,7 @@ public class TransitimeApi {
 			}
 			ApiAgencies apiAgencies = new ApiAgencies(apiAgencyList);
 			return stdParameters.createResponse(apiAgencies);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -966,7 +966,7 @@ public class TransitimeApi {
 			ApiServerStatus apiServerStatus = new ApiServerStatus(
 					stdParameters.getAgencyId(), ipcServerStatus);
 			return stdParameters.createResponse(apiServerStatus);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}

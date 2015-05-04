@@ -94,7 +94,7 @@ public class SiriApi {
 					new SiriVehiclesMonitoring(vehicles,
 							stdParameters.getAgencyId());
 			return stdParameters.createResponse(siriVehicles);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -155,7 +155,7 @@ public class SiriApi {
 
 			// Return SiriStopMonitoring response
 			return stdParameters.createResponse(siriStopMonitoring);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
