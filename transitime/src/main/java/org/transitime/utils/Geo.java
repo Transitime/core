@@ -78,11 +78,11 @@ public class Geo {
 	 * Useful when want to output speed or heading but don't want to
 	 * include units.
 	 * 
-	 * @param arg
+	 * @param value
 	 * @return
 	 */
-	public static String oneDigitFormat(float arg) {
-		return oneDigitFormat.format(arg);
+	public static String oneDigitFormat(double value) {
+		return oneDigitFormat.format(value);
 	}
 	
 	/**
