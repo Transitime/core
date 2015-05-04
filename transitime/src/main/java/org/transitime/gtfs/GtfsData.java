@@ -115,6 +115,7 @@ public class GtfsData {
 	private final double maxStopToPathDistance;
 	private final double maxDistanceForEliminatingVertices;
 	private final int defaultWaitTimeAtStopMsec;
+	private final double maxSpeedKph;
 	private final double maxTravelTimeSegmentLength;
 	private final boolean trimPathBeforeFirstStopOfTrip;
 	
@@ -246,6 +247,7 @@ public class GtfsData {
 	 * @param maxStopToPathDistance
 	 * @param maxDistanceForEliminatingVertices
 	 * @param defaultWaitTimeAtStopMsec
+	 * @param maxSpeedKph
 	 * @param maxTravelTimeSegmentLength
 	 * @param trimPathBeforeFirstStopOfTrip
 	 * @param titleFormatter
@@ -262,6 +264,7 @@ public class GtfsData {
 			double maxStopToPathDistance,
 			double maxDistanceForEliminatingVertices,
 			int defaultWaitTimeAtStopMsec,
+			double maxSpeedKph,
 			double maxTravelTimeSegmentLength,
 			boolean trimPathBeforeFirstStopOfTrip,
 			TitleFormatter titleFormatter) {
@@ -277,6 +280,7 @@ public class GtfsData {
 		this.maxDistanceForEliminatingVertices = 
 				maxDistanceForEliminatingVertices;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
+		this.maxSpeedKph = maxSpeedKph;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
 		this.trimPathBeforeFirstStopOfTrip = trimPathBeforeFirstStopOfTrip;
 		this.titleFormatter = titleFormatter;
@@ -2087,10 +2091,10 @@ public class GtfsData {
 		//outputPathsAndStopsForGraphing("8699");
 		
 		// Now process travel times and update the Trip objects. 
-		ScheduleBasedTravelTimesProcessor travelTimesProcesssor = 
-				new ScheduleBasedTravelTimesProcessor(
-						revs, originalTravelTimesRev,
-						maxTravelTimeSegmentLength, defaultWaitTimeAtStopMsec);
+		ScheduleBasedTravelTimesProcessor travelTimesProcesssor =
+				new ScheduleBasedTravelTimesProcessor(revs,
+						originalTravelTimesRev, maxTravelTimeSegmentLength,
+						defaultWaitTimeAtStopMsec, maxSpeedKph);
 		travelTimesProcesssor.process(session, this);
 		
 		// Try allowing garbage collector to free up some memory since

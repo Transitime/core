@@ -33,6 +33,7 @@ import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
+import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -56,10 +57,9 @@ public class ScheduleBasedTravelTimesProcessor {
 	private final int originalTravelTimesRev;
 	
 	private final int defaultWaitTimeAtStopMsec; 
+	private final double maxSpeedKph;
+	private final double maxSpeedMetersPerMsec;
 	private final double maxTravelTimeSegmentLength;
-	
-	// 0.036m/msec = 36.0m/s = 80mph
-	private static final double MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC = 0.036; 
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ScheduleBasedTravelTimesProcessor.class);
@@ -74,13 +74,16 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * @param originalTravelTimesRev
 	 * @param maxTravelTimeSegmentLength
 	 * @param defaultWaitTimeAtStopMsec
+	 * @param maxSpeedKph
 	 */
 	public ScheduleBasedTravelTimesProcessor(ActiveRevisions activeRevisions,
 			int originalTravelTimesRev, double maxTravelTimeSegmentLength,
-			int defaultWaitTimeAtStopMsec) {
+			int defaultWaitTimeAtStopMsec, double maxSpeedKph) {
 		this.activeRevisions = activeRevisions;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;	
+		this.maxSpeedKph = maxSpeedKph;
+		this.maxSpeedMetersPerMsec = maxSpeedKph * Geo.KPH_TO_MPS / Time.MS_PER_SEC;
 		this.originalTravelTimesRev = originalTravelTimesRev;
 	}
 	
@@ -196,20 +199,67 @@ public class ScheduleBasedTravelTimesProcessor {
 					msecSpentStopped = elapsedScheduleTimeInSecs*1000;
 				int msecForTravelBetweenScheduleTimes = 
 						elapsedScheduleTimeInSecs*1000 - msecSpentStopped;
-				// Make sure that speed is reasonable. An agency might 
+				// Make sure that speed is reasonable, taking default wait 
+				// stop times into account. An agency might 
 				// mistakenly only provide a few seconds of travel time and
 				// that could be completely eaten away by expected stop times.
-				if (msecForTravelBetweenScheduleTimes == 0 || 
-						distanceBetweenScheduleStops / msecForTravelBetweenScheduleTimes > 
-						MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC) {
-					logger.warn("Clamping schedule based travel speed to "
-							+ "MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC={} for "
-							+ "tripId={} stopPathIndex={}", 
-							MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC, trip.getId(), 
-							stopPathIndex);
-					msecForTravelBetweenScheduleTimes = 
-							(int) (distanceBetweenScheduleStops / 
-									MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC);
+				if (msecForTravelBetweenScheduleTimes == 0
+						|| distanceBetweenScheduleStops
+								/ msecForTravelBetweenScheduleTimes > maxSpeedMetersPerMsec) {
+					// It might be that for a non-rush hour bus route the agency
+					// doesn't expect the bus to stop at a stop. So first see if
+					// travel time is reasonable if there is no wait time.
+					if (elapsedScheduleTimeInSecs * Time.MS_PER_SEC > 0
+							&& distanceBetweenScheduleStops
+									/ (elapsedScheduleTimeInSecs * Time.MS_PER_SEC) <= maxSpeedMetersPerMsec) {
+						// Travel speed is OK if wait time is considered to 
+						// be less than the default time. So reduce wait time 
+						// such that travel speed limit is not violated.
+						msecSpentStopped =
+								elapsedScheduleTimeInSecs
+										* Time.MS_PER_SEC
+										- (int) (distanceBetweenScheduleStops / maxSpeedMetersPerMsec);
+						
+						logger.warn("When determining schedule based travel "
+								+ "times for routeId={} routeShortName={} " 
+								+ "tripId={} stopPathIndex={} "
+								+ "stopId={} stopName=\"{}\" "
+								+ "distanceBetweenScheduleStops={} "
+								+ "reducing stop wait time to {} msec "
+								+ "per stop so that maxSpeedKph={} kph is "
+								+ "not violated.", 
+								trip.getRouteId(), trip.getRouteShortName(),
+								trip.getId(), stopPathIndex, 
+								tripPattern.getStopId(stopPathIndex), 
+								gtfsData.getStop(tripPattern.getStopId(stopPathIndex)).getName(),
+								Geo.distanceFormat(distanceBetweenScheduleStops),
+								msecSpentStopped/numberOfStops, 
+								Geo.oneDigitFormat(maxSpeedKph));
+					} else {
+						// There is a real problem with the schedule time since 
+						// even if wait time was reduced to 0 the travel time 
+						// based on schedule would be too high.
+						logger.error("When determining schedule based travel "
+								+ "times for routeId={} routeShortName={} " 
+								+ "tripId={} stopPathIndex={} "
+								+ "stopId={} stopName=\"{}\" "
+								+ "distanceBetweenScheduleStops={} " 
+								+ "clamping schedule based travel "
+								+ "speed to {} kph for instead of the "
+								+ "calculated speed={} kph", 
+								trip.getRouteId(), trip.getRouteShortName(),
+								trip.getId(), stopPathIndex, 
+								tripPattern.getStopId(stopPathIndex), 
+								gtfsData.getStop(tripPattern.getStopId(stopPathIndex)).getName(),
+								Geo.distanceFormat(distanceBetweenScheduleStops),
+								Geo.oneDigitFormat(maxSpeedKph),								
+								Geo.oneDigitFormat((distanceBetweenScheduleStops / msecForTravelBetweenScheduleTimes)
+										* Time.MS_PER_SEC / Geo.KPH_TO_MPS));
+
+						msecForTravelBetweenScheduleTimes =
+								(int) (distanceBetweenScheduleStops / maxSpeedMetersPerMsec);
+
+					}
 				}
 				
 				// For each stop path between the last schedule stop and the 
@@ -257,7 +307,7 @@ public class ScheduleBasedTravelTimesProcessor {
 					// is not used for such a stop. Instead, schedule time and
 					// layover time is used.
 					int stopTimeMsec = (stopPathIndex < numberOfPaths-1) ? 
-							defaultWaitTimeAtStopMsec : 0;
+							msecSpentStopped/numberOfStops : 0;
 					
 					// Create and add the travel time for this stop path
 					TravelTimesForStopPath travelTimesForStopPath = 

@@ -66,6 +66,7 @@ public class GtfsFileProcessor {
 	private final double maxStopToPathDistance;
 	private final double maxDistanceForEliminatingVertices;
 	private final int defaultWaitTimeAtStopMsec;
+	private final double maxSpeedKph;
 	private final double maxTravelTimeSegmentLength;
 	private final boolean shouldCombineShortAndLongNamesForRoutes;
 	private final int configRev;
@@ -117,7 +118,8 @@ public class GtfsFileProcessor {
 			String regexReplaceListFileName, double pathOffsetDistance,
 			double maxStopToPathDistance,
 			double maxDistanceForEliminatingVertices,
-			int defaultWaitTimeAtStopMsec, double maxTravelTimeSegmentLength,
+			int defaultWaitTimeAtStopMsec, double maxSpeedKph,
+			double maxTravelTimeSegmentLength,
 			boolean shouldCombineShortAndLongNamesForRoutes, int configRev,
 			boolean shouldStoreNewRevs, boolean trimPathBeforeFirstStopOfTrip) {
 		// Read in config params if command line option specified
@@ -142,6 +144,7 @@ public class GtfsFileProcessor {
 		this.maxStopToPathDistance = maxStopToPathDistance;
 		this.maxDistanceForEliminatingVertices = maxDistanceForEliminatingVertices;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
+		this.maxSpeedKph = maxSpeedKph;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
 		this.shouldCombineShortAndLongNamesForRoutes = shouldCombineShortAndLongNamesForRoutes;
 		this.configRev = configRev;
@@ -238,13 +241,16 @@ public class GtfsFileProcessor {
 				regexReplaceListFileName, true);
 
 		// Process the GTFS data
-		GtfsData gtfsData = new GtfsData(configRev, notes, zipFileLastModifiedTime,
-				shouldStoreNewRevs, AgencyConfig.getAgencyId(),
-				gtfsDirectoryName, supplementDir,
-				shouldCombineShortAndLongNamesForRoutes, pathOffsetDistance,
-				maxStopToPathDistance, maxDistanceForEliminatingVertices,
-				defaultWaitTimeAtStopMsec, maxTravelTimeSegmentLength,
-				trimPathBeforeFirstStopOfTrip, titleFormatter);
+		GtfsData gtfsData =
+				new GtfsData(configRev, notes, zipFileLastModifiedTime,
+						shouldStoreNewRevs, AgencyConfig.getAgencyId(),
+						gtfsDirectoryName, supplementDir,
+						shouldCombineShortAndLongNamesForRoutes,
+						pathOffsetDistance, maxStopToPathDistance,
+						maxDistanceForEliminatingVertices,
+						defaultWaitTimeAtStopMsec, maxSpeedKph,
+						maxTravelTimeSegmentLength,
+						trimPathBeforeFirstStopOfTrip, titleFormatter);
 		gtfsData.processData();
 
 		// Log possibly useful info
@@ -357,6 +363,8 @@ public class GtfsFileProcessor {
 		int defaultWaitTimeAtStopMsec = getIntegerCommandLineOption(
 				"defaultWaitTimeAtStopMsec", 10 * Time.MS_PER_SEC,
 				commandLineArgs);
+		double maxSpeedKph =
+				getDoubleCommandLineOption("maxSpeedKph", 97.0, commandLineArgs);
 		double maxTravelTimeSegmentLength = getDoubleCommandLineOption(
 				"maxTravelTimeSegmentLength", 200.0, commandLineArgs);
 		int configRev = getIntegerCommandLineOption("configRev", -1,
@@ -370,13 +378,16 @@ public class GtfsFileProcessor {
 				.hasOption("trimPathBeforeFirstStopOfTrip");
 
 		// Create the processor and set all the options
-		GtfsFileProcessor processor = new GtfsFileProcessor(configFile, notes,
-				gtfsUrl, gtfsZipFileName, unzipSubdirectory, gtfsDirectoryName,
-				supplementDir, regexReplaceFile, pathOffsetDistance,
-				maxStopToPathDistance, maxDistanceForEliminatingVertices,
-				defaultWaitTimeAtStopMsec, maxTravelTimeSegmentLength,
-				shouldCombineShortAndLongNamesForRoutes, configRev,
-				shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
+		GtfsFileProcessor processor =
+				new GtfsFileProcessor(configFile, notes, gtfsUrl,
+						gtfsZipFileName, unzipSubdirectory, gtfsDirectoryName,
+						supplementDir, regexReplaceFile, pathOffsetDistance,
+						maxStopToPathDistance,
+						maxDistanceForEliminatingVertices,
+						defaultWaitTimeAtStopMsec, maxSpeedKph,
+						maxTravelTimeSegmentLength,
+						shouldCombineShortAndLongNamesForRoutes, configRev,
+						shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
 
 		return processor;
 	}
@@ -514,6 +525,17 @@ public class GtfsFileProcessor {
 								+ "Default is 10,000 msec (10 seconds).")
 				.create("defaultWaitTimeAtStopMsec"));
 
+		options.addOption(OptionBuilder
+				.hasArg()
+				.withArgName("kph")
+				.withDescription(
+						"For initial travel times before AVL data "
+								+ "used to refine them. Specifies maximum speed "
+								+ "a vehicle can go between stops when "
+								+ "determining schedule based travel times. "
+								+ "Default is 97kph (60mph).")
+				.create("maxSpeedKph"));
+		
 		options.addOption(OptionBuilder
 				.hasArg()
 				.withArgName("meters")
