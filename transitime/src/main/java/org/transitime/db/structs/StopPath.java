@@ -456,6 +456,9 @@ public class StopPath implements Serializable, Lifecycle {
 	}
 	
 	/**
+	 * Provides the name of the stop as obtained by a Core predictor. Cannot be
+	 * used with other applications.
+	 * 
 	 * @return the name of the stop
 	 */
 	public String getStopName() {
