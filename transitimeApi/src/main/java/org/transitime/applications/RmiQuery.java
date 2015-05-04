@@ -104,8 +104,8 @@ public class RmiQuery {
 		options.addOption(OptionBuilder.withArgName("agencyId")
                 .hasArg()
                 .isRequired()
-                .withDescription("Project name.")
-                .create("p")
+                .withDescription("Agency ID.")
+                .create("a")
                 );
 		
 		options.addOption(OptionBuilder.withArgName("command")
@@ -182,7 +182,7 @@ public class RmiQuery {
 			displayCommandLineOptionsAndExit(options);
 		}
 
-		agencyId = cmd.getOptionValue("p");
+		agencyId = cmd.getOptionValue("a");
 		
 		// Process the command
 		String commandStr = cmd.getOptionValue("c");
