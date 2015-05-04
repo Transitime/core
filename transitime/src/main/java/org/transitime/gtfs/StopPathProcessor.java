@@ -297,10 +297,14 @@ public class StopPathProcessor {
 			// far ahead because routes do weird things like loop back and 
 			// such and we don't want to find a closer but inappropriate
 			// match that is further along the route. Since sometimes stops
-			// might be really close together should add in 200.0m just to 
-			// be safe 
+			// might be really close together should add in 600.0m just to 
+			// be safe. 
+			// Note: the sfmta inbound 38-Geary from Ft Miley is a special case
+			// where the first stops are just 92m apart as the crow flies but 
+			// the distance along the shape is 760m. Therefore need to be 
+			// pretty generous to correctly find the 43rd Ave & Clement stop.
 			distanceAlongShapesExamined += shapeVector.length();
-			if (distanceAlongShapesExamined > 3.0 * distanceBetweenStops + 200.0)
+			if (distanceAlongShapesExamined > 3.0 * distanceBetweenStops + 600.0)
 				break;				
 		} // End of for each shape (finding best match)
 		
