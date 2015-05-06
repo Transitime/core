@@ -35,6 +35,9 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 	private final int shapePtSequence;
 	private final Double shapeDistTraveled;
 	
+	// For deleting a point via a supplemental shapes.txt file
+	private final Boolean delete;
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -47,6 +50,7 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 		this.shapePtLon = shapePtLon;
 		this.shapePtSequence = shapePtSequence;
 		this.shapeDistTraveled = shapeDistTraveled;
+		this.delete = false;
 	}
 
 	/**
@@ -62,8 +66,13 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 		super(record, supplemental, fileName);
 
 		shapeId = getRequiredValue(record, "shape_id");
-		shapePtLat = Double.parseDouble(getRequiredValue(record, "shape_pt_lat"));
-		shapePtLon = Double.parseDouble(getRequiredValue(record, "shape_pt_lon"));
+		
+		String latStr = getRequiredUnlessSupplementalValue(record, "shape_pt_lat");
+		shapePtLat = latStr!=null ? Double.parseDouble(latStr) : Double.NaN;
+		
+		String lonStr = getRequiredUnlessSupplementalValue(record, "shape_pt_lon");
+		shapePtLon = latStr!=null ? Double.parseDouble(lonStr) : Double.NaN;
+		
 		shapePtSequence = Integer.parseInt(getRequiredValue(record, "shape_pt_sequence"));
 		
 		String distStr = getOptionalValue(record, "shape_dist_traveled");
@@ -71,6 +80,8 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 			shapeDistTraveled = Double.parseDouble(distStr);
 		else
 			shapeDistTraveled = null;
+		
+		delete = getOptionalBooleanValue(record, "delete");
 	}
 	
 	/**
@@ -85,6 +96,7 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 	public GtfsShape(GtfsShape original, double shapePtLat, double shapePtLon) {
 		// Copy the values from the original passed in
 		super(original);
+		
 		this.shapeId = original.shapeId;
 		this.shapePtSequence = original.shapePtSequence;
 		this.shapeDistTraveled = original.shapeDistTraveled;
@@ -92,8 +104,38 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 		// Set the new location
 		this.shapePtLat = shapePtLat;
 		this.shapePtLon = shapePtLon;
+		
+		this.delete = false;
 	}
 
+	/**
+	 * When combining a regular shape point with a supplemental one need to
+	 * create a whole new object since this class is Immutable to make it safer
+	 * to use.
+	 * 
+	 * @param originalShape
+	 * @param supplementShape
+	 */
+	public GtfsShape(GtfsShape originalShape, GtfsShape supplementShape) {
+		super(originalShape);
+		
+		// Use short variable names
+		GtfsShape o = originalShape;
+		GtfsShape s = supplementShape;
+
+		this.shapeId = o.shapeId;
+		this.shapePtSequence = o.shapePtSequence;
+		this.shapeDistTraveled =
+				s.shapeDistTraveled == null ? o.shapeDistTraveled
+						: s.shapeDistTraveled;
+		this.shapePtLat =
+				Double.isNaN(s.shapePtLat) ? o.shapePtLat : s.shapePtLat;
+		this.shapePtLon =
+				Double.isNaN(s.shapePtLon) ? o.shapePtLon : s.shapePtLon;
+
+		this.delete = s.delete == null ? o.delete : s.delete;
+	}
+	
 	public String getShapeId() {
 		return shapeId;
 	}
@@ -118,6 +160,10 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 		return shapeDistTraveled;
 	}
 
+	public boolean shouldDelete() {
+		return delete != null && delete;
+	}
+	
 	/**
 	 * So can use Collections.sort() to sort an Array of GtfsStopTime objects by 
 	 * stop sequence.
@@ -138,7 +184,9 @@ public class GtfsShape extends CsvBase implements Comparable<GtfsShape> {
 				+ ", shapePtLat=" + shapePtLat 
 				+ ", shapePtLon=" + shapePtLon
 				+ ", shapePtSequence=" + shapePtSequence
-				+ ", shapeDistTraveled=" + shapeDistTraveled + "]";
+				+ ", shapeDistTraveled=" + shapeDistTraveled 
+				+ ", delete=" + delete 
+				+ "]";
 	}
 	
 }

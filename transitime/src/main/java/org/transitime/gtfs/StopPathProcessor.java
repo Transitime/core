@@ -76,7 +76,7 @@ public class StopPathProcessor {
 	 *            used for multiple trip patterns or the shapes simply have some
 	 *            problem points at the beginning (like sfmta 21-Hayes.
 	 */
-	public StopPathProcessor(List<GtfsShape> gtfsShapes, 
+	public StopPathProcessor(Collection<GtfsShape> gtfsShapes, 
 			Map<String, Stop> stopsMap, 
 			Collection<TripPattern> tripPatterns,
 			double offsetDistance,
@@ -329,7 +329,8 @@ public class StopPathProcessor {
 		if (bestStopToShapeDistance > maxStopToPathDistance) {
 			if (bestStopToShapeDistance < 250.0) {
 				logger.warn("Stop {} (stop_id={}) at lat={} lon={} for " + 
-						"route_id={} stop_sequence={} is located {} away " +
+						"route_id={} route_short_name={} "
+						+ "stop_sequence={} is located {} away " +
 						"from the shapes for shape_id={}. This is " +
 						"further than allowed distance of {} and means " +
 						"that either the location of the stop needs to " +
@@ -341,7 +342,8 @@ public class StopPathProcessor {
 						stop.getId(),  
 						Geo.format(stop.getLoc().getLat()), 
 						Geo.format(stop.getLoc().getLon()),
-						tripPattern.getRouteId(),
+						tripPattern.getRouteId(), 
+						tripPattern.getRouteShortName(),
 						stopIndex+1,
 						Geo.distanceFormat(bestStopToShapeDistance),
 						tripPattern.getShapeId(),
@@ -351,7 +353,8 @@ public class StopPathProcessor {
 				// Really far off so mark it as an error and use a stronger 
 				// message
 				logger.error("Stop {} (stop_id={}) at lat={} lon={} for " + 
-						"route_id={} stop_sequence={} is located {} away " +
+						"route_id={} route_short_name={} "
+						+ "stop_sequence={} is located {} away " +
 						"from the shapes for shape_id={}. This is MUCH " +
 						"further than allowed distance of {} and means " +
 						"that either the location of the stop needs to " +
@@ -363,7 +366,8 @@ public class StopPathProcessor {
 						stop.getId(),  
 						Geo.format(stop.getLoc().getLat()), 
 						Geo.format(stop.getLoc().getLon()),
-						tripPattern.getRouteId(),
+						tripPattern.getRouteId(),  
+						tripPattern.getRouteShortName(),
 						stopIndex+1,
 						Geo.distanceFormat(bestStopToShapeDistance),
 						tripPattern.getShapeId(),

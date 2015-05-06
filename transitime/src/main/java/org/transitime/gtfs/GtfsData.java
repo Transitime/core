@@ -77,7 +77,9 @@ import org.transitime.gtfs.readers.GtfsFrequenciesReader;
 import org.transitime.gtfs.readers.GtfsRoutesReader;
 import org.transitime.gtfs.readers.GtfsRoutesSupplementReader;
 import org.transitime.gtfs.readers.GtfsShapesReader;
+import org.transitime.gtfs.readers.GtfsShapesSupplementReader;
 import org.transitime.gtfs.readers.GtfsStopTimesReader;
+import org.transitime.gtfs.readers.GtfsStopTimesSupplementReader;
 import org.transitime.gtfs.readers.GtfsStopsReader;
 import org.transitime.gtfs.readers.GtfsStopsSupplementReader;
 import org.transitime.gtfs.readers.GtfsTransfersReader;
@@ -85,6 +87,7 @@ import org.transitime.gtfs.readers.GtfsTripsReader;
 import org.transitime.gtfs.readers.GtfsTripsSupplementReader;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.MapKey;
 import org.transitime.utils.Time;
 
 /**
@@ -919,8 +922,66 @@ public class GtfsData {
 		// reasonable.
 		GtfsStopTimesReader stopTimesReader = 
 				new GtfsStopTimesReader(gtfsDirectoryName);
-		List<GtfsStopTime> gtfsStopTimes = stopTimesReader.get(500000);
+		Collection<GtfsStopTime> gtfsStopTimes = stopTimesReader.get(500000);
 
+		// Handle possible supplemental stop_times.txt file.
+		// Match the supplemental data to the main data using both
+		// trip_id and stop_id.
+		if (supplementDir != null) {
+			GtfsStopTimesSupplementReader stopTimesSupplementReader =
+					new GtfsStopTimesSupplementReader(supplementDir);
+			List<GtfsStopTime> stopTimesSupplement =
+					stopTimesSupplementReader.get();
+			
+			if (stopTimesSupplement.size() > 0) {
+				// Put original shapes into map for quick searching
+				Map<MapKey, GtfsStopTime> map =
+						new HashMap<MapKey, GtfsStopTime>();
+				for (GtfsStopTime gtfsStopTime : gtfsStopTimes) {
+					MapKey key =
+							new MapKey(gtfsStopTime.getTripId(),
+									gtfsStopTime.getStopId());
+					map.put(key, gtfsStopTime);
+				}
+					
+				// Modify main GtfsShape objects using supplemental data
+				for (GtfsStopTime stopTimeSupplement : stopTimesSupplement) {
+					MapKey key =
+							new MapKey(stopTimeSupplement.getTripId(),
+									stopTimeSupplement.getStopId());
+
+					// Handle depending on whether the supplemental data 
+					// indicates the point is to be deleted, added, or modified
+					if (stopTimeSupplement.shouldDelete()) {
+						// The supplemental shape indicates that the point 
+						// should be deleted
+						GtfsStopTime oldStopTime = map.remove(key);
+						if (oldStopTime == null) {
+							logger.error("Supplement stop_times.txt file for "
+									+ "trip_id={} and stop_id={} specifies "
+									+ "that the stop time should be removed "
+									+ "but it is not actually configured in "
+									+ "the regular stop_times.txt file",
+									stopTimeSupplement.getTripId(), 
+									stopTimeSupplement.getStopId());
+						}
+					} else if (map.get(key) != null) {
+						// The stop time is already in map so modify it
+						GtfsStopTime combinedShape =
+								new GtfsStopTime(map.get(key),
+										stopTimeSupplement);
+						map.put(key, combinedShape);
+					} else {
+						// The stop time is not already in map so add it
+						map.put(key, stopTimeSupplement);
+					}
+				}
+				
+				// Use the new combined shapes
+				gtfsStopTimes = map.values();
+			}
+		}
+		
 		// The GtfsStopTimes are put into this map and then can create Trips
 		// and TripPatterns. Keyed by tripId
 		gtfsStopTimesForTripMap = new HashMap<String, List<GtfsStopTime>>();
@@ -1395,12 +1456,68 @@ public class GtfsData {
 		
 		// Read in the shapes.txt GTFS data from file
 		GtfsShapesReader shapesReader = new GtfsShapesReader(gtfsDirectoryName);
-		List<GtfsShape> gtfsShapes = shapesReader.get();
+		Collection<GtfsShape> gtfsShapes = shapesReader.get();
+		
+		// Handle possible supplemental shapes.txt file.
+		// Match the supplemental data to the main data using both
+		// shape_id and shape_pt_sequence.
+		if (supplementDir != null) {
+			GtfsShapesSupplementReader shapesSupplementReader =
+					new GtfsShapesSupplementReader(supplementDir);
+			List<GtfsShape> shapesSupplement = shapesSupplementReader.get();
+
+			if (shapesSupplement.size() > 0) {
+				// Put original shapes into map for quick searching
+				Map<MapKey, GtfsShape> map = new HashMap<MapKey, GtfsShape>();
+				for (GtfsShape gtfsShape : gtfsShapes) {
+					MapKey key =
+							new MapKey(gtfsShape.getShapeId(),
+									gtfsShape.getShapePtSequence());
+					map.put(key, gtfsShape);
+				}
+					
+				// Modify main GtfsShape objects using supplemental data. 
+				for (GtfsShape shapeSupplement : shapesSupplement) {
+					MapKey key =
+							new MapKey(shapeSupplement.getShapeId(),
+									shapeSupplement.getShapePtSequence());
+
+					// Handle depending on whether the supplemental data 
+					// indicates the point is to be deleted, added, or modified
+					if (shapeSupplement.shouldDelete()) {
+						// The supplemental shape indicates that the point 
+						// should be deleted
+						GtfsShape oldShape = map.remove(key);
+						if (oldShape == null) {
+							logger.error("Supplement shapes.txt file for "
+									+ "shape_id={} and shape_pt_sequence={} "
+									+ "specifies that the shape point should "
+									+ "be removed but it is not actually "
+									+ "configured in the regular shapes.txt "
+									+ "file",
+									shapeSupplement.getShapeId(), 
+									shapeSupplement.getShapePtSequence());
+						}
+					} else if (map.get(key) != null) {
+						// The shape point is already in map so modify it
+						GtfsShape combinedShape =
+								new GtfsShape(map.get(key), shapeSupplement);
+						map.put(key, combinedShape);
+					} else {
+						// The shape point is not already in map so add it
+						map.put(key, shapeSupplement);
+					}
+				}
+				
+				// Use the new combined shapes
+				gtfsShapes = map.values();
+			}
+		}
 		
 		// Process all the shapes into stopPaths
 		StopPathProcessor pathProcessor = 
 				new StopPathProcessor(
-						Collections.unmodifiableList(gtfsShapes), 
+						Collections.unmodifiableCollection(gtfsShapes), 
 						Collections.unmodifiableMap(stopsMap), 
 						Collections.unmodifiableCollection(tripPatternMap.values()),
 						pathOffsetDistance,
