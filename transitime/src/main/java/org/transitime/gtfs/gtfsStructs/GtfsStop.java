@@ -359,9 +359,9 @@ public class GtfsStop extends CsvBase {
 	public String toString() {
 		return "GtfsStop ["
 				+ "lineNumber="	+ lineNumber
-				+ ", stopId=" + stopId + ", "
-				+ (stopCode != -1 ? ", stopCode=" + stopCode : "")
-				+ ", stopName=" + stopName + ", "
+				+ ", stopId=" + stopId
+				+ (stopCode != null ? ", stopCode=" + stopCode : "")
+				+ ", stopName=" + stopName
 				+ (stopDesc != null ? ", stopDesc=" + stopDesc : "")
 				+ ", stopLat=" + stopLat
 				+ ", stopLon="	+ stopLon
