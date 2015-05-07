@@ -17,7 +17,6 @@
 
 package org.transitime.api.rootResources;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
