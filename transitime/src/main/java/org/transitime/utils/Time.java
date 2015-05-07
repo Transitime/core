@@ -49,17 +49,27 @@ public class Time {
 	// around if just using an int. For example a month of 31 days *
 	// MS_PER_DAY would wrap if MS_PER_DAY was an integer instead of a long.
 	public static final int MS_PER_SEC = 1000;
+	public static final int SEC_IN_MSECS = MS_PER_SEC;
 	public static final int MS_PER_MIN = 60 * MS_PER_SEC;
+	public static final int MIN_IN_MSECS = MS_PER_MIN;
 	public static final long MS_PER_HOUR = 60 * MS_PER_MIN;
+	public static final long HOUR_IN_MSECS = MS_PER_HOUR;
 	public static final long MS_PER_DAY = 24 * MS_PER_HOUR;
+	public static final long DAY_IN_MSECS = MS_PER_DAY;
 	public static final long MS_PER_WEEK = 7 * MS_PER_DAY;
+	public static final long WEEK_IN_MSECS = MS_PER_WEEK;
 	public static final long MS_PER_YEAR = 365 * MS_PER_DAY;
+	public static final long YEAR_IN_MSECS = MS_PER_YEAR;
 	
 	public static final int SEC_PER_MIN = 60;
+	public static final int MIN_IN_SECS = SEC_PER_MIN;
 	public static final int SEC_PER_HOUR = 60 * SEC_PER_MIN;
+	public static final int HOUR_IN_SECS = SEC_PER_HOUR;
 	public static final int SEC_PER_DAY = 24 * SEC_PER_HOUR;
+	public static final int DAY_IN_SECS = SEC_PER_DAY;
 	
 	public static final long NSEC_PER_MSEC = 1000000;
+	public static final long MSEC_IN_NSECS = NSEC_PER_MSEC;
 	
 	// These two are for reading in dates in various formats
 	private static final DateFormat defaultDateFormat =
