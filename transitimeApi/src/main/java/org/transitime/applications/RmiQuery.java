@@ -310,8 +310,10 @@ public class RmiQuery {
 					predsInterface.get(routeStops, 3);
 			
 			System.out.println("Predictions for agencyId=" + 
-					agencyId +	" routeStops=" + routeStops + "\nare " + 
-					predictionListList);
+					agencyId +	" routeStops=" + routeStops + " are:");
+			for (IpcPredictionsForRouteStopDest preds : predictionListList) {
+				System.out.println("  " + preds);
+			}
 		}
 	}
 	
