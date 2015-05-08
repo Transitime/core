@@ -18,6 +18,7 @@ package org.transitime.ipc.rmi;
 
 import org.transitime.configData.RmiConfig;
 import org.transitime.db.webstructs.WebAgency;
+import org.transitime.utils.Time;
 
 /**
  * Contains the info needed for creating an RMI stub, including the agency ID
@@ -49,16 +50,25 @@ public class RmiStubInfo {
 	public String getClassName() {
 		return className;
 	}
-	
+
 	/**
 	 * Returns the RMI hostname. Will use command line parameter
 	 * -Dtransitime.core.rmiHost if it is set. If not set then looks in
 	 * WebAgencies table in the web database. Returns null if not configured.
 	 * 
-	 * @return
+	 * @param rereadIfOlderThanMsecs
+	 *            If web agencies read from db more than this time ago then they
+	 *            are read in again. Set to a high value such as
+	 *            Integer.MAX_VALUE if there is no indication of a problem, such
+	 *            as when a ClientFactory is first setup. But if there is a
+	 *            problem communicating via RMI then should use a small value
+	 *            such as 30 seconds so that the system will read in possibly
+	 *            new host name from the database, yet not read db for every
+	 *            problematic request.
+	 * @return The host name, or null if agency not configured
 	 */
-	public String getHostName() {
-		// If RMI host is configured in CoreConfig via command line
+	private String getHostName(int rereadIfOlderThanMsecs) {
+		// If RMI host is configured in RmiConfig via command line
 		// option then use it.
 		String configuredRmiHost = RmiConfig.rmiHost();
 		if (configuredRmiHost != null)
@@ -66,7 +76,35 @@ public class RmiStubInfo {
 		
 		// RMI host not configured via command line so use value
 		// from database.
-		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
+		WebAgency webAgency =
+				WebAgency.getCachedWebAgency(agencyId, rereadIfOlderThanMsecs);
 		return webAgency!=null ? webAgency.getHostName() : null;
+	}
+	
+	/**
+	 * Returns the RMI hostname. Will use command line parameter
+	 * -Dtransitime.core.rmiHost if it is set. If not set then looks in cached
+	 * version of WebAgencies table from the web database. Returns null if
+	 * agency not configured.
+	 * 
+	 * @return The host name, or null if agency doesn't exist
+	 */
+	public String getHostName() {
+		return getHostName(Integer.MAX_VALUE); 
+	}
+	
+	/**
+	 * Intended for when communication was working but now is not in that this
+	 * method will get updated hostname data from db if cache is somewhat old.
+	 * Returns the RMI hostname. Will use command line parameter
+	 * -Dtransitime.core.rmiHost if it is set. If not set then looks in cached
+	 * version of WebAgencies table from the web database. If cached data is
+	 * more than 30 seconds old then will reread WebAgency data from db. Returns
+	 * null if agency not configured.
+	 * 
+	 * @return The host name, or null if agency doesn't exist
+	 */
+	public String getHostNameViaUpdatedCache() {
+		return getHostName(30 * Time.SEC_IN_MSECS); 
 	}
 }

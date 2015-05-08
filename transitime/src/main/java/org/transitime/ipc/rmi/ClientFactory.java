@@ -87,8 +87,11 @@ public class ClientFactory<T extends Remote> {
 			// an error.
 			RmiStubInfo info = new RmiStubInfo(agencyId, clazz.getSimpleName());
 
-			// Get the RMI stub
-			T rmiStub = getRmiStub(info);
+			// Get the RMI stub. Don't update host name since there is no 
+			// indication of a problem with the cached version. Instead,
+			// just use the cached version to reduce db access.
+			boolean updateHostName = false;
+			T rmiStub = getRmiStub(info, updateHostName);
 
 			logger.debug("Getting proxy instance...");
 
@@ -107,29 +110,41 @@ public class ClientFactory<T extends Remote> {
 			return (T) proxiedStub;
 		} catch (Exception e) {
 			logger.error("Exception occurred when creating the RMI client "
-					+ "object for class=" + clazz.getName() + " and agencyId="
-					+ agencyId, e);
+					+ "object for class={} and agencyId={}. {}", 
+					clazz.getName(), agencyId, e.getMessage());
 			return null;
 		}
 	}
 
 	/**
 	 * Creates an RMI stub based on the project name, host name, and class name.
+	 * An RMI stub is a remote reference to an object.
 	 * 
 	 * @param info
-	 * @return
+	 *            Species the agency ID and the host name
+	 * @param updateHostName
+	 *            Indicates whether should update host name instead of just
+	 *            getting old values from cache. Should update if there is a
+	 *            problem in invoking an RMI call since perhaps the server for
+	 *            an agency was moved to a new hostname. But when first creating
+	 *            a client factory don't want to access db so should just use
+	 *            cached value.
+	 * @return The RMI stub for the remote object
 	 * @throws RemoteException
 	 * @throws NotBoundException
 	 */
-	public static <T extends Remote> T getRmiStub(RmiStubInfo info)
-			throws RemoteException, NotBoundException {
+	public static <T extends Remote> T getRmiStub(RmiStubInfo info,
+			boolean updateHostName) throws RemoteException, NotBoundException {
+		// Determine the hostname depending on if should update cache or not
+		String hostName = updateHostName ? 
+				info.getHostNameViaUpdatedCache() : info.getHostName();
+		
 		logger.debug("Getting RMI registry for hostname={} port={} ...",
-				info.getHostName(), RmiParams.getRmiPort());
+				hostName, RmiParams.getRmiPort());
 
 		// Get the registry
 		Registry registry =
-				LocateRegistry.getRegistry(info.getHostName(),
-						RmiParams.getRmiPort());
+				LocateRegistry.getRegistry(hostName, RmiParams.getRmiPort());
 
 		// Get the remote object's bind name
 		String bindName =
@@ -149,7 +164,8 @@ public class ClientFactory<T extends Remote> {
 	}
 
 	/**
-	 * Sets the RMI timeout if haven't done so yet.
+	 * Sets the RMI timeout if haven't done so yet. This way RMI calls will not
+	 * just hang if can't connect.
 	 */
 	private static void enableRmiTimeout() {
 		synchronized (rmiTimeoutEnabled) {
@@ -201,7 +217,7 @@ public class ClientFactory<T extends Remote> {
 	public static int getTimeoutSec() {
 		return timeoutSec.getValue();
 	}
-	
+
 	/**
 	 * Just for debugging.
 	 * 

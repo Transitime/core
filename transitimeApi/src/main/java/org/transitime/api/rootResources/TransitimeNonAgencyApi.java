@@ -69,7 +69,8 @@ public class TransitimeNonAgencyApi {
 		// and return the list.
 		try {
 			List<ApiAgency> apiAgencyList = new ArrayList<ApiAgency>();
-			Collection<WebAgency> webAgencies = WebAgency.getWebAgencies();
+			Collection<WebAgency> webAgencies =
+					WebAgency.getCachedOrderedListOfWebAgencies();
 			for (WebAgency webAgency : webAgencies) {
 				String agencyId = webAgency.getAgencyId();
 				ConfigInterface inter = ConfigInterfaceFactory.get(agencyId);

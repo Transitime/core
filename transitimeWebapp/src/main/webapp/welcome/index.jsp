@@ -34,7 +34,7 @@
 <table id="agencyList">
 <%
 // Output links for all the agencies
-Collection<WebAgency> webAgencies = WebAgency.getCachedWebAgencies();
+Collection<WebAgency> webAgencies = WebAgency.getCachedOrderedListOfWebAgencies();
 for (WebAgency webAgency : webAgencies) {
 	// Only output active agencies
 	if (!webAgency.isActive())
