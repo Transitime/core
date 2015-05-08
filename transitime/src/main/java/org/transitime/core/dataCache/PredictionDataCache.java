@@ -169,7 +169,7 @@ public class PredictionDataCache {
 		// display in the UI.
 		if (clonedPredictions.size() == 0) {
 			IpcPredictionsForRouteStopDest pred = new IpcPredictionsForRouteStopDest(
-					routeShortName, stopId, directionId);
+					routeShortName, stopId, directionId, distanceToStop);
 			clonedPredictions.add(pred);
 		}
 		

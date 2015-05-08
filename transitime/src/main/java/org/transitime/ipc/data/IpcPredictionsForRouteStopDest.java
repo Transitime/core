@@ -211,9 +211,10 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param routeShortName
 	 * @param stopId
 	 * @param directionId
+	 * @param distanceToStop
 	 */
 	public IpcPredictionsForRouteStopDest(String routeShortName, String stopId, 
-			String directionId) {
+			String directionId, double distanceToStop) {
 		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);
 		if (route == null) {
 			throw new IllegalArgumentException("routeShortName="
@@ -233,7 +234,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.stopName = stop.getName();
 		this.headsign = null;
 		this.directionId = directionId;
-		this.distanceToStop = Double.NaN;
+		this.distanceToStop = distanceToStop;
 		this.predictionsForRouteStop = new ArrayList<IpcPrediction>();
 	}
 	

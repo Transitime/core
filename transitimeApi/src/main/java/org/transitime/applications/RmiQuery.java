@@ -280,7 +280,7 @@ public class RmiQuery {
 			
 			// Getting predictions based on location
 			List<IpcPredictionsForRouteStopDest> predictionList = 
-					predsInterface.get(loc, 1000.0, 3);
+					predsInterface.get(loc, 1500.0, 3);
 			
 			System.out.println("Predictions for agencyId=" + 
 					agencyId +	" " + loc + " are:");
@@ -322,10 +322,15 @@ public class RmiQuery {
 		}
 	}
 	
+	/**
+	 * For the vehicles commands. Outputs info on each vehicle.
+	 *  
+	 * @throws RemoteException
+	 */
 	private static void getVehicles() throws RemoteException {
 		// just for debugging
-//		System.err.println("Getting vehicles for agencyId=" + agencyId + 
-//				" routeShortNames=" + routeShortNames + " vehicleIds=" + vehicleIds);
+		System.err.println("Getting vehicles for agencyId=" + agencyId + 
+				" routeShortNames=" + routeShortNames + " vehicleIds=" + vehicleIds);
 		
 		VehiclesInterface vehiclesInterface = 
 				VehiclesInterfaceFactory.get(agencyId);
