@@ -27,7 +27,7 @@
 		</dependency>
 		<dependency>
 			<groupId>transitime</groupId>
-			<artifactId>transitime</artifactId>
+			<artifactId>transitimeCore</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
