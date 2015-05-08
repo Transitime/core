@@ -260,9 +260,9 @@ public class RmiQuery {
 	 */
 	private static void getPredictions() throws RemoteException {
 		// just for debugging
-//		System.err.println("Getting predictions for agencyId=" + agencyId + 
-//				" lat=" + latitude + " lon=" + longitude +
-//				" routeShortNames=" + routeShortNames + " stopIds=" + stopIds);
+		System.err.println("Getting predictions for agencyId=" + agencyId + 
+				" lat=" + latitude + " lon=" + longitude +
+				" routeShortNames=" + routeShortNames + " stopIds=" + stopIds);
 
 		// Make sure stops specified
 		if (stopIds == null 
@@ -283,8 +283,10 @@ public class RmiQuery {
 					predsInterface.get(loc, 1000.0, 3);
 			
 			System.out.println("Predictions for agencyId=" + 
-					agencyId +	" " + loc + " are " + predictionList);
-
+					agencyId +	" " + loc + " are:");
+			for (IpcPredictionsForRouteStopDest preds : predictionList) {
+				System.out.println("  " + preds);
+			}
 		} else if (stopIds.length == 1) {
 			// Getting prediction for single stop...
 			String stopId = stopIds[0];
@@ -295,7 +297,10 @@ public class RmiQuery {
 			
 			System.out.println("Predictions for agencyId=" + 
 					agencyId +	" routeId=" + routeId + " stopId=" + 
-					stopId + " are " + predictionList);
+					stopId + " are:");
+			for (IpcPredictionsForRouteStopDest preds : predictionList) {
+				System.out.println("  " + preds);
+			}
 		} else {
 			// Getting predictions for multiple stops
 			List<RouteStop> routeStops = new ArrayList<RouteStop>();
@@ -310,9 +315,9 @@ public class RmiQuery {
 					predsInterface.get(routeStops, 3);
 			
 			System.out.println("Predictions for agencyId=" + 
-					agencyId +	" routeStops=" + routeStops + " are:");
+					agencyId +	" routeStops=" + routeStops + " are:\n");
 			for (IpcPredictionsForRouteStopDest preds : predictionListList) {
-				System.out.println("  " + preds);
+				System.out.println("  " + preds + "\n");
 			}
 		}
 	}
