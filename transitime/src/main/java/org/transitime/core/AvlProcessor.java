@@ -746,7 +746,8 @@ public class AvlProcessor {
 						+ " to blockId=" + block.getId() + " but "
 						+ "vehicleId=" + vehicleId
 						+ " already assigned to that block so "
-						+ "removing assignment from that vehicle.";
+						+ "removing assignment from vehicleId=" + vehicleId 
+						+ ".";
 				logger.info(description);
 				makeVehicleUnpredictableAndGrabAssignment(vehicleState,
 						description, VehicleEvent.ASSIGNMENT_GRABBED);
