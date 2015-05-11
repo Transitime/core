@@ -91,7 +91,8 @@ public class BlocksInfo {
 	 * routes.
 	 * 
 	 * @param routeIds
-	 *            Collection of routes IDs that want blocks for
+	 *            Collection of routes IDs that want blocks for. Use null
+	 *            to indicate all routes.
 	 * @param allowableBeforeTimeSecs
 	 *            How much before the block time the block is considered to be
 	 *            active

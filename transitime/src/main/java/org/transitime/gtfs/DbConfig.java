@@ -1,18 +1,18 @@
-/* 
+/*
  * This file is part of Transitime.org
  * 
- * Transitime.org is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License (GPL) as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Transitime.org is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
+ * Transitime.org is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (GPL) as published by the
+ * Free Software Foundation, either version 3 of the License, or any later
+ * version.
+ * 
+ * Transitime.org is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Transitime.org . If not, see <http://www.gnu.org/licenses/>.
  */
 package org.transitime.gtfs;
 
@@ -68,16 +68,17 @@ public class DbConfig {
 
 	// Keeps track of which revision of config data was read in
 	private int configRev;
-	
+
 	// Following is for all the data read from the database
 	private List<Block> blocks;
-	
-	// So can access blocks by service ID and block ID easily
+
+	// So can access blocks by service ID and block ID easily.
+	// Keyed on serviceId. Submap keyed on blockId
 	private Map<String, Map<String, Block>> blocksByServiceMap = null;
-	
+
 	// So can access blocks by service ID and route ID easily
 	private Map<RouteServiceMapKey, List<Block>> blocksByRouteMap = null;
-	
+
 	private List<Route> routes;
 	// Keyed on routeId
 	private Map<String, Route> routesByRouteIdMap;
@@ -90,9 +91,9 @@ public class DbConfig {
 	// For trips that have been read in individually. Keyed on tripId.
 	private Map<String, Trip> individualTripsMap = new HashMap<String, Trip>();
 	// For trips that have been read in individually. Keyed on trip short name
-	private Map<String, Trip> individualTripsByShortNameMap = 
+	private Map<String, Trip> individualTripsByShortNameMap =
 			new HashMap<String, Trip>();
-	
+
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
 	private List<CalendarDate> calendarDates;
@@ -101,7 +102,7 @@ public class DbConfig {
 	private List<Frequency> frequencies;
 	private List<Transfer> transfers;
 
-	// Seems that stops not really needed because already in stopPaths. Unless 
+	// Seems that stops not really needed because already in stopPaths. Unless
 	// trying to determine nearest stops.
 	private Map<String, Stop> stopsMap;
 
@@ -110,8 +111,8 @@ public class DbConfig {
 	// and so that can read in TripPatterns later using the same session.
 	private Session globalSession;
 
-	private static final Logger logger = 
-			LoggerFactory.getLogger(DbConfig.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(DbConfig.class);
 
 	/********************** Member Functions **************************/
 
@@ -123,10 +124,10 @@ public class DbConfig {
 	public DbConfig(String agencyId) {
 		this.agencyId = agencyId;
 	}
-		
+
 	/**
-	 * Initiates the reading of the configuration data from the database.
-	 * Calls actuallyReadData() which does all the work.
+	 * Initiates the reading of the configuration data from the database. Calls
+	 * actuallyReadData() which does all the work.
 	 * 
 	 * @param configRev
 	 */
@@ -135,31 +136,32 @@ public class DbConfig {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Let user know what is going on
-		logger.info("Reading configuration database for configRev={}...", 
+		logger.info("Reading configuration database for configRev={}...",
 				configRev);
 
 		// Remember which revision of data is being used
 		this.configRev = configRev;
-				
+
 		// Do the low-level processing
 		try {
 			actuallyReadData(configRev);
 		} catch (HibernateException e) {
-			logger.error("Error reading configuration data from db for " +
-					"configRev={}.", configRev);
+			logger.error("Error reading configuration data from db for "
+					+ "configRev={}.", configRev);
 		} finally {
 			// Usually would always make sure session gets closed. But
 			// don't close session for now so can use lazy initialization
-			// for Blocks->Trips. This way app starts up much faster which is great
+			// for Blocks->Trips. This way app starts up much faster which is
+			// great
 			// for testing.
-			//session.close();
+			// session.close();
 		}
 
 		// Let user know what is going on
-		logger.info("Finished reading configuration data from database . " +
-				"Took {} msec.", timer.elapsedMsec());		
+		logger.info("Finished reading configuration data from database . "
+				+ "Took {} msec.", timer.elapsedMsec());
 	}
-	
+
 	/**
 	 * Creates a map of a map so that blocks can be looked up easily by service
 	 * and block IDs.
@@ -170,38 +172,36 @@ public class DbConfig {
 	 */
 	private static Map<String, Map<String, Block>> putBlocksIntoMap(
 			List<Block> blocks) {
-		Map<String, Map<String, Block>> blocksByServiceMap = 
+		Map<String, Map<String, Block>> blocksByServiceMap =
 				new HashMap<String, Map<String, Block>>();
-		
+
 		for (Block block : blocks) {
-			Map<String, Block> blocksByBlockIdMap = 
+			Map<String, Block> blocksByBlockIdMap =
 					blocksByServiceMap.get(block.getServiceId());
 			if (blocksByBlockIdMap == null) {
 				blocksByBlockIdMap = new HashMap<String, Block>();
 				blocksByServiceMap
 						.put(block.getServiceId(), blocksByBlockIdMap);
 			}
-			
+
 			blocksByBlockIdMap.put(block.getId(), block);
 		}
-		
+
 		return blocksByServiceMap;
 	}
-	
+
 	private static class RouteServiceMapKey extends MapKey {
 		private RouteServiceMapKey(String serviceId, String routeId) {
 			super(serviceId, routeId);
 		}
-		
+
 		@Override
 		public String toString() {
-			return "RouteServiceMapKey [" 
-					+ "serviceId=" + o1 
-					+ ", routeId=" + o2 
-					+ "]";
+			return "RouteServiceMapKey [" + "serviceId=" + o1 + ", routeId="
+					+ o2 + "]";
 		}
 	}
-	
+
 	/**
 	 * To be used by putBlocksIntoMapByRoute().
 	 * 
@@ -220,7 +220,7 @@ public class DbConfig {
 		}
 		blocksList.add(block);
 	}
-	
+
 	/**
 	 * Takes in List of Blocks read from db and puts them into the
 	 * blocksByRouteMap so that getBlocksForRoute() can be used to retrieve the
@@ -230,35 +230,36 @@ public class DbConfig {
 	 * @param blocks
 	 * @return the newly created blocksByRouteMap
 	 */
-	private static Map<RouteServiceMapKey, List<Block>> putBlocksIntoMapByRoute(
-			List<Block> blocks) {
-		Map<RouteServiceMapKey, List<Block>> blocksByRouteMap = 
+	private static Map<RouteServiceMapKey, List<Block>>
+			putBlocksIntoMapByRoute(List<Block> blocks) {
+		Map<RouteServiceMapKey, List<Block>> blocksByRouteMap =
 				new HashMap<RouteServiceMapKey, List<Block>>();
-		
+
 		for (Block block : blocks) {
 			String serviceId = block.getServiceId();
-			
+
 			Collection<String> routeIdsForBlock = block.getRouteIds();
 			for (String routeId : routeIdsForBlock) {
 				// Add the block to the map by keyed serviceId and routeId
 				addBlockToMapByRouteMap(blocksByRouteMap, serviceId, routeId,
 						block);
-				
+
 				// Also add block to map using serviceId of null so that
 				// can retrieve blocks for all service classes for a route
 				// by using a service ID of null.
 				addBlockToMapByRouteMap(blocksByRouteMap, null, routeId, block);
 			}
 		}
-		
+
 		return blocksByRouteMap;
 	}
 
 	/**
 	 * Returns List of Blocks associated with the serviceId and routeId.
 	 * 
-	 * @param serviceId Specified service ID that want blocks for. Can set 
-	 * to null to blocks for all service IDs for the route.
+	 * @param serviceId
+	 *            Specified service ID that want blocks for. Can set to null to
+	 *            blocks for all service IDs for the route.
 	 * @param routeId
 	 * @return List of Blocks. Null of no blocks for the serviceId and routeId
 	 */
@@ -277,7 +278,7 @@ public class DbConfig {
 	public List<Block> getBlocksForRoute(String routeId) {
 		return getBlocksForRoute(null, routeId);
 	}
-	
+
 	/**
 	 * Converts the stops list into a map.
 	 * 
@@ -292,15 +293,16 @@ public class DbConfig {
 		}
 		return map;
 	}
-	
+
 	/**
 	 * Converts trip patterns into map keyed on route ID
+	 * 
 	 * @param tripPatterns
 	 * @return
 	 */
 	private static Map<String, List<TripPattern>> putTripPatternsIntoMap(
 			List<TripPattern> tripPatterns) {
-		Map<String, List<TripPattern>> map = 
+		Map<String, List<TripPattern>> map =
 				new HashMap<String, List<TripPattern>>();
 		for (TripPattern tripPattern : tripPatterns) {
 			String routeId = tripPattern.getRouteId();
@@ -311,10 +313,10 @@ public class DbConfig {
 			}
 			tripPatternsForRoute.add(tripPattern);
 		}
-		
+
 		return map;
 	}
-	
+
 	/**
 	 * Returns the list of trip patterns associated with the specified route.
 	 * Reads the trip patterns from the database and stores them in cache so
@@ -333,26 +335,26 @@ public class DbConfig {
 			// Need to sync such that block data, which includes trip
 			// pattern data, is only read serially (not read simultaneously
 			// by multiple threads). Otherwise get a "force initialize loading
-			// collection" error. 
+			// collection" error.
 			synchronized (Block.getLazyLoadingSyncObject()) {
 				logger.debug("About to load trip patterns...");
-				
+
 				// Use the global session so that don't need to read in any
 				// trip patterns that have already been read in as part of
 				// reading in block assignments. This makes reading of the
 				// trip pattern data much faster.
-				List<TripPattern> tripPatterns = TripPattern.getTripPatterns(
-						globalSession, configRev);
+				List<TripPattern> tripPatterns =
+						TripPattern.getTripPatterns(globalSession, configRev);
 				tripPatternsByRouteMap = putTripPatternsIntoMap(tripPatterns);
 			}
-			logger.debug("Reading trip patterns took {} msec", 
+			logger.debug("Reading trip patterns took {} msec",
 					timer.elapsedMsec());
 		}
-		
+
 		// Return cached trip pattern data
 		return tripPatternsByRouteMap.get(routeId);
 	}
-	
+
 	/**
 	 * Returns cached map of all Trips. Can be slow first time accessed because
 	 * it can take a while to read in all trips including all sub-data.
@@ -362,27 +364,27 @@ public class DbConfig {
 	public Map<String, Trip> getTrips() {
 		if (tripsMap == null) {
 			IntervalTimer timer = new IntervalTimer();
-			
+
 			// Need to sync such that block data, which includes trip
 			// pattern data, is only read serially (not read simultaneously
 			// by multiple threads). Otherwise get a "force initialize loading
-			// collection" error. 
+			// collection" error.
 			synchronized (Block.getLazyLoadingSyncObject()) {
 				logger.debug("About to load trips...");
-				
+
 				// Use the global session so that don't need to read in any
 				// trip patterns that have already been read in as part of
 				// reading in block assignments. This makes reading of the
 				// trip pattern data much faster.
-				tripsMap = Trip.getTrips(globalSession, configRev);				
+				tripsMap = Trip.getTrips(globalSession, configRev);
 			}
 			logger.debug("Reading trips took {} msec", timer.elapsedMsec());
 		}
-		
+
 		// Return cached trip data
 		return tripsMap;
 	}
-	
+
 	/**
 	 * For more quickly getting a trip. If trip not already read in yet it only
 	 * reads in the specific trip from the db, not all trips like getTrips().
@@ -392,22 +394,22 @@ public class DbConfig {
 	 */
 	public Trip getTrip(String tripId) {
 		Trip trip = individualTripsMap.get(tripId);
-		
+
 		// If trip not read in yet, do so now
 		if (trip == null) {
 			// Need to sync such that block data, which includes trip
 			// pattern data, is only read serially (not read simultaneously
 			// by multiple threads). Otherwise get a "force initialize loading
-			// collection" error. 
+			// collection" error.
 			synchronized (Block.getLazyLoadingSyncObject()) {
 				trip = Trip.getTrip(globalSession, configRev, tripId);
 			}
 			individualTripsMap.put(tripId, trip);
 		}
-		
+
 		return trip;
 	}
-	
+
 	/**
 	 * For more quickly getting a trip. If trip not already read in yet it only
 	 * reads in the specific trip from the db, not all trips like getTrips().
@@ -417,26 +419,28 @@ public class DbConfig {
 	 */
 	public Trip getTripUsingTripShortName(String tripShortName) {
 		Trip trip = individualTripsByShortNameMap.get(tripShortName);
-		
+
 		// If trip not read in yet, do so now
 		if (trip == null) {
 			// Need to sync such that block data, which includes trip
 			// pattern data, is only read serially (not read simultaneously
 			// by multiple threads). Otherwise get a "force initialize loading
-			// collection" error. 
+			// collection" error.
 			synchronized (Block.getLazyLoadingSyncObject()) {
-				trip = Trip.getTripByShortName(globalSession, configRev, tripShortName);
+				trip =
+						Trip.getTripByShortName(globalSession, configRev,
+								tripShortName);
 			}
 			individualTripsByShortNameMap.put(tripShortName, trip);
 		}
-		
-		return trip;		
+
+		return trip;
 	}
-	
+
 	/**
-	 * Creates a map of routes keyed by route ID so that can easily find a 
-	 * route using its ID.
-	 *  
+	 * Creates a map of routes keyed by route ID so that can easily find a route
+	 * using its ID.
+	 * 
 	 * @param routes
 	 * @return
 	 */
@@ -449,7 +453,7 @@ public class DbConfig {
 		}
 		return routesMap;
 	}
-	
+
 	/**
 	 * Creates a map of routes keyed by route short name so that can easily find
 	 * a route.
@@ -457,15 +461,16 @@ public class DbConfig {
 	 * @param routes
 	 * @return
 	 */
-	private static Map<String, Route> putRoutesIntoMapByRouteShortName(List<Route> routes) {
+	private static Map<String, Route> putRoutesIntoMapByRouteShortName(
+			List<Route> routes) {
 		// Convert list of routes to a map keyed on routeId
 		Map<String, Route> routesMap = new HashMap<String, Route>();
 		for (Route route : routes) {
 			routesMap.put(route.getShortName(), route);
 		}
-		return routesMap;	
+		return routesMap;
 	}
-	
+
 	/**
 	 * Reads the individual data structures from the database.
 	 * 
@@ -478,38 +483,41 @@ public class DbConfig {
 		// session as a member variable. This is a bit odd because usually
 		// close sessions but want to keep it open so can do lazy loading
 		// and so that can read in TripPatterns later using the same session.
-		globalSession = HibernateUtils.getSession(agencyId);			
+		globalSession = HibernateUtils.getSession(agencyId);
 
-//		// NOTE. Thought that it might speed things up if would read in
-//		// trips, trip patterns, and stopPaths all at once so that can use a single 
-//		// query instead of one for each trip or trip pattern when block data is
-//		// read in. But surprisingly it didn't speed up the overall queries.
-//		// Yes, reading in trips and trip patterns first means that reading
-//		// in blocks takes far less time. But the total time for reading
-//		// everything in stays the same. The tests were done on a laptop
-//		// that both contained DbConfig program plus the database. So 
-//		// should conduct this test again with the database on a different
-//		// server because perhaps then reading in trips and trip patterns
-//		// first might make a big difference.
-//		timer = new IntervalTimer();
-//		List<Trip> trips = Trip.getTrips(session, configRev);
-//		System.out.println("Reading trips took " + timer.elapsedMsec() + " msec");
-//		
-//		timer = new IntervalTimer();
-//		tripPatterns = TripPattern.getTripPatterns(session, configRev);
-//		System.out.println("Reading trip patterns took " + timer.elapsedMsec() + " msec");
-//
-//		timer = new IntervalTimer();
-//		stopPaths = StopPath.getPaths(session, configRev);
-//		logger.debug("Reading stopPaths took {} msec", timer.elapsedMsec());
+		// // NOTE. Thought that it might speed things up if would read in
+		// // trips, trip patterns, and stopPaths all at once so that can use a
+		// single
+		// // query instead of one for each trip or trip pattern when block data
+		// is
+		// // read in. But surprisingly it didn't speed up the overall queries.
+		// // Yes, reading in trips and trip patterns first means that reading
+		// // in blocks takes far less time. But the total time for reading
+		// // everything in stays the same. The tests were done on a laptop
+		// // that both contained DbConfig program plus the database. So
+		// // should conduct this test again with the database on a different
+		// // server because perhaps then reading in trips and trip patterns
+		// // first might make a big difference.
+		// timer = new IntervalTimer();
+		// List<Trip> trips = Trip.getTrips(session, configRev);
+		// System.out.println("Reading trips took " + timer.elapsedMsec() +
+		// " msec");
+		//
+		// timer = new IntervalTimer();
+		// tripPatterns = TripPattern.getTripPatterns(session, configRev);
+		// System.out.println("Reading trip patterns took " +
+		// timer.elapsedMsec() + " msec");
+		//
+		// timer = new IntervalTimer();
+		// stopPaths = StopPath.getPaths(session, configRev);
+		// logger.debug("Reading stopPaths took {} msec", timer.elapsedMsec());
 
-		
 		timer = new IntervalTimer();
 		blocks = Block.getBlocks(globalSession, configRev);
 		blocksByServiceMap = putBlocksIntoMap(blocks);
 		blocksByRouteMap = putBlocksIntoMapByRoute(blocks);
 		logger.debug("Reading blocks took {} msec", timer.elapsedMsec());
-		
+
 		timer = new IntervalTimer();
 		routes = Route.getRoutes(globalSession, configRev);
 		routesByRouteIdMap = putRoutesIntoMapByRouteId(routes);
@@ -525,15 +533,16 @@ public class DbConfig {
 		agencies = Agency.getAgencies(globalSession, configRev);
 		calendars = Calendar.getCalendars(globalSession, configRev);
 		calendarDates = CalendarDate.getCalendarDates(globalSession, configRev);
-		fareAttributes= FareAttribute.getFareAttributes(globalSession, configRev);
+		fareAttributes =
+				FareAttribute.getFareAttributes(globalSession, configRev);
 		fareRules = FareRule.getFareRules(globalSession, configRev);
 		frequencies = Frequency.getFrequencies(globalSession, configRev);
 		transfers = Transfer.getTransfers(globalSession, configRev);
-		
-		logger.debug("Reading everything else took {} msec", 
+
+		logger.debug("Reading everything else took {} msec",
 				timer.elapsedMsec());
 	}
-	
+
 	/************************** Getter Methods ***************************/
 
 	/**
@@ -554,33 +563,53 @@ public class DbConfig {
 		if (serviceId != null) {
 			// For determining blocks for the service
 			Map<String, Block> blocksMap = blocksByServiceMap.get(serviceId);
-			
+
 			// If no such service class defined for the blocks then return
 			// null. This can happen if service classes are defined that
 			// even though no blocks use that service class, such as when
 			// working with a partial configuration.
 			if (blocksMap == null)
 				return null;
-			
+
 			return blocksMap.get(blockId);
 		} else {
 			// Service ID was not specified so determine current ones for now
 			Date now = Core.getInstance().getSystemDate();
-			
-			List<String> currentServiceIds = 
+
+			List<String> currentServiceIds =
 					Core.getInstance().getServiceUtils().getServiceIds(now);
 			for (String currentServiceId : currentServiceIds) {
 				Block block = getBlock(currentServiceId, blockId);
 				if (block != null)
-					return block;				
+					return block;
 			}
-			
+
 			// Couldn't find that block ID for any of the current service IDs
 			return null;
 		}
-		
+
 	}
-	
+
+	/**
+	 * Returns blocks for the specified blockId for all service IDs.
+	 * 
+	 * @param blockId
+	 *            Which blocks to return
+	 * @return Collection of blocks
+	 */
+	public Collection<Block> getBlocksForAllServiceIds(String blockId) {
+		Collection<Block> blocks = new ArrayList<Block>();
+
+		Collection<String> serviceIds = blocksByServiceMap.keySet();
+		for (String serviceId : serviceIds) {
+			Block block = getBlock(serviceId, blockId);
+			if (block != null)
+				blocks.add(block);
+		}
+
+		return blocks;
+	}
+
 	/**
 	 * Returns unmodifiable collection of blocks associated with the specified
 	 * serviceId.
@@ -590,7 +619,7 @@ public class DbConfig {
 	 *         collection is returned instead of null.
 	 */
 	public Collection<Block> getBlocks(String serviceId) {
-		Map<String, Block> blocksForServiceMap = 
+		Map<String, Block> blocksForServiceMap =
 				blocksByServiceMap.get(serviceId);
 		if (blocksForServiceMap != null) {
 			Collection<Block> blocksForService = blocksForServiceMap.values();
@@ -599,7 +628,7 @@ public class DbConfig {
 			return new ArrayList<Block>(0);
 		}
 	}
-	
+
 	/**
 	 * Returns unmodifiable list of blocks for the agency.
 	 * 
@@ -608,7 +637,7 @@ public class DbConfig {
 	public List<Block> getBlocks() {
 		return Collections.unmodifiableList(blocks);
 	}
-	
+
 	/**
 	 * Returns Map of routesMap keyed on the routeId.
 	 * 
@@ -617,7 +646,7 @@ public class DbConfig {
 	public Map<String, Route> getRoutesByRouteIdMap() {
 		return Collections.unmodifiableMap(routesByRouteIdMap);
 	}
-	
+
 	/**
 	 * Returns ordered list of routes.
 	 * 
@@ -626,7 +655,7 @@ public class DbConfig {
 	public List<Route> getRoutes() {
 		return Collections.unmodifiableList(routes);
 	}
-	
+
 	/**
 	 * Returns the Route with the specified routeId.
 	 * 
@@ -636,7 +665,7 @@ public class DbConfig {
 	public Route getRouteById(String routeId) {
 		return routesByRouteIdMap.get(routeId);
 	}
-	
+
 	/**
 	 * Returns the Route with the specified routeShortName
 	 * 
@@ -646,7 +675,7 @@ public class DbConfig {
 	public Route getRouteByShortName(String routeShortName) {
 		return routesByRouteShortNameMap.get(routeShortName);
 	}
-	
+
 	/**
 	 * Returns the Stop with the specified stopId.
 	 * 
@@ -656,29 +685,30 @@ public class DbConfig {
 	public Stop getStop(String stopId) {
 		return stopsMap.get(stopId);
 	}
-	
+
 	public List<Calendar> getCalendars() {
 		return Collections.unmodifiableList(calendars);
 	}
-	
+
 	public List<CalendarDate> getCalendarDates() {
 		return Collections.unmodifiableList(calendarDates);
 	}
-		
+
 	/**
-	 * There can be multiple agencies but usually there will be just one. 
-	 * For getting timezone and such want to be able to easily access
-	 * the main agency, hence this method.
+	 * There can be multiple agencies but usually there will be just one. For
+	 * getting timezone and such want to be able to easily access the main
+	 * agency, hence this method.
+	 * 
 	 * @return
 	 */
 	public Agency getFirstAgency() {
 		return agencies.get(0);
 	}
-	
+
 	public List<Agency> getAgencies() {
 		return Collections.unmodifiableList(agencies);
 	}
-	
+
 	/**
 	 * Returns the database revision of the configuration data that was read in.
 	 * 
@@ -687,7 +717,7 @@ public class DbConfig {
 	public int getConfigRev() {
 		return configRev;
 	}
-	
+
 	/**
 	 * Output contents of collection to stdout. For debugging.
 	 * 
@@ -697,14 +727,13 @@ public class DbConfig {
 	private static void outputCollection(String name, Collection<?> list) {
 		if (list == null)
 			return;
-		
+
 		System.out.println("\n" + name + ": ");
 		for (Object o : list) {
 			System.out.println(" " + o);
-		}		
+		}
 	}
-	
-	
+
 	/**
 	 * For debugging.
 	 * 
@@ -712,12 +741,12 @@ public class DbConfig {
 	 */
 	public static void main(String args[]) {
 		String projectId = "sfmta";
-		
+
 		int configRev = ActiveRevisions.get(projectId).getConfigRev();
-		
+
 		DbConfig dbConfig = new DbConfig(projectId);
 		dbConfig.read(configRev);
-		
+
 		Block block0 = dbConfig.blocks.get(0);
 		Trip trip0 = block0.getTrips().get(0);
 		TravelTimesForTrip ttft = trip0.getTravelTimes();
@@ -726,7 +755,7 @@ public class DbConfig {
 		TripPattern tp = trip0.getTripPattern();
 		@SuppressWarnings("unused")
 		StopPath path0 = tp.getStopPath(0);
-		
+
 		outputCollection("Blocks", dbConfig.blocks);
 		outputCollection("Routes", dbConfig.routesByRouteIdMap.values());
 		outputCollection("Stops", dbConfig.stopsMap.values());

@@ -96,6 +96,16 @@ public interface ConfigInterface extends Remote {
 			throws RemoteException;
 	
 	/**
+	 * Returns blocks for each service class for the blockId specified.
+	 * 
+	 * @param blockId
+	 * @return
+	 * @throws RemoteException
+	 */
+	public Collection<IpcBlock> getBlocks(String blockId)
+			throws RemoteException;
+	
+	/**
 	 * Returns trip info for specified tripId. Includes all trip pattern info
 	 * associated with the trip.
 	 * 

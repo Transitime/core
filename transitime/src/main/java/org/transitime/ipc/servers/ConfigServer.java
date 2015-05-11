@@ -187,6 +187,28 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getBlocks(java.lang.String)
+	 */
+	@Override
+	public Collection<IpcBlock> getBlocks(String blockId)
+			throws RemoteException {
+		// For returning results
+		Collection<IpcBlock> ipcBlocks = new ArrayList<IpcBlock>();
+		
+		// Get the blocks with specified ID
+		Collection<Block> dbBlocks = 
+				Core.getInstance().getDbConfig().getBlocksForAllServiceIds(blockId);
+		
+		// Convert blocks from DB into IpcBlocks
+		for (Block dbBlock : dbBlocks) {
+			ipcBlocks.add(new IpcBlock(dbBlock));
+		}
+		
+		// Return result
+		return ipcBlocks;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTrip(java.lang.String)
 	 */
 	@Override

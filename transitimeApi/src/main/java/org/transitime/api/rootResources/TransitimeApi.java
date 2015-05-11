@@ -39,6 +39,7 @@ import org.transitime.api.data.ApiActiveBlocksRoutes;
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
 import org.transitime.api.data.ApiBlock;
+import org.transitime.api.data.ApiBlocks;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
@@ -643,7 +644,9 @@ public class TransitimeApi {
 
 		// Make sure request is valid
 		stdParameters.validate();
-
+		if (serviceId == null)
+			throw WebUtils.badRequestException("Must specify serviceId");
+		
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
@@ -652,12 +655,52 @@ public class TransitimeApi {
 			// If the block doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
 			if (ipcBlock == null)
-				throw WebUtils.badRequestException("BlockId=" + blockId
+				throw WebUtils.badRequestException("The blockId=" + blockId
 						+ " for serviceId=" + serviceId + " does not exist.");
 
 			// Create and return ApiBlock response
 			ApiBlock apiBlock = new ApiBlock(ipcBlock);
 			return stdParameters.createResponse(apiBlock);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Handles the "block" command which outputs configuration data for the
+	 * specified block. Includes all sub-data such as trips and trip patterns.
+	 * 
+	 * @param stdParameters
+	 * @param blockId
+	 * @param serviceId
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/blocks")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getBlocks(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "blockId") String blockId)
+			throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+		
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			Collection<IpcBlock> ipcBlocks = inter.getBlocks(blockId);
+
+			// If the block doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcBlocks.isEmpty())
+				throw WebUtils.badRequestException("The blockId=" + blockId
+						+ " does not exist.");
+
+			// Create and return ApiBlock response
+			ApiBlocks apiBlocks = new ApiBlocks(ipcBlocks);
+			return stdParameters.createResponse(apiBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
