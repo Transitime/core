@@ -361,6 +361,7 @@
         predictable boolean,
         routeId varchar(60),
         routeShortName varchar(60),
+        serviceId varchar(60),
         stopId varchar(60),
         supervisor varchar(60),
         tripId varchar(60),

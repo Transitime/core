@@ -361,6 +361,7 @@
         predictable number(1,0),
         routeId varchar2(60 char),
         routeShortName varchar2(60 char),
+        serviceId varchar2(60 char),
         stopId varchar2(60 char),
         supervisor varchar2(60 char),
         tripId varchar2(60 char),

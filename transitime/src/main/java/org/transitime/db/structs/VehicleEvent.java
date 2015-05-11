@@ -132,6 +132,10 @@ public class VehicleEvent implements Serializable {
 
 	// Nice for providing context. 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private final String serviceId;
+
+	// Nice for providing context. 
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripId;
 
 	// Nice for providing context. 
@@ -176,13 +180,14 @@ public class VehicleEvent implements Serializable {
 	 * @param routeId
 	 * @param routeShortName
 	 * @param blockId
+	 * @param serviceId
 	 * @param tripId
 	 * @param stopId
 	 */
 	private VehicleEvent(Date time, String vehicleId, String eventType,
 			String description, boolean predictable,
 			boolean becameUnpredictable, String supervisor, Location location,
-			String routeId, String routeShortName, String blockId,
+			String routeId, String routeShortName, String blockId, String serviceId,
 			String tripId, String stopId) {
 		super();
 		this.time = time;
@@ -196,6 +201,7 @@ public class VehicleEvent implements Serializable {
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.blockId = blockId;
+		this.serviceId = serviceId;
 		this.tripId = tripId;
 		this.stopId = stopId;
 	}
@@ -215,6 +221,7 @@ public class VehicleEvent implements Serializable {
 	 * @param routeId
 	 * @param routeShortName
 	 * @param blockId
+	 * @param serviceId
 	 * @param tripId
 	 * @param stopId
 	 * @return The VehicleEvent constructed
@@ -223,11 +230,12 @@ public class VehicleEvent implements Serializable {
 			String eventType, String description, boolean predictable,
 			boolean becameUnpredictable, String supervisor, Location location,
 			String routeId, String routeShortName, String blockId,
-			String tripId, String stopId) {
-		VehicleEvent vehicleEvent = new VehicleEvent(time, vehicleId,
-				eventType, description, predictable, becameUnpredictable,
-				supervisor, location, routeId, routeShortName, blockId, tripId,
-				stopId);
+			String serviceId, String tripId, String stopId) {
+		VehicleEvent vehicleEvent =
+				new VehicleEvent(time, vehicleId, eventType, description,
+						predictable, becameUnpredictable, supervisor, location,
+						routeId, routeShortName, blockId, serviceId, tripId,
+						stopId);
 
 		// Log VehicleEvent in log file
 		logger.info(vehicleEvent.toString());
@@ -261,6 +269,7 @@ public class VehicleEvent implements Serializable {
 		String routeShortName = 
 				match==null ? null : match.getTrip().getRouteShortName();
 		String blockId = match==null ? null : match.getBlock().getId();
+		String serviceId = match==null ? null : match.getBlock().getServiceId();
 		String tripId = match==null ? null : match.getTrip().getId();
 		String stopId = match==null ? null : match.getStopPath().getStopId();
 		
@@ -268,7 +277,7 @@ public class VehicleEvent implements Serializable {
 		return create(avlReport.getDate(), avlReport.getVehicleId(),
 				eventType, description, predictable,
 				becameUnpredictable, supervisor, avlReport.getLocation(),
-				routeId, routeShortName, blockId,
+				routeId, routeShortName, blockId, serviceId,
 				tripId, stopId);
 	}
 	
@@ -296,6 +305,7 @@ public class VehicleEvent implements Serializable {
 		this.routeId = null;
 		this.routeShortName = null;
 		this.blockId = null;
+		this.serviceId = null;
 		this.tripId = null;
 		this.stopId = null;
 	}
@@ -319,6 +329,7 @@ public class VehicleEvent implements Serializable {
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime * result 
 				+ ((routeShortName == null) ? 0 : routeShortName.hashCode());
+		result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
 		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
 		result = prime * result
 				+ ((supervisor == null) ? 0 : supervisor.hashCode());
@@ -375,6 +386,11 @@ public class VehicleEvent implements Serializable {
 				return false;
 		} else if (!routeShortName.equals(other.routeShortName))
 			return false;
+		if (serviceId == null) {
+			if (other.serviceId != null)
+				return false;
+		} else if (!serviceId.equals(other.serviceId))
+			return false;
 		if (stopId == null) {
 			if (other.stopId != null)
 				return false;
@@ -413,6 +429,7 @@ public class VehicleEvent implements Serializable {
 				+ ", description=\"" + description + "\""
 				+ ", location=" + location 
 				+ ", blockId=" + blockId 
+				+ ", serviceId=" + serviceId
 				+ ", tripId=" + tripId 
 				+ ", routeId=" + routeId
 				+ ", predictable=" + predictable 
@@ -519,6 +536,10 @@ public class VehicleEvent implements Serializable {
 		return blockId;
 	}
 
+	public String getServiceId() {
+		return serviceId;
+	}
+	
 	public String getTripId() {
 		return tripId;
 	}
@@ -527,5 +548,4 @@ public class VehicleEvent implements Serializable {
 		return stopId;
 	}
 
-	
 }
