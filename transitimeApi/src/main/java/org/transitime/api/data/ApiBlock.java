@@ -73,7 +73,7 @@ public class ApiBlock {
 		serviceId = ipcBlock.getServiceId();
 		startTime = Time.timeOfDayStr(ipcBlock.getStartTime());
 		endTime = Time.timeOfDayStr(ipcBlock.getEndTime());
-		headwaySecs = ipcBlock.getHeadwaySecs() != 0 ? Integer
+		headwaySecs = ipcBlock.getHeadwaySecs() > 0 ? Integer
 				.toString(ipcBlock.getHeadwaySecs()) : null;
 
 		trips = new ArrayList<ApiTrip>();
