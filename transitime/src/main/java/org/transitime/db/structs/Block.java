@@ -17,6 +17,7 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,6 +51,7 @@ import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatch;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -114,8 +116,9 @@ public final class Block implements Serializable {
 	@Cascade({CascadeType.SAVE_UPDATE})
 	private final List<Trip> trips;
 	
+	// For non-scheduled blocks
 	@Column
-	private final int headwaySecs; // For non-scheduled blocks
+	private final int headwaySecs; 
 
 	// Sometimes will get vehicle assignment by routeId. This means that need
 	// to know which blocks are associated with a route. Getting the routeIds
@@ -444,6 +447,26 @@ public final class Block implements Serializable {
 	}
 	
 	/**
+	 * Returns true if the service ID for the block is for the time specified by
+	 * offset parameter. Useful for determining if the service ID for the block
+	 * is valid for today, yesterday, or for tomorrow.
+	 *
+	 * @param date
+	 *            The date want to see if the block is active for
+	 * @param offset
+	 *            Use 0 for today, -Time.DAY_IN_MSECS for yesterday, and
+	 *            Time.DAY_IN_MSECS for today.
+	 * @return true if service ID for block as valid for other day
+	 */
+	private boolean serviceClassIsValidForDay(Date date, long offset) {
+		long dateToCheck = date.getTime() + offset;
+		List<String> currentServiceIds =
+				Core.getInstance().getServiceUtils().getServiceIds(dateToCheck);
+		
+		return currentServiceIds.contains(serviceId);
+	}
+	
+	/**
 	 * Returns true if the time of day of the date passed in is between
 	 * allowableBeforeTimeSecs before the startTime and the endTime for the
 	 * block. No leeway is provided for the end time. Note: does not look to see
@@ -454,30 +477,47 @@ public final class Block implements Serializable {
 	 * @return True if the block is active.
 	 */
 	public boolean isActive(Date date, int allowableBeforeTimeSecs) {
-		int secsInDayForAvlReport = 
+		int secsInDay = 
 				Core.getInstance().getTime().getSecondsIntoDay(date);
 
 		// Handle normal situation where times are between midnight in the 
 		// morning and midnight in the evening
-		boolean active = secsInDayForAvlReport > startTime - allowableBeforeTimeSecs
-				&& secsInDayForAvlReport < endTime;
-		if (active)
-			return true;
+		boolean serviceClassValidToday = serviceClassIsValidForDay(date, 0);
+		if (serviceClassValidToday) {
+			if (secsInDay > startTime - allowableBeforeTimeSecs
+					&& secsInDay < endTime) {
+				return true;			
+			}
+		}
 		
-		// Also handle where date is late in the evening before midnight but 
-		// the start time is really early in the morning, just after midnight.
-		int secsInDayBeforeMidnight = secsInDayForAvlReport - Time.SEC_PER_DAY;
-		active = secsInDayBeforeMidnight > startTime - allowableBeforeTimeSecs
-				&& secsInDayBeforeMidnight < endTime;
-		if (active)
-			return true;
+		// If the service class was valid yesterday then try adding 24 hours to
+		// the time when checking if block active. This way handle situations
+		// past midnight, but only if the block was actually active yesterday.
+		boolean serviceClassValidYesterday =
+				serviceClassIsValidForDay(date, -Time.DAY_IN_MSECS);
+		if (serviceClassValidYesterday) {
+			int secsInDayPastMidnight =
+					secsInDay + Time.DAY_IN_SECS;
+			if (secsInDayPastMidnight > startTime - allowableBeforeTimeSecs
+					&& secsInDayPastMidnight < endTime) {
+				return true;			
+			}
+		}
 		
-		// And lastly, handle where start time or end time is past midnight
-		int secsInDayPastMidnight = secsInDayForAvlReport + Time.SEC_PER_DAY;
-		active = secsInDayPastMidnight > startTime - allowableBeforeTimeSecs
-				&& secsInDayPastMidnight < endTime;
-		if (active)
-			return true;
+		// If the service class is valid tomorrow then try subtracting 24 hours
+		// from the time when checking if block active. This way handle
+		// situations before midnight, but won't include a block that isn't
+		// actually active the next day.
+		boolean serviceClassValidTomorrow =
+				serviceClassIsValidForDay(date, Time.DAY_IN_MSECS);
+		if (serviceClassValidTomorrow) {
+			int secsInDayBeforeMidnight =
+					secsInDay - Time.SEC_PER_DAY;
+			if (secsInDayBeforeMidnight > startTime - allowableBeforeTimeSecs
+					&& secsInDayBeforeMidnight < endTime) {
+				return true;
+			}
+		}
 		
 		// It simply ain't active
 		return false;
@@ -494,6 +534,19 @@ public final class Block implements Serializable {
 	 */
 	public boolean isActive(Date date) {
 		return isActive(date, 0);
+	}
+	
+	/**
+	 * Returns true if the time of day of the date passed in is between the
+	 * startTime and the endTime for the block. No leeway is provided. Note:
+	 * does not look to see if the service associated with the block is active.
+	 * Only looks at time of day.
+	 * 
+	 * @param epochTime
+	 * @return True if the block is active.
+	 */
+	public boolean isActive(long epochTime) {
+		return isActive(new Date(epochTime), 0);
 	}
 	
 	/**
@@ -1061,4 +1114,24 @@ public final class Block implements Serializable {
 		return CoreConfig.exclusiveBlockAssignments();
 	}
 	
+	/**
+	 * For debugging
+	 * 
+	 * @param args
+	 */
+	@SuppressWarnings("unused")
+	public static void main(String[] args) {
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		Block block1 = dbConfig.getBlock("1", "2105");
+		Block block2 = dbConfig.getBlock("2", "2105");
+		Block block3 = dbConfig.getBlock("3", "2105");
+		try {
+			boolean b1 = block1.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS);
+			boolean b2 = block2.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS);
+			boolean b3 = block3.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS);
+			int forSettingBreakpoint=9;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
 }

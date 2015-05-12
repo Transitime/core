@@ -193,4 +193,21 @@ public class ServiceUtils {
 		return serviceIds;
 	}
 	
+	/**
+	 * Determines list of current service IDs for the specified time.
+	 * These service IDs designate which block assignments are currently
+	 * active.
+	 * <p>
+	 * Uses already read in calendars, but does a good number of calculations so
+	 * still a bit expensive.
+	 * 
+	 * @param epochTime The current time that determining service IDs for
+	 * @param calendars List of calendar.txt GTFS data
+	 * @param calendarDates List of calendar_dates.txt GTFS data
+	 * @return List of service IDs that are active for the specified time.
+	 */
+	public List<String> getServiceIds(long epochTime) {
+		return getServiceIds(new Date(epochTime));
+	}
+	
 }

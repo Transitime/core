@@ -20,10 +20,14 @@ package org.transitime.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.transitime.applications.Core;
 import org.transitime.db.structs.Block;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.utils.Time;
 
 /**
  * Contains information on Blocks as a whole, such as which blocks are currently
@@ -107,21 +111,45 @@ public class BlocksInfo {
 		if (core == null)
 			return activeBlocks;
 		
-		// Determine which service IDs are currently active.
-		// Yes, there can be multiple ones active at once.
-		Date now = core.getSystemDate();
+		// Determine which service IDs are currently active
+		Set<String> serviceIds = new HashSet<String>();
+		long now = core.getSystemTime();
 		List<String> currentServiceIds = 
 				core.getServiceUtils().getServiceIds(now);
+		serviceIds.addAll(currentServiceIds);
+		
+		// If current time is just a couple of hours after midnight then need
+		// to also look at service IDs for previous day as well since a block
+		// from the previous day might still be running after midnight.
+		int secsInDayForAvlReport = 
+				Core.getInstance().getTime().getSecondsIntoDay(now);
+		if (secsInDayForAvlReport < 4 * Time.HOUR_IN_SECS) {
+			List<String> previousDayServiceIds =
+					core.getServiceUtils().getServiceIds(
+							now - Time.DAY_IN_MSECS);
+			serviceIds.addAll(previousDayServiceIds);
+		}
 
+		// If current time is just before midnight then need to also look at
+		// service IDs from the next day since a block might start soon after
+		// midnight.
+		if (secsInDayForAvlReport > Time.DAY_IN_SECS - allowableBeforeTimeSecs) {
+			List<String> nextDayServiceIds =
+					core.getServiceUtils().getServiceIds(
+							now + Time.DAY_IN_MSECS);
+			serviceIds.addAll(nextDayServiceIds);
+		}
+		
 		// For each service ID ...
-		for (String serviceId : currentServiceIds) {
+		for (String serviceId : serviceIds) {
 			DbConfig dbConfig = core.getDbConfig();
 			Collection<Block> blocks = dbConfig.getBlocks(serviceId);
 			
 			// If the block is about to be or currently active then
 			// add it to the list to be returned
 			for (Block block : blocks) {
-				// Determine if block is for specified route
+				// Determine if block is for specified route. If routeIds is
+				// null then interested in all routes
 				boolean forSpecifiedRoute = true;
 				if (routeIds != null && !routeIds.isEmpty()) {
 					forSpecifiedRoute = false;
