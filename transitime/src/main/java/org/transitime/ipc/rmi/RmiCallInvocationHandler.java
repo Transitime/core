@@ -261,7 +261,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 									+ method.getName()
 									+ "() for agency "
 									+ info.getAgencyId()
-									+ "encountered exception. "
+									+ " encountered exception. "
 									+ e.getMessage()
 									+ ". "
 									+ e.getCause().getMessage()
