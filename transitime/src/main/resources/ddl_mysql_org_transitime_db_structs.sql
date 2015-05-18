@@ -79,7 +79,6 @@
         configRev integer not null,
         blockId varchar(60) not null,
         endTime integer,
-        headwaySecs integer,
         routeIds blob,
         startTime integer,
         primary key (serviceId, configRev, blockId)
@@ -227,7 +226,7 @@
 
     create table StopPaths (
         tripPatternId varchar(60) not null,
-        stopPathId varchar(60) not null,
+        stopPathId varchar(120) not null,
         configRev integer not null,
         breakTime integer,
         gtfsStopSeq integer,
@@ -270,7 +269,7 @@
         configRev integer,
         daysOfWeekOverride smallint,
         howSet varchar(5),
-        stopPathId varchar(60),
+        stopPathId varchar(120),
         stopTimeMsec integer,
         travelTimeSegmentLength float,
         travelTimesMsec blob,
@@ -298,7 +297,7 @@
         TripPatterns_id varchar(60) not null,
         TripPatterns_configRev integer not null,
         stopPaths_tripPatternId varchar(60) not null,
-        stopPaths_stopPathId varchar(60) not null,
+        stopPaths_stopPathId varchar(120) not null,
         stopPaths_configRev integer not null,
         listIndex integer not null,
         primary key (TripPatterns_id, TripPatterns_configRev, listIndex)
@@ -326,7 +325,9 @@
         blockId varchar(60),
         directionId varchar(60),
         endTime integer,
+        exactTimesHeadway bit,
         headsign varchar(255),
+        noSchedule bit,
         routeId varchar(60),
         routeShortName varchar(60),
         scheduledTimesList blob,
