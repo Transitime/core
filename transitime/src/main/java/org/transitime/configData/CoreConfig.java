@@ -17,10 +17,12 @@ package org.transitime.configData;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.FloatConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.config.StringConfigValue;
 import org.transitime.config.StringListConfigValue;
 import org.transitime.utils.Time;
 
@@ -597,7 +599,11 @@ public class CoreConfig {
 					+ "true then when a vehicle is assigned to a block the "
 					+ "system will unassign any other vehicles that were "
 					+ "assigned to the block. Important for when AVL system "
-					+ "doesn't always provide logout info.");
+					+ "doesn't always provide logout info. Also used by the "
+					+ "AutoBlockAssigner to determine which active blocks to "
+					+ "possibly assign a vehicle to. For no schedule routes "
+					+ "can set to false to allow multiple vehicles be assigned "
+					+ "to a route.");
 
 	public static int getTimeForDeterminingNoProgress() {
 		return timeForDeterminingNoProgress.getValue();
@@ -683,4 +689,16 @@ public class CoreConfig {
 					+ "enough so can store all AVL reports received over "
 					+ "timeForDeterminingNoProgress. If GPS rate is high then "
 					+ "this value will need to be high as well.");
+	
+	public static String getPidFileDirectory() {
+		return pidFileDirectory.getValue();
+	}
+	private static StringConfigValue pidFileDirectory =
+			new StringConfigValue(
+					"transitime.core.pidDirectory", 
+					"C:/Users/Michael/pids/",
+					"Directory where pid file should be written. The pid file "
+					+ "can be used by monit to make sure that core process is "
+					+ "always running.");
+	
 }

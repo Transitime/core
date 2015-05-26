@@ -45,6 +45,7 @@ import org.transitime.ipc.servers.PredictionsServer;
 import org.transitime.ipc.servers.ServerStatusServer;
 import org.transitime.ipc.servers.VehiclesServer;
 import org.transitime.modules.Module;
+import org.transitime.monitoring.PidFile;
 import org.transitime.utils.SettableSystemTime;
 import org.transitime.utils.SystemTime;
 import org.transitime.utils.SystemCurrentTime;
@@ -98,6 +99,9 @@ public class Core {
 	 * @param agencyId
 	 */
 	private Core(String agencyId) {
+		// Write pid file
+		PidFile.createPidFile(CoreConfig.getPidFileDirectory() + agencyId + ".pid");
+		
 		// Determine configuration rev to use. If one specified on command
 		// line, use it. If not, then use revision stored in db.
 		int configRev;
