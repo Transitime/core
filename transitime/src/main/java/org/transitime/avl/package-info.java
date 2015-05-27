@@ -53,7 +53,7 @@
  * used to start up the desired AVL modules.
  * <p>
  * Configuration parameters for AVL modules are listed in the AvlConfig.java 
- * class. Important params include -Dtransitime.core.storeDataInDatabase=false
+ * class. Important params include -Dtransitime.db.storeDataInDatabase=false
  * if the generated data such as arrivals/departures should not be stored
  * in the database. This is important for when in playback mode for 
  * debugging or such. Another important parameter is 
