@@ -685,7 +685,7 @@ public class AvlProcessor {
 			if (trip != null) {
 				SpatialMatch beginningOfTrip = new SpatialMatch(
 						vehicleState.getVehicleId(), avlReport.getTime(),
-						block, block.getTripIndex(trip.getId()), 0, // stopPathIndex
+						block, block.getTripIndex(trip), 0, // stopPathIndex
 						0, // segmentIndex
 						0.0, // distanceToSegment
 						0.0); // distanceAlongSegment
@@ -894,8 +894,6 @@ public class AvlProcessor {
 	 * assignment and haven't gotten too many bad assignments in a row then
 	 * simply use the old assignment. This is handy for when the assignment
 	 * portion of the AVL feed does not send assignment data for every report.
-	 * <p>
-	 * In the future might want to change code to try to auto assign vehicle.
 	 * 
 	 * @param vehicleState
 	 */
@@ -931,24 +929,21 @@ public class AvlProcessor {
 		TemporalMatch temporalMatch = vehicleState.getMatch();
 		if (temporalMatch != null) {
 			VehicleAtStopInfo atStopInfo = temporalMatch.getAtStop();
-			if (atStopInfo != null) {
-				if (atStopInfo.atEndOfBlock()) {
-					logger.info("For vehicleId={} the end of the block={} "
-							+ "was reached so will make vehicle unpredictable",
-							vehicleState.getVehicleId(), temporalMatch
-									.getBlock().getId());
+			if (atStopInfo != null && atStopInfo.atEndOfBlock()) {
+				logger.info("For vehicleId={} the end of the block={} "
+						+ "was reached so will make vehicle unpredictable",
+						vehicleState.getVehicleId(), temporalMatch.getBlock()
+								.getId());
 
-					// At end of block assignment so remove it
-					String eventDescription = "Block assignment "
-							+ vehicleState.getBlock().getId()
-							+ " ended for vehicle so it was made unpredictable.";
-					makeVehicleUnpredictableAndTerminateAssignment(
-							vehicleState, eventDescription,
-							VehicleEvent.END_OF_BLOCK);
+				// At end of block assignment so remove it
+				String eventDescription = "Block assignment "
+								+ vehicleState.getBlock().getId()
+								+ " ended for vehicle so it was made unpredictable.";
+				makeVehicleUnpredictableAndTerminateAssignment(vehicleState,
+						eventDescription, VehicleEvent.END_OF_BLOCK);
 
-					// Return that end of block reached
-					return true;
-				}
+				// Return that end of block reached
+				return true;
 			}
 		}
 
@@ -973,6 +968,11 @@ public class AvlProcessor {
 	 * @return
 	 */
 	private TemporalDifference checkScheduleAdherence(VehicleState vehicleState) {
+		// If no schedule then there can't be real-time schedule adherence
+		if (vehicleState.getBlock() == null
+				|| vehicleState.getBlock().isNoSchedule())
+			return null;
+		
 		logger.debug(
 				"Processing real-time schedule adherence for vehicleId={}",
 				vehicleState.getVehicleId());
@@ -1099,7 +1099,8 @@ public class AvlProcessor {
 				// New assignment so match the vehicle to it
 				matchVehicleToAssignment(vehicleState);
 			} else {
-				// Handle bad assignment where don't have assignment or such
+				// Handle bad assignment where don't have assignment or such.
+				// Will try auto assigning a vehicle if that feature is enabled.
 				handleProblemAssignment(vehicleState);
 			}
 
@@ -1223,7 +1224,7 @@ public class AvlProcessor {
 		if (AutoBlockAssigner.getInstance().ignoreAvlAssignments()
 				&& !avlReport.isForSchedBasedPreds()) {
 			logger.debug("Removing assignment from AVL report because "
-					+ "transitime.core.ignoreAvlAssignments=true. {}",
+					+ "transitime.autoBlockAssigner.ignoreAvlAssignments=true. {}",
 					avlReport);
 			avlReport.setAssignment(null, AssignmentType.UNSET);
 		}

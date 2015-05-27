@@ -28,7 +28,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.Block;
-import org.transitime.db.structs.Frequency;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.gtfs.gtfsStructs.GtfsRoute;
@@ -126,9 +125,9 @@ public class BlocksProcessor {
 				// this if found a trip for both direction "0" and "1".
 				if (longestTripPatternForDirection0 != null && longestTripPatternForDirection1 != null) {
 					List<Trip> tripsListForBlock = new ArrayList<Trip>();
-					// Note: it is OK to use getTrips() because only deprecated because 
-					// can only be used when processing in GTFS data, which is what we are
-					// doing here.
+					// Note: FIXME should actually create a copy of the trip with noSchedule set to true
+					// so that they will be treated as no-schedule trips. Also need to set start and
+					// end time for trip so that it is always active.
 					tripsListForBlock.add(longestTripPatternForDirection0.getTrips().get(0));
 					tripsListForBlock.add(longestTripPatternForDirection1.getTrips().get(0));
 					
@@ -139,7 +138,7 @@ public class BlocksProcessor {
 					for (String serviceId : serviceIdsUsed) {
 						Block block = new Block(configRev, blockId, serviceId,
 								startTimeForBlock, endTimeForBlock,
-								tripsListForBlock, headwaySecs);
+								tripsListForBlock);
 						
 						// Add the new block to the list of blocks
 						blocks.add(block);					
@@ -206,34 +205,6 @@ public class BlocksProcessor {
 				// Determine list of trips for the current block
 				List<Trip> tripsListForBlock = tripListForBlocksMap.get(blockId);
 								
-				// The following parameters need to be determined to create the
-				// Block. The differ depending on whether the block is supposed
-				// to be schedule based or not. It is schedule based if the
-				// trips are not listed in the frequencies.txt file.
-				int startTimeForBlock;
-				int endTimeForBlock;
-				int headwaySecs = -1; // If not frequency based headway set to -1
-				
-				// Determine headway for frequency based trips
-				// If schedule based block then handle normally. A block is 
-				// schedule based if its trips are listed in the frequencies.txt 
-				// file. Using the frequencies file is a bit vague though. It
-				// appears to be for individual trips but actually need a block
-				// to consist of multiple trips so that can predict through to 
-				// the next trip. Only thing can do for now is to get the tripId
-				// for the first trip for the block (as defined in the
-				// stop_times.txt file) and see if it is in the frequency.txt
-				// file.
-				String firstTripForBlockId = tripsListForBlock.get(0).getId();
-				if (gtfsData.isTripFrequencyBased(firstTripForBlockId)) {
-					// It is a frequency based block so use proper headway from
-					// file
-					List<Frequency> frequencyList = 
-							gtfsData.getFrequencyList(firstTripForBlockId);
-					Frequency frequency = frequencyList.get(0);		
-					headwaySecs = frequency.getHeadwaySecs();
-				}
-				
 				// Sort the List of Trips chronologically since they might
 				// be listed in the stop_times.txt file in any order.
 				Collections.sort(tripsListForBlock, 
@@ -247,17 +218,16 @@ public class BlocksProcessor {
 							
 				// Determine start time for block from the first trip.
 				Trip firstTripForBlock = tripsListForBlock.get(0);
-				startTimeForBlock = firstTripForBlock.getStartTime();
+				int startTimeForBlock = firstTripForBlock.getStartTime();
 				
 				// Determine end time for block from the last trip.
 				Trip lastTripForBlock = 
 						tripsListForBlock.get(tripsListForBlock.size()-1);
-				endTimeForBlock = lastTripForBlock.getEndTime();
+				int endTimeForBlock = lastTripForBlock.getEndTime();
 
 				// Create the Block
 				Block block = new Block(configRev, blockId, serviceId,
-						startTimeForBlock, endTimeForBlock, tripsListForBlock,
-						headwaySecs);
+						startTimeForBlock, endTimeForBlock, tripsListForBlock);
 				
 				// Add the new block to the list of blocks
 				blocks.add(block);

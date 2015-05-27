@@ -31,6 +31,7 @@ import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Departure;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
+import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.utils.Time;
 
@@ -159,9 +160,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		Indices indices = oldMatch.getIndices();
 		Indices newMatchIndices = newMatch.getIndices();
 		int stopsTraversedCnt=0;
-		while (!indices.pastEndOfBlock() 
+		while (!indices.pastEndOfBlock(avlReport.getTime()) 
 				&& indices.isEarlierStopPathThan(newMatchIndices)) {
-			indices.incrementStopPath();
+			indices.incrementStopPath(avlReport.getTime());
 			++stopsTraversedCnt;
 		}
 		
@@ -303,6 +304,19 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param arrivalDeparture
 	 */
 	protected void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
+		// Don't want to record arrival/departure time for last stop of a no
+		// schedule block/trip since the last stop is also the first stop of
+		// a non-schedule trip. We don't duplicate entries.
+		if (arrivalDeparture.getBlock().isNoSchedule()) {
+			Trip trip =
+					arrivalDeparture.getBlock().getTrip(
+							arrivalDeparture.getTripIndex());
+			// If last stop in trip then don't do anything here
+			if (arrivalDeparture.getStopPathIndex() == 
+					trip.getNumberStopPaths() - 1)
+				return;
+		}
+			
 		// Queue to store object into db
 		Core.getInstance().getDbLogger().add(arrivalDeparture);
 		
@@ -962,7 +976,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// just beyond the stop.
 		VehicleAtStopInfo oldVehicleAtStopInfo = oldMatch.getAtStop();
 		Indices indices = oldVehicleAtStopInfo != null ? 
-				oldVehicleAtStopInfo.clone().incrementStopPath() : 
+				oldVehicleAtStopInfo.clone().incrementStopPath(endTime) : 
 					oldMatch.getIndices();
 		
 		VehicleAtStopInfo newVehicleAtStopInfo = newMatch.getAtStop();				

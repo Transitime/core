@@ -465,14 +465,16 @@ public class TemporalMatcher {
 			// How far as the crow flies to the layover
 			Location tripStartLoc = trip.getStopPath(0).getEndOfPathLocation();
 			double distance = avlReport.getLocation().distance(tripStartLoc);
-			int crowFliesTimeMsec = TravelTimes.travelTimeAsTheCrowFlies(distance);
+			int crowFliesTimeMsec =
+					TravelTimes.travelTimeAsTheCrowFlies(distance);
 			boolean canDeadhead = crowFliesTimeMsec < availableTimeMsec;
-			trip.getBlock().getTripIndex(trip.getId());
+			trip.getBlock().getTripIndex(trip);
 			logger.debug("For vehicleId={} determining if can deadhead to "
 					+ "beginning of tripIndex={} tripId={}. msecsIntoDay={} "
 					+ "tripStartTimeMsecs={} distance={} availableTimeMsec={} "
 					+ "crowFliesTimeMsec={} canDeadhead={}",
-					avlReport.getVehicleId(), trip.getIndex(), trip.getId(),
+					avlReport.getVehicleId(), trip.getIndexInBlock(), 
+					trip.getId(),
 					Time.timeOfDayStr(msecsIntoDay / 1000),
 					Time.timeOfDayStr(tripStartTimeMsecs / 1000),
 					Geo.distanceFormat(distance), availableTimeMsec, 
@@ -484,7 +486,7 @@ public class TemporalMatcher {
 		logger.debug("For vehicleId={} tripIndex={} tripId={} is not in "
 				+ "future so can't deadhead to it. msecsIntoDay={} "
 				+ "tripStartTimeMsecs={}", avlReport.getVehicleId(),
-				trip.getIndex(), trip.getId(),
+				trip.getIndexInBlock(), trip.getId(),
 				Time.timeOfDayStr(msecsIntoDay / 1000),
 				Time.timeOfDayStr(tripStartTimeMsecs / 1000));
 		return false;

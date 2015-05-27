@@ -112,16 +112,31 @@ public class ServiceUtils {
 		// of situation use the most recent Calendars if none are
 		// configured to be active.
 		if (activeCalendarList.size() == 0) {
+			// Use most recent calendar to keep system running
+			long earliestStartTime = Long.MAX_VALUE;
 			for (Calendar calendar : originalCalendarList) {
 				if (calendar.getEndDate().getTime() == maxEndTime) {
 					activeCalendarList.add(calendar);
+					
+					// Determine earliest start time for calendars so can 
+					// determine if should output error message.
+					if (calendar.getStartDate().getTime() < earliestStartTime)
+						earliestStartTime = calendar.getStartDate().getTime();
 				}
 			}
 			
-			// This is a rather serious issue so log it as an error
-			logger.error("All Calendars were expired. Update them!!! So that " +
-					"the system will continue to run the old Calendars will " +
-					"be used: {}", activeCalendarList);
+			// This is a rather serious issue so log it as an error if the start
+			// time is OK, which indicates that the end time was not. The reason
+			// a start time violation is not worth noting is because sometimes
+			// the system looks at service class for previous day so can handle
+			// assignments that span midnight. If the calendar just started
+			// today and looking at yesterday then that is not a notable 
+			// problem.
+			boolean startTimeAProblem = earliestStartTime > epochTime.getTime();
+			if (!startTimeAProblem)
+				logger.error("All Calendars were expired. Update them!!! So " +
+					"that the system will continue to run the old Calendars " +
+					"will be used: {}", activeCalendarList);
 		}
 		
 		// Return the results

@@ -125,7 +125,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		Trip trip = indices.getTrip();
 		int expectedStopTimeMsec =
 				TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
-		
+
 		// If should generate arrival time...
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
@@ -259,8 +259,9 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		// trips should be marked as uncertain given that another vehicle
 		// might substitute in for that block.
 		TemporalDifference lateness = vehicleState.getRealTimeSchedAdh();
-		boolean lateSoMarkSubsequentTripsAsUncertain =
-				lateness.isLaterThan(maxLateCutoffPredsForNextTripsSecs.getValue());
+		boolean lateSoMarkSubsequentTripsAsUncertain = lateness != null ? 
+						lateness.isLaterThan(maxLateCutoffPredsForNextTripsSecs
+								.getValue()) : false;
 		if (lateSoMarkSubsequentTripsAsUncertain)
 			logger.info("Vehicle late so marking predictions for subsequent "
 					+ "trips as being uncertain. {}", vehicleState);
@@ -298,9 +299,17 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 					&& predictionForStop.getTime() > avlTime
 							+ maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC)
 				break;
-			
-			// The prediction is not too far into the future so add it to the list
-			newPredictions.add(predictionForStop);			
+
+			// If no schedule assignment then don't want to generate predictions for the
+			// last stop of the trip since it is a duplicate of the first stop
+			// of the trip
+			boolean lastStopOfNonSchedBasedTrip = 
+					indices.getBlock().isNoSchedule() && indices.atEndOfTrip();
+					
+			// The prediction is not too far into the future so add it to the list,
+			// unless it is last stop of non schedule based trip
+			if (!lastStopOfNonSchedBasedTrip)
+				newPredictions.add(predictionForStop);			
 
 			// Determine prediction time for the departure. For layovers
 			// the prediction time can be adjusted by deadhead time,
@@ -311,10 +320,10 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				predictionTime += indices.getStopTimeForPath();
 			
 			// Increment indices so can generate predictions for next path
-			indices.incrementStopPath();
+			indices.incrementStopPath(predictionTime);
 			
 			// If reached end of block then done
-			if (indices.pastEndOfBlock()) {
+			if (indices.pastEndOfBlock(predictionTime)) {
 				logger.debug("For vehicleId={} reached end of block when " +
 						"generating predictions.", 
 						vehicleState.getVehicleId());

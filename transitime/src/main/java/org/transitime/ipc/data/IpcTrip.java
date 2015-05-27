@@ -48,6 +48,7 @@ public class IpcTrip implements Serializable {
 	private final String blockId;
 	private final String shapeId;
 	
+	private final boolean noSchedule;
 	private final List<IpcSchedTimes> scheduleTimes;
 	private final TravelTimesForTrip travelTimes;
 	
@@ -71,6 +72,7 @@ public class IpcTrip implements Serializable {
 		blockId = dbTrip.getBlockId();
 		shapeId = dbTrip.getShapeId();
 		
+		noSchedule = dbTrip.isNoSchedule();
 		scheduleTimes = new ArrayList<IpcSchedTimes>();
 		for (int i=0; i<dbTrip.getNumberStopPaths(); ++i) {
 			String stopId = dbTrip.getTripPattern().getStopId(i);
@@ -96,6 +98,7 @@ public class IpcTrip implements Serializable {
 				+ ", headsign="	+ headsign 
 				+ ", blockId=" + blockId 
 				+ ", shapeId=" + shapeId
+				+ ", noSchedule=" + noSchedule
 				+ ", scheduleTimes=" + scheduleTimes
 				+ ", travelTimes=" + travelTimes
 				+ "]";
@@ -157,6 +160,10 @@ public class IpcTrip implements Serializable {
 		return shapeId;
 	}
 
+	public boolean isNoSchedule() {
+		return noSchedule;
+	}
+	
 	public List<IpcSchedTimes> getScheduleTimes() {
 		return scheduleTimes;
 	}

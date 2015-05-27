@@ -40,7 +40,6 @@ public class IpcBlock implements Serializable {
 	private final String serviceId;
 	private final int startTime; // In seconds from midnight
 	private final int endTime;   // In seconds from midnight
-	private final int headwaySecs;
 
 	private final List<IpcTrip> trips;
 	private final List<IpcRouteSummary> routeSummaries;
@@ -55,7 +54,6 @@ public class IpcBlock implements Serializable {
 		serviceId = dbBlock.getServiceId();
 		startTime = dbBlock.getStartTime();
 		endTime = dbBlock.getEndTime();
-		headwaySecs = dbBlock.getHeadwaySecs();
 		
 		trips = new ArrayList<IpcTrip>();
 		for (Trip dbTrip : dbBlock.getTrips()) {
@@ -78,7 +76,6 @@ public class IpcBlock implements Serializable {
 				+ ", serviceId=" + serviceId 
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime) 
-				+ ", headwaySecs=" + headwaySecs
 				+ ", trips=" + trips 
 				+ ", routeSummaries=" + routeSummaries
 				+ "]";
@@ -102,10 +99,6 @@ public class IpcBlock implements Serializable {
 
 	public int getEndTime() {
 		return endTime;
-	}
-
-	public int getHeadwaySecs() {
-		return headwaySecs;
 	}
 
 	public List<IpcTrip> getTrips() {

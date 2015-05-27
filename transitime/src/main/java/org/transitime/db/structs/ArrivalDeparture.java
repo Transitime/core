@@ -204,24 +204,27 @@ public class ArrivalDeparture implements Serializable {
 		String stopId = stopPath.getStopId();
 		
 		// Determine the schedule time, which is a bit complicated.
+		// Of course, only do this for schedule based assignments.
 		// The schedule time will only be set if the schedule info was available
 		// from the GTFS data and it is the proper type of arrival or departure 
 		// stop (there is an arrival schedule time and this is the last stop for
 		// a trip and and this is an arrival time OR there is a departure schedule
 		// time and this is not the last stop for a trip and this is a departure 
 		// time.
-		ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
 		Date scheduledEpochTime = null;
-		if (stopPath.isLastStopInTrip() && scheduleTime.getArrivalTime() != null
-				&& isArrival) {
-			long epochTime = Core.getInstance().getTime()
-					.getEpochTime(scheduleTime.getArrivalTime(), time);
-			scheduledEpochTime = new Date(epochTime);
-		} else if (!stopPath.isLastStopInTrip()
-				&& scheduleTime.getDepartureTime() != null && !isArrival) {
-			long epochTime = Core.getInstance().getTime()
-					.getEpochTime(scheduleTime.getDepartureTime(), time);
-			scheduledEpochTime = new Date(epochTime);
+		if (!trip.isNoSchedule()) {
+			ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
+			if (stopPath.isLastStopInTrip() && scheduleTime.getArrivalTime() != null
+					&& isArrival) {
+				long epochTime = Core.getInstance().getTime()
+						.getEpochTime(scheduleTime.getArrivalTime(), time);
+				scheduledEpochTime = new Date(epochTime);
+			} else if (!stopPath.isLastStopInTrip()
+					&& scheduleTime.getDepartureTime() != null && !isArrival) {
+				long epochTime = Core.getInstance().getTime()
+						.getEpochTime(scheduleTime.getDepartureTime(), time);
+				scheduledEpochTime = new Date(epochTime);
+			}
 		}
 		this.scheduledTime = scheduledEpochTime;
 		

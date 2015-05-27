@@ -17,6 +17,9 @@
  */
 package org.transitime.core;
 
+import java.util.Date;
+
+import org.transitime.applications.Core;
 import org.transitime.db.structs.Block;
 
 /**
@@ -71,18 +74,29 @@ public class VehicleAtStopInfo extends Indices {
 	}
 
 	/**
-	 * Returns true if tripIndex, stopPathIndex, and segmentIndex are for the
-	 * very last trip, path, segment for the block assignment. Had to override
-	 * Indices.atEndOfBlock() because this class doesn't use the segment index
-	 * while Indices does.
+	 * For schedule based assignment returns true if tripIndex and stopPathIndex
+	 * are for the very last trip, path, segment for the block assignment. Had
+	 * to override Indices.atEndOfBlock() because this class doesn't use the
+	 * segment index while Indices does.
+	 * <p>
+	 * But for no schedule based assignment then can't just look to see if at
+	 * last stop because since the vehicle will loop it will often be at the
+	 * last stop. Therefore for no schedule assignments this method looks at the
+	 * current time to see if the block is still active.
 	 * 
-	 * @return
+	 * @return true if vehicle at end of block
 	 */
 	@Override
 	public boolean atEndOfBlock() {
-		return getTripIndex() == getBlock().numTrips() - 1
+		Block block = getBlock();
+		if (block.isNoSchedule()) {
+			Date date = Core.getInstance().getSystemDate();
+			return !block.isActive(date);
+		} else {
+		return getTripIndex() == block.numTrips() - 1
 				&& getStopPathIndex() == 
-						getBlock().numStopPaths(getTripIndex()) - 1;
+						block.numStopPaths(getTripIndex()) - 1;
+		}
 	}
 
 }

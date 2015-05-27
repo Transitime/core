@@ -99,16 +99,26 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * of GtfsStopTimes instead of just a List of them.
 	 * 
 	 * @param tripId
-	 * @param stopId
+	 * @param tripPattern
+	 * @param stopPathIndex
 	 * @param gtfsData
 	 * @return
 	 */
-	private ScheduleTime getGtfsScheduleTime(String tripId, String stopId,
-			GtfsData gtfsData) {
-		// Go through list of stops for the tripId
+	private ScheduleTime getGtfsScheduleTime(String tripId,
+			TripPattern tripPattern, int stopPathIndex, GtfsData gtfsData) {
+		String stopId = tripPattern.getStopId(stopPathIndex);
+		
+		// Go through list of stops for the tripId. 
+		// Note: bit tricky handling trips where stop is encountered twice.
+		// But at least can start the for loop at 1 so that don't
+		// look at all the stop times. At least this will properly handle the
+		// situations where the first and last stop for a trip are the same.
 		List<GtfsStopTime> gtfsStopTimesList = 
 				gtfsData.getGtfsStopTimesForTrip(tripId);
-		for (GtfsStopTime gtfsStopTime : gtfsStopTimesList) {
+		for (int stopTimeIdx = stopPathIndex>0 ? 1 : 0; 
+				stopTimeIdx < gtfsStopTimesList.size(); 
+				++stopTimeIdx) {
+			GtfsStopTime gtfsStopTime = gtfsStopTimesList.get(stopTimeIdx);
 			if (gtfsStopTime.getStopId().equals(stopId)) {
 				// Found the stop. 
 				Integer arr = gtfsStopTime.getArrivalTimeSecs();
@@ -163,7 +173,7 @@ public class ScheduleBasedTravelTimesProcessor {
 		// Start at index 1 since the first stub path is a special case
 		int previousStopPathWithScheduleTimeIndex = 0;
 		ScheduleTime previousScheduleTime = getGtfsScheduleTime(trip.getId(), 
-				tripPattern.getStopId(0), gtfsData);
+				tripPattern, 0, gtfsData);
 		int numberOfPaths = trip.getTripPattern().getNumberStopPaths();
 		for (int stopPathIndex = 1; stopPathIndex < numberOfPaths; ++stopPathIndex) {
 			// Determine the schedule time for the stop using the GTFS data directly.
@@ -171,7 +181,7 @@ public class ScheduleBasedTravelTimesProcessor {
 			// be for schedule adherence stops, which could be a small subset of the 
 			// schedule times from the stop_times.txt GTFS file.
 			ScheduleTime scheduleTime = getGtfsScheduleTime(trip.getId(), 
-					tripPattern.getStopId(stopPathIndex), gtfsData);
+					tripPattern, stopPathIndex, gtfsData);
 			if (scheduleTime != null) {
 				// Determine time elapsed between schedule times for
 				// each path between the schedule times
@@ -225,6 +235,7 @@ public class ScheduleBasedTravelTimesProcessor {
 								+ "tripId={} stopPathIndex={} "
 								+ "stopId={} stopName=\"{}\" "
 								+ "distanceBetweenScheduleStops={} "
+								+ "msecForTravelBetweenScheduleTimes={} "
 								+ "reducing stop wait time to {} msec "
 								+ "per stop so that maxSpeedKph={} kph is "
 								+ "not violated.", 
@@ -233,6 +244,7 @@ public class ScheduleBasedTravelTimesProcessor {
 								tripPattern.getStopId(stopPathIndex), 
 								gtfsData.getStop(tripPattern.getStopId(stopPathIndex)).getName(),
 								Geo.distanceFormat(distanceBetweenScheduleStops),
+								msecForTravelBetweenScheduleTimes,
 								msecSpentStopped/numberOfStops, 
 								Geo.oneDigitFormat(maxSpeedKph));
 					} else {
@@ -244,6 +256,7 @@ public class ScheduleBasedTravelTimesProcessor {
 								+ "tripId={} stopPathIndex={} "
 								+ "stopId={} stopName=\"{}\" "
 								+ "distanceBetweenScheduleStops={} " 
+								+ "msecForTravelBetweenScheduleTimes={} "
 								+ "clamping schedule based travel "
 								+ "speed to {} kph for instead of the "
 								+ "calculated speed={} kph", 
@@ -252,6 +265,7 @@ public class ScheduleBasedTravelTimesProcessor {
 								tripPattern.getStopId(stopPathIndex), 
 								gtfsData.getStop(tripPattern.getStopId(stopPathIndex)).getName(),
 								Geo.distanceFormat(distanceBetweenScheduleStops),
+								msecForTravelBetweenScheduleTimes,
 								Geo.oneDigitFormat(maxSpeedKph),								
 								Geo.oneDigitFormat((distanceBetweenScheduleStops / msecForTravelBetweenScheduleTimes)
 										* Time.MS_PER_SEC / Geo.KPH_TO_MPS));

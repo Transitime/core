@@ -766,10 +766,11 @@ public class GtfsData {
 		String previousStopId = null;
 		boolean firstStopInTrip = true;
 		int previousTimeForTrip = 0;			
-		Iterator<GtfsStopTime> iterator = gtfsStopTimesForTrip.iterator();
-		while (iterator.hasNext()) {
+		Iterator<GtfsStopTime> stopTimesIterator =
+				gtfsStopTimesForTrip.iterator();
+		while (stopTimesIterator.hasNext()) {
 			// Get the GtfsStopTime to examine
-			GtfsStopTime gtfsStopTime = iterator.next();
+			GtfsStopTime gtfsStopTime = stopTimesIterator.next();
 			
 			// Convenience variable
 			String tripId = gtfsStopTime.getTripId();
@@ -794,7 +795,7 @@ public class GtfsData {
 								gtfsStop.getDeleteFirstStopFromRoutesStr();
 				if (gtfsStop.shouldDeleteFromRoute(routeShortName,
 						deleteFromRoutesStr)) {
-					iterator.remove();
+					stopTimesIterator.remove();
 					continue;
 				}
 			}
@@ -807,7 +808,7 @@ public class GtfsData {
 						gtfsStopTime.getLineNumber(),
 						gtfsStopTime.getStopId(),
 						gtfsStopTime.getTripId());
-				iterator.remove();
+				stopTimesIterator.remove();
 				continue;
 			}
 			
@@ -820,7 +821,7 @@ public class GtfsData {
 						gtfsStopTime.getStopId(),
 						gtfsStopTime.getTripId(),
 						gtfsStopTime.getLineNumber());
-				iterator.remove();
+				stopTimesIterator.remove();
 				continue;
 			}
 			
@@ -830,11 +831,23 @@ public class GtfsData {
 			// Make sure that first stop has a departure time and the
 			// last one has an arrival time.
 			if (firstStopInTrip && dep == null) {
-				logger.error("First stop in trip {} does not have a departure " 
-						+ "time. The problem is in the stop_times.txt file at line {}.",
-						tripId, getGtfsTrip(tripId).getLineNumber());
+				if (arr == null) {
+					logger.error("First stop in trip {} does not have a "
+							+ "departure time and no arrival time either. "
+							+ "The problem is in the "
+							+ "stop_times.txt file at line {}. ", 
+							tripId, getGtfsTrip(tripId).getLineNumber());					
+				} else {
+					logger.error("First stop in trip {} does not have a "
+							+ "departure time. The problem is in the "
+							+ "stop_times.txt file at line {}. Using arrival "
+							+ "time of {} as the departure time.", 
+							tripId, getGtfsTrip(tripId).getLineNumber(), 
+							Time.timeOfDayStr(arr));
+					dep = arr;
+				}
 			}
-			boolean lastStopInTrip = !iterator.hasNext();
+			boolean lastStopInTrip = !stopTimesIterator.hasNext();
 			if (lastStopInTrip && arr == null) {
 				logger.error("Last stop in trip {} does not have an arrival " 
 						+ "time. The problem is in the stop_times.txt file at line {}.",
@@ -1037,6 +1050,233 @@ public class GtfsData {
 	}
 	
 	/**
+	 * For the trip being created go through all the stop times from the
+	 * stop_times.txt GTFS file and determine all the stop paths for the trip.
+	 * Also update the trip patterns map when a new trip pattern encountered.
+	 * 
+	 * @param trip
+	 *            The trip being created
+	 * @return List of ScheduleTime objects for the trip
+	 */
+	private List<ScheduleTime> getScheduleTimesForTrip(Trip trip) {
+		// Make sure necessary data already read in
+		if (gtfsStopTimesForTripMap == null || gtfsStopTimesForTripMap.isEmpty()) {
+			logger.error("gtfsStopTimesForTripMap not filled in before " + 
+					"GtfsData.getScheduleTimesForTrip() was. Exiting.");
+			System.exit(-1);
+		}
+		if (gtfsRoutesMap == null) {
+			logger.error("gtfsRoutesMap not filled in before " + 
+					"GtfsData.getScheduleTimesForTrip() was. Exiting.");
+			System.exit(-1);			
+		}
+		
+		// Create list of Paths for creating trip pattern
+		List<StopPath> paths = new ArrayList<StopPath>();
+		
+		// Create set of path IDs for this trip so can tell if looping 
+		// back on path such that need to create a unique path ID
+		Set<String> pathIdsForTrip = new HashSet<String>();
+		
+		// Determine the gtfs stop times for this trip
+		List<GtfsStopTime> gtfsStopTimesForTrip = 
+				gtfsStopTimesForTripMap.get(trip.getId());
+
+		// For each stop time for the trip...
+		List<ScheduleTime> newScheduleTimesList = 
+				new ArrayList<ScheduleTime>();
+		String previousStopId = null;			
+		for (int i=0; i<gtfsStopTimesForTrip.size(); ++i) {
+			// The current gtfsStopTime
+			GtfsStopTime gtfsStopTime = gtfsStopTimesForTrip.get(i);
+			
+			// Convenience variables
+			Integer arrTime = gtfsStopTime.getArrivalTimeSecs();
+			Integer depTime = gtfsStopTime.getDepartureTimeSecs();
+			boolean firstStopInTrip = i==0;
+			boolean lastStopInTrip =  i==gtfsStopTimesForTrip.size()-1;
+			String stopId = gtfsStopTime.getStopId();
+			
+			// Add the schedule time to the Trip object. Some agencies configure the
+			// same arrival and departure time for every stop. That is just silly
+			// and overly verbose. If the times are the same should just use
+			// departure time, except for last stop for trip where should use 
+			// arrival time.
+			Integer filteredArr = arrTime;
+			Integer filteredDep = depTime;
+			if (arrTime != null && depTime != null && arrTime.equals(depTime)) {
+				if (lastStopInTrip)
+					filteredDep = null;
+				else
+					filteredArr = null;
+			}
+			ScheduleTime scheduleTime = new ScheduleTime(filteredArr, filteredDep);
+			newScheduleTimesList.add(scheduleTime);
+			
+			// Create StopPath so it can be used to create TripPattern. 
+			// First determine attributes layoverStop, 
+			// waitStop, and scheduleAdherenceStop. They are true 
+			// if there is a departure time and they are configured or 
+			// are first stop in trip.
+			Stop stop = getStop(stopId);
+
+			// Determine if layover stop. If trip doesn't have schedule then
+			// it definitely can't be a layover.
+			boolean layoverStop = false;
+			if (depTime != null && !trip.isNoSchedule()) {
+				if (stop.isLayoverStop() == null) {
+					layoverStop = firstStopInTrip;
+				} else {
+					layoverStop = stop.isLayoverStop();
+				}
+			}
+				
+			// Determine if it is a waitStop. If trip doesn't have schedule then
+			// it definitely can't be a waitStop.
+			boolean waitStop = false;
+			if (depTime != null && !trip.isNoSchedule()) {
+				if (stop.isWaitStop() == null) {
+					waitStop = firstStopInTrip;
+				} else {
+					waitStop = stop.isWaitStop();
+				}
+			}
+			
+			// This one is a bit complicated. Should be a scheduleAdherenceStop
+			// if there is an associated time and it is configured to be such.
+			// But should also be true if there is associated time and it is
+			// first or last stop of the trip.
+			boolean scheduleAdherenceStop = 
+					(depTime != null  
+						&& (firstStopInTrip 
+								|| gtfsStopTime.isTimepointStop() 
+								|| stop.isTimepointStop())) 
+					|| (arrTime != null && lastStopInTrip);
+			
+			// Determine the pathId. Make sure that use a unique path ID by
+			// appending "_loop" if looping over the same stops
+			String pathId = StopPath.determinePathId(previousStopId, stopId);
+			while (pathIdsForTrip.contains(pathId))
+				pathId += "_loop";
+			pathIdsForTrip.add(pathId);
+			
+			// Determine the GtfsRoute so that can get break time
+			GtfsRoute gtfsRoute = gtfsRoutesMap.get(trip.getRouteId());
+			
+			// Create the new StopPath and add it to the list
+			// for this trip.
+			StopPath path = new StopPath(revs.getConfigRev(), pathId,
+					stopId, gtfsStopTime.getStopSequence(), lastStopInTrip,
+					trip.getRouteId(), layoverStop, waitStop,
+					scheduleAdherenceStop, gtfsRoute.getBreakTime());
+			paths.add(path);
+			
+			previousStopId = stopId;
+		} // End of for each stop_time for trip
+		
+		// Now that have Paths defined for the trip, if need to, 
+		// also create new trip pattern
+		updateTripPatterns(trip, paths);			
+
+		return newScheduleTimesList;
+	}
+	
+	/**
+	 * For when encountering a new trip. Creates the trip.
+	 * 
+	 * @param tripId
+	 * @return The new trip, or null if there is a problem with this trip and
+	 *         should skip it.
+	 */
+	private Trip createNewTrip(String tripId) {		
+		// Determine the GtfsTrip for the ID so can be used
+		// to construct the Trip object.
+		GtfsTrip gtfsTrip = getGtfsTrip(tripId);
+		
+		// If resulting gtfsTrip is null because it wasn't defined in
+		// trips.txt then need to log this problem (and log this only 
+		// once) and continue
+		if (gtfsTrip == null) {
+			logger.warn("Encountered trip_id={} in the " +
+					"stop_times.txt file but that trip_id is not in " +
+					"the trips.txt file or the service ID for the " +
+					"trip is not valid in anytime in the future. " + 
+					"Therefore this trip cannot be configured and " +
+					"has been discarded.",
+					tripId);
+			
+			// Can't deal with this trip Id so skip to next trip ID
+			return null;
+		}
+		
+		// If the service ID for the trip is not valid in the future 
+		// then don't need to process this Trip				
+		if (!validServiceIds.contains(gtfsTrip.getServiceId())) {
+			// ServiceUtils ID not valid for this trip so log warning message
+			// and continue on to next trip ID
+			logger.warn("For tripId={} and serviceId={} the " +
+					"service is not valid in the future so the trip " +
+					"is being filtered out.", 
+					gtfsTrip.getTripId(), gtfsTrip.getServiceId());
+			return null;
+		}
+
+		// If this route is actually a sub-route of a parent then use
+		// the parent ID.
+		String properRouteId = 
+				getProperIdOfRoute(gtfsTrip.getRouteId());
+		
+		// Create the Trip and store the stop times into associated map
+		GtfsRoute gtfsRoute = gtfsRoutesMap.get(gtfsTrip.getRouteId());
+		String routeShortName = gtfsRoute.getRouteShortName();
+		Trip trip =
+				new Trip(revs.getConfigRev(), gtfsTrip, properRouteId,
+						routeShortName, titleFormatter);
+		return trip;
+	}
+	
+	/**
+	 * Returns true if the trip specified in frequency.txt GTFS file as being
+	 * frequency based with an exact schedule. This means that need several
+	 * copies of the trip, one for each start time.
+	 * 
+	 * @param tripId
+	 * @return tTrue if specified trip is frequency based with exact_time set to
+	 *         true
+	 */
+	private boolean isTripFrequencyBasedWithExactTimes(String tripId) {
+		// Get list of frequencies associated with trip ID
+		List<Frequency> frequencyList = getFrequencyList(tripId);
+		
+		// If first frequency is specified for "exact times" in GTFS then
+		// return true.
+		return frequencyList != null 
+				&& frequencyList.size() > 0
+				&& frequencyList.get(0).getExactTimes();
+	}
+
+	/**
+	 * Returns true if the trip specified is frequency.txt GTFS file as being
+	 * frequency based without an exact schedule. This means the trip doesn't
+	 * describe a schedule (it is noSchedule). Instead, the vehicles are
+	 * supposed to run in a loop at roughly the specified headway.
+	 * 
+	 * @param tripId
+	 * @return true if specified trip is frequency based but with exact_time set
+	 *         to false
+	 */
+	private boolean isTripFrequencyBasedWithoutExactTimes(String tripId) {
+		// Get list of frequencies associated with trip ID
+		List<Frequency> frequencyList = getFrequencyList(tripId);
+		
+		// If first frequency is specified for "exact times" in GTFS then
+		// return true.
+		return frequencyList != null 
+				&& frequencyList.size() > 0
+				&& !frequencyList.get(0).getExactTimes();
+	}
+
+	/**
 	 * 
 	 * @param gtfsStopTimesForTripMap
 	 *            Keyed by tripId. List of GtfsStopTimes for the tripId.
@@ -1065,241 +1305,69 @@ public class GtfsData {
 			System.exit(-1);
 		}
 
-		// Create the necessary collections for trips
+		// Create the necessary collections for trips. These collections are
+		// populated in the other methods that are called by this method.
+		tripsCollection = new ArrayList<Trip>();
 		tripPatternMap = new HashMap<TripPatternKey, TripPattern>();
 		tripPatternsByTripIdMap = new HashMap<String, TripPattern>();
 		tripPatternsByRouteIdMap = new HashMap<String, List<TripPattern>>();
 		tripPatternIdSet = new HashSet<String>();
-		
-		// Create the Paths lookup table
 		pathsMap = new HashMap<String, StopPath>();
-		
-		// Create the map where the trip info is going to be stored
-		Map<String, Trip> tripsInStopTimesFileMap = new HashMap<String, Trip>();
 		
 		// For each trip in the stop_times.txt file ...
 		for (String tripId : gtfsStopTimesForTripMap.keySet()) {
-			// Determine the gtfs stop times for this trip
-			List<GtfsStopTime> gtfsStopTimesForTrip = 
-					gtfsStopTimesForTripMap.get(tripId);
-
-			// Create list of Paths for creating trip pattern
-			List<StopPath> paths = new ArrayList<StopPath>();
+			// Create a Trip element for the trip ID. 
+			Trip trip = createNewTrip(tripId);
 			
-			// Create set of path IDs for this trip so can tell if looping 
-			// back on path such that need to create a unique path ID
-			Set<String> pathIdsForTrip = new HashSet<String>();
-			
-			// Determine the Trip element for the trip ID. Create new one if 
-			// need to.
-			Trip trip = tripsInStopTimesFileMap.get(tripId);
-			if (trip == null) {
-				// Determine the GtfsTrip for the ID so can be used
-				// to construct the Trip object.
-				GtfsTrip gtfsTrip = getGtfsTrip(tripId);
-				
-				// If resulting gtfsTrip is null because it wasn't defined in
-				// trips.txt then need to log this problem (and log this only 
-				// once) and continue
-				if (gtfsTrip == null) {
-					logger.warn("Encountered trip_id={} in the " +
-							"stop_times.txt file but that trip_id is not in " +
-							"the trips.txt file or the service ID for the " +
-							"trip is not valid in anytime in the future. " + 
-							"Therefore this trip cannot be configured and " +
-							"has been discarded.",
-							tripId);
-					
-					// Can't deal with this trip Id so skip to next trip ID
-					continue;
-				}
-				
-				// If the service ID for the trip is not valid in the future 
-				// then don't need to process this Trip				
-				if (!validServiceIds.contains(gtfsTrip.getServiceId())) {
-					// ServiceUtils ID not valid for this trip so log warning message
-					// and continue on to next trip ID
-					logger.warn("For tripId={} and serviceId={} the " +
-							"service is not valid in the future so the trip " +
-							"is being filtered out.", 
-							gtfsTrip.getTripId(), gtfsTrip.getServiceId());
-					continue;
-				}
-
-				// If this route is actually a sub-route of a parent then use
-				// the parent ID.
-				String properRouteId = 
-						getProperIdOfRoute(gtfsTrip.getRouteId());
-				
-				// Create the Trip and store the stop times into associated map
-				GtfsRoute gtfsRoute = gtfsRoutesMap.get(gtfsTrip.getRouteId());
-				String routeShortName = gtfsRoute.getRouteShortName();
-				trip = new Trip(revs.getConfigRev(), gtfsTrip, properRouteId,
-						routeShortName, titleFormatter);
-				tripsInStopTimesFileMap.put(tripId, trip);
-			}
-			
-			// For each stop time for the trip...
-			List<ScheduleTime> newScheduleTimesList = 
-					new ArrayList<ScheduleTime>();
-			String previousStopId = null;			
-			for (int i=0; i<gtfsStopTimesForTrip.size(); ++i) {
-				// The current gtfsStopTime
-				GtfsStopTime gtfsStopTime = gtfsStopTimesForTrip.get(i);
-				
-				// Convenience variables
-				Integer arrTime = gtfsStopTime.getArrivalTimeSecs();
-				Integer depTime = gtfsStopTime.getDepartureTimeSecs();
-				boolean firstStopInTrip = i==0;
-				boolean lastStopInTrip =  i==gtfsStopTimesForTrip.size()-1;
-				String stopId = gtfsStopTime.getStopId();
-				
-				// Add the schedule time to the Trip object. Some agencies configure the
-				// same arrival and departure time for every stop. That is just silly
-				// and overly verbose. If the times are the same should just use
-				// departure time, except for last stop for trip where should use 
-				// arrival time.
-				Integer filteredArr = arrTime;
-				Integer filteredDep = depTime;
-				if (arrTime != null && depTime != null && arrTime.equals(depTime)) {
-					if (lastStopInTrip)
-						filteredDep = null;
-					else
-						filteredArr = null;
-				}
-				ScheduleTime scheduleTime = new ScheduleTime(filteredArr, filteredDep);
-				newScheduleTimesList.add(scheduleTime);
-				
-				// Create StopPath so it can be used to create TripPattern. 
-				// First determine attributes layoverStop, 
-				// waitStop, and scheduleAdherenceStop. They are true 
-				// if there is a departure time and they are configured or 
-				// are first stop in trip.
-				Stop stop = getStop(stopId);
-
-				// Determine if layover stop
-				boolean layoverStop = false;
-				if (depTime != null) {
-					if (stop.isLayoverStop() == null) {
-						layoverStop = firstStopInTrip;
-					} else {
-						layoverStop = stop.isLayoverStop();
-					}
-				}
-					
-				// Determine if it is a waitStop
-				boolean waitStop = false;
-				if (depTime != null) {
-					if (stop.isWaitStop() == null) {
-						waitStop = firstStopInTrip;
-					} else {
-						waitStop = stop.isWaitStop();
-					}
-				}
-				
-				// This one is a bit complicated. Should be a scheduleAdherenceStop
-				// if there is an associated time and it is configured to be such.
-				// But should also be true if there is associated time and it is
-				// first or last stop of the trip.
-				boolean scheduleAdherenceStop = 
-						(depTime != null  
-							&& (firstStopInTrip 
-									|| gtfsStopTime.isTimepointStop() 
-									|| stop.isTimepointStop())) 
-						|| (arrTime != null && lastStopInTrip);
-				
-				// Determine the pathId. Make sure that use a unique path ID by
-				// appending "_loop" if looping over the same stops
-				String pathId = StopPath.determinePathId(previousStopId, stopId);
-				while (pathIdsForTrip.contains(pathId))
-					pathId += "_loop";
-				pathIdsForTrip.add(pathId);
-				
-				// Determine the GtfsRoute so that can get break time
-				GtfsRoute gtfsRoute = gtfsRoutesMap.get(trip.getRouteId());
-				
-				// Create the new StopPath and add it to the list
-				// for this trip.
-				StopPath path = new StopPath(revs.getConfigRev(), pathId,
-						stopId, gtfsStopTime.getStopSequence(), lastStopInTrip,
-						trip.getRouteId(), layoverStop, waitStop,
-						scheduleAdherenceStop, gtfsRoute.getBreakTime());
-				paths.add(path);
-				
-				previousStopId = stopId;
-			} // End of for each stop_time for trip
-					
-			// Now that all the schedule times have been added to the map, add 
-			// them all at once to the Trip. 
-			trip.addScheduleTimes(newScheduleTimesList);
-			
-			// Now that have Paths defined for the trip, if need to, 
-			// also create new trip pattern
-			updateTripPatterns(trip, paths);			
-		}  // End of for each trip ID
-		
-		// Now that have the tripsInStopTimesFileMap need to create
-		// collection of all trips if headways are defined in the
-		// frequencies.txt file.
-		createTripsCollection(tripsInStopTimesFileMap);
-	}
-	
-	/**
-	 * Returns whether the trip specified is frequency based with an exact
-	 * schedule. This means that won't have block assignments made out of
-	 * multiple trips because there won't be a real concept of multiple trips
-	 * for a block for a vehicle.
-	 * 
-	 * @param tripId
-	 * @return True if specified trip is frequency based with an exact time
-	 */
-	public boolean isTripFrequencyBased(String tripId) {
-		// Get list of frequencies associated with trip ID
-		List<Frequency> frequencyList = getFrequencyList(tripId);
-		
-		// If first frequency is specified for "exact times" in GTFS then
-		// return true.
-		return frequencyList != null 
-				&& frequencyList.size() > 0
-				&& frequencyList.get(0).getExactTimes();
-	}
-
-	/**
-	 * Now that have the tripsInStopTimesFileMap need to create collection of
-	 * all trips if headways are defined in frequencyMap from the
-	 * frequencies.txt file. Creates and fills in tripsCollection.
-	 * 
-	 * @param tripsInStopTimesFileMap
-	 */
-	private void createTripsCollection(Map<String, Trip> tripsInStopTimesFileMap) {
-		tripsCollection = new ArrayList<Trip>();
-		for (Trip tripFromStopTimes : tripsInStopTimesFileMap.values()) {
-			// Handle depending on whether a regular Trip or one defined
-			// in the frequencies.txt file.
-			String tripId = tripFromStopTimes.getId();
-			if (!isTripFrequencyBased(tripId)) {
-				// This is an actual Trip that is not affected by the
-				// frequencies.txt data. Therefore simply add it to
-				// the collection.
-				tripsCollection.add(tripFromStopTimes);
-			} else {
-				// For this trip ID there is an entry in the frequencies.txt
+			// All the schedule times are available in gtfsStopTimesForTripMap 
+			// so add them all at once to the Trip. This also sets the startTime 
+			// and endTime for the trip. This is done after the Trip is already
+			// created since it deals with a few things including schedule
+			// times list, trip patterns, paths, etc and so it is much simpler
+			// to have getScheduleTimesForTrip() update an already existing 
+			// Trip object.
+			List<ScheduleTime> scheduleTimesList = getScheduleTimesForTrip(trip);
+			trip.addScheduleTimes(scheduleTimesList); 
+						
+			if (isTripFrequencyBasedWithExactTimes(tripId)) {
+				// This is special case where for this trip ID 
+				// there is an entry in the frequencies.txt
 				// file with exact_times set indicating that need to create
 				// a separate Trip for each actual trip.  
-				List<Frequency> frequencyListForTripId = frequencyMap.get(tripId);
+				List<Frequency> frequencyListForTripId =
+						frequencyMap.get(tripId);
 				for (Frequency frequency : frequencyListForTripId) {
 					for (int tripStartTime = frequency.getStartTime(); 
 							tripStartTime < frequency.getEndTime();
 							tripStartTime += frequency.getHeadwaySecs()) {
 						Trip frequencyBasedTrip = 
-								new Trip(tripFromStopTimes,	tripStartTime);
+								new Trip(trip,	tripStartTime);
 						tripsCollection.add(frequencyBasedTrip);
 					}
 				}
+			} else if (isTripFrequencyBasedWithoutExactTimes(tripId)) {
+				// This is a trip defined in the GTFS frequency.txt file
+				// to not be schedule based (not have exact_times set). 
+				// Need to create a trip for each time range defined for
+				// the trip in frequency.txt .
+				List<Frequency> frequencyListForTripId =
+						frequencyMap.get(tripId);
+				for (Frequency frequency : frequencyListForTripId) {
+					Trip frequencyBasedTrip =
+							new Trip(trip, frequency.getStartTime(),
+									frequency.getEndTime());
+					tripsCollection.add(frequencyBasedTrip);
+				}
+			} else {
+				// This is the normal case, an actual Trip that is not affected 
+				// by exact times in frequencies.txt data. Therefore simply add 
+				// it to the collection. It still might be a trip with no 
+				// schedule, but it isn't one with exact times.
+				tripsCollection.add(trip);
 			}
-		}
+		}  // End of for each trip ID
 	}
-	
+		
 	/**
 	 * This method is called for each trip. Determines if the corresponding trip
 	 * pattern is already in tripPatternMap. If it is then it updates the trip
@@ -1400,7 +1468,8 @@ public class GtfsData {
 		frequencyMap = new HashMap<String, List<Frequency>>();
 
 		// Read in the frequencies.txt GTFS data from file
-		GtfsFrequenciesReader frequenciesReader = new GtfsFrequenciesReader(gtfsDirectoryName);
+		GtfsFrequenciesReader frequenciesReader =
+				new GtfsFrequenciesReader(gtfsDirectoryName);
 		List<GtfsFrequency> gtfsFrequencies = frequenciesReader.get();
 		
 		for (GtfsFrequency gtfsFrequency : gtfsFrequencies) {
@@ -1419,11 +1488,11 @@ public class GtfsData {
 			// Create the Frequency object and put it into the frequenctMap
 			Frequency frequency = new Frequency(revs.getConfigRev(),
 					gtfsFrequency);
-			String key = frequency.getTripId();
-			List<Frequency> frequenciesForTripId = frequencyMap.get(key);
+			String tripId = frequency.getTripId();
+			List<Frequency> frequenciesForTripId = frequencyMap.get(tripId);
 			if (frequenciesForTripId == null) {
 				frequenciesForTripId = new ArrayList<Frequency>();
-				frequencyMap.put(key, frequenciesForTripId);
+				frequencyMap.put(tripId, frequenciesForTripId);
 			}
 			frequenciesForTripId.add(frequency);
 		}		
@@ -1993,6 +2062,21 @@ public class GtfsData {
 	
 	public List<Agency> getAgencies() {
 		return agencies;
+	}
+	
+	/**
+	 * Returns true if according to frequency.txt GTFS file that specified trip
+	 * is frequencies based and doesn't have exact_times set. Note that if
+	 * exact_times is set then a schedule is used. It is just that the schedule
+	 * is based on the frequencies and start time of trip.
+	 * 
+	 * @param tripId
+	 * @return true if frequency based trip
+	 */
+	public boolean isTripFrequencyBased(String tripId) {
+		List<Frequency> frequencyListForTrip = getFrequencyList(tripId);
+		return frequencyListForTrip != null
+				&& !frequencyListForTrip.get(0).getExactTimes();
 	}
 	
 	/**

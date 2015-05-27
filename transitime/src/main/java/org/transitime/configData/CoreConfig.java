@@ -696,7 +696,7 @@ public class CoreConfig {
 	private static StringConfigValue pidFileDirectory =
 			new StringConfigValue(
 					"transitime.core.pidDirectory", 
-					"C:/Users/Michael/pids/",
+					"/home/ec2-user/pids/",
 					"Directory where pid file should be written. The pid file "
 					+ "can be used by monit to make sure that core process is "
 					+ "always running.");

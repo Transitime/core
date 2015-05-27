@@ -386,16 +386,20 @@ public class TravelTimes {
 		Indices endIndices = match2.getIndices();
 
 		// If the indices are not increasing then can simply return a travel 
-		// time of 0msec. This shouldn't happen so log an error.
-		if (!indices.lessThan(endIndices)) {
-			if (!indices.equals(endIndices)
-					|| match1.getDistanceAlongSegment() > 
-						match2.getDistanceAlongSegment()) {
-				logger.error("For vehicleId={} match1AfterStop is after " +
-						"match2BeforeStop so returning travel time of 0. " +
-						"match1AfterStop={}, match2BeforeStop={}",
-						vehicleId, match1, match2);
-				return 0;
+		// time of 0msec. This shouldn't happen so log an error. But only 
+		// investigate if a schedule based assignment since for non schedule
+		// based ones the trip loops back and so you can have match2 < match1.
+		if (!match2.block.isNoSchedule()) {
+			if (!indices.lessThan(endIndices)) {
+				if (!indices.equals(endIndices)
+						|| match1.getDistanceAlongSegment() > 
+							match2.getDistanceAlongSegment()) {
+					logger.error("For vehicleId={} match1AfterStop is after " +
+							"match2BeforeStop so returning travel time of 0. " +
+							"match1AfterStop={}, match2BeforeStop={}",
+							vehicleId, match1, match2);
+					return 0;
+				}
 			}
 		}
 		
@@ -410,7 +414,8 @@ public class TravelTimes {
 		// For special case where both matches are on the same stop path 
 		// need to subtract out the travel time for the travel time 
 		// stop path since adding the begin time and end time together. This 
-		// is a bit odd but draw it out to understand what is going on.
+		// is a bit odd but try drawing it out on piece of paper to understand
+		// what is going on.
 		if (indices.equalStopPath(endIndices)) {
 			int pathTravelTime = expectedTravelTimeForStopPath(indices);
 			travelTimeMsec -= pathTravelTime; 
@@ -438,35 +443,53 @@ public class TravelTimes {
 					travelTimeMsec, indices);
 		}
 		
-		// Already dealt with first partial stop path so increment indices
-		indices.incrementStopPath();
+		// Already dealt with first partial stop path so increment indices and 
+		// get all the travel times for intermediate paths. But
+		// don't do this for schedule based assignments where match2 is after
+		// match1 but on the same stop path. This is important since using 
+		// isEarlierStopPathThan() in the following while loop and it has to
+		// deal with no schedule assignments in special way where can only see
+		// if the indices are different, not one less than the other, since no
+		// schedule assignments loop back on themselves. Yes, this is way too
+		// complicated!
+		boolean specialNoSchedCase = indices.getBlock().isNoSchedule() 
+				&& indices.getStopPathIndex() == endIndices.getStopPathIndex()
+				&& match1.getDistanceAlongStopPath() < match2.getDistanceAlongStopPath();
+			
+		if (!specialNoSchedCase) {
+			// Already dealt with first partial stop path so increment indices and 
+			// get all the travel times for intermediate paths. 
+			indices.incrementStopPath(timeOfDaySecs);
 		
-		// For all segments between the begin and end ones...
-		while (indices.isEarlierStopPathThan(endIndices)) {
-			int stopPathTravelTime = expectedTravelTimeForStopPath(indices);
-			travelTimeMsec += stopPathTravelTime;
-			logger.debug("For vehicleId={} adding stop path travel time={} " +
-					"msec so travel time now is {} for {}", 
-					vehicleId, stopPathTravelTime, travelTimeMsec, indices);
+			// For all stop paths between the begin and end ones...
+			while (indices.isEarlierStopPathThan(endIndices)) {
+				// Add the travel time
+				int stopPathTravelTime = expectedTravelTimeForStopPath(indices);
+				travelTimeMsec += stopPathTravelTime;
+				logger.debug("For vehicleId={} adding stop path travel time={} "
+								+ "msec so travel time now is {} for {}",
+						vehicleId, stopPathTravelTime, travelTimeMsec, indices);
 
-			int stopTimeMsec = indices.getStopTimeForPath();
-			travelTimeMsec += stopTimeMsec;
-			logger.debug("For vehicleId={} adding stop time={} msec so " +
-					"travel time now is {} msec for {}",
-					vehicleId, stopTimeMsec, travelTimeMsec, indices);
-			
-			// TODO make sure this is tested 
-			// If layover then take that into account. For such a case the 
-			// travel time will then be the scheduled departure time minus 
-			// the start time.
-			if (indices.isWaitStop()) {
-				travelTimeMsec = 
-						adjustTravelTimeForWaitStop(timeOfDaySecs, 
-								travelTimeMsec, indices);
+				// Add the stop time
+				int stopTimeMsec = indices.getStopTimeForPath();
+				travelTimeMsec += stopTimeMsec;
+				logger.debug("For vehicleId={} adding stop time={} msec so "
+						+ "travel time now is {} msec for {}", vehicleId,
+						stopTimeMsec, travelTimeMsec, indices);
+
+				// TODO make sure this is tested
+				// If layover then take that into account. For such a case the
+				// travel time will then be the scheduled departure time minus
+				// the start time.
+				if (indices.isWaitStop()) {
+					travelTimeMsec =
+							adjustTravelTimeForWaitStop(timeOfDaySecs,
+									travelTimeMsec, indices);
+				}
+
+				// Increment for next time through while loop
+				indices.incrementStopPath(timeOfDaySecs);
 			}
-			
-			// Increment for next time through while loop
-			indices.incrementStopPath();
 		}
 		
 		// Add travel time for last partial segment

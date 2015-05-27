@@ -81,7 +81,8 @@ public class IpcPrediction implements Serializable {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructs a Prediction object. For use on server side.
+	 * Constructs a Prediction object. For use on server side. Also logs each
+	 * prediction in the prediction log file (if logback so enabled).
 	 * 
 	 * @param avlReport
 	 * @param stopId
@@ -129,7 +130,7 @@ public class IpcPrediction implements Serializable {
 				lateAndSubsequentTripSoMarkAsUncertain;
 		this.isArrival = isArrival;
 
-		// Debug log each creation of a Prediction
+		// Log each creation of a Prediction
 		logger.info("Creating {}", this);
 	}
 

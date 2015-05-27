@@ -694,7 +694,8 @@ public class VehicleState {
 	 * running a non-schedule based assignment).
 	 * 
 	 * @return The TemporalDifference representing schedule adherence, or null
-	 *         if vehicle not currently predictable.
+	 *         if vehicle not currently predictable or the assignment doesn't
+	 *         have a schedule
 	 */
 	public TemporalDifference getRealTimeSchedAdh() {
 		if (isPredictable())

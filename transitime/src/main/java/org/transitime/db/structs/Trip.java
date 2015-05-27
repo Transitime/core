@@ -67,7 +67,7 @@ public class Trip implements Serializable {
 	// The startTime needs to be an Id column because GTFS frequencies.txt
 	// file can be used to define multiple trips with the same trip ID. 
 	// It is in number of seconds into the day.
-	// Not final because only used for frequency based trips.
+	// Not declared as final because only used for frequency based trips.
 	@Column
 	@Id 
 	private Integer startTime;
@@ -126,6 +126,17 @@ public class Trip implements Serializable {
 	private final ArrayList<ScheduleTime> scheduledTimesList = 
 			new ArrayList<ScheduleTime>(); 
 	
+	// For non-scheduled blocks where vehicle runs a trip as a continuous loop 
+	@Column
+	private final boolean noSchedule; 
+
+	// For when times are determined via the GTFS frequency.txt file and
+	// exact_times for the trip is set to true. Indicates that the schedule
+	// times were determined using the trip frequency and start_time.
+	@Column
+	private final boolean exactTimesHeadway;
+	
+	// Service ID for the trip
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String serviceId;
 	
@@ -160,6 +171,9 @@ public class Trip implements Serializable {
 
 	/**
 	 * Constructs Trip object from GTFS data.
+	 * <p>
+	 * Does not set startTime nor endTime. Those are set separately using
+	 * addScheduleTimes().
 	 * 
 	 * @param configRev
 	 * @param gtfsTrip
@@ -194,6 +208,10 @@ public class Trip implements Serializable {
 		}
 		this.blockId = theBlockId;
 		this.shapeId = gtfsTrip.getShapeId();
+		this.noSchedule = false;
+
+		// Not a frequency based trip with an exact time so remember such
+		this.exactTimesHeadway = false;
 	}
 	
 	/**
@@ -244,6 +262,53 @@ public class Trip implements Serializable {
 					new ScheduleTime(arrivalTime, departureTime); 
 			this.scheduledTimesList.add(schedTimeFromFrequency);
 		}
+		
+		// Since this constructor is only for frequency based trips where
+		// exact_times is true set the corresponding members to indicate such
+		this.noSchedule = false;
+		this.exactTimesHeadway = true;		
+	}
+	
+	/**
+	 * Creates a copy of the Trip object but adjusts the startTime, endTime, and
+	 * scheduledTimesMap according to the frequenciesBasedStartTime. This is
+	 * used when the frequencies.txt specifies a time range for a trip but where
+	 * exact_times is false. This is for noSchedule routes where vehicle is
+	 * expected to continuously run on a route without a schedule.
+	 * 
+	 * @param tripFromStopTimes
+	 * @param frequenciesBasedStartTime
+	 * @param frequenciesBasedEndTime
+	 */
+	public Trip(Trip tripFromStopTimes, int frequenciesBasedStartTime,
+			int frequenciesBasedEndTime) {
+		this.configRev = tripFromStopTimes.configRev;
+		this.tripId = tripFromStopTimes.tripId;
+		this.tripShortName = tripFromStopTimes.tripShortName;
+		this.directionId = tripFromStopTimes.directionId;
+		this.routeId = tripFromStopTimes.routeId;
+		this.routeShortName = tripFromStopTimes.routeShortName;
+		this.serviceId = tripFromStopTimes.serviceId;
+		this.headsign = tripFromStopTimes.headsign;
+		this.shapeId = tripFromStopTimes.shapeId;
+		this.tripPattern = tripFromStopTimes.tripPattern;
+		this.travelTimes = tripFromStopTimes.travelTimes;
+		this.blockId = tripFromStopTimes.blockId;
+		
+		// Set the updated start and end times by using the times from the
+		// frequency.txt GTFS file
+		this.startTime = frequenciesBasedStartTime;
+		this.endTime = frequenciesBasedEndTime;
+		
+		// Set the scheduledTimesMap by using the frequencies based start time
+		for (ScheduleTime schedTimeFromStopTimes : tripFromStopTimes.scheduledTimesList) {
+			this.scheduledTimesList.add(schedTimeFromStopTimes);
+		}
+		
+		// Since this constructor is only for frequency based trips where
+		// exact_times is false set the corresponding members to indicate such
+		this.noSchedule = true;
+		this.exactTimesHeadway = false;		
 	}
 	
 	/**
@@ -261,6 +326,8 @@ public class Trip implements Serializable {
 		headsign = null;
 		blockId = null;
 		shapeId = null;
+		noSchedule = false;
+		exactTimesHeadway = false;
 	}
 
 	/**
@@ -465,13 +532,15 @@ public class Trip implements Serializable {
 				+ ", tripShortName=" + tripShortName
 				+ ", tripPatternId=" 
 					+ (tripPattern != null ? tripPattern.getId() : "null")
-				+ ", tripIndex=" + getIndex()
+				+ ", tripIndexInBlock=" + getIndexInBlock()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
-				+ ", name=\"" + headsign + "\""
+				+ (headsign != null ? ", headsign=\"" + headsign + "\"" : "")
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
 				+ ", routeShortName=" + routeShortName
+				+ (noSchedule ? ", noSchedule=" + noSchedule : "")
+				+ (exactTimesHeadway ? ", exactTimesHeadway=" + exactTimesHeadway : "")
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
@@ -492,13 +561,15 @@ public class Trip implements Serializable {
 				+ ", tripPatternId=" 
 					+ (tripPattern != null ? tripPattern.getId() : "null")
 				+ ", tripPattern=" + tripPattern
-				+ ", tripIndex=" + getIndex()
+				+ ", tripIndexInBlock=" + getIndexInBlock()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
-				+ ", name=\"" + headsign + "\""
+				+ (headsign != null ? ", headsign=\"" + headsign + "\"" : "")
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
 				+ ", routeShortName=" + routeShortName
+				+ (noSchedule ? ", noSchedule=" + noSchedule : "")
+				+ (exactTimesHeadway ? ", exactTimesHeadway=" + exactTimesHeadway : "")
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
@@ -518,13 +589,15 @@ public class Trip implements Serializable {
 				+ ", tripShortName=" + tripShortName
 				+ ", tripPatternId=" 
 					+ (tripPattern != null ? tripPattern.getId() : "null")
-				+ ", tripIndex=" + getIndex()
+				+ ", tripIndexInBlock=" + getIndexInBlock()
 				+ ", startTime=" + Time.timeOfDayStr(startTime)
 				+ ", endTime=" + Time.timeOfDayStr(endTime)
-				+ ", name=\"" + headsign + "\""
+				+ (headsign != null ? ", headsign=\"" + headsign + "\"" : "")
 				+ ", directionId=" + directionId
 				+ ", routeId=" + routeId
 				+ ", routeShortName=" + routeShortName
+				+ (noSchedule ? ", noSchedule=" + noSchedule : "")
+				+ (exactTimesHeadway ? ", exactTimesHeadway=" + exactTimesHeadway : "")
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
@@ -540,26 +613,45 @@ public class Trip implements Serializable {
 		int result = 1;
 		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
 		result = prime * result + configRev;
-		result = prime * result
-				+ ((directionId == null) ? 0 : directionId.hashCode());
+		result =
+				prime * result
+						+ ((directionId == null) ? 0 : directionId.hashCode());
 		result = prime * result + ((endTime == null) ? 0 : endTime.hashCode());
-		result = prime * result + ((headsign == null) ? 0 : headsign.hashCode());
+		result = prime * result + (exactTimesHeadway ? 1231 : 1237);
+		result =
+				prime * result + ((headsign == null) ? 0 : headsign.hashCode());
+		result = prime * result + (noSchedule ? 1231 : 1237);
+		result = prime * result + ((route == null) ? 0 : route.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
-		result = prime
-				* result
-				+ ((scheduledTimesList == null) ? 0 : scheduledTimesList
-						.hashCode());
-		result = prime * result
-				+ ((serviceId == null) ? 0 : serviceId.hashCode());
+		result =
+				prime
+						* result
+						+ ((routeShortName == null) ? 0 : routeShortName
+								.hashCode());
+		result =
+				prime
+						* result
+						+ ((scheduledTimesList == null) ? 0
+								: scheduledTimesList.hashCode());
+		result =
+				prime * result
+						+ ((serviceId == null) ? 0 : serviceId.hashCode());
 		result = prime * result + ((shapeId == null) ? 0 : shapeId.hashCode());
-		result = prime * result
-				+ ((startTime == null) ? 0 : startTime.hashCode());
-		result = prime * result
-				+ ((travelTimes == null) ? 0 : travelTimes.hashCode());
+		result =
+				prime * result
+						+ ((startTime == null) ? 0 : startTime.hashCode());
+		result =
+				prime * result
+						+ ((travelTimes == null) ? 0 : travelTimes.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
-		result = prime * result + ((tripShortName == null) ? 0 : tripShortName.hashCode());
-		result = prime * result
-				+ ((tripPattern == null) ? 0 : tripPattern.hashCode());
+		result =
+				prime * result
+						+ ((tripPattern == null) ? 0 : tripPattern.hashCode());
+		result =
+				prime
+						* result
+						+ ((tripShortName == null) ? 0 : tripShortName
+								.hashCode());
 		return result;
 	}
 
@@ -592,15 +684,29 @@ public class Trip implements Serializable {
 				return false;
 		} else if (!endTime.equals(other.endTime))
 			return false;
+		if (exactTimesHeadway != other.exactTimesHeadway)
+			return false;
 		if (headsign == null) {
 			if (other.headsign != null)
 				return false;
 		} else if (!headsign.equals(other.headsign))
 			return false;
+		if (noSchedule != other.noSchedule)
+			return false;
+		if (route == null) {
+			if (other.route != null)
+				return false;
+		} else if (!route.equals(other.route))
+			return false;
 		if (routeId == null) {
 			if (other.routeId != null)
 				return false;
 		} else if (!routeId.equals(other.routeId))
+			return false;
+		if (routeShortName == null) {
+			if (other.routeShortName != null)
+				return false;
+		} else if (!routeShortName.equals(other.routeShortName))
 			return false;
 		if (scheduledTimesList == null) {
 			if (other.scheduledTimesList != null)
@@ -632,19 +738,21 @@ public class Trip implements Serializable {
 				return false;
 		} else if (!tripId.equals(other.tripId))
 			return false;
-		if (tripShortName == null) {
-			if (other.tripShortName != null)
-				return false;
-		} else if (!tripShortName.equals(other.tripShortName))
-			return false;
 		if (tripPattern == null) {
 			if (other.tripPattern != null)
 				return false;
 		} else if (!tripPattern.equals(other.tripPattern))
 			return false;
+		if (tripShortName == null) {
+			if (other.tripShortName != null)
+				return false;
+		} else if (!tripShortName.equals(other.tripShortName))
+			return false;
 		return true;
 	}
 
+	/********************** Getter Methods **************************/
+	
 	/**
 	 * Returns departure time of first stop of trip. Gtfs requires departure
 	 * time of first stop of trip and arrival time of last stop of trip to be
@@ -670,8 +778,6 @@ public class Trip implements Serializable {
 	public Integer getEndTime() {
 		return endTime;
 	}
-	
-	/********************** Getter Methods **************************/
 	
 	/**
 	 * @return the configRev
@@ -751,6 +857,20 @@ public class Trip implements Serializable {
 	}
 
 	/**
+	 * @return noSchedule
+	 */
+	public boolean isNoSchedule() {
+		return noSchedule;
+	}
+	
+	/**
+	 * @return exactTimesHeadway
+	 */
+	public boolean isExactTimesHeadway() {
+		return exactTimesHeadway;
+	}
+	
+	/**
 	 * @return the serviceId
 	 */
 	public String getServiceId() {
@@ -806,14 +926,14 @@ public class Trip implements Serializable {
 	 * @return The index of the trip in the block or -1 if block info not
 	 *         available.
 	 */
-	public int getIndex() {
+	public int getIndexInBlock() {
 		// If block info no available then simply return -1
 		Block block = getBlock();
 		if (block == null)
 			return -1;
 		
 		// Block info available so return the trip index
-		return block.getTripIndex(getId());
+		return block.getTripIndex(this);
 	}
 	
 	/**

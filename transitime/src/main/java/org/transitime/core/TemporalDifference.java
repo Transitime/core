@@ -200,11 +200,12 @@ public class TemporalDifference implements Serializable {
 	}
 	
 	/**
-	 * Returns if the temporal difference for this object is better than that
-	 * for the TemporalDifference parameter other.
+	 * Returns true if the temporal difference for this object is better than
+	 * that for the TemporalDifference parameter other. If other param is null
+	 * then will return true.
 	 * 
 	 * @param other
-	 *            TemporalDifference to be compared to
+	 *            TemporalDifference to be compared to. Can be null.
 	 * @return
 	 */
 	public boolean betterThan(TemporalDifference other) {

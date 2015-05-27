@@ -53,9 +53,6 @@ public class ApiBlock {
 	@XmlAttribute
 	private String endTime; 
 
-	@XmlAttribute
-	private String headwaySecs;
-
 	@XmlElement(name = "trip")
 	private List<ApiTrip> trips;
 
@@ -73,8 +70,6 @@ public class ApiBlock {
 		serviceId = ipcBlock.getServiceId();
 		startTime = Time.timeOfDayStr(ipcBlock.getStartTime());
 		endTime = Time.timeOfDayStr(ipcBlock.getEndTime());
-		headwaySecs = ipcBlock.getHeadwaySecs() > 0 ? Integer
-				.toString(ipcBlock.getHeadwaySecs()) : null;
 
 		trips = new ArrayList<ApiTrip>();
 		for (IpcTrip ipcTrip : ipcBlock.getTrips()) {

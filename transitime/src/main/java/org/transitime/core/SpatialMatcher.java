@@ -117,7 +117,7 @@ public class SpatialMatcher {
 			processPossiblePotentialMatch(avlReport, indices);
 
 			// For next iteration through while loop
-			indices.increment();
+			indices.increment(avlReport.getTime());
 		} while (!indices.atBeginningOfTrip());
 
 		// Need to handle boundary condition. Done looking ahead but
@@ -311,19 +311,27 @@ public class SpatialMatcher {
 
 		// Don't want to match to just before end of block because that could
 		// cause a vehicle that has just finished its block to become reassigned
-		// again.
-		Iterator<SpatialMatch> iterator = spatialMatchesForAllTrips.iterator();
-		while (iterator.hasNext()) {
-			SpatialMatch match = iterator.next();
-			if (match.getBlock().nearEndOfBlock(match,
-					CoreConfig.getDistanceFromEndOfBlockForInitialMatching())) {
-				// The match is too close to end of block so don't use it
-				logger.debug("vehicleId={} match was within {}m of the end " +
-						"of the block so not using that spatial match.", 
-						match.getVehicleId(), 
-						CoreConfig.getDistanceFromEndOfBlockForInitialMatching(), 
-						match);
-				iterator.remove();
+		// again. But only do this if a schedule based assignment because for
+		// a no schedule based assignment the vehicle loops around the trip and
+		// will frequently be at the end of the trip, which should be considered
+		// fine.
+		if (!block.isNoSchedule()) {
+			Iterator<SpatialMatch> iterator =
+					spatialMatchesForAllTrips.iterator();
+			while (iterator.hasNext()) {
+				SpatialMatch match = iterator.next();
+				if (block.nearEndOfBlock(match, CoreConfig
+						.getDistanceFromEndOfBlockForInitialMatching())) {
+					// The match is too close to end of block so don't use it
+					logger.debug(
+							"vehicleId={} match was within {}m of the end "
+									+ "of the block so not using that spatial match.",
+							match.getVehicleId(),
+							CoreConfig
+									.getDistanceFromEndOfBlockForInitialMatching(),
+							match);
+					iterator.remove();
+				}
 			}
 		}
 		
@@ -473,7 +481,11 @@ public class SpatialMatcher {
 
 		// Make sure only searching starting from previous spatial match. 
 		// Otherwise would screw up determination of arrivals/departures etc.
-		if (startSearchSpatialMatch != null) {
+		// But only do this for blocks that have a schedule since no-schedule
+		// blocks are loops where we don't really have the concept of 
+		// before/after for indices.
+		if (startSearchSpatialMatch != null 
+				&& potentialMatchIndices.getBlock().hasSchedule()) {
 			// If looking at previous index then something is really wrong.
 			// Don't need to see if this is a match.
 			if (potentialMatchIndices.lessThan(startSearchSpatialMatch.getIndices())) {
@@ -654,7 +666,7 @@ public class SpatialMatcher {
 		// block reached.
 		Indices indices = new Indices(previousMatch);
 		spatialMatcher.setStartOfSearch(previousMatch);
-		while (!indices.pastEndOfBlock()
+		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime())
 				&& distanceSearched < distanceAlongPathToSearch) {
 			spatialMatcher.processPossiblePotentialMatch(
 					vehicleState.getAvlReport(), indices);
@@ -662,7 +674,7 @@ public class SpatialMatcher {
 			distanceSearched += indices.getSegment().length();
 
 			// For next iteration through while loop
-			indices.increment();
+			indices.increment(vehicleState.getAvlReport().getTime());
 		}
 
 		// Need to handle boundary condition. Done looking ahead but
@@ -703,11 +715,12 @@ public class SpatialMatcher {
 		// matching to it. So only add the final stop for the block as a 
 		// potential spatial match if the previous match was reasonably close to
 		// it.
-		if (previousMatch.isLastTripOfBlock()
+		Block block = previousMatch.getBlock();
+		if (!block.isNoSchedule()
+				&& previousMatch.isLastTripOfBlock()
 				&& previousMatch.withinDistanceOfEndOfTrip(
 						CoreConfig.getDistanceFromLastStopForEndMatching())) {
 			// Create a match that is at the end of the block
-			Block block = previousMatch.getBlock();
 			Trip trip = previousMatch.getTrip();
 			int indexOfLastStopPath = trip.getNumberStopPaths()-1;
 			StopPath lastStopPath = trip.getStopPath(indexOfLastStopPath);

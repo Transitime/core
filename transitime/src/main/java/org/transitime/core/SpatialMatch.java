@@ -83,7 +83,7 @@ public class SpatialMatch {
 		this.vehicleId = toCopy.vehicleId;
 		this.avlTime = toCopy.avlTime;
 		this.block = toCopy.block;
-		this.tripIndex = toCopy.block.getTripIndex(newTrip.getId());
+		this.tripIndex = toCopy.block.getTripIndex(newTrip);
 		this.stopPathIndex = toCopy.stopPathIndex;
 		this.segmentIndex = toCopy.segmentIndex;
 		this.distanceToSegment = toCopy.distanceToSegment;

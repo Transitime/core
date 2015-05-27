@@ -116,10 +116,6 @@ public final class Block implements Serializable {
 	@Cascade({CascadeType.SAVE_UPDATE})
 	private final List<Trip> trips;
 	
-	// For non-scheduled blocks
-	@Column
-	private final int headwaySecs; 
-
 	// Sometimes will get vehicle assignment by routeId. This means that need
 	// to know which blocks are associated with a route. Getting the routeIds
 	// from the Trip objects is problematic because then all the Trip data
@@ -155,20 +151,15 @@ public final class Block implements Serializable {
 	 * @param startTime
 	 * @param endTime
 	 * @param trips
-	 * @param headwaySecs
-	 *            If less than 0 then it is schedule based block. If 0 then it
-	 *            is unscheduled block where vehicles run whenever. If greater
-	 *            than 0 then vehicles are to run on this specified headway
 	 */
 	public Block(int configRev, String blockId, String serviceId,
-			int startTime, int endTime, List<Trip> trips, int headwaySecs) {
+			int startTime, int endTime, List<Trip> trips) {
 		this.configRev = configRev;
 		this.blockId = blockId;
 		this.serviceId = serviceId;
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.trips = trips;
-		this.headwaySecs = headwaySecs;
 		
 		// Obtain the set of route IDs from the trips
 		this.routeIds = new HashSet<String>();
@@ -188,7 +179,6 @@ public final class Block implements Serializable {
 		this.startTime = -1;
 		this.endTime = -1;
 		this.trips = null;
-		this.headwaySecs = -1;	
 		this.routeIds = null;
 	}
 	
@@ -273,15 +263,6 @@ public final class Block implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		// Want to better explain what headwaySecs means
-		String headwaySecsStr = "" + headwaySecs;
-		if (headwaySecs < 0)
-			headwaySecsStr += " (schedule based)";
-		else if (headwaySecs == 0)
-			headwaySecsStr += " (unscheduled and no specified frequency)";
-		else
-			headwaySecsStr += " (headway for unscheduled block)";
-		
 		return "Block [" 
 				+ "configRev=" + configRev
 				+ ", blockId=" + blockId
@@ -291,7 +272,6 @@ public final class Block implements Serializable {
 				// Use getTrips() instead of trips to deal with possible lazy 
 				// initialization issues
 				+ ", trips=" + getTrips() 
-				+ ", headwaySecs=" + headwaySecsStr 
 				+ "]";
 	}
 	
@@ -302,15 +282,6 @@ public final class Block implements Serializable {
 	 * @return
 	 */
 	public String toShortString() {
-		// Want to better explain what headwaySecs means
-		String headwaySecsStr = "" + headwaySecs;
-		if (headwaySecs < 0)
-			headwaySecsStr += " (schedule based)";
-		else if (headwaySecs == 0)
-			headwaySecsStr += " (unscheduled and no specified frequency)";
-		else
-			headwaySecsStr += " (headway for unscheduled block)";
-
 		// Create shortened version of Trip info that only includes the trip_id
 		String tripsStr = "Trip [";
 		for (Trip trip : getTrips()) {
@@ -324,7 +295,6 @@ public final class Block implements Serializable {
 				+ ", startTime=" + Time.timeOfDayStr(startTime) 
 				+ ", endTime=" + Time.timeOfDayStr(endTime) 
 				+ ", trips=" + tripsStr // Use the shortened version
-				+ ", headwaySecs=" + headwaySecsStr 
 				+ "]";
 	}
 	
@@ -336,11 +306,14 @@ public final class Block implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + blockId.hashCode();
-		result = prime * result + serviceId.hashCode();
+		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
 		result = prime * result + configRev;
 		result = prime * result + endTime;
-		result = prime * result + headwaySecs;
+		result =
+				prime * result + ((routeIds == null) ? 0 : routeIds.hashCode());
+		result =
+				prime * result
+						+ ((serviceId == null) ? 0 : serviceId.hashCode());
 		result = prime * result + startTime;
 		result = prime * result + ((trips == null) ? 0 : trips.hashCode());
 		return result;
@@ -358,15 +331,24 @@ public final class Block implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Block other = (Block) obj;
-		if (!blockId.equals(other.blockId))
-			return false;
-		if (!serviceId.equals(other.serviceId))
+		if (blockId == null) {
+			if (other.blockId != null)
+				return false;
+		} else if (!blockId.equals(other.blockId))
 			return false;
 		if (configRev != other.configRev)
 			return false;
 		if (endTime != other.endTime)
 			return false;
-		if (headwaySecs != other.headwaySecs)
+		if (routeIds == null) {
+			if (other.routeIds != null)
+				return false;
+		} else if (!routeIds.equals(other.routeIds))
+			return false;
+		if (serviceId == null) {
+			if (other.serviceId != null)
+				return false;
+		} else if (!serviceId.equals(other.serviceId))
 			return false;
 		if (startTime != other.startTime)
 			return false;
@@ -606,7 +588,7 @@ public final class Block implements Serializable {
 						"vehicleId={}",
 						trip.getBlock().getId(),
 						trip.getId(), 
-						trip.getBlock().getTripIndex(trip.getId()),
+						trip.getBlock().getTripIndex(trip),
 						Time.timeOfDayStr(secsInDayForAvlReport),
 						Time.timeOfDayStr(trip.getStartTime()),
 						Time.timeOfDayStr(trip.getEndTime()),
@@ -767,6 +749,24 @@ public final class Block implements Serializable {
 	}
 	
 	/**
+	 * Returns true if block assignment has no schedule (is frequency based)
+	 * 
+	 * @return true if no schedule
+	 */
+	public boolean isNoSchedule() {
+		return getTrips().get(0).isNoSchedule();
+	}
+	
+	/**
+	 * Returns true if block assignment has a schedule (is not frequency based)
+	 * 
+	 * @return true if has schedule
+	 */
+	public boolean hasSchedule() {
+		return !isNoSchedule();
+	}
+	
+	/**
 	 * Returns the trip specified by the tripIndex
 	 * 
 	 * @param tripIndex
@@ -796,34 +796,21 @@ public final class Block implements Serializable {
 		// The tripId was not found for this block so return null
 		return null;
 	}
-
-	/**
-	 * Returns the index into the trips list of the trip specified
-	 * by the tripId parameter.
-	 * @param tripId Specifies which trip looking for
-	 * @return Index into trips of the specified trip
-	 */
-	public int getTripIndex(String tripId) {
-		List<Trip> tripsList = getTrips();
-		
-		for (int i=0; i<tripsList.size(); ++i) {
-			Trip trip = tripsList.get(i);
-			if (trip.getId().equals(tripId))
-				return i;
-		}
-		
-		// The tripId was not found for this block so return -1
-		return -1;		
-	}
 	
 	/**
 	 * Returns the index into the trips list of the specified trip.
 	 * 
-	 * @param trip Specifies which trip looking for
+	 * @param trip
+	 *            Specifies which trip looking for
 	 * @return Index into trips of the specified trip
 	 */
 	public int getTripIndex(Trip trip) {
-		return getTripIndex(trip.getId());
+		List<Trip> tripsList = getTrips();
+		for (int i=0; i<tripsList.size(); ++i) {
+			if (tripsList.get(i) == trip)
+				return i;
+		}
+		return -1;
 	}
 	
 	/**
@@ -1065,24 +1052,6 @@ public final class Block implements Serializable {
 		return trip.getScheduleTime(stopPathIndex);
 	}
 	
-	/**
-	 * Returns the specified headway for unscheduled blocks. A block is unscheduled
-	 * if its trips are defined in the frequencies.txt file. If headway is 0 then
-	 * there is no planned headway. The vehicles will run when they run. If 
-	 * headway is less than 0 then it is a schedule based assignment.
-	 * @return the headwaySecs
-	 */
-	public int getHeadwaySecs() {
-		return headwaySecs;
-	}
-	
-	/**
-	 * @return true if block is schedule based as opposed to headway based
-	 */
-	public boolean isScheduleBased() {
-		return headwaySecs < 0;
-	}
-
 	/**
 	 * Returns true if on last trip of block and within the specified distance
 	 * of the end of that last trip.
