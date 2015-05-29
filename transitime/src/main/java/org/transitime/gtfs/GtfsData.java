@@ -642,8 +642,9 @@ public class GtfsData {
 		// Make sure needed data is already read in. This method uses
 		// GtfsRoutes info to make sure all trips reference a route.
 		if (gtfsRoutesMap == null || gtfsRoutesMap.isEmpty()) {
-			logger.error("processGtfsRouteMap() must be called before " + 
-					"GtfsData.processTripsData() is. Exiting.");
+			logger.error("processGtfsRouteMap() must be called before " 
+					+ "GtfsData.processTripsData() is or no routes were "
+					+ "found. Exiting.");
 			System.exit(-1);
 		}
 		
@@ -1194,18 +1195,8 @@ public class GtfsData {
 		GtfsTrip gtfsTrip = getGtfsTrip(tripId);
 		
 		// If resulting gtfsTrip is null because it wasn't defined in
-		// trips.txt then need to log this problem (and log this only 
-		// once) and continue
+		// trips.txt then return null
 		if (gtfsTrip == null) {
-			logger.warn("Encountered trip_id={} in the " +
-					"stop_times.txt file but that trip_id is not in " +
-					"the trips.txt file or the service ID for the " +
-					"trip is not valid in anytime in the future. " + 
-					"Therefore this trip cannot be configured and " +
-					"has been discarded.",
-					tripId);
-			
-			// Can't deal with this trip Id so skip to next trip ID
 			return null;
 		}
 		
@@ -1318,6 +1309,18 @@ public class GtfsData {
 		for (String tripId : gtfsStopTimesForTripMap.keySet()) {
 			// Create a Trip element for the trip ID. 
 			Trip trip = createNewTrip(tripId);
+			
+			// If trip not valid then skip over it
+			if (trip == null) {
+				logger.warn("Encountered trip_id={} in the " +
+						"stop_times.txt file but that trip_id is not in " +
+						"the trips.txt file or the service ID for the " +
+						"trip is not valid in anytime in the future. " + 
+						"Therefore this trip cannot be configured and " +
+						"has been discarded.",
+						tripId);
+				continue;
+			}
 			
 			// All the schedule times are available in gtfsStopTimesForTripMap 
 			// so add them all at once to the Trip. This also sets the startTime 
@@ -1476,7 +1479,7 @@ public class GtfsData {
 			// Make sure this Frequency is in trips.txt
 			GtfsTrip gtfsTrip = gtfsTripsMap.get(gtfsFrequency.getTripId());
 			if (gtfsTrip == null) {
-				logger.error("The frequency from line # {} of frequencies.txt" 
+				logger.error("The frequency from line # {} of frequencies.txt " 
 						+ "refers to trip_id={} but that trip is not in the " 
 						+ "trips.txt file. Therefore this frequency will be "
 						+ "ignored.",
