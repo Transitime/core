@@ -99,9 +99,6 @@ public class Core {
 	 * @param agencyId
 	 */
 	private Core(String agencyId) {
-		// Write pid file
-		PidFile.createPidFile(CoreConfig.getPidFileDirectory() + agencyId + ".pid");
-		
 		// Determine configuration rev to use. If one specified on command
 		// line, use it. If not, then use revision stored in db.
 		int configRev;
@@ -367,6 +364,11 @@ public class Core {
 				e1.printStackTrace();
 				System.exit(-1);
 			}
+			
+			// Write pid file so that monit can automatically start
+			// or restart this application
+			PidFile.createPidFile(CoreConfig.getPidFileDirectory()
+					+ AgencyConfig.getAgencyId() + ".pid");
 			
 			// For making sure logger configured properly
 			outputLoggerStatus();
