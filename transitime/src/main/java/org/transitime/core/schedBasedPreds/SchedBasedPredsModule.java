@@ -38,17 +38,22 @@ import org.transitime.utils.Time;
 
 /**
  * The schedule based predictions module runs in the background. Every few
- * minutes it looks for blocks that do not have an associated vehicle. For
- * these blocks the module creates a schedule based vehicle at the location
- * of the beginning of the block and generates predictions for the entire 
- * block that are based on the scheduled departure time. The purpose of this
- * module is to generate predictions well in advance even if vehicles are 
- * assigned just a few minutes before a vehicle is scheduled to start a
- * block. This feature should of course only be used if most of the time the 
- * blocks are actually run. It should not be used for agencies such as
- * SFMTA where blocks/trips are often missed because would then be
- * often providing predictions when no vehicle will arrive.
- *
+ * minutes it looks for blocks that do not have an associated vehicle. For these
+ * blocks the module creates a schedule based vehicle at the location of the
+ * beginning of the block and generates predictions for the entire block that
+ * are based on the scheduled departure time. The purpose of this module is to
+ * generate predictions well in advance even if vehicles are assigned just a few
+ * minutes before a vehicle is scheduled to start a block. This feature should
+ * of course only be used if most of the time the blocks are actually run. It
+ * should not be used for agencies such as SFMTA where blocks/trips are often
+ * missed because would then be often providing predictions when no vehicle will
+ * arrive.
+ * <p>
+ * Schedule based predictions are removed once a regular vehicle is assigned to
+ * the block or the schedule based vehicle is timed out iva TimeoutHandlerModule
+ * due to it being transitime.timeout.allowableNoAvlForSchedBasedPredictions
+ * after the scheduled departure time for the assignment.
+ * 
  * @author SkiBu Smith
  *
  */
@@ -60,20 +65,21 @@ public class SchedBasedPredsModule extends Module {
 	/********************** Config Params **************************/
 
 	private static final IntegerConfigValue timeBetweenPollingMsec = 
-			new IntegerConfigValue("transitime.schedBasedPreds.pollingRateMsec", 
+			new IntegerConfigValue(
+					"transitime.schedBasedPreds.pollingRateMsec",
 					4 * Time.MS_PER_MIN,
 					"How frequently to look for blocks that do not have "
-					+ "associated vehicle.");
+							+ "associated vehicle.");
 	
 	private static int getTimeBetweenPollingMsec() {
 		return timeBetweenPollingMsec.getValue();
 	}
 
 	private static final IntegerConfigValue beforeStartTimeMins = 
-			new IntegerConfigValue("transitime.schedBasedPreds.beforeStartTimeMins", 
-					60,
+			new IntegerConfigValue(
+					"transitime.schedBasedPreds.beforeStartTimeMins", 60,
 					"How much before a block start time should create a "
-					+ "schedule based vehicle for that block.");
+							+ "schedule based vehicle for that block.");
 	
 	private static int getBeforeStartTimeMins() {
 		return beforeStartTimeMins.getValue();
