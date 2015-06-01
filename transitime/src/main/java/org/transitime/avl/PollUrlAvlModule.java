@@ -65,6 +65,12 @@ public abstract class PollUrlAvlModule extends AvlModule {
 	protected abstract String getUrl();
 	
 	/**
+	 * Override this method if AVL feed needs to specify header info
+	 * @param con
+	 */
+	protected void setRequestHeaders(URLConnection con) {}
+	
+	/**
 	 * Actually processes the data from the InputStream. Called by
 	 * getAndProcessData(). Should be overwritten unless getAndProcessData() is
 	 * overwritten by superclass.
@@ -114,6 +120,9 @@ public abstract class PollUrlAvlModule extends AvlModule {
 		
 		// Request compressed data to reduce bandwidth used
 		con.setRequestProperty("Accept-Encoding", "gzip,deflate");
+	
+		// Set any additional AVL feed specific request headers
+		setRequestHeaders(con);
 		
 		// Create appropriate input stream depending on whether content is 
 		// compressed or not

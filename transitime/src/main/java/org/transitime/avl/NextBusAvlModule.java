@@ -32,8 +32,7 @@ import org.transitime.utils.MathUtils;
 import org.transitime.utils.Time;
 
 /**
- * Reads AVL data from a NextBus AVL feed and publishes it to appropriate JMS
- * topic so that it can be read by AVL clients.
+ * Reads AVL data from a NextBus AVL feed and processes each AVL report.
  * 
  * @author SkiBu Smith
  *
