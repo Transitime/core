@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
+import org.transitime.utils.Geo;
+
 import com.amazonaws.util.json.JSONArray;
 import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
@@ -131,8 +133,12 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 			String headingStr = vehicleData.getString("heading");
 			float heading = Float.parseFloat(headingStr);
 
+			// It appears that speed for Transloc API is in mph. Was
+			// getting a value of 66.3 which if in m/s would be about
+			// 120mph which wouldn't make sense. Unfortunately could
+			// not find documentation on the units for speed.
 			String speedStr = vehicleData.getString("speed");
-			float speed = Float.parseFloat(speedStr);
+			float speed = Float.parseFloat(speedStr) * Geo.MPH_TO_MPS;
 
 			String gpsTimeStr = vehicleData.getString("last_updated_on");
 			Date gpsTime = translocTimeFormat.parse(gpsTimeStr);
