@@ -333,7 +333,7 @@ public class AutoBlockAssigner {
 			AvlReport previousAvlReport, Block block) {
 		if (block.isNoSchedule()) {
 			logger.error("Called bestScheduleMatch() on block that does not "
-					+ "have a schedule. {}", block);
+					+ "have a schedule. {}", block.toShortString());
 			return null;
 		}		
 
