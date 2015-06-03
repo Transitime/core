@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -749,13 +748,22 @@ public class GtfsData {
 	}
 	
 	/**
-	 * Sorts gtfsStopTimesForTrip and then goes through the data to make sure
-	 * it is OK. If data is a real problem, like a duplicate stop, it is 
-	 * removed. Any problems found are logged.
+	 * Sorts gtfsStopTimesForTrip and then goes through the data to make sure it
+	 * is OK. If data is a real problem, like a duplicate stop, it is not
+	 * included in the returned list. If there is a duplicate stop and the times
+	 * are different then it is assumed that it is a wait stop and the arrival
+	 * time from the first stop entry and the departure time for the second stop
+	 * entry are used. Any problems found are logged.
 	 * 
 	 * @param gtfsStopTimesForTrip
+	 * @return Processed/cleaned up list of GtfsStopTime for the trip
 	 */
-	private void processStopTimesForTrip(List<GtfsStopTime> gtfsStopTimesForTrip) {
+	private List<GtfsStopTime> processStopTimesForTrip(
+			List<GtfsStopTime> gtfsStopTimesForTrip) {
+		// For returning results
+		List<GtfsStopTime> processedGtfsStopTimesForTrip =
+				new ArrayList<GtfsStopTime>();
+		
 		// Sort the list so that the stop times are in sequence order.
 		// This way can treat first and last stop times for a trip
 		// specially. Plus want them in order to determine trip patterns
@@ -767,12 +775,7 @@ public class GtfsData {
 		String previousStopId = null;
 		boolean firstStopInTrip = true;
 		int previousTimeForTrip = 0;			
-		Iterator<GtfsStopTime> stopTimesIterator =
-				gtfsStopTimesForTrip.iterator();
-		while (stopTimesIterator.hasNext()) {
-			// Get the GtfsStopTime to examine
-			GtfsStopTime gtfsStopTime = stopTimesIterator.next();
-			
+		for (GtfsStopTime gtfsStopTime : gtfsStopTimesForTrip) {
 			// Convenience variable
 			String tripId = gtfsStopTime.getTripId();
 			
@@ -796,7 +799,6 @@ public class GtfsData {
 								gtfsStop.getDeleteFirstStopFromRoutesStr();
 				if (gtfsStop.shouldDeleteFromRoute(routeShortName,
 						deleteFromRoutesStr)) {
-					stopTimesIterator.remove();
 					continue;
 				}
 			}
@@ -809,20 +811,6 @@ public class GtfsData {
 						gtfsStopTime.getLineNumber(),
 						gtfsStopTime.getStopId(),
 						gtfsStopTime.getTripId());
-				stopTimesIterator.remove();
-				continue;
-			}
-			
-			// Make sure that not listing the same stop twice in a row.
-			// Yes, SFMTA actually has done this!
-			if (gtfsStopTime.getStopId().equals(previousStopId)) {
-				logger.warn("Encountered stopId={} twice in a row for tripId={} " + 
-						"in stop_times.txt at line {}. The second stop will not " + 
-						"be included.",
-						gtfsStopTime.getStopId(),
-						gtfsStopTime.getTripId(),
-						gtfsStopTime.getLineNumber());
-				stopTimesIterator.remove();
 				continue;
 			}
 			
@@ -848,19 +836,59 @@ public class GtfsData {
 					dep = arr;
 				}
 			}
-			boolean lastStopInTrip = !stopTimesIterator.hasNext();
+			boolean lastStopInTrip =
+					gtfsStopTime == gtfsStopTimesForTrip
+							.get(gtfsStopTimesForTrip.size() - 1);
 			if (lastStopInTrip && arr == null) {
 				logger.error("Last stop in trip {} does not have an arrival " 
-						+ "time. The problem is in the stop_times.txt file at line {}.",
+						+ "time. The problem is in the stop_times.txt file at "
+						+ "line {}.",
 						tripId, getGtfsTrip(tripId).getLineNumber());				
+			}
+			
+			// Make sure that not listing the same stop twice in a row.
+			if (gtfsStopTime.getStopId().equals(previousStopId)) {
+				// If same time for same stop then filter out the duplicate stop.
+				// Yes, SFMTA actually has done this!
+				if (arr != null && arr == previousTimeForTrip) {
+					logger.warn("Encountered stopId={} twice in a row with the "
+									+ "same times for tripId={} "
+									+ "in stop_times.txt at line {}. The second "
+									+ "stop will not be included.",
+							gtfsStopTime.getStopId(), gtfsStopTime.getTripId(),
+							gtfsStopTime.getLineNumber());
+					continue;
+				} else {
+					// Special case where a stop was defined twice in a row but
+					// with different schedule time. This likely means that the
+					// stop is a wait stop but it isn't configured correctly.
+					// For this case remove the original GtfsStopTime and
+					// create a new one with the previous arrival time but the
+					// new departure time and create it as a wait stop.
+					GtfsStopTime arrivalStopTime =
+							processedGtfsStopTimesForTrip
+									.remove(processedGtfsStopTimesForTrip
+											.size() - 1);
+					gtfsStopTime =
+							new GtfsStopTime(gtfsStopTime,
+									arrivalStopTime.getArrivalTimeSecs());
+					logger.warn("Encountered stopId={} twice in a row with "
+							+ "different times for tripId={} "
+							+ "in stop_times.txt at line {}. Assuming "
+							+ "it is supposed to be a mid trip wait "
+							+ "stop. {}", gtfsStopTime.getStopId(),
+							gtfsStopTime.getTripId(),
+							gtfsStopTime.getLineNumber(), gtfsStopTime);
+				}
 			}
 			
 			// Make sure departure time >= arrival time.
 			// Of course either one can be null so bit more complicated.
 			if (arr != null && dep != null && dep < arr) {
-				logger.error("The departure time {} is before the arrival time {} " + 
-						"in the stop_times.txt file at line {}", 
-						Time.timeOfDayStr(dep), Time.timeOfDayStr(arr), gtfsStopTime.getLineNumber());				
+				logger.error("The departure time {} is before the arrival "
+						+ "time {} in the stop_times.txt file at line {}",
+						Time.timeOfDayStr(dep), Time.timeOfDayStr(arr),
+						gtfsStopTime.getLineNumber());
 			}
 			
 			// Now make sure that arrival/departures times never go backwards in time
@@ -886,11 +914,16 @@ public class GtfsData {
 			if (dep != null)
 				previousTimeForTrip = dep;
 
+			// The GtfsStopTime is acceptable so add it to list to be returned
+			processedGtfsStopTimesForTrip.add(gtfsStopTime);
+			
 			// For next time through loop
 			previousStopId = gtfsStopTime.getStopId();
 			firstStopInTrip = false;
 		}
 
+		// Return processed stop times for trip
+		return processedGtfsStopTimesForTrip;
 	}
 	
 	/**
@@ -1020,7 +1053,12 @@ public class GtfsData {
 		for (String tripId : tripIds) {
 			List<GtfsStopTime> gtfsStopTimesForTrip =
 					gtfsStopTimesForTripMap.get(tripId);			
-			processStopTimesForTrip(gtfsStopTimesForTrip);
+			List<GtfsStopTime> processedGtfsStopTimesForTrip =
+					processStopTimesForTrip(gtfsStopTimesForTrip);
+			
+			// Replace the stop times for the trip with the processed/cleaned 
+			// up version
+			gtfsStopTimesForTripMap.put(tripId, processedGtfsStopTimesForTrip);
 		}
 		
 		// Log if a trip is defined in the trips.txt file but not in 
@@ -1137,7 +1175,7 @@ public class GtfsData {
 			boolean waitStop = false;
 			if (depTime != null && !trip.isNoSchedule()) {
 				if (stop.isWaitStop() == null) {
-					waitStop = firstStopInTrip;
+					waitStop = firstStopInTrip || gtfsStopTime.isWaitStop();
 				} else {
 					waitStop = stop.isWaitStop();
 				}
@@ -1312,13 +1350,14 @@ public class GtfsData {
 			
 			// If trip not valid then skip over it
 			if (trip == null) {
-				logger.warn("Encountered trip_id={} in the " +
-						"stop_times.txt file but that trip_id is not in " +
-						"the trips.txt file or the service ID for the " +
-						"trip is not valid in anytime in the future. " + 
-						"Therefore this trip cannot be configured and " +
-						"has been discarded.",
-						tripId);
+				logger.warn("Encountered trip_id={} in the "
+						+ "stop_times.txt file but that trip_id is not in "
+						+ "the trips.txt file, the service ID for the "
+						+ "trip is not valid in anytime in the future, "
+						+ "or the associated route is filtered out, "
+						+ "or the trip is filtered out. "
+						+ "Therefore this trip cannot be configured and "
+						+ "has been discarded.", tripId);
 				continue;
 			}
 			

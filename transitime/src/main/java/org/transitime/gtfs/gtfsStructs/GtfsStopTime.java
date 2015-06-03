@@ -39,6 +39,10 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 	private final String pickupType;
 	private final String dropOffType;
 	private final Boolean timepointStop;
+	// For when a special GtfsStopTime is created using special constructor. 
+	// Currently not configured in GTFS file
+	private final Boolean isWaitStop;
+	
 	// Can be null
 	private final Double shapeDistTraveled; 
 
@@ -80,6 +84,8 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		this.shapeDistTraveled = null;
 		
 		this.delete = false;
+		
+		this.isWaitStop = null;
 	}
 	
 	/**
@@ -127,6 +133,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		timepointStop = getOptionalBooleanValue(record, "timepoint");
 		
 		delete = getOptionalBooleanValue(record, "delete");
+		isWaitStop = null;
 	}
 
 	/**
@@ -175,6 +182,38 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		departureTimeSecs = newDepartureTimeSecs;
 		
 		delete = false;
+		isWaitStop = null;
+	}
+
+	/**
+	 * For when need to create a GtfsStopTime that is a wait stop. Uses the
+	 * values from originalValues but uses the new arrival time and sets
+	 * isWaitStop to true.
+	 * 
+	 * @param originalValues
+	 *            The original values from the stop_times.txt file
+	 * @param newArrivalTimeSecs
+	 *            The new arrival time.
+	 */
+	public GtfsStopTime(GtfsStopTime originalValues, Integer newArrivalTimeSecs) {
+		super(originalValues);
+
+		tripId = originalValues.tripId;
+		stopId = originalValues.stopId;
+		stopSequence = originalValues.stopSequence;
+		stopHeadsign = originalValues.stopHeadsign;
+		pickupType = originalValues.pickupType;
+		dropOffType = originalValues.dropOffType;
+		shapeDistTraveled = originalValues.shapeDistTraveled;
+		timepointStop = originalValues.timepointStop;
+		
+		departureTimeSecs = originalValues.departureTimeSecs;
+		
+		delete = false;
+		
+		// Handle the special members
+		arrivalTimeSecs = newArrivalTimeSecs;
+		isWaitStop = true;
 	}
 
 	/**
@@ -213,6 +252,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 				s.shapeDistTraveled == null ? o.shapeDistTraveled
 						: s.shapeDistTraveled;
 		this.delete = s.delete == null ? o.delete : s.delete;
+		this.isWaitStop = s.isWaitStop == null ? o.isWaitStop : s.isWaitStop;
 	}
 
 	public String getTripId() {
@@ -274,6 +314,10 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		return delete != null && delete;
 	}
 	
+	public boolean isWaitStop() {
+		return isWaitStop != null && isWaitStop;
+	}
+	
 	@Override
 	public String toString() {
 		return "GtfsStopTime ["
@@ -293,7 +337,8 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 						+ shapeDistTraveled + ", " : "") 
 				+ (timepointStop != null ? "timepointStop=" + timepointStop 
 						+ ", ": "")
-				+ "delete=" + delete 
+				+ "delete=" + delete + ", "
+				+ (isWaitStop != null ? "isWaitStop=" + isWaitStop : "")
 				+ "]";
 	}
 
