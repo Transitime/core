@@ -133,12 +133,14 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 			String headingStr = vehicleData.getString("heading");
 			float heading = Float.parseFloat(headingStr);
 
-			// It appears that speed for Transloc API is in mph. Was
-			// getting a value of 66.3 which if in m/s would be about
-			// 120mph which wouldn't make sense. Unfortunately could
+			// It appears that speed for Transloc API is in kph. Was
+			// getting a value of 74.6 which if in m/s would be about
+			// 150mph which wouldn't make sense. And it is likely not
+			// mph since that would still be too fast. Therefore it
+			// is likely to be in kph. Unfortunately could
 			// not find documentation on the units for speed.
 			String speedStr = vehicleData.getString("speed");
-			float speed = Float.parseFloat(speedStr) * Geo.MPH_TO_MPS;
+			float speed = Float.parseFloat(speedStr) * Geo.KPH_TO_MPS;
 
 			String gpsTimeStr = vehicleData.getString("last_updated_on");
 			Date gpsTime = translocTimeFormat.parse(gpsTimeStr);
