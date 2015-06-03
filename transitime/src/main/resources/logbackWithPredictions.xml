@@ -358,7 +358,7 @@
   </logger>
 
   <logger name="org.transitime.core.autoAssigner"
-          level="debug" additivity="false">
+          level="info" additivity="false">
     <appender-ref ref="AUTO_ASSIGNER" />
   </logger>
 
