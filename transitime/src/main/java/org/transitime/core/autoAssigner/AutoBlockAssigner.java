@@ -331,7 +331,7 @@ public class AutoBlockAssigner {
 	 */
 	private TemporalMatch bestScheduleMatch(AvlReport avlReport,
 			AvlReport previousAvlReport, Block block) {
-		if (!block.isNoSchedule()) {
+		if (block.isNoSchedule()) {
 			logger.error("Called bestScheduleMatch() on block that does not "
 					+ "have a schedule. {}", block);
 			return null;
