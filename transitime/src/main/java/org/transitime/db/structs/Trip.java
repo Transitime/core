@@ -192,10 +192,12 @@ public class Trip implements Serializable {
 		this.tripId = gtfsTrip.getTripId();
 		this.tripShortName = gtfsTrip.getTripShortName();
 		this.directionId = gtfsTrip.getDirectionId();
-		this.routeId = properRouteId!=null? properRouteId : gtfsTrip.getRouteId();
+		this.routeId =
+				properRouteId != null ? properRouteId : gtfsTrip.getRouteId();
 		this.routeShortName = routeShortName;
 		this.serviceId = gtfsTrip.getServiceId();
-		this.headsign = gtfsTrip.getTripHeadsign();
+		this.headsign = titleFormatter.processTitle(gtfsTrip.getTripHeadsign());
+		
 		// block column is optional in GTFS trips.txt file. Best can do when
 		// block ID is not set is to use the trip short name or the trip id 
 		// as the block. MBTA uses trip short name in the feed so start with
