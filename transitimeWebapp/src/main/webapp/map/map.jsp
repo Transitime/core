@@ -761,7 +761,7 @@ if (!getRouteQueryStrParam()) {
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#routes").select2({
- 				placeholder: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select Route", 				
+ 				placeholder: "Select Route", 				
  				data : selectorData})
  				.on("change", function(e) {
  					// First remove all old vehicles so that they don't
