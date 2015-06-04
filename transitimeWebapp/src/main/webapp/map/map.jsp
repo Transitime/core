@@ -338,9 +338,11 @@ function getVehiclePopupContent(vehicleData) {
     var layoverDepartureStr = vehicleData.layover ? 
     		 ("<br/><b>Departure:</b> " + 
     				 dateFormat(vehicleData.layoverDepTime)) : "";
-    var nextStopIdStr = vehicleData.nextStopId ? 
-    		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName 
-    				 + " (" + vehicleData.nextStopId) + ")": "";
+    var nextStopNameStr = vehicleData.nextStopName ? 
+    		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName) : "";
+    if (verbose && vehicleData.nextStopId)
+    	nextStopNameStr += "<br/><b>Next Stop Id:</b> " + vehicleData.nextStopId;
+    
     var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat
     			+ "<br/><b>Lon:</b> " + vehicleData.loc.lon 
     			+ "<br/><b>Heading:</b> " + vehicleData.loc.heading 
@@ -362,7 +364,7 @@ function getVehiclePopupContent(vehicleData) {
 		+ tripPatternStr
 		+ layoverStr
 		+ layoverDepartureStr
-		+ nextStopIdStr;
+		+ nextStopNameStr;
 	
 	return content;
 }
