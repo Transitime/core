@@ -850,7 +850,10 @@ public class GtfsData {
 			if (gtfsStopTime.getStopId().equals(previousStopId)) {
 				// If same time for same stop then filter out the duplicate stop.
 				// Yes, SFMTA actually has done this!
-				if (arr != null && arr == previousTimeForTrip) {
+				if (arr == null || arr == previousTimeForTrip) {
+					// This stop doesn't have an arrival time or it is an 
+					// identical time to the previous stop which means it
+					// it is an uneeded duplicated. Therefore don't use it.
 					logger.warn("Encountered stopId={} twice in a row with the "
 									+ "same times for tripId={} "
 									+ "in stop_times.txt at line {}. The second "
