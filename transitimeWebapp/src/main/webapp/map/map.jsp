@@ -51,7 +51,7 @@
   <!--  To center successfully in all situations use div within a div trick -->  
   <div id="routesContainer">
     <div id="routesDiv">
-      <input type="hidden" id="routes" style="width:300px" />
+      <input type="hidden" id="routes" style="width:380px" />
     </div>
   </div>
   
@@ -339,7 +339,8 @@ function getVehiclePopupContent(vehicleData) {
     		 ("<br/><b>Departure:</b> " + 
     				 dateFormat(vehicleData.layoverDepTime)) : "";
     var nextStopIdStr = vehicleData.nextStopId ? 
-    		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopId) : "";
+    		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName 
+    				 + " (" + vehicleData.nextStopId) + ")": "";
     var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat
     			+ "<br/><b>Lon:</b> " + vehicleData.loc.lon 
     			+ "<br/><b>Heading:</b> " + vehicleData.loc.heading 
@@ -760,7 +761,7 @@ if (!getRouteQueryStrParam()) {
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#routes").select2({
- 				placeholder: "Select Route", 				
+ 				placeholder: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select Route", 				
  				data : selectorData})
  				.on("change", function(e) {
  					// First remove all old vehicles so that they don't

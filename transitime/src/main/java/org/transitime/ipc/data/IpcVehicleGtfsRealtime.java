@@ -102,6 +102,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	 * @param isLayover
 	 * @param layoverDepartureTime
 	 * @param nextStopId
+	 * @param nextStopName
 	 * @param vehicleType
 	 * @param atStopId
 	 */
@@ -112,11 +113,13 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			String headsign, boolean predictable, boolean schedBasedPred,
 			TemporalDifference realTimeSchdAdh, boolean isDelayed,
 			boolean isLayover, long layoverDepartureTime, String nextStopId,
-			String vehicleType, long tripStartEpochTime, String atStopId) {
+			String nextStopName, String vehicleType, long tripStartEpochTime,
+			String atStopId) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isLayover,
-				isDelayed, layoverDepartureTime, nextStopId, vehicleType);
+				isDelayed, layoverDepartureTime, nextStopId, nextStopName,
+				vehicleType);
 		this.tripStartEpochTime = tripStartEpochTime;
 		this.atStopId = atStopId;
 	}
@@ -192,7 +195,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 					avl, heading, routeId, routeShortName, tripId,
 					tripPatternId, directionId, headsign, predictable,
 					schedBasedPred, realTimeSchdAdh, isDelayed, isLayover,
-					layoverDepartureTime, nextStopId, vehicleType,
+					layoverDepartureTime, nextStopId, nextStopName, vehicleType,
 					tripStartEpochTime, atStopId);
 		}
 
@@ -231,6 +234,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 				+ ", layoverDepartureTime=" 
 					+ Time.timeStrNoTimeZone(getLayoverDepartureTime())
 				+ ", nextStopId=" + getNextStopId() 
+				+ ", nextStopName=" + getNextStopName()
 				+ ", avl=" + getAvl()
 				+ ", heading=" + getHeading() 
 				+ ", vehicleType=" + getVehicleType()

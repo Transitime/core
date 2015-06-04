@@ -40,7 +40,7 @@ import org.transitime.utils.Time;
 		"scheduleAdherence", "scheduleAdherenceStr", "blockId",
 		"blockAssignmentMethod", "tripId", "tripPatternId", "isDelayed",
 		"isLayover", "layoverDepTime", "layoverDepTimeStr", "nextStopId",
-		"driverId" })
+		"nextStopName", "driverId" })
 public class ApiVehicleDetails extends ApiVehicleAbstract {
 
 	// Note: needs to be Integer instead of an int because it can be null
@@ -77,6 +77,9 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 
 	@XmlAttribute
 	private String nextStopId;
+
+	@XmlAttribute
+	private String nextStopName;
 
 	@XmlElement(name = "driver")
 	private String driverId;
@@ -117,8 +120,12 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		layoverDepTimeStr = vehicle.isLayover() ?
 				timeForAgency.timeStrForTimezone(vehicle.getLayoverDepartureTime()) : null;
 				
-		nextStopId = vehicle.getNextStopId() != null ? vehicle.getNextStopId()
-				: null;
+		nextStopId =
+				vehicle.getNextStopId() != null ? vehicle.getNextStopId()
+						: null;
+		nextStopName =
+				vehicle.getNextStopName() != null ? vehicle.getNextStopName()
+						: null;
 		driverId = vehicle.getAvl().getDriverId();		
 	}
 

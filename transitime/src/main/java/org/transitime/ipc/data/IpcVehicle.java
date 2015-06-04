@@ -65,6 +65,7 @@ public class IpcVehicle implements Serializable {
 	private final boolean isLayover;
 	private final long layoverDepartureTime;
 	private final String nextStopId;
+	private final String nextStopName;
 	private final String vehicleType;
 	
 	private static final long serialVersionUID = -1744566765456572042L;
@@ -118,7 +119,8 @@ public class IpcVehicle implements Serializable {
 			// If vehicle is at a stop then "next" stop will actually be
 			// the current stop.
 			this.nextStopId = match.getStopPath().getStopId();
-
+			this.nextStopName = match.getStopPath().getStopName();
+			
 			this.vehicleType = match.getRoute().getType();
 		} else {
 			// Vehicle not assigned to trip so null out parameters
@@ -130,6 +132,7 @@ public class IpcVehicle implements Serializable {
 			this.isLayover = false;
 			this.layoverDepartureTime = 0;
 			this.nextStopId = null;
+			this.nextStopName = null;
 			this.vehicleType = null;
 		}
 		this.predictable = vs.isPredictable();
@@ -160,6 +163,7 @@ public class IpcVehicle implements Serializable {
 	 * @param isLayover
 	 * @param layoverDepartureTime
 	 * @param nextStopId
+	 * @param nextStopName
 	 * @param vehicleType
 	 */
 	protected IpcVehicle(String blockId,
@@ -169,7 +173,7 @@ public class IpcVehicle implements Serializable {
 			String headsign, boolean predictable, boolean schedBasedPred,
 			TemporalDifference realTimeSchdAdh, boolean isDelayed,
 			boolean isLayover, long layoverDepartureTime, String nextStopId,
-			String vehicleType) {
+			String nextStopName, String vehicleType) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
@@ -187,6 +191,7 @@ public class IpcVehicle implements Serializable {
 		this.isLayover = isLayover;
 		this.layoverDepartureTime = layoverDepartureTime;
 		this.nextStopId = nextStopId;
+		this.nextStopName = nextStopName;
 		this.vehicleType = vehicleType;
 	}
 
@@ -213,6 +218,7 @@ public class IpcVehicle implements Serializable {
 		protected boolean isLayover;
 		protected long layoverDepartureTime;
 		protected String nextStopId;
+		protected String nextStopName;
 		protected String vehicleType;
 
 		private static final long serialVersionUID = -4996254752417270043L;
@@ -239,6 +245,7 @@ public class IpcVehicle implements Serializable {
 			this.isLayover = v.isLayover;
 			this.layoverDepartureTime = v.layoverDepartureTime;
 			this.nextStopId = v.nextStopId;
+			this.nextStopName = v.nextStopName;
 			this.vehicleType = v.vehicleType;
 		}
 
@@ -269,6 +276,7 @@ public class IpcVehicle implements Serializable {
 		    stream.writeBoolean(isLayover);
 		    stream.writeLong(layoverDepartureTime);
 		    stream.writeObject(nextStopId);
+		    stream.writeObject(nextStopName);
 		    stream.writeObject(vehicleType);
 		}
 
@@ -306,6 +314,7 @@ public class IpcVehicle implements Serializable {
 			isLayover = stream.readBoolean();
 			layoverDepartureTime = stream.readLong();
 			nextStopId = (String) stream.readObject();
+			nextStopName = (String) stream.readObject();
 			vehicleType = (String) stream.readObject();
 		}
 
@@ -320,7 +329,7 @@ public class IpcVehicle implements Serializable {
 					routeId, routeShortName, tripId, tripPatternId,
 					directionId, headsign, predictable, schedBasedPred,
 					realTimeSchdAdh, isDelayed, isLayover, layoverDepartureTime,
-					nextStopId, vehicleType);
+					nextStopId, nextStopName, vehicleType);
 		}
 	} // End of SerializationProxy class
 
@@ -458,6 +467,10 @@ public class IpcVehicle implements Serializable {
 	public String getNextStopId() {
 		return nextStopId;
 	}
+	
+	public String getNextStopName() {
+		return nextStopName;
+	}
 
 	public String getVehicleType() {
 		return vehicleType;		
@@ -483,6 +496,7 @@ public class IpcVehicle implements Serializable {
 				+ ", layoverDepartureTime=" 
 					+ Time.timeStrNoTimeZone(layoverDepartureTime)
 				+ ", nextStopId=" + nextStopId
+				+ ", nextStopName=" + nextStopName
 				+ ", avl=" + avl
 				+ ", heading=" + heading 
 				+ ", vehicleType=" + vehicleType
@@ -495,10 +509,12 @@ public class IpcVehicle implements Serializable {
 	public static void main(String args[]) {
 		IpcAvl avl = new IpcAvl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f,
 				"block", "driver", "license", 0);
-		IpcVehicle v = new IpcVehicle("blockId",
-				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl, 123.456f,
-				"routeId", "routeShortName", "tripId", "tripPatternId",
-				"dirId", "headsign", true, false, null, false, false, 0, null, null);
+		IpcVehicle v =
+				new IpcVehicle("blockId",
+						BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl,
+						123.456f, "routeId", "routeShortName", "tripId",
+						"tripPatternId", "dirId", "headsign", true, false,
+						null, false, false, 0, null, null, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);
