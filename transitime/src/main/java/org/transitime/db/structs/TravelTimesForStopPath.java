@@ -220,7 +220,10 @@ public class TravelTimesForStopPath implements Serializable {
 						+ (trip!=null ? trip.getId() : "") 
 						+ " routeId=" + (trip!=null ? trip.getRouteId() : "")
 						+ " routeShortName=" 
-						+ (trip!=null ? trip.getRouteShortName() : "");
+						+ (trip!=null ? trip.getRouteShortName() : "")
+						+ ". You most likely need to set the "
+						+ "-maxTravelTimeSegmentLength command line option to "
+						+ "a larger value than than the default of 200m.";
 				logger.error(msg);
 				
 				// Since this could be a really problematic issue, throw an error
