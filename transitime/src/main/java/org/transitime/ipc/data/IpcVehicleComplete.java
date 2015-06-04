@@ -124,6 +124,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	 * @param isLayover
 	 * @param layoverDepartureTime
 	 * @param nextStopId
+	 * @param nextStopName
 	 * @param vehicleType
 	 * @param tripStartDateStr
 	 * @param atStopId
@@ -141,15 +142,15 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			String headsign, boolean predictable, boolean schedBasedPred,
 			TemporalDifference realTimeSchdAdh, boolean isDelayed,
 			boolean isLayover, long layoverDepartureTime, String nextStopId,
-			String vehicleType, long tripStartEpochTime, String atStopId,
-			String routeName, String originStopId, String destinationId,
-			double distanceToNextStop, double distanceOfNextStopFromTripStart,
-			double distanceAlongTrip) {
+			String nextStopName, String vehicleType, long tripStartEpochTime,
+			String atStopId, String routeName, String originStopId,
+			String destinationId, double distanceToNextStop,
+			double distanceOfNextStopFromTripStart, double distanceAlongTrip) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
-				isLayover, layoverDepartureTime, nextStopId, vehicleType,
-				tripStartEpochTime, atStopId);
+				isLayover, layoverDepartureTime, nextStopId, nextStopName,
+				vehicleType, tripStartEpochTime, atStopId);
 
 		this.routeName = routeName;
 		this.originStopId = originStopId;
@@ -248,9 +249,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					heading, routeId, routeShortName, tripId, tripPatternId,
 					directionId, headsign, predictable, schedBasedPred,
 					realTimeSchdAdh, isDelayed, isLayover,
-					layoverDepartureTime, nextStopId, vehicleType,
-					tripStartEpochTime, atStopId, routeName, originStopId,
-					destinationId, distanceToNextStop,
+					layoverDepartureTime, nextStopId, nextStopName,
+					vehicleType, tripStartEpochTime, atStopId, routeName,
+					originStopId, destinationId, distanceToNextStop,
 					distanceOfNextStopFromTripStart, distanceAlongTrip);
 		}
 
