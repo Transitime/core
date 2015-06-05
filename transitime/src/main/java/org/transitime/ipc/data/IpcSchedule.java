@@ -222,7 +222,7 @@ public class IpcSchedule implements Serializable {
 				}
 			}
 			
-			if (!timeFoundForStop) {
+			if (timeFoundForStop) {
 				// A time was found so the stop is OK. Continue to next stop
 				++stopIdx;
 			} else {
