@@ -1014,7 +1014,7 @@ public class AvlProcessor {
 
 		// Make sure the schedule adherence is reasonable
 		if (scheduleAdherence != null
-				&& !scheduleAdherence.isWithinBounds(vehicleState)) {
+				&& !scheduleAdherence.isWithinBounds()) {
 			logger.warn(
 					"For vehicleId={} schedule adherence {} is not "
 							+ "between the allowable bounds. Therefore trying to match "

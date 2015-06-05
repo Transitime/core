@@ -155,23 +155,6 @@ public class TemporalDifference implements Serializable {
 	}
 	
 	/**
-	 * Returns whether the schedule adherence is within bounds but if vehicle
-	 * is matched to a layover then allow vehicle to be really early since it
-	 * might get the assignment really early.
-	 * 
-	 * @param vehicleState
-	 * @return
-	 */
-	public boolean isWithinBounds(VehicleState vehicleState) {
-		if (vehicleState.getMatch().isLayover()) {
-			return isWithinBounds(Time.SEC_PER_DAY,
-					CoreConfig.getAllowableLateSecondsForInitialMatching());
-		} else {
-			return isWithinBounds();
-		}
-	}
-	
-	/**
 	 * Returns an easily comparable positive value for the temporal difference
 	 * that takes into account that being early is far worse and less likely
 	 * than being late.
