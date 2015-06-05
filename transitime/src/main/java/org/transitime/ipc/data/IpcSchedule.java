@@ -231,6 +231,9 @@ public class IpcSchedule implements Serializable {
 				for (IpcSchedTrip ipcSchedTrip : ipcScheduleTrips) {
 					ipcSchedTrip.getSchedTimes().remove(stopIdx);
 				}
+				
+				// Took out stop so keep track for the while loop
+				--stopsPerTrip;
 			}
 		}
 	}
