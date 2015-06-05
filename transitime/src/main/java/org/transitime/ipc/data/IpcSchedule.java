@@ -206,6 +206,33 @@ public class IpcSchedule implements Serializable {
 			IpcSchedTrip ipcScheduleTrip = new IpcSchedTrip(trip);
 			ipcScheduleTrips.add(ipcScheduleTrip);
 		}
+		
+		// Now that have data for all trips can remove stops that don't have
+		// any times at all. This can't be done when first processing an
+		// individual trip so has to be done here.
+		int stopsPerTrip = ipcScheduleTrips.get(0).getSchedTimes().size();
+		int stopIdx = 0;
+		while (stopIdx < stopsPerTrip) {
+			boolean timeFoundForStop = false;
+			for (IpcSchedTrip ipcSchedTrip : ipcScheduleTrips) {
+				// If found a time for the stop continue on
+				if (ipcSchedTrip.getSchedTimes().get(stopIdx).getTimeOfDay() != null) {
+					timeFoundForStop = true;
+					continue;
+				}
+			}
+			
+			if (!timeFoundForStop) {
+				// A time was found so the stop is OK. Continue to next stop
+				++stopIdx;
+			} else {
+				// No time found for the current stop so remove the stop from the 
+				// schedule
+				for (IpcSchedTrip ipcSchedTrip : ipcScheduleTrips) {
+					ipcSchedTrip.getSchedTimes().remove(stopIdx);
+				}
+			}
+		}
 	}
 	
 	/**
