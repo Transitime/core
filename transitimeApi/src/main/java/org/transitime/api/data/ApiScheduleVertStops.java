@@ -28,11 +28,13 @@ import org.transitime.ipc.data.IpcSchedTrip;
 
 /**
  * Represents a schedule for a route for a specific direction and service class.
+ * Stops are listed vertically in the matrix. For when there are a good number
+ * of stops but not as many trips, such as for commuter rail.
  *
  * @author SkiBu Smith
  *
  */
-public class ApiSchedule {
+public class ApiScheduleVertStops {
 
 	@XmlAttribute
 	private String serviceId;
@@ -61,10 +63,10 @@ public class ApiSchedule {
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
 	 * "MessageBodyWriter not found for media type=application/json" exception.
 	 */
-	protected ApiSchedule() {
+	protected ApiScheduleVertStops() {
 	}
 	
-	public ApiSchedule(IpcSchedule ipcSched) {
+	public ApiScheduleVertStops(IpcSchedule ipcSched) {
 		serviceId = ipcSched.getServiceId();
 		serviceName = ipcSched.getServiceName();
 		directionId = ipcSched.getDirectionId();

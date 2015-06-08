@@ -14,7 +14,7 @@
   <style>
   label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
   .param {margin-top: 10px;}
-  #route {width:300px;}
+  #route {width:380px;}
   #submit {margin-top: 40px; margin-left: 250px;}
   .note {font-size: small;}
   
@@ -29,7 +29,7 @@
 </div>
    
 <div id="mainDiv">
-<form action="scheduleReport.jsp" method="POST">
+<form action="scheduleVertStopsReport.jsp" method="POST">
    <%-- For passing agency param to the report --%>
    <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
    

@@ -45,7 +45,8 @@ import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoute;
 import org.transitime.api.data.ApiRouteSummaries;
-import org.transitime.api.data.ApiSchedules;
+import org.transitime.api.data.ApiSchedulesHorizStops;
+import org.transitime.api.data.ApiSchedulesVertStops;
 import org.transitime.api.data.ApiServerStatus;
 import org.transitime.api.data.ApiTrip;
 import org.transitime.api.data.ApiTripPatterns;
@@ -907,18 +908,20 @@ public class TransitimeApi {
 	}
 
 	/**
-	 * Handles the "tripPattern" command which outputs trip pattern
-	 * configuration data for the specified route.
+	 * Handles the "scheduleVertStops" command which outputs schedule for the
+	 * specified route. The data is output such that the stops are listed
+	 * vertically (and the trips are horizontal). For when there are a good
+	 * number of stops but not as many trips, such as for commuter rail.
 	 * 
 	 * @param stdParameters
 	 * @param routesIdOrShortNames
 	 * @return
 	 * @throws WebApplicationException
 	 */
-	@Path("/command/schedule")
+	@Path("/command/scheduleVertStops")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getSchedule(
+	public Response getScheduleVertStops(
 			@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "r") String routesIdOrShortNames)
 			throws WebApplicationException {
@@ -939,7 +942,50 @@ public class TransitimeApi {
 						+ routesIdOrShortNames + " does not exist.");
 
 			// Create and return ApiSchedules response
-			ApiSchedules apiSchedules = new ApiSchedules(ipcSchedules);
+			ApiSchedulesVertStops apiSchedules = new ApiSchedulesVertStops(ipcSchedules);
+			return stdParameters.createResponse(apiSchedules);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Handles the "scheduleHorizStops" command which outputs schedule for the
+	 * specified route. The data is output such that the stops are listed
+	 * horizontally (and the trips are vertical). For when there are many more
+	 * trips than stops, which is typical for bus routes.
+	 * 
+	 * @param stdParameters
+	 * @param routesIdOrShortNames
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/scheduleHorizStops")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getScheduleHorizStops(
+			@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "r") String routesIdOrShortNames)
+			throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcSchedule> ipcSchedules = inter
+					.getSchedules(routesIdOrShortNames);
+
+			// If the trip doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcSchedules == null)
+				throw WebUtils.badRequestException("route="
+						+ routesIdOrShortNames + " does not exist.");
+
+			// Create and return ApiSchedules response
+			ApiSchedulesHorizStops apiSchedules = new ApiSchedulesHorizStops(ipcSchedules);
 			return stdParameters.createResponse(apiSchedules);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request

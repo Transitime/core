@@ -27,14 +27,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.transitime.ipc.data.IpcSchedule;
 
 /**
- * Represents a collection of ApiSchedule objects for a route. There is one
- * ApiSchedule for each direction/service for a route.
+ * Represents a collection of ApiScheduleVertStops objects for a route. There is
+ * one ApiScheduleVertStops for each direction/service for a route. The stops
+ * are listed vertically in the matrix. For when there are a good number of
+ * stops but not as many trips, such as for commuter rail.
  *
  * @author SkiBu Smith
  *
  */
 @XmlRootElement(name = "schedules")
-public class ApiSchedules {
+public class ApiSchedulesVertStops {
 
 	@XmlAttribute
 	private String routeId;
@@ -43,7 +45,7 @@ public class ApiSchedules {
 	private String routeName;
 
 	@XmlElement(name = "schedule")
-	private List<ApiSchedule> schedules;
+	private List<ApiScheduleVertStops> schedules;
 	
 	/********************** Member Functions **************************/
 
@@ -51,16 +53,16 @@ public class ApiSchedules {
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
 	 * "MessageBodyWriter not found for media type=application/json" exception.
 	 */
-	protected ApiSchedules() {
+	protected ApiSchedulesVertStops() {
 	}
 	
-	public ApiSchedules(List<IpcSchedule> schedules) {
+	public ApiSchedulesVertStops(List<IpcSchedule> schedules) {
 		this.routeId = schedules.get(0).getRouteId();
 		this.routeName = schedules.get(0).getRouteName();
 		
-		this.schedules = new ArrayList<ApiSchedule>(schedules.size());
+		this.schedules = new ArrayList<ApiScheduleVertStops>(schedules.size());
 		for (IpcSchedule ipcSchedule : schedules) {
-			this.schedules.add(new ApiSchedule(ipcSchedule));
+			this.schedules.add(new ApiScheduleVertStops(ipcSchedule));
 		}
 	}
 }

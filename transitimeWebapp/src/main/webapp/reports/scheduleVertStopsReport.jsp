@@ -77,7 +77,7 @@ if (agencyId == null || agencyId.isEmpty()) {
     		  
     		  // Create the columns. First column is stop name. And then there
     		  // is one column per trip.
-    		  data.addColumn('string', 'Stop', 'stopColumn');
+    		  data.addColumn('string', '', 'stopColumn');
     		  for (var j=0; j<schedule.trip.length; ++j) {
     			  var trip = schedule.trip[j];
     			  var tripName = trip.tripShortName;
@@ -85,7 +85,7 @@ if (agencyId == null || agencyId.isEmpty()) {
     				  tripName = trip.tripId;
     			  var tripNameTooLong = tripName.length > 6;
     			  var html = tripNameTooLong ?
-    					  "Blck<br/>" + trip.blockId : "Trip<br/>" + tripName;
+    					  "Block<br/>" + trip.blockId : "Trip<br/>" + tripName;
         		  data.addColumn("string", html);    			  
     		  }
 
@@ -137,7 +137,7 @@ if (agencyId == null || agencyId.isEmpty()) {
       function getData() {
     	  $.ajax({
     	      	// The page being requested
-    		  	url: apiUrlPrefix + "/command/schedule",
+    		  	url: apiUrlPrefix + "/command/scheduleVertStops",
     	      	// Pass in query string parameters to page being requested
     	      	data: {<%= WebUtils.getAjaxDataString(request) %>},
     	    	// Needed so that parameters passed properly to page being requested
