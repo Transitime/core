@@ -136,7 +136,7 @@ public class GtfsRtTripFeed {
 					.setStopId(pred.getStopId());
 			
 			StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
-			stopTimeEvent.setTime(pred.getTime() / Time.MS_PER_SEC);
+			stopTimeEvent.setTime(pred.getPredictionTime() / Time.MS_PER_SEC);
 			
 			// If schedule based prediction then set the uncertainty to special
 			// value so that client can tell

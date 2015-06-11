@@ -275,8 +275,9 @@ public class VehiclesServer extends AbstractServer
 				new ArrayList<IpcActiveBlock>();
 		
 		// Determine all the active blocks
-		List<Block> blocks = BlocksInfo.getCurrentlyActiveBlocks(routeIds,
-				allowableBeforeTimeSecs);
+		List<Block> blocks =
+				BlocksInfo.getCurrentlyActiveBlocks(routeIds, null,
+						allowableBeforeTimeSecs);
 		
 		// For each active block determine associated vehicle
 		for (Block block : blocks) {

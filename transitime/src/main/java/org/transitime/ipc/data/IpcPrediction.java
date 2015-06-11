@@ -22,8 +22,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Trip;
@@ -73,16 +71,12 @@ public class IpcPrediction implements Serializable {
 	// when creating PredictionsForRouteStop object.
 	private final Trip trip;
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(IpcPrediction.class);
-
 	private static final long serialVersionUID = 7264507678733060173L;
 
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructs a Prediction object. For use on server side. Also logs each
-	 * prediction in the prediction log file (if logback so enabled).
+	 * Constructs a Prediction object. For use on server side. 
 	 * 
 	 * @param avlReport
 	 * @param stopId
@@ -129,9 +123,6 @@ public class IpcPrediction implements Serializable {
 		this.lateAndSubsequentTripSoMarkAsUncertain = 
 				lateAndSubsequentTripSoMarkAsUncertain;
 		this.isArrival = isArrival;
-
-		// Log each creation of a Prediction
-		logger.info("Creating {}", this);
 	}
 
 	/**
@@ -331,7 +322,7 @@ public class IpcPrediction implements Serializable {
 	public String toString() {
 		return "IpcPrediction [" 
 				+ "vehicleId=" + vehicleId
-				+ ", predTime="	+ Time.timeStrMsecNoTimeZone(predictionTime)
+				+ ", predTime="	+ Time.dateTimeStr(predictionTime)
 				+ ", routeId=" + routeId
 				+ (trip != null ? ", rteName=" + trip.getRouteShortName() : "")
 				+ ", stop="	+ stopId
@@ -344,7 +335,7 @@ public class IpcPrediction implements Serializable {
 				+ ", block=" + blockId
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
 				+ ", createTime=" + Time.timeStrMsecNoTimeZone(creationTime)
-				+ ", tripStartEpochTime=" + Time.timeStr(tripStartEpochTime)
+				+ ", tripStartEpochTime=" + Time.timeStrMsecNoTimeZone(tripStartEpochTime)
 				+ ", waitStop="	+ (affectedByWaitStop ? "t" : "f")
 				+ (schedBasedPred ? ", schedBasedPred=t" : "")
 				+ (isDelayed ? ", delayed=t" : "")
@@ -389,7 +380,7 @@ public class IpcPrediction implements Serializable {
 		return blockId;
 	}
 
-	public long getTime() {
+	public long getPredictionTime() {
 		return predictionTime;
 	}
 

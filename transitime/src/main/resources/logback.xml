@@ -310,7 +310,7 @@
 
   <!-- Taken out (by setting level to warn instead of info) for now because 
        so verbose -->
-  <logger name="org.transitime.ipc.data.IpcPrediction"
+  <logger name="org.transitime.core.PredictionGeneratorDefaultImpl"
           level="warn" additivity="false">
     <appender-ref ref="PREDICTION" />
   </logger>

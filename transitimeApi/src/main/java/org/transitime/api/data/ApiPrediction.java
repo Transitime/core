@@ -86,8 +86,8 @@ public class ApiPrediction {
 	}
 
 	public ApiPrediction(IpcPrediction prediction) {
-		time = prediction.getTime() / Time.MS_PER_SEC;
-		seconds = (int) (prediction.getTime() - System.currentTimeMillis()) /
+		time = prediction.getPredictionTime() / Time.MS_PER_SEC;
+		seconds = (int) (prediction.getPredictionTime() - System.currentTimeMillis()) /
 				Time.MS_PER_SEC;
 		// Always round down minutes to be conservative and so that user
 		// doesn't miss bus.

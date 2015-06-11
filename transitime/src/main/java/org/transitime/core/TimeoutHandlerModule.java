@@ -92,7 +92,7 @@ public class TimeoutHandlerModule extends Module {
 					"If predictions created for a block based on the schedule "
 					+ "will remove those predictions after this specified "
 					+ "number of seconds. If using schedule based predictions "
-					+ "to provide predictions for even when GPS is working "
+					+ "to provide predictions for even when there is no GPS "
 					+ "then this can be disabled by using a negative value. "
 					+ "But if using schedule based predictions until a GPS "
 					+ "based vehicle is matched then want the schedule based "
@@ -190,6 +190,11 @@ public class TimeoutHandlerModule extends Module {
 	 */
 	private void handleSchedBasedPredsPossibleTimeout(VehicleState vehicleState, long now,
 			Iterator<AvlReport> mapIterator) {
+		// Don't do anything here if this feature is disabled 
+		// (allowableNoAvlForSchedBasedPredictions is negative)
+		if (allowableNoAvlForSchedBasedPredictions.getValue() < 0)
+			return;
+		
 		long scheduledDepartureTime = vehicleState.getMatch()
 				.getScheduledWaitStopTime();
 		if (scheduledDepartureTime >= 0) {

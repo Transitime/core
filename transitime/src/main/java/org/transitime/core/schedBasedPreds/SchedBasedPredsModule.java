@@ -18,11 +18,14 @@
 package org.transitime.core.schedBasedPreds;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.AvlProcessor;
 import org.transitime.core.BlocksInfo;
@@ -31,6 +34,7 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.IntervalTimer;
@@ -50,7 +54,7 @@ import org.transitime.utils.Time;
  * arrive.
  * <p>
  * Schedule based predictions are removed once a regular vehicle is assigned to
- * the block or the schedule based vehicle is timed out iva TimeoutHandlerModule
+ * the block or the schedule based vehicle is timed out via TimeoutHandlerModule
  * due to it being transitime.timeout.allowableNoAvlForSchedBasedPredictions
  * after the scheduled departure time for the assignment.
  * 
@@ -75,6 +79,16 @@ public class SchedBasedPredsModule extends Module {
 		return timeBetweenPollingMsec.getValue();
 	}
 
+	private static final BooleanConfigValue processImmediatelyAtStartup =
+			new BooleanConfigValue("transitime.schedBasedPreds.processImmediatelyAtStartup", 
+					false,
+					"Whether should start creating schedule based predictions "
+					+ "right at startup. Usually want to give AVL data a "
+					+ "polling cycle to generate AVL based predictions so the "
+					+ "default is false. But for a purely schedule based "
+					+ "system want to set this to true so get the predictions "
+					+ "immediately.");
+	
 	private static final IntegerConfigValue beforeStartTimeMins = 
 			new IntegerConfigValue(
 					"transitime.schedBasedPreds.beforeStartTimeMins", 60,
@@ -103,12 +117,24 @@ public class SchedBasedPredsModule extends Module {
 	 * predictions.
 	 */
 	private void createSchedBasedPredsAsNecessary() {
+		// Determine all the block IDs already in use so that can skip these
+		// when doing the somewhat expensive searching for currently active
+		// blocks.
+		Set<String> blockIdsAlreadyAssigned = new HashSet<String>();
+		for (IpcVehicle vehicle : VehicleDataCache.getInstance().getVehicles()) {
+			String blockId = vehicle.getBlockId();
+			if (blockId != null)
+				blockIdsAlreadyAssigned.add(blockId);
+		}
+		
 		// Determine which blocks are coming up or currently active
-		List<Block> blocksAboutToStart = BlocksInfo.getBlocksAboutToStart(
-				getBeforeStartTimeMins() * Time.SEC_PER_MIN);
+		List<Block> activeBlocks =
+				BlocksInfo.getCurrentlyActiveBlocks(null,
+						blockIdsAlreadyAssigned, getBeforeStartTimeMins()
+								* Time.SEC_PER_MIN);
 		
 		// For each block about to start see if no associated vehicle
-		for (Block block : blocksAboutToStart) {
+		for (Block block : activeBlocks) {
 			// Is there a vehicle associated with the block?
 			Collection<String> vehiclesForBlock = VehicleDataCache.getInstance()
 					.getVehiclesByBlockId(block.getId());
@@ -116,19 +142,27 @@ public class SchedBasedPredsModule extends Module {
 				// No vehicle associated with the active block so create a
 				// schedule based one. First create a fake AVL report that
 				// corresponds to the first stop of the block.
-				logger.info("Creating a schedule based vehicle for blockId={}",
-						block.getId());
 				String vehicleId = 
 						"block_" + block.getId() + "_schedBasedVehicle"; 
-				long time = Core.getInstance().getSystemTime();
+				long referenceTime = Core.getInstance().getSystemTime();
+				long blockStartEpochTime =
+						Core.getInstance()
+								.getTime()
+								.getEpochTime(block.getStartTime(),
+										referenceTime);
 				Location location = block.getStartLoc();
-				AvlReport avlReport = new AvlReport(vehicleId, time, location);
+				AvlReport avlReport =
+						new AvlReport(vehicleId, blockStartEpochTime, location);
 				
 				// Set the block assignment for the AVL report and indicate 
 				// that it is for creating scheduled based predictions
 				avlReport.setAssignment(block.getId(), 
 						AssignmentType.BLOCK_FOR_SCHED_BASED_PREDS);
-				
+
+				logger.info("Creating a schedule based vehicle for blockId={}. "
+						+ "The fake AVL report is {}. The block is {}",
+						block.getId(), avlReport, block.toShortString());
+
 				// Process that AVL report to generate predictions and such
 				AvlProcessor.getInstance().processAvlReport(avlReport);
 			}
@@ -145,8 +179,11 @@ public class SchedBasedPredsModule extends Module {
 				getClass().getName(), getAgencyId());
 		
 		// No need to run at startup since haven't yet had change to assign 
-		// vehicles to blocks yet. So sleep a bit first.
-		Time.sleep(getTimeBetweenPollingMsec());
+		// vehicles to blocks yet. So sleep a bit first, unless specified to
+		// run immediately by the processImmediatelyAtStartup configuration 
+		// parameter.
+		if (!processImmediatelyAtStartup.getValue())
+			Time.sleep(getTimeBetweenPollingMsec());
 		
 		// Run forever
 		while (true) {

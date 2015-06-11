@@ -456,6 +456,7 @@ public final class Block implements Serializable {
 	 * day.
 	 * 
 	 * @param date
+	 * @param allowableBeforeTimeSecs
 	 * @return True if the block is active.
 	 */
 	public boolean isActive(Date date, int allowableBeforeTimeSecs) {
@@ -505,6 +506,21 @@ public final class Block implements Serializable {
 		return false;
 	}
 
+	/**
+	 * Returns true if the time of day of the epoch time passed in is between
+	 * allowableBeforeTimeSecs before the startTime and the endTime for the
+	 * block. No leeway is provided for the end time. Note: does not look to see
+	 * if the service associated with the block is active. Only looks at time of
+	 * day.
+	 * 
+	 * @param epochTime
+	 * @param allowableBeforeTimeSecs
+	 * @return
+	 */
+	public boolean isActive(long epochTime, int allowableBeforeTimeSecs) {
+		return isActive(new Date(epochTime), allowableBeforeTimeSecs);
+	}
+	
 	/**
 	 * Returns true if the time of day of the date passed in is between the
 	 * startTime and the endTime for the block. No leeway is provided. Note:
@@ -681,14 +697,14 @@ public final class Block implements Serializable {
 	}
 	
 	/**
-	 * @return the startTime
+	 * @return the startTime in seconds from midnight
 	 */
 	public int getStartTime() {
 		return startTime;
 	}
 
 	/**
-	 * @return the endTime
+	 * @return the endTime in seconds from midnight
 	 */
 	public int getEndTime() {
 		return endTime;

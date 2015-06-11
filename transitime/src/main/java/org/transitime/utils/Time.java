@@ -280,11 +280,16 @@ public class Time {
 			// problem if the AVL time is right after midnight but the 
 			// secondsIntoDay is just before midnight. Therefore if the 
 			// resulting epoch time is too far away then adjust the epoch
-			// time by plus or minus day.
-			if (epochTime > referenceDate.getTime() + 12 * MS_PER_HOUR) {
+			// time by plus or minus day. Note: originally used 12 hours
+			// instead of 20 hours but that caused problems when trying to 
+			// determine if a block is active because it might have started
+			// more than 12 hours ago. By using 20 hours we are much more likely
+			// to get the correct day because will only correct if really far 
+			// off.
+			if (epochTime > referenceDate.getTime() + 20 * MS_PER_HOUR) {
 				// subtract a day
 				epochTime -= MS_PER_DAY;
-			} else if (epochTime < referenceDate.getTime() - 12 * MS_PER_HOUR) {
+			} else if (epochTime < referenceDate.getTime() - 20 * MS_PER_HOUR) {
 				// add a day
 				epochTime += MS_PER_DAY;
 			}

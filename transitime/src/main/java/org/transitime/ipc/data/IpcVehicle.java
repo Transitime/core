@@ -110,7 +110,7 @@ public class IpcVehicle implements Serializable {
 								vs.getRouteShortName(),
 								match.getStopPath().getStopId());
 				this.layoverDepartureTime = predsForVehicle!=null ? 
-						predsForVehicle.getTime() : 0;
+						predsForVehicle.getPredictionTime() : 0;
 			} else {
 				// Not a layover so departure time not provided
 				this.layoverDepartureTime = 0;

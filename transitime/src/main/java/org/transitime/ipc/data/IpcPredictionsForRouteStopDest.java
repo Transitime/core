@@ -165,7 +165,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			for (int i=0; i<size; ++i) {
 				IpcPrediction prediction = toClone.predictionsForRouteStop.get(i);
 				// If prediction exceeds max time then done
-				if (prediction.getTime() > maxSystemTimeForPrediction)
+				if (prediction.getPredictionTime() > maxSystemTimeForPrediction)
 					break;
 				this.predictionsForRouteStop.add(i, prediction);
 			}
@@ -426,7 +426,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			// Remove predictions that are expired. It makes sense to do this 
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
-			if (currentPrediction.getTime() < currentTime) {
+			if (currentPrediction.getPredictionTime() < currentTime) {
 				iterator.remove();
 			} else {
 				// The subsequent predictions are later so if this one is
@@ -476,7 +476,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			// Remove predictions that are expired. It makes sense to do this 
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
-			if (currentPrediction.getTime() < currentTime) {
+			if (currentPrediction.getPredictionTime() < currentTime) {
 				iterator.remove();
 				continue;
 			}
@@ -489,8 +489,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			for (int i=0; i<predictionsForRouteStop.size(); ++i) {
 				// If the new prediction is before the previous prediction
 				// in currentPredsForRouteStop then insert it.
-				if (newPredForRouteStop.getTime() < 
-						predictionsForRouteStop.get(i).getTime()) {
+				if (newPredForRouteStop.getPredictionTime() < 
+						predictionsForRouteStop.get(i).getPredictionTime()) {
 					// Add the new prediction to the list. If the list already
 					// has the max number of predictions then first remove the
 					// last one so that the array doesn't need to grow to 

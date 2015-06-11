@@ -380,7 +380,7 @@ public class PredictionAccuracyModule extends Module {
 											routeId, directionId, stopId,
 											pred.getTripId(), 
 											pred.getVehicleId(),
-											new Date(pred.getTime()),
+											new Date(pred.getPredictionTime()),
 											predictionsReadTime,
 											pred.isArrival(),
 											pred.isAffectedByWaitStop(),

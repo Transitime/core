@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.AvlReport;
@@ -63,6 +64,9 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 					45 * Time.SEC_PER_MIN,
 					"How far forward into the future should generate " +
 					"predictions for.");
+	public static int getMaxPredictionsTimeSecs() {
+		return maxPredictionsTimeSecs.getValue();
+	}
 	
 	private static BooleanConfigValue useArrivalPredictionsForNormalStops =
 			new BooleanConfigValue("transitime.core.useArrivalPredictionsForNormalStops", 
@@ -216,8 +220,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	}
 		
 	/**
-	 * Generates the predictions for the vehicle. Updates the vehicle state with
-	 * those predictions. Also sends the predictions to the PredictionDataCache.
+	 * Generates the predictions for the vehicle. 
 	 * 
 	 * @param vehicleState
 	 *            Contains the new match for the vehicle that the predictions
@@ -267,6 +270,10 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 					+ "trips as being uncertain. {}", vehicleState);
 		int currentTripIndex = indices.getTripIndex();
 		
+		// For filtering out predictions that are before now, which can
+		// happen for schedule based predictions
+		long now = Core.getInstance().getSystemTime();
+		
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
 		while (schedBasedPreds
@@ -296,26 +303,33 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			// stop is added to the arrival time) then don't add the prediction
 			// and break out of the loop.
 			if (!schedBasedPreds
-					&& predictionForStop.getTime() > avlTime
+					&& predictionForStop.getPredictionTime() > avlTime
 							+ maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC)
 				break;
 
-			// If no schedule assignment then don't want to generate predictions for the
-			// last stop of the trip since it is a duplicate of the first stop
-			// of the trip
+			// If no schedule assignment then don't want to generate predictions
+			// for the last stop of the trip since it is a duplicate of the 			
+			// first stop of the trip
 			boolean lastStopOfNonSchedBasedTrip = 
 					indices.getBlock().isNoSchedule() && indices.atEndOfTrip();
 					
-			// The prediction is not too far into the future so add it to the list,
-			// unless it is last stop of non schedule based trip
-			if (!lastStopOfNonSchedBasedTrip)
-				newPredictions.add(predictionForStop);			
-
+			// The prediction is not too far into the future. Add it to the 
+			// list of predictions to be returned. But only do this if
+			// it is not last stop of non-schedule based trip since that is a
+			// a duplicate of the stop for the next trip. Also, don't add
+			// prediction if it is in the past since those are not needed.
+			// Can get predictions in the past for schedule based predictions.
+			if (!lastStopOfNonSchedBasedTrip
+					&& predictionForStop.getPredictionTime() > now) {
+				newPredictions.add(predictionForStop);
+				logger.info("Generated prediction {}", predictionForStop);
+			}
+			
 			// Determine prediction time for the departure. For layovers
 			// the prediction time can be adjusted by deadhead time,
 			// schedule time, break time, etc. For arrival predictions
 			// need to add the expected stop time.
-			predictionTime = predictionForStop.getTime();
+			predictionTime = predictionForStop.getPredictionTime();
 			if (predictionForStop.isArrival())
 				predictionTime += indices.getStopTimeForPath();
 			

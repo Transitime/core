@@ -122,7 +122,7 @@ public class Prediction implements Serializable {
 	
 	public Prediction(IpcPrediction prediction) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
-		this.predictionTime = new Date(prediction.getTime());
+		this.predictionTime = new Date(prediction.getPredictionTime());
 		this.creationTime = new Date(prediction.getCreationTime());
 		this.vehicleId = prediction.getVehicleId();
 		this.stopId = prediction.getStopId();

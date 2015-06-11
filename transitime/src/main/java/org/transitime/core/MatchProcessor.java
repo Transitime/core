@@ -62,7 +62,8 @@ public class MatchProcessor {
 
 	/**
 	 * Generates the new predictions for the vehicle based on the new match
-	 * stored in the vehicle state.
+	 * stored in the vehicle state. Updates vehicle state, the predictions
+	 * cache, and stores predictions in database.
 	 * 
 	 * @param vehicleState
 	 */
@@ -78,7 +79,7 @@ public class MatchProcessor {
 		if (CoreConfig.getMaxPredictionsTimeForDbSecs() > 0) {
 			for (IpcPrediction prediction : newPredictions) {
 				// If prediction not too far into the future then ...
-				if (prediction.getTime() - prediction.getAvlTime() < CoreConfig
+				if (prediction.getPredictionTime() - prediction.getAvlTime() < CoreConfig
 						.getMaxPredictionsTimeForDbSecs() * Time.MS_PER_SEC) {
 					// Store the prediction into db
 					Prediction dbPrediction = new Prediction(prediction);

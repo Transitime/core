@@ -144,10 +144,10 @@ public class SiriMonitoredCall {
 		if (prediction != null) {
 			if (prediction.isArrival()) {
 				expectedArrivalTime =
-						timeFormatter.format(new Date(prediction.getTime()));
+						timeFormatter.format(new Date(prediction.getPredictionTime()));
 			} else {
 				expectedDepartureTime =
-						timeFormatter.format(new Date(prediction.getTime()));
+						timeFormatter.format(new Date(prediction.getPredictionTime()));
 			}
 		}
 

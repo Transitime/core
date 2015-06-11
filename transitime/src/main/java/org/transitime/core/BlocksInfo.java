@@ -87,7 +87,7 @@ public class BlocksInfo {
 	 * @return List of currently active blocks. Will not be null.
 	 */
 	public static List<Block> getCurrentlyActiveBlocks() {
-		return getCurrentlyActiveBlocks(null, 0);
+		return getCurrentlyActiveBlocks(null, null, 0);
 	}
 	
 	/**
@@ -95,15 +95,21 @@ public class BlocksInfo {
 	 * routes.
 	 * 
 	 * @param routeIds
-	 *            Collection of routes IDs that want blocks for. Use null
-	 *            to indicate all routes.
+	 *            Collection of routes IDs that want blocks for. Use null to
+	 *            indicate all routes.
+	 * @param blockIdsToIgnore
+	 *            Won't do the expensive lookup of the blocks in this set. This
+	 *            way can filter out blocks already assigned or such, and speed
+	 *            up the determination of active blocks. Set to null if simply
+	 *            want all currently active blocks.
 	 * @param allowableBeforeTimeSecs
 	 *            How much before the block time the block is considered to be
 	 *            active
 	 * @return List of currently active blocks. Will not be null.
 	 */
 	public static List<Block> getCurrentlyActiveBlocks(
-			Collection<String> routeIds, int allowableBeforeTimeSecs) {
+			Collection<String> routeIds, Set<String> blockIdsToIgnore,
+			int allowableBeforeTimeSecs) {
 		// The list to be returned
 		List<Block> activeBlocks = new ArrayList<Block>(1000);
 		
@@ -148,6 +154,12 @@ public class BlocksInfo {
 			// If the block is about to be or currently active then
 			// add it to the list to be returned
 			for (Block block : blocks) {
+				// If this is a block to ignore then simply continue to the 
+				// next one
+				if (blockIdsToIgnore != null
+						&& blockIdsToIgnore.contains(block.getId()))
+					continue;
+				
 				// Determine if block is for specified route. If routeIds is
 				// null then interested in all routes
 				boolean forSpecifiedRoute = true;
@@ -163,7 +175,7 @@ public class BlocksInfo {
 				
 				// If block currently active and is for specified route then
 				// add it to the list
-				if (block.isActive(now) && forSpecifiedRoute)
+				if (block.isActive(now, allowableBeforeTimeSecs) && forSpecifiedRoute)
 					activeBlocks.add(block);
 			}
 		}
