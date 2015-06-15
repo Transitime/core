@@ -68,7 +68,9 @@ public class PidFile {
 			Files.createDirectories(path.getParent());
 			
 			// Create the pid file and write the pid to it
-			OutputStream out = Files.newOutputStream(path, StandardOpenOption.CREATE);
+			OutputStream out =
+					Files.newOutputStream(path, StandardOpenOption.CREATE,
+							StandardOpenOption.TRUNCATE_EXISTING);
 			out.write(pid.getBytes());
 			out.close();
 		} catch (IOException e) {
