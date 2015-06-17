@@ -82,7 +82,7 @@ public class BlockAssigner {
 							avlReport.getAssignmentId());
 					if (block != null) {
 						blockFoundForServiceId = true;
-						logger.info("For vehicleId={} the block assignment from "
+						logger.debug("For vehicleId={} the block assignment from "
 								+ "the AVL feed is blockId={}", 
 								avlReport.getVehicleId(), 
 								block.getId());
