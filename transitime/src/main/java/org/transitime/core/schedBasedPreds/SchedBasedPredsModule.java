@@ -29,6 +29,7 @@ import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.AvlProcessor;
 import org.transitime.core.BlocksInfo;
+import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
@@ -76,10 +77,6 @@ public class SchedBasedPredsModule extends Module {
 					"How frequently to look for blocks that do not have "
 							+ "associated vehicle.");
 	
-	private static int getTimeBetweenPollingMsec() {
-		return timeBetweenPollingMsec.getValue();
-	}
-
 	private static final BooleanConfigValue processImmediatelyAtStartup =
 			new BooleanConfigValue("transitime.schedBasedPreds.processImmediatelyAtStartup", 
 					false,
@@ -96,8 +93,33 @@ public class SchedBasedPredsModule extends Module {
 					"How much before a block start time should create a "
 							+ "schedule based vehicle for that block.");
 	
-	private static int getBeforeStartTimeMins() {
-		return beforeStartTimeMins.getValue();
+	private static IntegerConfigValue afterStartTimeMins =
+			new IntegerConfigValue(
+					"transitime.schedBasedPreds.afterStartTimeMins",
+					8, // Can take a while to automatically assign a vehicle
+					"If predictions created for a block based on the schedule "
+					+ "will remove those predictions this specified "
+					+ "number of seconds after the block start time. If using "
+					+ "schedule based predictions "
+					+ "to provide predictions for even when there is no GPS "
+					+ "feed then this can be disabled by using a negative value. "
+					+ "But if using schedule based predictions until a GPS "
+					+ "based vehicle is matched then want the schedule based "
+					+ "predictions to be available until it is clear that no "
+					+ "GPS based vehicle is in service. This is especially "
+					+ "important when using the automatic assignment method "
+					+ "because it can take a few minutes.");
+
+	/**
+	 * How long after start time of block want to created schedule based
+	 * prediction. Negative value means feature disabled and schedule based
+	 * vehicles should be created and be active all the way up until end time of
+	 * block.
+	 * 
+	 * @return Time after start time of block that block considered active
+	 */
+	public static int getAfterStartTimeMins() {
+		return afterStartTimeMins.getValue();
 	}
 
 	/********************** Member Functions **************************/
@@ -133,9 +155,10 @@ public class SchedBasedPredsModule extends Module {
 		
 		// Determine which blocks are coming up or currently active
 		List<Block> activeBlocks =
-				BlocksInfo.getCurrentlyActiveBlocks(null,
-						blockIdsAlreadyAssigned, getBeforeStartTimeMins()
-								* Time.SEC_PER_MIN);
+				BlocksInfo.getCurrentlyActiveBlocks(null, // Get for all routes
+						blockIdsAlreadyAssigned, 
+						beforeStartTimeMins.getValue() * Time.SEC_PER_MIN,
+						afterStartTimeMins.getValue() * Time.SEC_PER_MIN);
 		
 		// For each block about to start see if no associated vehicle
 		for (Block block : activeBlocks) {
@@ -173,6 +196,80 @@ public class SchedBasedPredsModule extends Module {
 		}
 	}
 	
+	/**
+	 * Determines if schedule based vehicle should be timed out. A schedule
+	 * based vehicle should be timed out if the block is now over (now is passed
+	 * the end time of the block) or if passed the start time of the block by
+	 * more than the allowable number of minutes (a real vehicle was never
+	 * assigned to the block).
+	 * 
+	 * @param vehicleState
+	 * @param now
+	 *            Current time
+	 * @return An event description if the schedule based vehicle should be
+	 *         timed out and predictions should be removed, otherwise null
+	 */
+	public static String shouldTimeoutVehicle(VehicleState vehicleState, long now) {
+		// Make sure method only called for schedule based vehicles
+		if (!vehicleState.isForSchedBasedPreds()) {
+			logger.error("Called SchedBasedPredictionsModule.shouldTimeoutVehicle() "
+					+ "for vehicle that is not schedule based. {}", 
+					vehicleState);
+			return null;
+		}
+		Block block = vehicleState.getBlock();
+		if (block == null) {
+			logger.error("Called SchedBasedPredictionsModule.shouldTimeoutVehicle() "
+					+ "for vehicle that does not have a block assigned. {}", 
+					vehicleState);
+			return null;
+		}
+		
+		// If block not active anymore then must have reached end of block then
+		// should remove the schedule based vehicle
+		if (!block.isActive(now,
+				beforeStartTimeMins.getValue() * Time.SEC_PER_MIN)) {
+			String shouldTimeoutEventDescription = 
+					"Schedule based predictions to be "
+					+ "removed for block " 
+					+ vehicleState.getBlock().getId()
+					+ " because the block is no longer active." 
+					+ " Block start time is " 
+					+ Time.timeOfDayShortStr(block.getStartTime())
+					+ " and block end time is " 
+					+ Time.timeOfDayShortStr(block.getEndTime());
+			return shouldTimeoutEventDescription;
+		}
+		
+		// If block is active but it is beyond the allowable number of minutes past the
+		// the block start time then should remove the schedule based vehicle
+		if (afterStartTimeMins.getValue() >= 0) {
+			long scheduledDepartureTime =
+					vehicleState.getMatch().getScheduledWaitStopTime();
+			if (scheduledDepartureTime >= 0) {
+				// There is a scheduled departure time. Make sure not too
+				// far past it
+				long maxNoAvl = afterStartTimeMins.getValue() * Time.MS_PER_MIN;
+				if (now > scheduledDepartureTime + maxNoAvl) {	
+					String shouldTimeoutEventDescription = 
+							"Schedule based predictions removed for block " 
+							+ vehicleState.getBlock().getId()
+							+ " because it is now "
+							+ Time.elapsedTimeStr(now
+									- scheduledDepartureTime)
+							+ " since the scheduled start time for the block"
+							+ Time.dateTimeStr(scheduledDepartureTime)
+							+ " while allowable time without an AVL report is "
+							+ Time.elapsedTimeStr(maxNoAvl) + ".";
+					return shouldTimeoutEventDescription;
+				}
+			}
+		}
+		
+		// Vehicle doesn't need to be timed out
+		return null;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
@@ -187,7 +284,7 @@ public class SchedBasedPredsModule extends Module {
 		// run immediately by the processImmediatelyAtStartup configuration 
 		// parameter.
 		if (!processImmediatelyAtStartup.getValue())
-			Time.sleep(getTimeBetweenPollingMsec());
+			Time.sleep(timeBetweenPollingMsec.getValue());
 		
 		// Run forever
 		while (true) {
@@ -200,7 +297,7 @@ public class SchedBasedPredsModule extends Module {
 				
 				// Wait appropriate amount of time till poll again
 				long sleepTime = 
-						getTimeBetweenPollingMsec() - timer.elapsedMsec();
+						timeBetweenPollingMsec.getValue() - timer.elapsedMsec();
 				if (sleepTime > 0)
 					Time.sleep(sleepTime);
 			} catch (Throwable e) {

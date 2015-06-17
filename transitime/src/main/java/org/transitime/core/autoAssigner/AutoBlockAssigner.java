@@ -165,7 +165,7 @@ public class AutoBlockAssigner {
 	 * @return List of blocks that are available for assignment. Can be empty
 	 *         but not null
 	 */
-	private List<Block> unassignedBlocks() {
+	private List<Block> unassignedActiveBlocks() {
 		List<Block> currentlyUnassignedBlocks = new ArrayList<Block>();
 		List<Block> activeBlocks = BlocksInfo.getCurrentlyActiveBlocks();
 		for (Block block : activeBlocks) {
@@ -414,7 +414,7 @@ public class AutoBlockAssigner {
 		// not used. But if not to be exclusive, such as for no schedule based
 		// routes, then look at all active blocks.
 		List<Block> blocksToExamine = CoreConfig.exclusiveBlockAssignments() ? 
-				unassignedBlocks() : BlocksInfo.getCurrentlyActiveBlocks();
+				unassignedActiveBlocks() : BlocksInfo.getCurrentlyActiveBlocks();
 		
 		if (blocksToExamine.isEmpty()) {
 			logger.info("No currently active blocks to assign vehicleId={} to.",

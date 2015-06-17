@@ -87,7 +87,7 @@ public class BlocksInfo {
 	 * @return List of currently active blocks. Will not be null.
 	 */
 	public static List<Block> getCurrentlyActiveBlocks() {
-		return getCurrentlyActiveBlocks(null, null, 0);
+		return getCurrentlyActiveBlocks(null, null, 0, -1);
 	}
 	
 	/**
@@ -105,11 +105,16 @@ public class BlocksInfo {
 	 * @param allowableBeforeTimeSecs
 	 *            How much before the block time the block is considered to be
 	 *            active
-	 * @return List of currently active blocks. Will not be null.
+	 * @param allowableAfterStartTimeSecs
+	 *            If set to value greater than or equal to zero then block
+	 *            considered active only if within this number of seconds after
+	 *            the start time. If less then zero then block considered active
+	 *            up to the block end time.
+     * @return List of currently active blocks. Will not be null.
 	 */
 	public static List<Block> getCurrentlyActiveBlocks(
 			Collection<String> routeIds, Set<String> blockIdsToIgnore,
-			int allowableBeforeTimeSecs) {
+			int allowableBeforeTimeSecs, int allowableAfterStartTimeSecs) {
 		// The list to be returned
 		List<Block> activeBlocks = new ArrayList<Block>(1000);
 		
@@ -175,7 +180,8 @@ public class BlocksInfo {
 				
 				// If block currently active and is for specified route then
 				// add it to the list
-				if (block.isActive(now, allowableBeforeTimeSecs) && forSpecifiedRoute)
+				if (block.isActive(now, allowableBeforeTimeSecs,
+						allowableAfterStartTimeSecs) && forSpecifiedRoute)
 					activeBlocks.add(block);
 			}
 		}

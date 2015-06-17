@@ -421,7 +421,7 @@ public final class Block implements Serializable {
 		// are considered to be active allowableBeforeTimeSecs before their
 		// scheduled start time if the block is active then must be matching
 		// to the first trip, so return 0.
-		if (index < 0 && isActive(date, allowableBeforeTimeSecs))
+		if (index < 0 && isActive(date, allowableBeforeTimeSecs, -1))
 			return 0;
 				
 		// Return result
@@ -456,19 +456,35 @@ public final class Block implements Serializable {
 	 * day.
 	 * 
 	 * @param date
+	 *            The time checking to see whether block is active for
 	 * @param allowableBeforeTimeSecs
-	 * @return True if the block is active.
+	 *            Block considered active if within this number of seconds
+	 *            before the block start time. Set to 0 if want to know if date
+	 *            is actually between the block start and end times.
+	 * @param allowableAfterStartTimeSecs
+	 *            If set to value greater than or equal to zero then block
+	 *            considered active only if within this number of seconds after
+	 *            the start time. If less then zero then block considered active
+	 *            up to the block end time.
+	 * @return True if the block is active for the specified date
 	 */
-	public boolean isActive(Date date, int allowableBeforeTimeSecs) {
+	public boolean isActive(Date date, int allowableBeforeTimeSecs,
+			int allowableAfterStartTimeSecs) {
 		int secsInDay = 
 				Core.getInstance().getTime().getSecondsIntoDay(date);
 
+		// Determine the allowable start and end times for when the block 
+		// is to be considered active
+		int allowableStartTime = startTime - allowableBeforeTimeSecs;
+		int allowableEndTime =
+				allowableAfterStartTimeSecs < 0 ? endTime : startTime
+						+ allowableAfterStartTimeSecs;
+		
 		// Handle normal situation where times are between midnight in the 
 		// morning and midnight in the evening
 		boolean serviceClassValidToday = serviceClassIsValidForDay(date, 0);
 		if (serviceClassValidToday) {
-			if (secsInDay > startTime - allowableBeforeTimeSecs
-					&& secsInDay < endTime) {
+			if (secsInDay > allowableStartTime && secsInDay < allowableEndTime) {
 				return true;			
 			}
 		}
@@ -481,8 +497,8 @@ public final class Block implements Serializable {
 		if (serviceClassValidYesterday) {
 			int secsInDayPastMidnight =
 					secsInDay + Time.DAY_IN_SECS;
-			if (secsInDayPastMidnight > startTime - allowableBeforeTimeSecs
-					&& secsInDayPastMidnight < endTime) {
+			if (secsInDayPastMidnight > allowableStartTime
+					&& secsInDayPastMidnight < allowableEndTime) {
 				return true;			
 			}
 		}
@@ -496,14 +512,40 @@ public final class Block implements Serializable {
 		if (serviceClassValidTomorrow) {
 			int secsInDayBeforeMidnight =
 					secsInDay - Time.SEC_PER_DAY;
-			if (secsInDayBeforeMidnight > startTime - allowableBeforeTimeSecs
-					&& secsInDayBeforeMidnight < endTime) {
+			if (secsInDayBeforeMidnight > allowableStartTime
+					&& secsInDayBeforeMidnight < allowableEndTime) {
 				return true;
 			}
 		}
 		
 		// It simply ain't active
 		return false;
+	}
+
+	/**
+	 * Returns true if the time of day of the date passed in is between
+	 * allowableBeforeTimeSecs before the startTime and the endTime for the
+	 * block. No leeway is provided for the end time. Note: does not look to see
+	 * if the service associated with the block is active. Only looks at time of
+	 * day.
+	 * 
+	 * @param date
+	 *            The time checking to see whether block is active for
+	 * @param allowableBeforeTimeSecs
+	 *            Block considered active if within this number of seconds
+	 *            before the block start time. Set to 0 if want to know if date
+	 *            is actually between the block start and end times.
+	 * @param allowableAfterStartTimeSecs
+	 *            If set to value greater than or equal to zero then block
+	 *            considered active only if within this number of seconds after
+	 *            the start time. If less then zero then block considered active
+	 *            up to the block end time.
+	 * @return True if the block is active for the specified date
+	 */
+	public boolean isActive(long epochTime, int allowableBeforeTimeSecs,
+			int allowableAfterStartTimeSecs) {
+		return isActive(new Date(epochTime), allowableBeforeTimeSecs,
+				allowableAfterStartTimeSecs);
 	}
 
 	/**
@@ -518,7 +560,7 @@ public final class Block implements Serializable {
 	 * @return
 	 */
 	public boolean isActive(long epochTime, int allowableBeforeTimeSecs) {
-		return isActive(new Date(epochTime), allowableBeforeTimeSecs);
+		return isActive(new Date(epochTime), allowableBeforeTimeSecs, -1);
 	}
 	
 	/**
@@ -531,7 +573,7 @@ public final class Block implements Serializable {
 	 * @return True if the block is active.
 	 */
 	public boolean isActive(Date date) {
-		return isActive(date, 0);
+		return isActive(date, 0, -1);
 	}
 	
 	/**
@@ -544,7 +586,7 @@ public final class Block implements Serializable {
 	 * @return True if the block is active.
 	 */
 	public boolean isActive(long epochTime) {
-		return isActive(new Date(epochTime), 0);
+		return isActive(new Date(epochTime), 0, -1);
 	}
 	
 	/**
@@ -1111,9 +1153,9 @@ public final class Block implements Serializable {
 		Block block2 = dbConfig.getBlock("2", "2105");
 		Block block3 = dbConfig.getBlock("3", "2105");
 		try {
-			boolean b1 = block1.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS);
-			boolean b2 = block2.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS);
-			boolean b3 = block3.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS);
+			boolean b1 = block1.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS, -1);
+			boolean b2 = block2.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS, -1);
+			boolean b3 = block3.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS, -1);
 			int forSettingBreakpoint=9;
 		} catch (ParseException e) {
 			e.printStackTrace();
