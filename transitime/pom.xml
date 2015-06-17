@@ -134,11 +134,15 @@
     		<version>1.3.0</version>
 		</dependency>
  
- 		<!--  For processing JSON. Needed for Amigocloud and other JSON based AVL feeds -->
+ 		<!--  For processing JSON. Needed for Amigocloud and other JSON based AVL feeds.
+ 		      NOTE: the version 20141113 does not work with Java 1.7, which is what is
+ 		      still the normal version of Java for AWS, at least as of June 2015. Need
+ 		      to use old version 20140107 which was compiled with Java 1.7 instead
+ 		      of Java 1.8 -->
  		<dependency>
 		    <groupId>org.json</groupId>
     		<artifactId>json</artifactId>
-    		<version>20141113</version>
+    		<version>20140107</version>
 		</dependency>
 		
 		<!-- For parsing CSV files, such as GTFS ones -->
