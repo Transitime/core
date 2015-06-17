@@ -145,12 +145,27 @@ function predictionCallback(preds, status) {
 			content += '<span class="prediction">';
 			
 			for (var j in routeStop.dest[i].pred) {
+				// Separators between the predictions
 				if (j == 1)
 					content += ', ';
 				else if (j ==2)
 					content += ' & '
+					
+				// Add the actual prediction
 				var pred = routeStop.dest[i].pred[j];
 				content += pred.min;
+				
+				// Added any special indicators for if schedule based,
+				// delayed, or not yet departed from terminal
+				if (pred.scheduleBased)
+					content += '<sup>sched</sup>';
+				else {
+					if (pred.notYetDeparted)
+						content += '<sup>terminal</sup>';
+					else
+						if (pred.delayed) 
+							content += '<sup>delayed</sup>';
+				}
 				
 				// If in verbose mode add vehicle info
 				if (verbose)

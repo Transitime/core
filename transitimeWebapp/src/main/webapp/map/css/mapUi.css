@@ -51,3 +51,10 @@ html, body, #map {
  */
 .vehicle { font-size: x-small; font-weight: normal;}
 .prediction {font-size: large; font-weight: bold;}
+
+/* For when displaying special info for predictions using superscript
+ */
+sup {
+	vertical-align: super;
+	font-size: xx-small;
+}
