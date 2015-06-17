@@ -32,9 +32,9 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
 import org.transitime.utils.Geo;
 
-import com.amazonaws.util.json.JSONArray;
-import com.amazonaws.util.json.JSONException;
-import com.amazonaws.util.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Reads AVL data from a Transloc AVL feed and processes each AVL report.
