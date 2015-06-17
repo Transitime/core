@@ -31,7 +31,6 @@ import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
 import org.transitime.utils.Geo;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,14 +89,14 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 	}
 
 	/**
-	 * Converts the input stream into a JSONObject
+	 * Converts the input stream into a string
 	 * 
 	 * @param in
-	 * @return the JSONObject
+	 * @return the JSON string
 	 * @throws IOException
 	 * @throws JSONException
 	 */
-	private JSONObject getJsonObject(InputStream in) throws IOException,
+	private String getJsonString(InputStream in) throws IOException,
 			JSONException {
 		BufferedReader streamReader =
 				new BufferedReader(new InputStreamReader(in, "UTF-8"));
@@ -109,56 +108,65 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 
 		String responseStr = responseStrBuilder.toString();
 		logger.debug("JSON={}", responseStr);
-		JSONObject jsonObject = new JSONObject(responseStr);
-		return jsonObject;
+		return responseStr;
 	}
 	
 	/**
 	 * Reads in the JSON data from the InputStream and creates and then
 	 * processes an AvlReport.
+	 * 
+	 * @param in
 	 */
 	@Override
 	protected void processData(InputStream in) throws Exception {
-		JSONObject jsonObj = getJsonObject(in);
-		JSONObject dataObj = jsonObj.getJSONObject("data");
-		JSONArray jsonArray = dataObj.getJSONArray(feedAgencyId.getValue());
-		for (int i=0; i<jsonArray.length(); ++i) {
-			JSONObject vehicleData = jsonArray.getJSONObject(i);
-			String vehicleId = vehicleData.getString("vehicle_id");
-			
-			JSONObject location = vehicleData.getJSONObject("location");
-			double lat = location.getDouble("lat");
-			double lon = location.getDouble("lng");
-			float heading = (float) vehicleData.getDouble("heading");
+		String jsonStr = getJsonString(in);
+		try {
+			JSONObject jsonObj = new JSONObject(jsonStr);
 
-			// It appears that speed for Transloc API is in kph. Was
-			// getting a value of 74.6 which if in m/s would be about
-			// 150mph which wouldn't make sense. And it is likely not
-			// mph since that would still be too fast. Therefore it
-			// is likely to be in kph. Unfortunately could
-			// not find documentation on the units for speed.
-			float speed = (float) vehicleData.getDouble("speed") * Geo.KPH_TO_MPS;
-
-			String gpsTimeStr = vehicleData.getString("last_updated_on");
-			Date gpsTime = translocTimeFormat.parse(gpsTimeStr);
-			
-			if (logger.isDebugEnabled()) {
-				// Following elements not actually needed but are parsed in 
-				// case needed for debugging
-				String callName = vehicleData.getString("call_name");
-				String routeId = vehicleData.getString("route_id");
+			JSONObject dataObj = jsonObj.getJSONObject("data");
+			JSONArray jsonArray = dataObj.getJSONArray(feedAgencyId.getValue());
+			for (int i=0; i<jsonArray.length(); ++i) {
+				JSONObject vehicleData = jsonArray.getJSONObject(i);
+				String vehicleId = vehicleData.getString("vehicle_id");
 				
-				logger.debug("vehicleId={} lat={} lon={} heading={} speed={} "
-						+ "last_updated_on={} call_name={} route_id={}",
-						vehicleId, lat, lon, heading, speed,
-						gpsTimeStr, callName, routeId);
+				JSONObject location = vehicleData.getJSONObject("location");
+				double lat = location.getDouble("lat");
+				double lon = location.getDouble("lng");
+				// For heading use optDouble() since it can be null
+				float heading = (float) vehicleData.optDouble("heading");
+
+				// It appears that speed for Transloc API is in kph. Was
+				// getting a value of 74.6 which if in m/s would be about
+				// 150mph which wouldn't make sense. And it is likely not
+				// mph since that would still be too fast. Therefore it
+				// is likely to be in kph. Unfortunately could
+				// not find documentation on the units for speed.
+				float speed = (float) vehicleData.getDouble("speed") * Geo.KPH_TO_MPS;
+
+				String gpsTimeStr = vehicleData.getString("last_updated_on");
+				Date gpsTime = translocTimeFormat.parse(gpsTimeStr);
+				
+				if (logger.isDebugEnabled()) {
+					// Following elements not actually needed but are parsed in 
+					// case needed for debugging
+					String callName = vehicleData.getString("call_name");
+					String routeId = vehicleData.getString("route_id");
+					
+					logger.debug("vehicleId={} lat={} lon={} heading={} speed={} "
+							+ "last_updated_on={} call_name={} route_id={}",
+							vehicleId, lat, lon, heading, speed,
+							gpsTimeStr, callName, routeId);
+				}
+				
+				// Process AVL report
+				AvlReport avlReport =
+						new AvlReport(vehicleId, gpsTime.getTime(), lat, lon,
+								speed, heading);
+				processAvlReport(avlReport);
 			}
-			
-			// Process AVL report
-			AvlReport avlReport =
-					new AvlReport(vehicleId, gpsTime.getTime(), lat, lon,
-							speed, heading);
-			processAvlReport(avlReport);
+		} catch (JSONException e) {
+			logger.error("Error parsing JSON. {}. {}", 
+					e.getMessage(), jsonStr, e);
 		}
 	}
 
