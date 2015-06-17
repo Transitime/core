@@ -107,7 +107,9 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 		while ((inputStr = streamReader.readLine()) != null)
 			responseStrBuilder.append(inputStr);
 
-		JSONObject jsonObject = new JSONObject(responseStrBuilder.toString());
+		String responseStr = responseStrBuilder.toString();
+		logger.debug("JSON={}", responseStr);
+		JSONObject jsonObject = new JSONObject(responseStr);
 		return jsonObject;
 	}
 	
@@ -125,13 +127,9 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 			String vehicleId = vehicleData.getString("vehicle_id");
 			
 			JSONObject location = vehicleData.getJSONObject("location");
-			String latStr = location.getString("lat");
-			double lat = Double.parseDouble(latStr);
-			String lonStr = location.getString("lng");
-			double lon = Double.parseDouble(lonStr);
-			
-			String headingStr = vehicleData.getString("heading");
-			float heading = Float.parseFloat(headingStr);
+			double lat = location.getDouble("lat");
+			double lon = location.getDouble("lng");
+			float heading = (float) vehicleData.getDouble("heading");
 
 			// It appears that speed for Transloc API is in kph. Was
 			// getting a value of 74.6 which if in m/s would be about
@@ -139,8 +137,7 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 			// mph since that would still be too fast. Therefore it
 			// is likely to be in kph. Unfortunately could
 			// not find documentation on the units for speed.
-			String speedStr = vehicleData.getString("speed");
-			float speed = Float.parseFloat(speedStr) * Geo.KPH_TO_MPS;
+			float speed = (float) vehicleData.getDouble("speed") * Geo.KPH_TO_MPS;
 
 			String gpsTimeStr = vehicleData.getString("last_updated_on");
 			Date gpsTime = translocTimeFormat.parse(gpsTimeStr);
@@ -153,7 +150,7 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 				
 				logger.debug("vehicleId={} lat={} lon={} heading={} speed={} "
 						+ "last_updated_on={} call_name={} route_id={}",
-						vehicleId, latStr, lonStr, headingStr, speedStr,
+						vehicleId, lat, lon, heading, speed,
 						gpsTimeStr, callName, routeId);
 			}
 			
