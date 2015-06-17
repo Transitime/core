@@ -35,6 +35,7 @@ import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.IntervalTimer;
@@ -121,7 +122,10 @@ public class SchedBasedPredsModule extends Module {
 		// when doing the somewhat expensive searching for currently active
 		// blocks.
 		Set<String> blockIdsAlreadyAssigned = new HashSet<String>();
-		for (IpcVehicle vehicle : VehicleDataCache.getInstance().getVehicles()) {
+		Collection<IpcVehicleComplete> vehicles =
+				VehicleDataCache.getInstance()
+						.getVehiclesUncludingSchedBasedOnes();
+		for (IpcVehicle vehicle : vehicles) {
 			String blockId = vehicle.getBlockId();
 			if (blockId != null)
 				blockIdsAlreadyAssigned.add(blockId);

@@ -358,6 +358,15 @@ public class VehicleDataCache {
 	public Collection<IpcVehicleComplete> getVehicles() {
 		return filterSchedBasedVehicleIfPastStart(vehiclesMap.values());
 	}
+	
+	/**
+	 * Returns all vehicles, even schedule based ones
+	 * 
+	 * @return all vehicles, even schedule based ones
+	 */
+	public Collection<IpcVehicleComplete> getVehiclesUncludingSchedBasedOnes() {
+		return vehiclesMap.values();
+	}
 
 	/**
 	 * Returns copy of list of vehicle IDs that are currently assigned to the
