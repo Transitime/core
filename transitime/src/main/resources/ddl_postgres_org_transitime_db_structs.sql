@@ -354,6 +354,7 @@
         vehicleId varchar(60) not null,
         time timestamp not null,
         eventType varchar(60) not null,
+        avlTime timestamp,
         becameUnpredictable boolean,
         blockId varchar(60),
         description varchar(500),

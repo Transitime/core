@@ -354,6 +354,7 @@
         vehicleId varchar2(60 char) not null,
         time timestamp not null,
         eventType varchar2(60 char) not null,
+        avlTime timestamp,
         becameUnpredictable number(1,0),
         blockId varchar2(60 char),
         description varchar2(500 char),

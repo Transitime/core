@@ -354,6 +354,7 @@
         vehicleId varchar(60) not null,
         time datetime(3) not null,
         eventType varchar(60) not null,
+        avlTime datetime(3),
         becameUnpredictable bit,
         blockId varchar(60),
         description longtext,
