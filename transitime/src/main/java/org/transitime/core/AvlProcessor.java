@@ -39,6 +39,7 @@ import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.utils.Geo;
+import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
@@ -1218,6 +1219,8 @@ public class AvlProcessor {
 	 *            The new AVL report to be processed
 	 */
 	public void processAvlReport(AvlReport avlReport) {
+		IntervalTimer timer = new IntervalTimer(); 
+
 		// Handle special case where want to not use assignment from AVL
 		// report, most likely because want to test automatic assignment
 		// capability
@@ -1266,6 +1269,8 @@ public class AvlProcessor {
 
 		// Do the low level work of matching vehicle and then generating results
 		lowLevelProcessAvlReport(avlReport, false);
+		
+		logger.debug("Processing AVL report took {}msec", timer);
 	}
 
 }

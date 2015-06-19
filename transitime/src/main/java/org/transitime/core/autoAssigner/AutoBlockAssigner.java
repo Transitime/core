@@ -41,6 +41,7 @@ import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Trip;
+import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 /**
@@ -320,8 +321,8 @@ public class AutoBlockAssigner {
 	}
 
 	/**
-	 * Returns best schedule based match. Only for schedule based block
-	 * assignments.
+	 * Returns best schedule based match. Only for block assignments that have a
+	 * schedule (are not frequency based).
 	 * 
 	 * @param avlReport
 	 * @param previousAvlReport
@@ -401,14 +402,18 @@ public class AutoBlockAssigner {
 		if (previousAvlReport == null) {
 			// There was no previous AVL report far enough away from the 
 			// current one so return empty list of matches
-			logger.debug("In AutoBlockAssigner.bestMatch() could not find "
+			logger.debug("In AutoBlockAssigner.bestMatch() cannot auto "
+					+ "assign vehicle because could not find "
 					+ "valid previous AVL report for vehicleId={} further away "
 					+ "than {}m from current AVL report {}",
 					vehicleState.getVehicleId(), minDistance,
 					vehicleState.getAvlReport());
 			return validMatches;
 		}
-		
+
+		// So can see how long the search takes
+		IntervalTimer timer = new IntervalTimer();		
+
 		// Determine which blocks to examine. If agency configured such that
 		// blocks are to be exclusive then only look at the ones currently
 		// not used. But if not to be exclusive, such as for no schedule based
@@ -423,6 +428,8 @@ public class AutoBlockAssigner {
 		
 		// For each active block that is currently unassigned...
 		for (Block block : blocksToExamine) {
+			IntervalTimer blockTimer = new IntervalTimer();
+			
 			if (logger.isDebugEnabled()) {
 				logger.debug("For vehicleId={} examining block for match. {}", 
 						vehicleState.getVehicleId(), block.toShortString());
@@ -430,15 +437,20 @@ public class AutoBlockAssigner {
 
 			// Determine best match for the block depending on whether the 
 			// block is schedule based or not
-			TemporalMatch bestMatch =
-					block.isNoSchedule() ? bestNoScheduleMatch(avlReport,
-							previousAvlReport, block) : bestScheduleMatch(
-							avlReport, previousAvlReport, block);
+			TemporalMatch bestMatch = block.isNoSchedule() ? 
+					bestNoScheduleMatch(avlReport, previousAvlReport, block) :
+					bestScheduleMatch(avlReport, previousAvlReport, block);
 			if (bestMatch != null)
-				validMatches.add(bestMatch);			
+				validMatches.add(bestMatch);
+			
+			logger.debug("For vehicleId={} checking block={} took {}msec",
+					vehicleState.getVehicleId(), block.getId(), blockTimer);
 		}
 
 		// Return the valid matches that were found
+		logger.debug("Total time for determining possible auto assignment "
+				+ "temporal matches for vehicleId={} was {}msec", 
+				vehicleState.getVehicleId(), timer);
 		return validMatches;
 	}
 	
@@ -465,7 +477,8 @@ public class AutoBlockAssigner {
 			return null;
 		
 		String vehicleId = vehicleState.getVehicleId();
-		logger.info("Determining auto assignment match for vehicleId={}", 
+		logger.info("Determining possible auto assignment match for "
+				+ "vehicleId={}", 
 				vehicleId);
 		
 		// Determine all the valid matches

@@ -288,22 +288,22 @@ public class SchedBasedPredsModule extends Module {
 		
 		// Run forever
 		while (true) {
+			// For determining when to poll next
+			IntervalTimer timer = new IntervalTimer();
+
 			try {
-				// For determining when to poll next
-				IntervalTimer timer = new IntervalTimer();
-								
 				// Do the actual work
-				createSchedBasedPredsAsNecessary();
-				
-				// Wait appropriate amount of time till poll again
-				long sleepTime = 
-						timeBetweenPollingMsec.getValue() - timer.elapsedMsec();
-				if (sleepTime > 0)
-					Time.sleep(sleepTime);
+				createSchedBasedPredsAsNecessary();				
 			} catch (Throwable e) {
 				logger.error(Markers.email(),
 						"Error with SchedBasedPredsModule", e);
-			}
+			} 
+
+			// Wait appropriate amount of time till poll again
+			long sleepTime =
+					timeBetweenPollingMsec.getValue() - timer.elapsedMsec();
+			if (sleepTime > 0)
+				Time.sleep(sleepTime);
 		}
 	}
 
