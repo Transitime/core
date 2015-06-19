@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.logging.Markers;
 
 import java.net.URI;
 import java.util.Random;
@@ -35,7 +36,7 @@ import java.util.Random;
  */
 public class AmigoWebsockets {
 	private WebSocketClient mWs = null;
-	private String websocket_token = "";
+	private String websocket_token = null;
 	private String userID = "";
 	private String datasetID = "";
 
@@ -53,33 +54,8 @@ public class AmigoWebsockets {
 	/********************** Member Functions **************************/
 	
 	/**
-	 * Constructor
-	 * 
-	 * @param userID
-	 * @param apiToken
-	 * @param listener
-	 */
-	public AmigoWebsockets(long userID, String apiToken,
-			AmigoWebsocketListener listener) {
-		this.userID = Long.toString(userID);
-		this.listener = listener;
-		AmigoRest client = new AmigoRest(apiToken);
-		String result =
-				client.get("https://" + BASE_URL
-						+ "/api/v1/me/start_websocket_session");
-		JSONObject obj = null;
-		try {
-			obj = new JSONObject(result);
-			websocket_token = obj.getString("websocket_session");
-			logger.info("Using amigocloud websocket_session={}",
-					websocket_token);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Constructor for a real-time data feed
+	 * Constructor for a real-time data feed. Determines the websocket_token
+	 * that is used in connect().
 	 * 
 	 * @param userID
 	 * @param projectID
@@ -102,6 +78,41 @@ public class AmigoWebsockets {
 						+ "/start_websocket_session";
 		logger.info("Getting amigocloud websocket session using uri {}", uri);
 		String result = client.get(uri);
+		
+		// If there was a problem getting websocket session then give up.
+		// websocket_token will be null for this situation
+		if (result == null) {
+			logger.error(Markers.email(), 
+					"Could not determine websocket session");
+			return;
+		}
+		
+		JSONObject obj = null;
+		try {
+			obj = new JSONObject(result);
+			websocket_token = obj.getString("websocket_session");
+			logger.info("Using amigocloud websocket_session={}",
+					websocket_token);
+		} catch (JSONException e) {
+			logger.error("{}", e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Constructor for non real-time data feeds
+	 * 
+	 * @param userID
+	 * @param apiToken
+	 * @param listener
+	 */
+	public AmigoWebsockets(long userID, String apiToken,
+			AmigoWebsocketListener listener) {
+		this.userID = Long.toString(userID);
+		this.listener = listener;
+		AmigoRest client = new AmigoRest(apiToken);
+		String result =
+				client.get("https://" + BASE_URL
+						+ "/api/v1/me/start_websocket_session");
 		JSONObject obj = null;
 		try {
 			obj = new JSONObject(result);
@@ -126,7 +137,7 @@ public class AmigoWebsockets {
 	 * @return true if successful
 	 */
 	public boolean connect() {
-		if (websocket_token.length() == 0)
+		if (websocket_token == null)
 			return false;
 
 		try {

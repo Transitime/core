@@ -70,7 +70,8 @@ public class AmigoRest {
 	 * Gets result of HTTP request to the URL and returns it as a string.
 	 * 
 	 * @param url
-	 * @return
+	 * @return The resulting string from the HTTP request. Will be null if
+	 * there was a problem connecting.
 	 */
 	public String get(String url) {
 		String uri;
@@ -94,7 +95,8 @@ public class AmigoRest {
 			}
 			return result.toString();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Exception when requesting URI {} . {}", 
+					uri, e.getMessage(), e);
 		}
 		return null;
 	}
