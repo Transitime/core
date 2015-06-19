@@ -212,6 +212,26 @@ public class AvlConfig {
 					"is not set.");
 	
 	/**
+	 * Minimum allowable time in seconds between AVL reports for a vehicle. If
+	 * get a report closer than this number of seconds to the previous one then
+	 * the new report is filtered out and not processed. Important for when
+	 * reporting rate is really high, such as every few seconds.
+	 */
+	public static int getMinTimeBetweenAvlReportsSecs() {
+		return minTimeBetweenAvlReportsSecs.getValue();
+	}
+	private static IntegerConfigValue minTimeBetweenAvlReportsSecs =
+			new IntegerConfigValue(
+					"transitime.avl.minTimeBetweenAvlReportsSecs", 
+					5,
+					"Minimum allowable time in seconds between AVL reports for "
+					+ "a vehicle. If get a report closer than this number of "
+					+ "seconds to the previous one then the new report is "
+					+ "filtered out and not processed. Important for when "
+					+ "reporting rate is really high, such as every few "
+					+ "seconds.");
+	
+	/**
 	 * For debugging. Logs each AVL report to stdout if set to true.
 	 * Default is false.
 	 * 

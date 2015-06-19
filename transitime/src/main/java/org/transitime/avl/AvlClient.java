@@ -20,8 +20,10 @@ import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AvlConfig;
 import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.utils.Time;
 
 /**
  * Receives data from the AvlJmsClientModule and processes it.
@@ -53,7 +55,11 @@ public class AvlClient implements Runnable {
 		this.avlReport = avlReport;
 	}
 	
-	/* (non-Javadoc)
+	/**
+	 * Filters out problematic AVL reports (such as for having invalid data,
+	 * being in the past, or too recent) and processes the ones that are good.
+	 * 
+	 * (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
@@ -66,24 +72,55 @@ public class AvlClient implements Runnable {
 			return;
 		}
 		
-		// If report the same then don't need to process it
+		// See if should filter out report
 		synchronized (avlReports) {			
 			AvlReport previousReportForVehicle = 
 					avlReports.get(avlReport.getVehicleId());
+
+			// If report the same time or older then don't need to process it
 			if (previousReportForVehicle != null &&
 					avlReport.getTime() <= previousReportForVehicle.getTime()) {
 				logger.warn("Throwing away AVL report because it is same time "
 						+ "or older than the previous AVL report for the "
-						+ "vehicle. New AVL report is {}. Old AVL report is{}", 
+						+ "vehicle. New AVL report is {}. Previous valid AVL "
+						+ "report is {}", 
 						avlReport, previousReportForVehicle);
 				return;
 			}
+			
+			// If previous report happened too recently then don't want to 
+			// process it. This is important for when get AVL data for a vehicle
+			// more frequently than is worthwhile, like every couple of seconds.
+			if (previousReportForVehicle != null
+					&& avlReport.getTime() < previousReportForVehicle.getTime()
+							+ AvlConfig.getMinTimeBetweenAvlReportsSecs()
+							* Time.MS_PER_SEC) {
+				// Log this but. But since this can happen very frequently (VTA
+				// has hundreds of vehicles reporting every second!) make the 
+				// long message a debug statement and use a shorter message for
+				// a warn statement
+				logger.info("AVL report for vehicleId={} for time {} too "
+						+ "recent so discarding it",
+						avlReport.getVehicleId(), avlReport.getTime());
+				logger.debug("Throwing away AVL report because the new report "
+						+ "is too close in time to the previous AVL report "
+						+ "for the vehicle. "
+						+ "transitime.avl.minTimeBetweenAvlReportsSecs={} "
+						+ "secs. New AVL report is {}. Previous valid AVL "
+						+ "report is {}", 
+						AvlConfig.getMinTimeBetweenAvlReportsSecs(), avlReport, 
+						previousReportForVehicle);
+				return;				
+			}
+			
+			// Should handle the avl report so remember so can possibly filter the
+			// next one
 			avlReports.put(avlReport.getVehicleId(), avlReport);
 		}
 		
 		// Process the report
 		logger.info("Thread={} AvlClient processing AVL data {}", 
-				Thread.currentThread().getName(), avlReport);		
+				Thread.currentThread().getName(), avlReport);	
 		AvlProcessor.getInstance().processAvlReport(avlReport);
 	}
 	
