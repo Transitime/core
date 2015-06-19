@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License along with
  * Transitime.org . If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.custom.amigocloud;
+package org.transitime.avl;
 
 import java.util.Date;
 
@@ -23,10 +23,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.avl.AvlModule;
+import org.transitime.avl.amigocloud.AmigoWebsocketListener;
+import org.transitime.avl.amigocloud.AmigoWebsockets;
 import org.transitime.config.LongConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
+import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
 public class AmigoCloudAvlModule extends AvlModule {
@@ -69,13 +72,28 @@ public class AmigoCloudAvlModule extends AvlModule {
 	}
 
 	/**
-	 * onMessage() is called for each AVL report from the websocket feed
+	 * Inner listener class. onMessage() is called for each AVL report from the
+	 * websocket feed
 	 */
 	private static class MyAmigoWebsocketListener implements
 			AmigoWebsocketListener {
+		private AmigoCloudAvlModule avlModule;
+		
+		/**
+		 * Constructor. So can store the AmigoCloudAvlModule so that it
+		 * can be accessed to call processAvlReport().
+		 * 
+		 * @param avlModule
+		 */
+		private MyAmigoWebsocketListener(AmigoCloudAvlModule avlModule) {
+			this.avlModule = avlModule;
+		}
+		
+		/**
+		 * Called for every AVL report
+		 */
 		@Override
 		public void onMessage(String message) {
-			System.out.println("onMessage(): " + message);
 			try {
 				JSONObject obj = new JSONObject(message);
 				JSONArray argsArray = obj.getJSONArray("args");
@@ -85,27 +103,53 @@ public class AmigoCloudAvlModule extends AvlModule {
 					for (int j=0; j<dataArray.length(); ++j) {
 						JSONObject data = dataArray.getJSONObject(j);
 						
+						// Read in AVL report data from JSON
 						String objectId = data.getString("object_id");
-						String vehicleId = objectId.substring(0, objectId.indexOf('-')).trim();
-						long timestamp = Long.parseLong(data.getString("timestamp"));
-						double latitude = Double.parseDouble(data.getString("latitude"));
-						double longitude = Double.parseDouble(data.getString("longitude"));
-						float heading = Float.parseFloat(data.getString("track"));
-						float speed = Float.parseFloat(data.getString("speed"));
+						String vehicleId =
+								objectId.substring(0, objectId.indexOf('-'))
+										.trim();
+						long timestamp =
+								Long.parseLong(data.getString("timestamp")) 
+									* Time.MS_PER_SEC;
+						double latitude =
+								Double.parseDouble(data.getString("latitude"));
+						double longitude =
+								Double.parseDouble(data.getString("longitude"));
 						
+						// Heading is a special case. It is set to 0.0000 when
+						// it is actually not available. For this case set it
+						// to Float.NaN
+						float heading =
+								Float.parseFloat(data.getString("track"));
+						if (heading == 0.0)
+							heading = Float.NaN;
+						
+						// By looking at GPS reports for speed and time and 
+						// measuring distance traveled using a map found that
+						// units appears to be mph.
+						float speed =
+								Float.parseFloat(data.getString("speed"))
+										* Geo.MPH_TO_MPS;
+						
+						// Read in some other info that probably isn't useful 
+						// but what the heck
 						String satelliteFix = data.getString("satellite_fix");
 						String satellites = data.getString("satellites");
 						String altitude = data.getString("altitude");
-						System.out.println(
-								"vehicleId=" + vehicleId
-								+ " t=" + new Date(timestamp * Time.MS_PER_SEC)
-								+ " latitude=" + latitude
-								+ " longitude=" + longitude
-								+ " heading=" + heading 
-								+ " speed=" + speed
-								+ " satelliteFix=" + satelliteFix
-								+ " satellites=" + satellites
-								+ " altitude=" + altitude);
+						
+						// Get a lot of data so this probably should be debug logging
+						logger.debug("AmigoCloud AVL report v={} t={} {} lat={} "
+								+ "lon={} heading={} speed={} satelliteFix={} "
+								+ "satellites={} altitude={}", 
+								vehicleId, timestamp, new Date(timestamp), latitude, longitude, 
+								heading, speed, satelliteFix, satellites, 
+								altitude);
+						
+						// Actually process the report
+						AvlReport avlReport =
+								new AvlReport(vehicleId, timestamp, latitude,
+										longitude, speed, heading);
+						avlModule.processAvlReport(avlReport);
 					}
 				}
 			} catch (JSONException | NumberFormatException e) {
@@ -118,22 +162,36 @@ public class AmigoCloudAvlModule extends AvlModule {
 	/**
 	 * For in case want to test a non-realtime amigocloud feed
 	 */
-	public static void testWebsockets() {
+	public void testWebsockets() {
 		AmigoWebsockets socket =
 				new AmigoWebsockets(userId.getValue(), feedUrl.toString(),
-						new MyAmigoWebsocketListener());
+						new MyAmigoWebsocketListener(this));
 		socket.connect();
 	}
 
 	/**
 	 * Initiates a real-time amigocloud feed
 	 */
-	public static void testRealitimeWebsockets() {
+	public void testRealitimeWebsockets() {
 		AmigoWebsockets socket =
 				new AmigoWebsockets(userId.getValue(), projectId.getValue(),
 						datasetId.getValue(), feedUrl.toString(),
-						new MyAmigoWebsocketListener());
+						new MyAmigoWebsocketListener(this));
 		socket.connect();
+	}
+
+	/**
+	 * Called in separate thread when module is started up
+	 */
+	@Override
+	public void run() {
+		logger.info("Started amigocloud AVL feed");
+
+		// For testing VTA system
+		testRealitimeWebsockets();
+
+		// For all other non-realtime feeds
+		// testWebsockets();
 	}
 
 	/**
@@ -142,21 +200,6 @@ public class AmigoCloudAvlModule extends AvlModule {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Module.start("org.transitime.custom.amigocloud.AmigoCloudAvlModule");
-	}
-
-	/**
-	 * Called in separate thread when module is started up
-	 */
-	@Override
-	public void run() {
-
-		logger.info("Started amigocloud AVL feed");
-
-		// For testing VTA system
-		testRealitimeWebsockets();
-
-		// For all other non-realtime feeds
-		// testWebsockets();
+		Module.start("org.transitime.avl.AmigoCloudAvlModule");
 	}
 }
