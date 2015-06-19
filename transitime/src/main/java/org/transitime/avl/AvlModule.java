@@ -154,10 +154,15 @@ public abstract class AvlModule extends Module {
 	}
 
 	/**
-	 * Instead of writing AVL report to JMS topic this method directly
-	 * processes it. By doing this one can bypass the need for a JMS server.
+	 * Instead of writing AVL report to JMS topic this method directly processes
+	 * it. By doing this one can bypass the need for a JMS server. Uses a thread
+	 * executor so that can both use multiple threads and queue up requests.
+	 * This is especially important if getting a dump of AVL data from an AVL
+	 * feed hitting the Transitime web server and the AVL data getting then
+	 * pushed to the core system in batches.
 	 * 
 	 * @param avlReport
+	 *            The AVL report to be processed
 	 */
 	private void processAvlReportWithoutJms(AvlReport avlReport) {
 		// Have another thread actually process the AVL data
@@ -165,10 +170,13 @@ public abstract class AvlModule extends Module {
 		// do the processing. This way can use multiple
 		// threads to simultaneously process the data.
 		Runnable avlClient = new AvlClient(avlReport);
+		
+		// Want to both be able to use multiple threads and to be able to 
+		// queue up requests so use a thread executor
 		try {
 			avlClientExecutor.execute(avlClient);
 		} catch (InterruptedException e) {
 			logger.error("Exception when processing AVL data", e);
-		}								
+		}		
 	}
 }
