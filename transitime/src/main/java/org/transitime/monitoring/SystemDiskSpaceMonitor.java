@@ -33,7 +33,7 @@ public class SystemDiskSpaceMonitor extends MonitorBase {
 
 	private LongConfigValue usableDiskSpaceThreshold = new LongConfigValue(
 			"transitime.monitoring.usableDiskSpaceThreshold", 
-			500 * 1024 * 1024L, // ~500 MB 
+			1024 * 1024 * 1024L, // ~1 GB 
 			"If usable disk space is less than this "
 			+ "value then file space monitoring is triggered.");
 
