@@ -133,10 +133,14 @@ public class ServiceUtils {
 			// today and looking at yesterday then that is not a notable 
 			// problem.
 			boolean startTimeAProblem = earliestStartTime > epochTime.getTime();
-			if (!startTimeAProblem)
-				logger.error("All Calendars were expired. Update them!!! So " +
-					"that the system will continue to run the old Calendars " +
-					"will be used: {}", activeCalendarList);
+			if (!startTimeAProblem) {
+				logger.error("All Calendars were expired. Update them!!!");
+				
+				// Output calendar list but only for debugging since it is 
+				// so verbose
+				logger.debug("So that the system will continue to run the " +
+					"old Calendars will be used: {}", activeCalendarList);
+			}
 		}
 		
 		// Return the results
