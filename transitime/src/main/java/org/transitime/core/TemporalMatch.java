@@ -47,7 +47,6 @@ public class TemporalMatch extends SpatialMatch {
 	public String toString() {
 		return "TemporalMatch [" 
 				+ "temporalDifference=" + temporalDifference
-				+ ", vehicleId=" + vehicleId
 				+ ", avlTime=" + Time.dateTimeStrMsec(avlTime)
 				+ ", blockId=" + block.getId()
 				+ ", tripIndex=" + tripIndex

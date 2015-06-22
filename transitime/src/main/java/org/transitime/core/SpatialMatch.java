@@ -38,7 +38,6 @@ import org.transitime.utils.Time;
  */
 public class SpatialMatch {
 
-	protected final String vehicleId;
 	protected final long avlTime;
 	protected final Block block;
 	protected final int tripIndex;
@@ -54,10 +53,9 @@ public class SpatialMatch {
 
 	/********************** Member Functions **************************/
 
-	public SpatialMatch(String vehicleId, long avlTime, Block block,
+	public SpatialMatch(long avlTime, Block block,
 			int tripIndex, int stopPathIndex, int segmentIndex,
 			double distanceToSegment, double distanceAlongSegment) {
-		this.vehicleId = vehicleId;
 		this.avlTime = avlTime;
 		this.block = block;
 		this.tripIndex = tripIndex;
@@ -71,19 +69,30 @@ public class SpatialMatch {
 	}
 
 	/**
-	 * For making a copy of the SpatialMatch but for a new trip. This is 
-	 * useful when doing things by TripPattern, such as spatial matching. 
-	 * Can then make copies for the other trips that use that
+	 * For making a copy of the SpatialMatch for the same trip pattern but for a
+	 * new trip/block. This is useful when doing things by TripPattern, such as
+	 * spatial matching. Can then make copies for the other trips that use that
 	 * TripPattern.
 	 * 
-	 * @param toCopy The SpatialMatch to copy (except for the trip info)
-	 * @param newTrip The new trip to use for the copy
+	 * @param toCopy
+	 *            The SpatialMatch to copy (except for the trip/block info)
+	 * @param newTrip
+	 *            The new trip to use for the copy. It is assumed to be for the
+	 *            same trip pattern. It can be for a separate block.
 	 */
 	public SpatialMatch(SpatialMatch toCopy, Trip newTrip) {
-		this.vehicleId = toCopy.vehicleId;
+		if (toCopy.getTrip().getTripPattern() != newTrip.getTripPattern())
+			logger.error("Trying to create a copy of a SpatialMatch using a "
+					+ "new trip but they have different trip patterns. "
+					+ "toCopy={} toCopy.tripPattern={} newTrip.tripPattern={}",
+					toCopy, toCopy.getTrip().getTripPattern().toShortString(),
+					newTrip.getTripPattern().toShortString());
 		this.avlTime = toCopy.avlTime;
-		this.block = toCopy.block;
-		this.tripIndex = toCopy.block.getTripIndex(newTrip);
+		
+		// Use the new block and trip index info
+		this.block = newTrip.getBlock();
+		this.tripIndex = newTrip.getBlock().getTripIndex(newTrip);
+		
 		this.stopPathIndex = toCopy.stopPathIndex;
 		this.segmentIndex = toCopy.segmentIndex;
 		this.distanceToSegment = toCopy.distanceToSegment;
@@ -94,9 +103,8 @@ public class SpatialMatch {
 		if (toCopy.atStop() == null) {
 			this.atStop = null;
 		} else {
-			this.atStop = new VehicleAtStopInfo(toCopy.getAtStop().getBlock(),
-					this.tripIndex - 
-						(toCopy.tripIndex - toCopy.getAtStop().getTripIndex()), 
+			this.atStop = new VehicleAtStopInfo(newTrip.getBlock(),
+					this.tripIndex, 
 					toCopy.atStop().getStopPathIndex());
 		}
 	}
@@ -112,7 +120,6 @@ public class SpatialMatch {
 	 */
 	public SpatialMatch(SpatialMatch toCopy, Indices newIndices, 
 			double distanceAlongSegment) {
-		this.vehicleId = toCopy.vehicleId;
 		this.avlTime = toCopy.avlTime;
 		this.block = toCopy.block;
 		this.tripIndex = newIndices.getTripIndex();
@@ -129,7 +136,6 @@ public class SpatialMatch {
 	 * @param toCopy
 	 */
 	protected SpatialMatch(SpatialMatch toCopy) {
-		this.vehicleId = toCopy.vehicleId;
 		this.avlTime = toCopy.avlTime;
 		this.block = toCopy.block;
 		this.tripIndex = toCopy.tripIndex;
@@ -252,10 +258,9 @@ public class SpatialMatch {
 	public SpatialMatch getMatchAdjustedToEndOfPath() {
 		// If not at a stop then we have a problem
 		if (atStop == null) {
-			logger.error("For vehicleId={} wrongly called " +
+			logger.error("Wrongly called " +
 					"getMatchAdjustedToEndOfPath() when vehicle is not at " +
-					"a stop. This is not allowed.",
-					vehicleId);
+					"a stop. This is not allowed.");
 			return null;
 		}
 		
@@ -334,10 +339,9 @@ public class SpatialMatch {
 	public SpatialMatch getMatchAdjustedToBeginningOfPath() {
 		// If not at a stop then we have a problem
 		if (atStop == null) {
-			logger.error("For vehicleId={} wrongly called " +
+			logger.error("Wrongly called " +
 					"getMatchAdjustedToBeginningOfPath() when vehicle is " +
-					"not at a stop. This is not allowed.",
-					vehicleId);
+					"not at a stop. This is not allowed.");
 			return null;
 		}
 
@@ -401,7 +405,7 @@ public class SpatialMatch {
 		double segmentLength = segmentVector.length();
 		
 		// Return a match that is at the end of the path
-		return new SpatialMatch(vehicleId,
+		return new SpatialMatch(
 				0, // Don't worry about avlTime for this special case
 				block, 
 				m.getTripIndex(),
@@ -460,7 +464,7 @@ public class SpatialMatch {
 				indices.getSegmentIndex());
 		double segmentVectorLength = segmentVector!=null ? 
 				segmentVector.length() : Double.NaN;
-		return new SpatialMatch(vehicleId,
+		return new SpatialMatch(
 				0, // Don't worry about avlTime for this special case
 				block, 
 				indices.getTripIndex(),
@@ -752,8 +756,7 @@ public class SpatialMatch {
 	@Override
 	public String toString() {
 		return "SpatialMatch [" 
-				+ "vehicleId=" + vehicleId
-				+ ", avlTime=" + Time.dateTimeStrMsec(avlTime)
+				+ "avlTime=" + Time.dateTimeStrMsec(avlTime)
 				// + ", block=" + block.toShortString() too verbose!
 				+ ", blockId=" + block.getId()
 				+ ", tripIndex=" + tripIndex
@@ -770,10 +773,6 @@ public class SpatialMatch {
 	}
 
 	/********************* Getter Methods *****************************/
-	
-	public String getVehicleId() {
-		return vehicleId;
-	}
 	
 	/**
 	 * Returns copy of the indices of the match as an Indices object.

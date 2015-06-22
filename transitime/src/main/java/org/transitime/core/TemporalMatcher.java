@@ -86,7 +86,7 @@ public class TemporalMatcher {
 		// Determine how long it should take to travel along trip to the match. 
 		// Can add this time to the trip scheduled start time to determine
 		// when the vehicle is predicted to be at the match. 
-		SpatialMatch beginningOfTrip = new SpatialMatch(vehicleId,
+		SpatialMatch beginningOfTrip = new SpatialMatch(
 				0,    // AVL time doesn't matter
 				spatialMatch.getBlock(), 
 				spatialMatch.getTripIndex(), 

@@ -856,7 +856,8 @@ public final class Block implements Serializable {
 	}
 	
 	/**
-	 * Returns the index into the trips list of the specified trip.
+	 * Returns for the specified trip the index into the trips list for the
+	 * block
 	 * 
 	 * @param trip
 	 *            Specifies which trip looking for

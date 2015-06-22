@@ -594,7 +594,7 @@ public class AvlProcessor {
 			// Get the potential spatial matches
 			List<SpatialMatch> spatialMatchesForBlock = SpatialMatcher
 					.getSpatialMatches(vehicleState.getAvlReport(),
-							potentialTrips, block);
+							block, potentialTrips);
 
 			// Add appropriate spatial matches to list
 			for (SpatialMatch spatialMatch : spatialMatchesForBlock) {
@@ -649,8 +649,9 @@ public class AvlProcessor {
 		// reasonable range of the start time and within the end time of
 		// the trip.
 		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
-		List<SpatialMatch> spatialMatches = SpatialMatcher.getSpatialMatches(
-				vehicleState.getAvlReport(), potentialTrips, block);
+		List<SpatialMatch> spatialMatches =
+				SpatialMatcher.getSpatialMatches(vehicleState.getAvlReport(),
+						block, potentialTrips);
 		logger.debug("For vehicleId={} and blockId={} spatial matches={}",
 				avlReport.getVehicleId(), block.getId(), spatialMatches);
 
@@ -685,7 +686,7 @@ public class AvlProcessor {
 					.matchToLayoverStopEvenIfOffRoute(avlReport, potentialTrips);
 			if (trip != null) {
 				SpatialMatch beginningOfTrip = new SpatialMatch(
-						vehicleState.getVehicleId(), avlReport.getTime(),
+						avlReport.getTime(),
 						block, block.getTripIndex(trip), 0, // stopPathIndex
 						0, // segmentIndex
 						0.0, // distanceToSegment
@@ -876,7 +877,7 @@ public class AvlProcessor {
 			return;
 
 		// Try to match vehicle to a block assignment if that feature is enabled
-		TemporalMatch bestMatch = AutoBlockAssigner.getInstance()
+		TemporalMatch bestMatch = new AutoBlockAssigner()
 				.autoAssignVehicleToBlockIfEnabled(vehicleState);
 		if (bestMatch != null) {
 			// Successfully matched vehicle to block so make vehicle predictable
@@ -1224,7 +1225,7 @@ public class AvlProcessor {
 		// Handle special case where want to not use assignment from AVL
 		// report, most likely because want to test automatic assignment
 		// capability
-		if (AutoBlockAssigner.getInstance().ignoreAvlAssignments()
+		if (AutoBlockAssigner.ignoreAvlAssignments()
 				&& !avlReport.isForSchedBasedPreds()) {
 			logger.debug("Removing assignment from AVL report because "
 					+ "transitime.autoBlockAssigner.ignoreAvlAssignments=true. {}",

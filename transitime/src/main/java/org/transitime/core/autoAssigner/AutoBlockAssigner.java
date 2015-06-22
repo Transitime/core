@@ -19,7 +19,9 @@ package org.transitime.core.autoAssigner;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,12 @@ public class AutoBlockAssigner {
 
 	/*********************** Config params *****************************/
 	
+	// Contains the results of spatial matching the avl report to the 
+	// specified trip pattern. Keyed on trip pattern ID. Note: since the spatial 
+	// matches are cached and reused the block member will not be correct
+	private Map<String, SpatialMatch> spatialMatchCache = 
+			new HashMap<String, SpatialMatch>();
+	
 	private static BooleanConfigValue autoAssignerEnabled =
 			new BooleanConfigValue(
 					"transitime.autoBlockAssigner.autoAssignerEnabled", 
@@ -69,7 +77,7 @@ public class AutoBlockAssigner {
 					"For when want to test automatic assignments. When set to "
 					+ "true then system ignores assignments from AVL feed so "
 					+ "vehicles need to be automatically assigned instead");
-	public boolean ignoreAvlAssignments() {
+	public static boolean ignoreAvlAssignments() {
 		return ignoreAvlAssignments.getValue();
 	}
 	
@@ -96,11 +104,7 @@ public class AutoBlockAssigner {
 					5*Time.SEC_PER_MIN,
 					"How late a vehicle can be in seconds and still be auto "
 					+ "assigned to a block");
-	
-	/*********************** Singleton ********************************/
-	
-	private static final AutoBlockAssigner singleton = new AutoBlockAssigner();
-	
+		
 	/*********************** Logging **********************************/
 	
 	private static final Logger logger = LoggerFactory
@@ -109,18 +113,9 @@ public class AutoBlockAssigner {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructor declared private because singleton class
+	 * Constructor
 	 */
-	private AutoBlockAssigner() {	
-	}
-	
-	/**
-	 * Get singleton object
-	 * 
-	 * @return the singleton object
-	 */
-	public static AutoBlockAssigner getInstance() {
-		return singleton;
+	public AutoBlockAssigner() {	
 	}
 	
 	/**
@@ -203,7 +198,7 @@ public class AutoBlockAssigner {
 		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
 		List<SpatialMatch> spatialMatches = SpatialMatcher
 				.getSpatialMatchesIgnoringLayovers(avlReport,
-						potentialTrips, block);
+						block, potentialTrips);
 		if (spatialMatches.isEmpty())
 			return null;
 
@@ -211,7 +206,7 @@ public class AutoBlockAssigner {
 		// that can make sure that it too matches the assignment.
 		List<SpatialMatch> prevSpatialMatches = SpatialMatcher
 				.getSpatialMatchesIgnoringLayovers(previousAvlReport,
-						potentialTrips, block);
+						block, potentialTrips);
 		if (prevSpatialMatches.isEmpty())
 			return null;
 		
@@ -269,27 +264,166 @@ public class AutoBlockAssigner {
 	}
 	
 	/**
-	 * Determines best non-layover match for the AVL report to the specified
-	 * block. First finds spatial matches and then finds one that best matches
-	 * to the schedule. If the match is adequate spatial and temporally then 
-	 * the match is returned. Intended for schedule based blocks only.
+	 * Gets the spatial matches of the AVL report for the specified block. Only
+	 * looks at trips that are currently active in order to speed things up.
+	 * Checking each active trip is still far too costly. Therefore uses a cache
+	 * of spatial matches by trip pattern ID. If a spatial match was already
+	 * determine for the trip pattern then the cached value is returned.
 	 * 
 	 * @param avlReport
+	 *            The AVL report to be matched
+	 * @param block
+	 *            The block to match the AVL report to
+	 * 
+	 * @return All possible spatial matches
+	 */
+	private List<SpatialMatch> getSpatialMatches(AvlReport avlReport, Block block) {
+		// Convenience variable
+		String vehicleId = avlReport.getVehicleId();
+		
+		// For returning results of this method
+		List<SpatialMatch> spatialMatches = new ArrayList<SpatialMatch>();
+		
+		// Determine which trips are currently active so that don't bother 
+		// looking at all trips
+		List<Trip> activeTrips = block.getTripsCurrentlyActive(avlReport);
+		
+		// Determine trips that need to look at for spatial matches because 
+		// haven't looked at the associated trip pattern yet.
+		List<Trip> tripsNeedToInvestigate = new ArrayList<Trip>();
+		
+		// Go through the activeTrips and determine which ones actually need
+		// to be investigated. If the associated trip pattern was already 
+		// examined then use the spatial match (or null) previous found
+		// and cached. If it is a new trip pattern then add the trip to the
+		// list of trips that need to be investigated.
+		for (Trip trip : activeTrips) {
+			String tripPatternId = trip.getTripPattern().getId();
+			
+			logger.debug("For vehicleId={} checking tripId={} with "
+					+ "tripPatternId={} for spatial "
+					+ "matches.", vehicleId, trip.getId(), 
+					trip.getTripPattern().getId());
+			
+			// If spatial match results already in cache...
+			if (spatialMatchCache.containsKey(tripPatternId)) {
+				// Already processed this trip pattern so use cached results. 
+				// Can be null
+				SpatialMatch previouslyFoundMatch =
+						spatialMatchCache.get(tripPatternId);
+
+				// If there actually was a successful spatial match to the 
+				// trip pattern in the cache then add it to spatialMatches list
+				if (previouslyFoundMatch != null) {
+					// The cached match has the wrong trip info so need  
+					// to create an equivalent match with the proper trip block 
+					// info
+					SpatialMatch matchWithProperBlock =
+							new SpatialMatch(previouslyFoundMatch, trip);
+					
+					// Add to list of spatial matches to return
+					spatialMatches.add(matchWithProperBlock);
+
+					logger.debug("For vehicleId={} for tripId={} with "
+							+ "tripPatternId={} using previously cached "
+							+ "spatial match.", 
+							vehicleId, trip.getId(), tripPatternId);
+				} else {
+					logger.debug("For vehicleId={} for tripId={} with "
+							+ "tripPatternId={} found from cache that there "
+							+ "is no spatial match.", 
+							vehicleId, trip.getId(), tripPatternId);
+				}
+			} else {
+				// New trip pattern so need to investigate it to search for 
+				// potential spatial matches
+				tripsNeedToInvestigate.add(trip);
+				
+				logger.debug("For vehicleId={} for tripId={} with "
+						+ "tripPatternId={} have not previously determined "
+						+ "spatial matches so will do so now.",
+						vehicleId, trip.getId(), tripPatternId);
+			}
+		}
+		
+		// Investigate the trip patterns not in the cache. Determine potential 
+		// spatial matches that are not layovers. If match is to a layover can 
+		// ignore it since layover matches are far too flexible to really be 
+		// considered a spatial match
+		List<SpatialMatch> newSpatialMatches = SpatialMatcher
+				.getSpatialMatchesIgnoringLayovers(avlReport,
+						block, tripsNeedToInvestigate);
+		
+		// Add newly discovered matches to the cache and to the list of spatial
+		// matches to be returned
+		for (SpatialMatch newSpatialMatch : newSpatialMatches) {
+			logger.debug("For vehicleId={} for tripId={} with "
+						+ "tripPatternId={} found new spatial match {}.",
+						vehicleId, newSpatialMatch.getTrip().getId(), 
+						newSpatialMatch.getTrip().getTripPattern().getId(),
+						newSpatialMatch);
+			
+			// Cache it
+			spatialMatchCache.put(newSpatialMatch.getTrip().getTripPattern()
+					.getId(), newSpatialMatch);
+			
+			// Add to list of spatial matches to return
+			spatialMatches.add(newSpatialMatch);
+		}
+		
+		// Also need to add to the cache the trips patterns that investigated 
+		// but did not find a spatial match. This is really important because
+		// when don't find a spatial match for a trip pattern don't want to 
+		// waste time searching it again to find out again that it doesn't 
+		// have a match.
+		for (Trip tripInvestigated : tripsNeedToInvestigate) {
+			// If the trip that was investigated did not result in spatial
+			// match then remember that by storing a null spatial match
+			// for the trip pattern
+			String tripPatternId = tripInvestigated.getTripPattern().getId();
+			boolean spatialMatchFound = false;
+			for (SpatialMatch newSpatialMatch : newSpatialMatches) {
+				String spatialMatchTripPatternId =
+						newSpatialMatch.getTrip().getTripPattern().getId();
+				if (spatialMatchTripPatternId.equals(tripPatternId)) {
+					spatialMatchFound = true;
+				}
+			}
+			// If no spatial match found for the trip pattern that just
+			// investigated then mark in cache that no match
+			if (!spatialMatchFound) {
+				spatialMatchCache.put(tripPatternId, null);
+				
+				logger.debug("For vehicleId={} for tripId={} with "
+						+ "tripPatternId={} no spatial match found so storing "
+						+ "that info in cache for investigating next block.",
+						vehicleId, tripInvestigated.getId(), 
+						tripInvestigated.getTripPattern().getId());
+			}
+		}
+		
+		// Return the results
+		return spatialMatches;
+	}
+	
+	/**
+	 * Determines best non-layover match for the AVL report to the specified
+	 * block. First finds spatial matches and then finds one that best matches
+	 * to the schedule. If the match is adequate spatial and temporally then the
+	 * match is returned. Intended for schedule based blocks only.
+	 * 
+	 * @param avlReport
+	 *            The AVL report to be matched
 	 * @param block
 	 *            The block to match the AVL report to
 	 * @return The best match if there is one. Null if there is not a valid
 	 *         match
 	 */
 	private TemporalMatch bestTemporalMatch(AvlReport avlReport, Block block) {
-		// Determine all potential spatial matches for the block that are 
-		// not layovers. If match is to a layover can ignore it since 
-		// layover matches are far too flexible to really be considered 
-		// a spatial match
-		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
-		List<SpatialMatch> spatialMatches = SpatialMatcher
-				.getSpatialMatchesIgnoringLayovers(avlReport,
-						potentialTrips, block);
-
+		// Determine all potential spatial matches for the block
+		List<SpatialMatch> spatialMatches = getSpatialMatches(avlReport, block);
+		
+		// Now that have the spatial matches determine the best temporal match
 		TemporalMatch bestMatch = TemporalMatcher.getInstance()
 				.getBestTemporalMatchComparedToSchedule(avlReport,
 						spatialMatches);
@@ -341,8 +475,8 @@ public class AutoBlockAssigner {
 		TemporalMatch bestMatch = bestTemporalMatch(avlReport, block);
 		if (bestMatch != null) {
 			// Found a valid match for the AVL report to the block
-			logger.debug("For vehicleId={} and blockId={} and AVL "
-					+ "report={} found bestMatch={}",
+			logger.debug("Found valid match for vehicleId={} and blockId={} "
+					+ "and AVL report={} . The bestMatch={}",
 					avlReport.getVehicleId(), block.getId(), avlReport, 
 					bestMatch);
 			
@@ -387,13 +521,16 @@ public class AutoBlockAssigner {
 	 */
 	private List<TemporalMatch> determineTemporalMatches(
 			VehicleState vehicleState) {
+		// Convenience variable
+		String vehicleId = vehicleState.getVehicleId();
+		
 		// The list of matches to return
 		List<TemporalMatch> validMatches = new ArrayList<TemporalMatch>();
 		
 		AvlReport avlReport = vehicleState.getAvlReport();
 
-		// Only want to match if there is also a previous AVL report
-		// that is significantly away from the current report. This
+		// Only want to try to auto assign if there is also a previous AVL 
+		// report that is significantly away from the current report. This
 		// way we avoid trying to match non-moving vehicles which are
 		// not in service.
 		double minDistance = minDistanceFromCurrentReport.getValue();
@@ -403,11 +540,10 @@ public class AutoBlockAssigner {
 			// There was no previous AVL report far enough away from the 
 			// current one so return empty list of matches
 			logger.debug("In AutoBlockAssigner.bestMatch() cannot auto "
-					+ "assign vehicle because could not find "
-					+ "valid previous AVL report for vehicleId={} further away "
+					+ "assign vehicle because could not find valid previous "
+					+ "AVL report in history for vehicleId={} further away "
 					+ "than {}m from current AVL report {}",
-					vehicleState.getVehicleId(), minDistance,
-					vehicleState.getAvlReport());
+					vehicleId, minDistance,	vehicleState.getAvlReport());
 			return validMatches;
 		}
 
@@ -423,7 +559,10 @@ public class AutoBlockAssigner {
 		
 		if (blocksToExamine.isEmpty()) {
 			logger.info("No currently active blocks to assign vehicleId={} to.",
-					vehicleState.getVehicleId());
+					vehicleId);
+		} else {
+			logger.info("For vehicleId={} examining {} blocks for matches.", 
+					vehicleId, blocksToExamine.size());
 		}
 		
 		// For each active block that is currently unassigned...
@@ -431,8 +570,10 @@ public class AutoBlockAssigner {
 			IntervalTimer blockTimer = new IntervalTimer();
 			
 			if (logger.isDebugEnabled()) {
-				logger.debug("For vehicleId={} examining block for match. {}", 
-						vehicleState.getVehicleId(), block.toShortString());
+				logger.debug("For vehicleId={} examining blockId={} for match. "
+						+ "The block contains the routes {}. {}", 
+						vehicleId, block.getId(), block.getRouteIds(), 
+						block.toShortString());
 			}
 
 			// Determine best match for the block depending on whether the 
@@ -444,13 +585,13 @@ public class AutoBlockAssigner {
 				validMatches.add(bestMatch);
 			
 			logger.debug("For vehicleId={} checking block={} took {}msec",
-					vehicleState.getVehicleId(), block.getId(), blockTimer);
+					vehicleId, block.getId(), blockTimer);
 		}
 
 		// Return the valid matches that were found
-		logger.debug("Total time for determining possible auto assignment "
+		logger.info("Total time for determining possible auto assignment "
 				+ "temporal matches for vehicleId={} was {}msec", 
-				vehicleState.getVehicleId(), timer);
+				vehicleId, timer);
 		return validMatches;
 	}
 	
