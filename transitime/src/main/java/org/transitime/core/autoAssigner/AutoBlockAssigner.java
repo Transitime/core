@@ -609,11 +609,16 @@ public class AutoBlockAssigner {
 						block.toShortString());
 			}
 
+			logger.debug("FOO TOP before calling bestScheduleMatch() time={}", blockTimer);
+			
 			// Determine best match for the block depending on whether the 
 			// block is schedule based or not
 			TemporalMatch bestMatch = block.isNoSchedule() ? 
 					bestNoScheduleMatch(avlReport, previousAvlReport, block) :
 					bestScheduleMatch(avlReport, previousAvlReport, block);
+					
+			logger.debug("FOO TOP after calling bestScheduleMatch() time={}", blockTimer);
+			
 			if (bestMatch != null)
 				validMatches.add(bestMatch);
 			
