@@ -19,9 +19,6 @@ package org.transitime.api.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -43,6 +40,7 @@ public class ApiActiveBlocksRoutes {
 	private List<ApiActiveBlocksRoute> routeData;
 
 	/********************** Member Functions **************************/
+	
 	/**
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
 	 * "MessageBodyWriter not found for media type=application/json" exception.
@@ -51,48 +49,34 @@ public class ApiActiveBlocksRoutes {
 	}
 
 	/**
-	 * Constructs an ApiRouteSummaries using a collection of IpcRouteSummary
+	 * Constructs an ApiRouteSummaries using a collection of IpcActiveBlock
 	 * objects.
 	 * 
-	 * @param routes
+	 * @param activeBlocks Already ordered list of active blocks
+	 * @param agencyId
 	 */
 	public ApiActiveBlocksRoutes(Collection<IpcActiveBlock> activeBlocks,
-			String agencyId) {
-		HashMap<String, ApiActiveBlocksRoute> routesMap = 
-				new HashMap<String, ApiActiveBlocksRoute>();
+			String agencyId) {		
+		routeData = new ArrayList<ApiActiveBlocksRoute>();
 		
-		for (IpcActiveBlock activeBlock : activeBlocks) {
+		ApiActiveBlocksRoute apiRoute = null;
+		for (IpcActiveBlock activeBlock : activeBlocks) {			
 			IpcTrip trip = activeBlock.getBlock().getTrips()
 					.get(activeBlock.getActiveTripIndex());
 			
-			// Get the ApiActiveBlocksRoute object. Create it if haven't yet
-			String routeId = trip.getRouteId();
-			ApiActiveBlocksRoute apiRoute = routesMap.get(routeId);
-			if (apiRoute == null) {
+			// If first block for the current route then create a new 
+			// ApiActiveBlocksRoute object to hold the info
+			if (apiRoute == null || !apiRoute.getName().equals(trip.getRouteName())) {
 				apiRoute = new ApiActiveBlocksRoute(
 						trip.getRouteId(), trip.getRouteShortName(),
 						trip.getRouteName());
-				routesMap.put(routeId, apiRoute);
+				
+				routeData.add(apiRoute);
 			}
 			
-			// Add the new activeBlock to the ApiActiveBlocksRoute
+			// Add the block info to the ApiActiveBlocksRoute object
 			apiRoute.add(activeBlock, agencyId);
-		}
-
-		// Put sorted results into routeData member
-		routeData = new ArrayList<ApiActiveBlocksRoute>(routesMap.values());
-		Collections.sort(routeData, comparator);
+		}		
 	}
-
-    /**
-     * For sorting the active blocks by route and then block ID
-     */
-	private static final Comparator<ApiActiveBlocksRoute> comparator = 
-			new Comparator<ApiActiveBlocksRoute>() {
-		@Override
-		public int compare(ApiActiveBlocksRoute o1, ApiActiveBlocksRoute o2) {
-			return o1.getName().compareTo(o2.getName());
-		}
-	};
 
 }

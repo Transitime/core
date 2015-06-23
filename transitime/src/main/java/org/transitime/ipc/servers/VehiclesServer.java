@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.core.BlocksInfo;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleConfig;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcVehicleComplete;
@@ -271,7 +272,7 @@ public class VehiclesServer extends AbstractServer
 			Collection<String> routeIds, int allowableBeforeTimeSecs)
 			throws RemoteException {
 		// List of data to be returned
-		Collection<IpcActiveBlock> results = 
+		List<IpcActiveBlock> results = 
 				new ArrayList<IpcActiveBlock>();
 		
 		// Determine all the active blocks
@@ -296,11 +297,16 @@ public class VehiclesServer extends AbstractServer
 					.getInstance().getVehiclesByBlockId(block.getId());
 			Collection<IpcVehicle> ipcVehiclesForBlock = get(vehicleIdsForBlock);
 			
-			// Create and add the IpcBlockAndVehicle
-			IpcActiveBlock ipcBlockAndVehicle = new IpcActiveBlock(
-					ipcBlock, activeTripIndex, ipcVehiclesForBlock);
+			// Create and add the IpcActiveBlock
+			Trip tripForSorting = block.getTrip(activeTripIndex);
+			IpcActiveBlock ipcBlockAndVehicle =
+					new IpcActiveBlock(ipcBlock, activeTripIndex,
+							ipcVehiclesForBlock, tripForSorting);
 			results.add(ipcBlockAndVehicle);
 		}
+		
+		// Sort the results so that ordered by route and then block start time
+		IpcActiveBlock.sort(results);
 		
 		// Return results
 		return results;
