@@ -436,14 +436,20 @@ public class AutoBlockAssigner {
 	 *         match
 	 */
 	private TemporalMatch bestTemporalMatch(AvlReport avlReport, Block block) {
+		IntervalTimer fooTimer = new IntervalTimer();
+		
 		// Determine all potential spatial matches for the block
 		List<SpatialMatch> spatialMatches = getSpatialMatches(avlReport, block);
 		
+		logger.debug("FOO XX getting spatial matches time={}msec. {}", fooTimer, spatialMatches);
+
 		// Now that have the spatial matches determine the best temporal match
 		TemporalMatch bestMatch = TemporalMatcher.getInstance()
 				.getBestTemporalMatchComparedToSchedule(avlReport,
 						spatialMatches);
 
+		logger.debug("FOO XX getting best temporal matche time={}msec. {}", fooTimer, bestMatch);
+		
 		// Want to be pretty restrictive about matching to avoid false 
 		// positives. At the same time, want to not have a temporal match
 		// that matches but not all that well cause the auto matcher to
