@@ -95,7 +95,9 @@ public class SpatialMatcher {
 	 * Goes through entire TripPattern for specified Trip and determines spatial
 	 * matches. Matches must be within getMaxAllowableDistanceFromSegment()
 	 * except layovers are always included since vehicle are allowed to be away
-	 * from the route path during layovers.
+	 * from the route path during layovers. First checks to see if the avlReport
+	 * location is near the extent of the trip pattern. If it is not then can
+	 * save processing power and return immediately.
 	 * 
 	 * @param avlReport
 	 * @param trip
@@ -112,10 +114,10 @@ public class SpatialMatcher {
 		// Looking at each stop path for a trip is pretty costly. So first
 		// see if the AVL report is even within the trip pattern. If not then
 		// can return right away.
-		Extent tripExtent = trip.getTripPattern().getExtent();
+		Extent tripPatternExtent = trip.getTripPattern().getExtent();
 		double allowableDistance =
 				getMaxAllowableDistanceFromSegment(trip.getRoute());
-		if (!tripExtent.isWithinDistance(avlReport.getLocation(),
+		if (!tripPatternExtent.isWithinDistance(avlReport.getLocation(),
 				allowableDistance))
 			return spatialMatches;
 		
