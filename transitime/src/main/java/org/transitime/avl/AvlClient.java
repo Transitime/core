@@ -99,9 +99,11 @@ public class AvlClient implements Runnable {
 				// has hundreds of vehicles reporting every second!) make the 
 				// long message a debug statement and use a shorter message for
 				// a warn statement
-				logger.info("AVL report for vehicleId={} for time {} too "
+				logger.info("AVL report for vehicleId={} for time {} is only {} "
+						+ "seconds old which is too "
 						+ "recent to previous report so discarding it",
-						avlReport.getVehicleId(), avlReport.getTime());
+						avlReport.getVehicleId(), avlReport.getTime(), 
+						(avlReport.getTime() - previousReportForVehicle.getTime()) / Time.MS_PER_SEC);
 				logger.debug("Throwing away AVL report because the new report "
 						+ "is too close in time to the previous AVL report "
 						+ "for the vehicle. "
