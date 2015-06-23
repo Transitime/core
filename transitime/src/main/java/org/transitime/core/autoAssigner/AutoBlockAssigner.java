@@ -488,43 +488,54 @@ public class AutoBlockAssigner {
 	 */
 	private TemporalMatch bestScheduleMatch(AvlReport avlReport,
 			AvlReport previousAvlReport, Block block) {
+		IntervalTimer fooTimer = new IntervalTimer();
+		
 		if (block.isNoSchedule()) {
 			logger.error("Called bestScheduleMatch() on block that does not "
 					+ "have a schedule. {}", block.toShortString());
 			return null;
 		}		
 
+		logger.debug("FOO YY about to call bestTemporalMatch() {}msec", fooTimer);
+		
 		TemporalMatch bestMatch = bestTemporalMatch(avlReport, block);
-		if (bestMatch != null) {
-			// Found a valid match for the AVL report to the block
-			logger.debug("Found valid match for vehicleId={} and blockId={} "
-					+ "and AVL report={} . The bestMatch={}",
-					avlReport.getVehicleId(), block.getId(), avlReport, 
-					bestMatch);
-			
-			// Make sure that previous AVL report also matches and 
-			// that it matches to block before the current AVL report
-			TemporalMatch previousAvlReportBestMatch = 
-					bestTemporalMatch(previousAvlReport, block);
-			if (previousAvlReportBestMatch != null
-					&& previousAvlReportBestMatch.lessThanOrEqualTo(bestMatch)) { 
-				// Previous AVL report also matches appropriately. 
-				// Therefore record this temporal match as appropriate one.
-				logger.debug("For vehicleId={} also found appropriate "
-						+ "match for previous AVL report {}. Previous "
-						+ "match was {}", 
-						avlReport.getVehicleId(), previousAvlReport, 
-						previousAvlReportBestMatch);	
-				return bestMatch;
-			} else {
-				logger.debug("For vehicleId={} did NOT get valid match for "
-						+ "previous AVL report {}. Previous match was {} ", 
-						avlReport.getVehicleId(), previousAvlReport, 
-						previousAvlReportBestMatch);					
-			}
-		}
 
-		// Did not find an adequate match
+		logger.debug("FOO YY called bestTemporalMatch() {}msec", fooTimer);
+
+		// If did not find an adequate match then done
+		if (bestMatch == null)
+			return null;			
+		
+		// Found a valid match for the AVL report to the block
+		logger.debug("Found valid match for vehicleId={} and blockId={} "
+				+ "and AVL report={} . Therefore will see if previous AVL "
+				+ "report also matches. The bestMatch={}",
+				avlReport.getVehicleId(), block.getId(), avlReport, 
+				bestMatch);
+		
+		// Make sure that previous AVL report also matches and 
+		// that it matches to block before the current AVL report
+		TemporalMatch previousAvlReportBestMatch = 
+				bestTemporalMatch(previousAvlReport, block);
+		
+		logger.debug("FOO YY determined second match {}msec", fooTimer);
+
+		if (previousAvlReportBestMatch != null
+				&& previousAvlReportBestMatch.lessThanOrEqualTo(bestMatch)) { 
+			// Previous AVL report also matches appropriately. 
+			// Therefore record this temporal match as appropriate one.
+			logger.debug("For vehicleId={} also found appropriate "
+					+ "match for previous AVL report {}. Previous "
+					+ "match was {}", 
+					avlReport.getVehicleId(), previousAvlReport, 
+					previousAvlReportBestMatch);	
+			return bestMatch;
+		} 
+
+		logger.debug("For vehicleId={} did NOT get valid match for "
+				+ "previous AVL report {}. Previous match was {} ",
+				avlReport.getVehicleId(), previousAvlReport,
+				previousAvlReportBestMatch);
 		return null;
 	}
 	
