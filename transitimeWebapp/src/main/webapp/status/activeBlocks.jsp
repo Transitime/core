@@ -188,24 +188,30 @@ function handleAjaxData(routes) {
 		blocksValueElement.text(numberOfActiveBlocks);
 
 		// Update the route info by setting number of vehicles and how many
-		// are late, on time, or early.
-		var numberOfVehicles = 0;
+		// are late, on time, or early. Ignore schedule based vehicles.
 		var vehiclesLate = 0;
 		var vehiclesOnTime = 0;
 		var vehiclesEarly = 0;
 		for (var k=0; k<routeData.block.length; ++k) {
 			var blockData = routeData.block[k];
-			numberOfVehicles += blockData.vehicle.length;
 			for (var l=0; l<blockData.vehicle.length; ++l) {
-				var schAdh = parseInt(blockData.vehicle[l].schAdh);
-				if (schAdh < -ALLOWABLE_LATE_MSEC)
-					++vehiclesLate;
-				else if (schAdh > ALLOWABLE_EARLY_MSEC)
-					++vehiclesEarly;
-				else
-					++vehiclesOnTime;
+				// Only count schedule based vehicles
+				if (!blockData.vehicle[l].scheduleBased) {
+					var schAdh = parseInt(blockData.vehicle[l].schAdh);
+					if (schAdh < -ALLOWABLE_LATE_MSEC) {
+						++vehiclesLate;
+					} else {
+						if (schAdh > ALLOWABLE_EARLY_MSEC) {
+							++vehiclesEarly;
+						} else {
+							++vehiclesOnTime;
+						}
+					}
+				}
 			}
 		}
+		var numberOfVehicles = vehiclesLate + vehiclesEarly + vehiclesOnTime;
+
 		var vehiclesValueElement = $("#" + routeElementId + " #routeVehicles");
 		vehiclesValueElement.text(numberOfVehicles);
 		if (numberOfVehicles < numberOfActiveBlocks)
@@ -292,7 +298,10 @@ function handleAjaxData(routes) {
 			var tripHeadsignValueElement = $("#" + routeElementId + " #" + blockElementId + " #tripHeadsign");
 			tripHeadsignValueElement.text(blockData.trip.headsign);
 			
+			var vehiclesValueElement = $("#" + routeElementId + " #" + blockElementId + " #vehiclesForBlock");
 			var vehiclesValue = "none";
+			var vehicleAssigned = false;
+			var scheduleBasedVehicle = false;
 			if (blockData.vehicle.length != 0) {
 				vehiclesValue = "";
 				for (var v=0; v<blockData.vehicle.length; ++v) {
@@ -303,14 +312,22 @@ function handleAjaxData(routes) {
 						vehiclesValue += ", ";
 					vehiclesValue += vehicleData.id;
 					
+					vehicleAssigned = true;
+					if (vehicleData.scheduleBased)
+						scheduleBasedVehicle = true;
 				}
-			}
-			var vehiclesValueElement = $("#" + routeElementId + " #" + blockElementId + " #vehiclesForBlock");
+			}		
 			vehiclesValueElement.text(vehiclesValue);
+			
 			if (vehiclesValue.length > 10) {
 				vehiclesValueElement.addClass("blockValueSmallerFont");
 			} else {
 				vehiclesValueElement.removeClass("blockValueSmallerFont");
+			}
+			if (vehicleAssigned && !scheduleBasedVehicle) {
+				vehiclesValueElement.removeClass("problemColor");
+			} else {
+				vehiclesValueElement.addClass("problemColor");
 			}
 
 			var vehiclesSchedAdhElement = $("#" + routeElementId + " #" + blockElementId + " #vehicleSchedAdh");
@@ -332,7 +349,7 @@ function handleAjaxData(routes) {
 		} // Done with each block for the route
 	} // Done with each route
 	
-	// Update the summary
+	// Update the summary at bottom of page
 	$("#totalBlocksValue").text(totalNumberBlocks);
 	
 	var percentageVehicles = 100.0 * totalVehicles / totalNumberBlocks
@@ -361,7 +378,6 @@ function handleAjaxData(routes) {
 	} else {
 		$("#percentLateValue").removeClass("earlyColor");		
 	}
-	
 
 	// Since route widgets might have changed need to call refresh
 	$( "#accordion" ).accordion("refresh");	
