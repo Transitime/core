@@ -278,6 +278,8 @@ public class AutoBlockAssigner {
 	 * @return All possible spatial matches
 	 */
 	private List<SpatialMatch> getSpatialMatches(AvlReport avlReport, Block block) {
+		IntervalTimer fooTimer = new IntervalTimer();
+		
 		// Convenience variable
 		String vehicleId = avlReport.getVehicleId();
 		
@@ -287,6 +289,8 @@ public class AutoBlockAssigner {
 		// Determine which trips are currently active so that don't bother 
 		// looking at all trips
 		List<Trip> activeTrips = block.getTripsCurrentlyActive(avlReport);
+		
+		logger.debug("Determined active trips. Time={}msec", fooTimer);
 		
 		// Determine trips that need to look at for spatial matches because 
 		// haven't looked at the associated trip pattern yet.
@@ -345,7 +349,10 @@ public class AutoBlockAssigner {
 						vehicleId, trip.getId(), tripPatternId);
 			}
 		}
-		
+
+		logger.debug("FOO Determined tripsNeedToInvestigate. Time={}msec. {}", 
+				fooTimer, tripsNeedToInvestigate);
+
 		// Investigate the trip patterns not in the cache. Determine potential 
 		// spatial matches that are not layovers. If match is to a layover can 
 		// ignore it since layover matches are far too flexible to really be 
@@ -353,6 +360,9 @@ public class AutoBlockAssigner {
 		List<SpatialMatch> newSpatialMatches = SpatialMatcher
 				.getSpatialMatchesIgnoringLayovers(avlReport,
 						block, tripsNeedToInvestigate);
+		
+		logger.debug("FOO Determined newSpatialMatches. Time={}msec. {}", 
+				fooTimer, newSpatialMatches);
 		
 		// Add newly discovered matches to the cache and to the list of spatial
 		// matches to be returned
@@ -370,6 +380,9 @@ public class AutoBlockAssigner {
 			// Add to list of spatial matches to return
 			spatialMatches.add(newSpatialMatch);
 		}
+		
+		logger.debug("FOO Added newSpatialMatches to spatialMatches. Time={}msec. {}", 
+				fooTimer, spatialMatches);
 		
 		// Also need to add to the cache the trips patterns that investigated 
 		// but did not find a spatial match. This is really important because
@@ -401,6 +414,9 @@ public class AutoBlockAssigner {
 						tripInvestigated.getTripPattern().getId());
 			}
 		}
+		
+		logger.debug("FOO Done getting spatial matches for block. Time={}msec.", 
+				fooTimer);
 		
 		// Return the results
 		return spatialMatches;
@@ -619,8 +635,9 @@ public class AutoBlockAssigner {
 		
 		String vehicleId = vehicleState.getVehicleId();
 		logger.info("Determining possible auto assignment match for "
-				+ "vehicleId={}", 
-				vehicleId);
+				+ "vehicleId={} at {}, {}", 
+				vehicleId, vehicleState.getAvlReport().getLat(), 
+				vehicleState.getAvlReport().getLon());
 		
 		// Determine all the valid matches
 		List<TemporalMatch> matches = determineTemporalMatches(vehicleState);
