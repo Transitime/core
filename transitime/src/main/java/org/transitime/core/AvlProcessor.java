@@ -459,11 +459,15 @@ public class AvlProcessor {
 
 	/**
 	 * When assigning a vehicle to a block then this method should be called to
-	 * update the VehicleState and log a corresponding VehicleEvent.
+	 * update the VehicleState and log a corresponding VehicleEvent. If block
+	 * assignments are to be exclusive then any old vehicle on that assignment
+	 * will be have its assignment removed.
 	 * 
 	 * @param bestMatch
 	 *            The TemporalMatch that the vehicle was matched to. If set then
-	 *            vehicle will be made predictable. If null then vehicle will be
+	 *            vehicle will be made predictable and if block assignments are
+	 *            to be exclusive then any old vehicle on that assignment will
+	 *            be have its assignment removed. If null then vehicle will be
 	 *            configured to be not predictable.
 	 * @param vehicleState
 	 *            The VehicleState for the vehicle to be updated
@@ -484,6 +488,16 @@ public class AvlProcessor {
 			String assignmentId, String assignmentType) {
 		// Convenience variables
 		AvlReport avlReport = vehicleState.getAvlReport();
+		String vehicleId = avlReport.getVehicleId();
+		
+		// Make sure no other vehicle is using that assignment
+		// if it is supposed to be exclusive. This needs to be done before
+		// the VehicleDataCache is updated with info from the current
+		// vehicle since this will affect all vehicles assigned to the
+		// block.
+		if (bestMatch != null) {
+			unassignOtherVehiclesFromBlock(bestMatch.getBlock(), vehicleId);
+		}
 
 		// If got a valid match then keep track of state
 		BlockAssignmentMethod blockAssignmentMethod = null;
@@ -495,8 +509,7 @@ public class AvlProcessor {
 			block = bestMatch.getBlock();
 			logger.info("vehicleId={} matched to {}Id={}. "
 					+ "Vehicle is now predictable. Match={}",
-					avlReport.getVehicleId(), assignmentType, assignmentId,
-					bestMatch);
+					vehicleId, assignmentType, assignmentId, bestMatch);
 
 			// Record a corresponding VehicleEvent
 			String eventDescription = "Vehicle successfully matched to "
@@ -508,7 +521,7 @@ public class AvlProcessor {
 		} else {
 			logger.debug("For vehicleId={} could not assign to {}Id={}. "
 					+ "Therefore vehicle is not being made predictable.",
-					avlReport.getVehicleId(), assignmentType, assignmentId);
+					vehicleId, assignmentType, assignmentId);
 		}
 
 		// Update the vehicle state with the determined block assignment
@@ -702,15 +715,6 @@ public class AvlProcessor {
 				logger.debug("For vehicleId={} couldn't find match for "
 						+ "blockId={}", avlReport.getVehicleId(), block.getId());
 			}
-		}
-
-		if (bestMatch != null) {
-			// Make sure no other vehicle is using that assignment
-			// if it is supposed to be exclusive. This needs to be done before
-			// the VehicleDataCache is updated with info from the current
-			// vehicle since this will affect all vehicles assigned to the
-			// block.
-			unassignOtherVehiclesFromBlock(block, avlReport.getVehicleId());
 		}
 
 		// Update the state of the vehicle
