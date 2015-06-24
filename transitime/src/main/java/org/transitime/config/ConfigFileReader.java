@@ -74,7 +74,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * readLock() if it is important to update the parameters in a consistent way,
  * such as when more than a single parameter are interrelated.
  * <p>
- * Logback error logging not used in this class so that logback can be not
+ * Logback error logging is not used in this class so that logback can be not
  * accessed until after the configuration is processed. In this way logback can
  * be configured using a configuration file to set any logback Java system
  * properties such as logback.configurationFile .
