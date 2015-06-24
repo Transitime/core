@@ -669,14 +669,15 @@ public class AutoBlockAssigner {
 		
 		// If no matches then not successful
 		if (matches.isEmpty()) {
-			logger.debug("Found no valid matches for vehicleId={}", vehicleId);
+			logger.info("Found no valid matches for vehicleId={}", vehicleId);
 			return null;
 		}
 		
 		// If more than a single match then situation is ambiguous and we can't
 		// consider that a match 
 		if (matches.size() > 1) {
-			logger.debug("Found multiple matches ({}) for vehicleId={}. {}", 
+			logger.info("Found multiple matches ({}) for vehicleId={}. "
+					+ "Therefore could not auto assigne vehicle. {}", 
 					matches.size(), vehicleId, matches);
 			return null;
 		}
