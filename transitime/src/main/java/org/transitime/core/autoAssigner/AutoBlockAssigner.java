@@ -660,7 +660,7 @@ public class AutoBlockAssigner {
 		
 		String vehicleId = vehicleState.getVehicleId();
 		logger.info("Determining possible auto assignment match for "
-				+ "vehicleId={} at {}, {}", 
+				+ "vehicleId={} at [{}, {}]", 
 				vehicleId, vehicleState.getAvlReport().getLat(), 
 				vehicleState.getAvlReport().getLon());
 		
