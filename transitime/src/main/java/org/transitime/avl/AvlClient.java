@@ -95,7 +95,7 @@ public class AvlClient implements Runnable {
 				long timeBetweenReportsSecs =
 						(avlReport.getTime() - previousReportForVehicle
 								.getTime()) / Time.MS_PER_SEC;
-				if (timeBetweenReportsSecs >= AvlConfig.getMinTimeBetweenAvlReportsSecs()) {
+				if (timeBetweenReportsSecs < AvlConfig.getMinTimeBetweenAvlReportsSecs()) {
 					// Log this but. Since this can happen very frequently 
 					// (VTA has hundreds of vehicles reporting every second!) 
 					// separated the logging into two statements in case want 
