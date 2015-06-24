@@ -91,30 +91,33 @@ public class AvlClient implements Runnable {
 			// If previous report happened too recently then don't want to 
 			// process it. This is important for when get AVL data for a vehicle
 			// more frequently than is worthwhile, like every couple of seconds.
-			if (previousReportForVehicle != null
-					&& avlReport.getTime() < previousReportForVehicle.getTime()
-							+ AvlConfig.getMinTimeBetweenAvlReportsSecs()
-							* Time.MS_PER_SEC) {
-				// Log this but. But since this can happen very frequently (VTA
-				// has hundreds of vehicles reporting every second!) make the 
-				// long message a debug statement and use a shorter message for
-				// a warn statement
-				logger.info("AVL report for vehicleId={} for time {} is only {} "
-						+ "seconds old which is too "
-						+ "recent to previous report so discarding it",
-						avlReport.getVehicleId(), avlReport.getTime(), 
-						(avlReport.getTime() - previousReportForVehicle.getTime()) / Time.MS_PER_SEC);
-				logger.debug("Throwing away AVL report because the new report "
-						+ "is too close in time to the previous AVL report "
-						+ "for the vehicle. "
-						+ "transitime.avl.minTimeBetweenAvlReportsSecs={} "
-						+ "secs. New AVL report is {}. Previous valid AVL "
-						+ "report is {}", 
-						AvlConfig.getMinTimeBetweenAvlReportsSecs(), avlReport, 
-						previousReportForVehicle);
-				return;				
+			if (previousReportForVehicle != null) {
+				long timeBetweenReportsSecs =
+						(avlReport.getTime() - previousReportForVehicle
+								.getTime()) / Time.MS_PER_SEC;
+				if (timeBetweenReportsSecs >= AvlConfig.getMinTimeBetweenAvlReportsSecs()) {
+					// Log this but. Since this can happen very frequently 
+					// (VTA has hundreds of vehicles reporting every second!) 
+					// separated the logging into two statements in case want 
+					// to make the first shorter one a warn message but keep the
+					// second more verbose one a debug statement.
+					logger.debug("AVL report for vehicleId={} for time {} is only {} "
+							+ "seconds old which is too "
+							+ "recent to previous report so discarding it",
+							avlReport.getVehicleId(), avlReport.getTime(), 
+							timeBetweenReportsSecs);
+					logger.debug("Throwing away AVL report because the new report "
+							+ "is too close in time to the previous AVL report "
+							+ "for the vehicle. "
+							+ "transitime.avl.minTimeBetweenAvlReportsSecs={} "
+							+ "secs. New AVL report is {}. Previous valid AVL "
+							+ "report is {}", 
+							AvlConfig.getMinTimeBetweenAvlReportsSecs(), avlReport, 
+							previousReportForVehicle);
+					return;				
+				}
 			}
-			
+						
 			// Should handle the avl report so remember so can possibly filter the
 			// next one
 			avlReports.put(avlReport.getVehicleId(), avlReport);
