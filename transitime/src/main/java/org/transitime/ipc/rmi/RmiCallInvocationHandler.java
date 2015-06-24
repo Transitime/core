@@ -254,24 +254,18 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				// right away is most likely not going to help with a networking
 				// problem or the server not running.
 				if (tryNumber >= 2) {
-					String message =
-							"Remote method "
-									+ info.getClassName()
-									+ "."
-									+ method.getName()
-									+ "() for agency "
-									+ info.getAgencyId()
-									+ " encountered exception. "
-									+ e.getMessage()
-									+ ". "
-									+ e.getCause().getMessage()
-									+ ". Gave up after "
-									+ "second attempt. Does security allow access "
-									+ "to the secondary RMI port? "
-									+ "Is the Java system property "
-									+ "transitime.rmi.timeoutSec timeout time of "
-									+ ClientFactory.getTimeoutSec()
-									+ " seconds adequate?";
+					String message = "Remote method "
+						+ info.getClassName() + "."
+						+ method.getName() + "() for agency " 
+						+ info.getAgencyId() + " encountered exception. "
+						+ e.getMessage() + ". "	+ e.getCause().getMessage()
+						+ ". Gave up after second attempt. Does security allow "
+						+ "access to the secondary RMI port? "
+						+ "Is the Java system property java.rmi.server.hostname "
+						+ "set to the proper host name? "
+						+ "Is the Java system "
+						+ "property transitime.rmi.timeoutSec timeout time of "
+						+ ClientFactory.getTimeoutSec()	+ " seconds adequate?";
 					
 					logger.error(message);
 					throw new RemoteException(message);
