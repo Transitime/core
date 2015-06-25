@@ -24,11 +24,13 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.Time;
 
@@ -508,7 +510,7 @@ public class IpcVehicle implements Serializable {
 	 */
 	public static void main(String args[]) {
 		IpcAvl avl = new IpcAvl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f,
-				"block", "driver", "license", 0);
+				"block", AssignmentType.BLOCK_ID, "driver", "license", 0);
 		IpcVehicle v =
 				new IpcVehicle("blockId",
 						BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl,

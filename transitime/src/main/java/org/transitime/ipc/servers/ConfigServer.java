@@ -65,7 +65,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * serve requests.
 	 * 
 	 * @param agencyId
-	 * @return the singleton PredictionsServer object. Usually does not need to
+	 * @return the singleton ConfigServer object. Usually does not need to
 	 *         used since the server will be fully running.
 	 */
 	public static ConfigServer start(String agencyId) {

@@ -40,6 +40,7 @@ import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.ipc.servers.CommandsServer;
 import org.transitime.ipc.servers.ConfigServer;
 import org.transitime.ipc.servers.PredictionsServer;
 import org.transitime.ipc.servers.ServerStatusServer;
@@ -337,7 +338,7 @@ public class Core {
 		}
 	}
 	
-	/*
+	/**
 	 * Start the RMI Servers so that clients can obtain data
 	 * on predictions, vehicles locations, etc.
 	 *  
@@ -349,6 +350,7 @@ public class Core {
 		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());
 		ConfigServer.start(agencyId);
 		ServerStatusServer.start(agencyId);
+		CommandsServer.start(agencyId);
 	}
 	
 	/**

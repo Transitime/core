@@ -32,7 +32,7 @@ import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 
 /**
- *
+ * Defines the RMI interface for getting configuration data.
  *
  * @author SkiBu Smith
  *

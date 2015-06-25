@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.configData.AvlConfig;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.ipc.data.IpcAvl;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
@@ -331,6 +332,31 @@ public class AvlReport implements Serializable {
 		this.timeProcessed = null;
 	}
 
+	/**
+	 * For converting a RMI IpcAvl object to a regular AvlReport.
+	 * 
+	 * @param ipcAvl
+	 */
+	public AvlReport(IpcAvl ipcAvl) {
+		this.vehicleId = ipcAvl.getVehicleId();
+		this.time = new Date(ipcAvl.getTime());
+		this.location = new Location(ipcAvl.getLatitude(), ipcAvl.getLongitude());
+		this.speed = ipcAvl.getSpeed();
+		this.heading = ipcAvl.getHeading();
+		this.assignmentId = ipcAvl.getAssignmentId();
+		this.assignmentType = ipcAvl.getAssignmentType();
+		this.leadVehicleId = null;
+		this.driverId = null;
+		this.licensePlate = null;
+		this.passengerCount = null;
+		this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
+		
+		// Don't yet know when processed so set timeProcessed to null
+		this.timeProcessed = null;
+	}
+	
 	/**
 	 * Makes a copy of the AvlReport but uses the new time passed in.
 	 * Useful for creating a new AvlReport when AVL timeout occurs

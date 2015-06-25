@@ -16,8 +16,6 @@
  */
 package org.transitime.avl;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import javax.jms.JMSException;
 
 import org.slf4j.Logger;
@@ -27,8 +25,6 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.jms.JMSWrapper;
 import org.transitime.ipc.jms.RestartableMessageProducer;
 import org.transitime.modules.Module;
-import org.transitime.utils.threading.BoundedExecutor;
-import org.transitime.utils.threading.NamedThreadFactory;
 
 
 /**
@@ -42,11 +38,6 @@ public abstract class AvlModule extends Module {
 	// For writing the AVL data to the JMS topic
 	protected RestartableMessageProducer jmsMsgProducer = null; 
 
-	// For when using a direct queue instead of JMS for processing the AVL 
-	// reports
-	private final static int MAX_THREADS = 100;
-	private BoundedExecutor avlClientExecutor = null;
-
 	private static final Logger logger = 
 			LoggerFactory.getLogger(AvlModule.class);	
 
@@ -59,44 +50,6 @@ public abstract class AvlModule extends Module {
 	 */
 	protected AvlModule(String agencyId) {
 		super(agencyId);		
-		
-		if (!AvlConfig.shouldUseJms()) 
-			initForUsingQueueInsteadOfJms();
-	}
-	
-	/**
-	 * For when using a direct queue instead of JMS for handling
-	 * the AVL reports.
-	 */
-	private void initForUsingQueueInsteadOfJms() {
-		int maxAVLQueueSize = AvlConfig.getAvlQueueSize();
-		int numberThreads = AvlConfig.getNumAvlThreads();
-		
-		logger.info("Starting AvlModule for directly handling AVL reports " +
-				"via a queue instead of JMS. For agencyId={} with "
-				+ "maxAVLQueueSize={} and numberThreads={}", agencyId,
-				maxAVLQueueSize, numberThreads);
-
-		// Make sure that numberThreads is reasonable
-		if (numberThreads < 1) {
-			logger.error("Number of threads must be at least 1 but {} was "
-					+ "specified. Therefore using 1 thread.", numberThreads);
-			numberThreads = 1;
-		}
-		if (numberThreads > MAX_THREADS) {
-			logger.error("Number of threads must be no greater than {} but "
-					+ "{} was specified. Therefore using {} threads.",
-					MAX_THREADS, numberThreads, MAX_THREADS);
-			numberThreads = MAX_THREADS;
-		}
-
-		// Create the executor that actually processes the AVL data. The executor
-		// will be passed an AvlClient and then AvlClient.run() is called.
-		NamedThreadFactory avlClientThreadFactory = 
-				new NamedThreadFactory("avlClient"); 
-		Executor executor = Executors.newFixedThreadPool(numberThreads,
-				avlClientThreadFactory);
-		avlClientExecutor = new BoundedExecutor(executor, maxAVLQueueSize);
 	}
 	
 	/**
@@ -165,18 +118,7 @@ public abstract class AvlModule extends Module {
 	 *            The AVL report to be processed
 	 */
 	private void processAvlReportWithoutJms(AvlReport avlReport) {
-		// Have another thread actually process the AVL data
-		// using the AvlClient class. Actually uses AvlClient.run() to
-		// do the processing. This way can use multiple
-		// threads to simultaneously process the data.
-		Runnable avlClient = new AvlClient(avlReport);
-		
-		// Want to both be able to use multiple threads and to be able to 
-		// queue up requests so use a thread executor
-		try {
-			avlClientExecutor.execute(avlClient);
-		} catch (InterruptedException e) {
-			logger.error("Exception when processing AVL data", e);
-		}		
+		// Use AvlExecutor to actually process the data using a thread executor
+		AvlExecutor.getInstance().processAvlReport(avlReport);	
 	}
 }

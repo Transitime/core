@@ -23,6 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
@@ -41,6 +42,7 @@ public class IpcAvl implements Serializable {
 	private final float speed;
 	private final float heading;
 	private final String assignmentId;
+	private final AssignmentType assignmentType;
 	private final String driverId;
 	private final String licensePlate;
 	private final int passengerCount;
@@ -57,12 +59,14 @@ public class IpcAvl implements Serializable {
 	 * @param speed
 	 * @param heading
 	 * @param assignmentId
+	 * @param assignmentType
 	 * @param driverId
 	 * @param licensePlate
 	 * @param passengerCount
 	 */
 	public IpcAvl(String vehicleId, long time, float latitude, float longitude,
-			float speed, float heading, String assignmentId, String driverId,
+			float speed, float heading, String assignmentId,
+			AssignmentType assignmentType, String driverId,
 			String licensePlate, int passengerCount) {
 		this.vehicleId = vehicleId;
 		this.time = time;
@@ -71,6 +75,7 @@ public class IpcAvl implements Serializable {
 		this.speed = speed;
 		this.heading = heading;
 		this.assignmentId = assignmentId;
+		this.assignmentType = assignmentType;
 		this.driverId = driverId;
 		this.licensePlate = licensePlate;
 		this.passengerCount = passengerCount;
@@ -87,10 +92,10 @@ public class IpcAvl implements Serializable {
 		this.speed = a.getSpeed();
 		this.heading = a.getHeading();
 		this.assignmentId = a.getAssignmentId();
+		this.assignmentType = a.getAssignmentType();
 		this.driverId = a.getDriverId();
 		this.licensePlate = a.getLicensePlate();
 		this.passengerCount = a.getPassengerCount();
-
 	}
 
 	/*
@@ -106,6 +111,7 @@ public class IpcAvl implements Serializable {
 		private float speed;
 		private float heading;
 		private String assignmentId;
+		private AssignmentType assignmentType;
 		private String driverId;
 		private String licensePlate;
 		private int passengerCount;
@@ -124,6 +130,7 @@ public class IpcAvl implements Serializable {
 			this.speed = avl.speed;
 			this.heading = avl.heading;
 			this.assignmentId = avl.assignmentId;
+			this.assignmentType = avl.assignmentType;
 			this.driverId = avl.driverId;
 			this.licensePlate = avl.licensePlate;
 			this.passengerCount = avl.passengerCount;
@@ -145,6 +152,7 @@ public class IpcAvl implements Serializable {
 			stream.writeFloat(speed);
 			stream.writeFloat(heading);
 			stream.writeObject(assignmentId);
+			stream.writeObject(assignmentType);
 			stream.writeObject(driverId);
 			stream.writeObject(licensePlate);
 			stream.writeInt(passengerCount);
@@ -159,8 +167,8 @@ public class IpcAvl implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcAvl(vehicleId, time, latitude, longitude, speed,
-					heading, assignmentId, driverId, licensePlate,
-					passengerCount);
+					heading, assignmentId, assignmentType, driverId,
+					licensePlate, passengerCount);
 		}
 
 		/*
@@ -183,6 +191,7 @@ public class IpcAvl implements Serializable {
 			speed = stream.readFloat();
 			heading = stream.readFloat();
 			assignmentId = (String) stream.readObject();
+			assignmentType = (AssignmentType) stream.readObject();
 			driverId = (String) stream.readObject();
 			licensePlate = (String) stream.readObject();
 			passengerCount = stream.readInt();
@@ -240,6 +249,10 @@ public class IpcAvl implements Serializable {
 	    return assignmentId;
 	}
 	
+	public AssignmentType getAssignmentType() {
+		return assignmentType;
+	}
+	
 	public String getDriverId() {
 		return driverId;
 	}
@@ -261,6 +274,7 @@ public class IpcAvl implements Serializable {
 				+ ", speed=" + Geo.speedFormat(speed)
 				+ ", heading=" + Geo.headingFormat(heading) 
 				+ ", assignmentId=" + assignmentId
+				+ ", assignmentType=" + assignmentType
 				+ ", driverId=" + driverId 
 				+ ", licensePlate=" + licensePlate
 				+ ", passengerCount=" + passengerCount 
