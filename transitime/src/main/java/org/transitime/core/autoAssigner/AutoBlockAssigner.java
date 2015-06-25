@@ -659,10 +659,8 @@ public class AutoBlockAssigner {
 			return null;
 		
 		String vehicleId = vehicleState.getVehicleId();
-		logger.info("Determining possible auto assignment match for "
-				+ "vehicleId={} at [{}, {}]", 
-				vehicleId, vehicleState.getAvlReport().getLat(), 
-				vehicleState.getAvlReport().getLon());
+		logger.info("Determining possible auto assignment match for {}",
+				vehicleId, vehicleState.getAvlReport());
 		
 		// Determine all the valid matches
 		List<TemporalMatch> matches = determineTemporalMatches(vehicleState);
