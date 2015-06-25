@@ -119,6 +119,22 @@ public class AutoBlockAssigner {
 					"How late a vehicle can be in seconds and still be auto "
 					+ "assigned to a block");
 		
+	private static IntegerConfigValue minTimeBetweenAutoAssigningSecs =
+			new IntegerConfigValue(
+					"transitime.autoBlockAssigner.minTimeBetweenAutoAssigningSecs", 
+					30,
+					"Minimum time per vehicle that can do auto assigning. Auto "
+					+ "assigning is computationally expensive, especially when "
+					+ "there are many blocks. Don't need to do it that "
+					+ "frequently. Especially important for agencies with high "
+					+ "reporting rates. So this param allows one to limit how "
+					+ "frequently auto assigner called for vehicle");
+	
+	// For keeping track of last time vehicle auto assigned so that can limit 
+	// how frequently it is done. Keyed on vehicleId
+	private static HashMap<String, Long> timeVehicleLastAutoAssigned =
+			new HashMap<String, Long>();
+	
 	/*********************** Logging **********************************/
 	
 	private static final Logger logger = LoggerFactory
@@ -637,6 +653,53 @@ public class AutoBlockAssigner {
 	}
 	
 	/**
+	 * Determines if the auto assigner is being called too recently, as specified by
+	 * the transitime.autoBlockAssigner.minTimeBetweenAutoAssigningSecs property. This
+	 * is important because auto assigning is quite costly for agencies with many available
+	 * blocks. If have high reporting rate and many available blocks then the system can get bogged
+	 * down just doing auto assigning.
+	 * 
+	 * @param vehicleState
+	 * @return true if was too recently called for the vehicle
+	 */
+	private static boolean tooRecent(VehicleState vehicleState) {
+		// Convenience variables
+		String vehicleId = vehicleState.getVehicleId();
+		long gpsTime = vehicleState.getAvlReport().getTime();
+		
+		// Determine last time vehicle was auto assigned
+		Long lastTime = timeVehicleLastAutoAssigned.get(vehicleId);
+
+		// If first time dealing with the vehicle then it is not too recent
+		if (lastTime == null) {
+			// Store the time for the vehicle for next time this method is called
+			timeVehicleLastAutoAssigned.put(vehicleId, gpsTime);
+			return false;
+		}
+		
+		// Return true if not enough time elapsed
+		long elapsedSecs = (gpsTime - lastTime) / Time.MS_PER_SEC;
+		boolean tooRecent =
+				elapsedSecs < minTimeBetweenAutoAssigningSecs.getValue();
+
+		logger.debug("For vehicleId={} tooRecent={} elapsedSecs={} lastTime={} "
+				+ "gpsTime={} minTimeBetweenAutoAssigningSecs={} ", 
+				vehicleId, tooRecent, elapsedSecs, Time.timeStrMsec(lastTime), 
+				Time.timeStrMsec(gpsTime), 
+				minTimeBetweenAutoAssigningSecs.getValue());
+
+		if (tooRecent) {
+			return true;
+		} else {
+			// Not too recent so should auto assign. Therefore store the time 
+			// for the vehicle for next time this method is called
+			timeVehicleLastAutoAssigned.put(vehicleId, gpsTime);
+			return false;
+		}
+			
+	}
+	
+	/**
 	 * For trying to match vehicle to a active but currently unused block and
 	 * the auto assigner is enabled. If auto assigner is not enabled then
 	 * returns null. Goes through all the currently active blocks and tries to
@@ -658,9 +721,13 @@ public class AutoBlockAssigner {
 		if (!autoAssignerEnabled.getValue())
 			return null;
 		
+		// If auto assigner called too recently for vehicle then return
+		if (tooRecent(vehicleState))
+			return null;
+		
 		String vehicleId = vehicleState.getVehicleId();
 		logger.info("Determining possible auto assignment match for {}",
-				vehicleId, vehicleState.getAvlReport());
+				vehicleState.getAvlReport());
 		
 		// Determine all the valid matches
 		List<TemporalMatch> matches = determineTemporalMatches(vehicleState);
