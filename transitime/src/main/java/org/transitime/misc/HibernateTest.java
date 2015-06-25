@@ -70,7 +70,9 @@ public class HibernateTest {
 				// Store some AVLReportss
 				long initialTime = System.currentTimeMillis();
 				for (int i=0; i<cnt; ++i) {
-					AvlReport report = new AvlReport((batch?"batch":"stateless")+i, initialTime + i, 1.23, 4.56);
+					AvlReport report =
+							new AvlReport((batch ? "batch" : "stateless") + i,
+									initialTime + i, 1.23, 4.56, null);
 					if (batch)
 						batchSession.save(report);
 					else

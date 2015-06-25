@@ -58,6 +58,7 @@
         lon float8,
         passengerCount int4,
         passengerFullness float4,
+        source varchar(10),
         speed float4,
         timeProcessed timestamp,
         primary key (vehicleId, time)

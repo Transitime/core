@@ -97,9 +97,10 @@ public class AvlCsvRecord extends CsvBase {
 				null : Integer.parseInt(passengerCountStr);
 		
 		// Create the avlReport
-		AvlReport avlReport = new AvlReport(vehicleId, time, lat, lon, speed,
-				heading, leadVehicleId, driverId, licensePlate, passengerCount,
-				passengerFullness);
+		AvlReport avlReport =
+				new AvlReport(vehicleId, time, lat, lon, speed, heading, "CSV",
+						leadVehicleId, driverId, licensePlate, passengerCount,
+						passengerFullness);
 
 		// Assignment info
 		String assignmentId = 

@@ -179,7 +179,8 @@ public class SchedBasedPredsModule extends Module {
 										referenceTime);
 				Location location = block.getStartLoc();
 				AvlReport avlReport =
-						new AvlReport(vehicleId, blockStartEpochTime, location);
+						new AvlReport(vehicleId, blockStartEpochTime, location,
+								"Schedule");
 				
 				// Set the block assignment for the AVL report and indicate 
 				// that it is for creating scheduled based predictions

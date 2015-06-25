@@ -48,6 +48,8 @@ import org.transitime.ipc.interfaces.CommandsInterface;
 @Path("/key/{key}/agency/{agency}")
 public class CommandsApi {
 
+	private static final String AVL_SOURCE = "API";
+	
 	/**
 	 * Reads in a single AVL report specified by the query string parameters
 	 * v=vehicleId
@@ -101,7 +103,7 @@ public class CommandsApi {
 			
 			// Create and send an IpcAvl report to the server
 			AvlReport avlReport = new AvlReport(vehicleId, time, 
-					lat, lon, speed, heading);
+					lat, lon, speed, heading, AVL_SOURCE);
 			
 			// Deal with assignment info if it is set
 			if (assignmentId != null) {
@@ -201,7 +203,8 @@ public class CommandsApi {
 						
 				// Convert the AVL info into a IpcAvl object to sent to server
 				AvlReport avlReport =
-						new AvlReport(vehicleId, time, lat, lon, speed, heading);
+						new AvlReport(vehicleId, time, lat, lon, speed,
+								heading, AVL_SOURCE);
 				
 				// Handle assignment info if there is any
 				if (avlJsonObj.has("assignmentId")) {

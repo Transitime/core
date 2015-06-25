@@ -148,7 +148,7 @@ public class AmigoCloudAvlModule extends AvlModule {
 						// Actually process the report
 						AvlReport avlReport =
 								new AvlReport(vehicleId, timestamp, latitude,
-										longitude, speed, heading);
+										longitude, speed, heading, "AmigoCloud");
 						avlModule.processAvlReport(avlReport);
 					}
 				}

@@ -112,7 +112,7 @@ public class ZonarAvlModule extends XmlPollingAvlModule {
 			// Create and process the AVL report. 
 			AvlReport avlReport = new AvlReport(vehicleId, time,
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
-					heading);
+					heading, "Zonar");
 			processAvlReport(avlReport);
 		}
 	}

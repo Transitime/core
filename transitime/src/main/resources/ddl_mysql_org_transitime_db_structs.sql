@@ -58,6 +58,7 @@
         lon double precision,
         passengerCount integer,
         passengerFullness float,
+        source varchar(10),
         speed float,
         timeProcessed datetime(3),
         primary key (vehicleId, time)

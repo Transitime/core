@@ -509,8 +509,10 @@ public class IpcVehicle implements Serializable {
 	 * Just for testing.
 	 */
 	public static void main(String args[]) {
-		IpcAvl avl = new IpcAvl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f,
-				"block", AssignmentType.BLOCK_ID, "driver", "license", 0);
+		IpcAvl avl =
+				new IpcAvl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f, null,
+						"block", AssignmentType.BLOCK_ID, "driver", "license",
+						0);
 		IpcVehicle v =
 				new IpcVehicle("blockId",
 						BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl,

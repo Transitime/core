@@ -191,7 +191,7 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 		
 		// Create the AVL report
 		AvlReport avlReport = new AvlReport(vehicleId, gpsTime, lat, lon,
-				speed, heading);
+				speed, heading, "MBTA");
 		
 		// Determine the assignment to use. usingTripsAssignments should be
 		// true if using trips assignments instead regular block assignments.

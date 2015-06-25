@@ -134,8 +134,10 @@ public class GeorgiaTechAvlModule extends AvlModule {
 		//writeToFile(vehicleId, gpsLoc);
 
 		// Create AvlReport that corresponds to data read in
-		AvlReport avlReport = new AvlReport(vehicleId, gpsLoc.getTime(),
-				gpsLoc.getLocation(), gpsLoc.getSpeed(), gpsLoc.getHeading());
+		AvlReport avlReport =
+				new AvlReport(vehicleId, gpsLoc.getTime(),
+						gpsLoc.getLocation(), gpsLoc.getSpeed(),
+						gpsLoc.getHeading(), "GeorgiaT");
 		avlReport.setAssignment(assignmentId, AssignmentType.BLOCK_ID);
 		
 		logger.debug("{}", avlReport);

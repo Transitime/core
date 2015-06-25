@@ -58,6 +58,7 @@
         lon double precision,
         passengerCount number(10,0),
         passengerFullness float,
+        source varchar2(10 char),
         speed float,
         timeProcessed timestamp,
         primary key (vehicleId, time)

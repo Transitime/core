@@ -204,7 +204,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			// round to just 5 decimal places.
 			AvlReport avlReport = new AvlReport(vehicleId, gpsEpochTime, 
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), 
-					speed, heading, leadingVehicleId, driverId, 
+					speed, heading, "NextBus", leadingVehicleId, driverId, 
 					null,       // license plate
 					passengerCount,
 					Float.NaN); // passengerFullness

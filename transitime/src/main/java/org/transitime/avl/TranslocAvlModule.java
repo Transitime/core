@@ -161,7 +161,7 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 				// Process AVL report
 				AvlReport avlReport =
 						new AvlReport(vehicleId, gpsTime.getTime(), lat, lon,
-								speed, heading);
+								speed, heading, "Transloc");
 				processAvlReport(avlReport);
 			}
 		} catch (JSONException e) {
