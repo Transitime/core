@@ -23,21 +23,30 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.BeanParam;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
+import org.transitime.api.data.ApiNearbyPredictionsForAgencies;
+import org.transitime.api.data.ApiPredictions;
+import org.transitime.api.predsByLoc.PredsByLoc;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
 import org.transitime.db.structs.Agency;
+import org.transitime.db.structs.Location;
 import org.transitime.db.webstructs.WebAgency;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
+import org.transitime.ipc.clients.PredictionsInterfaceFactory;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.ConfigInterface;
+import org.transitime.ipc.interfaces.PredictionsInterface;
 
 /**
  * Contains the API commands for the Transitime API for system wide commands,
@@ -57,6 +66,13 @@ public class TransitimeNonAgencyApi {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * For "agencies" command. Returns information for all configured agencies.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
 	@Path("/command/agencies")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -99,4 +115,74 @@ public class TransitimeNonAgencyApi {
 		}
 	}
 
+	/**
+	 * For "predictionsByLoc" command when want to return data for any agency instead of
+	 * a single specific one.
+	 * 
+	 * @param stdParameters
+	 *            StdParametersBean that gets the standard parameters from the
+	 *            URI, query string, and headers.
+	 * @param lat latitude in decimal degrees
+	 * @param lon longitude in decimal degrees
+	 * @param maxDistance
+	 *            How far away a stop can be from the lat/lon. Default is 1,500
+	 *            m.
+	 * @param numberPredictions
+	 *            Maximum number of predictions to return. Default value is 3.
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/predictionsByLoc")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getPredictions(
+			@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "lat") Double lat,
+			@QueryParam(value = "lon") Double lon,
+			@QueryParam(value = "maxDistance") @DefaultValue("1500.0") double maxDistance,
+			@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		if (maxDistance > PredsByLoc.MAX_MAX_DISTANCE)
+			throw WebUtils.badRequestException("Maximum maxDistance parameter "
+					+ "is " + PredsByLoc.MAX_MAX_DISTANCE + "m but " + maxDistance
+					+ "m was specified in the request.");
+		
+		try {
+			ApiNearbyPredictionsForAgencies predsForAgencies = 
+					new ApiNearbyPredictionsForAgencies();
+			
+			// For each nearby agency...
+			List<String> nearbyAgencies =
+					PredsByLoc.getNearbyAgencies(lat, lon, maxDistance);			
+			for (String agencyId : nearbyAgencies) {
+				// Get predictions by location for the agency
+				PredictionsInterface predictionsInterface =
+						PredictionsInterfaceFactory.get(agencyId);
+				List<IpcPredictionsForRouteStopDest> predictions =
+						predictionsInterface.get(new Location(lat, lon),
+								maxDistance, numberPredictions);
+	
+				// Convert predictions to API object
+				ApiPredictions predictionsData = new ApiPredictions(predictions);
+
+				// Add additional agency related info so can describe the 
+				// agency in the API.
+				WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
+				String agencyName = webAgency.getAgencyName();				
+				predictionsData.set(agencyId, agencyName);
+				
+				// Add the predictions for the agency to the predictions to
+				// be returned
+				predsForAgencies.addPredictionsForAgency(predictionsData);
+			}
+			return stdParameters.createResponse(predsForAgencies);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+
+	}
 }

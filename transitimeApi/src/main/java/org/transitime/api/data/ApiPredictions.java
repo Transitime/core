@@ -20,13 +20,15 @@ package org.transitime.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
- * Contains predictions for multiple stops.
+ * Contains predictions for multiple routes/stops. Can also contain info for the
+ * agency.
  *
  * @author SkiBu Smith
  *
@@ -34,7 +36,18 @@ import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 @XmlRootElement(name = "preds")
 public class ApiPredictions {
 
-	@XmlElement(name = "routeStop")
+	// Optional additional info. Needed for when providing predictions for
+	// multiple agencies, such as when getting predictions by location
+	@XmlAttribute
+	private String agencyId = null;
+
+	// Optional additional info. Needed for when providing predictions for
+	// multiple agencies, such as when getting predictions by location
+	@XmlAttribute
+	private String agencyName = null;
+
+	// The actual predictions, by route & stop
+	@XmlElement(name = "predictions")
 	private List<ApiPredictionRouteStop> predictionsForRouteStop;
 
 	/********************** Member Functions **************************/
@@ -87,6 +100,18 @@ public class ApiPredictions {
 		ApiPredictionRouteStop predictionsForRouteStopData =
 				new ApiPredictionRouteStop(predsForRouteStop);
 		predictionsForRouteStop.add(predictionsForRouteStopData);
+	}
+
+	/**
+	 * For setting info about the agency. Needed for when providing predictions
+	 * for multiple agencies, such as when getting predictions by location
+	 * 
+	 * @param agencyId
+	 * @param agencyName
+	 */
+	public void set(String agencyId, String agencyName) {
+		this.agencyId = agencyId;
+		this.agencyName = agencyName;
 	}
 
 }

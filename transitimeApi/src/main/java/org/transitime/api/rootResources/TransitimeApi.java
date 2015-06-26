@@ -54,6 +54,7 @@ import org.transitime.api.data.ApiTripWithTravelTimes;
 import org.transitime.api.data.ApiVehicleConfigs;
 import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
+import org.transitime.api.predsByLoc.PredsByLoc;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
 import org.transitime.db.structs.Agency;
@@ -449,9 +450,6 @@ public class TransitimeApi {
 		}
 	}
 
-	// The maximum allowable maxDistance for getting predictions by location
-	private final static double MAX_MAX_DISTANCE = 2000.0;
-
 	/**
 	 * Handles "predictionsByLoc" command. Gets predictions from server and
 	 * returns the corresponding response.
@@ -464,10 +462,10 @@ public class TransitimeApi {
 	 * @param stdParameters
 	 *            StdParametersBean that gets the standard parameters from the
 	 *            URI, query string, and headers.
-	 * @param lat
-	 * @param lon
+	 * @param lat latitude in decimal degrees
+	 * @param lon longitude in decimal degrees
 	 * @param maxDistance
-	 *            How far away a stop can be from the lat/lon. Default is 2,000
+	 *            How far away a stop can be from the lat/lon. Default is 1,500
 	 *            m.
 	 * @param numberPredictions
 	 *            Maximum number of predictions to return. Default value is 3.
@@ -487,9 +485,9 @@ public class TransitimeApi {
 		// Make sure request is valid
 		stdParameters.validate();
 
-		if (maxDistance > MAX_MAX_DISTANCE)
+		if (maxDistance > PredsByLoc.MAX_MAX_DISTANCE)
 			throw WebUtils.badRequestException("Maximum maxDistance parameter "
-					+ "is " + MAX_MAX_DISTANCE + "m but " + maxDistance
+					+ "is " + PredsByLoc.MAX_MAX_DISTANCE + "m but " + maxDistance
 					+ "m was specified in the request.");
 
 		try {
