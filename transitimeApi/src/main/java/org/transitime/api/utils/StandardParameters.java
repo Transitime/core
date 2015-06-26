@@ -206,8 +206,8 @@ public class StandardParameters {
 	}
 
 	/**
-	 * Gets the PredictionsInterface for the specified agencyId. If not valid
-	 * then throws WebApplicationException.
+	 * Gets the PredictionsInterface for the agencyId specified as part of the
+	 * standard parameters. If not valid then throws WebApplicationException.
 	 * 
 	 * @return The VehiclesInterface
 	 */
