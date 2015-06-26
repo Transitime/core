@@ -182,8 +182,10 @@ public class Extent implements Serializable {
 			return false;
 		
 		// Latitude was OK so check longitude
-		double distanceInDegreesLongitude = distance / 
-				Math.cos(Math.toRadians((minLat+maxLat) / 2));
+		double distanceInDegreesLongitude =
+				distance
+						/ (METERS_PER_DEGREE * Math.cos(Math
+								.toRadians((minLat + maxLat) / 2)));
 		if (minLon > loc.getLon() + distanceInDegreesLongitude 
 				|| maxLon < loc.getLon() - distanceInDegreesLongitude)
 			return false;
