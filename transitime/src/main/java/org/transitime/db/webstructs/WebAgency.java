@@ -93,7 +93,7 @@ public class WebAgency {
 	@Transient
 	private String agencyName;
 	
-	// Cache
+	// Cache. Keyed on agencyId
 	static private Map<String, WebAgency> webAgencyMapCache;
 	static private long webAgencyMapCacheReadTime = 0;
 	static private List<WebAgency> webAgencyOrderedList;
