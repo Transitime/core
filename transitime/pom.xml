@@ -221,6 +221,18 @@
 					<execution>
 						<id>build-second</id>
 						<configuration>
+							<mainClass>org.transitime.applications.UpdateTravelTimes</mainClass>
+							<attachToBuild>true</attachToBuild>
+							<classifier>onejar</classifier>
+							<filename>updateTravelTimes.jar</filename>
+						</configuration>
+						<goals>
+							<goal>one-jar</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>build-third</id>
+						<configuration>
 							<mainClass>org.transitime.applications.SchemaGenerator</mainClass>
 							<attachToBuild>true</attachToBuild>
 							<classifier>onejar</classifier>
@@ -231,7 +243,7 @@
 						</goals>
 					</execution>
 					<execution>
-						<id>build-third</id>
+						<id>build-fourth</id>
 						<configuration>
 							<mainClass>org.transitime.applications.ScheduleGenerator</mainClass>
 							<attachToBuild>true</attachToBuild>
@@ -243,7 +255,7 @@
 						</goals>
 					</execution>
 					<execution>
-						<id>build-forth</id>
+						<id>build-fifth</id>
 						<configuration>
 							<mainClass>org.transitime.applications.GtfsFileProcessor</mainClass>
 							<attachToBuild>true</attachToBuild>
@@ -255,7 +267,7 @@
 						</goals>
 					</execution>
 					<execution>
-						<id>build-fifth</id>
+						<id>build-sixth</id>
 						<configuration>
 							<mainClass>org.transitime.applications.RmiQuery</mainClass>
 							<attachToBuild>true</attachToBuild>
@@ -267,7 +279,7 @@
 						</goals>
 					</execution>
 					<execution>
-						<id>build-sixth</id>
+						<id>build-seventh</id>
 						<configuration>
 							<mainClass>org.transitime.applications.CreateAPIKey</mainClass>
 							<attachToBuild>true</attachToBuild>
