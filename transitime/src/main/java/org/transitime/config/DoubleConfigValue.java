@@ -48,7 +48,7 @@ public class DoubleConfigValue extends ConfigValue<Double> {
 	}
 
 	@Override protected Double convertFromString(List<String> dataList) {
-		return Double.valueOf(dataList.get(0));
+		return Double.valueOf(dataList.get(0).trim());
 	}	
 }
 
