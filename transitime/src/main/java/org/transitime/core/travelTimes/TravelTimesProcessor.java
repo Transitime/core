@@ -129,9 +129,15 @@ public class TravelTimesProcessor {
 	// order to combine data for a particular tripId and stopPathIndex.
 	// stopTimesMap contains data for each trip on how long vehicle was stopped
 	// for at a particular stop. It is obtained by comparing the arrival time
-	// with the departure time for each stop for each trip.
+	// with the departure time for each stop for each trip. There is one
+	// entry per data point, hence a List of Integers with one Integer
+	// per data point.
 	private static Map<ProcessedDataMapKey, List<Integer>> stopTimesMap = 
 			new HashMap<ProcessedDataMapKey, List<Integer>>();	
+	// Values are List of List of times where outer List is by single trip and
+	// inner List is by travel time segment. For every trip that has historical
+	// data we get a single entry in the outer List. For every travel time
+	// segment we have historical data for we get an entry in the inner List.
 	private static Map<ProcessedDataMapKey, List<List<Integer>>> travelTimesMap =
 			new HashMap<ProcessedDataMapKey, List<List<Integer>>>();
 
@@ -340,12 +346,24 @@ public class TravelTimesProcessor {
 	 * @param pathLength
 	 * @return number of travel time segments
 	 */
-	private int getNumTravelTimeSegments(double pathLength) {
+	private static int getNumTravelTimeSegments(double pathLength) {
 		int numberTravelTimeSegments = 
 				(int) (pathLength / getMaxTravelTimeSegmentLength() + 1.0);		
 		return numberTravelTimeSegments;
 	}
 
+	/**
+	 * Number of travel time segments for the stop path specified.
+	 * 
+	 * @param trip
+	 * @param stopPathIndex
+	 * @return
+	 */
+	private static int getNumTravelTimeSegments(Trip trip, int stopPathIndex) {
+		double pathLength = trip.getStopPath(stopPathIndex).getLength();
+		return getNumTravelTimeSegments(pathLength);
+	}
+	
 	/**
 	 * The travel time length is the length of the stop path divided into equal
 	 * segments such that the segments are no longer than
@@ -357,9 +375,11 @@ public class TravelTimesProcessor {
 	 *            For determining the StopPath
 	 * @return travel time length for the specified StopPath
 	 */
-	private double getTravelTimeSegmentLength(Trip trip, int stopPathIndex) {
-		double pathLength = trip.getStopPath(stopPathIndex).getLength(); 
-		double segLength = pathLength / getNumTravelTimeSegments(pathLength);
+	private static double getTravelTimeSegmentLength(Trip trip,
+			int stopPathIndex) {
+		double pathLength = trip.getStopPath(stopPathIndex).getLength();
+		double segLength =
+				pathLength / getNumTravelTimeSegments(trip, stopPathIndex);
 		return segLength;
 	}
 	
@@ -372,7 +392,7 @@ public class TravelTimesProcessor {
 	 *            The arrival stop for which to determine the travel time length
 	 * @return travel time length for the specified arrival
 	 */
-	private double getTravelTimeSegmentLength(ArrivalDeparture arrDep) {
+	private static double getTravelTimeSegmentLength(ArrivalDeparture arrDep) {
 		double pathLength = arrDep.getStopPathLength();
 		double segLength = pathLength / getNumTravelTimeSegments(pathLength);
 		return segLength;
@@ -465,7 +485,7 @@ public class TravelTimesProcessor {
 			departureTime = arrDep1.getScheduledTime();
 		}
 
-		// If this stop path is short enough such that it is just a signal 
+		// If this stop path is short enough such that it is just a single 
 		// travel times segment then handle specially since don't need
 		// to look at matches.
 		if (arrDep2.getStopPathLength() < getMaxTravelTimeSegmentLength()) {
@@ -562,8 +582,8 @@ public class TravelTimesProcessor {
 			double segmentSpeedMps = 
 					travelTimeSegmentLength * Time.MS_PER_SEC / segmentTime;
 			if (segmentSpeedMps < getMinSegmentSpeedMps()) {
-				logger.error("For segmentIdx={} segment speed of {}mps is "
-						+ "below the limit of minSegmentSpeedMps={}mps. Therefore "
+				logger.error("For segmentIdx={} segment speed of {}m/s is "
+						+ "below the limit of minSegmentSpeedMps={}m/s. Therefore "
 						+ "it is being reset to min segment speed. arrDep1={} "
 						+ "arrDep2={}",
 						i, StringUtils.twoDigitFormat(segmentSpeedMps), 
@@ -678,36 +698,73 @@ public class TravelTimesProcessor {
 	 * Converts the list of travel times such that times are grouped by segment
 	 * instead of by single trips. This allows the times to be more easily
 	 * processed when determining outliers, averages, etc.
+	 * <p>
+	 * Only uses historic travel time data if the number of travel times
+	 * segments in the data match the number of travel time segments needed for
+	 * the current trip configuration (which depends on the current path length
+	 * for the trip). This is important because configuration can change (stops
+	 * can move or the path between stops can change). Therefore need to make
+	 * sure that only using data if it applies to the current config (has same
+	 * number of travel time segments). This way can use as much historic info
+	 * as possible, yet not try to use data that doesn't pertain.
 	 * 
-	 * @param travelTimes
+	 * @param historicTravelTimes
 	 *            List of List of times where outer List is by single trip and
 	 *            inner List is travel time segment.
+	 * @param trip
+	 *            Contains config info for the trip that the data is for. Used
+	 *            to determine if the historic data for the trip has the proper
+	 *            number of travel time segments.
+	 * @param stopPathIndex
+	 *            Used to determine if the historic data for the trip has the
+	 *            proper number of travel time segments.
 	 * @return List of List of times but the outer List is by travel time
-	 *         segment and there is an inner List with a value per single trip
+	 *         segment and there is an inner List with a value per single trip,
+	 *         or null if there is no valid historic data for the trip.
 	 */
-	private static List<List<Integer>> bySegment(List<List<Integer>> travelTimes) {
-		int numTrips = travelTimes.size();
-		int numTravelTimeSegments = travelTimes.get(0).size();
+	private static List<List<Integer>> bySegment(
+			List<List<Integer>> historicTravelTimes, Trip trip,
+			int stopPathIndex) {
+		// Determine how many travel time segments there should be for the stop
+		// path according to the current configuration of the trip's path 
+		// length.
+		int expectedTravelTimeSegments =
+				getNumTravelTimeSegments(trip, stopPathIndex);
 		
 		// Create results object. Make array size only as big as the number of
 		// travel segments, instead of the default value of 10, to reduce 
 		// memory use.
 		List<List<Integer>> timesBySegment = 
-				new ArrayList<List<Integer>>(numTravelTimeSegments);
-		for (int i=0; i<numTravelTimeSegments; ++i) {
+				new ArrayList<List<Integer>>(expectedTravelTimeSegments);
+		for (int i=0; i<expectedTravelTimeSegments; ++i) {
 			timesBySegment.add(new ArrayList<Integer>());
 		}
 		
-		// Put the per trip data into the per segment array
-		for (int tripIdx=0; tripIdx<numTrips; ++tripIdx) {
-			for (int segIdx=0; segIdx<numTravelTimeSegments; ++segIdx) {
-				Integer value = travelTimes.get(tripIdx).get(segIdx);
-				timesBySegment.get(segIdx).add(value);				
+		// Put the historic per trip travel time data into the per segment array
+		boolean validDataFound = false;
+		for (int tripIdx = 0; tripIdx < historicTravelTimes.size(); ++tripIdx) {
+			// Determine historic travel times for the current trip.
+			List<Integer> historicTravelTimeForTrip =
+					historicTravelTimes.get(tripIdx);
+			int numberHistoricTravelTimeSegs = historicTravelTimeForTrip.size();
+
+			// Only use the historic travel times if have the number of travel
+			// time segments for the historical data matches the current 
+			// configuration of the trip (the path length). 
+			if (numberHistoricTravelTimeSegs == expectedTravelTimeSegments) {
+				validDataFound = true;
+				for (int segIdx = 0; segIdx < expectedTravelTimeSegments; ++segIdx) {
+					Integer value = historicTravelTimeForTrip.get(segIdx);
+					timesBySegment.get(segIdx).add(value);
+				}
 			}
 		}
 		
-		// Return the times grouped by segment
-		return timesBySegment;
+		// If valid data found then return the times grouped by segment
+		if (validDataFound)
+			return timesBySegment;
+		else
+			return null;
 	}
 	
 	/**
@@ -753,16 +810,21 @@ public class TravelTimesProcessor {
 			List<Integer> averageTravelTimes = new ArrayList<Integer>();
 			if (travelTimesForStopPathForTrip != null) {
 				// Get the travel times, grouped by segment
-				List<List<Integer>> travelTimesBySegment = 
-					bySegment(travelTimesForStopPathForTrip);
-				
-				// For each segment, process travel times...
-				for (List<Integer> travelTimesByTripForSegment : 
-						travelTimesBySegment) {
-					int averageTravelTimeForSegment = Statistics
-							.filteredMean(travelTimesByTripForSegment, 
-									FRACTION_LIMIT_FOR_SEGMENT_TIMES);
-					averageTravelTimes.add(averageTravelTimeForSegment);
+				List<List<Integer>> travelTimesBySegment =
+						bySegment(travelTimesForStopPathForTrip, trip,
+								mapKey.getStopPathIndex());
+
+				// Only continue to process if some of the historic data for 
+				// the trip was actually valid
+				if (travelTimesBySegment != null) {
+					// For each segment, process travel times...
+					for (List<Integer> travelTimesByTripForSegment : 
+							travelTimesBySegment) {
+						int averageTravelTimeForSegment = Statistics
+								.filteredMean(travelTimesByTripForSegment, 
+										FRACTION_LIMIT_FOR_SEGMENT_TIMES);
+						averageTravelTimes.add(averageTravelTimeForSegment);
+					}
 				}
 			}
 			
@@ -815,7 +877,7 @@ public class TravelTimesProcessor {
 					averageTravelTimes, travelTimeSegLength);
 			travelTimeInfoMap.add(travelTimeInfo);
 		}
-		
+
 		// Nice to log how long things took so can see progress and bottle necks
 		logger.info("Processing data into a TravelTimeInfoMap took {} msec.", 
 				intervalTimer.elapsedMsec());
@@ -875,7 +937,8 @@ public class TravelTimesProcessor {
 		List<List<Integer>> travelTimesByTrip = new ArrayList<List<Integer>>();
 		travelTimesByTrip.add(t1);
 		travelTimesByTrip.add(t2);
-		List<List<Integer>> travelTimesBySegment = bySegment(travelTimesByTrip);
+		List<List<Integer>> travelTimesBySegment =
+				bySegment(travelTimesByTrip, null, 0);
 		System.err.println(travelTimesByTrip);
 		System.err.println(travelTimesBySegment);
 	}

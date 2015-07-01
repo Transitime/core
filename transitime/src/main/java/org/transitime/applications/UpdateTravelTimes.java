@@ -349,6 +349,7 @@ public class UpdateTravelTimes {
 		} catch (Exception e) {
 			if (tx != null)
 				tx.rollback();
+			logger.error("Unexpected exception occurred", e);
 			throw e;
 		} finally {
 			// Close up db connection
