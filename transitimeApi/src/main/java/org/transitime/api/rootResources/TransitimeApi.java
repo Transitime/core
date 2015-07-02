@@ -625,7 +625,8 @@ public class TransitimeApi {
 
 	/**
 	 * Handles the "block" command which outputs configuration data for the
-	 * specified block. Includes all sub-data such as trips and trip patterns.
+	 * specified block ID and service ID. Includes all sub-data such as trips
+	 * and trip patterns.
 	 * 
 	 * @param stdParameters
 	 * @param blockId
@@ -667,12 +668,12 @@ public class TransitimeApi {
 	}
 
 	/**
-	 * Handles the "block" command which outputs configuration data for the
-	 * specified block. Includes all sub-data such as trips and trip patterns.
+	 * Handles the "blocks" command which outputs configuration data for the
+	 * specified block ID. Includes all sub-data such as trips and trip
+	 * patterns.
 	 * 
 	 * @param stdParameters
 	 * @param blockId
-	 * @param serviceId
 	 * @return
 	 * @throws WebApplicationException
 	 */
