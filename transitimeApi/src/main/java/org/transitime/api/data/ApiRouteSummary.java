@@ -41,6 +41,10 @@ public class ApiRouteSummary {
 
 	/********************** Member Functions **************************/
 
+    /**
+     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+     * "MessageBodyWriter not found for media type=application/json" exception.
+     */
 	protected ApiRouteSummary() {
 	}
 

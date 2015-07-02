@@ -1,18 +1,18 @@
 /*
  * This file is part of Transitime.org
  * 
- * Transitime.org is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License (GPL) as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Transitime.org is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
+ * Transitime.org is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (GPL) as published by the
+ * Free Software Foundation, either version 3 of the License, or any later
+ * version.
+ * 
+ * Transitime.org is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Transitime.org . If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.transitime.api.data;
@@ -29,7 +29,7 @@ import org.transitime.utils.Geo;
  * Note: this class marked as @XmlTransient so that ApiLocations are not part of
  * the domain model. This means that can't instantiate as an element. The reason
  * doing this is so that the subclass can set propOrder for all elements in the
- * subclass, including lat & lon. Explanation of this is in 
+ * subclass, including lat & lon. Explanation of this is in
  * http://blog.bdoughan.com/2011/06/ignoring-inheritance-with-xmltransient.html
  *
  * @author SkiBu Smith
@@ -38,27 +38,27 @@ import org.transitime.utils.Geo;
 @XmlTransient
 public class ApiTransientLocation {
 
-    @XmlAttribute
-    private String lat;
-    
-    @XmlAttribute
-    private String lon;
-    
-    /********************** Member Functions **************************/
+	@XmlAttribute
+	private String lat;
 
-    /**
-     * Need a no-arg constructor for Jersey. Otherwise get really 
-     * obtuse "MessageBodyWriter not found for media type=application/json"
-     * exception.
-     */
-    protected ApiTransientLocation() {}
+	@XmlAttribute
+	private String lon;
 
-    public ApiTransientLocation(double lat, double lon) {
-	// If location is in China (approximately) then adjust lat & lon so 
-	// that will be displayed properly on map. 
-	ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(lat, lon);
-	
-	this.lat = Geo.format(latLon.getLat());
-	this.lon = Geo.format(latLon.getLon());
-    }
+	/********************** Member Functions **************************/
+
+	/**
+	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+	 * "MessageBodyWriter not found for media type=application/json" exception.
+	 */
+	protected ApiTransientLocation() {
+	}
+
+	public ApiTransientLocation(double lat, double lon) {
+		// If location is in China (approximately) then adjust lat & lon so
+		// that will be displayed properly on map.
+		ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(lat, lon);
+
+		this.lat = Geo.format(latLon.getLat());
+		this.lon = Geo.format(latLon.getLon());
+	}
 }
