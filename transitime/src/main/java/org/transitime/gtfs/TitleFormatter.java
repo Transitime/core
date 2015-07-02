@@ -103,7 +103,7 @@ public class TitleFormatter {
 					false, 
 					"Sometimes GTFS titles have all capital letters or other "
 					+ "capitalization issues. If set to true then will properly "
-					+ "capitalie titles when process GTFS data. But note that "
+					+ "capitalize titles when process GTFS data. But note that "
 					+ "this can require using regular expressions to fix things "
 					+ "like acronyms that actually should be all caps.");
 	
@@ -200,13 +200,17 @@ public class TitleFormatter {
 	}
 	
 	/**
-	 * Capitalizes text so that first character after delimiter
-	 * is capitalized but other characters are made lower case.
+	 * Capitalizes text so that first character after delimiter is capitalized
+	 * but other characters are made lower case.
+	 * 
 	 * @param str
 	 * @return
 	 */
 	private static String capitalize(String str) {
-		char delimiters[] = {'-', '/', '.', '&', '@', '('};
+		// Delimiters specify word dividers. The text at beginning or  after a 
+		// whitespace or to the right of a delimiter is capitalized. Otherwise
+		// it will be in lower case.
+		char delimiters[] = {'-', '/', '.', '&', '@', '(', ':', ';'};
 		return capitalize(str, delimiters);
 	}
 	
