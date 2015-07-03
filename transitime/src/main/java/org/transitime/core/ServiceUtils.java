@@ -97,8 +97,7 @@ public class ServiceUtils {
 		for (Calendar calendar : originalCalendarList) {
 			// If calendar is currently active then add it to list of active ones
 			if (epochTime.getTime() >= calendar.getStartDate().getTime()
-					&& epochTime.getTime() <= calendar.getEndDate().getTime()
-							+ 1 * Time.MS_PER_DAY) {
+					&& epochTime.getTime() <= calendar.getEndDate().getTime()) {
 				activeCalendarList.add(calendar);
 			}
 			

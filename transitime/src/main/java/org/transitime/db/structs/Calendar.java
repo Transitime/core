@@ -94,7 +94,8 @@ public class Calendar implements Serializable {
 	@Id
 	private final Date startDate;
 	
-	// Midnight at the end of the end date
+	// The service is to run until midnight of the end date, which is actually
+	// the endDate plus 1 day.
 	@Temporal(TemporalType.DATE) 
 	@Id
 	private final Date endDate;
@@ -108,6 +109,24 @@ public class Calendar implements Serializable {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * Needed because Hibernate requires no-arg constructor
+	 */
+	@SuppressWarnings("unused")
+	private Calendar() {
+		configRev = -1;
+		serviceId = null;
+		monday = false;
+		tuesday = false;
+		wednesday = false;
+		thursday = false;
+		friday = false;
+		saturday = false;
+		sunday = false;
+		startDate = null;
+		endDate = null;
+	}
+	
 	/**
 	 * Constructor
 	 * 
@@ -152,7 +171,7 @@ public class Calendar implements Serializable {
 					gc.getFileName());
 			tempDate = new Date();
 		}
-		this.endDate = new Date(tempDate.getTime() + Time.MS_PER_DAY);
+		this.endDate = tempDate;
 	}
 	
 	/**
@@ -223,23 +242,6 @@ public class Calendar implements Serializable {
 	 */
 	private boolean isSetToTrue(String zeroOrOne) {
 		return zeroOrOne != null && zeroOrOne.trim().equals("1");
-	}
-	/**
-	 * Needed because Hibernate requires no-arg constructor
-	 */
-	@SuppressWarnings("unused")
-	private Calendar() {
-		configRev = -1;
-		serviceId = null;
-		monday = false;
-		tuesday = false;
-		wednesday = false;
-		thursday = false;
-		friday = false;
-		saturday = false;
-		sunday = false;
-		startDate = null;
-		endDate = null;
 	}
 	
 	/* (non-Javadoc)
@@ -405,11 +407,13 @@ public class Calendar implements Serializable {
 
 	/**
 	 * End of the last day of service. This means that when an end date is
-	 * specified the service runs for up to and including that day.
-	 * @return the endDate
+	 * specified the service runs for up to and including that day. Since days
+	 * start at midnight, this method returns the endDate plus 1 day so that
+	 * it represents midnight of the configured endDate.
+	 * @return midnight at the end of the endDate
 	 */
 	public Date getEndDate() {
-		return endDate;
+		return new Date(endDate.getTime() + 1*Time.MS_PER_DAY);
 	}
 	
 	

@@ -327,24 +327,28 @@ public class GtfsData {
 	}
 	
 	/**
-	 * Creates the static dateFormatter using the specified timezone. The
-	 * timezone is obtained from the first agency in the agency.txt file.
-	 * 
-	 * @param timezoneName
+	 * Creates the static dateFormatter using the specified timezone. Also sets
+	 * the default timezone so that dates and times will be written to the db
+	 * correctly.
+	 * <p>
+	 * The timezone name is obtained from the first agency in the agency.txt file.
 	 */
-	private void createDateFormatter() {
+	private void handleTimezoneAndDateFormatter() {
 		// Read in the agency.txt GTFS data from file
 		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
-		List<GtfsAgency> gtfsAgencies = agencyReader.get();
-		
+		List<GtfsAgency> gtfsAgencies = agencyReader.get();		
 		if (gtfsAgencies.isEmpty()) {
 			logger.error("Could not read in {}/agency.txt file, which is "
 					+ "needed for createDateFormatter()", gtfsDirectoryName);
 			System.exit(-1);
-		}
-		
+		}		
 		String timezoneName = gtfsAgencies.get(0).getAgencyTimezone();
 		
+		// Set system timezone so that dates and times will be written to db 
+		// properly
+		TimeZone.setDefault(TimeZone.getTimeZone(timezoneName));
+		
+		// Create the dateFormatter with the proper timezone
 		TimeZone timezone = TimeZone.getTimeZone(timezoneName);
 		dateFormatter =	new SimpleDateFormat("yyyyMMdd");
 		dateFormatter.setTimeZone(timezone);		
@@ -2301,7 +2305,7 @@ public class GtfsData {
 
 		// Need a date formatter using timezone before some data that
 		// has dates is processed. Includes calendars and calendar_dates.
-		createDateFormatter();
+		handleTimezoneAndDateFormatter();
 		
 		// Note. The order of how these are processed in important because
 		// some data sets rely on others in order to be fully processed.
