@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -171,6 +172,10 @@ public class GtfsData {
 	// even when really screwy things are done such as use the same
 	// shapeId for different trip patterns.
 	private Set<String> tripPatternIdSet;
+	
+	// So can know which service IDs have trips so that can remove
+	// calendars for ones that do not.
+	private Set<String> serviceIdsWithTrips;
 	
 	// List of all the blocks, random order
 	private List<Block> blocks;
@@ -1346,6 +1351,7 @@ public class GtfsData {
 		tripPatternsByTripIdMap = new HashMap<String, TripPattern>();
 		tripPatternsByRouteIdMap = new HashMap<String, List<TripPattern>>();
 		tripPatternIdSet = new HashSet<String>();
+		serviceIdsWithTrips = new HashSet<String>();
 		pathsMap = new HashMap<String, StopPath>();
 		
 		// For each trip in the stop_times.txt file ...
@@ -1365,6 +1371,9 @@ public class GtfsData {
 						+ "has been discarded.", tripId);
 				continue;
 			}
+			
+			// Keep track of service IDs so can filter unneeded calendars
+			serviceIdsWithTrips.add(trip.getServiceId());
 			
 			// All the schedule times are available in gtfsStopTimesForTripMap 
 			// so add them all at once to the Trip. This also sets the startTime 
@@ -1756,9 +1765,10 @@ public class GtfsData {
 		List<GtfsCalendar> gtfsCalendars = calendarReader.get();
 		
 		for (GtfsCalendar gtfsCalendar : gtfsCalendars) {
-			// Create the Calendar object and put it into the array
-			Calendar calendar = new Calendar(revs.getConfigRev(), gtfsCalendar,
-					getDateFormatter());
+			// Create the Calendar object and put it into the array)
+			Calendar calendar =
+					new Calendar(revs.getConfigRev(), gtfsCalendar,
+							getDateFormatter());
 			calendars.add(calendar);
 		}		
 					
@@ -1783,15 +1793,19 @@ public class GtfsData {
 		
 		for (GtfsCalendarDate gtfsCalendarDate : gtfsCalendarDates) {
 			// Create the CalendarDate object and put it into the array
-			CalendarDate calendarDate = new CalendarDate(revs.getConfigRev(),
-					gtfsCalendarDate, getDateFormatter());
+			CalendarDate calendarDate =
+					new CalendarDate(revs.getConfigRev(), gtfsCalendarDate,
+							getDateFormatter());
 			calendarDates.add(calendarDate);
-		}		
-					
+		}
+		
 		// Let user know what is going on
 		logger.info("Finished processing calendar_dates.txt data. ");
 	}
 
+	/**
+	 * Creates validServiceIds member by going through calendars 
+	 */
 	private void processServiceIds() {
 		// Make sure needed data is already read in. 
 		if (calendars == null) {
@@ -1817,6 +1831,44 @@ public class GtfsData {
 						"configuration. {}",
 						calendar.getServiceId(), calendar);
 			}
+		}
+	}
+	
+	/**
+	 * Get rid of calendars and calendar dates that don't have any trips
+	 * associated to try to pare down number of service IDs. Especially useful
+	 * when processing just part of an agency config, like MBTA commuter rail.
+	 */
+	private void trimCalendars() {
+		// Make sure needed data is already read in. 
+		if (serviceIdsWithTrips == null) {
+			logger.error("GtfsData.processStopTimesData() must be called " +
+					"before GtfsData.trimCalendars() is. Exiting.");
+			System.exit(-1);
+		}
+		
+		// Trim calendar list
+		Iterator<Calendar> calendarIter = calendars.iterator();
+		while (calendarIter.hasNext()) {
+			Calendar calendar = calendarIter.next();
+			if (!serviceIdsWithTrips.contains(calendar.getServiceId()))
+				calendarIter.remove();
+		}
+		
+		// Trim calendar date list
+		Iterator<CalendarDate> calendarDateIter = calendarDates.iterator();
+		while (calendarIter.hasNext()) {
+			CalendarDate calendarDate = calendarDateIter.next();
+			if (!serviceIdsWithTrips.contains(calendarDate.getServiceId()))
+				calendarDateIter.remove();
+		}
+
+		// Trim serviceIds list
+		Iterator<String> serviceIdIter = validServiceIds.iterator();
+		while (serviceIdIter.hasNext()) {
+			String serviceId = serviceIdIter.next();
+			if (!serviceIdsWithTrips.contains(serviceId))
+				serviceIdIter.remove();
 		}
 	}
 	
@@ -2330,6 +2382,12 @@ public class GtfsData {
 		// stops that are actually not used by the subset of trips. 
 		// Therefore trim out the unused stops.
 		trimStops();
+		
+		// Get rid of calendars and calendar dates that don't have any trips
+		// associated to try to pare down number of service IDs. Especially 
+		// useful when processing just part of an agency config, like
+		// MBTA commuter rail.
+		trimCalendars();
 		
 		// debugging
 		//outputPathsAndStopsForGraphing("8699");
