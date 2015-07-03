@@ -237,6 +237,9 @@ public class GtfsFileProcessor {
 	 * into the database.
 	 */
 	public void process() throws IllegalArgumentException {
+		// Gets the GTFS files from URL or from a zip file if need be.
+		obtainGtfsFiles();
+
 ///////////////////////// FIXME		
 		// Read in the agency.txt GTFS data from file
 		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
@@ -254,9 +257,6 @@ public class GtfsFileProcessor {
 		logger.info("Set at beginning default timezone to {}", timezoneName);
 ////////////////////////////////
 		
-		// Gets the GTFS files from URL or from a zip file if need be.
-		obtainGtfsFiles();
-
 		// Create a title formatter
 		TitleFormatter titleFormatter = new TitleFormatter(
 				regexReplaceListFileName, true);
