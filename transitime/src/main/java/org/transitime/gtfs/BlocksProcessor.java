@@ -91,7 +91,6 @@ public class BlocksProcessor {
 						gtfsRoute.getUnscheduledBlockSuffix();
 				int startTimeForBlock = 0;      // start at midnight
 				int endTimeForBlock = 24*60*60; // end at midnight
-				int headwaySecs = 0;            // Unscheduled service
 				
 				// find the two trips to make up the block. Use longest trip for
 				// each direction.
