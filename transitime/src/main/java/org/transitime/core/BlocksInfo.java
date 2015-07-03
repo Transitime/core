@@ -126,7 +126,7 @@ public class BlocksInfo {
 		Set<String> serviceIds = new HashSet<String>();
 		long now = core.getSystemTime();
 		List<String> currentServiceIds = 
-				core.getServiceUtils().getServiceIds(now);
+				core.getServiceUtils().getCurrentServiceIds(now);
 		serviceIds.addAll(currentServiceIds);
 		
 		// If current time is just a couple of hours after midnight then need
@@ -136,7 +136,7 @@ public class BlocksInfo {
 				Core.getInstance().getTime().getSecondsIntoDay(now);
 		if (secsInDayForAvlReport < 4 * Time.HOUR_IN_SECS) {
 			List<String> previousDayServiceIds =
-					core.getServiceUtils().getServiceIds(
+					core.getServiceUtils().getCurrentServiceIds(
 							now - Time.DAY_IN_MSECS);
 			serviceIds.addAll(previousDayServiceIds);
 		}
@@ -146,7 +146,7 @@ public class BlocksInfo {
 		// midnight.
 		if (secsInDayForAvlReport > Time.DAY_IN_SECS - allowableBeforeTimeSecs) {
 			List<String> nextDayServiceIds =
-					core.getServiceUtils().getServiceIds(
+					core.getServiceUtils().getCurrentServiceIds(
 							now + Time.DAY_IN_MSECS);
 			serviceIds.addAll(nextDayServiceIds);
 		}

@@ -212,20 +212,52 @@ public class ServiceUtils {
 	}
 	
 	/**
-	 * Determines list of current service IDs for the specified time.
-	 * These service IDs designate which block assignments are currently
-	 * active.
+	 * Determines list of current service IDs for the specified time. These
+	 * service IDs designate which block assignments are currently active.
 	 * <p>
 	 * Uses already read in calendars, but does a good number of calculations so
 	 * still a bit expensive.
 	 * 
-	 * @param epochTime The current time that determining service IDs for
-	 * @param calendars List of calendar.txt GTFS data
-	 * @param calendarDates List of calendar_dates.txt GTFS data
+	 * @param epochTime
+	 *            The current time that determining service IDs for
+	 * @param calendars
+	 *            List of calendar.txt GTFS data
+	 * @param calendarDates
+	 *            List of calendar_dates.txt GTFS data
 	 * @return List of service IDs that are active for the specified time.
 	 */
-	public List<String> getServiceIds(long epochTime) {
+	public List<String> getCurrentServiceIds(long epochTime) {
 		return getServiceIds(new Date(epochTime));
 	}
 	
+	/**
+	 * Finds the calendars that are currently active.
+	 * 
+	 * @param epochTime
+	 * @return List of calendars that are currently active.
+	 */
+	public List<Calendar> getCurrentCalendars(long epochTime) {
+		// Result to be returned
+		List<Calendar> currentCalendars = new ArrayList<Calendar>();
+
+		// Get list of all calendars that are configured
+		List<Calendar> allCalendars = dbConfig.getCalendars();
+		
+		// For each service ID that is currently active...
+		List<String> currentServiceIds = getCurrentServiceIds(epochTime);
+		for (String serviceId : currentServiceIds) {
+			// Find corresponding calendar
+			for (Calendar calendar : allCalendars) {
+				if (calendar.getServiceId().equals(serviceId)) {
+					// Found the calendar that corresponds to the service ID 
+					// so add it to the list
+					currentCalendars.add(calendar);
+					break;
+				}
+			}
+		}
+		
+		// Return the results
+		return currentCalendars;
+	}
 }
