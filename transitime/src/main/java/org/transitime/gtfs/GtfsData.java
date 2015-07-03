@@ -347,6 +347,7 @@ public class GtfsData {
 		// Set system timezone so that dates and times will be written to db 
 		// properly
 		TimeZone.setDefault(TimeZone.getTimeZone(timezoneName));
+		logger.info("Set default timezone to {}", timezoneName);
 		
 		// Create the dateFormatter with the proper timezone
 		TimeZone timezone = TimeZone.getTimeZone(timezoneName);
