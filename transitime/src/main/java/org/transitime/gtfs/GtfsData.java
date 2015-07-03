@@ -16,6 +16,7 @@
  */
 package org.transitime.gtfs;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -192,11 +193,9 @@ public class GtfsData {
 	private List<Transfer> transfers;
 	
 	// This is the format that dates are in for CSV. Should
-	// share this formatter. Note that it will not be set until
-	// the timezone is known and createDateFormatter() is called.
-	// This is done when the agency.txt file with the timezone is
-	// read in and createDateFormatter() is called.
-	protected SimpleDateFormat dateFormatter = null;
+	// be accessed only through getDateFormatter() to make
+	// sure that it is initialized.
+	private SimpleDateFormat _dateFormatter = null;
 
 	// So can process only routes that match a regular expression.
 	// Note, see http://stackoverflow.com/questions/406230/regular-expression-to-match-text-that-doesnt-contain-a-word
@@ -327,14 +326,16 @@ public class GtfsData {
 	}
 	
 	/**
-	 * Creates the static dateFormatter using the specified timezone. Also sets
-	 * the default timezone so that dates and times will be written to the db
-	 * correctly.
-	 * <p>
-	 * The timezone name is obtained from the first agency in the agency.txt file.
+	 * Creates the static dateFormatter using the specified timezone. The
+	 * timezone name is obtained from the first agency in the agency.txt file.
 	 */
-	private void handleTimezoneAndDateFormatter() {
-		// Read in the agency.txt GTFS data from file
+	private DateFormat getDateFormatter() {
+		// If already created then return cached version for efficiency
+		if (_dateFormatter != null)
+			return _dateFormatter;
+		
+		// The dateFormatter not yet read in.
+		// First, read in the agency.txt GTFS data from file
 		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
 		List<GtfsAgency> gtfsAgencies = agencyReader.get();		
 		if (gtfsAgencies.isEmpty()) {
@@ -344,15 +345,11 @@ public class GtfsData {
 		}		
 		String timezoneName = gtfsAgencies.get(0).getAgencyTimezone();
 		
-		// Set system timezone so that dates and times will be written to db 
-		// properly
-		TimeZone.setDefault(TimeZone.getTimeZone(timezoneName));
-		logger.info("Set default timezone to {}", timezoneName);
-		
 		// Create the dateFormatter with the proper timezone
 		TimeZone timezone = TimeZone.getTimeZone(timezoneName);
-		dateFormatter =	new SimpleDateFormat("yyyyMMdd");
-		dateFormatter.setTimeZone(timezone);		
+		_dateFormatter =	new SimpleDateFormat("yyyyMMdd");
+		_dateFormatter.setTimeZone(timezone);
+		return _dateFormatter;
 	}
 	
 
@@ -1761,7 +1758,7 @@ public class GtfsData {
 		for (GtfsCalendar gtfsCalendar : gtfsCalendars) {
 			// Create the Calendar object and put it into the array
 			Calendar calendar = new Calendar(revs.getConfigRev(), gtfsCalendar,
-					dateFormatter);
+					getDateFormatter());
 			calendars.add(calendar);
 		}		
 					
@@ -1787,7 +1784,7 @@ public class GtfsData {
 		for (GtfsCalendarDate gtfsCalendarDate : gtfsCalendarDates) {
 			// Create the CalendarDate object and put it into the array
 			CalendarDate calendarDate = new CalendarDate(revs.getConfigRev(),
-					gtfsCalendarDate, dateFormatter);
+					gtfsCalendarDate, getDateFormatter());
 			calendarDates.add(calendarDate);
 		}		
 					
@@ -2304,10 +2301,6 @@ public class GtfsData {
 		logger.info("Processing GTFS data from {} ...",
 				gtfsDirectoryName);
 
-		// Need a date formatter using timezone before some data that
-		// has dates is processed. Includes calendars and calendar_dates.
-		handleTimezoneAndDateFormatter();
-		
 		// Note. The order of how these are processed in important because
 		// some data sets rely on others in order to be fully processed.
 		// If the order is wrong then the methods below will log an error and
