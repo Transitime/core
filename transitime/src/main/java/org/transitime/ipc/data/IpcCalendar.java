@@ -17,13 +17,10 @@
 package org.transitime.ipc.data;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import org.transitime.db.structs.Calendar;
 
 /**
- * A calendar object for ipc via RMI
+ * A calendar object for IPC via RMI
  * 
  * @author SkiBu Smith
  *
@@ -42,7 +39,6 @@ public class IpcCalendar implements Serializable {
 	private final String endDate;
 	
 	private static final long serialVersionUID = 7248540190574905163L;
-	private static final DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
 	
 	public IpcCalendar(Calendar calendar) {
 		super();
@@ -54,8 +50,8 @@ public class IpcCalendar implements Serializable {
 		this.friday = calendar.getFriday();
 		this.saturday = calendar.getSaturday();
 		this.sunday = calendar.getSunday();
-		this.startDate = formatter.format(calendar.getStartDate());
-		this.endDate = formatter.format(calendar.getEndDate());
+		this.startDate = calendar.getStartDateStr();
+		this.endDate = calendar.getEndDateStr();
 	}
 
 	@Override

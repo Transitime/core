@@ -19,6 +19,7 @@ package org.transitime.db.structs;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -100,7 +101,9 @@ public class Calendar implements Serializable {
 	@Id
 	private final Date endDate;
 
-	
+	// For outputting start and end date as strings
+	private static final DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
+
 	// Logging
 	public static final Logger logger = LoggerFactory.getLogger(Calendar.class);
 
@@ -406,6 +409,13 @@ public class Calendar implements Serializable {
 	}
 
 	/**
+	 * @return the start date as a formatted string
+	 */
+	public String getStartDateStr() {
+		return formatter.format(startDate);
+	}
+	
+	/**
 	 * End of the last day of service. This means that when an end date is
 	 * specified the service runs for up to and including that day. Since days
 	 * start at midnight, this method returns the endDate plus 1 day so that
@@ -416,5 +426,11 @@ public class Calendar implements Serializable {
 		return new Date(endDate.getTime() + 1*Time.MS_PER_DAY);
 	}
 	
+	/**
+	 * @return the end date as a formatted string
+	 */
+	public String getEndDateStr() {
+		return formatter.format(endDate);
+	}
 	
 }
