@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -36,6 +38,8 @@ import org.transitime.configData.AgencyConfig;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.HttpGetGtfsFile;
 import org.transitime.gtfs.TitleFormatter;
+import org.transitime.gtfs.gtfsStructs.GtfsAgency;
+import org.transitime.gtfs.readers.GtfsAgencyReader;
 import org.transitime.utils.Time;
 import org.transitime.utils.Zip;
 
@@ -233,6 +237,23 @@ public class GtfsFileProcessor {
 	 * into the database.
 	 */
 	public void process() throws IllegalArgumentException {
+///////////////////////// FIXME		
+		// Read in the agency.txt GTFS data from file
+		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
+		List<GtfsAgency> gtfsAgencies = agencyReader.get();		
+		if (gtfsAgencies.isEmpty()) {
+			logger.error("Could not read in {}/agency.txt file, which is "
+					+ "needed for createDateFormatter()", gtfsDirectoryName);
+			System.exit(-1);
+		}		
+		String timezoneName = gtfsAgencies.get(0).getAgencyTimezone();
+		
+		// Set system timezone so that dates and times will be written to db 
+		// properly
+		TimeZone.setDefault(TimeZone.getTimeZone(timezoneName));
+		logger.info("Set at beginning default timezone to {}", timezoneName);
+////////////////////////////////
+		
 		// Gets the GTFS files from URL or from a zip file if need be.
 		obtainGtfsFiles();
 
