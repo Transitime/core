@@ -35,6 +35,13 @@
   <link href="<%= request.getContextPath() %>/select2/select2.css" rel="stylesheet"/>
   <script src="<%= request.getContextPath() %>/select2/select2.min.js"></script>
 
+  <!--  Override the body style from the includes.jsp/general.css files -->
+  <style>
+    body {
+	  margin: 0px;
+    }
+  </style>
+  
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   
   <title>Transitime Map</title>
