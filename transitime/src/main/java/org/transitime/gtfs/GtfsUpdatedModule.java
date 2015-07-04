@@ -230,7 +230,7 @@ public class GtfsUpdatedModule extends Module {
 			// to run even if there is an unexpected problem.
 			try {
 				get();
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error(Markers.email(),
 						"Exception in GtfsUpdatedModule", e);
 			}

@@ -310,7 +310,7 @@ public class TimeoutHandlerModule extends Module {
 						- timer.elapsedMsec();
 				if (sleepTime > 0)
 					Time.sleep(sleepTime);
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error(Markers.email(),
 						"Error with TimeoutHandlerModule", e);
 			}

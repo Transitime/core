@@ -295,7 +295,7 @@ public class SchedBasedPredsModule extends Module {
 			try {
 				// Do the actual work
 				createSchedBasedPredsAsNecessary();				
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error(Markers.email(),
 						"Error with SchedBasedPredsModule", e);
 			} 

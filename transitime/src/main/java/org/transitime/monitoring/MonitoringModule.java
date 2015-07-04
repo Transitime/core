@@ -96,7 +96,7 @@ public class MonitoringModule extends Module {
 					logger.error("MonitoringModule detected problem. {}", 
 							resultStr);
 				}
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error(Markers.email(), "Errror in MonitoringModule", e);
 			}
 		}
