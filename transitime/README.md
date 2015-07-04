@@ -1,4 +1,6 @@
-<b>generateDatabaseSchema.jar</b><br/>
+<b>generateDatabaseSchema.jar</b>
+=================================
+<br/>
 The jar generateDatabaseSchema.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. One for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
 
 usage: java -jar generateDatabaseSchema.jar
