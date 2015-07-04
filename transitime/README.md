@@ -18,6 +18,7 @@ example:
 	
 To create all tables require you to support the core and the webapp you should run
 <br/>
+TODO This works in eclipse but not on command line. Strange and need to investigate. Probably somthing to do with the fact it is an executable jar.
 	java -jar generateDatabaseSchema.jar -o c:\temp\core\ -p org.transitime.db.structs
 <br/>	java -jar generateDatabaseSchema.jar -o c:\temp\web\ -p org.transitime.db.webstructs
 <br/>
