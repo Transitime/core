@@ -21,6 +21,6 @@ To create all tables require you to support the core and the webapp you should r
 	java -jar generateDatabaseSchema.jar -o c:\temp\core\ -p org.transitime.db.structs
 <br/>	java -jar generateDatabaseSchema.jar -o c:\temp\web\ -p org.transitime.db.webstructs
 <br/>
-Once this is done you should run the sql in the files in the core and web directory in the database.
+Once these commands have been run you should run the sql created in the files in the core and web directory in your database.
 	
                                  
