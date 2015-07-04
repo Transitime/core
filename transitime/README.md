@@ -14,8 +14,7 @@ usage:
                                    
 </i>                                   
 example:
-<br/>	
-	java -jar generateDatabaseSchema.jar -o c:\temp\ -p org.transitime.db.structs	
+<br/>java -jar generateDatabaseSchema.jar -o c:\temp\ -p org.transitime.db.structs	
 	
 To create all tables require you to support the core and the webapp you should run
 <br/>
