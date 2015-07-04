@@ -20,15 +20,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.DbSetupConfig;
@@ -83,15 +83,23 @@ public class HibernateUtils {
 		String fileName = DbSetupConfig.getHibernateConfigFileName();
 		logger.info("Configuring Hibernate for dbName={} using config file={}",
 				dbName, fileName);
-		
-		ClassLoader classLoader = HibernateUtils.class.getClassLoader();
-		
-		if(classLoader.getResource(fileName)!=null)
-		{
-			File f = new File(classLoader.getResource(fileName).getFile());			
-			config.configure(f);
+		File f = new File(fileName);
+		if (!f.exists()) {
+			logger.info("The Hibernate file {} doesn't exist as a regular file "
+					+ "so seeing if it is in classpath.", fileName);
+			
+			// Couldn't find file directly so look in classpath for it
+			ClassLoader classLoader = HibernateUtils.class.getClassLoader();
+			URL url = classLoader.getResource(fileName);
+			if (url != null)
+				f = new File(url.getFile());
 		}
-
+		if (f.exists())
+			config.configure(f);
+		else {
+			logger.error("Could not load in hibernate config file {}", fileName);
+		}
+		
 		// Add the annotated classes so that they can be used
 		AnnotatedClassesList.addAnnotatedClasses(config);
 
@@ -128,8 +136,8 @@ public class HibernateUtils {
 		
 		// Get the session factory for persistence
 		Properties properties = config.getProperties();
-		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
-				.applySettings(properties).buildServiceRegistry();
+		ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+				.applySettings(properties).build();
 		SessionFactory sessionFactory = 
 				config.buildSessionFactory(serviceRegistry);
 

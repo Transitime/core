@@ -58,7 +58,11 @@ public class StopPath implements Serializable, Lifecycle {
 	@Id
 	private final int configRev;
 	
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
+	// Using size of
+	// 2 * DEFAULT_ID_SIZE since stop path names are stop1_to_stop2 so can
+	// be twice as long as other IDs. And when using GTFS Editor the IDs
+	// are quite long, a bit longer than 40 characters.
+	@Column(length=2*HibernateUtils.DEFAULT_ID_SIZE) 
 	@Id
 	private final String stopPathId;
 	
@@ -456,6 +460,9 @@ public class StopPath implements Serializable, Lifecycle {
 	}
 	
 	/**
+	 * Provides the name of the stop as obtained by a Core predictor. Cannot be
+	 * used with other applications.
+	 * 
 	 * @return the name of the stop
 	 */
 	public String getStopName() {

@@ -47,7 +47,7 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 
     <div id="routesDiv"  class="param">
       <label for="route">Route:</label>
-      <input id="route" name="r" style="width: 300px" 
+      <input id="route" name="r" style="width: 380px" 
       	title="Select which route you want data for. Note: selecting all routes
       		   indeed reads in data for all routes which means it could be 
       		   somewhat slow."/>

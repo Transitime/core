@@ -536,6 +536,7 @@ public class DataDbLogger {
 	
 	/**
 	 * Just for doing some testing
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -544,14 +545,14 @@ public class DataDbLogger {
 		long initialTime = (System.currentTimeMillis()  / 1000) * 1000;
 
 		for (int i=0; i<25; ++i)
-			logger.add(new AvlReport("test", initialTime + i, 1.23, 4.56));
+			logger.add(new AvlReport("test", initialTime + i, 1.23, 4.56, null));
 		
 		// This one should cause constraint problem with the second batch.
 		// Need to not retry for such an exception
-		logger.add(new AvlReport("test", initialTime, 1.23, 4.56)); 
+		logger.add(new AvlReport("test", initialTime, 1.23, 4.56, null)); 
 		
 		for (int i=HibernateUtils.BATCH_SIZE; i<2*HibernateUtils.BATCH_SIZE;++i)
-			logger.add(new AvlReport("test", initialTime+i, 1.23, 4.56));
+			logger.add(new AvlReport("test", initialTime+i, 1.23, 4.56, null));
 
 				
 		// Wait for all data to be processed

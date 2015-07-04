@@ -175,7 +175,9 @@ public class BusTimeSiriAvlModule extends XmlPollingAvlModule {
 						vehicleId, Time.timeStr(gpsEpochTime), lat, lon, speed, heading, block);
 				
 				// Create the AVL object and send it to the JMS topic
-				AvlReport avlReport = new AvlReport(vehicleId, gpsEpochTime, lat, lon, speed, heading);
+				AvlReport avlReport =
+						new AvlReport(vehicleId, gpsEpochTime, lat, lon, speed,
+								heading, "SIRI");
 				avlReport.setAssignment(block, AssignmentType.BLOCK_ID);
 				
 				processAvlReport(avlReport);

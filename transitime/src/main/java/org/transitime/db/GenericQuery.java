@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.webstructs.WebAgency;
 import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.Time;
 
 /**
  * For doing a query without using Hibernate. By using regular JDBC and avoiding
@@ -75,7 +76,10 @@ public abstract class GenericQuery {
 	 * @throws SQLException
 	 */
 	public GenericQuery(String agencyId) throws SQLException {
-		WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+		// Get the web agency. If it is really old, older than an hour then
+		// update the cache in case the db was moved.
+		WebAgency agency =
+				WebAgency.getCachedWebAgency(agencyId, 1 * Time.HOUR_IN_MSECS);
 		connection = getConnection(agency.getDbType(), agency.getDbHost(),
 				agency.getDbName(), agency.getDbUserName(),
 				agency.getDbPassword());

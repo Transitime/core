@@ -162,6 +162,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			AvlReport avlReport = new AvlReport(vehicleId, gpsTime,
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
 					heading,
+					"GTFS-rt",
 					null, // leadingVehicleId,
 					null, // driverId
 					getLicensePlate(vehicle), 

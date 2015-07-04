@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.configData.AvlConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.jms.JMSWrapper;
+import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.Time;
 import org.transitime.utils.threading.BoundedExecutor;
@@ -152,8 +153,9 @@ public class AvlJmsClientModule extends Module {
 			try {
 				// Actually process the data
 				processAVLDataFromJMSTopic();		
-			} catch (Exception e) {
-				logger.error("Unexpected exception occurred in AvlClient", e);
+			} catch (Throwable e) {
+				logger.error(Markers.email(),
+						"Unexpected exception occurred in AvlClient", e);
 			}
 		}
 	}

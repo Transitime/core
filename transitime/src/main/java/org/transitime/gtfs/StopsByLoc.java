@@ -27,6 +27,7 @@ import org.transitime.db.structs.Route;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitime.utils.Geo;
 
 /**
  * For determining which stops are near a location. This information
@@ -60,6 +61,16 @@ public class StopsByLoc {
 			this.routeShortName = routeShortName;
 			this.stopId = stopId;
 			this.distanceToStop = distanceToStop;
+		}
+		
+		@Override
+		public String toString() {
+			return "StopInfo [" 
+					+ "tripPatternID=" + tripPattern.getId() 
+					+ ", routeShortName=" + routeShortName 
+					+ ", stopId=" + stopId
+					+ ", distanceToStop=" + Geo.distanceFormat(distanceToStop) 
+					+ "]";
 		}
 	}
 	

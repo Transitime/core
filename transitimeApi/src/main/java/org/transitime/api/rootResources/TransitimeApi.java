@@ -39,12 +39,14 @@ import org.transitime.api.data.ApiActiveBlocksRoutes;
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
 import org.transitime.api.data.ApiBlock;
+import org.transitime.api.data.ApiBlocks;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoute;
 import org.transitime.api.data.ApiRouteSummaries;
-import org.transitime.api.data.ApiSchedules;
+import org.transitime.api.data.ApiSchedulesHorizStops;
+import org.transitime.api.data.ApiSchedulesVertStops;
 import org.transitime.api.data.ApiServerStatus;
 import org.transitime.api.data.ApiTrip;
 import org.transitime.api.data.ApiTripPatterns;
@@ -52,6 +54,7 @@ import org.transitime.api.data.ApiTripWithTravelTimes;
 import org.transitime.api.data.ApiVehicleConfigs;
 import org.transitime.api.data.ApiVehicles;
 import org.transitime.api.data.ApiVehiclesDetails;
+import org.transitime.api.predsByLoc.PredsByLoc;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
 import org.transitime.db.structs.Agency;
@@ -163,7 +166,7 @@ public class TransitimeApi {
 
 			// return ApiVehicles response
 			return stdParameters.createResponse(apiVehicles);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -244,7 +247,7 @@ public class TransitimeApi {
 
 			// return ApiVehiclesDetails response
 			return stdParameters.createResponse(apiVehiclesDetails);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -282,7 +285,7 @@ public class TransitimeApi {
 			
 			// return ApiVehiclesDetails response
 			return stdParameters.createResponse(apiVehicleConfigs);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -441,14 +444,11 @@ public class TransitimeApi {
 			// return ApiPredictions response
 			ApiPredictions predictionsData = new ApiPredictions(predictions);
 			return stdParameters.createResponse(predictionsData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
-
-	// The maximum allowable maxDistance for getting predictions by location
-	private final static double MAX_MAX_DISTANCE = 2000.0;
 
 	/**
 	 * Handles "predictionsByLoc" command. Gets predictions from server and
@@ -462,10 +462,10 @@ public class TransitimeApi {
 	 * @param stdParameters
 	 *            StdParametersBean that gets the standard parameters from the
 	 *            URI, query string, and headers.
-	 * @param lat
-	 * @param lon
+	 * @param lat latitude in decimal degrees
+	 * @param lon longitude in decimal degrees
 	 * @param maxDistance
-	 *            How far away a stop can be from the lat/lon. Default is 2,000
+	 *            How far away a stop can be from the lat/lon. Default is 1,500
 	 *            m.
 	 * @param numberPredictions
 	 *            Maximum number of predictions to return. Default value is 3.
@@ -485,9 +485,9 @@ public class TransitimeApi {
 		// Make sure request is valid
 		stdParameters.validate();
 
-		if (maxDistance > MAX_MAX_DISTANCE)
+		if (maxDistance > PredsByLoc.MAX_MAX_DISTANCE)
 			throw WebUtils.badRequestException("Maximum maxDistance parameter "
-					+ "is " + MAX_MAX_DISTANCE + "m but " + maxDistance
+					+ "is " + PredsByLoc.MAX_MAX_DISTANCE + "m but " + maxDistance
 					+ "m was specified in the request.");
 
 		try {
@@ -502,7 +502,7 @@ public class TransitimeApi {
 			// return ApiPredictions response
 			ApiPredictions predictionsData = new ApiPredictions(predictions);
 			return stdParameters.createResponse(predictionsData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -532,7 +532,7 @@ public class TransitimeApi {
 			// Create and return @QueryParam(value="s") String stopId response
 			ApiRouteSummaries routesData = new ApiRouteSummaries(routes);
 			return stdParameters.createResponse(routesData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -576,7 +576,7 @@ public class TransitimeApi {
 			// Create and return ApiRoute response
 			ApiRoute routeData = new ApiRoute(route);
 			return stdParameters.createResponse(routeData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -617,7 +617,7 @@ public class TransitimeApi {
 			// Create and return ApiDirections response
 			ApiDirections directionsData = new ApiDirections(stopsForRoute);
 			return stdParameters.createResponse(directionsData);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -643,7 +643,9 @@ public class TransitimeApi {
 
 		// Make sure request is valid
 		stdParameters.validate();
-
+		if (serviceId == null)
+			throw WebUtils.badRequestException("Must specify serviceId");
+		
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
@@ -652,13 +654,53 @@ public class TransitimeApi {
 			// If the block doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
 			if (ipcBlock == null)
-				throw WebUtils.badRequestException("BlockId=" + blockId
+				throw WebUtils.badRequestException("The blockId=" + blockId
 						+ " for serviceId=" + serviceId + " does not exist.");
 
 			// Create and return ApiBlock response
 			ApiBlock apiBlock = new ApiBlock(ipcBlock);
 			return stdParameters.createResponse(apiBlock);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Handles the "block" command which outputs configuration data for the
+	 * specified block. Includes all sub-data such as trips and trip patterns.
+	 * 
+	 * @param stdParameters
+	 * @param blockId
+	 * @param serviceId
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/blocks")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getBlocks(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "blockId") String blockId)
+			throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+		
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			Collection<IpcBlock> ipcBlocks = inter.getBlocks(blockId);
+
+			// If the block doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcBlocks.isEmpty())
+				throw WebUtils.badRequestException("The blockId=" + blockId
+						+ " does not exist.");
+
+			// Create and return ApiBlock response
+			ApiBlocks apiBlocks = new ApiBlocks(ipcBlocks);
+			return stdParameters.createResponse(apiBlocks);
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -704,7 +746,7 @@ public class TransitimeApi {
 			ApiActiveBlocks apiActiveBlocks = 
 					new ApiActiveBlocks(activeBlocks, stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocks);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -734,7 +776,7 @@ public class TransitimeApi {
 			ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
 					activeBlocks, stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocksRoutes);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -773,7 +815,7 @@ public class TransitimeApi {
 			// Include stop path info since just outputting single trip.
 			ApiTrip apiTrip = new ApiTrip(ipcTrip, true);
 			return stdParameters.createResponse(apiTrip);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -815,7 +857,7 @@ public class TransitimeApi {
 			ApiTripWithTravelTimes apiTrip = new ApiTripWithTravelTimes(
 					ipcTrip, true);
 			return stdParameters.createResponse(apiTrip);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -857,25 +899,27 @@ public class TransitimeApi {
 			ApiTripPatterns apiTripPatterns = new ApiTripPatterns(
 					ipcTripPatterns);
 			return stdParameters.createResponse(apiTripPatterns);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
 
 	/**
-	 * Handles the "tripPattern" command which outputs trip pattern
-	 * configuration data for the specified route.
+	 * Handles the "scheduleVertStops" command which outputs schedule for the
+	 * specified route. The data is output such that the stops are listed
+	 * vertically (and the trips are horizontal). For when there are a good
+	 * number of stops but not as many trips, such as for commuter rail.
 	 * 
 	 * @param stdParameters
 	 * @param routesIdOrShortNames
 	 * @return
 	 * @throws WebApplicationException
 	 */
-	@Path("/command/schedule")
+	@Path("/command/scheduleVertStops")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getSchedule(
+	public Response getScheduleVertStops(
 			@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "r") String routesIdOrShortNames)
 			throws WebApplicationException {
@@ -896,9 +940,52 @@ public class TransitimeApi {
 						+ routesIdOrShortNames + " does not exist.");
 
 			// Create and return ApiSchedules response
-			ApiSchedules apiSchedules = new ApiSchedules(ipcSchedules);
+			ApiSchedulesVertStops apiSchedules = new ApiSchedulesVertStops(ipcSchedules);
 			return stdParameters.createResponse(apiSchedules);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Handles the "scheduleHorizStops" command which outputs schedule for the
+	 * specified route. The data is output such that the stops are listed
+	 * horizontally (and the trips are vertical). For when there are many more
+	 * trips than stops, which is typical for bus routes.
+	 * 
+	 * @param stdParameters
+	 * @param routesIdOrShortNames
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/scheduleHorizStops")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getScheduleHorizStops(
+			@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "r") String routesIdOrShortNames)
+			throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcSchedule> ipcSchedules = inter
+					.getSchedules(routesIdOrShortNames);
+
+			// If the trip doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcSchedules == null)
+				throw WebUtils.badRequestException("route="
+						+ routesIdOrShortNames + " does not exist.");
+
+			// Create and return ApiSchedules response
+			ApiSchedulesHorizStops apiSchedules = new ApiSchedulesHorizStops(ipcSchedules);
+			return stdParameters.createResponse(apiSchedules);
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -933,7 +1020,7 @@ public class TransitimeApi {
 			}
 			ApiAgencies apiAgencies = new ApiAgencies(apiAgencyList);
 			return stdParameters.createResponse(apiAgencies);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
@@ -966,7 +1053,7 @@ public class TransitimeApi {
 			ApiServerStatus apiServerStatus = new ApiServerStatus(
 					stdParameters.getAgencyId(), ipcServerStatus);
 			return stdParameters.createResponse(apiServerStatus);
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}

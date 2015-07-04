@@ -27,6 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -36,12 +37,12 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.configData.AvlConfig;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.ipc.data.IpcAvl;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
@@ -58,10 +59,9 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable // From jcip.annoations
 @Entity @DynamicUpdate 
-@Table(name="AvlReports") 
-@org.hibernate.annotations.Table(appliesTo = "AvlReports", 
-                                 indexes = { @Index(name="AvlReportsTimeIndex", 
-                                                    columnNames={"time"} ) })
+@Table(name="AvlReports",  
+       indexes = { @Index(name="AvlReportsTimeIndex", 
+                          columnList="time" ) })
 public class AvlReport implements Serializable {
 	// vehicleId is an @Id since might get multiple AVL reports
 	// for different vehicles with the same time but need a unique
@@ -91,24 +91,30 @@ public class AvlReport implements Serializable {
 	@Embedded
 	private final Location location;
 	
+	// Speed of vehicle in m/s.
 	// Speed is an optional element since not always available
 	// in an AVL feed. Internally it needs to be a Float and
-	// bet set to null when the value is not valid so that it can be stored
+	// be set to null when the value is not valid so that it can be stored
 	// in the database. This is because Float.NaN doesn't work with JDBC
 	// drivers. Externally though, such as when calling the constructor, 
 	// should use Float.NaN. It is converted to a null internally.
 	@Column
 	private final Float speed;   // optional
 	
+	// Heading in degrees clockwise from north.
 	// Heading is an optional element since not always available
 	// in an AVL feed. It is in number of degrees clockwise from 
 	// north. Internally it needs to be a Float and
-	// bet set to null when the value is not valid so that it can be stored
+	// be set to null when the value is not valid so that it can be stored
 	// in the database. This is because Float.NaN doesn't work with JDBC
 	// drivers. Externally though, such as when calling the constructor, 
 	// should use Float.NaN. It is converted to a null internally.
 	@Column
 	private final Float heading; // optional
+	
+	// Optional text for describing the source of the AVL report
+	@Column(length=SOURCE_LENGTH)
+	private final String source;
 	
 	// Can be block, trip, or route ID
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -165,6 +171,10 @@ public class AvlReport implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	String field1Value;
 	
+	
+	// How long the AvlReport source field can be in db
+	private static final int SOURCE_LENGTH = 10;
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(AvlReport.class);	
 
@@ -191,6 +201,7 @@ public class AvlReport implements Serializable {
 		location = null;
 		speed = null;
 		heading = null;
+		source = null;
 		assignmentId = null;
 		assignmentType = AssignmentType.UNSET;
 		leadVehicleId = null;
@@ -212,18 +223,24 @@ public class AvlReport implements Serializable {
 	 * @param lat
 	 * @param lon
 	 * @param speed
-	 *            should be set to Float.NaN if speed not available
+	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
+	 *            not available
 	 * @param heading
-	 *            should be set to Float.NaN if speed not available
+	 *            Heading of vehicle in degrees clockwise from north. Should be
+	 *            set to Float.NaN if speed not available
+	 * @param source
+	 *            Text describing the source of the report
 	 */
 	public AvlReport(String vehicleId, long time, double lat, double lon, 
-			float speed, float heading) {
+			float speed, float heading, String source) {
 		// Store the values
 		this.vehicleId = vehicleId;
 		this.time = new Date(time);
 		this.location = new Location(lat, lon);
+		// DB requires null instead of NaN
 		this.speed = Float.isNaN(speed) ? null : speed;
 		this.heading = Float.isNaN(heading) ? null : heading;
+		this.source = sized(source);
 		this.assignmentId = null;
 		this.assignmentType = AssignmentType.UNSET;
 		this.leadVehicleId = null;
@@ -240,6 +257,113 @@ public class AvlReport implements Serializable {
 	
 	/**
 	 * Constructor for an AvlReport object that is not yet being processed.
+	 * Since not yet being processed timeProcessed is set to null. 
+	 * 
+	 * @param vehicleId
+	 * @param time
+	 * @param location
+	 * @param speed
+	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
+	 *            not available
+	 * @param heading
+	 *            Heading of vehicle in degrees clockwise from north. Should be
+	 *            set to Float.NaN if speed not available
+	 * @param source
+	 *            Text describing the source of the report
+	 */
+	public AvlReport(String vehicleId, long time, Location location, 
+			float speed, float heading, String source) {
+		// Store the values
+		this.vehicleId = vehicleId;
+		this.time = new Date(time);
+		this.location = location;
+		// DB requires null instead of NaN
+		this.speed = Float.isNaN(speed) ? null : speed;
+		this.heading = Float.isNaN(heading) ? null : heading;
+		this.source = sized(source);
+		this.assignmentId = null;
+		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = null;
+		this.driverId = null;
+		this.licensePlate = null;
+		this.passengerCount = null;
+		this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
+		
+		// Don't yet know when processed so set timeProcessed to null
+		this.timeProcessed = null;
+	}
+
+	/**
+	 * For when speed and heading are not valid. They are set to Float.NaN .
+	 * Since not yet being processed timeProcessed is set to null.
+
+	 * @param vehicleId
+	 * @param time
+	 * @param lat
+	 * @param lon
+	 * @param source
+	 *            Text describing the source of the report
+	 */
+	public AvlReport(String vehicleId, long time, double lat, double lon,
+			String source) {
+		// Store the values
+		this.vehicleId = vehicleId;
+		this.time = new Date(time);;
+		this.location = new Location(lat, lon);
+		this.speed = null;
+		this.heading = null;
+		this.source = sized(source);
+		this.assignmentId = null;
+		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = null;
+		this.driverId = null;
+		this.licensePlate = null;
+		this.passengerCount = null;
+		this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
+
+		// Don't yet know when processed so set timeProcessed to null
+		this.timeProcessed = null;
+	}
+
+	/**
+	 * For when speed and heading are not valid. They are set to Float.NaN .
+	 * Since not yet being processed timeProcessed is set to null.
+	 * 
+	 * @param vehicleId
+	 * @param time
+	 * @param location
+	 * @param source
+	 *            Text describing the source of the report
+	 */
+	public AvlReport(String vehicleId, long time, Location location,
+			String source) {
+		// Store the values
+		this.vehicleId = vehicleId;
+		this.time = new Date(time);
+		this.location = location;
+		this.speed = null;
+		this.heading = null;
+		this.source = sized(source);
+		this.assignmentId = null;
+		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = null;
+		this.driverId = null;
+		this.licensePlate = null;
+		this.passengerCount = null;
+		this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
+		
+		// Don't yet know when processed so set timeProcessed to null
+		timeProcessed = null;
+	}
+
+	/**
+	 * Constructor for an AvlReport object that is not yet being processed.
 	 * Since not yet being processed timeProcessed is set to null.
 	 * 
 	 * @param vehicleId
@@ -247,9 +371,13 @@ public class AvlReport implements Serializable {
 	 * @param lat
 	 * @param lon
 	 * @param speed
-	 *            should be set to Float.NaN if speed not available
+	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
+	 *            not available
 	 * @param heading
-	 *            should be set to Float.NaN if speed not available
+	 *            Heading of vehicle in degrees clockwise from north. Should be
+	 *            set to Float.NaN if speed not available
+	 * @param source
+	 *            Text describing the source of the report
 	 * @param leadVehicleId
 	 *            Optional value. Set to null if not available.
 	 * @param driverId
@@ -264,15 +392,17 @@ public class AvlReport implements Serializable {
 	 *            1.0=full. Set to Float.NaN if data not available.
 	 */
 	public AvlReport(String vehicleId, long time, double lat, double lon,
-			float speed, float heading, String leadVehicleId,
+			float speed, float heading, String source, String leadVehicleId,
 			String driverId, String licensePlate, Integer passengerCount,
 			float passengerFullness) {
 		// Store the values
 		this.vehicleId = vehicleId;
 		this.time = new Date(time);
 		this.location = new Location(lat, lon);
+		// DB requires null instead of NaN
 		this.speed = Float.isNaN(speed) ? null : speed;
 		this.heading = Float.isNaN(heading) ? null : heading;
+		this.source = sized(source);
 		this.assignmentId = null;
 		this.assignmentType = AssignmentType.UNSET;
 		this.leadVehicleId = leadVehicleId;
@@ -291,25 +421,19 @@ public class AvlReport implements Serializable {
 	}
 
 	/**
-	 * Constructor for an AvlReport object that is not yet being processed.
-	 * Since not yet being processed timeProcessed is set to null. 
+	 * For converting a RMI IpcAvl object to a regular AvlReport.
 	 * 
-	 * @param vehicleId
-	 * @param time
-	 * @param location
-	 * @param speed
-	 * @param heading
+	 * @param ipcAvl
 	 */
-	public AvlReport(String vehicleId, long time, Location location, 
-			float speed, float heading) {
-		// Store the values
-		this.vehicleId = vehicleId;
-		this.time = new Date(time);
-		this.location = location;
-		this.speed = Float.isNaN(speed) ? null : speed;
-		this.heading = Float.isNaN(heading) ? null : heading;
-		this.assignmentId = null;
-		this.assignmentType = AssignmentType.UNSET;
+	public AvlReport(IpcAvl ipcAvl) {
+		this.vehicleId = ipcAvl.getVehicleId();
+		this.time = new Date(ipcAvl.getTime());
+		this.location = new Location(ipcAvl.getLatitude(), ipcAvl.getLongitude());
+		this.speed = Float.isNaN(ipcAvl.getSpeed()) ? null : ipcAvl.getSpeed();
+		this.heading = Float.isNaN(ipcAvl.getHeading()) ? null : ipcAvl.getHeading();
+		this.source = sized(ipcAvl.getSource());
+		this.assignmentId = ipcAvl.getAssignmentId();
+		this.assignmentType = ipcAvl.getAssignmentType();
 		this.leadVehicleId = null;
 		this.driverId = null;
 		this.licensePlate = null;
@@ -321,7 +445,7 @@ public class AvlReport implements Serializable {
 		// Don't yet know when processed so set timeProcessed to null
 		this.timeProcessed = null;
 	}
-
+	
 	/**
 	 * Makes a copy of the AvlReport but uses the new time passed in.
 	 * Useful for creating a new AvlReport when AVL timeout occurs
@@ -338,6 +462,7 @@ public class AvlReport implements Serializable {
 		this.location = toCopy.location;
 		this.speed = toCopy.speed;
 		this.heading = toCopy.heading;
+		this.source = toCopy.source;
 		this.assignmentId = toCopy.assignmentId;
 		this.assignmentType = toCopy.assignmentType;
 		this.leadVehicleId = toCopy.leadVehicleId;
@@ -369,6 +494,7 @@ public class AvlReport implements Serializable {
 		this.location = toCopy.location;
 		this.speed = toCopy.speed;
 		this.heading = toCopy.heading;
+		this.source = toCopy.source;
 		this.assignmentId = assignmentId;
 		this.assignmentType = assignmentType;
 		this.leadVehicleId = toCopy.leadVehicleId;
@@ -382,64 +508,19 @@ public class AvlReport implements Serializable {
 	}
 	
 	/**
-	 * For when speed and heading are not valid. They are set to Float.NaN .
-	 * Since not yet being processed timeProcessed is set to null.
-
-	 * @param vehicleId
-	 * @param time
-	 * @param lat
-	 * @param lon
-	 */
-	public AvlReport(String vehicleId, long time, double lat, double lon) {
-		// Store the values
-		this.vehicleId = vehicleId;
-		this.time = new Date(time);;
-		this.location = new Location(lat, lon);
-		this.speed = null;
-		this.heading = null;
-		this.assignmentId = null;
-		this.assignmentType = AssignmentType.UNSET;
-		this.leadVehicleId = null;
-		this.driverId = null;
-		this.licensePlate = null;
-		this.passengerCount = null;
-		this.passengerFullness = null;
-		this.field1Name = null;
-		this.field1Value = null;
-
-		// Don't yet know when processed so set timeProcessed to null
-		this.timeProcessed = null;
-	}
-
-	/**
-	 * For when speed and heading are not valid. They are set to Float.NaN .
-	 * Since not yet being processed timeProcessed is set to null.
+	 * For truncating the source member to size allowed in db. This way don't
+	 * later get an exception when trying to write an AvlReport to the db.
 	 * 
-	 * @param vehicleId
-	 * @param time
-	 * @param location
+	 * @param source
+	 * @return The original source string, but truncated to SOURCE_LENGTH
 	 */
-	public AvlReport(String vehicleId, long time, Location location) {
-		// Store the values
-		this.vehicleId = vehicleId;
-		this.time = new Date(time);
-		this.location = location;
-		this.speed = null;
-		this.heading = null;
-		this.assignmentId = null;
-		this.assignmentType = AssignmentType.UNSET;
-		this.leadVehicleId = null;
-		this.driverId = null;
-		this.licensePlate = null;
-		this.passengerCount = null;
-		this.passengerFullness = null;
-		this.field1Name = null;
-		this.field1Value = null;
+	private static String sized(String source) {
+		if (source.length() <= SOURCE_LENGTH)
+			return source;
 		
-		// Don't yet know when processed so set timeProcessed to null
-		timeProcessed = null;
+		return source.substring(0, SOURCE_LENGTH);
 	}
-
+	
 	/**
 	 * Makes sure that the members of this class all have reasonable
 	 * values. 
@@ -673,6 +754,15 @@ public class AvlReport implements Serializable {
 			// Heading is valid so return it
 			return heading;
 		}
+	}
+	
+	/**
+	 * The source of the AVL report
+	 * 
+	 * @return
+	 */
+	public String getSource() {
+		return source;
 	}
 	
 	/**
@@ -924,12 +1014,13 @@ public class AvlReport implements Serializable {
 	public String toString() {
 		return "AvlReport [" +
 				"vehicleId=" + vehicleId +
-				", time=" + Time.dateTimeStrMsec(time) +
+				", time=" + Time.dateTimeStrMsec(time) + " " + time +
 				(timeProcessed==null? "" : ", timeProcessed=" + 
 					Time.dateTimeStrMsec(timeProcessed)) +
 				", location=" + location +
 				", speed=" + Geo.speedFormat(getSpeed()) +
 				", heading=" + Geo.headingFormat(getHeading()) + 
+				", source=" + source +
 				", assignmentId=" + assignmentId +
 				", assignmentType=" + assignmentType +
 				(leadVehicleId==null? "" : ", leadVehicleId=" + leadVehicleId) +
@@ -985,7 +1076,6 @@ public class AvlReport implements Serializable {
 			List<AvlReport> avlReports = query.list();
 			return avlReports;
 		} catch (HibernateException e) {
-			e.printStackTrace();
 			// Log error to the Core logger
 			Core.getLogger().error(e.getMessage(), e);
 			return null;

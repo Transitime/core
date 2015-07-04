@@ -211,22 +211,27 @@ public class TripPattern implements Serializable, Lifecycle {
 	}
 
 	/**
-	 * Gets the route_short_name from the GTFS data. If the route_short_name was
-	 * not specified in the GTFS data then will use the full route_name. This
-	 * way the route short name will always be set to something appropriate.
+	 * Gets the route_short_name from the GTFS route data. If the
+	 * route_short_name was not specified in the GTFS data then will use the
+	 * route_long_name. This way the route short name returned will always be
+	 * something appropriate.
 	 * 
 	 * @param routeId
 	 * @param gtfsData
-	 * @return The route short name. Will not be null even if it was in the GTFS
-	 *         data
+	 * @return The route_short_name if set, otherwise the route_long_name
 	 */
 	private static String getRouteShortName(String routeId, GtfsData gtfsData) {
-		GtfsRoute gtfsRoute = gtfsData.getGtfsRoute(routeId);
-		
+		// Determine GtfsRoute for the route ID
+		GtfsRoute gtfsRoute = gtfsData.getGtfsRoute(routeId);		
 		if (gtfsRoute == null)
 			return null;
 		
-		return gtfsRoute.getRouteLongName();
+		// Use route_short_name. If not defined then use route_long_name
+		String name = gtfsRoute.getRouteShortName();
+		if (name == null)
+			name = gtfsRoute.getRouteLongName();
+		
+		return name;
 	}
 	
 	/**
@@ -622,6 +627,17 @@ public class TripPattern implements Serializable, Lifecycle {
 	 */
 	public String getStopId(int i) {
 		return stopPaths.get(i).getStopId();
+	}
+	
+	/**
+	 * Gets the name of the specified stop as obtained by a Core predictor.
+	 * Cannot be used with other applications.
+	 * 
+	 * @param i
+	 * @return
+	 */
+	public String getStopName(int i) {
+		return stopPaths.get(i).getStopName();
 	}
 	
 	/**

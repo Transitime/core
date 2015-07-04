@@ -24,6 +24,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,7 +36,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -58,10 +58,9 @@ import org.transitime.utils.IntervalTimer;
  */
 @Immutable // From jcip.annoations
 @Entity @DynamicUpdate 
-@Table(name="Matches") 
-@org.hibernate.annotations.Table(appliesTo = "Matches", 
-                                 indexes = { @Index(name="avlTimeIndex", 
-                                                    columnNames={"avlTime"} ) } )
+@Table(name="Matches",
+       indexes = { @Index(name="AvlTimeIndex", 
+                          columnList="avlTime" ) } )
 public class Match implements Serializable {
 
 	// vehicleId is an @Id since might get multiple AVL reports

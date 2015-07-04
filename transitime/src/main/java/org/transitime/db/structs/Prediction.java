@@ -25,12 +25,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.ipc.data.IpcPrediction;
@@ -42,10 +42,9 @@ import org.transitime.ipc.data.IpcPrediction;
  *
  */
 @Entity @DynamicUpdate 
-@Table(name="Predictions") 
-@org.hibernate.annotations.Table(appliesTo = "Predictions", 
-indexes = { @Index(name="PredictionTimeIndex", 
-                   columnNames={"creationTime"} ) } )
+@Table(name="Predictions",
+       indexes = { @Index(name="PredictionTimeIndex", 
+                   columnList="creationTime" ) } )
 public class Prediction implements Serializable {
 		
 	// Need an ID but using a regular column doesn't really make
@@ -123,7 +122,7 @@ public class Prediction implements Serializable {
 	
 	public Prediction(IpcPrediction prediction) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
-		this.predictionTime = new Date(prediction.getTime());
+		this.predictionTime = new Date(prediction.getPredictionTime());
 		this.creationTime = new Date(prediction.getCreationTime());
 		this.vehicleId = prediction.getVehicleId();
 		this.stopId = prediction.getStopId();

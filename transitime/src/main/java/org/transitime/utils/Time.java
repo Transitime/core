@@ -49,17 +49,27 @@ public class Time {
 	// around if just using an int. For example a month of 31 days *
 	// MS_PER_DAY would wrap if MS_PER_DAY was an integer instead of a long.
 	public static final int MS_PER_SEC = 1000;
+	public static final int SEC_IN_MSECS = MS_PER_SEC;
 	public static final int MS_PER_MIN = 60 * MS_PER_SEC;
+	public static final int MIN_IN_MSECS = MS_PER_MIN;
 	public static final long MS_PER_HOUR = 60 * MS_PER_MIN;
+	public static final long HOUR_IN_MSECS = MS_PER_HOUR;
 	public static final long MS_PER_DAY = 24 * MS_PER_HOUR;
+	public static final long DAY_IN_MSECS = MS_PER_DAY;
 	public static final long MS_PER_WEEK = 7 * MS_PER_DAY;
+	public static final long WEEK_IN_MSECS = MS_PER_WEEK;
 	public static final long MS_PER_YEAR = 365 * MS_PER_DAY;
+	public static final long YEAR_IN_MSECS = MS_PER_YEAR;
 	
 	public static final int SEC_PER_MIN = 60;
+	public static final int MIN_IN_SECS = SEC_PER_MIN;
 	public static final int SEC_PER_HOUR = 60 * SEC_PER_MIN;
+	public static final int HOUR_IN_SECS = SEC_PER_HOUR;
 	public static final int SEC_PER_DAY = 24 * SEC_PER_HOUR;
+	public static final int DAY_IN_SECS = SEC_PER_DAY;
 	
 	public static final long NSEC_PER_MSEC = 1000000;
+	public static final long MSEC_IN_NSECS = NSEC_PER_MSEC;
 	
 	// These two are for reading in dates in various formats
 	private static final DateFormat defaultDateFormat =
@@ -130,9 +140,14 @@ public class Time {
 	 * 
 	 * @param timeZoneStr
 	 *            Such as "America/Los_Angeles" . List of time zones can be found
-	 *            at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+	 *            at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones . 
+	 *            If null then local timezone is used
 	 */
 	public Time(String timeZoneStr) {
+		// If no time zone string specified then use local timezone
+		if (timeZoneStr == null)
+			return;
+		
 		TimeZone timeZone = TimeZone.getTimeZone(timeZoneStr);
 		this.calendar = new GregorianCalendar(timeZone);
 		
@@ -265,11 +280,16 @@ public class Time {
 			// problem if the AVL time is right after midnight but the 
 			// secondsIntoDay is just before midnight. Therefore if the 
 			// resulting epoch time is too far away then adjust the epoch
-			// time by plus or minus day.
-			if (epochTime > referenceDate.getTime() + 12 * MS_PER_HOUR) {
+			// time by plus or minus day. Note: originally used 12 hours
+			// instead of 20 hours but that caused problems when trying to 
+			// determine if a block is active because it might have started
+			// more than 12 hours ago. By using 20 hours we are much more likely
+			// to get the correct day because will only correct if really far 
+			// off.
+			if (epochTime > referenceDate.getTime() + 20 * MS_PER_HOUR) {
 				// subtract a day
 				epochTime -= MS_PER_DAY;
-			} else if (epochTime < referenceDate.getTime() - 12 * MS_PER_HOUR) {
+			} else if (epochTime < referenceDate.getTime() - 20 * MS_PER_HOUR) {
 				// add a day
 				epochTime += MS_PER_DAY;
 			}

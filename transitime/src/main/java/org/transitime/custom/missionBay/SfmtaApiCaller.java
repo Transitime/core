@@ -357,9 +357,9 @@ public class SfmtaApiCaller {
 	 */
 	public static void main(String args[]) {
 		AvlReport avlReport1 = new AvlReport("vehicleId1",
-				System.currentTimeMillis(), 37.12345, -122.4567);
+				System.currentTimeMillis(), 37.12345, -122.4567, null);
 		AvlReport avlReport2 = new AvlReport("vehicleId2",
-				System.currentTimeMillis(), 37.12345, -122.4567);
+				System.currentTimeMillis(), 37.12345, -122.4567, null);
 		List<AvlReport> avlReports = new ArrayList<AvlReport>();
 		avlReports.add(avlReport1);
 		avlReports.add(avlReport2);

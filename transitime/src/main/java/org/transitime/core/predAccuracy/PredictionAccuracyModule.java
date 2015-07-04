@@ -208,7 +208,7 @@ public class PredictionAccuracyModule extends Module {
 						getTimeBetweenPollingPredictionsMsec() - elapsedMsec;
 				if (sleepTime > 0)
 					Time.sleep(sleepTime);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error accessing predictions feed", e);
 			}
 		}
@@ -380,7 +380,7 @@ public class PredictionAccuracyModule extends Module {
 											routeId, directionId, stopId,
 											pred.getTripId(), 
 											pred.getVehicleId(),
-											new Date(pred.getTime()),
+											new Date(pred.getPredictionTime()),
 											predictionsReadTime,
 											pred.isArrival(),
 											pred.isAffectedByWaitStop(),

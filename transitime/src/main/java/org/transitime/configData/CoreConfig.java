@@ -17,10 +17,12 @@ package org.transitime.configData;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.FloatConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.config.StringConfigValue;
 import org.transitime.config.StringListConfigValue;
 import org.transitime.utils.Time;
 
@@ -49,7 +51,7 @@ public class CoreConfig {
 		return storeDataInDatabase.getValue();
 	}
 	private static BooleanConfigValue storeDataInDatabase =
-			new BooleanConfigValue("transitime.core.storeDataInDatabase",
+			new BooleanConfigValue("transitime.db.storeDataInDatabase",
 					true,
 					"When in playback mode or some other situations don't " +
 					"want to store generated data such as arrivals/" +
@@ -266,38 +268,6 @@ public class CoreConfig {
 	 **************************************************************************
 	 * For predictions
 	 */
-	
-	/**
-	 * How far forward into the future should generate predictions for.
-	 * 
-	 * @return
-	 */
-	public static int getMaxPredictionsTimeSecs() {
-		return maxPredictionsTimeSecs.getValue();
-	}
-	public static int getMaxPredictionsTimeMsecs() {
-		return getMaxPredictionsTimeSecs() * Time.MS_PER_SEC;
-	}
-	private static IntegerConfigValue maxPredictionsTimeSecs =
-			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
-					45 * Time.SEC_PER_MIN,
-					"How far forward into the future should generate " +
-					"predictions for.");
-	
-	/**
-	 * For specifying whether to use arrival predictions or departure
-	 * predictions for normal, non-wait time, stops.
-	 * 
-	 * @return
-	 */
-	public static boolean getUseArrivalPredictionsForNormalStops() {
-		return useArrivalPredictionsForNormalStops.getValue();
-	}
-	private static BooleanConfigValue useArrivalPredictionsForNormalStops =
-			new BooleanConfigValue("transitime.core.useArrivalPredictionsForNormalStops", 
-					true,
-					"For specifying whether to use arrival predictions or " +
-					"departure predictions for normal, non-wait time, stops.");
 	
 	/**
 	 * For determining if prediction should be stored in db. Set to 0 to never
@@ -629,7 +599,11 @@ public class CoreConfig {
 					+ "true then when a vehicle is assigned to a block the "
 					+ "system will unassign any other vehicles that were "
 					+ "assigned to the block. Important for when AVL system "
-					+ "doesn't always provide logout info.");
+					+ "doesn't always provide logout info. Also used by the "
+					+ "AutoBlockAssigner to determine which active blocks to "
+					+ "possibly assign a vehicle to. For no schedule routes "
+					+ "can set to false to allow multiple vehicles be assigned "
+					+ "to a route.");
 
 	public static int getTimeForDeterminingNoProgress() {
 		return timeForDeterminingNoProgress.getValue();
@@ -637,9 +611,12 @@ public class CoreConfig {
 	private static IntegerConfigValue timeForDeterminingNoProgress =
 			new IntegerConfigValue(
 					"transitime.core.timeForDeterminingNoProgress", 
-					7 * Time.MS_PER_MIN, 
+					8 * Time.MS_PER_MIN, 
 					"The interval in msec at which look at vehicle's history "
-					+ "to determine if it is not making any progress.");
+					+ "to determine if it is not making any progress. A value"
+					+ "of 0 disables this feature. If "
+					+ "vehicle is found to not be making progress it is "
+					+ "made unpredictable.");
 			
 	public static double getMinDistanceForNoProgress() {
 		return minDistanceForNoProgress.getValue();
@@ -650,7 +627,40 @@ public class CoreConfig {
 					60.0,
 					"Minimum distance vehicle is expected to travel over "
 					+ "timeForDeterminingNoProgress to indicate vehicle is "
-					+ "making progress.");
+					+ "making progress. If "
+					+ "vehicle is found to not be making progress it is "
+					+ "made unpredictable.");
+	
+	/**
+	 * transitime.core.timeForDeterminingDelayedSecs
+	 * 
+	 * @return
+	 */
+	public static int getTimeForDeterminingDelayedSecs() {
+		return timeForDeterminingDelayedSecs.getValue();
+	}
+	private static IntegerConfigValue timeForDeterminingDelayedSecs =
+			new IntegerConfigValue(
+					"transitime.core.timeForDeterminingDelayedSecs", 
+					4 * Time.SEC_PER_MIN, 
+					"The interval in msec at which look at vehicle's history "
+					+ "to determine if it is delayed.");
+			
+	/**
+	 * transitime.core.minDistanceForDelayed
+	 * 
+	 * @return
+	 */
+	public static double getMinDistanceForDelayed() {
+		return minDistanceForDelayed.getValue();
+	}
+	private static DoubleConfigValue minDistanceForDelayed =
+			new DoubleConfigValue(
+					"transitime.core.minDistanceForDelayed",
+					60.0,
+					"Minimum distance vehicle is expected to travel over "
+					+ "timeForDeterminingDelayed to indicate vehicle is "
+					+ "delayed.");
 	
 	public static int getMatchHistoryMaxSize() {
 		return matchHistoryMaxSize.getValue();
@@ -679,4 +689,16 @@ public class CoreConfig {
 					+ "enough so can store all AVL reports received over "
 					+ "timeForDeterminingNoProgress. If GPS rate is high then "
 					+ "this value will need to be high as well.");
+	
+	public static String getPidFileDirectory() {
+		return pidFileDirectory.getValue();
+	}
+	private static StringConfigValue pidFileDirectory =
+			new StringConfigValue(
+					"transitime.core.pidDirectory", 
+					"/home/ec2-user/pids/",
+					"Directory where pid file should be written. The pid file "
+					+ "can be used by monit to make sure that core process is "
+					+ "always running.");
+	
 }

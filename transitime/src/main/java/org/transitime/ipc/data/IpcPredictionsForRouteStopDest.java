@@ -115,6 +115,10 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeShortName = tripPattern.getRouteShortName();		
 		Route route = Core.getInstance().getDbConfig()
 				.getRouteById(tripPattern.getRouteId());
+		if (route == null) {
+			throw new IllegalArgumentException("RouteId="
+					+ tripPattern.getRouteId() + " does not exist.");
+		}
 		this.routeName = route.getName();
 		this.routeOrder = route.getRouteOrder();
 		this.stopId = stopId;
@@ -161,7 +165,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			for (int i=0; i<size; ++i) {
 				IpcPrediction prediction = toClone.predictionsForRouteStop.get(i);
 				// If prediction exceeds max time then done
-				if (prediction.getTime() > maxSystemTimeForPrediction)
+				if (prediction.getPredictionTime() > maxSystemTimeForPrediction)
 					break;
 				this.predictionsForRouteStop.add(i, prediction);
 			}
@@ -207,11 +211,20 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param routeShortName
 	 * @param stopId
 	 * @param directionId
+	 * @param distanceToStop
 	 */
 	public IpcPredictionsForRouteStopDest(String routeShortName, String stopId, 
-			String directionId) {
-		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);	
+			String directionId, double distanceToStop) {
+		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);
+		if (route == null) {
+			throw new IllegalArgumentException("routeShortName="
+					+ routeShortName + " does not exist.");
+		}
 		Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+		if (stop == null) {
+			throw new IllegalArgumentException("stopId="
+					+ stopId + " does not exist.");
+		}
 		
 		this.routeId = route.getId();
 		this.routeShortName = routeShortName;
@@ -221,7 +234,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.stopName = stop.getName();
 		this.headsign = null;
 		this.directionId = directionId;
-		this.distanceToStop = Double.NaN;
+		this.distanceToStop = distanceToStop;
 		this.predictionsForRouteStop = new ArrayList<IpcPrediction>();
 	}
 	
@@ -241,7 +254,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private double distanceToStop;
 		private List<IpcPrediction> predictionsForRouteStop;
 
-		private static final short serializationVersion = 0;
+		private static final short currentSerializationVersion = 0;
 		private static final long serialVersionUID = -2312925771271829358L;
 
 		/*
@@ -268,7 +281,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		 */
 		private void writeObject(java.io.ObjectOutputStream stream)
 				throws IOException {
-			stream.writeShort(serializationVersion);
+			stream.writeShort(currentSerializationVersion);
 			
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
@@ -289,10 +302,12 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private void readObject(java.io.ObjectInputStream stream)
 				throws IOException, ClassNotFoundException {
 			short readVersion = stream.readShort();
-			if (serializationVersion != readVersion) {
+			if (currentSerializationVersion < readVersion) {
 				throw new IOException("Serialization error when reading "
 						+ getClass().getSimpleName()
-						+ " object. Read serializationVersion=" + readVersion);
+						+ " object. Read version=" + readVersion 
+						+ " but currently using software version=" 
+						+ currentSerializationVersion);
 			}
 
 			// serialization version is OK so read in object
@@ -411,7 +426,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			// Remove predictions that are expired. It makes sense to do this 
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
-			if (currentPrediction.getTime() < currentTime) {
+			if (currentPrediction.getPredictionTime() < currentTime) {
 				iterator.remove();
 			} else {
 				// The subsequent predictions are later so if this one is
@@ -461,7 +476,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			// Remove predictions that are expired. It makes sense to do this 
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
-			if (currentPrediction.getTime() < currentTime) {
+			if (currentPrediction.getPredictionTime() < currentTime) {
 				iterator.remove();
 				continue;
 			}
@@ -474,8 +489,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			for (int i=0; i<predictionsForRouteStop.size(); ++i) {
 				// If the new prediction is before the previous prediction
 				// in currentPredsForRouteStop then insert it.
-				if (newPredForRouteStop.getTime() < 
-						predictionsForRouteStop.get(i).getTime()) {
+				if (newPredForRouteStop.getPredictionTime() < 
+						predictionsForRouteStop.get(i).getPredictionTime()) {
 					// Add the new prediction to the list. If the list already
 					// has the max number of predictions then first remove the
 					// last one so that the array doesn't need to grow to 

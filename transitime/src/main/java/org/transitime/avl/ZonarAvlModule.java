@@ -51,6 +51,8 @@ public class ZonarAvlModule extends XmlPollingAvlModule {
 			new StringConfigValue("transitime.avl.zonarPassword",
 					"The Zonar password for API calls.");
  
+	private static final double KM_PER_HOUR_TO_METERS_PER_SEC = 0.27777777777778;
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ZonarAvlModule.class);	
 
@@ -84,10 +86,18 @@ public class ZonarAvlModule extends XmlPollingAvlModule {
 			double lon = MathUtils.round(Double.parseDouble(lonStr), 5);
 			
 			String headingStr = asset.getChild("heading").getValue();
-			float heading = Float.parseFloat(headingStr);
+			float heading = Float.parseFloat(headingStr);			
 			
-			String speedStr = asset.getChild("speed").getValue();
+			Element speedElement = asset.getChild("speed");
+			String speedStr = speedElement.getValue();
 			float speed = Float.parseFloat(speedStr);
+			String unitsStr = speedElement.getAttributeValue("unit");
+			if (unitsStr.equals("Km/Hour")) {
+				speed *= KM_PER_HOUR_TO_METERS_PER_SEC;
+			} else {
+				logger.error("Cannot handle units of \"{}\" for Zonar feed.", 
+						unitsStr);
+			}
 			
 			String timeStr = asset.getChild("time").getValue();
 			long time = Long.parseLong(timeStr)	* Time.MS_PER_SEC;
@@ -102,7 +112,7 @@ public class ZonarAvlModule extends XmlPollingAvlModule {
 			// Create and process the AVL report. 
 			AvlReport avlReport = new AvlReport(vehicleId, time,
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
-					heading);
+					heading, "Zonar");
 			processAvlReport(avlReport);
 		}
 	}

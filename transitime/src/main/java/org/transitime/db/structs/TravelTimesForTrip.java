@@ -27,6 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OrderColumn;
@@ -38,7 +39,6 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -54,11 +54,9 @@ import org.transitime.db.hibernate.HibernateUtils;
  */
 @Entity 
 @DynamicUpdate 
-@Table(name="TravelTimesForTrips")
-@org.hibernate.annotations.Table(
-		appliesTo = "TravelTimesForTrips", 
-		indexes = { @Index(	name="travelTimesRevIndex", 
-                   			columnNames={"travelTimesRev"} ) } )
+@Table(name="TravelTimesForTrips",
+       indexes = { @Index(	name="TravelTimesRevIndex", 
+                   			columnList="travelTimesRev" ) } )
 public class TravelTimesForTrip implements Serializable {
 
 	// Need a generated ID because trying to share TravelTimesForStopPath 
@@ -220,6 +218,9 @@ public class TravelTimesForTrip implements Serializable {
 	public static Map<String, List<TravelTimesForTrip>> getTravelTimesForTrips(
 			Session session, int travelTimesRev) 
 			throws HibernateException {
+		logger.info("Reading TravelTimesForTrips for travelTimesRev={} ...", 
+				travelTimesRev);
+		
 		// Get List of all TravelTimesForTrip for the specified rev
 		String hql = "FROM TravelTimesForTrip " +
 				"    WHERE travelTimesRev = :travelTimesRev";
@@ -229,8 +230,12 @@ public class TravelTimesForTrip implements Serializable {
 		try {
 			allTravelTimes = query.list();
 		} catch (Exception e) {
+			logger.error("Exception in getTravelTimesForTrips(). {}", 
+					e.getMessage());
 			throw e;
 		}
+		
+		logger.info("Putting travel times into map...");
 		
 		// Now create the map and return it
 		Map<String, List<TravelTimesForTrip>> map = 
@@ -248,6 +253,8 @@ public class TravelTimesForTrip implements Serializable {
 			// Add the travelTimes to the List
 			listForTripPattern.add(travelTimes);			
 		}
+		
+		logger.info("Done putting travel times into map.");
 		
 		// Return the map containing all the travel times
 		return map;

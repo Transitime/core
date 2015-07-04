@@ -95,7 +95,7 @@ public class NamedThread extends Thread {
 		try {
 			numAlive.incrementAndGet();
 			super.run();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			logger.error(Markers.email(), 
 					"Exception occurred which will cause thread {} " +

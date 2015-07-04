@@ -25,16 +25,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.transitime.db.webstructs.ApiKeyManager;
+import org.transitime.ipc.clients.CommandsInterfaceFactory;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.ServerStatusInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
+import org.transitime.ipc.interfaces.CommandsInterface;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
@@ -63,7 +64,7 @@ public class StandardParameters {
 	// this isn't enough. Still getting Bad Request. But leaving
 	// this in as documentation that it was tried.
 	@HeaderParam("accept")
-	@DefaultValue("application/xml")
+	@DefaultValue("application/json")
 	String acceptHeader;
 
 	@Context
@@ -88,11 +89,12 @@ public class StandardParameters {
 	 * @return The resulting media type
 	 */
 	public String getMediaType() throws WebApplicationException {
-		// Use default of APPLICATION_XML
-		String mediaType = MediaType.APPLICATION_XML;
+		// Use default of APPLICATION_JSON
+		String mediaType = MediaType.APPLICATION_JSON;
 
-		// If mediaType specified in accept header then start with it
-		if (acceptHeader != null) {
+		// If mediaType specified (to something besides "*/*") in accept 
+		// header then start with it.
+		if (acceptHeader != null && !acceptHeader.contains("*/*")) {
 			if (acceptHeader.contains(MediaType.APPLICATION_JSON))
 				mediaType = MediaType.APPLICATION_JSON;
 			else if (acceptHeader.contains(MediaType.APPLICATION_XML))
@@ -127,7 +129,8 @@ public class StandardParameters {
 	}
 
 	/**
-	 * Makes sure not access feed too much and that the key is valid.
+	 * Makes sure not access feed too much and that the key is valid. If
+	 * there is a problem then throws a WebApplicationException.
 	 * 
 	 * @throws WebApplicationException
 	 */
@@ -139,13 +142,10 @@ public class StandardParameters {
 		UsageValidator.getInstance().validateUsage(this);
 
 		// Make sure the application key is valid
-		// I have decoupled the manager from the web api.
-		try {
-			ApiKeyManager.getInstance().validateKey(key);
-		} catch (Exception e) {						
+		if (!ApiKeyManager.getInstance().isKeyValid(getKey())) {
 			throw WebUtils.badRequestException(
 					Status.UNAUTHORIZED.getStatusCode(), "Application key \""
-							+ key + "\" is not valid.");
+							+ getKey() + "\" is not valid.");			
 		}
 	}
 
@@ -189,8 +189,25 @@ public class StandardParameters {
 	}
 
 	/**
-	 * Gets the PredictionsInterface for the specified agencyId. If not valid
-	 * then throws WebApplicationException.
+	 * Gets the CommandsInterface for the specified agencyId. If not valid then
+	 * throws WebApplicationException.
+	 * 
+	 * @return The CommandsInterface
+	 */
+	public CommandsInterface getCommandsInterface()
+			throws WebApplicationException {
+		CommandsInterface commandsInterface = CommandsInterfaceFactory
+				.get(agencyId);
+		if (commandsInterface == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
+
+		return commandsInterface;
+	}
+
+	/**
+	 * Gets the PredictionsInterface for the agencyId specified as part of the
+	 * standard parameters. If not valid then throws WebApplicationException.
 	 * 
 	 * @return The VehiclesInterface
 	 */
@@ -262,11 +279,6 @@ public class StandardParameters {
 	 */
 	public HttpServletRequest getRequest() {
 		return request;
-	}
-
-	public void validate(HttpServletRequest request2) throws WebApplicationException {
-		// TODO Auto-generated method stub
-		this.request=request2;
 	}
 
 }

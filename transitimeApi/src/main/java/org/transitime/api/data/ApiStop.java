@@ -20,7 +20,6 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-import org.transitime.db.structs.Stop;
 import org.transitime.ipc.data.IpcStop;
 
 /**
@@ -63,16 +62,6 @@ public class ApiStop extends ApiTransientLocation {
 		// If true then set to null so that this attribute won't then be
 		// output as XML/JSON, therefore making output a bit more compact.
 		this.minor = stop.isUiStop() ? null : true;
-	}
-	public ApiStop(Stop stop) {
-		super(stop.getLoc().getLat(), stop.getLoc().getLon());
-		this.id = stop.getId();
-		this.name = stop.getName();
-		this.code = stop.getCode();
-		
-		// If true then set to null so that this attribute won't then be
-		// output as XML/JSON, therefore making output a bit more compact.
-		this.minor = null;
 	}
 
 }

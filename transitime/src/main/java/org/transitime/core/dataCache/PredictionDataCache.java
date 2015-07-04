@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
@@ -33,6 +34,7 @@ import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
 import org.transitime.utils.MapKey;
+import org.transitime.utils.Time;
 
 /**
  * For storing and retrieving predictions by stop.
@@ -144,6 +146,14 @@ public class PredictionDataCache {
 		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
 				getPredictionsForRouteStop(routeShortName, stopId);
 		
+		// Want to limit predictions to max time in future since if using
+		// schedule based predictions generating predictions far ahead.
+		long maxPredictionEpochTime =
+				Core.getInstance().getSystemTime()
+						+ PredictionGeneratorDefaultImpl
+								.getMaxPredictionsTimeSecs()
+						* Time.SEC_IN_MSECS;
+				
 		// Make a copy of the prediction objects so that they cannot be
 		// modified by another thread while they are being accessed. This
 		// is important because when the predictions are modified they are
@@ -159,8 +169,9 @@ public class PredictionDataCache {
 				continue;
 			
 			// Direction ID is OK so clone prediction and add to list
-			IpcPredictionsForRouteStopDest clone = 
-					predictions.getClone(maxPredictionsPerStop, distanceToStop);
+			IpcPredictionsForRouteStopDest clone =
+					predictions.getClone(maxPredictionsPerStop,
+							maxPredictionEpochTime, distanceToStop);
 			clonedPredictions.add(clone);
 		}
 		
@@ -169,7 +180,7 @@ public class PredictionDataCache {
 		// display in the UI.
 		if (clonedPredictions.size() == 0) {
 			IpcPredictionsForRouteStopDest pred = new IpcPredictionsForRouteStopDest(
-					routeShortName, stopId, directionId);
+					routeShortName, stopId, directionId, distanceToStop);
 			clonedPredictions.add(pred);
 		}
 		

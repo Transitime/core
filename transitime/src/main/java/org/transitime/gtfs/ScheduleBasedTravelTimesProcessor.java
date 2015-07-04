@@ -33,6 +33,7 @@ import org.transitime.db.structs.TravelTimesForTrip;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
+import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -56,10 +57,9 @@ public class ScheduleBasedTravelTimesProcessor {
 	private final int originalTravelTimesRev;
 	
 	private final int defaultWaitTimeAtStopMsec; 
+	private final double maxSpeedKph;
+	private final double maxSpeedMetersPerMsec;
 	private final double maxTravelTimeSegmentLength;
-	
-	// 0.036m/msec = 36.0m/s = 40mph
-	private static final double MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC = 0.018; 
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ScheduleBasedTravelTimesProcessor.class);
@@ -74,13 +74,16 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * @param originalTravelTimesRev
 	 * @param maxTravelTimeSegmentLength
 	 * @param defaultWaitTimeAtStopMsec
+	 * @param maxSpeedKph
 	 */
 	public ScheduleBasedTravelTimesProcessor(ActiveRevisions activeRevisions,
 			int originalTravelTimesRev, double maxTravelTimeSegmentLength,
-			int defaultWaitTimeAtStopMsec) {
+			int defaultWaitTimeAtStopMsec, double maxSpeedKph) {
 		this.activeRevisions = activeRevisions;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;	
+		this.maxSpeedKph = maxSpeedKph;
+		this.maxSpeedMetersPerMsec = maxSpeedKph * Geo.KPH_TO_MPS / Time.MS_PER_SEC;
 		this.originalTravelTimesRev = originalTravelTimesRev;
 	}
 	
@@ -96,16 +99,26 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * of GtfsStopTimes instead of just a List of them.
 	 * 
 	 * @param tripId
-	 * @param stopId
+	 * @param tripPattern
+	 * @param stopPathIndex
 	 * @param gtfsData
 	 * @return
 	 */
-	private ScheduleTime getGtfsScheduleTime(String tripId, String stopId,
-			GtfsData gtfsData) {
-		// Go through list of stops for the tripId
+	private ScheduleTime getGtfsScheduleTime(String tripId,
+			TripPattern tripPattern, int stopPathIndex, GtfsData gtfsData) {
+		String stopId = tripPattern.getStopId(stopPathIndex);
+		
+		// Go through list of stops for the tripId. 
+		// Note: bit tricky handling trips where stop is encountered twice.
+		// But at least can start the for loop at 1 so that don't
+		// look at all the stop times. At least this will properly handle the
+		// situations where the first and last stop for a trip are the same.
 		List<GtfsStopTime> gtfsStopTimesList = 
 				gtfsData.getGtfsStopTimesForTrip(tripId);
-		for (GtfsStopTime gtfsStopTime : gtfsStopTimesList) {
+		for (int stopTimeIdx = stopPathIndex>0 ? 1 : 0; 
+				stopTimeIdx < gtfsStopTimesList.size(); 
+				++stopTimeIdx) {
+			GtfsStopTime gtfsStopTime = gtfsStopTimesList.get(stopTimeIdx);
 			if (gtfsStopTime.getStopId().equals(stopId)) {
 				// Found the stop. 
 				Integer arr = gtfsStopTime.getArrivalTimeSecs();
@@ -160,120 +173,182 @@ public class ScheduleBasedTravelTimesProcessor {
 		// Start at index 1 since the first stub path is a special case
 		int previousStopPathWithScheduleTimeIndex = 0;
 		ScheduleTime previousScheduleTime = getGtfsScheduleTime(trip.getId(), 
-				tripPattern.getStopId(0), gtfsData);
+				tripPattern, 0, gtfsData);
 		int numberOfPaths = trip.getTripPattern().getNumberStopPaths();
-		for (int stopPathIndex = 1; stopPathIndex < numberOfPaths; ++stopPathIndex) {
+		for (int stopPathWithScheduleTimeIndex = 1; 
+				stopPathWithScheduleTimeIndex < numberOfPaths; 
+				++stopPathWithScheduleTimeIndex) {
 			// Determine the schedule time for the stop using the GTFS data directly.
 			// Can't use the trip stop times because those can be filtered to just
 			// be for schedule adherence stops, which could be a small subset of the 
 			// schedule times from the stop_times.txt GTFS file.
 			ScheduleTime scheduleTime = getGtfsScheduleTime(trip.getId(), 
-					tripPattern.getStopId(stopPathIndex), gtfsData);
-			if (scheduleTime != null) {
-				// Determine time elapsed between schedule times for
-				// each path between the schedule times
-				int newTimeInSecs = scheduleTime.getTime();
-				int oldTimeInSecs = previousScheduleTime.getTime();
-				int elapsedScheduleTimeInSecs = newTimeInSecs - oldTimeInSecs;
-				
-				// Determine distance traveled
-				double distanceBetweenScheduleStops = 0.0;
-				for (int i=previousStopPathWithScheduleTimeIndex+1; 
-						i<=stopPathIndex; 
-						++i) {
-					String pathId = tripPattern.getStopPathId(i);					
-					StopPath path = gtfsData.getPath(tripPattern.getId(), pathId);
-					distanceBetweenScheduleStops += path.length();
-				}
-				
-				// Determine averageSpeedMetersPerSecs. Do this by looking at  
-				// the total scheduled travel time between the scheduled stops 
-				// and subtracting out the time that will at stopped at stops.
-				int numberOfStops = 
-						stopPathIndex - previousStopPathWithScheduleTimeIndex;
-				int msecSpentStopped = numberOfStops * defaultWaitTimeAtStopMsec;
-				if (msecSpentStopped > elapsedScheduleTimeInSecs*1000)
-					msecSpentStopped = elapsedScheduleTimeInSecs*1000;
-				int msecForTravelBetweenScheduleTimes = 
-						elapsedScheduleTimeInSecs*1000 - msecSpentStopped;
-				// Make sure that speed is reasonable. An agency might 
-				// mistakenly only provide a few seconds of travel time and
-				// that could be completely eaten away by expected stop times.
-				if (msecForTravelBetweenScheduleTimes == 0 || 
-						distanceBetweenScheduleStops / msecForTravelBetweenScheduleTimes > 
-						MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC) {
-					msecForTravelBetweenScheduleTimes = 
-							(int) (distanceBetweenScheduleStops / 
-									MAX_TRAVEL_SPEED_IN_METERS_PER_MSEC);
-				}
-				
-				// For each stop path between the last schedule stop and the 
-				// current one...
-				for (int i=previousStopPathWithScheduleTimeIndex+1; 
-						i<=stopPathIndex; 
-						++i) {
-					// Determine the stop path
-					String stopPathId = tripPattern.getStopPathId(i);
-					StopPath path = gtfsData.getPath(tripPattern.getId(), stopPathId);
-
-					// For this path determine the number of travel times 
-					// segments and their lengths. They will be no longer 
-					// than maxTravelTimeSegmentLength.
-					double pathLength = path.length();
-					int numberTravelTimeSegments;
-					double travelTimeSegmentsLength;
-					if (pathLength > maxTravelTimeSegmentLength) {
-						// The stop path is longer then the max so divide it into
-						// shorter travel time segments
-						numberTravelTimeSegments = 
-								(int) (pathLength /	maxTravelTimeSegmentLength +
-										1.0);
-						travelTimeSegmentsLength = 
-								pathLength / numberTravelTimeSegments;
-					} else {
-						// The stop path length is less then the max so can use
-						// just a single travel time segment
-						numberTravelTimeSegments = 1;
-						travelTimeSegmentsLength = pathLength;
-					}
-					
-					// For this stop path determine the travel times. 				
-					ArrayList<Integer> travelTimesMsec = new ArrayList<Integer>();
-					int travelTimeForSegmentMsec = (int) 
-							((travelTimeSegmentsLength / distanceBetweenScheduleStops) * 
-									msecForTravelBetweenScheduleTimes);
-					for (int j = 0; j < numberTravelTimeSegments; ++j) {
-						// Add the travel time for the segment to the list
-						travelTimesMsec.add(travelTimeForSegmentMsec);
-					}
-					
-					// Determine the stop time. Use the default value except
-					// use zero for the last stop in the trip since stop time
-					// is not used for such a stop. Instead, schedule time and
-					// layover time is used.
-					int stopTimeMsec = (stopPathIndex < numberOfPaths-1) ? 
-							defaultWaitTimeAtStopMsec : 0;
-					
-					// Create and add the travel time for this stop path
-					TravelTimesForStopPath travelTimesForStopPath = 
-							new TravelTimesForStopPath(
-									activeRevisions.getConfigRev(), 
-									activeRevisions.getTravelTimesRev(),
-									stopPathId, 
-									travelTimeSegmentsLength,
-									travelTimesMsec, 
-									stopTimeMsec,
-									-1,  // daysOfWeekOverride
-									HowSet.SCHED,
-									trip);
-					travelTimes.add(travelTimesForStopPath);
-				}
-				
-				// For next iteration in for loop
-				previousStopPathWithScheduleTimeIndex = stopPathIndex;
-				previousScheduleTime = scheduleTime;
+					tripPattern, stopPathWithScheduleTimeIndex, gtfsData);
+			if (scheduleTime == null) 
+				continue;
+			
+			// Determine time elapsed between schedule times for
+			// each path between the schedule times
+			int newTimeInSecs = scheduleTime.getTime();
+			int oldTimeInSecs = previousScheduleTime.getTime();
+			int elapsedScheduleTimeInSecs = newTimeInSecs - oldTimeInSecs;
+			
+			// Determine distance traveled
+			double distanceBetweenScheduleStops = 0.0;
+			for (int i=previousStopPathWithScheduleTimeIndex+1; 
+					i<=stopPathWithScheduleTimeIndex; 
+					++i) {
+				String pathId = tripPattern.getStopPathId(i);					
+				StopPath path = gtfsData.getPath(tripPattern.getId(), pathId);
+				distanceBetweenScheduleStops += path.length();
 			}
-		}
+			
+			// Determine averageSpeedMetersPerSecs. Do this by looking at  
+			// the total scheduled travel time between the scheduled stops 
+			// and subtracting out the time that will at stopped at stops.
+			int numberOfStopsWithStopTime = 
+					stopPathWithScheduleTimeIndex - previousStopPathWithScheduleTimeIndex;
+			// Don't need stop time for last stop of trip
+			if (stopPathWithScheduleTimeIndex == numberOfPaths - 1)
+				--numberOfStopsWithStopTime;
+			int msecSpentStopped = numberOfStopsWithStopTime * defaultWaitTimeAtStopMsec;
+			if (msecSpentStopped > elapsedScheduleTimeInSecs*1000)
+				msecSpentStopped = elapsedScheduleTimeInSecs*1000;
+			int msecForTravelBetweenScheduleTimes = 
+					elapsedScheduleTimeInSecs*1000 - msecSpentStopped;
+			// Make sure that speed is reasonable, taking default wait 
+			// stop times into account. An agency might 
+			// mistakenly only provide a few seconds of travel time and
+			// that could be completely eaten away by expected stop times.
+			if (msecForTravelBetweenScheduleTimes == 0
+					|| distanceBetweenScheduleStops
+							/ msecForTravelBetweenScheduleTimes > maxSpeedMetersPerMsec) {
+				// It might be that for a non-rush hour bus route the agency
+				// doesn't expect the bus to stop at a stop. So first see if
+				// travel time is reasonable if there is no wait time.
+				if (elapsedScheduleTimeInSecs * Time.MS_PER_SEC > 0
+						&& distanceBetweenScheduleStops
+								/ (elapsedScheduleTimeInSecs * Time.MS_PER_SEC) <= maxSpeedMetersPerMsec) {
+					// Travel speed is OK if wait time is considered to 
+					// be less than the default time. So reduce wait time 
+					// such that travel speed limit is not violated.
+					msecSpentStopped =
+							elapsedScheduleTimeInSecs
+									* Time.MS_PER_SEC
+									- (int) (distanceBetweenScheduleStops / maxSpeedMetersPerMsec);
+					
+					logger.warn("When determining schedule based travel "
+							+ "times for routeId={} routeShortName={} " 
+							+ "tripId={} stopPathIndex={} "
+							+ "stopId={} stopName=\"{}\" "
+							+ "distanceBetweenScheduleStops={} "
+							+ "msecForTravelBetweenScheduleTimes={} "
+							+ "reducing stop wait time to {} msec "
+							+ "per stop so that maxSpeedKph={} kph is "
+							+ "not violated.", 
+							trip.getRouteId(), trip.getRouteShortName(),
+							trip.getId(), stopPathWithScheduleTimeIndex, 
+							tripPattern.getStopId(stopPathWithScheduleTimeIndex), 
+							gtfsData.getStop(tripPattern.getStopId(stopPathWithScheduleTimeIndex)).getName(),
+							Geo.distanceFormat(distanceBetweenScheduleStops),
+							msecForTravelBetweenScheduleTimes,
+							msecSpentStopped/numberOfStopsWithStopTime, 
+							Geo.oneDigitFormat(maxSpeedKph));
+				} else {
+					// There is a real problem with the schedule time since 
+					// even if wait time was reduced to 0 the travel time 
+					// based on schedule would be too high.
+					logger.error("When determining schedule based travel "
+							+ "times for routeId={} routeShortName={} " 
+							+ "tripId={} stopPathIndex={} "
+							+ "stopId={} stopName=\"{}\" "
+							+ "distanceBetweenScheduleStops={} " 
+							+ "msecForTravelBetweenScheduleTimes={} "
+							+ "clamping schedule based travel "
+							+ "speed to {} kph for instead of the "
+							+ "calculated speed={} kph", 
+							trip.getRouteId(), trip.getRouteShortName(),
+							trip.getId(), stopPathWithScheduleTimeIndex, 
+							tripPattern.getStopId(stopPathWithScheduleTimeIndex), 
+							gtfsData.getStop(tripPattern.getStopId(stopPathWithScheduleTimeIndex)).getName(),
+							Geo.distanceFormat(distanceBetweenScheduleStops),
+							msecForTravelBetweenScheduleTimes,
+							Geo.oneDigitFormat(maxSpeedKph),								
+							Geo.oneDigitFormat((distanceBetweenScheduleStops / msecForTravelBetweenScheduleTimes)
+									* Time.MS_PER_SEC / Geo.KPH_TO_MPS));
+
+					msecForTravelBetweenScheduleTimes =
+							(int) (distanceBetweenScheduleStops / maxSpeedMetersPerMsec);
+
+				}
+			}
+			
+			// For each stop path between the last schedule stop and the 
+			// current one...
+			for (int stopPathIndex = previousStopPathWithScheduleTimeIndex + 1; 
+					stopPathIndex <= stopPathWithScheduleTimeIndex; 
+					++stopPathIndex) {
+				// Determine the stop path
+				String stopPathId = tripPattern.getStopPathId(stopPathIndex);
+				StopPath path = gtfsData.getPath(tripPattern.getId(), stopPathId);
+
+				// For this path determine the number of travel times 
+				// segments and their lengths. They will be no longer 
+				// than maxTravelTimeSegmentLength.
+				double pathLength = path.length();
+				int numberTravelTimeSegments;
+				double travelTimeSegmentsLength;
+				if (pathLength > maxTravelTimeSegmentLength) {
+					// The stop path is longer then the max so divide it into
+					// shorter travel time segments
+					numberTravelTimeSegments = 
+							(int) (pathLength /	maxTravelTimeSegmentLength +
+									1.0);
+					travelTimeSegmentsLength = 
+							pathLength / numberTravelTimeSegments;
+				} else {
+					// The stop path length is less then the max so can use
+					// just a single travel time segment
+					numberTravelTimeSegments = 1;
+					travelTimeSegmentsLength = pathLength;
+				}
+				
+				// For this stop path determine the travel times. 				
+				ArrayList<Integer> travelTimesMsec = new ArrayList<Integer>();
+				int travelTimeForSegmentMsec = (int) 
+						((travelTimeSegmentsLength / distanceBetweenScheduleStops) * 
+								msecForTravelBetweenScheduleTimes);
+				for (int j = 0; j < numberTravelTimeSegments; ++j) {
+					// Add the travel time for the segment to the list
+					travelTimesMsec.add(travelTimeForSegmentMsec);
+				}
+				
+				// Determine the stop time. Use the default value except
+				// use zero for the last stop in the trip since stop time
+				// is not used for such a stop. Instead, schedule time and
+				// layover time is used.
+				int stopTimeMsec = (stopPathIndex < numberOfPaths-1) ? 
+						msecSpentStopped/numberOfStopsWithStopTime : 0;
+				
+				// Create and add the travel time for this stop path
+				TravelTimesForStopPath travelTimesForStopPath = 
+						new TravelTimesForStopPath(
+								activeRevisions.getConfigRev(), 
+								activeRevisions.getTravelTimesRev(),
+								stopPathId, 
+								travelTimeSegmentsLength,
+								travelTimesMsec, 
+								stopTimeMsec,
+								-1,  // daysOfWeekOverride
+								HowSet.SCHED,
+								trip);
+				travelTimes.add(travelTimesForStopPath);
+			}
+			
+			// For next iteration in for loop
+			previousStopPathWithScheduleTimeIndex = stopPathWithScheduleTimeIndex;
+			previousScheduleTime = scheduleTime;
+		} /* End of for loop for each stop path */
 
 		// Return the results
 		return travelTimes;

@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.utils.ChinaGpsOffset;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
@@ -54,7 +55,7 @@ public class AvlCsvWriter extends CsvWriterBase {
 	 *            output time in local time.
 	 */
 	public AvlCsvWriter(String fileName, String timezoneStr) {
-		super(fileName, true);
+		super(fileName, false);
 		
 		timeUsingTimeZone = new Time(timezoneStr);
 	}
@@ -118,22 +119,26 @@ public class AvlCsvWriter extends CsvWriterBase {
 				append(avlReport.getAssignmentId());
 			append(',');
 			
-			switch (avlReport.getAssignmentType()) {
-			case BLOCK_ID:
-				append("BLOCK_ID"); break;
-			case ROUTE_ID:
-				append("ROUTE_ID"); break;
-			case TRIP_ID:
-				append("TRIP_ID"); break;
-			case UNSET:
-				append("UNSET"); break;
-			default:
-				break;
+			// Add the assignment type using the name of the enumeration
+			AssignmentType assignmentType = avlReport.getAssignmentType();
+			if (assignmentType != null) {
+				append(assignmentType.name());
 			}
+
+			// Wrap up the record
 			append('\n');
 		} catch (IOException e) {
 			logger.error("Error writing {}.", avlReport, e);
 		}
+	}
 
+	/**
+	 * Appends an AvlReport to the CSV file.
+	 * 
+	 * @param avlReport
+	 *            The AvlReport to be appended to the CSV file
+	 */
+	public void write(AvlReport avlReport) {
+		write(avlReport, false);
 	}
 }

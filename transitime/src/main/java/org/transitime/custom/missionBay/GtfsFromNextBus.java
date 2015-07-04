@@ -549,15 +549,17 @@ public class GtfsFromNextBus {
 			}
 			
 			if (allStopsAreInDirection) {
-				// Handle caltrans route specially
-				if (routeId.equals("caltrans") || routeId.equals("east")) {
-					// For caltrans and east routes have two different directions with the
+				// Handle caltrain route specially
+				if (routeId.equals("caltrain")) {
+					// For caltrain route have two different directions with the
 					// same stops, but with a different start of the trip. One
 					// direction is for mornings and the other for afternoons.
-					// for special caltrans and east routes therefore make sure that first
+					// for special caltrain route therefore make sure that first
 					// stop of the trip matches the first stop of the direction
-					// for the direction to be used.
-					if (dir.stopIds.get(0).equals(stopIdsInSchedForTrip.get(0)))
+					// for the direction to be used. But the calttown stop is
+					// an exception to the exception since a trip starts there.
+					if (dir.stopIds.get(0).equals(stopIdsInSchedForTrip.get(0)) 
+							|| stopIdsInSchedForTrip.get(0).equals("calttown"))
 						return dir;
 				} else
 					return dir;
@@ -759,14 +761,37 @@ public class GtfsFromNextBus {
 		// where there is a different trip pattern in the morning and the
 		// afternoon, but cannot determine the trip pattern from the stops
 		// alone. Need to look at the schedule time as well.
-		if (routeId.equals("caltrans")) {
+//		if (routeId.equals("caltrans")) {
+//			String tripStartTimeStr = stopTimesForBlock.get(beginIdx).stopTimeStr;
+//			int tripStartTimeSecs = Time.parseTimeOfDay(tripStartTimeStr);
+//			if (tripStartTimeSecs < 12 * Time.SEC_PER_HOUR) {
+//				// It is morning caltrans trip so handle specially
+//				if (currentStopId.equals("calttown") || currentStopId.equals("trans390"))
+//					return true;
+//			}
+//		}
+		// KLUDGE
+		// The caltrain route is a mess. Need to simply hardcode which stops
+		// indicate the end of a trip.
+		if (routeId.equals("caltrain")) {
 			String tripStartTimeStr = stopTimesForBlock.get(beginIdx).stopTimeStr;
 			int tripStartTimeSecs = Time.parseTimeOfDay(tripStartTimeStr);
 			if (tripStartTimeSecs < 12 * Time.SEC_PER_HOUR) {
-				// It is morning caltrans trip so handle specially
-				if (currentStopId.equals("calttown") || currentStopId.equals("trans390"))
+				// morning trip
+				if (currentStopId.equals("1650owen"))
+					return true;
+			} else {
+				// Afternoon trip
+				if (currentStopId.equals("nektar"))
 					return true;
 			}
+		}
+		
+		// KLUDGE
+		// east loop route is also messy. Need to always end trips at powell stop at bart station
+		if (routeId.equals("east")) {
+			if (currentStopId.equals("powell"))
+				return true;
 		}
 
 		// For simple route with only single direction look for first stop
@@ -839,7 +864,7 @@ public class GtfsFromNextBus {
 				}
 				
 				// Handle special case where deadheading
-				if (routeId.equals("caltrans")
+				if (routeId.equals("caltrain")
 						&& stopTimesForBlock.get(endIdx).stopId.equals("trans390")
 						&& stopTimesForBlock.get(endIdx-1).stopId.equals("1650owen")) {
 					--endIdx;

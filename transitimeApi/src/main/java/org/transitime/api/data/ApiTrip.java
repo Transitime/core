@@ -72,6 +72,10 @@ public class ApiTrip {
 	@XmlAttribute
 	private String shapeId;
 
+	// Using a Boolean so that will be output only if true
+	@XmlAttribute
+	private Boolean noSchedule;
+	
 	@XmlElement
 	private ApiScheduleTimes scheduleTimes;
 
@@ -103,6 +107,7 @@ public class ApiTrip {
 		blockId = ipcTrip.getBlockId();
 		shapeId = ipcTrip.getShapeId();
 
+		noSchedule = ipcTrip.isNoSchedule() ? true : null;
 		scheduleTimes = new ApiScheduleTimes(ipcTrip);
 	}
 }

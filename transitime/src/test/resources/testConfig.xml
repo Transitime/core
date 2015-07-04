@@ -23,6 +23,6 @@
         <dbPassword>welcome</dbPassword>
     </db>     
     <hibernate>
-        <configFile>hibernate_postgres_cfg.xml</configFile>        
+        <configFile>postgres_hibernate.cfg.xml</configFile>        
     </hibernate>
 </transitime>

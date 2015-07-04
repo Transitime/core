@@ -26,18 +26,14 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.LongConfigValue;
-import org.transitime.config.StringConfigValue;
 import org.transitime.core.BlocksInfo;
 import org.transitime.core.dataCache.VehicleDataCache;
-import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Block;
-import org.transitime.db.structs.Location;
-import org.transitime.db.structs.Stop;
+import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleConfig;
 import org.transitime.ipc.data.IpcBlock;
-import org.transitime.ipc.data.IpcCompleteVehicle;
-import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
+import org.transitime.ipc.data.IpcVehicleGtfsRealtime;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcVehicleConfig;
@@ -55,14 +51,6 @@ import org.transitime.ipc.rmi.AbstractServer;
  */
 public class VehiclesServer extends AbstractServer 
 	implements VehiclesInterface {
-
-	private static LongConfigValue dwelltime =
-			new LongConfigValue("transitime.find.dwelltime", 	new Long("30000"),				
-					"This is the max you would expect a bus to be at a stop while moving normally.");
-	
-	private static LongConfigValue fuzzytime =
-			new LongConfigValue("transitime.find.fuzzytime", 	new Long("180000"),				
-					"This is the amount around a time that we look for an arrival or a departure.");
 
 	// Should only be accessed as singleton class
 	private static VehiclesServer singleton;
@@ -125,7 +113,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getComplete()
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getComplete() throws RemoteException {
+	public Collection<IpcVehicleComplete> getComplete() throws RemoteException {
 		return getCompleteSerializableCollection(vehicleDataCache.getVehicles());
 	}
 
@@ -133,7 +121,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getGtfsRealtime()
 	 */
 	@Override
-	public Collection<IpcGtfsRealtimeVehicle> getGtfsRealtime()
+	public Collection<IpcVehicleGtfsRealtime> getGtfsRealtime()
 			throws RemoteException {
 		return getGtfsRealtimeSerializableCollection(vehicleDataCache.getVehicles());
 	}
@@ -151,7 +139,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.lang.String)
 	 */
 	@Override
-	public IpcCompleteVehicle getComplete(String vehicleId) throws RemoteException {
+	public IpcVehicleComplete getComplete(String vehicleId) throws RemoteException {
 		return vehicleDataCache.getVehicle(vehicleId);
 	}
 
@@ -169,7 +157,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#get(java.util.List)
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getComplete(Collection<String> vehicleIds) 
+	public Collection<IpcVehicleComplete> getComplete(Collection<String> vehicleIds) 
 			throws RemoteException {
 		return getCompleteSerializableCollection(
 				vehicleDataCache.getVehicles(vehicleIds));
@@ -189,7 +177,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getForRoute(java.lang.String)
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getCompleteForRoute(String routeIdOrShortName) 
+	public Collection<IpcVehicleComplete> getCompleteForRoute(String routeIdOrShortName) 
 			throws RemoteException {
 		return getCompleteSerializableCollection(
 				vehicleDataCache.getVehiclesForRoute(routeIdOrShortName));
@@ -209,7 +197,7 @@ public class VehiclesServer extends AbstractServer
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getForRoute(java.util.Collection)
 	 */
 	@Override
-	public Collection<IpcCompleteVehicle> getCompleteForRoute(
+	public Collection<IpcVehicleComplete> getCompleteForRoute(
 			Collection<String> routeIdsOrShortNames) throws RemoteException {
 	    return getCompleteSerializableCollection(
 			vehicleDataCache.getVehiclesForRoute(routeIdsOrShortNames));
@@ -222,7 +210,7 @@ public class VehiclesServer extends AbstractServer
 	 * collections this method returns a serializable version.
 	 */
 	private Collection<IpcVehicle> getSerializableCollection(
-			Collection<IpcCompleteVehicle> vehicles) {
+			Collection<IpcVehicleComplete> vehicles) {
 		// If vehicles is null then return empty array
 		if (vehicles == null)
 			return new ArrayList<IpcVehicle>();
@@ -242,13 +230,13 @@ public class VehiclesServer extends AbstractServer
 	 *            Can be null.
 	 * @return Serializable Collection if IpcGtfsRealtimeVehicle objects.
 	 */
-	private Collection<IpcGtfsRealtimeVehicle> getGtfsRealtimeSerializableCollection(
-			Collection<IpcCompleteVehicle> vehicles) {
+	private Collection<IpcVehicleGtfsRealtime> getGtfsRealtimeSerializableCollection(
+			Collection<IpcVehicleComplete> vehicles) {
 		// If vehicles is null then return empty array.
 		if (vehicles == null)
-			return new ArrayList<IpcGtfsRealtimeVehicle>();
+			return new ArrayList<IpcVehicleGtfsRealtime>();
 		
-		return new ArrayList<IpcGtfsRealtimeVehicle>(vehicles);
+		return new ArrayList<IpcVehicleGtfsRealtime>(vehicles);
 	}
 
 	/**
@@ -263,16 +251,16 @@ public class VehiclesServer extends AbstractServer
 	 *            Can be null.
 	 * @return Serializable Collection if IpcCompleteVehicle objects.
 	 */
-	private Collection<IpcCompleteVehicle> getCompleteSerializableCollection(
-			Collection<IpcCompleteVehicle> vehicles) {
+	private Collection<IpcVehicleComplete> getCompleteSerializableCollection(
+			Collection<IpcVehicleComplete> vehicles) {
 		// If vehicles is null then return empty array.
 		if (vehicles == null)
-			return new ArrayList<IpcCompleteVehicle>();
+			return new ArrayList<IpcVehicleComplete>();
 		
 		if (vehicles instanceof Serializable) { 
 			return vehicles;
 		} else {
-			return new ArrayList<IpcCompleteVehicle>(vehicles);
+			return new ArrayList<IpcVehicleComplete>(vehicles);
 		}			
 	}
 
@@ -284,12 +272,13 @@ public class VehiclesServer extends AbstractServer
 			Collection<String> routeIds, int allowableBeforeTimeSecs)
 			throws RemoteException {
 		// List of data to be returned
-		Collection<IpcActiveBlock> results = 
+		List<IpcActiveBlock> results = 
 				new ArrayList<IpcActiveBlock>();
 		
 		// Determine all the active blocks
-		List<Block> blocks = BlocksInfo.getCurrentlyActiveBlocks(routeIds,
-				allowableBeforeTimeSecs);
+		List<Block> blocks =
+				BlocksInfo.getCurrentlyActiveBlocks(routeIds, null,
+						allowableBeforeTimeSecs, -1);
 		
 		// For each active block determine associated vehicle
 		for (Block block : blocks) {
@@ -300,18 +289,24 @@ public class VehiclesServer extends AbstractServer
 			// since can't get that info from the vehicle. This way the block
 			// can be properly grouped with the associated route even when it
 			// doesn't have a vehicle assigned.
-			int activeTripIndex = block.activeTripIndex(new Date());
+			int activeTripIndex = block.activeTripIndex(new Date(), 
+					allowableBeforeTimeSecs);
 			
 			// Determine vehicles associated with the block if there are any
 			Collection<String> vehicleIdsForBlock = VehicleDataCache
 					.getInstance().getVehiclesByBlockId(block.getId());
 			Collection<IpcVehicle> ipcVehiclesForBlock = get(vehicleIdsForBlock);
 			
-			// Create and add the IpcBlockAndVehicle
-			IpcActiveBlock ipcBlockAndVehicle = new IpcActiveBlock(
-					ipcBlock, activeTripIndex, ipcVehiclesForBlock);
+			// Create and add the IpcActiveBlock
+			Trip tripForSorting = block.getTrip(activeTripIndex);
+			IpcActiveBlock ipcBlockAndVehicle =
+					new IpcActiveBlock(ipcBlock, activeTripIndex,
+							ipcVehiclesForBlock, tripForSorting);
 			results.add(ipcBlockAndVehicle);
 		}
+		
+		// Sort the results so that ordered by route and then block start time
+		IpcActiveBlock.sort(results);
 		
 		// Return results
 		return results;
@@ -330,64 +325,6 @@ public class VehiclesServer extends AbstractServer
 		}
 
 		return result;
-	}
-	
-
-	/* (non-Javadoc)
-	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getVechicleLocation(java.lang.String, long)
-	 */
-	@Override
-	public Location getVechicleLocation(String vehicleId, long time)
-			throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getLastStopOnRoute(java.lang.String, long)
-	 */
-	@Override
-	public Stop getLastStopOnRoute(String vehicleId, long time)
-			throws RemoteException {
-		
-		Long timeToFind=new Long(time);
-		
-		Long fuzzySize=new Long(fuzzytime.getValue());
-		
-		Long stopDwellTime=new Long(dwelltime.getValue());								
-		
-		List<ArrivalDeparture> results = ArrivalDeparture.getArrivalsDeparturesFromDb(new Date(timeToFind-fuzzySize), new Date(timeToFind+fuzzySize), vehicleId);
-						
-		ArrivalDeparture closest=null;
-		
-		long closestInMilliseconds=fuzzySize;
-		/*
-		 * TODO speed up this search as when loads of calls will be a bottleneck 
-		 * */
-		for(ArrivalDeparture result:results)
-		{
-			if(result.isDeparture())
-			{
-				if(result.getDate().getTime()<timeToFind+stopDwellTime)
-				{
-					if(closest==null)
-					{
-						closest=result;
-					}
-					else if(result.getDate().getTime()-timeToFind<closestInMilliseconds) {
-						closestInMilliseconds=result.getDate().getTime()-timeToFind;
-						closest=result;
-					}
-				}
-			}				
-		}
-		logger.debug("Looking for departure closet to : "+new Date(timeToFind));
-		logger.debug("Closest departure : "+ closest);
-		if(closest!=null)
-			return closest.getStop();
-		else
-			return null;
-		
 	}
 
 }

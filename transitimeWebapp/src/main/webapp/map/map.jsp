@@ -15,25 +15,25 @@
   <!-- So that get proper sized map on iOS mobile device -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   
-  <link rel="stylesheet" href="/api/css/mapUi.css" />
+  <link rel="stylesheet" href="css/mapUi.css" />
  
   <!-- Load javascript and css files -->
   <%@include file="/template/includes.jsp" %>
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-  <script src="/api/javascript/leafletRotatedMarker.js"></script>
-  <script src="/api/javascript/jquery-dateFormat.min.js"></script>
-  <script src="/api/javascript/mapUiOptions.js"></script>
+  <script src="javascript/leafletRotatedMarker.js"></script>
+  <script src="javascript/mapUiOptions.js"></script>
+  <script src="<%= request.getContextPath() %>/javascript/jquery-dateFormat.min.js"></script>
 
   <%-- MBTA wants some color customization. Load in options file if mbta --%>
-  <% if (request.getParameter("a").equals("mbta")) { %>
-    <link rel="stylesheet" href="/api/css/mbtaMapUi.css" />
-    <script src="/api/javascript/mbtaMapUiOptions.js"></script>
+  <% if (request.getParameter("a").startsWith("mbta")) { %>
+    <link rel="stylesheet" href="css/mbtaMapUi.css" />
+    <script src="javascript/mbtaMapUiOptions.js"></script>
   <% } %>
   
   <!-- Load in Select2 files so can create fancy selectors -->
-  <link href="/api/select2/select2.css" rel="stylesheet"/>
-  <script src="/api/select2/select2.min.js"></script>
+  <link href="<%= request.getContextPath() %>/select2/select2.css" rel="stylesheet"/>
+  <script src="<%= request.getContextPath() %>/select2/select2.min.js"></script>
 
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   
@@ -51,7 +51,7 @@
   <!--  To center successfully in all situations use div within a div trick -->  
   <div id="routesContainer">
     <div id="routesDiv">
-      <input type="hidden" id="routes" style="width:300px" />
+      <input type="hidden" id="routes" style="width:380px" />
     </div>
   </div>
   
@@ -61,17 +61,16 @@
 
 
 
-/**
- * For format epoch times to human readable times, possibly including
- * a timezone offest.
- */
 var agencyTimezoneOffset;
-
+/**
+ * For formating epoch times to human readable times, possibly including
+ * a timezone offest. The time param in epoch time in seconds (not msec).
+ */
 function dateFormat(time) {
 	var localTimezoneOffset = (new Date()).getTimezoneOffset();
 	var timezoneDiffMinutes = localTimezoneOffset - agencyTimezoneOffset;
 	
-	var offsetDate = new Date(parseInt(time) + timezoneDiffMinutes*60*1000);
+	var offsetDate = new Date(parseInt(time*1000) + timezoneDiffMinutes*60*1000);
 	// Use jquery-dateFormat javascript library
 	return $.format.date(offsetDate, 'HH:mm:ss');
 }
@@ -146,12 +145,27 @@ function predictionCallback(preds, status) {
 			content += '<span class="prediction">';
 			
 			for (var j in routeStop.dest[i].pred) {
+				// Separators between the predictions
 				if (j == 1)
 					content += ', ';
 				else if (j ==2)
 					content += ' & '
+					
+				// Add the actual prediction
 				var pred = routeStop.dest[i].pred[j];
 				content += pred.min;
+				
+				// Added any special indicators for if schedule based,
+				// delayed, or not yet departed from terminal
+				if (pred.scheduleBased)
+					content += '<sup>sched</sup>';
+				else {
+					if (pred.notYetDeparted)
+						content += '<sup>terminal</sup>';
+					else
+						if (pred.delayed) 
+							content += '<sup>delayed</sup>';
+				}
 				
 				// If in verbose mode add vehicle info
 				if (verbose)
@@ -339,8 +353,11 @@ function getVehiclePopupContent(vehicleData) {
     var layoverDepartureStr = vehicleData.layover ? 
     		 ("<br/><b>Departure:</b> " + 
     				 dateFormat(vehicleData.layoverDepTime)) : "";
-    var nextStopIdStr = vehicleData.nextStopId ? 
-    		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopId) : "";
+    var nextStopNameStr = vehicleData.nextStopName ? 
+    		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName) : "";
+    if (verbose && vehicleData.nextStopId)
+    	nextStopNameStr += "<br/><b>Next Stop Id:</b> " + vehicleData.nextStopId;
+    
     var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat
     			+ "<br/><b>Lon:</b> " + vehicleData.loc.lon 
     			+ "<br/><b>Heading:</b> " + vehicleData.loc.heading 
@@ -362,7 +379,7 @@ function getVehiclePopupContent(vehicleData) {
 		+ tripPatternStr
 		+ layoverStr
 		+ layoverDepartureStr
-		+ nextStopIdStr;
+		+ nextStopNameStr;
 	
 	return content;
 }

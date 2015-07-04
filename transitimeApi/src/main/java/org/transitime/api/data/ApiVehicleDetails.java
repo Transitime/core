@@ -38,8 +38,9 @@ import org.transitime.utils.Time;
 @XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
 		"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc",
 		"scheduleAdherence", "scheduleAdherenceStr", "blockId",
-		"blockAssignmentMethod", "tripId", "tripPatternId", "isLayover",
-		"layoverDepTime", "layoverDepTimeStr", "nextStopId", "driverId" })
+		"blockAssignmentMethod", "tripId", "tripPatternId", "isDelayed",
+		"isLayover", "layoverDepTime", "layoverDepTimeStr", "nextStopId",
+		"nextStopName", "driverId" })
 public class ApiVehicleDetails extends ApiVehicleAbstract {
 
 	// Note: needs to be Integer instead of an int because it can be null
@@ -62,6 +63,9 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	@XmlAttribute(name = "tripPattern")
 	private String tripPatternId;
 
+	@XmlAttribute(name = "delayed")
+	private String isDelayed;
+	
 	@XmlAttribute(name = "layover")
 	private String isLayover;
 
@@ -73,6 +77,9 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 
 	@XmlAttribute
 	private String nextStopId;
+
+	@XmlAttribute
+	private String nextStopName;
 
 	@XmlElement(name = "driver")
 	private String driverId;
@@ -105,15 +112,20 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		blockAssignmentMethod = vehicle.getBlockAssignmentMethod();
 		tripId = vehicle.getTripId();
 		tripPatternId = vehicle.getTripPatternId();
+		isDelayed = vehicle.isDelayed() ? "true" : null;
 		isLayover = vehicle.isLayover() ? "true" : null;
 		layoverDepTime = vehicle.isLayover() ? 
-				Long.toString(vehicle.getLayoverDepartureTime()) : null;
+				Long.toString(vehicle.getLayoverDepartureTime()/Time.MS_PER_SEC) : null;
 				
 		layoverDepTimeStr = vehicle.isLayover() ?
 				timeForAgency.timeStrForTimezone(vehicle.getLayoverDepartureTime()) : null;
 				
-		nextStopId = vehicle.getNextStopId() != null ? vehicle.getNextStopId()
-				: null;
+		nextStopId =
+				vehicle.getNextStopId() != null ? vehicle.getNextStopId()
+						: null;
+		nextStopName =
+				vehicle.getNextStopName() != null ? vehicle.getNextStopName()
+						: null;
 		driverId = vehicle.getAvl().getDriverId();		
 	}
 

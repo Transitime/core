@@ -40,11 +40,13 @@ import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.ipc.servers.CommandsServer;
 import org.transitime.ipc.servers.ConfigServer;
 import org.transitime.ipc.servers.PredictionsServer;
 import org.transitime.ipc.servers.ServerStatusServer;
 import org.transitime.ipc.servers.VehiclesServer;
 import org.transitime.modules.Module;
+import org.transitime.monitoring.PidFile;
 import org.transitime.utils.SettableSystemTime;
 import org.transitime.utils.SystemTime;
 import org.transitime.utils.SystemCurrentTime;
@@ -75,15 +77,13 @@ public class Core {
 	// So that can access the current time, even when in playback mode
 	private SystemTime systemTime = new SystemCurrentTime();
 	
-	// Set by command line option. Specifies which config file to read in. 
-	private static String configFile = null;
-		
 	// Set by command line option. Specifies config rev to use if set
 	private static String configRevStr = null;
 
 	// Read in configuration files. This should be done statically before
 	// the logback LoggerFactory.getLogger() is called so that logback can
-	// also be configured using a transitime config file.
+	// also be configured using a transitime config file. The files are
+	// specified using the java system property -Dtransitime.configFiles .
 	static {
 		ConfigFileReader.processConfig();
 	}
@@ -240,7 +240,8 @@ public class Core {
 	 * mode then will be using a SettableSystemTime.
 	 * 
 	 * @return The system epoch time
-	 */	public Date getSystemDate() {
+	 */	
+	public Date getSystemDate() {
 		return new Date(getSystemTime());
 	}
 	
@@ -299,18 +300,7 @@ public class Core {
 		// Specify the options
 		Options options = new Options();
 		options.addOption("h", "help", false, "Display usage and help info."); 
-		
-		options.addOption(OptionBuilder.withArgName("configFile")
-                .hasArg()
-                .withDescription("Specifies optional configuration file to "
-			+ "read in. This option is deprecated and instead the "
-			+ "Java system property transitime.configFiles should"
-			+ "be used so that even logback can be configured using "
-			+ "a config file.")
-                .withLongOpt("config")
-                .create("c")
-                );
-		
+				
 		options.addOption(OptionBuilder.withArgName("configRev")
                 .hasArg()
                 .withDescription("Specifies optional configuration revision. "
@@ -323,11 +313,6 @@ public class Core {
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = parser.parse( options, args);
 		
-		// Handle config file option
-		if (cmd.hasOption("c")) {
-			configFile = cmd.getOptionValue("c");
-		}
-				
 		// Handle optional config rev
 		if (cmd.hasOption("configRev")) {
 			configRevStr = cmd.getOptionValue("configRev");
@@ -353,7 +338,7 @@ public class Core {
 		}
 	}
 	
-	/*
+	/**
 	 * Start the RMI Servers so that clients can obtain data
 	 * on predictions, vehicles locations, etc.
 	 *  
@@ -365,6 +350,7 @@ public class Core {
 		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());
 		ConfigServer.start(agencyId);
 		ServerStatusServer.start(agencyId);
+		CommandsServer.start(agencyId);
 	}
 	
 	/**
@@ -381,18 +367,13 @@ public class Core {
 				System.exit(-1);
 			}
 			
+			// Write pid file so that monit can automatically start
+			// or restart this application
+			PidFile.createPidFile(CoreConfig.getPidFileDirectory()
+					+ AgencyConfig.getAgencyId() + ".pid");
+			
 			// For making sure logger configured properly
 			outputLoggerStatus();
-			
-			// Read in config params
-			try {
-				// Read in the data from config file
-				ConfigFileReader.processConfig(configFile);
-			} catch (Exception e) {
-				logger.error("Error reading in config file \"" + configFile + 
-						"\". Exiting program.", e);
-				System.exit(-1);
-			}
 			
 			// Initialize the core now
 			createCore();

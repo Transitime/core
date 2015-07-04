@@ -18,7 +18,9 @@
 package org.transitime.core;
 
 /**
- *
+ * An interface used for generating arrival/departure times. An interface is
+ * used so that can easily swap in other software for generating
+ * arrivals/departures.
  *
  * @author SkiBu Smith
  *

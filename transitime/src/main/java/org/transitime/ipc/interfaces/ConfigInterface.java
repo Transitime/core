@@ -32,7 +32,7 @@ import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 
 /**
- *
+ * Defines the RMI interface for getting configuration data.
  *
  * @author SkiBu Smith
  *
@@ -93,6 +93,16 @@ public interface ConfigInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public IpcBlock getBlock(String blockId, String serviceId) 
+			throws RemoteException;
+	
+	/**
+	 * Returns blocks for each service class for the blockId specified.
+	 * 
+	 * @param blockId
+	 * @return
+	 * @throws RemoteException
+	 */
+	public Collection<IpcBlock> getBlocks(String blockId)
 			throws RemoteException;
 	
 	/**

@@ -21,11 +21,9 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Collection;
 
-import org.transitime.db.structs.Location;
-import org.transitime.db.structs.Stop;
 import org.transitime.ipc.data.IpcActiveBlock;
-import org.transitime.ipc.data.IpcCompleteVehicle;
-import org.transitime.ipc.data.IpcGtfsRealtimeVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
+import org.transitime.ipc.data.IpcVehicleGtfsRealtime;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.data.IpcVehicleConfig;
 
@@ -61,7 +59,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getComplete() throws RemoteException;
+	public Collection<IpcVehicleComplete> getComplete() throws RemoteException;
 
 	/**
 	 * Gets from server IpcCompleteVehicle info for all vehicles.
@@ -69,7 +67,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcGtfsRealtimeVehicle> getGtfsRealtime()
+	public Collection<IpcVehicleGtfsRealtime> getGtfsRealtime()
 			throws RemoteException;
 
 	/**
@@ -90,7 +88,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return info for specified vehicle
 	 * @throws RemoteException
 	 */
-	public IpcCompleteVehicle getComplete(String vehicleId)
+	public IpcVehicleComplete getComplete(String vehicleId)
 			throws RemoteException;
 
 	/**
@@ -114,7 +112,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getComplete(
+	public Collection<IpcVehicleComplete> getComplete(
 			Collection<String> vehicleIds) throws RemoteException;
 
 	/**
@@ -138,7 +136,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getCompleteForRoute(
+	public Collection<IpcVehicleComplete> getCompleteForRoute(
 			String routeIdOrShortName) throws RemoteException;
 
 	/**
@@ -162,7 +160,7 @@ public interface VehiclesInterface extends Remote {
 	 * @return Collection of Vehicle objects
 	 * @throws RemoteException
 	 */
-	public Collection<IpcCompleteVehicle> getCompleteForRoute(
+	public Collection<IpcVehicleComplete> getCompleteForRoute(
 			Collection<String> routeIdsOrShortNames) throws RemoteException;
 
 	/**
@@ -180,26 +178,4 @@ public interface VehiclesInterface extends Remote {
 	public Collection<IpcActiveBlock> getActiveBlocks(
 			Collection<String> routeIds, int allowableBeforeTimeSecs) 
 					throws RemoteException;
-	
-	/**
-	 * Get the estimated location of a vehicle at a point in time in the past.
-	 * @param vehicleId
-	 * 			The vechicleId of the vehicles whos location at a point in time we are looking for.
-	 * @param time T
-	 * 			The time as which we are looking for the vechicle estimate
-	 * @return The estimate location of the vechicle
-	 * @throws RemoteException
-	 */
-	public Location getVechicleLocation(String vehicleId, long time) throws RemoteException;
-	
-	/**
-	 * Get the last stop the bus was closest to at a point in time. 
-	 * @param vechileId 
-	 * 			The vechicle who we are looking at.
-	 * @param time 
-	 * 			The time we want to find the nearest stop for.
-	 * @return The closest departure stop that has been arrived at or passed on the vehicles current trip at the point in time.
-	 * @throws RemoteException
-	 */
-	public Stop getLastStopOnRoute(String vehicleId, long time) throws RemoteException;
 }

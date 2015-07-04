@@ -37,9 +37,13 @@ finding specific issues with predictions.">
   <li><a href="predAccuracyCsvParams.jsp?a=<%= agencyId %>"
     title="For downloading prediction accuracy data in CSV format.">
       Prediction Accuracy CSV Download</a></li>
-  <li><a href="scheduleParams.jsp?a=<%= agencyId %>"
+  <li><a href="scheduleHorizStopsParams.jsp?a=<%= agencyId %>"
     title="Displays in a table the schedule for a specified route.">
       Schedule for Route</a></li>
+  <li><a href="scheduleVertStopsParams.jsp?a=<%= agencyId %>"
+    title="Displays in a table the schedule for a specified route. Stops listed 
+    vertically which is useful for when there are not that many trips per day.">
+      Schedule for Route (vertical stops)</a></li>
 </ul>
 </div>
 </body>

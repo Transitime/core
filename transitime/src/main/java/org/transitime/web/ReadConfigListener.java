@@ -61,6 +61,11 @@ public class ReadConfigListener implements ServletContextListener {
 					arg0.getServletContext().getInitParameter(
 							FILE_LOCATION_PARAM_NAME);
 
+			System.out.println("Reading from web.xml file the context-param name " 
+					+ FILE_LOCATION_PARAM_NAME + " from the web.xml file to "
+					+ "determine the name of the Java properties configuration "
+					+ "file.");
+			
 			// If not params file configured in web.xml complain
 			if (configFileLocation == null) {
 				System.err.println("Should set the context-param "

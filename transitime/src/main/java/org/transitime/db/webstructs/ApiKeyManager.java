@@ -17,30 +17,17 @@
 
 package org.transitime.db.webstructs;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.Config;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.gtfs.DbConfig;
+import org.transitime.db.webstructs.ApiKey;
 import org.transitime.utils.Time;
 
 /**
@@ -231,77 +218,21 @@ public class ApiKeyManager {
 	}
 
 	/**
-	 * Throws exception if the specified application key is not valid.
-	 * 
-	 * @param stdParameters
-	 * @throws Exception
-	 */
-	public void validateKey(String key)
-			throws Exception {		
-		
-		if (!isKeyValid(key)) 
-		{
-			throw new Exception("Application key \""+ key + "\" is not valid.");
-		}
-	}
-
-	/**
 	 * For testing and debugging. Currently creates a new key for an
 	 * application.
 	 * 
 	 * @param args
 	 */
-	public static void main(String[] args) {		
-		
-		Options options = new Options();
-    	Option helpOption = new Option("h", "help", false, "Display usage and help info.");
-    	
-    	Option configOption=new Option("c", "config", true, "Specifies optional configuration file to read in.");
-    	Option nameOption=new Option("n", "name", true, "Application Name");
-		Option urlOption=new Option("u", "url", true, "Application URL");		
-		Option emailOption=new Option("e", "email", true, "Email address");
-		Option phoneOption=new Option("p", "phone", true, "Phone number");
-		Option descriptionOption=new Option("d", "description", true, "Description");
-		options.addOption(configOption);		
-		options.addOption(nameOption);
-		options.addOption(emailOption);
-		options.addOption(urlOption);
-		options.addOption(phoneOption);
-		options.addOption(descriptionOption);
-		options.addOption(helpOption);
-
-		// Parse the options
-		CommandLineParser parser = new BasicParser();
-					
-		try {
-			CommandLine cmd = parser.parse( options, args);
-			
-			if(cmd.hasOption("c")&&cmd.hasOption("n")&&cmd.hasOption("u")&&cmd.hasOption("e")&&cmd.hasOption("p")&&cmd.hasOption("d"))
-			{
-				String configFile=null;
-				
-				configFile = cmd.getOptionValue("c");
-				// Read in the data from config file
-				Config.processConfig(configFile);
-								
-
-				ApiKeyManager manager = ApiKeyManager.getInstance();
-				ApiKey apiKey = manager.generateApiKey(cmd.getOptionValue("n"),
-						cmd.getOptionValue("u"), cmd.getOptionValue("e"),
-						cmd.getOptionValue("p"), cmd.getOptionValue("d"));
-
-				System.out.println(apiKey);						
-			}else
-			{
-				throw new Exception("All parameteres required");				
-			}
-					
-		} catch (Exception e) {
-			
-			e.printStackTrace(System.out);		
-			printHelp(options);			
+	public static void main(String[] args) {
+		if (args.length != 5) {
+			System.err.println("Must supply arguments for applicationName, "
+					+ "applicationUrl, email, phone, and description");
+			System.exit(-1);
 		}
-		
+		ApiKeyManager manager = ApiKeyManager.getInstance();
+		ApiKey apiKey = manager.generateApiKey(args[0], args[1], args[2],
+				args[3], args[4]);
+		System.out.println(apiKey);
 
 		// try {
 		// ApiKey apiKey = generateApiKey("applicationName",
@@ -320,22 +251,5 @@ public class ApiKeyManager {
 		// boolean valid = manager.isKeyValid("1852453479"/* "sldkfj" */);
 		// int xx = 9;
 
-	}
-	static void printHelp(Options options)
-	{
-		final String commandLineSyntax = "java -jar transiTimeApi.jar";
-		final PrintWriter writer = new PrintWriter(System.out);
-		final HelpFormatter helpFormatter = new HelpFormatter();
-		helpFormatter.printHelp(writer,
-								80, // printedRowWidth
-								commandLineSyntax,
-								"args:", // header
-								options,
-								2,             // spacesBeforeOption
-								2,             // spacesBeforeOptionDescription
-								null,          // footer
-								true);         // displayUsage
-		writer.close();
-		
 	}
 }

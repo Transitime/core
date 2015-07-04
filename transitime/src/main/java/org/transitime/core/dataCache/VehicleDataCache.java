@@ -35,7 +35,7 @@ import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.VehicleConfig;
-import org.transitime.ipc.data.IpcCompleteVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.utils.ConcurrentHashMapNullKeyOk;
 import org.transitime.utils.Time;
 
@@ -56,14 +56,14 @@ public class VehicleDataCache {
     private static VehicleDataCache singleton = new VehicleDataCache();
 
     // Keyed by vehicle ID
-    private Map<String, IpcCompleteVehicle> vehiclesMap = 
-    		new ConcurrentHashMap<String, IpcCompleteVehicle>();
+    private Map<String, IpcVehicleComplete> vehiclesMap = 
+    		new ConcurrentHashMap<String, IpcVehicleComplete>();
 
     // Keyed by route_short_name. Key is null for vehicles that have not
     // been successfully associated with a route. For each route there is a 
     // submap that is keyed by vehicle.
-    private Map<String, Map<String, IpcCompleteVehicle>> vehiclesByRouteMap = 
-    		new ConcurrentHashMapNullKeyOk<String, Map<String, IpcCompleteVehicle>>();
+    private Map<String, Map<String, IpcVehicleComplete>> vehiclesByRouteMap = 
+    		new ConcurrentHashMapNullKeyOk<String, Map<String, IpcVehicleComplete>>();
 
     // So can determine vehicles associated with a block ID. Keyed on
     // block ID. Each block can have a list of vehicle IDs. Though rare
@@ -177,13 +177,13 @@ public class VehicleDataCache {
 	 * @param vehicles
 	 * @return
 	 */
-    private Collection<IpcCompleteVehicle> filterOldAvlReports(
-    		Collection<IpcCompleteVehicle> vehicles) {
-    	Collection<IpcCompleteVehicle> filteredVehicles = 
-				new ArrayList<IpcCompleteVehicle>(vehicles.size());
+    private Collection<IpcVehicleComplete> filterOldAvlReports(
+    		Collection<IpcVehicleComplete> vehicles) {
+    	Collection<IpcVehicleComplete> filteredVehicles = 
+				new ArrayList<IpcVehicleComplete>(vehicles.size());
     	
     	long timeCutoff = Core.getInstance().getSystemTime() - MAX_AGE_MSEC;
-    	for (IpcCompleteVehicle vehicle : vehicles) {
+    	for (IpcVehicleComplete vehicle : vehicles) {
     		if (vehicle.isLayover() 
     				|| vehicle.getAvl().getTime() > timeCutoff) {
     			filteredVehicles.add(vehicle);
@@ -207,12 +207,12 @@ public class VehicleDataCache {
 	 *            collection of vehicles to investigate
 	 * @return filtered collection of vehicles
 	 */
-	private Collection<IpcCompleteVehicle> filterSchedBasedVehicleIfPastStart(
-			Collection<IpcCompleteVehicle> vehicles) {
-    	Collection<IpcCompleteVehicle> filteredVehicles = 
-				new ArrayList<IpcCompleteVehicle>(vehicles.size());
+	private Collection<IpcVehicleComplete> filterSchedBasedVehicleIfPastStart(
+			Collection<IpcVehicleComplete> vehicles) {
+    	Collection<IpcVehicleComplete> filteredVehicles = 
+				new ArrayList<IpcVehicleComplete>(vehicles.size());
 
-    	for (IpcCompleteVehicle vehicle : vehicles) {
+    	for (IpcVehicleComplete vehicle : vehicles) {
 			// If past the start time of the trip/block by more than a minute
 			// then should remove the vehicle from the maps
 			if (vehicle.isForSchedBasedPred()
@@ -222,7 +222,7 @@ public class VehicleDataCache {
 				vehiclesMap.remove(vehicle.getId());
 
 				// Remove vehicle from vehiclesByRouteMap
-				Map<String, IpcCompleteVehicle> vehicleMapForRoute = 
+				Map<String, IpcVehicleComplete> vehicleMapForRoute = 
 						vehiclesByRouteMap.get(vehicle.getRouteShortName());
 				if (vehicleMapForRoute != null)
 					vehicleMapForRoute.remove(vehicle.getId());
@@ -255,7 +255,7 @@ public class VehicleDataCache {
 	 * @return Collection of IpcExtVehicle for vehicles on route, or null if no
 	 *         vehicles for the route.
 	 */
-	public Collection<IpcCompleteVehicle> getVehiclesForRoute(
+	public Collection<IpcVehicleComplete> getVehiclesForRoute(
 			String routeIdOrShortName) {
 		// Try getting vehicles using routeShortName
 		String routeShortName = routeIdOrShortName;
@@ -263,7 +263,7 @@ public class VehicleDataCache {
 		// as the route short name instead of an empty string.
 		if (routeShortName != null && routeShortName.isEmpty())
 			routeShortName = null;
-		Map<String, IpcCompleteVehicle> vehicleMapForRoute = vehiclesByRouteMap
+		Map<String, IpcVehicleComplete> vehicleMapForRoute = vehiclesByRouteMap
 				.get(routeShortName);
 		
 		// If couldn't get vehicles by route short name try using
@@ -295,7 +295,7 @@ public class VehicleDataCache {
 	 * @return Collection of vehicles for the route. Empty collection if there
 	 *         are none.
 	 */
-	public Collection<IpcCompleteVehicle> getVehiclesForRoute(
+	public Collection<IpcVehicleComplete> getVehiclesForRoute(
 			Collection<String> routeIdsOrShortNames) {
 		// If there is just a single route specified then use a shortcut
 		if (routeIdsOrShortNames.size() == 1) {
@@ -303,9 +303,9 @@ public class VehicleDataCache {
 			return getVehiclesForRoute(routeIdOrShortName);
 		}
 		
-		Collection<IpcCompleteVehicle> vehicles = new ArrayList<IpcCompleteVehicle>();
+		Collection<IpcVehicleComplete> vehicles = new ArrayList<IpcVehicleComplete>();
 		for (String routeIdOrShortName : routeIdsOrShortNames) {
-			Collection<IpcCompleteVehicle> vehiclesForRoute = 
+			Collection<IpcVehicleComplete> vehiclesForRoute = 
 					getVehiclesForRoute(routeIdOrShortName);
 			if (vehiclesForRoute != null)
 				vehicles.addAll(vehiclesForRoute);
@@ -322,10 +322,10 @@ public class VehicleDataCache {
 	 *            Specifies which vehicles should return.
 	 * @return
 	 */
-	public Collection<IpcCompleteVehicle> getVehicles(Collection<String> vehicleIds) {
-		Collection<IpcCompleteVehicle> vehicles = new ArrayList<IpcCompleteVehicle>();
+	public Collection<IpcVehicleComplete> getVehicles(Collection<String> vehicleIds) {
+		Collection<IpcVehicleComplete> vehicles = new ArrayList<IpcVehicleComplete>();
 		for (String vehicleId : vehicleIds) {
-			IpcCompleteVehicle vehicle = vehiclesMap.get(vehicleId);
+			IpcVehicleComplete vehicle = vehiclesMap.get(vehicleId);
 			if (vehicle != null)
 				vehicles.add(vehicle);
 		}
@@ -342,7 +342,7 @@ public class VehicleDataCache {
 	 * @param vehicleId
 	 * @return
 	 */
-	public IpcCompleteVehicle getVehicle(String vehicleId) {
+	public IpcVehicleComplete getVehicle(String vehicleId) {
 		return vehiclesMap.get(vehicleId);
 	}
 
@@ -355,8 +355,17 @@ public class VehicleDataCache {
 	 * 
 	 * @return
 	 */
-	public Collection<IpcCompleteVehicle> getVehicles() {
+	public Collection<IpcVehicleComplete> getVehicles() {
 		return filterSchedBasedVehicleIfPastStart(vehiclesMap.values());
+	}
+	
+	/**
+	 * Returns all vehicles, even schedule based ones
+	 * 
+	 * @return all vehicles, even schedule based ones
+	 */
+	public Collection<IpcVehicleComplete> getVehiclesUncludingSchedBasedOnes() {
+		return vehiclesMap.values();
 	}
 
 	/**
@@ -395,8 +404,8 @@ public class VehicleDataCache {
 	 * @param vehicle
 	 *            For getting the current block ID for the vehicle.
 	 */
-	private void updateVehicleIdsByBlockMap(IpcCompleteVehicle originalVehicle,
-			IpcCompleteVehicle vehicle) {
+	private void updateVehicleIdsByBlockMap(IpcVehicleComplete originalVehicle,
+			IpcVehicleComplete vehicle) {
 		// Handle old assignment		
 		if (originalVehicle != null) {
 			// If block assignment is same as before don't need to update the 
@@ -429,7 +438,7 @@ public class VehicleDataCache {
 	 * @param originalVehicle
 	 * @param vehicle
 	 */
-	private void updateVehiclesByRouteMap(IpcCompleteVehicle originalVehicle, IpcCompleteVehicle vehicle) {
+	private void updateVehiclesByRouteMap(IpcVehicleComplete originalVehicle, IpcVehicleComplete vehicle) {
 		// If the route has changed then remove the vehicle from the old map for
 		// that route. Watch out for getRouteShortName() sometimes being null
 		if (originalVehicle != null
@@ -438,16 +447,16 @@ public class VehicleDataCache {
 				&& (originalVehicle.getRouteShortName() == null 
 					|| !originalVehicle.getRouteShortName().equals(
 						vehicle.getRouteShortName()))) {
-			Map<String, IpcCompleteVehicle> vehicleMapForRoute = vehiclesByRouteMap
+			Map<String, IpcVehicleComplete> vehicleMapForRoute = vehiclesByRouteMap
 					.get(originalVehicle.getRouteShortName());
 			vehicleMapForRoute.remove(vehicle.getId());
 		}
 
 		// Add IpcExtVehicle to the vehiclesByRouteMap
-		Map<String, IpcCompleteVehicle> vehicleMapForRoute = 
+		Map<String, IpcVehicleComplete> vehicleMapForRoute = 
 				vehiclesByRouteMap.get(vehicle.getRouteShortName());
 		if (vehicleMapForRoute == null) {
-			vehicleMapForRoute = new HashMap<String, IpcCompleteVehicle>();
+			vehicleMapForRoute = new HashMap<String, IpcVehicleComplete>();
 			String routeMapKey = vehicle.getRouteShortName();
 			vehiclesByRouteMap.put(routeMapKey, vehicleMapForRoute);
 		}
@@ -463,7 +472,7 @@ public class VehicleDataCache {
 	 * 
 	 * @param vehicle
 	 */
-	private void updateVehiclesMap(IpcCompleteVehicle vehicle) {
+	private void updateVehiclesMap(IpcVehicleComplete vehicle) {
 		if (!vehicle.isForSchedBasedPred() || vehicle.isPredictable()) {
 			// Normal situation. Add vehicle to vehiclesMap
 			vehiclesMap.put(vehicle.getId(), vehicle);			
@@ -484,8 +493,8 @@ public class VehicleDataCache {
 	 *            The current VehicleState
 	 */
 	public void updateVehicle(VehicleState vehicleState) {
-		IpcCompleteVehicle vehicle = new IpcCompleteVehicle(vehicleState);
-		IpcCompleteVehicle originalVehicle = vehiclesMap.get(vehicle.getId());
+		IpcVehicleComplete vehicle = new IpcVehicleComplete(vehicleState);
+		IpcVehicleComplete originalVehicle = vehiclesMap.get(vehicle.getId());
 		
 		logger.debug("Adding to VehicleDataCache vehicle={}", vehicle);
 

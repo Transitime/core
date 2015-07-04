@@ -112,16 +112,35 @@ public class ServiceUtils {
 		// of situation use the most recent Calendars if none are
 		// configured to be active.
 		if (activeCalendarList.size() == 0) {
+			// Use most recent calendar to keep system running
+			long earliestStartTime = Long.MAX_VALUE;
 			for (Calendar calendar : originalCalendarList) {
 				if (calendar.getEndDate().getTime() == maxEndTime) {
 					activeCalendarList.add(calendar);
+					
+					// Determine earliest start time for calendars so can 
+					// determine if should output error message.
+					if (calendar.getStartDate().getTime() < earliestStartTime)
+						earliestStartTime = calendar.getStartDate().getTime();
 				}
 			}
 			
-			// This is a rather serious issue so log it as an error
-			logger.error("All Calendars were expired. Update them!!! So that " +
-					"the system will continue to run the old Calendars will " +
-					"be used: {}", activeCalendarList);
+			// This is a rather serious issue so log it as an error if the start
+			// time is OK, which indicates that the end time was not. The reason
+			// a start time violation is not worth noting is because sometimes
+			// the system looks at service class for previous day so can handle
+			// assignments that span midnight. If the calendar just started
+			// today and looking at yesterday then that is not a notable 
+			// problem.
+			boolean startTimeAProblem = earliestStartTime > epochTime.getTime();
+			if (!startTimeAProblem) {
+				logger.error("All Calendars were expired. Update them!!!");
+				
+				// Output calendar list but only for debugging since it is 
+				// so verbose
+				logger.debug("So that the system will continue to run the " +
+					"old Calendars will be used: {}", activeCalendarList);
+			}
 		}
 		
 		// Return the results
@@ -191,6 +210,23 @@ public class ServiceUtils {
 		
 		// Return the results
 		return serviceIds;
+	}
+	
+	/**
+	 * Determines list of current service IDs for the specified time.
+	 * These service IDs designate which block assignments are currently
+	 * active.
+	 * <p>
+	 * Uses already read in calendars, but does a good number of calculations so
+	 * still a bit expensive.
+	 * 
+	 * @param epochTime The current time that determining service IDs for
+	 * @param calendars List of calendar.txt GTFS data
+	 * @param calendarDates List of calendar_dates.txt GTFS data
+	 * @return List of service IDs that are active for the specified time.
+	 */
+	public List<String> getServiceIds(long epochTime) {
+		return getServiceIds(new Date(epochTime));
 	}
 	
 }

@@ -69,7 +69,8 @@ public class AgencyMonitorClient {
 	 */
 	public static String pingAllAgencies() {
 		String errorMessageForAllAgencies = "";
-		Collection<WebAgency> webAgencies = WebAgency.getWebAgencies();
+		Collection<WebAgency> webAgencies = 
+				WebAgency.getCachedOrderedListOfWebAgencies();
 		for (WebAgency webAgency : webAgencies) {
 			if (webAgency.isActive()) {
 				// Actually do the low-level monitoring on the core system
@@ -112,7 +113,8 @@ public class AgencyMonitorClient {
 			resultStr = serverStatusInterface.monitor();
 		    return resultStr;
 		} catch (RemoteException e) {
-			WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
+			WebAgency webAgency =
+					WebAgency.getCachedWebAgency(agencyId);
 			logger.error("Exception when trying to monitor agency {}. {}", 
 					webAgency, e.getMessage());
 			return "Could not connect via RMI for " + webAgency;
@@ -133,7 +135,8 @@ public class AgencyMonitorClient {
 	 */
 	public static String monitorAllAgencies() {
 		String errorMessageForAllAgencies = "";
-		Collection<WebAgency> webAgencies = WebAgency.getWebAgencies();
+		Collection<WebAgency> webAgencies =
+				WebAgency.getCachedOrderedListOfWebAgencies();
 		for (WebAgency webAgency : webAgencies) {
 			if (webAgency.isActive()) {
 				// Actually do the low-level monitoring on the core system

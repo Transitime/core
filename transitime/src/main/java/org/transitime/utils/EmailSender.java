@@ -54,7 +54,7 @@ public class EmailSender {
 	
 	private static StringConfigValue emailConfigFile =
 			new StringConfigValue("transitime.utils.emailConfigFile", 
-					"/home/ec2-user/config/emailConfig.txt",
+					"/home/ec2-user/transitimeScripts/emailConfig.txt",
 					"Specifies name of configuration file used for sending "
 					+ "out e-mails.");
 

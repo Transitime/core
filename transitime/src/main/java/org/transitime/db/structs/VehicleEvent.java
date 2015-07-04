@@ -25,6 +25,7 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,7 +36,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -55,14 +55,12 @@ import org.transitime.utils.Time;
  */
 @Immutable // From jcip.annoations
 @Entity @DynamicUpdate 
-@Table(name="VehicleEvents")
-@org.hibernate.annotations.Table(appliesTo = "VehicleEvents", 
-indexes = { @Index(name="VehicleEventsTimeIndex", 
-                   columnNames={"time"} ) } )
+@Table(name="VehicleEvents",
+       indexes = { @Index(name="VehicleEventsTimeIndex", 
+                   columnList="time" ) } )
 public class VehicleEvent implements Serializable {
 
-	// Time of the event. Should correspond to last AVL report time so that
-	// can join with AVL report to get more info if necessary.
+	// System time of the event. 
 	@Id
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
@@ -80,6 +78,12 @@ public class VehicleEvent implements Serializable {
 	@Id
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String eventType;
+	
+	// AVL time of the event. Should correspond to last AVL report time so that
+	// can join with AVL report to get more info if necessary.
+	@Column
+	@Temporal(TemporalType.TIMESTAMP)
+	private final Date avlTime;
 	
 	// A more verbose textual description of the event
 	@Column(length=500)
@@ -133,6 +137,10 @@ public class VehicleEvent implements Serializable {
 
 	// Nice for providing context. 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private final String serviceId;
+
+	// Nice for providing context. 
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String tripId;
 
 	// Nice for providing context. 
@@ -145,6 +153,7 @@ public class VehicleEvent implements Serializable {
 	public static final String TIMEOUT = "Timeout";
 	public static final String NO_MATCH = "No match";
 	public static final String NO_PROGRESS = "No progress";
+	public static final String DELAYED = "Delayed";
 	public static final String END_OF_BLOCK = "End of block";
 	public static final String LEFT_TERMINAL_EARLY = "Left terminal early";
 	public static final String LEFT_TERMINAL_LATE = "Left terminal late";
@@ -166,6 +175,7 @@ public class VehicleEvent implements Serializable {
 	 * creation of a VehicleEvent.
 	 * 
 	 * @param time
+	 * @param avlTime
 	 * @param vehicleId
 	 * @param eventType
 	 * @param description
@@ -176,16 +186,18 @@ public class VehicleEvent implements Serializable {
 	 * @param routeId
 	 * @param routeShortName
 	 * @param blockId
+	 * @param serviceId
 	 * @param tripId
 	 * @param stopId
 	 */
-	private VehicleEvent(Date time, String vehicleId, String eventType,
-			String description, boolean predictable,
+	private VehicleEvent(Date time, Date avlTime, String vehicleId,
+			String eventType, String description, boolean predictable,
 			boolean becameUnpredictable, String supervisor, Location location,
 			String routeId, String routeShortName, String blockId,
-			String tripId, String stopId) {
+			String serviceId, String tripId, String stopId) {
 		super();
 		this.time = time;
+		this.avlTime = avlTime;
 		this.vehicleId = vehicleId;
 		this.eventType = eventType;
 		this.description = description;
@@ -196,6 +208,7 @@ public class VehicleEvent implements Serializable {
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
 		this.blockId = blockId;
+		this.serviceId = serviceId;
 		this.tripId = tripId;
 		this.stopId = stopId;
 	}
@@ -205,6 +218,7 @@ public class VehicleEvent implements Serializable {
 	 * database.
 	 * 
 	 * @param time
+	 * @param avlTime
 	 * @param vehicleId
 	 * @param eventType
 	 * @param description
@@ -215,19 +229,22 @@ public class VehicleEvent implements Serializable {
 	 * @param routeId
 	 * @param routeShortName
 	 * @param blockId
+	 * @param serviceId
 	 * @param tripId
 	 * @param stopId
 	 * @return The VehicleEvent constructed
 	 */
-	public static VehicleEvent create(Date time, String vehicleId,
-			String eventType, String description, boolean predictable,
-			boolean becameUnpredictable, String supervisor, Location location,
-			String routeId, String routeShortName, String blockId,
+	public static VehicleEvent create(Date time, Date avlTime,
+			String vehicleId, String eventType, String description,
+			boolean predictable, boolean becameUnpredictable,
+			String supervisor, Location location, String routeId,
+			String routeShortName, String blockId, String serviceId,
 			String tripId, String stopId) {
-		VehicleEvent vehicleEvent = new VehicleEvent(time, vehicleId,
-				eventType, description, predictable, becameUnpredictable,
-				supervisor, location, routeId, routeShortName, blockId, tripId,
-				stopId);
+		VehicleEvent vehicleEvent =
+				new VehicleEvent(time, avlTime, vehicleId, eventType,
+						description, predictable, becameUnpredictable,
+						supervisor, location, routeId, routeShortName, blockId,
+						serviceId, tripId, stopId);
 
 		// Log VehicleEvent in log file
 		logger.info(vehicleEvent.toString());
@@ -261,15 +278,15 @@ public class VehicleEvent implements Serializable {
 		String routeShortName = 
 				match==null ? null : match.getTrip().getRouteShortName();
 		String blockId = match==null ? null : match.getBlock().getId();
+		String serviceId = match==null ? null : match.getBlock().getServiceId();
 		String tripId = match==null ? null : match.getTrip().getId();
 		String stopId = match==null ? null : match.getStopPath().getStopId();
 		
 		// Create and return the VehicleEvent
-		return create(avlReport.getDate(), avlReport.getVehicleId(),
-				eventType, description, predictable,
+		return create(Core.getInstance().getSystemDate(), avlReport.getDate(),
+				avlReport.getVehicleId(), eventType, description, predictable,
 				becameUnpredictable, supervisor, avlReport.getLocation(),
-				routeId, routeShortName, blockId,
-				tripId, stopId);
+				routeId, routeShortName, blockId, serviceId, tripId, stopId);
 	}
 	
 	/**
@@ -286,6 +303,7 @@ public class VehicleEvent implements Serializable {
 	 */
 	protected VehicleEvent() {
 		this.time = null;
+		this.avlTime = null;
 		this.vehicleId = null;
 		this.eventType = null;
 		this.description = null;
@@ -296,6 +314,7 @@ public class VehicleEvent implements Serializable {
 		this.routeId = null;
 		this.routeShortName = null;
 		this.blockId = null;
+		this.serviceId = null;
 		this.tripId = null;
 		this.stopId = null;
 	}
@@ -307,25 +326,36 @@ public class VehicleEvent implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((avlTime == null) ? 0 : avlTime.hashCode());
 		result = prime * result + (becameUnpredictable ? 1231 : 1237);
 		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
-		result = prime * result
-				+ ((description == null) ? 0 : description.hashCode());
-		result = prime * result
-				+ ((eventType == null) ? 0 : eventType.hashCode());
-		result = prime * result
-				+ ((location == null) ? 0 : location.hashCode());
+		result =
+				prime * result
+						+ ((description == null) ? 0 : description.hashCode());
+		result =
+				prime * result
+						+ ((eventType == null) ? 0 : eventType.hashCode());
+		result =
+				prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + (predictable ? 1231 : 1237);
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
-		result = prime * result 
-				+ ((routeShortName == null) ? 0 : routeShortName.hashCode());
+		result =
+				prime
+						* result
+						+ ((routeShortName == null) ? 0 : routeShortName
+								.hashCode());
+		result =
+				prime * result
+						+ ((serviceId == null) ? 0 : serviceId.hashCode());
 		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
-		result = prime * result
-				+ ((supervisor == null) ? 0 : supervisor.hashCode());
+		result =
+				prime * result
+						+ ((supervisor == null) ? 0 : supervisor.hashCode());
 		result = prime * result + ((time == null) ? 0 : time.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
-		result = prime * result
-				+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
+		result =
+				prime * result
+						+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
 	}
 
@@ -341,6 +371,11 @@ public class VehicleEvent implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		VehicleEvent other = (VehicleEvent) obj;
+		if (avlTime == null) {
+			if (other.avlTime != null)
+				return false;
+		} else if (!avlTime.equals(other.avlTime))
+			return false;
 		if (becameUnpredictable != other.becameUnpredictable)
 			return false;
 		if (blockId == null) {
@@ -375,6 +410,11 @@ public class VehicleEvent implements Serializable {
 				return false;
 		} else if (!routeShortName.equals(other.routeShortName))
 			return false;
+		if (serviceId == null) {
+			if (other.serviceId != null)
+				return false;
+		} else if (!serviceId.equals(other.serviceId))
+			return false;
 		if (stopId == null) {
 			if (other.stopId != null)
 				return false;
@@ -406,19 +446,21 @@ public class VehicleEvent implements Serializable {
 	@Override
 	public String toString() {
 		return "VehicleEvent [" 
-				+ "rShortName=" + routeShortName
+				+ "time=" + Time.dateTimeStrMsec(time)
+				+ ", rShortName=" + routeShortName
 				+ ", stopId=" + stopId 
 				+ ", vehicleId=" + vehicleId
 				+ ", eventType=\"" + eventType + "\"" 
 				+ ", description=\"" + description + "\""
 				+ ", location=" + location 
 				+ ", blockId=" + blockId 
+				+ ", serviceId=" + serviceId
 				+ ", tripId=" + tripId 
 				+ ", routeId=" + routeId
 				+ ", predictable=" + predictable 
 				+ ", becameUnpredictable=" + becameUnpredictable 
+				+ ", avlTime=" + Time.dateTimeStrMsec(avlTime)
 				+ ", supervisor=" + supervisor
-				+ ", time=" + Time.dateTimeStrMsec(time)
 				+ "]";
 	}
 
@@ -475,10 +517,20 @@ public class VehicleEvent implements Serializable {
 	
 	/***************** Getter/Setter methods ***************/
 	
+	/** 
+	 * @return the system time of when the event was created.
+	 */
 	public Date getTime() {
 		return time;
 	}
 
+	/**
+	 * @return the time of the AVL report that generated the event
+	 */
+	public Date getAvlTime() {
+		return avlTime;
+	}
+	
 	public String getVehicleId() {
 		return vehicleId;
 	}
@@ -519,6 +571,10 @@ public class VehicleEvent implements Serializable {
 		return blockId;
 	}
 
+	public String getServiceId() {
+		return serviceId;
+	}
+	
 	public String getTripId() {
 		return tripId;
 	}
@@ -527,5 +583,4 @@ public class VehicleEvent implements Serializable {
 		return stopId;
 	}
 
-	
 }

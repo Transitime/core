@@ -32,8 +32,7 @@ import org.transitime.utils.MathUtils;
 import org.transitime.utils.Time;
 
 /**
- * Reads AVL data from a NextBus AVL feed and publishes it to appropriate JMS
- * topic so that it can be read by AVL clients.
+ * Reads AVL data from a NextBus AVL feed and processes each AVL report.
  * 
  * @author SkiBu Smith
  *
@@ -205,7 +204,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			// round to just 5 decimal places.
 			AvlReport avlReport = new AvlReport(vehicleId, gpsEpochTime, 
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), 
-					speed, heading, leadingVehicleId, driverId, 
+					speed, heading, "NextBus", leadingVehicleId, driverId, 
 					null,       // license plate
 					passengerCount,
 					Float.NaN); // passengerFullness

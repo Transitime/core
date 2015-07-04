@@ -7,6 +7,11 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>transitimeWebapp</name>
 	<url>http://maven.apache.org</url>
+	
+	<properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -22,16 +27,19 @@
 		</dependency>
 		<dependency>
 			<groupId>transitime</groupId>
-			<artifactId>transitime</artifactId>
+			<artifactId>transitimeCore</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>transitimeWebapp</finalName>
+		<!-- Set the name of the war file -->
+		<finalName>web</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>
 				<inherited>true</inherited>
 				<configuration>
 					<source>1.7</source>

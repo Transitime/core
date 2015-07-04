@@ -76,8 +76,11 @@ public class TravelTimesForStopPath implements Serializable {
 	@Column
 	private final int travelTimesRev;
 	
-	// Which stop on the trip the travel times are for
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	// Which stop on the trip the travel times are for. Using size of
+	// 2 * DEFAULT_ID_SIZE since stop path names are stop1_to_stop2 so can
+	// be twice as long as other IDs. And when using GTFS Editor the IDs
+	// are quite long, a bit longer than 40 characters.
+	@Column(length=2*HibernateUtils.DEFAULT_ID_SIZE)
 	private final String stopPathId;
 	
 	// The distance for each travel time segment for this path. Doesn't 
@@ -217,7 +220,10 @@ public class TravelTimesForStopPath implements Serializable {
 						+ (trip!=null ? trip.getId() : "") 
 						+ " routeId=" + (trip!=null ? trip.getRouteId() : "")
 						+ " routeShortName=" 
-						+ (trip!=null ? trip.getRouteShortName() : "");
+						+ (trip!=null ? trip.getRouteShortName() : "")
+						+ ". You most likely need to set the "
+						+ "-maxTravelTimeSegmentLength command line option to "
+						+ "a larger value than than the default of 200m.";
 				logger.error(msg);
 				
 				// Since this could be a really problematic issue, throw an error

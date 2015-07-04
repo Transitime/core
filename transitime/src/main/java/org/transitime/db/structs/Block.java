@@ -17,6 +17,7 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,6 +51,7 @@ import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatch;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -114,9 +116,6 @@ public final class Block implements Serializable {
 	@Cascade({CascadeType.SAVE_UPDATE})
 	private final List<Trip> trips;
 	
-	@Column
-	private final int headwaySecs; // For non-scheduled blocks
-
 	// Sometimes will get vehicle assignment by routeId. This means that need
 	// to know which blocks are associated with a route. Getting the routeIds
 	// from the Trip objects is problematic because then all the Trip data
@@ -152,20 +151,15 @@ public final class Block implements Serializable {
 	 * @param startTime
 	 * @param endTime
 	 * @param trips
-	 * @param headwaySecs
-	 *            If less than 0 then it is schedule based block. If 0 then it
-	 *            is unscheduled block where vehicles run whenever. If greater
-	 *            than 0 then vehicles are to run on this specified headway
 	 */
 	public Block(int configRev, String blockId, String serviceId,
-			int startTime, int endTime, List<Trip> trips, int headwaySecs) {
+			int startTime, int endTime, List<Trip> trips) {
 		this.configRev = configRev;
 		this.blockId = blockId;
 		this.serviceId = serviceId;
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.trips = trips;
-		this.headwaySecs = headwaySecs;
 		
 		// Obtain the set of route IDs from the trips
 		this.routeIds = new HashSet<String>();
@@ -185,7 +179,6 @@ public final class Block implements Serializable {
 		this.startTime = -1;
 		this.endTime = -1;
 		this.trips = null;
-		this.headwaySecs = -1;	
 		this.routeIds = null;
 	}
 	
@@ -270,15 +263,6 @@ public final class Block implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		// Want to better explain what headwaySecs means
-		String headwaySecsStr = "" + headwaySecs;
-		if (headwaySecs < 0)
-			headwaySecsStr += " (schedule based)";
-		else if (headwaySecs == 0)
-			headwaySecsStr += " (unscheduled and no specified frequency)";
-		else
-			headwaySecsStr += " (headway for unscheduled block)";
-		
 		return "Block [" 
 				+ "configRev=" + configRev
 				+ ", blockId=" + blockId
@@ -288,7 +272,6 @@ public final class Block implements Serializable {
 				// Use getTrips() instead of trips to deal with possible lazy 
 				// initialization issues
 				+ ", trips=" + getTrips() 
-				+ ", headwaySecs=" + headwaySecsStr 
 				+ "]";
 	}
 	
@@ -299,15 +282,6 @@ public final class Block implements Serializable {
 	 * @return
 	 */
 	public String toShortString() {
-		// Want to better explain what headwaySecs means
-		String headwaySecsStr = "" + headwaySecs;
-		if (headwaySecs < 0)
-			headwaySecsStr += " (schedule based)";
-		else if (headwaySecs == 0)
-			headwaySecsStr += " (unscheduled and no specified frequency)";
-		else
-			headwaySecsStr += " (headway for unscheduled block)";
-
 		// Create shortened version of Trip info that only includes the trip_id
 		String tripsStr = "Trip [";
 		for (Trip trip : getTrips()) {
@@ -321,7 +295,6 @@ public final class Block implements Serializable {
 				+ ", startTime=" + Time.timeOfDayStr(startTime) 
 				+ ", endTime=" + Time.timeOfDayStr(endTime) 
 				+ ", trips=" + tripsStr // Use the shortened version
-				+ ", headwaySecs=" + headwaySecsStr 
 				+ "]";
 	}
 	
@@ -333,11 +306,14 @@ public final class Block implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + blockId.hashCode();
-		result = prime * result + serviceId.hashCode();
+		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
 		result = prime * result + configRev;
 		result = prime * result + endTime;
-		result = prime * result + headwaySecs;
+		result =
+				prime * result + ((routeIds == null) ? 0 : routeIds.hashCode());
+		result =
+				prime * result
+						+ ((serviceId == null) ? 0 : serviceId.hashCode());
 		result = prime * result + startTime;
 		result = prime * result + ((trips == null) ? 0 : trips.hashCode());
 		return result;
@@ -355,15 +331,24 @@ public final class Block implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Block other = (Block) obj;
-		if (!blockId.equals(other.blockId))
-			return false;
-		if (!serviceId.equals(other.serviceId))
+		if (blockId == null) {
+			if (other.blockId != null)
+				return false;
+		} else if (!blockId.equals(other.blockId))
 			return false;
 		if (configRev != other.configRev)
 			return false;
 		if (endTime != other.endTime)
 			return false;
-		if (headwaySecs != other.headwaySecs)
+		if (routeIds == null) {
+			if (other.routeIds != null)
+				return false;
+		} else if (!routeIds.equals(other.routeIds))
+			return false;
+		if (serviceId == null) {
+			if (other.serviceId != null)
+				return false;
+		} else if (!serviceId.equals(other.serviceId))
 			return false;
 		if (startTime != other.startTime)
 			return false;
@@ -401,25 +386,66 @@ public final class Block implements Serializable {
 	/**
 	 * Determines which trip is currently active and returns the associated
 	 * index of that trip such that getTrip(int) can be called to get the trip.
-	 * Trip is active if the date lies between the end time of the previous trip and the end time of the current
-	 * trip. To handle wrapping around midnight if there isn't a match initially
-	 * then will check past midnight and before midnight as well.
+	 * Trip is active if the date lies between the end time of the previous trip
+	 * and the end time of the current trip. To handle wrapping around midnight
+	 * if there isn't a match initially then will check past midnight and before
+	 * midnight as well.
+	 * <p>
+	 * Often consider a block to be active before its scheduled start time. For
+	 * this situation the first trip is returned if it is within
+	 * allowableBeforeTimeSecs before the block is supposed to start.
 	 * 
 	 * @param date
+	 *            The current time, to be used for determining if trip active.
+	 * @param allowableBeforeTimeSecs
+	 *            How much before the block time the block is considered to be
+	 *            active. Needed because often consider a block to be active
+	 *            before its scheduled start time. For this situation need to
+	 *            return first trip.
 	 * @return index of trip, or -1 if no match
 	 */
-	public int activeTripIndex(Date date) {
+	public int activeTripIndex(Date date, int allowableBeforeTimeSecs) {
+		// Find matching trip
 		int secondsIntoDay = 
-				Core.getInstance().getTime().getSecondsIntoDay(date);
-		
+				Core.getInstance().getTime().getSecondsIntoDay(date);		
 		int index = activeTripIndex(secondsIntoDay);
+
+		// If match not found check a day into future and day into past
 		if (index < 0) {
 			index = activeTripIndex(secondsIntoDay + Time.SEC_PER_DAY);
 			if (index < 0)
 				index = activeTripIndex(secondsIntoDay - Time.SEC_PER_DAY);
 		}
 
+		// Date is not when trip is supposed to be active. But since blocks 
+		// are considered to be active allowableBeforeTimeSecs before their
+		// scheduled start time if the block is active then must be matching
+		// to the first trip, so return 0.
+		if (index < 0 && isActive(date, allowableBeforeTimeSecs, -1))
+			return 0;
+				
+		// Return result
 		return index;
+	}
+	
+	/**
+	 * Returns true if the service ID for the block is for the time specified by
+	 * offset parameter. Useful for determining if the service ID for the block
+	 * is valid for today, yesterday, or for tomorrow.
+	 *
+	 * @param date
+	 *            The date want to see if the block is active for
+	 * @param offset
+	 *            Use 0 for today, -Time.DAY_IN_MSECS for yesterday, and
+	 *            Time.DAY_IN_MSECS for today.
+	 * @return true if service ID for block as valid for other day
+	 */
+	private boolean serviceClassIsValidForDay(Date date, long offset) {
+		long dateToCheck = date.getTime() + offset;
+		List<String> currentServiceIds =
+				Core.getInstance().getServiceUtils().getServiceIds(dateToCheck);
+		
+		return currentServiceIds.contains(serviceId);
 	}
 	
 	/**
@@ -430,38 +456,113 @@ public final class Block implements Serializable {
 	 * day.
 	 * 
 	 * @param date
-	 * @return True if the block is active.
+	 *            The time checking to see whether block is active for
+	 * @param allowableBeforeTimeSecs
+	 *            Block considered active if within this number of seconds
+	 *            before the block start time. Set to 0 if want to know if date
+	 *            is actually between the block start and end times.
+	 * @param allowableAfterStartTimeSecs
+	 *            If set to value greater than or equal to zero then block
+	 *            considered active only if within this number of seconds after
+	 *            the start time. If less then zero then block considered active
+	 *            up to the block end time.
+	 * @return True if the block is active for the specified date
 	 */
-	public boolean isActive(Date date, int allowableBeforeTimeSecs) {
-		int secsInDayForAvlReport = 
+	public boolean isActive(Date date, int allowableBeforeTimeSecs,
+			int allowableAfterStartTimeSecs) {
+		int secsInDay = 
 				Core.getInstance().getTime().getSecondsIntoDay(date);
 
+		// Determine the allowable start and end times for when the block 
+		// is to be considered active
+		int allowableStartTime = startTime - allowableBeforeTimeSecs;
+		int allowableEndTime =
+				allowableAfterStartTimeSecs < 0 ? endTime : startTime
+						+ allowableAfterStartTimeSecs;
+		
 		// Handle normal situation where times are between midnight in the 
 		// morning and midnight in the evening
-		boolean active = secsInDayForAvlReport > startTime - allowableBeforeTimeSecs
-				&& secsInDayForAvlReport < endTime;
-		if (active)
-			return true;
+		boolean serviceClassValidToday = serviceClassIsValidForDay(date, 0);
+		if (serviceClassValidToday) {
+			if (secsInDay > allowableStartTime && secsInDay < allowableEndTime) {
+				return true;			
+			}
+		}
 		
-		// Also handle where date is late in the evening before midnight but 
-		// the start time is really early in the morning, just after midnight.
-		int secsInDayBeforeMidnight = secsInDayForAvlReport - Time.SEC_PER_DAY;
-		active = secsInDayBeforeMidnight > startTime - allowableBeforeTimeSecs
-				&& secsInDayBeforeMidnight < endTime;
-		if (active)
-			return true;
+		// If the service class was valid yesterday then try adding 24 hours to
+		// the time when checking if block active. This way handle situations
+		// past midnight, but only if the block was actually active yesterday.
+		boolean serviceClassValidYesterday =
+				serviceClassIsValidForDay(date, -Time.DAY_IN_MSECS);
+		if (serviceClassValidYesterday) {
+			int secsInDayPastMidnight =
+					secsInDay + Time.DAY_IN_SECS;
+			if (secsInDayPastMidnight > allowableStartTime
+					&& secsInDayPastMidnight < allowableEndTime) {
+				return true;			
+			}
+		}
 		
-		// And lastly, handle where start time or end time is past midnight
-		int secsInDayPastMidnight = secsInDayForAvlReport + Time.SEC_PER_DAY;
-		active = secsInDayPastMidnight > startTime - allowableBeforeTimeSecs
-				&& secsInDayPastMidnight < endTime;
-		if (active)
-			return true;
+		// If the service class is valid tomorrow then try subtracting 24 hours
+		// from the time when checking if block active. This way handle
+		// situations before midnight, but won't include a block that isn't
+		// actually active the next day.
+		boolean serviceClassValidTomorrow =
+				serviceClassIsValidForDay(date, Time.DAY_IN_MSECS);
+		if (serviceClassValidTomorrow) {
+			int secsInDayBeforeMidnight =
+					secsInDay - Time.SEC_PER_DAY;
+			if (secsInDayBeforeMidnight > allowableStartTime
+					&& secsInDayBeforeMidnight < allowableEndTime) {
+				return true;
+			}
+		}
 		
 		// It simply ain't active
 		return false;
 	}
 
+	/**
+	 * Returns true if the time of day of the date passed in is between
+	 * allowableBeforeTimeSecs before the startTime and the endTime for the
+	 * block. No leeway is provided for the end time. Note: does not look to see
+	 * if the service associated with the block is active. Only looks at time of
+	 * day.
+	 * 
+	 * @param date
+	 *            The time checking to see whether block is active for
+	 * @param allowableBeforeTimeSecs
+	 *            Block considered active if within this number of seconds
+	 *            before the block start time. Set to 0 if want to know if date
+	 *            is actually between the block start and end times.
+	 * @param allowableAfterStartTimeSecs
+	 *            If set to value greater than or equal to zero then block
+	 *            considered active only if within this number of seconds after
+	 *            the start time. If less then zero then block considered active
+	 *            up to the block end time.
+	 * @return True if the block is active for the specified date
+	 */
+	public boolean isActive(long epochTime, int allowableBeforeTimeSecs,
+			int allowableAfterStartTimeSecs) {
+		return isActive(new Date(epochTime), allowableBeforeTimeSecs,
+				allowableAfterStartTimeSecs);
+	}
+
+	/**
+	 * Returns true if the time of day of the epoch time passed in is between
+	 * allowableBeforeTimeSecs before the startTime and the endTime for the
+	 * block. No leeway is provided for the end time. Note: does not look to see
+	 * if the service associated with the block is active. Only looks at time of
+	 * day.
+	 * 
+	 * @param epochTime
+	 * @param allowableBeforeTimeSecs
+	 * @return
+	 */
+	public boolean isActive(long epochTime, int allowableBeforeTimeSecs) {
+		return isActive(new Date(epochTime), allowableBeforeTimeSecs, -1);
+	}
+	
 	/**
 	 * Returns true if the time of day of the date passed in is between the
 	 * startTime and the endTime for the block. No leeway is provided. Note:
@@ -472,7 +573,20 @@ public final class Block implements Serializable {
 	 * @return True if the block is active.
 	 */
 	public boolean isActive(Date date) {
-		return isActive(date, 0);
+		return isActive(date, 0, -1);
+	}
+	
+	/**
+	 * Returns true if the time of day of the date passed in is between the
+	 * startTime and the endTime for the block. No leeway is provided. Note:
+	 * does not look to see if the service associated with the block is active.
+	 * Only looks at time of day.
+	 * 
+	 * @param epochTime
+	 * @return True if the block is active.
+	 */
+	public boolean isActive(long epochTime) {
+		return isActive(new Date(epochTime), 0, -1);
 	}
 	
 	/**
@@ -532,7 +646,7 @@ public final class Block implements Serializable {
 						"vehicleId={}",
 						trip.getBlock().getId(),
 						trip.getId(), 
-						trip.getBlock().getTripIndex(trip.getId()),
+						trip.getBlock().getTripIndex(trip),
 						Time.timeOfDayStr(secsInDayForAvlReport),
 						Time.timeOfDayStr(trip.getStartTime()),
 						Time.timeOfDayStr(trip.getEndTime()),
@@ -625,14 +739,14 @@ public final class Block implements Serializable {
 	}
 	
 	/**
-	 * @return the startTime
+	 * @return the startTime in seconds from midnight
 	 */
 	public int getStartTime() {
 		return startTime;
 	}
 
 	/**
-	 * @return the endTime
+	 * @return the endTime in seconds from midnight
 	 */
 	public int getEndTime() {
 		return endTime;
@@ -693,6 +807,24 @@ public final class Block implements Serializable {
 	}
 	
 	/**
+	 * Returns true if block assignment has no schedule (is frequency based)
+	 * 
+	 * @return true if no schedule
+	 */
+	public boolean isNoSchedule() {
+		return getTrips().get(0).isNoSchedule();
+	}
+	
+	/**
+	 * Returns true if block assignment has a schedule (is not frequency based)
+	 * 
+	 * @return true if has schedule
+	 */
+	public boolean hasSchedule() {
+		return !isNoSchedule();
+	}
+	
+	/**
 	 * Returns the trip specified by the tripIndex
 	 * 
 	 * @param tripIndex
@@ -722,34 +854,22 @@ public final class Block implements Serializable {
 		// The tripId was not found for this block so return null
 		return null;
 	}
-
-	/**
-	 * Returns the index into the trips list of the trip specified
-	 * by the tripId parameter.
-	 * @param tripId Specifies which trip looking for
-	 * @return Index into trips of the specified trip
-	 */
-	public int getTripIndex(String tripId) {
-		List<Trip> tripsList = getTrips();
-		
-		for (int i=0; i<tripsList.size(); ++i) {
-			Trip trip = tripsList.get(i);
-			if (trip.getId().equals(tripId))
-				return i;
-		}
-		
-		// The tripId was not found for this block so return -1
-		return -1;		
-	}
 	
 	/**
-	 * Returns the index into the trips list of the specified trip.
+	 * Returns for the specified trip the index into the trips list for the
+	 * block
 	 * 
-	 * @param trip Specifies which trip looking for
+	 * @param trip
+	 *            Specifies which trip looking for
 	 * @return Index into trips of the specified trip
 	 */
 	public int getTripIndex(Trip trip) {
-		return getTripIndex(trip.getId());
+		List<Trip> tripsList = getTrips();
+		for (int i=0; i<tripsList.size(); ++i) {
+			if (tripsList.get(i) == trip)
+				return i;
+		}
+		return -1;
 	}
 	
 	/**
@@ -992,24 +1112,6 @@ public final class Block implements Serializable {
 	}
 	
 	/**
-	 * Returns the specified headway for unscheduled blocks. A block is unscheduled
-	 * if its trips are defined in the frequencies.txt file. If headway is 0 then
-	 * there is no planned headway. The vehicles will run when they run. If 
-	 * headway is less than 0 then it is a schedule based assignment.
-	 * @return the headwaySecs
-	 */
-	public int getHeadwaySecs() {
-		return headwaySecs;
-	}
-	
-	/**
-	 * @return true if block is schedule based as opposed to headway based
-	 */
-	public boolean isScheduleBased() {
-		return headwaySecs < 0;
-	}
-
-	/**
 	 * Returns true if on last trip of block and within the specified distance
 	 * of the end of that last trip.
 	 * 
@@ -1040,4 +1142,24 @@ public final class Block implements Serializable {
 		return CoreConfig.exclusiveBlockAssignments();
 	}
 	
+	/**
+	 * For debugging
+	 * 
+	 * @param args
+	 */
+	@SuppressWarnings("unused")
+	public static void main(String[] args) {
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		Block block1 = dbConfig.getBlock("1", "2105");
+		Block block2 = dbConfig.getBlock("2", "2105");
+		Block block3 = dbConfig.getBlock("3", "2105");
+		try {
+			boolean b1 = block1.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS, -1);
+			boolean b2 = block2.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS, -1);
+			boolean b3 = block3.isActive(Time.parse("5-10-2015 00:00:01"), 90*Time.MIN_IN_SECS, -1);
+			int forSettingBreakpoint=9;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -24,7 +24,6 @@ import org.transitime.utils.Time;
 import org.transitime.utils.csv.CsvBase;
 
 import java.text.ParseException;
-import java.util.Date;
 
 /**
  * Represents a single record in a CSV file containing AVL data.
@@ -56,14 +55,14 @@ public class AvlCsvRecord extends CsvBase {
 
 		String timeStr = avlCsvRecord.getRequiredValue(record, "time");
 
+		// Process time
 		long time = 0L;
-		if(timeStr.contains(":"))
-			time=Time.parse(timeStr).getTime();
-		else
-		{
-			time=Long.parseLong(timeStr.substring(0, timeStr.length()-3));
-			Date d = new Date(time);
-			logger.debug("Date:"+d);
+		if (timeStr.contains(":")) {
+			// Time is in the format "MM-dd-yyyy HH:mm:ss z" then use Time.parse()
+			time = Time.parse(timeStr).getTime();
+		} else {
+			// Time is already an epoch time long
+			time = Long.parseLong(timeStr);
 		}
 								
 		String latStr = avlCsvRecord.getRequiredValue(record, "latitude");
@@ -98,9 +97,10 @@ public class AvlCsvRecord extends CsvBase {
 				null : Integer.parseInt(passengerCountStr);
 		
 		// Create the avlReport
-		AvlReport avlReport = new AvlReport(vehicleId, time, lat, lon, speed,
-				heading, leadVehicleId, driverId, licensePlate, passengerCount,
-				passengerFullness);
+		AvlReport avlReport =
+				new AvlReport(vehicleId, time, lat, lon, speed, heading, "CSV",
+						leadVehicleId, driverId, licensePlate, passengerCount,
+						passengerFullness);
 
 		// Assignment info
 		String assignmentId = 
@@ -115,6 +115,8 @@ public class AvlCsvRecord extends CsvBase {
 				assignmentType = AssignmentType.ROUTE_ID;
 			else if (assignmentTypeStr.equals("TRIP_ID"))
 				assignmentType = AssignmentType.TRIP_ID;
+			else if (assignmentTypeStr.equals("TRIP_SHORT_NAME"))
+				assignmentType = AssignmentType.TRIP_SHORT_NAME;
 			else
 				assignmentType = AssignmentType.UNSET;
 			avlReport.setAssignment(assignmentId, assignmentType);			

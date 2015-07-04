@@ -16,6 +16,9 @@
  */
 package org.transitime.applications;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,6 +34,13 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
@@ -53,13 +63,16 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
  * these are filtered out. This way the resulting sql is smaller and easier to
  * understand.
  * 
- * @author john.thompson and Skibu Smith
+ * @author john.thompson, Skibu Smith, and Sean Crudden
  *
  */
 public class SchemaGenerator {
 	private final Configuration cfg;
 	private final String packageName;
 	private final String outputDirectory;
+	
+	private static final Logger logger =
+			LoggerFactory.getLogger(SchemaGenerator.class);
 	
 	/**
 	 * MySQL handles fractional seconds differently from PostGRES and other
@@ -292,20 +305,58 @@ public class SchemaGenerator {
 	 * org_transitime.
 	 */
 	public static void main(String[] args) throws Exception {
-		final String packageName = args[0];
-		final String outputDirectory = args.length > 1 ? args[1] : null;
-		
-		// Note: need to use separate SchemaGenerator objects for each
-		// dialect because for some reason they otherwise interfere
-		// with each other.
-		SchemaGenerator gen = new SchemaGenerator(packageName, outputDirectory);
-		gen.generate(Dialect.POSTGRES);
-		
-		gen = new SchemaGenerator(packageName, outputDirectory);
-		gen.generate(Dialect.ORACLE);
+		// Handle the command line options
+		CommandLineParser parser = new BasicParser();
+		Options options = new Options();
+		Option hibernatePackagePathOption =
+				new Option(
+						"p",
+						"hibernatePackagePath",
+						true,
+						"This is the path to the package containing the "
+						+ "hibernate annotated java classes");
 
-		gen = new SchemaGenerator(packageName, outputDirectory);
-		gen.generate(Dialect.MYSQL);
+		Option outputDirectoryOption =
+				new Option("o", "outputDirectory", true,
+						"This is the directory to output the sql");
+		hibernatePackagePathOption.setRequired(true);
+		outputDirectoryOption.setRequired(true);
+		options.addOption(outputDirectoryOption);
+		options.addOption(hibernatePackagePathOption);
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+			if (cmd.hasOption("p") && cmd.hasOption("o")) {
+				String packageName = cmd.getOptionValue("p");
+				String outputDirectory = cmd.getOptionValue("o");
+
+				// Note: need to use separate SchemaGenerator objects for each
+				// dialect because for some reason they otherwise interfere
+				// with each other.
+				SchemaGenerator gen =
+						new SchemaGenerator(packageName, outputDirectory);
+				gen.generate(Dialect.POSTGRES);
+
+				gen = new SchemaGenerator(packageName, outputDirectory);
+				gen.generate(Dialect.ORACLE);
+
+				gen = new SchemaGenerator(packageName, outputDirectory);
+				gen.generate(Dialect.MYSQL);
+			} else {
+				// Necessary command line options were not set
+				HelpFormatter formatter = new HelpFormatter();
+				formatter.printHelp("java -jar generateDatabaseSchema.jar", 
+						options);				
+				System.exit(-1);
+			}
+		} catch (ParseException pe) {
+			logger.error(pe.getMessage());
+
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("java -jar generateDatabaseSchema.jar", 
+					options);
+			System.exit(-1);
+		}
 	}
 
 }

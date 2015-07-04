@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.utils.StringUtils;
+import org.transitime.utils.Time;
 
 /**
  * Extends a location by including GPS information including time, speed,
@@ -34,6 +35,7 @@ import org.transitime.utils.StringUtils;
 @XmlType(propOrder = { "lat", "lon", "time", "speed", "heading" })
 public class ApiGpsLocation extends ApiTransientLocation {
 
+	// Epoch time in seconds (not msec, so that shorter)
     @XmlAttribute
     private long time;
     
@@ -59,7 +61,7 @@ public class ApiGpsLocation extends ApiTransientLocation {
     public ApiGpsLocation(IpcVehicle vehicle) {
 	super(vehicle.getLatitude(), vehicle.getLongitude());
 
-	this.time = vehicle.getGpsTime();
+	this.time = vehicle.getGpsTime() / Time.MS_PER_SEC;
 	this.speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
 	this.heading = StringUtils.oneDigitFormat(vehicle.getHeading());
 

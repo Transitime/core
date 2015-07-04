@@ -38,6 +38,8 @@ import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.utils.Geo;
+import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
@@ -190,6 +192,10 @@ public class AvlProcessor {
 	}
 
 	/**
+	 * Looks at the previous AVL reports to determine if vehicle is actually
+	 * moving. If it is not moving then the vehicle is made unpredictable. Uses
+	 * the system properties transitime.core.timeForDeterminingNoProgress and
+	 * transitime.core.minDistanceForNoProgress
 	 * 
 	 * @param bestTemporalMatch
 	 * @param vehicleState
@@ -204,16 +210,15 @@ public class AvlProcessor {
 		if (bestTemporalMatch == null)
 			return false;
 
-		TemporalMatch previousMatch = vehicleState.getPreviousMatch(CoreConfig
-				.getTimeForDeterminingNoProgress());
-
+		// If this feature disabled then return false 
+		int noProgressMsec = CoreConfig.getTimeForDeterminingNoProgress();
+		if (noProgressMsec <= 0)
+			return false;
+		
 		// If no previous match then cannot determine if not making progress
+		TemporalMatch previousMatch = vehicleState.getPreviousMatch(noProgressMsec);
 		if (previousMatch == null)
 			return false;
-
-		// Determine how much time elapsed between AVL reports
-		long timeBetweenAvlReports = vehicleState.getAvlReport().getTime()
-				- previousMatch.getAvlTime();
 
 		// Determine distance traveled between the matches
 		double distanceTraveled = previousMatch
@@ -227,6 +232,11 @@ public class AvlProcessor {
 			boolean traversedWaitStop = previousMatch
 					.traversedWaitStop(bestTemporalMatch);
 			if (!traversedWaitStop) {
+				// Determine how much time elapsed between AVL reports
+				long timeBetweenAvlReports =
+						vehicleState.getAvlReport().getTime()
+								- previousMatch.getAvlTime();
+
 				// Create message indicating why vehicle being made
 				// unpredictable because vehicle not making forward progress.
 				String eventDescription = "Vehicle only traveled "
@@ -251,6 +261,99 @@ public class AvlProcessor {
 		return false;
 	}
 
+	/**
+	 * Looks at the previous AVL reports to determine if vehicle is actually
+	 * moving. If it is not moving then the vehicle should be marked as being
+	 * delayed. Uses the system properties
+	 * transitime.core.timeForDeterminingDelayed and
+	 * transitime.core.minDistanceForDelayed
+	 * 
+	 * @param vehicleState
+	 *            For providing the temporal match and the AVL history. It is
+	 *            expected that the new match has already been set.
+	 * @return True if vehicle not making progress, otherwise false. If vehicle
+	 *         doesn't currently match or if there is not enough history for the
+	 *         vehicle then false is returned.
+	 */
+	private boolean handlePossibleVehicleDelay(VehicleState vehicleState) {
+		// Assume vehicle is not delayed
+		boolean wasDelayed = vehicleState.isDelayed();
+		vehicleState.setIsDelayed(false);
+		
+		// Determine the new match
+		TemporalMatch currentMatch = vehicleState.getMatch();
+		
+		// If there is no current match anyways then don't need to do anything
+		// here.
+		if (currentMatch == null)
+			return false;
+
+		// If this feature disabled then return false 
+		int maxDelayedSecs = CoreConfig.getTimeForDeterminingDelayedSecs();
+		if (maxDelayedSecs <= 0)
+			return false;
+		
+		// If no previous match then cannot determine if not making progress
+		TemporalMatch previousMatch =
+				vehicleState.getPreviousMatch(maxDelayedSecs * Time.MS_PER_SEC);
+		if (previousMatch == null)
+			return false;
+
+		// Determine distance traveled between the matches
+		double distanceTraveled = previousMatch
+				.distanceBetweenMatches(currentMatch);
+
+		double minDistance = CoreConfig.getMinDistanceForDelayed();
+		if (distanceTraveled < minDistance) {
+			// Determine if went through any wait stops since if did then
+			// vehicle wasn't stuck in traffic. It was simply stopped at
+			// layover.
+			boolean traversedWaitStop = previousMatch
+					.traversedWaitStop(currentMatch);
+			if (!traversedWaitStop) {
+				// Mark vehicle as being delayed
+				vehicleState.setIsDelayed(true);
+
+				// Create description of event
+				long timeBetweenAvlReports = vehicleState.getAvlReport().getTime()
+						- previousMatch.getAvlTime();
+				String description =
+						"Vehicle vehicleId="
+								+ vehicleState.getVehicleId()
+								+ " is delayed. Over "
+								+ timeBetweenAvlReports
+								+ " msec it "
+								+ "traveled only "
+								+ Geo.distanceFormat(distanceTraveled)
+								+ " while "
+								+ "transitime.core.timeForDeterminingDelayedSecs="
+								+ maxDelayedSecs + " and "
+								+ "transitime.core.minDistanceForDelayed="
+								+ Geo.distanceFormat(minDistance);
+				
+				// Log the event
+				logger.info(description);
+				
+				// If vehicle newly delayed then also create a VehicleEvent 
+				// indicating such
+				if (!wasDelayed) {
+					VehicleEvent.create(vehicleState.getAvlReport(), 
+							vehicleState.getMatch(), VehicleEvent.DELAYED,
+							description, 
+							true, // predictable
+							false, // becameUnpredictable
+							null); // supervisor
+				}
+				
+				// Return that vehicle indeed delayed
+				return true;
+			}
+		}
+
+		// Vehicle was making progress so return such
+		return false;
+	}
+	
 	/**
 	 * For vehicles that were already predictable but then got a new AvlReport.
 	 * Determines where in the block assignment the vehicle now matches to.
@@ -356,11 +459,15 @@ public class AvlProcessor {
 
 	/**
 	 * When assigning a vehicle to a block then this method should be called to
-	 * update the VehicleState and log a corresponding VehicleEvent.
+	 * update the VehicleState and log a corresponding VehicleEvent. If block
+	 * assignments are to be exclusive then any old vehicle on that assignment
+	 * will be have its assignment removed.
 	 * 
 	 * @param bestMatch
 	 *            The TemporalMatch that the vehicle was matched to. If set then
-	 *            vehicle will be made predictable. If null then vehicle will be
+	 *            vehicle will be made predictable and if block assignments are
+	 *            to be exclusive then any old vehicle on that assignment will
+	 *            be have its assignment removed. If null then vehicle will be
 	 *            configured to be not predictable.
 	 * @param vehicleState
 	 *            The VehicleState for the vehicle to be updated
@@ -381,6 +488,16 @@ public class AvlProcessor {
 			String assignmentId, String assignmentType) {
 		// Convenience variables
 		AvlReport avlReport = vehicleState.getAvlReport();
+		String vehicleId = avlReport.getVehicleId();
+		
+		// Make sure no other vehicle is using that assignment
+		// if it is supposed to be exclusive. This needs to be done before
+		// the VehicleDataCache is updated with info from the current
+		// vehicle since this will affect all vehicles assigned to the
+		// block.
+		if (bestMatch != null) {
+			unassignOtherVehiclesFromBlock(bestMatch.getBlock(), vehicleId);
+		}
 
 		// If got a valid match then keep track of state
 		BlockAssignmentMethod blockAssignmentMethod = null;
@@ -392,8 +509,7 @@ public class AvlProcessor {
 			block = bestMatch.getBlock();
 			logger.info("vehicleId={} matched to {}Id={}. "
 					+ "Vehicle is now predictable. Match={}",
-					avlReport.getVehicleId(), assignmentType, assignmentId,
-					bestMatch);
+					vehicleId, assignmentType, assignmentId, bestMatch);
 
 			// Record a corresponding VehicleEvent
 			String eventDescription = "Vehicle successfully matched to "
@@ -405,7 +521,7 @@ public class AvlProcessor {
 		} else {
 			logger.debug("For vehicleId={} could not assign to {}Id={}. "
 					+ "Therefore vehicle is not being made predictable.",
-					avlReport.getVehicleId(), assignmentType, assignmentId);
+					vehicleId, assignmentType, assignmentId);
 		}
 
 		// Update the vehicle state with the determined block assignment
@@ -491,7 +607,7 @@ public class AvlProcessor {
 			// Get the potential spatial matches
 			List<SpatialMatch> spatialMatchesForBlock = SpatialMatcher
 					.getSpatialMatches(vehicleState.getAvlReport(),
-							potentialTrips, block);
+							block, potentialTrips);
 
 			// Add appropriate spatial matches to list
 			for (SpatialMatch spatialMatch : spatialMatchesForBlock) {
@@ -546,8 +662,9 @@ public class AvlProcessor {
 		// reasonable range of the start time and within the end time of
 		// the trip.
 		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
-		List<SpatialMatch> spatialMatches = SpatialMatcher.getSpatialMatches(
-				vehicleState.getAvlReport(), potentialTrips, block);
+		List<SpatialMatch> spatialMatches =
+				SpatialMatcher.getSpatialMatches(vehicleState.getAvlReport(),
+						block, potentialTrips);
 		logger.debug("For vehicleId={} and blockId={} spatial matches={}",
 				avlReport.getVehicleId(), block.getId(), spatialMatches);
 
@@ -582,8 +699,8 @@ public class AvlProcessor {
 					.matchToLayoverStopEvenIfOffRoute(avlReport, potentialTrips);
 			if (trip != null) {
 				SpatialMatch beginningOfTrip = new SpatialMatch(
-						vehicleState.getVehicleId(), avlReport.getTime(),
-						block, block.getTripIndex(trip.getId()), 0, // stopPathIndex
+						avlReport.getTime(),
+						block, block.getTripIndex(trip), 0, // stopPathIndex
 						0, // segmentIndex
 						0.0, // distanceToSegment
 						0.0); // distanceAlongSegment
@@ -598,15 +715,6 @@ public class AvlProcessor {
 				logger.debug("For vehicleId={} couldn't find match for "
 						+ "blockId={}", avlReport.getVehicleId(), block.getId());
 			}
-		}
-
-		if (bestMatch != null) {
-			// Make sure no other vehicle is using that assignment
-			// if it is supposed to be exclusive. This needs to be done before
-			// the VehicleDataCache is updated with info from the current
-			// vehicle since this will affect all vehicles assigned to the
-			// block.
-			unassignOtherVehiclesFromBlock(block, avlReport.getVehicleId());
 		}
 
 		// Update the state of the vehicle
@@ -644,7 +752,8 @@ public class AvlProcessor {
 						+ " to blockId=" + block.getId() + " but "
 						+ "vehicleId=" + vehicleId
 						+ " already assigned to that block so "
-						+ "removing assignment from that vehicle.";
+						+ "removing assignment from vehicleId=" + vehicleId 
+						+ ".";
 				logger.info(description);
 				makeVehicleUnpredictableAndGrabAssignment(vehicleState,
 						description, VehicleEvent.ASSIGNMENT_GRABBED);
@@ -772,7 +881,7 @@ public class AvlProcessor {
 			return;
 
 		// Try to match vehicle to a block assignment if that feature is enabled
-		TemporalMatch bestMatch = AutoBlockAssigner.getInstance()
+		TemporalMatch bestMatch = new AutoBlockAssigner()
 				.autoAssignVehicleToBlockIfEnabled(vehicleState);
 		if (bestMatch != null) {
 			// Successfully matched vehicle to block so make vehicle predictable
@@ -791,8 +900,6 @@ public class AvlProcessor {
 	 * assignment and haven't gotten too many bad assignments in a row then
 	 * simply use the old assignment. This is handy for when the assignment
 	 * portion of the AVL feed does not send assignment data for every report.
-	 * <p>
-	 * In the future might want to change code to try to auto assign vehicle.
 	 * 
 	 * @param vehicleState
 	 */
@@ -828,24 +935,21 @@ public class AvlProcessor {
 		TemporalMatch temporalMatch = vehicleState.getMatch();
 		if (temporalMatch != null) {
 			VehicleAtStopInfo atStopInfo = temporalMatch.getAtStop();
-			if (atStopInfo != null) {
-				if (atStopInfo.atEndOfBlock()) {
-					logger.info("For vehicleId={} the end of the block={} "
-							+ "was reached so will make vehicle unpredictable",
-							vehicleState.getVehicleId(), temporalMatch
-									.getBlock().getId());
+			if (atStopInfo != null && atStopInfo.atEndOfBlock()) {
+				logger.info("For vehicleId={} the end of the block={} "
+						+ "was reached so will make vehicle unpredictable",
+						vehicleState.getVehicleId(), temporalMatch.getBlock()
+								.getId());
 
-					// At end of block assignment so remove it
-					String eventDescription = "Block assignment "
-							+ vehicleState.getBlock().getId()
-							+ " ended for vehicle so it was made unpredictable.";
-					makeVehicleUnpredictableAndTerminateAssignment(
-							vehicleState, eventDescription,
-							VehicleEvent.END_OF_BLOCK);
+				// At end of block assignment so remove it
+				String eventDescription = "Block assignment "
+								+ vehicleState.getBlock().getId()
+								+ " ended for vehicle so it was made unpredictable.";
+				makeVehicleUnpredictableAndTerminateAssignment(vehicleState,
+						eventDescription, VehicleEvent.END_OF_BLOCK);
 
-					// Return that end of block reached
-					return true;
-				}
+				// Return that end of block reached
+				return true;
 			}
 		}
 
@@ -870,6 +974,11 @@ public class AvlProcessor {
 	 * @return
 	 */
 	private TemporalDifference checkScheduleAdherence(VehicleState vehicleState) {
+		// If no schedule then there can't be real-time schedule adherence
+		if (vehicleState.getBlock() == null
+				|| vehicleState.getBlock().isNoSchedule())
+			return null;
+		
 		logger.debug(
 				"Processing real-time schedule adherence for vehicleId={}",
 				vehicleState.getVehicleId());
@@ -911,7 +1020,7 @@ public class AvlProcessor {
 
 		// Make sure the schedule adherence is reasonable
 		if (scheduleAdherence != null
-				&& !scheduleAdherence.isWithinBounds(vehicleState)) {
+				&& !scheduleAdherence.isWithinBounds()) {
 			logger.warn(
 					"For vehicleId={} schedule adherence {} is not "
 							+ "between the allowable bounds. Therefore trying to match "
@@ -996,7 +1105,8 @@ public class AvlProcessor {
 				// New assignment so match the vehicle to it
 				matchVehicleToAssignment(vehicleState);
 			} else {
-				// Handle bad assignment where don't have assignment or such
+				// Handle bad assignment where don't have assignment or such.
+				// Will try auto assigning a vehicle if that feature is enabled.
 				handleProblemAssignment(vehicleState);
 			}
 
@@ -1006,6 +1116,10 @@ public class AvlProcessor {
 				// Reset the counter
 				vehicleState.setBadAssignmentsInARow(0);
 
+				// If vehicle is delayed as indicated by not making forward 
+				// progress then store that in the vehicle state
+				handlePossibleVehicleDelay(vehicleState);
+				
 				// Determine and store the schedule adherence. If schedule
 				// adherence is bad then try matching vehicle to assignment
 				// again. This can make vehicle unpredictable if can't match
@@ -1110,13 +1224,15 @@ public class AvlProcessor {
 	 *            The new AVL report to be processed
 	 */
 	public void processAvlReport(AvlReport avlReport) {
+		IntervalTimer timer = new IntervalTimer(); 
+
 		// Handle special case where want to not use assignment from AVL
 		// report, most likely because want to test automatic assignment
 		// capability
-		if (AutoBlockAssigner.getInstance().ignoreAvlAssignments()
+		if (AutoBlockAssigner.ignoreAvlAssignments()
 				&& !avlReport.isForSchedBasedPreds()) {
 			logger.debug("Removing assignment from AVL report because "
-					+ "transitime.core.ignoreAvlAssignments=true. {}",
+					+ "transitime.autoBlockAssigner.ignoreAvlAssignments=true. {}",
 					avlReport);
 			avlReport.setAssignment(null, AssignmentType.UNSET);
 		}
@@ -1127,10 +1243,8 @@ public class AvlProcessor {
 				+ "AvlProcessor processing {}", avlReport);
 
 		// Record when the AvlReport was actually processed. This is done here
-		// so
-		// that the value will be set when the avlReport is stored in the
-		// database
-		// using the DbLogger.
+		// so that the value will be set when the avlReport is stored in the
+		// database using the DbLogger.
 		avlReport.setTimeProcessed();
 
 		// Keep track of last AVL report processed so can determine if AVL
@@ -1160,6 +1274,8 @@ public class AvlProcessor {
 
 		// Do the low level work of matching vehicle and then generating results
 		lowLevelProcessAvlReport(avlReport, false);
+		
+		logger.debug("Processing AVL report took {}msec", timer);
 	}
 
 }

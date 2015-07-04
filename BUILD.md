@@ -1,9 +1,9 @@
 The software is made up of three modules which can each be built with maven.
 
-The core fucntionality is in the transiTime project. The REST api is in transiTimeApi and the user Web applicaton is in transiTimeWebapp.
+The core fucntionality is in the transitime project. The REST api is in transitimeApi and the user Web applicaton is in transitimeWebapp.
 
-1. transitTime
-2. transitTimeApi
-3. transitTimeWebApp
+1. transitime
+2. transitimeApi
+3. transitimeWebapp
 
-The project can be built from the root "core" directory by running "mvn install -skipTests".
+The project can be built from the root "core" directory by running "mvn install -DskipTests".

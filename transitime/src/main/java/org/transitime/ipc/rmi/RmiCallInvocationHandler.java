@@ -247,21 +247,29 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				// moved. For this situation want to create new RMI stub
 				// and try again, if not too many tries.
 				// Note that this can in turn throw RemoteException or NotBoundException
-				delegate = ClientFactory.getRmiStub(info);
+				boolean updateHostName = true;
+				delegate = ClientFactory.getRmiStub(info, updateHostName);
 	
 				// If this is already the second try give up. Trying yet again
 				// right away is most likely not going to help with a networking
 				// problem or the server not running.
-				if (tryNumber >= 2)
-					logger.error("Remote method {}.{}() for project {} "
-							+ "encountered exception. {}. Gave up after "
-							+ "second attempt. Does security allow access "
-							+ "to the secondary RMI port?",
-							info.getClassName(), method.getName(), 
-							info.getAgencyId(), e.getMessage());
-					throw new RemoteException(e.getMessage() +  
-							". Gave up after second attempt. Does security "
-							+ "allow access to the secondary RMI port?");
+				if (tryNumber >= 2) {
+					String message = "Remote method "
+						+ info.getClassName() + "."
+						+ method.getName() + "() for agency " 
+						+ info.getAgencyId() + " encountered exception. "
+						+ e.getMessage() + ". "	+ e.getCause().getMessage()
+						+ ". Gave up after second attempt. Does security allow "
+						+ "access to the secondary RMI port? "
+						+ "Is the Java system property java.rmi.server.hostname "
+						+ "set to the proper host name? "
+						+ "Is the Java system "
+						+ "property transitime.rmi.timeoutSec timeout time of "
+						+ ClientFactory.getTimeoutSec()	+ " seconds adequate?";
+					
+					logger.error(message);
+					throw new RemoteException(message);
+				}
 			} catch (ConcurrentAccessException e) {
 				// Encountered a ConcurrentAccessException which means the RMI
 				// call could not be done. Throw a RemoteException since that is
@@ -376,9 +384,10 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 				logger.debug("When calling remote method {}.{}() for agency {} "
 						+ "encountered exception {}.",
 						info.getClassName(), method.getName(), 
-						info.getAgencyId(), causeException.getMessage());
+						info.getAgencyId(), causeException);
 				throw causeException;
 			}
 		}		
 	}
 	
+}

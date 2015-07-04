@@ -39,14 +39,11 @@ public class RmiConfig {
 	public static String rmiHost() {
 		return rmiHost.getValue();
 	}
-	/* Sean Og Crudden set the default for server to 127.0.0.1 
-	 * TODO this needs to be read from the config file for the RmiClient. 
-	 * This will require adding the config file to the command line options for RMIQuery. */
 	private static StringConfigValue rmiHost =
 			new StringConfigValue("transitime.rmi.rmiHost",
-					"127.0.0.1",
+					null,
 					"For a client that needs to connect to an agency server. "
-					+ "Usually would get RMI host name from the WebAgencies "
+					+ "When null system gets RMI host name from the WebAgencies "
 					+ "table in the web database. But when doing simple calls "
 					+ "using this parameter eliminates the need to connect to "
 					+ "the web database, speeding up testing.");

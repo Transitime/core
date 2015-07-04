@@ -2,8 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>transitime</groupId>
-	<artifactId>transitime</artifactId>
+	<artifactId>transitimeCore</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	
+	<properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+	
 	<pluginRepositories>
 		<pluginRepository>
 			<id>onejar-maven-plugin.googlecode.com</id>
@@ -11,70 +16,106 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
+		<!-- Database related, including c3p0 production quality connector.
+                     Note: have found that can have problems if don't use similar
+		     versions. Can have trouble finding the c3p0 connection pooler
+		     for example if use old hibernate-core but new c3p0. -->
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk</artifactId>
-			<version>1.9.13</version>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.35</version>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.3-1103-jdbc41</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>4.2.2.Final</version>
+			<version>4.3.9.Final</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.hibernate.common</groupId>
 			<artifactId>hibernate-commons-annotations</artifactId>
-			<version>4.0.2.Final</version>
+			<version>4.0.5.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>4.3.9.Final</version>
+		</dependency>		
 
+		<!-- hibernate-core loads in really old version of xml-apis so
+                     load in newer version explicitly. Otherwise get problems
+		     with the Node class. -->
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<version>1.4.01</version>
+		</dependency>		
+
+		<!-- For logging -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 			<version>1.1.2</version>
 		</dependency>
-
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.2</version>
+		</dependency>
 
+		<!-- So can use Amazon API for archiving files and such -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk</artifactId>
+			<version>1.9.13</version>
+		</dependency>
+
+		<!-- For many java utilities, such as StringEscapeUtils -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.3.2</version>
 		</dependency>
 
+		<!-- For processing XML files, such as for AVL feeds -->
 		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>jdom</artifactId>
 			<version>2.0.2</version>
 		</dependency>
 
-
+		<!-- For GTFS-realtime feed -->
 		<dependency>
-			<groupId>c3p0</groupId>
-			<artifactId>c3p0</artifactId>
-			<version>0.9.1.2</version>
-		</dependency>		
-
-		<dependency>
-			<groupId>com.google.protobuf</groupId>
-			<artifactId>protobuf-java</artifactId>
-			<version>2.4.0a</version>
+			<groupId>com.google.transit</groupId>
+			<artifactId>gtfs-realtime-bindings</artifactId>
+			<version>0.0.4</version>
 		</dependency>
 
+		<!-- For more easily handling command line options -->
 		<dependency>
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
 			<version>1.2</version>
 		</dependency>
+
+		<!-- I believe not needed
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
 			<version>3.6.2</version>
 		</dependency>
+		-->
+
+		<!-- For JMS for fancy handling of AVL feeds -->
 		<dependency>
 			<groupId>org.hornetq</groupId>
 			<artifactId>hornetq-core-client</artifactId>
@@ -86,61 +127,75 @@
 			<version>2.3.25.Final</version>
 		</dependency>
 		
+		<!-- For Amigocloud web sockets AVL feed  -->
+		<dependency>
+    		<groupId>org.java-websocket</groupId>
+   		 	<artifactId>Java-WebSocket</artifactId>
+    		<version>1.3.0</version>
+		</dependency>
+ 
+ 		<!--  For processing JSON. Needed for Amigocloud and other JSON based AVL feeds.
+ 		      NOTE: the version 20141113 does not work with Java 1.7, which is what is
+ 		      still the normal version of Java for AWS, at least as of June 2015. Need
+ 		      to use old version 20140107 which was compiled with Java 1.7 instead
+ 		      of Java 1.8 -->
+ 		<dependency>
+		    <groupId>org.json</groupId>
+    		<artifactId>json</artifactId>
+    		<version>20140107</version>
+		</dependency>
 		
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.xerial.snappy</groupId>
-			<artifactId>snappy-java</artifactId>
-			<version>1.0.4</version>
-		</dependency>
+		<!-- For parsing CSV files, such as GTFS ones -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
 			<version>1.1</version>
 		</dependency>
+
+		<!-- For concurrency annotations like @Immutable and @ThreadSave
+		     from the "Concurrency in Practice" book need library -->
 		<dependency>
 			<groupId>net.jcip</groupId>
 			<artifactId>jcip-annotations</artifactId>
 			<version>1.0</version>
 		</dependency>
+
+		<!-- For encryption/decryption -->
 		<dependency>
 			<groupId>org.jasypt</groupId>
 			<artifactId>jasypt</artifactId>
 			<version>1.9.2</version>
 		</dependency>
-		
+	
+		<!-- So can send out monitoring related e-mails -->	
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 			<version>1.4.7</version>
 		</dependency>
+
+		<!-- JUnit testing of course -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.35</version>
-		</dependency>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>9.3-1103.jdbc41</version>
-		</dependency>
 
+		<!-- Servlet related functionality -->
+                <dependency>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>javax.servlet-api</artifactId>
+                        <version>3.0.1</version>
+                        <scope>provided</scope>
+                </dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>2.5.1</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>

@@ -19,7 +19,6 @@ package org.transitime.db.webstructs;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -91,7 +90,10 @@ public class WebAgency {
 	@Transient
 	private Agency agency;
 
-	// Cache
+	@Transient
+	private String agencyName;
+	
+	// Cache. Keyed on agencyId
 	static private Map<String, WebAgency> webAgencyMapCache;
 	static private long webAgencyMapCacheReadTime = 0;
 	static private List<WebAgency> webAgencyOrderedList;
@@ -164,7 +166,9 @@ public class WebAgency {
 	/**
 	 * Returns the first (there can be multiple) GTFS agency object for the
 	 * specified agencyId. The GTFS agency object is cached. First time it is
-	 * accessed it is read from server via RMI.
+	 * accessed it is read from server via RMI. If can't connect via RMI then
+	 * will timeout after a few seconds. This means that any call to this
+	 * method can take several seconds if there is a problem.
 	 * 
 	 * @return The Agency object, or null if can't access the agency via RMI
 	 */
@@ -200,13 +204,25 @@ public class WebAgency {
 	}
 	
 	/**
-	 * Returns the GTFS agency name. It is obtained via RMI as necessary.
+	 * Returns the GTFS agency name. It is obtained via RMI the first time this
+	 * method is access for an agency. Subsequent times a cached value is
+	 * returned. If cannot connect to RMI then the agencyId is returned.
 	 * 
 	 * @return The GTFS agency name
 	 */
 	public String getAgencyName() {
+		if (agencyName != null)
+			return agencyName;
+		
+		// Get agency object via RMI
 		Agency agency = getAgency();
-		return agency != null ? agency.getName() : null;
+		
+		// Get the agency name. If couldn't connect via RMI then use the
+		// agency ID. Cache the results so don't try to keep accessing via
+		// RMI, which is especially important if agency isn't running which
+		// means that would hang for a few seconds each call until timed out.
+		agencyName = agency != null ? agency.getName() : agencyId;
+		return agencyName;
 	}
 	
 	/**
@@ -257,35 +273,74 @@ public class WebAgency {
 	}
 
 	/**
-	 * If the cache of WebAgency objects not read in for a few minutes then
-	 * reads the WebAgency objects from the db. Synchronized since doing
-	 * multiple operations. Methods that call this method therefore also need to
-	 * be synchronized.
+	 * If the cache of WebAgency objects not read in for a while then reads the
+	 * WebAgency objects from the db.
+	 * <p>
+	 * Not synchronized since webAgencyMapCache is set in a single operation and
+	 * it is OK if read db twice on rare occurrence.
+	 * 
+	 * @param rereadIfOlderThanMsecs
+	 *            If web agencies read from db more than this time ago then they
+	 *            are read in again.
+	 * @return True if data was reread from db
 	 */
-	static synchronized private void updateCacheIfShould() {
+	static private boolean updateCacheIfShould(long rereadIfOlderThanMsecs) {
 		// If haven't read in web agencies yet or in a while, do so now
 		if (webAgencyMapCache == null
-				|| webAgencyOrderedList == null
-				|| System.currentTimeMillis() - webAgencyMapCacheReadTime > 5 * Time.MS_PER_MIN) {
+				|| System.currentTimeMillis() - webAgencyMapCacheReadTime > rereadIfOlderThanMsecs) {
 			webAgencyMapCache = getMapFromDb();
 			webAgencyMapCacheReadTime = System.currentTimeMillis();
 			
-			webAgencyOrderedList = new ArrayList<WebAgency>(webAgencyMapCache.values());
-			Collections.sort(webAgencyOrderedList, new Comparator<WebAgency>() {
-	            @Override
-	            public int compare(WebAgency o1, WebAgency o2) {
-	            	// Handle possibility of null agency name
-	            	String agencyName1 = o1.getAgencyName();
-	            	if (agencyName1 == null)
-	            		agencyName1 = "";
-	            	String agencyName2 = o2.getAgencyName();
-	            	if (agencyName2 == null)
-	            		agencyName2 = "";  
-
-	                return agencyName1.compareTo(agencyName2);
-	            }
-	        });			
+			// Read data from db so return true
+			return true;
+		} else {
+			// Didn't have to read data from db so return false
+			return false;
 		}
+	}
+	
+	/**
+	 * Gets list of web agencies, ordered by their agency names. Uses cached
+	 * version if possible. But if data not read from db since more than 5
+	 * minutes ago then will reread database. This way when this method is used
+	 * to indicate which agencies are available the list will automatically show
+	 * additions or deletions.
+	 * <p>
+	 * Not synchronized since webAgencyOrderedList is set in a single operation
+	 * and it is OK if read twice on rare occurrence.
+	 * 
+	 * @return List of WebAgency objects ordered by their agency names.
+	 */
+	static synchronized public List<WebAgency> getCachedOrderedListOfWebAgencies() {
+		// Reread web agencies from db if enough time has elapsed
+		boolean reread = updateCacheIfShould(5 * Time.MIN_IN_MSECS);
+		
+		if (reread || webAgencyOrderedList == null) {
+			List<WebAgency> webAgencyOrderedListTemp =
+					new ArrayList<WebAgency>(webAgencyMapCache.values());
+			
+			// Sort the list
+			Collections.sort(webAgencyOrderedListTemp,
+					new Comparator<WebAgency>() {
+						@Override
+						public int compare(WebAgency o1, WebAgency o2) {
+							// Handle possibility of null agency name
+							String agencyName1 = o1.getAgencyName();
+							if (agencyName1 == null)
+								agencyName1 = "";
+							String agencyName2 = o2.getAgencyName();
+							if (agencyName2 == null)
+								agencyName2 = "";
+
+							return agencyName1.compareTo(agencyName2);
+						}
+					});
+			
+			// Now that the list has been fully created set the member variable
+			webAgencyOrderedList = webAgencyOrderedListTemp;
+		}
+		
+		return webAgencyOrderedList;
 	}
 	
 	/**
@@ -295,48 +350,34 @@ public class WebAgency {
 	 * agencies that are added yet will not be reading from the database for
 	 * every page hit that needs list of agencies. Also, agencies automatically
 	 * removed.
-	 * <p>
-	 * Synchronized because calling updateCacheIfShould() which needs to be 
-	 * synchronized.
 	 * 
+	 * @param rereadIfOlderThanMsecs
+	 *            If web agencies read from db more than this time ago then they
+	 *            are read in again.
 	 * @return the cached map of WebAgency objects
 	 */
-	static synchronized private Map<String, WebAgency> getWebAgencyMapCache() {
-		updateCacheIfShould();
+	static private Map<String, WebAgency> getWebAgencyMapCache(
+			long rereadIfOlderThanMsecs) {
+		updateCacheIfShould(rereadIfOlderThanMsecs);
 
 		return webAgencyMapCache;
 	}
 	
 	/**
-	 * Returns collection of all agencies sorted by agency name. Values are
-	 * cached so won't be automatically updated when agencies are changed in the
-	 * database. Will update cache if haven't done so in 5 minutes. This way
-	 * will automatically get new agencies that are added yet will not be
-	 * reading from the database for every page hit that needs list of agencies.
-	 * <p>
-	 * Synchronized because calling updateCacheIfShould() which needs to be 
-	 * synchronized.
-	 * 
-	 * @return Collection of the WebAgency objects configured in db
-	 */
-	static synchronized public List<WebAgency> getCachedWebAgencies() {
-		updateCacheIfShould();
-
-		return webAgencyOrderedList;
-	}
-	
-	/**
-	 * Gets specified WebAgency from the cache. If the agency is not defined in
-	 * the cache then will reread the agencies from the database. In this way
-	 * can add an agency to the database and the system will automatically pick
-	 * up the new agency. 
+	 * Gets specified WebAgency from the cache. Rereads WebAgencies from
+	 * db if cache is older than rereadIfOlderThanMsecs.
 	 * 
 	 * @param agencyId
+	 * @param rereadIfOlderThanMsecs
+	 *            If web agencies read from db more than this time ago then they
+	 *            are read in again.
 	 * @return The specified WebAgency, or null if it doesn't exist.
 	 */
-	static public WebAgency getCachedWebAgency(String agencyId) {
+	static public WebAgency getCachedWebAgency(String agencyId,
+			long rereadIfOlderThanMsecs) {
 		// Get the web agency from the cache
-		WebAgency webAgency = getWebAgencyMapCache().get(agencyId);
+		WebAgency webAgency =
+				getWebAgencyMapCache(rereadIfOlderThanMsecs).get(agencyId);
 
 		// If web agency was not in cache update the cache and try again
 		if (webAgency == null) {
@@ -344,24 +385,21 @@ public class WebAgency {
 					+ "database {}. Will reload data from database to see if "
 					+ "agency only recently added.", 
 					agencyId, getWebAgencyDbName());
-			webAgencyMapCache = getMapFromDb();
-			webAgencyMapCacheReadTime = System.currentTimeMillis();
-			webAgency = webAgencyMapCache.get(agencyId);
 		}
 
 		// Return the possibly null web agency
 		return webAgency;
 	}
-
+	
 	/**
-	 * Returns collection of all agencies as read from database. No caching is
-	 * done. The database is read each time this method is called, so it should
-	 * not be used for every API call for example.
+	 * Gets specified WebAgency from the cache. Doesn't cause the cache of
+	 * WebAgencies to be reloaded from the db.
 	 * 
-	 * @return
+	 * @param agencyId
+	 * @return The specified WebAgency, or null if it doesn't exist.
 	 */
-	static public Collection<WebAgency> getWebAgencies() {
-		return getMapFromDb().values();
+	static public WebAgency getCachedWebAgency(String agencyId) {
+		return getCachedWebAgency(agencyId, Integer.MAX_VALUE);
 	}
 	
 	@Override
