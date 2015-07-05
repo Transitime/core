@@ -1072,7 +1072,7 @@ public class AvlProcessor {
 	 *            Set to true if this method is calling itself. Used to make
 	 *            sure that any bug can't cause infinite recursion.
 	 */
-	public void lowLevelProcessAvlReport(AvlReport avlReport,
+	private void lowLevelProcessAvlReport(AvlReport avlReport,
 			boolean rescursiveCall) {
 		// Determine previous state of vehicle
 		String vehicleId = avlReport.getVehicleId();
