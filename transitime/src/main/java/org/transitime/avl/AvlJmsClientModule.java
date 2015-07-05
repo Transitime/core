@@ -153,7 +153,7 @@ public class AvlJmsClientModule extends Module {
 			try {
 				// Actually process the data
 				processAVLDataFromJMSTopic();		
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error(Markers.email(),
 						"Unexpected exception occurred in AvlClient", e);
 			}

@@ -8,16 +8,22 @@ body {
 	margin: 0px 0px 10px 0px;
 }
 
+/* For the header on each page */
 #header {
-    /* Experiment with this top to bottom gradient which might look better */
-    background: linear-gradient(#0055aa, white); /* Standard syntax */
-    
+    background: linear-gradient(to right, #009933 , #4DDB4D);
 	margin-left: 0px;
 	margin-right: 0px;
 	padding: 10px;	
-	font-weight: normal;
-	font-size: x-large;
+	font-weight: 100;
+	font-size: xx-large;
+	color: white;
+	text-shadow: 2px 2px 4px #0D6E0E;
+	box-shadow: 0px 0px 10px black;
 }
+/* For header need to override link styles */
+#header a:link { color: white;}
+#header a:visited { color: white;}
+#header a:hover { font-weight: normal;}
 
 #mainDiv {
 	margin-left: auto;
@@ -39,10 +45,10 @@ body {
 	width: 350px;
 	margin-left: auto;
 	margin-right: auto;
+	line-height: 140%;
 }
 
-/* Make links look better. No underlining, keep colors consistent,
-   but bold when hovered over. */
+/* Make links look better. No underlining, keep colors consistent. */
 a:link {
 	text-decoration: none;
 	color: #0000a6;

@@ -22,6 +22,7 @@ import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.logging.Markers;
 
 /**
  * An Executor but limits how many tasks can be queued. If queue is full and
@@ -85,12 +86,37 @@ public class BoundedExecutor {
 					try {
 						// Actually call the run() method for the command
 						command.run();
-					} catch (Throwable e) {
+					} catch (Throwable t) {
 						// Need to catch (and log) exception. Otherwise 
 						// exception would bubble upwards and get infinite 
 						// number of threads, at least if have a breakpoint
 						// in Eclipse.
-						logger.error("Exception occurred in thread. ", e);
+						logger.error("Exception occurred in thread. ", t);
+						// Log the problem but do so within a try/catch in case it is
+						// an OutOfMemoryError and need to exit even if get another
+						// OutOfMemoryError when logging.
+						try {
+							t.printStackTrace();
+							if (t instanceof OutOfMemoryError) {
+								logger.error(Markers.email(),
+										"OutOfMemoryError occurred in "
+										+ "BoundedExecutor so "
+										+ "terminating application", t);
+							} else {
+								logger.error(Markers.email(),
+										"Unexpected Throwable occurred in "
+										+ "BoundedExecutor", t);
+							}
+						} catch (Throwable t2) {
+						}
+						
+						// OutOfMemoryErrors are really serious. Don't want application to
+						// continue in some kind of crippled mode that monitoring has a 
+						// difficult time detecting. Therefore exit the application so that
+						// can be automatically restarted.
+						if (t instanceof OutOfMemoryError) {
+							System.exit(-1);
+						}
 					} finally {
 						semaphore.release();
 					}

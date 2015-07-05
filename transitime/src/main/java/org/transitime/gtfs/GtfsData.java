@@ -16,6 +16,7 @@
  */
 package org.transitime.gtfs;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -171,6 +173,10 @@ public class GtfsData {
 	// shapeId for different trip patterns.
 	private Set<String> tripPatternIdSet;
 	
+	// So can know which service IDs have trips so that can remove
+	// calendars for ones that do not.
+	private Set<String> serviceIdsWithTrips;
+	
 	// List of all the blocks, random order
 	private List<Block> blocks;
 
@@ -192,11 +198,9 @@ public class GtfsData {
 	private List<Transfer> transfers;
 	
 	// This is the format that dates are in for CSV. Should
-	// share this formatter. Note that it will not be set until
-	// the timezone is known and createDateFormatter() is called.
-	// This is done when the agency.txt file with the timezone is
-	// read in and createDateFormatter() is called.
-	protected SimpleDateFormat dateFormatter = null;
+	// be accessed only through getDateFormatter() to make
+	// sure that it is initialized.
+	private SimpleDateFormat _dateFormatter = null;
 
 	// So can process only routes that match a regular expression.
 	// Note, see http://stackoverflow.com/questions/406230/regular-expression-to-match-text-that-doesnt-contain-a-word
@@ -328,26 +332,29 @@ public class GtfsData {
 	
 	/**
 	 * Creates the static dateFormatter using the specified timezone. The
-	 * timezone is obtained from the first agency in the agency.txt file.
-	 * 
-	 * @param timezoneName
+	 * timezone name is obtained from the first agency in the agency.txt file.
 	 */
-	private void createDateFormatter() {
-		// Read in the agency.txt GTFS data from file
-		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
-		List<GtfsAgency> gtfsAgencies = agencyReader.get();
+	private DateFormat getDateFormatter() {
+		// If already created then return cached version for efficiency
+		if (_dateFormatter != null)
+			return _dateFormatter;
 		
+		// The dateFormatter not yet read in.
+		// First, read in the agency.txt GTFS data from file
+		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
+		List<GtfsAgency> gtfsAgencies = agencyReader.get();		
 		if (gtfsAgencies.isEmpty()) {
 			logger.error("Could not read in {}/agency.txt file, which is "
 					+ "needed for createDateFormatter()", gtfsDirectoryName);
 			System.exit(-1);
-		}
-		
+		}		
 		String timezoneName = gtfsAgencies.get(0).getAgencyTimezone();
 		
+		// Create the dateFormatter with the proper timezone
 		TimeZone timezone = TimeZone.getTimeZone(timezoneName);
-		dateFormatter =	new SimpleDateFormat("yyyyMMdd");
-		dateFormatter.setTimeZone(timezone);		
+		_dateFormatter =	new SimpleDateFormat("yyyyMMdd");
+		_dateFormatter.setTimeZone(timezone);
+		return _dateFormatter;
 	}
 	
 
@@ -1344,6 +1351,7 @@ public class GtfsData {
 		tripPatternsByTripIdMap = new HashMap<String, TripPattern>();
 		tripPatternsByRouteIdMap = new HashMap<String, List<TripPattern>>();
 		tripPatternIdSet = new HashSet<String>();
+		serviceIdsWithTrips = new HashSet<String>();
 		pathsMap = new HashMap<String, StopPath>();
 		
 		// For each trip in the stop_times.txt file ...
@@ -1363,6 +1371,9 @@ public class GtfsData {
 						+ "has been discarded.", tripId);
 				continue;
 			}
+			
+			// Keep track of service IDs so can filter unneeded calendars
+			serviceIdsWithTrips.add(trip.getServiceId());
 			
 			// All the schedule times are available in gtfsStopTimesForTripMap 
 			// so add them all at once to the Trip. This also sets the startTime 
@@ -1754,9 +1765,10 @@ public class GtfsData {
 		List<GtfsCalendar> gtfsCalendars = calendarReader.get();
 		
 		for (GtfsCalendar gtfsCalendar : gtfsCalendars) {
-			// Create the Calendar object and put it into the array
-			Calendar calendar = new Calendar(revs.getConfigRev(), gtfsCalendar,
-					dateFormatter);
+			// Create the Calendar object and put it into the array)
+			Calendar calendar =
+					new Calendar(revs.getConfigRev(), gtfsCalendar,
+							getDateFormatter());
 			calendars.add(calendar);
 		}		
 					
@@ -1781,15 +1793,19 @@ public class GtfsData {
 		
 		for (GtfsCalendarDate gtfsCalendarDate : gtfsCalendarDates) {
 			// Create the CalendarDate object and put it into the array
-			CalendarDate calendarDate = new CalendarDate(revs.getConfigRev(),
-					gtfsCalendarDate, dateFormatter);
+			CalendarDate calendarDate =
+					new CalendarDate(revs.getConfigRev(), gtfsCalendarDate,
+							getDateFormatter());
 			calendarDates.add(calendarDate);
-		}		
-					
+		}
+		
 		// Let user know what is going on
 		logger.info("Finished processing calendar_dates.txt data. ");
 	}
 
+	/**
+	 * Creates validServiceIds member by going through calendars 
+	 */
 	private void processServiceIds() {
 		// Make sure needed data is already read in. 
 		if (calendars == null) {
@@ -1815,6 +1831,44 @@ public class GtfsData {
 						"configuration. {}",
 						calendar.getServiceId(), calendar);
 			}
+		}
+	}
+	
+	/**
+	 * Get rid of calendars and calendar dates that don't have any trips
+	 * associated to try to pare down number of service IDs. Especially useful
+	 * when processing just part of an agency config, like MBTA commuter rail.
+	 */
+	private void trimCalendars() {
+		// Make sure needed data is already read in. 
+		if (serviceIdsWithTrips == null) {
+			logger.error("GtfsData.processStopTimesData() must be called " +
+					"before GtfsData.trimCalendars() is. Exiting.");
+			System.exit(-1);
+		}
+		
+		// Trim calendar list
+		Iterator<Calendar> calendarIter = calendars.iterator();
+		while (calendarIter.hasNext()) {
+			Calendar calendar = calendarIter.next();
+			if (!serviceIdsWithTrips.contains(calendar.getServiceId()))
+				calendarIter.remove();
+		}
+		
+		// Trim calendar date list
+		Iterator<CalendarDate> calendarDateIter = calendarDates.iterator();
+		while (calendarIter.hasNext()) {
+			CalendarDate calendarDate = calendarDateIter.next();
+			if (!serviceIdsWithTrips.contains(calendarDate.getServiceId()))
+				calendarDateIter.remove();
+		}
+
+		// Trim serviceIds list
+		Iterator<String> serviceIdIter = validServiceIds.iterator();
+		while (serviceIdIter.hasNext()) {
+			String serviceId = serviceIdIter.next();
+			if (!serviceIdsWithTrips.contains(serviceId))
+				serviceIdIter.remove();
 		}
 	}
 	
@@ -2299,10 +2353,6 @@ public class GtfsData {
 		logger.info("Processing GTFS data from {} ...",
 				gtfsDirectoryName);
 
-		// Need a date formatter using timezone before some data that
-		// has dates is processed. Includes calendars and calendar_dates.
-		createDateFormatter();
-		
 		// Note. The order of how these are processed in important because
 		// some data sets rely on others in order to be fully processed.
 		// If the order is wrong then the methods below will log an error and
@@ -2335,6 +2385,12 @@ public class GtfsData {
 		// stops that are actually not used by the subset of trips. 
 		// Therefore trim out the unused stops.
 		trimStops();
+		
+		// Get rid of calendars and calendar dates that don't have any trips
+		// associated to try to pare down number of service IDs. Especially 
+		// useful when processing just part of an agency config, like
+		// MBTA commuter rail.
+		trimCalendars();
 		
 		// debugging
 		//outputPathsAndStopsForGraphing("8699");

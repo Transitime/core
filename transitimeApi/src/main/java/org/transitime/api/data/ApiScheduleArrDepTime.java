@@ -32,19 +32,25 @@ import org.transitime.utils.Time;
 public class ApiScheduleArrDepTime {
 
 	@XmlAttribute
-	private final String arrivalTime;
+	private String arrivalTime;
 
 	@XmlAttribute
-	private final String departureTime;
+	private String departureTime;
 
 	@XmlAttribute
-	private final String stopId;
+	private String stopId;
 
 	@XmlAttribute
-	private final String stopName;
+	private String stopName;
 
 	/********************** Member Functions **************************/
 
+    /**
+     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+     * "MessageBodyWriter not found for media type=application/json" exception.
+     */
+	protected ApiScheduleArrDepTime() {}
+	
 	public ApiScheduleArrDepTime(IpcSchedTimes ipcScheduleTimes) {
 		Integer arrivalInt = ipcScheduleTimes.getArrivalTime();
 		arrivalTime = arrivalInt == null ? null : Time.timeOfDayStr(arrivalInt);

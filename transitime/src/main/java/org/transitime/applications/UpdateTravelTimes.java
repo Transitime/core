@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.ConfigFileReader;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.core.travelTimes.TravelTimeInfoMap;
 import org.transitime.core.travelTimes.TravelTimeInfoWithHowSet;
@@ -56,6 +57,14 @@ import org.transitime.utils.Time;
  * 
  */
 public class UpdateTravelTimes {
+	
+	// Read in configuration files. This should be done statically before
+	// the logback LoggerFactory.getLogger() is called so that logback can
+	// also be configured using a transitime config file. The files are
+	// specified using the java system property -Dtransitime.configFiles .
+	static {
+		ConfigFileReader.processConfig();
+	}
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(UpdateTravelTimes.class);
@@ -340,6 +349,7 @@ public class UpdateTravelTimes {
 		} catch (Exception e) {
 			if (tx != null)
 				tx.rollback();
+			logger.error("Unexpected exception occurred", e);
 			throw e;
 		} finally {
 			// Close up db connection

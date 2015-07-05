@@ -238,7 +238,7 @@ public class ScheduleBasedTravelTimesProcessor {
 									- (int) (distanceBetweenScheduleStops / maxSpeedMetersPerMsec);
 					
 					logger.warn("When determining schedule based travel "
-							+ "times for routeId={} routeShortName={} " 
+							+ "times for routeId={} " 
 							+ "tripId={} stopPathIndex={} "
 							+ "stopId={} stopName=\"{}\" "
 							+ "distanceBetweenScheduleStops={} "
@@ -246,7 +246,7 @@ public class ScheduleBasedTravelTimesProcessor {
 							+ "reducing stop wait time to {} msec "
 							+ "per stop so that maxSpeedKph={} kph is "
 							+ "not violated.", 
-							trip.getRouteId(), trip.getRouteShortName(),
+							trip.getRouteId(),
 							trip.getId(), stopPathWithScheduleTimeIndex, 
 							tripPattern.getStopId(stopPathWithScheduleTimeIndex), 
 							gtfsData.getStop(tripPattern.getStopId(stopPathWithScheduleTimeIndex)).getName(),
@@ -259,7 +259,7 @@ public class ScheduleBasedTravelTimesProcessor {
 					// even if wait time was reduced to 0 the travel time 
 					// based on schedule would be too high.
 					logger.error("When determining schedule based travel "
-							+ "times for routeId={} routeShortName={} " 
+							+ "times for routeId={} " 
 							+ "tripId={} stopPathIndex={} "
 							+ "stopId={} stopName=\"{}\" "
 							+ "distanceBetweenScheduleStops={} " 
@@ -267,7 +267,7 @@ public class ScheduleBasedTravelTimesProcessor {
 							+ "clamping schedule based travel "
 							+ "speed to {} kph for instead of the "
 							+ "calculated speed={} kph", 
-							trip.getRouteId(), trip.getRouteShortName(),
+							trip.getRouteId(), 
 							trip.getId(), stopPathWithScheduleTimeIndex, 
 							tripPattern.getStopId(stopPathWithScheduleTimeIndex), 
 							gtfsData.getStop(tripPattern.getStopId(stopPathWithScheduleTimeIndex)).getName(),

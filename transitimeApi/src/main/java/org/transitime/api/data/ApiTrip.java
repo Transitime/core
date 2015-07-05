@@ -17,10 +17,14 @@
 
 package org.transitime.api.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.transitime.ipc.data.IpcSchedTimes;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.utils.Time;
 
@@ -76,11 +80,15 @@ public class ApiTrip {
 	@XmlAttribute
 	private Boolean noSchedule;
 	
-	@XmlElement
-	private ApiScheduleTimes scheduleTimes;
+	@XmlElement(name = "schedule")
+	private List<ApiScheduleArrDepTime> scheduleTimes;
 
 	/********************** Member Functions **************************/
 
+    /**
+     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+     * "MessageBodyWriter not found for media type=application/json" exception.
+     */
 	protected ApiTrip() {
 	}
 
@@ -108,6 +116,11 @@ public class ApiTrip {
 		shapeId = ipcTrip.getShapeId();
 
 		noSchedule = ipcTrip.isNoSchedule() ? true : null;
-		scheduleTimes = new ApiScheduleTimes(ipcTrip);
+
+		scheduleTimes = new ArrayList<ApiScheduleArrDepTime>();
+		for (IpcSchedTimes ipcScheduleTimes : ipcTrip.getScheduleTimes()) {
+			scheduleTimes.add(new ApiScheduleArrDepTime(ipcScheduleTimes));
+		}
+
 	}
 }

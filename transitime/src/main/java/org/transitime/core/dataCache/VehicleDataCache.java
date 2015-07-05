@@ -74,7 +74,8 @@ public class VehicleDataCache {
     
     // Keeps track of vehicle static config info. If new vehicle encountered
     // in AVL feed then this map is updated and the new VehicleConfig is also
-    // written to the database.
+    // written to the database. Using HashMap instead of ConcurrentHashMap
+    // since synchronizing puts anyways.
     private Map<String, VehicleConfig> vehicleConfigsMap =
     		new HashMap<String, VehicleConfig>();
     

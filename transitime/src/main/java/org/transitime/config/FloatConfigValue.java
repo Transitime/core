@@ -49,6 +49,6 @@ public class FloatConfigValue extends ConfigValue<Float> {
 	
 	@Override 
 	protected Float convertFromString(List<String> dataList) {
-		return Float.valueOf(dataList.get(0));
+		return Float.valueOf(dataList.get(0).trim());
 	}	
 }

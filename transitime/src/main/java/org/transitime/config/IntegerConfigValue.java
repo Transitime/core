@@ -47,6 +47,6 @@ public class IntegerConfigValue extends ConfigValue<Integer> {
 	
 	@Override 
 	protected Integer convertFromString(List<String> dataList) {
-		return Integer.valueOf(dataList.get(0));
+		return Integer.valueOf(dataList.get(0).trim());
 	}	
 }

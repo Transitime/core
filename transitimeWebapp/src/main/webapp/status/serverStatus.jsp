@@ -1,3 +1,4 @@
+<%@page import="org.transitime.db.webstructs.WebAgency"%>
 <%@page import="java.rmi.RemoteException"%>
 <%@page import="org.transitime.ipc.interfaces.ServerStatusInterface"%>
 <%@page import="org.transitime.ipc.clients.ServerStatusInterfaceFactory"%>
@@ -30,7 +31,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
-<div id="title">Server Status</div>
+<div id="title">Server Status for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 
 <%
 ServerStatusInterface serverStatusInterface = 

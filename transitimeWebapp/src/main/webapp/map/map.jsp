@@ -35,6 +35,13 @@
   <link href="<%= request.getContextPath() %>/select2/select2.css" rel="stylesheet"/>
   <script src="<%= request.getContextPath() %>/select2/select2.min.js"></script>
 
+  <!--  Override the body style from the includes.jsp/general.css files -->
+  <style>
+    body {
+	  margin: 0px;
+    }
+  </style>
+  
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   
   <title>Transitime Map</title>
@@ -118,33 +125,33 @@ function predictionCallback(preds, status) {
 		return;
 	
 	// There will be predictions for just a single route/stop
-	var routeStop = preds.routeStop[0];
+	var routeStopPreds = preds.predictions[0];
 	
 	// Set timeout to update predictions again in few seconds
-	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStop.rShortName, routeStop.sId);
+	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStopPreds.rShortName, routeStopPreds.sId);
 
 	// Add route and stop info
-	var content = '<b>Route:</b> ' + routeStop.rName + '<br/>' 
-		+ '<b>Stop:</b> ' + routeStop.sName + '<br/>';
+	var content = '<b>Route:</b> ' + routeStopPreds.rName + '<br/>' 
+		+ '<b>Stop:</b> ' + routeStopPreds.sName + '<br/>';
 	if (verbose)
-		content += '<b>Stop Id:</b> ' + routeStop.sId + '<br/>';
+		content += '<b>Stop Id:</b> ' + routeStopPreds.sId + '<br/>';
 		
 	// For each destination add predictions
-	for (var i in routeStop.dest) {
+	for (var i in routeStopPreds.dest) {
 		// If there are several destinations then add a horizontal rule
 		// to break predictions up by destination
-		if (routeStop.dest.length > 1)
+		if (routeStopPreds.dest.length > 1)
 			content += '<hr/>';
 		
 		// Add the destination/headsign info
-		if (routeStop.dest[i].headsign)
-			content += '<b>Destination:</b> ' + routeStop.dest[i].headsign + '<br/>';
+		if (routeStopPreds.dest[i].headsign)
+			content += '<b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '<br/>';
 		
 		// Add each prediction for the current destination
-		if (routeStop.dest[i].pred.length > 0) {
+		if (routeStopPreds.dest[i].pred.length > 0) {
 			content += '<span class="prediction">';
 			
-			for (var j in routeStop.dest[i].pred) {
+			for (var j in routeStopPreds.dest[i].pred) {
 				// Separators between the predictions
 				if (j == 1)
 					content += ', ';
@@ -152,7 +159,7 @@ function predictionCallback(preds, status) {
 					content += ' & '
 					
 				// Add the actual prediction
-				var pred = routeStop.dest[i].pred[j];
+				var pred = routeStopPreds.dest[i].pred[j];
 				content += pred.min;
 				
 				// Added any special indicators for if schedule based,
@@ -161,7 +168,7 @@ function predictionCallback(preds, status) {
 					content += '<sup>sched</sup>';
 				else {
 					if (pred.notYetDeparted)
-						content += '<sup>terminal</sup>';
+						content += '<sup>not left</sup>';
 					else
 						if (pred.delayed) 
 							content += '<sup>delayed</sup>';

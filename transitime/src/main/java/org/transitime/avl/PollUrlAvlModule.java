@@ -169,7 +169,7 @@ public abstract class PollUrlAvlModule extends AvlModule {
 						"Error accessing AVL feed using URL={} with a " +
 						"timeout of {} msec.", 
 						getUrl(), AvlConfig.getAvlFeedTimeoutInMSecs(), e);
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error("Error accessing AVL feed using URL={}.", 
 						getUrl(), e);
 			}

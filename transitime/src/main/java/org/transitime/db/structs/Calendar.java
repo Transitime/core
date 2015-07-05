@@ -19,6 +19,7 @@ package org.transitime.db.structs;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -94,12 +95,15 @@ public class Calendar implements Serializable {
 	@Id
 	private final Date startDate;
 	
-	// Midnight at the end of the end date
+	// The service is to run until midnight of the end date, which is actually
+	// the endDate plus 1 day.
 	@Temporal(TemporalType.DATE) 
 	@Id
 	private final Date endDate;
 
-	
+	// For outputting start and end date as strings
+	private static final DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
+
 	// Logging
 	public static final Logger logger = LoggerFactory.getLogger(Calendar.class);
 
@@ -108,6 +112,24 @@ public class Calendar implements Serializable {
 
 	/********************** Member Functions **************************/
 
+	/**
+	 * Needed because Hibernate requires no-arg constructor
+	 */
+	@SuppressWarnings("unused")
+	private Calendar() {
+		configRev = -1;
+		serviceId = null;
+		monday = false;
+		tuesday = false;
+		wednesday = false;
+		thursday = false;
+		friday = false;
+		saturday = false;
+		sunday = false;
+		startDate = null;
+		endDate = null;
+	}
+	
 	/**
 	 * Constructor
 	 * 
@@ -152,7 +174,7 @@ public class Calendar implements Serializable {
 					gc.getFileName());
 			tempDate = new Date();
 		}
-		this.endDate = new Date(tempDate.getTime() + Time.MS_PER_DAY);
+		this.endDate = tempDate;
 	}
 	
 	/**
@@ -223,23 +245,6 @@ public class Calendar implements Serializable {
 	 */
 	private boolean isSetToTrue(String zeroOrOne) {
 		return zeroOrOne != null && zeroOrOne.trim().equals("1");
-	}
-	/**
-	 * Needed because Hibernate requires no-arg constructor
-	 */
-	@SuppressWarnings("unused")
-	private Calendar() {
-		configRev = -1;
-		serviceId = null;
-		monday = false;
-		tuesday = false;
-		wednesday = false;
-		thursday = false;
-		friday = false;
-		saturday = false;
-		sunday = false;
-		startDate = null;
-		endDate = null;
 	}
 	
 	/* (non-Javadoc)
@@ -404,13 +409,28 @@ public class Calendar implements Serializable {
 	}
 
 	/**
-	 * End of the last day of service. This means that when an end date is
-	 * specified the service runs for up to and including that day.
-	 * @return the endDate
+	 * @return the start date as a formatted string
 	 */
-	public Date getEndDate() {
-		return endDate;
+	public String getStartDateStr() {
+		return formatter.format(startDate);
 	}
 	
+	/**
+	 * End of the last day of service. This means that when an end date is
+	 * specified the service runs for up to and including that day. Since days
+	 * start at midnight, this method returns the endDate plus 1 day so that
+	 * it represents midnight of the configured endDate.
+	 * @return midnight at the end of the endDate
+	 */
+	public Date getEndDate() {
+		return new Date(endDate.getTime() + 1*Time.MS_PER_DAY);
+	}
+	
+	/**
+	 * @return the end date as a formatted string
+	 */
+	public String getEndDateStr() {
+		return formatter.format(endDate);
+	}
 	
 }

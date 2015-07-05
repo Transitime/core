@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.transitime.db.structs.Agency;
 import org.transitime.ipc.data.IpcBlock;
+import org.transitime.ipc.data.IpcCalendar;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
@@ -142,4 +143,18 @@ public interface ConfigInterface extends Remote {
 	 */
 	public List<Agency> getAgencies() throws RemoteException;
 	
+	/**
+	 * Returns list of Calendar objects that are currently active.
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<IpcCalendar> getCurrentCalendars() throws RemoteException;
+	
+	/**
+	 * Returns list of all Calendar objects.
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<IpcCalendar> getAllCalendars() throws RemoteException;
+
 }

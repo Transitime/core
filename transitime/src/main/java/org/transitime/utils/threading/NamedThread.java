@@ -95,12 +95,31 @@ public class NamedThread extends Thread {
 		try {
 			numAlive.incrementAndGet();
 			super.run();
-		} catch (Throwable e) {
-			e.printStackTrace();
-			logger.error(Markers.email(), 
-					"Exception occurred which will cause thread {} " +
-					"to terminate",
-					getName(), e);
+		} catch (Throwable t) {
+			// Log the problem but do so within a try/catch in case it is
+			// an OutOfMemoryError and need to exit even if get another
+			// OutOfMemoryError when logging.
+			try {
+				t.printStackTrace();
+				if (t instanceof OutOfMemoryError) {
+					logger.error(Markers.email(),
+							"OutOfMemoryError occurred in thread {} so "
+							+ "terminating application", getName(), t);
+				} else {
+					logger.error(Markers.email(),
+							"Unexpected Throwable occurred which will cause "
+							+ "thread {} to terminate", getName(), t);
+				}
+			} catch (Throwable t2) {
+			}
+			
+			// OutOfMemoryErrors are really serious. Don't want application to
+			// continue in some kind of crippled mode that monitoring has a 
+			// difficult time detecting. Therefore exit the application so that
+			// can be automatically restarted.
+			if (t instanceof OutOfMemoryError) {
+				System.exit(-1);
+			}
 		} finally {
 			numAlive.decrementAndGet();
 			logger.debug("Exiting NamedThread {}", getName());

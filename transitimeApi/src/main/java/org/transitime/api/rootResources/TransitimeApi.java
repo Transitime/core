@@ -40,6 +40,7 @@ import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
 import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiBlocks;
+import org.transitime.api.data.ApiCalendars;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
@@ -61,6 +62,7 @@ import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcBlock;
+import org.transitime.ipc.data.IpcCalendar;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
@@ -625,7 +627,8 @@ public class TransitimeApi {
 
 	/**
 	 * Handles the "block" command which outputs configuration data for the
-	 * specified block. Includes all sub-data such as trips and trip patterns.
+	 * specified block ID and service ID. Includes all sub-data such as trips
+	 * and trip patterns.
 	 * 
 	 * @param stdParameters
 	 * @param blockId
@@ -667,12 +670,12 @@ public class TransitimeApi {
 	}
 
 	/**
-	 * Handles the "block" command which outputs configuration data for the
-	 * specified block. Includes all sub-data such as trips and trip patterns.
+	 * Handles the "blocks" command which outputs configuration data for the
+	 * specified block ID. Includes all sub-data such as trips and trip
+	 * patterns.
 	 * 
 	 * @param stdParameters
 	 * @param blockId
-	 * @param serviceId
 	 * @return
 	 * @throws WebApplicationException
 	 */
@@ -1026,6 +1029,66 @@ public class TransitimeApi {
 		}
 	}
 
+	/**
+	 * For getting calendars that are currently active.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/currentCalendars")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getCurrentCalendars(@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcCalendar> ipcCalendars = inter.getCurrentCalendars();
+
+			// Create and return ApiAgencies response
+			ApiCalendars apiCalendars = new ApiCalendars(ipcCalendars);
+			return stdParameters.createResponse(apiCalendars);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * For getting all calendars.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/allCalendars")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getAllCalendars(@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcCalendar> ipcCalendars = inter.getAllCalendars();
+
+			// Create and return ApiAgencies response
+			ApiCalendars apiCalendars = new ApiCalendars(ipcCalendars);
+			return stdParameters.createResponse(apiCalendars);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+	
 	/**
 	 * Returns status about the specified agency server. Currently provides info
 	 * on the DbLogger queue.

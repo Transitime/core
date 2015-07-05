@@ -166,7 +166,7 @@ public abstract class AbstractServer {
 					0, REBIND_RATE_SEC, TimeUnit.SECONDS);
 			
 			constructed = true;
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			// Log the error. Since RMI is critical send out e-mail as well so
 			// that the issue is taken care of.
 			logger.error(Markers.email(), 

@@ -29,6 +29,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.ConfigFileReader;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.gtfs.readers.GtfsAgencyReader;
 import org.transitime.statistics.ScheduleDataProcessor;
@@ -55,6 +56,14 @@ public class ScheduleGenerator {
 	private static boolean doNotUpdateFirstStopOfTrip;
 	private static int allowableEarlySecs;
 	private static int allowableLateSecs;
+	
+	// Read in configuration files. This should be done statically before
+	// the logback LoggerFactory.getLogger() is called so that logback can
+	// also be configured using a transitime config file. The files are
+	// specified using the java system property -Dtransitime.configFiles .
+	static {
+		ConfigFileReader.processConfig();
+	}
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ScheduleGenerator.class);

@@ -1,18 +1,18 @@
 /*
  * This file is part of Transitime.org
  * 
- * Transitime.org is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License (GPL) as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Transitime.org is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
+ * Transitime.org is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (GPL) as published by the
+ * Free Software Foundation, either version 3 of the License, or any later
+ * version.
+ * 
+ * Transitime.org is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Transitime.org . If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.transitime.api.data;
@@ -35,59 +35,67 @@ import org.transitime.utils.StringUtils;
  */
 public class ApiStopPath {
 
-    @XmlAttribute
-    private final int configRev;
+	@XmlAttribute
+	private int configRev;
 
-    @XmlAttribute
-    private final String stopPathId;
+	@XmlAttribute
+	private String stopPathId;
 
-    @XmlAttribute
-    private final String stopId;
+	@XmlAttribute
+	private String stopId;
 
-    @XmlAttribute
-    private final String stopName;
-    
-    @XmlAttribute
-    private final int gtfsStopSeq;
+	@XmlAttribute
+	private String stopName;
 
-    @XmlAttribute
-    private final String layoverStop;
+	@XmlAttribute
+	private int gtfsStopSeq;
 
-    @XmlAttribute
-    private final String waitStop;
+	@XmlAttribute
+	private String layoverStop;
 
-    @XmlAttribute
-    private final String scheduleAdherenceStop;
+	@XmlAttribute
+	private String waitStop;
 
-    @XmlAttribute
-    private final String breakTime;
+	@XmlAttribute
+	private String scheduleAdherenceStop;
 
-    @XmlElement(name="location")
-    private List<ApiLocation> locations;
+	@XmlAttribute
+	private String breakTime;
 
-    @XmlAttribute
-    private String pathLength;
+	@XmlElement(name = "location")
+	private List<ApiLocation> locations;
 
-    /********************** Member Functions **************************/
+	@XmlAttribute
+	private String pathLength;
 
-    public ApiStopPath(IpcStopPath ipcStopPath) {
-	configRev = ipcStopPath.getConfigRev();
-	stopPathId = ipcStopPath.getStopPathId();
-	stopId = ipcStopPath.getStopId();
-	stopName = ipcStopPath.getStopName();
-	gtfsStopSeq = ipcStopPath.getGtfsStopSeq();
-	layoverStop = ipcStopPath.isLayoverStop() ? "true" : null;
-	waitStop = ipcStopPath.isWaitStop() ? "true" : null;
-	scheduleAdherenceStop = ipcStopPath.isScheduleAdherenceStop() ? 
-		"true" : null;
-	breakTime = ipcStopPath.getBreakTime() != 0 ? 
-		ipcStopPath.getBreakTime().toString() : null;
-	
-	locations = new ArrayList<ApiLocation>();
-	for (Location loc : ipcStopPath.getLocations()) {
-	    locations.add(new ApiLocation(loc.getLat(), loc.getLon()));
+	/********************** Member Functions **************************/
+
+    /**
+     * Need a no-arg constructor for Jersey. Otherwise get really obtuse
+     * "MessageBodyWriter not found for media type=application/json" exception.
+     */
+	protected ApiStopPath() {
 	}
-	
-	pathLength = StringUtils.oneDigitFormat(ipcStopPath.getPathLength());
-    }
+
+	public ApiStopPath(IpcStopPath ipcStopPath) {
+		configRev = ipcStopPath.getConfigRev();
+		stopPathId = ipcStopPath.getStopPathId();
+		stopId = ipcStopPath.getStopId();
+		stopName = ipcStopPath.getStopName();
+		gtfsStopSeq = ipcStopPath.getGtfsStopSeq();
+		layoverStop = ipcStopPath.isLayoverStop() ? "true" : null;
+		waitStop = ipcStopPath.isWaitStop() ? "true" : null;
+		scheduleAdherenceStop =
+				ipcStopPath.isScheduleAdherenceStop() ? "true" : null;
+		breakTime =
+				ipcStopPath.getBreakTime() != 0 ? ipcStopPath.getBreakTime()
+						.toString() : null;
+
+		locations = new ArrayList<ApiLocation>();
+		for (Location loc : ipcStopPath.getLocations()) {
+			locations.add(new ApiLocation(loc.getLat(), loc.getLon()));
+		}
+
+		pathLength = StringUtils.oneDigitFormat(ipcStopPath.getPathLength());
+	}
 }

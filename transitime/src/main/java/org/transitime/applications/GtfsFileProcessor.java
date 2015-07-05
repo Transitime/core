@@ -1,19 +1,19 @@
-/* 
-* This file is part of Transitime.org
-* 
-* Transitime.org is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License (GPL) as published by
-* the Free Software Foundation, either version 3 of the License, or
-* any later version.
-*
-* Transitime.org is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
-*/
+/*
+ * This file is part of Transitime.org
+ * 
+ * Transitime.org is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (GPL) as published by the
+ * Free Software Foundation, either version 3 of the License, or any later
+ * version.
+ * 
+ * Transitime.org is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Transitime.org . If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.transitime.applications;
 
 import java.io.File;
@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -36,19 +38,21 @@ import org.transitime.configData.AgencyConfig;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.HttpGetGtfsFile;
 import org.transitime.gtfs.TitleFormatter;
+import org.transitime.gtfs.gtfsStructs.GtfsAgency;
+import org.transitime.gtfs.readers.GtfsAgencyReader;
 import org.transitime.utils.Time;
 import org.transitime.utils.Zip;
 
 /**
-* Reads GTFS files, validates and cleans up the data, stores the data into Java
-* objects, and then stores those objects into the database.
-* 
-* There are a good number of options. Therefore there are addOption methods so
-* don't have a constructor with a large number of parameters.
-* 
-* @author SkiBu Smith
-*
-*/
+ * Reads GTFS files, validates and cleans up the data, stores the data into Java
+ * objects, and then stores those objects into the database.
+ * 
+ * There are a good number of options. Therefore there are addOption methods so
+ * don't have a constructor with a large number of parameters.
+ * 
+ * @author SkiBu Smith
+ *
+ */
 public class GtfsFileProcessor {
 
 	// Optional command line info used within this class
@@ -74,13 +78,13 @@ public class GtfsFileProcessor {
 	private final String notes;
 	private final boolean trimPathBeforeFirstStopOfTrip;
 
-	// Read in configuration files. This should be done statically before 
+	// Read in configuration files. This should be done statically before
 	// the logback LoggerFactory.getLogger() is called so that logback can
 	// also be configured using a transitime config file.
 	static {
 		ConfigFileReader.processConfig();
 	}
-	
+
 	// Logging important in this class
 	private static final Logger logger = LoggerFactory
 			.getLogger(GtfsFileProcessor.class);
@@ -133,7 +137,7 @@ public class GtfsFileProcessor {
 				System.exit(-1);
 			}
 		}
-		
+
 		this.gtfsUrl = gtfsUrl;
 		this.gtfsZipFileName = gtfsZipFileName;
 		this.unzipSubdirectory = unzipSubdirectory;
@@ -142,11 +146,13 @@ public class GtfsFileProcessor {
 		this.regexReplaceListFileName = regexReplaceListFileName;
 		this.pathOffsetDistance = pathOffsetDistance;
 		this.maxStopToPathDistance = maxStopToPathDistance;
-		this.maxDistanceForEliminatingVertices = maxDistanceForEliminatingVertices;
+		this.maxDistanceForEliminatingVertices =
+				maxDistanceForEliminatingVertices;
 		this.defaultWaitTimeAtStopMsec = defaultWaitTimeAtStopMsec;
 		this.maxSpeedKph = maxSpeedKph;
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
-		this.shouldCombineShortAndLongNamesForRoutes = shouldCombineShortAndLongNamesForRoutes;
+		this.shouldCombineShortAndLongNamesForRoutes =
+				shouldCombineShortAndLongNamesForRoutes;
 		this.configRev = configRev;
 		this.notes = notes;
 		this.shouldStoreNewRevs = shouldStoreNewRevs;
@@ -191,16 +197,17 @@ public class GtfsFileProcessor {
 		// First need access to the zip file.
 		// If URL set then should the file from web and store it
 		if (gtfsUrl != null) {
-			gtfsZipFileName = HttpGetGtfsFile.getFile(
-					AgencyConfig.getAgencyId(), gtfsUrl);
+			gtfsZipFileName =
+					HttpGetGtfsFile
+							.getFile(AgencyConfig.getAgencyId(), gtfsUrl);
 		}
 
 		// Uncompress the GTFS zip file if need to
 		if (gtfsZipFileName != null) {
 			gtfsDirectoryName = Zip.unzip(gtfsZipFileName, unzipSubdirectory);
-			
-			zipFileLastModifiedTime = new Date(
-					new File(gtfsZipFileName).lastModified());
+
+			zipFileLastModifiedTime =
+					new Date(new File(gtfsZipFileName).lastModified());
 		}
 	}
 
@@ -228,17 +235,55 @@ public class GtfsFileProcessor {
 	}
 
 	/**
+	 * Sets timezone for the application so that times and dates will be written
+	 * correctly to the database. This is especially important for calendar
+	 * dates. Needs to be called before the db is first accessed in order to
+	 * have an effect with postgres (with mysql can do so afterwards, which is
+	 * strange). So needs to be done before GtfsData() object is constructed.
+	 * <p>
+	 * The timezone string is obtained from the agency.txt GTFS file.
+	 * 
+	 * @param gtfsDirectoryName Where to find the GTFS files
+	 */
+	private void setTimezone(String gtfsDirectoryName) {
+		// Read in the agency.txt GTFS data from file
+		GtfsAgencyReader agencyReader = new GtfsAgencyReader(gtfsDirectoryName);
+		List<GtfsAgency> gtfsAgencies = agencyReader.get();
+		if (gtfsAgencies.isEmpty()) {
+			logger.error("Could not read in {}/agency.txt file, which is "
+					+ "needed for createDateFormatter()", gtfsDirectoryName);
+			System.exit(-1);
+		}
+		String timezoneName = gtfsAgencies.get(0).getAgencyTimezone();
+
+		// Set system timezone so that dates and times will be written to db
+		// properly
+		TimeZone.setDefault(TimeZone.getTimeZone(timezoneName));
+		logger.info("Set at beginning default timezone to {}", timezoneName);
+	}
+
+	/**
 	 * Once the GtfsFileProcessor is constructed and the options have been set
 	 * then this function is used to actually process the GTFS data and store it
 	 * into the database.
 	 */
 	public void process() throws IllegalArgumentException {
 		// Gets the GTFS files from URL or from a zip file if need be.
+		// This also sets gtfsDirectoryName member
 		obtainGtfsFiles();
 
+		// Set the timezone of the application so that times and dates will be
+		// written correctly to the database. This is especially important for
+		// calendar dates. This has to be done after obtainGtfsFiles() so that
+		// gtfsDirectoryName member is set. Needs to be done before the db is
+		// first accessed in order to have an effect with postgres (with mysql
+		// can do so afterwards, which is strange). So needs to be done before
+		// GtfsData() object is constructed.
+		setTimezone(gtfsDirectoryName);
+
 		// Create a title formatter
-		TitleFormatter titleFormatter = new TitleFormatter(
-				regexReplaceListFileName, true);
+		TitleFormatter titleFormatter =
+				new TitleFormatter(regexReplaceListFileName, true);
 
 		// Process the GTFS data
 		GtfsData gtfsData =
@@ -343,39 +388,43 @@ public class GtfsFileProcessor {
 		String configFile = commandLineArgs.getOptionValue("c");
 		String notes = commandLineArgs.getOptionValue("n");
 		String gtfsUrl = commandLineArgs.getOptionValue("gtfsUrl");
-		String gtfsZipFileName = commandLineArgs
-				.getOptionValue("gtfsZipFileName");
-		String unzipSubdirectory = commandLineArgs
-				.getOptionValue("unzipSubdirectory");
-		String gtfsDirectoryName = commandLineArgs
-				.getOptionValue("gtfsDirectoryName");
+		String gtfsZipFileName =
+				commandLineArgs.getOptionValue("gtfsZipFileName");
+		String unzipSubdirectory =
+				commandLineArgs.getOptionValue("unzipSubdirectory");
+		String gtfsDirectoryName =
+				commandLineArgs.getOptionValue("gtfsDirectoryName");
 		String supplementDir = commandLineArgs.getOptionValue("supplementDir");
-		String regexReplaceFile = commandLineArgs
-				.getOptionValue("regexReplaceFile");
+		String regexReplaceFile =
+				commandLineArgs.getOptionValue("regexReplaceFile");
 
 		// Handle the parameters that have a floating point, double or int value
-		double pathOffsetDistance = getDoubleCommandLineOption(
-				"pathOffsetDistance", 0.0, commandLineArgs);
-		double maxStopToPathDistance = getDoubleCommandLineOption(
-				"maxStopToPathDistance", 60.0, commandLineArgs);
-		double maxDistanceForEliminatingVertices = getDoubleCommandLineOption(
-				"maxDistanceForEliminatingVertices", 0.0, commandLineArgs);
-		int defaultWaitTimeAtStopMsec = getIntegerCommandLineOption(
-				"defaultWaitTimeAtStopMsec", 10 * Time.MS_PER_SEC,
-				commandLineArgs);
+		double pathOffsetDistance =
+				getDoubleCommandLineOption("pathOffsetDistance", 0.0,
+						commandLineArgs);
+		double maxStopToPathDistance =
+				getDoubleCommandLineOption("maxStopToPathDistance", 60.0,
+						commandLineArgs);
+		double maxDistanceForEliminatingVertices =
+				getDoubleCommandLineOption("maxDistanceForEliminatingVertices",
+						0.0, commandLineArgs);
+		int defaultWaitTimeAtStopMsec =
+				getIntegerCommandLineOption("defaultWaitTimeAtStopMsec",
+						10 * Time.MS_PER_SEC, commandLineArgs);
 		double maxSpeedKph =
 				getDoubleCommandLineOption("maxSpeedKph", 97.0, commandLineArgs);
-		double maxTravelTimeSegmentLength = getDoubleCommandLineOption(
-				"maxTravelTimeSegmentLength", 200.0, commandLineArgs);
-		int configRev = getIntegerCommandLineOption("configRev", -1,
-				commandLineArgs);
+		double maxTravelTimeSegmentLength =
+				getDoubleCommandLineOption("maxTravelTimeSegmentLength", 200.0,
+						commandLineArgs);
+		int configRev =
+				getIntegerCommandLineOption("configRev", -1, commandLineArgs);
 
 		// Handle boolean command line options
-		boolean shouldCombineShortAndLongNamesForRoutes = commandLineArgs
-				.hasOption("combineRouteNames");
+		boolean shouldCombineShortAndLongNamesForRoutes =
+				commandLineArgs.hasOption("combineRouteNames");
 		boolean shouldStoreNewRevs = commandLineArgs.hasOption("storeNewRevs");
-		boolean trimPathBeforeFirstStopOfTrip = commandLineArgs
-				.hasOption("trimPathBeforeFirstStopOfTrip");
+		boolean trimPathBeforeFirstStopOfTrip =
+				commandLineArgs.hasOption("trimPathBeforeFirstStopOfTrip");
 
 		// Create the processor and set all the options
 		GtfsFileProcessor processor =
@@ -405,18 +454,17 @@ public class GtfsFileProcessor {
 	 */
 	@SuppressWarnings("static-access")
 	// Needed for using OptionBuilder
-	private static CommandLine processCommandLineOptions(String[] args) {
+			private static
+			CommandLine processCommandLineOptions(String[] args) {
 		// Specify the options
 		Options options = new Options();
 
 		options.addOption("h", false, "Display usage and help info.");
 
-		options.addOption(OptionBuilder
-				.withArgName("notes")
-				.hasArg()
+		options.addOption(OptionBuilder.withArgName("notes").hasArg()
 				.withDescription("Description of why processing the GTFS data")
 				.withLongOpt("notes").create("n"));
-		
+
 		options.addOption(OptionBuilder
 				.withArgName("configFile")
 				.hasArg()
@@ -535,7 +583,7 @@ public class GtfsFileProcessor {
 								+ "determining schedule based travel times. "
 								+ "Default is 97kph (60mph).")
 				.create("maxSpeedKph"));
-		
+
 		options.addOption(OptionBuilder
 				.hasArg()
 				.withArgName("meters")

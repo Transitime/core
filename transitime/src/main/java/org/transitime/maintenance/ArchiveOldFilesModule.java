@@ -186,7 +186,7 @@ public class ArchiveOldFilesModule extends Module {
 				
 				// Actually archive the logs
 				archiveLogFiles();
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				logger.error(Markers.email(), 
 						"Error when archiving old files.", e);
 			}

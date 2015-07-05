@@ -25,13 +25,16 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.ServiceUtils;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcBlock;
+import org.transitime.ipc.data.IpcCalendar;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
@@ -273,6 +276,47 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		List<IpcSchedule> ipcSchedules = 
 				IpcSchedule.createSchedules(dbRoute, blocksForRoute);
 		return ipcSchedules;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getCurrentCalendars()
+	 */
+	@Override
+	public List<IpcCalendar> getCurrentCalendars() {
+		// List to be returned
+		List<IpcCalendar> ipcCalendarList = new ArrayList<IpcCalendar>();
+
+		// Get list of currently active calendars
+		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+		List<Calendar> calendarList =
+				serviceUtils.getCurrentCalendars(System.currentTimeMillis());
+
+		// Convert Calendar list to IpcCalendar list
+		for (Calendar calendar : calendarList) {
+			ipcCalendarList.add(new IpcCalendar(calendar));
+		}
+
+		return ipcCalendarList;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getAllCalendars()
+	 */
+	@Override
+	public List<IpcCalendar> getAllCalendars() {		
+		// List to be returned
+		List<IpcCalendar> ipcCalendarList = new ArrayList<IpcCalendar>();
+
+		// Get list of currently active calendars
+		List<Calendar> calendarList =
+				Core.getInstance().getDbConfig().getCalendars();
+
+		// Convert Calendar list to IpcCalendar list
+		for (Calendar calendar : calendarList) {
+			ipcCalendarList.add(new IpcCalendar(calendar));
+		}
+
+		return ipcCalendarList;
 	}
 	
 }

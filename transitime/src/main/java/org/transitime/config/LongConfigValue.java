@@ -49,7 +49,7 @@ public class LongConfigValue extends ConfigValue<Long> {
 	
 	@Override 
 	protected Long convertFromString(List<String> dataList) {
-		return Long.valueOf(dataList.get(0));
+		return Long.valueOf(dataList.get(0).trim());
 	}	
 }
 
