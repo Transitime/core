@@ -26,8 +26,8 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.utils.Time;
 
 /**
- * Receives data from the AvlJmsClientModule and processes it.
- * Can use multiple threads to handle data.
+ * Receives data from the AvlExecytir and processes it.
+ * Can use multiple threads to process data.
  * 
  * @author SkiBu Smith
  */
