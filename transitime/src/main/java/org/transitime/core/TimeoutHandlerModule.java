@@ -260,6 +260,8 @@ public class TimeoutHandlerModule extends Module {
 				VehicleState vehicleState = VehicleStateManager.getInstance()
 						.getVehicleState(avlReport.getVehicleId());
 	
+				// Need to synchronize on vehicleState since it might be getting
+				// modified via a separate main AVL processing executor thread.
 				synchronized (vehicleState) {
 					if (!vehicleState.isPredictable()) {
 						// Vehicle is not predictable
