@@ -59,5 +59,10 @@ public class TestDatabase extends TestCase {
 			fail(e.toString());
 		}
 	}
+	
+	public void testCreateAgency()
+	{
+		
+	}
 
 }

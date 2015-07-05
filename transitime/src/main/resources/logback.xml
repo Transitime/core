@@ -445,8 +445,9 @@
        even though the logging level for route is configured to be info, 
        which is a higher level.
     -->
-  <root level="info">          
+  <root level="debug">          
     <appender-ref ref="CORE" />
     <appender-ref ref="ERROR_SMTP" />
+    <appender-ref ref="STDOUT" />
   </root>
 </configuration>

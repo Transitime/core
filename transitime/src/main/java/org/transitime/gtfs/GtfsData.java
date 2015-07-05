@@ -2325,6 +2325,9 @@ public class GtfsData {
 		processFareRules();
 		processTransfers();
 		
+		DbWriter dbWriter = new DbWriter(this);
+		dbWriter.write(session, revs.getConfigRev());		
+		
 		// Sometimes will be using a partial configuration. For example, for 
 		// MBTA commuter rail only want to use the trips defined for 
 		// commuter rail even though the GTFS data can have trips for
@@ -2351,8 +2354,8 @@ public class GtfsData {
 		
 		// Now that have read in all the data into collections output it
 		// to database.
-		DbWriter dbWriter = new DbWriter(this);
-		dbWriter.write(session, revs.getConfigRev());		
+		DbWriter dbWriter1 = new DbWriter(this);
+		dbWriter1.write(session, revs.getConfigRev());		
 		
 		// Finish things up by closing the session
 		session.close();
