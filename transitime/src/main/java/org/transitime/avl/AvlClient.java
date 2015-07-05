@@ -26,8 +26,9 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.utils.Time;
 
 /**
- * Receives data from the AvlExecytir and processes it.
- * Can use multiple threads to process data.
+ * Receives AVL data from the AvlExecutor or JMS, determines if AVL should be
+ * filtered, and processes data that doesn't need to be filtered. Can use
+ * multiple threads to process data.
  * 
  * @author SkiBu Smith
  */
