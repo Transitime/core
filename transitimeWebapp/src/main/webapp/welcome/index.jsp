@@ -15,7 +15,7 @@
   }
   
   /* adjust text in table */
-  th {
+  td {
   	padding-left: 20px;
   	padding-right: 20px;
   	padding-top: 5px;
@@ -30,7 +30,7 @@
 <body>
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
-<div id="title">Transitime Agencies</div>
+<div id="title">Agencies</div>
 <table id="agencyList">
 <%
 // Output links for all the agencies
@@ -41,10 +41,10 @@ for (WebAgency webAgency : webAgencies) {
 		continue;
 	%>
 	<tr>
-	  <th><%= webAgency.getAgencyName() %></th>
-	  <th><a href="<%= request.getContextPath() %>/map/map.jsp?a=<%= webAgency.getAgencyId() %>" title="Real-time map">Map</a></th>
-	  <th><a href="<%= request.getContextPath() %>/reports/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Reports on historic information">Reports</a></th>
-	  <th><a href="<%= request.getContextPath() %>/status/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Pages showing current status of system">Status</a></th>
+	  <td><%= webAgency.getAgencyName() %></td>
+	  <td><a href="<%= request.getContextPath() %>/map/map.jsp?a=<%= webAgency.getAgencyId() %>" title="Real-time map">Map</a></td>
+	  <td><a href="<%= request.getContextPath() %>/reports/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Reports on historic information">Reports</a></td>
+	  <td><a href="<%= request.getContextPath() %>/status/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Pages showing current status of system">Status</a></td>
 	</tr>
 	<%
 }
