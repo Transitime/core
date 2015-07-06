@@ -57,6 +57,15 @@ public class AvlClient implements Runnable {
 	}
 	
 	/**
+	 * Returns the AVL report associated with this AvlClient
+	 * 
+	 * @return the AVL report
+	 */
+	public AvlReport getAvlReport() {
+		return avlReport;
+	}
+	
+	/**
 	 * Filters out problematic AVL reports (such as for having invalid data,
 	 * being in the past, or too recent) and processes the ones that are good.
 	 * 
