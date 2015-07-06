@@ -515,7 +515,7 @@ public class AvlReport implements Serializable {
 	 * @return The original source string, but truncated to SOURCE_LENGTH
 	 */
 	private static String sized(String source) {
-		if (source.length() <= SOURCE_LENGTH)
+		if (source == null || source.length() <= SOURCE_LENGTH)
 			return source;
 		
 		return source.substring(0, SOURCE_LENGTH);
