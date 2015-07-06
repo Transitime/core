@@ -26,7 +26,7 @@ import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.configData.AvlConfig;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.jms.JMSWrapper;
 import org.transitime.logging.Markers;
@@ -42,12 +42,30 @@ import org.transitime.utils.threading.NamedThreadFactory;
  * @author SkiBu Smith
  */
 public class AvlJmsClientModule extends Module {
-	private final static int MAX_THREADS = 100;
-
 	private MessageConsumer msgConsumer;
 
 	private final BoundedExecutor avlClientExecutor;
 	
+	/*********************** Config Params ****************************/
+	
+	private final static int MAX_THREADS = 100;
+
+	private static IntegerConfigValue avlQueueSize = 
+			new IntegerConfigValue("transitime.avl.jmsQueueSize", 350,
+					"How many items to go into the blocking AVL queue "
+					+ "before need to wait for queue to have space. "
+					+ "Only for when JMS is used.");
+
+	private static IntegerConfigValue numAvlThreads = 
+			new IntegerConfigValue("transitime.avl.jmsNumThreads", 1,
+					"How many threads to be used for processing the AVL " +
+					"data. For most applications just using a single thread " +
+					"is probably sufficient and it makes the logging simpler " +
+					"since the messages will not be interleaved. But for " +
+					"large systems with lots of vehicles then should use " +
+					"multiple threads, such as 3-5 so that more of the cores " +
+					"are used. Only for when JMS is used.");
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(AvlJmsClientModule.class);	
 
@@ -67,8 +85,8 @@ public class AvlJmsClientModule extends Module {
 			NamingException {
 		super(agencyId);
 		
-		int maxAVLQueueSize = AvlConfig.getAvlQueueSize();
-		int numberThreads = AvlConfig.getNumAvlThreads();
+		int maxAVLQueueSize = avlQueueSize.getValue();
+		int numberThreads = numAvlThreads.getValue();
 		
 		logger.info("Starting AvlClient for agencyId={} with "
 				+ "maxAVLQueueSize={} and numberThreads={}", agencyId,

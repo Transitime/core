@@ -72,11 +72,11 @@ public class AvlExecutor {
 	// Singleton class
 	private static AvlExecutor singleton;
 	
+	/********************* Configurable parameters *************************/
+	
 	// For making sure that AvlConfig.getNumAvlThreads() config doesn't specify
 	// an absurdly large number of threads.
 	private final static int MAX_THREADS = 25;
-	
-	/********************* Configurable parameters *************************/
 	
 	private static IntegerConfigValue avlQueueSize = 
 			new IntegerConfigValue("transitime.avl.queueSize", 350,
