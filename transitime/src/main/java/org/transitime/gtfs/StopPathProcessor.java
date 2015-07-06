@@ -357,7 +357,9 @@ public class StopPathProcessor {
 						"be improved, the stop is out of sequence, the " +
 						"stop should not be included for the trips in " +
 						"stop_times.txt, or the shape needs to be " +
-						"improved. {}",
+						"improved. The stop path will be modified to go "
+						+ "through the stop, which can make the stop path "
+						+ "looked jagged and incorrect. {}",
 						stop.getName(), 
 						stop.getId(),  
 						Geo.format(stop.getLoc().getLat()), 
@@ -381,7 +383,9 @@ public class StopPathProcessor {
 						"be improved, the stop is out of sequence, the " +
 						"stop should not be included for the trips in " +
 						"stop_times.txt, or the shape needs to be " +
-						"improved. {}",
+						"improved. The stop path will be modified to go "
+						+ "through the stop, which can make the stop path "
+						+ "looked jagged and incorrect. {}",
 						stop.getName(), 
 						stop.getId(),  
 						Geo.format(stop.getLoc().getLat()), 
