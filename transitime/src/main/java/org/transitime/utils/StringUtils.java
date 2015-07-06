@@ -164,13 +164,16 @@ public class StringUtils {
 	}
 	
 	/**
-	 * Returns the route shortName, but the first number in the name
-	 * is padded with zeros so that the numbers have the same number
-	 * of digits. This way can sort the names properly even if have
-	 * names such as Y2 and Y101 (Y2 should be before Y101 even though
-	 * if used regular string comparison Y101 would be before Y2).
+	 * Returns the name passed in, but the first number in the name is padded
+	 * with zeros so that the numbers have the same number of digits. This way
+	 * can sort the names properly even if have names such as Y2 and Y101 (Y2
+	 * should be before Y101 even though if used regular string comparison Y101
+	 * would be before Y2).
 	 * 
-	 * @return
+	 * @param name
+	 *            The alpha numeric name to be padded.
+	 * @return a modified version of the name that can be used for proper
+	 *         ordering of a collection of names. for ordering
 	 */
 	public static String paddedName(String name) {
 		final int NUMBER_DIGITS_WHEN_PADDED = 8;
