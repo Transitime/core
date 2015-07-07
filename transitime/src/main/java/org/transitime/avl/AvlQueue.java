@@ -99,8 +99,9 @@ public class AvlQueue extends ArrayBlockingQueue<Runnable> {
 		AvlReport lastAvlReportForVehicle =
 				avlDataPerVehicleMap.get(avlReportFromQueue.getVehicleId());
 		boolean obsolete =
-				avlReportFromQueue.getTime() < lastAvlReportForVehicle
-						.getTime();
+				lastAvlReportForVehicle != null
+						&& avlReportFromQueue.getTime() < lastAvlReportForVehicle
+								.getTime();
 		if (obsolete) {
 			logger.error("AVL report from queue is obsolete (there is a newer "
 					+ "one for the vehicle) so dumping this report. {}", 
