@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.ServiceUtils;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
@@ -686,14 +687,54 @@ public class DbConfig {
 		return stopsMap.get(stopId);
 	}
 
+	/**
+	 * Returns list of all calendrs
+	 * @return calendars
+	 */
 	public List<Calendar> getCalendars() {
 		return Collections.unmodifiableList(calendars);
 	}
 
+	/**
+	 * Returns list of calendars that are currently active
+	 * @return current calendars
+	 */
+	public List<Calendar> getCurrentCalendars() {
+		// Get list of currently active calendars
+		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+		List<Calendar> calendarList =
+				serviceUtils.getCurrentCalendars(System.currentTimeMillis());
+		return calendarList;
+	}
+	
 	public List<CalendarDate> getCalendarDates() {
 		return Collections.unmodifiableList(calendarDates);
 	}
 
+	/**
+	 * Returns list of all service IDs
+	 * @return service IDs
+	 */
+	public List<String> getServiceIds() {
+		List<String> serviceIds = new ArrayList<String>();
+		for (Calendar calendar : getCalendars()) {
+			serviceIds.add(calendar.getServiceId());
+		}
+		return serviceIds;
+	}
+	
+	/**
+	 * Returns list of service IDs that are currently active
+	 * @return current service IDs
+	 */
+	public List<String> getCurrentServiceIds() {
+		List<String> serviceIds = new ArrayList<String>();
+		for (Calendar calendar : getCurrentCalendars()) {
+			serviceIds.add(calendar.getServiceId());
+		}
+		return serviceIds;
+	}
+	
 	/**
 	 * There can be multiple agencies but usually there will be just one. For
 	 * getting timezone and such want to be able to easily access the main

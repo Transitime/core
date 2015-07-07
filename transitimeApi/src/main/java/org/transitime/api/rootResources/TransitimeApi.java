@@ -42,6 +42,7 @@ import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiBlocks;
 import org.transitime.api.data.ApiCalendars;
 import org.transitime.api.data.ApiDirections;
+import org.transitime.api.data.ApiIds;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoute;
@@ -168,6 +169,35 @@ public class TransitimeApi {
 
 			// return ApiVehicles response
 			return stdParameters.createResponse(apiVehicles);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Handles the vehicleIds command. Returns list of vehicle IDs.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/vehicleIds")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getVehicleIds(
+			@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get Vehicle data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<String> ids = inter.getVehicleIds();
+			
+			ApiIds apiIds = new ApiIds(ids);
+			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
@@ -710,6 +740,36 @@ public class TransitimeApi {
 	}
 
 	/**
+	 * Handles the "blockIds" command. Returns list of block IDs.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/blockIds")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getBlockIds(
+			@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "serviceId") String serviceId)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get Vehicle data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<String> ids = inter.getBlockIds(serviceId);
+			
+			ApiIds apiIds = new ApiIds(ids);
+			return stdParameters.createResponse(apiIds);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
 	 * Gets which blocks are active. Can optionally specify list of routes and
 	 * how much before a block is supposed to start is it considered active.
 	 * 
@@ -860,6 +920,35 @@ public class TransitimeApi {
 			ApiTripWithTravelTimes apiTrip = new ApiTripWithTravelTimes(
 					ipcTrip, true);
 			return stdParameters.createResponse(apiTrip);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Handles the tripIds command. Returns list of trip IDs.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/tripIds")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getTripIds(
+			@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get Vehicle data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<String> ids = inter.getTripIds();
+			
+			ApiIds apiIds = new ApiIds(ids);
+			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
@@ -1089,6 +1178,64 @@ public class TransitimeApi {
 		}
 	}
 	
+	/**
+	 * Handles the "serviceIds" command. Returns list of all service IDs.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/serviceIds")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getServiceIds(
+			@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get Vehicle data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<String> ids = inter.getServiceIds();
+			
+			ApiIds apiIds = new ApiIds(ids);
+			return stdParameters.createResponse(apiIds);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Handles the currentServiceIds command. Returns list of service IDs that are currently active.
+	 * 
+	 * @param stdParameters
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/currentServiceIds")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getCurrentServiceIds(
+			@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get Vehicle data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<String> ids = inter.getCurrentServiceIds();
+			
+			ApiIds apiIds = new ApiIds(ids);
+			return stdParameters.createResponse(apiIds);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Returns status about the specified agency server. Currently provides info
 	 * on the DbLogger queue.
