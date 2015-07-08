@@ -17,6 +17,7 @@
 
 package org.transitime.avl;
 
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -153,7 +154,8 @@ public class TaipGpsLocation {
 		// that handling midnight properly. If fix epoch time ends up being 
 		// far in the future (more than 30 minutes) then subtract a day to
 		// get it right.
-		long fixEpochTime = Time.getStartOfDay(gmtTimeZone) + secondsIntoDay*Time.MS_PER_SEC;
+		long fixEpochTime = Time.getStartOfDay(new Date(), 
+						gmtTimeZone) + secondsIntoDay * Time.MS_PER_SEC;
 		long currentEpochTime = System.currentTimeMillis();
 		if (fixEpochTime - currentEpochTime > 30 * Time.MS_PER_MIN)
 			fixEpochTime -= Time.MS_PER_DAY;

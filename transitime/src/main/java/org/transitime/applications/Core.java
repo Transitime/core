@@ -39,6 +39,7 @@ import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.db.structs.ActiveRevisions;
+import org.transitime.db.structs.Agency;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.servers.CommandsServer;
 import org.transitime.ipc.servers.ConfigServer;
@@ -120,16 +121,16 @@ public class Core {
 			configRev = activeRevisions.getConfigRev();
 		}
 
+		// Set the timezone so that when dates are read from db or are logged 
+		// the time will be correct. Therefore this needs to be done right at
+		// the start of the application, before db is read.
+		TimeZone timeZone = Agency.getTimeZoneFromDb(agencyId);
+		TimeZone.setDefault(timeZone);
+		
 		// Read in all GTFS based config data from the database
 		configData = new DbConfig(agencyId);
 		configData.read(configRev);
 		
-		// Set the timezone so that when dates are logged the time
-		// is correct. Valid timezone format is at 
-		// http://en.wikipedia.org/wiki/List_of_tz_zones
-		String timezoneStr = configData.getFirstAgency().getTimeZoneStr();
-		TimeZone.setDefault(TimeZone.getTimeZone(timezoneStr));
-
 		// Create the DataDBLogger so that generated data can be stored
 		// to database via a robust queue. But don't actually log data
 		// if in playback mode since then would be writing data again 

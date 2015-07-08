@@ -217,14 +217,41 @@ public class Time {
 	}
 	
 	/**
-	 * Returns the epoch time of the start of the current day for the specified
-	 * timezone.
+	 * Returns the epoch time of the start of the day for the date and timezone
+	 * specified.
 	 * 
+	 * @param date
+	 *            the time that the start of the day is needed for
 	 * @param tz
-	 * @return
+	 *            the timezone
+	 * @return start of the current day
 	 */
-	public static long getStartOfDay(TimeZone tz) {
+	public static long getStartOfDay(Date date, TimeZone tz) {
 		Calendar calendar = new GregorianCalendar(tz);
+		calendar.setTime(date);
+		
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+
+		// Get the epoch time
+		long epochTime = calendar.getTimeInMillis();
+		return epochTime;
+	}
+	
+	/**
+	 * Returns the epoch time of the start of the current day for the default
+	 * timezone. The default timezone should be set by the application at
+	 * startup using TimeZone.setDefault(TimeZone.getTimeZone(timezoneName)).
+	 * 
+	 * @param date
+	 *            the time that the start of the day is needed for
+	 * @return start of the current day
+	 */
+	public static long getStartOfDay(Date date) {
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(date);
 
 		calendar.set(Calendar.MILLISECOND, 0);
 		calendar.set(Calendar.SECOND, 0);

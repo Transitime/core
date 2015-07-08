@@ -1792,10 +1792,20 @@ public class GtfsData {
 		List<GtfsCalendarDate> gtfsCalendarDates = calendarDatesReader.get();
 		
 		for (GtfsCalendarDate gtfsCalendarDate : gtfsCalendarDates) {
-			// Create the CalendarDate object and put it into the array
+			// Create the CalendarDate object
 			CalendarDate calendarDate =
 					new CalendarDate(revs.getConfigRev(), gtfsCalendarDate,
 							getDateFormatter());
+			
+			// If calendar date is not sometime in the future then can ignore
+			// it and not store it. This can be useful because an agency might
+			// not clean out old dates from the calendar_dates.txt file even
+			// if they are no longer useful.			
+			if (calendarDate.getDate().getTime() + 1*Time.DAY_IN_MSECS < 
+					System.currentTimeMillis()) 
+				continue;
+
+			// The calendar date is for in the future so store it
 			calendarDates.add(calendarDate);
 		}
 		
