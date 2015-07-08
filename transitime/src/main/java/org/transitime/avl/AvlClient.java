@@ -26,8 +26,9 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.utils.Time;
 
 /**
- * Receives data from the AvlJmsClientModule and processes it.
- * Can use multiple threads to handle data.
+ * Receives AVL data from the AvlExecutor or JMS, determines if AVL should be
+ * filtered, and processes data that doesn't need to be filtered. Can use
+ * multiple threads to process data.
  * 
  * @author SkiBu Smith
  */
@@ -53,6 +54,15 @@ public class AvlClient implements Runnable {
 	 */
 	public AvlClient(AvlReport avlReport) {
 		this.avlReport = avlReport;
+	}
+	
+	/**
+	 * Returns the AVL report associated with this AvlClient
+	 * 
+	 * @return the AVL report
+	 */
+	public AvlReport getAvlReport() {
+		return avlReport;
 	}
 	
 	/**

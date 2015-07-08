@@ -168,14 +168,14 @@ public class Agency implements Serializable {
 	/**
 	 * Returns the list of agencies for the specified project ID.
 	 * 
-	 * @param dbName
+	 * @param agencyId
 	 *            Specifies name of database
 	 * @param configRev
 	 * @return
 	 */
-	public static List<Agency> getAgencies(String dbName, int configRev) {
+	public static List<Agency> getAgencies(String agencyId, int configRev) {
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(dbName);
+		Session session = HibernateUtils.getSession(agencyId);
 		try {
 			return getAgencies(session, configRev);
 		} finally {
@@ -186,13 +186,13 @@ public class Agency implements Serializable {
 	/**
 	 * Reads the current timezone for the agency from the agencies database
 	 * 
-	 * @param dbName
+	 * @param agencyId
 	 * @return The TimeZone, or null if not successful
 	 */
-	public static TimeZone getTimeZoneFromDb(String dbName) {
-		int configRev = ActiveRevisions.get(dbName).getConfigRev();
+	public static TimeZone getTimeZoneFromDb(String agencyId) {
+		int configRev = ActiveRevisions.get(agencyId).getConfigRev();
 		
-		List<Agency> agencies = getAgencies(dbName, configRev);
+		List<Agency> agencies = getAgencies(agencyId, configRev);
 		if (agencies.size() != 0)
 			return agencies.get(0).getTimeZone();
 		else

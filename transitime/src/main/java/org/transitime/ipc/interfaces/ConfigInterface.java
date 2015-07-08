@@ -157,4 +157,54 @@ public interface ConfigInterface extends Remote {
 	 */
 	public List<IpcCalendar> getAllCalendars() throws RemoteException;
 
+	/**
+	 * Returns list of vehicle IDs, unsorted
+	 * 
+	 * @return vehicle IDs
+	 * @throws RemoteException
+	 */
+	public List<String> getVehicleIds() throws RemoteException;
+	
+	/**
+	 * Returns list of service IDs, unsorted
+	 * 
+	 * @return vehicle IDs
+	 * @throws RemoteException
+	 */
+	public List<String> getServiceIds() throws RemoteException;
+	
+	/**
+	 * Returns list of service IDs, unsorted
+	 * 
+	 * @return vehicle IDs
+	 * @throws RemoteException
+	 */
+	public List<String> getCurrentServiceIds() throws RemoteException;
+	
+	/**
+	 * Returns list of trip IDs, unsorted
+	 * 
+	 * @return vehicle IDs
+	 * @throws RemoteException
+	 */
+	public List<String> getTripIds() throws RemoteException;
+	
+	/**
+	 * Returns list of block IDs, unsorted
+	 * 
+	 * @return vehicle IDs
+	 * @throws RemoteException
+	 */
+	public List<String> getBlockIds() throws RemoteException;
+	
+	/**
+	 * Returns list of block IDs for specified serviceId, unsorted
+	 * 
+	 * @param serviceId If null then all block IDs are returned
+	 * @return vehicle IDs
+	 * @throws RemoteException
+	 */
+	public List<String> getBlockIds(String serviceId) throws RemoteException;
+	
+
 }

@@ -63,6 +63,15 @@ public class BoundedExecutor {
 	}
 	
 	/**
+	 * Returns how many items can still be added to the executor's queue.
+	 * 
+	 * @return How many items can add to queue
+	 */
+	public int spaceInQueue() {
+		return semaphore.availablePermits();
+	}
+	
+	/**
 	 * Executes the task by running the Runnable.run() method. Blocks if queue
 	 * is already full. The queue includes tasks already being executed so if
 	 * Executor can use 5 threads and all 5 threads are executing a task and

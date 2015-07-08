@@ -68,40 +68,6 @@ public class AvlConfig {
 					"timeout value is exceeded.");
 	
 	/**
-	 * How many items to go into the blocking AVL queue before need to
-	 * wait for queue to have space.
-	 * @return
-	 */
-	public static int getAvlQueueSize() {
-		return avlQueueSize.getValue();
-	}
-	private static IntegerConfigValue avlQueueSize = 
-			new IntegerConfigValue("transitime.avl.queueSize", 1000,
-					"How many items to go into the blocking AVL queue " +
-					"before need to wait for queue to have space.");
-
-	/**
-	 * How many threads to be used for processing the AVL data. For most
-	 * applications just using a single thread is probably sufficient and it
-	 * makes the logging simpler since the messages will not be interleaved.
-	 * But for large systems with lots of vehicles then should use multiple 
-	 * threads, such as 3-5 so that more of the cores are used.
-	 * @return
-	 */
-	public static int getNumAvlThreads() {
-		return numAvlThreads.getValue();
-	}
-	private static IntegerConfigValue numAvlThreads = 
-			new IntegerConfigValue("transitime.avl.numThreads", 1,
-					"How many threads to be used for processing the AVL " +
-					"data. For most applications just using a single thread " +
-					"is probably sufficient and it makes the logging simpler " +
-					"since the messages will not be interleaved. But for " +
-					"large systems with lots of vehicles then should use " +
-					"multiple threads, such as 3-5 so that more of the cores " +
-					"are used.");
-	
-	/**
 	 * Max speed that an AVL report is allowed to have.
 	 * @return max speed in m/s
 	 */

@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.ServiceUtils;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
@@ -48,6 +49,7 @@ import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
+import org.transitime.utils.Time;
 
 /**
  * Reads all the configuration data from the database. The data is based on GTFS
@@ -97,6 +99,8 @@ public class DbConfig {
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
 	private List<CalendarDate> calendarDates;
+	// So can efficiently look up calendar dates
+	private Map<Long, List<CalendarDate>> calendarDatesMap;
 	private List<FareAttribute> fareAttributes;
 	private List<FareRule> fareRules;
 	private List<Frequency> frequencies;
@@ -533,6 +537,18 @@ public class DbConfig {
 		agencies = Agency.getAgencies(globalSession, configRev);
 		calendars = Calendar.getCalendars(globalSession, configRev);
 		calendarDates = CalendarDate.getCalendarDates(globalSession, configRev);
+		
+		calendarDatesMap = new HashMap<Long, List<CalendarDate>>();
+		for (CalendarDate calendarDate : calendarDates) {
+			Long time = calendarDate.getTime();
+			List<CalendarDate> calendarDatesForDate = calendarDatesMap.get(time);
+			if (calendarDatesForDate == null) {
+				calendarDatesForDate = new ArrayList<CalendarDate>(1);
+				calendarDatesMap.put(time, calendarDatesForDate);
+			}
+			calendarDatesForDate.add(calendarDate);
+		}
+		
 		fareAttributes =
 				FareAttribute.getFareAttributes(globalSession, configRev);
 		fareRules = FareRule.getFareRules(globalSession, configRev);
@@ -686,14 +702,72 @@ public class DbConfig {
 		return stopsMap.get(stopId);
 	}
 
+	/**
+	 * Returns list of all calendars
+	 * @return calendars
+	 */
 	public List<Calendar> getCalendars() {
 		return Collections.unmodifiableList(calendars);
 	}
 
+	/**
+	 * Returns list of calendars that are currently active
+	 * @return current calendars
+	 */
+	public List<Calendar> getCurrentCalendars() {
+		// Get list of currently active calendars
+		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
+		List<Calendar> calendarList =
+				serviceUtils.getCurrentCalendars(Core.getInstance().getSystemTime());
+		return calendarList;
+	}
+	
+	/**
+	 * Returns list of all calendar dates from the GTFS calendar_dates.txt file.
+	 * 
+	 * @return list of calendar dates
+	 */
 	public List<CalendarDate> getCalendarDates() {
 		return Collections.unmodifiableList(calendarDates);
 	}
 
+	/**
+	 * Returns CalendarDate for the current day. This method is pretty quick
+	 * since it looks through a hashmap, instead of doing a linear search
+	 * through a possibly very large number of dates.
+	 * 
+	 * @return CalendarDate for current day if there is one, otherwise null.
+	 */
+	public List<CalendarDate> getCalendarDatesForNow() {
+		long startOfDay = 
+				Time.getStartOfDay(Core.getInstance().getSystemDate());
+		return calendarDatesMap.get(startOfDay);
+	}
+	
+	/**
+	 * Returns list of all service IDs
+	 * @return service IDs
+	 */
+	public List<String> getServiceIds() {
+		List<String> serviceIds = new ArrayList<String>();
+		for (Calendar calendar : getCalendars()) {
+			serviceIds.add(calendar.getServiceId());
+		}
+		return serviceIds;
+	}
+	
+	/**
+	 * Returns list of service IDs that are currently active
+	 * @return current service IDs
+	 */
+	public List<String> getCurrentServiceIds() {
+		List<String> serviceIds = new ArrayList<String>();
+		for (Calendar calendar : getCurrentCalendars()) {
+			serviceIds.add(calendar.getServiceId());
+		}
+		return serviceIds;
+	}
+	
 	/**
 	 * There can be multiple agencies but usually there will be just one. For
 	 * getting timezone and such want to be able to easily access the main

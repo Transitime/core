@@ -25,13 +25,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
-import org.transitime.core.ServiceUtils;
+import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
+import org.transitime.db.structs.VehicleConfig;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcCalendar;
@@ -283,15 +284,12 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<IpcCalendar> getCurrentCalendars() {
-		// List to be returned
-		List<IpcCalendar> ipcCalendarList = new ArrayList<IpcCalendar>();
-
 		// Get list of currently active calendars
-		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
 		List<Calendar> calendarList =
-				serviceUtils.getCurrentCalendars(System.currentTimeMillis());
+				Core.getInstance().getDbConfig().getCurrentCalendars();
 
 		// Convert Calendar list to IpcCalendar list
+		List<IpcCalendar> ipcCalendarList = new ArrayList<IpcCalendar>();
 		for (Calendar calendar : calendarList) {
 			ipcCalendarList.add(new IpcCalendar(calendar));
 		}
@@ -304,19 +302,87 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<IpcCalendar> getAllCalendars() {		
-		// List to be returned
-		List<IpcCalendar> ipcCalendarList = new ArrayList<IpcCalendar>();
-
 		// Get list of currently active calendars
 		List<Calendar> calendarList =
 				Core.getInstance().getDbConfig().getCalendars();
 
 		// Convert Calendar list to IpcCalendar list
+		List<IpcCalendar> ipcCalendarList = new ArrayList<IpcCalendar>();
 		for (Calendar calendar : calendarList) {
 			ipcCalendarList.add(new IpcCalendar(calendar));
 		}
 
 		return ipcCalendarList;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getVehicleIds()
+	 */
+	@Override
+	public List<String> getVehicleIds() throws RemoteException {
+		Collection<VehicleConfig> vehicleConfigs = VehicleDataCache.getInstance().getVehicleConfigs();
+		List<String> vehicleIds = new ArrayList<String>(vehicleConfigs.size());
+		for (VehicleConfig vehicleConfig : vehicleConfigs)
+			vehicleIds.add(vehicleConfig.getId());
+		return vehicleIds;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getServiceIds()
+	 */
+	@Override
+	public List<String> getServiceIds() throws RemoteException {
+		return Core.getInstance().getDbConfig().getServiceIds();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getCurrentServiceIds()
+	 */
+	@Override
+	public List<String> getCurrentServiceIds() throws RemoteException {
+		return Core.getInstance().getDbConfig().getCurrentServiceIds();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTripIds()
+	 */
+	@Override
+	public List<String> getTripIds() throws RemoteException {
+		Collection<Trip> trips =
+				Core.getInstance().getDbConfig().getTrips().values();
+		List<String> tripIds = new ArrayList<String>(trips.size());
+		for (Trip trip : trips)
+			tripIds.add(trip.getId());
+		return tripIds;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getBlockIds()
+	 */
+	@Override
+	public List<String> getBlockIds() throws RemoteException {
+		List<Block> blocks = Core.getInstance().getDbConfig().getBlocks();
+		List<String> blockIds = new ArrayList<String>(blocks.size());
+		for (Block block : blocks)
+			blockIds.add(block.getId());
+		return blockIds;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getBlockIds()
+	 */
+	@Override
+	public List<String> getBlockIds(String serviceId) throws RemoteException {
+		// If serviceId not specified (is null) then return all block IDs
+		if (serviceId == null)
+			return getBlockIds();
+		
+		Collection<Block> blocks =
+				Core.getInstance().getDbConfig().getBlocks(serviceId);
+		List<String> blockIds = new ArrayList<String>(blocks.size());
+		for (Block block : blocks)
+			blockIds.add(block.getId());
+		return blockIds;
 	}
 	
 }

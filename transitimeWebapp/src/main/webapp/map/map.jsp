@@ -627,6 +627,12 @@ function vehicleLocationsCallback(vehicles, status) {
 	// Go through vehicle data read in for route...
 	for (var i = 0; i < vehicles.vehicle.length; ++i) {
 		var vehicleData = vehicles.vehicle[i];
+		
+		// Don't display schedule based vehicles since they are not real and
+		// would only serve to confuse people.
+		if (vehicleData.scheduleBased)
+			continue;
+		
 		var vehicleLoc = L.latLng(vehicleData.loc.lat, vehicleData.loc.lon);
 
 		// If vehicle icon wasn't already created then create it now
