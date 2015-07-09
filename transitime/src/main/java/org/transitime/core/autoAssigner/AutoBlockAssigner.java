@@ -742,7 +742,7 @@ public class AutoBlockAssigner {
 		// consider that a match 
 		if (matches.size() > 1) {
 			logger.info("Found multiple matches ({}) for vehicleId={}. "
-					+ "Therefore could not auto assigne vehicle. {}", 
+					+ "Therefore could not auto assign vehicle. {}", 
 					matches.size(), vehicleId, matches);
 			return null;
 		}
