@@ -97,7 +97,7 @@ function setRouteQueryStrParam(param) {
 
 /**
  * Returns query string param to be used for API for specifying the route.
- * It can be either "r=routeId" or "r=rShortName" depending on whether route
+ * It can be either "r=routeId" or "r=routeShortName" depending on whether route
  * ID or route short name were used when bringing up the page.
  */
 function setRouteQueryStrParamViaQueryStr() {
@@ -128,13 +128,13 @@ function predictionCallback(preds, status) {
 	var routeStopPreds = preds.predictions[0];
 	
 	// Set timeout to update predictions again in few seconds
-	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStopPreds.rShortName, routeStopPreds.sId);
+	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStopPreds.routeShortName, routeStopPreds.stopId);
 
 	// Add route and stop info
-	var content = '<b>Route:</b> ' + routeStopPreds.rName + '<br/>' 
-		+ '<b>Stop:</b> ' + routeStopPreds.sName + '<br/>';
+	var content = '<b>Route:</b> ' + routeStopPreds.routeName + '<br/>' 
+		+ '<b>Stop:</b> ' + routeStopPreds.stopName + '<br/>';
 	if (verbose)
-		content += '<b>Stop Id:</b> ' + routeStopPreds.sId + '<br/>';
+		content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 		
 	// For each destination add predictions
 	for (var i in routeStopPreds.dest) {
@@ -194,9 +194,9 @@ function predictionCallback(preds, status) {
 /**
  * Initiates API call to get prediction data.
  */
-function getPredictionsJson(rShortName, stopId) {
+function getPredictionsJson(routeShortName, stopId) {
 	// JSON request of predicton data
-	var url = apiUrlPrefix + "/command/predictions?rs=" + rShortName 
+	var url = apiUrlPrefix + "/command/predictions?rs=" + routeShortName 
 			+ "|" + stopId;
 	$.getJSON(url, predictionCallback);	
 }
@@ -207,7 +207,7 @@ function getPredictionsJson(rShortName, stopId) {
  */
 function showStopPopup(stopMarker) {
 	// JSON request of predicton data
-	getPredictionsJson(stopMarker.rShortName, stopMarker.stop.id);
+	getPredictionsJson(stopMarker.routeShortName, stopMarker.stop.id);
     
 	// Create popup in proper place but content will be added in predictionCallback()
 	predictionsPopup = L.popup(stopPopupOptions)
@@ -260,7 +260,7 @@ function routeConfigCallback(route, status) {
 			
 			// Store routeShortName obtained via AJAX with stopMarker so can be 
 			// used to get predictions for stop/route
-			stopMarker.rShortName = route.rShortName;
+			stopMarker.routeShortName = route.routeShortName;
 			
 			// When user clicks on stop popup information box
 			stopMarker.on('click', function(e) {
@@ -375,7 +375,7 @@ function getVehiclePopupContent(vehicleData) {
     var tripPatternStr = verbose ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
     
     var content = "<b>Vehicle:</b> " + vehicleData.id 
-    	+ "<br/><b>Route: </b> " + vehicleData.rShortName
+    	+ "<br/><b>Route: </b> " + vehicleData.routeShortName
 		+ latLonHeadingStr
 		+ "<br/><b>GPS Time:</b> " + gpsTimeStr
 		+ "<br/><b>Headsign:</b> " + vehicleData.headsign
