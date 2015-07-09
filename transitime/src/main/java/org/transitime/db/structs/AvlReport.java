@@ -219,9 +219,13 @@ public class AvlReport implements Serializable {
 	 * Since not yet being processed timeProcessed is set to null.
 	 * 
 	 * @param vehicleId
+	 *            ID of the vehicle
 	 * @param time
+	 *            Epoch time in msec of GPS report (not when processed)
 	 * @param lat
+	 *            Latitude in decimal degrees
 	 * @param lon
+	 *            Longitude in decimal degrees
 	 * @param speed
 	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
 	 *            not available
@@ -260,7 +264,9 @@ public class AvlReport implements Serializable {
 	 * Since not yet being processed timeProcessed is set to null. 
 	 * 
 	 * @param vehicleId
+	 *            ID of the vehicle
 	 * @param time
+	 *            Epoch time in msec of GPS report (not when processed)
 	 * @param location
 	 * @param speed
 	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
@@ -296,13 +302,19 @@ public class AvlReport implements Serializable {
 	}
 
 	/**
+	 * @param vehicleId
+	 *            ID of the vehicle
+	 * @param time
+	 *            Epoch time in msec of GPS report (not when processed)
 	 * For when speed and heading are not valid. They are set to Float.NaN .
 	 * Since not yet being processed timeProcessed is set to null.
 
 	 * @param vehicleId
 	 * @param time
 	 * @param lat
+	 *            Latitude in decimal degrees
 	 * @param lon
+	 *            Longitude in decimal degrees
 	 * @param source
 	 *            Text describing the source of the report
 	 */
