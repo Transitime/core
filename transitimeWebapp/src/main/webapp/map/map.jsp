@@ -260,7 +260,7 @@ function routeConfigCallback(route, status) {
 			
 			// Store routeShortName obtained via AJAX with stopMarker so can be 
 			// used to get predictions for stop/route
-			stopMarker.routeShortName = route.routeShortName;
+			stopMarker.routeShortName = route.shortName;
 			
 			// When user clicks on stop popup information box
 			stopMarker.on('click', function(e) {
