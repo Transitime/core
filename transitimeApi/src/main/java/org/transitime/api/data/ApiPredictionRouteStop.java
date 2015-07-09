@@ -50,7 +50,7 @@ public class ApiPredictionRouteStop {
 	@XmlAttribute
 	private String stopId;
 
-	@XmlAttribute(name = "sName")
+	@XmlAttribute
 	private String stopName;
 
 	// Using String so that it will not be output if not showing predictions
