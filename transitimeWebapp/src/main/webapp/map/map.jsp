@@ -168,7 +168,7 @@ function predictionCallback(preds, status) {
 					content += '<sup>sched</sup>';
 				else {
 					if (pred.notYetDeparted)
-						content += '<sup>not left</sup>';
+						content += '<sup>not yet left</sup>';
 					else
 						if (pred.delayed) 
 							content += '<sup>delayed</sup>';
