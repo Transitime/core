@@ -1,4 +1,6 @@
-<b>generateDatabaseSchema.jar</b>
+There are several main classes which are used in the set up of the system. These can be run directly by specifying the class to run or by using the executable jar in the target directory.
+
+generateDatabaseSchema.jar -- Main class: org.transitime.applications.GTFSFileProcessor
 =================================
 <br/>
 The jar generateDatabaseSchema.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. One for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
@@ -24,4 +26,5 @@ TODO This works in eclipse but not on command line. Strange and need to investig
 <br/>
 Once these commands have been run you should run the sql created in the files in the core and web directory in your database.
 	
-                                 
+<b>processGTFSFile.jar</b>
+=================================                            
