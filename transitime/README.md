@@ -3,7 +3,7 @@ There are several main classes which are used in the set up of the system. These
 generateDatabaseSchema.jar -- Main class: org.transitime.applications.SchemaGenerator
 =================================
 <br/>
-The jar generateDatabaseSchema.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. One for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
+The jar generateDatabaseSchema.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. A file is generated for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
 <br/>
 <i>
 
