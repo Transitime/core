@@ -33,7 +33,7 @@ To create all tables require you to support the core and the webapp you should r
 
 Once these commands have been run you should run the sql created in the files in the core and web directory in your database.
 	
-TODO: This works in eclipse but not on command line. Strange and need to investigate. Probably somthing to do with the fact it is an executable jar.
+TODO: This works in eclipse by executing the class but not on command line using the executable jar. Strange and need to investigate. Probably somthing to do with the fact it is an executable jar.
 
 processGTFSFile.jar -- Main class: org.transitime.applications.GTFSFileProcessor
 =================================                            
