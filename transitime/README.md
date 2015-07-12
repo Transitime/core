@@ -1,5 +1,25 @@
 There are several main classes which are used in the set up of the system. These can be run directly by specifying the class to run or by using the executable jar in the target directory.
 
+The steps to set up the system are 
+<ul>
+	<li>Create Database. For this set you are on your own and you should find instructions on the related database providers web sites.
+	</li>
+	<li>Create Database structures
+		using generateDatabaseScheme.jar
+	</li>
+	</li>
+	<li>Import GTFS static data using
+		processGTFSFile
+	</li>		
+	<li>Get access to RealTime datasource.</li>
+	<li>Create transiTime module to read realtime datasource or create a convert the realtime datasource to a GTFS-RT vechicle location source.</li>
+	<li>Create Web Agency</li>
+	<li>Config and run core module</li>
+	<li>Setup tranitime api webapp</li>
+	<li>Setup tranitime webapp</li>
+</ul>
+	
+
 generateDatabaseSchema.jar -- Main class: org.transitime.applications.SchemaGenerator
 =================================
 <br/>
@@ -144,3 +164,6 @@ args:
 example:
 	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar processGTFSFile.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
 ```
+
+
+WORK IN PROGRESS........................
