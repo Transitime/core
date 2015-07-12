@@ -38,7 +38,7 @@ processGTFSFile.jar -- Main class: org.transitime.applications.GTFSFileProcessor
 This class the usage can be got from specifying the -h option on its own.
 
 ```
-usage: java transitime.jar [-c <configFile>] [-combineRouteNames]
+usage: java processGTFSFile.jar [-c <configFile>] [-combineRouteNames]
        [-defaultWaitTimeAtStopMsec <msec>] [-gtfsDirectoryName <dirName>]
        [-gtfsUrl <url>] [-gtfsZipFileName <zipFileName>] [-h]
        [-maxDistanceForEliminatingVertices <meters>] [-maxSpeedKph <kph>]
@@ -141,4 +141,6 @@ args:
 ```
 
 ```
+example:
+	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar processGTFSFile.jar -c d:/transiTime/transiTimeConfig.xml 			-gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
 ```
