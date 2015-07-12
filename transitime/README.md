@@ -142,5 +142,5 @@ args:
 
 ```
 example:
-	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar processGTFSFile.jar -c d:/transiTime/transiTimeConfig.xml 			-gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
+	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar processGTFSFile.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
 ```
