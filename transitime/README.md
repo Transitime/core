@@ -2,7 +2,7 @@ There are several main classes which are used in the set up of the system. These
 
 The steps to set up the system are 
 <ul>
-	<li>Create Database. For this set you are on your own and you should find instructions on the related database providers web sites.
+	<li>Create Database. For this step you are on your own and you should find instructions on the related database providers web sites.
 	</li>
 	<li>Create Database structures
 		using generateDatabaseScheme.jar
