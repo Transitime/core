@@ -21,6 +21,7 @@ GTFSFileProcessor.java will read a GTFS file into this database structure.<br/>
 Core.java is as the name implies is the workhorse of the system. <br/>
 RmiQuery.java allows you make queries to the server run in core from the command line.<br/>
 CreateAPIKey.java a test app to allow you create test/demo key to access REST api webapp.<br/>
+CreateWebAgency.java is used to create and agency that will work in transitimeWebapp.<br/>
 
 Details on how to run each of these and their respective parameters are in the README for the transitime module.
 
