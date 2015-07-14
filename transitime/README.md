@@ -14,6 +14,7 @@ The steps to set up the system are
 	<li>Get access to a source of realtime GPS data.</li>
 	<li>Create transiTime module to read realtime GPS data or create a converter to convert the realtime datasource to a GTFS-RT vechicle location source.</li>
 	<li>Create Web Agency using WebAgency class</li>
+	<li>Create API key. For the moment see TestAPIKeyManager.java test. The testAPIKeyManger test will create a key for you.</li>
 	<li>Config and run core module</li>
 	<li>Setup transitime api webapp. Instructions to be added to README.MD in transitimeApi.</li>
 	<li>Setup transitime webapp. Instructions to be added to README.MD in transitimeWebapp.</li>
