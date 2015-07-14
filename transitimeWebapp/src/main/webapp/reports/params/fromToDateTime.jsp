@@ -57,7 +57,7 @@ String currentDateStr = org.transitime.utils.Time.dateStr(new java.util.Date());
     <input type="text" id="beginDate" name="beginDate" 
     	title="The first day of the range you want to examine data for. 
     	<br><br> Begin date must be before the end date." 
-    	size="8"
+    	size="10"
     	value="<%= currentDateStr%>" />
   </div>
 
@@ -66,7 +66,7 @@ String currentDateStr = org.transitime.utils.Time.dateStr(new java.util.Date());
     <input type="text" id="endDate" name="endDate" 
     	title="The last date of the range you want to examine data for.
     	<br/><br/> End date must be after the begin date." 
-    	size="8"
+    	size="10"
     	value="<%= currentDateStr%>" />
   </div>
   
