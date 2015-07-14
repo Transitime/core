@@ -12,8 +12,8 @@ The steps to set up the system are
 		processGTFSFile
 	</li>		
 	<li>Get access to RealTime datasource.</li>
-	<li>Create transiTime module to read realtime datasource or create a convert the realtime datasource to a GTFS-RT vechicle location source.</li>
-	<li>Create Web Agency</li>
+	<li>Create transiTime module to read realtime datasource or create a converter to convert the realtime datasource to a GTFS-RT vechicle location source.</li>
+	<li>Create Web Agency using WebAgency class</li>
 	<li>Config and run core module</li>
 	<li>Setup tranitime api webapp</li>
 	<li>Setup tranitime webapp</li>
