@@ -779,8 +779,8 @@ public final class Block implements Serializable {
 				// Access the collection so that it is lazy loaded.
 				// Problems can be difficult to debug so log error along
 				// with the SQL.
-				try {
-					trips.get(0);
+				try {					
+					trips.get(0);					 
 				} catch (JDBCException e) {
 					logger.error("In Block.getTrips() got JDBCException. "
 							+ "SQL=\"{}\" msg={}", 
@@ -1070,7 +1070,10 @@ public final class Block implements Serializable {
 	 */
 	public Location getStartLoc() {
 		StopPath firstStopPath = getStopPath(0, 0);
-		return firstStopPath.getEndOfPathLocation();
+		if(firstStopPath!=null)
+			return firstStopPath.getEndOfPathLocation();
+		else
+			return null;
 	}
 	
 	/**

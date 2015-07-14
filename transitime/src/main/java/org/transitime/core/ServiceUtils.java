@@ -185,6 +185,7 @@ public class ServiceUtils {
 		// Go through calendar_dates to see if there is special service for 
 		// this date. Add or remove the special service.
 		List<CalendarDate> calendarDatesForNow = dbConfig.getCalendarDatesForNow();
+		logger.info("Start adding calendar dates");
 		if (calendarDatesForNow != null) {
 			for (CalendarDate calendarDate : calendarDatesForNow) {
 				// Handle special service for this date
@@ -196,12 +197,12 @@ public class ServiceUtils {
 					serviceIds.remove(calendarDate.getServiceId());
 				}
 	
-				logger.debug("{} is special service date in "
+				/*logger.debug("{} is special service date in "
 						+ "calendar_dates.txt file. Services now are {}",
-						epochTime, serviceIds);
+						epochTime, serviceIds);*/
 			}
 		}
-		
+		logger.info("Finished adding calendar dates");
 		// Return the results
 		return serviceIds;
 	}

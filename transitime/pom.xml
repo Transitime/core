@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>transitime</groupId>
 	<artifactId>transitimeCore</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	
 	<properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -285,6 +285,18 @@
 							<attachToBuild>true</attachToBuild>
 							<classifier>onejar</classifier>
 							<filename>createAPIKey.jar</filename>
+						</configuration>
+						<goals>
+							<goal>one-jar</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>build-eighth</id>
+						<configuration>
+							<mainClass>org.transitime.applications.CreateWebAgency</mainClass>
+							<attachToBuild>true</attachToBuild>
+							<classifier>onejar</classifier>
+							<filename>createWebAgency.jar</filename>
 						</configuration>
 						<goals>
 							<goal>one-jar</goal>
