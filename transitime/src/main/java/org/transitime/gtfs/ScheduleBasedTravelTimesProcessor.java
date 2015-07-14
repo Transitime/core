@@ -517,9 +517,13 @@ public class ScheduleBasedTravelTimesProcessor {
 	}
 	
 	/**
-	 * For determining how many travel times generated.
+	 * For determining how many travel times have been processed into the
+	 * travelTimesFromDbMap. There is a travel time for each stop path for each
+	 * trip.
+	 * 
 	 * @param travelTimesFromDbMap
-	 * @return
+	 * @return Total number of travel times (one per stop path) already
+	 *         processed)
 	 */
 	private static int numberOfTravelTimes(
 			Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
@@ -562,7 +566,8 @@ public class ScheduleBasedTravelTimesProcessor {
 				TravelTimesForTrip.getTravelTimesForTrips(session, 
 						originalTravelTimesRev);
 
-		int originalNumberTravelTimes = numberOfTravelTimes(travelTimesFromDbMap);
+		int originalNumberTravelTimes =
+				numberOfTravelTimes(travelTimesFromDbMap);
 		
 		// Do the low-level processing
 		processTrips(gtfsData, travelTimesFromDbMap);
