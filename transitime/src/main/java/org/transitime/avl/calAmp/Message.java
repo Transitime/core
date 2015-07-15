@@ -97,7 +97,13 @@ public class Message {
 				MiniEventReport miniEventReport =
 						MiniEventReport.getMiniEventReport(bytes,
 								messageHeader.getNextPart());
-				logger.debug("Mini event report {}", miniEventReport);
+				if (miniEventReport.isValidGps()) {
+					logger.debug("Mini event report {}", miniEventReport);
+				} else {
+					logger.error("GPS fix is not valid. {}", miniEventReport);
+				}
+			} else {
+				logger.info("Not a Mini Event Report so ignoring.");
 			}
 		} catch (Exception e) {
 			logger.error("Exception while parsing CalAmp message. {}", 

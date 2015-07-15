@@ -16,6 +16,11 @@
  */
 package org.transitime.avl.calAmp;
 
+import java.util.Date;
+
+import org.transitime.utils.Geo;
+import org.transitime.utils.Time;
+
 /**
  * Contains info for a CalAmp mini event report which is a simple GPS report.
  * Documentation is at https://puls.calamp.com/wiki/LM_Direct_Reference_Guide#
@@ -26,11 +31,11 @@ package org.transitime.avl.calAmp;
  */
 public class MiniEventReport {
 
-	private final int gpsTime;
+	private final int messageTime;
 	private final double lat;
 	private final double lon;
 	private final short heading;
-	private final short speed;
+	private final short speedKph;
 	private final byte fixStatus;
 	private final short numberSatellites;
 	private final byte communicationState;
@@ -46,7 +51,7 @@ public class MiniEventReport {
 	 * @param lat
 	 * @param lon
 	 * @param heading
-	 * @param speed
+	 * @param speedKph
 	 * @param fixStatus
 	 * @param numberSatellites
 	 * @param communicationState
@@ -54,14 +59,14 @@ public class MiniEventReport {
 	 * @param eventCode
 	 */
 	private MiniEventReport(int gpsTime, double lat, double lon, short heading,
-			short speed, byte fixStatus, short numberSatellites,
+			short speedKph, byte fixStatus, short numberSatellites,
 			byte communicationState, byte inputs, byte eventCode) {
 		super();
-		this.gpsTime = gpsTime;
+		this.messageTime = gpsTime;
 		this.lat = lat;
 		this.lon = lon;
 		this.heading = heading;
-		this.speed = speed;
+		this.speedKph = speedKph;
 		this.fixStatus = fixStatus;
 		this.numberSatellites = numberSatellites;
 		this.communicationState = communicationState;
@@ -92,13 +97,13 @@ public class MiniEventReport {
 		short heading = (short) Message.readShort(bytes, offset);
 		offset += 2;
 		
-		short speed = (short) Message.readShort(bytes, offset);
+		short speedKph = bytes[offset];
 		offset += 1;
 
 		byte fixStatus = bytes[offset];
 		offset += 1;
 		
-		short numberSatellites = (short) (fixStatus >> 4);
+		short numberSatellites = (short) (fixStatus & 0x0F);
 		
 		byte communicationState = bytes[offset];
 		offset += 1;
@@ -109,7 +114,7 @@ public class MiniEventReport {
 		byte eventCode = bytes[offset];
 		offset += 1;
 		
-		return new MiniEventReport(gpsTime, lat, lon, heading, speed,
+		return new MiniEventReport(gpsTime, lat, lon, heading, speedKph,
 				fixStatus, numberSatellites, communicationState, inputs,
 				eventCode);
 	}
@@ -118,11 +123,11 @@ public class MiniEventReport {
 	@Override
 	public String toString() {
 		return "MiniEventReport [" 
-				+ "gpsTime=" + gpsTime 
+				+ "messageTime=" + messageTime + " " + new Date(getEpochTime())
 				+ ", lat=" + lat
 				+ ", lon=" + lon 
-				+ ", heading=" + heading 
-				+ ", speed=" + speed
+				+ ", heading=" + heading + "deg"
+				+ ", speed=" + speedKph + "kph " + getSpeed() + "m/s"
 				+ ", fixStatus=" + String.format("%02X", fixStatus)
 				+ ", numberSatellites="	+ numberSatellites 
 				+ ", communicationState=" + String.format("%02X", communicationState) 
@@ -137,10 +142,20 @@ public class MiniEventReport {
 	 * 
 	 * @return epoch time in seconds
 	 */
-	public int getGpsTime() {
-		return gpsTime;
+	public int getMessageTime() {
+		return messageTime;
 	}
 
+	/**
+	 * Actually the message time, not the true GPS fix time, but it should be
+	 * the same. Only message time is available for mini event reports.
+	 * 
+	 * @return epoch time in msec
+	 */
+	public int getEpochTime() {
+		return messageTime * Time.MS_PER_SEC;
+	}
+	
 	public double getLat() {
 		return lat;
 	}
@@ -157,14 +172,25 @@ public class MiniEventReport {
 	}
 
 	/**
-	 * @return Speed in km/hr
+	 * @return Speed in meters/second
 	 */
-	public short getSpeed() {
-		return speed;
+	public float getSpeed() {
+		return speedKph * Geo.KPH_TO_MPS;
 	}
 
 	public byte getFixStatus() {
 		return fixStatus;
+	}
+	
+	/**
+	 * Whether GPS fix is actually valid. Looks at top 4 bits of fixStatus to
+	 * determine if Invalid Time, Invalid Fix, Last Known, or Historic. If any
+	 * of those bits are set then the fix is considered invalid.
+	 * 
+	 * @return true if GPS is not valid
+	 */
+	public boolean isValidGps() {
+		return (fixStatus & 0xF0) != 0;
 	}
 
 	public short getNumberSatellites() {
