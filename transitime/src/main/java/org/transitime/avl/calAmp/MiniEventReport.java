@@ -184,13 +184,13 @@ public class MiniEventReport {
 	
 	/**
 	 * Whether GPS fix is actually valid. Looks at top 4 bits of fixStatus to
-	 * determine if Invalid Time, Invalid Fix, Last Known, or Historic. If any
+	 * determine if Invalid Time, Invalid Fix, Last Known, or Historic are set. If any
 	 * of those bits are set then the fix is considered invalid.
 	 * 
 	 * @return true if GPS is not valid
 	 */
 	public boolean isValidGps() {
-		return (fixStatus & 0xF0) != 0;
+		return (fixStatus & 0xF0) == 0;
 	}
 
 	public short getNumberSatellites() {
