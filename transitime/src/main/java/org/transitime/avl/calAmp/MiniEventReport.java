@@ -78,21 +78,21 @@ public class MiniEventReport {
 	 * @return The MiniEventReport
 	 */
 	public static MiniEventReport getMiniEventReport(byte[] bytes, int offset) {
-		int gpsTime = Message.readNumber(bytes, offset, 4);
+		int gpsTime = Message.readInt(bytes, offset);
 		offset += 4;
 		
-		int latInt = Message.readNumber(bytes, offset, 4);
+		int latInt = Message.readInt(bytes, offset);
 		double lat = latInt / 10000000.0;
 		offset += 4;
 
-		int lonInt = Message.readNumber(bytes, offset, 4);
+		int lonInt = Message.readInt(bytes, offset);
 		double lon = lonInt / 10000000.0;
 		offset += 4;
 
-		short heading = (short) Message.readNumber(bytes, offset, 2);
+		short heading = (short) Message.readShort(bytes, offset);
 		offset += 2;
 		
-		short speed = (short) Message.readNumber(bytes, offset, 1);
+		short speed = (short) Message.readShort(bytes, offset);
 		offset += 1;
 
 		byte fixStatus = bytes[offset];

@@ -33,21 +33,41 @@ public class Message {
 	/************************ Methods *************************/
 		
 	/**
-	 * Convenience method for reading in an integer from the bytes
+	 * Convenience method for reading in a 4 byte integer from the bytes
 	 * 
 	 * @param bytes
 	 * @param offset
-	 * @param numBytes
 	 * @return the read in integer
 	 */
-	public static int readNumber(byte[] bytes, int offset, int numBytes) {
-		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes, offset, numBytes);
+	public static int readInt(byte[] bytes, int offset) {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes, offset, 4);
 		return byteBuffer.getInt();
-//		int result = 0;
-//		for (int i=0; i<numBytes; ++i)
-//			result += (bytes[i+offset] & 0xFF) << (8*(numBytes-i-1));
-//		return result;
 	}
+	
+	/**
+	 * Convenience method for reading in a 2 byte short from the bytes
+	 * 
+	 * @param bytes
+	 * @param offset
+	 * @return the read in integer
+	 */
+	public static short readShort(byte[] bytes, int offset) {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes, offset, 2);
+		return byteBuffer.getShort();
+	}
+	
+	/**
+	 * Convenience method for reading in a 4 byte integer from the bytes
+	 * 
+	 * @param bytes
+	 * @param offset
+	 * @return the read in integer
+	 */
+	public static int readByte(byte[] bytes, int offset) {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes, offset, 1);
+		return byteBuffer.get();
+	}
+	
 	
 	public static void parseMessage(DatagramPacket packet) {
 		byte[] bytes = packet.getData();

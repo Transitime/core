@@ -25,7 +25,7 @@ package org.transitime.avl.calAmp;
 public class MessageHeader {
 	private final byte serviceType;
 	private final byte messageType;
-	private final int sequenceNumber;
+	private final short sequenceNumber;
 	private final int nextPart;
 	
 	private static final byte EVENT_REPORT_MESSAGE = 2;
@@ -43,7 +43,7 @@ public class MessageHeader {
 	 * @param nextPart
 	 */
 	private MessageHeader(byte serviceType, byte messageType,
-			int sequenceNumber, int nextPart) {
+			short sequenceNumber, int nextPart) {
 		this.serviceType = serviceType;
 		this.messageType = messageType;
 		this.sequenceNumber = sequenceNumber;
@@ -60,8 +60,9 @@ public class MessageHeader {
 	public static MessageHeader getMessageHeader(byte[] bytes, int offset) {
 		byte serviceType = bytes[offset++];
 		byte messageType = bytes[offset++];
-		int sequenceNumber = Message.readNumber(bytes, offset, 2);
-
+		short sequenceNumber = Message.readShort(bytes, offset);
+		offset += 2;
+		
 		return new MessageHeader(serviceType, messageType, sequenceNumber,
 				offset);
 	}
