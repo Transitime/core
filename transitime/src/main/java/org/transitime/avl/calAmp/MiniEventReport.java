@@ -152,8 +152,8 @@ public class MiniEventReport {
 	 * 
 	 * @return epoch time in msec
 	 */
-	public int getEpochTime() {
-		return messageTime * Time.MS_PER_SEC;
+	public long getEpochTime() {
+		return ((long) messageTime) * Time.MS_PER_SEC;
 	}
 	
 	public double getLat() {
