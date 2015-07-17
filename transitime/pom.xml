@@ -290,18 +290,6 @@
 							<goal>one-jar</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>build-eighth</id>
-						<configuration>
-							<mainClass>org.transitime.avl.calAmp.Message</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>calamp.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
 				</executions>
 			</plugin>
 		</plugins>
