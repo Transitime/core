@@ -505,39 +505,46 @@ public class VehicleState {
 
 	/**
 	 * Returns true if the AVL report has a different assignment than what is in
-	 * the VehicleState. Uses the block assignment or the route assignment from
-	 * the AVL feed. If using trip assignment in AVL feed then the trip is
-	 * converted to a block assignment for doing the comparison. For when
+	 * the VehicleState. If the avlReport does not have an assignment then false
+	 * is returned such that the old assignment continues to be used. If a block
+	 * assignment then simply checks the new block ID from the AVL report to the
+	 * existing block ID. If using trip assignment in AVL feed then the trip is
+	 * converted to a block assignment for doing the comparison. When using a
+	 * route assignment then makes sure the route ID has not changed. For when
 	 * reassigning a vehicle via the AVL feed.
 	 * 
 	 * @param avlReport
-	 * @return True if new assignment
+	 *            For determining possibly new assignment
+	 * @return True if new assignment such that vehicle needs to be matched to
+	 *         the new assignment.
 	 */
 	public boolean hasNewAssignment(AvlReport avlReport) {
-		// Assignment only considered to be different if there actually
-		// is an assignment from the AVL feed. This way a null assignment,
-		// such as for testing the auto assigner, doesn't cause system
-		// to think vehicle has a new null assignment which would cause
-		// a predictable vehicle to not continue to be considered
-		// predictable.
-		if (avlReport.getAssignmentType() != AssignmentType.UNSET) {
-			String newAssignment = null;
-			Block block = BlockAssigner.getInstance().getBlockAssignment(
-					avlReport);
-			if (block != null)
-				newAssignment = block.getId();
-			else {
-				String routeId = BlockAssigner.getInstance()
-						.getRouteIdAssignment(avlReport);
-				if (routeId != null)
-					newAssignment = routeId;
-			}
+		// If no assignment specified in AVL report then should continue to use
+		// previous assignment.
+		if (avlReport.getAssignmentType() == AssignmentType.UNSET)
+			return false;
+
+		// If block assignment then simply check assignment ID
+		if (avlReport.getAssignmentType() == AssignmentType.BLOCK_ID) {
 			// Use Objects.equals() since either the existing assignment or
 			// the AVL report assignment can be null
-			if (!Objects.equals(assignmentId, newAssignment))
-				return true;
+			return !Objects.equals(assignmentId, avlReport.getAssignmentId());
 		}
-		return false;
+
+		// Must be a route ID, trip ID, or trip short name assignment
+		String newAssignment = null;
+		Block block = BlockAssigner.getInstance().getBlockAssignment(avlReport);
+		if (block != null)
+			newAssignment = block.getId();
+		else {
+			String routeId =
+					BlockAssigner.getInstance().getRouteIdAssignment(avlReport);
+			if (routeId != null)
+				newAssignment = routeId;
+		}
+		// Use Objects.equals() since either the existing assignment or
+		// the AVL report assignment can be null
+		return !Objects.equals(assignmentId, newAssignment);
 	}
 	
 	/**
