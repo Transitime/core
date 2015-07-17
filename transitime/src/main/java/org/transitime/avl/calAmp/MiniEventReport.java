@@ -29,7 +29,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class MiniEventReport {
+public class MiniEventReport extends Report {
 
 	private final int messageTime;
 	private final double lat;
@@ -47,6 +47,8 @@ public class MiniEventReport {
 	/**
 	 * Constructor private to force use of getMiniEventReport().
 	 * 
+	 * @param optionsHeader
+	 * @param messageHeader
 	 * @param gpsTime
 	 * @param lat
 	 * @param lon
@@ -55,13 +57,15 @@ public class MiniEventReport {
 	 * @param fixStatus
 	 * @param numberSatellites
 	 * @param communicationState
-	 * @param inputs
+	 * @param inputs 
 	 * @param eventCode
 	 */
-	private MiniEventReport(int gpsTime, double lat, double lon, short heading,
-			short speedKph, byte fixStatus, short numberSatellites,
-			byte communicationState, byte inputs, byte eventCode) {
-		super();
+	private MiniEventReport(OptionsHeader optionsHeader,
+			MessageHeader messageHeader, int gpsTime, double lat, double lon,
+			short heading, short speedKph, byte fixStatus,
+			short numberSatellites, byte communicationState, byte inputs,
+			byte eventCode) {
+		super(optionsHeader, messageHeader);
 		this.messageTime = gpsTime;
 		this.lat = lat;
 		this.lon = lon;
@@ -77,24 +81,29 @@ public class MiniEventReport {
 	/**
 	 * Reads MiniEventReport from byte stream starting at the offset, which should
 	 * be just past the message header.
-	 * 
+	 *
+	 * @param optionsHeader
+	 * @param messageHeader
 	 * @param bytes
 	 * @param offset
 	 * @return The MiniEventReport
 	 */
-	public static MiniEventReport getMiniEventReport(byte[] bytes, int offset) {
-		int gpsTime = Message.readInt(bytes, offset);
+	public static MiniEventReport getMiniEventReport(
+			OptionsHeader optionsHeader, MessageHeader messageHeader,
+			byte[] bytes, int offset) {
+		// Read all the elements of the report from the byte stream
+		int gpsTime = Report.readInt(bytes, offset);
 		offset += 4;
 		
-		int latInt = Message.readInt(bytes, offset);
+		int latInt = Report.readInt(bytes, offset);
 		double lat = latInt / 10000000.0;
 		offset += 4;
 
-		int lonInt = Message.readInt(bytes, offset);
+		int lonInt = Report.readInt(bytes, offset);
 		double lon = lonInt / 10000000.0;
 		offset += 4;
 
-		short heading = (short) Message.readShort(bytes, offset);
+		short heading = (short) Report.readShort(bytes, offset);
 		offset += 2;
 		
 		short speedKph = bytes[offset];
@@ -113,10 +122,11 @@ public class MiniEventReport {
 		
 		byte eventCode = bytes[offset];
 		offset += 1;
-		
-		return new MiniEventReport(gpsTime, lat, lon, heading, speedKph,
-				fixStatus, numberSatellites, communicationState, inputs,
-				eventCode);
+
+		// Create and return the report
+		return new MiniEventReport(optionsHeader, messageHeader, gpsTime, lat,
+				lon, heading, speedKph, fixStatus, numberSatellites,
+				communicationState, inputs, eventCode);
 	}
 
 	
@@ -133,6 +143,8 @@ public class MiniEventReport {
 				+ ", communicationState=" + String.format("%02X", communicationState) 
 				+ ", inputs=" + String.format("%02X", inputs)
 				+ ", eventCode=" + String.format("%02X", eventCode) 
+				+ ", optionsHeader=" + optionsHeader
+				+ ", messageHeader=" + messageHeader
 				+ "]";
 	}
 
@@ -207,6 +219,16 @@ public class MiniEventReport {
 
 	public byte getEventCode() {
 		return eventCode;
+	}
+
+	@Override
+	public void process() {
+		if (isValidGps()) {
+			logger.debug("Processing GPS fix mini event report {}", this);
+		} else {
+			logger.error("GPS fix mini event report is not valid. {}", this);
+		}
+
 	}
 	
 }

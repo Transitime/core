@@ -18,6 +18,9 @@ package org.transitime.avl.calAmp;
 
 /**
  * For processing CalAmp message header.
+ * <p>
+ * Documentation on message header at
+ * https://puls.calamp.com/wiki/LM_Direct_Reference_Guide#Message_Header
  * 
  * @author Skibu Smith
  *
@@ -60,7 +63,7 @@ public class MessageHeader {
 	public static MessageHeader getMessageHeader(byte[] bytes, int offset) {
 		byte serviceType = bytes[offset++];
 		byte messageType = bytes[offset++];
-		short sequenceNumber = Message.readShort(bytes, offset);
+		short sequenceNumber = Report.readShort(bytes, offset);
 		offset += 2;
 		
 		return new MessageHeader(serviceType, messageType, sequenceNumber,

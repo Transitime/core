@@ -25,13 +25,52 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.ipc.servers.ConfigServer;
 
-public class Message {
+public abstract class Report {
 	
-	private static final Logger logger = 
+	protected final OptionsHeader optionsHeader;
+	protected final MessageHeader messageHeader;
+	
+	protected static final Logger logger = 
 			LoggerFactory.getLogger(ConfigServer.class);
 
 	/************************ Methods *************************/
-		
+	
+	protected Report(OptionsHeader optionsHeader, MessageHeader messageHeader) {
+		this.optionsHeader = optionsHeader;
+		this.messageHeader = messageHeader;
+	}
+	
+	/**
+	 * Actually process the already created report.
+	 */
+	public abstract void process();
+	
+	/**
+	 * Returns the mobile ID associated with the report
+	 * 
+	 * @return mobile ID
+	 */
+	protected String getMobileId() {
+		return optionsHeader.getMobileId();
+	}
+	
+	/**
+	 * The type of Mobile ID being used by the LMU: 
+     *   0 – OFF 
+     *   1 – Electronic Serial Number (ESN) of the LMU 
+     *   2 – International Mobile Equipment Identifier (IMEI) or Electronic Identifier (EID) of the wireless modem 
+     *   3 – International Mobile Subscriber Identifier (IMSI) of the SIM card (GSM/GPRS devices only) 
+     *   4 – User Defined Mobile ID 
+     *   5 – Phone Number of the mobile (if available) 
+     *   6 – The current IP Address of the LMU 
+     *   7 - CDMA Mobile Equipment ID (MEID) or International Mobile Equipment Identifier (IMEI) of the wireless modem
+     *
+	 * @return mobile ID type
+	 */
+	protected byte getMobileIdType() {
+		return optionsHeader.getMobileIdType();
+	}
+	
 	/**
 	 * Convenience method for reading in a 4 byte integer from the bytes
 	 * 
@@ -39,7 +78,7 @@ public class Message {
 	 * @param offset
 	 * @return the read in integer
 	 */
-	public static int readInt(byte[] bytes, int offset) {
+	protected static int readInt(byte[] bytes, int offset) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes, offset, 4);
 		return byteBuffer.getInt();
 	}
@@ -51,7 +90,7 @@ public class Message {
 	 * @param offset
 	 * @return the read in integer
 	 */
-	public static short readShort(byte[] bytes, int offset) {
+	protected static short readShort(byte[] bytes, int offset) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes, offset, 2);
 		return byteBuffer.getShort();
 	}
@@ -63,13 +102,19 @@ public class Message {
 	 * @param offset
 	 * @return the read in integer
 	 */
-	public static int readByte(byte[] bytes, int offset) {
+	protected static int readByte(byte[] bytes, int offset) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes, offset, 1);
 		return byteBuffer.get();
 	}
 	
-	
-	public static void parseMessage(DatagramPacket packet) {
+	/**
+	 * Reads the CalAmp report from the DatagramPacket bytes
+	 * 
+	 * @param packet
+	 *            Contains the data
+	 * @return The Report, or null if not successul
+	 */
+	public static Report parseReport(DatagramPacket packet) {
 		byte[] bytes = packet.getData();
 
 		// Log the entire message in hexadecimal format
@@ -88,20 +133,17 @@ public class Message {
 					optionsHeader != null ? optionsHeader.getNextPart() : 0;
 			logger.debug("Options header {}", optionsHeader);
 
-			// Read message header
+			// Read message header, which specifies type of report
 			MessageHeader messageHeader =
 					MessageHeader.getMessageHeader(bytes, messageStartIdx);
 			logger.debug("Message header {}", messageHeader);
 
 			if (messageHeader.isMiniEventReport()) {
 				MiniEventReport miniEventReport =
-						MiniEventReport.getMiniEventReport(bytes,
+						MiniEventReport.getMiniEventReport(optionsHeader,
+								messageHeader, bytes,
 								messageHeader.getNextPart());
-				if (miniEventReport.isValidGps()) {
-					logger.debug("Mini event report {}", miniEventReport);
-				} else {
-					logger.error("GPS fix is not valid. {}", miniEventReport);
-				}
+				return miniEventReport;
 			} else {
 				logger.info("Not a Mini Event Report so ignoring.");
 			}
@@ -109,6 +151,9 @@ public class Message {
 			logger.error("Exception while parsing CalAmp message. {}", 
 					e.getMessage(), e);
 		}
+		
+		// Didn't successfully create a report so return null
+		return null;
 	}
 	
 	public static void main(String args[]) {
@@ -133,8 +178,14 @@ public class Message {
 		// Read from the socket
 		try {
 			while (true) {
+				// Get the bytes containing the report via UDP
 				socket.receive(packet);
-				parseMessage(packet);
+				
+				// Convert the bytes into a report
+				Report report = parseReport(packet);
+				
+				// Actually process the report
+				report.process();
 			}
 		} catch (Exception e) {
 			logger.error("Exception while parsing CalAmp message. {}", 
