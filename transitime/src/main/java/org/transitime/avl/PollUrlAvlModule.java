@@ -147,8 +147,7 @@ public abstract class PollUrlAvlModule extends AvlModule {
 	
 	/** 
 	 * Does all of the work for the class. Runs forever and reads in 
-	 * AVL data from feed and writes it to the appropriate JMS topic
-	 * so that AVL clients can access it.
+	 * AVL data from feed and processes it.
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
