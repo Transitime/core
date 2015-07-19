@@ -592,7 +592,7 @@ public class DbConfig {
 			// Service ID was not specified so determine current ones for now
 			Date now = Core.getInstance().getSystemDate();
 
-			List<String> currentServiceIds =
+			Collection<String> currentServiceIds =
 					Core.getInstance().getServiceUtils().getServiceIds(now);
 			for (String currentServiceId : currentServiceIds) {
 				Block block = getBlock(currentServiceId, blockId);

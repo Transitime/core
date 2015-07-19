@@ -562,8 +562,8 @@ public class AvlProcessor {
 		// to look at all the active ones to find out what blocks are active...
 		List<Block> allBlocksForRoute = new ArrayList<Block>();
 		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
-		List<String> serviceIds = serviceUtils.getServiceIds(avlReport
-				.getDate());
+		Collection<String> serviceIds =
+				serviceUtils.getServiceIds(avlReport.getDate());
 		for (String serviceId : serviceIds) {
 			List<Block> blocksForService = Core.getInstance().getDbConfig()
 					.getBlocksForRoute(serviceId, routeId);

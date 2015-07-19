@@ -16,8 +16,7 @@
  */
 package org.transitime.core;
 
-import java.util.List;
-
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -77,7 +76,7 @@ public class BlockAssigner {
 			// If using block assignment...
 			if (avlReport.isBlockIdAssignmentType()) {
 				ServiceUtils service = Core.getInstance().getServiceUtils();
-				List<String> serviceIds = 
+				Collection<String> serviceIds = 
 						service.getServiceIds(avlReport.getDate());
 				boolean blockFoundForServiceId = false;
 				for (String serviceId : serviceIds) {

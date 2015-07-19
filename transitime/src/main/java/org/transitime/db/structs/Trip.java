@@ -18,6 +18,7 @@ package org.transitime.db.structs;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -525,7 +526,7 @@ public class Trip implements Serializable {
 		// There are results so use the Trip that corresponds to the current 
 		// service ID.
 		Date now = Core.getInstance().getSystemDate();
-		List<String> currentServiceIds = 
+		Collection<String> currentServiceIds = 
 				Core.getInstance().getServiceUtils().getServiceIds(now);
 		for (Trip trip : trips) {
 			for (String serviceId : currentServiceIds) {

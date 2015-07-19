@@ -443,7 +443,8 @@ public final class Block implements Serializable {
 	private boolean serviceClassIsValidForDay(Date date, long offset) {
 		long dateToCheck = date.getTime() + offset;
 		List<String> currentServiceIds =
-				Core.getInstance().getServiceUtils().getCurrentServiceIds(dateToCheck);
+				Core.getInstance().getServiceUtils()
+						.getServiceIdsForDay(dateToCheck);
 		
 		return currentServiceIds.contains(serviceId);
 	}
