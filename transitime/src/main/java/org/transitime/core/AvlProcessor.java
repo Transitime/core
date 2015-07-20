@@ -1214,6 +1214,29 @@ public class AvlProcessor {
 	}
 	
 	/**
+	 * Updates the VehicleState in the cache to have the new avlReport. Intended
+	 * for when want to update VehicleState AVL report but don't want to
+	 * actually process the report, such as for when get data too frequently and
+	 * only want to fully process some of it yet still use latest vehicle
+	 * location so that vehicles move on map really smoothly.
+	 * 
+	 * @param avlReport
+	 */
+	public void cacheAvlReportWithoutProcessing(AvlReport avlReport) {
+		VehicleState vehicleState =
+				VehicleStateManager.getInstance().getVehicleState(
+						avlReport.getVehicleId());
+		
+		// Since modifying the VehicleState should synchronize in case another
+		// thread simultaneously processes data for the same vehicle. This
+		// would be extremely rare but need to be safe.
+		synchronized (vehicleState) {
+			// Update AVL report for cached VehicleState
+			vehicleState.setAvlReport(avlReport);
+		}
+	}
+	
+	/**
 	 * First does housekeeping for the AvlReport (stores it in db, logs it,
 	 * etc). Processes the AVL report by matching to the assignment and
 	 * generating predictions and such. Sets VehicleState for the vehicle based
