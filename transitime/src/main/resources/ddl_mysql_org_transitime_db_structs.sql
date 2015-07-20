@@ -346,7 +346,8 @@
         capacity integer,
         crushCapacity integer,
         description varchar(255),
-        passengerVehicle bit,
+        nonPassengerVehicle bit,
+        trackerId varchar(60),
         type integer,
         primary key (id)
     );
