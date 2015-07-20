@@ -112,7 +112,7 @@ public abstract class Report {
 	 * 
 	 * @param packet
 	 *            Contains the data
-	 * @return The Report, or null if not successul
+	 * @return The Report, or null if not successful
 	 */
 	public static Report parseReport(DatagramPacket packet) {
 		byte[] bytes = packet.getData();
@@ -155,7 +155,12 @@ public abstract class Report {
 		// Didn't successfully create a report so return null
 		return null;
 	}
-	
+
+	/**
+	 * Just for testing.
+	 * 
+	 * @param args
+	 */
 	public static void main(String args[]) {
 		int portNumber = 20500;
 		

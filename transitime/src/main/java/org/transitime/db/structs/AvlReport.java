@@ -261,7 +261,7 @@ public class AvlReport implements Serializable {
 	
 	/**
 	 * Constructor for an AvlReport object that is not yet being processed.
-	 * Since not yet being processed timeProcessed is set to null. 
+	 * Since not yet being processed timeProcessed is set to null.
 	 * 
 	 * @param vehicleId
 	 *            ID of the vehicle
@@ -275,7 +275,8 @@ public class AvlReport implements Serializable {
 	 *            Heading of vehicle in degrees clockwise from north. Should be
 	 *            set to Float.NaN if speed not available
 	 * @param source
-	 *            Text describing the source of the report
+	 *            Text describing the source of the report. Can only be
+	 *            SOURCE_LENGTH (10) characters long
 	 */
 	public AvlReport(String vehicleId, long time, Location location, 
 			float speed, float heading, String source) {
@@ -316,7 +317,8 @@ public class AvlReport implements Serializable {
 	 * @param lon
 	 *            Longitude in decimal degrees
 	 * @param source
-	 *            Text describing the source of the report
+	 *            Text describing the source of the report. Can only be
+	 *            SOURCE_LENGTH (10) characters long
 	 */
 	public AvlReport(String vehicleId, long time, double lat, double lon,
 			String source) {
@@ -349,7 +351,8 @@ public class AvlReport implements Serializable {
 	 * @param time
 	 * @param location
 	 * @param source
-	 *            Text describing the source of the report
+	 *            Text describing the source of the report. Can only be
+	 *            SOURCE_LENGTH (10) characters long
 	 */
 	public AvlReport(String vehicleId, long time, Location location,
 			String source) {
@@ -389,7 +392,8 @@ public class AvlReport implements Serializable {
 	 *            Heading of vehicle in degrees clockwise from north. Should be
 	 *            set to Float.NaN if speed not available
 	 * @param source
-	 *            Text describing the source of the report
+	 *            Text describing the source of the report. Can only be
+	 *            SOURCE_LENGTH (10) characters long
 	 * @param leadVehicleId
 	 *            Optional value. Set to null if not available.
 	 * @param driverId
