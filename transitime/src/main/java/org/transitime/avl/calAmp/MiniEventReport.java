@@ -232,23 +232,27 @@ public class MiniEventReport extends Report {
 	public void process() {
 		if (isValidGps()) {
 			logger.debug("Processing GPS fix mini event report {}", this);
-			
-			String mobileId = getMobileId();
-			VehicleConfig vehicleConfig = VehicleDataCache.getInstance().getVehicleConfigByTrackerId(mobileId);
-			String vehicleId = vehicleConfig != null ? vehicleConfig.getId() : mobileId;
-			
-			AvlReport avlReport =
-					new AvlReport(vehicleId, getEpochTime(),
-							getLat(), getLon(), getSpeed(),
-							getHeading(), "CalAmp");
-			
-			// Use AvlExecutor to actually process the data using a thread executor
-			AvlExecutor.getInstance().processAvlReport(avlReport);	
 
+			// Determine the vehicle ID by looking for VehicleConfig from db
+			// that has the corresponding tracker ID. If not such vehicle 
+			// then use the mobile/tracker ID as the vehicle ID.
+			String mobileId = getMobileId();
+			VehicleConfig vehicleConfig =
+					VehicleDataCache.getInstance().getVehicleConfigByTrackerId(
+							mobileId);
+			String vehicleId =
+					vehicleConfig != null ? vehicleConfig.getId() : mobileId;
+
+			AvlReport avlReport =
+					new AvlReport(vehicleId, getEpochTime(), getLat(),
+							getLon(), getSpeed(), getHeading(), "CalAmp");
+
+			// Use AvlExecutor to actually process the data using a thread
+			// executor
+			AvlExecutor.getInstance().processAvlReport(avlReport);
 		} else {
 			logger.error("GPS fix mini event report is not valid. {}", this);
 		}
-
 	}
 	
 }

@@ -64,7 +64,10 @@ public class OptionsHeader {
 			while (i < start + mobileIdFieldLength)
 				mobileId.append(String.format("%02X", bytes[i++]));
 
-			int mobileIdTypeLength = bytes[i++]; // Should always be 1
+			// Should always be 1 so not actually used
+			@SuppressWarnings("unused")
+			int mobileIdTypeLength = bytes[i++]; 
+			
 			byte mobileIdType = bytes[i++]; 
 
 			return new OptionsHeader(mobileId.toString(),
