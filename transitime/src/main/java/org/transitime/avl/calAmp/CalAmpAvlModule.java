@@ -26,7 +26,7 @@ public class CalAmpAvlModule extends AvlModule {
 	 * 
 	 * @param agencyId
 	 */
-	protected CalAmpAvlModule(String agencyId) {
+	public CalAmpAvlModule(String agencyId) {
 		super(agencyId);
 	}
 
