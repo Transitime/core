@@ -7,8 +7,9 @@
    r=ROUTE (optional, if not specified then a route selector is created)
    s=STOP_ID (optional, for specifying which stop interested in)
    tripPattern=TRIP_PATTERN (optional, for specifying which stop interested in).
-   verbose=true (for getting additional info in vehicle popup window)
-   showUnassignedVehicles=true (for showing unassigned vehicles)
+   verbose=true (optional, for getting additional info in vehicle popup window)
+   showUnassignedVehicles=true (optional, for showing unassigned vehicles)
+   updateRate=MSEC (optional, for specifying update rate for vehicle locations.
 -->
 <html>
 <head>
@@ -77,9 +78,20 @@ function dateFormat(time) {
 	var localTimezoneOffset = (new Date()).getTimezoneOffset();
 	var timezoneDiffMinutes = localTimezoneOffset - agencyTimezoneOffset;
 	
-	var offsetDate = new Date(parseInt(time*1000) + timezoneDiffMinutes*60*1000);
+	var offsetDate = new Date(parseInt(time)*1000 + timezoneDiffMinutes*60*1000);
 	// Use jquery-dateFormat javascript library
 	return $.format.date(offsetDate, 'HH:mm:ss');
+}
+
+/**
+ * Handle update rate specification
+ */
+ function getUpdateRate() {
+	 var updateRate = getQueryVariable("updateRate");
+	 if (updateRate)
+		 return parseInt(updateRate);
+	 else
+		 return 5000; // The default value
 }
 
 /**
@@ -831,7 +843,7 @@ if (!getRouteQueryStrParam()) {
 		url += "&tripPattern=" + getQueryVariable("tripPattern");
 	$.getJSON(url, routeConfigCallback);		
 	
-	// Read in vehicle locations now (and every 10 seconds)
+	// Read in vehicle locations now (and every few seconds)
 	updateVehiclesUsingApiData();
 }
 
@@ -839,7 +851,7 @@ if (!getRouteQueryStrParam()) {
  * Initiate timerloop that constantly updates vehicle positions.
  * Update every 5 seconds.
  */
-setInterval(updateVehiclesUsingApiData, 5000);
+setInterval(updateVehiclesUsingApiData, getUpdateRate());
 
 /**
  * Setup timer to determine if haven't updated vehicles in a while.
