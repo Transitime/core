@@ -12,6 +12,18 @@
   <script src="../../select2/select2.min.js"></script>
   
   <link href="../params/reportParams.css" rel="stylesheet"/>
+
+  <script>
+    function execute() {
+      var selectedBlockId = $("#block").val();
+      var format = $('input:radio[name=format]:checked').val();
+  	  var url = apiUrlPrefix + "/command/blocks?blockId=" + selectedBlockId + "&format=" + format;
+
+   	  // Actually do the API call
+   	  location.href = url;
+    }
+  </script>
+  
 </head>
 <body>
 
@@ -22,15 +34,15 @@
 </div>
    
 <div id="mainDiv">   
+   <%-- Create block selector --%>
    <jsp:include page="../params/block.jsp" />
-    
-   <!-- <button id="submit" type="submit" value="Run Report" />  --> 
-    <script>
-      function execute() {
-    	  var url = apiUrlPrefix + "/command/blocks?blockId=" + $("block").value();
-      }
-    </script>
-  </form>
+   
+   <%-- Create json/xml format radio buttons --%>
+   <jsp:include page="../params/jsonXmlFormat.jsp" />
+   
+   <%-- Create submit button --%> 
+   <input type='button' id='submit' onClick='execute()' value="Run API Call"/> 
+   
 </div>
 
 </body>
