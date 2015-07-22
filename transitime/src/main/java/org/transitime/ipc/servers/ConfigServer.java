@@ -20,6 +20,7 @@ package org.transitime.ipc.servers;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -347,7 +348,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTripIds()
 	 */
 	@Override
-	public List<String> getTripIds() throws RemoteException {
+	public Collection<String> getTripIds() throws RemoteException {
 		Collection<Trip> trips =
 				Core.getInstance().getDbConfig().getTrips().values();
 		List<String> tripIds = new ArrayList<String>(trips.size());
@@ -360,9 +361,9 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getBlockIds()
 	 */
 	@Override
-	public List<String> getBlockIds() throws RemoteException {
-		List<Block> blocks = Core.getInstance().getDbConfig().getBlocks();
-		List<String> blockIds = new ArrayList<String>(blocks.size());
+	public Collection<String> getBlockIds() throws RemoteException {
+		Collection<Block> blocks = Core.getInstance().getDbConfig().getBlocks();
+		Collection<String> blockIds = new HashSet<String>(blocks.size());
 		for (Block block : blocks)
 			blockIds.add(block.getId());
 		return blockIds;
@@ -372,14 +373,15 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getBlockIds()
 	 */
 	@Override
-	public List<String> getBlockIds(String serviceId) throws RemoteException {
+	public Collection<String> getBlockIds(String serviceId)
+			throws RemoteException {
 		// If serviceId not specified (is null) then return all block IDs
 		if (serviceId == null)
 			return getBlockIds();
 		
 		Collection<Block> blocks =
 				Core.getInstance().getDbConfig().getBlocks(serviceId);
-		List<String> blockIds = new ArrayList<String>(blocks.size());
+		Collection<String> blockIds = new ArrayList<String>(blocks.size());
 		for (Block block : blocks)
 			blockIds.add(block.getId());
 		return blockIds;
