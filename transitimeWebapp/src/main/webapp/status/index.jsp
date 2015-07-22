@@ -1,3 +1,5 @@
+<%@page import="org.transitime.db.webstructs.WebAgency"%>
+
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -17,7 +19,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 <body>
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
-<div id="title">Status Reports</div>
+<div id="title">Status Reports for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 <ul class="choicesList">
   <li><a href="activeBlocks.jsp?a=<%= agencyId %>"
     title="Shows how many block assignments are currently active and if they have assigned vehicles">

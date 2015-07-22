@@ -1,0 +1,8 @@
+/*
+ * CSS styles for report parameter pages
+ */
+label {width: 200px; float: left; text-align: right; margin-top: 4px; margin-right: 10px;}
+.param {margin-top: 10px;}
+#submit {margin-top: 40px; margin-left: 200px;}
+.note {font-size: small;}
+  

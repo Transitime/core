@@ -1,3 +1,5 @@
+<%@page import="org.transitime.db.webstructs.WebAgency"%>
+
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>    
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -18,7 +20,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 <body>
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
-<div id="title">Historical Reports</div>
+<div id="title">Historical Reports for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 <ul class="choicesList">
   <li><a href="predAccuracyRangeParams.jsp?a=<%= agencyId %>"
     title="Shows percentage of predictions that were accurate
