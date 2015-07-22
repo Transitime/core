@@ -348,7 +348,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getTripIds()
 	 */
 	@Override
-	public Collection<String> getTripIds() throws RemoteException {
+	public List<String> getTripIds() throws RemoteException {
 		Collection<Trip> trips =
 				Core.getInstance().getDbConfig().getTrips().values();
 		List<String> tripIds = new ArrayList<String>(trips.size());
@@ -361,19 +361,19 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getBlockIds()
 	 */
 	@Override
-	public Collection<String> getBlockIds() throws RemoteException {
+	public List<String> getBlockIds() throws RemoteException {
 		Collection<Block> blocks = Core.getInstance().getDbConfig().getBlocks();
 		Collection<String> blockIds = new HashSet<String>(blocks.size());
 		for (Block block : blocks)
 			blockIds.add(block.getId());
-		return blockIds;
+		return new ArrayList<String>(blockIds);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getBlockIds()
 	 */
 	@Override
-	public Collection<String> getBlockIds(String serviceId)
+	public List<String> getBlockIds(String serviceId)
 			throws RemoteException {
 		// If serviceId not specified (is null) then return all block IDs
 		if (serviceId == null)
@@ -381,7 +381,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		
 		Collection<Block> blocks =
 				Core.getInstance().getDbConfig().getBlocks(serviceId);
-		Collection<String> blockIds = new ArrayList<String>(blocks.size());
+		List<String> blockIds = new ArrayList<String>(blocks.size());
 		for (Block block : blocks)
 			blockIds.add(block.getId());
 		return blockIds;

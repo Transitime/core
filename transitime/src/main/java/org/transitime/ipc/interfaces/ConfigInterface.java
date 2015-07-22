@@ -163,7 +163,7 @@ public interface ConfigInterface extends Remote {
 	 * @return vehicle IDs
 	 * @throws RemoteException
 	 */
-	public Collection<String> getVehicleIds() throws RemoteException;
+	public List<String> getVehicleIds() throws RemoteException;
 	
 	/**
 	 * Returns list of service IDs, unsorted
@@ -171,7 +171,7 @@ public interface ConfigInterface extends Remote {
 	 * @return vehicle IDs
 	 * @throws RemoteException
 	 */
-	public Collection<String> getServiceIds() throws RemoteException;
+	public List<String> getServiceIds() throws RemoteException;
 	
 	/**
 	 * Returns list of service IDs, unsorted
@@ -179,7 +179,7 @@ public interface ConfigInterface extends Remote {
 	 * @return vehicle IDs
 	 * @throws RemoteException
 	 */
-	public Collection<String> getCurrentServiceIds() throws RemoteException;
+	public List<String> getCurrentServiceIds() throws RemoteException;
 	
 	/**
 	 * Returns list of trip IDs, unsorted
@@ -187,7 +187,7 @@ public interface ConfigInterface extends Remote {
 	 * @return vehicle IDs
 	 * @throws RemoteException
 	 */
-	public Collection<String> getTripIds() throws RemoteException;
+	public List<String> getTripIds() throws RemoteException;
 	
 	/**
 	 * Returns list of block IDs, unsorted, duplicates removed
@@ -195,7 +195,7 @@ public interface ConfigInterface extends Remote {
 	 * @return vehicle IDs
 	 * @throws RemoteException
 	 */
-	public Collection<String> getBlockIds() throws RemoteException;
+	public List<String> getBlockIds() throws RemoteException;
 	
 	/**
 	 * Returns list of block IDs for specified serviceId, unsorted
@@ -204,7 +204,7 @@ public interface ConfigInterface extends Remote {
 	 * @return vehicle IDs
 	 * @throws RemoteException
 	 */
-	public Collection<String> getBlockIds(String serviceId)
+	public List<String> getBlockIds(String serviceId)
 			throws RemoteException;	
 
 }
