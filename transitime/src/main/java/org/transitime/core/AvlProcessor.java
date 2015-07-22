@@ -1233,6 +1233,11 @@ public class AvlProcessor {
 		synchronized (vehicleState) {
 			// Update AVL report for cached VehicleState
 			vehicleState.setAvlReport(avlReport);
+			
+			// Let vehicle data cache know that the vehicle state was updated
+			// so that new IPC vehicle data will be created and cached and
+			// made available to the API.
+			VehicleDataCache.getInstance().updateVehicle(vehicleState);
 		}
 	}
 	
