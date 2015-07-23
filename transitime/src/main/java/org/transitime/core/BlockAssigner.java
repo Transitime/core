@@ -104,7 +104,7 @@ public class BlockAssigner {
 				Trip trip = config.getTrip(avlReport.getAssignmentId());
 				if (trip != null) {
 					Block block = trip.getBlock();
-					logger.info("For vehicleId={} the trip assignment from "
+					logger.debug("For vehicleId={} the trip assignment from "
 							+ "the AVL feed is tripId={} which corresponds to "
 							+ "blockId={}", 
 							avlReport.getVehicleId(), 
@@ -122,7 +122,7 @@ public class BlockAssigner {
 				Trip trip = config.getTripUsingTripShortName(tripShortName);
 				if (trip != null) {
 					Block block = trip.getBlock();
-					logger.info("For vehicleId={} the trip assignment from "
+					logger.debug("For vehicleId={} the trip assignment from "
 							+ "the AVL feed is tripShortName={} which "
 							+ "corresponds to blockId={}", 
 							avlReport.getVehicleId(), tripShortName, 
