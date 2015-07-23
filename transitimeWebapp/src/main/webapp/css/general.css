@@ -39,6 +39,10 @@ body {
 	text-align: center;
 }
 
+#subtitle {
+	text-align: center;
+}
+
 /* For list of choices to be centered in page, e.g. list of reports
  */
 .choicesList {

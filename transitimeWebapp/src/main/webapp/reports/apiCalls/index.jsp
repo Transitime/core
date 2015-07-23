@@ -20,20 +20,26 @@ if (agencyId == null || agencyId.isEmpty()) {
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
 <div id="title">API Calls for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
-This is a only a partial list of the API calls 
+<div id="subtitle">This is a only a partial list of the API calls</div>
 <ul class="choicesList">
   <li><a href="routeApiParams.jsp?a=<%= agencyId %>"
-    title="Data for a route">
+    title="Data for a route. Includes stop and path information needed to show route on map.">
       Route</a></li>
   <li><a href="vehiclesApiParams.jsp?a=<%= agencyId %>"
-    title="Data for vehicles, including GPS info, for a route">
+    title="Data for vehicles, including GPS info, for a route. Useful for showing location of vehicles on map.">
       Vehicles</a></li>
   <li><a href="vehiclesDetailsApiParams.jsp?a=<%= agencyId %>"
-    title="Detailed data for vehicles, including GPS info, for a route">
+    title="Detailed data for vehicles, including GPS info, for a route. Contains additional data such as schedule adherence and assignment information.">
       Vehicles Details</a></li>
   <li><a href="blocksApiParams.jsp?a=<%= agencyId %>"
-    title="Data for a block assignment">
+    title="Data for a block assignment. Shows each trip that makes up the block.">
       Block</a></li>
+  <li><a href="gtfsRealtimeTripUpdatesApiParams.jsp?a=<%= agencyId %>"
+    title="GTFS-realtime Trip Updates includes prediction data for entire agency">
+      GTFS-realtime Trip Updates</a></li>
+  <li><a href="gtfsRealtimeVehiclePositionsApiParams.jsp?a=<%= agencyId %>"
+    title="GTFS-realtime Vehicle Positions for entire agency">
+      GTFS-realtime Vehicle Positions</a></li>
 </ul>
 </div>
 </body>
