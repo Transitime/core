@@ -20,16 +20,17 @@ if (agencyId == null || agencyId.isEmpty()) {
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
 <div id="title">API Calls for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
+This is a only a partial list of the API calls 
 <ul class="choicesList">
   <li><a href="routeApiParams.jsp?a=<%= agencyId %>"
     title="Data for a route">
-      Block</a></li>
+      Route</a></li>
   <li><a href="vehiclesApiParams.jsp?a=<%= agencyId %>"
     title="Data for vehicles, including GPS info, for a route">
-      Block</a></li>
+      Vehicles</a></li>
   <li><a href="vehiclesDetailsApiParams.jsp?a=<%= agencyId %>"
     title="Detailed data for vehicles, including GPS info, for a route">
-      Block</a></li>
+      Vehicles Details</a></li>
   <li><a href="blocksApiParams.jsp?a=<%= agencyId %>"
     title="Data for a block assignment">
       Block</a></li>
