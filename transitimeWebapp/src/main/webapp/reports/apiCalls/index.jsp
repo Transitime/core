@@ -21,8 +21,17 @@ if (agencyId == null || agencyId.isEmpty()) {
 <div id="mainDiv">
 <div id="title">API Calls for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 <ul class="choicesList">
+  <li><a href="routeApiParams.jsp?a=<%= agencyId %>"
+    title="Data for a route">
+      Block</a></li>
+  <li><a href="vehiclesApiParams.jsp?a=<%= agencyId %>"
+    title="Data for vehicles, including GPS info, for a route">
+      Block</a></li>
+  <li><a href="vehiclesDetailsApiParams.jsp?a=<%= agencyId %>"
+    title="Detailed data for vehicles, including GPS info, for a route">
+      Block</a></li>
   <li><a href="blocksApiParams.jsp?a=<%= agencyId %>"
-    title="Details for block assignment specified by block ID">
+    title="Data for a block assignment">
       Block</a></li>
 </ul>
 </div>
