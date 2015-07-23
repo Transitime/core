@@ -1030,7 +1030,7 @@ public class AvlReport implements Serializable {
 	public String toString() {
 		return "AvlReport [" +
 				"vehicleId=" + vehicleId +
-				", time=" + Time.dateTimeStrMsec(time) + " " + time +
+				", time=" + Time.dateTimeStrMsec(time) + 
 				(timeProcessed==null? "" : ", timeProcessed=" + 
 					Time.dateTimeStrMsec(timeProcessed)) +
 				", location=" + location +
