@@ -346,10 +346,15 @@ public class Trip implements Serializable {
 	 * @param gtfsHeadsign
 	 * @param routeId
 	 * @param titleFormatter
-	 * @return
+	 * @return Processed headsign with proper formatting, or null if
+	 *         gtfsHeadsign passed in is null
 	 */
 	private String processedHeadsign(String gtfsHeadsign, String routeId,
 			TitleFormatter titleFormatter) {
+		// Prevent NPE since gtfsHeadsign can be null
+		if (gtfsHeadsign == null)
+			return null;
+		
 		String headsignWithoutRouteInfo;
 		if (gtfsHeadsign.startsWith(routeId)) {
 			// Headsign starts with route ID so trim that off
