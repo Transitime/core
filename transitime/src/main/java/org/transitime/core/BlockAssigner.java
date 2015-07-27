@@ -59,14 +59,15 @@ public class BlockAssigner {
 	 * Gets the appropriate block associated with the AvlReport by getting the
 	 * proper serviceId using the AVL timestamp and then determining the
 	 * appropriate block using the serviceId and the assignment from the AVL
-	 * report. Works for different assignment types from the AVL feed including
-	 * block assignments, trip assignments, and trip short name assignments. If
-	 * the assignment not specified in AVL data or the block could not be found
-	 * for the serviceId then null will be returned
+	 * report. Works for block assignments, trip assignments, and trip short
+	 * name assignments. If the assignment not specified in AVL data or the
+	 * block could not be found for the serviceId, it could not matched to the
+	 * trip, or it was a route assignment then null will be returned
 	 * 
 	 * @param avlReport
 	 *            So can determine the assignment specified
-	 * @return Block corresponding to the time and blockId from AVL report.
+	 * @return Block corresponding to the time and blockId from AVL report, or
+	 *         null if could not determine block.
 	 */
 	public Block getBlockAssignment(AvlReport avlReport) {
 		// If vehicle has assignment...
