@@ -88,10 +88,15 @@ function dateFormat(time) {
  */
  function getUpdateRate() {
 	 var updateRate = getQueryVariable("updateRate");
-	 if (updateRate)
-		 return parseInt(updateRate);
-	 else
+	 if (updateRate) {
+		 var configuredUpdateRate = parseInt(updateRate);
+	 	if (configuredUpdateRate < 2000)
+	 		return 2000;
+	 	else 
+	 		return configuredUpdateRate; 
+	 } else {
 		 return 5000; // The default value
+	 }
 }
 
 /**
@@ -599,7 +604,7 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 	// Update markers location on the map if vehicle has actually moved.
 	if (vehicleMarker.vehicleData.loc.lat != vehicleData.loc.lat
 			|| vehicleMarker.vehicleData.loc.lon != vehicleData.loc.lon) {
-		animateVehicle(vehicleMarker, 1,
+		animateVehicle(vehicleMarker, 
 				vehicleMarker.vehicleData.loc.lat, 
 				vehicleMarker.vehicleData.loc.lon, 
 				vehicleData.loc.lat, vehicleData.loc.lon);
@@ -669,23 +674,21 @@ function vehicleLocationsCallback(vehicles, status) {
 	lastVehiclesUpdateTime = new Date();
 }
 
-var ANIMATION_STEPS = 15;
-
 /**
  * Moves the vehicle an increment between its original and new locations.
  * Calls setTimeout() to call this function again in order to continue
  * the animation until finished.
  */
-function animateVehicle(vehicleMarker, cnt, origLat, origLon, newLat, newLon) {
+function interpolateVehicle(vehicleMarker, cnt, interpolationSteps, origLat, origLon, newLat, newLon) {
 	// Determine the interpolated location
 	var interpolatedLat = parseFloat(origLat) + (newLat - origLat) * cnt
-			/ ANIMATION_STEPS;
+			/ interpolationSteps;
 	var interpolatedLon = parseFloat(origLon) + (newLon - origLon) * cnt
-			/ ANIMATION_STEPS;
+			/ interpolationSteps;
 	var interpolatedLoc = [ interpolatedLat, interpolatedLon ];
 
-	//console.log("animating vehicleId=" + vehicleIcon.vehicleData.id + " cnt=" + cnt + 
-	//		" interpolatedLat=" + interpolatedLat + " interpolatedLoc=" + interpolatedLoc);
+//	console.log("interpolating vehicleId=" + vehicleMarker.vehicleData.id + " cnt=" + cnt + 
+//			" interpolatedLat=" + interpolatedLat + " interpolatedLon=" + interpolatedLon);
 
 	// Update all markers sto have interpolated location
 	vehicleMarker.setLatLng(interpolatedLoc);
@@ -696,10 +699,65 @@ function animateVehicle(vehicleMarker, cnt, origLat, origLon, newLat, newLon) {
 	if (vehicleMarker.popup)
 		vehicleMarker.popup.setLatLng(interpolatedLoc);
 
-	if (++cnt <= ANIMATION_STEPS) {
-		setTimeout(animateVehicle, 50, vehicleMarker, cnt, origLat, origLon,
-				newLat, newLon);
+	if (++cnt <= interpolationSteps) {
+		setTimeout(interpolateVehicle, 60, 
+				vehicleMarker, cnt, interpolationSteps, 
+				origLat, origLon, newLat, newLon);
 	}
+}
+
+/**
+ * Initiates animation of moving vehicle from old location to new location.
+ * Determines number of interpolations to use for the animation. Doesn't
+ * use animation (though still updates marker position) if vehicle not on
+ * visible part of map or moves less than a pixel. Interpolation count is
+ * determined such that will move at least a pixel towards the new loc.
+ * Trying to avoid situation where moves less than a pixel towards the
+ * new loc but then moves a pixel in the other horiz/vert direction due
+ * to rounding.
+ */
+function animateVehicle(vehicleMarker, origLat, origLon, newLat, newLon) {
+	//console.log("animating vehicleId=" + vehicleMarker.vehicleData.id + 
+	//		" origLat=" + origLat + " origLon=" + origLon +
+	//		" newLat=" + newLat + " newLon=" + newLon);
+	
+	// Use default interpolationSteps of 1 so that the marker location
+	// will be updated no matter what. This is important because even
+	// if vehicle only moves slightly or is off the map, still need
+	// to update vehicle position.
+	var interpolationSteps = 1;
+	
+	// Determine if vehicle is visile since no need to animate vehicles
+	// that aren't visible
+	var bounds = map.getBounds();
+	var origLatLng = L.latLng(origLat, origLon);
+	var newLatLng = L.latLng(newLat, newLon);
+	if (bounds.contains(origLatLng) && bounds.contains(newLatLng)) {
+		// Vehicle is visible. Determine number of pixels moving vehicle.
+		// Don't want to look at sqrt(x^2 + y^2) since trying to avoid 
+		// making the animation jagged. If use the sqrt distance traveled
+		// then would sometimes have the marker move sideways instead of
+		// forward since would be moving less than 1 pixel at a time
+		// horizontally or vertically.
+		var origPoint = map.latLngToLayerPoint(origLatLng) ;
+		var newPoint = map.latLngToLayerPoint(newLatLng) ;
+		var deltaX = origPoint.x - newPoint.x;
+		var deltaY = origPoint.y - newPoint.y;
+		var pixelsToMove = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+
+		//console.log("origPoint=" + origPoint + " newPoint=" + newPoint);
+		//console.log("pixelsToMove=" + pixelsToMove);
+		
+		// Set interpolationSteps to number of pixels that need to move. This
+		// provides smoothest possible animation. But limit interpolationSteps
+		// to be at least 1 and at most 10.
+		interpolationSteps = Math.max(pixelsToMove, 1);
+		interpolationSteps = Math.min(interpolationSteps, 10);
+	}
+		
+	// Start the interpolation process to update marker position
+	interpolateVehicle(vehicleMarker, 1, interpolationSteps, origLat, origLon, 
+			newLat, newLon);
 }
 
 /**
