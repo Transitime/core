@@ -50,6 +50,7 @@ public class VehicleState {
 	private final String vehicleId;
 	private Block block;
 	private BlockAssignmentMethod assignmentMethod;
+	// Will be set to block ID (even if used trip to determine assignment) or route ID
 	private String assignmentId;
 	private Date assignmentTime;
 	
@@ -524,27 +525,42 @@ public class VehicleState {
 		if (avlReport.getAssignmentType() == AssignmentType.UNSET)
 			return false;
 
-		// If block assignment then simply check assignment ID
-		if (avlReport.getAssignmentType() == AssignmentType.BLOCK_ID) {
+		// If block assignment then simply check assignment ID. This is much 
+		// more straight forward than determining the new AVL block and 
+		// comparing the new AVL block to the old block since determining
+		// the new block is problematic given that there can be multiple
+		// service IDs active at any given time.
+		if (avlReport.isBlockIdAssignmentType()) {
 			// Use Objects.equals() since either the existing assignment or
 			// the AVL report assignment can be null
 			return !Objects.equals(assignmentId, avlReport.getAssignmentId());
 		}
 
-		// Must be a route ID, trip ID, or trip short name assignment
-		String newAssignment = null;
-		Block block = BlockAssigner.getInstance().getBlockAssignment(avlReport);
-		if (block != null)
-			newAssignment = block.getId();
-		else {
+		// Not block assignment so try trip ID or trip short name assignment
+		if (avlReport.isTripIdAssignmentType()
+				|| avlReport.isTripShortNameAssignmentType()) {
+			Block avlBlock =
+					BlockAssigner.getInstance().getBlockAssignment(avlReport);
+			return block != avlBlock;
+		}
+		
+		// Not block or trip assignment so try route assignment
+		if (avlReport.isRouteIdAssignmentType()) {
 			String routeId =
 					BlockAssigner.getInstance().getRouteIdAssignment(avlReport);
-			if (routeId != null)
-				newAssignment = routeId;
+			if (routeId != null) {
+				String newAssignment = routeId;
+				// Use Objects.equals() since either the existing assignment or
+				// the AVL report assignment can be null
+				return !Objects.equals(assignmentId, newAssignment);
+			}
 		}
-		// Use Objects.equals() since either the existing assignment or
-		// the AVL report assignment can be null
-		return !Objects.equals(assignmentId, newAssignment);
+		
+		// Can't determine new assignment so return false. This shouldn't
+		// actually happen
+		logger.error("Could not determine if vehicle has new assignment. {}", 
+				avlReport);
+		return false;
 	}
 	
 	/**
