@@ -7,6 +7,8 @@ mvn install
 
 This will produce a war file which can be deployed on Tomcat. 
 
+You can configure the location of your transitimeconfig.xml file in web.xml
+
 This server talks to core using RMI calls to get the information to support the REST service calls.
 
 To access the service a key is required to be provided in the URL. This key is compared against a key in the database. You can use the CreateAPIKey application in transiTime to create a test/demo key.
