@@ -20,7 +20,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
 <div id="title">API Calls for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
-<div id="subtitle">This is a only a partial list of the API calls</div>
+<div id="subtitle">Note: This is a only a partial list of the API calls</div>
 <ul class="choicesList">
   <li><a href="routeApiParams.jsp?a=<%= agencyId %>"
     title="Data for a route. Includes stop and path information needed to show route on map.">
@@ -31,9 +31,18 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="vehiclesDetailsApiParams.jsp?a=<%= agencyId %>"
     title="Detailed data for vehicles, including GPS info, for a route. Contains additional data such as schedule adherence and assignment information.">
       Vehicles Details</a></li>
-  <li><a href="blocksApiParams.jsp?a=<%= agencyId %>"
-    title="Data for a block assignment. Shows each trip that makes up the block.">
+  <li><a href="predsByRouteStopApiParams.jsp?a=<%= agencyId %>"
+    title="Predictions for specified route and stop.">
+      Predictions by Route/Stop</a></li>
+  <li><a href="predsByLocApiParams.jsp?a=<%= agencyId %>"
+    title="Predictions for stops near specified latitude, longitude for the agency.">
+      Predictions by Location</a></li>
+  <li><a href="blocksTerseApiParams.jsp?a=<%= agencyId %>"
+    title="Data for a block assignment. Shows each trip that makes up the block in a terse format, without trip pattern or schedule info.">
       Block</a></li>
+  <li><a href="blocksApiParams.jsp?a=<%= agencyId %>"
+    title="Data for a block assignment. Shows each trip that makes up the block in a verbose format, including trip pattern and schedule info.">
+      Block Details</a></li>
   <li><a href="gtfsRealtimeTripUpdatesApiParams.jsp?a=<%= agencyId %>"
     title="GTFS-realtime Trip Updates includes prediction data for entire agency">
       GTFS-realtime Trip Updates</a></li>
@@ -54,6 +63,9 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="agenciesApiParams.jsp"
     title="List of all agencies available through the API">
       Agencies</a></li>
+  <li><a href="predsByLocForAllAgenciesApiParams.jsp?a=<%= agencyId %>"
+    title="Predictions for stops near specified latitude, longitude. Will return predictions for all agencies that have nearby stops.">
+      Predictions by Location</a></li>
 </ul>
 </div>
 </body>

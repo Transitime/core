@@ -41,8 +41,7 @@
    <jsp:include page="../params/jsonXmlFormat.jsp" />
    
    <%-- Create submit button --%> 
-   <input type='button' id='submit' onClick='execute()' value="Run API Call"/> 
-   
+   <jsp:include page="../params/submitApiCall.jsp" /> 
 </div>
 
 </body>

@@ -74,7 +74,7 @@
     	value=" 4.0"/> <span class="note">minutes</span>
   </div>
     
-    <input id="submit" type="submit" value="Run Report" />
+    <jsp:include page="params/submitReport.jsp" />
   </form>
 </div>
 

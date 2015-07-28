@@ -51,7 +51,7 @@ public class ApiActiveBlock {
 	private String endTime; 
 
 	@XmlElement(name = "trip")
-	private ApiTripSummary apiTripSummary;
+	private ApiTripTerse apiTripSummary;
 	
 	@XmlElement(name = "vehicle")
 	private Collection<ApiVehicleDetails> vehicles;
@@ -73,7 +73,7 @@ public class ApiActiveBlock {
 		
 		List<IpcTrip> trips = ipcActiveBlock.getBlock().getTrips();
 		IpcTrip ipcTrip = trips.get(ipcActiveBlock.getActiveTripIndex());
-		apiTripSummary = new ApiTripSummary(ipcTrip);
+		apiTripSummary = new ApiTripTerse(ipcTrip);
 		
 		// Get Time object based on timezone for agency
 		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
@@ -89,7 +89,7 @@ public class ApiActiveBlock {
 		return id;
 	}
 	
-	public ApiTripSummary getApiTripSummary() {
+	public ApiTripTerse getApiTripSummary() {
 		return apiTripSummary;
 	}
 }

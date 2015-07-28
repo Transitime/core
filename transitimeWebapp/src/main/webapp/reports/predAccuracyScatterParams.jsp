@@ -67,7 +67,7 @@
      </select>
    </div>
  
-    <input id="submit" type="submit" value="Run Report" />
+    <jsp:include page="params/submitReport.jsp" />
   </form>
 </div>
 

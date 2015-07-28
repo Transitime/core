@@ -16,8 +16,12 @@
   <script>
     function execute() {
       var selectedRouteId = $("#route").val();
+      var stopId = $("#stopId").val();
+      var numPreds = $("#numPreds").val();
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefix + "/command/gtfs-rt/vehiclePositions?format=" + format;
+  	  var url = apiUrlPrefix + "/command/predictions?rs=" + selectedRouteId + "|" + stopId
+		  	  + (numPreds!=""?"&numPreds=" + numPreds:"")
+  			  + "&format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -30,18 +34,28 @@
 <%@include file="/template/header.jsp" %>
 
 <div id="title">
-   Select Parameters for GTFS-Realtime Vehicle Positions API
+   Select Parameters for Predictions by Route/Stop API
 </div>
    
 <div id="mainDiv">   
-   <div id="radioButtonsDiv">
-     <input type="radio" name="format" value="binary" checked>Binary
-     <input type="radio" name="format" value="human">Human Readable
+   <%-- Create route selector --%>
+   <jsp:include page="../params/routeSingle.jsp" />
+   
+   <div class="param">
+    <label for="stop">Stop ID:</label>
+    <input type="text" id="stopId" size="10" />
    </div>
    
-   <%-- Create submit button --%> 
-   <jsp:include page="../params/submitApiCall.jsp" /> 
+   <div class="param">
+    <label for="numPreds">Number Predictions:</label>
+    <input type="text" id="numPreds" size="10" /> <span class="note">(default is 3 per stop)</span>
+   </div>
    
+   <%-- Create json/xml format radio buttons --%>
+   <jsp:include page="../params/jsonXmlFormat.jsp" />
+   
+   <%-- Create submit button --%> 
+   <jsp:include page="../params/submitApiCall.jsp" />    
 </div>
 
 </body>

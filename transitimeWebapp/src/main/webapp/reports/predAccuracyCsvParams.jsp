@@ -11,7 +11,7 @@
   <link href="../select2/select2.css" rel="stylesheet"/>
   <script src="../select2/select2.min.js"></script>
   
-  <link href="params/reportParams.css">
+  <link href="params/reportParams.css" rel="stylesheet"/>
 </head>
 <body>
 
@@ -30,7 +30,7 @@
    
    <jsp:include page="params/route.jsp" />
     
-    <input id="submit" type="submit" value="Run Report" />
+   <jsp:include page="params/submitReport.jsp" />
   </form>
 </div>
 

@@ -15,9 +15,9 @@
 
   <script>
     function execute() {
-      var selectedRouteId = $("#route").val();
+      var selectedBlockId = $("#block").val();
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefix + "/command/gtfs-rt/vehiclePositions?format=" + format;
+  	  var url = apiUrlPrefix + "/command/blocksTerse?blockId=" + selectedBlockId + "&format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -30,18 +30,18 @@
 <%@include file="/template/header.jsp" %>
 
 <div id="title">
-   Select Parameters for GTFS-Realtime Vehicle Positions API
+   Select Parameters for Blocks Terse API
 </div>
    
 <div id="mainDiv">   
-   <div id="radioButtonsDiv">
-     <input type="radio" name="format" value="binary" checked>Binary
-     <input type="radio" name="format" value="human">Human Readable
-   </div>
+   <%-- Create block selector --%>
+   <jsp:include page="../params/block.jsp" />
+   
+   <%-- Create json/xml format radio buttons --%>
+   <jsp:include page="../params/jsonXmlFormat.jsp" />
    
    <%-- Create submit button --%> 
-   <jsp:include page="../params/submitApiCall.jsp" /> 
-   
+   <jsp:include page="../params/submitApiCall.jsp" />
 </div>
 
 </body>

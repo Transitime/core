@@ -30,7 +30,7 @@ import org.transitime.ipc.data.IpcTrip;
 import org.transitime.utils.Time;
 
 /**
- *
+ * Describes a block
  *
  * @author SkiBu Smith
  *

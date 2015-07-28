@@ -31,7 +31,7 @@ import org.transitime.utils.Time;
  *
  */
 @XmlRootElement(name = "trip")
-public class ApiTripSummary {
+public class ApiTripTerse {
 
 	@XmlAttribute
 	private String id;
@@ -63,9 +63,9 @@ public class ApiTripSummary {
      * Need a no-arg constructor for Jersey. Otherwise get really obtuse
      * "MessageBodyWriter not found for media type=application/json" exception.
      */
-	protected ApiTripSummary() {}
+	protected ApiTripTerse() {}
 	
-	public ApiTripSummary(IpcTrip ipcTrip) {
+	public ApiTripTerse(IpcTrip ipcTrip) {
 		id = ipcTrip.getId();
 		shortName = ipcTrip.getShortName();
 		startTime = Time.timeOfDayStr(ipcTrip.getStartTime());
