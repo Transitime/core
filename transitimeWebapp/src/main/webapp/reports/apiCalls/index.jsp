@@ -20,7 +20,8 @@ if (agencyId == null || agencyId.isEmpty()) {
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
 <div id="title">API Calls for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
-<div id="subtitle">Note: This is a only a partial list of the API calls</div>
+<div id="subtitle" style="margin-bottom: 20px;">Note: This is a only a partial list of the API calls</div>
+<div id="subtitle">Agency Specific API calls</div>
 <ul class="choicesList">
   <li><a href="routeApiParams.jsp?a=<%= agencyId %>"
     title="Data for a route. Includes stop and path information needed to show route on map.">
@@ -58,7 +59,7 @@ if (agencyId == null || agencyId.isEmpty()) {
       Schedule for Route, stops vertical</a></li>
 </ul>
 
-<div id="subtitle">Not agency specify</div>
+<div id="subtitle">Not Agency Specific</div>
 <ul class="choicesList">
   <li><a href="agenciesApiParams.jsp"
     title="List of all agencies available through the API">
