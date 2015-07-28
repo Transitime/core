@@ -49,7 +49,8 @@ body {
 	width: 350px;
 	margin-left: auto;
 	margin-right: auto;
-	line-height: 140%;
+	line-height: 120%;
+	margin-top: 5px;
 }
 
 /* Make links look better. No underlining, keep colors consistent. */

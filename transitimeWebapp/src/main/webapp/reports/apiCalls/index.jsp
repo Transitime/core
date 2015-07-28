@@ -40,6 +40,20 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="gtfsRealtimeVehiclePositionsApiParams.jsp?a=<%= agencyId %>"
     title="GTFS-realtime Vehicle Positions for entire agency">
       GTFS-realtime Vehicle Positions</a></li>
+
+  <li><a href="horizStopsScheduleApiParams.jsp?a=<%= agencyId %>"
+    title="Schedule for route. For displaying schedule with stops listed in horizontal direction">
+      Schedule for Route, stops horizontal</a></li>
+  <li><a href="vertStopsScheduleApiParams.jsp?a=<%= agencyId %>"
+    title="Schedule for route. For displaying schedule with stops listed in vertical direction">
+      Schedule for Route, stops vertical</a></li>
+</ul>
+
+<div id="subtitle">Not agency specify</div>
+<ul class="choicesList">
+  <li><a href="agenciesApiParams.jsp"
+    title="List of all agencies available through the API">
+      Agencies</a></li>
 </ul>
 </div>
 </body>
