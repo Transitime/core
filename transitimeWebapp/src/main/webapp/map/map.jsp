@@ -907,7 +907,7 @@ if (!getRouteQueryStrParam()) {
 
 /**
  * Initiate timerloop that constantly updates vehicle positions.
- * Update every 5 seconds.
+ * Update every few seconds.
  */
 setInterval(updateVehiclesUsingApiData, getUpdateRate());
 
