@@ -38,6 +38,12 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="predsByLocApiParams.jsp?a=<%= agencyId %>"
     title="Predictions for stops near specified latitude, longitude for the agency.">
       Predictions by Location</a></li>
+  <li><a href="tripApiParams.jsp?a=<%= agencyId %>"
+    title="Data for a single trip. Includes trip pattern and schedule info.">
+      Trip</a></li>
+  <li><a href="tripWithTravelTimesApiParams.jsp?a=<%= agencyId %>"
+    title="Data for a single trip. Includes trip pattern and schedule info as well as historic travel times used for generating predictions.">
+      Trip With Travel Times</a></li>
   <li><a href="blocksTerseApiParams.jsp?a=<%= agencyId %>"
     title="Data for a block assignment. Shows each trip that makes up the block in a terse format, without trip pattern or schedule info.">
       Block</a></li>
