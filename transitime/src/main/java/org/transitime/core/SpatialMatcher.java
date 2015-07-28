@@ -483,14 +483,16 @@ public class SpatialMatcher {
 				Math.max(distanceBtwnStops*1.5, CoreConfig.getLayoverDistance());
 		
 		boolean withinAllowableDistanceOfLayover = distanceToLayover < allowableDistance;
-		if (!withinAllowableDistanceOfLayover) {
-		logger.error("VehicleId={} not within allowable distance of layover. This indicates to the system that the vehicle isn't actually at the layover and therefore won't match to it. "
-				+ "distanceToLayover={} distanceBtwnStops={} "
-				+ "CoreConfig.getLayoverDistance()={} allowableDistance={} "
-				+ "distanceToLayover < allowableDistance={}", 
-				vehicleId, distanceToLayover, distanceBtwnStops, 
-				CoreConfig.getLayoverDistance(), allowableDistance, 
-				withinAllowableDistanceOfLayover);
+		if (!withinAllowableDistanceOfLayover && logger.isDebugEnabled()) {
+			logger.debug("VehicleId={} not within allowable distance of "
+					+ "layover. This indicates to the system that the vehicle "
+					+ "isn't actually at the layover and therefore won't match "
+					+ "to it. distanceToLayover={} distanceBtwnStops={} "
+					+ "CoreConfig.getLayoverDistance()={} allowableDistance={} "
+					+ "distanceToLayover < allowableDistance={}", 
+					vehicleId, Geo.distanceFormat(distanceToLayover), distanceBtwnStops, 
+					CoreConfig.getLayoverDistance(), allowableDistance, 
+					withinAllowableDistanceOfLayover);
 		}
 		
 		// Return true if within allowable distance to layover
