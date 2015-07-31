@@ -258,7 +258,7 @@ public class TemporalMatcher {
 					CoreConfig.getDistanceFromLayoverForEarlyDeparture()
 				&& differenceFromExpectedTime.early() >= 0
 				&& differenceFromExpectedTime.early() <
-					CoreConfig.getAllowableEarlyTimeForEarlyDeparture();
+					CoreConfig.getAllowableEarlyTimeForEarlyDepartureSecs() * Time.MS_PER_SEC;
 		return earlyDeparture;
 	}
 	

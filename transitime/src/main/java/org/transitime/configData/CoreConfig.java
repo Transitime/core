@@ -450,7 +450,7 @@ public class CoreConfig {
 					+ "the layover, which is pretty common.");
 	
 	/**
-	 * How early in msec a vehicle can have left terminal and have it be considered an
+	 * How early in seconds a vehicle can have left terminal and have it be considered an
 	 * early departure instead of just moving around within the layover. Don't want
 	 * to mistakingly think that vehicles moving around during layover have started
 	 * their trip early. Therefore this value should be limited to just a few minutes
@@ -460,13 +460,13 @@ public class CoreConfig {
 	 * 
 	 * @return Time in msec
 	 */
-	public static int getAllowableEarlyTimeForEarlyDeparture() {
-		return allowableEarlyTimeForEarlyDeparture.getValue();		
+	public static int getAllowableEarlyTimeForEarlyDepartureSecs() {
+		return allowableEarlyTimeForEarlyDepartureSecs.getValue();		
 	}	
-	private static IntegerConfigValue allowableEarlyTimeForEarlyDeparture = 
-			new IntegerConfigValue("transitime.core.allowableEarlyTimeForEarlyDeparture", 
-			5*Time.MS_PER_MIN,
-			"How early in msec a vehicle can have left terminal and have it be considered "
+	private static IntegerConfigValue allowableEarlyTimeForEarlyDepartureSecs = 
+			new IntegerConfigValue("transitime.core.allowableEarlyTimeForEarlyDepartureSecs", 
+			5*Time.SEC_PER_MIN,
+			"How early in seconds a vehicle can have left terminal and have it be considered "
 					+ "an early departure instead of just moving around within "
 					+ "the layover. Don't want to mistakingly think that vehicles "
 					+ "moving around during layover have started their trip early. "
