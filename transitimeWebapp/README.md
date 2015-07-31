@@ -1,7 +1,9 @@
 This is the web application for transitTime and can be built by 
 
+```
 cd transitimeWebapp
 maven install -DskipTests
+```
 
 This produces a war file for deployment web.war in the target directory.
 
