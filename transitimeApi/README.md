@@ -6,9 +6,9 @@ cd transitTimeApi
 mvn install
 ```
 
-This will produce a war file which can be deployed on Tomcat. 
+This will produce a api.war file which can be deployed on Tomcat. 
 
-You can configure the location of your transitimeconfig.xml file in web.xml
+You will need to configure the location of your transitimeconfig.xml file in web.xml
 
 This server talks to core using RMI calls to get the information to support the REST service calls.
 
