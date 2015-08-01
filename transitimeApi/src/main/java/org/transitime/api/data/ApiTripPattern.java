@@ -58,7 +58,7 @@ public class ApiTripPattern {
 	@XmlAttribute
 	private String shapeId;
 
-	@XmlElement(name = "stopPath")
+	@XmlElement
 	private List<ApiStopPath> stopPaths;
 
 	/********************** Member Functions **************************/

@@ -44,6 +44,7 @@ for (WebAgency webAgency : webAgencies) {
 	  <td><%= webAgency.getAgencyName() %></td>
 	  <td><a href="<%= request.getContextPath() %>/map/map.jsp?a=<%= webAgency.getAgencyId() %>" title="Real-time map">Map</a></td>
 	  <td><a href="<%= request.getContextPath() %>/reports/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Reports on historic information">Reports</a></td>
+	  <td><a href="<%= request.getContextPath() %>/reports/apiCalls/index.jsp?a=<%= webAgency.getAgencyId() %>" title="API calls">API</a></td>
 	  <td><a href="<%= request.getContextPath() %>/status/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Pages showing current status of system">Status</a></td>
 	</tr>
 	<%

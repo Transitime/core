@@ -443,12 +443,13 @@ public class SpatialMatcher {
 	 * distance between the last stop of the previous trip and the layover stop,
 	 * or within the configured layover distance.
 	 * 
+	 * @param vehicleId
 	 * @param avlLoc
 	 * @param potentialMatchIndices
 	 * @return
 	 */
-	private boolean withinAllowableDistanceOfLayover(Location avlLoc,
-			Indices potentialMatchIndices) {
+	private boolean withinAllowableDistanceOfLayover(String vehicleId,
+			Location avlLoc, Indices potentialMatchIndices) {
 		// If match not at layover then can't be within allowable distance of 
 		// layover
 		if (!potentialMatchIndices.isLayover())
@@ -481,16 +482,21 @@ public class SpatialMatcher {
 		double allowableDistance = 
 				Math.max(distanceBtwnStops*1.5, CoreConfig.getLayoverDistance());
 		
-		logger.debug("Determining if layover within allowable distance. "
-				+ "distanceToLayover={} distanceBtwnStops={} "
-				+ "CoreConfig.getLayoverDistance()={} allowableDistance={} "
-				+ "distanceToLayover < allowableDistance={}", 
-				distanceToLayover, distanceBtwnStops, 
-				CoreConfig.getLayoverDistance(), allowableDistance, 
-				distanceToLayover < allowableDistance);
+		boolean withinAllowableDistanceOfLayover = distanceToLayover < allowableDistance;
+		if (!withinAllowableDistanceOfLayover && logger.isDebugEnabled()) {
+			logger.debug("VehicleId={} not within allowable distance of "
+					+ "layover. This indicates to the system that the vehicle "
+					+ "isn't actually at the layover and therefore won't match "
+					+ "to it. distanceToLayover={} distanceBtwnStops={} "
+					+ "CoreConfig.getLayoverDistance()={} allowableDistance={} "
+					+ "distanceToLayover < allowableDistance={}", 
+					vehicleId, Geo.distanceFormat(distanceToLayover), distanceBtwnStops, 
+					CoreConfig.getLayoverDistance(), allowableDistance, 
+					withinAllowableDistanceOfLayover);
+		}
 		
 		// Return true if within allowable distance to layover
-		return distanceToLayover < allowableDistance;
+		return withinAllowableDistanceOfLayover;
 	}
 	
 	/**
@@ -655,8 +661,8 @@ public class SpatialMatcher {
 		// be off of the route there. So always add layovers to the list of
 		// spatial matches.
 		if (atLayover
-				&& withinAllowableDistanceOfLayover(avlReport.getLocation(),
-						potentialMatchIndices)) {
+				&& withinAllowableDistanceOfLayover(avlReport.getVehicleId(),
+						avlReport.getLocation(), potentialMatchIndices)) {
 			logger.debug("For vehicleId={} segment is at a layover so adding " +
 					"it to list of spatial matches. {}",
 					avlReport.getVehicleId(), spatialMatch);

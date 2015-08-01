@@ -111,25 +111,34 @@ public class AvlClient implements Runnable {
 					// separated the logging into two statements in case want 
 					// to make the first shorter one a warn message but keep the
 					// second more verbose one a debug statement.
-					logger.debug("AVL report for vehicleId={} for time {} is only {} "
-							+ "seconds old which is too "
-							+ "recent to previous report so discarding it",
+					logger.debug("AVL report for vehicleId={} for time {} is "
+							+ "only {} seconds old which is too recent to "
+							+ "previous report so not fully processing it. "
+							+ "Just updating the vehicle's location in cache.",
 							avlReport.getVehicleId(), avlReport.getTime(), 
 							timeBetweenReportsSecs);
-					logger.debug("Throwing away AVL report because the new report "
-							+ "is too close in time to the previous AVL report "
-							+ "for the vehicle. "
+					logger.debug("Not processing AVL report because the new "
+							+ "report is too close in time to the previous AVL "
+							+ "report for the vehicle. "
 							+ "transitime.avl.minTimeBetweenAvlReportsSecs={} "
 							+ "secs. New AVL report is {}. Previous valid AVL "
 							+ "report is {}", 
-							AvlConfig.getMinTimeBetweenAvlReportsSecs(), avlReport, 
-							previousReportForVehicle);
+							AvlConfig.getMinTimeBetweenAvlReportsSecs(), 
+							avlReport, previousReportForVehicle);
+					
+					// But still want to update the vehicle cache with the 
+					// latest report because doing so is cheap and it allows 
+					// vehicles to move on map smoothly
+					AvlProcessor.getInstance().cacheAvlReportWithoutProcessing(
+							avlReport);
+					
+					// Done here since not processing this AVL report
 					return;				
 				}
 			}
 						
-			// Should handle the avl report so remember so can possibly filter the
-			// next one
+			// Should handle the AVL report. Remember it so can possibly filter 
+			// the next one
 			avlReports.put(avlReport.getVehicleId(), avlReport);
 		}
 		

@@ -18,6 +18,7 @@ package org.transitime.db.structs;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -196,7 +197,9 @@ public class Trip implements Serializable {
 				properRouteId != null ? properRouteId : gtfsTrip.getRouteId();
 		this.routeShortName = routeShortName;
 		this.serviceId = gtfsTrip.getServiceId();
-		this.headsign = titleFormatter.processTitle(gtfsTrip.getTripHeadsign());
+		this.headsign =
+				processedHeadsign(gtfsTrip.getTripHeadsign(), routeId,
+						titleFormatter);
 		
 		// block column is optional in GTFS trips.txt file. Best can do when
 		// block ID is not set is to use the trip short name or the trip id 
@@ -215,7 +218,7 @@ public class Trip implements Serializable {
 		// Not a frequency based trip with an exact time so remember such
 		this.exactTimesHeadway = false;
 	}
-	
+
 	/**
 	 * Creates a copy of the Trip object but adjusts the startTime, endTime, and
 	 * scheduledTimesMap according to the frequenciesBasedStartTime. This is
@@ -332,6 +335,46 @@ public class Trip implements Serializable {
 		exactTimesHeadway = false;
 	}
 
+	/**
+	 * For refining the headsign. For some agencies like VTA & AC Transit the
+	 * headsign includes the route number at the beginning. This is indeed the
+	 * headsign but not really appropriate as a destination indicator. Ideally
+	 * it might make sense to have an unprocessed headsign and a separate
+	 * destination indicator but for now lets just use headsign member. Also
+	 * uses TitleFormatter to deal with capitalization.
+	 * 
+	 * @param gtfsHeadsign
+	 * @param routeId
+	 * @param titleFormatter
+	 * @return Processed headsign with proper formatting, or null if
+	 *         gtfsHeadsign passed in is null
+	 */
+	private String processedHeadsign(String gtfsHeadsign, String routeId,
+			TitleFormatter titleFormatter) {
+		// Prevent NPE since gtfsHeadsign can be null
+		if (gtfsHeadsign == null)
+			return null;
+		
+		String headsignWithoutRouteInfo;
+		if (gtfsHeadsign.startsWith(routeId)) {
+			// Headsign starts with route ID so trim that off
+			headsignWithoutRouteInfo =
+					gtfsHeadsign.substring(routeId.length()).trim();
+			
+			// Handle possibility of having a separator between the route ID
+			// and the rest of the headsign. 
+			if (headsignWithoutRouteInfo.startsWith(":")
+					|| headsignWithoutRouteInfo.startsWith("-"))
+				headsignWithoutRouteInfo =
+						headsignWithoutRouteInfo.substring(1).trim();
+		} else
+			// Headsign doesn't start with route ID so use entire string
+			headsignWithoutRouteInfo = gtfsHeadsign;
+
+		// Handle capitalization and any other title formatting necessary
+		return titleFormatter.processTitle(headsignWithoutRouteInfo);
+	}
+	
 	/**
 	 * For adding ScheduleTimes for stops to a Trip. Updates scheduledTimesMap,
 	 * startTime, and endTime.
@@ -488,7 +531,7 @@ public class Trip implements Serializable {
 		// There are results so use the Trip that corresponds to the current 
 		// service ID.
 		Date now = Core.getInstance().getSystemDate();
-		List<String> currentServiceIds = 
+		Collection<String> currentServiceIds = 
 				Core.getInstance().getServiceUtils().getServiceIds(now);
 		for (Trip trip : trips) {
 			for (String serviceId : currentServiceIds) {

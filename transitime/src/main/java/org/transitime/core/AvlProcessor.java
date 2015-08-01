@@ -562,8 +562,8 @@ public class AvlProcessor {
 		// to look at all the active ones to find out what blocks are active...
 		List<Block> allBlocksForRoute = new ArrayList<Block>();
 		ServiceUtils serviceUtils = Core.getInstance().getServiceUtils();
-		List<String> serviceIds = serviceUtils.getServiceIds(avlReport
-				.getDate());
+		Collection<String> serviceIds =
+				serviceUtils.getServiceIds(avlReport.getDate());
 		for (String serviceId : serviceIds) {
 			List<Block> blocksForService = Core.getInstance().getDbConfig()
 					.getBlocksForRoute(serviceId, routeId);
@@ -1211,6 +1211,34 @@ public class AvlProcessor {
 	 */
 	public AvlReport getLastAvlReport() {
 		return lastRegularReportProcessed;
+	}
+	
+	/**
+	 * Updates the VehicleState in the cache to have the new avlReport. Intended
+	 * for when want to update VehicleState AVL report but don't want to
+	 * actually process the report, such as for when get data too frequently and
+	 * only want to fully process some of it yet still use latest vehicle
+	 * location so that vehicles move on map really smoothly.
+	 * 
+	 * @param avlReport
+	 */
+	public void cacheAvlReportWithoutProcessing(AvlReport avlReport) {
+		VehicleState vehicleState =
+				VehicleStateManager.getInstance().getVehicleState(
+						avlReport.getVehicleId());
+		
+		// Since modifying the VehicleState should synchronize in case another
+		// thread simultaneously processes data for the same vehicle. This
+		// would be extremely rare but need to be safe.
+		synchronized (vehicleState) {
+			// Update AVL report for cached VehicleState
+			vehicleState.setAvlReport(avlReport);
+			
+			// Let vehicle data cache know that the vehicle state was updated
+			// so that new IPC vehicle data will be created and cached and
+			// made available to the API.
+			VehicleDataCache.getInstance().updateVehicle(vehicleState);
+		}
 	}
 	
 	/**

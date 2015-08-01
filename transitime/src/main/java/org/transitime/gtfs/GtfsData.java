@@ -1867,7 +1867,7 @@ public class GtfsData {
 		
 		// Trim calendar date list
 		Iterator<CalendarDate> calendarDateIter = calendarDates.iterator();
-		while (calendarIter.hasNext()) {
+		while (calendarDateIter.hasNext()) {
 			CalendarDate calendarDate = calendarDateIter.next();
 			if (!serviceIdsWithTrips.contains(calendarDate.getServiceId()))
 				calendarDateIter.remove();

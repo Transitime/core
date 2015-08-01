@@ -430,8 +430,19 @@ public class PredictionAccuracyModule extends Module {
 			if (pred.isArrival() != arrivalDeparture.isArrival())
 				continue;
 			
+			// Make sure it is for the proper trip. This is important in case a
+			// vehicle is reassigned after a prediction is made. For example, a
+			// prediction could be made for a trip to leave at 10am but then the
+			// vehicle is reassigned to leave at 9:50am or 10:10am. That 
+			// shouldn't be counted against vehicle accuracy since likely 
+			// another vehicle substituted in for the original assignment. This 
+			// is especially true for MBTA Commuter Rail
+			if (!pred.getTripId().equals(arrivalDeparture.getTripId()))
+				continue;
+			
 			// Make sure predicted time isn't too far away from the 
-			// arrival/departure time. First determine how late vehicle arrived 
+			// arrival/departure time so that don't match to something really
+			// inappropriate. First determine how late vehicle arrived 
 			// at stop compared to the original prediction time.
 			long latenessComparedToPrediction = arrivalDeparture.getTime() 
 					- pred.getPredictedTime().getTime();

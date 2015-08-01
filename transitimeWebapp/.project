@@ -3,6 +3,7 @@
 	<name>transitime.transitimeWebapp-v1</name>
 	<comment></comment>
 	<projects>
+		<project>transitimeCore</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

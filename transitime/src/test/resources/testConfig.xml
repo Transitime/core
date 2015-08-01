@@ -17,7 +17,7 @@
     </avl>   
     <db>
         <dbName>transitime</dbName>
-        <dbHost>localhost:5432</dbHost>
+        <dbHost>192.168.1.20:5432</dbHost>
         <dbType>postgresql</dbType>
         <dbUserName>transitime</dbUserName>
         <dbPassword>welcome</dbPassword>

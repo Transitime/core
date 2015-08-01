@@ -7,8 +7,9 @@
    r=ROUTE (optional, if not specified then a route selector is created)
    s=STOP_ID (optional, for specifying which stop interested in)
    tripPattern=TRIP_PATTERN (optional, for specifying which stop interested in).
-   verbose=true (for getting additional info in vehicle popup window)
-   showUnassignedVehicles=true (for showing unassigned vehicles)
+   verbose=true (optional, for getting additional info in vehicle popup window)
+   showUnassignedVehicles=true (optional, for showing unassigned vehicles)
+   updateRate=MSEC (optional, for specifying update rate for vehicle locations.
 -->
 <html>
 <head>
@@ -77,9 +78,25 @@ function dateFormat(time) {
 	var localTimezoneOffset = (new Date()).getTimezoneOffset();
 	var timezoneDiffMinutes = localTimezoneOffset - agencyTimezoneOffset;
 	
-	var offsetDate = new Date(parseInt(time*1000) + timezoneDiffMinutes*60*1000);
+	var offsetDate = new Date(parseInt(time)*1000 + timezoneDiffMinutes*60*1000);
 	// Use jquery-dateFormat javascript library
 	return $.format.date(offsetDate, 'HH:mm:ss');
+}
+
+/**
+ * Handle update rate specification
+ */
+ function getUpdateRate() {
+	 var updateRate = getQueryVariable("updateRate");
+	 if (updateRate) {
+		 var configuredUpdateRate = parseInt(updateRate);
+	 	if (configuredUpdateRate < 2000)
+	 		return 2000;
+	 	else 
+	 		return configuredUpdateRate; 
+	 } else {
+		 return 5000; // The default value
+	 }
 }
 
 /**
@@ -97,7 +114,7 @@ function setRouteQueryStrParam(param) {
 
 /**
  * Returns query string param to be used for API for specifying the route.
- * It can be either "r=routeId" or "r=rShortName" depending on whether route
+ * It can be either "r=routeId" or "r=routeShortName" depending on whether route
  * ID or route short name were used when bringing up the page.
  */
 function setRouteQueryStrParamViaQueryStr() {
@@ -128,13 +145,13 @@ function predictionCallback(preds, status) {
 	var routeStopPreds = preds.predictions[0];
 	
 	// Set timeout to update predictions again in few seconds
-	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStopPreds.rShortName, routeStopPreds.sId);
+	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStopPreds.routeShortName, routeStopPreds.stopId);
 
 	// Add route and stop info
-	var content = '<b>Route:</b> ' + routeStopPreds.rName + '<br/>' 
-		+ '<b>Stop:</b> ' + routeStopPreds.sName + '<br/>';
+	var content = '<b>Route:</b> ' + routeStopPreds.routeName + '<br/>' 
+		+ '<b>Stop:</b> ' + routeStopPreds.stopName + '<br/>';
 	if (verbose)
-		content += '<b>Stop Id:</b> ' + routeStopPreds.sId + '<br/>';
+		content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 		
 	// For each destination add predictions
 	for (var i in routeStopPreds.dest) {
@@ -168,7 +185,7 @@ function predictionCallback(preds, status) {
 					content += '<sup>sched</sup>';
 				else {
 					if (pred.notYetDeparted)
-						content += '<sup>not left</sup>';
+						content += '<sup>not yet left</sup>';
 					else
 						if (pred.delayed) 
 							content += '<sup>delayed</sup>';
@@ -194,9 +211,9 @@ function predictionCallback(preds, status) {
 /**
  * Initiates API call to get prediction data.
  */
-function getPredictionsJson(rShortName, stopId) {
+function getPredictionsJson(routeShortName, stopId) {
 	// JSON request of predicton data
-	var url = apiUrlPrefix + "/command/predictions?rs=" + rShortName 
+	var url = apiUrlPrefix + "/command/predictions?rs=" + routeShortName 
 			+ "|" + stopId;
 	$.getJSON(url, predictionCallback);	
 }
@@ -207,7 +224,7 @@ function getPredictionsJson(rShortName, stopId) {
  */
 function showStopPopup(stopMarker) {
 	// JSON request of predicton data
-	getPredictionsJson(stopMarker.rShortName, stopMarker.stop.id);
+	getPredictionsJson(stopMarker.routeShortName, stopMarker.stop.id);
     
 	// Create popup in proper place but content will be added in predictionCallback()
 	predictionsPopup = L.popup(stopPopupOptions)
@@ -260,7 +277,7 @@ function routeConfigCallback(route, status) {
 			
 			// Store routeShortName obtained via AJAX with stopMarker so can be 
 			// used to get predictions for stop/route
-			stopMarker.rShortName = route.rShortName;
+			stopMarker.routeShortName = route.shortName;
 			
 			// When user clicks on stop popup information box
 			stopMarker.on('click', function(e) {
@@ -375,7 +392,7 @@ function getVehiclePopupContent(vehicleData) {
     var tripPatternStr = verbose ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
     
     var content = "<b>Vehicle:</b> " + vehicleData.id 
-    	+ "<br/><b>Route: </b> " + vehicleData.rShortName
+    	+ "<br/><b>Route: </b> " + vehicleData.routeShortName
 		+ latLonHeadingStr
 		+ "<br/><b>GPS Time:</b> " + gpsTimeStr
 		+ "<br/><b>Headsign:</b> " + vehicleData.headsign
@@ -587,7 +604,7 @@ function updateVehicleMarker(vehicleMarker, vehicleData) {
 	// Update markers location on the map if vehicle has actually moved.
 	if (vehicleMarker.vehicleData.loc.lat != vehicleData.loc.lat
 			|| vehicleMarker.vehicleData.loc.lon != vehicleData.loc.lon) {
-		animateVehicle(vehicleMarker, 1,
+		animateVehicle(vehicleMarker, 
 				vehicleMarker.vehicleData.loc.lat, 
 				vehicleMarker.vehicleData.loc.lon, 
 				vehicleData.loc.lat, vehicleData.loc.lon);
@@ -657,23 +674,21 @@ function vehicleLocationsCallback(vehicles, status) {
 	lastVehiclesUpdateTime = new Date();
 }
 
-var ANIMATION_STEPS = 15;
-
 /**
  * Moves the vehicle an increment between its original and new locations.
  * Calls setTimeout() to call this function again in order to continue
  * the animation until finished.
  */
-function animateVehicle(vehicleMarker, cnt, origLat, origLon, newLat, newLon) {
+function interpolateVehicle(vehicleMarker, cnt, interpolationSteps, origLat, origLon, newLat, newLon) {
 	// Determine the interpolated location
 	var interpolatedLat = parseFloat(origLat) + (newLat - origLat) * cnt
-			/ ANIMATION_STEPS;
+			/ interpolationSteps;
 	var interpolatedLon = parseFloat(origLon) + (newLon - origLon) * cnt
-			/ ANIMATION_STEPS;
+			/ interpolationSteps;
 	var interpolatedLoc = [ interpolatedLat, interpolatedLon ];
 
-	//console.log("animating vehicleId=" + vehicleIcon.vehicleData.id + " cnt=" + cnt + 
-	//		" interpolatedLat=" + interpolatedLat + " interpolatedLoc=" + interpolatedLoc);
+//	console.log("interpolating vehicleId=" + vehicleMarker.vehicleData.id + " cnt=" + cnt + 
+//			" interpolatedLat=" + interpolatedLat + " interpolatedLon=" + interpolatedLon);
 
 	// Update all markers sto have interpolated location
 	vehicleMarker.setLatLng(interpolatedLoc);
@@ -684,10 +699,65 @@ function animateVehicle(vehicleMarker, cnt, origLat, origLon, newLat, newLon) {
 	if (vehicleMarker.popup)
 		vehicleMarker.popup.setLatLng(interpolatedLoc);
 
-	if (++cnt <= ANIMATION_STEPS) {
-		setTimeout(animateVehicle, 50, vehicleMarker, cnt, origLat, origLon,
-				newLat, newLon);
+	if (++cnt <= interpolationSteps) {
+		setTimeout(interpolateVehicle, 60, 
+				vehicleMarker, cnt, interpolationSteps, 
+				origLat, origLon, newLat, newLon);
 	}
+}
+
+/**
+ * Initiates animation of moving vehicle from old location to new location.
+ * Determines number of interpolations to use for the animation. Doesn't
+ * use animation (though still updates marker position) if vehicle not on
+ * visible part of map or moves less than a pixel. Interpolation count is
+ * determined such that will move at least a pixel towards the new loc.
+ * Trying to avoid situation where moves less than a pixel towards the
+ * new loc but then moves a pixel in the other horiz/vert direction due
+ * to rounding.
+ */
+function animateVehicle(vehicleMarker, origLat, origLon, newLat, newLon) {
+	//console.log("animating vehicleId=" + vehicleMarker.vehicleData.id + 
+	//		" origLat=" + origLat + " origLon=" + origLon +
+	//		" newLat=" + newLat + " newLon=" + newLon);
+	
+	// Use default interpolationSteps of 1 so that the marker location
+	// will be updated no matter what. This is important because even
+	// if vehicle only moves slightly or is off the map, still need
+	// to update vehicle position.
+	var interpolationSteps = 1;
+	
+	// Determine if vehicle is visile since no need to animate vehicles
+	// that aren't visible
+	var bounds = map.getBounds();
+	var origLatLng = L.latLng(origLat, origLon);
+	var newLatLng = L.latLng(newLat, newLon);
+	if (bounds.contains(origLatLng) && bounds.contains(newLatLng)) {
+		// Vehicle is visible. Determine number of pixels moving vehicle.
+		// Don't want to look at sqrt(x^2 + y^2) since trying to avoid 
+		// making the animation jagged. If use the sqrt distance traveled
+		// then would sometimes have the marker move sideways instead of
+		// forward since would be moving less than 1 pixel at a time
+		// horizontally or vertically.
+		var origPoint = map.latLngToLayerPoint(origLatLng) ;
+		var newPoint = map.latLngToLayerPoint(newLatLng) ;
+		var deltaX = origPoint.x - newPoint.x;
+		var deltaY = origPoint.y - newPoint.y;
+		var pixelsToMove = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+
+		//console.log("origPoint=" + origPoint + " newPoint=" + newPoint);
+		//console.log("pixelsToMove=" + pixelsToMove);
+		
+		// Set interpolationSteps to number of pixels that need to move. This
+		// provides smoothest possible animation. But limit interpolationSteps
+		// to be at least 1 and at most 10.
+		interpolationSteps = Math.max(pixelsToMove, 1);
+		interpolationSteps = Math.min(interpolationSteps, 10);
+	}
+		
+	// Start the interpolation process to update marker position
+	interpolateVehicle(vehicleMarker, 1, interpolationSteps, origLat, origLon, 
+			newLat, newLon);
 }
 
 /**
@@ -831,15 +901,15 @@ if (!getRouteQueryStrParam()) {
 		url += "&tripPattern=" + getQueryVariable("tripPattern");
 	$.getJSON(url, routeConfigCallback);		
 	
-	// Read in vehicle locations now (and every 10 seconds)
+	// Read in vehicle locations now (and every few seconds)
 	updateVehiclesUsingApiData();
 }
 
 /**
  * Initiate timerloop that constantly updates vehicle positions.
- * Update every 5 seconds.
+ * Update every few seconds.
  */
-setInterval(updateVehiclesUsingApiData, 5000);
+setInterval(updateVehiclesUsingApiData, getUpdateRate());
 
 /**
  * Setup timer to determine if haven't updated vehicles in a while.

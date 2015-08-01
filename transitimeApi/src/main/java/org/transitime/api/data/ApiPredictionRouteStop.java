@@ -38,19 +38,19 @@ import org.transitime.utils.StringUtils;
 @XmlRootElement
 public class ApiPredictionRouteStop {
 
-	@XmlAttribute(name = "rShortName")
+	@XmlAttribute
 	private String routeShortName;
 
-	@XmlAttribute(name = "rName")
+	@XmlAttribute
 	private String routeName;
 
-	@XmlAttribute(name = "rId")
+	@XmlAttribute
 	private String routeId;
 
-	@XmlAttribute(name = "sId")
+	@XmlAttribute
 	private String stopId;
 
-	@XmlAttribute(name = "sName")
+	@XmlAttribute
 	private String stopName;
 
 	// Using String so that it will not be output if not showing predictions

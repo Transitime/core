@@ -190,7 +190,7 @@ public interface ConfigInterface extends Remote {
 	public List<String> getTripIds() throws RemoteException;
 	
 	/**
-	 * Returns list of block IDs, unsorted
+	 * Returns list of block IDs, unsorted, duplicates removed
 	 * 
 	 * @return vehicle IDs
 	 * @throws RemoteException
@@ -204,7 +204,7 @@ public interface ConfigInterface extends Remote {
 	 * @return vehicle IDs
 	 * @throws RemoteException
 	 */
-	public List<String> getBlockIds(String serviceId) throws RemoteException;
-	
+	public List<String> getBlockIds(String serviceId)
+			throws RemoteException;	
 
 }

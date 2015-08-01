@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,13 @@ public class VehicleDataCache {
     private Map<String, VehicleConfig> vehicleConfigsMap =
     		new HashMap<String, VehicleConfig>();
     
+    // So can quickly look up vehicle config using tracker ID
+    private Map<String, VehicleConfig> vehicleConfigByTrackerIdMap =
+    		new HashMap<String, VehicleConfig>();
+    
+    // So can determine how long since data was read from db
+    private long dbReadTime;
+    
 	// For filtering out info more than MAX_AGE since it means that the AVL info is
 	// obsolete and shouldn't be displayed.
     private static final int MAX_AGE_MSEC = 15 * Time.MS_PER_MIN;
@@ -105,25 +113,53 @@ public class VehicleDataCache {
     }
 
     /**
+     * Reads in vehicle config data from db. Unsynchronized since the
+     * calling methods are expected to sync.
+     */
+    private void readVehicleConfigFromDb() {
+		try {
+			// Read VehicleConfig data from database
+			Session session = 
+					HibernateUtils.getSession(AgencyConfig.getAgencyId());
+			List<VehicleConfig> vehicleConfigs = 
+					VehicleConfig.getVehicleConfigs(session);
+			
+			// Convert list to the maps
+			for (VehicleConfig vehicleConfig : vehicleConfigs) {
+				vehicleConfigsMap.put(vehicleConfig.getId(), vehicleConfig);
+				vehicleConfigByTrackerIdMap.put(
+						vehicleConfig.getTrackerId(), vehicleConfig);
+				dbReadTime = System.currentTimeMillis();
+			}
+		} catch (HibernateException e) {
+			logger.error("Exception reading in VehicleConfig data. {}", 
+					e.getMessage(), e);
+		}							
+    }
+    
+    /**
      * Reads in vehicle config data from db if haven't done so yet.
      */
 	private void readVehicleConfigFromDbIfNeedTo() {
 		synchronized (vehicleConfigsMap) {
 			if (vehicleConfigsMap.isEmpty()) {
-				// Read VehicleConfig data from database
-				Session session = 
-						HibernateUtils.getSession(AgencyConfig.getAgencyId());
-				List<VehicleConfig> vehicleConfigs = 
-						VehicleConfig.getVehicleConfigs(session);
-				
-				// Convert list to the map
-				for (VehicleConfig vehicleConfig : vehicleConfigs) {
-					vehicleConfigsMap.put(vehicleConfig.getId(), vehicleConfig);
-				}
+				readVehicleConfigFromDb();
 			}
 		}
 	}
     
+	/**
+	 * Reads in vehicle config data from db if more than 5 minutes since last
+	 * db read. Useful for when vehicle data has been updated in db.
+	 */
+	private void readVehicleConfigFromDbIfOld() {
+		synchronized (vehicleConfigsMap) {
+			// Read db if more than 5 minutes since last read
+			if (System.currentTimeMillis() > dbReadTime + 5 * Time.MIN_IN_MSECS)
+				readVehicleConfigFromDb();
+		}		
+	}
+	
 	/**
 	 * To be called when vehicle encountered in AVL feed. Adds the vehicle to
 	 * the cache and stores in database if haven't done so yet.
@@ -159,6 +195,33 @@ public class VehicleDataCache {
 		}
 	}
     
+	/**
+	 * Returns the VehicleConfig for the specified trackerId. Useful for when
+	 * getting a GPS feed that has a tracker ID, like an IMEI or phone #,
+	 * instead of a vehicle ID. Allows the corresponding vehicleId to be
+	 * determined from the VehicleConfig object.
+	 * <p>
+	 * If trackerId not found in VehicleConfig data then the VehicleData is
+	 * reread from the db. This way if a new vehicle is configured don't need to
+	 * restart the core system in order to determine the vehicle ID.
+	 * 
+	 * @param trackerId
+	 * @return VehicleConfig for the trackerId, or null if there isn't one
+	 *         configured.
+	 */
+	public VehicleConfig getVehicleConfigByTrackerId(String trackerId) {
+		VehicleConfig vehicleConfig =
+				vehicleConfigByTrackerIdMap.get(trackerId);
+		
+		// If specified trackerId not found then reread VehicleConfig data
+		// from db again to see if it has been updated.
+		if (vehicleConfig == null) {
+			readVehicleConfigFromDbIfOld();
+			vehicleConfig = vehicleConfigByTrackerIdMap.get(trackerId);
+		}
+		return vehicleConfig;
+	}
+	
 	/**
 	 * Returns an unmodifiable collection of the static vehicle configurations.
 	 * 

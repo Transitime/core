@@ -38,6 +38,7 @@ import org.transitime.core.TimeoutHandlerModule;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.DataDbLogger;
+import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.gtfs.DbConfig;
@@ -126,6 +127,19 @@ public class Core {
 		// the start of the application, before db is read.
 		TimeZone timeZone = Agency.getTimeZoneFromDb(agencyId);
 		TimeZone.setDefault(timeZone);
+		
+		// Clears out the session factory so that a new one will be created for
+		// future db access. This way new db connections are made. This is
+		// useful for dealing with timezones and postgres. For that situation
+		// want to be able to read in timezone from db so can set default 
+		// timezone. Problem with postgres is that once a factory is used to 
+		// generate sessions the database will continue to use the default 
+		// timezone that was configured at that time. This means that future 
+		// calls to the db will use the wrong timezone! Through this function 
+		// one can read in timezone from database, set the default timezone, 
+		// clear the factory so that future db connections will use the newly 
+		// configured timezone, and then successfully process dates.
+		HibernateUtils.clearSessionFactory();
 		
 		// Read in all GTFS based config data from the database
 		configData = new DbConfig(agencyId);

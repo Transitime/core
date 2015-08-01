@@ -17,16 +17,21 @@
 package org.transitime.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.transitime.applications.Core;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.CalendarDate;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.utils.Time;
 
 /**
  * For working with service types, such as determining serviceId or
@@ -41,6 +46,16 @@ public class ServiceUtils {
 	
 	private final DbConfig dbConfig;
 	
+	private static IntegerConfigValue minutesIntoMorningToIncludePreviousServiceIds =
+			new IntegerConfigValue(
+					"transitime.service.minutesIntoMorningToIncludePreviousServiceIds",
+					4*Time.HOUR_IN_MINS,
+					"Early in the morning also want to include at service IDs "
+					+ "for previous day since a block might have started on "
+					+ "that day. But don't want to always include previous day "
+					+ "service IDs since that confuses things. Therefore just "
+					+ "include them if before this time of the day, in minutes.");
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ServiceUtils.class);
 
@@ -148,19 +163,17 @@ public class ServiceUtils {
 	}
 	
 	/**
-	 * Determines list of current service IDs for the specified time.
-	 * These service IDs designate which block assignments are currently
-	 * active.
+	 * Determines list of current service IDs for the specified time. These
+	 * service IDs designate which block assignments are currently active.
 	 * <p>
 	 * Uses already read in calendars, but does a good number of calculations so
 	 * still a bit expensive.
 	 * 
-	 * @param epochTime The current time that determining service IDs for
-	 * @param calendars List of calendar.txt GTFS data
-	 * @param calendarDates List of calendar_dates.txt GTFS data
+	 * @param epochTime
+	 *            The current time that determining service IDs for
 	 * @return List of service IDs that are active for the specified time.
 	 */
-	public List<String> getServiceIds(Date epochTime) {
+	public List<String> getServiceIdsForDay(Date epochTime) {
 		List<String> serviceIds = new ArrayList<String>();
 		
 		// Make sure haven't accidentally let all calendars expire
@@ -208,7 +221,7 @@ public class ServiceUtils {
 		// Return the results
 		return serviceIds;
 	}
-	
+
 	/**
 	 * Determines list of current service IDs for the specified time. These
 	 * service IDs designate which block assignments are currently active.
@@ -218,13 +231,62 @@ public class ServiceUtils {
 	 * 
 	 * @param epochTime
 	 *            The current time that determining service IDs for
-	 * @param calendars
-	 *            List of calendar.txt GTFS data
-	 * @param calendarDates
-	 *            List of calendar_dates.txt GTFS data
 	 * @return List of service IDs that are active for the specified time.
 	 */
-	public List<String> getCurrentServiceIds(long epochTime) {
+	public List<String> getServiceIdsForDay(long epochTime) {
+		return getServiceIdsForDay(new Date(epochTime));
+	}
+	
+	/**
+	 * Determines list of current service IDs for the specified time. If it is
+	 * before the java property minutesIntoMorningToIncludePreviousServiceIds
+	 * then the service IDs for the previous day will also be included. This way
+	 * will get the proper service IDs even for blocks that started the previous
+	 * day. Important for late night service. These service IDs designate which
+	 * block assignments are currently active.
+	 * <p>
+	 * Uses already read in calendars, but does a good number of calculations so
+	 * still a bit expensive.
+	 * 
+	 * @param epochTime
+	 *            The current time that determining service IDs for
+	 * @return List of service IDs that are active for the specified time,
+	 *         includes ones for previous day if epochTime specifies it is early
+	 *         in the morning.
+	 */
+	public Collection<String> getServiceIds(Date epochTime) {
+		List<String> serviceIdsForDay = getServiceIdsForDay(epochTime);
+		Time time = Core.getInstance().getTime();
+		if (time.getSecondsIntoDay(epochTime) > minutesIntoMorningToIncludePreviousServiceIds
+				.getValue() * Time.MIN_IN_SECS)
+			return serviceIdsForDay;
+
+		List<String> serviceIdsForPreviousDay =
+				getServiceIdsForDay(epochTime.getTime() - 1 * Time.DAY_IN_MSECS);
+
+		Set<String> set = new HashSet<String>(serviceIdsForDay);
+		set.addAll(serviceIdsForPreviousDay);
+		return set;
+	}
+	
+	/**
+	 * Determines list of current service IDs for the specified time. If it is
+	 * before the java property minutesIntoMorningToIncludePreviousServiceIds
+	 * then the service IDs for the previous day will also be included. This way
+	 * will get the proper service IDs even for blocks that started the previous
+	 * day. Important for late night service. These service IDs designate which
+	 * block assignments are currently active.
+	 * <p>
+	 * Uses already read in calendars, but does a good number of calculations so
+	 * still a bit expensive.
+	 * 
+	 * @param epochTime
+	 *            The current time that determining service IDs for
+	 * @return List of service IDs that are active for the specified time,
+	 *         includes ones for previous day if epochTime specifies it is early
+	 *         in the morning.
+	 */
+	public Collection<String> getServiceIds(long epochTime) {
 		return getServiceIds(new Date(epochTime));
 	}
 	
@@ -242,7 +304,7 @@ public class ServiceUtils {
 		List<Calendar> allCalendars = dbConfig.getCalendars();
 		
 		// For each service ID that is currently active...
-		List<String> currentServiceIds = getCurrentServiceIds(epochTime);
+		Collection<String> currentServiceIds = getServiceIds(epochTime);
 		for (String serviceId : currentServiceIds) {
 			// Find corresponding calendar
 			for (Calendar calendar : allCalendars) {

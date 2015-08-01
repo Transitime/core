@@ -53,7 +53,7 @@ public abstract class ApiVehicleAbstract {
     @XmlAttribute
     protected String routeId;
     
-    @XmlAttribute(name="rShortName")
+    @XmlAttribute
     protected String routeShortName;
     
     @XmlAttribute

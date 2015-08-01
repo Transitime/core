@@ -426,7 +426,11 @@ public class CoreConfig {
 	
 	/**
 	 * How far vehicle can be away from layover stop and still match to it. For
-	 * when not deadheading to a trip.
+	 * when not deadheading to a trip. This can be useful to determine when a
+	 * vehicle is pulled out of service when it is expected to be at a layover
+	 * and start the next trip. Should usually be a pretty large value so that
+	 * vehicles are not taken out of service just because they drive a bit away
+	 * from the stop for the layover, which is pretty common.
 	 * 
 	 * @return
 	 */
@@ -435,9 +439,15 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue layoverDistance =
 			new DoubleConfigValue("transitime.core.layoverDistance", 
-					200.0,
+					2000.0,
 					"How far vehicle can be away from layover stop and still "
-					+ "match to it. For when not deadheading to a trip. ");
+					+ "match to it. For when not deadheading to a trip. This "
+					+ "can be useful to determine when a vehicle is pulled out "
+					+ "of service when it is expected to be at a layover and "
+					+ "start the next trip. Should usually be a pretty large "
+					+ "value so that vehicles are not taken out of service "
+					+ "just because they drive a bit away from the stop for "
+					+ "the layover, which is pretty common.");
 	
 	/**
 	 * How early in msec a vehicle can have left terminal and have it be considered an
