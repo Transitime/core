@@ -346,7 +346,8 @@
         capacity number(10,0),
         crushCapacity number(10,0),
         description varchar2(255 char),
-        passengerVehicle number(1,0),
+        nonPassengerVehicle number(1,0),
+        trackerId varchar2(60 char),
         type number(10,0),
         primary key (id)
     );

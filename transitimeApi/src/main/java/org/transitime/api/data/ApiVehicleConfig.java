@@ -31,7 +31,7 @@ import org.transitime.ipc.data.IpcVehicleConfig;
  */
 @XmlRootElement(name = "vehicleConfig")
 @XmlType(propOrder = { "id", "type", "description", "capacity",
-		"crushCapacity", "passengerVehicle" })
+		"crushCapacity", "nonPassengerVehicle" })
 public class ApiVehicleConfig {
 
 	@XmlAttribute
@@ -50,7 +50,7 @@ public class ApiVehicleConfig {
 	private Integer crushCapacity;
 	
 	@XmlAttribute
-	private Boolean passengerVehicle;
+	private Boolean nonPassengerVehicle;
 	
 	/********************** Member Functions **************************/
 
@@ -67,7 +67,7 @@ public class ApiVehicleConfig {
 		this.description = vehicle.getDescription();
 		this.capacity = vehicle.getCapacity();
 		this.crushCapacity = vehicle.getCrushCapacity();
-		this.passengerVehicle = vehicle.getPassengerVehicle();
+		this.nonPassengerVehicle = vehicle.isNonPassengerVehicle();
 	}
 
 }

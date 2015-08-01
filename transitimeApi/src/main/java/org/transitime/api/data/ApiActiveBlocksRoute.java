@@ -38,7 +38,7 @@ public class ApiActiveBlocksRoute {
 	private String id;
 
 	// Route short name
-	@XmlAttribute(name = "rShortName")
+	@XmlAttribute
 	private String shortName;
 
 	// Name of route

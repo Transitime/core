@@ -39,6 +39,7 @@ import org.transitime.db.hibernate.HibernateUtils;
 @Entity @DynamicUpdate @Table(name="VehicleConfigs")
 public class VehicleConfig {
 
+	// ID of vehicle
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	@Id
 	private final String id;
@@ -47,32 +48,45 @@ public class VehicleConfig {
 	@Column
 	private final Integer type;
 	
+	// A more verbose description of the vehicle.
 	@Column
 	private final String description;
 	
+	// Useful for when getting a GPS feed that has a tracker ID, like an IMEI 
+	// or phone #, instead of a vehicle ID. Allows the corresponding vehicleId 
+	// to be determined from the VehicleConfig object.
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
+	private final String trackerId;
+	
+	// Typical capacity of vehicle 
 	@Column
 	private final Integer capacity;
 	
+	// Absolute crush capacity of vehicle. Number of people who can be 
+	// squeezed in.
 	@Column 
 	private final Integer crushCapacity;
 	
+	// If true then a non-revenue vehicle.
 	@Column
-	private final Boolean passengerVehicle;
+	private final Boolean nonPassengerVehicle;
 	
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructor for when new vehicle encountered
+	 * Constructor for when new vehicle encountered and automatically adding it
+	 * to the db.
 	 * 
-	 * @param id
+	 * @param id vehicle ID
 	 */
 	public VehicleConfig(String id) {
 		this.id = id;
 		type = null;
 		description = null;
+		trackerId = null;
 		capacity = null;
 		crushCapacity = null;
-		passengerVehicle = null;
+		nonPassengerVehicle = null;
 	}
 
 	/**
@@ -83,9 +97,10 @@ public class VehicleConfig {
 		id = null;
 		type = null;
 		description = null;
+		trackerId = null;
 		capacity = null;
 		crushCapacity = null;
-		passengerVehicle = null;
+		nonPassengerVehicle = null;
 	}
 
 	/**
@@ -108,10 +123,11 @@ public class VehicleConfig {
 		return "VehicleConfig [" 
 				+ "id=" + id 
 				+ ", type=" + type 
-				+ ", description=" + description 
+				+ ", description=" + description
+				+ ", trackerId=" + trackerId
 				+ ", capacity=" + capacity
 				+ ", crushCapacity=" + crushCapacity
-				+ ", passengerVehicle=" + passengerVehicle 
+				+ ", nonPassengerVehicle=" + nonPassengerVehicle 
 				+ "]";
 	}
 
@@ -147,6 +163,14 @@ public class VehicleConfig {
 	}
 
 	/**
+	 * @return The tracker ID used for when getting a direct GPS report that
+	 *         doesn't include vehicleID.
+	 */
+	public String getTrackerId() {
+		return trackerId;
+	}
+	
+	/**
 	 * @return Passenger capacity of vehicle. Typically number of seats.
 	 */
 	public Integer getCapacity() {
@@ -165,8 +189,8 @@ public class VehicleConfig {
 	 * @return True if a revenue passenger vehicle as opposed to some type of
 	 *         service vehicle.
 	 */
-	public Boolean getPassengerVehicle() {
-		return passengerVehicle;
+	public Boolean isNonPassengerVehicle() {
+		return nonPassengerVehicle;
 	}
 	
 }

@@ -143,7 +143,18 @@ function drawChart() {
 	       	        // Nice to show a faint line for every 30 seconds as well
 	            	minorGridlines: {count: 1}
 	       	    },
-	         vAxis: {title: '% of Predictions Within Range'
+	         vAxis: {
+	        	 title: '% of Predictions Within Range',
+	        	 maxValue: 100,
+	        	 // Specify ticks so that when column adds up to just over 100% the horizontal
+	        	 // part of chart not increased to 120% to accomodate it.
+	        	 ticks: [
+	        	          {v:0, f:'0'},
+	        	          {v:20, f:'20'},
+	        	          {v:40, f:'40'},
+	        	          {v:60, f:'60'},
+	        	          {v:80, f:'80'},
+	        	          {v:100, f:'100'}]
 	             },
 
 	};

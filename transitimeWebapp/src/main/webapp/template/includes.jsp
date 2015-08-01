@@ -17,6 +17,6 @@
 // This needs to match the API key in the database
 var apiKey = "8a3273b0";
 // For accessing the api for an agency command
-var apiUrlPrefix = "/api/v1/key/" + apiKey + "/agency/<%= request.getParameter("a") %>";
-
+var apiUrlPrefixAllAgencies = "/api/v1/key/" + apiKey;
+var apiUrlPrefix = apiUrlPrefixAllAgencies + "/agency/<%= request.getParameter("a") %>";
 </script>

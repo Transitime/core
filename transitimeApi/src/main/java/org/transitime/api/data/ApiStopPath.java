@@ -62,7 +62,7 @@ public class ApiStopPath {
 	@XmlAttribute
 	private String breakTime;
 
-	@XmlElement(name = "location")
+	@XmlElement
 	private List<ApiLocation> locations;
 
 	@XmlAttribute

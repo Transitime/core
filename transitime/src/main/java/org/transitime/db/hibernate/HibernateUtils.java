@@ -151,19 +151,19 @@ public class HibernateUtils {
 	 * Returns a cached Hibernate SessionFactory. Returns null if there is a
 	 * problem.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Used as the database name if the property
 	 *            transitime.core.dbName is not set
 	 * @return
 	 */
-	public static SessionFactory getSessionFactory(String projectId) 
+	public static SessionFactory getSessionFactory(String agencyId) 
 			throws HibernateException{
 		// Determine the database name to use. Will usually use the
 		// projectId since each project has a database. But this might
 		// be overridden by the transitime.core.dbName property.
 		String dbName = DbSetupConfig.getDbName();
 		if (dbName == null)
-			dbName = projectId;
+			dbName = agencyId;
 		
 		SessionFactory factory;
 		
@@ -185,6 +185,22 @@ public class HibernateUtils {
 		return factory;
 	}
 
+	/**
+	 * Clears out the session factory so that a new one will be created for the
+	 * dbName. This way new db connections are made. This is useful for dealing
+	 * with timezones and postgres. For that situation want to be able to read
+	 * in timezone from db so can set default timezone. Problem with postgres is
+	 * that once a factory is used to generate sessions the database will
+	 * continue to use the default timezone that was configured at that time.
+	 * This means that future calls to the db will use the wrong timezone!
+	 * Through this function one can read in timezone from database, set the
+	 * default timezone, clear the factory so that future db connections will
+	 * use the newly configured timezone, and then successfully process dates.
+	 */
+	public static void clearSessionFactory() {
+		sessionFactoryCache.clear();
+	}
+	
 	/**
 	 * Returns session for the specified agencyId.
 	 * 

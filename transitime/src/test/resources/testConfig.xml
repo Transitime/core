@@ -16,10 +16,10 @@
         <maxLatitude>55.45</maxLatitude>        
     </avl>   
     <db>
-        <dbName>transiTime</dbName>
-        <dbHost>localhost:5432</dbHost>
+        <dbName>transitime</dbName>
+        <dbHost>192.168.1.20:5432</dbHost>
         <dbType>postgresql</dbType>
-        <dbUserName>transiTime</dbUserName>
+        <dbUserName>transitime</dbUserName>
         <dbPassword>welcome</dbPassword>
     </db>     
     <hibernate>

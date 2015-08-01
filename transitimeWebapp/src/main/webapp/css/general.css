@@ -39,13 +39,18 @@ body {
 	text-align: center;
 }
 
+#subtitle {
+	text-align: center;
+}
+
 /* For list of choices to be centered in page, e.g. list of reports
  */
 .choicesList {
 	width: 350px;
 	margin-left: auto;
 	margin-right: auto;
-	line-height: 140%;
+	line-height: 125%;
+	margin-top: 5px;
 }
 
 /* Make links look better. No underlining, keep colors consistent. */

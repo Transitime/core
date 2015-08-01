@@ -33,7 +33,7 @@ public class ApiRouteSummary {
 	@XmlAttribute
 	private String id;
 
-	@XmlAttribute(name = "rShortName")
+	@XmlAttribute
 	private String shortName;
 
 	@XmlAttribute

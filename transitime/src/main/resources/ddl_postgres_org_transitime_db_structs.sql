@@ -346,7 +346,8 @@
         capacity int4,
         crushCapacity int4,
         description varchar(255),
-        passengerVehicle boolean,
+        nonPassengerVehicle boolean,
+        trackerId varchar(60),
         type int4,
         primary key (id)
     );

@@ -22,7 +22,7 @@ import java.io.Serializable;
 import org.transitime.db.structs.VehicleConfig;
 
 /**
- *
+ * For transmitting via Interprocess Communication vehicle configuration info. 
  *
  * @author SkiBu Smith
  *
@@ -34,7 +34,7 @@ public class IpcVehicleConfig implements Serializable {
 	private final String description;
 	private final Integer capacity;
 	private final Integer crushCapacity;
-	private final Boolean passengerVehicle;
+	private final Boolean nonPassengerVehicle;
 
 	private static final long serialVersionUID = 4172266751162647909L;
 	
@@ -46,7 +46,7 @@ public class IpcVehicleConfig implements Serializable {
 		this.description = vc.getDescription();
 		this.capacity = vc.getCapacity();
 		this.crushCapacity = vc.getCrushCapacity();
-		this.passengerVehicle = vc.getPassengerVehicle();
+		this.nonPassengerVehicle = vc.isNonPassengerVehicle();
 	}
 
 	public String getId() {
@@ -69,8 +69,8 @@ public class IpcVehicleConfig implements Serializable {
 		return crushCapacity;
 	}
 
-	public Boolean getPassengerVehicle() {
-		return passengerVehicle;
+	public Boolean isNonPassengerVehicle() {
+		return nonPassengerVehicle;
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class IpcVehicleConfig implements Serializable {
 				+ ", description=" + description 
 				+ ", capacity=" + capacity
 				+ ", crushCapacity=" + crushCapacity 
-				+ ", passengerVehicle="	+ passengerVehicle 
+				+ ", nonPassengerVehicle="	+ nonPassengerVehicle 
 				+ "]";
 	}
 }

@@ -38,12 +38,12 @@ import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 /**
- * For setting travel times to default values as needed when GTFS data read
- * in. The idea is that when GTFS data read in sometimes there will be
- * new routes or stopPaths. For these want some kind of travel times so that
- * the prediction software will work. But don't have any AVL data yet
- * for these stopPaths since they are new. Therefore need to either use 
- * data from another service Id or nearby time.
+ * For setting travel times to default values as needed when GTFS data
+ * processed. The idea is that when GTFS data read in sometimes there will be
+ * new routes or stopPaths. For these want some kind of travel times so that the
+ * prediction software will work. But don't have any AVL data yet for these
+ * stopPaths since they are new. Therefore need to either use data from another
+ * service Id or nearby time.
  * 
  * @author SkiBu Smith
  * 
@@ -359,48 +359,63 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * match for the trip pattern such that existing travel times can be reused.
 	 * They are an adequate match if the path IDs are the same and the travel
 	 * times were generated via GPS or the schedule times match the new ones
-	 * within 60 seconds. Also, number of stopPaths and number of segments per path
-	 * for the travel times need to match that for the trip patterns.
+	 * within 60 seconds. Also, number of stopPaths and number of segments per
+	 * path for the travel times need to match that for the trip patterns.
 	 * 
 	 * @param trip
-	 * @param newTravelTimes
-	 * @param alreadyExistingTravelTimes
-	 * @param gtfsData
-	 * @return
+	 *            The trip current processing travel times for
+	 * @param scheduleBasedTravelTimes
+	 *            Travel times for trip obtained by just looking at the schedule
+	 * @param ttForTripFromDb
+	 *            Travel times obtained for trip from the database
+	 * @return True if the alreadyExistingTravelTimes passed in can be used for
+	 *         the trip
 	 */
-	private boolean adequateMatch(Trip trip, TravelTimesForTrip newTravelTimes, 
-			TravelTimesForTrip alreadyExistingTravelTimes, GtfsData gtfsData) {
+	private boolean adequateMatch(Trip trip,
+			TravelTimesForTrip scheduleBasedTravelTimes,
+			TravelTimesForTrip ttForTripFromDb) {
 		// Convenience variable
 		TripPattern tripPattern = trip.getTripPattern();
 		
 		// See if stopPaths match. If they don't then return false.
 		// First check if trip patterns have same number of stops.
 		if (tripPattern.getStopPaths().size() != 
-				alreadyExistingTravelTimes.numberOfStopPaths()) {
+				ttForTripFromDb.numberOfStopPaths()) {
 			logger.warn("In ScheduleBasedTravelTimesProcessor.adequateMatch(), "
-					+ "for tripId={} using tripPatternId={} has different "
-					+ "number of stops than for another tripId={} even though "
-					+ "it is associated with the same trip pattern. Therefore "
-					+ "the old travel times cannot be reused for this trip.", 
+					+ "for tripId={} tripPatternId={} has {} stops while "
+					+ "already existing travel times created for tripId={} are "
+					+ "for {} stops even though it is associated with the same "
+					+ "trip pattern. Therefore the old travel times cannot be "
+					+ "reused for this trip. "
+					+ "NOTE tripPattern={} "
+					+ "NOTE ttForTripFromDb={}", 
 					trip.getId(), 
 					tripPattern.getId(), 
-					alreadyExistingTravelTimes.getTripCreatedForId()); 
+					tripPattern.getStopPaths().size(),
+					ttForTripFromDb.getTripCreatedForId(), 
+					ttForTripFromDb.numberOfStopPaths(),
+					tripPattern,
+					ttForTripFromDb); 
 			return false;
 		}
+		// Make sure the path IDs match
 		for (int i=0; i<tripPattern.getStopPaths().size(); ++i) {
-			// Make sure the path IDs match
 			String pathIdFromTripPattern = 
 					tripPattern.getStopPathId(i);
-			String pathIdFromTravelTimes = 
-					alreadyExistingTravelTimes.getTravelTimesForStopPaths().get(i).getStopPathId();
+			String pathIdFromTravelTimes =
+					ttForTripFromDb.getTravelTimesForStopPaths()
+							.get(i).getStopPathId();
 			if (!pathIdFromTripPattern.equals(pathIdFromTravelTimes)) {
-				logger.error("In ScheduleBasedTravelTimesProcessor.adequateMatch(), for tripId={} " + 
-						"using tripPatternId={} has different stopPaths than " +
-						"for another tripId={} even though it is associated with the " + 
-						"same trip pattern.",
+				logger.error("In ScheduleBasedTravelTimesProcessor."
+						+ "adequateMatch(), for tripId={} using "
+						+ "tripPatternId={} has different stopPaths than "
+						+ "for another tripId={} even though it is associated "
+						+ "with the same trip pattern. pathIdFromTripPattern={} "
+						+ "but pathIdFromTravelTimes={}",
 						trip.getId(), 
 						tripPattern.getId(), 
-						alreadyExistingTravelTimes.getTripCreatedForId()); 
+						ttForTripFromDb.getTripCreatedForId(),
+						pathIdFromTripPattern, pathIdFromTravelTimes); 
 				return false;
 			}
 		}
@@ -411,7 +426,7 @@ public class ScheduleBasedTravelTimesProcessor {
 		// TODO It would be better to try to match trip ID so using the right 
 		// travel times. But that would be complicated so need to put it off
 		// until later.
-		if (!alreadyExistingTravelTimes.purelyScheduleBased())
+		if (!ttForTripFromDb.purelyScheduleBased())
 			return true;
 		
 		// Travel times are based on schedule. See if schedule time is close to
@@ -420,11 +435,11 @@ public class ScheduleBasedTravelTimesProcessor {
 		// schedule times. Then can compare with travel times in database.
 		int newTravelTimeMsec = 0;
 		int dbTravelTimeMsec = 0;
-		for (int i=0; i<newTravelTimes.numberOfStopPaths(); ++i) {
+		for (int i=0; i<scheduleBasedTravelTimes.numberOfStopPaths(); ++i) {
 			TravelTimesForStopPath newElement = 
-					newTravelTimes.getTravelTimesForStopPath(i);
+					scheduleBasedTravelTimes.getTravelTimesForStopPath(i);
 			TravelTimesForStopPath oldElement = 
-					alreadyExistingTravelTimes.getTravelTimesForStopPath(i);
+					ttForTripFromDb.getTravelTimesForStopPath(i);
 			newTravelTimeMsec += newElement.getStopPathTravelTimeMsec(); 
 			dbTravelTimeMsec += oldElement.getStopPathTravelTimeMsec();
 			// If travel time to this stop differ by more than a minute
@@ -435,7 +450,7 @@ public class ScheduleBasedTravelTimesProcessor {
 						"travel times differed by more than 60 seconds for stop " +
 						"path index {}, which is for pathId={} for the old tripId={}", 
 						trip.getId(), tripPattern.getId(), i, newElement.getStopPathId(),
-						alreadyExistingTravelTimes.getTripCreatedForId());
+						ttForTripFromDb.getTripCreatedForId());
 				return false;
 			}
 		}
@@ -480,7 +495,7 @@ public class ScheduleBasedTravelTimesProcessor {
 				for (TravelTimesForTrip ttForTripFromDb : ttForTripFromDbList) {
 					// If suitable travel times already in db then use them
 					if (adequateMatch(trip, scheduleBasedTravelTimes, 
-							ttForTripFromDb, gtfsData)) {
+							ttForTripFromDb)) {
 						travelTimesToUse = ttForTripFromDb;
 						adequateMatchFoundInDb = true;
 						logger.debug("Found adequate travel time match for " + 
@@ -517,9 +532,13 @@ public class ScheduleBasedTravelTimesProcessor {
 	}
 	
 	/**
-	 * For determining how many travel times generated.
+	 * For determining how many travel times have been processed into the
+	 * travelTimesFromDbMap. There is a travel time for each stop path for each
+	 * trip.
+	 * 
 	 * @param travelTimesFromDbMap
-	 * @return
+	 * @return Total number of travel times (one per stop path) already
+	 *         processed)
 	 */
 	private static int numberOfTravelTimes(
 			Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
@@ -562,7 +581,8 @@ public class ScheduleBasedTravelTimesProcessor {
 				TravelTimesForTrip.getTravelTimesForTrips(session, 
 						originalTravelTimesRev);
 
-		int originalNumberTravelTimes = numberOfTravelTimes(travelTimesFromDbMap);
+		int originalNumberTravelTimes =
+				numberOfTravelTimes(travelTimesFromDbMap);
 		
 		// Do the low-level processing
 		processTrips(gtfsData, travelTimesFromDbMap);

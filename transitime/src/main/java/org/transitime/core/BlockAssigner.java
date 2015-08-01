@@ -16,8 +16,7 @@
  */
 package org.transitime.core;
 
-import java.util.List;
-
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -59,12 +58,16 @@ public class BlockAssigner {
 	/**
 	 * Gets the appropriate block associated with the AvlReport by getting the
 	 * proper serviceId using the AVL timestamp and then determining the
-	 * appropriate block using the serviceId and the blockId from the AVL
-	 * report. If the blockId not specified in AVL data or the block could not
-	 * be found for the serviceId then null will be returned
+	 * appropriate block using the serviceId and the assignment from the AVL
+	 * report. Works for block assignments, trip assignments, and trip short
+	 * name assignments. If the assignment not specified in AVL data or the
+	 * block could not be found for the serviceId, it could not matched to the
+	 * trip, or it was a route assignment then null will be returned
 	 * 
 	 * @param avlReport
-	 * @return Block corresponding to the time and blockId from AVL report.
+	 *            So can determine the assignment specified
+	 * @return Block corresponding to the time and blockId from AVL report, or
+	 *         null if could not determine block.
 	 */
 	public Block getBlockAssignment(AvlReport avlReport) {
 		// If vehicle has assignment...
@@ -74,7 +77,7 @@ public class BlockAssigner {
 			// If using block assignment...
 			if (avlReport.isBlockIdAssignmentType()) {
 				ServiceUtils service = Core.getInstance().getServiceUtils();
-				List<String> serviceIds = 
+				Collection<String> serviceIds = 
 						service.getServiceIds(avlReport.getDate());
 				boolean blockFoundForServiceId = false;
 				for (String serviceId : serviceIds) {
@@ -102,7 +105,7 @@ public class BlockAssigner {
 				Trip trip = config.getTrip(avlReport.getAssignmentId());
 				if (trip != null) {
 					Block block = trip.getBlock();
-					logger.info("For vehicleId={} the trip assignment from "
+					logger.debug("For vehicleId={} the trip assignment from "
 							+ "the AVL feed is tripId={} which corresponds to "
 							+ "blockId={}", 
 							avlReport.getVehicleId(), 
@@ -120,7 +123,7 @@ public class BlockAssigner {
 				Trip trip = config.getTripUsingTripShortName(tripShortName);
 				if (trip != null) {
 					Block block = trip.getBlock();
-					logger.info("For vehicleId={} the trip assignment from "
+					logger.debug("For vehicleId={} the trip assignment from "
 							+ "the AVL feed is tripShortName={} which "
 							+ "corresponds to blockId={}", 
 							avlReport.getVehicleId(), tripShortName, 
