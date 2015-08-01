@@ -130,7 +130,7 @@ public class Time {
 	/******************* Methods ******************/
 	
 	public Time(DbConfig dbConfig) {
-		this.calendar = new GregorianCalendar(dbConfig.getFirstAgency().getTimeZone());
+		this.calendar = new GregorianCalendar();
 	}
 	
 	/**
