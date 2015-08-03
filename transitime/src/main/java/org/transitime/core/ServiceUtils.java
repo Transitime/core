@@ -67,9 +67,11 @@ public class ServiceUtils {
 	 * 
 	 * @param timezoneName See http://en.wikipedia.org/wiki/List_of_tz_zones
 	 */
-	public ServiceUtils(DbConfig dbConfig) { 
+	public ServiceUtils(DbConfig dbConfig) {
+		
 		this.calendar = 
-				new GregorianCalendar(dbConfig.getFirstAgency().getTimeZone());
+				new GregorianCalendar();
+				
 		this.dbConfig = dbConfig;
 	}
 
