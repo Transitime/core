@@ -128,6 +128,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	 * @param vehicleType
 	 * @param tripStartDateStr
 	 * @param atStopId
+	 * @param gtfsStopSeq
 	 * @param routeName
 	 * @param originStopId
 	 * @param destinationId
@@ -143,14 +144,14 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			TemporalDifference realTimeSchdAdh, boolean isDelayed,
 			boolean isLayover, long layoverDepartureTime, String nextStopId,
 			String nextStopName, String vehicleType, long tripStartEpochTime,
-			String atStopId, String routeName, String originStopId,
+			String atStopId, Integer gtfsStopSeq, String routeName, String originStopId,
 			String destinationId, double distanceToNextStop,
 			double distanceOfNextStopFromTripStart, double distanceAlongTrip) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
-				vehicleType, tripStartEpochTime, atStopId);
+				vehicleType, tripStartEpochTime, atStopId, gtfsStopSeq);
 
 		this.routeName = routeName;
 		this.originStopId = originStopId;
@@ -250,8 +251,8 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					directionId, headsign, predictable, schedBasedPred,
 					realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, nextStopName,
-					vehicleType, tripStartEpochTime, atStopId, routeName,
-					originStopId, destinationId, distanceToNextStop,
+					vehicleType, tripStartEpochTime, atStopId, gtfsStopSeq,
+					routeName, originStopId, destinationId, distanceToNextStop,
 					distanceOfNextStopFromTripStart, distanceAlongTrip);
 		}
 
@@ -322,6 +323,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", heading=" + getHeading() 
 				+ ", vehicleType=" + getVehicleType()
 				+ ", atStopId=" + getAtStopId()
+				+ ", gtfsStopSeq=" + getGtfsStopSeq()
 				+ ", tripStartEpochTime=" + getTripStartEpochTime()
 				+ ", tripStartEpochTime=" + new Date(getTripStartEpochTime())
 				+ ", routeName=" + routeName 
