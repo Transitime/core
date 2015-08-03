@@ -122,22 +122,21 @@ public class GtfsRtVehicleFeed {
 		vehiclePosition.setTimestamp(gpsTime / Time.MS_PER_SEC);
 
 		// Set the stop_id if at a stop or going to a stop
-		String stopId =
-				vehicleData.getAtStopId() != null ? vehicleData.getAtStopId()
-						: vehicleData.getNextStopId();
+		String stopId = vehicleData.getAtOrNextStopId();
 		if (stopId != null)
 			vehiclePosition.setStopId(stopId);
 
 		// Set current_status part of vehiclePosition if vehicle is actually
-		// predictable.
+		// predictable. If not predictable then the vehicle stop status will
+		// not be included in feed since it is not stopped nor in transit to.
 		if (vehicleData.isPredictable()) {
 			VehicleStopStatus currentStatus =
-					vehicleData.getAtStopId() != null ? VehicleStopStatus.STOPPED_AT
+					vehicleData.isAtStop() ? VehicleStopStatus.STOPPED_AT
 							: VehicleStopStatus.IN_TRANSIT_TO;
 			vehiclePosition.setCurrentStatus(currentStatus);
 			
-			if (vehicleData.getGtfsStopSeq() != null)
-				vehiclePosition.setCurrentStopSequence(vehicleData.getGtfsStopSeq());
+			if (vehicleData.getAtOrNextGtfsStopSeq() != null)
+				vehiclePosition.setCurrentStopSequence(vehicleData.getAtOrNextGtfsStopSeq());
 		}
 
 		// Return the results
