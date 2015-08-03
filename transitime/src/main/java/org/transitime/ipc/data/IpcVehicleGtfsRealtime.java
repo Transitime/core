@@ -41,8 +41,12 @@ import org.transitime.utils.Time;
  */
 public class IpcVehicleGtfsRealtime extends IpcVehicle {
 
-	// Null if not at stop
+	// Set if vehicle at stop. Otherwise null
 	private final String atStopId; 
+	
+	// Set if vehicle at stop. Otherwise null
+	private final Integer gtfsStopSeq;
+	
 	// For GTFS-rt to disambiguate trips
 	private final long tripStartEpochTime; 
 
@@ -60,7 +64,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 
 		// Get the match. If match is just after a stop then adjust
 		// it to just before the stop so that can determine proper 
-		// stop ID and such.
+		// stop ID and gtfs stop sequence.
 		TemporalMatch temporalMatch = vs.getMatch();
 		if (temporalMatch != null) {
 			SpatialMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();
@@ -68,6 +72,9 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			VehicleAtStopInfo stopInfo = match.getAtStop();
 			this.atStopId = stopInfo != null ? stopInfo.getStopId() : null;
 	
+			this.gtfsStopSeq = stopInfo != null ? 
+					stopInfo.getStopPath().getGtfsStopSeq() : null;
+			
 			// Note: the trip start date is created on server side so that
 			// proper timezone is used. This unfortunately is a bit expensive.
 			int time = vs.getTrip().getStartTime();
@@ -77,6 +84,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 							.getEpochTime(time, currentTime);
 		} else {
 			this.atStopId = null;
+			this.gtfsStopSeq = null;
 			this.tripStartEpochTime = 0;
 		}
 	}
@@ -105,6 +113,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	 * @param nextStopName
 	 * @param vehicleType
 	 * @param atStopId
+	 * @param gtfsStopSeq
 	 */
 	protected IpcVehicleGtfsRealtime(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
@@ -114,7 +123,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			TemporalDifference realTimeSchdAdh, boolean isDelayed,
 			boolean isLayover, long layoverDepartureTime, String nextStopId,
 			String nextStopName, String vehicleType, long tripStartEpochTime,
-			String atStopId) {
+			String atStopId, Integer gtfsStopSeq) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isLayover,
@@ -122,6 +131,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 				vehicleType);
 		this.tripStartEpochTime = tripStartEpochTime;
 		this.atStopId = atStopId;
+		this.gtfsStopSeq = gtfsStopSeq;
 	}
 	
 	/*
@@ -131,8 +141,9 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	protected static class GtfsRealtimeVehicleSerializationProxy 
 			extends SerializationProxy {
 		protected String atStopId; 
+		protected Integer gtfsStopSeq;
 		protected long tripStartEpochTime; 
-
+		
 		private static final short currentSerializationVersion = 0;
 		private static final long serialVersionUID = 5804716921925188073L;
 
@@ -140,6 +151,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			super(v);
 			this.atStopId = v.atStopId;
 			this.tripStartEpochTime = v.tripStartEpochTime;
+			this.gtfsStopSeq = v.gtfsStopSeq;
 		}
 		
 		/*
@@ -157,6 +169,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			stream.writeShort(currentSerializationVersion);
 			
 			stream.writeObject(atStopId);
+			stream.writeObject(gtfsStopSeq);
 		    stream.writeLong(tripStartEpochTime);
 		}
 
@@ -181,6 +194,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 
 			// Read in data for this class
 			atStopId = (String) stream.readObject();
+			gtfsStopSeq = (Integer) stream.readObject();
 			tripStartEpochTime = stream.readLong();
 		}
 		
@@ -196,7 +210,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 					tripPatternId, directionId, headsign, predictable,
 					schedBasedPred, realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, nextStopName, vehicleType,
-					tripStartEpochTime, atStopId);
+					tripStartEpochTime, atStopId, gtfsStopSeq);
 		}
 
 	} // End of class GtfsRealtimeVehicleSerializationProxy
@@ -209,12 +223,22 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	 * If vehicle currently at stop then returns the stop ID. Otherwise returns
 	 * null.
 	 * 
-	 * @return
+	 * @return Stop ID of stop that vehicle is current at
 	 */
 	public String getAtStopId() {
 		return atStopId;
 	}
 
+	/**
+	 * If vehicle currently at stop then returns the GTFS stop sequence of the
+	 * stop. Otherwise returns null.
+	 * 
+	 * @return GTFS stop sequence of stop that vehicle is current at
+	 */
+	public Integer getGtfsStopSeq() {
+		return gtfsStopSeq;
+	}
+	
 	@Override
 	public String toString() {
 		return "IpcGtfsRealtimeVehicle [" 
@@ -239,6 +263,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 				+ ", heading=" + getHeading() 
 				+ ", vehicleType=" + getVehicleType()
 				+ ", atStopId=" + atStopId
+				+ ", gtfsStopSeq=" + gtfsStopSeq
 				+ ", tripStartEpochTime=" + tripStartEpochTime 
 				+ ", tripStartEpochTime=" + new Date(tripStartEpochTime) 
 				+ "]";

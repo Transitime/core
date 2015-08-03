@@ -135,6 +135,9 @@ public class GtfsRtVehicleFeed {
 					vehicleData.getAtStopId() != null ? VehicleStopStatus.STOPPED_AT
 							: VehicleStopStatus.IN_TRANSIT_TO;
 			vehiclePosition.setCurrentStatus(currentStatus);
+			
+			if (vehicleData.getGtfsStopSeq() != null)
+				vehiclePosition.setCurrentStopSequence(vehicleData.getGtfsStopSeq());
 		}
 
 		// Return the results
