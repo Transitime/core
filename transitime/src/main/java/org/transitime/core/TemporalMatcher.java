@@ -261,6 +261,79 @@ public class TemporalMatcher {
 					CoreConfig.getAllowableEarlyTimeForEarlyDepartureSecs() * Time.MS_PER_SEC;
 		return earlyDeparture;
 	}
+
+	/**
+	 * There is a complication with vehicles leaving a layover slightly early
+	 * where might not temporally match to a match past the layover due to
+	 * system thinking that vehicle first needs to go back to the layover and
+	 * then to the spatial match. This leads to an overly long expected travel
+	 * time and the result would be that the system thinks the vehicle is at the
+	 * match earlier than expected. At the same time it will think that it is
+	 * late with respect to the layover, but since late is considered a better
+	 * match than early vehicle could be wrongly temporally matched to layover
+	 * again. As the vehicle moves further along the trip this only gets worse
+	 * since system will expect a longer and longer travel time for vehicle to
+	 * go back to layover and then to the spatial match. So could get incorrect
+	 * layover match for quiet a while, until the layover distance
+	 * transitime.core.layoverDistance, which can be large, is exceeded.
+	 * 
+	 * Therefore need to filter out such problematic layover matches. This is
+	 * done by seeing if past schedule time for the layover match (before the
+	 * schedule time vehicles should be able to roam around), the previous match
+	 * for vehicle is same layover as the current spatial match, the distance
+	 * from the layover stop is increasing, and there is a subsequent
+	 * non-layover spatial match that could be used. If all these conditions are
+	 * true then the current layover spatial match is ignored so that will
+	 * properly match vehicle to subsequent non-layover spatial match.
+	 * 
+	 * @param vehicleState
+	 *            So can get previous spatial match
+	 * @param spatialMatches
+	 *            So can get current spatial match being investigated and
+	 *            determine if subsequent ones are non-layover matches
+	 * @param matchIdx
+	 *            So can get current spatial match being investigated
+	 * @return true if it is a problematic layover match that should not be used
+	 */
+	private boolean isProblematicLayover(VehicleState vehicleState,
+			List<SpatialMatch> spatialMatches, int matchIdx) {
+		SpatialMatch previousMatch = vehicleState.getMatch();
+		SpatialMatch spatialMatch = spatialMatches.get(matchIdx);
+		
+		// If not even a layover then false
+		if (!previousMatch.isLayover())
+			return false;
+		
+		// If current spatial match is not the same layover then false
+		if (!previousMatch.getIndices().equalStopPath(
+							spatialMatch.getIndices()))
+			return false;
+		
+		// If not after the scheduled time then false		
+		long avlTime = spatialMatch.getAvlTime();
+		long waitStopSchedTime = spatialMatch.getScheduledWaitStopTime();
+		if (avlTime < waitStopSchedTime)
+			return false;
+		
+		// If distance from layover not increasing then false
+		if (spatialMatch.getDistanceToSegment() <= 
+			previousMatch.getDistanceToSegment())
+			return false;
+		
+		// If no subsequent non-layover stops then false
+		boolean foundSubsequentNonLayoverMatch = false;
+		for (int i=matchIdx+1; i<spatialMatches.size(); ++i) {
+			if (!spatialMatches.get(i).isLayover()) {
+				foundSubsequentNonLayoverMatch = true;
+				break;
+			}
+		}
+		if (!foundSubsequentNonLayoverMatch)
+			return false;
+		
+		// Met all the conditions as a problem layover so return true
+		return true;
+	}
 	
 	/**
 	 * For the spatial matches passed in determines the one that temporally
@@ -287,8 +360,21 @@ public class TemporalMatcher {
 
 		// Find best temporal match of the spatial matches
 		TemporalMatch bestTemporalMatchSoFar = null;
-		for (SpatialMatch spatialMatch : spatialMatches) {
+		for (int matchIdx = 0; matchIdx < spatialMatches.size(); ++matchIdx) {
+			SpatialMatch spatialMatch = spatialMatches.get(matchIdx);
 			logger.debug("Examining spatial match {}", spatialMatch);
+			
+			// There is a complication with vehicles leaving a layover slightly 
+			// early where might not temporally match to a match past the 
+			// layover due to system thinking that vehicle first needs to go
+			// back to the layover and then to the spatial match. 
+			if (isProblematicLayover(vehicleState, spatialMatches, matchIdx)) {
+				// Ignore this problematic layover match
+				logger.warn("Ignoring special case layover spatial match "
+						+ "because otherwise system would not properly match "
+						+ "past the layover for a long time. {}", spatialMatch);
+				continue;
+			}
 			
 			// Determine how long would expect it to take to get from previous
 			// match to the new match.
@@ -359,8 +445,7 @@ public class TemporalMatcher {
 			}
 					
 			// If this temporal match is better than the previous best one
-			// then remember it. The logic in determining this is complicated
-			// so first determining boolean thisMatchIsBest using if statements.
+			// then remember it. 
 			if (currentMatchIsBetter(bestTemporalMatchSoFar, spatialMatch,
 					differenceFromExpectedTime)) {
 				bestTemporalMatchSoFar = new TemporalMatch(spatialMatch,

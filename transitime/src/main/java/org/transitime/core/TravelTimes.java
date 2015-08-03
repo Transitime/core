@@ -161,43 +161,51 @@ public class TravelTimes {
 	}
 	
 	/**
-	 * Takes the currentTime passed in and determines if vehicle will be
-	 * departing at the waitStop time instead of currentTime. If so, then the
-	 * layover time is returned. Does not take break time or expected stop time
-	 * into account.
+	 * Returns the scheduled epoch time vehicle is scheduled leave a wait stop.
+	 * Does not take into account whether vehicle can make it to the wait stop
+	 * in time.
 	 * 
-	 * @param timeWithoutWaitStop
-	 *            The time vehicle is expected to depart if there was no
-	 *            waitStop
 	 * @param indices
 	 *            Describes which stop
-	 * @return
+	 * @param referenceTime
+	 *            For converting seconds into day schedule time to an epoch
+	 *            time. Just needs to be somewhat close to the time.
+	 * @return The scheduled epoch time in msecs, or -1 if stop doesn't have a
+	 *         schedule time.
 	 */
-	public static long adjustTimeAccordingToSchedule(
-			final long timeWithoutWaitStop, Indices indices) {
+	public static long scheduledDepartureTime(Indices indices,
+			long referenceTime) {
+		// Make sure method called appropriately
+		if (!indices.isWaitStop()) {
+			logger.error("Called scheduledDepartureTimePlusWaitTime() for stop "
+					+ "that is not a wait stop. {}", indices);
+			return -1;
+		}
+		
+		// Get the scheduled departure time for the wait stop
 		ScheduleTime scheduleTime = indices.getScheduleTime();
-		if (scheduleTime != null) {
-			Integer scheduledDepartureTimeSecs = 
-					scheduleTime.getDepartureTime();
-			if (scheduledDepartureTimeSecs != null) {
-				// If affected by waitStop...
-				Time time = Core.getInstance().getTime();
-				int departureTimeWithoutLayoverSecs = 
-						time.getSecondsIntoDay(timeWithoutWaitStop);
-				if (departureTimeWithoutLayoverSecs < scheduledDepartureTimeSecs) {
-					// Take waitStop time into account
-					long scheduleEpochTime = 
-							time.getEpochTime(scheduledDepartureTimeSecs, 
-									new Date(timeWithoutWaitStop));
-					return scheduleEpochTime;
-				}
-			}
+		if (scheduleTime == null) {
+			logger.error("Called scheduledDepartureTimePlusWaitTime() for stop "
+							+ "that doesn't have a schedule time. {}", indices);
+			return -1;
+		}		
+		Integer scheduledDepartureTimeSecs = 
+				scheduleTime.getDepartureTime();
+		if (scheduledDepartureTimeSecs == null) {
+			logger.error("Called scheduledDepartureTimePlusWaitTime() for stop "
+					+ "that doesn't have a scheduled departure time. {}", 
+					indices);
+			return -1;
 		}
 
-		// Not affected by waitStop so return the original time
-		return timeWithoutWaitStop;
+		// Get and return the scheduled departure time as an epoch time
+		Time timeUtil = Core.getInstance().getTime();
+		long scheduleEpochTime = 
+				timeUtil.getEpochTime(scheduledDepartureTimeSecs, 
+						new Date(referenceTime));
+		return scheduleEpochTime;
 	}
-
+	
 	/**
 	 * This class is so that travelTimeIndexForPartialPath() can return more
 	 * than a single piece of information.
