@@ -73,7 +73,7 @@ public class IpcStop implements Serializable {
 				+ ", name=" + name 
 				+ ", code=" + code
 				+ ", loc=" + loc
-				+ ", isUiStop" + isUiStop
+				+ ", isUiStop=" + isUiStop
 				+ ", directionId" + directionId
 				+ "]";
 	}
