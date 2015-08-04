@@ -34,8 +34,14 @@ if (timespan > 31*Time.MS_PER_DAY) {
 
 // Determine the time portion of the SQL
 String timeSql = "";
-if (beginTime != null && !beginTime.isEmpty() 
-		&& endTime != null && !endTime.isEmpty()) {
+if ((beginTime != null && !beginTime.isEmpty())
+		|| (endTime != null && !endTime.isEmpty())) {
+	// If only begin or only end time set then use default value
+	if (beginTime == null || beginTime.isEmpty())
+		beginTime = "00:00:00";
+	if (endTime == null || endTime.isEmpty())
+		endTime = "23:59:59";
+	
     timeSql = " AND arrivalDepartureTime::time BETWEEN '" 
 		+ beginTime + "' AND '" + endTime + "' ";
 }
