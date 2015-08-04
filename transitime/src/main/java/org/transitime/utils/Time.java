@@ -455,12 +455,12 @@ public class Time {
 	}
 	
 	/**
-	 * Parses a time such as HH:MM:SS into seconds into the day.
-	 * Instead of using SimpleDateFormat or such this function 
-	 * does the conversion directly and simply in order to be quicker.
-	 * This is useful for reading in large volumes of GTFS data and
-	 * such. 
-	 * @return
+	 * Parses a time such as HH:MM:SS or HH:MM into seconds into the day.
+	 * Instead of using SimpleDateFormat or such this function does the
+	 * conversion directly and simply in order to be quicker. This is useful for
+	 * reading in large volumes of GTFS data and such.
+	 * 
+	 * @return Seconds into the day
 	 */
 	public static int parseTimeOfDay(String timeStr) {
 		// At some point GTFS will handle negative values
@@ -470,10 +470,20 @@ public class Time {
 		String positiveTimeStr = negative ? timeStr.substring(1) : timeStr;
 
 		int firstColon = positiveTimeStr.indexOf(":");
+		int hours = Integer.parseInt(positiveTimeStr.substring(0, firstColon)); 
+		
+		// If there is a second colon then also process seconds
 		int secondColon = positiveTimeStr.lastIndexOf(":");
-		int hours = Integer.parseInt(positiveTimeStr.substring(0, firstColon));  
-		int minutes = Integer.parseInt(positiveTimeStr.substring(firstColon+1, secondColon));
-		int seconds = Integer.parseInt(positiveTimeStr.substring(secondColon+1));
+		int minutes, seconds;
+		if (firstColon != secondColon) {
+			// Second colon, so handle minutes and seconds
+			minutes = Integer.parseInt(positiveTimeStr.substring(firstColon+1, secondColon));
+			seconds = Integer.parseInt(positiveTimeStr.substring(secondColon+1));
+		} else {
+			// No second colon so just handle minutes
+			minutes = Integer.parseInt(positiveTimeStr.substring(firstColon+1));
+			seconds = 0;			
+		}
 		
 		int result = hours * 60 * 60 + minutes*60 + seconds;
 		if (negative)
