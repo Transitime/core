@@ -222,7 +222,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 					}					
 				}
 								
-				// Create and return the departure prediction for this wait 
+				// Create and return the departure prediction for this wait stop.
 				// If supposed to use exact schedule times for the end user for
 				// the wait stops then use the special IpcPrediction() 
 				// constructor that allows both the 
