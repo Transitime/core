@@ -227,6 +227,12 @@ abstract public class PredictionAccuracyQuery {
 		String timeSql = "";
 		if ((beginTimeStr != null && !beginTimeStr.isEmpty())
 				|| (endTimeStr != null && !endTimeStr.isEmpty())) {
+			// If only begin or only end time set then use default value
+			if (beginTimeStr == null || beginTimeStr.isEmpty())
+				beginTimeStr = "00:00:00";
+			if (endTimeStr == null || endTimeStr.isEmpty())
+				endTimeStr = "23:59:59";
+			
 			timeSql = " AND arrivalDepartureTime::time BETWEEN ? AND ? ";
 		}
 

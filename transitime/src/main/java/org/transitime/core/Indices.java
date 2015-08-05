@@ -479,9 +479,14 @@ class Indices {
 
 	@Override
 	public String toString() {
-		return "Indices [" + "blockId=" + block.getId() + ", tripIndex="
-				+ tripIndex + ", stopPathIndex=" + stopPathIndex
-				+ ", segmentIndex=" + segmentIndex + "]";
+		return "Indices [" 
+				+ "blockId=" + block.getId() 
+				// thought tripId not part of Indices nice to show for debugging
+				+ ", tripId=" + getTrip().getId()
+				+ ", tripIndex=" + tripIndex 
+				+ ", stopPathIndex=" + stopPathIndex
+				+ ", segmentIndex=" + segmentIndex 
+				+ "]";
 	}
 
 	@Override

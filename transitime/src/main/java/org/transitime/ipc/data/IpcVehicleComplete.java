@@ -127,7 +127,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	 * @param nextStopName
 	 * @param vehicleType
 	 * @param tripStartDateStr
-	 * @param atStopId
+	 * @param atStop
+	 * @param atOrNextStopId
+	 * @param atOrNextGtfsStopSeq
 	 * @param routeName
 	 * @param originStopId
 	 * @param destinationId
@@ -143,14 +145,16 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			TemporalDifference realTimeSchdAdh, boolean isDelayed,
 			boolean isLayover, long layoverDepartureTime, String nextStopId,
 			String nextStopName, String vehicleType, long tripStartEpochTime,
-			String atStopId, String routeName, String originStopId,
-			String destinationId, double distanceToNextStop,
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip) {
+			boolean atStop, String atOrNextStopId, Integer atOrNextGtfsStopSeq,
+			String routeName, String originStopId, String destinationId,
+			double distanceToNextStop, double distanceOfNextStopFromTripStart,
+			double distanceAlongTrip) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
-				vehicleType, tripStartEpochTime, atStopId);
+				vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
+				atOrNextGtfsStopSeq);
 
 		this.routeName = routeName;
 		this.originStopId = originStopId;
@@ -250,8 +254,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					directionId, headsign, predictable, schedBasedPred,
 					realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, nextStopName,
-					vehicleType, tripStartEpochTime, atStopId, routeName,
-					originStopId, destinationId, distanceToNextStop,
+					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
+					atOrNextGtfsStopSeq, routeName, originStopId,
+					destinationId, distanceToNextStop,
 					distanceOfNextStopFromTripStart, distanceAlongTrip);
 		}
 
@@ -321,7 +326,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", avl=" + getAvl()
 				+ ", heading=" + getHeading() 
 				+ ", vehicleType=" + getVehicleType()
-				+ ", atStopId=" + getAtStopId()
+				+ ", atStop=" + isAtStop()
+				+ ", atOrNextStopId=" + getAtOrNextStopId()
+				+ ", atOrNextGtfsStopSeq=" + getAtOrNextGtfsStopSeq()
 				+ ", tripStartEpochTime=" + getTripStartEpochTime()
 				+ ", tripStartEpochTime=" + new Date(getTripStartEpochTime())
 				+ ", routeName=" + routeName 

@@ -7,12 +7,17 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Specify Parameters</title>
 
+  <!-- Load in Select2 files so can create fancy route selector -->
+  <link href="../../select2/select2.css" rel="stylesheet"/>
+  <script src="../../select2/select2.min.js"></script>
+  
   <link href="../params/reportParams.css" rel="stylesheet"/>
 
   <script>
     function execute() {
+      var selectedRouteId = $("#route").val();
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefixAllAgencies + "/command/agencies?format=" + format;
+  	  var url = apiUrlPrefix + "/command/siri/vehicleMonitoring?r=" + selectedRouteId + "&format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -25,16 +30,18 @@
 <%@include file="/template/header.jsp" %>
 
 <div id="title">
-   Select Parameters for Agencies API
+   Select Parameters for SIRI Vehicle Montitoring API
 </div>
    
 <div id="mainDiv">   
+   <%-- Create route selector --%>
+   <jsp:include page="../params/routeSingle.jsp" />
+   
    <%-- Create json/xml format radio buttons --%>
    <jsp:include page="../params/jsonXmlFormat.jsp" />
    
    <%-- Create submit button --%> 
    <jsp:include page="../params/submitApiCall.jsp" />
-   
 </div>
 
 </body>

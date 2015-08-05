@@ -75,7 +75,7 @@ public class TravelTimesProcessor {
 	// standard deviation of the mean or higher, which is,
 	// 68% + (100% - 68%)/2 = 84%, meaning that 84% of the time the 
 	// vehicle would leave after the calculated stop time.
-	private final static double STD_DEV_BIAS_FOR_FIRST_STOP = 1.0;
+	private final static double STD_DEV_BIAS_FOR_FIRST_STOP = 1.5;
 	
 	// For first stop of trip should add a bit of a bias since passengers 
 	// have to get on a few seconds before doors shut and vehicle starts 
@@ -836,11 +836,17 @@ public class TravelTimesProcessor {
 				// For first stops of trip will be providing departure
 				// times so need to be conservative and bias the stop time
 				if (mapKey.getStopPathIndex() == 0) {
-					// First stop of trip so be extra conservative.
+					// First stop of trip so be extra conservative because
+					// don't want to determine that vehicles depart at 8:02
+					// when the doors actually shut at 8:01 and the vehicle
+					// starts moving slowly giving a slightly wrong departure
+					// time.
 					// Determine best stop time to use
-					averagedStopTime = Statistics.biasedFilteredMean(
-							stopTimesForStopPathForTrip,
-							FRACTION_LIMIT_FOR_STOP_TIMES, STD_DEV_BIAS_FOR_FIRST_STOP);
+					averagedStopTime =
+							Statistics.biasedFilteredMean(
+									stopTimesForStopPathForTrip,
+									FRACTION_LIMIT_FOR_STOP_TIMES,
+									STD_DEV_BIAS_FOR_FIRST_STOP);
 					
 					// So far have determine when vehicle has departed. But should add
 					// a bit of a bias since passengers have to get on a few seconds

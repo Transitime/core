@@ -12,7 +12,7 @@
   <script>
     function execute() {
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefixAllAgencies + "/command/agencies?format=" + format;
+  	  var url = apiUrlPrefix + "/command/vehicleConfigs?format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -25,7 +25,7 @@
 <%@include file="/template/header.jsp" %>
 
 <div id="title">
-   Select Parameters for Agencies API
+   Select Parameters for Vehicle Configurations API
 </div>
    
 <div id="mainDiv">   

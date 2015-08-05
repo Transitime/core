@@ -28,6 +28,7 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.ipc.data.IpcPrediction;
+import org.transitime.ipc.data.IpcPrediction.ArrivalOrDeparture;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
@@ -83,6 +84,18 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 					+ "might take over the next trip for the block due to "
 					+ "vehicle being late.");
 	
+	private static BooleanConfigValue useExactSchedTimeForWaitStops =
+			new BooleanConfigValue("transitime.core.useExactSchedTimeForWaitStops", 
+					true,
+					"The predicted time for wait stops includes the historic "
+					+ "wait stop time. This means it will be a bit after the "
+					+ "configured schedule time. But some might not want to "
+					+ "see such adjusted times. Plus just showing the schedule "
+					+ "time is more conservative, and therefore usually better. "
+					+ "If this value is set to true then the actual schedule "
+					+ "time will be used. If false then the schedule time plus "
+					+ "the wait stop time will be used.");
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionGeneratorDefaultImpl.class);
 
@@ -134,12 +147,12 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
-					predictionTime,	affectedByWaitStop, isDelayed, 
-					lateSoMarkAsUncertain,
-					true);  // isArrival. True to indicate arrival
+					predictionTime,	predictionTime, affectedByWaitStop, 
+					isDelayed, lateSoMarkAsUncertain,
+					ArrivalOrDeparture.ARRIVAL);
 		} else {
 			// Generate a departure time
-			// If at a layover then need to handle specially...
+			// If at a wait stop then need to handle specially...
 			if (indices.isWaitStop()) {
 				logger.debug("For vehicleId={} the original arrival time " +
 						"for waitStop stopId={} is {}",
@@ -174,47 +187,84 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				
 				// If it is currently before the scheduled departure time then use
 				// the schedule time. But if after the scheduled time then use
-				// the prediction time.
-				long adjustedDepartureTime = TravelTimes
-						.adjustTimeAccordingToSchedule(arrivalTime, indices) + 
-						expectedStopTimeMsec;
-				if (logger.isDebugEnabled() && adjustedDepartureTime>arrivalTime)
-					logger.debug("For vehicleId={} adjusted departure time for " +
-							"layover stopId={} to adjustedDeparatureTime={}", 
+				// the prediction time, which indicates when it is going to arrive
+				// at the stop, but also adjust for stop wait time and driver
+				// layover time as appropriate.
+				long scheduledDepartureTime = TravelTimes
+								.scheduledDepartureTime(indices, arrivalTime);
+				long expectedDepartureTime =
+						Math.max(arrivalTime, scheduledDepartureTime
+								+ expectedStopTimeMsec);
+				if (expectedDepartureTime > scheduledDepartureTime) {
+					logger.info("For vehicleId={} adjusted departure time "
+							+ "for wait stop stopId={} to "
+							+ "expectedDepartureTimeWithStopWaitTime={}", 
 							avlReport.getVehicleId(), path.getStopId(), 
-							Time.dateTimeStrMsec(adjustedDepartureTime));
+							Time.dateTimeStrMsec(expectedDepartureTime));
+				}
 				
 				// Make sure there is enough break time for the driver to get
 				// their break. But only giving drivers a break if vehicle not
 				// limited by deadheading time. Thought is that if deadheading
 				// then driver just starting assignment or already got break
 				// elsewhere, so won't take a break at this layover.
-				if (!deadheadingSoNoDriverBreak &&
-						adjustedDepartureTime < 
+				if (!deadheadingSoNoDriverBreak) {
+					if (expectedDepartureTime < 
 							predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC) {
-					adjustedDepartureTime = predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC;
-					logger.debug("For vehicleId={} adjusted departure time for " +
-							"layover stopId={} to adjustedDeparatureTime={} to " +
-							"to ensure driver gets break of path.getBreakTimeSec()={}",
-							avlReport.getVehicleId(), path.getStopId(),
-							Time.dateTimeStrMsec(adjustedDepartureTime), 
-							path.getBreakTimeSec());
+						expectedDepartureTime = 
+								predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC;
+						logger.info("For vehicleId={} adjusted departure time " +
+								"for wait stop stopId={} to expectedDepartureTime={} to " +
+								"to ensure driver gets break of path.getBreakTimeSec()={}",
+								avlReport.getVehicleId(), path.getStopId(),
+								Time.dateTimeStrMsec(expectedDepartureTime), 
+								path.getBreakTimeSec());
+					}					
 				}
 								
-				// Create and return the departure prediction for this layover.
-				// Add in expected stop time since vehicles often don't depart
-				// on time.
-				return new IpcPrediction(avlReport, stopId,	gtfsStopSeq, trip, 
-						adjustedDepartureTime,	affectedByWaitStop, isDelayed,
-						lateSoMarkAsUncertain,
-						false);  // isArrival. False to indicate departure			
+				// Create and return the departure prediction for this wait stop.
+				// If supposed to use exact schedule times for the end user for
+				// the wait stops then use the special IpcPrediction() 
+				// constructor that allows both the 
+				// predictionForNextStopCalculation and the predictionForUser 
+				// to be specified.
+				if (useExactSchedTimeForWaitStops.getValue()) {
+					// Configured to use schedule times instead of prediction
+					// times for wait stops. So need to determine the prediction
+					// time without taking into account the stop wait time.
+					long expectedDepartureTimeWithoutStopWaitTime = 
+							Math.max(arrivalTime, scheduledDepartureTime);
+					if (!deadheadingSoNoDriverBreak) {
+						expectedDepartureTimeWithoutStopWaitTime =
+								Math.max(
+										expectedDepartureTimeWithoutStopWaitTime,
+										path.getBreakTimeSec()
+												* Time.MS_PER_SEC);
+					}
+								
+					long predictionForNextStopCalculation = expectedDepartureTime;
+					long predictionForUser = expectedDepartureTimeWithoutStopWaitTime;
+					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
+							trip, predictionForUser,
+							predictionForNextStopCalculation,
+							affectedByWaitStop, isDelayed,
+							lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE);
+				} else {
+					// Use the expected departure times, possibly adjusted for 
+					// stop wait times
+					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
+							trip, expectedDepartureTime, expectedDepartureTime,
+							affectedByWaitStop, isDelayed,
+							lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE);
+				}
 			} else {
 				// Create and return the departure prediction for this 
-				// non-layover stop
+				// non-wait-stop stop
 				return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
 						predictionTime + expectedStopTimeMsec,
+						predictionTime + expectedStopTimeMsec,
 						affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-						false); // isArrival. False to indicate departure
+						ArrivalOrDeparture.DEPARTURE);
 			}
 		}			
 	}
@@ -328,8 +378,11 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			// Determine prediction time for the departure. For layovers
 			// the prediction time can be adjusted by deadhead time,
 			// schedule time, break time, etc. For arrival predictions
-			// need to add the expected stop time.
-			predictionTime = predictionForStop.getPredictionTime();
+			// need to add the expected stop time. Need to use 
+			// getActualPredictionTime() instead of getPredictionTime() to
+			// handle situations where want to display to the user for wait 
+			// stops schedule times instead of the calculated prediction time.
+			predictionTime = predictionForStop.getActualPredictionTime();
 			if (predictionForStop.isArrival())
 				predictionTime += indices.getStopTimeForPath();
 			

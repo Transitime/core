@@ -26,12 +26,17 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="routeApiParams.jsp?a=<%= agencyId %>"
     title="Data for a route. Includes stop and path information needed to show route on map.">
       Route</a></li>
+      
   <li><a href="vehiclesApiParams.jsp?a=<%= agencyId %>"
     title="Data for vehicles, including GPS info, for a route. Useful for showing location of vehicles on map.">
       Vehicles</a></li>
   <li><a href="vehiclesDetailsApiParams.jsp?a=<%= agencyId %>"
     title="Detailed data for vehicles, including GPS info, for a route. Contains additional data such as schedule adherence and assignment information.">
       Vehicles Details</a></li>
+  <li><a href="vehicleConfigsApiParams.jsp?a=<%= agencyId %>"
+    title="Configuration data for vehicles. A way of getting list of vehicles configured for agency.">
+      Vehicle Configurations</a></li>
+      
   <li><a href="predsByRouteStopApiParams.jsp?a=<%= agencyId %>"
     title="Predictions for specified route and stop.">
       Predictions by Route/Stop</a></li>
@@ -50,12 +55,27 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="blocksApiParams.jsp?a=<%= agencyId %>"
     title="Data for a block assignment. Shows each trip that makes up the block in a verbose format, including trip pattern and schedule info.">
       Block Details</a></li>
+
+  <li><a href="serviceIdsApiParams.jsp?a=<%= agencyId %>"
+    title="Data for all service IDs configured for agency.">
+      Service IDs</a></li>
+  <li><a href="serviceIdsCurrentApiParams.jsp?a=<%= agencyId %>"
+    title="Data for service IDs that are currently active for agency.">
+      Service IDs Current</a></li>
+
   <li><a href="gtfsRealtimeTripUpdatesApiParams.jsp?a=<%= agencyId %>"
     title="GTFS-realtime Trip Updates includes prediction data for entire agency">
       GTFS-realtime Trip Updates</a></li>
   <li><a href="gtfsRealtimeVehiclePositionsApiParams.jsp?a=<%= agencyId %>"
     title="GTFS-realtime Vehicle Positions for entire agency">
       GTFS-realtime Vehicle Positions</a></li>
+
+  <li><a href="siriVehicleMonitoringApiParams.jsp?a=<%= agencyId %>"
+    title="SIRI Vehicle Monitoring for specified route or entire agency">
+      SIRI Vehicle Monitoring</a></li>
+  <li><a href="siriStopMonitoringApiParams.jsp?a=<%= agencyId %>"
+    title="SIRI Stop Monitoring for specified route and stop">
+      SIRI Stop Monitoring</a></li>
 
   <li><a href="horizStopsScheduleApiParams.jsp?a=<%= agencyId %>"
     title="Schedule for route. For displaying schedule with stops listed in horizontal direction">

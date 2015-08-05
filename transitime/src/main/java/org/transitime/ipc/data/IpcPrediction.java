@@ -52,7 +52,16 @@ public class IpcPrediction implements Serializable {
 	private final String tripId;
 	private final String tripPatternId;
 	private final String blockId;
+	// The prediction to present to the user. Can be different from
+	// actualPredictionTime in that for wait stops might want to show
+	// user the scheduled time even if the actual prediction time,
+	// including the stop wait time, might be greater.
 	private final long predictionTime;
+	// The prediction time including all factors, including the stop
+	// wait time for wait stops presented to the user is different
+	// than the actual prediction time. Only used on server side when
+	// calculating predictions.
+	private final long actualPredictionTime;
 	private final boolean schedBasedPred;
 	// The time of the fix so can tell how stale prediction is
 	private final long avlTime;
@@ -73,10 +82,12 @@ public class IpcPrediction implements Serializable {
 
 	private static final long serialVersionUID = 7264507678733060173L;
 
+	public enum ArrivalOrDeparture {ARRIVAL, DEPARTURE};
+	
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructs a Prediction object. For use on server side. 
+	 * Constructs a Prediction object. For use on server side.
 	 * 
 	 * @param avlReport
 	 * @param stopId
@@ -85,15 +96,25 @@ public class IpcPrediction implements Serializable {
 	 *            Can be set to null for testing but usually will be a valid
 	 *            trip
 	 * @param predictionTime
+	 *            The prediction to present to the user. Can be different from
+	 *            actualPredictionTime in that for wait stops might want to show
+	 *            user the scheduled time even if the actual prediction time,
+	 *            including the stop wait time, might be greater.
+	 * @param actualPredictionTime
+	 *            The prediction time including all factors, including the stop
+	 *            wait time for wait stops presented to the user is different
+	 *            than the actual prediction time. Only used on server side when
+	 *            calculating predictions.
 	 * @param predictionAffectedByWaitStop
 	 * @param isDelayed
 	 * @param lateAndSubsequentTripSoMarkAsUncertain
-	 * @param isArrival
+	 * @param arrivalOrDeparture
 	 */
 	public IpcPrediction(AvlReport avlReport, String stopId, int gtfsStopSeq,
-			Trip trip, long predictionTime,
+			Trip trip, long predictionTime, long actualPredictionTime,
 			boolean predictionAffectedByWaitStop, boolean isDelayed,
-			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival) {
+			boolean lateAndSubsequentTripSoMarkAsUncertain, 
+			ArrivalOrDeparture arrivalOrDeparture) {
 		this.vehicleId = avlReport.getVehicleId();
 		this.routeId = trip.getRouteId();
 		this.stopId = stopId;
@@ -106,6 +127,7 @@ public class IpcPrediction implements Serializable {
 		this.tripPatternId = trip != null ? trip.getTripPattern().getId() : "";
 		this.blockId = trip != null ? trip.getBlockId() : null;
 		this.predictionTime = predictionTime;
+		this.actualPredictionTime = actualPredictionTime;
 		this.schedBasedPred = avlReport.isForSchedBasedPreds();
 		this.avlTime = avlReport.getTime();
 		this.creationTime = avlReport.getTimeProcessed();
@@ -122,7 +144,7 @@ public class IpcPrediction implements Serializable {
 		this.isDelayed = isDelayed;
 		this.lateAndSubsequentTripSoMarkAsUncertain = 
 				lateAndSubsequentTripSoMarkAsUncertain;
-		this.isArrival = isArrival;
+		this.isArrival = arrivalOrDeparture == ArrivalOrDeparture.ARRIVAL;
 	}
 
 	/**
@@ -131,11 +153,12 @@ public class IpcPrediction implements Serializable {
 	 */
 	private IpcPrediction(String vehicleId, String routeId, String stopId,
 			int gtfsStopSeq, String tripId, String tripPatternId,
-			String blockId, long predictionTime, boolean schedBasedPred,
-			long avlTime, long creationTime, long tripStartEpochTime,
-			boolean affectedByWaitStop, String driverId, short passengerCount,
-			float passengerFullness, boolean isDelayed,
-			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival) {
+			String blockId, long predictionTime, long actualPredictionTime,
+			boolean schedBasedPred, long avlTime, long creationTime,
+			long tripStartEpochTime, boolean affectedByWaitStop,
+			String driverId, short passengerCount, float passengerFullness,
+			boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
+			boolean isArrival) {
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
 		this.stopId = stopId;
@@ -146,6 +169,7 @@ public class IpcPrediction implements Serializable {
 		this.tripPatternId = tripPatternId;
 		this.blockId = blockId;
 		this.predictionTime = predictionTime;
+		this.actualPredictionTime = actualPredictionTime;
 		this.schedBasedPred = schedBasedPred;
 		this.avlTime = avlTime;
 		this.creationTime = creationTime;
@@ -292,7 +316,7 @@ public class IpcPrediction implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
-					tripId, tripPatternId, blockId, predictionTime,
+					tripId, tripPatternId, blockId, predictionTime, 0,
 					schedBasedPred, avlTime, creationTime, tripStartEpochTime,
 					affectedByWaitStop, driverId, passengerCount,
 					passengerFullness, isDelayed,
@@ -384,6 +408,10 @@ public class IpcPrediction implements Serializable {
 		return predictionTime;
 	}
 
+	public long getActualPredictionTime() {
+		return actualPredictionTime;
+	}
+	
 	public boolean isSchedBasedPred() {
 		return schedBasedPred;
 	}
