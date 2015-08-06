@@ -23,6 +23,7 @@ The steps to set up the system are
 
 generateDatabaseSchema.jar -- Main class: org.transitime.applications.SchemaGenerator
 =================================
+ISSUE: skip to ISSUE below for the moment as there is a classloader issue when using onejar.
 <br/>
 The jar generateDatabaseSchema.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. A file is generated for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
 <br/>
