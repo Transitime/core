@@ -52,7 +52,11 @@ To create all tables require you to support the core and the webapp you could ru
 
 Once these commands have been run you should run the sql created in the files in the core and web directory in your database.
 	
-TODO: This works in eclipse by executing the class but not on command line using the executable jar. Strange and need to investigate. Probably somthing to do with the fact it is an executable jar.
+TODO: This works in eclipse by executing the class but not on command line using the executable jar. Strange and need to investigate. Probably somthing to do with the fact it is an executable jar. It is an issue with the ClassLoader and onejar. Maybe better to create using mvn exec plugin.
+
+```
+mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitime.db.webstructs"
+````
 
 processGTFSFile.jar -- Main class: org.transitime.applications.GTFSFileProcessor
 =================================    
