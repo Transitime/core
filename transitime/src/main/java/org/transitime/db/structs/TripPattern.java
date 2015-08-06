@@ -545,14 +545,19 @@ public class TripPattern implements Serializable, Lifecycle {
 	 * @param stopId2
 	 * @return True if stopId2 is after stopId1
 	 */
-	public boolean isStopAfterStop(String stopId1, String stopId2) {
+	public boolean isStopAtOrAfterStop(String stopId1, String stopId2) {
+		// Short cut
+		if (stopId1.equals(stopId2))
+			return true;
+		
+		// Go through list of stops for trip pattern
 		boolean stopId1Found = false;
 		for (StopPath stopPath : stopPaths) {
-			if (stopPath.getId().equals(stopId1)) {
+			if (stopPath.getStopId().equals(stopId1)) {
 				stopId1Found = true;
 			}
 			
-			if (stopId1Found && stopPath.getId().equals(stopId2)) {
+			if (stopId1Found && stopPath.getStopId().equals(stopId2)) {
 				return true;
 			}
 		}
