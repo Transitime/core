@@ -537,6 +537,8 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * trip.
 	 * 
 	 * @param travelTimesFromDbMap
+	 *            Keyed on tripPatternId, contains list of TravelTimesForTrip
+	 *            for each tripPatternId
 	 * @return Total number of travel times (one per stop path) already
 	 *         processed)
 	 */
