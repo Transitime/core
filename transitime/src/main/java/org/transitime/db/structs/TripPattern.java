@@ -114,7 +114,7 @@ public class TripPattern implements Serializable, Lifecycle {
 		new HashMap<String, StopPath>();
 	
 	// For specifying max size of the trip pattern ID
-	private static final int TRIP_PATTERN_ID_LENGTH = 120;
+	public static final int TRIP_PATTERN_ID_LENGTH = 120;
 	
 	// Hibernate requires this class to be serializable because it uses multiple
 	// columns for the Id.
