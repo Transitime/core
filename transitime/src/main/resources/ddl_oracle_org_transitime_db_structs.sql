@@ -290,12 +290,12 @@
         configRev number(10,0),
         travelTimesRev number(10,0),
         tripCreatedForId varchar2(60 char),
-        tripPatternId varchar2(60 char),
+        tripPatternId varchar2(120 char),
         primary key (id)
     );
 
     create table TripPattern_to_Path_joinTable (
-        TripPatterns_id varchar2(60 char) not null,
+        TripPatterns_id varchar2(120 char) not null,
         TripPatterns_configRev number(10,0) not null,
         stopPaths_tripPatternId varchar2(60 char) not null,
         stopPaths_stopPathId varchar2(120 char) not null,
@@ -305,7 +305,7 @@
     );
 
     create table TripPatterns (
-        id varchar2(60 char) not null,
+        id varchar2(120 char) not null,
         configRev number(10,0) not null,
         directionId varchar2(60 char),
         maxLat double precision,
@@ -336,7 +336,7 @@
         shapeId varchar2(60 char),
         tripShortName varchar2(60 char),
         travelTimes_id number(10,0),
-        tripPattern_id varchar2(60 char),
+        tripPattern_id varchar2(120 char),
         tripPattern_configRev number(10,0),
         primary key (tripId, startTime, configRev)
     );
