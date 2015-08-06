@@ -226,7 +226,7 @@
     );
 
     create table StopPaths (
-        tripPatternId varchar(60) not null,
+        tripPatternId varchar(120) not null,
         stopPathId varchar(120) not null,
         configRev int4 not null,
         breakTime int4,
@@ -297,7 +297,7 @@
     create table TripPattern_to_Path_joinTable (
         TripPatterns_id varchar(120) not null,
         TripPatterns_configRev int4 not null,
-        stopPaths_tripPatternId varchar(60) not null,
+        stopPaths_tripPatternId varchar(120) not null,
         stopPaths_stopPathId varchar(120) not null,
         stopPaths_configRev int4 not null,
         listIndex int4 not null,
