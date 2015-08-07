@@ -32,7 +32,7 @@ import org.transitime.reports.ChartJsonBuilder.RowBuilder;
  * @author SkiBu Smith
  *
  */
-public class GenericJsonQuery extends GenericQuery {
+public class ChartGenericJsonQuery extends GenericQuery {
 
 	private ChartJsonBuilder jsonBuilder = new ChartJsonBuilder();
 
@@ -42,7 +42,7 @@ public class GenericJsonQuery extends GenericQuery {
 	 * @param agencyId
 	 * @throws SQLException
 	 */
-	public GenericJsonQuery(String agencyId) throws SQLException {
+	public ChartGenericJsonQuery(String agencyId) throws SQLException {
 		super(agencyId);
 	}
 
@@ -87,7 +87,7 @@ public class GenericJsonQuery extends GenericQuery {
 	 */
 	public static String getJsonString(String agencyId, String sql) 
 			throws SQLException {
-		GenericJsonQuery query = new GenericJsonQuery(agencyId);
+		ChartGenericJsonQuery query = new ChartGenericJsonQuery(agencyId);
 		query.doQuery(sql);
 		// If query returns empty set then should return null!
 		if (query.getNumberOfRows() != 0)			
@@ -121,7 +121,7 @@ public class GenericJsonQuery extends GenericQuery {
 				+ "  AND predictionSource='Transitime';";
 
 		try {
-			String str = GenericJsonQuery.getJsonString(agencyId, sql);
+			String str = ChartGenericJsonQuery.getJsonString(agencyId, sql);
 			System.out.println(str);
 		} catch (SQLException e) {
 			e.printStackTrace();
