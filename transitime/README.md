@@ -23,6 +23,7 @@ The steps to set up the system are
 
 generateDatabaseSchema.jar -- Main class: org.transitime.applications.SchemaGenerator
 =================================
+ISSUE: skip to ISSUE below for the moment as there is a classloader issue when using onejar.
 <br/>
 The jar generateDatabaseSchema.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. A file is generated for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
 <br/>
@@ -52,7 +53,13 @@ To create all tables require you to support the core and the webapp you could ru
 
 Once these commands have been run you should run the sql created in the files in the core and web directory in your database.
 	
-TODO: This works in eclipse by executing the class but not on command line using the executable jar. Strange and need to investigate. Probably somthing to do with the fact it is an executable jar.
+ISSUE: This works in eclipse by executing the class but not on command line using the executable jar. It is an issue with the ClassLoader and onejar. Maybe better to create using mvn exec plugin.
+
+The following will can be run from the transitime directory under core and will place the required SQL in the target directory.
+```
+mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitime.db.structs"
+mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitime.db.webstructs"
+````
 
 processGTFSFile.jar -- Main class: org.transitime.applications.GTFSFileProcessor
 =================================    
