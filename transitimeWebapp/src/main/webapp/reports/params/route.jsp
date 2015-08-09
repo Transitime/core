@@ -1,6 +1,6 @@
 <%-- For creating a route selector parameter via a jsp include.
-     User can select all routes or a single route (but not an
-     arbitrary multiple of routes). 
+     User can select all routes (r param then set to "") or a single 
+     route (but not an arbitrary multiple of routes). 
      Reads in routes via API for the agency specified by the "a" param. --%>
 
 <style type="text/css">
