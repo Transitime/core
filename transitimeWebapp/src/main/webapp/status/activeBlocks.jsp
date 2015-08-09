@@ -98,7 +98,7 @@ var ALLOWABLE_LATE_MSEC  = 4 * 60*1000; // 4 minutes
 
 // need to escape special character in jquery as . : are not interpreted correctly
 function jq( myid ) {	 
-    return "#" + myid.replace( /(:|\.|\[|\]|,)/g, "\\$1" ); 
+    return myid.replace( /(:|\.|\[|\]|,)/g, "\\\\$1" );
 }
 
 function removeUnneededBlockAndRouteElements(routes) {
