@@ -874,7 +874,7 @@ if (!getRouteQueryStrParam()) {
  					
  					// Configure map for new route	
  					var url = apiUrlPrefix + "/command/route?r=" + e.val;
- 					$.getJSON(url, routeConfigCallback);;
+ 					$.getJSON(url, routeConfigCallback);
 
  					// Read in vehicle locations now
  					setRouteQueryStrParam("r=" + e.val);
