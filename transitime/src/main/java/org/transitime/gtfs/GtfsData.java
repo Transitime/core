@@ -2403,8 +2403,8 @@ public class GtfsData {
 		//outputPathsAndStopsForGraphing("8699");
 		
 		// Now process travel times and update the Trip objects. 
-		ScheduleBasedTravelTimesProcessor travelTimesProcesssor =
-				new ScheduleBasedTravelTimesProcessor(revs,
+		TravelTimesProcessorForGtfsUpdates travelTimesProcesssor =
+				new TravelTimesProcessorForGtfsUpdates(revs,
 						originalTravelTimesRev, maxTravelTimeSegmentLength,
 						defaultWaitTimeAtStopMsec, maxSpeedKph);
 		travelTimesProcesssor.process(session, this);

@@ -38,17 +38,19 @@ import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 /**
- * For setting travel times to default values as needed when GTFS data
- * processed. The idea is that when GTFS data read in sometimes there will be
- * new routes or stopPaths. For these want some kind of travel times so that the
- * prediction software will work. But don't have any AVL data yet for these
- * stopPaths since they are new. Therefore need to either use data from another
- * service Id or nearby time.
+ * For setting travel times when processing GTFS configuration. Tries to use
+ * existing travel times from database. If data for trip exists it is used. If
+ * data for trip doesn't exist tries to use data for similar trip (see
+ * adequateMatch()). For when there is no matching historic travel times data
+ * then uses default values based on the schedule. The idea is that when GTFS
+ * data read in sometimes there will be new routes or stopPaths. For these want
+ * some kind of travel times so that the prediction software will work. But
+ * don't have any AVL data yet for these stopPaths since they are new.
  * 
  * @author SkiBu Smith
  * 
  */
-public class ScheduleBasedTravelTimesProcessor {
+public class TravelTimesProcessorForGtfsUpdates {
 
 	// Which config and travel times revs to write data for
 	private final ActiveRevisions activeRevisions;
@@ -62,7 +64,7 @@ public class ScheduleBasedTravelTimesProcessor {
 	private final double maxTravelTimeSegmentLength;
 	
 	private static final Logger logger = 
-			LoggerFactory.getLogger(ScheduleBasedTravelTimesProcessor.class);
+			LoggerFactory.getLogger(TravelTimesProcessorForGtfsUpdates.class);
 
 
 	/********************** Member Functions **************************/
@@ -76,7 +78,7 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * @param defaultWaitTimeAtStopMsec
 	 * @param maxSpeedKph
 	 */
-	public ScheduleBasedTravelTimesProcessor(ActiveRevisions activeRevisions,
+	public TravelTimesProcessorForGtfsUpdates(ActiveRevisions activeRevisions,
 			int originalTravelTimesRev, double maxTravelTimeSegmentLength,
 			int defaultWaitTimeAtStopMsec, double maxSpeedKph) {
 		this.activeRevisions = activeRevisions;
