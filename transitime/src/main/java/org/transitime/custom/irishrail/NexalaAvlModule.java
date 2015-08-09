@@ -64,6 +64,7 @@ public class NexalaAvlModule extends GtfsRealtimeModule {
 		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
 				.getAvlReports(getGtfsRealtimeNexalaURI());
 		for (AvlReport avlReport : avlReports) {
+			avlReport.setSource("NexalaGTFS");
 			processAvlReport(avlReport);
 		}
 	}
