@@ -94,11 +94,11 @@ var vehicleMarkerOptions = {
 };
 
 var secondaryVehicleMarkerOptions = {
-	opacity: 0.7,		
+	opacity: 0.8,		
 };
 
 var minorVehicleMarkerOptions = {
-	opacity: 0.4,		
+	opacity: 0.3,		
 };
 
 var vehicleMarkerBackgroundOptions = {
@@ -112,14 +112,14 @@ var secondaryVehicleMarkerBackgroundOptions = {
     radius: 12,
     weight: 0,
     fillColor: '#ffffff',
-    fillOpacity: 0.75,				
+    fillOpacity: 0.80,				
 };
 
 var minorVehicleMarkerBackgroundOptions = {
     radius: 12,
     weight: 0,
     fillColor: '#ffffff',
-    fillOpacity: 0.5,				
+    fillOpacity: 0.3,				
 };
 
 var unassignedVehicleMarkerBackgroundOptions = {
