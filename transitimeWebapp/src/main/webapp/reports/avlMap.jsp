@@ -35,6 +35,15 @@
       height:7px;
     }
     
+    .popupTable {
+    	border-spacing: 0px;
+    }
+    	
+    .popupTableLabel {
+    	font-weight: bold;
+    	text-align: right;
+    }
+    
   </style>
 
   <script>
@@ -58,9 +67,9 @@
 
   var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
 
-  var avlPopupOptions = {};
+  var avlPopupOptions = {closeButton: false};
 
-  var stopPopupOptions = {};
+  var stopPopupOptions = {closeButton: false};
 
   </script>
   
@@ -72,19 +81,22 @@
   
   /* Called when user clicks on map. Displays AVL data */
   function showAvlPopup(avlMarker) {
-	  var avl = avlMarker.avl;
-	  
-	  var content = "vehicleId = " +  avl.vehicleid + "<br/>"
-	  		+ "time = " + avl.time + "<br/>"
-	  		+ "timeProc = " + avl.timeprocessed + "<br/>"
-	  		+ "lat/lon = " + avl.lat + ", " + avl.lon + "<br/>"
-	  		+ "speed = " + avl.speed + "<br/>"
-	  		+ "heading = " + avl.heading;
-	  
-	  L.popup(avlPopupOptions)
+  	var avl = avlMarker.avl;
+  	var speed = Math.round(parseFloat(avl.speed) * 10)/10;
+	var content = "<table class='popupTable'>" 
+		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleid + "</td></tr>" 
+		+ "<tr><td class='popupTableLabel'>GPS Time:</td><td>" + avl.time + "</td></tr>" 
+  		+ "<tr><td class='popupTableLabel'>Time Proc:</td><td>" + avl.timeprocessed + "</td></tr>"
+ 		+ "<tr><td class='popupTableLabel'>Lat/Lon:</td><td>" + avl.lat + ", " + avl.lon + "</td></tr>"
+  		+ "<tr><td class='popupTableLabel'>Speed:</td><td>" + speed + " kph</td></tr>"
+  		+ "<tr><td class='popupTableLabel'>Heading:</td><td>" + avl.heading + "</td></tr>"
+  		+ "</table>";
+	  		
+  	  L.popup(avlPopupOptions)
 		.setLatLng(avlMarker.getLatLng())
 		.setContent(content)
 		.openOn(map);
+
   }
   
   /* Called when receiving the AVL data via AJAX call */
@@ -151,8 +163,10 @@
   function showStopPopup(stopMarker) {
 	  var stop = stopMarker.stop;
 	  
-	  var content = "Stop ID: " + stop.id + "<br/>"
-	  		+ stop.name;
+	  var content = "<table class='popupTable'>" 
+			+ "<tr><td class='popupTableLabel'>Stop ID:</td><td>" + stop.id + "</td></tr>" 
+			+ "<tr><td class='popupTableLabel'>Name:</td><td>" + stop.name + "</td></tr>" 
+	  		+ "</table>";
 	  
 	  L.popup(stopPopupOptions)
 		.setLatLng(stopMarker.getLatLng())
