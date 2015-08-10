@@ -174,7 +174,8 @@ public class Trip implements Serializable {
 	 * Constructs Trip object from GTFS data.
 	 * <p>
 	 * Does not set startTime nor endTime. Those are set separately using
-	 * addScheduleTimes().
+	 * addScheduleTimes(). Also doesn't set travel times. Those are set
+	 * separately using setTravelTimes().
 	 * 
 	 * @param configRev
 	 * @param gtfsTrip
