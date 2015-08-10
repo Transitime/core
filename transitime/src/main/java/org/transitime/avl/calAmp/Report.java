@@ -31,7 +31,7 @@ public abstract class Report {
 	protected final MessageHeader messageHeader;
 	
 	protected static final Logger logger = 
-			LoggerFactory.getLogger(ConfigServer.class);
+			LoggerFactory.getLogger(Report.class);
 
 	/************************ Methods *************************/
 	
