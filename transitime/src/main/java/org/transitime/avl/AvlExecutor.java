@@ -29,11 +29,14 @@ import org.transitime.utils.Time;
 import org.transitime.utils.threading.NamedThreadFactory;
 
 /**
- * A singleton thread executor for executing AVL reports. For
- * when not using JMS to handle queue of AVL reports. One can dump AVL reports
- * into this executor and then have them be executed, possibly using multiple
- * threads. The number of threads is specified using the Java property
- * transitime.avl.numThreads .
+ * A singleton thread executor for executing AVL reports. For when not using JMS
+ * to handle queue of AVL reports. One can dump AVL reports into this executor
+ * and then have them be executed, possibly using multiple threads. The number
+ * of threads is specified using the Java property transitime.avl.numThreads .
+ * The queue size is set using the Java property transitime.avl.queueSize .
+ * <p>
+ * Causes AvlClient.run() to be called on each AvlReport, unless using test
+ * executor, in which case the AvlClientTester() is called.
  * 
  * @author SkiBu Smith
  *
@@ -81,7 +84,7 @@ public class AvlExecutor {
 	 */
 	private AvlExecutor() {
 		int numberThreads = numAvlThreads.getValue();
-		int maxAVLQueueSize = avlQueueSize.getValue();
+		final int maxAVLQueueSize = avlQueueSize.getValue();
 
 		// Make sure that numberThreads is reasonable
 		if (numberThreads < 1) {
@@ -108,18 +111,19 @@ public class AvlExecutor {
 		BlockingQueue<Runnable> workQueue = new AvlQueue(maxAVLQueueSize);
 		NamedThreadFactory avlClientThreadFactory =
 				new NamedThreadFactory("avlClient");
-		RejectedExecutionHandler re = new RejectedExecutionHandler() {
+		RejectedExecutionHandler rejectedHandler = new RejectedExecutionHandler() {
 			@Override
-			public void
-					rejectedExecution(Runnable arg0, ThreadPoolExecutor arg1) {
-				logger.error("Rejected {}", ((AvlClient) arg0).getAvlReport());
+			public void	rejectedExecution(Runnable arg0, ThreadPoolExecutor arg1) {
+				logger.error("Rejected AVL report in AvlExecutor. The work "
+						+ "queue with capacity {} must be full. {}", 
+						maxAVLQueueSize, ((AvlClient) arg0).getAvlReport());
 			}};
 		
 		avlClientExecutor =
 				new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
 						keepAliveTime, TimeUnit.HOURS, workQueue,
 						avlClientThreadFactory,
-						re);
+						rejectedHandler);
 	}
 	
 	/**
@@ -149,6 +153,9 @@ public class AvlExecutor {
 	 * per vehicle. If another AVL report is to be added to the queue then the
 	 * previous one is removed since there is no point processing an old AVL
 	 * report for a vehicle when new data is available.
+	 * <p>
+	 * Causes AvlClient.run() to be called on each AvlReport, unless using test
+	 * executor, in which case the AvlClientTester() is called.
 	 * 
 	 * @param newAvlReport
 	 *            The AVL report to be processed
