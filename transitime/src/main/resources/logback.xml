@@ -155,7 +155,7 @@
     <smtpPort>465</smtpPort>
     <SSL>true</SSL>
     <username>transittestsmtp@gmail.com</username>
-    <password>transittest</password>
+    <password>transittest_</password>
     <from>msmithtransit@gmail.com</from>
     <subject>%level %logger{0} - %m</subject>
     <layout class="ch.qos.logback.classic.PatternLayout">
