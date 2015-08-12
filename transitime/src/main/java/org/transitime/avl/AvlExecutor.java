@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.logging.Markers;
 import org.transitime.utils.Time;
 import org.transitime.utils.threading.NamedThreadFactory;
 
@@ -77,6 +78,8 @@ public class AvlExecutor {
 	private static final Logger logger= 
 			LoggerFactory.getLogger(AvlExecutor.class);	
 
+	private static boolean emailSentDueToQueueFull = false;
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -111,12 +114,23 @@ public class AvlExecutor {
 		BlockingQueue<Runnable> workQueue = new AvlQueue(maxAVLQueueSize);
 		NamedThreadFactory avlClientThreadFactory =
 				new NamedThreadFactory("avlClient");
+		// Called when queue fills up
 		RejectedExecutionHandler rejectedHandler = new RejectedExecutionHandler() {
 			@Override
 			public void	rejectedExecution(Runnable arg0, ThreadPoolExecutor arg1) {
-				logger.error("Rejected AVL report in AvlExecutor. The work "
-						+ "queue with capacity {} must be full. {}", 
-						maxAVLQueueSize, ((AvlClient) arg0).getAvlReport());
+				String message = "Rejected AVL report in AvlExecutor. The work "
+						+ "queue with capacity " + maxAVLQueueSize 
+						+ " must be full. " + ((AvlClient) arg0).getAvlReport();
+				// If first one then send out an e-mail message since this can 
+				// be a serious issue indicating that system is locked up. This
+				// actually happened once when couldn't read from db due to a
+				// strange locking condition.
+				if (!emailSentDueToQueueFull) {
+					emailSentDueToQueueFull = true;
+					logger.error(Markers.email(), message);
+				} else {
+					logger.error(message);
+				}
 			}};
 		
 		avlClientExecutor =
