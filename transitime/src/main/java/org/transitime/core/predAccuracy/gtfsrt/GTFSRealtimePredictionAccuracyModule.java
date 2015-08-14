@@ -135,17 +135,21 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 									new Date(stopTime.getArrival().getTime()), true);
 						 	
 						    // Store in memory the prediction based on absolute time
+						 	String direction=null;
+						 	if(update.getTrip().hasDirectionId())
+						 		direction=""+update.getTrip().getDirectionId();
+						 	
 						 	PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							update.getTrip().getRouteId(), 
-							new String(""+update.getTrip().getDirectionId()), 
+							direction, 
 							stopTime.getStopId(), 
 							update.getTrip().getTripId(), 
 							update.getVehicle().getId(),
-							new Date(stopTime.getArrival().getTime()) , 
-							new Date(update.getTimestamp()), 
+							new Date(stopTime.getArrival().getTime()*1000) , 
+							new Date(update.getTimestamp()*1000), 
 							true,
 							new Boolean(false), 
-							"GTFS-RT");
+							"GTFS-rt");
 					 
 					 		storePrediction(pred);
 					 }									 					
