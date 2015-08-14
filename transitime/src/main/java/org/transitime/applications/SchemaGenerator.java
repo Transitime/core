@@ -241,7 +241,8 @@ public class SchemaGenerator {
 		List<Class> classes = new ArrayList<Class>();
 		File directory = null;
 		try {
-			ClassLoader cld = Thread.currentThread().getContextClassLoader();
+			ClassLoader cld = this.getClass().getClassLoader();
+			
 			if (cld == null) {
 				throw new ClassNotFoundException("Can't get class loader.");
 			}
