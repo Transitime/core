@@ -18,6 +18,7 @@
 package org.transitime.api.utils;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -48,8 +49,7 @@ public class WebUtils {
 	 * @return Exception to be thrown
 	 */
 	public static WebApplicationException badRequestException(String s) {
-		return new WebApplicationException(Response.status(Status.BAD_REQUEST)
-				.entity(s).build());
+		return badRequestException(Status.BAD_REQUEST.getStatusCode(), s);
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class WebUtils {
 	public static WebApplicationException badRequestException(int response,
 			String s) {
 		return new WebApplicationException(Response.status(response).entity(s)
-				.build());
+				.type(MediaType.TEXT_PLAIN).build());
 	}
 
 }
