@@ -128,7 +128,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 				 {					 
 					 if(stopTime.hasArrival())
 					 {						 
-						 	logger.debug("Storing external prediction routeId={}, "
+						 	logger.info("Storing external prediction routeId={}, "
 									+ "directionId={}, tripId={}, vehicleId={}, "
 									+ "stopId={}, prediction={}, isArrival={}",
 									update.getTrip().getRouteId(), new String(""+update.getTrip().getDirectionId()), update.getTrip().getTripId(), update.getVehicle().getId(), stopTime.getStopId(),
@@ -144,7 +144,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							direction, 
 							stopTime.getStopId(), 
 							update.getTrip().getTripId(), 
-							update.getVehicle().getId(),
+							update.getVehicle().getId(),							
 							new Date(stopTime.getArrival().getTime()*1000) , 
 							new Date(update.getTimestamp()*1000), 
 							true,
@@ -178,7 +178,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		// Process internal predictions
 		super.getAndProcessData(routesAndStops, predictionsReadTime);
 		
-		logger.debug("Calling GTFSRealtimePredictionAccuracyModule."
+		logger.info("Calling GTFSRealtimePredictionAccuracyModule."
 				+ "getAndProcessData()");
 		
 		// Get data for all items in the GTFS-RT trip updates feed		
