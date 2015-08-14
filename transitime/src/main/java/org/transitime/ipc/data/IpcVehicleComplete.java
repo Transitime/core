@@ -319,6 +319,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", predictable=" + isPredictable()
 				+ ", schedBasedPred=" + isForSchedBasedPred()
 				+ ", realTimeSchedAdh=" + getRealTimeSchedAdh() 
+				+ ", isDelayed=" + isDelayed()
 				+ ", isLayover=" + isLayover()
 				+ ", layoverDepartureTime=" 
 					+ Time.timeStrNoTimeZone(getLayoverDepartureTime())
