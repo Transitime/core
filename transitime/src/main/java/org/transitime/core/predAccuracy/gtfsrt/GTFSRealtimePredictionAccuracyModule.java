@@ -94,7 +94,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 			url = new URL(getGtfstripupdateurl().getValue());
 			
 			FeedMessage feed = FeedMessage.parseFrom(url.openStream());			   
-									
+			logger.info("Prediction read successfully from URL={}",getGtfstripupdateurl().getValue());
 			return feed;
 		} catch (Exception e) {
 			logger.error("Problem when getting data from GTFS realtime trip updates URL={}", 
@@ -117,7 +117,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		// If couldn't read data from feed then can't process it		
 		if (feed == null)		
 			return;
-		
+		logger.info("Processing GTFS-rt feed.....");
 		 for (FeedEntity entity : feed.getEntityList()) 
 		 {
 			 if (entity.hasTripUpdate()) 
@@ -152,7 +152,10 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							"GTFS-rt");
 					 
 					 		storePrediction(pred);
-					 }									 					
+					 }else
+					 {
+						 logger.debug("NO arrival for vechicleId={} information at stop={}",update.getVehicle().getId(),stopTime.getStopId());
+					 }
 				 }
 		     }
 		 }
