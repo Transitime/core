@@ -406,32 +406,31 @@ public class AvlProcessor {
 		// Record this match unless the match was null and haven't
 		// reached number of bad matches.
 		if (bestTemporalMatch != null || vehicleState.overLimitOfBadMatches()) {
-			// If going to make vehicle unpredictable due to bad matches log
-			// that info.
-			if (bestTemporalMatch == null
-					&& vehicleState.overLimitOfBadMatches()) {
+			// If not over the limit of bad matches then handle normally
+			if (bestTemporalMatch != null
+					|| !vehicleState.overLimitOfBadMatches()) {
+				// Set the match of the vehicle. 
+				vehicleState.setMatch(bestTemporalMatch);				
+			} else {
+				// Exceeded allowable number of bad matches so make vehicle 
+				// unpredictable due to bad matches log that info.
 				// Log that vehicle is being made unpredictable as a
 				// VehicleEvent
 				String eventDescription = "Vehicle had "
 						+ vehicleState.numberOfBadMatches()
 						+ " bad spatial matches in a row"
 						+ " and so was made unpredictable.";
-				VehicleEvent.create(vehicleState.getAvlReport(),
-						vehicleState.getMatch(), VehicleEvent.NO_MATCH,
-						eventDescription, false, // predictable,
-						true, // becameUnpredictable
-						null); // supervisor
 
 				logger.warn("For vehicleId={} {}", vehicleState.getVehicleId(),
 						eventDescription);
 
+				// Remove the predictions for the vehicle
+				makeVehicleUnpredictable(vehicleState.getVehicleId(), eventDescription,
+						VehicleEvent.NO_MATCH);
+
 				// Remove block assignment from vehicle
 				vehicleState.unsetBlock(BlockAssignmentMethod.COULD_NOT_MATCH);
 			}
-
-			// Set the match of the vehicle. If null then it will make the
-			// vehicle unpredictable.
-			vehicleState.setMatch(bestTemporalMatch);
 		} else {
 			logger.info("For vehicleId={} got a bad match, {} in a row, so "
 					+ "not updating match for vehicle",
