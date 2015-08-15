@@ -138,7 +138,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 						 	String direction=null;
 						 	if(update.getTrip().hasDirectionId())
 						 		direction=""+update.getTrip().getDirectionId();
-						 	
+						 							 							 
 						 	PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							update.getTrip().getRouteId(), 
 							direction, 
@@ -146,7 +146,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							update.getTrip().getTripId(), 
 							update.getVehicle().getId(),							
 							new Date(stopTime.getArrival().getTime()*1000) , 
-							new Date(update.getTimestamp()*1000), 
+							new Date(feed.getHeader().getTimestamp()*1000),													
 							true,
 							new Boolean(false), 
 							"GTFS-rt");
@@ -154,7 +154,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 					 		storePrediction(pred);
 					 }else
 					 {
-						 logger.debug("NO arrival for vechicleId={} information at stop={}",update.getVehicle().getId(),stopTime.getStopId());
+						 logger.debug("No arrival for vechicleId={} information at stop={}",update.getVehicle().getId(),stopTime.getStopId());
 					 }
 				 }
 		     }
