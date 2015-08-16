@@ -133,9 +133,9 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 									+ "directionId={}, tripId={}, vehicleId={}, "
 									+ "stopId={}, prediction={}, isArrival={}",
 									update.getTrip().getRouteId(), new String(""+update.getTrip().getDirectionId()), update.getTrip().getTripId(), update.getVehicle().getId(), stopTime.getStopId(),
-									new Date(stopTime.getArrival().getTime()), true);
+									new Date(stopTime.getArrival().getTime()*1000), true);
 						 	
-						    // Store in memory the prediction based on absolute time
+						    // Store in memory the prediction based on absolute time						 							 	
 						 	String direction=null;
 						 	if(update.getTrip().hasDirectionId())
 						 		direction=""+update.getTrip().getDirectionId();
@@ -145,7 +145,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							direction, 
 							stopTime.getStopId(), 
 							update.getTrip().getTripId(), 
-							update.getVehicle().getId(),							
+							update.getVehicle().getId(),	
+							
 							new Date(stopTime.getArrival().getTime()*1000) , 
 							new Date(feed.getHeader().getTimestamp()*1000),													
 							true,
