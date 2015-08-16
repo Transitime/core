@@ -17,6 +17,8 @@
 package org.transitime.avl;
 
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,6 +90,34 @@ public class AmigoCloudAvlModule extends AvlModule {
 		private MyAmigoWebsocketListener(AmigoCloudAvlModule avlModule) {
 			this.avlModule = avlModule;
 		}
+		
+		/**
+		 * Called by WebSocketClient.onClose() to indicate connection closed and
+		 * there is a problem. Restarts the connection after a few seconds. The
+		 * delay might be important to make sure that don't keep repeatedly
+		 * reconnecting. Plus the old connection might not be completely closed
+		 * when onClose() is called since can't tell from the documentation on
+		 * WebSocket.
+		 * 
+		 * @param code
+		 * @param reason
+		 */
+		@Override
+		public void onClose(int code, String reason) {
+			logger.error("AmigoCloudAvlModule.onClose() called so will restart "
+					+ "the connection after 10 seconds...");
+			
+			// Restart the connection after a few seconds. Use a TimerTask so that
+			// it happens in a separate thread to allow the old web socket to 
+			// first be completely closed.
+			TimerTask task = new TimerTask() {
+				@Override
+				public void run() {
+					avlModule.startRealtimeWebsockets();
+				}
+			};
+			new Timer().schedule(task, 10 * Time.SEC_IN_MSECS);
+		};
 		
 		/**
 		 * Called for every AVL report
@@ -162,7 +192,7 @@ public class AmigoCloudAvlModule extends AvlModule {
 	/**
 	 * For in case want to test a non-realtime amigocloud feed
 	 */
-	public void testWebsockets() {
+	public void startNonRealtimeWebsockets() {
 		AmigoWebsockets socket =
 				new AmigoWebsockets(userId.getValue(), feedUrl.toString(),
 						new MyAmigoWebsocketListener(this));
@@ -172,7 +202,9 @@ public class AmigoCloudAvlModule extends AvlModule {
 	/**
 	 * Initiates a real-time amigocloud feed
 	 */
-	public void testRealitimeWebsockets() {
+	public void startRealtimeWebsockets() {
+		logger.info("Starting amigocloud AVL feed");
+
 		AmigoWebsockets socket =
 				new AmigoWebsockets(userId.getValue(), projectId.getValue(),
 						datasetId.getValue(), feedUrl.toString(),
@@ -185,13 +217,8 @@ public class AmigoCloudAvlModule extends AvlModule {
 	 */
 	@Override
 	public void run() {
-		logger.info("Started amigocloud AVL feed");
-
 		// For testing VTA system
-		testRealitimeWebsockets();
-
-		// For all other non-realtime feeds
-		// testWebsockets();
+		startRealtimeWebsockets();
 	}
 
 	/**
