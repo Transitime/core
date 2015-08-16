@@ -135,6 +135,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 									update.getTrip().getRouteId(), new String(""+update.getTrip().getDirectionId()), update.getTrip().getTripId(), update.getVehicle().getId(), stopTime.getStopId(),
 									new Date(stopTime.getArrival().getTime()*1000), true);
 						 	
+						 	logger.info("Prediction in milliseonds is {} and converted it{}",stopTime.getArrival().getTime()*1000,  new Date(stopTime.getArrival().getTime()*1000));
+						 	
 						    // Store in memory the prediction based on absolute time						 							 	
 						 	String direction=null;
 						 	if(update.getTrip().hasDirectionId())
