@@ -331,10 +331,13 @@ public class PredictionAccuracyModule extends Module {
 					// a bad prediction was made
 					storePredictionAccuracyInfo(pred, null);
 				} else {
-					++numPredictionsInMemory;					
+					++numPredictionsInMemory;		
+					logger.debug("Prediction currently held in memory. {}"+pred.toString());
 				}
 			}
 		}
+		
+		
 		
 		logger.debug("There are now {} predictions in memory after removing {}.",
 				numPredictionsInMemory, numPredictionsRemoved);
