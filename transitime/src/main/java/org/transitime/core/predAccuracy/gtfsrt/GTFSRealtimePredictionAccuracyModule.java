@@ -117,6 +117,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		// If couldn't read data from feed then can't process it		
 		if (feed == null)		
 			return;
+		
 		logger.info("Processing GTFS-rt feed.....");
 		 for (FeedEntity entity : feed.getEntityList()) 
 		 {
@@ -158,9 +159,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 					 }
 				 }
 		     }
-		 }
-		
-	
+		 }			
 	}
 	
 	/**
