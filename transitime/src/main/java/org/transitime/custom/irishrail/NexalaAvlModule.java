@@ -42,7 +42,7 @@ public class NexalaAvlModule extends GtfsRealtimeModule {
 	
 	private static StringConfigValue gtfsRealtimeNexalaFeedURI =
 			new StringConfigValue("transitime.avl.gtfsRealtimeNexalaFeedURI", 
-					"file:///C:/Users/SeanOg/gtfsRealtimeData",
+					"http://developer.onebusaway.org/wmata-gtfsr/vehiclePositions",
 					"The URI of the GTFS-realtime feed generated form the Nexala data.");
 
 	/********************** Member Functions **************************/

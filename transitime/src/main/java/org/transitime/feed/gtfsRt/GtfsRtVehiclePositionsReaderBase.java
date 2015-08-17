@@ -132,9 +132,12 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// latency will be quite large, resulting in inaccurate predictions
 			// and arrival times. But better than not having a time at all.
 			long gpsTime;
-			if (vehicle.hasTimestamp())
+			if (vehicle.hasTimestamp()) {
 				gpsTime = vehicle.getTimestamp();
-			else
+				if (gpsTime < 14396727760l) { // TODO if too small to be milli second epoch
+					gpsTime = gpsTime * 1000;
+				}
+			} else
 				gpsTime = System.currentTimeMillis();
 			
 			// Determine the position data

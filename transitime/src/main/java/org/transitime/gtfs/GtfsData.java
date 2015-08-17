@@ -794,6 +794,7 @@ public class GtfsData {
 			// Therefore filter out such stops. Note that only filtering
 			// out such stops if they are the first stops in the trip.
 			GtfsStop gtfsStop = getGtfsStop(gtfsStopTime.getStopId());
+			if (gtfsStop == null) continue;
 			if (gtfsStop.getDeleteFromRoutesStr() != null
 					|| (firstStopInTrip && gtfsStop
 							.getDeleteFirstStopFromRoutesStr() != null)) {
