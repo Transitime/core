@@ -60,25 +60,36 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 			<version>1.1.2</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.2</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.2</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- So can use Amazon API for archiving files and such -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk</artifactId>
-			<version>1.9.13</version>
+			<version>1.10.11</version>
 		</dependency>
-
+		<!--  for SQS -->
+<!--
+		<dependency>
+		  <groupId>com.amazonaws</groupId>
+		  <artifactId>amazon-sqs-java-messaging-lib</artifactId>
+		  <version>1.0.0</version>
+		  <type>jar</type>
+		</dependency>
+-->		
 		<!-- For many java utilities, such as StringEscapeUtils -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

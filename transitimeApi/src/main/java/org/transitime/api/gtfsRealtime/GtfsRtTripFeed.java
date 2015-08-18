@@ -161,7 +161,7 @@ public class GtfsRtTripFeed {
 			else
 				stopTimeUpdate.setDeparture(stopTimeEvent);
 			
-			stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
+			stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);  // TODO does this need to be here?
 			tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 		}
 		

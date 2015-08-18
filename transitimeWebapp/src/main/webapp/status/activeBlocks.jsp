@@ -426,9 +426,10 @@ $(function() {
 		});
 	
 	// Start getting the active blocks data and processing it.
-	// Update every 30 seconds.
+// 	Update every 2 minutes.
 	getAndProcessData();
-	setInterval(getAndProcessData, 30000);
+	// do not update automatically -- until performance issues solved
+// 	setInterval(getAndProcessData, 120000);
 });
 
 

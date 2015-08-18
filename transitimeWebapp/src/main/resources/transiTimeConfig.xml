@@ -12,24 +12,24 @@
 	<beforeStartTimeMins>5</beforeStartTimeMins>
      </schedBasedPreds>
     <autoBlockAssigner>
-	<autoAssignerEnabled>true</autoAssignerEnabled>
+	<autoAssignerEnabled>false</autoAssignerEnabled>
 	<ignoreAvlAssignments>false</ignoreAvlAssignments>
 	<allowableEarlySeconds>180</allowableEarlySeconds>
 	<allowableLateSeconds>180</allowableLateSeconds>
     </autoBlockAssigner>
     <core>
-	<agencyId>978</agencyId>
+	<agencyId>1</agencyId>
     </core>	
     <avl>
         <!-- URL for GTFS realtime vechicle location stream -->
-        <gtfsRealtimeFeedURI>http://127.0.0.1:8092/vehiclePositions</gtfsRealtimeFeedURI>        
+        <gtfsRealtimeFeedURI>http://developer.onebusaway.org/wmata-gtfsr/vehiclePositions</gtfsRealtimeFeedURI>        
 	<!-- This is the location to read bulk AVL data from using BatchCsvAvlFeedModule -->
-		<csvAvlFeedFileName>d:/transiTime/siri_13_route_id_assigned.csv</csvAvlFeedFileName>
+<!-- 		<csvAvlFeedFileName>d:/transiTime/siri_13_route_id_assigned.csv</csvAvlFeedFileName> -->
 		<realTime>false</realTime>
-        <minLongitude>-10.725</minLongitude>
-        <maxLongitude>-5.35</maxLongitude>             
-        <minLatitude>51.35</minLatitude>
-        <maxLatitude>55.45</maxLatitude>        
+        <minLongitude>-360.0</minLongitude>
+        <maxLongitude>360.0</maxLongitude>             
+        <minLatitude>-360.0</minLatitude>
+        <maxLatitude>360.0</maxLatitude>        
     </avl>   
     
     <find>
@@ -39,12 +39,12 @@
     </find>
     <db>
         <dbName>transiTime</dbName>
-        <dbHost>localhost:5432</dbHost>
-        <dbType>postgresql</dbType>
-        <dbUserName>transiTime</dbUserName>
-        <dbPassword>welcome</dbPassword>
+        <dbHost>localhost:3306</dbHost>
+        <dbType>mysql</dbType>
+        <dbUserName>root</dbUserName>
+        <dbPassword>changeme</dbPassword>
     </db>     
     <hibernate>
-        <configFile>hibernate_postgres_cfg.xml</configFile>        
+        <configFile>mysql_hibernate_cfg.xml</configFile>        
     </hibernate>
 </transitime>
