@@ -51,7 +51,7 @@ public class TestAPIKeyManager extends TestCase {
 			
 			ApiKey apiKey = manager.generateApiKey("test",
 					"http://127.0.0.1:8080/transitime", "test@test.com",
-					"12345678", "test");
+					"12345678", "test"); 
 			
 			assert(manager.isKeyValid(apiKey.getKey()));
 

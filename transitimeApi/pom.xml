@@ -4,7 +4,7 @@
 	<groupId>transitime</groupId>
 	<artifactId>transitimeApi</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>transitimeApi</name>
 	
 	<properties>
@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>transitime</groupId>
 			<artifactId>transitimeCore</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

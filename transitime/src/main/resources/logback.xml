@@ -308,10 +308,10 @@
     <appender-ref ref="VEHICLE_EVENT" />
   </logger>
 
-  <!-- Taken out (by setting level to warn instead of info) for now because 
-       so verbose -->
+  <!-- Can not log predictions by setting level to warn instead of info
+    -->
   <logger name="org.transitime.core.PredictionGeneratorDefaultImpl"
-          level="warn" additivity="false">
+          level="info" additivity="false">
     <appender-ref ref="PREDICTION" />
   </logger>
 
@@ -326,7 +326,7 @@
   </logger>
 
   <logger name="org.transitime.avl"
-          level="info" additivity="false">
+          level="debug" additivity="false">
     <appender-ref ref="AVL" />
   </logger>
 
