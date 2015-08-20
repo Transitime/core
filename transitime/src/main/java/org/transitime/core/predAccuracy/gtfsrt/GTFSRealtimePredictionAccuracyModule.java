@@ -27,6 +27,8 @@ import org.transitime.applications.Core;
 import org.transitime.config.StringConfigValue;
 import org.transitime.core.predAccuracy.PredAccuracyPrediction;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
+import org.transitime.db.structs.Trip;
+import org.transitime.gtfs.DbConfig;
 import org.transitime.modules.Module;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
@@ -118,6 +120,9 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		if (feed == null)		
 			return;
 		
+		// So can look up info from db
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		
 		logger.info("Processing GTFS-rt feed.....");
 		 for (FeedEntity entity : feed.getEntityList()) 
 		 {
@@ -129,19 +134,30 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 				 {					 
 					 if(stopTime.hasArrival())
 					 {						 
-						 	logger.info("Storing external prediction routeId={}, "
+						 							 							    						 							 
+						 	String direction=null;
+						 	
+						 	if(update.getTrip().hasDirectionId())
+						 		direction=""+update.getTrip().getDirectionId();
+						 							 	
+							if (update.getTrip() != null) {
+								Trip trip = dbConfig.getTrip(update.getTrip().getTripId());
+								if (trip != null) {
+									direction = trip.getDirectionId();
+								} else {
+									logger.error("Got tripTag={} but no such trip in "
+											+ "the configuration.", update.getTrip().getTripId());
+								}
+							}
+							
+							logger.info("Storing external prediction routeId={}, "
 									+ "directionId={}, tripId={}, vehicleId={}, "
 									+ "stopId={}, prediction={}, isArrival={}",
-									update.getTrip().getRouteId(), new String(""+update.getTrip().getDirectionId()), update.getTrip().getTripId(), update.getVehicle().getId(), stopTime.getStopId(),
+									update.getTrip().getRouteId(), direction, update.getTrip().getTripId(), update.getVehicle().getId(), stopTime.getStopId(),
 									new Date(stopTime.getArrival().getTime()*1000), true);
 						 	
 						 	logger.info("Prediction in milliseonds is {} and converted is {}",stopTime.getArrival().getTime()*1000,  new Date(stopTime.getArrival().getTime()*1000));
-						 	
-						    // Store in memory the prediction based on absolute time						 							 	
-						 	String direction=null;
-						 	if(update.getTrip().hasDirectionId())
-						 		direction=""+update.getTrip().getDirectionId();
-						 							 							 
+													 							 							 							
 						 	PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							update.getTrip().getRouteId(), 
 							direction, 
@@ -154,8 +170,9 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							true,
 							new Boolean(false), 
 							"GTFS-rt");
-					 
-					 		storePrediction(pred);
+						 	
+						 	if(pred.getPredictedTime().getTime()>System.currentTimeMillis())
+						 		storePrediction(pred);
 					 }else
 					 {
 						 logger.debug("No arrival information for vehicleId={} information at stop={}",update.getVehicle().getId(),stopTime.getStopId());
