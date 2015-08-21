@@ -193,7 +193,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 					 }					
 					 else
 					 {
-						 logger.debug("No prediction for vehicleId={} information for stop={}",update.getVehicle().getId(),stopTime.getStopId());
+						 logger.debug("No predictions for vehicleId={} for stop={}",update.getVehicle().getId(),stopTime.getStopId());
 					 }
 				 }
 		     }
