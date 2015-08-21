@@ -120,7 +120,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		if (feed == null)		
 			return;
 		
-		// So can look up info from db
+		// So can look up direction in database
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		
 		logger.info("Processing GTFS-rt feed.....");
@@ -132,9 +132,9 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 				 List<StopTimeUpdate> stopTimes = update.getStopTimeUpdateList();
 				 for(StopTimeUpdate stopTime : stopTimes)
 				 {					 
-					 if(stopTime.hasArrival())
-					 {						 
-						 							 							    						 							 
+					 if(stopTime.hasArrival()||stopTime.hasDeparture())
+					 {
+					
 						 	String direction=null;
 						 	
 						 	if(update.getTrip().hasDirectionId())
@@ -158,24 +158,42 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 						 	
 						 	logger.info("Prediction in milliseonds is {} and converted is {}",stopTime.getArrival().getTime()*1000,  new Date(stopTime.getArrival().getTime()*1000));
 													 							 							 							
-						 	PredAccuracyPrediction pred = new PredAccuracyPrediction(
-							update.getTrip().getRouteId(), 
-							direction, 
-							stopTime.getStopId(), 
-							update.getTrip().getTripId(), 
-							update.getVehicle().getId(),	
-							
-							new Date(stopTime.getArrival().getTime()*1000) , 
-							new Date(feed.getHeader().getTimestamp()*1000),													
-							true,
-							new Boolean(false), 
-							"GTFS-rt");
-						 	
-						 	if(pred.getPredictedTime().getTime()>System.currentTimeMillis())
-						 		storePrediction(pred);
-					 }else
+						 	if(stopTime.hasArrival())
+						 	{
+							 	PredAccuracyPrediction pred = new PredAccuracyPrediction(
+								update.getTrip().getRouteId(), 
+								direction, 
+								stopTime.getStopId(), 
+								update.getTrip().getTripId(), 
+								update.getVehicle().getId(),									
+								new Date(stopTime.getArrival().getTime()*1000) , 
+								new Date(feed.getHeader().getTimestamp()*1000),													
+								true,
+								new Boolean(false), 
+								"GTFS-rt");
+							 	
+							 	storePrediction(pred);
+						 	}
+						 	if(stopTime.hasDeparture())
+						 	{
+						 		PredAccuracyPrediction pred = new PredAccuracyPrediction(
+								update.getTrip().getRouteId(), 
+								direction, 
+								stopTime.getStopId(), 
+								update.getTrip().getTripId(), 
+								update.getVehicle().getId(),	
+								new Date(stopTime.getDeparture().getTime()*1000) , 
+								new Date(feed.getHeader().getTimestamp()*1000),													
+								false,
+								new Boolean(false), 
+								"GTFS-rt");
+						 								 		 									
+								storePrediction(pred);
+						 	}						 							 	
+					 }					
+					 else
 					 {
-						 logger.debug("No arrival information for vehicleId={} information at stop={}",update.getVehicle().getId(),stopTime.getStopId());
+						 logger.debug("No prediction for vehicleId={} information for stop={}",update.getVehicle().getId(),stopTime.getStopId());
 					 }
 				 }
 		     }
@@ -209,16 +227,4 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		processExternalPredictions(feed, predictionsReadTime);
 		
 	}
-
-	/**
-	 * Just for debugging
-	 */
-	public static void main(String[] args) {
-		// Need to start up Core so that can access route & stop info
-		Core.createCore();
-
-		// Create a GTFSRealtimePredictionAccuracyModule for testing
-		Module.start("org.transitime.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule");
-	}
-
 }
