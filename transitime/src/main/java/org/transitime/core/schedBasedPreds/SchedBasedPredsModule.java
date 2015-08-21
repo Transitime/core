@@ -146,7 +146,7 @@ public class SchedBasedPredsModule extends Module {
 		Set<String> blockIdsAlreadyAssigned = new HashSet<String>();
 		Collection<IpcVehicleComplete> vehicles =
 				VehicleDataCache.getInstance()
-						.getVehiclesUncludingSchedBasedOnes();
+						.getVehiclesIncludingSchedBasedOnes();
 		for (IpcVehicle vehicle : vehicles) {
 			String blockId = vehicle.getBlockId();
 			if (blockId != null)

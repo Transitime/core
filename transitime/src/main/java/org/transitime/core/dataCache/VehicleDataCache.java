@@ -431,7 +431,7 @@ public class VehicleDataCache {
 	 * 
 	 * @return all vehicles, even schedule based ones
 	 */
-	public Collection<IpcVehicleComplete> getVehiclesUncludingSchedBasedOnes() {
+	public Collection<IpcVehicleComplete> getVehiclesIncludingSchedBasedOnes() {
 		return vehiclesMap.values();
 	}
 
@@ -505,7 +505,8 @@ public class VehicleDataCache {
 	 * @param originalVehicle
 	 * @param vehicle
 	 */
-	private void updateVehiclesByRouteMap(IpcVehicleComplete originalVehicle, IpcVehicleComplete vehicle) {
+	private void updateVehiclesByRouteMap(IpcVehicleComplete originalVehicle, 
+			IpcVehicleComplete vehicle) {
 		// If the route has changed then remove the vehicle from the old map for
 		// that route. Watch out for getRouteShortName() sometimes being null
 		if (originalVehicle != null
