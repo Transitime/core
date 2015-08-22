@@ -262,13 +262,12 @@ public class VehicleDataCache {
     }
 
 	/**
-	 * If the vehicle passed in is a schedule based vehicle whose trip has
-	 * already started then the vehicle is removed from the VehicleDataCache
-	 * maps. This is intended to be used, when the vehicle maps are read, in
-	 * order to remove schedule based vehicles that are no longer important.
-	 * This way can show schedule based vehicles on the map before a trip starts
-	 * but once the trip has started they will be removed since showing them at
-	 * the start of the trip would then most likely be incorrect.
+	 * This is intended to be used, when the vehicle maps are read, in order to
+	 * remove schedule based vehicles that are no longer important if the trip
+	 * has already started. This way can show schedule based vehicles on the map
+	 * before a trip starts but once the trip has started they will be removed
+	 * since showing them at the start of the trip would then most likely be
+	 * incorrect.
 	 * 
 	 * @param vehicles
 	 *            collection of vehicles to investigate
@@ -279,28 +278,16 @@ public class VehicleDataCache {
     	Collection<IpcVehicleComplete> filteredVehicles = 
 				new ArrayList<IpcVehicleComplete>(vehicles.size());
 
+    	long systemTime = Core.getInstance().getSystemTime();
+    	
     	for (IpcVehicleComplete vehicle : vehicles) {
-			// If past the start time of the trip/block by more than a minute
-			// then should remove the vehicle from the maps
-			if (vehicle.isForSchedBasedPred()
-					&& Core.getInstance().getSystemTime() > vehicle
-							.getTripStartEpochTime() + 1 * Time.MS_PER_MIN) {
-				// Remove vehicle from vehiclesMap
-				vehiclesMap.remove(vehicle.getId());
-
-				// Remove vehicle from vehiclesByRouteMap
-				Map<String, IpcVehicleComplete> vehicleMapForRoute = 
-						vehiclesByRouteMap.get(vehicle.getRouteShortName());
-				if (vehicleMapForRoute != null)
-					vehicleMapForRoute.remove(vehicle.getId());
-
-				// Remove vehicle from vehicleIdsByBlockMap
-				List<String> vehicleIdsForOldBlock = 
-						vehicleIdsByBlockMap.get(vehicle.getBlockId());
-				if (vehicleIdsForOldBlock != null)
-					vehicleIdsForOldBlock.remove(vehicle.getId());
-			} else {
-				// Not to be filtered so add it to result
+			long justAfterTripStartTime =
+					vehicle.getTripStartEpochTime() + 1 * Time.MS_PER_MIN;
+    		
+			// Return the vehicle info unless it is a schedule based vehicle 
+    		// and the trip departure time has already passed
+    		if (!vehicle.isForSchedBasedPred() 
+    				|| systemTime < justAfterTripStartTime) {
 				filteredVehicles.add(vehicle);
 			}
     	}
