@@ -555,13 +555,19 @@ public class TravelTimesProcessorForGtfsUpdates {
 	 *            which trip trying to get travel times for
 	 * @param ttForTripFromDb
 	 *            schedule based travel times from db that checking to see if
-	 *            close enough
+	 *            close enough. If null then returns false since no schedule
+	 *            to be close to.
 	 * @param gtfsData
 	 *            for getting schedule info
 	 * @return true if schedule from gtfsData is close enough to the one from
 	 *         ttForTripFromDb
 	 */
 	private boolean scheduleCloseEnough(Trip trip, TravelTimesForTrip ttForTripFromDb, GtfsData gtfsData) {
+		// If no travel times from database then return false
+		if (ttForTripFromDb == null)
+			return false;
+		
+		// Determine schedule based travel times
 		TravelTimesForTrip scheduleBasedTravelTimes =
 				determineTravelTimesBasedOnSchedule(trip, gtfsData);
 
