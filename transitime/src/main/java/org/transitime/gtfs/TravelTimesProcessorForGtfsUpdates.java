@@ -562,7 +562,8 @@ public class TravelTimesProcessorForGtfsUpdates {
 	 * @return true if schedule from gtfsData is close enough to the one from
 	 *         ttForTripFromDb
 	 */
-	private boolean scheduleCloseEnough(Trip trip, TravelTimesForTrip ttForTripFromDb, GtfsData gtfsData) {
+	private boolean scheduleCloseEnough(Trip trip,
+			TravelTimesForTrip ttForTripFromDb, GtfsData gtfsData) {
 		// If no travel times from database then return false
 		if (ttForTripFromDb == null)
 			return false;
