@@ -263,31 +263,20 @@ public class VehicleDataCache {
 
 	/**
 	 * This is intended to be used, when the vehicle maps are read, in order to
-	 * remove schedule based vehicles that are no longer important if the trip
-	 * has already started. This way can show schedule based vehicles on the map
-	 * before a trip starts but once the trip has started they will be removed
-	 * since showing them at the start of the trip would then most likely be
-	 * incorrect.
+	 * remove schedule based vehicles from a collection. 
 	 * 
 	 * @param vehicles
 	 *            collection of vehicles to investigate
 	 * @return filtered collection of vehicles
 	 */
-	private Collection<IpcVehicleComplete> filterSchedBasedVehicleIfPastStart(
+	private Collection<IpcVehicleComplete> filterSchedBasedVehicle(
 			Collection<IpcVehicleComplete> vehicles) {
     	Collection<IpcVehicleComplete> filteredVehicles = 
 				new ArrayList<IpcVehicleComplete>(vehicles.size());
 
-    	long systemTime = Core.getInstance().getSystemTime();
-    	
     	for (IpcVehicleComplete vehicle : vehicles) {
-			long justAfterTripStartTime =
-					vehicle.getTripStartEpochTime() + 1 * Time.MS_PER_MIN;
-    		
 			// Return the vehicle info unless it is a schedule based vehicle 
-    		// and the trip departure time has already passed
-    		if (!vehicle.isForSchedBasedPred() 
-    				|| systemTime < justAfterTripStartTime) {
+    		if (!vehicle.isForSchedBasedPred()) {
 				filteredVehicles.add(vehicle);
 			}
     	}
@@ -332,7 +321,7 @@ public class VehicleDataCache {
 		}
 
 		if (vehicleMapForRoute != null)
-			return filterSchedBasedVehicleIfPastStart(
+			return filterSchedBasedVehicle(
 					filterOldAvlReports(vehicleMapForRoute.values()));
 		else
 			return null;
@@ -410,7 +399,7 @@ public class VehicleDataCache {
 	 * @return
 	 */
 	public Collection<IpcVehicleComplete> getVehicles() {
-		return filterSchedBasedVehicleIfPastStart(vehiclesMap.values());
+		return filterSchedBasedVehicle(vehiclesMap.values());
 	}
 	
 	/**
