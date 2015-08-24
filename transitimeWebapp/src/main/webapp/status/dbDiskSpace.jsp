@@ -133,6 +133,7 @@ if (agencyId == null || agencyId.isEmpty()) {
     	    + "FROM pg_class C " 
     	    + "LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) " 
     	    + "WHERE nspname NOT IN ('pg_catalog', 'information_schema') "
+      	    + "    AND nspname !~ '^pg_toast' "
     	    + "ORDER BY pg_total_relation_size(C.oid) DESC";
     	%>
     	var jsonData2 = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql2) %>;
