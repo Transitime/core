@@ -117,7 +117,7 @@
          Note that gmail seems to filter out messages sometimes. Therefore
          make sure using non-gmail accounts. 
       -->
-    <to>${logback.errorEmail:-skibu@smith.net}</to>
+    <to>${logback.errorEmail:-sbrown@camsys.com}</to>
 
     <!-- Only send e-mail if special "EMAIL" marker is specified for an
          ERROR level message. 
@@ -447,6 +447,6 @@
     -->
   <root level="info">          
     <appender-ref ref="CORE" />
-    <appender-ref ref="ERROR_SMTP" />
+<!--     <appender-ref ref="ERROR_SMTP" /> -->
   </root>
 </configuration>

@@ -46,6 +46,7 @@ import org.transitime.utils.Time;
 abstract public class PredictionAccuracyQuery {
 
 	private final Connection connection;
+	private String dbType = null;
 
 	protected static final int MAX_PRED_LENGTH = 900;
 	protected static final int PREDICTION_LENGTH_BUCKET_SIZE = 30;
@@ -118,6 +119,7 @@ abstract public class PredictionAccuracyQuery {
 	 */
 	public PredictionAccuracyQuery(String dbType, String dbHost, String dbName,
 			String dbUserName, String dbPassword) throws SQLException {
+		this.dbType = dbType;
 		connection = GenericQuery.getConnection(dbType, dbHost, dbName,
 				dbUserName, dbPassword);
 
@@ -131,6 +133,7 @@ abstract public class PredictionAccuracyQuery {
 	 */
 	public PredictionAccuracyQuery(String agencyId) throws SQLException {
 		WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+		this.dbType = agency.getDbType();
 		connection = GenericQuery.getConnection(agency.getDbType(),
 				agency.getDbHost(), agency.getDbName(), agency.getDbUserName(),
 				agency.getDbPassword());
@@ -270,9 +273,9 @@ abstract public class PredictionAccuracyQuery {
 				predTypeSql = " AND affectedByWaitStop = false ";
 			}
 		}
-
+		// TODO generate database independent SQL if possible!
 		// Put the entire SQL query together
-		String sql = "SELECT "
+		String postSql = "SELECT "
 				+ "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
 				+ "     predictionAccuracyMsecs/1000 as predAccuracy, "
 				+ "     predictionSource as source "
@@ -288,6 +291,33 @@ abstract public class PredictionAccuracyQuery {
 				+ "  AND predictionSource <> 'MBTA_seconds' " + routeSql
 				+ sourceSql + predTypeSql;
 
+		
+		String mySql = "SELECT "
+				+ "     (to_seconds(predictedTime)-to_seconds(predictionReadTime)) div 1 as predLength, "
+				+ "     predictionAccuracyMsecs/1000 as predAccuracy, "
+				+ "     predictionSource as source "
+				+ " FROM PredictionAccuracy "
+				+ "WHERE "
+				+ "arrivalDepartureTime BETWEEN "
+				+ "  DATE_ADD(?, INTERVAL -1 DAY) "
+				+ "AND DATE_ADD(?, INTERVAL 1 DAY) "
+				+ timeSql
+				+ "  AND "
+				+ "abs(to_seconds(predictedTime)-to_seconds(predictionReadTime)) < 900 " //15 mins
+				// Filter out MBTA_seconds source since it is isn't
+				// significantly different from MBTA_epoch.
+				// TODO should clean this up by not having MBTA_seconds source
+				// at all
+				// in the prediction accuracy module for MBTA.
+				+ "  AND predictionSource <> 'MBTA_seconds' " + routeSql
+				+ sourceSql + predTypeSql;
+
+		
+		String sql = postSql;
+		if ("mysql".equals(dbType)) {
+			sql = mySql;
+		}
+		
 		PreparedStatement statement = null;
 		try {
 			statement = connection.prepareStatement(sql);
