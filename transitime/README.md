@@ -178,3 +178,13 @@ WORK IN PROGRESS........................
 Configuring the system
 =================================
 UpdateTravelTimes.java is a main application which looks at historical data in the system and updates the estimated times where there is relavent historical data.
+
+This takes one or two date arguments. It is intended to process one days data and update the travel times in the database based on this data.
+
+If two dates supplied it processes all data within the date range. If a single date provided it processes all data for that day.
+
+Date in is format MM-dd-yyyy
+
+````
+mvn exec:java -Dexec.mainClass="org.transitime.applications.UpdateTravelTimes" -Dexec.args="08-24-2015"
+````
