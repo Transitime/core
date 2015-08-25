@@ -18,6 +18,8 @@ The steps to set up the system are
 	<li>Create API key. For the moment see TestAPIKeyManager.java test. The testAPIKeyManger test will create a key for you.</li>
 	<li>Setup transitime api webapp. Instructions to be added to README.MD in transitimeApi.</li>
 	<li>Setup transitime webapp. Instructions to be added to README.MD in transitimeWebapp.</li>
+	
+	<li>Configure travel times/predictions based on historical data using UpdateTravelTimes.java. Instructions in configure system section below.</li>
 </ul>
 	
 
