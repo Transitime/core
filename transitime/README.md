@@ -185,8 +185,9 @@ If two dates supplied it processes all data within the date range. If a single d
 
 Date in is format MM-dd-yyyy
 
+Example using maven to execute
 ````
-Example using maven to execute<br/>
+
 
 mvn exec:java -Dtransitime.configFiles=/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml -Dtransitime.logging.dir=/home/scrudden/workspace/core/logs/ -Dexec.mainClass="org.transitime.applications.UpdateTravelTimes" -Dexec.args="08-24-2015"
 ````
