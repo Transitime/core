@@ -2,14 +2,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>transitime</groupId>
-  <artifactId>transitime-all</artifactId>
+  <artifactId>transitime</artifactId>
   <version>0.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>transitime-all</name>
+  <name>transitime</name>
   <url>http://www.transitime.org//</url>
   <modules>
     <module>transitime</module>
     <module>transitimeApi</module>
     <module>transitimeWebapp</module>
   </modules>
+  <distributionManagement>
+    <repository>
+      <id>releases-camsys-repo</id>
+      <name>OneBusAway Camsys Release Repo</name>
+      <url>http://developer.onebusaway.org/archiva/repository/releases/</url> 
+    </repository>
+    <snapshotRepository>
+      <id>snapshots-camsys-repo</id>
+      <name>OneBusAway Camsys Snapshot Repo</name>
+      <url>http://developer.onebusaway.org/archiva/repository/snapshots/</url> 
+    </snapshotRepository>
+  </distributionManagement>
+
 </project>
