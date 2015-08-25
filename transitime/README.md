@@ -186,5 +186,5 @@ If two dates supplied it processes all data within the date range. If a single d
 Date in is format MM-dd-yyyy
 
 ````
-mvn exec:java -Dexec.mainClass="org.transitime.applications.UpdateTravelTimes" -Dexec.args="08-24-2015"
+mvn exec:java -Dtransitime.configFiles=/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml -Dexec.mainClass="org.transitime.applications.UpdateTravelTimes" -Dexec.args="08-24-2015"
 ````
