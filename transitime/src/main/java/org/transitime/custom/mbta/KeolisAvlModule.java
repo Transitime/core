@@ -102,7 +102,6 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 				// Therefore need to convert to m/s.
 				float speed = (float) v.getDouble("vehicle_speed") * Geo.MPH_TO_MPS;
 				// Not sure if bearing is the same as heading.
-				// FIXME need to verify
 				float heading = (float) v.getDouble("vehicle_bearing");
 				// The time is really strange. It is off by 4 hours for some
 				// strange reason.
