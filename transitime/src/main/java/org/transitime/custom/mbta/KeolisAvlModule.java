@@ -39,8 +39,8 @@ import org.transitime.utils.Time;
  */
 public class KeolisAvlModule extends PollUrlAvlModule {
 
-	private static StringConfigValue keolisFeedUrl = 
-			new StringConfigValue("transitime.avl.keolisAvlFeedUrl", 
+	private static StringConfigValue mbtaCommuterRailFeedUrl = 
+			new StringConfigValue("transitime.avl.mbtaCommuterRailFeedUrl", 
 					"The URL of the Keolis feed to use.");
 
 	// If debugging feed and want to not actually process
@@ -68,7 +68,7 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 	 */
 	@Override
 	protected String getUrl() {
-		return keolisFeedUrl.getValue();
+		return mbtaCommuterRailFeedUrl.getValue();
 	}
 
 	/**
