@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.avl.AvlModule;
 import org.transitime.avl.PollUrlAvlModule;
 import org.transitime.avl.TaipGpsLocation;
 import org.transitime.config.StringConfigValue;
@@ -48,8 +49,9 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 	// set shouldProcessAvl to false;
 	private static boolean shouldProcessAvl = true;
 	
+	// For logging use AvlModule class so that will end up in the AVL log file
 	private static final Logger logger = LoggerFactory
-			.getLogger(MbtaCommuterRailAvlModule.class);
+			.getLogger(AvlModule.class);
 
 	/********************** Member Functions **************************/
 	
@@ -265,7 +267,7 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 		shouldProcessAvl = false;
 		
 		// Create a NextBusAvlModue for testing
-		Module.start("org.transitime.avl.MbtaCommuterRailAvlModule");
+		Module.start("org.transitime.custom.mbta.MbtaCommuterRailAvlModule");
 	}
 
 }
