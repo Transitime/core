@@ -115,8 +115,16 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 						new AvlReport(vehicleId, gpsTime, lat, lon, speed,
 								heading, "Keolis");
 
-				// Need to set assignment info separately
-				avlReport.setAssignment(tripName, AssignmentType.TRIP_ID);
+				// Need to set assignment info separately. Unfortunately the 
+				// trip ID in the Keolis feed doesn't correspond exactly to the
+				// trip IDs in the GTFS data. In Keolis feed it will be 
+				// something like "CR-FRAMINGHAM-Weekday-515" but in GTFS it will
+				// be "CR-Worcester-CR-Weekday-Worcester-Jun15-515". Therefore 
+				// it is best to just use the trip short name, such as "515".
+				String tripShortName =
+						tripName.substring(tripName.lastIndexOf('-') + 1);
+				avlReport.setAssignment(tripShortName,
+						AssignmentType.TRIP_SHORT_NAME);
 
 				logger.debug("From KeolisAvlModule {}", avlReport);
 				
