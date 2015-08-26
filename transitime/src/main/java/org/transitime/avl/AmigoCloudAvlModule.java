@@ -34,6 +34,12 @@ import org.transitime.modules.Module;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
+/**
+ * AVL module for websocket based feed from AmigoCloud.
+ * 
+ * @author SkiBu Smith
+ *
+ */
 public class AmigoCloudAvlModule extends AvlModule {
 	private static StringConfigValue feedUrl = new StringConfigValue(
 			"transitime.avl.amigocloud.apiToken",
