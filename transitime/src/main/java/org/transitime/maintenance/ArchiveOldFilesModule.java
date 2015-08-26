@@ -181,14 +181,20 @@ public class ArchiveOldFilesModule extends Module {
 	public void run() {		
 		while (true) {
 			try {
-				// Sleep until the time of day specified by secondsIntoDay member
+				// Sleep until the time of day specified by secondsIntoDay 
+				// member
 				sleepTillAppropriateTime();
 				
 				// Actually archive the logs
 				archiveLogFiles();
-			} catch (Exception e) {
+			} catch (Throwable t) {
+				// Note: catching Throwable instead of just Exception since
+				// AWS calls can throw a Throwable and don't want to this
+				// archival thread to exit when there is an error. Should 
+				// continue to run and send an e-mail once a day as a 
+				// reminder that there is a problem.
 				logger.error(Markers.email(), 
-						"Error when archiving old files.", e);
+						"Error when archiving old files.", t);
 			}
 		}
 
