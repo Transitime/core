@@ -35,8 +35,8 @@
 		      config for AWS"-->
 	  	<dependency>
     		<groupId>com.simontuffs</groupId>
-    		<artifactId>workspace</artifactId>
-    		<version>0.97.2</version>
+    		<artifactId>one-jar-boot</artifactId>
+    		<version>0.97.3</version>
   		</dependency>
   
 		<!-- Database related, including c3p0 production quality connector.
