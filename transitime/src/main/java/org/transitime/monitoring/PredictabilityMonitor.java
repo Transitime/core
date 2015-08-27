@@ -122,10 +122,10 @@ public class PredictabilityMonitor extends MonitorBase {
 				+ StringUtils.twoDigitFormat(minPredictableBlocks.getValue())
 				+ ", active blocks=" + activeBlocks.size()
 				+ ", predictable vehicles=" + predictableVehicleCount
-				+ ", vehicles using minimumPredictableVehicles=" 
+				+ " (minimumPredictableVehicles=" 
 				+ Math.max(predictableVehicleCount,
 						minimumPredictableVehicles.getValue())
-				+ ".";
+				+ ").";
 		
 		// If below the threshold then add all the active block IDs to the
 		// message so can more easily see 
