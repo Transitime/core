@@ -34,6 +34,7 @@ import org.transitime.core.TemporalDifference;
 import org.transitime.core.travelTimes.DataFetcher.DbDataMapKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Match;
+import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.statistics.Statistics;
 import org.transitime.utils.Geo;
@@ -41,6 +42,8 @@ import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
+
+import com.amazonaws.services.importexport.model.InvalidParameterException;
 
 /**
  * Takes arrival/departure times plus the matches (where vehicle is matched to a
@@ -357,10 +360,20 @@ public class TravelTimesProcessor {
 	 * 
 	 * @param trip
 	 * @param stopPathIndex
-	 * @return
+	 * @return Number of travel time segments
+	 * @throws InvalidParameterException
 	 */
 	private static int getNumTravelTimeSegments(Trip trip, int stopPathIndex) {
-		double pathLength = trip.getStopPath(stopPathIndex).getLength();
+		StopPath stopPath = trip.getStopPath(stopPathIndex);
+		if (stopPath == null) {
+			String message =
+					"In getNumTravelTimeSegments() stopPathIndex="
+							+ stopPathIndex + " not " + "valid for trip="
+							+ trip;
+			logger.error(message);
+			throw new InvalidParameterException(message);
+		}
+		double pathLength = stopPath.getLength();
 		return getNumTravelTimeSegments(pathLength);
 	}
 	
