@@ -54,6 +54,11 @@ import org.transitime.utils.IntervalTimer;
  * be joined with AvlReport data to get additional information.
  * <p>
  * Serializable since Hibernate requires such.
+ * <p>
+ * Implements Lifecycle so that can have the onLoad() callback be called when
+ * reading in data so that can intern() member strings. In order to do this the
+ * String members could not be declared as final since they are updated after
+ * the constructor is called. 
  *
  * @author SkiBu Smith
  *

@@ -50,7 +50,7 @@ import org.transitime.utils.Time;
  * For persisting an Arrival or a Departure time. Should use Arrival or
  * Departure subclasses.
  * <p>
- * Implements Lifecyle so that can have the onLoad() callback be called when
+ * Implements Lifecycle so that can have the onLoad() callback be called when
  * reading in data so that can intern() member strings. In order to do this the
  * String members could not be declared as final since they are updated after
  * the constructor is called. By interning the member strings less than half
