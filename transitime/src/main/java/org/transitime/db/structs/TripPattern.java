@@ -65,7 +65,7 @@ public class TripPattern implements Serializable, Lifecycle {
 	private final int configRev;
 	
 	// The ID of the trip pattern
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
+	@Column(length=TRIP_PATTERN_ID_LENGTH) 
 	@Id
 	private final String id;
 	
@@ -113,7 +113,9 @@ public class TripPattern implements Serializable, Lifecycle {
 	final protected Map<String, StopPath> stopPathsMap =
 		new HashMap<String, StopPath>();
 	
-
+	// For specifying max size of the trip pattern ID
+	public static final int TRIP_PATTERN_ID_LENGTH = 120;
+	
 	// Hibernate requires this class to be serializable because it uses multiple
 	// columns for the Id.
 	private static final long serialVersionUID = 8002349177548788550L;
@@ -149,8 +151,7 @@ public class TripPattern implements Serializable, Lifecycle {
 		// Generate the id . 
 		this.id = generateTripPatternId(
 				shapeId,
-				stopPaths.get(0),
-				stopPaths.get(stopPaths.size()-1),
+				stopPaths,
 				trip,
 				gtfsData);
 		
@@ -330,44 +331,75 @@ public class TripPattern implements Serializable, Lifecycle {
 
 
 	/**
-	 * Determines the ID of the TripPattern. If the Trip has a non-null shape ID
-	 * then use it. If the shape ID is null then base the ID on the beginning and 
-	 * ending stop IDs. It will be "stop1Id_to_stop2Id".
+	 * Determines the ID of the TripPattern. It is of course important that the
+	 * trip pattern be unique. It also needs to be consistent even if the order
+	 * of the stop_times file changes or trips are added or removed. Plus it
+	 * needs to be understandable. Therefore it consists of appending the
+	 * shapeId (if not-null), the from stop ID, the to stop ID, and a hash of
+	 * the concatenation of all the stop IDs that make up the trip pattern. It
+	 * will be something like "shape_932012_stops_stop1_to_stop2_hash". Long,
+	 * but it is readable, unique, and consistent.
 	 * 
-	 * It is important to not just always use "stop1_to_stop2" since some 
+	 * It is important to not just always use "stop1_to_stop2" since some
 	 * agencies might for the same stops have different stopPaths for connecting
-	 * them. Therefore should use the shapeId from the Trip passed in. 
+	 * them. Therefore should use the shapeId from the Trip passed in.
 	 * 
-	 * @param shapeId Used for the trip pattern id if it is not null
-	 * @param path1 If shapeId null then used as part of ID
-	 * @param path2 If shapeId null then used as part of ID
-	 * @param trip In case things get complicated with determining ID
-	 * @param gtfsData In case things get complicated with determining ID
-	 * @return
+	 * @param shapeId
+	 *            Used for the trip pattern id if it is not null
+	 * @param stopPaths
+	 *            If shapeId null then used as part of ID
+	 * @param trip
+	 *            In case things get complicated with determining ID and need to
+	 *            log message
+	 * @param gtfsData
+	 *            In case things get complicated with determining ID
+	 * @return Unique generated trip pattern ID for the specified trip
 	 */
 	private static String generateTripPatternId(String shapeId, 
-			StopPath path1, StopPath path2,
+			List<StopPath> stopPaths,
 			Trip trip, 
 			GtfsData gtfsData) {
-		String tripPatternId;
+		// The ID to be constructed and returned
+		String tripPatternId = "";
 		
-		// Use the shape ID if it is set.
-		if (shapeId != null)
-			tripPatternId = shapeId;
-		else
-			// No shape ID available so use "stop1_to_stop2"
-			tripPatternId = path1.getStopId() + "_to_" + path2.getStopId();
+		// If shapeId defined then start with it
+		if (shapeId != null) {
+			tripPatternId = "shape_" + shapeId + "_";
+		}
 		
-		// Still need to make sure that tripPatternIds are unique. Seen where
-		// SFMTA defines a trip using the same shape but defines a different
-		// number of stops. For this situation make the ID unique and
-		// warn the user that there likely is a problem with the data.
-		// A modified trip pattern will be something like "shapeId_var3".
+		// Add the from and to stop IDs
+		StopPath path1 = stopPaths.get(0);
+		StopPath path2 = stopPaths.get(stopPaths.size()-1);
+		tripPatternId += path1.getStopId() + "_to_" + path2.getStopId() + "_";
+		
+		// Determine hash in hexadecimal format of list of stops
+		StringBuilder sb = new StringBuilder();
+		for (StopPath stopPath : stopPaths) {
+			sb.append(stopPath.getStopId());
+		}
+		String hexOfStopsHash = String.format("%x", sb.toString().hashCode());
+		tripPatternId += hexOfStopsHash;
+		
+		// Make sure not too long for the database column. Include possibility 
+		// of needing to include the "_variation N" to make it unique. Otherwise
+		// wouldn't notice problem until actually written to db.
+		int extraNeededForVariation = "_variation".length() + 2;
+		if (tripPatternId.length() + extraNeededForVariation > TRIP_PATTERN_ID_LENGTH)
+			tripPatternId =
+					tripPatternId.substring(tripPatternId.length()
+							+ extraNeededForVariation - TRIP_PATTERN_ID_LENGTH);
+		
+		// Still need to make sure that tripPatternIds are unique. This should
+		// never be a problem due to the rather unique way the trip pattern IDs
+		// are determined but still want to be absolutely safe since using a 
+		// hash of the list of stop IDs and a hash isn't guaranteed to be 
+		// unique.
 		boolean problemWithTripPatternId = false;
 		int variationCounter = 1;
 		String originalTripPatternId = tripPatternId;
 		while (gtfsData.isTripPatternIdAlreadyUsed(tripPatternId)) {
-			tripPatternId = originalTripPatternId + "_variation" + variationCounter++;
+			tripPatternId = 
+					originalTripPatternId + "_variation" + variationCounter++;
 			problemWithTripPatternId = true;
 		}
 		
@@ -545,14 +577,19 @@ public class TripPattern implements Serializable, Lifecycle {
 	 * @param stopId2
 	 * @return True if stopId2 is after stopId1
 	 */
-	public boolean isStopAfterStop(String stopId1, String stopId2) {
+	public boolean isStopAtOrAfterStop(String stopId1, String stopId2) {
+		// Short cut
+		if (stopId1.equals(stopId2))
+			return true;
+		
+		// Go through list of stops for trip pattern
 		boolean stopId1Found = false;
 		for (StopPath stopPath : stopPaths) {
-			if (stopPath.getId().equals(stopId1)) {
+			if (stopPath.getStopId().equals(stopId1)) {
 				stopId1Found = true;
 			}
 			
-			if (stopId1Found && stopPath.getId().equals(stopId2)) {
+			if (stopId1Found && stopPath.getStopId().equals(stopId2)) {
 				return true;
 			}
 		}

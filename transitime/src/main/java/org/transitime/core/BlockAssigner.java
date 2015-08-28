@@ -17,6 +17,7 @@
 package org.transitime.core;
 
 import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -24,6 +25,7 @@ import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.utils.Time;
 
 /**
  * Singleton class that handles block assignments from AVL feed. 
@@ -56,16 +58,20 @@ public class BlockAssigner {
 	}
 	
 	/**
-	 * Gets the appropriate block associated with the AvlReport by getting the
-	 * proper serviceId using the AVL timestamp and then determining the
-	 * appropriate block using the serviceId and the assignment from the AVL
-	 * report. Works for block assignments, trip assignments, and trip short
-	 * name assignments. If the assignment not specified in AVL data or the
-	 * block could not be found for the serviceId, it could not matched to the
-	 * trip, or it was a route assignment then null will be returned
+	 * Gets the appropriate block associated with the AvlReport. If the
+	 * assignment is a block assignment then first gets the proper serviceIds
+	 * that are active for the AVL timestamp, and then determines the
+	 * appropriate block using the serviceIds and the assignment from the AVL
+	 * report.
+	 * <p>
+	 * Works for block assignments, trip assignments, and trip short name
+	 * assignments. If the assignment not specified in AVL data or the block
+	 * could not be found for the serviceIds, it could not matched to the trip,
+	 * or it was a route assignment then null will be returned
 	 * 
 	 * @param avlReport
-	 *            So can determine the assignment specified
+	 *            So can determine the assignment ID, and the time so that so
+	 *            that can determine the proper service ID.
 	 * @return Block corresponding to the time and blockId from AVL report, or
 	 *         null if could not determine block.
 	 */
@@ -76,23 +82,32 @@ public class BlockAssigner {
 
 			// If using block assignment...
 			if (avlReport.isBlockIdAssignmentType()) {
-				ServiceUtils service = Core.getInstance().getServiceUtils();
+				ServiceUtils serviceUtis = Core.getInstance().getServiceUtils();
 				Collection<String> serviceIds = 
-						service.getServiceIds(avlReport.getDate());
-				boolean blockFoundForServiceId = false;
+						serviceUtis.getServiceIds(avlReport.getDate());
+				// Go through all current service IDs to find the block
+				// that is currently active
+				Block activeBlock = null;
 				for (String serviceId : serviceIds) {
-					Block block = config.getBlock(serviceId,
+					Block blockForServiceId = config.getBlock(serviceId,
 							avlReport.getAssignmentId());
-					if (block != null) {
-						blockFoundForServiceId = true;
-						logger.debug("For vehicleId={} the block assignment from "
-								+ "the AVL feed is blockId={}", 
-								avlReport.getVehicleId(), 
-								block.getId());
-						return block;
+					// If there is a block for the current service ID
+					if (blockForServiceId != null) {
+						// If found a best match so far then remember it						
+						if (activeBlock == null
+								|| blockForServiceId.isActive(
+										avlReport.getTime(),
+										90 * Time.MIN_IN_SECS)) {
+							activeBlock = blockForServiceId;
+							logger.debug("For vehicleId={} and serviceId={} "
+									+ "the active block assignment from the "
+									+ "AVL feed is blockId={}", 
+									avlReport.getVehicleId(), serviceId,
+									activeBlock.getId());
+						}
 					}
 				}
-				if (!blockFoundForServiceId) {
+				if (activeBlock == null) {
 					logger.error("For vehicleId={} AVL report specifies " 
 							+ "blockId={} but block is not valid for "
 							+ "serviceIds={}",
@@ -100,6 +115,7 @@ public class BlockAssigner {
 							avlReport.getAssignmentId(), 
 							serviceIds);
 				}
+				return activeBlock;
 			} else if (avlReport.isTripIdAssignmentType()) {
 				// Using trip ID
 				Trip trip = config.getTrip(avlReport.getAssignmentId());

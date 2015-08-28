@@ -28,7 +28,7 @@ if (agencyId == null || agencyId.isEmpty()) {
     title="Shows how well system is running, including the AVL feed">
       Server Status</a></li>
   <li><a href="dbDiskSpace.jsp?a=<%= agencyId %>"
-    title="Shows how much disk space is being used by the database.">
+    title="Shows how much disk space is being used by the database. Currently only works for agencies where PostgreSQL database is used.">
       Database Disk Space Utilization</a></li>
 </ul>
 </div>

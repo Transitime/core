@@ -161,6 +161,9 @@ public class AmigoWebsockets {
 					logger.info("closed connection, remote:" + remote
 							+ ", code(" + Integer.toString(code)
 							+ "), reason: " + reason);
+					
+					// Let listener know that connection closing so can restart it
+					listener.onClose(code, reason);
 				}
 
 				@Override

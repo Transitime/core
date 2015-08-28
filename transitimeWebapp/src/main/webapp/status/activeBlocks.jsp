@@ -145,6 +145,15 @@ function removeUnneededBlockAndRouteElements(routes) {
 	}
 }
 
+/**
+ * When doing $(id) using jquery the id cannot contain "." or ":" characters
+ * since those are used to signifify the DOM heirarchy. So convert
+ * such characters to something acceptable.
+ */
+function idForQuery(id) {
+	return id.replace(".", "_").replace(":", "_");
+}
+
 function handleAjaxData(routes) {
 	// Remove blocks and routes that are not in the ajax data
 	removeUnneededBlockAndRouteElements(routes);
@@ -160,7 +169,7 @@ function handleAjaxData(routes) {
 		var routeData = routes.route[j];
 				
 		// If route element doesn't yet exist for this route then create it
-		var routeElementId = "routeId-" + routeData.id;
+		var routeElementId = "routeId-" + idForQuery(routeData.id);
 		var routeElement = $("#" + routeElementId);
 		if (routeElement.length == 0) {
 			// Note: the outer div with class='group' is needed so user can 
@@ -249,7 +258,7 @@ function handleAjaxData(routes) {
 			
 			// If block element doesn't yet exist then create it
 			var blockData = routeData.block[i];
-			var blockElementId = "blockId-" + blockData.id;
+			var blockElementId = "blockId-" + idForQuery(blockData.id);
 			var blockElement = $("#" + routeElementId + " #" + blockElementId);
 			if (blockElement.length == 0) {
 				blocksTable.append(

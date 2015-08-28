@@ -12,13 +12,36 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 	
-	<pluginRepositories>
+	<repositories>
+		<!--  Needed to fix problem with one-jar not working with AWS SDK. 
+		      Was getting error message "Fatal: Failed to load the internal 
+		      config for AWS"-->
+  		<repository>
+    		<snapshots>
+      			<enabled>false</enabled>
+    		</snapshots>
+    		<id>bintray-kevinlee-maven</id>
+    		<name>bintray</name>
+    		<url>http://dl.bintray.com/kevinlee/maven</url>
+  		</repository>
+  	</repositories>
+
+  <pluginRepositories>
 		<pluginRepository>
 			<id>onejar-maven-plugin.googlecode.com</id>
 			<url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
+		<!--  Needed to fix problem with one-jar not working with AWS SDK. 
+		      Was getting error message "Fatal: Failed to load the internal 
+		      config for AWS"-->
+	  	<dependency>
+    		<groupId>com.simontuffs</groupId>
+    		<artifactId>one-jar-boot</artifactId>
+    		<version>0.97.3</version>
+  		</dependency>
+  
 		<!-- Database related, including c3p0 production quality connector.
                      Note: have found that can have problems if don't use similar
 		     versions. Can have trouble finding the c3p0 connection pooler

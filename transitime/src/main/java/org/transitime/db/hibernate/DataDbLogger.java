@@ -354,7 +354,8 @@ public class DataDbLogger {
 			session.save(objectToBeStored);
 			tx.commit();
 		} finally {
-			session.close();
+			if (session != null)
+				session.close();
 		}
 	}
 	

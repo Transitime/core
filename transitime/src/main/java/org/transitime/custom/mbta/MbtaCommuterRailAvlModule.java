@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.avl.AvlModule;
 import org.transitime.avl.PollUrlAvlModule;
 import org.transitime.avl.TaipGpsLocation;
 import org.transitime.config.StringConfigValue;
@@ -48,8 +49,9 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 	// set shouldProcessAvl to false;
 	private static boolean shouldProcessAvl = true;
 	
+	// For logging use AvlModule class so that will end up in the AVL log file
 	private static final Logger logger = LoggerFactory
-			.getLogger(MbtaCommuterRailAvlModule.class);
+			.getLogger(AvlModule.class);
 
 	/********************** Member Functions **************************/
 	
@@ -111,33 +113,45 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 	}
 	
 	/**
-	 * Turns out that trip IDs in the AVL feed sometimes don't match the trip
-	 * short names in the trips.txt GTFS file. If an ID from the feed is only 1
-	 * or 2 characters long then it needs to be padded with zeros. But there is
-	 * also another case where the IDs from the feed are 4 digits long with two
-	 * trailing zeroes. For these need to take of the trailing zeroes. Specific
-	 * examples of these are 61, 62, 63, 64, 67, 68, 69, 72, 94, 95, 97, 98.
+	 * NOTE: used to be that the GTFS config always provided zero padded 3-digit
+	 * pattern/trip short names but the AVL feed would not include the preceding
+	 * zeros. Therefore had to adjust the assignment so that the non-padded
+	 * value from the feed would match the padded value from the config. But now
+	 * MBTA is supplying a supplemental trips.txt file that uses non-padded trip
+	 * short names. This means that don't need to adjust the assignments from
+	 * the feed anymore. Therefore this method simply returns the original
+	 * assignmentFromFeed.
+	 * <p>
+	 * Deprecated: Turns out that trip IDs in the AVL feed sometimes don't match
+	 * the trip short names in the trips.txt GTFS file. If an ID from the feed
+	 * is only 1 or 2 characters long then it needs to be padded with zeros. But
+	 * there is also another case where the IDs from the feed are 4 digits long
+	 * with two trailing zeroes. For these need to take of the trailing zeroes.
+	 * Specific examples of these are 61, 62, 63, 64, 67, 68, 69, 72, 94, 95,
+	 * 97, 98.
 	 * 
 	 * @param assignmentFromFeed
 	 * @return The assignment, adjusted to be proper number of characters so
 	 *         that matches trip short names in the trips.txt GTFS file
 	 */
 	private String adjustAssignment(String assignmentFromFeed) {
-		// Handle special null case
-		if (assignmentFromFeed == null)
-			return assignmentFromFeed;
-		
-		// Assignment is too short so pad it
-		if (assignmentFromFeed.length() == 1)
-			return "00" + assignmentFromFeed;
-		else if (assignmentFromFeed.length() == 2)
-			return "0" + assignmentFromFeed;
-		else if (assignmentFromFeed.length() == 4 
-				&& assignmentFromFeed.endsWith("00"))
-			return assignmentFromFeed.substring(0, 2);
-		
-		// Assignment is OK as is so return it
 		return assignmentFromFeed;
+//		
+//		// Handle special null case
+//		if (assignmentFromFeed == null)
+//			return assignmentFromFeed;
+//		
+//		// Assignment is too short so pad it
+//		if (assignmentFromFeed.length() == 1)
+//			return "00" + assignmentFromFeed;
+//		else if (assignmentFromFeed.length() == 2)
+//			return "0" + assignmentFromFeed;
+//		else if (assignmentFromFeed.length() == 4 
+//				&& assignmentFromFeed.endsWith("00"))
+//			return assignmentFromFeed.substring(0, 2);
+//		
+//		// Assignment is OK as is so return it
+//		return assignmentFromFeed;
 	}
 	
 	// The following are determining the proper place in the
@@ -253,7 +267,7 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 		shouldProcessAvl = false;
 		
 		// Create a NextBusAvlModue for testing
-		Module.start("org.transitime.avl.MbtaCommuterRailAvlModule");
+		Module.start("org.transitime.custom.mbta.MbtaCommuterRailAvlModule");
 	}
 
 }

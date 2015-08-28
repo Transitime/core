@@ -46,7 +46,8 @@ public class CalAmpAvlModule extends AvlModule {
 				
 				// Actually process the report. Creates an AvlReport and 
 				// processes it
-				report.process();
+				if (report != null)
+					report.process();
 			}
 		} catch (Exception e) {
 			logger.error("Exception while parsing CalAmp message. {}", 

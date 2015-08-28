@@ -592,7 +592,7 @@ public class AutoBlockAssigner {
 		if (previousAvlReport == null) {
 			// There was no previous AVL report far enough away from the 
 			// current one so return empty list of matches
-			logger.debug("In AutoBlockAssigner.bestMatch() cannot auto "
+			logger.info("In AutoBlockAssigner.bestMatch() cannot auto "
 					+ "assign vehicle because could not find valid previous "
 					+ "AVL report in history for vehicleId={} further away "
 					+ "than {}m from current AVL report {}",

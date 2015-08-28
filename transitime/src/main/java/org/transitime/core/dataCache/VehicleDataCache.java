@@ -117,10 +117,10 @@ public class VehicleDataCache {
      * calling methods are expected to sync.
      */
     private void readVehicleConfigFromDb() {
+		Session session = 
+				HibernateUtils.getSession(AgencyConfig.getAgencyId());
 		try {
 			// Read VehicleConfig data from database
-			Session session = 
-					HibernateUtils.getSession(AgencyConfig.getAgencyId());
 			List<VehicleConfig> vehicleConfigs = 
 					VehicleConfig.getVehicleConfigs(session);
 			
@@ -134,7 +134,10 @@ public class VehicleDataCache {
 		} catch (HibernateException e) {
 			logger.error("Exception reading in VehicleConfig data. {}", 
 					e.getMessage(), e);
-		}							
+		} finally {
+			// Always close the session
+			session.close();
+		}
     }
     
     /**
@@ -259,45 +262,21 @@ public class VehicleDataCache {
     }
 
 	/**
-	 * If the vehicle passed in is a schedule based vehicle whose trip has
-	 * already started then the vehicle is removed from the VehicleDataCache
-	 * maps. This is intended to be used, when the vehicle maps are read, in
-	 * order to remove schedule based vehicles that are no longer important.
-	 * This way can show schedule based vehicles on the map before a trip starts
-	 * but once the trip has started they will be removed since showing them at
-	 * the start of the trip would then most likely be incorrect.
+	 * This is intended to be used, when the vehicle maps are read, in order to
+	 * remove schedule based vehicles from a collection. 
 	 * 
 	 * @param vehicles
 	 *            collection of vehicles to investigate
 	 * @return filtered collection of vehicles
 	 */
-	private Collection<IpcVehicleComplete> filterSchedBasedVehicleIfPastStart(
+	private Collection<IpcVehicleComplete> filterSchedBasedVehicle(
 			Collection<IpcVehicleComplete> vehicles) {
     	Collection<IpcVehicleComplete> filteredVehicles = 
 				new ArrayList<IpcVehicleComplete>(vehicles.size());
 
     	for (IpcVehicleComplete vehicle : vehicles) {
-			// If past the start time of the trip/block by more than a minute
-			// then should remove the vehicle from the maps
-			if (vehicle.isForSchedBasedPred()
-					&& Core.getInstance().getSystemTime() > vehicle
-							.getTripStartEpochTime() + 1 * Time.MS_PER_MIN) {
-				// Remove vehicle from vehiclesMap
-				vehiclesMap.remove(vehicle.getId());
-
-				// Remove vehicle from vehiclesByRouteMap
-				Map<String, IpcVehicleComplete> vehicleMapForRoute = 
-						vehiclesByRouteMap.get(vehicle.getRouteShortName());
-				if (vehicleMapForRoute != null)
-					vehicleMapForRoute.remove(vehicle.getId());
-
-				// Remove vehicle from vehicleIdsByBlockMap
-				List<String> vehicleIdsForOldBlock = 
-						vehicleIdsByBlockMap.get(vehicle.getBlockId());
-				if (vehicleIdsForOldBlock != null)
-					vehicleIdsForOldBlock.remove(vehicle.getId());
-			} else {
-				// Not to be filtered so add it to result
+			// Return the vehicle info unless it is a schedule based vehicle 
+    		if (!vehicle.isForSchedBasedPred()) {
 				filteredVehicles.add(vehicle);
 			}
     	}
@@ -342,7 +321,7 @@ public class VehicleDataCache {
 		}
 
 		if (vehicleMapForRoute != null)
-			return filterSchedBasedVehicleIfPastStart(
+			return filterSchedBasedVehicle(
 					filterOldAvlReports(vehicleMapForRoute.values()));
 		else
 			return null;
@@ -420,7 +399,7 @@ public class VehicleDataCache {
 	 * @return
 	 */
 	public Collection<IpcVehicleComplete> getVehicles() {
-		return filterSchedBasedVehicleIfPastStart(vehiclesMap.values());
+		return filterSchedBasedVehicle(vehiclesMap.values());
 	}
 	
 	/**
@@ -428,7 +407,7 @@ public class VehicleDataCache {
 	 * 
 	 * @return all vehicles, even schedule based ones
 	 */
-	public Collection<IpcVehicleComplete> getVehiclesUncludingSchedBasedOnes() {
+	public Collection<IpcVehicleComplete> getVehiclesIncludingSchedBasedOnes() {
 		return vehiclesMap.values();
 	}
 
@@ -502,7 +481,8 @@ public class VehicleDataCache {
 	 * @param originalVehicle
 	 * @param vehicle
 	 */
-	private void updateVehiclesByRouteMap(IpcVehicleComplete originalVehicle, IpcVehicleComplete vehicle) {
+	private void updateVehiclesByRouteMap(IpcVehicleComplete originalVehicle, 
+			IpcVehicleComplete vehicle) {
 		// If the route has changed then remove the vehicle from the old map for
 		// that route. Watch out for getRouteShortName() sometimes being null
 		if (originalVehicle != null

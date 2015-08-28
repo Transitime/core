@@ -346,7 +346,7 @@ public class PredictionDataCache {
 	}
 	
 	/**
-	 * Updates predictions in the the cache that are associated with a vehicle.
+	 * Updates predictions in the cache that are associated with a vehicle.
 	 * Removes any that are in oldPredictionsForVehicle and adds all the ones in
 	 * newPredictionsForVehicle.
 	 * 

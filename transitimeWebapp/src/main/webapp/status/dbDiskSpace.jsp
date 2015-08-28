@@ -1,4 +1,4 @@
-<%@ page import="org.transitime.reports.GenericJsonQuery" %>
+<%@ page import="org.transitime.reports.ChartGenericJsonQuery" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -75,7 +75,7 @@ if (agencyId == null || agencyId.isEmpty()) {
           	    + ") AS needed_alias_name "
           	    + "ORDER BY ordering, \"Total Bytes\" DESC";
     	%>
-    	var jsonData = <%= GenericJsonQuery.getJsonString(agencyId, sql) %>;
+    	var jsonData = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql) %>;
         var data1 = new google.visualization.DataTable(jsonData);
         // Make total size cells right justified. When setting to class
         // totalSizeCell also need to set to google-visualization-table-td
@@ -83,6 +83,7 @@ if (agencyId == null || agencyId.isEmpty()) {
         setColumnProperty(data1, 1, 'className', 'totalSizeCell google-visualization-table-td');
         
         // Make the total bold so it stands out
+        var FOO = data1.getNumberOfRows();
         setRowProperty(data1, data1.getNumberOfRows()-1, 'style', 'font-weight: bold;');
         data1.setProperty(data1.getNumberOfRows()-1, 0, 'style', 'text-align: right; font-weight: bold;');
         
@@ -132,9 +133,10 @@ if (agencyId == null || agencyId.isEmpty()) {
     	    + "FROM pg_class C " 
     	    + "LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) " 
     	    + "WHERE nspname NOT IN ('pg_catalog', 'information_schema') "
+      	    + "    AND nspname !~ '^pg_toast' "
     	    + "ORDER BY pg_total_relation_size(C.oid) DESC";
     	%>
-    	var jsonData2 = <%= GenericJsonQuery.getJsonString(agencyId, sql2) %>;
+    	var jsonData2 = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql2) %>;
         var data2 = new google.visualization.DataTable(jsonData2);
         
         // Make total size cells right justified. When setting to class
@@ -167,7 +169,8 @@ if (agencyId == null || agencyId.isEmpty()) {
       // For sorting table with Total: row at bottom. Makes sure that row
       // stays at the bottom
       function sortWithTotalOnBottom(sortProperties, table, tableOptions, view) {
-    	  var sortedRows = view.getSortedRows({column: sortProperties.column, desc: !sortProperties.ascending});
+    	  var sortedRows = view.getSortedRows({column: sortProperties.column, 
+    		                                   desc: !sortProperties.ascending});
     	  
     	  // Find index of where the Totals row is
     	  for (var i=0; i<sortedRows.length; ++i) {
@@ -215,6 +218,11 @@ if (agencyId == null || agencyId.isEmpty()) {
   		margin-left: auto;
   		margin-right: auto;
   		margin-bottom: 30px;
+  	}
+  	
+  	/* For centering google chart tables horizontally */
+  	.google-visualization-table {
+  		width: 100%;
   	}
   	
   </style>

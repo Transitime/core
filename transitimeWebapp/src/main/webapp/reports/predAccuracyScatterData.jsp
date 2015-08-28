@@ -1,4 +1,4 @@
-<%@ page import="org.transitime.reports.GenericJsonQuery" %>
+<%@ page import="org.transitime.reports.ChartGenericJsonQuery" %>
 <%@ page import="org.transitime.utils.Time" %>
 <%@ page import="java.text.ParseException" %>
 <%
@@ -119,7 +119,7 @@ String sql = "SELECT "
 	+ "  AND predictionSource <> 'MBTA_seconds' ";
 
 // Determine the json data by running the query
-String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
+String jsonString = ChartGenericJsonQuery.getJsonString(agencyId, sql);
 
 // If no data then return error status with an error message
 if (jsonString == null || jsonString.isEmpty()) {

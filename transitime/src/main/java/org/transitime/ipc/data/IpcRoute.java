@@ -110,8 +110,10 @@ public class IpcRoute extends IpcRouteSummary {
 	}
 	
 	/**
-	 * Returns trip pattern specified by tripPatternId. If tripPatternId is null
-	 * then returns the longest trip pattern for each direction.
+	 * Returns trip pattern specified by tripPatternId or stopId. If
+	 * tripPatternId is null but stopId is set then returns the longest trip
+	 * pattern that serves the specified stopId. If both tripPatternId and
+	 * stopId are null then returns longest trip pattern each direction.
 	 * 
 	 * @param dbRoute
 	 *            The route to get the trip patterns for
@@ -121,7 +123,7 @@ public class IpcRoute extends IpcRouteSummary {
 	 * @param tripPatternId
 	 *            The specified trip pattern to get. If null then will use
 	 *            longest trip pattern for each direction.
-	 * @return
+	 * @return List of trip patterns for specified stopId and tripPatternId
 	 */
 	private static List<TripPattern> getUiTripPatterns(Route dbRoute,
 			String stopId, String tripPatternId) {
@@ -190,7 +192,7 @@ public class IpcRoute extends IpcRouteSummary {
 				if (stopId != null) {
 					isUiStop = false;
 					for (TripPattern tripPattern : uiTripPatterns) {
-						if (tripPattern.isStopAfterStop(stopId, currentStopId)) {
+						if (tripPattern.isStopAtOrAfterStop(stopId, currentStopId)) {
 							isUiStop = true;
 							break;
 						}

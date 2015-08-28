@@ -132,10 +132,11 @@
      <level>INFO</level>
    </filter>
 
-   <!-- Provide last 5 entries (INFO, WARN, or ERROR) to provide context.
+   <!-- Provide just last entry. If want to can provide addition previous 
+        entries (INFO, WARN, or ERROR) to provide context.
      -->
    <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
-     <bufferSize>3</bufferSize>
+     <bufferSize>1</bufferSize>
    </cyclicBufferTracker>
 
     <!-- NOTE: it is important to set asynchronousSending to false. Otherwise
@@ -155,7 +156,7 @@
     <smtpPort>465</smtpPort>
     <SSL>true</SSL>
     <username>transittestsmtp@gmail.com</username>
-    <password>transittest</password>
+    <password>transittest_</password>
     <from>msmithtransit@gmail.com</from>
     <subject>%level %logger{0} - %m</subject>
     <layout class="ch.qos.logback.classic.PatternLayout">
