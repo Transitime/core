@@ -23,8 +23,10 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -50,7 +52,8 @@ import org.transitime.utils.Time;
  *  
  * @author SkiBu Smith
  */
-@Entity @DynamicUpdate 
+@Entity @DynamicUpdate
+@EntityListeners(ArrivalDeparture.ListenerCallback.class)
 @Table(name="ArrivalsDepartures",
        indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
                       columnList="time" ) } )
@@ -58,7 +61,7 @@ public class ArrivalDeparture implements Serializable {
 	
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String vehicleId;
+	private /* FIXME final */ String vehicleId;
 	
 	// Originally did not use msec precision (datetime(3)) specification
 	// because arrival/departure times are only estimates and having such
@@ -79,7 +82,7 @@ public class ArrivalDeparture implements Serializable {
 
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String stopId;
+	private /* FIXME final */ String stopId;
 	
 	// From the GTFS stop_times.txt file for the trip. The gtfsStopSeq can
 	// be different from stopPathIndex. The stopIndex is included here so that
@@ -97,7 +100,7 @@ public class ArrivalDeparture implements Serializable {
 
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String tripId;
+	private /* FIXME final */ String tripId;
 	
 	// The revision of the configuration data that was being used
 	@Column 
@@ -120,10 +123,10 @@ public class ArrivalDeparture implements Serializable {
 	private final Date scheduledTime;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String blockId;
+	private /* FIXME final */ String blockId;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String routeId;
+	private /* FIXME final */ String routeId;
 	
 	// routeShortName is included because for some agencies the
 	// route_id changes when there are schedule updates. But the
@@ -131,13 +134,13 @@ public class ArrivalDeparture implements Serializable {
 	// it is better for when querying for arrival/departure data
 	// over a timespan.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String routeShortName;
+	private /* FIXME final */ String routeShortName;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String serviceId;
+	private /* FIXME final */ String serviceId;
 		
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String directionId;
+	private /* FIXME final */ String directionId;
 	
 	// The index of which trip this is within the block.
 	@Column 
@@ -175,6 +178,33 @@ public class ArrivalDeparture implements Serializable {
 
 	/********************** Member Functions **************************/
 
+	public static class ListenerCallback {
+		@PostLoad
+		public void postLoad(ArrivalDeparture ad) {
+			System.out.println("YES! v=" + ad.getVehicleId());
+		}
+	}
+	
+	@PostLoad
+	protected void compact() {
+		System.out.println("Interning v=" + vehicleId);
+		if (vehicleId != null)
+			vehicleId = vehicleId.intern();
+		if (stopId != null)
+			stopId = stopId.intern();
+		if (tripId != null)
+			tripId = tripId.intern();
+		if (blockId != null)
+			blockId = blockId.intern();
+		if (routeId != null)
+			routeId = routeId.intern();
+		if (routeShortName != null)
+			routeShortName = routeShortName.intern();
+		if (serviceId != null)
+			serviceId = serviceId.intern();
+		if (directionId != null)
+			directionId= directionId.intern();
+	}
 	/**
 	 * Constructor called when creating an ArrivalDeparture object to be 
 	 * stored in db.
@@ -244,6 +274,7 @@ public class ArrivalDeparture implements Serializable {
 	 * from database.
 	 */
 	protected ArrivalDeparture() {
+		System.out.println("In ArrivalDeparture() no arg constructor");
 		this.vehicleId = null;
 		this.time = null;
 		this.avlTime = null;
