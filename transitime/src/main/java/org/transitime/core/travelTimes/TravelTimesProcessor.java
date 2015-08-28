@@ -151,12 +151,17 @@ public class TravelTimesProcessor {
 
 	/**
 	 * Special MapKey class so that can make sure using the proper one for the
-	 * associated maps in this class. The key is made up of the tripId and the
-	 * stopPathIndex.
+	 * associated maps in this class. The key is made up of the tripId, the
+	 * stopPathIndex, and the stopId. The stopId is included so that can see if
+	 * the historic data stopPathIndex and stopId match for the currently
+	 * configured trip. This is important for making sure that don't use
+	 * historic data for a stopPathIndex when stops have been removed from or
+	 * added to the trip.
 	 */
 	public static class ProcessedDataMapKey extends MapKey {
-		private ProcessedDataMapKey(String tripId, int stopPathIndex) {
-			super(tripId, stopPathIndex);
+		private ProcessedDataMapKey(String tripId, int stopPathIndex,
+				String stopId) {
+			super(tripId, stopPathIndex, stopId);
 		}
 		
 		private String getTripId() {
@@ -167,14 +172,22 @@ public class TravelTimesProcessor {
 			return (int) o2;
 		}
 
+		private String getStopId() {
+			return (String) o3;
+		}
+		
 		@Override
 		public String toString() {
-			return "ProcessedDataMapKey [tripId=" + o1 + ", stopPathIndex=" + o2 + "]";
+			return "ProcessedDataMapKey [" 
+					+ "tripId=" + o1 
+					+ ", stopPathIndex=" + o2 
+					+ ", stopId=" + o3 + "]";
 		}
 	}
 
-	private static ProcessedDataMapKey getKey(String tripId, int stopIndex) {
-		return new ProcessedDataMapKey(tripId, stopIndex);
+	private static ProcessedDataMapKey getKey(String tripId, int stopPathIndex,
+			String stopId) {
+		return new ProcessedDataMapKey(tripId, stopPathIndex, stopId);
 	}
 
 	/**
@@ -259,8 +272,9 @@ public class TravelTimesProcessor {
 			lateTimeMsec = 0;
 		
 		// Get the MapKey so can put stop time into map
-		ProcessedDataMapKey mapKeyForTravelTimes = 
-				getKey(arrDep.getTripId(), arrDep.getStopPathIndex());
+		ProcessedDataMapKey mapKeyForTravelTimes =
+				getKey(arrDep.getTripId(), arrDep.getStopPathIndex(),
+						arrDep.getStopId());
 
 		// Add this stop time to map so it can be averaged
 		addStopTimeToMap(mapKeyForTravelTimes, lateTimeMsec);		
@@ -643,8 +657,9 @@ public class TravelTimesProcessor {
 		}
 		
 		// Determine the key for storing the data into appropriate map
-		ProcessedDataMapKey mapKeyForTravelTimes = 
-				getKey(arrDep2.getTripId(), arrDep2.getStopPathIndex());
+		ProcessedDataMapKey mapKeyForTravelTimes =
+				getKey(arrDep2.getTripId(), arrDep2.getStopPathIndex(),
+						arrDep2.getStopId());
 			
 		// If looking at arrival and departure for same stop then determine
 		// the stop time.
@@ -814,6 +829,28 @@ public class TravelTimesProcessor {
 						"configuration data even though historic data was " +
 						"found for it.", 
 						mapKey.getTripId());
+				continue;
+			}
+
+			// Make sure stopPathIndex and stopId from historic data match
+			// the current trip configuration. This is important since stops
+			// for a trip might have changed.
+			if (mapKey.getStopPathIndex() >= trip.getStopPaths().size()) {
+				logger.error("Problem with stopPathIndex for historical data. "
+						+ "The stopPathIndex from the historical data {} is "
+						+ "greater than the number of stop paths for {}",
+						mapKey.getStopPathIndex(), trip);
+				continue;
+			}
+			String stopIdFromTrip = 
+					trip.getStopPath(mapKey.getStopPathIndex()).getStopPathId();
+			if (!mapKey.getStopId().equals(stopIdFromTrip)) {
+				logger.error("Problem with stopPathIndex for historical data. "
+						+ "The stopPathIndex from the historical data {} "
+						+ "corresponds to stopId={} but for the trip the "
+						+ "stopId={}. {}",
+						mapKey.getStopPathIndex(), mapKey.getStopId(), 
+						stopIdFromTrip, trip);
 				continue;
 			}
 			
