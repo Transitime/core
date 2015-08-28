@@ -239,17 +239,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-			  <groupId>org.apache.maven.plugins</groupId>
-			  <artifactId>maven-jar-plugin</artifactId>
-			  <configuration>
-			    <archive>
-			      <manifest>
-				<mainClass>org.transitime.applications.Core</mainClass>
-			      </manifest>
-			    </archive>
-			  </configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.dstovall</groupId>
 				<artifactId>onejar-maven-plugin</artifactId>
 				<version>1.4.4</version>
@@ -257,10 +246,10 @@
 					<execution>
 						<id>build-first</id>
 						<configuration>
-							<mainClass>org.transitime.applications.Core</mainClass>
+							<mainClass>org.transitime.applications.CreateWebAgency</mainClass>
 							<attachToBuild>true</attachToBuild>
 							<classifier>onejar</classifier>
-							<filename>core.jar</filename>
+							<filename>createWebAgency.jar</filename>
 						</configuration>
 						<goals>
 							<goal>one-jar</goal>
@@ -338,13 +327,14 @@
 							<goal>one-jar</goal>
 						</goals>
 					</execution>
+					<!--  we build this one last so maven deploys the proper jar -->
 					<execution>
-						<id>build-eighth</id>
+						<id>build-last</id>
 						<configuration>
-							<mainClass>org.transitime.applications.CreateWebAgency</mainClass>
+							<mainClass>org.transitime.applications.Core</mainClass>
 							<attachToBuild>true</attachToBuild>
 							<classifier>onejar</classifier>
-							<filename>createWebAgency.jar</filename>
+							<filename>core.jar</filename>
 						</configuration>
 						<goals>
 							<goal>one-jar</goal>
@@ -352,6 +342,30 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-assembly-plugin</artifactId>
+			  <configuration>
+			  <descriptorRefs>
+			    <descriptorRef>jar-with-dependencies</descriptorRef>
+			  </descriptorRefs>
+			    <archive>
+			      <manifest>
+				<mainClass>org.transitime.applications.Core</mainClass>
+			      </manifest>
+			    </archive>
+			  </configuration>
+			  <executions>
+			    <execution>
+			      <id>make-assembly</id> <!-- this is used for inheritance merges -->
+			      <phase>package</phase> <!-- bind to the packaging phase -->
+			      <goals>
+				<goal>single</goal>
+			      </goals>
+			    </execution>
+			  </executions>
+			</plugin>
+
 		</plugins>
 
 	</build>
