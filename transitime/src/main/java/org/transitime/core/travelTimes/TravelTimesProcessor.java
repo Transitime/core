@@ -843,7 +843,7 @@ public class TravelTimesProcessor {
 				continue;
 			}
 			String stopIdFromTrip = 
-					trip.getStopPath(mapKey.getStopPathIndex()).getStopPathId();
+					trip.getStopPath(mapKey.getStopPathIndex()).getStopId();
 			if (!mapKey.getStopId().equals(stopIdFromTrip)) {
 				logger.error("Problem with stopPathIndex for historical data. "
 						+ "The stopPathIndex from the historical data {} "
