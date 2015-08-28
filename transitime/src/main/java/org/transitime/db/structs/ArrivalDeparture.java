@@ -274,7 +274,6 @@ public class ArrivalDeparture implements Serializable {
 	 * from database.
 	 */
 	protected ArrivalDeparture() {
-		System.out.println("In ArrivalDeparture() no arg constructor");
 		this.vehicleId = null;
 		this.time = null;
 		this.avlTime = null;
