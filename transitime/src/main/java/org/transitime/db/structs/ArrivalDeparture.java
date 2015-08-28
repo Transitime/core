@@ -23,10 +23,8 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -49,13 +47,20 @@ import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 /**
- * For persisting an Arrival or a Departure time. Should use Arrival or 
+ * For persisting an Arrival or a Departure time. Should use Arrival or
  * Departure subclasses.
- *  
+ * <p>
+ * Implements Lifecyle so that can have the onLoad() callback be called when
+ * reading in data so that can intern() member strings. In order to do this the
+ * String members could not be declared as final since they are updated after
+ * the constructor is called. By interning the member strings less than half
+ * (about 40%) of the RAM to be used. This is very important when reading in
+ * large batches of ArrivalDeparture objects!
+ * 
  * @author SkiBu Smith
  */
-@Entity @DynamicUpdate
-@EntityListeners(ArrivalDeparture.ListenerCallback.class)
+@Entity 
+@DynamicUpdate
 @Table(name="ArrivalsDepartures",
        indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
                       columnList="time" ) } )
@@ -63,7 +68,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private /* FIXME final */ String vehicleId;
+	private String vehicleId;
 	
 	// Originally did not use msec precision (datetime(3)) specification
 	// because arrival/departure times are only estimates and having such
@@ -84,7 +89,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private /* FIXME final */ String stopId;
+	private String stopId;
 	
 	// From the GTFS stop_times.txt file for the trip. The gtfsStopSeq can
 	// be different from stopPathIndex. The stopIndex is included here so that
@@ -102,7 +107,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private /* FIXME final */ String tripId;
+	private String tripId;
 	
 	// The revision of the configuration data that was being used
 	@Column 
@@ -125,10 +130,10 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	private final Date scheduledTime;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private /* FIXME final */ String blockId;
+	private String blockId;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private /* FIXME final */ String routeId;
+	private String routeId;
 	
 	// routeShortName is included because for some agencies the
 	// route_id changes when there are schedule updates. But the
@@ -136,13 +141,13 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	// it is better for when querying for arrival/departure data
 	// over a timespan.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private /* FIXME final */ String routeShortName;
+	private String routeShortName;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private /* FIXME final */ String serviceId;
+	private String serviceId;
 		
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private /* FIXME final */ String directionId;
+	private String directionId;
 	
 	// The index of which trip this is within the block.
 	@Column 
@@ -180,50 +185,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	/********************** Member Functions **************************/
 
-	@Override
-	public void onLoad(Session s, Serializable id) throws CallbackException {
-		System.out.println("In onLoad() for " + this);
-	}
-	@Override
-	public boolean onSave(Session s) throws CallbackException {
-		return Lifecycle.NO_VETO;
-	}
-	@Override
-	public boolean onUpdate(Session s) throws CallbackException {
-		return Lifecycle.NO_VETO;
-	}
-	@Override
-	public boolean onDelete(Session s) throws CallbackException {
-		return Lifecycle.NO_VETO;
-	}
-	
-	public static class ListenerCallback {
-		@PostLoad
-		public void postLoad(ArrivalDeparture ad) {
-			System.out.println("YES! v=" + ad.getVehicleId());
-		}
-	}
-	
-	@PostLoad
-	protected void compact() {
-		System.out.println("Interning v=" + vehicleId);
-		if (vehicleId != null)
-			vehicleId = vehicleId.intern();
-		if (stopId != null)
-			stopId = stopId.intern();
-		if (tripId != null)
-			tripId = tripId.intern();
-		if (blockId != null)
-			blockId = blockId.intern();
-		if (routeId != null)
-			routeId = routeId.intern();
-		if (routeShortName != null)
-			routeShortName = routeShortName.intern();
-		if (serviceId != null)
-			serviceId = serviceId.intern();
-		if (directionId != null)
-			directionId= directionId.intern();
-	}
 	/**
 	 * Constructor called when creating an ArrivalDeparture object to be 
 	 * stored in db.
@@ -313,6 +274,57 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.serviceId = null;
 	}
 
+	/**
+	 * Callback due to implementing Lifecycle interface. Used to compact
+	 * string members by interning them.
+	 */
+	@Override
+	public void onLoad(Session s, Serializable id) throws CallbackException {
+		if (vehicleId != null)
+			vehicleId = vehicleId.intern();
+		if (stopId != null)
+			stopId = stopId.intern();
+		if (tripId != null)
+			tripId = tripId.intern();
+		if (blockId != null)
+			blockId = blockId.intern();
+		if (routeId != null)
+			routeId = routeId.intern();
+		if (routeShortName != null)
+			routeShortName = routeShortName.intern();
+		if (serviceId != null)
+			serviceId = serviceId.intern();
+		if (directionId != null)
+			directionId= directionId.intern();
+	}
+	
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onSave(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onUpdate(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onDelete(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+	
 	/**
 	 * For logging each creation of an ArrivalDeparture to the separate
 	 * ArrivalsDepartures.log file.
