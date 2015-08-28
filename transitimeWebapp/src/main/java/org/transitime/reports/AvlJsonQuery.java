@@ -40,7 +40,7 @@ public class AvlJsonQuery {
 			String startTime, String endTime) {
 		String sql = "SELECT vehicleId, time, assignmentId, lat, lon, speed, "
 				+ "heading, timeProcessed "
-				+ "FROM avlreports "
+				+ "FROM AvlReports "
 				+ "WHERE time BETWEEN '" + startTime 
 				+ "' AND '" + endTime + "' ";
 

@@ -21,10 +21,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.GenericQuery;
 
 public class GenericJsonQuery extends GenericQuery {
 
+	private static final Logger logger = LoggerFactory
+			.getLogger(GenericJsonQuery.class);
 	private StringBuilder strBuilder = new StringBuilder();
 	private List<String> columnNames = new ArrayList<String>();
 	private boolean firstRow = true;
@@ -118,7 +122,7 @@ public class GenericJsonQuery extends GenericQuery {
 			
 			// Start the JSON
 			query.strBuilder.append("{\"data\": [\n");
-
+			logger.debug("sql=" + sql);
 			query.doQuery(sql);
 
 			// Finish up the JSON
