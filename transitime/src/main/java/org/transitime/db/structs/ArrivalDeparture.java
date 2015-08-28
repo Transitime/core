@@ -32,10 +32,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -57,7 +59,7 @@ import org.transitime.utils.Time;
 @Table(name="ArrivalsDepartures",
        indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
                       columnList="time" ) } )
-public class ArrivalDeparture implements Serializable {
+public class ArrivalDeparture implements Lifecycle, Serializable  {
 	
 	@Id 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -178,6 +180,23 @@ public class ArrivalDeparture implements Serializable {
 
 	/********************** Member Functions **************************/
 
+	@Override
+	public void onLoad(Session s, Serializable id) throws CallbackException {
+		System.out.println("In onLoad() for " + this);
+	}
+	@Override
+	public boolean onSave(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+	@Override
+	public boolean onUpdate(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+	@Override
+	public boolean onDelete(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+	
 	public static class ListenerCallback {
 		@PostLoad
 		public void postLoad(ArrivalDeparture ad) {
