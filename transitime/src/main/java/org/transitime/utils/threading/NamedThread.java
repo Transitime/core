@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 
 /**
@@ -64,7 +65,8 @@ public class NamedThread extends Thread {
 				new Thread.UncaughtExceptionHandler() {					
 					@Override
 					public void uncaughtException(Thread t, Throwable e) {
-						logger.error("Uncaught exception in thread " + t.getName(), e);						
+						logger.error("Uncaught exception in thread {}", 
+								t.getName(), e);						
 					}
 				});
 	}
@@ -104,11 +106,13 @@ public class NamedThread extends Thread {
 				if (t instanceof OutOfMemoryError) {
 					logger.error(Markers.email(),
 							"OutOfMemoryError occurred in thread {} so "
-							+ "terminating application", getName(), t);
+							+ "terminating application for {}", 
+							getName(), AgencyConfig.getAgencyId(), t);
 				} else {
 					logger.error(Markers.email(),
 							"Unexpected Throwable occurred which will cause "
-							+ "thread {} to terminate", getName(), t);
+							+ "thread {} to terminate for {}", 
+							getName(), AgencyConfig.getAgencyId(), t);
 				}
 			} catch (Throwable t2) {
 			}
