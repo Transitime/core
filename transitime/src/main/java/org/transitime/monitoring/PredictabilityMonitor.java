@@ -133,10 +133,11 @@ public class PredictabilityMonitor extends MonitorBase {
 			StringBuilder sb = new StringBuilder();
 			sb.append(" Currently active blocks without vehicles: ");
 			for (Block block : activeBlocksWithoutVehicle) {
-				sb.append(block.getId())
-					.append(' ')
+				sb.append("block=")
+					.append(block.getId())
+					.append(", serviceId=")
 					.append(block.getServiceId())
-					.append(", ");
+					.append("; ");
 			}
 			message += sb.toString();
 		}
