@@ -127,21 +127,19 @@ public class PredictabilityMonitor extends MonitorBase {
 						minimumPredictableVehicles.getValue())
 				+ ").";
 		
-		// If below the threshold then add all the active block IDs to the
-		// message so can more easily see 
-		if (fraction < threshold) {
-			StringBuilder sb = new StringBuilder();
-			sb.append(" Currently active blocks without vehicles: ");
-			for (Block block : activeBlocksWithoutVehicle) {
-				sb.append("block=")
-					.append(block.getId())
-					.append(", serviceId=")
-					.append(block.getServiceId())
-					.append("; ");
-			}
-			message += sb.toString();
+		// Add all the active block IDs to the message so can more easily see 
+		// what is going on 
+		StringBuilder sb = new StringBuilder();
+		sb.append(" Currently active blocks without vehicles: ");
+		for (Block block : activeBlocksWithoutVehicle) {
+			sb.append("block=")
+				.append(block.getId())
+				.append(", serviceId=")
+				.append(block.getServiceId())
+				.append("; ");
 		}
-		
+		message += sb.toString();
+
 		setMessage(message, fraction);
 		
 		// Return fraction of blocks that have a predictable vehicle
