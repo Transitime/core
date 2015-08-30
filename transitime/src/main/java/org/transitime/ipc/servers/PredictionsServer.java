@@ -132,7 +132,7 @@ public class PredictionsServer
 
 	// If stops are relatively close then should order routes based on route
 	// order instead of distance.
-	private static double DISTANCE_AT_WHICH_ROUTES_GROUPED = 150.0;
+	private static double DISTANCE_AT_WHICH_ROUTES_GROUPED = 80.0;
 	
 	/**
 	 * For sorting resulting predictions so that they are by how close
