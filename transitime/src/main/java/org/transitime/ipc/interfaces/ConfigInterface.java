@@ -41,7 +41,7 @@ import org.transitime.ipc.data.IpcTripPattern;
 public interface ConfigInterface extends Remote {
 
 	/**
-	 * Obtains list of routes configured.
+	 * Obtains ordered list of routes configured.
 	 * 
 	 * @return
 	 * @throws RemoteException

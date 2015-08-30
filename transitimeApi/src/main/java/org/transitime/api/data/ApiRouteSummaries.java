@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.transitime.ipc.data.IpcRouteSummary;
 
 /**
- * A list of routes.
+ * An ordered list of routes.
  *
  * @author SkiBu Smith
  *
