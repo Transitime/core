@@ -173,7 +173,7 @@ public class PredictionAccuracyModule extends Module {
 	 * 
 	 * @param agencyId
 	 */
-	protected PredictionAccuracyModule(String agencyId) {
+	public PredictionAccuracyModule(String agencyId) {
 		super(agencyId);
 	}
 
