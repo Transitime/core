@@ -133,7 +133,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// and arrival times. But better than not having a time at all.
 			long gpsTime;
 			if (vehicle.hasTimestamp())
-				gpsTime = vehicle.getTimestamp();
+				gpsTime = vehicle.getTimestamp()*1000;
 			else
 				gpsTime = System.currentTimeMillis();
 			
