@@ -16,6 +16,7 @@
  */
 package org.transitime.utils.threading;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -102,7 +103,13 @@ public class NamedThread extends Thread {
 			// an OutOfMemoryError and need to exit even if get another
 			// OutOfMemoryError when logging.
 			try {
+				// Output info to stderr since this is an exception situation.
+				// This will log it to the nohup file used for running core app.
+				System.err.println("Throwable \"" + t.getMessage() 
+						+ "\" occurred at " + new Date());
 				t.printStackTrace();
+				
+				// Log and send out e-mail since this is a serious problem
 				if (t instanceof OutOfMemoryError) {
 					logger.error(Markers.email(),
 							"OutOfMemoryError occurred in thread {} so "
