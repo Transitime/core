@@ -51,13 +51,13 @@ public class ApiStopPath {
 	private int gtfsStopSeq;
 
 	@XmlAttribute
-	private String layoverStop;
+	private Boolean layoverStop;
 
 	@XmlAttribute
-	private String waitStop;
+	private Boolean waitStop;
 
 	@XmlAttribute
-	private String scheduleAdherenceStop;
+	private Boolean scheduleAdherenceStop;
 
 	@XmlAttribute
 	private String breakTime;
@@ -83,10 +83,10 @@ public class ApiStopPath {
 		stopId = ipcStopPath.getStopId();
 		stopName = ipcStopPath.getStopName();
 		gtfsStopSeq = ipcStopPath.getGtfsStopSeq();
-		layoverStop = ipcStopPath.isLayoverStop() ? "true" : null;
-		waitStop = ipcStopPath.isWaitStop() ? "true" : null;
+		layoverStop = ipcStopPath.isLayoverStop() ? true : null;
+		waitStop = ipcStopPath.isWaitStop() ? true : null;
 		scheduleAdherenceStop =
-				ipcStopPath.isScheduleAdherenceStop() ? "true" : null;
+				ipcStopPath.isScheduleAdherenceStop() ? true : null;
 		breakTime =
 				ipcStopPath.getBreakTime() != 0 ? ipcStopPath.getBreakTime()
 						.toString() : null;
