@@ -110,6 +110,8 @@ function showStopPopup(stopMarker) {
 }
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
+ * Also fits the map to show the important part of the route along with
+ * the predicted for vehicles.
  * 
  * Uses global minorStopOptions, stopOptions, minorShapeOptions, shapeOptions, 
  * and map. 
@@ -383,16 +385,18 @@ function createVehicleMarker(vehicleData) {
 	vehicleMarker.headingArrow = headingArrow;
 
 	// When user clicks on vehicle popup shows additional info
-	vehicleMarker.on('click', function(e) {
-		var content = getVehiclePopupContent(this.vehicleData);
-		var latlng = L.latLng(this.vehicleData.loc.lat,
-				this.vehicleData.loc.lon);
-		// Create popup and associate it with the vehicleMarker
-		// so can later update the content.
-		this.popup = L.popup(vehiclePopupOptions, this)
-			.setLatLng(latlng)
-			.setContent(content).openOn(map);
-	});	
+	if (vehicleData.uiType != "minor") {
+		vehicleMarker.on('click', function(e) {
+			var content = getVehiclePopupContent(this.vehicleData);
+			var latlng = L.latLng(this.vehicleData.loc.lat,
+					this.vehicleData.loc.lon);
+			// Create popup and associate it with the vehicleMarker
+			// so can later update the content.
+			this.popup = L.popup(vehiclePopupOptions, this)
+				.setLatLng(latlng)
+				.setContent(content).openOn(map);
+			});	
+	}
 	
 	// Return the new marker
 	return vehicleMarker;
@@ -618,23 +622,110 @@ var apiUrlPrefixAllAgencies;
 var apiUrlPrefix;
 var initialStopId; // So can popup predictions window at startup
 var initialRouteId;
+var initialDirectionId; // Needed cause some agencies use single stop for both directions
+var updateVehiclesTimer;
+var hideStaleThingsTimer;
 
-function showRoute(agencyId, routeId, stopId, apiKey) {
+/**
+ * Clears any timers that might be running. Intended for when leaving the
+ * map page.
+ */
+function clearTimers() {
+	if (updateVehiclesTimer)
+		clearInterval(updateVehiclesTimer);
+	if (hideStaleThingsTimer)
+		clearInterval(hideStaleThingsTimer);
+}
+
+/**
+ * Start the timers for showing vehicle locations and user location.
+ */
+function startTimers() {
+	// Initiate timerloop that constantly updates vehicle positions.
+	// Update every few seconds.
+	updateVehiclesTimer = setInterval(updateVehiclesUsingApiData, 5000);
+	
+	// Setup timer to determine if haven't updated vehicles in a while.
+	// This happens when open up a laptop or tablet that was already
+	// displaying the map. For this situation should get rid of the
+	// old predictions and vehicles so that they don't scoot around
+	// wildly once actually do a vehicle update. This should happen
+	// pretty frequently (every 300ms) so that stale vehicles and
+	// such are removed as quickly as possible.
+	hideStaleThingsTimer = setInterval(hideThingsIfStale, 300);
+}
+
+/**
+ * To be called when the map is first displayed. Shows the specified route
+ * and then the vehicles and user location.
+ * 
+ * @param agencyId
+ * @param routeId
+ * @param stopId
+ * @param apiKey
+ */
+function showRoute(agencyId, routeId, directionId, stopId, apiKey) {
 	// Set globals
 	apiUrlPrefixAllAgencies = "/api/v1/key/" + apiKey;
 	apiUrlPrefix = apiUrlPrefixAllAgencies + "/agency/" + agencyId;
 	initialRouteId = routeId;
+	initialDirectionId = directionId;
 	initialStopId = stopId;
 	
 	// Get the route config data
 	var url = apiUrlPrefix + "/command/route?r=" + routeId;
+	if (directionId)
+		url += "&d=" + directionId;
 	if (stopId)
 		url += "&s=" + stopId;
 	$.getJSON(url, routeConfigCallback);	
 	
 	// Show the vehicles for the route
 	updateVehiclesUsingApiData();
+	
+	// Deal with the timers that show vehicles and user location. First 
+	// clear any old ones.
+	clearTimers();
+	startTimers();
 }
 
+/**
+ * Create the leaflet map with a scale and specify which map tiles to use.
+ * Creates the global map variable.
+ */
+var map;
 
+function createMap() {
+	// Create map. Don't use default zoom control so can set it's position
+	map = L.map('map', {zoomControl: false});
+	L.control.scale({metric: false}).addTo(map);
+	
+	// Add zoom control where it won't interfere with a back button in 
+	// upper left hand corner.
+	L.control.zoom({position: 'bottomleft'}).addTo(map);
+	
+	L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ',
+	  // Specifying a shorter version of attribution. Original really too long.
+	  //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+	  {attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+	   maxZoom: 19
+	   }).addTo(map);
+
+	// Set the CLIP_PADDING to a higher value so that when user pans on map
+	// the route path doesn't need to be redrawn. Note: leaflet documentation
+	// says that this could decrease drawing performance. But hey, it looks
+	// better.
+	L.Path.CLIP_PADDING = 0.8;
+
+	// Initiate event handler to be called when a popup is closed. Sets 
+	// predictionsPopup to null to indicate that don't need to update predictions 
+	// anymore since stop popup not displayed anymore.
+	map.on('popupclose', function(e) {
+		predictionsPopup = null;
+		clearTimeout(predictionsTimeout);
+		
+		if (e.popup.parent)
+			e.popup.parent.popup = null;
+	});
+}
 

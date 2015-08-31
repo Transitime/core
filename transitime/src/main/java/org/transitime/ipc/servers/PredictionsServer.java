@@ -101,10 +101,10 @@ public class PredictionsServer
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#get(java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public List<IpcPredictionsForRouteStopDest> get(String routeIdOrShortName, String stopId,
-			int predictionsPerStop) throws RemoteException {
-		return predictionDataCache.getPredictions(routeIdOrShortName, stopId, null,
-				predictionsPerStop);
+	public List<IpcPredictionsForRouteStopDest> get(String routeIdOrShortName,
+			String stopId, int predictionsPerStop) throws RemoteException {
+		return predictionDataCache.getPredictions(routeIdOrShortName, null,
+				stopId, predictionsPerStop);
 	}
 
 	/* (non-Javadoc)

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.hibernate.criterion.Example.AllPropertySelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -235,17 +234,17 @@ public class PredictionDataCache {
 	 * doesn't have to synchronize or such.
 	 * 
 	 * @param routeIdOrShortName
-	 * @param stopId
 	 * @param directionId
 	 *            Optional parameter for specifying that only want predictions
 	 *            for a specific directionId. Set to null if want predictions
 	 *            for all directions.
+	 * @param stopId
 	 * @param maxPredictionsPerStop
 	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
 	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			String routeIdOrShortName, String stopId, String directionId,
+			String routeIdOrShortName, String directionId, String stopId,
 			int maxPredictionsPerStop) {
 		return getPredictions(routeIdOrShortName, stopId, directionId,
 				maxPredictionsPerStop, Double.NaN);
@@ -256,13 +255,15 @@ public class PredictionDataCache {
 	 * routeShortName instead of the GTFS routeId to identify the stop.
 	 * 
 	 * @param routeIdOrShortName
+	 * @param directionId
 	 * @param stopId
 	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
 	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			String routeIdOrShortName, String stopId, String directionId) {
-		return getPredictions(routeIdOrShortName, stopId, directionId, Integer.MAX_VALUE);
+			String routeIdOrShortName, String directionId, String stopId) {
+		return getPredictions(routeIdOrShortName, directionId, stopId,
+				Integer.MAX_VALUE);
 	}
 	
 	/**
@@ -296,7 +297,7 @@ public class PredictionDataCache {
 		for (RouteStop routeStop : routeStops) {
 			List<IpcPredictionsForRouteStopDest> predsForStop =
 					getPredictions(routeStop.getRouteIdOrShortName(),
-							routeStop.getStopId(), null, predictionsPerStop);
+							null, routeStop.getStopId(), predictionsPerStop);
 			for (IpcPredictionsForRouteStopDest predictions : predsForStop)
 				listOfPredictions.add(predictions);
 		}
@@ -331,7 +332,7 @@ public class PredictionDataCache {
 		// of predictions in case there are a bunch of vehicles that will be
 		// leaving the stop.
 		List<IpcPredictionsForRouteStopDest> predsList = getPredictions(
-				routeShortName, stopId, null, 5 /* maxPredictionsPerStop */);
+				routeShortName, null, stopId, 5 /* maxPredictionsPerStop */);
 		
 		// Go through all the predictions and find the ones for the specified vehicle
 		for (IpcPredictionsForRouteStopDest predsForRouteStop : predsList) {

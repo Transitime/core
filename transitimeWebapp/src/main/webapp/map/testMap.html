@@ -38,34 +38,41 @@
   }
   
   .prediction {font-size: large; font-weight: bold;}
+  
+  /* For a back button. Currently not implemented */
+  #button {
+  	position: absolute; 
+  	z-index: 9999;
+  	top: 10px;
+  	left: 10px;
+  	padding-left: 20px;
+  	padding-right: 20px;
+  	font-size: x-large;
+  }
+  
   </style>
   
 </head>
+
 <body>
   <!--  Create map that takes up entire view -->
-  <div id="map"></div>
+  <div id="map">
+    <!--  <div id='button'>&lt; Back</div>  --> 
+  </div>
 </body>
   
   <script>
-  //Create the map with a scale and specify which map tiles to use
-  var map = L.map('map');
-  L.control.scale({metric: false}).addTo(map);
-  L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
-  	// Specifying a shorter version of attribution. Original really too long.
-      //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-      attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-      maxZoom: 19
-  }).addTo(map);
-
-  // Set the CLIP_PADDING to a higher value so that when user pans on map
-  // the route path doesn't need to be redrawn. Note: leaflet documentation
-  // says that this could decrease drawing performance. But hey, it looks
-  // better.
-  L.Path.CLIP_PADDING = 0.8;
-
+  // Create the leaflet map
+  createMap();
+  
+  // Customize some map options to get desired look. These override the usual
+  // options from mapUIOptions.js
   var stopPopupOptions = {
 			offset: L.point(0, -0),
-			closeButton: false,
+			closeButton: true,
+			// If true then popup closes when pan or zoom, which is underiable.
+			// But if false, then popup can only be closed if use the close button
+			// which is a nuisance since the popup can hide info on walking to stop.
 			closeOnClick: false
 		}
   
@@ -73,45 +80,79 @@
 			color: '#00ee00',
 			weight: 1,
 			opacity: 0.4,
+			clickable: false
 		};
   
-//Initiate event handler to be called when a popup is closed. Sets 
-//predictionsPopup to null to indicate that don't need to update predictions 
-//anymore since stop popup not displayed anymore.
-map.on('popupclose', function(e) {
-	predictionsPopup = null;
-	clearTimeout(predictionsTimeout);
-	
-	if (e.popup.parent)
-		e.popup.parent.popup = null;
-});
+  var shapeOptions = {
+			color: '#00ee00',
+			weight: 8,
+			opacity: 0.8,
+			lineJoin: 'round',
+			clickable: false
+		};
+				
+  var stopOptions = {
+		    color: '#006600',
+		    opacity: 1.0,
+		    radius: 4,
+		    weight: 2,
+		    fillColor: '#006600',
+		    fillOpacity: 0.6,
+		};
 
-//  showRoute("mbta-cr", "CR-Franklin", "Norwood Central", "5ec0de94");
-  showRoute("sfmta", "21", "4992", "5ec0de94");
+  var firstStopOptions = {
+		    color: '#006600',
+		    opacity: 1.0,
+		    radius: 7,
+		    weight: 2,
+		    fillColor: '#ccffcc',
+		    fillOpacity: 0.9,		
+		}
+
+  var minorStopOptions = {
+		    color: '#006600',
+		    opacity: 0.2,
+		    radius: 3,
+		    weight: 2,
+		    fillColor: '#006600',
+		    fillOpacity: 0.2,
+		    clickable: false
+		};
+
+  var vehicleMarkerOptions = {
+			opacity: 1.0,
+		};
+
+  var secondaryVehicleMarkerOptions = {
+			opacity: 0.8,		
+		};
+
+  var minorVehicleMarkerOptions = {
+			opacity: 0.3,
+			clickable: false
+		};
+
+
+  var busIcon = L.icon({
+		    iconUrl: 'images/bus-24.png',
+		    iconRetinaUrl: 'images/bus-24@2x.png',
+		    iconSize: [24, 24],
+		    iconAnchor: [13, 12],
+		    popupAnchor: [0, -12],
+		});
+
+
   
+  //  showRoute("mbta-cr", "CR-Franklin", "Norwood Central", "5ec0de94");
+  showRoute("sfmta", "21", "1", "4992", "5ec0de94");
+  
+  // Showing other route is just for testing
   function showOtherRoute() {
-	  //showRoute("mbta-cr", "CR-Haverhill", null, "5ec0de94");
-	  showRoute("sfmta", "38", "4271", "5ec0de94");
+	  showRoute("mbta-cr", "CR-Haverhill", "1", "North Wilmington", "5ec0de94");
+	  //showRoute("sfmta", "38", "0", "4271", "5ec0de94");
   }
-  
   setTimeout(showOtherRoute, 5000);
   
-  /**
-   * Initiate timerloop that constantly updates vehicle positions.
-   * Update every few seconds.
-   */
-  setInterval(updateVehiclesUsingApiData, 5000);
-
-  /**
-   * Setup timer to determine if haven't updated vehicles in a while.
-   * This happens when open up a laptop or tablet that was already
-   * displaying the map. For this situation should get rid of the
-   * old predictions and vehicles so that they don't scoot around
-   * wildly once actually do a vehicle update. This should happen
-   * pretty frequently (every 300ms) so that stale vehicles and
-   * such are removed as quickly as possible.
-   */
-  setInterval(hideThingsIfStale, 300);
   </script>
 
 </html>

@@ -370,7 +370,7 @@ public class PredictionAccuracyModule extends Module {
 				for (String stopId : stopIds) {
 					List<IpcPredictionsForRouteStopDest> predictions = 
 							PredictionDataCache.getInstance().getPredictions(
-									routeId, stopId, directionId);
+									routeId, directionId, stopId);
 					boolean predictionsFound = false;
 					for (IpcPredictionsForRouteStopDest predList : predictions) {
 						for (IpcPrediction pred : predList
