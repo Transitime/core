@@ -70,7 +70,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructor for creating a PredictionsForRouteStopDest on the server
+	 * Constructor for creating a IpcPredictionsForRouteStopDest on the server
 	 * side.
 	 * 
 	 * @param trip

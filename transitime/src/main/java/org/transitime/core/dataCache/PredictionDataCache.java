@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.hibernate.criterion.Example.AllPropertySelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -154,6 +155,24 @@ public class PredictionDataCache {
 								.getMaxPredictionsTimeSecs()
 						* Time.SEC_IN_MSECS;
 				
+		// Want to filter out arrivals at terminal if also getting departures 
+		// for that stop. Otherwise if user selects a terminal stop they could 
+		// see both departures and (useless) arrivals and be confused with too 
+		// much info. But if only have arrivals then should provide that info 
+		// because it could be useful to user.
+		boolean endOfTripPredFound = false;
+		boolean nonEndOfTripPredFound = false;
+		for (IpcPredictionsForRouteStopDest predictions : predictionsForRouteStop) {
+			for (IpcPrediction preds : predictions.getPredictionsForRouteStop()) {
+				if (preds.isAtEndOfTrip())
+					endOfTripPredFound = true;
+				else
+					nonEndOfTripPredFound = true;
+			}
+		}
+		boolean shouldFilterOutEndOfTripPreds = 
+				endOfTripPredFound && nonEndOfTripPredFound;
+		
 		// Make a copy of the prediction objects so that they cannot be
 		// modified by another thread while they are being accessed. This
 		// is important because when the predictions are modified they are
@@ -165,8 +184,27 @@ public class PredictionDataCache {
 			// If supposed to return only predictions for specific direction and 
 			// the current predictions are for the wrong direction then simply
 			// continue to the next predictions.
-			if (directionId != null && !directionId.equals(predictions.getDirectionId()))
+			if (directionId != null 
+					&& !directionId.equals(predictions.getDirectionId()))
 				continue;
+			
+			// If determined that should filter out end of trip predictions, 
+			// do so if all of the predictions for this stop are end of trip 
+			// predictions. Yes, this is a bit complicated.
+			if (shouldFilterOutEndOfTripPreds) {
+				if (predictions.getPredictionsForRouteStop().size() > 0) {
+					boolean allPredsForEndOfTrip = true;
+					for (IpcPrediction preds : predictions
+							.getPredictionsForRouteStop()) {
+						if (!preds.isAtEndOfTrip()) {
+							allPredsForEndOfTrip = false;
+							continue;
+						}
+					}
+					if (allPredsForEndOfTrip)
+						continue;
+				}
+			}
 			
 			// Direction ID is OK so clone prediction and add to list
 			IpcPredictionsForRouteStopDest clone =
@@ -256,9 +294,9 @@ public class PredictionDataCache {
 		List<IpcPredictionsForRouteStopDest> listOfPredictions = 
 				new ArrayList<IpcPredictionsForRouteStopDest>();
 		for (RouteStop routeStop : routeStops) {
-			List<IpcPredictionsForRouteStopDest> predsForStop = getPredictions(
-					routeStop.getRouteIdOrShortName(), routeStop.getStopId(), null,
-					predictionsPerStop);
+			List<IpcPredictionsForRouteStopDest> predsForStop =
+					getPredictions(routeStop.getRouteIdOrShortName(),
+							routeStop.getStopId(), null, predictionsPerStop);
 			for (IpcPredictionsForRouteStopDest predictions : predsForStop)
 				listOfPredictions.add(predictions);
 		}

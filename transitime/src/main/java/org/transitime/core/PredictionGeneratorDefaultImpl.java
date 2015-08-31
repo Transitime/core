@@ -147,8 +147,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
-					predictionTime,	predictionTime, affectedByWaitStop, 
-					isDelayed, lateSoMarkAsUncertain,
+					predictionTime,	predictionTime, indices.atEndOfTrip(),
+					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
 					ArrivalOrDeparture.ARRIVAL);
 		} else {
 			// Generate a departure time
@@ -247,22 +247,25 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
 							trip, predictionForUser,
 							predictionForNextStopCalculation,
-							affectedByWaitStop, isDelayed,
-							lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE);
+							indices.atEndOfTrip(), affectedByWaitStop,
+							isDelayed, lateSoMarkAsUncertain,
+							ArrivalOrDeparture.DEPARTURE);
 				} else {
 					// Use the expected departure times, possibly adjusted for 
 					// stop wait times
 					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
 							trip, expectedDepartureTime, expectedDepartureTime,
-							affectedByWaitStop, isDelayed,
-							lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE);
+							indices.atEndOfTrip(), affectedByWaitStop,
+							isDelayed, lateSoMarkAsUncertain,
+							ArrivalOrDeparture.DEPARTURE);
 				}
 			} else {
 				// Create and return the departure prediction for this 
 				// non-wait-stop stop
 				return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
-						predictionTime + expectedStopTimeMsec,
-						predictionTime + expectedStopTimeMsec,
+						predictionTime + expectedStopTimeMsec, 
+						predictionTime + expectedStopTimeMsec, 
+						indices.atEndOfTrip(),
 						affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
 						ArrivalOrDeparture.DEPARTURE);
 			}

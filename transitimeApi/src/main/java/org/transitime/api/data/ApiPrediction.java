@@ -61,6 +61,10 @@ public class ApiPrediction {
 	private String vehicleId;
 
 	// Only output if true
+	@XmlAttribute(name = "atEndOfTrip")
+	private String isAtEndOfTrip;
+	
+	// Only output if true
 	@XmlAttribute(name = "delayed")
 	private String isDelayed;
 	
@@ -106,6 +110,9 @@ public class ApiPrediction {
 
 		vehicleId = prediction.getVehicleId();
 
+		if (prediction.isAtEndOfTrip())
+			isAtEndOfTrip = "t";
+		
 		// Only set basedOnScheduledDeparture if true so that it is not output
 		// if false since it will then be null
 		if (prediction.isAffectedByWaitStop())
