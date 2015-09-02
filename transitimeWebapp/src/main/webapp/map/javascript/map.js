@@ -127,6 +127,7 @@ function showStopPopup(stopMarker) {
 var userLatLng = null;
 var nextVehicleLatLng = null;
 var initialStop = null;
+var secondStop = null;
 
 /**
  * Zooms in further to the user loc and the first stop
@@ -136,6 +137,11 @@ function zoomIn() {
 	var bounds = [];
 	bounds.push(L.latLng(initialStop.lat, initialStop.lon));
 
+	// Nice to show at least a bit of the route for context, so also make
+	// sure the second stop is shown
+	if (secondStop)
+		bounds.push(L.latLng(secondStop.lat, secondStop.lon));
+	
 	// Use user's location if it has been determined. If not known
 	// then will zoom in to the first stop alone.
 	if (userLatLng)
@@ -153,7 +159,7 @@ function zoomIn() {
 	var zoomLimit = map.getZoom() + 4;
 	if (zoomLimit > 18)
 		zoomLimit = 18;
-	map.fitBounds(bounds, {animate: true, maxZoom: zoomLimit, padding: [80, 80]});
+	map.fitBounds(bounds, {animate: true, maxZoom: zoomLimit, padding: [10, 10]});
 }
 
 /**
@@ -198,6 +204,12 @@ function routeConfigCallback(route, status) {
 				
 				// Remember the first stop so can zoom to it
 				initialStop = stop;
+				
+				// Also remember the second major stop if there is one
+				if (j+1 < direction.stop.length)
+					secondStop = direction.stop[j+1];
+				else
+					secondStop = null;
 			}
 			
 			// Keep track of non-minor stop locations so can fit map to show them all
