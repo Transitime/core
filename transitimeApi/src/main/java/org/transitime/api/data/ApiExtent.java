@@ -20,7 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import org.transitime.db.structs.Extent;
-import org.transitime.utils.Geo;
+import org.transitime.utils.MathUtils;
 
 /**
  * Describes the extent of a route or agency via a min & max lat & lon.
@@ -31,16 +31,16 @@ import org.transitime.utils.Geo;
 public class ApiExtent {
 
 	@XmlAttribute
-	private String minLat;
+	private double minLat;
 
 	@XmlAttribute
-	private String minLon;
+	private double minLon;
 
 	@XmlAttribute
-	private String maxLat;
+	private double maxLat;
 
 	@XmlAttribute
-	private String maxLon;
+	private double maxLon;
 
 	/********************** Member Functions **************************/
 
@@ -52,10 +52,10 @@ public class ApiExtent {
 	}
 
 	public ApiExtent(Extent extent) {
-		this.minLat = Geo.format(extent.getMinLat());
-		this.minLon = Geo.format(extent.getMinLon());
-		this.maxLat = Geo.format(extent.getMaxLat());
-		this.maxLon = Geo.format(extent.getMaxLon());
+		this.minLat = MathUtils.round(extent.getMinLat(), 5);
+		this.minLon = MathUtils.round(extent.getMinLon(), 5);
+		this.maxLat = MathUtils.round(extent.getMaxLat(), 5);
+		this.maxLon = MathUtils.round(extent.getMaxLon(), 5);
 	}
 
 }
