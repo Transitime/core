@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.transitime.utils.ChinaGpsOffset;
-import org.transitime.utils.Geo;
+import org.transitime.utils.MathUtils;
 
 /**
  * A simple latitude/longitude:
@@ -39,10 +39,10 @@ import org.transitime.utils.Geo;
 public class ApiTransientLocation {
 
 	@XmlAttribute
-	private String lat;
+	private double lat;
 
 	@XmlAttribute
-	private String lon;
+	private double lon;
 
 	/********************** Member Functions **************************/
 
@@ -58,7 +58,9 @@ public class ApiTransientLocation {
 		// that will be displayed properly on map.
 		ChinaGpsOffset.LatLon latLon = ChinaGpsOffset.transform(lat, lon);
 
-		this.lat = Geo.format(latLon.getLat());
-		this.lon = Geo.format(latLon.getLon());
+		// Output only 5 digits past decimal point
+		this.lat = MathUtils.round(latLon.getLat(), 5);
+		// Output only 5 digits past decimal point
+		this.lon = MathUtils.round(latLon.getLon(), 5);
 	}
 }

@@ -375,14 +375,14 @@ public class IpcVehicle implements Serializable {
 	 * is used when it is available. When path heading not available then uses
 	 * the AVL heading. That can be NaN as well though.
 	 * 
-	 * @return Heading of vehicle, or null if speed not defined.
+	 * @return Heading of vehicle, or Float.NaN if heading not defined.
 	 */
 	public float getHeading() {
 		return heading;
 	}
 
 	/**
-	 * @return Speed of vehicle, or null if speed not defined.
+	 * @return Speed of vehicle, or Float.NaN if speed not defined.
 	 */
 	public float getSpeed() {
 		return avl.getSpeed();
