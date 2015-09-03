@@ -233,7 +233,7 @@
 						<id>build-first</id>
 						<configuration>
 							<!-- Attempt to get modified on-jar-boot to work so can access AWS SDK when using OneJar, such as for archiving files -->
-							<onejarVersion>0.97.3</onejarVersion>
+							<!-- <onejarVersion>0.97.3</onejarVersion> -->
 							<mainClass>org.transitime.applications.Core</mainClass>
 							<attachToBuild>true</attachToBuild>
 							<classifier>onejar</classifier>
