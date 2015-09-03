@@ -33,12 +33,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -221,25 +222,16 @@ public class TravelTimesForTrip implements Serializable {
 		logger.info("Reading TravelTimesForTrips for travelTimesRev={} ...", 
 				travelTimesRev);
 		
-		// Get List of all TravelTimesForTrip for the specified rev
-		String hql = "FROM TravelTimesForTrip " +
-				"    WHERE travelTimesRev = :travelTimesRev";
-		Query query = session.createQuery(hql);
-		query.setInteger("travelTimesRev", travelTimesRev);
-		List<TravelTimesForTrip> allTravelTimes;
-		try {
-			allTravelTimes = query.list();
-		} catch (Exception e) {
-			logger.error("Exception in getTravelTimesForTrips(). {}", 
-					e.getMessage());
-			throw e;
-		}
+		List<TravelTimesForTrip> allTravelTimes = session.createCriteria(TravelTimesForTrip.class)
+				.add(Restrictions.eq("travelTimesRev", travelTimesRev))
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();		
 		
 		logger.info("Putting travel times into map...");
 		
 		// Now create the map and return it
 		Map<String, List<TravelTimesForTrip>> map = 
 				new HashMap<String, List<TravelTimesForTrip>>();
+		int i = 0;
 		for (TravelTimesForTrip travelTimes : allTravelTimes) {
 			// Get the List to add the travelTimes to
 			String tripPatternId = travelTimes.getTripPatternId();
@@ -294,7 +286,7 @@ public class TravelTimesForTrip implements Serializable {
 		result = prime * result + travelTimesRev;
 		result = prime * result + tripPatternId.hashCode();
 //		result = prime * result + tripCreatedForId.hashCode();
-		result = prime * result + travelTimesForStopPaths.hashCode();
+//		result = prime * result + travelTimesForStopPaths.hashCode();  // Stack Overflow with lots of data
 		return result;
 	}
 

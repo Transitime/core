@@ -63,14 +63,24 @@ public class DbWriter {
 	 * @param object
 	 */
 	private void writeObject(Session session, Object object) {
-		session.saveOrUpdate(object);
+		writeObject(session, object, true);
+	}
+	
+	private void writeObject(Session session, Object object, boolean checkForUpdate) {
+		if (checkForUpdate) {
+			session.saveOrUpdate(object);
+		} else {
+			session.save(object);
+		}
 
 		// Since can writing large amount of data should use Hibernate 
 		// batching to make sure don't run out memory.
 		counter++;
 		if (counter % HibernateUtils.BATCH_SIZE == 0) {
+			logger.info("flushing with " + counter + " % " + HibernateUtils.BATCH_SIZE);
 			session.flush();
 			session.clear();
+			logger.info("flushed with " + counter + " % " + HibernateUtils.BATCH_SIZE);
 		}
 	}
 	
@@ -112,10 +122,14 @@ public class DbWriter {
 		logger.info("Saving {} blocks (plus associated trips) to database...", 
 				gtfsData.getBlocks().size());
 		int c = 0;
+		long startTime = System.currentTimeMillis();
 		for (Block block : gtfsData.getBlocks()) {
 			logger.debug("Saving block #{} with blockId={} serviceId={} blockId={}",
 					++c, block.getId(), block.getServiceId(), block.getId());
-			writeObject(session, block);
+			writeObject(session, block, false);
+			if (c % 1000 == 0) {
+				logger.info("wrote " + c + " blocks in " + (System.currentTimeMillis()-startTime)/1000 + "s");
+			}
 		}
 		
 		logger.info("Saving routes to database...");

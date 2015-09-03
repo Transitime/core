@@ -489,7 +489,7 @@ public class TripPattern implements Serializable, Lifecycle {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((headsign == null) ? 0 : headsign.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
-		result = prime * result + ((trips == null) ? 0 : trips.hashCode());
+//		result = prime * result + ((trips == null) ? 0 : trips.hashCode());  // stack overflow with large db
 		return result;
 	}
 
