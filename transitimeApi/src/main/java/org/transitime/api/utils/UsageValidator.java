@@ -17,9 +17,9 @@
 
 package org.transitime.api.utils;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -48,7 +48,8 @@ public class UsageValidator {
 	// This is a singleton class
 	private static UsageValidator singleton = new UsageValidator();
 
-	private Map<String, LinkedList<Long>> requestTimesPerIp = new HashMap<String, LinkedList<Long>>();
+	private Map<String, LinkedList<Long>> requestTimesPerIp = 
+			new ConcurrentHashMap<String, LinkedList<Long>>();
 
 	/********************** Member Functions **************************/
 

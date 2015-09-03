@@ -11,7 +11,8 @@
   <!-- Load javascript and css files -->
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-  <!-- New version of map. CLIP_PADDING doesn't seem to work
+  <!-- New version of map. CLIP_PADDING doesn't seem to work and then see 
+       route paths be redrawn in ugly way when panning
   <link rel="stylesheet" href="leaflet/leaflet.css" />
   <script src="leaflet/leaflet.js"></script>
   -->
@@ -124,7 +125,7 @@
 		};
 
   var secondaryVehicleMarkerOptions = {
-			opacity: 0.8,		
+			opacity: 0.65,		
 		};
 
   var minorVehicleMarkerOptions = {
@@ -141,17 +142,24 @@
 		    popupAnchor: [0, -12],
 		});
 
+//Specifies how the blue dot indicating user position looks
+  var userMarkerOptions = {
+  	    color: '#9999FF',
+  	    opacity: 1.0,
+  	    radius: 6,
+  	    weight: 2,
+  	    fillColor: '#6666FF',
+  	    fillOpacity: 1.0,
+  	    clickable: false
+  	};
 
-  
-  //  showRoute("mbta-cr", "CR-Franklin", "Norwood Central", "5ec0de94");
-  showRoute("sfmta", "21", "1", "4992", "5ec0de94");
-  
-  // Showing other route is just for testing
-  function showOtherRoute() {
-	  showRoute("mbta-cr", "CR-Haverhill", "1", "North Wilmington", "5ec0de94");
-	  //showRoute("sfmta", "38", "0", "4271", "5ec0de94");
-  }
-  setTimeout(showOtherRoute, 5000);
+  // Get the parameters from query string and display the route
+  var agencyId = getQueryVariable("a");
+  var routeId = getQueryVariable("r");
+  var directionId = getQueryVariable("d");
+  var stopId = getQueryVariable("s");
+  var apiKey = "5ec0de94";
+  showRoute(agencyId, routeId, directionId, stopId, apiKey);
   
   </script>
 

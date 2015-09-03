@@ -22,7 +22,8 @@ var predictionsTimeout = null;
  */
  
 function predictionCallback(preds, status) {
-	// If predictions popup was closed then don't do anything
+	// If predictions popup was closed then don't do anything,
+	// and don't set timer to reread predictions again.
 	if (predictionsPopup == null) 
 		return;
 	
@@ -30,7 +31,7 @@ function predictionCallback(preds, status) {
 	var routeStopPreds = preds.predictions[0];
 	
 	// Set timeout to update predictions again in few seconds
-	predictionsTimeout = setTimeout(getPredictionsJson, 20000, 
+	predictionsTimeout = setTimeout(getAndShowPredictionsForStop, 20000, 
 			routeStopPreds.routeShortName, routeStopPreds.stopId);
 
 	// Add route and stop info
@@ -38,6 +39,13 @@ function predictionCallback(preds, status) {
 		
 	// For each destination add predictions
 	for (var i in routeStopPreds.dest) {
+		// If direction was specified then only show predictions for
+		// that direction. This is needed for agencies who define a single
+		// stop for both directions. So if prediction for wrong directionId
+		// then skip it.
+		if (initialDirectionId && initialDirectionId != routeStopPreds.dest[i].dir)
+			continue;
+		
 		// If there are several destinations then add a horizontal rule
 		// to break predictions up by destination
 		if (routeStopPreds.dest.length > 1)
@@ -86,9 +94,15 @@ function predictionCallback(preds, status) {
 }
 
 /**
- * Initiates API call to get prediction data.
+ * Initiates AJAX call to get prediction data.
  */
-function getPredictionsJson(routeShortName, stopId) {
+function getAndShowPredictionsForStop(routeShortName, stopId) {
+	// Clear any existing prediction timeout so don't get wrong prediction 
+	// displayed
+	if (predictionsTimeout)
+		clearTimeout(predictionsTimeout);
+	predictionsTimeout = null;
+
 	// JSON request of prediction data
 	var url = apiUrlPrefix + "/command/predictions?rs=" + routeShortName 
 			+ "|" + stopId + "&numPreds=2";
@@ -101,13 +115,47 @@ function getPredictionsJson(routeShortName, stopId) {
  */
 function showStopPopup(stopMarker) {
 	// JSON request of prediction data
-	getPredictionsJson(stopMarker.routeShortName, stopMarker.stop.id);
+	getAndShowPredictionsForStop(stopMarker.routeShortName, stopMarker.stop.id);
     
 	// Create popup in proper place but content will be added in predictionCallback()
 	predictionsPopup = L.popup(stopPopupOptions)
 		.setLatLng(stopMarker.getLatLng())
 		.openOn(map);
 }
+
+// So can zoom to user and initialStop
+var userLatLng = null;
+var nextVehicleLatLng = null;
+var initialStop = null;
+
+/**
+ * Zooms in further to the user loc and the first stop
+ */
+function zoomIn() {
+	// To fit in stop the user selected
+	var bounds = [];
+	bounds.push(L.latLng(initialStop.lat, initialStop.lon));
+
+	// Use user's location if it has been determined. If not known
+	// then will zoom in to the first stop alone.
+	if (userLatLng)
+		bounds.push(userLatLng);
+	
+	// FIXME As experiment also fit in next predicted vehicle
+	if (nextVehicleLatLng)
+		bounds.push(nextVehicleLatLng);
+	
+	// Actually zoom in. Animation is definitely cool looking.
+	// Limit maxZoom in case user is close to stop. Allow to zoom
+	// in only up to 4 levels because beyond that won't use nice
+	// animation for the transition. And limit zoom to level 18
+	// because greater than that is too far.
+	var zoomLimit = map.getZoom() + 4;
+	if (zoomLimit > 18)
+		zoomLimit = 18;
+	map.fitBounds(bounds, {animate: true, maxZoom: zoomLimit, padding: [80, 80]});
+}
+
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
  * Also fits the map to show the important part of the route along with
@@ -121,6 +169,14 @@ function routeConfigCallback(route, status) {
 	if (routeFeatureGroup) {
 		map.removeLayer(routeFeatureGroup);
 	}
+	
+	// If there is an old popup then remove it to make sure that when showing
+	// new route it doesn't try to also show the popup.
+	if (predictionsPopup) {
+		map.closePopup();
+		predictionsPopup = null;
+	}
+
 	// Use a FeatureGroup to contain all paths and stops so that can use
 	// bringToBack() on the whole group at once in  order to make sure that
 	// the paths & stops are drawn below the vehicles even if the vehicles
@@ -139,6 +195,9 @@ function routeConfigCallback(route, status) {
 			// Draw first non-minor stop differently to highlight it
 			if (stop.id == initialStopId) {
 				options = firstStopOptions;
+				
+				// Remember the first stop so can zoom to it
+				initialStop = stop;
 			}
 			
 			// Keep track of non-minor stop locations so can fit map to show them all
@@ -192,13 +251,16 @@ function routeConfigCallback(route, status) {
 	// If stop was specified for getting route then locationOfNextPredictedVehicle
 	// is also returned. Use this vehicle location when fitting bounds of map
 	// so that user will always see the next vehicle coming.
-	if (route.locationOfNextPredictedVehicle) {
-		locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat, 
-				route.locationOfNextPredictedVehicle.lon));
+	if (route.locationOfNextPredictedVehicle) {		
+		nextVehicleLatLng = L.latLng(route.locationOfNextPredictedVehicle.lat, 
+				route.locationOfNextPredictedVehicle.lon);
+		locsToFit.push(nextVehicleLatLng);
 	}
 	
-	// Get map to fit route
-	map.fitBounds(locsToFit);
+	// Get map to fit route. Need to set animate to false. Otherwise if called
+	// a second time bitBounds() doesn't work and the map pans to a strange
+	// place or completely stops working.
+	map.fitBounds(locsToFit, {animate: false});
 	
 	// It can happen that vehicles get drawn before the route paths & stops.
 	// In this case need call bringToBack() on the paths and stops so that
@@ -206,6 +268,9 @@ function routeConfigCallback(route, status) {
 	// Note: bringToBack() must be called after map is first specified 
 	// via fitBounds() or other such method.
 	routeFeatureGroup.bringToBack();
+	
+	// After a bit of a delay, once user can see context, zoom in further
+	setTimeout(zoomIn, 1200);
 }
 
 var vehicleMarkers = [];
@@ -689,6 +754,36 @@ function showRoute(agencyId, routeId, directionId, stopId, apiKey) {
 	startTimers();
 }
 
+var userMarker = null;
+
+/**
+ * Called when get user's location
+ * @param locationEvent
+ */
+function locationFound(locationEvent) {
+	console.log("locationEvent=" + locationEvent.latlng);
+	// Remember user location so can zoom to it when route selected
+	userLatLng = locationEvent.latlng;
+	
+	if (userMarker) {
+		// userMarker already created so move it to proper location
+		userMarker.setLatLng(locationEvent.latlng);
+	} else {
+		// userMarker not yet created so create it now
+		userMarker = L.circleMarker(locationEvent.latlng, userMarkerOptions)
+		.addTo(map);	
+	}
+
+}
+
+/**
+ * Called when error locating user. Nothing to do here but log error.
+ * @param errorEvent
+ */
+function locationError(errorEvent) {
+	console.log("error=" + errorEvent.message);
+}
+
 /**
  * Create the leaflet map with a scale and specify which map tiles to use.
  * Creates the global map variable.
@@ -723,9 +818,28 @@ function createMap() {
 	map.on('popupclose', function(e) {
 		predictionsPopup = null;
 		clearTimeout(predictionsTimeout);
+		predictionsTimeout = null;
 		
 		if (e.popup.parent)
 			e.popup.parent.popup = null;
 	});
+	
+	// Start continuous tracking of user location
+	map.locate({watch: true});
+	map.on("locationfound", locationFound);
+	map.on("locationerror", locationError);
 }
 
+function getQueryVariable(paramName) {
+	var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+    	var pair = vars[i].split("=");
+        if (pair[0] == paramName){
+        	return pair[1];
+        }
+    }
+    
+    // Didn't find the specified param so return false
+    return false;
+}
