@@ -147,7 +147,8 @@ public class PredictionDataCache {
 				getPredictionsForRouteStop(routeShortName, stopId);
 		
 		// Want to limit predictions to max time in future since if using
-		// schedule based predictions generating predictions far ahead.
+		// schedule based predictions then generating predictions far into the 		
+		// future.
 		long maxPredictionEpochTime =
 				Core.getInstance().getSystemTime()
 						+ PredictionGeneratorDefaultImpl
