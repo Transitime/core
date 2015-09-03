@@ -159,7 +159,8 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		    
 			// Create the core AVL object. The feed can provide a silly amount 
 		    // of precision so round to just 5 decimal places.
-			AvlReport avlReport = new AvlReport(vehicleId, gpsTime,
+            // AvlReport is expecting time in ms while the proto provides it in seconds
+			AvlReport avlReport = new AvlReport(vehicleId, gpsTime * 1000L,
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
 					heading,
 					"GTFS-rt",
