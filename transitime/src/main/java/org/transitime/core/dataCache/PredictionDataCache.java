@@ -19,6 +19,7 @@ package org.transitime.core.dataCache;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -217,9 +218,36 @@ public class PredictionDataCache {
 		// object so that the client can get route, stop, and direction info to
 		// display in the UI.
 		if (clonedPredictions.size() == 0) {
-			IpcPredictionsForRouteStopDest pred = new IpcPredictionsForRouteStopDest(
-					routeShortName, stopId, directionId, distanceToStop);
+			IpcPredictionsForRouteStopDest pred =
+					new IpcPredictionsForRouteStopDest(routeShortName, stopId,
+							directionId, distanceToStop);
 			clonedPredictions.add(pred);
+		}
+		
+		// Will frequently get info for trip patterns that are not currently in
+		// service. If only have no predictions, then that should be returned. 
+		// But if do have predictions for a destination then should filter out
+		// the destinations that don't have any predictions so that useful
+		// info doesn't clutter the screen.
+		for (IpcPredictionsForRouteStopDest pred : clonedPredictions) {
+			// If at least one of the destinations has predictions...
+			if (pred.getPredictionsForRouteStop().size() > 0) {
+				// Filter out destination info where there are no predictions.
+				// Use iterator since possibly removing elements in loop
+				Iterator<IpcPredictionsForRouteStopDest> iterator =
+						clonedPredictions.iterator();
+				while (iterator.hasNext()) {
+					IpcPredictionsForRouteStopDest predsForRouteStopDest =
+							iterator.next();
+					// If found destination with no predictions remove it
+					if (predsForRouteStopDest.getPredictionsForRouteStop()
+							.isEmpty()) {
+						iterator.remove();
+					}
+				}
+				
+				continue;
+			}
 		}
 		
 		// Return the safe cloned predictions
