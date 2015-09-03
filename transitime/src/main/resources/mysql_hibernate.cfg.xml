@@ -46,16 +46,14 @@
         easily speed things up. --> 
    <property name="hibernate.c3p0.max_statements">50</property>  
  
-   <!-- When doing lots of writes, such as logging AVL data and other
-        such regularlly occurring data then want to batch the requests
-        to improve efficiency. Info online indicates that a value of
-        between 5 and 30 is best. So using 25. 
-
-        NOTE: when timed where program and db running on same laptop
-        setting batch_size to 25 actually hurt performance by a few
-        percent. Probably much more important when db is remote and
-        network traffic could bog down the thread that is writing. -->
-   <property name="hibernate.jdbc.batch_size">25</property>  
+   <!-- When using a remote datbase batching is critical.
+        Though convincing hibernate to batch is not always
+        easy.  The following are hints to hibernate to batch
+        aggressively. -->
+   <property name="hibernate.jdbc.batch_size">100</property>  
+   <property name="default_batch_fetch_size">100</property>  
+   <property name="hibernate.order_inserts">true</property>  
+   <property name="hibernate.order_updates">true</property>  
  
    <!-- Configure db settings. Currently commented out because this
         can be done programmatically by HibernateUtils using
