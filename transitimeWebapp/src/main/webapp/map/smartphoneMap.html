@@ -74,48 +74,51 @@
 			// If true then popup closes when pan or zoom, which is underiable.
 			// But if false, then popup can only be closed if use the close button
 			// which is a nuisance since the popup can hide info on walking to stop.
-			closeOnClick: false
+			closeOnClick: false,
+			// Don't want map to auto pan every time prediction updated. Tried
+			// setting autoPan to false but didn't work. 
+			autoPan: false
 		}
   
   var minorShapeOptions = {
-			color: '#00ee00',
+			color: '#0080FF',
 			weight: 1,
 			opacity: 0.4,
 			clickable: false
 		};
   
   var shapeOptions = {
-			color: '#00ee00',
-			weight: 8,
-			opacity: 0.8,
+			color: '#0080FF',
+			weight: 7,
+			opacity: 0.75,
 			lineJoin: 'round',
 			clickable: false
 		};
 				
   var stopOptions = {
-		    color: '#006600',
+		    color: '#092F87',
 		    opacity: 1.0,
-		    radius: 4,
+		    radius: 3,
 		    weight: 2,
-		    fillColor: '#006600',
+		    fillColor: '#092F87',
 		    fillOpacity: 0.6,
 		};
 
   var firstStopOptions = {
-		    color: '#006600',
+		    color: '#092F87',
 		    opacity: 1.0,
-		    radius: 7,
+		    radius: 6,
 		    weight: 2,
-		    fillColor: '#ccffcc',
-		    fillOpacity: 0.9,		
+		    fillColor: '#0080FF',
+		    fillOpacity: 0.8,		
 		}
 
   var minorStopOptions = {
-		    color: '#006600',
+		    color: '#092F87',
 		    opacity: 0.2,
-		    radius: 3,
-		    weight: 2,
-		    fillColor: '#006600',
+		    radius: 2,
+		    weight: 1,
+		    fillColor: '#092F87',
 		    fillOpacity: 0.2,
 		    clickable: false
 		};
@@ -144,11 +147,11 @@
 
 //Specifies how the blue dot indicating user position looks
   var userMarkerOptions = {
-  	    color: '#9999FF',
+  	    color: '#ffffff',
   	    opacity: 1.0,
-  	    radius: 6,
-  	    weight: 2,
-  	    fillColor: '#6666FF',
+  	    radius: 5,
+  	    weight: 1,
+  	    fillColor: '#2363FA',
   	    fillOpacity: 1.0,
   	    clickable: false
   	};

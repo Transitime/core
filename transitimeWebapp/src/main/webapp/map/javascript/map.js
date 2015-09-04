@@ -270,7 +270,7 @@ function routeConfigCallback(route, status) {
 	}
 	
 	// Get map to fit route. Need to set animate to false. Otherwise if called
-	// a second time bitBounds() doesn't work and the map pans to a strange
+	// a second time fitBounds() doesn't work and the map pans to a strange
 	// place or completely stops working.
 	map.fitBounds(locsToFit, {animate: false});
 	
@@ -773,7 +773,6 @@ var userMarker = null;
  * @param locationEvent
  */
 function locationFound(locationEvent) {
-	console.log("locationEvent=" + locationEvent.latlng);
 	// Remember user location so can zoom to it when route selected
 	userLatLng = locationEvent.latlng;
 	
@@ -793,7 +792,7 @@ function locationFound(locationEvent) {
  * @param errorEvent
  */
 function locationError(errorEvent) {
-	console.log("error=" + errorEvent.message);
+	console.log("locationError() called. Error=" + errorEvent.message);
 }
 
 /**
