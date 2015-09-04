@@ -228,25 +228,30 @@ public class PredictionDataCache {
 		// service. If only have no predictions, then that should be returned. 
 		// But if do have predictions for a destination then should filter out
 		// the destinations that don't have any predictions so that useful
-		// info doesn't clutter the screen.
+		// info doesn't clutter the screen. Since need to make sure that don't
+		// modify clonedPredictions while removing elements need to be careful
+		// about how go about doing this.
+		boolean hasDestinationWithPredictions = false;
 		for (IpcPredictionsForRouteStopDest pred : clonedPredictions) {
 			// If at least one of the destinations has predictions...
 			if (pred.getPredictionsForRouteStop().size() > 0) {
-				// Filter out destination info where there are no predictions.
-				// Use iterator since possibly removing elements in loop
-				Iterator<IpcPredictionsForRouteStopDest> iterator =
-						clonedPredictions.iterator();
-				while (iterator.hasNext()) {
-					IpcPredictionsForRouteStopDest predsForRouteStopDest =
-							iterator.next();
-					// If found destination with no predictions remove it
-					if (predsForRouteStopDest.getPredictionsForRouteStop()
-							.isEmpty()) {
-						iterator.remove();
-					}
+				hasDestinationWithPredictions = true;
+				break;
+			}
+		}
+		if (hasDestinationWithPredictions) {
+			// Filter out destination info where there are no predictions.
+			// Use iterator since possibly removing elements in loop
+			Iterator<IpcPredictionsForRouteStopDest> iterator =
+					clonedPredictions.iterator();
+			while (iterator.hasNext()) {
+				IpcPredictionsForRouteStopDest predsForRouteStopDest =
+						iterator.next();
+				// If found destination with no predictions remove it
+				if (predsForRouteStopDest.getPredictionsForRouteStop()
+						.isEmpty()) {
+					iterator.remove();
 				}
-				
-				continue;
 			}
 		}
 		
