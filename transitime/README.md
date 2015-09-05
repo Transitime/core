@@ -63,6 +63,8 @@ mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -De
 mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitime.db.webstructs"
 ````
 
+UPDATE: I have swithced from onejar to try maven shade plugin which puts all resources and classed into one jar which I expect will resolve this issue.
+
 processGTFSFile.jar -- Main class: org.transitime.applications.GTFSFileProcessor
 =================================    
 This class the usage can be got from specifying the -h option on its own.
