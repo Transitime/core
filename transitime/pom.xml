@@ -327,65 +327,7 @@
                   </execution>
                 </executions>
             </plugin>
-            <!--
-			<plugin>
-				<groupId>org.dstovall</groupId>
-				<artifactId>onejar-maven-plugin</artifactId>
-				<version>1.4.4</version>
-				<executions>
-				
-				
-					<execution>
-						<id>build-fifth</id>
-						<configuration>
-							<mainClass>org.transitime.applications.GtfsFileProcessor</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>processGTFSFile.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-sixth</id>
-						<configuration>
-							<mainClass>org.transitime.applications.RmiQuery</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>RmiQeury.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-seventh</id>
-						<configuration>
-							<mainClass>org.transitime.applications.CreateAPIKey</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>createAPIKey.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-eighth</id>
-						<configuration>
-							<mainClass>org.transitime.applications.CreateWebAgency</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>createWebAgency.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			-->
+          
 		</plugins>
 
 	</build>
