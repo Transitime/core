@@ -1,11 +1,15 @@
-com.google.transit.realtime
 org.transitime.api
 org.transitime.api.data
 org.transitime.api.data.siri
+org.transitime.api.gtfsRealtime
+org.transitime.api.predsByLoc
 org.transitime.api.rootResources
 org.transitime.api.utils
 org.transitime.applications
 org.transitime.avl
+org.transitime.avl.amigocloud
+org.transitime.avl.calAmp
+org.transitime.avl.socket
 org.transitime.config
 org.transitime.configData
 org.transitime.core
@@ -49,5 +53,6 @@ org.transitime.utils
 org.transitime.utils.csv
 org.transitime.utils.threading
 org.transitime.utils.web
+org.transitime.web
 org.transitime.worldbank
 org.transitime.worldbank.gtfsRtExample
