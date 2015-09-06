@@ -36,6 +36,7 @@
     line-height: 1.2;
     margin: 3px 3px;
     text-align: center;
+    font-size: x-small;
   }
   
   .prediction {font-size: large; font-weight: bold;}
@@ -51,6 +52,22 @@
   	font-size: x-large;
   }
   
+  /* For labeling walking directions with distance and time */
+  .walkingDirDiv {
+  	background: white;
+  	padding-left: 0px;
+  	padding-right: 1px;
+  	height: 14px;
+  	white-space: nowrap; /* So all in one line */
+  	opacity: 0.9;
+  	font-size: x-small;
+  	border-radius: 3px;
+  	vertical-align: top;
+  	border-style: solid;
+  	border-width: 1px;
+  	border-color: gray;
+  }
+    
   </style>
   
 </head>
@@ -145,7 +162,7 @@
 		    popupAnchor: [0, -12],
 		});
 
-//Specifies how the blue dot indicating user position looks
+  //Specifies how the blue dot indicating user position looks
   var userMarkerOptions = {
   	    color: '#ffffff',
   	    opacity: 1.0,
@@ -155,6 +172,16 @@
   	    fillOpacity: 1.0,
   	    clickable: false
   	};
+
+  // For showing walking directions
+  var walkingOptions = {
+		color: '#008800',
+		opacity: 0.6,
+		weight: 4,
+		dashArray: "3,9",
+		lineCap: "square",
+		clickable: false
+  };
 
   // Get the parameters from query string and display the route
   var agencyId = getQueryVariable("a");

@@ -281,6 +281,12 @@ function routeConfigCallback(route, status) {
 	// via fitBounds() or other such method.
 	routeFeatureGroup.bringToBack();
 	
+	// Now that have the stop location can show walking directions
+	if (userLatLng) {
+		showWalkingDirections(userLatLng.lat, userLatLng.lng, 
+				initialStop.lat, initialStop.lon);
+	}
+
 	// After a bit of a delay, once user can see context, zoom in further
 	setTimeout(zoomIn, 1200);
 }
@@ -766,6 +772,62 @@ function showRoute(agencyId, routeId, directionId, stopId, apiKey) {
 	startTimers();
 }
 
+/**
+ * Displays walking directions on map
+ * @param data results from API
+ */
+function walkingDirectionCallback(data) {
+	for (var i=0; i<data.routes.length; ++i) {
+		var route = data.routes[i]
+		
+		// If person is right be the stop, within 20m, then no
+		// point drawing directions.
+		if (route.distance < 20)
+			break;
+		
+		var coordinates = route.geometry.coordinates;
+
+		// FIXME
+		// Create label for the path
+		var duration = Math.round(route.duration/60) + 1;
+		var theHtml = "<image src='images/pitch-12.png'></image>" + duration + "min";
+		var coordIdx = Math.round(coordinates.length/3);
+		var iconLat = coordinates[coordIdx][1];
+		var iconLon = coordinates[coordIdx][0];
+		iconOptions = {
+				className: 'walkingDirDiv', 
+				html: theHtml,
+				iconAnchor: [-3,0],
+				iconSize: null}; // So size isn't auto set to 12px
+		var myIcon = L.divIcon(iconOptions);		
+		L.marker([iconLat, iconLon], {icon: myIcon, clickable: false}).addTo(map);
+
+		// Draw the path
+		var latLngs = [];		
+		for (var j=0; j<coordinates.length; ++j) {
+			var loc = coordinates[j];
+			// Note: for Mapbox API lat & lng are reversed
+			latLngs.push(L.latLng(loc[1], loc[0]));
+		}		
+		var polyline = L.polyline(latLngs, walkingOptions).addTo(map);
+
+	}
+}
+
+/**
+ * Gets walking directions from Mapbox API and displays them on the map
+ */
+function showWalkingDirections(lat1, lon1, lat2, lon2) {
+	// Note that order of longitudes and latitudes is different for Mapbox than usual
+	var url = "https://api.mapbox.com/v4/directions/mapbox.walking/" 
+		+ lon1 + "," + lat1 + ";" 
+		+ lon2 + "," + lat2 +
+		".json?" 
+		+ "access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ";
+	$.getJSON(url, walkingDirectionCallback);
+}
+
+
 var userMarker = null;
 
 /**
@@ -773,6 +835,12 @@ var userMarker = null;
  * @param locationEvent
  */
 function locationFound(locationEvent) {
+	// If user location just now being set then show walking instructions
+	if (!userLatLng) {
+		showWalkingDirections(locationEvent.latlng.lat, locationEvent.latlng.lng, 
+				initialStop.lat, initialStop.lon);
+	}
+	
 	// Remember user location so can zoom to it when route selected
 	userLatLng = locationEvent.latlng;
 	
