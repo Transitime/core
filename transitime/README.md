@@ -193,3 +193,48 @@ Example using maven to execute
 
 mvn exec:java -Dtransitime.configFiles=/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml -Dtransitime.logging.dir=/home/scrudden/workspace/core/logs/ -Dexec.mainClass="org.transitime.applications.UpdateTravelTimes" -Dexec.args="08-24-2015"
 ````
+Configuration File for core.java
+==============================
+Core can read its configuration from an xml configuration file. The xml file is not based on a schema but on nested tags that match the hierachy specified in the names in the source.
+
+<b>/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml</b>
+````
+<?xml version="1.0" encoding="UTF-8"?>
+<transitime>
+    <modules>
+        <!-- <optionalModulesList>org.transitime.core.schedBasedPreds.SchedBasedPredsModule;org.transitime.avl.GtfsRealtimeModule</optionalModulesList> -->                            
+     	<!--<optionalModulesList>org.transitime.avl.GtfsRealtimeModule;org.transitime.custom.irishrail.NexalaAvlModule</optionalModulesList>-->
+     	<optionalModulesList>org.transitime.custom.irishrail.NexalaAvlModule</optionalModulesList>
+    </modules>
+     
+      <core>
+	    <allowableEarlySecondsForInitialMatching>1200</allowableEarlySecondsForInitialMatching>
+	    <allowableLateSecondsForInitialMatching>1200</allowableLateSecondsForInitialMatching>
+	    <maxDistanceFromSegment>10000</maxDistanceFromSegment>	    
+	    <maxPredictionsTimeSecs>7200</maxPredictionsTimeSecs>	    
+	    <agencyId>02</agencyId>
+    </core>	
+    <avl>
+        <!-- URL for GTFS realtime vechicle location stream -->
+        <gtfsRealtimeFeedURI>http://0.0.0.0:8092/vehiclePositions</gtfsRealtimeFeedURI>        
+	<gtfsRealtimeNexalaFeedURI>http://0.0.0.0:8091/vehiclePositions</gtfsRealtimeNexalaFeedURI>
+        <minLongitude>-10.725</minLongitude>
+        <maxLongitude>-5.35</maxLongitude>             
+        <minLatitude>51.35</minLatitude>
+        <maxLatitude>55.45</maxLatitude>                
+        <feedPollingRateSecs>60</feedPollingRateSecs>
+	<!-- Max Speed set to 62.6m/s=140mph -->
+	<maxSpeed>62.6</maxSpeed>	
+    </avl>   
+    <db>
+        <dbName>transitime</dbName>
+        <dbHost>127.0.0.1:5432</dbHost>
+        <dbType>postgresql</dbType>
+        <dbUserName>ogcrudden</dbUserName>
+        <dbPassword>password</dbPassword>
+    </db>     
+    <hibernate>
+        <configFile>/home/ogcrudden/workspace/transitimeconfig/postgres_hibernate.cfg.xml</configFile>        
+    </hibernate>
+</transitime>
+````
