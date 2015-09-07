@@ -195,7 +195,9 @@ mvn exec:java -Dtransitime.configFiles=/home/scrudden/workspace/transitimeconfig
 ````
 Configuration File for core.java
 ==============================
-Core can read its configuration from an xml configuration file. The xml file is not based on a schema but on nested tags that match the hierachy specified in the names in the source. The main work is done by the modules which are configured in the semi colon demlimited list in the optionModuleList tag.  The choice of module and the their individual configuration is a complex task which will be specific to each transit agency.
+Core can read its configuration from an xml configuration file. The xml file is not based on a schema but on nested tags that match the hierachy specified in the names in the source. The main work is done by the modules which are configured in the semi colon delimited list in the optionModuleList tag.  The choice of module and the their individual configuration is a complex task which will be specific to each transit agency.
+
+The database and hibernate config file are specified in this file.
 
 <b>/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml</b>
 ````
