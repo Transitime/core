@@ -19,7 +19,7 @@ The steps to set up the system are
 	<li>Setup transitime api webapp. Instructions to be added to README.MD in transitimeApi.</li>
 	<li>Setup transitime webapp. Instructions to be added to README.MD in transitimeWebapp.</li>
 	
-	<li>Configure travel times/predictions based on historical data using UpdateTravelTimes.java. Instructions in configure system section below.</li>
+	<li>Configure travel times/predictions based on historical data using UpdateTravelTimes.java. Instructions in "Improving Predictions" section below.</li>
 </ul>
 	
 
@@ -177,7 +177,7 @@ example:
 
 
 WORK IN PROGRESS........................
-Improving predictions
+Improving Predictions
 =================================
 UpdateTravelTimes.java is a main application which looks at historical data in the system and updates the estimated times where there is relavent historical data.
 
