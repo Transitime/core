@@ -177,7 +177,7 @@ example:
 
 
 WORK IN PROGRESS........................
-Configuring the system
+Immproving predictions
 =================================
 UpdateTravelTimes.java is a main application which looks at historical data in the system and updates the estimated times where there is relavent historical data.
 
