@@ -165,7 +165,7 @@ args:
 
 ```
 example:
-	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar processGTFSFile.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
+	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar GTFSFileProcessor.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
 ```
 
 
@@ -179,6 +179,11 @@ This takes one or two date arguments. It is intended to process one days data an
 If two dates supplied it processes all data within the date range. If a single date provided it processes all data for that day.
 
 Date in is format MM-dd-yyyy
+
+Example using UpdateTravelTimes.jar
+````
+java -Dtransitime.configFiles=/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml -Dtransitime.logging.dir=/home/scrudden/workspace/core/logs/ -jar UpdateTravelTimes.jar 08-24-2015
+````
 
 Example using maven to execute
 ````
