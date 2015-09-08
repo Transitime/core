@@ -23,18 +23,18 @@ The steps to set up the system are
 </ul>
 	
 
-generateDatabaseSchema.jar -- Main class: org.transitime.applications.SchemaGenerator
+SchemaGenerator.jar -- Main class: org.transitime.applications.SchemaGenerator
 =================================
 
 <br/>
-The jar generateDatabaseSchema.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. A file is generated for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
+The jar SchemaGenerator.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. A file is generated for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
 <br/>
 <i>
 
 
 ```
 usage: 
-	java -jar generateDatabaseSchema.jar<br/>
+	java -jar SchemaGenerator.jar<br/>
  		-o,--outputDirectory <arg>        This is the directory to output the sql<br/>
  		-p,--hibernatePackagePath <arg>   This is the path to the package
                 		                  containing the hibernate annotated java<br/>
@@ -44,24 +44,24 @@ usage:
 
 ```
 example:
-	java -jar generateDatabaseSchema.jar -o c:\temp\ -p org.transitime.db.structs	
+	java -jar SchemaGenerator.jar -o c:\temp\ -p org.transitime.db.structs	
 ```
 To create all tables require you to support the core and the webapp you could run
 
 ```
-	java -jar generateDatabaseSchema.jar -o c:\temp\core\ -p org.transitime.db.structs
-	java -jar generateDatabaseSchema.jar -o c:\temp\web\ -p org.transitime.db.webstructs
+	java -jar SchemaGenerator.jar -o c:\temp\core\ -p org.transitime.db.structs
+	java -jar SchemaGenerator.jar -o c:\temp\web\ -p org.transitime.db.webstructs
 ```
 
 Once these commands have been run you should run the sql created in the files in the core and web directory in your database.
 	
 
-processGTFSFile.jar -- Main class: org.transitime.applications.GTFSFileProcessor
+GTFSFileProcessor.jar -- Main class: org.transitime.applications.GTFSFileProcessor
 =================================    
 This class the usage can be got from specifying the -h option on its own.
 
 ```
-usage: java processGTFSFile.jar [-c <configFile>] [-combineRouteNames]
+usage: java GTFSFileProcessor.jar [-c <configFile>] [-combineRouteNames]
        [-defaultWaitTimeAtStopMsec <msec>] [-gtfsDirectoryName <dirName>]
        [-gtfsUrl <url>] [-gtfsZipFileName <zipFileName>] [-h]
        [-maxDistanceForEliminatingVertices <meters>] [-maxSpeedKph <kph>]
