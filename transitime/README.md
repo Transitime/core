@@ -184,10 +184,3 @@ Example using UpdateTravelTimes.jar
 ````
 java -Dtransitime.configFiles=/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml -Dtransitime.logging.dir=/home/scrudden/workspace/core/logs/ -jar UpdateTravelTimes.jar 08-24-2015
 ````
-
-Example using maven to execute
-````
-
-
-mvn exec:java -Dtransitime.configFiles=/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml -Dtransitime.logging.dir=/home/scrudden/workspace/core/logs/ -Dexec.mainClass="org.transitime.applications.UpdateTravelTimes" -Dexec.args="08-24-2015"
-````
