@@ -5,11 +5,11 @@ The steps to set up the system are
 	<li>Create Database. For this step you are on your own and you should find instructions on the related database providers web sites.
 	</li>
 	<li>Create Database structures
-		using generateDatabaseScheme.jar
+		using SchemaGenerator.jar
 	</li>
 	</li>
 	<li>Import GTFS static data using
-		processGTFSFile.jar
+		GTFSFileProcessor.jar
 	</li>		
 	<li>Get access to a source of realtime GPS data.</li>
 	<li>Create transiTime module to read realtime GPS data or create a converter to convert the realtime datasource to a GTFS-RT vechicle location source.</li>
