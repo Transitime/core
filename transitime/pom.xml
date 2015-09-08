@@ -204,7 +204,13 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-
+		
+		<!-- Used for reflection to find classes in package -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
 		<!-- Servlet related functionality -->
                 <dependency>
                         <groupId>javax.servlet</groupId>
