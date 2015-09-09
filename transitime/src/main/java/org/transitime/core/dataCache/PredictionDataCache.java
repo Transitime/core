@@ -118,11 +118,11 @@ public class PredictionDataCache {
 	 * doesn't have to synchronize or such.
 	 * 
 	 * @param routeIdOrShortName
-	 * @param stopId
 	 * @param directionId
 	 *            Optional parameter for specifying that only want predictions
 	 *            for a specific directionId. Set to null if want predictions
 	 *            for all directions.
+	 * @param stopId
 	 * @param maxPredictionsPerStop
 	 * @param distanceToStop
 	 *            For when getting predictions by location
@@ -130,7 +130,7 @@ public class PredictionDataCache {
 	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			String routeIdOrShortName, String stopId, String directionId,
+			String routeIdOrShortName, String directionId, String stopId,
 			int maxPredictionsPerStop, double distanceToStop) {
 		// Determine the routeShortName so can be used for maps in
 		// the low-level methods of this class
@@ -219,8 +219,8 @@ public class PredictionDataCache {
 		// display in the UI.
 		if (clonedPredictions.size() == 0) {
 			IpcPredictionsForRouteStopDest pred =
-					new IpcPredictionsForRouteStopDest(routeShortName, stopId,
-							directionId, distanceToStop);
+					new IpcPredictionsForRouteStopDest(routeShortName,
+							directionId, stopId, distanceToStop);
 			clonedPredictions.add(pred);
 		}
 		
@@ -280,7 +280,7 @@ public class PredictionDataCache {
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
 			String routeIdOrShortName, String directionId, String stopId,
 			int maxPredictionsPerStop) {
-		return getPredictions(routeIdOrShortName, stopId, directionId,
+		return getPredictions(routeIdOrShortName, directionId, stopId,
 				maxPredictionsPerStop, Double.NaN);
 	}
 	
@@ -311,7 +311,7 @@ public class PredictionDataCache {
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
 			String routeIdOrShortName, String stopId) {
-		return getPredictions(routeIdOrShortName, stopId, null, Integer.MAX_VALUE);
+		return getPredictions(routeIdOrShortName, null, stopId, Integer.MAX_VALUE);
 	}
 
 	/**
