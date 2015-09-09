@@ -178,21 +178,24 @@ public class SchedBasedPredsModule extends Module {
 								.getEpochTime(block.getStartTime(),
 										referenceTime);
 				Location location = block.getStartLoc();
-				AvlReport avlReport =
-						new AvlReport(vehicleId, blockStartEpochTime, location,
-								"Schedule");
-				
-				// Set the block assignment for the AVL report and indicate 
-				// that it is for creating scheduled based predictions
-				avlReport.setAssignment(block.getId(), 
-						AssignmentType.BLOCK_FOR_SCHED_BASED_PREDS);
-
-				logger.info("Creating a schedule based vehicle for blockId={}. "
-						+ "The fake AVL report is {}. The block is {}",
-						block.getId(), avlReport, block.toShortString());
-
-				// Process that AVL report to generate predictions and such
-				AvlProcessor.getInstance().processAvlReport(avlReport);
+				if(location!=null)
+				{
+					AvlReport avlReport =
+							new AvlReport(vehicleId, blockStartEpochTime, location,
+									"Schedule");
+					
+					// Set the block assignment for the AVL report and indicate 
+					// that it is for creating scheduled based predictions
+					avlReport.setAssignment(block.getId(), 
+							AssignmentType.BLOCK_FOR_SCHED_BASED_PREDS);
+	
+					logger.info("Creating a schedule based vehicle for blockId={}. "
+							+ "The fake AVL report is {}. The block is {}",
+							block.getId(), avlReport, block.toShortString());
+	
+					// Process that AVL report to generate predictions and such
+					AvlProcessor.getInstance().processAvlReport(avlReport);
+				}
 			}
 		}
 	}
@@ -296,6 +299,7 @@ public class SchedBasedPredsModule extends Module {
 				// Do the actual work
 				createSchedBasedPredsAsNecessary();				
 			} catch (Exception e) {
+				e.printStackTrace();
 				logger.error(Markers.email(),
 						"Error with SchedBasedPredsModule", e);
 			} 

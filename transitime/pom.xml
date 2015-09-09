@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>transitime</groupId>
 	<artifactId>transitimeCore</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	
 	<properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -204,7 +204,13 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-
+		
+		<!-- Used for reflection to find classes in package -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
 		<!-- Servlet related functionality -->
                 <dependency>
                         <groupId>javax.servlet</groupId>
@@ -224,156 +230,135 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.dstovall</groupId>
-				<artifactId>onejar-maven-plugin</artifactId>
-				<version>1.4.4</version>
-				<executions>
-					<execution>
-						<id>build-first</id>
-						<configuration>
-							<!-- Attempt to get modified on-jar-boot to work so can access AWS SDK when using OneJar, such as for archiving files -->
-							<!-- <onejarVersion>0.97.3</onejarVersion> -->
-							<mainClass>org.transitime.applications.Core</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>core.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-second</id>
-						<configuration>
-							<mainClass>org.transitime.applications.UpdateTravelTimes</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>updateTravelTimes.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-third</id>
-						<configuration>
-							<mainClass>org.transitime.applications.SchemaGenerator</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>generateDatabaseSchema.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-fourth</id>
-						<configuration>
-							<mainClass>org.transitime.applications.ScheduleGenerator</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>generateSchedule.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-fifth</id>
-						<configuration>
-							<mainClass>org.transitime.applications.GtfsFileProcessor</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>processGTFSFile.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-sixth</id>
-						<configuration>
-							<mainClass>org.transitime.applications.RmiQuery</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>RmiQeury.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>build-seventh</id>
-						<configuration>
-							<mainClass>org.transitime.applications.CreateAPIKey</mainClass>
-							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
-							<filename>createAPIKey.jar</filename>
-						</configuration>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                  <execution>
+                    <id>shade-UpdateTravelTimes</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                      <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                          <mainClass>org.transitime.applications.UpdateTravelTimes</mainClass>
+                        </transformer>
+                      </transformers>
+                      <outputFile>target/UpdateTravelTimes.jar</outputFile>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>shade-Core</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                              <mainClass>org.transitime.applications.Core</mainClass>
+                            </transformer>
+                      </transformers>
+                      <outputFile>target/Core.jar</outputFile>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>shade-SchemaGenerator</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                              <mainClass>org.transitime.applications.SchemaGenerator</mainClass>
+                            </transformer>
+                      </transformers>
+                      <outputFile>target/SchemaGenerator.jar</outputFile>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>shade-ScheduleGenerator</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                              <mainClass>org.transitime.applications.ScheduleGenerator</mainClass>
+                            </transformer>
+                      </transformers>
+                      <outputFile>target/ScheduleGenerator.jar</outputFile>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>shade-GtfsFileProcessor</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                              <mainClass>org.transitime.applications.GtfsFileProcessor</mainClass>
+                            </transformer>
+                      </transformers>
+                      <outputFile>target/GtfsFileProcessor.jar</outputFile>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>shade-RmiQuery</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                              <mainClass>org.transitime.applications.RmiQuery</mainClass>
+                            </transformer>
+                      </transformers>
+                      <outputFile>target/RmiQuery.jar</outputFile>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>shade-CreateAPIKey</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                              <mainClass>org.transitime.applications.CreateAPIKey</mainClass>
+                            </transformer>
+                      </transformers>
+                      <outputFile>target/CreateAPIKey.jar</outputFile>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>shade-CreateWebAgency</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                              <mainClass>org.transitime.applications.CreateWebAgency</mainClass>
+                            </transformer>
+                      </transformers>
+                      <outputFile>target/CreateWebAgency.jar</outputFile>
+                    </configuration>
+                  </execution>
+                </executions>
+            </plugin>
+          
+
 		</plugins>
 
 	</build>
-	<profiles>
-		<profile>
-			<id>runCore</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.1.1</version>
-						<executions>
-							<execution>
-								<phase>test</phase>
-								<goals>
-									<goal>java</goal>
-								</goals>
-								<configuration>
-									<mainClass>org.transitime.applications.Core</mainClass>
-									<arguments>
-										<argument>arg0</argument>
-										<argument>arg1</argument>
-									</arguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>	
-		<profile>
-			<id>dbTest</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.1.1</version>
-						<executions>
-							<execution>
-								<phase>test</phase>
-								<goals>
-									<goal>java</goal>
-								</goals>
-								<configuration>
-									<mainClass>org.transitime.applications.DbTest</mainClass>
-									<arguments>
-										<argument>arg0</argument>
-										<argument>arg1</argument>
-									</arguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>	
-	</profiles>
+
 </project>

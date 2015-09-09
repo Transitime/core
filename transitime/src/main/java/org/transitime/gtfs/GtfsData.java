@@ -2386,6 +2386,8 @@ public class GtfsData {
 		processFareRules();
 		processTransfers();
 		
+		
+		
 		// Sometimes will be using a partial configuration. For example, for 
 		// MBTA commuter rail only want to use the trips defined for 
 		// commuter rail even though the GTFS data can have trips for
@@ -2410,23 +2412,21 @@ public class GtfsData {
 						defaultWaitTimeAtStopMsec, maxSpeedKph);
 		travelTimesProcesssor.process(session, this);
 		
-		// Try allowing garbage collector to free up some memory since
-		// don't need the GTFS structures anymore.
-		gtfsRoutesMap = null;
-		gtfsTripsMap = null;
-		gtfsStopTimesForTripMap = null;
-		
-		// Now that have read in all the data into collections output it
-		// to database.
+				
 		DbWriter dbWriter = new DbWriter(this);
-		dbWriter.write(session, revs.getConfigRev());		
-		
+		dbWriter.write(session, revs.getConfigRev());	
 		// Finish things up by closing the session
 		session.close();
 		
 		// Let user know what is going on
 		logger.info("Finished processing GTFS data from {} . Took {} msec.",
-				gtfsDirectoryName, timer.elapsedMsec());		
+				gtfsDirectoryName, timer.elapsedMsec());
+		
+		// Try allowing garbage collector to free up some memory since
+		// don't need the GTFS structures anymore.
+		gtfsRoutesMap = null;
+		gtfsTripsMap = null;
+		gtfsStopTimesForTripMap = null;	
 
 		// just for debugging
 //		GtfsLoggingAppender.outputMessagesToSysErr();
