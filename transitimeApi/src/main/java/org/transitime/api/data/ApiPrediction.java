@@ -78,7 +78,7 @@ public class ApiPrediction {
 
 	// Only output if passenger count is valid
 	@XmlAttribute(name = "passengerCount")
-	private String passengerCount;
+	private Integer passengerCount;
 
 	/********************** Member Functions **************************/
 
@@ -121,7 +121,7 @@ public class ApiPrediction {
 		// Only set passengerCount if it is valid so that it is not output if it
 		// is not valid since will then be null
 		if (prediction.isPassengerCountValid())
-			passengerCount = Integer.toString(prediction.getPassengerCount());
+			passengerCount = (int) prediction.getPassengerCount();
 		
 		// Only set if true so only output for rare case
 		if (prediction.isDelayed())

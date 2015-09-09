@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcStopPath;
-import org.transitime.utils.StringUtils;
+import org.transitime.utils.MathUtils;
 
 /**
  *
@@ -60,13 +60,13 @@ public class ApiStopPath {
 	private Boolean scheduleAdherenceStop;
 
 	@XmlAttribute
-	private String breakTime;
+	private Integer breakTime;
 
 	@XmlElement
 	private List<ApiLocation> locations;
 
 	@XmlAttribute
-	private String pathLength;
+	private Double pathLength;
 
 	/********************** Member Functions **************************/
 
@@ -89,13 +89,13 @@ public class ApiStopPath {
 				ipcStopPath.isScheduleAdherenceStop() ? true : null;
 		breakTime =
 				ipcStopPath.getBreakTime() != 0 ? ipcStopPath.getBreakTime()
-						.toString() : null;
+						: null;
 
 		locations = new ArrayList<ApiLocation>();
 		for (Location loc : ipcStopPath.getLocations()) {
 			locations.add(new ApiLocation(loc.getLat(), loc.getLon()));
 		}
 
-		pathLength = StringUtils.oneDigitFormat(ipcStopPath.getPathLength());
+		pathLength = MathUtils.round(ipcStopPath.getPathLength(), 1);
 	}
 }
