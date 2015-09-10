@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Test Map</title>
+<title>Smartphone Map</title>
   <!-- So that get proper sized map on iOS mobile device -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   
@@ -80,9 +80,7 @@
 </body>
   
   <script>
-  // Create the leaflet map
-  createMap();
-  
+
   // Customize some map options to get desired look. These override the usual
   // options from mapUIOptions.js
   var stopPopupOptions = {
@@ -172,6 +170,13 @@
   	    fillOpacity: 1.0,
   	    clickable: false
   	};
+  
+  var userAccuracyMarkerOptions = {
+	  color: '#ff000',
+	  fillColor: '#2363FA',
+	  fillOpacity: 0.13,
+	  clickable: false
+  };
 
   // For showing walking directions
   var walkingOptions = {
@@ -183,6 +188,9 @@
 		clickable: false
   };
 
+  // Create the leaflet map
+  createMap();
+  
   // Get the parameters from query string and display the route
   var agencyId = getQueryVariable("a");
   var routeId = getQueryVariable("r");

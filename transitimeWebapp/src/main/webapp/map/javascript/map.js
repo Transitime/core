@@ -130,7 +130,8 @@ var initialStop = null;
 var secondStop = null;
 
 /**
- * Zooms in further to the user loc and the first stop
+ * Zooms in further to the user location, the first stop, and the location
+ * of the next vehicle for the stop.
  */
 function zoomIn() {
 	// To fit in stop the user selected
@@ -147,9 +148,18 @@ function zoomIn() {
 	if (userLatLng)
 		bounds.push(userLatLng);
 	
-	// FIXME As experiment also fit in next predicted vehicle
-	if (nextVehicleLatLng)
+	// As experiment also fit in next predicted vehicle
+	if (nextVehicleLatLng) {
 		bounds.push(nextVehicleLatLng);
+	
+		// If would have to zoom out too much to fit in the vehicle then
+		// don't do so.
+		var zoomLevelToIncludeVehicle = map.getBoundsZoom(bounds);
+		if (zoomLevelToIncludeVehicle < 15) {
+			bounds.pop();
+			//console.log("zoomLevelToIncludeVehicle=" + zoomLevelToIncludeVehicle);
+		}
+	}
 	
 	// Actually zoom in. Animation is definitely cool looking.
 	// Limit maxZoom in case user is close to stop. Allow to zoom
@@ -281,7 +291,9 @@ function routeConfigCallback(route, status) {
 	// via fitBounds() or other such method.
 	routeFeatureGroup.bringToBack();
 	
-	// Now that have the stop location can show walking directions
+	// Now that have the stop location can show walking directions if also
+	// already have the user location. If don't yet have user location
+	// then showWalkingDirections() will be called when it is found.
 	if (userLatLng) {
 		showWalkingDirections(userLatLng.lat, userLatLng.lng, 
 				initialStop.lat, initialStop.lon);
@@ -777,7 +789,11 @@ function showRoute(agencyId, routeId, directionId, stopId, apiKey) {
  * @param data results from API
  */
 function walkingDirectionCallback(data) {
-	for (var i=0; i<data.routes.length; ++i) {
+	// Just draw the first direction. The MapBox walking instructions
+	// often return a couple of choices that differ only in how
+	// one crosses a street. Looks bad to show two choices that
+	// almost overlap.
+	for (var i=0; i<1 /*data.routes.length*/; ++i) {
 		var route = data.routes[i]
 		
 		// If person is right be the stop, within 20m, then no
@@ -787,7 +803,6 @@ function walkingDirectionCallback(data) {
 		
 		var coordinates = route.geometry.coordinates;
 
-		// FIXME
 		// Create label for the path
 		var duration = Math.round(route.duration/60) + 1;
 		var theHtml = "<image src='images/pitch-12.png'></image>" + duration + "min";
@@ -829,14 +844,43 @@ function showWalkingDirections(lat1, lon1, lat2, lon2) {
 
 
 var userMarker = null;
+var userAccuracyMarker = null;
 
 /**
- * Called when get user's location
+ * Creates the marker to indicate the user's location
+ * @param latlng
+ */
+function createUserLocationMarker(latlng, accuracyRadius) {
+	// Create the user marker
+	userMarker = L.circleMarker(latlng, userMarkerOptions).addTo(map);
+	
+	// Create the user location accuracy marker
+	if (accuracyRadius)
+		userAccuracyMarker = L.circle(latlng, accuracyRadius, 
+				userAccuracyMarkerOptions)
+				.addTo(map);
+}
+
+/**
+ * Moves the users current location marker to specified location
+ */
+function setUserLocationMarkerLocation(latlng, accuracyRadius) {
+	if (userMarker)
+		userMarker.setLatLng(latlng);	
+	if (userAccuracyMarker) {
+		userAccuracyMarker.setLatLng(latlng);
+		if (accuracyRadius)
+			userAccuracyMarker.setRadius(accuracyRadius);
+	}
+}
+
+/**
+ * Called when got user's location
  * @param locationEvent
  */
 function locationFound(locationEvent) {
 	// If user location just now being set then show walking instructions
-	if (!userLatLng) {
+	if (!userLatLng && initialStop) {
 		showWalkingDirections(locationEvent.latlng.lat, locationEvent.latlng.lng, 
 				initialStop.lat, initialStop.lon);
 	}
@@ -846,11 +890,10 @@ function locationFound(locationEvent) {
 	
 	if (userMarker) {
 		// userMarker already created so move it to proper location
-		userMarker.setLatLng(locationEvent.latlng);
+		setUserLocationMarkerLocation(locationEvent.latlng, locationEvent.accuracy);
 	} else {
 		// userMarker not yet created so create it now
-		userMarker = L.circleMarker(locationEvent.latlng, userMarkerOptions)
-		.addTo(map);	
+		createUserLocationMarker(locationEvent.latlng, locationEvent.accuracy);
 	}
 
 }
@@ -906,10 +949,21 @@ function createMap() {
 			e.popup.parent.popup = null;
 	});
 	
-	// Start continuous tracking of user location
-	map.locate({watch: true});
-	map.on("locationfound", locationFound);
-	map.on("locationerror", locationError);
+	// See if user location specified in query string. If so, use it.
+	// This way can test out map, including walking directions, for
+	// particular locations.
+	if (getQueryVariable('userLat') && getQueryVariable('userLon')) {
+		var userLat = parseFloat(getQueryVariable('userLat'));
+		var userLon = parseFloat(getQueryVariable('userLon'));
+		userLatLng = L.latLng(userLat, userLon);
+		createUserLocationMarker(userLatLng);
+	} else {
+		// User location not specified in query string so start 
+		// continuous tracking of user location
+		map.locate({watch: true});
+		map.on("locationfound", locationFound);
+		map.on("locationerror", locationError);
+	}	
 }
 
 function getQueryVariable(paramName) {
