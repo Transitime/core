@@ -106,7 +106,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	}
 	
 	/**
-	 * Takes data from XML Document object and processes it and
+	 * Takes data from the GTFS-rt trip updates feed processes it and
 	 * calls storePrediction() on the predictions.
 	 * 
 	 * @param feed
