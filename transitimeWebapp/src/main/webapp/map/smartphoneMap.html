@@ -122,7 +122,7 @@
   var firstStopOptions = {
 		    color: '#092F87',
 		    opacity: 1.0,
-		    radius: 6,
+		    radius: 4,
 		    weight: 2,
 		    fillColor: '#0080FF',
 		    fillOpacity: 0.8,		
@@ -130,11 +130,11 @@
 
   var minorStopOptions = {
 		    color: '#092F87',
-		    opacity: 0.2,
+		    opacity: 0.25,
 		    radius: 2,
 		    weight: 1,
 		    fillColor: '#092F87',
-		    fillOpacity: 0.2,
+		    fillOpacity: 0.25,
 		    clickable: false
 		};
 
@@ -160,17 +160,18 @@
 		    popupAnchor: [0, -12],
 		});
 
-  //Specifies how the blue dot indicating user position looks
+  //Specifies how the blue dot indicating user position looks. Dark blue circle.
   var userMarkerOptions = {
   	    color: '#ffffff',
   	    opacity: 1.0,
-  	    radius: 5,
+  	    radius: 7,
   	    weight: 1,
   	    fillColor: '#2363FA',
   	    fillOpacity: 1.0,
   	    clickable: false
   	};
   
+  // For indicating accuracy of user location. Faint blue circle.
   var userAccuracyMarkerOptions = {
 	  color: '#ff000',
 	  fillColor: '#2363FA',
