@@ -435,37 +435,37 @@ public class PredictionDataCache {
 		if (newPredictionsForVehicle == null)
 			newPredictionsForVehicle = new ArrayList<IpcPrediction>();
 		
-		// Can have several predictions for a route/stop for a vehicle if
+		// Can have several predictions for a route/stop/dest for a vehicle if
 		// the route is a relatively short loop. And if have unscheduled
 		// trips then won't have a unique trip identifier. Therefore to
 		// atomically update the predictions for this vehicle for this
 		// route/stop need to delete all predictions for the vehicle
 		// and add all new ones in one synchronized operation.
-		// First step is to group the new predictions by route/stop so
+		// First step is to group the new predictions by route/stop/dest so
 		// can deal with them all at once. Those are put into
-		// newPredictionsByRouteStop.
-		Map<MapKey, List<IpcPrediction>> newPredsForVehicleByRouteStopMap =
+		// newPredsForVehicleByRouteStopDestMap.
+		Map<MapKey, List<IpcPrediction>> newPredsForVehicleByRouteStopDestMap =
 				new HashMap<MapKey, List<IpcPrediction>>();
 		
 		for (IpcPrediction newPrediction : newPredictionsForVehicle) {
 			MapKey key = new MapKey(newPrediction.getRouteShortName(),
-					newPrediction.getStopId(), newPrediction.getTrip()
-							.getHeadsign());
-			List<IpcPrediction> predsForRouteStopList = 
-					newPredsForVehicleByRouteStopMap.get(key);
-			if (predsForRouteStopList == null) {
-				predsForRouteStopList = new ArrayList<IpcPrediction>();
-				newPredsForVehicleByRouteStopMap
-						.put(key, predsForRouteStopList);
+							newPrediction.getStopId(), 
+							newPrediction.getTrip().getHeadsign());
+			List<IpcPrediction> predsForRouteStopDestList = 
+					newPredsForVehicleByRouteStopDestMap.get(key);
+			if (predsForRouteStopDestList == null) {
+				predsForRouteStopDestList = new ArrayList<IpcPrediction>();
+				newPredsForVehicleByRouteStopDestMap
+						.put(key, predsForRouteStopDestList);
 			}
-			predsForRouteStopList.add(newPrediction);
+			predsForRouteStopDestList.add(newPrediction);
 		}
 		
 		// Go through the new predictions grouped by route/stop/destination and
 		// process them.
-		for (List<IpcPrediction> newPredsForVehicleForRouteStop : 
-				newPredsForVehicleByRouteStopMap.values()) {
-			updatePredictionsForVehicle(newPredsForVehicleForRouteStop);
+		for (List<IpcPrediction> newPredsForVehicleForRouteStopDest : 
+				newPredsForVehicleByRouteStopDestMap.values()) {
+			updatePredictionsForVehicle(newPredsForVehicleForRouteStopDest);
 		}
 		
 		// Remove old predictions that are not in newPredictionsForVehicle 
@@ -474,9 +474,9 @@ public class PredictionDataCache {
 				// If there is no new prediction for the old prediction 
 				// route/stop...
 				MapKey key = new MapKey(oldPrediction.getRouteShortName(),
-						oldPrediction.getStopId(), oldPrediction.getTrip()
-								.getHeadsign());
-				if (newPredsForVehicleByRouteStopMap.get(key) == null) {
+						oldPrediction.getStopId(), 
+						oldPrediction.getTrip().getHeadsign());
+				if (newPredsForVehicleByRouteStopDestMap.get(key) == null) {
 					// Remove the old prediction
 					removePrediction(oldPrediction);
 				}
