@@ -365,9 +365,9 @@ public class IpcPrediction implements Serializable {
 				// predictions log file
 				// + (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "")
 				+ ", gtfsStopSeq=" + gtfsStopSeq
-				+ ", trip="	+ tripId
+				+ ", tripId=" + tripId
 				+ ", tripPatternId=" + tripPatternId
-				+ ", block=" + blockId
+				+ ", blockId=" + blockId
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
 				+ ", createTime=" + Time.timeStrMsecNoTimeZone(creationTime)
 				+ ", tripStartEpochTime=" + Time.timeStrMsecNoTimeZone(tripStartEpochTime)
