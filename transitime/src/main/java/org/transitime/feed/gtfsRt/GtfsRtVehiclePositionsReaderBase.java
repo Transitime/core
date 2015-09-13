@@ -152,14 +152,15 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		    // Handle speed and heading
 		    float speed = Float.NaN;
 		    if (position.hasSpeed()) {
-		    	speed = position.getSpeed();
+                //  TODO: remove hack for converting mph to m/s when capmetro fixes feed
+		    	speed = position.getSpeed() * 0.44704f;
 		    }
 		    float heading = Float.NaN;
 		    if (position.hasBearing()) {
 		    	heading = position.getBearing();
 		    }
 		    
-			// Create the core AVL object. The feed can provide a silly amount 
+			// Create the core AVL object. The feed can provide a silly amount
 		    // of precision so round to just 5 decimal places.
             // AvlReport is expecting time in ms while the proto provides it in
 		    // seconds
