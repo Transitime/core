@@ -15,12 +15,25 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
   @Override
   public AvlReport deserialize(Message message) {
     JSONObject jsonObj = new JSONObject(message.getBody());
+    // mandatory
     String vehicleId = String.valueOf(jsonObj.getLong("vehicleid"));
-    long time = jsonObj.getLong("avlDate");
+    // mandatory
     double lat = jsonObj.getDouble("latitude");
+    // mandatory
     double lon = jsonObj.getDouble("longitude");
-    float speed = (float) jsonObj.getDouble("averageSpeed");
-    float heading = (float) jsonObj.getDouble("heading");
+    // mandatory
+    long time = jsonObj.getLong("avlDate");
+    Float heading = null;
+    Float speed = null;
+    // optional
+    if (jsonObj.has("heading")) {  
+      heading = (float) jsonObj.getDouble("heading");
+    }
+    // optional
+    if (jsonObj.has("averageSpeed")) {
+      speed = (float) jsonObj.getDouble("averageSpeed");
+    }
+    
     String source = "sqs";
     AvlReport ar = new AvlReport(vehicleId, time, lat, lon, speed, heading, source);
     ar.setAssignment(jsonObj.getString("blockAlpha"), AssignmentType.BLOCK_ID);
