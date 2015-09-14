@@ -21,6 +21,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
+import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 
@@ -157,6 +158,14 @@ public class AvlSqsClientModule extends Module {
               // its important we know how many message fail deserialization
               logger.error("unable to deserialize avlReport for message={}", message);
             }
+          }
+          
+          // let SQS know we processed the messages
+          if (messages != null && messages.size() > 0) {
+            // only acknowledge receipt of the transmission, not of each message
+            String messageReceiptHandle = messages.get(0).getReceiptHandle();
+            _sqs.deleteMessage(new DeleteMessageRequest(_url, messageReceiptHandle));
+            // TOOD -- optionally re-queue in archiver queue
           }
           
         } catch (Exception e) {
