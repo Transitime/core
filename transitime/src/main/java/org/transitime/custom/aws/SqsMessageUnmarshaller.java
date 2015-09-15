@@ -11,6 +11,7 @@ import com.amazonaws.services.sqs.model.Message;
  */
 public interface SqsMessageUnmarshaller {
   
-  AvlReport deserialize(Message message) throws Exception;
+  AvlReport toAvlReport(Message message) throws Exception;
+  String toString(Message message) throws Exception;
 
 }

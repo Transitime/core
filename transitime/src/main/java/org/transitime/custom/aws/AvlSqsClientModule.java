@@ -16,9 +16,12 @@ import org.transitime.utils.threading.BoundedExecutor;
 import org.transitime.utils.threading.NamedThreadFactory;
 
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.sns.AmazonSNSClient;
+import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
@@ -35,8 +38,10 @@ public class AvlSqsClientModule extends Module {
       LoggerFactory.getLogger(AvlSqsClientModule.class);
   
   private final BoundedExecutor _avlClientExecutor;
-  private AWSCredentials _credentials;
+  private AWSCredentials _sqsCredentials;
+  private AWSCredentials _snsCredentials;
   private AmazonSQS _sqs;
+  private AmazonSNSClient _sns = null;
   private String _url = null;
   private SqsMessageUnmarshaller _messageUnmarshaller;
   private int _messageCount = 0;
@@ -71,6 +76,15 @@ public class AvlSqsClientModule extends Module {
   private static StringConfigValue avlUrl =
       new StringConfigValue("transitime.avl.sqsUrl", null, "The SQS URL from AWS");
   
+  private static StringConfigValue snsKey =
+      new StringConfigValue("transitime.avl.snsKey", null, "The AWS Key with SNS write access");
+
+  private static StringConfigValue snsSecret =
+      new StringConfigValue("transitime.avl.snsSecret", null, "The AWS Secret with SNS write access");
+  
+  private static StringConfigValue snsArn =
+      new StringConfigValue("transitime.avl.snsArn", null, "The AWS SNS ARN to write to");
+
   private static ClassConfigValue unmarshallerConfig =
       new ClassConfigValue("transitime.avl.unmarshaller", WmataAvlTypeUnmarshaller.class, 
           "Implementation of SqsMessageUnmarshaller to perform " + 
@@ -79,7 +93,7 @@ public class AvlSqsClientModule extends Module {
     public AvlSqsClientModule(String agencyId) throws Exception {
       super(agencyId);
       logger.info("loading AWS SQS credentials from environment");
-      _credentials =  new EnvironmentVariableCredentialsProvider().getCredentials();
+      _sqsCredentials =  new EnvironmentVariableCredentialsProvider().getCredentials();
       connect();
 
       int maxAVLQueueSize = avlQueueSize.getValue();
@@ -113,12 +127,25 @@ public class AvlSqsClientModule extends Module {
       
       // create an instance of the SQS message unmarshaller
       _messageUnmarshaller = (SqsMessageUnmarshaller) unmarshallerConfig.getValue().newInstance();
+      
+      if (snsKey.getValue() != null && snsSecret.getValue() != null && snsArn.getValue() != null) {
+        try {
+          logger.info("creating sns connection for archiving to ARN {}", snsArn.getValue());
+          _sns = new AmazonSNSClient(new BasicAWSCredentials(snsKey.getValue(), snsSecret.getValue()));
+        } catch (Exception any) {
+          // SNS topic failure is non-fatal
+          logger.error("failed to create sns client: {}", any);
+          _sns = null;
+        }
+      } else {
+        logger.info("sns configuration not set, skipping.");
+      }
     }
     
     
     
     private synchronized void connect() {
-      _sqs = new AmazonSQSClient(_credentials);
+      _sqs = new AmazonSQSClient(_sqsCredentials);
       Region usEast1 = Region.getRegion(Regions.US_EAST_1);
       _sqs.setRegion(usEast1);
     }
@@ -145,7 +172,7 @@ public class AvlSqsClientModule extends Module {
           for (Message message : messages) {
             AvlReport avlReport = null;
             try {
-              avlReport = _messageUnmarshaller.deserialize(message);
+              avlReport = _messageUnmarshaller.toAvlReport(message);
             } catch (Exception any) {
               logger.error("exception deserializing mesage={}:{}", message, any);
             }
@@ -160,13 +187,8 @@ public class AvlSqsClientModule extends Module {
             }
           }
           
-          // let SQS know we processed the messages
-          if (messages != null && messages.size() > 0) {
-            // only acknowledge receipt of the transmission, not of each message
-            String messageReceiptHandle = messages.get(0).getReceiptHandle();
-            _sqs.deleteMessage(new DeleteMessageRequest(_url, messageReceiptHandle));
-            // TOOD -- optionally re-queue in archiver queue
-          }
+          acknowledge(messages);
+          archive(messages);
           
         } catch (Exception e) {
           logger.error("issue receiving request", e);
@@ -183,6 +205,40 @@ public class AvlSqsClientModule extends Module {
           _messageStart = System.currentTimeMillis();
           _messageCount = 0;
         }
+      }
+    }
+
+
+    private void archive(List<Message> messages) {
+      // currently AWS does not support batch publishing to SNS
+      for (Message message : messages) {
+        try {
+          PublishRequest request = new PublishRequest();
+          request.setTopicArn(snsArn.getValue());
+          String content = _messageUnmarshaller.toString(message);
+          logger.info("archiving content {}", content);
+          request.setMessage(content);
+          _sns.publish(request);
+        } catch (Exception any) {
+          logger.error("issue archving message {}: {}", message, any);
+        }
+      }
+    }
+
+
+
+    private void acknowledge(List<Message> messages) {
+      // let SQS know we processed the messages
+      if (messages != null && messages.size() > 0) {
+        // only acknowledge receipt of the transmission, not of each message
+        String messageReceiptHandle = messages.get(0).getReceiptHandle();
+        try {
+          logger.info("ack message");
+          _sqs.deleteMessage(new DeleteMessageRequest(_url, messageReceiptHandle));
+        } catch (Exception e) {
+          logger.error("unable to mark message as received: {}", e);
+        }
+      
       }
     }
 
