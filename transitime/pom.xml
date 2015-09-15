@@ -110,17 +110,8 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk</artifactId>
-			<version>1.10.11</version>
+			<version>1.10.16</version>
 		</dependency>
-		<!--  for SQS -->
-<!--
-		<dependency>
-		  <groupId>com.amazonaws</groupId>
-		  <artifactId>amazon-sqs-java-messaging-lib</artifactId>
-		  <version>1.0.0</version>
-		  <type>jar</type>
-		</dependency>
--->		
 		<!-- For many java utilities, such as StringEscapeUtils -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
