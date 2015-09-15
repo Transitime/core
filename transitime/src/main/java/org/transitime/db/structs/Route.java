@@ -16,23 +16,6 @@
  */
 package org.transitime.db.structs;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -43,6 +26,10 @@ import org.transitime.gtfs.TitleFormatter;
 import org.transitime.gtfs.gtfsStructs.GtfsRoute;
 import org.transitime.utils.OrderedCollection;
 import org.transitime.utils.StringUtils;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.*;
 
 
 /**
@@ -346,7 +333,7 @@ public class Route implements Serializable {
 		result = prime * result + (hidden ? 1231 : 1237);
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + routeOrder;
+		result = prime * result + ((routeOrder == null) ? 0 : routeOrder);;
 		result = prime * result
 				+ ((shortName == null) ? 0 : shortName.hashCode());
 		result = prime * result
@@ -521,7 +508,7 @@ public class Route implements Serializable {
 		List<TripPattern> tripPatterns = new ArrayList<TripPattern>();
 		
 		List<String> directionIds = getDirectionIds();
-		for (String directionId : directionIds)
+    		for (String directionId : directionIds)
 			tripPatterns.add(getLongestTripPatternForDirection(directionId));
 		
 		return tripPatterns;
@@ -553,7 +540,7 @@ public class Route implements Serializable {
 	public List<String> getDirectionIds() {
 		List<String> directionIds = new ArrayList<String>();
 		List<TripPattern> tripPatternsForRoute = Core.getInstance()
-				.getDbConfig().getTripPatternsForRoute(getId());
+                .getDbConfig().getTripPatternsForRoute(getId());
 		for (TripPattern tripPattern : tripPatternsForRoute) {
 			String directionId = tripPattern.getDirectionId();
 			if (!directionIds.contains(directionId))

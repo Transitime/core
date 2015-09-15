@@ -16,22 +16,6 @@
  */
 package org.transitime.db.structs;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -46,6 +30,10 @@ import org.transitime.gtfs.DbConfig;
 import org.transitime.gtfs.TitleFormatter;
 import org.transitime.gtfs.gtfsStructs.GtfsTrip;
 import org.transitime.utils.Time;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.*;
 
 
 /**
@@ -116,16 +104,10 @@ public class Trip implements Serializable {
 	
 	// Contains schedule time for each stop as obtained from GTFS 
 	// stop_times.txt file. Useful for determining schedule adherence.
-	// NOTE: trying to use serialization. Serialization 
-	// makes the data not readable in the db using regular SQL but it means
-	// that don't need separate table and the data can be read and written
-	// much faster.
-	// scheduleTimesMaxBytes set to 4000 because for sfmta route 91 there
-	// is a trip with 91 schedule times.
-	private static final int scheduleTimesMaxBytes = 4000;
-	@Column(length=scheduleTimesMaxBytes)
-	private final ArrayList<ScheduleTime> scheduledTimesList = 
-			new ArrayList<ScheduleTime>(); 
+	@ElementCollection
+    @OrderColumn
+	private final List<ScheduleTime> scheduledTimesList =
+			new ArrayList<ScheduleTime>();
 	
 	// For non-scheduled blocks where vehicle runs a trip as a continuous loop 
 	@Column
@@ -404,22 +386,22 @@ public class Trip implements Serializable {
 		
 		// If resulting map takes up too much memory throw an exception.
 		// Only bother checking if have at least a few schedule times.
-		if (scheduledTimesList.size() > 5) {
+		/*if (scheduledTimesList.size() > 5) {
 			int serializedSize = HibernateUtils.sizeof(scheduledTimesList);
 			if (serializedSize > scheduleTimesMaxBytes) {
 				String msg = "Too many elements in "
 						+ "scheduledTimesMap when constructing a "
 						+ "Trip. Have " + scheduledTimesList.size()
-						+ " schedule times taking up " + serializedSize 
-						+ " bytes but only have " + scheduleTimesMaxBytes 
-						+ " bytes allocated for the data. Trip=" 
+						+ " schedule times taking up " + serializedSize
+						+ " bytes but only have " + scheduleTimesMaxBytes
+						+ " bytes allocated for the data. Trip="
 						+ this.toShortString();
 				logger.error(msg);
-				
+
 				// Since this could be a really problematic issue, throw an error
 				throw new ArrayIndexOutOfBoundsException(msg);
 			}
-		}
+		}*/
 	}
 	
 	/**

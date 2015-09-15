@@ -17,8 +17,6 @@
 
 package org.transitime.avl;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -28,6 +26,8 @@ import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
 import org.transitime.utils.Time;
+
+import java.util.List;
 
 /**
  * For reading in a batch of AVL data in CSV format and processing it. It only
@@ -133,7 +133,12 @@ public class BatchCsvAvlFeedModule extends Module {
 		}
 
 		// Kill off the whole program because done processing the AVL data
-		System.exit(0);
+        String integrationTest = System.getProperty("transitime.core.integrationTest");
+        if(integrationTest != null){
+            System.setProperty("transitime.core.csvImported","true");
+        }else{
+            System.exit(0);
+        }
 	}
 
 }
