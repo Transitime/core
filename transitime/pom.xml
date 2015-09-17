@@ -57,6 +57,11 @@
 			<version>9.3-1103-jdbc41</version>
 		</dependency>
 		<dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>4.3.9.Final</version>
@@ -356,9 +361,53 @@
 			    </execution>
 			  </executions>
 			</plugin>
-
 		</plugins>
-
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.5</version>
+                    <!-- By default, we exclude anything in the org.transitime.integration_tests
+                      package from regular unit test -->
+                    <configuration>
+                        <excludes>
+                            <exclude>**/*IntegrationTest.java</exclude>
+                        </excludes>
+                        <systemProperties>
+                            <property>
+                                <name>log4j.configuration</name>
+                                <value>log4j-stdout.xml</value>
+                            </property>
+                        </systemProperties>
+                        <argLine>${argLine}</argLine>
+                    </configuration>
+                    <executions>
+                        <!-- Instead, we add a special integration-test execution that
+                          runs any tests in the org.transitime.integration_tests package -->
+                        <execution>
+                            <id>integration-tests</id>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <configuration>
+                                <skip>false</skip>
+                                <excludes>
+                                    <exclude>none</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>**/*IntegrationTest.java</include>
+                                </includes>
+                                <!-- Don't stop the build if integration tests fail because
+                                  we still want post-integration-test cleanup to run -->
+                                <testFailureIgnore>false</testFailureIgnore>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 	</build>
 	<profiles>
 		<profile>
@@ -414,6 +463,72 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>	
+		</profile>
+        <profile>
+            <id>PredictionsAccuracyIntegrationTest</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>truezip-maven-plugin</artifactId>
+                        <version>1.2</version>
+                        <executions>
+                            <execution>
+                                <id>unzip-database</id>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <phase>test</phase>
+                                <configuration>
+                                    <verbose>true</verbose>
+                                    <fileset>
+                                        <directory>${project.basedir}/src/test/resources/database/transitime_test.zip</directory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/database/data</outputDirectory>
+                                    </fileset>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.onebusaway.plugins</groupId>
+                        <artifactId>maven-hsqldb-plugin</artifactId>
+                        <!-- version 1.0.1 supports hsqldb 2.3.2 -->
+                        <version>1.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>user-database-start</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <deleteOnEntry>true</deleteOnEntry>
+                                    <dbName>${project.basedir}/src/test/resources/database/data/transitime_test</dbName>
+                                    <port>9001</port>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.1.1</version>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <id>test-case-execution</id>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>org.transitime.applications.PredictionsAccuracyIntegrationTest</mainClass>
+                                    <commandlineArgs>-c transitime/src/test/resources/transiTimeConfigIntegrationTest.xml -gtfsDirectoryName transitime/src/test/resources/wmata_gtfs -storeNewRevs -maxTravelTimeSegmentLength 1000</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 	</profiles>
 </project>

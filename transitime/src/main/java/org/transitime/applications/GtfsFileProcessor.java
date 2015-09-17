@@ -16,21 +16,7 @@
  */
 package org.transitime.applications;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.ConfigFileReader;
@@ -42,6 +28,14 @@ import org.transitime.gtfs.gtfsStructs.GtfsAgency;
 import org.transitime.gtfs.readers.GtfsAgencyReader;
 import org.transitime.utils.Time;
 import org.transitime.utils.Zip;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Reads GTFS files, validates and cleans up the data, stores the data into Java
@@ -609,6 +603,11 @@ public class GtfsFileProcessor {
 						+ "stops of trips. Useful for when the shapes have problems "
 						+ "at the beginning, which is suprisingly common.");
 
+        options.addOption(
+                "integrationTest",
+                false,
+                "Flag to indicate whether import is being run as part of integration test");
+
 		// Parse the options
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = null;
@@ -657,6 +656,13 @@ public class GtfsFileProcessor {
 		// Found that when running on AWS that program never terminates,
 		// probably because still have db threads running. Therefore
 		// using exit() to definitely end the process.
-		System.exit(0);
+        String integrationTest = System.getProperty("transitime.core.integrationTest");
+        if(integrationTest != null){
+            logger.info("GTFS import complete for integration test");
+            System.setProperty("transitime.core.gtfsImported","true");
+        }else{
+            System.exit(0);
+        }
+
 	}
 }

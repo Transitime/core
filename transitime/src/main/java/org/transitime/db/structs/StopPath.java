@@ -16,16 +16,6 @@
  */
 package org.transitime.db.structs;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -38,6 +28,11 @@ import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -111,8 +106,9 @@ public class StopPath implements Serializable, Lifecycle {
 	// makes the data not readable in the db using regular SQL but it means
 	// that don't need separate table and the data can be read and written
 	// much faster.
-	@Column(length=1000)// @ElementCollection @OrderColumn
-	private ArrayList<Location> locations; 
+	@ElementCollection
+    @OrderColumn
+	private List<Location> locations;
 
 	// Having the path length readily accessible via the database is handy
 	// since that way can easily do queries to determine travel speeds and
