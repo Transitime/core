@@ -6,10 +6,10 @@
  <session-factory>
    <!-- Specify where database being used -->
    <property name="hibernate.dialect">
-      org.hibernate.dialect.MySQLDialect
+      org.hibernate.dialect.HSQLDialect
    </property>
    <property name="hibernate.connection.driver_class">
-      com.mysql.jdbc.Driver
+       org.hsqldb.jdbc.JDBCDriver
    </property>
 
    <!-- Enable full SQL logging that also shows the
@@ -34,11 +34,11 @@
    <!-- Default min_size is 1 but want to make sure that can have at
         least a couple of db access happening simultaneously without
         having to create an additional connection. -->
- <!--  <property name="hibernate.c3p0.min_size">2</property>
+  <!-- <property name="hibernate.c3p0.min_size">2</property>
    &lt;!&ndash; Default max_size is 100 but that seems excessive &ndash;&gt;
    <property name="hibernate.c3p0.max_size">20</property>
    &lt;!&ndash; Default timeout is 0s (forever) but want to reclaim connections
-        if not used for more than 5 minutes so don't get too many
+        if not used for more than 5 minutes so don't get too many 
         connections. &ndash;&gt;
    <property name="hibernate.c3p0.timeout">300</property>
    &lt;!&ndash; Default max_statements is 0 but since will be doing lots of logging
@@ -55,24 +55,31 @@
         setting batch_size to 25 actually hurt performance by a few
         percent. Probably much more important when db is remote and
         network traffic could bog down the thread that is writing. -->
-   <property name="hibernate.jdbc.batch_size">25</property>  
+     <property name="hibernate.jdbc.batch_size">100</property>
+     <property name="default_batch_fetch_size">100</property>
+     <property name="hibernate.order_inserts">true</property>
+     <property name="hibernate.order_updates">true</property>
+     <property name="hibernate.hbm2ddl.auto">create</property>
+     <property name="hibernate.connection.autocommit">true</property>
+
+
  
    <!-- Configure db settings. Currently commented out because this
         can be done programmatically by HibernateUtils using
         command line arguments so that some apps, like the 
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
-<!--
+
    <property name="hibernate.connection.url">
-      jdbc:mysql://localhost/mbta
+       jdbc:hsqldb:hsql://localhost/transitime_test
    </property>
    <property name="hibernate.connection.username">
-      root
+      SA
    </property>
    <property name="hibernate.connection.password">
-      PASSWORD
+
    </property>
--->
+
 
    <!-- List of XML mapping files. Commented out because adding
         the classes programatically via AnnoatedClassesList so

@@ -1,5 +1,6 @@
-<%@ page import="org.transitime.utils.Time" %>
 <%@ page import="org.transitime.db.GenericCsvQuery" %>
+<%@ page import="org.transitime.db.webstructs.WebAgency" %>
+<%@ page import="org.transitime.utils.Time" %>
 <%@ page import="java.text.ParseException" %>
 <%-- This file is for outputting prediction accuracy data in CSV format. 
   --%>
@@ -52,27 +53,52 @@ if (routeId!=null && !routeId.isEmpty()) {
 // NOTE: this query only works on postgreSQL. For mySQL would need to change
 // from using to_char(), not using casting like "::interger", don't put
 // single quotes around "'1 day'", etc.
-String sql = "SELECT "
-		+ "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as pred_length_secs, "
-		+ "     predictionAccuracyMsecs/1000 as accuracy_secs, "
-		+ "     predictedTime AS predicted_time,"
-		+ "     arrivalDepartureTime AS actual_time,"
-		+ "     predictionreadtime AS prediction_read_time,"
-		+ "     predictionSource AS source, routeId AS route, " 
-		+ "     directionId AS direction, tripId AS trip, "
-		+ "     stopId AS stop, vehicleId AS vehicle, " 
-		+ "     affectedByWaitStop AS affected_by_wait_stop"
-		+ " FROM predictionAccuracy "
-		+ "WHERE arrivalDepartureTime BETWEEN '" + beginDate 
-		+     "' AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' "
-		+ timeSql
-		+ "  AND predictedTime-predictionReadTime < '00:15:00' "
-		+ routeSql
-		// Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch. 
-		// TODO should clean this up by not having MBTA_seconds source at all
-		// in the prediction accuracy module for MBTA.
-		+ "  AND predictionSource <> 'MBTA_seconds' ";
-		
+
+    WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+    String dbtype = agency.getDbType();
+    String sql = null;
+    if(dbtype.equals("mysql")){
+        sql = "SELECT "
+                + "     predictedTime-predictionReadTime as pred_length_secs, "
+                + "     predictionAccuracyMsecs/1000 as accuracy_secs, "
+                + "     predictedTime AS predicted_time,"
+                + "     arrivalDepartureTime AS actual_time,"
+                + "     predictionreadtime AS prediction_read_time,"
+                + "     predictionSource AS source, routeId AS route, "
+                + "     directionId AS direction, tripId AS trip, "
+                + "     stopId AS stop, vehicleId AS vehicle, "
+                + "     affectedByWaitStop AS affected_by_wait_stop"
+                + " FROM predictionAccuracy "
+                + "WHERE arrivalDepartureTime BETWEEN STR_TO_DATE('" + beginDate + "', '%Y-%m-%d') and DATE_ADD(STR_TO_DATE('" + endDate + "', '%Y-%m-%d'),INTERVAL 1 DAY) "
+                + "  AND predictedTime-predictionReadTime < (15 * 60) "
+                + routeSql
+                // Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch.
+                // TODO should clean this up by not having MBTA_seconds source at all
+                // in the prediction accuracy module for MBTA.
+                + "  AND predictionSource <> 'MBTA_seconds' ";
+    }else{
+        sql = "SELECT "
+                + "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as pred_length_secs, "
+                + "     predictionAccuracyMsecs/1000 as accuracy_secs, "
+                + "     predictedTime AS predicted_time,"
+                + "     arrivalDepartureTime AS actual_time,"
+                + "     predictionreadtime AS prediction_read_time,"
+                + "     predictionSource AS source, routeId AS route, "
+                + "     directionId AS direction, tripId AS trip, "
+                + "     stopId AS stop, vehicleId AS vehicle, "
+                + "     affectedByWaitStop AS affected_by_wait_stop"
+                + " FROM predictionAccuracy "
+                + "WHERE arrivalDepartureTime BETWEEN '" + beginDate
+                +     "' AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' "
+                + timeSql
+                + "  AND predictedTime-predictionReadTime < '00:15:00' "
+                + routeSql
+                // Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch.
+                // TODO should clean this up by not having MBTA_seconds source at all
+                // in the prediction accuracy module for MBTA.
+                + "  AND predictionSource <> 'MBTA_seconds' ";
+    }
+
 // Do the actual query	
 String csvStr = GenericCsvQuery.getCsvString(agencyId, sql);
 response.getWriter().write(csvStr);
