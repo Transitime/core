@@ -565,19 +565,19 @@ public class AvlReport implements Serializable {
 		if (lat < AvlConfig.getMinAvlLatitude()) 
 			errorMsg += "Latitude of " + lat + " is less than the parameter " + 
 					AvlConfig.getMinAvlLatitudeParamName() + " which is set to " + 
-					AvlConfig.getMinAvlLatitude();
+					AvlConfig.getMinAvlLatitude() + " . ";
 		if (lat > AvlConfig.getMaxAvlLatitude()) 
 			errorMsg += "Latitude of " + lat + " is greater than the parameter " + 
 					AvlConfig.getMaxAvlLatitudeParamName() + " which is set to " + 
-					AvlConfig.getMaxAvlLatitude();
+					AvlConfig.getMaxAvlLatitude() + " . ";
 		if (lon < AvlConfig.getMinAvlLongitude()) 
 			errorMsg += "Longitude of " + lon + " is less than the parameter " + 
 					AvlConfig.getMinAvlLongitudeParamName() + " which is set to " + 
-					AvlConfig.getMinAvlLongitude();
+					AvlConfig.getMinAvlLongitude() + " . ";
 		if (lon > AvlConfig.getMaxAvlLongitude()) 
 			errorMsg += "Longitude of " + lon + " is greater than the parameter " + 
 					AvlConfig.getMaxAvlLongitudeParamName() + " which is set to " + 
-					AvlConfig.getMaxAvlLongitude();
+					AvlConfig.getMaxAvlLongitude() + " . ";
 				
 		// Make sure speed is OK
 		if (isSpeedValid()) {
