@@ -722,6 +722,35 @@ public class SpatialMatch {
 	}
 
 	/**
+	 * Returns true if this is before the other SpatialMatch passed in.
+	 * 
+	 * @param other
+	 *            The Spatial Match to compare to
+	 * @return true if this is before the other SpatialMatch
+	 */
+	public boolean lessThan(SpatialMatch other) {
+		if (tripIndex > other.tripIndex)
+			return false;
+		if (tripIndex < other.tripIndex)
+			return true;
+		
+		// tripIndex == other.tripIndex
+		if (stopPathIndex > other.stopPathIndex)
+			return false;
+		if (stopPathIndex < other.stopPathIndex)
+			return true;
+		
+		// stopPathIndex == other.pathIndex
+		if (segmentIndex > other.segmentIndex)
+			return false;
+		if (segmentIndex < other.segmentIndex)
+			return true;
+		
+		// segmentIndex == other.segmentIndex
+		return distanceAlongSegment < other.distanceAlongSegment;
+	}
+
+	/**
 	 * Returns the total number of stops traversed between the two
 	 * matches.
 	 * 

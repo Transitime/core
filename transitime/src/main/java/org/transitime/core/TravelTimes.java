@@ -395,19 +395,15 @@ public class TravelTimes {
 
 		// If the indices are not increasing then can simply return a travel 
 		// time of 0msec. This shouldn't happen so log an error. But only 
-		// investigate if a schedule based assignment since for non schedule
+		// log & investigate if a schedule based assignment since for non schedule
 		// based ones the trip loops back and so you can have match2 < match1.
 		if (!match2.block.isNoSchedule()) {
-			if (!indices.lessThan(endIndices)) {
-				if (!indices.equals(endIndices)
-						|| match1.getDistanceAlongSegment() > 
-							match2.getDistanceAlongSegment()) {
-					logger.error("For vehicleId={} match1AfterStop is after " +
-							"match2BeforeStop so returning travel time of 0. " +
-							"match1AfterStop={}, match2BeforeStop={}",
-							vehicleId, match1, match2);
-					return 0;
-				}
+			if (match2.lessThan(match1)) {
+				logger.error("For vehicleId={} match1AfterStop is after " +
+						"match2BeforeStop so returning travel time of 0. " +
+						"match1AfterStop={}, match2BeforeStop={}",
+						vehicleId, match1, match2);
+				return 0;
 			}
 		}
 		
