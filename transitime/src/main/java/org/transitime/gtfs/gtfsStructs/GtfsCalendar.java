@@ -17,9 +17,10 @@
  */
 package org.transitime.gtfs.gtfsStructs;
 
-import java.text.ParseException;
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.utils.csv.CsvBase;
+
+import java.text.ParseException;
 
 
 /**
@@ -65,6 +66,19 @@ public class GtfsCalendar extends CsvBase {
 		startDate = getRequiredValue(record, "start_date");
 		endDate = getRequiredValue(record, "end_date");
 	}
+
+    public GtfsCalendar(String serviceId, String monday, String tuesday, String wednesday, String thursday, String friday, String saturday, String sunday, String startDate, String endDate){
+        this.serviceId = serviceId;
+        this.monday = monday;
+        this.tuesday = tuesday;
+        this.wednesday = wednesday;
+        this.thursday = thursday;
+        this.friday = friday;
+        this.saturday = saturday;
+        this.sunday = sunday;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
 
 	public String getServiceId() {
 		return serviceId;

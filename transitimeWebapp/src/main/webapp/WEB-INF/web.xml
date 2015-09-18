@@ -12,4 +12,11 @@
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
 
+
+    <listener>
+        <listener-class>
+            org.transitime.web.ReadConfigListener
+        </listener-class>
+    </listener>
+
 </web-app>

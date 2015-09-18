@@ -37,13 +37,13 @@
         <dwelltime>30000</dwelltime>
         <fuzzytime>180000</fuzzytime>
     </find>
-    <db>
+    <!--<db>
         <dbName>transiTime</dbName>
-        <dbHost>localhost:3306</dbHost>
+        <dbHost>localhost</dbHost>
         <dbType>mysql</dbType>
         <dbUserName>root</dbUserName>
         <dbPassword>changeme</dbPassword>
-    </db>     
+    </db> -->
     <hibernate>
         <configFile>mysql_hibernate_cfg.xml</configFile>        
     </hibernate>

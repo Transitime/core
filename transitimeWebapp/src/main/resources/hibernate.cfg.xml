@@ -62,17 +62,17 @@
         command line arguments so that some apps, like the 
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
-<!--
+
    <property name="hibernate.connection.url">
-      jdbc:mysql://localhost/mbta
+      jdbc:mysql://localhost/transitime
    </property>
    <property name="hibernate.connection.username">
       root
    </property>
    <property name="hibernate.connection.password">
-      PASSWORD
+      changeme
    </property>
--->
+
 
    <!-- List of XML mapping files. Commented out because adding
         the classes programatically via AnnoatedClassesList so

@@ -16,80 +16,26 @@
  */
 package org.transitime.gtfs;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.db.structs.ActiveRevisions;
-import org.transitime.db.structs.Agency;
-import org.transitime.db.structs.Block;
+import org.transitime.db.structs.*;
 import org.transitime.db.structs.Calendar;
-import org.transitime.db.structs.CalendarDate;
-import org.transitime.db.structs.ConfigRevision;
-import org.transitime.db.structs.FareAttribute;
-import org.transitime.db.structs.FareRule;
-import org.transitime.db.structs.Frequency;
-import org.transitime.db.structs.Location;
-import org.transitime.db.structs.StopPath;
-import org.transitime.db.structs.Route;
-import org.transitime.db.structs.ScheduleTime;
-import org.transitime.db.structs.Stop;
-import org.transitime.db.structs.Transfer;
-import org.transitime.db.structs.Trip;
-import org.transitime.db.structs.TripPattern;
-import org.transitime.db.structs.TripPatternKey;
-import org.transitime.gtfs.gtfsStructs.GtfsAgency;
-import org.transitime.gtfs.gtfsStructs.GtfsCalendar;
-import org.transitime.gtfs.gtfsStructs.GtfsCalendarDate;
-import org.transitime.gtfs.gtfsStructs.GtfsFareAttribute;
-import org.transitime.gtfs.gtfsStructs.GtfsFareRule;
-import org.transitime.gtfs.gtfsStructs.GtfsFrequency;
-import org.transitime.gtfs.gtfsStructs.GtfsRoute;
-import org.transitime.gtfs.gtfsStructs.GtfsShape;
-import org.transitime.gtfs.gtfsStructs.GtfsStop;
-import org.transitime.gtfs.gtfsStructs.GtfsStopTime;
-import org.transitime.gtfs.gtfsStructs.GtfsTransfer;
-import org.transitime.gtfs.gtfsStructs.GtfsTrip;
-import org.transitime.gtfs.readers.GtfsAgenciesSupplementReader;
-import org.transitime.gtfs.readers.GtfsAgencyReader;
-import org.transitime.gtfs.readers.GtfsCalendarDatesReader;
-import org.transitime.gtfs.readers.GtfsCalendarReader;
-import org.transitime.gtfs.readers.GtfsFareAttributesReader;
-import org.transitime.gtfs.readers.GtfsFareRulesReader;
-import org.transitime.gtfs.readers.GtfsFrequenciesReader;
-import org.transitime.gtfs.readers.GtfsRoutesReader;
-import org.transitime.gtfs.readers.GtfsRoutesSupplementReader;
-import org.transitime.gtfs.readers.GtfsShapesReader;
-import org.transitime.gtfs.readers.GtfsShapesSupplementReader;
-import org.transitime.gtfs.readers.GtfsStopTimesReader;
-import org.transitime.gtfs.readers.GtfsStopTimesSupplementReader;
-import org.transitime.gtfs.readers.GtfsStopsReader;
-import org.transitime.gtfs.readers.GtfsStopsSupplementReader;
-import org.transitime.gtfs.readers.GtfsTransfersReader;
-import org.transitime.gtfs.readers.GtfsTripsReader;
-import org.transitime.gtfs.readers.GtfsTripsSupplementReader;
+import org.transitime.gtfs.gtfsStructs.*;
+import org.transitime.gtfs.readers.*;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
 import org.transitime.utils.Time;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * Contains all the GTFS data processed into Java lists and such. Also combines
@@ -1757,14 +1703,36 @@ public class GtfsData {
 	private void processCalendars() {
 		// Let user know what is going on
 		logger.info("Processing calendar.txt data...");
-		
-		// Create the map where the data is going to go
+
+        // Create the map where the data is going to go
 		calendars = new ArrayList<Calendar>();
 
 		// Read in the calendar.txt GTFS data from file
 		GtfsCalendarReader calendarReader = 
 				new GtfsCalendarReader(gtfsDirectoryName);
 		List<GtfsCalendar> gtfsCalendars = calendarReader.get();
+
+        if(gtfsCalendars.size() < 1){
+            logger.info("calendar.txt not found, will generate calendars and assume all services are always available...");
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            String start = format.format(cal.getTime());
+            cal.add(java.util.Calendar.MONTH, 6);
+            String end = format.format(cal.getTime());
+            GtfsTripsReader tripsReader = new GtfsTripsReader(gtfsDirectoryName);
+            List<GtfsTrip> gtfsTrips = tripsReader.get();
+            Set<String> serviceIds = new HashSet<>();
+            for(GtfsTrip gtfsTrip :gtfsTrips){
+                serviceIds.add(gtfsTrip.getServiceId());
+            }
+            for(String serviceId : serviceIds){
+                GtfsCalendar gtfsCalendar = new GtfsCalendar(
+                        serviceId, "1", "1", "1", "1", "1", "1", "1", start, end
+                );
+                gtfsCalendars.add(gtfsCalendar);
+            }
+        }
+
 		
 		for (GtfsCalendar gtfsCalendar : gtfsCalendars) {
 			// Create the Calendar object and put it into the array)
@@ -1784,7 +1752,7 @@ public class GtfsData {
 	private void processCalendarDates() {
 		// Let user know what is going on
 		logger.info("Processing calendar_dates.txt data...");
-		
+
 		// Create the map where the data is going to go
 		calendarDates = new ArrayList<CalendarDate>();
 
