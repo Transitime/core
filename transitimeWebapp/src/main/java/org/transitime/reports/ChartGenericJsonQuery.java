@@ -17,12 +17,12 @@
 
 package org.transitime.reports;
 
+import org.transitime.db.GenericQuery;
+import org.transitime.reports.ChartJsonBuilder.RowBuilder;
+
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
-
-import org.transitime.db.GenericQuery;
-import org.transitime.reports.ChartJsonBuilder.RowBuilder;
 
 /**
  * For providing data to a Google scatter chart when need to specify specific
@@ -55,7 +55,7 @@ public class ChartGenericJsonQuery extends GenericQuery {
 			jsonBuilder.addTooltipColumn();
 		else if (type == Types.NUMERIC || type == Types.INTEGER
 				|| type == Types.SMALLINT || type == Types.BIGINT
-				|| type == Types.FLOAT || type == Types.DOUBLE)
+				|| type == Types.FLOAT || type == Types.DOUBLE || type == Types.DECIMAL)
 			jsonBuilder.addNumberColumn(columnName);
 		else if (type == Types.VARCHAR)
 			jsonBuilder.addStringColumn(columnName);
