@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Test Map</title>
+<title>Smartphone Map</title>
   <!-- So that get proper sized map on iOS mobile device -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   
@@ -11,7 +11,8 @@
   <!-- Load javascript and css files -->
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-  <!-- New version of map. CLIP_PADDING doesn't seem to work
+  <!-- New version of map. CLIP_PADDING doesn't seem to work and then see 
+       route paths be redrawn in ugly way when panning
   <link rel="stylesheet" href="leaflet/leaflet.css" />
   <script src="leaflet/leaflet.js"></script>
   -->
@@ -35,6 +36,7 @@
     line-height: 1.2;
     margin: 3px 3px;
     text-align: center;
+    font-size: x-small;
   }
   
   .prediction {font-size: large; font-weight: bold;}
@@ -50,6 +52,22 @@
   	font-size: x-large;
   }
   
+  /* For labeling walking directions with distance and time */
+  .walkingDirDiv {
+  	background: white;
+  	padding-left: 0px;
+  	padding-right: 1px;
+  	height: 14px;
+  	white-space: nowrap; /* So all in one line */
+  	opacity: 0.9;
+  	font-size: x-small;
+  	border-radius: 3px;
+  	vertical-align: top;
+  	border-style: solid;
+  	border-width: 1px;
+  	border-color: gray;
+  }
+    
   </style>
   
 </head>
@@ -62,9 +80,7 @@
 </body>
   
   <script>
-  // Create the leaflet map
-  createMap();
-  
+
   // Customize some map options to get desired look. These override the usual
   // options from mapUIOptions.js
   var stopPopupOptions = {
@@ -73,49 +89,52 @@
 			// If true then popup closes when pan or zoom, which is underiable.
 			// But if false, then popup can only be closed if use the close button
 			// which is a nuisance since the popup can hide info on walking to stop.
-			closeOnClick: false
+			closeOnClick: false,
+			// Don't want map to auto pan every time prediction updated. Tried
+			// setting autoPan to false but didn't work. 
+			autoPan: false
 		}
   
+  var shapeOptions = {
+			color: '#0080FF',
+			weight: 7,
+			opacity: 0.75,
+			lineJoin: 'round',
+			clickable: false
+		};
+				
   var minorShapeOptions = {
-			color: '#00ee00',
+			color: '#0080FF',
 			weight: 1,
 			opacity: 0.4,
 			clickable: false
 		};
   
-  var shapeOptions = {
-			color: '#00ee00',
-			weight: 8,
-			opacity: 0.8,
-			lineJoin: 'round',
-			clickable: false
-		};
-				
   var stopOptions = {
-		    color: '#006600',
+		    color: '#092F87',
 		    opacity: 1.0,
-		    radius: 4,
+		    radius: 3,
 		    weight: 2,
-		    fillColor: '#006600',
+		    fillColor: '#092F87',
 		    fillOpacity: 0.6,
 		};
 
   var firstStopOptions = {
-		    color: '#006600',
+		    color: '#092F87',
 		    opacity: 1.0,
-		    radius: 7,
+		    radius: 4,
 		    weight: 2,
-		    fillColor: '#ccffcc',
-		    fillOpacity: 0.9,		
+		    fillColor: '#0080FF',
+		    fillOpacity: 0.8,		
 		}
 
   var minorStopOptions = {
-		    color: '#006600',
-		    opacity: 0.2,
-		    radius: 3,
-		    weight: 2,
-		    fillColor: '#006600',
-		    fillOpacity: 0.2,
+		    color: '#092F87',
+		    opacity: 0.25,
+		    radius: 2,
+		    weight: 1,
+		    fillColor: '#092F87',
+		    fillOpacity: 0.25,
 		    clickable: false
 		};
 
@@ -124,7 +143,7 @@
 		};
 
   var secondaryVehicleMarkerOptions = {
-			opacity: 0.8,		
+			opacity: 0.65,		
 		};
 
   var minorVehicleMarkerOptions = {
@@ -141,17 +160,45 @@
 		    popupAnchor: [0, -12],
 		});
 
+  //Specifies how the blue dot indicating user position looks. Dark blue circle.
+  var userMarkerOptions = {
+  	    color: '#ffffff',
+  	    opacity: 1.0,
+  	    radius: 7,
+  	    weight: 1,
+  	    fillColor: '#2363FA',
+  	    fillOpacity: 1.0,
+  	    clickable: false
+  	};
+  
+  // For indicating accuracy of user location. Faint blue circle.
+  var userAccuracyMarkerOptions = {
+	  color: '#ff000',
+	  fillColor: '#2363FA',
+	  fillOpacity: 0.13,
+	  clickable: false
+  };
 
+  // For showing walking directions
+  var walkingOptions = {
+		color: '#008800',
+		opacity: 0.6,
+		weight: 4,
+		dashArray: "3,9",
+		lineCap: "square",
+		clickable: false
+  };
+
+  // Create the leaflet map
+  createMap();
   
-  //  showRoute("mbta-cr", "CR-Franklin", "Norwood Central", "5ec0de94");
-  showRoute("sfmta", "21", "1", "4992", "5ec0de94");
-  
-  // Showing other route is just for testing
-  function showOtherRoute() {
-	  showRoute("mbta-cr", "CR-Haverhill", "1", "North Wilmington", "5ec0de94");
-	  //showRoute("sfmta", "38", "0", "4271", "5ec0de94");
-  }
-  setTimeout(showOtherRoute, 5000);
+  // Get the parameters from query string and display the route
+  var agencyId = getQueryVariable("a");
+  var routeId = getQueryVariable("r");
+  var directionId = getQueryVariable("d");
+  var stopId = getQueryVariable("s");
+  var apiKey = "5ec0de94";
+  showRoute(agencyId, routeId, directionId, stopId, apiKey);
   
   </script>
 

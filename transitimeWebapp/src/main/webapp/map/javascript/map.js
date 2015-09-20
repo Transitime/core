@@ -22,7 +22,8 @@ var predictionsTimeout = null;
  */
  
 function predictionCallback(preds, status) {
-	// If predictions popup was closed then don't do anything
+	// If predictions popup was closed then don't do anything,
+	// and don't set timer to reread predictions again.
 	if (predictionsPopup == null) 
 		return;
 	
@@ -30,7 +31,7 @@ function predictionCallback(preds, status) {
 	var routeStopPreds = preds.predictions[0];
 	
 	// Set timeout to update predictions again in few seconds
-	predictionsTimeout = setTimeout(getPredictionsJson, 20000, 
+	predictionsTimeout = setTimeout(getAndShowPredictionsForStop, 20000, 
 			routeStopPreds.routeShortName, routeStopPreds.stopId);
 
 	// Add route and stop info
@@ -38,6 +39,13 @@ function predictionCallback(preds, status) {
 		
 	// For each destination add predictions
 	for (var i in routeStopPreds.dest) {
+		// If direction was specified then only show predictions for
+		// that direction. This is needed for agencies who define a single
+		// stop for both directions. So if prediction for wrong directionId
+		// then skip it.
+		if (initialDirectionId && initialDirectionId != routeStopPreds.dest[i].dir)
+			continue;
+		
 		// If there are several destinations then add a horizontal rule
 		// to break predictions up by destination
 		if (routeStopPreds.dest.length > 1)
@@ -86,9 +94,15 @@ function predictionCallback(preds, status) {
 }
 
 /**
- * Initiates API call to get prediction data.
+ * Initiates AJAX call to get prediction data.
  */
-function getPredictionsJson(routeShortName, stopId) {
+function getAndShowPredictionsForStop(routeShortName, stopId) {
+	// Clear any existing prediction timeout so don't get wrong prediction 
+	// displayed
+	if (predictionsTimeout)
+		clearTimeout(predictionsTimeout);
+	predictionsTimeout = null;
+
 	// JSON request of prediction data
 	var url = apiUrlPrefix + "/command/predictions?rs=" + routeShortName 
 			+ "|" + stopId + "&numPreds=2";
@@ -101,13 +115,63 @@ function getPredictionsJson(routeShortName, stopId) {
  */
 function showStopPopup(stopMarker) {
 	// JSON request of prediction data
-	getPredictionsJson(stopMarker.routeShortName, stopMarker.stop.id);
+	getAndShowPredictionsForStop(stopMarker.routeShortName, stopMarker.stop.id);
     
 	// Create popup in proper place but content will be added in predictionCallback()
 	predictionsPopup = L.popup(stopPopupOptions)
 		.setLatLng(stopMarker.getLatLng())
 		.openOn(map);
 }
+
+// So can zoom to user and initialStop
+var userLatLng = null;
+var nextVehicleLatLng = null;
+var initialStop = null;
+var secondStop = null;
+
+/**
+ * Zooms in further to the user location, the first stop, and the location
+ * of the next vehicle for the stop.
+ */
+function zoomIn() {
+	// To fit in stop the user selected
+	var bounds = [];
+	bounds.push(L.latLng(initialStop.lat, initialStop.lon));
+
+	// Nice to show at least a bit of the route for context, so also make
+	// sure the second stop is shown
+	if (secondStop)
+		bounds.push(L.latLng(secondStop.lat, secondStop.lon));
+	
+	// Use user's location if it has been determined. If not known
+	// then will zoom in to the first stop alone.
+	if (userLatLng)
+		bounds.push(userLatLng);
+	
+	// As experiment also fit in next predicted vehicle
+	if (nextVehicleLatLng) {
+		bounds.push(nextVehicleLatLng);
+	
+		// If would have to zoom out too much to fit in the vehicle then
+		// don't do so.
+		var zoomLevelToIncludeVehicle = map.getBoundsZoom(bounds);
+		if (zoomLevelToIncludeVehicle < 15) {
+			bounds.pop();
+			//console.log("zoomLevelToIncludeVehicle=" + zoomLevelToIncludeVehicle);
+		}
+	}
+	
+	// Actually zoom in. Animation is definitely cool looking.
+	// Limit maxZoom in case user is close to stop. Allow to zoom
+	// in only up to 4 levels because beyond that won't use nice
+	// animation for the transition. And limit zoom to level 18
+	// because greater than that is too far.
+	var zoomLimit = map.getZoom() + 4;
+	if (zoomLimit > 18)
+		zoomLimit = 18;
+	map.fitBounds(bounds, {animate: true, maxZoom: zoomLimit, padding: [10, 10]});
+}
+
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
  * Also fits the map to show the important part of the route along with
@@ -121,6 +185,14 @@ function routeConfigCallback(route, status) {
 	if (routeFeatureGroup) {
 		map.removeLayer(routeFeatureGroup);
 	}
+	
+	// If there is an old popup then remove it to make sure that when showing
+	// new route it doesn't try to also show the popup.
+	if (predictionsPopup) {
+		map.closePopup();
+		predictionsPopup = null;
+	}
+
 	// Use a FeatureGroup to contain all paths and stops so that can use
 	// bringToBack() on the whole group at once in  order to make sure that
 	// the paths & stops are drawn below the vehicles even if the vehicles
@@ -139,6 +211,15 @@ function routeConfigCallback(route, status) {
 			// Draw first non-minor stop differently to highlight it
 			if (stop.id == initialStopId) {
 				options = firstStopOptions;
+				
+				// Remember the first stop so can zoom to it
+				initialStop = stop;
+				
+				// Also remember the second major stop if there is one
+				if (j+1 < direction.stop.length)
+					secondStop = direction.stop[j+1];
+				else
+					secondStop = null;
 			}
 			
 			// Keep track of non-minor stop locations so can fit map to show them all
@@ -192,13 +273,16 @@ function routeConfigCallback(route, status) {
 	// If stop was specified for getting route then locationOfNextPredictedVehicle
 	// is also returned. Use this vehicle location when fitting bounds of map
 	// so that user will always see the next vehicle coming.
-	if (route.locationOfNextPredictedVehicle) {
-		locsToFit.push(L.latLng(route.locationOfNextPredictedVehicle.lat, 
-				route.locationOfNextPredictedVehicle.lon));
+	if (route.locationOfNextPredictedVehicle) {		
+		nextVehicleLatLng = L.latLng(route.locationOfNextPredictedVehicle.lat, 
+				route.locationOfNextPredictedVehicle.lon);
+		locsToFit.push(nextVehicleLatLng);
 	}
 	
-	// Get map to fit route
-	map.fitBounds(locsToFit);
+	// Get map to fit route. Need to set animate to false. Otherwise if called
+	// a second time fitBounds() doesn't work and the map pans to a strange
+	// place or completely stops working.
+	map.fitBounds(locsToFit, {animate: false});
 	
 	// It can happen that vehicles get drawn before the route paths & stops.
 	// In this case need call bringToBack() on the paths and stops so that
@@ -206,6 +290,17 @@ function routeConfigCallback(route, status) {
 	// Note: bringToBack() must be called after map is first specified 
 	// via fitBounds() or other such method.
 	routeFeatureGroup.bringToBack();
+	
+	// Now that have the stop location can show walking directions if also
+	// already have the user location. If don't yet have user location
+	// then showWalkingDirections() will be called when it is found.
+	if (userLatLng) {
+		showWalkingDirections(userLatLng.lat, userLatLng.lng, 
+				initialStop.lat, initialStop.lon);
+	}
+
+	// After a bit of a delay, once user can see context, zoom in further
+	setTimeout(zoomIn, 1200);
 }
 
 var vehicleMarkers = [];
@@ -690,6 +785,128 @@ function showRoute(agencyId, routeId, directionId, stopId, apiKey) {
 }
 
 /**
+ * Displays walking directions on map
+ * @param data results from API
+ */
+function walkingDirectionCallback(data) {
+	// Just draw the first direction. The MapBox walking instructions
+	// often return a couple of choices that differ only in how
+	// one crosses a street. Looks bad to show two choices that
+	// almost overlap.
+	for (var i=0; i<1 /*data.routes.length*/; ++i) {
+		var route = data.routes[i]
+		
+		// If person is right be the stop, within 20m, then no
+		// point drawing directions.
+		if (route.distance < 20)
+			break;
+		
+		var coordinates = route.geometry.coordinates;
+
+		// Create label for the path
+		var duration = Math.round(route.duration/60) + 1;
+		var theHtml = "<image src='images/pitch-12.png'></image>" + duration + "min";
+		var coordIdx = Math.round(coordinates.length/3);
+		var iconLat = coordinates[coordIdx][1];
+		var iconLon = coordinates[coordIdx][0];
+		iconOptions = {
+				className: 'walkingDirDiv', 
+				html: theHtml,
+				iconAnchor: [-3,0],
+				iconSize: null}; // So size isn't auto set to 12px
+		var myIcon = L.divIcon(iconOptions);		
+		L.marker([iconLat, iconLon], {icon: myIcon, clickable: false}).addTo(map);
+
+		// Draw the path
+		var latLngs = [];		
+		for (var j=0; j<coordinates.length; ++j) {
+			var loc = coordinates[j];
+			// Note: for Mapbox API lat & lng are reversed
+			latLngs.push(L.latLng(loc[1], loc[0]));
+		}		
+		var polyline = L.polyline(latLngs, walkingOptions).addTo(map);
+
+	}
+}
+
+/**
+ * Gets walking directions from Mapbox API and displays them on the map
+ */
+function showWalkingDirections(lat1, lon1, lat2, lon2) {
+	// Note that order of longitudes and latitudes is different for Mapbox than usual
+	var url = "https://api.mapbox.com/v4/directions/mapbox.walking/" 
+		+ lon1 + "," + lat1 + ";" 
+		+ lon2 + "," + lat2 +
+		".json?" 
+		+ "access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ";
+	$.getJSON(url, walkingDirectionCallback);
+}
+
+
+var userMarker = null;
+var userAccuracyMarker = null;
+
+/**
+ * Creates the marker to indicate the user's location
+ * @param latlng
+ */
+function createUserLocationMarker(latlng, accuracyRadius) {
+	// Create the user marker
+	userMarker = L.circleMarker(latlng, userMarkerOptions).addTo(map);
+	
+	// Create the user location accuracy marker
+	if (accuracyRadius)
+		userAccuracyMarker = L.circle(latlng, accuracyRadius, 
+				userAccuracyMarkerOptions)
+				.addTo(map);
+}
+
+/**
+ * Moves the users current location marker to specified location
+ */
+function setUserLocationMarkerLocation(latlng, accuracyRadius) {
+	if (userMarker)
+		userMarker.setLatLng(latlng);	
+	if (userAccuracyMarker) {
+		userAccuracyMarker.setLatLng(latlng);
+		if (accuracyRadius)
+			userAccuracyMarker.setRadius(accuracyRadius);
+	}
+}
+
+/**
+ * Called when got user's location
+ * @param locationEvent
+ */
+function locationFound(locationEvent) {
+	// If user location just now being set then show walking instructions
+	if (!userLatLng && initialStop) {
+		showWalkingDirections(locationEvent.latlng.lat, locationEvent.latlng.lng, 
+				initialStop.lat, initialStop.lon);
+	}
+	
+	// Remember user location so can zoom to it when route selected
+	userLatLng = locationEvent.latlng;
+	
+	if (userMarker) {
+		// userMarker already created so move it to proper location
+		setUserLocationMarkerLocation(locationEvent.latlng, locationEvent.accuracy);
+	} else {
+		// userMarker not yet created so create it now
+		createUserLocationMarker(locationEvent.latlng, locationEvent.accuracy);
+	}
+
+}
+
+/**
+ * Called when error locating user. Nothing to do here but log error.
+ * @param errorEvent
+ */
+function locationError(errorEvent) {
+	console.log("locationError() called. Error=" + errorEvent.message);
+}
+
+/**
  * Create the leaflet map with a scale and specify which map tiles to use.
  * Creates the global map variable.
  */
@@ -704,7 +921,10 @@ function createMap() {
 	// upper left hand corner.
 	L.control.zoom({position: 'bottomleft'}).addTo(map);
 	
-	L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ',
+	var mapboxMapId = 'transitime.34a63309'; // 'transitime.j1g5bb0j';
+	L.tileLayer('http://api.tiles.mapbox.com/v4/' + mapboxMapId 
+			+ '/{z}/{x}/{y}.png?' 
+			+ 'access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ',
 	  // Specifying a shorter version of attribution. Original really too long.
 	  //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
 	  {attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -723,9 +943,39 @@ function createMap() {
 	map.on('popupclose', function(e) {
 		predictionsPopup = null;
 		clearTimeout(predictionsTimeout);
+		predictionsTimeout = null;
 		
 		if (e.popup.parent)
 			e.popup.parent.popup = null;
 	});
+	
+	// See if user location specified in query string. If so, use it.
+	// This way can test out map, including walking directions, for
+	// particular locations.
+	if (getQueryVariable('userLat') && getQueryVariable('userLon')) {
+		var userLat = parseFloat(getQueryVariable('userLat'));
+		var userLon = parseFloat(getQueryVariable('userLon'));
+		userLatLng = L.latLng(userLat, userLon);
+		createUserLocationMarker(userLatLng);
+	} else {
+		// User location not specified in query string so start 
+		// continuous tracking of user location
+		map.locate({watch: true});
+		map.on("locationfound", locationFound);
+		map.on("locationerror", locationError);
+	}	
 }
 
+function getQueryVariable(paramName) {
+	var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+    	var pair = vars[i].split("=");
+        if (pair[0] == paramName){
+        	return pair[1];
+        }
+    }
+    
+    // Didn't find the specified param so return false
+    return false;
+}

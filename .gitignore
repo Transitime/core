@@ -1,4 +1,6 @@
 *.class
+*.iml
+.idea/
 
 # Package Files #
 *.jar
@@ -6,5 +8,3 @@
 *.ear
 /bin/
 
-.idea/
-*.iml

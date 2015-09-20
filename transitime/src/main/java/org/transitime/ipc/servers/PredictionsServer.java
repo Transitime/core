@@ -191,8 +191,8 @@ public class PredictionsServer
 			// Get the predictions for the stop
 			List<IpcPredictionsForRouteStopDest> predictionsForStop =
 					predictionDataCache.getPredictions(stopInfo.routeShortName,
-							stopInfo.stopId,
 							stopInfo.tripPattern.getDirectionId(),
+							stopInfo.stopId,
 							predictionsPerStop, stopInfo.distanceToStop);
 			
 			// Add info from this stop to the results

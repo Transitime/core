@@ -22,6 +22,7 @@ import java.util.List;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
+import org.transitime.modules.Module;
 
 /**
  * For reading in feed of GTFS-realtime AVL data. Is used for both realtime
@@ -31,6 +32,11 @@ import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
  * 
  */
 public class GtfsRealtimeModule extends PollUrlAvlModule {
+
+	// If debugging feed and want to not actually process
+	// AVL reports to generate predictions and such then
+	// set shouldProcessAvl to false;
+	private static boolean shouldProcessAvl = true;
 
 	/*********** Configurable Parameters for this module ***********/
 	public static String getGtfsRealtimeURI() {
@@ -52,7 +58,7 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 
 	/**
 	 * Reads and processes the data. Called by AvlModule.run().
-	 * Reading GTFS-realtime doesn't use InputSteram so overriding
+	 * Reading GTFS-realtime doesn't use InputStream so overriding
 	 * getAndProcessData().
 	 */
 	@Override
@@ -60,7 +66,10 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
 				.getAvlReports(getGtfsRealtimeURI());
 		for (AvlReport avlReport : avlReports) {
-			processAvlReport(avlReport);
+			if (shouldProcessAvl)
+				processAvlReport(avlReport);
+			else
+				System.out.println(avlReport);
 		}
 	}
 
@@ -79,6 +88,15 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 	 */
 	@Override
 	protected void processData(InputStream in) throws Exception {
+	}
+
+	/**
+	 * Just for debugging
+	 */
+	public static void main(String[] args) {
+		// Create a ZonarAvlModule for testing
+		shouldProcessAvl = false;
+		Module.start("org.transitime.avl.GtfsRealtimeModule");
 	}
 
 }

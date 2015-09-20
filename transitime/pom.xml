@@ -214,8 +214,8 @@
         </executions>
       </plugin>
     </plugins>
-
   </build>
+
   <profiles>
     <profile>
       <id>runCore</id>

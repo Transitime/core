@@ -30,6 +30,7 @@ import org.transitime.avl.amigocloud.AmigoWebsockets;
 import org.transitime.config.LongConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
@@ -206,16 +207,43 @@ public class AmigoCloudAvlModule extends AvlModule {
 	}
 
 	/**
-	 * Initiates a real-time amigocloud feed
+	 * Initiates a real-time amigocloud feed. If there is a JSONException 
+	 * while starting connection then will try again every 10 seconds
+	 * until successful. 
 	 */
 	public void startRealtimeWebsockets() {
 		logger.info("Starting amigocloud AVL feed");
 
-		AmigoWebsockets socket =
-				new AmigoWebsockets(userId.getValue(), projectId.getValue(),
-						datasetId.getValue(), feedUrl.toString(),
-						new MyAmigoWebsocketListener(this));
-		socket.connect();
+		int numberOfExceptions = 0;
+		boolean exceptionOccurred = false;
+		do {
+			try {
+				// Actually make the connection
+				AmigoWebsockets socket =
+						new AmigoWebsockets(userId.getValue(),
+								projectId.getValue(), datasetId.getValue(),
+								feedUrl.toString(),
+								new MyAmigoWebsocketListener(this));
+				socket.connect();
+				exceptionOccurred = false;
+			} catch (JSONException e) {
+				++numberOfExceptions;
+				exceptionOccurred = true;
+				
+				// If exception has occurred several times then send e-mail to 
+				// indicate there is an ongoing problem
+				if (numberOfExceptions == 3) {
+					logger.error(
+							Markers.email(),
+							"Exception when starting up AmigoCloudAvlModule. "
+							+ "{}. numberOfExceptions={}",
+							e.getMessage(), numberOfExceptions, e);
+				}
+				
+				// Sleep 10 seconds before trying again
+				Time.sleep(10 * Time.MS_PER_SEC);
+			}
+		} while (exceptionOccurred);
 	}
 
 	/**

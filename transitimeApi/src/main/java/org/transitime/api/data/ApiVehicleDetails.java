@@ -70,7 +70,7 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	private Boolean isLayover;
 
 	@XmlAttribute
-	private String layoverDepTime;
+	private Long layoverDepTime;
 
 	@XmlAttribute
 	private String layoverDepTimeStr;
@@ -115,7 +115,7 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		isDelayed = vehicle.isDelayed() ? true : null;
 		isLayover = vehicle.isLayover() ? true : null;
 		layoverDepTime = vehicle.isLayover() ? 
-				Long.toString(vehicle.getLayoverDepartureTime()/Time.MS_PER_SEC) : null;
+				vehicle.getLayoverDepartureTime()/Time.MS_PER_SEC : null;
 				
 		layoverDepTimeStr = vehicle.isLayover() ?
 				timeForAgency.timeStrForTimezone(vehicle.getLayoverDepartureTime()) : null;

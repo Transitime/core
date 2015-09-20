@@ -20,12 +20,14 @@ package org.transitime.feed.gtfsRt;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MathUtils;
+import org.transitime.utils.Time;
 
 import com.google.protobuf.CodedInputStream;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
@@ -150,16 +152,20 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		    // Handle speed and heading
 		    float speed = Float.NaN;
 		    if (position.hasSpeed()) {
-		    	speed = position.getSpeed();
+                //  TODO: remove hack for converting mph to m/s when capmetro fixes feed
+		    	speed = position.getSpeed() * 0.44704f;
 		    }
 		    float heading = Float.NaN;
 		    if (position.hasBearing()) {
 		    	heading = position.getBearing();
 		    }
 		    
-			// Create the core AVL object. The feed can provide a silly amount 
+			// Create the core AVL object. The feed can provide a silly amount
 		    // of precision so round to just 5 decimal places.
-			AvlReport avlReport = new AvlReport(vehicleId, gpsTime,
+            // AvlReport is expecting time in ms while the proto provides it in
+		    // seconds
+			AvlReport avlReport = new AvlReport(vehicleId, 
+					gpsTime * Time.MS_PER_SEC,
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
 					heading,
 					"GTFS-rt",
