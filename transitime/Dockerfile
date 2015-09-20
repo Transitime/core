@@ -1,7 +1,7 @@
 FROM java
 MAINTAINER Nathan Walker <nathan@rylath.net>
 
-ADD target/transitimeCore-0.0.1-SNAPSHOT.jar transitime.jar
+ADD target/transitime.jar transitime.jar
 ADD target/classes/postgres_hibernate.cfg.xml hibernate.cfg.xml
 ADD docker/load_db.sh load_db.sh
 ADD docker/run_server.sh run_server.sh
