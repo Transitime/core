@@ -169,7 +169,7 @@
     create table MonitoringEvents (
         type varchar(40) not null,
         time timestamp not null,
-        message varchar(350),
+        message varchar(512),
         triggered boolean,
         value float8,
         primary key (type, time)

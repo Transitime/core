@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.AvlConfig;
-import org.transitime.configData.CoreConfig;
 import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.utils.Time;

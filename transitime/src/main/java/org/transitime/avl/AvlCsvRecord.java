@@ -27,6 +27,11 @@ import java.text.ParseException;
 
 /**
  * Represents a single record in a CSV file containing AVL data.
+ * <p>
+ * CSV columns include vehicleId, time (in epoch msec or as date string as in
+ * "9-14-2015 12:53:01"), latitude, longitude, speed (optional), heading
+ * (optional), assignmentId, and assignmentType (optional, but can be BLOCK_ID,
+ * ROUTE_ID, TRIP_ID, or TRIP_SHORT_NAME).
  *
  * @author SkiBu Smith
  *
@@ -41,6 +46,11 @@ public class AvlCsvRecord extends CsvBase {
 	
 	/**
 	 * Returns AvlReport that the line in the CSV file represents.
+	 * <p>
+	 * CSV columns include vehicleId, time (in epoch msec or as date string as
+	 * in "9-14-2015 12:53:01"), latitude, longitude, speed (optional), heading
+	 * (optional), assignmentId, and assignmentType (optional, but can be
+	 * BLOCK_ID, ROUTE_ID, TRIP_ID, or TRIP_SHORT_NAME).
 	 * 
 	 * @param record
 	 * @param fileName

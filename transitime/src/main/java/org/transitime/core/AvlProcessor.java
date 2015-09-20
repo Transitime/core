@@ -880,8 +880,8 @@ public class AvlProcessor {
 			return;
 
 		// Try to match vehicle to a block assignment if that feature is enabled
-		TemporalMatch bestMatch = new AutoBlockAssigner()
-				.autoAssignVehicleToBlockIfEnabled(vehicleState);
+		TemporalMatch bestMatch = new AutoBlockAssigner(vehicleState)
+				.autoAssignVehicleToBlockIfEnabled();
 		if (bestMatch != null) {
 			// Successfully matched vehicle to block so make vehicle predictable
 			logger.info("Auto matched vehicleId={} to a block assignment. {}",

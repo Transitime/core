@@ -169,7 +169,7 @@
     create table MonitoringEvents (
         type varchar2(40 char) not null,
         time timestamp not null,
-        message varchar2(350 char),
+        message varchar2(512 char),
         triggered number(1,0),
         value double precision,
         primary key (type, time)

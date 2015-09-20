@@ -35,13 +35,10 @@ import org.transitime.utils.Time;
  * read data. This module is useful for debugging because can relatively easily
  * create a plain text CSV file of AVL data and see what the code does.
  * <p>
- * The AVL data is processed directly by this class by it calling
- * AvlProcessor.processAvlReport(avlReport). The messages do not go through
- * the JMS server and JMS server does not need to be running.
- * <p>
- * Note: the URL for the GTFS-realtime feed is obtained in this module
- * from CoreConfig.getCsvAvlFeedURI(). This means it can be set in the
- * config file or as a Java property on the command line.
+ * CSV columns include vehicleId, time (in epoch msec or as date string as in
+ * "9-14-2015 12:53:01"), latitude, longitude, speed (optional), heading
+ * (optional), assignmentId, and assignmentType (optional, but can be BLOCK_ID,
+ * ROUTE_ID, TRIP_ID, or TRIP_SHORT_NAME).
  *
  * @author SkiBu Smith
  *

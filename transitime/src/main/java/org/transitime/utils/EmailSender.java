@@ -36,6 +36,7 @@ import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.StringConfigValue;
+import org.transitime.logging.Markers;
 
 /**
  * For programmatically sending out an e-mail. Uses a file specified by
@@ -131,8 +132,15 @@ public class EmailSender {
 					+ "message subject was: \"{}\", and body was: \"{}\"", 
 					recipients, subject, messageBody);
 		} catch (MessagingException e) {
-			logger.error("Failed sending e-mail. Exception message: {}. "
-					+ "The e-mail message subject was: \"{}\", and body was: \"{}\"", 
+			// Since this is a serious issue log the error and send an e-mail 
+			// via logback
+			logger.error(Markers.email(), 
+					"Failed sending e-mail. The e-mail config file {} "
+					+ "specified by the Java property {} contains the login "
+					+ "info to the SMTP server. Exception message: {}. "
+					+ "The e-mail message subject was: \"{}\", and body "
+					+ "was: \"{}\"",
+					emailConfigFile.getID(), emailConfigFile.getValue(), 
 					e.getMessage(), subject, messageBody);
 		}
 	}
