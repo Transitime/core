@@ -152,7 +152,8 @@ public class AutoBlockAssigner {
 	 * @param vehicleState
 	 *            Info on the vehicle to match
 	 */
-	public AutoBlockAssigner(VehicleState vehicleState) {	
+	public AutoBlockAssigner(VehicleState vehicleState) {
+		this.vehicleState = vehicleState;
 	}
 	
 	/**
