@@ -192,24 +192,24 @@ public class PredictionAccuracyModule extends Module {
 		
 		// Run forever
 		while (true) {
+			IntervalTimer timer = new IntervalTimer();
+			
 			try {
-				IntervalTimer timer = new IntervalTimer();
-								
 				// Process data
 				getAndProcessData(getRoutesAndStops(), new Date());
 				
 				// Make sure old predictions that were never matched to an
 				// arrival/departure don't stick around taking up memory.
 				clearStalePredictions();
-				
+			} catch (Exception e) {
+				logger.error("Error accessing predictions feed", e); 
+			} finally {				
 				// Wait appropriate amount of time till poll again
 				long elapsedMsec = timer.elapsedMsec();
 				long sleepTime = 
 						getTimeBetweenPollingPredictionsMsec() - elapsedMsec;
 				if (sleepTime > 0)
 					Time.sleep(sleepTime);
-			} catch (Exception e) {
-				logger.error("Error accessing predictions feed", e); 
 			}
 		}
 	}
