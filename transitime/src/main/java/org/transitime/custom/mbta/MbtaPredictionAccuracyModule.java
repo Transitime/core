@@ -223,7 +223,7 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 
 		List<Element> directions = rootNode.getChildren("direction");
 		if (directions.isEmpty()) {
-			logger.error("No direction element returned.");
+			logger.error("No direction element returned so ignoring.");
 			return;
 		}
 		for (Element direction : directions) {
@@ -238,8 +238,10 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 			for (Element trip : trips) {
 				String tripId = trip.getAttributeValue("trip_id");
 				Element vehicleChild = trip.getChild("vehicle");
-				if (vehicleChild == null)
+				if (vehicleChild == null) {
+					logger.error("No vehicle element returned so ignoring.");
 					continue;
+				}
 				String vehicleId = vehicleChild.getAttributeValue("vehicle_id");
 				List<Element> stops = trip.getChildren("stop");
 				for (Element stop : stops) {
