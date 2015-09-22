@@ -209,7 +209,7 @@ public class PredictionAccuracyModule extends Module {
 				if (sleepTime > 0)
 					Time.sleep(sleepTime);
 			} catch (Exception e) {
-				logger.error("Error accessing predictions feed", e);
+				logger.error("Error accessing predictions feed", e); 
 			}
 		}
 	}
