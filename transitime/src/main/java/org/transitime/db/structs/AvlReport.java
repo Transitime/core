@@ -114,7 +114,7 @@ public class AvlReport implements Serializable {
 	
 	// Optional text for describing the source of the AVL report
 	@Column(length=SOURCE_LENGTH)
-	private final String source;
+	private String source;
 	
 	// Can be block, trip, or route ID
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -781,6 +781,13 @@ public class AvlReport implements Serializable {
 		return source;
 	}
 	
+	
+	/**
+	 * Override the source set by constructor
+	 */
+	public void setSource(String source) {
+		this.source=sized(source);
+	}
 	/**
 	 * Returns how many msec elapsed between the GPS fix was generated
 	 * to the time it was finally processed. Returns 0 if timeProcessed

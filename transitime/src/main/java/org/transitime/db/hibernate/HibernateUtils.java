@@ -17,6 +17,8 @@
 package org.transitime.db.hibernate;
 
 import java.io.ByteArrayOutputStream;
+
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -32,6 +34,7 @@ import org.hibernate.service.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.DbSetupConfig;
+import org.hibernate.service.ServiceRegistryBuilder;
 
 /**
  * Utilities for dealing with Hibernate issues such as sessions.
@@ -136,8 +139,7 @@ public class HibernateUtils {
 		
 		// Get the session factory for persistence
 		Properties properties = config.getProperties();
-		ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-				.applySettings(properties).build();
+		ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(properties).build();
 		SessionFactory sessionFactory = 
 				config.buildSessionFactory(serviceRegistry);
 

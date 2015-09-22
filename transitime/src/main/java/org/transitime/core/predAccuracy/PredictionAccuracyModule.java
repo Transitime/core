@@ -331,10 +331,13 @@ public class PredictionAccuracyModule extends Module {
 					// a bad prediction was made
 					storePredictionAccuracyInfo(pred, null);
 				} else {
-					++numPredictionsInMemory;					
+					++numPredictionsInMemory;		
+					logger.debug("Prediction currently held in memory. {}"+pred.toString());
 				}
 			}
 		}
+		
+		
 		
 		logger.debug("There are now {} predictions in memory after removing {}.",
 				numPredictionsInMemory, numPredictionsRemoved);
@@ -416,8 +419,12 @@ public class PredictionAccuracyModule extends Module {
 		PredictionKey key = new PredictionKey(arrivalDeparture.getVehicleId(), 
 				arrivalDeparture.getDirectionId(), arrivalDeparture.getStopId());
 		List<PredAccuracyPrediction> predsList = predictionMap.get(key);
+		
 		if (predsList == null || predsList.isEmpty())
-			return;
+		{
+			logger.debug("No matching predictions for {}", arrivalDeparture);
+			return;			
+		}
 		
 		// Go through list of predictions for vehicle, direction, stop and handle
 		// the ones that match fully including being appropriate arrival or
