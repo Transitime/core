@@ -14,38 +14,41 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
 
   @Override
   public AvlReport toAvlReport(Message message) {
-    if (message == null) return null;
+    if (message == null || message.getBody() == null) return null;
+    
     JSONObject jsonObj = new JSONObject(message.getBody());
+    JSONObject msgObj = new JSONObject(jsonObj.getString("Message")); 
+    
     String vehicleId = null;
-    if (jsonObj.has("vehicleid"))
-      vehicleId = String.valueOf(jsonObj.getLong("vehicleid"));
+    if (msgObj.has("vehicleid"))
+      vehicleId = String.valueOf(msgObj.getLong("vehicleid"));
     Double lat = null;
-    if (jsonObj.has("latitude"))
-      lat = jsonObj.getDouble("latitude");
+    if (msgObj.has("latitude"))
+      lat = msgObj.getDouble("latitude");
 
     Double lon = null;
-    if (jsonObj.has("longitude"))
-      lon = jsonObj.getDouble("longitude");
+    if (msgObj.has("longitude"))
+      lon = msgObj.getDouble("longitude");
 
     Long time = null;
-    if (jsonObj.has("avlDate"))
-      time = jsonObj.getLong("avlDate");
+    if (msgObj.has("avlDate"))
+      time = msgObj.getLong("avlDate");
     
     Float heading = null;
-    if (jsonObj.has("heading")) {  
-      heading = (float) jsonObj.getDouble("heading");
+    if (msgObj.has("heading")) {  
+      heading = (float) msgObj.getDouble("heading");
     }
     
     Float speed = null;
-    if (jsonObj.has("averageSpeed")) {
-      speed = (float) jsonObj.getDouble("averageSpeed");
+    if (msgObj.has("averageSpeed")) {
+      speed = (float) msgObj.getDouble("averageSpeed");
     }
     
     String source = "sqs";
     if (vehicleId != null && lat != null && lon != null && time != null) {
     	AvlReport ar = new AvlReport(vehicleId, time, lat, lon, speed, heading, source);
-    	if (jsonObj.has("blockAlpha")) {
-    	  String blockAlpha = jsonObj.getString("blockAlpha");
+    	if (msgObj.has("blockAlpha")) {
+    	  String blockAlpha = msgObj.getString("blockAlpha");
     	  if (blockAlpha != null) {
     	    ar.setAssignment(blockAlpha, AssignmentType.BLOCK_ID);
     	  }
