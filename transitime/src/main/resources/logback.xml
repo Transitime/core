@@ -274,6 +274,17 @@
     </encoder>
   </appender>
 
+  <!-- Separate file for SQL logging -->
+  <appender name="SQL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/sql.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
   <!-- In case easiest to write logs to console.  -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
@@ -377,7 +388,7 @@
    -->
   <!-- 
   <logger name="org.hibernate.SQL" level="debug" additivity="false">
-    <appender-ref ref="CORE_DEBUG" />
+    <appender-ref ref="SQL" />
   </logger>
   -->
 
