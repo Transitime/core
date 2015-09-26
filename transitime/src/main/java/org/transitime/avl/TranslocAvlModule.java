@@ -103,6 +103,12 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 				JSONObject vehicleData = jsonArray.getJSONObject(i);
 				String vehicleId = vehicleData.getString("vehicle_id");
 				
+				// Have found that the feed sometimes include a null location.
+				// If so, ignore the data for this vehicle instead of generating
+				// an error.
+				if (vehicleData.isNull("location"))
+					continue;
+				
 				JSONObject location = vehicleData.getJSONObject("location");
 				double lat = location.getDouble("lat");
 				double lon = location.getDouble("lng");
