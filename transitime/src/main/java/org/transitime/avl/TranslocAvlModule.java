@@ -109,6 +109,7 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 				if (vehicleData.isNull("location"))
 					continue;
 				
+				// Get the location
 				JSONObject location = vehicleData.getJSONObject("location");
 				double lat = location.getDouble("lat");
 				double lon = location.getDouble("lng");
