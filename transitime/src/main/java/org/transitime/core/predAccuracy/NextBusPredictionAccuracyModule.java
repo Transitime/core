@@ -41,9 +41,10 @@ import org.transitime.gtfs.DbConfig;
 import org.transitime.modules.Module;
 
 /**
- * Reads in external prediction data a NextBus feed and stores the data in
- * memory. Then when arrivals/departures occur the prediction accuracy can be
- * determined and stored.
+ * Reads in external prediction data from NextBus feed and internal Transitime
+ * predictions (since inheriting from PredictionAccuracyModule) and stores the
+ * data in memory. Then when arrivals/departures occur the prediction accuracy
+ * can be determined and stored.
  *
  * @author SkiBu Smith
  *
