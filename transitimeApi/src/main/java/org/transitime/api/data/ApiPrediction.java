@@ -17,11 +17,11 @@
 
 package org.transitime.api.data;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.Time;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Contains data for a single prediction.
@@ -76,6 +76,13 @@ public class ApiPrediction {
 	@XmlAttribute(name = "passengerCount")
 	private String passengerCount;
 
+
+    @XmlAttribute(name = "isDeparture")
+    private String isDepartureDuplicate;  //same field different name
+
+    @XmlAttribute(name = "affectedByLayover")
+    private String affectedByLayover;
+
 	/********************** Member Functions **************************/
 
 	/**
@@ -123,6 +130,10 @@ public class ApiPrediction {
 		// Only set if true so only output for rare case
 		if (prediction.isLateAndSubsequentTripSoMarkAsUncertain())
 			isLateAndSubsequentTripSoMarkAsUncertain = "t";
+
+        affectedByLayover = Boolean.toString(prediction.isAffectedByWaitStop());
+
+        isDepartureDuplicate = Boolean.toString(!prediction.isArrival());
 	}
 
 }
