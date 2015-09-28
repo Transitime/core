@@ -745,6 +745,20 @@ public class DbConfig {
 	}
 	
 	/**
+	 * Returns CalendarDate for the current day. This method is pretty quick
+	 * since it looks through a hashmap, instead of doing a linear search
+	 * through a possibly very large number of dates.
+	 * 
+	 * @param epochTime
+	 *            the time that want calendar dates for
+	 * @return CalendarDate for current day if there is one, otherwise null.
+	 */
+	public List<CalendarDate> getCalendarDates(Date epochTime) {
+		long startOfDay = Time.getStartOfDay(epochTime);
+		return calendarDatesMap.get(startOfDay);
+	}
+
+	/**
 	 * Returns list of all service IDs
 	 * @return service IDs
 	 */
