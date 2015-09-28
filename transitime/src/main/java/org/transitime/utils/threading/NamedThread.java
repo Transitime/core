@@ -109,13 +109,22 @@ public class NamedThread extends Thread {
 						+ "\" occurred at " + new Date());
 				t.printStackTrace();
 				
-				// Log and send out e-mail since this is a serious problem
+				// Log since this is a serious problem
 				if (t instanceof OutOfMemoryError) {
-					logger.error(Markers.email(),
-							"OutOfMemoryError occurred in thread {} so "
+					// Would like to send out an e-mail as part of logging but
+					// found that when running out of memory that sending out an
+					// e-mail can hang the system for a while. This is a bad 
+					// thing since OutOfMemoryError is really serious and want
+					// to terminate the program right away so that it can be
+					// automatically restarted. This is unfortunate since
+					// really want to notify folks that there is an out of
+					// memory problem but notifying via email is not as 
+					// important as quickly getting the system restarted.
+					logger.error("OutOfMemoryError occurred in thread {} so "
 							+ "terminating application for {}", 
 							getName(), AgencyConfig.getAgencyId(), t);
 				} else {
+					// Log and send out e-mail since this is an unexpected problem
 					logger.error(Markers.email(),
 							"Unexpected Throwable occurred which will cause "
 							+ "thread {} to terminate for {}", 
