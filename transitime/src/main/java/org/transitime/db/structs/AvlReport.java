@@ -382,9 +382,13 @@ public class AvlReport implements Serializable {
 	 * Since not yet being processed timeProcessed is set to null.
 	 * 
 	 * @param vehicleId
+	 *            identifier of vehicle
 	 * @param time
+	 *            epoch time in msecs since 1970
 	 * @param lat
+	 *            latitude in decimal degrees
 	 * @param lon
+	 *            longitude in decimal degrees
 	 * @param speed
 	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
 	 *            not available
