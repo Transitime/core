@@ -135,7 +135,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// and arrival times. But better than not having a time at all.
 			long gpsTime;
 			if (vehicle.hasTimestamp())
-				gpsTime = vehicle.getTimestamp()*1000;
+				gpsTime = vehicle.getTimestamp()*Time.MS_PER_SEC;
 			else
 				gpsTime = System.currentTimeMillis();
 			
@@ -164,7 +164,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
             // AvlReport is expecting time in ms while the proto provides it in
 		    // seconds
 			AvlReport avlReport = new AvlReport(vehicleId, 
-					gpsTime * Time.MS_PER_SEC,
+					gpsTime,
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
 					heading,
 					"GTFS-rt",
