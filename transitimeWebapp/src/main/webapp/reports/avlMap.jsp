@@ -50,7 +50,7 @@
   /* For drawing the route and stops */
   var routeOptions = {
 			color: '#00ee00',
-			weight: 4,
+			weight: 5,
 			opacity: 0.4,
 			lineJoin: 'round',
 			clickable: false
@@ -219,7 +219,7 @@
 <script>
 var map = L.map('map');
 L.control.scale({metric: false}).addTo(map);
-L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
+L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.34a63309/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
     attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
     maxZoom: 19
 }).addTo(map);
