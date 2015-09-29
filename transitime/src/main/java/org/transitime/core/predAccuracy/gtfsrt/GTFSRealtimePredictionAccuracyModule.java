@@ -29,8 +29,6 @@ import org.transitime.core.predAccuracy.PredAccuracyPrediction;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
-import org.transitime.modules.Module;
-
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
@@ -46,9 +44,6 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
  */
 public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModule {
 
-	// For when requesting predictions from external GTFS RT URL
-	private static final int timeoutMsec = 20000;
-	
 	private static final Logger logger = LoggerFactory
 			.getLogger(GTFSRealtimePredictionAccuracyModule.class);
 
