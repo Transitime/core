@@ -16,6 +16,19 @@ var verbose = false;
 var predictionsPopup = null;
 var predictionsTimeout = null;
 
+// Start dynamic AVL polling rate at 2 sec and give it a max of 20 sec
+var avlPollingRate = 2000;
+var maxAvlPollingRate = 20000;
+
+//Globals are set via showRoute()
+var apiUrlPrefixAllAgencies;
+var apiUrlPrefix;
+var initialStopId; // So can popup predictions window at startup
+var initialRouteId;
+var initialDirectionId; // Needed cause some agencies use single stop for both directions
+var updateVehiclesTimer;
+var hideStaleThingsTimer;
+
 /**
  * Called when prediction read from API. Updates the content of the
  * predictionsPopup with the new prediction info.
@@ -576,10 +589,14 @@ function vehicleLocationsCallback(vehicles, status) {
 		}
 	}
 
+	// Keep track if got updated AVL data. If did then can keep the AVL
+	// polling rate the same.
+	var gotUpdatedAvlData = false;
+	
 	// Go through vehicle data read in for route...
 	for (var i = 0; i < vehicles.vehicle.length; ++i) {
 		var vehicleData = vehicles.vehicle[i];
-		
+				
 		// Don't display schedule based vehicles since they are not real and
 		// would only serve to confuse people.
 		if (vehicleData.scheduleBased)
@@ -595,13 +612,31 @@ function vehicleLocationsCallback(vehicles, status) {
 			
 			// Keep track of vehicle marker so it can be updated
 			vehicleMarkers.push(vehicleMarker);
-		} else {
+			
+			// Definitely got updated data
+			gotUpdatedAvlData = true;
+		} else {			
+			// If got new AVL report then remember such
+			var oldVehicleData = vehicleMarker.vehicleData;
+			if (vehicleData.loc.time != oldVehicleData.loc.time)
+				gotUpdatedAvlData = true;
+				
 			// Vehicle icon already exists, so update it
 			updateVehicleMarker(vehicleMarker, vehicleData);
 		}
 
-		// Store vehicle data obtained via AJAX with vehicle so it can be used in popup
+		// Store vehicle data obtained via AJAX with vehicle so it can be used 
+		// in popup
 		vehicleMarker.vehicleData = vehicleData;
+	}
+	
+	// If didn't get any updated AVL data then back off on the polling rate
+	if (!gotUpdatedAvlData) {
+		avlPollingRate = 2 * avlPollingRate;
+		if (avlPollingRate > maxAvlPollingRate)
+			avlPollingRate = maxAvlPollingRate;
+		console.log("Didn't get new AVL data so increasing polling rate to " 
+				+ avlPollingRate + " msec.");
 	}
 	
 	// Update when vehicles last updated so can determine if update
@@ -710,16 +745,13 @@ function updateVehiclesUsingApiData() {
 		  success: vehicleLocationsCallback,
 		  timeout: 6000 // 6 second timeout
 		});
+	
+	// Call this function again at the appropriate time. This can't be done
+	// in vehicleLocationsCallback() because it won't be called if there is
+	// an error.
+	updateVehiclesTimer = 
+		setTimeout(updateVehiclesUsingApiData, avlPollingRate);
 }
-
-// Globals are set via showRoute()
-var apiUrlPrefixAllAgencies;
-var apiUrlPrefix;
-var initialStopId; // So can popup predictions window at startup
-var initialRouteId;
-var initialDirectionId; // Needed cause some agencies use single stop for both directions
-var updateVehiclesTimer;
-var hideStaleThingsTimer;
 
 /**
  * Clears any timers that might be running. Intended for when leaving the
@@ -727,19 +759,15 @@ var hideStaleThingsTimer;
  */
 function clearTimers() {
 	if (updateVehiclesTimer)
-		clearInterval(updateVehiclesTimer);
+		clearTimeout(updateVehiclesTimer);
 	if (hideStaleThingsTimer)
 		clearInterval(hideStaleThingsTimer);
 }
 
 /**
- * Start the timers for showing vehicle locations and user location.
+ * Start the timers for hiding stale vehicles
  */
 function startTimers() {
-	// Initiate timerloop that constantly updates vehicle positions.
-	// Update every few seconds.
-	updateVehiclesTimer = setInterval(updateVehiclesUsingApiData, 5000);
-	
 	// Setup timer to determine if haven't updated vehicles in a while.
 	// This happens when open up a laptop or tablet that was already
 	// displaying the map. For this situation should get rid of the
@@ -775,13 +803,14 @@ function showRoute(agencyId, routeId, directionId, stopId, apiKey) {
 		url += "&s=" + stopId;
 	$.getJSON(url, routeConfigCallback);	
 	
-	// Show the vehicles for the route
-	updateVehiclesUsingApiData();
-	
-	// Deal with the timers that show vehicles and user location. First 
-	// clear any old ones.
+	// Deal with the timers that show vehicles and such. First 
+	// clear any old ones. Do this before updateVehiclesUsingApiData()
+	// since that creates a new timer.
 	clearTimers();
 	startTimers();
+	
+	// Show the vehicles for the route
+	updateVehiclesUsingApiData();
 }
 
 /**
