@@ -28,7 +28,7 @@ import org.transitime.ipc.data.IpcStopPath;
 import org.transitime.utils.MathUtils;
 
 /**
- *
+ * Represents a path from one stop to another.
  *
  * @author SkiBu Smith
  *
