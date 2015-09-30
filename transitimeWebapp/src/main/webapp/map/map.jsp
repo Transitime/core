@@ -119,6 +119,7 @@ var predictionsTimeout = null;
 var MIN_AVL_POLLING_RATE = 1000;
 var avlPollingRate = MIN_AVL_POLLING_RATE;
 var MAX_AVL_POLLING_RATE = 20000;
+var avlTimer = null;
 
 /**
  * Called when prediction read from API. Updates the content of the
@@ -802,7 +803,7 @@ function updateVehiclesUsingApiData() {
 	// Call this function again at the appropriate time. This can't be done
 	// in vehicleLocationsCallback() because it won't be called if there is
 	// an error.
-	setTimeout(updateVehiclesUsingApiData, avlPollingRate);
+	avlTimer = setTimeout(updateVehiclesUsingApiData, avlPollingRate);
 }
 
 /************** Executable statements **************/
@@ -895,6 +896,8 @@ if (!getRouteQueryStrParam()) {
 
  					// Reset the polling rate back down to minimum value since selecting new route
  					avlPollingRate = MIN_AVL_POLLING_RATE;
+ 					if (avlTimer)
+ 						clearTimeout(avlTimer);
  					
  					// Read in vehicle locations now
  					setRouteQueryStrParam("r=" + e.val); 					
