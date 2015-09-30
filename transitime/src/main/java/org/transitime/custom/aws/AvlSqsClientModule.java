@@ -205,16 +205,23 @@ public class AvlSqsClientModule extends Module {
           logger.error("issue receiving request", e);
         }
         
+        try {
         // put out a log message to show progress every so often
         if (_messageCount % logFrequency == 0) {
           long delta = (System.currentTimeMillis() - _messageStart)/1000;
-          long rate = _messageCount / delta;
+          long rate = 0;
+          if (delta != 0) {
+            rate = _messageCount / delta;
+          }
           logger.info("received " + _messageCount + " message in " +
               delta + " seconds (" + rate + "/s) receive size=" + _deserializeQueue.size() +
               ", archive size=" + _archiveQueue.size() + ", ack size=" 
               + _acknowledgeQueue.size());
           _messageStart = System.currentTimeMillis();
           _messageCount = 0;
+        }
+        } catch (Exception e) {
+          logger.error("status message exception: ", e);
         }
       }
     }
