@@ -162,7 +162,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 						+ StringUtils.oneDigitFormat(okPercentage) + "%");
 
 				rowBuilder.addRowElement(tooLatePercentage);
-				rowBuilder.addRowElement("Later than predicted: " + tooEarly + " points, "
+				rowBuilder.addRowElement("Later than predicted: " + tooLate + " points, "
 						+ StringUtils.oneDigitFormat(tooLatePercentage) + "%");
 			}
 		}
