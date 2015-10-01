@@ -1182,7 +1182,8 @@ public class AvlProcessor {
 	 * data will be ignored. In other words, the last AVL time will be for that
 	 * last valid AVL report.
 	 * 
-	 * @return The GPS time of last AVL report, or 0 if no last AVL report
+	 * @return The GPS time in msec epoch time of last AVL report, or 0 if no
+	 *         last AVL report
 	 */
 	public long lastAvlReportTime() {
 		if (lastRegularReportProcessed == null)
@@ -1193,14 +1194,25 @@ public class AvlProcessor {
 
 	/**
 	 * For storing the last regular (non-schedule based) AvlReport so can
-	 * determine if the AVL feed is working.
+	 * determine if the AVL feed is working. Makes sure that report is newer
+	 * than the previous last regular report so that ignore possibly old data
+	 * that might come in from the AVL feed.
 	 * 
 	 * @param avlReport
 	 *            The new report to possibly store
 	 */
 	private void setLastAvlReport(AvlReport avlReport) {
-		if (!avlReport.isForSchedBasedPreds())
+		// Ignore schedule based predictions AVL reports since those are faked 
+		// and don't represent what is going on with the AVL feed
+		if (avlReport.isForSchedBasedPreds())
+			return;
+
+		// Only store report if it is a newer one. In this way we ignore 
+		// possibly old data that might come in from the AVL feed.
+		if (lastRegularReportProcessed == null
+				|| avlReport.getTime() > lastRegularReportProcessed.getTime()) {
 			lastRegularReportProcessed = avlReport;
+		}
 	}
 	
 	/**
