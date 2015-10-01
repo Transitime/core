@@ -709,7 +709,7 @@ public class AvlReport implements Serializable {
 	}
 	
 	/**
-	 * @return The GPS time of the AVL report
+	 * @return The GPS time of the AVL report in msec epoch time
 	 */
 	public long getTime() {
 		return time.getTime();
