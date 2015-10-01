@@ -234,7 +234,7 @@ public class AvlSqsClientModule extends Module {
       PublishRequest request = new PublishRequest();
       request.setTopicArn(snsArn.getValue());
       String content = _messageUnmarshaller.toString(message);
-      logger.info("archiving content {}", content);
+      logger.debug("archiving content {}", content);
       request.setMessage(content);
       _sns.publish(request);
     } catch (Exception any) {
