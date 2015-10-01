@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@ page import="org.transitime.utils.web.WebUtils" %>
+<%@page import="org.transitime.db.webstructs.WebAgency"%>
 <%     
 // Determine all the parameters from the query string
 
@@ -30,7 +31,8 @@ String beginTime = request.getParameter("beginTime");
 String endDate = request.getParameter("endDate");
 String endTime = request.getParameter("endTime");
 
-String chartTitle = "Prediction Accuracy Range for " + agencyId   
+String chartTitle = "Prediction Accuracy Range for " 
+    + WebAgency.getCachedWebAgency(agencyId).getAgencyName()   
 	+ titleRoutes + source 
 	+ " for " + beginDate + " " + beginTime + " to " + endDate + " " + endTime;
 %>  
