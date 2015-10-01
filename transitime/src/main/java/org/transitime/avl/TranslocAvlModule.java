@@ -98,6 +98,13 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 			JSONObject jsonObj = new JSONObject(jsonStr);
 
 			JSONObject dataObj = jsonObj.getJSONObject("data");
+			
+			// If no agency data then give up (better then getting an exception
+			// when calling getJSONArray().
+			if (dataObj.isNull(feedAgencyId.getValue()))
+				return;
+			
+			// Process data for each vehicle
 			JSONArray jsonArray = dataObj.getJSONArray(feedAgencyId.getValue());
 			for (int i=0; i<jsonArray.length(); ++i) {
 				JSONObject vehicleData = jsonArray.getJSONObject(i);
