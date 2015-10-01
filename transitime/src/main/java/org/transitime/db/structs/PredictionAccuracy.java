@@ -34,6 +34,7 @@ import org.hibernate.CallbackException;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.classic.Lifecycle;
+import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 
 /**
@@ -63,17 +64,30 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
 	
+	// Not declared final since using intern() when reading from db
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String routeId;
 	
+	// routeShortName is included because for some agencies the
+	// route_id changes when there are schedule updates. But the
+	// routeShortName is more likely to stay consistent. Therefore
+	// it is better for when querying for arrival/departure data
+	// over a time span.
+	// Not declared final since using intern() when reading from db
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private String routeShortName;
+
+	// Not declared final since using intern() when reading from db
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String directionId;
 	
+	// Not declared final since using intern() when reading from db
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String stopId;
 	
 	// So can see which trip predictions for so can easily determine
 	// what the travel times are and see if they appear to be correct.
+	// Not declared final since using intern() when reading from db
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String tripId;
 	
@@ -109,7 +123,7 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	/********************** Member Functions **************************/
 
 	/**
-	 * Simple constructor
+	 * Simple constructor for creating object to be stored in db
 	 * 
 	 * @param routeId
 	 * @param directionId
@@ -129,6 +143,9 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 			Boolean affectedByWaitStop) {
 		super();
 		this.routeId = routeId;
+		
+		Route route = Core.getInstance().getDbConfig().getRouteById(routeId);
+		this.routeShortName = route.getShortName();
 		this.directionId = directionId;
 		this.stopId = stopId;
 		this.tripId = tripId;
@@ -149,6 +166,7 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	protected PredictionAccuracy() {
 		super();
 		this.routeId = null;
+		this.routeShortName = null;
 		this.directionId = null;
 		this.stopId = null;
 		this.tripId = null;
@@ -165,35 +183,49 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime
-				* result
-				+ ((affectedByWaitStop == null) ? 0 : affectedByWaitStop
-						.hashCode());
-		result = prime
-				* result
-				+ ((arrivalDepartureTime == null) ? 0 : arrivalDepartureTime
-						.hashCode());
-		result = prime * result
-				+ ((directionId == null) ? 0 : directionId.hashCode());
+		result =
+				prime
+						* result
+						+ ((affectedByWaitStop == null) ? 0
+								: affectedByWaitStop.hashCode());
+		result =
+				prime
+						* result
+						+ ((arrivalDepartureTime == null) ? 0
+								: arrivalDepartureTime.hashCode());
+		result =
+				prime * result
+						+ ((directionId == null) ? 0 : directionId.hashCode());
 		result = prime * result + (int) (id ^ (id >>> 32));
-		result = prime * result
-				+ ((predictedTime == null) ? 0 : predictedTime.hashCode());
+		result =
+				prime
+						* result
+						+ ((predictedTime == null) ? 0 : predictedTime
+								.hashCode());
 		result = prime * result + predictionAccuracyMsecs;
-		result = prime
-				* result
-				+ ((predictionReadTime == null) ? 0 : predictionReadTime
-						.hashCode());
-		result = prime
-				* result
-				+ ((predictionSource == null) ? 0 : predictionSource.hashCode());
+		result =
+				prime
+						* result
+						+ ((predictionReadTime == null) ? 0
+								: predictionReadTime.hashCode());
+		result =
+				prime
+						* result
+						+ ((predictionSource == null) ? 0 : predictionSource
+								.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
+		result =
+				prime
+						* result
+						+ ((routeShortName == null) ? 0 : routeShortName
+								.hashCode());
 		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
-		result = prime * result
-				+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
+		result =
+				prime * result
+						+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -243,6 +275,11 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 				return false;
 		} else if (!routeId.equals(other.routeId))
 			return false;
+		if (routeShortName == null) {
+			if (other.routeShortName != null)
+				return false;
+		} else if (!routeShortName.equals(other.routeShortName))
+			return false;
 		if (stopId == null) {
 			if (other.stopId != null)
 				return false;
@@ -261,11 +298,11 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		return true;
 	}
 
-
 	@Override
 	public String toString() {
 		return "PredictionAccuracy [" 
 				+ "routeId=" + routeId
+				+ " routeShortName=" + routeShortName
 				+ ", directionId=" + directionId 
 				+ ", stopId=" + stopId
 				+ ", tripId=" + tripId
@@ -284,6 +321,10 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		return routeId;
 	}
 
+	public String getRouteShortName() {
+		return routeShortName;
+	}
+	
 	public String getDirectionId() {
 		return directionId;
 	}
@@ -342,6 +383,8 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	public void onLoad(Session s, Serializable id) throws CallbackException {
 		if (routeId != null)
 			routeId = routeId.intern();
+		if (routeShortName != null)
+			routeShortName = routeShortName.intern();
 		if (directionId != null)
 			directionId = directionId.intern();
 		if (stopId != null)

@@ -175,13 +175,17 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 	}
 	
 	/**
-	 * Takes data from XML Document object and processes it and
-	 * calls storePrediction() on the predictions.
+	 * Takes data from XML Document object and processes it and calls
+	 * storePrediction() on the predictions.
 	 * 
+	 * @param routeAndStops
+	 *            which route and stops getting predictions for
 	 * @param doc
+	 *            The returned XML document
 	 * @param predictionsReadTime
 	 */
 	private void processExternalPredictionsForRoute(
+			RouteAndStops routeAndStops,
 			Document doc,
 			Date predictionsReadTime) {
 		// If couldn't read data from feed then can't process it
@@ -207,8 +211,6 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 
 					// Determine other parameters
 					String vehicleId = prediction.getAttributeValue("vehicle");
-					String routeId = predictionsForStop
-							.getAttributeValue("routeTag");
 					String stopId = predictionsForStop
 							.getAttributeValue("stopTag");
 					String tripId = prediction.getAttributeValue("tripTag");
@@ -229,6 +231,8 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 									+ "the configuration.", tripId);
 						}
 					}
+					
+					String routeId = routeAndStops.routeId;
 					
 					logger.debug("Storing external prediction routeId={}, "
 							+ "directionId={}, tripId={}, vehicleId={}, "
@@ -271,7 +275,7 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 		// Get data for each route and stop
 		for (RouteAndStops routeAndStops : routesAndStops) {
 			Document doc = getExternalPredictionsForRoute(routeAndStops);
-			processExternalPredictionsForRoute(doc, predictionsReadTime);
+			processExternalPredictionsForRoute(routeAndStops, doc, predictionsReadTime);
 		}
 	}
 
