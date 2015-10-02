@@ -211,7 +211,13 @@ public class TimeoutHandlerModule extends Module {
 			// far past it
 			long maxNoAvl = allowableNoAvlAfterSchedDepart.getValue()
 					* Time.MS_PER_SEC;
-			if (now > scheduledDepartureTime + maxNoAvl) {				
+			if (now > scheduledDepartureTime + maxNoAvl) {
+			  
+			  String stopId = null;
+			  if (vehicleState != null && vehicleState.getMatch() != null
+			      && vehicleState.getMatch().getAtStop() != null) {
+			    stopId = vehicleState.getMatch().getAtStop().getStopId();
+			  }
 				// Make vehicle unpredictable
 				String eventDescription = "Vehicle timed out because it "
 						+ "has not reported in "
@@ -220,7 +226,7 @@ public class TimeoutHandlerModule extends Module {
 						+ " since the scheduled departure time "
 						+ Time.dateTimeStr(scheduledDepartureTime)
 						+ " for the wait stop ID " 
-						+ vehicleState.getMatch().getAtStop().getStopId()
+						+ stopId
 						+ " while allowable time without an AVL report is "
 						+ Time.elapsedTimeStr(maxNoAvl)
 						+ " and so was made unpredictable.";
