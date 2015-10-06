@@ -196,7 +196,7 @@ public class AvlSqsClientModule extends Module {
             _deserializeQueue.add(message);
             _archiveQueue.add(message);
           } catch (IllegalStateException ise) {
-            logger.error("dropping message {} as queue is full:  ", message, ise);
+            logger.error("dropping message {} as queue is full.  deseralize size={}, archive size={}:  ", message, ise, _deserializeQueue.size(), _archiveQueue.size());
           } catch (Exception any) {
             logger.error("exception deserializing mesage={}: ", message, any);
           }
