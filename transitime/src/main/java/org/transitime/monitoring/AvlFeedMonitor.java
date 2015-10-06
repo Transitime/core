@@ -17,8 +17,6 @@
 
 package org.transitime.monitoring;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
@@ -28,6 +26,8 @@ import org.transitime.core.BlocksInfo;
 import org.transitime.db.structs.Block;
 import org.transitime.utils.EmailSender;
 import org.transitime.utils.Time;
+
+import java.util.List;
 
 /**
  * For determining if the AVL feed is up. If not getting data when blocks are
@@ -39,6 +39,8 @@ import org.transitime.utils.Time;
  *
  */
 public class AvlFeedMonitor extends MonitorBase {
+
+    private CloudwatchService cloudwatchService;
 
 	private static IntegerConfigValue allowableAvlFeedTimeNoDataSecs =
 			new IntegerConfigValue(
@@ -66,8 +68,9 @@ public class AvlFeedMonitor extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public AvlFeedMonitor(EmailSender emailSender, String agencyId) {
+	public AvlFeedMonitor(CloudwatchService cloudwatchService, EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
+        this.cloudwatchService = cloudwatchService;
 	}
 	
 	/**
@@ -83,12 +86,14 @@ public class AvlFeedMonitor extends MonitorBase {
 		// Determine age of AVL report
 		long lastAvlReportTime = AvlProcessor.getInstance().lastAvlReportTime();
 		long ageOfAvlReport = System.currentTimeMillis() - lastAvlReportTime;
-		
-		logger.debug("When monitoring AVL feed last AVL report={}", 
+		Double ageOfAvlReportInSecs = new Double(ageOfAvlReport / Time.MS_PER_SEC );
+        cloudwatchService.publishMetric("LATEST_AVL_REPORT_AGE_IN_SECONDS", ageOfAvlReportInSecs);
+
+		logger.debug("When monitoring AVL feed last AVL report={}",
 				AvlProcessor.getInstance().getLastAvlReport());
 		
 		setMessage("Last valid AVL report was " 
-				+ ageOfAvlReport / Time.MS_PER_SEC 
+				+ ageOfAvlReport / Time.MS_PER_SEC
 				+ " secs old while allowable age is " 
 				+ allowableAvlFeedTimeNoDataSecs.getValue()	+ " secs.",
 				ageOfAvlReport / Time.MS_PER_SEC);
