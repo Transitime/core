@@ -19,8 +19,8 @@ import java.util.Map;
 public class CloudwatchService {
 
     private String environmentName = System.getProperty("transitime.environmentName");
-    private String accessKey = System.getProperty("transitime.awsAccessKey");
-    private String secretKey = System.getProperty("transitime.awsSecretKey");
+    private String accessKey = System.getProperty("transitime.cloudwatch.awsAccessKey");
+    private String secretKey = System.getProperty("transitime.cloudwatch.awsSecretKey");
     private String endpoint = System.getProperty("transitime.awsEndpoint");
     private AmazonCloudWatchClient cloudWatch;
 
