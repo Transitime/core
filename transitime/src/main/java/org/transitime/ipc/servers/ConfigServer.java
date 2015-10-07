@@ -133,7 +133,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		Collection<IpcRouteSummary> ipcRoutes = 
 				new ArrayList<IpcRouteSummary>(dbRoutes.size());
 		for (org.transitime.db.structs.Route dbRoute : dbRoutes) {
-			IpcRouteSummary ipcRoute = new IpcRouteSummary(dbRoute);
+			IpcRouteSummary ipcRoute = new IpcRouteSummary(dbRoute, true);
 			ipcRoutes.add(ipcRoute);
 		}
 		
