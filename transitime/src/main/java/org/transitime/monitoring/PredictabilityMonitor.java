@@ -17,10 +17,6 @@
 
 package org.transitime.monitoring;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.BlocksInfo;
@@ -28,6 +24,10 @@ import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.structs.Block;
 import org.transitime.utils.EmailSender;
 import org.transitime.utils.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Monitors how many vehicles are predictable compared to how many active blocks
@@ -37,6 +37,8 @@ import org.transitime.utils.StringUtils;
  *
  */
 public class PredictabilityMonitor extends MonitorBase {
+
+    private CloudwatchService cloudwatchService;
 
 	private static DoubleConfigValue minPredictableBlocks =
 			new DoubleConfigValue(
@@ -72,8 +74,9 @@ public class PredictabilityMonitor extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public PredictabilityMonitor(EmailSender emailSender, String agencyId) {
+	public PredictabilityMonitor(CloudwatchService cloudwatchService, EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
+        this.cloudwatchService = cloudwatchService;
 	}
 
 	/**
@@ -87,7 +90,7 @@ public class PredictabilityMonitor extends MonitorBase {
 	private double fractionBlocksPredictable(double threshold) {
 		// For creating message
 		List<Block> activeBlocksWithoutVehicle = new ArrayList<Block>();
-		
+
 		// Determine number of currently active blocks.
 		// If there are no currently active blocks then don't need to be
 		// getting AVL data so return 0
@@ -95,6 +98,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		if (activeBlocks.size() == 0) {
 			setMessage("No currently active blocks so predictability "
 					+ "considered to be OK.");
+            cloudwatchService.publishMetric("PREDICTABLE_PERCENTAGE_OF_BLOCKS", 100d);
 			return 1.0;
 		}
 
@@ -114,7 +118,9 @@ public class PredictabilityMonitor extends MonitorBase {
 		// Determine fraction of active blocks that have a predictable vehicle 
 		double fraction = ((double) Math.max(predictableVehicleCount,
 				minimumPredictableVehicles.getValue())) / activeBlocks.size();
-		
+
+        cloudwatchService.publishMetric("PREDICTABLE_PERCENTAGE_OF_BLOCKS", fraction * 100d);
+
 		// Provide simple message explaining the situation
 		String message = "Predictable blocks fraction=" 
 				+ StringUtils.twoDigitFormat(fraction) 
