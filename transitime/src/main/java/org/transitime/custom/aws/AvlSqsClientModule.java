@@ -12,6 +12,7 @@ import org.transitime.avl.AvlClient;
 import org.transitime.config.ClassConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
 import org.transitime.utils.threading.BoundedExecutor;
@@ -352,16 +353,19 @@ public class AvlSqsClientModule extends Module {
     }
 
     private class StatusTask implements Runnable {
+      private static final int STATUS_FREQUENCY_SECONDS = 60;
+
       @Override
       public void run() {
         while (!Thread.interrupted()) {
           try {
-            logger.info("Queue Size Report:  recieve={}, deserialize={}, ack={}, archive={}", 
+            logger.info("Queue Size Report:  AVL last report {}s, recieve={}, deserialize={}, ack={}, archive={}",
+                (System.currentTimeMillis() - AvlProcessor.getInstance().lastAvlReportTime())/1000,
                 _receiveQueue.size(),
                 _deserializeQueue.size(),
                 _acknowledgeQueue.size(),
                 _archiveQueue.size());
-            Thread.sleep(60 * 1000);
+            Thread.sleep(STATUS_FREQUENCY_SECONDS * 1000);
           } catch (Exception any) {
             logger.error("exception with status: ", any);
           }
