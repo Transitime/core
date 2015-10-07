@@ -64,8 +64,9 @@ public class AvlConfig {
 	}
 	private static IntegerConfigValue avlFeedTimeoutInMSecs =
 			new IntegerConfigValue("transitime.avl.feedTimeoutInMSecs", 10000,
-					"For when polling AVL XML feed. Feed logs error if the " +
-					"timeout value is exceeded.");
+					"For when polling AVL XML feed. The feed logs error if "
+					+ "the timeout value is exceeded when performing the XML "
+					+ "request.");
 	
 	/**
 	 * Max speed that an AVL report is allowed to have.

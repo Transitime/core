@@ -203,11 +203,16 @@ public class HibernateUtils {
 	
 	/**
 	 * Returns session for the specified agencyId.
+	 * <p>
+	 * NOTE: Make sure you close the session after the query!! Use a try/catch
+	 * around the query and close the session in a finally block to make sure it
+	 * happens. The system only gets a limited number of sessions!!
 	 * 
 	 * @param agencyId
 	 *            Used as the database name if the property
 	 *            transitime.core.dbName is not set
-	 * @return The Session
+	 * @return The Session. Make sure you close it when done because system only
+	 *         gets limited number of open sessions.
 	 * @throws HibernateException
 	 */
 	public static Session getSession(String agencyId) 
@@ -221,8 +226,13 @@ public class HibernateUtils {
 	/**
 	 * Returns the session for the database name specified by the
 	 * transitime.db.dbName Java property.
+	 * <p>
+	 * NOTE: Make sure you close the session after the query!! Use a try/catch
+	 * around the query and close the session in a finally block to make sure it
+	 * happens. The system only gets a limited number of sessions!!
 	 * 
-	 * @return
+	 * @return The Session. Make sure you close it when done because system only
+	 *         gets limited number of open sessions.
 	 */
 	public static Session getSession() {
 		SessionFactory sessionFactory = 

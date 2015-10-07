@@ -64,13 +64,13 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	private String tripPatternId;
 
 	@XmlAttribute(name = "delayed")
-	private String isDelayed;
+	private Boolean isDelayed;
 	
 	@XmlAttribute(name = "layover")
-	private String isLayover;
+	private Boolean isLayover;
 
 	@XmlAttribute
-	private String layoverDepTime;
+	private Long layoverDepTime;
 
 	@XmlAttribute
 	private String layoverDepTimeStr;
@@ -112,10 +112,10 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		blockAssignmentMethod = vehicle.getBlockAssignmentMethod();
 		tripId = vehicle.getTripId();
 		tripPatternId = vehicle.getTripPatternId();
-		isDelayed = vehicle.isDelayed() ? "true" : null;
-		isLayover = vehicle.isLayover() ? "true" : null;
+		isDelayed = vehicle.isDelayed() ? true : null;
+		isLayover = vehicle.isLayover() ? true : null;
 		layoverDepTime = vehicle.isLayover() ? 
-				Long.toString(vehicle.getLayoverDepartureTime()/Time.MS_PER_SEC) : null;
+				vehicle.getLayoverDepartureTime()/Time.MS_PER_SEC : null;
 				
 		layoverDepTimeStr = vehicle.isLayover() ?
 				timeForAgency.timeStrForTimezone(vehicle.getLayoverDepartureTime()) : null;

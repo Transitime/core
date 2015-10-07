@@ -379,6 +379,14 @@ public class UpdateTravelTimes {
 //		specialDaysOfWeek.add(java.util.Calendar.FRIDAY);
 		List<Integer> specialDaysOfWeek = null;
 		
+		// Set the timezone for the application. Must be done before
+		// determine begin and end time so that get the proper time of day.
+		int configRev = ActiveRevisions.get(agencyId).getConfigRev();
+		TimeZone timezone = 
+				Agency.getAgencies(agencyId, configRev).get(0).getTimeZone();
+		TimeZone.setDefault(timezone);
+
+		// Determine beginTime and endTime
 		Date beginTime = null;
 		Date endTime = null;
 		try {
@@ -393,12 +401,6 @@ public class UpdateTravelTimes {
 		// Log params used right at top of log file
 		logger.info("Processing travel times for beginTime={} endTime={}",
 				startDateStr, endDateStr);
-		
-		// Set the timezone for the application
-		int configRev = ActiveRevisions.get(agencyId).getConfigRev();
-		TimeZone timezone = 
-				Agency.getAgencies(agencyId, configRev).get(0).getTimeZone();
-		TimeZone.setDefault(timezone);
 		
 		// Do all the work...
 		manageSessionAndProcessTravelTimes(agencyId, specialDaysOfWeek,

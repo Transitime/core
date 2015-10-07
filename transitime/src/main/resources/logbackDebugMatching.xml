@@ -101,8 +101,7 @@
          Note that gmail seems to filter out messages sometimes. Therefore
          make sure using non-gmail accounts. 
       -->
-    <to>msmithtransit@gmail.com</to> 
-    <to>skibu@smith.net</to>
+    <to>${logback.errorEmail}</to>
 
     <!-- Only send e-mail if special "EMAIL" marker is specified for an
          ERROR level message. 
@@ -136,12 +135,12 @@
 
     <!-- Specifies details of how the message is sent and the format of it
       -->
-    <smtpHost>smtp.gmail.com</smtpHost>
+    <smtpHost>${logback.smtpHost}</smtpHost>
     <smtpPort>465</smtpPort>
     <SSL>true</SSL>
-    <username>transittestsmtp@gmail.com</username>
-    <password>transittest1</password>
-    <from>msmithtransit@gmail.com</from>
+    <username>${logback.smtpUsername}</username>
+    <password>${logback.smtpPassword}</password>
+    <from>errorLogger@transitime.org</from>
     <subject>%level %logger{0} - %m</subject>
     <layout class="ch.qos.logback.classic.PatternLayout">
       <pattern>%d{MMM dd yyyy - HH:mm:ss.SSS} - %-5level - %logger{35} :%n%message%n</pattern>

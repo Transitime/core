@@ -71,7 +71,7 @@ public class MonitoringEvent implements Serializable {
 	private final boolean triggered;
 	
 	// The long message associated with the monitoring
-	@Column(length=350)
+	@Column(length=512)
 	private final String message;
 	
 	// The value that caused monitoring to be triggered or untriggered.

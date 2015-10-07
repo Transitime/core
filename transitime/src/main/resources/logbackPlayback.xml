@@ -290,7 +290,7 @@
        for the class. Was originally hoping to log errors to stdout but
        this interfered with other loggers. If another logger level was set
        to debug then for that class the message would also be logged via root
-       even though the logging level for route is configured to be info, 
+       even though the logging level for root is configured to be info, 
        which is a higher level.
     -->
   <root level="info">          

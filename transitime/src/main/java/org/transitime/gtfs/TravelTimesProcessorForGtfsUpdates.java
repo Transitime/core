@@ -38,17 +38,19 @@ import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
 /**
- * For setting travel times to default values as needed when GTFS data
- * processed. The idea is that when GTFS data read in sometimes there will be
- * new routes or stopPaths. For these want some kind of travel times so that the
- * prediction software will work. But don't have any AVL data yet for these
- * stopPaths since they are new. Therefore need to either use data from another
- * service Id or nearby time.
+ * For setting travel times when processing GTFS configuration. Tries to use
+ * existing travel times from database. If data for trip exists it is used. If
+ * data for trip doesn't exist tries to use data for similar trip (see
+ * adequateMatch()). For when there is no matching historic travel times data
+ * then uses default values based on the schedule. The idea is that when GTFS
+ * data read in sometimes there will be new routes or stopPaths. For these want
+ * some kind of travel times so that the prediction software will work. But
+ * don't have any AVL data yet for these stopPaths since they are new.
  * 
  * @author SkiBu Smith
  * 
  */
-public class ScheduleBasedTravelTimesProcessor {
+public class TravelTimesProcessorForGtfsUpdates {
 
 	// Which config and travel times revs to write data for
 	private final ActiveRevisions activeRevisions;
@@ -62,7 +64,7 @@ public class ScheduleBasedTravelTimesProcessor {
 	private final double maxTravelTimeSegmentLength;
 	
 	private static final Logger logger = 
-			LoggerFactory.getLogger(ScheduleBasedTravelTimesProcessor.class);
+			LoggerFactory.getLogger(TravelTimesProcessorForGtfsUpdates.class);
 
 
 	/********************** Member Functions **************************/
@@ -76,7 +78,7 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * @param defaultWaitTimeAtStopMsec
 	 * @param maxSpeedKph
 	 */
-	public ScheduleBasedTravelTimesProcessor(ActiveRevisions activeRevisions,
+	public TravelTimesProcessorForGtfsUpdates(ActiveRevisions activeRevisions,
 			int originalTravelTimesRev, double maxTravelTimeSegmentLength,
 			int defaultWaitTimeAtStopMsec, double maxSpeedKph) {
 		this.activeRevisions = activeRevisions;
@@ -346,33 +348,27 @@ public class ScheduleBasedTravelTimesProcessor {
 			}
 			
 			// For next iteration in for loop
-			previousStopPathWithScheduleTimeIndex = stopPathWithScheduleTimeIndex;
+			previousStopPathWithScheduleTimeIndex = 
+					stopPathWithScheduleTimeIndex;
 			previousScheduleTime = scheduleTime;
 		} /* End of for loop for each stop path */
 
 		// Return the results
 		return travelTimes;
 	}
-	
+
 	/**
 	 * Sees if the travel times for the trip from the database are an adequate
 	 * match for the trip pattern such that existing travel times can be reused.
-	 * They are an adequate match if the path IDs are the same and the travel
-	 * times were generated via GPS or the schedule times match the new ones
-	 * within 60 seconds. Also, number of stopPaths and number of segments per
-	 * path for the travel times need to match that for the trip patterns.
+	 * They are an adequate match if the path IDs are the same
 	 * 
 	 * @param trip
 	 *            The trip current processing travel times for
-	 * @param scheduleBasedTravelTimes
-	 *            Travel times for trip obtained by just looking at the schedule
 	 * @param ttForTripFromDb
 	 *            Travel times obtained for trip from the database
-	 * @return True if the alreadyExistingTravelTimes passed in can be used for
-	 *         the trip
+	 * @return true if the ttForTripFromDb passed in can be used for the trip
 	 */
-	private boolean adequateMatch(Trip trip,
-			TravelTimesForTrip scheduleBasedTravelTimes,
+	private boolean	stopPathsMatch(Trip trip, 
 			TravelTimesForTrip ttForTripFromDb) {
 		// Convenience variable
 		TripPattern tripPattern = trip.getTripPattern();
@@ -420,17 +416,164 @@ public class ScheduleBasedTravelTimesProcessor {
 			}
 		}
 		
-		// If the travel times from the database are based on GPS then use them
-		// since being based on historic data is better than being based on 
-		// schedule.
-		// TODO It would be better to try to match trip ID so using the right 
-		// travel times. But that would be complicated so need to put it off
-		// until later.
-		if (!ttForTripFromDb.purelyScheduleBased())
-			return true;
+		// Didn't find problem so the new trip being created matches the 
+		// travel time data in the db
+		return true;
+	}
+	
+	/**
+	 * Given list of travel times for the trip pattern looks to see one is for
+	 * the trip specified. If so, the travel times from the database for that
+	 * trip.
+	 * 
+	 * @param trip
+	 *            which trip trying to get travel times for
+	 * @param ttForTripFromDbList
+	 *            list of travel times from the db for the trip pattern. Can be
+	 *            null.
+	 * @param scheduleBasedOk
+	 *            set to true if OK to use schedule based travel times
+	 * @return travel times for the trip from the database, or null if no such
+	 *         travel times available
+	 */
+	private TravelTimesForTrip travelTimesForTripFromDb(Trip trip,
+			List<TravelTimesForTrip> ttForTripFromDbList,
+			boolean scheduleBasedOk) {
+		// If no travel times from db then we don't have a match
+		if (ttForTripFromDbList == null)
+			return null;
 		
-		// Travel times are based on schedule. See if schedule time is close to
-		// the same. If it is, then can use these times
+		// Determine if already have non-schedule based data in database 
+		// for the trip ID because that would be the preferable match.
+		for (TravelTimesForTrip ttForTripFromDb : ttForTripFromDbList) {
+			if (ttForTripFromDb.getTripCreatedForId().equals(trip.getId())) {
+				if (stopPathsMatch(trip, ttForTripFromDb)
+						&& (scheduleBasedOk || !ttForTripFromDb
+								.purelyScheduleBased())) {
+					// Found good match of travel times from db
+					logger.debug("Found exact travel time match for " + 
+							"tripId={} from database.",	trip.getId());
+					return ttForTripFromDb;
+				}
+			}
+		}
+
+		// Never found a match
+		return null;
+	}
+	
+	/**
+	 * Given list of travel times for the trip pattern looks to see one is for
+	 * the trip pattern specified. If so, the travel times from the database for
+	 * that trip pattern are used.
+	 * 
+	 * @param trip
+	 *            which trip trying to get travel times for
+	 * @param ttForTripFromDbList
+	 *            list of travel times from the db for the trip pattern. Can be
+	 *            null.
+	 * @param scheduleBasedOk
+	 *            set to true if OK to use schedule based travel times
+	 * @return travel times for the trip from the database, or null if no such
+	 *         travel times available
+	 */
+	private TravelTimesForTrip travelTimesForTripPatternFromDb(Trip trip,
+			List<TravelTimesForTrip> ttForTripFromDbList,
+			boolean scheduleBasedOk) {
+		// If no travel times from db then we don't have a match
+		if (ttForTripFromDbList == null)
+			return null;
+		
+		// Go through list and look for suitable match
+		for (TravelTimesForTrip ttForTripFromDb : ttForTripFromDbList) {
+			// If suitable travel times already in db then use them
+			if (stopPathsMatch(trip, ttForTripFromDb)
+					&& (scheduleBasedOk || !ttForTripFromDb
+							.purelyScheduleBased())) {
+				// Found good match of travel times from db
+				logger.debug("Found adequate travel time match for " + 
+						"tripId={} which is for tripPatternId={} so " +
+						"will use the old one created for tripId={}",
+						trip.getId(), trip.getTripPattern().getId(),
+						ttForTripFromDb.getTripCreatedForId());
+				return ttForTripFromDb;
+			}
+		}
+		
+		// Never found a match
+		return null;
+	}
+	
+	/**
+	 * Creates new schedule based travel times for the trip. Also adds the
+	 * schedule based travel times to travelTimesFromDbMap so that it can
+	 * possibly be used by other trips. For when historic non-schedule based
+	 * travel times are not available from the database.
+	 * 
+	 * @param trip
+	 *            which trip trying to get travel times for
+	 * @param gtfsData
+	 *            for getting schedule info
+	 * @param ttForTripFromDbList
+	 *            list of travel times from the db for the trip pattern. Can be
+	 *            null.
+	 * @param travelTimesFromDbMap
+	 *            so can add newly created schedule based travel times so can
+	 *            also be used by other trips
+	 * @return schedule based travel times
+	 */
+	private TravelTimesForTrip scheduleBasedTravelTimes(Trip trip,
+			GtfsData gtfsData, List<TravelTimesForTrip> ttForTripFromDbList,
+			Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
+		logger.debug("There was not an adequate travel time match for "
+				+ "tripId={} which is for tripPatternId={} so will "
+				+ "use newly created schedule based one.",
+		trip.getId(), trip.getTripPattern().getId());
+
+		// Determine the schedule based travel times
+		TravelTimesForTrip scheduleBasedTravelTimes =
+				determineTravelTimesBasedOnSchedule(trip, gtfsData);
+
+		// If list of travel times doesn't exist for this trip pattern yet
+		// then create it
+		if (ttForTripFromDbList == null) {
+			ttForTripFromDbList = new ArrayList<TravelTimesForTrip>();
+			travelTimesFromDbMap.put(trip.getTripPattern().getId(),
+					ttForTripFromDbList);
+		}
+		ttForTripFromDbList.add(scheduleBasedTravelTimes);
+
+		return scheduleBasedTravelTimes;
+	}
+
+	/**
+	 * Determines if schedule from gtfsData is close enough to the one from
+	 * ttForTripFromDb. If so then true is returned. This method is for trying
+	 * to reuse schedule based travel times.
+	 * 
+	 * @param trip
+	 *            which trip trying to get travel times for
+	 * @param ttForTripFromDb
+	 *            schedule based travel times from db that checking to see if
+	 *            close enough. If null then returns false since no schedule
+	 *            to be close to.
+	 * @param gtfsData
+	 *            for getting schedule info
+	 * @return true if schedule from gtfsData is close enough to the one from
+	 *         ttForTripFromDb
+	 */
+	private boolean scheduleCloseEnough(Trip trip,
+			TravelTimesForTrip ttForTripFromDb, GtfsData gtfsData) {
+		// If no travel times from database then return false
+		if (ttForTripFromDb == null)
+			return false;
+		
+		// Determine schedule based travel times
+		TravelTimesForTrip scheduleBasedTravelTimes =
+				determineTravelTimesBasedOnSchedule(trip, gtfsData);
+
+		// Travel times from db are based on schedule. See if schedule time is 
+		// close to the same. If it is, then can use these times
 		// Determine the travel times for this trip based on the GTFS
 		// schedule times. Then can compare with travel times in database.
 		int newTravelTimeMsec = 0;
@@ -449,13 +592,14 @@ public class ScheduleBasedTravelTimesProcessor {
 						"times for tripId={} for tripPatternId={} found that the " +
 						"travel times differed by more than 60 seconds for stop " +
 						"path index {}, which is for pathId={} for the old tripId={}", 
-						trip.getId(), tripPattern.getId(), i, newElement.getStopPathId(),
+						trip.getId(), trip.getTripPattern().getId(), i, 
+						newElement.getStopPathId(),
 						ttForTripFromDb.getTripCreatedForId());
 				return false;
 			}
 		}
 
-		// Travel times didn't vary so it is a good match
+		// schedule is close enough
 		return true;
 	}
 	
@@ -479,54 +623,53 @@ public class ScheduleBasedTravelTimesProcessor {
 					trip.getId(), tripPattern.getId(), trip.getRouteId());
 
 			// For determining if can use existing TravelTimesForTrip from 
-			// database. 
+			// database. Get list of all travel times for the same trip pattern
+			// so that can find which one is best.
 			List<TravelTimesForTrip> ttForTripFromDbList = 
 					travelTimesFromDbMap.get(tripPattern.getId());			
-				
-			// See if any of the existing travel times from the db are adequate.
-			// If so, use them.
-			TravelTimesForTrip scheduleBasedTravelTimes =
-					determineTravelTimesBasedOnSchedule(trip, gtfsData);
-			TravelTimesForTrip travelTimesToUse = scheduleBasedTravelTimes;
+
+			// See if have historic non-schedule based travel times from db for 
+			// the trip
+			TravelTimesForTrip travelTimesToUse =
+					travelTimesForTripFromDb(trip, ttForTripFromDbList, false);
+
+			// If didn't find travel times for trip see if have non-schedule 
+			// based ones for same trip pattern.
+			if (travelTimesToUse == null) {
+				travelTimesToUse =
+						travelTimesForTripPatternFromDb(trip,
+								ttForTripFromDbList, false);
+			}
 			
-			boolean adequateMatchFoundInDb = false;
-			if (ttForTripFromDbList != null) {
-				// Go through list and look for suitable match
-				for (TravelTimesForTrip ttForTripFromDb : ttForTripFromDbList) {
-					// If suitable travel times already in db then use them
-					if (adequateMatch(trip, scheduleBasedTravelTimes, 
-							ttForTripFromDb)) {
-						travelTimesToUse = ttForTripFromDb;
-						adequateMatchFoundInDb = true;
-						logger.debug("Found adequate travel time match for " + 
-								"tripId={} which is for tripPatternId={} so " +
-								"will use the old one created for tripId={}",
-								trip.getId(), tripPattern.getId(),
-								ttForTripFromDb.getTripCreatedForId());
-						break;
-					}
-				}
+			// If didn't find non-schedule based travel times from db then see 
+			// if can reuse existing schedule based travel time
+			if (travelTimesToUse == null) {
+				TravelTimesForTrip ttForTripFromDb =
+						travelTimesForTripFromDb(trip, ttForTripFromDbList, true);
+				if (scheduleCloseEnough(trip, ttForTripFromDb, gtfsData))
+					travelTimesToUse = ttForTripFromDb;
 			}
 
-			// If couldn't find an existing match then will be using the
-			// travel times created for this trip. Add these new travel
-			// times to the list of travel times from the db so that
-			// they can be used for subsequent trips.
-			if (!adequateMatchFoundInDb) {
-				logger.debug("There was not an adequate travel time match for " + 
-						"tripId={} which is for tripPatternId={} so will use new one.", 
-					trip.getId(), tripPattern.getId());
-				// If list of travel times doesn't exist for this trip pattern yet
-				// then create it
-				if (ttForTripFromDbList == null) {
-					ttForTripFromDbList = new ArrayList<TravelTimesForTrip>();
-					travelTimesFromDbMap.put(tripPattern.getId(), ttForTripFromDbList);
-				}
-				ttForTripFromDbList.add(scheduleBasedTravelTimes);					
+			// If didn't find non-schedule based travel times from db then see 
+			// if can reuse existing schedule based travel time from another trip
+			if (travelTimesToUse == null) {
+				TravelTimesForTrip ttForTripFromDb =
+						travelTimesForTripPatternFromDb(trip, ttForTripFromDbList, true);
+				if (scheduleCloseEnough(trip, ttForTripFromDb, gtfsData))
+					travelTimesToUse = ttForTripFromDb;
 			}
 			
-			// Add the resulting TravelTimesForTrip to the Trip so it can be stored
-			// as part of the trip
+			// If didn't have any usable travel times from db then create new
+			// schedule based travel times for this trip
+			if (travelTimesToUse == null) {
+				travelTimesToUse =
+						scheduleBasedTravelTimes(trip, gtfsData,
+								ttForTripFromDbList, travelTimesFromDbMap);
+			}
+			
+			// Set the resulting TravelTimesForTrip for the Trip so travel times 
+			// will be stored as part of the trip when the trip is stored to 
+			// the database.
 			trip.setTravelTimes(travelTimesToUse);
 		}			
 	}
@@ -537,6 +680,8 @@ public class ScheduleBasedTravelTimesProcessor {
 	 * trip.
 	 * 
 	 * @param travelTimesFromDbMap
+	 *            Keyed on tripPatternId, contains list of TravelTimesForTrip
+	 *            for each tripPatternId
 	 * @return Total number of travel times (one per stop path) already
 	 *         processed)
 	 */
@@ -576,7 +721,8 @@ public class ScheduleBasedTravelTimesProcessor {
 		// Let user know what is going on
 		logger.info("Processing travel time data...");
 
-		// Read existing data from db and put into travelTimesFromDbMap member
+		// Read existing data from db and put into travelTimesFromDbMap member.
+		// Map is keyed on trip pattern ID.
 		Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap = 
 				TravelTimesForTrip.getTravelTimesForTrips(session, 
 						originalTravelTimesRev);

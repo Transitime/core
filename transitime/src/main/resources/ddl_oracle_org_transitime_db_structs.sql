@@ -169,7 +169,7 @@
     create table MonitoringEvents (
         type varchar2(40 char) not null,
         time timestamp not null,
-        message varchar2(350 char),
+        message varchar2(512 char),
         triggered number(1,0),
         value double precision,
         primary key (type, time)
@@ -185,6 +185,7 @@
         predictionReadTime timestamp,
         predictionSource varchar2(60 char),
         routeId varchar2(60 char),
+        routeShortName varchar2(60 char),
         stopId varchar2(60 char),
         tripId varchar2(60 char),
         vehicleId varchar2(60 char),
@@ -226,7 +227,7 @@
     );
 
     create table StopPaths (
-        tripPatternId varchar2(60 char) not null,
+        tripPatternId varchar2(120 char) not null,
         stopPathId varchar2(120 char) not null,
         configRev number(10,0) not null,
         breakTime number(10,0),
@@ -290,14 +291,14 @@
         configRev number(10,0),
         travelTimesRev number(10,0),
         tripCreatedForId varchar2(60 char),
-        tripPatternId varchar2(60 char),
+        tripPatternId varchar2(120 char),
         primary key (id)
     );
 
     create table TripPattern_to_Path_joinTable (
-        TripPatterns_id varchar2(60 char) not null,
+        TripPatterns_id varchar2(120 char) not null,
         TripPatterns_configRev number(10,0) not null,
-        stopPaths_tripPatternId varchar2(60 char) not null,
+        stopPaths_tripPatternId varchar2(120 char) not null,
         stopPaths_stopPathId varchar2(120 char) not null,
         stopPaths_configRev number(10,0) not null,
         listIndex number(10,0) not null,
@@ -305,7 +306,7 @@
     );
 
     create table TripPatterns (
-        id varchar2(60 char) not null,
+        id varchar2(120 char) not null,
         configRev number(10,0) not null,
         directionId varchar2(60 char),
         maxLat double precision,
@@ -336,7 +337,7 @@
         shapeId varchar2(60 char),
         tripShortName varchar2(60 char),
         travelTimes_id number(10,0),
-        tripPattern_id varchar2(60 char),
+        tripPattern_id varchar2(120 char),
         tripPattern_configRev number(10,0),
         primary key (tripId, startTime, configRev)
     );

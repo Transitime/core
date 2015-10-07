@@ -33,7 +33,7 @@
    <jsp:include page="params/boolean.jsp">
     <jsp:param name="label" value="Provide tooltip info"/>
     <jsp:param name="name" value="tooltips"/>
-    <jsp:param name="default" value="false"/>
+    <jsp:param name="default" value="true"/>
     <jsp:param name="tooltip" value="If set to True then provides detailed 
       information on data through tooltip. Can be useful but if processing 
       large amounts of data can slow down the query."/>

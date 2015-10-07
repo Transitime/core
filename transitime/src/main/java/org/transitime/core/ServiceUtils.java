@@ -183,7 +183,8 @@ public class ServiceUtils {
 		// match, add them to the list of service IDs.
 		int dateOfWeek = getDayOfWeek(epochTime);
 		for (Calendar calendar : activeCalendars) {			
-			// If calendar for the current day of the week then add the serviceId
+			// If calendar for the current day of the week then add the 
+			// serviceId
 			if ((dateOfWeek == java.util.Calendar.MONDAY && calendar.getMonday())   ||
 				(dateOfWeek == java.util.Calendar.TUESDAY && calendar.getTuesday()) ||
 				(dateOfWeek == java.util.Calendar.WEDNESDAY && calendar.getWednesday()) ||
@@ -194,13 +195,15 @@ public class ServiceUtils {
 				serviceIds.add(calendar.getServiceId());				
 			}	
 		}
-		logger.debug("For {} services from calendar.txt that are active are {}", 
+		logger.debug("For {} services from calendar.txt that are active are {}",
 				epochTime, serviceIds);
 		
 		// Go through calendar_dates to see if there is special service for 
 		// this date. Add or remove the special service.
+
 		List<CalendarDate> calendarDatesForNow = dbConfig.getCalendarDatesForNow();
 		logger.info("Start adding calendar dates");
+
 		if (calendarDatesForNow != null) {
 			for (CalendarDate calendarDate : calendarDatesForNow) {
 				// Handle special service for this date

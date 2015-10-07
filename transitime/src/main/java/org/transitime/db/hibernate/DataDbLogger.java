@@ -224,6 +224,27 @@ public class DataDbLogger {
 	}
 	
 	/**
+	 * Determines set of class names in the queue. Useful for logging
+	 * error message when queue getting filled up so know what kind of
+	 * objects are backing the system up.
+	 * 
+	 * @return Map of class names and their count of the objects in the queue
+	 */
+	private Map<String, Integer> getClassNamesInQueue() {
+		Map<String, Integer> classNamesMap = new HashMap<String, Integer>();
+		for (Object o : queue) {
+			String className = o.getClass().getName();
+			Integer count = classNamesMap.get(className);
+			if (count == null) {
+				count = new Integer(0);
+				classNamesMap.put(className, count);
+			}
+			++count;
+		}
+		return classNamesMap;
+	}
+	
+	/**
 	 * Adds an object to be saved in the database to the queue. If queue is
 	 * getting filled up then an e-mail will be sent out indicating there is a
 	 * problem. The queue levels at which an e-mail is sent out is specified by
@@ -256,7 +277,17 @@ public class DataDbLogger {
 					queue.size() + " elements already in the queue."
 					:
 					"DataDbLogger queue is now completely full for projectId=" + 
-					projectId + ". LOSING DATA!!!"; 
+					projectId + ". LOSING DATA!!!";
+			
+			// Add to message the class names of the objects in the queue so 
+			// can see what objects are causing the problem
+			Map<String, Integer> classNamesCount = getClassNamesInQueue();
+			for (String className : classNamesCount.keySet()) {
+				int count = classNamesCount.get(className);
+				message += " Class " + className + " count: " + count + ";";
+			}
+			
+			// Log and send out email since this is an important issue 
 			logger.error(Markers.email(), message);
 		}
 		
@@ -354,7 +385,8 @@ public class DataDbLogger {
 			session.save(objectToBeStored);
 			tx.commit();
 		} finally {
-			session.close();
+			if (session != null)
+				session.close();
 		}
 	}
 	

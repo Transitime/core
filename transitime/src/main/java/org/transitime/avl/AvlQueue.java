@@ -104,8 +104,9 @@ public class AvlQueue extends ArrayBlockingQueue<Runnable> {
 								.getTime();
 		if (obsolete) {
 			logger.error("AVL report from queue is obsolete (there is a newer "
-					+ "one for the vehicle) so dumping this report. {}", 
-					avlReportFromQueue);
+					+ "one for the vehicle). Therefore ignoring this report so "
+					+ "can move on to next valid report for another vehicle. "
+					+ "{}",	avlReportFromQueue);
 		}
 		return obsolete;
 	}

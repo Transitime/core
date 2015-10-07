@@ -49,7 +49,7 @@ public class ApiPrediction {
 	// isDeparture will only be displayed for the more rare times that
 	// departure prediction is being provided.
 	@XmlAttribute(name = "departure")
-	private String isDeparture;
+	private Boolean isDeparture;
 
 	@XmlAttribute(name = "trip")
 	private String tripId;
@@ -61,20 +61,24 @@ public class ApiPrediction {
 	private String vehicleId;
 
 	// Only output if true
+	@XmlAttribute(name = "atEndOfTrip")
+	private Boolean isAtEndOfTrip;
+	
+	// Only output if true
 	@XmlAttribute(name = "delayed")
-	private String isDelayed;
+	private Boolean isDelayed;
 	
 	// Only output if true
 	@XmlAttribute(name = "lateAndSubsequentTripSoMarkAsUncertain")
-	private String isLateAndSubsequentTripSoMarkAsUncertain;
+	private Boolean isLateAndSubsequentTripSoMarkAsUncertain;
 	
 	// Only output if true
 	@XmlAttribute(name = "notYetDeparted")
-	private String basedOnScheduledDeparture;
+	private Boolean basedOnScheduledDeparture;
 
 	// Only output if passenger count is valid
 	@XmlAttribute(name = "passengerCount")
-	private String passengerCount;
+	private Integer passengerCount;
 
 	/********************** Member Functions **************************/
 
@@ -99,30 +103,33 @@ public class ApiPrediction {
 		schedBasedPreds = prediction.isSchedBasedPred() ? true : null;
 
 		if (!prediction.isArrival())
-			isDeparture = "t";
+			isDeparture = true;
 
 		tripId = prediction.getTripId();
 		tripPatternId = prediction.getTripPatternId();
 
 		vehicleId = prediction.getVehicleId();
 
+		if (prediction.isAtEndOfTrip())
+			isAtEndOfTrip = true;
+		
 		// Only set basedOnScheduledDeparture if true so that it is not output
 		// if false since it will then be null
 		if (prediction.isAffectedByWaitStop())
-			basedOnScheduledDeparture = "t";
+			basedOnScheduledDeparture = true;
 
 		// Only set passengerCount if it is valid so that it is not output if it
 		// is not valid since will then be null
 		if (prediction.isPassengerCountValid())
-			passengerCount = Integer.toString(prediction.getPassengerCount());
+			passengerCount = (int) prediction.getPassengerCount();
 		
 		// Only set if true so only output for rare case
 		if (prediction.isDelayed())
-			isDelayed = "t";
+			isDelayed = true;
 		
 		// Only set if true so only output for rare case
 		if (prediction.isLateAndSubsequentTripSoMarkAsUncertain())
-			isLateAndSubsequentTripSoMarkAsUncertain = "t";
+			isLateAndSubsequentTripSoMarkAsUncertain = true;
 	}
 
 }

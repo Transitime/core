@@ -89,7 +89,7 @@ public class TravelTimesForTrip implements Serializable {
 	@Column
 	private final int travelTimesRev;
 	
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	@Column(length=TripPattern.TRIP_PATTERN_ID_LENGTH)
 	private final String tripPatternId;
 	
 	// So know which trip these travel times were created for. Useful

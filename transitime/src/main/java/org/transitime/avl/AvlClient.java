@@ -20,6 +20,7 @@ import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.AvlConfig;
 import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
@@ -145,7 +146,15 @@ public class AvlClient implements Runnable {
 		// Process the report
 		logger.info("Thread={} AvlClient processing AVL data {}", 
 				Thread.currentThread().getName(), avlReport);	
-		AvlProcessor.getInstance().processAvlReport(avlReport);
+		try {
+			AvlProcessor.getInstance().processAvlReport(avlReport);
+		} catch (Exception e) {
+			// Catch unexpected exceptions so that can continue to use the same 
+			// AVL thread even if there is an unexpected problem. Only let 
+			// Errors, such as OutOfMemory errors, through.
+			logger.error("Exception {} for {} for avlReport={}.", 
+					e.getMessage(), AgencyConfig.getAgencyId() ,avlReport, e);
+		}
 	}
 	
 }

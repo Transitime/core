@@ -17,6 +17,7 @@
 
 package org.transitime.monitoring;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -79,9 +80,14 @@ public class PredictabilityMonitor extends MonitorBase {
 	 * Returns the fraction (0.0 - 1.0) of the blocks that currently have a
 	 * predictable vehicle associated.
 	 * 
+	 * @param threshold
+	 *            So can provide a more complete message if below the threshold
 	 * @return Fraction of blocks that have a predictable vehicle
 	 */
-	private double fractionBlocksPredictable() {
+	private double fractionBlocksPredictable(double threshold) {
+		// For creating message
+		List<Block> activeBlocksWithoutVehicle = new ArrayList<Block>();
+		
 		// Determine number of currently active blocks.
 		// If there are no currently active blocks then don't need to be
 		// getting AVL data so return 0
@@ -99,6 +105,10 @@ public class PredictabilityMonitor extends MonitorBase {
 			Collection<String> vehicleIdsForBlock = VehicleDataCache
 					.getInstance().getVehiclesByBlockId(block.getId());
 			predictableVehicleCount += vehicleIdsForBlock.size();
+			
+			// Keep track of active blocks without vehicles
+			if (vehicleIdsForBlock.size() == 0)
+				activeBlocksWithoutVehicle.add(block);
 		}
 		
 		// Determine fraction of active blocks that have a predictable vehicle 
@@ -112,10 +122,24 @@ public class PredictabilityMonitor extends MonitorBase {
 				+ StringUtils.twoDigitFormat(minPredictableBlocks.getValue())
 				+ ", active blocks=" + activeBlocks.size()
 				+ ", predictable vehicles=" + predictableVehicleCount
-				+ ", vehicles using minimumPredictableVehicles=" 
+				+ " (minimumPredictableVehicles=" 
 				+ Math.max(predictableVehicleCount,
 						minimumPredictableVehicles.getValue())
-				+ ".";
+				+ ").";
+		
+		// Add all the active block IDs to the message so can more easily see 
+		// what is going on 
+		StringBuilder sb = new StringBuilder();
+		sb.append(" Currently active blocks without vehicles: ");
+		for (Block block : activeBlocksWithoutVehicle) {
+			sb.append("block=")
+				.append(block.getId())
+				.append(", serviceId=")
+				.append(block.getServiceId())
+				.append("; ");
+		}
+		message += sb.toString();
+
 		setMessage(message, fraction);
 		
 		// Return fraction of blocks that have a predictable vehicle
@@ -127,8 +151,6 @@ public class PredictabilityMonitor extends MonitorBase {
 	 */
 	@Override
 	protected boolean triggered() {
-		double fraction = fractionBlocksPredictable();
-		
 		// Determine the threshold for triggering. If already triggered
 		// then raise the threshold by minPredictableBlocksGap in order
 		// to prevent lots of e-mail being sent out if the value is
@@ -136,6 +158,8 @@ public class PredictabilityMonitor extends MonitorBase {
 		double threshold = minPredictableBlocks.getValue();
 		if (wasTriggered())
 			threshold += minPredictableBlocksGap.getValue();
+		
+		double fraction = fractionBlocksPredictable(threshold);
 		
 		return fraction < threshold;
 	}

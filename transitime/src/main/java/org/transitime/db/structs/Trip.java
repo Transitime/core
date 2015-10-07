@@ -32,12 +32,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -50,12 +52,19 @@ import org.transitime.utils.Time;
 
 /**
  * Describes a GTFS trip but also includes travel time information.
+ * <p>
+ * Serializable since Hibernate requires such.
+ * <p>
+ * Implements Lifecycle so that can have the onLoad() callback be called when
+ * reading in data so that can intern() member strings. In order to do this the
+ * String members could not be declared as final since they are updated after
+ * the constructor is called. 
  * 
  * @author SkiBu Smith
  *
  */
 @Entity @DynamicUpdate @Table(name="Trips")
-public class Trip implements Serializable {
+public class Trip implements Lifecycle, Serializable {
 
 	@Column 
 	@Id	
@@ -63,7 +72,7 @@ public class Trip implements Serializable {
 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
 	@Id 
-	private final String tripId;
+	private String tripId;
 	
 	// The startTime needs to be an Id column because GTFS frequencies.txt
 	// file can be used to define multiple trips with the same trip ID. 
@@ -75,7 +84,7 @@ public class Trip implements Serializable {
 	
 	// Used by some agencies to identify the trip in the AVL feed
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
-	private final String tripShortName;
+	private String tripShortName;
 	
 	// Number of seconds into the day.
 	// Not final because only used for frequency based trips.
@@ -83,10 +92,10 @@ public class Trip implements Serializable {
 	private Integer endTime;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String directionId;
+	private String directionId;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String routeId;
+	private String routeId;
 	
 	// Route short name is also needed because some agencies such as SFMTA
 	// change the route IDs when making schedule changes. But we need a 
@@ -95,7 +104,7 @@ public class Trip implements Serializable {
 	// time. For where need a route identifier that is consistent over time
 	// it can be best to use the routeShortName.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String routeShortName;
+	private String routeShortName;
 	
 	// So can determine all the stops and stopPaths associated with trip
 	// Note that needs to be FetchType.EAGER because otherwise get a 
@@ -139,19 +148,19 @@ public class Trip implements Serializable {
 	
 	// Service ID for the trip
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String serviceId;
+	private String serviceId;
 	
 	// The GTFS trips.txt trip_headsign if set. Otherwise null.
 	@Column
-	private final String headsign;
+	private String headsign;
 	
 	// From GTFS trips.txt block_id if set. Otherwise the trip_id.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String blockId;
+	private String blockId;
 	
 	// The GTFS trips.txt shape_id
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String shapeId;
+	private String shapeId;
 
 	@Transient
 	private Route route;
@@ -174,7 +183,8 @@ public class Trip implements Serializable {
 	 * Constructs Trip object from GTFS data.
 	 * <p>
 	 * Does not set startTime nor endTime. Those are set separately using
-	 * addScheduleTimes().
+	 * addScheduleTimes(). Also doesn't set travel times. Those are set
+	 * separately using setTravelTimes().
 	 * 
 	 * @param configRev
 	 * @param gtfsTrip
@@ -1078,5 +1088,58 @@ public class Trip implements Serializable {
 	public int getNumberStopPaths() {
 		return getTripPattern().getStopPaths().size();
 	}
+
+	/**
+	 * Callback due to implementing Lifecycle interface. Used to compact
+	 * string members by interning them.
+	 */
+	@Override
+	public void onLoad(Session s, Serializable id) throws CallbackException {
+		if (tripId != null)
+			tripId = tripId.intern();
+		if (tripShortName != null)
+			tripShortName = tripShortName.intern();
+		if (directionId != null)
+			directionId = directionId.intern();
+		if (routeId != null)
+			routeId = routeId.intern();
+		if (routeShortName != null)
+			routeShortName = routeShortName.intern();
+		if (serviceId != null)
+			serviceId = serviceId.intern();
+		if (headsign != null)
+			headsign = headsign.intern();
+		if (blockId != null)
+			blockId = blockId.intern();
+		if (shapeId != null)
+			shapeId = shapeId.intern();
+	}
 	
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onSave(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onUpdate(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onDelete(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+		
 }

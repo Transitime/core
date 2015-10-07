@@ -9,7 +9,6 @@
    tripPattern=TRIP_PATTERN (optional, for specifying which stop interested in).
    verbose=true (optional, for getting additional info in vehicle popup window)
    showUnassignedVehicles=true (optional, for showing unassigned vehicles)
-   updateRate=MSEC (optional, for specifying update rate for vehicle locations.
 -->
 <html>
 <head>
@@ -84,22 +83,6 @@ function dateFormat(time) {
 }
 
 /**
- * Handle update rate specification
- */
- function getUpdateRate() {
-	 var updateRate = getQueryVariable("updateRate");
-	 if (updateRate) {
-		 var configuredUpdateRate = parseInt(updateRate);
-	 	if (configuredUpdateRate < 2000)
-	 		return 2000;
-	 	else 
-	 		return configuredUpdateRate; 
-	 } else {
-		 return 5000; // The default value
-	 }
-}
-
-/**
  * Handle the route specification
  */
 var routeQueryStrParam;
@@ -131,6 +114,12 @@ function setRouteQueryStrParamViaQueryStr() {
 // For keeping track the predictions popup so can update content
 var predictionsPopup = null;
 var predictionsTimeout = null;
+
+//Start dynamic AVL polling rate at 1 sec and give it a max of 20 sec
+var MIN_AVL_POLLING_RATE = 1000;
+var avlPollingRate = MIN_AVL_POLLING_RATE;
+var MAX_AVL_POLLING_RATE = 20000;
+var avlTimer = null;
 
 /**
  * Called when prediction read from API. Updates the content of the
@@ -641,6 +630,10 @@ function vehicleLocationsCallback(vehicles, status) {
 		}
 	}
 
+	// Keep track if got updated AVL data. If did then can keep the AVL
+	// polling rate the same.
+	var gotUpdatedAvlData = false;
+
 	// Go through vehicle data read in for route...
 	for (var i = 0; i < vehicles.vehicle.length; ++i) {
 		var vehicleData = vehicles.vehicle[i];
@@ -660,7 +653,15 @@ function vehicleLocationsCallback(vehicles, status) {
 			
 			// Keep track of vehicle marker so it can be updated
 			vehicleMarkers.push(vehicleMarker);
+			
+			// Definitely got updated data
+			gotUpdatedAvlData = true;
 		} else {
+			// If got new AVL report then remember such
+			var oldVehicleData = vehicleMarker.vehicleData;
+			if (vehicleData.loc.time != oldVehicleData.loc.time)
+				gotUpdatedAvlData = true;
+				
 			// Vehicle icon already exists, so update it
 			updateVehicleMarker(vehicleMarker, vehicleData);
 		}
@@ -669,6 +670,15 @@ function vehicleLocationsCallback(vehicles, status) {
 		vehicleMarker.vehicleData = vehicleData;
 	}
 	
+	// If didn't get any updated AVL data then back off on the polling rate
+	if (!gotUpdatedAvlData) {
+		avlPollingRate = 2 * avlPollingRate;
+		if (avlPollingRate > MAX_AVL_POLLING_RATE)
+			avlPollingRate = MAX_AVL_POLLING_RATE;
+		console.log("Didn't get new AVL data so increasing polling rate to " 
+				+ avlPollingRate + " msec.");
+	}
+
 	// Update when vehicles last updated so can determine if update
 	// hasn't happened in a long time
 	lastVehiclesUpdateTime = new Date();
@@ -789,6 +799,11 @@ function updateVehiclesUsingApiData() {
 		  success: vehicleLocationsCallback,
 		  timeout: 6000 // 6 second timeout
 		});
+	
+	// Call this function again at the appropriate time. This can't be done
+	// in vehicleLocationsCallback() because it won't be called if there is
+	// an error.
+	avlTimer = setTimeout(updateVehiclesUsingApiData, avlPollingRate);
 }
 
 /************** Executable statements **************/
@@ -802,7 +817,10 @@ if (!agencyId)
 // Create the map with a scale and specify which map tiles to use
 var map = L.map('map');
 L.control.scale({metric: false}).addTo(map);
-L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
+var mapboxMapId = 'transitime.34a63309'; // 'transitime.j1g5bb0j';
+L.tileLayer('http://api.tiles.mapbox.com/v4/' + mapboxMapId 
+		+ '/{z}/{x}/{y}.png?' 
+		+ 'access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
 	// Specifying a shorter version of attribution. Original really too long.
     //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
     attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -874,10 +892,15 @@ if (!getRouteQueryStrParam()) {
  					
  					// Configure map for new route	
  					var url = apiUrlPrefix + "/command/route?r=" + e.val;
- 					$.getJSON(url, routeConfigCallback);;
+ 					$.getJSON(url, routeConfigCallback);
 
+ 					// Reset the polling rate back down to minimum value since selecting new route
+ 					avlPollingRate = MIN_AVL_POLLING_RATE;
+ 					if (avlTimer)
+ 						clearTimeout(avlTimer);
+ 					
  					// Read in vehicle locations now
- 					setRouteQueryStrParam("r=" + e.val);
+ 					setRouteQueryStrParam("r=" + e.val); 					
  					updateVehiclesUsingApiData();
 				});
  			
@@ -904,12 +927,6 @@ if (!getRouteQueryStrParam()) {
 	// Read in vehicle locations now (and every few seconds)
 	updateVehiclesUsingApiData();
 }
-
-/**
- * Initiate timerloop that constantly updates vehicle positions.
- * Update every few seconds.
- */
-setInterval(updateVehiclesUsingApiData, getUpdateRate());
 
 /**
  * Setup timer to determine if haven't updated vehicles in a while.

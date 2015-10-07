@@ -66,7 +66,7 @@ public class StopPath implements Serializable, Lifecycle {
 	@Id
 	private final String stopPathId;
 	
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
+	@Column(length=TripPattern.TRIP_PATTERN_ID_LENGTH) 
 	@Id
 	private String tripPatternId;
 	

@@ -55,8 +55,10 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 	// For when requesting predictions from external MBTA API
 	private static final int timeoutMsec = 20000;
 	
+	// Use PredictionAccuracyModule as the class so that logging will go
+	// into the regular predAccuracy.log log file instead of the core one.
 	private static final Logger logger = LoggerFactory
-			.getLogger(MbtaPredictionAccuracyModule.class);
+			.getLogger(PredictionAccuracyModule.class);
 
 	/********************** Config Params **************************/
 	
@@ -221,7 +223,7 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 
 		List<Element> directions = rootNode.getChildren("direction");
 		if (directions.isEmpty()) {
-			logger.error("No direction element returned.");
+			logger.error("No direction element returned so ignoring.");
 			return;
 		}
 		for (Element direction : directions) {
@@ -235,8 +237,12 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 			List<Element> trips = direction.getChildren("trip");
 			for (Element trip : trips) {
 				String tripId = trip.getAttributeValue("trip_id");
-				String vehicleId = trip.getChild("vehicle")
-						.getAttributeValue("vehicle_id");
+				Element vehicleChild = trip.getChild("vehicle");
+				if (vehicleChild == null) {
+					logger.error("No vehicle element returned so ignoring.");
+					continue;
+				}
+				String vehicleId = vehicleChild.getAttributeValue("vehicle_id");
 				List<Element> stops = trip.getChildren("stop");
 				for (Element stop : stops) {
 					String stopId = stop.getAttributeValue("stop_id");

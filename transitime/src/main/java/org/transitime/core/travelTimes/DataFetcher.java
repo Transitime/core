@@ -232,8 +232,9 @@ public class DataFetcher {
 		// For keeping track of which rows should be returned by the batch.
 		int firstResult = 0;
 		// Batch size of 50k found to be significantly faster than 10k,
-		// by about a factor of 2.
-		int batchSize = 50000;  // Also known as maxResults
+		// by about a factor of 2. Since sometimes using really large
+		// batches of data using 500k
+		int batchSize = 500000;  // Also known as maxResults
 		// The temporary list for the loop that contains a batch of results
 		List<ArrivalDeparture> arrDepBatchList;
 		// Read in batch of 50k rows of data and process it
@@ -302,8 +303,9 @@ public class DataFetcher {
 		// For keeping track of which rows should be returned by the batch.
 		int firstResult = 0;
 		// Batch size of 50k found to be significantly faster than 10k,
-		// by about a factor of 2.
-		int batchSize = 50000;  // Also known as maxResults
+		// by about a factor of 2.  Since sometimes using really large
+		// batches of data using 500k
+		int batchSize = 500000;  // Also known as maxResults
 		// The temporary list for the loop that contains a batch of results
 		List<Match> matchBatchList;
 		// Read in batch of 50k rows of data and process it

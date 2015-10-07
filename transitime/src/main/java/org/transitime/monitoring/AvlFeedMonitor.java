@@ -40,16 +40,16 @@ import org.transitime.utils.Time;
  */
 public class AvlFeedMonitor extends MonitorBase {
 
-	private static IntegerConfigValue allowableAvlFeedTimeNoDataSecs =
+	private static IntegerConfigValue allowableNoAvlSecs =
 			new IntegerConfigValue(
-					"transitime.monitoring.allowableAvlFeedTimeNoDataSecs", 
+					"transitime.monitoring.allowableNoAvlSecs", 
 					5 * Time.SEC_PER_MIN, 
 					"How long in seconds that can not receive valid AVL data "
 					+ "before monitoring triggers an alert.");
 
 	private static StringConfigValue avlFeedEmailRecipients =
 			new StringConfigValue(
-					"transitime.monitoring.avlFeed.emailRecipients", 
+					"transitime.monitoring.avlFeedEmailRecipients", 
 					"monitoring@transitime.org", 
 					"Comma separated list of e-mail addresses indicating who "
 					+ "should be e-mail when monitor state changes for AVL "
@@ -90,11 +90,11 @@ public class AvlFeedMonitor extends MonitorBase {
 		setMessage("Last valid AVL report was " 
 				+ ageOfAvlReport / Time.MS_PER_SEC 
 				+ " secs old while allowable age is " 
-				+ allowableAvlFeedTimeNoDataSecs.getValue()	+ " secs.",
+				+ allowableNoAvlSecs.getValue()	+ " secs.",
 				ageOfAvlReport / Time.MS_PER_SEC);
 		
 		if (ageOfAvlReport > 
-				allowableAvlFeedTimeNoDataSecs.getValue() * Time.MS_PER_SEC) {
+				allowableNoAvlSecs.getValue() * Time.MS_PER_SEC) {
 			// last AVL report is too old
 			return (int) (ageOfAvlReport / Time.MS_PER_SEC);
 		} else {

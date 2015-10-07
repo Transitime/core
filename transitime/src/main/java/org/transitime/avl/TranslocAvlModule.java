@@ -16,10 +16,7 @@
  */
 package org.transitime.avl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -36,7 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Reads AVL data from a Transloc AVL feed and processes each AVL report.
+ * Reads AVL data from a Transloc JSON AVL feed and processes each AVL report.
  * <p>
  * Documentation on the Transloc API is at
  * https://www.mashape.com/transloc/openapi-1-2#
@@ -89,29 +86,6 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 	}
 
 	/**
-	 * Converts the input stream into a string
-	 * 
-	 * @param in
-	 * @return the JSON string
-	 * @throws IOException
-	 * @throws JSONException
-	 */
-	private String getJsonString(InputStream in) throws IOException,
-			JSONException {
-		BufferedReader streamReader =
-				new BufferedReader(new InputStreamReader(in, "UTF-8"));
-		StringBuilder responseStrBuilder = new StringBuilder();
-
-		String inputStr;
-		while ((inputStr = streamReader.readLine()) != null)
-			responseStrBuilder.append(inputStr);
-
-		String responseStr = responseStrBuilder.toString();
-		logger.debug("JSON={}", responseStr);
-		return responseStr;
-	}
-	
-	/**
 	 * Reads in the JSON data from the InputStream and creates and then
 	 * processes an AvlReport.
 	 * 
@@ -124,11 +98,25 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 			JSONObject jsonObj = new JSONObject(jsonStr);
 
 			JSONObject dataObj = jsonObj.getJSONObject("data");
+			
+			// If no agency data then give up (better then getting an exception
+			// when calling getJSONArray().
+			if (dataObj.isNull(feedAgencyId.getValue()))
+				return;
+			
+			// Process data for each vehicle
 			JSONArray jsonArray = dataObj.getJSONArray(feedAgencyId.getValue());
 			for (int i=0; i<jsonArray.length(); ++i) {
 				JSONObject vehicleData = jsonArray.getJSONObject(i);
 				String vehicleId = vehicleData.getString("vehicle_id");
 				
+				// Have found that the feed sometimes include a null location.
+				// If so, ignore the data for this vehicle instead of generating
+				// an error.
+				if (vehicleData.isNull("location"))
+					continue;
+				
+				// Get the location
 				JSONObject location = vehicleData.getJSONObject("location");
 				double lat = location.getDouble("lat");
 				double lon = location.getDouble("lng");

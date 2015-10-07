@@ -26,6 +26,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
 
 /**
@@ -59,6 +61,9 @@ public class ActiveRevisions {
 	@Column
 	private int travelTimesRev;
 
+	private static final Logger logger = 
+			LoggerFactory.getLogger(ActiveRevisions.class);
+
 	/********************** Member Functions **************************/
 
 	/**
@@ -73,9 +78,11 @@ public class ActiveRevisions {
 	 * Gets the ActiveRevisions object using the passed in database session.
 	 * 
 	 * @param session
-	 * @return
+	 * @return the ActiveRevisions
+	 * @throws HibernateException
 	 */
-	public static ActiveRevisions get(Session session) {
+	public static ActiveRevisions get(Session session) 
+		throws HibernateException {
 		// There should only be a single object so don't need a WHERE clause
 		String hql = "FROM ActiveRevisions";
 		Query query = session.createQuery(hql);
@@ -107,13 +114,24 @@ public class ActiveRevisions {
 	 */
 	public static ActiveRevisions get(String agencyId) 
 			throws HibernateException {
-		// Get from db
-		Session session = HibernateUtils.getSession(agencyId);
-		ActiveRevisions activeRevisions = get(session);
-		session.close();
+		Session session = null;
+		try {
+			// Get from db
+			session = HibernateUtils.getSession(agencyId);
+			ActiveRevisions activeRevisions = get(session);
+			
+			// Return the object
+			return activeRevisions;
+		} catch (HibernateException e) {
+			logger.error("Exception in ActiveRevisions.get(). {}", 
+					e.getMessage(), e);
+		} finally {
+			// Always make sure session gets closed
+			if (session != null)
+				session.close();
+		}
 		
-		// Return the object
-		return activeRevisions;
+		return null;
 	}
 	
 	/**

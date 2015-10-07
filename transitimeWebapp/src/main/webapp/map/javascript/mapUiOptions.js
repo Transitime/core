@@ -3,43 +3,44 @@
  */
 
 var shapeOptions = {
-	color: '#00ee00',
-	weight: 8,
-	opacity: 0.8,
+	color: '#0080FF',
+	weight: 7,
+	opacity: 0.75,
 	lineJoin: 'round'
 };
 		
 var minorShapeOptions = {
-	color: '#00ee00',
-	weight: 2,
+	color: '#0080FF',
+	weight: 1,
 	opacity: 0.4,
 };
 		
 var stopOptions = {
-    color: '#006600',
+    color: '#092F87',
     opacity: 1.0,
-    radius: 4,
+    radius: 3,
     weight: 2,
-    fillColor: '#006600',
+    fillColor: '#092F87',
     fillOpacity: 0.6,
 };
 
 var firstStopOptions = {
-    color: '#006600',
+    color: '#092F87',
     opacity: 1.0,
-    radius: 7,
+    radius: 6,
     weight: 2,
-    fillColor: '#ccffcc',
-    fillOpacity: 0.9,		
+    fillColor: '#0080FF',
+    fillOpacity: 0.8,		
 }
 
 var minorStopOptions = {
-    color: '#006600',
+    color: '#092F87',
     opacity: 0.2,
-    radius: 3,
-    weight: 2,
-    fillColor: '#006600',
+    radius: 2,
+    weight: 1,
+    fillColor: '#092F87',
     fillOpacity: 0.2,
+    clickable: false
 };
 
 var busIcon = L.icon({
@@ -94,11 +95,11 @@ var vehicleMarkerOptions = {
 };
 
 var secondaryVehicleMarkerOptions = {
-	opacity: 0.7,		
+	opacity: 0.8,		
 };
 
 var minorVehicleMarkerOptions = {
-	opacity: 0.4,		
+	opacity: 0.3,		
 };
 
 var vehicleMarkerBackgroundOptions = {
@@ -112,14 +113,14 @@ var secondaryVehicleMarkerBackgroundOptions = {
     radius: 12,
     weight: 0,
     fillColor: '#ffffff',
-    fillOpacity: 0.75,				
+    fillOpacity: 0.80,				
 };
 
 var minorVehicleMarkerBackgroundOptions = {
     radius: 12,
     weight: 0,
     fillColor: '#ffffff',
-    fillOpacity: 0.5,				
+    fillOpacity: 0.3,				
 };
 
 var unassignedVehicleMarkerBackgroundOptions = {

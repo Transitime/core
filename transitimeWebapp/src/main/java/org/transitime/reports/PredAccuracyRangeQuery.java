@@ -85,12 +85,12 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 		}
 
 		builder.addNumberColumn();
-		builder.addNumberColumn("Too Early (<" + maxEarlySec + " secs)");
+		builder.addNumberColumn("Earlier than predicted (<" + maxEarlySec + " secs)");
 		builder.addTooltipColumn();
 		builder.addNumberColumn("Within Bounds (" + maxEarlySec + " to "
 				+ maxLateSec + " secs)");
 		builder.addTooltipColumn();
-		builder.addNumberColumn("Too Late (>" + maxLateSec + " secs)");
+		builder.addNumberColumn("Later than predicted (>" + maxLateSec + " secs)");
 		builder.addTooltipColumn();
 	}
 
@@ -154,7 +154,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 				rowBuilder.addRowElement(predBucketSecs);
 
 				rowBuilder.addRowElement(tooEarlyPercentage);
-				rowBuilder.addRowElement("Too Early: " + tooEarly + " points, "
+				rowBuilder.addRowElement("Earlier than predicted: " + tooEarly + " points, "
 						+ StringUtils.oneDigitFormat(tooEarlyPercentage) + "%");
 
 				rowBuilder.addRowElement(okPercentage);
@@ -162,7 +162,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 						+ StringUtils.oneDigitFormat(okPercentage) + "%");
 
 				rowBuilder.addRowElement(tooLatePercentage);
-				rowBuilder.addRowElement("Too Late: " + tooEarly + " points, "
+				rowBuilder.addRowElement("Later than predicted: " + tooLate + " points, "
 						+ StringUtils.oneDigitFormat(tooLatePercentage) + "%");
 			}
 		}

@@ -140,13 +140,13 @@ public class MiniEventReport extends Report {
 				+ "messageTime=" + messageTime + " " + new Date(getEpochTime())
 				+ ", lat=" + lat
 				+ ", lon=" + lon 
-				+ ", heading=" + heading + "deg"
-				+ ", speed=" + speedKph + "kph " + getSpeed() + "m/s"
-				+ ", fixStatus=" + String.format("%02X", fixStatus)
+				+ ", heading=" + heading + " deg"
+				+ ", speed=" + speedKph + " kph " + getSpeed() + " m/s"
+				+ ", fixStatus=0x" + String.format("%02X", fixStatus)
 				+ ", numberSatellites="	+ numberSatellites 
-				+ ", communicationState=" + String.format("%02X", communicationState) 
+				+ ", communicationState=0x" + String.format("%02X", communicationState) 
 				+ ", inputs=" + String.format("%02X", inputs)
-				+ ", eventCode=" + String.format("%02X", eventCode) 
+				+ ", eventCode=0x" + String.format("%02X", eventCode) 
 				+ ", optionsHeader=" + optionsHeader
 				+ ", messageHeader=" + messageHeader
 				+ "]";
@@ -196,6 +196,22 @@ public class MiniEventReport extends Report {
 
 	public byte getFixStatus() {
 		return fixStatus;
+	}
+	
+	/**
+	 * Returns string representing the error status of the fix. If not an error
+	 * status then null is returned.
+	 * 
+	 * @return Fix status if error, otherwise null
+	 */
+	public String getFixStatusStr() {
+		switch (fixStatus & 0b11110000) {
+			case 0b00010000: return "Invalid Time";
+			case 0b00100000: return "Invalid Fix";
+			case 0b01000000: return "Last Known";
+			case 0b10000000: return "Historic";		
+			default: return null;
+		}
 	}
 	
 	/**
@@ -251,7 +267,8 @@ public class MiniEventReport extends Report {
 			// executor
 			AvlExecutor.getInstance().processAvlReport(avlReport);
 		} else {
-			logger.error("GPS fix mini event report is not valid. {}", this);
+			logger.error("GPS fix mini event report is not valid. Fix status "
+					+ "is \"{}\". {}", getFixStatusStr(), this);
 		}
 	}
 	

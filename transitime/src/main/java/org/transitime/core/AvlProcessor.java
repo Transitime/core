@@ -406,32 +406,31 @@ public class AvlProcessor {
 		// Record this match unless the match was null and haven't
 		// reached number of bad matches.
 		if (bestTemporalMatch != null || vehicleState.overLimitOfBadMatches()) {
-			// If going to make vehicle unpredictable due to bad matches log
-			// that info.
-			if (bestTemporalMatch == null
-					&& vehicleState.overLimitOfBadMatches()) {
+			// If not over the limit of bad matches then handle normally
+			if (bestTemporalMatch != null
+					|| !vehicleState.overLimitOfBadMatches()) {
+				// Set the match of the vehicle. 
+				vehicleState.setMatch(bestTemporalMatch);				
+			} else {
+				// Exceeded allowable number of bad matches so make vehicle 
+				// unpredictable due to bad matches log that info.
 				// Log that vehicle is being made unpredictable as a
 				// VehicleEvent
 				String eventDescription = "Vehicle had "
 						+ vehicleState.numberOfBadMatches()
 						+ " bad spatial matches in a row"
 						+ " and so was made unpredictable.";
-				VehicleEvent.create(vehicleState.getAvlReport(),
-						vehicleState.getMatch(), VehicleEvent.NO_MATCH,
-						eventDescription, false, // predictable,
-						true, // becameUnpredictable
-						null); // supervisor
 
 				logger.warn("For vehicleId={} {}", vehicleState.getVehicleId(),
 						eventDescription);
 
+				// Remove the predictions for the vehicle
+				makeVehicleUnpredictable(vehicleState.getVehicleId(), eventDescription,
+						VehicleEvent.NO_MATCH);
+
 				// Remove block assignment from vehicle
 				vehicleState.unsetBlock(BlockAssignmentMethod.COULD_NOT_MATCH);
 			}
-
-			// Set the match of the vehicle. If null then it will make the
-			// vehicle unpredictable.
-			vehicleState.setMatch(bestTemporalMatch);
 		} else {
 			logger.info("For vehicleId={} got a bad match, {} in a row, so "
 					+ "not updating match for vehicle",
@@ -881,8 +880,8 @@ public class AvlProcessor {
 			return;
 
 		// Try to match vehicle to a block assignment if that feature is enabled
-		TemporalMatch bestMatch = new AutoBlockAssigner()
-				.autoAssignVehicleToBlockIfEnabled(vehicleState);
+		TemporalMatch bestMatch = new AutoBlockAssigner(vehicleState)
+				.autoAssignVehicleToBlockIfEnabled();
 		if (bestMatch != null) {
 			// Successfully matched vehicle to block so make vehicle predictable
 			logger.info("Auto matched vehicleId={} to a block assignment. {}",
@@ -1183,7 +1182,8 @@ public class AvlProcessor {
 	 * data will be ignored. In other words, the last AVL time will be for that
 	 * last valid AVL report.
 	 * 
-	 * @return The GPS time of last AVL report, or 0 if no last AVL report
+	 * @return The GPS time in msec epoch time of last AVL report, or 0 if no
+	 *         last AVL report
 	 */
 	public long lastAvlReportTime() {
 		if (lastRegularReportProcessed == null)
@@ -1194,14 +1194,25 @@ public class AvlProcessor {
 
 	/**
 	 * For storing the last regular (non-schedule based) AvlReport so can
-	 * determine if the AVL feed is working.
+	 * determine if the AVL feed is working. Makes sure that report is newer
+	 * than the previous last regular report so that ignore possibly old data
+	 * that might come in from the AVL feed.
 	 * 
 	 * @param avlReport
 	 *            The new report to possibly store
 	 */
 	private void setLastAvlReport(AvlReport avlReport) {
-		if (!avlReport.isForSchedBasedPreds())
+		// Ignore schedule based predictions AVL reports since those are faked 
+		// and don't represent what is going on with the AVL feed
+		if (avlReport.isForSchedBasedPreds())
+			return;
+
+		// Only store report if it is a newer one. In this way we ignore 
+		// possibly old data that might come in from the AVL feed.
+		if (lastRegularReportProcessed == null
+				|| avlReport.getTime() > lastRegularReportProcessed.getTime()) {
 			lastRegularReportProcessed = avlReport;
+		}
 	}
 	
 	/**

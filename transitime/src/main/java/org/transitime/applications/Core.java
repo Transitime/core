@@ -241,8 +241,10 @@ public class Core {
 	}
 	
 	/**
-	 * For when need system time but might be in playback mode. If in playback
-	 * mode then will be using a SettableSystemTime.
+	 * For when need system time but might be in playback mode. If not in
+	 * playback mode then the time will be the time of the system clock. But if
+	 * in playback mode then will be using a SettableSystemTime and the time
+	 * will be that of the last AVL report.
 	 * 
 	 * @return The system epoch time
 	 */
@@ -251,11 +253,13 @@ public class Core {
 	}
 	
 	/**
-	 * For when need system time but might be in playback mode. If in playback
-	 * mode then will be using a SettableSystemTime.
+	 * For when need system time but might be in playback mode. If not in
+	 * playback mode then the time will be the time of the system clock. But if
+	 * in playback mode then will be using a SettableSystemTime and the time
+	 * will be that of the last AVL report.
 	 * 
 	 * @return The system epoch time
-	 */	
+	 */
 	public Date getSystemDate() {
 		return new Date(getSystemTime());
 	}

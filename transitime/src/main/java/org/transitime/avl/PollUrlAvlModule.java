@@ -17,12 +17,16 @@
 
 package org.transitime.avl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.AvlConfig;
@@ -85,6 +89,30 @@ public abstract class PollUrlAvlModule extends AvlModule {
 	 *             be processed.
 	 */
 	protected abstract void processData(InputStream in) throws Exception;
+	
+	/**
+	 * Converts the input stream into a JSON string. Useful for when processing
+	 * a JSON feed.
+	 * 
+	 * @param in
+	 * @return the JSON string
+	 * @throws IOException
+	 * @throws JSONException
+	 */
+	protected String getJsonString(InputStream in) throws IOException,
+			JSONException {
+		BufferedReader streamReader =
+				new BufferedReader(new InputStreamReader(in, "UTF-8"));
+		StringBuilder responseStrBuilder = new StringBuilder();
+
+		String inputStr;
+		while ((inputStr = streamReader.readLine()) != null)
+			responseStrBuilder.append(inputStr);
+
+		String responseStr = responseStrBuilder.toString();
+		logger.debug("JSON={}", responseStr);
+		return responseStr;
+	}
 	
 	/**
 	 * Actually reads data from feed and processes it by opening up a URL

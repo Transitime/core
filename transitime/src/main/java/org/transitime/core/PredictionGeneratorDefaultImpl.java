@@ -147,8 +147,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
-					predictionTime,	predictionTime, affectedByWaitStop, 
-					isDelayed, lateSoMarkAsUncertain,
+					predictionTime,	predictionTime, indices.atEndOfTrip(),
+					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
 					ArrivalOrDeparture.ARRIVAL);
 		} else {
 			// Generate a departure time
@@ -175,11 +175,13 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				if (avlReport.getTime() + crowFliesTimeToWaitStop > arrivalTime) {
 					arrivalTime = avlReport.getTime() + crowFliesTimeToWaitStop;
 					deadheadingSoNoDriverBreak = true;
-					logger.debug("For vehicleId={} adjusted the arrival time " +
-							"for layover stopId={} since crowFliesTimeToLayover={} " +
-							"but predictionTime-avlReport.getTime()={}msec. The " +
-							"arrival time is now {}",
+					logger.debug("For vehicleId={} adjusted the arrival time "
+							+ "for layover stopId={} tripId={} blockId={} "
+							+ "since crowFliesTimeToLayover={} "
+							+ "but predictionTime-avlReport.getTime()={}msec. The "
+							+ "arrival time is now {}",
 							avlReport.getVehicleId(), path.getStopId(),
+							trip.getId(), trip.getBlockId(),
 							crowFliesTimeToWaitStop, 
 							predictionTime-avlReport.getTime(),
 							Time.dateTimeStrMsec(arrivalTime));
@@ -188,19 +190,25 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				// If it is currently before the scheduled departure time then use
 				// the schedule time. But if after the scheduled time then use
 				// the prediction time, which indicates when it is going to arrive
-				// at the stop, but also adjust for stop wait time and driver
-				// layover time as appropriate.
+				// at the stop, but also adjust for stop wait time.
 				long scheduledDepartureTime = TravelTimes
 								.scheduledDepartureTime(indices, arrivalTime);
 				long expectedDepartureTime =
-						Math.max(arrivalTime, scheduledDepartureTime
-								+ expectedStopTimeMsec);
+						Math.max(arrivalTime + expectedStopTimeMsec,
+								scheduledDepartureTime);
 				if (expectedDepartureTime > scheduledDepartureTime) {
 					logger.info("For vehicleId={} adjusted departure time "
-							+ "for wait stop stopId={} to "
-							+ "expectedDepartureTimeWithStopWaitTime={}", 
+							+ "for wait stop stopId={} tripId={} blockId={} to "
+							+ "expectedDepartureTimeWithStopWaitTime={} "
+							+ "because arrivalTime={} but "
+							+ "scheduledDepartureTime={} and "
+							+ "expectedStopTimeMsec={}", 
 							avlReport.getVehicleId(), path.getStopId(), 
-							Time.dateTimeStrMsec(expectedDepartureTime));
+							trip.getId(), trip.getBlockId(),
+							Time.dateTimeStrMsec(expectedDepartureTime),
+							Time.dateTimeStrMsec(arrivalTime),
+							Time.dateTimeStrMsec(scheduledDepartureTime),
+							expectedStopTimeMsec);
 				}
 				
 				// Make sure there is enough break time for the driver to get
@@ -213,10 +221,12 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 							predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC) {
 						expectedDepartureTime = 
 								predictionTime + path.getBreakTimeSec()*Time.MS_PER_SEC;
-						logger.info("For vehicleId={} adjusted departure time " +
-								"for wait stop stopId={} to expectedDepartureTime={} to " +
-								"to ensure driver gets break of path.getBreakTimeSec()={}",
+						logger.info("For vehicleId={} adjusted departure time " 
+								+ "for wait stop stopId={} tripId={} blockId={} "
+								+ "to expectedDepartureTime={} to ensure "
+								+ "driver gets break of path.getBreakTimeSec()={}",
 								avlReport.getVehicleId(), path.getStopId(),
+								trip.getId(), trip.getBlockId(),
 								Time.dateTimeStrMsec(expectedDepartureTime), 
 								path.getBreakTimeSec());
 					}					
@@ -247,22 +257,25 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
 							trip, predictionForUser,
 							predictionForNextStopCalculation,
-							affectedByWaitStop, isDelayed,
-							lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE);
+							indices.atEndOfTrip(), affectedByWaitStop,
+							isDelayed, lateSoMarkAsUncertain,
+							ArrivalOrDeparture.DEPARTURE);
 				} else {
 					// Use the expected departure times, possibly adjusted for 
 					// stop wait times
 					return new IpcPrediction(avlReport, stopId, gtfsStopSeq,
 							trip, expectedDepartureTime, expectedDepartureTime,
-							affectedByWaitStop, isDelayed,
-							lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE);
+							indices.atEndOfTrip(), affectedByWaitStop,
+							isDelayed, lateSoMarkAsUncertain,
+							ArrivalOrDeparture.DEPARTURE);
 				}
 			} else {
 				// Create and return the departure prediction for this 
 				// non-wait-stop stop
 				return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
-						predictionTime + expectedStopTimeMsec,
-						predictionTime + expectedStopTimeMsec,
+						predictionTime + expectedStopTimeMsec, 
+						predictionTime + expectedStopTimeMsec, 
+						indices.atEndOfTrip(),
 						affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
 						ArrivalOrDeparture.DEPARTURE);
 			}

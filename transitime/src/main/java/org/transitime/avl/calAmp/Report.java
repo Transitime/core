@@ -23,7 +23,6 @@ import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.ipc.servers.ConfigServer;
 
 public abstract class Report {
 	
@@ -31,7 +30,7 @@ public abstract class Report {
 	protected final MessageHeader messageHeader;
 	
 	protected static final Logger logger = 
-			LoggerFactory.getLogger(ConfigServer.class);
+			LoggerFactory.getLogger(Report.class);
 
 	/************************ Methods *************************/
 	
@@ -119,6 +118,17 @@ public abstract class Report {
 
 		// Log the entire message in hexadecimal format
 		if (logger.isDebugEnabled()) {
+			// Log total length of packets so have an idea of how much data 
+			// being used. Header sizes are from
+			// https://puls.calamp.com/wiki/LM_Direct_Reference_Guide
+			int IP_HEADER_SIZE = 20;
+			int UDP_HEADER_SIZE = 8;
+			logger.debug("Message data is {} bytes long. Including IP Header "
+					+ "and UDP header total size is {} bytes long.", 
+					bytes.length, 
+					bytes.length + IP_HEADER_SIZE + UDP_HEADER_SIZE);
+			
+			// Actually log message
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < packet.getLength(); ++i) {
 				sb.append(String.format("%02X", bytes[i]));

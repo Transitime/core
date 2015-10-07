@@ -32,10 +32,12 @@ import javax.persistence.Transient;
 
 import net.jcip.annotations.Immutable;
 
+import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -52,23 +54,29 @@ import org.transitime.utils.IntervalTimer;
  * be joined with AvlReport data to get additional information.
  * <p>
  * Serializable since Hibernate requires such.
+ * <p>
+ * Implements Lifecycle so that can have the onLoad() callback be called when
+ * reading in data so that can intern() member strings. In order to do this the
+ * String members could not be declared as final since they are updated after
+ * the constructor is called. 
  *
  * @author SkiBu Smith
  *
  */
 @Immutable // From jcip.annoations
-@Entity @DynamicUpdate 
+@Entity 
+@DynamicUpdate 
 @Table(name="Matches",
        indexes = { @Index(name="AvlTimeIndex", 
                           columnList="avlTime" ) } )
-public class Match implements Serializable {
+public class Match implements Lifecycle, Serializable {
 
 	// vehicleId is an @Id since might get multiple AVL reports
 	// for different vehicles with the same avlTime but need a unique
 	// primary key.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
 	@Id
-	private final String vehicleId;
+	private String vehicleId;
 	
 	// Need to use columnDefinition to explicitly specify that should use 
 	// fractional seconds. This column is an Id since shouldn't get two
@@ -85,17 +93,17 @@ public class Match implements Serializable {
 	
 	// So that know which service type was used when this data point was created
 	@Column
-	private final String serviceId;
+	private String serviceId;
 	
 	// Not truly needed because currently using only trip info for generating
 	// travel times, which is the main use of Match data from the db.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String blockId;
+	private String blockId;
 	
 	// Creating travel times on a trip by trip basis so this element is 
 	// important.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String tripId;
+	private String tripId;
 	
 	// Important because generating travel times on a per stop path basis
 	@Column
@@ -383,4 +391,48 @@ public class Match implements Serializable {
 	public boolean isAtStop() {
 		return atStop;
 	}
+
+	/**
+	 * Callback due to implementing Lifecycle interface. Used to compact
+	 * string members by interning them.
+	 */
+	@Override
+	public void onLoad(Session s, Serializable id) throws CallbackException {
+		if (vehicleId != null)
+			vehicleId = vehicleId.intern();
+		if (tripId != null)
+			tripId = tripId.intern();
+		if (blockId != null)
+			blockId = blockId.intern();
+		if (serviceId != null)
+			serviceId = serviceId.intern();
+	}
+	
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onSave(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onUpdate(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+
+	/**
+	 * Implemented due to Lifecycle interface being implemented. Not actually
+	 * used.
+	 */
+	@Override
+	public boolean onDelete(Session s) throws CallbackException {
+		return Lifecycle.NO_VETO;
+	}
+	
 }

@@ -280,13 +280,9 @@ abstract public class PredictionAccuracyQuery {
 				+ "WHERE arrivalDepartureTime BETWEEN ? AND ? "
 				+ timeSql
 				+ "  AND predictedTime-predictionReadTime < '00:15:00' "
-				// Filter out MBTA_seconds source since it is isn't
-				// significantly different from MBTA_epoch.
-				// TODO should clean this up by not having MBTA_seconds source
-				// at all
-				// in the prediction accuracy module for MBTA.
-				+ "  AND predictionSource <> 'MBTA_seconds' " + routeSql
-				+ sourceSql + predTypeSql;
+				+ routeSql
+				+ sourceSql 
+				+ predTypeSql;
 
 		PreparedStatement statement = null;
 		try {

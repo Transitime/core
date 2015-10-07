@@ -62,9 +62,11 @@ public class AmigoWebsockets {
 	 * @param datasetID
 	 * @param apiToken
 	 * @param listener
+	 * @throws JSONException
 	 */
 	public AmigoWebsockets(long userID, long projectID, long datasetID,
-			String apiToken, AmigoWebsocketListener listener) {
+			String apiToken, AmigoWebsocketListener listener)
+			throws JSONException {
 		this.userID = Long.toString(userID);
 		this.datasetID = Long.toString(datasetID);
 		this.listener = listener;
@@ -95,6 +97,7 @@ public class AmigoWebsockets {
 					websocket_token);
 		} catch (JSONException e) {
 			logger.error("{}", e.getMessage(), e);
+			throw e;
 		}
 	}
 
@@ -161,6 +164,9 @@ public class AmigoWebsockets {
 					logger.info("closed connection, remote:" + remote
 							+ ", code(" + Integer.toString(code)
 							+ "), reason: " + reason);
+					
+					// Let listener know that connection closing so can restart it
+					listener.onClose(code, reason);
 				}
 
 				@Override

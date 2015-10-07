@@ -135,8 +135,8 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			boolean atStop, String atOrNextStopId, Integer atOrNextGtfsStopSeq) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, tripId, tripPatternId, directionId, headsign,
-				predictable, schedBasedPred, realTimeSchdAdh, isLayover,
-				isDelayed, layoverDepartureTime, nextStopId, nextStopName,
+				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
+				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType);
 		this.atStop = atStop;
 		this.atOrNextStopId = atOrNextStopId;
@@ -278,6 +278,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 				+ ", predictable=" + isPredictable()
 				+ ", schedBasedPred=" + isForSchedBasedPred()
 				+ ", realTimeSchedAdh=" + getRealTimeSchedAdh() 
+				+ ", isDelayed=" + isDelayed()
 				+ ", isLayover=" + isLayover()
 				+ ", layoverDepartureTime=" 
 					+ Time.timeStrNoTimeZone(getLayoverDepartureTime())

@@ -1,4 +1,5 @@
 <%@ page import="org.transitime.utils.web.WebUtils" %>
+<%@page import="org.transitime.db.webstructs.WebAgency"%>
 <%
 // Create title for chart
 String agencyId = request.getParameter("a");
@@ -13,7 +14,8 @@ String beginTime = request.getParameter("beginTime");
 String endDate = request.getParameter("endDate");
 String endTime = request.getParameter("endTime");
 
-String chartTitle = "Prediction Accuracy for " + agencyId   
+String chartTitle = "Prediction Accuracy for " 
+	+ WebAgency.getCachedWebAgency(agencyId).getAgencyName()    
 	+ routeTitle + sourceForTitle 
 	+ " for " + beginDate + " " + beginTime + " to " + endDate + " " + endTime;
 %>

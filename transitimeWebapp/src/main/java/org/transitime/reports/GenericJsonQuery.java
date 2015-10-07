@@ -14,35 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.transitime.reports;
 
 import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.transitime.db.GenericQuery;
-import org.transitime.reports.ChartJsonBuilder.RowBuilder;
 
-/**
- * For providing data to a Google scatter chart when need to specify specific
- * SQL for retrieving data from the database. Since any SQL statement can be
- * used this feed can be used for generating a variety of scatter charts.
- *
- * @author SkiBu Smith
- *
- */
 public class GenericJsonQuery extends GenericQuery {
 
-	private ChartJsonBuilder jsonBuilder = new ChartJsonBuilder();
-
-	/********************** Member Functions **************************/
-
+	private StringBuilder strBuilder = new StringBuilder();
+	private List<String> columnNames = new ArrayList<String>();
+	private boolean firstRow = true;
+	
 	/**
 	 * @param agencyId
 	 * @throws SQLException
 	 */
-	public GenericJsonQuery(String agencyId) throws SQLException {
+	private GenericJsonQuery(String agencyId) throws SQLException {
 		super(agencyId);
 	}
 
@@ -51,30 +42,65 @@ public class GenericJsonQuery extends GenericQuery {
 	 */
 	@Override
 	protected void addColumn(String columnName, int type) {
-		if (columnName.equals("tooltip"))
-			jsonBuilder.addTooltipColumn();
-		else if (type == Types.NUMERIC || type == Types.INTEGER
-				|| type == Types.SMALLINT || type == Types.BIGINT
-				|| type == Types.FLOAT || type == Types.DOUBLE)
-			jsonBuilder.addNumberColumn(columnName);
-		else if (type == Types.VARCHAR)
-			jsonBuilder.addStringColumn(columnName);
-		else
-			logger.error("Unknown type={} for columnName={}");
+		// Keep track of names of all columns
+		columnNames.add(columnName);
 	}
 
+	private void addRowElement(int i, double value) {
+		strBuilder.append(value);
+	}
+	
+	private void addRowElement(int i, long value) {
+		strBuilder.append(value);
+	}
+	
+	private void addRowElement(int i, String value) {
+		strBuilder.append("\"").append(value).append("\"");
+	}
+	
+	private void addRowElement(int i, Timestamp value) {
+		strBuilder.append("\"").append(value).append("\"");
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.transitime.db.GenericQuery#addRow(java.util.List)
 	 */
 	@Override
 	protected void addRow(List<Object> values) {
-		// Start building up the row
-		RowBuilder rowBuilder = jsonBuilder.newRow();
-
+		if (!firstRow)			
+			strBuilder.append(",\n");
+		firstRow = false;
+		
+		strBuilder.append('{');
+		
 		// Add each cell in the row
-		for (Object o : values) {
-			rowBuilder.addRowElement(o);
-		}	
+		boolean firstElementInRow = true;
+		for (int i=0; i<values.size(); ++i) {
+			Object o = values.get(i);
+			// Can't output null attributes
+			if (o == null)
+				continue;
+			
+			if (!firstElementInRow)
+				strBuilder.append(",");
+			firstElementInRow = false;
+			
+			// Output name of attribute
+			strBuilder.append("\"").append(columnNames.get(i)).append("\":");
+			
+			// Output value of attribute
+			if (o instanceof Double || o instanceof Float) {
+				addRowElement(i, ((Number) o).doubleValue());
+			} else if (o instanceof Number) {
+				addRowElement(i, ((Number) o).longValue());
+			} else if (o instanceof String) {
+				addRowElement(i, (String) o);
+			} else if (o instanceof Timestamp) {
+				addRowElement(i, ((Timestamp) o));
+			}
+		}
+		
+		strBuilder.append('}');
 	}
 
 	/**
@@ -85,47 +111,30 @@ public class GenericJsonQuery extends GenericQuery {
 	 * @return
 	 * @throws SQLException 
 	 */
-	public static String getJsonString(String agencyId, String sql) 
-			throws SQLException {
-		GenericJsonQuery query = new GenericJsonQuery(agencyId);
-		query.doQuery(sql);
-		// If query returns empty set then should return null!
-		if (query.getNumberOfRows() != 0)			
-			return query.jsonBuilder.getJson();
-		else
-			return null;
-	}
-
-	/**
-	 * For debugging
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		String agencyId = "mbtaAWS";
-
-		String sql = "SELECT "
-				+ "     to_char(arrivalDepartureTime-predictionReadTime, 'SSSS')::integer as predLength, "
-				// + "     predictionAccuracyMsecs/1000 as predAccuracy, "
-				+ "     abs(predictionAccuracyMsecs/1000) as absPredAccuracy, "
-				+ "     format(E'Stop=%s tripId=%s\\narrDepTime=%s predTime=%s predReadTime=%s\\nvehicleId=%s source=%s', "
-				+ "       stopId, tripId, "
-				+ "       to_char(arrivalDepartureTime, 'MM/DD/YYYY HH:MM:SS.MS'),"
-				+ "       to_char(predictedTime, 'HH:MM:SS.MS'),"
-				+ "       to_char(predictionReadTime, 'HH:MM:SS.MS'),"
-				+ "       vehicleId, predictionSource) AS tooltip "
-				+ " FROM predictionaccuracy "
-				+ "WHERE arrivaldeparturetime BETWEEN '2014-10-31' AND '2014-11-01' "
-				+ "  AND arrivalDepartureTime-predictionReadTime < '00:15:00' "
-				+ "  AND routeId='CR-Providence' "
-				+ "  AND predictionSource='Transitime';";
-
+	public static String getJsonString(String agencyId, String sql) {
+		// Add the rows from the query to the JSON string
 		try {
-			String str = GenericJsonQuery.getJsonString(agencyId, sql);
-			System.out.println(str);
+			GenericJsonQuery query = new GenericJsonQuery(agencyId);
+			
+			// Start the JSON
+			query.strBuilder.append("{\"data\": [\n");
+
+			query.doQuery(sql);
+
+			// Finish up the JSON
+			query.strBuilder.append("]}");
+						
+			return query.strBuilder.toString();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			return e.getMessage();
 		}
 	}
 
+	public static void main(String[] args) {
+		String agencyId = "sfmta";
+		
+		String sql = "SELECT * FROM avlreports ORDER BY time DESC LIMIT 5";
+		String str = GenericJsonQuery.getJsonString(agencyId, sql);
+		System.out.println(str);
+	}
 }

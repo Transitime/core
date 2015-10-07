@@ -576,10 +576,21 @@ public class TransitimeApi {
 	 * includes all stops and paths such that it can be drawn in a map.
 	 * 
 	 * @param stdParameters
-	 * @param routeId
-	 * @param routeShortName
+	 * @param routeIdOrShortName
 	 * @param stopId
+	 *            optional. If set then only this stop and the remaining ones on
+	 *            the trip pattern are marked as being for the UI and can be
+	 *            highlighted. Useful for when want to emphasize in the UI only
+	 *            the stops that are of interest to the user.
+	 * @param direction
+	 *            optional. If set then only the shape for specified direction
+	 *            is marked as being for the UI. Needed for situations where a
+	 *            single stop is used for both directions of a route and want to
+	 *            highlight in the UI only the stops and the shapes that the
+	 *            user is actually interested in.
 	 * @param tripPatternId
+	 *            optional. If set then only the specified trip pattern is
+	 *            marked as being for the UI.
 	 * @return
 	 * @throws WebApplicationException
 	 */
@@ -588,6 +599,7 @@ public class TransitimeApi {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getRoute(@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "r") String routeIdOrShortName,
+			@QueryParam(value = "d") String directionId,
 			@QueryParam(value = "s") String stopId,
 			@QueryParam(value = "tripPattern") String tripPatternId)
 			throws WebApplicationException {
@@ -597,8 +609,9 @@ public class TransitimeApi {
 		try {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			IpcRoute route = inter.getRoute(routeIdOrShortName, stopId,
-					tripPatternId);
+			IpcRoute route =
+					inter.getRoute(routeIdOrShortName, directionId, stopId,
+							tripPatternId);
 
 			// If the route doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.

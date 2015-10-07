@@ -27,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Types;
@@ -44,6 +43,8 @@ import org.apache.commons.cli.ParseException;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
+
+import com.google.common.reflect.ClassPath;
 
 /**
  * For generating SQL schema files based on classes to be stored in database
@@ -238,38 +239,23 @@ public class SchemaGenerator {
 	 */
 	@SuppressWarnings("rawtypes")
 	private List<Class> getClasses(String packageName) throws Exception {
-		List<Class> classes = new ArrayList<Class>();
-		File directory = null;
-		try {
-			ClassLoader cld = this.getClass().getClassLoader();
-			
-			if (cld == null) {
-				throw new ClassNotFoundException("Can't get class loader.");
-			}
-			String path = packageName.replace('.', '/');
-			URL resource = cld.getResource(path);
-			if (resource == null) {
-				throw new ClassNotFoundException("No resource for " + path);
-			}
-			directory = new File(resource.getFile());
-		} catch (NullPointerException x) {
-			throw new ClassNotFoundException(packageName + " (" + directory
-					+ ") does not appear to be a valid package");
-		}
-		if (directory.exists()) {
-			for (String fileName : directory.list()) {
-				if (fileName.endsWith(".class")) {
-					// removes the .class extension
-					String className = packageName + '.'
-							+ fileName.substring(0, fileName.indexOf(".class"));
-					classes.add(Class.forName(className));
-				}
-			}
-		} else {
-			throw new ClassNotFoundException(packageName
-					+ " is not a valid package");
-		}
+	    
+	    logger.debug("Start: Classes in "+ packageName);
+	    List<Class> classes = new ArrayList<Class>();
+	    final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
+        for (final ClassPath.ClassInfo info : ClassPath.from(loader).getTopLevelClasses()) 
+        {
+            if (info.getName().startsWith(packageName)) 
+            {
+                final Class<?> clazz = info.load();
+                logger.debug(info.getName());
+                classes.add(clazz);
+            } 
+        }
+        logger.debug("End: Classes in "+ packageName);
+	   
+        
 		return classes;
 	}
 
@@ -361,4 +347,5 @@ public class SchemaGenerator {
 	}
 
 }
+
 

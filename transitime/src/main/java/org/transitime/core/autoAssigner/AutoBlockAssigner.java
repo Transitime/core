@@ -67,7 +67,11 @@ import org.transitime.utils.Time;
  */
 public class AutoBlockAssigner {
 
-	/*********************** Config params *****************************/
+	/*********************** members *****************************/
+	
+	// The vehicle state is repeatedly used so it is a member so it doesn't
+	// have to be passed around to various methods.
+	private VehicleState vehicleState;
 	
 	// Contains the results of spatial matching the avl report to the 
 	// specified trip pattern. Keyed on trip pattern ID. Note: since the spatial 
@@ -144,8 +148,32 @@ public class AutoBlockAssigner {
 
 	/**
 	 * Constructor
+	 *
+	 * @param vehicleState
+	 *            Info on the vehicle to match
 	 */
-	public AutoBlockAssigner() {	
+	public AutoBlockAssigner(VehicleState vehicleState) {
+		this.vehicleState = vehicleState;
+	}
+	
+	/**
+	 * @return the current AVL report from vehicleState member
+	 */
+	private AvlReport getAvlReport() {
+		return vehicleState.getAvlReport();
+	}
+
+	/**
+	 * The previousAvlReport should be a good distance away from the current AVL
+	 * report in order to really be sure that vehicle is traveling along the
+	 * trip.
+	 * 
+	 * @return the previous AVL report, at least min distance away from current
+	 *         AVL report, from vehicleState member
+	 */
+	private AvlReport getPreviousAvlReport() {
+		double minDistance = minDistanceFromCurrentReport.getValue();
+		return vehicleState.getPreviousAvlReport(minDistance);
 	}
 	
 	/**
@@ -209,13 +237,10 @@ public class AutoBlockAssigner {
 	 * Determines the best match by looking at both the current AVL report and
 	 * the previous one. Only for block assignments that do not have a schedule.
 	 * 
-	 * @param avlReport
-	 * @param previousAvlReport
 	 * @param block
 	 * @return The best adequate match, or null if there isn't an adequate match
 	 */
-	private TemporalMatch bestNoScheduleMatch(AvlReport avlReport,
-			AvlReport previousAvlReport, Block block) {
+	private TemporalMatch bestNoScheduleMatch(Block block) {
 		if (!block.isNoSchedule()) {
 			logger.error("Called bestNoScheduleMatch() on block that has a "
 					+ "schedule. {}", block);
@@ -225,15 +250,17 @@ public class AutoBlockAssigner {
 		// Determine all potential spatial matches for the block that are 
 		// not layovers. Won't be a layover match anyways since this method
 		// is only for use with no schedule assignments.
+		AvlReport avlReport = getAvlReport();
 		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
 		List<SpatialMatch> spatialMatches = SpatialMatcher
-				.getSpatialMatchesIgnoringLayovers(avlReport,
+				.getSpatialMatchesIgnoringLayovers(getAvlReport(),
 						block, potentialTrips);
 		if (spatialMatches.isEmpty())
 			return null;
 
 		// Determine all possible spatial matches for the previous AVL report so
 		// that can make sure that it too matches the assignment.
+		AvlReport previousAvlReport = getPreviousAvlReport();
 		List<SpatialMatch> prevSpatialMatches = SpatialMatcher
 				.getSpatialMatchesIgnoringLayovers(previousAvlReport,
 						block, potentialTrips);
@@ -307,7 +334,8 @@ public class AutoBlockAssigner {
 	 * 
 	 * @return All possible spatial matches
 	 */
-	private List<SpatialMatch> getSpatialMatches(AvlReport avlReport, Block block) {
+	private List<SpatialMatch> getSpatialMatches(AvlReport avlReport,
+			Block block) {
 		// Convenience variable
 		String vehicleId = avlReport.getVehicleId();
 		
@@ -435,6 +463,32 @@ public class AutoBlockAssigner {
 		// Return the results
 		return spatialMatches;
 	}
+
+	/**
+	 * Gets the spatial matches of the AVL report for the specified block. Only
+	 * looks at trips that are currently active in order to speed things up.
+	 * Doesn't use cached value from when investigating the current AVL report.
+	 * Therefore this method is useful for checking previous AVL reports.
+	 * 
+	 * @param avlReport
+	 *            The AVL report to be matched
+	 * @param block
+	 *            The block to match the AVL report to
+	 * 
+	 * @return list of spatial matches for the avlReport
+	 */
+	private List<SpatialMatch> getSpatialMatchesWithoutCache(
+			AvlReport avlReport, Block block) {
+		// Determine which trips are currently active so that don't bother 
+		// looking at all trips
+		List<Trip> activeTrips = block.getTripsCurrentlyActive(avlReport);
+
+		// Get and return the spatial matches
+		List<SpatialMatch> spatialMatches = SpatialMatcher
+				.getSpatialMatchesIgnoringLayovers(avlReport,
+						block, activeTrips);
+		return spatialMatches;
+	}
 	
 	/**
 	 * Determines best non-layover match for the AVL report to the specified
@@ -446,13 +500,23 @@ public class AutoBlockAssigner {
 	 *            The AVL report to be matched
 	 * @param block
 	 *            The block to match the AVL report to
+	 * @param useCache
+	 *            true if can use match cache. The match cache is useful for
+	 *            when matching the current AVL report because it is more
+	 *            efficient. But for matching the previous AVL report don't want
+	 *            to use the cache because the cache was for the original AVL
+	 *            report.
 	 * @return The best match if there is one. Null if there is not a valid
 	 *         match
 	 */
-	private TemporalMatch bestTemporalMatch(AvlReport avlReport, Block block) {
+	private TemporalMatch bestTemporalMatch(AvlReport avlReport, Block block,
+			boolean useCache) {
 		// Determine all potential spatial matches for the block
-		List<SpatialMatch> spatialMatches = getSpatialMatches(avlReport, block);
-		
+		List<SpatialMatch> spatialMatches = useCache ? 
+			getSpatialMatches(avlReport, block) : 
+				getSpatialMatchesWithoutCache(avlReport, block);
+
+
 		// Now that have the spatial matches determine the best temporal match
 		TemporalMatch bestMatch = TemporalMatcher.getInstance()
 				.getBestTemporalMatchComparedToSchedule(avlReport,
@@ -488,21 +552,14 @@ public class AutoBlockAssigner {
 	 * Returns best schedule based match. Only for block assignments that have a
 	 * schedule (are not frequency based).
 	 * 
-	 * @param avlReport
-	 *            The AVL report that needs to be assigned to a block
-	 * @param previousAvlReport
-	 *            So can also make sure that a previous AVL report matches to
-	 *            the block. The previousAvlReport should be a good distance
-	 *            away from the current AVL report in order to really be sure
-	 *            that vehicle is traveling along the trip.
 	 * @param block
 	 *            The block to try to match to
 	 * @return Best TemporalMatch to the block assignment, or null if no
 	 *         adequate match
 	 */
-	private TemporalMatch bestScheduleMatch(AvlReport avlReport,
-			AvlReport previousAvlReport, Block block) {
+	private TemporalMatch bestScheduleMatch(Block block) {
 		IntervalTimer timer = new IntervalTimer();
+		AvlReport avlReport = getAvlReport();
 		String vehicleId = avlReport.getVehicleId();
 		String blockId = block.getId();
 		
@@ -513,8 +570,9 @@ public class AutoBlockAssigner {
 			return null;
 		}		
 
-		// Determine best temporal match if there is one
-		TemporalMatch bestMatch = bestTemporalMatch(avlReport, block);
+		// Determine best temporal match if there is one. Use cache to speed
+		// up processing.
+		TemporalMatch bestMatch = bestTemporalMatch(avlReport, block, true);
 
 		logger.debug("For vehicleId={} and blockId={} calling "
 				+ "bestTemporalMatch() took {}msec", 
@@ -531,9 +589,13 @@ public class AutoBlockAssigner {
 				vehicleId, blockId, avlReport, bestMatch);
 		
 		// Make sure that previous AVL report also matches and 
-		// that it matches to block before the current AVL report
+		// that it matches to block before the current AVL report.
+		// Don't use cache since cache contains matches using the
+		// current AVL report whereas here we are interested in the
+		// previous AVL report.
+		AvlReport previousAvlReport = getPreviousAvlReport();
 		TemporalMatch previousAvlReportBestMatch = 
-				bestTemporalMatch(previousAvlReport, block);
+				bestTemporalMatch(previousAvlReport, block, false);
 		
 		logger.debug("For vehicleId={} and blockId={} calling "
 				+ "bestTemporalMatch() for previous AVL report took {}msec", 
@@ -567,36 +629,29 @@ public class AutoBlockAssigner {
 	 * vehicle really matches and isn't just sitting there and isn't going in
 	 * other direction or crossing route and matching only momentarily.
 	 * 
-	 * @param vehicleState
-	 *            Info on vehicle to match
 	 * @return A non-null list of TemporalMatches. Will be empty if there are no
 	 *         valid matches.
 	 */
-	private List<TemporalMatch> determineTemporalMatches(
-			VehicleState vehicleState) {
-		// Convenience variable
+	private List<TemporalMatch> determineTemporalMatches() {
+		// Convenience variable for logging
 		String vehicleId = vehicleState.getVehicleId();
 		
 		// The list of matches to return
 		List<TemporalMatch> validMatches = new ArrayList<TemporalMatch>();
 		
-		AvlReport avlReport = vehicleState.getAvlReport();
-
 		// Only want to try to auto assign if there is also a previous AVL 
 		// report that is significantly away from the current report. This
 		// way we avoid trying to match non-moving vehicles which are
 		// not in service.
-		double minDistance = minDistanceFromCurrentReport.getValue();
-		AvlReport previousAvlReport =
-				vehicleState.getPreviousAvlReport(minDistance);
-		if (previousAvlReport == null) {
+		if (getPreviousAvlReport() == null) {
 			// There was no previous AVL report far enough away from the 
 			// current one so return empty list of matches
-			logger.debug("In AutoBlockAssigner.bestMatch() cannot auto "
+			logger.info("In AutoBlockAssigner.bestMatch() cannot auto "
 					+ "assign vehicle because could not find valid previous "
 					+ "AVL report in history for vehicleId={} further away "
 					+ "than {}m from current AVL report {}",
-					vehicleId, minDistance,	vehicleState.getAvlReport());
+					vehicleId, minDistanceFromCurrentReport.getValue(),	
+					getAvlReport());
 			return validMatches;
 		}
 
@@ -636,8 +691,8 @@ public class AutoBlockAssigner {
 			// Determine best match for the block depending on whether the 
 			// block is schedule based or not
 			TemporalMatch bestMatch = block.isNoSchedule() ? 
-					bestNoScheduleMatch(avlReport, previousAvlReport, block) :
-					bestScheduleMatch(avlReport, previousAvlReport, block);					
+					bestNoScheduleMatch(block) :
+					bestScheduleMatch(block);					
 			if (bestMatch != null)
 				validMatches.add(bestMatch);
 			
@@ -710,12 +765,9 @@ public class AutoBlockAssigner {
 	 * really matches and isn't just sitting there and isn't going in other
 	 * direction or crossing route and matching only momentarily.
 	 * 
-	 * @param vehicleState
-	 *            Info on the vehicle to match
 	 * @return A TemporalMatch if there is a single valid one, otherwise null
 	 */
-	public TemporalMatch autoAssignVehicleToBlockIfEnabled(
-			VehicleState vehicleState) {
+	public TemporalMatch autoAssignVehicleToBlockIfEnabled() {
 		// If the auto assigner is not enabled then simply return null for 
 		// the match
 		if (!autoAssignerEnabled.getValue())
@@ -730,7 +782,7 @@ public class AutoBlockAssigner {
 				vehicleState.getAvlReport());
 		
 		// Determine all the valid matches
-		List<TemporalMatch> matches = determineTemporalMatches(vehicleState);
+		List<TemporalMatch> matches = determineTemporalMatches();
 		
 		// If no matches then not successful
 		if (matches.isEmpty()) {

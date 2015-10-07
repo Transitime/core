@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.transitime.ipc.data.IpcVehicle;
-import org.transitime.utils.StringUtils;
+import org.transitime.utils.MathUtils;
 import org.transitime.utils.Time;
 
 /**
@@ -39,11 +39,13 @@ public class ApiGpsLocation extends ApiTransientLocation {
 	@XmlAttribute
 	private long time;
 
+	// A Double so if null then won't show up in output
 	@XmlAttribute
-	private String speed;
+	private Double speed;
 
+	// A Double so if null then won't show up in output
 	@XmlAttribute
-	private String heading;
+	private Double heading;
 
 	/********************** Member Functions **************************/
 
@@ -62,8 +64,12 @@ public class ApiGpsLocation extends ApiTransientLocation {
 		super(vehicle.getLatitude(), vehicle.getLongitude());
 
 		this.time = vehicle.getGpsTime() / Time.MS_PER_SEC;
-		this.speed = StringUtils.oneDigitFormat(vehicle.getSpeed());
-		this.heading = StringUtils.oneDigitFormat(vehicle.getHeading());
+		// Output only 1 digit past decimal point
+		this.speed = Float.isNaN(vehicle.getSpeed()) ? 
+				null : MathUtils.round(vehicle.getSpeed(), 1);
+		// Output only 1 digit past decimal point
+		this.heading = Float.isNaN(vehicle.getHeading()) ? 
+				null : MathUtils.round(vehicle.getHeading(), 1);
 
 	}
 

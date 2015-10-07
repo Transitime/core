@@ -1231,7 +1231,8 @@ public class GtfsData {
 	}
 	
 	/**
-	 * For when encountering a new trip. Creates the trip.
+	 * For when encountering a new trip. Creates the trip. Doesn't set the
+	 * travel times or startTime and endTime.
 	 * 
 	 * @param tripId
 	 * @return The new trip, or null if there is a problem with this trip and
@@ -2405,8 +2406,8 @@ public class GtfsData {
 		//outputPathsAndStopsForGraphing("8699");
 		
 		// Now process travel times and update the Trip objects. 
-		ScheduleBasedTravelTimesProcessor travelTimesProcesssor =
-				new ScheduleBasedTravelTimesProcessor(revs,
+		TravelTimesProcessorForGtfsUpdates travelTimesProcesssor =
+				new TravelTimesProcessorForGtfsUpdates(revs,
 						originalTravelTimesRev, maxTravelTimeSegmentLength,
 						defaultWaitTimeAtStopMsec, maxSpeedKph);
 		travelTimesProcesssor.process(session, this);

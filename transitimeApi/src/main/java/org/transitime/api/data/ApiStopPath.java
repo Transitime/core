@@ -25,10 +25,10 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcStopPath;
-import org.transitime.utils.StringUtils;
+import org.transitime.utils.MathUtils;
 
 /**
- *
+ * Represents a path from one stop to another.
  *
  * @author SkiBu Smith
  *
@@ -51,22 +51,22 @@ public class ApiStopPath {
 	private int gtfsStopSeq;
 
 	@XmlAttribute
-	private String layoverStop;
+	private Boolean layoverStop;
 
 	@XmlAttribute
-	private String waitStop;
+	private Boolean waitStop;
 
 	@XmlAttribute
-	private String scheduleAdherenceStop;
+	private Boolean scheduleAdherenceStop;
 
 	@XmlAttribute
-	private String breakTime;
+	private Integer breakTime;
 
 	@XmlElement
 	private List<ApiLocation> locations;
 
 	@XmlAttribute
-	private String pathLength;
+	private Double pathLength;
 
 	/********************** Member Functions **************************/
 
@@ -83,19 +83,19 @@ public class ApiStopPath {
 		stopId = ipcStopPath.getStopId();
 		stopName = ipcStopPath.getStopName();
 		gtfsStopSeq = ipcStopPath.getGtfsStopSeq();
-		layoverStop = ipcStopPath.isLayoverStop() ? "true" : null;
-		waitStop = ipcStopPath.isWaitStop() ? "true" : null;
+		layoverStop = ipcStopPath.isLayoverStop() ? true : null;
+		waitStop = ipcStopPath.isWaitStop() ? true : null;
 		scheduleAdherenceStop =
-				ipcStopPath.isScheduleAdherenceStop() ? "true" : null;
+				ipcStopPath.isScheduleAdherenceStop() ? true : null;
 		breakTime =
 				ipcStopPath.getBreakTime() != 0 ? ipcStopPath.getBreakTime()
-						.toString() : null;
+						: null;
 
 		locations = new ArrayList<ApiLocation>();
 		for (Location loc : ipcStopPath.getLocations()) {
 			locations.add(new ApiLocation(loc.getLat(), loc.getLon()));
 		}
 
-		pathLength = StringUtils.oneDigitFormat(ipcStopPath.getPathLength());
+		pathLength = MathUtils.round(ipcStopPath.getPathLength(), 1);
 	}
 }
