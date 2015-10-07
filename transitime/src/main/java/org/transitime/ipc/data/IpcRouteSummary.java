@@ -19,6 +19,7 @@ package org.transitime.ipc.data;
 
 import java.io.Serializable;
 
+import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.Extent;
 import org.transitime.db.structs.Route;
 
@@ -74,7 +75,8 @@ public class IpcRouteSummary implements Serializable {
      * @param dbRoute
      */
 	public IpcRouteSummary(Route dbRoute) {
-		this.id = dbRoute.getId();
+		this.id = CoreConfig.useRouteShortNameAsId() ? 
+				dbRoute.getShortName() : dbRoute.getId();
 		this.shortName = dbRoute.getShortName();
 		this.name = dbRoute.getName();
 		this.extent = dbRoute.getExtent();
@@ -183,6 +185,13 @@ public class IpcRouteSummary implements Serializable {
 //		throw new InvalidObjectException("Must use proxy instead");
 //	}
 
+	/**
+	 * @return the GTFS route_id. But returns route_short_name for those
+	 *         problematic agencies like sfmta where route_id is not stable
+	 *         across schedule changes but route_short_name is. This way always
+	 *         have a stable id to use. But of course the client needs to be
+	 *         able to handle getting the route_short_name.
+	 */
 	public String getId() {
 		return id;
 	}
