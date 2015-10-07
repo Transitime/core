@@ -133,9 +133,9 @@ public class AvlSqsClientModule extends Module {
           avlClientThreadFactory);
       _avlClientExecutor = new BoundedExecutor(executor, maxAVLQueueSize);
       _receiveQueue = new ArrayBlockingQueue<Message>(maxAVLQueueSize);
-      _deserializeQueue = new ArrayBlockingQueue<Message>(maxAVLQueueSize);
-      _acknowledgeQueue = new ArrayBlockingQueue<Message>(maxAVLQueueSize);
-      _archiveQueue = new ArrayBlockingQueue<Message>(maxAVLQueueSize);
+      _deserializeQueue = new ArrayBlockingQueue<Message>(maxAVLQueueSize*10);
+      _acknowledgeQueue = new ArrayBlockingQueue<Message>(maxAVLQueueSize*10);
+      _archiveQueue = new ArrayBlockingQueue<Message>(maxAVLQueueSize*1000);
       
       logger.info("starting {} threads for queues.", numberThreads);
       for (int i = 0; i <= numberThreads; i++) {
