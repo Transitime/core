@@ -264,6 +264,7 @@ public class AvlSqsClientModule extends Module {
       
       @Override
       public void run() {
+        try {
         while (!Thread.interrupted()) {
           try {
             ReceiveMessageRequest request = new ReceiveMessageRequest(_url);
@@ -286,6 +287,9 @@ public class AvlSqsClientModule extends Module {
             logger.error("exception receiving: ", any);
           }
         }
+      } finally {
+        logger.error("ReceiveTask exiting!");
+      }
       }
     }
 
@@ -328,6 +332,7 @@ public class AvlSqsClientModule extends Module {
       
       @Override
       public void run() {
+        try {
         while (!Thread.interrupted()) {
           try {
             Message message = _acknowledgeQueue.poll(250, TimeUnit.MILLISECONDS);
@@ -337,6 +342,9 @@ public class AvlSqsClientModule extends Module {
             logger.error("exception acking: ", any);
           }
         }
+        } finally {
+        logger.error("AcknowledgeTask exiting!");
+        }
       }
     }
     
@@ -344,6 +352,7 @@ public class AvlSqsClientModule extends Module {
       
       @Override
       public void run() {
+        try {
         while (!Thread.interrupted()) {
           try {
             Message message = _archiveQueue.poll(250, TimeUnit.MILLISECONDS);
@@ -353,6 +362,9 @@ public class AvlSqsClientModule extends Module {
             logger.error("exception archiving: ", any);
           }
         }
+      } finally {
+        logger.error("ArchiveTask exiting!");
+      }
       }
     }
 
