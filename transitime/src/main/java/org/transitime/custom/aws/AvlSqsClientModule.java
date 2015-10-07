@@ -145,6 +145,8 @@ public class AvlSqsClientModule extends Module {
         new Thread(new ArchiveTask()).start();
       }
       
+      new Thread(new StatusTask()).start();
+      
       // create an instance of the SQS message unmarshaller
       _messageUnmarshaller = (SqsMessageUnmarshaller) unmarshallerConfig.getValue().newInstance();
       
@@ -348,6 +350,23 @@ public class AvlSqsClientModule extends Module {
         }
       }
     }
-    
+
+    private class StatusTask implements Runnable {
+      @Override
+      public void run() {
+        while (!Thread.interrupted()) {
+          try {
+            logger.info("Queue Size Report:  recieve={}, deserialize={}, ack={}, archive={}", 
+                _receiveQueue.size(),
+                _deserializeQueue.size(),
+                _acknowledgeQueue.size(),
+                _archiveQueue.size());
+            Thread.sleep(60 * 1000);
+          } catch (Exception any) {
+            logger.error("exception with status: ", any);
+          }
+        }
+      }
+    }
     
 }
