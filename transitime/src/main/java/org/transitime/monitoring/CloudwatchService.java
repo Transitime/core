@@ -21,7 +21,7 @@ public class CloudwatchService {
     private String environmentName = System.getProperty("transitime.environmentName");
     private String accessKey = System.getProperty("transitime.cloudwatch.awsAccessKey");
     private String secretKey = System.getProperty("transitime.cloudwatch.awsSecretKey");
-    private String endpoint = System.getProperty("transitime.awsEndpoint");
+    private String endpoint = System.getProperty("transitime.cloudwatch.awsEndpoint");
     private AmazonCloudWatchClient cloudWatch;
 
     private static final Logger logger = LoggerFactory
