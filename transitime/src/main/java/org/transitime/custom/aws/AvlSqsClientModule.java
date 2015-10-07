@@ -295,6 +295,7 @@ public class AvlSqsClientModule extends Module {
       
       @Override
       public void run() {
+        try {
         while (!Thread.interrupted()) {
           try {
             Message message = _deserializeQueue.poll(250, TimeUnit.MILLISECONDS);
@@ -316,6 +317,9 @@ public class AvlSqsClientModule extends Module {
           } catch (Exception any) {
             logger.error("unexpected exception: ", any);
           }
+        }
+        } finally {
+          logger.error("DeserializeTask exiting!");
         }
       }
     }
