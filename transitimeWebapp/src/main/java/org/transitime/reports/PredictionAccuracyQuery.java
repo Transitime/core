@@ -237,11 +237,15 @@ abstract public class PredictionAccuracyQuery {
 		}
 
 		// Determine route portion of SQL
+		// Need to examine each route ID twice since doing a
+		// routeId='stableId' OR routeShortName='stableId' in
+		// order to handle agencies where GTFS route_id is not
+		// stable but the GTFS route_short_name is.
 		String routeSql = "";
 		if (routeIds != null && routeIds.length > 0 && !routeIds[0].isEmpty()) {
-			routeSql = " AND (routeId=?";
+			routeSql = " AND (routeId=? OR routeShortName=?";
 			for (int i = 1; i < routeIds.length; ++i)
-				routeSql += " OR routeId=?";
+				routeSql += " OR routeId=? OR routeShortName=?";
 			routeSql += ")";
 		}
 
@@ -332,8 +336,14 @@ abstract public class PredictionAccuracyQuery {
 				statement.setTime(i++, endTime);
 			if (routeIds != null) {
 				for (String routeId : routeIds)
-					if (!routeId.isEmpty())
+					if (!routeId.isEmpty()) {
+						// Need to add the route ID twice since doing a
+						// routeId='stableId' OR routeShortName='stableId' in
+						// order to handle agencies where GTFS route_id is not
+						// stable but the GTFS route_short_name is.
 						statement.setString(i++, routeId);
+						statement.setString(i++, routeId);
+					}
 			}
 
 			// Actually execute the query
