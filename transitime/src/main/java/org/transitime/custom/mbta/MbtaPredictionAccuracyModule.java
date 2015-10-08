@@ -40,7 +40,6 @@ import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.modules.Module;
-import org.transitime.utils.Time;
 
 /**
  * Reads in external prediction data from MBTA feed and stores the data in
@@ -259,13 +258,6 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 					Date predictedTime = new Date(
 							Long.parseLong(predictionEpochTimeStr + "000"));
 					
-					String predictionsInSecondsStr = 
-							stop.getAttributeValue("pre_away");
-					Date predictedTimeUsingSecs = new Date(
-							System.currentTimeMillis()
-									+ Integer.parseInt(predictionsInSecondsStr)
-									* Time.MS_PER_SEC);
-					
 					// Need to differentiate between arrival and departure 
 					// predictions
 					boolean isArrival = isArrival(tripId, stopId);
@@ -274,10 +266,10 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 							"Storing external prediction routeId={}, "
 							+ "directionId={}, tripId={}, vehicleId={}, "
 							+ "stopId={}, prediction={}, "
-							+ "predictedTimeUsingSecs={}, isArrival={}",
+							+ "isArrival={}",
 							routeId, directionId, tripId, 
 							vehicleId, stopId, predictedTime, 
-							predictedTimeUsingSecs, isArrival);
+							isArrival);
 					
 					// Store in memory the prediction based on absolute time
 					PredAccuracyPrediction pred = new PredAccuracyPrediction(
@@ -285,13 +277,6 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 							predictedTime, predictionsReadTime, isArrival, 
 							null, "MBTA_epoch");
 					storePrediction(pred);
-					
-					// Store in memory the prediction based on number of seconds
-					PredAccuracyPrediction predUsingSecs = new PredAccuracyPrediction(
-							routeId, directionId, stopId, tripId, vehicleId,
-							predictedTimeUsingSecs, predictionsReadTime, 
-							isArrival, null, "MBTA_seconds");
-					storePrediction(predUsingSecs);
 				}
 			}
 		}
