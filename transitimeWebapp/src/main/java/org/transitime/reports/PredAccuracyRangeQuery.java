@@ -184,12 +184,8 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 *            then just look at data for particular time of day, such as 7am
 	 *            to 9am, for those days. Set to null or empty string to use
 	 *            data for entire day.
-	 * @param endTimeStr
-	 *            For specifying time of day between the begin and end date to
-	 *            use data for. Can thereby specify a date range of a week but
-	 *            then just look at data for particular time of day, such as 7am
-	 *            to 9am, for those days. Set to null or empty string to use
-	 *            data for entire day.
+	 * @param numDays
+	 *            How long query should be run for.
 	 * @param routeIds
 	 *            Specifies which routes to do the query for. Can be null for
 	 *            all routes or an array of route IDs.
@@ -210,12 +206,12 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public String getJson(String beginDateStr, String endDateStr,
+	public String getJson(String beginDateStr, String numDays,
 			String beginTimeStr, String endTimeStr, String routeIds[],
 			String predSource, String predType, int maxEarlySec, int maxLateSec)
 			throws SQLException, ParseException {
 		// Actually perform the query
-		doQuery(beginDateStr, endDateStr, beginTimeStr, endTimeStr, routeIds,
+		doQuery(beginDateStr, numDays, beginTimeStr, endTimeStr, routeIds,
 				predSource, predType);
 
 		// If query returned no data then simply return null so that

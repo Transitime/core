@@ -26,7 +26,7 @@
    <%-- For passing agency param to the report --%>
    <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
    
-   <jsp:include page="params/fromToDateTime.jsp" />
+   <jsp:include page="params/fromDateNumDaysTime.jsp" />
    
    <jsp:include page="params/route.jsp" />
  

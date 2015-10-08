@@ -5,7 +5,7 @@
 	// Parameters from request
 String agencyId = request.getParameter("a");
 String beginDate = request.getParameter("beginDate");
-String endDate = request.getParameter("endDate");
+String numDays = request.getParameter("numDays");
 String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 String routeId =  request.getParameter("r");
@@ -17,19 +17,18 @@ String showTooltipsStr = request.getParameter("tooltips");
 if (showTooltipsStr != null && showTooltipsStr.toLowerCase().equals("false"))
     showTooltips = false;
     
-if (agencyId == null || beginDate == null || endDate == null) {
+if (agencyId == null || beginDate == null || numDays == null) {
 		response.getWriter().write("For predAccuracyScatterData.jsp must "
 	+ "specify parameters 'a' (agencyId), " 
-	+ "'beginDate', and 'endDate'."); 
+	+ "'beginDate', and 'numDays'."); 
 		return;
 }
 
 // Make sure not trying to get data for too long of a time span since
 // that could bog down the database.
-long timespan = Time.parseDate(endDate).getTime() - 
-	Time.parseDate(beginDate).getTime() + 1*Time.MS_PER_DAY;
-if (timespan > 31*Time.MS_PER_DAY) {
-    throw new ParseException("Begin date to end date spans more than a month", 0);
+if (Integer.parseInt(numDays) > 31) {
+	throw new ParseException(
+			"Number of days of " + numDays + " spans more than a month", 0);
 }
 
 // Determine the time portion of the SQL
@@ -39,9 +38,23 @@ if ((beginTime != null && !beginTime.isEmpty())
 	// If only begin or only end time set then use default value
 	if (beginTime == null || beginTime.isEmpty())
 		beginTime = "00:00:00";
+	else {
+		// beginTimeStr set so make sure it is valid, and prevent 
+		// possible SQL injection
+		if (!beginTime.matches("\\d+:\\d+"))
+			throw new ParseException("begin time \"" + beginTime 
+					+ "\" is not valid.", 0);
+	}
 	if (endTime == null || endTime.isEmpty())
 		endTime = "23:59:59";
-	
+	else {
+		// endTimeStr set so make sure it is valid, and prevent 
+		// possible SQL injection
+		if (!endTime.matches("\\d+:\\d+"))
+			throw new ParseException("end time \"" + endTime 
+					+ "\" is not valid.", 0);
+	}
+
     timeSql = " AND arrivalDepartureTime::time BETWEEN '" 
 		+ beginTime + "' AND '" + endTime + "' ";
 }
@@ -50,7 +63,7 @@ if ((beginTime != null && !beginTime.isEmpty())
 // all routes.
 String routeSql = "";
 if (routeId!=null && !routeId.isEmpty()) {
-    routeSql = "  AND routeId='" + routeId + "' ";
+    routeSql = "  AND (routeId='" + routeId + "' OR routeShortName='" + routeId + "') ";
 }
 
 // Determine the source portion of the SQL. Default is to provide
@@ -107,7 +120,7 @@ String sql = "SELECT "
 	+ tooltipsSql
 	+ " FROM predictionAccuracy "
 	+ "WHERE arrivalDepartureTime BETWEEN '" + beginDate 
-	+     "' AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' "
+	+     "' AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numDays + " day' "
 	+ timeSql
 	+ "  AND predictedTime-predictionReadTime < '00:15:00' "
 	+ routeSql
@@ -124,7 +137,7 @@ String jsonString = ChartGenericJsonQuery.getJsonString(agencyId, sql);
 // If no data then return error status with an error message
 if (jsonString == null || jsonString.isEmpty()) {
     String message = "No data for beginDate=" + beginDate
-	    + " endDate=" + endDate 
+	    + " numDays=" + numDays 
 	    + " beginTime=" + beginTime
 	    + " endTime=" + endTime 
 	    + " routeId=" + routeId

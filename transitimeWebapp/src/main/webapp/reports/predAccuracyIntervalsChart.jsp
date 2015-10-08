@@ -15,7 +15,7 @@ String agencyId = request.getParameter("a");
 String routeIds[] = request.getParameterValues("r");
 String titleRoutes = "";
 if (routeIds != null && !routeIds[0].isEmpty()) {
-    titleRoutes += " for route ";
+    titleRoutes += ", route ";
     if (routeIds.length > 1) 
         titleRoutes += "s";
     titleRoutes += routeIds[0];
@@ -27,16 +27,22 @@ if (routeIds != null && !routeIds[0].isEmpty()) {
 
 String sourceParam = request.getParameter("source");
 String source = (sourceParam != null && !sourceParam.isEmpty()) ? 
-	" for " + sourceParam + " predictions" : ""; 
+	", " + sourceParam + " predictions" : ""; 
 String beginDate = request.getParameter("beginDate");
+String numDays = request.getParameter("numDays");
 String beginTime = request.getParameter("beginTime");
-String endDate = request.getParameter("endDate");
 String endTime = request.getParameter("endTime");
 
 String chartTitle = "Prediction Accuracy for "
 	+ WebAgency.getCachedWebAgency(agencyId).getAgencyName()   
-	+ titleRoutes + source 
-	+ " for " + beginDate + " " + beginTime + " to " + endDate + " " + endTime;
+	+ titleRoutes 
+	+ source 
+	+ ", " + beginDate + " for " + numDays + " day" + (Integer.parseInt(numDays) > 1 ? "s" : "");
+
+if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.isEmpty())) {
+	chartTitle += ", " + beginTime + " to " + endTime;
+}
+
 %>  
 	  
     

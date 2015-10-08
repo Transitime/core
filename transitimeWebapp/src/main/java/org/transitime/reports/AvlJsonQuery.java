@@ -25,24 +25,48 @@ package org.transitime.reports;
 public class AvlJsonQuery {
 	
 	/**
-	 * Queries agency for AVL data and returns result as a JSON string.
+	 * Queries agency for AVL data and returns result as a JSON string. Limited
+	 * to returning 5,000 data points.
 	 * 
 	 * @param agencyId
 	 * @param vehicleId
 	 *            Which vehicle to get data for. Set to null or empty string to
 	 *            get data for all vehicles
-	 * @param startTime
+	 * @param beginDate
+	 *            date to start query
+	 * @param numdays
+	 *            of days to collect data for
+	 * @param beginTime
+	 *            optional time of day during the date range
 	 * @param endTime
+	 *            optional time of day during the date range
 	 * @return AVL reports in JSON format. Can be empty JSON array if no data
 	 *         meets criteria.
 	 */
 	public static String getJson(String agencyId, String vehicleId,
-			String startTime, String endTime) {
+			String beginDate, String numdays, String beginTime, String endTime) {
+		//Determine the time portion of the SQL
+		String timeSql = "";
+		// If beginTime or endTime set but not both then use default values
+		if ((beginTime != null && !beginTime.isEmpty())
+				|| (endTime != null && !endTime.isEmpty())) {
+			if (beginTime == null || beginTime.isEmpty())
+				beginTime = "00:00";
+			if (endTime == null || endTime.isEmpty())
+				endTime = "24:00";
+		}
+		if (beginTime != null && !beginTime.isEmpty() 
+				&& endTime != null && !endTime.isEmpty()) {
+			timeSql = " AND time::time BETWEEN '" 
+				+ beginTime + "' AND '" + endTime + "' ";
+		}
+
 		String sql = "SELECT vehicleId, time, assignmentId, lat, lon, speed, "
 				+ "heading, timeProcessed "
 				+ "FROM avlreports "
-				+ "WHERE time BETWEEN '" + startTime 
-				+ "' AND '" + endTime + "' ";
+				+ "WHERE time BETWEEN '" + beginDate 
+				+ "' AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numdays + " day' "
+				+ timeSql;
 
 		// If only want data for single vehicle then specify so in SQL
 		if (vehicleId != null && !vehicleId.isEmpty())
@@ -57,20 +81,6 @@ public class AvlJsonQuery {
 		
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 		return json;
-	}
-	
-	/**
-	 * For testing
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		String agencyId = "sfmta";
-		String vehicleId = null;
-		String startTime = "2015-08-07 12:25:02.381";
-		String endTime = "2015-08-07 12:25:12.381";
-		String json = getJson(agencyId, vehicleId, startTime, endTime);
-		System.out.println(json);
 	}
 	
 }

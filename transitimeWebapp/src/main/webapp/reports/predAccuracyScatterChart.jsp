@@ -3,21 +3,41 @@
 <%
 // Create title for chart
 String agencyId = request.getParameter("a");
-String routeId = request.getParameter("r");
-String routeTitle = (routeId != null && !routeId.isEmpty()) ? 
-	" for " + routeId : "";
-String source = request.getParameter("source");
-String sourceForTitle = (source != null && !source.isEmpty()) ? 
-	" for " + source + " predictions" : ""; 
+
+//Determine list of routes for title using "r" param.
+//Note that can specify multiple routes.
+String routeIds[] = request.getParameterValues("r");
+String titleRoutes = "";
+if (routeIds != null && !routeIds[0].isEmpty()) {
+ titleRoutes += ", route ";
+ if (routeIds.length > 1) 
+     titleRoutes += "s";
+ titleRoutes += routeIds[0];
+ for (int i=1; i<routeIds.length; ++i) {
+		String routeId = routeIds[i];
+	    titleRoutes += " & " + routeId;
+ }
+}
+
+String sourceParam = request.getParameter("source");
+String source = (sourceParam != null && !sourceParam.isEmpty()) ? 
+		", " + sourceParam + " predictions" : "";
+
 String beginDate = request.getParameter("beginDate");
+String numDays = request.getParameter("numDays");
 String beginTime = request.getParameter("beginTime");
-String endDate = request.getParameter("endDate");
 String endTime = request.getParameter("endTime");
 
 String chartTitle = "Prediction Accuracy for " 
 	+ WebAgency.getCachedWebAgency(agencyId).getAgencyName()    
-	+ routeTitle + sourceForTitle 
-	+ " for " + beginDate + " " + beginTime + " to " + endDate + " " + endTime;
+	+ titleRoutes 
+	+ source 
+	+ ", " + beginDate + " for " + numDays + " day" + (Integer.parseInt(numDays) > 1 ? "s" : "");
+
+if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.isEmpty())) {
+	chartTitle += ", " + beginTime + " to " + endTime;
+}
+
 %>
 <html>
   <head>
