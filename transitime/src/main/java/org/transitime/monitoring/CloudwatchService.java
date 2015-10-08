@@ -31,6 +31,7 @@ public class CloudwatchService {
         if(environmentName == null || accessKey == null || secretKey == null || endpoint == null){
             logger.warn("Cloudwatch monitoring not enabled, please specify environmentName, accessKey, secretKey and endpoint in configuration file");
         }else{
+            logger.info("starting Cloudwatch in env {} with accessKey {}", environmentName, accessKey);
             AmazonCloudWatchClient cloudWatch = new AmazonCloudWatchClient(new BasicAWSCredentials(accessKey, secretKey));
             cloudWatch.setEndpoint(endpoint);
             this.cloudWatch = cloudWatch;
@@ -61,7 +62,7 @@ public class CloudwatchService {
     }
 
     public synchronized void publishMetric(String metricName, Double metricValue){
-
+        logger.info("Cloudwatch[{}]={}", metricName, metricValue);
         if(cloudWatch == null)
             return;
 
