@@ -155,6 +155,7 @@
     create table Matches (
         vehicleId varchar(60) not null,
         avlTime timestamp not null,
+        atStop boolean,
         blockId varchar(60),
         configRev int4,
         distanceAlongSegment float4,
