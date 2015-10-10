@@ -86,6 +86,7 @@
 	var content = "<table class='popupTable'>" 
 		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleid + "</td></tr>" 
 		+ "<tr><td class='popupTableLabel'>GPS Time:</td><td>" + avl.time + "</td></tr>" 
+  		+ "<tr><td class='popupTableLabel'>Route:</td><td>" + avl.routeshortname + "</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Block:</td><td>" + avl.blockid + "</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Trip:</td><td>" + avl.tripid + "</td></tr>"
  		+ "<tr><td class='popupTableLabel'>Lat/Lon:</td><td>" + avl.lat + ", " + avl.lon + "</td></tr>"

@@ -23,10 +23,12 @@ package org.transitime.reports;
  *
  */
 public class AvlJsonQuery {
+	// Maximum number of rows that can be retrieved by a query
+	private static final int MAX_ROWS = 50000;
 	
 	/**
 	 * Queries agency for AVL data and returns result as a JSON string. Limited
-	 * to returning 5,000 data points.
+	 * to returning MAX_ROWS (50,000) data points.
 	 * 
 	 * @param agencyId
 	 * @param vehicleId
@@ -77,17 +79,18 @@ public class AvlJsonQuery {
 		// to order by time to make sure they are in proper order. And
 		// lastly, limit AVL reports to 5000 so that someone doesn't try
 		// to view too much data at once.
-		sql += "ORDER BY vehicleId, time LIMIT 5000";
+		sql += "ORDER BY vehicleId, time LIMIT " + MAX_ROWS;
 		
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 		return json;
 	}
 	
 	/**
-	 * Queries agency for AVL data and corresponding Match data. By combining in
-	 * Match data can see what the block and trip IDs, and possibly other
-	 * information, are associated with each AVL report. Returns result as a
-	 * JSON string. Limited to returning 5,000 data points.
+	 * Queries agency for AVL data and corresponding Match and Trip data. By
+	 * joining in Match and Trip data can see what the block and trip IDs, the
+	 * routeShortName, and possibly other information, for each AVL report.
+	 * Returns result as a JSON string. Limited to returning MAX_ROWS (50,000)
+	 * data points.
 	 * 
 	 * @param agencyId
 	 * @param vehicleId
@@ -122,14 +125,17 @@ public class AvlJsonQuery {
 				+ beginTime + "' AND '" + endTime + "' ";
 		}
 
-		String sql = "SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, "
-				+ "a.speed, a.heading, a.timeProcessed, m.blockId, m.tripId  "
+		String sql = 
+				"SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, "
+				+ "     a.speed, a.heading, a.timeProcessed, m.blockId, "
+				+ "     m.tripId, t.routeShortName  "
 				+ "FROM avlreports a "
-				+ "LEFT JOIN matches m "
-                + "ON a.vehicleId = m.vehicleId "
-                + "AND a.time = m.avltime "
-				+ "WHERE a.time BETWEEN '" + beginDate 
-				+ "' AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numdays + " day' "
+				+ "  LEFT JOIN matches m "
+				+ "    ON m.vehicleId = a.vehicleId AND m.avlTime = a.time "
+				+ "  LEFT JOIN trips t "
+				+ "    ON t.configRev = m.configRev AND t.tripId = m.tripID "
+				+ "WHERE a.time BETWEEN '" + beginDate + "' "
+				+ "     AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numdays + " day' "
 				+ timeSql;
 
 		// If only want data for single vehicle then specify so in SQL
@@ -141,7 +147,7 @@ public class AvlJsonQuery {
 		// to order by time to make sure they are in proper order. And
 		// lastly, limit AVL reports to 5000 so that someone doesn't try
 		// to view too much data at once.
-		sql += "ORDER BY vehicleId, time LIMIT 5000";
+		sql += "ORDER BY vehicleId, time LIMIT " + MAX_ROWS;
 		
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 		return json;
