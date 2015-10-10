@@ -11,7 +11,7 @@ String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 
 // Query db and get JSON string
-String jsonString = AvlJsonQuery.getJson(agencyId, vehicleId, beginDate, numDays, beginTime, endTime);
+String jsonString = AvlJsonQuery.getAvlWithMatchesJson(agencyId, vehicleId, beginDate, numDays, beginTime, endTime);
 
 // Respond with the JSON string
 response.getWriter().write(jsonString);
