@@ -94,8 +94,11 @@ public class AvlJsonQuery {
 	 * 
 	 * @param agencyId
 	 * @param vehicleId
-	 *            Which vehicle to get data for. Set to null or empty string to
-	 *            get data for all vehicles
+	 *            Which vehicle to get data for. Set to empty string to get data
+	 *            for all vehicles. If null then will get data by route.
+	 * @param routeId
+	 *            Which route to get data for. Set to empty string to get data
+	 *            for all routes. If null then will get data by vehicle.
 	 * @param beginDate
 	 *            date to start query
 	 * @param numdays
@@ -107,8 +110,9 @@ public class AvlJsonQuery {
 	 * @return AVL reports in JSON format. Can be empty JSON array if no data
 	 *         meets criteria.
 	 */
-	public static String getAvlWithMatchesJson(String agencyId, String vehicleId,
-			String beginDate, String numdays, String beginTime, String endTime) {
+	public static String getAvlWithMatchesJson(String agencyId,
+			String vehicleId, String routeId, String beginDate, String numdays,
+			String beginTime, String endTime) {
 		//Determine the time portion of the SQL
 		String timeSql = "";
 		// If beginTime or endTime set but not both then use default values
@@ -138,6 +142,13 @@ public class AvlJsonQuery {
 				+ "     AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numdays + " day' "
 				+ timeSql;
 
+		// If only want data for single route then specify so in SQL.
+		// Since some agencies like sfmta don't have consistent route IDs 
+		// across schedule changes need to try to match to GTFS route_id or
+		// route_short_name.
+		if (vehicleId == null && routeId != null && !routeId.isEmpty())
+			sql += "AND (t.routeId='" + routeId + "' OR t.routeShortName='" + routeId + "') ";
+		
 		// If only want data for single vehicle then specify so in SQL
 		if (vehicleId != null && !vehicleId.isEmpty())
 			sql += "AND vehicleId='" + vehicleId + "' ";
