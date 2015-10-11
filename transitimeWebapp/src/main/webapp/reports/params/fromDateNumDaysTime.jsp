@@ -80,21 +80,6 @@ String currentDateStr = org.transitime.utils.Time.dateStr(new java.util.Date());
   </div>
   
   <div class="param">
-     <label for="predictionType">Prediction Type:</label> 
-     <select id="predictionType" name="predictionType" 
-     	title="Specifies whether or not to show prediction accuracy for 
-     	predictions that were affected by a layover. Select 'All' to show
-     	data for predictions, 'Affected by layover' to only see data where
-     	predictions affected by when a driver is scheduled to leave a layover, 
-     	or 'Not affected by layover' if you only want data for predictions 
-     	that were not affected by layovers.">
-       <option value="">All</option>
-       <option value="AffectedByWaitStop">Affected by layover</option>
-       <option value="NotAffectedByWaitStop">Not affected by layover</option>
-     </select>
-   </div>
-   
-  <div class="param">
     <label for="beginTime">Begin Time:</label>
     <input id="beginTime" name="beginTime"
     	title="Optional begin time of day to limit query to. Useful if
