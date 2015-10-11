@@ -45,9 +45,12 @@ finding specific issues with predictions.">
 
 <div id="subtitle">AVL Reports</div>
 <ul class="choicesList">
-  <li><a href="avlMapParams.jsp?a=<%= agencyId %>"
+  <li><a href="avlMapByRouteParams.jsp?a=<%= agencyId %>"
+    title="Displays historic AVL data for a route in a map.">
+      AVL Data in Map by Route</a></li>
+  <li><a href="avlMapByVehicleParams.jsp?a=<%= agencyId %>"
     title="Displays historic AVL data for a vehicle in a map.">
-      AVL Data in Map</a></li>
+      AVL Data in Map by Vehicle</a></li>
 </ul>
 
 <div id="subtitle">Miscellaneous Reports</div>

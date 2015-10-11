@@ -18,7 +18,7 @@
 <%@include file="/template/header.jsp" %>
 
 <div id="title">
-   Select Parameters for Displaying AVL Data in Map
+   Select Parameters for Displaying AVL Data in Map by Vehicle
 </div>
    
 <div id="mainDiv">
@@ -31,6 +31,10 @@
    <jsp:include page="params/fromDateNumDaysTime.jsp" />
    
    <jsp:include page="params/routeSingle.jsp" />
+   <script>
+     // Make selector label more appropriate 
+     $("#routesDiv label").text("Route to Display:");
+   </script>
     
    <jsp:include page="params/submitReport.jsp" />
   </form>
