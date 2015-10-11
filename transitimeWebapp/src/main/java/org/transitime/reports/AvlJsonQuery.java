@@ -151,14 +151,14 @@ public class AvlJsonQuery {
 		
 		// If only want data for single vehicle then specify so in SQL
 		if (vehicleId != null && !vehicleId.isEmpty())
-			sql += "AND vehicleId='" + vehicleId + "' ";
+			sql += "AND a.vehicleId='" + vehicleId + "' ";
 		
 		// Make sure data is ordered by vehicleId so that can draw lines 
 		// connecting the AVL reports per vehicle properly. Also then need
 		// to order by time to make sure they are in proper order. And
 		// lastly, limit AVL reports to 5000 so that someone doesn't try
 		// to view too much data at once.
-		sql += "ORDER BY vehicleId, time LIMIT " + MAX_ROWS;
+		sql += "ORDER BY a.vehicleId, time LIMIT " + MAX_ROWS;
 		
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 		return json;
