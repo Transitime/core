@@ -71,7 +71,8 @@ public class MonitoringEvent implements Serializable {
 	private final boolean triggered;
 	
 	// The long message associated with the monitoring
-	@Column(length=512)
+	private final static int MAX_MESSAGE_LENGTH = 512;
+	@Column(length=MAX_MESSAGE_LENGTH)
 	private final String message;
 	
 	// The value that caused monitoring to be triggered or untriggered.
@@ -105,7 +106,10 @@ public class MonitoringEvent implements Serializable {
 		this.time = time;
 		this.type = type;
 		this.triggered = triggered;
-		this.message = message;
+		// Since message to be stored in db and don't know how long it might
+		// be make sure it is not too long so that don't get db errors.
+		this.message = message.length() <= MAX_MESSAGE_LENGTH ? 
+				message : message.substring(0, MAX_MESSAGE_LENGTH);;
 		this.value = value;
 	}
 	
