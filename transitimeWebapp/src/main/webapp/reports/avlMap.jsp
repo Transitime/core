@@ -42,6 +42,7 @@
     .popupTableLabel {
     	font-weight: bold;
     	text-align: right;
+    	padding-right: 4px;
     }
     
   </style>
