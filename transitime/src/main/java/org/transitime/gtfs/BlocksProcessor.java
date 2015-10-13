@@ -210,6 +210,9 @@ public class BlocksProcessor {
 						new Comparator<Trip>() {
 							@Override
 							public int compare(Trip arg0, Trip arg1) {
+							  if (arg0 == arg1) return 0;
+							  if (arg0 == null || arg0.getStartTime() == null) return -1;
+							  if (arg1 == null || arg1.getStartTime() == null) return 1;
 								return arg0.getStartTime().
 										compareTo(arg1.getStartTime());
 							}
@@ -217,6 +220,8 @@ public class BlocksProcessor {
 							
 				// Determine start time for block from the first trip.
 				Trip firstTripForBlock = tripsListForBlock.get(0);
+				if (firstTripForBlock == null || firstTripForBlock.getStartTime() == null)
+				  continue;
 				int startTimeForBlock = firstTripForBlock.getStartTime();
 				
 				// Determine end time for block from the last trip.

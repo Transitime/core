@@ -13,14 +13,13 @@ import org.transitime.config.ClassConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.core.AvlProcessor;
-import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
+import org.transitime.monitoring.CloudwatchService;
 import org.transitime.utils.threading.BoundedExecutor;
 import org.transitime.utils.threading.NamedThreadFactory;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
@@ -54,6 +53,7 @@ public class AvlSqsClientModule extends Module {
   private ArrayBlockingQueue<Message> _deserializeQueue;
   private ArrayBlockingQueue<Message> _acknowledgeQueue;
   private ArrayBlockingQueue<Message> _archiveQueue;
+  private CloudwatchService monitoring;
   
   private final static int MAX_THREADS = 100;
 
@@ -83,6 +83,13 @@ public class AvlSqsClientModule extends Module {
   
   private static StringConfigValue avlUrl =
       new StringConfigValue("transitime.avl.sqsUrl", null, "The SQS URL from AWS");
+
+  private static StringConfigValue sqsKey =
+      new StringConfigValue("transitime.avl.sqsKey", null, "The AWS Key with SQS read access");
+
+  private static StringConfigValue sqsSecret =
+      new StringConfigValue("transitime.avl.sqsSecret", null, "The AWS Secret with SQS read access");
+
   
   private static StringConfigValue snsKey =
       new StringConfigValue("transitime.avl.snsKey", null, "The AWS Key with SNS write access");
@@ -100,8 +107,9 @@ public class AvlSqsClientModule extends Module {
   
     public AvlSqsClientModule(String agencyId) throws Exception {
       super(agencyId);
+      monitoring = new CloudwatchService();
       logger.info("loading AWS SQS credentials from environment");
-      _sqsCredentials =  new EnvironmentVariableCredentialsProvider().getCredentials();
+      _sqsCredentials =  new BasicAWSCredentials(sqsKey.getValue(), sqsSecret.getValue());
       connect();
 
       int maxAVLQueueSize = avlQueueSize.getValue();
@@ -151,7 +159,7 @@ public class AvlSqsClientModule extends Module {
       // create an instance of the SQS message unmarshaller
       _messageUnmarshaller = (SqsMessageUnmarshaller) unmarshallerConfig.getValue().newInstance();
       
-      if (snsKey.getValue() != null && snsSecret.getValue() != null && snsArn.getValue() != null) {
+      if (snsKey.getValue() != null && snsSecret.getValue() != null && snsSecret.getValue() != "" && snsArn.getValue() != null) {
         try {
           logger.info("creating sns connection for archiving to ARN {}", snsArn.getValue());
           _sns = new AmazonSNSClient(new BasicAWSCredentials(snsKey.getValue(), snsSecret.getValue()));
@@ -293,25 +301,33 @@ public class AvlSqsClientModule extends Module {
       }
     }
 
-    
-    
     private class DeserailzeTask implements Runnable {
       
+      private static final long MONITORING_FREQUENCY = 5 * 60 * 1000;// 5 mins
+
       @Override
       public void run() {
+        int latencyCount = 0;
+        long start = System.currentTimeMillis();
+        long latencyTotal = 0;
+        
         try {
         while (!Thread.interrupted()) {
           try {
             Message message = _deserializeQueue.poll(250, TimeUnit.MILLISECONDS);
             if (message == null) continue;
-            AvlReport avlReport = null;
+            AvlReportWrapper avlReport = null;
             try {
               avlReport = _messageUnmarshaller.toAvlReport(message);
+              if (avlReport.getQueueLatency() != null) {
+                latencyTotal = latencyTotal + avlReport.getQueueLatency();
+                latencyCount++;
+              }
             } catch (Exception any) {
               logger.error("exception deserializing message {}", message, any);
             }
             if (avlReport != null) {
-              Runnable avlClient = new AvlClient(avlReport);
+              Runnable avlClient = new AvlClient(avlReport.getReport());
               _avlClientExecutor.execute(avlClient);
             } else {
               // we could potentially quiet this statement some -- but for now
@@ -322,6 +338,19 @@ public class AvlSqsClientModule extends Module {
             logger.error("unexpected exception: ", any);
           }
         }
+        
+        if (System.currentTimeMillis() - start > MONITORING_FREQUENCY) {
+          if (latencyCount != 0) {
+            double latencyAverage = (latencyTotal/latencyCount)/1000;
+            monitoring.publishMetric("AvlQueueLatencyInSeconds", latencyAverage);
+            latencyCount = 0;
+            latencyTotal = 0;
+            start = System.currentTimeMillis();
+          } else {
+            logger.info("no latencyCount to report");
+          }
+        }
+        
         } finally {
           logger.error("DeserializeTask exiting!");
         }

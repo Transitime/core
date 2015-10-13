@@ -1,7 +1,5 @@
 package org.transitime.custom.aws;
 
-import org.transitime.db.structs.AvlReport;
-
 import com.amazonaws.services.sqs.model.Message;
 
 /**
@@ -11,7 +9,7 @@ import com.amazonaws.services.sqs.model.Message;
  */
 public interface SqsMessageUnmarshaller {
   
-  AvlReport toAvlReport(Message message) throws Exception;
+  AvlReportWrapper toAvlReport(Message message) throws Exception;
   String toString(Message message) throws Exception;
 
 }

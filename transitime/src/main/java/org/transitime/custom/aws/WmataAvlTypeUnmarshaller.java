@@ -14,7 +14,7 @@ import com.amazonaws.services.sqs.model.Message;
 public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
 
     @Override
-    public AvlReport toAvlReport(Message message) {
+    public AvlReportWrapper toAvlReport(Message message) {
         if (message == null || message.getBody() == null) return null;
 
         JSONObject jsonObj = new JSONObject(message.getBody());
@@ -50,6 +50,16 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
             speed = (float) msgObj.getDouble("averageSpeed");
         }
 
+        Long proxied = null;
+        if (msgObj.has("proxied")) {
+          proxied = msgObj.getLong("proxied");
+        }
+        
+        Long queueLatency = null;
+        if (proxied != null) {
+          queueLatency = System.currentTimeMillis() - proxied;
+        }
+        
         String source = "sqs";
         if (vehicleId != null && lat != null && lon != null && time != null) {
             AvlReport ar = new AvlReport(vehicleId, time, lat, lon, speed, heading, source);
@@ -59,7 +69,7 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
                     ar.setAssignment(blockAlpha, AssignmentType.BLOCK_ID);
                 }
             }
-            return ar;
+            return new AvlReportWrapper(ar, queueLatency);
         }
         // missing necessary info
         return null;
