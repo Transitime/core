@@ -14,43 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.transitime.custom.lametro;
 
 import org.transitime.avl.NextBusAvlModule;
+import org.transitime.config.StringConfigValue;
 
 /**
- * For lametro agency the block assignments from the feed don't
- * match to the GTFS data. Therefore this module must be used
- * for the sfmta AVL feed.
+ * For lametro agency using two separate AVL feeds so need a 
+ * separate agency name for feed for rail.
  *
  * @author SkiBu Smith
  * 
  */
-public class LametroNextBusAvlModule extends NextBusAvlModule {
+public class LametroRailNextBusAvlModule extends NextBusAvlModule {
+
+	private static StringConfigValue agencyNameForFeed =
+			new StringConfigValue("transitime.custom.lametro.agencyNameForLametroRailFeed",
+					"If set then specifies the agency name to use for the "
+					+ "feed. If not set then the transitime.core.agencyId "
+					+ "is used.");
+	@Override
+	protected String getAgencyNameForFeed() {
+		return agencyNameForFeed.getValue();
+	}
 
 	/**
 	 * @param agencyId
 	 */
-	public LametroNextBusAvlModule(String agencyId) {
+	public LametroRailNextBusAvlModule(String agencyId) {
 		super(agencyId);
 	}
 	
-	/**
-	 * At least for sfmta agency they don't use a leading 0 in the block ID in
-	 * the GTFS data. Therefore to match strip out leading zeros from the block
-	 * ID here.
-	 * 
-	 * @param originalBlockIdFromFeed
-	 *            the block ID to be modified
-	 * @return the modified block ID that corresponds to the GTFS data
-	 */
-	@Override
-	protected String processBlockId(String originalBlockIdFromFeed) {
-		String block = originalBlockIdFromFeed;
-		while (block != null && block.startsWith("0"))
-			block = block.substring(1);
-		return block;
-	}
 
 }

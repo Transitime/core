@@ -60,7 +60,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 					"If set then specifies the agency name to use for the "
 					+ "feed. If not set then the transitime.core.agencyId "
 					+ "is used.");
-	private static String getAgencyNameForFeed() {
+	protected String getAgencyNameForFeed() {
 		return agencyNameForFeed.getValue();
 	}
 	
