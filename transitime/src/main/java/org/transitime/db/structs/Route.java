@@ -541,6 +541,7 @@ public class Route implements Serializable {
 		List<String> directionIds = new ArrayList<String>();
 		List<TripPattern> tripPatternsForRoute = Core.getInstance()
                 .getDbConfig().getTripPatternsForRoute(getId());
+		if (tripPatternsForRoute == null) return directionIds;
 		for (TripPattern tripPattern : tripPatternsForRoute) {
 			String directionId = tripPattern.getDirectionId();
 			if (!directionIds.contains(directionId))
