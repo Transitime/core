@@ -150,7 +150,8 @@ public class Trip implements Lifecycle, Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String serviceId;
 	
-	// The GTFS trips.txt trip_headsign if set. Otherwise null.
+	// The GTFS trips.txt trip_headsign if set. Otherwise will get from the
+	// stop_headsign, if set, from the first stop of the trip. Otherwise null.
 	@Column
 	private String headsign;
 	
@@ -194,11 +195,15 @@ public class Trip implements Lifecycle, Serializable {
 	 * @param routeShortName
 	 *            Needed to provide a route identifier that is consistent over
 	 *            schedule changes.
+	 * @param unprocessedHeadsign
+	 *            the headsign from the GTFS trips.txt file, or if that is not
+	 *            available then the stop_headsign from the GTFS stop_times.txt
+	 *            file.
 	 * @param titleFormatter
 	 *            So can fix titles associated with trip
 	 */
 	public Trip(int configRev, GtfsTrip gtfsTrip, String properRouteId,
-			String routeShortName, TitleFormatter titleFormatter) {
+			String routeShortName, String unprocessedHeadsign, TitleFormatter titleFormatter) {
 		this.configRev = configRev;
 		this.tripId = gtfsTrip.getTripId();
 		this.tripShortName = gtfsTrip.getTripShortName();
@@ -208,7 +213,7 @@ public class Trip implements Lifecycle, Serializable {
 		this.routeShortName = routeShortName;
 		this.serviceId = gtfsTrip.getServiceId();
 		this.headsign =
-				processedHeadsign(gtfsTrip.getTripHeadsign(), routeId,
+				processedHeadsign(unprocessedHeadsign, routeId,
 						titleFormatter);
 		
 		// block column is optional in GTFS trips.txt file. Best can do when

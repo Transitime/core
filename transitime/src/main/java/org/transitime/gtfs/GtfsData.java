@@ -1235,10 +1235,15 @@ public class GtfsData {
 	 * travel times or startTime and endTime.
 	 * 
 	 * @param tripId
+	 * @param gtfsStopTimesForTrip
+	 *            needed in case headsign not set in trips.txt GTFS file so that
+	 *            can get it from stop_headsign in the stop_times.txt file as a
+	 *            backup.
 	 * @return The new trip, or null if there is a problem with this trip and
 	 *         should skip it.
 	 */
-	private Trip createNewTrip(String tripId) {		
+	private Trip createNewTrip(String tripId, 
+			List<GtfsStopTime> gtfsStopTimesForTrip) {		
 		// Determine the GtfsTrip for the ID so can be used
 		// to construct the Trip object.
 		GtfsTrip gtfsTrip = getGtfsTrip(tripId);
@@ -1261,6 +1266,14 @@ public class GtfsData {
 			return null;
 		}
 
+		// For most agencies the headsign is obtained from the GTFS trips.txt
+		// file but for some it is instead defined in the stop_times.txt file.
+		String unprocessedHeadsign = gtfsTrip.getTripHeadsign();
+		if (unprocessedHeadsign == null) {
+			GtfsStopTime firstGtfsStopTime = gtfsStopTimesForTrip.get(0);
+			unprocessedHeadsign = firstGtfsStopTime.getStopHeadsign();
+		}
+		
 		// If this route is actually a sub-route of a parent then use
 		// the parent ID.
 		String properRouteId = 
@@ -1271,7 +1284,7 @@ public class GtfsData {
 		String routeShortName = gtfsRoute.getRouteShortName();
 		Trip trip =
 				new Trip(revs.getConfigRev(), gtfsTrip, properRouteId,
-						routeShortName, titleFormatter);
+						routeShortName, unprocessedHeadsign, titleFormatter);
 		return trip;
 	}
 	
@@ -1317,9 +1330,11 @@ public class GtfsData {
 	}
 
 	/**
+	 * Takes raw GTFS data and creates Trip and TripPattern objects.
 	 * 
 	 * @param gtfsStopTimesForTripMap
-	 *            Keyed by tripId. List of GtfsStopTimes for the tripId.
+	 *            Keyed by tripId. Value is List of GtfsStopTimes for the
+	 *            tripId.
 	 */
 	private void createTripsAndTripPatterns(
 			Map<String, List<GtfsStopTime>> gtfsStopTimesForTripMap) {
@@ -1358,7 +1373,8 @@ public class GtfsData {
 		// For each trip in the stop_times.txt file ...
 		for (String tripId : gtfsStopTimesForTripMap.keySet()) {
 			// Create a Trip element for the trip ID. 
-			Trip trip = createNewTrip(tripId);
+			Trip trip =
+					createNewTrip(tripId, gtfsStopTimesForTripMap.get(tripId));
 			
 			// If trip not valid then skip over it
 			if (trip == null) {
