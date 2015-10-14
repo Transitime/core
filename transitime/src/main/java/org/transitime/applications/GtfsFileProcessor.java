@@ -195,7 +195,7 @@ public class GtfsFileProcessor {
 		}
 
 		// First need access to the zip file.
-		// If URL set then should the file from web and store it
+		// If URL set then should get the file from web and store it
 		if (gtfsUrl != null) {
 			gtfsZipFileName =
 					HttpGetGtfsFile
