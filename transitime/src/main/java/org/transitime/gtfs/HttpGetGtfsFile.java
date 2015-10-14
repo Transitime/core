@@ -24,7 +24,8 @@ import org.transitime.utils.Time;
 /**
  * For grabbing a GTFS zip file over the web using http.
  * The getFile() method copies the file to the directory
- * specified by getDirectoryForStoringFile().
+ * specified by getDirectoryForStoringFile() which will be
+ * will be gtfs/projectId/MM-dd-yyyy/
  * 
  * @author SkiBu Smith
  *
@@ -40,22 +41,27 @@ public class HttpGetGtfsFile extends HttpGetFile {
 	
 	/**
 	 * Returns directory name of where to store the file.
-	 * The directory will be /GTFS/projectId/MM-dd-yyyy/
+	 * The directory will be gtfs/projectId/MM-dd-yyyy/
 	 * 
 	 * @return the directory name for storing the results
 	 */
 	private static String getDirectoryForStoringFile(String projectId) {		
-		return "/GTFS/" + projectId + "/" + 
+		return "gtfs/" + projectId + "/" + 
 				Time.dateStr(System.currentTimeMillis()) + "/";
 	}
 	
 	/**
-	 * Main entry point to class. Reads in specified file from URL and stores 
-	 * it using same file name into directory specified by getDirectoryRorFile().
-	 * The directory name will be something like "/GTFS/projectId/MM-dd-yyyy/file.zip".
-	 * @param projectId For determining directory where to store file
-	 * @param urlStr URL of where to get file
-	 * @return The file name of the newly created file, null if there was a problem
+	 * Main entry point to class. Reads in specified file from URL and stores it
+	 * using same file name into directory specified by getDirectoryForFile().
+	 * The directory name will be something like
+	 * "/GTFS/projectId/MM-dd-yyyy/file.zip".
+	 * 
+	 * @param projectId
+	 *            For determining directory where to store file
+	 * @param urlStr
+	 *            URL of where to get file
+	 * @return The file name of the newly created file, null if there was a
+	 *         problem
 	 */
 	public static String getFile(String projectId, String urlStr) {
 		HttpGetFile getter = new HttpGetGtfsFile(projectId, urlStr);
@@ -71,7 +77,9 @@ public class HttpGetGtfsFile extends HttpGetFile {
 
 	/**
 	 * Copies over Gtfs file.
-	 * @param args First arg=projectId, second arg=url
+	 * 
+	 * @param args
+	 *            First arg=projectId, second arg=url
 	 */
 	public static void main(String[] args) {
 		String projectId = args[0];
