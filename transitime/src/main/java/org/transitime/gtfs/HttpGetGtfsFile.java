@@ -25,7 +25,7 @@ import org.transitime.utils.Time;
  * For grabbing a GTFS zip file over the web using http.
  * The getFile() method copies the file to the directory
  * specified by getDirectoryForStoringFile() which will be
- * will be gtfs/projectId/MM-dd-yyyy/
+ * will be ~/gtfs/projectId/MM-dd-yyyy/
  * 
  * @author SkiBu Smith
  *
@@ -46,7 +46,7 @@ public class HttpGetGtfsFile extends HttpGetFile {
 	 * @return the directory name for storing the results
 	 */
 	private static String getDirectoryForStoringFile(String projectId) {		
-		return "gtfs/" + projectId + "/" + 
+		return "~/gtfs/" + projectId + "/" + 
 				Time.dateStr(System.currentTimeMillis()) + "/";
 	}
 	
@@ -54,7 +54,7 @@ public class HttpGetGtfsFile extends HttpGetFile {
 	 * Main entry point to class. Reads in specified file from URL and stores it
 	 * using same file name into directory specified by getDirectoryForFile().
 	 * The directory name will be something like
-	 * "/GTFS/projectId/MM-dd-yyyy/file.zip".
+	 * "~/gtfs/projectId/MM-dd-yyyy".
 	 * 
 	 * @param projectId
 	 *            For determining directory where to store file
