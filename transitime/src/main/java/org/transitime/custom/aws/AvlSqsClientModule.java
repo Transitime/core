@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.avl.AvlClient;
@@ -41,8 +42,6 @@ public class AvlSqsClientModule extends Module {
   
   private final BoundedExecutor _avlClientExecutor;
   private AWSCredentials _sqsCredentials;
-  // todo convert EnvironmentCredential to use props instead
-  private AWSCredentials _snsCredentials;
   private AmazonSQS _sqs;
   private AmazonSNSClient _sns = null;
   private String _url = null;
@@ -159,7 +158,9 @@ public class AvlSqsClientModule extends Module {
       // create an instance of the SQS message unmarshaller
       _messageUnmarshaller = (SqsMessageUnmarshaller) unmarshallerConfig.getValue().newInstance();
       
-      if (snsKey.getValue() != null && snsSecret.getValue() != null && snsSecret.getValue() != "" && snsArn.getValue() != null) {
+      if (!StringUtils.isEmpty(snsKey.getValue())
+          && !StringUtils.isEmpty(snsSecret.getValue())
+          && !StringUtils.isEmpty(snsArn.getValue())) {
         try {
           logger.info("creating sns connection for archiving to ARN {}", snsArn.getValue());
           _sns = new AmazonSNSClient(new BasicAWSCredentials(snsKey.getValue(), snsSecret.getValue()));
