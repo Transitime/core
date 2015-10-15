@@ -378,13 +378,23 @@ public class DataDbLogger {
 	 */
 	private void processSingleObject(Object objectToBeStored) {
 		Session session = null;
+		Transaction tx = null;
 		try {
 			session = sessionFactory.openSession();
-			Transaction tx = session.beginTransaction();
+			tx = session.beginTransaction();
 			logger.debug("Individually saving object {}", objectToBeStored);
 			session.save(objectToBeStored);
 			tx.commit();
-		} finally {
+		} catch (HibernateException e) {
+			if (tx != null) {
+				try {
+					tx.rollback();
+				} catch (HibernateException e2) {
+					logger.error("Error rolling back transaction in "
+							+ "processSingleObject(). ", e2);
+				}
+			}
+		} finally {			
 			if (session != null)
 				session.close();
 		}
@@ -491,21 +501,33 @@ public class DataDbLogger {
 			tx.commit();
 			session.close();
 		} catch (HibernateException e) {
+			// Rollback the transaction since it likely was not committed. 
+			// Otherwise can get an error when using Postgres "ERROR: current 
+			// transaction is aborted, commands ignored until end of 
+			// transaction block".
+			try {
+				tx.rollback();
+			} catch (HibernateException e2) {
+				logger.error("Error rolling back transaction after processing "
+						+ "batch of data via DataDbLogger failed.", e2);
+			}
+			
+			// Close session here so that can process the objects individually
+			// using a new session.
+			session.close();
+							
 			Throwable cause = getRootCause(e);
 			// If it is a SQLGrammarException then also log the SQL to
 			// help in debugging.
 			String additionaInfo = e instanceof SQLGrammarException ?
 					" SQL=\"" + ((SQLGrammarException) e).getSQL() + "\"" 
 					: "";
-			logger.error(e.getClass().getSimpleName() + " for database for " +
-					"project=" + projectId + " when batch writing objects: " + 
-					cause.getMessage() + ". Will try to write each object " +
-					"from batch individually." + additionaInfo);		
+			logger.error("{} for database for project={} when batch writing "
+					+ "objects: {}. Will try to write each object from batch "
+					+ "individually. {}",
+					e.getClass().getSimpleName(), projectId, 
+					cause.getMessage(), additionaInfo);		
 			
-			// Close session here so that can process the objects individually
-			// using a new session.
-			session.close();
-							
 			// Write each object individually so that the valid ones will be
 			// successfully written.
 			for (Object o : objectsForThisBatch) {
