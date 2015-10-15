@@ -857,8 +857,10 @@ public class AvlProcessor {
 			String eventDescription = "VehicleId="
 					+ vehicleState.getVehicleId() + " was assigned to blockId="
 					+ oldAssignment
-					+ " but received too many null assignments so making "
-					+ "vehicle unpredictable.";
+					+ " but received " + vehicleState.getBadAssignmentsInARow() 
+					+ " null assignments in a row, which is configured by "
+					+ "transitime.core.allowableBadAssignments to be too many, "
+					+ "so making vehicle unpredictable.";
 			makeVehicleUnpredictable(vehicleState.getVehicleId(),
 					eventDescription, VehicleEvent.ASSIGNMENT_CHANGED);
 		}
