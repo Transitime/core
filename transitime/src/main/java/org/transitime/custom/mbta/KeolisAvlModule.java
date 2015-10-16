@@ -123,14 +123,6 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 				String tripShortName =
 						tripName.substring(tripName.lastIndexOf('-') + 1);
 				
-				// The trip short names from the supplemental trips.txt GTFS 
-				// file don't have leading zeros, but the trip name from the
-				// feed does. Therefore need to modify the trip name from the 
-				// feed to not have zeros.
-				while (tripShortName.length() >= 1 
-						&& tripShortName.charAt(0) == '0')
-					tripShortName = tripShortName.substring(1);
-				
 				// Actually set the assignment
 				avlReport.setAssignment(tripShortName,
 						AssignmentType.TRIP_SHORT_NAME);
