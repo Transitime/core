@@ -19,6 +19,7 @@ package org.transitime.reports;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Date;
 import java.util.List;
 
 import org.transitime.db.GenericQuery;
@@ -76,7 +77,7 @@ public class ChartGenericJsonQuery extends GenericQuery {
 			rowBuilder.addRowElement(o);
 		}	
 	}
-
+	
 	/**
 	 * Does SQL query and returns JSON formatted results.
 	 * 
@@ -85,10 +86,11 @@ public class ChartGenericJsonQuery extends GenericQuery {
 	 * @return
 	 * @throws SQLException 
 	 */
-	public static String getJsonString(String agencyId, String sql) 
+	public static String getJsonString(String agencyId, String sql, Date... parameters) 
 			throws SQLException {
 		ChartGenericJsonQuery query = new ChartGenericJsonQuery(agencyId);
-		query.doQuery(sql);
+						
+		query.doQuery(sql, (Object[]) parameters);
 		// If query returns empty set then should return null!
 		if (query.getNumberOfRows() != 0)			
 			return query.jsonBuilder.getJson();

@@ -60,8 +60,8 @@ String sql = "SELECT "
 		+ "     stopId AS stop, vehicleId AS vehicle, " 
 		+ "     affectedByWaitStop AS affected_by_wait_stop"
 		+ " FROM predictionAccuracy "
-		+ "WHERE arrivalDepartureTime BETWEEN '" + beginDate 
-		+     "' AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numDays + " day' "
+		+ "WHERE arrivalDepartureTime BETWEEN cast(? as timestamp) "
+		+     "AND cast(? as timestamp) + INTERVAL '" + numDays + " day' "
 		+ timeSql
 		+ "  AND predictedTime-predictionReadTime < '00:15:00' "
 		+ routeSql
@@ -71,6 +71,6 @@ String sql = "SELECT "
 		+ "  AND predictionSource <> 'MBTA_seconds' ";
 		
 // Do the actual query	
-String csvStr = GenericCsvQuery.getCsvString(agencyId, sql);
+String csvStr = GenericCsvQuery.getCsvString(agencyId, sql, Time.parseDate(beginDate), Time.parseDate(beginDate));
 response.getWriter().write(csvStr);
 %>

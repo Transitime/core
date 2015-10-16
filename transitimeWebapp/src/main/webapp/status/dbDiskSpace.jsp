@@ -75,7 +75,7 @@ if (agencyId == null || agencyId.isEmpty()) {
           	    + ") AS needed_alias_name "
           	    + "ORDER BY ordering, \"Total Bytes\" DESC";
     	%>
-    	var jsonData = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql) %>;
+    	var jsonData = <%= ChartGenericJsonQuery.getJsonString(agencyId, sql, null, null) %>;
         var data1 = new google.visualization.DataTable(jsonData);
         // Make total size cells right justified. When setting to class
         // totalSizeCell also need to set to google-visualization-table-td

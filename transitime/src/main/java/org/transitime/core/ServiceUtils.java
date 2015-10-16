@@ -68,8 +68,9 @@ public class ServiceUtils {
 	 * @param timezoneName See http://en.wikipedia.org/wiki/List_of_tz_zones
 	 */
 	public ServiceUtils(DbConfig dbConfig) { 
-		this.calendar = 
-				new GregorianCalendar(dbConfig.getFirstAgency().getTimeZone());
+		
+		this.calendar = new GregorianCalendar();		
+		
 		this.dbConfig = dbConfig;
 	}
 
@@ -198,8 +199,10 @@ public class ServiceUtils {
 		
 		// Go through calendar_dates to see if there is special service for 
 		// this date. Add or remove the special service.
+
 		List<CalendarDate> calendarDatesForNow = 
 				dbConfig.getCalendarDates(epochTime);
+
 		if (calendarDatesForNow != null) {
 			for (CalendarDate calendarDate : calendarDatesForNow) {
 				// Handle special service for this date
@@ -216,7 +219,7 @@ public class ServiceUtils {
 						epochTime, serviceIds);
 			}
 		}
-		
+
 		// Return the results
 		return serviceIds;
 	}

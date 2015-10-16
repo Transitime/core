@@ -19,10 +19,12 @@ package org.transitime.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -136,13 +138,24 @@ public abstract class GenericQuery {
 	 *         (instead of null)
 	 * @throws SQLException
 	 */
-	protected void doQuery(String sql) throws SQLException {
-		Statement statement = null;
+	protected void doQuery(String sql, Object...parameters) throws SQLException {
+		PreparedStatement statement = null;
 		IntervalTimer timer = new IntervalTimer();
 
-		try {
-			statement = connection.createStatement();
-			ResultSet rs = statement.executeQuery(sql);
+		try {			
+			
+			statement = connection.prepareStatement(sql);
+			
+			// TODO Deal with dates for the moment
+			for (int i=0;i<parameters.length;i++)
+			{
+				if(parameters[i] instanceof java.util.Date)
+				{
+					statement.setTimestamp(i+1, new Timestamp(((java.util.Date)parameters[i]).getTime()));
+				}
+			}
+			
+			ResultSet rs = statement.executeQuery();
 			ResultSetMetaData metaData = rs.getMetaData();
 			
 			// Add all the columns by calling subclass addColumn()

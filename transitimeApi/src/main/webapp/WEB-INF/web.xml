@@ -6,7 +6,9 @@
 	<context-param>
       <param-name>transitime_config_file_location</param-name>
       <!-- Set to customized properties file with db config info and such -->
-      <param-value>/usr/local/transitimeTomcatConfig/transitime.properties</param-value>      
+
+      <param-value>D:\\transiTime\\transiTimeConfig.xml</param-value>      
+
     </context-param>
 	
 	<!-- So that configuration parameters can be read in from file -->
@@ -25,9 +27,6 @@
       <location>/error/messageOnlyError.jsp</location>
     </error-page>
     
-    <!-- So that configuration parameters can be read in from file -->
-    <listener>
-      <listener-class>org.transitime.web.ReadConfigListener</listener-class>
-    </listener>
+
     
 </web-app>

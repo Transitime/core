@@ -107,6 +107,8 @@
   		+ "<tr><td class='popupTableLabel'>Layover:</td><td>" + avl.islayover + "</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Wait&nbsp;Stop:</td><td>" + avl.iswaitstop + "</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Time&nbsp;Proc:</td><td>" + avl.timeprocessed + "</td></tr>"
+  		+ "<tr><td class='popupTableLabel'>AVL Source:</td><td>" + avl.source + "</td></tr>"
+
   		+ "</table>";
 	  		
   	  L.popup(avlPopupOptions)

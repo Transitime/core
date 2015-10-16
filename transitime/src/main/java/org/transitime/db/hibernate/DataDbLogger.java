@@ -528,6 +528,7 @@ public class DataDbLogger {
 					e.getClass().getSimpleName(), projectId, 
 					cause.getMessage(), additionaInfo);		
 			
+
 			// Write each object individually so that the valid ones will be
 			// successfully written.
 			for (Object o : objectsForThisBatch) {

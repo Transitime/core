@@ -47,7 +47,7 @@ abstract public class PredictionAccuracyQuery {
 
 	private final Connection connection;
 
-	protected static final int MAX_PRED_LENGTH = 900;
+	protected static final int MAX_PRED_LENGTH = 1800;
 	protected static final int PREDICTION_LENGTH_BUCKET_SIZE = 30;
 
 	// Keyed on source (so can show data for multiple sources at
@@ -169,13 +169,18 @@ abstract public class PredictionAccuracyQuery {
 
 		// Determine the index of the appropriate prediction bucket
 		int predictionBucketIndex = index(predLength);
-		while (predictionBuckets.size() < predictionBucketIndex + 1)
-			predictionBuckets.add(new ArrayList<Integer>());
-		List<Integer> predictionAccuracies = predictionBuckets
-				.get(predictionBucketIndex);
-
-		// Add the prediction accuracy to the bucket.
-		predictionAccuracies.add(predAccuracy);
+		
+		// Don't use predictions that are recorded after the predicted time
+		if(predictionBucketIndex >= 0)
+		{
+			while (predictionBuckets.size() < predictionBucketIndex + 1)
+				predictionBuckets.add(new ArrayList<Integer>());
+			List<Integer> predictionAccuracies = predictionBuckets
+					.get(predictionBucketIndex);
+	
+			// Add the prediction accuracy to the bucket.
+			predictionAccuracies.add(predAccuracy);
+		}
 	}
 
 	/**
