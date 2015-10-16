@@ -122,12 +122,14 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 	 * names in the GTFS data so sometimes the assignment IDs need to be
 	 * modified.
 	 * 
-	 * Previously, if an ID from the feed is only 1 or 2 characters long then it
-	 * needed to be padded with zeros so would end up with the 3-digit trip
-	 * short name in the GTFS data. But now MBTA is supplying a supplemental
-	 * trips.txt file that uses non-padded trip short names. This means that
-	 * don't need to adjust the short assignments from the feed anymore for
-	 * assignment IDs that are only 1 or 2 characters long.
+	 * For short non-3 digit IDs from the AVL feed need to pad them so there
+	 * are 3 digits. This way they will match what is in the GTFS trips.txt
+	 * file. But note that MBTA provided a supplemental trips.txt file to
+	 * provide block assignment info. This file unfortunately has incorrect
+	 * trip_short_names since the leading zeros are trimmed. Therefore before
+	 * using the supplemental trips.txt file need to remove the trip short names.
+	 * This is done using the sed command 
+	 * "sed -r 's/^(([^,]*,){4})([0-9]*)(.*)\r/\1\4/' trips.txt_with_trip_short_name > trips.txt"
 	 * <p>
 	 * But there is also another case where the IDs from the feed are 4 digits
 	 * long with two trailing zeroes. For these need to take of the trailing
@@ -145,9 +147,14 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 		if (assignmentFromFeed == null)
 			return assignmentFromFeed;
 
+		// If assignment is too short so pad it with leading zeros
+		if (assignmentFromFeed.length() == 1)
+			return "00" + assignmentFromFeed;
+		else if (assignmentFromFeed.length() == 2)
+			return "0" + assignmentFromFeed;
 		// Trim assignment ID from feed if it is 4-digits long and ends 
 		// with "00".
-		if (assignmentFromFeed.length() == 4
+		else if (assignmentFromFeed.length() == 4
 				&& assignmentFromFeed.endsWith("00"))
 			return assignmentFromFeed.substring(0, 2);
 
