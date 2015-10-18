@@ -23,6 +23,7 @@ import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
@@ -71,6 +72,25 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 					"For some agencies the block info in the feed doesn't "
 					+ "match the GTFS data. For these can sometimes use the "
 					+ "trip short name instead.");
+	
+	// Query for determining value to use is:
+	// select max(time - timeprocessed)	from avlreports	where time between '10-16-2015' and '10-17-2015';
+	// This will show the GPS time that is farthest into the future. If 
+	// greater than 0 then apiClockSkewMsecs needs to be increased
+	// accordingly. If negative than this value might need to be
+	// decreased.
+	private static IntegerConfigValue apiClockSkewMsecs =
+			new IntegerConfigValue(
+					"transitime.avl.nextbus.apiClockSkewMsecs",
+					0,
+					"Determining GPS time from API is kludgey. Only have "
+					+ "secsSinceReport attribute in API. Sometimes, probably "
+					+ "when there is a clock skew in the NextBus web server or "
+					+ "predictor system, secsSinceReport is negative, which is "
+					+ "definitely wrong. Therefore need to sometimes look at "
+					+ "AVL reports in db and see which one has the highest "
+					+ "time-timeprocessed and adjust apiClockSkewMsecs "
+					+ "accordingly.");
 	
 	// So can just get data since last query. Initialize so when first called
 	// get data for last 10 minutes. Definitely don't want to use t=0 because
@@ -148,10 +168,16 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			float lon = Float.parseFloat(vehicle.getAttributeValue("lon"));
 			
 			// Determine GPS time. Use the previousTime read from the feed
-			// because it indicates what the secsSinceReport is relative to
+			// because it indicates what the secsSinceReport is relative to. This
+			// is a rather kludgey value and appears to be somewhat incorrect if
+			// the NextBus server clock is off. Therefore the time is adjusted 
+			// by apiClockSkewMsecs parameter to make sure that GPS times are
+			// not in the future.
 			int secsSinceReport = 
 					Integer.parseInt(vehicle.getAttributeValue("secsSinceReport"));
-			long gpsEpochTime = previousTime - secsSinceReport * 1000;
+			long gpsEpochTime =
+					previousTime - secsSinceReport * 1000
+							- apiClockSkewMsecs.getValue();
 			
 			// Handle the speed
 			float speed = Float.NaN;
