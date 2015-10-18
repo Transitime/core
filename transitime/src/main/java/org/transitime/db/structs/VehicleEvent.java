@@ -86,7 +86,8 @@ public class VehicleEvent implements Serializable {
 	private final Date avlTime;
 	
 	// A more verbose textual description of the event
-	@Column(length=500)
+	private final static int MAX_DESCRIPTION_LENGTH = 500;
+	@Column(length=MAX_DESCRIPTION_LENGTH)
 	private final String description;
 
 	// The new state of the vehicle.
@@ -200,7 +201,8 @@ public class VehicleEvent implements Serializable {
 		this.avlTime = avlTime;
 		this.vehicleId = vehicleId;
 		this.eventType = eventType;
-		this.description = description;
+		this.description = description.length() <= MAX_DESCRIPTION_LENGTH ?
+				description : description.substring(0, MAX_DESCRIPTION_LENGTH);
 		this.predictable = predictable;
 		this.becameUnpredictable = becameUnpredictable;
 		this.supervisor = supervisor;
