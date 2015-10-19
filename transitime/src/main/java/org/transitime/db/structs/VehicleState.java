@@ -118,21 +118,28 @@ public class VehicleState implements Serializable {
 	public VehicleState(org.transitime.core.VehicleState vs) {
 		this.vehicleId =
 				truncate(vs.getVehicleId(), HibernateUtils.DEFAULT_ID_SIZE);
-		this.avlTime = vs.getAvlReport().getDate();
-		this.blockId = vs.getBlock().getId();
+		this.avlTime =
+				vs.getAvlReport() == null ? null : vs.getAvlReport().getDate();
+		this.blockId = vs.getBlock() == null ? null : vs.getBlock().getId();
 		this.tripId =
-				truncate(vs.getTrip().getId(), HibernateUtils.DEFAULT_ID_SIZE);
-		this.tripShortName =
-				truncate(vs.getTrip().getShortName(),
+				vs.getTrip() == null ? null : truncate(vs.getTrip().getId(),
 						HibernateUtils.DEFAULT_ID_SIZE);
+		this.tripShortName =
+				vs.getTrip() == null ? null : truncate(vs.getTrip()
+						.getShortName(), HibernateUtils.DEFAULT_ID_SIZE);
 		this.routeId = vs.getRouteId();
 		this.routeShortName =
 				truncate(vs.getRouteShortName(), ROUTE_SHORT_NAME_MAX_LENGTH);
-		this.schedAdhMsec = vs.getRealTimeSchedAdh().getTemporalDifference();
+		this.schedAdhMsec =
+				vs.getRealTimeSchedAdh() == null ? null : vs
+						.getRealTimeSchedAdh().getTemporalDifference();
 		this.schedAdh =
-				truncate(vs.getRealTimeSchedAdh().toString(),
-						SCHED_ADH_MAX_LENGTH);
-		this.schedAdhWithinBounds = vs.getRealTimeSchedAdh().isWithinBounds();
+				vs.getRealTimeSchedAdh() == null ? null
+						: truncate(vs.getRealTimeSchedAdh().toString(),
+								SCHED_ADH_MAX_LENGTH);
+		this.schedAdhWithinBounds =
+				vs.getRealTimeSchedAdh() == null ? null : vs
+						.getRealTimeSchedAdh().isWithinBounds();
 		this.isDelayed = vs.isDelayed();
 		this.isLayover = vs.isLayover();
 		this.isPredictable = vs.isPredictable();
