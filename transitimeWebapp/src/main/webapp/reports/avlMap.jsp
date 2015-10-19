@@ -95,7 +95,7 @@
   		// Only output both trip ID and trip short name if they are different from each other
   		if (avl.tripid != avl.tripshortname) {
   			content += 
-  				"<tr><td class='popupTableLabel'>Trip Short Name:</td><td>" + avl.tripid + "</td></tr>";
+  				"<tr><td class='popupTableLabel'>Trip Name:</td><td>" + avl.tripshortname + "</td></tr>";
   		}
   		
   		content +=
