@@ -136,8 +136,16 @@ public class MatchProcessor {
 		
 		Match match = new Match(vehicleState);
 		
-		// Store match in database
-		Core.getInstance().getDbLogger().add(match);
+		// Store match in database if it is not at a stop. The reason only
+		// storing to db if not at a stop is because reason for storing
+		// matches is for determining travel times. But when determining
+		// travel times using departure and arrival times at the stops.
+		// The matches are only used for in between the stops. And in fact,
+		// matches at stops only confuse things since they will be before
+		// the departure time or after the arrival time. Plus not storing
+		// the matches at the stops means there is less data to store.
+		if (!match.isAtStop())
+			Core.getInstance().getDbLogger().add(match);
 	}
 	
 	/**
