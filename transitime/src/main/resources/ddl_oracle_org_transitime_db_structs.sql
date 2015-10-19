@@ -385,7 +385,7 @@
         isWaitStop number(1,0),
         routeId varchar2(60 char),
         routeShortName varchar2(80 char),
-        schedAdh varchar2(255 char),
+        schedAdh varchar2(50 char),
         schedAdhMsec number(10,0),
         schedAdhWithinBounds number(1,0),
         tripId varchar2(60 char),
@@ -412,7 +412,7 @@
 
     create index VehicleEventsTimeIndex on VehicleEvents (time);
 
-    create index AvlTimeIndex on VehicleStates (avlTime);
+    create index VehicleStateAvlTimeIndex on VehicleStates (avlTime);
 
     alter table Block_to_Trip_joinTable 
         add constraint FK_abaj8ke6oh4imbbgnaercsowo 
