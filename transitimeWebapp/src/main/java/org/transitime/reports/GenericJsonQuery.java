@@ -54,6 +54,10 @@ public class GenericJsonQuery extends GenericQuery {
 		strBuilder.append(value);
 	}
 	
+	private void addRowElement(int i, boolean value) {
+		strBuilder.append(value);
+	}
+	
 	private void addRowElement(int i, String value) {
 		strBuilder.append("\"").append(value).append("\"");
 	}
@@ -97,6 +101,8 @@ public class GenericJsonQuery extends GenericQuery {
 				addRowElement(i, (String) o);
 			} else if (o instanceof Timestamp) {
 				addRowElement(i, ((Timestamp) o));
+			} else if (o instanceof Boolean) {
+				addRowElement(i, ((Boolean) o));
 			}
 		}
 		

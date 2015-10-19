@@ -134,7 +134,7 @@ public class AvlJsonQuery {
 				+ "     a.speed, a.heading, a.timeProcessed, "
 				+ "     vs.blockId, vs.tripId, vs.tripShortName, vs.routeId, "
 				+ "     vs.routeShortName, vs.schedAdhMsec, vs.schedAdh, "
-				+ "     vs.isDelayed, vs.isWaitStop  "
+				+ "     vs.isDelayed, vs.isLayover, vs.isWaitStop  "
 				+ "FROM avlreports a "
 				+ "  LEFT JOIN vehicleStates vs "
 				+ "    ON vs.vehicleId = a.vehicleId AND vs.avlTime = a.time "
