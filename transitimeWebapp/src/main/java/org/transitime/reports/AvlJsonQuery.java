@@ -131,13 +131,13 @@ public class AvlJsonQuery {
 
 		String sql = 
 				"SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, "
-				+ "     a.speed, a.heading, a.timeProcessed, m.blockId, "
-				+ "     m.tripId, t.routeShortName  "
+				+ "     a.speed, a.heading, a.timeProcessed, "
+				+ "     vs.blockId, vs.tripId, vs.tripShortName, vs.routeId, "
+				+ "     vs.routeShortName, vs.schedAdhMsec, vs.schedAdh, "
+				+ "     vs.isDelayed, vs.isWaitStop  "
 				+ "FROM avlreports a "
-				+ "  LEFT JOIN matches m "
-				+ "    ON m.vehicleId = a.vehicleId AND m.avlTime = a.time "
-				+ "  LEFT JOIN trips t "
-				+ "    ON t.configRev = m.configRev AND t.tripId = m.tripID "
+				+ "  LEFT JOIN vehicleStates vs "
+				+ "    ON vs.vehicleId = a.vehicleId AND vs.avlTime = a.time "
 				+ "WHERE a.time BETWEEN '" + beginDate + "' "
 				+ "     AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numdays + " day' "
 				+ timeSql;
@@ -147,7 +147,7 @@ public class AvlJsonQuery {
 		// across schedule changes need to try to match to GTFS route_id or
 		// route_short_name.
 		if (vehicleId == null && routeId != null && !routeId.isEmpty())
-			sql += "AND (t.routeId='" + routeId + "' OR t.routeShortName='" + routeId + "') ";
+			sql += "AND (vs.routeId='" + routeId + "' OR vs.routeShortName='" + routeId + "') ";
 		
 		// If only want data for single vehicle then specify so in SQL
 		if (vehicleId != null && !vehicleId.isEmpty())

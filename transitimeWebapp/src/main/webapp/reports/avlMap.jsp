@@ -90,9 +90,13 @@
   		+ "<tr><td class='popupTableLabel'>Route:</td><td>" + avl.routeshortname + "</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Block:</td><td>" + avl.blockid + "</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Trip:</td><td>" + avl.tripid + "</td></tr>"
+  		+ "<tr><td class='popupTableLabel'>Trip Short Name:</td><td>" + avl.tripshortname + "</td></tr>"
+  		+ "<tr><td class='popupTableLabel'>Schedule Adh:</td><td>" + avl.schedadh + "</td></tr>"
  		+ "<tr><td class='popupTableLabel'>Lat/Lon:</td><td>" + avl.lat + ", " + avl.lon + "</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Speed:</td><td>" + speed + " kph</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Heading:</td><td>" + avl.heading + " degrees</td></tr>"
+  		+ "<tr><td class='popupTableLabel'>Delayed:</td><td>" + avl.isdelayed + "</td></tr>"
+  		+ "<tr><td class='popupTableLabel'>Delayed:</td><td>" + avl.iswaitstop + "</td></tr>"
   		+ "<tr><td class='popupTableLabel'>Time Proc:</td><td>" + avl.timeprocessed + "</td></tr>"
   		+ "</table>";
 	  		

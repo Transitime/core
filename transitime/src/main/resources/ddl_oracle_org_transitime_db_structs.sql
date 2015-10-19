@@ -374,6 +374,25 @@
         primary key (vehicleId, time, eventType)
     );
 
+    create table VehicleStates (
+        vehicleId varchar2(60 char) not null,
+        avlTime timestamp not null,
+        blockId varchar2(60 char),
+        isDelayed number(1,0),
+        isForSchedBasedPreds number(1,0),
+        isLayover number(1,0),
+        isPredictable number(1,0),
+        isWaitStop number(1,0),
+        routeId varchar2(60 char),
+        routeShortName varchar2(80 char),
+        schedAdh varchar2(255 char),
+        schedAdhMsec number(10,0),
+        schedAdhWithinBounds number(1,0),
+        tripId varchar2(60 char),
+        tripShortName varchar2(60 char),
+        primary key (vehicleId, avlTime)
+    );
+
     create index ArrivalsDeparturesTimeIndex on ArrivalsDepartures (time);
 
     create index AvlReportsTimeIndex on AvlReports (time);
@@ -392,6 +411,8 @@
         add constraint UK_s0gaw8iv60vc17a5ltryqwg27  unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
 
     create index VehicleEventsTimeIndex on VehicleEvents (time);
+
+    create index AvlTimeIndex on VehicleStates (avlTime);
 
     alter table Block_to_Trip_joinTable 
         add constraint FK_abaj8ke6oh4imbbgnaercsowo 

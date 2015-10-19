@@ -1174,6 +1174,12 @@ public class AvlProcessor {
 			// VehicleDataCache so that when data queried for API the proper
 			// info is provided.
 			VehicleDataCache.getInstance().updateVehicle(vehicleState);
+			
+			// Write out current vehicle state to db so can join it with AVL
+			// data from db and get historical context of AVL report.
+			org.transitime.db.structs.VehicleState dbVehicleState =
+					new org.transitime.db.structs.VehicleState(vehicleState);
+			Core.getInstance().getDbLogger().add(dbVehicleState);
 		} // End of synchronizing on vehicleState }
 	}
 
