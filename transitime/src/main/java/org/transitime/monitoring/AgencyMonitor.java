@@ -71,14 +71,13 @@ public class AgencyMonitor {
 		monitors = new ArrayList<MonitorBase>();
 		monitors.add(new AvlFeedMonitor(cloudwatchService, emailSender, agencyId));
 		monitors.add(new PredictabilityMonitor(cloudwatchService, emailSender, agencyId));
+        monitors.add(new DatabaseQueueMonitor(cloudwatchService, emailSender, agencyId));
         if(enableSystemMonitoring != null && enableSystemMonitoring.equalsIgnoreCase("true")){
             monitors.add(new SystemMemoryMonitor(emailSender, agencyId));
             monitors.add(new SystemCpuMonitor(emailSender, agencyId));
             monitors.add(new SystemDiskSpaceMonitor(emailSender,
                     agencyId));
             monitors.add(new DatabaseMonitor(emailSender, agencyId));
-            monitors.add(new DatabaseQueueMonitor(emailSender,
-                    agencyId));
         }
 	}
 	
