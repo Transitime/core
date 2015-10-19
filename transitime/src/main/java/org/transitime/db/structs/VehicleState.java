@@ -44,7 +44,7 @@ import org.transitime.db.hibernate.HibernateUtils;
 @Entity 
 @DynamicUpdate 
 @Table(name="VehicleStates",
-       indexes = { @Index(name="AvlTimeIndex", 
+       indexes = { @Index(name="VehicleStateAvlTimeIndex", 
                           columnList="avlTime" ) } )
 public class VehicleState implements Serializable {
 	// vehicleId is an @Id since might get multiple AVL reports
