@@ -18,6 +18,10 @@
   <script src="<%= request.getContextPath() %>/map/javascript/leafletRotatedMarker.js"></script>
   <script src="<%= request.getContextPath() %>/map/javascript/mapUiOptions.js"></script>
   
+   <!-- Load in Select2 files so can create fancy route selector -->
+  <link href="../select2/select2.css" rel="stylesheet"/>
+  <script src="../select2/select2.min.js"></script>
+    
   <!--  Override the body style from the includes.jsp/general.css files -->
   <style>
     body {
@@ -36,12 +40,33 @@
     }
     
     .popupTable {
-    	border-spacing: 0px;
+      border-spacing: 0px;
     }
     	
     .popupTableLabel {
-    	font-weight: bold;
-    	text-align: right;
+      font-weight: bold;
+      text-align: right;
+    }
+    
+    /* For the params menu */
+    #params {
+      background: lightgrey;
+      position:absolute;
+      top:10px;
+      right:10px;
+      border-radius: 25px;
+      padding: 2%;
+    }
+    
+    .param {
+      margin-top: 10px;
+      text-align: right;
+    }
+    
+    /* overide mapUi.css */
+    #params div {
+      visibility: visible; 
+      left: 0%;
     }
     
   </style>
@@ -133,7 +158,7 @@
                 iconSize: [7, 7]
             }),
             title: tooltip
-        }).addTo(map);
+        }).addTo(group);
     	
   		// Store the AVL data with the marker so can popup detailed info
     	avlMarker.avl = avl;
@@ -141,18 +166,18 @@
 		// When user clicks on AVL marker popup information box
 		avlMarker.on('click', function(e) {
 			showAvlPopup(this);
-		}).addTo(map);
+		}).addTo(group);
 
 		latLngs.push(latLng);
     }
     
     // Draw polyline for the last vehicle in the AVL data
     if (latLngsForVehicle.length >= 2)
-    	L.polyline(latLngsForVehicle, routePolylineOptions).addTo(map); //.bringToBack();
+    	L.polyline(latLngsForVehicle, routePolylineOptions).addTo(group); //.bringToBack();
     
     // If actually read AVL data...
     if (latLngs.length > 0) {
-    	// To make all AVL reports fit in bounds of map
+    	// To make all AVL reports fit in bounds of map.
     	map.fitBounds(latLngs);
   	} else {
 		alert("No AVL data for the criteria specified.")
@@ -186,7 +211,7 @@
 			var loc = shape.loc[j];			
 			latLngs.push(L.latLng(loc.lat, loc.lon));
 		}
-		L.polyline(latLngs, routeOptions).addTo(map);
+		L.polyline(latLngs, routeOptions).addTo(group);
 	}
 	  
   	// Draw stops for the route. 
@@ -196,7 +221,7 @@
   			var stop = direction.stop[j];
   			
   			// Create the stop Marker
-  			var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions).addTo(map);
+  			var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions).addTo(group);
   			
   			// Store stop data obtained via AJAX with stopMarker so it can be used in popup
   			stopMarker.stop = stop;
@@ -204,7 +229,7 @@
   			// When user clicks on stop popup information box
   			stopMarker.on('click', function(e) {
   				showStopPopup(this);
-  			}).addTo(map);
+  			}).addTo(group);
   		}
    	 }
   }
@@ -214,9 +239,17 @@
 
 <body>
   <div id="map"></div>
+  <div id="params">
+  	<jsp:include page="params/vehicle.jsp" />
+  	<jsp:include page="params/fromToDateTime.jsp" />
+    <jsp:include page="params/routeSingle.jsp" /> 
+  </div>
 </body>
 
 <script>
+
+// Add a new layer for only route/bus markers, so that it can be refreshed
+// when selections change without having to redraw tiles.
 var map = L.map('map');
 L.control.scale({metric: false}).addTo(map);
 L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
@@ -224,37 +257,74 @@ L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?
     maxZoom: 19
 }).addTo(map);
 
+var group = L.layerGroup().addTo(map);
+
 // Set the CLIP_PADDING to a higher value so that when user pans on map
 // the route path doesn't need to be redrawn. Note: leaflet documentation
 // says that this could decrease drawing performance. But hey, it looks
 // better.
 L.Path.CLIP_PADDING = 0.8;
 
-// Get the AVL data via AJAX and call processAvlCallback to draw it
-$.ajax({
-  	// The page being requested
-    url: "/web/reports/avlJsonData.jsp",
-	// Pass in query string parameters to page being requested
-	data: {<%= WebUtils.getAjaxDataString(request) %>},
-	// Needed so that parameters passed properly to page being requested
-	traditional: true,
-    dataType:"json",
-    async: true,
-    // When successful process JSON data
-    success: processAvlCallback,
-    // When there is an AJAX problem alert the user
-    error: function(request, status, error) {
-      alert(error + '. ' + request.responseText);
-    },
+var request = {<%= WebUtils.getAjaxDataString(request) %>};
+
+// Set all the controls to match the values in the request.
+$("#vehicle").val(request.v).trigger("change");
+$("#beginDate").val(request.beginDate).trigger("change");
+$("#endDate").val(request.endDate).trigger("change");
+$("#beginTime").val(request.beginTime).trigger("change");
+$("#endTime").val(request.endTime).trigger("change");
+$("#route").val(request.r).trigger("change");
+
+
+$(".param input").on("change", function() {
+	
+	/* Set request object to match new values */
+	request.v = $("#vehicle").val();
+	request.beginDate = $("#beginDate").val();
+	request.endDate = $("#endDate").val();
+	request.beginTime = $("#beginTime").val();
+	request.endTime = $("#endTime").val();
+	request.r = $("#route").val();
+
+	
+	/* Clear existing layer and draw new objects on map. */
+	group.clearLayers();
+	drawAvlData();
 });
 
-// If route specified then display it
-var route = "<%= request.getParameter("r") %>";
-if (route != "") {
-	var url = apiUrlPrefix + "/command/route?r=" + route;
-	$.getJSON(url, routeConfigCallback);		
+// Get the AVL data via AJAX and call processAvlCallback to draw it
+function drawAvlData() {
+	$.ajax({
+	  	// The page being requested
+	    url: "/web/reports/avlJsonData.jsp",
+		// Pass in query string parameters to page being requested
+		data: request,
+		// Needed so that parameters passed properly to page being requested
+		traditional: true,
+	    dataType:"json",
+	    async: true,
+	    // When successful process JSON data
+	    success: processAvlCallback,
+	    // When there is an AJAX problem alert the user
+	    error: function(request, status, error) {
+	      alert(error + '. ' + request.responseText);
+	    },
+	});
+	
+	// If route specified then display it
+	var route = request.r;
+	if (route != "") {
+		var url = apiUrlPrefix + "/command/route?r=" + route;
+		$.getJSON(url, routeConfigCallback);
+	}
 
 }
+
+drawAvlData();
+
+
+// Edit route input width. TODO: should I just copy from route.jsp?
+$('#route').attr("style", "width: 200px");
 
 </script>
 </html>
