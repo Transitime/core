@@ -193,8 +193,13 @@ public final class Block implements Serializable {
 	@SuppressWarnings("unchecked")
 	public static List<Block> getBlocks(Session session, int configRev) 
 			throws HibernateException {
-		String hql = "FROM Blocks " +
-				"    WHERE configRev = :configRev";
+		String hql = "FROM Blocks b "
+        + "join fetch b.trips t "
+        + "join fetch t.travelTimes "
+        + "join fetch t.tripPattern tp "
+        + "join fetch tp.stopPaths sp "
+        /*+ "join fetch sp.locations "*/  //this makes the resultset REALLY big
+        + "WHERE b.configRev = :configRev";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 		return query.list();
