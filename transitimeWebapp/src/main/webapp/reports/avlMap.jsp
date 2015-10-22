@@ -110,6 +110,9 @@
   
   <script>
   
+  // vehicles is a list of {id: vehicle_id, data: [avl1, avl2, ...]}
+  var vehicles = [];
+  
   /* Called when user clicks on map. Displays AVL data */
   function showAvlPopup(avlMarker) {
   	var avl = avlMarker.avl;
@@ -132,14 +135,14 @@
 
 	
   function drawAvlMarker(avl) {
-	  var latLng = L.latLng(avl.lat, avl.lon);
+	var latLng = L.latLng(avl.lat, avl.lon);
 	  
 	// Create the marker. Use a divIcon so that can have tooltips
   	var tooltip = avl.time.substring(avl.time.indexOf(' ') + 1);  
   	var avlMarker = L.marker(latLng, {
           icon: L.divIcon({
         		 className: 'avlMarker',
-        		 html: "<div class='avlTriangle' style='transform: rotate("+ avl.heading + "deg);' />",
+        		 html: "<div class='avlTriangle icon_" + avl.vehicleId + "' style='transform: rotate("+ avl.heading + "deg);' />",
         		 iconSize: [7,7]
         	  }),
           title: tooltip
@@ -153,14 +156,13 @@
 		showAvlPopup(this);
 	});
   	
-  	return latLng;
+  	return avlMarker;
   }
   
   /* Called when receiving the AVL data via AJAX call */
   function processAvlCallback(jsonData) {
 	  	  
 	/* Save avl data */ 
-	group.data = jsonData.data;
 	
     // List of all the latLngs
     var latLngs = [];
@@ -170,21 +172,29 @@
     var latLngsForVehicle = [];
     
     // For each AVL report...
+    var vehicle;
     for (var i=0; i<jsonData.data.length; ++i) {
     	var avl = jsonData.data[i];
     	
     	// If getting data for new vehicle then need to draw out polyline 
     	// for the old vehicle
-		if (avl.vehicleid != previousVehicleId) {		    
+		if (avl.vehicleId != previousVehicleId) {		    
 	    	// Create a line connecting the AVL locations as long as there are 
 	    	// at least 2 AVL reports for the vehicle
 	    	if (latLngsForVehicle.length >= 2)
 	    		L.polyline(latLngsForVehicle, routePolylineOptions).addTo(map); //.bringToBack();
 	    	latLngsForVehicle = [];
-		}  
-		previousVehicleId = avl.vehicleid;
+	    	vehicle = {id: avl.vehicleId, data: []}
+	    	vehicles.push(vehicle);
+		} 
 		
-		var latLng = drawAvlMarker(avl);
+    	// parse date string -> number
+    	avl.timenum = Date.parse(avl.time.replace(/-/g, '/').slice(0,-2))
+    	
+		vehicle.data.push(avl)
+		previousVehicleId = avl.vehicleId;
+		
+		var latLng = drawAvlMarker(avl).getLatLng();
 
 		latLngsForVehicle.push(latLng);
 		latLngs.push(latLng);
@@ -348,17 +358,75 @@ drawAvlData();
 
 /* Playback functionality */
 
+var currTime;
+
 $("#playbackPrev").on("click", function() {
 	group.clearLayers();
 	
-	var avl = group.data[0];
-	drawAvlMarker(avl);
-	$("#playbackTime").text(avl.time);
-})
+	var times = vehicles.map(function(v) { return (v.data[0].timenum) });
+	currTime = Math.min.apply(null, times);
+	
+	for (i = 0; i < vehicles.length; i++) {
+		var v = vehicles[i];
+		v.marker = drawAvlMarker(v.data[0]);
+		v.avlIndex = 0;
+	}
+
+	console.log(vehicles[0])
+	$("#playbackTime").text(parseTime(currTime));
+});
+
+$("#playbackPlay").on("click", function() {
+	function tick() {
+		var stop = true;
+		currTime += 1000;
+		
+		// for each vehicle, update the position if the next AVL reflects a time 
+		// less than the current time
+		for (i = 0; i < vehicles.length; i++) {
+			var v = vehicles[i];
+			
+			if (v.avlIndex + 1 == v.data.length) {
+				continue;
+			}
+			stop = false;
+		
+			if (v.data[v.avlIndex+1].timenum <= currTime) {
+				v.avlIndex += 1;
+				var avl = v.data[v.avlIndex];
+				
+				// change position
+				var latLng = L.latLng(avl.lat, avl.lon);
+				v.marker.setLatLng(latLng);
+				v.marker.update();
+				
+				// change heading
+				$(".icon_"+v.id).attr("style", "transform: rotate("+ avl.heading + "deg");
+				
+			}
+		}
+		
+		$("#playbackTime").text(parseTime(currTime));
+		
+		// setTimeout instead of requestAnimationFrame because we are only doing
+		// this once per second
+		if (!stop)
+			setTimeout(tick, 1)
+	}
+	tick();
+});
+
+			
+
+function parseTime(x) {
+	return new Date(x).toTimeString().slice(0, 8);
+}
 
 
 // Edit route input width. TODO: should I just copy from route.jsp?
 $('#route').attr("style", "width: 200px");
+
+
 
 </script>
 </html>
