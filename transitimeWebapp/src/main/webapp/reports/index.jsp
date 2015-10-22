@@ -51,6 +51,9 @@ finding specific issues with predictions.">
   <li><a href="avlMapByVehicleParams.jsp?a=<%= agencyId %>"
     title="Displays historic AVL data for a vehicle in a map.">
       AVL Data in Map by Vehicle</a></li>
+  <li><a href="lastAvlReport.jsp?a=<%= agencyId %>"
+    title="Displays the last time each vehicle reported its GPS position over the last 24 hours.">
+      Last GPS Report by Vehicle</a></li>
 </ul>
 
 <div id="subtitle">Miscellaneous Reports</div>
