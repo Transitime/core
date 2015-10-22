@@ -102,7 +102,7 @@ input, select {
 }
 
 #dataTable, #dataTable th, #dataTable td {
- border: 1px solid black;
+ border: 1px solid #BBB;
  border-collapse: collapse;
 }
 
