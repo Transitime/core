@@ -941,7 +941,7 @@ function locationError(errorEvent) {
  */
 var map;
 
-function createMap() {
+function createMap(mapTileUrl, mapTileCopyright) {
 	// Create map. Don't use default zoom control so can set it's position
 	map = L.map('map', {zoomControl: false});
 	L.control.scale({metric: false}).addTo(map);
@@ -950,13 +950,10 @@ function createMap() {
 	// upper left hand corner.
 	L.control.zoom({position: 'bottomleft'}).addTo(map);
 	
-	var mapboxMapId = 'transitime.34a63309'; // 'transitime.j1g5bb0j';
-	L.tileLayer('http://api.tiles.mapbox.com/v4/' + mapboxMapId 
-			+ '/{z}/{x}/{y}.png?' 
-			+ 'access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ',
+	L.tileLayer(mapTileUrl,
 	  // Specifying a shorter version of attribution. Original really too long.
 	  //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-	  {attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+	  {attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © ' + mapTileCopyright,
 	   maxZoom: 19
 	   }).addTo(map);
 

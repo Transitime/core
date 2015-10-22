@@ -1,3 +1,4 @@
+<%@page import="org.transitime.web.WebConfigParams"%>
 <!--  NOTE: this file is obsolete. Should only be using smartphoneMap.jsp. 
       But this smartphoneMap.html needs to be kept around because is being 
       used for VTA smartphone app. -->
@@ -193,9 +194,7 @@
   };
 
   // Create the leaflet map
-  createMap('http://api.tiles.mapbox.com/v4/transitime.34a63309/{z}/{x}/{y}.png?' 
-		  + 'access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', 
-		  '<a href="http://mapbox.com">Mapbox</a>');
+  createMap('<%= WebConfigParams.getMapTileUrl() %>', '<%= WebConfigParams.getMapTileCopyright() %>');
   
   // Get the parameters from query string and display the route
   var agencyId = getQueryVariable("a");
