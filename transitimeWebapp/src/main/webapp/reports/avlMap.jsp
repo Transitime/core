@@ -29,15 +29,13 @@
     }
     
     /* For the AVL points */
-    div.avlMarker {
-      background-color: #ff7800;
-      border-color: black;
-      border-radius: 4px;
-      border-style: solid;
-      border-width: 1px;
-      width:7px;
-      height:7px;
-    }
+	div.avlTriangle {
+	  width: 0px;
+  	  height: 0px;
+  	  border-bottom: 10px solid #ff7800;
+  	  border-left: 5px solid transparent;
+  	  border-right: 5px solid transparent
+  	 }
     
     .popupTable {
       border-spacing: 0px;
@@ -67,6 +65,14 @@
     #params div {
       visibility: visible; 
       left: 0%;
+    }
+    
+    /* Playback menu */
+    #playback {
+    	background: white;
+    	position: absolute;
+    	left: 50%;
+    	bottom: 10px;
     }
     
   </style>
@@ -123,9 +129,39 @@
 		.openOn(map);
 
   }
+
+	
+  function drawAvlMarker(avl) {
+	  var latLng = L.latLng(avl.lat, avl.lon);
+	  
+	// Create the marker. Use a divIcon so that can have tooltips
+  	var tooltip = avl.time.substring(avl.time.indexOf(' ') + 1);  
+  	var avlMarker = L.marker(latLng, {
+          icon: L.divIcon({
+        		 className: 'avlMarker',
+        		 html: "<div class='avlTriangle' style='transform: rotate("+ avl.heading + "deg);' />",
+        		 iconSize: [7,7]
+        	  }),
+          title: tooltip
+      }).addTo(group); 
+	
+  	// Store the AVL data with the marker so can popup detailed info
+	avlMarker.avl = avl;
+	
+  	// When user clicks on AVL marker popup information box
+	avlMarker.on('click', function(e) {
+		showAvlPopup(this);
+	});
+  	
+  	return latLng;
+  }
   
   /* Called when receiving the AVL data via AJAX call */
-  function processAvlCallback(jsonData) {  
+  function processAvlCallback(jsonData) {
+	  	  
+	/* Save avl data */ 
+	group.data = jsonData.data;
+	
     // List of all the latLngs
     var latLngs = [];
 
@@ -136,7 +172,6 @@
     // For each AVL report...
     for (var i=0; i<jsonData.data.length; ++i) {
     	var avl = jsonData.data[i];
-    	var latLng = L.latLng(avl.lat, avl.lon);
     	
     	// If getting data for new vehicle then need to draw out polyline 
     	// for the old vehicle
@@ -148,26 +183,10 @@
 	    	latLngsForVehicle = [];
 		}  
 		previousVehicleId = avl.vehicleid;
-		latLngsForVehicle.push(latLng);
 		
-    	// Create the marker. Use a divIcon so that can have tooltips
-    	var tooltip = avl.time.substring(avl.time.indexOf(' ') + 1);    	
-    	var avlMarker = L.marker(latLng, {
-            icon: L.divIcon({
-                className: 'avlMarker',
-                iconSize: [7, 7]
-            }),
-            title: tooltip
-        }).addTo(group);
-    	
-  		// Store the AVL data with the marker so can popup detailed info
-    	avlMarker.avl = avl;
-    	
-		// When user clicks on AVL marker popup information box
-		avlMarker.on('click', function(e) {
-			showAvlPopup(this);
-		}).addTo(group);
+		var latLng = drawAvlMarker(avl);
 
+		latLngsForVehicle.push(latLng);
 		latLngs.push(latLng);
     }
     
@@ -243,6 +262,11 @@
   	<jsp:include page="params/vehicle.jsp" />
   	<jsp:include page="params/fromToDateTime.jsp" />
     <jsp:include page="params/routeSingle.jsp" /> 
+  </div>
+  <div id="playback">
+  	<a href='#' id="playbackPrev">prev</a><br>
+  	<a href='#' id="playbackPlay">play</a><br>
+  	<span id="playbackTime">00:00:00</span>
   </div>
 </body>
 
@@ -321,6 +345,16 @@ function drawAvlData() {
 }
 
 drawAvlData();
+
+/* Playback functionality */
+
+$("#playbackPrev").on("click", function() {
+	group.clearLayers();
+	
+	var avl = group.data[0];
+	drawAvlMarker(avl);
+	$("#playbackTime").text(avl.time);
+})
 
 
 // Edit route input width. TODO: should I just copy from route.jsp?

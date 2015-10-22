@@ -16,7 +16,7 @@
 
     <context-param>
         <param-name>transitime_config_file_location</param-name>
-        <param-value>/users/Dbenoff/transitime/transiTimeConfig.xml</param-value>
+        <param-value>/Users/sjacobs/work/wmata/transitime/transiTimeConfig.xml</param-value>
     </context-param>
 
 </web-app>

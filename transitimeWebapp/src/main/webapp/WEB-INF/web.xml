@@ -18,5 +18,10 @@
             org.transitime.web.ReadConfigListener
         </listener-class>
     </listener>
+	
+	<context-param>
+	 <param-name>transitime_config_file_location</param-name>
+	 <param-value>/Users/sjacobs/work/wmata/transitime/transiTimeConfig.xml</param-value>
+	</context-param>
 
 </web-app>
