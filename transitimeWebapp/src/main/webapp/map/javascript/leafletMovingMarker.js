@@ -1,6 +1,7 @@
 // Leaflet plugin for animating a marker.
 // https://github.com/ewoken/Leaflet.MovingMarker
 // MIT-licensed code by Github user ewoken
+// sjacobs added event called "tick" on each update, at line 208 
 
 L.interpolatePosition = function(p1, p2, duration, t) {
     var k = t/duration;
@@ -204,6 +205,8 @@ L.Marker.MovingMarker = L.Marker.extend({
             elapsedTime);
         this.setLatLng(p);
 
+        this.fire('tick', {elapsedTime: elapsedTime, currentIndex: this._currentIndex});
+        
         if (! noRequestAnim) {
             this._animId = L.Util.requestAnimFrame(this._animate, this, false);
             this._animRequested = true;

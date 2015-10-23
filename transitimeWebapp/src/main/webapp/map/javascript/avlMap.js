@@ -1,4 +1,13 @@
+//Edit route input width.
+$("#route").attr("style", "width: 200px");
 
+// Put the param menu into a table.
+$(".param label").wrap("<td>")
+$(".param").each(function(i, div) {
+	$(div).find(":not(:first-child)").wrapAll("<td>")
+	$(div).replaceWith("<tr class='param'>" + div.innerHTML + "</tr>")
+})
+	
 /* For drawing the route and stops */
 var routeOptions = {
 	color: '#00ee00',
@@ -231,7 +240,7 @@ var animationGroup = L.layerGroup().addTo(map);
 L.Path.CLIP_PADDING = 0.8;
 
 function main(request, contextpath) {
-
+	
 	var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
 		pauseButton = contextPath + "/reports/images/playback/media-playback-pause.svg";
 	
@@ -323,17 +332,20 @@ function main(request, contextpath) {
 			animation = makeAnimation(vehicles);
 			animation.setup();
 		}
-		else if (animation.running()) {
+		
+		if (animation.paused()) {
+			animation.resume();
+			$("#playbackPlay").attr("src", pauseButton);
+		}
+		else if (animation.started()) {
 			animation.pause()
 			// change button icon back to play
 			$("#playbackPlay").attr("src", playButton);
-			return;
 		}
-		
-		
-		animation.start();
-		// change button icon to pause
-		$("#playbackPlay").attr("src", pauseButton);
+		else { // need to start it
+			animation.start();
+			$("#playbackPlay").attr("src", pauseButton);
+		}
 		
 	});
 	
@@ -353,6 +365,10 @@ function main(request, contextpath) {
 		$("#playbackRate").text(rate + "X");
 	});
 	
+	$("#playbackNext").on("click", function() {
+		console.log(vehicles[0].animation._currentDuration);
+	})
+	
 
 	//This is a factory function to return a (closure style) object to animate the clock,
 	//with start, pause, and a rate getter/setter.
@@ -363,30 +379,26 @@ function main(request, contextpath) {
 		var endTimes = vehicles.map(function(v) { return (v.data[v.data.length-1].timenum) });
 		var endTime = Math.max.apply(null, endTimes);
 		
-		var currTime = startTime,
-			clock = $("#playbackTime");
+		var clock = $("#playbackTime");
 		
 		var animation = {},
-			pause = true,
 			rate = 1;
 		
-		clock.text(parseTime(currTime));
+		var baseTimes, elapsedTime;
 		
-		function tick() {
-			if(pause)
-				return;
-			
-			currTime += 1000;
-			clock.text(parseTime(currTime));
-			setTimeout(tick, 1000/rate);
-		}
+		var started = false, paused = false;
 		
 		animation.setup = function() {
 			
 			// delete old animation
 			animationGroup.clearLayers();
 			
-			currTime = startTime;
+			started = false;
+			paused = false;
+			
+			// Base times to use to calculate clock: AVL times. 
+			baseTimes = vehicles[0].data.map(function (v) { return v.timenum }),
+				elapsedTime = 0;
 			
 			for (var i = 0; i < vehicles.length; i++) {
 				var vehicle = vehicles[i];
@@ -402,37 +414,49 @@ function main(request, contextpath) {
 					    iconUrl:  contextPath + "/reports/images/bus.png", 
 					    iconSize: [25,25]
 					}),
+					zIndexOffset: 1000
 				}).addTo(animationGroup)
-				
+								
 				vehicle.animation.on("end", function() {
 					pause = true;
 					// set play button back to play
 					$("#playbackPlay").attr("src", playButton);
-					// reset time
-					currTime = startTime;
 				})
-				
 			}
 			
-			clock.text(parseTime(currTime));
+			// Synchronize clock to first vehicle.
+			vehicles[0].animation.on("tick", function(tick) {
+				var baseTime = baseTimes[tick.currentIndex];
+				elapsedTime = tick.elapsedTime;
+				var currTime = baseTime + tick.elapsedTime * rate;
+				if (!paused)
+					clock.text(parseTime(currTime));
+			})
+			
+			clock.text(parseTime(baseTimes[0]))
 		}
 		
 		animation.start = function() {
-			pause = false;
-			tick();
+			started = true, paused = false;
 			for (var i = 0; i < vehicles.length; i++)
 				vehicles[i].animation.start();
-			
+		}
+		
+		animation.resume = function() {
+			paused = false;
+			for (var i = 0; i < vehicles.length; i++)
+				vehicles[i].animation.resume();
 		}
 		
 		animation.pause = function() {
-			pause = true;
+			paused = true;
+			var referenceAnim = vehicles[0].animation;
+			baseTimes[referenceAnim._currentIndex] += elapsedTime * rate;
 			for (var i = 0; i < vehicles.length; i++)
 				vehicles[i].animation.pause();
 		}
 		
 		animation.stop = function() {
-			pause = true;
 			for (var i = 0; i < vehicles.length; i++)
 				vehicles[i].animation.stop();
 		}
@@ -449,15 +473,14 @@ function main(request, contextpath) {
 						durations[j] *= delta;
 			        vehicles[i].animation._currentDuration *= delta;
 				}
-				animation.start();
+				animation.resume();
 			}
 			else
 				return rate;				
 		}
 		
-		animation.running = function() {
-			return !pause;
-		}
+		animation.paused = function() { return paused; };
+		animation.started = function() { return started; };
 		
 		return animation;
 	}
@@ -466,7 +489,4 @@ function main(request, contextpath) {
 		return new Date(x).toTimeString().slice(0, 8);
 	}
 	
-	
-	//Edit route input width. TODO: should I just copy from route.jsp?
-	$('#route').attr("style", "width: 200px");
 }
