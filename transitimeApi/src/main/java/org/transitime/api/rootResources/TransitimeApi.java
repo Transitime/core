@@ -143,7 +143,7 @@ public class TransitimeApi {
 			VehiclesInterface inter = stdParameters.getVehiclesInterface();
 
 			Collection<IpcVehicle> vehicles;
-			if (!routesIdOrShortNames.isEmpty()) {
+			if (!routesIdOrShortNames.isEmpty() && !routesIdOrShortNames.get(0).isEmpty()) {
 				vehicles = inter.getForRoute(routesIdOrShortNames);
 			} else if (!vehicleIds.isEmpty()) {
 				vehicles = inter.get(vehicleIds);
@@ -252,7 +252,7 @@ public class TransitimeApi {
 			VehiclesInterface inter = stdParameters.getVehiclesInterface();
 
 			Collection<IpcVehicle> vehicles;
-			if (!routesIdOrShortNames.isEmpty()) {
+			if (!routesIdOrShortNames.isEmpty() && !routesIdOrShortNames.get(0).isEmpty()) {
 				vehicles = inter.getForRoute(routesIdOrShortNames);
 			} else if (!vehicleIds.isEmpty()) {
 				vehicles = inter.get(vehicleIds);
