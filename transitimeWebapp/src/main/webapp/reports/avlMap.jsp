@@ -16,9 +16,7 @@
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   
-  <!--  TODO: should this be local? -->
-  <script src="https://raw.githubusercontent.com/ewoken/Leaflet.MovingMarker/master/MovingMarker.js"></script>
-  
+  <script src="<%= request.getContextPath() %>/map/javascript/leafletMovingMarker.js"></script>
   <script src="<%= request.getContextPath() %>/map/javascript/leafletRotatedMarker.js"></script>
   <script src="<%= request.getContextPath() %>/map/javascript/mapUiOptions.js"></script>
   
