@@ -36,7 +36,8 @@ function dataReadCallback(jsonData) {
 }
 
 // Initiate AJAX call to get data to put into table
-$.ajax({
+$( document ).ready(function() {
+  $.ajax({
    	// The page being requested
   	url: "/web/reports/lastAvlJsonData.jsp",
    	// Pass in query string parameters to page being requested
@@ -45,6 +46,7 @@ $.ajax({
    	traditional: true,
     dataType:"json",
 	success: dataReadCallback
+  });
 });
 </script>
 </head>
