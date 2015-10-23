@@ -43,11 +43,11 @@
   </div>
   <div id="playback_container">
 	  <div id="playback">
-	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/prev.png" id="playbackPrev" />
-	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/rew.png" id="playbackRew" />
-	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/play.png" id="playbackPlay" />
-	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/ff.png" id="playbackFF" /> <span id="playbackRate">1X</span>
-	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/next.png" id="playbackNext" /> <br>
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/media-seek-backward.svg" id="playbackPrev" />
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/media-skip-backward.svg" id="playbackRew" />
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/media-playback-start.svg" id="playbackPlay" />
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/media-skip-forward.svg" id="playbackFF" /> <span id="playbackRate">1X</span>
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/media-seek-forward.svg" id="playbackNext" /> <br>
 	  	<span id="playbackTime">00:00:00</span>
 	  </div>
   </div>

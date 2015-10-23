@@ -1,4 +1,5 @@
-  /* For drawing the route and stops */
+
+/* For drawing the route and stops */
 var routeOptions = {
 	color: '#00ee00',
 	weight: 4,
@@ -221,6 +222,7 @@ L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?
 
 var vehicleGroup = L.layerGroup().addTo(map);
 var routeGroup = L.layerGroup().addTo(map);
+var animationGroup = L.layerGroup().addTo(map);
 
 //Set the CLIP_PADDING to a higher value so that when user pans on map
 //the route path doesn't need to be redrawn. Note: leaflet documentation
@@ -230,6 +232,8 @@ L.Path.CLIP_PADDING = 0.8;
 
 function main(request, contextpath) {
 
+	var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
+		pauseButton = contextPath + "/reports/images/playback/media-playback-pause.svg";
 	
 	//Set all the controls to match the values in the request.
 	$("#vehicle").val(request.v).trigger("change");
@@ -259,7 +263,7 @@ function main(request, contextpath) {
 		// Reset animation object and associated UI elements.
 		if (animation) {
 			animation.stop();
-			$("#playbackPlay").attr("src", contextPath + "/reports/images/playback/play.png");	
+			$("#playbackPlay").attr("src", playButton);	
 			$("#playbackRate").text("1X");
 			$("#playbackTime").text("00:00:00");
 			animation = undefined;
@@ -308,7 +312,7 @@ function main(request, contextpath) {
 		animation.setup();
 		
 		// change button back to play
-		$("#playbackPlay").attr("src", contextPath + "/reports/images/playback/play.png");
+		$("#playbackPlay").attr("src", playButton);
 		
 		$("#playbackRate").text("1X");
 	}); 
@@ -322,14 +326,14 @@ function main(request, contextpath) {
 		else if (animation.running()) {
 			animation.pause()
 			// change button icon back to play
-			$("#playbackPlay").attr("src", contextPath + "/reports/images/playback/play.png");
+			$("#playbackPlay").attr("src", playButton);
 			return;
 		}
 		
 		
 		animation.start();
 		// change button icon to pause
-		$("#playbackPlay").attr("src", contextPath + "/reports/images/playback/pause.png");
+		$("#playbackPlay").attr("src", pauseButton);
 		
 	});
 	
@@ -349,7 +353,7 @@ function main(request, contextpath) {
 		$("#playbackRate").text(rate + "X");
 	});
 	
-	
+
 	//This is a factory function to return a (closure style) object to animate the clock,
 	//with start, pause, and a rate getter/setter.
 	function makeAnimation(vehicles) {
@@ -377,6 +381,10 @@ function main(request, contextpath) {
 		}
 		
 		animation.setup = function() {
+			
+			// delete old animation
+			animationGroup.clearLayers();
+			
 			currTime = startTime;
 			
 			for (var i = 0; i < vehicles.length; i++) {
@@ -393,12 +401,12 @@ function main(request, contextpath) {
 				   		 className: 'avlMarker',
 						 iconSize: [7,7]
 					    }),
-				}).addTo(vehicleGroup)
+				}).addTo(animationGroup)
 				
 				vehicle.animation.on("end", function() {
 					pause = true;
 					// set play button back to play
-					$("#playbackPlay").attr("src", contextPath + "/reports/images/playback/play.png");
+					$("#playbackPlay").attr("src", playButton);
 					// reset time
 					currTime = startTime;
 				})
