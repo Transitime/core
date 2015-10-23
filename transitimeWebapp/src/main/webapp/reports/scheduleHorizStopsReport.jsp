@@ -22,7 +22,12 @@ if (agencyId == null || agencyId.isEmpty()) {
   	text-align: center;
   }
 
-  .tripColumnClass {
+  #dataTable {
+	font-size: 8pt;
+    text-align: center;
+  }
+    
+  #headerCell {
   	font-weight: bold;
   	background-color: #F2F5F7;
   }
@@ -32,35 +37,9 @@ if (agencyId == null || agencyId.isEmpty()) {
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
   
   <script type="text/javascript">
-      // Load in Google charts library
-      google.load("visualization", "1", {packages:["table"]});
-      google.setOnLoadCallback(getDataAndDrawChart);
-      
-      function centerTablesKludge() {
-          $(".google-visualization-table-table").css("width", "");
-          $(".google-visualization-table-table").css("margin-left", "auto");
-          $(".google-visualization-table-table").css("margin-right", "auto");
-          $(".google-visualization-table").css("width", "");    	  
-      }
-
-      // Sets the property for the entire column, except for the header.
-      // Need to use this for Table since it ignores column wide properties.
-      // Can be used to set propertyName of 'style' or 'className'.
-      function setColumnProperty(dataTable, columnIndex, propertyName, propertyValue) {
-    	  for (var rowIndex=0; rowIndex<dataTable.getNumberOfRows(); ++rowIndex) {
-    		  dataTable.setProperty(rowIndex, columnIndex, propertyName, propertyValue);
-    	  }
-      }
-      
       function dataReadCallback(jsonData) {
-	      var tableOptions = {
-	    		  showRowNumber: false, 
-	    		  allowHtml: true, 
-	    		  sort: 'disable'
-	      };
-
 	      // Set the title now that have the route name from the API
-	      $('#title').html(jsonData.routeName);
+	      $('#title').html('Schedule for ' + jsonData.routeName);
 	      
 	      // Go through all service classes and directions for route
     	  for (var i=0; i<jsonData.schedule.length; ++i) {
@@ -71,23 +50,25 @@ if (agencyId == null || agencyId.isEmpty()) {
     				  + "Direction " + schedule.directionId 
     				  + ", " + schedule.serviceName
     				  + "</div>");
+
+    		  var table = $("<table id='dataTable'></table>").appendTo('body')[0];
     		  
-    		  // Create data for the schedule table
-    		  var data = new google.visualization.DataTable();
-    		  
-    		  // Create the columns. First column is stop name. And then there
+    		  // Create the columns for the header. First column is stop name. And then there
     		  // is one column per trip.
-    		  data.addColumn('string', '', 'blockColumn');
+    		  var headerRow = table.insertRow(0);
+    		  headerRow.insertCell(0).id = 'headerCell';
     		  for (var j=0; j<schedule.stop.length; ++j) {
     			  var stop = schedule.stop[j];
-        		  data.addColumn("string", stop.stopName);    			  
+    			  var headerCell = headerRow.insertCell(j+1);
+    			  headerCell.id = 'headerCell';
+    			  headerCell.innerHTML = stop.stopName;
     		  }
 
     		  // Add data for each row for the schedule. This is a bit complicated
     		  // because the API provides data per trip but want each row in the
     		  // schedule to be for a particular stop for all trips.
     		  for (var tripIdx=0; tripIdx<schedule.timesForTrip.length; ++tripIdx) {
-        	      var rowArray = [];
+        		  var row = table.insertRow(tripIdx+1);
         		  var timesForTrip = schedule.timesForTrip[tripIdx];
 
         		  // Add block/trip info to row
@@ -97,45 +78,20 @@ if (agencyId == null || agencyId.isEmpty()) {
                   var tripNameTooLong = tripName.length > 6;
                   var html = tripNameTooLong ?
                       "Block&nbsp;" + timesForTrip.blockId : "Trip&nbsp;" + tripName;
-                  rowArray.push(html);
+                  var headerCell = row.insertCell(0);
+                  headerCell.id = 'headerCell';
+                  headerCell.innerHTML = html;
         		  
         		  // Add the times for the stop to the row
                   for (var stopIdx=0; stopIdx<timesForTrip.time.length; ++stopIdx) {    				  
                       var time = timesForTrip.time[stopIdx];
-                      rowArray.push(time.timeStr);
+                      row.insertCell(stopIdx+1).innerHTML = time.timeStr ? time.timeStr : '';
                   }
-        		  
-                  // Add row of data to the data table
-                  data.addRow(rowArray);
     		  }    		  
-
-    		  // Reduce horizontal padding so can fit in more trips per page.
-    		  // Tried by setting class for the cells but that didn't work because
-    		  // apparently google charts overrides the padding for the class. But
-    		  // setting the style works.
-    		  for (var stopIdx=0; stopIdx<schedule.timesForTrip[0].time.length; ++stopIdx)
-    		  	setColumnProperty(data, 1+stopIdx, 'style', 'padding: 2px 1px; text-align: center');
-    		  
-    	      // Make trip/block cells bold. When setting to class
-    	      // tripColumnClass also need to set to google-visualization-table-td
-    	      // because otherwise the default properties for those cells are erased.
-			  setColumnProperty(data, 0, 'className', 'tripColumnClass google-visualization-table-td');
-    		  
-    		  // Create the div to be used as the data table. Note that
-    		  // appendTo() returns JQuery object. Therefore need to use 
-    		  // rather cryptic "[0]" to get the HTML DOM object.
-    		  var tableDiv = $("<div id='dataTable'>the table</div>").appendTo('body')[0];
-    		  
-    		  // Actually create the table for the schedule using the appropriate data
-    		  var table = new google.visualization.Table(tableDiv);
-    	      table.draw(data, tableOptions);
     	  }
-	      
-	      // Deal with having table only take up minimal space and to be centered
-    	  centerTablesKludge();
       }
       
-      function getData() {
+      $( document ).ready(function() {
     	  $.ajax({
     	      	// The page being requested
     		  	url: apiUrlPrefix + "/command/scheduleHorizStops",
@@ -146,12 +102,8 @@ if (agencyId == null || agencyId.isEmpty()) {
     	        dataType:"json",
 				success: dataReadCallback
     	  });
-      }
-      
-      function getDataAndDrawChart() {
-    	getData();  
-      }
-      
+      });
+            
   </script>
 
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -160,5 +112,4 @@ if (agencyId == null || agencyId.isEmpty()) {
 <body>
 <%@include file="/template/header.jsp" %>
 <div id="title"></div>
-
 </body>
