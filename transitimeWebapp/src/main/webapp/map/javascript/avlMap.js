@@ -375,6 +375,7 @@ function main(request, contextpath) {
 		function tick() {
 			if(pause)
 				return;
+			
 			currTime += 1000;
 			clock.text(parseTime(currTime));
 			setTimeout(tick, 1000/rate);
@@ -397,10 +398,10 @@ function main(request, contextpath) {
 				}
 				
 				vehicle.animation = L.Marker.movingMarker(positions, durations, {
-					icon:  L.divIcon({
-				   		 className: 'avlMarker',
-						 iconSize: [7,7]
-					    }),
+					icon:  L.icon({
+					    iconUrl:  contextPath + "/reports/images/bus.png", 
+					    iconSize: [25,25]
+					}),
 				}).addTo(animationGroup)
 				
 				vehicle.animation.on("end", function() {
@@ -410,6 +411,7 @@ function main(request, contextpath) {
 					// reset time
 					currTime = startTime;
 				})
+				
 			}
 			
 			clock.text(parseTime(currTime));
