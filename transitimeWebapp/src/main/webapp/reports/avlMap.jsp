@@ -14,7 +14,10 @@
   
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-        
+  
+  <!--  TODO: should this be local? -->
+  <script src="https://raw.githubusercontent.com/ewoken/Leaflet.MovingMarker/master/MovingMarker.js"></script>
+  
   <script src="<%= request.getContextPath() %>/map/javascript/leafletRotatedMarker.js"></script>
   <script src="<%= request.getContextPath() %>/map/javascript/mapUiOptions.js"></script>
   
@@ -29,6 +32,16 @@
     }
     
     /* For the AVL points */
+    div.avlMarker {
+      background-color: #ff7800;
+      border-color: black;
+      border-radius: 4px;
+      border-style: solid;
+      border-width: 1px;
+      width:7px;
+      height:7px;
+    }
+    
 	div.avlTriangle {
 	  width: 0px;
   	  height: 0px;
@@ -68,11 +81,18 @@
     }
     
     /* Playback menu */
-    #playback {
-    	background: white;
+    #playback_container {
     	position: absolute;
     	left: 50%;
-    	bottom: 10px;
+    	bottom: 5%;"
+    }
+    #playback {
+    	background: lightgrey;
+    	position: relative;
+    	left: -50%;
+    	text-align: center;
+    	border-radius: 25px;
+        padding: 2%;
     }
     
   </style>
@@ -118,7 +138,7 @@
   	var avl = avlMarker.avl;
   	var speed = Math.round(parseFloat(avl.speed) * 10)/10;
 	var content = "<table class='popupTable'>" 
-		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleid + "</td></tr>" 
+		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleId + "</td></tr>" 
 		+ "<tr><td class='popupTableLabel'>GPS Time:</td><td>" + avl.time + "</td></tr>" 
   		+ "<tr><td class='popupTableLabel'>Time Proc:</td><td>" + avl.timeprocessed + "</td></tr>"
  		+ "<tr><td class='popupTableLabel'>Lat/Lon:</td><td>" + avl.lat + ", " + avl.lon + "</td></tr>"
@@ -139,14 +159,15 @@
 	  
 	// Create the marker. Use a divIcon so that can have tooltips
   	var tooltip = avl.time.substring(avl.time.indexOf(' ') + 1);  
-  	var avlMarker = L.marker(latLng, {
+  	var avlMarker = L.rotatedMarker(latLng, {
           icon: L.divIcon({
-        		 className: 'avlMarker',
-        		 html: "<div class='avlTriangle icon_" + avl.vehicleId + "' style='transform: rotate("+ avl.heading + "deg);' />",
+        		 className: 'avlMarker_',
+        		 html: "<div class='avlTriangle icon_" + avl.vehicleId + "' />",
         		 iconSize: [7,7]
         	  }),
+          angle: avl.heading,
           title: tooltip
-      }).addTo(group); 
+      }).addTo(vehicleGroup); 
 	
   	// Store the AVL data with the marker so can popup detailed info
 	avlMarker.avl = avl;
@@ -161,7 +182,7 @@
   
   /* Called when receiving the AVL data via AJAX call */
   function processAvlCallback(jsonData) {
-	  	  
+	  	
 	/* Save avl data */ 
 	
     // List of all the latLngs
@@ -170,6 +191,9 @@
     // So can draw separate polyline per vehicle
     var previousVehicleId = "";
     var latLngsForVehicle = [];
+    
+    // reset list of vehicles
+    vehicles = [];
     
     // For each AVL report...
     var vehicle;
@@ -202,7 +226,7 @@
     
     // Draw polyline for the last vehicle in the AVL data
     if (latLngsForVehicle.length >= 2)
-    	L.polyline(latLngsForVehicle, routePolylineOptions).addTo(group); //.bringToBack();
+    	L.polyline(latLngsForVehicle, routePolylineOptions).addTo(vehicleGroup); //.bringToBack();
     
     // If actually read AVL data...
     if (latLngs.length > 0) {
@@ -211,6 +235,8 @@
   	} else {
 		alert("No AVL data for the criteria specified.")
   	}
+    
+    createExport(vehicles);
   }
 
   /* Called when user clicks on map. Displays AVL data */
@@ -240,7 +266,7 @@
 			var loc = shape.loc[j];			
 			latLngs.push(L.latLng(loc.lat, loc.lon));
 		}
-		L.polyline(latLngs, routeOptions).addTo(group);
+		L.polyline(latLngs, routeOptions).addTo(routeGroup);
 	}
 	  
   	// Draw stops for the route. 
@@ -250,7 +276,7 @@
   			var stop = direction.stop[j];
   			
   			// Create the stop Marker
-  			var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions).addTo(group);
+  			var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions).addTo(routeGroup);
   			
   			// Store stop data obtained via AJAX with stopMarker so it can be used in popup
   			stopMarker.stop = stop;
@@ -258,11 +284,40 @@
   			// When user clicks on stop popup information box
   			stopMarker.on('click', function(e) {
   				showStopPopup(this);
-  			}).addTo(group);
+  			}).addTo(routeGroup);
   		}
    	 }
   }
-
+  
+  // Data in vehicles will be available as CSV when you click the `export' link.
+  function createExport(vehicles) {
+  	var data = vehicles[0].data
+  	
+  	// find data keys
+  	var keys = []
+  	for (k in data[0])
+  		if (data[0].hasOwnProperty(k))
+  			keys.push(k)
+  	
+  	// write header
+  	var text = keys[0];
+  	for (var i = 1; i < keys.length; i++)
+  		text += "," + keys[i]
+  	text += '\n'
+  	
+  	// write rows
+  	for (var i = 0; i < data.length; i++) {
+  		text += data[i][keys[0]]
+  		for (var j = 1; j < keys.length; j++) {
+  			text += "," + data[i][keys[j]]
+  		}
+  		text += "\n";
+  	}
+  	
+  	var blob = new Blob([text], { type: 'text/plain' }); //  change to text/csv for download prompt
+  	$("#exportData")[0].href = window.URL.createObjectURL(blob);
+  }
+  
   </script>
 </head>
 
@@ -271,12 +326,18 @@
   <div id="params">
   	<jsp:include page="params/vehicle.jsp" />
   	<jsp:include page="params/fromToDateTime.jsp" />
-    <jsp:include page="params/routeSingle.jsp" /> 
+    <jsp:include page="params/routeSingle.jsp" /> <br>
+    <a href="#" id="exportData">Export</a>
   </div>
-  <div id="playback">
-  	<a href='#' id="playbackPrev">prev</a><br>
-  	<a href='#' id="playbackPlay">play</a><br>
-  	<span id="playbackTime">00:00:00</span>
+  <div id="playback_container">
+	  <div id="playback">
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/prev.png" id="playbackPrev" />
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/rew.png" id="playbackRew" />
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/play.png" id="playbackPlay" />
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/ff.png" id="playbackFF" /> <span id="playbackRate">1X</span>
+	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/next.png" id="playbackNext" /> <br>
+	  	<span id="playbackTime">00:00:00</span>
+	  </div>
   </div>
 </body>
 
@@ -291,7 +352,8 @@ L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?
     maxZoom: 19
 }).addTo(map);
 
-var group = L.layerGroup().addTo(map);
+var vehicleGroup = L.layerGroup().addTo(map);
+var routeGroup = L.layerGroup().addTo(map);
 
 // Set the CLIP_PADDING to a higher value so that when user pans on map
 // the route path doesn't need to be redrawn. Note: leaflet documentation
@@ -321,9 +383,19 @@ $(".param input").on("change", function() {
 	request.r = $("#route").val();
 
 	
-	/* Clear existing layer and draw new objects on map. */
-	group.clearLayers();
+	// Clear existing layer and draw new objects on map.
+	routeGroup.clearLayers();
+	vehicleGroup.clearLayers();
 	drawAvlData();
+	
+	// Reset animation object and associated UI elements.
+	if (animation) {
+		animation.stop();
+		$("#playbackPlay").attr("src", "<%= request.getContextPath() %>/reports/images/playback/play.png");	
+		$("#playbackRate").text("1X");
+		$("#playbackTime").text("00:00:00");
+		animation = undefined;
+	}
 });
 
 // Get the AVL data via AJAX and call processAvlCallback to draw it
@@ -358,66 +430,160 @@ drawAvlData();
 
 /* Playback functionality */
 
-var currTime;
+var animation;
 
 $("#playbackPrev").on("click", function() {
-	group.clearLayers();
+	if (animation)
+		animation.stop();
+	//vehicleGroup.clearLayers();
+	animation = makeAnimation(vehicles);
+	animation.setup();
 	
-	var times = vehicles.map(function(v) { return (v.data[0].timenum) });
-	currTime = Math.min.apply(null, times);
+	// change button back to play
+	$("#playbackPlay").attr("src", "<%= request.getContextPath() %>/reports/images/playback/play.png");
 	
-	for (i = 0; i < vehicles.length; i++) {
-		var v = vehicles[i];
-		v.marker = drawAvlMarker(v.data[0]);
-		v.avlIndex = 0;
-	}
-
-	console.log(vehicles[0])
-	$("#playbackTime").text(parseTime(currTime));
-});
+	$("#playbackRate").text("1X");
+}); 
 
 $("#playbackPlay").on("click", function() {
-	function tick() {
-		var stop = true;
-		currTime += 1000;
-		
-		// for each vehicle, update the position if the next AVL reflects a time 
-		// less than the current time
-		for (i = 0; i < vehicles.length; i++) {
-			var v = vehicles[i];
-			
-			if (v.avlIndex + 1 == v.data.length) {
-				continue;
-			}
-			stop = false;
-		
-			if (v.data[v.avlIndex+1].timenum <= currTime) {
-				v.avlIndex += 1;
-				var avl = v.data[v.avlIndex];
-				
-				// change position
-				var latLng = L.latLng(avl.lat, avl.lon);
-				v.marker.setLatLng(latLng);
-				v.marker.update();
-				
-				// change heading
-				$(".icon_"+v.id).attr("style", "transform: rotate("+ avl.heading + "deg");
-				
-			}
-		}
-		
-		$("#playbackTime").text(parseTime(currTime));
-		
-		// setTimeout instead of requestAnimationFrame because we are only doing
-		// this once per second
-		if (!stop)
-			setTimeout(tick, 1)
+	if (animation === undefined) {
+		//vehicleGroup.clearLayers();
+		animation = makeAnimation(vehicles);
+		animation.setup();
 	}
-	tick();
+	else if (animation.running()) {
+		animation.pause()
+		// change button icon back to play
+		$("#playbackPlay").attr("src", "<%= request.getContextPath() %>/reports/images/playback/play.png");
+		return;
+	}
+	
+	
+	animation.start();
+	// change button icon to pause
+	$("#playbackPlay").attr("src", "<%= request.getContextPath() %>/reports/images/playback/pause.png");
+	
 });
 
-			
+$("#playbackFF").on("click", function() {
+	if (!animation)
+		return;
+	var rate = animation.rate()*2;
+	animation.rate(rate);
+	$("#playbackRate").text(rate + "X");
+});
 
+$("#playbackRew").on("click", function() {
+	if (!animation)
+		return;
+	var rate = animation.rate()/2;
+	animation.rate(rate);
+	$("#playbackRate").text(rate + "X");
+});
+
+
+// This is a factory function to return a (closure style) object to animate the clock,
+// with start, pause, and a rate getter/setter.
+function makeAnimation(vehicles) {
+	
+	var startTimes = vehicles.map(function(v) { return (v.data[0].timenum) });
+	var startTime = Math.min.apply(null, startTimes);
+	var endTimes = vehicles.map(function(v) { return (v.data[v.data.length-1].timenum) });
+	var endTime = Math.max.apply(null, endTimes);
+	
+	var currTime = startTime,
+		clock = $("#playbackTime");
+	
+	var animation = {},
+		pause = true,
+		rate = 1;
+	
+	clock.text(parseTime(currTime));
+	
+	function tick() {
+		if(pause)
+			return;
+		currTime += 1000;
+		clock.text(parseTime(currTime));
+		setTimeout(tick, 1000/rate);
+	}
+	
+	animation.setup = function() {
+		currTime = startTime;
+		
+		for (var i = 0; i < vehicles.length; i++) {
+			var vehicle = vehicles[i];
+			var positions = vehicle.data.map(function(v) { return [v.lat, v.lon] });
+			var durations = []
+			for (var i = 0; i < vehicle.data.length-1; i++) {
+				var d = (vehicle.data[i+1].timenum - vehicle.data[i].timenum)/rate;
+				durations.push(d);
+			}
+			
+			vehicle.animation = L.Marker.movingMarker(positions, durations, {
+				icon:  L.divIcon({
+			   		 className: 'avlMarker',
+					 iconSize: [7,7]
+				    }),
+			}).addTo(vehicleGroup)
+			
+			vehicle.animation.on("end", function() {
+				pause = true;
+				// set play button back to play
+				$("#playbackPlay").attr("src", "<%= request.getContextPath() %>/reports/images/playback/play.png");
+				// reset time
+				currTime = startTime;
+			})
+		}
+		
+		clock.text(parseTime(currTime));
+	}
+	
+	animation.start = function() {
+		pause = false;
+		tick();
+		for (var i = 0; i < vehicles.length; i++)
+			vehicles[i].animation.start();
+		
+	}
+	
+	animation.pause = function() {
+		pause = true;
+		for (var i = 0; i < vehicles.length; i++)
+			vehicles[i].animation.pause();
+	}
+	
+	animation.stop = function() {
+		pause = true;
+		for (var i = 0; i < vehicles.length; i++)
+			vehicles[i].animation.stop();
+	}
+	
+	animation.rate = function(_) {
+		if (_) {
+			var oldrate = rate;
+			rate = _;
+			animation.pause();
+			var delta = oldrate / rate;
+			for (var i = 0; i < vehicles.length; i++) {
+				var durations = vehicles[i].animation._durations;
+		        for (var j = 0; j < durations.length; j++) 
+					durations[j] *= delta;
+		        vehicles[i].animation._currentDuration *= delta;
+			}
+			animation.start();
+		}
+		else
+			return rate;				
+	}
+	
+	animation.running = function() {
+		return !pause;
+	}
+	
+	return animation;
+}
+				
 function parseTime(x) {
 	return new Date(x).toTimeString().slice(0, 8);
 }
