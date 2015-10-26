@@ -135,15 +135,17 @@ function processAvlCallback(jsonData) {
     if (latLngs.length > 0) {
     	// To make all AVL reports fit in bounds of map.
     	map.fitBounds(latLngs);
+    	// connect export to link to csv creation.
+    	createExport(vehicles);
   	} else {
 		alert("No AVL data for the criteria specified.")
   	}
-    
-    createExport(vehicles);
+   
 }
 
 /* Called when user clicks on map. Displays AVL data */
 function showStopPopup(stopMarker) {
+	
 	var stop = stopMarker.stop;
 	  
 	var content = "<table class='popupTable'>" 
@@ -162,9 +164,11 @@ function showStopPopup(stopMarker) {
  */
 function routeConfigCallback(route, status) {
 	// Draw the paths for the route
+	
+	var latLngs = [];
+	
 	for (var i=0; i<route.shape.length; ++i) {
 		var shape = route.shape[i];
-		var latLngs = [];		
 		for (var j=0; j<shape.loc.length; ++j) {
 			var loc = shape.loc[j];			
 			latLngs.push(L.latLng(loc.lat, loc.lon));
@@ -194,6 +198,7 @@ function routeConfigCallback(route, status) {
   
 // Data in vehicles will be available as CSV when you click the `export' link.
 function createExport(vehicles) {
+	
 	var data = vehicles[0].data
   	
   	// find data keys
@@ -325,7 +330,34 @@ function main(request, contextpath) {
 		$("#playbackPlay").attr("src", playButton);
 		
 		$("#playbackRate").text("1X");
-	}); 
+	});
+	
+	$("#playbackNext").on("click", function() {
+		// create animation if it doesn't exist, or stop it.
+		if (animation)
+			animation.stop()
+		else {
+			animation = makeAnimation(vehicles)
+			animation.setup()
+		}
+		
+		// move marker to end
+		for (var i = 0; i < vehicles.length; i++) {
+			var marker = vehicles[i].animation,
+				positions = vehicles[i].data,
+				last = positions[positions.length-1];
+			
+			marker.setLatLng(last);
+			
+			// change clock time
+			$("#playbackTime").text(parseTime(last.timenum))
+		}
+		
+		// change button back to play
+		$("#playbackPlay").attr("src", playButton);
+	})
+	
+	
 	
 	$("#playbackPlay").on("click", function() {
 		if (animation === undefined) {
@@ -365,11 +397,6 @@ function main(request, contextpath) {
 		animation.rate(rate);
 		$("#playbackRate").text(rate + "X");
 	});
-	
-	$("#playbackNext").on("click", function() {
-		console.log(vehicles[0].animation._currentDuration);
-	})
-	
 
 	//This is a factory function to return a (closure style) object to animate the clock,
 	//with start, pause, and a rate getter/setter.
