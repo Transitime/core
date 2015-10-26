@@ -39,6 +39,7 @@ var vehicles = [];
 function showAvlPopup(avlMarker) {
 	var avl = avlMarker.avl;
   	var speed = Math.round(parseFloat(avl.speed) * 10)/10;
+  	
 	var content = "<table class='popupTable'>" 
 		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleId + "</td></tr>" 
 		+ "<tr><td class='popupTableLabel'>GPS Time:</td><td>" + avl.time + "</td></tr>" 

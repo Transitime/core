@@ -38,13 +38,14 @@ div.avlTriangle {
   right:10px;
   border-radius: 25px;
   padding: 2%;
+  border: 2px solid black;
 }
 
 /* Playback menu */
 #playback_container {
 	position: absolute;
 	left: 50%;
-	bottom: 5%;"
+	bottom: 5%;
 }
 #playback {
 	background: lightgrey;
@@ -54,6 +55,7 @@ div.avlTriangle {
 	border-radius: 25px;
     padding: 2%;
     font-family: monospace;
+    border: 2px solid black;
 }
 
 #playback input {
