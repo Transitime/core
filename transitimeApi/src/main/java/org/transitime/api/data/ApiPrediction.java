@@ -138,7 +138,7 @@ public class ApiPrediction {
 
         isDepartureDuplicate = Boolean.toString(!prediction.isArrival());
         
-        blockId = prediction.getTrip() != null ? prediction.getTrip().getBlockId() : null;
+        blockId = prediction.getBlockId();
 	}
 
 }
