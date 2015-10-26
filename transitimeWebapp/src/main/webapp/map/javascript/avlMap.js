@@ -53,7 +53,6 @@ function showAvlPopup(avlMarker) {
 		.setLatLng(avlMarker.getLatLng())
 		.setContent(content)
 		.openOn(map);
-
 }
 
 	
@@ -85,7 +84,7 @@ function drawAvlMarker(avl) {
   
 /* Called when receiving the AVL data via AJAX call */
 function processAvlCallback(jsonData) {
-	  	
+	 
 	/* Save avl data */ 
 	
     // List of all the latLngs
@@ -250,14 +249,38 @@ function main(request, contextpath) {
 	var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
 		pauseButton = contextPath + "/reports/images/playback/media-playback-pause.svg";
 	
-	//Set all the controls to match the values in the request.
-	$("#vehicle").val(request.v).trigger("change");
-	$("#beginDate").val(request.beginDate).trigger("change");
-	$("#endDate").val(request.endDate).trigger("change");
-	$("#beginTime").val(request.beginTime).trigger("change");
-	$("#endTime").val(request.endTime).trigger("change");
-	$("#route").val(request.r).trigger("change");
 	
+	if (request.v || request.r) {
+		// Request exists; set all the controls to match the values in the request.
+		$("#vehicle").val(request.v).trigger("change");
+		$("#beginDate").val(request.beginDate).trigger("change");
+		$("#endDate").val(request.endDate).trigger("change");
+		$("#beginTime").val(request.beginTime).trigger("change");
+		$("#endTime").val(request.endTime).trigger("change");
+		$("#route").val(request.r).trigger("change");
+	}
+	else {
+		// no request
+		// set beginDate and endDate to defaults
+		request.beginDate = $("#beginDate").val()
+		request.endDate = $("#endDate").val()
+		
+		// fit map to agency boundaries.
+		$.ajax({
+		  	
+		    url: apiUrlPrefix + "/command/agencyGroup",
+			
+		    success: function(agencies) {
+		    	var e = agencies.agency[0].extent;
+				map.fitBounds([[e.minLat, e.minLon], [e.maxLat, e.maxLon]]);
+		    },
+		    
+		    // When there is an AJAX problem alert the user
+		    error: function(request, status, error) {
+		      alert(error + '. ' + request.responseText);
+		    },
+		});
+	}
 	
 	$(".param input").on("change", function() {
 		
@@ -313,7 +336,8 @@ function main(request, contextpath) {
 	
 	}
 	
-	drawAvlData();
+	if (request.v) // draw vehicles if there is request information
+		drawAvlData();
 	
 	/* Playback functionality */
 	
