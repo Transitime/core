@@ -55,7 +55,7 @@ function showAvlPopup(avlMarker) {
 		.openOn(map);
 }
 
-	
+
 function drawAvlMarker(avl) {
 	var latLng = L.latLng(avl.lat, avl.lon);
 	  
@@ -63,10 +63,10 @@ function drawAvlMarker(avl) {
   	var tooltip = avl.time.substring(avl.time.indexOf(' ') + 1);  
   	var avlMarker = L.rotatedMarker(latLng, {
           icon: L.divIcon({
-        		 className: 'avlMarker_',
-        		 html: "<div class='avlTriangle icon_" + avl.vehicleId + "' />",
-        		 iconSize: [7,7]
-        	  }),
+        	  className: 'avlMarker_',
+        	  html: "<div class='avlTriangle icon_" + avl.vehicleId + "' />",
+        	  iconSize: [7,7]
+          }),
           angle: avl.heading,
           title: tooltip
       }).addTo(vehicleGroup); 
@@ -196,16 +196,23 @@ function routeConfigCallback(route, status) {
 }
   
 // Data in vehicles will be available as CSV when you click the `export' link.
+// CSV should be the AVL CSV format used elsewhere in Transitime.
+// org.transitime.avl.AvlCsvWriter writes the following header:
+// vehicleId,time,justTime,latitude,longitude,speed,heading,assignmentId,assignmentType
+// org.transitime.avl.AvlCsvRecord has required keys vehicleId, time, latitude, longitude
+// all others optional
 function createExport(vehicles) {
 	
 	var data = vehicles[0].data
   	
-  	// find data keys
-	var keys = []
-	for (k in data[0])
-		if (data[0].hasOwnProperty(k))
-  			keys.push(k)
-  			
+  	// set keys
+	var keys = ["vehicleId", "time", "latitude", "longitude", "speed", "heading", "assignmentId"]
+	// CSV key => JS object key
+	function mapKey(k) {
+		var o = {"latitude": "lat", "longitude": "lon"}
+		return o[k] || k;
+	}
+	
   	// write header
   	var text = keys[0];
   	for (var i = 1; i < keys.length; i++)
@@ -216,7 +223,8 @@ function createExport(vehicles) {
   	for (var i = 0; i < data.length; i++) {
   		text += data[i][keys[0]]
   		for (var j = 1; j < keys.length; j++) {
-  			text += "," + data[i][keys[j]]
+  			var k = mapKey(keys[j])
+  			text += "," + data[i][k]
   		}
   		text += "\n";
   	}
@@ -244,12 +252,15 @@ var animationGroup = L.layerGroup().addTo(map);
 //better.
 L.Path.CLIP_PADDING = 0.8;
 
-function main(request, contextpath) {
+var contextPath, playButton, pauseButton;
+
+function main(request, path) {
 	
-	var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
+	contextPath = path;
+	
+	playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
 		pauseButton = contextPath + "/reports/images/playback/media-playback-pause.svg";
-	
-	
+		
 	if (request.v || request.r) {
 		// Request exists; set all the controls to match the values in the request.
 		$("#vehicle").val(request.v).trigger("change");
@@ -312,7 +323,7 @@ function main(request, contextpath) {
 	function drawAvlData() {
 		$.ajax({
 		  	// The page being requested
-		    url: "/web/reports/avlJsonData.jsp",
+		    url: contextPath + "/reports/avlJsonData.jsp",
 			// Pass in query string parameters to page being requested
 			data: request,
 			// Needed so that parameters passed properly to page being requested
@@ -338,207 +349,206 @@ function main(request, contextpath) {
 	
 	if (request.v) // draw vehicles if there is request information
 		drawAvlData();
+}
+
+/* Playback functionality */
+
+var animation;
+
+$("#playbackPrev").on("click", function() {
+	if (animation)
+		animation.stop();
+	//vehicleGroup.clearLayers();
+	animation = makeAnimation(vehicles);
+	animation.setup();
 	
-	/* Playback functionality */
+	// change button back to play
+	$("#playbackPlay").attr("src", playButton);
 	
-	var animation;
+	$("#playbackRate").text("1X");
+});
+
+$("#playbackNext").on("click", function() {
+	// create animation if it doesn't exist, or stop it.
+	if (animation)
+		animation.stop()
+	else {
+		animation = makeAnimation(vehicles)
+		animation.setup()
+	}
 	
-	$("#playbackPrev").on("click", function() {
-		if (animation)
-			animation.stop();
+	// move marker to end
+	for (var i = 0; i < vehicles.length; i++) {
+		var marker = vehicles[i].animation,
+			positions = vehicles[i].data,
+			last = positions[positions.length-1];
+		
+		marker.setLatLng(last);
+		
+		// change clock time
+		$("#playbackTime").text(parseTime(last.timenum))
+	}
+	
+	// change button back to play
+	$("#playbackPlay").attr("src", playButton);
+})
+
+$("#playbackPlay").on("click", function() {
+	if (animation === undefined) {
 		//vehicleGroup.clearLayers();
 		animation = makeAnimation(vehicles);
 		animation.setup();
-		
-		// change button back to play
+	}
+	
+	if (animation.paused()) {
+		animation.resume();
+		$("#playbackPlay").attr("src", pauseButton);
+	}
+	else if (animation.started()) {
+		animation.pause()
+		// change button icon back to play
 		$("#playbackPlay").attr("src", playButton);
-		
-		$("#playbackRate").text("1X");
-	});
+	}
+	else { // need to start it
+		animation.start();
+		$("#playbackPlay").attr("src", pauseButton);
+	}
 	
-	$("#playbackNext").on("click", function() {
-		// create animation if it doesn't exist, or stop it.
-		if (animation)
-			animation.stop()
-		else {
-			animation = makeAnimation(vehicles)
-			animation.setup()
-		}
-		
-		// move marker to end
-		for (var i = 0; i < vehicles.length; i++) {
-			var marker = vehicles[i].animation,
-				positions = vehicles[i].data,
-				last = positions[positions.length-1];
-			
-			marker.setLatLng(last);
-			
-			// change clock time
-			$("#playbackTime").text(parseTime(last.timenum))
-		}
-		
-		// change button back to play
-		$("#playbackPlay").attr("src", playButton);
-	})
-	
-	
-	
-	$("#playbackPlay").on("click", function() {
-		if (animation === undefined) {
-			//vehicleGroup.clearLayers();
-			animation = makeAnimation(vehicles);
-			animation.setup();
-		}
-		
-		if (animation.paused()) {
-			animation.resume();
-			$("#playbackPlay").attr("src", pauseButton);
-		}
-		else if (animation.started()) {
-			animation.pause()
-			// change button icon back to play
-			$("#playbackPlay").attr("src", playButton);
-		}
-		else { // need to start it
-			animation.start();
-			$("#playbackPlay").attr("src", pauseButton);
-		}
-		
-	});
-	
-	$("#playbackFF").on("click", function() {
-		if (!animation)
-			return;
-		var rate = animation.rate()*2;
-		animation.rate(rate);
-		$("#playbackRate").text(rate + "X");
-	});
-	
-	$("#playbackRew").on("click", function() {
-		if (!animation)
-			return;
-		var rate = animation.rate()/2;
-		animation.rate(rate);
-		$("#playbackRate").text(rate + "X");
-	});
+});
 
-	//This is a factory function to return a (closure style) object to animate the clock,
-	//with start, pause, and a rate getter/setter.
-	function makeAnimation(vehicles) {
+$("#playbackFF").on("click", function() {
+	if (!animation)
+		return;
+	var rate = animation.rate()*2;
+	animation.rate(rate);
+	$("#playbackRate").text(rate + "X");
+});
+
+$("#playbackRew").on("click", function() {
+	if (!animation)
+		return;
+	var rate = animation.rate()/2;
+	animation.rate(rate);
+	$("#playbackRate").text(rate + "X");
+});
+
+//This is a factory function to return a (closure style) object to animate the clock,
+//with start, pause, and a rate getter/setter.
+function makeAnimation(vehicles) {
+	
+	var startTimes = vehicles.map(function(v) { return (v.data[0].timenum) });
+	var startTime = Math.min.apply(null, startTimes);
+	var endTimes = vehicles.map(function(v) { return (v.data[v.data.length-1].timenum) });
+	var endTime = Math.max.apply(null, endTimes);
+	
+	var clock = $("#playbackTime");
+	
+	var animation = {},
+		rate = 1;
+	
+	var baseTimes, elapsedTime;
+	
+	var started = false, paused = false;
+	
+	animation.setup = function() {
 		
-		var startTimes = vehicles.map(function(v) { return (v.data[0].timenum) });
-		var startTime = Math.min.apply(null, startTimes);
-		var endTimes = vehicles.map(function(v) { return (v.data[v.data.length-1].timenum) });
-		var endTime = Math.max.apply(null, endTimes);
+		// delete old animation
+		animationGroup.clearLayers();
 		
-		var clock = $("#playbackTime");
+		started = false;
+		paused = false;
 		
-		var animation = {},
-			rate = 1;
+		// Base times to use to calculate clock: AVL times. 
+		baseTimes = vehicles[0].data.map(function (v) { return v.timenum }),
+			elapsedTime = 0;
 		
-		var baseTimes, elapsedTime;
-		
-		var started = false, paused = false;
-		
-		animation.setup = function() {
-			
-			// delete old animation
-			animationGroup.clearLayers();
-			
-			started = false;
-			paused = false;
-			
-			// Base times to use to calculate clock: AVL times. 
-			baseTimes = vehicles[0].data.map(function (v) { return v.timenum }),
-				elapsedTime = 0;
-			
-			for (var i = 0; i < vehicles.length; i++) {
-				var vehicle = vehicles[i];
-				var positions = vehicle.data.map(function(v) { return [v.lat, v.lon] });
-				var durations = []
-				for (var i = 0; i < vehicle.data.length-1; i++) {
-					var d = (vehicle.data[i+1].timenum - vehicle.data[i].timenum)/rate;
-					durations.push(d);
-				}
-				
-				vehicle.animation = L.Marker.movingMarker(positions, durations, {
-					icon:  L.icon({
-					    iconUrl:  contextPath + "/reports/images/bus.png", 
-					    iconSize: [25,25]
-					}),
-					zIndexOffset: 1000
-				}).addTo(animationGroup)
-								
-				vehicle.animation.on("end", function() {
-					pause = true;
-					// set play button back to play
-					$("#playbackPlay").attr("src", playButton);
-				})
+		for (var i = 0; i < vehicles.length; i++) {
+			var vehicle = vehicles[i];
+			var positions = vehicle.data.map(function(v) { return [v.lat, v.lon] });
+			var durations = []
+			for (var i = 0; i < vehicle.data.length-1; i++) {
+				var d = (vehicle.data[i+1].timenum - vehicle.data[i].timenum)/rate;
+				durations.push(d);
 			}
 			
-			// Synchronize clock to first vehicle.
-			vehicles[0].animation.on("tick", function(tick) {
-				var baseTime = baseTimes[tick.currentIndex];
-				elapsedTime = tick.elapsedTime;
-				var currTime = baseTime + tick.elapsedTime * rate;
-				if (!paused)
-					clock.text(parseTime(currTime));
+			vehicle.animation = L.Marker.movingMarker(positions, durations, {
+				icon:  L.icon({
+				    iconUrl:  contextPath + "/reports/images/bus.png", 
+				    iconSize: [25,25]
+				}),
+				zIndexOffset: 1000
+			}).addTo(animationGroup)
+							
+			vehicle.animation.on("end", function() {
+				pause = true;
+				// set play button back to play
+				$("#playbackPlay").attr("src", playButton);
 			})
-			
-			clock.text(parseTime(baseTimes[0]))
 		}
 		
-		animation.start = function() {
-			started = true, paused = false;
-			for (var i = 0; i < vehicles.length; i++)
-				vehicles[i].animation.start();
-		}
+		// Synchronize clock to first vehicle.
+		vehicles[0].animation.on("tick", function(tick) {
+			var baseTime = baseTimes[tick.currentIndex];
+			elapsedTime = tick.elapsedTime;
+			var currTime = baseTime + tick.elapsedTime * rate;
+			if (!paused)
+				clock.text(parseTime(currTime));
+		})
 		
-		animation.resume = function() {
-			paused = false;
-			for (var i = 0; i < vehicles.length; i++)
-				vehicles[i].animation.resume();
-		}
-		
-		animation.pause = function() {
-			paused = true;
-			var referenceAnim = vehicles[0].animation;
-			baseTimes[referenceAnim._currentIndex] += elapsedTime * rate;
-			for (var i = 0; i < vehicles.length; i++)
-				vehicles[i].animation.pause();
-		}
-		
-		animation.stop = function() {
-			for (var i = 0; i < vehicles.length; i++)
-				vehicles[i].animation.stop();
-		}
-		
-		animation.rate = function(_) {
-			if (_) {
-				var oldrate = rate;
-				rate = _;
-				animation.pause();
-				var delta = oldrate / rate;
-				for (var i = 0; i < vehicles.length; i++) {
-					var durations = vehicles[i].animation._durations;
-			        for (var j = 0; j < durations.length; j++) 
-						durations[j] *= delta;
-			        vehicles[i].animation._currentDuration *= delta;
-				}
-				animation.resume();
-			}
-			else
-				return rate;				
-		}
-		
-		animation.paused = function() { return paused; };
-		animation.started = function() { return started; };
-		
-		return animation;
-	}
-					
-	function parseTime(x) {
-		return new Date(x).toTimeString().slice(0, 8);
+		clock.text(parseTime(baseTimes[0]))
 	}
 	
+	animation.start = function() {
+		started = true, paused = false;
+		for (var i = 0; i < vehicles.length; i++)
+			vehicles[i].animation.start();
+	}
+	
+	animation.resume = function() {
+		paused = false;
+		for (var i = 0; i < vehicles.length; i++)
+			vehicles[i].animation.resume();
+	}
+	
+	animation.pause = function() {
+		paused = true;
+		var referenceAnim = vehicles[0].animation;
+		baseTimes[referenceAnim._currentIndex] += elapsedTime * rate;
+		for (var i = 0; i < vehicles.length; i++)
+			vehicles[i].animation.pause();
+	}
+	
+	animation.stop = function() {
+		for (var i = 0; i < vehicles.length; i++)
+			vehicles[i].animation.stop();
+	}
+	
+	animation.rate = function(_) {
+		if (_) {
+			var oldrate = rate;
+			rate = _;
+			animation.pause();
+			var delta = oldrate / rate;
+			for (var i = 0; i < vehicles.length; i++) {
+				var durations = vehicles[i].animation._durations;
+		        for (var j = 0; j < durations.length; j++) 
+					durations[j] *= delta;
+		        vehicles[i].animation._currentDuration *= delta;
+			}
+			animation.resume();
+		}
+		else
+			return rate;				
+	}
+	
+	animation.paused = function() { return paused; };
+	animation.started = function() { return started; };
+	
+	return animation;
 }
+				
+function parseTime(x) {
+	return new Date(x).toTimeString().slice(0, 8);
+}
+	
+
