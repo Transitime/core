@@ -82,7 +82,7 @@ public class DatabaseQueueMonitor extends MonitorBase {
 				+ ".",
 				dbLogger.queueLevel());
 
-        cloudwatchService.publishMetric("DatabaseQueueLevel", dbLogger.queueLevel());
+        cloudwatchService.publishMetric("DatabaseQueueLevel", dbLogger.queueLevel()*100);
 		
 		// Determine the threshold for triggering. If already triggered
 		// then lower the threshold by maxQueueFractionGap in order
