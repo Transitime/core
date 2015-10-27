@@ -98,7 +98,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		if (activeBlocks.size() == 0) {
 			setMessage("No currently active blocks so predictability "
 					+ "considered to be OK.");
-            cloudwatchService.publishMetric("PredictablePercentageOfBlocks", 100d);
+            cloudwatchService.publishMetric("PredictablePercentageOfBlocks", 1d);
 			return 1.0;
 		}
 
@@ -119,7 +119,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		double fraction = ((double) Math.max(predictableVehicleCount,
 				minimumPredictableVehicles.getValue())) / activeBlocks.size();
 
-        cloudwatchService.publishMetric("PredictablePercentageOfBlocks", fraction * 100d);
+        cloudwatchService.publishMetricAsPercent("PredictablePercentageOfBlocks", fraction);
 
 		// Provide simple message explaining the situation
 		String message = "Predictable blocks fraction=" 

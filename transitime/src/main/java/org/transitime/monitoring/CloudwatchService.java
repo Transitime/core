@@ -78,4 +78,26 @@ public class CloudwatchService {
 
     }
 
+    /**
+     * metric value should be between 0 and 1 representing values 0 to 100 percent.
+     * @param metricName
+     * @param metricValue
+     */
+    public synchronized void publishMetricAsPercent(String metricName, Double metricValue){
+      logger.info("Cloudwatch[{}]={}", metricName, metricValue);
+      if(cloudWatch == null)
+          return;
+
+      MetricDatum datum = new MetricDatum().
+              withMetricName(metricName).
+              withTimestamp(new Date()).
+              withValue(metricValue).
+              withUnit(StandardUnit.Percent);
+      PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
+              withNamespace(environmentName).
+              withMetricData(datum);
+      cloudWatch.putMetricData(putMetricDataRequest);
+
+  }
+
 }
