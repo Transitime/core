@@ -311,7 +311,7 @@ function main(request, path) {
 		
 		// Reset animation object and associated UI elements.
 		if (animation) {
-			animation.stop();
+			animation.destroy();
 			$("#playbackPlay").attr("src", playButton);	
 			$("#playbackRate").text("1X");
 			$("#playbackTime").text("00:00:00");
@@ -355,66 +355,30 @@ function main(request, path) {
 
 var animation;
 
-$("#playbackPrev").on("click", function() {
-	if (animation)
-		animation.stop();
-	//vehicleGroup.clearLayers();
-	animation = makeAnimation(vehicles);
-	animation.setup();
-	
-	// change button back to play
-	$("#playbackPlay").attr("src", playButton);
-	
-	$("#playbackRate").text("1X");
-});
 
 $("#playbackNext").on("click", function() {
-	// create animation if it doesn't exist, or stop it.
 	if (animation)
-		animation.stop()
-	else {
-		animation = makeAnimation(vehicles)
-		animation.setup()
-	}
-	
-	// move marker to end
-	for (var i = 0; i < vehicles.length; i++) {
-		var marker = vehicles[i].animation,
-			positions = vehicles[i].data,
-			last = positions[positions.length-1];
-		
-		marker.setLatLng(last);
-		
-		// change clock time
-		$("#playbackTime").text(parseTime(last.timenum))
-	}
-	
-	// change button back to play
-	$("#playbackPlay").attr("src", playButton);
+		animation.next()
+});
+
+$("#playbackPrev").on("click", function() {
+	if (animation)
+		animation.prev()
 })
 
 $("#playbackPlay").on("click", function() {
 	if (animation === undefined) {
-		//vehicleGroup.clearLayers();
 		animation = makeAnimation(vehicles[0]);
-		//animation.setup();
 	}
 	
-	/*
-	if (animation.paused()) {
-		animation.resume();
-		$("#playbackPlay").attr("src", pauseButton);
-	}
-	else if (animation.started()) {
-		animation.pause()
-		// change button icon back to play
+	if (!animation.paused()) {
+		animation.pause();
 		$("#playbackPlay").attr("src", playButton);
 	}
-	*/
-	//else { // need to start it
+	else { // need to start it
 		animation.start();
 		$("#playbackPlay").attr("src", pauseButton);
-	//}
+	}
 	
 });
 
@@ -451,19 +415,25 @@ function makeAnimation(vehicle) {
 	var clock = $("#playbackTime");
 	
 	var animation = {},
-		rate = 16;
+		rate = 1;
 	
 	var currentIndex = 0; // this means we're going to 1
 	
-	var elapsedTime = 0,
+	var elapsedTime = vehicle.data[0].timenum,
 		lastTime = 0,
 		lineDone = 0;
+	
+	var paused = true;
 	
 	var durations = []
 	for (var i = 0; i < vehicle.data.length - 1; i++)
 		durations.push(vehicle.data[i+1].timenum - vehicle.data[i].timenum);
 		
-	var icon = L.marker(vehicle.data[0]).addTo(animationGroup);
+	var icon = L.marker(vehicle.data[0],
+			{icon:  L.icon({
+			    iconUrl:  contextPath + "/reports/images/bus.png", 
+			    iconSize: [25,25]
+			})}).addTo(animationGroup);
 	
 	function tick() {
 		var now = Date.now(),
@@ -472,9 +442,8 @@ function makeAnimation(vehicle) {
 		lastTime = now;
 		
 		elapsedTime += delta * rate;
-		clock.text(parseTime(elapsedTime));
 		
-		lineDone += (delta * rate);
+		lineDone += delta * rate;
 		
 		if (lineDone > durations[currentIndex]) {
 			// advance index and icon
@@ -486,20 +455,74 @@ function makeAnimation(vehicle) {
 			
 			icon.setLatLng(vehicle.data[currentIndex])
 			icon.update()
+			elapsedTime = vehicle.data[currentIndex].timenum
 		}
 		else {
 			var pos = interpolatePosition(vehicle.data[currentIndex], vehicle.data[currentIndex+1], durations[currentIndex], lineDone)
 			icon.setLatLng(pos)
 			icon.update()
-			//thunk()
+			
 		}
+		clock.text(parseTime(elapsedTime));
 		
-		requestAnimationFrame(tick)
+		if (!paused)
+			requestAnimationFrame(tick)
 	}
 	
 	animation.start = function() { 
 		lastTime = Date.now();
+		paused = false;
 		tick();
+	}
+	
+	animation.pause = function() {
+		paused = true;
+	}
+	
+	animation.destroy = function() {
+		paused = true;
+		animationGroup.removeLayer(icon);
+	}
+	
+	animation.paused = function() {
+		return paused;
+	}
+	
+	animation.rate = function(_) {
+		if(_)
+			rate = _;
+		else
+			return rate;
+	}
+	
+	// skip to next AVL
+	animation.next = function() {
+		updateToIndex(currentIndex+1);
+	}
+	
+	// previous AVL
+	animation.prev = function() {
+		// don't actually want to go *back* an index, just restart this one.
+		updateToIndex(currentIndex);
+	}
+		
+	function updateToIndex(i) {
+		if (i > vehicle.data.length - 1)
+			i = vehicle.data.length - 1;
+		if (i < 0)
+			i = 0;
+		
+		currentIndex = i; //+= 1;
+		lineDone = 0;
+		var avl = vehicle.data[currentIndex];
+		elapsedTime = avl.timenum;
+		
+		// update GUI if tick won't.
+		if (paused) {
+			icon.setLatLng(avl);
+			icon.update();
+			clock.text(parseTime(elapsedTime));
+		}
 	}
 	
 	
