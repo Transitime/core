@@ -396,10 +396,11 @@ $("#playbackNext").on("click", function() {
 $("#playbackPlay").on("click", function() {
 	if (animation === undefined) {
 		//vehicleGroup.clearLayers();
-		animation = makeAnimation(vehicles);
-		animation.setup();
+		animation = makeAnimation(vehicles[0]);
+		//animation.setup();
 	}
 	
+	/*
 	if (animation.paused()) {
 		animation.resume();
 		$("#playbackPlay").attr("src", pauseButton);
@@ -409,10 +410,11 @@ $("#playbackPlay").on("click", function() {
 		// change button icon back to play
 		$("#playbackPlay").attr("src", playButton);
 	}
-	else { // need to start it
+	*/
+	//else { // need to start it
 		animation.start();
 		$("#playbackPlay").attr("src", pauseButton);
-	}
+	//}
 	
 });
 
@@ -432,117 +434,74 @@ $("#playbackRew").on("click", function() {
 	$("#playbackRate").text(rate + "X");
 });
 
-//This is a factory function to return a (closure style) object to animate the clock,
-//with start, pause, and a rate getter/setter.
-function makeAnimation(vehicles) {
+
+// taken from leafletMovingMarker.js
+var interpolatePosition = function(p1, p2, duration, t) {
+    var k = t/duration;
+    k = (k>0) ? k : 0;
+    k = (k>1) ? 1 : k;
+    return L.latLng(p1.lat + k*(p2.lat-p1.lat), p1.lon + k*(p2.lon-p1.lon));
+};
+
+function makeAnimation(vehicle) {
 	
-	var startTimes = vehicles.map(function(v) { return (v.data[0].timenum) });
-	var startTime = Math.min.apply(null, startTimes);
-	var endTimes = vehicles.map(function(v) { return (v.data[v.data.length-1].timenum) });
-	var endTime = Math.max.apply(null, endTimes);
+	var startTime = vehicle.data[0].timenum,
+		endTime = vehicle.data[vehicle.data.length-1].timenum;
 	
 	var clock = $("#playbackTime");
 	
 	var animation = {},
-		rate = 1;
+		rate = 16;
 	
-	var baseTimes, elapsedTime;
+	var currentIndex = 0; // this means we're going to 1
 	
-	var started = false, paused = false;
+	var elapsedTime = 0,
+		lastTime = 0,
+		lineDone = 0;
 	
-	animation.setup = function() {
+	var durations = []
+	for (var i = 0; i < vehicle.data.length - 1; i++)
+		durations.push(vehicle.data[i+1].timenum - vehicle.data[i].timenum);
 		
-		// delete old animation
-		animationGroup.clearLayers();
+	var icon = L.marker(vehicle.data[0]).addTo(animationGroup);
+	
+	function tick() {
+		var now = Date.now(),
+			delta = now - lastTime;
 		
-		started = false;
-		paused = false;
+		lastTime = now;
 		
-		// Base times to use to calculate clock: AVL times. 
-		baseTimes = vehicles[0].data.map(function (v) { return v.timenum }),
-			elapsedTime = 0;
+		elapsedTime += delta * rate;
+		clock.text(parseTime(elapsedTime));
 		
-		for (var i = 0; i < vehicles.length; i++) {
-			var vehicle = vehicles[i];
-			var positions = vehicle.data.map(function(v) { return [v.lat, v.lon] });
-			var durations = []
-			for (var i = 0; i < vehicle.data.length-1; i++) {
-				var d = (vehicle.data[i+1].timenum - vehicle.data[i].timenum)/rate;
-				durations.push(d);
-			}
+		lineDone += (delta * rate);
+		
+		if (lineDone > durations[currentIndex]) {
+			// advance index and icon
+			currentIndex += 1
+			lineDone = 0;
 			
-			vehicle.animation = L.Marker.movingMarker(positions, durations, {
-				icon:  L.icon({
-				    iconUrl:  contextPath + "/reports/images/bus.png", 
-				    iconSize: [25,25]
-				}),
-				zIndexOffset: 1000
-			}).addTo(animationGroup)
-							
-			vehicle.animation.on("end", function() {
-				pause = true;
-				// set play button back to play
-				$("#playbackPlay").attr("src", playButton);
-			})
+			if (currentIndex == vehicle.data.length - 1)
+				return;
+			
+			icon.setLatLng(vehicle.data[currentIndex])
+			icon.update()
+		}
+		else {
+			var pos = interpolatePosition(vehicle.data[currentIndex], vehicle.data[currentIndex+1], durations[currentIndex], lineDone)
+			icon.setLatLng(pos)
+			icon.update()
+			//thunk()
 		}
 		
-		// Synchronize clock to first vehicle.
-		vehicles[0].animation.on("tick", function(tick) {
-			var baseTime = baseTimes[tick.currentIndex];
-			elapsedTime = tick.elapsedTime;
-			var currTime = baseTime + tick.elapsedTime * rate;
-			if (!paused)
-				clock.text(parseTime(currTime));
-		})
-		
-		clock.text(parseTime(baseTimes[0]))
+		requestAnimationFrame(tick)
 	}
 	
-	animation.start = function() {
-		started = true, paused = false;
-		for (var i = 0; i < vehicles.length; i++)
-			vehicles[i].animation.start();
+	animation.start = function() { 
+		lastTime = Date.now();
+		tick();
 	}
 	
-	animation.resume = function() {
-		paused = false;
-		for (var i = 0; i < vehicles.length; i++)
-			vehicles[i].animation.resume();
-	}
-	
-	animation.pause = function() {
-		paused = true;
-		var referenceAnim = vehicles[0].animation;
-		baseTimes[referenceAnim._currentIndex] += elapsedTime * rate;
-		for (var i = 0; i < vehicles.length; i++)
-			vehicles[i].animation.pause();
-	}
-	
-	animation.stop = function() {
-		for (var i = 0; i < vehicles.length; i++)
-			vehicles[i].animation.stop();
-	}
-	
-	animation.rate = function(_) {
-		if (_) {
-			var oldrate = rate;
-			rate = _;
-			animation.pause();
-			var delta = oldrate / rate;
-			for (var i = 0; i < vehicles.length; i++) {
-				var durations = vehicles[i].animation._durations;
-		        for (var j = 0; j < durations.length; j++) 
-					durations[j] *= delta;
-		        vehicles[i].animation._currentDuration *= delta;
-			}
-			animation.resume();
-		}
-		else
-			return rate;				
-	}
-	
-	animation.paused = function() { return paused; };
-	animation.started = function() { return started; };
 	
 	return animation;
 }
