@@ -91,7 +91,7 @@ public class CloudwatchService {
       MetricDatum datum = new MetricDatum().
               withMetricName(metricName).
               withTimestamp(new Date()).
-              withValue(metricValue).
+              withValue(metricValue * 100d).
               withUnit(StandardUnit.Percent);
       PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
               withNamespace(environmentName).
