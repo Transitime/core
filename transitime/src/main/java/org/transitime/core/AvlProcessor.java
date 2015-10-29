@@ -27,6 +27,7 @@ import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.SpatialMatcher.MatchingType;
 import org.transitime.core.autoAssigner.AutoBlockAssigner;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
@@ -606,12 +607,12 @@ public class AvlProcessor {
 			// Get the potential spatial matches
 			List<SpatialMatch> spatialMatchesForBlock = SpatialMatcher
 					.getSpatialMatches(vehicleState.getAvlReport(),
-							block, potentialTrips);
+							block, potentialTrips, MatchingType.AUTO_ASSIGNING_MATCHING);
 
 			// Add appropriate spatial matches to list
 			for (SpatialMatch spatialMatch : spatialMatchesForBlock) {
 				if (!SpatialMatcher.problemMatchDueToLackOfHeadingInfo(
-						spatialMatch, vehicleState)
+						spatialMatch, vehicleState, MatchingType.AUTO_ASSIGNING_MATCHING)
 						&& matchOkForRouteMatching(spatialMatch))
 					allPotentialSpatialMatchesForRoute.add(spatialMatch);
 			}
@@ -659,11 +660,15 @@ public class AvlProcessor {
 		// Determine best spatial matches for trips that are currently
 		// active. Currently active means that the AVL time is within
 		// reasonable range of the start time and within the end time of
-		// the trip.
+		// the trip. Matching type is set to MatchingType.STANDARD_MATCHING,
+		// which means the matching can be more lenient than with
+		// MatchingType.AUTO_ASSIGNING_MATCHING, because the AVL feed is
+		// specifying the block assignment so it should find a match even
+		// if it pretty far off.
 		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
 		List<SpatialMatch> spatialMatches =
 				SpatialMatcher.getSpatialMatches(vehicleState.getAvlReport(),
-						block, potentialTrips);
+						block, potentialTrips, MatchingType.STANDARD_MATCHING);
 		logger.debug("For vehicleId={} and blockId={} spatial matches={}",
 				avlReport.getVehicleId(), block.getId(), spatialMatches);
 
@@ -679,7 +684,7 @@ public class AvlProcessor {
 		// get another AVL report at a different location so can see if making
 		// progress along route in proper direction.
 		if (SpatialMatcher.problemMatchDueToLackOfHeadingInfo(bestMatch,
-				vehicleState)) {
+				vehicleState, MatchingType.STANDARD_MATCHING)) {
 			logger.debug("Found match but could not confirm that heading is "
 					+ "proper. Therefore not matching vehicle to block. {}",
 					bestMatch);
