@@ -48,6 +48,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.StringConfigValue;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatch;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -133,6 +135,9 @@ public final class Block implements Serializable {
 	
 	// Hibernate requires class to be serializable because has composite Id
 	private static final long serialVersionUID = 6511242755235485004L;
+	
+	private static BooleanConfigValue blockLoading =
+      new BooleanConfigValue("transitime.blockLoading.agressive", false, "Set true to eagerly fetch all blocks into memory on startup");
 
 	private static final Logger logger = LoggerFactory.getLogger(Block.class);
 
@@ -193,18 +198,50 @@ public final class Block implements Serializable {
 	@SuppressWarnings("unchecked")
 	public static List<Block> getBlocks(Session session, int configRev) 
 			throws HibernateException {
-		String hql = "FROM Blocks b "
-        + "join fetch b.trips t "
-        + "join fetch t.travelTimes "
-        + "join fetch t.tripPattern tp "
-        + "join fetch tp.stopPaths sp "
-        /*+ "join fetch sp.locations "*/  //this makes the resultset REALLY big
-        + "WHERE b.configRev = :configRev";
-		Query query = session.createQuery(hql);
-		query.setInteger("configRev", configRev);
-		return query.list();
+	  try {
+	    if (Boolean.TRUE.equals(blockLoading.getValue())) {
+	      return getBlocksAgressively(session, configRev);
+	    }
+	    return getBlocksPassive(session, configRev);
+	  } finally {
+	    logger.warn("caching complete");
+	  }
 	}
 
+	 private static List<Block> getBlocksPassive(Session session, int configRev) 
+	      throws HibernateException {
+	    try {
+	      logger.warn("caching blocks....");
+	      String hql = "FROM Blocks b "
+	          + "WHERE b.configRev = :configRev";
+	      Query query = session.createQuery(hql);
+	      query.setInteger("configRev", configRev);
+	      return query.list();
+	    } finally {
+	      logger.warn("caching complete");
+	    }
+	  }
+
+	  private static List<Block> getBlocksAgressively(Session session, int configRev) 
+	      throws HibernateException {
+	    try {
+	      logger.warn("caching blocks....");
+	      String hql = "FROM Blocks b "
+	          + "join fetch b.trips t "
+	          + "join fetch t.travelTimes "
+	          + "join fetch t.tripPattern tp "
+	          + "join fetch tp.stopPaths sp "
+	          /*+ "join fetch sp.locations "*/  //this makes the resultset REALLY big
+	          + "WHERE b.configRev = :configRev";
+	      Query query = session.createQuery(hql);
+	      query.setInteger("configRev", configRev);
+	      return query.list();
+	    } finally {
+	      logger.warn("caching complete");
+	    }
+	  }
+
+	
 	/**
 	 * Deletes rev from the Blocks, Trips, and Block_to_Trip_joinTable
 	 * 

@@ -124,7 +124,7 @@ public class DbWriter {
 		int c = 0;
 		long startTime = System.currentTimeMillis();
 		for (Block block : gtfsData.getBlocks()) {
-			logger.debug("Saving block #{} with blockId={} serviceId={} blockId={}",
+			logger.info("Saving block #{} with blockId={} serviceId={} blockId={}",
 					++c, block.getId(), block.getServiceId(), block.getId());
 			writeObject(session, block, false);
 			if (c % 1000 == 0) {
