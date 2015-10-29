@@ -49,14 +49,14 @@ public class Agency implements Serializable {
 	@Id
 	private final int configRev;
 	
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	@Id
+	private final String agencyName;
+	
 	// Note: this is the GTFS agency_id, not the usual
 	// Transitime agencyId.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE) 
-	@Id
 	private final String agencyId;
-	
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String agencyName;
 	
 	@Column
 	private final String agencyUrl;

@@ -8,10 +8,10 @@
 
     create table Agencies (
         configRev number(10,0) not null,
-        agencyId varchar2(60 char) not null,
+        agencyName varchar2(60 char) not null,
         agencyFareUrl varchar2(255 char),
+        agencyId varchar2(60 char),
         agencyLang varchar2(15 char),
-        agencyName varchar2(60 char),
         agencyPhone varchar2(15 char),
         agencyTimezone varchar2(40 char),
         agencyUrl varchar2(255 char),
@@ -19,7 +19,7 @@
         maxLon double precision,
         minLat double precision,
         minLon double precision,
-        primary key (configRev, agencyId)
+        primary key (configRev, agencyName)
     );
 
     create table ArrivalsDepartures (
