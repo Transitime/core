@@ -53,7 +53,10 @@ public class ApiPrediction {
 
 	@XmlAttribute(name = "trip")
 	private String tripId;
-
+	
+	@XmlAttribute(name = "blockId")
+	private String blockId;
+	
 	@XmlAttribute(name = "tripPattern")
 	private String tripPatternId;
 
@@ -134,6 +137,8 @@ public class ApiPrediction {
         affectedByLayover = Boolean.toString(prediction.isAffectedByWaitStop());
 
         isDepartureDuplicate = Boolean.toString(!prediction.isArrival());
+        
+        blockId = prediction.getBlockId();
 	}
 
 }
