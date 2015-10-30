@@ -24,6 +24,9 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="activeBlocks.jsp?a=<%= agencyId %>"
     title="Shows how many block assignments are currently active and if they have assigned vehicles">
       Active Blocks</a></li>
+  <li><a href="../map/schAdhMap.jsp?a=<%= agencyId %>"
+    title="Shows current real-time schedule adherence of vehicles in map">
+      Schedule Adherence Map</a></li>
   <li><a href="serverStatus.jsp?a=<%= agencyId %>"
     title="Shows how well system is running, including the AVL feed">
       Server Status</a></li>
