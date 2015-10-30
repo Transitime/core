@@ -199,6 +199,7 @@ public final class Block implements Serializable {
 	public static List<Block> getBlocks(Session session, int configRev) 
 			throws HibernateException {
 	  try {
+	    logger.warn("caching blocks....");
 	    if (Boolean.TRUE.equals(blockLoading.getValue())) {
 	      return getBlocksAgressively(session, configRev);
 	    }
@@ -210,35 +211,25 @@ public final class Block implements Serializable {
 
 	 private static List<Block> getBlocksPassive(Session session, int configRev) 
 	      throws HibernateException {
-	    try {
-	      logger.warn("caching blocks....");
-	      String hql = "FROM Blocks b "
-	          + "WHERE b.configRev = :configRev";
-	      Query query = session.createQuery(hql);
-	      query.setInteger("configRev", configRev);
-	      return query.list();
-	    } finally {
-	      logger.warn("caching complete");
-	    }
+      String hql = "FROM Blocks b "
+          + "WHERE b.configRev = :configRev";
+      Query query = session.createQuery(hql);
+      query.setInteger("configRev", configRev);
+      return query.list();
 	  }
 
 	  private static List<Block> getBlocksAgressively(Session session, int configRev) 
 	      throws HibernateException {
-	    try {
-	      logger.warn("caching blocks....");
-	      String hql = "FROM Blocks b "
-	          + "join fetch b.trips t "
-	          + "join fetch t.travelTimes "
-	          + "join fetch t.tripPattern tp "
-	          + "join fetch tp.stopPaths sp "
-	          /*+ "join fetch sp.locations "*/  //this makes the resultset REALLY big
-	          + "WHERE b.configRev = :configRev";
-	      Query query = session.createQuery(hql);
-	      query.setInteger("configRev", configRev);
-	      return query.list();
-	    } finally {
-	      logger.warn("caching complete");
-	    }
+      String hql = "FROM Blocks b "
+          + "join fetch b.trips t "
+          + "join fetch t.travelTimes "
+          + "join fetch t.tripPattern tp "
+          + "join fetch tp.stopPaths sp "
+          /*+ "join fetch sp.locations "*/  //this makes the resultset REALLY big
+          + "WHERE b.configRev = :configRev";
+      Query query = session.createQuery(hql);
+      query.setInteger("configRev", configRev);
+      return query.list();
 	  }
 
 	
