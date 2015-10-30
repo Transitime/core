@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   
-  <script src="<%= request.getContextPath() %>/map/javascript/leafletMovingMarker.js"></script>
   <script src="<%= request.getContextPath() %>/map/javascript/leafletRotatedMarker.js"></script>
   <script src="<%= request.getContextPath() %>/map/javascript/mapUiOptions.js"></script>
   
