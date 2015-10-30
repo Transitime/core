@@ -871,8 +871,8 @@ if (!getRouteQueryStrParam()) {
  		function(routes) {
 	        // Generate list of routes for the selector
 	 		var selectorData = [];
-	 		for (var i in routes.route) {
-	 			var route = routes.route[i];
+	 		for (var i in routes.routes) {
+	 			var route = routes.routes[i];
 	 			selectorData.push({id: route.id, text: route.name})
 	 		}
 	 		

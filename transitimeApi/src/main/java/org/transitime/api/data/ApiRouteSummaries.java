@@ -32,10 +32,10 @@ import org.transitime.ipc.data.IpcRouteSummary;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "routes")
+@XmlRootElement
 public class ApiRouteSummaries {
 
-	@XmlElement(name = "route")
+	@XmlElement(name = "routes")
 	private List<ApiRouteSummary> routeSummariesData;
 
 	/********************** Member Functions **************************/

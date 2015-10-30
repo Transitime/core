@@ -105,7 +105,7 @@ function removeUnneededBlockAndRouteElements(routes) {
 		var routeInAjaxData = false;
 		// Go through ajax route data
 		for (var j=0; j<routes.route.length; ++j) {
-			if (routeElementId == "routeId-" + routes.route[j].id) {
+			if (routeElementId == "routeId-" + routes.routes[j].id) {
 				routeInAjaxData = true;
 				break;
 			}
@@ -122,8 +122,8 @@ function removeUnneededBlockAndRouteElements(routes) {
 		var blockElementId = blockElements[i].id;
 		var blockInAjaxData = false;
 		// Go through block ajax data
-		for (var j=0; j<routes.route.length; ++j) {
-			var routeData = routes.route[j];
+		for (var j=0; j<routes.routes.length; ++j) {
+			var routeData = routes.routes[j];
 			for (var k=0; k<routeData.block.length; ++k) {
 				if (blockElementId == "blockId=" + routeData.block[k].id) {
 					blockInAjaxData = true;
@@ -160,8 +160,8 @@ function handleAjaxData(routes) {
 	var totalEarly = 0;
 	
 	// Now add a route element if it is in ajax data but element doesn't exist yet
-	for (var j=0; j<routes.route.length; ++j) {
-		var routeData = routes.route[j];
+	for (var j=0; j<routes.routes.length; ++j) {
+		var routeData = routes.routes[j];
 				
 		// If route element doesn't yet exist for this route then create it
 		var routeElementId = "routeId-" + idForQuery(routeData.id);
