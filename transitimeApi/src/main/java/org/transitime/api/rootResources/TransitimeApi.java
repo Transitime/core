@@ -48,6 +48,7 @@ import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoute;
 import org.transitime.api.data.ApiRouteSummaries;
+import org.transitime.api.data.ApiRoutes;
 import org.transitime.api.data.ApiSchedulesHorizStops;
 import org.transitime.api.data.ApiSchedulesVertStops;
 import org.transitime.api.data.ApiServerStatus;
@@ -542,8 +543,8 @@ public class TransitimeApi {
 	}
 
 	/**
-	 * Handles the "routes" command. Returns data describing all of the routes.
-	 * Useful for creating a route selector as part of a UI.
+	 * Handles the "routes" command. Returns summary data describing all of the
+	 * routes. Useful for creating a route selector as part of a UI.
 	 * 
 	 * @param stdParameters
 	 * @return
@@ -576,7 +577,12 @@ public class TransitimeApi {
 	 * includes all stops and paths such that it can be drawn in a map.
 	 * 
 	 * @param stdParameters
-	 * @param routeIdOrShortName
+	 * @param routeIdsOrShortNames
+	 *            list of route IDs or route short names. If a single route is
+	 *            specified then data for just the single route is returned. If
+	 *            no route is specified then data for all routes returned in an
+	 *            array. If multiple routes specified then data for those routes
+	 *            returned in an array.
 	 * @param stopId
 	 *            optional. If set then only this stop and the remaining ones on
 	 *            the trip pattern are marked as being for the UI and can be
@@ -598,7 +604,7 @@ public class TransitimeApi {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getRoute(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "r") String routeIdOrShortName,
+			@QueryParam(value = "r") List<String> routeIdsOrShortNames,
 			@QueryParam(value = "d") String directionId,
 			@QueryParam(value = "s") String stopId,
 			@QueryParam(value = "tripPattern") String tripPatternId)
@@ -609,25 +615,59 @@ public class TransitimeApi {
 		try {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			IpcRoute route =
-					inter.getRoute(routeIdOrShortName, directionId, stopId,
-							tripPatternId);
+			
+			// If single route specified
+			if (routeIdsOrShortNames != null
+					&& routeIdsOrShortNames.size() == 1) {
+				String routeIdOrShortName = routeIdsOrShortNames.get(0);
+				IpcRoute route =
+						inter.getRoute(routeIdOrShortName, directionId, stopId,
+								tripPatternId);
 
-			// If the route doesn't exist then throw exception such that
-			// Bad Request with an appropriate message is returned.
-			if (route == null)
-				throw WebUtils.badRequestException("Route for route="
-						+ routeIdOrShortName + " does not exist.");
+				// If the route doesn't exist then throw exception such that
+				// Bad Request with an appropriate message is returned.
+				if (route == null)
+					throw WebUtils.badRequestException("Route for route="
+							+ routeIdOrShortName + " does not exist.");
 
-			// Create and return ApiRoute response
-			ApiRoute routeData = new ApiRoute(route);
-			return stdParameters.createResponse(routeData);
+				// Create and return ApiRoute response
+				ApiRoute routeData = new ApiRoute(route);
+				return stdParameters.createResponse(routeData);
+			} else {
+				// Multiple routes specified
+				List<IpcRoute> routes = inter.getRoutes(routeIdsOrShortNames);
+				ApiRoutes routeData = new ApiRoutes(routes);
+				return stdParameters.createResponse(routeData);
+			}
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
 
+	@Path("/command/routeMulti")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getRoute(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "r") List<String> routeIdsOrShortNames)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get Vehicle data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			Collection<IpcRouteSummary> routes = inter.getRoutes();
+
+			// Create and return @QueryParam(value="s") String stopId response
+			ApiRouteSummaries routesData = new ApiRouteSummaries(routes);
+			return stdParameters.createResponse(routesData);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+	
 	/**
 	 * Handles the "stops" command. Returns all stops associated with a route,
 	 * grouped by direction. Useful for creating a UI where user needs to select

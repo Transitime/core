@@ -158,6 +158,40 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		return ipcRoute;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRoutes(java.util.List)
+	 */
+	@Override
+	public List<IpcRoute> getRoutes(List<String> routeIdsOrShortNames)
+			throws RemoteException {
+		List<IpcRoute> routes = new ArrayList<IpcRoute>();
+
+		// If no route specified then return data for all routes
+		if (routeIdsOrShortNames == null || routeIdsOrShortNames.isEmpty()) {
+			DbConfig dbConfig = Core.getInstance().getDbConfig();
+			List<org.transitime.db.structs.Route> dbRoutes =
+					dbConfig.getRoutes();
+			for (Route dbRoute : dbRoutes) {
+				IpcRoute ipcRoute = new IpcRoute(dbRoute, null, null, null);
+				routes.add(ipcRoute);
+			}
+		} else {
+			// Routes specified so return data for those routes
+			for (String routeIdOrShortName : routeIdsOrShortNames) {
+				// Determine the route
+				Route dbRoute = getRoute(routeIdOrShortName);
+				if (dbRoute == null)
+					continue;
+
+				IpcRoute ipcRoute = new IpcRoute(dbRoute, null, null, null);
+				routes.add(ipcRoute);
+			}
+		}
+		
+		return routes;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getStops(java.lang.String)
 	 */
@@ -387,5 +421,5 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 			blockIds.add(block.getId());
 		return blockIds;
 	}
-	
+
 }

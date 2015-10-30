@@ -41,7 +41,7 @@ import org.transitime.ipc.data.IpcTripPattern;
 public interface ConfigInterface extends Remote {
 
 	/**
-	 * Obtains ordered list of routes configured.
+	 * Obtains ordered list of route summaries.
 	 * 
 	 * @return
 	 * @throws RemoteException
@@ -75,6 +75,14 @@ public interface ConfigInterface extends Remote {
 	 */
 	public IpcRoute getRoute(String routeIdOrShortName, String directionId,
 			String stopId, String tripPatternId) throws RemoteException;
+	
+	/**
+	 * Obtains ordered list of route details
+	 * @param routeIdOrShortName
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<IpcRoute> getRoutes(List<String> routeIdsOrShortNames) throws RemoteException;
 	
 	/**
 	 * Returns stops for each direction for a route.
