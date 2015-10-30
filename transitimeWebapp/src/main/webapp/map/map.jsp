@@ -637,8 +637,8 @@ function vehicleLocationsCallback(vehicles, status) {
 	var gotUpdatedAvlData = false;
 
 	// Go through vehicle data read in for route...
-	for (var i = 0; i < vehicles.vehicle.length; ++i) {
-		var vehicleData = vehicles.vehicle[i];
+	for (var i = 0; i < vehicles.vehicles.length; ++i) {
+		var vehicleData = vehicles.vehicles[i];
 		
 		// Don't display schedule based vehicles since they are not real and
 		// would only serve to confuse people.

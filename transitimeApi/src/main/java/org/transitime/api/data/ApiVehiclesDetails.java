@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
@@ -37,12 +37,10 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "vehicles")
+@XmlRootElement
 public class ApiVehiclesDetails {
 
-	// Need to use @XmlElementRef so that the element name used for each
-	// ApiVehicle object will be what is specified in the ApiVehicle class.
-	@XmlElementRef
+	@XmlElement(name = "vehicles")
 	private List<ApiVehicleDetails> vehiclesData;
 
 	/********************** Member Functions **************************/

@@ -34,7 +34,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "vehicle")
+@XmlRootElement
 @XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
 		"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc",
 		"scheduleAdherence", "scheduleAdherenceStr", "blockId",
