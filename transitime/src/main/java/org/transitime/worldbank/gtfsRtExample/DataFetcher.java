@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.transitime.configData.DbSetupConfig;
+
 /**
  *
  * For retrieving ApiVehicle from the database
@@ -105,6 +107,12 @@ public class DataFetcher {
 			Properties connectionProps = new Properties();
 			connectionProps.put("user", ConfigurableParameters.DB_USER);
 			connectionProps.put("password", ConfigurableParameters.DB_PASSWORD);
+			// some performance optimizations for mysql
+			if ("mysql".equals(DbSetupConfig.getDbType())) {
+			  connectionProps.put("rewriteBatchedStatements", true);
+			  connectionProps.put("cachePrepStmts", true);
+			  connectionProps.put("autoReconnect", true);
+			}
 			
 			try {
 				databaseConnection = 
