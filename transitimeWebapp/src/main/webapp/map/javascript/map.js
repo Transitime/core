@@ -193,7 +193,7 @@ function zoomIn() {
  * Uses global minorStopOptions, stopOptions, minorShapeOptions, shapeOptions, 
  * and map. 
  */
-function routeConfigCallback(route, status) {
+function routeConfigCallback(routesData, status) {
 	// If there is an old route then remove it
 	if (routeFeatureGroup) {
 		map.removeLayer(routeFeatureGroup);
@@ -212,6 +212,9 @@ function routeConfigCallback(route, status) {
 	// happen to be drawn first.
 	routeFeatureGroup = L.featureGroup();
 
+	// Only working with single route at a time for now
+	var route = routesData.routes[0];
+	
 	// Draw stops for the route. Do stops before paths so that when call  
 	// bringToBack() the stops will end up being on top.
 	var locsToFit = [];
@@ -796,7 +799,7 @@ function showRoute(agencyId, routeId, directionId, stopId, apiKey) {
 	initialStopId = stopId;
 	
 	// Get the route config data
-	var url = apiUrlPrefix + "/command/route?r=" + routeId;
+	var url = apiUrlPrefix + "/command/routesDetails?r=" + routeId;
 	if (directionId)
 		url += "&d=" + directionId;
 	if (stopId)

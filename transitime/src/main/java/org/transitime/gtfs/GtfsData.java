@@ -114,7 +114,6 @@ public class GtfsData {
 	private final Date zipFileLastModifiedTime;
 	private final int originalTravelTimesRev;
 	private final String agencyId;
-	private final boolean shouldCombineShortAndLongNamesForRoutes;
 	private final double pathOffsetDistance;
 	private final double maxStopToPathDistance;
 	private final double maxDistanceForEliminatingVertices;
@@ -248,7 +247,6 @@ public class GtfsData {
 	 * @param projectId
 	 * @param gtfsDirectoryName
 	 * @param supplementDir
-	 * @param shouldCombineShortAndLongNamesForRoutes
 	 * @param pathOffsetDistance
 	 * @param maxStopToPathDistance
 	 * @param maxDistanceForEliminatingVertices
@@ -265,7 +263,6 @@ public class GtfsData {
 			String projectId,
 			String gtfsDirectoryName, 
 			String supplementDir, 
-			boolean shouldCombineShortAndLongNamesForRoutes,
 			double pathOffsetDistance,
 			double maxStopToPathDistance,
 			double maxDistanceForEliminatingVertices,
@@ -279,8 +276,6 @@ public class GtfsData {
 		this.zipFileLastModifiedTime = zipFileLastModifiedTime;
 		this.gtfsDirectoryName = gtfsDirectoryName;
 		this.supplementDir = supplementDir;
-		this.shouldCombineShortAndLongNamesForRoutes = 
-				shouldCombineShortAndLongNamesForRoutes;
 		this.pathOffsetDistance = pathOffsetDistance;
 		this.maxStopToPathDistance = maxStopToPathDistance;
 		this.maxDistanceForEliminatingVertices = 
@@ -520,8 +515,7 @@ public class GtfsData {
 			// Create the route object and add it to the container
 			Route route = new Route(revs.getConfigRev(), gtfsRoute,
 									tripPatternsForRoute,
-									titleFormatter, 
-									shouldCombineShortAndLongNamesForRoutes);
+									titleFormatter);
 			routes.add(route);
 		}
 		

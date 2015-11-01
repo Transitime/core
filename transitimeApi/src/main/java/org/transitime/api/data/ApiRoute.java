@@ -17,56 +17,30 @@
 
 package org.transitime.api.data;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.db.structs.Location;
-import org.transitime.ipc.data.IpcDirection;
-import org.transitime.ipc.data.IpcRoute;
-import org.transitime.ipc.data.IpcShape;
-import org.transitime.ipc.data.IpcDirectionsForRoute;
+import org.transitime.ipc.data.IpcRouteSummary;
 
 /**
- * Provides detailed information for a route include stops and shape info.
+ * A short description of a route. For when outputting list of routes for
+ * agency.
  *
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "route")
 public class ApiRoute {
 
 	@XmlAttribute
 	private String id;
 
 	@XmlAttribute
-	private String shortName;
-
-	@XmlAttribute
 	private String name;
 
 	@XmlAttribute
-	private String color;
+	private String shortName;
 
 	@XmlAttribute
-	private String textColor;
-
-	@XmlAttribute
-	private String type;
-
-	@XmlElement(name = "direction")
-	private List<ApiDirection> directions;
-
-	@XmlElement(name = "shape")
-	private List<ApiShape> shapes;
-
-	@XmlElement
-	private ApiExtent extent;
-
-	@XmlElement
-	private ApiLocation locationOfNextPredictedVehicle;
+	private String longName;
 
 	/********************** Member Functions **************************/
 
@@ -77,32 +51,11 @@ public class ApiRoute {
 	protected ApiRoute() {
 	}
 
-	public ApiRoute(IpcRoute ipcRoute) {
-		this.id = ipcRoute.getId();
-		this.shortName = ipcRoute.getShortName();
-		this.name = ipcRoute.getName();
-		this.color = ipcRoute.getColor();
-		this.textColor = ipcRoute.getTextColor();
-		this.type = ipcRoute.getType();
-
-		IpcDirectionsForRoute stops = ipcRoute.getStops();
-		this.directions = new ArrayList<ApiDirection>();
-		for (IpcDirection ipcDirection : stops.getDirections()) {
-			this.directions.add(new ApiDirection(ipcDirection));
-		}
-
-		this.shapes = new ArrayList<ApiShape>();
-		for (IpcShape shape : ipcRoute.getShapes()) {
-			this.shapes.add(new ApiShape(shape));
-		}
-
-		this.extent = new ApiExtent(ipcRoute.getExtent());
-
-		Location vehicleLoc = ipcRoute.getLocationOfNextPredictedVehicle();
-		if (vehicleLoc == null)
-			this.locationOfNextPredictedVehicle = null;
-		else
-			this.locationOfNextPredictedVehicle = new ApiLocation(vehicleLoc);
+	public ApiRoute(IpcRouteSummary route) {
+		this.id = route.getId();
+		this.name = route.getName();
+		this.shortName = route.getShortName();
+		this.longName = route.getLongName();
 	}
 
 }

@@ -351,8 +351,9 @@ public class IpcRoute extends IpcRouteSummary {
 	public String toString() {
 		return "IpcRoute [" 
 				+ "id=" + id 
-				+ ", shortName=" + shortName 
 				+ ", name=" + name 
+				+ ", shortName=" + shortName 
+				+ ", longName=" + longName 
 				+ ", extent=" + extent
 				+ ", type=" + type 
 				+ ", color=" + color 

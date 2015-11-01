@@ -84,11 +84,17 @@ public class Route implements Serializable {
 	@Column
 	private final String description;
 	
-	@Column
-	private final String name;
-	
+	// Directly from GTFS data
 	@Column(length=80)
 	private final String shortName;
+	
+	// Directly from GTFS data
+	@Column(length=80)
+	private final String longName;
+	
+	// Processed name combing the GTFS route_short_name and route_long_name
+	@Column(length=80)
+	private final String name;
 	
 	@Embedded
 	private final Extent extent;
@@ -127,12 +133,10 @@ public class Route implements Serializable {
 	 * @param gtfsRoute
 	 * @param tripPatternsForRoute
 	 * @param titleFormatter
-	 * @param shouldCombineShortAndLongNamesForRoutes
 	 */
 	public Route(int configRev, GtfsRoute gtfsRoute, 
 			List<TripPattern> tripPatternsForRoute,
-			TitleFormatter titleFormatter, 
-			boolean shouldCombineShortAndLongNamesForRoutes) {
+			TitleFormatter titleFormatter) {
 		// Because will be writing data to the sandbox in the db
 		this.configRev = configRev;
 		
@@ -145,27 +149,26 @@ public class Route implements Serializable {
 		this.type = gtfsRoute.getRouteType();
 		this.description = gtfsRoute.getRouteDesc(); 
 
+		this.shortName = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
+		this.longName = titleFormatter.processTitle(gtfsRoute.getRouteLongName());
+		
 		// Get the name of the route. Need to do some fancy processing here because 
 		// need to fix the capitalization using the TitleFormatter. This also
 		// does all the regex processing to fix other issues. Might also need
 		// to combine short and long names into a single name.
-		if (shouldCombineShortAndLongNamesForRoutes) {			
-			if (gtfsRoute.getRouteLongName() != null && !gtfsRoute.getRouteLongName().isEmpty()) {
-				String shortName = "";
-				if (gtfsRoute.getRouteShortName() != null)
-					shortName = gtfsRoute.getRouteShortName() + " - ";
-				this.name = shortName + titleFormatter.processTitle(gtfsRoute.getRouteLongName());
-			} else
-				this.name = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
+		if (gtfsRoute.getRouteLongName() != null 
+				&& !gtfsRoute.getRouteLongName().isEmpty()) {
+			// route_long_name is set so use it
+			String shortName = "";
+			if (gtfsRoute.getRouteShortName() != null)
+				shortName = gtfsRoute.getRouteShortName() + " - ";
+			this.name = shortName + this.longName;
 		} else {
-			if (gtfsRoute.getRouteLongName() != null && !gtfsRoute.getRouteLongName().isEmpty())
-				this.name = titleFormatter.processTitle(gtfsRoute.getRouteLongName());
-			else
-				this.name = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
+			// route_long_name not set so just use the route_short_name
+			this.name = this.shortName;
 		}
 		
 		this.tripPatternsForRoute = tripPatternsForRoute;	
-		this.shortName = gtfsRoute.getRouteShortName();
 		this.maxDistance =gtfsRoute.getMaxDistance();  
 		
 		// Determine the extent of the route by looking at the extent
@@ -189,8 +192,9 @@ public class Route implements Serializable {
 		hidden = false;
 		type = null;
 		description = null;
-		name = null;
 		shortName = null;
+		longName = null;
+		name = null;
 		extent = null;
 		tripPatternsForRoute = null;
 		maxDistance = null;
@@ -326,6 +330,7 @@ public class Route implements Serializable {
 				+ ", type=" + type
 				+ ", description=" + description 
 				+ ", shortName=" + shortName
+				+ ", longName=" + longName
 				+ ", extent" + extent
 				+ ", tripPatternsForRoute=" + tripPatternIds
 				+ "]";
@@ -349,6 +354,8 @@ public class Route implements Serializable {
 		result = prime * result + routeOrder;
 		result = prime * result
 				+ ((shortName == null) ? 0 : shortName.hashCode());
+		result = prime * result
+				+ ((longName == null) ? 0 : longName.hashCode());
 		result = prime * result
 				+ ((textColor == null) ? 0 : textColor.hashCode());
 		result = prime
@@ -406,6 +413,11 @@ public class Route implements Serializable {
 			if (other.shortName != null)
 				return false;
 		} else if (!shortName.equals(other.shortName))
+			return false;
+		if (longName == null) {
+			if (other.longName != null)
+				return false;
+		} else if (!longName.equals(other.longName))
 			return false;
 		if (textColor == null) {
 			if (other.textColor != null)
@@ -647,7 +659,10 @@ public class Route implements Serializable {
 	}
 
 	/**
-	 * @return the name of the route
+	 * The processed name of the route consisting of the combination of the 
+	 * route_short_name plus the route_long_name. So get something like "38 - Geary".
+	 * 
+	 * @return the processed name of the route
 	 */
 	public String getName() {
 		return name;
@@ -655,11 +670,22 @@ public class Route implements Serializable {
 	
 	/**
 	 * The short name is either specified by route_short_name in the routes.txt
-	 * GTFS file or if that is null it will be the long name name. 
+	 * GTFS file or if that is null it will be the long name name.
+	 * 
 	 * @return the short name for the route
 	 */
 	public String getShortName() {
 		return shortName != null ? shortName : name;
+	}
+	
+	/**
+	 * The long name is either specified by route_long_name in the routes.txt
+	 * GTFS file or if that is null it will be the short name name.
+	 * 
+	 * @return the long name for the route
+	 */
+	public String getLongName() {		
+		return longName != null ? longName : name;
 	}
 	
 	/**

@@ -33,8 +33,9 @@ import org.transitime.db.structs.Route;
 public class IpcRouteSummary implements Serializable {
 
 	protected final String id;
-	protected final String shortName;
 	protected final String name;
+	protected final String shortName;
+	protected final String longName;
 	protected final Extent extent;
 	protected final String type;
 	protected final String color;
@@ -63,8 +64,9 @@ public class IpcRouteSummary implements Serializable {
 						&& useStableIdIfSoConfigured[0]
 						&& CoreConfig.useRouteShortNameAsId() ? 
 								dbRoute.getShortName() : dbRoute.getId();
-		this.shortName = dbRoute.getShortName();
 		this.name = dbRoute.getName();
+		this.shortName = dbRoute.getShortName();
+		this.longName = dbRoute.getLongName();
 		this.extent = dbRoute.getExtent();
 		this.type = dbRoute.getType();
 		this.color = dbRoute.getColor();
@@ -82,14 +84,18 @@ public class IpcRouteSummary implements Serializable {
 		return id;
 	}
 
-	public String getShortName() {
-		return shortName;
-	}
-
 	public String getName() {
 		return name;
 	}
 
+	public String getShortName() {
+		return shortName;
+	}
+
+	public String getLongName() {
+		return longName;
+	}
+	
 	public Extent getExtent() {
 		return extent;
 	}
@@ -110,8 +116,9 @@ public class IpcRouteSummary implements Serializable {
 	public String toString() {
 		return "IpcRouteSummary [" 
 				+ "id=" + id 
-				+ ", shortName=" + shortName 
 				+ ", name="	+ name
+				+ ", shortName=" + shortName 
+				+ ", longName=" + longName 
 				+ ", extent=" + extent
 				+ ", type=" + type
 				+ ", color=" + color

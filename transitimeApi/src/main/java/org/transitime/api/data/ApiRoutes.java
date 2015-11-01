@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.transitime.api.data;
 
 import java.util.ArrayList;
@@ -23,15 +24,17 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcRoute;
+import org.transitime.ipc.data.IpcRouteSummary;
 
 /**
- * When have a list of routes.
- * @author Michael
+ * An ordered list of routes.
+ *
+ * @author SkiBu Smith
  *
  */
 @XmlRootElement
 public class ApiRoutes {
+
 	@XmlElement(name = "routes")
 	private List<ApiRoute> routesData;
 
@@ -41,19 +44,20 @@ public class ApiRoutes {
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
 	 * "MessageBodyWriter not found for media type=application/json" exception.
 	 */
-	public ApiRoutes() {
+	protected ApiRoutes() {
 	}
 
 	/**
-	 * For constructing a ApiRoutes object from a Collection of IpcRoute
-	 * objects. 
+	 * Constructs an ApiRouteSummaries using a collection of IpcRouteSummary
+	 * objects.
 	 * 
 	 * @param routes
 	 */
-	public ApiRoutes(Collection<IpcRoute> routes) {
+	public ApiRoutes(Collection<IpcRouteSummary> routes) {
 		routesData = new ArrayList<ApiRoute>();
-		for (IpcRoute route : routes) {
-			routesData.add(new ApiRoute(route));
+		for (IpcRouteSummary route : routes) {
+			ApiRoute routeSummary = new ApiRoute(route);
+			routesData.add(routeSummary);
 		}
 	}
 }

@@ -46,9 +46,8 @@ import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiIds;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
-import org.transitime.api.data.ApiRoute;
-import org.transitime.api.data.ApiRouteSummaries;
 import org.transitime.api.data.ApiRoutes;
+import org.transitime.api.data.ApiRoutesDetails;
 import org.transitime.api.data.ApiSchedulesHorizStops;
 import org.transitime.api.data.ApiSchedulesVertStops;
 import org.transitime.api.data.ApiServerStatus;
@@ -564,7 +563,7 @@ public class TransitimeApi {
 			Collection<IpcRouteSummary> routes = inter.getRoutes();
 
 			// Create and return @QueryParam(value="s") String stopId response
-			ApiRouteSummaries routesData = new ApiRouteSummaries(routes);
+			ApiRoutes routesData = new ApiRoutes(routes);
 			return stdParameters.createResponse(routesData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -573,7 +572,7 @@ public class TransitimeApi {
 	}
 
 	/**
-	 * Handles the "route" command. Provides detailed information for a route
+	 * Handles the "routesDetails" command. Provides detailed information for a route
 	 * includes all stops and paths such that it can be drawn in a map.
 	 * 
 	 * @param stdParameters
@@ -600,10 +599,10 @@ public class TransitimeApi {
 	 * @return
 	 * @throws WebApplicationException
 	 */
-	@Path("/command/route")
+	@Path("/command/routesDetails")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getRoute(@BeanParam StandardParameters stdParameters,
+	public Response getRouteDetails(@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "r") List<String> routeIdsOrShortNames,
 			@QueryParam(value = "d") String directionId,
 			@QueryParam(value = "s") String stopId,
@@ -615,6 +614,8 @@ public class TransitimeApi {
 		try {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
+			
+			List<IpcRoute> ipcRoutes;
 			
 			// If single route specified
 			if (routeIdsOrShortNames != null
@@ -630,44 +631,23 @@ public class TransitimeApi {
 					throw WebUtils.badRequestException("Route for route="
 							+ routeIdOrShortName + " does not exist.");
 
-				// Create and return ApiRoute response
-				ApiRoute routeData = new ApiRoute(route);
-				return stdParameters.createResponse(routeData);
+				ipcRoutes = new ArrayList<IpcRoute>();
+				ipcRoutes.add(route);
 			} else {
 				// Multiple routes specified
-				List<IpcRoute> routes = inter.getRoutes(routeIdsOrShortNames);
-				ApiRoutes routeData = new ApiRoutes(routes);
-				return stdParameters.createResponse(routeData);
+				ipcRoutes = inter.getRoutes(routeIdsOrShortNames);				
 			}
+			
+			// Take the IpcRoute data array and create and return 
+			// ApiRoutesDetails object
+			ApiRoutesDetails routeData = new ApiRoutesDetails(ipcRoutes);
+			return stdParameters.createResponse(routeData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
 
-	@Path("/command/routeMulti")
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getRoute(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "r") List<String> routeIdsOrShortNames)
-			throws WebApplicationException {
-		// Make sure request is valid
-		stdParameters.validate();
-
-		try {
-			// Get Vehicle data from server
-			ConfigInterface inter = stdParameters.getConfigInterface();
-			Collection<IpcRouteSummary> routes = inter.getRoutes();
-
-			// Create and return @QueryParam(value="s") String stopId response
-			ApiRouteSummaries routesData = new ApiRouteSummaries(routes);
-			return stdParameters.createResponse(routesData);
-		} catch (Exception e) {
-			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
-		}
-	}
-	
 	/**
 	 * Handles the "stops" command. Returns all stops associated with a route,
 	 * grouped by direction. Useful for creating a UI where user needs to select

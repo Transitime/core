@@ -24,8 +24,11 @@ if (agencyId == null || agencyId.isEmpty()) {
 <div id="subtitle">Agency Specific API calls</div>
 <ul class="choicesList">
   <li><a href="routeApiParams.jsp?a=<%= agencyId %>"
-    title="Data for a route. Includes stop and path information needed to show route on map.">
+    title="Summary data for all routes, listed in order. Useful for creating a UI selector for routes.">
       Route</a></li>
+  <li><a href="routeDetailsApiParams.jsp?a=<%= agencyId %>"
+    title="Detailed data for selected routes. Includes stop and path information needed to show route on map.">
+      Route Details</a></li>
       
   <li><a href="vehiclesApiParams.jsp?a=<%= agencyId %>"
     title="Data for vehicles, including GPS info, for a route. Useful for showing location of vehicles on map.">

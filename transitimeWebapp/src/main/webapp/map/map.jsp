@@ -228,7 +228,7 @@ var routeFeatureGroup = null;
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
  */
-function routeConfigCallback(route, status) {
+function routeConfigCallback(routesData, status) {
 	// If there is an old route then remove it
 	if (routeFeatureGroup) {
 		map.removeLayer(routeFeatureGroup);
@@ -239,6 +239,9 @@ function routeConfigCallback(route, status) {
 	// happen to be drawn first.
 	routeFeatureGroup = L.featureGroup();
 
+	// Only working with single route at a time for now
+	var route = routesData.routes[0];
+	
 	// Draw stops for the route. Do stops before paths so that when call  
 	// bringToBack() the stops will end up being on top.
 	var locsToFit = [];
@@ -891,7 +894,7 @@ if (!getRouteQueryStrParam()) {
  						map.closePopup(predictionsPopup);
  					
  					// Configure map for new route	
- 					var url = apiUrlPrefix + "/command/route?r=" + e.val;
+ 					var url = apiUrlPrefix + "/command/routesDetails?r=" + e.val;
  					$.getJSON(url, routeConfigCallback);
 
  					// Reset the polling rate back down to minimum value since selecting new route
@@ -917,7 +920,7 @@ if (!getRouteQueryStrParam()) {
 } else {
 	// Route was specified in query string. 
 	// Read in the route info and draw it on map.
-	var url = apiUrlPrefix + "/command/route?" + getRouteQueryStrParam();
+	var url = apiUrlPrefix + "/command/routesDetails?" + getRouteQueryStrParam();
 	if (getQueryVariable("s"))
 		url += "&s=" + getQueryVariable("s");
 	if (getQueryVariable("tripPattern"))
