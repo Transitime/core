@@ -104,13 +104,18 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 		if (route == null) {
 			logger.error("No route with routeId={}", routeAndStops.routeId);
 		}
-		String routeShortName = route.getShortName();
+		// But route_short_name is optional in GTFS and LA Metro doesn't use it
+		// for the rail lines. So use route_id if route_short_name not defined,
+		// though that might not work either.
+		String routeIdForNextBusApi = route.getShortName();
+		if (routeIdForNextBusApi == null || routeIdForNextBusApi.isEmpty())
+			routeIdForNextBusApi = route.getId();
 		
 		// For all of the stops for the route, complete the URL
 		for (String directionId : routeAndStops.stopIds.keySet()) {
 			Collection<String> stopIds = routeAndStops.stopIds.get(directionId);
 			for (String stopId : stopIds) {
-				fullUrl += "&stops=" + routeShortName + "|" + stopId;
+				fullUrl += "&stops=" + routeIdForNextBusApi + "|" + stopId;
 			}
 		}
 		
