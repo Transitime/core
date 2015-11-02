@@ -35,7 +35,7 @@ import org.transitime.utils.Time;
  *
  */
 @XmlRootElement
-@XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
+@XmlType(propOrder = { "id", "routeId", "routeShortName", "routeName", "headsign",
 		"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc",
 		"scheduleAdherence", "scheduleAdherenceStr", "blockId",
 		"blockAssignmentMethod", "tripId", "tripPatternId", "isDelayed",
@@ -43,6 +43,9 @@ import org.transitime.utils.Time;
 		"nextStopName", "driverId" })
 public class ApiVehicleDetails extends ApiVehicleAbstract {
 
+	@XmlAttribute
+	private String routeName;
+	
 	// Note: needs to be Integer instead of an int because it can be null
 	// (for vehicles that are not predictable)
 	@XmlAttribute(name = "schAdh")
@@ -104,6 +107,7 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	public ApiVehicleDetails(IpcVehicle vehicle, Time timeForAgency, UiMode... uiType) {
 		super(vehicle, uiType.length > 0 ? uiType[0] : UiMode.NORMAL);
 		
+		routeName = vehicle.getRouteName();
 		scheduleAdherence = vehicle.getRealTimeSchedAdh() != null ? vehicle
 				.getRealTimeSchedAdh().getTemporalDifference() : null;
 		scheduleAdherenceStr = vehicle.getRealTimeSchedAdh() != null ? vehicle
