@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+<%-- Shows real-time schedule adherence, for all vehicles, in a map.  --%>    
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%@page import="org.transitime.web.WebConfigParams"%>
 
@@ -37,13 +38,16 @@ var vehiclePopupOptions = {
 
 var map;
 
+// Global so can keep track and delete all vehicles at once
+var vehicleLayer;
+
 /** 
  * Returns content for vehicle popup window. For showing vehicle ID and 
  * schedule adherence.
  */
 function getVehiclePopupContent(vehicle) {
 	return "<b>Vehicle:</b> " + vehicle.id 
-		+ "<br/><b>Route:</b> " + vehicle.routeShortName
+		+ "<br/><b>Route:</b> " + vehicle.routeName
 		+ "<br/><b>To:</b> " + vehicle.headsign
 		+ "<br/><b>SchAhd:</b> " + vehicle.schAdhStr
 		+ "<br/><b>Block:</b> " + vehicle.block;
@@ -57,6 +61,9 @@ function getAndProcessSchAdhData() {
 	$.getJSON(apiUrlPrefix + "/command/vehiclesDetails",
 			// Process data
 			function(jsonData) {
+				var newVehicleLayer = L.featureGroup();
+				
+				// Add new vehicles
 				var len = jsonData.vehicles.length;
 				while (len--) {
 					var vehicle = jsonData.vehicles[len];
@@ -78,6 +85,7 @@ function getAndProcessSchAdhData() {
 					var maxEarly = 180000;  // 3 minutes
 					var lateTime = -120000; // 2 minutes
 				    var maxLate = -600000;  // 10 minutes
+				    var msecPerRadiusPixels = 25000;
 				    
 					// Determine how to draw vehicle depending on how early/late it is
 					var radius;
@@ -85,14 +93,12 @@ function getAndProcessSchAdhData() {
 					var fillOpacity;
 					if (vehicle.schAdh < lateTime) {
 						// Vehicle is late
-						radius = 3 - (Math.max(maxLate, vehicle.schAdh) - lateTime)/20000;
-						console.log("late radius=" + radius);
+						radius = 3 - (Math.max(maxLate, vehicle.schAdh) - lateTime)/msecPerRadiusPixels;
 						fillColor = '#E6D83E';
 						fillOpacity = 0.5;
 					} else if (vehicle.schAdh > earlyTime) { 
 						// Vehicle is early
-						radius = 3 + (Math.min(maxEarly, vehicle.schAdh) - earlyTime)/20000;
-						console.log("early radius=" + radius);
+						radius = 3 + (Math.min(maxEarly, vehicle.schAdh) - earlyTime)/(msecPerRadiusPixels/2);
 						fillColor = '#E34B71';
 						fillOpacity = 0.5;
 					} else {
@@ -121,7 +127,7 @@ function getAndProcessSchAdhData() {
 					var vehicleMarker = 
 						L.circleMarker([vehicle.loc.lat, vehicle.loc.lon], 
 								vehicleMarkerOptions);
-					vehicleMarker.addTo(map);
+					newVehicleLayer.addLayer(vehicleMarker);
 					
 					// Store vehicle data obtained via AJAX with stopMarker so it can be used in popup
 					vehicleMarker.vehicle = vehicle;
@@ -138,7 +144,18 @@ function getAndProcessSchAdhData() {
 							.setContent(content).openOn(map);
 					});	
 
-				}
+				} // End of while loop
+				
+				// Remove old vehicles
+				if (vehicleLayer)
+					map.removeLayer(vehicleLayer);
+				
+				// Add all the vehicles at once
+				newVehicleLayer.addTo(map);
+				
+				// Remember the vehicle layer so can remove all the old 
+				// vehicles next time updating the map
+				vehicleLayer = newVehicleLayer;
 			});
 }
 
@@ -206,11 +223,14 @@ function createMap(mapTileUrl, mapTileCopyright) {
 			});	
 	
 	// Get route config data and draw all routes
-	$.getJSON(apiUrlPrefix + "/command/route", routeConfigCallback);
+	$.getJSON(apiUrlPrefix + "/command/routesDetails", routeConfigCallback);
 
-	// Start showing schedule adherence data and update every 30 seconds
+	// Start showing schedule adherence data and update every 10 seconds.
+	// Updating every is more than is truly useful since won't get significant
+	// change every 10 seconds, but it shows that the map is live and is
+	// really cool.
 	getAndProcessSchAdhData();
-	// FIXME setInterval(getAndProcessSchAdhData, 30000);
+	setInterval(getAndProcessSchAdhData, 10000);
 }
 
 /**
