@@ -91,6 +91,7 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String tripId;
 	
+	// The actual arrival time that corresponds to the prediction time
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date arrivalDepartureTime;
@@ -100,6 +101,8 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date predictedTime;
 	
+	// The time the prediction was read. This allows us to determine
+	// how far out into the future the prediction is for.
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date predictionReadTime;

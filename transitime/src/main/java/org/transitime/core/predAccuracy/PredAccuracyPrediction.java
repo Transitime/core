@@ -108,6 +108,11 @@ public class PredAccuracyPrediction {
 		return predictedTime;
 	}
 	
+	/**
+	 * The time the prediction was read. This allows us to determine
+	 * how far out into the future the prediction is for.
+	 * @return
+	 */
 	public Date getPredictionReadTime() {
 		return predictionReadTime;
 	}

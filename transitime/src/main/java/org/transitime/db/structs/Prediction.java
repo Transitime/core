@@ -62,6 +62,12 @@ public class Prediction implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date predictionTime;
 	
+	// Timestamp of the AVL report that caused the prediction to be generated
+	@Column
+	@Temporal(TemporalType.TIMESTAMP)
+	private final Date avlTime;
+	
+	// The time the AVL data was processed and the prediction was created.
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date creationTime;
@@ -105,11 +111,12 @@ public class Prediction implements Serializable {
 	 * @param affectedByWaitStop
 	 * @param isArrival
 	 */
-	public Prediction(long predictionTime, long creationTime, 
+	public Prediction(long predictionTime, long avlTime, long creationTime, 
 			String vehicleId, String stopId, String tripId, String routeId, 
 			boolean affectedByWaitStop, boolean isArrival, boolean schedBasedPred) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.predictionTime = new Date(predictionTime);
+		this.avlTime = new Date(avlTime);
 		this.creationTime = new Date(creationTime);
 		this.vehicleId = vehicleId;
 		this.stopId = stopId;
@@ -123,6 +130,7 @@ public class Prediction implements Serializable {
 	public Prediction(IpcPrediction prediction) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.predictionTime = new Date(prediction.getPredictionTime());
+		this.avlTime = new Date(prediction.getAvlTime());
 		this.creationTime = new Date(prediction.getCreationTime());
 		this.vehicleId = prediction.getVehicleId();
 		this.stopId = prediction.getStopId();
@@ -140,6 +148,7 @@ public class Prediction implements Serializable {
 	protected Prediction() {
 		this.configRev = -1;
 		this.predictionTime = null;
+		this.avlTime = null;
 		this.creationTime = null;
 		this.vehicleId = null;
 		this.stopId = null;
@@ -158,6 +167,8 @@ public class Prediction implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (affectedByWaitStop ? 1231 : 1237);
+		result = prime * result
+				+ ((avlTime == null) ? 0 : avlTime.hashCode());
 		result = prime * result + configRev;
 		result = prime * result
 				+ ((creationTime == null) ? 0 : creationTime.hashCode());
@@ -187,6 +198,11 @@ public class Prediction implements Serializable {
 			return false;
 		Prediction other = (Prediction) obj;
 		if (affectedByWaitStop != other.affectedByWaitStop)
+			return false;
+		if (avlTime == null) {
+			if (other.avlTime != null)
+				return false;
+		} else if (!avlTime.equals(other.avlTime))
 			return false;
 		if (configRev != other.configRev)
 			return false;
@@ -233,6 +249,7 @@ public class Prediction implements Serializable {
 	public String toString() {
 		return "Prediction [" 
 				+ "predictionTime=" + predictionTime
+				+ ", avlTime=" + avlTime
 				+ ", creationTime=" + creationTime 
 				+ ", vehicleId=" + vehicleId
 				+ ", stopId=" + stopId 
@@ -248,6 +265,10 @@ public class Prediction implements Serializable {
 		return predictionTime;
 	}
 
+	public Date getAvlTime() {
+		return avlTime;
+	}
+	
 	public Date getCreationTime() {
 		return creationTime;
 	}

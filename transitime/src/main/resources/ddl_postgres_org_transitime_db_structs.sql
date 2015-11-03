@@ -196,6 +196,7 @@
     create table Predictions (
         id int8 not null,
         affectedByWaitStop boolean,
+        avlTime timestamp,
         configRev int4,
         creationTime timestamp,
         isArrival boolean,
