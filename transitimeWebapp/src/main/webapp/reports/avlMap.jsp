@@ -18,6 +18,7 @@
   
   <script src="<%= request.getContextPath() %>/map/javascript/leafletRotatedMarker.js"></script>
   <script src="<%= request.getContextPath() %>/map/javascript/mapUiOptions.js"></script>
+  <script src="<%= request.getContextPath() %>/map/javascript/animation.js"></script>
   
    <!-- Load in Select2 files so can create fancy route selector -->
   <link href="../select2/select2.css" rel="stylesheet"/>
@@ -37,6 +38,7 @@
   	<jsp:include page="params/vehicle.jsp" />
   	<jsp:include page="params/fromToDateTime.jsp" />
     <jsp:include page="params/routeSingle.jsp" /> <br>
+    <input type="button" id="submit" value="Submit">
     <a href="#" id="exportData">Export</a>
   </div>
   <div id="playback_container">
@@ -52,11 +54,9 @@
   </div>
 </body>
 
-<script src="<%= request.getContextPath() %>/map/javascript/avlMap.js"></script>
 <script>
 var request = {<%= WebUtils.getAjaxDataString(request) %>},
 	contextPath = "<%= request.getContextPath() %>";
-main(request, contextPath);
 </script>
-
+<script src="<%= request.getContextPath() %>/map/javascript/avlMap.js"></script>
 </html>
