@@ -21,6 +21,15 @@
   	padding-top: 5px;
   	text-align: left;
   }
+  
+  /* for handling names that are too long */
+  #agencyName {
+  	width: 300px;
+  	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  	
   </style>
     
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -41,7 +50,7 @@ for (WebAgency webAgency : webAgencies) {
 		continue;
 	%>
 	<tr>
-	  <td><%= webAgency.getAgencyName() %></td>
+	  <td><div id=agencyName><%= webAgency.getAgencyName() %></div></td>
 	  <td><a href="<%= request.getContextPath() %>/map/map.jsp?a=<%= webAgency.getAgencyId() %>" title="Real-time map">Map</a></td>
 	  <td><a href="<%= request.getContextPath() %>/reports/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Reports on historic information">Reports</a></td>
 	  <td><a href="<%= request.getContextPath() %>/reports/apiCalls/index.jsp?a=<%= webAgency.getAgencyId() %>" title="API calls">API</a></td>
