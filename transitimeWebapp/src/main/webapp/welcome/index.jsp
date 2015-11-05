@@ -14,14 +14,22 @@
     margin-right: auto;
   }
   
+  table {
+  	border-spacing: 0px;
+  }
   /* adjust text in table */
   td {
-  	padding-left: 20px;
-  	padding-right: 20px;
-  	padding-top: 5px;
+  	padding-left: 16px;
+  	padding-right: 16px;
+  	padding-top: 4px;
+  	padding-bottom: 4px;
   	text-align: left;
   }
   
+  /* Alternate row colors to make table more readable */
+  tr:nth-child(odd) {background: #F6F6F6}
+  tr:nth-child(even) {background: #EBEBEB}
+
   /* for handling names that are too long */
   #agencyName {
   	width: 300px;
@@ -51,7 +59,7 @@ for (WebAgency webAgency : webAgencies) {
 	%>
 	<tr>
 	  <td><div id=agencyName><%= webAgency.getAgencyName() %></div></td>
-	  <td><a href="<%= request.getContextPath() %>/map/map.jsp?a=<%= webAgency.getAgencyId() %>" title="Real-time map">Map</a></td>
+	  <td><a href="<%= request.getContextPath() %>/maps/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Real-time maps">Maps</a></td>
 	  <td><a href="<%= request.getContextPath() %>/reports/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Reports on historic information">Reports</a></td>
 	  <td><a href="<%= request.getContextPath() %>/reports/apiCalls/index.jsp?a=<%= webAgency.getAgencyId() %>" title="API calls">API</a></td>
 	  <td><a href="<%= request.getContextPath() %>/status/index.jsp?a=<%= webAgency.getAgencyId() %>" title="Pages showing current status of system">Status</a></td>
