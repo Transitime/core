@@ -194,7 +194,10 @@
   /**
    * Reads in route data obtained via AJAX and draws route and stops on map.
    */
-  function routeConfigCallback(route, status) {
+  function routeConfigCallback(routesData, status) {
+	// Only displaying a single route  
+	var route = routesData.routes[0];
+	  
 	// Draw the paths for the route
 	for (var i=0; i<route.shape.length; ++i) {
 		var shape = route.shape[i];
@@ -268,7 +271,7 @@ $.ajax({
 // If route specified then display it
 var route = "<%= request.getParameter("r") %>";
 if (route != "") {
-	var url = apiUrlPrefix + "/command/route?r=" + route;
+	var url = apiUrlPrefix + "/command/routesDetails?r=" + route;
 	$.getJSON(url, routeConfigCallback);		
 
 }
