@@ -159,9 +159,16 @@ public class Route implements Serializable {
 		if (gtfsRoute.getRouteLongName() != null 
 				&& !gtfsRoute.getRouteLongName().isEmpty()) {
 			// route_long_name is set so use it
+			
+			// Prepend the route short name plus a " - ", but only if
+			// route short name is defined and it is short. This way
+			// will end up with a route name like "38 - Geary" but
+			// not "HYDE-POWELL - Hyde Powell".
 			String shortName = "";
-			if (gtfsRoute.getRouteShortName() != null)
+			if (gtfsRoute.getRouteShortName() != null 
+					&& gtfsRoute.getRouteShortName().length() <=4)
 				shortName = gtfsRoute.getRouteShortName() + " - ";
+			
 			this.name = shortName + this.longName;
 		} else {
 			// route_long_name not set so just use the route_short_name
