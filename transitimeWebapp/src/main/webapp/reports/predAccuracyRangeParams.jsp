@@ -61,7 +61,7 @@
     	and still be acceptable. Must be a negative number to indicate
     	early." 
     	size="1"
-    	value="-1.0" /> <span class="note">minutes</span>
+    	value="1.0" /> <span class="note">minutes</span>
   </div>
  
    <div class="param">
@@ -71,7 +71,7 @@
     	and still be acceptable. Must be a positive number to indicate
     	late." 
     	size="1" 
-    	value=" 4.0"/> <span class="note">minutes</span>
+    	value="4.0"/> <span class="note">minutes</span>
   </div>
     
     <jsp:include page="params/submitReport.jsp" />

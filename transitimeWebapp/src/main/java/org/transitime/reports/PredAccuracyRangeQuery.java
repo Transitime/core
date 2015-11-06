@@ -85,12 +85,12 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 		}
 
 		builder.addNumberColumn();
-		builder.addNumberColumn("Earlier than predicted (<" + maxEarlySec + " secs)");
+		builder.addNumberColumn("Earlier than predicted (more than " + maxEarlySec + " secs early)");
 		builder.addTooltipColumn();
-		builder.addNumberColumn("Within Bounds (" + maxEarlySec + " to "
-				+ maxLateSec + " secs)");
+		builder.addNumberColumn("Within Bounds (" + maxEarlySec + " secs early to "
+				+ maxLateSec + " secs late)");
 		builder.addTooltipColumn();
-		builder.addNumberColumn("Later than predicted (>" + maxLateSec + " secs)");
+		builder.addNumberColumn("Later than predicted (more than " + maxLateSec + " secs late)");
 		builder.addTooltipColumn();
 	}
 
@@ -132,7 +132,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 				// between min and max, and above max.
 				int tooEarly = 0, ok = 0, tooLate = 0;
 				for (int accuracyInSecs : listForPredBucket) {
-					if (accuracyInSecs < maxEarlySec)
+					if (accuracyInSecs < -maxEarlySec)
 						++tooEarly;
 					else if (accuracyInSecs < maxLateSec)
 						++ok;
@@ -197,7 +197,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 *            all), "AffectedByWaitStop", or "NotAffectedByWaitStop".
 	 * @param maxEarlySec
 	 *            How early in msec a prediction is allowed to be. Should be a
-	 *            negative value.
+	 *            positive value.
 	 * @param maxLateSec
 	 *            How late a in msec a prediction is allowed to be. Should be a
 	 *            positive value.
