@@ -93,18 +93,18 @@ function getAndProcessSchAdhData() {
 					var fillOpacity;
 					if (vehicle.schAdh < lateTime) {
 						// Vehicle is late
-						radius = 3 - (Math.max(maxLate, vehicle.schAdh) - lateTime)/msecPerRadiusPixels;
+						radius = 5 - (Math.max(maxLate, vehicle.schAdh) - lateTime)/msecPerRadiusPixels;
 						fillColor = '#E6D83E';
 						fillOpacity = 0.5;
 					} else if (vehicle.schAdh > earlyTime) { 
 						// Vehicle is early
-						radius = 3 + (Math.min(maxEarly, vehicle.schAdh) - earlyTime)/(msecPerRadiusPixels/2);
+						radius = 5 + (Math.min(maxEarly, vehicle.schAdh) - earlyTime)/(msecPerRadiusPixels/2);
 						fillColor = '#E34B71';
 						fillOpacity = 0.5;
 					} else {
 						// Vehicle is ontime
-						radius = 4;
-						fillColor = '#fff'; 
+						radius = 5;
+						fillColor = '#37E627'; 
 						fillOpacity = 0.5;
 					}
 					
