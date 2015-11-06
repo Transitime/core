@@ -18,6 +18,8 @@ package org.transitime.reports;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.transitime.utils.Time;
+
 /**
  * SQL utilities for creating SQL statements using parameters passed in to a
  * page. Intended to make creating sql for route and time based queries easier
@@ -167,5 +169,15 @@ public class SqlUtils {
 		return " AND " + timeColumnName + " BETWEEN '" + beginDate
 				+ "' " + " AND TIMESTAMP '" + beginDate + "' + INTERVAL '"
 				+ numDays + " day' " + timeSql + ' ';
+	}
+	
+	/**
+	 * Converts minutes string to seconds.
+	 * 
+	 * @param minutes
+	 * @return seconds
+	 */
+	public static int convertMinutesToSecs(String minutes) {
+		return (int) Double.parseDouble(minutes) * Time.SEC_PER_MIN;
 	}
 }

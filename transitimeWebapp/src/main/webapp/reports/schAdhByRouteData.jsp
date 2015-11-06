@@ -1,13 +1,41 @@
+<%-- Provides schedule adherence data in JSON format. Provides for
+     each route the route name, number arrivals/departures that
+     are early, number late, number on time, number total, percent
+     early, percent late, and percent on time. 
+     Request parameters are:
+       a - agency ID
+       r - route ID or route short name. Can specify multiple routes. 
+           Not specifying route provides data for all routes.
+       beginDate - date to begin query
+       numDays - number of days can do query. Limited to 31 days
+       beginTime - for optionally specifying time of day for query for each day
+       endTime - for optionally specifying time of day for query for each day
+       allowableEarlyMinutes - how early vehicle can be and still be OK.  Decimal format OK. 
+       allowableLateMinutes - how early vehicle can be and still be OK. Decimal format OK.
+--%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@ page import="org.transitime.reports.GenericJsonQuery" %>
 <%@ page import="org.transitime.reports.SqlUtils" %>
 <%
+String allowableEarlyMinutesStr = "'" 
+	+ SqlUtils.convertMinutesToSecs(request.getParameter("allowableEarlyMinutes"))
+	+ " seconds'";
+String allowableLateMinutesStr = "'" 
+	+ SqlUtils.convertMinutesToSecs(request.getParameter("allowableLateMinutes")) 
+	+ " seconds'";
+    		   
 String sql =
-	"SELECT COUNT(CASE WHEN time-scheduledtime > '00:02:00' THEN 1 ELSE null END) AS late, \n" 
-	+ "     COUNT(CASE WHEN scheduledtime-time > '00:01:00' THEN 1 ELSE null END) as early, \n"
+	"SELECT " 
+	+ "     COUNT(CASE WHEN scheduledtime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
+	+ "     COUNT(CASE WHEN scheduledtime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledtime <= " 
+				+ allowableLateMinutesStr + " THEN 1 ELSE null END) AS ontime, \n" 
+    + "     COUNT(CASE WHEN time-scheduledtime > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n" 
     + "     COUNT(*) AS total, \n"
-    + "     100.0 * COUNT(CASE WHEN time-scheduledtime > '00:02:00' THEN 1 ELSE null END)/count(*) AS late_percent, \n"
+    + "     100.0 * COUNT(CASE WHEN scheduledtime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END)/count(*) AS early_percent, \n"
+    + "     100.0 * COUNT(CASE WHEN scheduledtime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledtime <= " 
+    			+ allowableLateMinutesStr + " THEN 1 ELSE null END)/count(*) AS ontime_percent, \n"
+    + "     100.0 * COUNT(CASE WHEN time-scheduledtime > " + allowableLateMinutesStr + " THEN 1 ELSE null END)/count(*) AS late_percent, \n"
     + "     r.name \n"
     + "FROM arrivalsdepartures ad, routes r \n"
     + "WHERE "
