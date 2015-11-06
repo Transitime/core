@@ -51,10 +51,8 @@
     }
 	
     try {
-		// Perform the query.
+		// Perform the query and convert results of query to a JSON string
 		PredAccuracyIntervalQuery query = new PredAccuracyIntervalQuery(agencyId);
-
-		// Convert results of query to a JSON string
 		String jsonString = query
 			.getJson(beginDate, numDays, beginTime, endTime,
 				routeIds, source, predictionType,
