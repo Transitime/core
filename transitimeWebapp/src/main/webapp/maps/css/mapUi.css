@@ -33,18 +33,14 @@ html, body, #map {
  * it works in both iOS and elsewhere. Sheesh!
  */
 #routesContainer {
-	position:absolute; top: 2%; left: 50%;
-}
-#routesDiv {
-	 visibility: hidden; 
-	 position: relative; left: -50%;
+	position:absolute; top: 5px; left: 5px;
 }
 
 /* Set font for route selector. Need to use #select2-drop because of 
  * extra elements that select2 adds 
  */
 #select2-drop, #routesDiv {
-  font-family: sans-serif; font-size: large;
+  font-family: sans-serif; font-size: normal;
 }
 
 /* For the vehicle and prediction popups 
