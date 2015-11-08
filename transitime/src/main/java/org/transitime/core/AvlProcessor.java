@@ -16,10 +16,6 @@
  */
 package org.transitime.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -31,17 +27,17 @@ import org.transitime.core.autoAssigner.AutoBlockAssigner;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
-import org.transitime.db.structs.AvlReport;
-import org.transitime.db.structs.Block;
-import org.transitime.db.structs.Route;
-import org.transitime.db.structs.Stop;
-import org.transitime.db.structs.Trip;
-import org.transitime.db.structs.VehicleEvent;
+import org.transitime.db.structs.*;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.monitoring.CloudwatchService;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This is a very important high-level class. It takes the AVL data and
@@ -1301,8 +1297,8 @@ public class AvlProcessor {
 
 		// Do the low level work of matching vehicle and then generating results
 		lowLevelProcessAvlReport(avlReport, false);
-		
 		logger.debug("Processing AVL report took {}msec", timer);
+        CloudwatchService.getInstance().saveMetric("AvlProcessingTimeInMillis", Double.valueOf(timer.elapsedMsec()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
 	}
 
 }

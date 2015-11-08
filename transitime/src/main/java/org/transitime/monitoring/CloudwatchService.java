@@ -7,27 +7,62 @@ import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.amazonaws.services.cloudwatch.model.StandardUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.utils.MathUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by dbenoff on 10/6/15.
  */
 public class CloudwatchService {
-
     private String environmentName = System.getProperty("transitime.environmentName");
     private String accessKey = System.getProperty("transitime.cloudwatch.awsAccessKey");
     private String secretKey = System.getProperty("transitime.cloudwatch.awsSecretKey");
     private String endpoint = System.getProperty("transitime.cloudwatch.awsEndpoint");
     private AmazonCloudWatchClient cloudWatch;
+    private Map<String, MetricDefinition> metricMap = new ConcurrentHashMap<>();
+    private ScheduledExecutorService executor;
 
     private static final Logger logger = LoggerFactory
             .getLogger(CloudwatchService.class);
 
-    public CloudwatchService (){
+    private class MetricDefinition{
+        String metricName;
+        MetricType metricType;
+        ReportingIntervalTimeUnit reportingIntervalTimeUnit;
+        Integer reportingInterval;
+        Long reportingIntervalInMillis;
+        Date lastUpdate;
+        Collection<Double> data = new LinkedList<>();
+        Boolean formatAsPercent = false;
+    }
+
+
+    public enum MetricType{
+        SCALAR,
+        SUM,
+        AVERAGE,
+        COUNT,
+        MIN,
+        MAX
+    }
+
+    public enum ReportingIntervalTimeUnit {
+        IMMEDIATE,
+        SECOND,
+        MINUTE,
+        HOUR,
+        DAY
+    }
+
+    private static CloudwatchService singleton;
+
+    private CloudwatchService() {
+        logger.info("Cloudwatch service starting up");
         if(environmentName == null || accessKey == null || secretKey == null || endpoint == null){
             logger.warn("Cloudwatch monitoring not enabled, please specify environmentName, accessKey, secretKey and endpoint in configuration file");
         }else{
@@ -36,36 +71,71 @@ public class CloudwatchService {
             cloudWatch.setEndpoint(endpoint);
             this.cloudWatch = cloudWatch;
         }
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(new PublishMetricsTask(), 0, 1, TimeUnit.SECONDS);
     }
 
-    public synchronized void publishMetrics(Map<String, Double> metricMap){
+    /**
+     * Returns the singleton CloudwatchService
+     *
+     * @return
+     */
+    public static CloudwatchService getInstance() {
+        if(singleton == null)
+            singleton = new CloudwatchService();
+        return singleton;
+    }
 
-        if(cloudWatch == null)
+    /**
+     *
+     * Saves metric to local cache, to be reported to Cloudwatch by PublishMetricsTask
+     *
+     * @param metricName
+     * @param metricValue
+     * @param reportingInterval
+     * @param metricType
+     * @param reportingIntervalTimeUnit
+     * @param formatAsPercent
+     */
+    public synchronized void saveMetric(String metricName, Double metricValue, Integer reportingInterval, MetricType metricType,
+                                        ReportingIntervalTimeUnit reportingIntervalTimeUnit, Boolean formatAsPercent){
+
+        if(metricValue == null)
             return;
 
-        List<MetricDatum> data = new ArrayList<>();
-        for(String metricName : metricMap.keySet()){
-            data.add(
-                    new MetricDatum().
-                            withMetricName(metricName).
-                            withTimestamp(new Date()).
-                            withValue(metricMap.get(metricName)).
-                            withUnit(StandardUnit.Count)
-            );
+        logger.info("Cloudwatch[{}]={}", metricName, metricValue);
+
+        if(metricType == MetricType.SCALAR && reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE)
+            publishMetric(metricName, metricValue);
+
+        if(!this.metricMap.containsKey(metricName)){
+            if(metricType == MetricType.SCALAR && reportingIntervalTimeUnit != ReportingIntervalTimeUnit.IMMEDIATE)
+                throw new IllegalArgumentException("SCALAR values must be reported with IMMEDIATE frequency");
+            if(reportingIntervalTimeUnit != ReportingIntervalTimeUnit.IMMEDIATE && metricType == MetricType.SCALAR)
+                throw new IllegalArgumentException("IMMEDIATE frequency can only be specified for SCALAR values");
+
+            MetricDefinition metricDefinition = new MetricDefinition();
+            metricDefinition.lastUpdate = new Date();
+            metricDefinition.metricName = metricName;
+            metricDefinition.metricType = metricType;
+            metricDefinition.reportingInterval = reportingInterval;
+            metricDefinition.reportingIntervalTimeUnit = reportingIntervalTimeUnit;
+            metricDefinition.formatAsPercent = formatAsPercent;
+            if(reportingIntervalTimeUnit == ReportingIntervalTimeUnit.SECOND)
+                metricDefinition.reportingIntervalInMillis = reportingInterval * 1000l;
+            if(reportingIntervalTimeUnit == ReportingIntervalTimeUnit.MINUTE)
+                metricDefinition.reportingIntervalInMillis = reportingInterval * 60l * 1000l;
+            if(reportingIntervalTimeUnit == ReportingIntervalTimeUnit.HOUR)
+                metricDefinition.reportingIntervalInMillis = reportingInterval * 60l * 60l * 1000l;
+            if(reportingIntervalTimeUnit == ReportingIntervalTimeUnit.DAY)
+                metricDefinition.reportingIntervalInMillis = reportingInterval * 24l * 60l * 60l * 1000l;
+            this.metricMap.put(metricName, metricDefinition);
         }
 
-        PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
-                withNamespace(environmentName).
-                withMetricData(data);
-        cloudWatch.putMetricData(putMetricDataRequest);
-
+        this.metricMap.get(metricName).data.add(metricValue);
     }
 
-    public synchronized void publishMetric(String metricName, Double metricValue){
-        logger.info("Cloudwatch[{}]={}", metricName, metricValue);
-        if(cloudWatch == null)
-            return;
-
+    private void publishMetric(String metricName, Double metricValue){
         MetricDatum datum = new MetricDatum().
                 withMetricName(metricName).
                 withTimestamp(new Date()).
@@ -75,7 +145,6 @@ public class CloudwatchService {
                 withNamespace(environmentName).
                 withMetricData(datum);
         cloudWatch.putMetricData(putMetricDataRequest);
-
     }
 
     /**
@@ -83,7 +152,7 @@ public class CloudwatchService {
      * @param metricName
      * @param metricValue
      */
-    public synchronized void publishMetricAsPercent(String metricName, Double metricValue){
+    private synchronized void publishMetricAsPercent(String metricName, Double metricValue){
       logger.info("Cloudwatch[{}]={}", metricName, metricValue);
       if(cloudWatch == null)
           return;
@@ -100,4 +169,51 @@ public class CloudwatchService {
 
   }
 
+    private class PublishMetricsTask implements Runnable {
+
+        @Override
+        public void run() {
+            Date now = new Date();
+            for(String metricName : metricMap.keySet()){
+                MetricDefinition metricDefinition = metricMap.get(metricName);
+                long dateDiff = now.getTime() - metricDefinition.lastUpdate.getTime();
+                Double metric = null;
+                if(dateDiff >= metricDefinition.reportingIntervalInMillis){
+                    if(metricDefinition.metricType == MetricType.AVERAGE){
+                        metric = MathUtils.average(metricDefinition.data);
+                    }else if(metricDefinition.metricType == MetricType.COUNT){
+                        metric = new Double(metricDefinition.data.size());
+                    }else if(metricDefinition.metricType == MetricType.SUM){
+                        metric = MathUtils.sum(metricDefinition.data);
+                    }else if(metricDefinition.metricType == MetricType.MIN){
+                        if(metricDefinition.data.size() < 1)
+                            return;
+                        metric = MathUtils.min(metricDefinition.data);
+                    }else if(metricDefinition.metricType == MetricType.MAX){
+                        if(metricDefinition.data.size() < 1)
+                            return;
+                        metric = MathUtils.max(metricDefinition.data);
+                    }
+                    metricDefinition.data.clear();
+                    metricDefinition.lastUpdate = now;
+                }
+                if(metric != null){
+                    if(metricDefinition.formatAsPercent){
+                        publishMetricAsPercent(metricName, metric);
+                    }else{
+                        publishMetric(metricName, metric);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args){
+        CloudwatchService cloudwatchService = CloudwatchService.getInstance();
+        int i = 0;
+        while (i < 100){
+            cloudwatchService.saveMetric("testing", Math.random(), 1, MetricType.AVERAGE, ReportingIntervalTimeUnit.SECOND, false);
+            i++;
+        }
+    }
 }

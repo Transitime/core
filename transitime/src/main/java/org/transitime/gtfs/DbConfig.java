@@ -16,14 +16,6 @@
  */
 package org.transitime.gtfs;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -31,25 +23,13 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.core.ServiceUtils;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.db.structs.ActiveRevisions;
-import org.transitime.db.structs.Agency;
-import org.transitime.db.structs.Block;
+import org.transitime.db.structs.*;
 import org.transitime.db.structs.Calendar;
-import org.transitime.db.structs.CalendarDate;
-import org.transitime.db.structs.FareAttribute;
-import org.transitime.db.structs.FareRule;
-import org.transitime.db.structs.Frequency;
-import org.transitime.db.structs.StopPath;
-import org.transitime.db.structs.Route;
-import org.transitime.db.structs.Stop;
-import org.transitime.db.structs.Transfer;
-import org.transitime.db.structs.TravelTimesForStopPath;
-import org.transitime.db.structs.TravelTimesForTrip;
-import org.transitime.db.structs.Trip;
-import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
 import org.transitime.utils.Time;
+
+import java.util.*;
 
 /**
  * Reads all the configuration data from the database. The data is based on GTFS
@@ -606,6 +586,15 @@ public class DbConfig {
 
 	}
 
+    public int getBlockCount(){
+        int blockCount = 0;
+        for(String serviceId : blocksByServiceMap.keySet()){
+            blockCount += (blocksByServiceMap.get(serviceId) != null
+                    ? blocksByServiceMap.get(serviceId).size() : 0);
+        }
+        return blockCount;
+    }
+
 	/**
 	 * Returns blocks for the specified blockId for all service IDs.
 	 * 
@@ -636,7 +625,7 @@ public class DbConfig {
 	 */
 	public Collection<Block> getBlocks(String serviceId) {
 		Map<String, Block> blocksForServiceMap =
-				blocksByServiceMap.get(serviceId);
+                blocksByServiceMap.get(serviceId);
 		if (blocksForServiceMap != null) {
 			Collection<Block> blocksForService = blocksForServiceMap.values();
 			return Collections.unmodifiableCollection(blocksForService);
@@ -814,7 +803,7 @@ public class DbConfig {
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		String projectId = "sfmta";
+		String projectId = "1";
 
 		int configRev = ActiveRevisions.get(projectId).getConfigRev();
 

@@ -1,11 +1,16 @@
 package org.transitime.custom.aws;
 
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.sns.AmazonSNSClient;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClient;
+import com.amazonaws.services.sqs.model.DeleteMessageRequest;
+import com.amazonaws.services.sqs.model.Message;
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +24,11 @@ import org.transitime.monitoring.CloudwatchService;
 import org.transitime.utils.threading.BoundedExecutor;
 import org.transitime.utils.threading.NamedThreadFactory;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClient;
-import com.amazonaws.services.sqs.model.DeleteMessageRequest;
-import com.amazonaws.services.sqs.model.Message;
-import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Reads AVL data from AWS SQS topic, deserializes it, and process it
@@ -103,12 +102,12 @@ public class AvlSqsClientModule extends Module {
       new ClassConfigValue("transitime.avl.unmarshaller", WmataAvlTypeUnmarshaller.class, 
           "Implementation of SqsMessageUnmarshaller to perform " + 
       "the deserialization of SQS Message objects into AVLReport objects");
-  
+
     public AvlSqsClientModule(String agencyId) throws Exception {
       super(agencyId);
-      monitoring = new CloudwatchService();
+      monitoring = CloudwatchService.getInstance();
       logger.info("loading AWS SQS credentials from environment");
-      _sqsCredentials =  new BasicAWSCredentials(sqsKey.getValue(), sqsSecret.getValue());
+      _sqsCredentials = new BasicAWSCredentials(sqsKey.getValue(), sqsSecret.getValue());
       connect();
 
       int maxAVLQueueSize = avlQueueSize.getValue();
@@ -343,10 +342,7 @@ public class AvlSqsClientModule extends Module {
         if (System.currentTimeMillis() - start > MONITORING_FREQUENCY) {
           if (latencyCount != 0) {
             double latencyAverage = (latencyTotal/latencyCount)/1000;
-            monitoring.publishMetric("AvlQueueLatencyInSeconds", latencyAverage);
-            latencyCount = 0;
-            latencyTotal = 0;
-            start = System.currentTimeMillis();
+            monitoring.saveMetric("AvlQueueLatencyInSeconds", latencyAverage, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
           } else {
             logger.info("no latencyCount to report");
           }

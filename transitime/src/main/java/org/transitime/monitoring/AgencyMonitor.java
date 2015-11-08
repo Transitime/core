@@ -65,13 +65,14 @@ public class AgencyMonitor {
 	 */
 	private AgencyMonitor(String agencyId) {
 		emailSender = new EmailSender();
-        cloudwatchService = new CloudwatchService();
+        cloudwatchService = CloudwatchService.getInstance();
 
 		// Create all the monitors and add them to the monitors list
 		monitors = new ArrayList<MonitorBase>();
 		monitors.add(new AvlFeedMonitor(cloudwatchService, emailSender, agencyId));
 		monitors.add(new PredictabilityMonitor(cloudwatchService, emailSender, agencyId));
         monitors.add(new DatabaseQueueMonitor(cloudwatchService, emailSender, agencyId));
+        monitors.add(new ActiveBlocksMonitor(cloudwatchService, emailSender, agencyId));
         if(enableSystemMonitoring != null && enableSystemMonitoring.equalsIgnoreCase("true")){
             monitors.add(new SystemMemoryMonitor(emailSender, agencyId));
             monitors.add(new SystemCpuMonitor(emailSender, agencyId));
