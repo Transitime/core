@@ -104,7 +104,7 @@ function removeUnneededBlockAndRouteElements(routes) {
 		var routeElementId = routesElements[i].id;
 		var routeInAjaxData = false;
 		// Go through ajax route data
-		for (var j=0; j<routes.route.length; ++j) {
+		for (var j=0; j<routes.routes.length; ++j) {
 			if (routeElementId == "routeId-" + routes.routes[j].id) {
 				routeInAjaxData = true;
 				break;
