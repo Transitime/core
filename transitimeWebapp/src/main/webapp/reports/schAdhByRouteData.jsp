@@ -18,12 +18,15 @@
 <%@ page import="org.transitime.reports.GenericJsonQuery" %>
 <%@ page import="org.transitime.reports.SqlUtils" %>
 <%
-String allowableEarlyMinutesStr = "'" 
-	+ SqlUtils.convertMinutesToSecs(request.getParameter("allowableEarlyMinutes"))
-	+ " seconds'";
-String allowableLateMinutesStr = "'" 
-	+ SqlUtils.convertMinutesToSecs(request.getParameter("allowableLateMinutes")) 
-	+ " seconds'";
+String allowableEarlyStr = request.getParameter("allowableEarly");
+if (allowableEarlyStr == null || allowableEarlyStr.isEmpty())
+	allowableEarlyStr = "1.0";
+String allowableEarlyMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableEarlyStr) + " seconds'";
+
+String allowableLateStr = request.getParameter("allowableLate");
+if (allowableLateStr == null || allowableLateStr.isEmpty())
+	allowableLateStr = "4.0";
+String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLateStr) + " seconds'";
     		   
 String sql =
 	"SELECT " 
@@ -32,10 +35,6 @@ String sql =
 				+ allowableLateMinutesStr + " THEN 1 ELSE null END) AS ontime, \n" 
     + "     COUNT(CASE WHEN time-scheduledtime > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n" 
     + "     COUNT(*) AS total, \n"
-    + "     100.0 * COUNT(CASE WHEN scheduledtime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END)/count(*) AS early_percent, \n"
-    + "     100.0 * COUNT(CASE WHEN scheduledtime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledtime <= " 
-    			+ allowableLateMinutesStr + " THEN 1 ELSE null END)/count(*) AS ontime_percent, \n"
-    + "     100.0 * COUNT(CASE WHEN time-scheduledtime > " + allowableLateMinutesStr + " THEN 1 ELSE null END)/count(*) AS late_percent, \n"
     + "     r.name \n"
     + "FROM arrivalsdepartures ad, routes r \n"
     + "WHERE "
@@ -48,7 +47,7 @@ String sql =
     + SqlUtils.routeClause(request, "ad") + "\n"
     + SqlUtils.timeRangeClause(request, "ad.time", 31) + "\n"
     // Grouping needed since want to output route name
-    + " GROUP BY r.name;";
+    + " GROUP BY r.name, r.routeorder ORDER BY r.routeorder, r.name;";
 
 // Just for debugging
 System.out.println("\nFor schedule adherence query sql=\n" + sql);

@@ -43,6 +43,13 @@ finding specific issues with predictions.">
       Prediction Accuracy CSV Download</a></li>
 </ul>
 
+<div id="subtitle">Schedule Adherence Reports</div>
+<ul class="choicesList">
+  <li><a href="schAdhByRouteParams.jsp?a=<%= agencyId %>"
+    title="Displays historic schedule adherence data by route in a bar chart.">
+      Schedule Adherence by Route</a></li>
+</ul>
+
 <div id="subtitle">AVL Reports</div>
 <ul class="choicesList">
   <li><a href="avlMapByRouteParams.jsp?a=<%= agencyId %>"
