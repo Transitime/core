@@ -41,14 +41,9 @@ import org.transitime.utils.Time;
 public class NextBusAvlModule extends XmlPollingAvlModule {
 	
 	// Parameter that specifies URL of the NextBus feed.
-	// Note that uses the old NextBus feed since that provides 
-	// non-predictable vehicles, block assignment, driver ID, and other info.
-	// If the old NextBus feed goes away then can use the private one
-	// /service/xmlFeed .
-
 	private static StringConfigValue nextBusFeedUrl = 
 			new StringConfigValue("transitime.avl.nextbus.url", 
-					"http://webservices.nextbus.com/s/xmlFeed",
+					"http://webservices.nextbus.com/service/publicXMLFeed",
 					"The URL of the NextBus feed to use.");
 	private static String getNextBusFeedUrl() {
 		return nextBusFeedUrl.getValue();
