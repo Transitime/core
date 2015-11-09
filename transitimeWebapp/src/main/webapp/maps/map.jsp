@@ -34,8 +34,8 @@
   <% } %>
   
   <!-- Load in Select2 files so can create fancy selectors -->
-  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
-  <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+  <link href="<%= request.getContextPath() %>/select2/select2.css" rel="stylesheet"/>
+  <script src="<%= request.getContextPath() %>/select2/select2.min.js"></script>
 
   <!--  Override the body style from the includes.jsp/general.css files -->
   <style>
@@ -64,7 +64,7 @@
         to set the css width here. Yes, strange! -->  
   <div id="routesContainer">
     <div id="routesDiv">
-      <select type="hidden" id="routes" style="width:280px" ></select>
+      <input type="hidden" id="routes" style="width:280px" />
     </div>
   </div>
   
