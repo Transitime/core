@@ -17,7 +17,11 @@
 $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
 	        // Generate list of routes for the selector
-	 		var selectorData = [{id: '', text: 'All Routes'}];
+	        // For selector2 version 4.0 now can't set id to empty
+	        // string because then it returns the text 'All Routes'.
+	        // So need to use a blank string that can be determined
+	        // to be empty when trimmed.
+	 		var selectorData = [{id: ' ', text: 'All Routes'}];
 	 		for (var i in routes.routes) {
 	 			var route = routes.routes[i];
 	 			selectorData.push({id: route.id, text: route.name})

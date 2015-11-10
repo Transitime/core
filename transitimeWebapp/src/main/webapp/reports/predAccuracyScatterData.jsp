@@ -62,7 +62,7 @@ if ((beginTime != null && !beginTime.isEmpty())
 // Determine route portion of SQL. Default is to provide info for
 // all routes.
 String routeSql = "";
-if (routeId!=null && !routeId.isEmpty()) {
+if (routeId != null && !routeId.trim().isEmpty()) {
     routeSql = "  AND (routeId='" + routeId + "' OR routeShortName='" + routeId + "') ";
 }
 
