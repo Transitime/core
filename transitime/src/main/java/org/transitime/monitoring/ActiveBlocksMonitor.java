@@ -20,14 +20,12 @@ package org.transitime.monitoring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
-import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.data.IpcActiveBlock;
-import org.transitime.ipc.interfaces.VehiclesInterface;
+import org.transitime.core.BlocksInfo;
+import org.transitime.db.structs.Block;
 import org.transitime.utils.EmailSender;
 
-import java.rmi.RemoteException;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * For monitoring active blocks.  Unlike the other monitors,
@@ -56,24 +54,18 @@ public class ActiveBlocksMonitor extends MonitorBase {
 	protected boolean triggered() {
         Date now = new Date();
         if(now.getTime() - lastUpdate.getTime() > reportingIntervalInMillis){
-            VehiclesInterface vehiclesInterface = VehiclesInterfaceFactory
-                    .get(agencyId);
-            try {
-                Collection<IpcActiveBlock> blocks = vehiclesInterface.getActiveBlocks(null, 0);
-                double activeBlockCount = (blocks != null ? blocks.size() : 0);
-                double totalBlockCount = Core.getInstance().getDbConfig().getBlockCount();
-                cloudwatchService.saveMetric("ActiveBlockCount", activeBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-                cloudwatchService.saveMetric("TotalBlockCount", activeBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-                double activeBlockCountPercentage = 0;
-                if(activeBlockCount > 0){
-                    activeBlockCountPercentage = activeBlockCount / totalBlockCount;
-                }
-                cloudwatchService.saveMetric("PercentageActiveBlockCount", activeBlockCountPercentage , 1,
-                        CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, true);
-
-            } catch (RemoteException e) {
-                logger.warn("getActiveBlocks threw Remote Exception");
+            List<Block> blocks = BlocksInfo.getCurrentlyActiveBlocks();
+            double activeBlockCount = (blocks != null ? blocks.size() : 0);
+            double totalBlockCount = Core.getInstance().getDbConfig().getBlockCount();
+            cloudwatchService.saveMetric("ActiveBlockCount", activeBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            cloudwatchService.saveMetric("TotalBlockCount", activeBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            double activeBlockCountPercentage = 0;
+            if(activeBlockCount > 0){
+                activeBlockCountPercentage = activeBlockCount / totalBlockCount;
             }
+            cloudwatchService.saveMetric("PercentageActiveBlockCount", activeBlockCountPercentage , 1,
+                    CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, true);
+            lastUpdate = new Date();
         }
         return false;
 	}

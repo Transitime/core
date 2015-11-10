@@ -105,8 +105,14 @@ public class CloudwatchService {
 
         logger.info("Cloudwatch[{}]={}", metricName, metricValue);
 
-        if(metricType == MetricType.SCALAR && reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE)
-            publishMetric(metricName, metricValue);
+        if(metricType == MetricType.SCALAR && reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE){
+            if(formatAsPercent){
+                publishMetricAsPercent(metricName, metricValue);
+            }else{
+                publishMetric(metricName, metricValue);
+            }
+        }
+
 
         if(!this.metricMap.containsKey(metricName)){
             if(metricType == MetricType.SCALAR && reportingIntervalTimeUnit != ReportingIntervalTimeUnit.IMMEDIATE)
@@ -173,37 +179,44 @@ public class CloudwatchService {
 
         @Override
         public void run() {
-            Date now = new Date();
-            for(String metricName : metricMap.keySet()){
-                MetricDefinition metricDefinition = metricMap.get(metricName);
-                long dateDiff = now.getTime() - metricDefinition.lastUpdate.getTime();
-                Double metric = null;
-                if(dateDiff >= metricDefinition.reportingIntervalInMillis){
-                    if(metricDefinition.metricType == MetricType.AVERAGE){
-                        metric = MathUtils.average(metricDefinition.data);
-                    }else if(metricDefinition.metricType == MetricType.COUNT){
-                        metric = new Double(metricDefinition.data.size());
-                    }else if(metricDefinition.metricType == MetricType.SUM){
-                        metric = MathUtils.sum(metricDefinition.data);
-                    }else if(metricDefinition.metricType == MetricType.MIN){
-                        if(metricDefinition.data.size() < 1)
-                            return;
-                        metric = MathUtils.min(metricDefinition.data);
-                    }else if(metricDefinition.metricType == MetricType.MAX){
-                        if(metricDefinition.data.size() < 1)
-                            return;
-                        metric = MathUtils.max(metricDefinition.data);
+            try {
+                Date now = new Date();
+                for (String metricName : metricMap.keySet()) {
+                    MetricDefinition metricDefinition = metricMap.get(metricName);
+                    if(metricDefinition.reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE)
+                        continue;
+                    long dateDiff = now.getTime() - metricDefinition.lastUpdate.getTime();
+                    Double metric = null;
+                    if (dateDiff >= metricDefinition.reportingIntervalInMillis) {
+                        if (metricDefinition.metricType == MetricType.AVERAGE) {
+                            metric = MathUtils.average(metricDefinition.data);
+                        } else if (metricDefinition.metricType == MetricType.COUNT) {
+                            metric = new Double(metricDefinition.data.size());
+                        } else if (metricDefinition.metricType == MetricType.SUM) {
+                            metric = MathUtils.sum(metricDefinition.data);
+                        } else if (metricDefinition.metricType == MetricType.MIN) {
+                            if (metricDefinition.data.size() < 1)
+                                return;
+                            metric = MathUtils.min(metricDefinition.data);
+                        } else if (metricDefinition.metricType == MetricType.MAX) {
+                            if (metricDefinition.data.size() < 1)
+                                return;
+                            metric = MathUtils.max(metricDefinition.data);
+                        }
+                        metricDefinition.data.clear();
+                        metricDefinition.lastUpdate = now;
                     }
-                    metricDefinition.data.clear();
-                    metricDefinition.lastUpdate = now;
-                }
-                if(metric != null){
-                    if(metricDefinition.formatAsPercent){
-                        publishMetricAsPercent(metricName, metric);
-                    }else{
-                        publishMetric(metricName, metric);
+                    if (metric != null) {
+                        if (metricDefinition.formatAsPercent) {
+                            publishMetricAsPercent(metricName, metric);
+                        } else {
+                            publishMetric(metricName, metric);
+                        }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn(e.getMessage());
             }
         }
     }
