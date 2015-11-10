@@ -26,7 +26,7 @@ if (agencyId == null || agencyId.isEmpty()) {
       Map for Selected Route</a></li>
   <li><a href="../maps/map.jsp?a=<%= agencyId %>&showUnassignedVehicles=true"
     title="Real-time map for selected route but also shows vehicles not currently assigned to a route">
-      Map Including Assigned Vehicles</a></li>
+      Map Including Unassigned Vehicles</a></li>
   <li><a href="../maps/schAdhMap.jsp?a=<%= agencyId %>"
     title="Shows current real-time schedule adherence of vehicles in map">
       Schedule Adherence Map</a></li>
