@@ -1,7 +1,6 @@
 <%-- Provides schedule adherence data in JSON format. Provides for
      each route the route name, number arrivals/departures that
-     are early, number late, number on time, number total, percent
-     early, percent late, and percent on time. 
+     are early, number late, number on time, and number total. 
      Request parameters are:
        a - agency ID
        r - route ID or route short name. Can specify multiple routes. 
