@@ -146,11 +146,11 @@ public class AvlJsonQuery {
 		// Since some agencies like sfmta don't have consistent route IDs 
 		// across schedule changes need to try to match to GTFS route_id or
 		// route_short_name.
-		if (vehicleId == null && routeId != null && !routeId.isEmpty())
+		if (vehicleId == null && routeId != null && !routeId.trim().isEmpty())
 			sql += "AND (vs.routeId='" + routeId + "' OR vs.routeShortName='" + routeId + "') ";
 		
 		// If only want data for single vehicle then specify so in SQL
-		if (vehicleId != null && !vehicleId.isEmpty())
+		if (vehicleId != null && !vehicleId.trim().isEmpty())
 			sql += "AND a.vehicleId='" + vehicleId + "' ";
 		
 		// Make sure data is ordered by vehicleId so that can draw lines 

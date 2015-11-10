@@ -34,8 +34,8 @@
   <% } %>
   
   <!-- Load in Select2 files so can create fancy selectors -->
-  <link href="<%= request.getContextPath() %>/select2/select2.css" rel="stylesheet"/>
-  <script src="<%= request.getContextPath() %>/select2/select2.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
   <!--  Override the body style from the includes.jsp/general.css files -->
   <style>
@@ -64,7 +64,7 @@
         to set the css width here. Yes, strange! -->  
   <div id="routesContainer">
     <div id="routesDiv">
-      <input type="hidden" id="routes" style="width:280px" />
+      <select id="routes" style="width:280px" ></select>	
     </div>
   </div>
   
@@ -880,7 +880,7 @@ if (!getRouteQueryStrParam()) {
   $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
 	        // Generate list of routes for the selector
-	 		var selectorData = [];
+	 		var selectorData = [{id: '', text: 'Select Route'}];
 	 		for (var i in routes.routes) {
 	 			var route = routes.routes[i];
 	 			selectorData.push({id: route.id, text: route.name})
@@ -891,7 +891,8 @@ if (!getRouteQueryStrParam()) {
  			$("#routes").select2({
  				placeholder: "Select Route", 				
  				data : selectorData})
- 				.on("change", function(e) {
+ 				// Called when user selects route. Draws route and associated vehicles on map.
+ 				.on("select2:select", function(e) {
  					// First remove all old vehicles so that they don't
  					// get moved around when zooming to new route
  					removeAllVehicles();
@@ -901,7 +902,8 @@ if (!getRouteQueryStrParam()) {
  						map.closePopup(predictionsPopup);
  					
  					// Configure map for new route	
- 					var url = apiUrlPrefix + "/command/routesDetails?r=" + e.val;
+ 					var selectedRouteId = e.params.data.id;
+ 					var url = apiUrlPrefix + "/command/routesDetails?r=" + selectedRouteId;
  					$.getJSON(url, routeConfigCallback);
 
  					// Reset the polling rate back down to minimum value since selecting new route
@@ -910,13 +912,17 @@ if (!getRouteQueryStrParam()) {
  						clearTimeout(avlTimer);
  					
  					// Read in vehicle locations now
- 					setRouteQueryStrParam("r=" + e.val); 					
+ 					setRouteQueryStrParam("r=" + selectedRouteId); 					
  					updateVehiclesUsingApiData();
 				});
- 			
- 			// Make route selector visible
-  			$("#routesDiv").css({"visibility":"visible"});
- 			
+
+	 		// Want to get rid of annoying tooltip listing selected route
+	 		// but could not figure out how to do so successfully.
+ 			//$( "#select2-routes-container" ).tooltip("option", "disabled", true);
+ 			//$( "#routes" ).tooltip("option", "disabled", true);
+ 			//$( ".select2-selection" ).tooltip("option", "disabled", true);
+ 			//$( ".selection" ).tooltip("option", "disabled", true);
+
  			// Set focus to selector so that user can simply start
  			// typing to select a route. Can't use something like
  			// '#routes' since select2 changes  the input element to a
@@ -927,8 +933,10 @@ if (!getRouteQueryStrParam()) {
  			// that keyboard pops up when user tries to pan screen.
  			var isMobile = window.matchMedia("only screen and (max-width: 760px)");
             if (!isMobile.matches) {
-                $("input").focus();
-            	}
+            	var selector = $(".select2-selection"); // .selection .select2-selection #select2-routes-container
+            	// Could not figure out how to set focus successfully.
+            	//selector.focus();
+            }
  	});	 
 } else {
 	// Route was specified in query string. 
@@ -942,6 +950,9 @@ if (!getRouteQueryStrParam()) {
 	
 	// Read in vehicle locations now (and every few seconds)
 	updateVehiclesUsingApiData();
+
+	// Make route selector visible. Haven't tested this!
+	$("#routesDiv").css({"visibility":"hidden"});
 }
 
 /**

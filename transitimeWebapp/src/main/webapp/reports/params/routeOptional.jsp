@@ -1,6 +1,9 @@
-<%-- For creating a route selector parameter via a jsp include. 
-     User can select a single route (not all routes).
-     Reads in routes via API for the agency specified by the "a" param. --%>
+<%-- For creating a route selector parameter via a jsp include.
+     User can select no routes (r param then set to " ") or a single 
+     route (but not an arbitrary multiple of routes). For when 
+     selecting a route is optional.
+     Select is created by reading in routes via API for the agency 
+     specified by the "a" param. --%>
 
 <style type="text/css">
 /* Set font for route selector. Need to use #select2-drop because of 
@@ -16,10 +19,11 @@
 $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
 	        // Generate list of routes for the selector.
-	        // Put in default value of Select Route but need to use
-	        // an id of ' ' instead of '' since otherwise select2
-	        // version 4.0.0 uses the text name as the id, which is wrong!
-	 		var selectorData = [];
+	        // For selector2 version 4.0 now can't set id to empty
+	        // string because then it returns the text 'All Routes'.
+	        // So need to use a blank string that can be determined
+	        // to be empty when trimmed.
+	 		var selectorData = [{id: ' ', text: 'Optionally Select Route'}];
 	 		for (var i in routes.routes) {
 	 			var route = routes.routes[i];
 	 			selectorData.push({id: route.id, text: route.name})
@@ -33,6 +37,7 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		// Tooltips for a select2 widget are rather broken. So get
 	 		// the tooltip title attribute from the original route element
 	 		// and set the tooltip for the newly created element.
+	 		var modifiedRouteElement = $( "#route" );
 	 		var configuredTitle = $( "#route" ).attr("title");
 	 		$( "#select2-route-container" ).tooltip({ content: configuredTitle,
 	 				position: { my: "left+10 center", at: "right center" } });
@@ -43,6 +48,6 @@ $.getJSON(apiUrlPrefix + "/command/routes",
     <div id="routesDiv"  class="param">
       <label for="route">Route:</label>
       <select id="route" name="r" style="width: 380px" 
-      	title="Select which route you want data for. " ></select>
+      	title="For when you want to optionally display information about a route."></select>
     </div>
     

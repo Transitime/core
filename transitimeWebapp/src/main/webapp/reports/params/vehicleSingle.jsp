@@ -25,7 +25,7 @@ $.getJSON(apiUrlPrefix + "/command/vehicleIds",
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#vehicle").select2({
- 				placeholder: "Select Vehicle", 				
+ 				placeholder: "Select VehicleXXX MGS", 				
  				data : selectorData});
 	 		
 	 		// Tooltips for a select2 widget don't automatically go away when 
