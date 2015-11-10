@@ -755,6 +755,15 @@ public class AutoBlockAssigner {
 	}
 	
 	/**
+	 * Returns true if the AutoBlockAssigner is actually enabled.
+	 * 
+	 * @return true if enabled
+	 */
+	public static boolean enabled() {
+		return autoAssignerEnabled.getValue();
+	}
+	
+	/**
 	 * For trying to match vehicle to a active but currently unused block and
 	 * the auto assigner is enabled. If auto assigner is not enabled then
 	 * returns null. Goes through all the currently active blocks and tries to
