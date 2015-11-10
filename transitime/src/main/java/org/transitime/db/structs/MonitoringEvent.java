@@ -109,8 +109,11 @@ public class MonitoringEvent implements Serializable {
 		// Since message to be stored in db and don't know how long it might
 		// be make sure it is not too long so that don't get db errors.
 		this.message = message.length() <= MAX_MESSAGE_LENGTH ? 
-				message : message.substring(0, MAX_MESSAGE_LENGTH);;
-		this.value = value;
+				message : message.substring(0, MAX_MESSAGE_LENGTH);
+		// Note: MySQL can't handle double values of Double.NaN. Get an exception
+		// "java.sql.SQLException: 'NaN' is not a valid numeric or approximate numeric value".
+		// So if value is a NaN use 0.0 instead. Works fine with Postgres though.
+		this.value = Double.isNaN(value) ? 0.0 : value;
 	}
 	
 	/**
