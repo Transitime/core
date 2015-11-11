@@ -914,14 +914,16 @@ if (!getRouteQueryStrParam()) {
  					// Read in vehicle locations now
  					setRouteQueryStrParam("r=" + selectedRouteId); 					
  					updateVehiclesUsingApiData();
-				});
+ 					
+ 		 			// Disable tooltips. For some reason get an unwanted 
+ 		 			// tooltip consisting of the current select once a selection
+ 		 			// has been made. It is really distracting. So have to do
+ 		 			// this convoluted thing after every selection in order to
+ 		 			// make sure this annoying tooltip doesn't popup.
+ 		 			$( "#select2-routes-container" ).tooltip({ content: 'foo' });
+ 		 			$( "#select2-routes-container" ).tooltip("option", "disabled", true);
 
-	 		// Want to get rid of annoying tooltip listing selected route
-	 		// but could not figure out how to do so successfully.
- 			//$( "#select2-routes-container" ).tooltip("option", "disabled", true);
- 			//$( "#routes" ).tooltip("option", "disabled", true);
- 			//$( ".select2-selection" ).tooltip("option", "disabled", true);
- 			//$( ".selection" ).tooltip("option", "disabled", true);
+				});
 
  			// Set focus to selector so that user can simply start
  			// typing to select a route. Can't use something like
