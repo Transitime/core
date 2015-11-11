@@ -70,9 +70,9 @@ public class CloudwatchService {
             AmazonCloudWatchClient cloudWatch = new AmazonCloudWatchClient(new BasicAWSCredentials(accessKey, secretKey));
             cloudWatch.setEndpoint(endpoint);
             this.cloudWatch = cloudWatch;
+            executor = Executors.newSingleThreadScheduledExecutor();
+            executor.scheduleAtFixedRate(new PublishMetricsTask(), 0, 1, TimeUnit.SECONDS);
         }
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(new PublishMetricsTask(), 0, 1, TimeUnit.SECONDS);
     }
 
     /**
