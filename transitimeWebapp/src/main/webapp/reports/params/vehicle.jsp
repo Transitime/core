@@ -26,7 +26,13 @@ $.getJSON(apiUrlPrefix + "/command/vehicleIds",
 	 		// search capability
  			$("#vehicle").select2({
  				/* placeholder: "Select VehicleYYY", */ 				
- 				data : selectorData});
+ 				data : selectorData})
+ 			// Need to reset tooltip after selector is used. Sheesh!
+ 			.on("select2:select", function(e) {
+ 				var configuredTitle = $( "#vehicle" ).attr("title");
+ 			 	$( "#select2-route-container" ).tooltip({ content: configuredTitle,
+ 			 			position: { my: "left+10 center", at: "right center" } });
+ 			});
 
 	 		// Tooltips for a select2 widget are rather broken. So get
 	 		// the tooltip title attribute from the original route element
