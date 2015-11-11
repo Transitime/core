@@ -39,6 +39,7 @@ import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import org.transitime.ipc.rmi.AbstractServer;
+import org.transitime.utils.IntervalTimer;
 
 /**
  * Implements the VehiclesInterface interface on the server side such that a
@@ -274,14 +275,16 @@ public class VehiclesServer extends AbstractServer
 		// List of data to be returned
 		List<IpcActiveBlock> results = 
 				new ArrayList<IpcActiveBlock>();
-		
+        IntervalTimer timer = new IntervalTimer();
 		// Determine all the active blocks
 		List<Block> blocks =
 				BlocksInfo.getCurrentlyActiveBlocks(routeIds, null,
 						allowableBeforeTimeSecs, -1);
-		
+        logger.warn("interval: getCurrentlyActiveBlocks took " + timer.elapsedMsec() + " msec");
+        timer = new IntervalTimer();
 		// For each active block determine associated vehicle
 		for (Block block : blocks) {
+            IntervalTimer loopTimer = new IntervalTimer();
 			IpcBlock ipcBlock = new IpcBlock(block);
 			
 			// If a block doesn't have a vehicle associated with it need
@@ -303,8 +306,9 @@ public class VehiclesServer extends AbstractServer
 					new IpcActiveBlock(ipcBlock, activeTripIndex,
 							ipcVehiclesForBlock, tripForSorting);
 			results.add(ipcBlockAndVehicle);
+            logger.warn("interval: processing block took " + loopTimer.elapsedMsec() + " msec");
 		}
-		
+        logger.warn("interval: getVehiclesByBlockId took " + timer.elapsedMsec() + " msec");
 		// Sort the results so that ordered by route and then block start time
 		IpcActiveBlock.sort(results);
 		
