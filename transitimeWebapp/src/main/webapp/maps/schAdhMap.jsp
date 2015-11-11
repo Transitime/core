@@ -50,7 +50,8 @@ function getVehiclePopupContent(vehicle) {
 		+ "<br/><b>Route:</b> " + vehicle.routeName
 		+ "<br/><b>To:</b> " + vehicle.headsign
 		+ "<br/><b>SchAhd:</b> " + vehicle.schAdhStr
-		+ "<br/><b>Block:</b> " + vehicle.block;
+		+ "<br/><b>Block:</b> " + vehicle.block
+		+ "<br/><b>Driver:</b> " + vehicle.driver;
 }
 
 /**

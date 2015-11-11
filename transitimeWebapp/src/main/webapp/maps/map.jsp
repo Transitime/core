@@ -379,7 +379,8 @@ function getVehiclePopupContent(vehicleData) {
     		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName) : "";
     if (verbose && vehicleData.nextStopId)
     	nextStopNameStr += "<br/><b>Next Stop Id:</b> " + vehicleData.nextStopId;
-    
+    var driver = vehicleData.driver ? 
+    		"<br/><b>Driver:</b> " + vehicleData.driver : "";
     var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat
     			+ "<br/><b>Lon:</b> " + vehicleData.loc.lon 
     			+ "<br/><b>Heading:</b> " + vehicleData.loc.heading 
@@ -401,7 +402,8 @@ function getVehiclePopupContent(vehicleData) {
 		+ tripPatternStr
 		+ layoverStr
 		+ layoverDepartureStr
-		+ nextStopNameStr;
+		+ nextStopNameStr
+		+ driver;
 	
 	return content;
 }
