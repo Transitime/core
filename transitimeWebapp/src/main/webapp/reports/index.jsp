@@ -46,8 +46,14 @@ finding specific issues with predictions.">
 <div id="subtitle">Schedule Adherence Reports</div>
 <ul class="choicesList">
   <li><a href="schAdhByRouteParams.jsp?a=<%= agencyId %>"
-    title="Displays historic schedule adherence data by route in a bar chart.">
+    title="Displays historic schedule adherence data by route in a bar chart. 
+    Can compare schedule adherence for multiple routes.">
       Schedule Adherence by Route</a></li>
+  <li><a href="schAdhByTimeParams.jsp?a=<%= agencyId %>"
+    title="Displays historic schedule adherence data for a route grouped by 
+    how early/late. The resulting bell curve shows the distribution of 
+    early/late times. ">
+      Schedule Adherence by how Early/Late</a></li>
 </ul>
 
 <div id="subtitle">AVL Reports</div>

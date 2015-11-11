@@ -1,8 +1,9 @@
 <%-- Provides schedule adherence data in JSON format. Provides
-     count of times for each time bucket. Time buckets are 
-     -2 for -60 to -30 seconds late, -1 for -30 seconds to 0 seconds late,
-     0 for 0 seconds to 30 seconds early, 1 for 30 seconds to 60 seconds
-     early, 2 for 60 seconds to 90 seconds late, etc
+     count of times for each time bucket. The json time_period is 
+     the floor of the time span span. So it is -60 for -60 to -30 seconds 
+     late, -30 for -30 seconds to 0 seconds late,
+     0 for 0 seconds to 30 seconds early, 30 for 30 seconds to 60 seconds
+     early, 60 for 60 seconds to 90 seconds late, etc
      
      Request parameters are:
        a - agency ID
@@ -12,8 +13,8 @@
        numDays - number of days can do query. Limited to 31 days
        beginTime - for optionally specifying time of day for query for each day
        endTime - for optionally specifying time of day for query for each day
-       allowableEarlyMinutes - how early vehicle can be and still be OK.  Decimal format OK. 
-       allowableLateMinutes - how early vehicle can be and still be OK. Decimal format OK.
+       allowableEarly - how early vehicle can be and still be OK.  Decimal format OK. 
+       allowableLate - how early vehicle can be and still be OK. Decimal format OK.
 --%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
@@ -31,12 +32,12 @@ if (allowableLateStr == null || allowableLateStr.isEmpty())
 String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLateStr) + " seconds'";
 
 // Group into timebuckets of 30 seconds
-int BUCKET_TIME = 20;
+int BUCKET_TIME = 30;
 
 String sql =
 	"SELECT " 
 	+ "  COUNT(*) AS counts_per_time_period, \n"
-	// Put into time buckets of every x seconds. 
+	// Put into time buckets of every BUCKET_TIME seconds. 
 	+ "  FLOOR(EXTRACT (EPOCH FROM (scheduledtime-time)) / " + BUCKET_TIME + ")*" + BUCKET_TIME + " AS time_period \n"
 	+ "FROM arrivalsdepartures ad\n"
     + "WHERE "
