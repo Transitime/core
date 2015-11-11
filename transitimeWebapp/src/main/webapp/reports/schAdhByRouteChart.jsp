@@ -122,8 +122,8 @@ var globalNumberOfRoutes;
           hAxis: {textStyle: {fontSize: 16}},
           legend: {textStyle: {fontSize: 16}, position: 'right'},
           
-          // Use proper colors for early, ontime, and late
-          series: [{'color': '#E84D5F'}, {'color': '#6FD656'}, {'color': '#F0DB56'}],
+          // Use proper colors for late, ontime, and early
+          series: [{'color': '#F0DB56'}, {'color': '#6FD656'}, {'color': '#E84D5F'}],
         };
 
         // Use old style charts instead of the Material ones because animation
@@ -143,9 +143,9 @@ var globalNumberOfRoutes;
 	  // Initialize dataArray with the column info
 	  var dataArray = [[
 	                  'Route', 
-	                  'Early',   {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
+	                  'Late',    {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
 	                  'On Time', {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
-	                  'Late',    {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'}
+	                  'Early',   {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'}
 	                  ]];
 	  
 	  // Add data for each route to the dataArray
@@ -159,18 +159,18 @@ var globalNumberOfRoutes;
 		  var latePercent = (100.0 * route.late / route.total); 
 		  var dataArrayForRoute = [
 		             route.name, 
-		             earlyPercent, 
-		             	'opacity: 1.0', 
-		             	'Early: ' + route.early + ' out of ' + route.total + ' stops', 
-		             	(route.early > 0) ? earlyPercent.toFixed(2) + '%' : '',
-		             ontimePercent, 
-		             	'opacity: 1.0', 
-		             	'On time: ' + route.ontime + ' out of ' + route.total + ' stops', 
-		             	route.ontime > 0 ? ontimePercent.toFixed(2) + '%' : '',
 		             latePercent, 
 		             	'opacity: 1.0', 
 		             	'Late: ' + route.late + ' out of ' + route.total + ' stops', 
-		             	route.late > 0 ? latePercent.toFixed(2) + '%' : ''
+		             	route.late > 0 ? latePercent.toFixed(1) + '%' : '',
+		             ontimePercent, 
+		             	'opacity: 1.0', 
+		             	'On time: ' + route.ontime + ' out of ' + route.total + ' stops', 
+	             	 	route.ontime > 0 ? ontimePercent.toFixed(1) + '%' : '',
+			         earlyPercent, 
+		             	'opacity: 1.0', 
+		             	'Early: ' + route.early + ' out of ' + route.total + ' stops', 
+		             	(route.early > 0) ? earlyPercent.toFixed(1) + '%' : ''
 		             ];
 		  dataArray.push(dataArrayForRoute);
 		  
@@ -187,18 +187,18 @@ var globalNumberOfRoutes;
 		  var latePercent = (100.0 * totalLate / totalTotal); 
 		  var dataArrayForRoute = [
 		     		 'Combined',
+		     		 latePercent, 
+		     		 	'opacity: 1.0', 
+		     		 	'Late: ' + totalLate + ' out of ' + totalTotal + ' stops', 
+		     		 	latePercent.toFixed(1) + '%',
+			     	 ontimePercent, 
+			     	 	'opacity: 1.0', 
+			     	 	'On time: ' + totalOntime + ' out of ' + totalTotal + ' stops', 
+			     	 	ontimePercent.toFixed(1) + '%',
 		     		 earlyPercent, 
 		     		 	'opacity: 1.0', 
 		     		 	'Early: ' + totalEarly + ' out of ' + totalTotal + ' stops', 
-		     		 	earlyPercent.toFixed(2) + '%',
-		     		 ontimePercent, 
-		     		 	'opacity: 1.0', 
-		     		 	'On time: ' + totalEarly + ' out of ' + totalTotal + ' stops', 
-		     		 	ontimePercent.toFixed(2) + '%',
-		     		 latePercent, 
-		     		 	'opacity: 1.0', 
-		     		 	'Late: ' + totalEarly + ' out of ' + totalTotal + ' stops', 
-		     		 	latePercent.toFixed(2) + '%'
+		     		 	earlyPercent.toFixed(1) + '%'
 		     		 ];
 		  dataArray.push(dataArrayForRoute);		  
 	  }
