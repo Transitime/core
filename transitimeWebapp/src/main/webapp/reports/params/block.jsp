@@ -25,27 +25,28 @@ $.getJSON(apiUrlPrefix + "/command/blockIds",
 	 		// search capability
  			$("#block").select2({
  				placeholder: "Select Block", 				
- 				data : selectorData});
+ 				data : selectorData})
+ 			// Need to reset tooltip after selector is used. Sheesh!
+ 			.on("select2:select", function(e) {
+ 				var configuredTitle = $( "#block" ).attr("title");
+ 				$( "#select2-block-container" ).tooltip({ content: configuredTitle,
+ 						position: { my: "left+10 center", at: "right center" } });
+ 			});
+
 	 		
-	 		// Tooltips for a select2 widget don't automatically go away when 
-	 		// item selected so remove the tooltip manually. This is a really 
-	 		// complicated interaction between select2 and jquery UI tooltips.
-	 		// First need to set the tooltip title content but getting the
-	 		// originally configured title for the element.
- 			var modifiedRouteElement = $( "#s2id_block" );
-	 		var configuredTitle = modifiedRouteElement.attr("title");
-	 		$( "#s2id_block" ).tooltip({ content: configuredTitle });
- 			
-	 		// Now that the title has set need to manually remove the tooltip
-	 		// when a select2 item is selected. Sheesh!
- 		 	$("#block").on("change", function(e) { $("#s2id_block").tooltip("close") }); 		 	
+	 		// Tooltips for a select2 widget are rather broken. So get
+	 		// the tooltip title attribute from the original route element
+	 		// and set the tooltip for the newly created element.
+	 		var configuredTitle = $( "#block" ).attr("title");
+	 		$( "#select2-block-container" ).tooltip({ content: configuredTitle,
+	 				position: { my: "left+10 center", at: "right center" } });
  	});
  	
 </script>
 
     <div id="blocksDiv"  class="param">
       <label for="block">Block:</label>
-      <input id="block" name="b" style="width: 300px" 
-      	title="Select which block you want data for."/>
+      <select id="block" name="b" style="width: 300px" 
+      	title="Select which block you want data for."></select>
     </div>
     
