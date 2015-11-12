@@ -35,7 +35,21 @@ import org.transitime.ipc.data.IpcVehicleConfig;
  */
 public interface VehiclesInterface extends Remote {
 
-	/**
+    /* (non-Javadoc)
+     * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
+     */
+    Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
+            Collection<String> routeIds, int allowableBeforeTimeSecs)
+            throws RemoteException;
+
+    /* (non-Javadoc)
+     * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
+     */
+    Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
+            String routeId, int allowableBeforeTimeSecs)
+            throws RemoteException;
+
+    /**
 	 * For getting configuration information for all vehicles. Useful for
 	 * determining IDs of all vehicles in system
 	 * 

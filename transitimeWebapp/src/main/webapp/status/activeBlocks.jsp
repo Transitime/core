@@ -155,8 +155,18 @@ function idForQuery(id) {
 }
 
 function handleAjaxData(routes) {
-	// Remove blocks and routes that are not in the ajax data
-	removeUnneededBlockAndRouteElements(routes);
+    baseHandleAjaxData(routes, true);
+}
+
+function updateAjaxData(routes) {
+    baseHandleAjaxData(routes, false);
+}
+
+function baseHandleAjaxData(routes, removeAll) {
+    if(removeAll){
+        // Remove blocks and routes that are not in the ajax data
+        removeUnneededBlockAndRouteElements(routes);
+    }
 
 	var totalNumberBlocks = 0;
 	var totalVehicles = 0;
@@ -181,7 +191,8 @@ function handleAjaxData(routes) {
  					 // using an h3 element and h3 can't have a div in it.
  					 // And the spans need to be created in reverse order since
  					 // using css float: right to get spans displayed on the right.
- 				     "  <span class='routeValue' id='routeEarlyVehicles' title='Number of vehicles that are more than 1 minute early'></span>" + 
+ 				     "<div style='display:none'>" +
+                     "  <span class='routeValue' id='routeEarlyVehicles' title='Number of vehicles that are more than 1 minute early'></span>" +
  				     "  <span class='routeLabel' id='routeEarlyVehiclesLabel' title='Number of vehicles that are more than 1 minute early'>Early:</span>" +
  				     "  <span class='routeValue' id='routeOnTimeVehicles' title='Number of vehicles that are on time'></span>" + 
  				     "  <span class='routeLabel' id='routeOnTimeVehiclesLabel' title='Number of vehicles that are on time'>On Time:</span>" +
@@ -189,6 +200,7 @@ function handleAjaxData(routes) {
  				     "  <span class='routeLabel' id='routeLateVehiclesLabel' title='Number of vehicles more that 4 minutes late'>Late:</span>" +
  				     "  <span class='routeValue' id='routeVehicles' title='Number of vehicles assigned to blocks and predictable for the route'></span>" + 
  				     "  <span class='routeLabel' id='routeVehiclesLabel' title='Number of vehicles assigned to blocks and predictable for the route'>Assigned:</span>" +
+                     "</div>" +
  				     "  <span class='routeValue' id='routeBlocks' title='Number of blocks currently active for the route'></span>" + 
  				     "  <span class='routeLabel' id='routeBlocksLabel' title='Number of blocks currently active for the route'>Blocks:</span>" +
 					 " </h3>" +
@@ -406,9 +418,9 @@ function handleAjaxData(routes) {
  * Get active block data via AJAX
  */
 function getAndProcessData() {
-	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRoute", handleAjaxData)
+	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRouteWithoutVehicles", handleAjaxData)
 		.fail(function() {
-	 		console.log( "Could not access /command/activeBlocksByRoute" );
+	 		console.log( "Could not access /command/activeBlocksByRouteWithoutVehicles" );
 	 	});	
 }
 
@@ -421,7 +433,18 @@ $(function() {
 			active: false,         // Don't have any panels open at startup
 			animate: 200,
 			heightStyle: "content", // So each blocks info element can be different size 
-			header: "> div > h3"}) // So can be sortable
+			header: "> div > h3", // So can be sortable
+            beforeActivate: function(event, ui) {
+                var headerId = $(ui.newHeader).attr('id');
+                if(headerId){
+                    headerId = $('#'+headerId).parent().attr('id')
+                    var routeId = headerId.substring(headerId.lastIndexOf('-') + 1);
+                    $.getJSON(apiUrlPrefix + "/command/activeBlockByRouteWithVehicles?r=" + routeId, updateAjaxData)
+                            .fail(function() {
+                                console.log( "Could not access /command/activeBlockByRouteWithVehicles" );
+                            });
+                }
+            }})
 		.sortable({
 			axis: "y",
 			handle: "h3",

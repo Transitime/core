@@ -598,7 +598,7 @@ public class TransitimeApi {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
 			IpcRoute route = inter.getRoute(routeIdOrShortName, stopId,
-					tripPatternId);
+                    tripPatternId);
 
 			// If the route doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
@@ -843,7 +843,7 @@ public class TransitimeApi {
 					stdParameters.getVehiclesInterface();
 			Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
 					.getActiveBlocks(routesIdOrShortNames,
-							allowableBeforeTimeSecs);
+                            allowableBeforeTimeSecs);
 
 			// Create and return ApiBlock response
 			ApiActiveBlocks apiActiveBlocks = 
@@ -873,7 +873,7 @@ public class TransitimeApi {
 					stdParameters.getVehiclesInterface();
 			Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
 					.getActiveBlocks(routesIdOrShortNames,
-							allowableBeforeTimeSecs);
+                            allowableBeforeTimeSecs);
 
 			// Create and return ApiBlock response
 			ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
@@ -884,7 +884,72 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
-	/**
+
+
+    @Path("/command/activeBlocksByRouteWithoutVehicles")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getActiveBlocksByRouteWithoutVehicles(
+            @BeanParam StandardParameters stdParameters,
+            @QueryParam(value = "r") List<String> routesIdOrShortNames,
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get active block data from server
+            VehiclesInterface vehiclesInterface =
+                    stdParameters.getVehiclesInterface();
+            Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
+                    .getActiveBlocksWithoutVehicles(routesIdOrShortNames,
+                            allowableBeforeTimeSecs);
+
+            // Create and return ApiBlock response
+            ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
+                    activeBlocks, stdParameters.getAgencyId());
+            return stdParameters.createResponse(apiActiveBlocksRoutes);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e.getMessage());
+        }
+    }
+
+
+
+    @Path("/command/activeBlockByRouteWithVehicles")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getActiveBlockByRouteWithVehicles(
+            @BeanParam StandardParameters stdParameters,
+            @QueryParam(value = "r") String routesIdOrShortName,
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get active block data from server
+            VehiclesInterface vehiclesInterface =
+                    stdParameters.getVehiclesInterface();
+            Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
+                    .getActiveBlocksAndVehiclesByRouteId(routesIdOrShortName,
+                            allowableBeforeTimeSecs);
+
+            // Create and return ApiBlock response
+            ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
+                    activeBlocks, stdParameters.getAgencyId());
+            return stdParameters.createResponse(apiActiveBlocksRoutes);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e.getMessage());
+        }
+    }
+
+
+    /**
 	 * Handles the "trip" command which outputs configuration data for the
 	 * specified trip. Includes all sub-data such as trip patterns.
 	 * 

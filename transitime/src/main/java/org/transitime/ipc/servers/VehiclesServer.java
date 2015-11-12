@@ -39,7 +39,6 @@ import org.transitime.ipc.data.IpcActiveBlock;
 import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.VehiclesInterface;
 import org.transitime.ipc.rmi.AbstractServer;
-import org.transitime.utils.IntervalTimer;
 
 /**
  * Implements the VehiclesInterface interface on the server side such that a
@@ -275,16 +274,12 @@ public class VehiclesServer extends AbstractServer
 		// List of data to be returned
 		List<IpcActiveBlock> results = 
 				new ArrayList<IpcActiveBlock>();
-        IntervalTimer timer = new IntervalTimer();
 		// Determine all the active blocks
 		List<Block> blocks =
 				BlocksInfo.getCurrentlyActiveBlocks(routeIds, null,
 						allowableBeforeTimeSecs, -1);
-        logger.warn("interval: getCurrentlyActiveBlocks took " + timer.elapsedMsec() + " msec");
-        timer = new IntervalTimer();
 		// For each active block determine associated vehicle
 		for (Block block : blocks) {
-            IntervalTimer loopTimer = new IntervalTimer();
 			IpcBlock ipcBlock = new IpcBlock(block);
 			
 			// If a block doesn't have a vehicle associated with it need
@@ -306,15 +301,102 @@ public class VehiclesServer extends AbstractServer
 					new IpcActiveBlock(ipcBlock, activeTripIndex,
 							ipcVehiclesForBlock, tripForSorting);
 			results.add(ipcBlockAndVehicle);
-            logger.warn("interval: processing block took " + loopTimer.elapsedMsec() + " msec");
 		}
-        logger.warn("interval: getVehiclesByBlockId took " + timer.elapsedMsec() + " msec");
 		// Sort the results so that ordered by route and then block start time
 		IpcActiveBlock.sort(results);
 		
 		// Return results
 		return results;
 	}
+
+
+    /* (non-Javadoc)
+     * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
+     */
+    @Override
+    public Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
+            Collection<String> routeIds, int allowableBeforeTimeSecs)
+            throws RemoteException {
+        // List of data to be returned
+        List<IpcActiveBlock> results =
+                new ArrayList<IpcActiveBlock>();
+        // Determine all the active blocks
+        List<Block> blocks =
+                BlocksInfo.getCurrentlyActiveBlocks(routeIds, null,
+                        allowableBeforeTimeSecs, -1);
+        // For each active block determine associated vehicle
+        for (Block block : blocks) {
+            try{
+                IpcBlock ipcBlock = new IpcBlock(block);
+                int activeTripIndex = block.activeTripIndex(new Date(),
+                        allowableBeforeTimeSecs);
+
+
+                // Create and add the IpcActiveBlock, skipping the slow vehicle fetching
+                Trip tripForSorting = block.getTrip(activeTripIndex);
+                IpcActiveBlock ipcBlockAndVehicle =
+                        new IpcActiveBlock(ipcBlock, activeTripIndex,
+                                new ArrayList<IpcVehicle>(), tripForSorting);
+                results.add(ipcBlockAndVehicle);
+            }catch (Exception e){
+                logger.warn("Error while fecthing active blocks data (probably hibernate still loading data): " + e.getMessage());
+            }
+        }
+        // Sort the results so that ordered by route and then block start time
+        IpcActiveBlock.sort(results);
+
+        // Return results
+        return results;
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
+     */
+    @Override
+    public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
+            String routeId, int allowableBeforeTimeSecs)
+            throws RemoteException {
+
+        Collection<String> routeIds = new ArrayList<>();
+        routeIds.add(routeId);
+        // List of data to be returned
+        List<IpcActiveBlock> results =
+                new ArrayList<IpcActiveBlock>();
+        // Determine all the active blocks
+        List<Block> blocks =
+                BlocksInfo.getCurrentlyActiveBlocks(routeIds, null,
+                        allowableBeforeTimeSecs, -1);
+        // For each active block determine associated vehicle
+        for (Block block : blocks) {
+            IpcBlock ipcBlock = new IpcBlock(block);
+
+            // If a block doesn't have a vehicle associated with it need
+            // to determine which route a block is currently associated with
+            // since can't get that info from the vehicle. This way the block
+            // can be properly grouped with the associated route even when it
+            // doesn't have a vehicle assigned.
+            int activeTripIndex = block.activeTripIndex(new Date(),
+                    allowableBeforeTimeSecs);
+
+            // Determine vehicles associated with the block if there are any
+            Collection<String> vehicleIdsForBlock = VehicleDataCache
+                    .getInstance().getVehiclesByBlockId(block.getId());
+            Collection<IpcVehicle> ipcVehiclesForBlock = get(vehicleIdsForBlock);
+
+            // Create and add the IpcActiveBlock
+            Trip tripForSorting = block.getTrip(activeTripIndex);
+            IpcActiveBlock ipcBlockAndVehicle =
+                    new IpcActiveBlock(ipcBlock, activeTripIndex,
+                            ipcVehiclesForBlock, tripForSorting);
+            results.add(ipcBlockAndVehicle);
+        }
+        // Sort the results so that ordered by route and then block start time
+        IpcActiveBlock.sort(results);
+
+        // Return results
+        return results;
+    }
 
 	/* (non-Javadoc)
 	 * @see org.transitime.ipc.interfaces.VehiclesInterface#getVehicleConfigs()
