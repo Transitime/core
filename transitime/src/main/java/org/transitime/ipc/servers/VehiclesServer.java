@@ -370,25 +370,15 @@ public class VehiclesServer extends AbstractServer
         // For each active block determine associated vehicle
         for (Block block : blocks) {
             IpcBlock ipcBlock = new IpcBlock(block);
-
-            // If a block doesn't have a vehicle associated with it need
-            // to determine which route a block is currently associated with
-            // since can't get that info from the vehicle. This way the block
-            // can be properly grouped with the associated route even when it
-            // doesn't have a vehicle assigned.
             int activeTripIndex = block.activeTripIndex(new Date(),
                     allowableBeforeTimeSecs);
 
-            // Determine vehicles associated with the block if there are any
-            Collection<String> vehicleIdsForBlock = VehicleDataCache
-                    .getInstance().getVehiclesByBlockId(block.getId());
-            Collection<IpcVehicle> ipcVehiclesForBlock = get(vehicleIdsForBlock);
 
-            // Create and add the IpcActiveBlock
+            // Create and add the IpcActiveBlock, skipping the slow vehicle fetching
             Trip tripForSorting = block.getTrip(activeTripIndex);
             IpcActiveBlock ipcBlockAndVehicle =
                     new IpcActiveBlock(ipcBlock, activeTripIndex,
-                            ipcVehiclesForBlock, tripForSorting);
+                            new ArrayList<IpcVehicle>(), tripForSorting);
             results.add(ipcBlockAndVehicle);
         }
         // Sort the results so that ordered by route and then block start time

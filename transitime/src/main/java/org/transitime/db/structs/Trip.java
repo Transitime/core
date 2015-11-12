@@ -463,7 +463,9 @@ public class Trip implements Serializable {
 	public static Trip getTrip(Session session, int configRev, String tripId) 
 			throws HibernateException {
 		// Setup the query
-		String hql = "FROM Trip " +
+		String hql = "FROM Trip t " +
+                "   left join fetch t.scheduledTimesList " +
+                "   left join fetch t.travelTimes " +
 				"    WHERE configRev = :configRev" +
 				"      AND tripId = :tripId";
 		Query query = session.createQuery(hql);
@@ -489,9 +491,11 @@ public class Trip implements Serializable {
 	public static Trip getTripByShortName(Session session, int configRev,
 			String tripShortName) throws HibernateException {
 		// Setup the query
-		String hql = "FROM Trip " +
-				"    WHERE configRev = :configRev" +
-				"      AND tripShortName = :tripShortName";
+		String hql = "FROM Trip t " +
+                "   left join fetch t.scheduledTimesList " +
+                "   left join fetch t.travelTimes " +
+				"    WHERE t.configRev = :configRev" +
+				"      AND t.tripShortName = :tripShortName";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 		query.setString("tripShortName", tripShortName);

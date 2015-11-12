@@ -103,7 +103,7 @@ public class CloudwatchService {
         if(metricValue == null)
             return;
 
-        logger.info("Cloudwatch[{}]={}", metricName, metricValue);
+        logger.info("saving metric to CloudwatchService [{}]={}", metricName, metricValue);
 
         if(metricType == MetricType.SCALAR && reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE){
             if(formatAsPercent){
@@ -142,6 +142,7 @@ public class CloudwatchService {
     }
 
     private void publishMetric(String metricName, Double metricValue){
+        logger.info("Cloudwatch publishMetric [{}]={}", metricName, metricValue);
         MetricDatum datum = new MetricDatum().
                 withMetricName(metricName).
                 withTimestamp(new Date()).
@@ -159,7 +160,7 @@ public class CloudwatchService {
      * @param metricValue
      */
     private synchronized void publishMetricAsPercent(String metricName, Double metricValue){
-      logger.info("Cloudwatch[{}]={}", metricName, metricValue);
+      logger.info("Cloudwatch publishMetricAsPercent [{}]={}", metricName, metricValue);
       if(cloudWatch == null)
           return;
 
