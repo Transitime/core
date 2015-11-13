@@ -307,10 +307,8 @@ public class AvlSqsClientModule extends Module {
 
       @Override
       public void run() {
-        int latencyCount = 0;
         long start = System.currentTimeMillis();
-        long latencyTotal = 0;
-        
+
         try {
         while (!Thread.interrupted()) {
           try {
@@ -320,8 +318,8 @@ public class AvlSqsClientModule extends Module {
             try {
               avlReport = _messageUnmarshaller.toAvlReport(message);
               if (avlReport.getQueueLatency() != null) {
-                latencyTotal = latencyTotal + avlReport.getQueueLatency();
-                latencyCount++;
+                  monitoring.saveMetric("AvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+                  monitoring.saveMetric("AverageAvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
               }
             } catch (Exception any) {
               logger.error("exception deserializing message {}", message, any);
@@ -336,15 +334,6 @@ public class AvlSqsClientModule extends Module {
             }
           } catch (Exception any) {
             logger.error("unexpected exception: ", any);
-          }
-        }
-        
-        if (System.currentTimeMillis() - start > MONITORING_FREQUENCY) {
-          if (latencyCount != 0) {
-            double latencyAverage = (latencyTotal/latencyCount)/1000;
-            monitoring.saveMetric("AvlQueueLatencyInSeconds", latencyAverage, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
-          } else {
-            logger.info("no latencyCount to report");
           }
         }
         
