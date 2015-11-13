@@ -19,7 +19,7 @@
       var format = $('input:radio[name=format]:checked').val();
   	  var url = apiUrlPrefix + "/command/vehicles?r=" + selectedRouteId + "&format=" + format;
 
-   	  // Actually do the API call
+   	  // Actually do the API call 
    	  location.href = url;
     }
   </script>

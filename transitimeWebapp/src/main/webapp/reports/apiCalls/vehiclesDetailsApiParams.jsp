@@ -30,7 +30,7 @@
 <%@include file="/template/header.jsp" %>
 
 <div id="title">
-   Select Parameters for Vehicles Details API
+   Select Parameters for Vehicles Details API 
 </div>
    
 <div id="mainDiv">   
