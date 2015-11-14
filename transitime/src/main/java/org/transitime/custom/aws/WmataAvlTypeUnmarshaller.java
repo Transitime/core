@@ -47,7 +47,7 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
 
         Float speed = null;
         if (msgObj.has("averageSpeed")) {
-            speed = (float) msgObj.getDouble("averageSpeed");
+            speed = (float) msgObj.getDouble("averageSpeed") * 0.44704f; // convert to m/s
         }
 
         Long proxied = null;
