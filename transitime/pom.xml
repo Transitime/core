@@ -244,7 +244,7 @@
 						<configuration>
 							<mainClass>org.transitime.applications.CreateWebAgency</mainClass>
 							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
+							<classifier>createWebAgency</classifier>
 							<filename>createWebAgency.jar</filename>
 						</configuration>
 						<goals>
@@ -256,7 +256,7 @@
 						<configuration>
 							<mainClass>org.transitime.applications.UpdateTravelTimes</mainClass>
 							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
+							<classifier>UpdateTravelTimes</classifier>
 							<filename>updateTravelTimes.jar</filename>
 						</configuration>
 						<goals>
@@ -280,7 +280,7 @@
 						<configuration>
 							<mainClass>org.transitime.applications.ScheduleGenerator</mainClass>
 							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
+							<classifier>generateSchedule</classifier>
 							<filename>generateSchedule.jar</filename>
 						</configuration>
 						<goals>
@@ -292,7 +292,7 @@
 						<configuration>
 							<mainClass>org.transitime.applications.GtfsFileProcessor</mainClass>
 							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
+							<classifier>procesGTFSFile</classifier>
 							<filename>processGTFSFile.jar</filename>
 						</configuration>
 						<goals>
@@ -304,7 +304,7 @@
 						<configuration>
 							<mainClass>org.transitime.applications.RmiQuery</mainClass>
 							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
+							<classifier>RmiQuery</classifier>
 							<filename>RmiQeury.jar</filename>
 						</configuration>
 						<goals>
@@ -316,7 +316,7 @@
 						<configuration>
 							<mainClass>org.transitime.applications.CreateAPIKey</mainClass>
 							<attachToBuild>true</attachToBuild>
-							<classifier>onejar</classifier>
+							<classifier>createAPIKey</classifier>
 							<filename>createAPIKey.jar</filename>
 						</configuration>
 						<goals>
