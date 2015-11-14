@@ -292,7 +292,7 @@
 						<configuration>
 							<mainClass>org.transitime.applications.GtfsFileProcessor</mainClass>
 							<attachToBuild>true</attachToBuild>
-							<classifier>procesGTFSFile</classifier>
+							<classifier>processGTFSFile</classifier>
 							<filename>processGTFSFile.jar</filename>
 						</configuration>
 						<goals>
