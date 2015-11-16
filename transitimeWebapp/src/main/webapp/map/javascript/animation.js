@@ -6,7 +6,7 @@
 function avlAnimation(map, icon, clock) {
 	
 	var startTime, endTime, rate, currentIndex, elapsedTime,
-		lastTime, lineDone, paused, durations, sprite, positions;
+		lastTime, lineDone, paused, durations, sprite, positions, end;
 	
 	var ready = false;
 	
@@ -56,8 +56,13 @@ function avlAnimation(map, icon, clock) {
 			currentIndex += 1
 			lineDone = 0;
 			
-			if (currentIndex == positions.length - 1)
+			if (currentIndex == positions.length - 1) {
+				if (end)
+					end()
+				currentIndex = 0;
+				paused = true;
 				return;
+			}
 			
 			sprite.setLatLng(positions[currentIndex])
 			sprite.update()
@@ -91,6 +96,10 @@ function avlAnimation(map, icon, clock) {
 	
 	animation.paused = function() {
 		return paused;
+	}
+	
+	animation.onEnd = function (_) {
+		end = _;
 	}
 	
 	animation.rate = function(_) {
@@ -162,7 +171,7 @@ function avlAnimation(map, icon, clock) {
 	    k = (k>1) ? 1 : k;
 	    return L.latLng(p1.lat + k*(p2.lat-p1.lat), p1.lon + k*(p2.lon-p1.lon));
 	};
-
+	
 
 	return animation;
 }
