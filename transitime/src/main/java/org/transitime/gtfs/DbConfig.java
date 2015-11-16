@@ -81,6 +81,7 @@ public class DbConfig {
 	// So can access blocks by service ID and route ID easily
 	private Map<RouteServiceMapKey, List<Block>> blocksByRouteMap = null;
 
+	// Ordered list of routes
 	private List<Route> routes;
 	// Keyed on routeId
 	private Map<String, Route> routesByRouteIdMap;
