@@ -63,7 +63,8 @@ public class TemporalMatcher {
 	 * For the spatial match, determines how far off in time the vehicle is from
 	 * what is expected based on the start time of the trip plus the travel time
 	 * from the beginning of the trip. This can be used to determine which
-	 * spatial match has the best temporal match.
+	 * spatial match has the best temporal match. Intended to be used when first
+	 * matching a vehicle to an assignment.
 	 * 
 	 * @param for logging messages
 	 * @param date
@@ -142,12 +143,14 @@ public class TemporalMatcher {
 					vehicleId, deltaFromSchedule, spatialMatch);
 			return deltaFromSchedule;
 		} else {
-			logger.debug("For vehicleId={} in determineHowFarOffScheduledTime() "
+			logger.info("For vehicleId={} in "
+					+ "TemporalMatcher.determineHowFarOffScheduledTime() "
 					+ "expectedTimeDelta={} is not within bounds of "
-					+ "getAllowableEarlySeconds()={} and "
-					+ "getAllowableLateSeconds()={} so returning null for {}",
+					+ "{}={} and {}={} so returning null for {}",
 					vehicleId, deltaFromSchedule, 
+					CoreConfig.getAllowableEarlySecondsId(), 
 					CoreConfig.getAllowableEarlySeconds(), 
+					CoreConfig.getAllowableLateSecondsId(), 
 					CoreConfig.getAllowableLateSeconds(),
 					spatialMatch);
 			return null;
