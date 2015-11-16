@@ -120,11 +120,15 @@ public interface ConfigInterface extends Remote {
 			throws RemoteException;
 	
 	/**
-	 * Returns trip info for specified tripId. Includes all trip pattern info
-	 * associated with the trip.
+	 * Returns trip info for specified tripId. If trip with the specified
+	 * trip_id is not found then looks for a trip with a trip_short_name that
+	 * matches the tripId. This way can easily find trips using trip_short_name,
+	 * which for agencies such as MBTA commuter rail is more frequently used.
+	 * Includes all trip pattern info associated with the trip.
 	 * 
 	 * @param tripId
-	 * @return
+	 *            The GTFS trip_id or trip_short_name
+	 * @return The IpcTrip for interprocess communication
 	 * @throws RemoteException
 	 */
 	public IpcTrip getTrip(String tripId) 
