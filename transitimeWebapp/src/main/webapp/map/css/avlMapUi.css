@@ -41,23 +41,32 @@ div.avlTriangle {
   border: 2px solid black;
 }
 
-/* Playback menu */
-#playback_container {
-	position: absolute;
-	left: 50%;
-	bottom: 5%;
+ /* Playback menu */
+#playbackContainer {
+  position: absolute;
+  left: 50%;
+  bottom: -50%; /* initially hidden */
 }
 #playback {
-	background: lightgrey;
-	position: relative;
-	left: -50%;
-	text-align: center;
-	border-radius: 25px;
-    padding: 2%;
-    font-family: monospace;
-    border: 2px solid black;
+  background: lightgrey;
+  position: relative;
+  left: -50%;
+  text-align: center;
+  border-radius: 25px;
+  padding: 2%;
+  font-family: monospace;
+  border: 2px solid black;
 }
 
 #playback input {
-	background: lightgrey;
+  background: lightgrey;
+}
+
+#playback input:hover {
+  border: 1px solid #CCC;
+  box-shadow: 1px 1px 5px #999
+}
+
+#playback input:active {
+  background: lightblue;
 }

@@ -288,7 +288,7 @@ function drawAvlData() {
 	    	// connect export to link to csv creation.
 	    	createExport(vehicles);
 	    	if (vehicles.length)
-	    		animate(vehicles[0].data); // only animate first vehicle returned.
+	    		prepareAnimation(vehicles[0].data); // only animate first vehicle returned.
 	    },
 	    // When there is an AJAX problem alert the user
 	    error: function(request, status, error) {
@@ -316,6 +316,9 @@ var animate = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
 var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
 	pauseButton = contextPath + "/reports/images/playback/media-playback-pause.svg";
 
+animate.onEnd(function() {
+	$("#playbackPlay").attr("src", playButton);
+})
 
 // Given a list of AVL positions, initialize the animation object.
 function prepareAnimation(avlData) {

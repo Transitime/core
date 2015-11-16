@@ -41,7 +41,7 @@
     <input type="button" id="submit" value="Submit">
     <a href="#" id="exportData">Export</a>
   </div>
-  <div id="playback_container">
+  <div id="playbackContainer">
 	  <div id="playback">
 	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/media-seek-backward.svg" id="playbackPrev" />
 	  	<input type="image" src="<%= request.getContextPath() %>/reports/images/playback/media-skip-backward.svg" id="playbackRew" />
