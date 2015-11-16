@@ -133,6 +133,9 @@ public class DbConfig {
 	/**
 	 * Initiates the reading of the configuration data from the database. Calls
 	 * actuallyReadData() which does all the work.
+	 * <p>
+	 * NOTE: exits system if config data could not be read in. This is done so
+	 * that action will be taken to fix this issue.
 	 * 
 	 * @param configRev
 	 */
@@ -152,7 +155,10 @@ public class DbConfig {
 			actuallyReadData(configRev);
 		} catch (HibernateException e) {
 			logger.error("Error reading configuration data from db for "
-					+ "configRev={}.", configRev);
+					+ "configRev={}. Exiting because could not read in data.", 
+					configRev, e);
+			
+			System.exit(-1);
 		} finally {
 			// Usually would always make sure session gets closed. But
 			// don't close session for now so can use lazy initialization
