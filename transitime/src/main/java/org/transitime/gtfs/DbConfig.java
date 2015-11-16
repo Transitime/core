@@ -155,8 +155,8 @@ public class DbConfig {
 			actuallyReadData(configRev);
 		} catch (HibernateException e) {
 			logger.error("Error reading configuration data from db for "
-					+ "configRev={}. Exiting because could not read in data.", 
-					configRev, e);
+					+ "configRev={}. NOTE: Exiting because could not read in "
+					+ "data!!!!", configRev, e);
 			
 			System.exit(-1);
 		} finally {
