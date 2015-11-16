@@ -300,7 +300,7 @@ public class Route implements Serializable {
 		// FIXME order by route_order
 		String hql = "FROM Route " 
 				+ "    WHERE configRev = :configRev"
-				+ "    ORDER BY routeOrder, routeShortName";
+				+ "    ORDER BY routeOrder, shortName";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 		List<Route> routesList = query.list();
