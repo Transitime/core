@@ -149,8 +149,9 @@ public class Route implements Serializable {
 		this.type = gtfsRoute.getRouteType();
 		this.description = gtfsRoute.getRouteDesc(); 
 
-		this.shortName = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
-		this.longName = titleFormatter.processTitle(gtfsRoute.getRouteLongName());
+		this.shortName = gtfsRoute.getRouteShortName();
+		this.longName =
+				titleFormatter.processTitle(gtfsRoute.getRouteLongName());
 		
 		// Get the name of the route. Need to do some fancy processing here because 
 		// need to fix the capitalization using the TitleFormatter. This also
