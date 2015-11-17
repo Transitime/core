@@ -98,8 +98,8 @@ public class GtfsRoute extends CsvBase {
 		
 		routeId = getRequiredUnlessSupplementalValue(record, "route_id");
 		agencyId = getOptionalValue(record, "agency_id");
-		routeShortName = getRequiredUnlessSupplementalValue(record, "route_short_name");
-		routeLongName = getRequiredUnlessSupplementalValue(record, "route_long_name");
+		routeShortName = getOptionalValue(record, "route_short_name");
+		routeLongName = getOptionalValue(record, "route_long_name");
 		routeDesc = getOptionalValue(record, "route_desc");
 		routeType = getRequiredUnlessSupplementalValue(record, "route_type");
 		routeURL = getOptionalValue(record, "route_url");

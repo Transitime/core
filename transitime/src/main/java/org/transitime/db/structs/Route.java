@@ -149,9 +149,17 @@ public class Route implements Serializable {
 		this.type = gtfsRoute.getRouteType();
 		this.description = gtfsRoute.getRouteDesc(); 
 
-		this.shortName = gtfsRoute.getRouteShortName();
 		this.longName =
 				titleFormatter.processTitle(gtfsRoute.getRouteLongName());
+
+		// Handle short name specially. route_short_name is optional
+		// but Transitime uses it as an identifier since route_ids
+		// are not always consistent across schedule changes. Therefore
+		// if the GTFS route_short_name is not set then use the 
+		// route_long_name.
+		String shortName = gtfsRoute.getRouteShortName();
+		this.shortName = shortName != null && !shortName.isEmpty() ? 
+				shortName : gtfsRoute.getRouteLongName();
 		
 		// Get the name of the route. Need to do some fancy processing here because 
 		// need to fix the capitalization using the TitleFormatter. This also
@@ -165,12 +173,12 @@ public class Route implements Serializable {
 			// route short name is defined and it is short. This way
 			// will end up with a route name like "38 - Geary" but
 			// not "HYDE-POWELL - Hyde Powell".
-			String shortName = "";
+			String shortNameComponent = "";
 			if (gtfsRoute.getRouteShortName() != null 
 					&& gtfsRoute.getRouteShortName().length() <=4)
-				shortName = gtfsRoute.getRouteShortName() + " - ";
+				shortNameComponent = gtfsRoute.getRouteShortName() + " - ";
 			
-			this.name = shortName + this.longName;
+			this.name = shortNameComponent + this.longName;
 		} else {
 			// route_long_name not set so just use the route_short_name
 			this.name = this.shortName;
@@ -298,7 +306,6 @@ public class Route implements Serializable {
 	public static List<Route> getRoutes(Session session, int configRev) 
 			throws HibernateException {
 		// Get list of routes from database
-		// FIXME order by route_order
 		String hql = "FROM Route " 
 				+ "    WHERE configRev = :configRev"
 				+ "    ORDER BY routeOrder, shortName";
@@ -306,7 +313,7 @@ public class Route implements Serializable {
 		query.setInteger("configRev", configRev);
 		List<Route> routesList = query.list();
 	
-		// Put the routes into proper order. Should really need to do this
+		// FIXME. Put the routes into proper order. Should really need to do this
 		// since route order should now be set when GTFS data read in. But
 		// for older agencies that haven't been configured with the new
 		// 11/12/15 version of software should sort here too to be safe.
