@@ -869,7 +869,8 @@ public class Trip implements Lifecycle, Serializable {
 	
 	/**
 	 * Returns the routeShortName. If it is null then returns the full route
-	 * name.
+	 * name. Causes exception if Core not available, such as when processing
+	 * GTFS data.
 	 * 
 	 * @return the routeShortName
 	 */
@@ -898,7 +899,9 @@ public class Trip implements Lifecycle, Serializable {
 	/**
 	 * Returns route name. Gets it from the Core database configuration. If Core
 	 * database configuration not available such as when processing GTFS data
-	 * then will return null.
+	 * then will return null. Will cause exception if core not available
+	 * and gtfs data not loaded in db yet since the active revisions will
+	 * not be set properly yet.
 	 * 
 	 * @return The route name or null if Core object not available
 	 */
