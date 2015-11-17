@@ -103,10 +103,11 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 				float speed = (float) v.getDouble("vehicle_speed") * Geo.MPH_TO_MPS;
 				// Not sure if bearing is the same as heading.
 				float heading = (float) v.getDouble("vehicle_bearing");
-				// The time is really strange. It is off by 4 hours for some
-				// strange reason.
+				// The time is really strange. It is off by 4-5 hours for some
+				// strange reason. It appears to be 4 hours off during daylight
+				// savings time but 5 hours during normal winter hours. Yikes! FIXME
 				long gpsTime =
-						v.getLong("vehicle_timestamp") * Time.MS_PER_SEC + 4
+						v.getLong("vehicle_timestamp") * Time.MS_PER_SEC + 5
 								* Time.HOUR_IN_MSECS;
 
 				// Create the AvlReport
