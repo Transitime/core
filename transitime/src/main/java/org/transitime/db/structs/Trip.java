@@ -888,10 +888,14 @@ public class Trip implements Lifecycle, Serializable {
 	 */
 	public Route getRoute() {
 		if (route == null) {
-			DbConfig dbConfig = Core.getInstance().getDbConfig();
-			if (dbConfig == null)
+			if (Core.isCoreApplication()) {
+				DbConfig dbConfig = Core.getInstance().getDbConfig();				
+				if (dbConfig == null)
+					return null;
+				route = dbConfig.getRouteById(routeId);
+			} else {
 				return null;
-			route = dbConfig.getRouteById(routeId);
+			}
 		}
 		return route;
 	}

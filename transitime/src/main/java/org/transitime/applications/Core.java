@@ -215,6 +215,17 @@ public class Core {
 	}
 	
 	/**
+	 * Returns true if core application. If GTFS processing or other application
+	 * then not a Core application and should't try to read in data such as
+	 * route names for a trip.
+	 * 
+	 * @return true if core application
+	 */
+	public static boolean isCoreApplication() {
+		return Core.singleton != null;
+	}
+	
+	/**
 	 * Makes the config data available to all
 	 * @return
 	 */
