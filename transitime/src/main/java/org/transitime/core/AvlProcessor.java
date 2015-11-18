@@ -1102,6 +1102,13 @@ public class AvlProcessor {
 			// Keep track of last AvlReport even if vehicle not predictable.
 			vehicleState.setAvlReport(avlReport);
 
+			// If part of consist and shouldn't be generating predictions
+			// and such and shouldn't grab assignment the simply return
+			// not that the last AVL report has been set for the vehicle.
+			if (avlReport.ignoreBecauseInConsist()) {
+				return;
+			}
+			
 			// Do the matching depending on the old and the new assignment
 			// for the vehicle.
 			boolean matchAlreadyPredictableVehicle = 
