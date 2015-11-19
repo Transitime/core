@@ -48,7 +48,7 @@ public class ApiTravelTimesForStopPath {
 	private int stopTimeMsec;
 
 	@XmlAttribute
-	private int totalTravelTime;
+	private int totalTravelTimeMsec;
 
 	@XmlAttribute
 	private HowSet howSet;
@@ -79,7 +79,7 @@ public class ApiTravelTimesForStopPath {
 				Double.isNaN(travelTimeSegLengthValue) ? 
 						null : travelTimeSegLengthValue;
 		this.stopTimeMsec = travelTimesForStopPath.getStopTimeMsec();
-		this.totalTravelTime =
+		this.totalTravelTimeMsec =
 				travelTimesForStopPath.getStopPathTravelTimeMsec();
 		this.howSet = travelTimesForStopPath.getHowSet();
 
