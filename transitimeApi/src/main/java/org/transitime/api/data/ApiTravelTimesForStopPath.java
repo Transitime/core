@@ -26,7 +26,6 @@ import javax.xml.bind.annotation.XmlElement;
 import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.db.structs.TravelTimesForStopPath.HowSet;
 import org.transitime.utils.MathUtils;
-import org.transitime.utils.StringUtils;
 
 /**
  * Represents travel times for a stop path
