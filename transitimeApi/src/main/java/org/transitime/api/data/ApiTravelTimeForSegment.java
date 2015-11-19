@@ -38,13 +38,13 @@ public class ApiTravelTimeForSegment {
 	private int segmentTimeMsec;
 
 	@XmlAttribute
-	private double speedInMph;
+	private Double speedInMph;
 
 	@XmlAttribute
-	private double speedInKph;
+	private Double speedInKph;
 
 	@XmlAttribute
-	private double speedInMetersPerSec;
+	private Double speedInMetersPerSec;
 
 	/********************** Member Functions **************************/
 
@@ -66,10 +66,17 @@ public class ApiTravelTimeForSegment {
 		this.segmentIndex = segmentIndex;
 		this.segmentTimeMsec = segmentTimeMsec;
 
-		double speedInMetersPerSec =
-				segmentLength * Time.MS_PER_SEC / segmentTimeMsec;
-		this.speedInMph = MathUtils.round(speedInMetersPerSec / Geo.MPH_TO_MPS, 1);
-		this.speedInKph = MathUtils.round(speedInMetersPerSec / Geo.KPH_TO_MPS, 1);
-		this.speedInMetersPerSec = MathUtils.round(speedInMetersPerSec, 1);
+		// If segment time is 0 then speeds will default to null and will 
+		// not be output. Better than trying to divide by zero since
+		// can't output NaN with JSON.
+		if (segmentTimeMsec != 0) {
+			double speedInMetersPerSec =
+					segmentLength * Time.MS_PER_SEC / segmentTimeMsec;
+			this.speedInMph =
+					MathUtils.round(speedInMetersPerSec / Geo.MPH_TO_MPS, 1);
+			this.speedInKph =
+					MathUtils.round(speedInMetersPerSec / Geo.KPH_TO_MPS, 1);
+			this.speedInMetersPerSec = MathUtils.round(speedInMetersPerSec, 1);
+		}
 	}
 }
