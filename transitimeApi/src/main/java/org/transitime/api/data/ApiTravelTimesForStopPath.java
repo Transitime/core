@@ -73,9 +73,11 @@ public class ApiTravelTimesForStopPath {
 			TravelTimesForStopPath travelTimesForStopPath) {
 		this.stopPathIndex = stopPathIndex;
 		this.stopPathId = travelTimesForStopPath.getStopPathId();
+		double travelTimeSegLengthValue = MathUtils.round(
+				travelTimesForStopPath.getTravelTimeSegmentLength(), 1);
 		this.travelTimeSegmentLength =
-				MathUtils.round(
-						travelTimesForStopPath.getTravelTimeSegmentLength(), 1);
+				Double.isNaN(travelTimeSegLengthValue) ? 
+						null : travelTimeSegLengthValue;
 		this.stopTimeMsec = travelTimesForStopPath.getStopTimeMsec();
 		this.totalTravelTime =
 				travelTimesForStopPath.getStopPathTravelTimeMsec();
