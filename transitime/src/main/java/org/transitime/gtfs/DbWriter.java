@@ -22,20 +22,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.db.structs.Agency;
-import org.transitime.db.structs.Block;
-import org.transitime.db.structs.Calendar;
-import org.transitime.db.structs.CalendarDate;
-import org.transitime.db.structs.FareAttribute;
-import org.transitime.db.structs.FareRule;
-import org.transitime.db.structs.Frequency;
-import org.transitime.db.structs.Route;
-import org.transitime.db.structs.Stop;
-import org.transitime.db.structs.Transfer;
-import org.transitime.db.structs.TravelTimesForTrip;
-import org.transitime.db.structs.Trip;
-import org.transitime.db.structs.TripPattern;
+import org.transitime.configData.DbSetupConfig;
+import org.transitime.db.structs.*;
 import org.transitime.utils.IntervalTimer;
 
 /**
@@ -76,11 +64,11 @@ public class DbWriter {
 		// Since can writing large amount of data should use Hibernate 
 		// batching to make sure don't run out memory.
 		counter++;
-		if (counter % HibernateUtils.BATCH_SIZE == 0) {
-			logger.info("flushing with " + counter + " % " + HibernateUtils.BATCH_SIZE);
+		if (counter % DbSetupConfig.getBatchSize() == 0) {
+			logger.info("flushing with " + counter + " % " + DbSetupConfig.getBatchSize());
 			session.flush();
 			session.clear();
-			logger.info("flushed with " + counter + " % " + HibernateUtils.BATCH_SIZE);
+			logger.info("flushed with " + counter + " % " + DbSetupConfig.getBatchSize());
 		}
 	}
 	

@@ -17,6 +17,7 @@
 
 package org.transitime.configData;
 
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
 
 /**
@@ -92,5 +93,13 @@ public class DbSetupConfig {
 					+ "to use to configure hibernate. The system will look both "
 					+ "on the file system and in the classpath. Can specify "
 					+ "mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml");
+
+    public static Integer getBatchSize() {
+        return batchSize.getValue();
+    }
+    private static IntegerConfigValue batchSize =
+            new IntegerConfigValue("transitime.db.batchSize",
+                    100,
+                    "Specifies the database batch size, defaults to 100");
 
 }

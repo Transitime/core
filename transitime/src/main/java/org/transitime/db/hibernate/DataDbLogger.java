@@ -34,6 +34,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.logging.Markers;
 import org.transitime.utils.Time;
@@ -439,7 +440,7 @@ public class DataDbLogger {
 		// then can try to write the objects one at a time to make sure that the
 		// the good ones are written. This way don't lose any good data even if
 		// an exception occurs while batching data.
-		List<Object> objectsForThisBatch = new ArrayList<Object>(HibernateUtils.BATCH_SIZE);
+		List<Object> objectsForThisBatch = new ArrayList<Object>(DbSetupConfig.getBatchSize());
 		
 		try {			
 			int batchingCounter = 0;
@@ -455,7 +456,7 @@ public class DataDbLogger {
 				logger.debug("DataDbLogger batch saving object={}", 
 						objectToBeStored);
 				session.save(objectToBeStored);
-			} while (queueHasData() && ++batchingCounter < HibernateUtils.BATCH_SIZE);
+			} while (queueHasData() && ++batchingCounter < DbSetupConfig.getBatchSize());
 			
 			tx.commit();
 			session.close();
@@ -552,7 +553,7 @@ public class DataDbLogger {
 		// Need to not retry for such an exception
 		logger.add(new AvlReport("test", initialTime, 1.23, 4.56, null)); 
 		
-		for (int i=HibernateUtils.BATCH_SIZE; i<2*HibernateUtils.BATCH_SIZE;++i)
+		for (int i=DbSetupConfig.getBatchSize(); i<2*DbSetupConfig.getBatchSize();++i)
 			logger.add(new AvlReport("test", initialTime+i, 1.23, 4.56, null));
 
 				
