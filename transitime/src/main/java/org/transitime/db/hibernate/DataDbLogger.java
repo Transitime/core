@@ -75,7 +75,7 @@ import org.transitime.utils.threading.NamedThreadFactory;
 public class DataDbLogger {
 	
 	// For when cannot connect to data the length of time in msec between retries
-	private static final long TIME_BETWEEN_RETRIES = 2 * Time.MS_PER_SEC;
+	private static final long TIME_BETWEEN_RETRIES = 250; //msec
 	
 	private static final int QUEUE_CAPACITY = 5000000;
 	
@@ -288,48 +288,35 @@ public class DataDbLogger {
 		return success;
 	}
 	
-	/**
-	 * Gets the next object from the head of the queue, waiting if
-	 * necessary until an object becomes available. If the capacity
-	 * level drops significantly from when last logged then that
-	 * info is logged to indicate that the situation is getting better. 
-	 * When the queue level drops down below 10% of a specified level
-	 * then an e-mail mail message is sent out indicating such. That way
-	 * a supervisor can see that the queue is being cleared out.
-	 * @return The object to be stored in the database
-	 */
-	private Object get() {
-		// Get the next object from the head of the queue
-		Object o = null;
-		do {
-			try {
-				o = queue.take();
-			} catch (InterruptedException e) {
-				// If interrupted simply try again
-			}
-		} while (o == null);
-		
-		// Log if went below a capacity level
-		// See if queue dropped to 10% less than the previously logged level.
-		// Use a margin of 10% so that don't get flood of messages if queue
-		// oscillating around a level.
-		double level = queueLevel();
-		int levelIndexIncludingMargin = indexOfLevel(level + 0.10);
-		if (levelIndexIncludingMargin < indexOfLevelWhenMessageLogged) {
-			logger.error(Markers.email(), "DataDbLogger queue emptying out somewhat " +
-					" for projectId=" + projectId +". It is now at " + 
-					String.format("%.1f", level*100) + "% capacity with " + queue.size() + 
-					" elements already in the queue. The maximum capacity was " +
-					String.format("%.1f", maxQueueLevel*100) + "%.");
-			indexOfLevelWhenMessageLogged = levelIndexIncludingMargin;
-			
-			// Reset the maxQueueLevel so can determine what next peak is
-			maxQueueLevel = level;
-		}
+	 private List<Object> drain() {
+	    // Get the next object from the head of the queue
+	    ArrayList<Object> buff = new ArrayList<Object>(DbSetupConfig.getBatchSize());
+	    do {
+	        queue.drainTo(buff);
+	    } while (buff.isEmpty());
+	    
+	    // Log if went below a capacity level
+	    // See if queue dropped to 10% less than the previously logged level.
+	    // Use a margin of 10% so that don't get flood of messages if queue
+	    // oscillating around a level.
+	    double level = queueLevel();
+	    int levelIndexIncludingMargin = indexOfLevel(level + 0.10);
+	    if (levelIndexIncludingMargin < indexOfLevelWhenMessageLogged) {
+	      logger.error(Markers.email(), "DataDbLogger queue emptying out somewhat " +
+	          " for projectId=" + projectId +". It is now at " + 
+	          String.format("%.1f", level*100) + "% capacity with " + queue.size() + 
+	          " elements already in the queue. The maximum capacity was " +
+	          String.format("%.1f", maxQueueLevel*100) + "%.");
+	      indexOfLevelWhenMessageLogged = levelIndexIncludingMargin;
+	      
+	      // Reset the maxQueueLevel so can determine what next peak is
+	      maxQueueLevel = level;
+	    }
 
-		// Return the result
-		return o;
-	}
+	    // Return the result
+	    return buff;
+	  }
+
 	
 	/**
 	 * Returns whether queue has any elements in it that should be stored.
@@ -443,21 +430,14 @@ public class DataDbLogger {
 		List<Object> objectsForThisBatch = new ArrayList<Object>(DbSetupConfig.getBatchSize());
 		
 		try {			
-			int batchingCounter = 0;
-			do {	
-				// Get the object to be stored from the queue
-				Object objectToBeStored = get();
-				
-				objectsForThisBatch.add(objectToBeStored);
-				
-				// Write the data to the session. This doesn't yet
-				// actually write the data to the db though. That is only
-				// done when the session is flushed or committed.
-				logger.debug("DataDbLogger batch saving object={}", 
-						objectToBeStored);
-				session.save(objectToBeStored);
-			} while (queueHasData() && ++batchingCounter < DbSetupConfig.getBatchSize());
+			// Get the objects to be stored from the queue
+			List<Object> objectsToBeStored = drain();
 			
+			objectsForThisBatch.addAll(objectsToBeStored);
+			
+			for (Object objectToBeStored : objectsToBeStored) {
+			  session.save(objectToBeStored);
+			}
 			tx.commit();
 			session.close();
 		} catch (HibernateException e) {
