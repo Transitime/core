@@ -91,7 +91,7 @@ public class AvlFeedMonitor extends MonitorBase {
 				+ ageOfAvlReport / Time.MS_PER_SEC 
 				+ " secs old while allowable age is " 
 				+ allowableNoAvlSecs.getValue()	+ " secs as specified by "
-				+ "parameter transitime.monitoring.allowableNoAvlSecs.",
+				+ "parameter " + allowableNoAvlSecs.getID() + " .",
 				ageOfAvlReport / Time.MS_PER_SEC);
 		
 		if (ageOfAvlReport > 
