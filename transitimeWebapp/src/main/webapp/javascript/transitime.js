@@ -27,10 +27,15 @@ function getQueryVariable(paramName) {
  * buttons are clicked in a datepicker.
  */  
 $(function() {
-	  $( document ).tooltip({
+	$( document ).tooltip({
+		// Content for tooltip comes from title attribute of html object  
         content: function () {
             return $(this).prop('title');
-        }
+        },
+        
+        // Position tooltips to right of element so that not covering
+        // up element below as happens with default positioning
+        position: { my: "left+10 center", at: "right center" }
     }).off('focusin');
 });
 

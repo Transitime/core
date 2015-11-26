@@ -633,7 +633,7 @@ public class TravelTimesProcessor {
 			if (segmentSpeedMps > maxSegmentSpeedMps.getValue()) {
 				logger.error("For segmentIdx={} segment speed of {}m/s is "
 						+ "above the limit of maxSegmentSpeedMps={}m/s. "
-						+ "Therefore it is being reset to min segment speed. "
+						+ "Therefore it is being reset to max segment speed. "
 						+ "arrDep1={} arrDep2={}",
 						i, StringUtils.twoDigitFormat(segmentSpeedMps), 
 						maxSegmentSpeedMps.getValue(), arrDep1, arrDep2);

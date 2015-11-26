@@ -18,7 +18,7 @@
 	
 	String predictionType = request.getParameter("predictionType");
 	
-    int allowableEarlySec = (int) -1.5 * Time.SEC_PER_MIN; // Default value
+    int allowableEarlySec = (int) 1.5 * Time.SEC_PER_MIN; // Default value
 	String allowableEarlyStr = request.getParameter("allowableEarly");
     try {
     	if (allowableEarlyStr != null && !allowableEarlyStr.isEmpty())

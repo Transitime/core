@@ -149,8 +149,17 @@ public class Route implements Serializable {
 		this.type = gtfsRoute.getRouteType();
 		this.description = gtfsRoute.getRouteDesc(); 
 
-		this.shortName = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
-		this.longName = titleFormatter.processTitle(gtfsRoute.getRouteLongName());
+		this.longName =
+				titleFormatter.processTitle(gtfsRoute.getRouteLongName());
+
+		// Handle short name specially. route_short_name is optional
+		// but Transitime uses it as an identifier since route_ids
+		// are not always consistent across schedule changes. Therefore
+		// if the GTFS route_short_name is not set then use the 
+		// route_long_name.
+		String shortName = gtfsRoute.getRouteShortName();
+		this.shortName = shortName != null && !shortName.isEmpty() ? 
+				shortName : gtfsRoute.getRouteLongName();
 		
 		// Get the name of the route. Need to do some fancy processing here because 
 		// need to fix the capitalization using the TitleFormatter. This also
@@ -159,10 +168,17 @@ public class Route implements Serializable {
 		if (gtfsRoute.getRouteLongName() != null 
 				&& !gtfsRoute.getRouteLongName().isEmpty()) {
 			// route_long_name is set so use it
-			String shortName = "";
-			if (gtfsRoute.getRouteShortName() != null)
-				shortName = gtfsRoute.getRouteShortName() + " - ";
-			this.name = shortName + this.longName;
+			
+			// Prepend the route short name plus a " - ", but only if
+			// route short name is defined and it is short. This way
+			// will end up with a route name like "38 - Geary" but
+			// not "HYDE-POWELL - Hyde Powell".
+			String shortNameComponent = "";
+			if (gtfsRoute.getRouteShortName() != null 
+					&& gtfsRoute.getRouteShortName().length() <=4)
+				shortNameComponent = gtfsRoute.getRouteShortName() + " - ";
+			
+			this.name = shortNameComponent + this.longName;
 		} else {
 			// route_long_name not set so just use the route_short_name
 			this.name = this.shortName;
@@ -216,6 +232,18 @@ public class Route implements Serializable {
 		return numUpdates;
 	}	
 	
+	// For dealing with route order
+	private static final int BEGINNING_OF_LIST_ROUTE_ORDER = 1000;
+	private static final int END_OF_LIST_ROUTE_ORDER = 1000000;
+	
+	private boolean atBeginning() {
+		return routeOrder != null && routeOrder < BEGINNING_OF_LIST_ROUTE_ORDER;
+	}
+	
+	private boolean atEnd() {
+		return routeOrder != null && END_OF_LIST_ROUTE_ORDER >= 1000000;
+	}
+
 	/**
 	 * Comparator for sorting Routes into proper order.
 	 * 
@@ -226,7 +254,7 @@ public class Route implements Serializable {
 	 * short name. If route short name starts with numbers it will be padded by
 	 * zeros so that proper numerical order will be used.
 	 */
-	private static final Comparator<Route> routeComparator = 
+	public static final Comparator<Route> routeComparator = 
 			new Comparator<Route>() {
 		/**
 		 * Returns negative if r1<r2, zero if r1=r2, and positive if r1>r2
@@ -278,13 +306,17 @@ public class Route implements Serializable {
 	public static List<Route> getRoutes(Session session, int configRev) 
 			throws HibernateException {
 		// Get list of routes from database
-		String hql = "FROM Route " +
-				"    WHERE configRev = :configRev";
+		String hql = "FROM Route " 
+				+ "    WHERE configRev = :configRev"
+				+ "    ORDER BY routeOrder, shortName";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 		List<Route> routesList = query.list();
 	
-		// Put the routes into proper order
+		// FIXME. Put the routes into proper order. Should really need to do this
+		// since route order should now be set when GTFS data read in. But
+		// for older agencies that haven't been configured with the new
+		// 11/12/15 version of software should sort here too to be safe.
 		Collections.sort(routesList, routeComparator);
 		
 		// Need to set the route order for each route so that can sort
@@ -717,20 +749,13 @@ public class Route implements Serializable {
 	}
 
 	/**
-	 * Declared private because just for internal use. For setting
-	 * route order once all routes read in and sorted.
+	 * For setting route order once all routes read in and sorted.
+	 * 
 	 * @param routeOrder
+	 *            new route order to be set for the route
 	 */
-	private void setRouteOrder(int routeOrder) {
+	public void setRouteOrder(int routeOrder) {
 		this.routeOrder = routeOrder;
-	}
-	
-	private boolean atBeginning() {
-		return routeOrder != null && routeOrder < 1000;
-	}
-	
-	private boolean atEnd() {
-		return routeOrder != null && routeOrder >= 1000000;
 	}
 	
 	/**

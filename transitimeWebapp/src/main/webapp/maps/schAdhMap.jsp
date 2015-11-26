@@ -50,7 +50,8 @@ function getVehiclePopupContent(vehicle) {
 		+ "<br/><b>Route:</b> " + vehicle.routeName
 		+ "<br/><b>To:</b> " + vehicle.headsign
 		+ "<br/><b>SchAhd:</b> " + vehicle.schAdhStr
-		+ "<br/><b>Block:</b> " + vehicle.block;
+		+ "<br/><b>Block:</b> " + vehicle.block
+		+ "<br/><b>Driver:</b> " + vehicle.driver;
 }
 
 /**
@@ -84,27 +85,28 @@ function getAndProcessSchAdhData() {
 					var earlyTime = 30000;  // 30 seconds
 					var maxEarly = 180000;  // 3 minutes
 					var lateTime = -120000; // 2 minutes
-				    var maxLate = -600000;  // 10 minutes
-				    var msecPerRadiusPixels = 25000;
+				    var maxLate = -960000;  // 16 minutes
+				    var msecPerRadiusPixels = 33000;
 				    
-					// Determine how to draw vehicle depending on how early/late it is
+					// Determine radius and color for vehicle depending on how early/late it is
 					var radius;
 					var fillColor;
 					var fillOpacity;
 					if (vehicle.schAdh < lateTime) {
 						// Vehicle is late
-						radius = 3 - (Math.max(maxLate, vehicle.schAdh) - lateTime)/msecPerRadiusPixels;
+						radius = 5 - (Math.max(maxLate, vehicle.schAdh) - lateTime)/msecPerRadiusPixels;
 						fillColor = '#E6D83E';
 						fillOpacity = 0.5;
 					} else if (vehicle.schAdh > earlyTime) { 
-						// Vehicle is early
-						radius = 3 + (Math.min(maxEarly, vehicle.schAdh) - earlyTime)/(msecPerRadiusPixels/2);
+						// Vehicle is early. Since early is worse make radius 
+						// of larger by using msecPerRadiusPixels/2
+						radius = 5 + (Math.min(maxEarly, vehicle.schAdh) - earlyTime)/(msecPerRadiusPixels/2);
 						fillColor = '#E34B71';
 						fillOpacity = 0.5;
 					} else {
 						// Vehicle is ontime
-						radius = 4;
-						fillColor = '#fff'; 
+						radius = 5;
+						fillColor = '#37E627'; 
 						fillOpacity = 0.5;
 					}
 					

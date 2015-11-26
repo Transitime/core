@@ -1,18 +1,18 @@
 /*
  * This file is part of Transitime.org
  * 
- * Transitime.org is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License (GPL) as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Transitime.org is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
+ * Transitime.org is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (GPL) as published by the
+ * Free Software Foundation, either version 3 of the License, or any later
+ * version.
+ * 
+ * Transitime.org is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Transitime.org . If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.transitime.api.rootResources;
@@ -128,13 +128,15 @@ public class TransitimeApi {
 	@Path("/command/vehicles")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getVehicles(
-			@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "v") List<String> vehicleIds,
-			@QueryParam(value = "r") List<String> routesIdOrShortNames,
-			@QueryParam(value = "s") String stopId,
-			@QueryParam(value = "numPreds") @DefaultValue("2") int numberPredictions)
-			throws WebApplicationException {
+	public
+			Response
+			getVehicles(
+					@BeanParam StandardParameters stdParameters,
+					@QueryParam(value = "v") List<String> vehicleIds,
+					@QueryParam(value = "r") List<String> routesIdOrShortNames,
+					@QueryParam(value = "s") String stopId,
+					@QueryParam(value = "numPreds") @DefaultValue("2") int numberPredictions)
+					throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
@@ -143,9 +145,11 @@ public class TransitimeApi {
 			VehiclesInterface inter = stdParameters.getVehiclesInterface();
 
 			Collection<IpcVehicle> vehicles;
-			if (!routesIdOrShortNames.isEmpty() && !routesIdOrShortNames.get(0).isEmpty()) {
+			if (!routesIdOrShortNames.isEmpty()
+					&& !routesIdOrShortNames.get(0).trim().isEmpty()) {
 				vehicles = inter.getForRoute(routesIdOrShortNames);
-			} else if (!vehicleIds.isEmpty()) {
+			} else if (!vehicleIds.isEmpty()
+					&& !vehicleIds.get(0).trim().isEmpty()) {
 				vehicles = inter.get(vehicleIds);
 			} else {
 				vehicles = inter.get();
@@ -161,12 +165,12 @@ public class TransitimeApi {
 			// specified
 			// when getting vehicle info then only the vehicles being predicted
 			// for, should be highlighted. The others should be dimmed.
-			Map<String, UiMode> uiTypesForVehicles = determineUiModesForVehicles(
-					vehicles, stdParameters, routesIdOrShortNames, stopId,
-					numberPredictions);
+			Map<String, UiMode> uiTypesForVehicles =
+					determineUiModesForVehicles(vehicles, stdParameters,
+							routesIdOrShortNames, stopId, numberPredictions);
 
-			ApiVehicles apiVehicles = new ApiVehicles(vehicles,
-					uiTypesForVehicles);
+			ApiVehicles apiVehicles =
+					new ApiVehicles(vehicles, uiTypesForVehicles);
 
 			// return ApiVehicles response
 			return stdParameters.createResponse(apiVehicles);
@@ -186,8 +190,7 @@ public class TransitimeApi {
 	@Path("/command/vehicleIds")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getVehicleIds(
-			@BeanParam StandardParameters stdParameters)
+	public Response getVehicleIds(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
@@ -196,7 +199,7 @@ public class TransitimeApi {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
 			List<String> ids = inter.getVehicleIds();
-			
+
 			ApiIds apiIds = new ApiIds(ids);
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
@@ -237,13 +240,15 @@ public class TransitimeApi {
 	@Path("/command/vehiclesDetails")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getVehiclesDetails(
-			@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "v") List<String> vehicleIds,
-			@QueryParam(value = "r") List<String> routesIdOrShortNames,
-			@QueryParam(value = "s") String stopId,
-			@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
-			throws WebApplicationException {
+	public
+			Response
+			getVehiclesDetails(
+					@BeanParam StandardParameters stdParameters,
+					@QueryParam(value = "v") List<String> vehicleIds,
+					@QueryParam(value = "r") List<String> routesIdOrShortNames,
+					@QueryParam(value = "s") String stopId,
+					@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
+					throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
@@ -252,9 +257,11 @@ public class TransitimeApi {
 			VehiclesInterface inter = stdParameters.getVehiclesInterface();
 
 			Collection<IpcVehicle> vehicles;
-			if (!routesIdOrShortNames.isEmpty() && !routesIdOrShortNames.get(0).isEmpty()) {
+			if (!routesIdOrShortNames.isEmpty()
+					&& !routesIdOrShortNames.get(0).trim().isEmpty()) {
 				vehicles = inter.getForRoute(routesIdOrShortNames);
-			} else if (!vehicleIds.isEmpty()) {
+			} else if (!vehicleIds.isEmpty()
+					&& !vehicleIds.get(0).trim().isEmpty()) {
 				vehicles = inter.get(vehicleIds);
 			} else {
 				vehicles = inter.get();
@@ -270,13 +277,14 @@ public class TransitimeApi {
 			// specified
 			// when getting vehicle info then only the vehicles being predicted
 			// for, should be highlighted. The others should be dimmed.
-			Map<String, UiMode> uiTypesForVehicles = determineUiModesForVehicles(
-					vehicles, stdParameters, routesIdOrShortNames, stopId,
-					numberPredictions);
+			Map<String, UiMode> uiTypesForVehicles =
+					determineUiModesForVehicles(vehicles, stdParameters,
+							routesIdOrShortNames, stopId, numberPredictions);
 
 			// Convert IpcVehiclesDetails to ApiVehiclesDetails
-			ApiVehiclesDetails apiVehiclesDetails = new ApiVehiclesDetails(
-					vehicles, stdParameters.getAgencyId(), uiTypesForVehicles);
+			ApiVehiclesDetails apiVehiclesDetails =
+					new ApiVehiclesDetails(vehicles,
+							stdParameters.getAgencyId(), uiTypesForVehicles);
 
 			// return ApiVehiclesDetails response
 			return stdParameters.createResponse(apiVehiclesDetails);
@@ -311,11 +319,11 @@ public class TransitimeApi {
 		try {
 			// Get Vehicle data from server
 			VehiclesInterface inter = stdParameters.getVehiclesInterface();
-			Collection<IpcVehicleConfig> ipcVehicleConfigs = 
+			Collection<IpcVehicleConfig> ipcVehicleConfigs =
 					inter.getVehicleConfigs();
-			ApiVehicleConfigs apiVehicleConfigs = 
+			ApiVehicleConfigs apiVehicleConfigs =
 					new ApiVehicleConfigs(ipcVehicleConfigs);
-			
+
 			// return ApiVehiclesDetails response
 			return stdParameters.createResponse(apiVehicleConfigs);
 		} catch (Exception e) {
@@ -323,7 +331,7 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Determines Map of UiTypes for vehicles so that the vehicles can be drawn
 	 * correctly in the UI. If when getting vehicles no specific route and stop
@@ -357,9 +365,9 @@ public class TransitimeApi {
 			}
 		} else {
 			// Stop specified so get predictions and set UI type accordingly
-			List<String> vehiclesGeneratingPreds = determineVehiclesGeneratingPreds(
-					stdParameters, routesIdOrShortNames, stopId,
-					numberPredictions);
+			List<String> vehiclesGeneratingPreds =
+					determineVehiclesGeneratingPreds(stdParameters,
+							routesIdOrShortNames, stopId, numberPredictions);
 			for (IpcVehicle ipcVehicle : vehicles) {
 				UiMode uiType = UiMode.MINOR;
 				if (!vehiclesGeneratingPreds.isEmpty()
@@ -404,10 +412,11 @@ public class TransitimeApi {
 		// If vehicle is not one of the ones generating a prediction
 		// then it is labeled as a minor vehicle for the UI.
 		if (!routesIdOrShortNames.isEmpty() && stopId != null) {
-			PredictionsInterface predsInter = stdParameters
-					.getPredictionsInterface();
-			List<IpcPredictionsForRouteStopDest> predictions = predsInter.get(
-					routesIdOrShortNames.get(0), stopId, numberPredictions);
+			PredictionsInterface predsInter =
+					stdParameters.getPredictionsInterface();
+			List<IpcPredictionsForRouteStopDest> predictions =
+					predsInter.get(routesIdOrShortNames.get(0), stopId,
+							numberPredictions);
 
 			// Determine set of which vehicles predictions generated for
 			for (IpcPredictionsForRouteStopDest predsForRouteStop : predictions) {
@@ -448,18 +457,20 @@ public class TransitimeApi {
 	@Path("/command/predictions")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getPredictions(
-			@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "rs") List<String> routeStopStrs,
-			@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
-			throws WebApplicationException {
+	public
+			Response
+			getPredictions(
+					@BeanParam StandardParameters stdParameters,
+					@QueryParam(value = "rs") List<String> routeStopStrs,
+					@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
+					throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
 		try {
 			// Get Prediction data from server
-			PredictionsInterface inter = stdParameters
-					.getPredictionsInterface();
+			PredictionsInterface inter =
+					stdParameters.getPredictionsInterface();
 
 			// Get predictions by route/stops
 			List<RouteStop> routeStopsList = new ArrayList<RouteStop>();
@@ -467,12 +478,12 @@ public class TransitimeApi {
 				// Each route/stop is specified as a single string using "\"
 				// as a divider (e.g. "routeId|stopId")
 				String routeStopParams[] = routeStopStr.split("\\|");
-				RouteStop routeStop = new RouteStop(routeStopParams[0],
-						routeStopParams[1]);
+				RouteStop routeStop =
+						new RouteStop(routeStopParams[0], routeStopParams[1]);
 				routeStopsList.add(routeStop);
 			}
-			List<IpcPredictionsForRouteStopDest> predictions = inter.get(
-					routeStopsList, numberPredictions);
+			List<IpcPredictionsForRouteStopDest> predictions =
+					inter.get(routeStopsList, numberPredictions);
 
 			// return ApiPredictions response
 			ApiPredictions predictionsData = new ApiPredictions(predictions);
@@ -495,8 +506,10 @@ public class TransitimeApi {
 	 * @param stdParameters
 	 *            StdParametersBean that gets the standard parameters from the
 	 *            URI, query string, and headers.
-	 * @param lat latitude in decimal degrees
-	 * @param lon longitude in decimal degrees
+	 * @param lat
+	 *            latitude in decimal degrees
+	 * @param lon
+	 *            longitude in decimal degrees
 	 * @param maxDistance
 	 *            How far away a stop can be from the lat/lon. Default is 1,500
 	 *            m.
@@ -508,29 +521,32 @@ public class TransitimeApi {
 	@Path("/command/predictionsByLoc")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getPredictions(
-			@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "lat") Double lat,
-			@QueryParam(value = "lon") Double lon,
-			@QueryParam(value = "maxDistance") @DefaultValue("1500.0") double maxDistance,
-			@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
-			throws WebApplicationException {
+	public
+			Response
+			getPredictions(
+					@BeanParam StandardParameters stdParameters,
+					@QueryParam(value = "lat") Double lat,
+					@QueryParam(value = "lon") Double lon,
+					@QueryParam(value = "maxDistance") @DefaultValue("1500.0") double maxDistance,
+					@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
+					throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
 		if (maxDistance > PredsByLoc.MAX_MAX_DISTANCE)
 			throw WebUtils.badRequestException("Maximum maxDistance parameter "
-					+ "is " + PredsByLoc.MAX_MAX_DISTANCE + "m but " + maxDistance
-					+ "m was specified in the request.");
+					+ "is " + PredsByLoc.MAX_MAX_DISTANCE + "m but "
+					+ maxDistance + "m was specified in the request.");
 
 		try {
 			// Get Prediction data from server
-			PredictionsInterface inter = stdParameters
-					.getPredictionsInterface();
+			PredictionsInterface inter =
+					stdParameters.getPredictionsInterface();
 
 			// Get predictions by location
-			List<IpcPredictionsForRouteStopDest> predictions = inter.get(
-					new Location(lat, lon), maxDistance, numberPredictions);
+			List<IpcPredictionsForRouteStopDest> predictions =
+					inter.get(new Location(lat, lon), maxDistance,
+							numberPredictions);
 
 			// return ApiPredictions response
 			ApiPredictions predictionsData = new ApiPredictions(predictions);
@@ -572,8 +588,8 @@ public class TransitimeApi {
 	}
 
 	/**
-	 * Handles the "routesDetails" command. Provides detailed information for a route
-	 * includes all stops and paths such that it can be drawn in a map.
+	 * Handles the "routesDetails" command. Provides detailed information for a
+	 * route includes all stops and paths such that it can be drawn in a map.
 	 * 
 	 * @param stdParameters
 	 * @param routeIdsOrShortNames
@@ -602,7 +618,8 @@ public class TransitimeApi {
 	@Path("/command/routesDetails")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getRouteDetails(@BeanParam StandardParameters stdParameters,
+	public Response getRouteDetails(
+			@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "r") List<String> routeIdsOrShortNames,
 			@QueryParam(value = "d") String directionId,
 			@QueryParam(value = "s") String stopId,
@@ -614,9 +631,9 @@ public class TransitimeApi {
 		try {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			
+
 			List<IpcRoute> ipcRoutes;
-			
+
 			// If single route specified
 			if (routeIdsOrShortNames != null
 					&& routeIdsOrShortNames.size() == 1) {
@@ -635,10 +652,10 @@ public class TransitimeApi {
 				ipcRoutes.add(route);
 			} else {
 				// Multiple routes specified
-				ipcRoutes = inter.getRoutes(routeIdsOrShortNames);				
+				ipcRoutes = inter.getRoutes(routeIdsOrShortNames);
 			}
-			
-			// Take the IpcRoute data array and create and return 
+
+			// Take the IpcRoute data array and create and return
 			// ApiRoutesDetails object
 			ApiRoutesDetails routeData = new ApiRoutesDetails(ipcRoutes);
 			return stdParameters.createResponse(routeData);
@@ -671,8 +688,8 @@ public class TransitimeApi {
 		try {
 			// Get stops data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			IpcDirectionsForRoute stopsForRoute = inter
-					.getStops(routesIdOrShortNames);
+			IpcDirectionsForRoute stopsForRoute =
+					inter.getStops(routesIdOrShortNames);
 
 			// If the route doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
@@ -712,7 +729,7 @@ public class TransitimeApi {
 		stdParameters.validate();
 		if (serviceId == null)
 			throw WebUtils.badRequestException("Must specify serviceId");
-		
+
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
@@ -734,8 +751,9 @@ public class TransitimeApi {
 	}
 
 	/**
-	 * Handles the "blocksTerse" command which outputs configuration data for the
-	 * specified block ID. Does not include trip pattern and schedule data for trips.
+	 * Handles the "blocksTerse" command which outputs configuration data for
+	 * the specified block ID. Does not include trip pattern and schedule data
+	 * for trips.
 	 * 
 	 * @param stdParameters
 	 * @param blockId
@@ -751,7 +769,7 @@ public class TransitimeApi {
 
 		// Make sure request is valid
 		stdParameters.validate();
-		
+
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
@@ -791,7 +809,7 @@ public class TransitimeApi {
 
 		// Make sure request is valid
 		stdParameters.validate();
-		
+
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
@@ -822,8 +840,7 @@ public class TransitimeApi {
 	@Path("/command/blockIds")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getBlockIds(
-			@BeanParam StandardParameters stdParameters,
+	public Response getBlockIds(@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "serviceId") String serviceId)
 			throws WebApplicationException {
 		// Make sure request is valid
@@ -833,7 +850,7 @@ public class TransitimeApi {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
 			List<String> ids = inter.getBlockIds(serviceId);
-			
+
 			ApiIds apiIds = new ApiIds(ids);
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
@@ -862,25 +879,29 @@ public class TransitimeApi {
 	@Path("/command/activeBlocks")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getActiveBlocks(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "r") List<String> routesIdOrShortNames,
-			@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
-			throws WebApplicationException {
+	public
+			Response
+			getActiveBlocks(
+					@BeanParam StandardParameters stdParameters,
+					@QueryParam(value = "r") List<String> routesIdOrShortNames,
+					@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+					throws WebApplicationException {
 
 		// Make sure request is valid
 		stdParameters.validate();
 
 		try {
 			// Get active block data from server
-			VehiclesInterface vehiclesInterface = 
+			VehiclesInterface vehiclesInterface =
 					stdParameters.getVehiclesInterface();
-			Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
-					.getActiveBlocks(routesIdOrShortNames,
+			Collection<IpcActiveBlock> activeBlocks =
+					vehiclesInterface.getActiveBlocks(routesIdOrShortNames,
 							allowableBeforeTimeSecs);
 
 			// Create and return ApiBlock response
-			ApiActiveBlocks apiActiveBlocks = 
-					new ApiActiveBlocks(activeBlocks, stdParameters.getAgencyId());
+			ApiActiveBlocks apiActiveBlocks =
+					new ApiActiveBlocks(activeBlocks,
+							stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -891,38 +912,43 @@ public class TransitimeApi {
 	@Path("/command/activeBlocksByRoute")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getActiveBlocksByRoute(
-			@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "r") List<String> routesIdOrShortNames,
-			@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
-			throws WebApplicationException {
+	public
+			Response
+			getActiveBlocksByRoute(
+					@BeanParam StandardParameters stdParameters,
+					@QueryParam(value = "r") List<String> routesIdOrShortNames,
+					@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+					throws WebApplicationException {
 
 		// Make sure request is valid
 		stdParameters.validate();
 
 		try {
 			// Get active block data from server
-			VehiclesInterface vehiclesInterface = 
+			VehiclesInterface vehiclesInterface =
 					stdParameters.getVehiclesInterface();
-			Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
-					.getActiveBlocks(routesIdOrShortNames,
+			Collection<IpcActiveBlock> activeBlocks =
+					vehiclesInterface.getActiveBlocks(routesIdOrShortNames,
 							allowableBeforeTimeSecs);
 
 			// Create and return ApiBlock response
-			ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
-					activeBlocks, stdParameters.getAgencyId());
+			ApiActiveBlocksRoutes apiActiveBlocksRoutes =
+					new ApiActiveBlocksRoutes(activeBlocks,
+							stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocksRoutes);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
+
 	/**
 	 * Handles the "trip" command which outputs configuration data for the
 	 * specified trip. Includes all sub-data such as trip patterns.
 	 * 
 	 * @param stdParameters
 	 * @param tripId
+	 *            Can be the GTFS trip_id or the trip_short_name
 	 * @return
 	 * @throws WebApplicationException
 	 */
@@ -990,8 +1016,8 @@ public class TransitimeApi {
 
 			// Create and return ApiBlock response.
 			// Include stop path info since just outputting single trip.
-			ApiTripWithTravelTimes apiTrip = new ApiTripWithTravelTimes(
-					ipcTrip, true);
+			ApiTripWithTravelTimes apiTrip =
+					new ApiTripWithTravelTimes(ipcTrip, true);
 			return stdParameters.createResponse(apiTrip);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -1009,8 +1035,7 @@ public class TransitimeApi {
 	@Path("/command/tripIds")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getTripIds(
-			@BeanParam StandardParameters stdParameters)
+	public Response getTripIds(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
@@ -1019,7 +1044,7 @@ public class TransitimeApi {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
 			List<String> ids = inter.getTripIds();
-			
+
 			ApiIds apiIds = new ApiIds(ids);
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
@@ -1051,8 +1076,8 @@ public class TransitimeApi {
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			List<IpcTripPattern> ipcTripPatterns = inter
-					.getTripPatterns(routesIdOrShortNames);
+			List<IpcTripPattern> ipcTripPatterns =
+					inter.getTripPatterns(routesIdOrShortNames);
 
 			// If the trip doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
@@ -1061,8 +1086,8 @@ public class TransitimeApi {
 						+ routesIdOrShortNames + " does not exist.");
 
 			// Create and return ApiTripPatterns response
-			ApiTripPatterns apiTripPatterns = new ApiTripPatterns(
-					ipcTripPatterns);
+			ApiTripPatterns apiTripPatterns =
+					new ApiTripPatterns(ipcTripPatterns);
 			return stdParameters.createResponse(apiTripPatterns);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -1095,8 +1120,8 @@ public class TransitimeApi {
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			List<IpcSchedule> ipcSchedules = inter
-					.getSchedules(routesIdOrShortNames);
+			List<IpcSchedule> ipcSchedules =
+					inter.getSchedules(routesIdOrShortNames);
 
 			// If the trip doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
@@ -1105,7 +1130,8 @@ public class TransitimeApi {
 						+ routesIdOrShortNames + " does not exist.");
 
 			// Create and return ApiSchedules response
-			ApiSchedulesVertStops apiSchedules = new ApiSchedulesVertStops(ipcSchedules);
+			ApiSchedulesVertStops apiSchedules =
+					new ApiSchedulesVertStops(ipcSchedules);
 			return stdParameters.createResponse(apiSchedules);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -1138,8 +1164,8 @@ public class TransitimeApi {
 		try {
 			// Get block data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			List<IpcSchedule> ipcSchedules = inter
-					.getSchedules(routesIdOrShortNames);
+			List<IpcSchedule> ipcSchedules =
+					inter.getSchedules(routesIdOrShortNames);
 
 			// If the trip doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
@@ -1148,7 +1174,8 @@ public class TransitimeApi {
 						+ routesIdOrShortNames + " does not exist.");
 
 			// Create and return ApiSchedules response
-			ApiSchedulesHorizStops apiSchedules = new ApiSchedulesHorizStops(ipcSchedules);
+			ApiSchedulesHorizStops apiSchedules =
+					new ApiSchedulesHorizStops(ipcSchedules);
 			return stdParameters.createResponse(apiSchedules);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -1201,7 +1228,8 @@ public class TransitimeApi {
 	@Path("/command/currentCalendars")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getCurrentCalendars(@BeanParam StandardParameters stdParameters)
+	public Response getCurrentCalendars(
+			@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 
 		// Make sure request is valid
@@ -1220,7 +1248,7 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * For getting all calendars.
 	 * 
@@ -1231,8 +1259,9 @@ public class TransitimeApi {
 	@Path("/command/allCalendars")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getAllCalendars(@BeanParam StandardParameters stdParameters)
-			throws WebApplicationException {
+	public Response
+			getAllCalendars(@BeanParam StandardParameters stdParameters)
+					throws WebApplicationException {
 
 		// Make sure request is valid
 		stdParameters.validate();
@@ -1250,7 +1279,7 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Handles the "serviceIds" command. Returns list of all service IDs.
 	 * 
@@ -1261,8 +1290,7 @@ public class TransitimeApi {
 	@Path("/command/serviceIds")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getServiceIds(
-			@BeanParam StandardParameters stdParameters)
+	public Response getServiceIds(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
@@ -1271,7 +1299,7 @@ public class TransitimeApi {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
 			List<String> ids = inter.getServiceIds();
-			
+
 			ApiIds apiIds = new ApiIds(ids);
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
@@ -1281,7 +1309,8 @@ public class TransitimeApi {
 	}
 
 	/**
-	 * Handles the currentServiceIds command. Returns list of service IDs that are currently active.
+	 * Handles the currentServiceIds command. Returns list of service IDs that
+	 * are currently active.
 	 * 
 	 * @param stdParameters
 	 * @return
@@ -1300,7 +1329,7 @@ public class TransitimeApi {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
 			List<String> ids = inter.getCurrentServiceIds();
-			
+
 			ApiIds apiIds = new ApiIds(ids);
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
@@ -1320,21 +1349,23 @@ public class TransitimeApi {
 	@Path("/command/serverStatus")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getServerStatus(@BeanParam StandardParameters stdParameters)
-			throws WebApplicationException {
+	public Response
+			getServerStatus(@BeanParam StandardParameters stdParameters)
+					throws WebApplicationException {
 
 		// Make sure request is valid
 		stdParameters.validate();
 
 		try {
 			// Get status information from server
-			ServerStatusInterface inter = stdParameters
-					.getServerStatusInterface();
+			ServerStatusInterface inter =
+					stdParameters.getServerStatusInterface();
 			IpcServerStatus ipcServerStatus = inter.get();
 
 			// Create and return ApiServerStatus response
-			ApiServerStatus apiServerStatus = new ApiServerStatus(
-					stdParameters.getAgencyId(), ipcServerStatus);
+			ApiServerStatus apiServerStatus =
+					new ApiServerStatus(stdParameters.getAgencyId(),
+							ipcServerStatus);
 			return stdParameters.createResponse(apiServerStatus);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request

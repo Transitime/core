@@ -19,20 +19,17 @@ if (agencyId == null || agencyId.isEmpty()) {
 <body>
 <%@include file="/template/header.jsp" %>
 <div id="mainDiv">
-<div id="title">Status Reports for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
+<div id="title">Real-time Maps for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 <ul class="choicesList">
-  <li><a href="activeBlocks.jsp?a=<%= agencyId %>"
-    title="Shows how many block assignments are currently active and if they have assigned vehicles">
-      Active Blocks</a></li>
+  <li><a href="../maps/map.jsp?a=<%= agencyId %>"
+    title="Real-time map for selected route">
+      Map for Selected Route</a></li>
+  <li><a href="../maps/map.jsp?a=<%= agencyId %>&showUnassignedVehicles=true"
+    title="Real-time map for selected route but also shows vehicles not currently assigned to a route">
+      Map Including Unassigned Vehicles</a></li>
   <li><a href="../maps/schAdhMap.jsp?a=<%= agencyId %>"
     title="Shows current real-time schedule adherence of vehicles in map">
       Schedule Adherence Map</a></li>
-  <li><a href="serverStatus.jsp?a=<%= agencyId %>"
-    title="Shows how well system is running, including the AVL feed">
-      Server Status</a></li>
-  <li><a href="dbDiskSpace.jsp?a=<%= agencyId %>"
-    title="Shows how much disk space is being used by the database. Currently only works for agencies where PostgreSQL database is used.">
-      Database Disk Space Utilization</a></li>
 </ul>
 </div>
 </body>

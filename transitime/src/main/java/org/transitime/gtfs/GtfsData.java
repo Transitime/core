@@ -454,6 +454,11 @@ public class GtfsData {
 	 * corresponding Route objects and stores them into the database.
 	 * This method is separated out from processRouteData() since reading
 	 * trips needs the gtfs route info but reading Routes requires trips.
+	 * <p>
+	 * Also sets route order for when route_order not specified in GTFS. 
+	 * This is important so that route order is always stored as part of
+	 * the route in the db so can join the routes table with other tables
+	 * and then sort the results by route order, all within a SQL call.
 	 */
 	private void processRouteMaps() {
 		// For logging how long things take
@@ -517,6 +522,24 @@ public class GtfsData {
 									tripPatternsForRoute,
 									titleFormatter);
 			routes.add(route);
+		}
+		
+		// Sort the routes so that can determine the route order for each one.
+		// Uses GTFS route_order when available and uses route_name when not.
+		// FIXME
+		Collections.sort(routes, Route.routeComparator);
+		
+		// Determine and set route order for each route if it is not already set
+		// FIXME
+		int routeOrderCounter = 0;
+		for (Route route : routes) {
+			if (route.getRouteOrder() == null) {
+				// Route order not set in GTFS so use current routeOrderCounter
+				route.setRouteOrder(routeOrderCounter++);
+			} else {
+				// Route order set in GTFS so remember the new value
+				routeOrderCounter = route.getRouteOrder() + 1;
+			}
 		}
 		
 		// Summarize how many problem routes there are that don't have trips

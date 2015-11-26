@@ -113,7 +113,7 @@ public class DbWriter {
 				gtfsData.getBlocks().size());
 		int c = 0;
 		for (Block block : gtfsData.getBlocks()) {
-			logger.debug("Saving block #{} with blockId={} serviceId={} blockId={}",
+			logger.info("Saving block #{} with blockId={} serviceId={} blockId={}",
 					++c, block.getId(), block.getServiceId(), block.getId());
 			writeObject(session, block);
 		}

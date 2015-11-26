@@ -1,5 +1,6 @@
-<%-- For creating a route selector parameter via a jsp include. 
-     User can select a single route (not all routes).
+<%-- For creating a route selector parameter via a jsp include.
+     User can select all routes (r param then set to " ") or any
+     number of routes. 
      Reads in routes via API for the agency specified by the "a" param. --%>
 
 <style type="text/css">
@@ -15,11 +16,12 @@
 
 $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
-	        // Generate list of routes for the selector.
-	        // Put in default value of Select Route but need to use
-	        // an id of ' ' instead of '' since otherwise select2
-	        // version 4.0.0 uses the text name as the id, which is wrong!
-	 		var selectorData = [];
+	        // Generate list of routes for the selector
+	        // For selector2 version 4.0 now can't set id to empty
+	        // string because then it returns the text 'All Routes'.
+	        // So need to use a blank string that can be determined
+	        // to be empty when trimmed.
+	 		var selectorData = [{id: ' ', text: 'All Routes'}];
 	 		for (var i in routes.routes) {
 	 			var route = routes.routes[i];
 	 			selectorData.push({id: route.id, text: route.name})
@@ -28,6 +30,7 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#route").select2({
+ 				placeholder: "All Routes", 				
  				data : selectorData})
  			// Need to reset tooltip after selector is used. Sheesh!
  			.on("select2:select", function(e) {
@@ -47,8 +50,11 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 </script>
 
     <div id="routesDiv"  class="param">
-      <label for="route">Route:</label>
-      <select id="route" name="r" style="width: 380px" 
-      	title="Select which route you want data for. " ></select>
+      <label for="route">Routes:</label>
+      <select id="route" name="r" style="width: 380px" multiple="multiple"
+      	title="Select which routes you want data for. You can use the Ctrl key along
+      		   with the mouse to select multiple routes. Note: selecting all routes
+      		   indeed reads in data for all routes which means it could be 
+      		   somewhat slow." ></select>
     </div>
     

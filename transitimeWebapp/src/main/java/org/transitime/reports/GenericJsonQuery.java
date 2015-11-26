@@ -16,6 +16,7 @@
  */
 package org.transitime.reports;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -93,7 +94,7 @@ public class GenericJsonQuery extends GenericQuery {
 			strBuilder.append("\"").append(columnNames.get(i)).append("\":");
 			
 			// Output value of attribute
-			if (o instanceof Double || o instanceof Float) {
+			if (o instanceof BigDecimal || o instanceof Double || o instanceof Float) {
 				addRowElement(i, ((Number) o).doubleValue());
 			} else if (o instanceof Number) {
 				addRowElement(i, ((Number) o).longValue());

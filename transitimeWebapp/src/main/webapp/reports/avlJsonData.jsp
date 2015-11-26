@@ -15,5 +15,6 @@ String endTime = request.getParameter("endTime");
 String jsonString = AvlJsonQuery.getAvlWithMatchesJson(agencyId, vehicleId, routeId, beginDate, numDays, beginTime, endTime);
 
 // Respond with the JSON string
+response.setContentType("application/json");
 response.getWriter().write(jsonString);
 %>

@@ -7,10 +7,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Specify Parameters</title>
 
-  <!-- Load in Select2 files so can create fancy route selector -->
-  <link href="../../select2/select2.css" rel="stylesheet"/>
-  <script src="../../select2/select2.min.js"></script>
-  
   <link href="../params/reportParams.css" rel="stylesheet"/>
 
   <script>

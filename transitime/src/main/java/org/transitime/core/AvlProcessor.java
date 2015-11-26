@@ -886,9 +886,16 @@ public class AvlProcessor {
 		if (vehicleState.isForSchedBasedPreds())
 			return;
 
+		if (!AutoBlockAssigner.enabled()) {
+			logger.info("Could not automatically assign vehicleId={} because "
+					+ "AutoBlockAssigner not enabled.", 
+					vehicleState.getVehicleId());
+			return;
+		}
+		
 		// Try to match vehicle to a block assignment if that feature is enabled
-		TemporalMatch bestMatch = new AutoBlockAssigner(vehicleState)
-				.autoAssignVehicleToBlockIfEnabled();
+		AutoBlockAssigner autoAssigner = new AutoBlockAssigner(vehicleState);
+		TemporalMatch bestMatch = autoAssigner.autoAssignVehicleToBlockIfEnabled();
 		if (bestMatch != null) {
 			// Successfully matched vehicle to block so make vehicle predictable
 			logger.info("Auto matched vehicleId={} to a block assignment. {}",
@@ -912,6 +919,9 @@ public class AvlProcessor {
 	private void handleProblemAssignment(VehicleState vehicleState) {
 		String oldAssignment = vehicleState.getAssignmentId();
 		boolean wasPredictable = vehicleState.isPredictable();
+
+		logger.info("No assignment info for vehicleId={} so trying to assign "
+				+ "vehicle without it.", vehicleState.getVehicleId());
 
 		// If the vehicle previously was predictable and had an assignment
 		// then see if can continue to use the old assignment.
@@ -1092,6 +1102,13 @@ public class AvlProcessor {
 			// Keep track of last AvlReport even if vehicle not predictable.
 			vehicleState.setAvlReport(avlReport);
 
+			// If part of consist and shouldn't be generating predictions
+			// and such and shouldn't grab assignment the simply return
+			// not that the last AVL report has been set for the vehicle.
+			if (avlReport.ignoreBecauseInConsist()) {
+				return;
+			}
+			
 			// Do the matching depending on the old and the new assignment
 			// for the vehicle.
 			boolean matchAlreadyPredictableVehicle = 

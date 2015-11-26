@@ -171,7 +171,7 @@ public class TravelTimesForTrip implements Serializable {
 		// use the IN statement with a SELECT clause.
 		int rowsUpdated = session.
 				createSQLQuery("DELETE "
-						+ " FROM TravelTimesForTrip_to_TravelTimesForPath_jointable "
+						+ " FROM TravelTimesForTrip_to_TravelTimesForPath_joinTable "
 						+ "WHERE TravelTimesForTrips_id IN "
 						+ "  (SELECT id " 
                         + "     FROM TravelTimesForTrips "
@@ -179,7 +179,7 @@ public class TravelTimesForTrip implements Serializable {
                         + "  )" ).
 				executeUpdate();
 		logger.info("Deleted {} rows from "
-				+ "TravelTimesForTrip_to_TravelTimesForPath_jointable for "
+				+ "TravelTimesForTrip_to_TravelTimesForPath_joinTable for "
 				+ "configRev={}", rowsUpdated, configRev);
 		totalRowsUpdated += rowsUpdated;
 		

@@ -8,8 +8,8 @@
 <title>Specify Parameters</title>
 
   <!-- Load in Select2 files so can create fancy route selector -->
-  <link href="../select2/select2.css" rel="stylesheet"/>
-  <script src="../select2/select2.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
   
   <link href="params/reportParams.css" rel="stylesheet"/>
 </head>
@@ -30,7 +30,7 @@
     
    <jsp:include page="params/fromDateNumDaysTime.jsp" />
    
-   <jsp:include page="params/routeSingle.jsp" />
+   <jsp:include page="params/routeOptional.jsp" />
    <script>
      // Make selector label more appropriate 
      $("#routesDiv label").text("Route to Display:");

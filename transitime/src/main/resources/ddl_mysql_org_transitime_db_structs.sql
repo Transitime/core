@@ -196,6 +196,7 @@
     create table Predictions (
         id bigint not null auto_increment,
         affectedByWaitStop bit,
+        avlTime datetime(3),
         configRev integer,
         creationTime datetime(3),
         isArrival bit,

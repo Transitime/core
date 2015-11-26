@@ -34,8 +34,8 @@
   <% } %>
   
   <!-- Load in Select2 files so can create fancy selectors -->
-  <link href="<%= request.getContextPath() %>/select2/select2.css" rel="stylesheet"/>
-  <script src="<%= request.getContextPath() %>/select2/select2.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
   <!--  Override the body style from the includes.jsp/general.css files -->
   <style>
@@ -51,16 +51,20 @@
 
 <body>
   <div id="map"></div>
-  <!-- To center successfully in all situations need to use a div within a div.
+  <!-- To center successfully in all situations tried to use a div within a div.
        The title text is set in css so that it is easily configurable -->
   <div id="titleContainer">
     <div id="mapTitle"></div>
   </div>
   
-  <!--  To center successfully in all situations use div within a div trick -->  
+  <!--  Wanted to center the routes selector horizontally but couldn't get
+        it to work. Got problems with the map not fitting page properly
+        when tried to use fancy position absolute and relative css.
+        Also, found that only way to set width of route selector is
+        to set the css width here. Yes, strange! -->  
   <div id="routesContainer">
     <div id="routesDiv">
-      <input type="hidden" id="routes" style="width:380px" />
+      <select id="routes" style="width:280px" ></select>	
     </div>
   </div>
   
@@ -375,7 +379,8 @@ function getVehiclePopupContent(vehicleData) {
     		 ("<br/><b>Next Stop:</b> " + vehicleData.nextStopName) : "";
     if (verbose && vehicleData.nextStopId)
     	nextStopNameStr += "<br/><b>Next Stop Id:</b> " + vehicleData.nextStopId;
-    
+    var driver = vehicleData.driver ? 
+    		"<br/><b>Driver:</b> " + vehicleData.driver : "";
     var latLonHeadingStr = verbose ? "<br/><b>Lat:</b> " + vehicleData.loc.lat
     			+ "<br/><b>Lon:</b> " + vehicleData.loc.lon 
     			+ "<br/><b>Heading:</b> " + vehicleData.loc.heading 
@@ -397,7 +402,8 @@ function getVehiclePopupContent(vehicleData) {
 		+ tripPatternStr
 		+ layoverStr
 		+ layoverDepartureStr
-		+ nextStopNameStr;
+		+ nextStopNameStr
+		+ driver;
 	
 	return content;
 }
@@ -617,8 +623,8 @@ function vehicleLocationsCallback(vehicles, status) {
 		var haveDataForVehicle = false;
 		var vehicleMarker = vehicleMarkers[i];
 		var markerVehicleId = vehicleMarker.vehicleData.id;
-		for (var j = 0; j < vehicles.vehicle.length; ++j) {
-			var dataVehicleId = vehicles.vehicle[j].id;
+		for (var j = 0; j < vehicles.vehicles.length; ++j) {
+			var dataVehicleId = vehicles.vehicles[j].id;
 			if (markerVehicleId == dataVehicleId) {
 				haveDataForVehicle = true;
 				break;
@@ -819,9 +825,12 @@ var agencyId = getQueryVariable("a");
 if (!agencyId)
 	alert("You must specify agency in URL using a=agencyId parameter");
  
-// Create the map with a scale and specify which map tiles to use
-var map = L.map('map');
+// Create the map with a scale and zoom control in bottomleft so
+// doesn't interfere with route selector
+var map = L.map('map', {zoomControl: false});
 L.control.scale({metric: false}).addTo(map);
+L.control.zoom({position: 'bottomleft'}).addTo(map);
+
 var mapTileUrl = '<%= WebConfigParams.getMapTileUrl() %>'; 
 L.tileLayer(mapTileUrl, {
 	// Specifying a shorter version of attribution. Original really too long.
@@ -873,7 +882,7 @@ if (!getRouteQueryStrParam()) {
   $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
 	        // Generate list of routes for the selector
-	 		var selectorData = [];
+	 		var selectorData = [{id: '', text: 'Select Route'}];
 	 		for (var i in routes.routes) {
 	 			var route = routes.routes[i];
 	 			selectorData.push({id: route.id, text: route.name})
@@ -884,7 +893,8 @@ if (!getRouteQueryStrParam()) {
  			$("#routes").select2({
  				placeholder: "Select Route", 				
  				data : selectorData})
- 				.on("change", function(e) {
+ 				// Called when user selects route. Draws route and associated vehicles on map.
+ 				.on("select2:select", function(e) {
  					// First remove all old vehicles so that they don't
  					// get moved around when zooming to new route
  					removeAllVehicles();
@@ -894,7 +904,8 @@ if (!getRouteQueryStrParam()) {
  						map.closePopup(predictionsPopup);
  					
  					// Configure map for new route	
- 					var url = apiUrlPrefix + "/command/routesDetails?r=" + e.val;
+ 					var selectedRouteId = e.params.data.id;
+ 					var url = apiUrlPrefix + "/command/routesDetails?r=" + selectedRouteId;
  					$.getJSON(url, routeConfigCallback);
 
  					// Reset the polling rate back down to minimum value since selecting new route
@@ -903,19 +914,33 @@ if (!getRouteQueryStrParam()) {
  						clearTimeout(avlTimer);
  					
  					// Read in vehicle locations now
- 					setRouteQueryStrParam("r=" + e.val); 					
+ 					setRouteQueryStrParam("r=" + selectedRouteId); 					
  					updateVehiclesUsingApiData();
+ 					
+ 		 			// Disable tooltips. For some reason get an unwanted 
+ 		 			// tooltip consisting of the current select once a selection
+ 		 			// has been made. It is really distracting. So have to do
+ 		 			// this convoluted thing after every selection in order to
+ 		 			// make sure this annoying tooltip doesn't popup.
+ 		 			$( "#select2-routes-container" ).tooltip({ content: 'foo' });
+ 		 			$( "#select2-routes-container" ).tooltip("option", "disabled", true);
+
 				});
- 			
- 			// Make route selector visible
-  			$("#routesDiv").css({"visibility":"visible"});
- 			
+
  			// Set focus to selector so that user can simply start
  			// typing to select a route. Can't use something like
  			// '#routes' since select2 changes  the input element to a
  			// bunch of elements with peculiar and sometimes autogenerated
- 			// ids. Therefore simply set focus to the "inpu" element.	 			
-  			$("input").focus();
+ 			// ids. Therefore simply set focus to the "inpu" element.
+ 			// Note: only do this if not mobile touch device because on
+ 			// such a device have input focus on route selector means 
+ 			// that keyboard pops up when user tries to pan screen.
+ 			var isMobile = window.matchMedia("only screen and (max-width: 760px)");
+            if (!isMobile.matches) {
+            	var selector = $(".select2-selection"); // .selection .select2-selection #select2-routes-container
+            	// Could not figure out how to set focus successfully.
+            	//selector.focus();
+            }
  	});	 
 } else {
 	// Route was specified in query string. 
@@ -929,6 +954,9 @@ if (!getRouteQueryStrParam()) {
 	
 	// Read in vehicle locations now (and every few seconds)
 	updateVehiclesUsingApiData();
+
+	// Make route selector visible. Haven't tested this!
+	$("#routesDiv").css({"visibility":"hidden"});
 }
 
 /**

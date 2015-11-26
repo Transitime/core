@@ -352,6 +352,9 @@ public class CoreConfig {
 	public static int getAllowableEarlySeconds() {
 		return allowableEarlySeconds.getValue();
 	}
+	public static String getAllowableEarlySecondsId() {
+		return allowableEarlySeconds.getID();
+	}
 	private static IntegerConfigValue allowableEarlySeconds = 
 			new IntegerConfigValue("transitime.core.allowableEarlySeconds", 
 					15 * Time.SEC_PER_MIN,
@@ -371,6 +374,9 @@ public class CoreConfig {
 	 */
 	public static int getAllowableLateSeconds() {
 		return allowableLateSeconds.getValue();
+	}
+	public static String getAllowableLateSecondsId() {
+		return allowableLateSeconds.getID();
 	}
 	private static IntegerConfigValue allowableLateSeconds = 
 			new IntegerConfigValue("transitime.core.allowableLateSeconds", 

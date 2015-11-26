@@ -255,6 +255,14 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	public IpcTrip getTrip(String tripId) throws RemoteException {
 		Trip dbTrip = Core.getInstance().getDbConfig().getTrip(tripId);
 
+		// If couldn't find a trip with the specified trip_id then see if a
+		// a trip has the trip_short_name specified.
+		if (dbTrip == null) {
+			dbTrip =
+					Core.getInstance().getDbConfig()
+							.getTripUsingTripShortName(tripId);
+		}
+		
 		// If no such trip then return null since can't create a IpcTrip
 		if (dbTrip == null)
 			return null;

@@ -8,8 +8,8 @@
 <title>Specify Parameters</title>
 
   <!-- Load in Select2 files so can create fancy route selector -->
-  <link href="../../select2/select2.css" rel="stylesheet"/>
-  <script src="../../select2/select2.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
   
   <link href="../params/reportParams.css" rel="stylesheet"/>
 
@@ -19,7 +19,7 @@
       var format = $('input:radio[name=format]:checked').val();
   	  var url = apiUrlPrefix + "/command/vehicles?r=" + selectedRouteId + "&format=" + format;
 
-   	  // Actually do the API call
+   	  // Actually do the API call 
    	  location.href = url;
     }
   </script>
@@ -35,7 +35,7 @@
    
 <div id="mainDiv">   
    <%-- Create route selector --%>
-   <jsp:include page="../params/routeSingle.jsp" />
+   <jsp:include page="../params/routeAllOrSingle.jsp" />
    
    <%-- Create json/xml format radio buttons --%>
    <jsp:include page="../params/jsonXmlFormat.jsp" />
