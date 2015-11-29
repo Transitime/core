@@ -702,12 +702,12 @@ public class GtfsData {
 					
 		// Read in supplemental trips data
 		if (supplementDir != null) {
-			// Read in the supplemental stop data
+			// Read in the supplemental trip data
 			GtfsTripsSupplementReader tripsSupplementReader = 
 					new GtfsTripsSupplementReader(supplementDir);
 			List<GtfsTrip> gtfsTripsSupplement = tripsSupplementReader.get();
 			
-			// Modify the main GtfsStop objects using the supplemental data
+			// Modify the main GtfsTrip objects using the supplemental data
 			for (GtfsTrip supplementTrip : gtfsTripsSupplement) {
 				// First try matching supplemental trip to the regular trip 
 				// using trip ID
