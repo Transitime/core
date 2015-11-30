@@ -189,7 +189,7 @@ public class WebAgency {
 					List<Agency> agencies = inter.getAgencies();
 
 					// Use the first agency if there are multiple ones
-					agency = agencies.get(0);
+					agency = agencies.isEmpty() ? null : agencies.get(0);
 				} catch (RemoteException e) {
 					logger.error(
 							"Could not get Agency object for agencyId={}. "

@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
+import org.transitime.db.structs.Agency;
 import org.transitime.db.webstructs.WebAgency;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.utils.Time;
@@ -66,7 +67,9 @@ public class ApiVehiclesDetails {
 			String agencyId, Map<String, UiMode> uiTypesForVehicles) {
 		// Get Time object based on timezone for agency
 		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
-		Time timeForAgency = webAgency.getAgency().getTime();				
+		Agency agency = webAgency.getAgency();
+		Time timeForAgency = agency != null ? 
+				agency.getTime() : new Time((String) null);				
 		
 		// Process each vehicle
 		vehiclesData = new ArrayList<ApiVehicleDetails>();

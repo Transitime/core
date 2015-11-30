@@ -181,7 +181,7 @@ public class AvlExecutor {
 			boolean... useTestExecutor) {
 		boolean testing = useTestExecutor.length > 0 && useTestExecutor[0];
 		Runnable avlClient = !testing ? 
-		new AvlClient(newAvlReport) : new AvlClientTester(newAvlReport); 
+				new AvlClient(newAvlReport) : new AvlClientTester(newAvlReport);
 
 		avlClientExecutor.execute(avlClient);		
 	}

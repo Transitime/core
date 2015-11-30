@@ -787,8 +787,9 @@ function animateVehicle(vehicleMarker, origLat, origLon, newLat, newLon) {
 function updateVehiclesUsingApiData() {
 	// If route not yet configured then simply return. Don't want to read
 	// in all vehicles for agency!
-	if (!getRouteQueryStrParam())
-		return;
+	// FIXME
+	//if (!getRouteQueryStrParam())
+	//	return;
 	
 	var url = apiUrlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
 	// If stop specified as query str param to this page pass it to the 
@@ -860,6 +861,13 @@ map.on('popupclose', function(e) {
 // and set map bounds to the agency extent if route not specified in query string
 $.getJSON(apiUrlPrefix + "/command/agencyGroup", 
 		function(agencies) {
+			// If agency not defined, such as when just testing AVL feed,
+			// then set map to United States
+			if (agencies.agency.length == 0) {
+				map.fitBounds([[25.0, -130.0], [55.0, -70.0]]);
+				return;
+			}
+			
 	        agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
 			
 	        // Fit the map initially to the agency, but only if route not
@@ -924,9 +932,15 @@ if (!getRouteQueryStrParam()) {
  		 			// make sure this annoying tooltip doesn't popup.
  		 			$( "#select2-routes-container" ).tooltip({ content: 'foo' });
  		 			$( "#select2-routes-container" ).tooltip("option", "disabled", true);
-
 				});
 
+	 		// If showing unassigned vehicles then start getting vehicle 
+	 		// location data now instead instead of waiting till route selected.
+	 		if (getQueryVariable("showUnassignedVehicles")) {
+	 			updateVehiclesUsingApiData();
+	 		}
+	 		
+	 		// of waiting 
  			// Set focus to selector so that user can simply start
  			// typing to select a route. Can't use something like
  			// '#routes' since select2 changes  the input element to a

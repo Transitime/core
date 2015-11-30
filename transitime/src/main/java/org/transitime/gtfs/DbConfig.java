@@ -794,10 +794,10 @@ public class DbConfig {
 	 * getting timezone and such want to be able to easily access the main
 	 * agency, hence this method.
 	 * 
-	 * @return
+	 * @return The first agency, or null if no agencies configured
 	 */
-	public Agency getFirstAgency() {
-		return agencies.get(0);
+	public Agency getFirstAgency() {		
+		return agencies.size() > 0 ? agencies.get(0) : null;
 	}
 
 	public List<Agency> getAgencies() {

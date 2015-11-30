@@ -112,12 +112,13 @@ public class Core {
 			// Read in config rev from ActiveRevisions table in db
 			ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId);
 			
-			// If config rev not set properly then can't do anything so exit
+			// If config rev not set properly then simply log error.
+			// Originally would also exit() but found that want system to 
+			// work even without GTFS configuration so that can test AVL feed.
 			if (!activeRevisions.isValid()) {
 				logger.error("ActiveRevisions in database is not valid. The "
 						+ "configuration revs must be set to proper values. {}", 
 						activeRevisions);
-				System.exit(-1);
 			}
 			configRev = activeRevisions.getConfigRev();
 		}

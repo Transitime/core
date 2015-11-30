@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.CalendarDate;
 import org.transitime.gtfs.DbConfig;
@@ -68,8 +69,11 @@ public class ServiceUtils {
 	 * @param timezoneName See http://en.wikipedia.org/wiki/List_of_tz_zones
 	 */
 	public ServiceUtils(DbConfig dbConfig) { 
-		this.calendar = 
-				new GregorianCalendar(dbConfig.getFirstAgency().getTimeZone());
+		Agency agency = dbConfig.getFirstAgency();
+		this.calendar =
+				agency != null ? 
+						new GregorianCalendar(agency.getTimeZone())
+						: new GregorianCalendar();
 		this.dbConfig = dbConfig;
 	}
 
