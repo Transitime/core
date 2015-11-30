@@ -27,30 +27,30 @@ import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
 
 
 /**
- * This is a seperate module to read the nexala realtime data form the GTFS-RT vechicle location url. 
+ * This is a seperate module to read the GTFS realtime realtime data form the GTFS-RT vehicle location url. 
  * This is to allow for the less accurate realtime info be read from else where.
  *
  * @author Sean Og Crudden
  *
  */
-public class NexalaAvlModule extends GtfsRealtimeModule {
+public class GtfsRtAvlModule extends GtfsRealtimeModule {
 	
 	/*********** Configurable Parameters for this module ***********/
-	public static String getGtfsRealtimeNexalaURI() {
-		return gtfsRealtimeNexalaFeedURI.getValue();
+	public static String getGtfsRealtimeURI() {
+		return gtfsRealtimeFeedURI.getValue();
 	}
 	
-	private static StringConfigValue gtfsRealtimeNexalaFeedURI =
-			new StringConfigValue("transitime.avl.gtfsRealtimeNexalaFeedURI", 
+	private static StringConfigValue gtfsRealtimeFeedURI =
+			new StringConfigValue("transitime.avl.gtfsRealtimeFeedURI", 
 					"http://developer.onebusaway.org/wmata-gtfsr/vehiclePositions",
-					"The URI of the GTFS-realtime feed generated form the Nexala data.");
+					"The URI of the GTFS-realtime feed generated form the gtfs-realtime data.");
 
 	/********************** Member Functions **************************/
 
 	/**
 	 * @param projectId
 	 */
-	public NexalaAvlModule(String projectId) {
+	public GtfsRtAvlModule(String projectId) {
 		super(projectId);
 	}
 
@@ -62,9 +62,9 @@ public class NexalaAvlModule extends GtfsRealtimeModule {
 	@Override
 	protected void getAndProcessData() {
 		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
-				.getAvlReports(getGtfsRealtimeNexalaURI());
+				.getAvlReports(getGtfsRealtimeURI());
 		for (AvlReport avlReport : avlReports) {
-			avlReport.setSource("NexalaGTFS");
+			avlReport.setSource("gtfsrt");
 			processAvlReport(avlReport);
 		}
 	}
@@ -74,7 +74,7 @@ public class NexalaAvlModule extends GtfsRealtimeModule {
 	 */
 	@Override
 	protected String getUrl() {
-		return getGtfsRealtimeNexalaURI();
+		return getGtfsRealtimeURI();
 	}
 
 	/* Not needed since all processing for this class is done in

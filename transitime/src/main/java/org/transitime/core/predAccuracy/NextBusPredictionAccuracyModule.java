@@ -41,9 +41,10 @@ import org.transitime.gtfs.DbConfig;
 import org.transitime.modules.Module;
 
 /**
- * Reads in external prediction data a NextBus feed and stores the data in
- * memory. Then when arrivals/departures occur the prediction accuracy can be
- * determined and stored.
+ * Reads in external prediction data from NextBus feed and internal Transitime
+ * predictions (since inheriting from PredictionAccuracyModule) and stores the
+ * data in memory. Then when arrivals/departures occur the prediction accuracy
+ * can be determined and stored.
  *
  * @author SkiBu Smith
  *
@@ -103,13 +104,18 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 		if (route == null) {
 			logger.error("No route with routeId={}", routeAndStops.routeId);
 		}
-		String routeShortName = route.getShortName();
+		// But route_short_name is optional in GTFS and LA Metro doesn't use it
+		// for the rail lines. So use route_id if route_short_name not defined,
+		// though that might not work either.
+		String routeIdForNextBusApi = route.getShortName();
+		if (routeIdForNextBusApi == null || routeIdForNextBusApi.isEmpty())
+			routeIdForNextBusApi = route.getId();
 		
 		// For all of the stops for the route, complete the URL
 		for (String directionId : routeAndStops.stopIds.keySet()) {
 			Collection<String> stopIds = routeAndStops.stopIds.get(directionId);
 			for (String stopId : stopIds) {
-				fullUrl += "&stops=" + routeShortName + "|" + stopId;
+				fullUrl += "&stops=" + routeIdForNextBusApi + "|" + stopId;
 			}
 		}
 		
@@ -174,13 +180,17 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 	}
 	
 	/**
-	 * Takes data from XML Document object and processes it and
-	 * calls storePrediction() on the predictions.
+	 * Takes data from XML Document object and processes it and calls
+	 * storePrediction() on the predictions.
 	 * 
+	 * @param routeAndStops
+	 *            which route and stops getting predictions for
 	 * @param doc
+	 *            The returned XML document
 	 * @param predictionsReadTime
 	 */
 	private void processExternalPredictionsForRoute(
+			RouteAndStops routeAndStops,
 			Document doc,
 			Date predictionsReadTime) {
 		// If couldn't read data from feed then can't process it
@@ -206,8 +216,6 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 
 					// Determine other parameters
 					String vehicleId = prediction.getAttributeValue("vehicle");
-					String routeId = predictionsForStop
-							.getAttributeValue("routeTag");
 					String stopId = predictionsForStop
 							.getAttributeValue("stopTag");
 					String tripId = prediction.getAttributeValue("tripTag");
@@ -228,6 +236,8 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 									+ "the configuration.", tripId);
 						}
 					}
+					
+					String routeId = routeAndStops.routeId;
 					
 					logger.debug("Storing external prediction routeId={}, "
 							+ "directionId={}, tripId={}, vehicleId={}, "
@@ -270,7 +280,7 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 		// Get data for each route and stop
 		for (RouteAndStops routeAndStops : routesAndStops) {
 			Document doc = getExternalPredictionsForRoute(routeAndStops);
-			processExternalPredictionsForRoute(doc, predictionsReadTime);
+			processExternalPredictionsForRoute(routeAndStops, doc, predictionsReadTime);
 		}
 	}
 
