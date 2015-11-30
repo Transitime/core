@@ -79,6 +79,13 @@ public class WorkwaveAvlModule extends PollUrlAvlModule {
 	 * can send the PHPSESSID cookie as authentication.
 	 */
 	private void setSessionId() {
+		// Make sure the API key is configured
+		if (apiKey.getValue() == null) {
+			logger.error("API key not set for WorkwaveAvlModule. Needs to be "
+					+ "set via Java property {} .",	apiKey.getID());
+			return;
+		}
+		
 		String fullUrl = null;
 		try {
 			// Create the connection
@@ -99,6 +106,9 @@ public class WorkwaveAvlModule extends PollUrlAvlModule {
 					int equalSign = cookie.indexOf('=');
 					int semicolon = cookie.indexOf(';');
 					sessionId = cookie.substring(equalSign + 1, semicolon);
+					
+					logger.info("Session ID for Workwave AVL feed is "
+							+ "PHPSESSID={}", sessionId);
 				}
 			}
 		} catch (Exception e) {
@@ -112,7 +122,7 @@ public class WorkwaveAvlModule extends PollUrlAvlModule {
 	@Override
 	protected void setRequestHeaders(URLConnection con) {
 		if (sessionId == null)
-			logger.error("PHPSESSID not set.");
+			logger.error("PHPSESSID not set when trying to fetch AVL data.");
 		
 		con.setRequestProperty("Cookie", "PHPSESSID=" + sessionId);
 	}
@@ -135,7 +145,9 @@ public class WorkwaveAvlModule extends PollUrlAvlModule {
 			boolean success = jsonObj.getBoolean("success");
 			if (!success) {
 				String message = jsonObj.getString("message");
-				logger.error("Error occurred when getting AVL data. {}", message);
+				logger.error("Error occurred when getting AVL data. URL={} and "
+						+ "PHPSESSID={}. {}", 
+						getUrl(), sessionId, message);
 				
 				// Since there was a problem try getting new session ID since
 				// perhaps old one is invalid.
