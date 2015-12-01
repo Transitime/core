@@ -293,7 +293,7 @@ abstract public class PredictionAccuracyQuery {
 
 		
 		String mySql = "SELECT "
-				+ "     (to_seconds(predictedTime)-to_seconds(predictionReadTime)) div 1 as predLength, "
+				+ "     (unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) div 1 as predLength, "
 				+ "     predictionAccuracyMsecs/1000 as predAccuracy, "
 				+ "     predictionSource as source "
 				+ " FROM PredictionAccuracy "
@@ -303,7 +303,7 @@ abstract public class PredictionAccuracyQuery {
 				+ "AND DATE_ADD(?, INTERVAL 1 DAY) "
 				+ timeSql
 				+ "  AND "
-				+ "abs(to_seconds(predictedTime)-to_seconds(predictionReadTime)) < 900 " //15 mins
+				+ "abs(unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) < 900 " //15 mins
 				// Filter out MBTA_seconds source since it is isn't
 				// significantly different from MBTA_epoch.
 				// TODO should clean this up by not having MBTA_seconds source
