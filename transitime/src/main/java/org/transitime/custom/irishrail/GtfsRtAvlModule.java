@@ -20,6 +20,8 @@ package org.transitime.custom.irishrail;
 import java.io.InputStream;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.avl.GtfsRealtimeModule;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
@@ -35,6 +37,9 @@ import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
  */
 public class GtfsRtAvlModule extends GtfsRealtimeModule {
 	
+  private static final Logger logger = LoggerFactory
+      .getLogger(GtfsRtAvlModule.class);
+  
 	/*********** Configurable Parameters for this module ***********/
 	public static String getGtfsRealtimeURI() {
 		return gtfsRealtimeFeedURI.getValue();
@@ -61,12 +66,15 @@ public class GtfsRtAvlModule extends GtfsRealtimeModule {
 	 */
 	@Override
 	protected void getAndProcessData() {
+	  logger.info("reading {}", getGtfsRealtimeURI());
 		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
 				.getAvlReports(getGtfsRealtimeURI());
+		logger.info("read complete");
 		for (AvlReport avlReport : avlReports) {
 			avlReport.setSource("gtfsrt");
 			processAvlReport(avlReport);
 		}
+		logger.info("processed {} avl reports", avlReports.size());
 	}
 
 	/* (non-Javadoc)

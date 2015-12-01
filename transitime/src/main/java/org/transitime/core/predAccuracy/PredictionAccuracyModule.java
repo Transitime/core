@@ -197,8 +197,9 @@ public class PredictionAccuracyModule extends Module {
 		  try {
 		    timer = new IntervalTimer();
 				// Process data
+		    logger.info("processing prediction accuracy....");
 				getAndProcessData(getRoutesAndStops(), new Date());
-				
+				logger.info("processing prediction accuracy complete.");
 				// Make sure old predictions that were never matched to an
 				// arrival/departure don't stick around taking up memory.
 				clearStalePredictions();

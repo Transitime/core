@@ -19,6 +19,8 @@ package org.transitime.avl;
 import java.io.InputStream;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
@@ -32,6 +34,9 @@ import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
  */
 public class GtfsRealtimeModule extends PollUrlAvlModule {
 
+  private static final Logger logger = LoggerFactory
+      .getLogger(GtfsRealtimeModule.class);
+  
 	/*********** Configurable Parameters for this module ***********/
 	public static String getGtfsRealtimeURI() {
 		return gtfsRealtimeURI.getValue();
@@ -57,11 +62,14 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 	 */
 	@Override
 	protected void getAndProcessData() {
+	  logger.info("reading {}", getGtfsRealtimeURI());
 		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
 				.getAvlReports(getGtfsRealtimeURI());
+		logger.info("read complete");
 		for (AvlReport avlReport : avlReports) {
 			processAvlReport(avlReport);
 		}
+		logger.info("processed {} reports", avlReports.size());
 	}
 
 	/* (non-Javadoc)
