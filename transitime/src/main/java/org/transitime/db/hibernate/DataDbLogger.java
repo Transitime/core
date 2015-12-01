@@ -292,7 +292,8 @@ public class DataDbLogger {
 	    // Get the next object from the head of the queue
 	    ArrayList<Object> buff = new ArrayList<Object>(DbSetupConfig.getBatchSize());
 	    do {
-	        queue.drainTo(buff);
+	        int count = queue.drainTo(buff);
+	        logger.info("drained {} elements", count);
 	    } while (buff.isEmpty());
 	    
 	    // Log if went below a capacity level
