@@ -5,6 +5,8 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.amazonaws.services.cloudwatch.model.StandardUnit;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.utils.MathUtils;
@@ -26,6 +28,7 @@ public class CloudwatchService {
     private AmazonCloudWatchClient cloudWatch;
     private Map<String, MetricDefinition> metricMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService executor;
+    private boolean enabled = false;
 
     private static final Logger logger = LoggerFactory
             .getLogger(CloudwatchService.class);
@@ -63,7 +66,7 @@ public class CloudwatchService {
 
     private CloudwatchService() {
         logger.info("Cloudwatch service starting up");
-        if(environmentName == null || accessKey == null || secretKey == null || endpoint == null){
+        if(StringUtils.isBlank(environmentName) || StringUtils.isBlank(accessKey) || StringUtils.isBlank(secretKey) || StringUtils.isBlank(endpoint)) {
             logger.warn("Cloudwatch monitoring not enabled, please specify environmentName, accessKey, secretKey and endpoint in configuration file");
         }else{
             logger.info("starting Cloudwatch in env {} with accessKey {} and pass {}", environmentName, accessKey, secretKey);
@@ -72,6 +75,7 @@ public class CloudwatchService {
             this.cloudWatch = cloudWatch;
             executor = Executors.newSingleThreadScheduledExecutor();
             executor.scheduleAtFixedRate(new PublishMetricsTask(), 0, 1, TimeUnit.SECONDS);
+            enabled = true;
         }
     }
 
@@ -100,7 +104,7 @@ public class CloudwatchService {
     public synchronized void saveMetric(String metricName, Double metricValue, Integer reportingInterval, MetricType metricType,
                                         ReportingIntervalTimeUnit reportingIntervalTimeUnit, Boolean formatAsPercent){
 
-        if(metricValue == null)
+        if(metricValue == null || !enabled)
             return;
 
         logger.info("saving metric to CloudwatchService [{}]={}", metricName, metricValue);
@@ -142,6 +146,7 @@ public class CloudwatchService {
     }
 
     private void publishMetric(String metricName, Double metricValue){
+        if (!enabled) return;
         logger.info("Cloudwatch publishMetric [{}]={}", metricName, metricValue);
         MetricDatum datum = new MetricDatum().
                 withMetricName(metricName).
@@ -161,7 +166,7 @@ public class CloudwatchService {
      */
     private synchronized void publishMetricAsPercent(String metricName, Double metricValue){
       logger.info("Cloudwatch publishMetricAsPercent [{}]={}", metricName, metricValue);
-      if(cloudWatch == null)
+      if(cloudWatch == null || !enabled)
           return;
 
       MetricDatum datum = new MetricDatum().

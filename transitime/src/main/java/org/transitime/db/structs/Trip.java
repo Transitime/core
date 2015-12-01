@@ -466,7 +466,7 @@ public class Trip implements Serializable {
 		String hql = "FROM Trip t " +
                 "   left join fetch t.scheduledTimesList " +
                 "   left join fetch t.travelTimes " +
-				"    WHERE configRev = :configRev" +
+				"    WHERE t.configRev = :configRev" +
 				"      AND tripId = :tripId";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);

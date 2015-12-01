@@ -207,6 +207,8 @@ public class PredictionAccuracyModule extends Module {
 			} catch (Exception e) {
 				logger.error("Error accessing predictions feed {}", e, e);
 				logger.debug("execption details {}", e, e);
+			} catch (Throwable t) {
+			  logger.error("possible sql exception {}", t, t);
 			} finally {
 			  // if we have an exception, we still need to wait to be nice to the cpu
 	       // Wait appropriate amount of time till poll again
