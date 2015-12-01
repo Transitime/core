@@ -293,7 +293,8 @@ public class DataDbLogger {
 	    ArrayList<Object> buff = new ArrayList<Object>(DbSetupConfig.getBatchSize());
 	    int count = 0;
 	    do {
-	        count = queue.drainTo(buff);
+	        buff.clear();
+	        count = queue.drainTo(buff, DbSetupConfig.getBatchSize());
 	        if (count == 0)
             try {
               Thread.sleep(TIME_BETWEEN_RETRIES);
