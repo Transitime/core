@@ -291,11 +291,16 @@ public class DataDbLogger {
 	 private List<Object> drain() {
 	    // Get the next object from the head of the queue
 	    ArrayList<Object> buff = new ArrayList<Object>(DbSetupConfig.getBatchSize());
+	    int count = 0;
 	    do {
-	        int count = queue.drainTo(buff);
-	        logger.info("drained {} elements", count);
+	        count = queue.drainTo(buff);
+	        if (count == 0)
+            try {
+              Thread.sleep(TIME_BETWEEN_RETRIES);
+            } catch (InterruptedException e) {
+            }
 	    } while (buff.isEmpty());
-	    
+	    logger.info("drained {} elements", count);
 	    // Log if went below a capacity level
 	    // See if queue dropped to 10% less than the previously logged level.
 	    // Use a margin of 10% so that don't get flood of messages if queue
