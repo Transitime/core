@@ -117,6 +117,10 @@ public class DataDbLogger {
 	// The Session for writing data to db
 	private SessionFactory sessionFactory;
 	
+	// collect some statistics on how the db is performing
+	private static long throughputCount = 0;
+	private static long throughputTimestamp = System.currentTimeMillis();
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(DataDbLogger.class);
 
@@ -172,7 +176,6 @@ public class DataDbLogger {
 		this.projectId = projectId;
 		this.shouldStoreToDb = shouldStoreToDb;
 		this.shouldPauseToReduceQueue = shouldPauseToReduceQueue;
-		
 		// Create the reusable heavy weight session factory
 		sessionFactory = HibernateUtils.getSessionFactory(projectId);
 		
@@ -185,7 +188,8 @@ public class DataDbLogger {
 				processData();
 				}
 			});
-
+		ThroughputMonitor tm = new ThroughputMonitor();
+		new Thread(tm).start();
 	}
 	
 	/**
@@ -295,6 +299,7 @@ public class DataDbLogger {
 	    do {
 	        buff.clear();
 	        count = queue.drainTo(buff, DbSetupConfig.getBatchSize());
+	        throughputCount += count;
 	        if (count == 0)
             try {
               Thread.sleep(TIME_BETWEEN_RETRIES);
@@ -521,6 +526,36 @@ public class DataDbLogger {
 				Time.sleep(TIME_BETWEEN_RETRIES);
 			}
 		}
+	}
+
+	private static class ThroughputMonitor implements Runnable {
+	  private long interval = 1l;  // minutes
+	  @Override
+	  public void run() {
+	    Time.sleep(interval * Time.MS_PER_MIN);
+	    while (!Thread.interrupted()) {
+	      try {
+	        processThroughput();
+	      } catch (Throwable t) {
+	        logger.error("monitor broke:{}", t, t);
+	      }
+	      Time.sleep(interval * Time.MS_PER_MIN);
+	    }
+	  }
+	  
+	  private void processThroughput() {
+	    long delta = System.currentTimeMillis() - throughputTimestamp;
+	    if (throughputCount == 0) {
+	      logger.debug("wrote nothing");
+	      return;
+	    }
+	    
+	    long throughput = throughputCount;
+	    throughputCount = 0;
+	    throughputTimestamp = System.currentTimeMillis();
+	    double rate = throughput/(delta/1000);
+	    logger.info("wrote {} messages in {}s, ({}/s) ", throughput, (long)delta/1000, (long)rate);
+	  }
 	}
 	
 	/**
