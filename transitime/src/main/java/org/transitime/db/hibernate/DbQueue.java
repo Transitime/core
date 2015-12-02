@@ -31,7 +31,7 @@ public class DbQueue<T> {
       LoggerFactory.getLogger(DbQueue.class);
   
   // For when cannot connect to data the length of time in msec between retries
-  private static final long TIME_BETWEEN_RETRIES = 250; //msec
+  private static final long TIME_BETWEEN_RETRIES = 1 * 1000; //msec
   
   private static final int QUEUE_CAPACITY = 500000;
 
