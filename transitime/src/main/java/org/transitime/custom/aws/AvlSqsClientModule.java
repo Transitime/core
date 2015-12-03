@@ -318,7 +318,7 @@ public class AvlSqsClientModule extends Module {
               avlReports = _messageUnmarshaller.toAvlReports(message);
               for (AvlReportWrapper avlReport : avlReports) {
                 recordCount++;
-                if (avlReport.getQueueLatency() != null) {
+                if (avlReport != null && avlReport.getQueueLatency() != null) {
                   monitoring.saveMetric("AvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
                   monitoring.saveMetric("AverageAvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
                 }
