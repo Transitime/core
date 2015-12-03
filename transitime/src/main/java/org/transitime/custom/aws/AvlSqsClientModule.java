@@ -224,7 +224,7 @@ public class AvlSqsClientModule extends Module {
           if (delta != 0) {
             rate = _messageCount / delta;
           }
-          logger.info("received " + _messageCount + " message in " +
+          logger.info("received " + _messageCount + " messages in " +
               delta + " seconds (" + rate + "/s) receive size=" + _deserializeQueue.size() +
               ", archive size=" + _archiveQueue.size() + ", ack size=" 
               + _acknowledgeQueue.size());
@@ -303,34 +303,43 @@ public class AvlSqsClientModule extends Module {
 
     private class DeserailzeTask implements Runnable {
       
-      private static final long MONITORING_FREQUENCY = 5 * 60 * 1000;// 5 mins
-
       @Override
       public void run() {
-        long start = System.currentTimeMillis();
-
+        int logFrequency = messageLogFrequency.getValue();
+        int recordCount = 0;
+        long recordStart = System.currentTimeMillis();
         try {
         while (!Thread.interrupted()) {
           try {
             Message message = _deserializeQueue.poll(250, TimeUnit.MILLISECONDS);
             if (message == null) continue;
-            AvlReportWrapper avlReport = null;
+            List<AvlReportWrapper> avlReports = null;
             try {
-              avlReport = _messageUnmarshaller.toAvlReport(message);
-              if (avlReport.getQueueLatency() != null) {
+              avlReports = _messageUnmarshaller.toAvlReports(message);
+              for (AvlReportWrapper avlReport : avlReports) {
+                recordCount++;
+                if (avlReport.getQueueLatency() != null) {
                   monitoring.saveMetric("AvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
                   monitoring.saveMetric("AverageAvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                }
+                Runnable avlClient = new AvlClient(avlReport.getReport());
+               _avlClientExecutor.execute(avlClient);
+               if (recordCount % logFrequency == 0) {
+                 long delta = (System.currentTimeMillis() - recordStart)/1000;
+                 long rate = 0;
+                 if (delta != 0) {
+                   rate = recordCount / delta;
+                 }
+                 logger.info("deserialized " + recordCount + " messages in " +
+                     delta + " seconds (" + rate + "/s) receive size=" + _deserializeQueue.size() +
+                     ", archive size=" + _archiveQueue.size() + ", ack size=" 
+                     + _acknowledgeQueue.size());
+                 recordStart = System.currentTimeMillis();
+                 recordCount = 0;
+               }
               }
             } catch (Exception any) {
               logger.error("exception deserializing message {}", message, any);
-            }
-            if (avlReport != null) {
-              Runnable avlClient = new AvlClient(avlReport.getReport());
-              _avlClientExecutor.execute(avlClient);
-            } else {
-              // we could potentially quiet this statement some -- but for now
-              // its important we know how many message fail deserialization
-              logger.error("unable to deserialize avlReport for message={}", message);
             }
           } catch (Exception any) {
             logger.error("unexpected exception: ", any);
