@@ -105,7 +105,7 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
     @Override
     public String toString(Message message) {
         if (message == null) return null;
-        return message.getBody();
+        return message.getBody().replace("\\\"", "'"); // we have a bug in the serialization
     }
 
 }
