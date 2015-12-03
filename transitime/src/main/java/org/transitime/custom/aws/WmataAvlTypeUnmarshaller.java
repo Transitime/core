@@ -22,6 +22,11 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
   public List<AvlReportWrapper> toAvlReports(Message message) {
     List<AvlReportWrapper> reports = new ArrayList<AvlReportWrapper>();
     String body = message.getBody();
+    if (body.indexOf('\\') != -1) {
+      // we have a bug in the serialization
+      body = body.replace("\\", "");
+    }
+
     if (body.startsWith("[")) {
       // we have an array
       JSONArray jsonArray = new JSONArray(body);

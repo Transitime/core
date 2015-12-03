@@ -321,9 +321,13 @@ public class AvlSqsClientModule extends Module {
                 if (avlReport != null && avlReport.getQueueLatency() != null) {
                   monitoring.saveMetric("AvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
                   monitoring.saveMetric("AverageAvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                } else {
+                  logger.error("invalid avlreport for message=" + message);
                 }
-                Runnable avlClient = new AvlClient(avlReport.getReport());
-               _avlClientExecutor.execute(avlClient);
+                if (avlReport != null) {
+                  Runnable avlClient = new AvlClient(avlReport.getReport());
+                  _avlClientExecutor.execute(avlClient);
+                }
                if (recordCount % logFrequency == 0) {
                  long delta = (System.currentTimeMillis() - recordStart)/1000;
                  long rate = 0;
