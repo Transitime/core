@@ -110,7 +110,7 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
                 ar.setAssignment(blockAlpha, AssignmentType.BLOCK_ID);
             }
         }
-        return new AvlReportWrapper(ar,avlLatency, forwarderProcessingLatency, sqsLatency, totalLatency);
+        return new AvlReportWrapper(ar, avlLatency, forwarderProcessingLatency, sqsLatency, totalLatency);
     }
     // missing necessary info
     return null;
