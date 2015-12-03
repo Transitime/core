@@ -16,7 +16,9 @@ public class AvlReportWrapper {
     _sqsLatency = sqsLatency;
     _totalLatency = totalLatency;
     _forwarderProcessingLatency = forwarderProcessingLatency;
-    _forwarderSendLatency = sqsLatency - forwarderProcessingLatency;
+    if (sqsLatency != null && forwarderProcessingLatency != null) {
+      _forwarderSendLatency = sqsLatency - forwarderProcessingLatency;
+    }
   }
   
   public AvlReport getReport() {
