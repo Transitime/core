@@ -318,12 +318,23 @@ public class AvlSqsClientModule extends Module {
               avlReports = _messageUnmarshaller.toAvlReports(message);
               for (AvlReportWrapper avlReport : avlReports) {
                 recordCount++;
-                if (avlReport != null && avlReport.getQueueLatency() != null) {
-                  monitoring.saveMetric("AvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-                  monitoring.saveMetric("AverageAvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
-                } else {
-                  logger.error("invalid avlreport for message=" + message);
+                if (avlReport != null) {
+                  if (avlReport.getTotalLatency() != null) {
+                    monitoring.saveMetric("TotalQueueLatencyInMillis", new Double(avlReport.getTotalLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+                    monitoring.saveMetric("AverageQueueLatencyInMillis", new Double(avlReport.getTotalLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                  if (avlReport.getSqsLatency() != null) {
+                    monitoring.saveMetric("SQSQueueLatencyInMillis", new Double(avlReport.getSqsLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+                    monitoring.saveMetric("AverageSQSQueueLatencyInMillis", new Double(avlReport.getSqsLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                  if (avlReport.getAvlLatency() != null) {
+                    monitoring.saveMetric("AvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+                    monitoring.saveMetric("AverageAvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                  
                 }
+                
+                  
                 if (avlReport != null) {
                   Runnable avlClient = new AvlClient(avlReport.getReport());
                   _avlClientExecutor.execute(avlClient);

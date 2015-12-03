@@ -79,9 +79,17 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
       proxied = msgObj.getLong("proxied");
     }
     
-    Long queueLatency = null;
+    Long sqsLatency = null;
+    Long avlLatency = null;
+    Long totalLatency = null;
     if (proxied != null) {
-      queueLatency = System.currentTimeMillis() - proxied;
+      Long now = System.currentTimeMillis();
+      sqsLatency = now - proxied;
+      if (time != null) {
+        totalLatency = now - time;
+        avlLatency = proxied - time;
+      }
+      
     }
     
     String source = "sqs";
@@ -93,7 +101,7 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
                 ar.setAssignment(blockAlpha, AssignmentType.BLOCK_ID);
             }
         }
-        return new AvlReportWrapper(ar, queueLatency);
+        return new AvlReportWrapper(ar, avlLatency, sqsLatency, totalLatency);
     }
     // missing necessary info
     return null;
