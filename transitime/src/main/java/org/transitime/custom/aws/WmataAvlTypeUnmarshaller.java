@@ -74,20 +74,29 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
         speed = (float) msgObj.getDouble("averageSpeed") * 0.44704f; // convert to m/s
     }
 
-    Long proxied = null;
-    if (msgObj.has("proxied")) {
-      proxied = msgObj.getLong("proxied");
+    Long forwarderTimeReceived = null;
+    if (msgObj.has("received")) {
+      forwarderTimeReceived = msgObj.getLong("received");
+    }
+    
+    Long forwarderTimeProcessed = null;
+    if (msgObj.has("processed")) {
+      forwarderTimeProcessed = msgObj.getLong("processed");
     }
     
     Long sqsLatency = null;
     Long avlLatency = null;
     Long totalLatency = null;
-    if (proxied != null) {
+    Long forwarderProcessingLatency = null;
+    if (forwarderTimeReceived != null) {
       Long now = System.currentTimeMillis();
-      sqsLatency = now - proxied;
+      sqsLatency = now - forwarderTimeReceived;
       if (time != null) {
         totalLatency = now - time;
-        avlLatency = proxied - time;
+        avlLatency = forwarderTimeReceived - time;
+        if (forwarderTimeProcessed != null) {
+          forwarderProcessingLatency = forwarderTimeProcessed - forwarderTimeReceived;
+        }
       }
       
     }
@@ -101,7 +110,7 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
                 ar.setAssignment(blockAlpha, AssignmentType.BLOCK_ID);
             }
         }
-        return new AvlReportWrapper(ar, avlLatency, sqsLatency, totalLatency);
+        return new AvlReportWrapper(ar,avlLatency, forwarderProcessingLatency, sqsLatency, totalLatency);
     }
     // missing necessary info
     return null;

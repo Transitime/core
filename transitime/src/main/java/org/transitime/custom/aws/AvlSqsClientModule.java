@@ -331,7 +331,15 @@ public class AvlSqsClientModule extends Module {
                     monitoring.saveMetric("AvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
                     monitoring.saveMetric("AverageAvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
                   }
-                  
+                  if (avlReport.getForwarderProcessingLatency() != null) {
+                    monitoring.saveMetric("ForwarderProcessingLatencyInMillis", new Double(avlReport.getForwarderProcessingLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+                    monitoring.saveMetric("AverageForwarderProcessingLatencyInMillis", new Double(avlReport.getForwarderProcessingLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                  if (avlReport.getForwarderSendLatency() != null) {
+                    monitoring.saveMetric("ForwarderSendLatencyInMillis", new Double(avlReport.getForwarderSendLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+                    monitoring.saveMetric("AverageForwarderSendLatencyInMillis", new Double(avlReport.getForwarderSendLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+
                 }
                 
                   
