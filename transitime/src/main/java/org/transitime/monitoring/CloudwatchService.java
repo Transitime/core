@@ -84,7 +84,7 @@ public class CloudwatchService {
      *
      * @return
      */
-    public static CloudwatchService getInstance() {
+    public synchronized static CloudwatchService getInstance() {
         if(singleton == null)
             singleton = new CloudwatchService();
         return singleton;
@@ -221,8 +221,7 @@ public class CloudwatchService {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                logger.warn(e.getMessage());
+                logger.warn("Exception with metrics: {} {}", e.getMessage(), e);
             }
         }
     }
