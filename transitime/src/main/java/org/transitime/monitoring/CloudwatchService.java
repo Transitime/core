@@ -28,12 +28,16 @@ public class CloudwatchService {
     private AmazonCloudWatchClient cloudWatch;
     private Map<String, MetricDefinition> metricMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService executor;
+    private Integer _batchSize = 1000;
     private boolean enabled = false;
 
     private static final Logger logger = LoggerFactory
             .getLogger(CloudwatchService.class);
 
-    private class MetricDefinition{
+    private ArrayBlockingQueue<MetricScalar> individualMetricsQueue = new ArrayBlockingQueue<MetricScalar>(
+            100000);
+
+    private class MetricDefinition {
         String metricName;
         MetricType metricType;
         ReportingIntervalTimeUnit reportingIntervalTimeUnit;
@@ -44,6 +48,11 @@ public class CloudwatchService {
         Boolean formatAsPercent = false;
     }
 
+    private class MetricScalar {
+        String metricName;
+        Double metricValue;
+        Boolean formatAsPercent;
+    }
 
     public enum MetricType{
         SCALAR,
@@ -74,7 +83,8 @@ public class CloudwatchService {
             cloudWatch.setEndpoint(endpoint);
             this.cloudWatch = cloudWatch;
             executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(new PublishMetricsTask(), 0, 1, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(new PublishSummaryMetricsTask(), 0, 1, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(new PublishIndividualMetricsTask(), 0, 10, TimeUnit.SECONDS);
             enabled = true;
         }
     }
@@ -101,20 +111,20 @@ public class CloudwatchService {
      * @param reportingIntervalTimeUnit
      * @param formatAsPercent
      */
-    public synchronized void saveMetric(String metricName, Double metricValue, Integer reportingInterval, MetricType metricType,
-                                        ReportingIntervalTimeUnit reportingIntervalTimeUnit, Boolean formatAsPercent){
+    public void saveMetric(String metricName, Double metricValue, Integer reportingInterval, MetricType metricType,
+                           ReportingIntervalTimeUnit reportingIntervalTimeUnit, Boolean formatAsPercent){
 
-        if(metricValue == null || !enabled)
+        if(metricValue == null)
             return;
 
-        logger.info("saving metric to CloudwatchService [{}]={}", metricName, metricValue);
-
         if(metricType == MetricType.SCALAR && reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE){
-            if(formatAsPercent){
-                publishMetricAsPercent(metricName, metricValue);
-            }else{
-                publishMetric(metricName, metricValue);
-            }
+            logger.info("adding individual metric to queue [{}]={}", metricName, metricValue);
+            MetricScalar metricScalar = new MetricScalar();
+            metricScalar.metricName = metricName;
+            metricScalar.metricValue = metricValue;
+            metricScalar.formatAsPercent = formatAsPercent;
+            individualMetricsQueue.add(metricScalar);
+            return;
         }
 
 
@@ -141,13 +151,11 @@ public class CloudwatchService {
                 metricDefinition.reportingIntervalInMillis = reportingInterval * 24l * 60l * 60l * 1000l;
             this.metricMap.put(metricName, metricDefinition);
         }
-
+        logger.info("saving metric for summarized publication to Cloudwatch [{}]={}", metricName, metricValue);
         this.metricMap.get(metricName).data.add(metricValue);
     }
 
     private void publishMetric(String metricName, Double metricValue){
-        if (!enabled) return;
-        logger.info("Cloudwatch publishMetric [{}]={}", metricName, metricValue);
         MetricDatum datum = new MetricDatum().
                 withMetricName(metricName).
                 withTimestamp(new Date()).
@@ -166,22 +174,39 @@ public class CloudwatchService {
      */
     private synchronized void publishMetricAsPercent(String metricName, Double metricValue){
       logger.info("Cloudwatch publishMetricAsPercent [{}]={}", metricName, metricValue);
-      if(cloudWatch == null || !enabled)
+        if(cloudWatch == null || !enabled)
           return;
 
-      MetricDatum datum = new MetricDatum().
-              withMetricName(metricName).
-              withTimestamp(new Date()).
-              withValue(metricValue * 100d).
-              withUnit(StandardUnit.Percent);
-      PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
-              withNamespace(environmentName).
-              withMetricData(datum);
-      cloudWatch.putMetricData(putMetricDataRequest);
+        MetricDatum datum = new MetricDatum().
+                withMetricName(metricName).
+                withTimestamp(new Date()).
+                withValue(metricValue * 100d).
+                withUnit(StandardUnit.Percent);
+        PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
+                withNamespace(environmentName).
+                withMetricData(datum);
+        cloudWatch.putMetricData(putMetricDataRequest);
 
-  }
+    }
 
-    private class PublishMetricsTask implements Runnable {
+    private class PublishIndividualMetricsTask implements Runnable {
+
+        @Override
+        public void run() {
+            List<MetricScalar> records = new ArrayList<MetricScalar>();
+            individualMetricsQueue.drainTo(records, _batchSize);
+            for(MetricScalar metricScalar : records){
+                logger.info("Publishing individual metric [{}]={}", metricScalar.metricName, metricScalar.metricValue);
+                if(metricScalar.formatAsPercent){
+                    publishMetricAsPercent(metricScalar.metricName, metricScalar.metricValue);
+                }else{
+                    publishMetric(metricScalar.metricName, metricScalar.metricValue);
+                }
+            }
+        }
+    }
+
+    private class PublishSummaryMetricsTask implements Runnable {
 
         @Override
         public void run() {
