@@ -169,7 +169,6 @@ public class CloudwatchService {
      * @param metricValue
      */
     private synchronized void publishMetricAsPercent(String metricName, Double metricValue){
-      logger.info("Cloudwatch publishMetricAsPercent [{}]={}", metricName, metricValue);
         if(cloudWatch == null || !enabled)
           return;
 
