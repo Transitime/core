@@ -41,6 +41,11 @@ finding specific issues with predictions.">
   <li><a href="predAccuracyCsvParams.jsp?a=<%= agencyId %>"
     title="For downloading prediction accuracy data in CSV format.">
       Prediction Accuracy CSV Download</a></li>
+  <li><a href="routePerformanceTable.jsp?a=<%= agencyId %>"
+    title="Shows route performance, where performance is defined as the 
+    number of ontime predictions over the total number of predicitons for a
+    given route.">
+      Route Performance Table</a></li>
 </ul>
 
 <div id="subtitle">AVL Reports</div>
