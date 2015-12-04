@@ -215,8 +215,10 @@ public class CloudwatchService {
                 Date now = new Date();
                 for (String metricName : metricMap.keySet()) {
                     MetricDefinition metricDefinition = metricMap.get(metricName);
-                    if(metricDefinition.reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE)
+                    if(metricDefinition == null || metricDefinition.reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE)
                         continue;
+                    if (metricDefinition.lastUpdate == null)
+                      continue;
                     long dateDiff = now.getTime() - metricDefinition.lastUpdate.getTime();
                     Double metric = null;
                     if (dateDiff >= metricDefinition.reportingIntervalInMillis) {
