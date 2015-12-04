@@ -157,7 +157,11 @@ public class CloudwatchService {
         PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
                 withNamespace(environmentName).
                 withMetricData(datum);
-        cloudWatch.putMetricData(putMetricDataRequest);
+        try {
+          cloudWatch.putMetricData(putMetricDataRequest);
+        } catch (Exception any) {
+          logger.error("exception publishing for {}={}: {}", metricName, metricValue, any);
+        }
     }
 
     /**
@@ -177,7 +181,11 @@ public class CloudwatchService {
         PutMetricDataRequest putMetricDataRequest = new PutMetricDataRequest().
                 withNamespace(environmentName).
                 withMetricData(datum);
-        cloudWatch.putMetricData(putMetricDataRequest);
+        try {
+          cloudWatch.putMetricData(putMetricDataRequest);
+        } catch (Exception any) {
+          logger.error("exception publishing for {}={}: {}", metricName, metricValue, any);
+        }
 
     }
 
