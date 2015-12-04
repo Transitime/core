@@ -80,7 +80,7 @@ public class CloudwatchService {
             this.cloudWatch = cloudWatch;
             executor = Executors.newSingleThreadScheduledExecutor();
             executor.scheduleAtFixedRate(new PublishSummaryMetricsTask(), 0, 1, TimeUnit.SECONDS);
-            executor.scheduleAtFixedRate(new PublishIndividualMetricsTask(), 0, 10, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(new PublishIndividualMetricsTask(), 0, 1, TimeUnit.SECONDS);
             enabled = true;
         }
     }
