@@ -98,7 +98,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		if (activeBlocks.size() == 0) {
 			setMessage("No currently active blocks so predictability "
 					+ "considered to be OK.");
-            cloudwatchService.saveMetric("PredictablePercentageOfBlocks", 1d, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+            cloudwatchService.saveMetric("PredictionPredictablePercentageOfBlocks", 1d, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
 			return 1.0;
 		}
 

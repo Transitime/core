@@ -1299,7 +1299,7 @@ public class AvlProcessor {
 		lowLevelProcessAvlReport(avlReport, false);
 		logger.debug("Processing AVL report took {}msec", timer);
         CloudwatchService.getInstance().saveMetric("PredictionProcessingTimeInMillis", Double.valueOf(timer.elapsedMsec()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
-        CloudwatchService.getInstance().saveMetric("TotalPredictionLatencyInMillis", Double.valueOf((System.currentTimeMillis() - avlReport.getTime())), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+        CloudwatchService.getInstance().saveMetric("PredictionTotalLatencyInMillis", Double.valueOf((System.currentTimeMillis() - avlReport.getTime())), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
 	}
 
 }
