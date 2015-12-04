@@ -61,7 +61,6 @@ public class CloudwatchService {
 
     public enum ReportingIntervalTimeUnit {
         IMMEDIATE,
-        SECOND,
         MINUTE,
         HOUR,
         DAY
@@ -137,8 +136,6 @@ public class CloudwatchService {
             metricDefinition.reportingInterval = reportingInterval;
             metricDefinition.reportingIntervalTimeUnit = reportingIntervalTimeUnit;
             metricDefinition.formatAsPercent = formatAsPercent;
-            if(reportingIntervalTimeUnit == ReportingIntervalTimeUnit.SECOND)
-                metricDefinition.reportingIntervalInMillis = reportingInterval * 1000l;
             if(reportingIntervalTimeUnit == ReportingIntervalTimeUnit.MINUTE)
                 metricDefinition.reportingIntervalInMillis = reportingInterval * 60l * 1000l;
             if(reportingIntervalTimeUnit == ReportingIntervalTimeUnit.HOUR)
@@ -250,7 +247,7 @@ public class CloudwatchService {
         CloudwatchService cloudwatchService = CloudwatchService.getInstance();
         int i = 0;
         while (i < 100){
-            cloudwatchService.saveMetric("testing", Math.random(), 1, MetricType.AVERAGE, ReportingIntervalTimeUnit.SECOND, false);
+            cloudwatchService.saveMetric("testing", Math.random(), 1, MetricType.AVERAGE, ReportingIntervalTimeUnit.MINUTE, false);
             i++;
         }
     }
