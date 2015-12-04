@@ -6,6 +6,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 
@@ -17,15 +19,13 @@ import com.amazonaws.services.sqs.model.Message;
  */
 public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
 
+  private static final Logger logger = 
+      LoggerFactory.getLogger(WmataAvlTypeUnmarshaller.class);
   
   @Override
   public List<AvlReportWrapper> toAvlReports(Message message) {
     List<AvlReportWrapper> reports = new ArrayList<AvlReportWrapper>();
     String body = message.getBody();
-    if (body.indexOf('\\') != -1) {
-      // we have a bug in the serialization
-      body = body.replace("\\", "");
-    }
 
     if (body.startsWith("[")) {
       // we have an array
@@ -90,12 +90,13 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
     Long forwarderProcessingLatency = null;
     if (forwarderTimeReceived != null) {
       Long now = System.currentTimeMillis();
-      sqsLatency = now - forwarderTimeReceived;
+      
       if (time != null) {
         totalLatency = now - time;
         avlLatency = forwarderTimeReceived - time;
         if (forwarderTimeProcessed != null) {
           forwarderProcessingLatency = forwarderTimeProcessed - forwarderTimeReceived;
+          sqsLatency = now - forwarderTimeProcessed;
         }
       }
       
@@ -112,6 +113,7 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
         }
         return new AvlReportWrapper(ar, avlLatency, forwarderProcessingLatency, sqsLatency, totalLatency);
     }
+    logger.info("invalid message={}", jsonObj);
     // missing necessary info
     return null;
     
