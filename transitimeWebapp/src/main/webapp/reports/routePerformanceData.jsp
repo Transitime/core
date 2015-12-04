@@ -2,6 +2,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page contentType="application/json" %>
 <%
 
@@ -30,16 +31,7 @@ Date endDate = dateFormat.parse(endDateStr + " " + endTimeStr);
 
 List<Object[]> results = new RoutePerformanceQuery().query(agency, beginDate, endDate, allowableEarly, allowableLate, predictionType, predictionSource);
 
-String res = "[\n";
-for (Object[] row : results) {
-  res += ("\t{\"routeId\": \"" + row[0] + "\", \"performance\": \"" + row[1] + "\"},\n");
-}
-
-if (res.length() > 2)
-	res  = res.substring(0, res.length()-2);
-
-res += "]";
-
-out.print(res);
+JSONArray json = new JSONArray(results);
+json.write(out);
 
 %>

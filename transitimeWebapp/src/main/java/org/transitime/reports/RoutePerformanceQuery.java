@@ -24,6 +24,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.type.Type;
 import org.hibernate.type.DoubleType;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
@@ -64,10 +65,10 @@ public class RoutePerformanceQuery {
       session = HibernateUtils.getSession(agencyId);
             
       Projection proj = Projections.projectionList()
-          .add(Projections.groupProperty("routeId"))
-          .add(Projections.alias(Projections.sqlProjection(sqlProjection,
+          .add(Projections.groupProperty("routeId"), "routeId")
+          .add(Projections.sqlProjection(sqlProjection,
               new String[] { "avgAccuracy" }, 
-              new Type[] { DoubleType.INSTANCE }), "avgAccuracy"));
+              new Type[] { DoubleType.INSTANCE }), "performance");
           
       Criteria criteria = session.createCriteria(PredictionAccuracy.class)
         .setProjection(proj)
@@ -81,8 +82,10 @@ public class RoutePerformanceQuery {
       if (predictionSource != "")
           criteria.add(Restrictions.eq("predictionSource", predictionSource));
       
-      criteria.addOrder(Order.desc("avgAccuracy"));
+      criteria.addOrder(Order.desc("performance"));
       
+      criteria.setResultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP);
+          
       @SuppressWarnings("unchecked")
       List<Object[]> results = criteria.list();
 
