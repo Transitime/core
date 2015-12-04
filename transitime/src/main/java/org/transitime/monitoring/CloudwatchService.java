@@ -5,6 +5,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
 import com.amazonaws.services.cloudwatch.model.StandardUnit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,7 +221,8 @@ public class CloudwatchService {
                     Double metric = null;
                     if (dateDiff >= metricDefinition.reportingIntervalInMillis) {
                         if (metricDefinition.metricType == MetricType.AVERAGE) {
-                            metric = MathUtils.average(metricDefinition.data);
+                            Collection<Double> dataCopy = new ArrayList<Double>(metricDefinition.data);
+                            metric = MathUtils.average(dataCopy);
                         } else if (metricDefinition.metricType == MetricType.COUNT) {
                             metric = new Double(metricDefinition.data.size());
                         } else if (metricDefinition.metricType == MetricType.SUM) {
