@@ -246,7 +246,7 @@ public class CloudwatchService {
                     }
                 }
             } catch (Exception e) {
-                logger.error("Exception with metrics: {} {}", e.getMessage(), e);
+                logger.error("Exception with metrics: {} {}", e.getMessage(), e, e);
             }
         }
     }
