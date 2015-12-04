@@ -28,12 +28,20 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
     String body = message.getBody();
 
     if (body.startsWith("[")) {
-      // we have an array
-      JSONArray jsonArray = new JSONArray(body);
-      for (int i=0; i<jsonArray.length(); i++) {
-        reports.add(toAvlReport((JSONObject)jsonArray.get(i)));
+      reports.addAll(toAvlReportsFromJsonArray(body));
+    } else if (body.contains("SigningCertURL")) {
+      // SNS to SQS leaves some artifacts
+      // TODO find out why this happens
+      try {
+          JSONObject jsonObj = new JSONObject(message.getBody());
+          String content = jsonObj.getString("Message");
+          reports.addAll(toAvlReportsFromJsonArray(content));    
+      } catch (JSONException e) {
+          // try one last time
+        reports.add(toAvlReport(message));
       }
-    } else {
+    }
+    else {
       // not an array, try to deserialize as is
       reports.add(toAvlReport(message));
     }
@@ -41,6 +49,18 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
   }
 
   
+  private List<AvlReportWrapper> toAvlReportsFromJsonArray(String body) {
+    List<AvlReportWrapper> reports = new ArrayList<AvlReportWrapper>();
+    if (body == null) return reports;
+    // we have an array
+    JSONArray jsonArray = new JSONArray(body);
+    for (int i=0; i<jsonArray.length(); i++) {
+      reports.add(toAvlReport((JSONObject)jsonArray.get(i)));
+    }
+    return reports;
+  }
+
+
   private AvlReportWrapper toAvlReport(JSONObject jsonObj) {
     JSONObject msgObj;
     try{
@@ -129,7 +149,7 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
     @Override
     public String toString(Message message) {
         if (message == null) return null;
-        return message.getBody().replace("\\\"", "'"); // we have a bug in the serialization
+        return message.getBody();
     }
 
 }
