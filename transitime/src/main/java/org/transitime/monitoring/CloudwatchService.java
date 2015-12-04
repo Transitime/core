@@ -224,6 +224,7 @@ public class CloudwatchService {
                     if (dateDiff >= metricDefinition.reportingIntervalInMillis) {
                         if (metricDefinition.metricType == MetricType.AVERAGE) {
                             Collection<Double> dataCopy = new ArrayList<Double>(metricDefinition.data);
+                            if (dataCopy.isEmpty()) continue;
                             metric = MathUtils.average(dataCopy);
                         } else if (metricDefinition.metricType == MetricType.COUNT) {
                             metric = new Double(metricDefinition.data.size());
