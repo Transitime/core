@@ -54,7 +54,11 @@ public class RoutePerformanceQuery {
     int msecLo = (int) (allowableEarlyMin * 60 * 1000);
     int msecHi = (int) (allowableLateMin * 60 * 1000);
     
-    String sqlProjection =  "avg(predictionAccuracyMsecs BETWEEN " + Integer.toString(msecLo) + " AND " + Integer.toString(msecHi) + ") AS avgAccuracy";
+    // Project to: # of predictions in which route is on time / # of predictions
+    // for route. This cannot be done with pure Criteria API. This could be
+    // moved to a separate class or XML file.
+    String sqlProjection = "avg(predictionAccuracyMsecs BETWEEN " + Integer.toString(msecLo) + " AND "
+        + Integer.toString(msecHi) + ") AS avgAccuracy";
 
     try {
       session = HibernateUtils.getSession(agencyId);
