@@ -1298,7 +1298,8 @@ public class AvlProcessor {
 		// Do the low level work of matching vehicle and then generating results
 		lowLevelProcessAvlReport(avlReport, false);
 		logger.debug("Processing AVL report took {}msec", timer);
-        CloudwatchService.getInstance().saveMetric("AvlProcessingTimeInMillis", Double.valueOf(timer.elapsedMsec()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+        CloudwatchService.getInstance().saveMetric("PredictionProcessingTimeInMillis", Double.valueOf(timer.elapsedMsec()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+        CloudwatchService.getInstance().saveMetric("PredictionTotalLatencyInMillis", Double.valueOf((System.currentTimeMillis() - avlReport.getTime())), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
 	}
 
 }

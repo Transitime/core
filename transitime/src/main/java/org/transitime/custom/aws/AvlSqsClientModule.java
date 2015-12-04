@@ -224,7 +224,7 @@ public class AvlSqsClientModule extends Module {
           if (delta != 0) {
             rate = _messageCount / delta;
           }
-          logger.info("received " + _messageCount + " message in " +
+          logger.info("received " + _messageCount + " messages in " +
               delta + " seconds (" + rate + "/s) receive size=" + _deserializeQueue.size() +
               ", archive size=" + _archiveQueue.size() + ", ack size=" 
               + _acknowledgeQueue.size());
@@ -303,34 +303,59 @@ public class AvlSqsClientModule extends Module {
 
     private class DeserailzeTask implements Runnable {
       
-      private static final long MONITORING_FREQUENCY = 5 * 60 * 1000;// 5 mins
-
       @Override
       public void run() {
-        long start = System.currentTimeMillis();
-
+        int logFrequency = messageLogFrequency.getValue();
+        int recordCount = 0;
+        long recordStart = System.currentTimeMillis();
         try {
         while (!Thread.interrupted()) {
           try {
             Message message = _deserializeQueue.poll(250, TimeUnit.MILLISECONDS);
             if (message == null) continue;
-            AvlReportWrapper avlReport = null;
+            List<AvlReportWrapper> avlReports = null;
             try {
-              avlReport = _messageUnmarshaller.toAvlReport(message);
-              if (avlReport.getQueueLatency() != null) {
-                  monitoring.saveMetric("AvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-                  monitoring.saveMetric("AverageAvlQueueLatencyInMillis", new Double(avlReport.getQueueLatency()), 5, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+              avlReports = _messageUnmarshaller.toAvlReports(message);
+              for (AvlReportWrapper avlReport : avlReports) {
+                recordCount++;
+                if (avlReport != null) {
+                  if (avlReport.getTotalLatency() != null) {
+                    monitoring.saveMetric("PredictionTotalQueueLatencyInMillis", new Double(avlReport.getTotalLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                  if (avlReport.getSqsLatency() != null) {
+                    monitoring.saveMetric("PredictionSQSQueueLatencyInMillis", new Double(avlReport.getSqsLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                  if (avlReport.getAvlLatency() != null) {
+                    monitoring.saveMetric("PredictionAvlQueueLatencyInMillis", new Double(avlReport.getAvlLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                  if (avlReport.getForwarderProcessingLatency() != null) {
+                    monitoring.saveMetric("PredictionForwarderProcessingLatencyInMillis", new Double(avlReport.getForwarderProcessingLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                  if (avlReport.getForwarderSendLatency() != null) {
+                    monitoring.saveMetric("PredictionForwarderSendLatencyInMillis", new Double(avlReport.getForwarderSendLatency()), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+                  }
+                }
+                  
+                if (avlReport != null) {
+                  Runnable avlClient = new AvlClient(avlReport.getReport());
+                  _avlClientExecutor.execute(avlClient);
+                }
+               if (recordCount % logFrequency == 0) {
+                 long delta = (System.currentTimeMillis() - recordStart)/1000;
+                 long rate = 0;
+                 if (delta != 0) {
+                   rate = recordCount / delta;
+                 }
+                 logger.info("deserialized " + recordCount + " messages in " +
+                     delta + " seconds (" + rate + "/s) receive size=" + _deserializeQueue.size() +
+                     ", archive size=" + _archiveQueue.size() + ", ack size=" 
+                     + _acknowledgeQueue.size());
+                 recordStart = System.currentTimeMillis();
+                 recordCount = 0;
+               }
               }
             } catch (Exception any) {
               logger.error("exception deserializing message {}", message, any);
-            }
-            if (avlReport != null) {
-              Runnable avlClient = new AvlClient(avlReport.getReport());
-              _avlClientExecutor.execute(avlClient);
-            } else {
-              // we could potentially quiet this statement some -- but for now
-              // its important we know how many message fail deserialization
-              logger.error("unable to deserialize avlReport for message={}", message);
             }
           } catch (Exception any) {
             logger.error("unexpected exception: ", any);
@@ -390,12 +415,18 @@ public class AvlSqsClientModule extends Module {
       public void run() {
         while (!Thread.interrupted()) {
           try {
+            long lastAvlReportTime = (System.currentTimeMillis() - AvlProcessor.getInstance().lastAvlReportTime())/1000;
             logger.info("Queue Size Report:  AVL last report {}s, recieve={}, deserialize={}, ack={}, archive={}",
-                (System.currentTimeMillis() - AvlProcessor.getInstance().lastAvlReportTime())/1000,
+                lastAvlReportTime,
                 _receiveQueue.size(),
                 _deserializeQueue.size(),
                 _acknowledgeQueue.size(),
                 _archiveQueue.size());
+            // lastAvlReportTime is already reported as LatestAvlReportAgeInSeconds
+            monitoring.saveMetric("PredictionReceiveQueueSize", new Double(_receiveQueue.size()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            monitoring.saveMetric("PredictionDeserializeQueueSize", new Double(_deserializeQueue.size()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            monitoring.saveMetric("PredictionAckQueueSize", new Double(_acknowledgeQueue.size()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            monitoring.saveMetric("PredictionArchiveQueueSize", new Double(_archiveQueue.size()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
             Thread.sleep(STATUS_FREQUENCY_SECONDS * 1000);
           } catch (Exception any) {
             logger.error("exception with status: ", any);
