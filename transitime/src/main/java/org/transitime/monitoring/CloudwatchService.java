@@ -79,8 +79,8 @@ public class CloudwatchService {
             cloudWatch.setEndpoint(endpoint);
             this.cloudWatch = cloudWatch;
             executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(new PublishSummaryMetricsTask(), 0, 1, TimeUnit.SECONDS);
-            executor.scheduleAtFixedRate(new PublishIndividualMetricsTask(), 0, 1, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(new PublishSummaryMetricsTask(), 0, 1, TimeUnit.MINUTES);
+            executor.scheduleAtFixedRate(new PublishIndividualMetricsTask(), 0, 1, TimeUnit.MINUTES);
             enabled = true;
         }
     }
