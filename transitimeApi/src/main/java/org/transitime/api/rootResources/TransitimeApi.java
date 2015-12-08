@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response;
 
 import org.transitime.api.data.ApiActiveBlocks;
 import org.transitime.api.data.ApiActiveBlocksRoutes;
+import org.transitime.api.data.ApiAdherenceSummary;
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
 import org.transitime.api.data.ApiBlock;
@@ -60,6 +61,7 @@ import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.predsByLoc.PredsByLoc;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
+import org.transitime.core.TemporalDifference;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcActiveBlock;
@@ -75,6 +77,7 @@ import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
@@ -947,7 +950,49 @@ public class TransitimeApi {
             throw WebUtils.badRequestException(e.getMessage());
         }
     }
+    
+  @Path("/command/vehicleAdherenceSummary")
+  @GET
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+  public Response getVehicleAdherenceSummary(@BeanParam StandardParameters stdParameters,
+      @QueryParam(value = "allowableEarlySec") @DefaultValue("0") int allowableEarlySec,
+      @QueryParam(value = "allowableLateSec") @DefaultValue("0") int allowableLateSec,
+      @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs) throws WebApplicationException {
 
+    // Make sure request is valid
+    stdParameters.validate();
+
+    try {
+
+      int late = 0, ontime = 0, early = 0, nodata = 0, blocks = 0;
+
+      VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
+
+      Collection<IpcVehicleComplete> ipcVehicleCompletes = vehiclesInterface.getComplete();
+
+      for (IpcVehicleComplete v : ipcVehicleCompletes) {
+        TemporalDifference adh = v.getRealTimeSchedAdh();
+
+        if (adh == null)
+          nodata++;
+        else if (adh.isEarlierThan(allowableEarlySec))
+          early++;
+        else if (adh.isLaterThan(allowableLateSec))
+          late++;
+        else
+          ontime++;
+      }
+
+      blocks = vehiclesInterface.getNumActiveBlocks(null, allowableBeforeTimeSecs);
+
+      ApiAdherenceSummary resp = new ApiAdherenceSummary(late, ontime, early, nodata, blocks);
+
+      return stdParameters.createResponse(resp);
+    } catch (Exception e) {
+      // If problem getting data then return a Bad Request
+      throw WebUtils.badRequestException(e.getMessage());
+    }
+  }
 
     /**
 	 * Handles the "trip" command which outputs configuration data for the

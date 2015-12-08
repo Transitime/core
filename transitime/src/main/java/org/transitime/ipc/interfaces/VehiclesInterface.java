@@ -192,4 +192,19 @@ public interface VehiclesInterface extends Remote {
 	public Collection<IpcActiveBlock> getActiveBlocks(
 			Collection<String> routeIds, int allowableBeforeTimeSecs) 
 					throws RemoteException;
+	
+	 /**
+   * Gets from the server the number of blocks that are currently active.
+   * 
+   * @param routeIds
+   *            List of routes that want data for. Can also be null or empty.
+   * @param allowableBeforeTimeSecs
+   *            How much before the block time the block is considered to be
+   *            active
+   * @return Number of blocks that are active.
+   * @throws RemoteException
+   */
+  public int getNumActiveBlocks(
+      Collection<String> routeIds, int allowableBeforeTimeSecs) 
+          throws RemoteException;
 }

@@ -382,10 +382,20 @@ function baseHandleAjaxData(routes, removeAll) {
 		} // Done with each block for the route
 	} // Done with each route
 	
-	// Update the summary at bottom of page
-	$("#totalBlocksValue").text(totalNumberBlocks);
+	// If we have all blocks and not just blocks for route, update total.
+	if (routes.route.length > 0)
+		$("#totalBlocksValue").text(totalNumberBlocks);
 	
-	var percentageVehicles = 100.0 * totalVehicles / totalNumberBlocks
+	// Since route widgets might have changed need to call refresh
+	$( "#accordion" ).accordion("refresh");	
+}
+
+function updateFooter(total) {
+	// Update the summary at bottom of page
+	
+	var totalVehicles = total.late + total.ontime + total.early; 
+
+	var percentageVehicles = 100.0 * totalVehicles / total.blocks;
 	$("#percentWithVehiclesValue").text(percentageVehicles.toFixed(0) + "%");
 	if (percentageVehicles < 90.0) {
 		$("#percentWithVehiclesValue").addClass("problemColor");
@@ -393,7 +403,7 @@ function baseHandleAjaxData(routes, removeAll) {
 		$("#percentWithVehiclesValue").removeClass("problemColor");		
 	}
 	
-	var percentageLate = 100.0 * totalLate / totalNumberBlocks;
+	var percentageLate = 100.0 * total.late / total.blocks;
 	$("#percentLateValue").text(percentageLate.toFixed(0) + "%");
 	if (percentageLate > 10.0) {
 		$("#percentLateValue").addClass("lateColor");
@@ -401,29 +411,38 @@ function baseHandleAjaxData(routes, removeAll) {
 		$("#percentLateValue").removeClass("lateColor");		
 	}
 	
-	var percentageOnTime = 100.0 * totalOnTime / totalNumberBlocks;
+	var percentageOnTime = 100.0 * total.ontime / total.blocks;
 	$("#percentOnTimeValue").text(percentageOnTime.toFixed(0) + "%");
 	
-	var percentageEarly = 100.0 * totalEarly / totalNumberBlocks;
+	var percentageEarly = 100.0 * total.early / total.blocks;
 	$("#percentEarlyValue").text(percentageEarly.toFixed(0) + "%");
 	if (percentageEarly > 10.0) {
 		$("#percentLateValue").addClass("earlyColor");
 	} else {
 		$("#percentLateValue").removeClass("earlyColor");		
 	}
-
-	// Since route widgets might have changed need to call refresh
-	$( "#accordion" ).accordion("refresh");	
 }
+
 
 /*
  * Get active block data via AJAX
  */
 function getAndProcessData() {
+	// Populate accordion
 	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRouteWithoutVehicles", handleAjaxData)
 		.fail(function() {
 	 		console.log( "Could not access /command/activeBlocksByRouteWithoutVehicles" );
-	 	});	
+	 	});
+	 		
+	// Add footer
+	var requestData = {
+			"allowableEarlySec": ALLOWABLE_EARLY_MSEC/1000,
+			"allowableLateSec": ALLOWABLE_LATE_MSEC/1000
+	}
+	$.getJSON(apiUrlPrefix + "/command/vehicleAdherenceSummary", requestData, updateFooter)
+		.fail(function() {
+			console.log("Could not access /command/vehicleAdherenceSummary");
+		});
 }
 
 // Called when page is ready

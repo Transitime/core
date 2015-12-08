@@ -309,7 +309,21 @@ public class VehiclesServer extends AbstractServer
 		return results;
 	}
 
-
+	/* (non-Javadoc)
+   * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
+   */
+  @Override
+  public int getNumActiveBlocks(
+      Collection<String> routeIds, int allowableBeforeTimeSecs)
+      throws RemoteException {
+    // Determine all the active blocks
+    List<Block> blocks =
+        BlocksInfo.getCurrentlyActiveBlocks(routeIds, null,
+            allowableBeforeTimeSecs, -1);
+    
+    return blocks.size();
+  }
+  
     /* (non-Javadoc)
      * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
      */
