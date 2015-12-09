@@ -77,7 +77,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 	text-align: center;
 }
 
-#percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel {
+#percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel, #asOfLabel {
 	margin-left: 20px;
 }
 
@@ -85,7 +85,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 	margin-left: 40px;
 }
 
-#totalBlocksLabel, #percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel, #percentLateLabel {
+#totalBlocksLabel, #percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel, #percentLateLabel, #asOfLabel {
 	margin-right: 4px;
 	color: graytext;
 }
@@ -380,18 +380,17 @@ function baseHandleAjaxData(routes, removeAll) {
 			}
 			vehiclesSchedAdhElement.text(schAdhStr);
 		} // Done with each block for the route
-	} // Done with each route
-	
-	// If we have all blocks and not just blocks for route, update total.
-	if (routes.route.length > 0)
-		$("#totalBlocksValue").text(totalNumberBlocks);
+	} // Done with each route	
 	
 	// Since route widgets might have changed need to call refresh
 	$( "#accordion" ).accordion("refresh");	
 }
 
+
 function updateFooter(total) {
 	// Update the summary at bottom of page
+	
+	$("#totalBlocksValue").text(total.blocks);
 	
 	var totalVehicles = total.late + total.ontime + total.early; 
 
@@ -421,7 +420,21 @@ function updateFooter(total) {
 	} else {
 		$("#percentLateValue").removeClass("earlyColor");		
 	}
+	
+	$("#asOfValue").text(new Date().toLocaleTimeString())
 }
+
+function getSummaryData() {
+	var requestData = {
+			"allowableEarlySec": ALLOWABLE_EARLY_MSEC/1000,
+			"allowableLateSec": ALLOWABLE_LATE_MSEC/1000
+	}
+	$.getJSON(apiUrlPrefix + "/command/vehicleAdherenceSummary", requestData, updateFooter)
+		.fail(function() {
+			console.log("Could not access /command/vehicleAdherenceSummary");
+		});
+}
+	
 
 
 /*
@@ -433,16 +446,6 @@ function getAndProcessData() {
 		.fail(function() {
 	 		console.log( "Could not access /command/activeBlocksByRouteWithoutVehicles" );
 	 	});
-	 		
-	// Add footer
-	var requestData = {
-			"allowableEarlySec": ALLOWABLE_EARLY_MSEC/1000,
-			"allowableLateSec": ALLOWABLE_LATE_MSEC/1000
-	}
-	$.getJSON(apiUrlPrefix + "/command/vehicleAdherenceSummary", requestData, updateFooter)
-		.fail(function() {
-			console.log("Could not access /command/vehicleAdherenceSummary");
-		});
 }
 
 // Called when page is ready
@@ -483,6 +486,10 @@ $(function() {
 	getAndProcessData();
 	// do not update automatically -- until performance issues solved
 // 	setInterval(getAndProcessData, 120000);
+	
+	// update summary every minute
+	getSummaryData()
+	setInterval(getSummaryData, 60000);
 });
 
 
@@ -507,6 +514,8 @@ $(function() {
   <span id="percentOnTimeValue" title="Percentage of blocks where vehicle is on time"></span>
   <span id="percentEarlyLabel" title="Percentage of blocks where vehicle is more than 1 minute early">Early:</span>
   <span id="percentEarlyValue" title="Percentage of blocks where vehicle is more than 1 minute early"></span>
+  <span id="asOfLabel" title="Time that summary information was last updated">As of:</span>
+  <span id="asOfValue" title="Time that summary information was last updated"></span>
 </div>
 </body>
 </html>
