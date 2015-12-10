@@ -146,7 +146,6 @@ public class DbConfig {
 	 * objects so can lazy load data.
 	 */
 	public void createNewGlobalSession() {
-		// FIXME test this
 		logger.info("Creating a new session for agencyId={}", agencyId);
 		HibernateUtils.clearSessionFactory();
 		globalSession = HibernateUtils.getSession(agencyId);
