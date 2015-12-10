@@ -1092,12 +1092,12 @@ public class AvlProcessor {
 	 * 
 	 * @param avlReport
 	 *            The new AVL report to be processed
-	 * @param rescursiveCall
+	 * @param recursiveCall
 	 *            Set to true if this method is calling itself. Used to make
 	 *            sure that any bug can't cause infinite recursion.
 	 */
 	private void lowLevelProcessAvlReport(AvlReport avlReport,
-			boolean rescursiveCall) {
+			boolean recursiveCall) {
 		// Determine previous state of vehicle
 		String vehicleId = avlReport.getVehicleId();
 		VehicleState vehicleState = VehicleStateManager.getInstance()
@@ -1143,7 +1143,8 @@ public class AvlProcessor {
 
 			// If the last match is actually valid then generate associated
 			// data like predictions and arrival/departure times.
-			if (vehicleState.isPredictable() && vehicleState.lastMatchIsValid()) {
+			if (vehicleState.isPredictable() 
+					&& vehicleState.lastMatchIsValid()) {
 				// Reset the counter
 				vehicleState.setBadAssignmentsInARow(0);
 
@@ -1165,7 +1166,8 @@ public class AvlProcessor {
 
 					// If finished block assignment then should remove
 					// assignment
-					boolean endOfBlockReached = handlePossibleEndOfBlock(vehicleState);
+					boolean endOfBlockReached = 
+							handlePossibleEndOfBlock(vehicleState);
 
 					// If just reached the end of the block and took the block
 					// assignment away and made the vehicle unpredictable then
@@ -1176,7 +1178,7 @@ public class AvlProcessor {
 					// when vehicle finishes one trip/block it can go into the
 					// next block right away.
 					if (endOfBlockReached) {
-						if (rescursiveCall) {
+						if (recursiveCall) {
 							// This method was already called recursively which
 							// means unassigned vehicle at end of block but then
 							// it got assigned to end of block again. This
@@ -1186,7 +1188,7 @@ public class AvlProcessor {
 							// assign vehicle again.
 							logger.error(
 									"AvlProcessor.lowLevelProcessAvlReport() "
-											+ "called recursively, which is wrong. {}",
+									+ "called recursively, which is wrong. {}",
 									vehicleState);
 						} else {
 							// Actually process AVL report again to see if can
@@ -1197,6 +1199,12 @@ public class AvlProcessor {
 				}
 			}
 
+			// If called recursively (because end of block reached) but
+			// didn't match to new assignment then don't want to store the
+			// vehicle state since already did that. 
+			if (recursiveCall && !vehicleState.isPredictable())
+				return;
+			
 			// Now that VehicleState has been updated need to update the
 			// VehicleDataCache so that when data queried for API the proper
 			// info is provided.
