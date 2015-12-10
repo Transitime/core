@@ -131,6 +131,28 @@ public class DbConfig {
 	}
 
 	/**
+	 * Returns the global session used for lazy loading data. Useful for
+	 * determining if the global session has changed.
+	 * 
+	 * @return the global session used for lazy loading of data
+	 */
+	public final Session getGlobalSession() {
+		return globalSession;
+	}
+	
+	/**
+	 * For when the session dies, which happens when db failed over or rebooted.
+	 * Idea is to create a new session that can be attached to persistent
+	 * objects so can lazy load data.
+	 */
+	public void createNewGlobalSession() {
+		// FIXME test this
+		logger.info("Creating a new session for agencyId={}", agencyId);
+		HibernateUtils.clearSessionFactory();
+		globalSession = HibernateUtils.getSession(agencyId);
+	}
+	
+	/**
 	 * Initiates the reading of the configuration data from the database. Calls
 	 * actuallyReadData() which does all the work.
 	 * <p>
