@@ -365,10 +365,8 @@ public class AvlProcessor {
 	 * 
 	 * @param vehicleState
 	 *            the previous vehicle state
-	 * @return the new match, if successful. Otherwise null.
 	 */
-	public TemporalMatch matchNewFixForPredictableVehicle(
-			VehicleState vehicleState) {
+	public void matchNewFixForPredictableVehicle(VehicleState vehicleState) {
 		// Make sure state is coherent
 		if (!vehicleState.isPredictable() || vehicleState.getMatch() == null) {
 			throw new RuntimeException("Called AvlProcessor.matchNewFix() "
@@ -398,11 +396,11 @@ public class AvlProcessor {
 		if (bestTemporalMatch == null)
 			vehicleState.incrementNumberOfBadMatches();
 
-		// If vehicle not making progress then return null
+		// If vehicle not making progress then return
 		boolean notMakingProgress = handleIfVehicleNotMakingProgress(
 				bestTemporalMatch, vehicleState);
 		if (notMakingProgress)
-			return null;
+			return;
 
 		// Record this match unless the match was null and haven't
 		// reached number of bad matches.
@@ -439,8 +437,11 @@ public class AvlProcessor {
 					vehicleState.numberOfBadMatches());
 		}
 
-		// Return results
-		return bestTemporalMatch;
+		// If schedule adherence is bad then try matching vehicle to assignment
+		// again. This can make vehicle unpredictable if can't match vehicle to 
+		// assignment.
+		if (vehicleState.isPredictable() && vehicleState.lastMatchIsValid())
+			verifyRealTimeSchAdh(vehicleState);
 	}
 
 	/**
@@ -974,9 +975,6 @@ public class AvlProcessor {
 	}
 
 	/**
-	 * Determines the real-time schedule adherence for the vehicle. To be called
-	 * after the vehicle is matched.
-	 * <p>
 	 * If schedule adherence is not within bounds then will try to match the
 	 * vehicle to the assignment again. This can be important if system is run
 	 * for a while and then paused and then started up again. Vehicle might
@@ -987,16 +985,14 @@ public class AvlProcessor {
 	 * Updates vehicleState accordingly.
 	 * 
 	 * @param vehicleState
-	 * @return
 	 */
-	private TemporalDifference checkScheduleAdherence(VehicleState vehicleState) {
+	private void verifyRealTimeSchAdh(VehicleState vehicleState) {
 		// If no schedule then there can't be real-time schedule adherence
 		if (vehicleState.getBlock() == null
 				|| vehicleState.getBlock().isNoSchedule())
-			return null;
+			return;
 		
-		logger.debug(
-				"Processing real-time schedule adherence for vehicleId={}",
+		logger.debug("Confirming real-time schedule adherence for vehicleId={}",
 				vehicleState.getVehicleId());
 
 		// Determine the schedule adherence for the vehicle
@@ -1062,20 +1058,32 @@ public class AvlProcessor {
 			// Schedule adherence not reasonable so match vehicle to assignment
 			// again.
 			matchVehicleToAssignment(vehicleState);
-
-			// Now that have matched vehicle to assignment again determine
-			// schedule adherence once more.
-			scheduleAdherence = RealTimeSchedAdhProcessor
-					.generate(vehicleState);
 		}
-
-		// Store the schedule adherence with the vehicle
-		vehicleState.setRealTimeSchedAdh(scheduleAdherence);
-
-		// Return results
-		return scheduleAdherence;
 	}
 
+	/**
+	 * Determines the real-time schedule adherence and stores the value in the
+	 * vehicleState. To be called after the vehicle is matched.
+	 * 
+	 * @param vehicleState
+	 */
+	private void determineAndSetRealTimeSchAdh(VehicleState vehicleState) {
+		// If no schedule then there can't be real-time schedule adherence
+		if (vehicleState.getBlock() == null
+				|| vehicleState.getBlock().isNoSchedule())
+			return;
+		
+		logger.debug("Determining and setting real-time schedule adherence for "
+				+ "vehicleId={}", vehicleState.getVehicleId());
+
+		// Determine the schedule adherence for the vehicle
+		TemporalDifference scheduleAdherence = RealTimeSchedAdhProcessor
+				.generate(vehicleState);
+		
+		// Store the schedule adherence with the vehicle
+		vehicleState.setRealTimeSchedAdh(scheduleAdherence);		
+	}
+	
 	/**
 	 * Processes the AVL report by matching to the assignment and generating
 	 * predictions and such. Sets VehicleState for the vehicle based on the
@@ -1143,12 +1151,9 @@ public class AvlProcessor {
 				// progress then store that in the vehicle state
 				handlePossibleVehicleDelay(vehicleState);
 				
-				// Determine and store the schedule adherence. If schedule
-				// adherence is bad then try matching vehicle to assignment
-				// again. This can make vehicle unpredictable if can't match
-				// vehicle to assignment.
-				checkScheduleAdherence(vehicleState);
-
+				// Determine and store the schedule adherence. 
+				determineAndSetRealTimeSchAdh(vehicleState);
+				
 				// Only continue processing if vehicle is still predictable
 				// since calling checkScheduleAdherence() can make it
 				// unpredictable if schedule adherence is really bad.
