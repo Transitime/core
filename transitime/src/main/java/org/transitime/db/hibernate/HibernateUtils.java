@@ -106,18 +106,27 @@ public class HibernateUtils {
 		// Add the annotated classes so that they can be used
 		AnnotatedClassesList.addAnnotatedClasses(config);
 
-		// Set the db info for the URL, user name, and password. Use values 
-		// from CoreConfig if set. If they are not set then the values will be 
-		// obtained from the hibernate.cfg.xml 
-		// config file.
-		String dbUrl = null;
-		if (DbSetupConfig.getDbHost() != null) {
+		// Set the db info for the URL, user name, and password. Uses the 
+		// property hibernate.connection.url if it is set so that everything
+		// can be overwritten in a standard way. If that property not set then
+		// uses values from DbSetupConfig if set. If they are not set then the 
+		// values will be obtained from the hibernate.cfg.xml config file.
+		String dbUrl = config.getProperty("hibernate.connection.url");
+		if (dbUrl == null || dbUrl.isEmpty()) {
 			dbUrl = "jdbc:" + DbSetupConfig.getDbType() + "://" +
 					DbSetupConfig.getDbHost() +
 					"/" + dbName;
+			
+			// If socket timeout specified then addd that to the URL
+			Integer timeout = DbSetupConfig.getSocketTimeoutSec();
+			if (timeout != null && timeout != 0) {
+				// If mysql then timeout specified in msec instead of secs
+				if (DbSetupConfig.getDbType().equals("mysql"))
+					timeout *= 1000;
+				
+				dbUrl += "?connectTimeout=" + timeout + "&socketTimeout=" + timeout;
+			}
 			config.setProperty("hibernate.connection.url", dbUrl);			
-		} else {
-			dbUrl = config.getProperty("hibernate.connection.url");
 		}
 		
 		String dbUserName = DbSetupConfig.getDbUserName();
@@ -264,5 +273,21 @@ public class HibernateUtils {
 		}
 
 	    return byteOutputStream.toByteArray().length;
+	}
+	
+		/**
+	 * Recursively finds the root cause of the throwable. Useful for complicated
+	 * inconsistent exceptions like what one gets with JDBC drivers.
+	 * 
+	 * @param t
+	 *            The throwable to get the root cause of
+	 * @return The root cause of the throwable passed in
+	 */
+	public static Throwable getRootCause(Throwable t) {
+		Throwable subcause = t.getCause();
+		if (subcause == null || subcause == t)
+			return t;
+		else
+			return getRootCause(subcause);
 	}
 }
