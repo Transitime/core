@@ -159,6 +159,10 @@ public class TravelTimesProcessorForGtfsUpdates {
 		firstPathTravelTimesMsec.add(0);
 
 		StopPath firstPath = trip.getStopPath(0);
+		if (firstPath == null) {
+		  logger.error(" trip {} is missing stop paths, skipping travel times", trip.getId());
+		  return travelTimes;
+		}
 		TravelTimesForStopPath firstPathTravelTimesForPath = 
 				new TravelTimesForStopPath(
 						activeRevisions.getConfigRev(), 
