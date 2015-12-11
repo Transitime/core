@@ -105,7 +105,6 @@ public class DbQueue<T> {
   }
   
   public boolean add(T t) {
-    // TODO Auto-generated method stub
     // If in playback mode then don't want to store the
     // derived data because it would interfere with the
     // derived data already stored when was running in real time.
@@ -352,79 +351,6 @@ public class DbQueue<T> {
 		}
 	}
 	
-	public void processBatchOfData_OLD() {
-    Session session = sessionFactory.openSession();
-    Transaction tx = session.beginTransaction();
-
-    // Create an array for holding what is being written to db. If there
-    // is an exception with one of the objects, such as a constraint violation,
-    // then can try to write the objects one at a time to make sure that the
-    // the good ones are written. This way don't lose any good data even if
-    // an exception occurs while batching data.
-    List<T> objectsForThisBatch = new ArrayList<T>(DbSetupConfig.getBatchSize());
-    
-    try {     
-      // Get the objects to be stored from the queue
-      List<T> objectsToBeStored = drain();
-      
-      objectsForThisBatch.addAll(objectsToBeStored);
-      
-      for (Object objectToBeStored : objectsToBeStored) {
-        session.save(objectToBeStored);
-      }
-      tx.commit();
-      session.close();
-    } catch (HibernateException e) {
-      Throwable cause = getRootCause(e);
-      // If it is a SQLGrammarException then also log the SQL to
-      // help in debugging.
-      String additionaInfo = e instanceof SQLGrammarException ?
-          " SQL=\"" + ((SQLGrammarException) e).getSQL() + "\"" 
-          : "";
-      logger.error(e.getClass().getSimpleName() + " for database for " +
-          "project=" + projectId + " when batch writing objects: " + 
-          cause.getMessage() + ". Will try to write each object " +
-          "from batch individually." + additionaInfo);    
-      
-      // Close session here so that can process the objects individually
-      // using a new session.
-      session.close();
-              
-      // Write each object individually so that the valid ones will be
-      // successfully written.
-      for (Object o : objectsForThisBatch) {
-        boolean shouldKeepTrying = false;
-        do {
-          try {
-            processSingleObject(o);
-            shouldKeepTrying = false;
-          } catch (HibernateException e2) {
-            // Need to know if it is a problem with the database not
-            // being accessible or if there is a problem with the SQL/data.
-            // If there is a problem accessibility of the database then
-            // want to keep trying writing the old data. But if it is
-            // a problem with the SQL/data then only want to try to write
-            // the good data from the batch a single time to make sure 
-            // all good data is written.
-            if (shouldKeepTryingBecauseConnectionException(e2)) {
-              shouldKeepTrying = true;
-              logger.error("Encountered database connection " +
-                  "exception so will sleep for {} msec and " +
-                  "will then try again.", TIME_BETWEEN_RETRIES);
-              Time.sleep(TIME_BETWEEN_RETRIES);
-            }
-            
-            // Output message on what is going on
-            Throwable cause2 = getRootCause(e2);
-            logger.error(e2.getClass().getSimpleName() + " when individually writing object " +
-                o + ". " + 
-                (shouldKeepTrying?"Will keep trying. " : "") +
-                "msg=" + cause2.getMessage()); 
-          }
-        } while (shouldKeepTrying);
-      }
-    }
-  }
   
   /**
    * This is the main method for processing data. It simply keeps on calling
@@ -496,6 +422,7 @@ public class DbQueue<T> {
    * @param e
    * @return
    */
+  @SuppressWarnings("unused")
   private Throwable getRootCause(Exception e) {
     Throwable prev =  e;
     while (true) {
