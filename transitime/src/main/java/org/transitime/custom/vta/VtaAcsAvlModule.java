@@ -40,7 +40,6 @@ public class VtaAcsAvlModule extends PollUrlAvlModule {
 
 	private static StringConfigValue feedUrl = 
 			new StringConfigValue("transitime.avl.vta.url", 
-					"http://rtihub.vta.org/currentdata/bus-prediction.txt",
 					"The URL of the ACS feed to use.");
 
 	private static final Logger logger = LoggerFactory
