@@ -78,6 +78,16 @@ public class DbSetupConfig {
 					"value to use values from hibernate config file.",
 					false); // Don't log password in configParams log file
 	
+	public static Integer getSocketTimeoutSec() {
+		return socketTimeoutSec.getValue();
+	}
+	public static IntegerConfigValue socketTimeoutSec =
+			new IntegerConfigValue("transitime.db.socketTimeoutSec", 
+					60,
+					"So can set low-level socket timeout for JDBC connections. "
+					+ "Useful for when a session dies during a request, such as "
+					+ "for when a db is rebooted.");
+	
 	/**
 	 * So that have flexibility with where the hibernate config file is.
 	 * This way can easily access it within Eclipse.
