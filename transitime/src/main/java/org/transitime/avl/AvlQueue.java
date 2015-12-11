@@ -106,7 +106,7 @@ public class AvlQueue extends ArrayBlockingQueue<Runnable> {
 			logger.warn("AVL report from queue is obsolete (there is a newer "
 					+ "one for the vehicle). Therefore ignoring this report so "
 					+ "can move on to next valid report for another vehicle. "
-					+ "From queue {}. Last AVL report in map {}. Size of queue"
+					+ "From queue {}. Last AVL report in map {}. Size of queue "
 					+ "is {}",	
 					avlReportFromQueue, lastAvlReportForVehicle, size());
 		}
