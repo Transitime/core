@@ -45,7 +45,7 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 	private static StringConfigValue feedUrl = 
 			new StringConfigValue("transitime.avl.transloc.url", 
 					"https://transloc-api-1-2.p.mashape.com/",
-					"The URL of the NextBus feed to use.");
+					"The URL of the Transloc API to use.");
 
 	private static StringConfigValue feedAgencyId =
 			new StringConfigValue("transitime.avl.transloc.agencyId",
