@@ -306,12 +306,15 @@ public class AvlReport implements Serializable {
 	 * @param vehicleId
 	 *            ID of the vehicle
 	 * @param time
-	 *            Epoch time in msec of GPS report (not when processed)
-	 * For when speed and heading are not valid. They are set to Float.NaN .
-	 * Since not yet being processed timeProcessed is set to null.
-
+	 *            Epoch time in msec of GPS report (not when processed) For when
+	 *            speed and heading are not valid. They are set to Float.NaN .
+	 *            Since not yet being processed timeProcessed is set to null.
+	 * 
 	 * @param vehicleId
 	 * @param time
+	 *            GPS time, in number of milliseconds since the standard base
+	 *            time known as "the epoch", namely January 1, 1970, 00:00:00
+	 *            GMT.
 	 * @param lat
 	 *            Latitude in decimal degrees
 	 * @param lon
