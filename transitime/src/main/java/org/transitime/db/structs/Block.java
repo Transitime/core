@@ -906,8 +906,7 @@ public final class Block implements Serializable {
 				} else {
 					// Not a socket timeout. Therefore don't know handle
 					// to handle so just log and throw the exception
-					logger.error(Markers.email(),
-							"In Block.getTrips() got JDBCException. "
+					logger.error("In Block.getTrips() got JDBCException. "
 									+ "SQL=\"{}\" msg={}", e.getSQL(), e
 									.getSQLException().getMessage(), e);
 					throw e;
