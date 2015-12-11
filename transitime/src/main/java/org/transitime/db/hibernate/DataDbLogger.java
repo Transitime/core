@@ -187,32 +187,14 @@ public class DataDbLogger {
 	  return genericQueue.add(o);
 	}
 	
+	// the predictionQueue is the largest queue, so report on it for now
 	public double queueLevel() {
-	  return (
-	      arrivalDepartureQueue.queueLevel()
-	      + avlReportQueue.queueLevel()
-	      + vehicleConfigQueue.queueLevel()
-	      + predictionQueue.queueLevel()
-	      + matchQueue.queueLevel()
-	      + predictionAccuracyQueue.queueLevel()
-	      + monitoringEventQueue.queueLevel()
-	      + vehicleEventQueue.queueLevel()
-	      + genericQueue.queueLevel()
-	      ) / 9;
+	  // TODO split this out into seperate queues
+	  return predictionAccuracyQueue.queueLevel();
 	}
 	
 	public int queueSize() {
-	  return 
-        arrivalDepartureQueue.queueSize()
-        + avlReportQueue.queueSize()
-        + vehicleConfigQueue.queueSize()
-        + predictionQueue.queueSize()
-        + matchQueue.queueSize()
-        + predictionAccuracyQueue.queueSize()
-        + monitoringEventQueue.queueSize()
-        + vehicleEventQueue.queueSize()
-        + genericQueue.queueSize()
-	      ;
+	  return predictionAccuracyQueue.queueSize();
 	}
 	
 	/**
