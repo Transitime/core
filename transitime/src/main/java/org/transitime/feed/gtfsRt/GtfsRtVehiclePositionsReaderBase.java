@@ -60,21 +60,28 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 	}
 	
 	/**
-	 * Returns the vehicleID. Returns null if no VehicleDescription associated
-	 * with the vehicle or if no ID associated with the VehicleDescription.
+	 * Returns the vehicleID. If vehicle ID not available then returns vehicle label. Returns null if no VehicleDescription associated
+	 * with the vehicle or if no ID or label associated with the VehicleDescription.
 	 * 
 	 * @param vehicle
-	 * @return vehicle ID or null if there isn't one
+	 * @return vehicle ID or label or null if there isn't one
 	 */
 	private static String getVehicleId(VehiclePosition vehicle) {
 		if (!vehicle.hasVehicle()) {
 			return null;
 		}
 		VehicleDescriptor desc = vehicle.getVehicle();
-		if (!desc.hasId()) {
-			return null;
-		}
-		return desc.getId();
+		
+		// Return vehicle ID if there is one
+		if (desc.hasId())
+			return desc.getId();
+		
+		// No vehicle ID so return vehicle label if there is one
+		if (desc.hasLabel())
+			return desc.getLabel();
+
+		// No ID nor label so return null
+		return null;
 	}
 
 	/**
