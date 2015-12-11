@@ -1,5 +1,7 @@
 package org.transitime.db.hibernate;
 
+import java.net.SocketTimeoutException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.logging.Markers;
+import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 import org.transitime.utils.threading.NamedThreadFactory;
 
@@ -213,7 +216,143 @@ public class DbQueue<T> {
    * commit is done. Therefore the need here isn't true Hibernate batch
    * processing. Instead, need to use a transaction for each batch.
    */
-  public void processBatchOfData() {
+  	public void processBatchOfData() {
+		// Create an array for holding what is being written to db. If there
+		// is an exception with one of the objects, such as a constraint violation,
+		// then can try to write the objects one at a time to make sure that the
+		// the good ones are written. This way don't lose any good data even if
+		// an exception occurs while batching data.
+		List<Object> objectsForThisBatch = new ArrayList<Object>(DbSetupConfig.getBatchSize());
+		
+		Transaction tx = null;
+		Session session = null;
+		
+		try {			
+			session = sessionFactory.openSession();
+			tx = session.beginTransaction();			
+
+      // Get the objects to be stored from the queue
+      List<T> objectsToBeStored = drain();
+      
+      objectsForThisBatch.addAll(objectsToBeStored);
+			for (Object objectToBeStored : objectsForThisBatch) {				
+				// Write the data to the session. This doesn't yet
+				// actually write the data to the db though. That is only
+				// done when the session is flushed or committed.
+				logger.debug("DataDbLogger batch saving object={}", 
+						objectToBeStored);
+				session.save(objectToBeStored);
+			}
+			
+			// Sometimes useful for debugging via the console
+			//System.err.println(new Date() + " Committing " 
+			//		+ objectsForThisBatch.size() + " objects. " + queueSize() 
+			//		+ " objects still in queue.");			
+			logger.debug("Committing {} objects. {} objects still in queue.", 
+					objectsForThisBatch.size(), queueSize());			
+			IntervalTimer timer = new IntervalTimer();
+
+			// Actually do the commit
+			tx.commit();
+			
+			// Sometimes useful for debugging via the console
+			//System.err.println(new Date() + " Done committing. Took " 
+			//		+ timer.elapsedMsec() + " msec");
+			logger.debug("Done committing. Took {} msec", timer.elapsedMsec());
+			
+			session.close();
+		} catch (HibernateException e) {
+			e.printStackTrace();
+			
+			// If there was a connection problem then create a whole session
+			// factory so that get new connections.
+			Throwable rootCause = HibernateUtils.getRootCause(e);
+			
+			if (rootCause instanceof SocketTimeoutException
+					|| (rootCause instanceof SQLException 
+							&& rootCause.getMessage().contains("statement closed"))) {
+				logger.error(Markers.email(),
+						"Had a connection problem to the database. Likely "
+						+ "means that the db was rebooted or that the "
+						+ "connection to it was lost. Therefore creating a new "
+						+ "SessionFactory so get new connections.");
+				HibernateUtils.clearSessionFactory();
+				sessionFactory = HibernateUtils.getSessionFactory(projectId);
+			} else {
+				// Rollback the transaction since it likely was not committed.
+				// Otherwise can get an error when using Postgres "ERROR:
+				// current transaction is aborted, commands ignored until end of
+				// transaction block".
+				try {
+					if (tx != null)
+						tx.rollback();
+				} catch (HibernateException e2) {
+					logger.error(
+							"Error rolling back transaction after processing "
+									+ "batch of data via DataDbLogger.", e2);
+				}
+
+				// Close session here so that can process the objects
+				// individually
+				// using a new session.
+				try {
+					if (session != null)
+						session.close();
+				} catch (HibernateException e2) {
+					logger.error("Error closing session after processing "
+							+ "batch of data via DataDbLogger.", e2);
+				}
+			
+				// If it is a SQLGrammarException then also log the SQL to
+				// help in debugging.
+				String additionaInfo = e instanceof SQLGrammarException ? 
+						" SQL=\"" + ((SQLGrammarException) e).getSQL() + "\""
+						: "";
+				Throwable cause = HibernateUtils.getRootCause(e);
+				logger.error("{} for database for project={} when batch writing "
+						+ "objects: {}. Will try to write each object "
+						+ "from batch individually. {}", 
+						e.getClass().getSimpleName(), projectId,
+						cause.getMessage(), additionaInfo);
+			}
+			
+			// Write each object individually so that the valid ones will be
+			// successfully written.
+			for (Object o : objectsForThisBatch) {
+				boolean shouldKeepTrying = false;
+				do {
+					try {
+						processSingleObject(o);
+						shouldKeepTrying = false;
+					} catch (HibernateException e2) {
+						// Need to know if it is a problem with the database not
+						// being accessible or if there is a problem with the SQL/data.
+						// If there is a problem accessibility of the database then
+						// want to keep trying writing the old data. But if it is
+						// a problem with the SQL/data then only want to try to write
+						// the good data from the batch a single time to make sure 
+						// all good data is written.
+						if (shouldKeepTryingBecauseConnectionException(e2)) {
+							shouldKeepTrying = true;
+							logger.error("Encountered database connection " +
+									"exception so will sleep for {} msec and " +
+									"will then try again.", TIME_BETWEEN_RETRIES);
+							Time.sleep(TIME_BETWEEN_RETRIES);
+						}
+						
+						// Output message on what is going on
+						Throwable cause2 = HibernateUtils.getRootCause(e2);
+						logger.error(e2.getClass().getSimpleName() + " when individually writing object " +
+								o + ". " + 
+								(shouldKeepTrying?"Will keep trying. " : "") +
+								"msg=" + cause2.getMessage()); 
+					}
+				} while (shouldKeepTrying);
+			}
+		}
+	}
+	
+	public void processBatchOfData_OLD() {
     Session session = sessionFactory.openSession();
     Transaction tx = session.beginTransaction();
 
