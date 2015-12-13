@@ -282,7 +282,7 @@ public class Stop implements Serializable {
 	}
 
 	/**
-	 * @return the code
+	 * @return the code. Null if not set.
 	 */
 	public Integer getCode() {
 		return code;
