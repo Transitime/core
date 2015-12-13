@@ -510,7 +510,7 @@ public class TransitimeApi {
 				routeStopsList.add(routeStop);				
 			}
 			
-			// Actualy get the predictions via IPC
+			// Actually get the predictions via IPC
 			List<IpcPredictionsForRouteStopDest> predictions =
 					inter.get(routeStopsList, numberPredictions);
 
