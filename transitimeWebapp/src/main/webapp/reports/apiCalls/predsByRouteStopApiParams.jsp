@@ -42,7 +42,7 @@
    <jsp:include page="../params/routeSingle.jsp" />
    
    <div class="param">
-    <label for="stop">Stop ID:</label>
+    <label for="stop">Stop ID or code:</label>
     <input type="text" id="stopId" size="10" />
    </div>
    

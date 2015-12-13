@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +88,9 @@ public class DbConfig {
 	private Map<String, Route> routesByRouteIdMap;
 	// Keyed on routeShortName
 	private Map<String, Route> routesByRouteShortNameMap;
+	// Keyed on stopiD
+	private Map<String, Collection<Route>> routesListByStopIdMap;
+	
 	// Keyed on routeId
 	private Map<String, List<TripPattern>> tripPatternsByRouteMap;
 	// For when reading in all trips from db. Keyed on tripId
@@ -107,10 +111,11 @@ public class DbConfig {
 	private List<Frequency> frequencies;
 	private List<Transfer> transfers;
 
-	// Seems that stops not really needed because already in stopPaths. Unless
-	// trying to determine nearest stops.
+	// Keyed by stop_id.
 	private Map<String, Stop> stopsMap;
-
+	// Keyed by stop_code
+	private Map<Integer, Stop> stopsByStopCode;
+	
 	// Remember the session. This is a bit odd because usually
 	// close sessions but want to keep it open so can do lazy loading
 	// and so that can read in TripPatterns later using the same session.
@@ -316,7 +321,7 @@ public class DbConfig {
 	 * 
 	 * @param stopsList
 	 *            To be converted
-	 * @return The map
+	 * @return The map, keyed on stop_id
 	 */
 	private static Map<String, Stop> putStopsIntoMap(List<Stop> stopsList) {
 		Map<String, Stop> map = new HashMap<String, Stop>();
@@ -326,6 +331,69 @@ public class DbConfig {
 		return map;
 	}
 
+	/**
+	 * Converts the stops list into a map keyed by stop code.
+	 * 
+	 * @param stopsList
+	 *            To be converted
+	 * @return The map, keyed on stop_code
+	 */
+	private static Map<Integer, Stop> putStopsIntoMapByStopCode(List<Stop> stopsList) {
+		Map<Integer, Stop> map = new HashMap<Integer, Stop>();
+		for (Stop stop : stopsList) {
+			Integer stopCode = stop.getCode();
+			if (stopCode != null)
+				map.put(stopCode, stop);
+		}
+		return map;
+	}
+
+	/**
+	 * Returns the stop IDs for the specified route. Stop IDs can be included
+	 * multiple times.
+	 * 
+	 * @param routeId
+	 * @return collection of stop IDs for route
+	 */
+	private Collection<String> getStopIdsForRoute(String routeId) {
+		Collection<String> stopIds = new ArrayList<String>(100);
+		
+		List<TripPattern> tripPatternsForRoute = tripPatternsByRouteMap.get(routeId);
+		for (TripPattern tripPattern : tripPatternsForRoute) {
+			for (String stopId : tripPattern.getStopIds()) {
+				stopIds.add(stopId);
+			}
+		}
+		
+		return stopIds;
+	}
+	
+	/**
+	 * Returns map, keyed on stopId, or collection of routes. Allows one to
+	 * determine all routes associated with a stop.
+	 * 
+	 * @param routes
+	 * @return map, keyed on stopId, or collection of routes
+	 */
+	private Map<String, Collection<Route>> putRoutesIntoMapByStopId(
+			List<Route> routes) {
+		Map<String, Collection<Route>> map =
+				new HashMap<String, Collection<Route>>();
+		for (Route route : routes) {
+			for (String stopId : getStopIdsForRoute(route.getId())) {
+				Collection<Route> routesForStop = map.get(stopId);
+				if (routesForStop == null) {
+					routesForStop = new HashSet<Route>();
+					map.put(stopId, routesForStop);
+				}
+				routesForStop.add(route);
+			}
+		}
+
+		// Return the created map
+		return map;
+	}
+	
 	/**
 	 * Converts trip patterns into map keyed on route ID
 	 * 
@@ -350,6 +418,30 @@ public class DbConfig {
 	}
 
 	/**
+	 * Reads in trips patterns from db and puts them into a map
+	 * 
+	 * @return trip patterns map, keyed by route ID
+	 */
+	private Map<String, List<TripPattern>> putTripPatternsInfoRouteMap() {
+			IntervalTimer timer = new IntervalTimer();
+			logger.debug("About to load trip patterns for all routes...");
+
+			// Use the global session so that don't need to read in any
+			// trip patterns that have already been read in as part of
+			// reading in block assignments. This makes reading of the
+			// trip pattern data much faster.
+			List<TripPattern> tripPatterns =
+					TripPattern.getTripPatterns(globalSession, configRev);
+			Map<String, List<TripPattern>> theTripPatternsByRouteMap = 
+					putTripPatternsIntoMap(tripPatterns);
+
+			logger.debug("Reading trip patterns for all routes took {} msec",
+					timer.elapsedMsec());
+			
+			return theTripPatternsByRouteMap;
+	}
+	
+	/**
 	 * Returns the list of trip patterns associated with the specified route.
 	 * Reads the trip patterns from the database and stores them in cache so
 	 * that subsequent calls get them directly from the cache. The first time
@@ -362,25 +454,9 @@ public class DbConfig {
 	public List<TripPattern> getTripPatternsForRoute(String routeId) {
 		// If haven't read in the trip pattern data yet, do so now and cache it
 		if (tripPatternsByRouteMap == null) {
-			IntervalTimer timer = new IntervalTimer();
-
-			// Need to sync such that block data, which includes trip
-			// pattern data, is only read serially (not read simultaneously
-			// by multiple threads). Otherwise get a "force initialize loading
-			// collection" error.
-			synchronized (Block.getLazyLoadingSyncObject()) {
-				logger.debug("About to load trip patterns...");
-
-				// Use the global session so that don't need to read in any
-				// trip patterns that have already been read in as part of
-				// reading in block assignments. This makes reading of the
-				// trip pattern data much faster.
-				List<TripPattern> tripPatterns =
-						TripPattern.getTripPatterns(globalSession, configRev);
-				tripPatternsByRouteMap = putTripPatternsIntoMap(tripPatterns);
-			}
-			logger.debug("Reading trip patterns took {} msec",
-					timer.elapsedMsec());
+			logger.error("tripPatternsByRouteMap not set when "
+					+ "getTripPatternsForRoute() called. Exiting!");
+			System.exit(-1);
 		}
 
 		// Return cached trip pattern data
@@ -459,8 +535,7 @@ public class DbConfig {
 			// by multiple threads). Otherwise get a "force initialize loading
 			// collection" error.
 			synchronized (Block.getLazyLoadingSyncObject()) {
-				trip =
-						Trip.getTripByShortName(globalSession, configRev,
+				trip = Trip.getTripByShortName(globalSession, configRev,
 								tripShortName);
 			}
 			individualTripsByShortNameMap.put(tripShortName, trip);
@@ -556,9 +631,13 @@ public class DbConfig {
 		routesByRouteShortNameMap = putRoutesIntoMapByRouteShortName(routes);
 		logger.debug("Reading routes took {} msec", timer.elapsedMsec());
 
+		tripPatternsByRouteMap = putTripPatternsInfoRouteMap();
+		
 		timer = new IntervalTimer();
 		List<Stop> stopsList = Stop.getStops(globalSession, configRev);
 		stopsMap = putStopsIntoMap(stopsList);
+		stopsByStopCode = putStopsIntoMapByStopCode(stopsList);
+		routesListByStopIdMap = putRoutesIntoMapByStopId(routes);
 		logger.debug("Reading stops took {} msec", timer.elapsedMsec());
 
 		timer = new IntervalTimer();
@@ -724,12 +803,32 @@ public class DbConfig {
 	 * Returns the Stop with the specified stopId.
 	 * 
 	 * @param stopId
-	 * @return
+	 * @return The stop, or null if no such stop
 	 */
 	public Stop getStop(String stopId) {
 		return stopsMap.get(stopId);
 	}
 
+	/**
+	 * Returns the Stop with the specified stopCode.
+	 * 
+	 * @param stopCode
+	 * @return The stop, or null if no such stop
+	 */
+	public Stop getStop(Integer stopCode) {
+		return stopsByStopCode.get(stopsByStopCode);
+	}
+	
+	/**
+	 * Returns collection of routes that use the specified stop.
+	 * 
+	 * @param stopId
+	 * @return collection of routes for the stop
+	 */
+	public Collection<Route> getRoutesForStop(String stopId) {
+		return routesListByStopIdMap.get(stopId);
+	}
+	
 	/**
 	 * Returns list of all calendars
 	 * @return calendars

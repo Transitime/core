@@ -443,12 +443,19 @@ public class TransitimeApi {
 	 *            StdParametersBean that gets the standard parameters from the
 	 *            URI, query string, and headers.
 	 * @param routeStopStrs
-	 *            List of route/stops. The route specifier is the route id or
-	 *            the route short name. It is often best to use route short name
-	 *            for consistency across configuration changes (route ID is not
-	 *            consistent for many agencies). Each route/stop is separated by
-	 *            the "|" character so for example the query string could have
-	 *            "rs=43|2029&rs=43|3029"
+	 *            List of route/stops to return predictions for. If route not
+	 *            specified then data will be returned for all routes for the
+	 *            specified stop. The route specifier is the route id or the
+	 *            route short name. It is often best to use route short name for
+	 *            consistency across configuration changes (route ID is not
+	 *            consistent for many agencies). The stop specified can either
+	 *            be the stop ID or the stop code. Each route/stop is separated
+	 *            by the "|" character so for example the query string could
+	 *            have "rs=43|2029&rs=43|3029"
+	 * @param stopStrs
+	 *            List of stops to return predictions for. Provides predictions
+	 *            for all routes that serve the stop. Can use either stop ID or
+	 *            stop code. Can specify multiple stops.
 	 * @param numberPredictions
 	 *            Maximum number of predictions to return. Default value is 3.
 	 * @return
@@ -462,6 +469,7 @@ public class TransitimeApi {
 			getPredictions(
 					@BeanParam StandardParameters stdParameters,
 					@QueryParam(value = "rs") List<String> routeStopStrs,
+					@QueryParam(value = "s") List<String> stopStrs,
 					@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
 					throws WebApplicationException {
 		// Make sure request is valid
@@ -472,16 +480,37 @@ public class TransitimeApi {
 			PredictionsInterface inter =
 					stdParameters.getPredictionsInterface();
 
-			// Get predictions by route/stops
+			// Create list of route/stops that should get predictions for
 			List<RouteStop> routeStopsList = new ArrayList<RouteStop>();
 			for (String routeStopStr : routeStopStrs) {
 				// Each route/stop is specified as a single string using "\"
 				// as a divider (e.g. "routeId|stopId")
 				String routeStopParams[] = routeStopStr.split("\\|");
+				String routeIdOrShortName;
+				String stopIdOrCode;
+				if (routeStopParams.length == 1) {
+					// Just stop specified
+					routeIdOrShortName = null;
+					stopIdOrCode = routeStopParams[0];
+				} else {
+					// Both route and stop specified
+					routeIdOrShortName = routeStopParams[0];
+					stopIdOrCode = routeStopParams[1];
+				}
 				RouteStop routeStop =
-						new RouteStop(routeStopParams[0], routeStopParams[1]);
+						new RouteStop(routeIdOrShortName, stopIdOrCode);
 				routeStopsList.add(routeStop);
 			}
+			
+			// Add to list the stops that should get predictions for
+			for (String stopStr : stopStrs) {
+				// Use null for route identifier so get predictions for all 
+				// routes for the stop
+				RouteStop routeStop = new RouteStop(null, stopStr);
+				routeStopsList.add(routeStop);				
+			}
+			
+			// Actualy get the predictions via IPC
 			List<IpcPredictionsForRouteStopDest> predictions =
 					inter.get(routeStopsList, numberPredictions);
 

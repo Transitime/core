@@ -143,8 +143,11 @@ function predictionCallback(preds, status) {
 	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStopPreds.routeShortName, routeStopPreds.stopId);
 
 	// Add route and stop info
+	var stopName = routeStopPreds.stopName;
+	if (routeStopPreds.stopCode)
+		stopName += " (" + routeStopPreds.stopCode + ")";
 	var content = '<b>Route:</b> ' + routeStopPreds.routeName + '<br/>' 
-		+ '<b>Stop:</b> ' + routeStopPreds.stopName + '<br/>';
+		+ '<b>Stop:</b> ' + stopName + '<br/>';
 	if (verbose)
 		content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 		

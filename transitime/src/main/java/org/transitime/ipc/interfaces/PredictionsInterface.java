@@ -37,26 +37,29 @@ public interface PredictionsInterface extends Remote {
 	 */
 	public static class RouteStop implements Serializable{
 		private final String routeIdOrShortName;
-		private final String stopId;
+		private final String stopIdOrCode;
 		
 		private static final long serialVersionUID = -4558270897399749207L;
 
 		public RouteStop(String routeIdOrShortName, String stopId) {
 			this.routeIdOrShortName = routeIdOrShortName;
-			this.stopId = stopId;
+			this.stopIdOrCode = stopId;
 		}
 
 		public String getRouteIdOrShortName() {
 			return routeIdOrShortName;
 		}
 
-		public String getStopId() {
-			return stopId;
+		public String getStopIdOrCode() {
+			return stopIdOrCode;
 		}
 
 		@Override
 		public String toString() {
-			return "RouteStop [routeIdOrShortName=" + routeIdOrShortName + ", stopId=" + stopId + "]";
+			return "RouteStop [" 
+					+ "routeIdOrShortName=" + routeIdOrShortName 
+					+ ", stopIdOrCode=" + stopIdOrCode 
+					+ "]";
 		}
 	}
 	
