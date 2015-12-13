@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
@@ -230,6 +231,12 @@ public class GtfsData {
 			+ "if want to filter out two names. The default value "
 			+ "of null causes all trips to be included.");
 	private static Pattern tripIdFilterRegExPattern = null;
+	
+	private static IntegerConfigValue stopCodeBaseValue = 
+			new IntegerConfigValue("transitime.gtfs.stopCodeBaseValue", 
+					"If agency doesn't specify stop codes but simply wants to "
+					+ "have them be a based number plus the stop ID then this "
+					+ "parameter can specify the base value. ");
 	
 	// Logging
 	public static final Logger logger = 
@@ -607,7 +614,9 @@ public class GtfsData {
 		// while iterating across the hash map.
 		stopsMap = new ConcurrentHashMap<String, Stop>(gtfsStops.size());
 		for (GtfsStop gtfsStop : gtfsStopsMap.values()) {
-			Stop stop = new Stop(revs.getConfigRev(), gtfsStop, titleFormatter);
+			Stop stop =
+					new Stop(revs.getConfigRev(), gtfsStop,
+							stopCodeBaseValue.getValue(), titleFormatter);
 			stopsMap.put(stop.getId(), stop);
 		}
 		

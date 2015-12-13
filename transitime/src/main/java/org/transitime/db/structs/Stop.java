@@ -92,9 +92,14 @@ public class Stop implements Serializable {
 	 * 
 	 * @param configRev
 	 * @param gtfsStop
+	 * @param stopCodeBaseValue
+	 *            For when stop code not specified in GTFS. If this value is set
+	 *            but stop code not configured then will sets the stop code to
+	 *            the stop ID plus the this stopCodeBaseValue.
 	 * @param titleFormatter
 	 */
-	public Stop(int configRev, GtfsStop gtfsStop, TitleFormatter titleFormatter) {
+	public Stop(int configRev, GtfsStop gtfsStop, Integer stopCodeBaseValue,
+			TitleFormatter titleFormatter) {
 		// Because will be writing data to sandbox rev in the db
 		this.configRev = configRev;
 		
@@ -107,6 +112,8 @@ public class Stop implements Serializable {
 			// stop_code was not set in GTFS data so try using stop_id
 			try {
 				stopCode = Integer.parseInt(id);
+				if (stopCodeBaseValue != null)
+					stopCode += stopCodeBaseValue;
 			} catch (NumberFormatException e) {
 				// Well, we tried using the stopId but it was not numeric.
 				// Therefore the stopCode will simply be null.
