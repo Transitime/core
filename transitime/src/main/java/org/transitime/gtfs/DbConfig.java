@@ -816,7 +816,7 @@ public class DbConfig {
 	 * @return The stop, or null if no such stop
 	 */
 	public Stop getStop(Integer stopCode) {
-		return stopsByStopCode.get(stopsByStopCode);
+		return stopsByStopCode.get(stopCode);
 	}
 	
 	/**
