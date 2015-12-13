@@ -332,7 +332,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			distanceToStop = stream.readDouble();
 			predictionsForRouteStop = (List<IpcPrediction>) stream.readObject();
 			
-			if (currentSerializationVersion >=1)
+			if (readVersion >=1)
 				stopCode = stream.readInt();
 		}
 
