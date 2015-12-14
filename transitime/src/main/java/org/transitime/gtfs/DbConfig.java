@@ -97,9 +97,10 @@ public class DbConfig {
 	private Map<String, Trip> tripsMap;
 	// For trips that have been read in individually. Keyed on tripId.
 	private Map<String, Trip> individualTripsMap = new HashMap<String, Trip>();
-	// For trips that have been read in individually. Keyed on trip short name
-	private Map<String, Trip> individualTripsByShortNameMap =
-			new HashMap<String, Trip>();
+	// For trips that have been read in individually. Keyed on trip short name.
+	// Contains
+	private Map<String, List<Trip>> individualTripsByShortNameMap =
+			new HashMap<String, List<Trip>>();
 
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
@@ -519,6 +520,30 @@ public class DbConfig {
 	}
 
 	/**
+	 * Looks through the trips passed in and returns the one that has
+	 * a service ID that is currently valid.
+	 * 
+	 * @param trips
+	 * @return trip whose service ID is currently valid
+	 */
+	private static Trip getTripForCurrentService(List<Trip> trips) {
+		Date now = Core.getInstance().getSystemDate();
+		Collection<String> currentServiceIds = 
+				Core.getInstance().getServiceUtils().getServiceIds(now);
+		for (Trip trip : trips) {
+			for (String serviceId : currentServiceIds) {
+				if (trip.getServiceId().equals(serviceId)) {
+					// Found a service ID match so return this trip 
+					return trip;
+				}
+			}
+		}
+		
+		// No such trip is currently active
+		return null;
+	}
+	
+	/**
 	 * For more quickly getting a trip. If trip not already read in yet it only
 	 * reads in the specific trip from the db, not all trips like getTrips().
 	 * 
@@ -526,22 +551,33 @@ public class DbConfig {
 	 * @return
 	 */
 	public Trip getTripUsingTripShortName(String tripShortName) {
-		Trip trip = individualTripsByShortNameMap.get(tripShortName);
-
-		// If trip not read in yet, do so now
-		if (trip == null) {
-			// Need to sync such that block data, which includes trip
-			// pattern data, is only read serially (not read simultaneously
-			// by multiple threads). Otherwise get a "force initialize loading
-			// collection" error.
-			synchronized (Block.getLazyLoadingSyncObject()) {
-				trip = Trip.getTripByShortName(globalSession, configRev,
-								tripShortName);
-			}
-			individualTripsByShortNameMap.put(tripShortName, trip);
+		// Find trip with the tripShortName with a currently active service ID
+		// from the map. If found, return it.
+		List<Trip> trips = individualTripsByShortNameMap.get(tripShortName);
+		if (trips != null) {
+			Trip trip = getTripForCurrentService(trips);
+			if (trip != null)
+				return trip;
+			else
+				// Trips for the tripShortName already read in but none valid
+				// for the current service IDs so return null
+				return null;
 		}
 
-		return trip;
+		// Trips for the short name not read in yet, do so now
+		// Need to sync such that block data, which includes trip
+		// pattern data, is only read serially (not read simultaneously
+		// by multiple threads). Otherwise get a "force initialize loading
+		// collection" error.
+		synchronized (Block.getLazyLoadingSyncObject()) {
+			trips =	Trip.getTripByShortName(globalSession, configRev,
+							tripShortName);
+		}
+
+		// Add the newly read trips to the map
+		individualTripsByShortNameMap.put(tripShortName, trips);
+
+		return getTripForCurrentService(trips);
 	}
 
 	/**

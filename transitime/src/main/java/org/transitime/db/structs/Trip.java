@@ -18,8 +18,6 @@ package org.transitime.db.structs;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -509,16 +507,17 @@ public class Trip implements Lifecycle, Serializable {
 	}
 
 	/**
-	 * Returns specified Trip object for the specified configRev and
-	 * tripShortName.
+	 * Returns list of Trip objects for the specified configRev and
+	 * tripShortName. There can be multiple trips for a tripShortName since can
+	 * have multiple service IDs configured. Therefore a list must be returned.
 	 * 
 	 * @param session
 	 * @param configRev
 	 * @param tripShortName
-	 * @return The Trip or null if no such trip
+	 * @return list of trips for specified configRev and tripShortName
 	 * @throws HibernateException
 	 */
-	public static Trip getTripByShortName(Session session, int configRev,
+	public static List<Trip> getTripByShortName(Session session, int configRev,
 			String tripShortName) throws HibernateException {
 		// Setup the query
 		String hql = "FROM Trip " +
@@ -532,33 +531,7 @@ public class Trip implements Lifecycle, Serializable {
 		@SuppressWarnings("unchecked")
 		List<Trip> trips = query.list();
 		
-		// If no results return null
-		if (trips.size() == 0)
-			return null;
-
-		// If only a single trip matched then assume that the service ID is 
-		// correct so return it. This should usually be fine, and it means
-		// then don't need to determine current service IDs, which is
-		// somewhat expensive.
-		if (trips.size() == 1) 
-			return trips.get(0);
-		
-		// There are results so use the Trip that corresponds to the current 
-		// service ID.
-		Date now = Core.getInstance().getSystemDate();
-		Collection<String> currentServiceIds = 
-				Core.getInstance().getServiceUtils().getServiceIds(now);
-		for (Trip trip : trips) {
-			for (String serviceId : currentServiceIds) {
-				if (trip.getServiceId().equals(serviceId)) {
-					// Found a service ID match so return this trip 
-					return trip;
-				}
-			}
-		}
-		
-		// Didn't find a trip that matched a current service ID so return null
-		return null;
+		return trips;
 	}
 	
 	/**
