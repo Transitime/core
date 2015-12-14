@@ -189,12 +189,12 @@ public class DataDbLogger {
 	
 	// the predictionQueue is the largest queue, so report on it for now
 	public double queueLevel() {
-	  // TODO split this out into seperate queues
-	  return predictionAccuracyQueue.queueLevel();
+	  // TODO split this out into separate queues
+	  return predictionQueue.queueLevel();
 	}
 	
 	public int queueSize() {
-	  return predictionAccuracyQueue.queueSize();
+	  return predictionQueue.queueSize();
 	}
 	
 	/**
