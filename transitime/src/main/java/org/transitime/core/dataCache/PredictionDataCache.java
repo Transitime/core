@@ -142,12 +142,21 @@ public class PredictionDataCache {
 		// Determine the routeShortName so can be used for maps in
 		// the low-level methods of this class. Can be null to specify
 		// getting data for all routes.
-		String routeShortName;
-		Route route = dbConfig.getRouteById(routeIdOrShortName);
-		if (route != null)
-			routeShortName = route.getShortName();
-		else {
-			routeShortName = routeIdOrShortName;
+		String routeShortName = routeIdOrShortName;
+		if (routeIdOrShortName != null) {
+			// See if it is route ID or a short name
+			Route route = dbConfig.getRouteById(routeIdOrShortName);
+			if (route != null)
+				// routeIdOrShortName was route ID so get the short name
+				routeShortName = route.getShortName();
+			else {
+				// A routeIdOrShortName was specified but is wasn't a route ID
+				if (dbConfig.getRouteByShortName(routeIdOrShortName) == null) {
+					// That route doesn't exist so error
+					throw new IllegalArgumentException("Route "
+							+ routeIdOrShortName + " not valid");
+				}
+			}
 		}
 		
 		// Determine the stop ID since can pass in stopIdOrCode
@@ -156,10 +165,17 @@ public class PredictionDataCache {
 			try {
 				Integer stopCode = Integer.parseInt(stopIdOrCode);
 				Stop stop = Core.getInstance().getDbConfig().getStop(stopCode);
+				
+				// If no such stop then complain
+				if (stop == null)
+					throw new IllegalArgumentException("Stop " + stopIdOrCode 
+							+ " not valid");
+				
 				stopId = stop.getId();
 			} catch (NumberFormatException e) {
 				// The stopIdOrCode was not an integer so give up
-				return new ArrayList<IpcPredictionsForRouteStopDest>();
+				throw new IllegalArgumentException("Stop " + stopIdOrCode 
+						+ " not a valid integer");
 			}
 		}
 		
