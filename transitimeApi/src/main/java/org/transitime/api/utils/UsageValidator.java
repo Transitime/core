@@ -23,6 +23,8 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.transitime.config.IntegerConfigValue;
+
 /**
  * For making sure that use of API doesn't exceed limits. Intended to deal with
  * bad applications that are requesting too much data or a denial of service
@@ -42,9 +44,15 @@ import javax.ws.rs.WebApplicationException;
 public class UsageValidator {
 
 	// The limits of requests per IP address
-	private static int MAX_REQUESTS = 100;
-	private static int MAX_REQUESTS_TIME_MSEC = 10000;
-
+	
+	private static IntegerConfigValue maxRequests = new IntegerConfigValue(
+			"transitime.usage.maxRequests", 2000,
+			"Maximum number of requests to allow within the specified time frame");
+	
+	private static IntegerConfigValue maxRequestsTimeMsec = new IntegerConfigValue(
+			"transitime.usage.maxRequestsTimeMsec", 1000,
+			"Amount of time in msec before max requests count limit is reset");
+	
 	// This is a singleton class
 	private static UsageValidator singleton = new UsageValidator();
 
@@ -98,15 +106,15 @@ public class UsageValidator {
 
 			// If number of requests already reached see if got too many
 			// within the time limit.
-			if (accessTimes.size() == MAX_REQUESTS) {
+			if (accessTimes.size() == maxRequests.getValue()) {
 				Long oldestAccessTime = accessTimes.getLast();
-				if (oldestAccessTime > currentTime - MAX_REQUESTS_TIME_MSEC) {
+				if (oldestAccessTime > currentTime - maxRequestsTimeMsec.getValue()) {
 					// Note that using special HTTP response 429, which is for
 					// Too Many Requests. See
 					// http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 					throw WebUtils.badRequestException(429, "Exceeded "
-							+ MAX_REQUESTS + " requests within "
-							+ MAX_REQUESTS_TIME_MSEC + " msec for IP address "
+							+ maxRequests.getValue() + " requests within "
+							+ maxRequestsTimeMsec.getValue() + " msec for IP address "
 							+ requestIpAddress);
 				}
 			}
@@ -115,7 +123,7 @@ public class UsageValidator {
 			accessTimes.addFirst(currentTime);
 
 			// Clean up queue of old requests that are beyond the time limit
-			while (accessTimes.getLast() < currentTime - MAX_REQUESTS_TIME_MSEC)
+			while (accessTimes.getLast() < currentTime - maxRequestsTimeMsec.getValue())
 				accessTimes.removeLast();
 		}
 	}
