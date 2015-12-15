@@ -150,6 +150,9 @@ public class CloudwatchService {
     }
 
     private void publishMetric(String metricName, Double metricValue){
+      if (metricName == null || metricValue == null)
+        return ;
+      
         MetricDatum datum = new MetricDatum().
                 withMetricName(metricName).
                 withTimestamp(new Date()).
@@ -171,7 +174,7 @@ public class CloudwatchService {
      * @param metricValue
      */
     private synchronized void publishMetricAsPercent(String metricName, Double metricValue){
-        if(cloudWatch == null || !enabled)
+        if(cloudWatch == null || !enabled || metricName == null || metricValue == null)
           return;
 
         MetricDatum datum = new MetricDatum().
@@ -215,40 +218,44 @@ public class CloudwatchService {
                 Date now = new Date();
                 for (String metricName : metricMap.keySet()) {
                     MetricDefinition metricDefinition = metricMap.get(metricName);
-                    if(metricDefinition == null || metricDefinition.reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE)
+                    try {
+                      if(metricDefinition == null || metricDefinition.reportingIntervalTimeUnit == ReportingIntervalTimeUnit.IMMEDIATE)
+                          continue;
+                      if (metricDefinition.lastUpdate == null)
                         continue;
-                    if (metricDefinition.lastUpdate == null)
-                      continue;
-                    long dateDiff = now.getTime() - metricDefinition.lastUpdate.getTime();
-                    Double metric = null;
-                    if (dateDiff >= metricDefinition.reportingIntervalInMillis) {
-                        if (metricDefinition.metricType == MetricType.AVERAGE) {
-                            Collection<Double> dataCopy = new ArrayList<Double>(metricDefinition.data);
-                            if (dataCopy.isEmpty()) continue;
-                            metric = MathUtils.average(dataCopy);
-                        } else if (metricDefinition.metricType == MetricType.COUNT) {
-                            metric = new Double(metricDefinition.data.size());
-                        } else if (metricDefinition.metricType == MetricType.SUM) {
-                            metric = MathUtils.sum(metricDefinition.data);
-                        } else if (metricDefinition.metricType == MetricType.MIN) {
-                            if (metricDefinition.data.size() < 1)
-                                return;
-                            metric = MathUtils.min(metricDefinition.data);
-                        } else if (metricDefinition.metricType == MetricType.MAX) {
-                            if (metricDefinition.data.size() < 1)
-                                return;
-                            metric = MathUtils.max(metricDefinition.data);
-                        }
-                        metricDefinition.data.clear();
-                        metricDefinition.lastUpdate = now;
-                    }
-                    if (metric != null) {
-                        if (metricDefinition.formatAsPercent) {
-                            publishMetricAsPercent(metricName, metric);
-                        } else {
-                            publishMetric(metricName, metric);
-                        }
-                    }
+                      long dateDiff = now.getTime() - metricDefinition.lastUpdate.getTime();
+                      Double metric = null;
+                      if (dateDiff >= metricDefinition.reportingIntervalInMillis) {
+                          if (metricDefinition.metricType == MetricType.AVERAGE) {
+                              Collection<Double> dataCopy = new ArrayList<Double>(metricDefinition.data);
+                              if (dataCopy.isEmpty()) continue;
+                              metric = MathUtils.average(dataCopy);
+                          } else if (metricDefinition.metricType == MetricType.COUNT) {
+                              metric = new Double(metricDefinition.data.size());
+                          } else if (metricDefinition.metricType == MetricType.SUM) {
+                              metric = MathUtils.sum(metricDefinition.data);
+                          } else if (metricDefinition.metricType == MetricType.MIN) {
+                              if (metricDefinition.data.size() < 1)
+                                  return;
+                              metric = MathUtils.min(metricDefinition.data);
+                          } else if (metricDefinition.metricType == MetricType.MAX) {
+                              if (metricDefinition.data.size() < 1)
+                                  return;
+                              metric = MathUtils.max(metricDefinition.data);
+                          }
+                          metricDefinition.data.clear();
+                          metricDefinition.lastUpdate = now;
+                      }
+                      if (metric != null) {
+                          if (metricDefinition.formatAsPercent) {
+                              publishMetricAsPercent(metricName, metric);
+                          } else {
+                              publishMetric(metricName, metric);
+                          }
+                      }
+                  } catch (Exception e) {
+                    logger.error("issue with metric {}, {}", metricName, e ,e);
+                  }
                 }
             } catch (Exception e) {
                 logger.error("Exception with metrics: {} {}", e.getMessage(), e, e);
