@@ -302,7 +302,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			stream.writeObject(directionId);
 			stream.writeDouble(distanceToStop);
 			stream.writeObject(predictionsForRouteStop);
-			stream.writeInt(stopCode);
+			// Can be null so use writeObject()
+			stream.writeObject(stopCode);
 		}
 		
 		/*
@@ -332,8 +333,10 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			distanceToStop = stream.readDouble();
 			predictionsForRouteStop = (List<IpcPrediction>) stream.readObject();
 			
-			if (readVersion >=1)
-				stopCode = stream.readInt();
+			if (readVersion >=1) {
+				// Can be null so use readObject()
+				stopCode = (Integer) stream.readObject();
+			}
 		}
 
 		/*
