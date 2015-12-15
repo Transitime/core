@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.utils.IntervalTimer;
 
 /**
@@ -67,8 +68,10 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	private static final ConcurrentHashMap<String, Counts> currentCallsByAgencyMap =
 			new ConcurrentHashMap<String, Counts>();
 	
-	// Set default value to 25 
-	private static int maxConcurrentCallsPerProject = 25;
+	private static IntegerConfigValue maxConcurrentCallsPerProjectConfig = new IntegerConfigValue(
+	    "transitime.usage.maxRmiCalls", 100000,
+	    "Maximum number of concurrent RMI calls to allow");
+	private static int maxConcurrentCallsPerProject = maxConcurrentCallsPerProjectConfig.getValue().intValue();
 	
 	// Logging
 	private static final Logger logger = 
