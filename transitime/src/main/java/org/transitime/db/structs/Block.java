@@ -17,6 +17,7 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -825,12 +826,15 @@ public final class Block implements Serializable {
 				trips.get(0);
 			} catch (JDBCException e) {
 				// If root cause of exception is a SocketTimeoutException
-				// then somehow lost connection to the database. Might have
+				// or a SocketException then somehow lost connection to the 
+				// database. It is a bit peculiar but have encountered both 
+				// types of exceptions so both must be handled. Might have
 				// been rebooted or such. For this situation need to attach
 				// object to new session.
 				Throwable rootCause = HibernateUtils.getRootCause(e);
-				if (rootCause instanceof SocketTimeoutException) {
-					logger.error("Socket timeout in getTrips() for "
+				if (rootCause instanceof SocketTimeoutException 
+						|| rootCause instanceof SocketException) {
+					logger.error("Socket exception in getTrips() for "
 							+ "blockId={}. Database might have been "
 							+ "rebooted. Creating a new session.",
 							this.getId(), e);
