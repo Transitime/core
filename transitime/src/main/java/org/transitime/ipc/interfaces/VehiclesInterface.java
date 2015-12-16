@@ -130,7 +130,7 @@ public interface VehiclesInterface extends Remote {
 			Collection<String> vehicleIds) throws RemoteException;
 
 	/**
-	 * Gets from server IpcVehicle info for all vehicles currently. associated
+	 * Gets from server IpcVehicle info for all vehicles currently associated
 	 * with route.
 	 * 
 	 * @param routeIdOrShortName
@@ -140,6 +140,16 @@ public interface VehiclesInterface extends Remote {
 	 */
 	public Collection<IpcVehicle> getForRoute(String routeIdOrShortName)
 			throws RemoteException;
+	
+	/**
+   * Gets from server IpcVehicle info for all vehicles currently associated
+   * with a block. Each block should have a IpcVehicle in the returned collection.
+   * 
+   * @return Collection of Vehicle objects
+   * @throws RemoteException
+   */
+  public Collection<IpcVehicle> getVehiclesForBlocks()
+      throws RemoteException;
 
 	/**
 	 * Gets from server IpcCompleteVehicle info for all vehicles currently.
@@ -207,4 +217,5 @@ public interface VehiclesInterface extends Remote {
   public int getNumActiveBlocks(
       Collection<String> routeIds, int allowableBeforeTimeSecs) 
           throws RemoteException;
+  
 }

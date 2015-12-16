@@ -968,9 +968,9 @@ public class TransitimeApi {
 
       VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
 
-      Collection<IpcVehicleComplete> ipcVehicleCompletes = vehiclesInterface.getComplete();
+      Collection<IpcVehicle> ipcVehicles = vehiclesInterface.getVehiclesForBlocks();
 
-      for (IpcVehicleComplete v : ipcVehicleCompletes) {
+      for (IpcVehicle v : ipcVehicles) {
         TemporalDifference adh = v.getRealTimeSchedAdh();
 
         if (adh == null)

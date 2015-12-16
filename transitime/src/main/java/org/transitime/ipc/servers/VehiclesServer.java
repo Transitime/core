@@ -22,7 +22,9 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -426,4 +428,18 @@ public class VehiclesServer extends AbstractServer
 		return result;
 	}
 
+	/* (non-Javadoc)
+   * @see org.transitime.ipc.interfaces.VehiclesInterface#getVehiclesForBlocks()
+   */
+  @Override
+	public Collection<IpcVehicle> getVehiclesForBlocks() throws RemoteException {
+	  List<String> vehicleIds = new ArrayList<String>();
+	  List<Block> blocks = BlocksInfo.getCurrentlyActiveBlocks();
+	  for (Block block : blocks) {
+	    Collection<String> vehicleIdsForBlock = VehicleDataCache
+          .getInstance().getVehiclesByBlockId(block.getId());
+	    vehicleIds.addAll(vehicleIdsForBlock);
+	  }
+	  return get(vehicleIds);
+	}
 }
