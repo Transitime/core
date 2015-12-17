@@ -17,7 +17,9 @@
 package org.transitime.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +146,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
 
 		// If should generate arrival time...
-		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
+		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {	
 			// Create and return arrival time for this stop
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
 					predictionTime,	predictionTime, affectedByWaitStop, 
@@ -324,6 +326,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		// happen for schedule based predictions
 		long now = Core.getInstance().getSystemTime();
 		
+		Map<Integer, IpcPrediction> filteredPredictions = new HashMap<Integer, IpcPrediction>();
+		
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
 		while (schedBasedPreds
@@ -371,8 +375,29 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			// Can get predictions in the past for schedule based predictions.
 			if (!lastStopOfNonSchedBasedTrip
 					&& predictionForStop.getPredictionTime() > now) {
-				newPredictions.add(predictionForStop);
-				logger.info("Generated prediction {}", predictionForStop);
+
+					if(indices.atEndOfTrip() || indices.atBeginningOfTrip()){
+						// Deals with case where a vehicle transitions from one trip to another and the lastStop then becomes the firstSTop
+						// This occassionally leads to duplicate predictions. This works around the problem by creating a hash of predictions
+						// that have the same Prediction information but different trips
+						int predictionKey = lastStopPredictionHash(predictionForStop);
+						if(filteredPredictions.containsKey(predictionKey) && 
+								filteredPredictions.get(predictionKey) != null){
+							if(predictionForStop.getTrip().getStartTime() > filteredPredictions.get(predictionKey).getTrip().getStartTime()){
+								logger.debug("Found multiple predictions for Prediction with routeId={}, stopId={}, and vehicleId={} ", 
+										predictionForStop.getRouteId(), predictionForStop.getStopId(), predictionForStop.getVehicleId());
+								filteredPredictions.put(predictionKey, predictionForStop);
+							}	
+						}
+						else{
+							filteredPredictions.put(predictionKey, predictionForStop);
+						}	
+					}
+					else{
+						newPredictions.add(predictionForStop);
+					}
+					
+					logger.info("Generated prediction {}", predictionForStop);
 			}
 			
 			// Determine prediction time for the departure. For layovers
@@ -401,9 +426,30 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			// arrival time of this stop
 			predictionTime += indices.getTravelTimeForPath();
 		}
-
+		
+		for(IpcPrediction prediction : filteredPredictions.values()){
+			newPredictions.add(prediction);
+		}
+		
 		// Return the results
 		return newPredictions;
 	}
 	
+	
+	private int lastStopPredictionHash(IpcPrediction prediction){
+		final int prime = 31;
+		int result = 1;
+		
+		result = prime * result
+				+ ((prediction.getBlockId() == null) ? 0 : prediction.getBlockId().hashCode());
+		result = prime * result
+				+ ((prediction.getVehicleId() == null) ? 0 : prediction.getVehicleId().hashCode());
+		result = prime * result
+				+ ((prediction.getStopId() == null) ? 0 : prediction.getStopId().hashCode());
+		result = prime * result
+				+ ((prediction.getRouteId() == null) ? 0 : prediction.getRouteId().hashCode());
+		result = prime * result + Long.valueOf(prediction.getPredictionTime()).hashCode();
+		
+		return result;
+	}
 }
