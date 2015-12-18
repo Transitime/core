@@ -1,5 +1,6 @@
 package org.transitime.db.hibernate;
 
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -267,7 +268,7 @@ public class DbQueue<T> {
 			// factory so that get new connections.
 			Throwable rootCause = HibernateUtils.getRootCause(e);
 			
-			if (rootCause instanceof SocketTimeoutException
+			if (rootCause instanceof SocketTimeoutException || rootCause instanceof SocketException
 					|| (rootCause instanceof SQLException 
 							&& rootCause.getMessage().contains("statement closed"))) {
 				logger.error(Markers.email(),

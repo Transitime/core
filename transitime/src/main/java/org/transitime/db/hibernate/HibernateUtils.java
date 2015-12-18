@@ -179,8 +179,9 @@ public class HibernateUtils {
 		synchronized(sessionFactoryCache) {
 			factory = sessionFactoryCache.get(dbName);
 			// If factory not yet created for this projectId then create it
-			if (factory == null) {
+			if (factory == null || factory.isClosed()) {
 				try {
+				  logger.info("creating new session factory");
 					factory = createSessionFactory(dbName);
 					sessionFactoryCache.put(dbName, factory);
 				} catch (Exception e) {

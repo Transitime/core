@@ -551,7 +551,7 @@ public class SpatialMatch {
 			return scheduleTime.getDepartureTime();
 		} catch (Exception e) {
 			logger.error("Tried to get wait stop time for a stop that didn't "
-					+ "have one. {}", this);
+					+ "have one. {} {}", this, e, e);
 			return -1; 
 		}
 	}

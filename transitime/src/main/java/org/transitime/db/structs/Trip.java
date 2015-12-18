@@ -22,6 +22,8 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.collection.internal.PersistentList;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -991,6 +993,17 @@ public class Trip implements Serializable {
 	 * @return
 	 */
 	public ScheduleTime getScheduleTime(int stopPathIndex) {
+	  if (scheduledTimesList instanceof PersistentList) {
+	    // TODO this is an anti-pattern
+	    // instead find a way to manage sessions more consistently 
+	    PersistentList persistentListTimes = (PersistentList)scheduledTimesList;
+	    SessionImplementor session = 
+          persistentListTimes.getSession();
+	    if (session == null) {
+	      Session globalLazyLoadSession = Core.getInstance().getDbConfig().getGlobalSession();
+	      globalLazyLoadSession.update(this);
+	    }
+	  }
 		return scheduledTimesList.get(stopPathIndex);
 	}
 	
