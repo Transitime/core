@@ -194,8 +194,8 @@ public class GtfsFileProcessor {
 		// If URL set then should get the file from web and store it
 		if (gtfsUrl != null) {
 			gtfsZipFileName =
-					HttpGetGtfsFile
-							.getFile(AgencyConfig.getAgencyId(), gtfsUrl);
+					HttpGetGtfsFile.getFile(AgencyConfig.getAgencyId(),
+							gtfsUrl, unzipSubdirectory);
 		}
 
 		// Uncompress the GTFS zip file if need to
