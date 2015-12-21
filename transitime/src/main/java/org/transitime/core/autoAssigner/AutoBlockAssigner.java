@@ -744,6 +744,12 @@ public class AutoBlockAssigner {
 				minTimeBetweenAutoAssigningSecs.getValue());
 
 		if (tooRecent) {
+			logger.info("For vehicleId={} too recent to autoassign. "
+					+ "ElapsedSecs={} lastTime={} gpsTime={} "
+					+ "minTimeBetweenAutoAssigningSecs={} ", 
+					vehicleId, elapsedSecs, Time.timeStrMsec(lastTime), 
+					Time.timeStrMsec(gpsTime), 
+					minTimeBetweenAutoAssigningSecs.getValue());
 			return true;
 		} else {
 			// Not too recent so should auto assign. Therefore store the time 

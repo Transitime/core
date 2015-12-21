@@ -894,6 +894,9 @@ public class AvlProcessor {
 			return;
 		}
 		
+		logger.info("Trying to automatically assign vehicleId={}", 
+				vehicleState.getVehicleId());
+		
 		// Try to match vehicle to a block assignment if that feature is enabled
 		AutoBlockAssigner autoAssigner = new AutoBlockAssigner(vehicleState);
 		TemporalMatch bestMatch = autoAssigner.autoAssignVehicleToBlockIfEnabled();
@@ -1133,7 +1136,7 @@ public class AvlProcessor {
 				// within the assignment.
 				matchNewFixForPredictableVehicle(vehicleState);
 			} else if (matchToNewAssignment) {
-				// New assignment so match the vehicle to it
+				// New assignment from AVL feed so match the vehicle to it
 				matchVehicleToAssignment(vehicleState);
 			} else {
 				// Handle bad assignment where don't have assignment or such.
