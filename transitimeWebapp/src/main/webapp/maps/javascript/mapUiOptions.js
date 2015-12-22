@@ -59,6 +59,14 @@ var streetcarIcon = L.icon({
     popupAnchor: [0, -12],
 });
 
+var subwayIcon = L.icon({
+    iconUrl: 'images/rail-metro-24.png',
+    iconRetinaUrl: 'images/rail-metro-24@2x.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
+});
+
 var railIcon = L.icon({
     iconUrl: 'images/rail-24.png',
     iconRetinaUrl: 'images/rail-24@2x.png',
