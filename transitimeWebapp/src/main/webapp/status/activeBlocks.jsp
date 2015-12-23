@@ -90,6 +90,10 @@ if (agencyId == null || agencyId.isEmpty()) {
 	color: graytext;
 }
 
+#menu {
+	text-align: center;
+}
+
 </style>
 
 <script>
@@ -442,10 +446,35 @@ function getSummaryData() {
  */
 function getAndProcessData() {
 	// Populate accordion
-	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRouteWithoutVehicles", handleAjaxData)
+	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRouteWithoutVehicles", function(data) {
+		handleAjaxData(data);
+		initializeLoadAllData(data);
+	})
 		.fail(function() {
 	 		console.log( "Could not access /command/activeBlocksByRouteWithoutVehicles" );
 	 	});
+}
+
+// When loadAllData button is pressed, we should load in sequence all route data.
+// Wait for a request to finish before sending the next one.
+function initializeLoadAllData(routes) {
+	
+	var routeNames = routes.route.map(function(d) { return d.name })
+	
+	function getDataForRoute(i) {
+		$.getJSON(apiUrlPrefix + "/command/activeBlockByRouteNameWithVehicles?r=" + routeNames[i], updateAjaxData)
+        	.fail(function() {
+            	console.log( "Could not access /command/activeBlockByRouteNameWithVehicles" );
+        	})
+        	.done(function() {
+        		if (i + 1 < routeNames.length)
+        			getDataForRoute(i + 1);
+        	})
+	}
+	
+	$("#loadAllData").click(function() {
+		getDataForRoute(0);
+	})
 }
 
 // Called when page is ready
@@ -502,6 +531,9 @@ $(function() {
 <%@include file="/template/header.jsp" %>
 
 <div id="title">Active Blocks</div>
+<div id="menu">
+	<button id="loadAllData">Load all data</button>
+</div>
 <div id="accordion"></div>
 <div id="summary">
   <span id="totalBlocksLabel" title="Total number of blocks">Blocks:</span>

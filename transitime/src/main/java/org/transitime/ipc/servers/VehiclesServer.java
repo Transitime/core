@@ -396,6 +396,8 @@ public class VehiclesServer extends AbstractServer
             .add(Restrictions.eq("name", routeName))
             .setProjection(Projections.groupProperty("id"));
         List<String> routeIds = criteria.list();
+        session.close();
+        
         return getActiveBlocksAndVehiclesByRouteId(routeIds, allowableBeforeTimeSecs);
     }
     
