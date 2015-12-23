@@ -42,6 +42,9 @@ public class ApiRoute {
 	@XmlAttribute
 	private String longName;
 
+	@XmlAttribute
+	private String type;
+	
 	/********************** Member Functions **************************/
 
     /**
@@ -56,6 +59,7 @@ public class ApiRoute {
 		this.name = route.getName();
 		this.shortName = route.getShortName();
 		this.longName = route.getLongName();
+		this.type = route.getType();
 	}
 
 }
