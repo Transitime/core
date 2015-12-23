@@ -84,7 +84,7 @@ public class TripPattern implements Serializable, Lifecycle {
 	final protected List<StopPath> stopPaths;
 	
 	@Column
-	private final String headsign;
+	private String headsign;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String directionId;
@@ -446,6 +446,7 @@ public class TripPattern implements Serializable, Lifecycle {
 				+ ", id=" + id
 				+ ", name=" + headsign
 				+ ", routeId=" + routeId
+				+ ", directionId=" + directionId
 				+ ", shapeId=" + shapeId
 				+ ", extent=" + extent
 				+ ", trips=" + tripsIds
@@ -459,7 +460,8 @@ public class TripPattern implements Serializable, Lifecycle {
 	 * @return A short version of the TripPattern object
 	 */
 	public String toShortString() {
-		return headsign 
+		return "Headsign \"" + headsign + "\"" 
+				+ " direction " + directionId
 				+ " from stop " + stopPaths.get(0).getStopId() 
 				+ " to stop " + stopPaths.get(stopPaths.size()-1).getStopId(); 
 	}
@@ -626,6 +628,16 @@ public class TripPattern implements Serializable, Lifecycle {
 	}
 	
 	/**
+	 * Returns the stop ID of the last stop of the trip. This is the destination
+	 * for the trip.
+	 * 
+	 * @return ID of last stop
+	 */
+	public String getLastStopIdForTrip() {
+		return stopPaths.get(stopPaths.size()-1).getStopId();
+	}
+	
+	/**
 	 * Returns length of the trip from the first terminal to the last.
 	 * 
 	 * @return
@@ -717,6 +729,17 @@ public class TripPattern implements Serializable, Lifecycle {
 		return routeShortName;
 	}
 	
+	/**
+	 * For modifying the headsign. Useful for when reading in GTFS data and
+	 * determine that the headsign should be modified because it is for a
+	 * different last stop or such.
+	 * 
+	 * @param headsign
+	 */
+	public void setHeadsign(String headsign) {
+		this.headsign = headsign;
+	}
+
 	/**
 	 * Usually from the trip_headsign from the trips.txt file
 	 * @return name, the title of the trip pattern

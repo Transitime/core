@@ -533,11 +533,9 @@ public class GtfsData {
 		
 		// Sort the routes so that can determine the route order for each one.
 		// Uses GTFS route_order when available and uses route_name when not.
-		// FIXME
 		Collections.sort(routes, Route.routeComparator);
 		
 		// Determine and set route order for each route if it is not already set
-		// FIXME
 		int routeOrderCounter = 0;
 		for (Route route : routes) {
 			if (route.getRouteOrder() == null) {
@@ -1465,6 +1463,125 @@ public class GtfsData {
 				tripsCollection.add(trip);
 			}
 		}  // End of for each trip ID
+		
+		// Process the headsigns for the trips and the trip patterns to make sure that 
+		// they are unique for each destination.
+		makeHeadsignsUniqueIfDifferentLastStop();
+	}
+	
+	/**
+	 * For each route makes sure that the headsigns are unique if the last stop of
+	 * the trip is different. This way get different headsigns if the destination
+	 * is different. 
+	 */
+	private void makeHeadsignsUniqueIfDifferentLastStop() {
+		// Make sure all necessary data already read in
+		if (gtfsRoutesMap == null || gtfsRoutesMap.isEmpty()) {
+			logger.error("processRouteData() must be called before " + 
+					"GtfsData.makeHeadsignsUniqueIfDifferentLastStop() is. Exiting.");
+			System.exit(-1);
+		}
+		if (gtfsStopsMap == null || gtfsStopsMap.isEmpty()) {
+			logger.error("processStopData() must be called before " + 
+					"GtfsData.makeHeadsignsUniqueIfDifferentLastStop() is. Exiting.");
+			System.exit(-1);
+		}
+		
+		Set<String> routeIds = gtfsRoutesMap.keySet();
+		for (String routeId : routeIds) {
+			// Determine the trip patterns for the route so that they
+			// can be included when constructing the route object.
+			// If there aren't any then can't 
+			List<TripPattern> tripPatternsForRoute = getTripPatterns(routeId);
+			
+			// FIXME
+			// Keyed on headsign
+			Map<String, List<TripPattern>> tripPatternsByHeadsign = 
+					new HashMap<String, List<TripPattern>>();
+			for (TripPattern tripPattern : tripPatternsForRoute) {
+				// Add the trip pattern to tripPatternsByHeadsign map
+				String headsign = tripPattern.getHeadsign();
+				List<TripPattern> tripPatternsForHeadsign = 
+						tripPatternsByHeadsign.get(headsign);
+				if (tripPatternsForHeadsign == null) {
+					tripPatternsForHeadsign = new ArrayList<TripPattern>();
+					tripPatternsByHeadsign.put(headsign, tripPatternsForHeadsign);
+				}
+				tripPatternsForHeadsign.add(tripPattern);
+			}
+			
+			// Now that we have list of trip patterns for each headsign can 
+			// make sure they have different final stops
+			for (String headsign : tripPatternsByHeadsign.keySet()) {
+				List<TripPattern> tripPatternsForHeadsign = 
+						tripPatternsByHeadsign.get(headsign);
+				TripPattern firstTripPatternForHeadsign = 
+						tripPatternsForHeadsign.get(0);
+				String lastStopId = 
+						firstTripPatternForHeadsign.getLastStopIdForTrip();
+				for (TripPattern tripPattern: tripPatternsForHeadsign) {
+					String lastStopIdForTrip = 
+							tripPattern.getLastStopIdForTrip();
+					// If for this headsign the last stops differ then want to 
+					// differentiate the headsigns. But only modify a headsign 
+					// if it wasn't already set by title formatter. This way can
+					// use title formatter to actually combine trip patterns 
+					// that vary only slightly into a single headsign.
+					if (!lastStopIdForTrip.equals(lastStopId) 
+							&& !titleFormatter.isReplaceTitle(headsign)) {
+						// The last stop is different for this trip pattern even
+						// though the configured headsign is the same. Therefore 
+						// modify the shorter trip pattern to append the last 
+						// stop name to the headsign
+						if (firstTripPatternForHeadsign.getNumberStopPaths() < 
+								tripPattern.getNumberStopPaths()) {
+							// The first trip pattern is shorter so it should 
+							// have headsign modified
+							String modifiedHeadsign =
+									firstTripPatternForHeadsign.getHeadsign()
+											+ " to "
+											+ getStop(
+													firstTripPatternForHeadsign
+															.getLastStopIdForTrip())
+													.getName();
+							logger.warn("Modifying headsign \"{}\" to \"{}\" "
+									+ "since it has a different last stop. "
+									+ "TripPattern {}. Other TripPattern {}", 
+									firstTripPatternForHeadsign.getHeadsign(), 
+									modifiedHeadsign, 
+									firstTripPatternForHeadsign.toShortString(),
+									tripPattern.toShortString());
+							firstTripPatternForHeadsign.setHeadsign(modifiedHeadsign);
+							for (Trip trip : firstTripPatternForHeadsign.getTrips()) {
+								trip.setHeadsign(modifiedHeadsign);
+							}
+						} else {
+							// The current trip pattern is shorter so it should have 
+							// headsign modified
+							String modifiedHeadsign =
+									tripPattern.getHeadsign()
+											+ " to "
+											+ getStop(
+													tripPattern
+															.getLastStopIdForTrip())
+													.getName();
+							logger.warn("Modifying headsign \"{}\" to \"{}\" "
+									+ "since it has a different last stop. "
+									+ "TripPattern {}. Other TripPattern {}", 
+									tripPattern.getHeadsign(), 
+									modifiedHeadsign,
+									tripPattern.toShortString(),
+									firstTripPatternForHeadsign.toShortString());
+							tripPattern.setHeadsign(modifiedHeadsign);
+							for (Trip trip : tripPattern.getTrips()) {
+								trip.setHeadsign(modifiedHeadsign);
+							}
+						}
+					}
+				}
+			}
+		}
+		
 	}
 		
 	/**

@@ -926,6 +926,17 @@ public class Trip implements Lifecycle, Serializable {
 	public String getHeadsign() {
 		return headsign;
 	}
+	
+	/**
+	 * For modifying the headsign. Useful for when reading in GTFS data and
+	 * determine that the headsign should be modified because it is for a
+	 * different last stop or such.
+	 * 
+	 * @param headsign
+	 */
+	public void setHeadsign(String headsign) {
+		this.headsign = headsign;
+	}
 
 	/**
 	 * The block_id is an optional element in GTFS trips.txt file.
@@ -1035,6 +1046,16 @@ public class Trip implements Lifecycle, Serializable {
 		return getTripPattern().getLength();
 	}
 	
+	/**
+	 * Returns the stop ID of the last stop of the trip. This is the destination
+	 * for the trip.
+	 * 
+	 * @return ID of last stop
+	 */
+	public String getLastStopId() {
+		return getTripPattern().getLastStopIdForTrip();
+	}
+
 	/**
 	 * Returns the List of the stop paths for the trip pattern
 	 * 
