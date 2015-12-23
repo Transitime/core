@@ -34,7 +34,7 @@ public class SystemCpuMonitor extends MonitorBase {
 
 	DoubleConfigValue cpuThreshold = new DoubleConfigValue(
 			"transitime.monitoring.cpuThreshold", 
-			0.9, 
+			0.99, 
 			"If CPU load averaged over a minute exceeds this 0.0 - 1.0 "
 			+ "value then CPU monitoring is triggered.");
 	
@@ -90,7 +90,7 @@ public class SystemCpuMonitor extends MonitorBase {
 						+ "of {} so taking another reading.", 
 						StringUtils.twoDigitFormat(cpuLoad),
 						StringUtils.twoDigitFormat(cpuThreshold.getValue()));
-				Time.sleep(1000);
+				Time.sleep(1 * Time.MS_PER_MIN);
 				resultObject = SystemMemoryMonitor
 						.getOperatingSystemValue("getSystemCpuLoad");
 				double cpuLoad2 = (Double) resultObject;
