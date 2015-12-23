@@ -173,12 +173,12 @@ public class Route implements Serializable {
 			// route short name is defined and it is short. This way
 			// will end up with a route name like "38 - Geary" but
 			// not "HYDE-POWELL - Hyde Powell". For LA Metro some route short 
-			// names to prepend are something like "166/364" so need to go up
-			// to 7 characters. Also, only prepend the route short name if
+			// names to prepend are something like "51/52/352" so need to go up
+			// to 9 characters. Also, only prepend the route short name if
 			// the route long name doesn't already contain it.
 			String shortNameComponent = "";
 			if (gtfsRoute.getRouteShortName() != null 
-					&& gtfsRoute.getRouteShortName().length() <=7
+					&& gtfsRoute.getRouteShortName().length() <= 9
 					&& !this.longName.contains(gtfsRoute.getRouteShortName()))
 				shortNameComponent = gtfsRoute.getRouteShortName() + " - ";
 			
