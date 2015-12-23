@@ -951,6 +951,36 @@ public class TransitimeApi {
         }
     }
     
+    @Path("/command/activeBlockByRouteNameWithVehicles")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getActiveBlockByRouteNameWithVehicles(
+            @BeanParam StandardParameters stdParameters,
+            @QueryParam(value = "r") String routeName,
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            throws WebApplicationException {
+   // Make sure request is valid
+      stdParameters.validate();
+
+      try {
+          // Get active block data from server
+          VehiclesInterface vehiclesInterface =
+                  stdParameters.getVehiclesInterface();
+          Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
+                  .getActiveBlocksAndVehiclesByRouteName(routeName,
+                          allowableBeforeTimeSecs);
+
+          // Create and return ApiBlock response
+          ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
+                  activeBlocks, stdParameters.getAgencyId());
+          return stdParameters.createResponse(apiActiveBlocksRoutes);
+      } catch (Exception e) {
+          // If problem getting data then return a Bad Request
+          throw WebUtils.badRequestException(e.getMessage());
+      }
+        
+    }
+    
   @Path("/command/vehicleAdherenceSummary")
   @GET
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

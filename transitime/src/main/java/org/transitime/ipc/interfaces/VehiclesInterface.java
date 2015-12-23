@@ -35,20 +35,54 @@ import org.transitime.ipc.data.IpcVehicleConfig;
  */
 public interface VehiclesInterface extends Remote {
 
-    /* (non-Javadoc)
-     * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
-     */
-    Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
-            Collection<String> routeIds, int allowableBeforeTimeSecs)
-            throws RemoteException;
+  /**
+   * Gets from the server IpcActiveBlocks for blocks that are currently
+   * active without vehicle data.
+   * 
+   * @param routeIds
+   *            List of routes that want data for. Can also be null or empty.
+   * @param allowableBeforeTimeSecs
+   *            How much before the block time the block is considered to be
+   *            active
+   * @return Collection of blocks that are active
+   * @throws RemoteException
+   */
+  public Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
+     Collection<String> routeIds, int allowableBeforeTimeSecs)
+     throws RemoteException;
 
-    /* (non-Javadoc)
-     * @see org.transitime.ipc.interfaces.VehiclesInterface#getActiveBlocks()
-     */
-    Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
-            String routeId, int allowableBeforeTimeSecs)
-            throws RemoteException;
+  /**
+   * Gets from the server IpcActiveBlocks for blocks that are currently
+   * active with vehicle data for a particular route.
+   * 
+   * @param routeId
+   *            Route that want data for. Can also be null or empty.
+   * @param allowableBeforeTimeSecs
+   *            How much before the block time the block is considered to be
+   *            active
+   * @return Collection of blocks that are active
+   * @throws RemoteException
+   */
+  public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
+     String routeId, int allowableBeforeTimeSecs)
+     throws RemoteException;
 
+  /**
+   * Gets from the server IpcActiveBlocks for blocks that are currently
+   * active with vehicle data for all routes with given route name.
+   * 
+   * @param routeName
+   *            Route name that want data for. Can also be null or empty.
+   * @param allowableBeforeTimeSecs
+   *            How much before the block time the block is considered to be
+   *            active
+   * @return Collection of blocks that are active
+   * @throws RemoteException
+   */
+  public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteName(
+     String routeName, int allowableBeforeTimeSecs)
+     throws RemoteException;
+    
     /**
 	 * For getting configuration information for all vehicles. Useful for
 	 * determining IDs of all vehicles in system
@@ -217,5 +251,6 @@ public interface VehiclesInterface extends Remote {
   public int getNumActiveBlocks(
       Collection<String> routeIds, int allowableBeforeTimeSecs) 
           throws RemoteException;
+
   
 }

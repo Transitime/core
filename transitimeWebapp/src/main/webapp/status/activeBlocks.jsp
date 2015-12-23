@@ -461,11 +461,11 @@ $(function() {
             beforeActivate: function(event, ui) {
                 var headerId = $(ui.newHeader).attr('id');
                 if(headerId){
-                    headerId = $('#'+headerId).parent().attr('id')
-                    var routeId = headerId.substring(headerId.lastIndexOf('-') + 1);
-                    $.getJSON(apiUrlPrefix + "/command/activeBlockByRouteWithVehicles?r=" + routeId, updateAjaxData)
+                	// route name is header title without summary
+                	var routeName = $('#'+headerId).clone().find('*').remove().end().text();                	
+                    $.getJSON(apiUrlPrefix + "/command/activeBlockByRouteNameWithVehicles?r=" + routeName, updateAjaxData)
                             .fail(function() {
-                                console.log( "Could not access /command/activeBlockByRouteWithVehicles" );
+                                console.log( "Could not access /command/activeBlockByRouteNameWithVehicles" );
                             });
                 }
             }})
