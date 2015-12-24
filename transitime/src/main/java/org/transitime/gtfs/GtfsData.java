@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -90,6 +91,7 @@ import org.transitime.gtfs.readers.GtfsTripsSupplementReader;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
+import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
 /**
@@ -237,6 +239,14 @@ public class GtfsData {
 					"If agency doesn't specify stop codes but simply wants to "
 					+ "have them be a based number plus the stop ID then this "
 					+ "parameter can specify the base value. ");
+	
+	private static DoubleConfigValue minDistanceBetweenStopsToDisambiguateHeadsigns =
+			new DoubleConfigValue("transitime.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns", 
+					1000.0,
+					"When disambiguating headsigns by appending the too stop "
+					+ "name of the last stop, won't disambiguate if the last "
+					+ "stops for the trips with the same headsign differ by "
+					+ "less than this amount.");
 	
 	// Logging
 	public static final Logger logger = 
@@ -1494,7 +1504,6 @@ public class GtfsData {
 			// If there aren't any then can't 
 			List<TripPattern> tripPatternsForRoute = getTripPatterns(routeId);
 			
-			// FIXME
 			// Keyed on headsign
 			Map<String, List<TripPattern>> tripPatternsByHeadsign = 
 					new HashMap<String, List<TripPattern>>();
@@ -1519,16 +1528,30 @@ public class GtfsData {
 						tripPatternsForHeadsign.get(0);
 				String lastStopId = 
 						firstTripPatternForHeadsign.getLastStopIdForTrip();
+				Location firstTripPatternLastStopLoc = 
+						getStop(lastStopId).getLoc();
+				
 				for (TripPattern tripPattern: tripPatternsForHeadsign) {
 					String lastStopIdForTrip = 
-							tripPattern.getLastStopIdForTrip();
+							tripPattern.getLastStopIdForTrip();					
+					Location currentTripPatternLastStopLoc = 
+							getStop(lastStopIdForTrip).getLoc();
+					double distanceBetweenLastStops =
+							Geo.distance(currentTripPatternLastStopLoc,
+									firstTripPatternLastStopLoc);
+					
 					// If for this headsign the last stops differ then want to 
 					// differentiate the headsigns. But only modify a headsign 
 					// if it wasn't already set by title formatter. This way can
 					// use title formatter to actually combine trip patterns 
-					// that vary only slightly into a single headsign.
+					// that vary only slightly into a single headsign. Also,
+					// only modify headsign if the last stops are actually 
+					// significantly apart (more than 1000 meters). There are a 
+					// good number of times where there is just a small difference 
+					// not worth taking into account.
 					if (!lastStopIdForTrip.equals(lastStopId) 
-							&& !titleFormatter.isReplaceTitle(headsign)) {
+							&& !titleFormatter.isReplaceTitle(headsign)
+							&& distanceBetweenLastStops > minDistanceBetweenStopsToDisambiguateHeadsigns.getValue()) {
 						// The last stop is different for this trip pattern even
 						// though the configured headsign is the same. Therefore 
 						// modify the shorter trip pattern to append the last 
@@ -1545,10 +1568,14 @@ public class GtfsData {
 															.getLastStopIdForTrip())
 													.getName();
 							logger.warn("Modifying headsign \"{}\" to \"{}\" "
-									+ "since it has a different last stop. "
+									+ "since it has a different last stop {} away "
+									+ "which is further away than "
+									+ "transitime.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns of {}. "
 									+ "TripPattern {}. Other TripPattern {}", 
 									firstTripPatternForHeadsign.getHeadsign(), 
 									modifiedHeadsign, 
+									StringUtils.distanceFormat(distanceBetweenLastStops),
+									minDistanceBetweenStopsToDisambiguateHeadsigns.getValue(),
 									firstTripPatternForHeadsign.toShortString(),
 									tripPattern.toShortString());
 							firstTripPatternForHeadsign.setHeadsign(modifiedHeadsign);
@@ -1566,10 +1593,14 @@ public class GtfsData {
 															.getLastStopIdForTrip())
 													.getName();
 							logger.warn("Modifying headsign \"{}\" to \"{}\" "
-									+ "since it has a different last stop. "
+									+ "since it has a different last stop {} away "
+									+ "which is further away than "
+									+ "transitime.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns of {}. "
 									+ "TripPattern {}. Other TripPattern {}", 
 									tripPattern.getHeadsign(), 
 									modifiedHeadsign,
+									StringUtils.distanceFormat(distanceBetweenLastStops),
+									minDistanceBetweenStopsToDisambiguateHeadsigns.getValue(),
 									tripPattern.toShortString(),
 									firstTripPatternForHeadsign.toShortString());
 							tripPattern.setHeadsign(modifiedHeadsign);
