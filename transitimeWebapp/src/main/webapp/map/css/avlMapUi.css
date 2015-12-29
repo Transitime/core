@@ -56,7 +56,7 @@ div.avlTriangle {
   padding: 2%;
   font-family: monospace;
   border: 2px solid black;
-  width: 100%;
+  width: 300px;
 }
 
 #playback input {
