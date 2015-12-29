@@ -1504,6 +1504,14 @@ public class GtfsData {
 			// If there aren't any then can't 
 			List<TripPattern> tripPatternsForRoute = getTripPatterns(routeId);
 			
+			// If no trip patterns for the route then can ignore it
+			if (tripPatternsForRoute == null) {
+				logger.warn("In makeHeadsignsUniqueIfDifferentLastStop() no "
+						+ "trip patterns configured for routeId={} so skipping "
+						+ "that route.", routeId);
+				continue;
+			}
+			
 			// Keyed on headsign
 			Map<String, List<TripPattern>> tripPatternsByHeadsign = 
 					new HashMap<String, List<TripPattern>>();
@@ -2247,7 +2255,7 @@ public class GtfsData {
 	
 	/**
 	 * @param routeId
-	 * @return List of TripPatterns for the routeId
+	 * @return List of TripPatterns for the routeId. Can be null.
 	 */
 	public List<TripPattern> getTripPatterns(String routeId) {
 		return tripPatternsByRouteIdMap.get(routeId);
