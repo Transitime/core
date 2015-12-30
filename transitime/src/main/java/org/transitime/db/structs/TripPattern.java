@@ -444,7 +444,7 @@ public class TripPattern implements Serializable, Lifecycle {
 		return "TripPattern ["
 				+ "configRev=" + configRev
 				+ ", id=" + id
-				+ ", name=" + headsign
+				+ ", headsign=" + headsign
 				+ ", routeId=" + routeId
 				+ ", directionId=" + directionId
 				+ ", shapeId=" + shapeId
@@ -472,7 +472,10 @@ public class TripPattern implements Serializable, Lifecycle {
 	 * @return
 	 */
 	public String toStringListingTripIds() {
-		String s = "Trip Pattern [id=" + id + ", name=" + headsign + ", trips=[";
+		String s = "Trip Pattern ["
+				+ "id=" + id 
+				+ ", headsign=" + headsign 
+				+ ", trips=[";
 		for (Trip trip : trips) {
 			s += trip.getId() + ",";
 		}
@@ -480,6 +483,23 @@ public class TripPattern implements Serializable, Lifecycle {
 		return s;
 	}
 		
+	/**
+	 * A short version of the Trip string. Only includes the name and
+	 * a list of the stop ids.
+	 * @return
+	 */
+	public String toStringListingStopIds() {
+		String s = "Trip Pattern ["
+				+ "id=" + id 
+				+ ", headsign=" + headsign 
+				+ ", stopIds=[";
+		for (StopPath stopPath : stopPaths) {
+			s += stopPath.getStopId() + ",";
+		}
+		s += "] ]";
+		return s;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
