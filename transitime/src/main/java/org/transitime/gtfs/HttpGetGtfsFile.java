@@ -50,12 +50,12 @@ public class HttpGetGtfsFile extends HttpGetFile {
 	
 	/**
 	 * Returns directory name of where to store the file.
-	 * The directory will be /home/ec2-user/gtfs/projectId/MM-dd-yyyy/
+	 * The directory will be /USER-HOME/gtfs/projectId/MM-dd-yyyy/
 	 * 
 	 * @return the directory name for storing the results
 	 */
 	private static String getDirectoryForStoringFile(String projectId) {		
-		return "/home/ec2-user/gtfs/" + projectId + "/" + 
+		return System.getProperty("user.home") + "/gtfs/" + projectId + "/" + 
 				Time.dateStr(System.currentTimeMillis()) + "/";
 	}
 	
