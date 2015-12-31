@@ -20,6 +20,8 @@ package org.transitime.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -81,10 +83,15 @@ public class OrderedCollection {
 	}
 	
 	/**
-	 * Adds items that are not already in the list to the list. 
+	 * Adds items that are not already in the list to the list. Items are
+	 * carefully added at proper place in list. New items are either added
+	 * at beginning, middle, or end of list, depending on other items that
+	 * match to the original list.
+	 * 
 	 * @param newList
+	 *            items to be added to the ordered list
 	 */
-	public void add(Collection<String> newList) {
+	private void add(Collection<String> newList) {
 		// Groups of items in a row that haven't yet been added to list.
 		// They are grouped so that can find the right place to insert them.
 		List<String> itemsToAdd = new ArrayList<String>();
@@ -93,29 +100,55 @@ public class OrderedCollection {
 		int insertionPoint = 0;
 		for (String item : newList) {
 			// If item already in the list then don't need to add it
-			int indexWhereItemExists = indexWhereItemExists(insertionPoint, item);
+			int indexWhereItemExists = 
+					indexWhereItemExists(insertionPoint, item);
 			if (indexWhereItemExists >= 0) {
 				// If there are items to add, then add them now
 				if (!itemsToAdd.isEmpty()) {
 					// Add the items to the proper place
-					add(indexWhereItemExists, itemsToAdd);
+					add(insertionPoint, itemsToAdd);
 					
 					// Determine the new insertion point
-					insertionPoint = indexWhereItemExists + itemsToAdd.size();
+					insertionPoint = insertionPoint + itemsToAdd.size();
 					
 					// Done inserting these new items so clear the list
 					itemsToAdd.clear();
 				} else {
-					insertionPoint = indexWhereItemExists;
+					// There were no items to add so just update insertion point
+					insertionPoint = indexWhereItemExists + 1;
 				}
 			} else {
-				// Item not already in list so keep track of it
+				// Item not already in list so keep track of it so it can be 
+				// added at appropriate place
 				itemsToAdd.add(item);
 			}
 		}
 		
 		// If still have extra items from newList then append those to end
-		add(list.size(), itemsToAdd);
+		add(insertionPoint, itemsToAdd);
+	}
+	
+	// For sorting lists by their size descending
+	private Comparator<List<String>> comparator = new Comparator<List<String>>() {
+		@Override
+		public int compare(List<String> l1, List<String> l2) {
+			return l2.size() - l1.size();
+		}
+	};
+	
+	/**
+	 * Adds the lists to the OrderedCollection. Need to add all lists at once so
+	 * that this method can first sort them by length so that the end result is
+	 * usually proper. Important for complicated routes like sfmta route 38
+	 * outbound.
+	 * 
+	 * @param listOfLists
+	 */
+	public void add(List<List<String>> listOfLists) {
+		Collections.sort(listOfLists, comparator);
+		for (Collection<String> list : listOfLists) {
+			add(list);
+		}
 	}
 	
 	/**
@@ -127,6 +160,11 @@ public class OrderedCollection {
 		return list;
 	}
 	
+	@Override
+	public String toString() {
+		return "OrderedCollection [list=" + list + "]";
+	}
+
 	/**
 	 * For testing.
 	 * 
@@ -134,7 +172,7 @@ public class OrderedCollection {
 	 */
 	public static void main(String args[]) {
 		List<String> a1 = Arrays.asList("1", "2", "3", "4");
-		List<String> a1x = Arrays.asList("1", "2", "3", "4", "1");
+		List<String> a1x = Arrays.asList("1", "2", "3", "3.1", "3.2", "4");
 		List<String> a1xx = Arrays.asList("3", "4", "1", "2", "3");
 		List<String> a2 = Arrays.asList("a21", "a22", "1", "2", "3");
 		List<String> a3 = Arrays.asList("1", "2", "a31", "a32", "3","4", "a35", "a36");

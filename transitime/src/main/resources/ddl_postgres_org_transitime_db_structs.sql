@@ -38,6 +38,7 @@
         routeShortName varchar(60),
         scheduledTime timestamp,
         serviceId varchar(60),
+        stopOrder int4,
         stopPathIndex int4,
         stopPathLength float4,
         tripIndex int4,
