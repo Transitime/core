@@ -597,18 +597,29 @@ public class TransitimeApi {
 	@Path("/command/routes")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getRoutes(@BeanParam StandardParameters stdParameters)
+	public Response getRoutes(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "r") List<String> routeIdsOrShortNames)
 			throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
 		try {
-			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			Collection<IpcRouteSummary> routes = inter.getRoutes();
-
-			// Create and return @QueryParam(value="s") String stopId response
-			ApiRoutes routesData = new ApiRoutes(routes);
+			
+			// Get agency info so can also return agency name
+			List<Agency> agencies = inter.getAgencies();
+			
+			// Get route data from server
+			ApiRoutes routesData;
+			if (routeIdsOrShortNames == null) {
+				Collection<IpcRouteSummary> routes = inter.getRoutes();
+				routesData = new ApiRoutes(routes, agencies.get(0));
+			} else {
+				List<IpcRoute> ipcRoutes = inter.getRoutes(routeIdsOrShortNames);
+				routesData = new ApiRoutes(ipcRoutes, agencies.get(0));
+			}
+			
+			// Create and return response
 			return stdParameters.createResponse(routesData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -661,6 +672,9 @@ public class TransitimeApi {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
 
+			// Get agency info so can also return agency name
+			List<Agency> agencies = inter.getAgencies();
+			
 			List<IpcRoute> ipcRoutes;
 
 			// If single route specified
@@ -686,7 +700,8 @@ public class TransitimeApi {
 
 			// Take the IpcRoute data array and create and return
 			// ApiRoutesDetails object
-			ApiRoutesDetails routeData = new ApiRoutesDetails(ipcRoutes);
+			ApiRoutesDetails routeData = 
+					new ApiRoutesDetails(ipcRoutes, agencies.get(0));
 			return stdParameters.createResponse(routeData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
