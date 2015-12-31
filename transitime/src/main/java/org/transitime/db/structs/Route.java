@@ -195,7 +195,7 @@ public class Route implements Serializable {
 			this.name = shortNameComponent + this.longName;
 		} else {
 			// route_long_name not set so just use the route_short_name
-			this.name = this.shortName;
+			this.name = titleFormatter.processTitle(this.shortName);
 		}
 		
 		this.tripPatternsForRoute = tripPatternsForRoute;	
