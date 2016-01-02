@@ -853,9 +853,8 @@ public class DbConfig {
 					logger.error("session test failure: {} {}", t, t);
 					// the only reason this validate query should fail is if
 					// our db connnection is invalid 
-					// eventually we will recover from this but for now we exit
-					// and have service restart
-					System.exit(1);
+					// log the issue for now
+					// eventually flush connection pool or give other hints
 				}
 				
 			}
