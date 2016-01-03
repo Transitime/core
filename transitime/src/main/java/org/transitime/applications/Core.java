@@ -207,7 +207,7 @@ public class Core {
 	 * @returns the Core singleton object for this application, or null if it
 	 *          could not be created
 	 */
-	public static Core getInstance() {
+	public synchronized static Core getInstance() {
 		if (Core.singleton == null)
 			createCore();
 		
