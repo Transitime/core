@@ -820,70 +820,84 @@ public final class Block implements Serializable {
 
 						globalLazyLoadSession.update(this);
 					}
+				} else {
+					// trips member must always be a PersistentList
+					logger.error("Blocks.trips member is not a PersistentList!?!?. "
+							+ "Exiting!");
+					System.exit(-1);
 				}
 
 				// Actually lazy-load the trips
 				trips.get(0);
 			} catch (JDBCException e) {
-				// If root cause of exception is a SocketTimeoutException
-				// or a SocketException then somehow lost connection to the 
-				// database. It is a bit peculiar but have encountered both 
-				// types of exceptions so both must be handled. Might have
-				// been rebooted or such. For this situation need to attach
-				// object to new session.
+				// Really shouldn't get an exception unless there was a problem
+				// communicating with the db. If connection to db lost then need
+				// to create a new one. It likely means that the db was rebooted
+				// or such. For this situation need to use a new session.
+				// Originally tried to only use a new session if the root cause
+				// of the exception was a SocketException or 
+				// SocketTimeoutException. But then found that other exceptions
+				// can occur. So best to use a new session when any exception
+				// occurs.
 				Throwable rootCause = HibernateUtils.getRootCause(e);
-				if (rootCause instanceof SocketTimeoutException 
-						|| rootCause instanceof SocketException) {
-					logger.error("Socket exception in getTrips() for "
-							+ "blockId={}. Database might have been "
-							+ "rebooted. Creating a new session.",
-							this.getId(), e);
+				logger.error(
+						"Socket exception in getTrips() for "
+								+ "blockId={}. Database might have been "
+								+ "rebooted. Creating a new session if "
+								+ "necessary. Root cause is {}.",
+						this.getId(), rootCause, e);
 
-					// Even though there was a timeout meaning that the
-					// session is no longer any good the Block object
-					// might still be associated with the old session.
-					// In order to attach the Block to a newly created
-					// session need to first close the old session or else
-					// system will complain that trying to add a object
-					// to two live sessions. Tried using session.evict(this)
-					// but still got exception "Illegal attempt to associate
-					// a collection with two open sessions"
-					PersistentList persistentListTrips = (PersistentList) trips;
-					SessionImplementor sessionImpl =
-							persistentListTrips.getSession();
-					SessionImpl session = (SessionImpl) sessionImpl;
-					if (!session.isClosed()) {
-						try {
-							// Note: this causes a stack trace to be output
-							// to stdout by Hibernate. Seems that this
-							// cannot be avoided since need to close the
-							// session.
-							session.close();
-						} catch (HibernateException e1) {
-							logger.error("Exception occurred when trying "
-									+ "to close session when lazy loading "
-									+ "data after socket timeout occurred.", e1);
-						}
-					}
-
-					// Get new session, update object to use it, and try again.
-					DbConfig dbConfig = Core.getInstance().getDbConfig();
-					dbConfig.createNewGlobalSession();
-					Session globalLazyLoadSession = dbConfig.getGlobalSession();
-					globalLazyLoadSession.update(this);
-
-					// Now that have attached a new session lazy load the trips
-					// data
-					trips.get(0);
-				} else {
-					// Not a socket timeout. Therefore don't know handle
-					// to handle so just log and throw the exception
-					logger.error(Markers.email(),
-							"In Block.getTrips() got JDBCException. "
-									+ "SQL=\"{}\" msg={}", e.getSQL(), e
-									.getSQLException().getMessage(), e);
-					throw e;
+				if (!(rootCause instanceof SocketException 
+						|| rootCause instanceof SocketTimeoutException)) {
+					logger.error(Markers.email(), 
+							"In Blocks.getTrips() for blockId={} encountered "
+							+ "exception whose root cause was not a "
+							+ "SocketException or a SocketTimeoutException, "
+							+ "which is unexpected. Therefore should "
+							+ "investigate. Root cause is {}.",
+							this.getId(), rootCause, e);
 				}
+				
+				// Even though there was a timeout meaning that the
+				// session is no longer any good the Block object
+				// might still be associated with the old session.
+				// In order to attach the Block to a newly created
+				// session need to first close the old session or else
+				// system will complain that trying to add a object
+				// to two live sessions. Tried using session.evict(this)
+				// but still got exception "Illegal attempt to associate
+				// a collection with two open sessions"
+				PersistentList persistentListTrips = (PersistentList) trips;
+				SessionImplementor originalSessionImpl =
+						persistentListTrips.getSession();
+				SessionImpl originalSession = (SessionImpl) originalSessionImpl;
+				if (!originalSession.isClosed()) {
+					try {
+						// Note: this causes a stack trace to be output
+						// to stdout by Hibernate. Seems that this
+						// cannot be avoided since need to close the
+						// session.
+						originalSession.close();
+					} catch (HibernateException e1) {
+						logger.error("Exception occurred when trying "
+								+ "to close session when lazy loading "
+								+ "data after socket timeout occurred.", e1);
+					}
+				}
+
+				// Get new session, update object to use it, and try again.
+				// Note: before calling get(0) to load the data first made
+				// sure that the session used for the Block.trips is the same
+				// as the current session. Therefore if made it here then it
+				// means that definitely need to create new session.
+				DbConfig dbConfig = Core.getInstance().getDbConfig();
+				dbConfig.createNewGlobalSession();
+				Session globalLazyLoadSession = dbConfig.getGlobalSession();
+				globalLazyLoadSession.update(this);
+
+				// Now that have attached a new session lazy try loading the 
+				// trips data
+				trips.get(0);
 			}
 
 			logger.debug("Finished lazy load for trips data for "
