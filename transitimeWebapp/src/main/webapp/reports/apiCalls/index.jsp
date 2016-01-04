@@ -66,6 +66,13 @@ if (agencyId == null || agencyId.isEmpty()) {
     title="Data for service IDs that are currently active for agency.">
       Service IDs Current</a></li>
 
+  <li><a href="calendarsApiParams.jsp?a=<%= agencyId %>"
+    title="Data for all calendars configured for agency.">
+      Calendars</a></li>
+  <li><a href="calendarsCurrentApiParams.jsp?a=<%= agencyId %>"
+    title="Data for calendars that are currently active for agency.">
+      Calendars Current</a></li>
+
   <li><a href="gtfsRealtimeTripUpdatesApiParams.jsp?a=<%= agencyId %>"
     title="GTFS-realtime Trip Updates includes prediction data for entire agency">
       GTFS-realtime Trip Updates</a></li>
