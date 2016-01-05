@@ -163,6 +163,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 								} else {
 									logger.error("Got tripTag={} but no such trip in "
 											+ "the configuration.", update.getTrip().getTripId());
+									continue;
 								}
 							}
 							
@@ -210,6 +211,10 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	}
 	
 	private Date getPredictedTimeFromEvent(StopTimeUpdate stopTime, Trip trip, long serviceDate) {
+	  if (trip == null) {
+	    logger.error("no trip provided for stopTime {}", stopTime);
+	    return null;
+	  }
 	  StopTimeEvent event = null;
 	  if (stopTime.hasArrival()) {
 	    event = stopTime.getArrival();
