@@ -9,7 +9,7 @@ import com.google.transit.realtime.GtfsRealtime.FeedHeader;
  * digits to stopIds.  Below is a quick-and-dirty method to strip them.
  *
  */
-public class KCMSTranslator implements GTFSRealtimeTranslator {
+public class KCMTranslator implements GTFSRealtimeTranslator {
 
   @Override
   public String parseStopId(String stopId) {
