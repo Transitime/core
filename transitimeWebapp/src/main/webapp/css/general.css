@@ -33,7 +33,7 @@ body {
 
 #title {
 	margin-top: 40px;
-	margin-bottom: 20px;
+	margin-bottom: 2px;
 	font-weight: normal;
 	font-size: xx-large;
 	text-align: center;
@@ -41,6 +41,7 @@ body {
 
 #subtitle {
 	text-align: center;
+	font-size: x-large;
 }
 
 /* For list of choices to be centered in page, e.g. list of reports
