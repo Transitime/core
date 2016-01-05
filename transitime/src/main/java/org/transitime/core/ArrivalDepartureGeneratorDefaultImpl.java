@@ -33,6 +33,7 @@ import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
+import org.transitime.logging.Markers;
 import org.transitime.utils.Time;
 
 /**
@@ -294,6 +295,31 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	}
 
 	/**
+	 * For making sure that the arrival/departure time is reasonably close to
+	 * the AVL time. Otherwise this indicates there was a problem determining
+	 * the arrival/departure time.
+	 * 
+	 * @param time
+	 * @param avlReport
+	 * @return true if arrival/departure time within 30 minutes of the AVL
+	 *         report time.
+	 */
+	private boolean timeReasonable(ArrivalDeparture arrivalDeparture) {
+		if (Math.abs(arrivalDeparture.getAvlTime().getTime()
+				- arrivalDeparture.getDate().getTime()) < 30 * Time.MS_PER_MIN)
+			return true;
+		else {
+			logger.error(Markers.email(), 
+					"Arrival or departure time of {} is more than 30 minutes "
+					+ "away from the AVL time of {}. Therefore not storing "
+					+ "this time. {}", 
+					arrivalDeparture.getDate(), arrivalDeparture.getAvlTime(), 
+					arrivalDeparture);
+			return false;
+		}
+	}
+
+	/**
 	 * Stores the specified ArrivalDeparture object into the db
 	 * and log to the ArrivalsDeparatures log file that the
 	 * object was created. 
@@ -304,6 +330,12 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param arrivalDeparture
 	 */
 	protected void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
+		// If arrival/departure time too far from the AVL time then something 
+		// must be wrong. For this situation don't store the arrival/departure 
+		// into db.
+		if (!timeReasonable(arrivalDeparture))
+			return;
+		
 		// Don't want to record arrival/departure time for last stop of a no
 		// schedule block/trip since the last stop is also the first stop of
 		// a non-schedule trip. We don't duplicate entries.
