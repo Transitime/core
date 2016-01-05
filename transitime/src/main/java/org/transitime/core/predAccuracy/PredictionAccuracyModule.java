@@ -314,7 +314,7 @@ public class PredictionAccuracyModule extends Module {
 	 * will not be removed from memory. In order to prevent memory use from
 	 * building up need to clear out the old predictions.
 	 */
-	private void clearStalePredictions() {
+	private synchronized void clearStalePredictions() {
 		int numPredictionsInMemory = 0;
 		int numPredictionsRemoved = 0;
 		
@@ -361,7 +361,7 @@ public class PredictionAccuracyModule extends Module {
 	 *            same time can easily see from data in db which internal and
 	 *            external predictions are associated with each other.
 	 */
-	protected void getAndProcessData(List<RouteAndStops> routesAndStops,
+	protected synchronized void getAndProcessData(List<RouteAndStops> routesAndStops,
 			Date predictionsReadTime) {
 		logger.debug("Calling PredictionReaderModule.getAndProcessData() "
 				+ "to process internal prediction.");
