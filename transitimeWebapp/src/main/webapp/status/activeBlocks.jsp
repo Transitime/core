@@ -32,8 +32,9 @@ if (agencyId == null || agencyId.isEmpty()) {
 
 .routeValue {
 	padding-left: 3px;
-	padding-right: 12px;
-	width: 0.2em; /* 1.2em is enough for two digits but then when color things it looks odd */
+	padding-right: 3px;
+	width: 1.2em; /* Trying to make coloring of early/late vehicles look right */
+	text-align: right;
 }
 
 /* Separate Blocks: & Vehicles: from the schedule adherence labels */
