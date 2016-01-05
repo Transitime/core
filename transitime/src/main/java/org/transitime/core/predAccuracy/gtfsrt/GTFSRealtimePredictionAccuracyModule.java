@@ -36,6 +36,7 @@ import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.Time;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
+import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
@@ -61,13 +62,13 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 					"http://127.0.0.1:8091/trip-updates",
 					"URL to access gtfs-rt trip updates.");
 		
-  private static ClassConfigValue stopIdParserConfig =
-      new ClassConfigValue("transitime.predAccuracy.stopIdParser", null, 
-          "Implementation of StopIdParser to perform " + 
-      "the translation of stopIds");
+  private static ClassConfigValue translatorConfig =
+      new ClassConfigValue("transitime.predAccuracy.RtTranslator", null, 
+          "Implementation of GTFSRealtimeTranslator to perform " + 
+      "the translation of stopIds and other rt quirks");
 	
   // if stopIds needs optional parsing/translation
-  private StopIdParser stopIdParser = null;
+  private GTFSRealtimeTranslator translator = null;
   
 	/**
 	 * @return the gtfstripupdateurl
@@ -86,9 +87,9 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	 */
 	public GTFSRealtimePredictionAccuracyModule(String agencyId) throws Exception {
 		super(agencyId);
-		if (stopIdParserConfig.getValue() != null) {
-		  logger.info("instantiating parser {}", stopIdParserConfig.getValue());
-		  stopIdParser = (StopIdParser) stopIdParserConfig.getValue().newInstance();
+		if (translatorConfig.getValue() != null) {
+		  logger.info("instantiating translator {}", translatorConfig.getValue());
+		  translator = (GTFSRealtimeTranslator) translatorConfig.getValue().newInstance();
 		}
 	}
 
@@ -185,7 +186,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							update.getTrip().getTripId(), 
 							update.getVehicle().getId(),									
 							prediction, 
-							new Date(feed.getHeader().getTimestamp()*1000),													
+							getPredictedReadTimeFromHeader(feed.getHeader()),													
 							(stopTime.hasArrival()),
 							new Boolean(false), 
 							"GTFS-rt");
@@ -210,7 +211,16 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		 }			
 	}
 	
-	private Date getPredictedTimeFromEvent(StopTimeUpdate stopTime, Trip trip, long serviceDate) {
+	private Date getPredictedReadTimeFromHeader(FeedHeader header) {
+	  if (translator != null) {
+	    return translator.parseFeedHeaderTimestamp(header);
+	  }
+	  return new Date(header.getTimestamp()*1000);
+  }
+
+
+
+  private Date getPredictedTimeFromEvent(StopTimeUpdate stopTime, Trip trip, long serviceDate) {
 	  if (trip == null) {
 	    logger.error("no trip provided for stopTime {}", stopTime);
 	    return null;
@@ -286,8 +296,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 
 
 private String cleanStopId(String stopId) {
-   if (stopIdParser != null) {
-     return stopIdParser.parse(stopId);
+   if (translator != null) {
+     return translator.parseStopId(stopId);
    }
    return stopId;
   }
