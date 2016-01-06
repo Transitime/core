@@ -661,13 +661,20 @@ public class StopPath implements Serializable, Lifecycle {
 		vectors = new ArrayList<VectorWithHeading>(locations.size()-1);
 		for (int segmentIndex=0; segmentIndex<locations.size()-1; ++segmentIndex) {
 			VectorWithHeading v = 
-					new VectorWithHeading(locations.get(segmentIndex), 
-					              		  locations.get(segmentIndex+1));
+					new VectorWithHeading(nullSafeLocation(locations.get(segmentIndex)), 
+					              		  nullSafeLocation(locations.get(segmentIndex+1)));
 			vectors.add(v);
 		}
 	}
 
-	/* (non-Javadoc)
+	private Location nullSafeLocation(Location location) {
+	  if (location == null) {
+	    location = new Location(0.0, 0.0);
+	  }
+    return location;
+  }
+
+  /* (non-Javadoc)
 	 * @see org.hibernate.classic.Lifecycle#onSave(org.hibernate.Session)
 	 */
 	@Override
