@@ -323,9 +323,6 @@ abstract public class PredictionAccuracyQuery {
 		String sql = postSql;
 		if ("mysql".equals(dbType)) {
 			sql = mySql;
-			// we need the date to reflect timezone changes, as the time will as well
-			beginDateStr = beginDateStr + " 00:00:00.000 GMT";
-			endDateStr = endDateStr + " 23:59:59.000 GMT";
 		}
 		
 		PreparedStatement statement = null;
@@ -340,11 +337,7 @@ abstract public class PredictionAccuracyQuery {
 			beginDate = new Timestamp(date.getTime());
 
       date = Time.parse(endDateStr);			
-	    if ("mysql".equals(dbType)) {
-	      endDate = new Timestamp(date.getTime()); // we already added end date
-	    } else {
-	      endDate = new Timestamp(date.getTime() + Time.MS_PER_DAY);
-	    }
+      endDate = new Timestamp(date.getTime() + Time.MS_PER_DAY);
 	     
 			// Determine the time parameters for the query
 			// If begin time not set but end time is then use midnight as begin
@@ -387,7 +380,7 @@ abstract public class PredictionAccuracyQuery {
 			statement.setTimestamp(i++, endDate);
 			if (beginTime != null) {
 			  if ("mysql".equals(dbType)) {
-			    // for mysql use the time str as is
+			    // for mysql use the time str as is to avoid TZ issues
 			    statement.setString(i++, beginTimeStr);
 			  } else {
 			    statement.setTime(i++, beginTime);
@@ -395,7 +388,7 @@ abstract public class PredictionAccuracyQuery {
 			}
 			if (endTime != null) {
 			  if ("mysql".equals(dbType)) {
-	         // for mysql use the time str as is
+	         // for mysql use the time str as is to avoid TZ issues
           statement.setString(i++, endTimeStr);
 			  } else {
 			    statement.setTime(i++, endTime);
