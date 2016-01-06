@@ -174,11 +174,16 @@ abstract public class PredictionAccuracyQuery {
 		int predictionBucketIndex = index(predLength);
 		while (predictionBuckets.size() < predictionBucketIndex + 1)
 			predictionBuckets.add(new ArrayList<Integer>());
-		List<Integer> predictionAccuracies = predictionBuckets
-				.get(predictionBucketIndex);
+		if (predictionBucketIndex < predictionBuckets.size() && predictionBucketIndex >= 0) {
+		  List<Integer> predictionAccuracies = predictionBuckets
+		      .get(predictionBucketIndex);
+	    // Add the prediction accuracy to the bucket.
+	    predictionAccuracies.add(predAccuracy);
+		} else {
+		  logger.error("predictionLength {} has illegal index {} for predAccuracy {} and source {}", 
+		      predLength, predictionBucketIndex, predAccuracy, source);
+		}
 
-		// Add the prediction accuracy to the bucket.
-		predictionAccuracies.add(predAccuracy);
 	}
 
 	/**
@@ -228,6 +233,7 @@ abstract public class PredictionAccuracyQuery {
 
 		// Determine the time of day portion of the SQL
 		String timeSql = "";
+		String mySqlTimeSql = "";
 		if ((beginTimeStr != null && !beginTimeStr.isEmpty())
 				|| (endTimeStr != null && !endTimeStr.isEmpty())) {
 			// If only begin or only end time set then use default value
@@ -237,6 +243,7 @@ abstract public class PredictionAccuracyQuery {
 				endTimeStr = "23:59:59";
 			
 			timeSql = " AND arrivalDepartureTime::time BETWEEN ? AND ? ";
+			mySqlTimeSql = "AND CAST(arrivalDeparture AS TIME) BETWEEN CAST(? AS TIME) AND CAST(? AS TIME) ";
 		}
 
 		// Determine route portion of SQL
@@ -299,9 +306,9 @@ abstract public class PredictionAccuracyQuery {
 				+ " FROM PredictionAccuracy "
 				+ "WHERE "
 				+ "arrivalDepartureTime BETWEEN "
-				+ "  DATE_ADD(?, INTERVAL -1 DAY) "
-				+ "AND DATE_ADD(?, INTERVAL 1 DAY) "
-				+ timeSql
+				+ "CAST(? AS DATETIME) "
+				+ "AND CAST(? AS DATETIME) "
+				+ mySqlTimeSql
 				+ "  AND "
 				+ "abs(unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) < 900 " //15 mins
 				// Filter out MBTA_seconds source since it is isn't
@@ -320,6 +327,7 @@ abstract public class PredictionAccuracyQuery {
 		
 		PreparedStatement statement = null;
 		try {
+		  logger.debug("SQL: {}", sql);
 			statement = connection.prepareStatement(sql);
 
 			// Determine the date parameters for the query
@@ -356,6 +364,12 @@ abstract public class PredictionAccuracyQuery {
 						* Time.MS_PER_SEC);
 			}
 
+			logger.debug("beginDate {} endDate {} beginTime {} endTime {}",
+			    beginDate,
+			    endDate,
+			    beginTime,
+			    endTime);
+			
 			// Set the parameters for the query
 			int i = 1;
 			statement.setTimestamp(i++, beginDate);
@@ -380,8 +394,6 @@ abstract public class PredictionAccuracyQuery {
 				String sourceResult = rs.getString("source");
 
 				addDataToMap(predLength, predAccuracy, sourceResult);
-				logger.debug("predLength={} predAccuracy={} source={}",
-						predLength, predAccuracy, sourceResult);
 			}
 		} catch (SQLException e) {
 			throw e;
