@@ -323,6 +323,9 @@ abstract public class PredictionAccuracyQuery {
 		String sql = postSql;
 		if ("mysql".equals(dbType)) {
 			sql = mySql;
+			// we need the date to reflect timezone changes, as the time will as well
+			beginDateStr = beginDateStr + " 00:00:00.000 GMT";
+			endDateStr = endDateStr + " 23:59:59.000 GMT";
 		}
 		
 		PreparedStatement statement = null;
@@ -333,12 +336,16 @@ abstract public class PredictionAccuracyQuery {
 			// Determine the date parameters for the query
 			Timestamp beginDate = null;
 			Timestamp endDate = null;
-			java.util.Date date = Time.parseDate(beginDateStr);
+			java.util.Date date = Time.parse(beginDateStr);
 			beginDate = new Timestamp(date.getTime());
 
-			date = Time.parseDate(endDateStr);
-			endDate = new Timestamp(date.getTime() + Time.MS_PER_DAY);
-
+      date = Time.parse(endDateStr);			
+	    if ("mysql".equals(dbType)) {
+	      endDate = new Timestamp(date.getTime()); // we already added end date
+	    } else {
+	      endDate = new Timestamp(date.getTime() + Time.MS_PER_DAY);
+	    }
+	     
 			// Determine the time parameters for the query
 			// If begin time not set but end time is then use midnight as begin
 			// time
@@ -364,20 +371,36 @@ abstract public class PredictionAccuracyQuery {
 						* Time.MS_PER_SEC);
 			}
 
-			logger.debug("beginDate {} endDate {} beginTime {} endTime {}",
+			logger.debug("beginDate {} beginDateStr {} endDate {} endDateStr {} beginTime {} beginTimeStr {} endTime {} endTimeStr {}",
 			    beginDate,
+			    beginDateStr,
 			    endDate,
+			    endDateStr,
 			    beginTime,
-			    endTime);
+			    beginTimeStr,
+			    endTime,
+			    endTimeStr);
 			
 			// Set the parameters for the query
 			int i = 1;
 			statement.setTimestamp(i++, beginDate);
 			statement.setTimestamp(i++, endDate);
-			if (beginTime != null)
-				statement.setTime(i++, beginTime);
-			if (endTime != null)
-				statement.setTime(i++, endTime);
+			if (beginTime != null) {
+			  if ("mysql".equals(dbType)) {
+			    // for mysql use the time str as is
+			    statement.setString(i++, beginTimeStr);
+			  } else {
+			    statement.setTime(i++, beginTime);
+			  }
+			}
+			if (endTime != null) {
+			  if ("mysql".equals(dbType)) {
+	         // for mysql use the time str as is
+          statement.setString(i++, endTimeStr);
+			  } else {
+			    statement.setTime(i++, endTime);
+			  }
+			}
 			if (routeIds != null) {
 				for (String routeId : routeIds)
 					if (!routeId.isEmpty())
