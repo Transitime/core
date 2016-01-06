@@ -243,7 +243,7 @@ abstract public class PredictionAccuracyQuery {
 				endTimeStr = "23:59:59";
 			
 			timeSql = " AND arrivalDepartureTime::time BETWEEN ? AND ? ";
-			mySqlTimeSql = "AND CAST(arrivalDeparture AS TIME) BETWEEN CAST(? AS TIME) AND CAST(? AS TIME) ";
+			mySqlTimeSql = "AND CAST(arrivalDepartureTime AS TIME) BETWEEN CAST(? AS TIME) AND CAST(? AS TIME) ";
 		}
 
 		// Determine route portion of SQL
