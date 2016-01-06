@@ -139,6 +139,8 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		
 		logger.info("Processing GTFS-rt feed.....");
+		Date readTime = getPredictedReadTimeFromHeader(feed.getHeader());
+		
 		 for (FeedEntity entity : feed.getEntityList()) 
 		 {
 			 if (entity.hasTripUpdate()) 
@@ -186,7 +188,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							update.getTrip().getTripId(), 
 							update.getVehicle().getId(),									
 							prediction, 
-							getPredictedReadTimeFromHeader(feed.getHeader()),													
+							readTime,													
 							(stopTime.hasArrival()),
 							new Boolean(false), 
 							"GTFS-rt");
