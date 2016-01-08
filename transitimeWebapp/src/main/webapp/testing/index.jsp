@@ -35,6 +35,8 @@ function sendVehicleArrivedEventToWebsite(agencyId, routeId, routeShortName, rou
 				+ "&d=" + directionId 
 				+ "&headsign=" + headsign; 
 	$.getJSON(url);	
+	$('#' + routeId + stopId).css('background-color', '#f99');
+	setTimeout(function() {$('#' + routeId + stopId).css('background-color', 'white')}, 1000);
 }
 
 /**
@@ -72,6 +74,7 @@ function predictionsReadCallback(predictionData) {
 		// Create the labels and button for sending arrived event
 		jQuery('<div/>', {
 			"class": 'route',
+			id: routeId + stopId,
 			text: routeName
 		}).appendTo('body');
 		jQuery('<div/>', {
@@ -83,7 +86,6 @@ function predictionsReadCallback(predictionData) {
 			text: stopName
 		}).appendTo('body');
 		jQuery('<button/>', {
-			id: 'record',
 			text: 'Arrived',
 			click: sendVehicleArrivedEventToWebsiteHandler(agencyId, routeId, routeShortName, 
 						routeName, stopId, stopName, directionId, headsign)
