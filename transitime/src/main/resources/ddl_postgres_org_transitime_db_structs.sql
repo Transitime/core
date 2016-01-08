@@ -168,6 +168,16 @@
         primary key (vehicleId, avlTime)
     );
 
+    create table MeasuredArrivalTimes (
+        time timestamp not null,
+        stopId varchar(60) not null,
+        directionId varchar(60),
+        headsign varchar(60),
+        routeId varchar(60),
+        routeShortName varchar(60),
+        primary key (time, stopId)
+    );
+
     create table MonitoringEvents (
         type varchar(40) not null,
         time timestamp not null,
@@ -401,6 +411,8 @@
     create index AvlReportsTimeIndex on AvlReports (time);
 
     create index AvlTimeIndex on Matches (avlTime);
+
+    create index MeasuredArrivalTimesIndex on MeasuredArrivalTimes (time);
 
     create index MonitoringEventsTimeIndex on MonitoringEvents (time);
 

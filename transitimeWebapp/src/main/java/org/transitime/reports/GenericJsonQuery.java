@@ -24,6 +24,12 @@ import java.util.List;
 
 import org.transitime.db.GenericQuery;
 
+/**
+ * For web server. Allows a query on an agency db to be easily run.
+ * 
+ * @author Michael Smith
+ *
+ */
 public class GenericJsonQuery extends GenericQuery {
 
 	private StringBuilder strBuilder = new StringBuilder();
