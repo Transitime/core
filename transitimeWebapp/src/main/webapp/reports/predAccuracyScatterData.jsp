@@ -149,5 +149,6 @@ if (jsonString == null || jsonString.isEmpty()) {
 }
 
 // Return the JSON data
+response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
 %>

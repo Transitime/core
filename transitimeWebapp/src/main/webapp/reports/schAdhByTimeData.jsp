@@ -60,5 +60,6 @@ System.out.println("\nFor schedule adherence by time buckets query sql=\n" + sql
 String agencyId = request.getParameter("a");
 String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
 response.setContentType("application/json");
+response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
 %>

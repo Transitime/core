@@ -8,5 +8,6 @@ String sql =
 	+ "GROUP BY vehicleId;";
 String agencyId = request.getParameter("a");
 String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
+response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
 %>

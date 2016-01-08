@@ -82,6 +82,7 @@
 		}
 
 		// Respond with the JSON string
+		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.getWriter().write(jsonString);
     } catch (java.sql.SQLException e) {
 		// Respond with error message of exception

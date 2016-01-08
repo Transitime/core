@@ -49,11 +49,12 @@ String sql =
     + " GROUP BY r.name, r.routeorder ORDER BY r.routeorder, r.name;";
 
 // Just for debugging
-System.out.println("\nFor schedule adherence query sql=\n" + sql);
+System.out.println("\nFor schedule adherence by routequery sql=\n" + sql);
     		
 // Do the query and return result in JSON format    
 String agencyId = request.getParameter("a");
 String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
 response.setContentType("application/json");
+response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
 %>
