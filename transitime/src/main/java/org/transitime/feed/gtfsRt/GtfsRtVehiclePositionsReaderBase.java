@@ -20,9 +20,12 @@ package org.transitime.feed.gtfsRt;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.utils.IntervalTimer;
@@ -48,6 +51,16 @@ import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
  */
 public abstract class GtfsRtVehiclePositionsReaderBase {
 
+	private static StringConfigValue gtfsRealtimeFeedUser =
+			new StringConfigValue("transitime.avl.gtfsRealtimeFeedUser", 
+					"If authentication used for the feed then this specifies "
+					+ "the user.");
+
+	private static StringConfigValue gtfsRealtimeFeedPassword =
+			new StringConfigValue("transitime.avl.gtfsRealtimeFeedPassword", 
+					"If authentication used for the feed then this specifies "
+					+ "the password.");
+
 	private final String urlString;
 	
 	private static final Logger logger = LoggerFactory
@@ -60,8 +73,9 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 	}
 	
 	/**
-	 * Returns the vehicleID. If vehicle ID not available then returns vehicle label. Returns null if no VehicleDescription associated
-	 * with the vehicle or if no ID or label associated with the VehicleDescription.
+	 * Returns the vehicleID. If vehicle ID not available then returns vehicle
+	 * label. Returns null if no VehicleDescription associated with the vehicle
+	 * or if no ID or label associated with the VehicleDescription.
 	 * 
 	 * @param vehicle
 	 * @return vehicle ID or label or null if there isn't one
@@ -218,12 +232,26 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			IntervalTimer timer = new IntervalTimer();
 			
 			URI uri = new URI(urlString);
-			URL url = uri.toURL();
+			URL url = uri.toURL();		
+			URLConnection con = url.openConnection();
+			
+			// If authentication being used then set user and password
+			if (gtfsRealtimeFeedUser.getValue() != null
+					&& gtfsRealtimeFeedPassword.getValue() != null) {
+				String authString =
+						gtfsRealtimeFeedUser.getValue() + ":"
+								+ gtfsRealtimeFeedPassword.getValue();
+				byte[] authEncBytes =
+						Base64.encodeBase64(authString.getBytes());
+				String authStringEnc = new String(authEncBytes);
+				con.setRequestProperty("Authorization", "Basic "
+						+ authStringEnc);
+			}
 			
 			// Create a CodedInputStream instead of just a regular InputStream
 			// so that can change the size limit. Otherwise if file is greater
 			// than 64MB get an exception.
-			InputStream inputStream = url.openStream();
+			InputStream inputStream = con.getInputStream();
 			CodedInputStream codedStream = 
 					CodedInputStream.newInstance(inputStream);
 			// What to use instead of default 64MB limit
