@@ -21,6 +21,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +138,7 @@ public class WorkwaveAvlModule extends PollUrlAvlModule {
 	 * Reads in and processes JSON AVL data
 	 */
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 		String jsonStr = getJsonString(in);
 		try {
 			JSONObject jsonObj = new JSONObject(jsonStr);
@@ -152,8 +154,11 @@ public class WorkwaveAvlModule extends PollUrlAvlModule {
 				// Since there was a problem try getting new session ID since
 				// perhaps old one is invalid.
 				setSessionId();
-				return;
+				return new ArrayList<AvlReport>();
 			}
+			
+			// The return value for the method
+			Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
 			
 			JSONObject points = jsonObj.getJSONObject("points");
 			JSONArray features = points.getJSONArray("features");
@@ -180,12 +185,16 @@ public class WorkwaveAvlModule extends PollUrlAvlModule {
 				AvlReport avlReport =
 						new AvlReport(vehicleId, gpsTime.getTime(), latitude, longitude,
 								speed, heading, "WorkWave");
-				processAvlReport(avlReport);
+				
+				avlReportsReadIn.add(avlReport);
 			}
 			
+			// Return all the AVL reports read in
+			return avlReportsReadIn;
 		} catch (JSONException e) {
 			logger.error("Error parsing JSON. {}. {}", 
 					e.getMessage(), jsonStr, e);
+			return new ArrayList<AvlReport>();
 		}
 
 	}

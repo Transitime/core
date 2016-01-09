@@ -20,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,15 +62,19 @@ public class VtaAcsAvlModule extends PollUrlAvlModule {
 	 * Gets AVL data from input stream. Each line has data for a vehicle.
 	 */
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 		BufferedReader buf =
 				new BufferedReader(new InputStreamReader(in,
 						StandardCharsets.UTF_8));
+
+		// The return value for the method
+		Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
 
 		String line;
 		while ((line = buf.readLine()) != null) {
 			String components[] = line.split(",");
 			String vehicleId = components[0];
+			@SuppressWarnings("unused")
 			String route = components[1];
 			String blockId = components[3];
 			Double lat = Double.parseDouble(components[9]);
@@ -83,9 +89,10 @@ public class VtaAcsAvlModule extends PollUrlAvlModule {
 
 			logger.debug("AVL report from VTA ACS feed: {}", avlReport);
 			
-			processAvlReport(avlReport);
+			avlReportsReadIn.add(avlReport);
 		}
 
+		return avlReportsReadIn;
 	}
 
 	/**

@@ -24,12 +24,17 @@ import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collection;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.StringConfigValue;
 import org.transitime.configData.AvlConfig;
+import org.transitime.db.structs.AvlReport;
 import org.transitime.logging.Markers;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
@@ -48,6 +53,32 @@ import org.transitime.utils.Time;
  */
 public abstract class PollUrlAvlModule extends AvlModule {
 
+	private static StringConfigValue url =
+			new StringConfigValue("transitime.avl.url", 
+					"The URL of the AVL feed to poll.");
+
+	private static StringConfigValue authenticationUser =
+			new StringConfigValue("transitime.avl.authenticationUser", 
+					"If authentication used for the feed then this specifies "
+					+ "the user.");
+
+	private static StringConfigValue authenticationPassword =
+			new StringConfigValue("transitime.avl.authenticationPassword", 
+					"If authentication used for the feed then this specifies "
+					+ "the password.");
+
+	private static BooleanConfigValue shouldProcessAvl = 
+			new BooleanConfigValue("transitime.avl.shouldProcessAvl", 
+					true,
+					"Usually want to process the AVL data when it is read in "
+					+ "so that predictions and such are generated. But if "
+					+ "debugging then can set this param to false.");
+	
+	// Usually want to use compression when reading data but for some AVL
+	// feeds might be binary where don't want additional compression. A
+	// superclass can override this value.
+	protected boolean useCompression = true;
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(PollUrlAvlModule.class);
 
@@ -63,10 +94,14 @@ public abstract class PollUrlAvlModule extends AvlModule {
 	}
 
 	/**
-	 * Feed specific URL to use when accessing data.
+	 * Feed specific URL to use when accessing data. Will often be
+	 * overridden by subclass.
+	 * 
 	 * @return
 	 */
-	protected abstract String getUrl();
+	protected String getUrl() {
+		return url.getValue();
+	}
 	
 	/**
 	 * Override this method if AVL feed needs to specify header info
@@ -82,13 +117,15 @@ public abstract class PollUrlAvlModule extends AvlModule {
 	 * 
 	 * @param in
 	 *            The input stream containing the AVL data
+	 * @return List of AvlReports read in
 	 * @throws Exception
 	 *             Throws a generic exception since the processing is done in
 	 *             the abstract method processData() and it could throw any type
 	 *             of exception since we don't really know how the AVL feed will
 	 *             be processed.
 	 */
-	protected abstract void processData(InputStream in) throws Exception;
+	protected abstract Collection<AvlReport> processData(InputStream in)
+			throws Exception;
 	
 	/**
 	 * Converts the input stream into a JSON string. Useful for when processing
@@ -147,8 +184,22 @@ public abstract class PollUrlAvlModule extends AvlModule {
 		con.setReadTimeout(timeoutMsec);
 		
 		// Request compressed data to reduce bandwidth used
-		con.setRequestProperty("Accept-Encoding", "gzip,deflate");
+		if (useCompression)
+			con.setRequestProperty("Accept-Encoding", "gzip,deflate");
 	
+		// If authentication being used then set user and password
+		if (authenticationUser.getValue() != null
+				&& authenticationPassword.getValue() != null) {
+			String authString =
+					authenticationUser.getValue() + ":"
+							+ authenticationPassword.getValue();
+			byte[] authEncBytes =
+					Base64.encodeBase64(authString.getBytes());
+			String authStringEnc = new String(authEncBytes);
+			con.setRequestProperty("Authorization", "Basic "
+					+ authStringEnc);
+		}
+		
 		// Set any additional AVL feed specific request headers
 		setRequestHeaders(con);
 		
@@ -157,9 +208,9 @@ public abstract class PollUrlAvlModule extends AvlModule {
 		InputStream in = con.getInputStream();
 		if ("gzip".equals(con.getContentEncoding())) {
 		    in = new GZIPInputStream(in);
-		    logger.debug("Returned XML data is compressed");
+		    logger.debug("Returned data is compressed");
 		} else {
-		    logger.debug("Returned XML data is NOT compressed");			
+		    logger.debug("Returned data is NOT compressed");			
 		}
 
 		// For debugging
@@ -168,9 +219,13 @@ public abstract class PollUrlAvlModule extends AvlModule {
 				
 		// Call the abstract method to actually process the data
 		timer.resetTimer();
-		processData(in);		
+		Collection<AvlReport> avlReportsReadIn = processData(in);		
 		in.close();
-		logger.debug("Time to parse XML document {} msec", timer.elapsedMsec());
+		logger.debug("Time to parse document {} msec", timer.elapsedMsec());
+		
+		// Process all the reports read in
+		if (shouldProcessAvl.getValue())
+			processAvlReports(avlReportsReadIn);
 	}
 	
 	/** 
