@@ -150,8 +150,8 @@ abstract public class PredictionAccuracyQuery {
 	 * @return
 	 */
 	private static int index(int predLength) {
-		return (predLength + PREDICTION_LENGTH_BUCKET_SIZE / 2)
-				/ PREDICTION_LENGTH_BUCKET_SIZE;
+		return Math.abs((predLength + PREDICTION_LENGTH_BUCKET_SIZE / 2)
+				/ PREDICTION_LENGTH_BUCKET_SIZE);
 	}
 
 	/**
