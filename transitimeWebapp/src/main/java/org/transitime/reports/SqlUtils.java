@@ -123,7 +123,7 @@ public class SqlUtils {
 	 * @param request
 	 *            Http request containing parameters for the query
 	 * @param timeColumnName
-	 *            name of time column that for query
+	 *            name of time column for that for query
 	 * @param maxNumDays
 	 *            maximum number of days for query. Request parameter numDays is
 	 *            limited to this value in order to make sure that query doesn't
@@ -133,17 +133,6 @@ public class SqlUtils {
 	 */
 	public static String timeRangeClause(HttpServletRequest request,
 			String timeColumnName, int maxNumDays) {
-		String beginDate = request.getParameter("beginDate");
-		throwOnSqlInjection(beginDate);
-		
-		String numDaysStr = request.getParameter("numDays");
-		throwOnSqlInjection(numDaysStr);
-		// Limit number of days to maxNumDays to prevent queries that are 
-		// too big
-		int numDays = Integer.parseInt(numDaysStr);
-		if (numDays > maxNumDays)
-			numDays = maxNumDays;
-		
 		String beginTime = request.getParameter("beginTime");
 		throwOnSqlInjection(beginTime);
 		
@@ -166,9 +155,38 @@ public class SqlUtils {
 				+ beginTime + "' AND '" + endTime + "' ";
 		}
 
-		return " AND " + timeColumnName + " BETWEEN '" + beginDate
-				+ "' " + " AND TIMESTAMP '" + beginDate + "' + INTERVAL '"
-				+ numDays + " day' " + timeSql + ' ';
+		String dateRange = request.getParameter("dateRange");
+		throwOnSqlInjection(dateRange);
+		if (dateRange != null) {
+			String fromToDates[] = dateRange.split(" to ");
+			String beginDate, endDate;
+			if (fromToDates.length == 1) {
+				beginDate = endDate = fromToDates[0];
+			} else {
+				beginDate = fromToDates[0];
+				endDate = fromToDates[1];
+			}
+			return " AND " + timeColumnName + " BETWEEN '" + beginDate
+					+ "' " + " AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' " 
+					+ timeSql + ' ';						
+		} else {
+			String beginDate = request.getParameter("beginDate");
+			throwOnSqlInjection(beginDate);
+			
+			String numDaysStr = request.getParameter("numDays");
+			throwOnSqlInjection(numDaysStr);
+			
+			// Limit number of days to maxNumDays to prevent queries that are 
+			// too big
+			int numDays = Integer.parseInt(numDaysStr);
+			if (numDays > maxNumDays)
+				numDays = maxNumDays;
+			
+			return " AND " + timeColumnName + " BETWEEN '" + beginDate
+					+ "' " + " AND TIMESTAMP '" + beginDate + "' + INTERVAL '"
+					+ numDays + " day' " + timeSql + ' ';			
+		}
+
 	}
 	
 	/**
