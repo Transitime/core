@@ -507,7 +507,9 @@ public class DbConfig {
 
 		// If couldn't get trip by tripId then see if using the trip short name.
 		if (trip == null) {
-			trip = getTripForCurrentService(individualTripsByShortNameMap.get(tripIdOrShortName));			
+			logger.info("Could not find tripId={} so seeing if there is a "
+					+ "tripShortName with that ID.", tripIdOrShortName);
+			trip = getTripUsingTripShortName(tripIdOrShortName);
 		}
 		
 		// If trip not read in yet, do so now
