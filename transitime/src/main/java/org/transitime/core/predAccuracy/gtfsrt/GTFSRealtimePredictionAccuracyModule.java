@@ -170,9 +170,9 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 								}
 							}
 							
-							Date prediction = getPredictedTimeFromEvent(stopTime, trip, this.getTodayInMilliseconds(feed.getHeader().getTimestamp()*1000));
+							Date prediction = getPredictedTimeFromEvent(stopTime, trip, readTime.getTime());
 							if (prediction == null) {
-							  logger.error("could not compute prediction");
+							  logger.error("could not compute prediction for trip {} and stopId {}", trip.getId(), stopId);
 							  continue;
 							}
 							logger.info("Storing external prediction routeId={}, "
