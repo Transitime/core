@@ -150,8 +150,8 @@ abstract public class PredictionAccuracyQuery {
 	 * @return
 	 */
 	private static int index(int predLength) {
-		return Math.abs((predLength + PREDICTION_LENGTH_BUCKET_SIZE / 2)
-				/ PREDICTION_LENGTH_BUCKET_SIZE);
+		return (predLength + PREDICTION_LENGTH_BUCKET_SIZE / 2)
+				/ PREDICTION_LENGTH_BUCKET_SIZE;
 	}
 
 	/**
@@ -300,7 +300,7 @@ abstract public class PredictionAccuracyQuery {
 
 		
 		String mySql = "SELECT "
-				+ "     (unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) div 1 as predLength, "
+				+ "     abs((unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) div 1) as predLength, "
 				+ "     predictionAccuracyMsecs/1000 as predAccuracy, "
 				+ "     predictionSource as source "
 				+ " FROM PredictionAccuracy "
