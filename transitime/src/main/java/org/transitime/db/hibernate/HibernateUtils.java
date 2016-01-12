@@ -114,7 +114,7 @@ public class HibernateUtils {
 					DbSetupConfig.getDbHost() +
 					"/" + dbName;
 			
-			// If socket timeout specified then addd that to the URL
+			// If socket timeout specified then add that to the URL
 			Integer timeout = DbSetupConfig.getSocketTimeoutSec();
 			if (timeout != null && timeout != 0) {
 				// If mysql then timeout specified in msec instead of secs
