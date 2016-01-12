@@ -47,8 +47,8 @@ function drawAvlMarker(avl) {
 	
   	// Create popup with detailed info
 	
-	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading"],
-		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading"];
+	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID"],
+		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId"];
 	
 	// populate missing keys
 	avl.latlon = avl.lat + ", " + avl.lon
