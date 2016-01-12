@@ -42,6 +42,7 @@ import org.transitime.applications.Core;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.core.TemporalDifference;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.logging.Markers;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
@@ -760,6 +761,28 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return tripId;
 	}
 
+	/**
+	 * Returns the trip short name for the trip associated with the
+	 * arrival/departure.
+	 * 
+	 * @return trip short name for the trip associated with the
+	 * arrival/departure or null if there is a problem
+	 */
+	public String getTripShortName() {
+		if (!Core.isCoreApplication()) {
+			logger.error(Markers.email(), 
+					"Calling ArrivalDeparture.getTripShortName() but it is not "
+					+ "part of core application");
+			return null;
+		}
+		
+		Trip trip = Core.getInstance().getDbConfig().getTrip(tripId);
+		if (trip != null)
+			return trip.getShortName();
+		else
+			return null;
+	}
+	
 	public String getBlockId() {
 		return blockId;
 	}

@@ -444,7 +444,9 @@ public class PredictionAccuracyModule extends Module {
 			// shouldn't be counted against vehicle accuracy since likely 
 			// another vehicle substituted in for the original assignment. This 
 			// is especially true for MBTA Commuter Rail
-			if (!pred.getTripId().equals(arrivalDeparture.getTripId()))
+			String tripIdOrShortName = pred.getTripId();
+			if (!tripIdOrShortName.equals(arrivalDeparture.getTripId()) 
+					&& !tripIdOrShortName.equals(arrivalDeparture.getTripShortName()))
 				continue;
 			
 			// Make sure predicted time isn't too far away from the 
