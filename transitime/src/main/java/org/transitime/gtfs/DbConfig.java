@@ -497,13 +497,19 @@ public class DbConfig {
 	/**
 	 * For more quickly getting a trip. If trip not already read in yet it only
 	 * reads in the specific trip from the db, not all trips like getTrips().
+	 * If trip ID not found then sees if can match to a trip short name.
 	 * 
-	 * @param tripId
+	 * @param tripIdOrShortName
 	 * @return The trip, or null if no such trip
 	 */
-	public Trip getTrip(String tripId) {
-		Trip trip = individualTripsMap.get(tripId);
+	public Trip getTrip(String tripIdOrShortName) {
+		Trip trip = individualTripsMap.get(tripIdOrShortName);
 
+		// If couldn't get trip by tripId then see if using the trip short name.
+		if (trip == null) {
+			trip = getTripForCurrentService(individualTripsByShortNameMap.get(tripIdOrShortName));			
+		}
+		
 		// If trip not read in yet, do so now
 		if (trip == null) {
 			// Need to sync such that block data, which includes trip
@@ -511,9 +517,9 @@ public class DbConfig {
 			// by multiple threads). Otherwise get a "force initialize loading
 			// collection" error.
 			synchronized (Block.getLazyLoadingSyncObject()) {
-				trip = Trip.getTrip(globalSession, configRev, tripId);
+				trip = Trip.getTrip(globalSession, configRev, tripIdOrShortName);
 			}
-			individualTripsMap.put(tripId, trip);
+			individualTripsMap.put(tripIdOrShortName, trip);
 		}
 
 		return trip;
