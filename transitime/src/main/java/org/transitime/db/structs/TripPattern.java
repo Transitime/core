@@ -83,7 +83,7 @@ public class TripPattern implements Serializable, Lifecycle {
 	@OrderColumn( name="listIndex")
 	final protected List<StopPath> stopPaths;
 	
-	@Column
+	@Column(length=HEADSIGN_LENGTH)
 	private String headsign;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -115,6 +115,8 @@ public class TripPattern implements Serializable, Lifecycle {
 	
 	// For specifying max size of the trip pattern ID
 	public static final int TRIP_PATTERN_ID_LENGTH = 120;
+	// For specifying max size of headsign
+	private static final int HEADSIGN_LENGTH = 255;
 	
 	// Hibernate requires this class to be serializable because it uses multiple
 	// columns for the Id.
@@ -171,6 +173,10 @@ public class TripPattern implements Serializable, Lifecycle {
 			String lastStopIdForTrip = lastPath.getStopId();
 			Stop lastStopForTrip = gtfsData.getStop(lastStopIdForTrip);
 			this.headsign = lastStopForTrip.getName();
+		}
+		// Make sure headsign not too long for db
+		if (this.headsign.length() > HEADSIGN_LENGTH) {
+			this.headsign = this.headsign.substring(0, HEADSIGN_LENGTH);
 		}
 		
 		// Store additional info from this trip
