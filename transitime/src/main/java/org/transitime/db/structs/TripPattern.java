@@ -763,7 +763,8 @@ public class TripPattern implements Serializable, Lifecycle {
 	 * @param headsign
 	 */
 	public void setHeadsign(String headsign) {
-		this.headsign = headsign;
+		this.headsign =	headsign.length() <= HEADSIGN_LENGTH ? 
+				headsign : headsign.substring(0, HEADSIGN_LENGTH);
 	}
 
 	/**
