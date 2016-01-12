@@ -650,7 +650,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param arrivalOrDeparture
 	 *            Enumeration specifying whether to read in just arrivals or
 	 *            just departures. Set to null to read in both.
-	 * @return
+	 * @return List<ArrivalDeparture> or null if there is an exception
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
 			String dbName, Date beginTime, Date endTime, 
@@ -714,7 +714,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param firstResult
 	 * @param maxResults
 	 * @param arrivalOrDeparture
-	 * @return
+	 * @return List<ArrivalDeparture> or null if there is an exception
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
 			Date beginTime, Date endTime, String sqlClause,
