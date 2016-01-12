@@ -175,14 +175,14 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// Determine vehicle assignment information
 			if (vehicle.hasTrip()) {
 				TripDescriptor tripDescriptor = vehicle.getTrip();
-				if (tripDescriptor.hasTripId()) {
-					avlReport.setAssignment(tripDescriptor.getTripId(), 
-							AssignmentType.TRIP_ID);
-				}
 				if (tripDescriptor.hasRouteId()) {
 					avlReport.setAssignment(tripDescriptor.getRouteId(), 
 							AssignmentType.ROUTE_ID);
 				}
+        if (tripDescriptor.hasTripId()) {
+          avlReport.setAssignment(tripDescriptor.getTripId(), 
+              AssignmentType.TRIP_ID);
+        }
 			}
 			
 			logger.debug("Processed {}", avlReport);
