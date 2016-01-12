@@ -19,12 +19,14 @@
 .datepicker--cell.-in-range- {
     background: rgba(92, 196, 239, 0.5);
     }
-    
+ 
+/* Round the corners even more to emphasize that showing a date range */
 .datepicker--cell.-range-from- {
-border-radius: 6px 0 0 6px; }
-
+	border-radius: 6px 0 0 6px; 
+}
 .datepicker--cell.-range-to- {
- border-radius: 0 6px 6px 0; }
+	border-radius: 0 6px 6px 0; 
+}
      
 </style>
      
@@ -35,6 +37,11 @@ $(function() {
 	  range: true,
 	  
 	  multipleDatesSeparator: ' to ',
+	  
+	  // Default date format uses '/' but want to use '-' because looks
+	  // better and is consistent with the date formater used to specify 
+	  // initial value.
+	  dateFormat: 'mm-dd-yyyy',
 	  
 	  // Don't allow selection into the future
 	  maxDate: new Date(),
