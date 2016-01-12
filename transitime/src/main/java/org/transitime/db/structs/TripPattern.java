@@ -116,7 +116,7 @@ public class TripPattern implements Serializable, Lifecycle {
 	// For specifying max size of the trip pattern ID
 	public static final int TRIP_PATTERN_ID_LENGTH = 120;
 	// For specifying max size of headsign
-	private static final int HEADSIGN_LENGTH = 255;
+	public static final int HEADSIGN_LENGTH = 255;
 	
 	// Hibernate requires this class to be serializable because it uses multiple
 	// columns for the Id.

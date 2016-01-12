@@ -150,7 +150,7 @@ public class Trip implements Lifecycle, Serializable {
 	
 	// The GTFS trips.txt trip_headsign if set. Otherwise will get from the
 	// stop_headsign, if set, from the first stop of the trip. Otherwise null.
-	@Column
+	@Column(length=TripPattern.HEADSIGN_LENGTH)
 	private String headsign;
 	
 	// From GTFS trips.txt block_id if set. Otherwise the trip_id.
@@ -213,7 +213,12 @@ public class Trip implements Lifecycle, Serializable {
 		this.headsign =
 				processedHeadsign(unprocessedHeadsign, routeId,
 						titleFormatter);
-		
+		// Make sure headsign not too long for db
+		if (this.headsign.length() > TripPattern.HEADSIGN_LENGTH) {
+			this.headsign = 
+					this.headsign.substring(0, TripPattern.HEADSIGN_LENGTH);
+		}
+
 		// block column is optional in GTFS trips.txt file. Best can do when
 		// block ID is not set is to use the trip short name or the trip id 
 		// as the block. MBTA uses trip short name in the feed so start with
@@ -935,7 +940,8 @@ public class Trip implements Lifecycle, Serializable {
 	 * @param headsign
 	 */
 	public void setHeadsign(String headsign) {
-		this.headsign = headsign;
+		this.headsign =	headsign.length() <= TripPattern.HEADSIGN_LENGTH ? 
+				headsign : headsign.substring(0, TripPattern.HEADSIGN_LENGTH);
 	}
 
 	/**
