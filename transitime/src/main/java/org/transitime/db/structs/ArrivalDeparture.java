@@ -64,7 +64,9 @@ import org.transitime.utils.Time;
 @DynamicUpdate
 @Table(name="ArrivalsDepartures",
        indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
-                      columnList="time" ) } )
+                      columnList="time" ),
+                   @Index(name="ArrivalsDeparturesRouteTimeIndex", 
+                      columnList="routeShortName, time" )} )
 public class ArrivalDeparture implements Lifecycle, Serializable  {
 	
 	@Id 

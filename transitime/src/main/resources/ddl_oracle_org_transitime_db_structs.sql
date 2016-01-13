@@ -408,6 +408,8 @@
 
     create index ArrivalsDeparturesTimeIndex on ArrivalsDepartures (time);
 
+    create index ArrivalsDeparturesRouteTimeIndex on ArrivalsDepartures (routeShortName, time);
+
     create index AvlReportsTimeIndex on AvlReports (time);
 
     create index AvlTimeIndex on Matches (avlTime);
