@@ -7,7 +7,7 @@
   <style>
     #chart_div {
       width: 98%; 
-      margin-top: 30px;
+      margin-top: 10px;
       margin-left: 10px;
     }
     
@@ -47,21 +47,12 @@
 <body>
   <%@include file="/template/header.jsp" %>
   
-  <div id="chart_div"></div>
-  <div id="loading"></div>
-  <div id="errorMessage"></div>
-</body>
-
-<script type="text/javascript">
-
 <%
-  String numDays = request.getParameter("numDays");
   String allowableEarly = request.getParameter("allowableEarly");;
   String allowableLate = request.getParameter("allowableLate");;
-  String chartTitle = "Schedule Adherence by Route\\n" 
-    + allowableEarly + " min early to " + allowableLate + " min late\\n" 
-	+ request.getParameter("beginDate") 
-	+ " for " + numDays + " day" + (numDays.equals("1") ? "" : "s");
+  String chartSubtitle = allowableEarly + " min early to " 
+  	+ allowableLate + " min late</br>" 
+	+ request.getParameter("dateRange");
   
   String beginTime = request.getParameter("beginTime");
   String endTime = request.getParameter("endTime");
@@ -70,16 +61,24 @@
 		  beginTime = "00:00"; // default value
 	  if (endTime.isEmpty())
 		  endTime = "24:00";   // default value
-	  chartTitle += ", " + beginTime + " to " + endTime;
-  }
-  
+      chartSubtitle += ", " + beginTime + " to " + endTime;
+  }  
 %>
+
+  <div id="title">Schedule Adherence by Route</div>
+  <div id="subtitle"><%= chartSubtitle %></div>
+  <div id="chart_div"></div>
+  <div id="loading"></div>
+  <div id="errorMessage"></div>
+</body>
+
+<script type="text/javascript">
 
 var globalDataTable;
 var globalNumberOfRoutes;
 
-  function drawChart() {
-	  var vertSpaceForTitleAndHAxis = 150;
+  function drawChart() {      
+      var vertSpaceForTitleAndHAxis = 150;
 	  var vertSpaceForChart = (globalNumberOfRoutes + 1) * 36;
 	  var chartDivHeight = vertSpaceForTitleAndHAxis + vertSpaceForChart;
 	  
@@ -90,11 +89,6 @@ var globalNumberOfRoutes;
       }
       
         var options = {
-          title: '<%= chartTitle %>', 
-          titleTextStyle: {
-        	 fontSize: 26,
-        	 bold: false
-          },
           animation: {
         	 startup: true,
         	 duration: 500, 
@@ -111,7 +105,7 @@ var globalNumberOfRoutes;
           // Use small height than default to make sure units show for hAxis.
           // Use smaller width than default so that have room for route
           // names and the legend on the right
-          chartArea: {top: 105, height: vertSpaceForChart, width: '70%'},
+          chartArea: {top: 10, height: vertSpaceForChart, width: '70%'},
           
           // Need to set font size for things since default is to use font 
           // size proportional to height of chart and since could show many
@@ -135,8 +129,6 @@ var globalNumberOfRoutes;
         // didn't work, like animation.
         //var chart = new google.charts.Bar(document.getElementById('chart_div'));
         //chart.draw(globalDataTable, google.charts.Bar.convertOptions(options));
-        
-        $("#loading").fadeOut("slow");
   }
   
   function createDataTableAndDrawChart(jsonData) {
@@ -209,6 +201,8 @@ var globalNumberOfRoutes;
 	  globalDataTable = 
 		  google.visualization.arrayToDataTable(dataArray);
 	  
+      $("#loading").fadeOut("fast");
+
 	  drawChart();
   }
   

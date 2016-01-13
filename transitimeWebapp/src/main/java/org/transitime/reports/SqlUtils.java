@@ -111,9 +111,7 @@ public class SqlUtils {
 		if (tableAliasName != null && !tableAliasName.isEmpty())
 			tableAlias = tableAliasName + ".";
 		
-		return " AND (" + tableAlias + "routeshortname IN " 
-		+ routeIdentifiers + " OR " + tableAlias + "routeid IN " 
-		+ routeIdentifiers + ") ";
+		return " AND " + tableAlias + "routeshortname IN " + routeIdentifiers;
 	}
 	
 	/**

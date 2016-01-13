@@ -47,21 +47,12 @@
   <body>
     <%@include file="/template/header.jsp" %>
   
-    <div id="chart_div"></div>
-    <div id="loading"></div>
-    <div id="errorMessage"></div>
-  </body>
-  
-  <script type="text/javascript">
-  
   <%
-  String numDays = request.getParameter("numDays");
   String allowableEarly = request.getParameter("allowableEarly");;
   String allowableLate = request.getParameter("allowableLate");;
-  String chartTitle = "Schedule Adherence by Route\\n" 
-    + allowableEarly + " min early to " + allowableLate + " min late\\n" 
-	+ request.getParameter("beginDate") 
-	+ " for " + numDays + " day" + (numDays.equals("1") ? "" : "s");
+  String chartSubtitle = allowableEarly + " min early to " 
+    + allowableLate + " min late</br>" 
+	+ request.getParameter("dateRange");
   
   String beginTime = request.getParameter("beginTime");
   String endTime = request.getParameter("endTime");
@@ -71,10 +62,18 @@
 		  beginTime = "00:00"; // default value
 	  if (endTime.isEmpty())
 		  endTime = "24:00";   // default value
-	  chartTitle += ", " + beginTime + " to " + endTime;
-  }
-  
+		  chartSubtitle += ", " + beginTime + " to " + endTime;
+  }  
 %>
+    <div id="title"></div>
+    <div id="subtitle"><%= chartSubtitle %></div>
+    <div id="chart_div"></div>
+    <div id="loading"></div>
+    <div id="errorMessage"></div>
+  </body>
+  
+  <script type="text/javascript">
+  
 
 var MAX_LATE_BUCKET = -1800;
 var MAX_EARLY_BUCKET = 1200;
@@ -85,10 +84,7 @@ var globalChartOptions;
 function drawChart() {
     // Actually create the chart
     var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-    chart.draw(globalDataTable, globalChartOptions);
-        
-    // Get rid of the loading icon
-    $("#loading").fadeOut("slow");
+    chart.draw(globalDataTable, globalChartOptions);    
 }
 
 /**
@@ -170,8 +166,12 @@ function createDataTableAndDrawChart(jsonData) {
 
 	// The options for the chart
     globalChartOptions = {
-          title: 'Schedule Adherence',
-          chartArea: {top:50, width: '86%', height: '80%'},
+          animation: {
+          	 startup: true,
+          	 duration: 500, 
+          	 easing: 'out'
+          },
+          chartArea: {top:10, width: '86%', height: '90%'},
           vAxis: {
         	  minValue: 0,
         	  title: "Number of stops per time interval",
@@ -195,10 +195,23 @@ function createDataTableAndDrawChart(jsonData) {
         	    textStyle: {fontSize: 10}},
     };
 
+    // Get rid of the loading icon
+    $("#loading").fadeOut("fast");
+
 	drawChart();
 }
 
+function determineChartTitle(routeData) {
+	var agencyName = routeData.agency;
+	var routeName = routeData.routes[0].name;
+	$("#title").html('Schedule Adherence for ' + routeName);
+}
+
 function getDataAndDrawChart() {
+    // Get agency and route name for titles
+	$.getJSON(apiUrlPrefix + "/command/routes?r=<%= request.getParameter("r") %>", 
+			  determineChartTitle);	
+
 	$.ajax({
 	  	// The page being requested
 	    url: "schAdhByTimeData.jsp",

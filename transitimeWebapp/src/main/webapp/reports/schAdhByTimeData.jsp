@@ -9,8 +9,9 @@
        a - agency ID
        r - route ID or route short name. Can specify multiple routes. 
            Not specifying route provides data for all routes.
-       beginDate - date to begin query
-       numDays - number of days can do query. Limited to 31 days
+       dateRange - in format "xx/xx/xx to yy/yy/yy"
+       beginDate - date to begin query. For if dateRange not used.
+       numDays - number of days can do query. Limited to 31 days. For if dateRange not used.
        beginTime - for optionally specifying time of day for query for each day
        endTime - for optionally specifying time of day for query for each day
        allowableEarly - how early vehicle can be and still be OK.  Decimal format OK. 
