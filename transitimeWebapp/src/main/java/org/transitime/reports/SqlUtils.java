@@ -16,6 +16,8 @@
  */
 package org.transitime.reports;
 
+import java.text.ParseException;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.transitime.utils.Time;
@@ -46,7 +48,7 @@ public class SqlUtils {
 		// If parameter contains a ' or a ; then throw error to 
 		// prevent possible SQL injection attack
 		if (parameter.contains("'") || parameter.contains(";"))
-			throw new RuntimeException("Parameter \"" + parameter
+			throw new IllegalArgumentException("Parameter \"" + parameter
 					+ "\" not valid.");
 		
 		// Not a problem so return parameter
@@ -157,17 +159,32 @@ public class SqlUtils {
 		throwOnSqlInjection(dateRange);
 		if (dateRange != null) {
 			String fromToDates[] = dateRange.split(" to ");
-			String beginDate, endDate;
+			String beginDateStr, endDateStr;
 			if (fromToDates.length == 1) {
-				beginDate = endDate = fromToDates[0];
+				beginDateStr = endDateStr = fromToDates[0];
 			} else {
-				beginDate = fromToDates[0];
-				endDate = fromToDates[1];
+				beginDateStr = fromToDates[0];
+				endDateStr = fromToDates[1];
 			}
-			return " AND " + timeColumnName + " BETWEEN '" + beginDate
-					+ "' " + " AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' " 
+			
+			// Make sure not running report for too many days
+			try {
+				long beginDateTime = Time.parseDate(beginDateStr).getTime();
+				long endDateTime = Time.parseDate(endDateStr).getTime();
+				if (endDateTime - beginDateTime >= maxNumDays * Time.DAY_IN_MSECS) {					
+					throw new IllegalArgumentException("Date range is limited to "
+							+ maxNumDays + " days.");
+				}
+			} catch (ParseException e) {
+				throw new IllegalArgumentException("Could not parse begin date \"" 
+						+ beginDateStr + "\" or end date \"" 
+						+ endDateStr + "\".");
+			}
+			
+			return " AND " + timeColumnName + " BETWEEN '" + beginDateStr
+					+ "' " + " AND TIMESTAMP '" + endDateStr + "' + INTERVAL '1 day' " 
 					+ timeSql + ' ';						
-		} else {
+		} else { // Not using dateRange so must be using beginDate and numDays params
 			String beginDate = request.getParameter("beginDate");
 			throwOnSqlInjection(beginDate);
 			

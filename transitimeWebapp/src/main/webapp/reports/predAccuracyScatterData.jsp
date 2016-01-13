@@ -143,8 +143,8 @@ if (jsonString == null || jsonString.isEmpty()) {
 	    + " routeId=" + routeId
 	    + " source=" + source
 	    + " predictionType=" + predictionType;
-    response.sendError(416 /* Requested Range Not Satisfiable */, 
-	    message);
+	response.setStatus(400);
+	response.getWriter().write(message);
 	return;
 }
 

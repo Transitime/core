@@ -27,14 +27,16 @@
     #errorMessage {
 	  display: none;
       position: fixed;
-	  top: 30px;
-	  margin-left: 20%;
-	  margin-right: 20%;
+	  left: 0px;
+	  top: 0px;
+	  width: 100%;
 	  height: 100%;
+	  padding-top: 100px;
 	  text-align: center;
 	  font-family: sans-serif;
 	  font-size: large;
 	  z-index: 9999;
+	  background: white;
 	}
   </style>
 
@@ -226,7 +228,8 @@ function getDataAndDrawChart() {
 	       //alert(error + '. ' + request.responseText);
 	     	$("#errorMessage").html(request.responseText +
 	     			"<br/><br/>Hit back button to try other parameters.");
-	        $("#errorMessage").fadeIn("slow");
+	        $("#errorMessage").fadeIn("fast");
+	        $("#loading").fadeOut("slow");
 	       },
 	    });
 }

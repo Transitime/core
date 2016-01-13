@@ -22,6 +22,7 @@
 <%@ page import="org.transitime.reports.GenericJsonQuery" %>
 <%@ page import="org.transitime.reports.SqlUtils" %>
 <%
+try {
 String allowableEarlyStr = request.getParameter("allowableEarly");
 if (allowableEarlyStr == null || allowableEarlyStr.isEmpty())
 	allowableEarlyStr = "1.0";
@@ -48,7 +49,7 @@ String sql =
     + " AND ABS(EXTRACT (EPOCH FROM (scheduledtime-time))) < 3600\n"
     // Specifies which routes to provide data for
     + SqlUtils.routeClause(request, "ad") + "\n"
-    + SqlUtils.timeRangeClause(request, "ad.time", 31) + "\n"
+    + SqlUtils.timeRangeClause(request, "ad.time", 7) + "\n"
     // Grouping needed to put times in time buckets
     + " GROUP BY time_period \n"
     // Order by lateness so can easily understand results
@@ -63,4 +64,9 @@ String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
 response.setContentType("application/json");
 response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
+} catch (Exception e) {
+	response.setStatus(400);
+	response.getWriter().write(e.getMessage());
+	return;
+}
 %>

@@ -18,6 +18,7 @@
 <%@ page import="org.transitime.reports.GenericJsonQuery" %>
 <%@ page import="org.transitime.reports.SqlUtils" %>
 <%
+try {		
 String allowableEarlyStr = request.getParameter("allowableEarly");
 if (allowableEarlyStr == null || allowableEarlyStr.isEmpty())
 	allowableEarlyStr = "1.0";
@@ -45,7 +46,7 @@ String sql =
     + " AND ad.scheduledtime IS NOT NULL \n"
     // Specifies which routes to provide data for
     + SqlUtils.routeClause(request, "ad") + "\n"
-    + SqlUtils.timeRangeClause(request, "ad.time", 31) + "\n"
+    + SqlUtils.timeRangeClause(request, "ad.time", 7) + "\n"
     // Grouping needed since want to output route name
     + " GROUP BY r.name, r.routeorder ORDER BY r.routeorder, r.name;";
 
@@ -54,8 +55,13 @@ System.out.println("\nFor schedule adherence by route query sql=\n" + sql);
     		
 // Do the query and return result in JSON format    
 String agencyId = request.getParameter("a");
-String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
+String jsonString  = GenericJsonQuery.getJsonString(agencyId, sql);
 response.setContentType("application/json");
 response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
+} catch (Exception e) {
+	response.setStatus(400);
+	response.getWriter().write(e.getMessage());
+	return;
+}
 %>
