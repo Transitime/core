@@ -1306,6 +1306,16 @@ public class GtfsData {
 		if (unprocessedHeadsign == null) {
 			GtfsStopTime firstGtfsStopTime = gtfsStopTimesForTrip.get(0);
 			unprocessedHeadsign = firstGtfsStopTime.getStopHeadsign();
+			
+			// If headsign not defined in stop times either then use default 
+			// of "Loop".
+			if (unprocessedHeadsign == null) {
+				unprocessedHeadsign = "Loop";
+				logger.error("No headsign for tripId={} defined in either "
+						+ "trips.txt nor stop_times.txt. Therefore using "
+						+ "default of \"Loop\"",
+						gtfsTrip.getTripId());
+			}
 		}
 		
 		// If this route is actually a sub-route of a parent then use
