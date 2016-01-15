@@ -175,6 +175,13 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							  logger.error("could not compute prediction for trip {} and stopId {}", trip.getId(), stopId);
 							  continue;
 							}
+							
+							if (prediction.getTime() - readTime.getTime() + 60 * Time.MS_PER_SEC < 0) {
+							  // stoptime updates can be for entire trip, we really only care about predictions in the future
+							  logger.debug("prediction {} is too far in past, discarding.", prediction);
+							  continue;
+							}
+							
 							logger.info("Storing external prediction routeId={}, "
 									+ "directionId={}, tripId={}, vehicleId={}, "
 									+ "stopId={}, prediction={}, isArrival={}",

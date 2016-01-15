@@ -83,6 +83,14 @@ public class TemporalMatcher {
 	private static TemporalDifference determineHowFarOffScheduledTime(
 			String vehicleId, Date date, SpatialMatch spatialMatch,
 			boolean isFirstSpatialMatch) {
+
+	  // check to see if we are frequency based
+    if (spatialMatch.getTrip().isNoSchedule()) {
+      // if there is no schedule, we really can't be late!
+      logger.debug("frequency trip has no schedule adherence, using temporalDifference of 0 {}", spatialMatch.getTrip());
+      return new TemporalDifference(0);
+    }
+	  
 		// Determine how long it should take to travel along trip to the match. 
 		// Can add this time to the trip scheduled start time to determine
 		// when the vehicle is predicted to be at the match. 
@@ -358,6 +366,12 @@ public class TemporalMatcher {
 		long avlTimeDifferenceMsec = 
 				avlTime.getTime() - previousAvlTime.getTime();
 
+		if (spatialMatches.size() == 1 && spatialMatches.get(0).getTrip().isNoSchedule()) {
+		  // here we blindly trust avl assignment if its the only match
+		  logger.debug("greedily matching to only spatial assigment for frequency based trip {}", spatialMatches.get(0).getTrip());
+		  return new TemporalMatch(spatialMatches.get(0), new TemporalDifference(0));
+		}
+		
 		// Find best temporal match of the spatial matches
 		TemporalMatch bestTemporalMatchSoFar = null;
 		for (int matchIdx = 0; matchIdx < spatialMatches.size(); ++matchIdx) {
@@ -487,6 +501,15 @@ public class TemporalMatcher {
 			AvlReport avlReport, List<SpatialMatch> spatialMatches) {
 		TemporalDifference bestDifferenceFromExpectedTime = null;
 		SpatialMatch bestSpatialMatch = null;
+		
+		
+		logger.debug("getBestTemporalMatchComparedToSchedule has spatialMatches {}", spatialMatches);
+		
+	  if (spatialMatches.size() == 1 && spatialMatches.get(0).getTrip().isNoSchedule()) {
+	    // again we blindly trust avl assignment if its the only match
+      logger.debug("greedily matching to only scheduled spatial assigment for frequency based trip {}", spatialMatches.get(0).getTrip());
+      return new TemporalMatch(spatialMatches.get(0), new TemporalDifference(0));
+    }
 		
 		for (int i=0; i<spatialMatches.size(); ++i) {	
 			SpatialMatch spatialMatch = spatialMatches.get(i);

@@ -697,7 +697,10 @@ public final class Block implements Serializable {
 			return true;
 		}
 		
-		// Not a match so return false
+		if (logger.isDebugEnabled())
+		  logger.debug("block {} is not active for vehicleId {}", trip.getBlock().getId(), vehicleId);
+
+    // Not a match so return false
 		return false;
 	}
 	

@@ -118,8 +118,10 @@ public class SpatialMatcher {
 		double allowableDistance =
 				getMaxAllowableDistanceFromSegment(trip.getRoute());
 		if (!tripPatternExtent.isWithinDistance(avlReport.getLocation(),
-				allowableDistance))
+				allowableDistance)) {
+		  logger.debug("AvlReport {} is too far from route for trip {}", avlReport, trip.getId());
 			return spatialMatches;
+		}
 		
 		// Start looking for matches at the beginning of the trip.
 		Indices indices = new Indices(block, block.getTripIndex(trip), 

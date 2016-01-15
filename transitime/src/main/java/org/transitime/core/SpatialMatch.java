@@ -524,6 +524,7 @@ public class SpatialMatch {
 	 * @return true if this spatial match is for a layover
 	 */
 	public boolean isLayover() {
+	  if (block.isNoSchedule()) return false; // Frequency-based blocks can't have layovers
 		return block.isLayover(tripIndex, stopPathIndex);
 	}
 	

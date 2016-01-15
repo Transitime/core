@@ -660,8 +660,8 @@ public class AvlProcessor {
 		List<SpatialMatch> spatialMatches =
 				SpatialMatcher.getSpatialMatches(vehicleState.getAvlReport(),
 						block, potentialTrips);
-		logger.debug("For vehicleId={} and blockId={} spatial matches={}",
-				avlReport.getVehicleId(), block.getId(), spatialMatches);
+		logger.debug("For vehicleId={} and blockId={} spatial matches={} from potentialTrips={}",
+				avlReport.getVehicleId(), block.getId(), spatialMatches, potentialTrips);
 
 		// Determine the best temporal match
 		TemporalMatch bestMatch = TemporalMatcher.getInstance()

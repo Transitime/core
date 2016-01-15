@@ -204,7 +204,15 @@ public class TimeoutHandlerModule extends Module {
 	 */
 	private void handleWaitStopPossibleTimeout(VehicleState vehicleState, long now,
 			Iterator<AvlReport> mapIterator) {
-		long scheduledDepartureTime = vehicleState.getMatch()
+
+	  // we can't easily determine wait stop time for frequency based trips  
+	  // so don't timeout based on stop info
+	  if (vehicleState.getBlock().isNoSchedule()) {
+      logger.debug("not timing out frequency based assignment {}", vehicleState);
+      return;
+    }
+	  
+	  long scheduledDepartureTime = vehicleState.getMatch()
 				.getScheduledWaitStopTime();
 		if (scheduledDepartureTime >= 0) {
 			// There is a scheduled departure time. Make sure not too
