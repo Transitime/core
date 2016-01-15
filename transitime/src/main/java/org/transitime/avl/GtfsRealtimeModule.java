@@ -62,14 +62,25 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 	 */
 	@Override
 	protected void getAndProcessData() {
-	  logger.info("reading {}", getGtfsRealtimeURI());
-		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
-				.getAvlReports(getGtfsRealtimeURI());
-		logger.info("read complete");
-		for (AvlReport avlReport : avlReports) {
-			processAvlReport(avlReport);
-		}
-		logger.info("processed {} reports", avlReports.size());
+	  
+	  String[] urls = getGtfsRealtimeURI().split(",");
+	  
+	  
+	  for (String urlStr : urls) {
+  	  try {
+    	  logger.info("reading {}", urlStr);
+    		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
+    				.getAvlReports(urlStr);
+    		logger.info("read complete");
+    		for (AvlReport avlReport : avlReports) {
+    			processAvlReport(avlReport);
+    		}
+    		logger.info("processed {} reports for feed {}", avlReports.size(), urlStr);
+  	  } catch (Exception any) {
+  	    logger.error("issues processing feed {}:{}", urlStr, any, any);
+  	  }
+  		
+	  }
 	}
 
 	/* (non-Javadoc)

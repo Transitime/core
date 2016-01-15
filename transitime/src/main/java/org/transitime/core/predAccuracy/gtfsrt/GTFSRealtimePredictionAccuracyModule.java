@@ -38,6 +38,7 @@ import org.transitime.utils.Time;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
@@ -100,18 +101,12 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	 * 
 	 * @return the FeedMessage to be processed
 	 */
-	private FeedMessage getExternalPredictions() {
+	private FeedMessage getExternalPredictions(URL url) {
 				
-		// Will just read all data from gtfs-rt url
-		URL url=null;
-		logger.info("Getting predictions from API using URL={}", getGtfstripupdateurl().getValue());
 		
 		try {
-			// Create the connection
-			url = new URL(getGtfstripupdateurl().getValue());
-			
 			FeedMessage feed = FeedMessage.parseFrom(url.openStream());			   
-			logger.info("Prediction read successfully from URL={}",getGtfstripupdateurl().getValue());
+			logger.info("Prediction read successfully from URL={}", url.toExternalForm());
 			return feed;
 		} catch (Exception e) {
 			logger.error("Problem when getting data from GTFS realtime trip updates URL={}", 
@@ -170,7 +165,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 								}
 							}
 							
-							Date prediction = getPredictedTimeFromEvent(stopTime, trip, readTime.getTime());
+							Date prediction = getPredictedTimeFromEvent(stopTime, trip, getTodayInMilliseconds(readTime.getTime()));
 							if (prediction == null) {
 							  logger.error("could not compute prediction for trip {} and stopId {}", trip.getId(), stopId);
 							  continue;
@@ -178,18 +173,24 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							
 							if (prediction.getTime() - readTime.getTime() + 60 * Time.MS_PER_SEC < 0) {
 							  // stoptime updates can be for entire trip, we really only care about predictions in the future
-							  logger.debug("prediction {} is too far in past, discarding.", prediction);
+							  logger.debug("prediction {} is too far in past for trip {} and stop {} and vehicle {}, discarding.", 
+							      prediction,
+							      trip,
+							      stopId,
+							      update.getVehicle().getId());
 							  continue;
 							}
+							
+							String routeId = lookupRouteId(update.getTrip()); 
 							
 							logger.info("Storing external prediction routeId={}, "
 									+ "directionId={}, tripId={}, vehicleId={}, "
 									+ "stopId={}, prediction={}, isArrival={}",
-									update.getTrip().getRouteId(), direction, update.getTrip().getTripId(), update.getVehicle().getId(), stopId,
+									routeId, direction, update.getTrip().getTripId(), update.getVehicle().getId(), stopId,
 									prediction, true);
 						 	
 						 	PredAccuracyPrediction pred = new PredAccuracyPrediction(
-							update.getTrip().getRouteId(), 
+							routeId, 
 							direction, 
 							stopId, 
 							update.getTrip().getTripId(), 
@@ -220,7 +221,21 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		 }			
 	}
 	
-	private Date getPredictedReadTimeFromHeader(FeedHeader header) {
+	private String lookupRouteId(TripDescriptor td) {
+	  if (td.hasRouteId()) {
+	    return td.getRouteId();
+	    
+	  }
+	  
+	  String tripId = td.getTripId();
+	  Trip trip = Core.getInstance().getDbConfig().getTrip(tripId);
+	  return trip.getRouteId();
+	  
+  }
+
+
+
+  private Date getPredictedReadTimeFromHeader(FeedHeader header) {
 	  if (translator != null) {
 	    return translator.parseFeedHeaderTimestamp(header);
 	  }
@@ -338,10 +353,23 @@ private String cleanStopId(String stopId) {
 		logger.info("Calling GTFSRealtimePredictionAccuracyModule."
 				+ "getAndProcessData()");
 		
-		// Get data for all items in the GTFS-RT trip updates feed		
-		FeedMessage feed = getExternalPredictions();
-			
-		processExternalPredictions(feed, predictionsReadTime);
-		
+    // Will just read all data from gtfs-rt url
+    URL url=null;
+    logger.info("Getting predictions from API using URL={}", getGtfstripupdateurl().getValue());
+    String[] urls = getGtfstripupdateurl().getValue().split(",");
+    
+    for (String urlStr : urls) {
+      try {
+        // Create the connection
+        url = new URL(urlStr);
+  
+    		// Get data for all items in the GTFS-RT trip updates feed		
+    		FeedMessage feed = getExternalPredictions(url);
+    			
+    		processExternalPredictions(feed, predictionsReadTime);
+      } catch (Exception any) {
+        logger.error("exception processing feed {}:{}", urlStr, any, any);
+      }
+    }
 	}
 }
