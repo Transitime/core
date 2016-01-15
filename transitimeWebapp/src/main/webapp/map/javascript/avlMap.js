@@ -322,9 +322,6 @@ animate.onEnd(function() {
 
 // Given a list of AVL positions, initialize the animation object.
 function prepareAnimation(avlData) {
-	
-	// Fade in playback buttons
-	$("#playbackContainer").animate({bottom: "5%"});
 
 	// Make sure animation controls are in their initial state.
 	$("#playbackPlay").attr("src", playButton);

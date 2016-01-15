@@ -69,6 +69,17 @@ finding specific issues with predictions.">
     vertically which is useful for when there are not that many trips per day.">
       Schedule for Route (vertical stops)</a></li>
 </ul>
+
+<div id="subtitle">Status Reports</div>
+<ul class="choicesList">
+  <li><a href="../status/activeBlocks.jsp?a=<%= agencyId %>"
+    title="Shows how many block assignments are currently active and if they have assigned vehicles">
+      Active Blocks</a></li>
+  <li><a href="../status/serverStatus.jsp?a=<%= agencyId %>"
+    title="Shows how well system is running, including the AVL feed">
+      Server Status</a></li>
+</ul>
+
 </div>
 </body>
 </html>
