@@ -39,6 +39,7 @@ import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.logging.Markers;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.StringUtils;
@@ -722,6 +723,20 @@ public class AvlProcessor {
 			}
 		}
 
+		// Sometimes get a bad assignment where there is already a valid vehicle
+		// with the assignment and the new match is actually far away from the
+		// route, indicating driver might have entered wrong ID or never
+		// logged out. For this situation ignore the match.
+		if (matchProblematicDueOtherVehicleHavingAssignment(bestMatch,
+				avlReport.getVehicleId())) {
+			logger.error("Got a match for vehicleId={} but that assignment is "
+					+ "already taken by another vehicle and the new match "
+					+ "doesn't appear to be valid because it is far away from "
+					+ "the route. {}",
+					avlReport.getVehicleId(), bestMatch);
+			return false;
+		}
+		
 		// Update the state of the vehicle
 		updateVehicleStateFromAssignment(bestMatch, vehicleState,
 				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, block.getId(),
@@ -731,6 +746,80 @@ public class AvlProcessor {
 		return bestMatch != null;
 	}
 
+	/**
+	 * Determines if match is problematic since other vehicle already has
+	 * assignment and the other vehicle seems to be more appropriate. Match is
+	 * problematic if 1) exclusive matching is enabled, 2) other non-schedule
+	 * based vehicle already has the assignment, 3) the other vehicle that
+	 * already has the assignment isn't having any problems such as vehicle
+	 * being delayed, and 4) the new match is far away from the route which
+	 * implies that it might be a mistaken login.
+	 * <p>
+	 * Should be noted that this issue was encountered with sfmta on 1/1/2016
+	 * around 15:00 for vehicle 8660 when avl feed showed it getting block
+	 * assignment 573 even though it was far from the route and vehicle 8151
+	 * already had that assignment and actually was on the route. This
+	 * can happen if driver enters wrong assignment, or perhaps if they
+	 * never log out.
+	 * 
+	 * @param match
+	 * @param newVehicleId
+	 * @return true if the match is problematic and should not be used
+	 */
+	private boolean matchProblematicDueOtherVehicleHavingAssignment(
+			TemporalMatch match, String newVehicleId) {
+		// If matches don't need to be exclusive then don't have a problem
+		Block block = match.getBlock();
+		if (!block.shouldBeExclusive())
+			return false;
+		
+		// If no other non-schedule based vehicle assigned to the block then 
+		// not a problem
+		Collection<String> vehiclesAssignedToBlock = VehicleDataCache
+				.getInstance().getVehiclesByBlockId(block.getId());
+		if (vehiclesAssignedToBlock.isEmpty())
+			// No other vehicle has assignment so not a problem
+			return false;
+		String otherVehicleId = null;
+		for (String vehicleId : vehiclesAssignedToBlock) {
+			otherVehicleId = vehicleId;
+			
+			VehicleState vehicleState =
+					VehicleStateManager.getInstance()
+							.getVehicleState(vehicleId);
+			// If other vehicle that has assignment is schedule based then not 
+			// a problem to take its assignment away
+			if (vehicleState.isForSchedBasedPreds())
+				return false;
+			
+			// If that other vehicle actually having any problem then not a 
+			// problem to take assignment away
+			if (!vehicleState.isPredictable() || vehicleState.isDelayed())
+				return false;			
+		}
+		 
+		// So far we know that another vehicle has exclusive assignment and
+		// there are no problems with that vehicle. This means the new match 
+		// could be a mistake. Shouldn't use it if the new vehicle is far
+		// away from route (it matches to a layover where matches are lenient),
+		// indicating that the vehicle might have gotten wrong assignment while
+		// doing something else.
+		if (match.getDistanceToSegment() > 1000.0) {			
+			// Match is far away from route so consider it to be invalid
+			logger.error(Markers.email(),
+					"Got a match for vehicleId={} but that assignment is "
+					+ "already taken by vehicleId={} and the new match "
+					+ "doesn't appear to be valid because it is more than "
+					+ "1000m from the route. {}",
+					newVehicleId, otherVehicleId, match);
+			return true;
+		} else {
+			// The new match is reasonably close to the route so should consider
+			// it valid
+			return false;
+		}
+	}
+	
 	/**
 	 * If the block assignment is supposed to be exclusive then looks for any
 	 * vehicles assigned to the specified block and removes the assignment from
