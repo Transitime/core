@@ -865,7 +865,7 @@ public class AvlProcessor {
 		// If message not yet sent for vehicle or it has been more than 10 minutes...
 		if (emailMessagesWhenAssignmentGrabImproper.getValue() 
 				&& (lastTimeSentForVehicle == null 
-				    || avlReport.getTime() > lastTimeSentForVehicle + 10*Time.MS_PER_MIN)) {
+				    || avlReport.getTime() > lastTimeSentForVehicle + 30*Time.MS_PER_MIN)) {
 			problemGrabbingAssignmentMap.put(vehicleId, avlReport.getTime());
 			return true;
 		} else 
