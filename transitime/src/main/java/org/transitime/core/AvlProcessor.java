@@ -18,7 +18,9 @@ package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
@@ -700,15 +703,19 @@ public class AvlProcessor {
 					+ "match so will try to match to layover stop.",
 					avlReport.getVehicleId());
 
-			Trip trip = TemporalMatcher
-					.getInstance()
+			Trip trip = TemporalMatcher.getInstance()
 					.matchToLayoverStopEvenIfOffRoute(avlReport, potentialTrips);
 			if (trip != null) {
+				// Determine distance to first stop of trip
+				Location firstStopInTripLoc = trip.getStopPath(0).getStopLocation();
+				double distanceToSegment = 
+						firstStopInTripLoc.distance(avlReport.getLocation());
+
 				SpatialMatch beginningOfTrip = new SpatialMatch(
 						avlReport.getTime(),
 						block, block.getTripIndex(trip), 0, // stopPathIndex
 						0, // segmentIndex
-						0.0, // distanceToSegment
+						distanceToSegment,
 						0.0); // distanceAlongSegment
 
 				bestMatch = new TemporalMatch(beginningOfTrip,
@@ -728,12 +735,12 @@ public class AvlProcessor {
 		// route, indicating driver might have entered wrong ID or never
 		// logged out. For this situation ignore the match.
 		if (matchProblematicDueOtherVehicleHavingAssignment(bestMatch,
-				avlReport.getVehicleId())) {
+				vehicleState)) {
 			logger.error("Got a match for vehicleId={} but that assignment is "
 					+ "already taken by another vehicle and the new match "
 					+ "doesn't appear to be valid because it is far away from "
-					+ "the route. {}",
-					avlReport.getVehicleId(), bestMatch);
+					+ "the route. {} {}",
+					avlReport.getVehicleId(), bestMatch, avlReport);
 			return false;
 		}
 		
@@ -763,11 +770,11 @@ public class AvlProcessor {
 	 * never log out.
 	 * 
 	 * @param match
-	 * @param newVehicleId
+	 * @param vehicleState
 	 * @return true if the match is problematic and should not be used
 	 */
 	private boolean matchProblematicDueOtherVehicleHavingAssignment(
-			TemporalMatch match, String newVehicleId) {
+			TemporalMatch match, VehicleState vehicleState) {
 		// If matches don't need to be exclusive then don't have a problem
 		Block block = match.getBlock();
 		if (!block.shouldBeExclusive())
@@ -783,18 +790,18 @@ public class AvlProcessor {
 		String otherVehicleId = null;
 		for (String vehicleId : vehiclesAssignedToBlock) {
 			otherVehicleId = vehicleId;
-			
-			VehicleState vehicleState =
+			VehicleState otherVehicleState =
 					VehicleStateManager.getInstance()
-							.getVehicleState(vehicleId);
+							.getVehicleState(otherVehicleId);
+
 			// If other vehicle that has assignment is schedule based then not 
 			// a problem to take its assignment away
-			if (vehicleState.isForSchedBasedPreds())
+			if (otherVehicleState.isForSchedBasedPreds())
 				return false;
 			
 			// If that other vehicle actually having any problem then not a 
 			// problem to take assignment away
-			if (!vehicleState.isPredictable() || vehicleState.isDelayed())
+			if (!otherVehicleState.isPredictable() || vehicleState.isDelayed())
 				return false;			
 		}
 		 
@@ -806,18 +813,46 @@ public class AvlProcessor {
 		// doing something else.
 		if (match.getDistanceToSegment() > 1000.0) {			
 			// Match is far away from route so consider it to be invalid
-			logger.error(Markers.email(),
+			if (shouldSendMessage(vehicleState.getVehicleId(), 
+					vehicleState.getAvlReport())) {
+				logger.error(Markers.email(),
 					"Got a match for vehicleId={} but that assignment is "
 					+ "already taken by vehicleId={} and the new match "
 					+ "doesn't appear to be valid because it is more than "
-					+ "1000m from the route. {}",
-					newVehicleId, otherVehicleId, match);
+					+ "1000m from the route. {} {}",
+					vehicleState.getVehicleId(), otherVehicleId, match, 
+					vehicleState.getAvlReport());
+			}
 			return true;
 		} else {
 			// The new match is reasonably close to the route so should consider
 			// it valid
 			return false;
 		}
+	}
+	
+	// Keyed on vehicleId. Contains last time problem grabbing assignment 
+	// message sent for the vehicle. For reducing number of emails sent
+	// when there is a problem.
+	private Map<String, Long> problemGrabbingAssignmentMap = 
+			new HashMap<String, Long>();
+	
+	/**
+	 * For reducing e-mail logging messages when problem grabbing assignment.
+	 * 
+	 * @param vehicleId
+	 * @param avlReport
+	 * @return true if should send message
+	 */
+	private boolean shouldSendMessage(String vehicleId, AvlReport avlReport) {
+		Long lastTimeSentForVehicle = problemGrabbingAssignmentMap.get(vehicleId);
+		// If message not yet sent for vehicle or it has been more than 10 minutes...
+		if (lastTimeSentForVehicle == null 
+				|| avlReport.getTime() > lastTimeSentForVehicle + 10*Time.MS_PER_MIN) {
+			problemGrabbingAssignmentMap.put(vehicleId, avlReport.getTime());
+			return true;
+		} else 
+			return false;
 	}
 	
 	/**
