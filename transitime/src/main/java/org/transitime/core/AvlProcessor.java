@@ -25,6 +25,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.AvlConfig;
@@ -89,6 +90,19 @@ public class AvlProcessor {
 					+ "previous assignment. Useful for when assignment part "
 					+ "of AVL feed doesn't always provide a valid assignment.");
 
+	private static BooleanConfigValue emailMessagesWhenAssignmentGrabImproper =
+			new BooleanConfigValue(
+					"transitime.core.emailMessagesWhenAssignmentGrabImproper", 
+					false, 
+					"When one vehicle gets assigned by AVL feed but another "
+					+ "vehicle already has that assignment then sometimes the "
+					+ "assignment to the new vehicle would be incorrect. Could "
+					+ "be that vehicle was never logged out or simply got bad "
+					+ "assignment. For this situation it can be useful to "
+					+ "receive error message via e-mail. But can get too many "
+					+ "such e-mails. This property allows one to control those "
+					+ "e-mails.");
+	
 	/************************** Logging *******************************/
 
 	private static final Logger logger = LoggerFactory
@@ -839,6 +853,8 @@ public class AvlProcessor {
 	
 	/**
 	 * For reducing e-mail logging messages when problem grabbing assignment.
+	 * Java property transitime.avl.emailMessagesWhenAssignmentGrabImproper must
+	 * be true for e-mail to be sent when there is an error.
 	 * 
 	 * @param vehicleId
 	 * @param avlReport
@@ -847,8 +863,9 @@ public class AvlProcessor {
 	private boolean shouldSendMessage(String vehicleId, AvlReport avlReport) {
 		Long lastTimeSentForVehicle = problemGrabbingAssignmentMap.get(vehicleId);
 		// If message not yet sent for vehicle or it has been more than 10 minutes...
-		if (lastTimeSentForVehicle == null 
-				|| avlReport.getTime() > lastTimeSentForVehicle + 10*Time.MS_PER_MIN) {
+		if (emailMessagesWhenAssignmentGrabImproper.getValue() 
+				&& (lastTimeSentForVehicle == null 
+				    || avlReport.getTime() > lastTimeSentForVehicle + 10*Time.MS_PER_MIN)) {
 			problemGrabbingAssignmentMap.put(vehicleId, avlReport.getTime());
 			return true;
 		} else 
