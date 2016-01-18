@@ -955,6 +955,14 @@ public class AvlProcessor {
 			}
 		}
 
+		// This method called when there is an assignment from AVL feed. But
+		// if that assignment is invalid then will make it here. Try the
+		// auto assignment feature in case it is enabled.
+		boolean autoAssigned = 
+				automaticalyMatchVehicleToAssignment(vehicleState);
+		if (autoAssigned)
+			return true;
+		
 		// There was no valid block or route assignment from AVL feed so can't
 		// do anything. But set the block assignment for the vehicle
 		// so it is up to date. This call also sets the vehicle state
@@ -1016,23 +1024,24 @@ public class AvlProcessor {
 	/**
 	 * For when vehicle is not predictable and didn't have previous assignment.
 	 * Since this method is to be called when vehicle isn't assigned and didn't
-	 * get an assignment through the feed should try to automatically assign the
-	 * vehicle based on how it matches to a currently unmatched block. If it can
-	 * match the vehicle then this method fully processes the match, generating
-	 * predictions and such.
+	 * get a valid assignment through the feed should try to automatically
+	 * assign the vehicle based on how it matches to a currently unmatched
+	 * block. If it can match the vehicle then this method fully processes the
+	 * match, generating predictions and such.
 	 * 
 	 * @param vehicleState
+	 * @return true if auto assigned vehicle
 	 */
-	private void automaticalyMatchVehicleToAssignment(VehicleState vehicleState) {
+	private boolean automaticalyMatchVehicleToAssignment(VehicleState vehicleState) {
 		// If actually creating a schedule based prediction
 		if (vehicleState.isForSchedBasedPreds())
-			return;
+			return false;
 
 		if (!AutoBlockAssigner.enabled()) {
 			logger.info("Could not automatically assign vehicleId={} because "
 					+ "AutoBlockAssigner not enabled.", 
 					vehicleState.getVehicleId());
-			return;
+			return false;
 		}
 		
 		logger.info("Trying to automatically assign vehicleId={}", 
@@ -1050,7 +1059,10 @@ public class AvlProcessor {
 			updateVehicleStateFromAssignment(bestMatch, vehicleState,
 					BlockAssignmentMethod.AUTO_ASSIGNER, bestMatch.getBlock()
 							.getId(), "block");
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
