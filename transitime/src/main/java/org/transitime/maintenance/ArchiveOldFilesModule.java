@@ -195,7 +195,7 @@ public class ArchiveOldFilesModule extends Module {
 				// continue to run and send an e-mail once a day as a 
 				// reminder that there is a problem.
 				logger.error(Markers.email(), 
-						"Error when archiving old files for agency .", 
+						"Error when archiving old files for agencyId={}.", 
 						AgencyConfig.getAgencyId(), t);
 			}
 		}

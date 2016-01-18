@@ -109,12 +109,12 @@ public class DataDbLogger {
 	// Used for logging when queue use is going down.
 	private double maxQueueLevel = 0.0;
 	
-	// This is a singleton class that only returns a single object per projectId.
+	// This is a singleton class that only returns a single object per agencyId.
 	private static Map<String, DataDbLogger> dataDbLoggerMap = 
 			new HashMap<String, DataDbLogger>(1);
 	
-	// So can access projectId for logging messages
-	private String projectId;
+	// So can access agencyId for logging messages
+	private String agencyId;
 	
 	// The Session for writing data to db
 	private SessionFactory sessionFactory;
@@ -126,9 +126,9 @@ public class DataDbLogger {
 
 	/**
 	 * Factory method. Returns the singleton db logger for the specified
-	 * projectId.
+	 * agencyId.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Id of database to be written to
 	 * @param shouldStoreToDb
 	 *            Specifies whether data should actually be written to db. If in
@@ -138,16 +138,16 @@ public class DataDbLogger {
 	 *            Specifies if should pause the thread calling add() if the
 	 *            queue is filling up. Useful for when in batch mode and dumping
 	 *            a whole bunch of data to the db really quickly.
-	 * @return The DataDbLogger for the specified projectId
+	 * @return The DataDbLogger for the specified agencyId
 	 */
-	public static DataDbLogger getDataDbLogger(String projectId,
+	public static DataDbLogger getDataDbLogger(String agencyId,
 			boolean shouldStoreToDb, boolean shouldPauseToReduceQueue) {
 		synchronized (dataDbLoggerMap) {
-			DataDbLogger logger = dataDbLoggerMap.get(projectId);
+			DataDbLogger logger = dataDbLoggerMap.get(agencyId);
 			if (logger == null) {
-				logger = new DataDbLogger(projectId, shouldStoreToDb,
+				logger = new DataDbLogger(agencyId, shouldStoreToDb,
 						shouldPauseToReduceQueue);
-				dataDbLoggerMap.put(projectId, logger);
+				dataDbLoggerMap.put(agencyId, logger);
 			}
 			return logger;
 		}
@@ -158,7 +158,7 @@ public class DataDbLogger {
 	 * used. Starts up separate thread that actually reads from queue and stores
 	 * the data.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Id of database to be written to
 	 * @param shouldStoreToDb
 	 *            Specifies whether data should actually be written to db. If in
@@ -169,14 +169,14 @@ public class DataDbLogger {
 	 *            queue is filling up. Useful for when in batch mode and dumping
 	 *            a whole bunch of data to the db really quickly.
 	 */
-	private DataDbLogger(String projectId, boolean shouldStoreToDb, 
+	private DataDbLogger(String agencyId, boolean shouldStoreToDb, 
 			boolean shouldPauseToReduceQueue) {
-		this.projectId = projectId;
+		this.agencyId = agencyId;
 		this.shouldStoreToDb = shouldStoreToDb;
 		this.shouldPauseToReduceQueue = shouldPauseToReduceQueue;
 		
 		// Create the reusable heavy weight session factory
-		sessionFactory = HibernateUtils.getSessionFactory(projectId);
+		sessionFactory = HibernateUtils.getSessionFactory(agencyId);
 		
 		// Start up separate thread that reads from the queue and
 		// actually stores the data
@@ -275,12 +275,12 @@ public class DataDbLogger {
 			indexOfLevelWhenMessageLogged = levelIndex;
 			String message = success ?
 					"DataDbLogger queue filling up " +
-					" for projectId=" + projectId +". It is now at " + 
+					" for agencyId=" + agencyId +". It is now at " + 
 					String.format("%.1f", level*100) + "% capacity with " + 
 					queue.size() + " elements already in the queue."
 					:
-					"DataDbLogger queue is now completely full for projectId=" + 
-					projectId + ". LOSING DATA!!!";
+					"DataDbLogger queue is now completely full for agencyId=" + 
+					agencyId + ". LOSING DATA!!!";
 			
 			// Add to message the class names of the objects in the queue so 
 			// can see what objects are causing the problem
@@ -297,7 +297,7 @@ public class DataDbLogger {
 		// If losing data then log such
 		if (!success) {
 			logger.error("DataDbLogger queue is now completely full for " +
-					"projectId=" + projectId + ". LOSING DATA!!! Failed to " +
+					"agencyId=" + agencyId + ". LOSING DATA!!! Failed to " +
 					"store object=[" + o + "]");
 		}
 		
@@ -350,7 +350,7 @@ public class DataDbLogger {
 		int levelIndexIncludingMargin = indexOfLevel(level + 0.10);
 		if (levelIndexIncludingMargin < indexOfLevelWhenMessageLogged) {
 			logger.error(Markers.email(), "DataDbLogger queue emptying out somewhat " +
-					" for projectId=" + projectId +". It is now at " + 
+					" for agencyId=" + agencyId +". It is now at " + 
 					String.format("%.1f", level*100) + "% capacity with " + queue.size() + 
 					" elements already in the queue. The maximum capacity was " +
 					String.format("%.1f", maxQueueLevel*100) + "%.");
@@ -515,12 +515,12 @@ public class DataDbLogger {
 					|| (rootCause instanceof SQLException 
 							&& rootCause.getMessage().contains("statement closed"))) {
 				logger.error(Markers.email(),
-						"Had a connection problem to the database. Likely "
-						+ "means that the db was rebooted or that the "
+						"Had a connection problem to the database for agencyId={}. "
+						+ "Likely means that the db was rebooted or that the "
 						+ "connection to it was lost. Therefore creating a new "
-						+ "SessionFactory so get new connections.");
+						+ "SessionFactory so get new connections.", agencyId);
 				HibernateUtils.clearSessionFactory();
-				sessionFactory = HibernateUtils.getSessionFactory(projectId);
+				sessionFactory = HibernateUtils.getSessionFactory(agencyId);
 			} else {
 				// Rollback the transaction since it likely was not committed.
 				// Otherwise can get an error when using Postgres "ERROR:
@@ -555,7 +555,7 @@ public class DataDbLogger {
 				logger.error("{} for database for project={} when batch writing "
 						+ "objects: {}. Will try to write each object "
 						+ "from batch individually. {}", 
-						e.getClass().getSimpleName(), projectId,
+						e.getClass().getSimpleName(), agencyId,
 						cause.getMessage(), additionaInfo);
 			}
 			

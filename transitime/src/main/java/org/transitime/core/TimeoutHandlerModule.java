@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.schedBasedPreds.SchedBasedPredsModule;
 import org.transitime.db.structs.AvlReport;
@@ -334,7 +335,8 @@ public class TimeoutHandlerModule extends Module {
 					Time.sleep(sleepTime);
 			} catch (Exception e) {
 				logger.error(Markers.email(),
-						"Error with TimeoutHandlerModule", e);
+						"Error with TimeoutHandlerModule for agencyId={}", 
+						AgencyConfig.getAgencyId(), e);
 			}
 
 		}

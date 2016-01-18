@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.AvlConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.logging.Markers;
@@ -248,9 +249,10 @@ public abstract class PollUrlAvlModule extends AvlModule {
 				getAndProcessData();
 			} catch (SocketTimeoutException e) {
 				logger.error(Markers.email(),
-						"Error accessing AVL feed using URL={} with a " +
-						"timeout of {} msec.", 
-						getUrl(), AvlConfig.getAvlFeedTimeoutInMSecs(), e);
+						"Error for agencyId={} accessing AVL feed using URL={} "
+						+ "with a timeout of {} msec.", 
+						AgencyConfig.getAgencyId(), getUrl(), 
+						AvlConfig.getAvlFeedTimeoutInMSecs(), e);
 			} catch (Exception e) {
 				logger.error("Error accessing AVL feed using URL={}.", 
 						getUrl(), e);

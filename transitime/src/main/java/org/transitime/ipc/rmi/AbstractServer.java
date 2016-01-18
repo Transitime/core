@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 import org.transitime.utils.Timer;
 
@@ -170,8 +171,8 @@ public abstract class AbstractServer {
 			// Log the error. Since RMI is critical send out e-mail as well so
 			// that the issue is taken care of.
 			logger.error(Markers.email(), 
-					"Error occurred when constructing a " 
-							+	getClass().getSimpleName(), 
+					"For agencyId={} error occurred when constructing a {}", 
+					AgencyConfig.getAgencyId(), getClass().getSimpleName(), 
 					e);
 		}
 	}
@@ -217,9 +218,9 @@ public abstract class AbstractServer {
 				} catch (UnknownHostException e1) {
 				}
 				logger.error(Markers.email(), 
-						"Problem with rmiregistry on host " + 
-								hostname + 
-								" has been resolved.");
+						"For agencyId={} problem with rmiregistry on host {} "
+						+ "has been resolved.", 
+						AgencyConfig.getAgencyId(), hostname);
 				errorEmailedSoAlsoNotifyWhenSuccessful = false;
 			}
 		} catch (Exception e) {

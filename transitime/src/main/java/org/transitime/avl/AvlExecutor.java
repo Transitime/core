@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.logging.Markers;
 import org.transitime.utils.Time;
@@ -118,7 +119,8 @@ public class AvlExecutor {
 		RejectedExecutionHandler rejectedHandler = new RejectedExecutionHandler() {
 			@Override
 			public void	rejectedExecution(Runnable arg0, ThreadPoolExecutor arg1) {
-				String message = "Rejected AVL report in AvlExecutor. The work "
+				String message = "Rejected AVL report in AvlExecutor for agencyId=" 
+						+ AgencyConfig.getAgencyId() + ". The work "
 						+ "queue with capacity " + maxAVLQueueSize 
 						+ " must be full. " + ((AvlClient) arg0).getAvlReport();
 				// If first one then send out an e-mail message since this can 

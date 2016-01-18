@@ -232,7 +232,8 @@ public class GtfsUpdatedModule extends Module {
 				get();
 			} catch (Exception e) {
 				logger.error(Markers.email(),
-						"Exception in GtfsUpdatedModule", e);
+						"Exception in GtfsUpdatedModule for agencyId={}", 
+						AgencyConfig.getAgencyId(), e);
 			}
 		}
 	}

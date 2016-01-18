@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.core.AvlProcessor;
 import org.transitime.core.BlocksInfo;
 import org.transitime.core.VehicleState;
@@ -297,7 +298,8 @@ public class SchedBasedPredsModule extends Module {
 				createSchedBasedPredsAsNecessary();				
 			} catch (Exception e) {
 				logger.error(Markers.email(),
-						"Error with SchedBasedPredsModule", e);
+						"Error with SchedBasedPredsModule for agencyId={}", 
+						AgencyConfig.getAgencyId(), e);
 			} 
 
 			// Wait appropriate amount of time till poll again

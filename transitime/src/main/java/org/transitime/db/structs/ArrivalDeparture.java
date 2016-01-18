@@ -39,6 +39,7 @@ import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.core.TemporalDifference;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -773,8 +774,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public String getTripShortName() {
 		if (!Core.isCoreApplication()) {
 			logger.error(Markers.email(), 
-					"Calling ArrivalDeparture.getTripShortName() but it is not "
-					+ "part of core application");
+					"For agencyId={} alling ArrivalDeparture.getTripShortName() "
+					+ "but it is not part of core application", 
+					AgencyConfig.getAgencyId());
 			return null;
 		}
 		

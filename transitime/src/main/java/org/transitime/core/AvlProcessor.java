@@ -28,6 +28,7 @@ import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatcher.MatchingType;
@@ -830,12 +831,12 @@ public class AvlProcessor {
 			if (shouldSendMessage(vehicleState.getVehicleId(), 
 					vehicleState.getAvlReport())) {
 				logger.error(Markers.email(),
-					"Got a match for vehicleId={} but that assignment is "
-					+ "already taken by vehicleId={} and the new match "
-					+ "doesn't appear to be valid because it is more than "
-					+ "1000m from the route. {} {}",
-					vehicleState.getVehicleId(), otherVehicleId, match, 
-					vehicleState.getAvlReport());
+					"For agencyId={} got a match for vehicleId={} but that "
+					+ "assignment is already taken by vehicleId={} and the new "
+					+ "match doesn't appear to be valid because it is more "
+					+ "than 1000m from the route. {} {}",
+					AgencyConfig.getAgencyId(), vehicleState.getVehicleId(), 
+					otherVehicleId, match, vehicleState.getAvlReport());
 			}
 			return true;
 		} else {

@@ -53,6 +53,7 @@ import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatch;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -850,12 +851,13 @@ public final class Block implements Serializable {
 				if (!(rootCause instanceof SocketException 
 						|| rootCause instanceof SocketTimeoutException)) {
 					logger.error(Markers.email(), 
-							"In Blocks.getTrips() for blockId={} encountered "
-							+ "exception whose root cause was not a "
+							"For agencyId={} in Blocks.getTrips() for blockId={} "
+							+ "encountered exception whose root cause was not a "
 							+ "SocketException or a SocketTimeoutException, "
 							+ "which is unexpected. Therefore should "
 							+ "investigate. Root cause is {}.",
-							this.getId(), rootCause, e);
+							AgencyConfig.getAgencyId(), this.getId(), 
+							rootCause, e);
 				}
 				
 				// Even though there was a timeout meaning that the

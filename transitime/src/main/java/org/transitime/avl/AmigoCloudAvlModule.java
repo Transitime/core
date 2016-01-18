@@ -31,6 +31,7 @@ import org.transitime.avl.amigocloud.AmigoWebsocketListener;
 import org.transitime.avl.amigocloud.AmigoWebsockets;
 import org.transitime.config.LongConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
@@ -243,9 +244,10 @@ public class AmigoCloudAvlModule extends AvlModule {
 				if (numberOfExceptions == 3) {
 					logger.error(
 							Markers.email(),
-							"Exception when starting up AmigoCloudAvlModule. "
-							+ "{}. numberOfExceptions={}",
-							e.getMessage(), numberOfExceptions, e);
+							"For agencyId={} exception when starting up "
+							+ "AmigoCloudAvlModule. {}. numberOfExceptions={}",
+							AgencyConfig.getAgencyId(), e.getMessage(), 
+							numberOfExceptions, e);
 				}
 				
 				// Sleep 10 seconds before trying again
