@@ -104,6 +104,15 @@ public class AvlProcessor {
 					+ "such e-mails. This property allows one to control those "
 					+ "e-mails.");
 	
+	private static DoubleConfigValue maxDistanceForAssignmentGrab =
+			new DoubleConfigValue(
+					"transitime.core.maxDistanceForAssignmentGrab",
+					10000.0,
+					"For when another vehicles gets assignment and needs to "
+					+ "grab it from another vehicle. The new vehicle must "
+					+ "match to route within maxDistanceForAssignmentGrab in "
+					+ "order to grab the assignment.");
+	
 	/************************** Logging *******************************/
 
 	private static final Logger logger = LoggerFactory
@@ -749,8 +758,9 @@ public class AvlProcessor {
 		// with the assignment and the new match is actually far away from the
 		// route, indicating driver might have entered wrong ID or never
 		// logged out. For this situation ignore the match.
-		if (matchProblematicDueOtherVehicleHavingAssignment(bestMatch,
-				vehicleState)) {
+		if (bestMatch != null
+				&& matchProblematicDueOtherVehicleHavingAssignment(bestMatch,
+						vehicleState)) {
 			logger.error("Got a match for vehicleId={} but that assignment is "
 					+ "already taken by another vehicle and the new match "
 					+ "doesn't appear to be valid because it is far away from "
@@ -790,6 +800,10 @@ public class AvlProcessor {
 	 */
 	private boolean matchProblematicDueOtherVehicleHavingAssignment(
 			TemporalMatch match, VehicleState vehicleState) {
+		// If no match in first place then not a problem
+		if (match == null)
+			return false;
+		
 		// If matches don't need to be exclusive then don't have a problem
 		Block block = match.getBlock();
 		if (!block.shouldBeExclusive())
@@ -826,7 +840,7 @@ public class AvlProcessor {
 		// away from route (it matches to a layover where matches are lenient),
 		// indicating that the vehicle might have gotten wrong assignment while
 		// doing something else.
-		if (match.getDistanceToSegment() > 1000.0) {			
+		if (match.getDistanceToSegment() > maxDistanceForAssignmentGrab.getValue()) {			
 			// Match is far away from route so consider it to be invalid
 			if (shouldSendMessage(vehicleState.getVehicleId(), 
 					vehicleState.getAvlReport())) {
@@ -834,9 +848,10 @@ public class AvlProcessor {
 					"For agencyId={} got a match for vehicleId={} but that "
 					+ "assignment is already taken by vehicleId={} and the new "
 					+ "match doesn't appear to be valid because it is more "
-					+ "than 1000m from the route. {} {}",
+					+ "than {}m from the route. {} {}",
 					AgencyConfig.getAgencyId(), vehicleState.getVehicleId(), 
-					otherVehicleId, match, vehicleState.getAvlReport());
+					otherVehicleId, maxDistanceForAssignmentGrab.getValue(), 
+					match, vehicleState.getAvlReport());
 			}
 			return true;
 		} else {
