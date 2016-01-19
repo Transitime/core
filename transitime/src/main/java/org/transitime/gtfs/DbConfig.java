@@ -507,7 +507,7 @@ public class DbConfig {
 
 		// If trip not read in yet, do so now
 		if (trip == null) {
-			logger.info("FIXME Trip for tripIdOrShortName={} not read from db yet "
+			logger.debug("Trip for tripIdOrShortName={} not read from db yet "
 					+ "so reading it now.", tripIdOrShortName);
 			
 			// Need to sync such that block data, which includes trip
@@ -523,8 +523,7 @@ public class DbConfig {
 
 		// If couldn't get trip by tripId then see if using the trip short name.
 		if (trip == null) {
-			// FIXME make this debug logging
-			logger.info("FIXME Could not find tripId={} so seeing if there is a "
+			logger.debug("Could not find tripId={} so seeing if there is a "
 					+ "tripShortName with that ID.", tripIdOrShortName);
 			trip = getTripUsingTripShortName(tripIdOrShortName);
 			
@@ -532,7 +531,7 @@ public class DbConfig {
 			// individualTripsMap so that it doesn't need to be read in next
 			// time getTrip() is called.
 			if (trip != null) {
-				logger.info("FIXME read tripIdOrShortName={} from db", tripIdOrShortName);
+				logger.debug("Read tripIdOrShortName={} from db", tripIdOrShortName);
 				individualTripsMap.put(trip.getId(), trip);
 			}				
 		}
@@ -578,13 +577,13 @@ public class DbConfig {
 		if (trips != null) {
 			Trip trip = getTripForCurrentService(trips);
 			if (trip != null) {
-				logger.info("FIXME Read in trip using tripShortName={}", tripShortName);
+				logger.debug("Read in trip using tripShortName={}", tripShortName);
 				
 				return trip;
 			} else {
 				// Trips for the tripShortName already read in but none valid
 				// for the current service IDs so return null
-				logger.info("FIXME When reading tripShortName={} found trips "
+				logger.debug("When reading tripShortName={} found trips "
 						+ "but not for current service.", tripShortName);
 				return null;
 			}
