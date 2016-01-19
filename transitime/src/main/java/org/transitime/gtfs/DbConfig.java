@@ -505,15 +505,11 @@ public class DbConfig {
 	public Trip getTrip(String tripIdOrShortName) {
 		Trip trip = individualTripsMap.get(tripIdOrShortName);
 
-		// If couldn't get trip by tripId then see if using the trip short name.
-		if (trip == null) {
-			logger.info("Could not find tripId={} so seeing if there is a "
-					+ "tripShortName with that ID.", tripIdOrShortName);
-			trip = getTripUsingTripShortName(tripIdOrShortName);
-		}
-		
 		// If trip not read in yet, do so now
 		if (trip == null) {
+			logger.info("FIXME Trip for tripIdOrShortName={} not read from db yet "
+					+ "so reading it now.", tripIdOrShortName);
+			
 			// Need to sync such that block data, which includes trip
 			// pattern data, is only read serially (not read simultaneously
 			// by multiple threads). Otherwise get a "force initialize loading
@@ -521,9 +517,26 @@ public class DbConfig {
 			synchronized (Block.getLazyLoadingSyncObject()) {
 				trip = Trip.getTrip(globalSession, configRev, tripIdOrShortName);
 			}
-			individualTripsMap.put(tripIdOrShortName, trip);
+			if (trip != null)
+				individualTripsMap.put(tripIdOrShortName, trip);
 		}
 
+		// If couldn't get trip by tripId then see if using the trip short name.
+		if (trip == null) {
+			// FIXME make this debug logging
+			logger.info("FIXME Could not find tripId={} so seeing if there is a "
+					+ "tripShortName with that ID.", tripIdOrShortName);
+			trip = getTripUsingTripShortName(tripIdOrShortName);
+			
+			// If the trip successfully read in it also needs to be added to 
+			// individualTripsMap so that it doesn't need to be read in next
+			// time getTrip() is called.
+			if (trip != null) {
+				logger.info("FIXME read tripIdOrShortName={} from db", tripIdOrShortName);
+				individualTripsMap.put(trip.getId(), trip);
+			}				
+		}
+		
 		return trip;
 	}
 
@@ -564,14 +577,21 @@ public class DbConfig {
 		List<Trip> trips = individualTripsByShortNameMap.get(tripShortName);
 		if (trips != null) {
 			Trip trip = getTripForCurrentService(trips);
-			if (trip != null)
+			if (trip != null) {
+				logger.info("FIXME Read in trip using tripShortName={}", tripShortName);
+				
 				return trip;
-			else
+			} else {
 				// Trips for the tripShortName already read in but none valid
 				// for the current service IDs so return null
+				logger.info("FIXME When reading tripShortName={} found trips "
+						+ "but not for current service.", tripShortName);
 				return null;
+			}
 		}
 
+		logger.info("FIXME tripShortName={} not yet read from db so reading it in now", tripShortName);
+		
 		// Trips for the short name not read in yet, do so now
 		// Need to sync such that block data, which includes trip
 		// pattern data, is only read serially (not read simultaneously
