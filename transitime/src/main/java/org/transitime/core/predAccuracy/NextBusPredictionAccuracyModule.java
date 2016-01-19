@@ -232,8 +232,8 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 						if (trip != null) {
 							directionId = trip.getDirectionId();
 						} else {
-							logger.error("Got tripTag={} but no such trip in "
-									+ "the configuration.", tripId);
+							logger.error("Got tripId={} from NextBus feed but "
+									+ "no such trip in the configuration.", tripId);
 						}
 					}
 					
