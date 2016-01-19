@@ -50,6 +50,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.collection.internal.PersistentList;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.internal.SessionImpl;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -849,12 +850,14 @@ public final class Block implements Serializable {
 						this.getId(), rootCause, e);
 
 				if (!(rootCause instanceof SocketException 
-						|| rootCause instanceof SocketTimeoutException)) {
+						|| rootCause instanceof SocketTimeoutException
+						|| rootCause instanceof PSQLException)) {
 					logger.error(Markers.email(), 
-							"For agencyId={} in Blocks.getTrips() for blockId={} "
-							+ "encountered exception whose root cause was not a "
-							+ "SocketException or a SocketTimeoutException, "
-							+ "which is unexpected. Therefore should "
+							"For agencyId={} in Blocks.getTrips() for "
+							+ "blockId={} encountered exception whose root "
+							+ "cause was not a SocketException, "
+							+ "SocketTimeoutException, or PSQLException,"
+							+ "which therefore is unexpected. Therefore should "
 							+ "investigate. Root cause is {}.",
 							AgencyConfig.getAgencyId(), this.getId(), 
 							rootCause, e);
