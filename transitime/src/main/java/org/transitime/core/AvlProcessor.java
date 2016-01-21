@@ -841,7 +841,18 @@ public class AvlProcessor {
 		// indicating that the vehicle might have gotten wrong assignment while
 		// doing something else.
 		if (match.getDistanceToSegment() > maxDistanceForAssignmentGrab.getValue()) {			
-			// Match is far away from route so consider it to be invalid
+			// Match is far away from route so consider it to be invalid.
+			// Log an error
+			logger.error(
+					"For agencyId={} got a match for vehicleId={} but that "
+					+ "assignment is already taken by vehicleId={} and the new "
+					+ "match doesn't appear to be valid because it is more "
+					+ "than {}m from the route. {} {}",
+					AgencyConfig.getAgencyId(), vehicleState.getVehicleId(), 
+					otherVehicleId, maxDistanceForAssignmentGrab.getValue(), 
+					match, vehicleState.getAvlReport());
+
+			// Only send e-mail error rarely
 			if (shouldSendMessage(vehicleState.getVehicleId(), 
 					vehicleState.getAvlReport())) {
 				logger.error(Markers.email(),
@@ -853,6 +864,7 @@ public class AvlProcessor {
 					otherVehicleId, maxDistanceForAssignmentGrab.getValue(), 
 					match, vehicleState.getAvlReport());
 			}
+			
 			return true;
 		} else {
 			// The new match is reasonably close to the route so should consider
