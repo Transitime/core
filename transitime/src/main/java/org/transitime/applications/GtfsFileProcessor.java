@@ -402,7 +402,7 @@ public class GtfsFileProcessor {
 						commandLineArgs);
 		double maxDistanceForEliminatingVertices =
 				getDoubleCommandLineOption("maxDistanceForEliminatingVertices",
-						0.0, commandLineArgs);
+						3.0, commandLineArgs);
 		int defaultWaitTimeAtStopMsec =
 				getIntegerCommandLineOption("defaultWaitTimeAtStopMsec",
 						10 * Time.MS_PER_SEC, commandLineArgs);
