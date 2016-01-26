@@ -143,7 +143,7 @@ public class TemporalMatcher {
 					vehicleId, deltaFromSchedule, spatialMatch);
 			return deltaFromSchedule;
 		} else {
-			logger.info("For vehicleId={} in "
+			logger.debug("For vehicleId={} in "
 					+ "TemporalMatcher.determineHowFarOffScheduledTime() "
 					+ "expectedTimeDelta={} is not within bounds of "
 					+ "{}={} and {}={} so returning null for {}",
