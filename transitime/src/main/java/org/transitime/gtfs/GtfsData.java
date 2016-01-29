@@ -1891,13 +1891,14 @@ public class GtfsData {
 		for (GtfsAgency gtfsAgency : gtfsAgencies)
 			gtfsAgenciesMap.put(gtfsAgency.getAgencyId(), gtfsAgency);
 		
-		// Read in supplemental stop data
+		// Read in supplemental agency data
 		if (supplementDir != null) {
-			// Read in the supplemental stop data
+			// Read in the supplemental agency data
 			GtfsAgenciesSupplementReader agenciesSupplementReader = 
 					new GtfsAgenciesSupplementReader(supplementDir);
 			List<GtfsAgency> gtfsAgenciesSupplement = agenciesSupplementReader.get();
 			for (GtfsAgency gtfsAgencySupplement : gtfsAgenciesSupplement) {
+				// Determine the proper agency by agencyId.  
 				GtfsAgency gtfsAgency = gtfsAgenciesMap.get(gtfsAgencySupplement.getAgencyId());
 				if (gtfsAgency == null) {
 					logger.error("Found supplemental agency data for agencyId={} "
