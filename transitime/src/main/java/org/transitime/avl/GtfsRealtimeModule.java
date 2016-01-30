@@ -60,7 +60,7 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 	 * Just for debugging
 	 */
 	public static void main(String[] args) {
-		// Create a ZonarAvlModule for testing
+		// Create a GtfsRealtimeModule for testing
 		Module.start("org.transitime.avl.GtfsRealtimeModule");
 	}
 
