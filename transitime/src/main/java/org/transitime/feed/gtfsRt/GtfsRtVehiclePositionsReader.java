@@ -136,8 +136,13 @@ public class GtfsRtVehiclePositionsReader {
 			long gpsTime;
 			if (vehicle.hasTimestamp())
 				gpsTime = vehicle.getTimestamp()*Time.MS_PER_SEC;
-			else
+			else {
+				logger.warn("For vehicleId={} GPS time not available in "
+						+ "GTFS-realtime feed so using system time, which is "
+						+ "not accurate!",
+						vehicleId);
 				gpsTime = System.currentTimeMillis();
+			}
 			
 			// Determine the position data
 		    Position position = vehicle.getPosition();
