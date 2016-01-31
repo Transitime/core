@@ -1880,7 +1880,7 @@ public class GtfsData {
 		// Let user know what is going on
 		logger.info("Processing agency.txt data...");
 		
-		// Create the map where the data is going to go
+		// Create the array where the data is going to go
 		agencies = new ArrayList<Agency>();
 
 		// Read in the agency.txt GTFS data from file
@@ -1896,31 +1896,44 @@ public class GtfsData {
 			// Read in the supplemental agency data
 			GtfsAgenciesSupplementReader agenciesSupplementReader = 
 					new GtfsAgenciesSupplementReader(supplementDir);
-			List<GtfsAgency> gtfsAgenciesSupplement = agenciesSupplementReader.get();
+			List<GtfsAgency> gtfsAgenciesSupplement =
+					agenciesSupplementReader.get();
 			for (GtfsAgency gtfsAgencySupplement : gtfsAgenciesSupplement) {
 				// Determine the proper agency by agencyId.  
-				GtfsAgency gtfsAgency = gtfsAgenciesMap.get(gtfsAgencySupplement.getAgencyId());
+				GtfsAgency gtfsAgency =
+						gtfsAgenciesMap.get(gtfsAgencySupplement.getAgencyId());
 				if (gtfsAgency == null) {
-					logger.error("Found supplemental agency data for agencyId={} "
-							+ "but that agency did not exist in the main "
-							+ "agency.txt file. {}", 
-							gtfsAgencySupplement.getAgencyId(), gtfsAgencySupplement);
+					logger.error("Found supplemental agency data for "
+							+ "agencyId={} but that agency did not exist in "
+							+ "the main agency.txt file. {}", 
+							gtfsAgencySupplement.getAgencyId(), 
+							gtfsAgencySupplement);
 					continue;
 				}
 				
 				// Create a new GtfsAgency object that combines the original
 				// data with the supplemental data
-				GtfsAgency combinedAgency = new GtfsAgency(gtfsAgency, gtfsAgencySupplement);
-				
+				GtfsAgency combinedAgency =
+						new GtfsAgency(gtfsAgency, gtfsAgencySupplement);
+	
 				// Store that combined data agency in the map 
-				gtfsAgenciesMap.put(combinedAgency.getAgencyId(), combinedAgency);
-
+				gtfsAgenciesMap.put(combinedAgency.getAgencyId(),
+						combinedAgency);
 			}
 		}
 		
-		for (GtfsAgency gtfsAgency : gtfsAgenciesMap.values()) {
+		// Go through the agencies as they were listed in the agency.txt file 
+		// and add the combined agencies (including the supplemental data) to 
+		// the agencies member in the proper order. This way when getting an 
+		// agency for the UI can just use the first agency.
+		for (GtfsAgency originalGtfsAgency : gtfsAgencies) {
+			GtfsAgency combinedGtfsAgency =
+					gtfsAgenciesMap.get(originalGtfsAgency.getAgencyId());
+
 			// Create the Agency object and put it into the array
-			Agency agency = new Agency(revs.getConfigRev(), gtfsAgency, getRoutes());
+			Agency agency =
+					new Agency(revs.getConfigRev(), combinedGtfsAgency,
+							getRoutes());
 			agencies.add(agency);
 		}		
 					
