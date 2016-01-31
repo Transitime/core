@@ -30,7 +30,7 @@ import org.transitime.utils.csv.CsvBaseReader;
 public class GtfsCalendarReader extends CsvBaseReader<GtfsCalendar> {
 
 	public GtfsCalendarReader(String dirName) {
-		super(dirName, "calendar.txt", true, false);
+		super(dirName, "calendar.txt", false, false);
 	}
 	
 	@Override

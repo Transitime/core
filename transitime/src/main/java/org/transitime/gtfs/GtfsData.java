@@ -1398,10 +1398,11 @@ public class GtfsData {
 			System.exit(-1);
 		}
 		if (validServiceIds.isEmpty()) {
-			logger.error("There are no services that are still active. Make "
+			logger.warn("There are no services that are still active. This is "
+					+ "only acceptable if every day is listed in the "
+					+ "calendar_dates.txt file. Make "
 					+ "sure you are processing the most up to date GTFS data "
-					+ "that includes service that will be active. Exiting.");
-			System.exit(-1);
+					+ "that includes service that will be active. ");
 		}
 
 		// Create the necessary collections for trips. These collections are
