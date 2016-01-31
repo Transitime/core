@@ -1974,6 +1974,18 @@ public class GtfsData {
 	}
 	
 	/**
+	 * Returns true if the specified calendar date is in the future and is for
+	 * adding service.
+	 * 
+	 * @param calendarDate
+	 * @return
+	 */
+	private static boolean isCalendarDateActiveInTheFuture(CalendarDate calendarDate) {
+		return calendarDate.getDate().getTime() > System.currentTimeMillis()
+				&& calendarDate.addService();
+	}
+	
+	/**
 	 * Reads calendar.txt file and puts data into calendars list.
 	 */
 	private void processCalendars() {
@@ -2053,7 +2065,7 @@ public class GtfsData {
 			System.exit(-1);
 		}
 
-		// Create set of service IDs
+		// Create set of service IDs from the calendar.txt data
 		validServiceIds = new HashSet<String>();
 		for (Calendar calendar : calendars) {
 			if (isCalendarActiveInTheFuture(calendar, calendarDates)) {
@@ -2065,6 +2077,13 @@ public class GtfsData {
 						"configuration. {}",
 						calendar.getServiceId(), calendar);
 			}
+		}
+		
+		// Add in service IDs that might be in calendar_date.txt but not in 
+		// calendar.txt file
+		for (CalendarDate calendarDate : calendarDates) {
+			if (isCalendarDateActiveInTheFuture(calendarDate))
+				validServiceIds.add(calendarDate.getServiceId());
 		}
 	}
 	
