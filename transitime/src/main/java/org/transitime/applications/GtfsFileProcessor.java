@@ -640,7 +640,7 @@ public class GtfsFileProcessor {
 		// Process the data
 		try {
 			processor.process();
-		} catch (IllegalArgumentException e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
 

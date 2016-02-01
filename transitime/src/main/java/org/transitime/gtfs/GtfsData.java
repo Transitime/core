@@ -32,6 +32,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -2166,7 +2167,13 @@ public class GtfsData {
 				new GtfsFareRulesReader(gtfsDirectoryName);
 		List<GtfsFareRule> gtfsFareRules = fareRulesReader.get();
 		
+		// Get rid of duplicates
+		Set<GtfsFareRule> gtfsFareRulesSet = new HashSet<GtfsFareRule>();
 		for (GtfsFareRule gtfsFareRule : gtfsFareRules) {
+			gtfsFareRulesSet.add(gtfsFareRule);
+		}
+		
+		for (GtfsFareRule gtfsFareRule : gtfsFareRulesSet) {
 			// If this route is actually a sub-route of a parent then use the
 			// parent ID.
 			String parentRouteId = 
@@ -2660,15 +2667,20 @@ public class GtfsData {
 		
 		// Now that have read in all the data into collections output it
 		// to database.
-		DbWriter dbWriter = new DbWriter(this);
-		dbWriter.write(session, revs.getConfigRev());		
-		
-		// Finish things up by closing the session
-		session.close();
-		
-		// Let user know what is going on
-		logger.info("Finished processing GTFS data from {} . Took {} msec.",
-				gtfsDirectoryName, timer.elapsedMsec());		
+		try {
+			DbWriter dbWriter = new DbWriter(this);
+			dbWriter.write(session, revs.getConfigRev());		
+			
+			// Finish things up by closing the session
+			session.close();
+			
+			// Let user know what is going on
+			logger.info("Finished processing GTFS data from {} . Took {} msec.",
+					gtfsDirectoryName, timer.elapsedMsec());
+		} catch (HibernateException e) {
+			logger.error("Exception when writing data to db", e);
+			throw e;
+		}		
 
 		// just for debugging
 //		GtfsLoggingAppender.outputMessagesToSysErr();
