@@ -37,11 +37,23 @@
   <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
   <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
-  <!--  Override the body style from the includes.jsp/general.css files -->
   <style>
+    /* Override the body style from the includes.jsp/general.css files */
     body {
 	  margin: 0px;
     }
+    
+    /* Set width of route selector. For smaller displays use smaller width */
+    #routes {
+      width: 400px;
+    }
+    
+    @media (max-width:600px) {
+      #routes {
+        width: 300px;
+      }
+    }
+    
   </style>
   
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -64,7 +76,7 @@
         to set the css width here. Yes, strange! -->  
   <div id="routesContainer">
     <div id="routesDiv">
-      <select id="routes" style="width:280px" ></select>	
+      <select id="routes"></select>	
     </div>
   </div>
   
