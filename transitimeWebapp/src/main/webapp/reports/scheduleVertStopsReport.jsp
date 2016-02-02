@@ -52,8 +52,8 @@ if (agencyId == null || agencyId.isEmpty()) {
     		  
     		  // Create title for schedule
     		  $('body').append("<div id='scheduleTitle'>" 
-    				  + "Direction " + schedule.directionId 
-    				  + ", " + schedule.serviceName
+    				  + "Direction: " + schedule.directionId 
+    				  + ", Service: " + schedule.serviceName
     				  + "</div>");
     		  
     		  var table = $("<table id='dataTable'></table>").appendTo('body')[0];
