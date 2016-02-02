@@ -19,7 +19,9 @@ package org.transitime.monitoring;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.config.DoubleConfigValue;
+import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.EmailSender;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
@@ -76,6 +78,15 @@ public class SystemCpuMonitor extends MonitorBase {
 	 */
 	@Override
 	protected boolean triggered() {
+		// If just a few, 12, minutes past midnight then don't bother checking
+		// CPU since that is when the log files are compressed and we always
+		// get high CPU then.
+		int secondsIntoDay =
+				Core.getInstance().getTime()
+						.getSecondsIntoDay(System.currentTimeMillis());
+		if (secondsIntoDay < 12 * Time.SEC_PER_MIN)
+			return false;
+			
 		Object resultObject = SystemMemoryMonitor
 				.getOperatingSystemValue("getSystemCpuLoad");
 		if (resultObject != null) {
