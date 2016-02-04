@@ -133,7 +133,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		Collection<IpcRouteSummary> ipcRoutes = 
 				new ArrayList<IpcRouteSummary>(dbRoutes.size());
 		for (org.transitime.db.structs.Route dbRoute : dbRoutes) {
-			IpcRouteSummary ipcRoute = new IpcRouteSummary(dbRoute, true);
+			IpcRouteSummary ipcRoute = new IpcRouteSummary(dbRoute);
 			ipcRoutes.add(ipcRoute);
 		}
 		
@@ -376,7 +376,10 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<String> getServiceIds() throws RemoteException {
-		return Core.getInstance().getDbConfig().getServiceIds();
+		// Convert the Set from getServiceIds() to a List since need
+		// to use a List for IPC due to serialization.
+		return new ArrayList<String>(Core.getInstance().getDbConfig()
+				.getServiceIds());
 	}
 
 	/* (non-Javadoc)
@@ -384,7 +387,10 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<String> getCurrentServiceIds() throws RemoteException {
-		return Core.getInstance().getDbConfig().getCurrentServiceIds();
+		// Convert the Set from getCurrentServiceIds() to a List since need
+		// to use a List for IPC due to serialization.
+		return new ArrayList<String>(Core.getInstance().getDbConfig()
+				.getCurrentServiceIds());
 	}
 
 	/* (non-Javadoc)

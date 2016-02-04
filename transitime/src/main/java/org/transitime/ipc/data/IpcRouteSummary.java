@@ -19,7 +19,6 @@ package org.transitime.ipc.data;
 
 import java.io.Serializable;
 
-import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.Extent;
 import org.transitime.db.structs.Route;
 
@@ -51,19 +50,9 @@ public class IpcRouteSummary implements Serializable {
 	 * RMI.
 	 * 
 	 * @param dbRoute
-	 * @param useStableIdIfSoConfigured
-	 *            optional param. If set and agency has
-	 *            CoreConfig.useRouteShortNameAsId() set then will use the
-	 *            route's GTFS route_short_name instead of the GTFS route_id.
-	 *            This is useful for agencies that don't have stable route_ids
-	 *            across schedule changes.
 	 */
-	public IpcRouteSummary(Route dbRoute, boolean... useStableIdIfSoConfigured) {
-		this.id =
-				useStableIdIfSoConfigured.length > 0
-						&& useStableIdIfSoConfigured[0]
-						&& CoreConfig.useRouteShortNameAsId() ? 
-								dbRoute.getShortName() : dbRoute.getId();
+	public IpcRouteSummary(Route dbRoute) {
+		this.id = dbRoute.getId();
 		this.name = dbRoute.getName();
 		this.shortName = dbRoute.getShortName();
 		this.longName = dbRoute.getLongName();
@@ -74,11 +63,24 @@ public class IpcRouteSummary implements Serializable {
 	}
 	
 	/**
-	 * @return the GTFS route_id. But returns route_short_name for those
-	 *         problematic agencies like sfmta where route_id is not stable
-	 *         across schedule changes but route_short_name is. This way always
-	 *         have a stable id to use. But of course the client needs to be
-	 *         able to handle getting the route_short_name.
+	 * For need to clone a IpcRouteSummary but with a new route name.
+	 * 
+	 * @param toCopy
+	 * @param newRouteName
+	 */
+	public IpcRouteSummary(IpcRouteSummary toCopy, String newRouteName) {
+		this.id = toCopy.getId();
+		this.name = newRouteName;
+		this.shortName = toCopy.getShortName();
+		this.longName = toCopy.getLongName();
+		this.extent = toCopy.getExtent();
+		this.type = toCopy.getType();
+		this.color = toCopy.getColor();
+		this.textColor = toCopy.getTextColor();
+	}
+	
+	/**
+	 * @return the GTFS route_id. 
 	 */
 	public String getId() {
 		return id;

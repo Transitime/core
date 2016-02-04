@@ -904,7 +904,7 @@ setRouteQueryStrParamViaQueryStr();
 if (!getRouteQueryStrParam()) {
   // Route not specified in query string. Therefore populate the route 
   // selector if route not specified in query string.
-  $.getJSON(apiUrlPrefix + "/command/routes", 
+  $.getJSON(apiUrlPrefix + "/command/routes?keepDuplicates=true", 
  		function(routes) {
 	        // Generate list of routes for the selector
 	 		var selectorData = [{id: '', text: 'Select Route'}];

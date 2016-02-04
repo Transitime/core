@@ -598,7 +598,8 @@ public class TransitimeApi {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getRoutes(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "r") List<String> routeIdsOrShortNames)
+			@QueryParam(value = "r") List<String> routeIdsOrShortNames,
+			@QueryParam(value = "keepDuplicates") Boolean keepDuplicates)
 			throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
@@ -611,10 +612,52 @@ public class TransitimeApi {
 			
 			// Get route data from server
 			ApiRoutes routesData;
-			if (routeIdsOrShortNames == null) {
-				Collection<IpcRouteSummary> routes = inter.getRoutes();
-				routesData = new ApiRoutes(routes, agencies.get(0));
+			if (routeIdsOrShortNames == null || routeIdsOrShortNames.isEmpty()) {
+				// Get all routes
+				List<IpcRouteSummary> routes = 
+						new ArrayList<IpcRouteSummary>(inter.getRoutes());
+				
+				// Handle duplicates. If should keep duplicates (where couple
+				// of routes have the same route_short_name) then modify 
+				// the route name to indicate the different IDs. If should
+				// ignore duplicates then don't include them in final list
+				Collection<IpcRouteSummary> processedRoutes = 
+						new ArrayList<IpcRouteSummary>();
+				for (int i = 0; i < routes.size()-1; ++i) {
+					IpcRouteSummary route = routes.get(i);
+					IpcRouteSummary nextRoute = routes.get(i+1);
+					
+					// If find a duplicate route_short_name...
+					if (route.getShortName().equals(nextRoute.getShortName())) {
+						// Only keep route if supposed to
+						if (keepDuplicates != null && keepDuplicates) {
+							// Keep duplicates but change route name
+							IpcRouteSummary routeWithModifiedName =
+									new IpcRouteSummary(route, route.getName()
+											+ " (ID=" + route.getId() + ")");
+							processedRoutes.add(routeWithModifiedName);
+
+							IpcRouteSummary nextRouteWithModifiedName =
+									new IpcRouteSummary(nextRoute,
+											nextRoute.getName() + " (ID="
+													+ nextRoute.getId() + ")");
+							processedRoutes.add(nextRouteWithModifiedName);
+							
+							// Since processed both this route and the next 
+							// route can skip to next one
+							++i;
+						}
+					} else {
+						// Not a duplicate so simply add it
+						processedRoutes.add(route);
+					}
+				}
+				// Add the last route
+				processedRoutes.add(routes.get(routes.size()-1));
+				
+				routesData = new ApiRoutes(processedRoutes, agencies.get(0));
 			} else {
+				// Get specified routes
 				List<IpcRoute> ipcRoutes = inter.getRoutes(routeIdsOrShortNames);
 				routesData = new ApiRoutes(ipcRoutes, agencies.get(0));
 			}
