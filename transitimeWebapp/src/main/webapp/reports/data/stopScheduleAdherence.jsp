@@ -19,7 +19,7 @@ else
 	startTime += ":00";
 
 if (endTime == null || endTime == "")
-	endTime = "00:00:00";
+	endTime = "23:59:59";
 else
 	endTime += ":00";
 

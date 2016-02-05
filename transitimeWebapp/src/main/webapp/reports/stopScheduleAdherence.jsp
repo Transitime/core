@@ -32,13 +32,13 @@
 	<div id="extra">
 		
 		<div class="param">
-			Limit stops by number of data points: <input type="number" id="limitStop" />
+			Limit stops by number of data points: <input type="number" style="width: 5em;" id="limitStop" />
 		</div>
 		<div class="param">
-			<input type="button" id="fiveWorst" value="Five worst"></input>
-		</div>
-		<div class="param">
-			<input type="button" id="fiveBest" value="Five best"></input>
+			Get <input type="number" id="numberStops" style="width: 5em;" value="5"> 
+			<input type="button" id="fiveWorst" value="worst"></input> / 
+			<input type="button" id="fiveBest" value="best"></input>
+			stops
 		</div>
 		<div class="param">
 			Stops: 

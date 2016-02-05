@@ -46,9 +46,6 @@ finding specific issues with predictions.">
     number of ontime predictions over the total number of predicitons for a
     given route.">
       Route Performance Table</a></li>
-     <li><a href="stopScheduleAdherence.jsp?a=<%= agencyId %>"
-    title="Shows stop schedule adherence.">
-      Stop schedule adherence</a></li>
 </ul>
 
 <div id="subtitle">AVL Reports</div>
@@ -71,6 +68,12 @@ finding specific issues with predictions.">
     title="Displays in a table the schedule for a specified route. Stops listed 
     vertically which is useful for when there are not that many trips per day.">
       Schedule for Route (vertical stops)</a></li>
+  <li><a href="stopScheduleAdherence.jsp?a=<%= agencyId %>"
+    title="Shows stop schedule adherence. Schedule adherence for a stop is the
+    difference between the observed (or interpolated) time a vehicle departs/arrives
+    at a stop and the scheduled time. Box plot shows the median, first and third
+    quartiles, min and max for the adherence data for a stop.">
+      Stop schedule adherence</a></li>
 </ul>
 
 <div id="subtitle">Status Reports</div>

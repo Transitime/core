@@ -1,4 +1,5 @@
-
+// Code for creating the box plot is based on
+// https://developers.google.com/chart/interactive/docs/gallery/intervals#box-plot
 
 google.load('visualization', 1, {'packages':['corechart']});
 
@@ -63,14 +64,16 @@ function initStops(stops) {
 	
 	$("#fiveBest").off("click");
 	$("#fiveBest").on("click", function() {
-		var stopIds = sortedStops.slice(0, 5).map(function(d) { return d.stopId });
+		var num = $("#numberStops").val()
+		var stopIds = sortedStops.slice(0, num).map(function(d) { return d.stopId });
 		$("#stops").val(stopIds).trigger("change");
 	})
 	
 	$("#fiveWorst").off("click");
 	$("#fiveWorst").on("click", function() {
 		var len = stops.length;
-		var stopIds = sortedStops.slice(len-5, len).map(function(d) { return d.stopId });
+		var num = $("#numberStops").val()
+		var stopIds = sortedStops.slice(len-num, len).map(function(d) { return d.stopId });
 		$("#stops").val(stopIds).trigger("change");
 	})
 	
