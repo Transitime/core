@@ -46,6 +46,9 @@ finding specific issues with predictions.">
     number of ontime predictions over the total number of predicitons for a
     given route.">
       Route Performance Table</a></li>
+     <li><a href="stopScheduleAdherence.jsp?a=<%= agencyId %>"
+    title="Shows stop schedule adherence.">
+      Stop schedule adherence</a></li>
 </ul>
 
 <div id="subtitle">AVL Reports</div>
