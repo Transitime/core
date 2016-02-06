@@ -78,7 +78,7 @@ public class Time {
 	private static final DateFormat defaultDateFormat =
 			new SimpleDateFormat("yyyy-MM-dd");
 	private static final DateFormat dateFormatDashesShortYear =
-			new SimpleDateFormat("MM-dd-yy");
+			new SimpleDateFormat("yy-MM-dd");
 
 	
 	private static final DateFormat readableDateFormat =
@@ -437,7 +437,7 @@ public class Time {
 	
 	/**
 	 * Parses the dateStr and returns a Date object. Format of 
-	 * date is "MM-dd-yyyy".
+	 * date is "yyyy-MM-dd".
 	 * 
 	 * @param dateStr
 	 * @return

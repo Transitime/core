@@ -62,4 +62,29 @@ public class WebUtils {
 
 	return queryStringParams;
     }
+    
+    public static String getQueryParamsString(HttpServletRequest request) {
+		String queryStringParams = "";
+		java.util.Map<String, String[]> paramsMap = request.getParameterMap();
+		boolean firstParam = true;
+		for (String paramName : paramsMap.keySet()) {
+			if (!firstParam)
+			    queryStringParams += "&";
+			firstParam = false;
+	
+			queryStringParams += paramName + "=";
+			String paramValues[] = paramsMap.get(paramName);
+			boolean firstValue = true;
+		    for (String paramValue : paramValues) {
+				if (!firstValue)
+				    queryStringParams += ",";
+				firstValue = false;
+	
+		    	queryStringParams += paramValue;
+		    }
+		}
+
+	return queryStringParams;
+    }
+
 }

@@ -16,6 +16,8 @@
  */
 package org.transitime.reports;
 
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,12 +30,16 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.DoubleType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
+import org.hsqldb.lib.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ArrivalDeparture;
 
 public class ScheduleAdherenceController {
 	 
-	
+	private static final Logger logger = LoggerFactory
+			.getLogger(ScheduleAdherenceController.class);	
 	// TODO: Combine routeScheduleAdherence and stopScheduleAdherence
 	// - Make this a REST endpoint
 	
@@ -126,8 +132,72 @@ public class ScheduleAdherenceController {
 
 	}
 	
-	 
-	 private static List<Object> dbify(DetachedCriteria criteria) {
+	public static List<Integer> routeScheduleAdherenceSummary(Date startDate,
+			Date endDate,
+			String startTime,
+			String endTime,
+			Double earlyLimit,
+			Double lateLimit,
+			List<String> routeIds) {
+
+		endDate = endOfDay(endDate);
+		String sqlProjection = "(scheduledTime - time) AS scheduleAdherence";
+
+		ProjectionList proj = Projections.projectionList();
+		proj.add(Projections.sqlProjection(sqlProjection, new String[] { "scheduleAdherence" },
+				new Type[] { DoubleType.INSTANCE }), "scheduleAdherence");
+
+		DetachedCriteria criteria = DetachedCriteria.forClass(ArrivalDeparture.class)
+				.add(Restrictions.between("time", startDate, endDate))
+				.add(Restrictions.isNotNull("scheduledTime"));
+		
+		String sql = "time({alias}.time) between ? and ?";
+		String[] values = { startTime, endTime };
+		Type[] types = { StringType.INSTANCE, StringType.INSTANCE };
+		criteria.add(Restrictions.sqlRestriction(sql, values, types));
+		
+		logger.info("sql=" + sql);
+		
+		criteria.setProjection(proj).setResultTransformer(DetachedCriteria.ALIAS_TO_ENTITY_MAP);
+				
+		int count = 0;
+		int early = 0;
+		int late = 0;
+		int ontime = 0;
+		List<Object> results = dbify(criteria);
+		for (Object o : results) {
+			count++;
+			java.util.HashMap hm = (java.util.HashMap)o;
+			Double d = (Double)hm.get("scheduleAdherence");
+			if (d > lateLimit) {
+				late++;
+			} else if (d < earlyLimit) {
+				early++;
+			} else {
+				ontime++;
+			}
+		}
+		logger.info("query complete -- earlyLimit={}, lateLimit={}, early={}, ontime={}, late={}, count={}",
+				earlyLimit, lateLimit, early, ontime, late, count);
+		double earlyPercent = (1.0 - (double)(count - early)/count) * 100;
+		double onTimePercent = (1.0 - (double)(count - ontime)/count) * 100;
+		double latePercent = (1.0 - (double)(count - late)/count) * 100;
+		logger.info("count={} earlyPercent={} onTimePercent={} latePercent={}",
+				count, earlyPercent, onTimePercent, latePercent);
+		Integer[] summary = new Integer[] {count, (int) earlyPercent, (int) onTimePercent, (int) latePercent};
+		return Arrays.asList(summary);
+	}
+	
+	 private static Date endOfDay(Date endDate) {
+		 Calendar c = Calendar.getInstance();
+		 c.setTime(endDate);
+		 c.set(Calendar.HOUR, 23);
+		 c.set(Calendar.MINUTE, 59);
+		 c.set(Calendar.SECOND, 59);
+		 return c.getTime();
+	}
+
+	private static List<Object> dbify(DetachedCriteria criteria) {
 		 Session session = HibernateUtils.getSession();
 		 try {
 			 return criteria.getExecutableCriteria(session).list();

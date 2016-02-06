@@ -228,10 +228,11 @@ abstract public class PredictionAccuracyQuery {
 				- Time.parseDate(beginDateStr).getTime() + 1 * Time.MS_PER_DAY;
 		if (timespan > 31 * Time.MS_PER_DAY) {
 			throw new ParseException(
-					"Begin date to end date spans more than a month", 0);
+					"Begin date to end date spans more than a month for endDate="
+					+ endDateStr + " and startDate=" + beginDateStr 
+					+ " endDate=" + Time.parseDate(endDateStr)
+					+ " startDate=" + Time.parseDate(beginDateStr), 0);
 		}
-
-		// Determine the time of day portion of the SQL
 		String timeSql = "";
 		String mySqlTimeSql = "";
 		if ((beginTimeStr != null && !beginTimeStr.isEmpty())
