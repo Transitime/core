@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.ProjectionList;
@@ -150,7 +151,13 @@ public class ScheduleAdherenceController {
 		DetachedCriteria criteria = DetachedCriteria.forClass(ArrivalDeparture.class)
 				.add(Restrictions.between("time", startDate, endDate))
 				.add(Restrictions.isNotNull("scheduledTime"));
-		
+		if (routeIds != null && !routeIds.isEmpty()) {
+			for (String routeId : routeIds) {
+				if (StringUtils.isNotBlank(routeId)) {
+					criteria.add(Restrictions.eq("routeId", routeId));
+				}
+			}
+		}
 		String sql = "time({alias}.time) between ? and ?";
 		String[] values = { startTime, endTime };
 		Type[] types = { StringType.INSTANCE, StringType.INSTANCE };

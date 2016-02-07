@@ -9,7 +9,7 @@
 // todo this code should be in a struts action
 String startDateStr = request.getParameter("beginDate");
 String endDateStr = request.getParameter("endDate");
-String startTime = request.getParameter("startTime");
+String startTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 String earlyLimitStr = request.getParameter("allowableEarly");
 String lateLimitStr = request.getParameter("allowableLate");
@@ -34,7 +34,7 @@ if (lateLimitStr != null && lateLimitStr != "") {
 }
 
 
-String routeIdList = request.getParameter("routeIds");
+String routeIdList = request.getParameter("r");
 List<String> routeIds = routeIdList == null ? null : Arrays.asList(routeIdList.split(","));
 
 
