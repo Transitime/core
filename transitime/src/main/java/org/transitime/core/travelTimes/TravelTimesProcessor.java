@@ -169,7 +169,7 @@ public class TravelTimesProcessor {
 	 * added to the trip.
 	 */
 	public static class ProcessedDataMapKey extends MapKey {
-		private ProcessedDataMapKey(String tripId, int stopPathIndex,
+		public ProcessedDataMapKey(String tripId, int stopPathIndex,
 				String stopId) {
 			super(tripId, stopPathIndex, stopId);
 		}

@@ -78,26 +78,26 @@ public class Time {
 	private static final DateFormat defaultDateFormat =
 			SimpleDateFormat.getDateInstance(DateFormat.SHORT);
 	private static final DateFormat dateFormatDashesShortYear =
-			new SimpleDateFormat("MM-dd-yy");
+			new SimpleDateFormat("dd-MM-yy");
 
 	
 	private static final DateFormat readableDateFormat =
-			new SimpleDateFormat("MM-dd-yyyy");
+			new SimpleDateFormat("dd-MM-yyyy");
 	
 	private static final DateFormat readableDateFormat24 = 
-			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss z");
+			new SimpleDateFormat("dd-MM-yyyy HH:mm:ss z");
 	
 	private static final DateFormat readableDateFormat24NoSecs = 
-		new SimpleDateFormat("MM-dd-yyyy HH:mm");
+		new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
 	private static final DateFormat readableDateFormat24Msec = 
-			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
+			new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS z");
 	
 	private static final DateFormat readableDateFormat24NoTimeZoneMsec = 
-			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS");
+			new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
 	
 	private static final DateFormat readableDateFormat24NoTimeZoneNoMsec = 
-			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+			new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
 	private static final DateFormat timeFormat24 =
 			new SimpleDateFormat("HH:mm:ss z");
@@ -118,11 +118,11 @@ public class Time {
 	// Note that this one is not static. It is for when need to include
 	// timezone via a Time object.
 	private final DateFormat readableDateFormat24MsecForTimeZone =
-			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
+			new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS z");
 	private final DateFormat readableTimeFormatForTimeZone =
 			new SimpleDateFormat("HH:mm:ss");
 	private final DateFormat readableDateFormatForTimeZone =
-			new SimpleDateFormat("MM-dd-yyyy");
+			new SimpleDateFormat("dd-MM-yyyy");
 	
 	// So can output headings and such with a consistent number of decimal places
 	private static final DecimalFormat oneDigitFormat = new DecimalFormat("0.0");
@@ -384,7 +384,7 @@ public class Time {
 	
 	/**
 	 * Parses the datetimeStr and returns a Date object. Format is
-	 * "MM-dd-yyyy HH:mm:ss z". Tries multiple formats including with
+	 * "dd-MM-yyyy HH:mm:ss z". Tries multiple formats including with
 	 * milliseconds and with and without time zones.
 	 * 
 	 * @param datetimeStr
@@ -437,7 +437,7 @@ public class Time {
 	
 	/**
 	 * Parses the dateStr and returns a Date object. Format of 
-	 * date is "MM-dd-yyyy".
+	 * date is "dd-MM-yyyy".
 	 * 
 	 * @param dateStr
 	 * @return
@@ -678,7 +678,7 @@ public class Time {
 	}
 	
 	/**
-	 * Returns date in format "MM-dd-yyyy"
+	 * Returns date in format "dd-MM-yyyy"
 	 * @param epochTime
 	 * @return
 	 */
@@ -687,7 +687,7 @@ public class Time {
 	}
 	
 	/**
-	 * Returns date in format "MM-dd-yyyy"
+	 * Returns date in format "dd-MM-yyyy"
 	 * @param epochTime
 	 * @return
 	 */
@@ -696,7 +696,7 @@ public class Time {
 	}
 	
 	/**
-	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss z
+	 * Returns epochTime as a string in the format dd-MM-yyyy HH:mm:ss z
 	 * @param epochTime
 	 * @return
 	 */
@@ -705,7 +705,7 @@ public class Time {
 	}
 	
 	/**
-	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss z
+	 * Returns epochTime as a string in the format dd-MM-yyyy HH:mm:ss z
 	 * 
 	 * @param epochTime
 	 * @return
@@ -715,7 +715,7 @@ public class Time {
 	}	
 	
 	/**
-	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss.SSS z
+	 * Returns epochTime as a string in the format dd-MM-yyyy HH:mm:ss.SSS z
 	 * 
 	 * @param epochTime
 	 * @return
@@ -725,7 +725,7 @@ public class Time {
 	}
 	
 	/**
-	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss.SSS z
+	 * Returns epochTime as a string in the format dd-MM-yyyy HH:mm:ss.SSS z
 	 * but does so for the Timezone specified by this Time object.
 	 * 
 	 * @param epochTime
@@ -741,7 +741,7 @@ public class Time {
 	
 	/**
 	 * Returns epochTime as a string, including msec, in the 
-	 * format MM-dd-yyyy HH:mm:ss.SSS z
+	 * format dd-MM-yyyy HH:mm:ss.SSS z
 	 * 
 	 * @param epochTime
 	 * @return

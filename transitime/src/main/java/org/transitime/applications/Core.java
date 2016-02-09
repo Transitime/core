@@ -17,6 +17,7 @@
 package org.transitime.applications;
 
 import java.io.PrintWriter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -28,6 +29,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.ConfigFileReader;
@@ -36,6 +39,7 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
 import org.transitime.core.TimeoutHandlerModule;
 import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -407,6 +411,13 @@ public class Core {
 			
 			// Initialize the core now
 			createCore();
+			
+			Session session = HibernateUtils.getSession();
+			
+			Date endDate=Calendar.getInstance().getTime();			
+			Date startDate=DateUtils.addDays(endDate, -1);
+			
+			TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
 						
 			// Start any optional modules. 
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
@@ -426,6 +437,7 @@ public class Core {
 			startRmiServers(agencyId);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 

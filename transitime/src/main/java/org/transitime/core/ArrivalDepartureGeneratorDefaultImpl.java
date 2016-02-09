@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -319,9 +320,15 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			
 		// Queue to store object into db
 		Core.getInstance().getDbLogger().add(arrivalDeparture);
-		
+								
 		// Log creation of ArrivalDeparture in ArrivalsDepartures.log file
 		arrivalDeparture.logCreation();
+		
+		
+		/*protected ArrivalDeparture(arrivalDeparture., String vehicleId, Date time, Date avlTime, Block block, 
+				int tripIndex, int stopPathIndex, boolean isArrival) {*/
+		
+		TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);

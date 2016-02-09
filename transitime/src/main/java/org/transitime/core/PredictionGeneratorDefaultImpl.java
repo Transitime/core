@@ -131,7 +131,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	 *            are less certain.
 	 * @return The generated Prediction
 	 */
-	private IpcPrediction generatePredictionForStop(AvlReport avlReport,
+	protected IpcPrediction generatePredictionForStop(AvlReport avlReport,
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
 			boolean lateSoMarkAsUncertain) {
@@ -412,11 +412,15 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			
 			// Add in travel time for the next path to get to predicted 
 			// arrival time of this stop
-			predictionTime += indices.getTravelTimeForPath();
+			predictionTime += getTravelTimeForPath(indices, avlReport);
 		}
 
 		// Return the results
 		return newPredictions;
+	}
+	protected long getTravelTimeForPath(Indices indices, AvlReport avlReport)
+	{
+		return indices.getTravelTimeForPath();
 	}
 	
 }

@@ -7,7 +7,7 @@
       <param-name>transitime_config_file_location</param-name>
       <!-- Set to customized properties file with db config info and such -->
 
-      <param-value>D:\\transiTime\\transiTimeConfig.xml</param-value>      
+      <param-value>D:\\transiTime\\transiTimeDartConfig.xml</param-value>      
 
     </context-param>
 	
