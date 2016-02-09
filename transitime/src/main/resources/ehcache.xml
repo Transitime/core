@@ -1,0 +1,27 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="true"
+	monitoring="autodetect" dynamicConfig="true">
+
+	<!-- By default, Ehcache stored the cached files in temp folder. -->
+	<!-- <diskStore path="java.io.tmpdir" /> -->
+	
+	<!-- Ask Ehcache to store cache in this path -->
+	<diskStore path="c:\\cache" />
+	
+	<cache name="arrivalDepartures" 
+		maxEntriesLocalHeap="20000"
+		maxEntriesLocalDisk="2000" 
+		eternal="false" 
+		diskSpoolBufferSizeMB="20"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+	<cache name="KalmanErrorCache" 
+		maxEntriesLocalHeap="20000"
+		maxEntriesLocalDisk="2000" 
+		eternal="false" 
+		diskSpoolBufferSizeMB="20"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+</ehcache>
