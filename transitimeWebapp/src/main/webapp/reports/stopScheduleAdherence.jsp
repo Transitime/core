@@ -16,33 +16,41 @@
 
 <%@include file="/template/header.jsp" %>
 
+<div style="display: none;" id="_group">stop</div>
+<div style="display: none;" id="_groupId">stopId</div>
+
 <div id="mainDiv">
 
 <div id="title">Stop Schedule Adherence</div>
 
 <div id="menu">
 
-	<jsp:include page="params/fromToDateTime.jsp" />
-
-	<div class="submitDiv">
-		<input type="button" id="getStops" value="Get stop data"></input>
-	</div>
+	<form id="params">
+		<jsp:include page="params/fromToDateTime.jsp" />
+	
+		<div class="submitDiv">
+			<input type="button" id="getGroups" value="Get stop data"></input>
+		</div>
+	
+	</form>
 	
 	<span id="message"></span> <br>
 	<div id="extra">
 		
 		<div class="param">
-			Limit stops by number of data points: <input type="number" style="width: 5em;" id="limitStop" />
+			Limit stops by number of data points: <input type="number" style="width: 5em;" id="limitGroup" />
 		</div>
 		<div class="param">
-			Get <input type="number" id="numberStops" style="width: 5em;" value="5"> 
+			Get <input type="number" id="numberGroups" style="width: 5em;" value="5"> 
 			<input type="button" id="fiveWorst" value="worst"></input> / 
-			<input type="button" id="fiveBest" value="best"></input>
+			<input type="button" id="fiveBest" value="best"></input> / 
+			<input type="button" id="fiveEarly" value="earliest"></input> / 
+			<input type="button" id="fiveLate" value="latest"></input>
 			stops
 		</div>
 		<div class="param">
 			Stops: 
-			<select multiple="multiple" id="stops" style="width:500px;"></select> <br>
+			<select multiple="multiple" id="groups" style="width:500px;"></select> <br>
 		</div>
 		
 		<input type="button" id="go" value="Plot" /> <br>
@@ -50,19 +58,27 @@
 	
 </div>
 
-<div id="box_plot"></div>
-
 <div id="title">
 	<img src="images/page-loader.gif" id="loading"></img>
 </div>
 
 </div>
+
+<div id="boxPlot"></div>
+<div id="boxPlotInfo" style="width: 700px; margin-left: auto; margin-right: auto;">
+This box plot shows the distribution of schedule adherence data across stops.
+For each stop, the maximum and minimum schedule adherences are horizontal grey
+lines. The median, first quartile (middle value between the minimum and median),
+and third quartile (middle value between the median and maximum) are horizontal
+colored lines. 50% of a stop's data points lie within the colored box.
+</div>
+
 </body>
 
 
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
-<script type="text/javascript" src="javascript/stopScheduleAdherence.js"></script>
+<script type="text/javascript" src="javascript/scheduleAdherence.js"></script>
 
 </html>

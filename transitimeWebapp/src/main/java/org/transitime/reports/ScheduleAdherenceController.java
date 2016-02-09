@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -43,6 +44,16 @@ public class ScheduleAdherenceController {
 			.getLogger(ScheduleAdherenceController.class);	
 	// TODO: Combine routeScheduleAdherence and stopScheduleAdherence
 	// - Make this a REST endpoint
+	// problem - negative schedule adherence means we're late
+	
+	
+	private static final String ADHERENCE_SQL = "(time - scheduledTime) AS scheduleAdherence";
+	private static final Projection ADHERENCE_PROJECTION = Projections.sqlProjection(
+			ADHERENCE_SQL, new String[] { "scheduleAdherence" },
+			new Type[] { DoubleType.INSTANCE });
+	private static final Projection AVG_ADHERENCE_PROJECTION = Projections.sqlProjection(
+			"avg" + ADHERENCE_SQL, new String[] { "scheduleAdherence" },
+			new Type[] { DoubleType.INSTANCE });
 	
 	public static List<Object> routeScheduleAdherence(Date startDate,
 			Date endDate,
@@ -52,8 +63,6 @@ public class ScheduleAdherenceController {
 			boolean byRoute) {
 
 		endDate = new Date(endDate.getTime() + TimeUnit.DAYS.toMillis(1));
-		
-		String sqlProjection = "avg(scheduledTime - time) AS scheduleAdherence";
 
 		ProjectionList proj = Projections.projectionList();
         
@@ -65,8 +74,7 @@ public class ScheduleAdherenceController {
 			proj.add(Projections.property("routeId"), "routeId")
 				.add(Projections.groupProperty("tripId"), "tripId");
 		
-		proj.add(Projections.sqlProjection(sqlProjection, new String[] { "scheduleAdherence" },
-						new Type[] { DoubleType.INSTANCE }), "scheduleAdherence");
+		proj.add(ADHERENCE_PROJECTION, "scheduleAdherence");
 
 		DetachedCriteria criteria = DetachedCriteria.forClass(ArrivalDeparture.class)
 				.add(Restrictions.between("time", startDate, endDate))
@@ -97,10 +105,7 @@ public class ScheduleAdherenceController {
 
 		endDate = new Date(endDate.getTime() + TimeUnit.DAYS.toMillis(1));
 		
-		String sqlProjection = "(scheduledTime - time) AS scheduleAdherence";
-
 		ProjectionList proj = Projections.projectionList();
-  
         		
 		if (byStop)
 			proj.add(Projections.groupProperty("stopId"), "stopId")
@@ -110,8 +115,7 @@ public class ScheduleAdherenceController {
 				.add(Projections.property("stopId"), "stopId")
 				.add(Projections.property("tripId"), "tripId");
 		
-		proj.add(Projections.sqlProjection(sqlProjection, new String[] { "scheduleAdherence" },
-						new Type[] { DoubleType.INSTANCE }), "scheduleAdherence");
+		proj.add(byStop ? AVG_ADHERENCE_PROJECTION : ADHERENCE_PROJECTION, "scheduleAdherence");
 
 		DetachedCriteria criteria = DetachedCriteria.forClass(ArrivalDeparture.class)
 				.add(Restrictions.between("time", startDate, endDate))
@@ -142,11 +146,9 @@ public class ScheduleAdherenceController {
 			List<String> routeIds) {
 
 		endDate = endOfDay(endDate);
-		String sqlProjection = "(scheduledTime - time) AS scheduleAdherence";
 
 		ProjectionList proj = Projections.projectionList();
-		proj.add(Projections.sqlProjection(sqlProjection, new String[] { "scheduleAdherence" },
-				new Type[] { DoubleType.INSTANCE }), "scheduleAdherence");
+		proj.add(ADHERENCE_PROJECTION, "scheduleAdherence");
 
 		DetachedCriteria criteria = DetachedCriteria.forClass(ArrivalDeparture.class)
 				.add(Restrictions.between("time", startDate, endDate))

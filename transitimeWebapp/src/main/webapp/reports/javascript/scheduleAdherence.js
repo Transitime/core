@@ -1,80 +1,94 @@
 // Code for creating the box plot is based on
 // https://developers.google.com/chart/interactive/docs/gallery/intervals#box-plot
 
+// This code should work for routes or stops depending on the value of the "group" and "groupId" variables
+
 google.load('visualization', 1, {'packages':['corechart']});
 
-
-$("#loading").hide()
-$("#extra").hide()
+$("#loading, #extra, #boxPlotInfo").hide()
 
 var today = new Date().toISOString().slice(0,10)
 $("#fromDate, #toDate").val(today);
 $("#fromTime, #toTime").val("09:00")
 
-$("#stops").select2()
+$("#groups").select2()
 
-$("#getStops").click(function() {
-	var startDate = $("#beginDate").val()
-	var endDate = $("#endDate").val()
-	var startTime = $("#beginTime").val();
-	var endTime = $("#endTime").val()
+var group = $("#_group").text();
+var groupId = $("#_groupId").text();
+var dataUrl = "data/" + group + "ScheduleAdherence.jsp?";
+
+$("#getGroups").click(function() {
 	
 	$("#message").text("Loading...")
 	
-	var dateString = "startDate="+startDate+"&endDate="+endDate+"&startTime="+startTime+"&endTime="+endTime;
-	console.log(dateString)
-	$.get("data/stopScheduleAdherence.jsp?"+dateString+"&byStop=true", function(stops) {
+	var params = $("#params").serialize();
+	
+	$.get(dataUrl + params + "&byGroup=true", function(groups) {
 	
 		$("#extra").show();
-		initStops(stops);
+		initGroups(groups);
 		
 		$("#go").click(function() {
 			$("#loading").show()
-			var r = $("#stops").val()
-			$.get("data/stopScheduleAdherence.jsp?"+dateString+"&stopIds=" + r.join(","), main);
+			var r = $("#groups").val()
+			$.get(dataUrl + params + "&" + groupId + "s=" + r.join(","), main);
 		})
 	
-		$("#limitStop").on("change", function(evt) {
+		$("#limitGroup").on("change", function(evt) {
 			var limit = evt.target.value;
-			var filterStops = stops.filter(function(d) { return d.count > limit })
-			initStops(filterStops);
+			var filterGroups = groups.filter(function(d) { return d.count > limit })
+			initGroups(filterGroups);
 		})
 	})
 })
 
 
 
-function initStops(stops) {
-	console.log("init stops: " + stops.length)
-	$("#stops *").remove();
+function initGroups(groups) {
+	$("#groups *").remove();
 	
-	$("#message").text("" + stops.length + " stops");
+	$("#message").text("" + groups.length + " " + group + "s");
 	
-	stops.forEach(function(stop) {
+	groups.forEach(function(x) {
 		var option = $("<option>")
-		option.attr("value", stop.stopId)
-		option.text(stop.stopId)
-		$("#stops").append(option)
+		option.attr("value", x[groupId])
+		option.text(x[groupId])
+		$("#groups").append(option)
 	})
-	$("#stops").select2()
+	$("#groups").select2()
 	
+	var sortedGroups = groups.slice(0);
+	sortedGroups.sort(function(a, b) { return a.scheduleAdherence - b.scheduleAdherence })
 	
-	var sortedStops = stops.slice(0);
-	sortedStops.sort(function(a, b) { return b.scheduleAdherence - a.scheduleAdherence })
+	var sortedGroupsAbs = groups.slice(0);
+	sortedGroupsAbs.sort(function(a, b) { return Math.abs(a.scheduleAdherence) - Math.abs(b.scheduleAdherence) })
 	
-	$("#fiveBest").off("click");
+	$("#fiveBest, #fiveWorst, #fiveEarly, #fiveLate").off("click");
+	
 	$("#fiveBest").on("click", function() {
-		var num = $("#numberStops").val()
-		var stopIds = sortedStops.slice(0, num).map(function(d) { return d.stopId });
-		$("#stops").val(stopIds).trigger("change");
+		var num = $("#numberGroups").val()
+		var ids = sortedGroupsAbs.slice(0, num).map(function(d) { return d[groupId] });
+		$("#groups").val(ids).trigger("change");
 	})
 	
-	$("#fiveWorst").off("click");
 	$("#fiveWorst").on("click", function() {
-		var len = stops.length;
-		var num = $("#numberStops").val()
-		var stopIds = sortedStops.slice(len-num, len).map(function(d) { return d.stopId });
-		$("#stops").val(stopIds).trigger("change");
+		var len = groups.length;
+		var num = $("#numberGroups").val()
+		var ids = sortedGroupsAbs.slice(len-num, len).map(function(d) { return d[groupId] });
+		$("#groups").val(ids).trigger("change");
+	})
+	
+	$("#fiveEarly").on("click", function() {
+		var num = $("#numberGroups").val()
+		var ids = sortedGroups.slice(0, num).map(function(d) { return d[groupId] });
+		$("#groups").val(ids).trigger("change");
+	})
+	
+	$("#fiveLate").on("click", function() {
+		var len = groups.length;
+		var num = $("#numberGroups").val()
+		var ids = sortedGroups.slice(len-num, len).map(function(d) { return d[groupId] });
+		$("#groups").val(ids).trigger("change");
 	})
 	
 }
@@ -82,14 +96,15 @@ function initStops(stops) {
 function main(data) {
 	
 	$("#loading").hide();
+	$("#boxPlotInfo").show();
 	
 	var rowById = {};
 	var array = [];
 	data.forEach(function(d) {
-		var row = rowById[d.stopId]
+		var row = rowById[d[groupId]]
 		if (row == null) {
-			row = [d.stopId]
-			rowById[d.stopId] = row
+			row = [d[groupId]]
+			rowById[d[groupId]] = row
 			array.push(row)
 		}
 		row.push(d.scheduleAdherence)
@@ -143,14 +158,15 @@ function drawBoxPlot(array, dataLen) {
 
   data.addRows(array);
 
-
-
   var options = {
-      title:'Stop Schedule Adherence',
+      title: $("#title").text(),
       height: 500,
       legend: {position: 'none'},
       hAxis: {
         gridlines: {color: '#fff'}
+      },
+      vAxis: {
+        title: "Adherence (sec)"
       },
       lineWidth: 0,
       series: [{'color': '#D3362D'}],
@@ -174,7 +190,7 @@ function drawBoxPlot(array, dataLen) {
       }
   };
 
-  var chart = new google.visualization.LineChart(document.getElementById('box_plot'));
+  var chart = new google.visualization.LineChart(document.getElementById('boxPlot'));
 
   chart.draw(data, options);
 }

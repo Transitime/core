@@ -7,11 +7,11 @@
 <%@ page contentType="application/json" %>
 <%
 
-String startDateStr = request.getParameter("startDate");
+String startDateStr = request.getParameter("beginDate");
 String endDateStr = request.getParameter("endDate");
-String startTime = request.getParameter("startTime");
+String startTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
-boolean byStop = new Boolean(request.getParameter("byStop"));
+boolean byStop = new Boolean(request.getParameter("byGroup"));
 
 if (startTime == null || startTime == "")
 	startTime = "00:00:00";
