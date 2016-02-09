@@ -19,6 +19,7 @@ package org.transitime.reports;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +33,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.DoubleType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
-import org.hsqldb.lib.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -84,37 +84,16 @@ public class ScheduleAdherenceController {
 			List<String> routeIds) {
 
 		endDate = endOfDay(endDate);
-
-		ProjectionList proj = Projections.projectionList();
-		proj.add(ADHERENCE_PROJECTION, "scheduleAdherence");
-
-		DetachedCriteria criteria = DetachedCriteria.forClass(ArrivalDeparture.class)
-				.add(Restrictions.between("time", startDate, endDate))
-				.add(Restrictions.isNotNull("scheduledTime"));
-		if (routeIds != null && !routeIds.isEmpty()) {
-			for (String routeId : routeIds) {
-				if (StringUtils.isNotBlank(routeId)) {
-					criteria.add(Restrictions.eq("routeId", routeId));
-				}
-			}
-		}
-		String sql = "time({alias}.time) between ? and ?";
-		String[] values = { startTime, endTime };
-		Type[] types = { StringType.INSTANCE, StringType.INSTANCE };
-		criteria.add(Restrictions.sqlRestriction(sql, values, types));
-		
-		logger.info("sql=" + sql);
-		
-		criteria.setProjection(proj).setResultTransformer(DetachedCriteria.ALIAS_TO_ENTITY_MAP);
 				
 		int count = 0;
 		int early = 0;
 		int late = 0;
 		int ontime = 0;
-		List<Object> results = dbify(criteria);
+		List<Object> results = routeScheduleAdherence(startDate, endDate, startTime, endTime, routeIds, false);
+
 		for (Object o : results) {
 			count++;
-			java.util.HashMap hm = (java.util.HashMap)o;
+			HashMap hm = (HashMap) o;
 			Double d = (Double)hm.get("scheduleAdherence");
 			if (d > lateLimit) {
 				late++;
