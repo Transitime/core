@@ -74,6 +74,12 @@ finding specific issues with predictions.">
     at a stop and the scheduled time. Box plot shows the median, first and third
     quartiles, min and max for the adherence data for a stop.">
       Stop schedule adherence</a></li>
+  <li><a href="routeScheduleAdherence.jsp?a=<%= agencyId %>"
+    title="Shows route schedule adherence. Schedule adherence for a route is the
+    difference between the observed (or interpolated) time a vehicle departs/arrives
+    at a stop and the scheduled time for all stops on the route. Box plot shows the median,
+    first and third quartiles, min and max for the adherence data for a route.">
+      Route schedule adherence</a></li>
 </ul>
 
 <div id="subtitle">Status Reports</div>
