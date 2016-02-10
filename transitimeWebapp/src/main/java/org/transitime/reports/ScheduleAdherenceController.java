@@ -143,8 +143,10 @@ public class ScheduleAdherenceController {
 		DetachedCriteria criteria = DetachedCriteria.forClass(ArrivalDeparture.class)
 				.add(Restrictions.between("time", startDate, endDate)).add(Restrictions.isNotNull("scheduledTime"));
 
-		if (datatype != null)
-			criteria.add(Restrictions.eq("isArrival", datatype=="arrival"));
+		if ("arrival".equals(datatype))
+			criteria.add(Restrictions.eq("isArrival", true));
+		else if ("departure".equals(datatype))
+			criteria.add(Restrictions.eq("isArrival", false));
 		
 		String sql = "time({alias}.time) between ? and ?";
 		String[] values = { startTime, endTime };

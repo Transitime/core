@@ -12,6 +12,7 @@ String endDateStr = request.getParameter("endDate");
 String startTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 boolean byRoute = new Boolean(request.getParameter("byGroup"));
+String datatype = request.getParameter("datatype");
 
 if (startTime == null || startTime == "")
 	startTime = "00:00:00";
@@ -32,7 +33,7 @@ Date startDate = dateFormat.parse(startDateStr);
 Date endDate = dateFormat.parse(endDateStr);
 
 List<Object> results = ScheduleAdherenceController.routeScheduleAdherence(startDate,
-		endDate, startTime, endTime, routeIds, byRoute);
+		endDate, startTime, endTime, routeIds, byRoute, datatype);
 
 JSONArray json = new JSONArray(results);
 json.write(out);

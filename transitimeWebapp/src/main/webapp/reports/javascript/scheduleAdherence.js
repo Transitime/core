@@ -28,12 +28,14 @@ $("#getGroups").click(function() {
 		$("#extra").show();
 		initGroups(groups);
 		
+		$("#go").off("click");
 		$("#go").click(function() {
 			$("#loading").show()
 			var r = $("#groups").val()
 			$.get(dataUrl + params + "&" + groupId + "s=" + r.join(","), main);
 		})
 	
+		$("#limitGroup").off("change");
 		$("#limitGroup").on("change", function(evt) {
 			var limit = evt.target.value;
 			var filterGroups = groups.filter(function(d) { return d.count > limit })
