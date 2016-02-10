@@ -16,6 +16,7 @@
  */
 package org.transitime.reports;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -89,6 +90,7 @@ public class ScheduleAdherenceController {
 		int early = 0;
 		int late = 0;
 		int ontime = 0;
+
 		List<Object> results = routeScheduleAdherence(startDate, endDate, startTime, endTime, routeIds, false);
 
 		for (Object o : results) {
@@ -115,8 +117,15 @@ public class ScheduleAdherenceController {
 	}
 	
 	private static List<Object> groupScheduleAdherence(Date startDate, Date endDate, String startTime, String endTime,
-			String groupName, List<String> ids, boolean byGroup) {
+			String groupName, List<String> idsOrEmpty, boolean byGroup) {
 
+		// filter ids which may be empty.
+		List<String> ids = new ArrayList<String>();
+		if (idsOrEmpty != null)
+			for (String id : ids)
+				if (!StringUtils.isEmpty(id))
+					ids.add(id);
+		
 		endDate = new Date(endDate.getTime() + TimeUnit.DAYS.toMillis(1));
 
 		ProjectionList proj = Projections.projectionList();
@@ -138,7 +147,7 @@ public class ScheduleAdherenceController {
 		criteria.add(Restrictions.sqlRestriction(sql, values, types));
 
 		criteria.setProjection(proj).setResultTransformer(DetachedCriteria.ALIAS_TO_ENTITY_MAP);
-
+		
 		if (ids != null && ids.size() > 0)
 			criteria.add(Restrictions.in(groupName, ids));
 
