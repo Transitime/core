@@ -122,7 +122,7 @@ public class ScheduleAdherenceController {
 		// filter ids which may be empty.
 		List<String> ids = new ArrayList<String>();
 		if (idsOrEmpty != null)
-			for (String id : ids)
+			for (String id : idsOrEmpty)
 				if (!StringUtils.isEmpty(id))
 					ids.add(id);
 		
