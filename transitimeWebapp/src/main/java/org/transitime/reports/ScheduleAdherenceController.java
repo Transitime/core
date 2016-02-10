@@ -61,9 +61,10 @@ public class ScheduleAdherenceController {
 			String startTime,
 			String endTime,
 			List<String> stopIds,
-			boolean byStop) {
+			boolean byStop,
+			String datatype) {
 
-		return groupScheduleAdherence(startDate, endDate, startTime, endTime, "stopId", stopIds, byStop);
+		return groupScheduleAdherence(startDate, endDate, startTime, endTime, "stopId", stopIds, byStop, datatype);
 	}
 	
 	public static List<Object> routeScheduleAdherence(Date startDate,
@@ -71,9 +72,10 @@ public class ScheduleAdherenceController {
 			String startTime,
 			String endTime,
 			List<String> routeIds,
-			boolean byRoute) {
+			boolean byRoute,
+			String datatype) {
 
-		return groupScheduleAdherence(startDate, endDate, startTime, endTime, "routeId", routeIds, byRoute);
+		return groupScheduleAdherence(startDate, endDate, startTime, endTime, "routeId", routeIds, byRoute, datatype);
 	}
 	
 	public static List<Integer> routeScheduleAdherenceSummary(Date startDate,
@@ -91,7 +93,7 @@ public class ScheduleAdherenceController {
 		int late = 0;
 		int ontime = 0;
 
-		List<Object> results = routeScheduleAdherence(startDate, endDate, startTime, endTime, routeIds, false);
+		List<Object> results = routeScheduleAdherence(startDate, endDate, startTime, endTime, routeIds, false, null);
 
 		for (Object o : results) {
 			count++;
@@ -117,7 +119,7 @@ public class ScheduleAdherenceController {
 	}
 	
 	private static List<Object> groupScheduleAdherence(Date startDate, Date endDate, String startTime, String endTime,
-			String groupName, List<String> idsOrEmpty, boolean byGroup) {
+			String groupName, List<String> idsOrEmpty, boolean byGroup, String datatype) {
 
 		// filter ids which may be empty.
 		List<String> ids = new ArrayList<String>();
@@ -141,6 +143,9 @@ public class ScheduleAdherenceController {
 		DetachedCriteria criteria = DetachedCriteria.forClass(ArrivalDeparture.class)
 				.add(Restrictions.between("time", startDate, endDate)).add(Restrictions.isNotNull("scheduledTime"));
 
+		if (datatype != null)
+			criteria.add(Restrictions.eq("isArrival", datatype=="arrival"));
+		
 		String sql = "time({alias}.time) between ? and ?";
 		String[] values = { startTime, endTime };
 		Type[] types = { StringType.INSTANCE, StringType.INSTANCE };

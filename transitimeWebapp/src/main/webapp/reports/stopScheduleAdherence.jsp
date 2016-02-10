@@ -28,6 +28,17 @@
 	<form id="params">
 		<jsp:include page="params/fromToDateTime.jsp" />
 	
+		<div class="param">
+			<label for="datatype">Data type:</label>
+    		<select id="datatype" name="datatype"
+    			title="Choose whether schedule adeherence will be calculated
+    			using arrivals, departures, or both.">
+    			<option value="">Both</option>
+    			<option value="arrival">Arrivals</option>
+    			<option value="departure">Departures</option>
+    		</select>
+		</div>
+	
 		<div class="submitDiv">
 			<input type="button" id="getGroups" value="Get stop data"></input>
 		</div>
