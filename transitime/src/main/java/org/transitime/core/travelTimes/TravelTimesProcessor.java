@@ -818,13 +818,14 @@ public class TravelTimesProcessor {
 				new HashSet<ProcessedDataMapKey>();
 		combinedKeySet.addAll(travelTimesMap.keySet());
 		combinedKeySet.addAll(stopTimesMap.keySet());
-		int setSize = combinedKeySet.size();
+		int setSize = 0;
 		int invalid = 0;
 		
 		// For each trip/stop path that had historical arrivals/departures and 
 		// or matches in the database...
 		int updated = 0;
 		for (ProcessedDataMapKey mapKey : combinedKeySet) {
+		  setSize++;
 			// Determine the associated Trip object for the data
 			Trip trip = tripMap.get(mapKey.getTripId());
 			if (trip == null) {
@@ -846,7 +847,7 @@ public class TravelTimesProcessor {
 				continue;
 			}
 			String stopIdFromTrip = 
-					trip.getStopPath(mapKey.getStopPathIndex()).getStopPathId();
+					trip.getStopPath(mapKey.getStopPathIndex()).getStopId();
 			if (!mapKey.getStopId().equals(stopIdFromTrip)) {
 				logger.error("Problem with stopPathIndex for historical data. "
 						+ "The stopPathIndex from the historical data {} "
