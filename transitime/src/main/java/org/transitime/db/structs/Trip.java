@@ -578,7 +578,7 @@ public class Trip implements Serializable {
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
-				+ ", scheduledTimesList=" + scheduledTimesList 
+//				+ ", scheduledTimesList=" + scheduledTimesList 
 				+ "]";
 	}
 	

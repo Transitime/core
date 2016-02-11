@@ -549,6 +549,10 @@ public class SpatialMatch {
 		try {
 			ScheduleTime scheduleTime = 
 					block.getScheduleTime(tripIndex, stopPathIndex);
+			if (scheduleTime == null) {
+			  logger.error("no scheduled wait stop time for {} {}", tripIndex, stopPathIndex);
+			  return -1;
+			}
 			return scheduleTime.getDepartureTime();
 		} catch (Exception e) {
 			logger.error("Tried to get wait stop time for a stop that didn't "

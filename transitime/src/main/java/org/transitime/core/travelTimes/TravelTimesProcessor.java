@@ -818,10 +818,14 @@ public class TravelTimesProcessor {
 				new HashSet<ProcessedDataMapKey>();
 		combinedKeySet.addAll(travelTimesMap.keySet());
 		combinedKeySet.addAll(stopTimesMap.keySet());
+		int setSize = 0;
+		int invalid = 0;
 		
 		// For each trip/stop path that had historical arrivals/departures and 
 		// or matches in the database...
+		int updated = 0;
 		for (ProcessedDataMapKey mapKey : combinedKeySet) {
+		  setSize++;
 			// Determine the associated Trip object for the data
 			Trip trip = tripMap.get(mapKey.getTripId());
 			if (trip == null) {
@@ -843,7 +847,7 @@ public class TravelTimesProcessor {
 				continue;
 			}
 			String stopIdFromTrip = 
-					trip.getStopPath(mapKey.getStopPathIndex()).getStopPathId();
+					trip.getStopPath(mapKey.getStopPathIndex()).getStopId();
 			if (!mapKey.getStopId().equals(stopIdFromTrip)) {
 				logger.error("Problem with stopPathIndex for historical data. "
 						+ "The stopPathIndex from the historical data {} "
@@ -918,6 +922,8 @@ public class TravelTimesProcessor {
 				if (mapKey.getStopPathIndex() != trip.getNumberStopPaths()-1) {
 					logger.debug("No stop times for {} even though there are " +
 						"travel times for that map key", mapKey);
+				} else {
+				  invalid++;
 				}
 			}
 			
@@ -932,11 +938,12 @@ public class TravelTimesProcessor {
 					mapKey.getStopPathIndex(), averagedStopTime,
 					averageTravelTimes, travelTimeSegLength);
 			travelTimeInfoMap.add(travelTimeInfo);
+			updated++;
 		}
 
 		// Nice to log how long things took so can see progress and bottle necks
-		logger.info("Processing data into a TravelTimeInfoMap took {} msec.", 
-				intervalTimer.elapsedMsec());
+		logger.info("Processing data (updates={} of {} keys with {} invalid) into a TravelTimeInfoMap took {} msec.", 
+				intervalTimer.elapsedMsec(), updated, setSize, invalid);
 
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
