@@ -105,7 +105,7 @@ if (timespan > 31*Time.MS_PER_DAY) {
                 + "     predictedTime-predictionReadTime as predLength, "
                 + "     predictionAccuracyMsecs/1000 as predAccuracy "
                 + tooltipsSql
-                + " FROM predictionAccuracy "
+                + " FROM PredictionAccuracy "
                 + "WHERE date(arrivalDepartureTime) " +
                 "BETWEEN STR_TO_DATE('" + beginDate + "', '%Y-%m-%d') and DATE_ADD(STR_TO_DATE('" + endDate + "', '%Y-%m-%d'),INTERVAL 1 DAY)"
                 + timeSql
@@ -193,7 +193,7 @@ if (timespan > 31*Time.MS_PER_DAY) {
                 + "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
                 + "     predictionAccuracyMsecs/1000 as predAccuracy "
                 + tooltipsSql
-                + " FROM predictionAccuracy "
+                + " FROM PredictionAccuracy "
                 + "WHERE arrivalDepartureTime BETWEEN '" + beginDate
                 +     "' AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' "
                 + timeSql

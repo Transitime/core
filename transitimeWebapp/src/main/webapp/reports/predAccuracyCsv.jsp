@@ -68,7 +68,7 @@ if (routeId!=null && !routeId.isEmpty()) {
                 + "     directionId AS direction, tripId AS trip, "
                 + "     stopId AS stop, vehicleId AS vehicle, "
                 + "     affectedByWaitStop AS affected_by_wait_stop"
-                + " FROM predictionAccuracy "
+                + " FROM PredictionAccuracy "
                 + "WHERE arrivalDepartureTime BETWEEN STR_TO_DATE('" + beginDate + "', '%Y-%m-%d') and DATE_ADD(STR_TO_DATE('" + endDate + "', '%Y-%m-%d'),INTERVAL 1 DAY) "
                 + "  AND predictedTime-predictionReadTime < (15 * 60) "
                 + routeSql
@@ -87,7 +87,7 @@ if (routeId!=null && !routeId.isEmpty()) {
                 + "     directionId AS direction, tripId AS trip, "
                 + "     stopId AS stop, vehicleId AS vehicle, "
                 + "     affectedByWaitStop AS affected_by_wait_stop"
-                + " FROM predictionAccuracy "
+                + " FROM PredictionAccuracy "
                 + "WHERE arrivalDepartureTime BETWEEN '" + beginDate
                 +     "' AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' "
                 + timeSql
