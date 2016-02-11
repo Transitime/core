@@ -821,6 +821,7 @@ public class TravelTimesProcessor {
 		
 		// For each trip/stop path that had historical arrivals/departures and 
 		// or matches in the database...
+		int updated = 0;
 		for (ProcessedDataMapKey mapKey : combinedKeySet) {
 			// Determine the associated Trip object for the data
 			Trip trip = tripMap.get(mapKey.getTripId());
@@ -932,11 +933,12 @@ public class TravelTimesProcessor {
 					mapKey.getStopPathIndex(), averagedStopTime,
 					averageTravelTimes, travelTimeSegLength);
 			travelTimeInfoMap.add(travelTimeInfo);
+			updated++;
 		}
 
 		// Nice to log how long things took so can see progress and bottle necks
-		logger.info("Processing data into a TravelTimeInfoMap took {} msec.", 
-				intervalTimer.elapsedMsec());
+		logger.info("Processing data (updates={} of {} keys) into a TravelTimeInfoMap took {} msec.", 
+				intervalTimer.elapsedMsec(), updated, combinedKeySet.size());
 
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
