@@ -818,6 +818,8 @@ public class TravelTimesProcessor {
 				new HashSet<ProcessedDataMapKey>();
 		combinedKeySet.addAll(travelTimesMap.keySet());
 		combinedKeySet.addAll(stopTimesMap.keySet());
+		int setSize = combinedKeySet.size();
+		int invalid = 0;
 		
 		// For each trip/stop path that had historical arrivals/departures and 
 		// or matches in the database...
@@ -919,6 +921,8 @@ public class TravelTimesProcessor {
 				if (mapKey.getStopPathIndex() != trip.getNumberStopPaths()-1) {
 					logger.debug("No stop times for {} even though there are " +
 						"travel times for that map key", mapKey);
+				} else {
+				  invalid++;
 				}
 			}
 			
@@ -937,8 +941,8 @@ public class TravelTimesProcessor {
 		}
 
 		// Nice to log how long things took so can see progress and bottle necks
-		logger.info("Processing data (updates={} of {} keys) into a TravelTimeInfoMap took {} msec.", 
-				intervalTimer.elapsedMsec(), updated, combinedKeySet.size());
+		logger.info("Processing data (updates={} of {} keys with {} invalid) into a TravelTimeInfoMap took {} msec.", 
+				intervalTimer.elapsedMsec(), updated, setSize, invalid);
 
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
