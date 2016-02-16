@@ -50,15 +50,18 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.collection.internal.PersistentList;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.internal.SessionImpl;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatch;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.logging.Markers;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
@@ -797,7 +800,7 @@ public final class Block implements Serializable {
 	/**
 	 * Uses lazy initialization to determine the trips for the block.
 	 * 
-	 * @return the trips
+	 * @return the trips as an unmodifiable collection
 	 */
 	public List<Trip> getTrips() {
 		// If trips already lazy loaded then simply return them
@@ -855,6 +858,9 @@ public final class Block implements Serializable {
 
 						globalLazyLoadSession.update(this);
 					}
+				} else {
+				  logger.error("Blocks.trips member is not a PersistentList!?!?. ");
+				  // not exiting here....
 				}
 
 				// Actually lazy-load the trips
@@ -872,6 +878,20 @@ public final class Block implements Serializable {
 							+ "rebooted. Creating a new session.",
 							this.getId(), e);
 
+	        if (!(rootCause instanceof SocketException 
+	            || rootCause instanceof SocketTimeoutException
+	            || rootCause instanceof PSQLException)) {
+	          logger.error(Markers.email(), 
+	              "For agencyId={} in Blocks.getTrips() for "
+	              + "blockId={} encountered exception whose root "
+	              + "cause was not a SocketException, "
+	              + "SocketTimeoutException, or PSQLException,"
+	              + "which therefore is unexpected. Therefore should "
+	              + "investigate. Root cause is {}.",
+	              AgencyConfig.getAgencyId(), this.getId(), 
+	              rootCause, e);
+	        }
+					
 					// Even though there was a timeout meaning that the
 					// session is no longer any good the Block object
 					// might still be associated with the old session.
@@ -899,7 +919,11 @@ public final class Block implements Serializable {
 						}
 					}
 
-					// Get new session, update object to use it, and try again.
+	        // Get new session, update object to use it, and try again.
+	        // Note: before calling get(0) to load the data first made
+	        // sure that the session used for the Block.trips is the same
+	        // as the current session. Therefore if made it here then it
+	        // means that definitely need to create new session.
 					DbConfig dbConfig = Core.getInstance().getDbConfig();
 					logger.info("CREATING NEW SESSION");
 					dbConfig.createNewGlobalSession();
@@ -917,7 +941,10 @@ public final class Block implements Serializable {
 									.getSQLException().getMessage(), e);
 					throw e;
 				}
-			}
+
+				// Actually lazy-load the trips
+				trips.get(0);
+			} 
 
 			logger.debug("Finished lazy load for trips data for "
 					+ "blockId={} serviceId={}. Took {} msec", blockId,

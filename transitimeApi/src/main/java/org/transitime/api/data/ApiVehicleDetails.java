@@ -34,8 +34,8 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "vehicle")
-@XmlType(propOrder = { "id", "routeId", "routeShortName", "headsign",
+@XmlRootElement
+@XmlType(propOrder = { "id", "routeId", "routeShortName", "routeName", "headsign",
 		"directionId", "vehicleType", "uiType", "schedBasedPreds", "loc",
 		"scheduleAdherence", "scheduleAdherenceStr", "blockId",
 		"blockAssignmentMethod", "tripId", "tripPatternId", "isDelayed",
@@ -43,6 +43,9 @@ import org.transitime.utils.Time;
 		"nextStopName", "driverId" })
 public class ApiVehicleDetails extends ApiVehicleAbstract {
 
+	@XmlAttribute
+	private String routeName;
+	
 	// Note: needs to be Integer instead of an int because it can be null
 	// (for vehicles that are not predictable)
 	@XmlAttribute(name = "schAdh")
@@ -64,13 +67,13 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	private String tripPatternId;
 
 	@XmlAttribute(name = "delayed")
-	private String isDelayed;
+	private Boolean isDelayed;
 	
 	@XmlAttribute(name = "layover")
-	private String isLayover;
+	private Boolean isLayover;
 
 	@XmlAttribute
-	private String layoverDepTime;
+	private Long layoverDepTime;
 
 	@XmlAttribute
 	private String layoverDepTimeStr;
@@ -104,6 +107,7 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	public ApiVehicleDetails(IpcVehicle vehicle, Time timeForAgency, UiMode... uiType) {
 		super(vehicle, uiType.length > 0 ? uiType[0] : UiMode.NORMAL);
 		
+		routeName = vehicle.getRouteName();
 		scheduleAdherence = vehicle.getRealTimeSchedAdh() != null ? vehicle
 				.getRealTimeSchedAdh().getTemporalDifference() : null;
 		scheduleAdherenceStr = vehicle.getRealTimeSchedAdh() != null ? vehicle
@@ -112,10 +116,10 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		blockAssignmentMethod = vehicle.getBlockAssignmentMethod();
 		tripId = vehicle.getTripId();
 		tripPatternId = vehicle.getTripPatternId();
-		isDelayed = vehicle.isDelayed() ? "true" : null;
-		isLayover = vehicle.isLayover() ? "true" : null;
+		isDelayed = vehicle.isDelayed() ? true : null;
+		isLayover = vehicle.isLayover() ? true : null;
 		layoverDepTime = vehicle.isLayover() ? 
-				Long.toString(vehicle.getLayoverDepartureTime()/Time.MS_PER_SEC) : null;
+				vehicle.getLayoverDepartureTime()/Time.MS_PER_SEC : null;
 				
 		layoverDepTimeStr = vehicle.isLayover() ?
 				timeForAgency.timeStrForTimezone(vehicle.getLayoverDepartureTime()) : null;

@@ -40,6 +40,17 @@
       <pattern>%n%d{HH:mm:ss.SSS} %-5level - %msg%n</pattern>
     </encoder>
   </appender>
+
+  <!-- Separate file for SQL logging -->
+  <appender name="SQL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_ROOT}/sql.log.gz</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${DEFAULT_PATTERN}</pattern>
+    </encoder>
+  </appender>
  
   <!-- Special appender so that can log errors and warnings so they can be
        output at end of GTFS processing in a nice coherent way.
@@ -96,10 +107,10 @@
 <!--
 -->
   <logger name="org.hibernate.SQL" level="debug" additivity="false">
-    <appender-ref ref="STDOUT" />
+    <appender-ref ref="SQL" />
   </logger>
   <logger name="org.hibernate.type" level="trace" additivity="false">
-    <appender-ref ref="STDOUT" />
+    <appender-ref ref="SQL" />
   </logger>
 
   <!-- Set default level of logging. -->

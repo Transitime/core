@@ -28,8 +28,6 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
 import net.jcip.annotations.Immutable;
 
 import org.hibernate.CallbackException;
@@ -54,6 +52,11 @@ import org.transitime.utils.IntervalTimer;
  * be joined with AvlReport data to get additional information.
  * <p>
  * Serializable since Hibernate requires such.
+ * <p>
+ * Implements Lifecycle so that can have the onLoad() callback be called when
+ * reading in data so that can intern() member strings. In order to do this the
+ * String members could not be declared as final since they are updated after
+ * the constructor is called. 
  *
  * @author SkiBu Smith
  *
@@ -118,9 +121,10 @@ public class Match implements Lifecycle, Serializable {
 	@Column
 	private final float distanceAlongStopPath;
 	
-	// Whether vehicle is considered to be at a stop. Used to determine if match
-	// should be stored to database.
-	@Transient
+	// Whether vehicle is considered to be at a stop. Especially useful so
+	// can filter out atStop matches when determining travel times since
+	// instead using arrival/departure times for that situation.
+	@Column
 	private final boolean atStop;
 	
 	
@@ -186,28 +190,32 @@ public class Match implements Lifecycle, Serializable {
 
 	/**
 	 * Because using a composite Id Hibernate wants this member.
-	 */
+	 */	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (atStop ? 1231 : 1237);
 		result = prime * result + ((avlTime == null) ? 0 : avlTime.hashCode());
-		result = prime * result + configRev;
-		result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
 		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
+		result = prime * result + configRev;
 		result = prime * result + Float.floatToIntBits(distanceAlongSegment);
 		result = prime * result + Float.floatToIntBits(distanceAlongStopPath);
 		result = prime * result + segmentIndex;
+		result =
+				prime * result
+						+ ((serviceId == null) ? 0 : serviceId.hashCode());
 		result = prime * result + stopPathIndex;
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
-		result = prime * result
-				+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
+		result =
+				prime * result
+						+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
 	}
 
 	/**
 	 * Because using a composite Id Hibernate wants this member.
-	 */
+	 */	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -217,6 +225,8 @@ public class Match implements Lifecycle, Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Match other = (Match) obj;
+		if (atStop != other.atStop)
+			return false;
 		if (avlTime == null) {
 			if (other.avlTime != null)
 				return false;
@@ -378,10 +388,7 @@ public class Match implements Lifecycle, Serializable {
 	}
 	
 	/**
-	 * Returns true if vehicle is at or near a stop. The atStop member is
-	 * transient which means it is not set properly if the Match object was read
-	 * from the database. It is only set when the Match is created by the
-	 * predictor software.
+	 * Returns true if vehicle is at or near a stop. 
 	 */
 	public boolean isAtStop() {
 		return atStop;

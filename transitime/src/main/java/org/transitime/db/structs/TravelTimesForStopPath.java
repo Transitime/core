@@ -219,8 +219,11 @@ public class TravelTimesForStopPath implements Serializable {
 						+ " bytes allocated for the data. TripId=" 
 						+ (trip!=null ? trip.getId() : "") 
 						+ " routeId=" + (trip!=null ? trip.getRouteId() : "")
-						+ " routeShortName=" 
-						+ (trip!=null ? trip.getRouteShortName() : "")
+						// Would like to get the route short name from the trip
+						// but that requires Core to be read in, which can't be
+						// don't when processing GTFS data.
+						//+ " routeShortName=" 
+						//+ (trip!=null ? trip.getRouteShortName() : "")
 						+ ". You most likely need to set the "
 						+ "-maxTravelTimeSegmentLength command line option to "
 						+ "a larger value than than the default of 200m.";

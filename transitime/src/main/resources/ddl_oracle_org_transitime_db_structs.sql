@@ -8,10 +8,10 @@
 
     create table Agencies (
         configRev number(10,0) not null,
-        agencyId varchar2(60 char) not null,
+        agencyName varchar2(60 char) not null,
         agencyFareUrl varchar2(255 char),
+        agencyId varchar2(60 char),
         agencyLang varchar2(15 char),
-        agencyName varchar2(60 char),
         agencyPhone varchar2(15 char),
         agencyTimezone varchar2(40 char),
         agencyUrl varchar2(255 char),
@@ -19,7 +19,7 @@
         maxLon double precision,
         minLat double precision,
         minLon double precision,
-        primary key (configRev, agencyId)
+        primary key (configRev, agencyName)
     );
 
     create table ArrivalsDepartures (
@@ -38,6 +38,7 @@
         routeShortName varchar2(60 char),
         scheduledTime timestamp,
         serviceId varchar2(60 char),
+        stopOrder number(10,0),
         stopPathIndex number(10,0),
         stopPathLength float,
         tripIndex number(10,0),
@@ -155,6 +156,7 @@
     create table Matches (
         vehicleId varchar2(60 char) not null,
         avlTime timestamp not null,
+        atStop number(1,0),
         blockId varchar2(60 char),
         configRev number(10,0),
         distanceAlongSegment float,
@@ -166,10 +168,20 @@
         primary key (vehicleId, avlTime)
     );
 
+    create table MeasuredArrivalTimes (
+        time timestamp not null,
+        stopId varchar2(60 char) not null,
+        directionId varchar2(60 char),
+        headsign varchar2(60 char),
+        routeId varchar2(60 char),
+        routeShortName varchar2(60 char),
+        primary key (time, stopId)
+    );
+
     create table MonitoringEvents (
         type varchar2(40 char) not null,
         time timestamp not null,
-        message varchar2(350 char),
+        message varchar2(512 char),
         triggered number(1,0),
         value double precision,
         primary key (type, time)
@@ -185,6 +197,7 @@
         predictionReadTime timestamp,
         predictionSource varchar2(60 char),
         routeId varchar2(60 char),
+        routeShortName varchar2(60 char),
         stopId varchar2(60 char),
         tripId varchar2(60 char),
         vehicleId varchar2(60 char),
@@ -194,6 +207,7 @@
     create table Predictions (
         id number(19,0) not null,
         affectedByWaitStop number(1,0),
+        avlTime timestamp,
         configRev number(10,0),
         creationTime timestamp,
         isArrival number(1,0),
@@ -216,8 +230,9 @@
         minLat double precision,
         minLon double precision,
         hidden number(1,0),
+        longName varchar2(80 char),
         maxDistance double precision,
-        name varchar2(255 char),
+        name varchar2(80 char),
         routeOrder number(10,0),
         shortName varchar2(80 char),
         textColor varchar2(10 char),
@@ -372,11 +387,34 @@
         primary key (vehicleId, time, eventType)
     );
 
+    create table VehicleStates (
+        vehicleId varchar2(60 char) not null,
+        avlTime timestamp not null,
+        blockId varchar2(60 char),
+        isDelayed number(1,0),
+        isForSchedBasedPreds number(1,0),
+        isLayover number(1,0),
+        isPredictable number(1,0),
+        isWaitStop number(1,0),
+        routeId varchar2(60 char),
+        routeShortName varchar2(80 char),
+        schedAdh varchar2(50 char),
+        schedAdhMsec number(10,0),
+        schedAdhWithinBounds number(1,0),
+        tripId varchar2(60 char),
+        tripShortName varchar2(60 char),
+        primary key (vehicleId, avlTime)
+    );
+
     create index ArrivalsDeparturesTimeIndex on ArrivalsDepartures (time);
+
+    create index ArrivalsDeparturesRouteTimeIndex on ArrivalsDepartures (routeShortName, time);
 
     create index AvlReportsTimeIndex on AvlReports (time);
 
     create index AvlTimeIndex on Matches (avlTime);
+
+    create index MeasuredArrivalTimesIndex on MeasuredArrivalTimes (time);
 
     create index MonitoringEventsTimeIndex on MonitoringEvents (time);
 
@@ -390,6 +428,8 @@
         add constraint UK_s0gaw8iv60vc17a5ltryqwg27  unique (stopPaths_tripPatternId, stopPaths_stopPathId, stopPaths_configRev);
 
     create index VehicleEventsTimeIndex on VehicleEvents (time);
+
+    create index VehicleStateAvlTimeIndex on VehicleStates (avlTime);
 
     alter table Block_to_Trip_joinTable 
         add constraint FK_abaj8ke6oh4imbbgnaercsowo 

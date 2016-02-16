@@ -145,16 +145,51 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRoute(java.lang.String)
 	 */
 	@Override
-	public IpcRoute getRoute(String routeIdOrShortName, String stopId,
-			String tripPatternId) throws RemoteException {
+	public IpcRoute getRoute(String routeIdOrShortName, String directionId,
+			String stopId, String tripPatternId) throws RemoteException {
 		// Determine the route
 		Route dbRoute = getRoute(routeIdOrShortName);		
 		if (dbRoute == null)
 			return null;
 		
 		// Convert db route into an ipc route and return it
-		IpcRoute ipcRoute = new IpcRoute(dbRoute, stopId, tripPatternId);
+		IpcRoute ipcRoute =
+				new IpcRoute(dbRoute, directionId, stopId, tripPatternId);
 		return ipcRoute;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.transitime.ipc.interfaces.ConfigInterface#getRoutes(java.util.List)
+	 */
+	@Override
+	public List<IpcRoute> getRoutes(List<String> routeIdsOrShortNames)
+			throws RemoteException {
+		List<IpcRoute> routes = new ArrayList<IpcRoute>();
+
+		// If no route specified then return data for all routes
+		if (routeIdsOrShortNames == null || routeIdsOrShortNames.isEmpty()) {
+			DbConfig dbConfig = Core.getInstance().getDbConfig();
+			List<org.transitime.db.structs.Route> dbRoutes =
+					dbConfig.getRoutes();
+			for (Route dbRoute : dbRoutes) {
+				IpcRoute ipcRoute = new IpcRoute(dbRoute, null, null, null);
+				routes.add(ipcRoute);
+			}
+		} else {
+			// Routes specified so return data for those routes
+			for (String routeIdOrShortName : routeIdsOrShortNames) {
+				// Determine the route
+				Route dbRoute = getRoute(routeIdOrShortName);
+				if (dbRoute == null)
+					continue;
+
+				IpcRoute ipcRoute = new IpcRoute(dbRoute, null, null, null);
+				routes.add(ipcRoute);
+			}
+		}
+		
+		return routes;
 	}
 
 	/* (non-Javadoc)
@@ -220,6 +255,14 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	public IpcTrip getTrip(String tripId) throws RemoteException {
 		Trip dbTrip = Core.getInstance().getDbConfig().getTrip(tripId);
 
+		// If couldn't find a trip with the specified trip_id then see if a
+		// a trip has the trip_short_name specified.
+		if (dbTrip == null) {
+			dbTrip =
+					Core.getInstance().getDbConfig()
+							.getTripUsingTripShortName(tripId);
+		}
+		
 		// If no such trip then return null since can't create a IpcTrip
 		if (dbTrip == null)
 			return null;
@@ -333,7 +376,10 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<String> getServiceIds() throws RemoteException {
-		return Core.getInstance().getDbConfig().getServiceIds();
+		// Convert the Set from getServiceIds() to a List since need
+		// to use a List for IPC due to serialization.
+		return new ArrayList<String>(Core.getInstance().getDbConfig()
+				.getServiceIds());
 	}
 
 	/* (non-Javadoc)
@@ -341,7 +387,10 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 	 */
 	@Override
 	public List<String> getCurrentServiceIds() throws RemoteException {
-		return Core.getInstance().getDbConfig().getCurrentServiceIds();
+		// Convert the Set from getCurrentServiceIds() to a List since need
+		// to use a List for IPC due to serialization.
+		return new ArrayList<String>(Core.getInstance().getDbConfig()
+				.getCurrentServiceIds());
 	}
 
 	/* (non-Javadoc)
@@ -386,5 +435,5 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 			blockIds.add(block.getId());
 		return blockIds;
 	}
-	
+
 }

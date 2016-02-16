@@ -376,7 +376,7 @@ public class RmiQuery {
 			System.out.println(routeSummary);
 			
 			IpcRoute route = configInterface.getRoute(routeSummary.getShortName(),
-					null, null);
+					null, null, null);
 			System.out.println(route);
 			
 			IpcDirectionsForRoute stopsForRoute = 

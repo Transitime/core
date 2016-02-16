@@ -24,7 +24,7 @@ import org.transitime.config.StringConfigValue;
 import org.transitime.utils.csv.CsvBase;
 
 /**
- * A GTFS trip object.
+ * A GTFS trip object as read from the trips.txt GTFS file.
  * 
  * @author SkiBu Smith
  *
@@ -53,6 +53,19 @@ public class GtfsTrip extends CsvBase {
 			+ "ID by specifying a grouping. For example, to get name before "
 			+ "a \"-\" would use something like \"(.*?)-\"");
 	private static Pattern tripShortNameRegExPattern = null;
+	
+	// For determining proper block_id that corresponds to AVL feed
+	// Default of null means simply use block_id without any modification.
+	private static StringConfigValue blockIdRegEx = new StringConfigValue(
+			"transitime.gtfs.blockIdRegEx", 
+			null,
+			"For agencies where block ID from GTFS datda needs to be modified "
+			+ "to match that of the AVL feed. Can use this "
+			+ "regular expression to determine the proper block ID "
+			+ " by specifying a grouping. For example, to get name after "
+			+ "a \"xx-\" would use something like \"xx-(.*)\"");
+	private static Pattern blockIdRegExPattern = null;
+	
 	
 	/********************** Member Functions **************************/
 
@@ -108,7 +121,7 @@ public class GtfsTrip extends CsvBase {
 								tripId);
 		
 		directionId = getOptionalValue(record, "direction_id");
-		blockId = getOptionalValue(record, "block_id");
+		blockId = getBlockId(getOptionalValue(record, "block_id"));
 		shapeId = getOptionalValue(record, "shape_id");
 		String wheelchairAccessibleStr = getOptionalValue(record, "wheelchair_accessible");
 		wheelchairAccessible = wheelchairAccessibleStr == null ? 
@@ -212,7 +225,7 @@ public class GtfsTrip extends CsvBase {
 	 *         defined or if no match.
 	 */
 	private static String getTripShortName(String tripShortName, String tripId) {
-		// If tripShortName provided then use sit
+		// If tripShortName provided then use it
 		if (tripShortName != null)
 			return tripShortName;
 		
@@ -233,6 +246,37 @@ public class GtfsTrip extends CsvBase {
 			return tripId;
 		if (m.groupCount() < 1)
 			return tripId;
+		
+		// Return the first group. Note: group #0 is the entire string. Need to 
+		// use group #1 for the group match.
+		return m.group(1);
+	}
+	
+	/**
+	 * In case block IDs from GTFS needs to be modified to match block IDs from
+	 * AVL feed. Uses the property transitime.gtfs.blockIdRegEx if it is not
+	 * null.
+	 * 
+	 * @param originalBlockId
+	 * @return the processed block ID
+	 */
+	public static String getBlockId(String originalBlockId) {
+		// If nothing to do then return original value
+		if (originalBlockId == null)
+			return originalBlockId;		
+		if (blockIdRegEx.getValue() == null)
+			return originalBlockId;
+		
+		// Initialize the pattern if need to, but do so just once
+		if (blockIdRegExPattern == null)
+			blockIdRegExPattern = Pattern.compile(blockIdRegEx.getValue());
+		
+		// Create the matcher
+		Matcher m = blockIdRegExPattern.matcher(originalBlockId);
+		
+		// If insufficient match return original value
+		if (!m.find() || m.groupCount() < 1)
+			return originalBlockId;
 		
 		// Return the first group. Note: group #0 is the entire string. Need to 
 		// use group #1 for the group match.

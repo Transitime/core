@@ -32,10 +32,10 @@ import org.transitime.ipc.data.IpcTripPattern;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name="tripPatterns")
+@XmlRootElement
 public class ApiTripPatterns {
 
-    @XmlElement(name="tripPattern")
+    @XmlElement(name="tripPatterns")
     private List<ApiTripPattern> tripPatterns;
 
     /********************** Member Functions **************************/

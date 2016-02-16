@@ -123,6 +123,7 @@ public class GenericJsonQuery extends GenericQuery {
 			// Start the JSON
 			query.strBuilder.append("{\"data\": [\n");
 			logger.debug("sql=" + sql);
+
 			query.doQuery(sql);
 
 			// Finish up the JSON

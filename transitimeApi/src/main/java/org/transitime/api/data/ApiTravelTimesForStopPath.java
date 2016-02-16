@@ -25,10 +25,10 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.transitime.db.structs.TravelTimesForStopPath;
 import org.transitime.db.structs.TravelTimesForStopPath.HowSet;
-import org.transitime.utils.StringUtils;
+import org.transitime.utils.MathUtils;
 
 /**
- *
+ * Represents travel times for a stop path
  *
  * @author SkiBu Smith
  *
@@ -42,13 +42,13 @@ public class ApiTravelTimesForStopPath {
 	private String stopPathId;
 
 	@XmlAttribute
-	private String travelTimeSegmentLength;
+	private Double travelTimeSegmentLength;
 
 	@XmlAttribute
 	private int stopTimeMsec;
 
 	@XmlAttribute
-	private int totalTravelTime;
+	private int totalTravelTimeMsec;
 
 	@XmlAttribute
 	private HowSet howSet;
@@ -73,11 +73,13 @@ public class ApiTravelTimesForStopPath {
 			TravelTimesForStopPath travelTimesForStopPath) {
 		this.stopPathIndex = stopPathIndex;
 		this.stopPathId = travelTimesForStopPath.getStopPathId();
+		double travelTimeSegLengthValue = MathUtils.round(
+				travelTimesForStopPath.getTravelTimeSegmentLength(), 1);
 		this.travelTimeSegmentLength =
-				StringUtils.twoDigitFormat(travelTimesForStopPath
-						.getTravelTimeSegmentLength());
+				Double.isNaN(travelTimeSegLengthValue) ? 
+						null : travelTimeSegLengthValue;
 		this.stopTimeMsec = travelTimesForStopPath.getStopTimeMsec();
-		this.totalTravelTime =
+		this.totalTravelTimeMsec =
 				travelTimesForStopPath.getStopPathTravelTimeMsec();
 		this.howSet = travelTimesForStopPath.getHowSet();
 

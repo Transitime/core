@@ -420,6 +420,7 @@ public class UpdateTravelTimes {
 //		tripList.add(trip5889634);
 //		tripList.add(trip5889635);
 //		DbWriter.writeTrips(session, tripList);
+		
 	}
 
 }

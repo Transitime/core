@@ -117,7 +117,7 @@
          Note that gmail seems to filter out messages sometimes. Therefore
          make sure using non-gmail accounts. 
       -->
-    <to>${logback.errorEmail:-skibu@smith.net}</to>
+    <to>${logback.errorEmail}</to>
 
     <!-- Only send e-mail if special "EMAIL" marker is specified for an
          ERROR level message. 
@@ -151,12 +151,12 @@
 
     <!-- Specifies details of how the message is sent and the format of it
       -->
-    <smtpHost>smtp.gmail.com</smtpHost>
+    <smtpHost>${logback.smtpHost}</smtpHost>
     <smtpPort>465</smtpPort>
     <SSL>true</SSL>
-    <username>transittestsmtp@gmail.com</username>
-    <password>transittest</password>
-    <from>msmithtransit@gmail.com</from>
+    <username>${logback.smtpUsername}</username>
+    <password>${logback.smtpPassword}</password>
+    <from>errorLogger@transitime.org</from>
     <subject>%level %logger{0} - %m</subject>
     <layout class="ch.qos.logback.classic.PatternLayout">
       <pattern>%d{MMM dd yyyy - HH:mm:ss.SSS} - %-5level - %logger{35} :%n%message%n</pattern>
@@ -262,17 +262,6 @@
     </encoder>
   </appender>
 
-  <!-- Separate file for Auto Block Assigner logging -->
-  <appender name="AUTO_ASSIGNER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/autoAssigner.log.gz</fileNamePattern>
-    </rollingPolicy>
-    <encoder>
-      <charset>UTF-8</charset>
-      <pattern>${DEFAULT_PATTERN}</pattern>
-    </encoder>
-  </appender>
-
   <!-- In case easiest to write logs to console.  -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
@@ -357,11 +346,6 @@
     <appender-ref ref="MONITORING" />
   </logger>
 
-  <logger name="org.transitime.core.autoAssigner"
-          level="debug" additivity="false">
-    <appender-ref ref="AUTO_ASSIGNER" />
-  </logger>
-
   <!--  In order to log the hibernate SQL queries need to set org.hibernate.SQL
         to debug. To show the values of the parameters need to set
         org.hibernate.type to trace. Probably also want to set in 
@@ -442,7 +426,7 @@
        for the class. Was originally hoping to log errors to stdout but
        this interfered with other loggers. If another logger level was set
        to debug then for that class the message would also be logged via root
-       even though the logging level for route is configured to be info, 
+       even though the logging level for root is configured to be info, 
        which is a higher level.
     -->
   <root level="info">          

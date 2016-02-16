@@ -41,7 +41,7 @@ import org.transitime.ipc.data.IpcTripPattern;
 public interface ConfigInterface extends Remote {
 
 	/**
-	 * Obtains list of routes configured.
+	 * Obtains ordered list of route summaries.
 	 * 
 	 * @return
 	 * @throws RemoteException
@@ -55,21 +55,34 @@ public interface ConfigInterface extends Remote {
 	 *            Specifies which route to provide data for. routeShortName is
 	 *            often used instead of routeId since routeIds unfortunately
 	 *            often change when there is a schedule change.
+	 * @param directionId
+	 *            optional. If want UI to highlight the remaining stops and
+	 *            paths left in the trip then can specify directionId along with
+	 *            the stopId. The directionId can be needed for agencies where
+	 *            only a single stop is used for both directions for a route.
 	 * @param stopId
-	 *            If want UI to highlight the remaining stops and paths left in
-	 *            trip then stopId is used to return which stops remain in trip.
-	 *            If this additional info not needed for UI then null can be
-	 *            specified.
+	 *            optional. If want UI to highlight the remaining stops and
+	 *            paths left in trip then stopId is used to return which stops
+	 *            remain in trip. If this additional info not needed for UI then
+	 *            null can be specified.
 	 * @param tripPatternId
-	 *            If want UI to highlight the remaining stops and paths left in
-	 *            trip then stopId is used to determine which trip pattern to
-	 *            highlight. If this additional info not needed for UI then null
-	 *            can be specified.
+	 *            optional. If want UI to highlight the remaining stops and
+	 *            paths left in trip then stopId is used to determine which trip
+	 *            pattern to highlight. If this additional info not needed for
+	 *            UI then null can be specified.
 	 * @return
 	 * @throws RemoteException
 	 */
-	public IpcRoute getRoute(String routeIdOrShortName, String stopId,
-			String tripPatternId) throws RemoteException;
+	public IpcRoute getRoute(String routeIdOrShortName, String directionId,
+			String stopId, String tripPatternId) throws RemoteException;
+	
+	/**
+	 * Obtains ordered list of route details
+	 * @param routeIdOrShortName
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<IpcRoute> getRoutes(List<String> routeIdsOrShortNames) throws RemoteException;
 	
 	/**
 	 * Returns stops for each direction for a route.
@@ -107,11 +120,15 @@ public interface ConfigInterface extends Remote {
 			throws RemoteException;
 	
 	/**
-	 * Returns trip info for specified tripId. Includes all trip pattern info
-	 * associated with the trip.
+	 * Returns trip info for specified tripId. If trip with the specified
+	 * trip_id is not found then looks for a trip with a trip_short_name that
+	 * matches the tripId. This way can easily find trips using trip_short_name,
+	 * which for agencies such as MBTA commuter rail is more frequently used.
+	 * Includes all trip pattern info associated with the trip.
 	 * 
 	 * @param tripId
-	 * @return
+	 *            The GTFS trip_id or trip_short_name
+	 * @return The IpcTrip for interprocess communication
 	 * @throws RemoteException
 	 */
 	public IpcTrip getTrip(String tripId) 

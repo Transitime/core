@@ -16,10 +16,28 @@
  */
 package org.transitime.db.structs;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.gtfs.TitleFormatter;
@@ -71,11 +89,17 @@ public class Route implements Serializable {
 	@Column
 	private final String description;
 	
-	@Column
-	private final String name;
-	
+	// Directly from GTFS data
 	@Column(length=80)
 	private final String shortName;
+	
+	// Directly from GTFS data
+	@Column(length=80)
+	private final String longName;
+	
+	// Processed name combing the GTFS route_short_name and route_long_name
+	@Column(length=80)
+	private final String name;
 	
 	@Embedded
 	private final Extent extent;
@@ -100,9 +124,18 @@ public class Route implements Serializable {
 	// For getOrderedStopsByDirection()
 	@Transient
 	private Map<String, List<String>> orderedStopsPerDirectionMap = null;
+
+	// For getStopOrder().
+	// Keeps track of stop order for each direction. Keyed on direction id. 
+	// The submap is keyed on stop id and contains list of stop orders.
+	// Need a list since a stop can be in a trip multiple times.
+	@Transient
+	private Map<String, Map<String, List<Integer>>> stopOrderByDirectionMap = null;
 	
 	// Because Hibernate requires objects with composite Ids to be Serializable
 	private static final long serialVersionUID = 9037023420649883860L;
+
+	private static final Logger logger = LoggerFactory.getLogger(Route.class);
 
 	/********************** Member Functions **************************/
 
@@ -114,12 +147,10 @@ public class Route implements Serializable {
 	 * @param gtfsRoute
 	 * @param tripPatternsForRoute
 	 * @param titleFormatter
-	 * @param shouldCombineShortAndLongNamesForRoutes
 	 */
 	public Route(int configRev, GtfsRoute gtfsRoute, 
 			List<TripPattern> tripPatternsForRoute,
-			TitleFormatter titleFormatter, 
-			boolean shouldCombineShortAndLongNamesForRoutes) {
+			TitleFormatter titleFormatter) {
 		// Because will be writing data to the sandbox in the db
 		this.configRev = configRev;
 		
@@ -132,28 +163,47 @@ public class Route implements Serializable {
 		this.type = gtfsRoute.getRouteType();
 		this.description = gtfsRoute.getRouteDesc(); 
 
+		this.longName =
+				titleFormatter.processTitle(gtfsRoute.getRouteLongName());
+
+		// Handle short name specially. route_short_name is optional
+		// but Transitime uses it as an identifier since route_ids
+		// are not always consistent across schedule changes. Therefore
+		// if the GTFS route_short_name is not set then use the 
+		// route_long_name.
+		String shortName = gtfsRoute.getRouteShortName();
+		this.shortName = shortName != null && !shortName.isEmpty() ? 
+				shortName : gtfsRoute.getRouteLongName();
+		
 		// Get the name of the route. Need to do some fancy processing here because 
 		// need to fix the capitalization using the TitleFormatter. This also
 		// does all the regex processing to fix other issues. Might also need
 		// to combine short and long names into a single name.
-		if (shouldCombineShortAndLongNamesForRoutes) {			
-			if (gtfsRoute.getRouteLongName() != null && !gtfsRoute.getRouteLongName().isEmpty()) {
-				String shortName = "";
-				if (gtfsRoute.getRouteShortName() != null)
-					shortName = gtfsRoute.getRouteShortName() + " - ";
-				this.name = shortName + titleFormatter.processTitle(gtfsRoute.getRouteLongName());
-			} else
-				this.name = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
+		if (gtfsRoute.getRouteLongName() != null 
+				&& !gtfsRoute.getRouteLongName().isEmpty()) {
+			// route_long_name is set so use it
+			
+			// Prepend the route short name plus a " - ", but only if
+			// route short name is defined and it is short. This way
+			// will end up with a route name like "38 - Geary" but
+			// not "HYDE-POWELL - Hyde Powell". For LA Metro some route short 
+			// names to prepend are something like "51/52/352" so need to go up
+			// to 9 characters. Also, only prepend the route short name if
+			// the route long name doesn't already contain it.
+			String shortNameComponent = "";
+			if (gtfsRoute.getRouteShortName() != null 
+					&& gtfsRoute.getRouteShortName().length() <= 9
+					&& !this.longName.contains(gtfsRoute.getRouteShortName()))
+				shortNameComponent = gtfsRoute.getRouteShortName() + " - ";
+			
+			this.name = shortNameComponent + this.longName;
 		} else {
-			if (gtfsRoute.getRouteLongName() != null && !gtfsRoute.getRouteLongName().isEmpty())
-				this.name = titleFormatter.processTitle(gtfsRoute.getRouteLongName());
-			else
-				this.name = titleFormatter.processTitle(gtfsRoute.getRouteShortName());
+			// route_long_name not set so just use the route_short_name
+			this.name = titleFormatter.processTitle(this.shortName);
 		}
 		
 		this.tripPatternsForRoute = tripPatternsForRoute;	
-		this.shortName = gtfsRoute.getRouteShortName();
-		this.maxDistance =gtfsRoute.getMaxDistance();  
+		this.maxDistance = gtfsRoute.getMaxDistance();  
 		
 		// Determine the extent of the route by looking at the extent
 		// of all of the trip patterns.
@@ -176,8 +226,9 @@ public class Route implements Serializable {
 		hidden = false;
 		type = null;
 		description = null;
-		name = null;
 		shortName = null;
+		longName = null;
+		name = null;
 		extent = null;
 		tripPatternsForRoute = null;
 		maxDistance = null;
@@ -199,6 +250,18 @@ public class Route implements Serializable {
 		return numUpdates;
 	}	
 	
+	// For dealing with route order
+	private static final int BEGINNING_OF_LIST_ROUTE_ORDER = 1000;
+	private static final int END_OF_LIST_ROUTE_ORDER = 1000000;
+	
+	private boolean atBeginning() {
+		return routeOrder != null && routeOrder < BEGINNING_OF_LIST_ROUTE_ORDER;
+	}
+	
+	private boolean atEnd() {
+		return routeOrder != null && END_OF_LIST_ROUTE_ORDER >= 1000000;
+	}
+
 	/**
 	 * Comparator for sorting Routes into proper order.
 	 * 
@@ -209,7 +272,7 @@ public class Route implements Serializable {
 	 * short name. If route short name starts with numbers it will be padded by
 	 * zeros so that proper numerical order will be used.
 	 */
-	private static final Comparator<Route> routeComparator = 
+	public static final Comparator<Route> routeComparator = 
 			new Comparator<Route>() {
 		/**
 		 * Returns negative if r1<r2, zero if r1=r2, and positive if r1>r2
@@ -261,15 +324,13 @@ public class Route implements Serializable {
 	public static List<Route> getRoutes(Session session, int configRev) 
 			throws HibernateException {
 		// Get list of routes from database
-		String hql = "FROM Route " +
-				"    WHERE configRev = :configRev";
+		String hql = "FROM Route " 
+				+ "    WHERE configRev = :configRev"
+				+ "    ORDER BY routeOrder, shortName";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 		List<Route> routesList = query.list();
 	
-		// Put the routes into proper order
-		Collections.sort(routesList, routeComparator);
-		
 		// Need to set the route order for each route so that can sort
 		// predictions based on distance from stop and route order. For
 		// the routes that didn't have route ordered configured in db
@@ -313,6 +374,7 @@ public class Route implements Serializable {
 				+ ", type=" + type
 				+ ", description=" + description 
 				+ ", shortName=" + shortName
+				+ ", longName=" + longName
 				+ ", extent" + extent
 				+ ", tripPatternsForRoute=" + tripPatternIds
 				+ "]";
@@ -336,6 +398,8 @@ public class Route implements Serializable {
 		result = prime * result + ((routeOrder == null) ? 0 : routeOrder);;
 		result = prime * result
 				+ ((shortName == null) ? 0 : shortName.hashCode());
+		result = prime * result
+				+ ((longName == null) ? 0 : longName.hashCode());
 		result = prime * result
 				+ ((textColor == null) ? 0 : textColor.hashCode());
 		result = prime
@@ -393,6 +457,11 @@ public class Route implements Serializable {
 			if (other.shortName != null)
 				return false;
 		} else if (!shortName.equals(other.shortName))
+			return false;
+		if (longName == null) {
+			if (other.longName != null)
+				return false;
+		} else if (!longName.equals(other.longName))
 			return false;
 		if (textColor == null) {
 			if (other.textColor != null)
@@ -508,7 +577,7 @@ public class Route implements Serializable {
 		List<TripPattern> tripPatterns = new ArrayList<TripPattern>();
 		
 		List<String> directionIds = getDirectionIds();
-    		for (String directionId : directionIds)
+		for (String directionId : directionIds)
 			tripPatterns.add(getLongestTripPatternForDirection(directionId));
 		
 		return tripPatterns;
@@ -597,11 +666,12 @@ public class Route implements Serializable {
 	 * For each GTFS direction ID returns list of stops that in the appropriate
 	 * order for the direction. The appropriate order means that when there are
 	 * different trip patterns that the stops that are different will be
-	 * inserted appropriately into the list
+	 * inserted appropriately into the list. Synchronized since can be access
+	 * through multiple threads.
 	 * 
 	 * @return Map keyed by direction ID and value of List of ordered stop IDs.
 	 */
-	public Map<String, List<String>> getOrderedStopsByDirection() {
+	public synchronized Map<String, List<String>> getOrderedStopsByDirection() {
 		// If already determined the stops return the cached map
 		if (orderedStopsPerDirectionMap != null)
 			return orderedStopsPerDirectionMap;
@@ -614,15 +684,111 @@ public class Route implements Serializable {
 			// Determine ordered collection of stops for direction
 			OrderedCollection orderedCollection = new OrderedCollection();			
 			List<TripPattern> tripPatternsForDir = getTripPatterns(directionId);
+			List<List<String>> stopIdsForTripPatternList = 
+					new ArrayList<List<String>>();
 			for (TripPattern tripPattern : tripPatternsForDir) {
 				List<String> stopIdsForTripPattern = tripPattern.getStopIds();
-				orderedCollection.add(stopIdsForTripPattern);
+				stopIdsForTripPatternList.add(stopIdsForTripPattern);
 			}
+			orderedCollection.add(stopIdsForTripPatternList);
 			
 			orderedStopsPerDirectionMap.put(directionId, orderedCollection.get());
 		}
 		
 		return orderedStopsPerDirectionMap;
+	}
+	
+	/**
+	 * Initializes stopOrderByDirectionMap member if haven't done so yet. Used
+	 * by getStopOrder(). Synchronized since can be access through multiple
+	 * threads.
+	 */
+	private synchronized void createStopOrderByDirectionMapIfNeedTo() {
+		// If map already created then done
+		if (stopOrderByDirectionMap != null)
+			return;
+
+		// Map not yet created so create it now
+		stopOrderByDirectionMap = new HashMap<String, Map<String, List<Integer>>>();
+		Map<String, List<String>> orderedStopsByDirection =
+				getOrderedStopsByDirection();
+
+		// Create submap for each direction Id
+		for (String directionId : orderedStopsByDirection.keySet()) {
+			// Create the submap for the direction ID. Map is keyed on stop Id 
+			// and contains list of stop order for the stop. Need a list since 
+			// a stop can be in a trip multiple times.
+			Map<String, List<Integer>> stopOrderMap = 
+					new HashMap<String, List<Integer>>();
+			stopOrderByDirectionMap.put(directionId, stopOrderMap);
+
+			// Add each stop for the direction Id
+			List<String> orderedStopsForDirectionList = 
+					orderedStopsPerDirectionMap.get(directionId);
+			for (int stopOrder=0; stopOrder<orderedStopsForDirectionList.size(); ++stopOrder) {
+				// Determine stopId (we already have stopOrder)
+				String stopId = orderedStopsForDirectionList.get(stopOrder);
+				
+				// Get list of stop orders for the stop Id
+				List<Integer> stopOrderListForStopId = stopOrderMap.get(stopId);
+				if (stopOrderListForStopId == null) {
+					stopOrderListForStopId = new ArrayList<Integer>(1);
+					stopOrderMap.put(stopId, stopOrderListForStopId);
+				}
+				
+				// For the stopId add the stop order to its list of stop orders
+				stopOrderListForStopId.add(stopOrder);
+			}
+		}
+	}
+	
+	/**
+	 * Gets the order for the stop. Important when have multiple trip patterns
+	 * for a direction. Allows each stop in the trip to have a unique sequential
+	 * stop order so that can save the stop order in the db and then use it for
+	 * db queries to order the stop data for a direction for a route.
+	 * 
+	 * @param directionId
+	 * @param stopId
+	 * @param stopIndex
+	 *            so that can handle stop being on trip multiple times
+	 * @return the stop order for the stop for the direction for the route
+	 */
+	public int getStopOrder(String directionId, String stopId, int stopIndex) {
+		// Make sure initialized
+		createStopOrderByDirectionMapIfNeedTo();
+		
+		// For the direction get the map of stop orders
+		Map<String, List<Integer>> stopOrderMap = 
+				stopOrderByDirectionMap.get(directionId);
+		if (stopOrderMap == null) {
+			logger.error("In Route.getStopOrder() directionId={} is not valid "
+					+ "for routeId={}.", directionId, id);
+			return -1;
+		}
+		
+		// For the stop Id for the direction get the list of stop orders
+		List<Integer> stopOrderListForStopId = stopOrderMap.get(stopId);
+		if (stopOrderListForStopId == null) {
+			logger.error("In Route.getStopOrder() stopId={} is not valid "
+					+ "for routeId={} directionId={}.", 
+					stopId, id, directionId);
+			return -1;
+		}
+		
+		// Return the appropriate stop order. In order to handle situation
+		// where stop might be in trip multiple times need to make sure the
+		// stop order is greater than the stop index.
+		for (int stopOrder : stopOrderListForStopId) {
+			if (stopOrder >= stopIndex)
+				return stopOrder;
+		}
+		
+		// Didn't find appropriate stop order
+		logger.error("In Route.getStopOrder() did not find stop order for "
+					+ "for routeId={} directionId={} stopId={} stopIndex={}.", 
+					id, directionId, stopId, stopIndex);
+		return -1;
 	}
 	
 	/********************** Getter Methods **************************/
@@ -635,7 +801,10 @@ public class Route implements Serializable {
 	}
 
 	/**
-	 * @return the name of the route
+	 * The processed name of the route consisting of the combination of the 
+	 * route_short_name plus the route_long_name. So get something like "38 - Geary".
+	 * 
+	 * @return the processed name of the route
 	 */
 	public String getName() {
 		return name;
@@ -643,11 +812,22 @@ public class Route implements Serializable {
 	
 	/**
 	 * The short name is either specified by route_short_name in the routes.txt
-	 * GTFS file or if that is null it will be the long name name. 
+	 * GTFS file or if that is null it will be the long name name.
+	 * 
 	 * @return the short name for the route
 	 */
 	public String getShortName() {
 		return shortName != null ? shortName : name;
+	}
+	
+	/**
+	 * The long name is either specified by route_long_name in the routes.txt
+	 * GTFS file or if that is null it will be the short name name.
+	 * 
+	 * @return the long name for the route
+	 */
+	public String getLongName() {		
+		return longName != null ? longName : name;
 	}
 	
 	/**
@@ -679,20 +859,13 @@ public class Route implements Serializable {
 	}
 
 	/**
-	 * Declared private because just for internal use. For setting
-	 * route order once all routes read in and sorted.
+	 * For setting route order once all routes read in and sorted.
+	 * 
 	 * @param routeOrder
+	 *            new route order to be set for the route
 	 */
-	private void setRouteOrder(int routeOrder) {
+	public void setRouteOrder(int routeOrder) {
 		this.routeOrder = routeOrder;
-	}
-	
-	private boolean atBeginning() {
-		return routeOrder != null && routeOrder < 1000;
-	}
-	
-	private boolean atEnd() {
-		return routeOrder != null && routeOrder >= 1000000;
 	}
 	
 	/**

@@ -15,39 +15,36 @@ response.setContentType("application/csv");
 // Parameters from request
 String agencyId = request.getParameter("a");
 String beginDate = request.getParameter("beginDate");
-String endDate = request.getParameter("endDate");
+String numDays = request.getParameter("numDays");
 String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 String routeId =  request.getParameter("r");
 
-if (agencyId == null || beginDate == null || endDate == null) {
+if (agencyId == null || beginDate == null || numDays == null) {
 	response.getWriter().write("For predAccuracyCsv.jsp must "
 		+ "specify parameters 'a' (agencyId), " 
-		+ "'beginDate', and 'endDate'."); 
+		+ "'beginDate', and 'numDays'."); 
 	return;
-}
-
-//Make sure not trying to get data for too long of a time span since
-//that could bog down the database.
-long timespan = Time.parseDate(endDate).getTime() - 
-	Time.parseDate(beginDate).getTime() + 1*Time.MS_PER_DAY;
-if (timespan > 31*Time.MS_PER_DAY) {
-	throw new ParseException("Begin date to end date spans more than a month", 0);
 }
 
 //Determine the time portion of the SQL
 String timeSql = "";
-if (beginTime != null && !beginTime.isEmpty() 
-		&& endTime != null && !endTime.isEmpty()) {
- timeSql = " AND arrivalDepartureTime::time BETWEEN '" 
+if ((beginTime != null && !beginTime.isEmpty()) 
+		|| (endTime != null && !endTime.isEmpty())) {
+	// If only begin or only end time set then use default value
+	if (beginTime == null || beginTime.isEmpty())
+		beginTime = "00:00:00";
+	if (endTime == null || endTime.isEmpty())
+		endTime = "23:59:59";
+    timeSql = " AND arrivalDepartureTime::time BETWEEN '" 
 		+ beginTime + "' AND '" + endTime + "' ";
 }
 
 //Determine route portion of SQL. Default is to provide info for
 //all routes.
 String routeSql = "";
-if (routeId!=null && !routeId.isEmpty()) {
- routeSql = "  AND routeId='" + routeId + "' ";
+if (routeId!=null && !routeId.trim().isEmpty()) {
+ routeSql = "  AND routeShortName='" + routeId + "' ";
 }
 
 // NOTE: this query only works on postgreSQL. For mySQL would need to change

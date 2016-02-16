@@ -58,7 +58,6 @@ public abstract class MonitorBase {
 	private static StringConfigValue emailRecipients =
 			new StringConfigValue(
 					"transitime.monitoring.emailRecipients", 
-					"monitoring@transitime.org", 
 					"Comma separated list of e-mail addresses indicating who "
 					+ "should be e-mailed when monitor state changes.");
 
@@ -150,7 +149,13 @@ public abstract class MonitorBase {
 			String subject = "ERROR - " + type() + " - " + agencyId;
 			logger.info("Sending ERROR e-mail \"{}\" to {}", 
 					message, recipients());
-			emailSender.send(recipients(), subject, message);			
+			if (emailRecipients.getValue() != null) {
+				emailSender.send(recipients(), subject, message);
+			} else {
+				logger.error("Could not send ERROR e-mail because "
+						+ "transitime.monitoring.emailRecipients Java property "
+						+ "not set");
+			}
 		} else if (wasTriggered && !isTriggered) {
 			// Changed from being triggered to not being triggered.
 			wasTriggered = false;
@@ -159,7 +164,13 @@ public abstract class MonitorBase {
 			String subject = "OK - " + type() + " - " + agencyId;
 			logger.info("Sending OK e-mail \"{}\" to {}", 
 					message, recipients());
-			emailSender.send(recipients(), subject, message);			
+			if (emailRecipients.getValue() != null) {
+				emailSender.send(recipients(), subject, message);			
+			} else {
+				logger.error("Could not send ERROR e-mail because "
+						+ "transitime.monitoring.emailRecipients Java property "
+						+ "not set");
+			}
 		}
 		
 		// Return true if monitor currently triggered
@@ -267,7 +278,7 @@ public abstract class MonitorBase {
 	 * 
 	 * @return E-mail addresses of who to notify
 	 */
-	protected String recipients() {
+	protected String recipients() {		
 		return emailRecipients.getValue();
 	}
 	

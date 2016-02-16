@@ -36,7 +36,7 @@ import org.transitime.ipc.data.IpcTrip;
 @XmlRootElement(name = "routes")
 public class ApiActiveBlocksRoutes {
 
-	@XmlElement(name = "route")
+	@XmlElement(name = "routes")
 	private List<ApiActiveBlocksRoute> routeData;
 
 	/********************** Member Functions **************************/

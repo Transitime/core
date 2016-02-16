@@ -231,7 +231,6 @@ public class TravelTimesForTrip implements Serializable {
 		// Now create the map and return it
 		Map<String, List<TravelTimesForTrip>> map = 
 				new HashMap<String, List<TravelTimesForTrip>>();
-		int i = 0;
 		for (TravelTimesForTrip travelTimes : allTravelTimes) {
 			// Get the List to add the travelTimes to
 			String tripPatternId = travelTimes.getTripPatternId();

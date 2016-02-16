@@ -105,9 +105,18 @@ public class GtfsStop extends CsvBase {
 		
 		stopId = getRequiredValue(record, "stop_id");
 		String stopCodeStr = getOptionalValue(record, "stop_code");
-		if (stopCodeStr != null)
-			stopCode = Integer.parseInt(stopCodeStr);
-		else
+		if (stopCodeStr != null) {
+			// According to the GTFS spec stop codes could be text and therefore
+			// not a parsable integer. Ignore these since it seems reasonable
+			// to require stop IDs to be integers since they are for phone systems.
+			Integer parsedStopCode;
+			try {
+				parsedStopCode = Integer.parseInt(stopCodeStr);
+			} catch (NumberFormatException e) {	
+				parsedStopCode = null;
+			}
+			stopCode = parsedStopCode;
+		} else
 			stopCode = null;
 		stopName = getRequiredUnlessSupplementalValue(record, "stop_name");
 		stopDesc = getOptionalValue(record, "stop_desc");

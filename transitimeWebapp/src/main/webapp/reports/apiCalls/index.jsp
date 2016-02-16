@@ -24,8 +24,11 @@ if (agencyId == null || agencyId.isEmpty()) {
 <div id="subtitle">Agency Specific API calls</div>
 <ul class="choicesList">
   <li><a href="routeApiParams.jsp?a=<%= agencyId %>"
-    title="Data for a route. Includes stop and path information needed to show route on map.">
-      Route</a></li>
+    title="Summary data for all routes, listed in order. Useful for creating a UI selector for routes.">
+      Routes</a></li>
+  <li><a href="routeDetailsApiParams.jsp?a=<%= agencyId %>"
+    title="Detailed data for selected routes. Includes stop and path information needed to show route on map.">
+      Route Details</a></li>
       
   <li><a href="vehiclesApiParams.jsp?a=<%= agencyId %>"
     title="Data for vehicles, including GPS info, for a route. Useful for showing location of vehicles on map.">
@@ -62,6 +65,13 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="serviceIdsCurrentApiParams.jsp?a=<%= agencyId %>"
     title="Data for service IDs that are currently active for agency.">
       Service IDs Current</a></li>
+
+  <li><a href="calendarsApiParams.jsp?a=<%= agencyId %>"
+    title="Data for all calendars configured for agency.">
+      Calendars</a></li>
+  <li><a href="calendarsCurrentApiParams.jsp?a=<%= agencyId %>"
+    title="Data for calendars that are currently active for agency.">
+      Calendars Current</a></li>
 
   <li><a href="gtfsRealtimeTripUpdatesApiParams.jsp?a=<%= agencyId %>"
     title="GTFS-realtime Trip Updates includes prediction data for entire agency">

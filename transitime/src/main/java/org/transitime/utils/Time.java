@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import org.transitime.db.structs.Agency;
 import org.transitime.gtfs.DbConfig;
 
 /**
@@ -133,7 +134,10 @@ public class Time {
 	/******************* Methods ******************/
 	
 	public Time(DbConfig dbConfig) {
-		this.calendar = new GregorianCalendar();
+		Agency agency = dbConfig.getFirstAgency();
+		this.calendar =
+				agency != null ? new GregorianCalendar(agency.getTimeZone())
+						: new GregorianCalendar();
 	}
 	
 	/**

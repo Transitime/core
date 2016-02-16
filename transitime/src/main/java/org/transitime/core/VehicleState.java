@@ -349,14 +349,26 @@ public class VehicleState {
 	}
 	
 	/**
-	 * Returns the current route short name for the vehicle. Returns null if not
-	 * currently associated with a trip.
+	 * Returns the current GTFS route_short_name for the vehicle. Returns null
+	 * if not currently associated with a trip.
 	 * 
 	 * @return route short name or null
 	 */
 	public String getRouteShortName() {
 		Trip trip = getTrip();
-		return trip!=null ? trip.getRouteShortName() : null;
+		return trip != null ? trip.getRouteShortName() : null;
+	}
+
+	/**
+	 * Returns the current name of the route that the vehicle is on. The route
+	 * name is a combination of the GTFS route_short_name and the GTFS
+	 * route_long_name so get a full name of something like "38 - Geary".
+	 * 
+	 * @return route name or null
+	 */
+	public String getRouteName() {
+		Trip trip = getTrip();
+		return trip != null ? trip.getRouteName() : null;
 	}
 	
 	/**

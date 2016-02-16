@@ -35,12 +35,10 @@ import org.transitime.ipc.data.IpcVehicle;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "vehicles")
+@XmlRootElement
 public class ApiVehicles {
 
-	// Need to use @XmlElementRef so that the element name used for each
-	// ApiVehicle object will be what is specified in the ApiVehicle class.
-	@XmlElement(name = "vehicle")
+	@XmlElement(name = "vehicles")
 	private List<ApiVehicle> vehiclesData;
 
 	/********************** Member Functions **************************/

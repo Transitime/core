@@ -85,12 +85,12 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 		}
 
 		builder.addNumberColumn();
-		builder.addNumberColumn("Too Early (<" + maxEarlySec + " secs)");
+		builder.addNumberColumn("Earlier than predicted (more than " + maxEarlySec + " secs early)");
 		builder.addTooltipColumn();
-		builder.addNumberColumn("Within Bounds (" + maxEarlySec + " to "
-				+ maxLateSec + " secs)");
+		builder.addNumberColumn("Within Bounds (" + maxEarlySec + " secs early to "
+				+ maxLateSec + " secs late)");
 		builder.addTooltipColumn();
-		builder.addNumberColumn("Too Late (>" + maxLateSec + " secs)");
+		builder.addNumberColumn("Later than predicted (more than " + maxLateSec + " secs late)");
 		builder.addTooltipColumn();
 	}
 
@@ -132,7 +132,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 				// between min and max, and above max.
 				int tooEarly = 0, ok = 0, tooLate = 0;
 				for (int accuracyInSecs : listForPredBucket) {
-					if (accuracyInSecs < maxEarlySec)
+					if (accuracyInSecs < -maxEarlySec)
 						++tooEarly;
 					else if (accuracyInSecs < maxLateSec)
 						++ok;
@@ -154,7 +154,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 				rowBuilder.addRowElement(predBucketSecs);
 
 				rowBuilder.addRowElement(tooEarlyPercentage);
-				rowBuilder.addRowElement("Too Early: " + tooEarly + " points, "
+				rowBuilder.addRowElement("Earlier than predicted: " + tooEarly + " points, "
 						+ StringUtils.oneDigitFormat(tooEarlyPercentage) + "%");
 
 				rowBuilder.addRowElement(okPercentage);
@@ -163,6 +163,8 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 
 				rowBuilder.addRowElement(tooLatePercentage);
 				rowBuilder.addRowElement("Too Late: " + tooLate + " points, "
+				    + StringUtils.oneDigitFormat(tooLatePercentage) + "%");
+				rowBuilder.addRowElement("Later than predicted: " + tooLate + " points, "
 						+ StringUtils.oneDigitFormat(tooLatePercentage) + "%");
 			}
 		}
@@ -184,12 +186,8 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 *            then just look at data for particular time of day, such as 7am
 	 *            to 9am, for those days. Set to null or empty string to use
 	 *            data for entire day.
-	 * @param endTimeStr
-	 *            For specifying time of day between the begin and end date to
-	 *            use data for. Can thereby specify a date range of a week but
-	 *            then just look at data for particular time of day, such as 7am
-	 *            to 9am, for those days. Set to null or empty string to use
-	 *            data for entire day.
+	 * @param numDays
+	 *            How long query should be run for.
 	 * @param routeIds
 	 *            Specifies which routes to do the query for. Can be null for
 	 *            all routes or an array of route IDs.
@@ -201,7 +199,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 *            all), "AffectedByWaitStop", or "NotAffectedByWaitStop".
 	 * @param maxEarlySec
 	 *            How early in msec a prediction is allowed to be. Should be a
-	 *            negative value.
+	 *            positive value.
 	 * @param maxLateSec
 	 *            How late a in msec a prediction is allowed to be. Should be a
 	 *            positive value.
@@ -210,12 +208,12 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public String getJson(String beginDateStr, String endDateStr,
+	public String getJson(String beginDateStr, String endDateStr, String numDays,
 			String beginTimeStr, String endTimeStr, String routeIds[],
 			String predSource, String predType, int maxEarlySec, int maxLateSec)
 			throws SQLException, ParseException {
 		// Actually perform the query
-		doQuery(beginDateStr, endDateStr, beginTimeStr, endTimeStr, routeIds,
+		doQuery(beginDateStr, endDateStr, numDays, beginTimeStr, endTimeStr, routeIds,
 				predSource, predType);
 
 		// If query returned no data then simply return null so that
@@ -242,6 +240,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 		String endDate = "11-25-2014";
 		String beginTime = null;
 		String endTime = null;
+		String numDays = "1";
 		String routeIds[] = { "CR-Fairmount" };
 		String source = "Transitime";
 
@@ -254,7 +253,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 		try {
 			PredAccuracyRangeQuery query = new PredAccuracyRangeQuery(dbType,
 					dbHost, dbName, dbUserName, dbPassword);
-			String jsonString = query.getJson(beginDate, endDate, beginTime,
+			String jsonString = query.getJson(beginDate, endDate, numDays, beginTime,
 					endTime, routeIds, source, null, -60 * Time.MS_PER_SEC,
 					3 * Time.MS_PER_SEC);
 			System.out.println(jsonString);

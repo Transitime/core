@@ -20,7 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import org.transitime.utils.Geo;
-import org.transitime.utils.StringUtils;
+import org.transitime.utils.MathUtils;
 import org.transitime.utils.Time;
 
 /**
@@ -37,17 +37,14 @@ public class ApiTravelTimeForSegment {
 	@XmlAttribute
 	private int segmentTimeMsec;
 
-	// Use String so can output speed with desired digits past decimal point
 	@XmlAttribute
-	private String speedInMph;
+	private Double speedInMph;
 
-	// Use String so can output speed with desired digits past decimal point
 	@XmlAttribute
-	private String speedInKph;
+	private Double speedInKph;
 
-	// Use String so can output speed with desired digits past decimal point
 	@XmlAttribute
-	private String speedInMetersPerSec;
+	private Double speedInMetersPerSec;
 
 	/********************** Member Functions **************************/
 
@@ -69,15 +66,17 @@ public class ApiTravelTimeForSegment {
 		this.segmentIndex = segmentIndex;
 		this.segmentTimeMsec = segmentTimeMsec;
 
-		double speedInMetersPerSec =
-				segmentLength * Time.MS_PER_SEC / segmentTimeMsec;
-		this.speedInMph =
-				StringUtils
-						.oneDigitFormat(speedInMetersPerSec / Geo.MPH_TO_MPS);
-		this.speedInKph =
-				StringUtils
-						.oneDigitFormat(speedInMetersPerSec / Geo.KPH_TO_MPS);
-		this.speedInMetersPerSec =
-				StringUtils.oneDigitFormat(speedInMetersPerSec);
+		// If segment time is 0 then speeds will default to null and will 
+		// not be output. Better than trying to divide by zero since
+		// can't output NaN with JSON.
+		if (segmentTimeMsec != 0) {
+			double speedInMetersPerSec =
+					segmentLength * Time.MS_PER_SEC / segmentTimeMsec;
+			this.speedInMph =
+					MathUtils.round(speedInMetersPerSec / Geo.MPH_TO_MPS, 1);
+			this.speedInKph =
+					MathUtils.round(speedInMetersPerSec / Geo.KPH_TO_MPS, 1);
+			this.speedInMetersPerSec = MathUtils.round(speedInMetersPerSec, 1);
+		}
 	}
 }

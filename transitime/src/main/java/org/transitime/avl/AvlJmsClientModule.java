@@ -27,6 +27,7 @@ import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.jms.JMSWrapper;
 import org.transitime.logging.Markers;
@@ -173,7 +174,8 @@ public class AvlJmsClientModule extends Module {
 				processAVLDataFromJMSTopic();		
 			} catch (Exception e) {
 				logger.error(Markers.email(),
-						"Unexpected exception occurred in AvlClient", e);
+						"Unexpected exception occurred in AvlClient for "
+						+ "agencyId={}", AgencyConfig.getAgencyId(), e);
 			}
 		}
 	}

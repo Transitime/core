@@ -27,4 +27,4 @@ public interface AmigoWebsocketListener {
 	 * @param reason
 	 */
     public void onClose(int code, String reason);
-}
+} 

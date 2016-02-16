@@ -17,8 +17,11 @@
 package org.transitime.avl;
 
 import java.io.InputStream;
+import java.util.Collection;
+
 import org.jdom2.Document;
 import org.jdom2.input.SAXBuilder;
+import org.transitime.db.structs.AvlReport;
 
 /**
  *
@@ -42,12 +45,14 @@ public abstract class XmlPollingAvlModule extends PollUrlAvlModule {
 	}
 	
 	/**
-	 * Extracts the AVL data from the XML document.
-	 * Uses JDOM to parse the XML because it makes the Java code much simpler.
+	 * Extracts the AVL data from the XML document. Uses JDOM to parse the XML
+	 * because it makes the Java code much simpler.
+	 * 
 	 * @param doc
+	 * @return Collection of AvlReports
 	 * @throws NumberFormatException
 	 */
-	protected abstract void extractAvlData(Document doc) 
+	protected abstract Collection<AvlReport> extractAvlData(Document doc) 
 			throws NumberFormatException;
 	
 	/**
@@ -55,6 +60,7 @@ public abstract class XmlPollingAvlModule extends PollUrlAvlModule {
 	 * 
 	 * @param in
 	 *            The input stream containing the AVL data
+	 * @return Collection of AvlReports
 	 * @throws Exception
 	 *             Throws a generic exception since the processing is done in
 	 *             the abstract method processData() and it could throw any type
@@ -62,12 +68,12 @@ public abstract class XmlPollingAvlModule extends PollUrlAvlModule {
 	 *             be processed.
 	 */
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build(in);
 
 			// Have the AVL feed subclass processes the document and extract the AVL data
-			extractAvlData(doc);	
+			return extractAvlData(doc);	
 	}
 	
 }

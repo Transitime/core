@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.schedBasedPreds.SchedBasedPredsModule;
 import org.transitime.db.structs.AvlReport;
@@ -65,17 +66,17 @@ public class TimeoutHandlerModule extends Module {
 					+ "every new AVL report and it has to look at every "
 					+ "vehicle to see if has been timed out.");
 
-	private static IntegerConfigValue allowableNoAvl =
+	private static IntegerConfigValue allowableNoAvlSecs =
 			new IntegerConfigValue(
-					"transitime.timeout.allowableNoAvl", 
+					"transitime.timeout.allowableNoAvlSecs", 
 					6*Time.SEC_PER_MIN,
 					"For AVL timeouts. If don't get an AVL report for the "
-					+ "vehicle in this amount of time then the vehicle will be " 
-					+ "made non-predictable.");
+					+ "vehicle in this amount of time in seconds then the " 
+					+ "vehicle will be made non-predictable.");
 
-	private static IntegerConfigValue allowableNoAvlAfterSchedDepart = 
+	private static IntegerConfigValue allowableNoAvlAfterSchedDepartSecs = 
 			new IntegerConfigValue(
-					"transitime.timeout.allowableNoAvlAfterSchedDepart",
+					"transitime.timeout.allowableNoAvlAfterSchedDepartSecs",
 					6 * Time.SEC_PER_MIN,
 					"If a vehicle is at a wait stop, such as "
 					+ "sitting at a terminal, and doesn't provide an AVL report "
@@ -126,7 +127,7 @@ public class TimeoutHandlerModule extends Module {
 	 */
 	private void handlePredictablePossibleTimeout(VehicleState vehicleState, long now, Iterator<AvlReport> mapIterator) {
 		// If haven't reported in too long...
-		long maxNoAvl = allowableNoAvl.getValue() * Time.MS_PER_SEC;
+		long maxNoAvl = allowableNoAvlSecs.getValue() * Time.MS_PER_SEC;
 		if (now > vehicleState.getAvlReport().getTime() + maxNoAvl) {
 			// Make vehicle unpredictable
 			String eventDescription = "Vehicle timed out because it "
@@ -212,23 +213,34 @@ public class TimeoutHandlerModule extends Module {
       return;
     }
 	  
-	  long scheduledDepartureTime = vehicleState.getMatch()
-				.getScheduledWaitStopTime();
+	  // If hasn't been too long between AVL reports then everything is fine
+		// and simply return
+		long maxNoAvl = allowableNoAvlSecs.getValue() * Time.MS_PER_SEC;
+		if (now < vehicleState.getAvlReport().getTime() + maxNoAvl)
+			return;
+
+		// It has been a long time since an AVL report so see if also past the 
+		// scheduled time for the wait stop
+		long scheduledDepartureTime =
+				vehicleState.getMatch().getScheduledWaitStopTime();
 		if (scheduledDepartureTime >= 0) {
 			// There is a scheduled departure time. Make sure not too
 			// far past it
-			long maxNoAvl = allowableNoAvlAfterSchedDepart.getValue()
-					* Time.MS_PER_SEC;
-			if (now > scheduledDepartureTime + maxNoAvl) {
-			  
-			  String stopId = null;
-			  if (vehicleState != null && vehicleState.getMatch() != null
-			      && vehicleState.getMatch().getAtStop() != null) {
-			    stopId = vehicleState.getMatch().getAtStop().getStopId();
-			  }
+			long maxNoAvlAfterSchedDepartSecs =
+					allowableNoAvlAfterSchedDepartSecs.getValue() * Time.MS_PER_SEC;
+			if (now > scheduledDepartureTime + maxNoAvlAfterSchedDepartSecs) {				
 				// Make vehicle unpredictable
+				String stopId = "none (vehicle not matched)";
+				if (vehicleState.getMatch() != null) {
+					if (vehicleState.getMatch().getAtEndStop() != null) {
+						stopId = vehicleState.getMatch().getAtStop().getStopId();
+					}
+				}
 				String eventDescription = "Vehicle timed out because it "
-						+ "has not reported in "
+						+ "has not reported AVL location in "
+						+ Time.elapsedTimeStr(now - 
+								vehicleState.getAvlReport().getTime())
+						+ " and it is "
 						+ Time.elapsedTimeStr(now
 								- scheduledDepartureTime)
 						+ " since the scheduled departure time "
@@ -237,7 +249,10 @@ public class TimeoutHandlerModule extends Module {
 						+ stopId
 						+ " while allowable time without an AVL report is "
 						+ Time.elapsedTimeStr(maxNoAvl)
-						+ " and so was made unpredictable.";
+						+ " and maximum allowed time after scheduled departure "
+						+ "time without AVL is "  
+						+ Time.elapsedTimeStr(maxNoAvlAfterSchedDepartSecs)
+						+ ". Therefore vehicle was made unpredictable.";
 				AvlProcessor.getInstance().makeVehicleUnpredictable(
 						vehicleState.getVehicleId(), eventDescription,
 						VehicleEvent.TIMEOUT);
@@ -328,7 +343,8 @@ public class TimeoutHandlerModule extends Module {
 					Time.sleep(sleepTime);
 			} catch (Exception e) {
 				logger.error(Markers.email(),
-						"Error with TimeoutHandlerModule", e);
+						"Error with TimeoutHandlerModule for agencyId={}", 
+						AgencyConfig.getAgencyId(), e);
 			}
 
 		}

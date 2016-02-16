@@ -86,7 +86,7 @@ public class DbSetupConfig {
 					60,
 					"So can set low-level socket timeout for JDBC connections. "
 					+ "Useful for when a session dies during a request, such as "
-					+ "for when a db is rebooted.");
+					+ "for when a db is rebooted. Set to 0 to have no timeout.");
 	
 	/**
 	 * So that have flexibility with where the hibernate config file is.

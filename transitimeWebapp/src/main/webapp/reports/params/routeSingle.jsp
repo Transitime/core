@@ -15,38 +15,40 @@
 
 $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
-	        // Generate list of routes for the selector
+	        // Generate list of routes for the selector.
+	        // Put in default value of Select Route but need to use
+	        // an id of ' ' instead of '' since otherwise select2
+	        // version 4.0.0 uses the text name as the id, which is wrong!
 	 		var selectorData = [];
-	 		for (var i in routes.route) {
-	 			var route = routes.route[i];
-	 			selectorData.push({id: route.id, text: route.name})
+	 		for (var i in routes.routes) {
+	 			var route = routes.routes[i];
+	 			selectorData.push({id: route.shortName, text: route.name})
 	 		}
 	 		
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#route").select2({
- 				placeholder: "Select Route", 				
- 				data : selectorData});
+ 				data : selectorData})
+ 			// Need to reset tooltip after selector is used. Sheesh!
+ 			.on("select2:select", function(e) {
+ 				var configuredTitle = $( "#route" ).attr("title");
+ 				$( "#select2-route-container" ).tooltip({ content: configuredTitle,
+ 						position: { my: "left+10 center", at: "right center" } });
+ 			});
 	 		
-	 		// Tooltips for a select2 widget don't automatically go away when 
-	 		// item selected so remove the tooltip manually. This is a really 
-	 		// complicated interaction between select2 and jquery UI tooltips.
-	 		// First need to set the tooltip title content but getting the
-	 		// originally configured title for the element.
- 			var modifiedRouteElement = $( "#s2id_route" );
-	 		var configuredTitle = modifiedRouteElement.attr("title");
-	 		$( "#s2id_route" ).tooltip({ content: configuredTitle });
- 			
-	 		// Now that the title has set need to manually remove the tooltip
-	 		// when a select2 item is selected. Sheesh!
- 		 	$("#route").on("change", function(e) { $("#s2id_route").tooltip("close") }); 		 	
+	 		// Tooltips for a select2 widget are rather broken. So get
+	 		// the tooltip title attribute from the original route element
+	 		// and set the tooltip for the newly created element.
+	 		var configuredTitle = $( "#route" ).attr("title");
+	 		$( "#select2-route-container" ).tooltip({ content: configuredTitle,
+	 				position: { my: "left+10 center", at: "right center" } });
  	});
  	
 </script>
 
     <div id="routesDiv"  class="param">
       <label for="route">Route:</label>
-      <input id="route" name="r" style="width: 380px" 
-      	title="Select which route you want data for. "/>
+      <select id="route" name="r" style="width: 380px" 
+      	title="Select which route you want data for. " ></select>
     </div>
     

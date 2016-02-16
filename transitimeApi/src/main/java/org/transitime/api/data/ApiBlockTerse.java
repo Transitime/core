@@ -55,7 +55,7 @@ public class ApiBlockTerse {
 	private List<ApiTripTerse> trips;
 
 	@XmlElement(name = "routes")
-	private List<ApiRouteSummary> routeSummaries;
+	private List<ApiRoute> routeSummaries;
 
 	/********************** Member Functions **************************/
 
@@ -78,9 +78,9 @@ public class ApiBlockTerse {
 			trips.add(new ApiTripTerse(ipcTrip));
 		}
 
-		routeSummaries = new ArrayList<ApiRouteSummary>();
+		routeSummaries = new ArrayList<ApiRoute>();
 		for (IpcRouteSummary ipcRouteSummary : ipcBlock.getRouteSummaries()) {
-			routeSummaries.add(new ApiRouteSummary(ipcRouteSummary));
+			routeSummaries.add(new ApiRoute(ipcRouteSummary));
 		}
 	}
 

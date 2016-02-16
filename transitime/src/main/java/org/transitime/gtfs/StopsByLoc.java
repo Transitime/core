@@ -83,7 +83,8 @@ public class StopsByLoc {
 	 * @param tripPattern
 	 * @param loc
 	 * @param maxDistance
-	 * @return
+	 * @return The closest stop for the trip pattern that is not the last stop
+	 *         of the trip pattern and is within maxDistance of the loc.
 	 */
 	private static StopInfo determineClosestStop(TripPattern tripPattern,
 			Location loc, double maxDistance) {
@@ -94,13 +95,20 @@ public class StopsByLoc {
 		double bestDistance = Double.MAX_VALUE;
 		StopPath bestStopPath = null;
 		List<StopPath> stopPaths = tripPattern.getStopPaths();
-		for (int i=0; i<stopPaths.size()-1; ++i) {
+		for (int i=0; i<stopPaths.size(); ++i) {
 			StopPath stopPath = stopPaths.get(i);
 			double distanceToStop = stopPath.getStopLocation().distance(loc);
 			// If this is the closest stop for the trip pattern remember it
 			// as such. Bias to the later stop since then passenger will have
 			// more time to get there and a shorter transit ride.
 			if (distanceToStop < bestDistance + BIAS_TO_NEXT_STOP_OFFSET) {
+				// If this stop that is the closest is the last stop of the
+				// trip then simply return null since having arrival info
+				// at terminal is confusing
+				if (i == stopPaths.size()-1)
+					return null;
+				
+				// Not last stop of trip so remember it as best one
 				bestDistance = distanceToStop;
 				bestStopPath = stopPath;
 			}

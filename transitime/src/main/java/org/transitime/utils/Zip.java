@@ -219,7 +219,7 @@ public class Zip {
 			}
 		} else {
 			// It is a file, not a directory, so add it to list
-			logger.info("Adding file {} to list of files to store in "
+			logger.debug("Adding file {} to list of files to store in "
 					+ "zip file {}", 
 					fileOrDirName, outputFileName);
 			fileNames.add(fileOrDirName);

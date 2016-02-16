@@ -313,9 +313,11 @@ public class DataFetcher {
 			matchBatchList = Match.getMatchesFromDb(
 					projectId, 
 					beginTime, endTime, 
+					// Only want matches that are not at a stop since for that
+					// situation instead using arrivals/departures. 
 					// Order results by time so that process them in the same
 					// way that a vehicle travels.
-					"ORDER BY avlTime", // SQL clause
+					"AND atStop = false ORDER BY avlTime", // SQL clause
 					firstResult, batchSize);
 			
 			// Add arrivals/departures to map

@@ -17,9 +17,9 @@
 
 package org.transitime.api.utils;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -56,7 +56,10 @@ public class UsageValidator {
 	// This is a singleton class
 	private static UsageValidator singleton = new UsageValidator();
 
-	private Map<String, LinkedList<Long>> requestTimesPerIp = new HashMap<String, LinkedList<Long>>();
+	// Keyed on IP address. Contains list of times API last called for the 
+	// IP address.
+	private Map<String, LinkedList<Long>> requestTimesPerIp = 
+			new ConcurrentHashMap<String, LinkedList<Long>>();
 
 	/********************** Member Functions **************************/
 
@@ -76,14 +79,8 @@ public class UsageValidator {
 	}
 
 	/**
-	 * Makes sure that usage doesn't exceed limits. Intended to deal with bad
-	 * applications that are requesting too much data or a denial of service
-	 * attack. Currently simply checks to make sure that for a given request IP
-	 * address that there aren't more than a certain number of requests per time
-	 * frame.
-	 * <p>
-	 * Probably should be refined in the future.
-	 * 
+	 * TODO: previous impl was not thread safe -- so now its just a placeholder
+	 * for future checks  
 	 * @param stdParameters
 	 * @throws WebApplicationException
 	 */

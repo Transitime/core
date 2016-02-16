@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 
 /**
@@ -237,10 +238,10 @@ public abstract class ConfigValue<T> {
 		// out e-mail since this is a serious problem.
 		if (defaultValue == null && !defaultValueConfigured) {
 			logger.error(Markers.email(),
-					"When reading parameter \"{}\" no valid "
-							+ "value was configured and no default was "
-							+ "specified so resulting value is null.", 
-					id);
+					"When reading parameter \"{}\" for agencyId={} no valid "
+					+ "value was configured and no default was "
+					+ "specified so resulting value is null.", 
+					id, AgencyConfig.getAgencyId());
 		}
 		
 		// Use the default value.

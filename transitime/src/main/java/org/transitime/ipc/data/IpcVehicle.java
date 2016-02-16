@@ -55,6 +55,7 @@ public class IpcVehicle implements Serializable {
 	// routeShortName needed because routeId is sometimes not consistent over
 	// schedule changes but routeShortName usually is.
 	private final String routeShortName;
+	private final String routeName;
 	private final String tripId;	
 	private final String tripPatternId;
 	private final String directionId;
@@ -85,6 +86,7 @@ public class IpcVehicle implements Serializable {
 		this.heading = vs.getHeading();
 		this.routeId = vs.getRouteId();
 		this.routeShortName = vs.getRouteShortName();
+		this.routeName = vs.getRouteName();
 		Trip trip = vs.getTrip();
 		if (trip != null) {
 			this.blockId = vs.getBlock().getId();
@@ -154,6 +156,7 @@ public class IpcVehicle implements Serializable {
 	 * @param pathHeading
 	 * @param routeId
 	 * @param routeShortName
+	 * @param routeName
 	 * @param tripId
 	 * @param tripPatternId
 	 * @param directionId
@@ -171,17 +174,18 @@ public class IpcVehicle implements Serializable {
 	protected IpcVehicle(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float heading, String routeId, String routeShortName,
-			String tripId, String tripPatternId, String directionId,
-			String headsign, boolean predictable, boolean schedBasedPred,
-			TemporalDifference realTimeSchdAdh, boolean isDelayed,
-			boolean isLayover, long layoverDepartureTime, String nextStopId,
-			String nextStopName, String vehicleType) {
+			String routeName, String tripId, String tripPatternId,
+			String directionId, String headsign, boolean predictable,
+			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
+			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
+			String nextStopId, String nextStopName, String vehicleType) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
 		this.heading = heading;
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
+		this.routeName = routeName;
 		this.tripId = tripId;
 		this.tripPatternId = tripPatternId;
 		this.directionId = directionId;
@@ -209,6 +213,7 @@ public class IpcVehicle implements Serializable {
 		protected float heading;
 		protected String routeId;
 		protected String routeShortName;
+		protected String routeName;
 		protected String tripId;
 		protected String tripPatternId;
 		protected String directionId;
@@ -236,6 +241,7 @@ public class IpcVehicle implements Serializable {
 			this.heading = v.heading;
 			this.routeId = v.routeId;
 			this.routeShortName = v.routeShortName;
+			this.routeName = v.routeName;
 			this.tripId = v.tripId;
 			this.tripPatternId = v.tripPatternId;
 			this.directionId = v.directionId;
@@ -267,6 +273,7 @@ public class IpcVehicle implements Serializable {
 			stream.writeFloat(heading);
 			stream.writeObject(routeId);
 			stream.writeObject(routeShortName);
+			stream.writeObject(routeName);
 			stream.writeObject(tripId);
 			stream.writeObject(tripPatternId);
 			stream.writeObject(directionId);
@@ -305,6 +312,7 @@ public class IpcVehicle implements Serializable {
 			heading = stream.readFloat();
 			routeId = (String) stream.readObject();
 			routeShortName = (String) stream.readObject();
+			routeName = (String) stream.readObject();
 			tripId = (String) stream.readObject();
 			tripPatternId = (String) stream.readObject();
 			directionId = (String) stream.readObject();
@@ -328,7 +336,7 @@ public class IpcVehicle implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcVehicle(blockId, blockAssignmentMethod, avl, heading,
-					routeId, routeShortName, tripId, tripPatternId,
+					routeId, routeShortName, routeName, tripId, tripPatternId,
 					directionId, headsign, predictable, schedBasedPred,
 					realTimeSchdAdh, isDelayed, isLayover, layoverDepartureTime,
 					nextStopId, nextStopName, vehicleType);
@@ -375,14 +383,14 @@ public class IpcVehicle implements Serializable {
 	 * is used when it is available. When path heading not available then uses
 	 * the AVL heading. That can be NaN as well though.
 	 * 
-	 * @return Heading of vehicle, or null if speed not defined.
+	 * @return Heading of vehicle, or Float.NaN if heading not defined.
 	 */
 	public float getHeading() {
 		return heading;
 	}
 
 	/**
-	 * @return Speed of vehicle, or null if speed not defined.
+	 * @return Speed of vehicle, or Float.NaN if speed not defined.
 	 */
 	public float getSpeed() {
 		return avl.getSpeed();
@@ -417,6 +425,10 @@ public class IpcVehicle implements Serializable {
 		return routeShortName;
 	}
 
+	public String getRouteName() {
+		return routeName;
+	}
+	
 	public String getTripId() {
 		return tripId;
 	}
@@ -486,6 +498,7 @@ public class IpcVehicle implements Serializable {
 				+ ", blockAssignmentMethod=" + blockAssignmentMethod
 				+ ", routeId=" + routeId 
 				+ ", routeShortName=" + routeShortName
+				+ ", routeName=" + routeName
 				+ ", tripId=" + tripId 
 				+ ", tripPatternId=" + tripPatternId
 				+ ", directionId=" + directionId
@@ -516,9 +529,9 @@ public class IpcVehicle implements Serializable {
 		IpcVehicle v =
 				new IpcVehicle("blockId",
 						BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl,
-						123.456f, "routeId", "routeShortName", "tripId",
-						"tripPatternId", "dirId", "headsign", true, false,
-						null, false, false, 0, null, null, null);
+						123.456f, "routeId", "routeShortName", "routeName",
+						"tripId", "tripPatternId", "dirId", "headsign", true,
+						false, null, false, false, 0, null, null, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);

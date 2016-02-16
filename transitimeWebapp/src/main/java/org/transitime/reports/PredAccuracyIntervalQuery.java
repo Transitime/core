@@ -302,10 +302,8 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 	 *
 	 * @param beginDateStr
 	 *            Begin date for date range of data to use.
-	 * @param endDateStr
-	 *            End date for date range of data to use. Since want to include
-	 *            data for the end date, 1 day is added to the end date for the
-	 *            query.
+	 * @param numDaysStr
+	 *            Number of days to run the query for.
 	 * @param beginTimeStr
 	 *            For specifying time of day between the begin and end date to
 	 *            use data for. Can thereby specify a date range of a week but
@@ -341,13 +339,13 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public String getJson(String beginDateStr, String endDateStr,
+	public String getJson(String beginDateStr, String endDateStr, String numDaysStr,
 			String beginTimeStr, String endTimeStr, String routeIds[],
 			String predSource, String predType, IntervalsType intervalsType,
 			double intervalPercentage1, double intervalPercentage2)
 			throws SQLException, ParseException {
 		// Actually perform the query
-		doQuery(beginDateStr, endDateStr, beginTimeStr, endTimeStr, routeIds,
+		doQuery(beginDateStr, endDateStr, numDaysStr, beginTimeStr, endTimeStr, routeIds,
 				predSource, predType);
 
 		// If query returned no data then simply return null so that
@@ -373,7 +371,8 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 	 */
 	public static void main(String args[]) {
 		String beginDate = "11-03-2014";
-		String endDate = "11-06-2014";
+		String endDate = "11-04-2014";
+		String numDays = "1";
 		String beginTime = null;
 		String endTime = null;
 		String routeIds[] = { "CR-Providence" };
@@ -384,7 +383,7 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 		try {
 			PredAccuracyIntervalQuery query = new PredAccuracyIntervalQuery(
 					agencyId);
-			String jsonString = query.getJson(beginDate, endDate, beginTime,
+			String jsonString = query.getJson(beginDate, endDate, numDays, beginTime,
 					endTime, routeIds, source, null, IntervalsType.BOTH, 0.68,
 					0.80);
 			System.out.println(jsonString);

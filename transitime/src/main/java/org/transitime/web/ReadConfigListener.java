@@ -24,6 +24,9 @@ package org.transitime.web;
  * transitime_config_file_location needs to be set to specify the config file to
  * read in.
  * <p>
+ * When running Tomcat within Eclipse it is most likely easiest to just set the
+ * necessary Java properties in the Debug Configurations VM properties.
+ * <p>
  * This class in in the main transitime package so that it can be used by all
  * webapps.
  * 

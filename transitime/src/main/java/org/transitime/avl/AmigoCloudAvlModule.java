@@ -16,6 +16,8 @@
  */
 package org.transitime.avl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,7 +31,9 @@ import org.transitime.avl.amigocloud.AmigoWebsocketListener;
 import org.transitime.avl.amigocloud.AmigoWebsockets;
 import org.transitime.config.LongConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
@@ -131,6 +135,9 @@ public class AmigoCloudAvlModule extends AvlModule {
 		@Override
 		public void onMessage(String message) {
 			try {
+				// The return value for the method
+				Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
+				
 				JSONObject obj = new JSONObject(message);
 				JSONArray argsArray = obj.getJSONArray("args");
 				for (int i=0; i<argsArray.length(); ++i) {
@@ -185,9 +192,12 @@ public class AmigoCloudAvlModule extends AvlModule {
 						AvlReport avlReport =
 								new AvlReport(vehicleId, timestamp, latitude,
 										longitude, speed, heading, "AmigoCloud");
-						avlModule.processAvlReport(avlReport);
+						avlReportsReadIn.add(avlReport);
 					}
 				}
+				
+				// Process all the AVL reports read in
+				avlModule.processAvlReports(avlReportsReadIn);
 			} catch (JSONException | NumberFormatException e) {
 				logger.error("Exception {} parsing from amigocloud AVL feed {}", 
 						e.getMessage(), e);
@@ -206,16 +216,44 @@ public class AmigoCloudAvlModule extends AvlModule {
 	}
 
 	/**
-	 * Initiates a real-time amigocloud feed
+	 * Initiates a real-time amigocloud feed. If there is a JSONException 
+	 * while starting connection then will try again every 10 seconds
+	 * until successful. 
 	 */
 	public void startRealtimeWebsockets() {
 		logger.info("Starting amigocloud AVL feed");
 
-		AmigoWebsockets socket =
-				new AmigoWebsockets(userId.getValue(), projectId.getValue(),
-						datasetId.getValue(), feedUrl.toString(),
-						new MyAmigoWebsocketListener(this));
-		socket.connect();
+		int numberOfExceptions = 0;
+		boolean exceptionOccurred = false;
+		do {
+			try {
+				// Actually make the connection
+				AmigoWebsockets socket =
+						new AmigoWebsockets(userId.getValue(),
+								projectId.getValue(), datasetId.getValue(),
+								feedUrl.toString(),
+								new MyAmigoWebsocketListener(this));
+				socket.connect();
+				exceptionOccurred = false;
+			} catch (JSONException e) {
+				++numberOfExceptions;
+				exceptionOccurred = true;
+				
+				// If exception has occurred several times then send e-mail to 
+				// indicate there is an ongoing problem
+				if (numberOfExceptions == 3) {
+					logger.error(
+							Markers.email(),
+							"For agencyId={} exception when starting up "
+							+ "AmigoCloudAvlModule. {}. numberOfExceptions={}",
+							AgencyConfig.getAgencyId(), e.getMessage(), 
+							numberOfExceptions, e);
+				}
+				
+				// Sleep 10 seconds before trying again
+				Time.sleep(10 * Time.MS_PER_SEC);
+			}
+		} while (exceptionOccurred);
 	}
 
 	/**

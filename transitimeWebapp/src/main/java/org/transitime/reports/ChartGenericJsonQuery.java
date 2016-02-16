@@ -53,9 +53,9 @@ public class ChartGenericJsonQuery extends GenericQuery {
 	protected void addColumn(String columnName, int type) {
 		if (columnName.equals("tooltip"))
 			jsonBuilder.addTooltipColumn();
-		else if (type == Types.NUMERIC || type == Types.INTEGER
-				|| type == Types.SMALLINT || type == Types.BIGINT
-				|| type == Types.FLOAT || type == Types.DOUBLE || type == Types.DECIMAL)
+    else if (type == Types.NUMERIC || type == Types.INTEGER
+        || type == Types.SMALLINT || type == Types.BIGINT
+        || type == Types.FLOAT || type == Types.DOUBLE)
 			jsonBuilder.addNumberColumn(columnName);
 		else if (type == Types.VARCHAR)
 			jsonBuilder.addStringColumn(columnName);

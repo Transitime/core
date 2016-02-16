@@ -524,7 +524,7 @@ public class SpatialMatch {
 	 * @return true if this spatial match is for a layover
 	 */
 	public boolean isLayover() {
-	  if (block.isNoSchedule()) return false; // Frequency-based blocks can't have layovers
+	  if (block.isNoSchedule()) return false; // Frequency-based unscheduled blocks can't have layovers
 		return block.isLayover(tripIndex, stopPathIndex);
 	}
 	
@@ -550,6 +550,7 @@ public class SpatialMatch {
 			ScheduleTime scheduleTime = 
 					block.getScheduleTime(tripIndex, stopPathIndex);
 			if (scheduleTime == null) {
+			  // prevent nullpointer
 			  logger.error("no scheduled wait stop time for {} {}", tripIndex, stopPathIndex);
 			  return -1;
 			}
@@ -724,6 +725,35 @@ public class SpatialMatch {
 		
 		// segmentIndex == other.segmentIndex
 		return distanceAlongSegment <= other.distanceAlongSegment;
+	}
+
+	/**
+	 * Returns true if this is before the other SpatialMatch passed in.
+	 * 
+	 * @param other
+	 *            The Spatial Match to compare to
+	 * @return true if this is before the other SpatialMatch
+	 */
+	public boolean lessThan(SpatialMatch other) {
+		if (tripIndex > other.tripIndex)
+			return false;
+		if (tripIndex < other.tripIndex)
+			return true;
+		
+		// tripIndex == other.tripIndex
+		if (stopPathIndex > other.stopPathIndex)
+			return false;
+		if (stopPathIndex < other.stopPathIndex)
+			return true;
+		
+		// stopPathIndex == other.pathIndex
+		if (segmentIndex > other.segmentIndex)
+			return false;
+		if (segmentIndex < other.segmentIndex)
+			return true;
+		
+		// segmentIndex == other.segmentIndex
+		return distanceAlongSegment < other.distanceAlongSegment;
 	}
 
 	/**

@@ -20,6 +20,7 @@ package org.transitime.monitoring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.IntervalTimer;
@@ -97,7 +98,9 @@ public class MonitoringModule extends Module {
 							resultStr);
 				}
 			} catch (Exception e) {
-				logger.error(Markers.email(), "Errror in MonitoringModule", e);
+				logger.error(Markers.email(), 
+						"Errror in MonitoringModule for agencyId={}", 
+						AgencyConfig.getAgencyId(), e);
 			}
 		}
 

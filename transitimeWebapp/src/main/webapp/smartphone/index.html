@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="ISO-8859-1">
+  <title>Smartphone WebApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <!-- 
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <link href="jquery.mobile/jquery.mobile-1.4.5.css" rel="stylesheet" />
+  <script src="jquery.mobile/jquery.mobile-1.4.5.js"></script>
+   -->
+  <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body>
+<div data-role="page">
+  <div data-role="header" data-position="fixed"><h2>Nearest Stops</h2></div>
+  
+  <select name="agencySelector" data-native-menu="false" data-mini="true">
+    <option value="sfmta">SFMTA</option>
+    <option value="missionBay">Mission Bay</option>
+    <option value="actransit">AC Transit</option>
+  </select>
+  
+  <div role="main" class="ui-content">
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    some stuff<br/>
+    more stuff<p>
+    <a href="#mapPage" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="flip">Map Page</a>
+  </div>
+  
+  <div data-role="footer" data-position="fixed">
+    <div data-role="navbar" data-iconpos="left">
+        <ul>
+          <li><a href="#" data-icon="grid">Summary</a></li>
+          <li><a href="#" data-icon="star">Favs</a></li>
+          <li><a href="#" data-icon="gear">Setup</a></li>
+        </ul>
+     </div>
+  </div>
+  
+</div>
+
+<div data-role="page" id="mapPage">
+  <div data-role="header" data-add-back-btn="true"><h2>The Map</h2></div>
+  The map
+</div>
+
+</body>
+
+</html>

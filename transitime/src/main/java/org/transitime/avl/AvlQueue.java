@@ -29,7 +29,7 @@ import org.transitime.db.structs.AvlReport;
  * A queue of AvlClient runnables that can be used with a ThreadPoolExecutor.
  * Implements by subclassing a ArrayBlockingQueue<Runnable> where the Runnable
  * is an AvlClient. Also keeps track of the last AVL report per vehicle. When
- * getting data form queue, if the data is obsolete (a new AVL report has been
+ * getting data from queue, if the data is obsolete (a new AVL report has been
  * received for the vehicle) then that element from the queue is thrown out and
  * the next item is retrieved until a non-obsolete one is found.
  * <p>
@@ -71,7 +71,7 @@ public class AvlQueue extends ArrayBlockingQueue<Runnable> {
 	/**
 	 * Adds the AVL report to the map of last AVL report for each vehicle
 	 * 
-	 * @param runnable
+	 * @param runnable the AvlClient
 	 */
 	private void addToAvlDataPerVehicleMap(Runnable runnable) {
 		if (!(runnable instanceof AvlClient))
@@ -86,7 +86,7 @@ public class AvlQueue extends ArrayBlockingQueue<Runnable> {
 	 * vehicle and is therefore obsolete and doesn't need to be processed.
 	 * 
 	 * @param avlReportFromQueue
-	 *            AVL report from the queue
+	 *            AvlClient from the queue containing an AvlReport
 	 * @return true of obsolete
 	 */
 	private boolean isObsolete(Runnable runnableFromQueue) {
@@ -103,10 +103,12 @@ public class AvlQueue extends ArrayBlockingQueue<Runnable> {
 						&& avlReportFromQueue.getTime() < lastAvlReportForVehicle
 								.getTime();
 		if (obsolete) {
-			logger.error("AVL report from queue is obsolete (there is a newer "
+			logger.debug("AVL report from queue is obsolete (there is a newer "
 					+ "one for the vehicle). Therefore ignoring this report so "
 					+ "can move on to next valid report for another vehicle. "
-					+ "{}",	avlReportFromQueue);
+					+ "From queue {}. Last AVL report in map {}. Size of queue "
+					+ "is {}",	
+					avlReportFromQueue, lastAvlReportForVehicle, size());
 		}
 		return obsolete;
 	}
@@ -123,7 +125,7 @@ public class AvlQueue extends ArrayBlockingQueue<Runnable> {
 	}
 
 	/**
-	 * Calls superclass add() method but also updates the AVL data per vehicle
+	 * Calls superclass put() method but also updates the AVL data per vehicle
 	 * map. Doesn't seem to be used by ThreadPoolExecutor but still included
 	 * for completeness.
 	 */

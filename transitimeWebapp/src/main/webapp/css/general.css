@@ -33,7 +33,7 @@ body {
 
 #title {
 	margin-top: 40px;
-	margin-bottom: 20px;
+	margin-bottom: 2px;
 	font-weight: normal;
 	font-size: xx-large;
 	text-align: center;
@@ -41,6 +41,7 @@ body {
 
 #subtitle {
 	text-align: center;
+	font-size: x-large;
 }
 
 /* For list of choices to be centered in page, e.g. list of reports
@@ -95,3 +96,21 @@ input, select {
 	border-radius: 4px;
 }
 
+/* For tables showing data in reports */
+#dataTable {
+	margin-left: auto;
+ 	margin-right: auto;
+}
+
+#dataTable, #dataTable th, #dataTable td {
+ border: 1px solid #BBB;
+ border-collapse: collapse;
+}
+
+#dataTable th, #dataTable td {
+    padding: 2px 10px;
+}
+
+#dataTable th, #dataTable thead {
+  background: #ddd;
+}

@@ -313,6 +313,8 @@ public class PredictionAccuracyModule extends Module {
 	 * needed because sometimes a vehicle will never arrive at a stop and so
 	 * will not be removed from memory. In order to prevent memory use from
 	 * building up need to clear out the old predictions.
+	 * 
+	 * Synchronized as multiple subclasses exist.
 	 */
 	private synchronized void clearStalePredictions() {
 		int numPredictionsInMemory = 0;
@@ -338,10 +340,13 @@ public class PredictionAccuracyModule extends Module {
 					// a bad prediction was made
 					storePredictionAccuracyInfo(pred, null);
 				} else {
-					++numPredictionsInMemory;					
+					++numPredictionsInMemory;		
+					logger.debug("Prediction currently held in memory. {}"+pred.toString());
 				}
 			}
 		}
+		
+		
 		
 		logger.debug("There are now {} predictions in memory after removing {}.",
 				numPredictionsInMemory, numPredictionsRemoved);
@@ -377,7 +382,7 @@ public class PredictionAccuracyModule extends Module {
 				for (String stopId : stopIds) {
 					List<IpcPredictionsForRouteStopDest> predictions = 
 							PredictionDataCache.getInstance().getPredictions(
-									routeId, stopId, directionId);
+									routeId, directionId, stopId);
 					boolean predictionsFound = false;
 					for (IpcPredictionsForRouteStopDest predList : predictions) {
 						for (IpcPrediction pred : predList
@@ -423,8 +428,12 @@ public class PredictionAccuracyModule extends Module {
 		PredictionKey key = new PredictionKey(arrivalDeparture.getVehicleId(), 
 				arrivalDeparture.getDirectionId(), arrivalDeparture.getStopId());
 		List<PredAccuracyPrediction> predsList = predictionMap.get(key);
+		
 		if (predsList == null || predsList.isEmpty())
-			return;
+		{
+			logger.debug("No matching predictions for {}", arrivalDeparture);
+			return;			
+		}
 		
 		// Go through list of predictions for vehicle, direction, stop and handle
 		// the ones that match fully including being appropriate arrival or
@@ -444,7 +453,9 @@ public class PredictionAccuracyModule extends Module {
 			// shouldn't be counted against vehicle accuracy since likely 
 			// another vehicle substituted in for the original assignment. This 
 			// is especially true for MBTA Commuter Rail
-			if (!pred.getTripId().equals(arrivalDeparture.getTripId()))
+			String tripIdOrShortName = pred.getTripId();
+			if (!tripIdOrShortName.equals(arrivalDeparture.getTripId()) 
+					&& !tripIdOrShortName.equals(arrivalDeparture.getTripShortName()))
 				continue;
 			
 			// Make sure predicted time isn't too far away from the 
