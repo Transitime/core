@@ -26,6 +26,7 @@ import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.CalendarDate;
 import org.transitime.db.structs.ConfigRevision;
 import org.transitime.db.structs.DbTest;
+import org.transitime.db.structs.MeasuredArrivalTime;
 import org.transitime.db.structs.Prediction;
 import org.transitime.db.structs.Departure;
 import org.transitime.db.structs.FareAttribute;
@@ -44,6 +45,7 @@ import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.db.structs.VehicleConfig;
 import org.transitime.db.structs.VehicleEvent;
+import org.transitime.db.structs.VehicleState;
 import org.transitime.db.webstructs.ApiKey;
 import org.transitime.db.webstructs.WebAgency;
 
@@ -83,6 +85,7 @@ public class AnnotatedClassesList {
 		FareRule.class,
 		Frequency.class,
 		Match.class,
+		MeasuredArrivalTime.class,
 		MonitoringEvent.class,
 		PredictionAccuracy.class,
 		Route.class,
@@ -95,6 +98,7 @@ public class AnnotatedClassesList {
 		TripPattern.class,
 		VehicleEvent.class,
 		VehicleConfig.class,
+		VehicleState.class,
 		
 		// For website
 		ApiKey.class,

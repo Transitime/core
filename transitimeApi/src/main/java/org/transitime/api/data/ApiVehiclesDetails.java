@@ -22,10 +22,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
+import org.transitime.db.structs.Agency;
 import org.transitime.db.webstructs.WebAgency;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.utils.Time;
@@ -37,12 +38,10 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-@XmlRootElement(name = "vehicles")
+@XmlRootElement
 public class ApiVehiclesDetails {
 
-	// Need to use @XmlElementRef so that the element name used for each
-	// ApiVehicle object will be what is specified in the ApiVehicle class.
-	@XmlElementRef
+	@XmlElement(name = "vehicles")
 	private List<ApiVehicleDetails> vehiclesData;
 
 	/********************** Member Functions **************************/
@@ -68,7 +67,9 @@ public class ApiVehiclesDetails {
 			String agencyId, Map<String, UiMode> uiTypesForVehicles) {
 		// Get Time object based on timezone for agency
 		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
-		Time timeForAgency = webAgency.getAgency().getTime();				
+		Agency agency = webAgency.getAgency();
+		Time timeForAgency = agency != null ? 
+				agency.getTime() : new Time((String) null);				
 		
 		// Process each vehicle
 		vehiclesData = new ArrayList<ApiVehicleDetails>();

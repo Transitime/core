@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
 import org.transitime.utils.Time;
@@ -194,7 +195,8 @@ public class ArchiveOldFilesModule extends Module {
 				// continue to run and send an e-mail once a day as a 
 				// reminder that there is a problem.
 				logger.error(Markers.email(), 
-						"Error when archiving old files.", t);
+						"Error when archiving old files for agencyId={}.", 
+						AgencyConfig.getAgencyId(), t);
 			}
 		}
 

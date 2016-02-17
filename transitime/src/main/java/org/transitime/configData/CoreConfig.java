@@ -141,8 +141,36 @@ public class CoreConfig {
 	private static DoubleConfigValue maxDistanceFromSegment =
 			new DoubleConfigValue("transitime.core.maxDistanceFromSegment", 
 					60.0,
-					"How far a location can be from a path segment and still " +
-					"be considered a match.");
+					"How far a location can be from a path segment and still "
+					+ "be considered a match. Can be overridden on a per route "
+					+ "basis via max_distance supplemental column of route GTFS "
+					+ "data. When auto assigning, the parameter "
+					+ "transitime.core.maxDistanceFromSegmentForAutoAssigning "
+					+ "is used instead.");
+	
+	/**
+	 * How far a location can be from a path segment and still be considered
+	 * a match when auto assigning.
+	 * @return
+	 */
+	public static double getMaxDistanceFromSegmentForAutoAssigning() {
+		return maxDistanceFromSegmentForAutoAssigning.getValue();
+	}
+	private static DoubleConfigValue maxDistanceFromSegmentForAutoAssigning =
+			new DoubleConfigValue("transitime.core.maxDistanceFromSegmentForAutoAssigning", 
+					60.0,
+					"How far a location can be from a path segment and still "
+					+ "be considered a match when auto assigning a vehicle. Auto "
+					+ "assigning is treated separately because sometimes need "
+					+ "to make maxDistanceFromSegment really lenient because "
+					+ "vehicles do not always follow same route. This is "
+					+ "especially true with deviated fixed route service. But "
+					+ "don't want the distance to be too lenient when auto "
+					+ "assigning because if too lenient then would match to "
+					+ "multiple routes and therefore no assignment would be "
+					+ "made because the matches would be ambiguous. Therefore "
+					+ "maxDistanceFromSegmentForAutoAssigning should be less"
+					+ "than or equal to maxDistanceFromSegment.");
 	
 	/**
 	 * How many bad spatial/temporal matches a predictable vehicle can have in a
@@ -324,6 +352,9 @@ public class CoreConfig {
 	public static int getAllowableEarlySeconds() {
 		return allowableEarlySeconds.getValue();
 	}
+	public static String getAllowableEarlySecondsId() {
+		return allowableEarlySeconds.getID();
+	}
 	private static IntegerConfigValue allowableEarlySeconds = 
 			new IntegerConfigValue("transitime.core.allowableEarlySeconds", 
 					15 * Time.SEC_PER_MIN,
@@ -343,6 +374,9 @@ public class CoreConfig {
 	 */
 	public static int getAllowableLateSeconds() {
 		return allowableLateSeconds.getValue();
+	}
+	public static String getAllowableLateSecondsId() {
+		return allowableLateSeconds.getID();
 	}
 	private static IntegerConfigValue allowableLateSeconds = 
 			new IntegerConfigValue("transitime.core.allowableLateSeconds", 

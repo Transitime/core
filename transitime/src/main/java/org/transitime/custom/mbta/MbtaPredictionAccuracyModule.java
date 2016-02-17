@@ -40,7 +40,6 @@ import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.modules.Module;
-import org.transitime.utils.Time;
 
 /**
  * Reads in external prediction data from MBTA feed and stores the data in
@@ -55,8 +54,10 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 	// For when requesting predictions from external MBTA API
 	private static final int timeoutMsec = 20000;
 	
+	// Use PredictionAccuracyModule as the class so that logging will go
+	// into the regular predAccuracy.log log file instead of the core one.
 	private static final Logger logger = LoggerFactory
-			.getLogger(MbtaPredictionAccuracyModule.class);
+			.getLogger(PredictionAccuracyModule.class);
 
 	/********************** Config Params **************************/
 	
@@ -221,7 +222,7 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 
 		List<Element> directions = rootNode.getChildren("direction");
 		if (directions.isEmpty()) {
-			logger.error("No direction element returned.");
+			logger.error("No direction element returned so ignoring.");
 			return;
 		}
 		for (Element direction : directions) {
@@ -235,8 +236,12 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 			List<Element> trips = direction.getChildren("trip");
 			for (Element trip : trips) {
 				String tripId = trip.getAttributeValue("trip_id");
-				String vehicleId = trip.getChild("vehicle")
-						.getAttributeValue("vehicle_id");
+				Element vehicleChild = trip.getChild("vehicle");
+				if (vehicleChild == null) {
+					logger.error("No vehicle element returned so ignoring.");
+					continue;
+				}
+				String vehicleId = vehicleChild.getAttributeValue("vehicle_id");
 				List<Element> stops = trip.getChildren("stop");
 				for (Element stop : stops) {
 					String stopId = stop.getAttributeValue("stop_id");
@@ -253,13 +258,6 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 					Date predictedTime = new Date(
 							Long.parseLong(predictionEpochTimeStr + "000"));
 					
-					String predictionsInSecondsStr = 
-							stop.getAttributeValue("pre_away");
-					Date predictedTimeUsingSecs = new Date(
-							System.currentTimeMillis()
-									+ Integer.parseInt(predictionsInSecondsStr)
-									* Time.MS_PER_SEC);
-					
 					// Need to differentiate between arrival and departure 
 					// predictions
 					boolean isArrival = isArrival(tripId, stopId);
@@ -268,10 +266,10 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 							"Storing external prediction routeId={}, "
 							+ "directionId={}, tripId={}, vehicleId={}, "
 							+ "stopId={}, prediction={}, "
-							+ "predictedTimeUsingSecs={}, isArrival={}",
+							+ "isArrival={}",
 							routeId, directionId, tripId, 
 							vehicleId, stopId, predictedTime, 
-							predictedTimeUsingSecs, isArrival);
+							isArrival);
 					
 					// Store in memory the prediction based on absolute time
 					PredAccuracyPrediction pred = new PredAccuracyPrediction(
@@ -279,13 +277,6 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 							predictedTime, predictionsReadTime, isArrival, 
 							null, "MBTA_epoch");
 					storePrediction(pred);
-					
-					// Store in memory the prediction based on number of seconds
-					PredAccuracyPrediction predUsingSecs = new PredAccuracyPrediction(
-							routeId, directionId, stopId, tripId, vehicleId,
-							predictedTimeUsingSecs, predictionsReadTime, 
-							isArrival, null, "MBTA_seconds");
-					storePrediction(predUsingSecs);
 				}
 			}
 		}

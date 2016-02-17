@@ -33,14 +33,19 @@ public class MathUtils {
 	}
 
 	/**
-	 * Fast way of truncating a double to a certain number of digits.
-	 * Certainly useful for latitudes and longitudes.
+	 * Fast way of truncating a double to a certain number of digits. Certainly
+	 * useful for latitudes and longitudes.
 	 * 
 	 * @param v
 	 * @param precision
-	 * @return
+	 * @return the value v rounded such that there are specified precision
+	 *         number of digits after the decimal point. If v is NaN then NaN is
+	 *         returned.
 	 */
 	public static double round(double v, int precision) {
+		if (Double.isNaN(v))
+			return v;
+		
 	    assert precision >= 0 && precision < TENS.length;
 	    double unscaled = v * TENS[precision];
 	    if(unscaled < Long.MIN_VALUE || unscaled > Long.MAX_VALUE) 

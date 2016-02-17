@@ -22,6 +22,7 @@ import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 
 /**
@@ -108,13 +109,15 @@ public class BoundedExecutor {
 							t.printStackTrace();
 							if (t instanceof OutOfMemoryError) {
 								logger.error(Markers.email(),
-										"OutOfMemoryError occurred in "
+										"For {} OutOfMemoryError occurred in "
 										+ "BoundedExecutor so "
-										+ "terminating application", t);
+										+ "terminating application",
+										AgencyConfig.getAgencyId(), t);
 							} else {
 								logger.error(Markers.email(),
-										"Unexpected Throwable occurred in "
-										+ "BoundedExecutor", t);
+										"For {} unexpected Throwable occurred "
+										+ "in BoundedExecutor", 
+										AgencyConfig.getAgencyId(), t);
 							}
 						} catch (Throwable t2) {
 						}

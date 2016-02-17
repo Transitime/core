@@ -17,6 +17,8 @@
 package org.transitime.custom.mbta;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.avl.AvlModule;
 import org.transitime.avl.PollUrlAvlModule;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
@@ -43,6 +46,13 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 			new StringConfigValue("transitime.avl.mbtaCommuterRailFeedUrl", 
 					"The URL of the Keolis feed to use.");
 
+	private static IntegerConfigValue keolisFeedAvlTimeOffset =
+			new IntegerConfigValue("transitime.mbta.keolisFeedAvlTimeOffset", 
+					5, 
+					"The GPS time from the Keolis feed has a strange 4 or 5 "
+					+ "hour offset. It appears that it is 4 hours during "
+					+ "saving time but 5 hours during normal winter time.");
+	
 	// If debugging feed and want to not actually process
 	// AVL reports to generate predictions and such then
 	// set shouldProcessAvl to false;
@@ -76,7 +86,7 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 	 * processAvlReport() for each AVL report.
 	 */
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 		// Get the JSON string containing the AVL data
 		String jsonStr = getJsonString(in);
 		try {
@@ -90,6 +100,9 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 			// so that each one can be accessed by name.
 			String tripNames[] = JSONObject.getNames(jsonObj);
 			
+			// The return value for the method
+			Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
+
 			// For each vehicle...
 			for (String tripName : tripNames) {
 				JSONObject v = jsonObj.getJSONObject(tripName);
@@ -103,10 +116,14 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 				float speed = (float) v.getDouble("vehicle_speed") * Geo.MPH_TO_MPS;
 				// Not sure if bearing is the same as heading.
 				float heading = (float) v.getDouble("vehicle_bearing");
-				// The time is really strange. It is off by 4 hours for some
-				// strange reason.
+				// The time is really strange. It is off by 4-5 hours for some
+				// strange reason. It appears to be 4 hours off during daylight
+				// savings time but 5 hours during normal winter hours. Yikes!
+				// Therefore using the parameter keolisFeedAvlTimeOffset to
+				// specify the offset.
 				long gpsTime =
-						v.getLong("vehicle_timestamp") * Time.MS_PER_SEC + 4
+						v.getLong("vehicle_timestamp") * Time.MS_PER_SEC
+								+ keolisFeedAvlTimeOffset.getValue()
 								* Time.HOUR_IN_MSECS;
 
 				// Create the AvlReport
@@ -122,18 +139,25 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 				// it is best to just use the trip short name, such as "515".
 				String tripShortName =
 						tripName.substring(tripName.lastIndexOf('-') + 1);
+				
+				// Actually set the assignment
 				avlReport.setAssignment(tripShortName,
 						AssignmentType.TRIP_SHORT_NAME);
 
 				logger.debug("From KeolisAvlModule {}", avlReport);
 				
 				if (shouldProcessAvl) {
-					processAvlReport(avlReport);
+					avlReportsReadIn.add(avlReport);
 				}
-			}			
+			}	
+			
+			// Return all the AVL reports read in
+			return avlReportsReadIn;
 		} catch (JSONException e) {
 			logger.error("Error parsing JSON. {}. {}", e.getMessage(), jsonStr,
 					e);
+			return new ArrayList<AvlReport>();
+
 		}
 
 	}

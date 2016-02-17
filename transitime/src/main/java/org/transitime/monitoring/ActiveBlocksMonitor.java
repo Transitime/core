@@ -75,6 +75,6 @@ public class ActiveBlocksMonitor extends MonitorBase {
 	 */
 	@Override
 	protected String type() {
-		return "Database Queue";
+		return "Active Blocks";
 	}
 }

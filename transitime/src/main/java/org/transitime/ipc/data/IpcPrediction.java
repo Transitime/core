@@ -62,6 +62,8 @@ public class IpcPrediction implements Serializable {
 	// than the actual prediction time. Only used on server side when
 	// calculating predictions.
 	private final long actualPredictionTime;
+	// True if prediction for last stop of trip
+	private final boolean atEndOfTrip;
 	private final boolean schedBasedPred;
 	// The time of the fix so can tell how stale prediction is
 	private final long avlTime;
@@ -105,6 +107,9 @@ public class IpcPrediction implements Serializable {
 	 *            wait time for wait stops presented to the user is different
 	 *            than the actual prediction time. Only used on server side when
 	 *            calculating predictions.
+	 * @param atEndOfTrip
+	 *            True if prediction for last stop of trip, which means likely
+	 *            not useful to user
 	 * @param predictionAffectedByWaitStop
 	 * @param isDelayed
 	 * @param lateAndSubsequentTripSoMarkAsUncertain
@@ -112,8 +117,8 @@ public class IpcPrediction implements Serializable {
 	 */
 	public IpcPrediction(AvlReport avlReport, String stopId, int gtfsStopSeq,
 			Trip trip, long predictionTime, long actualPredictionTime,
-			boolean predictionAffectedByWaitStop, boolean isDelayed,
-			boolean lateAndSubsequentTripSoMarkAsUncertain, 
+			boolean atEndOfTrip, boolean predictionAffectedByWaitStop,
+			boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
 			ArrivalOrDeparture arrivalOrDeparture) {
 		this.vehicleId = avlReport.getVehicleId();
 		this.routeId = trip.getRouteId();
@@ -128,6 +133,7 @@ public class IpcPrediction implements Serializable {
 		this.blockId = trip != null ? trip.getBlockId() : null;
 		this.predictionTime = predictionTime;
 		this.actualPredictionTime = actualPredictionTime;
+		this.atEndOfTrip = atEndOfTrip;
 		this.schedBasedPred = avlReport.isForSchedBasedPreds();
 		this.avlTime = avlReport.getTime();
 		this.creationTime = avlReport.getTimeProcessed();
@@ -154,11 +160,11 @@ public class IpcPrediction implements Serializable {
 	private IpcPrediction(String vehicleId, String routeId, String stopId,
 			int gtfsStopSeq, String tripId, String tripPatternId,
 			String blockId, long predictionTime, long actualPredictionTime,
-			boolean schedBasedPred, long avlTime, long creationTime,
-			long tripStartEpochTime, boolean affectedByWaitStop,
-			String driverId, short passengerCount, float passengerFullness,
-			boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
-			boolean isArrival) {
+			boolean atEndOfTrip, boolean schedBasedPred, long avlTime,
+			long creationTime, long tripStartEpochTime,
+			boolean affectedByWaitStop, String driverId, short passengerCount,
+			float passengerFullness, boolean isDelayed,
+			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival) {
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
 		this.stopId = stopId;
@@ -170,6 +176,7 @@ public class IpcPrediction implements Serializable {
 		this.blockId = blockId;
 		this.predictionTime = predictionTime;
 		this.actualPredictionTime = actualPredictionTime;
+		this.atEndOfTrip = atEndOfTrip;
 		this.schedBasedPred = schedBasedPred;
 		this.avlTime = avlTime;
 		this.creationTime = creationTime;
@@ -198,6 +205,7 @@ public class IpcPrediction implements Serializable {
 		private String tripPatternId;
 		private String blockId;
 		private long predictionTime;
+		private boolean atEndOfTrip;
 		private boolean schedBasedPred;
 		private long avlTime;
 		private long creationTime;
@@ -225,6 +233,7 @@ public class IpcPrediction implements Serializable {
 			this.tripPatternId = p.tripPatternId;
 			this.blockId = p.blockId;
 			this.predictionTime = p.predictionTime;
+			this.atEndOfTrip = p.atEndOfTrip;
 			this.schedBasedPred = p.schedBasedPred;
 			this.avlTime = p.avlTime;
 			this.creationTime = p.creationTime;
@@ -257,6 +266,7 @@ public class IpcPrediction implements Serializable {
 			stream.writeObject(tripPatternId);
 			stream.writeObject(blockId);
 			stream.writeLong(predictionTime);
+			stream.writeBoolean(atEndOfTrip);
 			stream.writeBoolean(schedBasedPred);
 			stream.writeLong(avlTime);
 			stream.writeLong(creationTime);
@@ -295,6 +305,7 @@ public class IpcPrediction implements Serializable {
 			tripPatternId = (String) stream.readObject();
 			blockId = (String) stream.readObject();
 			predictionTime = stream.readLong();
+			atEndOfTrip = stream.readBoolean();
 			schedBasedPred = stream.readBoolean();
 			avlTime = stream.readLong();
 			creationTime = stream.readLong();
@@ -317,9 +328,9 @@ public class IpcPrediction implements Serializable {
 		private Object readResolve() {
 			return new IpcPrediction(vehicleId, routeId, stopId, gtfsStopSeq,
 					tripId, tripPatternId, blockId, predictionTime, 0,
-					schedBasedPred, avlTime, creationTime, tripStartEpochTime,
-					affectedByWaitStop, driverId, passengerCount,
-					passengerFullness, isDelayed,
+					atEndOfTrip, schedBasedPred, avlTime, creationTime,
+					tripStartEpochTime, affectedByWaitStop, driverId,
+					passengerCount, passengerFullness, isDelayed,
 					lateAndSubsequentTripSoMarkAsUncertain, isArrival);
 		}
 	}
@@ -354,12 +365,13 @@ public class IpcPrediction implements Serializable {
 				// predictions log file
 				// + (stopName!=null ? ", stopNm=\"" + stopName + "\"" : "")
 				+ ", gtfsStopSeq=" + gtfsStopSeq
-				+ ", trip="	+ tripId
+				+ ", tripId=" + tripId
 				+ ", tripPatternId=" + tripPatternId
-				+ ", block=" + blockId
+				+ ", blockId=" + blockId
 				+ ", avlTime=" + Time.timeStrMsecNoTimeZone(avlTime)
 				+ ", createTime=" + Time.timeStrMsecNoTimeZone(creationTime)
 				+ ", tripStartEpochTime=" + Time.timeStrMsecNoTimeZone(tripStartEpochTime)
+				+ ", atEndOfTrip=" + (atEndOfTrip ? "t" : "f")
 				+ ", waitStop="	+ (affectedByWaitStop ? "t" : "f")
 				+ (schedBasedPred ? ", schedBasedPred=t" : "")
 				+ (isDelayed ? ", delayed=t" : "")
@@ -410,6 +422,10 @@ public class IpcPrediction implements Serializable {
 
 	public long getActualPredictionTime() {
 		return actualPredictionTime;
+	}
+	
+	public boolean isAtEndOfTrip() {
+		 return atEndOfTrip;
 	}
 	
 	public boolean isSchedBasedPred() {

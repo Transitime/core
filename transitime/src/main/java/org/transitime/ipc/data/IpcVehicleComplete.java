@@ -23,12 +23,10 @@ import java.io.ObjectInputStream;
 import java.util.Date;
 import java.util.List;
 
-import org.transitime.applications.Core;
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
-import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
@@ -47,7 +45,6 @@ import org.transitime.utils.Time;
  */
 public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 
-	private final String routeName;
 	private final String originStopId;
 	private final String destinationId;
 	private final double distanceToNextStop;
@@ -65,11 +62,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	 */
 	public IpcVehicleComplete(VehicleState vs) {
 		super(vs);
-		
-		// Determine the route name. Can be null.
-		Route route = Core.getInstance().getDbConfig()
-				.getRouteById(vs.getRouteId());
-		this.routeName = route!=null ? route.getName() : null;
 		
 		// If vehicle assigned then can set the parameters
 		Trip trip = vs.getTrip();
@@ -114,6 +106,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	 * @param pathHeading
 	 * @param routeId
 	 * @param routeShortName
+	 * @param routeName
 	 * @param tripId
 	 * @param tripPatternId
 	 * @param directionId
@@ -130,7 +123,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	 * @param atStop
 	 * @param atOrNextStopId
 	 * @param atOrNextGtfsStopSeq
-	 * @param routeName
 	 * @param originStopId
 	 * @param destinationId
 	 * @param distanceToNextStop
@@ -140,23 +132,22 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	private IpcVehicleComplete(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
-			String tripId, String tripPatternId, String directionId,
-			String headsign, boolean predictable, boolean schedBasedPred,
-			TemporalDifference realTimeSchdAdh, boolean isDelayed,
-			boolean isLayover, long layoverDepartureTime, String nextStopId,
-			String nextStopName, String vehicleType, long tripStartEpochTime,
-			boolean atStop, String atOrNextStopId, Integer atOrNextGtfsStopSeq,
-			String routeName, String originStopId, String destinationId,
-			double distanceToNextStop, double distanceOfNextStopFromTripStart,
-			double distanceAlongTrip) {
+			String routeName, String tripId, String tripPatternId,
+			String directionId, String headsign, boolean predictable,
+			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
+			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
+			String nextStopId, String nextStopName, String vehicleType,
+			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
+			Integer atOrNextGtfsStopSeq, String originStopId,
+			String destinationId, double distanceToNextStop,
+			double distanceOfNextStopFromTripStart, double distanceAlongTrip) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
-				routeShortName, tripId, tripPatternId, directionId, headsign,
+				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
 				atOrNextGtfsStopSeq);
 
-		this.routeName = routeName;
 		this.originStopId = originStopId;
 		this.destinationId = destinationId;
 		this.distanceToNextStop = distanceToNextStop;
@@ -171,7 +162,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	protected static class CompleteVehicleSerializationProxy 
 		extends GtfsRealtimeVehicleSerializationProxy {
 		// Exact copy of fields of IpcCompleteVehicle enclosing class object
-		private String routeName;
 		private String originStopId;
 		private String destinationId;
 		private double distanceToNextStop;
@@ -184,7 +174,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 
 		private CompleteVehicleSerializationProxy(IpcVehicleComplete v) {
 			super(v);
-			this.routeName = v.routeName;
 			this.originStopId = v.originStopId;
 			this.destinationId = v.destinationId;
 			this.distanceToNextStop = v.distanceToNextStop;
@@ -206,7 +195,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			// Write the data for this class
 			stream.writeShort(currentSerializationVersion);
 			
-		    stream.writeObject(routeName);
 		    stream.writeObject(originStopId);
 		    stream.writeObject(destinationId);
 		    stream.writeDouble(distanceToNextStop);
@@ -234,7 +222,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			}
 
 			// Read in data for this class
-			routeName = (String) stream.readObject();
 			originStopId = (String) stream.readObject();
 			destinationId = (String) stream.readObject();
 			distanceToNextStop = stream.readDouble();
@@ -250,14 +237,14 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		 */
 		private Object readResolve() {
 			return new IpcVehicleComplete(blockId, blockAssignmentMethod, avl,
-					heading, routeId, routeShortName, tripId, tripPatternId,
-					directionId, headsign, predictable, schedBasedPred,
-					realTimeSchdAdh, isDelayed, isLayover,
+					heading, routeId, routeShortName, routeName, tripId,
+					tripPatternId, directionId, headsign, predictable,
+					schedBasedPred, realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, nextStopName,
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
-					atOrNextGtfsStopSeq, routeName, originStopId,
-					destinationId, distanceToNextStop,
-					distanceOfNextStopFromTripStart, distanceAlongTrip);
+					atOrNextGtfsStopSeq, originStopId, destinationId,
+					distanceToNextStop, distanceOfNextStopFromTripStart,
+					distanceAlongTrip);
 		}
 
 	} // End of class SiriVehicleSerializationProxy
@@ -278,10 +265,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	private void readObject(ObjectInputStream stream)
 			throws InvalidObjectException {
 		throw new InvalidObjectException("Must use proxy instead");
-	}
-
-	public String getRouteName() {
-		return routeName;
 	}
 
 	public String getOriginStopId() {
@@ -312,6 +295,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", blockAssignmentMethod=" + getBlockAssignmentMethod()
 				+ ", routeId=" + getRouteId()
 				+ ", routeShortName=" + getRouteShortName()
+				+ ", routeName=" + getRouteName() 
 				+ ", tripId=" + getTripId()
 				+ ", tripPatternId=" + getTripPatternId()
 				+ ", directionId=" + getDirectionId()
@@ -332,7 +316,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", atOrNextGtfsStopSeq=" + getAtOrNextGtfsStopSeq()
 				+ ", tripStartEpochTime=" + getTripStartEpochTime()
 				+ ", tripStartEpochTime=" + new Date(getTripStartEpochTime())
-				+ ", routeName=" + routeName 
 				+ ", originStopId="	+ originStopId 
 				+ ", destinationId=" + destinationId
 				+ ", distanceToNextStop=" 

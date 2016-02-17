@@ -48,6 +48,23 @@ finding specific issues with predictions.">
       Route Performance Table</a></li>
 </ul>
 
+<div id="subtitle">Schedule Adherence Reports</div>
+<ul class="choicesList">
+  <li><a href="schAdhByRouteParams.jsp?a=<%= agencyId %>"
+    title="Displays historic schedule adherence data by route in a bar chart. 
+    Can compare schedule adherence for multiple routes.">
+      Schedule Adherence by Route</a></li>
+  <li><a href="schAdhByStopParams.jsp?a=<%= agencyId %>"
+    title="Displays historic schedule adherence data for each stop for a 
+    route in a bar chart. ">
+      Schedule Adherence by Stop</a></li>
+  <li><a href="schAdhByTimeParams.jsp?a=<%= agencyId %>"
+    title="Displays historic schedule adherence data for a route grouped by 
+    how early/late. The resulting bell curve shows the distribution of 
+    early/late times. ">
+      Schedule Adherence by how Early/Late</a></li>
+</ul>
+
 <div id="subtitle">AVL Reports</div>
 <ul class="choicesList">
   <li><a href="avlMap.jsp?a=<%= agencyId %>"
@@ -56,8 +73,17 @@ finding specific issues with predictions.">
   <li><a href="avlMapParams.jsp?a=<%= agencyId %>"
     title="Displays historic AVL data for a vehicle in a map.">
       AVL Data in Map (parameters page)</a></li>
-      
+  <li><a href="avlMapByRouteParams.jsp?a=<%= agencyId %>"
+    title="Displays historic AVL data for a route in a map.">
+      AVL Data in Map by Route</a></li>
+  <li><a href="avlMapByVehicleParams.jsp?a=<%= agencyId %>"
+    title="Displays historic AVL data for a vehicle in a map.">
+      AVL Data in Map by Vehicle</a></li>
+  <li><a href="lastAvlReport.jsp?a=<%= agencyId %>"
+    title="Displays the last time each vehicle reported its GPS position over the last 24 hours.">
+      Last GPS Report by Vehicle</a></li>
 </ul>
+
 
 <div id="subtitle">Miscellaneous Reports</div>
 <ul class="choicesList">

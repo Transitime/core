@@ -19,6 +19,7 @@ package org.transitime.core.dataCache;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +30,9 @@ import org.transitime.applications.Core;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
+import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
+import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
@@ -116,12 +119,15 @@ public class PredictionDataCache {
 	 * cloning is not very costly. And this way the caller of this method
 	 * doesn't have to synchronize or such.
 	 * 
-	 * @param routeIdOrShortName
-	 * @param stopId
+	 * @param routeIdOrShortName  
+	 *            route_id or route_short_name, or null to specify all routes
+	 *            for stop.
 	 * @param directionId
 	 *            Optional parameter for specifying that only want predictions
 	 *            for a specific directionId. Set to null if want predictions
 	 *            for all directions.
+	 * @param stopIdOrCode
+	 *            stop_id or stop_code
 	 * @param maxPredictionsPerStop
 	 * @param distanceToStop
 	 *            For when getting predictions by location
@@ -129,31 +135,87 @@ public class PredictionDataCache {
 	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			String routeIdOrShortName, String stopId, String directionId,
+			String routeIdOrShortName, String directionId, String stopIdOrCode,
 			int maxPredictionsPerStop, double distanceToStop) {
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		
 		// Determine the routeShortName so can be used for maps in
-		// the low-level methods of this class
-		String routeShortName;
-		Route route = Core.getInstance().getDbConfig()
-				.getRouteById(routeIdOrShortName);
-		if (route != null)
-			routeShortName = route.getShortName();
-		else {
-			routeShortName = routeIdOrShortName;
+		// the low-level methods of this class. Can be null to specify
+		// getting data for all routes.
+		String routeShortName = routeIdOrShortName;
+		if (routeIdOrShortName != null) {
+			// See if it is route ID or a short name
+			Route route = dbConfig.getRouteById(routeIdOrShortName);
+			if (route != null)
+				// routeIdOrShortName was route ID so get the short name
+				routeShortName = route.getShortName();
+			else {
+				// A routeIdOrShortName was specified but is wasn't a route ID
+				if (dbConfig.getRouteByShortName(routeIdOrShortName) == null) {
+					// That route doesn't exist so error
+					throw new IllegalArgumentException("Route "
+							+ routeIdOrShortName + " not valid");
+				}
+			}
+		}
+		
+		// Determine the stop ID since can pass in stopIdOrCode
+		String stopId = stopIdOrCode;
+		if (dbConfig.getStop(stopIdOrCode) == null) {
+			try {
+				Integer stopCode = Integer.parseInt(stopIdOrCode);
+				Stop stop = Core.getInstance().getDbConfig().getStop(stopCode);
+				
+				// If no such stop then complain
+				if (stop == null)
+					throw new IllegalArgumentException("Stop " + stopIdOrCode 
+							+ " not valid");
+				
+				stopId = stop.getId();
+			} catch (NumberFormatException e) {
+				// The stopIdOrCode was not an integer so give up
+				throw new IllegalArgumentException("Stop " + stopIdOrCode 
+						+ " not a valid integer");
+			}
 		}
 		
 		// Get the predictions from the map
 		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
 				getPredictionsForRouteStop(routeShortName, stopId);
 		
+		// Remove old predictions so that they are not provided through the 
+		// API and such
+		for (IpcPredictionsForRouteStopDest preds : predictionsForRouteStop) {
+			preds.removeExpiredPredictions(getSystemTime());
+		}
+
 		// Want to limit predictions to max time in future since if using
-		// schedule based predictions generating predictions far ahead.
+		// schedule based predictions then generating predictions far into the 		
+		// future.
 		long maxPredictionEpochTime =
 				Core.getInstance().getSystemTime()
 						+ PredictionGeneratorDefaultImpl
 								.getMaxPredictionsTimeSecs()
 						* Time.SEC_IN_MSECS;
 				
+		// Want to filter out arrivals at terminal if also getting departures 
+		// for that stop. Otherwise if user selects a terminal stop they could 
+		// see both departures and (useless) arrivals and be confused with too 
+		// much info. But if only have arrivals then should provide that info 
+		// because it could be useful to user.
+		boolean endOfTripPredFound = false;
+		boolean nonEndOfTripPredFound = false;
+		for (IpcPredictionsForRouteStopDest predictions : predictionsForRouteStop) {
+			for (IpcPrediction preds : predictions.getPredictionsForRouteStop()) {
+				if (preds.isAtEndOfTrip())
+					endOfTripPredFound = true;
+				else
+					nonEndOfTripPredFound = true;
+			}
+		}
+		boolean shouldFilterOutEndOfTripPreds = 
+				endOfTripPredFound && nonEndOfTripPredFound;
+		
 		// Make a copy of the prediction objects so that they cannot be
 		// modified by another thread while they are being accessed. This
 		// is important because when the predictions are modified they are
@@ -165,8 +227,27 @@ public class PredictionDataCache {
 			// If supposed to return only predictions for specific direction and 
 			// the current predictions are for the wrong direction then simply
 			// continue to the next predictions.
-			if (directionId != null && !directionId.equals(predictions.getDirectionId()))
+			if (directionId != null 
+					&& !directionId.equals(predictions.getDirectionId()))
 				continue;
+			
+			// If determined that should filter out end of trip predictions, 
+			// do so if all of the predictions for this stop are end of trip 
+			// predictions. Yes, this is a bit complicated.
+			if (shouldFilterOutEndOfTripPreds) {
+				if (predictions.getPredictionsForRouteStop().size() > 0) {
+					boolean allPredsForEndOfTrip = true;
+					for (IpcPrediction preds : predictions
+							.getPredictionsForRouteStop()) {
+						if (!preds.isAtEndOfTrip()) {
+							allPredsForEndOfTrip = false;
+							continue;
+						}
+					}
+					if (allPredsForEndOfTrip)
+						continue;
+				}
+			}
 			
 			// Direction ID is OK so clone prediction and add to list
 			IpcPredictionsForRouteStopDest clone =
@@ -179,9 +260,41 @@ public class PredictionDataCache {
 		// object so that the client can get route, stop, and direction info to
 		// display in the UI.
 		if (clonedPredictions.size() == 0) {
-			IpcPredictionsForRouteStopDest pred = new IpcPredictionsForRouteStopDest(
-					routeShortName, stopId, directionId, distanceToStop);
+			IpcPredictionsForRouteStopDest pred =
+					new IpcPredictionsForRouteStopDest(routeShortName,
+							directionId, stopIdOrCode, distanceToStop);
 			clonedPredictions.add(pred);
+		}
+		
+		// Will frequently get info for trip patterns that are not currently in
+		// service. If only have no predictions, then that should be returned. 
+		// But if do have predictions for a destination then should filter out
+		// the destinations that don't have any predictions so that useful
+		// info doesn't clutter the screen. Since need to make sure that don't
+		// modify clonedPredictions while removing elements need to be careful
+		// about how go about doing this.
+		boolean hasDestinationWithPredictions = false;
+		for (IpcPredictionsForRouteStopDest pred : clonedPredictions) {
+			// If at least one of the destinations has predictions...
+			if (pred.getPredictionsForRouteStop().size() > 0) {
+				hasDestinationWithPredictions = true;
+				break;
+			}
+		}
+		if (hasDestinationWithPredictions) {
+			// Filter out destination info where there are no predictions.
+			// Use iterator since possibly removing elements in loop
+			Iterator<IpcPredictionsForRouteStopDest> iterator =
+					clonedPredictions.iterator();
+			while (iterator.hasNext()) {
+				IpcPredictionsForRouteStopDest predsForRouteStopDest =
+						iterator.next();
+				// If found destination with no predictions remove it
+				if (predsForRouteStopDest.getPredictionsForRouteStop()
+						.isEmpty()) {
+					iterator.remove();
+				}
+			}
 		}
 		
 		// Return the safe cloned predictions
@@ -197,19 +310,22 @@ public class PredictionDataCache {
 	 * doesn't have to synchronize or such.
 	 * 
 	 * @param routeIdOrShortName
-	 * @param stopId
+	 *            route_id or route_short_name, or null to specify all routes
+	 *            for stop.
 	 * @param directionId
 	 *            Optional parameter for specifying that only want predictions
 	 *            for a specific directionId. Set to null if want predictions
 	 *            for all directions.
+	 * @param stopIdOrCode
+	 *            stop_id or stop_code
 	 * @param maxPredictionsPerStop
 	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
 	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			String routeIdOrShortName, String stopId, String directionId,
+			String routeIdOrShortName, String directionId, String stopIdOrCode,
 			int maxPredictionsPerStop) {
-		return getPredictions(routeIdOrShortName, stopId, directionId,
+		return getPredictions(routeIdOrShortName, directionId, stopIdOrCode,
 				maxPredictionsPerStop, Double.NaN);
 	}
 	
@@ -218,13 +334,15 @@ public class PredictionDataCache {
 	 * routeShortName instead of the GTFS routeId to identify the stop.
 	 * 
 	 * @param routeIdOrShortName
+	 * @param directionId
 	 * @param stopId
 	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
 	 *         be null.
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
-			String routeIdOrShortName, String stopId, String directionId) {
-		return getPredictions(routeIdOrShortName, stopId, directionId, Integer.MAX_VALUE);
+			String routeIdOrShortName, String directionId, String stopId) {
+		return getPredictions(routeIdOrShortName, directionId, stopId,
+				Integer.MAX_VALUE);
 	}
 	
 	/**
@@ -238,7 +356,7 @@ public class PredictionDataCache {
 	 */
 	public List<IpcPredictionsForRouteStopDest> getPredictions(
 			String routeIdOrShortName, String stopId) {
-		return getPredictions(routeIdOrShortName, stopId, null, Integer.MAX_VALUE);
+		return getPredictions(routeIdOrShortName, null, stopId, Integer.MAX_VALUE);
 	}
 
 	/**
@@ -246,19 +364,20 @@ public class PredictionDataCache {
 	 * specified.
 	 * 
 	 * @param routeStops
-	 *            Specified using route_short_name instead of route_id
+	 *            Specified using route_short_name or route_id, and stop_id or
+	 *            stop_code
 	 * @param predictionsPerStop
 	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
 	 *         be null.
 	 */
-	public List<IpcPredictionsForRouteStopDest> getPredictions(List<RouteStop> routeStops,
-			int predictionsPerStop) {
+	public List<IpcPredictionsForRouteStopDest> getPredictions(
+			List<RouteStop> routeStops, int predictionsPerStop) {
 		List<IpcPredictionsForRouteStopDest> listOfPredictions = 
 				new ArrayList<IpcPredictionsForRouteStopDest>();
 		for (RouteStop routeStop : routeStops) {
-			List<IpcPredictionsForRouteStopDest> predsForStop = getPredictions(
-					routeStop.getRouteIdOrShortName(), routeStop.getStopId(), null,
-					predictionsPerStop);
+			List<IpcPredictionsForRouteStopDest> predsForStop =
+					getPredictions(routeStop.getRouteIdOrShortName(), null,
+							routeStop.getStopIdOrCode(), predictionsPerStop);
 			for (IpcPredictionsForRouteStopDest predictions : predsForStop)
 				listOfPredictions.add(predictions);
 		}
@@ -266,7 +385,8 @@ public class PredictionDataCache {
 	}
 	
 	/**
-	 * Returns copy of all predictions currently associated for each route/stop specified.
+	 * Returns copy of all predictions currently associated for each route/stop
+	 * specified.
 	 * 
 	 * @param routeStops
 	 * @return List of IpcPredictionsForRouteStopDest. Can be empty but will not
@@ -293,7 +413,7 @@ public class PredictionDataCache {
 		// of predictions in case there are a bunch of vehicles that will be
 		// leaving the stop.
 		List<IpcPredictionsForRouteStopDest> predsList = getPredictions(
-				routeShortName, stopId, null, 5 /* maxPredictionsPerStop */);
+				routeShortName, null, stopId, 5 /* maxPredictionsPerStop */);
 		
 		// Go through all the predictions and find the ones for the specified vehicle
 		for (IpcPredictionsForRouteStopDest predsForRouteStop : predsList) {
@@ -362,37 +482,37 @@ public class PredictionDataCache {
 		if (newPredictionsForVehicle == null)
 			newPredictionsForVehicle = new ArrayList<IpcPrediction>();
 		
-		// Can have several predictions for a route/stop for a vehicle if
+		// Can have several predictions for a route/stop/dest for a vehicle if
 		// the route is a relatively short loop. And if have unscheduled
 		// trips then won't have a unique trip identifier. Therefore to
 		// atomically update the predictions for this vehicle for this
 		// route/stop need to delete all predictions for the vehicle
 		// and add all new ones in one synchronized operation.
-		// First step is to group the new predictions by route/stop so
+		// First step is to group the new predictions by route/stop/dest so
 		// can deal with them all at once. Those are put into
-		// newPredictionsByRouteStop.
-		Map<MapKey, List<IpcPrediction>> newPredsForVehicleByRouteStopMap =
+		// newPredsForVehicleByRouteStopDestMap.
+		Map<MapKey, List<IpcPrediction>> newPredsForVehicleByRouteStopDestMap =
 				new HashMap<MapKey, List<IpcPrediction>>();
 		
 		for (IpcPrediction newPrediction : newPredictionsForVehicle) {
 			MapKey key = new MapKey(newPrediction.getRouteShortName(),
-					newPrediction.getStopId(), newPrediction.getTrip()
-							.getHeadsign());
-			List<IpcPrediction> predsForRouteStopList = 
-					newPredsForVehicleByRouteStopMap.get(key);
-			if (predsForRouteStopList == null) {
-				predsForRouteStopList = new ArrayList<IpcPrediction>();
-				newPredsForVehicleByRouteStopMap
-						.put(key, predsForRouteStopList);
+							newPrediction.getStopId(), 
+							newPrediction.getTrip().getHeadsign());
+			List<IpcPrediction> predsForRouteStopDestList = 
+					newPredsForVehicleByRouteStopDestMap.get(key);
+			if (predsForRouteStopDestList == null) {
+				predsForRouteStopDestList = new ArrayList<IpcPrediction>();
+				newPredsForVehicleByRouteStopDestMap
+						.put(key, predsForRouteStopDestList);
 			}
-			predsForRouteStopList.add(newPrediction);
+			predsForRouteStopDestList.add(newPrediction);
 		}
 		
 		// Go through the new predictions grouped by route/stop/destination and
 		// process them.
-		for (List<IpcPrediction> newPredsForVehicleForRouteStop : 
-				newPredsForVehicleByRouteStopMap.values()) {
-			updatePredictionsForVehicle(newPredsForVehicleForRouteStop);
+		for (List<IpcPrediction> newPredsForVehicleForRouteStopDest : 
+				newPredsForVehicleByRouteStopDestMap.values()) {
+			updatePredictionsForVehicle(newPredsForVehicleForRouteStopDest);
 		}
 		
 		// Remove old predictions that are not in newPredictionsForVehicle 
@@ -401,9 +521,9 @@ public class PredictionDataCache {
 				// If there is no new prediction for the old prediction 
 				// route/stop...
 				MapKey key = new MapKey(oldPrediction.getRouteShortName(),
-						oldPrediction.getStopId(), oldPrediction.getTrip()
-								.getHeadsign());
-				if (newPredsForVehicleByRouteStopMap.get(key) == null) {
+						oldPrediction.getStopId(), 
+						oldPrediction.getTrip().getHeadsign());
+				if (newPredsForVehicleByRouteStopDestMap.get(key) == null) {
 					// Remove the old prediction
 					removePrediction(oldPrediction);
 				}
@@ -478,28 +598,49 @@ public class PredictionDataCache {
 	 * have multiple destinations.
 	 * 
 	 * @param routeShortName
+	 *            The route short name. Set to null to get predictions for all
+	 *            routes for the stop.
 	 * @param stopId
-	 * @return
+	 * @return list of predictions. Can be empty array but never null.
 	 */
 	private List<IpcPredictionsForRouteStopDest> getPredictionsForRouteStop(
 			String routeShortName, String stopId) {
-		// Determine the predictions for all destinations for the route/stop
-		MapKey key = MapKey.create(routeShortName, stopId);
-		List<IpcPredictionsForRouteStopDest> predictionsForRouteStop = 
-				predictionsMap.get(key);
-		if (predictionsForRouteStop == null) {
-			predictionsForRouteStop = 
-					new ArrayList<IpcPredictionsForRouteStopDest>(1);
-			predictionsMap.putIfAbsent(key, predictionsForRouteStop);
-		} 
-
-		// Remove old predictions so that they are not provided through the 
-		// API and such
-		for (IpcPredictionsForRouteStopDest preds : predictionsForRouteStop) {
-			preds.removeExpiredPredictions(getSystemTime());
-		}
+		List<IpcPredictionsForRouteStopDest> predictionsForStop;
 		
-		return predictionsForRouteStop;
+		// If routeShortName specified then get predictions for that route.
+		// If not then get predictions for all routes that serve the stop.
+		if (routeShortName != null) {
+			// Determine the predictions for all destinations for the route/stop
+			MapKey key = MapKey.create(routeShortName, stopId);
+			predictionsForStop = predictionsMap.get(key);
+
+			if (predictionsForStop == null) {
+				// No predictions so return empty array instead of null
+				predictionsForStop = 
+						new ArrayList<IpcPredictionsForRouteStopDest>(1);
+				
+				// Need to update the predictions map with the 
+				// predictionsForStop list for this route/stop so that
+				// when this list of predictions is updated it will be
+				// kept around.
+				predictionsMap.putIfAbsent(key, predictionsForStop);
+			}
+		} else {
+			// No route specified so get predictions for all routes for the stop
+			predictionsForStop =
+					new ArrayList<IpcPredictionsForRouteStopDest>();
+			Collection<Route> routes = 
+					Core.getInstance().getDbConfig().getRoutesForStop(stopId);
+			for (Route route : routes) {
+				MapKey key = MapKey.create(route.getShortName(), stopId);
+				 List<IpcPredictionsForRouteStopDest> predsForRoute = 
+						 predictionsMap.get(key);
+				 if (predsForRoute != null)
+					 predictionsForStop.addAll(predsForRoute);
+			}
+		}		
+
+		return predictionsForStop;
 	}
 	
 	/**

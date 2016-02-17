@@ -16,6 +16,15 @@
  */
 package org.transitime.core.dataCache;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -30,9 +39,6 @@ import org.transitime.db.structs.VehicleConfig;
 import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.utils.ConcurrentHashMapNullKeyOk;
 import org.transitime.utils.Time;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * For storing and retrieving vehicle information that can be used by clients.
@@ -51,7 +57,7 @@ public class VehicleDataCache {
     private static VehicleDataCache singleton = new VehicleDataCache();
 
     // Keyed by vehicle ID
-    private Map<String, IpcVehicleComplete> vehiclesMap =
+    private Map<String, IpcVehicleComplete> vehiclesMap = 
     		new ConcurrentHashMap<String, IpcVehicleComplete>();
 
     // Keyed by route_short_name. Key is null for vehicles that have not
@@ -172,8 +178,6 @@ public class VehicleDataCache {
 		// Make sure go initial data from database
 		readVehicleConfigFromDbIfNeedTo();
 		
-		// Synchronize on the map since separately testing for object
-		// and adding object
 		// If new vehicle...
 		String vehicleId = avlReport.getVehicleId();
 		VehicleConfig vehicleConfig = new VehicleConfig(vehicleId);

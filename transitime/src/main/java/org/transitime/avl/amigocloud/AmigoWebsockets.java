@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 
 import java.net.URI;
@@ -62,9 +63,11 @@ public class AmigoWebsockets {
 	 * @param datasetID
 	 * @param apiToken
 	 * @param listener
+	 * @throws JSONException
 	 */
 	public AmigoWebsockets(long userID, long projectID, long datasetID,
-			String apiToken, AmigoWebsocketListener listener) {
+			String apiToken, AmigoWebsocketListener listener)
+			throws JSONException {
 		this.userID = Long.toString(userID);
 		this.datasetID = Long.toString(datasetID);
 		this.listener = listener;
@@ -83,7 +86,8 @@ public class AmigoWebsockets {
 		// websocket_token will be null for this situation
 		if (result == null) {
 			logger.error(Markers.email(), 
-					"Could not determine websocket session");
+					"For agencyId={} could not determine websocket session",
+					AgencyConfig.getAgencyId());
 			return;
 		}
 		
@@ -95,6 +99,7 @@ public class AmigoWebsockets {
 					websocket_token);
 		} catch (JSONException e) {
 			logger.error("{}", e.getMessage(), e);
+			throw e;
 		}
 	}
 

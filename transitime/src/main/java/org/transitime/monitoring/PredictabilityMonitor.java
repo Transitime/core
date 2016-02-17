@@ -17,6 +17,10 @@
 
 package org.transitime.monitoring;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.BlocksInfo;
@@ -90,7 +94,6 @@ public class PredictabilityMonitor extends MonitorBase {
 	private double fractionBlocksPredictable(double threshold) {
 		// For creating message
 		List<Block> activeBlocksWithoutVehicle = new ArrayList<Block>();
-
 		// Determine number of currently active blocks.
 		// If there are no currently active blocks then don't need to be
 		// getting AVL data so return 0
@@ -138,14 +141,16 @@ public class PredictabilityMonitor extends MonitorBase {
 			StringBuilder sb = new StringBuilder();
 			sb.append(" Currently active blocks without vehicles: ");
 			for (Block block : activeBlocksWithoutVehicle) {
-				sb.append(block.getId())
-					.append(' ')
-					.append(block.getServiceId())
-					.append(", ");
+	      sb.append("block=")
+        .append(block.getId())
+        .append(", serviceId=")
+        .append(block.getServiceId())
+        .append("; ");
 			}
 			message += sb.toString();
 		}
 		
+
 		setMessage(message, fraction);
 		
 		// Return fraction of blocks that have a predictable vehicle

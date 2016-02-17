@@ -112,7 +112,7 @@ public class IpcAvl implements Serializable {
 		private long time;
 		private float latitude;
 		private float longitude;
-		private float speed;
+		private float speed; // in m/s
 		private float heading;
 		private String source;
 		private String assignmentId;
@@ -240,7 +240,7 @@ public class IpcAvl implements Serializable {
 	}
 
 	/**
-	 * @return Speed of vehicle, or NaN if speed not defined.
+	 * @return Speed of vehicle in m/s, or NaN if speed not defined.
 	 */
 	public float getSpeed() {
 		return speed;

@@ -18,6 +18,7 @@
 package org.transitime.custom.irishrail;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -100,6 +101,7 @@ public class GtfsRtAvlModule extends GtfsRealtimeModule {
 	 * @see org.transitime.avl.AvlModule#processData(java.io.InputStream)
 	 */
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
+	  return null; // we've override getAndProcessData so this need not do anything
 	}
 }

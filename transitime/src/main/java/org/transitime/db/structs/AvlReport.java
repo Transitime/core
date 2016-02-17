@@ -306,12 +306,15 @@ public class AvlReport implements Serializable {
 	 * @param vehicleId
 	 *            ID of the vehicle
 	 * @param time
-	 *            Epoch time in msec of GPS report (not when processed)
-	 * For when speed and heading are not valid. They are set to Float.NaN .
-	 * Since not yet being processed timeProcessed is set to null.
-
+	 *            Epoch time in msec of GPS report (not when processed) For when
+	 *            speed and heading are not valid. They are set to Float.NaN .
+	 *            Since not yet being processed timeProcessed is set to null.
+	 * 
 	 * @param vehicleId
 	 * @param time
+	 *            GPS time, in number of milliseconds since the standard base
+	 *            time known as "the epoch", namely January 1, 1970, 00:00:00
+	 *            GMT.
 	 * @param lat
 	 *            Latitude in decimal degrees
 	 * @param lon
@@ -382,9 +385,13 @@ public class AvlReport implements Serializable {
 	 * Since not yet being processed timeProcessed is set to null.
 	 * 
 	 * @param vehicleId
+	 *            identifier of vehicle
 	 * @param time
+	 *            epoch time in msecs since 1970
 	 * @param lat
+	 *            latitude in decimal degrees
 	 * @param lon
+	 *            longitude in decimal degrees
 	 * @param speed
 	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
 	 *            not available
@@ -565,19 +572,19 @@ public class AvlReport implements Serializable {
 		if (lat < AvlConfig.getMinAvlLatitude()) 
 			errorMsg += "Latitude of " + lat + " is less than the parameter " + 
 					AvlConfig.getMinAvlLatitudeParamName() + " which is set to " + 
-					AvlConfig.getMinAvlLatitude();
+					AvlConfig.getMinAvlLatitude() + " . ";
 		if (lat > AvlConfig.getMaxAvlLatitude()) 
 			errorMsg += "Latitude of " + lat + " is greater than the parameter " + 
 					AvlConfig.getMaxAvlLatitudeParamName() + " which is set to " + 
-					AvlConfig.getMaxAvlLatitude();
+					AvlConfig.getMaxAvlLatitude() + " . ";
 		if (lon < AvlConfig.getMinAvlLongitude()) 
 			errorMsg += "Longitude of " + lon + " is less than the parameter " + 
 					AvlConfig.getMinAvlLongitudeParamName() + " which is set to " + 
-					AvlConfig.getMinAvlLongitude();
+					AvlConfig.getMinAvlLongitude() + " . ";
 		if (lon > AvlConfig.getMaxAvlLongitude()) 
 			errorMsg += "Longitude of " + lon + " is greater than the parameter " + 
 					AvlConfig.getMaxAvlLongitudeParamName() + " which is set to " + 
-					AvlConfig.getMaxAvlLongitude();
+					AvlConfig.getMaxAvlLongitude() + " . ";
 				
 		// Make sure speed is OK
 		if (isSpeedValid()) {
@@ -705,7 +712,7 @@ public class AvlReport implements Serializable {
 	}
 	
 	/**
-	 * @return The GPS time of the AVL report
+	 * @return The GPS time of the AVL report in msec epoch time
 	 */
 	public long getTime() {
 		return time.getTime();

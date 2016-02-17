@@ -123,7 +123,7 @@ public class AwsGlacier {
 			}
 		} catch (AmazonClientException | FileNotFoundException e) {
 			logger.error("Exception occurred when uploading file \"{}\" to "
-					+ "AWS Glacier.", fileName, e);
+					+ "AWS Glacier. {}", fileName, e.getMessage(), e);
 			return null;
 		}
 	}

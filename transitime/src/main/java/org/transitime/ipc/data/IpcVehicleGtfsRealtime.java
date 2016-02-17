@@ -106,6 +106,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	 * @param pathHeading
 	 * @param routeId
 	 * @param routeShortName
+	 * @param routeName
 	 * @param tripId
 	 * @param tripStartDateStr
 	 * @param tripPatternId
@@ -127,14 +128,15 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	protected IpcVehicleGtfsRealtime(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
-			String tripId, String tripPatternId, String directionId,
-			String headsign, boolean predictable, boolean schedBasedPred,
-			TemporalDifference realTimeSchdAdh, boolean isDelayed,
-			boolean isLayover, long layoverDepartureTime, String nextStopId,
-			String nextStopName, String vehicleType, long tripStartEpochTime,
-			boolean atStop, String atOrNextStopId, Integer atOrNextGtfsStopSeq) {
+			String routeName, String tripId, String tripPatternId,
+			String directionId, String headsign, boolean predictable,
+			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
+			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
+			String nextStopId, String nextStopName, String vehicleType,
+			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
+			Integer atOrNextGtfsStopSeq) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
-				routeShortName, tripId, tripPatternId, directionId, headsign,
+				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType);
@@ -220,7 +222,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		 */
 		private Object readResolve() {
 			return new IpcVehicleGtfsRealtime(blockId, blockAssignmentMethod,
-					avl, heading, routeId, routeShortName, tripId,
+					avl, heading, routeId, routeShortName, routeName, tripId,
 					tripPatternId, directionId, headsign, predictable,
 					schedBasedPred, realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, nextStopName,

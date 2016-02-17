@@ -17,6 +17,7 @@
 package org.transitime.avl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -26,12 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.StringListConfigValue;
-import org.transitime.configData.CoreConfig;
 import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Location;
 import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
-import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReaderBase;
 import org.transitime.modules.Module;
 import org.transitime.utils.Time;
 
@@ -69,40 +68,6 @@ public class BatchGtfsRealtimeModule extends Module {
 			new StringListConfigValue("transitime.avl.gtfsRealtimeFeedURIs",
 					null,
 					"Semicolon separated list of URIs of the GTFS-realtime data to read in");
-
-	/********************* Helper Class ************************/
-
-	/**
-	 * For reading data from GTFS-realtime feed and processing one AVL report at
-	 * a time. By using this class don't have to read in all AVL reports into
-	 * memory.
-	 */
-	static class GtfsRtBatchReader extends GtfsRtVehiclePositionsReaderBase {
-		public GtfsRtBatchReader(String urlString) {
-			super(urlString);
-		}
-
-		/**
-		 * (non-Javadoc)
-		 * 
-		 * @see org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReaderBase#handleAvlReport(
-		 * org.transitime.db.structs.AvlReport)
-		 */
-		@Override
-		protected void handleAvlReport(AvlReport avlReport) {
-			if (!CoreConfig.onlyNeedArrivalDepartures()) {
-				logger.info("Processing from URI {} avlReport={}", 
-						getUrlString(), avlReport);
-			}
-			
-			// Update the Core SystemTime to use this AVL time
-			Core.getInstance().setSystemTime(avlReport.getTime());
-
-			// Actually process the AvlReport
-			AvlProcessor.getInstance().processAvlReport(avlReport);
-		}
-		
-	}
 	
 	/********************** Member Functions **************************/
 
@@ -121,8 +86,8 @@ public class BatchGtfsRealtimeModule extends Module {
 	 */
 	private void debugZhengzhou() {
 		for (String uri : getGtfsRealtimeURIs()) {
-			List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
-					.getAvlReports(uri);
+			Collection<AvlReport> avlReports =
+					GtfsRtVehiclePositionsReader.getAvlReports(uri);
 	
 			// Location of downtown Zhengzhou
 			Location downtown = new Location(34.75, 113.65);
@@ -176,8 +141,15 @@ public class BatchGtfsRealtimeModule extends Module {
 		
 		// Process the VehiclePosition reports from the GTFS-realtime files
 		for (String uri : getGtfsRealtimeURIs()) {
-			GtfsRtBatchReader reader = new GtfsRtBatchReader(uri);
-			reader.process();		
+			Collection<AvlReport> avlReports =
+					GtfsRtVehiclePositionsReader.getAvlReports(uri);
+			for (AvlReport avlReport : avlReports) {
+				// Update the Core SystemTime to use this AVL time
+				Core.getInstance().setSystemTime(avlReport.getTime());
+
+				// Actually process the AvlReport
+				AvlProcessor.getInstance().processAvlReport(avlReport);
+			}
 		}
 		
 		// Done processing the batch data. Wait a bit more to make sure system

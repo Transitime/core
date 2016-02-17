@@ -8,7 +8,7 @@
     String agencyId = request.getParameter("a");
 
 	String beginDate = request.getParameter("beginDate");
-    String endDate = request.getParameter("endDate");
+    String numDays = request.getParameter("numDays");
     String beginTime = request.getParameter("beginTime");
     String endTime = request.getParameter("endTime");
 
@@ -43,20 +43,18 @@
 	    return;	    
     }
 
-    if (agencyId == null || beginDate == null || endDate == null ) {
+    if (agencyId == null || beginDate == null || numDays == null ) {
 		response.getWriter().write("For predAccuracyIntervalsData.jsp must "
 			+ "specify parameters 'a' (agencyId), 'beginDate', "
-			+ "and 'endDate'."); 
+			+ "and 'numDays'."); 
 		return;
     }
 	
     try {
-		// Perform the query.
+		// Perform the query and convert results of query to a JSON string
 		PredAccuracyIntervalQuery query = new PredAccuracyIntervalQuery(agencyId);
-
-		// Convert results of query to a JSON string
 		String jsonString = query
-			.getJson(beginDate, endDate, beginTime, endTime,
+			.getJson(beginDate, numDays, beginTime, endTime,
 				routeIds, source, predictionType,
 				intervalsType, intervalPercentage1,
 				intervalPercentage2);
@@ -64,7 +62,7 @@
 		// If no data then return error status with an error message
 		if (jsonString == null || jsonString.isEmpty()) {
 		    String message = "No data for beginDate=" + beginDate 
-			    + " endDate=" + endDate 
+			    + " numDays=" + numDays 
 			    + " beginTime=" + beginTime
 			    + " endTime=" + endTime 
 			    + " routeIds=" + Arrays.asList(routeIds) 
@@ -77,9 +75,11 @@
 		}
 
 		// Respond with the JSON string
+		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.getWriter().write(jsonString);
     } catch (java.sql.SQLException e) {
 		// Respond with error message of exception
-		response.sendError(400, e.getMessage());
+    	response.setStatus(400);
+    	response.getWriter().write(e.getMessage());
     }
 %>

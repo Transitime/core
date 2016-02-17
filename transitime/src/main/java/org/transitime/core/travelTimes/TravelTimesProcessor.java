@@ -36,6 +36,7 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Match;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
+import org.transitime.monitoring.CloudwatchService;
 import org.transitime.statistics.Statistics;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
@@ -122,10 +123,20 @@ public class TravelTimesProcessor {
 	private static DoubleConfigValue minSegmentSpeedMps =
 			new DoubleConfigValue("transitime.traveltimes.minSegmentSpeedMps",
 					0.0,
-					"If a a travel time segment is determined to have a lower "
-					+ "speed than this value then the travel time will be "
-					+ "decreased to meet this limit. Purpose is to make sure "
-					+ "that don't get invalid travel times due to bad data.");
+					"If a travel time segment is determined to have a lower "
+					+ "speed than this value in meters/sec then the travel time"
+					+ " will be increased to meet this limit. Purpose is to "
+					+ "make sure that don't get invalid travel times due to "
+					+ "bad data.");
+	
+	private static DoubleConfigValue maxSegmentSpeedMps =
+			new DoubleConfigValue("transitime.traveltimes.maxSegmentSpeedMps",
+					27.0, // 27.0m/s = 60mph
+					"If a travel time segment is determined to have a higher "
+					+ "speed than this value in meters/second then the travel "
+					+ "time will be decreased to meet this limit. Purpose is "
+					+ "to make sure that don't get invalid travel times due to "
+					+ "bad data.");
 	
 	// The aggregate data processed from the historic db data.
 	// ProcessedDataMapKey combines tripId and stopPathIndex in 
@@ -147,6 +158,12 @@ public class TravelTimesProcessor {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(TravelTimesProcessor.class);
 
+	private CloudwatchService cloudwatchService;
+	
+	public TravelTimesProcessor() {
+    cloudwatchService = CloudwatchService.getInstance();
+	}
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -603,20 +620,32 @@ public class TravelTimesProcessor {
 			long vertexTime2 = vertexTimes.get(i+1);
 			int segmentTime = (int) (vertexTime2 - vertexTime1);
 			
-			// Make sure value isn't ridiculously low. For MBTA commuter
+			// Make sure segment speed isn't ridiculously low. For MBTA commuter
 			// rail for example vehicles don't travel below a certain speed.
 			// A low speed indicates a problem with the data.
 			double segmentSpeedMps = 
 					travelTimeSegmentLength * Time.MS_PER_SEC / segmentTime;
 			if (segmentSpeedMps < getMinSegmentSpeedMps()) {
 				logger.error("For segmentIdx={} segment speed of {}m/s is "
-						+ "below the limit of minSegmentSpeedMps={}m/s. Therefore "
-						+ "it is being reset to min segment speed. arrDep1={} "
-						+ "arrDep2={}",
+						+ "below the limit of minSegmentSpeedMps={}m/s. "
+						+ "Therefore it is being reset to min segment speed. "
+						+ "arrDep1={} arrDep2={}",
 						i, StringUtils.twoDigitFormat(segmentSpeedMps), 
-						minSegmentSpeedMps, arrDep1, arrDep2);
+						minSegmentSpeedMps.getValue(), arrDep1, arrDep2);
 				segmentTime = (int) (travelTimeSegmentLength * Time.MS_PER_SEC / 
 						getMinSegmentSpeedMps());
+			}
+			
+			// Make sure segment speed isn't ridiculously high.
+			if (segmentSpeedMps > maxSegmentSpeedMps.getValue()) {
+				logger.error("For segmentIdx={} segment speed of {}m/s is "
+						+ "above the limit of maxSegmentSpeedMps={}m/s. "
+						+ "Therefore it is being reset to max segment speed. "
+						+ "arrDep1={} arrDep2={}",
+						i, StringUtils.twoDigitFormat(segmentSpeedMps), 
+						maxSegmentSpeedMps.getValue(), arrDep1, arrDep2);
+				segmentTime = (int) (travelTimeSegmentLength * Time.MS_PER_SEC / 
+						maxSegmentSpeedMps.getValue());
 			}
 			
 			// Keep track of this segment time for this segment
@@ -857,7 +886,6 @@ public class TravelTimesProcessor {
 						stopIdFromTrip, trip);
 				continue;
 			}
-			
 			// Determine average travel times for this trip/stop path
 			List<List<Integer>> travelTimesForStopPathForTrip =
 					travelTimesMap.get(mapKey);
@@ -944,7 +972,9 @@ public class TravelTimesProcessor {
 		// Nice to log how long things took so can see progress and bottle necks
 		logger.info("Processing data (updates={} of {} keys with {} invalid) into a TravelTimeInfoMap took {} msec.", 
 				intervalTimer.elapsedMsec(), updated, setSize, invalid);
-
+		cloudwatchService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
+		cloudwatchService.saveMetric("TravelTimeUpdates", updated * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
+		cloudwatchService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
 	}

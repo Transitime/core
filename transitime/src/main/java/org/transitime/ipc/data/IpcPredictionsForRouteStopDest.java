@@ -31,6 +31,7 @@ import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.Geo;
+import org.transitime.utils.TrimmableArrayList;
 
 /**
  * Contains list of predictions for a route/stop/destination. 
@@ -49,6 +50,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	
 	private final String stopId;
 	private final String stopName;
+	private final Integer stopCode;
 	
 	private final String headsign;
 	private final String directionId;
@@ -56,21 +58,17 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	// For when providing predictions based on location
 	private final double distanceToStop;
 	
-	// The predictions associated with the route/stop
-	private final List<IpcPrediction> predictionsForRouteStop;
+	// The predictions associated with the route/stop/dest
+	private final List<IpcPrediction> predictionsForRouteStopDest;
 
-	// How big the prediction arrays for the route/stops can be. Really doesn't
-	// need to be all that large. Might generate predictions further into the
-	// future but when a user requests predictions they really just need 
-	// a few.
-	private final static int MAX_PREDICTIONS = 5;
-
+	private final static int INITIAL_CAPACITY = 5;
+	
 	private static final long serialVersionUID = 5875028328864504842L;
 
 	/********************** Member Functions **************************/
 
 	/**
-	 * Constructor for creating a PredictionsForRouteStopDest on the server
+	 * Constructor for creating a IpcPredictionsForRouteStopDest on the server
 	 * side.
 	 * 
 	 * @param trip
@@ -90,15 +88,18 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeOrder = 
 				trip != null ? trip.getRoute().getRouteOrder() : -1;
 		this.stopId = stopId;
-		this.stopName = 
-				Core.getInstance().getDbConfig().getStop(stopId).getName();
+		
+		Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+		this.stopName = stop != null ? stop.getName() : null;
+		this.stopCode = stop != null ? stop.getCode() : null;
+
 		this.headsign = 
 				trip != null ? trip.getHeadsign() : null;
 		this.directionId = 
 				trip != null ? trip.getDirectionId() : null;
 		this.distanceToStop = distanceToStop;
-		this.predictionsForRouteStop = 
-				new ArrayList<IpcPrediction>(MAX_PREDICTIONS);
+		this.predictionsForRouteStopDest = 
+				new TrimmableArrayList<IpcPrediction>(INITIAL_CAPACITY);
 	}
 	
 	/**
@@ -122,12 +123,14 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeName = route.getName();
 		this.routeOrder = route.getRouteOrder();
 		this.stopId = stopId;
-		this.stopName = Core.getInstance().getDbConfig().getStop(stopId)
-				.getName();
+		Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+		this.stopName = stop != null ? stop.getName() : null;
+		this.stopCode = stop != null ? stop.getCode() : null;
+
 		this.headsign = tripPattern.getHeadsign();
 		this.directionId = tripPattern.getDirectionId();
 		this.distanceToStop = distanceToStop;
-		this.predictionsForRouteStop = new ArrayList<IpcPrediction>(0);
+		this.predictionsForRouteStopDest = new TrimmableArrayList<IpcPrediction>(0);
 
 	}
 	
@@ -152,6 +155,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeOrder = toClone.routeOrder;
 		this.stopId = toClone.stopId;
 		this.stopName = toClone.stopName;
+		this.stopCode = toClone.stopCode;
 		this.headsign = toClone.headsign;
 		this.directionId = toClone.directionId;
 		this.distanceToStop = distanceToStop;
@@ -159,15 +163,15 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		// Copy all the prediction info. Do while synchronized since another
 		// thread could otherwise be changing the data.
 		synchronized (toClone) {	
-			int size = Math.min(toClone.predictionsForRouteStop.size(),
+			int size = Math.min(toClone.predictionsForRouteStopDest.size(),
 					maxPredictionsPerStop);
-			this.predictionsForRouteStop = new ArrayList<IpcPrediction>(size);			
+			this.predictionsForRouteStopDest = new ArrayList<IpcPrediction>(size);			
 			for (int i=0; i<size; ++i) {
-				IpcPrediction prediction = toClone.predictionsForRouteStop.get(i);
+				IpcPrediction prediction = toClone.predictionsForRouteStopDest.get(i);
 				// If prediction exceeds max time then done
 				if (prediction.getPredictionTime() > maxSystemTimeForPrediction)
 					break;
-				this.predictionsForRouteStop.add(i, prediction);
+				this.predictionsForRouteStopDest.add(i, prediction);
 			}
 		}
 	}
@@ -182,6 +186,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param routeOrder
 	 * @param stopId
 	 * @param stopName
+	 * @param stopCode
 	 * @param destination
 	 * @param directionId
 	 * @param distanceToStop
@@ -189,8 +194,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 */
 	private IpcPredictionsForRouteStopDest(String routeId,
 			String routeShortName, String routeName, int routeOrder,
-			String stopId, String stopName, String destination,
-			String directionId, double distanceToStop,
+			String stopId, String stopName, Integer stopCode,
+			String destination, String directionId, double distanceToStop,
 			List<IpcPrediction> predictions) {
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
@@ -198,10 +203,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeOrder = routeOrder;
 		this.stopId = stopId;
 		this.stopName = stopName;
+		this.stopCode = stopCode;
 		this.headsign = destination;
 		this.directionId = directionId;
 		this.distanceToStop = distanceToStop;
-		this.predictionsForRouteStop = predictions;
+		this.predictionsForRouteStopDest = predictions;
 	}
 	
 	/**
@@ -209,12 +215,12 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * current predictions.
 	 * 
 	 * @param routeShortName
-	 * @param stopId
 	 * @param directionId
+	 * @param stopId
 	 * @param distanceToStop
 	 */
-	public IpcPredictionsForRouteStopDest(String routeShortName, String stopId, 
-			String directionId, double distanceToStop) {
+	public IpcPredictionsForRouteStopDest(String routeShortName,
+			String directionId, String stopId, double distanceToStop) {
 		Route route = Core.getInstance().getDbConfig().getRouteByShortName(routeShortName);
 		if (route == null) {
 			throw new IllegalArgumentException("routeShortName="
@@ -232,10 +238,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeOrder = route.getRouteOrder();
 		this.stopId = stopId;
 		this.stopName = stop.getName();
+		this.stopCode = stop.getCode();
 		this.headsign = null;
 		this.directionId = directionId;
 		this.distanceToStop = distanceToStop;
-		this.predictionsForRouteStop = new ArrayList<IpcPrediction>();
+		this.predictionsForRouteStopDest = new TrimmableArrayList<IpcPrediction>(0);
 	}
 	
 	/**
@@ -249,12 +256,13 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private int routeOrder;
 		private String stopId;
 		private String stopName;
+		private Integer stopCode;
 		private String headsign;
 		private String directionId;
 		private double distanceToStop;
 		private List<IpcPrediction> predictionsForRouteStop;
 
-		private static final short currentSerializationVersion = 0;
+		private static final short currentSerializationVersion = 1;
 		private static final long serialVersionUID = -2312925771271829358L;
 
 		/*
@@ -267,10 +275,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			this.routeOrder = p.routeOrder;
 			this.stopId = p.stopId;
 			this.stopName = p.stopName;
+			this.stopCode = p.stopCode;
 			this.headsign = p.headsign;
 			this.directionId = p.directionId;
 			this.distanceToStop = p.distanceToStop;
-			this.predictionsForRouteStop = p.predictionsForRouteStop;
+			this.predictionsForRouteStop = p.predictionsForRouteStopDest;
 		}
 
 		/*
@@ -293,6 +302,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			stream.writeObject(directionId);
 			stream.writeDouble(distanceToStop);
 			stream.writeObject(predictionsForRouteStop);
+			// Can be null so use writeObject()
+			stream.writeObject(stopCode);
 		}
 		
 		/*
@@ -321,6 +332,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			directionId = (String) stream.readObject();
 			distanceToStop = stream.readDouble();
 			predictionsForRouteStop = (List<IpcPrediction>) stream.readObject();
+			
+			if (readVersion >=1) {
+				// Can be null so use readObject()
+				stopCode = (Integer) stream.readObject();
+			}
 		}
 
 		/*
@@ -331,8 +347,9 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcPredictionsForRouteStopDest(routeId, routeShortName,
-					routeName, routeOrder, stopId, stopName, headsign,
-					directionId, distanceToStop, predictionsForRouteStop);
+					routeName, routeOrder, stopId, stopName, stopCode,
+					headsign, directionId, distanceToStop,
+					predictionsForRouteStop);
 		}
 	} /* End of SerializationProxy inner class */
 	
@@ -406,7 +423,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param oldPrediction
 	 */
 	public synchronized void removePrediction(IpcPrediction oldPrediction) {
-		predictionsForRouteStop.remove(oldPrediction);
+		predictionsForRouteStopDest.remove(oldPrediction);
 	}
 
 	/**
@@ -419,7 +436,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 *            even when in playback mode.
 	 */
 	public synchronized void removeExpiredPredictions(long currentTime) {
-		Iterator<IpcPrediction> iterator = predictionsForRouteStop.iterator();
+		Iterator<IpcPrediction> iterator = predictionsForRouteStopDest.iterator();
 		while (iterator.hasNext()) {
 			IpcPrediction currentPrediction = iterator.next();
 
@@ -463,7 +480,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		
 		// Go through current predictions and get rid of existing ones for
 		// this vehicle or ones that have expired
-		Iterator<IpcPrediction> iterator = predictionsForRouteStop.iterator();
+		Iterator<IpcPrediction> iterator = predictionsForRouteStopDest.iterator();
 		while (iterator.hasNext()) {
 			IpcPrediction currentPrediction = iterator.next();
 
@@ -486,22 +503,13 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		// appropriate places
 		for (IpcPrediction newPredForRouteStop : newPredsForRouteStopDest) {
 			boolean insertedPrediction = false;
-			for (int i=0; i<predictionsForRouteStop.size(); ++i) {
+			for (int i=0; i<predictionsForRouteStopDest.size(); ++i) {
 				// If the new prediction is before the previous prediction
 				// in currentPredsForRouteStop then insert it.
 				if (newPredForRouteStop.getPredictionTime() < 
-						predictionsForRouteStop.get(i).getPredictionTime()) {
-					// Add the new prediction to the list. If the list already
-					// has the max number of predictions then first remove the
-					// last one so that the array doesn't need to grow to 
-					// accommodate the new one.
-					int arraySize = predictionsForRouteStop.size();
-					if (arraySize == MAX_PREDICTIONS)
-						predictionsForRouteStop.remove(arraySize-1);
-					
-					// Now that definitely have room, actually add the 
-					// prediction to the list
-					predictionsForRouteStop.add(i, newPredForRouteStop);
+						predictionsForRouteStopDest.get(i).getPredictionTime()) {			
+					// Actually add the prediction to the list
+					predictionsForRouteStopDest.add(i, newPredForRouteStop);
 					insertedPrediction = true;
 					
 					// Done with the inner for loop so break out of loop
@@ -511,21 +519,9 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			}
 			
 			// If didn't find that the prediction was before one of the 
-			// existing ones then insert it onto the end if there is still
-			// some space in the array.
+			// existing ones then insert it onto the end
 			if (!insertedPrediction) {
-				if (predictionsForRouteStop.size() < MAX_PREDICTIONS) {
-					predictionsForRouteStop.add(predictionsForRouteStop.size(), 
-							newPredForRouteStop);
-				} else {
-					// Didn't insert prediction because it was greater than
-					// the others but there is no space at end. This means that
-					// done with the new predictions. Don't need to look at 
-					// anymore because the remaining ones will have an even
-					// higher prediction time and therefore also don't need
-					// to be added.
-					break;
-				}
+				predictionsForRouteStopDest.add(newPredForRouteStop);
 			}
 		}
 	}
@@ -539,10 +535,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				+ ", routeOrder=" + routeOrder
 				+ ", stopId=" + stopId
 				+ ", stopName=" + stopName 
+				+ (stopCode != null ? (", stopCode=" + stopCode) : "")
 				+ ", headsign=" + headsign
 				+ ", directionId=" + directionId 
 				+ ", distanceToStop=" + Geo.distanceFormat(distanceToStop)
-				+ ", predictionsForRouteStop=" + predictionsForRouteStop 
+				+ ", predictionsForRouteStop=" + predictionsForRouteStopDest 
 				+ "]";
 	}
 
@@ -557,6 +554,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				+ ", routeOrder=" + routeOrder
 				+ ", stopId=" + stopId
 				+ ", stopName=" + stopName 
+				+ (stopCode != null ? (", stopCode=" + stopCode) : "")
 				+ ", headsign=" + headsign
 				+ ", directionId=" + directionId 
 				+ ", distanceToStop=" + Geo.distanceFormat(distanceToStop)
@@ -583,6 +581,10 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		return stopName;
 	}
 
+	public Integer getStopCode() {
+		return stopCode;
+	}
+	
 	public String getHeadsign() {
 		return headsign;
 	}
@@ -602,7 +604,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	}
 	
 	public List<IpcPrediction> getPredictionsForRouteStop() {
-		return predictionsForRouteStop;
+		return predictionsForRouteStopDest;
 	}
 
 	public int getRouteOrder() {

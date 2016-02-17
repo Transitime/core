@@ -23,7 +23,20 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.DbSetupConfig;
-import org.transitime.db.structs.*;
+import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.db.structs.Agency;
+import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Calendar;
+import org.transitime.db.structs.CalendarDate;
+import org.transitime.db.structs.FareAttribute;
+import org.transitime.db.structs.FareRule;
+import org.transitime.db.structs.Frequency;
+import org.transitime.db.structs.Route;
+import org.transitime.db.structs.Stop;
+import org.transitime.db.structs.Transfer;
+import org.transitime.db.structs.TravelTimesForTrip;
+import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.IntervalTimer;
 
 /**
@@ -184,8 +197,10 @@ public class DbWriter {
      *
 	 * @param session
 	 * @param configRev So can delete old data for the rev
+	 * @throws HibernateException when problem with database
 	 */
-	public void write(Session session, int configRev) {
+	public void write(Session session, int configRev)
+			throws HibernateException {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
 
@@ -201,7 +216,8 @@ public class DbWriter {
 			// Done writing data so commit it
 			tx.commit();
 		} catch (HibernateException e) {
-			logger.error("Error writing configuration data to db.", e);
+			logger.error("Error writing GTFS configuration data to db.", e);
+			throw e;
 		} 
 
 		// Let user know what is going on

@@ -16,8 +16,13 @@
  */
 package org.transitime.db.hibernate;
 
+import java.net.SocketTimeoutException;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +35,10 @@ import org.transitime.db.structs.Prediction;
 import org.transitime.db.structs.PredictionAccuracy;
 import org.transitime.db.structs.VehicleConfig;
 import org.transitime.db.structs.VehicleEvent;
+import org.transitime.logging.Markers;
+import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.Time;
+import org.transitime.utils.threading.NamedThreadFactory;
 
 /**
  * DataDbLogger is for storing to the db a stream of data objects. It is intended
@@ -66,7 +75,7 @@ import org.transitime.db.structs.VehicleEvent;
 public class DataDbLogger {
 	
 
-  // This is a singleton class that only returns a single object per projectId.
+  // This is a singleton class that only returns a single object per agencyId.
   private static Map<String, DataDbLogger> dataDbLoggerMap = 
       new HashMap<String, DataDbLogger>(1);
 
@@ -80,6 +89,38 @@ public class DataDbLogger {
   private DbQueue<VehicleEvent> vehicleEventQueue;
   private DbQueue<Object> genericQueue;
 	
+	private static final int QUEUE_CAPACITY = 100000;
+	
+	// The queue capacity levels when an error message should be e-mailed out. 
+	// The max value should be 1.0. 
+	private final double levels[] = { 0.5, 0.8, 1.00 };
+	
+	// The queue that objects to be stored are placed in
+	private BlockingQueue<Object> queue = new LinkedBlockingQueue<Object>(QUEUE_CAPACITY);
+	
+	// When running in playback mode where getting AVLReports from database
+	// instead of from an AVL feed, then debugging and don't want to store
+	// derived data into the database because that would interfere with the
+	// derived data that was already stored in real time. For that situation
+	// shouldStoreToDb should be set to false.
+	private final boolean shouldStoreToDb;
+	
+	// Used by add(). If queue filling up to 25% and shouldPauseToReduceQueue is
+	// true then will pause the calling thread for a few seconds so that more
+	// objects can be written out and not have the queue fill up.
+	private final boolean shouldPauseToReduceQueue;
+	
+	// For keeping track of index into levels, which level of capacity of
+	// queue being used. When level changes then an e-mail is sent out warning
+	// the operators.
+	private double indexOfLevelWhenMessageLogged = 0;
+	
+	// For keeping track of maximum capacity of queue that was used. 
+	// Used for logging when queue use is going down.
+	private double maxQueueLevel = 0.0;
+	
+	// So can access agencyId for logging messages
+	private String agencyId;
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(DataDbLogger.class);
@@ -88,9 +129,9 @@ public class DataDbLogger {
 
 	/**
 	 * Factory method. Returns the singleton db logger for the specified
-	 * projectId.
+	 * agencyId.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Id of database to be written to
 	 * @param shouldStoreToDb
 	 *            Specifies whether data should actually be written to db. If in
@@ -100,16 +141,16 @@ public class DataDbLogger {
 	 *            Specifies if should pause the thread calling add() if the
 	 *            queue is filling up. Useful for when in batch mode and dumping
 	 *            a whole bunch of data to the db really quickly.
-	 * @return The DataDbLogger for the specified projectId
+	 * @return The DataDbLogger for the specified agencyId
 	 */
-	public static DataDbLogger getDataDbLogger(String projectId,
+	public static DataDbLogger getDataDbLogger(String agencyId,
 			boolean shouldStoreToDb, boolean shouldPauseToReduceQueue) {
 		synchronized (dataDbLoggerMap) {
-			DataDbLogger logger = dataDbLoggerMap.get(projectId);
+			DataDbLogger logger = dataDbLoggerMap.get(agencyId);
 			if (logger == null) {
-				logger = new DataDbLogger(projectId, shouldStoreToDb,
+				logger = new DataDbLogger(agencyId, shouldStoreToDb,
 						shouldPauseToReduceQueue);
-				dataDbLoggerMap.put(projectId, logger);
+				dataDbLoggerMap.put(agencyId, logger);
 			}
 			return logger;
 		}
@@ -120,7 +161,7 @@ public class DataDbLogger {
 	 * used. Starts up separate thread that actually reads from queue and stores
 	 * the data.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Id of database to be written to
 	 * @param shouldStoreToDb
 	 *            Specifies whether data should actually be written to db. If in
@@ -131,18 +172,20 @@ public class DataDbLogger {
 	 *            queue is filling up. Useful for when in batch mode and dumping
 	 *            a whole bunch of data to the db really quickly.
 	 */
-	private DataDbLogger(String projectId, boolean shouldStoreToDb, 
+	private DataDbLogger(String agencyId, boolean shouldStoreToDb, 
 			boolean shouldPauseToReduceQueue) {
-		
-	  arrivalDepartureQueue = new DbQueue<ArrivalDeparture>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, ArrivalDeparture.class.getSimpleName());
-	  avlReportQueue = new DbQueue<AvlReport>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, AvlReport.class.getSimpleName());
-	  vehicleConfigQueue = new DbQueue<VehicleConfig>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleConfig.class.getSimpleName());
-		predictionQueue = new DbQueue<Prediction>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, Prediction.class.getSimpleName());
-	  matchQueue = new DbQueue<Match>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, Match.class.getSimpleName());
-	  predictionAccuracyQueue = new DbQueue<PredictionAccuracy>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionAccuracy.class.getSimpleName());
-	  monitoringEventQueue = new DbQueue<MonitoringEvent>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, MonitoringEvent.class.getSimpleName());
-	  vehicleEventQueue = new DbQueue<VehicleEvent>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleEvent.class.getSimpleName());
-	  genericQueue = new DbQueue<Object>(projectId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
+		this.agencyId = agencyId;
+		this.shouldStoreToDb = shouldStoreToDb;
+		this.shouldPauseToReduceQueue = shouldPauseToReduceQueue;
+	  arrivalDepartureQueue = new DbQueue<ArrivalDeparture>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, ArrivalDeparture.class.getSimpleName());
+	  avlReportQueue = new DbQueue<AvlReport>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, AvlReport.class.getSimpleName());
+	  vehicleConfigQueue = new DbQueue<VehicleConfig>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleConfig.class.getSimpleName());
+		predictionQueue = new DbQueue<Prediction>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Prediction.class.getSimpleName());
+	  matchQueue = new DbQueue<Match>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Match.class.getSimpleName());
+	  predictionAccuracyQueue = new DbQueue<PredictionAccuracy>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionAccuracy.class.getSimpleName());
+	  monitoringEventQueue = new DbQueue<MonitoringEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, MonitoringEvent.class.getSimpleName());
+	  vehicleEventQueue = new DbQueue<VehicleEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleEvent.class.getSimpleName());
+	  genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
 		
 	}
 	
@@ -173,6 +216,27 @@ public class DataDbLogger {
 
 	
 	/**
+	 * Determines set of class names in the queue. Useful for logging
+	 * error message when queue getting filled up so know what kind of
+	 * objects are backing the system up.
+	 * 
+	 * @return Map of class names and their count of the objects in the queue
+	 */
+	private Map<String, Integer> getClassNamesInQueue() {
+		Map<String, Integer> classNamesMap = new HashMap<String, Integer>();
+		for (Object o : queue) {
+			String className = o.getClass().getName();
+			Integer count = classNamesMap.get(className);
+			if (count == null) {
+				count = new Integer(0);
+				classNamesMap.put(className, count);
+			}
+			++count;
+		}
+		return classNamesMap;
+	}
+	
+	/**
 	 * Adds an object to be saved in the database to the queue. If queue is
 	 * getting filled up then an e-mail will be sent out indicating there is a
 	 * problem. The queue levels at which an e-mail is sent out is specified by
@@ -184,6 +248,7 @@ public class DataDbLogger {
 	 *         queue was full.
 	 */
 	public boolean add(Object o) {	
+	  // this is now a catch-all -- most objects have an argument overriden method
 	  return genericQueue.add(o);
 	}
 	

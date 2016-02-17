@@ -16,6 +16,15 @@
  */
 package org.transitime.gtfs;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -25,13 +34,25 @@ import org.transitime.applications.Core;
 import org.transitime.config.StringConfigValue;
 import org.transitime.core.ServiceUtils;
 import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.db.structs.*;
+import org.transitime.db.structs.ActiveRevisions;
+import org.transitime.db.structs.Agency;
+import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Calendar;
+import org.transitime.db.structs.CalendarDate;
+import org.transitime.db.structs.FareAttribute;
+import org.transitime.db.structs.FareRule;
+import org.transitime.db.structs.Frequency;
+import org.transitime.db.structs.StopPath;
+import org.transitime.db.structs.Route;
+import org.transitime.db.structs.Stop;
+import org.transitime.db.structs.Transfer;
+import org.transitime.db.structs.TravelTimesForStopPath;
+import org.transitime.db.structs.TravelTimesForTrip;
+import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.TripPattern;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
 import org.transitime.utils.Time;
-
-import java.util.*;
 
 /**
  * Reads all the configuration data from the database. The data is based on GTFS
@@ -63,20 +84,25 @@ public class DbConfig {
 	// So can access blocks by service ID and route ID easily
 	private Map<RouteServiceMapKey, List<Block>> blocksByRouteMap = null;
 
+	// Ordered list of routes
 	private List<Route> routes;
 	// Keyed on routeId
 	private Map<String, Route> routesByRouteIdMap;
 	// Keyed on routeShortName
 	private Map<String, Route> routesByRouteShortNameMap;
+	// Keyed on stopiD
+	private Map<String, Collection<Route>> routesListByStopIdMap;
+	
 	// Keyed on routeId
 	private Map<String, List<TripPattern>> tripPatternsByRouteMap;
 	// For when reading in all trips from db. Keyed on tripId
 	private Map<String, Trip> tripsMap;
 	// For trips that have been read in individually. Keyed on tripId.
 	private Map<String, Trip> individualTripsMap = new HashMap<String, Trip>();
-	// For trips that have been read in individually. Keyed on trip short name
-	private Map<String, Trip> individualTripsByShortNameMap =
-			new HashMap<String, Trip>();
+	// For trips that have been read in individually. Keyed on trip short name.
+	// Contains
+	private Map<String, List<Trip>> individualTripsByShortNameMap =
+			new HashMap<String, List<Trip>>();
 
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
@@ -88,10 +114,11 @@ public class DbConfig {
 	private List<Frequency> frequencies;
 	private List<Transfer> transfers;
 
-	// Seems that stops not really needed because already in stopPaths. Unless
-	// trying to determine nearest stops.
+	// Keyed by stop_id.
 	private Map<String, Stop> stopsMap;
-
+	// Keyed by stop_code
+	private Map<Integer, Stop> stopsByStopCode;
+	
 	// Remember the session. This is a bit odd because usually
 	// close sessions but want to keep it open so can do lazy loading
 	// and so that can read in TripPatterns later using the same session.
@@ -146,6 +173,9 @@ public class DbConfig {
 	/**
 	 * Initiates the reading of the configuration data from the database. Calls
 	 * actuallyReadData() which does all the work.
+	 * <p>
+	 * NOTE: exits system if config data could not be read in. This is done so
+	 * that action will be taken to fix this issue.
 	 * 
 	 * @param configRev
 	 */
@@ -165,7 +195,10 @@ public class DbConfig {
 			actuallyReadData(configRev);
 		} catch (HibernateException e) {
 			logger.error("Error reading configuration data from db for "
-					+ "configRev={}.", configRev);
+					+ "configRev={}. NOTE: Exiting because could not read in "
+					+ "data!!!!", configRev, e);
+			
+			System.exit(-1);
 		} finally {
 			// Usually would always make sure session gets closed. But
 			// don't close session for now so can use lazy initialization
@@ -302,7 +335,7 @@ public class DbConfig {
 	 * 
 	 * @param stopsList
 	 *            To be converted
-	 * @return The map
+	 * @return The map, keyed on stop_id
 	 */
 	private static Map<String, Stop> putStopsIntoMap(List<Stop> stopsList) {
 		Map<String, Stop> map = new HashMap<String, Stop>();
@@ -312,6 +345,69 @@ public class DbConfig {
 		return map;
 	}
 
+	/**
+	 * Converts the stops list into a map keyed by stop code.
+	 * 
+	 * @param stopsList
+	 *            To be converted
+	 * @return The map, keyed on stop_code
+	 */
+	private static Map<Integer, Stop> putStopsIntoMapByStopCode(List<Stop> stopsList) {
+		Map<Integer, Stop> map = new HashMap<Integer, Stop>();
+		for (Stop stop : stopsList) {
+			Integer stopCode = stop.getCode();
+			if (stopCode != null)
+				map.put(stopCode, stop);
+		}
+		return map;
+	}
+
+	/**
+	 * Returns the stop IDs for the specified route. Stop IDs can be included
+	 * multiple times.
+	 * 
+	 * @param routeId
+	 * @return collection of stop IDs for route
+	 */
+	private Collection<String> getStopIdsForRoute(String routeId) {
+		Collection<String> stopIds = new ArrayList<String>(100);
+		
+		List<TripPattern> tripPatternsForRoute = tripPatternsByRouteMap.get(routeId);
+		for (TripPattern tripPattern : tripPatternsForRoute) {
+			for (String stopId : tripPattern.getStopIds()) {
+				stopIds.add(stopId);
+			}
+		}
+		
+		return stopIds;
+	}
+	
+	/**
+	 * Returns map, keyed on stopId, or collection of routes. Allows one to
+	 * determine all routes associated with a stop.
+	 * 
+	 * @param routes
+	 * @return map, keyed on stopId, or collection of routes
+	 */
+	private Map<String, Collection<Route>> putRoutesIntoMapByStopId(
+			List<Route> routes) {
+		Map<String, Collection<Route>> map =
+				new HashMap<String, Collection<Route>>();
+		for (Route route : routes) {
+			for (String stopId : getStopIdsForRoute(route.getId())) {
+				Collection<Route> routesForStop = map.get(stopId);
+				if (routesForStop == null) {
+					routesForStop = new HashSet<Route>();
+					map.put(stopId, routesForStop);
+				}
+				routesForStop.add(route);
+			}
+		}
+
+		// Return the created map
+		return map;
+	}
+	
 	/**
 	 * Converts trip patterns into map keyed on route ID
 	 * 
@@ -336,6 +432,30 @@ public class DbConfig {
 	}
 
 	/**
+	 * Reads in trips patterns from db and puts them into a map
+	 * 
+	 * @return trip patterns map, keyed by route ID
+	 */
+	private Map<String, List<TripPattern>> putTripPatternsInfoRouteMap() {
+			IntervalTimer timer = new IntervalTimer();
+			logger.debug("About to load trip patterns for all routes...");
+
+			// Use the global session so that don't need to read in any
+			// trip patterns that have already been read in as part of
+			// reading in block assignments. This makes reading of the
+			// trip pattern data much faster.
+			List<TripPattern> tripPatterns =
+					TripPattern.getTripPatterns(globalSession, configRev);
+			Map<String, List<TripPattern>> theTripPatternsByRouteMap = 
+					putTripPatternsIntoMap(tripPatterns);
+
+			logger.debug("Reading trip patterns for all routes took {} msec",
+					timer.elapsedMsec());
+			
+			return theTripPatternsByRouteMap;
+	}
+	
+	/**
 	 * Returns the list of trip patterns associated with the specified route.
 	 * Reads the trip patterns from the database and stores them in cache so
 	 * that subsequent calls get them directly from the cache. The first time
@@ -348,25 +468,9 @@ public class DbConfig {
 	public List<TripPattern> getTripPatternsForRoute(String routeId) {
 		// If haven't read in the trip pattern data yet, do so now and cache it
 		if (tripPatternsByRouteMap == null) {
-			IntervalTimer timer = new IntervalTimer();
-
-			// Need to sync such that block data, which includes trip
-			// pattern data, is only read serially (not read simultaneously
-			// by multiple threads). Otherwise get a "force initialize loading
-			// collection" error.
-			synchronized (Block.getLazyLoadingSyncObject()) {
-				logger.debug("About to load trip patterns...");
-
-				// Use the global session so that don't need to read in any
-				// trip patterns that have already been read in as part of
-				// reading in block assignments. This makes reading of the
-				// trip pattern data much faster.
-				List<TripPattern> tripPatterns =
-						TripPattern.getTripPatterns(globalSession, configRev);
-				tripPatternsByRouteMap = putTripPatternsIntoMap(tripPatterns);
-			}
-			logger.debug("Reading trip patterns took {} msec",
-					timer.elapsedMsec());
+			logger.error("tripPatternsByRouteMap not set when "
+					+ "getTripPatternsForRoute() called. Exiting!");
+			System.exit(-1);
 		}
 
 		// Return cached trip pattern data
@@ -406,28 +510,72 @@ public class DbConfig {
 	/**
 	 * For more quickly getting a trip. If trip not already read in yet it only
 	 * reads in the specific trip from the db, not all trips like getTrips().
+	 * If trip ID not found then sees if can match to a trip short name.
 	 * 
-	 * @param tripId
+	 * @param tripIdOrShortName
 	 * @return The trip, or null if no such trip
 	 */
-	public Trip getTrip(String tripId) {
-		Trip trip = individualTripsMap.get(tripId);
+	public Trip getTrip(String tripIdOrShortName) {
+		Trip trip = individualTripsMap.get(tripIdOrShortName);
 
 		// If trip not read in yet, do so now
 		if (trip == null) {
+			logger.debug("Trip for tripIdOrShortName={} not read from db yet "
+					+ "so reading it now.", tripIdOrShortName);
+			
 			// Need to sync such that block data, which includes trip
 			// pattern data, is only read serially (not read simultaneously
 			// by multiple threads). Otherwise get a "force initialize loading
 			// collection" error.
 			synchronized (Block.getLazyLoadingSyncObject()) {
-				trip = Trip.getTrip(globalSession, configRev, tripId);
+				trip = Trip.getTrip(globalSession, configRev, tripIdOrShortName);
 			}
-			individualTripsMap.put(tripId, trip);
+			if (trip != null)
+				individualTripsMap.put(tripIdOrShortName, trip);
 		}
 
+		// If couldn't get trip by tripId then see if using the trip short name.
+		if (trip == null) {
+			logger.debug("Could not find tripId={} so seeing if there is a "
+					+ "tripShortName with that ID.", tripIdOrShortName);
+			trip = getTripUsingTripShortName(tripIdOrShortName);
+			
+			// If the trip successfully read in it also needs to be added to 
+			// individualTripsMap so that it doesn't need to be read in next
+			// time getTrip() is called.
+			if (trip != null) {
+				logger.debug("Read tripIdOrShortName={} from db", tripIdOrShortName);
+				individualTripsMap.put(trip.getId(), trip);
+			}				
+		}
+		
 		return trip;
 	}
 
+	/**
+	 * Looks through the trips passed in and returns the one that has
+	 * a service ID that is currently valid.
+	 * 
+	 * @param trips
+	 * @return trip whose service ID is currently valid
+	 */
+	private static Trip getTripForCurrentService(List<Trip> trips) {
+		Date now = Core.getInstance().getSystemDate();
+		Collection<String> currentServiceIds = 
+				Core.getInstance().getServiceUtils().getServiceIds(now);
+		for (Trip trip : trips) {
+			for (String serviceId : currentServiceIds) {
+				if (trip.getServiceId().equals(serviceId)) {
+					// Found a service ID match so return this trip 
+					return trip;
+				}
+			}
+		}
+		
+		// No such trip is currently active
+		return null;
+	}
+	
 	/**
 	 * For more quickly getting a trip. If trip not already read in yet it only
 	 * reads in the specific trip from the db, not all trips like getTrips().
@@ -436,23 +584,40 @@ public class DbConfig {
 	 * @return
 	 */
 	public Trip getTripUsingTripShortName(String tripShortName) {
-		Trip trip = individualTripsByShortNameMap.get(tripShortName);
-
-		// If trip not read in yet, do so now
-		if (trip == null) {
-			// Need to sync such that block data, which includes trip
-			// pattern data, is only read serially (not read simultaneously
-			// by multiple threads). Otherwise get a "force initialize loading
-			// collection" error.
-			synchronized (Block.getLazyLoadingSyncObject()) {
-				trip =
-						Trip.getTripByShortName(globalSession, configRev,
-								tripShortName);
+		// Find trip with the tripShortName with a currently active service ID
+		// from the map. If found, return it.
+		List<Trip> trips = individualTripsByShortNameMap.get(tripShortName);
+		if (trips != null) {
+			Trip trip = getTripForCurrentService(trips);
+			if (trip != null) {
+				logger.debug("Read in trip using tripShortName={}", tripShortName);
+				
+				return trip;
+			} else {
+				// Trips for the tripShortName already read in but none valid
+				// for the current service IDs so return null
+				logger.debug("When reading tripShortName={} found trips "
+						+ "but not for current service.", tripShortName);
+				return null;
 			}
-			individualTripsByShortNameMap.put(tripShortName, trip);
 		}
 
-		return trip;
+		logger.info("FIXME tripShortName={} not yet read from db so reading it in now", tripShortName);
+		
+		// Trips for the short name not read in yet, do so now
+		// Need to sync such that block data, which includes trip
+		// pattern data, is only read serially (not read simultaneously
+		// by multiple threads). Otherwise get a "force initialize loading
+		// collection" error.
+		synchronized (Block.getLazyLoadingSyncObject()) {
+			trips =	Trip.getTripByShortName(globalSession, configRev,
+							tripShortName);
+		}
+
+		// Add the newly read trips to the map
+		individualTripsByShortNameMap.put(tripShortName, trips);
+
+		return getTripForCurrentService(trips);
 	}
 
 	/**
@@ -542,9 +707,13 @@ public class DbConfig {
 		routesByRouteShortNameMap = putRoutesIntoMapByRouteShortName(routes);
 		logger.debug("Reading routes took {} msec", timer.elapsedMsec());
 
+		tripPatternsByRouteMap = putTripPatternsInfoRouteMap();
+		
 		timer = new IntervalTimer();
 		List<Stop> stopsList = Stop.getStops(globalSession, configRev);
 		stopsMap = putStopsIntoMap(stopsList);
+		stopsByStopCode = putStopsIntoMapByStopCode(stopsList);
+		routesListByStopIdMap = putRoutesIntoMapByStopId(routes);
 		logger.debug("Reading stops took {} msec", timer.elapsedMsec());
 
 		timer = new IntervalTimer();
@@ -719,12 +888,32 @@ public class DbConfig {
 	 * Returns the Stop with the specified stopId.
 	 * 
 	 * @param stopId
-	 * @return
+	 * @return The stop, or null if no such stop
 	 */
 	public Stop getStop(String stopId) {
 		return stopsMap.get(stopId);
 	}
 
+	/**
+	 * Returns the Stop with the specified stopCode.
+	 * 
+	 * @param stopCode
+	 * @return The stop, or null if no such stop
+	 */
+	public Stop getStop(Integer stopCode) {
+		return stopsByStopCode.get(stopCode);
+	}
+	
+	/**
+	 * Returns collection of routes that use the specified stop.
+	 * 
+	 * @param stopId
+	 * @return collection of routes for the stop
+	 */
+	public Collection<Route> getRoutesForStop(String stopId) {
+		return routesListByStopIdMap.get(stopId);
+	}
+	
 	/**
 	 * Returns list of all calendars
 	 * @return calendars
@@ -768,6 +957,20 @@ public class DbConfig {
 	}
 	
 	/**
+	 * Returns CalendarDate for the current day. This method is pretty quick
+	 * since it looks through a hashmap, instead of doing a linear search
+	 * through a possibly very large number of dates.
+	 * 
+	 * @param epochTime
+	 *            the time that want calendar dates for
+	 * @return CalendarDate for current day if there is one, otherwise null.
+	 */
+	public List<CalendarDate> getCalendarDates(Date epochTime) {
+		long startOfDay = Time.getStartOfDay(epochTime);
+		return calendarDatesMap.get(startOfDay);
+	}
+
+	/**
 	 * Returns list of all service IDs
 	 * @return service IDs
 	 */
@@ -796,10 +999,10 @@ public class DbConfig {
 	 * getting timezone and such want to be able to easily access the main
 	 * agency, hence this method.
 	 * 
-	 * @return
+	 * @return The first agency, or null if no agencies configured
 	 */
-	public Agency getFirstAgency() {
-		return agencies.get(0);
+	public Agency getFirstAgency() {		
+		return agencies.size() > 0 ? agencies.get(0) : null;
 	}
 
 	public List<Agency> getAgencies() {

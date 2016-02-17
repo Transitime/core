@@ -17,7 +17,7 @@
     function execute() {
       var selectedRouteId = $("#route").val();
       var format = $('input:radio[name=format]:checked').val();
-  	  var url = apiUrlPrefix + "/command/route?r=" + selectedRouteId + "&format=" + format;
+  	  var url = apiUrlPrefix + "/command/routes?format=" + format;
 
    	  // Actually do the API call
    	  location.href = url;
@@ -30,13 +30,10 @@
 <%@include file="/template/header.jsp" %>
 
 <div id="title">
-   Select Parameters for Route API
+   Select Parameters for routes API
 </div>
    
 <div id="mainDiv">   
-   <%-- Create route selector --%>
-   <jsp:include page="../params/routeSingle.jsp" />
-   
    <%-- Create json/xml format radio buttons --%>
    <jsp:include page="../params/jsonXmlFormat.jsp" />
    

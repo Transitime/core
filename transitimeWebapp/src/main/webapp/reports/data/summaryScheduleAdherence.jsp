@@ -1,4 +1,6 @@
 <%@ page import="org.transitime.reports.ScheduleAdherenceController" %>
+<%@ page import="org.transitime.utils.Time" %>
+<%@ page import="java.sql.Timestamp" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="java.util.Arrays" %>
@@ -40,7 +42,9 @@ List<String> routeIds = routeIdList == null ? null : Arrays.asList(routeIdList.s
 
 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 Date startDate = dateFormat.parse(startDateStr);
+if (endDateStr == null) endDateStr = startDateStr;
 Date endDate = dateFormat.parse(endDateStr);
+endDate = new Timestamp(endDate.getTime() + Time.MS_PER_DAY);
 
 List<Integer> results = ScheduleAdherenceController.routeScheduleAdherenceSummary(startDate,
 		endDate, startTime, endTime, earlyLimit, lateLimit, routeIds);

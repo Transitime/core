@@ -17,8 +17,6 @@
 package org.transitime.db.hibernate;
 
 import java.io.ByteArrayOutputStream;
-
-
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -117,7 +115,7 @@ public class HibernateUtils {
 					DbSetupConfig.getDbHost() +
 					"/" + dbName;
 			
-			// If socket timeout specified then addd that to the URL
+			// If socket timeout specified then add that to the URL
 			Integer timeout = DbSetupConfig.getSocketTimeoutSec();
 			if (timeout != null && timeout != 0) {
 				// If mysql then timeout specified in msec instead of secs
@@ -142,7 +140,7 @@ public class HibernateUtils {
 		
 		// Log info, but don't log password. This can just be debug logging
 		// even though it is important because the C3P0 connector logs the info.
-		logger.debug("For Hibernate factory project dbName={} " +
+		logger.info("For Hibernate factory project dbName={} " +
 				"using url={} username={}, and configured password",
 				dbName, dbUrl, dbUserName);
 		
@@ -162,7 +160,7 @@ public class HibernateUtils {
 	 * 
 	 * @param agencyId
 	 *            Used as the database name if the property
-	 *            transitime.core.dbName is not set
+	 *            transitime.db.dbName is not set
 	 * @return
 	 */
 	public static SessionFactory getSessionFactory(String agencyId) 
@@ -225,9 +223,8 @@ public class HibernateUtils {
 	 *         gets limited number of open sessions.
 	 * @throws HibernateException
 	 */
-	public static Session getSession(String agencyId) 
-		throws HibernateException {
-		SessionFactory sessionFactory = 
+	public static Session getSession(String agencyId) throws HibernateException {
+		SessionFactory sessionFactory =
 				HibernateUtils.getSessionFactory(agencyId);
 		Session session = sessionFactory.openSession();
 		return session;
@@ -276,7 +273,7 @@ public class HibernateUtils {
 	    return byteOutputStream.toByteArray().length;
 	}
 	
-		/**
+	/**
 	 * Recursively finds the root cause of the throwable. Useful for complicated
 	 * inconsistent exceptions like what one gets with JDBC drivers.
 	 * 

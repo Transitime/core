@@ -101,10 +101,10 @@ public class PredictionsServer
 	 * @see org.transitime.ipc.interfaces.PredictionsInterface#get(java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public List<IpcPredictionsForRouteStopDest> get(String routeIdOrShortName, String stopId,
-			int predictionsPerStop) throws RemoteException {
-		return predictionDataCache.getPredictions(routeIdOrShortName, stopId, null,
-				predictionsPerStop);
+	public List<IpcPredictionsForRouteStopDest> get(String routeIdOrShortName,
+			String stopId, int predictionsPerStop) throws RemoteException {
+		return predictionDataCache.getPredictions(routeIdOrShortName, null,
+				stopId, predictionsPerStop);
 	}
 
 	/* (non-Javadoc)
@@ -132,7 +132,7 @@ public class PredictionsServer
 
 	// If stops are relatively close then should order routes based on route
 	// order instead of distance.
-	private static double DISTANCE_AT_WHICH_ROUTES_GROUPED = 150.0;
+	private static double DISTANCE_AT_WHICH_ROUTES_GROUPED = 80.0;
 	
 	/**
 	 * For sorting resulting predictions so that they are by how close
@@ -191,8 +191,8 @@ public class PredictionsServer
 			// Get the predictions for the stop
 			List<IpcPredictionsForRouteStopDest> predictionsForStop =
 					predictionDataCache.getPredictions(stopInfo.routeShortName,
-							stopInfo.stopId,
 							stopInfo.tripPattern.getDirectionId(),
+							stopInfo.stopId,
 							predictionsPerStop, stopInfo.distanceToStop);
 			
 			// Add info from this stop to the results

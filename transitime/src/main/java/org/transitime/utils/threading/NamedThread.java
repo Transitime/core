@@ -16,11 +16,13 @@
  */
 package org.transitime.utils.threading;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 
 /**
@@ -64,7 +66,8 @@ public class NamedThread extends Thread {
 				new Thread.UncaughtExceptionHandler() {					
 					@Override
 					public void uncaughtException(Thread t, Throwable e) {
-						logger.error("Uncaught exception in thread " + t.getName(), e);						
+						logger.error("Uncaught exception in thread {}", 
+								t.getName(), e);						
 					}
 				});
 	}
@@ -100,15 +103,32 @@ public class NamedThread extends Thread {
 			// an OutOfMemoryError and need to exit even if get another
 			// OutOfMemoryError when logging.
 			try {
+				// Output info to stderr since this is an exception situation.
+				// This will log it to the nohup file used for running core app.
+				System.err.println("Throwable \"" + t.getMessage() 
+						+ "\" occurred at " + new Date());
 				t.printStackTrace();
+				
+				// Log since this is a serious problem
 				if (t instanceof OutOfMemoryError) {
-					logger.error(Markers.email(),
-							"OutOfMemoryError occurred in thread {} so "
-							+ "terminating application", getName(), t);
+					// Would like to send out an e-mail as part of logging but
+					// found that when running out of memory that sending out an
+					// e-mail can hang the system for a while. This is a bad 
+					// thing since OutOfMemoryError is really serious and want
+					// to terminate the program right away so that it can be
+					// automatically restarted. This is unfortunate since
+					// really want to notify folks that there is an out of
+					// memory problem but notifying via email is not as 
+					// important as quickly getting the system restarted.
+					logger.error("OutOfMemoryError occurred in thread {} so "
+							+ "terminating application for agencyId={}", 
+							getName(), AgencyConfig.getAgencyId(), t);
 				} else {
+					// Log and send out e-mail since this is an unexpected problem
 					logger.error(Markers.email(),
 							"Unexpected Throwable occurred which will cause "
-							+ "thread {} to terminate", getName(), t);
+							+ "thread {} to terminate for agencyId={}", 
+							getName(), AgencyConfig.getAgencyId(), t);
 				}
 			} catch (Throwable t2) {
 			}

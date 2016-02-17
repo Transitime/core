@@ -37,7 +37,7 @@ import org.transitime.ipc.data.IpcActiveBlock;
 @XmlRootElement(name="blocks")
 public class ApiActiveBlocks {
 
-    @XmlElement(name="block")
+    @XmlElement(name="blocks")
     private List<ApiActiveBlock> activeBlocks;
 
 	/********************** Member Functions **************************/

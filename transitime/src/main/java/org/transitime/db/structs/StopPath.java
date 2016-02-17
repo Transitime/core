@@ -101,13 +101,9 @@ public class StopPath implements Serializable, Lifecycle {
 	@Column
 	private final Integer breakTime;
 	
-	// NOTE: since trying to use serialization need to use ArrayList<> instead
-	// of List<> since List<> doesn't implement Serializable. Serialization 
-	// makes the data not readable in the db using regular SQL but it means
-	// that don't need separate table and the data can be read and written
-	// much faster.
+  // sacrifice performance for reportability -- use a child table instead of java serialization 
 	@ElementCollection
-    @OrderColumn
+  @OrderColumn
 	private List<Location> locations;
 
 	// Having the path length readily accessible via the database is handy

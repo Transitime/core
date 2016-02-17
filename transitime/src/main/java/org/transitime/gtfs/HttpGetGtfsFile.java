@@ -24,7 +24,7 @@ import org.transitime.utils.Time;
 /**
  * For grabbing a GTFS zip file over the web using http.
  * The getFile() method copies the file to the directory
- * specified by getDirectoryForStoringFile().
+ * specified by the directory parameter or getDirectoryForStoringFile().
  * 
  * @author SkiBu Smith
  *
@@ -34,31 +34,48 @@ public class HttpGetGtfsFile extends HttpGetFile {
 
 	/********************** Member Functions **************************/
 
-	public HttpGetGtfsFile(String projectId, String urlStr) {
-		super(urlStr, getDirectoryForStoringFile(projectId));
+	/**
+	 * @param projectId
+	 *            For determining directory where to store file
+	 * @param urlStr
+	 *            URL of where to get file
+	 * @param directory where
+	 *            to put the retrieved file. If null then
+	 *            getDirectoryForStoringFile() is used as the directory.
+	 */
+	 public HttpGetGtfsFile(String projectId, String urlStr, String directory) {
+		super(urlStr, directory != null ? directory
+				: getDirectoryForStoringFile(projectId));
 	}
 	
 	/**
 	 * Returns directory name of where to store the file.
-	 * The directory will be /GTFS/projectId/MM-dd-yyyy/
+	 * The directory will be /USER-HOME/gtfs/projectId/MM-dd-yyyy/
 	 * 
 	 * @return the directory name for storing the results
 	 */
 	private static String getDirectoryForStoringFile(String projectId) {		
-		return "/GTFS/" + projectId + "/" + 
+		return System.getProperty("user.home") + "/gtfs/" + projectId + "/" + 
 				Time.dateStr(System.currentTimeMillis()) + "/";
 	}
 	
 	/**
-	 * Main entry point to class. Reads in specified file from URL and stores 
-	 * it using same file name into directory specified by getDirectoryRorFile().
-	 * The directory name will be something like "/GTFS/projectId/MM-dd-yyyy/file.zip".
-	 * @param projectId For determining directory where to store file
-	 * @param urlStr URL of where to get file
-	 * @return The file name of the newly created file, null if there was a problem
+	 * Main entry point to class. Reads in specified file from URL and stores it
+	 * using same file name into directory specified by getDirectoryForFile().
+	 * The directory name will be something like "~/gtfs/projectId/MM-dd-yyyy".
+	 * 
+	 * @param projectId
+	 *            For determining directory where to store file
+	 * @param urlStr
+	 *            URL of where to get file
+	 * @param directory where
+	 *            to put the retrieved file. If null then
+	 *            getDirectoryForStoringFile() is used as the directory.
+	 * @return The file name of the newly created file, null if there was a
+	 *         problem
 	 */
-	public static String getFile(String projectId, String urlStr) {
-		HttpGetFile getter = new HttpGetGtfsFile(projectId, urlStr);
+	public static String getFile(String projectId, String urlStr, String directory) {
+		HttpGetFile getter = new HttpGetGtfsFile(projectId, urlStr, directory);
 		try {
 			getter.getFile();
 			return getter.getFullFileName();
@@ -71,12 +88,14 @@ public class HttpGetGtfsFile extends HttpGetFile {
 
 	/**
 	 * Copies over Gtfs file.
-	 * @param args First arg=projectId, second arg=url
+	 * 
+	 * @param args
+	 *            First arg=projectId, second arg=url
 	 */
 	public static void main(String[] args) {
 		String projectId = args[0];
 		String url = args[1];
-		HttpGetGtfsFile.getFile(projectId, url);
+		HttpGetGtfsFile.getFile(projectId, url, null);
 	}
 
 }

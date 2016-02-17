@@ -62,6 +62,7 @@ public class FareRule implements Serializable {
 	private final String destinationId;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	@Id
 	private final String containsId;
 
 	// Because Hibernate requires objects with composite Ids to be Serializable
@@ -258,7 +259,10 @@ public class FareRule implements Serializable {
 	 * @return the containsId
 	 */
 	public String getContainsId() {
-		return containsId;
+		// With respect to the database, containsId cannot be null since 
+		// it is a primary key. But sometimes it won't be set. For this case
+		// should return null instead of empty string for consistency.
+		return containsId.length()==0?null:containsId;
 	}
 	
 }

@@ -39,10 +39,12 @@ org.transitime.ipc.clients.ServerStatusInterfaceFactory.get(agencyId);
 try {
   List<MonitorResult> monitorResults = serverStatusInterface.get().getMonitorResults();
   for (MonitorResult monitorResult : monitorResults) {
+    if (monitorResult.getMessage() != null) {
 	%>
 	<h3><%= monitorResult.getType() %></h3>
 	<div class="content"><%= monitorResult.getMessage() %></div>
 	<%
+    }
   }
 } catch (RemoteException e) {
 	%><%= e.getMessage() %><%
