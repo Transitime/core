@@ -339,13 +339,13 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public String getJson(String beginDateStr, String endDateStr, String numDaysStr,
+	public String getJson(String beginDateStr, String numDaysStr,
 			String beginTimeStr, String endTimeStr, String routeIds[],
 			String predSource, String predType, IntervalsType intervalsType,
 			double intervalPercentage1, double intervalPercentage2)
 			throws SQLException, ParseException {
 		// Actually perform the query
-		doQuery(beginDateStr, endDateStr, numDaysStr, beginTimeStr, endTimeStr, routeIds,
+		doQuery(beginDateStr, numDaysStr, beginTimeStr, endTimeStr, routeIds,
 				predSource, predType);
 
 		// If query returned no data then simply return null so that
@@ -371,7 +371,6 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 	 */
 	public static void main(String args[]) {
 		String beginDate = "11-03-2014";
-		String endDate = "11-04-2014";
 		String numDays = "1";
 		String beginTime = null;
 		String endTime = null;
@@ -383,7 +382,7 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 		try {
 			PredAccuracyIntervalQuery query = new PredAccuracyIntervalQuery(
 					agencyId);
-			String jsonString = query.getJson(beginDate, endDate, numDays, beginTime,
+			String jsonString = query.getJson(beginDate, numDays, beginTime,
 					endTime, routeIds, source, null, IntervalsType.BOTH, 0.68,
 					0.80);
 			System.out.println(jsonString);

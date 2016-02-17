@@ -19,10 +19,16 @@
 --%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+<%@ page import="org.transitime.db.webstructs.WebAgency" %>
 <%@ page import="org.transitime.reports.GenericJsonQuery" %>
 <%@ page import="org.transitime.reports.SqlUtils" %>
 <%
 try {
+ String agencyId = request.getParameter("a");
+ WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+ String dbtype = agency.getDbType();
+ boolean isMysql = "mysql".equals(dbtype);
+
 String allowableEarlyStr = request.getParameter("allowableEarly");
 if (allowableEarlyStr == null || allowableEarlyStr.isEmpty())
 	allowableEarlyStr = "1.0";
@@ -35,18 +41,23 @@ String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLa
 
 // Group into timebuckets of 30 seconds
 int BUCKET_TIME = 30;
-
+String epochCommandPre = "EXTRACT (EPOCH FROM ";
+String epochCommandPost = ")";
+if (isMysql) {
+  epochCommandPre = "UNIX_TIMESTAMP";
+  epochCommandPost = "";
+}
 String sql =
 	"SELECT " 
 	+ "  COUNT(*) AS counts_per_time_period, \n"
 	// Put into time buckets of every BUCKET_TIME seconds. 
-	+ "  FLOOR(EXTRACT (EPOCH FROM (scheduledTime-time)) / " + BUCKET_TIME + ")*" + BUCKET_TIME + " AS time_period \n"
+	+ "  FLOOR(" + epochCommandPre + " (scheduledTime-time)" + epochCommandPost + " / " + BUCKET_TIME + ")*" + BUCKET_TIME + " AS time_period \n"
 	+ "FROM ArrivalsDepartures ad\n"
     + "WHERE "
     // Only need arrivals/departures that have a schedule time
     + " ad.scheduledTime IS NOT NULL \n"
     // Ignore stops where schedule adherence really far off
-    + " AND ABS(EXTRACT (EPOCH FROM (scheduledTime-time))) < 3600\n"
+    + " AND ABS(" + epochCommandPre + " (scheduledTime-time)" + epochCommandPost + ") < 3600\n"
     // Specifies which routes to provide data for
     + SqlUtils.routeClause(request, "ad") + "\n"
     + SqlUtils.timeRangeClause(request, "ad.time", 7) + "\n"
@@ -59,7 +70,6 @@ String sql =
 System.out.println("\nFor schedule adherence by time buckets query sql=\n" + sql);
     		
 // Do the query and return result in JSON format    
-String agencyId = request.getParameter("a");
 String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
 response.setContentType("application/json");
 response.setHeader("Access-Control-Allow-Origin", "*");

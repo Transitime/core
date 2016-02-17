@@ -219,7 +219,7 @@ abstract public class PredictionAccuracyQuery {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	protected void doQuery(String beginDateStr, String endDateStr, String numDaysStr,
+	protected void doQuery(String beginDateStr, String numDaysStr,
 			String beginTimeStr, String endTimeStr, String routeIds[],
 			String predSource, String predType) throws SQLException,
 			ParseException {
@@ -229,8 +229,6 @@ abstract public class PredictionAccuracyQuery {
 		if (numDays > 31) {
 			throw new ParseException(
 					"Begin date to end date spans more than a month for endDate="
-					+ endDateStr + " and startDate=" + beginDateStr 
-					+ " endDate=" + Time.parseDate(endDateStr)
 					+ " startDate=" + Time.parseDate(beginDateStr)
 					+ " Number of days of " + numDays + " spans more than a month", 0);
 		}
@@ -318,7 +316,7 @@ abstract public class PredictionAccuracyQuery {
 				+ "WHERE "
 				+ "arrivalDepartureTime BETWEEN "
 				+ "CAST(? AS DATETIME) "
-				+ "AND CAST(? AS DATETIME) "
+				+ "AND DATE_ADD(CAST(? AS DATETIME), INTERVAL " + numDays + " day) " 
 				+ mySqlTimeSql
 				+ "  AND "
 				+ "abs(unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) < 900 " //15 mins
@@ -343,11 +341,8 @@ abstract public class PredictionAccuracyQuery {
 
 			// Determine the date parameters for the query
 			Timestamp beginDate = null;
-			Timestamp endDate = null;
 			java.util.Date date = Time.parse(beginDateStr);
 			beginDate = new Timestamp(date.getTime());
-      date = Time.parse(endDateStr);			
-      endDate = new Timestamp(date.getTime() + Time.MS_PER_DAY);
 	     
 			// Determine the time parameters for the query
 			// If begin time not set but end time is then use midnight as begin
@@ -374,11 +369,10 @@ abstract public class PredictionAccuracyQuery {
 						* Time.MS_PER_SEC);
 			}
 
-			logger.debug("beginDate {} beginDateStr {} endDate {} endDateStr {} beginTime {} beginTimeStr {} endTime {} endTimeStr {}",
+			logger.debug("beginDate {} beginDateStr {} endDateStr {} beginTime {} beginTimeStr {} endTime {} endTimeStr {}",
 			    beginDate,
 			    beginDateStr,
-			    endDate,
-			    endDateStr,
+			    numDays,
 			    beginTime,
 			    beginTimeStr,
 			    endTime,
@@ -387,7 +381,7 @@ abstract public class PredictionAccuracyQuery {
 			// Set the parameters for the query
 			int i = 1;
 			statement.setTimestamp(i++, beginDate);
-			statement.setTimestamp(i++, endDate);
+			statement.setTimestamp(i++, beginDate);
 			if (beginTime != null) {
 			  if ("mysql".equals(dbType)) {
 			    // for mysql use the time str as is to avoid TZ issues

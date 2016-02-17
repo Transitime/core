@@ -66,7 +66,7 @@ if (routeId!=null && !routeId.trim().isEmpty()) {
                 + "     stopId AS stop, vehicleId AS vehicle, "
                 + "     affectedByWaitStop AS affected_by_wait_stop"
                 + " FROM PredictionAccuracy "
-                + "WHERE arrivalDepartureTime BETWEEN STR_TO_DATE('" + beginDate + "', '%Y-%m-%d') and DATE_ADD(STR_TO_DATE('" + endDate + "', '%Y-%m-%d'),INTERVAL 1 DAY) "
+                + "WHERE arrivalDepartureTime BETWEEN STR_TO_DATE('" + beginDate + "', '%Y-%m-%d') and DATE_ADD(STR_TO_DATE('" + beginDate + "', '%Y-%m-%d'),INTERVAL " + numDays + " DAY) "
                 + "  AND predictedTime-predictionReadTime < (15 * 60) "
                 + routeSql
                 // Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch.
@@ -86,7 +86,7 @@ if (routeId!=null && !routeId.trim().isEmpty()) {
                 + "     affectedByWaitStop AS affected_by_wait_stop"
                 + " FROM PredictionAccuracy "
                 + "WHERE arrivalDepartureTime BETWEEN '" + beginDate
-                +     "' AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' "
+                +     "' AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numDays + " day' "
                 + timeSql
                 + "  AND predictedTime-predictionReadTime < '00:15:00' "
                 + routeSql

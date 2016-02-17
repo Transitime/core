@@ -36,6 +36,7 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Match;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
+import org.transitime.monitoring.CloudwatchService;
 import org.transitime.statistics.Statistics;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
@@ -157,6 +158,12 @@ public class TravelTimesProcessor {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(TravelTimesProcessor.class);
 
+	private CloudwatchService cloudwatchService;
+	
+	public TravelTimesProcessor() {
+    cloudwatchService = CloudwatchService.getInstance();
+	}
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -965,8 +972,9 @@ public class TravelTimesProcessor {
 		// Nice to log how long things took so can see progress and bottle necks
 		logger.info("Processing data (updates={} of {} keys with {} invalid) into a TravelTimeInfoMap took {} msec.", 
 				intervalTimer.elapsedMsec(), updated, setSize, invalid);
-		// TODO publish as a metric
-
+		cloudwatchService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
+		cloudwatchService.saveMetric("TravelTimeUpdates", updated * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
+		cloudwatchService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
 	}

@@ -2,6 +2,7 @@
 <%@ page import="org.transitime.reports.ChartGenericJsonQuery" %>
 <%@ page import="org.transitime.utils.Time" %>
 <%@ page import="java.text.ParseException" %>
+<%@ page import="org.transitime.reports.SqlUtils" %>
 <%
 	// Parameters from request
 String agencyId = request.getParameter("a");
@@ -13,7 +14,11 @@ String routeId =  request.getParameter("r");
 String source = request.getParameter("source");
 String predictionType = request.getParameter("predictionType");
 
-boolean showTooltips = true;
+WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+String dbtype = agency.getDbType();
+boolean isMysql = "mysql".equals(dbtype);
+
+boolean showTooltips = false;
 String showTooltipsStr = request.getParameter("tooltips");
 if (showTooltipsStr != null && showTooltipsStr.toLowerCase().equals("false"))
     showTooltips = false;
@@ -32,12 +37,6 @@ if (Integer.parseInt(numDays) > 31) {
 			"Number of days of " + numDays + " spans more than a month", 0);
 }
 
-    WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
-    String dbtype = agency.getDbType();
-    String sql = null;
-    if(dbtype.equals("mysql")){
-
-
 // Determine the time portion of the SQL
         String timeSql = "";
         if ((beginTime != null && !beginTime.isEmpty())
@@ -48,95 +47,13 @@ if (Integer.parseInt(numDays) > 31) {
             if (endTime == null || endTime.isEmpty())
                 endTime = "23:59:59";
 
-            timeSql = " AND time(arrivalDepartureTime) BETWEEN '"
-                    + beginTime + "' AND '" + endTime + "' ";
+			timeSql = SqlUtils.timeRangeClause(request, "arrivalDepatureTime", Integer.parseInt(numDays));
         }
 
 // Determine route portion of SQL. Default is to provide info for
 // all routes.
         String routeSql = "";
-        if (routeId!=null && !routeId.isEmpty()) {
-            routeSql = "  AND routeId='" + routeId + "' ";
-        }
-
-// Determine the source portion of the SQL. Default is to provide
-// predictions for all sources
-        String sourceSql = "";
-        if (source != null && !source.isEmpty()) {
-            if (source.equals("Transitime")) {
-                // Only "Transitime" predictions
-                sourceSql = " AND predictionSource='Transitime'";
-            } else {
-                // Anything but "Transitime"
-                sourceSql = " AND predictionSource<>'Transitime'";
-            }
-        }
-
-// Determine SQL for prediction type ()
-        String predTypeSql = "";
-        if (predictionType != null && !predictionType.isEmpty()) {
-            if (source.equals("AffectedByWaitStop")) {
-                // Only "AffectedByLayover" predictions
-                predTypeSql = " AND affectedByWaitStop = true ";
-            } else {
-                // Only "NotAffectedByLayover" predictions
-                predTypeSql = " AND affectedByWaitStop = false ";
-            }
-        }
-
-        String tooltipsSql = "";
-        if (showTooltips)
-            tooltipsSql =
-                    ",  concat(\n" +
-                            "'predAccuracy=', predictedTime-predictionReadTime, '\\n',\n" +
-                            "'stopId=', stopId, '\\n',\n" +
-                            "'routeId=', routeId, '\\n',\n" +
-                            "'tripId=', tripId, '\\n',\n" +
-                            "'arrDepTime=', arrivalDepartureTime, '\\n',\n" +
-                            "'predTime=', predictedTime, '\\n',\n" +
-                            "'predReadTime=', predictionReadTime, '\\n',\n" +
-                            "'vehicleId=', vehicleId, '\\n',\n" +
-                            "'source=', predictionSource, '\\n',\n" +
-                            "'affectedByLayover=', CASE WHEN affectedbywaitstop THEN 'True' ELSE 'False' END, '\\n'\n" +
-                            ") as tooltip ";
-
-        sql = "SELECT "
-                + "     predictedTime-predictionReadTime as predLength, "
-                + "     predictionAccuracyMsecs/1000 as predAccuracy "
-                + tooltipsSql
-                + " FROM PredictionAccuracy "
-                + "WHERE date(arrivalDepartureTime) " +
-                "BETWEEN STR_TO_DATE('" + beginDate + "', '%Y-%m-%d') and DATE_ADD(STR_TO_DATE('" + endDate + "', '%Y-%m-%d'),INTERVAL 1 DAY)"
-                + timeSql
-                + "  AND predictedTime-predictionReadTime < (15 * 60) "
-                + routeSql
-                + sourceSql
-                + predTypeSql
-                // Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch.
-                // TODO should clean this up by not having MBTA_seconds source at all
-                // in the prediction accuracy module for MBTA.
-                + "  AND predictionSource <> 'MBTA_seconds' ";
-    }else{
-
-
-// Determine the time portion of the SQL
-        String timeSql = "";
-        if ((beginTime != null && !beginTime.isEmpty())
-                || (endTime != null && !endTime.isEmpty())) {
-            // If only begin or only end time set then use default value
-            if (beginTime == null || beginTime.isEmpty())
-                beginTime = "00:00:00";
-            if (endTime == null || endTime.isEmpty())
-                endTime = "23:59:59";
-
-            timeSql = " AND arrivalDepartureTime::time BETWEEN '"
-                    + beginTime + "' AND '" + endTime + "' ";
-        }
-
-// Determine route portion of SQL. Default is to provide info for
-// all routes.
-        String routeSql = "";
-        if (routeId!=null && !routeId.isEmpty()) {
+        if (routeId!=null && !routeId.trim().isEmpty()) {
             routeSql = "  AND routeId='" + routeId + "' ";
         }
 
@@ -188,15 +105,22 @@ if (Integer.parseInt(numDays) > 31) {
                             + "   predictionSource,"
                             + "   CASE WHEN affectedbywaitstop THEN 'True' ELSE 'False' END) AS tooltip ";
 
-        sql = "SELECT "
-                + "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
-                + "     predictionAccuracyMsecs/1000 as predAccuracy "
+        String predLengthSql = "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, ";
+        String predAccuracySql = "     predictionAccuracyMsecs/1000 as predAccuracy ";
+        if (isMysql) {
+          predLengthSql = "CAST(predictedTime-predictionReadTime as SIGNED) as predLength, ";
+          predAccuracySql = "CAST(predictionAccuracyMsecs/1000 AS DECIMAL) as predAccuracy "; 
+        }
+        
+       String sql = "SELECT "
+                + predLengthSql
+                + predAccuracySql
                 + tooltipsSql
                 + " FROM PredictionAccuracy "
-                + "WHERE arrivalDepartureTime BETWEEN '" + beginDate
-                +     "' AND TIMESTAMP '" + endDate + "' + INTERVAL '1 day' "
-                + timeSql
-                + "  AND predictedTime-predictionReadTime < '00:15:00' "
+                + "WHERE "
+                + "1=1 "
+				+ SqlUtils.timeRangeClause(request, "arrivalDepartureTime", 30)
+                + "  AND predictedTime-predictionReadTime < 900 "
                 + routeSql
                 + sourceSql
                 + predTypeSql
@@ -204,47 +128,7 @@ if (Integer.parseInt(numDays) > 31) {
                 // TODO should clean this up by not having MBTA_seconds source at all
                 // in the prediction accuracy module for MBTA.
                 + "  AND predictionSource <> 'MBTA_seconds' ";
-    }
 
-String tooltipsSql = "";
-if (showTooltips)
-    tooltipsSql = 	
-    	", format(E'predAccuracy= %s\\n"
-    	+         "prediction=%s\\n"
-		+         "stopId=%s\\n"
-		+         "routeId=%s\\n"
-		+         "tripId=%s\\n"
-		+         "arrDepTime=%s\\n"
-		+         "predTime=%s\\n"
-		+         "predReadTime=%s\\n"
-		+         "vehicleId=%s\\n"
-		+         "source=%s\\n"
-		+         "affectedByLayover=%s', "
-		+ "   CAST(predictionAccuracyMsecs || ' msec' AS INTERVAL), predictedTime-predictionReadTime,"
-		+ "   stopId, routeId, tripId, "
-		+ "   to_char(arrivalDepartureTime, 'HH24:MI:SS.MS MM/DD/YYYY'),"
-		+ "   to_char(predictedTime, 'HH24:MI:SS.MS'),"
-		+ "   to_char(predictionReadTime, 'HH24:MI:SS.MS'),"
-		+ "   vehicleId,"
-		+ "   predictionSource," 
-		+ "   CASE WHEN affectedbywaitstop THEN 'True' ELSE 'False' END) AS tooltip ";
-    
-String sql = "SELECT "
-	+ "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
-	+ "     predictionAccuracyMsecs/1000 as predAccuracy "
-	+ tooltipsSql
-	+ " FROM predictionAccuracy "
-	+ "WHERE arrivalDepartureTime BETWEEN '" + beginDate 
-	+     "' AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numDays + " day' "
-	+ timeSql
-	+ "  AND predictedTime-predictionReadTime < '00:15:00' "
-	+ routeSql
-	+ sourceSql
-	+ predTypeSql
-	// Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch. 
-	// TODO should clean this up by not having MBTA_seconds source at all
-	// in the prediction accuracy module for MBTA.
-	+ "  AND predictionSource <> 'MBTA_seconds' ";
 
     // Determine the json data by running the query
     String jsonString = ChartGenericJsonQuery.getJsonString(agencyId, sql);

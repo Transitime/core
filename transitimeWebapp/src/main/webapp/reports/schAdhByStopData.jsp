@@ -38,7 +38,7 @@ String sql =
     + "     COUNT(*) AS total, \n"
     + "     s.name AS stop_name, \n"
     + "     ad.directionid AS direction_id \n"
-    + "FROM ArrivalsdDepartures ad, stops s \n"
+    + "FROM ArrivalsDepartures ad, Stops s \n"
     + "WHERE "
     // To get stop name
     + " ad.configRev = s.configRev \n"

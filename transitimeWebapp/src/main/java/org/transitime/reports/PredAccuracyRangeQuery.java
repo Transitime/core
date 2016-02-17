@@ -208,12 +208,12 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	public String getJson(String beginDateStr, String endDateStr, String numDays,
+	public String getJson(String beginDateStr, String numDays,
 			String beginTimeStr, String endTimeStr, String routeIds[],
 			String predSource, String predType, int maxEarlySec, int maxLateSec)
 			throws SQLException, ParseException {
 		// Actually perform the query
-		doQuery(beginDateStr, endDateStr, numDays, beginTimeStr, endTimeStr, routeIds,
+		doQuery(beginDateStr, numDays, beginTimeStr, endTimeStr, routeIds,
 				predSource, predType);
 
 		// If query returned no data then simply return null so that
@@ -237,7 +237,6 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 */
 	public static void main(String args[]) {
 		String beginDate = "11-25-2014";
-		String endDate = "11-25-2014";
 		String beginTime = null;
 		String endTime = null;
 		String numDays = "1";
@@ -253,7 +252,7 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 		try {
 			PredAccuracyRangeQuery query = new PredAccuracyRangeQuery(dbType,
 					dbHost, dbName, dbUserName, dbPassword);
-			String jsonString = query.getJson(beginDate, endDate, numDays, beginTime,
+			String jsonString = query.getJson(beginDate, numDays, beginTime,
 					endTime, routeIds, source, null, -60 * Time.MS_PER_SEC,
 					3 * Time.MS_PER_SEC);
 			System.out.println(jsonString);
