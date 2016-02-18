@@ -982,15 +982,12 @@ public class TravelTimesProcessor {
 		// Nice to log how long things took so can see progress and bottle necks
 		logger.info("Processing data (total={} matched={} unmatched={} invalid={}) into a TravelTimeInfoMap took {} msec.", 
 				setSize, matched, unmatched, invalid, intervalTimer.elapsedMsec());
-		cloudwatchService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-		cloudwatchService.saveMetric("TravelTimeMatched", matched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-		cloudwatchService.saveMetric("TravelTimeUnmatched", unmatched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-		cloudwatchService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+		reportStatus(setSize, matched, unmatched, invalid);
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
 	}
 	
-	/**
+  /**
 	 * Reads in the Matches and the ArrivalDepartures from the database for the
 	 * time specified. Puts the data into the stopTimesMap and the travelTimesMap 
 	 * for further processing.
@@ -1011,6 +1008,7 @@ public class TravelTimesProcessor {
     if (dataFetcher.getMatchesMap()== null || dataFetcher.getMatchesMap().isEmpty()) {
       logger.error("No Matches:  Nothing to do!");
       isEmpty = true;
+      reportStatus(0, 0, 0, 0);
       return;
     }
     isEmpty = false;
@@ -1032,6 +1030,14 @@ public class TravelTimesProcessor {
 				intervalTimer.elapsedMsec());
 	}	
 
+	// cloudwatch reporting/monitoring
+  private void reportStatus(int setSize, int matched, int unmatched, int invalid) {
+    cloudwatchService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("TravelTimeMatched", matched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("TravelTimeUnmatched", unmatched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+
+  }
 
 	/*
 	 * Just for debugging
