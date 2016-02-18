@@ -351,6 +351,10 @@ public class DataFetcher {
 		// Read in arrival/departure times and matches from db
 		logger.info("Reading historic data from db...");
 		matchesMap = readMatches(agencyId, beginTime, endTime);
+		if (matchesMap == null || matchesMap.isEmpty()) {
+			logger.info("No Matches present in db");
+			return;
+		}
 		arrivalDepartureMap = 
 				readArrivalsDepartures(agencyId, beginTime, endTime);
 	}
