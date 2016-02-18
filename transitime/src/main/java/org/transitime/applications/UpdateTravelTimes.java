@@ -305,6 +305,11 @@ public class UpdateTravelTimes {
 		processor.readAndProcessHistoricData(agencyId, specialDaysOfWeek,
 				beginTime, endTime);
 
+		if (processor.isEmpty()) {
+		  logger.info("Exiting...");
+		  return;
+		}
+		
 		// Read in the current Trips. This is done after the historical data
 		// is read in so that less memory is used at once.
 		logger.info("reading trips...");

@@ -159,7 +159,13 @@ public class TravelTimesProcessor {
 			LoggerFactory.getLogger(TravelTimesProcessor.class);
 
 	private CloudwatchService cloudwatchService;
+
+  private boolean isEmpty = true;
 	
+  public boolean isEmpty() {
+    return isEmpty;
+  }
+  
 	public TravelTimesProcessor() {
     cloudwatchService = CloudwatchService.getInstance();
 	}
@@ -999,6 +1005,15 @@ public class TravelTimesProcessor {
 		// Read the arrivals/departures and matches into a DataFetcher
 		DataFetcher dataFetcher = new DataFetcher(projectId, specialDaysOfWeek);
 		dataFetcher.readData(projectId, beginTime, endTime);
+		
+    // exit here if no matches are present
+    // no further work can be done!
+    if (dataFetcher.getMatchesMap()== null || dataFetcher.getMatchesMap().isEmpty()) {
+      logger.error("No Matches:  Nothing to do!");
+      isEmpty = true;
+      return;
+    }
+    isEmpty = false;
 		
 		// Process all the historic data read from the database. Puts 
 		// resulting data into stopTimesMap and travelTimesMap.
