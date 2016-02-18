@@ -848,11 +848,12 @@ public class TravelTimesProcessor {
 		combinedKeySet.addAll(travelTimesMap.keySet());
 		combinedKeySet.addAll(stopTimesMap.keySet());
 		int setSize = 0;
+		int unmatched = 0;
+		int matched = 0;
 		int invalid = 0;
 		
 		// For each trip/stop path that had historical arrivals/departures and 
 		// or matches in the database...
-		int updated = 0;
 		for (ProcessedDataMapKey mapKey : combinedKeySet) {
 		  setSize++;
 			// Determine the associated Trip object for the data
@@ -862,6 +863,7 @@ public class TravelTimesProcessor {
 						"configuration data even though historic data was " +
 						"found for it.", 
 						mapKey.getTripId());
+				invalid ++;
 				continue;
 			}
 
@@ -873,6 +875,7 @@ public class TravelTimesProcessor {
 						+ "The stopPathIndex from the historical data {} is "
 						+ "greater than the number of stop paths for {}",
 						mapKey.getStopPathIndex(), trip);
+				invalid++;
 				continue;
 			}
 			String stopIdFromTrip = 
@@ -884,6 +887,7 @@ public class TravelTimesProcessor {
 						+ "stopId={}. {}",
 						mapKey.getStopPathIndex(), mapKey.getStopId(), 
 						stopIdFromTrip, trip);
+				invalid++;
 				continue;
 			}
 			// Determine average travel times for this trip/stop path
@@ -951,7 +955,7 @@ public class TravelTimesProcessor {
 					logger.debug("No stop times for {} even though there are " +
 						"travel times for that map key", mapKey);
 				} else {
-				  invalid++;
+				  unmatched++;
 				}
 			}
 			
@@ -966,15 +970,16 @@ public class TravelTimesProcessor {
 					mapKey.getStopPathIndex(), averagedStopTime,
 					averageTravelTimes, travelTimeSegLength);
 			travelTimeInfoMap.add(travelTimeInfo);
-			updated++;
+			matched++;
 		}
 
 		// Nice to log how long things took so can see progress and bottle necks
-		logger.info("Processing data (updates={} of {} keys with {} invalid) into a TravelTimeInfoMap took {} msec.", 
-				intervalTimer.elapsedMsec(), updated, setSize, invalid);
-		cloudwatchService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
-		cloudwatchService.saveMetric("TravelTimeUpdates", updated * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
-		cloudwatchService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.DAY, false);
+		logger.info("Processing data (total={} matched={} unmatched={} invalid={}) into a TravelTimeInfoMap took {} msec.", 
+				setSize, matched, unmatched, invalid, intervalTimer.elapsedMsec());
+		cloudwatchService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+		cloudwatchService.saveMetric("TravelTimeMatched", matched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+		cloudwatchService.saveMetric("TravelTimeUnmatched", unmatched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+		cloudwatchService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
 	}

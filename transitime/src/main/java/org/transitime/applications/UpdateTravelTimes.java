@@ -269,13 +269,16 @@ public class UpdateTravelTimes {
 	 */
 	private static Map<String, Trip> readTripsFromDb(String agencyId,
 			Session session) {
-		ActiveRevisions activeRevisions = ActiveRevisions.get(session); 
-		IntervalTimer timer = new IntervalTimer();
-		logger.info("Reading in trips from db...");
-		Map<String, Trip> tripMap = 
-				Trip.getTrips(session, activeRevisions.getConfigRev());
-		logger.info("Reading in trips from db took {} msec", timer.elapsedMsec());	
-		
+	  Map<String, Trip> tripMap = new HashMap<String, Trip>() ;
+	  IntervalTimer timer = new IntervalTimer();
+	  try {
+  		ActiveRevisions activeRevisions = ActiveRevisions.get(session); 
+  		logger.info("Reading in trips from db...");
+  		tripMap = 
+  				Trip.getTrips(session, activeRevisions.getConfigRev());
+	  } finally {
+	    logger.info("Reading in trips from db took {} msec", timer.elapsedMsec());
+	  }
 		// Return results
 		return tripMap;
 	}
@@ -304,17 +307,23 @@ public class UpdateTravelTimes {
 
 		// Read in the current Trips. This is done after the historical data
 		// is read in so that less memory is used at once.
+		logger.info("reading trips...");
 		Map<String, Trip> tripMap = readTripsFromDb(agencyId, session);
 		
+		logger.info("processing travel times...");
 		// Process the historic data into a simple TravelTimeInfoMap
 		TravelTimeInfoMap travelTimeInfoMap = 
 				processor.createTravelTimesFromMaps(tripMap);
 		
+		logger.info("assigning travel times...");
 		// Update all the Trip objects with the new travel times
 		setTravelTimesForAllTrips(session, tripMap, travelTimeInfoMap);
 		
+		logger.info("saving travel times...");
 		// Write out the trip objects, which also writes out the travel times
-		writeNewTripDataToDb(session, tripMap);		
+		writeNewTripDataToDb(session, tripMap);
+		
+		logger.info("committing....");
 	}
 
 	/**
