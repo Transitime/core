@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.utils.Time;
 
 public class ScheduleAdherenceController {
 	 
@@ -57,43 +58,41 @@ public class ScheduleAdherenceController {
 			new Type[] { DoubleType.INSTANCE });
 	
 	public static List<Object> stopScheduleAdherence(Date startDate,
-			Date endDate,
+			int numDays,
 			String startTime,
 			String endTime,
 			List<String> stopIds,
 			boolean byStop,
 			String datatype) {
 
-		return groupScheduleAdherence(startDate, endDate, startTime, endTime, "stopId", stopIds, byStop, datatype);
+		return groupScheduleAdherence(startDate, numDays, startTime, endTime, "stopId", stopIds, byStop, datatype);
 	}
 	
 	public static List<Object> routeScheduleAdherence(Date startDate,
-			Date endDate,
+			int numDays,
 			String startTime,
 			String endTime,
 			List<String> routeIds,
 			boolean byRoute,
 			String datatype) {
 
-		return groupScheduleAdherence(startDate, endDate, startTime, endTime, "routeId", routeIds, byRoute, datatype);
+		return groupScheduleAdherence(startDate, numDays, startTime, endTime, "routeId", routeIds, byRoute, datatype);
 	}
 	
 	public static List<Integer> routeScheduleAdherenceSummary(Date startDate,
-			Date endDate,
+			int numDays,
 			String startTime,
 			String endTime,
 			Double earlyLimit,
 			Double lateLimit,
 			List<String> routeIds) {
-
-		endDate = endOfDay(endDate);
 				
 		int count = 0;
 		int early = 0;
 		int late = 0;
 		int ontime = 0;
 
-		List<Object> results = routeScheduleAdherence(startDate, endDate, startTime, endTime, routeIds, false, null);
+		List<Object> results = routeScheduleAdherence(startDate, numDays, startTime, endTime, routeIds, false, null);
 
 		for (Object o : results) {
 			count++;
@@ -118,17 +117,18 @@ public class ScheduleAdherenceController {
 		return Arrays.asList(summary);
 	}
 	
-	private static List<Object> groupScheduleAdherence(Date startDate, Date endDate, String startTime, String endTime,
+	private static List<Object> groupScheduleAdherence(Date startDate, int numDays, String startTime, String endTime,
 			String groupName, List<String> idsOrEmpty, boolean byGroup, String datatype) {
 
 		// filter ids which may be empty.
 		List<String> ids = new ArrayList<String>();
 		if (idsOrEmpty != null)
 			for (String id : idsOrEmpty)
-				if (!StringUtils.isEmpty(id))
+				if (!StringUtils.isBlank(id)) {
 					ids.add(id);
+				}
 		
-		endDate = new Date(endDate.getTime() + TimeUnit.DAYS.toMillis(1));
+		Date endDate = new Date(startDate.getTime() + (numDays * Time.MS_PER_DAY));
 
 		ProjectionList proj = Projections.projectionList();
 

@@ -10,7 +10,7 @@
 <%
 // todo this code should be in a struts action
 String startDateStr = request.getParameter("beginDate");
-String endDateStr = request.getParameter("endDate");
+String numDaysStr = request.getParameter("numDays");
 String startTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 String earlyLimitStr = request.getParameter("allowableEarly");
@@ -42,12 +42,9 @@ List<String> routeIds = routeIdList == null ? null : Arrays.asList(routeIdList.s
 
 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 Date startDate = dateFormat.parse(startDateStr);
-if (endDateStr == null) endDateStr = startDateStr;
-Date endDate = dateFormat.parse(endDateStr);
-endDate = new Timestamp(endDate.getTime() + Time.MS_PER_DAY);
 
 List<Integer> results = ScheduleAdherenceController.routeScheduleAdherenceSummary(startDate,
-		endDate, startTime, endTime, earlyLimit, lateLimit, routeIds);
+		Integer.parseInt(numDaysStr), startTime, endTime, earlyLimit, lateLimit, routeIds);
 
 JSONArray json = new JSONArray(results);
 json.write(out);
