@@ -1,5 +1,8 @@
 <%-- For specifying a begin date & time and an end date & time --%> 
 
+<script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
+
 <script>
 $(function() {
   var calendarIconTooltip = "Popup calendar to select date";
@@ -45,6 +48,16 @@ $(function() {
   
   // Use a better tooltip than the default "..." for the calendar icon
   $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+  
+  $("#beginTime, #endTime").timepicker({timeFormat: "H:i"})
+	.on('change', function(evt) {
+	  if (evt.originalEvent) { // manual change
+		// validate that this looks like HH:MM
+	  	if (!evt.target.value.match(/^(([0,1][0-9])|(2[0-3])):[0-5][0-9]$/))
+	  		evt.target.value = evt.target.oldval ? evt.target.oldval : "";
+	  }
+	  evt.target.oldval = evt.target.value;
+	});
 });
 </script>
 
