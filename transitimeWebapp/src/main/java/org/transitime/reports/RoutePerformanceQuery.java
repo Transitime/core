@@ -52,7 +52,7 @@ public class RoutePerformanceQuery {
   
   public List<Object[]> query(String agencyId, Date startDate, Date endDate, double allowableEarlyMin, double allowableLateMin, String predictionType, String predictionSource) {
     
-    int msecLo = (int) (allowableEarlyMin * 60 * 1000);
+    int msecLo = (int) (allowableEarlyMin * 60 * 1000 * -1);
     int msecHi = (int) (allowableLateMin * 60 * 1000);
     
     // Project to: # of predictions in which route is on time / # of predictions
