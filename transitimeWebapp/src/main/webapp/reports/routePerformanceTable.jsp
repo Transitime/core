@@ -56,8 +56,9 @@
 		    	title="How early a vehicle can arrive compared to the prediction
 		    	and still be acceptable. Must be a negative number to indicate
 		    	early." 
-		    	size="1"
-		    	value="-1.0" /> <span class="note">minutes</span>
+		    	type="number"
+		    	value="1.0"
+		    	step="0.1" /> <span class="note">minutes</span>
 		 </div>
 		 
 		 <div class="param">
@@ -66,8 +67,9 @@
 		    	title="How late a vehicle can arrive compared to the prediction
 		    	and still be acceptable. Must be a positive number to indicate
 		    	late." 
-		    	size="1" 
-		    	value=" 4.0"/> <span class="note">minutes</span>
+		    	type="number"
+		    	value="1.0"
+		    	step="0.1" /> <span class="note">minutes</span>
 		 </div>
 		  
 	</form>

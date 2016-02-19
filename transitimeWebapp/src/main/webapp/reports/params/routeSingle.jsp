@@ -28,7 +28,9 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#route").select2({
- 				data : selectorData})
+ 				placeholder: "Select Route",
+ 				data: selectorData
+ 			})
  			// Need to reset tooltip after selector is used. Sheesh!
  			.on("select2:select", function(e) {
  				var configuredTitle = $( "#route" ).attr("title");

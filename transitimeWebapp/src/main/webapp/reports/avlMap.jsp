@@ -7,7 +7,7 @@
   <!-- So that get proper sized map on iOS mobile device -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   
-  <link rel="stylesheet" href="<%= request.getContextPath() %>/map/css/mapUi.css" />
+  <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
   <link rel="stylesheet" href="<%= request.getContextPath() %>/map/css/avlMapUi.css" />
  
   <!-- Load javascript and css files -->
@@ -16,14 +16,14 @@
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
   <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
   
-  <script src="<%= request.getContextPath() %>/map/javascript/leafletRotatedMarker.js"></script>
-  <script src="<%= request.getContextPath() %>/map/javascript/mapUiOptions.js"></script>
+  <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
+  <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
   <script src="<%= request.getContextPath() %>/map/javascript/animation.js"></script>
   
-   <!-- Load in Select2 files so can create fancy route selector -->
-  <link href="../select2/select2.css" rel="stylesheet"/>
-  <script src="../select2/select2.min.js"></script>
-  
+  <!-- Load in Select2 files so can create fancy route selector -->
+  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   
   <title>AVL Data Map</title>

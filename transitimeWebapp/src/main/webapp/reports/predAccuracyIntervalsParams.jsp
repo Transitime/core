@@ -82,8 +82,10 @@
     	title="For when using a 'Percentage' interval type. Specifies the 
     	       percent of predictions that should lie within the minimum 
     	       and maximum intervals." 
-    	size="1"
-    	value="70" /> <span class="note">%</span>
+    	type="number"
+    	value="70"
+    	min="0"
+    	max="100"/> <span class="note">%</span>
   </div>
  
    <div class="param">
@@ -92,7 +94,9 @@
     	title="Optional value for when using a 'Percentage' interval type. 
     		Specifies a second percent of predictions that should lie within 
     		the minimum and maximum intervals." 
-    	size="1" /> <span class="note">%</span>
+    	type="number"
+    	min="0"
+    	max="100"/> <span class="note">%</span>
   </div>
     
     <jsp:include page="params/submitReport.jsp" />

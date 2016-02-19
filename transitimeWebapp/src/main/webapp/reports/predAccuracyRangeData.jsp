@@ -23,7 +23,7 @@
     try {
     	if (allowableEarlyStr != null && !allowableEarlyStr.isEmpty())
     	allowableEarlySec = 
-    		(int) Double.parseDouble(allowableEarlyStr) * Time.SEC_PER_MIN;
+    		(int) Double.parseDouble(allowableEarlyStr) * Time.SEC_PER_MIN * -1;
     } catch (NumberFormatException e) {
 	    response.sendError(416 /* Requested Range Not Satisfiable */, 
 		    "Could not parse Allowable Early value of " + allowableEarlyStr);

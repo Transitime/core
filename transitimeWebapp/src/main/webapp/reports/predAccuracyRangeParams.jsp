@@ -58,10 +58,11 @@
     <label for="allowableEarly">Allowable Early:</label>
     <input id="allowableEarly" name="allowableEarly"
     	title="How early a vehicle can arrive compared to the prediction
-    	and still be acceptable. Must be a negative number to indicate
+    	and still be acceptable. Must be a positive number to indicate
     	early." 
-    	size="1"
-    	value="1.0" /> <span class="note">minutes</span>
+    	value="1.0"
+    	step="0.1"
+    	type="number" /> <span class="note">minutes</span>
   </div>
  
    <div class="param">
@@ -70,8 +71,9 @@
     	title="How late a vehicle can arrive compared to the prediction
     	and still be acceptable. Must be a positive number to indicate
     	late." 
-    	size="1" 
-    	value="4.0"/> <span class="note">minutes</span>
+    	value="1.0" 
+    	step="0.1"
+    	type="number" /> <span class="note">minutes</span>
   </div>
     
     <jsp:include page="params/submitReport.jsp" />
