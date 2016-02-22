@@ -115,7 +115,9 @@ public class PredAccuracyIntervalQuery extends PredictionAccuracyQuery {
 	private Long getMax(List<Integer> data, double percentage) {
 		if (percentage == 0.0 || Double.isNaN(percentage))
 			return null;
-
+		if (percentage == 100.0)
+			return (long) data.get(data.size() - 1);
+		
 		double fraction = percentage / 100.0;
 
 		int index = (int) (data.size() * (fraction + (1 - fraction) / 2));

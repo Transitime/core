@@ -36,7 +36,7 @@
   <div id="params">
   	<table id="paramsTable"></table>
   	<jsp:include page="params/vehicle.jsp" />
-  	<jsp:include page="params/fromToDateTime.jsp" />
+  	<jsp:include page="params/fromDateNumDaysTime.jsp" />
     <jsp:include page="params/routeSingle.jsp" /> <br>
     <input type="button" id="submit" value="Submit">
     <a href="#" id="exportData">Export</a>

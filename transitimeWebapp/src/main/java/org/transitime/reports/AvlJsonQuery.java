@@ -66,8 +66,8 @@ public class AvlJsonQuery {
 		String sql = "SELECT vehicleId, time, assignmentId, lat, lon, speed, "
 				+ "heading, timeProcessed "
 				+ "FROM AvlReports "
-				+ "WHERE time BETWEEN '" + beginDate 
-				+ "' AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numdays + " day' "
+				+ "WHERE time BETWEEN '" + beginDate + "' "
+				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
 				+ timeSql;
 
 		// If only want data for single vehicle then specify so in SQL

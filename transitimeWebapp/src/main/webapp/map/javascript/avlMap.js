@@ -1,12 +1,5 @@
 //Edit route input width.
 $("#route").attr("style", "width: 200px");
-
-// Put the param menu into a table.
-$(".param label").wrap("<td>")
-$(".param").each(function(i, div) {
-	$(div).find(":not(:first-child)").wrapAll("<td>")
-	$(div).replaceWith("<tr class='param'>" + div.innerHTML + "</tr>")
-})
 	
 /* For drawing the route and stops */
 var routeOptions = {
@@ -232,7 +225,7 @@ if (request.v || request.r) {
 	// Request exists; set all the controls to match the values in the request.
 	$("#vehicle").val(request.v).trigger("change");
 	$("#beginDate").val(request.beginDate).trigger("change");
-	$("#endDate").val(request.endDate).trigger("change");
+	$("#numDays").val(request.endDate).trigger("change");
 	$("#beginTime").val(request.beginTime).trigger("change");
 	$("#endTime").val(request.endTime).trigger("change");
 	$("#route").val(request.r).trigger("change");
@@ -249,7 +242,7 @@ else {
 	// no request
 	// set beginDate and endDate to defaults
 	request.beginDate = $("#beginDate").val()
-	request.endDate = $("#endDate").val()
+	request.numDays = $("#numDays").val()
 }
 
 // draw route data when dropdown is selected
@@ -260,7 +253,7 @@ $("#submit").on("click", function() {
 	/* Set request object to match new values */
 	request.v = $("#vehicle").val();
 	request.beginDate = $("#beginDate").val();
-	request.endDate = $("#endDate").val();
+	request.numDays = $("#numDays").val();
 	request.beginTime = $("#beginTime").val();
 	request.endTime = $("#endTime").val();
 	request.r = $("#route").val();
