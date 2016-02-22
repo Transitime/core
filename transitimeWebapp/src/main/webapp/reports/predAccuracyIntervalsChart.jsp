@@ -123,9 +123,9 @@ if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.
           },
         // When there is an AJAX problem alert the user
         error: function(request, status, error) {
-          //alert(error + '. ' + request.responseText);
-        	$("#errorMessage").html(request.responseText +
-        			"<br/><br/>Hit back button to try other parameters.");
+        	console.log(request.responseText)
+        	var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.")
+     		$("#errorMessage").append(msg);
 			$("#errorMessage").fadeIn("slow");
           },
         }).responseJSON;
