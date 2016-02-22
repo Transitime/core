@@ -19,6 +19,7 @@ package org.transitime.reports;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -50,6 +51,8 @@ public class RoutePerformanceQuery {
   public static final String PREDICTION_TYPE_AFFECTED = "AffectedByWaitStop";
   public static final String PREDICTION_TYPE_NOT_AFFECTED = "NotAffectedByWaitStop";
   
+  private static final String TRANSITIME_PREDICTION_SOURCE = "Transitime";
+  
   public List<Object[]> query(String agencyId, Date startDate, Date endDate, double allowableEarlyMin, double allowableLateMin, String predictionType, String predictionSource) {
     
     int msecLo = (int) (allowableEarlyMin * 60 * 1000 * -1);
@@ -79,8 +82,12 @@ public class RoutePerformanceQuery {
       else if (predictionType == PREDICTION_TYPE_NOT_AFFECTED)
           criteria.add(Restrictions.eq("affectedByWaitStop", false));
       
-      if (predictionSource != "")
-          criteria.add(Restrictions.eq("predictionSource", predictionSource));
+      if (predictionSource != null && !StringUtils.isEmpty(predictionSource)) {
+    	  if (predictionSource.equals(TRANSITIME_PREDICTION_SOURCE))
+    		  criteria.add(Restrictions.eq("predictionSource", TRANSITIME_PREDICTION_SOURCE));
+    	  else
+    		  criteria.add(Restrictions.ne("predictionSource", TRANSITIME_PREDICTION_SOURCE));
+      }
       
       criteria.addOrder(Order.desc("performance"));
       
