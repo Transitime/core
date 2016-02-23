@@ -23,10 +23,9 @@
 <form action="schAdhByRouteChart.jsp" method="POST">
    <%-- For passing agency param to the report --%>
    <input type="hidden" name="a" value="<%= request.getParameter("a")%>">
-   
-   <jsp:include page="params/routeMultiple.jsp" />
+   <jsp:include page="params/routeSingle.jsp" />
  
-   <jsp:include page="params/fromToDateTime.jsp" />
+   <jsp:include page="params/fromDateNumDaysTime.jsp" />
      
    <div class="param">
     <label for="allowableEarly">Allowable Early:</label>

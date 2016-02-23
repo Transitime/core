@@ -30,8 +30,8 @@ function dataReadCallback(jsonData) {
 
 		// Insert row (after the header)
 		var row = table.insertRow(i+1);
-		row.insertCell(0).innerHTML = vehicleInfo.vehicleid;
-		row.insertCell(1).innerHTML = vehicleInfo.maxtime;
+		row.insertCell(0).innerHTML = vehicleInfo.vehicleId;
+		row.insertCell(1).innerHTML = vehicleInfo.maxTime;
 	}
 }
 

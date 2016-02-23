@@ -226,11 +226,12 @@
 	var routeName = routeData.routes[0].name;
 		
 	  <%
+	  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " days)";
 	  String allowableEarly = request.getParameter("allowableEarly");;
 	  String allowableLate = request.getParameter("allowableLate");;
 	  String chartParams = 
 	    allowableEarly + " min early to " + allowableLate + " min late</br>" 
-		+ request.getParameter("dateRange");
+		+ dateRange;
 	  
 	  String beginTime = request.getParameter("beginTime");
 	  String endTime = request.getParameter("endTime");

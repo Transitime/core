@@ -50,11 +50,12 @@
     <%@include file="/template/header.jsp" %>
   
   <%
+  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " days)";
   String allowableEarly = request.getParameter("allowableEarly");;
   String allowableLate = request.getParameter("allowableLate");;
   String chartSubtitle = allowableEarly + " min early to " 
     + allowableLate + " min late</br>" 
-	+ request.getParameter("dateRange");
+	+ dateRange;
   
   String beginTime = request.getParameter("beginTime");
   String endTime = request.getParameter("endTime");

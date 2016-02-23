@@ -63,6 +63,18 @@ finding specific issues with predictions.">
     how early/late. The resulting bell curve shows the distribution of 
     early/late times. ">
       Schedule Adherence by how Early/Late</a></li>
+  <li><a href="stopScheduleAdherence.jsp?a=<%= agencyId %>"
+    title="Shows stop schedule adherence. Schedule adherence for a stop is the
+    difference between the observed (or interpolated) time a vehicle departs/arrives
+    at a stop and the scheduled time. Box plot shows the median, first and third
+    quartiles, min and max for the adherence data for a stop.">
+      Stop Schedule Adherence Distribution</a></li>
+  <li><a href="routeScheduleAdherence.jsp?a=<%= agencyId %>"
+    title="Shows route schedule adherence. Schedule adherence for a route is the
+    difference between the observed (or interpolated) time a vehicle departs/arrives
+    at a stop and the scheduled time for all stops on the route. Box plot shows the median,
+    first and third quartiles, min and max for the adherence data for a route.">
+      Route Schedule Adherence Distribution</a></li>
 </ul>
 
 <div id="subtitle">AVL Reports</div>
@@ -73,12 +85,6 @@ finding specific issues with predictions.">
   <li><a href="avlMapParams.jsp?a=<%= agencyId %>"
     title="Displays historic AVL data for a vehicle in a map.">
       AVL Data in Map (parameters page)</a></li>
-  <li><a href="avlMapByRouteParams.jsp?a=<%= agencyId %>"
-    title="Displays historic AVL data for a route in a map.">
-      AVL Data in Map by Route</a></li>
-  <li><a href="avlMapByVehicleParams.jsp?a=<%= agencyId %>"
-    title="Displays historic AVL data for a vehicle in a map.">
-      AVL Data in Map by Vehicle</a></li>
   <li><a href="lastAvlReport.jsp?a=<%= agencyId %>"
     title="Displays the last time each vehicle reported its GPS position over the last 24 hours.">
       Last GPS Report by Vehicle</a></li>
@@ -94,18 +100,6 @@ finding specific issues with predictions.">
     title="Displays in a table the schedule for a specified route. Stops listed 
     vertically which is useful for when there are not that many trips per day.">
       Schedule for Route (vertical stops)</a></li>
-  <li><a href="stopScheduleAdherence.jsp?a=<%= agencyId %>"
-    title="Shows stop schedule adherence. Schedule adherence for a stop is the
-    difference between the observed (or interpolated) time a vehicle departs/arrives
-    at a stop and the scheduled time. Box plot shows the median, first and third
-    quartiles, min and max for the adherence data for a stop.">
-      Stop schedule adherence</a></li>
-  <li><a href="routeScheduleAdherence.jsp?a=<%= agencyId %>"
-    title="Shows route schedule adherence. Schedule adherence for a route is the
-    difference between the observed (or interpolated) time a vehicle departs/arrives
-    at a stop and the scheduled time for all stops on the route. Box plot shows the median,
-    first and third quartiles, min and max for the adherence data for a route.">
-      Route schedule adherence</a></li>
 </ul>
 
 <div id="subtitle">Status Reports</div>

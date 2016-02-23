@@ -8,7 +8,7 @@
 <%
 
 String startDateStr = request.getParameter("beginDate");
-String endDateStr = request.getParameter("endDate");
+String numDaysStr = request.getParameter("numDays");
 String startTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 boolean byStop = new Boolean(request.getParameter("byGroup"));
@@ -30,10 +30,10 @@ List<String> stopIds = stopIdList == null ? null : Arrays.asList(stopIdList.spli
 
 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 Date startDate = dateFormat.parse(startDateStr);
-Date endDate = dateFormat.parse(endDateStr);
+int numDays  = Integer.parseInt(numDaysStr);
 
 List<Object> results = ScheduleAdherenceController.stopScheduleAdherence(startDate,
-		endDate, startTime, endTime, stopIds, byStop, datatype);
+		numDays, startTime, endTime, stopIds, byStop, datatype);
 
 JSONArray json = new JSONArray(results);
 json.write(out);

@@ -4,7 +4,7 @@
 <%
 String sql =
 	"SELECT vehicleId, max(time) AS maxTime "
-	+ "FROM AvlReports WHERE time > now() + '-24 hours' "
+	+ "FROM AvlReports WHERE time > date_sub(now(), interval 1 day) "
 	+ "GROUP BY vehicleId;";
 String agencyId = request.getParameter("a");
 String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
