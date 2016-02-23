@@ -59,7 +59,7 @@ public class AvlJsonQuery {
 		}
 		if (beginTime != null && !beginTime.isEmpty() 
 				&& endTime != null && !endTime.isEmpty()) {
-			timeSql = " AND time::time BETWEEN '" 
+			timeSql = " AND time(time) BETWEEN '" 
 				+ beginTime + "' AND '" + endTime + "' ";
 		}
 

@@ -225,7 +225,7 @@ if (request.v || request.r) {
 	// Request exists; set all the controls to match the values in the request.
 	$("#vehicle").val(request.v).trigger("change");
 	$("#beginDate").val(request.beginDate).trigger("change");
-	$("#numDays").val(request.endDate).trigger("change");
+	$("#numDays").val(parseInt(request.numDays)).trigger("change");
 	$("#beginTime").val(request.beginTime).trigger("change");
 	$("#endTime").val(request.endTime).trigger("change");
 	$("#route").val(request.r).trigger("change");
