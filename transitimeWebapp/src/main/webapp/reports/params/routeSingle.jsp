@@ -22,7 +22,8 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		var selectorData = [];
 	 		for (var i in routes.routes) {
 	 			var route = routes.routes[i];
-	 			selectorData.push({id: route.shortName, text: route.name})
+	 			var name = route.name.replace("-", "");
+	 			selectorData.push({id: route.shortName, text: name})
 	 		}
 	 		
 	 		// Configure the selector to be a select2 one that has
