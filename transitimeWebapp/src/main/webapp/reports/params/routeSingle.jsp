@@ -22,7 +22,7 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		var selectorData = [];
 	 		for (var i in routes.routes) {
 	 			var route = routes.routes[i];
-	 			var name = route.name.replace("-", "");
+	 			var name = route.shortName + " " + route.longName
 	 			selectorData.push({id: route.shortName, text: name})
 	 		}
 	 		

@@ -48,35 +48,6 @@ finding specific issues with predictions.">
       Route Performance Table</a></li>
 </ul>
 
-<div id="subtitle">Schedule Adherence Reports</div>
-<ul class="choicesList">
-  <li><a href="schAdhByRouteParams.jsp?a=<%= agencyId %>"
-    title="Displays historic schedule adherence data by route in a bar chart. 
-    Can compare schedule adherence for multiple routes.">
-      Schedule Adherence by Route</a></li>
-  <li><a href="schAdhByStopParams.jsp?a=<%= agencyId %>"
-    title="Displays historic schedule adherence data for each stop for a 
-    route in a bar chart. ">
-      Schedule Adherence by Stop</a></li>
-  <li><a href="schAdhByTimeParams.jsp?a=<%= agencyId %>"
-    title="Displays historic schedule adherence data for a route grouped by 
-    how early/late. The resulting bell curve shows the distribution of 
-    early/late times. ">
-      Schedule Adherence by how Early/Late</a></li>
-  <li><a href="stopScheduleAdherence.jsp?a=<%= agencyId %>"
-    title="Shows stop schedule adherence. Schedule adherence for a stop is the
-    difference between the observed (or interpolated) time a vehicle departs/arrives
-    at a stop and the scheduled time. Box plot shows the median, first and third
-    quartiles, min and max for the adherence data for a stop.">
-      Stop Schedule Adherence Distribution</a></li>
-  <li><a href="routeScheduleAdherence.jsp?a=<%= agencyId %>"
-    title="Shows route schedule adherence. Schedule adherence for a route is the
-    difference between the observed (or interpolated) time a vehicle departs/arrives
-    at a stop and the scheduled time for all stops on the route. Box plot shows the median,
-    first and third quartiles, min and max for the adherence data for a route.">
-      Route Schedule Adherence Distribution</a></li>
-</ul>
-
 <div id="subtitle">AVL Reports</div>
 <ul class="choicesList">
   <li><a href="avlMap.jsp?a=<%= agencyId %>"
