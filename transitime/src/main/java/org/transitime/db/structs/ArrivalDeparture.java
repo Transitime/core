@@ -708,6 +708,51 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		
 	}
 
+	public static Long getArrivalsDeparturesCountFromDb(
+			String dbName, Date beginTime, Date endTime, 
+			ArrivalsOrDepartures arrivalOrDeparture) {
+		IntervalTimer timer = new IntervalTimer();
+		Long count = null;
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = dbName != null ? HibernateUtils.getSession(dbName) : HibernateUtils.getSession();
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+		String hql = "select count(id) FROM ArrivalDeparture " +
+				"    WHERE time >= :beginDate " +
+				"      AND time < :endDate";
+		if (arrivalOrDeparture != null) {
+			if (arrivalOrDeparture == ArrivalsOrDepartures.ARRIVALS)
+				hql += " AND isArrival = true";
+			else 
+				hql += " AND isArrival = false";
+		}
+		
+		Query query = session.createQuery(hql);
+		
+		// Set the parameters for the query
+		query.setTimestamp("beginDate", beginTime);
+		query.setTimestamp("endDate", endTime);
+		
+		
+		try {
+			count = (Long) query.uniqueResult();
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
+			return count;
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error(e.getMessage(), e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+		
+	}
+
+	
 	/**
 	 * Same as other getArrivalsDeparturesFromDb() but uses
 	 * -Dtransitime.db.dbName Java property to specify the name of the database.

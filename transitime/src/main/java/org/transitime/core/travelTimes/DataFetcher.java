@@ -236,6 +236,9 @@ public class DataFetcher {
 		// batches of data using 500k
 		int batchSize = 500000;  // Also known as maxResults
 		// The temporary list for the loop that contains a batch of results
+		
+		Long count = ArrivalDeparture.getArrivalsDeparturesCountFromDb(dbName, beginTime, endTime, null);
+		logger.info("retrieving {} arrival/departures", count);
 		List<ArrivalDeparture> arrDepBatchList;
 		// Read in batch of 50k rows of data and process it
 		do {				
@@ -253,8 +256,8 @@ public class DataFetcher {
 				addArrivalDepartureToMap(resultsMap, arrDep);
 			}
 			
-			logger.info("Read in total of {} arrival/departures", 
-					firstResult+arrDepBatchList.size());
+			logger.info("Read in total of {} arrival/departures of {} {}%", 
+					firstResult+arrDepBatchList.size(), count, (int)(firstResult+arrDepBatchList.size())/count*100);
 			
 			// Update firstResult for reading next batch of data
 			firstResult += batchSize;
