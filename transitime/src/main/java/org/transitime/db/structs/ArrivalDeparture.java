@@ -718,7 +718,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
-		String hql = "select count(id) FROM ArrivalDeparture " +
+		String hql = "select count(*) FROM ArrivalDeparture " +
 				"    WHERE time >= :beginDate " +
 				"      AND time < :endDate";
 		if (arrivalOrDeparture != null) {
