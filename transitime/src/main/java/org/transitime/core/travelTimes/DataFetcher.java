@@ -27,6 +27,7 @@ import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -43,6 +44,16 @@ import org.transitime.utils.Time;
  * 
  */
 public class DataFetcher {
+
+	private static boolean pageDbReads() {
+		return pageDbReads.getValue();
+	}
+	private static BooleanConfigValue pageDbReads =
+			new BooleanConfigValue("transitime.updates.pageDbReads",
+					true,
+					"page database reads to break up long reads. "
+					+ "It may impact performance on MySql"
+					);
 
 	// The data ends up in arrivalDepartureMap and matchesMap.
 	// It is keyed by DbDataMapKey which means that data is grouped
@@ -237,9 +248,15 @@ public class DataFetcher {
 		int batchSize = 500000;  // Also known as maxResults
 		// The temporary list for the loop that contains a batch of results
 		
+		logger.info("counting arrival/departures");
 		Long count = ArrivalDeparture.getArrivalsDeparturesCountFromDb(dbName, beginTime, endTime, null);
 		logger.info("retrieving {} arrival/departures", count);
 		List<ArrivalDeparture> arrDepBatchList;
+		
+		if (!pageDbReads.getValue()) {
+			batchSize = count.intValue();
+		}
+		
 		// Read in batch of 50k rows of data and process it
 		do {				
 			arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
@@ -309,6 +326,16 @@ public class DataFetcher {
 		// by about a factor of 2.  Since sometimes using really large
 		// batches of data using 500k
 		int batchSize = 500000;  // Also known as maxResults
+		
+		logger.info("counting matches...");
+		Long count = Match.getMatchesCountFromDb(projectId, beginTime, endTime, "AND atStop = false");
+		logger.info("found {} matches", count);
+		
+		if (!pageDbReads.getValue()) {
+			batchSize = count.intValue();
+		}
+
+		
 		// The temporary list for the loop that contains a batch of results
 		List<Match> matchBatchList;
 		// Read in batch of 50k rows of data and process it
