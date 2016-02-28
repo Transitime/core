@@ -328,7 +328,7 @@ public class DataFetcher {
 				addMatchToMap(resultsMap, match);
 			}
 			
-			logger.info("Read in total of {} (matches {} this round)", 
+			logger.info("Read in total of {} matches ({} this round)", 
 					firstResult+matchBatchList.size(), matchBatchList.size());
 			
 			// Update firstResult for reading next batch of data
