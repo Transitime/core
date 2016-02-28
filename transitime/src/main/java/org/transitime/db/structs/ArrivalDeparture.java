@@ -664,7 +664,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = dbName != null ? HibernateUtils.getSession(dbName) : HibernateUtils.getSession();
+		Session session = dbName != null ? HibernateUtils.getSession(dbName, true) : HibernateUtils.getSession(true);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
@@ -714,7 +714,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		IntervalTimer timer = new IntervalTimer();
 		Long count = null;
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = dbName != null ? HibernateUtils.getSession(dbName) : HibernateUtils.getSession();
+		Session session = dbName != null ? HibernateUtils.getSession(dbName, true) : HibernateUtils.getSession(true);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.

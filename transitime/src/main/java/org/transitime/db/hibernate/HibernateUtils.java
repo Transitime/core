@@ -68,6 +68,10 @@ public class HibernateUtils {
 	 */
 	private static SessionFactory createSessionFactory(String dbName) 
 			throws HibernateException {
+		return createSessionFactory(dbName, false);
+	}
+	private static SessionFactory createSessionFactory(String dbName, boolean readOnly) 
+			throws HibernateException {
 		logger.debug("Creating new Hibernate SessionFactory for dbName={}", 
 				dbName);
 		
@@ -110,6 +114,12 @@ public class HibernateUtils {
 		// uses values from DbSetupConfig if set. If they are not set then the 
 		// values will be obtained from the hibernate.cfg.xml config file.
 		String dbUrl = config.getProperty("hibernate.connection.url");
+		if (readOnly) {
+			dbUrl = config.getProperty("hibernate.ro.connection.url");
+			// override the configured url so its picked up by the driver
+			config.setProperty("hibernate.connection.url", dbUrl);
+			logger.info("using read only connection url {}", dbUrl);
+		}
 		if (dbUrl == null || dbUrl.isEmpty()) {
 			dbUrl = "jdbc:" + DbSetupConfig.getDbType() + "://" +
 					DbSetupConfig.getDbHost() +
@@ -165,6 +175,11 @@ public class HibernateUtils {
 	 */
 	public static SessionFactory getSessionFactory(String agencyId) 
 			throws HibernateException{
+		return getSessionFactory(agencyId, false);
+	}
+	
+	public static SessionFactory getSessionFactory(String agencyId, boolean readOnly) 
+			throws HibernateException{
 		// Determine the database name to use. Will usually use the
 		// projectId since each project has a database. But this might
 		// be overridden by the transitime.core.dbName property.
@@ -172,6 +187,9 @@ public class HibernateUtils {
 		if (dbName == null)
 			dbName = agencyId;
 		
+		if (readOnly) {
+			dbName = dbName + "-ro";
+		}
 		SessionFactory factory;
 		
 		synchronized(sessionFactoryCache) {
@@ -179,8 +197,8 @@ public class HibernateUtils {
 			// If factory not yet created for this projectId then create it
 			if (factory == null || factory.isClosed()) {
 				try {
-				  logger.info("creating new session factory");
-					factory = createSessionFactory(dbName);
+				  logger.info("creating new session factory with readOnly={}", readOnly);
+					factory = createSessionFactory(dbName, readOnly);
 					sessionFactoryCache.put(dbName, factory);
 				} catch (Exception e) {
 					logger.error("Could not create SessionFactory for "
@@ -224,8 +242,12 @@ public class HibernateUtils {
 	 * @throws HibernateException
 	 */
 	public static Session getSession(String agencyId) throws HibernateException {
+		return getSession(agencyId, false);
+	}
+
+	public static Session getSession(String agencyId, boolean readOnly) throws HibernateException {
 		SessionFactory sessionFactory =
-				HibernateUtils.getSessionFactory(agencyId);
+				HibernateUtils.getSessionFactory(agencyId, readOnly);
 		Session session = sessionFactory.openSession();
 		return session;
 	}
@@ -242,8 +264,12 @@ public class HibernateUtils {
 	 *         gets limited number of open sessions.
 	 */
 	public static Session getSession() {
+		return getSession(false);
+	}
+	
+	public static Session getSession(boolean readOnly) {
 		SessionFactory sessionFactory = 
-				HibernateUtils.getSessionFactory(DbSetupConfig.getDbName());
+				HibernateUtils.getSessionFactory(DbSetupConfig.getDbName(), readOnly);
 		Session session = sessionFactory.openSession();
 		return session;
 	}
