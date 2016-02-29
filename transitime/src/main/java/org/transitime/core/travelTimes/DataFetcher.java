@@ -28,6 +28,7 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -54,7 +55,14 @@ public class DataFetcher {
 					"page database reads to break up long reads. "
 					+ "It may impact performance on MySql"
 					);
-
+	private static Integer pageSize() {
+	  return pageSize.getValue();
+	}
+	private static IntegerConfigValue pageSize =
+	    new IntegerConfigValue("transitime.updates.pageSize",
+	        50000,
+	        "Number of records to read in at a time");
+	
 	// The data ends up in arrivalDepartureMap and matchesMap.
 	// It is keyed by DbDataMapKey which means that data is grouped
 	// per vehicle trip. This way can later subsequent arrivals/departures
@@ -245,7 +253,7 @@ public class DataFetcher {
 		// Batch size of 50k found to be significantly faster than 10k,
 		// by about a factor of 2. Since sometimes using really large
 		// batches of data using 500k
-		int batchSize = 500000;  // Also known as maxResults
+		int batchSize = pageSize.getValue();  // Also known as maxResults
 		// The temporary list for the loop that contains a batch of results
 		
 		logger.info("counting arrival/departures");
@@ -325,7 +333,7 @@ public class DataFetcher {
 		// Batch size of 50k found to be significantly faster than 10k,
 		// by about a factor of 2.  Since sometimes using really large
 		// batches of data using 500k
-		int batchSize = 500000;  // Also known as maxResults
+		int batchSize = pageSize.getValue();  // Also known as maxResults
 		
 		logger.info("counting matches...");
 		Long count = Match.getMatchesCountFromDb(projectId, beginTime, endTime, "AND atStop = false");
