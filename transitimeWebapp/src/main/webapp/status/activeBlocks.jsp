@@ -460,7 +460,7 @@ function getAndProcessData() {
 // Wait for a request to finish before sending the next one.
 function initializeLoadAllData(routes) {
 	
-	var routeNames = routes.route.map(function(d) { return d.name })
+	var routeNames = routes.routes.map(function(d) { return d.name })
 	
 	function getDataForRoute(i) {
 		$.getJSON(apiUrlPrefix + "/command/activeBlockByRouteNameWithVehicles?r=" + routeNames[i], updateAjaxData)
