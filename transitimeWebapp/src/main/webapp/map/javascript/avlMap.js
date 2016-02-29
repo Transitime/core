@@ -231,7 +231,7 @@ if (request.v || request.r) {
 	$("#route").val(request.r).trigger("change");
 	
 	//draw vehicles if there is already request information
-	if (request.v && request.v != "") {
+	if (request.v) {
 		drawAvlData();
 	}
 	if (request.r && request.r != "")

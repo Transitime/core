@@ -16,7 +16,6 @@
 $.getJSON(apiUrlPrefix + "/command/vehicleIds", 
  		function(vehicles) {
 	        // Generate list of routes for the selector
-	 		var selectorData = [];
 	 		var selectorData = [{id: '', text: 'All Vehicles'}];
 	 		for (var i in vehicles.ids) {
 	 			var id = vehicles.ids[i];
@@ -26,8 +25,11 @@ $.getJSON(apiUrlPrefix + "/command/vehicleIds",
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#vehicle").select2({
- 				placeholder: "Select Vehicle", 				
- 				data : selectorData});
+ 				data : selectorData
+ 			});
+	 		
+	 		// Set first value. Empty string value not set with select2.
+	 		$("#vehicle option:first").attr("value", "");
 	 		
 	 		// Tooltips for a select2 widget don't automatically go away when 
 	 		// item selected so remove the tooltip manually. This is a really 
