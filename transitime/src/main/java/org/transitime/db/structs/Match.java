@@ -312,7 +312,7 @@ public class Match implements Lifecycle, Serializable {
 		// class name instead of the name of the db table.
 		String hql = "FROM Match " +
 				"    WHERE avlTime between :beginDate " +
-				"      AND avlTime :endDate";
+				"      AND :endDate";
 		if (sqlClause != null)
 			hql += " " + sqlClause;
 		Query query = session.createQuery(hql);
