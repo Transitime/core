@@ -659,7 +659,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
 			String dbName, Date beginTime, Date endTime, 
 			String sqlClause,
-			final int firstResult, final int maxResults,
+			final Integer firstResult, final Integer maxResults,
 			ArrivalsOrDepartures arrivalOrDeparture) {
 		IntervalTimer timer = new IntervalTimer();
 		
@@ -686,9 +686,12 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		query.setTimestamp("endDate", endTime);
 		
 		// Only get a batch of data at a time if maxResults specified
-		query.setFirstResult(firstResult);
-		if (maxResults > 0)
+		if (firstResult != null) {
+			query.setFirstResult(firstResult);
+		}
+		if (maxResults != null && maxResults > 0) {
 			query.setMaxResults(maxResults);
+		}
 		
 		try {
 			@SuppressWarnings("unchecked")

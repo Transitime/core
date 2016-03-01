@@ -302,7 +302,7 @@ public class Match implements Lifecycle, Serializable {
 	public static List<Match> getMatchesFromDb(
 			String projectId, Date beginTime, Date endTime, 
 			String sqlClause,
-			final int firstResult, final int maxResults) {
+			final Integer firstResult, final Integer maxResults) {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
@@ -321,9 +321,13 @@ public class Match implements Lifecycle, Serializable {
 		query.setTimestamp("beginDate", beginTime);
 		query.setTimestamp("endDate", endTime);
 		
+		if (firstResult != null) {
 		// Only get a batch of data at a time
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
+			query.setFirstResult(firstResult);
+		}
+		if (maxResults != null) {
+			query.setMaxResults(maxResults);
+		}
 		
 		try {
 			@SuppressWarnings("unchecked")
