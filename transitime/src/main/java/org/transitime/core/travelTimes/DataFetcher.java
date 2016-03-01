@@ -270,7 +270,7 @@ public class DataFetcher {
 				logger.info("querying a/d for between {} and {}", pageBeginTime, pageEndTime);
 				arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
 						dbName, 
-						beginTime, endTime, 
+						pageBeginTime, pageEndTime, 
 						// Order results by time so that process them in the same
 						// way that a vehicle travels.
 						"ORDER BY time", // SQL clause
