@@ -311,8 +311,8 @@ public class Match implements Lifecycle, Serializable {
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
 		String hql = "FROM Match " +
-				"    WHERE avlTime >= :beginDate " +
-				"      AND avlTime < :endDate";
+				"    WHERE avlTime between :beginDate " +
+				"      AND avlTime :endDate";
 		if (sqlClause != null)
 			hql += " " + sqlClause;
 		Query query = session.createQuery(hql);

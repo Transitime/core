@@ -669,8 +669,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
 		String hql = "FROM ArrivalDeparture " +
-				"    WHERE time >= :beginDate " +
-				"      AND time < :endDate";
+				"    WHERE time between :beginDate " +
+				"      AND :endDate";
 		if (arrivalOrDeparture != null) {
 			if (arrivalOrDeparture == ArrivalsOrDepartures.ARRIVALS)
 				hql += " AND isArrival = true";
