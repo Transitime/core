@@ -282,7 +282,7 @@ public class DataFetcher {
 			}
 			
 			logger.info("Read in total of {} arrival/departures of {} {}%", 
-					firstResult+arrDepBatchList.size(), count, (int)(firstResult+arrDepBatchList.size())/count*100);
+					firstResult+arrDepBatchList.size(), count, Math.round(firstResult+arrDepBatchList.size())/count*100);
 			
 			// Update firstResult for reading next batch of data
 			firstResult += batchSize;
@@ -364,7 +364,7 @@ public class DataFetcher {
 			}
 			
 			logger.info("Read in total of {} matches of {} {}%", 
-					firstResult+matchBatchList.size(), count, (int)(firstResult+matchBatchList.size())/count*100);
+					firstResult+matchBatchList.size(), count, Math.round(firstResult+matchBatchList.size())/count*100);
 			
 			// Update firstResult for reading next batch of data
 			firstResult += batchSize;
