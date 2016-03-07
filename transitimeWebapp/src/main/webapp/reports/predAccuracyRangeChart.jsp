@@ -28,6 +28,7 @@ String source = (sourceParam != null && !sourceParam.isEmpty()) ?
 	", " + sourceParam + " predictions" : ""; 
 String beginDate = request.getParameter("beginDate");
 String numDays = request.getParameter("numDays");
+if (numDays == null) numDays = "1";
 String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 

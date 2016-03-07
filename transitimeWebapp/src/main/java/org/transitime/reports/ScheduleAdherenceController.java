@@ -22,7 +22,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
@@ -36,6 +35,8 @@ import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.utils.Time;
@@ -49,6 +50,21 @@ public class ScheduleAdherenceController {
 	// problem - negative schedule adherence means we're late
 	
 	
+	private static IntegerConfigValue scheduleEarlySeconds =
+	    new IntegerConfigValue("transitime.web.scheduleEarlyMinutes", 
+	        -120, 
+	        "Schedule Adherence early limit");
+
+	 private static IntegerConfigValue scheduleLateSeconds =
+	      new IntegerConfigValue("transitime.web.scheduleLateMinutes", 
+	          420, 
+	          "Schedule Adherence late limit");
+
+	 private static BooleanConfigValue usePredictionLimits =
+	     new BooleanConfigValue("transitme.web.userPredictionLimits", 
+	         Boolean.FALSE,
+	         "use the allowable early/late report params or use configured schedule limits");
+	 
 	private static final String ADHERENCE_SQL = "(time - scheduledTime) AS scheduleAdherence";
 	private static final Projection ADHERENCE_PROJECTION = Projections.sqlProjection(
 			ADHERENCE_SQL, new String[] { "scheduleAdherence" },
@@ -83,15 +99,16 @@ public class ScheduleAdherenceController {
 			int numDays,
 			String startTime,
 			String endTime,
-			Double earlyLimit,
-			Double lateLimit,
+			Double earlyLimitParam,
+			Double lateLimitParam,
 			List<String> routeIds) {
 				
 		int count = 0;
 		int early = 0;
 		int late = 0;
 		int ontime = 0;
-
+		Double earlyLimit = (usePredictionLimits.getValue() ? earlyLimitParam : scheduleEarlySeconds.getValue());
+		Double lateLimit = (usePredictionLimits.getValue() ? lateLimitParam : scheduleLateSeconds.getValue());
 		List<Object> results = routeScheduleAdherence(startDate, numDays, startTime, endTime, routeIds, false, null);
 
 		for (Object o : results) {

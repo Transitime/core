@@ -16,6 +16,7 @@
  */
 package org.transitime.reports;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -53,11 +54,14 @@ public class RoutePerformanceQuery {
   
   private static final String TRANSITIME_PREDICTION_SOURCE = "Transitime";
   
-  public List<Object[]> query(String agencyId, Date startDate, Date endDate, double allowableEarlyMin, double allowableLateMin, String predictionType, String predictionSource) {
+  public List<Object[]> query(String agencyId, Date startDate, int numDays, double allowableEarlyMin, double allowableLateMin, String predictionType, String predictionSource) {
     
     int msecLo = (int) (allowableEarlyMin * 60 * 1000 * -1);
     int msecHi = (int) (allowableLateMin * 60 * 1000);
-    
+    Calendar c = Calendar.getInstance();
+    c.setTime(startDate);
+    c.add(Calendar.DAY_OF_YEAR,numDays);
+    Date endDate = c.getTime();
     // Project to: # of predictions in which route is on time / # of predictions
     // for route. This cannot be done with pure Criteria API. This could be
     // moved to a separate class or XML file.

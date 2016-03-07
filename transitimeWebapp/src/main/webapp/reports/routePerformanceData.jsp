@@ -8,7 +8,7 @@
 
 String agency = request.getParameter("a");
 String beginDateStr = request.getParameter("beginDate");
-String endDateStr = request.getParameter("endDate");
+String numDaysStr = request.getParameter("numDays");
 String beginTimeStr = request.getParameter("beginTime");
 String endTimeStr = request.getParameter("endTime");
 double allowableEarly = Double.parseDouble(request.getParameter("allowableEarly"));
@@ -27,9 +27,9 @@ else
 
 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 Date beginDate = dateFormat.parse(beginDateStr + " " + beginTimeStr);
-Date endDate = dateFormat.parse(endDateStr + " " + endTimeStr);
+int numDays = Integer.parseInt(numDaysStr);
 
-List<Object[]> results = new RoutePerformanceQuery().query(agency, beginDate, endDate, allowableEarly, allowableLate, predictionType, predictionSource);
+List<Object[]> results = new RoutePerformanceQuery().query(agency, beginDate, numDays, allowableEarly, allowableLate, predictionType, predictionSource);
 
 JSONArray json = new JSONArray(results);
 json.write(out);
