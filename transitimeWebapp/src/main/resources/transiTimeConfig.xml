@@ -47,4 +47,7 @@
     <hibernate>
         <configFile>mysql_hibernate_cfg.xml</configFile>        
     </hibernate>
+    <reports>
+    	<showPredictionSource>false</showPredictionSource>
+    </reports>
 </transitime>

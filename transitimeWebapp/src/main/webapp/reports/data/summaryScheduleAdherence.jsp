@@ -6,6 +6,8 @@
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="org.json.JSONArray" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+
 <%@ page contentType="application/json" %>
 <%
 // todo this code should be in a struts action
@@ -18,20 +20,20 @@ String lateLimitStr = request.getParameter("allowableLate");
 Double earlyLimit = -60.0;
 Double lateLimit = 60.0;
 
-if (startTime == null || startTime == "")
+if (StringUtils.isEmpty(startTime))
 	startTime = "00:00:00";
 else
 	startTime += ":00";
 
-if (endTime == null || endTime == "")
+if (StringUtils.isEmpty(endTime))
 	endTime = "23:59:59";
 else
 	endTime += ":00";
 
-if (earlyLimitStr != null && earlyLimitStr != "") {
+if (!StringUtils.isEmpty(earlyLimitStr)) {
 	earlyLimit = Double.parseDouble(earlyLimitStr) * 60;
 }
-if (lateLimitStr != null && lateLimitStr != "") {
+if (!StringUtils.isEmpty(lateLimitStr)) {
 	lateLimit = Double.parseDouble(lateLimitStr) * 60;
 }
 
