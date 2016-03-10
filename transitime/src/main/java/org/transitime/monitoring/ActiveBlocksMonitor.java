@@ -58,7 +58,7 @@ public class ActiveBlocksMonitor extends MonitorBase {
             double activeBlockCount = (blocks != null ? blocks.size() : 0);
             double totalBlockCount = Core.getInstance().getDbConfig().getBlockCount();
             cloudwatchService.saveMetric("PredictionActiveBlockCount", activeBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-            cloudwatchService.saveMetric("PredictionTotalBlockCount", activeBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            cloudwatchService.saveMetric("PredictionTotalBlockCount", totalBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
             double activeBlockCountPercentage = 0;
             if(activeBlockCount > 0){
                 activeBlockCountPercentage = activeBlockCount / totalBlockCount;
