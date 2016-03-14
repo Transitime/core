@@ -90,8 +90,10 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
     }
 
     Float speed = null;
+    // incoming speed is mph according to NextBus ICD Rev 1.3.pdf, but it guessing its actually kph
     if (msgObj.has("averageSpeed")) {
-        speed = (float) msgObj.getDouble("averageSpeed") * 0.44704f; // convert to m/s
+//        speed = (float) msgObj.getDouble("averageSpeed") * 0.44704f; // convert to m/s
+        speed = (float) msgObj.getDouble("averageSpeed") * 0.277778f; // convert to m/s
     }
 
     Long forwarderTimeReceived = null;
