@@ -34,7 +34,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.transitime.api.data.ApiActiveBlocks;
 import org.transitime.api.data.ApiActiveBlocksRoutes;
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
@@ -963,39 +962,6 @@ public class TransitimeApi {
 	 * @return
 	 * @throws WebApplicationException
 	 */
-	@Path("/command/activeBlocks")
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public
-			Response
-			getActiveBlocks(
-					@BeanParam StandardParameters stdParameters,
-					@QueryParam(value = "r") List<String> routesIdOrShortNames,
-					@QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
-					throws WebApplicationException {
-
-		// Make sure request is valid
-		stdParameters.validate();
-
-		try {
-			// Get active block data from server
-			VehiclesInterface vehiclesInterface =
-					stdParameters.getVehiclesInterface();
-			Collection<IpcActiveBlock> activeBlocks =
-					vehiclesInterface.getActiveBlocks(routesIdOrShortNames,
-							allowableBeforeTimeSecs);
-
-			// Create and return ApiBlock response
-			ApiActiveBlocks apiActiveBlocks =
-					new ApiActiveBlocks(activeBlocks,
-							stdParameters.getAgencyId());
-			return stdParameters.createResponse(apiActiveBlocks);
-		} catch (Exception e) {
-			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
-		}
-	}
-
 	@Path("/command/activeBlocksByRoute")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
