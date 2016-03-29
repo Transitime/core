@@ -57,8 +57,7 @@ public class ActiveBlocksMonitor extends MonitorBase {
             List<Block> blocks = BlocksInfo.getCurrentlyActiveBlocks();
             double activeBlockCount = (blocks != null ? blocks.size() : 0);
             double totalBlockCount = Core.getInstance().getDbConfig().getBlockCount();
-            cloudwatchService.saveMetric("PredictionActiveBlockCount", activeBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
-            cloudwatchService.saveMetric("PredictionTotalBlockCount", totalBlockCount , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+            // cloudwatch metrics for active/total moved to PredictabilityMonitor
             double activeBlockCountPercentage = 0;
             if(activeBlockCount > 0){
                 activeBlockCountPercentage = activeBlockCount / totalBlockCount;
