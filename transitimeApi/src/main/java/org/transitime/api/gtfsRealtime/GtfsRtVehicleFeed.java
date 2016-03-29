@@ -225,10 +225,19 @@ public class GtfsRtVehicleFeed {
 		FeedMessage feedMessage = vehicleFeedDataCache.get(agencyId, cacheTime);
 		if (feedMessage != null)
 			return feedMessage;
-
-		GtfsRtVehicleFeed feed = new GtfsRtVehicleFeed(agencyId);
-		feedMessage = feed.createMessage();
-		vehicleFeedDataCache.put(agencyId, feedMessage);
+		
+		synchronized(vehicleFeedDataCache) {
+		
+			// Cache may have been filled while waiting.
+			feedMessage = vehicleFeedDataCache.get(agencyId, cacheTime);
+			if (feedMessage != null)
+				return feedMessage;
+		
+			GtfsRtVehicleFeed feed = new GtfsRtVehicleFeed(agencyId);
+			feedMessage = feed.createMessage();
+			vehicleFeedDataCache.put(agencyId, feedMessage);
+		}
+		
 		return feedMessage;
 	}
 }

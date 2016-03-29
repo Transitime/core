@@ -281,9 +281,18 @@ public class GtfsRtTripFeed {
 	    if (feedMessage != null)
 	    	return feedMessage;
 	    
-	    GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
-	    feedMessage = feed.createMessage();
-	    tripFeedDataCache.put(agencyId, feedMessage);
+	    synchronized(tripFeedDataCache) {
+	    	
+	    	// Cache may have been filled while waiting.
+	    	feedMessage = tripFeedDataCache.get(agencyId, cacheTime);
+	    	if (feedMessage != null)
+	    		return feedMessage;
+	    	
+	    	GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
+		    feedMessage = feed.createMessage();
+		    tripFeedDataCache.put(agencyId, feedMessage);
+	    }
+	    
 	    return feedMessage;
 	}
 
