@@ -27,14 +27,14 @@ import org.transitime.ipc.data.IpcVehicleComplete;
 /**
  * @author Sean Og Crudden This is a prediction generator that uses a Kalman
  *         filter to provide predictions. It uses the default prediction
- *         methoduuu of transiTime while it generates enough data to support
+ *         method of transiTime while it generates enough data to support
  *         this method of prediction.
  * 
  *         TODO I intend using the error value from the last transiTime
  *         prediciton as the starting value.
  */
 public class KalmanPredictionGeneratorImpl extends
-		PredictionGeneratorDefaultImpl {
+		PredictionGeneratorDefaultImpl  implements PredictionGenerator {
 
 	/*
 	 * TODO I think this needs to be a minimum of two and if just one will use
@@ -69,7 +69,7 @@ public class KalmanPredictionGeneratorImpl extends
 	 * (org.transitime.core.Indices, org.transitime.db.structs.AvlReport)
 	 */
 	@Override
-	protected long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
 
 		VehicleDataCache vehicleCache = VehicleDataCache.getInstance();
 
@@ -220,7 +220,7 @@ public class KalmanPredictionGeneratorImpl extends
 		return result;
 	}
 
-	private List<Integer> lastDaysTimes(TripDataHistoryCache cache,
+	protected List<Integer> lastDaysTimes(TripDataHistoryCache cache,
 			String tripId, int stopPathIndex, Date startDate,
 			Integer startTime, int num_days_look_back, int num_days) {
 
