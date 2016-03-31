@@ -55,11 +55,19 @@ public class ScheduleAdherenceController {
 	        -120, 
 	        "Schedule Adherence early limit");
 
+	public static int getScheduleEarlySeconds() {
+	  return scheduleEarlySeconds.getValue();
+	}
+	
 	 private static IntegerConfigValue scheduleLateSeconds =
 	      new IntegerConfigValue("transitime.web.scheduleLateMinutes", 
 	          420, 
 	          "Schedule Adherence late limit");
 
+	 public static int getScheduleLateSeconds() {
+	    return scheduleLateSeconds.getValue();
+	  }
+	 
 	 private static BooleanConfigValue usePredictionLimits =
 	     new BooleanConfigValue("transitme.web.userPredictionLimits", 
 	         Boolean.FALSE,

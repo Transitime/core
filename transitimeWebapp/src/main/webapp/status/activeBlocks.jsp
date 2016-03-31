@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+<%@ page import="org.transitime.reports.ScheduleAdherenceController" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%
 String agencyId = request.getParameter("a");
@@ -98,8 +99,8 @@ if (agencyId == null || agencyId.isEmpty()) {
 </style>
 
 <script>
-var ALLOWABLE_EARLY_MSEC = 1 * 60*1000; // 1 minute
-var ALLOWABLE_LATE_MSEC  = 4 * 60*1000; // 4 minutes
+var ALLOWABLE_EARLY_MSEC = <%= ScheduleAdherenceController.getScheduleEarlySeconds() %> * -1000; 
+var ALLOWABLE_LATE_MSEC  = <%= ScheduleAdherenceController.getScheduleLateSeconds() %> * 1000;
 
 // need to escape special character in jquery as . : are not interpreted correctly
 function jq( myid ) {	 
@@ -197,12 +198,12 @@ function baseHandleAjaxData(routes, removeAll) {
  					 // And the spans need to be created in reverse order since
  					 // using css float: right to get spans displayed on the right.
  				     "<span class='blocksummary' style='display:none'>" +
-                     "  <span class='routeValue' id='routeEarlyVehicles' title='Number of vehicles that are more than 1 minute early'></span>" +
- 				     "  <span class='routeLabel' id='routeEarlyVehiclesLabel' title='Number of vehicles that are more than 1 minute early'>Early:</span>" +
+                     "  <span class='routeValue' id='routeEarlyVehicles' title='Number of vehicles that are more than <%= ScheduleAdherenceController.getScheduleEarlySeconds()/-60 %> minute(s) early'></span>" +
+ 				     "  <span class='routeLabel' id='routeEarlyVehiclesLabel' title='Number of vehicles that are more than <%= ScheduleAdherenceController.getScheduleEarlySeconds()/-60 %> minute(s) early'>Early:</span>" +
  				     "  <span class='routeValue' id='routeOnTimeVehicles' title='Number of vehicles that are on time'></span>" + 
  				     "  <span class='routeLabel' id='routeOnTimeVehiclesLabel' title='Number of vehicles that are on time'>On Time:</span>" +
- 				     "  <span class='routeValue' id='routeLateVehicles' title='Number of vehicles more that 4 minutes late'></span>" + 
- 				     "  <span class='routeLabel' id='routeLateVehiclesLabel' title='Number of vehicles more that 4 minutes late'>Late:</span>" +
+ 				     "  <span class='routeValue' id='routeLateVehicles' title='Number of vehicles more that <%= ScheduleAdherenceController.getScheduleLateSeconds()/60 %> minutes late'></span>" + 
+ 				     "  <span class='routeLabel' id='routeLateVehiclesLabel' title='Number of vehicles more that <%= ScheduleAdherenceController.getScheduleLateSeconds()/60 %> minutes late'>Late:</span>" +
  				     "  <span class='routeValue' id='routeVehicles' title='Number of vehicles assigned to blocks and predictable for the route'></span>" + 
  				     "  <span class='routeLabel' id='routeVehiclesLabel' title='Number of vehicles assigned to blocks and predictable for the route'>Assigned:</span>" +
                      "</span>" +
@@ -541,12 +542,12 @@ $(function() {
   <span id="totalBlocksValue" title="Total number of blocks"></span>
   <span id="percentWithVehiclesLabel" title="Percentage of blocks that have an assigned and predictable vehicle">Assigned:</span>
   <span id="percentWithVehiclesValue" title="Percentage of blocks that have an assigned and predictable vehicle"></span>
-  <span id="percentLateLabel" title="Percentage of blocks where vehicle is more than 4 minutes late">Late:</span>
-  <span id="percentLateValue" title="Percentage of blocks where vehicle is more than 4 minutes late"></span>
+  <span id="percentLateLabel" title="Percentage of blocks where vehicle is more than <%= ScheduleAdherenceController.getScheduleLateSeconds()/60 %> minutes late">Late:</span>
+  <span id="percentLateValue" title="Percentage of blocks where vehicle is more than <%= ScheduleAdherenceController.getScheduleLateSeconds()/60 %> minutes late"></span>
   <span id="percentOnTimeLabel" title="Percentage of blocks where vehicle is on time">OnTime:</span>
   <span id="percentOnTimeValue" title="Percentage of blocks where vehicle is on time"></span>
-  <span id="percentEarlyLabel" title="Percentage of blocks where vehicle is more than 1 minute early">Early:</span>
-  <span id="percentEarlyValue" title="Percentage of blocks where vehicle is more than 1 minute early"></span>
+  <span id="percentEarlyLabel" title="Percentage of blocks where vehicle is more than <%= ScheduleAdherenceController.getScheduleEarlySeconds()/-60 %> minute(s) early">Early:</span>
+  <span id="percentEarlyValue" title="Percentage of blocks where vehicle is more than <%= ScheduleAdherenceController.getScheduleEarlySeconds()/-60 %> minute(s) early"></span>
   <span id="asOfLabel" title="Time that summary information was last updated">As of:</span>
   <span id="asOfValue" title="Time that summary information was last updated"></span>
 </div>
