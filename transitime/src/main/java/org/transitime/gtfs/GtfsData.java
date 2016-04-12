@@ -1446,6 +1446,12 @@ public class GtfsData {
 			// to have getScheduleTimesForTrip() update an already existing 
 			// Trip object.
 			List<ScheduleTime> scheduleTimesList = getScheduleTimesForTrip(trip);
+
+			if (scheduleTimesList.size() < 2) {
+				logger.warn("trip_id={} has zero or one stoptimes and will be discarded.", tripId);
+				continue;
+			}
+
 			trip.addScheduleTimes(scheduleTimesList); 
 						
 			if (isTripFrequencyBasedWithExactTimes(tripId)) {
