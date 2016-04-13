@@ -136,7 +136,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	private IpcPrediction generatePredictionForStop(AvlReport avlReport,
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
-			boolean lateSoMarkAsUncertain) {
+			boolean lateSoMarkAsUncertain, Integer delay) {
 		// Determine additional parameters for the prediction to be generated
 		StopPath path = indices.getStopPath();
 		String stopId = path.getStopId();
@@ -151,7 +151,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
 					predictionTime,	predictionTime, indices.atEndOfTrip(),
 					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-					ArrivalOrDeparture.ARRIVAL);
+					ArrivalOrDeparture.ARRIVAL, delay);
 		} else {
 			// Generate a departure time
 			// If at a wait stop then need to handle specially...
@@ -261,7 +261,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 							predictionForNextStopCalculation,
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain,
-							ArrivalOrDeparture.DEPARTURE);
+							ArrivalOrDeparture.DEPARTURE, delay);
 				} else {
 					// Use the expected departure times, possibly adjusted for 
 					// stop wait times
@@ -269,7 +269,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 							trip, expectedDepartureTime, expectedDepartureTime,
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain,
-							ArrivalOrDeparture.DEPARTURE);
+							ArrivalOrDeparture.DEPARTURE, delay);
 				}
 			} else {
 				// Create and return the departure prediction for this 
@@ -279,7 +279,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 						predictionTime + expectedStopTimeMsec, 
 						indices.atEndOfTrip(),
 						affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-						ArrivalOrDeparture.DEPARTURE);
+						ArrivalOrDeparture.DEPARTURE, delay);
 			}
 		}			
 	}
@@ -361,7 +361,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			IpcPrediction predictionForStop = generatePredictionForStop(avlReport,
 					indices, predictionTime,
 					useArrivalPreds, affectedByWaitStop, 
-					vehicleState.isDelayed(), lateSoMarkAsUncertain);
+					vehicleState.isDelayed(), lateSoMarkAsUncertain, -1*lateness.getTemporalDifference());
 			logger.debug("For vehicleId={} generated prediction {}",
 					vehicleState.getVehicleId(), predictionForStop);
 			
