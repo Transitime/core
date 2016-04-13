@@ -357,11 +357,16 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 					lateSoMarkSubsequentTripsAsUncertain
 							&& indices.getTripIndex() > currentTripIndex;
 			
+			Integer scheduleDeviation = null;
+			if (lateness != null && lateness.getTemporalDifference() != 0) {
+			  scheduleDeviation = lateness.getTemporalDifference() / -1000; // in seconds
+			}
+							
 			// Determine the new prediction
 			IpcPrediction predictionForStop = generatePredictionForStop(avlReport,
 					indices, predictionTime,
 					useArrivalPreds, affectedByWaitStop, 
-					vehicleState.isDelayed(), lateSoMarkAsUncertain, -1*lateness.getTemporalDifference());
+					vehicleState.isDelayed(), lateSoMarkAsUncertain, scheduleDeviation);
 			logger.debug("For vehicleId={} generated prediction {}",
 					vehicleState.getVehicleId(), predictionForStop);
 			
