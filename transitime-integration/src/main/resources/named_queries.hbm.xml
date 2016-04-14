@@ -20,14 +20,15 @@ select p.affectedByWaitStop, ad.time as arrivalDepartureTime, ad.directionId,
 	p.routeId, p.stopId, p.tripId, p.vehicleId, ad.routeShortName
 from Predictions p join ArrivalsDepartures ad on
 	(p.gtfsStopSeq = ad.gtfsStopSeq and p.tripId = ad.tripId and p.vehicleId = ad.vehicleId
-		and p.avlTime <= ad.avlTime and p.isArrival = ad.isArrival)		
+		and p.avlTime <= ad.avlTime and p.isArrival = ad.isArrival)
+	where p.creationTime between :start and :end
 ]]>
 	</sql-query>
 	<sql-query name="get_prediction_accuracy_within_length">
 <![CDATA[
 select predictionAccuracyMsecs/1000 accuracy
 	from PredictionAccuracy
-	where datediff('ss', predictionReadTime, predictedTime) <= :maxPredLength
+	where datediff('ss', predictionReadTime, predictedTime) between :minPredLength and :maxPredLength
 	order by accuracy asc
 ]]>
 	</sql-query>

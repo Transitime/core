@@ -70,7 +70,7 @@
         uncomment this part and set the db parameters here. -->
 
    <property name="hibernate.connection.url">
-       jdbc:hsqldb:hsql://localhost/transitime_test
+       jdbc:hsqldb:mem://localhost/xdb
    </property>
    <property name="hibernate.connection.username">
       SA
@@ -86,5 +86,7 @@
         of the hibernate config files. -->
    <!-- <mapping class="org.transitime.modules.structures.AVLReport"/>  -->
 
- </session-factory>
+
+	<mapping resource="named_queries.hbm.xml" />
+  </session-factory>
 </hibernate-configuration>

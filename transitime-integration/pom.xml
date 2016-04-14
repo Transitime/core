@@ -18,6 +18,12 @@
             <artifactId>transitimeCore</artifactId>
             <version>0.0.20-SNAPSHOT</version>
         </dependency>
+        
+        <dependency>
+            <groupId>transitime</groupId>
+            <artifactId>transitimeApi</artifactId>
+            <version>0.0.20-SNAPSHOT</version>
+        </dependency>
 
         <!-- For logging -->
         <dependency>
