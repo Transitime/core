@@ -30,7 +30,7 @@ import org.transitime.ipc.data.IpcPrediction;
  * @author SkiBu Smith
  * 
  */
-public interface PredictionGenerator {
+public interface PredictionGenerator  {
 	
 	/**
 	 * Generates and returns the predictions for the vehicle. 

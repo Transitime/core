@@ -22,6 +22,7 @@ import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcVehicleComplete;
 
 /**
@@ -34,7 +35,7 @@ import org.transitime.ipc.data.IpcVehicleComplete;
  *         prediciton as the starting value.
  */
 public class KalmanPredictionGeneratorImpl extends
-		PredictionGeneratorDefaultImpl  implements PredictionGenerator {
+		PredictionGeneratorDefaultImpl  implements PredictionComponentElementsGenerator {
 
 	/*
 	 * TODO I think this needs to be a minimum of two and if just one will use
@@ -381,5 +382,16 @@ public class KalmanPredictionGeneratorImpl extends
 
 	public static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
+	}
+
+	
+	@Override
+	public IpcPrediction generatePredictionForStop(AvlReport avlReport,
+			Indices indices, long predictionTime, boolean useArrivalTimes,
+			boolean affectedByWaitStop, boolean isDelayed,
+			boolean lateSoMarkAsUncertain) {
+	
+		return super.generatePredictionForStop(avlReport, indices, predictionTime,
+				useArrivalTimes, affectedByWaitStop, isDelayed, lateSoMarkAsUncertain);
 	}
 }

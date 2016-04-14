@@ -14,8 +14,9 @@ import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl;
-import org.transitime.core.predictiongenerator.PredictionGenerator;
+import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * @author Sean Og Crudden
@@ -36,8 +37,21 @@ import org.transitime.db.structs.AvlReport;
  *  particular days such as today as it will more reflect the current situaton on the ground.
  */
 public class HistoricalAveragePredictionGeneratorImpl extends
-		KalmanPredictionGeneratorImpl implements PredictionGenerator {
+		KalmanPredictionGeneratorImpl implements PredictionComponentElementsGenerator {
 	
+	/* (non-Javadoc)
+	 * @see org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl#generatePredictionForStop(org.transitime.db.structs.AvlReport, org.transitime.core.Indices, long, boolean, boolean, boolean, boolean)
+	 */
+	@Override
+	public IpcPrediction generatePredictionForStop(AvlReport avlReport,
+			Indices indices, long predictionTime, boolean useArrivalTimes,
+			boolean affectedByWaitStop, boolean isDelayed,
+			boolean lateSoMarkAsUncertain) {
+		// TODO Auto-generated method stub
+		return super.generatePredictionForStop(avlReport, indices, predictionTime,
+				useArrivalTimes, affectedByWaitStop, isDelayed, lateSoMarkAsUncertain);
+	}
+
 	private static final IntegerConfigValue minDays = new IntegerConfigValue(
 			"transitime.prediction.data.average.mindays",
 			new Integer(2),

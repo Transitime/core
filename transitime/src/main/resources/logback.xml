@@ -332,6 +332,11 @@
     <appender-ref ref="PREDICTION" />
   </logger>
   
+  <logger name="org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl"
+          level="debug" additivity="false">
+    <appender-ref ref="PREDICTION" />
+  </logger>
+  
   <logger name="org.transitime.core.schedBasedPreds"
           level="debug" additivity="false">
     <appender-ref ref="SCHED_BASED_PREDS" />

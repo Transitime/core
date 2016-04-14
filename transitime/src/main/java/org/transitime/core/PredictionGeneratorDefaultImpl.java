@@ -131,7 +131,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	 *            are less certain.
 	 * @return The generated Prediction
 	 */
-	protected IpcPrediction generatePredictionForStop(AvlReport avlReport,
+	 protected IpcPrediction generatePredictionForStop(AvlReport avlReport,
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
 			boolean lateSoMarkAsUncertain) {
