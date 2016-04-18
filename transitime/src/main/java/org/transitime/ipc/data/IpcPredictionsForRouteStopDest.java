@@ -414,6 +414,25 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	}
 	
 	/**
+	 * Gets a copy of this object. This is done with the object being copied
+	 * synchronized so that the predictions remain coherent. Limits number of
+	 * predictions to maxPredictionsPerStop.
+	 * 
+	 * @param maxPredictionsPerStop
+	 *            Won't copy more then this number of predictions
+	 * @param maxSystemTimeForPrediction
+	 *            Max point in future want predictions for. This way can limit
+	 *            predictions when requesting a large number of them.
+	 * @return
+	 */
+	public IpcPredictionsForRouteStopDest getClone(int maxPredictionsPerStop,
+			long maxSystemTimeForPrediction) {
+		IpcPredictionsForRouteStopDest clone = getClone(maxPredictionsPerStop,
+				maxSystemTimeForPrediction, Double.NaN);
+		return clone;
+	}
+	
+	/**
 	 * Removes a prediction.
 	 * <p>
 	 * Not sure if really need to synchronize removal of predictions
