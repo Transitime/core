@@ -145,15 +145,10 @@ public class ClientFactory<T extends Remote> {
 		String hostName = updateHostName ? 
 				info.getHostNameViaUpdatedCache() : info.getHostName();
 		
-<<<<<<< Updated upstream
-    if (debugRmiServerHost.getValue() != null) {
-      logger.info("using debug RMI server value of {}", debugRmiServerHost.getValue());
-      hostName = debugRmiServerHost.getValue();
-    }
-=======
-		logger.info("Getting RMI registry for hostname={} port={} ...",
-				hostName, RmiParams.getRmiPort());
->>>>>>> Stashed changes
+	    if (debugRmiServerHost.getValue() != null) {
+	      logger.info("using debug RMI server value of {}", debugRmiServerHost.getValue());
+	      hostName = debugRmiServerHost.getValue();
+	    }
 
 		logger.debug("Getting RMI registry for hostname={} port={} ...",
 		    hostName, RmiParams.getRmiPort());
@@ -203,14 +198,10 @@ public class ClientFactory<T extends Remote> {
 								timeoutSec.getValue() * Time.MS_PER_SEC;
 						socket.setSoTimeout(timeoutMillis);
 						socket.setSoLinger(false, 0);
-<<<<<<< Updated upstream
+
 						if (debugRmiServerHost.getValue() != null) {
 						  host = debugRmiServerHost.getValue();
 						}
-=======
-						host = "prediction.dev.wmata.obaweb.org";
-						logger.info("InetSocketAddress({}, {})", host, port);
->>>>>>> Stashed changes
 						socket.connect(new InetSocketAddress(host, port),
 								timeoutMillis);
 						return socket;
