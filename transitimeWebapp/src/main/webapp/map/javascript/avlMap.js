@@ -122,8 +122,10 @@ function processAvlCallback(jsonData) {
 /**
  * Reads in route data obtained via AJAX and draws route and stops on map.
  */
-function routeConfigCallback(route, status) {
+function routeConfigCallback(data, status) {
 	// Draw the paths for the route
+	
+	var route = data.routes[0];
 	
 	for (var i=0; i<route.shape.length; ++i) {
 		var shape = route.shape[i];
@@ -293,7 +295,7 @@ function drawAvlData() {
 function drawRoute(route) {
 	routeGroup.clearLayers();
 	if (route != "") {
-		var url = apiUrlPrefix + "/command/route?r=" + route;
+		var url = apiUrlPrefix + "/command/routesDetails?r=" + route;
 		$.getJSON(url, routeConfigCallback);
 	}
 }

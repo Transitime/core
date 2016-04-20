@@ -89,7 +89,7 @@ public class DataDbLogger {
   private DbQueue<VehicleEvent> vehicleEventQueue;
   private DbQueue<Object> genericQueue;
 	
-	private static final int QUEUE_CAPACITY = 100000;
+	private static final int QUEUE_CAPACITY = 1000000;
 	
 	// The queue capacity levels when an error message should be e-mailed out. 
 	// The max value should be 1.0. 

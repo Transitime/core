@@ -120,8 +120,11 @@ public class PredictabilityMonitor extends MonitorBase {
 		
 		// Determine fraction of active blocks that have a predictable vehicle 
 		double fraction = ((double) Math.max(predictableVehicleCount,
-				minimumPredictableVehicles.getValue())) / activeBlocks.size();
-        cloudwatchService.saveMetric("PredictablePercentageOfBlocks", fraction, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+		minimumPredictableVehicles.getValue())) / activeBlocks.size();
+		cloudwatchService.saveMetric("PredictionActiveBlockCount", (double)Math.max(predictableVehicleCount,
+		    minimumPredictableVehicles.getValue()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+		cloudwatchService.saveMetric("PredictionTotalBlockCount", (double)activeBlocks.size() , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("PredictablePercentageOfBlocks", fraction, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
 
 		// Provide simple message explaining the situation
 		String message = "Predictable blocks fraction=" 

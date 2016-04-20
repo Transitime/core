@@ -1233,16 +1233,9 @@ public class AvlProcessor {
 			String eventDescription = "Vehicle had schedule adherence of "
 					+ scheduleAdherence + " which is beyond acceptable "
 					+ "limits. Therefore vehicle made unpredictable.";
-			VehicleEvent.create(vehicleState.getAvlReport(),
-					vehicleState.getMatch(), VehicleEvent.NO_MATCH,
-					eventDescription, false, // predictable,
-					true, // becameUnpredictable
-					null); // supervisor
-
-			// Clear out match because it is no good! This is especially
-			// important for when determining arrivals/departures because
-			// that looks at previous match and current match.
-			vehicleState.setMatch(null);
+		
+			// Clear out match, make vehicle event, clear predictions.
+			makeVehicleUnpredictable(vehicleState.getVehicleId(), eventDescription, VehicleEvent.NO_MATCH);
 
 			// Schedule adherence not reasonable so match vehicle to assignment
 			// again.
