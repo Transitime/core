@@ -22,6 +22,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utilities for web based API.
  *
@@ -30,6 +33,9 @@ import javax.ws.rs.core.Response.Status;
  */
 public class WebUtils {
 
+  private static final Logger logger = LoggerFactory
+      .getLogger(WebUtils.class);
+  
 	/**
 	 * Provides the API key to be used to access the Transitime API by
 	 * Transitime web pages.
@@ -40,6 +46,19 @@ public class WebUtils {
 		return "5ec0de94";
 	}
 	
+	 /**
+   * Convenience method for when need to throw a BAD_REQUEST exception
+   * response.
+   * 
+   * @param ex the exception which will be logged
+   *            Message to be provided as part of the response.
+   * @return Exception to be thrown
+   */
+  public static WebApplicationException badRequestException(Throwable ex) {
+    logger.error("Bad Request", ex);
+    return badRequestException(Status.BAD_REQUEST.getStatusCode(), ex.getMessage());
+  }
+
 	/**
 	 * Convenience method for when need to throw a BAD_REQUEST exception
 	 * response.

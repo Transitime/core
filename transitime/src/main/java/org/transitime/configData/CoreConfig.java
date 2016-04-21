@@ -593,8 +593,7 @@ public class CoreConfig {
 					"still be considered at the stop.");
 	
 	/**
-	 * How far a vehicle can be past a stop in meters and still be considered at
-	 * the stop.
+	 * Returns how long driver is expected to have a break for a stop.
 	 * 
 	 * @return
 	 */
@@ -605,8 +604,7 @@ public class CoreConfig {
 			new IntegerConfigValue(
 					"transitime.core.defaultBreakTimeSec", 
 					0,
-					"How far a vehicle can be past a stop in meters and " +
-					"still be considered at the stop.");
+					"How long driver is expected to have a break for a stop.");
 	
 	/**
 	 * How much worse it is for a vehicle to be early as opposed to late when

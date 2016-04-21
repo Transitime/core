@@ -129,7 +129,7 @@ public class CommandsApi {
 			return stdParameters.createResponse(ack);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 
 	}
@@ -235,7 +235,7 @@ public class CommandsApi {
 			inter.pushAvl(avlData);
 		} catch (JSONException | IOException e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 
 		// Create the acknowledgment and return it as JSON or XML
@@ -283,7 +283,7 @@ public class CommandsApi {
 			return stdParameters.createResponse(ack);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 	

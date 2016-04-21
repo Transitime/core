@@ -179,7 +179,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiVehicles);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -207,7 +207,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -293,7 +293,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiVehiclesDetails);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -331,7 +331,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiVehicleConfigs);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -522,7 +522,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(predictionsData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -585,7 +585,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(predictionsData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -669,7 +669,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(routesData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -751,7 +751,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(routeData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -792,7 +792,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(directionsData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -836,7 +836,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiBlock);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -876,7 +876,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -916,7 +916,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -945,7 +945,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -995,7 +995,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiActiveBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1028,7 +1028,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiActiveBlocksRoutes);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1059,7 +1059,7 @@ public class TransitimeApi {
             return stdParameters.createResponse(apiActiveBlocksRoutes);
         } catch (Exception e) {
             // If problem getting data then return a Bad Request
-            throw WebUtils.badRequestException(e.getMessage());
+            throw WebUtils.badRequestException(e);
         }
     }
 
@@ -1091,7 +1091,7 @@ public class TransitimeApi {
             return stdParameters.createResponse(apiActiveBlocksRoutes);
         } catch (Exception e) {
             // If problem getting data then return a Bad Request
-            throw WebUtils.badRequestException(e.getMessage());
+            throw WebUtils.badRequestException(e);
         }
     }
     
@@ -1120,7 +1120,7 @@ public class TransitimeApi {
           return stdParameters.createResponse(apiActiveBlocksRoutes);
       } catch (Exception e) {
           // If problem getting data then return a Bad Request
-          throw WebUtils.badRequestException(e.getMessage());
+          throw WebUtils.badRequestException(e);
       }
         
     }
@@ -1164,7 +1164,7 @@ public class TransitimeApi {
       return stdParameters.createResponse(resp);
     } catch (Exception e) {
       // If problem getting data then return a Bad Request
-      throw WebUtils.badRequestException(e.getMessage());
+      throw WebUtils.badRequestException(e);
     }
   }
 
@@ -1205,7 +1205,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiTrip);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1247,7 +1247,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiTrip);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1275,7 +1275,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1317,7 +1317,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiTripPatterns);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1361,7 +1361,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiSchedules);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1405,7 +1405,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiSchedules);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1440,7 +1440,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiAgencies);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1471,7 +1471,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiCalendars);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1502,7 +1502,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiCalendars);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1530,7 +1530,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1560,7 +1560,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1595,7 +1595,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiServerStatus);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
