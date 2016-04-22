@@ -96,7 +96,7 @@ public class ClientFactory<T extends Remote> {
 			// Get the RMI stub. Don't update host name since there is no 
 			// indication of a problem with the cached version. Instead,
 			// just use the cached version to reduce db access.
-			boolean updateHostName = false;
+			boolean updateHostName = true;
 			T rmiStub = getRmiStub(info, updateHostName);
 
 			logger.debug("Getting proxy instance...");
@@ -145,10 +145,10 @@ public class ClientFactory<T extends Remote> {
 		String hostName = updateHostName ? 
 				info.getHostNameViaUpdatedCache() : info.getHostName();
 		
-    if (debugRmiServerHost.getValue() != null) {
-      logger.info("using debug RMI server value of {}", debugRmiServerHost.getValue());
-      hostName = debugRmiServerHost.getValue();
-    }
+	    if (debugRmiServerHost.getValue() != null) {
+	      logger.info("using debug RMI server value of {}", debugRmiServerHost.getValue());
+	      hostName = debugRmiServerHost.getValue();
+	    }
 
 		logger.debug("Getting RMI registry for hostname={} port={} ...",
 		    hostName, RmiParams.getRmiPort());
@@ -198,6 +198,7 @@ public class ClientFactory<T extends Remote> {
 								timeoutSec.getValue() * Time.MS_PER_SEC;
 						socket.setSoTimeout(timeoutMillis);
 						socket.setSoLinger(false, 0);
+
 						if (debugRmiServerHost.getValue() != null) {
 						  host = debugRmiServerHost.getValue();
 						}

@@ -123,6 +123,8 @@ public class GtfsRtTripFeed {
 			tripDescriptor.setStartDate(tripStartDateStr);
 		}
 		tripUpdate.setTrip(tripDescriptor);
+		if (firstPred.getDelay() != null)
+		  tripUpdate.setDelay(firstPred.getDelay()); // set schedule deviation
 
 		// Add the VehicleDescriptor information
 		VehicleDescriptor.Builder vehicleDescriptor =

@@ -583,9 +583,10 @@ public class SpatialMatcher {
 			if (potentialMatchIndices.equals(startSearchSpatialMatch.getIndices())
 					&& distanceAlongSegment < 
 						startSearchSpatialMatch.getDistanceAlongSegment()) {
+				
 				// The current match would be before the starting point so
 				// adjust it.
-				logger.debug("For vehicleId={} the spatial match was before " +
+				logger.info("For vehicleId={} the spatial match was before " +
 						"the starting previous match so will use the previous " +
 						"match. original distanceAlongSegment={} and " +
 						"startSearchSpatialMatch={}",
@@ -594,8 +595,10 @@ public class SpatialMatcher {
 						startSearchSpatialMatch);
 				distanceAlongSegment = 
 						startSearchSpatialMatch.getDistanceAlongSegment();
-				distanceToSegment = 
-						startSearchSpatialMatch.getDistanceToSegment();
+				
+				// Do not set distanceToSegment to startSearchSpatialMatch value:
+				// - Need to check that it is in bounds
+				// - Need accurate comparison with next match's distance.
 			}
 		}
 		

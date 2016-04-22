@@ -14,9 +14,13 @@
       <location>/error/messageOnlyError.jsp</location>
     </error-page>
 
-    <context-param>
-        <param-name>transitime_config_file_location</param-name>
-        <param-value>/users/Dbenoff/transitime/transiTimeConfig.xml</param-value>
-    </context-param>
 
+	  <filter>
+	    <filter-name>ApiLoggingFilter</filter-name>
+	    <filter-class>org.transitime.api.utils.ApiLoggingFilter</filter-class>
+	  </filter> 
+	  <filter-mapping>
+	    <filter-name>ApiLoggingFilter</filter-name>
+	    <url-pattern>/*</url-pattern>
+	  </filter-mapping> 
 </web-app>

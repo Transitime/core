@@ -23,6 +23,9 @@ import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
@@ -53,11 +56,11 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	private final RmiStubInfo info;
 	
 	// For keeping track of number of total and current RMI calls.
-	// Don't actually need to use Atomic variables since
-	// not doing a change & get.
+	// Java's increment does a change & get behind the scenes so
+	// we need to worry about thread safety here!
 	private static class Counts {
-		long total = 0L;
-		int current = 0;
+		AtomicLong total = new AtomicLong(0L);
+		AtomicInteger current = new AtomicInteger(0);
 	}
 	
 	// For limiting how many RMI calls are in process for a particular
@@ -128,7 +131,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	 * @return
 	 */
 	public static int getCount(String agencyId) {
-		return getAccessCounter(agencyId).current;
+		return getAccessCounter(agencyId).current.get();
 	}
 	
 	/**
@@ -139,7 +142,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 	 * @return
 	 */
 	public static long getTotalCount(String agencyId) {
-		return getAccessCounter(agencyId).total;
+		return getAccessCounter(agencyId).total.get();
 	}
 	
 	/**
@@ -308,8 +311,8 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 		// burden the project even more with additional calls. 
 		// Therefore when behind want to return as quickly as possible.
 		Counts accessCounter = getAccessCounter(info.getAgencyId());
-		accessCounter.total++;
-		if (accessCounter.current >= getMaxConcurrentCallsPerProject()) {
+		accessCounter.total.incrementAndGet();
+		if (accessCounter.current.get() >= getMaxConcurrentCallsPerProject()) {
 			// Currently too many RMI calls is progress so log error
 			// and throw exception
 			String message = "Reached MAX_CURRENT_CALLS_PER_PROJECT="
@@ -323,14 +326,14 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 		} else {
 			try {
 				// Keep track that another RMI call is being initiated
-				accessCounter.current++;
+				accessCounter.current.incrementAndGet();
 				
 				// Actually make the RMI call
 				Object result = lowLevelInvoke(method, args);
 				return result;
 			} finally {
 				// Make sure that access counter decrement no matter what
-				accessCounter.current--;
+				accessCounter.current.decrementAndGet();
 			}
 		}
 	}
