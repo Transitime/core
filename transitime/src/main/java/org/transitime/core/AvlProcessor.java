@@ -18,6 +18,7 @@ package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,23 +38,20 @@ import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.VectorWithHeading;
 import org.transitime.db.structs.VehicleEvent;
-import org.transitime.db.structs.AvlReport.AssignmentType;
-import org.transitime.monitoring.CloudwatchService;
 import org.transitime.logging.Markers;
+import org.transitime.monitoring.CloudwatchService;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * This is a very important high-level class. It takes the AVL data and
@@ -117,6 +115,19 @@ public class AvlProcessor {
 					+ "grab it from another vehicle. The new vehicle must "
 					+ "match to route within maxDistanceForAssignmentGrab in "
 					+ "order to grab the assignment.");
+
+	 private static DoubleConfigValue maxMatchDistanceFromAVLRecord =
+	      new DoubleConfigValue(
+	          "transitime.core.maxMatchDistanceFromAVLRecord",
+	          500.0,
+	          "For logging distance between spatial match and actual AVL assignment ");
+
+	
+  private double getMaxMatchDistanceFromAVLRecord() {
+    return maxMatchDistanceFromAVLRecord.getValue();
+  }
+
+
 	
 	/************************** Logging *******************************/
 
@@ -564,9 +575,52 @@ public class AvlProcessor {
 		vehicleState.setMatch(bestMatch);
 		vehicleState.setBlock(block, blockAssignmentMethod, assignmentId,
 				predictable);
+		
+		if (bestMatch != null) {
+		  logConflictingSpatialAssigment(bestMatch, vehicleState);
+		}
 	}
 
 	/**
+	 * compare the match to the avl location and log if they differ greatly.
+	 * Note we just log this, we do not make the vehicle unpredictable.
+	 * @param bestMatch
+	 * @param vehicleState
+	 */
+	private void logConflictingSpatialAssigment(TemporalMatch bestMatch,
+      VehicleState vehicleState) {
+	  if (vehicleState == null || vehicleState.getAvlReport() == null) return;
+
+    // avl location
+    double avlLat = vehicleState.getAvlReport().getLat();
+    double avlLon = vehicleState.getAvlReport().getLon();
+    Location avlLocation = new Location(avlLat, avlLon);
+
+    // match location
+    VectorWithHeading segment = bestMatch.getIndices().getSegment();
+    double distanceAlongSegment = bestMatch.getDistanceAlongSegment();
+    Location matchLocation = segment.locAlongVector(distanceAlongSegment);
+
+    long tripStartTime = bestMatch.getTrip().getStartTime() * 1000 + Time.getStartOfDay(new Date());
+    // ignore future trips as we are deadheading
+    if (tripStartTime > System.currentTimeMillis()) return;
+    
+    // difference
+	  double deltaDistance = Math.abs(Geo.distance(avlLocation, matchLocation));
+	  
+	  if (vehicleState.isPredictable() && deltaDistance > getMaxMatchDistanceFromAVLRecord()) {
+      String eventDescription = "Vehicle match conflict from AVL report of " 
+	    + Geo.distanceFormat(deltaDistance) + " from match " + matchLocation; 
+	    
+      VehicleEvent.create(vehicleState.getAvlReport(), bestMatch, VehicleEvent.AVL_CONFLICT,
+          eventDescription, true, // predictable
+          false, // becameUnpredictable
+          null); // supervisor
+	  }    
+    
+  }
+
+  /**
 	 * Attempts to match vehicle to the specified route by finding appropriate
 	 * block assignment. Updates the VehicleState with the new block assignment
 	 * and match. These will be null if vehicle could not successfully be
