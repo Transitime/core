@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>transitime</groupId>
   <artifactId>transitime</artifactId>
-  <version>0.0.21-SNAPSHOT</version>
+  <version>0.0.22-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>transitime</name>
   <url>http://www.transitime.org//</url>
