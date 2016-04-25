@@ -128,8 +128,8 @@ public class PredictionAccuracyIntegrationTest extends TestCase {
         final Class<?> clazz = Class.forName(classname);
         final Method main = clazz.getMethod("main", String[].class);
 
-        new Thread(new Runnable() {
-            @Override
+        new Thread() {
+            
             public void run() {
                 try {
                     main.invoke(null, new Object[]{params});
@@ -137,6 +137,6 @@ public class PredictionAccuracyIntegrationTest extends TestCase {
                     throw new AssertionError(e);
                 }
             }
-        }).start();
+        }.start();
     }
 }

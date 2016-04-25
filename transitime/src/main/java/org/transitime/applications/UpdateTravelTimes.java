@@ -345,7 +345,7 @@ public class UpdateTravelTimes {
 	 * @param beginTime
 	 * @param endTime
 	 */
-	private static void manageSessionAndProcessTravelTimes(String agencyId,
+	public static void manageSessionAndProcessTravelTimes(String agencyId,
 			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
 		// Get a database session
 		Session session = HibernateUtils.getSession(agencyId);

@@ -1,13 +1,7 @@
 package org.transitime.playback;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -20,35 +14,23 @@ import org.transitime.avl.BatchCsvAvlFeedModule;
 import org.transitime.config.ConfigFileReader;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.db.structs.VehicleEvent;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.TitleFormatter;
-import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
-import org.transitime.ipc.data.IpcVehicleComplete;
-import org.transitime.ipc.data.IpcVehicleGtfsRealtime;
-import org.transitime.api.gtfsRealtime.GtfsRtTripFeed;
-import org.transitime.api.gtfsRealtime.GtfsRtVehicleFeed;
 
 /*
  * MS also has a playback module. It's a little different. Reads in AVLs from the database.
  */
-// Stateful:  arrivalsdepartures, avlreports, matches, vehicleevents, vehiclestates
+// Stateful tables:  arrivalsdepartures, avlreports, matches, vehicleevents, vehiclestates
 
 public class PlaybackModule {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PlaybackModule.class);
 
-	// "/Users/sjacobs/work/predictions-stuff/39" /Users/sjacobs/work/predictions-stuff/avl/AvlReports_4-6-16_2807.csv
-	// /Users/sjacobs/work/predictions-stuff/avl/AvlReports_4-6-16_2807.csv
-	
 	private static String gtfsDirectoryName = "src/main/resources/wmata_gtfs"; 
 	private static String avlReportsCsv = "src/main/resources/avl/03142016_SE-04.csv";
 	private static final String transitimeConfigFile = "src/main/resources/transiTimeConfigHsql.xml";
