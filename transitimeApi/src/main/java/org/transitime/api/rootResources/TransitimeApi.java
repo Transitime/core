@@ -210,6 +210,23 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e);
 		}
 	}
+	
+	@Path("/command/vehicleLocation")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getVehicleLocation(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "v") String vehicleId) throws WebApplicationException {
+		try {
+			
+			// Get Vehicle data from server
+			VehiclesInterface inter = stdParameters.getVehiclesInterface();
+			IpcVehicle vehicle = inter.get(vehicleId);
+			Location matchedLocation = new Location(vehicle.getPredictedLatitude(), vehicle.getPredictedLongitude());
+			return stdParameters.createResponse(matchedLocation);
+		} catch (Exception e) {
+			throw WebUtils.badRequestException(e);
+		}
+	}
 
 	/**
 	 * Handles the "vehiclesDetails" command. Returns detailed data for all
