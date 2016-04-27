@@ -13,14 +13,17 @@ import org.transitime.applications.UpdateTravelTimes;
 import org.transitime.avl.BatchCsvAvlFeedModule;
 import org.transitime.config.ConfigFileReader;
 import org.transitime.configData.AgencyConfig;
+import org.transitime.core.AvlProcessor;
 import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.db.structs.AvlReport;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.TitleFormatter;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.utils.Time;
 
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /*
  * MS also has a playback module. It's a little different. Reads in AVLs from the database.
@@ -34,7 +37,15 @@ public class PlaybackModule {
 	private static String gtfsDirectoryName = "src/main/resources/wmata_gtfs"; 
 	private static String avlReportsCsv = "src/main/resources/avl/03142016_SE-04.csv";
 	private static final String transitimeConfigFile = "src/main/resources/transiTimeConfigHsql.xml";
-	
+
+	// Take defaults from GtfsFileProcessor.java
+	private static final double pathOffsetDistance = 0.0;					
+	private static final double maxStopToPathDistance =  60.0;
+	private static final double maxDistanceForEliminatingVertices = 3.0;
+	private static final int defaultWaitTimeAtStopMsec = 10 * Time.MS_PER_SEC;
+	private static final double maxSpeedKph = 97.0;
+	private static final double maxTravelTimeSegmentLength = 200.0;
+
 	private static Session session;
 	
 	public static void main(String[] args) {
@@ -54,14 +65,13 @@ public class PlaybackModule {
 		setupGtfs();
 		System.out.println("Done with GTFS.");
 		
-	
 		System.out.println("adding avls");
 		// Core is created on first access
 		Date readTimeStart = new Date();
 		new BatchCsvAvlFeedModule("1").run(); 
 		Date readTimeEnd = new Date();
 		System.out.println("done");
-
+		
 		session = HibernateUtils.getSession();
 		
 		// Prediction accuracy post process. Can't use the module because
@@ -162,8 +172,9 @@ public class PlaybackModule {
 	// but actually maybe it doesn't matter for playback.
 	private static void setupGtfs() {
 		TitleFormatter titleFormatter = new TitleFormatter(null, true);
-		GtfsData gtfsData = new GtfsData(1, null, null, true, AgencyConfig.getAgencyId(), gtfsDirectoryName, null, 0.0, 
-				50.0, 0.0, 6, 97.0, 1000.0, false, titleFormatter);
+		GtfsData gtfsData = new GtfsData(1, null, null, true, AgencyConfig.getAgencyId(), gtfsDirectoryName, null, 
+				pathOffsetDistance,  maxStopToPathDistance, maxDistanceForEliminatingVertices,
+				defaultWaitTimeAtStopMsec, maxSpeedKph, maxTravelTimeSegmentLength, false, titleFormatter);
 		gtfsData.processData();
 	}
 	
@@ -189,4 +200,5 @@ public class PlaybackModule {
 		}
 		
 	}
+
 }
