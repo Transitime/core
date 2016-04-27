@@ -25,16 +25,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import net.jcip.annotations.Immutable;
+
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.Time;
-
-import net.jcip.annotations.Immutable;
 
 /**
  * Contains information on a single vehicle. For providing info to client. This
@@ -70,8 +71,10 @@ public class IpcVehicle implements Serializable {
 	private final String nextStopId;
 	private final String nextStopName;
 	private final String vehicleType;
+	private final double predictedLatitude;
+	private final double predictedLongitude;
 	
-	private static final long serialVersionUID = -1744566765456572042L;
+	private static final long serialVersionUID = -1744566765456572041L;
 
 	/********************** Member Functions **************************/
 
@@ -143,6 +146,14 @@ public class IpcVehicle implements Serializable {
 		this.schedBasedPred = vs.isForSchedBasedPreds();
 		this.realTimeSchedAdh = vs.getRealTimeSchedAdh();
 		this.isDelayed = vs.isDelayed();
+		if (vs.getMatch() != null && vs.getMatch().getLocation() != null) {
+			Location matchLocation = vs.getMatch().getLocation();
+			this.predictedLatitude = matchLocation.getLat();
+			this.predictedLongitude = matchLocation.getLon();
+		} else {
+			this.predictedLatitude = 0.0;
+			this.predictedLongitude = 0.0;
+		}
 	}
 
 	/**
@@ -178,7 +189,8 @@ public class IpcVehicle implements Serializable {
 			String directionId, String headsign, boolean predictable,
 			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
 			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
-			String nextStopId, String nextStopName, String vehicleType) {
+			String nextStopId, String nextStopName, String vehicleType, 
+			double predictedLatitude, double predictedLongitude) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
@@ -199,6 +211,8 @@ public class IpcVehicle implements Serializable {
 		this.nextStopId = nextStopId;
 		this.nextStopName = nextStopName;
 		this.vehicleType = vehicleType;
+		this.predictedLatitude = predictedLatitude;
+		this.predictedLongitude = predictedLongitude;
 	}
 
 	/*
@@ -227,8 +241,10 @@ public class IpcVehicle implements Serializable {
 		protected String nextStopId;
 		protected String nextStopName;
 		protected String vehicleType;
+		protected double predictedLatitude;
+		protected double predictedLongitude;
 
-		private static final long serialVersionUID = -4996254752417270043L;
+		private static final long serialVersionUID = -4996254752417270041L;
 		private static final short currentSerializationVersion = 0;
 
 		/*
@@ -255,6 +271,8 @@ public class IpcVehicle implements Serializable {
 			this.nextStopId = v.nextStopId;
 			this.nextStopName = v.nextStopName;
 			this.vehicleType = v.vehicleType;
+			this.predictedLatitude = v.predictedLatitude;
+			this.predictedLongitude = v.predictedLongitude;
 		}
 
 		/*
@@ -277,16 +295,18 @@ public class IpcVehicle implements Serializable {
 			stream.writeObject(tripId);
 			stream.writeObject(tripPatternId);
 			stream.writeObject(directionId);
-		    stream.writeObject(headsign);
+		  stream.writeObject(headsign);
 			stream.writeBoolean(predictable);
 			stream.writeBoolean(schedBasedPred);
 			stream.writeObject(realTimeSchdAdh);
 			stream.writeBoolean(isDelayed);
-		    stream.writeBoolean(isLayover);
-		    stream.writeLong(layoverDepartureTime);
-		    stream.writeObject(nextStopId);
-		    stream.writeObject(nextStopName);
-		    stream.writeObject(vehicleType);
+		  stream.writeBoolean(isLayover);
+		  stream.writeLong(layoverDepartureTime);
+		  stream.writeObject(nextStopId);
+		  stream.writeObject(nextStopName);
+		  stream.writeObject(vehicleType);
+		  stream.writeDouble(predictedLatitude);
+		  stream.writeDouble(predictedLongitude);
 		}
 
 		/*
@@ -326,6 +346,8 @@ public class IpcVehicle implements Serializable {
 			nextStopId = (String) stream.readObject();
 			nextStopName = (String) stream.readObject();
 			vehicleType = (String) stream.readObject();
+			predictedLatitude = stream.readDouble();
+			predictedLongitude = stream.readDouble();
 		}
 
 		/*
@@ -339,7 +361,7 @@ public class IpcVehicle implements Serializable {
 					routeId, routeShortName, routeName, tripId, tripPatternId,
 					directionId, headsign, predictable, schedBasedPred,
 					realTimeSchdAdh, isDelayed, isLayover, layoverDepartureTime,
-					nextStopId, nextStopName, vehicleType);
+					nextStopId, nextStopName, vehicleType, predictedLatitude, predictedLongitude);
 		}
 	} // End of SerializationProxy class
 
@@ -402,6 +424,14 @@ public class IpcVehicle implements Serializable {
 
 	public float getLongitude() {
 		return avl.getLongitude();
+	}
+	
+	public double getPredictedLatitude() {
+		return predictedLatitude;
+	}
+
+	public double getPredictedLongitude() {
+		return predictedLongitude;
 	}
 
 	public String getLicensePlate() {
@@ -531,7 +561,7 @@ public class IpcVehicle implements Serializable {
 						BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl,
 						123.456f, "routeId", "routeShortName", "routeName",
 						"tripId", "tripPatternId", "dirId", "headsign", true,
-						false, null, false, false, 0, null, null, null);
+						false, null, false, false, 0, null, null, null, 0.0, 0.0);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);

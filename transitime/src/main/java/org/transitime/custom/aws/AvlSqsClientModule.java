@@ -103,6 +103,9 @@ public class AvlSqsClientModule extends Module {
           "Implementation of SqsMessageUnmarshaller to perform " + 
       "the deserialization of SQS Message objects into AVLReport objects");
 
+  private static StringConfigValue applicableList =
+      new StringConfigValue("transitime.avl.filterVehicleIdList", null, "List of vehicle Ids to filter on");
+  
     public AvlSqsClientModule(String agencyId) throws Exception {
       super(agencyId);
       monitoring = CloudwatchService.getInstance();
@@ -337,8 +340,10 @@ public class AvlSqsClientModule extends Module {
                 }
                   
                 if (avlReport != null) {
-                  Runnable avlClient = new AvlClient(avlReport.getReport());
-                  _avlClientExecutor.execute(avlClient);
+                  if (applicableList.getValue() == null || isApplicable(avlReport)) {
+                    Runnable avlClient = new AvlClient(avlReport.getReport());
+                    _avlClientExecutor.execute(avlClient);
+                  }
                 }
                if (recordCount % logFrequency == 0) {
                  long delta = (System.currentTimeMillis() - recordStart)/1000;
@@ -365,6 +370,15 @@ public class AvlSqsClientModule extends Module {
         } finally {
           logger.error("DeserializeTask exiting!");
         }
+      }
+
+      private boolean isApplicable(AvlReportWrapper avlReport) {
+        for (String s : applicableList.getValue().split(",")) {
+          if (avlReport.getReport().getVehicleId().equals(s.trim())) {
+            return true;
+          }
+        }
+        return false;
       }
     }
     

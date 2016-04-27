@@ -140,13 +140,14 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
 			Integer atOrNextGtfsStopSeq, String originStopId,
 			String destinationId, double distanceToNextStop,
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip) {
+			double distanceOfNextStopFromTripStart, double distanceAlongTrip,
+			double predictedLatitude, double predictedLongitude) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
-				atOrNextGtfsStopSeq);
+				atOrNextGtfsStopSeq, predictedLatitude, predictedLongitude);
 
 		this.originStopId = originStopId;
 		this.destinationId = destinationId;
@@ -244,7 +245,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
 					atOrNextGtfsStopSeq, originStopId, destinationId,
 					distanceToNextStop, distanceOfNextStopFromTripStart,
-					distanceAlongTrip);
+					distanceAlongTrip, predictedLatitude, predictedLongitude);
 		}
 
 	} // End of class SiriVehicleSerializationProxy
