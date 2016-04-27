@@ -107,21 +107,16 @@ public class TravelTimesProcessorForGtfsUpdates {
 	 * @return
 	 */
 	private ScheduleTime getGtfsScheduleTime(String tripId,
-			TripPattern tripPattern, int stopPathIndex, GtfsData gtfsData) {
-		String stopId = tripPattern.getStopId(stopPathIndex);
+			TripPattern tripPattern, int gtfsStopSequence, GtfsData gtfsData) {
 		
 		// Go through list of stops for the tripId. 
-		// Note: bit tricky handling trips where stop is encountered twice.
-		// But at least can start the for loop at 1 so that don't
-		// look at all the stop times. At least this will properly handle the
-		// situations where the first and last stop for a trip are the same.
 		List<GtfsStopTime> gtfsStopTimesList = 
 				gtfsData.getGtfsStopTimesForTrip(tripId);
-		for (int stopTimeIdx = stopPathIndex>0 ? 1 : 0; 
+		for (int stopTimeIdx = 0; 
 				stopTimeIdx < gtfsStopTimesList.size(); 
 				++stopTimeIdx) {
 			GtfsStopTime gtfsStopTime = gtfsStopTimesList.get(stopTimeIdx);
-			if (gtfsStopTime.getStopId().equals(stopId)) {
+			if (gtfsStopTime.getStopSequence() == gtfsStopSequence) {
 				// Found the stop. 
 				Integer arr = gtfsStopTime.getArrivalTimeSecs();
 				Integer dep = gtfsStopTime.getDepartureTimeSecs();
@@ -179,7 +174,7 @@ public class TravelTimesProcessorForGtfsUpdates {
 		// Start at index 1 since the first stub path is a special case
 		int previousStopPathWithScheduleTimeIndex = 0;
 		ScheduleTime previousScheduleTime = getGtfsScheduleTime(trip.getId(), 
-				tripPattern, 0, gtfsData);
+				tripPattern, firstPath.getGtfsStopSeq(), gtfsData);
 		int numberOfPaths = trip.getTripPattern().getNumberStopPaths();
 		for (int stopPathWithScheduleTimeIndex = 1; 
 				stopPathWithScheduleTimeIndex < numberOfPaths; 
@@ -188,8 +183,9 @@ public class TravelTimesProcessorForGtfsUpdates {
 			// Can't use the trip stop times because those can be filtered to just
 			// be for schedule adherence stops, which could be a small subset of the 
 			// schedule times from the stop_times.txt GTFS file.
+			int stopSeq = trip.getStopPath(stopPathWithScheduleTimeIndex).getGtfsStopSeq();
 			ScheduleTime scheduleTime = getGtfsScheduleTime(trip.getId(), 
-					tripPattern, stopPathWithScheduleTimeIndex, gtfsData);
+					tripPattern, stopSeq, gtfsData);
 			if (scheduleTime == null) 
 				continue;
 			
@@ -222,6 +218,7 @@ public class TravelTimesProcessorForGtfsUpdates {
 				msecSpentStopped = elapsedScheduleTimeInSecs*1000;
 			int msecForTravelBetweenScheduleTimes = 
 					elapsedScheduleTimeInSecs*1000 - msecSpentStopped;
+			
 			// Make sure that speed is reasonable, taking default wait 
 			// stop times into account. An agency might 
 			// mistakenly only provide a few seconds of travel time and
