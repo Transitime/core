@@ -603,7 +603,8 @@ public class AvlProcessor {
 
     long tripStartTime = bestMatch.getTrip().getStartTime() * 1000 + Time.getStartOfDay(new Date());
     // ignore future trips as we are deadheading
-    if (tripStartTime > System.currentTimeMillis()) return;
+    if (tripStartTime > Core.getInstance().getSystemTime() || bestMatch.isLayover())
+    	return;
     
     // difference
 	  double deltaDistance = Math.abs(Geo.distance(avlLocation, matchLocation));
