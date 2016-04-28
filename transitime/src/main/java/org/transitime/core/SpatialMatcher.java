@@ -754,7 +754,7 @@ public class SpatialMatcher {
 		Indices indices = new Indices(previousMatch);
 		spatialMatcher.setStartOfSearch(previousMatch);
 		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime())
-				&& distanceSearched < distanceAlongPathToSearch) {
+				&& (vehicleState.isLayover() || distanceSearched < distanceAlongPathToSearch)) {
 			spatialMatcher.processPossiblePotentialMatch(
 					vehicleState.getAvlReport(), indices, spatialMatches,
 					MatchingType.STANDARD_MATCHING);
