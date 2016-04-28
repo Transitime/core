@@ -603,7 +603,7 @@ public class AvlProcessor {
 
     long tripStartTime = bestMatch.getTrip().getStartTime() * 1000 + Time.getStartOfDay(new Date());
     // ignore future trips as we are deadheading
-    if (tripStartTime > Core.getInstance().getSystemTime() || bestMatch.isLayover())
+    if (tripStartTime > Core.getInstance().getSystemTime())
     	return;
     
     // difference
