@@ -13,12 +13,9 @@ import org.transitime.applications.UpdateTravelTimes;
 import org.transitime.avl.BatchCsvAvlFeedModule;
 import org.transitime.config.ConfigFileReader;
 import org.transitime.configData.AgencyConfig;
-import org.transitime.core.AvlProcessor;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.db.structs.AvlReport;
 import org.transitime.gtfs.GtfsData;
 import org.transitime.gtfs.TitleFormatter;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
@@ -34,8 +31,8 @@ public class PlaybackModule {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PlaybackModule.class);
 
-	private static String gtfsDirectoryName = "src/main/resources/wmata_gtfs"; 
-	private static String avlReportsCsv = "src/main/resources/avl/03142016_SE-04.csv";
+	private static String defaultGtfsDirectoryName = "src/main/resources/wmata_gtfs"; 
+	private static String defaultAvlReportsCsv = "src/main/resources/avl/03142016_SE-04.csv";
 	private static final String transitimeConfigFile = "src/main/resources/transiTimeConfigHsql.xml";
 
 	// Take defaults from GtfsFileProcessor.java
@@ -50,37 +47,17 @@ public class PlaybackModule {
 	
 	public static void main(String[] args) {
 		
+		String gtfsDirectoryName = defaultGtfsDirectoryName;
+		String avlReportsCsv = defaultAvlReportsCsv;
+		
 		if (args.length >= 2) {
 			gtfsDirectoryName = args[0];
 			avlReportsCsv = args[1];
 		}
 		
-        System.setProperty("transitime.avl.csvAvlFeedFileName", avlReportsCsv);
-		System.setProperty("transitime.configFiles", transitimeConfigFile);
-		System.setProperty("transitime.core.agencyId", "1");
-		
-		ConfigFileReader.processConfig();
-		
-		System.out.println("Adding GTFS to database... " + gtfsDirectoryName);
-		setupGtfs();
-		System.out.println("Done with GTFS.");
-		
-		System.out.println("adding avls");
-		// Core is created on first access
-		Date readTimeStart = new Date();
-		new BatchCsvAvlFeedModule("1").run(); 
-		Date readTimeEnd = new Date();
-		System.out.println("done");
+        runTrace(gtfsDirectoryName, avlReportsCsv, true, true);
 		
 		session = HibernateUtils.getSession();
-		
-		// Prediction accuracy post process. Can't use the module because
-		// we're not reading in in real time.
-		// This may not be performant for larger samples.
-		System.out.println("add predictionaccuracy");
-	
-		addPredictionAccuracy(readTimeStart, readTimeEnd);
-	
 		// Look at 5 min intervals
 		for (int i = 1800; i > 0; i -= 300)
 			getResults(i-300, i);
@@ -94,6 +71,49 @@ public class PlaybackModule {
 		
 		System.exit(0); // threads somewhere. maybe in Core.		
 		
+	}
+	
+	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log) {
+		System.setProperty("transitime.avl.csvAvlFeedFileName", avlReportsCsv);
+		System.setProperty("transitime.configFiles", transitimeConfigFile);
+		System.setProperty("transitime.core.agencyId", "1");
+			
+		ConfigFileReader.processConfig();
+		
+		if (log)
+			System.out.println("Adding GTFS to database... " + gtfsDirectoryName);
+		
+		setupGtfs(gtfsDirectoryName);
+		
+		if (log)
+			System.out.println("Done with GTFS. Adding AVLs.");
+		
+		// Core is created on first access
+		Date readTimeStart = new Date();
+		new BatchCsvAvlFeedModule("1").run(); 
+		Date readTimeEnd = new Date();
+		
+		if (log)
+			System.out.println("done");
+		
+		if (!addPredictionAccuracy)
+			return;
+		
+		// Prediction accuracy post process. Can't use the module because
+		// we're not reading in in real time.
+		// This may not be performant for larger samples.
+		session = HibernateUtils.getSession();
+		
+		if (log)
+			System.out.println("add predictionaccuracy");
+		
+		addPredictionAccuracy(readTimeStart, readTimeEnd);
+		session.close();
+		
+	}
+	
+	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv) {
+		runTrace(gtfsDirectoryName, avlReportsCsv, false, true);
 	}
 
 	private static void statError() {
@@ -170,7 +190,7 @@ public class PlaybackModule {
 
 	// Adapted from GtfsFileProcessor. May need to add setTimezone in the future,
 	// but actually maybe it doesn't matter for playback.
-	private static void setupGtfs() {
+	private static void setupGtfs(String gtfsDirectoryName) {
 		TitleFormatter titleFormatter = new TitleFormatter(null, true);
 		GtfsData gtfsData = new GtfsData(1, null, null, true, AgencyConfig.getAgencyId(), gtfsDirectoryName, null, 
 				pathOffsetDistance,  maxStopToPathDistance, maxDistanceForEliminatingVertices,
@@ -200,5 +220,6 @@ public class PlaybackModule {
 		}
 		
 	}
+
 
 }
