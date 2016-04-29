@@ -16,13 +16,13 @@
         <dependency>
             <groupId>transitime</groupId>
             <artifactId>transitimeCore</artifactId>
-            <version>0.0.22-SNAPSHOT</version>
+            <version>0.0.22</version>
         </dependency>
         
         <dependency>
             <groupId>transitime</groupId>
             <artifactId>transitimeApi</artifactId>
-            <version>0.0.22-SNAPSHOT</version>
+            <version>0.0.22</version>
         </dependency>
 
         <!-- For logging -->
