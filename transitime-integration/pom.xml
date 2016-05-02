@@ -19,12 +19,6 @@
             <version>0.0.23-SNAPSHOT</version>
         </dependency>
         
-        <dependency>
-            <groupId>transitime</groupId>
-            <artifactId>transitimeApi</artifactId>
-            <version>0.0.23-SNAPSHOT</version>
-        </dependency>
-
         <!-- For logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -69,21 +63,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
                 <configuration>
-                    <excludes>
-                        <exclude>**/**IntegrationTest.java</exclude>
-                    </excludes>
+                	<reuseForks>false</reuseForks>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.19.1</version>
-                <configuration>
-                    <skipTests>false</skipTests>
-                    <includes>
-                        <include>**/**IntegrationTest.java</include>
-                    </includes>
-                </configuration>
+                
                 <executions>
                     <execution>
                         <goals>
@@ -93,47 +80,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>truezip-maven-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <id>unzip-database</id>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <phase>test</phase>
-                        <configuration>
-                            <verbose>true</verbose>
-                            <fileset>
-                                <directory>${project.basedir}/src/test/resources/database/transitime_test.zip</directory>
-                                <outputDirectory>${project.basedir}/src/test/resources/database/data</outputDirectory>
-                            </fileset>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.onebusaway.plugins</groupId>
-                <artifactId>maven-hsqldb-plugin</artifactId>
-                <!-- version 1.0.1 supports hsqldb 2.3.2 -->
-                <version>1.0.2-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>user-database-start</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <deleteOnEntry>false</deleteOnEntry>
-                            <dbName>${project.basedir}/src/test/resources/database/data/transitime_test</dbName>
-                            <port>9001</port>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+           
         </plugins>
     </build>
 </project>

@@ -310,4 +310,8 @@ public class Prediction implements Serializable {
 	public boolean isSchedBasedPred() {
 		return schedBasedPred;
 	}
+	
+	public int getGtfsStopSeq() {
+		return gtfsStopSeq;
+	}
 }

@@ -928,4 +928,12 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public Stop getStop() {
 		return Core.getInstance().getDbConfig().getStop(stopId);
 	}
+	
+	/**
+	 * @return the gtfsStopSequence associated with the arrival/departure
+	 */
+	public int getGtfsStopSequence() {
+		return gtfsStopSeq;
+	}
+
 }
