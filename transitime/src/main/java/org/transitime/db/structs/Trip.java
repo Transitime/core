@@ -17,6 +17,7 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1166,5 +1167,29 @@ public class Trip implements Lifecycle, Serializable {
 	public boolean onDelete(Session s) throws CallbackException {
 		return Lifecycle.NO_VETO;
 	}
+
+	/**
+	 * Query how many travel times for trips entries exist for a given
+	 * travelTimesRev.  Used for metrics.
+	 * @param session
+	 * @param travelTimesRev
+	 * @return
+	 */
+  public static Long countTravelTimesForTrips(Session session,
+      int travelTimesRev) {
+    String sql = "Select count(*) from TravelTimesForTrips where travelTimesRev=:rev";
+    
+    Query query = session.createSQLQuery(sql);
+    query.setInteger("rev", travelTimesRev);
+    Long count = null;
+    try {
+      BigInteger bcount = (BigInteger) query.uniqueResult();
+      if (bcount != null)
+        count = bcount.longValue();
+    } catch (HibernateException e) {
+      Core.getLogger().error("exception querying for metrics", e);
+    }
+    return count;
+  }
 		
 }

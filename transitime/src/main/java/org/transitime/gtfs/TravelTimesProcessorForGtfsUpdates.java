@@ -17,8 +17,10 @@
 package org.transitime.gtfs;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -611,10 +613,14 @@ public class TravelTimesProcessorForGtfsUpdates {
 	 * @param gtfsData
 	 * @param travelTimesFromDbMap
 	 *            Map keyed by tripPatternId of Lists of TripPatterns
+	 * @return the number of distinct traveltimes referenced for the travelTimesRev            
 	 * @throws HibernateException
 	 */
-	private void processTrips(GtfsData gtfsData, 
+	private Integer processTrips(GtfsData gtfsData, 
 			Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
+	  // keep a set of travel times for trips for metrics
+	  Set<Integer> travelTimesForTripIds = new HashSet<Integer>();
+	  
 		// For trip read from GTFS data..
 		for (Trip trip : gtfsData.getTrips()) {
 			TripPattern tripPattern = trip.getTripPattern();
@@ -668,11 +674,14 @@ public class TravelTimesProcessorForGtfsUpdates {
 								ttForTripFromDbList, travelTimesFromDbMap);
 			}
 			
+			// were he keep a count of travel times for later metrics
+			travelTimesForTripIds.add(travelTimesToUse.getId());
 			// Set the resulting TravelTimesForTrip for the Trip so travel times 
 			// will be stored as part of the trip when the trip is stored to 
 			// the database.
 			trip.setTravelTimes(travelTimesToUse);
 		}			
+		return travelTimesForTripIds.size();
 	}
 	
 	/**
@@ -728,21 +737,38 @@ public class TravelTimesProcessorForGtfsUpdates {
 				TravelTimesForTrip.getTravelTimesForTrips(session, 
 						originalTravelTimesRev);
 
-		int originalNumberTravelTimes =
-				numberOfTravelTimes(travelTimesFromDbMap);
+		setOriginalNumberOfTravelTimes(
+				numberOfTravelTimes(travelTimesFromDbMap));
 		
 		// Do the low-level processing
-		processTrips(gtfsData, travelTimesFromDbMap);
+		setNumberOfTravelTimes(processTrips(gtfsData, travelTimesFromDbMap));
 							
 		// Let user know what is going on
 		logger.info("Finished processing travel time data. " + 
 				"Number of travel times read from db={}. " + 
 				"Total number of travel times needed to cover each trip={}. " + 
 				"Total number of trips={}.  Took {} msec.", 
-				originalNumberTravelTimes,
+				getOriginalNumberOfTravelTimes(),
 				numberOfTravelTimes(travelTimesFromDbMap),
 				gtfsData.getTrips().size(),
 				timer.elapsedMsec());
 	}
+
+	int numberOfTravelTimes = 0;
+	public int getNumberOfTravelTimes() {
+	  return numberOfTravelTimes;
+	}
+	public void setNumberOfTravelTimes(Integer numberOfTravelTimes) {
+	  if (numberOfTravelTimes != null)
+	    this.numberOfTravelTimes = numberOfTravelTimes;
+  }
+
+  int originalNumberOfTravelTimes = 0;
+	public int getOriginalNumberOfTravelTimes() {
+	  return originalNumberOfTravelTimes;
+	}
+  public void setOriginalNumberOfTravelTimes(int numberOfTravelTimes) {
+    originalNumberOfTravelTimes = numberOfTravelTimes;
+  }
 
 }

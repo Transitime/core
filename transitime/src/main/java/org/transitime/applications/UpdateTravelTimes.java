@@ -84,8 +84,9 @@ public class UpdateTravelTimes {
 	 *            Map of all of the trips. Keyed on tripId.
 	 * @param travelTimeInfoMap
 	 *            Contains travel times that are available by trip pattern ID
+	 * @return the newly created travelTimesRev
 	 */
-	private static void setTravelTimesForAllTrips(Session session, 
+	private static int setTravelTimesForAllTrips(Session session, 
 			Map<String, Trip> tripMap, TravelTimeInfoMap travelTimeInfoMap) {
 		// For caching TravelTimesForTrip and TravelTimesForStopPaths that are
 		// created. This way won't store duplicate objects. Caching both 
@@ -231,7 +232,8 @@ public class UpdateTravelTimes {
 			
 			// Store the new travel times as part of the trip
 			trip.setTravelTimes(ttForTrip);
-		} // End of for each trip that is configured		
+		} // End of for each trip that is configured	
+		return newTravelTimesRev;
 	}
 	
 	/**
@@ -296,8 +298,9 @@ public class UpdateTravelTimes {
 	 *            Not fully implemented. Should therefore be null for now.
 	 * @param beginTime
 	 * @param endTime
+	 * @return the newly created travelTimeRev
 	 */
-	private static void processTravelTimes(Session session, String agencyId,
+	private static int processTravelTimes(Session session, String agencyId,
 			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
 		// Read in historic data from db and put it into maps so that it can
 		// be processed.
@@ -307,7 +310,7 @@ public class UpdateTravelTimes {
 
 		if (processor.isEmpty()) {
 		  logger.info("Exiting...");
-		  return;
+		  return -1;
 		}
 		
 		// Read in the current Trips. This is done after the historical data
@@ -322,13 +325,14 @@ public class UpdateTravelTimes {
 		
 		logger.info("assigning travel times...");
 		// Update all the Trip objects with the new travel times
-		setTravelTimesForAllTrips(session, tripMap, travelTimeInfoMap);
+		int travelTimesRev = setTravelTimesForAllTrips(session, tripMap, travelTimeInfoMap);
 		
 		logger.info("saving travel times...");
 		// Write out the trip objects, which also writes out the travel times
 		writeNewTripDataToDb(session, tripMap);
 		
 		logger.info("committing....");
+		return travelTimesRev;
 	}
 
 	/**
@@ -347,6 +351,7 @@ public class UpdateTravelTimes {
 	 */
 	public static void manageSessionAndProcessTravelTimes(String agencyId,
 			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
+	  int newTravelTimesRev = -2;
 		// Get a database session
 		Session session = HibernateUtils.getSession(agencyId);
 		Transaction tx = null;
@@ -355,7 +360,7 @@ public class UpdateTravelTimes {
 			tx = session.beginTransaction();
 
 			// Actually do all the data processing
-			processTravelTimes(session, agencyId, specialDaysOfWeek, beginTime,
+			newTravelTimesRev = processTravelTimes(session, agencyId, specialDaysOfWeek, beginTime,
 					endTime);
 			
 			// Make sure that everything actually written out to db
@@ -371,7 +376,17 @@ public class UpdateTravelTimes {
 		}
 		
 		logger.info("Done processing travel times. Changes successfully "
-				+ "committed to database");
+				+ "committed to database.  Querying for metrics....");
+		HibernateUtils.clearSessionFactory();
+    Session statsSession = HibernateUtils.getSession(agencyId);
+    try {
+      TravelTimesProcessor processor = new TravelTimesProcessor();
+      Long inserts = processor.updateMetrics(statsSession, newTravelTimesRev);
+      logger.info("{} succesfully inserted for travelTimesRev={}", inserts, newTravelTimesRev);
+    } catch (Exception e) {
+      logger.error("exception querying for statistics for tavelTimesRev={}.  Update most likely failed!", newTravelTimesRev, e);
+    }
+    
 	}
 	
 	/**

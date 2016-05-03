@@ -90,6 +90,7 @@ import org.transitime.gtfs.readers.GtfsStopsSupplementReader;
 import org.transitime.gtfs.readers.GtfsTransfersReader;
 import org.transitime.gtfs.readers.GtfsTripsReader;
 import org.transitime.gtfs.readers.GtfsTripsSupplementReader;
+import org.transitime.monitoring.CloudwatchService;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
@@ -111,6 +112,9 @@ public class GtfsData {
 
 	// The session used throughout the class
 	private final Session session;
+	
+	// log metrics
+	private CloudwatchService cloudwatchService;
 	
 	// Various params set by constructor
 	private final ActiveRevisions revs;
@@ -310,6 +314,7 @@ public class GtfsData {
 				HibernateUtils.getSessionFactory(getAgencyId());
 		session = sessionFactory.openSession();
 		
+		cloudwatchService = CloudwatchService.getInstance();
 		// Deal with the ActiveRevisions. First, store the original travel times
 		// rev since need it to read in old travel time data. 		
 		ActiveRevisions originalRevs = ActiveRevisions.get(session); 
@@ -2688,7 +2693,10 @@ public class GtfsData {
     gtfsRoutesMap = null;
     gtfsTripsMap = null;
     gtfsStopTimesForTripMap = null; 
-
+    int originalNumberOfTravelTimes = travelTimesProcesssor.getOriginalNumberOfTravelTimes();
+    int numberOfTravelTimes = travelTimesProcesssor.getNumberOfTravelTimes();
+    int configRev = revs.getConfigRev();
+    int travelTimesRev= revs.getTravelTimesRev();
 		try {
   		DbWriter dbWriter = new DbWriter(this);
   		dbWriter.write(session, revs.getConfigRev());	
@@ -2702,6 +2710,7 @@ public class GtfsData {
       logger.error("Exception when writing data to db", e);
       throw e;
     }   
+		updateMetrics(originalNumberOfTravelTimes, numberOfTravelTimes, configRev, travelTimesRev);
   		
   		
 
@@ -2738,4 +2747,26 @@ public class GtfsData {
 //			System.err.println("  " + r);
 //		}
 	}
+
+  public Long updateMetrics(int originalTravelTimesCount, int expectedTravelTimesCount, int configRev, int travelTimesRev) {
+    HibernateUtils.clearSessionFactory();
+    SessionFactory sessionFactory =  
+        HibernateUtils.getSessionFactory(getAgencyId());
+    Session statsSession = sessionFactory.openSession();
+    cloudwatchService.saveMetric("PredictionLatestConfigRev", configRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("PredictionLatestTravelTimesRev", travelTimesRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    Long count = Trip.countTravelTimesForTrips(statsSession, travelTimesRev);
+    if (count != null) {
+      cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    } else {
+      cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    }
+    cloudwatchService.saveMetric("PredictionTravelTimesForTripsExpectedCount", expectedTravelTimesCount*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("PredictionTravelTimesForTripsOriginalCount", originalTravelTimesCount*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+
+    logger.info("Found {} TravelTimesForTrips for {}:{} with expected={}, orginal={}", 
+        count, configRev, travelTimesRev, expectedTravelTimesCount, originalTravelTimesCount);
+    return count;
+    
+  }
 }

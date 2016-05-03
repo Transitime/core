@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.BooleanConfigValue;
@@ -1029,6 +1030,18 @@ public class TravelTimesProcessor {
 				"times map took {} msec.", 
 				intervalTimer.elapsedMsec());
 	}	
+	
+	 public Long updateMetrics(Session session, int travelTimesRev) {
+	   Long count = Trip.countTravelTimesForTrips(session, travelTimesRev);
+	   cloudwatchService.saveMetric("PredictionLatestTravelTimeRev", travelTimesRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	   if (count != null) {
+	     cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	   } else {
+	     cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	   }
+	   return count;
+	  }
+
 
 	// cloudwatch reporting/monitoring
   private void reportStatus(int setSize, int matched, int unmatched, int invalid) {

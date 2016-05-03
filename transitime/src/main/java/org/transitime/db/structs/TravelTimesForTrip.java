@@ -69,7 +69,9 @@ public class TravelTimesForTrip implements Serializable {
 	@Id 
 	@GeneratedValue 
 	private Integer id;
-
+	public Integer getId() { 
+	  return id; 
+	}
 	// Need configRev for the configuration so that when old configurations 
 	// cleaned out can also easily get rid of old travel times. Note: at one
 	// point tried making configRevan @Id so that the config rev is part of 
