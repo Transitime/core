@@ -326,7 +326,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		// Determine if vehicle is so late that predictions for subsequent 
 		// trips should be marked as uncertain given that another vehicle
 		// might substitute in for that block.
-		TemporalDifference lateness = vehicleState.getRealTimeSchedAdh();
+		TemporalDifference lateness = vehicleState.getRealTimeSchedAdhNoWait();
 		boolean lateSoMarkSubsequentTripsAsUncertain = lateness != null ? 
 						lateness.isLaterThan(maxLateCutoffPredsForNextTripsSecs
 								.getValue()) : false;

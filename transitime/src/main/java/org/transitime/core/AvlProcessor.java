@@ -1315,10 +1315,14 @@ public class AvlProcessor {
 
 		// Determine the schedule adherence for the vehicle
 		TemporalDifference scheduleAdherence = RealTimeSchedAdhProcessor
-				.generate(vehicleState);
-		
+				.generate(vehicleState, true);
+
+    TemporalDifference scheduleAdherenceNoWait = RealTimeSchedAdhProcessor
+        .generate(vehicleState, false);
+
 		// Store the schedule adherence with the vehicle
 		vehicleState.setRealTimeSchedAdh(scheduleAdherence);		
+		vehicleState.setRealTimeSchedAdhNoWait(scheduleAdherenceNoWait);
 	}
 	
 	/**

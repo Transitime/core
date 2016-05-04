@@ -63,6 +63,7 @@ public class VehicleState {
 			new LinkedList<AvlReport>();
 	private List<IpcPrediction> predictions;
 	private TemporalDifference realTimeSchedAdh;
+	private TemporalDifference realTimeSchedAdhNoWait;
 	
 	// For keeping track of how many bad matches have been encountered.
 	// This way can ignore bad matches if only get a couple
@@ -738,6 +739,27 @@ public class VehicleState {
 		else
 			return null;
 	}
+
+ /**
+   * Stores the real-time schedule adherence without any wait times
+   * 
+   * @param realTimeSchedAdh
+   */
+  public void setRealTimeSchedAdhNoWait(TemporalDifference realTimeSchedAdhNoWait) {
+    this.realTimeSchedAdhNoWait = realTimeSchedAdhNoWait;
+  }
+
+	
+	/**
+	 * like realtime adherence, but does not include stop wait times.
+	 * @return
+	 */
+  public TemporalDifference getRealTimeSchedAdhNoWait() {
+    if (isPredictable())
+      return realTimeSchedAdhNoWait;
+    else
+      return null;
+  }
 	
 	/**
 	 * Determines the heading of the vector that defines the stop path segment
@@ -944,4 +966,6 @@ public class VehicleState {
 	public boolean isDelayed() {
 		return isDelayed;
 	}
+
+
 }
