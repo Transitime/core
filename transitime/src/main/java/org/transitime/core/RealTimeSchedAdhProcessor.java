@@ -35,11 +35,6 @@ public class RealTimeSchedAdhProcessor {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(RealTimeSchedAdhProcessor.class);
 
-	
-	
-	 public static TemporalDifference generate(VehicleState vehicleState) {
-	   return RealTimeSchedAdhProcessor.generate(vehicleState, true);
-	 }
 	/********************** Member Functions **************************/
 
 	/**
@@ -52,12 +47,11 @@ public class RealTimeSchedAdhProcessor {
 	 * is in between stops.
 	 * 
 	 * @param vehicleState
-	 * @param includeWaitTime should the deviation consider stop wait times as well
 	 * @return The real-time schedule adherence for the vehicle, or null if
 	 *         vehicle is not predictable or there are no upcoming stops with a
 	 *         schedule time.
 	 */
-	public static TemporalDifference generate(VehicleState vehicleState, boolean includeWaitTime) {
+	public static TemporalDifference generate(VehicleState vehicleState) {
 		// If vehicle not matched/predictable then cannot provide schedule
 		// adherence
 		if (!vehicleState.isPredictable())
@@ -150,7 +144,7 @@ public class RealTimeSchedAdhProcessor {
 		// If using departure time then add in expected stop wait time
 		int stopPathIndex = matchAtStopWithScheduleTime.getStopPathIndex();
 		ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
-		if (scheduleTime.getDepartureTime() != null && includeWaitTime) {
+		if (scheduleTime.getDepartureTime() != null) {
 			//TravelTimesForStopPath 
 			int stopTime = trip.getTravelTimesForStopPath(stopPathIndex)
 					.getStopTimeMsec();
