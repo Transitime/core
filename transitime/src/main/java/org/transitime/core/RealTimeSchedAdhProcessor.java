@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.ScheduleTime;
+import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.Time;
 
@@ -176,50 +177,56 @@ public class RealTimeSchedAdhProcessor {
 	public static TemporalDifference generateEffectiveScheduleDifference(VehicleState vehicleState) {
 	  TemporalMatch match = vehicleState.getMatch();
     Trip trip = match.getTrip();
-    Date avlTime = vehicleState.getAvlReport().getDate();
+    long avlTime = match.getAvlTime();
     String vehicleId = vehicleState.getVehicleId();
     
     int nextStopPathIndex = match.getStopPathIndex();
     int previousStopPathIndex = nextStopPathIndex -1;
     
-    if (match.atBeginningOfPathStop() || previousStopPathIndex < 0) {
-      //we are either before the trip or at the first stop (layover)
+    if (previousStopPathIndex < 0) {
+      // we are either before the trip or at the first stop (layover)
       Long departureEpoch = Core.getInstance().getTime().getEpochTime(trip.getScheduleTime(0).getTime(), avlTime);
+  
+      // if trip has not started yet schedule difference = 0
+      long difference = Math.max(0, avlTime - departureEpoch);
+    	  
       logger.info("vehicleId {} has schedDev before trip start of {}", 
           vehicleId,
-          (avlTime.getTime() - departureEpoch));
-      return new TemporalDifference(avlTime.getTime() - departureEpoch);
+          difference);
+      
+      return new TemporalDifference(difference);
     }
-    if (match.isAtStop() || match.atEndOfPathStop()) {
-      // we can only be late, or on layover
+    if (match.isAtStop()) {
+      // If at stop, nextStopPathIndex can be for current stop or next stop depending
+      // on match.atEndOfPathStop()
+      int departureSecs = match.getAtStop().getScheduleTime().getTime();
       Long departureEpoch = Core.getInstance().getTime()
-          .getEpochTime(trip.getScheduleTime(nextStopPathIndex).getTime(), avlTime);
-      if (departureEpoch > avlTime.getTime()) {
+          .getEpochTime(departureSecs, avlTime);
+      if (departureEpoch > avlTime) {
         logger.info("vehicleId {} has schedDev at stop of 0", 
             vehicleId);
       }
       logger.info("vehicleId {} has schedDev at stop of {}", 
           vehicleId,
-          (avlTime.getTime() - departureEpoch));
-      return new TemporalDifference(avlTime.getTime() - departureEpoch);
+          (avlTime - departureEpoch));
+      return new TemporalDifference(avlTime - departureEpoch);
     }
     
     // we must be between stops, interpolate effective schedule
-    long fromStopTimeSecs = trip.getScheduleTime(nextStopPathIndex).getTime();
-    long toStopTimeSecs = trip.getScheduleTime(previousStopPathIndex).getTime();
-    double fromDistance = match.getMatchAtPreviousStop().getDistanceAlongStopPath();
-    double toDistance = match.getMatchAtNextStopWithScheduleTime().getDistanceAlongStopPath();
-    double currentDistance = match.getDistanceAlongStopPath();
+    long fromStopTimeSecs = trip.getScheduleTime(previousStopPathIndex).getTime();
+    long toStopTimeSecs = trip.getScheduleTime(nextStopPathIndex).getTime();
+    long pathTime = toStopTimeSecs - fromStopTimeSecs;
     
-    double ratio = (currentDistance - fromDistance)
-        / (toDistance - fromDistance);
-    int effectiveStopTimeSec = (int) (fromStopTimeSecs + (toStopTimeSecs - fromStopTimeSecs) * ratio);
+    double ratio = match.getDistanceAlongStopPath() / match.getStopPath().getLength();
+    
+    int effectiveStopTimeSec = (int) (fromStopTimeSecs + (pathTime * ratio));
     Long effectiveScheduleTimeEpoch = Core.getInstance().getTime().getEpochTime(effectiveStopTimeSec, avlTime);
+    
     logger.info("vehicleId {} has interpolated schedDev of {}, avlTime={}, effective={}", 
         vehicleId, 
-        Time.elapsedTimeStr(avlTime.getTime() - effectiveScheduleTimeEpoch),
-        Time.timeStr(avlTime.getTime()),
+        Time.elapsedTimeStr(avlTime - effectiveScheduleTimeEpoch),
+        Time.timeStr(avlTime),
         Time.timeStr(effectiveScheduleTimeEpoch));
-	  return new TemporalDifference(avlTime.getTime() - effectiveScheduleTimeEpoch);
+	  return new TemporalDifference(avlTime - effectiveScheduleTimeEpoch);
 	}
 }
