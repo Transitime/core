@@ -18,11 +18,14 @@
 package org.transitime.core;
 
 import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.db.structs.Block;
 import org.transitime.db.structs.ScheduleTime;
 import org.transitime.db.structs.Trip;
+import org.transitime.utils.Time;
 
 /**
  * For determining the real-time schedule adherence for a predictable vehicle.
@@ -37,9 +40,6 @@ public class RealTimeSchedAdhProcessor {
 
 	
 	
-	 public static TemporalDifference generate(VehicleState vehicleState) {
-	   return RealTimeSchedAdhProcessor.generate(vehicleState, true);
-	 }
 	/********************** Member Functions **************************/
 
 	/**
@@ -57,7 +57,7 @@ public class RealTimeSchedAdhProcessor {
 	 *         vehicle is not predictable or there are no upcoming stops with a
 	 *         schedule time.
 	 */
-	public static TemporalDifference generate(VehicleState vehicleState, boolean includeWaitTime) {
+	public static TemporalDifference generate(VehicleState vehicleState) {
 		// If vehicle not matched/predictable then cannot provide schedule
 		// adherence
 		if (!vehicleState.isPredictable())
@@ -150,7 +150,7 @@ public class RealTimeSchedAdhProcessor {
 		// If using departure time then add in expected stop wait time
 		int stopPathIndex = matchAtStopWithScheduleTime.getStopPathIndex();
 		ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
-		if (scheduleTime.getDepartureTime() != null && includeWaitTime) {
+		if (scheduleTime.getDepartureTime() != null) {
 			//TravelTimesForStopPath 
 			int stopTime = trip.getTravelTimesForStopPath(stopPathIndex)
 					.getStopTimeMsec();
@@ -167,5 +167,59 @@ public class RealTimeSchedAdhProcessor {
 				"schedule adherence={}. avlTime={} and scheduled time={}",
 				vehicleId, scheduleAdherence, avlTime, scheduleTime);
 		return scheduleAdherence;
+	}
+	
+	/**
+	 * We define effective schedule time as where the bus currently falls in the schedule based on 
+	 * its current position.
+	 */
+	public static TemporalDifference generateEffectiveScheduleDifference(VehicleState vehicleState) {
+	  TemporalMatch match = vehicleState.getMatch();
+    Trip trip = match.getTrip();
+    Date avlTime = vehicleState.getAvlReport().getDate();
+    String vehicleId = vehicleState.getVehicleId();
+    
+    int nextStopPathIndex = match.getStopPathIndex();
+    int previousStopPathIndex = nextStopPathIndex -1;
+    
+    if (match.atBeginningOfPathStop() || previousStopPathIndex < 0) {
+      //we are either before the trip or at the first stop (layover)
+      Long departureEpoch = Core.getInstance().getTime().getEpochTime(trip.getScheduleTime(0).getTime(), avlTime);
+      logger.info("vehicleId {} has schedDev before trip start of {}", 
+          vehicleId,
+          (avlTime.getTime() - departureEpoch));
+      return new TemporalDifference(avlTime.getTime() - departureEpoch);
+    }
+    if (match.isAtStop() || match.atEndOfPathStop()) {
+      // we can only be late, or on layover
+      Long departureEpoch = Core.getInstance().getTime()
+          .getEpochTime(trip.getScheduleTime(nextStopPathIndex).getTime(), avlTime);
+      if (departureEpoch > avlTime.getTime()) {
+        logger.info("vehicleId {} has schedDev at stop of 0", 
+            vehicleId);
+      }
+      logger.info("vehicleId {} has schedDev at stop of {}", 
+          vehicleId,
+          (avlTime.getTime() - departureEpoch));
+      return new TemporalDifference(avlTime.getTime() - departureEpoch);
+    }
+    
+    // we must be between stops, interpolate effective schedule
+    long fromStopTimeSecs = trip.getScheduleTime(nextStopPathIndex).getTime();
+    long toStopTimeSecs = trip.getScheduleTime(previousStopPathIndex).getTime();
+    double fromDistance = match.getMatchAtPreviousStop().getDistanceAlongStopPath();
+    double toDistance = match.getMatchAtNextStopWithScheduleTime().getDistanceAlongStopPath();
+    double currentDistance = match.getDistanceAlongStopPath();
+    
+    double ratio = (currentDistance - fromDistance)
+        / (toDistance - fromDistance);
+    int effectiveStopTimeSec = (int) (fromStopTimeSecs + (toStopTimeSecs - fromStopTimeSecs) * ratio);
+    Long effectiveScheduleTimeEpoch = Core.getInstance().getTime().getEpochTime(effectiveStopTimeSec, avlTime);
+    logger.info("vehicleId {} has interpolated schedDev of {}, avlTime={}, effective={}", 
+        vehicleId, 
+        Time.elapsedTimeStr(avlTime.getTime() - effectiveScheduleTimeEpoch),
+        Time.timeStr(avlTime.getTime()),
+        Time.timeStr(effectiveScheduleTimeEpoch));
+	  return new TemporalDifference(avlTime.getTime() - effectiveScheduleTimeEpoch);
 	}
 }
