@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.applications.UpdateTravelTimes;
 import org.transitime.avl.BatchCsvAvlFeedModule;
+import org.transitime.avl.BatchCsvAvlFeedModule.AvlPostProcessor;
 import org.transitime.config.ConfigFileReader;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.core.dataCache.PredictionDataCache;
@@ -73,7 +74,7 @@ public class PlaybackModule {
 		
 	}
 	
-	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log) {
+	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log, AvlPostProcessor processor) {
 		System.setProperty("transitime.avl.csvAvlFeedFileName", avlReportsCsv);
 		System.setProperty("transitime.configFiles", transitimeConfigFile);
 		System.setProperty("transitime.core.agencyId", "1");
@@ -89,8 +90,11 @@ public class PlaybackModule {
 			System.out.println("Done with GTFS. Adding AVLs.");
 		
 		// Core is created on first access
+		BatchCsvAvlFeedModule mod = new BatchCsvAvlFeedModule("1");
+		if (processor != null)
+			mod.setAvlPostProcessor(processor);
 		Date readTimeStart = new Date();
-		new BatchCsvAvlFeedModule("1").run(); 
+		mod.run();
 		Date readTimeEnd = new Date();
 		
 		if (log)
@@ -112,8 +116,16 @@ public class PlaybackModule {
 		
 	}
 	
+	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log) {
+		runTrace(gtfsDirectoryName, avlReportsCsv, addPredictionAccuracy, log);
+	}
+	
 	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv) {
 		runTrace(gtfsDirectoryName, avlReportsCsv, false, true);
+	}
+	
+	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, AvlPostProcessor processor) {
+		runTrace(gtfsDirectoryName, avlReportsCsv, false, true, processor);
 	}
 
 	private static void statError() {

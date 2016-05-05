@@ -127,6 +127,10 @@ public class BatchCsvAvlFeedModule extends Module {
 
 			// Actually process the AVL report
 			AvlProcessor.getInstance().processAvlReport(avlReport);
+			
+			// Post process if neccessary
+			if (avlPostProcessor != null)
+				avlPostProcessor.postProcess(avlReport);
 		}
 
 		// Kill off the whole program because done processing the AVL data
@@ -138,4 +142,13 @@ public class BatchCsvAvlFeedModule extends Module {
         }
 	}
 
+	private AvlPostProcessor avlPostProcessor = null;
+	
+	public void setAvlPostProcessor(AvlPostProcessor avlPostProcessor) {
+		this.avlPostProcessor = avlPostProcessor;
+	}
+	
+	public interface AvlPostProcessor {
+		void postProcess(AvlReport avlReport);
+	}
 }
