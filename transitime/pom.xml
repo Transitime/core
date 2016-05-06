@@ -3,7 +3,7 @@
 	<parent>
 	  <groupId>transitime</groupId>
 	  <artifactId>transitime</artifactId>
-	  <version>0.0.23</version>
+	  <version>0.0.24-SNAPSHOT</version>
 	</parent>
 	  <artifactId>transitimeCore</artifactId>
 	
