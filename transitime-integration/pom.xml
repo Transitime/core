@@ -16,7 +16,7 @@
         <dependency>
             <groupId>transitime</groupId>
             <artifactId>transitimeCore</artifactId>
-            <version>0.0.24-SNAPSHOT</version>
+            <version>0.0.24</version>
         </dependency>
         
         <!-- For logging -->
