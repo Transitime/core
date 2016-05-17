@@ -178,6 +178,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 				if (avlReport.getTime() + crowFliesTimeToWaitStop > arrivalTime) {
 					arrivalTime = avlReport.getTime() + crowFliesTimeToWaitStop;
 					deadheadingSoNoDriverBreak = true;
+					scheduleDeviation = null; // if we are deadheading we aren't on a schedule
 					logger.debug("For vehicleId={} adjusted the arrival time "
 							+ "for layover stopId={} tripId={} blockId={} "
 							+ "since crowFliesTimeToLayover={} "
@@ -232,6 +233,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 								trip.getId(), trip.getBlockId(),
 								Time.dateTimeStrMsec(expectedDepartureTime), 
 								path.getBreakTimeSec());
+						// again don't trust schedule deviation
+						scheduleDeviation = null;
 					}					
 				}
 								
