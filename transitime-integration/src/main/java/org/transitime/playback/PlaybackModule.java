@@ -117,7 +117,7 @@ public class PlaybackModule {
 	}
 	
 	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log) {
-		runTrace(gtfsDirectoryName, avlReportsCsv, addPredictionAccuracy, log);
+		runTrace(gtfsDirectoryName, avlReportsCsv, addPredictionAccuracy, log, null);
 	}
 	
 	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv) {
