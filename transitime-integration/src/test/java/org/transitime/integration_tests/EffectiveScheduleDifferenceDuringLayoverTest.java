@@ -16,13 +16,13 @@ import org.transitime.playback.PlaybackModule;
 import junit.framework.TestCase;
 
 // When we're using schedule times, effective schedule difference should be equal to schedule deviation.
-public class EffectiveScheduleDifferenceDuringLayover extends TestCase {
+public class EffectiveScheduleDifferenceDuringLayoverTest extends TestCase {
 	
 	private static final String GTFS = "src/test/resources/gtfs/5A";
 	private static final String AVL = "src/test/resources/avl/5A_8062.csv";
 	
 
-	private static final Logger logger = LoggerFactory.getLogger(EffectiveScheduleDifferenceDuringLayover.class);
+	private static final Logger logger = LoggerFactory.getLogger(EffectiveScheduleDifferenceDuringLayoverTest.class);
 
 	/*
 	 * Test effective schedule adherence during a layover, which should be
