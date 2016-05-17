@@ -3,12 +3,14 @@ package org.transitime.integration_tests;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.avl.BatchCsvAvlFeedModule.AvlPostProcessor;
 import org.transitime.core.RealTimeSchedAdhProcessor;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.Trip;
 import org.transitime.playback.PlaybackModule;
 
 import junit.framework.TestCase;
@@ -29,6 +31,7 @@ public class GenerateEffectiveScheduleDifferenceTest extends TestCase {
 		AvlPostProcessor processor = new AvlPostProcessor() {
 
 			public void postProcess(AvlReport avlReport) {
+				
 				String vehicleId = avlReport.getVehicleId();
 				VehicleState vehicleState = VehicleStateManager.getInstance()
 						.getVehicleState(vehicleId);
@@ -38,6 +41,13 @@ public class GenerateEffectiveScheduleDifferenceTest extends TestCase {
 				
 				TemporalDifference schAdh = vehicleState.getRealTimeSchedAdh();
 				TemporalDifference effSchAdh = RealTimeSchedAdhProcessor.generateEffectiveScheduleDifference(vehicleState);
+				
+				// Only do this check if previous trip is not still active
+				int tripIndex = vehicleState.getTrip().getIndexInBlock();
+				Trip prevTrip = vehicleState.getBlock().getTrip(tripIndex - 1);				
+				if (prevTrip != null && 
+						Core.getInstance().getTime().getEpochTime(prevTrip.getEndTime(), avlReport.getTime()) > avlReport.getTime())
+					return;
 				
 				if (schAdh != null) {
 					int delta = Math.abs(schAdh.getTemporalDifference() - -1*effSchAdh.getTemporalDifference());
@@ -50,4 +60,5 @@ public class GenerateEffectiveScheduleDifferenceTest extends TestCase {
 		
 		PlaybackModule.runTrace(GTFS, AVL, processor);
 	}
+	
 }

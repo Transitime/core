@@ -183,13 +183,32 @@ public class RealTimeSchedAdhProcessor {
     if (previousStopPathIndex < 0) {
       // we are either before the trip or at the first stop (layover)
       Long departureEpoch = Core.getInstance().getTime().getEpochTime(trip.getScheduleTime(0).getTime(), avlTime);
-  
-      // if trip has not started yet schedule difference = 0
-      long difference = Math.max(0, avlTime - departureEpoch);
+ 
+      
+      // if trip has not started yet schedule difference = 0,
+      // unless previous trip is active in which case schedule difference=early
+      long difference = avlTime - departureEpoch;
+      
+      if (difference < 0) {
+    	  difference = 0;
+    	  
+    	  int tripIndex = match.getTripIndex();
+    	  if (tripIndex > 0) {
+    		  Trip prevTrip = match.getBlock().getTrip(tripIndex - 1);
+        	  Long epochEndTime = Core.getInstance().getTime().getEpochTime(prevTrip.getEndTime(), avlTime);
+        	          	  
+        	  difference = Math.min(0, avlTime - epochEndTime);
+        	  
+        	  logger.info("vehicleId {} has schedDev before trip set by previous trip of {}",
+        			  vehicleId,
+        			  difference);
+    	  }
+      }
+      
     	  
       logger.info("vehicleId {} has schedDev before trip start of {}", 
           vehicleId,
-          difference);
+          difference); 
       
       return new TemporalDifference(difference);
     }
