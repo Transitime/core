@@ -727,7 +727,10 @@ public class TravelTimesProcessor {
 					determineTravelTimesForStopPath(dataFetcher, arrDep1, 
 							arrDep2);
 			
-			// Ignore a stop path if any segment travel time is negative
+			// Ignore a stop path if any segment travel time is negative. Nulls will
+			// be ignored downstream anyway so can also ignore those.
+			if (travelTimesForStopPath == null)
+				return;
 			for (Integer travelTimeForSegment : travelTimesForStopPath) {
 				if (travelTimeForSegment < 0) {
 					logger.error("Ignoring negative travel times={} for stop path "
