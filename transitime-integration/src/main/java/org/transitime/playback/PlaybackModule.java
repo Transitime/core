@@ -36,6 +36,8 @@ public class PlaybackModule {
 	private static String defaultAvlReportsCsv = "src/main/resources/avl/03142016_SE-04.csv";
 	private static final String transitimeConfigFile = "src/main/resources/transiTimeConfigHsql.xml";
 
+	private static final String agencyId = "1";
+	
 	// Take defaults from GtfsFileProcessor.java
 	private static final double pathOffsetDistance = 0.0;					
 	private static final double maxStopToPathDistance =  60.0;
@@ -77,7 +79,7 @@ public class PlaybackModule {
 	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log, AvlPostProcessor processor) {
 		System.setProperty("transitime.avl.csvAvlFeedFileName", avlReportsCsv);
 		System.setProperty("transitime.configFiles", transitimeConfigFile);
-		System.setProperty("transitime.core.agencyId", "1");
+		System.setProperty("transitime.core.agencyId", agencyId);
 			
 		ConfigFileReader.processConfig();
 		
@@ -90,7 +92,7 @@ public class PlaybackModule {
 			System.out.println("Done with GTFS. Adding AVLs.");
 		
 		// Core is created on first access
-		BatchCsvAvlFeedModule mod = new BatchCsvAvlFeedModule("1");
+		BatchCsvAvlFeedModule mod = new BatchCsvAvlFeedModule(agencyId);
 		if (processor != null)
 			mod.setAvlPostProcessor(processor);
 		Date readTimeStart = new Date();
@@ -114,6 +116,11 @@ public class PlaybackModule {
 		addPredictionAccuracy(readTimeStart, readTimeEnd);
 		session.close();
 		
+		if (log)
+			System.out.println("Update travel times");
+		UpdateTravelTimes.manageSessionAndProcessTravelTimes(agencyId, null, new Date(0), new Date(Long.MAX_VALUE));
+		if (log)
+			System.out.println("Done");
 	}
 	
 	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log) {

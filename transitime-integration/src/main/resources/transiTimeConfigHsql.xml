@@ -18,7 +18,7 @@
         <exclusiveBlockAssignments>true</exclusiveBlockAssignments>
         <integrationTest>true</integrationTest>
         <matchHistoryMaxSize>40</matchHistoryMaxSize>
-        <allowableLateSecondsForInitialMatching>3600</allowableLateSecondsForInitialMatching>
+        <allowableLateSecondsForInitialMatching>2700</allowableLateSecondsForInitialMatching>
     </core>
     <avl>
        <csvAvlFeedFileName>sample.csv</csvAvlFeedFileName>

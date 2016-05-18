@@ -72,6 +72,9 @@
    <property name="hibernate.connection.url">
        jdbc:hsqldb:mem://localhost/xdb
    </property>
+   <property name="hibernate.ro.connection.url">
+   	   jdbc:hsqldb:mem://localhost/xdb
+   </property>
    <property name="hibernate.connection.username">
       SA
    </property>
