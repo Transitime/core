@@ -706,8 +706,14 @@ public class TravelTimesProcessor {
 			int dwellTimeMsec = (int) (arrDep2.getTime() - arrDep1.getTime());
 
 			// Add this stop time to map so it can be averaged
-			addStopTimeToMap(mapKeyForTravelTimes, dwellTimeMsec);		
-
+			if (dwellTimeMsec >= 0)
+				addStopTimeToMap(mapKeyForTravelTimes, dwellTimeMsec);		
+			else
+				logger.error("Ignoring negative dwell time={} for stop path "
+						+ "at arrival/departures {} and {} (key = {})",
+						dwellTimeMsec, arrDep1, arrDep2,
+						mapKeyForTravelTimes);
+			
 			return;
 		}
 		
@@ -720,6 +726,18 @@ public class TravelTimesProcessor {
 			List<Integer> travelTimesForStopPath = 
 					determineTravelTimesForStopPath(dataFetcher, arrDep1, 
 							arrDep2);
+			
+			// Ignore a stop path if any segment travel time is negative
+			for (Integer travelTimeForSegment : travelTimesForStopPath) {
+				if (travelTimeForSegment < 0) {
+					logger.error("Ignoring negative travel times={} for stop path "
+							+ "between arrival/departures {} and {} (key = {})",
+							travelTimesForStopPath, arrDep1, arrDep2,
+							mapKeyForTravelTimes);
+					return;
+				}
+			}
+			
 			addTravelTimesToMap(mapKeyForTravelTimes, travelTimesForStopPath);
 				
 			return;
