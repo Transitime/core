@@ -145,6 +145,8 @@ public class UpdateTravelTimes {
 						TravelTimesForStopPath originalTravelTimes =
 								trip.getTravelTimesForStopPath(stopIdx);
 						travelTimes = originalTravelTimes.getTravelTimesMsec();
+						logger.error("For trip={} stop={} invalid travel times from {} so falling back "
+								+ "on old travel times from {}", trip, stopIdx, travelTimeInfo, originalTravelTimes);
 					}
 					
 					// Determine stop time to use. There are situations where
@@ -161,6 +163,8 @@ public class UpdateTravelTimes {
 						TravelTimesForStopPath originalTravelTimes =
 								trip.getTravelTimesForStopPath(stopIdx);
 						stopTime = originalTravelTimes.getStopTimeMsec();
+						logger.error("For trip={} stop={} invalid stop times from {} so falling back "
+								+ "on old stop time from {}", trip, stopIdx, travelTimeInfo, originalTravelTimes);
 					}
 					// Create and add the travel time for this stop path
 					ttForStopPathToUse = 
@@ -180,6 +184,8 @@ public class UpdateTravelTimes {
 					// Determine original travel times
 					TravelTimesForStopPath originalTravelTimes =
 							trip.getTravelTimesForStopPath(stopIdx);
+					
+					logger.error("No historic data so using old travel times {}", originalTravelTimes);
 
 					// Create copy of the original travel times but update the 
 					// travel time rev.
