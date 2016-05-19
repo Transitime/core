@@ -965,7 +965,7 @@ public class TravelTimesProcessor {
 					// So far have determine when vehicle has departed. But should add
 					// a bit of a bias since passengers have to get on a few seconds
 					// before doors shut and vehicle starts moving.
-					averagedStopTime -= STOP_TIME_BIAS_FOR_FIRST_STOP;
+					averagedStopTime = Math.max(0, averagedStopTime - STOP_TIME_BIAS_FOR_FIRST_STOP);
 				} else {
 					// Not first stop of trip
 					averagedStopTime = Statistics.filteredMean(
