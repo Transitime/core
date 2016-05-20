@@ -456,7 +456,13 @@ public class TravelTimesProcessorForGtfsUpdates {
 					// Found good match of travel times from db
 					logger.debug("Found exact travel time match for " + 
 							"tripId={} from database.",	trip.getId());
-					return ttForTripFromDb;
+					
+					if (ttForTripFromDb.isValid())
+						return ttForTripFromDb;
+					
+					logger.error("Found invalid travel times for "  +
+							"tripId={} from database: {}", trip.getId(),
+							ttForTripFromDb);
 				}
 			}
 		}
@@ -499,7 +505,14 @@ public class TravelTimesProcessorForGtfsUpdates {
 						"will use the old one created for tripId={}",
 						trip.getId(), trip.getTripPattern().getId(),
 						ttForTripFromDb.getTripCreatedForId());
-				return ttForTripFromDb;
+				
+				if (ttForTripFromDb.isValid())
+					return ttForTripFromDb;
+				
+				logger.error("Found invalid travel time match for "  +
+						"tripId={}, tripPatternId={} from database: {}", 
+						trip.getId(), trip.getTripPattern().getId(),
+						ttForTripFromDb);
 			}
 		}
 		
@@ -545,6 +558,10 @@ public class TravelTimesProcessorForGtfsUpdates {
 					ttForTripFromDbList);
 		}
 		ttForTripFromDbList.add(scheduleBasedTravelTimes);
+		
+		// This would indicate a bug in the schedule-based travel time calculation code
+		if (!scheduleBasedTravelTimes.isValid())
+			logger.error("Schedule based travel time is invalid: {}", scheduleBasedTravelTimes);
 
 		return scheduleBasedTravelTimes;
 	}

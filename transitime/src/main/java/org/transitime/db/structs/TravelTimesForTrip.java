@@ -268,6 +268,16 @@ public class TravelTimesForTrip implements Serializable {
 	}
 	
 	/**
+	 * Returns true if all stop paths are valid.
+	 */
+	public boolean isValid() {
+		for (TravelTimesForStopPath times : travelTimesForStopPaths)
+			if (!times.isValid())
+				return false;
+		return true;
+	}
+	
+	/**
 	 * Needed because of Hibernate and also because want to cache 
 	 * TravelTimesForTrip and to do so need to store the objects
 	 * as keys in a map and need hashCode() and equals() for doing

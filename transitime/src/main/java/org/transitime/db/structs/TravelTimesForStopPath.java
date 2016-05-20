@@ -438,6 +438,21 @@ public class TravelTimesForStopPath implements Serializable {
 			session.close();
 		}
 	}
+	
+	/**
+	 * Returns true if all travel times and dwell time are nonnegative.
+	 */
+	public boolean isValid() {
+		if (travelTimesMsec != null) {
+			for (int time : travelTimesMsec) {
+				if (time < 0)
+					return false;
+			}
+		}
+		if (stopTimeMsec < 0)
+			return false;
+		return true;
+	}
 
 	/**
 	 * Defined so can use as key in map
