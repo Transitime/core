@@ -199,14 +199,14 @@ public class RealTimeSchedAdhProcessor {
         	          	  
         	  difference = Math.min(0, avlTime - epochEndTime);
         	  
-        	  logger.info("vehicleId {} has schedDev before trip set by previous trip of {}",
+        	  logger.debug("vehicleId {} has schedDev before trip set by previous trip of {}",
         			  vehicleId,
         			  difference);
     	  }
       }
       
     	  
-      logger.info("vehicleId {} has schedDev before trip start of {}", 
+      logger.debug("vehicleId {} has schedDev before trip start of {}", 
           vehicleId,
           difference); 
       
@@ -219,10 +219,10 @@ public class RealTimeSchedAdhProcessor {
       Long departureEpoch = Core.getInstance().getTime()
           .getEpochTime(departureSecs, avlTime);
       if (departureEpoch > avlTime) {
-        logger.info("vehicleId {} has schedDev at stop of 0", 
+        logger.debug("vehicleId {} has schedDev at stop of 0", 
             vehicleId);
       }
-      logger.info("vehicleId {} has schedDev at stop of {}", 
+      logger.debug("vehicleId {} has schedDev at stop of {}", 
           vehicleId,
           (avlTime - departureEpoch));
       return new TemporalDifference(avlTime - departureEpoch);
@@ -238,7 +238,7 @@ public class RealTimeSchedAdhProcessor {
     int effectiveStopTimeSec = (int) (fromStopTimeSecs + (pathTime * ratio));
     Long effectiveScheduleTimeEpoch = Core.getInstance().getTime().getEpochTime(effectiveStopTimeSec, avlTime);
     
-    logger.info("vehicleId {} has interpolated schedDev of {}, avlTime={}, effective={}", 
+    logger.debug("vehicleId {} has interpolated schedDev of {}, avlTime={}, effective={}", 
         vehicleId, 
         Time.elapsedTimeStr(avlTime - effectiveScheduleTimeEpoch),
         Time.timeStr(avlTime),

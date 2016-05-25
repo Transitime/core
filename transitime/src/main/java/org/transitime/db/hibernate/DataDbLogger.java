@@ -16,9 +16,6 @@
  */
 package org.transitime.db.hibernate;
 
-import java.net.SocketTimeoutException;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -35,10 +32,7 @@ import org.transitime.db.structs.Prediction;
 import org.transitime.db.structs.PredictionAccuracy;
 import org.transitime.db.structs.VehicleConfig;
 import org.transitime.db.structs.VehicleEvent;
-import org.transitime.logging.Markers;
-import org.transitime.utils.IntervalTimer;
-import org.transitime.utils.Time;
-import org.transitime.utils.threading.NamedThreadFactory;
+import org.transitime.db.structs.VehicleState;
 
 /**
  * DataDbLogger is for storing to the db a stream of data objects. It is intended
@@ -87,6 +81,7 @@ public class DataDbLogger {
   private DbQueue<PredictionAccuracy> predictionAccuracyQueue;
   private DbQueue<MonitoringEvent> monitoringEventQueue;
   private DbQueue<VehicleEvent> vehicleEventQueue;
+  private DbQueue<VehicleState> vehicleStateQueue;
   private DbQueue<Object> genericQueue;
 	
 	private static final int QUEUE_CAPACITY = 1000000;
@@ -185,6 +180,7 @@ public class DataDbLogger {
 	  predictionAccuracyQueue = new DbQueue<PredictionAccuracy>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, PredictionAccuracy.class.getSimpleName());
 	  monitoringEventQueue = new DbQueue<MonitoringEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, MonitoringEvent.class.getSimpleName());
 	  vehicleEventQueue = new DbQueue<VehicleEvent>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleEvent.class.getSimpleName());
+	  vehicleStateQueue = new DbQueue<VehicleState>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, VehicleState.class.getSimpleName());
 	  genericQueue = new DbQueue<Object>(agencyId, shouldStoreToDb, shouldPauseToReduceQueue, Object.class.getSimpleName());
 		
 	}
@@ -212,6 +208,9 @@ public class DataDbLogger {
   }
   public boolean add(VehicleEvent ve) {
     return vehicleEventQueue.add(ve);
+  }
+  public boolean add(VehicleState vs) {
+    return vehicleStateQueue.add(vs);
   }
 
 	
