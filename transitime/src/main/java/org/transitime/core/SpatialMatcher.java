@@ -116,18 +116,6 @@ public class SpatialMatcher {
 		// The matches to be returned
 		List<SpatialMatch> spatialMatches = new ArrayList<SpatialMatch>();
 		
-		// Looking at each stop path for a trip is pretty costly. So first
-		// see if the AVL report is even within the trip pattern. If not then
-		// can return right away.
-		Extent tripPatternExtent = trip.getTripPattern().getExtent();
-		double allowableDistance =
-				getMaxAllowableDistanceFromSegment(trip.getRoute(), matchingType);
-		if (!tripPatternExtent.isWithinDistance(avlReport.getLocation(),
-				allowableDistance)) {
-		  logger.debug("AvlReport {} is too far from route for trip {}", avlReport, trip.getId());
-			return spatialMatches;
-		}
-		
 		// Start looking for matches at the beginning of the trip.
 		Indices indices = new Indices(block, block.getTripIndex(trip), 
 				0, // stopPathIndex
