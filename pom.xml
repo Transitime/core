@@ -11,5 +11,6 @@
     <module>transitime</module>
     <module>transitimeApi</module>
     <module>transitimeWebapp</module>
+    <module>transitimeQuickStart</module>
   </modules>
 </project>
