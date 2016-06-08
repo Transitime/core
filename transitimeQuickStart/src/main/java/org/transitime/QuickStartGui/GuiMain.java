@@ -17,10 +17,10 @@ public class GuiMain {
      */
     private static void createAndShowGUI() {
         //Create and set up the window.
-        JFrame frame = new JFrame("FrameDemo");
+        JFrame frame = new JFrame("transiTime QuickStar");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
-        JLabel emptyLabel = new JLabel("transiTime QuickStart");
+        JLabel emptyLabel = new JLabel("");
         emptyLabel.setPreferredSize(new Dimension(740,660));
         frame.getContentPane().add(emptyLabel, BorderLayout.CENTER);
  

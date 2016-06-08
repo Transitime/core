@@ -1,4 +1,4 @@
-package com.transitime.app;
+package org.transitime.testapp;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

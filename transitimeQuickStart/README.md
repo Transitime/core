@@ -1,1 +1,4 @@
-How to set up Transitime QuickStart
+How to set up transiTime QuickStart:
+
+example: run:
+java - jar Quickstartpackage.jar
