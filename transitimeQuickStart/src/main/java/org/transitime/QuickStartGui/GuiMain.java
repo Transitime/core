@@ -20,7 +20,7 @@ public class GuiMain {
         JFrame frame = new JFrame("FrameDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
-        JLabel emptyLabel = new JLabel("");
+        JLabel emptyLabel = new JLabel("transiTime QuickStart");
         emptyLabel.setPreferredSize(new Dimension(740,660));
         frame.getContentPane().add(emptyLabel, BorderLayout.CENTER);
  
