@@ -1,4 +1,4 @@
-package org.transitime.QuickStartGui;
+package org.transitime.gui;
 
 import java.awt.EventQueue;
 
@@ -26,7 +26,7 @@ public class OutputPanel {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	public void OutputPanelstart(){
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {

@@ -1,4 +1,4 @@
-package org.transitime.QuickStartGui;
+package org.transitime.gui;
 
 import java.awt.EventQueue;
 
@@ -22,18 +22,18 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.Canvas;
 
-public class Welcomepanel {
+public class WelcomePanel {
 
 	private JFrame frame;
 
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	public void WelcomePanelstart() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Welcomepanel window = new Welcomepanel();
+					WelcomePanel window = new WelcomePanel();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -45,7 +45,7 @@ public class Welcomepanel {
 	/**
 	 * Create the application.
 	 */
-	public Welcomepanel() {
+	public WelcomePanel() {
 		initialize();
 	}
 

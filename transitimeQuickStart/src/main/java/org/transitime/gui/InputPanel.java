@@ -1,4 +1,4 @@
-package org.transitime.QuickStartGui;
+package org.transitime.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -37,7 +37,7 @@ public class InputPanel extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	public void InputPanelstart(){
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -54,6 +54,7 @@ public class InputPanel extends JFrame {
 	 * Create the frame.
 	 */
 	public InputPanel() {
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 571, 544);
 		contentPane = new JPanel();
