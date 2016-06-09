@@ -65,6 +65,8 @@ public class WelcomePanel {
 		btnNewButton.setFont(new Font("Arial", Font.PLAIN, 19));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				InputPanel windowinput = new InputPanel();
+				windowinput.InputPanelstart();	
 			}
 		});
 		
