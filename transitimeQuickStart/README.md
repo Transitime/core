@@ -1,4 +1,8 @@
 How to set up transiTime QuickStart:
 
-example: run:
+example: 
+
+from:
+ transitimeQuickStart/target/
+run:
 java - jar TransiTimeQuickStart.jar
