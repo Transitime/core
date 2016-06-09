@@ -2,7 +2,7 @@ package org.transitime.gui;
 
 import java.awt.EventQueue;
 
-public class PanelController {
+public class TransitimeQuickStart {
 	public static void main (String args[])
 	{
 		WelcomePanel window = new WelcomePanel();
