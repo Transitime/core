@@ -7,10 +7,10 @@ public class TransitimeQuickStart {
 	{
 		WelcomePanel window = new WelcomePanel();
 		window.WelcomePanelstart();
-		InputPanel windowinput = new InputPanel();
+		/*InputPanel windowinput = new InputPanel();
 		windowinput.InputPanelstart();
 		OutputPanel windowoutput = new OutputPanel();
-		windowoutput.OutputPanelstart();
+		windowoutput.OutputPanelstart();*/
 	}
 }
 

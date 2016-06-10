@@ -100,6 +100,12 @@ public class InputPanel extends JFrame {
 		textField.setColumns(10);
 		
 		Button button_2 = new Button("i");
+		button_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				InformationPanel infopanel = new InformationPanel();
+				infopanel.InformationPanelstart();
+			}
+		});
 		button_2.setBackground(SystemColor.textHighlight);
 		GridBagConstraints gbc_button_2 = new GridBagConstraints();
 		gbc_button_2.gridheight = 2;
@@ -130,6 +136,12 @@ public class InputPanel extends JFrame {
 		contentPane.add(textField_1, gbc_textField_1);
 		
 		Button button_1 = new Button("i");
+		button_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				InformationPanel infopanel = new InformationPanel();
+				infopanel.InformationPanelstart();
+			}
+		});
 		button_1.setBackground(SystemColor.textHighlight);
 		GridBagConstraints gbc_button_1 = new GridBagConstraints();
 		gbc_button_1.gridheight = 4;
@@ -160,6 +172,12 @@ public class InputPanel extends JFrame {
 		contentPane.add(textField_2, gbc_textField_2);
 		
 		Button button = new Button("i");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				InformationPanel infopanel = new InformationPanel();
+				infopanel.InformationPanelstart();
+			}
+		});
 		button.setBackground(SystemColor.textHighlight);
 		GridBagConstraints gbc_button = new GridBagConstraints();
 		gbc_button.gridheight = 4;
@@ -191,6 +209,13 @@ public class InputPanel extends JFrame {
 		contentPane.add(btnHelp, gbc_btnHelp);
 		
 		JButton btnNext = new JButton("Next");
+		btnNext.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OutputPanel windowinput = new OutputPanel();
+				windowinput.OutputPanelstart();
+				dispose();
+			}
+		});
 		btnNext.setVerticalAlignment(SwingConstants.BOTTOM);
 		GridBagConstraints gbc_btnNext = new GridBagConstraints();
 		gbc_btnNext.anchor = GridBagConstraints.SOUTH;

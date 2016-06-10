@@ -66,7 +66,9 @@ public class WelcomePanel {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				InputPanel windowinput = new InputPanel();
-				windowinput.InputPanelstart();	
+				windowinput.InputPanelstart();
+				frame.dispose();
+
 			}
 		});
 		
