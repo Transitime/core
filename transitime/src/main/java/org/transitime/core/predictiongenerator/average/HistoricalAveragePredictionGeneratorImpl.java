@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
+import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleDataCache;
@@ -37,7 +38,7 @@ import org.transitime.ipc.data.IpcPrediction;
  *  particular days such as today as it will more reflect the current situaton on the ground.
  */
 public class HistoricalAveragePredictionGeneratorImpl extends
-		KalmanPredictionGeneratorImpl implements PredictionComponentElementsGenerator {
+	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
 	
 	/* (non-Javadoc)
 	 * @see org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl#generatePredictionForStop(org.transitime.db.structs.AvlReport, org.transitime.core.Indices, long, boolean, boolean, boolean, boolean)
@@ -76,6 +77,8 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 	@Override
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
 
+		logger.debug("Calling historical average algorithm.");
+		
 		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();
 		
 		VehicleStateManager vehicleStateManager = VehicleStateManager
@@ -94,7 +97,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 				maxDaysToSearch.getValue(),
 				minDays.getValue());
 		/*
-		 * if we have enough data start using historucal averageotherwise
+		 * if we have enough data start using historical average otherwise
 		 * revert to default. This does not mean that this method of
 		 * prediction is better than the default.
 		 */
@@ -124,7 +127,8 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 			}
 						
 		}
-		/* default to transiTime method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
+		logger.debug("Generating default prediction.");
+		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
 		return super.getTravelTimeForPath(indices, avlReport);
 	}
 	

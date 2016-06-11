@@ -58,7 +58,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
+public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
 
 	private static IntegerConfigValue maxPredictionsTimeSecs =
 			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
@@ -136,6 +136,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			boolean affectedByWaitStop, boolean isDelayed,
 			boolean lateSoMarkAsUncertain) {
 		// Determine additional parameters for the prediction to be generated
+		logger.debug("Calling default transitime prediction algorithm.");
 		StopPath path = indices.getStopPath();
 		String stopId = path.getStopId();
 		int gtfsStopSeq = path.getGtfsStopSeq();
@@ -422,5 +423,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	{
 		return indices.getTravelTimeForPath();
 	}
+	
+
 	
 }

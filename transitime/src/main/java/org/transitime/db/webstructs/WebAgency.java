@@ -468,7 +468,7 @@ public class WebAgency {
 	public static void main(String args[]) {
 		// Determine all the params
 		if (args.length <= 5) {
-			System.err.println("Specify params for the WebAgency: agencyId = args[0]; hostName = args[1]; dbType = args[2]; dbHost = args[3]; dbUserName = args[4]; dbPassword = args[5];");
+			System.err.println("Specify params for the WebAgency: agencyId = args[0]; hostName = args[1]; dbName = args[2] ;dbType = args[3]; dbHost = args[4]; dbUserName = args[5]; dbPassword = args[6];");
 			System.exit(-1);
 		}
 		String agencyId = args[0];
