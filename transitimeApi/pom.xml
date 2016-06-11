@@ -15,6 +15,31 @@
 		
 		
 		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- jax-rs 2.0 -->
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<!-- jersey implementation library -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+			<version>2.11</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+			<version>2.11</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>transitime</groupId>
 			<artifactId>transitimeCore</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
