@@ -58,7 +58,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		
 		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 		
-		if(average.getCount()>=minDays.getValue())
+		if(average!=null && average.getCount()>=minDays.getValue())
 			return (long)average.getAverage();
 		
 		logger.debug("No historical average found, generating default prediction.");
