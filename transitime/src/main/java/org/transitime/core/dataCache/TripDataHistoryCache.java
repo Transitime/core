@@ -184,7 +184,10 @@ public class TripDataHistoryCache {
 			
 			if(duration>0)
 			{
-				average.update(duration);		
+				if(average==null)				
+					average=new HistoricalAverage();
+				
+				average.update(duration);
 			
 				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}
@@ -200,11 +203,14 @@ public class TripDataHistoryCache {
 				trip.getStartTime());
 						
 		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) getTripHistory(tripKey);
-				
-		ArrivalDeparture previousEvent = findPreviousArrivalOrDeparture(arrivalDepartures, arrivalDeparture);
 		
-		if(previousEvent!=null && arrivalDeparture!=null )
-				return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
+		if(arrivalDepartures!=null && arrivalDepartures.size()>0)
+		{			
+			ArrivalDeparture previousEvent = findPreviousArrivalOrDeparture(arrivalDepartures, arrivalDeparture);
+			
+			if(previousEvent!=null && arrivalDeparture!=null )
+					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
+		}
 					
 		return -1;
 	}
@@ -212,17 +218,15 @@ public class TripDataHistoryCache {
 	{
 		ArrivalDeparture previous=null;
 		
-		BeanComparator<ArrivalDeparture> compartor = new BeanComparator<ArrivalDeparture>(
-				"stopPathIndex");
-		
-		Collections.sort(arrivalDepartures, compartor);
-		
-		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
-		{
-			if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1))
+		if(arrivalDepartures!=null && arrivalDepartures.size()>0)
+		{												
+			for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 			{
-				previous=tocheck;
-			}			
+				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1))
+				{
+					previous=tocheck;
+				}			
+			}
 		}
 		return previous;		
 	}
