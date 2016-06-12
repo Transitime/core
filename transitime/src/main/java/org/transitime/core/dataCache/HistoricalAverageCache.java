@@ -80,6 +80,6 @@ public class HistoricalAverageCache {
 		
 		cache.put(averageElement);
 				
-		logCache(logger);
+		// logCache(logger);
 	}				
 }
