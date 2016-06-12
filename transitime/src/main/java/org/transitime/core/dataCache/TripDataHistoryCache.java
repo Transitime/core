@@ -204,9 +204,9 @@ public class TripDataHistoryCache {
 						
 		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) getTripHistory(tripKey);
 		
-		if(arrivalDepartures!=null && arrivalDepartures.size()>0)
+		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isArrival())
 		{			
-			ArrivalDeparture previousEvent = findPreviousArrivalOrDeparture(arrivalDepartures, arrivalDeparture);
+			ArrivalDeparture previousEvent = findPreviousDepartureEvent(arrivalDepartures, arrivalDeparture);
 			
 			if(previousEvent!=null && arrivalDeparture!=null )
 					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
@@ -214,7 +214,7 @@ public class TripDataHistoryCache {
 					
 		return -1;
 	}
-	private ArrivalDeparture findPreviousArrivalOrDeparture(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	private ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
 	{
 		ArrivalDeparture previous=null;
 		
@@ -222,7 +222,7 @@ public class TripDataHistoryCache {
 		{												
 			for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 			{
-				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1))
+				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
 				{
 					previous=tocheck;
 				}			

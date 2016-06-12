@@ -8,7 +8,9 @@ public class HistoricalAverageCacheKey implements java.io.Serializable {
 		super();
 		this.blockId = blockId;
 		this.tripIndex = tripIndex;
-		this.stopPathIndex = stopPathIndex;		
+		this.stopPathIndex = stopPathIndex;	
+		
+		
 	}
 
 	private String blockId;
