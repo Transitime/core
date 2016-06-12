@@ -58,18 +58,9 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 
 	private static final IntegerConfigValue minDays = new IntegerConfigValue(
 			"transitime.prediction.data.average.mindays",
-			new Integer(2),
+			new Integer(1),
 			"Min number of days trip data that needs to be available before historical average prediciton is used instead of default transiTime prediction.");
-
-	private static final IntegerConfigValue maxDays = new IntegerConfigValue(
-			"transitime.prediction.data.average.maxdays",
-			new Integer(3),
-			"Max number of historical days trips to include in average calculation.");
-
-	private static final IntegerConfigValue maxDaysToSearch = new IntegerConfigValue(
-			"transitime.prediction.data.average.maxdaystoseach",
-			new Integer(21),
-			"Max number of days to look back for data. This will also be effected by how old the data in the cache is.");
+	
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(HistoricalAveragePredictionGeneratorImpl.class);
@@ -90,7 +81,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		
 		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 		
-		if(average.getCount()>0)
+		if(average.getCount()>=minDays.getValue())
 			return (long)average.getAverage();
 		
 		logger.debug("No historical average found, generating default prediction.");
