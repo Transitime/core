@@ -1,23 +1,13 @@
 package org.transitime.core.predictiongenerator.average;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
-import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.HistoricalAverageCacheKey;
-import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.VehicleDataCache;
-import org.transitime.core.dataCache.VehicleStateManager;
-import org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.data.IpcPrediction;

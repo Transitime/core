@@ -6,7 +6,7 @@
 	<!-- <diskStore path="java.io.tmpdir" /> -->
 	
 	<!-- Ask Ehcache to store cache in this path -->
-	<diskStore path="c:\\cache" />
+	<diskStore path="/usr/local/transitime/cache" />
 	
 	<cache name="arrivalDepartures" 
 		maxEntriesLocalHeap="20000"
@@ -17,6 +17,14 @@
 		<persistence strategy="none" />
 	</cache>
 	<cache name="KalmanErrorCache" 
+		maxEntriesLocalHeap="20000"
+		maxEntriesLocalDisk="2000" 
+		eternal="false" 
+		diskSpoolBufferSizeMB="20"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+	<cache name="HistoricalAverageCache" 
 		maxEntriesLocalHeap="20000"
 		maxEntriesLocalDisk="2000" 
 		eternal="false" 
