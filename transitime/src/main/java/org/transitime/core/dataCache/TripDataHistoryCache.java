@@ -45,7 +45,7 @@ import org.transitime.utils.Time;
 public class TripDataHistoryCache {
 	private static TripDataHistoryCache singleton = new TripDataHistoryCache();
 	
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	final private static String cacheName = "arrivalDepartures";
 
@@ -138,15 +138,14 @@ public class TripDataHistoryCache {
 	@SuppressWarnings("unchecked")
 	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
-		if(debug)
-			logger.debug(cache.toString());		
+		
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
 		int days_back=1;
 		if(debug)
-			days_back=3;		
+			days_back=2;		
 		TripKey tripKey=null;
 		
-		for(int i=2;i>-1;i--)
+		for(int i=days_back;i>-1;i--)
 		{
 			Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
 									
@@ -190,9 +189,7 @@ public class TripDataHistoryCache {
 				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}
 		}
-		if(debug)
-			logCache(logger);
-		
+				
 		return tripKey;
 	}
 	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
