@@ -24,21 +24,8 @@ import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * @author Sean Og Crudden
- *	This is a prediction generator that uses a an average of the last x days journeys.
- *	It uses the default prediction method of transiTime while it generates enough data to support
- *  this method of prediction. 
- *  
- *  TODO 
- *  The data could be by two paramaters. 
- *  One is the last X number of weeks and the other a bitmap for which days of each week to include.
- *  
- *  Eg. 
- *  2 0x01 would be Each sunday of the last two weeks.
- *  3 0x02 woud be Each monday of the last two weeks.
- *  4 0x03 would be each sunday and monday of the last two weeks.
- *  
- *  The method of setting which days to use will probably expand. Also may weight 
- *  particular days such as today as it will more reflect the current situaton on the ground.
+ *	This provides a prediction based on the average of historical data. The average is taken from the HistoricalAverageCache which is 
+ *  populated each time an arrival/departure event occurs. The HistoricalAverageCache is updated using data from the TripDataHistory cache.
  */
 public class HistoricalAveragePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
