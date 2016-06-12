@@ -45,7 +45,7 @@ import org.transitime.utils.Time;
 public class TripDataHistoryCache {
 	private static TripDataHistoryCache singleton = new TripDataHistoryCache();
 	
-	private static boolean debug = true;
+	private static boolean debug = false;
 
 	final private static String cacheName = "arrivalDepartures";
 
@@ -145,7 +145,7 @@ public class TripDataHistoryCache {
 			days_back=2;		
 		TripKey tripKey=null;
 		
-		for(int i=days_back;i>-1;i--)
+		for(int i=0;i < days_back;i++)
 		{
 			Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
 									
