@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
+import org.transitime.core.dataCache.TripKey;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -329,6 +331,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				int tripIndex, int stopPathIndex, boolean isArrival) {*/
 		
 		TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		
+		
 		
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);

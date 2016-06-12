@@ -1,0 +1,41 @@
+package org.transitime.core.dataCache;
+
+public class HistoricalAverage {
+	
+	public HistoricalAverage() {
+		super();
+		count=0;
+		average=0;	
+	}
+
+	private int count;
+	
+	double average;
+	
+	public int getCount() {
+		return count;
+	}
+	public void setCount(int count) {
+		this.count = count;
+	}
+	public double getAverage() {
+		return average;
+	}
+	public void setAverage(double average) {
+		this.average = average;
+	}
+	
+	public void update(double element)
+	{
+		average=((count*average)+element)/(count+1);		
+		count=count+1;		
+	}
+	public void udpate(double[] elements)
+	{
+		for(int i=0;i<elements.length;i++)
+		{
+			update(elements[i]);
+		}
+	}
+	
+}

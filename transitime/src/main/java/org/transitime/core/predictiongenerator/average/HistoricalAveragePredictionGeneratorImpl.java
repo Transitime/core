@@ -11,6 +11,9 @@ import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
+import org.transitime.core.dataCache.HistoricalAverage;
+import org.transitime.core.dataCache.HistoricalAverageCache;
+import org.transitime.core.dataCache.HistoricalAverageCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
@@ -77,56 +80,19 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 	@Override
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
 
-		logger.debug("Calling historical average algorithm.");
-		
-		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();
-		
-		VehicleStateManager vehicleStateManager = VehicleStateManager
-				.getInstance();
-
-		VehicleState currentVehicleState = vehicleStateManager
-				.getVehicleState(avlReport.getVehicleId());
-		
-		Date nearestDay = DateUtils.truncate(Calendar.getInstance()
-				.getTime(), Calendar.DAY_OF_MONTH);
-
-		List<Integer> lastDaysTimes = lastDaysTimes(tripCache,
-				currentVehicleState.getTrip().getId(),
-				indices.getStopPathIndex(), nearestDay,
-				currentVehicleState.getTrip().getStartTime(),
-				maxDaysToSearch.getValue(),
-				minDays.getValue());
+		logger.debug("Calling historical average algorithm.");				
 		/*
 		 * if we have enough data start using historical average otherwise
 		 * revert to default. This does not mean that this method of
 		 * prediction is better than the default.
 		 */
-
-		if (lastDaysTimes != null
-				&& lastDaysTimes.size() >= minDays.getValue()
-						.intValue()) {
-
-			logger.debug("Generating prediction based on basic historical average.");
-			
-			long total=0;
-			
-			int counter=0;
-						
-			for(Integer time:lastDaysTimes)
-			{
-				if(counter<maxDays.getValue())
-				{				
-					total=total+time;
-					counter++;
-				}
-			}
-			if(counter>0)
-			{
-				long average = total/counter;
-				return average;
-			}
-						
-		}
+		HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(indices.getBlock().getId(),indices.getTripIndex(), indices.getStopPathIndex());
+		
+		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		
+		if(average.getCount()>0)
+			return (long)average.getAverage();
+		
 		logger.debug("Generating default prediction.");
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
 		return super.getTravelTimeForPath(indices, avlReport);

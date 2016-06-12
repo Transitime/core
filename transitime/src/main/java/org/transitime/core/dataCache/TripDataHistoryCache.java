@@ -17,6 +17,7 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.Policy;
 
+import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
@@ -39,7 +40,7 @@ import org.transitime.utils.Time;
  *         hashmap. This approach to holding data in memory for transitime needs
  *         to be proven.
  *         
- *         TODO this could do with an interface, factory class, and alternative implemenations, perhaps using Infinispan.
+ *         TODO this could do with an interface, factory class, and alternative implementations, perhaps using Infinispan.
  */
 public class TripDataHistoryCache {
 	private static TripDataHistoryCache singleton = new TripDataHistoryCache();
@@ -135,7 +136,7 @@ public class TripDataHistoryCache {
 	}
 
 	@SuppressWarnings("unchecked")
-	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
+	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
 		if(debug)
 			logger.debug(cache.toString());		
@@ -143,8 +144,9 @@ public class TripDataHistoryCache {
 		int days_back=1;
 		if(debug)
 			days_back=3;		
+		TripKey tripKey=null;
 		
-		for(int i=0;i<days_back;i++)
+		for(int i=2;i>-1;i--)
 		{
 			Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
 									
@@ -154,7 +156,7 @@ public class TripDataHistoryCache {
 			
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 			
-			TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
+			tripKey = new TripKey(arrivalDeparture.getTripId(),
 					nearestDay,
 					trip.getStartTime());
 			
@@ -174,12 +176,63 @@ public class TripDataHistoryCache {
 			Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
 						
 			cache.put(arrivalDepartures);
+			
+			HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(arrivalDeparture.getBlockId(),arrivalDeparture.getTripIndex(), arrivalDeparture.getStopPathIndex());
+			
+			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+						
+			double duration=getLastPathDuration(arrivalDeparture, trip);
+			
+			if(duration>0)
+			{
+				average.update(duration);		
+			
+				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+			}
 		}
 		if(debug)
 			logCache(logger);
+		
+		return tripKey;
 	}
-	
-	
+	public double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
+	{
+		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
+		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
+				nearestDay,
+				trip.getStartTime());
+						
+		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) getTripHistory(tripKey);
+				
+		ArrivalDeparture previousEvent = findPreviousArrivalOrDeparture(arrivalDepartures, arrivalDeparture);
+		
+		if(previousEvent!=null && arrivalDeparture!=null )
+				return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
+					
+		return -1;
+	}
+	ArrivalDeparture findPreviousArrivalOrDeparture(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	{
+		ArrivalDeparture previous=null;
+		
+		BeanComparator<ArrivalDeparture> compartor = new BeanComparator<ArrivalDeparture>(
+				"stopPathIndex");
+		
+		Collections.sort(arrivalDepartures, compartor);
+		
+		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		{
+			if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1))
+			{
+				previous=tocheck;
+			}			
+		}
+		return previous;		
+	}
+
+	protected static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
+		return iterable == null ? Collections.<T> emptyList() : iterable;
+	}
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
 	{
  		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
