@@ -74,8 +74,12 @@ public class HistoricalAverageCache {
 	}
 	synchronized public void putAverage(HistoricalAverageCacheKey key, HistoricalAverage average) {
 			
+		logger.debug("Putting: "+key.toString()+" in cache with values : "+average);
+		
 		Element averageElement = new Element(key, average);
 		
 		cache.put(averageElement);
+				
+		logCache(logger);
 	}				
 }

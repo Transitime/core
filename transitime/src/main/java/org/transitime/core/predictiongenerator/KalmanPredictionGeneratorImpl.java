@@ -175,7 +175,7 @@ public class KalmanPredictionGeneratorImpl extends
 								avlReport.getVehicleId(),
 								kalmanPredictionResult.getFilterError());
 						
-						logger.debug("Kalman prediction: "+predictionTime+" Historical average prediction: "+super.getTravelTimeForPath(indices, avlReport));
+						logger.debug("Kalman prediction: "+predictionTime+" Tranistime prediction: "+super.getTravelTimeForPath(indices, avlReport));
 						logger.debug("Kalman error value: "+kalmanPredictionResult.getFilterError()+" Vechicle Id: "+avlReport.getVehicleId());
 						
 						return predictionTime;

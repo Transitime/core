@@ -2,6 +2,10 @@ package org.transitime.core.dataCache;
 
 public class HistoricalAverage {
 	
+	@Override
+	public String toString() {
+		return "HistoricalAverage [count=" + count + ", average=" + average + "]";
+	}
 	public HistoricalAverage() {
 		super();
 		count=0;
