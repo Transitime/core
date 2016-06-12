@@ -195,7 +195,7 @@ public class TripDataHistoryCache {
 		
 		return tripKey;
 	}
-	public double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
+	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
 		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
@@ -211,7 +211,7 @@ public class TripDataHistoryCache {
 					
 		return -1;
 	}
-	ArrivalDeparture findPreviousArrivalOrDeparture(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	private ArrivalDeparture findPreviousArrivalOrDeparture(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
 	{
 		ArrivalDeparture previous=null;
 		
@@ -230,7 +230,7 @@ public class TripDataHistoryCache {
 		return previous;		
 	}
 
-	protected static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
+	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
