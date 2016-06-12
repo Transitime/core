@@ -62,6 +62,14 @@ public class HistoricalAverageCache {
 			}
 		}		
 	}
+	public void logCacheSize(Logger logger)
+	{
+		@SuppressWarnings("unchecked")
+		List<HistoricalAverageCacheKey> keys = cache.getKeys();
+		
+		if(keys!=null)
+			logger.debug("Number of entries in HistoricalAverageCache : "+keys.size());
+	}
 	
 	synchronized public HistoricalAverage getAverage(HistoricalAverageCacheKey key) {		
 						
@@ -79,7 +87,8 @@ public class HistoricalAverageCache {
 		Element averageElement = new Element(key, average);
 		
 		cache.put(averageElement);
-				
+			
+		logCacheSize(logger);
 		// logCache(logger);
 	}				
 }
