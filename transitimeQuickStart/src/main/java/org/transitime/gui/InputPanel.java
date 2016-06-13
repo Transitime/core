@@ -126,6 +126,11 @@ public class InputPanel extends JFrame {
 		button.setBackground(SystemColor.textHighlight);
 		
 		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 		
 		JButton btnHelp = new JButton("Help");
 		

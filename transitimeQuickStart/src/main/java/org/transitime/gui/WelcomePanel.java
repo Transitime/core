@@ -79,6 +79,11 @@ public class WelcomePanel {
 		rdbtnBasicMode.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		
 		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.dispose();
+			}
+		});
 		btnCancel.setBackground(SystemColor.menu);
 		btnCancel.setFont(new Font("Arial", Font.PLAIN, 19));
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
