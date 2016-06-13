@@ -114,7 +114,7 @@ public class GtfsFileProcessor {
 	 *            If true then will store the new config and travel times revs
 	 *            into ActiveRevisions table in db
 	 */
-	private GtfsFileProcessor(String configFile, String notes, String gtfsUrl,
+	public GtfsFileProcessor(String configFile, String notes, String gtfsUrl,
 			String gtfsZipFileName, String unzipSubdirectory,
 			String gtfsDirectoryName, String supplementDir,
 			String regexReplaceListFileName, double pathOffsetDistance,

@@ -36,7 +36,7 @@ public class TestGTFSFileProcessor extends TestCase{
 	        	boolean trimPathBeforeFirstStopOfTrip=false;
 	        	GtfsFileProcessor testprocessor = new GtfsFileProcessor(configFile,notes,gtfsUrl,gtfsZipFileName,unzipSubdirectory,gtfsDirectoryName,supplementDir,regexReplaceListFileName,pathOffsetDistance,maxStopToPathDistance,maxDistanceForEliminatingVertices,defaultWaitTimeAtStopMsec,maxSpeedKph,maxTravelTimeSegmentLength,configRev,shouldStoreNewRevs,trimPathBeforeFirstStopOfTrip);
 	        	testprocessor.process();
-			  Assert();
+			//  Assert();
 			}
 		    
 		
