@@ -128,6 +128,7 @@ public class GtfsFileProcessor {
 		if (configFile != null) {
 			try {
 				// Read in the data from config file
+				
 				ConfigFileReader.processConfig(configFile);
 			} catch (Exception e) {
 				logger.error("Error reading in config file \"" + configFile
