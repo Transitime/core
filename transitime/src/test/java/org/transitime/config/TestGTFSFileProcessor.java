@@ -17,12 +17,12 @@ public class TestGTFSFileProcessor extends TestCase{
 	        @Test
 			public void Testmain()
 			{
-	        	String configFile="C:\\Users\\Brendan\\Documents\\Transitime\\core\\transiTimeconfig.xml";
+	        	String configFile="transiTimeconfig.xml";
 	        	String notes=null;
 	        	String gtfsUrl=null;
 	        	String gtfsZipFileName=null;
 	        	String unzipSubdirectory=null;
-	        	String gtfsDirectoryName="C:\\Users\\Brendan\\Documents\\GTFS\\GTFSAUS\\";
+	        	String gtfsDirectoryName="GTFSAUS\\";
 	        	String supplementDir=null;
 	        	String regexReplaceListFileName=null;
 	        	double pathOffsetDistance=0.0;
@@ -35,8 +35,8 @@ public class TestGTFSFileProcessor extends TestCase{
 	        	boolean shouldStoreNewRevs=true;
 	        	boolean trimPathBeforeFirstStopOfTrip=false;
 	        	GtfsFileProcessor testprocessor = new GtfsFileProcessor(configFile,notes,gtfsUrl,gtfsZipFileName,unzipSubdirectory,gtfsDirectoryName,supplementDir,regexReplaceListFileName,pathOffsetDistance,maxStopToPathDistance,maxDistanceForEliminatingVertices,defaultWaitTimeAtStopMsec,maxSpeedKph,maxTravelTimeSegmentLength,configRev,shouldStoreNewRevs,trimPathBeforeFirstStopOfTrip);
-	        	testprocessor.process();
-			//  Assert();
+	        	boolean tester=testprocessor.process();
+			assertTrue(tester);
 			}
 		    
 		

@@ -125,7 +125,8 @@ public class GtfsFileProcessor {
 			int configRev,
 			boolean shouldStoreNewRevs, boolean trimPathBeforeFirstStopOfTrip) {
 		// Read in config params if command line option specified
-		if (configFile != null) {
+		
+			if (configFile != null) {
 			try {
 				// Read in the data from config file
 				
@@ -135,7 +136,10 @@ public class GtfsFileProcessor {
 						+ "\". Exiting program.", e);
 				System.exit(-1);
 			}
-		}
+			}
+		
+			
+		
 
 		this.gtfsUrl = gtfsUrl;
 		this.gtfsZipFileName = gtfsZipFileName;
@@ -264,9 +268,10 @@ public class GtfsFileProcessor {
 	 * then this function is used to actually process the GTFS data and store it
 	 * into the database.
 	 */
-	public void process() throws IllegalArgumentException {
+	public boolean process() throws IllegalArgumentException {
 		// Gets the GTFS files from URL or from a zip file if need be.
 		// This also sets gtfsDirectoryName member
+		
 		obtainGtfsFiles();
 
 		// Set the timezone of the application so that times and dates will be
@@ -292,13 +297,20 @@ public class GtfsFileProcessor {
 						defaultWaitTimeAtStopMsec, maxSpeedKph,
 						maxTravelTimeSegmentLength,
 						trimPathBeforeFirstStopOfTrip, titleFormatter);
+		boolean test;
+		try{
 		gtfsData.processData();
-
+		}catch (Exception e){
+			test =false;
+			return test;
+		}
 		// Log possibly useful info
 		titleFormatter.logRegexesThatDidNotMakeDifference();
 
 		// Do any necessary cleanup
 		cleanupGtfsFiles();
+		test = true;
+		return test;
 	}
 
 	/**

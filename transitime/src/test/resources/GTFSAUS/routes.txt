@@ -1,0 +1,85 @@
+route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color
+1,1,1,Metric/South Congress,,3,,004A97,FFFFFF
+2,1,2,Rosewood,,3,,004A97,FFFFFF
+3,1,3,Burnet/Manchaca,,3,,004A97,FFFFFF
+4,1,4,Montopolis,,3,,004A97,FFFFFF
+5,1,5,Woodrow/South 5th,,3,,004A97,FFFFFF
+6,1,6,East 12th,,3,,004A97,FFFFFF
+7,1,7,Duval / Dove Springs,,3,,004A97,FFFFFF
+10,1,10,South 1st/Red River,,3,,004A97,FFFFFF
+17,1,17,Cesar Chavez,,3,,004A97,FFFFFF
+18,1,18,Martin Luther King,,3,,004A97,FFFFFF
+19,1,19,Bull Creek,,3,,004A97,FFFFFF
+20,1,20,Manor Rd/Riverside,,3,,004A97,FFFFFF
+21,1,21,Exposition,,3,,004A97,FFFFFF
+22,1,22,Chicon,,3,,004A97,FFFFFF
+30,1,30,Barton Creek Sq,,3,,004A97,FFFFFF
+37,1,37,Colony Park/Windsor Park,,3,,004A97,FFFFFF
+100,1,100,MetroAirport,,3,,555555,FFFFFF
+103,1,103,Manchaca Flyer,,3,,555555,FFFFFF
+110,1,110,South Central Flyer,,3,,555555,FFFFFF
+111,1,111,South Mopac Flyer,,3,,555555,FFFFFF
+122,1,122,Four Points Limited,,3,,555555,FFFFFF
+127,1,127,Dove Springs Flyer,,3,,555555,FFFFFF
+135,1,135,Dell Limited,,3,,555555,FFFFFF
+142,1,142,Metric Flyer,,3,,555555,FFFFFF
+171,1,171,Oak Hill Flyer,,3,,555555,FFFFFF
+201,1,201,Southpark Meadows,,3,,004A97,FFFFFF
+214,1,214,Northwest FEEDER,,3,,004A97,FFFFFF
+228,1,228,Burleson,,3,,004A97,FFFFFF
+233,1,233,Far Northeast Feeder,,3,,004A97,FFFFFF
+237,1,237,Northeast FEEDER,,3,,004A97,FFFFFF
+238,1,238,Westgate,,3,,004A97,FFFFFF
+240,1,240,Rutland,,3,,004A97,FFFFFF
+243,1,243,Wells Branch,,3,,004A97,FFFFFF
+271,1,271,Del Valle FEEDER,,3,,004A97,FFFFFF
+275,1,275,North Lamar Feeder,,3,,004A97,FFFFFF
+300,1,300,Govalle,,3,,004A97,FFFFFF
+311,1,311,Stassney,,3,,004A97,FFFFFF
+320,1,320,St Johns,,3,,004A97,FFFFFF
+323,1,323,Anderson,,3,,004A97,FFFFFF
+325,1,325,Ohlen,,3,,004A97,FFFFFF
+331,1,331,Oltorf,,3,,004A97,FFFFFF
+333,1,333,William Cannon,,3,,004A97,FFFFFF
+338,1,338,Lamar/45th,,3,,004A97,FFFFFF
+350,1,350,Airport Blvd,,3,,004A97,FFFFFF
+383,1,383,Research,,3,,004A97,FFFFFF
+392,1,392,Braker,,3,,004A97,FFFFFF
+410,1,410,E-Bus/West Campus,,3,,004A97,FFFFFF
+411,1,411,E-Bus/Riverside,,3,,004A97,FFFFFF
+412,1,412,E-Bus/Main Campus,,3,,004A97,FFFFFF
+450,1,450,METRO RAIL SHUTTLE,,3,,004A97,FFFFFF
+464,1,464,MLK Jr/Capitol,,3,,004A97,FFFFFF
+465,1,465,MLK/University of Texas,,3,,004A97,FFFFFF
+466,1,466,Kramer/Domain,,3,,004A97,FFFFFF
+470,1,470,MANOR CIRCULATOR,,3,,004A97,FFFFFF
+481,1,481,Night Owl North Lamar,,3,,004A97,FFFFFF
+483,1,483,Night Owl Riverside,,3,,004A97,FFFFFF
+484,1,484,Night Owl South Lamar,,3,,004A97,FFFFFF
+485,1,485,Night Owl Cameron,,3,,004A97,FFFFFF
+486,1,486,Night Owl South Congress,,3,,004A97,FFFFFF
+490,1,490,HEB Shuttle,,3,,004A97,FFFFFF
+491,1,491,Allandale,,3,,004A97,FFFFFF
+492,1,492,Delwood,,3,,004A97,FFFFFF
+550,1,550,Metro Rail Red Line,,0,,E2231A,FFFFFF
+640,1,640,FA Forty Acres,,3,,004A97,FFFFFF
+641,1,641,EC East Campus,,3,,004A97,FFFFFF
+642,1,642,WC West Campus/UT,,3,,004A97,FFFFFF
+653,1,653,RR Red River/UT,,3,,004A97,FFFFFF
+656,1,656,IF Intramural Fields/UT,,3,,004A97,FFFFFF
+661,1,661,FW Far West/UT,,3,,004A97,FFFFFF
+663,1,663,LA Lake Austin/UT,,3,,004A97,FFFFFF
+670,1,670,CP Crossing Place,,3,,004A97,FFFFFF
+671,1,671,NR North Riverside,,3,,004A97,FFFFFF
+672,1,672,LS Lakeshore,,3,,004A97,FFFFFF
+680,1,680,NR/LS North Riverside/Lakeshore,,3,,004A97,FFFFFF
+681,1,681,IF/FW Intramural/Far West,,3,,004A97,FFFFFF
+801,1,801,N Lamar S Congress,,3,,555555,FFFFFF
+803,1,803,Burnet/S Lamar,,3,,555555,FFFFFF
+935,1,935,Tech Ridge Express,,3,,E2231A,FFFFFF
+970,1,970,AMD/Lantana Campus,,3,,E2231A,FFFFFF
+982,1,982,Pavilion Express,,3,,E2231A,FFFFFF
+983,1,983,N USExpress,,3,,E2231A,FFFFFF
+985,1,985,Leander/Lakeline Direct,,3,,E2231A,FFFFFF
+987,1,987,Leander/Lakeline Express,,3,,E2231A,FFFFFF
+990,1,990,Manor/Elgin Express,,3,,E2231A,FFFFFF

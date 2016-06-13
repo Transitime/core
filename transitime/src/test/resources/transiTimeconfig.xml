@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transitime>
+    <db>        
+        <dbName>postgres</dbName>
+        <dbHost>localhost:5432</dbHost>
+        <dbType>postgresql</dbType>
+        <dbUserName>transitime</dbUserName>
+        <dbPassword>0000</dbPassword>
+    </db>     
+    <hibernate>
+        <configFile>C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg</configFile>        
+    </hibernate>
+</transitime>
