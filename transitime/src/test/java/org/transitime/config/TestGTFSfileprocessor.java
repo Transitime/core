@@ -38,6 +38,7 @@ public class TestGtfsFileProcessor extends TestCase{
 			  GtfsFileProcessor Test = new GtfsFileProcessor(args1);
 			  GtfsFileProcessor Test1 = new GtfsFileProcessor("-c",configFile,"-n",notes,"-gtfsUrl",gtfsUrl,"-gtfsZipFileName",gtfsZipFileName,"-unzipSubdirectory",unzipSubdirectory,"-gtfsDirectoryName",gtfsDirectoryName,"-supplementDir",supplementDir,"-regexReplaceFile",regexReplaceListFileName,"-pathOffsetDistance",pathOffsetDistance,"-maxStopToPathDistance",maxStopToPathDistance,"-maxDistanceForEliminatingVertices",maxDistanceForEliminatingVertices,"-defaultWaitTimeAtStopMsec",defaultWaitTimeAtStopMsec,"-maxSpeedKph",maxSpeedKph,"-maxTravelTimeSegmentLength",maxTravelTimeSegmentLength,"-configRev",configRev,"-shouldStoreNewRevs",shouldStoreNewRevs,"-trimPathBeforeFirstStopOfTrip",trimPathBeforeFirstStopOfTrip);
 			  GtfsFileProcessor Test2 = new GtfsFileProcessor(configFile,notes,gtfsUrl,gtfsZipFileName,unzipSubdirectory,gtfsDirectoryName,supplementDir,regexReplaceListFileName,pathOffsetDistance,maxStopToPathDistance,maxDistanceForEliminatingVertices,defaultWaitTimeAtStopMsec,maxSpeedKph,maxTravelTimeSegmentLength,configRev,shouldStoreNewRevs,trimPathBeforeFirstStopOfTrip);
+			  Test2.process();
 			  Assert();
 			}
 		    
