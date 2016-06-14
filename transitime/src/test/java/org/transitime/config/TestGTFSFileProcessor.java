@@ -1,7 +1,6 @@
 package org.transitime.config;
 
 import static org.junit.Assert.*;
-
 import junit.framework.TestCase;
 import org.transitime.applications.GtfsFileProcessor;
 import org.junit.Test;
@@ -9,7 +8,7 @@ import org.junit.Test;
 public class TestGTFSFileProcessor extends TestCase{
 	
 	        @Test
-			public void Testmain()
+			public void test()
 			{
 	        	String configFile="transiTimeconfig.xml";
 	        	String notes=null;
@@ -28,6 +27,7 @@ public class TestGTFSFileProcessor extends TestCase{
 	        	int configRev=-1;
 	        	boolean shouldStoreNewRevs=true;
 	        	boolean trimPathBeforeFirstStopOfTrip=false;
+	        	
 	        	GtfsFileProcessor testprocessor = new GtfsFileProcessor(configFile,notes,gtfsUrl,gtfsZipFileName,unzipSubdirectory,gtfsDirectoryName,supplementDir,regexReplaceListFileName,pathOffsetDistance,maxStopToPathDistance,maxDistanceForEliminatingVertices,defaultWaitTimeAtStopMsec,maxSpeedKph,maxTravelTimeSegmentLength,configRev,shouldStoreNewRevs,trimPathBeforeFirstStopOfTrip);
 	        	boolean tester=testprocessor.process();
 			assertTrue(tester);
