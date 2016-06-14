@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.Time;
@@ -174,9 +175,9 @@ public class TripDataHistoryCache {
 			
 			Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
 						
-			cache.put(arrivalDepartures);
-	
-			HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(arrivalDeparture.getBlockId(),arrivalDeparture.getBlock().getTrip(arrivalDeparture.getTripIndex()).getId(), arrivalDeparture.getStopPathIndex());
+			cache.put(arrivalDepartures);															
+			
+			HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(arrivalDeparture.getBlockId(),trip.getId(), arrivalDeparture.getStopPathIndex());
 			
 			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 						
