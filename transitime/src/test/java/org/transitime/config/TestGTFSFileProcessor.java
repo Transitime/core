@@ -1,19 +1,13 @@
 package org.transitime.config;
 
 import static org.junit.Assert.*;
+
 import junit.framework.TestCase;
 import org.transitime.applications.GtfsFileProcessor;
 import org.junit.Test;
 
 public class TestGTFSFileProcessor extends TestCase{
-
-	@Test
-	public void testProcess() {
-		fail("Not yet implemented");
-	}
-
 	
-		
 	        @Test
 			public void Testmain()
 			{
