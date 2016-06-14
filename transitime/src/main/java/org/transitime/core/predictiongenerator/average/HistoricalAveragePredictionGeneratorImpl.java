@@ -53,13 +53,16 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		 * if we have enough data start using historical average otherwise
 		 * revert to default. This does not mean that this method of
 		 * prediction is better than the default.
-		 */
-		HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(indices.getBlock().getId(),indices.getTripIndex(), indices.getStopPathIndex());
+		 */				
+		HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(indices.getBlock().getId(),indices.getTrip().getId(), indices.getStopPathIndex());
 		
 		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
+		{
+			logger.debug("Using historical average algorithm for prediction.");
 			return (long)average.getAverage();
+		}
 		
 		logger.debug("No historical average found, generating default prediction.");
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */

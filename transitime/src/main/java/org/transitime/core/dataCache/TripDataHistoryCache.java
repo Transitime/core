@@ -175,8 +175,8 @@ public class TripDataHistoryCache {
 			Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
 						
 			cache.put(arrivalDepartures);
-			
-			HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(arrivalDeparture.getBlockId(),arrivalDeparture.getTripIndex(), arrivalDeparture.getStopPathIndex());
+	
+			HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(arrivalDeparture.getBlockId(),arrivalDeparture.getBlock().getTrip(arrivalDeparture.getTripIndex()).getId(), arrivalDeparture.getStopPathIndex());
 			
 			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 						

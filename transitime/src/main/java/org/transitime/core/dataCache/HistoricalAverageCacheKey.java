@@ -3,85 +3,37 @@ package org.transitime.core.dataCache;
 import org.transitime.core.Indices;
 
 public class HistoricalAverageCacheKey implements java.io.Serializable {
-		
-	public HistoricalAverageCacheKey(String blockId, Integer tripIndex, Integer stopPathIndex) {
-		super();
-		this.blockId = blockId;
-		this.tripIndex = tripIndex;
-		this.stopPathIndex = stopPathIndex;	
-		
-		
-	}
-
+	
 	private String blockId;
-	private Integer tripIndex;
+	private String tripId;
 	private Integer stopPathIndex;
-				
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8359136555230359690L;
+	
 	
 	public HistoricalAverageCacheKey(Indices indices) {
 		super();
 		this.blockId=indices.getBlock().getId();
-		this.tripIndex=indices.getTripIndex();
+		
 		this.stopPathIndex=indices.getStopPathIndex();
 		
+		int tripIndex = indices.getTripIndex();
+		
+		this.tripId=indices.getBlock().getTrip(tripIndex).getId();
+		
 	}
-	
-	/**
-	 * @return the blockId
-	 */
-	public String getBlockId() {
-		return blockId;
+	@Override
+	public String toString() {
+		return "HistoricalAverageCacheKey [blockId=" + blockId + ", tripId=" + tripId + ", stopPathIndex="
+				+ stopPathIndex + "]";
 	}
-
-	/**
-	 * @param blockId the blockId to set
-	 */
-	public void setBlockId(String blockId) {
-		this.blockId = blockId;
-	}
-
-	/**
-	 * @return the tripIndex
-	 */
-	public int getTripIndex() {
-		return tripIndex;
-	}
-
-	/**
-	 * @param tripIndex the tripIndex to set
-	 */
-	public void setTripIndex(int tripIndex) {
-		this.tripIndex = tripIndex;
-	}
-
-	/**
-	 * @return the stopPathIndex
-	 */
-	public int getStopPathIndex() {
-		return stopPathIndex;
-	}
-
-	/**
-	 * @param stopPathIndex the stopPathIndex to set
-	 */
-	public void setStopPathIndex(int stopPathIndex) {
-		this.stopPathIndex = stopPathIndex;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
 		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
-		result = prime * result + ((tripIndex == null) ? 0 : tripIndex.hashCode());
+		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		return result;
 	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -101,25 +53,49 @@ public class HistoricalAverageCacheKey implements java.io.Serializable {
 				return false;
 		} else if (!stopPathIndex.equals(other.stopPathIndex))
 			return false;
-		if (tripIndex == null) {
-			if (other.tripIndex != null)
+		if (tripId == null) {
+			if (other.tripId != null)
 				return false;
-		} else if (!tripIndex.equals(other.tripIndex))
+		} else if (!tripId.equals(other.tripId))
 			return false;
 		return true;
 	}
-
-	@Override
-	public String toString() {
-		return "HistoricalAverageCacheKey [blockId=" + blockId + ", tripIndex=" + tripIndex + ", stopPathIndex="
-				+ stopPathIndex + "]";
+	public HistoricalAverageCacheKey(String blockId, String tripId, Integer stopPathIndex) {
+		super();
+		this.blockId = blockId;
+		this.tripId = tripId;
+		this.stopPathIndex = stopPathIndex;					
+	}
+				
+	public String getBlockId() {
+		return blockId;
 	}
 
-	
+	public void setBlockId(String blockId) {
+		this.blockId = blockId;
+	}
 
-	
+	public String getTripId() {
+		return tripId;
+	}
 
-	
+	public void setTripId(String tripId) {
+		this.tripId = tripId;
+	}
+
+	public Integer getStopPathIndex() {
+		return stopPathIndex;
+	}
+
+	public void setStopPathIndex(Integer stopPathIndex) {
+		this.stopPathIndex = stopPathIndex;
+	}
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8359136555230359690L;
+					
 }
 
 
