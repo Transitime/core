@@ -15,7 +15,7 @@ public class TestGTFSFileProcessor extends TestCase {
 		try {
 			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
         	String configFilePath=configFile.getPath();
-        	
+
         	URL gtfsFile = this.getClass().getClassLoader().getResource("gtfs.zip");
         	String gtfsFilePath=gtfsFile.getPath();
 			String notes = null;
