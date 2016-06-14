@@ -39,7 +39,7 @@ public class KalmanErrorCache {
 		
 		config.setEternal(true);
 		
-		config.setMaxEntriesLocalHeap(10000);
+		config.setMaxEntriesLocalHeap(1000000);
 		
 		config.setMaxEntriesLocalDisk(1000000);								
 	}
