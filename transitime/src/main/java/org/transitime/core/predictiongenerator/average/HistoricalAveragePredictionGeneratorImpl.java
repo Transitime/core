@@ -60,7 +60,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
-			logger.debug("Using historical average algorithm for prediction.");
+			logger.debug("Using historical average algorithm for prediction : " + historicalAverageCacheKey.toString() + " Value: "+average.toString());
 			return (long)average.getAverage();
 		}
 		

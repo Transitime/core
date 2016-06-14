@@ -383,10 +383,15 @@
 	<!-- <logger name="org.transitime.config" level="error" additivity="false"> 
 		<appender-ref ref="ERROR_SMTP" /> </logger> -->
 
-	<logger name="org.transitime.core.predAccuracy" level="info"
+	<logger name="org.transitime.core.predAccuracy" level="debug"
 		additivity="false">
 		<appender-ref ref="PRED_ACCURACY" />
 	</logger>
+	
+	<logger name="org.transitime.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule" level="debug"
+		additivity="false">
+		<appender-ref ref="PRED_ACCURACY" />
+	</logger>		
 
 	<logger name="org.transitime.monitoring" level="info"
 		additivity="false">
