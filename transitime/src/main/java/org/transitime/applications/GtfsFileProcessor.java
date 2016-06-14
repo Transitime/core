@@ -268,7 +268,7 @@ public class GtfsFileProcessor {
 	 * then this function is used to actually process the GTFS data and store it
 	 * into the database.
 	 */
-	public boolean process() throws IllegalArgumentException {
+	public void process() throws IllegalArgumentException {
 		// Gets the GTFS files from URL or from a zip file if need be.
 		// This also sets gtfsDirectoryName member
 		
@@ -297,20 +297,14 @@ public class GtfsFileProcessor {
 						defaultWaitTimeAtStopMsec, maxSpeedKph,
 						maxTravelTimeSegmentLength,
 						trimPathBeforeFirstStopOfTrip, titleFormatter);
-		boolean test;
-		try{
+		
 		gtfsData.processData();
-		}catch (Exception e){
-			test =false;
-			return test;
-		}
+		
 		// Log possibly useful info
 		titleFormatter.logRegexesThatDidNotMakeDifference();
 
 		// Do any necessary cleanup
 		cleanupGtfsFiles();
-		test = true;
-		return test;
 	}
 
 	/**

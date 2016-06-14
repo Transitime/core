@@ -1,2 +1,0 @@
-feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version
-CapMetro,http://www.capmetro.org,en,20160110,20160820,Jan2016_Aug2016_20160513150620
