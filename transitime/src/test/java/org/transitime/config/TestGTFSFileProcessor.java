@@ -10,7 +10,8 @@ public class TestGTFSFileProcessor extends TestCase{
 	        @Test
 			public void test()
 			{
-	        	String configFile="transiTimeconfig.xml";
+
+	        	String configFile = this.getClass().getResource("transiTimeconfig.xml").getFile();
 	        	String notes=null;
 	        	String gtfsUrl=null;
 	        	String gtfsZipFileName=null;
