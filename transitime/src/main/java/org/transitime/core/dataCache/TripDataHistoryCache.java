@@ -209,7 +209,7 @@ public class TripDataHistoryCache {
 		{			
 			ArrivalDeparture previousEvent = findPreviousDepartureEvent(arrivalDepartures, arrivalDeparture);
 			
-			if(previousEvent!=null && arrivalDeparture!=null )
+			if(previousEvent!=null && arrivalDeparture!=null && previousEvent.isDeparture())
 					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
 		}
 					

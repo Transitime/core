@@ -34,12 +34,6 @@ public class HistoricalAverage {
 		average=((count*average)+element)/(count+1);		
 		count=count+1;		
 	}
-	public void udpate(double[] elements)
-	{
-		for(int i=0;i<elements.length;i++)
-		{
-			update(elements[i]);
-		}
-	}
+
 	
 }
