@@ -61,6 +61,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
 			logger.debug("Using historical average algorithm for prediction : " + historicalAverageCacheKey.toString() + " Value: "+average.toString());
+			logger.debug("Instead of transtime value : " + super.getTravelTimeForPath(indices, avlReport));
 			return (long)average.getAverage();
 		}
 		
