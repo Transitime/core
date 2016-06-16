@@ -415,8 +415,8 @@ public class Core {
 			Session session = HibernateUtils.getSession();
 			
 			Date endDate=Calendar.getInstance().getTime();
-			/* TODO this -7 need to be made configurable */
-			Date startDate=DateUtils.addDays(endDate, -7);
+			
+			Date startDate=DateUtils.addDays(endDate, CoreConfig.getDaysPopulateHistoricalCache());
 			
 			TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
 						
