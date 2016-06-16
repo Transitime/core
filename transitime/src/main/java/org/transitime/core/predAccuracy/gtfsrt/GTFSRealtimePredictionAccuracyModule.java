@@ -136,13 +136,25 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 						}
 					
 						Trip gtfsTrip = dbConfig.getTrip(update.getTrip().getTripId());
+						if(gtfsTrip!=null)
+							logger.debug("Trip loaded.");
 
 						StopPath stopPath = gtfsTrip.getStopPath(stopTime.getStopId());
+						
+						if(stopPath!=null)
+							logger.debug(stopPath.toString());
 
 						int stopPathIndex = getStopPathIndex(gtfsTrip, stopPath);
+						
+						logger.debug("StopPathIndex : "+stopPathIndex);
 
 						ScheduleTime scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex);
 						
+						if(scheduledTime!=null)
+							logger.debug(scheduledTime.toString());
+						else
+							logger.debug("No schedule time found");
+																				
 						Date eventTime = null;
 						
 						if (stopTime.hasArrival()) {
