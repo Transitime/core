@@ -243,6 +243,19 @@
 			<pattern>${DEFAULT_PATTERN}</pattern>
 		</encoder>
 	</appender>
+	
+	<!-- Separate file for PRED_ACCURACY logging -->
+	<appender name="EXTERNAL_PRED_ACCURACY"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE_ROOT}/externalPredAccuracy.log.gz
+			</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>${DEFAULT_PATTERN}</pattern>
+		</encoder>
+	</appender>
 
 	<!-- Separate file for Match logging -->
 	<appender name="MATCH"
@@ -390,7 +403,7 @@
 	
 	<logger name="org.transitime.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule" level="debug"
 		additivity="false">
-		<appender-ref ref="PRED_ACCURACY" />
+		<appender-ref ref="EXTERNAL_PRED_ACCURACY" />
 	</logger>		
 
 	<logger name="org.transitime.monitoring" level="info"

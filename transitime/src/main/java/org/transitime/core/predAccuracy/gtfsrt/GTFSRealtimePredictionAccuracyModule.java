@@ -18,6 +18,7 @@
 package org.transitime.core.predAccuracy.gtfsrt;
 
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +28,8 @@ import org.transitime.applications.Core;
 import org.transitime.config.StringConfigValue;
 import org.transitime.core.predAccuracy.PredAccuracyPrediction;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
+import org.transitime.db.structs.ScheduleTime;
+import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
@@ -35,26 +38,23 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 
 /**
- * Reads in external prediction data from a GTFS realtime trip updates feed and stores the data in
- * memory. Then when arrivals/departures occur the prediction accuracy can be
- * determined and stored.
+ * Reads in external prediction data from a GTFS realtime trip updates feed and
+ * stores the data in memory. Then when arrivals/departures occur the prediction
+ * accuracy can be determined and stored.
  *
  * @author Sean Og Crudden
  *
  */
 public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModule {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(GTFSRealtimePredictionAccuracyModule.class);
+	private static final Logger logger = LoggerFactory.getLogger(GTFSRealtimePredictionAccuracyModule.class);
 
 	/********************** Config Params **************************/
-	
-	private static final StringConfigValue gtfsTripUpdateUrl = 
-			new StringConfigValue("transitime.predAccuracy.gtfsTripUpdateUrl", 
-					"http://127.0.0.1:8091/trip-updates",
-					"URL to access gtfs-rt trip updates.");
-		
-	
+
+	private static final StringConfigValue gtfsTripUpdateUrl = new StringConfigValue(
+			"transitime.predAccuracy.gtfsTripUpdateUrl", "http://127.0.0.1:8091/trip-updates",
+			"URL to access gtfs-rt trip updates.");
+
 	/**
 	 * @return the gtfstripupdateurl
 	 */
@@ -62,8 +62,6 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		return gtfsTripUpdateUrl;
 	}
 
-	
-	
 	/********************** Member Functions **************************/
 
 	/**
@@ -73,128 +71,152 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		super(agencyId);
 	}
 
-	
-	
 	/**
 	 * Gets GTFS realtime feed all routes from URL and return FeedMessage
 	 * 
 	 * @return the FeedMessage to be processed
 	 */
 	private FeedMessage getExternalPredictions() {
-				
+
 		// Will just read all data from gtfs-rt url
-		URL url=null;
+		URL url = null;
 		logger.info("Getting predictions from API using URL={}", getGtfstripupdateurl().getValue());
-		
+
 		try {
 			// Create the connection
 			url = new URL(getGtfstripupdateurl().getValue());
-			
-			FeedMessage feed = FeedMessage.parseFrom(url.openStream());			   
-			logger.info("Prediction read successfully from URL={}",getGtfstripupdateurl().getValue());
+
+			FeedMessage feed = FeedMessage.parseFrom(url.openStream());
+			logger.info("Prediction read successfully from URL={}", getGtfstripupdateurl().getValue());
 			return feed;
 		} catch (Exception e) {
-			logger.error("Problem when getting data from GTFS realtime trip updates URL={}", 
-					url, e);
+			logger.error("Problem when getting data from GTFS realtime trip updates URL={}", url, e);
 			return null;
 		}
 	}
-	
+
 	/**
-	 * Takes data from XML Document object and processes it and
-	 * calls storePrediction() on the predictions.
+	 * Takes data from XML Document object and processes it and calls
+	 * storePrediction() on the predictions.
 	 * 
 	 * @param feed
 	 * @param predictionsReadTime
 	 */
-	private void processExternalPredictions(
-			FeedMessage feed,
-			Date predictionsReadTime) {
+	private void processExternalPredictions(FeedMessage feed, Date predictionsReadTime) {
 
-		// If couldn't read data from feed then can't process it		
-		if (feed == null)		
+		// If couldn't read data from feed then can't process it
+		if (feed == null)
 			return;
-		
+
 		// So can look up direction in database
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
-		
+
 		logger.info("Processing GTFS-rt feed.....");
-		 for (FeedEntity entity : feed.getEntityList()) 
-		 {
-			 if (entity.hasTripUpdate()) 
-			 {
-				 TripUpdate update = entity.getTripUpdate();
-				 List<StopTimeUpdate> stopTimes = update.getStopTimeUpdateList();
-				 for(StopTimeUpdate stopTime : stopTimes)
-				 {					 
-					 if(stopTime.hasArrival()||stopTime.hasDeparture())
-					 {
-					
-						 	String direction=null;
-						 	
-						 	if(update.getTrip().hasDirectionId())
-						 		direction=""+update.getTrip().getDirectionId();
-						 							 	
-							if (update.getTrip() != null) {
-								Trip trip = dbConfig.getTrip(update.getTrip().getTripId());
-								if (trip != null) {
-									direction = trip.getDirectionId();
-								} else {
-									logger.error("Got tripTag={} but no such trip in "
-											+ "the configuration.", update.getTrip().getTripId());
-								}
+		for (FeedEntity entity : feed.getEntityList()) {
+			if (entity.hasTripUpdate()) {
+				TripUpdate update = entity.getTripUpdate();
+				List<StopTimeUpdate> stopTimes = update.getStopTimeUpdateList();
+				for (StopTimeUpdate stopTime : stopTimes) {
+					if (stopTime.hasArrival() || stopTime.hasDeparture()) {
+
+						String direction = null;
+
+						if (update.getTrip().hasDirectionId())
+							direction = "" + update.getTrip().getDirectionId();
+
+						if (update.getTrip() != null) {
+							Trip trip = dbConfig.getTrip(update.getTrip().getTripId());
+							if (trip != null) {
+								direction = trip.getDirectionId();
+							} else {
+								logger.error("Got tripTag={} but no such trip in " + "the configuration.",
+										update.getTrip().getTripId());
 							}
-							
-							logger.info("Storing external prediction routeId={}, "
-									+ "directionId={}, tripId={}, vehicleId={}, "
-									+ "stopId={}, prediction={}, isArrival={}",
-									update.getTrip().getRouteId(), direction, update.getTrip().getTripId(), update.getVehicle().getId(), stopTime.getStopId(),
-									new Date(stopTime.getArrival().getTime()*1000), true);
-						 	
-						 	logger.info("Prediction in milliseonds is {} and converted is {}",stopTime.getArrival().getTime()*1000,  new Date(stopTime.getArrival().getTime()*1000));
-													 							 							 							
-						 	if(stopTime.hasArrival())
-						 	{
-							 	PredAccuracyPrediction pred = new PredAccuracyPrediction(
-								update.getTrip().getRouteId(), 
-								direction, 
-								stopTime.getStopId(), 
-								update.getTrip().getTripId(), 
-								update.getVehicle().getId(),									
-								new Date(stopTime.getArrival().getTime()*1000) , 
-								new Date(feed.getHeader().getTimestamp()*1000),													
-								true,
-								new Boolean(false), 
-								"GTFS-rt");
-							 	
-							 	storePrediction(pred);
-						 	}
-						 	if(stopTime.hasDeparture())
-						 	{
-						 		PredAccuracyPrediction pred = new PredAccuracyPrediction(
-								update.getTrip().getRouteId(), 
-								direction, 
-								stopTime.getStopId(), 
-								update.getTrip().getTripId(), 
-								update.getVehicle().getId(),	
-								new Date(stopTime.getDeparture().getTime()*1000) , 
-								new Date(feed.getHeader().getTimestamp()*1000),													
-								false,
-								new Boolean(false), 
-								"GTFS-rt");
-						 								 		 									
-								storePrediction(pred);
-						 	}						 							 	
-					 }					
-					 else
-					 {
-						 logger.debug("No predictions for vehicleId={} for stop={}",update.getVehicle().getId(),stopTime.getStopId());
-					 }
-				 }
-		     }
-		 }			
+						}
+
+						logger.info(
+								"Storing external prediction routeId={}, " + "directionId={}, tripId={}, vehicleId={}, "
+										+ "stopId={}, prediction={}, isArrival={}",
+								update.getTrip().getRouteId(), direction, update.getTrip().getTripId(),
+								update.getVehicle().getId(), stopTime.getStopId(),
+								new Date(stopTime.getArrival().getTime() * 1000), true);
+
+						logger.info("Prediction in milliseonds is {} and converted is {}",
+								stopTime.getArrival().getTime() * 1000,
+								new Date(stopTime.getArrival().getTime() * 1000));
+
+						Trip gtfsTrip = dbConfig.getTrip(update.getTrip().getTripId());
+
+						StopPath stopPath = gtfsTrip.getStopPath(stopTime.getStopId());
+
+						int stopPathIndex = getStopPathIndex(gtfsTrip, stopPath);
+
+						ScheduleTime scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex);
+						
+						Date eventTime = null;
+						
+						if (stopTime.hasArrival()) {
+
+							if (stopTime.getArrival().getDelay() > 0) {
+								int timeInSeconds = scheduledTime.getArrivalTime() + stopTime.getArrival().getDelay();
+
+								Calendar calendar = Calendar.getInstance();
+								calendar.set(Calendar.HOUR_OF_DAY, 0);
+								calendar.add(Calendar.SECOND, timeInSeconds);
+
+								eventTime = calendar.getTime();
+							} else {
+								eventTime = new Date(stopTime.getArrival().getTime());
+							}
+
+						}
+						if (stopTime.hasDeparture()) {
+							if (stopTime.getDeparture().getDelay() > 0) {
+								int timeInSeconds = scheduledTime.getDepartureTime() + stopTime.getDeparture().getDelay();
+
+								Calendar calendar = Calendar.getInstance();
+								calendar.set(Calendar.HOUR_OF_DAY, 0);
+								calendar.add(Calendar.SECOND, timeInSeconds);
+
+								eventTime = calendar.getTime();
+							} else {
+								eventTime = new Date(stopTime.getDeparture().getTime());
+							}
+
+						}
+						if (eventTime != null) {
+							PredAccuracyPrediction pred = new PredAccuracyPrediction(update.getTrip().getRouteId(),
+									direction, stopTime.getStopId(), update.getTrip().getTripId(),
+									update.getVehicle().getId(), new Date(eventTime.getTime() * 1000),
+									new Date(feed.getHeader().getTimestamp() * 1000), true, new Boolean(false),
+									"GTFS-rt");
+
+							storePrediction(pred);
+						}
+					} else {
+						logger.debug("No predictions for vehicleId={} for stop={}", update.getVehicle().getId(),
+								stopTime.getStopId());
+					}
+				}
+			}
+		}
 	}
-	
+
+	private int getStopPathIndex(Trip gtfsTrip, StopPath stopPath) {
+		// TODO Auto-generated method stub
+
+		if (gtfsTrip != null && stopPath != null) {
+			int i = 0;
+			for (StopPath nextStopPath : gtfsTrip.getStopPaths()) {
+				if (nextStopPath.basicEquals(stopPath)) {
+					return i;
+				}
+				i++;
+			}
+		}
+		return -1;
+	}
+
 	/**
 	 * Processes both the internal and external predictions
 	 * 
@@ -208,18 +230,16 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	 *            external predictions are associated with each other.
 	 */
 	@Override
-	protected void getAndProcessData(List<RouteAndStops> routesAndStops, 
-			Date predictionsReadTime) {
+	protected void getAndProcessData(List<RouteAndStops> routesAndStops, Date predictionsReadTime) {
 		// Process internal predictions
 		super.getAndProcessData(routesAndStops, predictionsReadTime);
-		
-		logger.info("Calling GTFSRealtimePredictionAccuracyModule."
-				+ "getAndProcessData()");
-		
-		// Get data for all items in the GTFS-RT trip updates feed		
+
+		logger.info("Calling GTFSRealtimePredictionAccuracyModule." + "getAndProcessData()");
+
+		// Get data for all items in the GTFS-RT trip updates feed
 		FeedMessage feed = getExternalPredictions();
-			
+
 		processExternalPredictions(feed, predictionsReadTime);
-		
+
 	}
 }
