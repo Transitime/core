@@ -134,133 +134,140 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 										update.getTrip().getTripId());
 							}
 						}
-					
-						Trip gtfsTrip = dbConfig.getTrip(update.getTrip().getTripId());
-						if(gtfsTrip!=null)
-							logger.debug("Trip loaded.");
-
-						StopPath stopPath = gtfsTrip.getStopPath(stopTime.getStopId());
-						
-						if(stopPath!=null)
-							logger.debug(stopPath.toString());
-
-						int stopPathIndex = getStopPathIndex(gtfsTrip, stopPath);
-						
-						logger.debug("StopPathIndex : "+stopPathIndex);
-
-						ScheduleTime scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex);
-						
-						if(scheduledTime!=null)
-							logger.debug(scheduledTime.toString());
-						else
-							logger.debug("No schedule time found");
-																				
+						ScheduleTime scheduledTime=null;
+						/* use stop as means for getting scheduled time */
+						if(stopTime.hasStopId())
+						{					
+							Trip gtfsTrip = dbConfig.getTrip(update.getTrip().getTripId());
+							
+							if(gtfsTrip!=null)
+								logger.debug("Trip loaded.");
+	
+							StopPath stopPath = gtfsTrip.getStopPath(stopTime.getStopId());
+																					
+							if(stopPath!=null)
+								logger.debug(stopPath.toString());
+	
+							int stopPathIndex = getStopPathIndex(gtfsTrip, stopPath);
+							
+							logger.debug("StopPathIndex : "+stopPathIndex);
+	
+							scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex);
+							
+							if(scheduledTime!=null)
+								logger.debug(scheduledTime.toString());
+							else
+								logger.debug("No schedule time found");
+						}														
 						Date eventTime = null;
-						
-						if (stopTime.hasArrival()) {
-								
-							if (stopTime.getArrival().getDelay() > 0) {
-								int timeInSeconds = scheduledTime.getArrivalTime() + stopTime.getArrival().getDelay();
-
-								Calendar calendar = Calendar.getInstance();
-								calendar.set(Calendar.HOUR_OF_DAY, 0);
-								calendar.add(Calendar.SECOND, timeInSeconds);
-
-								eventTime = calendar.getTime();
-								logger.debug("Event Time : "+ eventTime );
-								logger.debug("Time in seconds :" + timeInSeconds );
-								
-							} else if(update.getDelay() > 0) {
-								
-								int timeInSeconds = scheduledTime.getArrivalTime() + update.getDelay();
-
-								Calendar calendar = Calendar.getInstance();
-								calendar.set(Calendar.HOUR_OF_DAY, 0);
-								calendar.add(Calendar.SECOND, timeInSeconds);
-
-								eventTime = calendar.getTime();
-								logger.debug("Event Time : "+ eventTime );
-								logger.debug("Time in seconds :" + timeInSeconds );
-							}else {
-								
-								eventTime = new Date(stopTime.getArrival().getTime());
-								logger.debug("Event Time : "+ eventTime );
-								
+						if(scheduledTime!=null)
+						{
+							if (stopTime.hasArrival()) {
+								if(stopTime.getArrival().hasTime())
+								{
+									eventTime = new Date(stopTime.getArrival().getTime());							
+									
+									logger.debug("Event Time : "+ eventTime );
+								}else
+								if (stopTime.getArrival().hasDelay()) {
+									int timeInSeconds = scheduledTime.getArrivalTime() + stopTime.getArrival().getDelay();
+	
+									Calendar calendar = Calendar.getInstance();
+									calendar.set(Calendar.HOUR_OF_DAY, 0);
+									calendar.add(Calendar.SECOND, timeInSeconds);
+	
+									eventTime = calendar.getTime();
+									logger.debug("Event Time : "+ eventTime );
+									logger.debug("Time in seconds :" + timeInSeconds );
+									
+								} else if(update.hasDelay()) {
+									
+									int timeInSeconds = scheduledTime.getArrivalTime() + update.getDelay();
+	
+									Calendar calendar = Calendar.getInstance();
+									calendar.set(Calendar.HOUR_OF_DAY, 0);
+									calendar.add(Calendar.SECOND, timeInSeconds);
+	
+									eventTime = calendar.getTime();
+									logger.debug("Event Time : "+ eventTime );
+									logger.debug("Time in seconds :" + timeInSeconds );
+								}
+								if (eventTime != null) {
+									
+									logger.info(
+											"Storing external prediction routeId={}, " + "directionId={}, tripId={}, vehicleId={}, "
+													+ "stopId={}, prediction={}, isArrival={}",
+											update.getTrip().getRouteId(), direction, update.getTrip().getTripId(),
+											update.getVehicle().getId(), stopTime.getStopId(),
+											eventTime, true);
+	
+									logger.info("Prediction in milliseconds is {} and converted is {}",
+											eventTime.getTime(),
+											eventTime);
+	
+									
+									PredAccuracyPrediction pred = new PredAccuracyPrediction(update.getTrip().getRouteId(),
+											direction, stopTime.getStopId(), update.getTrip().getTripId(),
+											update.getVehicle().getId(), eventTime,
+											new Date(feed.getHeader().getTimestamp() * 1000), true, new Boolean(false),
+											"GTFS-rt");
+	
+									storePrediction(pred);
+								}
 							}
-							if (eventTime != null) {
-								
-								logger.info(
-										"Storing external prediction routeId={}, " + "directionId={}, tripId={}, vehicleId={}, "
-												+ "stopId={}, prediction={}, isArrival={}",
-										update.getTrip().getRouteId(), direction, update.getTrip().getTripId(),
-										update.getVehicle().getId(), stopTime.getStopId(),
-										eventTime, true);
-
-								logger.info("Prediction in milliseconds is {} and converted is {}",
-										eventTime.getTime(),
-										eventTime);
-
-								
-								PredAccuracyPrediction pred = new PredAccuracyPrediction(update.getTrip().getRouteId(),
-										direction, stopTime.getStopId(), update.getTrip().getTripId(),
-										update.getVehicle().getId(), eventTime,
-										new Date(feed.getHeader().getTimestamp() * 1000), true, new Boolean(false),
-										"GTFS-rt");
-
-								storePrediction(pred);
+							if (stopTime.hasDeparture()) {
+								if(stopTime.getDeparture().hasTime())
+								{
+									eventTime = new Date(stopTime.getDeparture().getTime());
+									logger.debug("Event Time : "+ eventTime );
+								}else
+								if (stopTime.getDeparture().hasDelay()) {
+									int timeInSeconds = scheduledTime.getDepartureTime() + stopTime.getDeparture().getDelay();
+	
+									Calendar calendar = Calendar.getInstance();
+									calendar.set(Calendar.HOUR_OF_DAY, 0);
+									calendar.add(Calendar.SECOND, timeInSeconds);
+	
+									eventTime = calendar.getTime();
+									logger.debug("Event Time : "+ eventTime );
+									logger.debug("Time in seconds :" + timeInSeconds );
+								} else if(update.hasDelay()) {
+									
+									int timeInSeconds = scheduledTime.getDepartureTime() + update.getDelay();
+	
+									Calendar calendar = Calendar.getInstance();
+									calendar.set(Calendar.HOUR_OF_DAY, 0);
+									calendar.add(Calendar.SECOND, timeInSeconds);
+	
+									eventTime = calendar.getTime();
+									logger.debug("Event Time : "+ eventTime );
+									logger.debug("Time in seconds :" + timeInSeconds );
+								} 
+								if (eventTime != null) {
+									
+									logger.info(
+											"Storing external prediction routeId={}, " + "directionId={}, tripId={}, vehicleId={}, "
+													+ "stopId={}, prediction={}, isArrival={}",
+											update.getTrip().getRouteId(), direction, update.getTrip().getTripId(),
+											update.getVehicle().getId(), stopTime.getStopId(),
+											eventTime, false);
+	
+									logger.info("Prediction in milliseonds is {} and converted is {}",
+											eventTime.getTime(),
+											eventTime);
+	
+									
+									PredAccuracyPrediction pred = new PredAccuracyPrediction(update.getTrip().getRouteId(),
+											direction, stopTime.getStopId(), update.getTrip().getTripId(),
+											update.getVehicle().getId(), eventTime,
+											new Date(feed.getHeader().getTimestamp() * 1000), false, new Boolean(false),
+											"GTFS-rt");
+	
+									storePrediction(pred);
+								}
+	
 							}
-						}
-						if (stopTime.hasDeparture()) {
-							if (stopTime.getDeparture().getDelay() > 0) {
-								int timeInSeconds = scheduledTime.getDepartureTime() + stopTime.getDeparture().getDelay();
-
-								Calendar calendar = Calendar.getInstance();
-								calendar.set(Calendar.HOUR_OF_DAY, 0);
-								calendar.add(Calendar.SECOND, timeInSeconds);
-
-								eventTime = calendar.getTime();
-								logger.debug("Event Time : "+ eventTime );
-								logger.debug("Time in seconds :" + timeInSeconds );
-							} else if(update.getDelay() > 0) {
-								
-								int timeInSeconds = scheduledTime.getDepartureTime() + update.getDelay();
-
-								Calendar calendar = Calendar.getInstance();
-								calendar.set(Calendar.HOUR_OF_DAY, 0);
-								calendar.add(Calendar.SECOND, timeInSeconds);
-
-								eventTime = calendar.getTime();
-								logger.debug("Event Time : "+ eventTime );
-								logger.debug("Time in seconds :" + timeInSeconds );
-							} else {
-								eventTime = new Date(stopTime.getDeparture().getTime());
-								logger.debug("Event Time : "+ eventTime );
-							}
-							if (eventTime != null) {
-								
-								logger.info(
-										"Storing external prediction routeId={}, " + "directionId={}, tripId={}, vehicleId={}, "
-												+ "stopId={}, prediction={}, isArrival={}",
-										update.getTrip().getRouteId(), direction, update.getTrip().getTripId(),
-										update.getVehicle().getId(), stopTime.getStopId(),
-										eventTime, false);
-
-								logger.info("Prediction in milliseonds is {} and converted is {}",
-										eventTime.getTime(),
-										eventTime);
-
-								
-								PredAccuracyPrediction pred = new PredAccuracyPrediction(update.getTrip().getRouteId(),
-										direction, stopTime.getStopId(), update.getTrip().getTripId(),
-										update.getVehicle().getId(), eventTime,
-										new Date(feed.getHeader().getTimestamp() * 1000), false, new Boolean(false),
-										"GTFS-rt");
-
-								storePrediction(pred);
-							}
-
-						}
-						
+						}						
 					} else {
 						logger.debug("No predictions for vehicleId={} for stop={}", update.getVehicle().getId(),
 								stopTime.getStopId());
