@@ -413,7 +413,7 @@ public class GtfsFileProcessor {
 
 		// Handle boolean command line options
 		boolean shouldStoreNewRevs = commandLineArgs.hasOption("storeNewRevs");
-		boolean shouldDeleteRevs = commandLineArgs.hasOption("deleteRevs");
+		boolean shouldDeleteRevs = !commandLineArgs.hasOption("skipDeleteRevs");
 		boolean trimPathBeforeFirstStopOfTrip =
 				commandLineArgs.hasOption("trimPathBeforeFirstStopOfTrip");
 
@@ -591,7 +591,7 @@ public class GtfsFileProcessor {
 				"Stores the config and travel time revs into ActiveRevisions "
 						+ "in database.");
 
-		options.addOption("deleteRevs", false,
+		options.addOption("skipDeleteRevs", false,
 				"Delete the rev to be created first just in case.");
 		
 		options.addOption(
