@@ -130,6 +130,7 @@ public class GtfsData {
 	private final double maxSpeedKph;
 	private final double maxTravelTimeSegmentLength;
 	private final boolean trimPathBeforeFirstStopOfTrip;
+	private final boolean cleanupRevs;
 	
 	// So can make the titles more readable
 	private final TitleFormatter titleFormatter;
@@ -283,6 +284,7 @@ public class GtfsData {
 			String notes,
 			Date zipFileLastModifiedTime,
 			boolean shouldStoreNewRevs,
+			boolean shouldDeleteRevs,
 			String projectId,
 			String gtfsDirectoryName, 
 			String supplementDir, 
@@ -333,7 +335,7 @@ public class GtfsData {
 			// Don't need to store new revs in db so use a transient object
 			revs = new ActiveRevisions();
 		}
-		
+		cleanupRevs = shouldDeleteRevs;
 		// If particular configuration rev specified then use it. This way
 		// can write over existing configuration revisions.
 		if (configRev >= 0) {
@@ -2699,7 +2701,7 @@ public class GtfsData {
     int travelTimesRev= revs.getTravelTimesRev();
 		try {
   		DbWriter dbWriter = new DbWriter(this);
-  		dbWriter.write(session, revs.getConfigRev());	
+  		dbWriter.write(session, revs.getConfigRev(), cleanupRevs);	
   		// Finish things up by closing the session
   		session.close();
   		

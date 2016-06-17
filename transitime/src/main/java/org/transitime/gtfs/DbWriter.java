@@ -91,30 +91,32 @@ public class DbWriter {
 	 * 
 	 * @param configRev
 	 */
-	private void actuallyWriteData(Session session, int configRev) {
-		// Get rid of old data. Getting rid of trips, trip patterns, and blocks
-		// is a bit complicated. Need to delete them in proper order because
-		// of the foreign keys. Because appear to need to use plain SQL
-		// to do so successfully (without reading in objects and then
-		// deleting them, which takes too much time and memory). Therefore
-		// deleting of this data is done here before writing the data.
-		logger.info("Deleting old blocks and associated trips from rev {} of "
-				+ "database...", configRev);
-		Block.deleteFromRev(session, configRev);
-
-		logger.info("Deleting old trips from rev {} of database...", 
-				configRev);
-		Trip.deleteFromRev(session, configRev);
-
-		logger.info("Deleting old trip patterns from rev {} of database...", 
-				configRev);
-		TripPattern.deleteFromRev(session, configRev);
-		
-		// Get rid of travel times that are associated with the rev being 
-		// deleted
-		logger.info("Deleting old travel times from rev {} of database...", 
-				configRev);
-		TravelTimesForTrip.deleteFromRev(session, configRev);
+	private void actuallyWriteData(Session session, int configRev, boolean cleanupRevs) {
+		if (cleanupRevs) {
+			// Get rid of old data. Getting rid of trips, trip patterns, and blocks
+			// is a bit complicated. Need to delete them in proper order because
+			// of the foreign keys. Because appear to need to use plain SQL
+			// to do so successfully (without reading in objects and then
+			// deleting them, which takes too much time and memory). Therefore
+			// deleting of this data is done here before writing the data.
+			logger.info("Deleting old blocks and associated trips from rev {} of "
+					+ "database...", configRev);
+			Block.deleteFromRev(session, configRev);
+	
+			logger.info("Deleting old trips from rev {} of database...", 
+					configRev);
+			Trip.deleteFromRev(session, configRev);
+	
+			logger.info("Deleting old trip patterns from rev {} of database...", 
+					configRev);
+			TripPattern.deleteFromRev(session, configRev);
+			
+			// Get rid of travel times that are associated with the rev being 
+			// deleted
+			logger.info("Deleting old travel times from rev {} of database...", 
+					configRev);
+			TravelTimesForTrip.deleteFromRev(session, configRev);
+		}
 		
 		// Now write the data to the database.
 		// First write the Blocks. This will also write the Trips, TripPatterns,
@@ -199,7 +201,13 @@ public class DbWriter {
 	 * @param configRev So can delete old data for the rev
 	 * @throws HibernateException when problem with database
 	 */
+	
 	public void write(Session session, int configRev)
+			throws HibernateException {
+		write(session, configRev, true);
+	}
+	
+	public void write(Session session, int configRev, boolean cleanupRevs)
 			throws HibernateException {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
@@ -211,7 +219,7 @@ public class DbWriter {
 		
 		// Do the low-level processing
 		try {
-			actuallyWriteData(session, configRev);
+			actuallyWriteData(session, configRev, cleanupRevs);
 			
 			// Done writing data so commit it
 			tx.commit();

@@ -68,6 +68,7 @@ public class GtfsFileProcessor {
 	private final double maxTravelTimeSegmentLength;
 	private final int configRev;
 	private final boolean shouldStoreNewRevs;
+	private final boolean shouldDeleteRevs;
 	private final String notes;
 	private final boolean trimPathBeforeFirstStopOfTrip;
 
@@ -117,7 +118,7 @@ public class GtfsFileProcessor {
 			int defaultWaitTimeAtStopMsec, double maxSpeedKph,
 			double maxTravelTimeSegmentLength,
 			int configRev,
-			boolean shouldStoreNewRevs, boolean trimPathBeforeFirstStopOfTrip) {
+			boolean shouldStoreNewRevs, boolean shouldDeleteRevs, boolean trimPathBeforeFirstStopOfTrip) {
 		// Read in config params if command line option specified
 		if (configFile != null) {
 			try {
@@ -146,6 +147,7 @@ public class GtfsFileProcessor {
 		this.configRev = configRev;
 		this.notes = notes;
 		this.shouldStoreNewRevs = shouldStoreNewRevs;
+		this.shouldDeleteRevs = shouldDeleteRevs;
 		this.trimPathBeforeFirstStopOfTrip = trimPathBeforeFirstStopOfTrip;
 	}
 
@@ -278,7 +280,8 @@ public class GtfsFileProcessor {
 		// Process the GTFS data
 		GtfsData gtfsData =
 				new GtfsData(configRev, notes, zipFileLastModifiedTime,
-						shouldStoreNewRevs, AgencyConfig.getAgencyId(),
+						shouldStoreNewRevs, shouldDeleteRevs,
+						AgencyConfig.getAgencyId(),
 						gtfsDirectoryName, supplementDir,
 						pathOffsetDistance, maxStopToPathDistance,
 						maxDistanceForEliminatingVertices,
@@ -410,6 +413,7 @@ public class GtfsFileProcessor {
 
 		// Handle boolean command line options
 		boolean shouldStoreNewRevs = commandLineArgs.hasOption("storeNewRevs");
+		boolean shouldDeleteRevs = commandLineArgs.hasOption("deleteRevs");
 		boolean trimPathBeforeFirstStopOfTrip =
 				commandLineArgs.hasOption("trimPathBeforeFirstStopOfTrip");
 
@@ -423,7 +427,8 @@ public class GtfsFileProcessor {
 						defaultWaitTimeAtStopMsec, maxSpeedKph,
 						maxTravelTimeSegmentLength,
 						configRev,
-						shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
+						shouldStoreNewRevs, shouldDeleteRevs, 
+						trimPathBeforeFirstStopOfTrip);
 
 		return processor;
 	}
@@ -586,6 +591,9 @@ public class GtfsFileProcessor {
 				"Stores the config and travel time revs into ActiveRevisions "
 						+ "in database.");
 
+		options.addOption("deleteRevs", true,
+				"Delete the rev to be created first just in case.");
+		
 		options.addOption(
 				"trimPathBeforeFirstStopOfTrip",
 				false,
