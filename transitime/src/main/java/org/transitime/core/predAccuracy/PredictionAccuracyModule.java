@@ -202,7 +202,8 @@ public class PredictionAccuracyModule extends Module {
 				// arrival/departure don't stick around taking up memory.
 				clearStalePredictions();
 			} catch (Exception e) {
-				logger.error("Error accessing predictions feed", e); 
+				e.printStackTrace();
+				logger.error("Error accessing predictions feed :  "+ e.getMessage(), e); 
 			} finally {				
 				// Wait appropriate amount of time till poll again
 				long elapsedMsec = timer.elapsedMsec();
