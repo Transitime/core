@@ -591,7 +591,7 @@ public class GtfsFileProcessor {
 				"Stores the config and travel time revs into ActiveRevisions "
 						+ "in database.");
 
-		options.addOption("deleteRevs", true,
+		options.addOption("deleteRevs", false,
 				"Delete the rev to be created first just in case.");
 		
 		options.addOption(
