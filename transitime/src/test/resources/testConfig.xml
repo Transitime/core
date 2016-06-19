@@ -5,12 +5,15 @@
         <!-- GtfsRealtimeModule read a GTFS vehicle location feed as the source of AVL data. -->
         <!-- PredictionAccuracyModule is used to store the transiTime prediction and record their accuracy. Look in class for comments explaining detail. -->
         <!-- GTFSRealtimePredictionAccuracyModule is used to store an alternative source of predictions and again record there accuracy based on actual arrival/departure times -->                            
-        <optionalModulesList>org.transitime.avl.GtfsRealtimeModule;org.transitime.core.predAccuracy.PredictionAccuracyModule;org.transitime.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule</optionalModulesList>                
+        <optionalModulesList>org.transitime.avl.GtfsRealtimeModule;org.transitime.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule</optionalModulesList>                
     </modules>    
     <predAccuracy>
-    	<pollingRateMsec>120000</pollingRateMsec>
+    	<pollingRateMsec>30000</pollingRateMsec>
     	<!-- This value is used by GTFSRealtimePredictionAccuracyModule to pick up feed to compare against transitime feed -->
     	<gtfsTripUpdateUrl>http://realtime.prod.obahart.org:8088/trip-updates</gtfsTripUpdateUrl>
+    	<maxPredTimeMinutes>60</maxPredTimeMinutes>
+    	<maxPredStalenessMinutes>45</maxPredStalenessMinutes>
+    	<stopsPerTrip>10</stopsPerTrip>
     </predAccuracy>
     
     <autoBlockAssigner>
@@ -47,7 +50,7 @@
     </avl>   
     <db>        
         <dbName>GOHART</dbName>
-        <dbHost>192.168.99.101:5432</dbHost>
+        <dbHost>192.168.99.100:5432</dbHost>
         <dbType>postgresql</dbType>
         <dbUserName>postgres</dbUserName>
         <dbPassword>transitime</dbPassword>

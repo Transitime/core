@@ -33,15 +33,7 @@ public class HistoricalAverageCache {
 		if (cm.getCache(cacheName) == null) {
 			cm.addCache(cacheName);
 		}
-		cache = cm.getCache(cacheName);
-		
-		CacheConfiguration config = cache.getCacheConfiguration();
-		
-		config.setEternal(true);
-		
-		config.setMaxEntriesLocalHeap(1000000);
-		
-		config.setMaxEntriesLocalDisk(1000000);								
+		cache = cm.getCache(cacheName);											
 	}
 	public void logCache(Logger logger)
 	{

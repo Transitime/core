@@ -275,7 +275,7 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 					PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							routeId, directionId, stopId, tripId, vehicleId,
 							predictedTime, predictionsReadTime, isArrival, 
-							null, "MBTA_epoch");
+							null, "MBTA_epoch", null);
 					storePrediction(pred);
 				}
 			}

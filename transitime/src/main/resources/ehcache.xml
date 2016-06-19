@@ -10,7 +10,7 @@
 	
 	<cache name="arrivalDepartures" 
 		maxEntriesLocalHeap="20000"
-		maxEntriesLocalDisk="2000" 
+		maxEntriesLocalDisk="20000" 
 		eternal="false" 
 		diskSpoolBufferSizeMB="20"				
 		transactionalMode="off">
@@ -25,9 +25,9 @@
 		<persistence strategy="none" />
 	</cache>
 	<cache name="HistoricalAverageCache" 
-		maxEntriesLocalHeap="20000"
-		maxEntriesLocalDisk="2000" 
-		eternal="false" 
+		maxEntriesLocalHeap="500000"
+		maxEntriesLocalDisk="500000" 
+		eternal="true" 
 		diskSpoolBufferSizeMB="20"				
 		transactionalMode="off">
 		<persistence strategy="none" />

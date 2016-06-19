@@ -39,6 +39,7 @@ public class PredAccuracyPrediction {
 	// The time the prediction was read. This allows us to determine
 	// how far out into the future the prediction is for.
 	private final Date predictionReadTime;
+	private final String scheduledTime;
 	private final boolean isArrival;
 	// affectedByWaitStop is a Boolean so that null can represent "don't know"
 	private final Boolean affectedByWaitStop;
@@ -70,7 +71,7 @@ public class PredAccuracyPrediction {
 	public PredAccuracyPrediction(String routeId, String directionId,
 			String stopId, String tripId, String vehicleId, Date predictedTime,
 			Date predictionReadTime, boolean isArrival,
-			Boolean affectedByWaitStop, String source) {
+			Boolean affectedByWaitStop, String source, String scheduledTime) {
 		super();
 		this.routeId = routeId;
 		this.directionId = directionId;
@@ -82,6 +83,7 @@ public class PredAccuracyPrediction {
 		this.isArrival = isArrival;
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.source = source;
+		this.scheduledTime = scheduledTime;
 	}
 	
 	public String getRouteId() {
@@ -143,8 +145,14 @@ public class PredAccuracyPrediction {
 					(predictedTime.getTime() - predictionReadTime.getTime())
 				+ ", isArrival=" + isArrival
 				+ ", affectedByWaitStop=" + affectedByWaitStop
-				+ ", source=" + source 
+				+ ", source=" + source
+				+ ", scheduleTime=" + scheduledTime
 				+ "]";
 	}
+
+	public String getScheduledTime() {
+		return scheduledTime;
+	}
+
 	
 }

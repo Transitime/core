@@ -388,7 +388,7 @@ public class PredictionAccuracyModule extends Module {
 											predictionsReadTime,
 											pred.isArrival(),
 											pred.isAffectedByWaitStop(),
-											"Transitime");
+											"Transitime", null);
 							storePrediction(accuracyPred);
 							predictionsFound = true;
 						}
@@ -404,7 +404,30 @@ public class PredictionAccuracyModule extends Module {
 			}
 		}
 	}
-	
+	private static void printPredictionsMap(ConcurrentHashMap<PredictionKey, List<PredAccuracyPrediction>>  predictionMap, ArrivalDeparture arrivalDeparture)
+	{
+		
+		logger.debug("Looking for match : " + arrivalDeparture.toString() );
+		for (PredictionKey key: predictionMap.keySet())
+		{			                      
+            List<PredAccuracyPrediction> value = predictionMap.get(key);
+            for(PredAccuracyPrediction pred:value)
+            {
+            	boolean keyprinted=false;
+            	if(pred.getVehicleId().equals(arrivalDeparture.getVehicleId()))
+            	{
+            		if(!keyprinted)
+            		{            			
+            			logger.debug(key.toString());
+            			keyprinted=true;
+            		}            			
+                    logger.debug(pred.toString());
+            	}
+            }
+            
+                        
+		} 
+	}
 	/**
 	 * Looks for corresponding prediction in memory. If found then prediction
 	 * accuracy information for that prediction is stored in the database.
@@ -424,6 +447,7 @@ public class PredictionAccuracyModule extends Module {
 		if (predsList == null || predsList.isEmpty())
 		{
 			logger.debug("No matching predictions for {}", arrivalDeparture);
+			printPredictionsMap(predictionMap, arrivalDeparture);
 			return;			
 		}
 		
