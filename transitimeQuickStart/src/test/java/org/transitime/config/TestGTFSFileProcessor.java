@@ -17,9 +17,7 @@
 package org.transitime.config;
 
 import static org.junit.Assert.*;
-
 import java.net.URL;
-
 import junit.framework.TestCase;
 import org.transitime.applications.GtfsFileProcessor;
 import org.junit.Test;
