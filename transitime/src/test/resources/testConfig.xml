@@ -15,13 +15,13 @@
         <minLatitude>51.35</minLatitude>
         <maxLatitude>55.45</maxLatitude>        
     </avl>   
-    <db>
+ <!--    <db>
         <dbName>transiTime</dbName>
         <dbHost>localhost:5432</dbHost>
         <dbType>postgresql</dbType>
         <dbUserName>transiTime</dbUserName>
         <dbPassword>welcome</dbPassword>
-    </db>     
+    </db>      -->
     <hibernate>
         <configFile>postgres_hibernate.cfg.xml</configFile>        
     </hibernate>

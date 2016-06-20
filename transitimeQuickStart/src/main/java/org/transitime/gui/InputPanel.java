@@ -23,6 +23,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
@@ -43,10 +45,12 @@ import java.awt.Button;
 import java.awt.Color;
 import java.awt.SystemColor;
 import java.awt.event.InputMethodListener;
+import java.io.File;
 import java.awt.event.InputMethodEvent;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import org.transitime.gui.TransitimeQuickStart;
 /**
  * 
  * @author Brendan Egan
@@ -58,6 +62,8 @@ public class InputPanel extends JFrame {
 	private JTextField textField;
 	private JTextField textField_1;
 	private JTextField textField_2;
+	public String filelocation=null;
+	FileBrowser browse = new FileBrowser();
 
 	/**
 	 * Launch the application.
@@ -110,8 +116,15 @@ public class InputPanel extends JFrame {
 		JButton btnNewButton = new JButton("Browse");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				FileBrowser browse = new FileBrowser();
-				browse.fileBrowser();
+				JFileChooser fc = new JFileChooser();
+			
+			            int returnVal = fc.showOpenDialog(browse);
+
+			            if (returnVal == JFileChooser.APPROVE_OPTION) {
+			                File file = fc.getSelectedFile();
+			                filelocation=file.getPath();
+			            }
+				
 			}
 		});
 		
@@ -160,6 +173,8 @@ public class InputPanel extends JFrame {
 				OutputPanel windowinput = new OutputPanel();
 				windowinput.OutputPanelstart();
 				dispose();
+				TransitimeQuickStart start=new TransitimeQuickStart();
+				start.StartGtfsFileProcessor(filelocation);
 			}
 		});
 		btnNext.setVerticalAlignment(SwingConstants.BOTTOM);

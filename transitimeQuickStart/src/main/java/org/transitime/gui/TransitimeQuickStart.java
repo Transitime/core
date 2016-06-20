@@ -17,6 +17,9 @@
 package org.transitime.gui;
 
 import java.awt.EventQueue;
+import java.net.URL;
+import org.transitime.applications.GtfsFileProcessor;
+
 /**
  * 
  * @author Brendan Egan
@@ -31,6 +34,44 @@ public class TransitimeQuickStart {
 		windowinput.InputPanelstart();
 		OutputPanel windowoutput = new OutputPanel();
 		windowoutput.OutputPanelstart();*/
+	}
+	public void StartGtfsFileProcessor(String gtfsZipFileName)
+	{
+		URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
+    	String configFilePath=configFile.getPath();
+    	String gtfsFilePath;
+    	if(gtfsZipFileName==null)
+    	{
+    	URL gtfsFile = this.getClass().getClassLoader().getResource("gtfs.zip");
+    	gtfsFilePath=gtfsFile.getPath();
+    	gtfsZipFileName=gtfsFilePath;
+    	}
+    	else
+    	{
+    	gtfsFilePath=gtfsZipFileName;
+    	}
+		String notes = null;
+		String gtfsUrl = null;
+		//String gtfsZipFileName = gtfsFilePath;
+		String unzipSubdirectory = null;
+		String gtfsDirectoryName = null;
+		String supplementDir = null;
+		String regexReplaceListFileName = null;
+		double pathOffsetDistance = 0.0;
+		double maxStopToPathDistance = 60.0;
+		double maxDistanceForEliminatingVertices = 3.0;
+		int defaultWaitTimeAtStopMsec = 10000;
+		double maxSpeedKph = 97;
+		double maxTravelTimeSegmentLength = 1000.0;
+		int configRev = -1;
+		boolean shouldStoreNewRevs = true;
+		boolean trimPathBeforeFirstStopOfTrip = false;
+
+		GtfsFileProcessor processor = new GtfsFileProcessor(configFilePath, notes, gtfsUrl, gtfsZipFileName,
+				unzipSubdirectory, gtfsDirectoryName, supplementDir, regexReplaceListFileName, pathOffsetDistance,
+				maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
+				maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
+		 processor.process();
 	}
 }
 

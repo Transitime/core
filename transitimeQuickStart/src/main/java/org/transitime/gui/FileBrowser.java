@@ -50,7 +50,7 @@ public class FileBrowser extends JPanel
     JButton openButton;
     JTextArea log;
     JFileChooser fc;
-
+   private String pickedfile=null;
     public FileBrowser() {
         super(new BorderLayout());
 
@@ -98,8 +98,8 @@ public class FileBrowser extends JPanel
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
-                
-                //This is where a real application would open the file.
+                pickedfile=file.getPath();
+                System.out.println("test");
                 log.append("Opening: " + file.getName() + "." + newline);
             } else {
                 log.append("Open command cancelled by user." + newline);
@@ -133,7 +133,7 @@ public class FileBrowser extends JPanel
     private static void createAndShowGUI() {
         //Create and set up the window.
         JFrame frame = new JFrame("FileChooserDemo");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         //Add content to the window.
         frame.getContentPane().add(new FileBrowser());
@@ -142,7 +142,6 @@ public class FileBrowser extends JPanel
         frame.pack();
         frame.setVisible(true);
     }
-
     public void fileBrowser() {
         //Schedule a job for the event dispatch thread:
         //creating and showing this application's GUI.
