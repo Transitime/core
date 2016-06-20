@@ -39,7 +39,7 @@ import javax.swing.JButton;
  */
 public class OutputPanel {
 
-	private JFrame frame;
+	private JFrame frmTransitimequickstart;
 	private JTextField textField;
 	private JTextField textField_1;
 
@@ -51,7 +51,7 @@ public class OutputPanel {
 			public void run() {
 				try {
 					OutputPanel window = new OutputPanel();
-					window.frame.setVisible(true);
+					window.frmTransitimequickstart.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -70,9 +70,10 @@ public class OutputPanel {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 543, 606);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmTransitimequickstart = new JFrame();
+		frmTransitimequickstart.setTitle("transiTimeQuickStart");
+		frmTransitimequickstart.setBounds(100, 100, 543, 606);
+		frmTransitimequickstart.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JLabel lblInstallationIsNow = new JLabel("Installation is now up and running! you can copy and paste ");
 		lblInstallationIsNow.setFont(new Font("Arial", Font.PLAIN, 19));
@@ -95,7 +96,7 @@ public class OutputPanel {
 		JButton btnMinimize = new JButton("Minimize");
 		
 		JButton btnShowMap = new JButton("Show map");
-		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
+		GroupLayout groupLayout = new GroupLayout(frmTransitimequickstart.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
@@ -143,6 +144,6 @@ public class OutputPanel {
 						.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 74, GroupLayout.PREFERRED_SIZE))
 					.addContainerGap())
 		);
-		frame.getContentPane().setLayout(groupLayout);
+		frmTransitimequickstart.getContentPane().setLayout(groupLayout);
 	}
 }

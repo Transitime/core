@@ -85,6 +85,8 @@ public class InputPanel extends JFrame {
 	 * Create the frame.
 	 */
 	public InputPanel() {
+		setFont(new Font("Dialog", Font.BOLD, 12));
+		setTitle("transiTimeQuickStart");
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 632, 546);

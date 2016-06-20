@@ -37,6 +37,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.Canvas;
+import java.awt.Window.Type;
 /**
  * 
  * @author Brendan Egan
@@ -44,7 +45,7 @@ import java.awt.Canvas;
  */
 public class WelcomePanel {
 
-	private JFrame frame;
+	private JFrame frmTransitimequickstart;
 
 	/**
 	 * Launch the application.
@@ -54,7 +55,7 @@ public class WelcomePanel {
 			public void run() {
 				try {
 					WelcomePanel window = new WelcomePanel();
-					window.frame.setVisible(true);
+					window.frmTransitimequickstart.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -73,9 +74,10 @@ public class WelcomePanel {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 408, 381);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmTransitimequickstart = new JFrame();
+		frmTransitimequickstart.setTitle("transiTimeQuickStart");
+		frmTransitimequickstart.setBounds(100, 100, 408, 381);
+		frmTransitimequickstart.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JLabel lblNewLabel = new JLabel("Welcome to the transiTime QuickStart guide!");
 		lblNewLabel.setFont(new Font("Arial", Font.PLAIN, 19));
@@ -87,7 +89,7 @@ public class WelcomePanel {
 			public void actionPerformed(ActionEvent e) {
 				InputPanel windowinput = new InputPanel();
 				windowinput.InputPanelstart();
-				frame.dispose();
+				frmTransitimequickstart.dispose();
 
 			}
 		});
@@ -101,12 +103,12 @@ public class WelcomePanel {
 		JButton btnCancel = new JButton("Cancel");
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				frame.dispose();
+				frmTransitimequickstart.dispose();
 			}
 		});
 		btnCancel.setBackground(SystemColor.menu);
 		btnCancel.setFont(new Font("Arial", Font.PLAIN, 19));
-		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
+		GroupLayout groupLayout = new GroupLayout(frmTransitimequickstart.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
@@ -142,7 +144,7 @@ public class WelcomePanel {
 						.addComponent(btnCancel))
 					.addContainerGap())
 		);
-		frame.getContentPane().setLayout(groupLayout);
+		frmTransitimequickstart.getContentPane().setLayout(groupLayout);
 	}
 
 }
