@@ -1,0 +1,180 @@
+
+09:41:00.292 Config param transitime.db.storeDataInDatabase="true" (the default value). When in playback mode or some other situations don't want to store generated data such as arrivals/departures, events, and such to the database because only debugging.
+
+09:41:00.300 Config param transitime.core.onlyNeedArrivalDepartures="false" (the default value). When batching large amount of AVL data through system to generate improved schedule time (as has been done for Zhengzhou) it takes huge amount of time to process everything. To speed things up you can set -Dtransitime.core.onlyNeedArrivalDepartures=true such that the system will be sped up by not generating nor logging predictions, not logging AVL data nor storing it in db, and not logging nor storing match data in db.
+
+09:41:00.300 Config param transitime.core.pauseIfDbQueueFilling="false" (the default value). When in batch mode can flood db with lots of objects. Iftransitime.core.pauseIfDbQueueFilling is set to true then when objects are put into the DataDbLogger queue the calling thread will be temporarily suspended so that the separate thread can run to write to the db and thereby empty out the queue.
+
+09:41:00.301 Config param transitime.modules.optionalModulesList="[]" (the default value). The semicolon separated list of names of all of the modules that should be automatically started.
+
+09:41:00.301 Config param transitime.core.maxDistanceFromSegment="10000.0" instead of the default of "60.0". How far a location can be from a path segment and still be considered a match. Can be overridden on a per route basis via max_distance supplemental column of route GTFS data. When auto assigning, the parameter transitime.core.maxDistanceFromSegmentForAutoAssigning is used instead.
+
+09:41:00.303 Config param transitime.core.maxDistanceFromSegmentForAutoAssigning="60.0" (the default value). How far a location can be from a path segment and still be considered a match when auto assigning a vehicle. Auto assigning is treated separately because sometimes need to make maxDistanceFromSegment really lenient because vehicles do not always follow same route. This is especially true with deviated fixed route service. But don't want the distance to be too lenient when auto assigning because if too lenient then would match to multiple routes and therefore no assignment would be made because the matches would be ambiguous. Therefore maxDistanceFromSegmentForAutoAssigning should be lessthan or equal to maxDistanceFromSegment.
+
+09:41:00.303 Config param transitime.core.allowableNumberOfBadMatches="2" (the default value). How many bad spatial/temporal matches a predictable vehicle can have in a row before the vehicle is made unpredictable.
+
+09:41:00.303 Config param transitime.core.maxHeadingOffsetFromSegment="135.0" (the default value). How far heading in degrees of vehicle can be away from path segment and still be considered a match. Needs to be pretty lenient because stopPaths and heading might not be that accurate.
+
+09:41:00.303 Config param transitime.core.distanceFromEndOfBlockForInitialMatching="250.0" (the default value). For initial matching of vehicle to block assignment. If vehicle is closer than this distance from the end of the block then the spatial match will not be used. This is to prevent a vehicle that has already completed its block from wrongly being assigned to that block again.
+
+09:41:00.304 Config param transitime.core.distanceFromLastStopForEndMatching="250.0" (the default value). How close vehicle needs to be from the last stop of the block such that the next AVL report should possibly be considered to match to the end of the block. This is important for determining the arrival time at the laststop of the block even if don't get an AVL report near that stop.
+
+09:41:00.304 Config param transitime.core.deadheadingShortVersusLongDistance="1000.0" (the default value). For determining if enough time to deadhead to beginning of a trip. If vehicles are far away then they are more likely to be able to travel faster because they could take a freeway or other fast road. But when get closer then will be on regular streets and will travel more slowly. The parameters should be set in a conservative way such that the travel time is underestimated by using slower speeds than will actually encounter. This way the vehicle will arrive after the predicted time which means that passenger won't miss the bus.
+
+09:41:00.304 Config param transitime.core.shortDistanceDeadheadingSpeed="4.0" (the default value). Part of determining if enough time to deadhead to layover.
+
+09:41:00.304 Config param transitime.core.longDistanceDeadheadingSpeed="10.0" (the default value). Part of determining if enough time to deadhead to layover.
+
+09:41:00.304 Config param transitime.core.maxPredictionTimeForDbSecs="0" (the default value). For determining if prediction should be stored in db. Set to 0 to never store predictions. A very large number of predictions is created so be careful with this value so that the db doesn't get filled up too quickly.
+
+09:41:00.304 Config param transitime.core.allowableEarlyForLayoverSeconds="3600" (the default value). How early a vehicle can be and still be matched to a layover. Needs to be pretty large because sometimes vehicles will be assigned to a layover quite early, and want to be able to make the vehicle predictable and generate predictions far in advance. Don't want it to be too large, like 90 minutes, though because then could match incorrectly if vehicle simply stays at terminal.
+
+09:41:00.304 Config param transitime.core.allowableEarlySeconds="900" (the default value). How early a vehicle can be and still be matched to its block assignment. If when a new AVL report is received for a predictable vehicle and it is found with respect to the real-time schedule adherence to be earlier than this value the vehicle will be made unpredictable.
+
+09:41:00.305 Config param transitime.core.allowableLateSeconds="5400" (the default value). How late a vehicle can be and still be matched to its block assignment. If when a new AVL report is received for a predictable vehicle and it is found with respect to the real-time schedule adherence to be later than this value the vehicle will be made unpredictable.
+
+09:41:00.305 Config param transitime.core.allowableEarlySecondsForInitialMatching="1200" instead of the default of "600". How early a vehicle can be in seconds and still be matched to its block assignment.
+
+09:41:00.305 Config param transitime.core.allowableLateSecondsForInitialMatching="1200" (the default value). How late a vehicle can be in seconds and still be matched to its block assignment.
+
+09:41:00.305 Config param transitime.core.distanceBetweenAvlsForInitialMatchingWithoutHeading="100.0" (the default value). For initial matching vehicle to assignment when there isn't any heading information. In that case also want to match to previous AVL report. This parameter specifies how far, as the crow flies, the previous AVL report to be used from the VehicleState AvlReport history is from the current AvlReport.
+
+09:41:00.305 Config param transitime.core.distanceFromLayoverForEarlyDeparture="180.0" (the default value). How far along path past a layover stop a vehicle needs to be in order for it to be considered an early departure instead of just moving around within the layover. Needs to be a decent distance since the stop locations are not always accurate.
+
+09:41:00.306 Config param transitime.core.layoverDistance="2000.0" (the default value). How far vehicle can be away from layover stop and still match to it. For when not deadheading to a trip. This can be useful to determine when a vehicle is pulled out of service when it is expected to be at a layover and start the next trip. Should usually be a pretty large value so that vehicles are not taken out of service just because they drive a bit away from the stop for the layover, which is pretty common.
+
+09:41:00.306 Config param transitime.core.allowableEarlyTimeForEarlyDepartureSecs="300" (the default value). How early in seconds a vehicle can have left terminal and have it be considered an early departure instead of just moving around within the layover. Don't want to mistakingly think that vehicles moving around during layover have started their trip early. Therefore this value should be limited to just a few minutes since vehicles usually don't leave early.
+
+09:41:00.306 Config param transitime.core.allowableEarlyDepartureTimeForLoggingEvent="60" (the default value). How early in seconds a vehicle can depart a terminal before it registers a VehicleEvent indicating a problem.
+
+09:41:00.306 Config param transitime.core.allowableLateDepartureTimeForLoggingEvent="240" (the default value). How late in seconds a vehicle can depart a terminal before it registers a VehicleEvent indicating a problem.
+
+09:41:00.306 Config param transitime.core.allowableLateAtTerminalForLoggingEvent="60" (the default value). If a vehicle is sitting at a terminal and provides another GPS report indicating that it is more than this much later, in seconds, than the configured departure time then a VehicleEvent is created to record the problem.
+
+09:41:00.306 Config param transitime.core.beforeStopDistance="50.0" (the default value). How far a vehicle can be ahead of a stop in meters and be considered to have arrived.
+
+09:41:00.306 Config param transitime.core.afterStopDistance="50.0" (the default value). How far a vehicle can be past a stop in meters and still be considered at the stop.
+
+09:41:00.306 Config param transitime.core.defaultBreakTimeSec="0" (the default value). How far a vehicle can be past a stop in meters and still be considered at the stop.
+
+09:41:00.306 Config param transitime.core.earlyToLateRatio="3.0" (the default value). How much worse it is for a vehicle to be early as opposed to late when determining schedule adherence.
+
+09:41:00.306 Config param transitime.core.exclusiveBlockAssignments="true" (the default value). True if block assignments should be exclusive. If set to true then when a vehicle is assigned to a block the system will unassign any other vehicles that were assigned to the block. Important for when AVL system doesn't always provide logout info. Also used by the AutoBlockAssigner to determine which active blocks to possibly assign a vehicle to. For no schedule routes can set to false to allow multiple vehicles be assigned to a route.
+
+09:41:00.306 Config param transitime.core.timeForDeterminingNoProgress="480000" (the default value). The interval in msec at which look at vehicle's history to determine if it is not making any progress. A valueof 0 disables this feature. If vehicle is found to not be making progress it is made unpredictable.
+
+09:41:00.306 Config param transitime.core.minDistanceForNoProgress="60.0" (the default value). Minimum distance vehicle is expected to travel over timeForDeterminingNoProgress to indicate vehicle is making progress. If vehicle is found to not be making progress it is made unpredictable.
+
+09:41:00.306 Config param transitime.core.timeForDeterminingDelayedSecs="240" (the default value). The interval in msec at which look at vehicle's history to determine if it is delayed.
+
+09:41:00.306 Config param transitime.core.minDistanceForDelayed="60.0" (the default value). Minimum distance vehicle is expected to travel over timeForDeterminingDelayed to indicate vehicle is delayed.
+
+09:41:00.306 Config param transitime.core.matchHistoryMaxSize="20" (the default value). How many matches are kept in history for vehicle so that can can do things such as look back at history to determine if vehicle has broken down. Should be large enough so can store all matchets generated over timeForDeterminingNoProgress. If GPS rate is high then this value will need to be high as well.
+
+09:41:00.306 Config param transitime.core.avlHistoryMaxSize="20" (the default value). How many AVL reports are kept in history for vehicle so that can can do things such as look back at history to determine if vehicle has broken down. Should be large enough so can store all AVL reports received over timeForDeterminingNoProgress. If GPS rate is high then this value will need to be high as well.
+
+09:41:00.307 Config param transitime.core.pidDirectory="/home/ec2-user/pids/" (the default value). Directory where pid file should be written. The pid file can be used by monit to make sure that core process is always running.
+
+09:41:00.307 Config param transitime.core.agencyId="$AGENCYID" instead of the default of "null". Specifies the ID of the agency. Used for the database name and in the logback configuration to specify the directory where to put the log files.
+
+09:41:00.323 Config param transitime.db.dbName="postgres" instead of the default of "null". Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+09:41:00.323 Config param transitime.db.dbHost="localhost:5432" instead of the default of "null". Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+09:41:00.324 Config param transitime.db.dbType="postgresql" instead of the default of "mysql". Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+09:41:00.324 Config param transitime.db.dbUserName="transitime" instead of the default of "null". Specifies login for the project database. Use null value to use values from hibernate config file.
+
+09:41:00.324 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+09:41:00.324 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg" instead of the default of "mysql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+10:36:55.929 Config param transitime.db.storeDataInDatabase="true" (the default value). When in playback mode or some other situations don't want to store generated data such as arrivals/departures, events, and such to the database because only debugging.
+
+10:36:55.937 Config param transitime.core.onlyNeedArrivalDepartures="false" (the default value). When batching large amount of AVL data through system to generate improved schedule time (as has been done for Zhengzhou) it takes huge amount of time to process everything. To speed things up you can set -Dtransitime.core.onlyNeedArrivalDepartures=true such that the system will be sped up by not generating nor logging predictions, not logging AVL data nor storing it in db, and not logging nor storing match data in db.
+
+10:36:55.937 Config param transitime.core.pauseIfDbQueueFilling="false" (the default value). When in batch mode can flood db with lots of objects. Iftransitime.core.pauseIfDbQueueFilling is set to true then when objects are put into the DataDbLogger queue the calling thread will be temporarily suspended so that the separate thread can run to write to the db and thereby empty out the queue.
+
+10:36:55.938 Config param transitime.modules.optionalModulesList="[]" (the default value). The semicolon separated list of names of all of the modules that should be automatically started.
+
+10:36:55.938 Config param transitime.core.maxDistanceFromSegment="10000.0" instead of the default of "60.0". How far a location can be from a path segment and still be considered a match. Can be overridden on a per route basis via max_distance supplemental column of route GTFS data. When auto assigning, the parameter transitime.core.maxDistanceFromSegmentForAutoAssigning is used instead.
+
+10:36:55.939 Config param transitime.core.maxDistanceFromSegmentForAutoAssigning="60.0" (the default value). How far a location can be from a path segment and still be considered a match when auto assigning a vehicle. Auto assigning is treated separately because sometimes need to make maxDistanceFromSegment really lenient because vehicles do not always follow same route. This is especially true with deviated fixed route service. But don't want the distance to be too lenient when auto assigning because if too lenient then would match to multiple routes and therefore no assignment would be made because the matches would be ambiguous. Therefore maxDistanceFromSegmentForAutoAssigning should be lessthan or equal to maxDistanceFromSegment.
+
+10:36:55.940 Config param transitime.core.allowableNumberOfBadMatches="2" (the default value). How many bad spatial/temporal matches a predictable vehicle can have in a row before the vehicle is made unpredictable.
+
+10:36:55.940 Config param transitime.core.maxHeadingOffsetFromSegment="135.0" (the default value). How far heading in degrees of vehicle can be away from path segment and still be considered a match. Needs to be pretty lenient because stopPaths and heading might not be that accurate.
+
+10:36:55.940 Config param transitime.core.distanceFromEndOfBlockForInitialMatching="250.0" (the default value). For initial matching of vehicle to block assignment. If vehicle is closer than this distance from the end of the block then the spatial match will not be used. This is to prevent a vehicle that has already completed its block from wrongly being assigned to that block again.
+
+10:36:55.940 Config param transitime.core.distanceFromLastStopForEndMatching="250.0" (the default value). How close vehicle needs to be from the last stop of the block such that the next AVL report should possibly be considered to match to the end of the block. This is important for determining the arrival time at the laststop of the block even if don't get an AVL report near that stop.
+
+10:36:55.940 Config param transitime.core.deadheadingShortVersusLongDistance="1000.0" (the default value). For determining if enough time to deadhead to beginning of a trip. If vehicles are far away then they are more likely to be able to travel faster because they could take a freeway or other fast road. But when get closer then will be on regular streets and will travel more slowly. The parameters should be set in a conservative way such that the travel time is underestimated by using slower speeds than will actually encounter. This way the vehicle will arrive after the predicted time which means that passenger won't miss the bus.
+
+10:36:55.940 Config param transitime.core.shortDistanceDeadheadingSpeed="4.0" (the default value). Part of determining if enough time to deadhead to layover.
+
+10:36:55.941 Config param transitime.core.longDistanceDeadheadingSpeed="10.0" (the default value). Part of determining if enough time to deadhead to layover.
+
+10:36:55.941 Config param transitime.core.maxPredictionTimeForDbSecs="0" (the default value). For determining if prediction should be stored in db. Set to 0 to never store predictions. A very large number of predictions is created so be careful with this value so that the db doesn't get filled up too quickly.
+
+10:36:55.941 Config param transitime.core.allowableEarlyForLayoverSeconds="3600" (the default value). How early a vehicle can be and still be matched to a layover. Needs to be pretty large because sometimes vehicles will be assigned to a layover quite early, and want to be able to make the vehicle predictable and generate predictions far in advance. Don't want it to be too large, like 90 minutes, though because then could match incorrectly if vehicle simply stays at terminal.
+
+10:36:55.941 Config param transitime.core.allowableEarlySeconds="900" (the default value). How early a vehicle can be and still be matched to its block assignment. If when a new AVL report is received for a predictable vehicle and it is found with respect to the real-time schedule adherence to be earlier than this value the vehicle will be made unpredictable.
+
+10:36:55.941 Config param transitime.core.allowableLateSeconds="5400" (the default value). How late a vehicle can be and still be matched to its block assignment. If when a new AVL report is received for a predictable vehicle and it is found with respect to the real-time schedule adherence to be later than this value the vehicle will be made unpredictable.
+
+10:36:55.941 Config param transitime.core.allowableEarlySecondsForInitialMatching="1200" instead of the default of "600". How early a vehicle can be in seconds and still be matched to its block assignment.
+
+10:36:55.941 Config param transitime.core.allowableLateSecondsForInitialMatching="1200" (the default value). How late a vehicle can be in seconds and still be matched to its block assignment.
+
+10:36:55.942 Config param transitime.core.distanceBetweenAvlsForInitialMatchingWithoutHeading="100.0" (the default value). For initial matching vehicle to assignment when there isn't any heading information. In that case also want to match to previous AVL report. This parameter specifies how far, as the crow flies, the previous AVL report to be used from the VehicleState AvlReport history is from the current AvlReport.
+
+10:36:55.942 Config param transitime.core.distanceFromLayoverForEarlyDeparture="180.0" (the default value). How far along path past a layover stop a vehicle needs to be in order for it to be considered an early departure instead of just moving around within the layover. Needs to be a decent distance since the stop locations are not always accurate.
+
+10:36:55.942 Config param transitime.core.layoverDistance="2000.0" (the default value). How far vehicle can be away from layover stop and still match to it. For when not deadheading to a trip. This can be useful to determine when a vehicle is pulled out of service when it is expected to be at a layover and start the next trip. Should usually be a pretty large value so that vehicles are not taken out of service just because they drive a bit away from the stop for the layover, which is pretty common.
+
+10:36:55.942 Config param transitime.core.allowableEarlyTimeForEarlyDepartureSecs="300" (the default value). How early in seconds a vehicle can have left terminal and have it be considered an early departure instead of just moving around within the layover. Don't want to mistakingly think that vehicles moving around during layover have started their trip early. Therefore this value should be limited to just a few minutes since vehicles usually don't leave early.
+
+10:36:55.943 Config param transitime.core.allowableEarlyDepartureTimeForLoggingEvent="60" (the default value). How early in seconds a vehicle can depart a terminal before it registers a VehicleEvent indicating a problem.
+
+10:36:55.943 Config param transitime.core.allowableLateDepartureTimeForLoggingEvent="240" (the default value). How late in seconds a vehicle can depart a terminal before it registers a VehicleEvent indicating a problem.
+
+10:36:55.943 Config param transitime.core.allowableLateAtTerminalForLoggingEvent="60" (the default value). If a vehicle is sitting at a terminal and provides another GPS report indicating that it is more than this much later, in seconds, than the configured departure time then a VehicleEvent is created to record the problem.
+
+10:36:55.943 Config param transitime.core.beforeStopDistance="50.0" (the default value). How far a vehicle can be ahead of a stop in meters and be considered to have arrived.
+
+10:36:55.943 Config param transitime.core.afterStopDistance="50.0" (the default value). How far a vehicle can be past a stop in meters and still be considered at the stop.
+
+10:36:55.943 Config param transitime.core.defaultBreakTimeSec="0" (the default value). How far a vehicle can be past a stop in meters and still be considered at the stop.
+
+10:36:55.943 Config param transitime.core.earlyToLateRatio="3.0" (the default value). How much worse it is for a vehicle to be early as opposed to late when determining schedule adherence.
+
+10:36:55.943 Config param transitime.core.exclusiveBlockAssignments="true" (the default value). True if block assignments should be exclusive. If set to true then when a vehicle is assigned to a block the system will unassign any other vehicles that were assigned to the block. Important for when AVL system doesn't always provide logout info. Also used by the AutoBlockAssigner to determine which active blocks to possibly assign a vehicle to. For no schedule routes can set to false to allow multiple vehicles be assigned to a route.
+
+10:36:55.943 Config param transitime.core.timeForDeterminingNoProgress="480000" (the default value). The interval in msec at which look at vehicle's history to determine if it is not making any progress. A valueof 0 disables this feature. If vehicle is found to not be making progress it is made unpredictable.
+
+10:36:55.943 Config param transitime.core.minDistanceForNoProgress="60.0" (the default value). Minimum distance vehicle is expected to travel over timeForDeterminingNoProgress to indicate vehicle is making progress. If vehicle is found to not be making progress it is made unpredictable.
+
+10:36:55.943 Config param transitime.core.timeForDeterminingDelayedSecs="240" (the default value). The interval in msec at which look at vehicle's history to determine if it is delayed.
+
+10:36:55.943 Config param transitime.core.minDistanceForDelayed="60.0" (the default value). Minimum distance vehicle is expected to travel over timeForDeterminingDelayed to indicate vehicle is delayed.
+
+10:36:55.943 Config param transitime.core.matchHistoryMaxSize="20" (the default value). How many matches are kept in history for vehicle so that can can do things such as look back at history to determine if vehicle has broken down. Should be large enough so can store all matchets generated over timeForDeterminingNoProgress. If GPS rate is high then this value will need to be high as well.
+
+10:36:55.943 Config param transitime.core.avlHistoryMaxSize="20" (the default value). How many AVL reports are kept in history for vehicle so that can can do things such as look back at history to determine if vehicle has broken down. Should be large enough so can store all AVL reports received over timeForDeterminingNoProgress. If GPS rate is high then this value will need to be high as well.
+
+10:36:55.944 Config param transitime.core.pidDirectory="/home/ec2-user/pids/" (the default value). Directory where pid file should be written. The pid file can be used by monit to make sure that core process is always running.
+
+10:36:55.944 Config param transitime.core.agencyId="$AGENCYID" instead of the default of "null". Specifies the ID of the agency. Used for the database name and in the logback configuration to specify the directory where to put the log files.
+
+10:36:55.960 Config param transitime.db.dbName="postgres" instead of the default of "null". Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+10:36:55.960 Config param transitime.db.dbHost="localhost:5432" instead of the default of "null". Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+10:36:55.960 Config param transitime.db.dbType="postgresql" instead of the default of "mysql". Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+10:36:55.960 Config param transitime.db.dbUserName="transitime" instead of the default of "null". Specifies login for the project database. Use null value to use values from hibernate config file.
+
+10:36:55.960 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+10:36:55.960 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg" instead of the default of "mysql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml

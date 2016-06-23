@@ -1,0 +1,194 @@
+
+09:41:00.420 INFO  thread=main [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+09:41:00.426 INFO  thread=main [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+09:41:00.428 INFO  thread=main [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+09:41:00.429 INFO  thread=main [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+09:41:00.444 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=postgres using config file=C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg
+
+09:41:00.445 INFO  thread=main [o.t.d.h.HibernateUtils:88] The Hibernate file C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg doesn't exist as a regular file so seeing if it is in classpath.
+
+09:41:00.445 ERROR thread=main [o.t.d.h.HibernateUtils:100] Could not load in hibernate config file C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg
+
+09:41:00.458 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=postgres using url=jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60 username=transitime, and configured password
+
+09:41:00.518 WARN  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+09:41:00.519 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [null] at URL [jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60]
+
+09:41:00.519 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=transitime, password=****}
+
+09:41:00.520 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: false
+
+09:41:00.520 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+09:41:00.536 ERROR thread=main [o.t.d.h.HibernateUtils:185] Could not create SessionFactory for dbName=postgres
+org.hibernate.exception.JDBCConnectionException: Error calling DriverManager#getConnection
+	at org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:132) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator$1$1.convert(BasicConnectionCreator.java:118) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.convertSqlException(BasicConnectionCreator.java:140) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionCreator.makeConnection(DriverManagerConnectionCreator.java:54) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.createConnection(BasicConnectionCreator.java:75) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl.configure(DriverManagerConnectionProviderImpl.java:106) ~[Core.jar:na]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.buildJdbcConnectionAccess(JdbcServicesImpl.java:260) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:94) ~[Core.jar:na]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[Core.jar:na]
+	at org.hibernate.cfg.Configuration.buildTypeRegistrations(Configuration.java:1887) ~[Core.jar:na]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:1845) ~[Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.createSessionFactory(HibernateUtils.java:151) [Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSessionFactory(HibernateUtils.java:182) [Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSession(HibernateUtils.java:227) [Core.jar:na]
+	at org.transitime.db.structs.ActiveRevisions.get(ActiveRevisions.java:120) [Core.jar:na]
+	at org.transitime.db.structs.Agency.getTimeZoneFromDb(Agency.java:193) [Core.jar:na]
+	at org.transitime.applications.Core.<init>(Core.java:129) [Core.jar:na]
+	at org.transitime.applications.Core.createCore(Core.java:200) [Core.jar:na]
+	at org.transitime.applications.Core.main(Core.java:410) [Core.jar:na]
+Caused by: java.sql.SQLException: No suitable driver found for jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+	at java.sql.DriverManager.getConnection(DriverManager.java:689) ~[na:1.8.0_73]
+	at java.sql.DriverManager.getConnection(DriverManager.java:208) ~[na:1.8.0_73]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionCreator.makeConnection(DriverManagerConnectionCreator.java:51) ~[Core.jar:na]
+	... 20 common frames omitted
+
+09:41:00.536 ERROR thread=main [o.t.d.s.ActiveRevisions:126] Exception in ActiveRevisions.get(). Error calling DriverManager#getConnection
+org.hibernate.exception.JDBCConnectionException: Error calling DriverManager#getConnection
+	at org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:132) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator$1$1.convert(BasicConnectionCreator.java:118) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.convertSqlException(BasicConnectionCreator.java:140) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionCreator.makeConnection(DriverManagerConnectionCreator.java:54) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.createConnection(BasicConnectionCreator.java:75) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl.configure(DriverManagerConnectionProviderImpl.java:106) ~[Core.jar:na]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.buildJdbcConnectionAccess(JdbcServicesImpl.java:260) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:94) ~[Core.jar:na]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[Core.jar:na]
+	at org.hibernate.cfg.Configuration.buildTypeRegistrations(Configuration.java:1887) ~[Core.jar:na]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:1845) ~[Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.createSessionFactory(HibernateUtils.java:151) ~[Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSessionFactory(HibernateUtils.java:182) ~[Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSession(HibernateUtils.java:227) ~[Core.jar:na]
+	at org.transitime.db.structs.ActiveRevisions.get(ActiveRevisions.java:120) ~[Core.jar:na]
+	at org.transitime.db.structs.Agency.getTimeZoneFromDb(Agency.java:193) [Core.jar:na]
+	at org.transitime.applications.Core.<init>(Core.java:129) [Core.jar:na]
+	at org.transitime.applications.Core.createCore(Core.java:200) [Core.jar:na]
+	at org.transitime.applications.Core.main(Core.java:410) [Core.jar:na]
+Caused by: java.sql.SQLException: No suitable driver found for jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+	at java.sql.DriverManager.getConnection(DriverManager.java:689) ~[na:1.8.0_73]
+	at java.sql.DriverManager.getConnection(DriverManager.java:208) ~[na:1.8.0_73]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionCreator.makeConnection(DriverManagerConnectionCreator.java:51) ~[Core.jar:na]
+	... 20 common frames omitted
+
+09:41:00.537 ERROR thread=main [o.t.a.Core:429] null
+java.lang.NullPointerException: null
+	at org.transitime.db.structs.Agency.getTimeZoneFromDb(Agency.java:193) ~[Core.jar:na]
+	at org.transitime.applications.Core.<init>(Core.java:129) ~[Core.jar:na]
+	at org.transitime.applications.Core.createCore(Core.java:200) ~[Core.jar:na]
+	at org.transitime.applications.Core.main(Core.java:410) ~[Core.jar:na]
+
+10:36:56.054 INFO  thread=main [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+10:36:56.060 INFO  thread=main [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+10:36:56.061 INFO  thread=main [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+10:36:56.063 INFO  thread=main [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+10:36:56.078 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=postgres using config file=C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg
+
+10:36:56.078 INFO  thread=main [o.t.d.h.HibernateUtils:88] The Hibernate file C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg doesn't exist as a regular file so seeing if it is in classpath.
+
+10:36:56.078 ERROR thread=main [o.t.d.h.HibernateUtils:100] Could not load in hibernate config file C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg
+
+10:36:56.091 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=postgres using url=jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60 username=transitime, and configured password
+
+10:36:56.151 WARN  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+10:36:56.152 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [null] at URL [jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60]
+
+10:36:56.152 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=transitime, password=****}
+
+10:36:56.153 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: false
+
+10:36:56.154 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+10:36:56.169 ERROR thread=main [o.t.d.h.HibernateUtils:185] Could not create SessionFactory for dbName=postgres
+org.hibernate.exception.JDBCConnectionException: Error calling DriverManager#getConnection
+	at org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:132) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator$1$1.convert(BasicConnectionCreator.java:118) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.convertSqlException(BasicConnectionCreator.java:140) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionCreator.makeConnection(DriverManagerConnectionCreator.java:54) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.createConnection(BasicConnectionCreator.java:75) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl.configure(DriverManagerConnectionProviderImpl.java:106) ~[Core.jar:na]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.buildJdbcConnectionAccess(JdbcServicesImpl.java:260) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:94) ~[Core.jar:na]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[Core.jar:na]
+	at org.hibernate.cfg.Configuration.buildTypeRegistrations(Configuration.java:1887) ~[Core.jar:na]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:1845) ~[Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.createSessionFactory(HibernateUtils.java:151) [Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSessionFactory(HibernateUtils.java:182) [Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSession(HibernateUtils.java:227) [Core.jar:na]
+	at org.transitime.db.structs.ActiveRevisions.get(ActiveRevisions.java:120) [Core.jar:na]
+	at org.transitime.db.structs.Agency.getTimeZoneFromDb(Agency.java:193) [Core.jar:na]
+	at org.transitime.applications.Core.<init>(Core.java:129) [Core.jar:na]
+	at org.transitime.applications.Core.createCore(Core.java:200) [Core.jar:na]
+	at org.transitime.applications.Core.main(Core.java:410) [Core.jar:na]
+Caused by: java.sql.SQLException: No suitable driver found for jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+	at java.sql.DriverManager.getConnection(DriverManager.java:689) ~[na:1.8.0_73]
+	at java.sql.DriverManager.getConnection(DriverManager.java:208) ~[na:1.8.0_73]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionCreator.makeConnection(DriverManagerConnectionCreator.java:51) ~[Core.jar:na]
+	... 20 common frames omitted
+
+10:36:56.169 ERROR thread=main [o.t.d.s.ActiveRevisions:126] Exception in ActiveRevisions.get(). Error calling DriverManager#getConnection
+org.hibernate.exception.JDBCConnectionException: Error calling DriverManager#getConnection
+	at org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:132) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator$1$1.convert(BasicConnectionCreator.java:118) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.convertSqlException(BasicConnectionCreator.java:140) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionCreator.makeConnection(DriverManagerConnectionCreator.java:54) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.createConnection(BasicConnectionCreator.java:75) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl.configure(DriverManagerConnectionProviderImpl.java:106) ~[Core.jar:na]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.buildJdbcConnectionAccess(JdbcServicesImpl.java:260) ~[Core.jar:na]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:94) ~[Core.jar:na]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[Core.jar:na]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[Core.jar:na]
+	at org.hibernate.cfg.Configuration.buildTypeRegistrations(Configuration.java:1887) ~[Core.jar:na]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:1845) ~[Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.createSessionFactory(HibernateUtils.java:151) ~[Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSessionFactory(HibernateUtils.java:182) ~[Core.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSession(HibernateUtils.java:227) ~[Core.jar:na]
+	at org.transitime.db.structs.ActiveRevisions.get(ActiveRevisions.java:120) ~[Core.jar:na]
+	at org.transitime.db.structs.Agency.getTimeZoneFromDb(Agency.java:193) [Core.jar:na]
+	at org.transitime.applications.Core.<init>(Core.java:129) [Core.jar:na]
+	at org.transitime.applications.Core.createCore(Core.java:200) [Core.jar:na]
+	at org.transitime.applications.Core.main(Core.java:410) [Core.jar:na]
+Caused by: java.sql.SQLException: No suitable driver found for jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+	at java.sql.DriverManager.getConnection(DriverManager.java:689) ~[na:1.8.0_73]
+	at java.sql.DriverManager.getConnection(DriverManager.java:208) ~[na:1.8.0_73]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionCreator.makeConnection(DriverManagerConnectionCreator.java:51) ~[Core.jar:na]
+	... 20 common frames omitted
+
+10:36:56.170 ERROR thread=main [o.t.a.Core:429] null
+java.lang.NullPointerException: null
+	at org.transitime.db.structs.Agency.getTimeZoneFromDb(Agency.java:193) ~[Core.jar:na]
+	at org.transitime.applications.Core.<init>(Core.java:129) ~[Core.jar:na]
+	at org.transitime.applications.Core.createCore(Core.java:200) ~[Core.jar:na]
+	at org.transitime.applications.Core.main(Core.java:410) ~[Core.jar:na]

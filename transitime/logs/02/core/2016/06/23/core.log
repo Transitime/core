@@ -1,0 +1,166 @@
+
+05:15:21.448 INFO  thread=main [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+05:15:21.457 INFO  thread=main [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+05:15:21.459 INFO  thread=main [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+05:15:21.461 INFO  thread=main [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+05:15:21.481 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=postgres using config file=C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg.xml
+
+05:15:21.481 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: postgres_hibernate.cfg.xml
+
+05:15:21.549 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+05:15:21.572 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=postgres using url=jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60 username=transitime, and configured password
+
+05:15:21.683 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:134] HHH010002: C3P0 using driver: org.postgresql.Driver at URL: jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+
+05:15:21.683 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:135] HHH000046: Connection properties: {user=transitime, password=****}
+
+05:15:21.683 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:138] HHH000006: Autocommit mode: false
+
+05:15:22.480 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
+
+05:15:22.491 INFO  thread=main [o.h.e.j.i.LobCreatorBuilder:123] HHH000424: Disabling contextual LOB creation as createClob() method threw error : java.lang.reflect.InvocationTargetException
+
+05:17:17.900 INFO  thread=main [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+05:17:17.927 INFO  thread=main [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+05:17:17.929 INFO  thread=main [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+05:17:17.931 INFO  thread=main [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+05:17:17.953 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=postgres using config file=C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg.xml
+
+05:17:17.953 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: postgres_hibernate.cfg.xml
+
+05:17:17.996 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+05:17:18.051 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=postgres using url=jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60 username=transitime, and configured password
+
+05:17:18.155 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:134] HHH010002: C3P0 using driver: org.postgresql.Driver at URL: jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+
+05:17:18.155 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:135] HHH000046: Connection properties: {user=transitime, password=****}
+
+05:17:18.155 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:138] HHH000006: Autocommit mode: false
+
+05:17:18.935 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
+
+05:17:18.947 INFO  thread=main [o.h.e.j.i.LobCreatorBuilder:123] HHH000424: Disabling contextual LOB creation as createClob() method threw error : java.lang.reflect.InvocationTargetException
+
+05:17:19.257 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+05:17:19.262 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+05:17:20.104 INFO  thread=main [o.t.g.DbConfig:174] Reading configuration database for configRev=26...
+
+05:17:20.105 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=postgres using config file=C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg.xml
+
+05:17:20.106 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: postgres_hibernate.cfg.xml
+
+05:17:20.112 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+05:17:20.113 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=postgres using url=jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60 username=transitime, and configured password
+
+05:17:20.122 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:134] HHH010002: C3P0 using driver: org.postgresql.Driver at URL: jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+
+05:17:20.123 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:135] HHH000046: Connection properties: {user=transitime, password=****}
+
+05:17:20.123 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:138] HHH000006: Autocommit mode: false
+
+05:17:20.438 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
+
+05:17:20.439 INFO  thread=main [o.h.e.j.i.LobCreatorBuilder:123] HHH000424: Disabling contextual LOB creation as createClob() method threw error : java.lang.reflect.InvocationTargetException
+
+05:17:20.508 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+05:17:20.509 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+05:17:21.462 INFO  thread=main [o.t.g.DbConfig:199] Finished reading configuration data from database . Took 1357 msec.
+
+05:17:21.470 INFO  thread=TimeoutHandlerModule-1 [o.t.c.TimeoutHandlerModule:316] Starting module org.transitime.core.TimeoutHandlerModule for agencyId=02
+
+05:17:21.472 INFO  thread=main [o.t.a.Core:418] No optional modules to start up.
+
+05:17:21.485 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+05:17:21.510 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+05:17:21.516 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+05:17:21.527 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+05:17:21.531 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+07:44:11.018 INFO  thread=main [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+07:44:11.025 INFO  thread=main [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+07:44:11.027 INFO  thread=main [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+07:44:11.028 INFO  thread=main [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+07:44:11.047 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=postgres using config file=C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg.xml
+
+07:44:11.047 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: postgres_hibernate.cfg.xml
+
+07:44:11.088 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+07:44:11.128 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=postgres using url=jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60 username=transitime, and configured password
+
+07:44:11.218 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:134] HHH010002: C3P0 using driver: org.postgresql.Driver at URL: jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+
+07:44:11.218 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:135] HHH000046: Connection properties: {user=transitime, password=****}
+
+07:44:11.218 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:138] HHH000006: Autocommit mode: false
+
+07:44:11.940 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
+
+07:44:11.949 INFO  thread=main [o.h.e.j.i.LobCreatorBuilder:123] HHH000424: Disabling contextual LOB creation as createClob() method threw error : java.lang.reflect.InvocationTargetException
+
+07:44:12.291 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+07:44:12.295 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+07:44:13.021 INFO  thread=main [o.t.g.DbConfig:174] Reading configuration database for configRev=26...
+
+07:44:13.021 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=postgres using config file=C:\Users\Brendan\Documents\Transitime\core\transitime\src\main\resources\postgres_hibernate.cfg.xml
+
+07:44:13.022 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: postgres_hibernate.cfg.xml
+
+07:44:13.026 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+07:44:13.027 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=postgres using url=jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60 username=transitime, and configured password
+
+07:44:13.032 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:134] HHH010002: C3P0 using driver: org.postgresql.Driver at URL: jdbc:postgresql://localhost:5432/postgres?connectTimeout=60&socketTimeout=60
+
+07:44:13.032 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:135] HHH000046: Connection properties: {user=transitime, password=****}
+
+07:44:13.033 INFO  thread=main [o.h.c.i.C3P0ConnectionProvider:138] HHH000006: Autocommit mode: false
+
+07:44:13.299 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
+
+07:44:13.300 INFO  thread=main [o.h.e.j.i.LobCreatorBuilder:123] HHH000424: Disabling contextual LOB creation as createClob() method threw error : java.lang.reflect.InvocationTargetException
+
+07:44:13.356 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+07:44:13.357 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+07:44:14.155 INFO  thread=main [o.t.g.DbConfig:199] Finished reading configuration data from database . Took 1133 msec.
+
+07:44:14.163 INFO  thread=TimeoutHandlerModule-1 [o.t.c.TimeoutHandlerModule:316] Starting module org.transitime.core.TimeoutHandlerModule for agencyId=02
+
+07:44:14.165 INFO  thread=main [o.t.a.Core:418] No optional modules to start up.
+
+07:44:14.173 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+07:44:14.199 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+07:44:14.205 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+07:44:14.213 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+07:44:14.217 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098

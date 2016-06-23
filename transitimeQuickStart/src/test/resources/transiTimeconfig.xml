@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transitime>
-    <modules>
+ <modules>
         <optionalModulesList>transitime.core.schedBasedPreds.SchedBasedPredsModule;org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
     </modules>
     <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
@@ -15,14 +15,7 @@
         <minLatitude>51.35</minLatitude>
         <maxLatitude>55.45</maxLatitude>        
     </avl>   
- <!--    <db>
-        <dbName>transiTime</dbName>
-        <dbHost>localhost:5432</dbHost>
-        <dbType>postgresql</dbType>
-        <dbUserName>transiTime</dbUserName>
-        <dbPassword>welcome</dbPassword>
-    </db>      -->
     <hibernate>
-        <configFile>postgres_hibernate.cfg.xml</configFile>        
+        <configFile>hsql_hibernate.cfg.xml</configFile>        
     </hibernate>
 </transitime>
