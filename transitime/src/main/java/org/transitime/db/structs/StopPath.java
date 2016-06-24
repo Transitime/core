@@ -111,7 +111,7 @@ public class StopPath implements Serializable, Lifecycle {
 	// makes the data not readable in the db using regular SQL but it means
 	// that don't need separate table and the data can be read and written
 	// much faster.
-	@Column(length=1000)// @ElementCollection @OrderColumn
+	@Column(length=5000)// @ElementCollection @OrderColumn
 	private ArrayList<Location> locations; 
 
 	// Having the path length readily accessible via the database is handy
