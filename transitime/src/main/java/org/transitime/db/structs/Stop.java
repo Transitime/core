@@ -214,10 +214,10 @@ public class Stop implements Serializable {
 		result = prime * result + configRev;
 		result = prime * result + (hidden ? 1231 : 1237);
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + (layoverStop ? 1231 : 1237);
+		 result = prime * result + ((layoverStop != null ? layoverStop : false) ? 1231 : 1237);
 		result = prime * result + ((loc == null) ? 0 : loc.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + (waitStop ? 1231 : 1237);
+		result = prime * result + ((waitStop != null ? waitStop : false) ? 1231 : 1237);
 		return result;
 	}
 
