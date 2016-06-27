@@ -60,8 +60,6 @@ public class TestGTFSFileProcessor extends TestCase {
 			 testprocessor.process();
 			assertTrue(true);
 		} catch (Exception e) {
-			
-			System.out.println(e);
 			fail(e.toString());
 			e.printStackTrace();
 		}
