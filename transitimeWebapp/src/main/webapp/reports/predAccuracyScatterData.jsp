@@ -119,13 +119,9 @@ String sql = "SELECT "
 	+ "     predictionAccuracyMsecs/1000 as predAccuracy "
 	+ tooltipsSql
 	+ " FROM predictionAccuracy "
-<<<<<<< HEAD
-	+ "WHERE arrivalDepartureTime BETWEEN '" + beginDate 
-	+     "' AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numDays + " day' "
-=======
+
 	+ "WHERE arrivalDepartureTime BETWEEN cast(? as timestamp) " 
 	+     " AND cast(? as timestamp)" + " + INTERVAL '1 day' "
->>>>>>> 1718e7d... Fixed issues with dates in Reports in general. Now use ? instead of appending strings
 	+ timeSql
 	+ "  AND predictedTime-predictionReadTime < '00:15:00' "
 	+ routeSql
