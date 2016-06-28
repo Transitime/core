@@ -39,15 +39,12 @@ public class TransitimeQuickStart {
 	{
 		URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
     	String configFilePath=configFile.getPath();
-    	System.out.println(configFilePath);
     	String gtfsFilePath;
     	if(gtfsZipFileName==null)
     	{
     		URL gtfsFile = this.getClass().getClassLoader().getResource("gtfs.zip");
     		gtfsFilePath=gtfsFile.getPath();
     		gtfsZipFileName=gtfsFilePath;
-    		System.out.println("tester file:");
-    		System.out.println(gtfsFilePath);
     	}
     	else
     	{
