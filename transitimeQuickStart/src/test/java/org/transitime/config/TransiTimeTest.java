@@ -19,23 +19,29 @@ package org.transitime.config;
 import static org.junit.Assert.*;
 import java.net.URL;
 import junit.framework.TestCase;
+
+import org.transitime.applications.Core;
 import org.transitime.applications.GtfsFileProcessor;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
+
 /**
  * 
  * @author Brendan Egan
  *
  */
-public class TestGTFSFileProcessor extends TestCase {
-
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class TransiTimeTest extends TestCase {
+	
 	@Test
-	public void test() {
+	public void test_1_GTFSfileprocessor() {
 		try {
 			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
-        	String configFilePath=configFile.getPath();
+			String configFilePath = configFile.getPath();
 
-        	URL gtfsFile = this.getClass().getClassLoader().getResource("collins.zip");
-        	String gtfsFilePath=gtfsFile.getPath();
+			URL gtfsFile = this.getClass().getClassLoader().getResource("collins.zip");
+			String gtfsFilePath = gtfsFile.getPath();
 			String notes = null;
 			String gtfsUrl = null;
 			String gtfsZipFileName = gtfsFilePath;
@@ -57,7 +63,7 @@ public class TestGTFSFileProcessor extends TestCase {
 					unzipSubdirectory, gtfsDirectoryName, supplementDir, regexReplaceListFileName, pathOffsetDistance,
 					maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
 					maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
-			 testprocessor.process();
+			testprocessor.process();
 			assertTrue(true);
 		} catch (Exception e) {
 			fail(e.toString());
@@ -66,4 +72,28 @@ public class TestGTFSFileProcessor extends TestCase {
 
 	}
 
+	@Test
+	public void test_2_Core() {
+		String agencyid = "02";
+		System.getProperties().setProperty("transitime.core.configRevStr", "0");
+		System.getProperties().setProperty("transitime.core.agencyId", "02");
+		System.getProperties().setProperty("transitime.logging.dir",
+				"C:\\Users\\Brendan\\Documents\\TransitimeTest\\core\\transitime\\logs\\");
+		System.getProperties().setProperty("transitime.configFiles",
+				"C:\\Users\\Brendan\\Documents\\TransitimeTest\\core\\transitime\\src\\main\\resources\\transiTimeconfig.xml");
+		//Core testcore = new Core(agencyid);
+		try {
+
+			// Initialize the core now
+			Core.createCore();
+		} catch (Exception e) {
+			fail(e.toString());
+			e.printStackTrace();
+		}
+
+	}
+
+	// Start the RMI Servers so that clients can obtain data
+	// on predictions, vehicles locations, etc.
+	// testcore.startRmiServers(agencyid);
 }

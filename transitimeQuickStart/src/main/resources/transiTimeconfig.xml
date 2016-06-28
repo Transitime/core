@@ -3,6 +3,7 @@
  <modules>
         <optionalModulesList>transitime.core.schedBasedPreds.SchedBasedPredsModule;org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
     </modules>
+    
     <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
     <core>
 	<agencyId>02</agencyId>

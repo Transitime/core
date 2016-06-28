@@ -107,6 +107,7 @@ public class Core {
 		int configRev;
 		if (configRevStr != null) {
 			// Use config rev from command line
+			
 			configRev = Integer.parseInt(configRevStr);
 		} else {
 			// Read in config rev from ActiveRevisions table in db
