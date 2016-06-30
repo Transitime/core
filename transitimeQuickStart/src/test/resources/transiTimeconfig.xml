@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transitime>
  <modules>
-        <optionalModulesList>transitime.core.schedBasedPreds.SchedBasedPredsModule;org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
+        <optionalModulesList>org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
     </modules>
     <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
     <core>

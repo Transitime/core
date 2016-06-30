@@ -1,0 +1,1728 @@
+
+09:58:34.111 INFO  thread=main [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+09:58:34.119 INFO  thread=main [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+09:58:34.121 INFO  thread=main [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+09:58:34.123 INFO  thread=main [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+09:58:34.142 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=02 using config file=hsql_hibernate.cfg.xml
+
+09:58:34.143 INFO  thread=main [o.t.d.h.HibernateUtils:88] The Hibernate file hsql_hibernate.cfg.xml doesn't exist as a regular file so seeing if it is in classpath.
+
+09:58:34.143 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+09:58:34.185 INFO  thread=main [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+09:58:34.743 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+09:58:34.762 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=02 using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+09:58:34.842 WARN  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+09:58:34.853 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+09:58:34.853 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+09:58:34.853 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+09:58:34.854 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+09:58:35.152 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+09:58:35.487 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+09:58:35.491 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+09:58:36.565 INFO  thread=main [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+09:58:36.565 INFO  thread=main [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+09:58:36.567 INFO  thread=main [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+09:58:36.578 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:58:36.582 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:58:36.585 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:58:36.587 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:58:36.590 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:58:36.595 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:58:36.597 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:58:36.599 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:58:36.600 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:58:36.602 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:58:36.603 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:58:36.605 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:58:36.606 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:58:36.607 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:58:36.609 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:58:36.611 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:58:36.612 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:58:36.613 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:58:36.615 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:58:36.616 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:58:36.618 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:58:36.620 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:58:36.622 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:58:36.624 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:58:36.626 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:58:36.627 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:58:36.629 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:58:36.631 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:58:36.633 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:58:36.634 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:58:36.636 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:58:36.638 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:58:36.640 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:58:36.641 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:58:36.643 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:58:36.645 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:58:36.646 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:58:36.647 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:58:36.649 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:58:36.650 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:58:36.652 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:58:36.653 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:58:36.655 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:58:36.656 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:58:36.657 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:58:36.659 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:58:36.660 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:58:36.661 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:58:36.663 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:58:36.664 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:58:36.665 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:58:36.667 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:58:36.668 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:58:36.669 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:58:36.671 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:58:36.672 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:58:36.674 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:58:36.675 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:58:36.676 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:58:36.678 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:58:36.679 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:58:36.681 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:58:36.683 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:58:36.684 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:58:36.686 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:58:36.688 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:58:36.689 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:58:36.690 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:58:36.692 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:58:36.693 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:58:36.694 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:58:36.696 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:58:36.697 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:58:36.699 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:58:36.700 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:58:36.701 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:58:36.703 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:58:36.704 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:58:36.705 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:58:36.706 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:58:36.708 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:58:36.709 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:58:36.710 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:58:36.712 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:58:36.713 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:58:36.715 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:58:36.716 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:58:36.717 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:58:36.719 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:58:36.720 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:58:36.721 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:58:36.723 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:58:36.724 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:58:36.725 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:58:36.727 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:58:36.728 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:58:36.729 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:58:36.731 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:58:36.732 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:58:36.734 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:58:36.735 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:58:36.736 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:58:36.768 INFO  thread=main [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+09:58:36.988 ERROR thread=main [o.t.a.Core:121] ActiveRevisions in database is not valid. The configuration revs must be set to proper values. ActiveRevisions [configRev=-1, travelTimesRev=-1]
+
+09:58:37.002 INFO  thread=main [o.t.g.DbConfig:174] Reading configuration database for configRev=-1...
+
+09:58:37.002 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=02 using config file=hsql_hibernate.cfg.xml
+
+09:58:37.002 INFO  thread=main [o.t.d.h.HibernateUtils:88] The Hibernate file hsql_hibernate.cfg.xml doesn't exist as a regular file so seeing if it is in classpath.
+
+09:58:37.003 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+09:58:37.007 INFO  thread=main [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+09:58:37.279 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+09:58:37.279 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=02 using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+09:58:37.285 WARN  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+09:58:37.285 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+09:58:37.285 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+09:58:37.286 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+09:58:37.286 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+09:58:37.289 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+09:58:37.338 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+09:58:37.338 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+09:58:37.707 INFO  thread=main [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+09:58:37.707 INFO  thread=main [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+09:58:37.708 INFO  thread=main [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+09:58:37.732 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ACTIVEREVISIONS
+
+09:58:37.732 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, id, configrev]
+
+09:58:37.732 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.732 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10129_10130]
+
+09:58:37.749 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.AGENCIES
+
+09:58:37.749 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [minlon, agencytimezone, maxlat, minlat, agencyurl, maxlon, agencyfareurl, agencyid, agencyphone, configrev, agencyname, agencylang]
+
+09:58:37.749 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.749 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10133_10134]
+
+09:58:37.763 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.APIKEYS
+
+09:58:37.763 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [phone, applicationkey, applicationurl, description, email, applicationname]
+
+09:58:37.764 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.764 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10136_10137]
+
+09:58:37.776 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ARRIVALSDEPARTURES
+
+09:58:37.777 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, gtfsstopseq, stoppathindex, directionid, stoporder, dtype, stopid, tripid, configrev, stoppathlength, blockid, routeid, routeshortname, isarrival, vehicleid, time, serviceid, scheduledtime, tripindex]
+
+09:58:37.777 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.777 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [arrivalsdeparturestimeindex, sys_idx_sys_pk_10145_10146, arrivalsdeparturesroutetimeindex]
+
+09:58:37.790 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.AVLREPORTS
+
+09:58:37.790 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [passengercount, heading, passengerfullness, lon, source, field1value, assignmentid, speed, assignmenttype, driverid, field1name, timeprocessed, vehicleid, time, licenseplate, lat]
+
+09:58:37.790 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.790 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [avlreportstimeindex, sys_idx_sys_pk_10149_10150]
+
+09:58:37.806 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.BLOCK_TO_TRIP_JOINTABLE
+
+09:58:37.806 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blocks_configrev, trips_configrev, listindex, blocks_blockid, trips_tripid, trips_starttime, blocks_serviceid]
+
+09:58:37.806 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_1c1e1twdap19vq0xkav0amvm, fk_abaj8ke6oh4imbbgnaercsowo]
+
+09:58:37.806 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10288, sys_idx_sys_pk_10158_10159, sys_idx_10290]
+
+09:58:37.819 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.BLOCKS
+
+09:58:37.820 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blockid, endtime, starttime, serviceid, configrev, routeids]
+
+09:58:37.820 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.820 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10163_10164]
+
+09:58:37.834 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CALENDARDATES
+
+09:58:37.834 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [date, serviceid, configrev, exceptiontype]
+
+09:58:37.834 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.835 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10168_10169]
+
+09:58:37.848 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CALENDARS
+
+09:58:37.848 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [sunday, saturday, tuesday, enddate, wednesday, thursday, friday, startdate, serviceid, configrev, monday]
+
+09:58:37.849 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.849 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10181_10182]
+
+09:58:37.862 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CONFIGREVISION
+
+09:58:37.863 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [zipfilelastmodifiedtime, notes, processedtime, configrev]
+
+09:58:37.863 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.863 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10184_10185]
+
+09:58:37.878 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.DBTEST
+
+09:58:37.878 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [id]
+
+09:58:37.878 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.878 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10187_10188]
+
+09:58:37.892 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FAREATTRIBUTES
+
+09:58:37.892 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [currencytype, fareid, price, transfers, transferduration, configrev, paymentmethod]
+
+09:58:37.892 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:37.892 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10191_10192]
+
+09:58:38.107 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FARERULES
+
+09:58:38.107 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [containsid, routeid, originid, fareid, destinationid, configrev]
+
+09:58:38.107 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.107 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10199_10200]
+
+09:58:38.119 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FREQUENCIES
+
+09:58:38.119 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headwaysecs, endtime, exacttimes, tripid, starttime, configrev]
+
+09:58:38.119 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.120 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10204_10205]
+
+09:58:38.133 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MATCHES
+
+09:58:38.134 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blockid, avltime, stoppathindex, segmentindex, tripid, vehicleid, atstop, distancealongstoppath, configrev, serviceid, distancealongsegment]
+
+09:58:38.134 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.134 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [avltimeindex, sys_idx_sys_pk_10208_10209]
+
+09:58:38.146 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MEASUREDARRIVALTIMES
+
+09:58:38.146 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headsign, routeid, directionid, routeshortname, stopid, time]
+
+09:58:38.146 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.147 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10212_10213, measuredarrivaltimesindex]
+
+09:58:38.158 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MONITORINGEVENTS
+
+09:58:38.159 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [triggered, time, type, message, value]
+
+09:58:38.159 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.159 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10216_10217, monitoringeventstimeindex]
+
+09:58:38.171 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.PREDICTIONACCURACY
+
+09:58:38.172 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [directionid, predictedtime, stopid, tripid, predictionreadtime, routeid, predictionsource, routeshortname, affectedbywaitstop, id, vehicleid, arrivaldeparturetime, predictionaccuracymsecs]
+
+09:58:38.172 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.172 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [predictionaccuracytimeindex, sys_idx_sys_pk_10218_10219]
+
+09:58:38.183 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.PREDICTIONS
+
+09:58:38.184 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [routeid, avltime, predictiontime, stopid, affectedbywaitstop, isarrival, tripid, id, creationtime, vehicleid, configrev, schedbasedpred]
+
+09:58:38.184 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.184 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10220_10221, predictiontimeindex]
+
+09:58:38.196 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ROUTES
+
+09:58:38.197 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [maxdistance, longname, minlon, routeorder, color, hidden, maxlon, textcolor, description, configrev, type, shortname, maxlat, minlat, name, id]
+
+09:58:38.197 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.197 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10224_10225]
+
+09:58:38.210 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPPATH_LOCATIONS
+
+09:58:38.210 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [locations_order, stoppath_trippatternid, lon, stoppath_configrev, lat, stoppath_stoppathid]
+
+09:58:38.210 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_sdjt3vtd3w0cl07p0doob6khi]
+
+09:58:38.210 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10292, sys_idx_sys_pk_10230_10231]
+
+09:58:38.223 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPPATHS
+
+09:58:38.223 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [laststopintrip, breaktime, trippatternid, routeid, gtfsstopseq, layoverstop, pathlength, stopid, stoppathid, waitstop, configrev, scheduleadherencestop]
+
+09:58:38.223 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.223 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10235_10236]
+
+09:58:38.235 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPS
+
+09:58:38.235 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [timepointstop, code, hidden, layoverstop, name, lon, waitstop, id, configrev, lat]
+
+09:58:38.236 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.236 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10239_10240]
+
+09:58:38.247 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRANSFERS
+
+09:58:38.247 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [mintransfertime, tostopid, configrev, fromstopid, transfertype]
+
+09:58:38.248 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.248 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10244_10245]
+
+09:58:38.260 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORSTOPPATHS
+
+09:58:38.260 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, stoptimemsec, traveltimesmsec, daysofweekoverride, stoppathid, id, configrev, traveltimesegmentlength, howset]
+
+09:58:38.260 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.260 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10246_10247]
+
+09:58:38.274 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORTRIP_TO_TRAVELTIMESFORPATH_JOINTABLE
+
+09:58:38.275 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [listindex, traveltimesfortrips_id, traveltimesforstoppaths_id]
+
+09:58:38.275 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_hh5uepurijcqj0pyc6e3h5mqw, fk_9j1s8ewsmokqg4m35wrr29na7]
+
+09:58:38.275 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10294, sys_idx_10296, sys_idx_sys_pk_10251_10252]
+
+09:58:38.290 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORTRIPS
+
+09:58:38.291 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, trippatternid, id, configrev, tripcreatedforid]
+
+09:58:38.291 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.291 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [traveltimesrevindex, sys_idx_sys_pk_10253_10254]
+
+09:58:38.305 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPPATTERN_TO_PATH_JOINTABLE
+
+09:58:38.305 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [listindex, stoppaths_trippatternid, trippatterns_configrev, trippatterns_id, stoppaths_configrev, stoppaths_stoppathid]
+
+09:58:38.306 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_s0gaw8iv60vc17a5ltryqwg27, fk_qsr8l6u1nelb5pt8rlnei08sy]
+
+09:58:38.306 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_uk_s0gaw8iv60vc17a5ltryqwg27_10287, sys_idx_10298, sys_idx_10300, sys_idx_sys_pk_10261_10262]
+
+09:58:38.319 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPPATTERNS
+
+09:58:38.319 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headsign, minlon, routeid, shapeid, maxlat, directionid, minlat, routeshortname, maxlon, id, configrev]
+
+09:58:38.319 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.319 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10265_10266]
+
+09:58:38.332 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPS
+
+09:58:38.332 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [exacttimesheadway, scheduledtimeslist, directionid, traveltimes_id, endtime, tripid, starttime, configrev, trippattern_id, blockid, headsign, tripshortname, routeid, shapeid, routeshortname, noschedule, trippattern_configrev, serviceid]
+
+09:58:38.332 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_p1er53449kkfsca6mbnxkdyst, fk_676npp7h4bxh8sjcnugnxt5wb]
+
+09:58:38.332 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10270_10271, sys_idx_10302, sys_idx_10304]
+
+09:58:38.345 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLECONFIGS
+
+09:58:38.345 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [trackerid, nonpassengervehicle, crushcapacity, description, id, type, capacity]
+
+09:58:38.346 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.346 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10273_10274]
+
+09:58:38.360 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLEEVENTS
+
+09:58:38.360 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, becameunpredictable, description, stopid, lon, tripid, blockid, routeid, predictable, routeshortname, eventtype, vehicleid, time, serviceid, lat, supervisor]
+
+09:58:38.360 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.360 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10278_10279, vehicleeventstimeindex]
+
+09:58:38.374 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLESTATES
+
+09:58:38.374 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, schedadhmsec, schedadh, schedadhwithinbounds, iswaitstop, tripid, blockid, tripshortname, islayover, routeid, routeshortname, isforschedbasedpreds, ispredictable, isdelayed, vehicleid]
+
+09:58:38.374 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.374 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [vehiclestateavltimeindex, sys_idx_sys_pk_10282_10283]
+
+09:58:38.388 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.WEBAGENCIES
+
+09:58:38.388 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [hostname, dbname, dbtype, dbusername, active, agencyid, dbhost, dbencryptedpassword]
+
+09:58:38.389 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:58:38.389 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10285_10286]
+
+09:58:38.392 INFO  thread=main [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+09:58:38.427 INFO  thread=main [o.t.g.DbConfig:199] Finished reading configuration data from database . Took 1425 msec.
+
+09:58:38.431 INFO  thread=TimeoutHandlerModule-1 [o.t.c.TimeoutHandlerModule:316] Starting module org.transitime.core.TimeoutHandlerModule for agencyId=02
+
+09:58:38.434 INFO  thread=main [o.t.a.Core:420] No optional modules to start up.
+
+09:58:38.439 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:58:38.467 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:58:38.473 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:58:38.482 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:58:38.487 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:59:27.085 INFO  thread=main [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+09:59:27.092 INFO  thread=main [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+09:59:27.094 INFO  thread=main [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+09:59:27.096 INFO  thread=main [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+09:59:27.114 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=02 using config file=hsql_hibernate.cfg.xml
+
+09:59:27.114 INFO  thread=main [o.t.d.h.HibernateUtils:88] The Hibernate file hsql_hibernate.cfg.xml doesn't exist as a regular file so seeing if it is in classpath.
+
+09:59:27.114 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+09:59:27.156 INFO  thread=main [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+09:59:27.717 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+09:59:27.739 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=02 using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+09:59:27.815 WARN  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+09:59:27.825 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+09:59:27.826 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+09:59:27.826 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+09:59:27.827 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+09:59:28.124 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+09:59:28.452 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+09:59:28.456 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+09:59:29.529 INFO  thread=main [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+09:59:29.530 INFO  thread=main [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+09:59:29.532 INFO  thread=main [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+09:59:29.543 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:59:29.547 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:59:29.550 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:59:29.553 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:59:29.556 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:59:29.560 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:59:29.562 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:59:29.564 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:59:29.565 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:59:29.567 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:59:29.568 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:59:29.570 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:59:29.571 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:59:29.573 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:59:29.575 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:59:29.576 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:59:29.578 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:59:29.579 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:59:29.580 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:59:29.581 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:59:29.583 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:59:29.584 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:59:29.586 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:59:29.587 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:59:29.588 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:59:29.590 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:59:29.591 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:59:29.593 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:59:29.594 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:59:29.596 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:59:29.598 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:59:29.599 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:59:29.601 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:59:29.603 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:59:29.605 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:59:29.606 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:59:29.608 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:59:29.610 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:59:29.611 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:59:29.613 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:59:29.614 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:59:29.615 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:59:29.617 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:59:29.618 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:59:29.620 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:59:29.621 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:59:29.622 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:59:29.624 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:59:29.625 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:59:29.627 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:59:29.628 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:59:29.630 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:59:29.631 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:59:29.632 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:59:29.633 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:59:29.634 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:59:29.636 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:59:29.637 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:59:29.639 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:59:29.640 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:59:29.642 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:59:29.643 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:59:29.645 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:59:29.647 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:59:29.648 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:59:29.650 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:59:29.651 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:59:29.652 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:59:29.654 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:59:29.655 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:59:29.657 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:59:29.658 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:59:29.660 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:59:29.661 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:59:29.663 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:59:29.664 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:59:29.666 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:59:29.667 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:59:29.669 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:59:29.670 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:59:29.672 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:59:29.673 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:59:29.675 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:59:29.676 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:59:29.678 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:59:29.679 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:59:29.680 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:59:29.681 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:59:29.683 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:59:29.685 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:59:29.686 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:59:29.687 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:59:29.688 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:59:29.690 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:59:29.691 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:59:29.693 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:59:29.695 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:59:29.696 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:59:29.698 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:59:29.699 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:59:29.700 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:59:29.702 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:59:29.730 INFO  thread=main [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+09:59:29.941 ERROR thread=main [o.t.a.Core:121] ActiveRevisions in database is not valid. The configuration revs must be set to proper values. ActiveRevisions [configRev=-1, travelTimesRev=-1]
+
+09:59:29.953 INFO  thread=main [o.t.g.DbConfig:174] Reading configuration database for configRev=-1...
+
+09:59:29.954 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=02 using config file=hsql_hibernate.cfg.xml
+
+09:59:29.954 INFO  thread=main [o.t.d.h.HibernateUtils:88] The Hibernate file hsql_hibernate.cfg.xml doesn't exist as a regular file so seeing if it is in classpath.
+
+09:59:29.954 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+09:59:29.958 INFO  thread=main [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+09:59:30.229 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+09:59:30.230 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=02 using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+09:59:30.234 WARN  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+09:59:30.235 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+09:59:30.235 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+09:59:30.235 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+09:59:30.235 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+09:59:30.238 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+09:59:30.287 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+09:59:30.287 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+09:59:30.630 INFO  thread=main [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+09:59:30.630 INFO  thread=main [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+09:59:30.631 INFO  thread=main [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+09:59:30.653 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ACTIVEREVISIONS
+
+09:59:30.653 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, id, configrev]
+
+09:59:30.653 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.653 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10129_10130]
+
+09:59:30.670 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.AGENCIES
+
+09:59:30.670 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [minlon, agencytimezone, maxlat, minlat, agencyurl, maxlon, agencyfareurl, agencyid, agencyphone, configrev, agencyname, agencylang]
+
+09:59:30.670 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.670 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10133_10134]
+
+09:59:30.684 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.APIKEYS
+
+09:59:30.684 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [phone, applicationkey, applicationurl, description, email, applicationname]
+
+09:59:30.684 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.684 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10136_10137]
+
+09:59:30.697 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ARRIVALSDEPARTURES
+
+09:59:30.697 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, gtfsstopseq, stoppathindex, directionid, stoporder, dtype, stopid, tripid, configrev, stoppathlength, blockid, routeid, routeshortname, isarrival, vehicleid, time, serviceid, scheduledtime, tripindex]
+
+09:59:30.697 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.697 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [arrivalsdeparturestimeindex, sys_idx_sys_pk_10145_10146, arrivalsdeparturesroutetimeindex]
+
+09:59:30.713 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.AVLREPORTS
+
+09:59:30.713 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [passengercount, heading, passengerfullness, lon, source, field1value, assignmentid, speed, assignmenttype, driverid, field1name, timeprocessed, vehicleid, time, licenseplate, lat]
+
+09:59:30.713 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.713 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [avlreportstimeindex, sys_idx_sys_pk_10149_10150]
+
+09:59:30.727 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.BLOCK_TO_TRIP_JOINTABLE
+
+09:59:30.727 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blocks_configrev, trips_configrev, listindex, blocks_blockid, trips_tripid, trips_starttime, blocks_serviceid]
+
+09:59:30.727 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_1c1e1twdap19vq0xkav0amvm, fk_abaj8ke6oh4imbbgnaercsowo]
+
+09:59:30.728 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10288, sys_idx_sys_pk_10158_10159, sys_idx_10290]
+
+09:59:30.740 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.BLOCKS
+
+09:59:30.741 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blockid, endtime, starttime, serviceid, configrev, routeids]
+
+09:59:30.741 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.741 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10163_10164]
+
+09:59:30.755 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CALENDARDATES
+
+09:59:30.755 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [date, serviceid, configrev, exceptiontype]
+
+09:59:30.755 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.755 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10168_10169]
+
+09:59:30.768 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CALENDARS
+
+09:59:30.768 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [sunday, saturday, tuesday, enddate, wednesday, thursday, friday, startdate, serviceid, configrev, monday]
+
+09:59:30.768 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.768 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10181_10182]
+
+09:59:30.783 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CONFIGREVISION
+
+09:59:30.783 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [zipfilelastmodifiedtime, notes, processedtime, configrev]
+
+09:59:30.783 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.783 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10184_10185]
+
+09:59:30.796 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.DBTEST
+
+09:59:30.796 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [id]
+
+09:59:30.797 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.797 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10187_10188]
+
+09:59:30.987 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FAREATTRIBUTES
+
+09:59:30.987 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [currencytype, fareid, price, transfers, transferduration, configrev, paymentmethod]
+
+09:59:30.987 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.988 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10191_10192]
+
+09:59:30.998 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FARERULES
+
+09:59:30.999 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [containsid, routeid, originid, fareid, destinationid, configrev]
+
+09:59:30.999 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:30.999 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10199_10200]
+
+09:59:31.010 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FREQUENCIES
+
+09:59:31.010 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headwaysecs, endtime, exacttimes, tripid, starttime, configrev]
+
+09:59:31.010 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.011 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10204_10205]
+
+09:59:31.021 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MATCHES
+
+09:59:31.022 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blockid, avltime, stoppathindex, segmentindex, tripid, vehicleid, atstop, distancealongstoppath, configrev, serviceid, distancealongsegment]
+
+09:59:31.022 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.022 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [avltimeindex, sys_idx_sys_pk_10208_10209]
+
+09:59:31.034 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MEASUREDARRIVALTIMES
+
+09:59:31.035 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headsign, routeid, directionid, routeshortname, stopid, time]
+
+09:59:31.035 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.035 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10212_10213, measuredarrivaltimesindex]
+
+09:59:31.047 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MONITORINGEVENTS
+
+09:59:31.047 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [triggered, time, type, message, value]
+
+09:59:31.047 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.047 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10216_10217, monitoringeventstimeindex]
+
+09:59:31.058 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.PREDICTIONACCURACY
+
+09:59:31.059 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [directionid, predictedtime, stopid, tripid, predictionreadtime, routeid, predictionsource, routeshortname, affectedbywaitstop, id, vehicleid, arrivaldeparturetime, predictionaccuracymsecs]
+
+09:59:31.059 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.059 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [predictionaccuracytimeindex, sys_idx_sys_pk_10218_10219]
+
+09:59:31.070 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.PREDICTIONS
+
+09:59:31.070 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [routeid, avltime, predictiontime, stopid, affectedbywaitstop, isarrival, tripid, id, creationtime, vehicleid, configrev, schedbasedpred]
+
+09:59:31.070 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.071 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10220_10221, predictiontimeindex]
+
+09:59:31.083 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ROUTES
+
+09:59:31.083 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [maxdistance, longname, minlon, routeorder, color, hidden, maxlon, textcolor, description, configrev, type, shortname, maxlat, minlat, name, id]
+
+09:59:31.083 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.083 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10224_10225]
+
+09:59:31.097 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPPATH_LOCATIONS
+
+09:59:31.098 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [locations_order, stoppath_trippatternid, lon, stoppath_configrev, lat, stoppath_stoppathid]
+
+09:59:31.098 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_sdjt3vtd3w0cl07p0doob6khi]
+
+09:59:31.098 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10292, sys_idx_sys_pk_10230_10231]
+
+09:59:31.111 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPPATHS
+
+09:59:31.111 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [laststopintrip, breaktime, trippatternid, routeid, gtfsstopseq, layoverstop, pathlength, stopid, stoppathid, waitstop, configrev, scheduleadherencestop]
+
+09:59:31.111 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.112 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10235_10236]
+
+09:59:31.123 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPS
+
+09:59:31.124 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [timepointstop, code, hidden, layoverstop, name, lon, waitstop, id, configrev, lat]
+
+09:59:31.124 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.124 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10239_10240]
+
+09:59:31.137 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRANSFERS
+
+09:59:31.137 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [mintransfertime, tostopid, configrev, fromstopid, transfertype]
+
+09:59:31.137 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.137 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10244_10245]
+
+09:59:31.149 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORSTOPPATHS
+
+09:59:31.149 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, stoptimemsec, traveltimesmsec, daysofweekoverride, stoppathid, id, configrev, traveltimesegmentlength, howset]
+
+09:59:31.150 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.150 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10246_10247]
+
+09:59:31.163 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORTRIP_TO_TRAVELTIMESFORPATH_JOINTABLE
+
+09:59:31.163 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [listindex, traveltimesfortrips_id, traveltimesforstoppaths_id]
+
+09:59:31.163 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_hh5uepurijcqj0pyc6e3h5mqw, fk_9j1s8ewsmokqg4m35wrr29na7]
+
+09:59:31.163 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10294, sys_idx_10296, sys_idx_sys_pk_10251_10252]
+
+09:59:31.176 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORTRIPS
+
+09:59:31.177 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, trippatternid, id, configrev, tripcreatedforid]
+
+09:59:31.177 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.177 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [traveltimesrevindex, sys_idx_sys_pk_10253_10254]
+
+09:59:31.188 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPPATTERN_TO_PATH_JOINTABLE
+
+09:59:31.189 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [listindex, stoppaths_trippatternid, trippatterns_configrev, trippatterns_id, stoppaths_configrev, stoppaths_stoppathid]
+
+09:59:31.189 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_s0gaw8iv60vc17a5ltryqwg27, fk_qsr8l6u1nelb5pt8rlnei08sy]
+
+09:59:31.189 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_uk_s0gaw8iv60vc17a5ltryqwg27_10287, sys_idx_10298, sys_idx_10300, sys_idx_sys_pk_10261_10262]
+
+09:59:31.199 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPPATTERNS
+
+09:59:31.200 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headsign, minlon, routeid, shapeid, maxlat, directionid, minlat, routeshortname, maxlon, id, configrev]
+
+09:59:31.200 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.200 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10265_10266]
+
+09:59:31.211 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPS
+
+09:59:31.211 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [exacttimesheadway, scheduledtimeslist, directionid, traveltimes_id, endtime, tripid, starttime, configrev, trippattern_id, blockid, headsign, tripshortname, routeid, shapeid, routeshortname, noschedule, trippattern_configrev, serviceid]
+
+09:59:31.211 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_p1er53449kkfsca6mbnxkdyst, fk_676npp7h4bxh8sjcnugnxt5wb]
+
+09:59:31.212 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10270_10271, sys_idx_10302, sys_idx_10304]
+
+09:59:31.224 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLECONFIGS
+
+09:59:31.224 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [trackerid, nonpassengervehicle, crushcapacity, description, id, type, capacity]
+
+09:59:31.224 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.224 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10273_10274]
+
+09:59:31.237 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLEEVENTS
+
+09:59:31.238 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, becameunpredictable, description, stopid, lon, tripid, blockid, routeid, predictable, routeshortname, eventtype, vehicleid, time, serviceid, lat, supervisor]
+
+09:59:31.238 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.238 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10278_10279, vehicleeventstimeindex]
+
+09:59:31.250 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLESTATES
+
+09:59:31.250 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, schedadhmsec, schedadh, schedadhwithinbounds, iswaitstop, tripid, blockid, tripshortname, islayover, routeid, routeshortname, isforschedbasedpreds, ispredictable, isdelayed, vehicleid]
+
+09:59:31.250 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.250 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [vehiclestateavltimeindex, sys_idx_sys_pk_10282_10283]
+
+09:59:31.262 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.WEBAGENCIES
+
+09:59:31.262 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [hostname, dbname, dbtype, dbusername, active, agencyid, dbhost, dbencryptedpassword]
+
+09:59:31.262 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+09:59:31.262 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10285_10286]
+
+09:59:31.265 INFO  thread=main [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+09:59:31.293 INFO  thread=main [o.t.g.DbConfig:199] Finished reading configuration data from database . Took 1340 msec.
+
+09:59:31.298 INFO  thread=TimeoutHandlerModule-1 [o.t.c.TimeoutHandlerModule:316] Starting module org.transitime.core.TimeoutHandlerModule for agencyId=02
+
+09:59:31.300 INFO  thread=main [o.t.a.Core:420] No optional modules to start up.
+
+09:59:31.304 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:59:31.330 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:59:31.335 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:59:31.343 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+09:59:31.347 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+10:00:31.448 INFO  thread=main [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+10:00:31.455 INFO  thread=main [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+10:00:31.457 INFO  thread=main [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+10:00:31.459 INFO  thread=main [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+10:00:31.477 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=02 using config file=hsql_hibernate.cfg.xml
+
+10:00:31.477 INFO  thread=main [o.t.d.h.HibernateUtils:88] The Hibernate file hsql_hibernate.cfg.xml doesn't exist as a regular file so seeing if it is in classpath.
+
+10:00:31.478 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+10:00:31.521 INFO  thread=main [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+10:00:32.081 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+10:00:32.100 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=02 using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+10:00:32.180 WARN  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+10:00:32.191 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+10:00:32.191 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+10:00:32.191 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+10:00:32.193 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+10:00:32.485 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+10:00:32.810 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+10:00:32.814 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+10:00:33.881 INFO  thread=main [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+10:00:33.881 INFO  thread=main [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+10:00:33.883 INFO  thread=main [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+10:00:33.895 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+10:00:33.899 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+10:00:33.902 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+10:00:33.904 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+10:00:33.907 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+10:00:33.911 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+10:00:33.913 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+10:00:33.915 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+10:00:33.917 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+10:00:33.919 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+10:00:33.920 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+10:00:33.922 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+10:00:33.924 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+10:00:33.925 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+10:00:33.927 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+10:00:33.928 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+10:00:33.930 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+10:00:33.931 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+10:00:33.933 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+10:00:33.934 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+10:00:33.936 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+10:00:33.938 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+10:00:33.940 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+10:00:33.942 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+10:00:33.943 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+10:00:33.945 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+10:00:33.946 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+10:00:33.947 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+10:00:33.949 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+10:00:33.951 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+10:00:33.953 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+10:00:33.955 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+10:00:33.956 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+10:00:33.958 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+10:00:33.959 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+10:00:33.961 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+10:00:33.962 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+10:00:33.963 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+10:00:33.965 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+10:00:33.966 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+10:00:33.968 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+10:00:33.969 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+10:00:33.971 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+10:00:33.972 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+10:00:33.974 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+10:00:33.975 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+10:00:33.976 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+10:00:33.978 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+10:00:33.979 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+10:00:33.981 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+10:00:33.982 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+10:00:33.983 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+10:00:33.985 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+10:00:33.986 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+10:00:33.987 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+10:00:33.989 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+10:00:33.990 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+10:00:33.991 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+10:00:33.993 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+10:00:33.995 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+10:00:33.996 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+10:00:33.997 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+10:00:33.999 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+10:00:34.000 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+10:00:34.001 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+10:00:34.003 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+10:00:34.004 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+10:00:34.005 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+10:00:34.006 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+10:00:34.008 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+10:00:34.009 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+10:00:34.010 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+10:00:34.011 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+10:00:34.012 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+10:00:34.014 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+10:00:34.015 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+10:00:34.016 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+10:00:34.018 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+10:00:34.019 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+10:00:34.020 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+10:00:34.021 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+10:00:34.022 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+10:00:34.024 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+10:00:34.025 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+10:00:34.026 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+10:00:34.028 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+10:00:34.029 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+10:00:34.030 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+10:00:34.031 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+10:00:34.032 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+10:00:34.034 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+10:00:34.035 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+10:00:34.036 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+10:00:34.038 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+10:00:34.039 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+10:00:34.040 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+10:00:34.042 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+10:00:34.043 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+10:00:34.045 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+10:00:34.047 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+10:00:34.048 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+10:00:34.049 INFO  thread=main [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+10:00:34.078 INFO  thread=main [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+10:00:34.300 ERROR thread=main [o.t.a.Core:121] ActiveRevisions in database is not valid. The configuration revs must be set to proper values. ActiveRevisions [configRev=-1, travelTimesRev=-1]
+
+10:00:34.313 INFO  thread=main [o.t.g.DbConfig:174] Reading configuration database for configRev=-1...
+
+10:00:34.314 INFO  thread=main [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=02 using config file=hsql_hibernate.cfg.xml
+
+10:00:34.314 INFO  thread=main [o.t.d.h.HibernateUtils:88] The Hibernate file hsql_hibernate.cfg.xml doesn't exist as a regular file so seeing if it is in classpath.
+
+10:00:34.315 INFO  thread=main [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+10:00:34.319 INFO  thread=main [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+10:00:34.590 INFO  thread=main [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+10:00:34.590 INFO  thread=main [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=02 using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+10:00:34.595 WARN  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+10:00:34.595 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+10:00:34.596 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+10:00:34.596 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+10:00:34.596 INFO  thread=main [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+10:00:34.599 INFO  thread=main [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+10:00:34.653 INFO  thread=main [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+10:00:34.653 INFO  thread=main [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+10:00:35.005 INFO  thread=main [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+10:00:35.005 INFO  thread=main [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+10:00:35.006 INFO  thread=main [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+10:00:35.028 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ACTIVEREVISIONS
+
+10:00:35.028 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, id, configrev]
+
+10:00:35.028 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.028 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10129_10130]
+
+10:00:35.045 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.AGENCIES
+
+10:00:35.045 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [minlon, agencytimezone, maxlat, minlat, agencyurl, maxlon, agencyfareurl, agencyid, agencyphone, configrev, agencyname, agencylang]
+
+10:00:35.045 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.045 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10133_10134]
+
+10:00:35.059 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.APIKEYS
+
+10:00:35.060 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [phone, applicationkey, applicationurl, description, email, applicationname]
+
+10:00:35.060 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.060 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10136_10137]
+
+10:00:35.073 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ARRIVALSDEPARTURES
+
+10:00:35.073 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, gtfsstopseq, stoppathindex, directionid, stoporder, dtype, stopid, tripid, configrev, stoppathlength, blockid, routeid, routeshortname, isarrival, vehicleid, time, serviceid, scheduledtime, tripindex]
+
+10:00:35.073 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.073 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [arrivalsdeparturestimeindex, sys_idx_sys_pk_10145_10146, arrivalsdeparturesroutetimeindex]
+
+10:00:35.087 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.AVLREPORTS
+
+10:00:35.087 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [passengercount, heading, passengerfullness, lon, source, field1value, assignmentid, speed, assignmenttype, driverid, field1name, timeprocessed, vehicleid, time, licenseplate, lat]
+
+10:00:35.087 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.088 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [avlreportstimeindex, sys_idx_sys_pk_10149_10150]
+
+10:00:35.104 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.BLOCK_TO_TRIP_JOINTABLE
+
+10:00:35.104 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blocks_configrev, trips_configrev, listindex, blocks_blockid, trips_tripid, trips_starttime, blocks_serviceid]
+
+10:00:35.104 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_1c1e1twdap19vq0xkav0amvm, fk_abaj8ke6oh4imbbgnaercsowo]
+
+10:00:35.104 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10288, sys_idx_sys_pk_10158_10159, sys_idx_10290]
+
+10:00:35.119 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.BLOCKS
+
+10:00:35.119 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blockid, endtime, starttime, serviceid, configrev, routeids]
+
+10:00:35.119 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.120 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10163_10164]
+
+10:00:35.133 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CALENDARDATES
+
+10:00:35.134 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [date, serviceid, configrev, exceptiontype]
+
+10:00:35.134 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.134 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10168_10169]
+
+10:00:35.150 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CALENDARS
+
+10:00:35.150 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [sunday, saturday, tuesday, enddate, wednesday, thursday, friday, startdate, serviceid, configrev, monday]
+
+10:00:35.150 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.150 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10181_10182]
+
+10:00:35.166 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CONFIGREVISION
+
+10:00:35.167 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [zipfilelastmodifiedtime, notes, processedtime, configrev]
+
+10:00:35.167 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.167 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10184_10185]
+
+10:00:35.180 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.DBTEST
+
+10:00:35.180 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [id]
+
+10:00:35.180 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.181 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10187_10188]
+
+10:00:35.393 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FAREATTRIBUTES
+
+10:00:35.393 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [currencytype, fareid, price, transfers, transferduration, configrev, paymentmethod]
+
+10:00:35.394 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.394 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10191_10192]
+
+10:00:35.407 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FARERULES
+
+10:00:35.408 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [containsid, routeid, originid, fareid, destinationid, configrev]
+
+10:00:35.408 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.408 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10199_10200]
+
+10:00:35.419 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FREQUENCIES
+
+10:00:35.419 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headwaysecs, endtime, exacttimes, tripid, starttime, configrev]
+
+10:00:35.419 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.420 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10204_10205]
+
+10:00:35.432 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MATCHES
+
+10:00:35.432 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blockid, avltime, stoppathindex, segmentindex, tripid, vehicleid, atstop, distancealongstoppath, configrev, serviceid, distancealongsegment]
+
+10:00:35.432 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.432 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [avltimeindex, sys_idx_sys_pk_10208_10209]
+
+10:00:35.444 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MEASUREDARRIVALTIMES
+
+10:00:35.444 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headsign, routeid, directionid, routeshortname, stopid, time]
+
+10:00:35.444 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.444 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10212_10213, measuredarrivaltimesindex]
+
+10:00:35.455 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MONITORINGEVENTS
+
+10:00:35.455 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [triggered, time, type, message, value]
+
+10:00:35.455 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.455 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10216_10217, monitoringeventstimeindex]
+
+10:00:35.467 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.PREDICTIONACCURACY
+
+10:00:35.467 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [directionid, predictedtime, stopid, tripid, predictionreadtime, routeid, predictionsource, routeshortname, affectedbywaitstop, id, vehicleid, arrivaldeparturetime, predictionaccuracymsecs]
+
+10:00:35.467 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.467 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [predictionaccuracytimeindex, sys_idx_sys_pk_10218_10219]
+
+10:00:35.477 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.PREDICTIONS
+
+10:00:35.478 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [routeid, avltime, predictiontime, stopid, affectedbywaitstop, isarrival, tripid, id, creationtime, vehicleid, configrev, schedbasedpred]
+
+10:00:35.478 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.478 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10220_10221, predictiontimeindex]
+
+10:00:35.489 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ROUTES
+
+10:00:35.489 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [maxdistance, longname, minlon, routeorder, color, hidden, maxlon, textcolor, description, configrev, type, shortname, maxlat, minlat, name, id]
+
+10:00:35.489 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.489 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10224_10225]
+
+10:00:35.501 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPPATH_LOCATIONS
+
+10:00:35.502 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [locations_order, stoppath_trippatternid, lon, stoppath_configrev, lat, stoppath_stoppathid]
+
+10:00:35.502 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_sdjt3vtd3w0cl07p0doob6khi]
+
+10:00:35.502 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10292, sys_idx_sys_pk_10230_10231]
+
+10:00:35.514 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPPATHS
+
+10:00:35.514 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [laststopintrip, breaktime, trippatternid, routeid, gtfsstopseq, layoverstop, pathlength, stopid, stoppathid, waitstop, configrev, scheduleadherencestop]
+
+10:00:35.514 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.515 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10235_10236]
+
+10:00:35.526 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPS
+
+10:00:35.526 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [timepointstop, code, hidden, layoverstop, name, lon, waitstop, id, configrev, lat]
+
+10:00:35.526 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.526 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10239_10240]
+
+10:00:35.538 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRANSFERS
+
+10:00:35.538 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [mintransfertime, tostopid, configrev, fromstopid, transfertype]
+
+10:00:35.538 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.538 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10244_10245]
+
+10:00:35.549 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORSTOPPATHS
+
+10:00:35.550 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, stoptimemsec, traveltimesmsec, daysofweekoverride, stoppathid, id, configrev, traveltimesegmentlength, howset]
+
+10:00:35.550 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.550 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10246_10247]
+
+10:00:35.562 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORTRIP_TO_TRAVELTIMESFORPATH_JOINTABLE
+
+10:00:35.563 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [listindex, traveltimesfortrips_id, traveltimesforstoppaths_id]
+
+10:00:35.563 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_hh5uepurijcqj0pyc6e3h5mqw, fk_9j1s8ewsmokqg4m35wrr29na7]
+
+10:00:35.563 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10294, sys_idx_10296, sys_idx_sys_pk_10251_10252]
+
+10:00:35.575 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORTRIPS
+
+10:00:35.576 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, trippatternid, id, configrev, tripcreatedforid]
+
+10:00:35.576 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.576 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [traveltimesrevindex, sys_idx_sys_pk_10253_10254]
+
+10:00:35.588 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPPATTERN_TO_PATH_JOINTABLE
+
+10:00:35.589 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [listindex, stoppaths_trippatternid, trippatterns_configrev, trippatterns_id, stoppaths_configrev, stoppaths_stoppathid]
+
+10:00:35.589 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_s0gaw8iv60vc17a5ltryqwg27, fk_qsr8l6u1nelb5pt8rlnei08sy]
+
+10:00:35.589 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_uk_s0gaw8iv60vc17a5ltryqwg27_10287, sys_idx_10298, sys_idx_10300, sys_idx_sys_pk_10261_10262]
+
+10:00:35.600 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPPATTERNS
+
+10:00:35.600 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headsign, minlon, routeid, shapeid, maxlat, directionid, minlat, routeshortname, maxlon, id, configrev]
+
+10:00:35.600 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.601 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10265_10266]
+
+10:00:35.612 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPS
+
+10:00:35.613 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [exacttimesheadway, scheduledtimeslist, directionid, traveltimes_id, endtime, tripid, starttime, configrev, trippattern_id, blockid, headsign, tripshortname, routeid, shapeid, routeshortname, noschedule, trippattern_configrev, serviceid]
+
+10:00:35.613 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_p1er53449kkfsca6mbnxkdyst, fk_676npp7h4bxh8sjcnugnxt5wb]
+
+10:00:35.613 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10270_10271, sys_idx_10302, sys_idx_10304]
+
+10:00:35.624 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLECONFIGS
+
+10:00:35.625 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [trackerid, nonpassengervehicle, crushcapacity, description, id, type, capacity]
+
+10:00:35.625 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.625 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10273_10274]
+
+10:00:35.637 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLEEVENTS
+
+10:00:35.637 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, becameunpredictable, description, stopid, lon, tripid, blockid, routeid, predictable, routeshortname, eventtype, vehicleid, time, serviceid, lat, supervisor]
+
+10:00:35.637 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.638 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10278_10279, vehicleeventstimeindex]
+
+10:00:35.648 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLESTATES
+
+10:00:35.648 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, schedadhmsec, schedadh, schedadhwithinbounds, iswaitstop, tripid, blockid, tripshortname, islayover, routeid, routeshortname, isforschedbasedpreds, ispredictable, isdelayed, vehicleid]
+
+10:00:35.649 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.649 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [vehiclestateavltimeindex, sys_idx_sys_pk_10282_10283]
+
+10:00:35.660 INFO  thread=main [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.WEBAGENCIES
+
+10:00:35.661 INFO  thread=main [o.h.t.h.TableMetadata:67] HHH000037: Columns: [hostname, dbname, dbtype, dbusername, active, agencyid, dbhost, dbencryptedpassword]
+
+10:00:35.661 INFO  thread=main [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+10:00:35.661 INFO  thread=main [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10285_10286]
+
+10:00:35.663 INFO  thread=main [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+10:00:35.691 INFO  thread=main [o.t.g.DbConfig:199] Finished reading configuration data from database . Took 1377 msec.
+
+10:00:35.695 INFO  thread=TimeoutHandlerModule-1 [o.t.c.TimeoutHandlerModule:316] Starting module org.transitime.core.TimeoutHandlerModule for agencyId=02
+
+10:00:35.697 INFO  thread=main [o.t.a.Core:420] No optional modules to start up.
+
+10:00:35.701 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+10:00:35.728 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+10:00:35.733 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+10:00:35.741 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
+
+10:00:35.745 INFO  thread=main [o.t.i.r.AbstractServer:135] Setting up AbstractServer for RMI using secondary port=2098
