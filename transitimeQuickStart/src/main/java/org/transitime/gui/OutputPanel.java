@@ -32,6 +32,7 @@ import java.awt.Font;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JTextField;
 import javax.swing.JButton;
+import java.awt.SystemColor;
 /**
  * 
  * @author Brendan Egan
@@ -94,13 +95,15 @@ public class OutputPanel {
 		textField_1.setColumns(10);
 		
 		JButton btnMinimize = new JButton("Minimize");
+		btnMinimize.setBackground(SystemColor.menu);
 		
 		JButton btnShowMap = new JButton("Show map");
+		btnShowMap.setBackground(SystemColor.menu);
 		GroupLayout groupLayout = new GroupLayout(frmTransitimequickstart.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(7)
 							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
@@ -114,9 +117,9 @@ public class OutputPanel {
 						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(btnMinimize, GroupLayout.PREFERRED_SIZE, 249, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
+							.addGap(18)
 							.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(lblTripUpdatesUrl)
 							.addPreferredGap(ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
@@ -138,10 +141,10 @@ public class OutputPanel {
 					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 						.addComponent(lblVechiclePositionsUrl)
 						.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED, 221, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED, 196, Short.MAX_VALUE)
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-						.addComponent(btnMinimize, GroupLayout.PREFERRED_SIZE, 74, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 74, GroupLayout.PREFERRED_SIZE))
+						.addComponent(btnMinimize, GroupLayout.PREFERRED_SIZE, 57, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 56, GroupLayout.PREFERRED_SIZE))
 					.addContainerGap())
 		);
 		frmTransitimequickstart.getContentPane().setLayout(groupLayout);
