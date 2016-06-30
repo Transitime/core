@@ -88,10 +88,10 @@ public class TransitimeQuickStart {
 		String agencyid = "02";
 		System.getProperties().setProperty("transitime.core.configRevStr", "0");
 		System.getProperties().setProperty("transitime.core.agencyId", "02");
-		
+		String currentdir= System.getProperty("user.dir");
 		//Sending VM arguments
 		System.getProperties().setProperty("transitime.logging.dir",
-				"C:\\Users\\Brendan\\Documents\\TransitimeTest\\core\\transitime\\logs\\");
+				currentdir);
 		System.getProperties().setProperty("transitime.configFiles",
 				configFilePath);
 		try {
