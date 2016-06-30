@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
  * @author Brendan Egan
  *
  */
-//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class App{
 	private static final Logger logger = LoggerFactory.getLogger(App.class);
 	public static void main (String args[])
@@ -42,7 +41,6 @@ public class App{
 		test.test_1_GTFSfileprocessor();
 		test.test_2_Core();
 	}
-	//@Test
 	public void test_1_GTFSfileprocessor() {
 		
 			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
@@ -77,7 +75,7 @@ public class App{
 
 	}
 
-	//@Test
+
 	public void test_2_Core() {
 
 		String agencyid = "02";

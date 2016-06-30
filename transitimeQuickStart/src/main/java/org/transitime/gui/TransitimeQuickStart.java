@@ -18,14 +18,23 @@ package org.transitime.gui;
 
 import java.awt.EventQueue;
 import java.net.URL;
+import java.util.List;
+import org.transitime.configData.AgencyConfig;
+import org.transitime.modules.Module;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.transitime.app.App;
+import org.transitime.applications.Core;
 import org.transitime.applications.GtfsFileProcessor;
-
+import org.transitime.configData.CoreConfig;
 /**
  * 
  * @author Brendan Egan
  *
  */
 public class TransitimeQuickStart {
+	private static final Logger logger = LoggerFactory.getLogger(App.class);
+
 	public static void main (String args[])
 	{
 		WelcomePanel window = new WelcomePanel();
@@ -42,7 +51,7 @@ public class TransitimeQuickStart {
     	String gtfsFilePath;
     	if(gtfsZipFileName==null)
     	{
-    		URL gtfsFile = this.getClass().getClassLoader().getResource("gtfs.zip");
+    		URL gtfsFile = this.getClass().getClassLoader().getResource("collins.zip");
     		gtfsFilePath=gtfsFile.getPath();
     		gtfsZipFileName=gtfsFilePath;
     	}
@@ -72,6 +81,39 @@ public class TransitimeQuickStart {
 				maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
 				maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
 		 processor.process();
+		 StartCore(configFilePath);
+	}
+	public void StartCore(String configFilePath)
+	{
+		String agencyid = "02";
+		System.getProperties().setProperty("transitime.core.configRevStr", "0");
+		System.getProperties().setProperty("transitime.core.agencyId", "02");
+		
+		//Sending VM arguments
+		System.getProperties().setProperty("transitime.logging.dir",
+				"C:\\Users\\Brendan\\Documents\\TransitimeTest\\core\\transitime\\logs\\");
+		System.getProperties().setProperty("transitime.configFiles",
+				configFilePath);
+		try {
+
+			// Initialize the core now
+			Core.createCore();
+			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
+			if (optionalModuleNames.size() > 0)
+				logger.info("Starting up optional modules specified via "
+						+ "transitime.modules.optionalModulesList param:");
+			else
+				logger.info("No optional modules to start up.");
+			for (String moduleName : optionalModuleNames) {
+				logger.info("Starting up optional module " + moduleName);
+				Module.start(moduleName);
+			}
+			//start servers
+			Core.startRmiServers(agencyid);
+		} catch (Exception e) {
+			//fail(e.toString());
+			e.printStackTrace();
+		}
 	}
 }
 

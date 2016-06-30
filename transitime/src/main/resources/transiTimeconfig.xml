@@ -8,7 +8,7 @@
 	<agencyId>02</agencyId>
     </core>	
     <avl>
-            <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
+        <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
 		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>	
         <!-- URL for GTFS realtime vechicle location stream -->
                <!--  commented out for now for ease of use -->
@@ -18,7 +18,6 @@
         <minLongitude>-98.072043</minLongitude>
         <maxLongitude>-97.495917</maxLongitude>   -->   
     </avl>  
-    
     <hibernate>
         <configFile>hsql_hibernate.cfg.xml</configFile>        
     </hibernate>

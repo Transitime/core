@@ -3,7 +3,6 @@
  <modules>
         <optionalModulesList>org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
     </modules>
-    
     <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
     <core>
 	<agencyId>02</agencyId>
