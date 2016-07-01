@@ -19,12 +19,6 @@ package org.transitime.gui;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import net.miginfocom.swing.MigLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
@@ -87,13 +81,14 @@ public class OutputPanel {
 		
 		textField = new JTextField();
 		textField.setColumns(10);
+		textField.setText("Test output");
 		
 		JLabel lblVechiclePositionsUrl = new JLabel("Vechicle Positions URL");
 		lblVechiclePositionsUrl.setFont(new Font("Arial", Font.PLAIN, 16));
 		
 		textField_1 = new JTextField();
 		textField_1.setColumns(10);
-		
+		textField_1.setText("Test output 2");
 		JButton btnMinimize = new JButton("Minimize");
 		btnMinimize.setBackground(SystemColor.menu);
 		

@@ -23,7 +23,6 @@ import org.transitime.configData.AgencyConfig;
 import org.transitime.modules.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.app.App;
 import org.transitime.applications.Core;
 import org.transitime.applications.GtfsFileProcessor;
 import org.transitime.configData.CoreConfig;
@@ -33,7 +32,7 @@ import org.transitime.configData.CoreConfig;
  *
  */
 public class TransitimeQuickStart {
-	private static final Logger logger = LoggerFactory.getLogger(App.class);
+	private static final Logger logger = LoggerFactory.getLogger(TransitimeQuickStart.class);
 
 	public static void main (String args[])
 	{
