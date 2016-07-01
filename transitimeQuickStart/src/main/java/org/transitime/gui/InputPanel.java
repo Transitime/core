@@ -62,7 +62,9 @@ public class InputPanel extends JFrame {
 	private JTextField textField;
 	private JTextField textField_1;
 	private JTextField textField_2;
-	public String filelocation=null;
+	private String filelocation=null;
+	private String realtimefeedURL=null;
+	
 	FileBrowser browse = new FileBrowser();
 
 	/**
@@ -143,6 +145,7 @@ public class InputPanel extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				InformationPanel infopanel = new InformationPanel();
 				infopanel.InformationPanelstart();
+				
 			}
 		});
 		button_1.setBackground(SystemColor.textHighlight);
@@ -183,8 +186,14 @@ public class InputPanel extends JFrame {
 				OutputPanel windowinput = new OutputPanel();
 				windowinput.OutputPanelstart();
 				dispose();
+				//reads in URL
+				
+				realtimefeedURL=textField_1.getText();
+				//Starts the GtfsFileProcessor and core
+				
 				TransitimeQuickStart start=new TransitimeQuickStart();
 				start.StartGtfsFileProcessor(filelocation);
+				start.StartCore(realtimefeedURL);
 			}
 		});
 		btnNext.setVerticalAlignment(SwingConstants.BOTTOM);
