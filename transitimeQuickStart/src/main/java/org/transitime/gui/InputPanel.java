@@ -64,6 +64,7 @@ public class InputPanel extends JFrame {
 	private JTextField textField_2;
 	private String filelocation=null;
 	private String realtimefeedURL=null;
+	private String loglocation=null;
 	
 	FileBrowser browse = new FileBrowser();
 
@@ -150,7 +151,7 @@ public class InputPanel extends JFrame {
 		});
 		button_1.setBackground(SystemColor.textHighlight);
 		
-		JLabel lblInstallLocation = new JLabel("Install location:");
+		JLabel lblInstallLocation = new JLabel("Log location:");
 		lblInstallLocation.setFont(new Font("Arial", Font.PLAIN, 19));
 		
 		textField_2 = new JTextField();
@@ -185,15 +186,15 @@ public class InputPanel extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				OutputPanel windowinput = new OutputPanel();
 				windowinput.OutputPanelstart();
-				dispose();
 				//reads in URL
-				
+				loglocation=textField_2.getText();
 				realtimefeedURL=textField_1.getText();
 				//Starts the GtfsFileProcessor and core
 				
 				TransitimeQuickStart start=new TransitimeQuickStart();
 				start.StartGtfsFileProcessor(filelocation);
-				start.StartCore(realtimefeedURL);
+				start.StartCore(realtimefeedURL,loglocation);
+				dispose();
 			}
 		});
 		btnNext.setVerticalAlignment(SwingConstants.BOTTOM);

@@ -82,7 +82,7 @@ public class TransitimeQuickStart {
 				maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
 		 processor.process();
 	}
-	public void StartCore(String realtimefeedURL)
+	public void StartCore(String realtimefeedURL,String loglocation)
 	{
 		URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
     	String configFilePath=configFile.getPath(); 
@@ -90,17 +90,22 @@ public class TransitimeQuickStart {
 		String agencyid = "02";
 		System.getProperties().setProperty("transitime.core.configRevStr", "0");
 		System.getProperties().setProperty("transitime.core.agencyId", "02");
-		//gets current directory
-		String currentdir= System.getProperty("user.dir");
-		//Sending VM arguments
+		if(loglocation.equals(""))
+		{
+			//uses current directory if one not specified
+			 loglocation= System.getProperty("user.dir");
+		}		
 		System.getProperties().setProperty("transitime.logging.dir",
-				currentdir);
+				loglocation);
 		System.getProperties().setProperty("transitime.configFiles",
 				configFilePath);
-		System.getProperties().setProperty("transitime.avl.url",
+		//only set the paramater for realtimeURLfeed if specified by user
+		if(!realtimefeedURL.equals(""))
+		{
+	System.getProperties().setProperty("transitime.avl.url",
 				realtimefeedURL);
+		}
 		try {
-
 			// Initialize the core now
 			Core.createCore();
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();

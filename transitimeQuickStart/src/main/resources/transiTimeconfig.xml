@@ -7,7 +7,8 @@
     <core>
 	<agencyId>02</agencyId>
     </core>	
-    <avl>	  
+    <avl>
+        <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
 		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>	
         <!-- URL for GTFS realtime vechicle location stream -->
                <!--  commented out for now for ease of use -->
