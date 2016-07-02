@@ -31,7 +31,8 @@
         <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
 		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>		    
 		<!--  These are the values used for Irish Rail. -->
-        <!-- <minLongitude>-10.725</minLongitude>
+        <!-- 
+        <minLongitude>-10.725</minLongitude>
         <maxLongitude>-5.35</maxLongitude>             
         <minLatitude>51.35</minLatitude>
         <maxLatitude>55.45</maxLatitude>

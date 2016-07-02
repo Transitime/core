@@ -78,8 +78,7 @@ public class Time {
 	private static final DateFormat defaultDateFormat =
 			SimpleDateFormat.getDateInstance(DateFormat.SHORT);
 	private static final DateFormat dateFormatDashesShortYear =
-			new SimpleDateFormat("dd-MM-yy");
-
+			new SimpleDateFormat("MM-dd-yy");
 	
 	private static final DateFormat readableDateFormat =
 			new SimpleDateFormat("MM-dd-yyyy");
