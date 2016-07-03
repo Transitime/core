@@ -381,7 +381,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 												storePrediction(pred);
 											} else {
 												logger.info(
-														"Discarding as predictin after event. routeId={}, "
+														"Discarding as prediction after event. routeId={}, "
 																+ "directionId={}, tripId={}, vehicleId={}, "
 																+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
 														gtfsTrip.getRouteId(), direction, update.getTrip().getTripId(),
