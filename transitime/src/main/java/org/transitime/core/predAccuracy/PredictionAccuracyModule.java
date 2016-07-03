@@ -447,7 +447,7 @@ public class PredictionAccuracyModule extends Module {
 		if (predsList == null || predsList.isEmpty())
 		{
 			logger.debug("No matching predictions for {}", arrivalDeparture);
-			printPredictionsMap(predictionMap, arrivalDeparture);
+			//printPredictionsMap(predictionMap, arrivalDeparture);
 			return;			
 		}
 		

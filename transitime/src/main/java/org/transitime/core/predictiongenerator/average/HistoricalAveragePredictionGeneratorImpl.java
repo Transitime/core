@@ -8,6 +8,7 @@ import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.HistoricalAverageCacheKey;
+import org.transitime.core.dataCache.TripStopPathCacheKey;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.data.IpcPrediction;
@@ -54,7 +55,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		 * revert to default. This does not mean that this method of
 		 * prediction is better than the default.
 		 */				
-		HistoricalAverageCacheKey historicalAverageCacheKey=new HistoricalAverageCacheKey(indices.getBlock().getId(),indices.getTrip().getId(), indices.getStopPathIndex());
+		TripStopPathCacheKey historicalAverageCacheKey=new TripStopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex());
 		
 		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 		

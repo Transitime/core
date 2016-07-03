@@ -5,11 +5,8 @@ import java.util.List;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.core.Indices;
 
 public class HistoricalAverageCache {
 	final private static String cacheName = "HistoricalAverageCache";
@@ -39,9 +36,9 @@ public class HistoricalAverageCache {
 	{
 		logger.debug("Cache content log.");
 		@SuppressWarnings("unchecked")
-		List<HistoricalAverageCacheKey> keys = cache.getKeys();
+		List<TripStopPathCacheKey> keys = cache.getKeys();
 		
-		for(HistoricalAverageCacheKey key : keys)
+		for(TripStopPathCacheKey key : keys)
 		{
 			Element result=cache.get(key);
 			if(result!=null)
@@ -57,13 +54,13 @@ public class HistoricalAverageCache {
 	public void logCacheSize(Logger logger)
 	{
 		@SuppressWarnings("unchecked")
-		List<HistoricalAverageCacheKey> keys = cache.getKeys();
+		List<TripStopPathCacheKey> keys = cache.getKeys();
 		
 		if(keys!=null)
 			logger.debug("Number of entries in HistoricalAverageCache : "+keys.size());
 	}
 	
-	synchronized public HistoricalAverage getAverage(HistoricalAverageCacheKey key) {		
+	synchronized public HistoricalAverage getAverage(TripStopPathCacheKey key) {		
 						
 		Element result = cache.get(key);
 		
@@ -72,7 +69,7 @@ public class HistoricalAverageCache {
 		else
 			return (HistoricalAverage)result.getObjectValue();		
 	}
-	synchronized public void putAverage(HistoricalAverageCacheKey key, HistoricalAverage average) {
+	synchronized public void putAverage(TripStopPathCacheKey key, HistoricalAverage average) {
 			
 		logger.debug("Putting: "+key.toString()+" in cache with values : "+average);
 		
