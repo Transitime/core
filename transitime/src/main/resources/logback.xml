@@ -350,7 +350,13 @@
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
-
+	
+	<logger
+		name="org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl"
+		level="debug" additivity="false">
+		<appender-ref ref="PREDICTION" />
+	</logger>
+	
 	<logger
 		name="org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl"
 		level="debug" additivity="false">
