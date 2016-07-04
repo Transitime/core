@@ -193,14 +193,13 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							if (i + 1 < stopTimes.size())
 								nextStopTime = stopTimes.get(i + 1);
 
-							while ((nextStopTime != null && gtfsTrip.getStopPath(stopPathIndex + nextStopIndexIncrement)
-									.getGtfsStopSeq() < nextStopTime.getStopSequence())
+							while ((nextStopTime != null &&  !stopTimeMatchesStopPath(nextStopTime, gtfsTrip.getStopPath(stopPathIndex + nextStopIndexIncrement)))										
 									|| (nextStopTime == null && (stopPathIndex + nextStopIndexIncrement) < gtfsTrip
 											.getStopPaths().size())) {
 								ScheduleTime scheduledTime = null;
-								
+
 								scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex + nextStopIndexIncrement);
-								
+
 								String stopId = gtfsTrip.getStopPath(stopPathIndex + nextStopIndexIncrement)
 										.getStopId();
 
@@ -262,17 +261,26 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 											logger.debug("Time in seconds :" + timeInSeconds);
 										}
 										if (eventTime != null) {
-											/* TODO could be used to cache read times */
 											/*
-											if (readTimesMap.get(new PredictionReadTimeKey(stopId,
-													update.getVehicle().getId(), eventTime.getTime())) == null)
-												readTimesMap.put(new PredictionReadTimeKey(stopId,
-														update.getVehicle().getId(), eventTime.getTime()),
-														eventReadTime.getTime());
-											else
-												eventReadTime.setTime(readTimesMap.get(new PredictionReadTimeKey(stopId,
-														update.getVehicle().getId(), eventTime.getTime())));
-											*/
+											 * TODO could be used to cache read
+											 * times
+											 */
+											/*
+											 * if (readTimesMap.get(new
+											 * PredictionReadTimeKey(stopId,
+											 * update.getVehicle().getId(),
+											 * eventTime.getTime())) == null)
+											 * readTimesMap.put(new
+											 * PredictionReadTimeKey(stopId,
+											 * update.getVehicle().getId(),
+											 * eventTime.getTime()),
+											 * eventReadTime.getTime()); else
+											 * eventReadTime.setTime(
+											 * readTimesMap.get(new
+											 * PredictionReadTimeKey(stopId,
+											 * update.getVehicle().getId(),
+											 * eventTime.getTime())));
+											 */
 											if (eventTime.after(eventReadTime)) {
 
 												logger.info(
@@ -350,16 +358,26 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 											logger.debug("Time in seconds :" + timeInSeconds);
 										}
 										if (eventTime != null) {
-											/* TODO could be used to cache read times */
-											/*if (readTimesMap.get(new PredictionReadTimeKey(stopId,
-													update.getVehicle().getId(), eventTime.getTime())) == null)
-												readTimesMap.put(new PredictionReadTimeKey(stopId,
-														update.getVehicle().getId(), eventTime.getTime()),
-														eventReadTime.getTime());
-											else
-												eventReadTime.setTime(readTimesMap.get(new PredictionReadTimeKey(stopId,
-														update.getVehicle().getId(), eventTime.getTime())));
-											*/
+											/*
+											 * TODO could be used to cache read
+											 * times
+											 */
+											/*
+											 * if (readTimesMap.get(new
+											 * PredictionReadTimeKey(stopId,
+											 * update.getVehicle().getId(),
+											 * eventTime.getTime())) == null)
+											 * readTimesMap.put(new
+											 * PredictionReadTimeKey(stopId,
+											 * update.getVehicle().getId(),
+											 * eventTime.getTime()),
+											 * eventReadTime.getTime()); else
+											 * eventReadTime.setTime(
+											 * readTimesMap.get(new
+											 * PredictionReadTimeKey(stopId,
+											 * update.getVehicle().getId(),
+											 * eventTime.getTime())));
+											 */
 											if (eventTime.after(eventReadTime)) {
 												logger.info(
 														"Storing external prediction routeId={}, "
@@ -402,7 +420,24 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 			}
 		}
 	}
-
+	private boolean stopTimeMatchesStopPath(StopTimeUpdate stopTimeUpdate, StopPath stopPath)
+	{
+		if(stopTimeUpdate.hasStopSequence())
+		{
+			if(stopTimeUpdate.getStopSequence()==stopPath.getGtfsStopSeq())
+				return true;
+			else
+				return false;
+		}
+		else if(stopTimeUpdate.hasStopId())
+		{
+			if(stopTimeUpdate.getStopId().equals(stopPath.getStopId()))
+				return true;
+			else
+				return false;
+		}else
+			return false;
+	}
 	private int getStopPathIndex(Trip gtfsTrip, int gtfsStopSequence) {
 		int index = 0;
 		for (StopPath path : gtfsTrip.getStopPaths()) {
