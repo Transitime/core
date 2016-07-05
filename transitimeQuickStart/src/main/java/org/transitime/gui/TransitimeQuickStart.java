@@ -16,16 +16,19 @@
  */
 package org.transitime.gui;
 
-import java.awt.EventQueue;
 import java.net.URL;
 import java.util.List;
-import org.transitime.configData.AgencyConfig;
 import org.transitime.modules.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.applications.GtfsFileProcessor;
+import org.transitime.config.ConfigFileReader;
+import org.transitime.config.ConfigFileReader.ConfigException;
+import org.transitime.config.ConfigValue.ConfigParamException;
 import org.transitime.configData.CoreConfig;
+import org.transitime.db.webstructs.ApiKey;
+import org.transitime.db.webstructs.ApiKeyManager;
 /**
  * 
  * @author Brendan Egan
@@ -33,7 +36,8 @@ import org.transitime.configData.CoreConfig;
  */
 public class TransitimeQuickStart {
 	private static final Logger logger = LoggerFactory.getLogger(TransitimeQuickStart.class);
-
+	ApiKey apiKey;
+	
 	public static void main (String args[])
 	{
 		WelcomePanel window = new WelcomePanel();
@@ -80,6 +84,28 @@ public class TransitimeQuickStart {
 				maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
 				maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
 		 processor.process();
+	}
+	public ApiKey CreateApikey()
+	{
+		String fileName = "transiTimeconfig.xml";
+		try {
+			ConfigFileReader.processConfig(this.getClass().getClassLoader()
+					.getResource(fileName).getPath());
+		} catch (ConfigException e) {
+			e.printStackTrace();
+		} catch (ConfigParamException e) {
+			
+		}
+		String name="Brendan";
+		String url="http://www.transitime.org";
+		String email="egan129129@gmail.com";
+		String phone="123456789";
+		String description="Foo";
+		ApiKeyManager manager = ApiKeyManager.getInstance();
+		apiKey = manager.generateApiKey(name,
+				url, email,
+				phone, description);
+		return apiKey;
 	}
 	public void StartCore(String realtimefeedURL,String loglocation)
 	{

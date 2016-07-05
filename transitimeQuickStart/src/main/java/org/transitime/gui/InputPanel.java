@@ -50,6 +50,8 @@ import java.awt.event.InputMethodEvent;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+
+import org.transitime.db.webstructs.ApiKey;
 import org.transitime.gui.TransitimeQuickStart;
 /**
  * 
@@ -184,17 +186,23 @@ public class InputPanel extends JFrame {
 		btnNext.setFont(new Font("Arial", Font.PLAIN, 13));
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				OutputPanel windowinput = new OutputPanel();
-				windowinput.OutputPanelstart();
+				
 				//reads in URL
 				loglocation=textField_2.getText();
 				realtimefeedURL=textField_1.getText();
-				//Starts the GtfsFileProcessor and core
+				//Starts the GtfsFileProcessor ,ApiKey and core
 				
 				TransitimeQuickStart start=new TransitimeQuickStart();
 				start.StartGtfsFileProcessor(filelocation);
+				
+				ApiKey apikey=start.CreateApikey();
+				
+			
 				start.StartCore(realtimefeedURL,loglocation);
+				OutputPanel windowinput = new OutputPanel(apikey);
+				windowinput.OutputPanelstart();
 				dispose();
+				
 			}
 		});
 		btnNext.setVerticalAlignment(SwingConstants.BOTTOM);

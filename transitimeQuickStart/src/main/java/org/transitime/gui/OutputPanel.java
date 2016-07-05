@@ -24,6 +24,9 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.LayoutStyle.ComponentPlacement;
+
+import org.transitime.db.webstructs.ApiKey;
+
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.SystemColor;
@@ -37,6 +40,8 @@ public class OutputPanel {
 	private JFrame frmTransitimequickstart;
 	private JTextField textField;
 	private JTextField textField_1;
+	ApiKey apiKey;
+	private JTextField textField_2;
 
 	/**
 	 * Launch the application.
@@ -45,7 +50,7 @@ public class OutputPanel {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					OutputPanel window = new OutputPanel();
+					OutputPanel window = new OutputPanel(apiKey);
 					window.frmTransitimequickstart.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -57,7 +62,8 @@ public class OutputPanel {
 	/**
 	 * Create the application.
 	 */
-	public OutputPanel() {
+	public OutputPanel(ApiKey apikey) {
+		apiKey=apikey;
 		initialize();
 	}
 
@@ -94,31 +100,42 @@ public class OutputPanel {
 		
 		JButton btnShowMap = new JButton("Show map");
 		btnShowMap.setBackground(SystemColor.menu);
+		
+		textField_2 = new JTextField();
+		textField_2.setColumns(10);
+		String apikey=apiKey.getKey();
+		textField_2.setText(apikey);
+		
+		JLabel lblApikey = new JLabel("ApiKey");
+		lblApikey.setFont(new Font("Arial", Font.PLAIN, 16));
 		GroupLayout groupLayout = new GroupLayout(frmTransitimequickstart.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(7)
-							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblInstallationIsNow, GroupLayout.PREFERRED_SIZE, 511, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblTheseLinksInto)
-								.addGroup(groupLayout.createSequentialGroup()
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(lblVechiclePositionsUrl)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, 335, GroupLayout.PREFERRED_SIZE))))
-						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(btnMinimize, GroupLayout.PREFERRED_SIZE, 249, GroupLayout.PREFERRED_SIZE)
 							.addGap(18)
 							.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(lblTripUpdatesUrl)
-							.addPreferredGap(ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
-							.addComponent(textField, GroupLayout.PREFERRED_SIZE, 335, GroupLayout.PREFERRED_SIZE)))
+						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
+							.addGap(7)
+							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+								.addGroup(groupLayout.createSequentialGroup()
+									.addComponent(lblTripUpdatesUrl)
+									.addPreferredGap(ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
+									.addComponent(textField, GroupLayout.PREFERRED_SIZE, 335, GroupLayout.PREFERRED_SIZE))
+								.addComponent(lblInstallationIsNow, GroupLayout.PREFERRED_SIZE, 511, GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblTheseLinksInto)
+								.addGroup(groupLayout.createSequentialGroup()
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+										.addComponent(lblVechiclePositionsUrl)
+										.addComponent(lblApikey, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE))
+									.addPreferredGap(ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+									.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
+										.addComponent(textField_2, Alignment.LEADING)
+										.addComponent(textField_1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE))))))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
@@ -136,7 +153,11 @@ public class OutputPanel {
 					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 						.addComponent(lblVechiclePositionsUrl)
 						.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED, 196, Short.MAX_VALUE)
+					.addGap(62)
+					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+						.addComponent(textField_2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblApikey))
+					.addPreferredGap(ComponentPlacement.RELATED, 129, Short.MAX_VALUE)
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(btnMinimize, GroupLayout.PREFERRED_SIZE, 57, GroupLayout.PREFERRED_SIZE)
 						.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 56, GroupLayout.PREFERRED_SIZE))
