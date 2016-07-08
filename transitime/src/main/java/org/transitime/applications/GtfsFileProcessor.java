@@ -641,7 +641,7 @@ public class GtfsFileProcessor {
 		try {
 			processor.process();
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error("Exception while processing GTFS", e);
 		}
 
 		// Found that when running on AWS that program never terminates,
