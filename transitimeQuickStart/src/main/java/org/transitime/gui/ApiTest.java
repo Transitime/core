@@ -20,14 +20,12 @@ public class ApiTest {
 		
 		webapp.setWar(warlocation);
 		// http://127.0.0.1:8080/ctx1/
-		webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern", ".*/[^/]*jstl.*\\.jar$");
+		//webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern", ".*/[^/]*jstl.*\\.jar$");
 
-		org.eclipse.jetty.webapp.Configuration.ClassList classlist = org.eclipse.jetty.webapp.Configuration.ClassList
-				.setServerDefault(server);
-		 classlist.addAfter("org.eclipse.jetty.webapp.FragmentConfiguration",
-		 "", "");
-		classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
-		 "org.eclipse.jetty.annotations.AnnotationConfiguration");
+		//org.eclipse.jetty.webapp.Configuration.ClassList classlist = org.eclipse.jetty.webapp.Configuration.ClassList
+		//		.setServerDefault(server);
+		 
+		//classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration");
 
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
 		contexts.setHandlers(new Handler[] { context0, webapp });
