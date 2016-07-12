@@ -39,6 +39,16 @@
 			<version>${jettyVersion}</version>
 		</dependency>
 		<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-annotations</artifactId>
+  <version>${jettyVersion}</version>
+</dependency>
+<dependency>
+<groupId>org.eclipse.jetty</groupId>
+  <artifactId>apache-jstl</artifactId>
+  <version>${jettyVersion}</version>
+</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
