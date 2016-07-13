@@ -1,24 +1,28 @@
-package org.transitime.gui;
+package org.transitime.config;
 
+import static org.junit.Assert.*;
+
+import java.io.File;
 
 import org.eclipse.jetty.server.Server;
-import java.io.File;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.junit.Test;
 
+public class ApiJettyTest {
 
-public class ApiTest {
-	public static void main(String[] args) throws Exception {
+	@Test
+	public void test() {
 		Server server = new Server(8080);
 
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath("/api");
 		File warFile = new File(
-				ApiTest.class.getClassLoader().getResource("api.war").getPath());
-		System.out.println(warFile.toString());
-		webapp.setWar(warFile.toString());
+                "C:\\Users\\Brendan\\Documents\\TransitimeTest\\core\\transitimeApi\\target\\api.war" );
 		
-		// location to go to= http://127.0.0.1:8080/ctx1/
+		webapp.setWar(warFile.getAbsolutePath());
+		// location to go to=
+		// http://127.0.0.1:8080/ctx1/
 		
 		Configuration.ClassList classlist = Configuration.ClassList
                 .setServerDefault( server );
