@@ -40,7 +40,7 @@ public class OutputPanel {
 	private JFrame frmTransitimequickstart;
 	private JTextField textField;
 	private JTextField textField_1;
-	ApiKey apiKey;
+	private String apiKey;
 	private JTextField textField_2;
 
 	/**
@@ -62,7 +62,7 @@ public class OutputPanel {
 	/**
 	 * Create the application.
 	 */
-	public OutputPanel(ApiKey apikey) {
+	public OutputPanel(String apikey) {
 		apiKey=apikey;
 		initialize();
 	}
@@ -103,22 +103,21 @@ public class OutputPanel {
 		
 		textField_2 = new JTextField();
 		textField_2.setColumns(10);
-		String apikey=apiKey.getKey();
-		textField_2.setText(apikey);
+		textField_2.setText("http://127.0.0.1:8080/api/"+apiKey);
 		
-		JLabel lblApikey = new JLabel("ApiKey");
+		JLabel lblApikey = new JLabel("Server address");
 		lblApikey.setFont(new Font("Arial", Font.PLAIN, 16));
 		GroupLayout groupLayout = new GroupLayout(frmTransitimequickstart.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(btnMinimize, GroupLayout.PREFERRED_SIZE, 249, GroupLayout.PREFERRED_SIZE)
 							.addGap(18)
 							.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
-						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
+						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(7)
 							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addGroup(groupLayout.createSequentialGroup()
@@ -131,8 +130,8 @@ public class OutputPanel {
 									.addPreferredGap(ComponentPlacement.RELATED)
 									.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 										.addComponent(lblVechiclePositionsUrl)
-										.addComponent(lblApikey, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE))
-									.addPreferredGap(ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+										.addComponent(lblApikey, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
+									.addGap(18)
 									.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
 										.addComponent(textField_2, Alignment.LEADING)
 										.addComponent(textField_1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE))))))

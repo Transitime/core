@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class TransiTimeTest extends TestCase {
+public class TransiTimeTest  {
 	private static final Logger logger = LoggerFactory.getLogger(TransiTimeTest.class);
 
 	@Test

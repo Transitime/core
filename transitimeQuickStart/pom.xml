@@ -92,12 +92,11 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Build an executable JAR -->
-				<groupId>org.apache.maven.plugins</groupId>
+        <groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>2.4.3</version>
-				<executions>
-					<execution>
+				 <executions>
+			<execution>
 						<id>shade-WelcomePanel</id>
 						<phase>package</phase>
 						<goals>
@@ -105,11 +104,7 @@
 						</goals>
 						<configuration>
 							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-									<resource>transitimeApi/target/api</resource>
-									<file>api.war</file>
-								</transformer>
+
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>org.transitime.gui.TransitimeQuickStart</mainClass>
@@ -118,6 +113,39 @@
 							<outputFile>target/transitimeQuickStart.jar</outputFile>
 						</configuration>
 					</execution>
+				
+        </executions>
+      </plugin>
+			<plugin>
+				<!-- Build an executable JAR -->
+				  <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.10</version>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>transitime</groupId>
+									<artifactId>transitimeApi</artifactId>
+									<type>war</type>
+									<version>0.0.1-SNAPSHOT</version>
+									<overWrite>true</overWrite>
+									<outputDirectory>../transitimeQuickStart/src/main/resources</outputDirectory>
+									<destFileName>api.war</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>../transitimeQuickStart/src/main/resources</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+					
 				</executions>
 			</plugin>
 		</plugins>

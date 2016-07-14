@@ -196,10 +196,13 @@ public class InputPanel extends JFrame {
 				start.StartGtfsFileProcessor(filelocation);
 				
 				ApiKey apikey=start.CreateApikey();
+				String apikeystring=apikey.getKey();
 				
-			
+				start.StartJettyapi(apikeystring);
 				start.StartCore(realtimefeedURL,loglocation);
-				OutputPanel windowinput = new OutputPanel(apikey);
+				
+				//Makes output Panel
+				OutputPanel windowinput = new OutputPanel(apikeystring);
 				windowinput.OutputPanelstart();
 				dispose();
 				

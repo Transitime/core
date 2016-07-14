@@ -14,11 +14,12 @@ public class ApiTest {
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath("/api");
 		File warFile = new File(
-				ApiTest.class.getClassLoader().getResource("api.war").getPath());
-		System.out.println(warFile.toString());
-		webapp.setWar(warFile.toString());
+		ApiTest.class.getClassLoader().getResource("api.war").getPath());
 		
-		// location to go to= http://127.0.0.1:8080/ctx1/
+		System.out.print(warFile.getPath()+"test");
+		webapp.setWar(warFile.getPath());
+		
+		// location to go to= http://127.0.0.1:8080/api/
 		
 		Configuration.ClassList classlist = Configuration.ClassList
                 .setServerDefault( server );
