@@ -5,7 +5,7 @@
     <parent>
         <artifactId>transitime</artifactId>
         <groupId>transitime</groupId>
-        <version>0.0.30</version>
+        <version>0.0.31-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,7 +16,7 @@
         <dependency>
             <groupId>transitime</groupId>
             <artifactId>transitimeCore</artifactId>
-            <version>0.0.30</version>
+            <version>0.0.31-SNAPSHOT</version>
         </dependency>
         
         <!-- For logging -->
