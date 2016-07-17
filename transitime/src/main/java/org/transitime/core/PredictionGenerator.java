@@ -19,16 +19,33 @@ package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
+import org.transitime.applications.Core;
+import org.transitime.config.IntegerConfigValue;
+import org.transitime.core.dataCache.ArrivalDepartureComparator;
+import org.transitime.core.dataCache.StopArrivalDepartureCache;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
+import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.db.structs.Block;
+import org.transitime.db.structs.StopPath;
+import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.TripPattern;
+import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcPrediction;
+import org.transitime.utils.Time;
+
+import ch.qos.logback.classic.Logger;
 
 /**
  * Defines the interface for generating predictions. To create predictions using
@@ -39,39 +56,115 @@ import org.transitime.ipc.data.IpcPrediction;
  * @author SkiBu Smith
  * 
  */
-public abstract class PredictionGenerator  {
-	
+public abstract class PredictionGenerator {
+
 	/**
-	 * Generates and returns the predictions for the vehicle. 
+	 * Generates and returns the predictions for the vehicle.
 	 * 
 	 * @param vehicleState
 	 *            Contains the new match for the vehicle that the predictions
 	 *            are to be based on.
 	 */
 	public abstract List<IpcPrediction> generate(VehicleState vehicleState);
-	
-	protected VehicleState getClosetVechicle(List<VehicleState> vehiclesOnRoute,
-			Indices indices) {
-		int index_diff = 100;
-		VehicleState result = null;
-		for (VehicleState vehicle : vehiclesOnRoute) {
-			if (vehicle.getMatch() != null) {
-				if (vehicle.getMatch().getStopPathIndex() > indices
-						.getStopPathIndex()) {
-					int diff = vehicle.getMatch().getStopPathIndex()
-							- indices.getStopPathIndex();
-					if (diff < index_diff) {
-						index_diff = diff;
-						result = vehicle;
-					}
+
+	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
+			"transitime.prediction.closestvehiclestopsahead", new Integer(2),
+			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
+
+	protected long getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
+
+		StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(
+				indices.getStopPath().getStopId(),
+				new Date(currentVehicleState.getMatch().getAvlTime()));
+		
+		int stopPathIndex = indices.getStopPathIndex();
+
+		String nextStopId = currentVehicleState.getTrip().getStopPath(stopPathIndex + 1).getStopId();
+
+		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(nextStopId,
+				new Date(currentVehicleState.getMatch().getAvlTime()));
+
+		List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+
+		List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+
+		if (currentStopList != null && nextStopList != null) {
+			/* TODO only sorting again here. Best sort on recording the event */
+			// currentStopList.sort(new ArrivalDepartureComparator());
+
+			// nextStopList.sort(new ArrivalDepartureComparator());
+			for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
+				
+				if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
+				{
+					ArrivalDeparture found;
+										
+					if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
+							return found.getTime() - currentArrivalDeparture.getTime();
+					}					
 				}
+			}
+		}
+		return -1;
+	}
+
+	protected ArrivalDeparture findMatchInList(List<ArrivalDeparture> nextStopList,
+			ArrivalDeparture currentArrivalDeparture) {
+		for (ArrivalDeparture nextStopArrivalDeparture : nextStopList) {			
+			if (currentArrivalDeparture.getVehicleId() == nextStopArrivalDeparture.getVehicleId()
+					&& currentArrivalDeparture.getTripId() == nextStopArrivalDeparture.getTripId()
+					&&  currentArrivalDeparture.isDeparture() && nextStopArrivalDeparture.isArrival() ) {
+				return nextStopArrivalDeparture;
+			}
+		}
+		return null;
+	}
+
+	protected VehicleState getClosetVechicle(List<VehicleState> vehiclesOnRoute, Indices indices,
+			VehicleState currentVehicleState) {
+
+		Map<String, List<String>> stopsByDirection = currentVehicleState.getTrip().getRoute()
+				.getOrderedStopsByDirection();
+
+		List<String> routeStops = stopsByDirection.get(currentVehicleState.getTrip().getDirectionId());
+
+		Integer closest = 100;
+
+		VehicleState result = null;
+
+		for (VehicleState vehicle : vehiclesOnRoute) {
+
+			Integer numAfter = numAfter(routeStops, vehicle.getMatch().getStopPath().getStopId(),
+					currentVehicleState.getMatch().getStopPath().getStopId());
+			if (numAfter != null && numAfter > closestVehicleStopsAhead.getValue() && numAfter < closest) {
+				closest = numAfter;
+				result = vehicle;
 			}
 		}
 		return result;
 	}
-	
-	protected List<Integer> lastDaysTimes(TripDataHistoryCache cache,
-			String tripId, int stopPathIndex, Date startDate,
+
+	boolean isAfter(List<String> stops, String stop1, String stop2) {
+		if (stops != null && stop1 != null && stop2 != null) {
+			if (stops.contains(stop1) && stops.contains(stop2)) {
+				if (stops.indexOf(stop1) > stops.indexOf(stop2))
+					return true;
+				else
+					return false;
+			}
+		}
+		return false;
+	}
+
+	Integer numAfter(List<String> stops, String stop1, String stop2) {
+		if (stops != null && stop1 != null && stop2 != null)
+			if (stops.contains(stop1) && stops.contains(stop2))
+				return stops.indexOf(stop1) - stops.indexOf(stop2);
+
+		return null;
+	}
+
+	protected List<Integer> lastDaysTimes(TripDataHistoryCache cache, String tripId, int stopPathIndex, Date startDate,
 			Integer startTime, int num_days_look_back, int num_days) {
 
 		List<Integer> times = new ArrayList<Integer>();
@@ -79,18 +172,15 @@ public abstract class PredictionGenerator  {
 		int num_found = 0;
 		/*
 		 * TODO This could be smarter about the dates it looks at by looking at
-		 * which services use this trip and only l.111ook on day srvice is running
+		 * which services use this trip and only l.111ook on day srvice is
+		 * running
 		 */
 
 		for (int i = 0; i < num_days_look_back && num_found < num_days; i++) {
 
-			Date nearestDay = DateUtils.truncate(
-					DateUtils.addDays(startDate, (i + 1) * -1),
-					Calendar.DAY_OF_MONTH);
+			Date nearestDay = DateUtils.truncate(DateUtils.addDays(startDate, (i + 1) * -1), Calendar.DAY_OF_MONTH);
 
 			TripKey tripKey = new TripKey(tripId, nearestDay, startTime);
-
-
 
 			result = cache.getTripHistory(tripKey);
 
@@ -100,13 +190,12 @@ public abstract class PredictionGenerator  {
 
 				if (result != null && result.size() > 1) {
 					ArrivalDeparture arrival = getArrival(result);
-										
+
 					ArrivalDeparture departure = getDeparture(result);
 					if (arrival != null && departure != null) {
 
-						times.add(new Integer((int) (timeBetweenStops(
-								departure, arrival))));
-						num_found++;											
+						times.add(new Integer((int) (timeBetweenStops(departure, arrival))));
+						num_found++;
 					}
 				}
 			}
@@ -117,28 +206,24 @@ public abstract class PredictionGenerator  {
 			return null;
 		}
 	}
-	
+
 	protected long timeBetweenStops(ArrivalDeparture ad1, ArrivalDeparture ad2) {
 		if (ad2.getStopPathIndex() - ad1.getStopPathIndex() == 1) {
-			// This is the movemment between two stops
-			
+			// This is the movement between two stops
 			return (ad2.getTime() - ad1.getTime());
 		}
 		return -1;
 	}
 
-	protected long getTimeTaken(TripDataHistoryCache cache,
-			VehicleState previousVehicleOnRouteState,
+	protected long getTimeTaken(TripDataHistoryCache cache, VehicleState previousVehicleOnRouteState,
 			Indices currentVehicleIndices) {
 
 		int currentIndex = currentVehicleIndices.getStopPathIndex();
 
-		Date nearestDay = DateUtils.truncate(Calendar.getInstance().getTime(),
-				Calendar.DAY_OF_MONTH);
+		Date nearestDay = DateUtils.truncate(Calendar.getInstance().getTime(), Calendar.DAY_OF_MONTH);
 
-		TripKey tripKey = new TripKey(previousVehicleOnRouteState.getTrip()
-				.getId(), nearestDay, previousVehicleOnRouteState.getTrip()
-				.getStartTime());
+		TripKey tripKey = new TripKey(previousVehicleOnRouteState.getTrip().getId(), nearestDay,
+				previousVehicleOnRouteState.getTrip().getStartTime());
 
 		List<ArrivalDeparture> results = cache.getTripHistory(tripKey);
 
@@ -172,19 +257,15 @@ public abstract class PredictionGenerator  {
 		return null;
 	}
 
-	protected List<ArrivalDeparture> getDepartureArrival(int stopPathIndex,
-			List<ArrivalDeparture> results) {
-		BeanComparator<ArrivalDeparture> compartor = new BeanComparator<ArrivalDeparture>(
-				"stopPathIndex");
+	protected List<ArrivalDeparture> getDepartureArrival(int stopPathIndex, List<ArrivalDeparture> results) {
+		BeanComparator<ArrivalDeparture> compartor = new BeanComparator<ArrivalDeparture>("stopPathIndex");
 
 		Collections.sort(results, compartor);
 
 		ArrayList<ArrivalDeparture> stopPathEnds = new ArrayList<ArrivalDeparture>();
 		for (ArrivalDeparture result : emptyIfNull(results)) {
-			if ((result.getStopPathIndex() == (stopPathIndex - 1) && result
-					.isDeparture())
-					|| (result.getStopPathIndex() == stopPathIndex && result
-							.isArrival())) {
+			if ((result.getStopPathIndex() == (stopPathIndex - 1) && result.isDeparture())
+					|| (result.getStopPathIndex() == stopPathIndex && result.isArrival())) {
 				stopPathEnds.add(result);
 			}
 		}
@@ -192,29 +273,23 @@ public abstract class PredictionGenerator  {
 
 	}
 
-	protected VehicleState getPreviousVehicle(List<VehicleState> vehicles,
-			VehicleState vehicle) {
+	protected VehicleState getPreviousVehicle(List<VehicleState> vehicles, VehicleState vehicle) {
 		double closestDistance = 1000000;
 
 		VehicleState vehicleState = null;
 		String direction = vehicle.getMatch().getTrip().getDirectionId();
 		for (VehicleState currentVehicle : vehicles) {
 
-			String currentDirection = currentVehicle.getMatch().getTrip()
-					.getDirectionId();
+			String currentDirection = currentVehicle.getMatch().getTrip().getDirectionId();
 
 			if (currentDirection.equals(direction)) {
-				double distance = vehicle.getMatch().distanceBetweenMatches(
-						currentVehicle.getMatch());
+				double distance = vehicle.getMatch().distanceBetweenMatches(currentVehicle.getMatch());
 				/*
 				 * must check which is closest that has actually passed the stop
 				 * the current vehicle is moving towards
 				 */
-				if (distance > 0
-						&& distance < closestDistance
-						&& currentVehicle.getMatch().getStopPath()
-								.getGtfsStopSeq() > vehicle.getMatch()
-								.getStopPath().getGtfsStopSeq()) {
+				if (distance > 0 && distance < closestDistance && currentVehicle.getMatch().getStopPath()
+						.getGtfsStopSeq() > vehicle.getMatch().getStopPath().getGtfsStopSeq()) {
 					closestDistance = distance;
 					vehicleState = currentVehicle;
 				}
@@ -226,5 +301,5 @@ public abstract class PredictionGenerator  {
 	protected static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
-	
+
 }

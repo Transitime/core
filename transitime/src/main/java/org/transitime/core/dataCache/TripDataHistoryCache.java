@@ -48,7 +48,8 @@ public class TripDataHistoryCache {
 	
 	private static boolean debug = false;
 
-	final private static String cacheName = "arrivalDepartures";
+	final private static String cacheByTrip = "arrivalDeparturesByTrip";
+	
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(TripDataHistoryCache.class);
@@ -85,14 +86,18 @@ public class TripDataHistoryCache {
 					4 * Time.SEC_PER_DAY *Time.MS_PER_SEC);
 		}
 
-		if (cm.getCache(cacheName) == null) {
-			cm.addCache(cacheName);
+		if (cm.getCache(cacheByTrip) == null) {
+			cm.addCache(cacheByTrip);
 		}
-		cache = cm.getCache(cacheName);
+		cache = cm.getCache(cacheByTrip);
 		
 		//CacheConfiguration config = cache.getCacheConfiguration();							
 		
 		cache.setMemoryStoreEvictionPolicy(evictionPolicy);
+	}
+	public List<TripKey> getKeys()
+	{
+		return cache.getKeys();
 	}
 	public void logCache(Logger logger)
 	{
@@ -122,7 +127,7 @@ public class TripDataHistoryCache {
 	@SuppressWarnings("unchecked")
 	synchronized public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {
 
-		logger.debug(cache.toString());
+		//logger.debug(cache.toString());
 
 		Element result = cache.get(tripKey);
 
@@ -139,7 +144,7 @@ public class TripDataHistoryCache {
 	@SuppressWarnings("unchecked")
 	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
-		logger.debug("Putting :"+arrivalDeparture.toString() + " in cache.");
+		logger.debug("Putting :"+arrivalDeparture.toString() + " in TripDataHistoryCache cache.");
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
 		int days_back=1;
 		if(debug)
@@ -245,6 +250,7 @@ public class TripDataHistoryCache {
 		for(ArrivalDeparture result : results)
 		{
 			TripDataHistoryCache.getInstance().putArrivalDeparture(result);
+			
 		}		
 	}
 	/**

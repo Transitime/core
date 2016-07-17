@@ -47,7 +47,7 @@ public class CoreConfig {
 		return daysPopulateHistoricalCache.getValue();
 	}
 	private static IntegerConfigValue daysPopulateHistoricalCache =
-			new IntegerConfigValue("transitime.cache.daysPopulateHistoricalCache", 1,
+			new IntegerConfigValue("transitime.cache.daysPopulateHistoricalCache", 5,
 					"How many days data to read in to populate historical cache on start up.");
 	/**
 	 * When in playback mode or some other situations don't want to store

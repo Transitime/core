@@ -28,6 +28,8 @@ import org.transitime.ipc.data.IpcVehicleComplete;
  *  TODO Debug as this has yet to be tried and tested.
  *  Could do a combination with historical average  so that it improves quickly rather than just waiting on having enough data to support average or Kalman.
  *  So do a progression from LastVehicle --> Historical Average --> Kalman. Might be interesting to look at the rate of improvement of prediction as well as the end result.
+ *  
+ *  Doen this by changing which class each extends. How can we make configurable?
  */
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
@@ -76,17 +78,20 @@ public class LastVehiclePredictionGeneratorImpl extends
 		}
 		
 		VehicleState previousVehicleOnRouteState = getClosetVechicle(
-				vehiclesOnRoute, indices);
-		
-		if (previousVehicleOnRouteState != null) 
+				vehiclesOnRoute, indices, currentVehicleState);
+		long time = 0;
+		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
 		{
-			long time = 0;
-
+			logger.debug("Using last vehicle algorithm (getLastVehicleTravelTime) for prediction : " + indices + " Value: "+time + " instead of transiTime default:"+super.getTravelTimeForPath(indices, avlReport));
+			return time;
+		}
+		if (previousVehicleOnRouteState != null) 
+		{			
 			time = getTimeTaken(tripCache, previousVehicleOnRouteState, indices);
 
 			if (time > 0) {
-				logger.debug("Using last vehicle algorithm  for prediction : " + indices + " Value: "+time);
-				logger.debug("Instead of transitime value : " + super.getTravelTimeForPath(indices, avlReport));
+				logger.debug("Using last vehicle algorithm (getClosetVechicle) for prediction : " + indices + " Value: "+time);
+				//logger.debug("Instead of transitime value : " + super.getTravelTimeForPath(indices, avlReport));
 				return time;	
 			}
 		}		

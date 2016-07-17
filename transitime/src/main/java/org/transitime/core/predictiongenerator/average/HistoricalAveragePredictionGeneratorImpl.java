@@ -10,6 +10,7 @@ import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.HistoricalAverageCacheKey;
 import org.transitime.core.dataCache.TripStopPathCacheKey;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
+import org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.data.IpcPrediction;
 
@@ -19,7 +20,7 @@ import org.transitime.ipc.data.IpcPrediction;
  *  populated each time an arrival/departure event occurs. The HistoricalAverageCache is updated using data from the TripDataHistory cache.
  */
 public class HistoricalAveragePredictionGeneratorImpl extends
-	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
+LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerator {
 	
 	/* (non-Javadoc)
 	 * @see org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl#generatePredictionForStop(org.transitime.db.structs.AvlReport, org.transitime.core.Indices, long, boolean, boolean, boolean, boolean)
@@ -61,12 +62,12 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
-			logger.debug("Using historical average algorithm for prediction : " + historicalAverageCacheKey.toString() + " Value: "+average.toString());
-			logger.debug("Instead of transtime value : " + super.getTravelTimeForPath(indices, avlReport));
+			logger.debug("Using historical average algorithm for prediction : " + historicalAverageCacheKey.toString() + " Value: "+average.toString());			
+			//logger.debug("Instead of transtime value : " + super.getTravelTimeForPath(indices, avlReport));
 			return (long)average.getAverage();
 		}
 		
-		logger.debug("No historical average found, generating default prediction : " + historicalAverageCacheKey.toString());
+		logger.debug("No historical average found, generating prediction using lastvehicle algorithm: " + historicalAverageCacheKey.toString());
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
 		return super.getTravelTimeForPath(indices, avlReport);
 	}	
