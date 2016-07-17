@@ -8,7 +8,15 @@
 	<!-- Ask Ehcache to store cache in this path -->
 	<diskStore path="/usr/local/transitime/cache" />
 	
-	<cache name="arrivalDepartures" 
+	<cache name="arrivalDeparturesByTrip" 
+		maxEntriesLocalHeap="20000"
+		maxEntriesLocalDisk="20000" 
+		eternal="false" 
+		diskSpoolBufferSizeMB="20"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+	<cache name="arrivalDeparturesByStop" 
 		maxEntriesLocalHeap="20000"
 		maxEntriesLocalDisk="20000" 
 		eternal="false" 
