@@ -238,7 +238,6 @@ public class TransitimeQuickStart {
         boolean isServlet = false;
         
     	server=new org.hsqldb.server.Server();
-    	server.setPort(8085);
     	server.setDatabaseName(0, "test");
         server.setDatabasePath(0, dbPath);
         server.setLogWriter(null);
