@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 
 public class ApiJettyTest extends TestCase{
 	private Server server = new Server(8080);
+	
 	@Test
 	public void test() {
 		try{

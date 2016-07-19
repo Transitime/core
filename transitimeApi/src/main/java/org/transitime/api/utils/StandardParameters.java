@@ -140,9 +140,12 @@ public class StandardParameters {
 		// bad requests before too much effort is expended. Throw exception
 		// if usage limits exceeded.
 		UsageValidator.getInstance().validateUsage(this);
-
+		
+		
 		// Make sure the application key is valid
 		if (!ApiKeyManager.getInstance().isKeyValid(getKey())) {
+			ApiKeyManager manager = ApiKeyManager.getInstance();
+			boolean test=manager.isKeyValid(getKey());
 			throw WebUtils.badRequestException(
 					Status.UNAUTHORIZED.getStatusCode(), "Application key \""
 							+ getKey() + "\" is not valid.");			

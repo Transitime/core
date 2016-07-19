@@ -1,0 +1,1428 @@
+
+08:25:36.227 INFO  thread=qtp235801832-55 [o.t.d.w.WebAgency:248] Reading WebAgencies data from database "null"...
+
+08:25:36.445 INFO  thread=qtp235801832-55 [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+08:25:36.457 INFO  thread=qtp235801832-55 [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+08:25:36.462 INFO  thread=qtp235801832-55 [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+08:25:36.465 INFO  thread=qtp235801832-55 [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+08:25:36.505 INFO  thread=qtp235801832-55 [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=null using config file=C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml
+
+08:25:36.505 INFO  thread=qtp235801832-55 [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+08:25:36.562 INFO  thread=qtp235801832-55 [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+08:25:37.347 INFO  thread=qtp235801832-55 [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+08:25:37.374 INFO  thread=qtp235801832-55 [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=null using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+08:25:37.518 WARN  thread=qtp235801832-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+08:25:37.524 INFO  thread=qtp235801832-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+08:25:37.524 INFO  thread=qtp235801832-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+08:25:37.525 INFO  thread=qtp235801832-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+08:25:37.527 INFO  thread=qtp235801832-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+08:25:37.923 INFO  thread=qtp235801832-55 [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+08:25:38.468 INFO  thread=qtp235801832-55 [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+08:25:38.478 INFO  thread=qtp235801832-55 [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+08:25:39.823 INFO  thread=qtp235801832-55 [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+08:25:39.824 INFO  thread=qtp235801832-55 [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+08:25:39.829 INFO  thread=qtp235801832-55 [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+08:25:39.851 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:25:39.882 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:25:39.885 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:25:39.887 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:25:39.889 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:25:39.898 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:25:39.933 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:25:39.935 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:25:39.937 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:25:39.939 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:25:39.941 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:25:39.942 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:25:39.944 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:25:39.946 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:25:39.948 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:25:39.950 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:25:39.951 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:25:39.953 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:25:39.955 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:25:39.958 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:25:39.960 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:25:39.999 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:25:40.001 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:25:40.002 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:25:40.004 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:25:40.007 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:25:40.009 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:25:40.011 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:25:40.035 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:25:40.037 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:25:40.048 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:25:40.050 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:25:40.052 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:25:40.053 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:25:40.055 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:25:40.056 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:25:40.058 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:25:40.059 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:25:40.061 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:25:40.063 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:25:40.064 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:25:40.066 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:25:40.068 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:25:40.069 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:25:40.071 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:25:40.072 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:25:40.074 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:25:40.076 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:25:40.078 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:25:40.080 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:25:40.082 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:25:40.083 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:25:40.085 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:25:40.086 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:25:40.088 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:25:40.089 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:25:40.091 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:25:40.092 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:25:40.094 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:25:40.096 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:25:40.097 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:25:40.099 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:25:40.101 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:25:40.103 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:25:40.105 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:25:40.107 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:25:40.109 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:25:40.110 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:25:40.113 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:25:40.114 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:25:40.116 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:25:40.118 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:25:40.120 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:25:40.122 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:25:40.123 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:25:40.125 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:25:40.127 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:25:40.129 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:25:40.130 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:25:40.132 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:25:40.134 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:25:40.136 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:25:40.139 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:25:40.140 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:25:40.142 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:25:40.144 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:25:40.146 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:25:40.147 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:25:40.149 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:25:40.151 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:25:40.152 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:25:40.154 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:25:40.156 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:25:40.157 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:25:40.159 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:25:40.161 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:25:40.162 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:25:40.164 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:25:40.166 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:25:40.168 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:25:40.169 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:25:40.171 INFO  thread=qtp235801832-55 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:25:40.230 INFO  thread=qtp235801832-55 [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+08:25:40.846 INFO  thread=qtp235801832-55 [o.t.d.w.WebAgency:262] Done reading WebAgencies from database. Took 4614 msec. They are []
+
+08:34:27.305 INFO  thread=qtp464428986-61 [o.t.d.w.WebAgency:248] Reading WebAgencies data from database "null"...
+
+08:34:28.139 INFO  thread=qtp464428986-61 [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+08:34:28.164 INFO  thread=qtp464428986-61 [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+08:34:28.223 INFO  thread=qtp464428986-61 [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+08:34:28.229 INFO  thread=qtp464428986-61 [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+08:34:28.348 INFO  thread=qtp464428986-61 [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=null using config file=C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml
+
+08:34:28.349 INFO  thread=qtp464428986-61 [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+08:34:28.430 INFO  thread=qtp464428986-61 [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+08:34:29.250 INFO  thread=qtp464428986-61 [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+08:34:29.279 INFO  thread=qtp464428986-61 [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=null using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+08:34:29.411 WARN  thread=qtp464428986-61 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+08:34:29.417 INFO  thread=qtp464428986-61 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+08:34:29.417 INFO  thread=qtp464428986-61 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+08:34:29.418 INFO  thread=qtp464428986-61 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+08:34:29.420 INFO  thread=qtp464428986-61 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+08:34:29.816 INFO  thread=qtp464428986-61 [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+08:34:30.360 INFO  thread=qtp464428986-61 [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+08:34:30.369 INFO  thread=qtp464428986-61 [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+08:34:31.676 INFO  thread=qtp464428986-61 [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+08:34:31.677 INFO  thread=qtp464428986-61 [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+08:34:31.680 INFO  thread=qtp464428986-61 [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+08:34:31.697 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:34:31.702 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:34:31.704 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:34:31.706 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:34:31.708 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:34:31.715 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:34:31.736 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:34:31.738 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:34:31.740 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:34:31.741 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:34:31.743 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:34:31.744 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:34:31.746 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:34:31.748 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:34:31.750 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:34:31.752 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:34:31.754 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:34:31.756 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:34:31.759 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:34:31.761 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:34:31.763 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:34:31.775 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:34:31.776 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:34:31.778 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:34:31.781 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:34:31.783 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:34:31.785 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:34:31.786 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:34:31.800 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:34:31.802 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:34:31.809 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:34:31.811 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:34:31.812 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:34:31.814 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:34:31.816 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:34:31.817 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:34:31.819 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:34:31.821 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:34:31.823 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:34:31.824 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:34:31.826 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:34:31.827 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:34:31.828 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:34:31.829 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:34:31.831 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:34:31.832 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:34:31.834 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:34:31.835 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:34:31.837 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:34:31.838 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:34:31.840 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:34:31.841 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:34:31.843 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:34:31.845 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:34:31.846 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:34:31.848 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:34:31.849 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:34:31.851 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:34:31.853 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:34:31.854 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:34:31.856 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:34:31.858 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:34:31.860 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:34:31.862 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:34:31.864 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:34:31.866 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:34:31.867 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:34:31.869 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:34:31.870 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:34:31.872 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:34:31.874 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:34:31.876 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:34:31.877 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:34:31.879 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:34:31.881 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:34:31.883 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:34:31.884 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:34:31.886 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:34:31.887 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:34:31.888 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:34:31.890 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:34:31.891 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:34:31.892 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:34:31.894 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:34:31.895 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:34:31.896 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:34:31.897 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:34:31.899 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:34:31.900 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:34:31.902 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:34:31.903 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:34:31.904 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:34:31.906 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:34:31.907 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:34:31.909 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:34:31.910 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:34:31.912 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:34:31.913 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:34:31.915 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:34:31.916 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:34:31.917 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:34:31.919 INFO  thread=qtp464428986-61 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:34:31.951 INFO  thread=qtp464428986-61 [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+08:34:32.290 INFO  thread=qtp464428986-61 [o.t.d.w.WebAgency:262] Done reading WebAgencies from database. Took 4969 msec. They are []
+
+08:55:28.243 INFO  thread=qtp464428986-70 [o.t.d.w.WebAgency:248] Reading WebAgencies data from database "null"...
+
+08:55:28.464 INFO  thread=qtp464428986-70 [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+08:55:28.478 INFO  thread=qtp464428986-70 [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+08:55:28.484 INFO  thread=qtp464428986-70 [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+08:55:28.486 INFO  thread=qtp464428986-70 [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+08:55:28.524 INFO  thread=qtp464428986-70 [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=null using config file=C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml
+
+08:55:28.525 INFO  thread=qtp464428986-70 [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+08:55:28.582 INFO  thread=qtp464428986-70 [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+08:55:31.371 INFO  thread=qtp464428986-70 [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+08:55:31.399 INFO  thread=qtp464428986-70 [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=null using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+08:55:31.538 WARN  thread=qtp464428986-70 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+08:55:31.543 INFO  thread=qtp464428986-70 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+08:55:31.544 INFO  thread=qtp464428986-70 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+08:55:31.544 INFO  thread=qtp464428986-70 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+08:55:31.546 INFO  thread=qtp464428986-70 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+08:55:31.933 INFO  thread=qtp464428986-70 [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+08:55:32.471 INFO  thread=qtp464428986-70 [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+08:55:32.479 INFO  thread=qtp464428986-70 [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+08:55:33.855 INFO  thread=qtp464428986-70 [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+08:55:33.856 INFO  thread=qtp464428986-70 [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+08:55:33.860 INFO  thread=qtp464428986-70 [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+08:55:33.878 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:55:33.885 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:55:33.888 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:55:33.891 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:55:33.893 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:55:33.900 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:55:33.920 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:55:33.922 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:55:33.924 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:55:33.925 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:55:33.927 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:55:33.929 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:55:33.931 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:55:33.933 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:55:33.935 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:55:33.936 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:55:33.938 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:55:33.940 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:55:33.941 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:55:33.943 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:55:33.945 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:55:33.955 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:55:33.956 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:55:33.958 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:55:33.960 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:55:33.962 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:55:33.964 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:55:33.965 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:55:33.979 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:55:33.981 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:55:33.987 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:55:33.989 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:55:33.991 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:55:33.992 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:55:33.995 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:55:33.997 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:55:33.998 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:55:34.000 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:55:34.002 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:55:34.003 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:55:34.005 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:55:34.007 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:55:34.008 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:55:34.010 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:55:34.012 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:55:34.013 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:55:34.015 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:55:34.016 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:55:34.018 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:55:34.020 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:55:34.022 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:55:34.024 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:55:34.026 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:55:34.027 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:55:34.029 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:55:34.031 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:55:34.032 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:55:34.034 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:55:34.036 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:55:34.038 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:55:34.039 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:55:34.041 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:55:34.043 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:55:34.045 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:55:34.047 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:55:34.049 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:55:34.050 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:55:34.052 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:55:34.053 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+08:55:34.055 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+08:55:34.057 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+08:55:34.058 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+08:55:34.060 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+08:55:34.062 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+08:55:34.064 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+08:55:34.065 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+08:55:34.067 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+08:55:34.069 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+08:55:34.070 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+08:55:34.072 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+08:55:34.074 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+08:55:34.075 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+08:55:34.077 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+08:55:34.079 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+08:55:34.081 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+08:55:34.082 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+08:55:34.084 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+08:55:34.086 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+08:55:34.087 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+08:55:34.089 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+08:55:34.091 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+08:55:34.092 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+08:55:34.094 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+08:55:34.096 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+08:55:34.097 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+08:55:34.099 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+08:55:34.101 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+08:55:34.102 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+08:55:34.104 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+08:55:34.105 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+08:55:34.107 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+08:55:34.109 INFO  thread=qtp464428986-70 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+08:55:34.144 INFO  thread=qtp464428986-70 [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+08:55:36.022 INFO  thread=qtp464428986-70 [o.t.d.w.WebAgency:262] Done reading WebAgencies from database. Took 7774 msec. They are []
+
+09:07:57.177 INFO  thread=qtp54103999-71 [o.t.d.w.WebAgency:248] Reading WebAgencies data from database "null"...
+
+09:07:57.449 INFO  thread=qtp54103999-71 [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+09:07:57.464 INFO  thread=qtp54103999-71 [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+09:07:57.471 INFO  thread=qtp54103999-71 [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+09:07:57.476 INFO  thread=qtp54103999-71 [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+09:07:57.525 INFO  thread=qtp54103999-71 [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=null using config file=C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml
+
+09:07:57.525 INFO  thread=qtp54103999-71 [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+09:07:57.593 INFO  thread=qtp54103999-71 [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+09:07:58.274 INFO  thread=qtp54103999-71 [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+09:07:58.323 INFO  thread=qtp54103999-71 [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=null using url=jdbc:hsqldb:mem://localhost/xdb username=SA, and configured password
+
+09:07:58.491 WARN  thread=qtp54103999-71 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+09:07:58.498 INFO  thread=qtp54103999-71 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbc.JDBCDriver] at URL [jdbc:hsqldb:mem://localhost/xdb]
+
+09:07:58.498 INFO  thread=qtp54103999-71 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=SA, password=****, autocommit=true}
+
+09:07:58.499 INFO  thread=qtp54103999-71 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+09:07:58.501 INFO  thread=qtp54103999-71 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+09:07:58.978 INFO  thread=qtp54103999-71 [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+09:08:00.114 INFO  thread=qtp54103999-71 [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+09:08:00.132 INFO  thread=qtp54103999-71 [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+09:08:01.979 INFO  thread=qtp54103999-71 [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+09:08:01.980 INFO  thread=qtp54103999-71 [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+09:08:01.986 INFO  thread=qtp54103999-71 [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+09:08:02.007 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:08:02.012 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:08:02.017 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:08:02.020 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:08:02.023 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:08:02.031 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:08:02.056 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:08:02.059 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:08:02.064 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:08:02.068 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:08:02.070 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:08:02.073 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:08:02.078 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:08:02.087 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:08:02.089 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:08:02.095 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:08:02.099 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:08:02.102 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:08:02.103 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:08:02.105 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:08:02.107 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:08:02.120 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:08:02.123 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:08:02.125 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:08:02.126 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:08:02.129 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:08:02.130 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:08:02.132 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:08:02.148 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:08:02.149 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:08:02.157 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:08:02.159 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:08:02.160 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:08:02.162 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:08:02.164 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:08:02.166 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:08:02.168 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:08:02.169 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:08:02.171 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:08:02.173 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:08:02.175 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:08:02.177 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:08:02.178 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:08:02.180 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:08:02.182 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:08:02.184 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:08:02.185 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:08:02.186 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:08:02.188 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:08:02.190 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:08:02.191 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:08:02.193 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:08:02.195 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:08:02.197 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:08:02.199 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:08:02.201 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:08:02.203 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:08:02.205 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:08:02.207 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:08:02.209 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:08:02.211 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:08:02.213 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:08:02.216 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:08:02.217 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:08:02.219 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:08:02.220 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:08:02.222 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:08:02.224 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:08:02.226 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ActiveRevisions
+
+09:08:02.228 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Agencies
+
+09:08:02.229 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ApiKeys
+
+09:08:02.231 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ArrivalsDepartures
+
+09:08:02.233 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: AvlReports
+
+09:08:02.235 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Block_to_Trip_joinTable
+
+09:08:02.237 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Blocks
+
+09:08:02.239 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: CalendarDates
+
+09:08:02.241 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Calendars
+
+09:08:02.242 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: ConfigRevision
+
+09:08:02.244 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: DbTest
+
+09:08:02.246 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareAttributes
+
+09:08:02.247 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: FareRules
+
+09:08:02.248 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Frequencies
+
+09:08:02.250 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Matches
+
+09:08:02.252 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MeasuredArrivalTimes
+
+09:08:02.254 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: MonitoringEvents
+
+09:08:02.256 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: PredictionAccuracy
+
+09:08:02.259 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Predictions
+
+09:08:02.263 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Routes
+
+09:08:02.268 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPath_locations
+
+09:08:02.270 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: StopPaths
+
+09:08:02.271 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Stops
+
+09:08:02.273 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Transfers
+
+09:08:02.276 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForStopPaths
+
+09:08:02.277 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrip_to_TravelTimesForPath_joinTable
+
+09:08:02.279 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TravelTimesForTrips
+
+09:08:02.282 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPattern_to_Path_joinTable
+
+09:08:02.284 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: TripPatterns
+
+09:08:02.285 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: Trips
+
+09:08:02.287 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleConfigs
+
+09:08:02.288 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleEvents
+
+09:08:02.290 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: VehicleStates
+
+09:08:02.292 INFO  thread=qtp54103999-71 [j.s.DatabaseMetaData:147] HHH000262: Table not found: WebAgencies
+
+09:08:02.340 INFO  thread=qtp54103999-71 [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+09:08:02.723 INFO  thread=qtp54103999-71 [o.t.d.w.WebAgency:262] Done reading WebAgencies from database. Took 5540 msec. They are []
+
+09:21:57.075 INFO  thread=qtp2070563936-54 [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+09:21:57.116 INFO  thread=qtp2070563936-54 [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+09:21:57.121 INFO  thread=qtp2070563936-54 [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+09:21:57.123 INFO  thread=qtp2070563936-54 [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+09:21:57.167 INFO  thread=qtp2070563936-54 [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=null using config file=C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml
+
+09:21:57.167 INFO  thread=qtp2070563936-54 [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+09:21:57.239 INFO  thread=qtp2070563936-54 [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+09:21:58.021 INFO  thread=qtp2070563936-54 [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+09:21:58.062 INFO  thread=qtp2070563936-54 [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=null using url=jdbc:hsqldb:data/tutorial username=sa, and configured password
+
+09:21:58.227 WARN  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+09:21:58.234 INFO  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbcDriver] at URL [jdbc:hsqldb:data/tutorial]
+
+09:21:58.234 INFO  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=sa, password=****, autocommit=true}
+
+09:21:58.235 INFO  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+09:21:58.237 INFO  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+09:22:08.913 ERROR thread=qtp2070563936-54 [o.t.d.h.HibernateUtils:185] Could not create SessionFactory for dbName=null
+org.hibernate.exception.JDBCConnectionException: Error calling Driver#connect
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator$1$1.convert(BasicConnectionCreator.java:122) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.convertSqlException(BasicConnectionCreator.java:140) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.DriverConnectionCreator.makeConnection(DriverConnectionCreator.java:58) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.createConnection(BasicConnectionCreator.java:75) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl.configure(DriverManagerConnectionProviderImpl.java:106) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.buildJdbcConnectionAccess(JdbcServicesImpl.java:260) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:94) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.cfg.Configuration.buildTypeRegistrations(Configuration.java:1887) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:1845) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.transitime.db.hibernate.HibernateUtils.createSessionFactory(HibernateUtils.java:151) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSessionFactory(HibernateUtils.java:182) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSession(HibernateUtils.java:227) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.webstructs.ApiKeyManager.getApiKeys(ApiKeyManager.java:135) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.webstructs.ApiKeyManager.isKeyValid(ApiKeyManager.java:112) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.api.utils.StandardParameters.validate(StandardParameters.java:146) [classes/:na]
+	at org.transitime.api.rootResources.TransitimeApi.getRoutes(TransitimeApi.java:604) [classes/:na]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.8.0_73]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[na:1.8.0_73]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.8.0_73]
+	at java.lang.reflect.Method.invoke(Method.java:497) ~[na:1.8.0_73]
+	at org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory$1.invoke(ResourceMethodInvocationHandlerFactory.java:81) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:151) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:171) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:152) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:104) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:387) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:331) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:103) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:271) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors$1.call(Errors.java:271) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors$1.call(Errors.java:267) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:315) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:297) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:267) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:297) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:254) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:1028) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:372) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:381) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:344) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:221) [jersey-container-servlet-core-2.11.jar:na]
+	at org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:838) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:552) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:143) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548) [jetty-security-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1589) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1213) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:487) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1552) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1126) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.Server.handle(Server.java:550) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:321) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:254) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:269) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:97) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:124) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.Invocable.invokePreferred(Invocable.java:102) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecutingExecutionStrategy.invoke(ExecutingExecutionStrategy.java:58) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecuteProduceConsume.produceConsume(ExecuteProduceConsume.java:201) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecuteProduceConsume.produce(ExecuteProduceConsume.java:97) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.ManagedSelector$1.run(ManagedSelector.java:77) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:672) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:590) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at java.lang.Thread.run(Thread.java:745) [na:1.8.0_73]
+Caused by: java.sql.SQLException: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@e76a7bee[file =C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\data\tutorial.lck, exists=true, locked=false, valid=false, ] method: checkHeartbeat read: 2016-07-19 16:22:07 heartbeat - read: -6874 ms.
+	at org.hsqldb.jdbc.Util.sqlException(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.Util.sqlException(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCConnection.<init>(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCDriver.getConnection(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCDriver.connect(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hibernate.engine.jdbc.connections.internal.DriverConnectionCreator.makeConnection(DriverConnectionCreator.java:55) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	... 69 common frames omitted
+Caused by: org.hsqldb.HsqlException: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@e76a7bee[file =C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\data\tutorial.lck, exists=true, locked=false, valid=false, ] method: checkHeartbeat read: 2016-07-19 16:22:07 heartbeat - read: -6874 ms.
+	at org.hsqldb.error.Error.error(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.error.Error.error(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.LockFile.newLockFileLock(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.Logger.acquireLock(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.Logger.openPersistence(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.Database.reopen(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.Database.open(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.DatabaseManager.getDatabase(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.DatabaseManager.newSession(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	... 73 common frames omitted
+
+09:22:08.922 ERROR thread=qtp2070563936-54 [o.t.d.w.ApiKeyManager:118] Problem checking key "1727f2a" to see if valid.
+org.hibernate.exception.JDBCConnectionException: Error calling Driver#connect
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator$1$1.convert(BasicConnectionCreator.java:122) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.convertSqlException(BasicConnectionCreator.java:140) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.DriverConnectionCreator.makeConnection(DriverConnectionCreator.java:58) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.createConnection(BasicConnectionCreator.java:75) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl.configure(DriverManagerConnectionProviderImpl.java:106) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.buildJdbcConnectionAccess(JdbcServicesImpl.java:260) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:94) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.cfg.Configuration.buildTypeRegistrations(Configuration.java:1887) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:1845) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.transitime.db.hibernate.HibernateUtils.createSessionFactory(HibernateUtils.java:151) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSessionFactory(HibernateUtils.java:182) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSession(HibernateUtils.java:227) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.webstructs.ApiKeyManager.getApiKeys(ApiKeyManager.java:135) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.webstructs.ApiKeyManager.isKeyValid(ApiKeyManager.java:112) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.api.utils.StandardParameters.validate(StandardParameters.java:146) [classes/:na]
+	at org.transitime.api.rootResources.TransitimeApi.getRoutes(TransitimeApi.java:604) [classes/:na]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.8.0_73]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[na:1.8.0_73]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.8.0_73]
+	at java.lang.reflect.Method.invoke(Method.java:497) ~[na:1.8.0_73]
+	at org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory$1.invoke(ResourceMethodInvocationHandlerFactory.java:81) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:151) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:171) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:152) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:104) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:387) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:331) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:103) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:271) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors$1.call(Errors.java:271) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors$1.call(Errors.java:267) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:315) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:297) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:267) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:297) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:254) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:1028) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:372) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:381) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:344) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:221) [jersey-container-servlet-core-2.11.jar:na]
+	at org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:838) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:552) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:143) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548) [jetty-security-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1589) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1213) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:487) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1552) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1126) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.Server.handle(Server.java:550) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:321) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:254) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:269) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:97) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:124) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.Invocable.invokePreferred(Invocable.java:102) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecutingExecutionStrategy.invoke(ExecutingExecutionStrategy.java:58) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecuteProduceConsume.produceConsume(ExecuteProduceConsume.java:201) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecuteProduceConsume.produce(ExecuteProduceConsume.java:97) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.ManagedSelector$1.run(ManagedSelector.java:77) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:672) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:590) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at java.lang.Thread.run(Thread.java:745) [na:1.8.0_73]
+Caused by: java.sql.SQLException: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@e76a7bee[file =C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\data\tutorial.lck, exists=true, locked=false, valid=false, ] method: checkHeartbeat read: 2016-07-19 16:22:07 heartbeat - read: -6874 ms.
+	at org.hsqldb.jdbc.Util.sqlException(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.Util.sqlException(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCConnection.<init>(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCDriver.getConnection(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCDriver.connect(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hibernate.engine.jdbc.connections.internal.DriverConnectionCreator.makeConnection(DriverConnectionCreator.java:55) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	... 69 common frames omitted
+Caused by: org.hsqldb.HsqlException: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@e76a7bee[file =C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\data\tutorial.lck, exists=true, locked=false, valid=false, ] method: checkHeartbeat read: 2016-07-19 16:22:07 heartbeat - read: -6874 ms.
+	at org.hsqldb.error.Error.error(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.error.Error.error(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.LockFile.newLockFileLock(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.Logger.acquireLock(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.Logger.openPersistence(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.Database.reopen(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.Database.open(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.DatabaseManager.getDatabase(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.DatabaseManager.newSession(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	... 73 common frames omitted
+
+09:22:08.924 INFO  thread=qtp2070563936-54 [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=null using config file=C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml
+
+09:22:08.924 INFO  thread=qtp2070563936-54 [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+09:22:08.930 INFO  thread=qtp2070563936-54 [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+09:22:09.696 INFO  thread=qtp2070563936-54 [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+09:22:09.696 INFO  thread=qtp2070563936-54 [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=null using url=jdbc:hsqldb:data/tutorial username=sa, and configured password
+
+09:22:09.702 WARN  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+09:22:09.703 INFO  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbcDriver] at URL [jdbc:hsqldb:data/tutorial]
+
+09:22:09.703 INFO  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=sa, password=****, autocommit=true}
+
+09:22:09.703 INFO  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+09:22:09.703 INFO  thread=qtp2070563936-54 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+09:22:19.943 ERROR thread=qtp2070563936-54 [o.t.d.h.HibernateUtils:185] Could not create SessionFactory for dbName=null
+org.hibernate.exception.JDBCConnectionException: Error calling Driver#connect
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator$1$1.convert(BasicConnectionCreator.java:122) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.convertSqlException(BasicConnectionCreator.java:140) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.DriverConnectionCreator.makeConnection(DriverConnectionCreator.java:58) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.createConnection(BasicConnectionCreator.java:75) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl.configure(DriverManagerConnectionProviderImpl.java:106) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.buildJdbcConnectionAccess(JdbcServicesImpl.java:260) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:94) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.cfg.Configuration.buildTypeRegistrations(Configuration.java:1887) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:1845) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.transitime.db.hibernate.HibernateUtils.createSessionFactory(HibernateUtils.java:151) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSessionFactory(HibernateUtils.java:182) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSession(HibernateUtils.java:227) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.webstructs.ApiKeyManager.getApiKeys(ApiKeyManager.java:135) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.webstructs.ApiKeyManager.isKeyValid(ApiKeyManager.java:112) [transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.api.utils.StandardParameters.validate(StandardParameters.java:148) [classes/:na]
+	at org.transitime.api.rootResources.TransitimeApi.getRoutes(TransitimeApi.java:604) [classes/:na]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.8.0_73]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[na:1.8.0_73]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.8.0_73]
+	at java.lang.reflect.Method.invoke(Method.java:497) ~[na:1.8.0_73]
+	at org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory$1.invoke(ResourceMethodInvocationHandlerFactory.java:81) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:151) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:171) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:152) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:104) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:387) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:331) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:103) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:271) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors$1.call(Errors.java:271) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors$1.call(Errors.java:267) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:315) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:297) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:267) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:297) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:254) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:1028) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:372) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:381) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:344) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:221) [jersey-container-servlet-core-2.11.jar:na]
+	at org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:838) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:552) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:143) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548) [jetty-security-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1589) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1213) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:487) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1552) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1126) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.Server.handle(Server.java:550) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:321) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:254) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:269) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:97) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:124) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.Invocable.invokePreferred(Invocable.java:102) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecutingExecutionStrategy.invoke(ExecutingExecutionStrategy.java:58) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecuteProduceConsume.produceConsume(ExecuteProduceConsume.java:201) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecuteProduceConsume.produce(ExecuteProduceConsume.java:97) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.ManagedSelector$1.run(ManagedSelector.java:77) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:672) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:590) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at java.lang.Thread.run(Thread.java:745) [na:1.8.0_73]
+Caused by: java.sql.SQLException: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@e76a7bee[file =C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\data\tutorial.lck, exists=true, locked=false, valid=false, ] method: checkHeartbeat read: 2016-07-19 16:22:18 heartbeat - read: -7931 ms.
+	at org.hsqldb.jdbc.Util.sqlException(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.Util.sqlException(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCConnection.<init>(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCDriver.getConnection(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCDriver.connect(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hibernate.engine.jdbc.connections.internal.DriverConnectionCreator.makeConnection(DriverConnectionCreator.java:55) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	... 69 common frames omitted
+Caused by: org.hsqldb.HsqlException: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@e76a7bee[file =C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\data\tutorial.lck, exists=true, locked=false, valid=false, ] method: checkHeartbeat read: 2016-07-19 16:22:18 heartbeat - read: -7931 ms.
+	at org.hsqldb.error.Error.error(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.error.Error.error(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.LockFile.newLockFileLock(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.Logger.acquireLock(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.Logger.openPersistence(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.Database.reopen(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.Database.open(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.DatabaseManager.getDatabase(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.DatabaseManager.newSession(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	... 73 common frames omitted
+
+09:22:19.951 ERROR thread=qtp2070563936-54 [o.t.d.w.ApiKeyManager:118] Problem checking key "1727f2a" to see if valid.
+org.hibernate.exception.JDBCConnectionException: Error calling Driver#connect
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator$1$1.convert(BasicConnectionCreator.java:122) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.convertSqlException(BasicConnectionCreator.java:140) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.DriverConnectionCreator.makeConnection(DriverConnectionCreator.java:58) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.BasicConnectionCreator.createConnection(BasicConnectionCreator.java:75) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl.configure(DriverManagerConnectionProviderImpl.java:106) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.buildJdbcConnectionAccess(JdbcServicesImpl.java:260) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:94) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:111) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:234) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:206) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.cfg.Configuration.buildTypeRegistrations(Configuration.java:1887) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:1845) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	at org.transitime.db.hibernate.HibernateUtils.createSessionFactory(HibernateUtils.java:151) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSessionFactory(HibernateUtils.java:182) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.hibernate.HibernateUtils.getSession(HibernateUtils.java:227) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.webstructs.ApiKeyManager.getApiKeys(ApiKeyManager.java:135) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.db.webstructs.ApiKeyManager.isKeyValid(ApiKeyManager.java:112) ~[transitimeCore-0.0.1-SNAPSHOT.jar:na]
+	at org.transitime.api.utils.StandardParameters.validate(StandardParameters.java:148) [classes/:na]
+	at org.transitime.api.rootResources.TransitimeApi.getRoutes(TransitimeApi.java:604) [classes/:na]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.8.0_73]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[na:1.8.0_73]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.8.0_73]
+	at java.lang.reflect.Method.invoke(Method.java:497) ~[na:1.8.0_73]
+	at org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory$1.invoke(ResourceMethodInvocationHandlerFactory.java:81) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:151) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:171) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:152) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:104) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:387) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:331) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:103) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:271) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors$1.call(Errors.java:271) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors$1.call(Errors.java:267) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:315) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:297) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.internal.Errors.process(Errors.java:267) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:297) [jersey-common-2.11.jar:na]
+	at org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:254) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:1028) [jersey-server-2.11.jar:na]
+	at org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:372) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:381) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:344) [jersey-container-servlet-core-2.11.jar:na]
+	at org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:221) [jersey-container-servlet-core-2.11.jar:na]
+	at org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:838) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:552) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:143) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548) [jetty-security-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1589) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1213) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:487) [jetty-servlet-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1552) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1126) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.Server.handle(Server.java:550) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:321) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:254) [jetty-server-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:269) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:97) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:124) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.Invocable.invokePreferred(Invocable.java:102) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecutingExecutionStrategy.invoke(ExecutingExecutionStrategy.java:58) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecuteProduceConsume.produceConsume(ExecuteProduceConsume.java:201) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.strategy.ExecuteProduceConsume.produce(ExecuteProduceConsume.java:97) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.io.ManagedSelector$1.run(ManagedSelector.java:77) [jetty-io-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:672) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:590) [jetty-util-9.4.0.M0.jar:9.4.0.M0]
+	at java.lang.Thread.run(Thread.java:745) [na:1.8.0_73]
+Caused by: java.sql.SQLException: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@e76a7bee[file =C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\data\tutorial.lck, exists=true, locked=false, valid=false, ] method: checkHeartbeat read: 2016-07-19 16:22:18 heartbeat - read: -7931 ms.
+	at org.hsqldb.jdbc.Util.sqlException(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.Util.sqlException(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCConnection.<init>(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCDriver.getConnection(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.jdbc.JDBCDriver.connect(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hibernate.engine.jdbc.connections.internal.DriverConnectionCreator.makeConnection(DriverConnectionCreator.java:55) ~[hibernate-core-4.3.9.Final.jar:4.3.9.Final]
+	... 69 common frames omitted
+Caused by: org.hsqldb.HsqlException: Database lock acquisition failure: lockFile: org.hsqldb.persist.LockFile@e76a7bee[file =C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\data\tutorial.lck, exists=true, locked=false, valid=false, ] method: checkHeartbeat read: 2016-07-19 16:22:18 heartbeat - read: -7931 ms.
+	at org.hsqldb.error.Error.error(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.error.Error.error(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.LockFile.newLockFileLock(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.Logger.acquireLock(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.persist.Logger.openPersistence(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.Database.reopen(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.Database.open(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.DatabaseManager.getDatabase(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	at org.hsqldb.DatabaseManager.newSession(Unknown Source) ~[hsqldb-2.2.4.jar:2.2.4]
+	... 73 common frames omitted
+
+09:22:31.992 INFO  thread=Finalizer [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:281] HHH000030: Cleaning up connection pool [jdbc:hsqldb:data/tutorial]
+
+09:22:31.993 INFO  thread=Finalizer [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:281] HHH000030: Cleaning up connection pool [jdbc:hsqldb:data/tutorial]

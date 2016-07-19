@@ -40,7 +40,7 @@ import org.transitime.db.webstructs.ApiKeyManager;
  */
 public class TransitimeQuickStart {
 	private static final Logger logger = LoggerFactory.getLogger(TransitimeQuickStart.class);
-	ApiKey apiKey;
+	private ApiKey apiKey;
 	
 	public static void main (String args[])
 	{
@@ -55,6 +55,7 @@ public class TransitimeQuickStart {
 	{
 		URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
     	String configFilePath=configFile.getPath();
+		//String configFilePath="..//transitimeQuickStart//src//main//resources//transiTimeconfig.xml";
     	String gtfsFilePath;
     	if(gtfsZipFileName==null)
     	{
@@ -109,20 +110,26 @@ public class TransitimeQuickStart {
 		apiKey = manager.generateApiKey(name,
 				url, email,
 				phone, description);
+		
+		List<ApiKey> keys = manager.getApiKeys();
+		for(ApiKey key:keys)
+		{
+			System.out.print(key);
+		}
 		return apiKey;
 	}
 	public void StartJettyapi(String apikey){
 		Server server = new Server(8080);
 
 		WebAppContext webapp = new WebAppContext();
-		webapp.setContextPath("/api/"+apikey);
+		webapp.setContextPath("/api");
 		File warFile = new File(
 		ApiTest.class.getClassLoader().getResource("api.war").getPath());
 		
 		System.out.print(warFile.getPath()+"test");
 		webapp.setWar(warFile.getPath());
 		
-		// location to go to= http://127.0.0.1:8080/api/
+		// location to go to= http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
 		
 		Configuration.ClassList classlist = Configuration.ClassList
                 .setServerDefault( server );
@@ -149,6 +156,7 @@ public class TransitimeQuickStart {
 		String agencyid = "02";
 		System.getProperties().setProperty("transitime.core.configRevStr", "0");
 		System.getProperties().setProperty("transitime.core.agencyId", "02");
+		//uses default if nothing entered 
 		if(loglocation.equals(""))
 		{
 			//uses current directory if one not specified
@@ -181,6 +189,36 @@ public class TransitimeQuickStart {
 			Core.startRmiServers(agencyid);
 		} catch (Exception e) {
 			//fail(e.toString());
+			e.printStackTrace();
+		}
+	}
+	public void StartJettyWebapp(){
+		Server server = new Server(8081);
+
+		WebAppContext webapp = new WebAppContext();
+		webapp.setContextPath("/webapp");
+		File warFile = new File(
+		ApiTest.class.getClassLoader().getResource("web.war").getPath());
+		
+		
+		webapp.setWar(warFile.getPath());
+		
+		// location to go to= http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
+		
+		Configuration.ClassList classlist = Configuration.ClassList
+                .setServerDefault( server );
+        classlist.addBefore(
+                "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+                "org.eclipse.jetty.annotations.AnnotationConfiguration" );
+        webapp.setAttribute(
+                "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
+                ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$" );
+
+		server.setHandler(webapp);
+		try {
+			server.start();
+			//server.join();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

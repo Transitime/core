@@ -1,0 +1,108 @@
+
+05:30:54.122 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+05:30:54.129 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+05:30:54.129 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+05:30:54.129 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+05:30:54.130 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+05:30:54.130 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+05:51:56.092 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+05:51:56.098 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+05:51:56.098 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+05:51:56.098 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+05:51:56.099 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+05:51:56.099 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+07:30:56.894 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+07:30:56.898 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+07:30:56.898 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+07:30:56.899 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+07:30:56.899 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+07:30:56.899 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+07:34:42.567 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+07:34:42.572 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+07:34:42.572 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+07:34:42.572 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+07:34:42.573 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+07:34:42.573 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+09:28:11.807 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+09:28:11.828 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+09:28:11.828 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+09:28:11.828 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+09:28:11.829 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+09:28:11.829 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+09:33:48.739 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+09:33:48.744 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+09:33:48.744 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+09:33:48.744 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+09:33:48.745 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+09:33:48.745 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+09:41:34.960 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+09:41:34.966 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+09:41:34.966 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+09:41:34.966 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+09:41:34.967 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+09:41:34.967 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+10:08:23.455 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+10:08:23.473 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+10:08:23.473 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+10:08:23.473 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+10:08:23.474 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+10:08:23.474 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+10:13:46.178 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+10:13:46.183 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+10:13:46.183 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+10:13:46.183 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+10:13:46.184 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+10:13:46.184 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+	<display-name>Transitime api</display-name>
+	
+
+	<context-param>
+      <param-name>transitimeQuickStart/src/main/resources/transitimeConfig.xml</param-name>
+      <!-- Set to customized properties file with db config info and such -->
+      <param-value>/usr/local/transitimeTomcatConfig/transitime.properties</param-value>      
+    </context-param>
+	<!-- So that configuration parameters can be read in from file -->
+    <listener>
+      <listener-class>org.transitime.web.ReadConfigListener</listener-class>
+    </listener>
+    
+	
+	<!-- For special Http response 416 "Requested Range Not Satisfiable" which
+     is used for when there is no data for a request, use special error
+     page that only returns the message instead of a bunch of ugly
+     html. This way the page that requested the data page via AJAX can
+     read the resulting message and display it without lots of ugly
+     error page html. -->  
+    <error-page> 
+      <error-code>416</error-code>
+      <location>/error/messageOnlyError.jsp</location>
+    </error-page>
+    
+    <!-- So that configuration parameters can be read in from file -->
+    <listener>
+      <listener-class>org.transitime.web.ReadConfigListener</listener-class>
+    </listener>
+    <servlet id="jsp">
+     <servlet-name>jsp</servlet-name>
+     <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+     <init-param>
+         <param-name>logVerbosityLevel</param-name>
+         <param-value>DEBUG</param-value>
+     </init-param>
+     <init-param>
+         <param-name>fork</param-name>
+         <param-value>false</param-value>
+     </init-param>
+     <init-param>
+         <param-name>keepgenerated</param-name>
+         <param-value>true</param-value>
+     </init-param>
+ 
+     <load-on-startup>0</load-on-startup>
+   </servlet>
+ 
+   <servlet-mapping>
+     <servlet-name>jsp</servlet-name>
+     <url-pattern>*.jsp</url-pattern>
+     <url-pattern>*.jspf</url-pattern>
+     <url-pattern>*.jspx</url-pattern>
+     <url-pattern>*.xsp</url-pattern>
+     <url-pattern>*.JSP</url-pattern>
+     <url-pattern>*.JSPF</url-pattern>
+     <url-pattern>*.JSPX</url-pattern>
+     <url-pattern>*.XSP</url-pattern>
+   </servlet-mapping>
+    
+</web-app>

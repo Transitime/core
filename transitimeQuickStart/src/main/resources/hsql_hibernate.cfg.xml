@@ -68,18 +68,10 @@
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
 
-   <property name="hibernate.connection.url">
-       jdbc:hsqldb:mem://localhost/xdb
-   </property>
-   <property name="hibernate.ro.connection.url">
-   	   jdbc:hsqldb:mem://localhost/xdb
-   </property>
-   <property name="hibernate.connection.username">
-      SA
-   </property>
-   <property name="hibernate.connection.password">
-
-   </property>
+  <property name="connection.driver_class">org.hsqldb.jdbcDriver</property>
+        <property name="connection.url">jdbc:hsqldb:data/tutorial</property>
+        <property name="connection.username">sa</property>
+        <property name="connection.password"></property>
 
 
    <!-- List of XML mapping files. Commented out because adding

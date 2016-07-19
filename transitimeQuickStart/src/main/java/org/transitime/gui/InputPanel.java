@@ -52,6 +52,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.transitime.db.webstructs.ApiKey;
+import org.transitime.db.webstructs.ApiKeyManager;
 import org.transitime.gui.TransitimeQuickStart;
 /**
  * 
@@ -69,6 +70,7 @@ public class InputPanel extends JFrame {
 	private String loglocation=null;
 	
 	FileBrowser browse = new FileBrowser();
+	private JRadioButton rdbtnStartWebapp;
 
 	/**
 	 * Launch the application.
@@ -198,9 +200,14 @@ public class InputPanel extends JFrame {
 				ApiKey apikey=start.CreateApikey();
 				String apikeystring=apikey.getKey();
 				
-				start.StartJettyapi(apikeystring);
 				start.StartCore(realtimefeedURL,loglocation);
-				
+				start.StartJettyapi(apikeystring);
+				ApiKeyManager manager = ApiKeyManager.getInstance();
+				boolean test=manager.isKeyValid(apikey.getKey());
+				if(getRdbtnStartWebappSelected()==true)
+				{
+				start.StartJettyWebapp();
+				}
 				//Makes output Panel
 				OutputPanel windowinput = new OutputPanel(apikeystring);
 				windowinput.OutputPanelstart();
@@ -209,39 +216,46 @@ public class InputPanel extends JFrame {
 			}
 		});
 		btnNext.setVerticalAlignment(SwingConstants.BOTTOM);
+		
+		rdbtnStartWebapp = new JRadioButton("Start webapp");
+		rdbtnStartWebapp.setFont(new Font("Arial", Font.PLAIN, 16));
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
+			gl_contentPane.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_contentPane.createSequentialGroup()
 					.addGap(58)
 					.addComponent(lblWelcomeToThe))
 				.addGroup(gl_contentPane.createSequentialGroup()
+					.addContainerGap()
 					.addComponent(lblGtfsFileLocation, GroupLayout.PREFERRED_SIZE, 223, GroupLayout.PREFERRED_SIZE)
-					.addGap(5)
+					.addGap(19)
 					.addComponent(btnNewButton)
 					.addGap(18)
 					.addComponent(textField, GroupLayout.PREFERRED_SIZE, 235, GroupLayout.PREFERRED_SIZE)
 					.addGap(5)
 					.addComponent(button_2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addGroup(gl_contentPane.createSequentialGroup()
+					.addContainerGap()
 					.addComponent(lblGtfsrealtimeFeedLocationurl, GroupLayout.PREFERRED_SIZE, 309, GroupLayout.PREFERRED_SIZE)
-					.addGap(12)
+					.addGap(26)
 					.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, 235, GroupLayout.PREFERRED_SIZE)
 					.addGap(5)
 					.addComponent(button_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
-					.addGroup(gl_contentPane.createSequentialGroup()
-						.addComponent(btnHelp, GroupLayout.PREFERRED_SIZE, 205, GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(btnCancel, GroupLayout.PREFERRED_SIZE, 165, GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(btnNext, GroupLayout.PREFERRED_SIZE, 197, GroupLayout.PREFERRED_SIZE))
-					.addGroup(gl_contentPane.createSequentialGroup()
-						.addComponent(lblInstallLocation, GroupLayout.PREFERRED_SIZE, 309, GroupLayout.PREFERRED_SIZE)
-						.addGap(12)
-						.addComponent(textField_2, GroupLayout.PREFERRED_SIZE, 235, GroupLayout.PREFERRED_SIZE)
-						.addGap(5)
-						.addComponent(button, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+				.addGroup(gl_contentPane.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(lblInstallLocation, GroupLayout.PREFERRED_SIZE, 309, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
+					.addComponent(textField_2, GroupLayout.PREFERRED_SIZE, 235, GroupLayout.PREFERRED_SIZE)
+					.addGap(5)
+					.addComponent(button, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addGroup(gl_contentPane.createSequentialGroup()
+					.addComponent(btnHelp, GroupLayout.PREFERRED_SIZE, 205, GroupLayout.PREFERRED_SIZE)
+					.addGap(18)
+					.addComponent(btnCancel, GroupLayout.PREFERRED_SIZE, 165, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addComponent(rdbtnStartWebapp, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnNext, GroupLayout.PREFERRED_SIZE, 197, GroupLayout.PREFERRED_SIZE)))
 		);
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -250,8 +264,9 @@ public class InputPanel extends JFrame {
 					.addComponent(lblWelcomeToThe)
 					.addGap(53)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addComponent(lblGtfsFileLocation)
-						.addComponent(btnNewButton)
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+							.addComponent(btnNewButton)
+							.addComponent(lblGtfsFileLocation))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(1)
 							.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
@@ -260,28 +275,33 @@ public class InputPanel extends JFrame {
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(2)
-							.addComponent(lblGtfsrealtimeFeedLocationurl))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(2)
-							.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+								.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblGtfsrealtimeFeedLocationurl)))
 						.addComponent(button_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 					.addGap(35)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(2)
-							.addComponent(lblInstallLocation))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(2)
-							.addComponent(textField_2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+								.addComponent(textField_2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblInstallLocation)))
 						.addComponent(button, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addGap(200)
+					.addGap(125)
+					.addComponent(rdbtnStartWebapp, GroupLayout.PREFERRED_SIZE, 57, GroupLayout.PREFERRED_SIZE)
+					.addGap(18)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 						.addComponent(btnNext)
 						.addComponent(btnHelp)
 						.addComponent(btnCancel))
-					.addContainerGap(23, Short.MAX_VALUE))
+					.addContainerGap(27, Short.MAX_VALUE))
 		);
 		contentPane.setLayout(gl_contentPane);
 	}
-
+	public boolean getRdbtnStartWebappSelected() {
+		return rdbtnStartWebapp.isSelected();
+	}
+	public void setRdbtnStartWebappSelected(boolean selected) {
+		rdbtnStartWebapp.setSelected(selected);
+	}
 }

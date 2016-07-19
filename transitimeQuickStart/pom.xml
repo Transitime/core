@@ -104,6 +104,10 @@
 						</goals>
 						<configuration>
 							<transformers>
+							<transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                 			   <resource>../src/main/resources/transiTimeconfig.xml</resource>
+                			    <file>transiTimeconfig.xml</file>
+             					   </transformer>
 
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -140,14 +144,69 @@
 									<destFileName>api.war</destFileName>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../transitimeQuickStart/src/main/resources</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>true</overWriteSnapshots>
 						</configuration>
-					</execution>
+						</execution>
+						<execution>
+						<id>copy2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>transitime</groupId>
+									<artifactId>transitimeWebapp</artifactId>
+									<type>war</type>
+									<version>0.0.1-SNAPSHOT</version>
+									<overWrite>true</overWrite>
+									<outputDirectory>../transitimeQuickStart/src/main/resources</outputDirectory>
+									<destFileName>web.war</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
 					
+					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<!-- Build an executable JAR -->
+				  <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.10</version>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>copy</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>transitime</groupId>
+									<artifactId>transiTimeconfig.xml</artifactId>
+									<type></type>
+									<version></version>
+									<overWrite>true</overWrite>
+									<outputDirectory>transitimeQuickStart/src/main/resources</outputDirectory>
+									<destFileName>transiTimeconfig.xml</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			 <plugin>
+			 <groupId>transitime</groupId>
+            <artifactId>jetty-maven-plugin</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <configuration>
+                <webAppConfig>
+                  <overrideDescriptor>src/main/resources/transitimeConfig.xml</overrideDescriptor>
+                </webAppConfig>
+            </configuration>
+        </plugin>
 		</plugins>
 	</build>
 </project>
