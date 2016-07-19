@@ -85,7 +85,7 @@ public class TransitimeQuickStart {
 		boolean shouldStoreNewRevs = true;
 		boolean trimPathBeforeFirstStopOfTrip = false;
 
-		GtfsFileProcessor processor = new GtfsFileProcessor(configFilePath, notes, gtfsUrl, gtfsZipFileName,
+		GtfsFileProcessor processor = new GtfsFileProcessor("transiTimeconfig.xml", notes, gtfsUrl, gtfsZipFileName,
 				unzipSubdirectory, gtfsDirectoryName, supplementDir, regexReplaceListFileName, pathOffsetDistance,
 				maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
 				maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
