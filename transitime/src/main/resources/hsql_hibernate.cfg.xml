@@ -69,8 +69,8 @@
         uncomment this part and set the db parameters here. -->
 
  
-  <property name="connection.driver_class">org.hsqldb.jdbcDriver</property>
-        <property name="connection.url">jdbc:hsqldb:data/tutorial</property>
+   <property name="connection.driver_class">org.hsqldb.jdbcDriver</property>
+        <property name="connection.url">jdbc:hsqldb:hsql://localhost/test</property>
         <property name="connection.username">sa</property>
         <property name="connection.password"></property>
 

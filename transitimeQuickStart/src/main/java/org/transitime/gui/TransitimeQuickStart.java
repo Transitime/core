@@ -19,7 +19,7 @@ package org.transitime.gui;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
-import org.transitime.modules.Module;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -33,6 +33,7 @@ import org.transitime.config.ConfigValue.ConfigParamException;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.webstructs.ApiKey;
 import org.transitime.db.webstructs.ApiKeyManager;
+import org.transitime.modules.Module;
 /**
  * 
  * @author Brendan Egan
@@ -221,6 +222,28 @@ public class TransitimeQuickStart {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	public void startDatabase()
+	{
+
+    	String  dbPath = "mem:test;sql.enforce_strict_size=true";
+    	
+        String  serverProps;
+        String  url;
+        String  user     = "sa";
+        String  password = "";
+        org.hsqldb.server.Server server;
+        boolean isNetwork = true;
+        boolean isHTTP    = false;    // Set false to test HSQL protocol, true to test HTTP, in which case you can use isUseTestServlet to target either HSQL's webserver, or the Servlet server-mode
+        boolean isServlet = false;
+        
+    	server=new org.hsqldb.server.Server();
+    	server.setPort(8085);
+    	server.setDatabaseName(0, "test");
+        server.setDatabasePath(0, dbPath);
+        server.setLogWriter(null);
+        server.setErrWriter(null);
+        server.start();
 	}
 }
 

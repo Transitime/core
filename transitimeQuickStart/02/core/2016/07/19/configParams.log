@@ -58,3 +58,15 @@
 09:21:56.669 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
 
 09:21:56.669 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+09:47:21.147 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+09:47:21.155 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+09:47:21.156 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+09:47:21.156 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+09:47:21.157 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+09:47:21.157 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml

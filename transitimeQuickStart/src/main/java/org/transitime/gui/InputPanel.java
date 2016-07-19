@@ -195,6 +195,7 @@ public class InputPanel extends JFrame {
 				//Starts the GtfsFileProcessor ,ApiKey and core
 				
 				TransitimeQuickStart start=new TransitimeQuickStart();
+				start.startDatabase();
 				start.StartGtfsFileProcessor(filelocation);
 				
 				ApiKey apikey=start.CreateApikey();
@@ -205,9 +206,8 @@ public class InputPanel extends JFrame {
 				ApiKeyManager manager = ApiKeyManager.getInstance();
 				boolean test=manager.isKeyValid(apikey.getKey());
 				if(getRdbtnStartWebappSelected()==true)
-				{
 				start.StartJettyWebapp();
-				}
+				
 				//Makes output Panel
 				OutputPanel windowinput = new OutputPanel(apikeystring);
 				windowinput.OutputPanelstart();
