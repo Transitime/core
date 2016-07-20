@@ -104,11 +104,6 @@
 						</goals>
 						<configuration>
 							<transformers>
-							<transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
-                 			   <resource>../src/main/resources/transiTimeconfig.xml</resource>
-                			    <file>transiTimeconfig.xml</file>
-             					   </transformer>
-
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>org.transitime.gui.TransitimeQuickStart</mainClass>
@@ -165,35 +160,6 @@
 								</artifactItem>
 							</artifactItems>
 						</configuration>
-					
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Build an executable JAR -->
-				  <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.10</version>
-				<executions>
-					<execution>
-						<id>copy</id>
-						<phase>copy</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>transitime</groupId>
-									<artifactId>transiTimeconfig.xml</artifactId>
-									<type></type>
-									<version></version>
-									<overWrite>true</overWrite>
-									<outputDirectory>transitimeQuickStart/src/main/resources</outputDirectory>
-									<destFileName>transiTimeconfig.xml</destFileName>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -203,7 +169,7 @@
             <version>0.0.1-SNAPSHOT</version>
             <configuration>
                 <webAppConfig>
-                  <overrideDescriptor>src/main/resources/transitimeConfig.xml</overrideDescriptor>
+                  <overrideDescriptor>../transitimeQuickStart/src/main/resources/transiimeconfig.xml</overrideDescriptor>
                 </webAppConfig>
             </configuration>
         </plugin>

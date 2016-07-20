@@ -85,7 +85,7 @@ public class TransitimeQuickStart {
 		boolean shouldStoreNewRevs = true;
 		boolean trimPathBeforeFirstStopOfTrip = false;
 
-		GtfsFileProcessor processor = new GtfsFileProcessor("transiTimeconfig.xml", notes, gtfsUrl, gtfsZipFileName,
+		GtfsFileProcessor processor = new GtfsFileProcessor(configFilePath, notes, gtfsUrl, gtfsZipFileName,
 				unzipSubdirectory, gtfsDirectoryName, supplementDir, regexReplaceListFileName, pathOffsetDistance,
 				maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
 				maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
@@ -140,7 +140,8 @@ public class TransitimeQuickStart {
         webapp.setAttribute(
                 "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
                 ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$" );
-
+      //Set the path to the override descriptor, based on your $(jetty.home) directory
+      webapp.setOverrideDescriptor("..\\transitimeApi\\src\\main\\webapp\\WEB-INF\\override-web.xml");
 		server.setHandler(webapp);
 		try {
 			server.start();

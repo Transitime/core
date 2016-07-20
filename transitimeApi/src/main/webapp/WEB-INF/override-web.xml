@@ -5,9 +5,9 @@
 	
 
 	<context-param>
-      <param-name>transitimeQuickStart/src/main/resources/transitimeConfig.xml</param-name>
+      <param-name>transitime_config_file_location</param-name>
       <!-- Set to customized properties file with db config info and such -->
-      <param-value>/usr/local/transitimeTomcatConfig/transitime.properties</param-value>      
+      <param-value>..\\transitimeQuickStart\\src\\main\\resources\\transiTimeconfig.xml</param-value>      
     </context-param>
 	<!-- So that configuration parameters can be read in from file -->
     <listener>

@@ -101,7 +101,7 @@ public class InputPanel extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		
-		JLabel lblWelcomeToThe = new JLabel("Enter the locations of each object in the fields below");
+		JLabel lblWelcomeToThe = new JLabel("Enter the locations of each object in the fields below:");
 		lblWelcomeToThe.setFont(new Font("Arial", Font.PLAIN, 19));
 		
 		JLabel lblGtfsFileLocation = new JLabel("GTFS file location:");
@@ -203,8 +203,6 @@ public class InputPanel extends JFrame {
 				
 				start.StartCore(realtimefeedURL,loglocation);
 				start.StartJettyapi(apikeystring);
-				ApiKeyManager manager = ApiKeyManager.getInstance();
-				boolean test=manager.isKeyValid(apikey.getKey());
 				if(getRdbtnStartWebappSelected()==true)
 				start.StartJettyWebapp();
 				
@@ -222,9 +220,6 @@ public class InputPanel extends JFrame {
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGap(58)
-					.addComponent(lblWelcomeToThe))
 				.addGroup(gl_contentPane.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(lblGtfsFileLocation, GroupLayout.PREFERRED_SIZE, 223, GroupLayout.PREFERRED_SIZE)
@@ -256,13 +251,17 @@ public class InputPanel extends JFrame {
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addComponent(rdbtnStartWebapp, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)
 						.addComponent(btnNext, GroupLayout.PREFERRED_SIZE, 197, GroupLayout.PREFERRED_SIZE)))
+				.addGroup(Alignment.LEADING, gl_contentPane.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(lblWelcomeToThe)
+					.addContainerGap(155, Short.MAX_VALUE))
 		);
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGap(4)
+					.addContainerGap()
 					.addComponent(lblWelcomeToThe)
-					.addGap(53)
+					.addGap(44)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 							.addComponent(btnNewButton)
@@ -294,7 +293,7 @@ public class InputPanel extends JFrame {
 						.addComponent(btnNext)
 						.addComponent(btnHelp)
 						.addComponent(btnCancel))
-					.addContainerGap(27, Short.MAX_VALUE))
+					.addContainerGap(24, Short.MAX_VALUE))
 		);
 		contentPane.setLayout(gl_contentPane);
 	}
