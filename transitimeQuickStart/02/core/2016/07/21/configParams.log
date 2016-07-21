@@ -1,0 +1,20 @@
+
+03:51:31.140 Config param transitime.db.dbName="null" (the default value). Specifies the name of the database. If not set then the transitime.core.agencyId will be used.
+
+03:51:31.146 Config param transitime.db.dbHost="null" (the default value). Specifies the name of the machine the database for the project resides on. Use null value to use values from hibernate config file. Set to "localhost" if database running on same machine as the core application.
+
+03:51:31.146 Config param transitime.db.dbType="mysql" (the default value). Specifies type of database when creating the URL to connect to the database. Can be mysql or postgresql. Should work for other dbs as well. Default is mysql.
+
+03:51:31.147 Config param transitime.db.dbUserName="null" (the default value). Specifies login for the project database. Use null value to use values from hibernate config file.
+
+03:51:31.148 Config param transitime.db.socketTimeoutSec="60" (the default value). So can set low-level socket timeout for JDBC connections. Useful for when a session dies during a request, such as for when a db is rebooted. Set to 0 to have no timeout.
+
+03:51:31.148 Config param transitime.hibernate.configFile="C:\Users\Brendan\Documents\TransitimeTest\core\transitimeQuickStart\src\main\resources\hsql_hibernate.cfg.xml" instead of the default of "hsql_hibernate.cfg.xml". Specifies the database dependent hibernate.cfg.xml file to use to configure hibernate. The system will look both on the file system and in the classpath. Can specify mysql_hibernate.cfg.xml or postgres_hibernate.cfg.xml
+
+03:51:36.148 Config param transitime.rmi.timeoutSec="4" (the default value). Specifies the timeout time in seconds for RMI calls. Note that when an RMI failure occurs a second try is done so total timeout time is twice what is specified here.
+
+03:51:36.151 Config param transitime.rmi.rmiHost="null" (the default value). For a client that needs to connect to an agency server. When null system gets RMI host name from the WebAgencies table in the web database. But when doing simple calls using this parameter eliminates the need to connect to the web database, speeding up testing.
+
+03:51:36.151 Config param transitime.rmi.rmiPort="2099" (the default value). Which port to use for RMI calls. Usually RMI uses port 1099 but using default of 2099 to not interfere with other RMI based applications.
+
+03:51:36.151 Config param transitime.rmi.secondaryRmiPort="2098" (the default value). Which secondary port to use for RMI calls, for once initial communication has been established. Usually RMI uses port 0 which means any port. But then can't configure firewall to limit access to specific ports. Therefore using default value of 2098 so that the port is consistent. Every server on a machine must use a different secondary port for communication.

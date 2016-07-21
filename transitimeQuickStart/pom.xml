@@ -169,7 +169,7 @@
             <version>0.0.1-SNAPSHOT</version>
             <configuration>
                 <webAppConfig>
-                  <overrideDescriptor>../transitimeQuickStart/src/main/resources/transiimeconfig.xml</overrideDescriptor>
+                  <overrideDescriptor>../transitimeQuickStart/src/main/resources/transiTimeconfig.xml</overrideDescriptor>
                 </webAppConfig>
             </configuration>
         </plugin>

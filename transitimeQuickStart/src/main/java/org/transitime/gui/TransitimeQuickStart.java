@@ -125,7 +125,7 @@ public class TransitimeQuickStart {
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath("/api");
 		File warFile = new File(
-		ApiTest.class.getClassLoader().getResource("api.war").getPath());
+		this.getClass().getClassLoader().getResource("api.war").getPath());
 		
 		System.out.print(warFile.getPath()+"test");
 		webapp.setWar(warFile.getPath());
@@ -141,7 +141,7 @@ public class TransitimeQuickStart {
                 "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
                 ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$" );
       //Set the path to the override descriptor, based on your $(jetty.home) directory
-      webapp.setOverrideDescriptor("..\\transitimeApi\\src\\main\\webapp\\WEB-INF\\override-web.xml");
+      webapp.setOverrideDescriptor("override-web.xml");
 		server.setHandler(webapp);
 		try {
 			server.start();
@@ -200,7 +200,7 @@ public class TransitimeQuickStart {
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath("/webapp");
 		File warFile = new File(
-		ApiTest.class.getClassLoader().getResource("web.war").getPath());
+		this.getClass().getClassLoader().getResource("web.war").getPath());
 		
 		
 		webapp.setWar(warFile.getPath());
@@ -215,7 +215,7 @@ public class TransitimeQuickStart {
         webapp.setAttribute(
                 "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
                 ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$" );
-
+        webapp.setOverrideDescriptor("override-web.xml");
 		server.setHandler(webapp);
 		try {
 			server.start();
