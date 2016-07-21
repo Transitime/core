@@ -95,7 +95,7 @@ public class OutputPanel {
 		
 		textField_1 = new JTextField();
 		textField_1.setColumns(10);
-		textField_1.setText("Test output 2");
+		textField_1.setText("Test output 2: "+apiKey);
 		JButton btnMinimize = new JButton("Minimize");
 		btnMinimize.setBackground(SystemColor.menu);
 		

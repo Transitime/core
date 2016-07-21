@@ -125,7 +125,7 @@ public class TransitimeQuickStart {
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath("/api");
 		File warFile = new File(
-		this.getClass().getClassLoader().getResource("api.war").getPath());
+		TransitimeQuickStart.class.getClassLoader().getResource("api.war").getPath());
 		
 		System.out.print(warFile.getPath()+"test");
 		webapp.setWar(warFile.getPath());
@@ -200,7 +200,7 @@ public class TransitimeQuickStart {
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath("/webapp");
 		File warFile = new File(
-		this.getClass().getClassLoader().getResource("web.war").getPath());
+		TransitimeQuickStart.class.getClassLoader().getResource("web.war").getPath());
 		
 		
 		webapp.setWar(warFile.getPath());
