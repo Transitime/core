@@ -389,6 +389,11 @@
 		level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>
+	<logger name="org.transitime.core.dataCache.StopArrivalDepartureCache"
+		level="debug" additivity="false">
+		<appender-ref ref="CACHE" />
+	</logger>
+	
 
 	<!-- For config params it is more complicated because want to both have 
 		config params logged in separate file but also want some errors to send out 
