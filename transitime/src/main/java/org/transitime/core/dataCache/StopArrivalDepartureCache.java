@@ -4,34 +4,23 @@
 package org.transitime.core.dataCache;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.Policy;
 
-import org.apache.commons.beanutils.BeanComparator;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.db.structs.Block;
-import org.transitime.db.structs.Stop;
-import org.transitime.db.structs.Trip;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.utils.Time;
 
 /**
@@ -165,7 +154,9 @@ public class StopArrivalDepartureCache {
 		
 		list.add(arrivalDeparture);
 		
-		list.sort(new ArrivalDepartureComparator());
+		Collections.sort(list, new ArrivalDepartureComparator());
+		
+		// This is java 1.8 list.sort(new ArrivalDepartureComparator());
 		
 		Element arrivalDepartures = new Element(key, Collections.synchronizedList(list));
 
