@@ -29,6 +29,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.CallbackException;
 import org.hibernate.Session;
@@ -115,7 +116,9 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String predictionSource;
 	
-	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	/* TODO */
+	//@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	@Transient
 	private String predictionAlgorithm;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
