@@ -44,6 +44,7 @@ public class PredAccuracyPrediction {
 	// affectedByWaitStop is a Boolean so that null can represent "don't know"
 	private final Boolean affectedByWaitStop;
 	private final String source;
+	private final String algorithm;
 
 	/********************** Member Functions **************************/
 
@@ -67,11 +68,13 @@ public class PredAccuracyPrediction {
 	 * @param source
 	 *            Description of the feed, especially useful if have couple of
 	 *            sources. Can be a value such as "MBTA_epoch" or "NextBus".
+	 * @param algorithm 
+	 * 			  This is the algorithm used to generate prediction.
 	 */
 	public PredAccuracyPrediction(String routeId, String directionId,
 			String stopId, String tripId, String vehicleId, Date predictedTime,
 			Date predictionReadTime, boolean isArrival,
-			Boolean affectedByWaitStop, String source, String scheduledTime) {
+			Boolean affectedByWaitStop, String source, String algorithm, String scheduledTime) {
 		super();
 		this.routeId = routeId;
 		this.directionId = directionId;
@@ -84,8 +87,13 @@ public class PredAccuracyPrediction {
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.source = source;
 		this.scheduledTime = scheduledTime;
+		this.algorithm = algorithm;
 	}
 	
+	public String getAlgorithm() {
+		return algorithm;
+	}
+
 	public String getRouteId() {
 		return routeId;
 	}
@@ -146,6 +154,7 @@ public class PredAccuracyPrediction {
 				+ ", isArrival=" + isArrival
 				+ ", affectedByWaitStop=" + affectedByWaitStop
 				+ ", source=" + source
+				+ ", algorithm=" + algorithm
 				+ ", scheduleTime=" + scheduledTime
 				+ "]";
 	}

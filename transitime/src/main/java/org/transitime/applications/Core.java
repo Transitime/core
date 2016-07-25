@@ -47,6 +47,7 @@ import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.ipc.servers.CacheQueryServer;
 import org.transitime.ipc.servers.CommandsServer;
 import org.transitime.ipc.servers.ConfigServer;
 import org.transitime.ipc.servers.PredictionsServer;
@@ -386,6 +387,8 @@ public class Core {
 		ConfigServer.start(agencyId);
 		ServerStatusServer.start(agencyId);
 		CommandsServer.start(agencyId);
+		CacheQueryServer.start(agencyId);
+		
 	}
 	
 	/**
