@@ -89,10 +89,7 @@ public abstract class PredictionGenerator {
 		List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
 
 		if (currentStopList != null && nextStopList != null) {
-			/* TODO only sorting again here. Best sort on recording the event */
-			// currentStopList.sort(new ArrivalDepartureComparator());
-
-			// nextStopList.sort(new ArrivalDepartureComparator());
+			// lists are already sorted when put into cache.
 			for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
 				
 				if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())

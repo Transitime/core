@@ -12,10 +12,10 @@ public class ArrivalDepartureComparator implements Comparator<ArrivalDeparture> 
 		
 		if(ad1.getTime()<ad2.getTime())
 		{
-			 return -1;
+			 return 1;
 		}else if(ad1.getTime()> ad2.getTime())
 		{
-			 return 1;
+			 return -1;
 		}
 		return 0;
 	}
