@@ -196,15 +196,15 @@ public class InputPanel extends JFrame {
 				
 				TransitimeQuickStart start=new TransitimeQuickStart();
 				start.startDatabase();
-				start.StartGtfsFileProcessor(filelocation);
-				
-				ApiKey apikey=start.CreateApikey();
+				start.startGtfsFileProcessor(filelocation);
+				start.createApiKey();
+				ApiKey apikey=start.getApiKey();
 				String apikeystring=apikey.getKey();
 				
-				start.StartCore(realtimefeedURL,loglocation);
-				start.StartJettyapi(apikeystring);
+				start.startCore(realtimefeedURL,loglocation);
+				start.startJettyApi(apikeystring);
 				if(getRdbtnStartWebappSelected()==true)
-				start.StartJettyWebapp();
+				start.startJettyWebapp();
 				
 				//Makes output Panel
 				OutputPanel windowinput = new OutputPanel(apikeystring);

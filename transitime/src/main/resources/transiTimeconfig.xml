@@ -19,6 +19,6 @@
         <maxLongitude>-97.495917</maxLongitude>   -->   
     </avl>  
     <hibernate>
-        <configFile>hsql_hibernate.cfg.xml</configFile>        
+        <configFile>src/main/resources/hsql_hibernate.cfg.xml</configFile>        
     </hibernate>
 </transitime>

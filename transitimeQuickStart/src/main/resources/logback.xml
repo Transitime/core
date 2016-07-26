@@ -43,7 +43,7 @@
         from about 2.5 seconds to 10 seconds when the sql logging
         was enabled. So don't use all the time!
    -->
-  <logger name="org.hibernate.SQL" level="debug" additivity="false">
+  <logger name="org.hibernate.SQL" level="info" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
 
@@ -53,7 +53,7 @@
     <appender-ref ref="STDOUT" />
   </logger>
   
-  <root level="debug">          
+  <root level="info">          
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

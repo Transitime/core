@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 @SuppressWarnings("deprecation")
 public class TestConfig extends TestCase {
 
-	static String fileName = "testConfig.xml";
+	static String fileName = "transiTimeconfig.xml";
 
 	protected void setUp() throws Exception {
 		super.setUp();

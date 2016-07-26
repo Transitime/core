@@ -68,8 +68,7 @@
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
 
- 
-   <property name="connection.driver_class">org.hsqldb.jdbcDriver</property>
+  <property name="connection.driver_class">org.hsqldb.jdbcDriver</property>
         <property name="connection.url">jdbc:hsqldb:hsql://localhost/test</property>
         <property name="connection.username">sa</property>
         <property name="connection.password"></property>
@@ -80,6 +79,7 @@
         that when the classes change don't need to modify all
         of the hibernate config files. -->
    <!-- <mapping class="org.transitime.modules.structures.AVLReport"/>  -->
- <mapping resource="named_queries.hbm.xml" />
+   <mapping resource="named_queries.hbm.xml" />
+
   </session-factory>
 </hibernate-configuration>

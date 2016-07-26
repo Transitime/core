@@ -34,6 +34,7 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.db.webstructs.ApiKey;
 import org.transitime.db.webstructs.ApiKeyManager;
 import org.transitime.modules.Module;
+
 /**
  * 
  * @author Brendan Egan
@@ -41,140 +42,137 @@ import org.transitime.modules.Module;
  */
 public class TransitimeQuickStart {
 	private static final Logger logger = LoggerFactory.getLogger(TransitimeQuickStart.class);
-	private ApiKey apiKey;
+	private ApiKey apiKey = null;
+
+	public static void main(String args[]) {
+		/*WelcomePanel window = new WelcomePanel();
+		window.WelcomePanelstart();*/
 	
-	public static void main (String args[])
-	{
-		WelcomePanel window = new WelcomePanel();
-		window.WelcomePanelstart();
-		/*InputPanel windowinput = new InputPanel();
-		windowinput.InputPanelstart();
-		OutputPanel windowoutput = new OutputPanel();
-		windowoutput.OutputPanelstart();*/
+		  InputPanel windowinput = new InputPanel();
+		  windowinput.InputPanelstart(); 
+		
 	}
-	public void StartGtfsFileProcessor(String gtfsZipFileName)
-	{
-		URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
-    	String configFilePath=configFile.getPath();
-		//String configFilePath="..//transitimeQuickStart//src//main//resources//transiTimeconfig.xml";
-    	String gtfsFilePath;
-    	if(gtfsZipFileName==null)
-    	{
-    		URL gtfsFile = this.getClass().getClassLoader().getResource("collins.zip");
-    		gtfsFilePath=gtfsFile.getPath();
-    		gtfsZipFileName=gtfsFilePath;
-    	}
-    	else
-    	{
-    	gtfsFilePath=gtfsZipFileName;
-    	}
-		String notes = null;
-		String gtfsUrl = null;
-		//String gtfsZipFileName = gtfsFilePath;
-		String unzipSubdirectory = null;
-		String gtfsDirectoryName = null;
-		String supplementDir = null;
-		String regexReplaceListFileName = null;
-		double pathOffsetDistance = 0.0;
-		double maxStopToPathDistance = 60.0;
-		double maxDistanceForEliminatingVertices = 3.0;
-		int defaultWaitTimeAtStopMsec = 10000;
-		double maxSpeedKph = 97;
-		double maxTravelTimeSegmentLength = 1000.0;
-		int configRev = -1;
-		boolean shouldStoreNewRevs = true;
-		boolean trimPathBeforeFirstStopOfTrip = false;
 
-		GtfsFileProcessor processor = new GtfsFileProcessor(configFilePath, notes, gtfsUrl, gtfsZipFileName,
-				unzipSubdirectory, gtfsDirectoryName, supplementDir, regexReplaceListFileName, pathOffsetDistance,
-				maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
-				maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
-		 processor.process();
-	}
-	public ApiKey CreateApikey()
-	{
-		String fileName = "transiTimeconfig.xml";
-		try {
-			ConfigFileReader.processConfig(this.getClass().getClassLoader()
-					.getResource(fileName).getPath());
-		} catch (ConfigException e) {
-			e.printStackTrace();
-		} catch (ConfigParamException e) {
-			
-		}
-		String name="Brendan";
-		String url="http://www.transitime.org";
-		String email="egan129129@gmail.com";
-		String phone="123456789";
-		String description="Foo";
-		ApiKeyManager manager = ApiKeyManager.getInstance();
-		apiKey = manager.generateApiKey(name,
-				url, email,
-				phone, description);
+	public void startGtfsFileProcessor(String gtfsZipFileName) {
 		
-		List<ApiKey> keys = manager.getApiKeys();
-		for(ApiKey key:keys)
-		{
-			System.out.print(key);
-		}
-		return apiKey;
-	}
-	public void StartJettyapi(String apikey){
-		Server server = new Server(8080);
+		try {
+			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
+			String configFilePath = configFile.getPath();
+			// String
+			// configFilePath="..//transitimeQuickStart//src//main//resources//transiTimeconfig.xml";
+			String gtfsFilePath;
+			if (gtfsZipFileName == null) {
+				URL gtfsFile = this.getClass().getClassLoader().getResource("collins.zip");
+				gtfsFilePath = gtfsFile.getPath();
+				gtfsZipFileName = gtfsFilePath;
+			} else {
+				gtfsFilePath = gtfsZipFileName;
+			}
+			String notes = null;
+			String gtfsUrl = null;
+			// String gtfsZipFileName = gtfsFilePath;
+			String unzipSubdirectory = null;
+			String gtfsDirectoryName = null;
+			String supplementDir = null;
+			String regexReplaceListFileName = null;
+			double pathOffsetDistance = 0.0;
+			double maxStopToPathDistance = 60.0;
+			double maxDistanceForEliminatingVertices = 3.0;
+			int defaultWaitTimeAtStopMsec = 10000;
+			double maxSpeedKph = 97;
+			double maxTravelTimeSegmentLength = 1000.0;
+			int configRev = -1;
+			boolean shouldStoreNewRevs = true;
+			boolean trimPathBeforeFirstStopOfTrip = false;
 
-		WebAppContext webapp = new WebAppContext();
-		webapp.setContextPath("/api");
-		File warFile = new File(
-		TransitimeQuickStart.class.getClassLoader().getResource("api.war").getPath());
-		
-		System.out.print(warFile.getPath()+"test");
-		webapp.setWar(warFile.getPath());
-		
-		// location to go to= http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
-		
-		Configuration.ClassList classlist = Configuration.ClassList
-                .setServerDefault( server );
-        classlist.addBefore(
-                "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
-                "org.eclipse.jetty.annotations.AnnotationConfiguration" );
-        webapp.setAttribute(
-                "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
-                ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$" );
-      //Set the path to the override descriptor, based on your $(jetty.home) directory
-      webapp.setOverrideDescriptor("override-web.xml");
-		server.setHandler(webapp);
-		try {
-			server.start();
-			//server.join();
+			GtfsFileProcessor processor = new GtfsFileProcessor(configFilePath, notes, gtfsUrl, gtfsZipFileName,
+					unzipSubdirectory, gtfsDirectoryName, supplementDir, regexReplaceListFileName, pathOffsetDistance,
+					maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
+					maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
+			processor.process();
+			logger.info("startGtfsFileProcessor successful");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
-	public void StartCore(String realtimefeedURL,String loglocation)
-	{
-		URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
-    	String configFilePath=configFile.getPath(); 
-    	
-		String agencyid = "02";
-		System.getProperties().setProperty("transitime.core.configRevStr", "0");
-		System.getProperties().setProperty("transitime.core.agencyId", "02");
-		//uses default if nothing entered 
-		if(loglocation.equals(""))
-		{
-			//uses current directory if one not specified
-			 loglocation= System.getProperty("user.dir");
-		}		
-		System.getProperties().setProperty("transitime.logging.dir",
-				loglocation);
-		System.getProperties().setProperty("transitime.configFiles",
-				configFilePath);
-		//only set the paramater for realtimeURLfeed if specified by user
-		if(!realtimefeedURL.equals(""))
-		{
-	System.getProperties().setProperty("transitime.avl.url",
-				realtimefeedURL);
-		}
+
+	public void createApiKey() {
 		try {
+
+			String fileName = "transiTimeconfig.xml";
+
+			ConfigFileReader.processConfig(this.getClass().getClassLoader().getResource(fileName).getPath());
+
+			String name = "Brendan";
+			String url = "http://www.transitime.org";
+			String email = "egan129129@gmail.com";
+			String phone = "123456789";
+			String description = "Foo";
+			ApiKeyManager manager = ApiKeyManager.getInstance();
+			apiKey = manager.generateApiKey(name, url, email, phone, description);
+			
+			List<ApiKey> keys = manager.getApiKeys();
+			for (ApiKey key : keys) {
+				logger.info(key.getKey());
+			}
+			logger.info("createApiKey successful");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+
+	}
+
+	public void startJettyApi(String apikey) {
+		try {
+			Server server = new Server(8080);
+
+			WebAppContext webapp = new WebAppContext();
+			webapp.setContextPath("/api");
+			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("api.war").getPath());
+			webapp.setWar(warFile.getPath());
+
+			// location to go to=
+			// http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
+
+			Configuration.ClassList classlist = Configuration.ClassList.setServerDefault(server);
+			classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+					"org.eclipse.jetty.annotations.AnnotationConfiguration");
+			webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
+					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
+			// Set the path to the override descriptor, based on your
+			// $(jetty.home)
+			// directory
+			webapp.setOverrideDescriptor("override-web.xml");
+			server.setHandler(webapp);
+
+			server.start();
+			// server.join();
+			logger.info("StartJettyapi successful");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public void startCore(String realtimefeedURL, String loglocation) {
+		try {
+			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
+			String configFilePath = configFile.getPath();
+			//TODO this by using the config file
+			String agencyid = System.getProperties().getProperty("transitime.core.agencyId");
+			System.getProperties().setProperty("transitime.core.configRevStr", "0");
+			System.getProperties().setProperty("transitime.core.agencyId", "agencyid");
+			// uses default if nothing entered
+			if (loglocation.equals("")) {
+				// uses current directory if one not specified
+				loglocation = System.getProperty("user.dir");
+			}
+			System.getProperties().setProperty("transitime.logging.dir", loglocation);
+			System.getProperties().setProperty("transitime.configFiles", configFilePath);
+			// only set the paramater for realtimeURLfeed if specified by user
+			if (!realtimefeedURL.equals("")) {
+				System.getProperties().setProperty("transitime.avl.url", realtimefeedURL);
+			}
+
 			// Initialize the core now
 			Core.createCore();
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
@@ -187,64 +185,77 @@ public class TransitimeQuickStart {
 				logger.info("Starting up optional module " + moduleName);
 				Module.start(moduleName);
 			}
-			//start servers
+			// start servers
 			Core.startRmiServers(agencyid);
+			logger.info("startCore successful");
 		} catch (Exception e) {
-			//fail(e.toString());
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
-	public void StartJettyWebapp(){
-		Server server = new Server(8081);
 
-		WebAppContext webapp = new WebAppContext();
-		webapp.setContextPath("/webapp");
-		File warFile = new File(
-		TransitimeQuickStart.class.getClassLoader().getResource("web.war").getPath());
-		
-		
-		webapp.setWar(warFile.getPath());
-		
-		// location to go to= http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
-		
-		Configuration.ClassList classlist = Configuration.ClassList
-                .setServerDefault( server );
-        classlist.addBefore(
-                "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
-                "org.eclipse.jetty.annotations.AnnotationConfiguration" );
-        webapp.setAttribute(
-                "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
-                ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$" );
-        webapp.setOverrideDescriptor("override-web.xml");
-		server.setHandler(webapp);
+	public void startJettyWebapp() {
 		try {
+			Server server = new Server(8081);
+
+			WebAppContext webapp = new WebAppContext();
+			webapp.setContextPath("/webapp");
+			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("web.war").getPath());
+
+			webapp.setWar(warFile.getPath());
+
+			// location to go to=
+			// http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
+
+			Configuration.ClassList classlist = Configuration.ClassList.setServerDefault(server);
+			classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+					"org.eclipse.jetty.annotations.AnnotationConfiguration");
+			webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
+					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
+			webapp.setOverrideDescriptor("override-web.xml");
+			server.setHandler(webapp);
+
 			server.start();
-			//server.join();
+			// server.join();
+			logger.info("startJettyWebapp successful");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
-	public void startDatabase()
-	{
 
-    	String  dbPath = "mem:test;sql.enforce_strict_size=true";
-    	
-        String  serverProps;
-        String  url;
-        String  user     = "sa";
-        String  password = "";
-        org.hsqldb.server.Server server;
-        boolean isNetwork = true;
-        boolean isHTTP    = false;    // Set false to test HSQL protocol, true to test HTTP, in which case you can use isUseTestServlet to target either HSQL's webserver, or the Servlet server-mode
-        boolean isServlet = false;
-        
-    	server=new org.hsqldb.server.Server();
-    	server.setDatabaseName(0, "test");
-        server.setDatabasePath(0, dbPath);
-        server.setLogWriter(null);
-        server.setErrWriter(null);
-        server.start();
+	public void startDatabase() {
+		try {
+			String dbPath = "mem:test;sql.enforce_strict_size=true";
+
+			String serverProps;
+			String url;
+			String user = "sa";
+			String password = "";
+			org.hsqldb.server.Server server;
+			boolean isNetwork = true;
+			boolean isHTTP = false; // Set false to test HSQL protocol, true to
+									// test
+									// HTTP, in which case you can use
+									// isUseTestServlet to target either HSQL's
+									// webserver, or the Servlet server-mode
+			boolean isServlet = false;
+
+			server = new org.hsqldb.server.Server();
+			server.setDatabaseName(0, "test");
+			server.setDatabasePath(0, dbPath);
+			server.setLogWriter(null);
+			server.setErrWriter(null);
+			server.start();
+			logger.info("startDatabase successful");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public ApiKey getApiKey() {
+		return apiKey;
+	}
+
+	public void setApiKey(ApiKey apiKey) {
+		this.apiKey = apiKey;
 	}
 }
-
-
