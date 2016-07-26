@@ -24,12 +24,15 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.LayoutStyle.ComponentPlacement;
-
+import java.awt.datatransfer.*;
+import java.awt.Toolkit;
 import org.transitime.db.webstructs.ApiKey;
 
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.SystemColor;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 /**
  * 
  * @author Brendan Egan
@@ -116,39 +119,64 @@ public class OutputPanel {
 		textField_3.setText("http://127.0.0.1:8081/webapp/");
 		JLabel lblWebappAddress = new JLabel("transitime Webapp address");
 		lblWebappAddress.setFont(new Font("Arial", Font.PLAIN, 16));
+		
+		JButton btnCopy = new JButton("Copy");
+		btnCopy.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			String copy = textField.getText();
+			StringSelection stringSelection = new StringSelection(copy);
+			Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clpbrd.setContents(stringSelection, null);
+			}
+		});
+		
+		JButton button = new JButton("Copy");
+		button.addActionListener(new ActionListener() {
+			//Copys the content of the textfield to clipboard.
+			public void actionPerformed(ActionEvent e) {
+				String copy = textField_1.getText();
+				StringSelection stringSelection = new StringSelection(copy);
+				Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clpbrd.setContents(stringSelection, null);
+			}
+		});
 		GroupLayout groupLayout = new GroupLayout(frmTransitimequickstart.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(7)
 							.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 								.addGroup(groupLayout.createSequentialGroup()
-									.addComponent(lblTripUpdatesUrl)
-									.addPreferredGap(ComponentPlacement.RELATED, 86, Short.MAX_VALUE)
-									.addComponent(textField, GroupLayout.PREFERRED_SIZE, 335, GroupLayout.PREFERRED_SIZE))
-								.addComponent(lblInstallationIsNow, GroupLayout.PREFERRED_SIZE, 511, GroupLayout.PREFERRED_SIZE)
-								.addGroup(groupLayout.createSequentialGroup()
-									.addPreferredGap(ComponentPlacement.RELATED)
 									.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addComponent(lblWebappAddress, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addComponent(lblVechiclePositionsUrl)
-										.addComponent(lblApikey, GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE))
-									.addGap(18)
+										.addComponent(lblTripUpdatesUrl)
+										.addGroup(groupLayout.createSequentialGroup()
+											.addPreferredGap(ComponentPlacement.RELATED)
+											.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+												.addComponent(lblWebappAddress, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+												.addComponent(lblVechiclePositionsUrl)
+												.addComponent(lblApikey, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE))))
+									.addPreferredGap(ComponentPlacement.RELATED)
 									.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
-										.addComponent(textField_2, Alignment.LEADING)
-										.addComponent(textField_1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
-										.addComponent(textField_3, Alignment.LEADING)))))
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+										.addComponent(button, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+										.addComponent(btnCopy, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+									.addGap(7)
+									.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+										.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+											.addComponent(textField_2, Alignment.LEADING, 279, 279, 279)
+											.addComponent(textField_3, Alignment.LEADING, 279, 279, 279)
+											.addComponent(textField_1, GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE))
+										.addComponent(textField, GroupLayout.PREFERRED_SIZE, 279, GroupLayout.PREFERRED_SIZE)))
+								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+									.addComponent(lblTheseLinksInto)
+									.addComponent(lblInstallationIsNow, GroupLayout.PREFERRED_SIZE, 511, GroupLayout.PREFERRED_SIZE))))
+						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(36)
-							.addComponent(btnMinimize, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(btnMinimize, GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
 							.addGap(71)
 							.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 201, GroupLayout.PREFERRED_SIZE)
-							.addGap(44))
-						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(91)
-							.addComponent(lblTheseLinksInto)))
+							.addGap(44)))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
@@ -161,11 +189,14 @@ public class OutputPanel {
 					.addGap(54)
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblTripUpdatesUrl, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE))
+						.addComponent(lblTripUpdatesUrl, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnCopy))
 					.addGap(61)
 					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 						.addComponent(lblVechiclePositionsUrl)
-						.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+							.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+							.addComponent(button)))
 					.addGap(62)
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(textField_2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)

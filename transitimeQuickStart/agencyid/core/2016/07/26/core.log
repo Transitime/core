@@ -1,0 +1,320 @@
+
+04:51:00.185 INFO  thread=qtp365217435-55 [o.h.a.c.Version:66] HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
+
+04:51:00.199 INFO  thread=qtp365217435-55 [o.h.Version:54] HHH000412: Hibernate Core {4.3.9.Final}
+
+04:51:00.203 INFO  thread=qtp365217435-55 [o.h.c.Environment:239] HHH000206: hibernate.properties not found
+
+04:51:00.206 INFO  thread=qtp365217435-55 [o.h.c.Environment:346] HHH000021: Bytecode provider name : javassist
+
+04:51:00.233 INFO  thread=qtp365217435-55 [o.t.d.h.HibernateUtils:84] Configuring Hibernate for dbName=null using config file=src/main/resources/hsql_hibernate.cfg.xml
+
+04:51:00.234 INFO  thread=qtp365217435-55 [o.h.c.Configuration:2133] HHH000042: Configuring from file: hsql_hibernate.cfg.xml
+
+04:51:00.283 INFO  thread=qtp365217435-55 [o.h.c.Configuration:759] HHH000221: Reading mappings from resource: named_queries.hbm.xml
+
+04:51:00.928 INFO  thread=qtp365217435-55 [o.h.c.Configuration:2216] HHH000041: Configured SessionFactory: null
+
+04:51:00.949 INFO  thread=qtp365217435-55 [o.t.d.h.HibernateUtils:142] For Hibernate factory project dbName=null using url=jdbc:hsqldb:hsql://localhost/test username=sa, and configured password
+
+04:51:01.038 WARN  thread=qtp365217435-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:93] HHH000402: Using Hibernate built-in connection pool (not for production use!)
+
+04:51:01.043 INFO  thread=qtp365217435-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:166] HHH000401: using driver [org.hsqldb.jdbcDriver] at URL [jdbc:hsqldb:hsql://localhost/test]
+
+04:51:01.043 INFO  thread=qtp365217435-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:175] HHH000046: Connection properties: {user=sa, password=****, autocommit=true}
+
+04:51:01.043 INFO  thread=qtp365217435-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:180] HHH000006: Autocommit mode: true
+
+04:51:01.045 INFO  thread=qtp365217435-55 [o.h.e.j.c.i.DriverManagerConnectionProviderImpl:102] HHH000115: Hibernate connection pool size: 20 (min=1)
+
+04:51:01.283 INFO  thread=qtp365217435-55 [o.h.d.Dialect:145] HHH000400: Using dialect: org.hibernate.dialect.HSQLDialect
+
+04:51:01.711 INFO  thread=qtp365217435-55 [o.h.e.t.i.TransactionFactoryInitiator:62] HHH000399: Using default transaction strategy (direct JDBC transactions)
+
+04:51:01.716 INFO  thread=qtp365217435-55 [o.h.h.i.a.ASTQueryTranslatorFactory:47] HHH000397: Using ASTQueryTranslatorFactory
+
+04:51:02.793 INFO  thread=qtp365217435-55 [o.h.t.h.SchemaUpdate:207] HHH000228: Running hbm2ddl schema update
+
+04:51:02.794 INFO  thread=qtp365217435-55 [o.h.t.h.SchemaUpdate:218] HHH000102: Fetching database metadata
+
+04:51:02.797 INFO  thread=qtp365217435-55 [o.h.t.h.SchemaUpdate:230] HHH000396: Updating schema
+
+04:51:02.814 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ACTIVEREVISIONS
+
+04:51:02.815 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, id, configrev]
+
+04:51:02.815 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.815 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10129_10130]
+
+04:51:02.827 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.AGENCIES
+
+04:51:02.828 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [minlon, agencytimezone, maxlat, minlat, agencyurl, maxlon, agencyfareurl, agencyid, agencyphone, configrev, agencyname, agencylang]
+
+04:51:02.828 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.828 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10133_10134]
+
+04:51:02.839 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.APIKEYS
+
+04:51:02.840 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [phone, applicationkey, applicationurl, description, email, applicationname]
+
+04:51:02.840 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.840 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10136_10137]
+
+04:51:02.852 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ARRIVALSDEPARTURES
+
+04:51:02.853 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, gtfsstopseq, stoppathindex, directionid, stoporder, dtype, stopid, tripid, configrev, stoppathlength, blockid, routeid, routeshortname, isarrival, vehicleid, time, serviceid, scheduledtime, tripindex]
+
+04:51:02.853 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.853 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [arrivalsdeparturestimeindex, sys_idx_sys_pk_10145_10146, arrivalsdeparturesroutetimeindex]
+
+04:51:02.866 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.AVLREPORTS
+
+04:51:02.866 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [passengercount, heading, passengerfullness, lon, source, field1value, assignmentid, speed, assignmenttype, driverid, field1name, timeprocessed, vehicleid, time, licenseplate, lat]
+
+04:51:02.867 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.867 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [avlreportstimeindex, sys_idx_sys_pk_10149_10150]
+
+04:51:02.880 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.BLOCK_TO_TRIP_JOINTABLE
+
+04:51:02.881 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blocks_configrev, trips_configrev, listindex, blocks_blockid, trips_tripid, trips_starttime, blocks_serviceid]
+
+04:51:02.881 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_1c1e1twdap19vq0xkav0amvm, fk_abaj8ke6oh4imbbgnaercsowo]
+
+04:51:02.881 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10288, sys_idx_sys_pk_10158_10159, sys_idx_10290]
+
+04:51:02.893 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.BLOCKS
+
+04:51:02.894 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blockid, endtime, starttime, serviceid, configrev, routeids]
+
+04:51:02.894 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.894 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10163_10164]
+
+04:51:02.908 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CALENDARDATES
+
+04:51:02.908 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [date, serviceid, configrev, exceptiontype]
+
+04:51:02.908 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.909 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10168_10169]
+
+04:51:02.919 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CALENDARS
+
+04:51:02.920 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [sunday, saturday, tuesday, enddate, wednesday, thursday, friday, startdate, serviceid, configrev, monday]
+
+04:51:02.920 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.920 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10181_10182]
+
+04:51:02.931 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.CONFIGREVISION
+
+04:51:02.931 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [zipfilelastmodifiedtime, notes, processedtime, configrev]
+
+04:51:02.932 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.932 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10184_10185]
+
+04:51:02.943 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.DBTEST
+
+04:51:02.944 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [id]
+
+04:51:02.944 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.944 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10187_10188]
+
+04:51:02.956 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FAREATTRIBUTES
+
+04:51:02.957 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [currencytype, fareid, price, transfers, transferduration, configrev, paymentmethod]
+
+04:51:02.957 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.957 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10191_10192]
+
+04:51:02.968 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FARERULES
+
+04:51:02.968 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [containsid, routeid, originid, fareid, destinationid, configrev]
+
+04:51:02.969 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.969 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10199_10200]
+
+04:51:02.980 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.FREQUENCIES
+
+04:51:02.980 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headwaysecs, endtime, exacttimes, tripid, starttime, configrev]
+
+04:51:02.980 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.980 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10204_10205]
+
+04:51:02.992 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MATCHES
+
+04:51:02.993 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [blockid, avltime, stoppathindex, segmentindex, tripid, vehicleid, atstop, distancealongstoppath, configrev, serviceid, distancealongsegment]
+
+04:51:02.993 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:02.993 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [avltimeindex, sys_idx_sys_pk_10208_10209]
+
+04:51:03.004 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MEASUREDARRIVALTIMES
+
+04:51:03.004 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headsign, routeid, directionid, routeshortname, stopid, time]
+
+04:51:03.004 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.005 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10212_10213, measuredarrivaltimesindex]
+
+04:51:03.016 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.MONITORINGEVENTS
+
+04:51:03.017 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [triggered, time, type, message, value]
+
+04:51:03.017 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.017 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10216_10217, monitoringeventstimeindex]
+
+04:51:03.029 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.PREDICTIONACCURACY
+
+04:51:03.029 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [directionid, predictedtime, stopid, tripid, predictionreadtime, routeid, predictionsource, routeshortname, affectedbywaitstop, id, vehicleid, arrivaldeparturetime, predictionaccuracymsecs]
+
+04:51:03.029 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.030 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [predictionaccuracytimeindex, sys_idx_sys_pk_10218_10219]
+
+04:51:03.041 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.PREDICTIONS
+
+04:51:03.042 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [routeid, avltime, predictiontime, stopid, affectedbywaitstop, isarrival, tripid, id, creationtime, vehicleid, configrev, schedbasedpred]
+
+04:51:03.042 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.042 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10220_10221, predictiontimeindex]
+
+04:51:03.054 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.ROUTES
+
+04:51:03.054 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [maxdistance, longname, minlon, routeorder, color, hidden, maxlon, textcolor, description, configrev, type, shortname, maxlat, minlat, name, id]
+
+04:51:03.054 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.055 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10224_10225]
+
+04:51:03.067 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPPATH_LOCATIONS
+
+04:51:03.067 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [locations_order, stoppath_trippatternid, lon, stoppath_configrev, lat, stoppath_stoppathid]
+
+04:51:03.068 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_sdjt3vtd3w0cl07p0doob6khi]
+
+04:51:03.068 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10292, sys_idx_sys_pk_10230_10231]
+
+04:51:03.080 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPPATHS
+
+04:51:03.080 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [laststopintrip, breaktime, trippatternid, routeid, gtfsstopseq, layoverstop, pathlength, stopid, stoppathid, waitstop, configrev, scheduleadherencestop]
+
+04:51:03.080 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.080 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10235_10236]
+
+04:51:03.092 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.STOPS
+
+04:51:03.092 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [timepointstop, code, hidden, layoverstop, name, lon, waitstop, id, configrev, lat]
+
+04:51:03.093 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.093 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10239_10240]
+
+04:51:03.104 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRANSFERS
+
+04:51:03.104 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [mintransfertime, tostopid, configrev, fromstopid, transfertype]
+
+04:51:03.104 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.104 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10244_10245]
+
+04:51:03.115 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORSTOPPATHS
+
+04:51:03.117 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, stoptimemsec, traveltimesmsec, daysofweekoverride, stoppathid, id, configrev, traveltimesegmentlength, howset]
+
+04:51:03.117 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.117 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10246_10247]
+
+04:51:03.129 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORTRIP_TO_TRAVELTIMESFORPATH_JOINTABLE
+
+04:51:03.129 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [listindex, traveltimesfortrips_id, traveltimesforstoppaths_id]
+
+04:51:03.129 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_hh5uepurijcqj0pyc6e3h5mqw, fk_9j1s8ewsmokqg4m35wrr29na7]
+
+04:51:03.130 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10294, sys_idx_10296, sys_idx_sys_pk_10251_10252]
+
+04:51:03.141 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRAVELTIMESFORTRIPS
+
+04:51:03.142 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [traveltimesrev, trippatternid, id, configrev, tripcreatedforid]
+
+04:51:03.142 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.142 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [traveltimesrevindex, sys_idx_sys_pk_10253_10254]
+
+04:51:03.154 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPPATTERN_TO_PATH_JOINTABLE
+
+04:51:03.155 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [listindex, stoppaths_trippatternid, trippatterns_configrev, trippatterns_id, stoppaths_configrev, stoppaths_stoppathid]
+
+04:51:03.155 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_s0gaw8iv60vc17a5ltryqwg27, fk_qsr8l6u1nelb5pt8rlnei08sy]
+
+04:51:03.155 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_10298, sys_idx_10300, sys_idx_uk_s0gaw8iv60vc17a5ltryqwg27_10376, sys_idx_sys_pk_10261_10262]
+
+04:51:03.166 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPPATTERNS
+
+04:51:03.166 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [headsign, minlon, routeid, shapeid, maxlat, directionid, minlat, routeshortname, maxlon, id, configrev]
+
+04:51:03.167 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.167 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10265_10266]
+
+04:51:03.178 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.TRIPS
+
+04:51:03.179 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [exacttimesheadway, scheduledtimeslist, directionid, traveltimes_id, endtime, tripid, starttime, configrev, trippattern_id, blockid, headsign, tripshortname, routeid, shapeid, routeshortname, noschedule, trippattern_configrev, serviceid]
+
+04:51:03.179 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: [fk_p1er53449kkfsca6mbnxkdyst, fk_676npp7h4bxh8sjcnugnxt5wb]
+
+04:51:03.179 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10270_10271, sys_idx_10302, sys_idx_10304]
+
+04:51:03.191 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLECONFIGS
+
+04:51:03.191 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [trackerid, nonpassengervehicle, crushcapacity, description, id, type, capacity]
+
+04:51:03.191 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.192 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10273_10274]
+
+04:51:03.203 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLEEVENTS
+
+04:51:03.204 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, becameunpredictable, description, stopid, lon, tripid, blockid, routeid, predictable, routeshortname, eventtype, vehicleid, time, serviceid, lat, supervisor]
+
+04:51:03.204 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.204 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10278_10279, vehicleeventstimeindex]
+
+04:51:03.216 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.VEHICLESTATES
+
+04:51:03.216 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [avltime, schedadhmsec, schedadh, schedadhwithinbounds, iswaitstop, tripid, blockid, tripshortname, islayover, routeid, routeshortname, isforschedbasedpreds, ispredictable, isdelayed, vehicleid]
+
+04:51:03.216 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.217 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [vehiclestateavltimeindex, sys_idx_sys_pk_10282_10283]
+
+04:51:03.227 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:66] HHH000261: Table found: PUBLIC.PUBLIC.WEBAGENCIES
+
+04:51:03.228 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:67] HHH000037: Columns: [hostname, dbname, dbtype, dbusername, active, agencyid, dbhost, dbencryptedpassword]
+
+04:51:03.228 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:69] HHH000108: Foreign keys: []
+
+04:51:03.228 INFO  thread=qtp365217435-55 [o.h.t.h.TableMetadata:70] HHH000126: Indexes: [sys_idx_sys_pk_10285_10286]
+
+04:51:03.234 INFO  thread=qtp365217435-55 [o.h.t.h.SchemaUpdate:267] HHH000232: Schema update complete
+
+04:51:03.552 INFO  thread=qtp365217435-55 [o.t.d.w.WebAgency:248] Reading WebAgencies data from database "null"...
+
+04:51:03.676 INFO  thread=qtp365217435-55 [o.t.d.w.WebAgency:262] Done reading WebAgencies from database. Took 123 msec. They are []
+
+04:51:03.678 ERROR thread=qtp365217435-55 [o.t.d.w.WebAgency:404] Did not find agencyId=02 in WebAgencies table for database null. Will reload data from database to see if agency only recently added.
