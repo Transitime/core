@@ -76,25 +76,14 @@ public class LastVehiclePredictionGeneratorImpl extends
 					.getVehicleState(vehicle.getId());
 			vehiclesOnRoute.add(vehicleOnRouteState);
 		}
-		
-		VehicleState previousVehicleOnRouteState = getClosetVechicle(
-				vehiclesOnRoute, indices, currentVehicleState);
+				
 		long time = 0;
 		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
 		{
 			logger.debug("Using last vehicle algorithm (getLastVehicleTravelTime) for prediction : " + indices + " Value: "+time + " instead of transiTime default:"+super.getTravelTimeForPath(indices, avlReport));
 			return time;
 		}
-		if (previousVehicleOnRouteState != null) 
-		{			
-			time = getTimeTaken(tripCache, previousVehicleOnRouteState, indices);
-
-			if (time > 0) {
-				logger.debug("Using last vehicle algorithm (getClosetVechicle) for prediction : " + indices + " Value: "+time);
-				//logger.debug("Instead of transitime value : " + super.getTravelTimeForPath(indices, avlReport));
-				return time;	
-			}
-		}		
+				
 		logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
 		return super.getTravelTimeForPath(indices, avlReport);

@@ -47,6 +47,7 @@ import org.transitime.api.data.ApiBlocksTerse;
 import org.transitime.api.data.ApiCacheDetails;
 import org.transitime.api.data.ApiCalendars;
 import org.transitime.api.data.ApiDirections;
+import org.transitime.api.data.ApiHistoricalAverage;
 import org.transitime.api.data.ApiIds;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
@@ -64,6 +65,10 @@ import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.predsByLoc.PredsByLoc;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
+import org.transitime.core.dataCache.HistoricalAverage;
+import org.transitime.core.dataCache.HistoricalAverageCache;
+import org.transitime.core.dataCache.HistoricalAverageCacheKey;
+import org.transitime.core.dataCache.TripStopPathCacheKey;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcActiveBlock;
@@ -77,6 +82,7 @@ import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcSchedule;
 import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
+import org.transitime.ipc.data.IpcHistoricalAverage;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
@@ -1316,7 +1322,7 @@ public class TransitimeApi {
 	@Path("/command/stoparrivaldeparturecachedata")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getHistoricalAverageCacheData(@BeanParam StandardParameters stdParameters,
+	public Response getStopArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "stopid") String stopid, @QueryParam(value = "date") Date date)
 			throws WebApplicationException {
 		try {
@@ -1334,6 +1340,34 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
+
+	/*
+	 *  This will give the historical cache value for an individual stop path index of a trip
+	 *	private String tripId;
+	 *	private Integer stopPathIndex;
+	 */
+	@Path("/command/historicalaveragecachedata")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getHistoricalAverageCacheData(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "tripId") Integer stopPathIndex)
+	{
+		try {			
+			
+			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
+			
+			IpcHistoricalAverage result = cachequeryInterface.getHistoricalAverage(tripId, stopPathIndex);
+																								
+			Response response = stdParameters.createResponse(new ApiHistoricalAverage(result));
+			
+			return response;
+
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}	
+	
 	// /**
 	// * For creating response of list of vehicles. Would like to make this a
 	// * generic type but due to type erasure cannot do so since GenericEntity

@@ -11,10 +11,14 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.core.dataCache.HistoricalAverage;
+import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitime.core.dataCache.TripStopPathCacheKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.ipc.data.IpcArrivalDeparture;
+import org.transitime.ipc.data.IpcHistoricalAverage;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.interfaces.CommandsInterface;
 import org.transitime.ipc.rmi.AbstractServer;
@@ -101,6 +105,14 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 		else
 			return null;
 
+	}
+
+	@Override
+	public IpcHistoricalAverage getHistoricalAverage(String tripId, Integer stopPathIndex) throws RemoteException {
+		TripStopPathCacheKey key=new TripStopPathCacheKey(tripId,stopPathIndex);
+		
+		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(key);
+		return new IpcHistoricalAverage(average);
 	}
 
 }

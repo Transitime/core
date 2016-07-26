@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import org.transitime.ipc.data.IpcArrivalDeparture;
+import org.transitime.ipc.data.IpcHistoricalAverage;
 
 /**
  * Defines the RMI interface used for obtaining cache runtime information. 
@@ -51,6 +52,16 @@ public interface CacheQueryInterface extends Remote {
 	 */
 	public Integer entriesInCache(String cacheName)
 			throws RemoteException;
+	
+	/**
+	 * Returns the historical average value for the trip stopPathIndex that is held in the HistoricalAverageCache
+	 * @param tripId
+	 * @param stopPathIndex
+	 * @return IpcHistoricalAverage
+	 * @throws RemoteException
+	 */
+	public IpcHistoricalAverage getHistoricalAverage(String tripId, Integer stopPathIndex)
+		throws RemoteException;
 	
 	
 

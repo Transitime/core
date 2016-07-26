@@ -19,33 +19,20 @@ package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
-import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
-import org.transitime.core.dataCache.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
-import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.db.structs.Block;
-import org.transitime.db.structs.StopPath;
-import org.transitime.db.structs.Trip;
-import org.transitime.db.structs.TripPattern;
-import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.utils.Time;
-
-import ch.qos.logback.classic.Logger;
 
 /**
  * Defines the interface for generating predictions. To create predictions using
@@ -104,7 +91,8 @@ public abstract class PredictionGenerator {
 		}
 		return -1;
 	}
-
+	
+	/* TODO could also make it a requirement that it is on the same route as the one we are generating prediction for */
 	protected ArrivalDeparture findMatchInList(List<ArrivalDeparture> nextStopList,
 			ArrivalDeparture currentArrivalDeparture) {
 		for (ArrivalDeparture nextStopArrivalDeparture : nextStopList) {			
