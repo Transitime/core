@@ -60,32 +60,34 @@ public abstract class PredictionGenerator {
 
 	protected long getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
 
-		StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(
+		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
 				indices.getStopPath().getStopId(),
 				new Date(currentVehicleState.getMatch().getAvlTime()));
-		
-		int stopPathIndex = indices.getStopPathIndex();
-
-		String nextStopId = currentVehicleState.getTrip().getStopPath(stopPathIndex + 1).getStopId();
-
-		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(nextStopId,
-				new Date(currentVehicleState.getMatch().getAvlTime()));
-
-		List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
-
-		List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
-
-		if (currentStopList != null && nextStopList != null) {
-			// lists are already sorted when put into cache.
-			for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
-				
-				if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
-				{
-					ArrivalDeparture found;
 										
-					if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
-							return found.getTime() - currentArrivalDeparture.getTime();
-					}					
+		/* TODO how do we handle the the first stop path. Where do we get the first stop id. */ 		 
+		if(!indices.atBeginningOfTrip())
+		{						
+			String currentStopId = indices.getPreviousStopPath().getStopId();
+			
+			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
+					new Date(currentVehicleState.getMatch().getAvlTime()));
+	
+			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+	
+			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+	
+			if (currentStopList != null && nextStopList != null) {
+				// lists are already sorted when put into cache.
+				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
+					
+					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
+					{
+						ArrivalDeparture found;
+											
+						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
+								return found.getTime() - currentArrivalDeparture.getTime();
+						}					
+					}
 				}
 			}
 		}
