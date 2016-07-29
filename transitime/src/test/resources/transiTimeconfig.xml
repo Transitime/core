@@ -17,6 +17,9 @@
         <maxLatitude>55.45</maxLatitude>     -->    
     </avl>   
     <hibernate>
-        <configFile>src/main/resources/hsql_hibernate.cfg.xml</configFile>        
+        <configFile>hsql_hibernate.cfg.xml</configFile>        
     </hibernate>
+   <db>
+   <dbName>02</dbName>
+   </db>
 </transitime>

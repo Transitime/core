@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transitime>
  <modules>
-        <optionalModulesList>org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
+        <optionalModulesList>org.transitime.core.schedBasedPreds.SchedBasedPredsModule</optionalModulesList>        
     </modules>
     <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
     <core>
 	<agencyId>02</agencyId>
     </core>	
     <avl>
-        <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
-		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>	
+    <!--     <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
+		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>	 -->
         <!-- URL for GTFS realtime vechicle location stream -->
                <!--  commented out for now for ease of use -->
      <!--    <minLatitude>30.145125</minLatitude>   

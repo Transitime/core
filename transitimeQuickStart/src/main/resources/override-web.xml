@@ -6,6 +6,6 @@
 	<context-param>
       <param-name>transitime_config_file_location</param-name>
       <!-- Set to customized properties file with db config info and such -->
-      <param-value>transiTimeconfig.xml</param-value>      
+      <param-value>src/main/resources/transiTimeconfig.xml</param-value>      
     </context-param>
 </web-app>

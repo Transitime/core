@@ -16,11 +16,16 @@
  */
 package org.transitime.gui;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
@@ -33,6 +38,7 @@ import org.transitime.config.ConfigValue.ConfigParamException;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.webstructs.ApiKey;
 import org.transitime.db.webstructs.ApiKeyManager;
+import org.transitime.db.webstructs.WebAgency;
 import org.transitime.modules.Module;
 
 /**
@@ -43,18 +49,22 @@ import org.transitime.modules.Module;
 public class TransitimeQuickStart {
 	private static final Logger logger = LoggerFactory.getLogger(TransitimeQuickStart.class);
 	private ApiKey apiKey = null;
+	static Server webserver = new Server(8080);
+	WebAppContext apiapp = null;
+	WebAppContext webapp = null;
 
 	public static void main(String args[]) {
-		/*WelcomePanel window = new WelcomePanel();
-		window.WelcomePanelstart();*/
-	
-		  InputPanel windowinput = new InputPanel();
-		  windowinput.InputPanelstart(); 
-		
+		/*
+		 * WelcomePanel window = new WelcomePanel(); window.WelcomePanelstart();
+		 */
+
+		InputPanel windowinput = new InputPanel();
+		windowinput.InputPanelstart();
+
 	}
 
 	public void startGtfsFileProcessor(String gtfsZipFileName) {
-		
+
 		try {
 			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
 			String configFilePath = configFile.getPath();
@@ -110,7 +120,7 @@ public class TransitimeQuickStart {
 			String description = "Foo";
 			ApiKeyManager manager = ApiKeyManager.getInstance();
 			apiKey = manager.generateApiKey(name, url, email, phone, description);
-			
+
 			List<ApiKey> keys = manager.getApiKeys();
 			for (ApiKey key : keys) {
 				logger.info(key.getKey());
@@ -122,42 +132,11 @@ public class TransitimeQuickStart {
 
 	}
 
-	public void startJettyApi(String apikey) {
-		try {
-			Server server = new Server(8080);
-
-			WebAppContext webapp = new WebAppContext();
-			webapp.setContextPath("/api");
-			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("api.war").getPath());
-			webapp.setWar(warFile.getPath());
-
-			// location to go to=
-			// http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
-
-			Configuration.ClassList classlist = Configuration.ClassList.setServerDefault(server);
-			classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
-					"org.eclipse.jetty.annotations.AnnotationConfiguration");
-			webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
-					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
-			// Set the path to the override descriptor, based on your
-			// $(jetty.home)
-			// directory
-			webapp.setOverrideDescriptor("override-web.xml");
-			server.setHandler(webapp);
-
-			server.start();
-			// server.join();
-			logger.info("StartJettyapi successful");
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
 	public void startCore(String realtimefeedURL, String loglocation) {
 		try {
 			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
 			String configFilePath = configFile.getPath();
-			//TODO this by using the config file
+			// TODO this by using the config file
 			String agencyid = System.getProperties().getProperty("transitime.core.agencyId");
 			System.getProperties().setProperty("transitime.core.configRevStr", "0");
 			System.getProperties().setProperty("transitime.core.agencyId", "agencyid");
@@ -193,35 +172,6 @@ public class TransitimeQuickStart {
 		}
 	}
 
-	public void startJettyWebapp() {
-		try {
-			Server server = new Server(8081);
-
-			WebAppContext webapp = new WebAppContext();
-			webapp.setContextPath("/webapp");
-			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("web.war").getPath());
-
-			webapp.setWar(warFile.getPath());
-
-			// location to go to=
-			// http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
-
-			Configuration.ClassList classlist = Configuration.ClassList.setServerDefault(server);
-			classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
-					"org.eclipse.jetty.annotations.AnnotationConfiguration");
-			webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
-					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
-			webapp.setOverrideDescriptor("override-web.xml");
-			server.setHandler(webapp);
-
-			server.start();
-			// server.join();
-			logger.info("startJettyWebapp successful");
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
 	public void startDatabase() {
 		try {
 			String dbPath = "mem:test;sql.enforce_strict_size=true";
@@ -230,7 +180,7 @@ public class TransitimeQuickStart {
 			String url;
 			String user = "sa";
 			String password = "";
-			org.hsqldb.server.Server server;
+			org.hsqldb.server.Server serverdb;
 			boolean isNetwork = true;
 			boolean isHTTP = false; // Set false to test HSQL protocol, true to
 									// test
@@ -239,16 +189,113 @@ public class TransitimeQuickStart {
 									// webserver, or the Servlet server-mode
 			boolean isServlet = false;
 
-			server = new org.hsqldb.server.Server();
-			server.setDatabaseName(0, "test");
-			server.setDatabasePath(0, dbPath);
-			server.setLogWriter(null);
-			server.setErrWriter(null);
-			server.start();
+			serverdb = new org.hsqldb.server.Server();
+			serverdb.setDatabaseName(0, "test");
+			serverdb.setDatabasePath(0, dbPath);
+			serverdb.setLogWriter(null);
+			serverdb.setErrWriter(null);
+			serverdb.start();
 			logger.info("startDatabase successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+
+	public void addApi(String apikey) {
+		try {
+			// Server server = new Server(8080);
+
+			apiapp = new WebAppContext();
+			apiapp.setContextPath("/api");
+			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("api.war").getPath());
+			apiapp.setWar(warFile.getPath());
+
+			// location to go to=
+			// http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
+			Configuration.ClassList classlist = Configuration.ClassList.setServerDefault(webserver);
+			classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+					"org.eclipse.jetty.annotations.AnnotationConfiguration");
+			apiapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
+					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
+			// Set the path to the override descriptor, based on your
+			// $(jetty.home)
+			// directory
+			apiapp.setOverrideDescriptor("override-web.xml");
+
+			// server.start();
+			// server.join();
+			logger.info("add api successful");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public void addWebapp() {
+		try {
+			// Server server = new Server(8081);
+
+			webapp = new WebAppContext();
+			webapp.setContextPath("/webapp");
+			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("web.war").getPath());
+
+			webapp.setWar(warFile.getPath());
+
+			// location to go to=
+			// http://127.0.0.1:8080/api/v1/key/1727f2a/agency/02/command/routes?format=json
+
+			webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
+					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
+			webapp.setOverrideDescriptor("override-web.xml");
+			webserver.setHandler(webapp);
+
+			// server.join();
+			logger.info("add Webapp successful");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public void startJetty() {
+		try {
+			HandlerCollection handlerCollection = new HandlerCollection();
+			handlerCollection.setHandlers(new Handler[] { apiapp, webapp });
+		
+			webserver.start();
+			webserver.join();
+			webserver.setHandler(handlerCollection);
+			apiapp.start();
+			webapp.start();
+			logger.info("started Jetty successful");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public void webAgency() {
+		try {
+			String agencyId = "02";
+			String hostName = "127.0.0.1";
+			boolean active = true;
+			String dbName = "02";
+			String dbType = "hsql";
+			String dbHost = "http://127.0.0.1:8080/";
+			String dbUserName = "sa";
+			String dbPassword = "";
+			// Name of database where to store the WebAgency object
+			String webAgencyDbName = "test";
+
+			// Create the WebAgency object
+			WebAgency webAgency = new WebAgency(agencyId, hostName, active, dbName, dbType, dbHost, dbUserName,
+					dbPassword);
+			System.out.println("Storing " + webAgency);
+
+			// Store the WebAgency
+			webAgency.store(webAgencyDbName);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public ApiKey getApiKey() {
