@@ -261,10 +261,8 @@ public class TransitimeQuickStart {
 			handlerCollection.setHandlers(new Handler[] { apiapp, webapp });
 			webserver.setHandler(handlerCollection);
 			webserver.start();
-		
-			
-			apiapp.start();
-			webapp.start();
+			/*apiapp.start();
+			webapp.start();*/
 			logger.info("started Jetty successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
