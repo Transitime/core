@@ -246,7 +246,7 @@ public class TransitimeQuickStart {
 			webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
 					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
 			webapp.setOverrideDescriptor("override-web.xml");
-			webserver.setHandler(webapp);
+		
 
 			// server.join();
 			logger.info("add Webapp successful");
@@ -259,10 +259,10 @@ public class TransitimeQuickStart {
 		try {
 			HandlerCollection handlerCollection = new HandlerCollection();
 			handlerCollection.setHandlers(new Handler[] { apiapp, webapp });
-		
-			webserver.start();
-			webserver.join();
 			webserver.setHandler(handlerCollection);
+			webserver.start();
+		
+			
 			apiapp.start();
 			webapp.start();
 			logger.info("started Jetty successful");
