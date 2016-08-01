@@ -346,7 +346,7 @@
 	</logger>
 
 	<logger
-		name="org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl"
+		name="org.transitime.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl"
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>

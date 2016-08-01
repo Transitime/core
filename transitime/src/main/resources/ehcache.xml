@@ -9,24 +9,24 @@
 	<diskStore path="/usr/local/transitime/cache" />
 	
 	<cache name="arrivalDeparturesByTrip" 
-		maxEntriesLocalHeap="20000"
-		maxEntriesLocalDisk="20000" 
+		maxEntriesLocalHeap="200000"
+		maxEntriesLocalDisk="200000" 
 		eternal="false" 
 		diskSpoolBufferSizeMB="20"				
 		transactionalMode="off">
 		<persistence strategy="none" />
 	</cache>
 	<cache name="arrivalDeparturesByStop" 
-		maxEntriesLocalHeap="20000"
-		maxEntriesLocalDisk="20000" 
+		maxEntriesLocalHeap="200000"
+		maxEntriesLocalDisk="200000" 
 		eternal="false" 
 		diskSpoolBufferSizeMB="20"				
 		transactionalMode="off">
 		<persistence strategy="none" />
 	</cache>
 	<cache name="KalmanErrorCache" 
-		maxEntriesLocalHeap="20000"
-		maxEntriesLocalDisk="2000" 
+		maxEntriesLocalHeap="200000"
+		maxEntriesLocalDisk="200000" 
 		eternal="false" 
 		diskSpoolBufferSizeMB="20"				
 		transactionalMode="off">

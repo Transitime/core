@@ -21,6 +21,7 @@ import org.transitime.core.dataCache.TripKey;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
+import org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.ipc.data.IpcPrediction;
@@ -35,7 +36,7 @@ import org.transitime.ipc.data.IpcVehicleComplete;
  *         TODO I intend using the error value from the last transiTime
  *         prediciton as the starting value.
  */
-public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImpl
+public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGeneratorImpl
 		implements PredictionComponentElementsGenerator {
 
 	/*
@@ -141,7 +142,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 					kalmanErrorCache.putErrorValue(indices, avlReport.getVehicleId(),
 							kalmanPredictionResult.getFilterError());
 
-					logger.debug("Kalman prediction: " + predictionTime + " Tranistime prediction: "
+					logger.debug("Kalman prediction: " + predictionTime + " Transitime prediction: "
 							+ super.getTravelTimeForPath(indices, avlReport));
 					logger.debug("Kalman error value: " + kalmanPredictionResult.getFilterError() + " Vechicle Id: "
 							+ avlReport.getVehicleId());
@@ -161,7 +162,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 	private Double lastPredictionError(KalmanErrorCache cache, Indices indices, String vechicleId) {
 		Indices lastErrorIndices = new Indices(indices.getBlock(), indices.getTripIndex(),
-				indices.getStopPathIndex() - 1, indices.getSegmentIndex());
+				indices.decrementStopPath().getStopPathIndex(), indices.getSegmentIndex());
 		Double result = cache.getErrorValue(lastErrorIndices, vechicleId);
 		if (result == null)
 			return initialErrorValue;

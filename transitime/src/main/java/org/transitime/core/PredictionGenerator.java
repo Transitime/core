@@ -85,8 +85,18 @@ public abstract class PredictionGenerator {
 						ArrivalDeparture found;
 											
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
+							if(found.getTime() - currentArrivalDeparture.getTime()>0)
+							{								
 								return found.getTime() - currentArrivalDeparture.getTime();
-						}					
+							}else
+							{
+								// must be going backwards
+								return -1;
+							}
+						}else
+						{
+							return -1;
+						}
 					}
 				}
 			}
