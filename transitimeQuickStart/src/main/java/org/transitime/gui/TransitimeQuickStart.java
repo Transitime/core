@@ -119,6 +119,7 @@ public class TransitimeQuickStart {
 			for (ApiKey key : keys) {
 				logger.info(key.getKey());
 			}
+			
 			logger.info("createApiKey successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -227,7 +228,7 @@ public class TransitimeQuickStart {
 	public void addWebapp() {
 		try {
 			// Server server = new Server(8081);
-
+			
 			webapp = new WebAppContext();
 			webapp.setContextPath("/webapp");
 			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("web.war").getPath());
@@ -241,7 +242,7 @@ public class TransitimeQuickStart {
 					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
 			webapp.setOverrideDescriptor("override-web.xml");
 		
-
+			System.setProperty("transitime.apikey",apiKey.getKey());
 			// server.join();
 			logger.info("add Webapp successful");
 		} catch (Exception e) {
