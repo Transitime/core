@@ -16,13 +16,9 @@
  */
 package org.transitime.gui;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.net.URL;
 import java.util.List;
-
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -33,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.applications.GtfsFileProcessor;
 import org.transitime.config.ConfigFileReader;
-import org.transitime.config.ConfigFileReader.ConfigException;
-import org.transitime.config.ConfigValue.ConfigParamException;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.webstructs.ApiKey;
 import org.transitime.db.webstructs.ApiKeyManager;
