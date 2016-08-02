@@ -52,7 +52,7 @@ public class TestConfig extends TestCase {
 			// Get the module list param
 			List<String> moduleList = CoreConfig.getOptionalModules();
 
-			Assert.assertTrue(moduleList.get(0).equals(
+			assertTrue(moduleList.get(0).equals(
 					"transitime.core.schedBasedPreds.SchedBasedPredsModule"));
 		} catch (ConfigException | ConfigParamException e) {			
 			fail(e.toString());
