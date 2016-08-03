@@ -84,7 +84,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 			return time;
 		}
 				
-		logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());
+		//logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
 		return super.getTravelTimeForPath(indices, avlReport);
 	}	

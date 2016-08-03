@@ -1350,7 +1350,7 @@ public class TransitimeApi {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getHistoricalAverageCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "tripId") Integer stopPathIndex)
+			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex") Integer stopPathIndex)
 	{
 		try {			
 			

@@ -169,7 +169,7 @@ public abstract class PredictionGenerator {
 		int num_found = 0;
 		/*
 		 * TODO This could be smarter about the dates it looks at by looking at
-		 * which services use this trip and only l.111ook on day srvice is
+		 * which services use this trip and only 1ook on day service is
 		 * running
 		 */
 

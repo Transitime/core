@@ -421,6 +421,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
 	}
 	protected long getTravelTimeForPath(Indices indices, AvlReport avlReport)
 	{
+		logger.debug("Using transiTime default algorithm for prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
 		return indices.getTravelTimeForPath();
 	}
 	

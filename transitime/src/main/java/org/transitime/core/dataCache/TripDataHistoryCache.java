@@ -198,7 +198,7 @@ public class TripDataHistoryCache {
 				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}
 		}
-				
+				 
 		return tripKey;
 	}
 	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)

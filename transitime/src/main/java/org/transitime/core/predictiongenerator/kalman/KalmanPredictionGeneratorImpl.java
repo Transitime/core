@@ -10,6 +10,7 @@ import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
@@ -29,19 +30,17 @@ import org.transitime.ipc.data.IpcVehicleComplete;
 
 /**
  * @author Sean Og Crudden This is a prediction generator that uses a Kalman
- *         filter to provide predictions. It uses the default prediction method
- *         of transiTime while it generates enough data to support this method
- *         of prediction.
+ *         filter to provide predictions. It uses historical average while waiting on enough data to support a Kalman filter.
  * 
  *         TODO I intend using the error value from the last transiTime
- *         prediciton as the starting value.
+ *         prediction as the starting value.
  */
 public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGeneratorImpl
 		implements PredictionComponentElementsGenerator {
 
 	/*
 	 * TODO I think this needs to be a minimum of two and if just one will use
-	 * historical value. This needs to be added to transiTime config file
+	 * historical value. 
 	 */
 	private static final IntegerConfigValue minKalmanDays = new IntegerConfigValue(
 			"transitime.prediction.data.kalman.mindays", new Integer(2),
@@ -54,9 +53,10 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	private static final IntegerConfigValue maxKalmanDaysToSearch = new IntegerConfigValue(
 			"transitime.prediction.data.kalman.maxdaystoseach", new Integer(21),
 			"Max number of days to look back for data. This will also be effected by how old the data in the cache is.");
-
-	/* TODO This needs to be added to the transitTime config file */
-	private static Double initialErrorValue = (double) 100;
+	
+	private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(
+			"transitime.prediction.data.kalman.initialerrorvalue", new Double(100),
+			"Initial Kalman error value to use to start filter.");
 
 	private static final Logger logger = LoggerFactory.getLogger(KalmanPredictionGeneratorImpl.class);
 
@@ -142,9 +142,9 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					kalmanErrorCache.putErrorValue(indices, avlReport.getVehicleId(),
 							kalmanPredictionResult.getFilterError());
 
-					logger.debug("Kalman prediction: " + predictionTime + " Transitime prediction: "
+					logger.debug("Using Kalman prediction: " + predictionTime + " Transitime prediction: "
 							+ super.getTravelTimeForPath(indices, avlReport));
-					logger.debug("Kalman error value: " + kalmanPredictionResult.getFilterError() + " Vechicle Id: "
+					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " Vechicle Id: "
 							+ avlReport.getVehicleId());
 
 					return predictionTime;
@@ -155,7 +155,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			}
 
 		}
-		logger.debug("Generating default prediction.");
+		//logger.debug("Generating default prediction.");
 		return super.getTravelTimeForPath(indices, avlReport);
 
 	}
@@ -165,7 +165,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 				indices.decrementStopPath().getStopPathIndex(), indices.getSegmentIndex());
 		Double result = cache.getErrorValue(lastErrorIndices, vechicleId);
 		if (result == null)
-			return initialErrorValue;
+			return initialErrorValue.getValue();
 		return result;
 	}
 
