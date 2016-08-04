@@ -56,7 +56,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 	@Override
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
 
-		logger.debug("Calling last vehicle algorithm.");
+		logger.debug("Calling last vehicle algorithm : "+indices.toString());
 		
 		VehicleDataCache vehicleCache = VehicleDataCache.getInstance();
 		

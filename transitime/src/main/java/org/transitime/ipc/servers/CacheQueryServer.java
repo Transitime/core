@@ -119,10 +119,33 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			throws RemoteException {
 
 		try {
-			TripKey tripKey = new TripKey(tripId, date, starttime);
+			List<ArrivalDeparture> result = new ArrayList<ArrivalDeparture>();
+			
+			if(tripId!=null && date!=null && starttime!=null){
+				TripKey tripKey = new TripKey(tripId, date, starttime);
 
-			List<ArrivalDeparture> result = TripDataHistoryCache.getInstance().getTripHistory(tripKey);
-
+				result = TripDataHistoryCache.getInstance().getTripHistory(tripKey);
+			}
+			else if(tripId!=null && date!=null && starttime==null)
+			{
+				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				{
+					if(key.getTripId().equals(tripId) && date.compareTo(key.getTripStartDate())==0)
+					{
+						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
+					}										
+				}
+			}else if(tripId!=null && date==null && starttime==null)
+			{
+				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				{
+					if(key.getTripId().equals(tripId))
+					{
+						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
+					}										
+				}
+			}
+			
 			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
 
 			for (ArrivalDeparture arrivalDeparture : result) {

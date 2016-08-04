@@ -50,7 +50,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	@Override
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
 
-		logger.debug("Calling historical average algorithm.");				
+		logger.debug("Calling historical average algorithm : "+indices.toString());				
 		/*
 		 * if we have enough data start using historical average otherwise
 		 * revert to default. This does not mean that this method of

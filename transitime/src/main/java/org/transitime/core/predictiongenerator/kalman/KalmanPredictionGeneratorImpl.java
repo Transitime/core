@@ -70,7 +70,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	@Override
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
 
-		logger.debug("Calling Kalman prediction algorithm.");
+		logger.debug("Calling Kalman prediction algorithm : "+indices.toString());
 		
 		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();
 
