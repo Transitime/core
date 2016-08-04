@@ -18,6 +18,7 @@
 package org.transitime.api.rootResources;
 
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -1344,13 +1345,15 @@ public class TransitimeApi {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getTripArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripid") String tripid, @QueryParam(value = "date") Date date, @QueryParam(value = "starttime") Integer starttime)
+			@QueryParam(value = "tripid") String tripid, @QueryParam(value = "date") String date, @QueryParam(value = "starttime") Integer starttime)
 			throws WebApplicationException {
 		try {
 
+			SimpleDateFormat dateformater=new SimpleDateFormat("yyyyMMdd");
+			
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
-
-			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, date, starttime);
+						
+			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, dateformater.parse(date), starttime);
 					
 			ApiArrivalDepartures apiResult = new ApiArrivalDepartures(result);
 			Response response = stdParameters.createResponse(apiResult);
