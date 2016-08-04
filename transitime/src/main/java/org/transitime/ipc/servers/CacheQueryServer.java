@@ -6,11 +6,13 @@ package org.transitime.ipc.servers;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.core.dataCache.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
@@ -147,7 +149,9 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			}
 			
 			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
-
+			
+			Collections.sort(result, new ArrivalDepartureComparator());
+			
 			for (ArrivalDeparture arrivalDeparture : result) {
 				ipcResultList.add(new IpcArrivalDeparture(arrivalDeparture));
 			}
