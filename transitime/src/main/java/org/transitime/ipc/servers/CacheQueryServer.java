@@ -15,6 +15,8 @@ import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitime.core.dataCache.TripDataHistoryCache;
+import org.transitime.core.dataCache.TripKey;
 import org.transitime.core.dataCache.TripStopPathCacheKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.ipc.data.IpcArrivalDeparture;
@@ -81,18 +83,15 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			List<ArrivalDeparture> result = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
 
 			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
-			
-			
+
 			for (ArrivalDeparture arrivalDeparture : result) {
 				ipcResultList.add(new IpcArrivalDeparture(arrivalDeparture));
 			}
-			
-			return ipcResultList;
+			return ipcResultList;			
 		} catch (Exception e) {
 
-			throw new RemoteException(e.toString());
+			throw new RemoteException(e.toString(),e);
 		}
-		
 	}
 
 	@Override
@@ -109,10 +108,33 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 
 	@Override
 	public IpcHistoricalAverage getHistoricalAverage(String tripId, Integer stopPathIndex) throws RemoteException {
-		TripStopPathCacheKey key=new TripStopPathCacheKey(tripId,stopPathIndex);
-		
+		TripStopPathCacheKey key = new TripStopPathCacheKey(tripId, stopPathIndex);
+
 		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(key);
 		return new IpcHistoricalAverage(average);
+	}
+
+	@Override
+	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, Date date, Integer starttime)
+			throws RemoteException {
+
+		try {
+			TripKey tripKey = new TripKey(tripId, date, starttime);
+
+			List<ArrivalDeparture> result = TripDataHistoryCache.getInstance().getTripHistory(tripKey);
+
+			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
+
+			for (ArrivalDeparture arrivalDeparture : result) {
+				ipcResultList.add(new IpcArrivalDeparture(arrivalDeparture));
+			}
+
+			return ipcResultList;
+
+		} catch (Exception e) {
+
+			throw new RemoteException(e.toString(), e);
+		}		
 	}
 
 }

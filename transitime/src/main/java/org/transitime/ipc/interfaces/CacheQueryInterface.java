@@ -18,6 +18,7 @@ package org.transitime.ipc.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Date;
 import java.util.List;
 
 import org.transitime.ipc.data.IpcArrivalDeparture;
@@ -63,6 +64,17 @@ public interface CacheQueryInterface extends Remote {
 	public IpcHistoricalAverage getHistoricalAverage(String tripId, Integer stopPathIndex)
 		throws RemoteException;
 	
+	
+	/**
+	 * Return the arrivals and departures for a trip on a specific day and start time
+	 * @param tripId
+	 * @param date
+	 * @param starttime
+	 * @return
+	 * @throws RemoteException
+	 */
+	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, Date date, Integer starttime)
+		throws RemoteException;
 	
 
 }

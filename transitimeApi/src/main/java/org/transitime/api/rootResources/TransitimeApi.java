@@ -1340,7 +1340,27 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
+	@Path("/command/triparrivaldeparturecachedata")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getTripArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "tripid") String tripid, @QueryParam(value = "date") Date date, @QueryParam(value = "starttime") Integer starttime)
+			throws WebApplicationException {
+		try {
 
+			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
+
+			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, date, starttime);
+					
+			ApiArrivalDepartures apiResult = new ApiArrivalDepartures(result);
+			Response response = stdParameters.createResponse(apiResult);
+			return response;
+
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
 	/*
 	 *  This will give the historical cache value for an individual stop path index of a trip
 	 *	private String tripId;
