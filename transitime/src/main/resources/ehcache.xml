@@ -11,24 +11,24 @@
 	<cache name="arrivalDeparturesByTrip" 
 		maxEntriesLocalHeap="200000"
 		maxEntriesLocalDisk="200000" 
-		eternal="false" 
-		diskSpoolBufferSizeMB="20"				
+		eternal="true" 
+		diskSpoolBufferSizeMB="50"				
 		transactionalMode="off">
 		<persistence strategy="none" />
 	</cache>
 	<cache name="arrivalDeparturesByStop" 
 		maxEntriesLocalHeap="200000"
 		maxEntriesLocalDisk="200000" 
-		eternal="false" 
-		diskSpoolBufferSizeMB="20"				
+		eternal="true" 
+		diskSpoolBufferSizeMB="50"				
 		transactionalMode="off">
 		<persistence strategy="none" />
 	</cache>
 	<cache name="KalmanErrorCache" 
 		maxEntriesLocalHeap="200000"
 		maxEntriesLocalDisk="200000" 
-		eternal="false" 
-		diskSpoolBufferSizeMB="20"				
+		eternal="true" 
+		diskSpoolBufferSizeMB="50"				
 		transactionalMode="off">
 		<persistence strategy="none" />
 	</cache>
@@ -36,7 +36,7 @@
 		maxEntriesLocalHeap="500000"
 		maxEntriesLocalDisk="500000" 
 		eternal="true" 
-		diskSpoolBufferSizeMB="20"				
+		diskSpoolBufferSizeMB="100"				
 		transactionalMode="off">
 		<persistence strategy="none" />
 	</cache>
