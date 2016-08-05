@@ -196,30 +196,35 @@ public class InputPanel extends JFrame {
 		btnNext.setFont(new Font("Arial", Font.PLAIN, 13));
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
+				String apikeystring = null;
 				// reads in URL
 				loglocation = textField_2.getText();
 				realtimefeedURL = textField_1.getText();
 				// Starts the GtfsFileProcessor ,ApiKey and core
+				try {
+					TransitimeQuickStart start = new TransitimeQuickStart();
+					start.startDatabase();
+					start.startGtfsFileProcessor(filelocation);
+					start.createApiKey();
+					ApiKey apikey = start.getApiKey();
+					apikeystring = apikey.getKey();
 
-				TransitimeQuickStart start = new TransitimeQuickStart();
-				start.startDatabase();
-				start.startGtfsFileProcessor(filelocation);
-				start.createApiKey();
-				ApiKey apikey = start.getApiKey();
-				String apikeystring = apikey.getKey();
+					start.startCore(realtimefeedURL, loglocation);
+					start.addApi(apikeystring);
+					if (getRdbtnStartWebappSelected() == true) {
+						start.addWebapp();
+						start.webAgency();
+					}
+					start.startJetty();
+					OutputPanel windowinput = new OutputPanel(apikeystring);
+					windowinput.OutputPanelstart();
+					dispose();
+				} catch (QuickStartException qe) {
 
-				start.startCore(realtimefeedURL, loglocation);
-				start.addApi(apikeystring);
-				if (getRdbtnStartWebappSelected() == true) {
-					start.addWebapp();
-					start.webAgency();
 				}
-				start.startJetty();
 				// Makes output Panel
-				OutputPanel windowinput = new OutputPanel(apikeystring);
-				windowinput.OutputPanelstart();
-				dispose();
+				
+				
 
 			}
 		});

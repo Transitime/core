@@ -57,7 +57,7 @@ public class TransitimeQuickStart {
 
 	}
 
-	public void startGtfsFileProcessor(String gtfsZipFileName) {
+	public void startGtfsFileProcessor(String gtfsZipFileName) throws QuickStartException {
 
 		try {
 			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
@@ -97,10 +97,11 @@ public class TransitimeQuickStart {
 			logger.info("startGtfsFileProcessor successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw new QuickStartException("GtfsFileProcessor failed to start",e);
 		}
 	}
 
-	public void createApiKey() {
+	public void createApiKey() throws QuickStartException {
 		try {
 
 			String fileName = "transiTimeconfig.xml";
@@ -123,11 +124,12 @@ public class TransitimeQuickStart {
 			logger.info("createApiKey successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw new QuickStartException("create ApiKey failed to start",e);
 		}
 
 	}
 
-	public void startCore(String realtimefeedURL, String loglocation) {
+	public void startCore(String realtimefeedURL, String loglocation) throws QuickStartException {
 		try {
 			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
 			String configFilePath = configFile.getPath();
@@ -164,10 +166,11 @@ public class TransitimeQuickStart {
 			logger.info("startCore successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw new QuickStartException("Core failed to start",e);
 		}
 	}
 
-	public void startDatabase() {
+	public void startDatabase() throws QuickStartException {
 		try {
 			String dbPath = "mem:test;sql.enforce_strict_size=true";
 
@@ -193,10 +196,11 @@ public class TransitimeQuickStart {
 			logger.info("startDatabase successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw new QuickStartException("Start Database failed to start",e);
 		}
 	}
 
-	public void addApi(String apikey) {
+	public void addApi(String apikey) throws QuickStartException {
 		try {
 			// Server server = new Server(8080);
 
@@ -222,15 +226,16 @@ public class TransitimeQuickStart {
 			logger.info("add api successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw new QuickStartException("add api failed to start",e);
 		}
 	}
 
-	public void addWebapp() {
+	public void addWebapp() throws QuickStartException {
 		try {
 			// Server server = new Server(8081);
 			
 			webapp = new WebAppContext();
-			webapp.setContextPath("/webapp");
+			webapp.setContextPath("/web");
 			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("web.war").getPath());
 
 			webapp.setWar(warFile.getPath());
@@ -247,10 +252,11 @@ public class TransitimeQuickStart {
 			logger.info("add Webapp successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw new QuickStartException("Webapp failed to start",e);
 		}
 	}
 
-	public void startJetty() {
+	public void startJetty() throws QuickStartException{
 		try {
 			HandlerCollection handlerCollection = new HandlerCollection();
 			handlerCollection.setHandlers(new Handler[] { apiapp, webapp });
@@ -261,10 +267,11 @@ public class TransitimeQuickStart {
 			logger.info("started Jetty successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw new QuickStartException("Jetty server failed to start",e);
 		}
 	}
 
-	public void webAgency() {
+	public void webAgency() throws QuickStartException {
 		try {
 			String agencyId = "02";
 			String hostName = "127.0.0.1";
@@ -287,6 +294,7 @@ public class TransitimeQuickStart {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new QuickStartException("web agency failed to start",e);
 		}
 
 	}

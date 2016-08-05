@@ -32,6 +32,8 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.SystemColor;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.awt.event.ActionEvent;
 /**
  * 
@@ -45,7 +47,7 @@ public class OutputPanel {
 	private JTextField textField_1;
 	private String apiKey;
 	private JTextField textField_2;
-	private JTextField textField_3;
+	private JTextField txtHttpweb;
 
 	/**
 	 * Launch the application.
@@ -114,9 +116,9 @@ public class OutputPanel {
 		JLabel lblApikey = new JLabel("transitime Server address");
 		lblApikey.setFont(new Font("Arial", Font.PLAIN, 16));
 		
-		textField_3 = new JTextField();
-		textField_3.setColumns(10);
-		textField_3.setText("http://127.0.0.1:8081/webapp/");
+		txtHttpweb = new JTextField();
+		txtHttpweb.setColumns(10);
+		txtHttpweb.setText("http://127.0.0.1:8080/web");
 		JLabel lblWebappAddress = new JLabel("transitime Webapp address");
 		lblWebappAddress.setFont(new Font("Arial", Font.PLAIN, 16));
 		
@@ -140,28 +142,43 @@ public class OutputPanel {
 				clpbrd.setContents(stringSelection, null);
 			}
 		});
+		
+		JButton btnOpenInBrowser = new JButton("Open in browser");
+		btnOpenInBrowser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					java.awt.Desktop.getDesktop().browse(new java.net.URI("http://127.0.0.1:8080/web"));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 		GroupLayout groupLayout = new GroupLayout(frmTransitimequickstart.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-							.addContainerGap(55, Short.MAX_VALUE)
+					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+						.addGroup(groupLayout.createSequentialGroup()
+							.addContainerGap(50, Short.MAX_VALUE)
 							.addComponent(lblInstallationIsNow, GroupLayout.PREFERRED_SIZE, 511, GroupLayout.PREFERRED_SIZE))
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(31)
-							.addComponent(btnMinimize, GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+							.addComponent(btnMinimize, GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE)
 							.addGap(91)
 							.addComponent(btnShowMap, GroupLayout.PREFERRED_SIZE, 201, GroupLayout.PREFERRED_SIZE)
 							.addGap(29))
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(textField, GroupLayout.PREFERRED_SIZE, 481, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnCopy, GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE))
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+							.addComponent(btnCopy, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
-							.addComponent(textField_1, GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
+							.addComponent(textField_1, GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(button, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE))
 						.addGroup(groupLayout.createSequentialGroup()
@@ -173,20 +190,22 @@ public class OutputPanel {
 					.addContainerGap())
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(lblApikey, GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+					.addComponent(lblApikey, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
 					.addGap(351))
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(textField_2, 279, 279, 279)
-					.addContainerGap(287, Short.MAX_VALUE))
+					.addContainerGap(282, Short.MAX_VALUE))
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(lblWebappAddress, GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+					.addComponent(lblWebappAddress, GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
 					.addGap(359))
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(textField_3, 279, 279, 279)
-					.addContainerGap(287, Short.MAX_VALUE))
+					.addComponent(txtHttpweb, 279, 279, 279)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(btnOpenInBrowser)
+					.addContainerGap(148, Short.MAX_VALUE))
 				.addGroup(groupLayout.createSequentialGroup()
 					.addGap(84)
 					.addComponent(lblTheseLinksInto)
@@ -218,7 +237,9 @@ public class OutputPanel {
 					.addGap(18)
 					.addComponent(lblWebappAddress)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
-					.addComponent(textField_3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+						.addComponent(txtHttpweb, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnOpenInBrowser))
 					.addGap(69)
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(btnMinimize, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)

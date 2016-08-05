@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transitime>
+ <web><mapTileUrl>http://tile.openstreetmap.org/{z}/{x}/{y}.png</mapTileUrl></web>
  <modules>
-        <optionalModulesList>org.transitime.core.schedBasedPreds.SchedBasedPredsModule</optionalModulesList>        
+
+        <optionalModulesList>org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
     </modules>
     <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
     <core>
 	<agencyId>02</agencyId>
     </core>	
     <avl>
-    <!--     <gtfsRealtimeFeedURI>http://realtime.prod.obahart.org:8088/vehicle-positions</gtfsRealtimeFeedURI> 		  
-		<url>http://realtime.prod.obahart.org:8088/vehicle-positions</url>	 -->
+       <gtfsRealtimeFeedURI>http://api.pugetsound.onebusaway.org/api/gtfs_realtime/vehicle-positions-for-agency/19.pb?key=6d665ba6-0d09-459d-b815-5388215e8b7f</gtfsRealtimeFeedURI> 		  
+		<url>http://api.pugetsound.onebusaway.org/api/gtfs_realtime/vehicle-positions-for-agency/19.pb?key=6d665ba6-0d09-459d-b815-5388215e8b7f</url>	
         <!-- URL for GTFS realtime vechicle location stream -->
                <!--  commented out for now for ease of use -->
      <!--    <minLatitude>30.145125</minLatitude>   
