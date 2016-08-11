@@ -16,51 +16,43 @@
  */
 package org.transitime.gui;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 import javax.swing.JRadioButton;
-import java.awt.GridLayout;
 import javax.swing.JLabel;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormSpecs;
-import com.jgoodies.forms.layout.RowSpec;
-import java.awt.FlowLayout;
 import javax.swing.JTextField;
 import java.awt.Font;
 import java.awt.Button;
-import java.awt.Color;
 import java.awt.SystemColor;
-import java.awt.event.InputMethodListener;
 import java.io.File;
-import java.awt.event.InputMethodEvent;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
-
 import org.transitime.db.webstructs.ApiKey;
-import org.transitime.db.webstructs.ApiKeyManager;
 import org.transitime.gui.TransitimeQuickStart;
 
 /**
+ * This is the First and main gui element of the gui, all values needed for the
+ * transitimeQuickStart are entered in this panel install jswing should allow
+ * you to see and edit the gui.
  * 
  * @author Brendan Egan
  *
  */
 public class InputPanel extends JFrame {
+	/**
+	 * @parem filelocation where the gtfs is located when selected by the user,
+	 *        will use a default if nothing entered
+	 * @parem realtimefeedURL the realtimefeed entered by the user, will use a
+	 *        default if nothing entered
+	 * @parem loglocation where the logs will be outputted to, entered by the
+	 *        user, will use a default if nothing entered, default is currently
+	 *        the directory the application was called
+	 */
 
 	private JPanel contentPane;
 	private JTextField textField;
@@ -130,11 +122,17 @@ public class InputPanel extends JFrame {
 		btnNewButton.setBackground(SystemColor.menu);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				/**
+				 * creates a file browse on selection of the browse button
+				 */
 				JFileChooser fc = new JFileChooser();
 
 				int returnVal = fc.showOpenDialog(browse);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					/**
+					 * @parem file will be the chosen file selected by the file browser
+					 */
 					File file = fc.getSelectedFile();
 					filelocation = file.getPath();
 					textField.setText(filelocation);
@@ -155,6 +153,7 @@ public class InputPanel extends JFrame {
 		button_1.setBounds(442, 194, 17, 24);
 		button_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				//creates an information panel on selecting of the I buttons
 				InformationPanel infopanel = new InformationPanel();
 				infopanel.InformationPanelstart();
 
@@ -174,6 +173,7 @@ public class InputPanel extends JFrame {
 		button.setBounds(442, 256, 17, 24);
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				//creates an information panel on selecting of the I buttons
 				InformationPanel infopanel = new InformationPanel();
 				infopanel.InformationPanelstart();
 			}
@@ -196,6 +196,9 @@ public class InputPanel extends JFrame {
 		btnNext.setFont(new Font("Arial", Font.PLAIN, 13));
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				/**
+				 * calls the methods of the transitimeQuickStart 
+				 */
 				String apikeystring = null;
 				// reads in URL
 				loglocation = textField_2.getText();
@@ -206,30 +209,28 @@ public class InputPanel extends JFrame {
 					start.startDatabase();
 					start.startGtfsFileProcessor(filelocation);
 					start.createApiKey();
+					//creates an apikey, holds the key as a string in apikeystring
 					ApiKey apikey = start.getApiKey();
 					apikeystring = apikey.getKey();
 
 					start.startCore(realtimefeedURL, loglocation);
-					start.addApi(apikeystring);
+					start.addApi();
+					//Starts webapp if selected in gui
 					if (getRdbtnStartWebappSelected() == true) {
 						start.addWebapp();
 						start.webAgency();
 					}
 					start.startJetty();
+					//creates the output panel
 					OutputPanel windowinput = new OutputPanel(apikeystring);
 					windowinput.OutputPanelstart();
 					dispose();
 				} catch (QuickStartException qe) {
 
 				}
-				// Makes output Panel
-				
-				
-
 			}
 		});
 		btnNext.setVerticalAlignment(SwingConstants.BOTTOM);
-
 		rdbtnStartWebapp = new JRadioButton("Start webapp");
 		rdbtnStartWebapp.setBounds(17, 309, 150, 57);
 		rdbtnStartWebapp.setFont(new Font("Arial", Font.PLAIN, 16));

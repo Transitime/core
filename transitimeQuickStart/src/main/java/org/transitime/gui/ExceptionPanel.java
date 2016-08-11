@@ -91,7 +91,7 @@ public class ExceptionPanel {
 		txtrEx.setBounds(12, 57, 366, 264);
 		frmTransitimequickstart.getContentPane().add(txtrEx);
 		
-		JLabel lblErrorIn = new JLabel("Error in starting QuickStart:");
+		JLabel lblErrorIn = new JLabel("Error in starting TransitimeQuickStart:");
 		lblErrorIn.setFont(new Font("Arial", Font.PLAIN, 16));
 		lblErrorIn.setBounds(12, 13, 366, 31);
 		frmTransitimequickstart.getContentPane().add(lblErrorIn);
