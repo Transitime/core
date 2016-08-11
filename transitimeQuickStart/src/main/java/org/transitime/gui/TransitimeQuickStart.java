@@ -78,7 +78,7 @@ public class TransitimeQuickStart {
 		 * selected from the input panel
 		 */
 		try {
-			URL configFile = this.getClass().getClassLoader().getResource("transiTimeconfig.xml");
+			URL configFile = this.getClass().getClassLoader().getResource("transitime.properties");
 			String configFilePath = configFile.getPath();
 			// String
 			// configFilePath="..//transitimeQuickStart//src//main//resources//transiTimeconfig.xml";
@@ -128,9 +128,9 @@ public class TransitimeQuickStart {
 		 */
 		try {
 
-			// String fileName = "transiTimeconfig.xml";
+			
 			ConfigFileReader.processConfig();
-			// ConfigFileReader.processConfig(this.getClass().getClassLoader().getResource(fileName).getPath());
+			
 
 			String name = "Joe bloggs";
 			String url = "http://www.transitime.org";
@@ -168,7 +168,7 @@ public class TransitimeQuickStart {
 			// TODO set the agency id by getting it from the gtfs file.
 			String agencyid = System.getProperties().getProperty("transitime.core.agencyId");
 			System.getProperties().setProperty("transitime.core.configRevStr", "0");
-			System.getProperties().setProperty("transitime.core.agencyId", "agencyid");
+			System.getProperties().setProperty("transitime.core.agencyId", agencyid);
 			// uses default if nothing entered
 			if (loglocation.equals("")) {
 				// uses current directory if one none specified by user.

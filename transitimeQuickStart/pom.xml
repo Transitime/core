@@ -17,7 +17,6 @@
 		<jettyVersion>9.4.0.M0</jettyVersion>
 	</properties>
 	<dependencies>
-
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
