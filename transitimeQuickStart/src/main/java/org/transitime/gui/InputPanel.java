@@ -186,6 +186,7 @@ public class InputPanel extends JFrame {
 		btnCancel.setFont(new Font("Arial", Font.PLAIN, 13));
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
 				dispose();
 			}
 		});
