@@ -207,6 +207,7 @@ public class InputPanel extends JFrame {
 				// Starts the GtfsFileProcessor ,ApiKey and core
 				try {
 					TransitimeQuickStart start = new TransitimeQuickStart();
+					start.extractResources();
 					start.startDatabase();
 					start.startGtfsFileProcessor(filelocation);
 					start.createApiKey();

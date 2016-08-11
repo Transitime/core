@@ -45,6 +45,7 @@ public class OutputPanel {
 	private JTextField textField_1;
 	private String apiKey;
 	private JTextField txtHttpweb;
+	private String agencyid=null;
 
 	/**
 	 * Launch the application.
@@ -91,7 +92,7 @@ public class OutputPanel {
 		textField = new JTextField();
 		textField.setColumns(10);
 		//gets the agencyid
-		String agencyid=System.getProperties().getProperty("transitime.core.agencyId");
+		agencyid=System.getProperties().getProperty("transitime.core.agencyId");
 		textField.setText("http://127.0.0.1:8080/api/v1/key/"+apiKey+"/agency/"+agencyid+"/command/gtfs-rt/tripUpdates");
 		
 		JLabel lblVechiclePositionsUrl = new JLabel("Vechicle Positions URL");
@@ -148,7 +149,7 @@ public class OutputPanel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					//opens in default browser at the location specfied
-					java.awt.Desktop.getDesktop().browse(new java.net.URI("http://127.0.0.1:8080/api/v1/key/"+apiKey+"/agency/02/command/gtfs-rt/tripUpdates?format=human"));
+					java.awt.Desktop.getDesktop().browse(new java.net.URI("http://127.0.0.1:8080/api/v1/key/"+apiKey+"/agency/"+agencyid+"/command/gtfs-rt/tripUpdates?format=human"));
 				} catch (IOException e1) {
 					
 					e1.printStackTrace();
@@ -164,7 +165,7 @@ public class OutputPanel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					//opens in default browser at the location specfied
-					java.awt.Desktop.getDesktop().browse(new java.net.URI("http://127.0.0.1:8080/api/v1/key/"+apiKey+"/agency/02/command/gtfs-rt/vehiclePositions?format=human"));
+					java.awt.Desktop.getDesktop().browse(new java.net.URI("http://127.0.0.1:8080/api/v1/key/"+apiKey+"/agency/"+agencyid+"/command/gtfs-rt/vehiclePositions?format=human"));
 				} catch (IOException e1) {
 				
 					e1.printStackTrace();

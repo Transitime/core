@@ -17,6 +17,7 @@
 package org.transitime.gui;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import org.eclipse.jetty.server.Handler;
@@ -34,6 +35,7 @@ import org.transitime.db.webstructs.ApiKey;
 import org.transitime.db.webstructs.ApiKeyManager;
 import org.transitime.db.webstructs.WebAgency;
 import org.transitime.modules.Module;
+import org.transitime.quickstart.resource.ExtractResource;
 
 /**
  * <h1>transitimeQuickStart
@@ -66,10 +68,22 @@ public class TransitimeQuickStart {
 		/**
 		 * creates and starts the input panel of the gui
 		 */
-
 		InputPanel windowinput = new InputPanel();
 		windowinput.InputPanelstart();
 
+	}
+
+	public void extractResources() throws QuickStartException {
+		try {
+			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "hibernate.cfg.xml");
+			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "transitime.properties");
+			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "api.war");
+			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "web.war");
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			// TODO send strack trace in all quickStart exceptions
+			throw new QuickStartException("extractResources failed", e);
+		}
 	}
 
 	public void startGtfsFileProcessor(String gtfsZipFileName) throws QuickStartException {
@@ -78,14 +92,13 @@ public class TransitimeQuickStart {
 		 * selected from the input panel
 		 */
 		try {
-			URL configFile = this.getClass().getClassLoader().getResource("transitime.properties");
-			String configFilePath = configFile.getPath();
+			String configFilePath = null;
+			
 			// String
 			// configFilePath="..//transitimeQuickStart//src//main//resources//transiTimeconfig.xml";
 			String gtfsFilePath;
 			if (gtfsZipFileName == null) {
-				// TODO get this via new method
-				URL gtfsFile = this.getClass().getClassLoader().getResource("Intercity.zip");
+				File gtfsFile = ExtractResource.extractResourceFile(this.getClass().getClassLoader(), "Intercity.zip");
 				gtfsFilePath = gtfsFile.getPath();
 				gtfsZipFileName = gtfsFilePath;
 			} else {
@@ -116,7 +129,7 @@ public class TransitimeQuickStart {
 			logger.info("startGtfsFileProcessor successful");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			//TODO send strack trace in all quickStart exceptions
+			// TODO send strack trace in all quickStart exceptions
 			throw new QuickStartException("GtfsFileProcessor failed to start", e);
 		}
 	}
@@ -128,9 +141,7 @@ public class TransitimeQuickStart {
 		 */
 		try {
 
-			
 			ConfigFileReader.processConfig();
-			
 
 			String name = "Joe bloggs";
 			String url = "http://www.transitime.org";
@@ -162,20 +173,16 @@ public class TransitimeQuickStart {
 		 * where the transitimeQuickStart was called
 		 */
 		try {
-			// TODO use get property to fix this?
-			URL configFile = this.getClass().getClassLoader().getResource("transitime.properties");
-			String configFilePath = configFile.getPath();
+			ConfigFileReader.processConfig();
 			// TODO set the agency id by getting it from the gtfs file.
 			String agencyid = System.getProperties().getProperty("transitime.core.agencyId");
 			System.getProperties().setProperty("transitime.core.configRevStr", "0");
-			System.getProperties().setProperty("transitime.core.agencyId", agencyid);
 			// uses default if nothing entered
 			if (loglocation.equals("")) {
 				// uses current directory if one none specified by user.
 				loglocation = System.getProperty("user.dir");
 			}
 			System.getProperties().setProperty("transitime.logging.dir", loglocation);
-			System.getProperties().setProperty("transitime.configFiles", configFilePath);
 			// only set the paramater for realtimeURLfeed if specified by user
 			if (!realtimefeedURL.equals("")) {
 				System.getProperties().setProperty("transitime.avl.url", realtimefeedURL);
@@ -245,7 +252,7 @@ public class TransitimeQuickStart {
 
 			apiapp = new WebAppContext();
 			apiapp.setContextPath("/api");
-			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("api.war").getPath());
+			File warFile = new File("api.war");
 			apiapp.setWar(warFile.getPath());
 
 			// location to go to=
@@ -275,7 +282,7 @@ public class TransitimeQuickStart {
 
 			webapp = new WebAppContext();
 			webapp.setContextPath("/web");
-			File warFile = new File(TransitimeQuickStart.class.getClassLoader().getResource("web.war").getPath());
+			File warFile = new File("web.war");
 
 			webapp.setWar(warFile.getPath());
 
@@ -300,7 +307,8 @@ public class TransitimeQuickStart {
 		 * Starts the server for webapp and/or api
 		 */
 		try {
-			// handler Collection is used to allow 2 different war files(api.war and
+			// handler Collection is used to allow 2 different war files(api.war
+			// and
 			// web.war) to be used
 			HandlerCollection handlerCollection = new HandlerCollection();
 			handlerCollection.setHandlers(new Handler[] { apiapp, webapp });
