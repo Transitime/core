@@ -64,9 +64,9 @@ public class KalmanErrorCache {
 	}
 	
 	@SuppressWarnings("unchecked")
-	synchronized public Double getErrorValue(Indices indices, String vehicleId) {		
+	synchronized public Double getErrorValue(Indices indices) {		
 		
-		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices, vehicleId);
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
 		
 		Element result = cache.get(key);
 		
@@ -76,9 +76,9 @@ public class KalmanErrorCache {
 			return (Double)result.getObjectValue();		
 	}
 	@SuppressWarnings("unchecked")
-	synchronized public void putErrorValue(Indices indices, String vehicleId, Double value) {
+	synchronized public void putErrorValue(Indices indices,  Double value) {
 		
-		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices, vehicleId);
+		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
 		Element errorElement = new Element(key, value);
 		
 		cache.put(errorElement);

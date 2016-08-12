@@ -17,6 +17,7 @@ import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.TravelTimes;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.KalmanErrorCache;
+import org.transitime.core.dataCache.KalmanErrorCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
 import org.transitime.core.dataCache.VehicleDataCache;
@@ -79,9 +80,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 		VehicleStateManager vehicleStateManager = VehicleStateManager.getInstance();
 
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());		
-
-		
-
+	
 		long time = 0;
 
 		// time = getTimeTaken(tripCache, previousVehicleOnRouteState, indices);
@@ -130,42 +129,46 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					TripSegment ts_day_0_k_1 = new TripSegment(originDetail, destinationDetail_0_k_1);
 
 					TripSegment last_vehicle_segment = ts_day_0_k_1;
-
-					Double last_prediction_error = lastPredictionError(kalmanErrorCache, indices,
-							avlReport.getVehicleId());
+								
+					Indices previousVehicleIndices = getLastVehicleIndices(currentVehicleState, indices);
+					
+					Double last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);
 
 					kalmanPredictionResult = kalmanPrediction.predict(last_vehicle_segment, historical_segments_k,
 							last_prediction_error);
 
 					long predictionTime = (long) kalmanPredictionResult.getResult();
 
-					kalmanErrorCache.putErrorValue(indices, avlReport.getVehicleId(),
-							kalmanPredictionResult.getFilterError());
+					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + "for key "+ new KalmanErrorCacheKey(indices).toString());
+					
+					kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
 
-					logger.debug("Using Kalman prediction: " + predictionTime + " Transitime prediction: "
+					logger.debug("Using Kalman prediction: " + predictionTime + " instead of prediction: "
 							+ super.getTravelTimeForPath(indices, avlReport));
-					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " Vechicle Id: "
-							+ avlReport.getVehicleId());
-
+																
 					return predictionTime;
 
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 			}
-
 		}
 		//logger.debug("Generating default prediction.");
 		return super.getTravelTimeForPath(indices, avlReport);
 
 	}
 
-	private Double lastPredictionError(KalmanErrorCache cache, Indices indices, String vechicleId) {
-		Indices lastErrorIndices = new Indices(indices.getBlock(), indices.getTripIndex(),
-				indices.decrementStopPath().getStopPathIndex(), indices.getSegmentIndex());
-		Double result = cache.getErrorValue(lastErrorIndices, vechicleId);
-		if (result == null)
+	private Double lastVehiclePredictionError(KalmanErrorCache cache, Indices indices) {		
+		Double result = cache.getErrorValue(indices);
+		if(result!=null)
+		{
+			logger.debug("Kalman Error value : "+result +" for key: "+new KalmanErrorCacheKey(indices).toString());
+		}
+		else
+		{
+			logger.debug("Kalman Error value set to default: "+initialErrorValue.getValue() +" for key: "+new KalmanErrorCacheKey(indices).toString());
 			return initialErrorValue.getValue();
+		}
 		return result;
 	}
 

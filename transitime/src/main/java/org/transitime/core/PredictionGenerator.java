@@ -86,7 +86,7 @@ public abstract class PredictionGenerator {
 											
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
 							if(found.getTime() - currentArrivalDeparture.getTime()>0)
-							{								
+							{																
 								return found.getTime() - currentArrivalDeparture.getTime();
 							}else
 							{
@@ -103,7 +103,51 @@ public abstract class PredictionGenerator {
 		}
 		return -1;
 	}
+	protected Indices getLastVehicleIndices(VehicleState currentVehicleState, Indices indices) {
+
+		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
+				indices.getStopPath().getStopId(),
+				new Date(currentVehicleState.getMatch().getAvlTime()));
+										
+		/* TODO how do we handle the the first stop path. Where do we get the first stop id. */ 		 
+		if(!indices.atBeginningOfTrip())
+		{						
+			String currentStopId = indices.getPreviousStopPath().getStopId();
+			
+			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
+					new Date(currentVehicleState.getMatch().getAvlTime()));
 	
+			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+	
+			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+	
+			if (currentStopList != null && nextStopList != null) {
+				// lists are already sorted when put into cache.
+				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
+					
+					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
+					{
+						ArrivalDeparture found;
+											
+						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
+							if(found.getTime() - currentArrivalDeparture.getTime()>0)
+							{																
+								return new Indices(found.getBlock(), found.getTripIndex(), found.getStopPathIndex(), 0);
+							}else
+							{
+								// must be going backwards
+								return null;
+							}
+						}else
+						{
+							return null;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 	/* TODO could also make it a requirement that it is on the same route as the one we are generating prediction for */
 	protected ArrivalDeparture findMatchInList(List<ArrivalDeparture> nextStopList,
 			ArrivalDeparture currentArrivalDeparture) {
