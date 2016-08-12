@@ -17,28 +17,15 @@
 package org.transitime.gui;
 
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import javax.swing.JLabel;
-import java.awt.GridBagConstraints;
-import javax.swing.JButton;
-import java.awt.Insets;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Font;
-import javax.swing.Box;
-import javax.swing.JRadioButton;
-import java.awt.Color;
-import java.awt.SystemColor;
-import net.miginfocom.swing.MigLayout;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import java.awt.Canvas;
-import java.awt.Window.Type;
+import javax.swing.JPanel;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import javax.swing.JScrollPane;
 /**
  * 
  * @author Brendan Egan
@@ -79,21 +66,27 @@ public class ExceptionPanel {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frmTransitimequickstart = new JFrame();
-		frmTransitimequickstart.setTitle("transiTimeQuickStart");
-		frmTransitimequickstart.setBounds(100, 100, 408, 381);
-		frmTransitimequickstart.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmTransitimequickstart.getContentPane().setLayout(null);
-		
-		JTextArea txtrEx = new JTextArea();
-		txtrEx.setText(message+"\n"+ex.getMessage());
-		
-		txtrEx.setBounds(12, 57, 366, 264);
-		frmTransitimequickstart.getContentPane().add(txtrEx);
-		
-		JLabel lblErrorIn = new JLabel("Error in starting TransitimeQuickStart:");
-		lblErrorIn.setFont(new Font("Arial", Font.PLAIN, 16));
-		lblErrorIn.setBounds(12, 13, 366, 31);
-		frmTransitimequickstart.getContentPane().add(lblErrorIn);
+		JPanel middlePanel = new JPanel ();
+	    middlePanel.setBorder ( new TitledBorder ( new EtchedBorder (), "Error Starting TransitimeQuickStart" ) );
+
+	    // create the middle panel components
+
+	    JTextArea display = new JTextArea ( 35, 90 );
+	    display.setEditable ( false ); // set textArea non-editable
+	    JScrollPane scroll = new JScrollPane ( display );
+	    scroll.setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
+
+	    //Add Textarea in to middle panel
+	    middlePanel.add ( scroll );
+
+	   
+	    JFrame frame = new JFrame ();
+	    frame.add ( middlePanel );
+	    frame.pack ();
+	    frame.setLocationRelativeTo ( null );
+	    frame.setVisible ( true );
+	    String stackTrace = ExceptionUtils.getStackTrace(ex);
+	    display.setText(message+"\n"+ex.toString()+"\n"+stackTrace);
 	}
-}
+}     
+   

@@ -17,8 +17,6 @@
 package org.transitime.gui;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -70,7 +68,7 @@ public class TransitimeQuickStart {
 		 */
 		InputPanel windowinput = new InputPanel();
 		windowinput.InputPanelstart();
-
+		
 	}
 
 	public void extractResources() throws QuickStartException {
@@ -78,10 +76,9 @@ public class TransitimeQuickStart {
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "hibernate.cfg.xml");
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "transitime.properties");
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "api.war");
-			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "web.war");
+			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "test");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			// TODO send strack trace in all quickStart exceptions
 			throw new QuickStartException("extractResources failed", e);
 		}
 	}
