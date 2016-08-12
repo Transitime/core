@@ -14,8 +14,12 @@ public class IpcHistoricalAverage implements Serializable{
 	
 	public IpcHistoricalAverage(HistoricalAverage historicalAverage) {
 		super();
-		this.count = historicalAverage.getCount();
-		this.average = historicalAverage.getAverage();
+		
+		if(historicalAverage!=null)
+		{
+			this.count = historicalAverage.getCount();
+			this.average = historicalAverage.getAverage();
+		}
 	}
 
 
@@ -42,8 +46,8 @@ public class IpcHistoricalAverage implements Serializable{
 	private static final long serialVersionUID = -1285357644186049157L;
 
 
-	private Integer count;
+	private Integer count=0;
 	
 
-	private Double average;
+	private Double average=0.0;
 }

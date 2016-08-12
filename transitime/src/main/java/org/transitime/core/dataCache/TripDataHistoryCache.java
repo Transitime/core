@@ -148,7 +148,7 @@ public class TripDataHistoryCache {
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
 		int days_back=1;
 		if(debug)
-			days_back=2;		
+			days_back=3;		
 		TripKey tripKey=null;
 		
 		for(int i=0;i < days_back;i++)
@@ -176,7 +176,7 @@ public class TripDataHistoryCache {
 				list = new ArrayList<ArrivalDeparture>();
 			}
 			
-			list.add(arrivalDeparture);			
+			list.add(arrivalDeparture);									
 			
 			Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
 						

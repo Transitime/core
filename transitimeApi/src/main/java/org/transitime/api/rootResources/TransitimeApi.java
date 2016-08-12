@@ -1351,9 +1351,20 @@ public class TransitimeApi {
 
 			SimpleDateFormat dateformater=new SimpleDateFormat("yyyyMMdd");
 			
+			Date dateQuery=null;
+			
+			if(date!=null && date.length()>0)
+			{
+				try {
+					dateQuery=dateformater.parse(date);
+				} catch (Exception e) {					
+					throw WebUtils.badRequestException("Date is not in correct format (yyyyMMdd):"+date);
+				}
+			}
+			
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
 						
-			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, dateformater.parse(date), starttime);
+			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, dateQuery, starttime);
 					
 			ApiArrivalDepartures apiResult = new ApiArrivalDepartures(result);
 			Response response = stdParameters.createResponse(apiResult);

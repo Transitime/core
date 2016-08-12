@@ -63,6 +63,8 @@ public class IpcArrivalDeparture implements Serializable {
 		this.tripId=arrivalDepature.getTripId();
 		this.isArrival=arrivalDepature.isArrival();
 		this.stopId=arrivalDepature.getStopId();
+		this.stopPathIndex=arrivalDepature.getStopPathIndex();
+		this.scheduledTime=arrivalDepature.getScheduledDate();
 	}
 	
 	@Override
