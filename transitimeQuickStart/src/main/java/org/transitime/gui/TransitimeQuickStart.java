@@ -76,7 +76,7 @@ public class TransitimeQuickStart {
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "hibernate.cfg.xml");
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "transitime.properties");
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "api.war");
-			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "test");
+			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "web.war");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new QuickStartException("extractResources failed", e);
