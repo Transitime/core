@@ -10,7 +10,7 @@ public class QuickStartException extends Exception {
 	public QuickStartException(String message, Exception ex) {
 		super(message, ex);
 		ExceptionPanel exception = new ExceptionPanel(message, ex);
-		exception.ExceptionPanelstart();
+		//exception.ExceptionPanelstart();
 		//System.exit(-1);
 	}
 
