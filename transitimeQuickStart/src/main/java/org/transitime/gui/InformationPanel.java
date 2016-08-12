@@ -63,7 +63,7 @@ public class InformationPanel {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 522, 442);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
 		JTextPane txtpnInfopanel = new JTextPane();
 		txtpnInfopanel.setFont(new Font("Tahoma", Font.PLAIN, 16));
