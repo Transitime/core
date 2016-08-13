@@ -34,6 +34,8 @@ import java.awt.SystemColor;
 import java.io.File;
 import org.transitime.db.webstructs.ApiKey;
 import org.transitime.gui.TransitimeQuickStart;
+import org.transitime.quickstart.resource.FileBrowser;
+import org.transitime.quickstart.resource.QuickStartException;
 
 /**
  * This is the First and main gui element of the gui, all values needed for the
@@ -217,12 +219,13 @@ public class InputPanel extends JFrame {
 
 					start.startCore(realtimefeedURL, loglocation);
 					start.addApi();
+					boolean startwebapp = getRdbtnStartWebappSelected();
 					//Starts webapp if selected in gui
-					if (getRdbtnStartWebappSelected() == true) {
+					if (startwebapp == true) {
 						start.addWebapp();
 						start.webAgency();
 					}
-					start.startJetty();
+					start.startJetty(startwebapp);
 					//creates the output panel
 					OutputPanel windowinput = new OutputPanel(apikeystring);
 					windowinput.OutputPanelstart();

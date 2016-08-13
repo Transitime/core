@@ -34,6 +34,7 @@ import org.transitime.db.webstructs.ApiKeyManager;
 import org.transitime.db.webstructs.WebAgency;
 import org.transitime.modules.Module;
 import org.transitime.quickstart.resource.ExtractResource;
+import org.transitime.quickstart.resource.QuickStartException;
 
 /**
  * <h1>transitimeQuickStart
@@ -299,7 +300,7 @@ public class TransitimeQuickStart {
 		}
 	}
 
-	public void startJetty() throws QuickStartException {
+	public void startJetty(boolean startwebapp) throws QuickStartException {
 		/**
 		 * Starts the server for webapp and/or api
 		 */
@@ -308,7 +309,14 @@ public class TransitimeQuickStart {
 			// and
 			// web.war) to be used
 			HandlerCollection handlerCollection = new HandlerCollection();
+			if(startwebapp==true)
+			{
 			handlerCollection.setHandlers(new Handler[] { apiapp, webapp });
+			}
+			else
+			{
+			handlerCollection.setHandlers(new Handler[] {apiapp});
+			}
 			webserver.setHandler(handlerCollection);
 			webserver.start();
 			/*

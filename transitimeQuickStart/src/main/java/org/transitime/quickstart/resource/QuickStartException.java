@@ -1,4 +1,6 @@
-package org.transitime.gui;
+package org.transitime.quickstart.resource;
+
+import org.transitime.gui.ExceptionPanel;
 
 public class QuickStartException extends Exception {
 
@@ -10,8 +12,6 @@ public class QuickStartException extends Exception {
 	public QuickStartException(String message, Exception ex) {
 		super(message, ex);
 		ExceptionPanel exception = new ExceptionPanel(message, ex);
-		//exception.ExceptionPanelstart();
-		//System.exit(-1);
 	}
 
 }
