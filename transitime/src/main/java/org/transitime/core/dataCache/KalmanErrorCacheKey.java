@@ -4,12 +4,12 @@ import org.transitime.core.Indices;
 
 /**
  * @author Sean Og Crudden
- * This is really just Indices without segment.
+ * 
  */
 public class KalmanErrorCacheKey implements java.io.Serializable {
 	
-	private String blockId;
-	private Integer tripIndex;
+	
+	private String tripId;
 	private Integer stopPathIndex;
 	
 		
@@ -21,39 +21,55 @@ public class KalmanErrorCacheKey implements java.io.Serializable {
 
 	public KalmanErrorCacheKey(Indices indices) {
 		super();
-		this.blockId=indices.getBlock().getId();
-		this.tripIndex=indices.getTripIndex();
+		
+		this.tripId=indices.getBlock().getTrip(indices.getTripIndex()).getId();
 		this.stopPathIndex=indices.getStopPathIndex();		
 	}
 	
-	/**
-	 * @return the blockId
-	 */
-	public String getBlockId() {
-		return blockId;
+	@Override
+	public String toString() {
+		return "KalmanErrorCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + "]";
 	}
 
-	/**
-	 * @param blockId the blockId to set
-	 */
-	public void setBlockId(String blockId) {
-		this.blockId = blockId;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
+		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
+		return result;
 	}
 
-	/**
-	 * @return the tripIndex
-	 */
-	public int getTripIndex() {
-		return tripIndex;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		KalmanErrorCacheKey other = (KalmanErrorCacheKey) obj;
+		if (stopPathIndex == null) {
+			if (other.stopPathIndex != null)
+				return false;
+		} else if (!stopPathIndex.equals(other.stopPathIndex))
+			return false;
+		if (tripId == null) {
+			if (other.tripId != null)
+				return false;
+		} else if (!tripId.equals(other.tripId))
+			return false;
+		return true;
 	}
 
-	/**
-	 * @param tripIndex the tripIndex to set
-	 */
-	public void setTripIndex(int tripIndex) {
-		this.tripIndex = tripIndex;
+	public KalmanErrorCacheKey(String tripId, Integer stopPathIndex) {
+		super();
+		
+		this.tripId = tripId;
+		this.stopPathIndex = stopPathIndex;
 	}
 
+	
 	/**
 	 * @return the stopPathIndex
 	 */
@@ -71,58 +87,6 @@ public class KalmanErrorCacheKey implements java.io.Serializable {
 	
 	
 
-	/**
-	 * @param indices the indices to set
-	 */
-	public void setIndices(Indices indices) {
-		this.blockId=indices.getBlock().getId();
-		this.tripIndex=indices.getTripIndex();
-		this.stopPathIndex=indices.getStopPathIndex();
-					
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
-		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
-		result = prime * result + ((tripIndex == null) ? 0 : tripIndex.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		KalmanErrorCacheKey other = (KalmanErrorCacheKey) obj;
-		if (blockId == null) {
-			if (other.blockId != null)
-				return false;
-		} else if (!blockId.equals(other.blockId))
-			return false;
-		if (stopPathIndex == null) {
-			if (other.stopPathIndex != null)
-				return false;
-		} else if (!stopPathIndex.equals(other.stopPathIndex))
-			return false;
-		if (tripIndex == null) {
-			if (other.tripIndex != null)
-				return false;
-		} else if (!tripIndex.equals(other.tripIndex))
-			return false;
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "KalmanErrorCacheKey [blockId=" + blockId + ", tripIndex=" + tripIndex + ", stopPathIndex="
-				+ stopPathIndex + "]";
-	}
 
 
 	

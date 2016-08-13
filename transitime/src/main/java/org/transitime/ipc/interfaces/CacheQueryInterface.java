@@ -79,7 +79,20 @@ public interface CacheQueryInterface extends Remote {
 		throws RemoteException;
 	
 	
+	/**
+	 * @return a list of the keys that have values is the historical average cache
+	 * @throws RemoteException
+	 */
 	public List<IpcHistoricalAverageCacheKey> getHistoricalAverageCacheKeys()
 		throws RemoteException;
+	
+	/**
+	 * Return the latest Kalman error value for a the stop path of a trip.
+	 * @param tripId
+	 * @param stopPathIndex
+	 * @return
+	 * @throws RemoteException
+	 */	
+	public  Double getKalmanErrorValue(String tripId, Integer stopPathIndex) throws RemoteException;
 
 }

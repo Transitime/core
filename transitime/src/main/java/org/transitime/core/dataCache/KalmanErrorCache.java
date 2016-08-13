@@ -76,6 +76,16 @@ public class KalmanErrorCache {
 			return (Double)result.getObjectValue();		
 	}
 	@SuppressWarnings("unchecked")
+	synchronized public Double getErrorValue(KalmanErrorCacheKey key) {		
+						
+		Element result = cache.get(key);
+		
+		if(result==null)
+			return null;
+		else
+			return (Double)result.getObjectValue();		
+	}
+	@SuppressWarnings("unchecked")
 	synchronized public void putErrorValue(Indices indices,  Double value) {
 		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);

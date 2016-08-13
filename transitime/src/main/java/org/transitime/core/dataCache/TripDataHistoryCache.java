@@ -61,7 +61,7 @@ public class TripDataHistoryCache {
 	 */
 	private static final IntegerConfigValue tripDataCacheMaxAgeSec = new IntegerConfigValue(
 			"transitime.tripdatacache.tripDataCacheMaxAgeSec",
-			4 * Time.SEC_PER_DAY,
+			15 * Time.SEC_PER_DAY,
 			"How old an arrivaldeparture has to be before it is removed from the cache ");
 
 	/**
@@ -83,7 +83,7 @@ public class TripDataHistoryCache {
 		}else
 		{
 			evictionPolicy = new EvictionAgePolicy(
-					4 * Time.SEC_PER_DAY *Time.MS_PER_SEC);
+					15 * Time.SEC_PER_DAY *Time.MS_PER_SEC);
 		}
 
 		if (cm.getCache(cacheByTrip) == null) {
@@ -92,7 +92,7 @@ public class TripDataHistoryCache {
 		cache = cm.getCache(cacheByTrip);
 		
 		//CacheConfiguration config = cache.getCacheConfiguration();							
-		
+		/*TODO We need to refine the eviction policy. */
 		cache.setMemoryStoreEvictionPolicy(evictionPolicy);
 	}
 	public List<TripKey> getKeys()

@@ -11,8 +11,8 @@ public class KalmanPrediction
 	/**
 	 * @param last_vehicle_segment The last vehicles info for the time taken to cover the same segment
 	 * @param historical_segments The last 3 days for info relating to the time taken for the vehicle handling the same service/trip took. 
-	 * @param last_prediction_error From the previous segments calculation result. (I am 99% sure you just start the chain of calcuations with an estimate)
-	 * @return KalmanPredictionResult which contains the predicted time and the last_prediction_error to be used in the next segment prediction calculation.
+	 * @param last_prediction_error From the previous segments calculation result. (I am 99.9% sure you just start the chain of calcuations with an estimate)
+	 * @return KalmanPredictionResult which contains the predicted time and the last_prediction_error to be used in the next prediction calculation.
 	 * @throws Exception
 	 */
 	public KalmanPredictionResult predict(TripSegment last_vehicle_segment,TripSegment historical_segments[], double last_prediction_error) throws Exception

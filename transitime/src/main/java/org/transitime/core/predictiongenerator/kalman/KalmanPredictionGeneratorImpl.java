@@ -103,7 +103,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 												
 			if(lastDaysTimes!=null)
 			{												
-				logger.debug("Kalman has " +lastDaysTimes.size()+ "  historical values for : " +indices.toString());
+				logger.debug("Kalman has " +lastDaysTimes.size()+ " historical values for : " +indices.toString());
 			}
 			/*
 			 * if we have enough data start using Kalman filter otherwise revert

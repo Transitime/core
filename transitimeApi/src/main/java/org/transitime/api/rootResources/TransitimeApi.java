@@ -1294,24 +1294,25 @@ public class TransitimeApi {
 	@Path("/command/historicalaveragecachekeys")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getHistoricalAverageCacheKeys(@BeanParam StandardParameters stdParameters) 
+	public Response getHistoricalAverageCacheKeys(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		try {
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
-			
+
 			List<IpcHistoricalAverageCacheKey> result = cachequeryInterface.getHistoricalAverageCacheKeys();
-			
-			ApiHistoricalAverageCacheKeys keys=new ApiHistoricalAverageCacheKeys(result);
-			
+
+			ApiHistoricalAverageCacheKeys keys = new ApiHistoricalAverageCacheKeys(result);
+
 			Response response = stdParameters.createResponse(keys);
-			
+
 			return response;
-			
+
 		} catch (Exception e) {
 			// If problem getting result then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
+
 	/**
 	 * Returns info about a cache.
 	 * 
@@ -1355,7 +1356,7 @@ public class TransitimeApi {
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
 
 			List<IpcArrivalDeparture> result = cachequeryInterface.getStopArrivalDepartures(stopid);
-					
+
 			ApiArrivalDepartures apiResult = new ApiArrivalDepartures(result);
 			Response response = stdParameters.createResponse(apiResult);
 			return response;
@@ -1365,20 +1366,22 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
+
 	@Path("/command/triparrivaldeparturecachedata")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getTripArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripid") String tripid, @QueryParam(value = "date") DateParam date, @QueryParam(value = "starttime") Integer starttime)
-			throws WebApplicationException {
+			@QueryParam(value = "tripid") String tripid, @QueryParam(value = "date") DateParam date,
+			@QueryParam(value = "starttime") Integer starttime) throws WebApplicationException {
 		try {
-						
+
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
-			LocalDate queryDate=null;
-			if(date!=null)
-				queryDate=date.getDate();
-			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, queryDate, starttime);
-					
+			LocalDate queryDate = null;
+			if (date != null)
+				queryDate = date.getDate();
+			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, queryDate,
+					starttime);
+
 			ApiArrivalDepartures apiResult = new ApiArrivalDepartures(result);
 			Response response = stdParameters.createResponse(apiResult);
 			return response;
@@ -1388,33 +1391,52 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
+
 	/*
-	 *  This will give the historical cache value for an individual stop path index of a trip
-	 *	private String tripId;
-	 *	private Integer stopPathIndex;
+	 * This will give the historical cache value for an individual stop path
+	 * index of a trip private String tripId; private Integer stopPathIndex;
 	 */
 	@Path("/command/historicalaveragecachedata")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getHistoricalAverageCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex") Integer stopPathIndex)
-	{
-		try {			
-			
+			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex") Integer stopPathIndex) {
+		try {
+
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
-			
+
 			IpcHistoricalAverage result = cachequeryInterface.getHistoricalAverage(tripId, stopPathIndex);
-																								
+
 			Response response = stdParameters.createResponse(new ApiHistoricalAverage(result));
-			
+
 			return response;
 
 		} catch (Exception e) {
 			// If problem getting result then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());
 		}
-	}	
-	
+	}
+
+	@Path("/command/getkalmanerrorvalue")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getKalmanErrorValue(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex") Integer stopPathIndex) {
+		try {
+
+			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
+
+			Double result = cachequeryInterface.getKalmanErrorValue(tripId, stopPathIndex);
+
+			Response response = stdParameters.createResponse(result);
+
+			return response;
+
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
 	// /**
 	// * For creating response of list of vehicles. Would like to make this a
 	// * generic type but due to type erasure cannot do so since GenericEntity
