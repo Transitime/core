@@ -49,6 +49,7 @@ import org.transitime.api.data.ApiCacheDetails;
 import org.transitime.api.data.ApiCalendars;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiHistoricalAverage;
+import org.transitime.api.data.ApiHistoricalAverageCacheKeys;
 import org.transitime.api.data.ApiIds;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
@@ -84,6 +85,7 @@ import org.transitime.ipc.data.IpcSchedule;
 import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcHistoricalAverage;
+import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
@@ -1288,6 +1290,27 @@ public class TransitimeApi {
 		return stdParameters.createResponse(apiRmiServerStatus);
 	}
 
+	@Path("/command/historicalaveragecachekeys")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getHistoricalAverageCacheKeys(@BeanParam StandardParameters stdParameters) 
+			throws WebApplicationException {
+		try {
+			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
+			
+			List<IpcHistoricalAverageCacheKey> result = cachequeryInterface.getHistoricalAverageCacheKeys();
+			
+			ApiHistoricalAverageCacheKeys keys=new ApiHistoricalAverageCacheKeys(result);
+			
+			Response response = stdParameters.createResponse(keys);
+			
+			return response;
+			
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
 	/**
 	 * Returns info about a cache.
 	 * 
@@ -1345,26 +1368,13 @@ public class TransitimeApi {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getTripArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripid") String tripid, @QueryParam(value = "date") String date, @QueryParam(value = "starttime") Integer starttime)
+			@QueryParam(value = "tripid") String tripid, @QueryParam(value = "date") DateParam date, @QueryParam(value = "starttime") Integer starttime)
 			throws WebApplicationException {
 		try {
-
-			SimpleDateFormat dateformater=new SimpleDateFormat("yyyyMMdd");
-			
-			Date dateQuery=null;
-			
-			if(date!=null && date.length()>0)
-			{
-				try {
-					dateQuery=dateformater.parse(date);
-				} catch (Exception e) {					
-					throw WebUtils.badRequestException("Date is not in correct format (yyyyMMdd):"+date);
-				}
-			}
-			
+						
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
 						
-			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, dateQuery, starttime);
+			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, date.getDate(), starttime);
 					
 			ApiArrivalDepartures apiResult = new ApiArrivalDepartures(result);
 			Response response = stdParameters.createResponse(apiResult);

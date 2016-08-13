@@ -32,6 +32,12 @@ public class HistoricalAverageCache {
 		}
 		cache = cm.getCache(cacheName);											
 	}
+	public List<TripStopPathCacheKey> getKeys()
+	{
+		@SuppressWarnings("unchecked")
+		List<TripStopPathCacheKey> keys = cache.getKeys();
+		return keys;
+	}
 	public void logCache(Logger logger)
 	{
 		logger.debug("Cache content log.");

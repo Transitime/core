@@ -18,11 +18,13 @@ package org.transitime.ipc.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 import org.transitime.ipc.data.IpcArrivalDeparture;
 import org.transitime.ipc.data.IpcHistoricalAverage;
+import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
 
 /**
  * Defines the RMI interface used for obtaining cache runtime information. 
@@ -73,8 +75,11 @@ public interface CacheQueryInterface extends Remote {
 	 * @return
 	 * @throws RemoteException
 	 */
-	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, Date date, Integer starttime)
+	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, LocalDate date, Integer starttime)
 		throws RemoteException;
 	
+	
+	public List<IpcHistoricalAverageCacheKey> getHistoricalAverageCacheKeys()
+		throws RemoteException;
 
 }

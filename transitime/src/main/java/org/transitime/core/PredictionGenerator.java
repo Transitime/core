@@ -241,11 +241,7 @@ public abstract class PredictionGenerator {
 				}
 			}
 		}
-		if (times.size() == num_days) {
-			return times;
-		} else {
-			return null;
-		}
+		return times;		
 	}
 
 	protected long timeBetweenStops(ArrivalDeparture ad1, ArrivalDeparture ad2) {

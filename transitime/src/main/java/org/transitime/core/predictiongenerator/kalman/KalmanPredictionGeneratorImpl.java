@@ -71,7 +71,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	@Override
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
 
-		logger.debug("Calling Kalman prediction algorithm : "+indices.toString());
+		logger.debug("Calling Kalman prediction algorithm for : "+indices.toString());
 		
 		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();
 
@@ -93,20 +93,26 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 		 */
 		if (time > -1) {
 
+			logger.debug("Kalman has last vehicle info for : " +indices.toString());
+			
 			Date nearestDay = DateUtils.truncate(Calendar.getInstance().getTime(), Calendar.DAY_OF_MONTH);
 
 			List<Integer> lastDaysTimes = lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),
 					indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
 					maxKalmanDaysToSearch.getValue(), minKalmanDays.getValue());
+												
+			if(lastDaysTimes!=null)
+			{												
+				logger.debug("Kalman has " +lastDaysTimes.size()+ "  historical values for : " +indices.toString());
+			}
 			/*
 			 * if we have enough data start using Kalman filter otherwise revert
 			 * to default. This does not mean that this method of prediction is
 			 * yet better than the default.
-			 */
-
+			 */	
 			if (lastDaysTimes != null && lastDaysTimes.size() >= minKalmanDays.getValue().intValue()) {
 
-				logger.debug("Generating Kalman prediction.");
+				logger.debug("Generating Kalman prediction for : "+indices.toString());
 				
 				try {
 
@@ -139,12 +145,12 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 					long predictionTime = (long) kalmanPredictionResult.getResult();
 
-					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + "for key "+ new KalmanErrorCacheKey(indices).toString());
+					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + "for : "+ new KalmanErrorCacheKey(indices).toString());
 					
 					kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
 
 					logger.debug("Using Kalman prediction: " + predictionTime + " instead of prediction: "
-							+ super.getTravelTimeForPath(indices, avlReport));
+							+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
 																
 					return predictionTime;
 
