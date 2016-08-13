@@ -153,6 +153,17 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 					}										
 				}
 			}
+			else if(tripId==null && localDate!=null && starttime==null)
+			{
+				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				{
+					if(date.compareTo(key.getTripStartDate())==0)
+					{
+						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
+					}										
+				}
+			}
 			
 			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
 			

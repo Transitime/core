@@ -19,6 +19,7 @@ package org.transitime.api.rootResources;
 
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -1373,8 +1374,10 @@ public class TransitimeApi {
 		try {
 						
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
-						
-			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, date.getDate(), starttime);
+			LocalDate queryDate=null;
+			if(date!=null)
+				queryDate=date.getDate();
+			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, queryDate, starttime);
 					
 			ApiArrivalDepartures apiResult = new ApiArrivalDepartures(result);
 			Response response = stdParameters.createResponse(apiResult);
