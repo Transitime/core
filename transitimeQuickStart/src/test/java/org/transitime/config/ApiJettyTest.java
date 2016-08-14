@@ -14,7 +14,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.Test;
-import org.transitime.gui.ApiTest;
 
 import junit.framework.TestCase;
 
@@ -29,7 +28,7 @@ public class ApiJettyTest extends TestCase{
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath("/api");
 		File warFile = new File(
-		ApiTest.class.getClassLoader().getResource("api.war").getPath());
+		ApiJettyTest.class.getClassLoader().getResource("api.war").getPath());
 		
 		System.out.print(warFile.getPath()+"test");
 		webapp.setWar(warFile.getPath());
