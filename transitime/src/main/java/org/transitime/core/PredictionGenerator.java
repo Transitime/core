@@ -132,7 +132,7 @@ public abstract class PredictionGenerator {
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
 							if(found.getTime() - currentArrivalDeparture.getTime()>0)
 							{																
-								return new Indices(found.getBlock(), found.getTripIndex(), found.getStopPathIndex(), 0);
+								return new Indices(currentArrivalDeparture.getBlock(), currentArrivalDeparture.getTripIndex(), found.getStopPathIndex(), 0);
 							}else
 							{
 								// must be going backwards
