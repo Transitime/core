@@ -26,12 +26,15 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
+import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.db.structs.Block;
+import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcPrediction;
 
 /**
@@ -131,8 +134,20 @@ public abstract class PredictionGenerator {
 											
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
 							if(found.getTime() - currentArrivalDeparture.getTime()>0)
-							{																
-								return new Indices(currentArrivalDeparture.getBlock(), currentArrivalDeparture.getTripIndex(), found.getStopPathIndex(), 0);
+							{	
+								Block currentBlock=null;
+								/* block is transient in arrival departure so when read from database need to get from dbconfig. */ 
+								if(currentArrivalDeparture.getBlock()==null&&currentArrivalDeparture.getServiceId()!=null && currentArrivalDeparture.getBlockId()!=null)
+								{																																			
+									DbConfig dbConfig = Core.getInstance().getDbConfig();
+									
+									currentBlock=dbConfig.getBlock(currentArrivalDeparture.getServiceId(), currentArrivalDeparture.getBlockId());
+								}else
+								{
+									currentBlock=currentArrivalDeparture.getBlock();
+								}				
+								if(currentBlock!=null)
+									return new Indices(currentBlock, currentArrivalDeparture.getTripIndex(), found.getStopPathIndex(), 0);
 							}else
 							{
 								// must be going backwards

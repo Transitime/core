@@ -145,11 +145,11 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 					long predictionTime = (long) kalmanPredictionResult.getResult();
 
-					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + "for : "+ new KalmanErrorCacheKey(indices).toString());
+					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " for : "+ new KalmanErrorCacheKey(indices).toString());
 					
 					kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
 
-					logger.debug("Using Kalman prediction: " + predictionTime + " instead of prediction: "
+					logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+super.getClass().getName()+" prediction: "
 							+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
 																
 					return predictionTime;

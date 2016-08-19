@@ -80,7 +80,8 @@ public class LastVehiclePredictionGeneratorImpl extends
 		long time = 0;
 		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
 		{
-			logger.debug("Using last vehicle algorithm (getLastVehicleTravelTime) for prediction : " + indices + " Value: "+time + " instead of transiTime default:"+super.getTravelTimeForPath(indices, avlReport));
+			logger.debug("Using last vehicle algorithm (getLastVehicleTravelTime) for prediction : " + indices + " Value: "+time + " instead of "+super.getClass().getName()+" prediction: "
+					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
 			return time;
 		}
 				

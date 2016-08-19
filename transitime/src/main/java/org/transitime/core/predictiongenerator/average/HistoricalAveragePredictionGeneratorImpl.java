@@ -62,7 +62,8 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
-			logger.debug("Using historical average algorithm for prediction : " + historicalAverageCacheKey.toString() + " Value: "+average.toString());			
+			logger.debug("Using historical average algorithm for prediction : " +average.toString() + " instead of "+super.getClass().getName()+" prediction: "
+					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
 			//logger.debug("Instead of transtime value : " + super.getTravelTimeForPath(indices, avlReport));
 			return (long)average.getAverage();
 		}
