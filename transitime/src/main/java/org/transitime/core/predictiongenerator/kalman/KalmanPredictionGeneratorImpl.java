@@ -10,6 +10,7 @@ import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
@@ -26,6 +27,7 @@ import org.transitime.core.predictiongenerator.PredictionComponentElementsGenera
 import org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcVehicleComplete;
 
@@ -151,6 +153,12 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 					logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+super.getClass().getName()+" prediction: "
 							+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
+					
+					if(storeTravelTimeStopPathPredictions.getValue())
+					{
+						PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), this.getClass().getName());					
+						Core.getInstance().getDbLogger().add(predictionForStopPath);
+					}
 																
 					return predictionTime;
 

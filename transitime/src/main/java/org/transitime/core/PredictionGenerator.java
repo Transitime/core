@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
@@ -60,6 +61,10 @@ public abstract class PredictionGenerator {
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
 			"transitime.prediction.closestvehiclestopsahead", new Integer(2),
 			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
+	
+	protected static BooleanConfigValue storeTravelTimeStopPathPredictions = new BooleanConfigValue("transitime.core.storeTravelTimeStopPathPredictions", 
+			false,
+			"This is set to true to record all travelTime  predictions for individual stopPaths generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
 
 	protected long getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
 

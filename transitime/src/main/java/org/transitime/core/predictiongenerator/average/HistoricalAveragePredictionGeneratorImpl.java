@@ -1,7 +1,10 @@
 package org.transitime.core.predictiongenerator.average;
 
+import java.util.Calendar;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
@@ -12,6 +15,7 @@ import org.transitime.core.dataCache.TripStopPathCacheKey;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.ipc.data.IpcPrediction;
 
 /**
@@ -62,6 +66,12 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
+			if(storeTravelTimeStopPathPredictions.getValue())
+			{
+				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), this.getClass().getName());			
+				Core.getInstance().getDbLogger().add(predictionForStopPath);
+			}
+			
 			logger.debug("Using historical average algorithm for prediction : " +average.toString() + " instead of "+super.getClass().getName()+" prediction: "
 					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
 			//logger.debug("Instead of transtime value : " + super.getTravelTimeForPath(indices, avlReport));

@@ -17,6 +17,7 @@
 package org.transitime.core;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.ipc.data.IpcPrediction;
@@ -68,6 +70,9 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
 	public static int getMaxPredictionsTimeSecs() {
 		return maxPredictionsTimeSecs.getValue();
 	}
+	
+
+			
 	
 	private static BooleanConfigValue useArrivalPredictionsForNormalStops =
 			new BooleanConfigValue("transitime.core.useArrivalPredictionsForNormalStops", 
@@ -422,6 +427,11 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
 	protected long getTravelTimeForPath(Indices indices, AvlReport avlReport)
 	{
 		logger.debug("Using transiTime default algorithm for prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
+		if(storeTravelTimeStopPathPredictions.getValue())
+		{		
+			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), this.getClass().getName());		
+			Core.getInstance().getDbLogger().add(predictionForStopPath);
+		}
 		return indices.getTravelTimeForPath();
 	}
 	

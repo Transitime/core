@@ -1,10 +1,12 @@
 package org.transitime.core.predictiongenerator.lastvehicle;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
@@ -18,6 +20,7 @@ import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcVehicleComplete;
 
@@ -80,8 +83,16 @@ public class LastVehiclePredictionGeneratorImpl extends
 		long time = 0;
 		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
 		{
+			
 			logger.debug("Using last vehicle algorithm (getLastVehicleTravelTime) for prediction : " + indices + " Value: "+time + " instead of "+super.getClass().getName()+" prediction: "
 					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
+			
+			if(storeTravelTimeStopPathPredictions.getValue())
+			{
+				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(time).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), this.getClass().getName());			
+				Core.getInstance().getDbLogger().add(predictionForStopPath);
+			}
+			
 			return time;
 		}
 				
