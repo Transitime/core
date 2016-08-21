@@ -52,6 +52,7 @@ import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiHistoricalAverage;
 import org.transitime.api.data.ApiHistoricalAverageCacheKeys;
 import org.transitime.api.data.ApiIds;
+import org.transitime.api.data.ApiKalmanErrorCacheKeys;
 import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoutes;
@@ -87,6 +88,7 @@ import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcHistoricalAverage;
 import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
+import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
@@ -1290,7 +1292,27 @@ public class TransitimeApi {
 		ApiRmiServerStatus apiRmiServerStatus = new ApiRmiServerStatus();
 		return stdParameters.createResponse(apiRmiServerStatus);
 	}
+	@Path("/command/kalmanerrorcachekeys")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getKalmanErrorCacheKeys(@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+		try {
+			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
 
+			List<IpcKalmanErrorCacheKey> result = cachequeryInterface.getKalmanErrorCacheKeys();
+
+			ApiKalmanErrorCacheKeys keys = new ApiKalmanErrorCacheKeys(result);
+
+			Response response = stdParameters.createResponse(keys);
+
+			return response;
+
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
 	@Path("/command/historicalaveragecachekeys")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

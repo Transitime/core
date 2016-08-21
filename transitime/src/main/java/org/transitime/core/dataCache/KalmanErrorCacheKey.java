@@ -9,6 +9,18 @@ import org.transitime.core.Indices;
 public class KalmanErrorCacheKey implements java.io.Serializable {
 	
 	
+	public String getTripId() {
+		return tripId;
+	}
+
+	public void setTripId(String tripId) {
+		this.tripId = tripId;
+	}
+
+	public void setStopPathIndex(Integer stopPathIndex) {
+		this.stopPathIndex = stopPathIndex;
+	}
+
 	private String tripId;
 	private Integer stopPathIndex;
 	

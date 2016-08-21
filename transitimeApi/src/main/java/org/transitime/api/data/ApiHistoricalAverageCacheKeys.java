@@ -8,7 +8,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
-
+/**
+ *
+ * @author Sean Og Crudden
+ *
+ */
 @XmlRootElement(name = "HistoricalAverageCacheKeys")
 public class ApiHistoricalAverageCacheKeys {
 	

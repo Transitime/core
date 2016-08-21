@@ -28,6 +28,7 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.ipc.data.IpcArrivalDeparture;
 import org.transitime.ipc.data.IpcHistoricalAverage;
 import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
+import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 
@@ -200,6 +201,18 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(tripId, stopPathIndex);
 		Double result = KalmanErrorCache.getInstance().getErrorValue(key);
 		return result;
+	}
+
+	@Override
+	public List<IpcKalmanErrorCacheKey> getKalmanErrorCacheKeys() throws RemoteException {
+		List<KalmanErrorCacheKey> keys = KalmanErrorCache.getInstance().getKeys();
+		List<IpcKalmanErrorCacheKey> ipcResultList = new ArrayList<IpcKalmanErrorCacheKey>();
+				
+		for(KalmanErrorCacheKey key:keys)
+		{
+			ipcResultList.add(new IpcKalmanErrorCacheKey(key));
+		}
+		return ipcResultList;
 	}
 
 }

@@ -93,4 +93,10 @@ public class KalmanErrorCache {
 		
 		cache.put(errorElement);
 	}				
+	public List<KalmanErrorCacheKey> getKeys()
+	{
+		@SuppressWarnings("unchecked")
+		List<KalmanErrorCacheKey> keys = cache.getKeys();
+		return keys;
+	}
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import org.transitime.ipc.data.IpcArrivalDeparture;
 import org.transitime.ipc.data.IpcHistoricalAverage;
 import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
+import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
 
 /**
  * Defines the RMI interface used for obtaining cache runtime information. 
@@ -80,12 +81,18 @@ public interface CacheQueryInterface extends Remote {
 	
 	
 	/**
-	 * @return a list of the keys that have values is the historical average cache
+	 * @return a list of the keys that have values in the historical average cache
 	 * @throws RemoteException
 	 */
 	public List<IpcHistoricalAverageCacheKey> getHistoricalAverageCacheKeys()
 		throws RemoteException;
 	
+	/**
+	 * @return a list of the keys that have values in the Kalman error value cache
+	 * @throws RemoteException
+	 */
+	public List<IpcKalmanErrorCacheKey> getKalmanErrorCacheKeys()
+		throws RemoteException;
 	/**
 	 * Return the latest Kalman error value for a the stop path of a trip.
 	 * @param tripId
