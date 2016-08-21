@@ -34,7 +34,6 @@ public class PredictionForStopPath implements Serializable{
 	private final Date creationTime;
 	
 	@Column	
-	@Temporal(TemporalType.TIMESTAMP)
 	private final Double predictionTime;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)

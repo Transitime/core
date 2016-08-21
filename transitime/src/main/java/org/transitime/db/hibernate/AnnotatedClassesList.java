@@ -33,6 +33,7 @@ import org.transitime.db.structs.Frequency;
 import org.transitime.db.structs.Match;
 import org.transitime.db.structs.MonitoringEvent;
 import org.transitime.db.structs.PredictionAccuracy;
+import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Transfer;
@@ -91,6 +92,7 @@ public class AnnotatedClassesList {
 		StopPath.class,
 		Transfer.class,
 		TravelTimesForStopPath.class,
+		PredictionForStopPath.class,
 		TravelTimesForTrip.class,
 		Trip.class,
 		TripPattern.class,
