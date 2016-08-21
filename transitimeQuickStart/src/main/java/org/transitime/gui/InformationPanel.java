@@ -67,7 +67,7 @@ public class InformationPanel {
 		
 		JTextPane txtpnInfopanel = new JTextPane();
 		txtpnInfopanel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		txtpnInfopanel.setText("GTFS File location: This is the location of the GTFS file you want transitime to use eg:\r\n C:\\Users\\Brendan\\Documents\\GTFS\\GTFSAUS \r\nThere should be a series of txt files at this location such as agency.txt, calender.txt, stops.txt...etc\r\n\r\nGTFS Realtime feed location: Generally a URL, more information can found at:https://developers.google.com/transit/gtfs-realtime/\r\n\r\n Install location: where any need on disc objects will be stored");
+		txtpnInfopanel.setText("GTFS File location: This is the location of the GTFS file you want transitime to use eg:\r\nC:\\Users\\..\\transitimeQuickStart\\src\\main\\resources\\Intercity.zip \r\n\r\nGTFS Realtime feed location: Generally a URL, more information can found at:https://developers.google.com/transit/gtfs-realtime/\r\n\r\n Log location: where you want the outputted log files to go\r\n\r\n(transitimeQuickStart will use defaults if nothing entered)");
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
