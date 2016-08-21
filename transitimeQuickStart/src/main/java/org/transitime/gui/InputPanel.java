@@ -25,6 +25,7 @@ import javax.swing.JFileChooser;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.JRadioButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -36,6 +37,9 @@ import org.transitime.db.webstructs.ApiKey;
 import org.transitime.gui.TransitimeQuickStart;
 import org.transitime.quickstart.resource.FileBrowser;
 import org.transitime.quickstart.resource.QuickStartException;
+import javax.swing.JProgressBar;
+import javax.swing.JTextPane;
+import javax.swing.UIManager;
 
 /**
  * This is the First and main gui element of the gui, all values needed for the
@@ -76,6 +80,7 @@ public class InputPanel extends JFrame {
 				try {
 					InputPanel frame = new InputPanel();
 					frame.setVisible(true);
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -91,7 +96,7 @@ public class InputPanel extends JFrame {
 		setTitle("transiTimeQuickStart");
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 500, 474);
+		setBounds(100, 100, 500, 475);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -133,7 +138,8 @@ public class InputPanel extends JFrame {
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					/**
-					 * @parem file will be the chosen file selected by the file browser
+					 * @parem file will be the chosen file selected by the file
+					 *        browser
 					 */
 					File file = fc.getSelectedFile();
 					filelocation = file.getPath();
@@ -155,7 +161,7 @@ public class InputPanel extends JFrame {
 		button_1.setBounds(442, 194, 17, 24);
 		button_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//creates an information panel on selecting of the I buttons
+				// creates an information panel on selecting of the I buttons
 				InformationPanel infopanel = new InformationPanel();
 				infopanel.InformationPanelstart();
 
@@ -175,7 +181,7 @@ public class InputPanel extends JFrame {
 		button.setBounds(442, 256, 17, 24);
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//creates an information panel on selecting of the I buttons
+				// creates an information panel on selecting of the I buttons
 				InformationPanel infopanel = new InformationPanel();
 				infopanel.InformationPanelstart();
 			}
@@ -198,43 +204,49 @@ public class InputPanel extends JFrame {
 		btnNext.setBackground(SystemColor.menu);
 		btnNext.setFont(new Font("Arial", Font.PLAIN, 13));
 		btnNext.addActionListener(new ActionListener() {
+			/**
+			 * calls the methods of the transitimeQuickStart
+			 */
 			public void actionPerformed(ActionEvent e) {
 				/**
-				 * calls the methods of the transitimeQuickStart 
+				 * calls the methods of the transitimeQuickStart
 				 */
+				setBounds(100, 100, 500, 603);
+				JProgressBar progressBar = new JProgressBar();
+				progressBar.setBounds(17, 497, 453, 31);
+				contentPane.add(progressBar);
+				JTextPane textPane = new JTextPane();
+				textPane.setBackground(UIManager.getColor("Button.highlight"));
+				textPane.setFont(new Font("Arial", Font.PLAIN, 16));
+				textPane.setBounds(17, 427, 453, 57);
+				contentPane.add(textPane);
 				String apikeystring = null;
 				// reads in URL
 				loglocation = textField_2.getText();
 				realtimefeedURL = textField_1.getText();
-				// Starts the GtfsFileProcessor ,ApiKey and core
-				try {
-					TransitimeQuickStart start = new TransitimeQuickStart();
-					start.extractResources();
-					start.startDatabase();
-					start.startGtfsFileProcessor(filelocation);
-					start.createApiKey();
-					//creates an apikey, holds the key as a string in apikeystring
-					ApiKey apikey = start.getApiKey();
-					apikeystring = apikey.getKey();
 
-					start.startCore(realtimefeedURL, loglocation);
-					start.addApi();
-					boolean startwebapp = getRdbtnStartWebappSelected();
-					//Starts webapp if selected in gui
-					if (startwebapp == true) {
-						start.addWebapp();
-						start.webAgency();
-					}
-					start.startJetty(startwebapp);
-					//creates the output panel
-					OutputPanel windowinput = new OutputPanel(apikeystring);
-					windowinput.OutputPanelstart();
-					dispose();
-				} catch (QuickStartException qe) {
+				// Creates a thread which calls all the methods of the transitimeQuickStart
 
+				TransitimeQuickStartThread quickstartthread = new TransitimeQuickStartThread();
+				quickstartthread.filelocation = filelocation;
+				quickstartthread.realtimefeedURL = realtimefeedURL;
+				quickstartthread.loglocation = loglocation;
+				quickstartthread.startwebapp = getRdbtnStartWebappSelected();
+				quickstartthread.apikeystring = apikeystring;
+				quickstartthread.progressBar=progressBar;
+				quickstartthread.progresstextPane=textPane;
+				//quickstartthread.inputPanel=frame;
+				Thread t = new Thread(quickstartthread);
+				t.start();
+				/*for(t.isAlive())
+				{
+					
 				}
+*/
 			}
+			
 		});
+	
 		btnNext.setVerticalAlignment(SwingConstants.BOTTOM);
 		rdbtnStartWebapp = new JRadioButton("Start webapp");
 		rdbtnStartWebapp.setBounds(17, 309, 150, 57);
@@ -254,6 +266,9 @@ public class InputPanel extends JFrame {
 		contentPane.add(textField_1);
 		contentPane.add(btnCancel);
 		contentPane.add(btnNext);
+		
+		
+		
 	}
 
 	public boolean getRdbtnStartWebappSelected() {

@@ -53,7 +53,7 @@ public class TestConfig extends TestCase {
 			List<String> moduleList = CoreConfig.getOptionalModules();
 
 			assertTrue(moduleList.get(0).equals(
-					"transitime.core.schedBasedPreds.SchedBasedPredsModule"));
+					"org.transitime.avl.GtfsRealtimeModule"));
 		} catch (ConfigException | ConfigParamException e) {			
 			fail(e.toString());
 		}
