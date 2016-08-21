@@ -77,7 +77,7 @@ public class OutputPanel {
 	private void initialize() {
 		frmTransitimequickstart = new JFrame();
 		frmTransitimequickstart.setTitle("transiTimeQuickStart");
-		frmTransitimequickstart.setBounds(100, 100, 590, 399);
+		frmTransitimequickstart.setBounds(100, 100, 590, 440);
 		frmTransitimequickstart.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JLabel lblInstallationIsNow = new JLabel("Installation is now up and running! you can copy and paste ");
@@ -187,44 +187,42 @@ public class OutputPanel {
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-						.addGroup(groupLayout.createSequentialGroup()
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addContainerGap(50, Short.MAX_VALUE)
 							.addComponent(lblInstallationIsNow, GroupLayout.PREFERRED_SIZE, 511, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(textField, GroupLayout.PREFERRED_SIZE, 481, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnCopy, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(textField_1, GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(button, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(lblWebappAddress, GroupLayout.DEFAULT_SIZE, 339, Short.MAX_VALUE)
 							.addGap(83)
 							.addComponent(btnNewButton))
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addGap(84)
 							.addComponent(lblTheseLinksInto))
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(lblVechiclePositionsUrl)
 							.addPreferredGap(ComponentPlacement.RELATED, 258, Short.MAX_VALUE)
 							.addComponent(btnOpenInBroswer))
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(lblTripUpdatesUrl))
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(txtHttpweb, GroupLayout.DEFAULT_SIZE, 549, Short.MAX_VALUE))
-						.addGroup(groupLayout.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(btnStop)
-							.addPreferredGap(ComponentPlacement.RELATED, 299, Short.MAX_VALUE)
-							.addComponent(btnOpenInBrowser)))
+						.addGroup(Alignment.TRAILING, groupLayout.createParallelGroup(Alignment.LEADING, false)
+							.addComponent(btnStop, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(btnOpenInBrowser, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
@@ -257,9 +255,9 @@ public class OutputPanel {
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(txtHttpweb, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-						.addComponent(btnOpenInBrowser)
-						.addComponent(btnStop))
+					.addComponent(btnOpenInBrowser)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(btnStop)
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		frmTransitimequickstart.getContentPane().setLayout(groupLayout);

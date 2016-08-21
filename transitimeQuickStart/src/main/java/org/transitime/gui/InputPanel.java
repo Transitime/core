@@ -25,7 +25,6 @@ import javax.swing.JFileChooser;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.JRadioButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -33,10 +32,7 @@ import java.awt.Font;
 import java.awt.Button;
 import java.awt.SystemColor;
 import java.io.File;
-import org.transitime.db.webstructs.ApiKey;
-import org.transitime.gui.TransitimeQuickStart;
 import org.transitime.quickstart.resource.FileBrowser;
-import org.transitime.quickstart.resource.QuickStartException;
 import javax.swing.JProgressBar;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
@@ -224,7 +220,11 @@ public class InputPanel extends JFrame {
 				// reads in URL
 				loglocation = textField_2.getText();
 				realtimefeedURL = textField_1.getText();
-
+				if (loglocation.equals("")) {
+					// uses current directory if one none specified by user.
+					loglocation = System.getProperty("user.dir");
+				}
+				System.getProperties().setProperty("transitime.logging.dir", loglocation);
 				// Creates a thread which calls all the methods of the transitimeQuickStart
 
 				TransitimeQuickStartThread quickstartthread = new TransitimeQuickStartThread();
@@ -235,14 +235,10 @@ public class InputPanel extends JFrame {
 				quickstartthread.apikeystring = apikeystring;
 				quickstartthread.progressBar=progressBar;
 				quickstartthread.progresstextPane=textPane;
-				//quickstartthread.inputPanel=frame;
+			
 				Thread t = new Thread(quickstartthread);
 				t.start();
-				/*for(t.isAlive())
-				{
-					
-				}
-*/
+				
 			}
 			
 		});
