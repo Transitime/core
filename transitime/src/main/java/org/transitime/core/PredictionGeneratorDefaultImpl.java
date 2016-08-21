@@ -429,7 +429,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
 		logger.debug("Using transiTime default algorithm for prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
 		if(storeTravelTimeStopPathPredictions.getValue())
 		{		
-			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), this.getClass().getName());		
+			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "TRANSITIME DEFAULT");		
 			Core.getInstance().getDbLogger().add(predictionForStopPath);
 		}
 		return indices.getTravelTimeForPath();
