@@ -15,7 +15,10 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.db.hibernate.HibernateUtils;
-
+/**
+ * @author Sean Og Crudden
+ * Store the travel time prediction for a stopPath.  
+ */
 @Entity @DynamicUpdate 
 @Table(name="StopPathPredictions",
        indexes = { @Index(name="StopPathPredictionTimeIndex", 

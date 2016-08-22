@@ -10,7 +10,10 @@ import net.sf.ehcache.config.CacheConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.core.Indices;
-
+/**
+ * @author Sean Og Crudden
+ * 
+ */
 public class KalmanErrorCache {
 	final private static String cacheName = "KalmanErrorCache";
 	private static KalmanErrorCache singleton = new KalmanErrorCache();

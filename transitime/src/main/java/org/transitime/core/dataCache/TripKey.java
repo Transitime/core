@@ -1,7 +1,10 @@
 package org.transitime.core.dataCache;
 
 import java.util.Date;
-
+/**
+ * @author Sean Og Crudden
+ * 
+ */
 public class TripKey implements java.io.Serializable {
 	/**
 	 * Needs to be serializable to add to cache

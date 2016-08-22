@@ -7,7 +7,10 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @author Sean Og Crudden
+ * 
+ */
 public class HistoricalAverageCache {
 	final private static String cacheName = "HistoricalAverageCache";
 	private static HistoricalAverageCache singleton = new HistoricalAverageCache();

@@ -1,7 +1,10 @@
 package org.transitime.core.dataCache;
 
 import org.transitime.core.Indices;
-
+/**
+ * @author Sean Og Crudden
+ * 
+ */
 public class HistoricalAverageCacheKey implements java.io.Serializable {
 	
 	private String blockId;

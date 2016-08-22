@@ -2,7 +2,10 @@ package org.transitime.core.dataCache;
 
 import java.io.Serializable;
 import java.util.Date;
-
+/**
+ * @author Sean Og Crudden
+ * 
+ */
 public class StopArrivalDepartureCacheKey implements Serializable {
 	
 	

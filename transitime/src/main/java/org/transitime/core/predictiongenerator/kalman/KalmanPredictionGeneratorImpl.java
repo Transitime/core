@@ -34,13 +34,11 @@ import org.transitime.ipc.data.IpcVehicleComplete;
 /**
  * @author Sean Og Crudden This is a prediction generator that uses a Kalman
  *         filter to provide predictions. It uses historical average while waiting on enough data to support a Kalman filter.
- * 
- *         TODO I intend using the error value from the last transiTime
- *         prediction as the starting value.
  */
 public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGeneratorImpl
 		implements PredictionComponentElementsGenerator {
-
+	
+	private String alternative="HistoricalAveragePredictionGeneratorImpl";
 	/*
 	 * TODO I think this needs to be a minimum of two and if just one will use
 	 * historical value. 
@@ -151,7 +149,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					
 					kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
 
-					logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+super.getClass().getName()+" prediction: "
+					logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+alternative+" prediction: "
 							+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
 					
 					if(storeTravelTimeStopPathPredictions.getValue())
@@ -166,10 +164,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					logger.error(e.getMessage(), e);
 				}
 			}
-		}
-		//logger.debug("Generating default prediction.");
+		}	
 		return super.getTravelTimeForPath(indices, avlReport);
-
 	}
 
 	private Double lastVehiclePredictionError(KalmanErrorCache cache, Indices indices) {		

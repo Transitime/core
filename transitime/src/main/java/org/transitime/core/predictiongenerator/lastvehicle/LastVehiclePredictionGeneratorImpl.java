@@ -36,7 +36,7 @@ import org.transitime.ipc.data.IpcVehicleComplete;
  */
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
-	
+	private String alternative="PredictionGeneratorDefaultImpl";
 	/* (non-Javadoc)
 	 * @see org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl#generatePredictionForStop(org.transitime.db.structs.AvlReport, org.transitime.core.Indices, long, boolean, boolean, boolean, boolean)
 	 */
@@ -84,7 +84,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
 		{
 			
-			logger.debug("Using last vehicle algorithm (getLastVehicleTravelTime) for prediction : " + indices + " Value: "+time + " instead of "+super.getClass().getName()+" prediction: "
+			logger.debug("Using last vehicle algorithm (getLastVehicleTravelTime) for prediction : " + indices + " Value: "+time + " instead of "+alternative+" prediction: "
 					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
 			
 			if(storeTravelTimeStopPathPredictions.getValue())

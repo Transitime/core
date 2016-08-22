@@ -1,5 +1,8 @@
 package org.transitime.core.dataCache;
-
+/**
+ * @author Sean Og Crudden
+ * 
+ */
 public class HistoricalAverage {
 	
 	@Override

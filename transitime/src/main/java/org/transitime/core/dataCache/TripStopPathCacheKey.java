@@ -1,7 +1,10 @@
 package org.transitime.core.dataCache;
 
 import org.transitime.core.Indices;
-
+/**
+ * @author Sean Og Crudden
+ * 
+ */
 public class TripStopPathCacheKey implements java.io.Serializable {
 		
 	/**

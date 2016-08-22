@@ -25,7 +25,7 @@ import org.transitime.ipc.data.IpcPrediction;
  */
 public class HistoricalAveragePredictionGeneratorImpl extends
 LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerator {
-	
+	private String alternative="LastVehiclePredictionGeneratorImpl";
 	/* (non-Javadoc)
 	 * @see org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl#generatePredictionForStop(org.transitime.db.structs.AvlReport, org.transitime.core.Indices, long, boolean, boolean, boolean, boolean)
 	 */
@@ -72,7 +72,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 				Core.getInstance().getDbLogger().add(predictionForStopPath);
 			}
 			
-			logger.debug("Using historical average algorithm for prediction : " +average.toString() + " instead of "+super.getClass().getName()+" prediction: "
+			logger.debug("Using historical average algorithm for prediction : " +average.toString() + " instead of "+alternative+" prediction: "
 					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
 			//logger.debug("Instead of transtime value : " + super.getTravelTimeForPath(indices, avlReport));
 			return (long)average.getAverage();
