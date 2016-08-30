@@ -10,8 +10,8 @@ import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HistoricalAverageCache;
-import org.transitime.core.dataCache.HistoricalAverageCacheKey;
-import org.transitime.core.dataCache.TripStopPathCacheKey;
+
+import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl;
 import org.transitime.db.structs.AvlReport;
@@ -60,7 +60,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		 * revert to default. This does not mean that this method of
 		 * prediction is better than the default.
 		 */				
-		TripStopPathCacheKey historicalAverageCacheKey=new TripStopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex());
+		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex());
 		
 		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 		

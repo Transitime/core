@@ -2,7 +2,7 @@ package org.transitime.ipc.data;
 
 import java.io.Serializable;
 
-import org.transitime.core.dataCache.TripStopPathCacheKey;
+import org.transitime.core.dataCache.StopPathCacheKey;
 
 public class IpcHistoricalAverageCacheKey implements Serializable	
 {
@@ -12,7 +12,7 @@ public class IpcHistoricalAverageCacheKey implements Serializable
 	private String tripId;
 	private Integer stopPathIndex;
 	
-	public IpcHistoricalAverageCacheKey(TripStopPathCacheKey key) {
+	public IpcHistoricalAverageCacheKey(StopPathCacheKey key) {
 		super();		
 		this.tripId=key.getTripId();
 		this.stopPathIndex=key.getStopPathIndex();	

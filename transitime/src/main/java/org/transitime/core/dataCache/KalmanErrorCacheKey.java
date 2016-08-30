@@ -4,7 +4,7 @@ import org.transitime.core.Indices;
 
 /**
  * @author Sean Og Crudden
- * 
+ * TODO This is the same as StopPathCacheKey but left seperate in case we might use block_id as well.
  */
 public class KalmanErrorCacheKey implements java.io.Serializable {
 	

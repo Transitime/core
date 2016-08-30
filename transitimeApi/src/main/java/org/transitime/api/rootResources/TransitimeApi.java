@@ -18,8 +18,9 @@
 package org.transitime.api.rootResources;
 
 import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -41,7 +42,6 @@ import org.transitime.api.data.ApiActiveBlocks;
 import org.transitime.api.data.ApiActiveBlocksRoutes;
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
-import org.transitime.api.data.ApiArrivalDeparture;
 import org.transitime.api.data.ApiArrivalDepartures;
 import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiBlocks;
@@ -54,6 +54,7 @@ import org.transitime.api.data.ApiHistoricalAverageCacheKeys;
 import org.transitime.api.data.ApiIds;
 import org.transitime.api.data.ApiKalmanErrorCacheKeys;
 import org.transitime.api.data.ApiPredictions;
+import org.transitime.api.data.ApiPredictionsForStopPath;
 import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoutes;
 import org.transitime.api.data.ApiRoutesDetails;
@@ -69,10 +70,6 @@ import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.predsByLoc.PredsByLoc;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
-import org.transitime.core.dataCache.HistoricalAverage;
-import org.transitime.core.dataCache.HistoricalAverageCache;
-import org.transitime.core.dataCache.HistoricalAverageCacheKey;
-import org.transitime.core.dataCache.TripStopPathCacheKey;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcActiveBlock;
@@ -80,6 +77,7 @@ import org.transitime.ipc.data.IpcArrivalDeparture;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcCalendar;
 import org.transitime.ipc.data.IpcPrediction;
+import org.transitime.ipc.data.IpcPredictionForStopPath;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
@@ -95,6 +93,7 @@ import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.interfaces.ConfigInterface;
+import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.interfaces.VehiclesInterface;
@@ -1451,6 +1450,38 @@ public class TransitimeApi {
 			Double result = cachequeryInterface.getKalmanErrorValue(tripId, stopPathIndex);
 
 			Response response = stdParameters.createResponse(result);
+
+			return response;
+
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+	@Path("/command/getstoppathpredictions")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getStopPathPredictions(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "algorithm") String algorithm,
+			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex" ) Integer stopPathIndex, @QueryParam(value = "date") DateParam date) 
+	{
+		try {
+			
+			LocalDate now = date.getDate(); // 2015-11-19T19:42:19.224
+			// start of a day
+			LocalDate start=now.with(LocalTime.MIN); // 2015-11-19T00:00
+			now.with(LocalTime.MIDNIGHT); // 2015-11-19T00:00
+			// end of a day
+			LocalDate end=now.with(LocalTime.MAX); // 2015-11-19T23:59:59.999999999
+			
+			Date start_date = Date.from(start.atStartOfDay(ZoneId.systemDefault()).toInstant());
+			Date end_date = Date.from(end.atStartOfDay(ZoneId.systemDefault()).toInstant());
+						
+			PredictionAnalysisInterface predictionAnalysisInterface = stdParameters.getPredictionAnalysisInterface();
+
+			List<IpcPredictionForStopPath> result = predictionAnalysisInterface.getRecordedTravelTimePredictions(tripId, stopPathIndex, start_date, end_date, algorithm);
+			
+			Response response = stdParameters.createResponse(new ApiPredictionsForStopPath(result));
 
 			return response;
 

@@ -562,10 +562,48 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Session session, Date beginTime, Date endTime, String tripId, String serviceId)	
 	{
 		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+						
+		criteria.add(Restrictions.eq( "tripId",tripId ));
+		criteria.add(Restrictions.gt("time", beginTime));
+		criteria.add(Restrictions.lt("time",endTime)).list();
+		
+		if(serviceId!=null)
+			criteria.add(Restrictions.eq( "serviceId",serviceId ));
 		
 		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> arrivalsDeparatures=criteria.add(Restrictions.eq( "tripId",tripId )).add(Restrictions.eq("serviceId", serviceId)).add(Restrictions.gt("time", beginTime)).add(Restrictions.lt("time",endTime)).list();
+		List<ArrivalDeparture> arrivalsDeparatures=criteria.list();
+		return arrivalsDeparatures;
+					
+	}
+	/**
+	 * Reads in arrivals and departures for a particular stopPathIndex of a trip between two dates. Uses session provided
+	 * 
+	 * @paran session
+	 * @param beginTime
+	 * @param endTime
+	 * @param trip
+	 * @param stopPathIndex
+	 * @return
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Session session, Date beginTime, Date endTime, String tripId, Integer stopPathIndex)	
+	{
+		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+						
+		if(tripId!=null)
+		{
+			criteria.add(Restrictions.eq( "tripId",tripId ));
+			
+			if(stopPathIndex!=null)
+				criteria.add(Restrictions.eq( "stopPathIndex",stopPathIndex ));
+		}
 		
+		criteria.add(Restrictions.gt("time", beginTime));
+		criteria.add(Restrictions.lt("time",endTime)).list();
+		
+				
+		
+		@SuppressWarnings("unchecked")
+		List<ArrivalDeparture> arrivalsDeparatures=criteria.list();
 		return arrivalsDeparatures;
 					
 	}

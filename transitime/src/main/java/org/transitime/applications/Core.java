@@ -50,6 +50,7 @@ import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.servers.CacheQueryServer;
 import org.transitime.ipc.servers.CommandsServer;
 import org.transitime.ipc.servers.ConfigServer;
+import org.transitime.ipc.servers.PredictionAnalysisServer;
 import org.transitime.ipc.servers.PredictionsServer;
 import org.transitime.ipc.servers.ServerStatusServer;
 import org.transitime.ipc.servers.VehiclesServer;
@@ -388,6 +389,7 @@ public class Core {
 		ServerStatusServer.start(agencyId);
 		CommandsServer.start(agencyId);
 		CacheQueryServer.start(agencyId);
+		PredictionAnalysisServer.start(agencyId);
 		
 	}
 	

@@ -23,7 +23,7 @@ import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
-import org.transitime.core.dataCache.TripStopPathCacheKey;
+import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.ipc.data.IpcArrivalDeparture;
 import org.transitime.ipc.data.IpcHistoricalAverage;
@@ -115,7 +115,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 
 	@Override
 	public IpcHistoricalAverage getHistoricalAverage(String tripId, Integer stopPathIndex) throws RemoteException {
-		TripStopPathCacheKey key = new TripStopPathCacheKey(tripId, stopPathIndex);
+		StopPathCacheKey key = new StopPathCacheKey(tripId, stopPathIndex);
 
 		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(key);
 		return new IpcHistoricalAverage(average);
@@ -186,10 +186,10 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	@Override
 	public List<IpcHistoricalAverageCacheKey> getHistoricalAverageCacheKeys() throws RemoteException {
 		
-		List<TripStopPathCacheKey> keys = HistoricalAverageCache.getInstance().getKeys();
+		List<StopPathCacheKey> keys = HistoricalAverageCache.getInstance().getKeys();
 		List<IpcHistoricalAverageCacheKey> ipcResultList = new ArrayList<IpcHistoricalAverageCacheKey>();
 				
-		for(TripStopPathCacheKey key:keys)
+		for(StopPathCacheKey key:keys)
 		{
 			ipcResultList.add(new IpcHistoricalAverageCacheKey(key));
 		}

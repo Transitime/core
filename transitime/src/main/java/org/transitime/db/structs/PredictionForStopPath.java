@@ -2,6 +2,7 @@ package org.transitime.db.structs;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +14,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.criterion.Restrictions;
 import org.transitime.db.hibernate.HibernateUtils;
 /**
  * @author Sean Og Crudden
@@ -125,5 +129,29 @@ public class PredictionForStopPath implements Serializable{
 			return false;
 		return true;
 	}
-
+	@SuppressWarnings("unchecked")
+	public static List<PredictionForStopPath> getPredictionForStopPathFromDB (
+			Date beginTime, 
+			Date endTime,
+			String algorithm,
+			String tripId,
+			Integer stopPathIndex)
+	{
+		Session session = HibernateUtils.getSession();
+		Criteria criteria = session.createCriteria(PredictionForStopPath.class);
+		
+		if(algorithm!=null)
+			criteria.add(Restrictions.eq("algorithm", algorithm));
+		if(tripId!=null)
+			criteria.add(Restrictions.eq("tripId", algorithm));
+		if(stopPathIndex!=null)
+			criteria.add(Restrictions.eq("stopPathIndex", stopPathIndex));
+		if(beginTime!=null)
+			criteria.add(Restrictions.ge("creationTime", beginTime));
+		if(beginTime!=null)
+			criteria.add(Restrictions.lt("creationTime", endTime));		
+		
+		return criteria.list();				
+	}
+			
 }

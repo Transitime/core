@@ -182,7 +182,7 @@ public class TripDataHistoryCache {
 						
 			cache.put(arrivalDepartures);															
 			
-			TripStopPathCacheKey historicalAverageCacheKey=new TripStopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex());
+			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex());
 			
 			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 						

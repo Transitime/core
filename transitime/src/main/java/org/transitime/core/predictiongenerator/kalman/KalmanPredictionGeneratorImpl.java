@@ -40,11 +40,11 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	
 	private String alternative="HistoricalAveragePredictionGeneratorImpl";
 	/*
-	 * TODO I think this needs to be a minimum of two and if just one will use
+	 * TODO I think this needs to be a minimum of three and if just two will use
 	 * historical value. 
 	 */
 	private static final IntegerConfigValue minKalmanDays = new IntegerConfigValue(
-			"transitime.prediction.data.kalman.mindays", new Integer(2),
+			"transitime.prediction.data.kalman.mindays", new Integer(3),
 			"Min number of days trip data that needs to be available before Kalman prediciton is used instead of default transiTime prediction.");
 
 	private static final IntegerConfigValue maxKalmanDays = new IntegerConfigValue(
@@ -154,7 +154,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					
 					if(storeTravelTimeStopPathPredictions.getValue())
 					{
-						PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "Kalman");					
+						PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "KALMAN");					
 						Core.getInstance().getDbLogger().add(predictionForStopPath);
 					}
 																

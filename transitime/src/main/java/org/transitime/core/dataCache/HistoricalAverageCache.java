@@ -35,19 +35,19 @@ public class HistoricalAverageCache {
 		}
 		cache = cm.getCache(cacheName);											
 	}
-	public List<TripStopPathCacheKey> getKeys()
+	public List<StopPathCacheKey> getKeys()
 	{
 		@SuppressWarnings("unchecked")
-		List<TripStopPathCacheKey> keys = cache.getKeys();
+		List<StopPathCacheKey> keys = cache.getKeys();
 		return keys;
 	}
 	public void logCache(Logger logger)
 	{
 		logger.debug("Cache content log.");
 		@SuppressWarnings("unchecked")
-		List<TripStopPathCacheKey> keys = cache.getKeys();
+		List<StopPathCacheKey> keys = cache.getKeys();
 		
-		for(TripStopPathCacheKey key : keys)
+		for(StopPathCacheKey key : keys)
 		{
 			Element result=cache.get(key);
 			if(result!=null)
@@ -63,13 +63,13 @@ public class HistoricalAverageCache {
 	public void logCacheSize(Logger logger)
 	{
 		@SuppressWarnings("unchecked")
-		List<TripStopPathCacheKey> keys = cache.getKeys();
+		List<StopPathCacheKey> keys = cache.getKeys();
 		
 		if(keys!=null)
 			logger.debug("Number of entries in HistoricalAverageCache : "+keys.size());
 	}
 	
-	synchronized public HistoricalAverage getAverage(TripStopPathCacheKey key) {		
+	synchronized public HistoricalAverage getAverage(StopPathCacheKey key) {		
 						
 		Element result = cache.get(key);
 		
@@ -78,7 +78,7 @@ public class HistoricalAverageCache {
 		else
 			return (HistoricalAverage)result.getObjectValue();		
 	}
-	synchronized public void putAverage(TripStopPathCacheKey key, HistoricalAverage average) {
+	synchronized public void putAverage(StopPathCacheKey key, HistoricalAverage average) {
 			
 		logger.debug("Putting: "+key.toString()+" in cache with values : "+average);
 		
