@@ -3,7 +3,11 @@ package org.transitime.core.predictiongenerator.kalman;
 import org.transitime.db.structs.Stop;
 
 public class VehicleStopDetail {
- protected Stop stop;
+ @Override
+	public String toString() {
+		return "VehicleStopDetail [stop=" + stop + ", time=" + time + ", vehicle=" + vehicle + "]";
+	}
+protected Stop stop;
  protected long time=-1L;
  protected Vehicle vehicle;
  public VehicleStopDetail(Stop stop, long time, Vehicle vehicle) {

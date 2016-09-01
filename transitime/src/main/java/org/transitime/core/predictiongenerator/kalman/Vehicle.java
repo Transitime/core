@@ -1,6 +1,11 @@
 package org.transitime.core.predictiongenerator.kalman;
 
 public class Vehicle {
+	@Override
+	public String toString() {
+		return "Vehicle [licence=" + licence + "]";
+	}
+
 	private String licence=null;
 
 	/* (non-Javadoc)

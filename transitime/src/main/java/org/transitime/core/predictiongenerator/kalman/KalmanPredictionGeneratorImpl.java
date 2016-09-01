@@ -142,7 +142,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					
 					for(int i=0;i<historical_segments_k.length;i++)
 					{
-						logger.debug("Using historical value: " + historical_segments_k[i] + " for : "+new KalmanErrorCacheKey(indices).toString());	
+						logger.debug("Using historical value: " + historical_segments_k[i].getDuration() + " for : "+new KalmanErrorCacheKey(indices).toString());	
 					}
 					
 					logger.debug("Using error value: " + last_prediction_error + " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
