@@ -139,7 +139,14 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					Indices previousVehicleIndices = getLastVehicleIndices(currentVehicleState, indices);
 					
 					Double last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);
-
+					
+					for(int i=0;i<historical_segments_k.length;i++)
+					{
+						logger.debug("Using historical value: " + historical_segments_k[i] + " for : "+new KalmanErrorCacheKey(indices).toString());	
+					}
+					
+					logger.debug("Using error value: " + last_prediction_error + " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
+					
 					kalmanPredictionResult = kalmanPrediction.predict(last_vehicle_segment, historical_segments_k,
 							last_prediction_error);
 
@@ -156,10 +163,9 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					{
 						PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "KALMAN");					
 						Core.getInstance().getDbLogger().add(predictionForStopPath);
-					}
-																
+					}													
 					return predictionTime;
-
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
