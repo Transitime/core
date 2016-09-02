@@ -197,8 +197,7 @@ public class TripDataHistoryCache {
 			
 				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}
-		}
-				 
+		}				
 		return tripKey;
 	}
 	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
@@ -220,21 +219,19 @@ public class TripDataHistoryCache {
 					
 		return -1;
 	}
-	private ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
-	{
-		ArrivalDeparture previous=null;
-		
+	static public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	{	
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0)
 		{												
 			for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 			{
 				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
 				{
-					previous=tocheck;
+					return tocheck;
 				}			
 			}
 		}
-		return previous;		
+		return null;		
 	}
 
 	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {

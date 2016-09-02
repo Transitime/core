@@ -229,7 +229,7 @@ public abstract class PredictionGenerator {
 			Integer startTime, int num_days_look_back, int num_days) {
 
 		List<Integer> times = new ArrayList<Integer>();
-		List<ArrivalDeparture> result = null;
+		List<ArrivalDeparture> results = null;
 		int num_found = 0;
 		/*
 		 * TODO This could be smarter about the dates it looks at by looking at
@@ -243,115 +243,37 @@ public abstract class PredictionGenerator {
 
 			TripKey tripKey = new TripKey(tripId, nearestDay, startTime);
 
-			result = cache.getTripHistory(tripKey);
+			results = cache.getTripHistory(tripKey);
 
-			if (result != null) {
+			if (results != null) {
 
-				result = getDepartureArrival(stopPathIndex, result);
+				ArrivalDeparture arrival = getArrival(stopPathIndex, results);
+				
+				ArrivalDeparture departure = TripDataHistoryCache.findPreviousDepartureEvent(results, arrival);
+														
+				if (arrival != null && departure != null) {
 
-				if (result != null && result.size() > 1) {
-					ArrivalDeparture arrival = getArrival(result);
-
-					ArrivalDeparture departure = getDeparture(result);
-					if (arrival != null && departure != null) {
-
-						times.add(new Integer((int) (timeBetweenStops(departure, arrival))));
+					times.add(new Integer((int) (timeBetweenStops(departure, arrival))));
 						num_found++;
-					}
-				}
+				}			
 			}
 		}
 		return times;		
 	}
-
+	ArrivalDeparture getArrival(int stopPathIndex, List<ArrivalDeparture> results)
+	{
+		for(ArrivalDeparture result:results)
+		{
+			if(result.isArrival()&&result.getStopPathIndex()==stopPathIndex)
+			{
+				return result;
+			}
+		}
+		return null;	
+	}
 	protected long timeBetweenStops(ArrivalDeparture ad1, ArrivalDeparture ad2) {
-		if (ad2.getStopPathIndex() ==ad1.getStopPathIndex()) {
-			// This is the movement between two stops
-			return (ad2.getTime() - ad1.getTime());
-		}
-		return -1;
-	}
-
-	protected long getTimeTaken(TripDataHistoryCache cache, VehicleState previousVehicleOnRouteState,
-			Indices currentVehicleIndices) {
-
-		int currentIndex = currentVehicleIndices.getStopPathIndex();
-
-		Date nearestDay = DateUtils.truncate(Calendar.getInstance().getTime(), Calendar.DAY_OF_MONTH);
-
-		TripKey tripKey = new TripKey(previousVehicleOnRouteState.getTrip().getId(), nearestDay,
-				previousVehicleOnRouteState.getTrip().getStartTime());
-
-		List<ArrivalDeparture> results = cache.getTripHistory(tripKey);
-
-		if (results != null) {
-			results = getDepartureArrival(currentIndex, results);
-
-			if (results != null && results.size() > 1) {
-				ArrivalDeparture arrival = getArrival(results);
-				ArrivalDeparture departure = getDeparture(results);
-				if (arrival != null && departure != null) {
-					return timeBetweenStops(departure, arrival);
-				}
-			}
-		}
-		return 0;
-	}
-
-	protected ArrivalDeparture getArrival(List<ArrivalDeparture> results) {
-		for (ArrivalDeparture result : emptyIfNull(results)) {
-			if (result.isArrival())
-				return result;
-		}
-		return null;
-	}
-
-	protected ArrivalDeparture getDeparture(List<ArrivalDeparture> results) {
-		for (ArrivalDeparture result : emptyIfNull(results)) {
-			if (result.isDeparture())
-				return result;
-		}
-		return null;
-	}
-
-	protected List<ArrivalDeparture> getDepartureArrival(int stopPathIndex, List<ArrivalDeparture> results) {
-		BeanComparator<ArrivalDeparture> compartor = new BeanComparator<ArrivalDeparture>("stopPathIndex");
-
-		Collections.sort(results, compartor);
-
-		ArrayList<ArrivalDeparture> stopPathEnds = new ArrayList<ArrivalDeparture>();
-		for (ArrivalDeparture result : emptyIfNull(results)) {
-			if ((result.getStopPathIndex() == stopPathIndex && result.isDeparture())
-					|| (result.getStopPathIndex() == stopPathIndex && result.isArrival())) {
-				stopPathEnds.add(result);
-			}
-		}
-		return stopPathEnds;
-	}
-
-	protected VehicleState getPreviousVehicle(List<VehicleState> vehicles, VehicleState vehicle) {
-		double closestDistance = 1000000;
-
-		VehicleState vehicleState = null;
-		String direction = vehicle.getMatch().getTrip().getDirectionId();
-		for (VehicleState currentVehicle : vehicles) {
-
-			String currentDirection = currentVehicle.getMatch().getTrip().getDirectionId();
-
-			if (currentDirection.equals(direction)) {
-				double distance = vehicle.getMatch().distanceBetweenMatches(currentVehicle.getMatch());
-				/*
-				 * must check which is closest that has actually passed the stop
-				 * the current vehicle is moving towards
-				 */
-				if (distance > 0 && distance < closestDistance && currentVehicle.getMatch().getStopPath()
-						.getGtfsStopSeq() > vehicle.getMatch().getStopPath().getGtfsStopSeq()) {
-					closestDistance = distance;
-					vehicleState = currentVehicle;
-				}
-			}
-		}
-		return vehicleState;
+		
+		return Math.abs(ad2.getTime() - ad1.getTime());		
 	}
 
 	protected static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
