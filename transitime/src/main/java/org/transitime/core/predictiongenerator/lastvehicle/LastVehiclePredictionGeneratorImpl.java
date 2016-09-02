@@ -32,7 +32,7 @@ import org.transitime.ipc.data.IpcVehicleComplete;
  *  Could do a combination with historical average  so that it improves quickly rather than just waiting on having enough data to support average or Kalman.
  *  So do a progression from LastVehicle --> Historical Average --> Kalman. Might be interesting to look at the rate of improvement of prediction as well as the end result.
  *  
- *  Doen this by changing which class each extends. How can we make configurable?
+ *  Does this by changing which class each extends. How can we make configurable?
  */
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {

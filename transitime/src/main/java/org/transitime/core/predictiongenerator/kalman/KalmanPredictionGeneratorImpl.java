@@ -81,9 +81,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());		
 	
-		long time = 0;
-
-		// time = getTimeTaken(tripCache, previousVehicleOnRouteState, indices);
+		long time = 0;	
 
 		time = this.getLastVehicleTravelTime(currentVehicleState, indices);
 		/*
@@ -94,6 +92,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 		if (time > -1) {
 
 			logger.debug("Kalman has last vehicle info for : " +indices.toString());
+			
+			
 			
 			Date nearestDay = DateUtils.truncate(Calendar.getInstance().getTime(), Calendar.DAY_OF_MONTH);
 
@@ -107,8 +107,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			}
 			/*
 			 * if we have enough data start using Kalman filter otherwise revert
-			 * to default. This does not mean that this method of prediction is
-			 * yet better than the default.
+			 * to extended class for prediction. 
 			 */	
 			if (lastDaysTimes != null && lastDaysTimes.size() >= minKalmanDays.getValue().intValue()) {
 
@@ -146,6 +145,9 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					}
 					
 					logger.debug("Using error value: " + last_prediction_error + " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
+					
+					//TODO this should also display the detail of which vehicle it choose as the last one.
+					logger.debug("Using last vehicle value: " + time + " for : "+ indices.toString());
 					
 					kalmanPredictionResult = kalmanPrediction.predict(last_vehicle_segment, historical_segments_k,
 							last_prediction_error);
