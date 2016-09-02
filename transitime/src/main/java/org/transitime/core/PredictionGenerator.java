@@ -321,13 +321,12 @@ public abstract class PredictionGenerator {
 
 		ArrayList<ArrivalDeparture> stopPathEnds = new ArrayList<ArrivalDeparture>();
 		for (ArrivalDeparture result : emptyIfNull(results)) {
-			if ((result.getStopPathIndex() == (stopPathIndex - 1) && result.isDeparture())
+			if ((result.getStopPathIndex() == stopPathIndex && result.isDeparture())
 					|| (result.getStopPathIndex() == stopPathIndex && result.isArrival())) {
 				stopPathEnds.add(result);
 			}
 		}
 		return stopPathEnds;
-
 	}
 
 	protected VehicleState getPreviousVehicle(List<VehicleState> vehicles, VehicleState vehicle) {
