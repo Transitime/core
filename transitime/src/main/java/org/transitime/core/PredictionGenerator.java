@@ -265,7 +265,7 @@ public abstract class PredictionGenerator {
 	}
 
 	protected long timeBetweenStops(ArrivalDeparture ad1, ArrivalDeparture ad2) {
-		if (ad2.getStopPathIndex() - ad1.getStopPathIndex() == 1) {
+		if (ad2.getStopPathIndex() ==ad1.getStopPathIndex()) {
 			// This is the movement between two stops
 			return (ad2.getTime() - ad1.getTime());
 		}
