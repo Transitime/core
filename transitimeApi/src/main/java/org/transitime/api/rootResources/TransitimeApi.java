@@ -1468,14 +1468,18 @@ public class TransitimeApi {
 	{
 		try {						
 			LocalTime midnight = LocalTime.MIDNIGHT;
-			  		 
-			LocalDate now = date.getDate();
-						
-			LocalDateTime todayMidnight = LocalDateTime.of(now, midnight);
-			LocalDateTime yesterdatMidnight = todayMidnight.plusDays(-1);
-									
-			Date end_date = Date.from(todayMidnight.atZone(ZoneId.systemDefault()).toInstant());
-			Date start_date = Date.from(yesterdatMidnight.atZone(ZoneId.systemDefault()).toInstant());
+			Date end_date=null;
+			Date start_date=null;
+			if(date!=null)
+			{
+				LocalDate now = date.getDate();
+							
+				LocalDateTime todayMidnight = LocalDateTime.of(now, midnight);
+				LocalDateTime yesterdatMidnight = todayMidnight.plusDays(-1);
+										
+				end_date = Date.from(todayMidnight.atZone(ZoneId.systemDefault()).toInstant());
+				start_date = Date.from(yesterdatMidnight.atZone(ZoneId.systemDefault()).toInstant());
+			}
 											
 			PredictionAnalysisInterface predictionAnalysisInterface = stdParameters.getPredictionAnalysisInterface();
 
