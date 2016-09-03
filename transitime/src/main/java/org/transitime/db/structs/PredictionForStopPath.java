@@ -163,15 +163,14 @@ public class PredictionForStopPath implements Serializable{
 		if(algorithm!=null)
 			criteria.add(Restrictions.eq("algorithm", algorithm));
 		if(tripId!=null)
-			criteria.add(Restrictions.eq("tripId", algorithm));
+			criteria.add(Restrictions.eq("tripId", tripId));
 		if(stopPathIndex!=null)
-			criteria.add(Restrictions.eq("stopPathIndex", stopPathIndex));
-		/*		
+			criteria.add(Restrictions.eq("stopPathIndex", stopPathIndex));			
 		if(beginTime!=null)
 			criteria.add(Restrictions.gt("creationTime", beginTime));
 		if(endTime!=null)
 			criteria.add(Restrictions.lt("creationTime", endTime));		
-		*/
+		
 		return criteria.list();				
 	}
 
