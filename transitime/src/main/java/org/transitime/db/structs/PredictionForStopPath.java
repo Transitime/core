@@ -38,19 +38,19 @@ public class PredictionForStopPath implements Serializable{
 	
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
-	private final Date creationTime;
+	private Date creationTime;
 	
 	@Column	
-	private final Double predictionTime;
+	private Double predictionTime;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String tripId;
+	private String tripId;
 	
 	@Column
-	private final String algorithm;
+	private String algorithm;
 	
 	@Column
-	private final Integer stopPathIndex;
+	private Integer stopPathIndex;
 
 	public PredictionForStopPath(Date creationTime, Double predictionTimeMilliseconds, String tripId, Integer stopPathIndex, String algorithm) {
 		super();
@@ -59,6 +59,26 @@ public class PredictionForStopPath implements Serializable{
 		this.tripId = tripId;
 		this.stopPathIndex = stopPathIndex;
 		this.algorithm=algorithm;
+	}
+
+	public void setCreationTime(Date creationTime) {
+		this.creationTime = creationTime;
+	}
+
+	public void setPredictionTime(Double predictionTime) {
+		this.predictionTime = predictionTime;
+	}
+
+	public void setTripId(String tripId) {
+		this.tripId = tripId;
+	}
+
+	public void setAlgorithm(String algorithm) {
+		this.algorithm = algorithm;
+	}
+
+	public void setStopPathIndex(Integer stopPathIndex) {
+		this.stopPathIndex = stopPathIndex;
 	}
 
 	public Integer getStopPathIndex() {
@@ -153,6 +173,15 @@ public class PredictionForStopPath implements Serializable{
 			criteria.add(Restrictions.lt("creationTime", endTime));		
 		*/
 		return criteria.list();				
+	}
+
+	public PredictionForStopPath() {
+		super();
+		this.creationTime = null;
+		this.predictionTime = null;
+		this.tripId = null;
+		this.stopPathIndex = null;
+		this.algorithm=null;						
 	}
 			
 }
