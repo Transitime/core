@@ -19,6 +19,7 @@ package org.transitime.api.rootResources;
 
 import java.rmi.RemoteException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -1465,18 +1466,17 @@ public class TransitimeApi {
 			@QueryParam(value = "algorithm") String algorithm,
 			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex" ) Integer stopPathIndex, @QueryParam(value = "date") DateParam date) 
 	{
-		try {
-			
-			LocalDate now = date.getDate(); // 2015-11-19T19:42:19.224
-			// start of a day
-			LocalDate start=now.with(LocalTime.MIN); // 2015-11-19T00:00
-			now.with(LocalTime.MIDNIGHT); // 2015-11-19T00:00
-			// end of a day
-			LocalDate end=now.with(LocalTime.MAX); // 2015-11-19T23:59:59.999999999
-			
-			Date start_date = Date.from(start.atStartOfDay(ZoneId.systemDefault()).toInstant());
-			Date end_date = Date.from(end.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		try {						
+			LocalTime midnight = LocalTime.MIDNIGHT;
+			  		 
+			LocalDate now = date.getDate();
 						
+			LocalDateTime todayMidnight = LocalDateTime.of(now, midnight);
+			LocalDateTime yesterdatMidnight = todayMidnight.plusDays(-1);
+									
+			Date end_date = Date.from(todayMidnight.atZone(ZoneId.systemDefault()).toInstant());
+			Date start_date = Date.from(yesterdatMidnight.atZone(ZoneId.systemDefault()).toInstant());
+											
 			PredictionAnalysisInterface predictionAnalysisInterface = stdParameters.getPredictionAnalysisInterface();
 
 			List<IpcPredictionForStopPath> result = predictionAnalysisInterface.getRecordedTravelTimePredictions(tripId, stopPathIndex, start_date, end_date, algorithm);
