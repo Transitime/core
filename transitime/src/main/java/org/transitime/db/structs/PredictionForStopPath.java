@@ -170,8 +170,12 @@ public class PredictionForStopPath implements Serializable{
 			criteria.add(Restrictions.gt("creationTime", beginTime));
 		if(endTime!=null)
 			criteria.add(Restrictions.lt("creationTime", endTime));		
-		
-		return criteria.list();				
+		List<PredictionForStopPath> results=criteria.list();
+		if(results.size()>0)
+		{
+			System.out.println("Got some results");
+		}
+		return results;				
 	}
 
 	public PredictionForStopPath() {

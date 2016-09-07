@@ -1393,7 +1393,7 @@ public class TransitimeApi {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getTripArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripid") String tripid, @QueryParam(value = "date") DateParam date,
+			@QueryParam(value = "tripId") String tripid, @QueryParam(value = "date") DateParam date,
 			@QueryParam(value = "starttime") Integer starttime) throws WebApplicationException {
 		try {
 
