@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.db.structs.StopPath;
@@ -60,7 +61,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
+public class PredictionGeneratorDefaultImpl extends PredictionGenerator implements PredictionComponentElementsGenerator{
 
 	private static IntegerConfigValue maxPredictionsTimeSecs =
 			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
@@ -146,9 +147,9 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
 		String stopId = path.getStopId();
 		int gtfsStopSeq = path.getGtfsStopSeq();
 		Trip trip = indices.getTrip();
-		int expectedStopTimeMsec =
-				TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
-
+		int expectedStopTimeMsec = 
+				(int) getStopTimeForPath(indices, avlReport);
+			
 		// If should generate arrival time...
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
@@ -424,9 +425,9 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
 		// Return the results
 		return newPredictions;
 	}
-	protected long getTravelTimeForPath(Indices indices, AvlReport avlReport)
+	public long getTravelTimeForPath(Indices indices, AvlReport avlReport)
 	{
-		logger.debug("Using transiTime default algorithm for prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
+		logger.debug("Using transiTime default algorithm for travel time prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
 		if(storeTravelTimeStopPathPredictions.getValue())
 		{		
 			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "TRANSITIME DEFAULT");		
@@ -434,7 +435,12 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator {
 		}
 		return indices.getTravelTimeForPath();
 	}
-	
 
-	
+	@Override
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+		long prediction=TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
+		logger.debug("Using transiTime default algorithm for stop time prediction : "+indices + " Value: "+prediction);
+		return prediction;		
+	}
+		
 }

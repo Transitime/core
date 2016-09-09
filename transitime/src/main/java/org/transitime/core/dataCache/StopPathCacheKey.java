@@ -14,6 +14,7 @@ public class StopPathCacheKey implements java.io.Serializable {
 	private String tripId;
 	private Integer stopPathIndex;
 	
+	
 	public StopPathCacheKey(String tripId, Integer stopPathIndex) {
 		super();
 		

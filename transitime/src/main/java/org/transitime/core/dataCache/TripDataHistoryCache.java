@@ -186,16 +186,22 @@ public class TripDataHistoryCache {
 			
 			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 						
-			double duration=getLastPathDuration(arrivalDeparture, trip);
+			double pathDuration=getLastPathDuration(arrivalDeparture, trip);
 			
-			if(duration>0)
+			if(pathDuration>0)
 			{
 				if(average==null)				
 					average=new HistoricalAverage();
 				
-				average.update(duration);
+				average.update(pathDuration);
 			
 				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+			}
+			
+			double stopDuration=getLastStopDuration(arrivalDeparture, trip);
+			if(stopDuration>0)
+			{
+				// TODO Add to a historical average cache for stop/dwell times.
 			}
 		}				
 		return tripKey;
@@ -217,6 +223,10 @@ public class TripDataHistoryCache {
 					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
 		}
 					
+		return -1;
+	}
+	private double getLastStopDuration(ArrivalDeparture arrivalDeparture, Trip trip)
+	{
 		return -1;
 	}
 	static public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)

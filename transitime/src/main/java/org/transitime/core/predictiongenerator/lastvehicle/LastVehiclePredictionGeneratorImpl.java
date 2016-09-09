@@ -37,19 +37,10 @@ import org.transitime.ipc.data.IpcVehicleComplete;
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
 	private String alternative="PredictionGeneratorDefaultImpl";
-	/* (non-Javadoc)
-	 * @see org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl#generatePredictionForStop(org.transitime.db.structs.AvlReport, org.transitime.core.Indices, long, boolean, boolean, boolean, boolean)
-	 */
-	@Override
-	public IpcPrediction generatePredictionForStop(AvlReport avlReport,
-			Indices indices, long predictionTime, boolean useArrivalTimes,
-			boolean affectedByWaitStop, boolean isDelayed,
-			boolean lateSoMarkAsUncertain) {
-		// TODO Auto-generated method stub
-		return super.generatePredictionForStop(avlReport, indices, predictionTime,
-				useArrivalTimes, affectedByWaitStop, isDelayed, lateSoMarkAsUncertain);
-	}
+	
 		
+	
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(LastVehiclePredictionGeneratorImpl.class);
 
@@ -98,5 +89,10 @@ public class LastVehiclePredictionGeneratorImpl extends
 		//logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
 		return super.getTravelTimeForPath(indices, avlReport);
-	}	
+	}
+	@Override
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+		// TODO Auto-generated method stub
+		return super.getStopTimeForPath(indices, avlReport);
+	}
 }

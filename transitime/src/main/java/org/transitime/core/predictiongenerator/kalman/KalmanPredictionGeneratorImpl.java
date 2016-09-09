@@ -191,10 +191,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	}
 
 	@Override
-	public IpcPrediction generatePredictionForStop(AvlReport avlReport, Indices indices, long predictionTime,
-			boolean useArrivalTimes, boolean affectedByWaitStop, boolean isDelayed, boolean lateSoMarkAsUncertain) {
-
-		return super.generatePredictionForStop(avlReport, indices, predictionTime, useArrivalTimes, affectedByWaitStop,
-				isDelayed, lateSoMarkAsUncertain);
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+		// TODO Auto-generated method stub
+		return super.getStopTimeForPath(indices, avlReport);
 	}
 }
