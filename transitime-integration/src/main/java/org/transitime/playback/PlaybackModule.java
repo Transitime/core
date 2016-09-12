@@ -211,7 +211,8 @@ public class PlaybackModule {
 	// but actually maybe it doesn't matter for playback.
 	private static void setupGtfs(String gtfsDirectoryName) {
 		TitleFormatter titleFormatter = new TitleFormatter(null, true);
-		GtfsData gtfsData = new GtfsData(1, null, null, true, AgencyConfig.getAgencyId(), gtfsDirectoryName, null, 
+		boolean shouldStoreNewRevs = true, shouldDeleteRevs = false;
+		GtfsData gtfsData = new GtfsData(1, null, null, shouldStoreNewRevs, shouldDeleteRevs, AgencyConfig.getAgencyId(), gtfsDirectoryName, null, 
 				pathOffsetDistance,  maxStopToPathDistance, maxDistanceForEliminatingVertices,
 				defaultWaitTimeAtStopMsec, maxSpeedKph, maxTravelTimeSegmentLength, false, titleFormatter);
 		gtfsData.processData();
