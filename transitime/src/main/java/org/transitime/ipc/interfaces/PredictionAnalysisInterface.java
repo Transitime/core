@@ -18,7 +18,6 @@ package org.transitime.ipc.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 

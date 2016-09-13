@@ -16,10 +16,6 @@
  */
 package org.transitime.reports;
 
-import java.text.ParseException;
-
-import org.transitime.utils.Time;
-
 /**
  * Does a query of AVL data and returns result in JSON format.
  * 
@@ -69,9 +65,9 @@ public class AvlJsonQuery {
 
 		String sql = "SELECT vehicleId, time, assignmentId, lat, lon, speed, "
 				+ "heading, timeProcessed, source "
-				+ "FROM avlreports "
-				+ "WHERE time BETWEEN " + " cast(? as timestamp)"
-				+ " AND " + "cast(? as timestamp)"  + " + INTERVAL '" + numdays + " day' "
+				+ "FROM AvlReports "
+				+ "WHERE time BETWEEN '" + beginDate + "' "
+				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
 				+ timeSql;
 
 		// If only want data for single vehicle then specify so in SQL
@@ -85,17 +81,11 @@ public class AvlJsonQuery {
 		// to view too much data at once.
 		sql += "ORDER BY vehicleId, time LIMIT " + MAX_ROWS;
 		
-		String json=null;
-		try {
-			java.util.Date startdate = Time.parseDate(beginDate);	
-			json = GenericJsonQuery.getJsonString(agencyId, sql,startdate, startdate);
-		} catch (ParseException e) {			
-			json = e.getMessage();
-		}
+		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 
 		return json;
 	}
-	
+
 	/**
 	 * Queries agency for AVL data and corresponding Match and Trip data. By
 	 * joining in Match and Trip data can see what the block and trip IDs, the

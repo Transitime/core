@@ -1,6 +1,8 @@
 package org.transitime.custom.wexfordcoach;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
@@ -25,7 +27,9 @@ public class WexfordCoachAvlModule extends PollUrlAvlModule {
 	}
 
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
+		
+		Collection<AvlReport> reports = new ArrayList<AvlReport>();
 		
 		String json=this.getJsonString(in);
 		
@@ -50,8 +54,10 @@ public class WexfordCoachAvlModule extends PollUrlAvlModule {
 					new AvlReport(vehicleId, timestamp.getTime(), latitude,
 							longitude, heading, speed, "Wexford Coach");
 			
-			processAvlReport(avlReport);
+			reports.add(avlReport);
 		}
+		
+		return reports;
 	}
 	/**
 	 * Just for debugging

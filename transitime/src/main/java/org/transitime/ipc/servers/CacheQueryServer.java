@@ -4,8 +4,6 @@
 package org.transitime.ipc.servers;
 
 import java.rmi.RemoteException;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -122,22 +120,20 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	}
 
 	@Override
-	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, LocalDate localDate, Integer starttime)
+	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, Date date, Integer starttime)
 			throws RemoteException {
 		
 		try {
 			List<ArrivalDeparture> result = new ArrayList<ArrivalDeparture>();
 			
-			if(tripId!=null && localDate!=null && starttime!=null){
+			if(tripId!=null && date!=null && starttime!=null){
 				
-				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				TripKey tripKey = new TripKey(tripId, date, starttime);
 
 				result = TripDataHistoryCache.getInstance().getTripHistory(tripKey);
 			}
-			else if(tripId!=null && localDate!=null && starttime==null)
+			else if(tripId!=null && date!=null && starttime==null)
 			{
-				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
 				{
 					if(key.getTripId().equals(tripId) && date.compareTo(key.getTripStartDate())==0)
@@ -145,7 +141,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
 					}										
 				}
-			}else if(tripId!=null && localDate==null && starttime==null)
+			}else if(tripId!=null && date==null && starttime==null)
 			{
 				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
 				{
@@ -155,9 +151,8 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 					}										
 				}
 			}
-			else if(tripId==null && localDate!=null && starttime==null)
+			else if(tripId==null && date!=null && starttime==null)
 			{
-				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
 				{
 					if(date.compareTo(key.getTripStartDate())==0)

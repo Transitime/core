@@ -234,6 +234,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			Trip trip = block.getTrip(tripIndex);
 			StopPath stopPath = trip.getStopPath(stopPathIndex);
 			String stopId = stopPath.getStopId();
+			this.stopOrder = trip.getRoute().getStopOrder(trip.getDirectionId(), stopId, stopPathIndex);
+
 			
 			// Determine the schedule time, which is a bit complicated.
 			// Of course, only do this for schedule based assignments.
@@ -278,6 +280,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			this.tripId="";
 			this.stopId="";
 			this.serviceId = "";
+			this.stopOrder = 0;
 		}
 	}
 	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block, 

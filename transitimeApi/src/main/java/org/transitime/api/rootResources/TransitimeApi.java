@@ -18,10 +18,6 @@
 package org.transitime.api.rootResources;
 
 import java.rmi.RemoteException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -93,7 +89,6 @@ import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
-import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.interfaces.ConfigInterface;
@@ -101,6 +96,7 @@ import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.interfaces.VehiclesInterface;
+import org.transitime.utils.Time;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
 
 /**
@@ -1652,9 +1648,7 @@ public class TransitimeApi {
 		try {
 
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
-			LocalDate queryDate = null;
-			if (date != null)
-				queryDate = date.getDate();
+			Date queryDate = date.getDate();
 			List<IpcArrivalDeparture> result = cachequeryInterface.getTripArrivalDepartures(tripid, queryDate,
 					starttime);
 
@@ -1721,18 +1715,12 @@ public class TransitimeApi {
 			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex" ) Integer stopPathIndex, @QueryParam(value = "date") DateParam date) 
 	{
 		try {						
-			LocalTime midnight = LocalTime.MIDNIGHT;
 			Date end_date=null;
 			Date start_date=null;
 			if(date!=null)
 			{
-				LocalDate now = date.getDate();
-							
-				LocalDateTime todayMidnight = LocalDateTime.of(now, midnight);
-				LocalDateTime yesterdatMidnight = todayMidnight.plusDays(-1);
-										
-				end_date = Date.from(todayMidnight.atZone(ZoneId.systemDefault()).toInstant());
-				start_date = Date.from(yesterdatMidnight.atZone(ZoneId.systemDefault()).toInstant());
+				start_date = date.getDate();
+				end_date = new Date(start_date.getTime() + Time.DAY_IN_MSECS);
 			}
 											
 			PredictionAnalysisInterface predictionAnalysisInterface = stdParameters.getPredictionAnalysisInterface();
