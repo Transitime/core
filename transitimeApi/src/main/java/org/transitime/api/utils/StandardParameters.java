@@ -30,13 +30,17 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.transitime.db.webstructs.ApiKeyManager;
+import org.transitime.ipc.clients.CacheQueryInterfaceFactory;
 import org.transitime.ipc.clients.CommandsInterfaceFactory;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
+import org.transitime.ipc.clients.PredictionAnalysisInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.ServerStatusInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
+import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.interfaces.CommandsInterface;
 import org.transitime.ipc.interfaces.ConfigInterface;
+import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.interfaces.VehiclesInterface;
@@ -253,7 +257,38 @@ public class StandardParameters {
 
 		return serverStatusInterface;
 	}
+	/**
+	 * Gets the CacheQueryInterface for the specified agencyId. If not valid
+	 * then throws WebApplicationException.
+	 * 
+	 * @return The CacheQueryInterface
+	 */
+	public CacheQueryInterface getCacheQueryInterface()
+			throws WebApplicationException {
+		CacheQueryInterface cachequeryInterface = 
+				CacheQueryInterfaceFactory.get(agencyId);
+		if (cachequeryInterface == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
 
+		return cachequeryInterface;
+	}
+	/**
+	 * Gets the PredictionAnalysisInterface for the specified agencyId. If not valid
+	 * then throws WebApplicationException.
+	 * 
+	 * @return The PredictionAnalysisInterface
+	 */
+	public PredictionAnalysisInterface getPredictionAnalysisInterface()
+			throws WebApplicationException {
+		PredictionAnalysisInterface predictionAnalysisInterface = 
+				PredictionAnalysisInterfaceFactory.get(agencyId);
+		if (predictionAnalysisInterface  == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
+
+		return predictionAnalysisInterface ;
+	}
 	/**
 	 * Simple getter for the key
 	 * 

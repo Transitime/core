@@ -249,7 +249,7 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 					PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							routeId, directionId, stopId, tripId, vehicleId,
 							predictedTime, predictionsReadTime, isArrival,
-							affectedByWaitStop, "NextBus");
+							affectedByWaitStop, "NextBus",null,null);
 					storePrediction(pred);
 				}
 			}

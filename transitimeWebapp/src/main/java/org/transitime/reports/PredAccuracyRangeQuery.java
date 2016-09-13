@@ -236,17 +236,17 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		String beginDate = "11-25-2014";
+		String beginDate = "06-30-2016";
+		String numDays = "1";
 		String beginTime = null;
 		String endTime = null;
-		String numDays = "1";
-		String routeIds[] = { "CR-Fairmount" };
+		String routeIds[] = { };
 		String source = "Transitime";
 
 		String dbType = "postgresql";// "mysql";
-		String dbHost = "sfmta.c3zbap9ppyby.us-west-2.rds.amazonaws.com";// "localhost";
-		String dbName = "mbta";
-		String dbUserName = "transitime";// "root";
+		String dbHost = "192.168.99.100";// "localhost";
+		String dbName = "GOHART";
+		String dbUserName = "postgres";// "root";
 		String dbPassword = "transitime";
 
 		try {

@@ -30,12 +30,16 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
+
 import org.hibernate.CallbackException;
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.classic.Lifecycle;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
@@ -61,6 +65,7 @@ import org.transitime.utils.Time;
  * 
  * @author SkiBu Smith
  */
+@IgnoreSizeOf
 @Entity 
 @DynamicUpdate
 @Table(name="ArrivalsDepartures",
@@ -189,6 +194,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	
 	// Needed because some methods need to know if dealing with arrivals or 
 	// departures.
+	  
 	public enum ArrivalsOrDepartures {ARRIVALS, DEPARTURES};
 
 	private static final Logger logger = 
@@ -211,7 +217,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param stopPathIndex
 	 * @param isArrival
 	 */
-	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block, 
+	protected ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block, 
 			int tripIndex, int stopPathIndex, boolean isArrival) {
 		this.vehicleId = vehicleId;
 		this.time = time;
@@ -220,54 +226,66 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.tripIndex = tripIndex;
 		this.stopPathIndex = stopPathIndex;
 		this.isArrival = isArrival;
-		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
+		this.configRev = configRev; 
 		
 		// Some useful convenience variables
-		Trip trip = block.getTrip(tripIndex);
-		StopPath stopPath = trip.getStopPath(stopPathIndex);
-		String stopId = stopPath.getStopId();
-		
-		// Determine and store stop order
-		this.stopOrder =
-				trip.getRoute().getStopOrder(trip.getDirectionId(), stopId,
-						stopPathIndex);
-
-		// Determine the schedule time, which is a bit complicated.
-		// Of course, only do this for schedule based assignments.
-		// The schedule time will only be set if the schedule info was available
-		// from the GTFS data and it is the proper type of arrival or departure 
-		// stop (there is an arrival schedule time and this is the last stop for
-		// a trip and and this is an arrival time OR there is a departure schedule
-		// time and this is not the last stop for a trip and this is a departure 
-		// time.
-		Date scheduledEpochTime = null;
-		if (!trip.isNoSchedule()) {
-			ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
-			if (stopPath.isLastStopInTrip() && scheduleTime.getArrivalTime() != null
-					&& isArrival) {
-				long epochTime = Core.getInstance().getTime()
-						.getEpochTime(scheduleTime.getArrivalTime(), time);
-				scheduledEpochTime = new Date(epochTime);
-			} else if (!stopPath.isLastStopInTrip()
-					&& scheduleTime.getDepartureTime() != null && !isArrival) {
-				long epochTime = Core.getInstance().getTime()
-						.getEpochTime(scheduleTime.getDepartureTime(), time);
-				scheduledEpochTime = new Date(epochTime);
+		if(block!=null)
+		{
+			Trip trip = block.getTrip(tripIndex);
+			StopPath stopPath = trip.getStopPath(stopPathIndex);
+			String stopId = stopPath.getStopId();
+			
+			// Determine the schedule time, which is a bit complicated.
+			// Of course, only do this for schedule based assignments.
+			// The schedule time will only be set if the schedule info was available
+			// from the GTFS data and it is the proper type of arrival or departure 
+			// stop (there is an arrival schedule time and this is the last stop for
+			// a trip and and this is an arrival time OR there is a departure schedule
+			// time and this is not the last stop for a trip and this is a departure 
+			// time.
+			Date scheduledEpochTime = null;
+			if (!trip.isNoSchedule()) {
+				ScheduleTime scheduleTime = trip.getScheduleTime(stopPathIndex);
+				if (stopPath.isLastStopInTrip() && scheduleTime.getArrivalTime() != null
+						&& isArrival) {
+					long epochTime = Core.getInstance().getTime()
+							.getEpochTime(scheduleTime.getArrivalTime(), time);
+					scheduledEpochTime = new Date(epochTime);
+				} else if (!stopPath.isLastStopInTrip()
+						&& scheduleTime.getDepartureTime() != null && !isArrival) {
+					long epochTime = Core.getInstance().getTime()
+							.getEpochTime(scheduleTime.getDepartureTime(), time);
+					scheduledEpochTime = new Date(epochTime);
+				}
 			}
+			this.scheduledTime = scheduledEpochTime;
+			
+			this.blockId = block.getId();
+			this.tripId = trip.getId();
+			this.directionId = trip.getDirectionId();
+			this.stopId = stopId;
+			this.gtfsStopSeq = stopPath.getGtfsStopSeq();
+			this.stopPathLength = (float) stopPath.getLength();
+			this.routeId = trip.getRouteId();
+			this.routeShortName = trip.getRouteShortName();
+			this.serviceId = block.getServiceId();
+		}else
+		{
+			/* have to do this as they are final */
+			this.stopPathLength=0;
+			this.gtfsStopSeq=0;
+			this.scheduledTime=null;
+			this.tripId="";
+			this.stopId="";
+			this.serviceId = "";
 		}
-		this.scheduledTime = scheduledEpochTime;
-		
-		this.blockId = block.getId();
-		this.tripId = trip.getId();
-		this.directionId = trip.getDirectionId();
-		this.stopId = stopId;
-		this.gtfsStopSeq = stopPath.getGtfsStopSeq();
-		this.stopPathLength = (float) stopPath.getLength();
-		this.routeId = trip.getRouteId();
-		this.routeShortName = trip.getRouteShortName();
-		this.serviceId = block.getServiceId();		
 	}
-	
+	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block, 
+			int tripIndex, int stopPathIndex, boolean isArrival) {
+			
+		this(Core.getInstance().getDbConfig().getConfigRev(),vehicleId, time, avlTime, block, 
+				tripIndex, stopPathIndex, isArrival);
+	}
 	/**
 	 * Hibernate requires a no-arg constructor for reading objects
 	 * from database.
@@ -578,6 +596,80 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				null); // Read both arrivals and departures
 	}
 	
+	/**
+	 * Reads in arrivals and departures for a particular trip and service. Create session and uses it
+	 * 
+	 * @param beginTime
+	 * @param endTime
+	 * @param trip
+	 * @param serviceId
+	 * @return
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Date beginTime, Date endTime, String tripId, String serviceId)	
+	{
+		Session session = HibernateUtils.getSession();		
+				
+		return ArrivalDeparture.getArrivalsDeparturesFromDb(session, beginTime, endTime, tripId, serviceId);		
+	}
+
+	/**
+	 * Reads in arrivals and departures for a particular trip and service. Uses session provided
+	 * 
+	 * @paran session
+	 * @param beginTime
+	 * @param endTime
+	 * @param trip
+	 * @param serviceId
+	 * @return
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Session session, Date beginTime, Date endTime, String tripId, String serviceId)	
+	{
+		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+						
+		criteria.add(Restrictions.eq( "tripId",tripId ));
+		criteria.add(Restrictions.gt("time", beginTime));
+		criteria.add(Restrictions.lt("time",endTime)).list();
+		
+		if(serviceId!=null)
+			criteria.add(Restrictions.eq( "serviceId",serviceId ));
+		
+		@SuppressWarnings("unchecked")
+		List<ArrivalDeparture> arrivalsDeparatures=criteria.list();
+		return arrivalsDeparatures;
+					
+	}
+	/**
+	 * Reads in arrivals and departures for a particular stopPathIndex of a trip between two dates. Uses session provided
+	 * 
+	 * @paran session
+	 * @param beginTime
+	 * @param endTime
+	 * @param trip
+	 * @param stopPathIndex
+	 * @return
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Session session, Date beginTime, Date endTime, String tripId, Integer stopPathIndex)	
+	{
+		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
+						
+		if(tripId!=null)
+		{
+			criteria.add(Restrictions.eq( "tripId",tripId ));
+			
+			if(stopPathIndex!=null)
+				criteria.add(Restrictions.eq( "stopPathIndex",stopPathIndex ));
+		}
+		
+		criteria.add(Restrictions.gt("time", beginTime));
+		criteria.add(Restrictions.lt("time",endTime)).list();
+		
+				
+		
+		@SuppressWarnings("unchecked")
+		List<ArrivalDeparture> arrivalsDeparatures=criteria.list();
+		return arrivalsDeparatures;
+					
+	}
 	/**
 	 * Reads the arrivals/departures for the timespan specified. All of the 
 	 * data is read in at once so could present memory issue if reading

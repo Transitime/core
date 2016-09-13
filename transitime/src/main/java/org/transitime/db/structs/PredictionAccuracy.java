@@ -29,6 +29,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.CallbackException;
 import org.hibernate.Session;
@@ -115,6 +116,11 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String predictionSource;
 	
+	/* TODO */
+	//@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	@Transient
+	private String predictionAlgorithm;
+	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String vehicleId;
 
@@ -137,12 +143,13 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	 *            The time the vehicle was predicted to arrive at the stop
 	 * @param predictionReadTime
 	 * @param predictionSource
+	 * @param predictionAlgorithm
 	 * @param vehicleId
 	 */
 	public PredictionAccuracy(String routeId, String directionId,
 			String stopId, String tripId, Date arrivalDepartureTime,
 			Date predictedTime, Date predictionReadTime,
-			String predictionSource, String vehicleId, 
+			String predictionSource,String predictionAlgorithm, String vehicleId, 
 			Boolean affectedByWaitStop) {
 		super();
 		this.routeId = routeId;
@@ -160,6 +167,11 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		this.predictionSource = predictionSource;
 		this.vehicleId = vehicleId;
 		this.affectedByWaitStop = affectedByWaitStop;
+		this.predictionAlgorithm=predictionAlgorithm;
+	}
+
+	public String getPredictionAlgorithm() {
+		return predictionAlgorithm;
 	}
 
 	/**
@@ -180,6 +192,7 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		this.predictionSource = null;
 		this.vehicleId = null;
 		this.affectedByWaitStop = null;
+		this.predictionAlgorithm = null;
 	}
 
 	@Override
@@ -273,6 +286,11 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 				return false;
 		} else if (!predictionSource.equals(other.predictionSource))
 			return false;
+		if (predictionAlgorithm == null) {
+			if (other.predictionAlgorithm != null)
+				return false;
+		} else if (!predictionAlgorithm.equals(other.predictionAlgorithm))
+			return false;
 		if (routeId == null) {
 			if (other.routeId != null)
 				return false;
@@ -315,6 +333,7 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 				+ ", predictionLengthMsecs=" + getPredictionLengthMsecs()
 				+ ", predictionAccuracyMsecs=" + predictionAccuracyMsecs
 				+ ", predictionSource=" + predictionSource 
+				+ ", predictionAlgorithm=" + predictionAlgorithm				
 				+ ", vehicleId=" + vehicleId 
 				+ ", affectedByWaitStop=" + affectedByWaitStop
 				+ "]";
@@ -380,7 +399,7 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 
 	/**
 	 * Callback due to implementing Lifecycle interface. Used to compact
-	 * string members by interning them.
+	 * string members by   them.
 	 */
 	@Override
 	public void onLoad(Session s, Serializable id) throws CallbackException {
@@ -396,6 +415,8 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 			tripId = tripId.intern();
 		if (predictionSource != null)
 			predictionSource = predictionSource.intern();
+		if (predictionAlgorithm != null)
+			predictionAlgorithm = predictionAlgorithm.intern();
 		if (vehicleId != null)
 			vehicleId = vehicleId.intern();
 	}

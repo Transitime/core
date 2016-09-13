@@ -3,6 +3,20 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
 	<display-name>Transitime api</display-name>
 
+	
+	<context-param>
+      <param-name>transitime_config_file_location</param-name>
+      <!-- Set to customized properties file with db config info and such -->
+
+          <param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>      
+
+    </context-param>
+	
+	<!-- So that configuration parameters can be read in from file -->
+    <listener>
+      <listener-class>org.transitime.web.ReadConfigListener</listener-class>
+    </listener>
+	
 	<!-- For special Http response 416 "Requested Range Not Satisfiable" which
      is used for when there is no data for a request, use special error
      page that only returns the message instead of a bunch of ugly

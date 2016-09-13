@@ -2,6 +2,13 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
   <display-name>Transitime webapp</display-name>
 
+
+  <context-param>
+      <param-name>transitime_config_file_location</param-name>
+      <!-- Set to customized properties file with db config info and such -->
+      <param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>      
+  </context-param>
+
   <welcome-file-list>
     <welcome-file>welcome/index.jsp</welcome-file>
     <welcome-file>index.html</welcome-file>

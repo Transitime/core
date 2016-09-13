@@ -240,6 +240,16 @@
         primary key (id, configRev)
     );
 
+    create table StopPathPredictions (
+        id number(19,0) not null,
+        algorithm varchar2(255 char),
+        creationTime timestamp,
+        predictionTime double precision,
+        stopPathIndex number(10,0),
+        tripId varchar2(60 char),
+        primary key (id)
+    );
+
     create table StopPaths (
         tripPatternId varchar2(120 char) not null,
         stopPathId varchar2(120 char) not null,
@@ -288,7 +298,7 @@
         stopPathId varchar2(120 char),
         stopTimeMsec number(10,0),
         travelTimeSegmentLength float,
-        travelTimesMsec raw(2000),
+        travelTimesMsec long raw,
         travelTimesRev number(10,0),
         primary key (id)
     );
@@ -421,6 +431,8 @@
     create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 
     create index PredictionTimeIndex on Predictions (creationTime);
+
+    create index StopPathPredictionTimeIndex on StopPathPredictions (creationTime);
 
     create index TravelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
 

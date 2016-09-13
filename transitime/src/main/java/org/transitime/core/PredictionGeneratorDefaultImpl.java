@@ -18,6 +18,7 @@ package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.ipc.data.IpcPrediction;
@@ -60,7 +63,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
+public class PredictionGeneratorDefaultImpl extends PredictionGenerator implements PredictionComponentElementsGenerator{
 
 	private static IntegerConfigValue maxPredictionsTimeSecs =
 			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
@@ -71,6 +74,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		return maxPredictionsTimeSecs.getValue();
 	}
 	
+
 	private static BooleanConfigValue useArrivalPredictionsForNormalStops =
 			new BooleanConfigValue("transitime.core.useArrivalPredictionsForNormalStops", 
 					true,
@@ -133,19 +137,20 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 	 *            are less certain.
 	 * @return The generated Prediction
 	 */
-	private IpcPrediction generatePredictionForStop(AvlReport avlReport,
+	 protected IpcPrediction generatePredictionForStop(AvlReport avlReport,
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
 			boolean lateSoMarkAsUncertain, Integer scheduleDeviation) {
 	  logger.debug("vehicleId {} calculated delay of {}", avlReport.getVehicleId(), scheduleDeviation);
 		// Determine additional parameters for the prediction to be generated
+		logger.debug("Calling default transitime prediction algorithm.");
 		StopPath path = indices.getStopPath();
 		String stopId = path.getStopId();
 		int gtfsStopSeq = path.getGtfsStopSeq();
 		Trip trip = indices.getTrip();
-		int expectedStopTimeMsec =
-				TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
-
+		int expectedStopTimeMsec = 
+				(int) getStopTimeForPath(indices, avlReport);
+			
 		// If should generate arrival time...
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {	
 			// Create and return arrival time for this stop
@@ -441,7 +446,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 			
 			// Add in travel time for the next path to get to predicted 
 			// arrival time of this stop
-			predictionTime += indices.getTravelTimeForPath();
+			predictionTime += getTravelTimeForPath(indices, avlReport);
 		}
 		
 		for(IpcPrediction prediction : filteredPredictions.values()){
@@ -452,6 +457,24 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator {
 		return newPredictions;
 	}
 	
+	public long getTravelTimeForPath(Indices indices, AvlReport avlReport)
+	{
+		logger.debug("Using transiTime default algorithm for travel time prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
+		if(storeTravelTimeStopPathPredictions.getValue())
+		{		
+			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "TRANSITIME DEFAULT");		
+			Core.getInstance().getDbLogger().add(predictionForStopPath);
+		}
+		return indices.getTravelTimeForPath();
+	}
+
+	@Override
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+		long prediction=TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
+		logger.debug("Using transiTime default algorithm for stop time prediction : "+indices + " Value: "+prediction);
+		return prediction;		
+	}
+		
 	
 	private int lastStopPredictionHash(IpcPrediction prediction){
 		final int prime = 31;

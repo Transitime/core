@@ -106,7 +106,32 @@ public class GenericJsonQuery extends GenericQuery {
 		
 		strBuilder.append('}');
 	}
+	/**
+	 * Does SQL query and returns JSON formatted results.
+	 * 
+	 * @param agencyId
+	 * @param sql
+	 * @return
+	 * @throws SQLException 
+	 */
+	public static String getJsonString(String agencyId, String sql, Object...parameters) {
+		// Add the rows from the query to the JSON string
+		try {
+			GenericJsonQuery query = new GenericJsonQuery(agencyId);
+			
+			// Start the JSON
+			query.strBuilder.append("{\"data\": [\n");
 
+			query.doQuery(sql, parameters);
+
+			// Finish up the JSON
+			query.strBuilder.append("]}");
+						
+			return query.strBuilder.toString();
+		} catch (SQLException e) {
+			return e.getMessage();
+		}
+	}
 	/**
 	 * Does SQL query and returns JSON formatted results.
 	 * 

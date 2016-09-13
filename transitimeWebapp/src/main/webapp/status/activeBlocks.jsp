@@ -107,6 +107,11 @@ function jq( myid ) {
     return myid.replace( /(:|\.|\[|\]|,)/g, "\\\\$1" );
 }
 
+//need to escape special character in jquery as . : are not interpreted correctly
+function jq( myid ) {	 
+    return myid.replace( /(:|\.|\[|\]|,)/g, "\\\\$1" );
+}
+
 function removeUnneededBlockAndRouteElements(routes) {
 	// First get rid of route elements that are not needed anymore because they
 	// are not in the ajax data.
@@ -299,6 +304,9 @@ function baseHandleAjaxData(routes, removeAll) {
 						" <td class='blockLabel'>Adh:</td><td id='vehicleSchedAdh'></td>" +
 						"</tr>");
 			}
+			/* this is to escape . and :  characters */			
+			routeElementId=jq(routeElementId);
+			blockElementId=jq(blockElementId);
 			
 			// Update the information for the block 
 			

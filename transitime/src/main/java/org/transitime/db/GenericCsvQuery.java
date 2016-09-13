@@ -100,9 +100,9 @@ public class GenericCsvQuery extends GenericQuery {
 	 * @return CVS string of results from query
 	 * @throws SQLException
 	 */
-	public static String getCsvString(String agencyId, String sql) throws SQLException {
+	public static String getCsvString(String agencyId, String sql, Object... parameters) throws SQLException {
 		GenericCsvQuery query = new GenericCsvQuery(agencyId);
-		query.doQuery(sql);
+		query.doQuery(sql,parameters);
 		return query.sb.toString();
 	}
 

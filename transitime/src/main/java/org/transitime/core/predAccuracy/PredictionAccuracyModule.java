@@ -211,12 +211,12 @@ public class PredictionAccuracyModule extends Module {
 			  logger.error("possible sql exception {}", t, t);
 			} finally {
 			  // if we have an exception, we still need to wait to be nice to the cpu
-	       // Wait appropriate amount of time till poll again
-        long elapsedMsec = timer.elapsedMsec();
-        long sleepTime = 
-            getTimeBetweenPollingPredictionsMsec() - elapsedMsec;
-        if (sleepTime > 0)
-          Time.sleep(sleepTime);
+	       	  // Wait appropriate amount of time till poll again
+              long elapsedMsec = timer.elapsedMsec();
+              long sleepTime = 
+                      getTimeBetweenPollingPredictionsMsec() - elapsedMsec;
+              if (sleepTime > 0)
+                  Time.sleep(sleepTime);
 			}
 		}
 	}
@@ -396,7 +396,7 @@ public class PredictionAccuracyModule extends Module {
 											predictionsReadTime,
 											pred.isArrival(),
 											pred.isAffectedByWaitStop(),
-											"Transitime");
+											"Transitime", null, null);
 							storePrediction(accuracyPred);
 							predictionsFound = true;
 						}
@@ -412,7 +412,30 @@ public class PredictionAccuracyModule extends Module {
 			}
 		}
 	}
-	
+	private static void printPredictionsMap(ConcurrentHashMap<PredictionKey, List<PredAccuracyPrediction>>  predictionMap, ArrivalDeparture arrivalDeparture)
+	{
+		
+		logger.debug("Looking for match : " + arrivalDeparture.toString() );
+		for (PredictionKey key: predictionMap.keySet())
+		{			                      
+            List<PredAccuracyPrediction> value = predictionMap.get(key);
+            for(PredAccuracyPrediction pred:value)
+            {
+            	boolean keyprinted=false;
+            	if(pred.getVehicleId().equals(arrivalDeparture.getVehicleId()))
+            	{
+            		if(!keyprinted)
+            		{            			
+            			logger.debug(key.toString());
+            			keyprinted=true;
+            		}            			
+                    logger.debug(pred.toString());
+            	}
+            }
+            
+                        
+		} 
+	}
 	/**
 	 * Looks for corresponding prediction in memory. If found then prediction
 	 * accuracy information for that prediction is stored in the database.
@@ -500,7 +523,7 @@ public class PredictionAccuracyModule extends Module {
 				pred.getRouteId(), pred.getDirectionId(), pred.getStopId(),
 				pred.getTripId(), arrivalDepartureTime,
 				pred.getPredictedTime(), pred.getPredictionReadTime(),
-				pred.getSource(), pred.getVehicleId(), pred.isAffectedByWaitStop());
+				pred.getSource(),pred.getAlgorithm(), pred.getVehicleId(), pred.isAffectedByWaitStop());
 		
 		// Add the prediction accuracy object to the db logger so that
 		// it gets written to database

@@ -51,7 +51,12 @@ public class Arrival extends ArrivalDeparture {
 		super(vehicleId, time, avlTime, block, tripIndex, pathIndex, 
 				true); // isArrival
 	}
-
+	
+	public Arrival(int configRev, String vehicleId, Date time, Date avlTime, Block block,
+			int tripIndex, int pathIndex) {
+		super(configRev, vehicleId, time, avlTime, block, tripIndex, pathIndex, 
+				true); // isArrival
+	}
 	/**
 	 * Hibernate always wants a no-arg constructor. Made private since 
 	 * it shouldn't normally be used.

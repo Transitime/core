@@ -176,11 +176,12 @@ abstract public class PredictionAccuracyQuery {
 		int predictionBucketIndex = index(predLength);
 		while (predictionBuckets.size() < predictionBucketIndex + 1)
 			predictionBuckets.add(new ArrayList<Integer>());
+			
 		if (predictionBucketIndex < predictionBuckets.size() && predictionBucketIndex >= 0) {
 		  List<Integer> predictionAccuracies = predictionBuckets
 		      .get(predictionBucketIndex);
-	    // Add the prediction accuracy to the bucket.
-	    predictionAccuracies.add(predAccuracy);
+	    	// Add the prediction accuracy to the bucket.
+	    	predictionAccuracies.add(predAccuracy);
 		} else {
 		  // some prediction streams supply predictions in the past -- ignore those
 		  logger.error("predictionLength {} has illegal index {} for predAccuracy {} and source {}", 

@@ -39,7 +39,16 @@ import org.transitime.utils.Time;
 public class CoreConfig {
 	
 	// Database params
-	
+	/**
+	 * How many days data to look back at to fill cache
+	 * @return
+	 */
+	public static int getDaysPopulateHistoricalCache() {
+		return daysPopulateHistoricalCache.getValue();
+	}
+	private static IntegerConfigValue daysPopulateHistoricalCache =
+			new IntegerConfigValue("transitime.cache.daysPopulateHistoricalCache", 4,
+					"How many days data to read in to populate historical cache on start up.");
 	/**
 	 * When in playback mode or some other situations don't want to store
 	 * generated data such as arrivals/departures, events, and such to the

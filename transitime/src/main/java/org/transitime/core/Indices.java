@@ -16,6 +16,8 @@
  */
 package org.transitime.core;
 
+import java.io.Serializable;
+
 import org.transitime.applications.Core;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.StopPath;
@@ -32,7 +34,7 @@ import org.transitime.db.structs.VectorWithHeading;
  * @author SkiBu Smith
  * 
  */
-class Indices {
+public class Indices implements Serializable {
 	private Block block;
 	private int tripIndex;
 	private int stopPathIndex;
