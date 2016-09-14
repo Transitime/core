@@ -32,14 +32,6 @@
 	</pluginRepositories>
 	<dependencies>
 
-		<!-- Needed to fix problem with one-jar not working with AWS SDK. Was getting 
-			error message "Fatal: Failed to load the internal config for AWS" -->
-		<dependency>
-			<groupId>com.simontuffs</groupId>
-			<artifactId>one-jar-boot</artifactId>
-			<version>0.97.3</version>
-		</dependency>
-
 		<!-- Database related, including c3p0 production quality connector. Note: 
 			have found that can have problems if don't use similar versions. Can have 
 			trouble finding the c3p0 connection pooler for example if use old hibernate-core 
@@ -218,12 +210,7 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<version>2.2.4</version>
-			<scope>test</scope>
-		</dependency>
+		
 		<!-- Used for reflection to find classes in package -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -263,6 +250,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.4.3</version>
 				<executions>
 					<execution>
 						<id>shade-UpdateTravelTimes</id>
