@@ -98,7 +98,7 @@ public class DbSetupConfig {
 	}
 	private static StringConfigValue hibernateConfigFileName = 
 			new StringConfigValue("transitime.hibernate.configFile", 
-					"mysql_hibernate.cfg.xml",
+					"hsql_hibernate.cfg.xml",
 					"Specifies the database dependent hibernate.cfg.xml file "
 					+ "to use to configure hibernate. The system will look both "
 					+ "on the file system and in the classpath. Can specify "

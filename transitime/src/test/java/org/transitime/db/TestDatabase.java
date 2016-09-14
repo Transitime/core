@@ -34,7 +34,7 @@ import org.transitime.db.structs.AvlReport;
  */
 public class TestDatabase extends TestCase {
 
-	static String fileName = "testConfig.xml";
+	static String fileName = "transiTimeconfig.xml";
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(TestDatabase.class);

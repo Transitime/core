@@ -11,7 +11,6 @@
           <param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>      
 
     </context-param>
-	
 	<!-- So that configuration parameters can be read in from file -->
     <listener>
       <listener-class>org.transitime.web.ReadConfigListener</listener-class>
@@ -27,8 +26,7 @@
       <error-code>416</error-code>
       <location>/error/messageOnlyError.jsp</location>
     </error-page>
-
-
+    
 	  <filter>
 	    <filter-name>ApiLoggingFilter</filter-name>
 	    <filter-class>org.transitime.api.utils.ApiLoggingFilter</filter-class>

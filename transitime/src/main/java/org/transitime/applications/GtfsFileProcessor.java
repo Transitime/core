@@ -109,7 +109,7 @@ public class GtfsFileProcessor {
 	 *            If true then will store the new config and travel times revs
 	 *            into ActiveRevisions table in db
 	 */
-	private GtfsFileProcessor(String configFile, String notes, String gtfsUrl,
+	public GtfsFileProcessor(String configFile, String notes, String gtfsUrl,
 			String gtfsZipFileName, String unzipSubdirectory,
 			String gtfsDirectoryName, String supplementDir,
 			String regexReplaceListFileName, double pathOffsetDistance,
@@ -120,16 +120,21 @@ public class GtfsFileProcessor {
 			int configRev,
 			boolean shouldStoreNewRevs, boolean shouldDeleteRevs, boolean trimPathBeforeFirstStopOfTrip) {
 		// Read in config params if command line option specified
-		if (configFile != null) {
+		
+			if (configFile != null) {
 			try {
 				// Read in the data from config file
+				
 				ConfigFileReader.processConfig(configFile);
 			} catch (Exception e) {
 				logger.error("Error reading in config file \"" + configFile
 						+ "\". Exiting program.", e);
 				System.exit(-1);
 			}
-		}
+			}
+		
+			
+		
 
 		this.gtfsUrl = gtfsUrl;
 		this.gtfsZipFileName = gtfsZipFileName;
@@ -262,6 +267,7 @@ public class GtfsFileProcessor {
 	public void process() throws IllegalArgumentException {
 		// Gets the GTFS files from URL or from a zip file if need be.
 		// This also sets gtfsDirectoryName member
+		
 		obtainGtfsFiles();
 
 		// Set the timezone of the application so that times and dates will be
@@ -288,8 +294,9 @@ public class GtfsFileProcessor {
 						defaultWaitTimeAtStopMsec, maxSpeedKph,
 						maxTravelTimeSegmentLength,
 						trimPathBeforeFirstStopOfTrip, titleFormatter);
+		
 		gtfsData.processData();
-
+		
 		// Log possibly useful info
 		titleFormatter.logRegexesThatDidNotMakeDifference();
 

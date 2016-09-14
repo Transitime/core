@@ -31,7 +31,7 @@ import org.transitime.db.webstructs.ApiKeyManager;
  */
 public class TestAPIKeyManager extends TestCase {
 
-	static String fileName = "testConfig.xml";
+	static String fileName = "transiTimeconfig.xml";
 
 	protected void setUp() throws Exception {
 //		super.setUp();
