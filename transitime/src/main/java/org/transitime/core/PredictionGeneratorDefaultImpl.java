@@ -63,7 +63,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class PredictionGeneratorDefaultImpl extends PredictionGenerator implements PredictionComponentElementsGenerator{
+public class PredictionGeneratorDefaultImpl implements PredictionGenerator, PredictionComponentElementsGenerator{
 
 	private static IntegerConfigValue maxPredictionsTimeSecs =
 			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
@@ -101,6 +101,11 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					+ "If this value is set to true then the actual schedule "
 					+ "time will be used. If false then the schedule time plus "
 					+ "the wait stop time will be used.");
+	
+	protected static BooleanConfigValue storeTravelTimeStopPathPredictions = new BooleanConfigValue("transitime.core.storeTravelTimeStopPathPredictions", 
+             false,
+             "This is set to true to record all travelTime  predictions for individual stopPaths generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
+
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionGeneratorDefaultImpl.class);
@@ -491,5 +496,10 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		result = prime * result + Long.valueOf(prediction.getPredictionTime()).hashCode();
 		
 		return result;
+	}
+
+	@Override
+	public boolean hasDataForPath(Indices indices, AvlReport avlReport) {
+		return true;
 	}
 }

@@ -10,5 +10,5 @@ public interface PredictionComponentElementsGenerator {
 	
 	long getStopTimeForPath(Indices indices, AvlReport avlReport);
 	
-	
+	boolean hasDataForPath(Indices indices, AvlReport avlReport);
 }

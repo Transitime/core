@@ -1,12 +1,9 @@
 package org.transitime.core.predictiongenerator.kalman;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,27 +12,21 @@ import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
-import org.transitime.core.TravelTimes;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.KalmanErrorCache;
 import org.transitime.core.dataCache.KalmanErrorCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.TripKey;
-import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
+import org.transitime.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
-import org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl;
-import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcVehicleComplete;
 
 /**
  * @author Sean Og Crudden This is a prediction generator that uses a Kalman
  *         filter to provide predictions. It uses historical average while waiting on enough data to support a Kalman filter.
  */
-public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGeneratorImpl
+public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImpl
 		implements PredictionComponentElementsGenerator {
 	
 	private String alternative="HistoricalAveragePredictionGeneratorImpl";
@@ -83,7 +74,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	
 		long time = 0;	
 
-		time = this.getLastVehicleTravelTime(currentVehicleState, indices);
+		time = HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices);
 		/*
 		 * The first vehicle of the day should use schedule or historic data to
 		 * make prediction. Cannot use Kalman as yesterdays vehicle will have
@@ -97,7 +88,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			
 			Date nearestDay = DateUtils.truncate(Calendar.getInstance().getTime(), Calendar.DAY_OF_MONTH);
 
-			List<Integer> lastDaysTimes = lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),
+			List<Integer> lastDaysTimes = HistoricalPredictionLibrary.lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),
 					indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
 					maxKalmanDaysToSearch.getValue(), minKalmanDays.getValue());
 												
@@ -135,7 +126,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 					TripSegment last_vehicle_segment = ts_day_0_k_1;
 								
-					Indices previousVehicleIndices = getLastVehicleIndices(currentVehicleState, indices);
+					Indices previousVehicleIndices = HistoricalPredictionLibrary.getLastVehicleIndices(currentVehicleState, indices);
 					
 					Double last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);
 					
@@ -194,5 +185,30 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
 		// TODO Auto-generated method stub
 		return super.getStopTimeForPath(indices, avlReport);
+	}
+	
+	@Override
+	public boolean hasDataForPath(Indices indices, AvlReport avlReport) {
+
+		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();		
+		VehicleStateManager vehicleStateManager = VehicleStateManager.getInstance();
+		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());		
+	
+		long time = HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices);
+		/*
+		 * The first vehicle of the day should use schedule or historic data to
+		 * make prediction. Cannot use Kalman as yesterdays vehicle will have
+		 * little to say about todays.
+		 */
+		if (time > -1) {
+			Date nearestDay = DateUtils.truncate(Calendar.getInstance().getTime(), Calendar.DAY_OF_MONTH);
+			List<Integer> lastDaysTimes = HistoricalPredictionLibrary.lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),
+					indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
+					maxKalmanDaysToSearch.getValue(), minKalmanDays.getValue());
+			
+			return (lastDaysTimes != null && lastDaysTimes.size() >= minKalmanDays.getValue().intValue());
+		}
+		
+		return false;
 	}
 }

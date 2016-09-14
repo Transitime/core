@@ -13,10 +13,8 @@ import org.transitime.core.dataCache.HistoricalAverageCache;
 
 import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
-import org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
-import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * @author Sean Og Crudden
@@ -24,7 +22,7 @@ import org.transitime.ipc.data.IpcPrediction;
  *  populated each time an arrival/departure event occurs. The HistoricalAverageCache is updated using data from the TripDataHistory cache.
  */
 public class HistoricalAveragePredictionGeneratorImpl extends
-LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerator {
+	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
 	private String alternative="LastVehiclePredictionGeneratorImpl";
 	
 
@@ -77,5 +75,13 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
 		// TODO Auto-generated method stub
 		return super.getStopTimeForPath(indices, avlReport);
+	}
+	
+	@Override
+	public boolean hasDataForPath(Indices indices, AvlReport avlReport) {
+		StopPathCacheKey historicalAverageCacheKey = new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex());
+		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		
+		return (average!=null && average.getCount()>=minDays.getValue());
 	}
 }

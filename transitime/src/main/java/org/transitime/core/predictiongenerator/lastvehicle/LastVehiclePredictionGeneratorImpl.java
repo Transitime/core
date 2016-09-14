@@ -7,21 +7,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
-import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
-import org.transitime.core.dataCache.HistoricalAverage;
-import org.transitime.core.dataCache.HistoricalAverageCache;
 
 import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
+import org.transitime.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
-import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcVehicleComplete;
 
 /**
@@ -64,15 +60,17 @@ public class LastVehiclePredictionGeneratorImpl extends
 		VehicleState currentVehicleState = vehicleStateManager
 				.getVehicleState(avlReport.getVehicleId());
 
-		for (IpcVehicleComplete vehicle : emptyIfNull(vehicleCache
-				.getVehiclesForRoute(currentVehicleState.getRouteId()))) {
-			VehicleState vehicleOnRouteState = vehicleStateManager
-					.getVehicleState(vehicle.getId());
-			vehiclesOnRoute.add(vehicleOnRouteState);
+		if (vehicleCache != null) {
+			for (IpcVehicleComplete vehicle : vehicleCache
+					.getVehiclesForRoute(currentVehicleState.getRouteId())) {
+				VehicleState vehicleOnRouteState = vehicleStateManager
+						.getVehicleState(vehicle.getId());
+				vehiclesOnRoute.add(vehicleOnRouteState);
+			}
 		}
 				
 		long time = 0;
-		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
+		if((time = HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices))>0)
 		{			
 			logger.debug("Using last vehicle algorithm for prediction : " + time + " instead of "+alternative+" prediction: "
 					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());					
@@ -90,9 +88,19 @@ public class LastVehiclePredictionGeneratorImpl extends
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
 		return super.getTravelTimeForPath(indices, avlReport);
 	}
+	
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
 		// TODO Auto-generated method stub
 		return super.getStopTimeForPath(indices, avlReport);
+	}
+	
+	@Override
+	public boolean hasDataForPath(Indices indices, AvlReport avlReport) {
+		VehicleStateManager vehicleStateManager = VehicleStateManager
+				.getInstance();
+		VehicleState currentVehicleState = vehicleStateManager
+				.getVehicleState(avlReport.getVehicleId());
+		return HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices) > 0;
 	}
 }
