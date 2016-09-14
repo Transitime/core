@@ -383,7 +383,7 @@ public class Core {
 	 *  
 	 * @param agencyId
 	 */
-	private static void startRmiServers(String agencyId) {
+	public static void startRmiServers(String agencyId) {
 		// Start up all of the RMI servers
 		PredictionsServer.start(agencyId, PredictionDataCache.getInstance());
 		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());

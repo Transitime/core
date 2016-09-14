@@ -87,7 +87,7 @@ public class GtfsFileProcessor {
 
 	/**
 	 * Simple constructor. Stores the configurable parameters for this class.
-	 * Declared private since only used internally by createGtfsFileProcessor().
+	 * In main project, only used by createGtfsFileProcessor().
 	 * 
 	 * @param configFile
 	 * @param notes
@@ -109,7 +109,7 @@ public class GtfsFileProcessor {
 	 *            If true then will store the new config and travel times revs
 	 *            into ActiveRevisions table in db
 	 */
-	private GtfsFileProcessor(String configFile, String notes, String gtfsUrl,
+	public GtfsFileProcessor(String configFile, String notes, String gtfsUrl,
 			String gtfsZipFileName, String unzipSubdirectory,
 			String gtfsDirectoryName, String supplementDir,
 			String regexReplaceListFileName, double pathOffsetDistance,
