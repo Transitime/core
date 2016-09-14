@@ -108,13 +108,12 @@ public class Core {
 	 * 
 	 * @param agencyId
 	 */
-	public Core(String agencyId) {
+	private Core(String agencyId) {
 		// Determine configuration rev to use. If one specified on command
 		// line, use it. If not, then use revision stored in db.
 		int configRev;
 		if (configRevStr != null) {
 			// Use config rev from command line
-			
 			configRev = Integer.parseInt(configRevStr);
 		} else {
 			// Read in config rev from ActiveRevisions table in db
@@ -384,7 +383,7 @@ public class Core {
 	 *  
 	 * @param agencyId
 	 */
-	public static void startRmiServers(String agencyId) {
+	private static void startRmiServers(String agencyId) {
 		// Start up all of the RMI servers
 		PredictionsServer.start(agencyId, PredictionDataCache.getInstance());
 		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());
