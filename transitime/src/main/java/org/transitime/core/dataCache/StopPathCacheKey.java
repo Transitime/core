@@ -14,12 +14,27 @@ public class StopPathCacheKey implements java.io.Serializable {
 	private String tripId;
 	private Integer stopPathIndex;
 	
+	private boolean travelTime=true;
 	
-	public StopPathCacheKey(String tripId, Integer stopPathIndex) {
+	public boolean isTravelTime() {
+		return travelTime;
+	}
+
+	public StopPathCacheKey(String tripId, Integer stopPathIndex)
+	{
 		super();
 		
 		this.tripId = tripId;
-		this.stopPathIndex = stopPathIndex;					
+		this.stopPathIndex = stopPathIndex;	
+		this.travelTime=true;
+	}
+	
+	public StopPathCacheKey(String tripId, Integer stopPathIndex, boolean travelTime) {
+		super();
+		
+		this.tripId = tripId;
+		this.stopPathIndex = stopPathIndex;	
+		this.travelTime=travelTime;
 	}
 	public StopPathCacheKey(Indices indices) {
 		super();
@@ -29,6 +44,8 @@ public class StopPathCacheKey implements java.io.Serializable {
 		int tripIndex = indices.getTripIndex();
 		
 		this.tripId=indices.getBlock().getTrip(tripIndex).getId();
+		
+		this.travelTime=true;
 		
 	}
 
@@ -52,16 +69,15 @@ public class StopPathCacheKey implements java.io.Serializable {
 		this.stopPathIndex = stopPathIndex;
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
+		result = prime * result + (travelTime ? 1231 : 1237);
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -77,6 +93,8 @@ public class StopPathCacheKey implements java.io.Serializable {
 				return false;
 		} else if (!stopPathIndex.equals(other.stopPathIndex))
 			return false;
+		if (travelTime != other.travelTime)
+			return false;
 		if (tripId == null) {
 			if (other.tripId != null)
 				return false;
@@ -84,10 +102,15 @@ public class StopPathCacheKey implements java.io.Serializable {
 			return false;
 		return true;
 	}
+
 	@Override
 	public String toString() {
-		return "TripStopPathCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + "]";
+		return "StopPathCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + ", travelTime=" + travelTime
+				+ "]";
 	}
+
+
+	
 						
 }
 

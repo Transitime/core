@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
@@ -432,6 +433,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		{		
 			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "TRANSITIME DEFAULT");		
 			Core.getInstance().getDbLogger().add(predictionForStopPath);
+			StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 		}
 		return indices.getTravelTimeForPath();
 	}

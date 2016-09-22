@@ -38,4 +38,6 @@ import org.transitime.ipc.data.IpcPredictionForStopPath;
 public interface PredictionAnalysisInterface extends Remote {		
 	public List<IpcPredictionForStopPath> getRecordedTravelTimePredictions(String tripId, Integer stopPathIndex, Date startdate, Date enddate,  String algorithm)
 			throws RemoteException;	
+	public List<IpcPredictionForStopPath> getCachedTravelTimePredictions(String tripId, Integer stopPathIndex, Date startdate, Date enddate,  String algorithm)
+			throws RemoteException;
 }

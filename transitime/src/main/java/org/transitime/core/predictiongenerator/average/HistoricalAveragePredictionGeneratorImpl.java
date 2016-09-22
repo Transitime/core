@@ -12,6 +12,7 @@ import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HistoricalAverageCache;
 
 import org.transitime.core.dataCache.StopPathCacheKey;
+import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl;
 import org.transitime.db.structs.AvlReport;
@@ -60,11 +61,12 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 			{
 				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE");			
 				Core.getInstance().getDbLogger().add(predictionForStopPath);
+				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 			}
 			
 			logger.debug("Using historical average algorithm for prediction : " +average.toString() + " instead of "+alternative+" prediction: "
 					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
-			//logger.debug("Instead of transtime value : " + super.getTravelTimeForPath(indices, avlReport));
+			//logger.debug("Instead of transitime value : " + super.getTravelTimeForPath(indices, avlReport));
 			return (long)average.getAverage();
 		}
 		
@@ -75,7 +77,18 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
-		// TODO Auto-generated method stub
+		
+		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),false);
+		
+		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		
+		if(average!=null && average.getCount()>=minDays.getValue())
+		{
+			logger.debug("Using historical average alogrithm for dwell time prediction : "+average.toString() + " instead of "+alternative+" prediction: "
+					+ super.getStopTimeForPath(indices, avlReport) +" for : " + indices.toString());
+			return (long)average.getAverage();
+		}
+					
 		return super.getStopTimeForPath(indices, avlReport);
 	}
 }

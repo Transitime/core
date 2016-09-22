@@ -16,6 +16,8 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.criterion.Restrictions;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -26,7 +28,7 @@ import org.transitime.db.hibernate.HibernateUtils;
 @Entity @DynamicUpdate 
 @Table(name="StopPathPredictions",
        indexes = { @Index(name="StopPathPredictionTimeIndex", 
-                   columnList="creationTime" ) } )
+                   columnList="tripId, stopPathIndex" ) } )
 public class PredictionForStopPath implements Serializable{
 
 	
@@ -160,7 +162,7 @@ public class PredictionForStopPath implements Serializable{
 		Session session = HibernateUtils.getSession();
 		Criteria criteria = session.createCriteria(PredictionForStopPath.class);
 		
-		if(algorithm!=null)
+		if(algorithm!=null&&algorithm.length()>0)
 			criteria.add(Restrictions.eq("algorithm", algorithm));
 		if(tripId!=null)
 			criteria.add(Restrictions.eq("tripId", tripId));
