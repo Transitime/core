@@ -1725,7 +1725,7 @@ public class TransitimeApi {
 											
 			PredictionAnalysisInterface predictionAnalysisInterface = stdParameters.getPredictionAnalysisInterface();
 
-			List<IpcPredictionForStopPath> result = predictionAnalysisInterface.getRecordedTravelTimePredictions(tripId, stopPathIndex, start_date, end_date, algorithm);
+			List<IpcPredictionForStopPath> result = predictionAnalysisInterface.getCachedTravelTimePredictions(tripId, stopPathIndex, start_date, end_date, algorithm);
 			
 			Response response = stdParameters.createResponse(new ApiPredictionsForStopPath(result));
 

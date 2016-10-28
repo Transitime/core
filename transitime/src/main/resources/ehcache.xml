@@ -40,4 +40,12 @@
 		transactionalMode="off">
 		<persistence strategy="none" />
 	</cache>
+	<cache name="StopPathPredictionCache" 
+		maxEntriesLocalHeap="500000"
+		maxEntriesLocalDisk="500000" 
+		eternal="true" 
+		diskSpoolBufferSizeMB="100"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>	
 </ehcache>

@@ -43,7 +43,7 @@ import org.transitime.utils.Time;
  *         
  *         TODO this could do with an interface, factory class, and alternative implementations, perhaps using Infinispan.
  */
-public class TripDataHistoryCache {
+public class TripDataHistoryCache{
 	private static TripDataHistoryCache singleton = new TripDataHistoryCache();
 	
 	private static boolean debug = false;
@@ -125,7 +125,7 @@ public class TripDataHistoryCache {
 	}
 
 	@SuppressWarnings("unchecked")
-	synchronized public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {
+	public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {
 
 		//logger.debug(cache.toString());
 
@@ -181,72 +181,12 @@ public class TripDataHistoryCache {
 			Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
 						
 			cache.put(arrivalDepartures);															
+											
 			
-			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex());
-			
-			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
-						
-			double pathDuration=getLastPathDuration(arrivalDeparture, trip);
-			
-			if(pathDuration>0)
-			{
-				if(average==null)				
-					average=new HistoricalAverage();
-				
-				average.update(pathDuration);
-			
-				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
-			}
-			
-			double stopDuration=getLastStopDuration(arrivalDeparture, trip);
-			if(stopDuration>0)
-			{
-				// TODO Add to a historical average cache for stop/dwell times.
-			}
 		}				
 		return tripKey;
 	}
-	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
-	{
-		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
-		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
-				nearestDay,
-				trip.getStartTime());
-						
-		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) getTripHistory(tripKey);
-		
-		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isArrival())
-		{			
-			ArrivalDeparture previousEvent = findPreviousDepartureEvent(arrivalDepartures, arrivalDeparture);
-			
-			if(previousEvent!=null && arrivalDeparture!=null && previousEvent.isDeparture())
-					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
-		}
-					
-		return -1;
-	}
-	private double getLastStopDuration(ArrivalDeparture arrivalDeparture, Trip trip)
-	{
-		return -1;
-	}
-	static public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
-	{	
-		if(arrivalDepartures!=null && arrivalDepartures.size()>0)
-		{												
-			for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
-			{
-				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
-				{
-					return tocheck;
-				}			
-			}
-		}
-		return null;		
-	}
 
-	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
-		return iterable == null ? Collections.<T> emptyList() : iterable;
-	}
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
 	{
  		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
@@ -256,9 +196,37 @@ public class TripDataHistoryCache {
 						
 		for(ArrivalDeparture result : results)
 		{
-			TripDataHistoryCache.getInstance().putArrivalDeparture(result);
-			
+			TripDataHistoryCache.getInstance().putArrivalDeparture(result);			
 		}		
+	}
+	
+	
+	static public ArrivalDeparture findPreviousArrivalEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	{
+		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		{
+			if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isDeparture() && tocheck.isArrival()))
+			{
+				return tocheck;
+			}			
+		}
+		return null;
+	}
+	static public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	{	
+													
+		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		{
+			if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
+			{
+				return tocheck;
+			}			
+		}		
+		return null;		
+	}
+	
+	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
+		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 	/**
 	 * 	This policy evicts arrival departures from the cache

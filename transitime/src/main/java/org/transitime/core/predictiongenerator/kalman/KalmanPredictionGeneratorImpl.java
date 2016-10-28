@@ -15,6 +15,7 @@ import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.KalmanErrorCache;
 import org.transitime.core.dataCache.KalmanErrorCacheKey;
+import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.HistoricalPredictionLibrary;
@@ -83,9 +84,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 		if (time > -1) {
 
 			logger.debug("Kalman has last vehicle info for : " +indices.toString());
-			
-			
-			
+									
 			Date nearestDay = DateUtils.truncate(Calendar.getInstance().getTime(), Calendar.DAY_OF_MONTH);
 
 			List<Integer> lastDaysTimes = HistoricalPredictionLibrary.lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),
@@ -156,6 +155,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 					{
 						PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "KALMAN");					
 						Core.getInstance().getDbLogger().add(predictionForStopPath);
+						StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 					}													
 					return predictionTime;
 					

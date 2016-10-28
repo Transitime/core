@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.core.dataCache.StopPathCacheKey;
+import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.ipc.data.IpcPredictionForStopPath;
 import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
@@ -64,6 +66,34 @@ public class PredictionAnalysisServer extends AbstractServer implements Predicti
 		{
 			IpcPredictionForStopPath ipcPrediction=new IpcPredictionForStopPath(prediction);
 			results.add(ipcPrediction);
+		}
+		
+		
+		return results;
+	}
+
+	@Override
+	public List<IpcPredictionForStopPath> getCachedTravelTimePredictions(String tripId, Integer stopPathIndex,
+			Date startdate, Date enddate, String algorithm) throws RemoteException {
+		StopPathCacheKey key=new StopPathCacheKey(tripId,stopPathIndex,true);
+		List<PredictionForStopPath> predictions = StopPathPredictionCache.getInstance().getPredictions(key);
+		List<IpcPredictionForStopPath> results=new ArrayList<IpcPredictionForStopPath>();
+		if(predictions!=null)
+		{
+			for(PredictionForStopPath prediction:predictions)
+			{
+				IpcPredictionForStopPath ipcPrediction=new IpcPredictionForStopPath(prediction);
+				if(algorithm!=null&&algorithm.length()>0)
+				{
+					if(algorithm.equals(prediction.getAlgorithm()))
+					{
+						results.add(ipcPrediction);
+					}
+				}else
+				{				
+					results.add(ipcPrediction);
+				}
+			}
 		}
 		return results;
 	}

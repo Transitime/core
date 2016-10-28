@@ -76,6 +76,7 @@ public class KalmanPrediction
 	
 	private double prediction(double gain, double loop_gain, TripSegment historical_segments[],  TripSegment last_vechicle_segment)	
 	{
+		/* TODO This may be better use the historical average rather than just the vehicle on previous day. This would damping issues with last days value being dramtically different. */
 		long historical_duration=historical_segments[historical_segments.length-1].getDestination().getTime()-historical_segments[historical_segments.length-1].getOrigin().getTime();
 		
 		long last_vehicle_duration=last_vechicle_segment.getDestination().getTime()-last_vechicle_segment.getOrigin().getTime();

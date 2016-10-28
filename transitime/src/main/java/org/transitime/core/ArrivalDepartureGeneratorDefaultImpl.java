@@ -379,6 +379,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		
+		HistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);
 	}

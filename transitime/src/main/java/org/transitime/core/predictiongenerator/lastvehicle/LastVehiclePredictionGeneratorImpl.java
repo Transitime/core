@@ -12,6 +12,8 @@ import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 
 import org.transitime.core.dataCache.TripDataHistoryCache;
+import org.transitime.core.dataCache.StopPathCacheKey;
+import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.HistoricalPredictionLibrary;
@@ -33,10 +35,7 @@ import org.transitime.ipc.data.IpcVehicleComplete;
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
 	private String alternative="PredictionGeneratorDefaultImpl";
-	
-		
-	
-
+				
 	private static final Logger logger = LoggerFactory
 			.getLogger(LastVehiclePredictionGeneratorImpl.class);
 
@@ -50,8 +49,6 @@ public class LastVehiclePredictionGeneratorImpl extends
 		
 		VehicleDataCache vehicleCache = VehicleDataCache.getInstance();
 		
-		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();
-
 		List<VehicleState> vehiclesOnRoute = new ArrayList<VehicleState>();
 
 		VehicleStateManager vehicleStateManager = VehicleStateManager
@@ -77,8 +74,10 @@ public class LastVehiclePredictionGeneratorImpl extends
 			
 			if(storeTravelTimeStopPathPredictions.getValue())
 			{
-				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(time).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE");			
+				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), new Double(new Long(time).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE");				
+				
 				Core.getInstance().getDbLogger().add(predictionForStopPath);
+				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 			}
 			
 			return time;
@@ -91,7 +90,8 @@ public class LastVehiclePredictionGeneratorImpl extends
 	
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
-		// TODO Auto-generated method stub
+		// Looking at last vehicle value would be a bad idea for dwell time, so no implementation here.
+		
 		return super.getStopTimeForPath(indices, avlReport);
 	}
 	
