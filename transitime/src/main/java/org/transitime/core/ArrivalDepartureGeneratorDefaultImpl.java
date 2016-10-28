@@ -375,11 +375,13 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		/*protected ArrivalDeparture(arrivalDeparture., String vehicleId, Date time, Date avlTime, Block block, 
 				int tripIndex, int stopPathIndex, boolean isArrival) {*/
 		
-		TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		if (CoreConfig.getFillHistoricalCaches()) {
+		  TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		
-		StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		  StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		
-		HistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		  HistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		}
 		
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);

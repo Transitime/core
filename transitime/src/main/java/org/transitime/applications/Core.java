@@ -377,6 +377,35 @@ public class Core {
 		}
 	}
 	
+	private static void fillHistoricalCaches() {
+	  Session session = HibernateUtils.getSession();
+    
+    Date endDate=Calendar.getInstance().getTime();
+    /* populate one day at a time to avoid memory issue */
+    for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+    {
+      Date startDate=DateUtils.addDays(endDate, -1);
+      
+      logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
+      TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+      
+      endDate=startDate;
+    }
+          
+    endDate=Calendar.getInstance().getTime();
+    /* populate one day at a time to avoid memory issue */
+    for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+    {
+      Date startDate=DateUtils.addDays(endDate, -1);
+      
+      logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
+      StopArrivalDepartureCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+      
+      endDate=startDate;
+    }
+	}
+	
+	
 	/**
 	 * Start the RMI Servers so that clients can obtain data
 	 * on predictions, vehicles locations, etc.
@@ -420,31 +449,8 @@ public class Core {
 			// Initialize the core now
 			createCore();
 			
-			Session session = HibernateUtils.getSession();
-			
-			Date endDate=Calendar.getInstance().getTime();
-			/* populate one day at a time to avoid memory issue */
-			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-			{
-				Date startDate=DateUtils.addDays(endDate, -1);
-				
-				logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
-				TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-				
-				endDate=startDate;
-			}
-						
-			endDate=Calendar.getInstance().getTime();
-			/* populate one day at a time to avoid memory issue */
-			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-			{
-				Date startDate=DateUtils.addDays(endDate, -1);
-				
-				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
-				StopArrivalDepartureCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-				
-				endDate=startDate;
-			}
+			if (CoreConfig.getFillHistoricalCaches())
+			  fillHistoricalCaches();
 			
 			// Start any optional modules. 
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();

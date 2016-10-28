@@ -752,4 +752,19 @@ public class CoreConfig {
 					+ "can be used by monit to make sure that core process is "
 					+ "always running.");
 	
+	/**
+	 * Whether historical arrival/departure caches should be filled on
+	 * Core start. These are used for some prediction generators, but
+	 * not the default.
+	 * @return
+	 */
+	public static boolean getFillHistoricalCaches() {
+	  return fillHistoricalCaches.getValue();
+	}
+	private static BooleanConfigValue fillHistoricalCaches = 
+	    new BooleanConfigValue(
+	        "transitime.core.fillHistoricalCaches",
+	        false,
+	        "whether historical caches should be filled on Core start.");
+	
 }
