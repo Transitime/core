@@ -16,8 +16,12 @@
  */
 package org.transitime.core;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.db.structs.Headway;
+
 
 /**
  *
@@ -29,15 +33,19 @@ public class HeadwayGeneratorDefaultImpl implements HeadwayGenerator {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(HeadwayGeneratorDefaultImpl.class);
 
-	/********************** Member Functions **************************/
+	/********************** Member Functions 
+	 * @return **************************/
 
 	/* (non-Javadoc)
 	 * @see org.transitime.core.HeadwayGenerator#generate(org.transitime.core.VehicleState)
 	 */
 	@Override
-	public void generate(VehicleState vehicleState) {		
+	public Headway generate(VehicleState vehicleState) {		
 		// FIXME Still needs to be implemented!!
 		logger.debug("HeadwayGeneratorDefaultImpl.generate() still needs to " +
 				"be implemented");
+		return null;
+		
+		
 	}
 }

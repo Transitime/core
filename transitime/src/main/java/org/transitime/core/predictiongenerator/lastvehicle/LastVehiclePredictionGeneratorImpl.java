@@ -26,7 +26,7 @@ import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcVehicleComplete;
 
 /**
- * @author Sean Og Crudden
+ * @author Sean Óg Crudden
  *	This provides a prediction based on the time it took the previous vehicle on the same route to cover the same ground. This is another step to get to Kalman implementation.
  *	  
  *  TODO Debug as this has yet to be tried and tested.

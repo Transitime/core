@@ -33,6 +33,7 @@ import org.transitime.db.webstructs.ApiKeyManager;
 import org.transitime.ipc.clients.CacheQueryInterfaceFactory;
 import org.transitime.ipc.clients.CommandsInterfaceFactory;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
+import org.transitime.ipc.clients.HoldingTimeInterfaceFactory;
 import org.transitime.ipc.clients.PredictionAnalysisInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.ServerStatusInterfaceFactory;
@@ -40,6 +41,7 @@ import org.transitime.ipc.clients.VehiclesInterfaceFactory;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.interfaces.CommandsInterface;
 import org.transitime.ipc.interfaces.ConfigInterface;
+import org.transitime.ipc.interfaces.HoldingTimeInterface;
 import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
@@ -289,6 +291,23 @@ public class StandardParameters {
 
 		return predictionAnalysisInterface ;
 	}
+	
+	/**
+	 * Gets the HoldingTimeInterface for the specified agencyId. If not valid
+	 * then throws WebApplicationException.
+	 * 
+	 * @return The PredictionAnalysisInterface
+	 */
+	public HoldingTimeInterface getHoldingTimeInterface()
+	{
+		HoldingTimeInterface holdingTimeInterface = HoldingTimeInterfaceFactory.get(agencyId);
+		if (holdingTimeInterface  == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
+
+		return holdingTimeInterface ;
+	}
+	
 	/**
 	 * Simple getter for the key
 	 * 

@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.transitime.core.dataCache.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HistoricalAverageCache;
+import org.transitime.core.dataCache.HoldingTimeCache;
+import org.transitime.core.dataCache.HoldingTimeCacheKey;
 import org.transitime.core.dataCache.KalmanErrorCache;
 import org.transitime.core.dataCache.KalmanErrorCacheKey;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
@@ -28,6 +30,7 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.ipc.data.IpcArrivalDeparture;
 import org.transitime.ipc.data.IpcHistoricalAverage;
 import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
+import org.transitime.ipc.data.IpcHoldingTimeCacheKey;
 import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.rmi.AbstractServer;
@@ -214,5 +217,16 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 		}
 		return ipcResultList;
 	}
-
+	
+	@Override
+	public List<IpcHoldingTimeCacheKey> getHoldingTimeCacheKeys() throws RemoteException {
+		List<HoldingTimeCacheKey> keys = HoldingTimeCache.getInstance().getKeys();
+		List<IpcHoldingTimeCacheKey> ipcResultList = new ArrayList<IpcHoldingTimeCacheKey>();
+				
+		for(HoldingTimeCacheKey key:keys)
+		{
+			ipcResultList.add(new IpcHoldingTimeCacheKey(key));
+		}
+		return ipcResultList;		
+	}
 }

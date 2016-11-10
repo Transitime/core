@@ -33,7 +33,7 @@ import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcVehicleComplete;
 
 /**
- * @author Sean Og Crudden This is a prediction generator that uses a Kalman
+ * @author Sean Óg Crudden This is a prediction generator that uses a Kalman
  *         filter to provide predictions. It uses historical average while waiting on enough data to support a Kalman filter.
  */
 public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGeneratorImpl

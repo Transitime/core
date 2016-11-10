@@ -20,7 +20,7 @@ import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.ipc.data.IpcPrediction;
 
 /**
- * @author Sean Og Crudden
+ * @author Sean Óg Crudden
  *	This provides a prediction based on the average of historical data. The average is taken from the HistoricalAverageCache which is 
  *  populated each time an arrival/departure event occurs. The HistoricalAverageCache is updated using data from the TripDataHistory cache.
  */

@@ -17,6 +17,10 @@
 
 package org.transitime.core;
 
+import java.util.List;
+
+import org.transitime.db.structs.Headway;
+
 /**
  * Defines the interface for generating headway information. To create headway info using
  * an alternate method simply implement this interface and configure
@@ -34,5 +38,5 @@ public interface HeadwayGenerator {
 	 * 
 	 * @param vehicleState
 	 */
-	public void generate(VehicleState vehicleState);
+	public Headway generate(VehicleState vehicleState);
 }

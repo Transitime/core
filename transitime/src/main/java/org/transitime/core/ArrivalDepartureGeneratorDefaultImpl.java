@@ -24,15 +24,18 @@ import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.HistoricalAverageCache;
+import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
+import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Departure;
+import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
@@ -336,6 +339,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		
 		HistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		
+		HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(arrivalDeparture);
+		
+		HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
 		
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);

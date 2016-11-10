@@ -30,6 +30,8 @@ import org.transitime.db.structs.Prediction;
 import org.transitime.db.structs.Departure;
 import org.transitime.db.structs.FareAttribute;
 import org.transitime.db.structs.Frequency;
+import org.transitime.db.structs.Headway;
+import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.Match;
 import org.transitime.db.structs.MonitoringEvent;
 import org.transitime.db.structs.PredictionAccuracy;
@@ -92,14 +94,15 @@ public class AnnotatedClassesList {
 		StopPath.class,
 		Transfer.class,
 		TravelTimesForStopPath.class,
-		PredictionForStopPath.class,
+		PredictionForStopPath.class,		
 		TravelTimesForTrip.class,
 		Trip.class,
 		TripPattern.class,
 		VehicleEvent.class,
 		VehicleConfig.class,
 		VehicleState.class,
-		
+		HoldingTime.class,
+		Headway.class,
 		// For website
 		ApiKey.class,
 		WebAgency.class,

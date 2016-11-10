@@ -52,6 +52,8 @@ import org.transitime.api.data.ApiCalendars;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiHistoricalAverage;
 import org.transitime.api.data.ApiHistoricalAverageCacheKeys;
+import org.transitime.api.data.ApiHoldingTime;
+import org.transitime.api.data.ApiHoldingTimeCacheKeys;
 import org.transitime.api.data.ApiIds;
 import org.transitime.api.data.ApiKalmanErrorCacheKeys;
 import org.transitime.api.data.ApiPredictions;
@@ -87,6 +89,8 @@ import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcHistoricalAverage;
 import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
+import org.transitime.ipc.data.IpcHoldingTime;
+import org.transitime.ipc.data.IpcHoldingTimeCacheKey;
 import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
@@ -94,6 +98,7 @@ import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.interfaces.ConfigInterface;
+import org.transitime.ipc.interfaces.HoldingTimeInterface;
 import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
@@ -1334,6 +1339,27 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
+	@Path("/command/holdingtimecachekeys")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getHoldingTimeCacheKeys(@BeanParam StandardParameters stdParameters)
+			throws WebApplicationException {
+		try {
+			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
+
+			List<IpcHoldingTimeCacheKey> result = cachequeryInterface.getHoldingTimeCacheKeys();
+
+			ApiHoldingTimeCacheKeys keys = new ApiHoldingTimeCacheKeys(result);
+
+			Response response = stdParameters.createResponse(keys);
+
+			return response;
+
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
 
 	/**
 	 * Returns info about a cache.
@@ -1489,6 +1515,24 @@ public class TransitimeApi {
 
 			return response;
 
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+	@Path("/command/getholdingtime")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getHoldingTime(@BeanParam StandardParameters stdParameters,			
+			@QueryParam(value = "stopId") String stopId, @QueryParam(value = "vehicleId" ) String vehicleId) 
+	{
+		try {						
+			 HoldingTimeInterface holdingtimeInterface = stdParameters.getHoldingTimeInterface();
+			 IpcHoldingTime result = holdingtimeInterface.getHoldTime(stopId, vehicleId);
+			 			 
+			 Response response = stdParameters.createResponse(new ApiHoldingTime(result));
+
+			 return response;		
 		} catch (Exception e) {
 			// If problem getting result then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());

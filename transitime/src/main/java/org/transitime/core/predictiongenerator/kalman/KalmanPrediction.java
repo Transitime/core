@@ -2,7 +2,7 @@ package org.transitime.core.predictiongenerator.kalman;
 
   
 /**
- * @author Sean Og Crudden
+ * @author Sean Óg Crudden
  *
  */
 public class KalmanPrediction 

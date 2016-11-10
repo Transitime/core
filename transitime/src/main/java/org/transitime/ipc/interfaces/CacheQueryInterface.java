@@ -25,6 +25,7 @@ import java.util.List;
 import org.transitime.ipc.data.IpcArrivalDeparture;
 import org.transitime.ipc.data.IpcHistoricalAverage;
 import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
+import org.transitime.ipc.data.IpcHoldingTimeCacheKey;
 import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
 
 /**
@@ -93,6 +94,15 @@ public interface CacheQueryInterface extends Remote {
 	 */
 	public List<IpcKalmanErrorCacheKey> getKalmanErrorCacheKeys()
 		throws RemoteException;
+
+	/**
+	 * @return a list of the keys for the holding times in the cache
+	 * @throws RemoteException
+	 */
+	public List<IpcHoldingTimeCacheKey> getHoldingTimeCacheKeys()
+		throws RemoteException;
+	
+	
 	/**
 	 * Return the latest Kalman error value for a the stop path of a trip.
 	 * @param tripId

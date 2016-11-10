@@ -22,8 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.PredictionDataCache;
+import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.db.structs.Prediction;
+import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.Match;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.Time;
@@ -83,7 +86,11 @@ public class MatchProcessor {
 						.getMaxPredictionsTimeForDbSecs() * Time.MS_PER_SEC) {
 					// Store the prediction into db
 					Prediction dbPrediction = new Prediction(prediction);
+					
 					Core.getInstance().getDbLogger().add(dbPrediction);
+					
+				
+					
 				}
 			}
 		}
@@ -96,6 +103,9 @@ public class MatchProcessor {
 
 		// Update predictions for vehicle
 		vehicleState.setPredictions(newPredictions);
+		
+		
+		
 	}
 
 	/**

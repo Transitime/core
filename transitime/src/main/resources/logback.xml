@@ -205,7 +205,17 @@
 			<pattern>${DATA_PATTERN}</pattern>
 		</encoder>
 	</appender>
-
+	<!-- Separate file for Holding Time Generator logging -->
+	<appender name="HOLDING"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE_ROOT}/holding.log.gz</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>${DATA_PATTERN}</pattern>
+		</encoder>
+	</appender>
 	<!-- Separate file for Prediction logging -->
 	<appender name="PREDICTION"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -393,7 +403,10 @@
 		level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>
-	
+	<logger name="org.transitime.core.holdingmethod.HoldingTimeGeneratorDefaultImpl"
+		level="debug" additivity="false">
+		<appender-ref ref="HOLDING" />
+	</logger>
 
 	<!-- For config params it is more complicated because want to both have 
 		config params logged in separate file but also want some errors to send out 
@@ -434,6 +447,10 @@
 	
 	<logger name="net.sf.ehcache" level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
+	</logger>
+	
+	<logger name="net.sf.ehcache" level="debug" additivity="false">
+		<appender-ref ref="HOLDING" />
 	</logger>
 
 	<!-- In order to log the hibernate SQL queries need to set org.hibernate.SQL 

@@ -270,7 +270,7 @@ $.ajax({
 // If route specified then display it
 var route = "<%= request.getParameter("r") %>";
 if (route != "") {
-	var url = apiUrlPrefix + "/command/route?r=" + route;
+	var url = apiUrlPrefix + "/command/routes?r=" + route;
 	$.getJSON(url, routeConfigCallback);		
 
 }

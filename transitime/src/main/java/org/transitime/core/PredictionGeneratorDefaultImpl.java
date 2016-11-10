@@ -25,9 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.StopPathPredictionCache;
+import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.PredictionForStopPath;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
@@ -366,6 +369,17 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					indices, predictionTime,
 					useArrivalPreds, affectedByWaitStop, 
 					vehicleState.isDelayed(), lateSoMarkAsUncertain);
+			
+			try {
+				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(predictionForStop);
+				
+				if(holdingTime!=null)
+					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			logger.debug("For vehicleId={} generated prediction {}",
 					vehicleState.getVehicleId(), predictionForStop);
 			
@@ -405,7 +419,11 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			// stops schedule times instead of the calculated prediction time.
 			predictionTime = predictionForStop.getActualPredictionTime();
 			if (predictionForStop.isArrival())
+			{								
 				predictionTime += indices.getStopTimeForPath();
+				
+				/* TODO this is where we should take account of holding time */			
+			}
 			
 			// Increment indices so can generate predictions for next path
 			indices.incrementStopPath(predictionTime);
