@@ -31,6 +31,7 @@ import org.transitime.db.structs.Prediction;
 import org.transitime.db.structs.Departure;
 import org.transitime.db.structs.FareAttribute;
 import org.transitime.db.structs.Frequency;
+import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Match;
 import org.transitime.db.structs.MonitoringEvent;
 import org.transitime.db.structs.PredictionAccuracy;
@@ -85,6 +86,7 @@ public class AnnotatedClassesList {
 		FareAttribute.class,
 		FareRule.class,
 		Frequency.class,
+		Location.class,
 		Match.class,
 		MeasuredArrivalTime.class,
 		MonitoringEvent.class,
