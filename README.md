@@ -30,3 +30,4 @@ Once this is set up the next step is to set up the transitimeApi which is a REST
 
 The transitimeWebapp in turn is a web application which uses the transitTimeAPI to provided a user interface. This is a war file which can be deployed into Tomcat. This connects to the database and the connection information is configured in hibernate.cfg.xml in the src/main/resources directory. Currently this needs to be deployed on the same server as the API.
 
+<Installation Steps of Transitime/Core Project>
