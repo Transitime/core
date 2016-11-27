@@ -1,123 +1,178 @@
 <html>
-    <link rel="stylesheet" href="css/general.css">
-    <head>
-         <style>
-              #holding_div {
-      width: 98%; 
-      margin-top: 30px;
-      margin-left: 10px;
-    }
-        </style>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <script src="js/transiTimeHolding.js"></script>
-        <script src="js/transiTimeVehicles.js"></script> 
-        <script src="js/transiTimeRoutes.js"></script> 
-        <script src="js/transiTimeTrips.js"></script> 
-        <title>Vehicle Holding Times</title>
-    </head>
-            
-    <body>
-    <div id="header"><a href="http://www.transitime.org">Transitime Extension: Holding Times for Atlanta Streetcar.</a></div>
-    
-        <div id="holding_div">
-    
-            
-        <table>
-                                  
-            <tr>
-                <td>    
-                    Remaining Holding Time
-                    <div id="counter"></div>
-                </td>
-            </tr>
-                       
-        </table>        
-   
-        <table>
-            <tr>
-                <td colspan="2">Vehicle Information</td>
-                             
-            </tr>             
-            <tr>
-                <td>Vehicle ID</td>
-                <td>                  
-                    <div id="vehicleid"></div>
-                </td>              
-            </tr>
-            <tr>
-                <td>Time of Arrival</td>
-                <td>                  
-                    <div id="timeofarrival"></div>
-                </td>              
-            </tr>
-            <tr>
-                <td>Time of Departure</td>
-                <td>                  
-                    <div id="timeofdeparture"></div>
-                </td>              
-            </tr>
-            <tr>
-                <td>Predicted next arrival time</td>
-                <td>                  
-                    <div id="nextarrivaltime"></div>
-                </td>              
-            </tr>   
-                                            
-        </table>  
-        
-        </div>
-    </body>
-    
-    <script> 
-    		var host = null;
-            var vehicle = null;
-            var timeofarrival = new Date(0);
-            var timeofdepature = new Date(0);
-            var predictednextarrival = new Date(0);
-            function str_pad_left(string,pad,length) {
-                return (new Array(length+1).join(pad)+string).slice(-length);   
-            }
+<link rel="stylesheet" href="css/general.css">
+<head>
+<style>
 
-      
-            function processNextVehicle(nextVehiclePrediction)
-            {                               
-                vehicle=nextVehiclePrediction.predictions[0].dest[0].pred[0].vehicle;                              
-                                
-                $("#vehicleid").text(vehicle);
-                if(nextVehiclePrediction.predictions[0].dest[0].pred.size > 1)
-                {
-                    predictednextarrival=new Date(nextVehiclePrediction.predictions[0].dest[0].pred[1].time*1000);
-                    $("#nextarrivaltime").text(predictednextarrival.toLocaleTimeString());
-                }
-               
-                                             
-            };
-            function processHoldingTime(holdingTime)
-            {
-                //$("#counter").text(holdingTime.holdingTime);
-                $("#timeofdeparture").text(new Date(holdingTime.holdingTime).toLocaleTimeString());
-                
-                var holdingTimeMilliseconds=new Date(holdingTime.holdingTime).getTime()-new Date(holdingTime.currentTime).getTime()
-                var time =holdingTimeMilliseconds/1000;
-                if(time < 0)
-                    $("#counter").css({ 'color': 'red', 'font-size': '400%' });  
-                else
-                    $("#counter").css({ 'color': 'green', 'font-size': '400%' });  
-                
-                var minutes = Math.floor(time / 60);
-                var seconds = time  - (minutes * 60);
-                $("#counter").text( str_pad_left(minutes.toFixed(),'0',2)+':'+str_pad_left(seconds.toFixed(),'0',2));
-            };
-        
-            $(document).ready(function ()  {
-            
-            host = document.location.host;
-            setInterval(function () {getNextVehicleArrival(host, '4560595', processNextVehicle);}  , 1000);
-            setInterval(function () {getHoldingTime(host, '4560595', vehicle , processHoldingTime);}  , 1000);  
-                
-            });
-        
-                                              
-    </script>
-            
+body {
+   margin:0;
+   padding:0;
+  }
+
+#holding_div {
+	width: 98%;
+	margin-top: 30px;
+	margin-left: 10px;
+}
+.container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+}
+.mapframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 98%;
+    height: 100%;
+}
+</style>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="js/transiTimeHolding.js"></script>
+<script src="js/transiTimeVehicles.js"></script>
+<script src="js/transiTimeRoutes.js"></script>
+<script src="js/transiTimeTrips.js"></script>
+<title>Vehicle Holding Times</title>
+</head>
+
+<body>
+	<div id="header">
+		<a href="http://www.transitime.org">Transitime Extension: Holding
+			Times for Atlanta Streetcar.</a>
+	</div>
+
+	<div id="holding_div">
+
+
+		<table width="100%"  border="0">
+
+			<tr>
+				<td width="30%">Remaining Holding Time
+					<div id="counter"></div>
+					<table>
+						<tr>
+							<td colspan="2">Vehicle Information</td>
+
+						</tr>
+						<tr>
+							<td>Vehicle ID</td>
+							<td>
+								<div id="vehicleid"></div>
+							</td>
+						</tr>
+						<tr>
+							<td>Time of Arrival</td>
+							<td>
+								<div id="timeofarrival"></div>
+							</td>
+						</tr>
+						<tr>
+							<td>Time of Departure</td>
+							<td>
+								<div id="timeofdeparture"></div>
+							</td>
+						</tr>
+						<tr>
+							<td>Predicted next arrival time</td>
+							<td>
+								<div id="nextarrivaltime"></div>
+							</td>
+						</tr>
+
+					</table>
+
+				</td>
+				
+				<td width="50%">
+				<table>
+				<tr align="justify">
+					Real-Time Vehicle Location
+				</tr>
+				<tr>
+					<div class="container">				
+						<iframe src="http://localhost:8080/web/maps/map.jsp?a=ASC" frameborder="0" allowfullscreen class="mapframe">
+						</iframe>
+				</div>
+				</tr>
+				</table>
+				</td>
+				<td width="20%">
+					
+				<td>
+			</tr>
+
+		</table>
+
+
+	</div>
+</body>
+
+<script>
+	var host = null;
+	var vehicle = null;
+	var timeofarrival = new Date(0);
+	var timeofdepature = new Date(0);
+	var predictednextarrival = new Date(0);
+	function str_pad_left(string, pad, length) {
+		return (new Array(length + 1).join(pad) + string).slice(-length);
+	}
+
+	function processNextVehicle(nextVehiclePrediction) {
+		vehicle = nextVehiclePrediction.predictions[0].dest[0].pred[0].vehicle;
+
+		$("#vehicleid").text(vehicle);
+		if (nextVehiclePrediction.predictions[0].dest[0].pred.length > 1) {
+			timeofarrival =  new Date(
+					nextVehiclePrediction.predictions[0].dest[0].pred[0].time * 1000);
+			predictednextarrival = new Date(
+					nextVehiclePrediction.predictions[0].dest[0].pred[1].time * 1000);
+			$("#timeofarrival").text(
+					timeofarrival.toLocaleTimeString());
+			$("#nextarrivaltime").text(
+					predictednextarrival.toLocaleTimeString());
+			
+		}
+
+	};
+	function processHoldingTime(holdingTime) {
+		//$("#counter").text(holdingTime.holdingTime);
+		$("#timeofdeparture").text(
+				new Date(holdingTime.holdingTime).toLocaleTimeString());
+
+		var holdingTimeMilliseconds = new Date(holdingTime.holdingTime)
+				.getTime()
+				- new Date(holdingTime.currentTime).getTime()
+		var time = holdingTimeMilliseconds / 1000;
+		if (time < 0)
+			$("#counter").css({
+				'color' : 'red',
+				'font-size' : '400%'
+			});
+		else
+			$("#counter").css({
+				'color' : 'green',
+				'font-size' : '400%'
+			});
+
+		var minutes = Math.floor(time / 60);
+		var seconds = time - (minutes * 60);
+		$("#counter").text(
+				str_pad_left(minutes.toFixed(), '0', 2) + ':'
+						+ str_pad_left(seconds.toFixed(), '0', 2));
+	};
+
+	$(document).ready(function() {
+
+		host = document.location.host;
+		setInterval(function() {
+			getNextVehicleArrival(host, '4560595', processNextVehicle);
+		}, 1000);
+		setInterval(function() {
+			getHoldingTime(host, '4560595', vehicle, processHoldingTime);
+		}, 1000);
+
+	});
+</script>
+
 </html>

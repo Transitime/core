@@ -58,5 +58,5 @@
     <hibernate>
         <configFile>C:/cygwin64/home/SeanOg/workspace/transitime-historical/core/transitimeWebapp/src/main/resources/postgres_hibernate.cfg.xml</configFile>        
     </hibernate>
-    
+     <web><mapTileUrl>http://tile.openstreetmap.org/{z}/{x}/{y}.png</mapTileUrl></web>
 </transitime>

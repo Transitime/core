@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.Route;
@@ -63,6 +64,10 @@ public class PredictionDataCache {
 	// This is a singleton class
 	private static PredictionDataCache singleton = 
 			new PredictionDataCache();
+	
+	protected static BooleanConfigValue returnArrivalPredictionForEndOfTrip = new BooleanConfigValue("transitime.prediction.returnArrivalPredictionForEndOfTrip", 
+			true,
+			"This set to false will not return arrival predictions of the last stop on a trip.");
 	
 	// Contains lists of predictions per route/stop. Also want to group
 	// predictions by destination/trip head sign together so that can
@@ -171,8 +176,9 @@ public class PredictionDataCache {
 					nonEndOfTripPredFound = true;
 			}
 		}
+		/* Is this the best place to filter out predictions. Would it be better to allow the consumer filter? */
 		boolean shouldFilterOutEndOfTripPreds = 
-				endOfTripPredFound && nonEndOfTripPredFound;
+				(endOfTripPredFound && nonEndOfTripPredFound && !returnArrivalPredictionForEndOfTrip.getValue());
 		
 		// Make a copy of the prediction objects so that they cannot be
 		// modified by another thread while they are being accessed. This
