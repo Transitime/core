@@ -57,3 +57,12 @@ function getNextVehicleArrival(host, stopId, processData)
     xmlhttp.open("GET", baseurl, true);
     xmlhttp.send();   
 };
+function getCurrentStopPathIndex(stopPathData)
+{
+    for(var i=0; i< stopPathData.trip.schedule.length; i++)
+    {
+        if(stopPathData.trip.schedule[i].stopId===stopPathData.vehicle.nextStopId)        
+            return i;
+    }
+    return -1;
+};

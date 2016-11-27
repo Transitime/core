@@ -1,7 +1,7 @@
  
 
 
-function getStopPathPredictions(host, tripId, stopPathIndex, algorithm, date, processData, stopPathData)
+function getStopPathPredictions(host, tripId, stopPathIndex, algorithm, processData, stopPathData)
 {    
                 
     var baseurl= "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/getstoppathpredictions?";
@@ -19,13 +19,13 @@ function getStopPathPredictions(host, tripId, stopPathIndex, algorithm, date, pr
         tripId:null,
         stopPathIndex:null,
         algorithm:null,
-        date:null                    
+    
     };
     
     queryObject.tripId=tripId;
     queryObject.stopPathIndex=stopPathIndex;
     queryObject.algorithm=algorithm;
-    queryObject.date=date;
+    
                 
     var encodedQueryObject = $.param( queryObject );
                                
@@ -34,7 +34,7 @@ function getStopPathPredictions(host, tripId, stopPathIndex, algorithm, date, pr
     
 };
 
-function getStopPathTravelTimes(host, tripId, stopPathIndex, date, processData , stopPathData)
+function getStopPathTravelTimes(host, tripId, stopPathIndex, processData , stopPathData)
 {                                       
     var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/triparrivaldeparturecachedata?";
 
@@ -53,14 +53,14 @@ function getStopPathTravelTimes(host, tripId, stopPathIndex, date, processData ,
     var queryObject = {
                         tripId:null,
                         stopPathIndex:null,
-                        date:null
+    
         
 
     };
     
     queryObject.tripId=tripId;
     queryObject.stopPathIndex=stopPathIndex;
-    queryObject.date=date;
+    
 
     var encodedQueryObject = $.param( queryObject );
 
