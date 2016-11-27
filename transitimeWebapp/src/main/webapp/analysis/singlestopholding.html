@@ -69,6 +69,7 @@
     </body>
     
     <script> 
+    		var host = null;
             var vehicle = null;
             var timeofarrival = new Date(0);
             var timeofdepature = new Date(0);
@@ -109,8 +110,10 @@
             };
         
             $(document).ready(function ()  {
-            setInterval(function () {getNextVehicleArrival('4560595', processNextVehicle);}  , 1000);
-            setInterval(function () {getHoldingTime('4560595', vehicle , processHoldingTime);}  , 1000);  
+            
+            host = document.location.host;
+            setInterval(function () {getNextVehicleArrival(host, '4560595', processNextVehicle);}  , 1000);
+            setInterval(function () {getHoldingTime(host, '4560595', vehicle , processHoldingTime);}  , 1000);  
                 
             });
         
