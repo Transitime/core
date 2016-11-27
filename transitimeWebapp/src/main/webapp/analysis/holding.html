@@ -34,14 +34,7 @@
    
         <table border="1">
            
-            <tr>   
-                <td>
-                    <div>
-                        <input type="button" name="GetHoldingTimes_API" id="GetHoldingTimes_API" value="Get Holding Times"/>
-                    </div>
-                    <div id="holdingtimes"></div>
-                </td>
-            </tr>
+            
             <tr>
                 <td> 
                     <div class="submitDiv">
@@ -64,7 +57,14 @@
                     <div id="counter"></div>
                 </td>
             </tr>
-                       
+            <tr>   
+                <td>
+                    <div>
+                        <input type="button" name="GetHoldingTimes_API" id="GetHoldingTimes_API" value="Get Holding Times"/>
+                    </div>
+                    <div id="holdingtimes"></div>
+                </td>
+            </tr>       
         </table>        
     </body>
     </div>
@@ -88,6 +88,7 @@
             {                                      
                 var options = $("#vehicles");
                 options.empty();
+                options.append($("<option />").val("none").text("none"));
                 $.each(vehicleDetails.vehicles, function() {
                     options.append($("<option />").val(this.id).text(this.id));
                 });
