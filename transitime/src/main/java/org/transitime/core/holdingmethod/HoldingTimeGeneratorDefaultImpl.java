@@ -307,7 +307,8 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 				logger.debug(prediction.toString());
 				//TODO if(prediction.getPredictionTime()>predictionEvent.getPredictionTime()&&prediction.isArrival())
 				// The end of the route it seems to only generate departure predictions which points towards an issue.
-				if(prediction.getPredictionTime()>predictionEvent.getPredictionTime())
+				//if(prediction.getPredictionTime()>predictionEvent.getPredictionTime())
+				if(prediction.getPredictionTime()>predictionEvent.getPredictionTime()&&prediction.isArrival())
 					predictions.add(prediction);				
 			}													
 		}					

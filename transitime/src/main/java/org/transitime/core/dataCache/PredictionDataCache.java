@@ -66,7 +66,7 @@ public class PredictionDataCache {
 			new PredictionDataCache();
 	
 	protected static BooleanConfigValue returnArrivalPredictionForEndOfTrip = new BooleanConfigValue("transitime.prediction.returnArrivalPredictionForEndOfTrip", 
-			true,
+			false,
 			"This set to false will not return arrival predictions of the last stop on a trip.");
 	
 	// Contains lists of predictions per route/stop. Also want to group

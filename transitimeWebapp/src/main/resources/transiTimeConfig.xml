@@ -54,7 +54,10 @@
         <dbType>postgresql</dbType>
         <dbUserName>postgres</dbUserName>
         <dbPassword>transitime</dbPassword>
-    </db>     
+    </db>         
+    <prediction>
+    	<returnArrivalPredictionForEndOfTrip>true</returnArrivalPredictionForEndOfTrip>
+    </prediction>
     <hibernate>
         <configFile>C:/cygwin64/home/SeanOg/workspace/transitime-historical/core/transitimeWebapp/src/main/resources/postgres_hibernate.cfg.xml</configFile>        
     </hibernate>
