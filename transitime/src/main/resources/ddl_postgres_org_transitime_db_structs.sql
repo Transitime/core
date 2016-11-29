@@ -152,6 +152,20 @@
         primary key (tripId, startTime, configRev)
     );
 
+    create table HoldingTimes (
+        id int8 not null,
+        arrivalPredictionUsed boolean,
+        arrivalUsed boolean,
+        configRev int4,
+        creationTime timestamp,
+        holdingTime timestamp,
+        routeId varchar(60),
+        stopId varchar(60),
+        tripId varchar(60),
+        vehicleId varchar(60),
+        primary key (id)
+    );
+
     create table Matches (
         vehicleId varchar(60) not null,
         avlTime timestamp not null,
@@ -409,6 +423,8 @@
 
     create index AvlReportsTimeIndex on AvlReports (time);
 
+    create index HoldingTimeIndex on HoldingTimes (creationTime);
+
     create index AvlTimeIndex on Matches (avlTime);
 
     create index MonitoringEventsTimeIndex on MonitoringEvents (time);
@@ -417,7 +433,7 @@
 
     create index PredictionTimeIndex on Predictions (creationTime);
 
-    create index StopPathPredictionTimeIndex on StopPathPredictions (creationTime);
+    create index StopPathPredictionTimeIndex on StopPathPredictions (tripId, stopPathIndex);
 
     create index TravelTimesRevIndex on TravelTimesForTrips (travelTimesRev);
 
