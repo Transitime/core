@@ -41,9 +41,10 @@ function getVehicleDetails(host, vehicleId, processData, stopPathData)
 function getNextVehicleArrival(host, stopId, processData)
 {
     console.log("Calling getNextVehicleArrival.");
-    
-    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/predictions?rs=ASC_4560585|4560595&format=json";
-                    
+
+    //http://ec2-54-187-31-47.us-west-2.compute.amazonaws.com:8080/api/v1/key/f78a2e9a/agency/ASC/command/predictions?format=json&rs=ASC_4560585%7C4560595
+    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/predictions?format=json&rs=ASC_4560585%7C4560595";
+
     var xmlhttp = new XMLHttpRequest();
                                 
     xmlhttp.onreadystatechange = function() {

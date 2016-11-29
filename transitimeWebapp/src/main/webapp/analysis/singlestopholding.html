@@ -6,6 +6,7 @@
 body {
    margin:0;
    padding:0;
+   font: 20px Arial, sans-serif;
   }
 
 #holding_div {
@@ -147,15 +148,28 @@ body {
 				- new Date(holdingTime.currentTime).getTime()
 		var time = holdingTimeMilliseconds / 1000;
 		if (time < 0)
+			
 			$("#counter").css({
 				'color' : 'red',
 				'font-size' : '400%'
 			});
 		else
-			$("#counter").css({
-				'color' : 'green',
-				'font-size' : '400%'
-			});
+		{
+				if(holdingTime.arrivalUsed == false)
+				{
+					$("#counter").css({
+						'color' : 'blue',
+						'font-size' : '400%'
+					});
+				}else
+				{
+						$("#counter").css({
+							'color' : 'green',
+							'font-size' : '400%'
+						});
+				}
+		}
+			
 
 		var minutes = Math.floor(time / 60);
 		var seconds = time - (minutes * 60);
