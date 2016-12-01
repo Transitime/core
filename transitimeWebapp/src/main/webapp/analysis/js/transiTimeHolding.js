@@ -1,7 +1,7 @@
 function alertHolding(paramTest) {
     alert(paramTest.tosay);    
 };
-function getHoldingTime(host, stopId, vehicleId, processHoldingTime) 
+function getHoldingTime(host, stopId, vehicleId, processHoldingTime, data) 
 {                               
     console.log("Calling getHoldingTime.");
     
@@ -16,9 +16,8 @@ function getHoldingTime(host, stopId, vehicleId, processHoldingTime)
             var holdingTime = JSON.parse(this.responseText);
 
             $("#result").text(this.responseText);        
-            
-            processHoldingTime(holdingTime);
-
+            data.holdingTime=holdingTime;
+            processHoldingTime(data, holdingTime);
         }
     };
                 

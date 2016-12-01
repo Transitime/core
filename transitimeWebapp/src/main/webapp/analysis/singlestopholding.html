@@ -34,6 +34,7 @@ body {
 <script src="js/transiTimeVehicles.js"></script>
 <script src="js/transiTimeRoutes.js"></script>
 <script src="js/transiTimeTrips.js"></script>
+<script src="js/transiTimeEvents.js"></script>
 <title>Vehicle Holding Times</title>
 </head>
 
@@ -41,8 +42,7 @@ body {
 	<div id="header">
 	<img class="gt-logo-svg" alt="Georgia Tech" src="http://www.gatech.edu/sites/all/themes/gt/images/logos/logo-gt.png"/>
 		<a href="http://www.transitime.org">Transitime Extension: Holding
-			Times for ATLANTA STREETCAR</a>
-					
+			Times for ATLANTA STREETCAR</a>					
 	</div>
 
 	<div id="holding_div">
@@ -120,7 +120,92 @@ body {
 	function str_pad_left(string, pad, length) {
 		return (new Array(length + 1).join(pad) + string).slice(-length);
 	}
+	var data =  {
+			vehicle: null,
+			holdingTime: null,
+			events : null			
+	};
+	
+	function getData()
+	{
+		if(data.vehicle==null || vehicleDeparted(data, '4560595' ))
+		{
+			getNextVehicleArrival(host, '4560595', processNextVehicle);
+		}else
+		{
+			getNextVehicleArrival(host, '4560595', processCurrentVehicle);
+		}
+		
+		getStopEvents(host, '4560595' , processEvents, data);
+		
+		getHoldingTime(host, '4560595', vehicle, processHoldingTime, data);
+		
+		updateScreen(data);
+	}
+		
 
+	function updateScreen(data)
+	{
+		if(data.vehicle != null && data.holdingTime != null && data.events != null)
+		{
+			console.log("Have enough data");
+			
+			if(data.vehicle==data.holdingTime.vehicleId)
+			{
+				$("#timeofdeparture").text(
+						new Date(data.holdingTime.holdingTime).toLocaleTimeString());
+
+				var holdingTimeMilliseconds = new Date(data.holdingTime.holdingTime)
+						.getTime()
+						- new Date(data.holdingTime.currentTime).getTime();
+				
+				var time = holdingTimeMilliseconds / 1000;
+				
+				if (time < 0)
+				{	
+					if(vehicleDeparted(data, '4560595' ))
+						$("#counter").css({'color' : 'red','font-size' : '400%'});
+					else
+						$("#counter").css({'color' : 'DarkOrange','font-size' : '400%'});
+				}	
+				else
+				{
+					if(data.holdingTime.arrivalUsed == false)
+					{
+						$("#counter").css({'color' : 'blue','font-size' : '400%'});
+					}
+					else
+					{
+						$("#counter").css({'color' : 'green','font-size' : '400%'});
+					}
+				}				
+				var minutes = Math.floor(time / 60);
+				var seconds = time - (minutes * 60);
+				$("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+			}			
+		}else
+		{
+			console.log("Need more data");
+		}
+	}
+	function processEvents(data, events)
+	{
+			 		
+	};
+	function processHoldingTime(data, holdingTime) {
+		
+	};
+	function processCurrentVehicle(nextVehiclePrediction)
+	{
+		var l_vehicle=nextVehiclePrediction.predictions[0].dest[0].pred[0].vehicle;
+		if(l_vehicle==vehicle)
+		{
+			var timeofarrival =  new Date(
+					nextVehiclePrediction.predictions[0].dest[0].pred[0].time * 1000);
+			$("#timeofarrival").text(
+					timeofarrival.toLocaleTimeString());
+		}
+	}
 	function processNextVehicle(nextVehiclePrediction) {
 		vehicle = nextVehiclePrediction.predictions[0].dest[0].pred[0].vehicle;
 
@@ -136,58 +221,37 @@ body {
 					predictednextarrival.toLocaleTimeString());
 			
 		}
+		
+		data.vehicle=vehicle;
 
 	};
-	function processHoldingTime(holdingTime) {
-		//$("#counter").text(holdingTime.holdingTime);
-		$("#timeofdeparture").text(
-				new Date(holdingTime.holdingTime).toLocaleTimeString());
-
-		var holdingTimeMilliseconds = new Date(holdingTime.holdingTime)
-				.getTime()
-				- new Date(holdingTime.currentTime).getTime()
-		var time = holdingTimeMilliseconds / 1000;
-		if (time < 0)
-			
-			$("#counter").css({
-				'color' : 'red',
-				'font-size' : '400%'
-			});
-		else
+	function vehicleDeparted(data, stopid)
+	{
+		for(var i =0; i< data.events.arrivalDeparture.length;i++)
 		{
-				if(holdingTime.arrivalUsed == false)
+			data.events.arrivalDeparture[i];
+			if(!data.events.arrivalDeparture[i].isArrival)
+			{				 
+				if(data.holdingTime !=null && data.vehicle!=null)
 				{
-					$("#counter").css({
-						'color' : 'blue',
-						'font-size' : '400%'
-					});
-				}else
-				{
-						$("#counter").css({
-							'color' : 'green',
-							'font-size' : '400%'
-						});
+					if(data.vehicle==data.holdingTime.vehicle) 
+					{						
+						if(data.arrivalDeparture[i].time > holdingTime.holdingTime || data.arrivalDeparture[i].time > data.arrivalDeparture[i-1].time  )
+						{
+							return true;		
+						}
+					}									
 				}
+			}
 		}
-			
-
-		var minutes = Math.floor(time / 60);
-		var seconds = time - (minutes * 60);
-		$("#counter").text(
-				str_pad_left(minutes.toFixed(), '0', 2) + ':'
-						+ str_pad_left(seconds.toFixed(), '0', 2));
-	};
-
+		return false;
+	}
 	$(document).ready(function() {
 
 		host = document.location.host;
 		setInterval(function() {
-			getNextVehicleArrival(host, '4560595', processNextVehicle);
-		}, 1000);
-		setInterval(function() {
-			getHoldingTime(host, '4560595', vehicle, processHoldingTime);
-		}, 1000);
-
+			getData();
+		}, 1000);		
 	});
 </script>
 
