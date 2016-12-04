@@ -102,7 +102,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					logger.debug("Holding time for : {} is {}.", event.toString(), holdingTimeValue);
 					
 					HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time+holdingTimeValue), Calendar.getInstance().getTime(), event.getVehicleId(), event.getStopId(), event.getTripId(),
-							event.getRouteId(), false, true); 
+							event.getRouteId(), false, true, new Date(event.getTime())); 
 					
 					if(storeHoldingTimes.getValue())
 						Core.getInstance().getDbLogger().add(holdingTime);
@@ -211,7 +211,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 						logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 						
 						holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue), Calendar.getInstance().getTime(), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-								arrivalPrediction.getRouteId(),true, false);
+								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime()));
 																						
 					}else if(lastDeparture.getTime()<=forwardDeparturePrediction.getPredictionTime())
 					{
@@ -220,7 +220,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 						logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 						
 						holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue), Calendar.getInstance().getTime(), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-								arrivalPrediction.getRouteId(),true, false); 
+								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime())); 
 
 					}
 				}else if(forwardDeparturePrediction!=null)
@@ -230,7 +230,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 					
 					holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue), Calendar.getInstance().getTime(), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-							arrivalPrediction.getRouteId(), true, false);
+							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()));
 					
 				}else if(lastDeparture!=null)
 				{
@@ -239,7 +239,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 					
 					holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue), Calendar.getInstance().getTime(), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-							arrivalPrediction.getRouteId(), true, false);				
+							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()));				
 				}
 					
 			}else

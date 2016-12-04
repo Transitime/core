@@ -36,6 +36,9 @@ public class ApiHoldingTime {
 	
 	@XmlAttribute
 	private boolean arrivalUsed;
+	
+	@XmlAttribute
+	private Date arrivalTime;
 
 	protected ApiHoldingTime() {
 	
@@ -51,5 +54,6 @@ public class ApiHoldingTime {
 		this.arrivalPredictionUsed = ipcHoldingTime.isArrivalPredictionUsed();
 		this.arrivalUsed = ipcHoldingTime.isArrivalUsed();	
 		this.currentTime = ipcHoldingTime.getCurrentTime();
+		this.arrivalTime = ipcHoldingTime.getArrivalTime();
 	}
 }

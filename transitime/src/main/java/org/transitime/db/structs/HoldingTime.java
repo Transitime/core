@@ -28,12 +28,83 @@ import org.transitime.db.hibernate.HibernateUtils;
  *
  */
 public class HoldingTime implements Serializable {
-			
+	
 	@Override
 	public String toString() {
 		return "HoldingTime [configRev=" + configRev + ", holdingTime=" + holdingTime + ", creationTime=" + creationTime
 				+ ", vehicleId=" + vehicleId + ", stopId=" + stopId + ", tripId=" + tripId + ", routeId=" + routeId
-				+ ", arrivalPredictionUsed=" + arrivalPredictionUsed + ", arrivalUsed=" + arrivalUsed + "]";
+				+ ", arrivalTime=" + arrivalTime + ", arrivalPredictionUsed=" + arrivalPredictionUsed + ", arrivalUsed="
+				+ arrivalUsed + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (arrivalPredictionUsed ? 1231 : 1237);
+		result = prime * result + ((arrivalTime == null) ? 0 : arrivalTime.hashCode());
+		result = prime * result + (arrivalUsed ? 1231 : 1237);
+		result = prime * result + configRev;
+		result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+		result = prime * result + ((holdingTime == null) ? 0 : holdingTime.hashCode());
+		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
+		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
+		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
+		result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HoldingTime other = (HoldingTime) obj;
+		if (arrivalPredictionUsed != other.arrivalPredictionUsed)
+			return false;
+		if (arrivalTime == null) {
+			if (other.arrivalTime != null)
+				return false;
+		} else if (!arrivalTime.equals(other.arrivalTime))
+			return false;
+		if (arrivalUsed != other.arrivalUsed)
+			return false;
+		if (configRev != other.configRev)
+			return false;
+		if (creationTime == null) {
+			if (other.creationTime != null)
+				return false;
+		} else if (!creationTime.equals(other.creationTime))
+			return false;
+		if (holdingTime == null) {
+			if (other.holdingTime != null)
+				return false;
+		} else if (!holdingTime.equals(other.holdingTime))
+			return false;
+		if (routeId == null) {
+			if (other.routeId != null)
+				return false;
+		} else if (!routeId.equals(other.routeId))
+			return false;
+		if (stopId == null) {
+			if (other.stopId != null)
+				return false;
+		} else if (!stopId.equals(other.stopId))
+			return false;
+		if (tripId == null) {
+			if (other.tripId != null)
+				return false;
+		} else if (!tripId.equals(other.tripId))
+			return false;
+		if (vehicleId == null) {
+			if (other.vehicleId != null)
+				return false;
+		} else if (!vehicleId.equals(other.vehicleId))
+			return false;
+		return true;
 	}
 
 	private static final long serialVersionUID = -8000018800462712153L;
@@ -67,6 +138,14 @@ public class HoldingTime implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String routeId;
 	
+	@Column	
+	@Temporal(TemporalType.TIMESTAMP)
+	private final Date arrivalTime;
+	
+	public Date getArrivalTime() {
+		return arrivalTime;
+	}
+
 	@Column
 	private boolean arrivalPredictionUsed;
 	
@@ -115,10 +194,11 @@ public class HoldingTime implements Serializable {
 		this.routeId = null;	
 		arrivalPredictionUsed=false;
 		arrivalUsed=false;
+		arrivalTime = null;
 	}
 
 	public HoldingTime(Date holdingTime, Date creationTime, String vehicleId, String stopId, String tripId,
-			String routeId, boolean arrivalPredictionUsed, boolean arrivalUsed) {
+			String routeId, boolean arrivalPredictionUsed, boolean arrivalUsed,  Date arrivalTime) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.holdingTime = holdingTime;
 		this.creationTime = creationTime;
@@ -127,73 +207,9 @@ public class HoldingTime implements Serializable {
 		this.tripId = tripId;
 		this.routeId = routeId;
 		this.arrivalPredictionUsed=arrivalPredictionUsed;
+		this.arrivalTime=arrivalTime;
 		this.arrivalUsed=arrivalUsed;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (arrivalPredictionUsed ? 1231 : 1237);
-		result = prime * result + (arrivalUsed ? 1231 : 1237);
-		result = prime * result + configRev;
-		result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
-		result = prime * result + ((holdingTime == null) ? 0 : holdingTime.hashCode());
-		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
-		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
-		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
-		result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
-		return result;
-	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		HoldingTime other = (HoldingTime) obj;
-		if (arrivalPredictionUsed != other.arrivalPredictionUsed)
-			return false;
-		if (arrivalUsed != other.arrivalUsed)
-			return false;
-		if (configRev != other.configRev)
-			return false;
-		if (creationTime == null) {
-			if (other.creationTime != null)
-				return false;
-		} else if (!creationTime.equals(other.creationTime))
-			return false;
-		if (holdingTime == null) {
-			if (other.holdingTime != null)
-				return false;
-		} else if (!holdingTime.equals(other.holdingTime))
-			return false;
-		if (routeId == null) {
-			if (other.routeId != null)
-				return false;
-		} else if (!routeId.equals(other.routeId))
-			return false;
-		if (stopId == null) {
-			if (other.stopId != null)
-				return false;
-		} else if (!stopId.equals(other.stopId))
-			return false;
-		if (tripId == null) {
-			if (other.tripId != null)
-				return false;
-		} else if (!tripId.equals(other.tripId))
-			return false;
-		if (vehicleId == null) {
-			if (other.vehicleId != null)
-				return false;
-		} else if (!vehicleId.equals(other.vehicleId))
-			return false;
-		return true;
-	}
-
-	
-	
 }

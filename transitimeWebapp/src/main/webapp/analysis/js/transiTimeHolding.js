@@ -16,8 +16,8 @@ function getHoldingTime(host, stopId, vehicleId, processHoldingTime, data)
             var holdingTime = JSON.parse(this.responseText);
 
             $("#result").text(this.responseText);        
-            data.holdingTime=holdingTime;
-            processHoldingTime(data, holdingTime);
+           
+            processHoldingTime(data, vehicleId, holdingTime);
         }
     };
                 
@@ -34,7 +34,7 @@ function getHoldingTime(host, stopId, vehicleId, processHoldingTime, data)
     xmlhttp.send();                             
     
 };
-function getHoldingTimeKeys(host)
+function getHoldingTimeKeys(host, processHoldingTimeKeys, data)
 {
     console.log("Calling getHoldingTimeKeys.");
     var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/holdingtimecachekeys";
@@ -44,12 +44,12 @@ function getHoldingTimeKeys(host)
     xmlhttp.onreadystatechange = function() {
                    
         if (this.readyState == 4 && this.status == 200) 
-        {
-                        
+        {                        
             var response = JSON.parse(this.responseText);
                         
-            $("#holdingtimes").text(this.responseText);                          
-                                                
+            $("#holdingtimes").text(this.responseText);
+            
+            processHoldingTimeKeys(data, response);                                                
         }
     };                                                             
     xmlhttp.open("GET", baseurl, true);

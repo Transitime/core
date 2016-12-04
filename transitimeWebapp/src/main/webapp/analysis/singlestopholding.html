@@ -35,14 +35,16 @@ body {
 <script src="js/transiTimeRoutes.js"></script>
 <script src="js/transiTimeTrips.js"></script>
 <script src="js/transiTimeEvents.js"></script>
+<script src="js/transiTimeUtils.js"></script>
 <title>Vehicle Holding Times</title>
 </head>
 
 <body>
 	<div id="header">
 	<img class="gt-logo-svg" alt="Georgia Tech" src="http://www.gatech.edu/sites/all/themes/gt/images/logos/logo-gt.png"/>
-		<a href="http://www.transitime.org">Transitime Extension: Holding
-			Times for ATLANTA STREETCAR</a>					
+		<a href="http://www.transitime.org">transitimeExtension: Holding
+			Times for ATLANTA STREETCAR</a>		
+       
 	</div>
 
 	<div id="holding_div">
@@ -76,8 +78,14 @@ body {
 								<div id="timeofdeparture"></div>
 							</td>
 						</tr>
+                        <tr>
+							<td>Predicted next vehicle</td>
+							<td>
+								<div id="nextarrival"></div>
+							</td>
+						</tr>
 						<tr>
-							<td>Predicted next arrival time</td>
+							<td>Predicted arrival time</td>
 							<td>
 								<div id="nextarrivaltime"></div>
 							</td>
@@ -98,15 +106,23 @@ body {
 						</iframe>
 				</div>
 				</tr>
+				<tr> 
+				 <div id="lastevent"></div>
+				</tr>
 				</table>
 				</td>
 				<td width="20%">
 					
 				<td>
 			</tr>
+            <tr>
+                <td >
+                    <div id="byline">Developed by <br/></br/>Sean Óg Crudden (og.crudden@gmail.com)<br/>Simon Berrebi (simon@berrebi.net)</div>
+                </td>
+            </tr>
 
 		</table>
-
+        
 
 	</div>
 </body>
@@ -117,140 +133,222 @@ body {
 	var timeofarrival = new Date(0);
 	var timeofdepature = new Date(0);
 	var predictednextarrival = new Date(0);
+    $("#byline").css({'color' : 'green','font-size' : '90%'});
 	function str_pad_left(string, pad, length) {
 		return (new Array(length + 1).join(pad) + string).slice(-length);
 	}
 	var data =  {
 			vehicle: null,
-			holdingTime: null,
-			events : null			
-	};
-	
-	function getData()
-	{
-		if(data.vehicle==null || vehicleDeparted(data, '4560595' ))
-		{
-			getNextVehicleArrival(host, '4560595', processNextVehicle);
-		}else
-		{
-			getNextVehicleArrival(host, '4560595', processCurrentVehicle);
-		}
-		
-		getStopEvents(host, '4560595' , processEvents, data);
-		
-		getHoldingTime(host, '4560595', vehicle, processHoldingTime, data);
-		
-		updateScreen(data);
-	}
-		
-
-	function updateScreen(data)
-	{
-		if(data.vehicle != null && data.holdingTime != null && data.events != null)
-		{
-			console.log("Have enough data");
+			holdingTimeKeys:null,
+			holdingTimes: {},
+			events : null,	
+			predictions : null
 			
-			if(data.vehicle==data.holdingTime.vehicleId)
-			{
-				$("#timeofdeparture").text(
-						new Date(data.holdingTime.holdingTime).toLocaleTimeString());
-
-				var holdingTimeMilliseconds = new Date(data.holdingTime.holdingTime)
-						.getTime()
-						- new Date(data.holdingTime.currentTime).getTime();
-				
-				var time = holdingTimeMilliseconds / 1000;
-				
-				if (time < 0)
-				{	
-					if(vehicleDeparted(data, '4560595' ))
-						$("#counter").css({'color' : 'red','font-size' : '400%'});
-					else
-						$("#counter").css({'color' : 'DarkOrange','font-size' : '400%'});
-				}	
-				else
-				{
-					if(data.holdingTime.arrivalUsed == false)
-					{
-						$("#counter").css({'color' : 'blue','font-size' : '400%'});
-					}
-					else
-					{
-						$("#counter").css({'color' : 'green','font-size' : '400%'});
-					}
-				}				
-				var minutes = Math.floor(time / 60);
-				var seconds = time - (minutes * 60);
-				$("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
-			}			
-		}else
+	};
+	function vehicleToDisplay(data, stopid)
+    {
+        if(data.holdingTimes != null && data.events != null && data.predictions!=null)
 		{
-			console.log("Need more data");
+            var keys=Object.keys(data.holdingTimes);
+            for (var index = 0; index < keys.length; ++index) {
+                if(vehicleAtStop(data, stopid, keys[index]))
+                {
+                    return keys[index];
+                }
+            }
+            return null;
+                                            	
+        }else
+        {
+            return null;
+        }
+    }
+	function getData(data,stopid)
+	{						
+		getStopEvents(host, stopid , processEvents, data);
+		
+		getHoldingTimeKeys(host, processHoldingTimeKeys, data);
+		
+		getNextVehicleArrivalPredictions(host, stopid, processArrivalPredictions, data);
+                    		    
+        var vehicles = [];
+        $.each(data.predictions, function() {
+                    vehicles.push(this.vehicle);                
+        });
+            
+        vehicles=unique(vehicles);
+            
+        for (var index = 0; index < vehicles.length; ++index) {
+            getHoldingTime(host, stopid, vehicles[index], processHoldingTime, data);		        
+        }
+       
+	};
+		
+
+	function updateScreen(data,stopid)
+	{
+     			
+        var vehicle=vehicleToDisplay(data, stopid);
+       
+        if(vehicle!=null)
+        {
+            console.log("Display holding info for:"+vehicle); 
+            data.vehicle=vehicle;
+            $("#vehicleid").text(data.vehicle);
+            
+            if(data.holdingTimes[data.vehicle] != null)
+		    {                       
+			     console.log("Have data");									
+                
+                $("#timeofdeparture").text(
+						new Date(data.holdingTimes[data.vehicle].holdingTime).toLocaleTimeString());
+                
+                $("#timeofarrival").text(
+						new Date(data.holdingTimes[data.vehicle].arrivalTime).toLocaleTimeString());
+                
+                var holdingTimeMilliseconds = new Date(data.holdingTimes[data.vehicle].holdingTime)
+						.getTime()
+						- new Date(data.holdingTimes[data.vehicle].currentTime).getTime();
+				
+				var time = Math.abs(holdingTimeMilliseconds) / 1000;
+                
+                var minutes = Math.floor(time / 60);
+                
+				var seconds = time - (minutes * 60);
+                
+           
+                if(holdingTimeMilliseconds>0)
+                    $("#counter").css({'color' : 'green','font-size' : '400%'});
+                else
+                    $("#counter").css({'color' : 'red','font-size' : '400%'});
+                
+				$("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+		    }
+            else
+            {
+                console.log("Need data");
+                
+            }
+        }
+        else
+        {
+            $("#vehicleid").text("No vehicle at stop");
+            $("#timeofdeparture").text("");
+            $("#timeofarrival").text("");            
+            $("#nextarrivaltime").text("");
+            $("#nextarrival").text("");
+            $("#counter").text("00:00");
+            $("#counter").css({'color' : 'blue','font-size' : '400%'});
+            
+        }        
+        var lasteventindex=findLastEvent(data);
+			
+        /* This is just for debug purposes */
+        if(lasteventindex>-1)
+		{				
+			$("#lastevent").text(JSON.stringify(data.events[lasteventindex]));
 		}
-	}
+        /* display the next prediction. TODO this could be a function. */
+        if(data.predictions!=null)
+        {
+            var predictednextarrival = new Date(data.predictions[0].time * 1000);		
+            $("#nextarrivaltime").text(predictednextarrival.toLocaleTimeString());
+            $("#nextarrival").text(data.predictions[0].vehicle);
+        }
+	};
+    
 	function processEvents(data, events)
 	{
-			 		
+          data.events=events.arrivalDeparture;		
 	};
-	function processHoldingTime(data, holdingTime) {
-		
+	function processHoldingTime(data, vehicleid, holdingTime) {
+		data.holdingTimes[vehicleid]=holdingTime;
 	};
-	function processCurrentVehicle(nextVehiclePrediction)
+	function processHoldingTimeKeys(data, holdingTimeKeys) {
+		data.holdingTimeKeys=holdingTimeKeys;
+		//getHoldingTime(host, '4560595', vehicle, processHoldingTime, data);
+	};
+	function processArrivalPredictions(predictions, data)
 	{
-		var l_vehicle=nextVehiclePrediction.predictions[0].dest[0].pred[0].vehicle;
-		if(l_vehicle==vehicle)
-		{
-			var timeofarrival =  new Date(
-					nextVehiclePrediction.predictions[0].dest[0].pred[0].time * 1000);
-			$("#timeofarrival").text(
-					timeofarrival.toLocaleTimeString());
-		}
-	}
-	function processNextVehicle(nextVehiclePrediction) {
-		vehicle = nextVehiclePrediction.predictions[0].dest[0].pred[0].vehicle;
-
-		$("#vehicleid").text(vehicle);
-		if (nextVehiclePrediction.predictions[0].dest[0].pred.length > 1) {
-			timeofarrival =  new Date(
-					nextVehiclePrediction.predictions[0].dest[0].pred[0].time * 1000);
-			predictednextarrival = new Date(
-					nextVehiclePrediction.predictions[0].dest[0].pred[1].time * 1000);
-			$("#timeofarrival").text(
-					timeofarrival.toLocaleTimeString());
-			$("#nextarrivaltime").text(
-					predictednextarrival.toLocaleTimeString());
-			
-		}
-		
-		data.vehicle=vehicle;
-
+		data.predictions=predictions.predictions[0].dest[0].pred;		
 	};
-	function vehicleDeparted(data, stopid)
-	{
-		for(var i =0; i< data.events.arrivalDeparture.length;i++)
+	
+	function vehicleAtStop(data, stopid, vehicleid)
+	{		
+		if(findLastEventByVehicle(data, vehicleid)>-1)
 		{
-			data.events.arrivalDeparture[i];
-			if(!data.events.arrivalDeparture[i].isArrival)
-			{				 
-				if(data.holdingTime !=null && data.vehicle!=null)
-				{
-					if(data.vehicle==data.holdingTime.vehicle) 
-					{						
-						if(data.arrivalDeparture[i].time > holdingTime.holdingTime || data.arrivalDeparture[i].time > data.arrivalDeparture[i-1].time  )
-						{
-							return true;		
-						}
-					}									
-				}
+			var lastEvent=data.events[findLastEventByVehicle(data, vehicleid)];
+								
+			if(lastEvent.isArrival)
+			{
+									
+				return true;	
+				
+			}			
+		}
+		return false;			
+	}	;
+    function findLastEvent(data)
+	{
+		var index=-1;
+		var latesttime=null;
+		if(data.events !== 'undefined')
+		{
+			for(var i =0; i< data.events.length;i++)
+			{			
+				                   
+                if(latesttime==null)
+                {
+                    latesttime=new Date(data.events[i].time);	
+                    index=i;
+                }else
+                {
+                    if(new Date(data.events[i].time) > latesttime )	
+                    {
+                        latesttime=new Date(data.events[i].time);
+                        index=i;
+                    }
+                }                  				
 			}
 		}
-		return false;
-	}
+		return index;
+	};
+	function findLastEventByVehicle(data, vehicleid)
+	{
+		var index=-1;
+		var latesttime=null;
+		if(data.events !== 'undefined')
+		{
+			for(var i =0; i< data.events.length;i++)
+			{			
+				    if(data.events[i].vehicleId===vehicleid)
+                    {
+               
+                        if(latesttime==null)
+                        {
+                            latesttime=new Date(data.events[i].time);	
+                            index=i;
+                        }else
+                        {
+                            if(new Date(data.events[i].time) > latesttime )	
+                            {
+                                latesttime=new Date(data.events[i].time);
+                                index=i;
+                            }
+                        }
+                    }
+				
+			}
+		}
+		return index;
+	};
 	$(document).ready(function() {
 
 		host = document.location.host;
+        host = "127.0.0.1:8080"
 		setInterval(function() {
-			getData();
+			getData(data, "4560595");
+			updateScreen(data, "4560595");
 		}, 1000);		
 	});
 </script>

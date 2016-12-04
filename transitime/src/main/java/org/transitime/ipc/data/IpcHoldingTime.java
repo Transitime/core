@@ -31,9 +31,11 @@ public class IpcHoldingTime implements Serializable{
 	
 	private boolean arrivalUsed;
 	
+	private final Date arrivalTime;
+	
 	
 	public IpcHoldingTime(Date holdingTime, Date creationTime, String vehicleId, String stopId, String tripId,
-			String routeId, boolean arrivalPredictionUsed , boolean arrivalUsed) {
+			String routeId, boolean arrivalPredictionUsed , boolean arrivalUsed, Date arrivalTime) {
 		super();
 		this.holdingTime = holdingTime;
 		this.creationTime = creationTime;
@@ -42,6 +44,7 @@ public class IpcHoldingTime implements Serializable{
 		this.tripId = tripId;
 		this.routeId = routeId;
 		this.currentTime = Calendar.getInstance().getTime();
+		this.arrivalTime=arrivalTime;
 	}
 	public IpcHoldingTime(HoldingTime holdingTime) {
 		
@@ -54,8 +57,18 @@ public class IpcHoldingTime implements Serializable{
 		this.arrivalPredictionUsed = holdingTime.isArrivalPredictionUsed();
 		this.arrivalUsed =  holdingTime.isArrivalUsed();
 		this.currentTime = Calendar.getInstance().getTime();
+		this.arrivalTime=holdingTime.getArrivalTime();
 	}
 
+	public Date getArrivalTime() {
+		return arrivalTime;
+	}
+	public void setArrivalPredictionUsed(boolean arrivalPredictionUsed) {
+		this.arrivalPredictionUsed = arrivalPredictionUsed;
+	}
+	public void setArrivalUsed(boolean arrivalUsed) {
+		this.arrivalUsed = arrivalUsed;
+	}
 	public Date getCurrentTime() {
 		return currentTime;
 	}

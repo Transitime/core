@@ -38,7 +38,7 @@ function getVehicleDetails(host, vehicleId, processData, stopPathData)
     xmlhttp.open("GET", baseurl, true);
     xmlhttp.send();      
 };
-function getNextVehicleArrival(host, stopId, processData)
+function getNextVehicleArrivalPredictions(host, stopId, processData, data)
 {
     console.log("Calling getNextVehicleArrival.");
 
@@ -52,7 +52,7 @@ function getNextVehicleArrival(host, stopId, processData)
         if (this.readyState == 4 && this.status == 200) 
         {                                              
             var vehicleDetails = JSON.parse(this.responseText);
-            processData(vehicleDetails);                                                                                       
+            processData(vehicleDetails, data);                                                                                       
         }
     };                                                             
     xmlhttp.open("GET", baseurl, true);

@@ -155,6 +155,7 @@
     create table HoldingTimes (
         id bigint not null auto_increment,
         arrivalPredictionUsed bit,
+        arrivalTime datetime(3),
         arrivalUsed bit,
         configRev integer,
         creationTime datetime(3),

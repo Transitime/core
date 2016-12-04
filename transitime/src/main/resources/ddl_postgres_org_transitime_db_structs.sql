@@ -155,6 +155,7 @@
     create table HoldingTimes (
         id int8 not null,
         arrivalPredictionUsed boolean,
+        arrivalTime timestamp,
         arrivalUsed boolean,
         configRev int4,
         creationTime timestamp,
