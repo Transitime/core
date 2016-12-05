@@ -40,7 +40,7 @@
         <maxLongitude>-97.495917</maxLongitude>
          -->
                                                  
-        <feedPollingRateSecs>20</feedPollingRateSecs>
+        <feedPollingRateSecs>10</feedPollingRateSecs>
          <nextbus>
         	<agencyNameForFeed>atlanta-sc</agencyNameForFeed>
         </nextbus>

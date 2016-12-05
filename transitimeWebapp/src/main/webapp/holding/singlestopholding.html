@@ -6,13 +6,14 @@
 body {
    margin:0;
    padding:0;
-   font: 20px Arial, sans-serif;
+   font: 30px Arial, sans-serif;
   }
 
 #holding_div {
 	width: 98%;
 	margin-top: 30px;
 	margin-left: 10px;
+	
 }
 .container {
     position: relative;
@@ -26,6 +27,11 @@ body {
     left: 0;
     width: 98%;
     height: 100%;
+}
+.holdinginfo {
+  font-family:Arial,Verdana,sans-serif;
+  font-size:1em; <font color='red'>/* Never set font sizes in pixels! */</font>
+  color:#00f;
 }
 </style>
 <script
@@ -50,12 +56,15 @@ body {
 	<div id="holding_div">
 
 
-		<table width="100%"  border="0">
+		<table width="100%"  border="0" class="holdinginfo">
 
 			<tr>
-				<td width="30%">Remaining Holding Time
+				<td width="10%">
+					
+				<td>
+				<td width="40%">Remaining Holding Time
 					<div id="counter"></div>
-					<table>
+					<table  class="holdinginfo">
 						<tr>
 							<td colspan="2">Vehicle Information</td>
 
@@ -79,47 +88,53 @@ body {
 							</td>
 						</tr>
                         <tr>
-							<td>Predicted next vehicle</td>
+							<td>Next vehicle</td>
 							<td>
 								<div id="nextarrival"></div>
 							</td>
 						</tr>
 						<tr>
-							<td>Predicted arrival time</td>
+							<td>Predicted arrival</td>
 							<td>
 								<div id="nextarrivaltime"></div>
 							</td>
 						</tr>
-
+						<tr>
+							<td colspan="2">
+								<br/>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<div id="byline">Developed by Sean Óg Crudden (og.crudden@gmail.com) and Simon Berrebi (simon@berrebi.net)</div>
+							</td>
+						</tr>
 					</table>
-
+ 				
 				</td>
 				
-				<td width="50%">
-				<table>
-				<tr align="justify">
-					Real-Time Vehicle Location
-				</tr>
-				<tr>
-					<div class="container">				
-						<iframe src="/web/maps/map.jsp?a=ASC" frameborder="0" allowfullscreen class="mapframe">
-						</iframe>
-				</div>
-				</tr>
-				<tr> 
-				 <div id="lastevent"></div>
-				</tr>
-				</table>
+				<td width="40%">
+					<table>
+					<tr align="justify">
+						Real-Time Vehicle Location
+					</tr>
+					<tr>
+						<div class="container">				
+							<iframe src="/web/maps/map.jsp?a=ASC&r=ASC_4560585" frameborder="0" allowfullscreen class="mapframe">
+							</iframe>
+						</div>
+					</tr>
+					<tr> 
+					
+					 <div id="lastevent"></div>
+					</tr>
+					</table>
 				</td>
-				<td width="20%">
+				<td width="10%">
 					
 				<td>
 			</tr>
-            <tr>
-                <td >
-                    <div id="byline">Developed by <br/></br/>Sean Ã“g Crudden (og.crudden@gmail.com)<br/>Simon Berrebi (simon@berrebi.net)</div>
-                </td>
-            </tr>
+            
 
 		</table>
         
@@ -133,7 +148,7 @@ body {
 	var timeofarrival = new Date(0);
 	var timeofdepature = new Date(0);
 	var predictednextarrival = new Date(0);
-    $("#byline").css({'color' : 'green','font-size' : '90%'});
+    $("#byline").css({'color' : 'green','font-size' : '60%'});
 	function str_pad_left(string, pad, length) {
 		return (new Array(length + 1).join(pad) + string).slice(-length);
 	}
@@ -145,13 +160,13 @@ body {
 			predictions : null
 			
 	};
-	function vehicleToDisplay(data, stopid)
+	function vehicleToDisplay(data, stopid, stopPathIndex)
     {
         if(data.holdingTimes != null && data.events != null && data.predictions!=null)
 		{
             var keys=Object.keys(data.holdingTimes);
             for (var index = 0; index < keys.length; ++index) {
-                if(vehicleAtStop(data, stopid, keys[index]))
+                if(vehicleAtStop(data, stopid, keys[index],stopPathIndex))
                 {
                     return keys[index];
                 }
@@ -241,13 +256,13 @@ body {
             $("#counter").css({'color' : 'blue','font-size' : '400%'});
             
         }        
-        var lasteventindex=findLastEvent(data);
+        var lasteventindex=findLastEventByStopPath(data,6);
 			
         /* This is just for debug purposes */
-        if(lasteventindex>-1)
+        /*if(lasteventindex>-1)
 		{				
-			$("#lastevent").text(JSON.stringify(data.events[lasteventindex]));
-		}
+			$("#lastevent").text(JSON.stringify(data.events[findLastEventByStopPath(data,6)]));
+		}*/
         /* display the next prediction. TODO this could be a function. */
         if(data.predictions!=null)
         {
@@ -273,17 +288,15 @@ body {
 		data.predictions=predictions.predictions[0].dest[0].pred;		
 	};
 	
-	function vehicleAtStop(data, stopid, vehicleid)
+	function vehicleAtStop(data, stopid, vehicleid, stopPathIndex)
 	{		
-		if(findLastEventByVehicle(data, vehicleid)>-1)
+		if(findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)>-1)
 		{
-			var lastEvent=data.events[findLastEventByVehicle(data, vehicleid)];
+			var lastEvent=data.events[findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)];
 								
 			if(lastEvent.isArrival)
-			{
-									
-				return true;	
-				
+			{								
+				return true;				
 			}			
 		}
 		return false;			
@@ -342,12 +355,70 @@ body {
 		}
 		return index;
 	};
+	function findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)
+	{
+		var index=-1;
+		var latesttime=null;
+		if(data.events !== 'undefined')
+		{
+			for(var i =0; i< data.events.length;i++)
+			{			
+				    if(data.events[i].vehicleId===vehicleid && data.events.stopPathIndex===stopPathIndex)
+                    {
+               
+                        if(latesttime==null)
+                        {
+                            latesttime=new Date(data.events[i].time);	
+                            index=i;
+                        }else
+                        {
+                            if(new Date(data.events[i].time) > latesttime )	
+                            {
+                                latesttime=new Date(data.events[i].time);
+                                index=i;
+                            }
+                        }
+                    }
+				
+			}
+		}
+		return index;
+	};
+	function findLastEventByStopPath(data,  stopPathIndex)
+	{
+		var index=-1;
+		var latesttime=null;
+		if(data.events !== 'undefined')
+		{
+			for(var i =0; i< data.events.length;i++)
+			{			
+				    if(data.events[i].stopPathIndex===stopPathIndex)
+                    {
+               
+                        if(latesttime==null)
+                        {
+                            latesttime=new Date(data.events[i].time);	
+                            index=i;
+                        }else
+                        {
+                            if(new Date(data.events[i].time) > latesttime )	
+                            {
+                                latesttime=new Date(data.events[i].time);
+                                index=i;
+                            }
+                        }
+                    }
+				
+			}
+		}
+		return index;
+	};
 	$(document).ready(function() {
 
 		host = document.location.host;
-        host = "127.0.0.1:8080"
+        /*host = "127.0.0.1:8080"*/
 		setInterval(function() {
-			getData(data, "4560595");
+			getData(data, "4560595", 6);
 			updateScreen(data, "4560595");
 		}, 1000);		
 	});
