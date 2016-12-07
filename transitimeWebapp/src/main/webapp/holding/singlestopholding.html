@@ -49,8 +49,7 @@ body {
 	<div id="header">
 	<img class="gt-logo-svg" alt="Georgia Tech" src="http://www.gatech.edu/sites/all/themes/gt/images/logos/logo-gt.png"/>
 		<a href="http://www.transitime.org">transitimeExtension: Holding
-			Times for ATLANTA STREETCAR</a>		
-       
+			Times for ATLANTA STREETCAR</a>		       
 	</div>
 
 	<div id="holding_div">
@@ -64,11 +63,7 @@ body {
 				<td>
 				<td width="40%">Remaining Holding Time
 					<div id="counter"></div>
-					<table  class="holdinginfo">
-						<tr>
-							<td colspan="2">Vehicle Information</td>
-
-						</tr>
+					<table  class="holdinginfo">						
 						<tr>
 							<td>Vehicle ID</td>
 							<td>
@@ -233,11 +228,15 @@ body {
                 
            
                 if(holdingTimeMilliseconds>0)
+                {
                     $("#counter").css({'color' : 'green','font-size' : '400%'});
+                    $("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+                }
                 else
-                    $("#counter").css({'color' : 'red','font-size' : '400%'});
-                
-				$("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+                {
+                    $("#counter").css({'color' : 'red','font-size' : '400%'});                
+					$("#counter").text('-'+str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+                }
 		    }
             else
             {

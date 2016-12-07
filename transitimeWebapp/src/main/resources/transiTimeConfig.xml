@@ -5,12 +5,12 @@
         <optionalModulesList>org.transitime.avl.NextBusAvlModule;org.transitime.core.predAccuracy.PredictionAccuracyModule</optionalModulesList>
     </modules>
     <holding>
-     	<controlStops>4560595</controlStops>
+     	<controlStops>4560595:6</controlStops>
     </holding>    
     <autoBlockAssigner>
 		<autoAssignerEnabled>true</autoAssignerEnabled>
 		<ignoreAvlAssignments>false</ignoreAvlAssignments>
-		<allowableEarlySeconds>600</allowableEarlySeconds>
+		<allowableEarlySeconds>600</allowableEarlySeconds> 
 		<allowableLateSeconds>600</allowableLateSeconds>
     </autoBlockAssigner>
     <core>
@@ -22,23 +22,7 @@
     </core>	
 	<predAccuracy><maxPredTimeMinutes>30</maxPredTimeMinutes></predAccuracy>
     <avl>
-        <!-- URL for GTFS realtime vechicle location stream. Changed name in versions do use both for the moment.
-        <gtfsRealtimeFeedURI>GTFSRTVEHICLEPOSITIONS</gtfsRealtimeFeedURI> 		  
-		<url>GTFSRTVEHICLEPOSITIONS</url>		     -->
-		<!--  These are the values used for Irish Rail. -->
-        <!-- <minLongitude>-10.725</minLongitude>
-        <maxLongitude>-5.35</maxLongitude>             
-        <minLatitude>51.35</minLatitude>
-        <maxLatitude>55.45</maxLatitude>
-         -->                
-        <!--  defaults are for north america so only need this if we are not using data from there. -->
-        <!--  These are the values used for CAPMETRO in Austin, Texas. -->
-        <!-- <minLatitude>30.145125</minLatitude>   
-        <maxLatitude>30.517681</maxLatitude>
-        
-        <minLongitude>-98.072043</minLongitude>
-        <maxLongitude>-97.495917</maxLongitude>
-         -->
+      
                                                  
         <feedPollingRateSecs>10</feedPollingRateSecs>
          <nextbus>

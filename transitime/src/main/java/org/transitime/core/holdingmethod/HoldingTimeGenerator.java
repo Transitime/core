@@ -11,7 +11,7 @@ import org.transitime.ipc.data.IpcPrediction;
  * @author Sean Óg Crudden
  */
 public interface HoldingTimeGenerator {
-	public List<String> getControlPointStops();
+	public List<ControlStop> getControlPointStops();
 	public HoldingTime generateHoldingTime(ArrivalDeparture event);	
 	public HoldingTime generateHoldingTime(IpcPrediction arrivalPrediction);
 }

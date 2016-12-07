@@ -43,11 +43,13 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
 	public HoldingTime generateHoldingTime(ArrivalDeparture event) {
+		
+		
 		PredictionDataCache predictionCache = PredictionDataCache.getInstance();
 							
 		HashMap<String, List<IpcPrediction>> predictionsByVehicle = new HashMap<String, List<IpcPrediction>>();
 		
-		if(event.isArrival() && isControlStop(event.getStopId()))
+		if(event.isArrival() && isControlStop(event.getStopId(), event.getStopPathIndex()))
 		{
 			logger.debug("Calling Holding Generator for event : {}", event.toString());
 															
@@ -317,16 +319,39 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		return predictions;
 	}
 	@Override
-	public List<String> getControlPointStops() {
-		return controlStopList.getValue();		
+	public List<ControlStop> getControlPointStops() {
+		
+		ArrayList<ControlStop> controlStops=new ArrayList<ControlStop>();
+		
+		for(String stopEntry: controlStopList.getValue())
+		{
+			controlStops.add(new ControlStop(stopEntry));			
+		}
+		return controlStops;	
 	}
 	
-	private boolean isControlStop(String stopId)
+	private boolean isControlStop(String stopId, int stopPathIndex)
 	{
+		ControlStop controlStop=new ControlStop(stopId, ""+stopPathIndex);
 		if(getControlPointStops()!=null)
-			return getControlPointStops().contains(stopId);
+			return getControlPointStops().contains(controlStop);
 		else
 			return false;
 	}
 	
+	private boolean isControlStop(String stopId)
+	{
+		ControlStop controlStop=new ControlStop( null, stopId);
+		if(getControlPointStops()!=null)
+		{
+			for(ControlStop controlStopInList:getControlPointStops())
+			{
+				if(controlStopInList.getStopId().equals(controlStop.getStopId()))
+				{
+					return true;
+				}
+			}			
+		}					
+		return false;
+	}
 }
