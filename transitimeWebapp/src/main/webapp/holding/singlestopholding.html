@@ -53,8 +53,6 @@ body {
 	</div>
 
 	<div id="holding_div">
-
-
 		<table width="100%"  border="0" class="holdinginfo">
 
 			<tr>
@@ -152,7 +150,8 @@ body {
 			holdingTimeKeys:null,
 			holdingTimes: {},
 			events : null,	
-			predictions : null
+			predictions : null,
+			vehicleDetails: {},
 			
 	};
 	function vehicleToDisplay(data, stopid, stopPathIndex)
@@ -176,7 +175,7 @@ body {
 	function getData(data,stopid)
 	{						
 		getStopEvents(host, stopid , processEvents, data);
-		
+						
 		getHoldingTimeKeys(host, processHoldingTimeKeys, data);
 		
 		getNextVehicleArrivalPredictions(host, stopid, processArrivalPredictions, data);
@@ -189,7 +188,8 @@ body {
         vehicles=unique(vehicles);
             
         for (var index = 0; index < vehicles.length; ++index) {
-            getHoldingTime(host, stopid, vehicles[index], processHoldingTime, data);		        
+            getHoldingTime(host, stopid, vehicles[index], processHoldingTime, data);
+            getVehicleDetails(host, vehicles[index], processVehicleDetails, data);
         }
        
 	};
@@ -286,10 +286,27 @@ body {
 	{
 		data.predictions=predictions.predictions[0].dest[0].pred;		
 	};
-	
-	function vehicleAtStop(data, stopid, vehicleid, stopPathIndex)
+	function processVehicleDetails(data, vehicleDetails)
+	{
+		console.log(vehicleDetails);
+		data.vehicleDetails[vehicleDetails.vehicles[0].id]=vehicleDetails.vehicles[0];
+	}
+	function vehicleAtStop(data, stopId, vehicleId, stopPathIndex)
 	{		
-		if(findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)>-1)
+		if(findLastEvent(data)>-1)
+		{
+			var lastEvent=data.events[findLastEvent(data)];
+			if(lastEvent.vehicleId==vehicleId)
+			{
+				if(data.vehicleDetails[lastEvent.vehicleId].nextStopId==stopId)
+				{
+					return true;	
+				}
+			}
+		}
+		return false;
+		
+		/*if(findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)>-1)
 		{
 			var lastEvent=data.events[findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)];
 								
@@ -298,13 +315,14 @@ body {
 				return true;				
 			}			
 		}
-		return false;			
+		return false;
+		*/
 	}	;
     function findLastEvent(data)
 	{
 		var index=-1;
 		var latesttime=null;
-		if(data.events !== 'undefined')
+		if(data.events != null)
 		{
 			for(var i =0; i< data.events.length;i++)
 			{			
@@ -417,7 +435,7 @@ body {
 		host = document.location.host;
         /*host = "127.0.0.1:8080"*/
 		setInterval(function() {
-			getData(data, "4560595", 6);
+			getData(data, "4560595",6);
 			updateScreen(data, "4560595");
 		}, 1000);		
 	});

@@ -35,10 +35,10 @@ public class HoldingTimeCacheKey implements java.io.Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((stopid == null) ? 0 : stopid.hashCode());
-		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -52,11 +52,6 @@ public class HoldingTimeCacheKey implements java.io.Serializable {
 			if (other.stopid != null)
 				return false;
 		} else if (!stopid.equals(other.stopid))
-			return false;
-		if (tripId == null) {
-			if (other.tripId != null)
-				return false;
-		} else if (!tripId.equals(other.tripId))
 			return false;
 		if (vehicleId == null) {
 			if (other.vehicleId != null)

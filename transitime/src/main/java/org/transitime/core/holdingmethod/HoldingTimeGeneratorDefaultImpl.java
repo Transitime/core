@@ -49,6 +49,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 							
 		HashMap<String, List<IpcPrediction>> predictionsByVehicle = new HashMap<String, List<IpcPrediction>>();
 		
+		
 		if(event.isArrival() && isControlStop(event.getStopId(), event.getStopPathIndex()))
 		{
 			logger.debug("Calling Holding Generator for event : {}", event.toString());
@@ -332,7 +333,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	
 	private boolean isControlStop(String stopId, int stopPathIndex)
 	{
-		ControlStop controlStop=new ControlStop(stopId, ""+stopPathIndex);
+		ControlStop controlStop=new ControlStop(""+stopPathIndex, stopId);
 		if(getControlPointStops()!=null)
 			return getControlPointStops().contains(controlStop);
 		else

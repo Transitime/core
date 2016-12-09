@@ -371,10 +371,12 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					vehicleState.isDelayed(), lateSoMarkAsUncertain);
 			
 			try {
+				/*
 				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(predictionForStop);
 				
 				if(holdingTime!=null)
 					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+					*/
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

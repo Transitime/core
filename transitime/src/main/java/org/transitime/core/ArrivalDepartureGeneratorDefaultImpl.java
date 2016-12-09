@@ -344,9 +344,12 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{
-			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(arrivalDeparture);
-			if(holdingTime!=null)
-				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+			if(arrivalDeparture.getStopPathIndex()!=0)
+			{
+				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(arrivalDeparture);
+				if(holdingTime!=null)
+					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+			}
 		}
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);

@@ -18,7 +18,7 @@ function getVehicleDetailsByRoute(host, routeId, processData)
     xmlhttp.open("GET", baseurl, true);
     xmlhttp.send();      
 };
-function getVehicleDetails(host, vehicleId, processData, stopPathData)
+function getVehicleDetails(host, vehicleId, processData, data)
 {
     console.log("Calling getVehicleDetails.");
     var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/vehiclesDetails";
@@ -32,7 +32,7 @@ function getVehicleDetails(host, vehicleId, processData, stopPathData)
         if (this.readyState == 4 && this.status == 200) 
         {                                              
             var vehicleDetails = JSON.parse(this.responseText);
-            processData(vehicleDetails, stopPathData);                                                                                       
+            processData(data, vehicleDetails);                                                                                       
         }
     };                                                             
     xmlhttp.open("GET", baseurl, true);
