@@ -167,12 +167,13 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		
 		if(((E18-H15)/3)>((F17-H15)/2))
 		{
-			holdingTime=(long) (((E18-H15)/3-(B16-H15))/1.5);
+			holdingTime=(long) (((E18-H15)/3-(B16-H15)));
 		}else
 		{
-			holdingTime=((F17-H15)/2-(B16-H15))/2;
+			holdingTime=((F17-H15)/2-(B16-H15));
 		}		
 		return Math.max(holdingTime, 0);
+		
 	}
 	
 	@Override
