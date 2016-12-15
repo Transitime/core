@@ -55,6 +55,9 @@ public class GtfsRtVehicleFeed {
 	private SimpleDateFormat gtfsRealtimeDateFormatter = 
 			new SimpleDateFormat("yyyyMMdd");
 	
+	private SimpleDateFormat gtfsRealtimeTimeFormatter = 
+			new SimpleDateFormat("HH:mm:ss");
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(GtfsRtVehicleFeed.class);
 
@@ -91,7 +94,13 @@ public class GtfsRtVehicleFeed {
 							.setRouteId(vehicleData.getRouteId())
 							.setTripId(vehicleData.getTripId())
 							.setStartDate(tripStartDateStr);
+			if(vehicleData.getFreqStartTime()>0)
+			{
+				String tripStartTimeStr=gtfsRealtimeTimeFormatter.format(new Date(vehicleData.getFreqStartTime()));
+				tripDescriptor.setStartTime(tripStartTimeStr);
+			}
 			vehiclePosition.setTrip(tripDescriptor);
+			
 		}
 
 		// Add the VehicleDescriptor information

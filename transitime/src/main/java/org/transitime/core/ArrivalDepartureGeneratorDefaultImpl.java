@@ -28,6 +28,8 @@ import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
+import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Arrival;
@@ -40,6 +42,7 @@ import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
+import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.utils.Time;
 
 /**
@@ -351,6 +354,14 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
 			}
 		}
+				
+		/* add event to vehicle state. Will increment tripCounter if the last arrival in a trip */
+		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(arrivalDeparture.getVehicleId());
+		
+		vehicleState.setStartTripEvent(arrivalDeparture);
+		
+		
+		
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);
 	}

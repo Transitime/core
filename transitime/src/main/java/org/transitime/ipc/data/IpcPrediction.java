@@ -78,6 +78,9 @@ public class IpcPrediction implements Serializable {
 	private final boolean lateAndSubsequentTripSoMarkAsUncertain;
 	private final boolean isArrival;
 	
+	
+	private final long freqStartTime;
+	private final int tripCounter;
 	// Want to store trip on server side so that can determine route info
 	// when creating PredictionsForRouteStop object.
 	private final Trip trip;
@@ -114,12 +117,13 @@ public class IpcPrediction implements Serializable {
 	 * @param isDelayed
 	 * @param lateAndSubsequentTripSoMarkAsUncertain
 	 * @param arrivalOrDeparture
+	 * @param freqStartTime 
 	 */
 	public IpcPrediction(AvlReport avlReport, String stopId, int gtfsStopSeq,
 			Trip trip, long predictionTime, long actualPredictionTime,
 			boolean atEndOfTrip, boolean predictionAffectedByWaitStop,
 			boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
-			ArrivalOrDeparture arrivalOrDeparture) {
+			ArrivalOrDeparture arrivalOrDeparture, long freqStartTime, int tripCounter) {
 		this.vehicleId = avlReport.getVehicleId();
 		this.routeId = trip.getRouteId();
 		this.stopId = stopId;
@@ -151,6 +155,13 @@ public class IpcPrediction implements Serializable {
 		this.lateAndSubsequentTripSoMarkAsUncertain = 
 				lateAndSubsequentTripSoMarkAsUncertain;
 		this.isArrival = arrivalOrDeparture == ArrivalOrDeparture.ARRIVAL;
+		
+		this.freqStartTime = freqStartTime;
+		this.tripCounter =  tripCounter;
+	}
+
+	public long getFreqStartTime() {
+		return freqStartTime;
 	}
 
 	/**
@@ -164,7 +175,7 @@ public class IpcPrediction implements Serializable {
 			long creationTime, long tripStartEpochTime,
 			boolean affectedByWaitStop, String driverId, short passengerCount,
 			float passengerFullness, boolean isDelayed,
-			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival) {
+			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival, Long freqStartTime, int tripCounter) {
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
 		this.stopId = stopId;
@@ -189,6 +200,8 @@ public class IpcPrediction implements Serializable {
 		this.lateAndSubsequentTripSoMarkAsUncertain = 
 				lateAndSubsequentTripSoMarkAsUncertain;
 		this.isArrival = isArrival;
+		this.freqStartTime = freqStartTime;
+		this.tripCounter = tripCounter;
 	}
 
 	/**
@@ -217,6 +230,8 @@ public class IpcPrediction implements Serializable {
 		private boolean isDelayed;
 		private boolean lateAndSubsequentTripSoMarkAsUncertain;
 		private boolean isArrival;
+		private long freqStartTime;
+		private int tripCounter;
 
 		private static final long serialVersionUID = -8585283691951746718L;
 		private static final short currentSerializationVersion = 0;
@@ -246,6 +261,8 @@ public class IpcPrediction implements Serializable {
 			this.lateAndSubsequentTripSoMarkAsUncertain = 
 					p.lateAndSubsequentTripSoMarkAsUncertain;
 			this.isArrival = p.isArrival;
+			this.freqStartTime = p.freqStartTime;
+			this.tripCounter = p.tripCounter;
 		}
 
 		/*
@@ -278,6 +295,8 @@ public class IpcPrediction implements Serializable {
 			stream.writeBoolean(isArrival);
 			stream.writeBoolean(isDelayed);
 			stream.writeBoolean(lateAndSubsequentTripSoMarkAsUncertain);
+			stream.writeLong(freqStartTime);
+			stream.writeInt(tripCounter);
 		}
 
 		/*
@@ -317,6 +336,8 @@ public class IpcPrediction implements Serializable {
 			isArrival = stream.readBoolean();
 			isDelayed = stream.readBoolean();
 			lateAndSubsequentTripSoMarkAsUncertain = stream.readBoolean();
+			freqStartTime=stream.readLong();
+			tripCounter=stream.readInt();
 		}
 
 		/*
@@ -331,7 +352,7 @@ public class IpcPrediction implements Serializable {
 					atEndOfTrip, schedBasedPred, avlTime, creationTime,
 					tripStartEpochTime, affectedByWaitStop, driverId,
 					passengerCount, passengerFullness, isDelayed,
-					lateAndSubsequentTripSoMarkAsUncertain, isArrival);
+					lateAndSubsequentTripSoMarkAsUncertain, isArrival, freqStartTime, tripCounter);
 		}
 	}
 

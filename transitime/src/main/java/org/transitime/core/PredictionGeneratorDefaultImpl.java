@@ -27,8 +27,11 @@ import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.StopPathPredictionCache;
+import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
+import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.PredictionForStopPath;
@@ -36,6 +39,7 @@ import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPrediction.ArrivalOrDeparture;
+import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
@@ -144,13 +148,34 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	 protected IpcPrediction generatePredictionForStop(AvlReport avlReport,
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
-			boolean lateSoMarkAsUncertain) {
+			boolean lateSoMarkAsUncertain, int tripCounter) {
 		// Determine additional parameters for the prediction to be generated
 		logger.debug("Calling default transitime prediction algorithm.");
 		StopPath path = indices.getStopPath();
 		String stopId = path.getStopId();
 		int gtfsStopSeq = path.getGtfsStopSeq();
+		
+		
 		Trip trip = indices.getTrip();
+		long freqStartTime=-1;
+		
+		if(trip.isNoSchedule())
+		{
+			logger.debug("This is a frequency based trip {}."+trip.toString());
+						
+			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(avlReport.getVehicleId());
+						
+			if(vehicleState.getTripStartTime(tripCounter)!=null)
+			{
+				freqStartTime=vehicleState.getTripStartTime(tripCounter).longValue();
+			}else
+			if(vehicleState.getTripStartEvent()!=null)
+			{
+				ArrivalDeparture event = vehicleState.getTripStartEvent();
+				freqStartTime=new Long(event.getTime());				
+			}
+		}
+		
 		int expectedStopTimeMsec = 
 				(int) getStopTimeForPath(indices, avlReport);
 			
@@ -160,7 +185,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
 					predictionTime,	predictionTime, indices.atEndOfTrip(),
 					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-					ArrivalOrDeparture.ARRIVAL);
+					ArrivalOrDeparture.ARRIVAL, freqStartTime, tripCounter);
 		} else {
 			// Generate a departure time
 			// If at a wait stop then need to handle specially...
@@ -270,7 +295,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 							predictionForNextStopCalculation,
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain,
-							ArrivalOrDeparture.DEPARTURE);
+							ArrivalOrDeparture.DEPARTURE, freqStartTime, tripCounter);
 				} else {
 					// Use the expected departure times, possibly adjusted for 
 					// stop wait times
@@ -278,7 +303,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 							trip, expectedDepartureTime, expectedDepartureTime,
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain,
-							ArrivalOrDeparture.DEPARTURE);
+							ArrivalOrDeparture.DEPARTURE, freqStartTime, tripCounter);
 				}
 			} else {
 				// Create and return the departure prediction for this 
@@ -288,7 +313,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 						predictionTime + expectedStopTimeMsec, 
 						indices.atEndOfTrip(),
 						affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-						ArrivalOrDeparture.DEPARTURE);
+						ArrivalOrDeparture.DEPARTURE, freqStartTime, tripCounter);
 			}
 		}			
 	}
@@ -321,6 +346,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		TemporalMatch match = vehicleState.getMatch();
 		Indices indices = match.getIndices();
 		
+		
 		// Get info from the AVL report.
 		AvlReport avlReport = vehicleState.getAvlReport();
 		long avlTime = avlReport.getTime();
@@ -348,6 +374,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		// happen for schedule based predictions
 		long now = Core.getInstance().getSystemTime();
 		
+		
+		Integer tripCounter = vehicleState.getTripCounter();
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
 		while (schedBasedPreds
@@ -368,7 +396,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			IpcPrediction predictionForStop = generatePredictionForStop(avlReport,
 					indices, predictionTime,
 					useArrivalPreds, affectedByWaitStop, 
-					vehicleState.isDelayed(), lateSoMarkAsUncertain);
+					vehicleState.isDelayed(), lateSoMarkAsUncertain, tripCounter);
 			
 			try {
 				/*
@@ -385,6 +413,11 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			logger.debug("For vehicleId={} generated prediction {}",
 					vehicleState.getVehicleId(), predictionForStop);
 			
+			if(indices.atEndOfTrip()){								
+				tripCounter++;
+				vehicleState.putTripStartTime(tripCounter, predictionForStop.getPredictionTime());								
+			}
+			
 			// If prediction ended up being too far in the future (which can 
 			// happen if it is a departure prediction where the time at the 
 			// stop is added to the arrival time) then don't add the prediction
@@ -400,6 +433,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			boolean lastStopOfNonSchedBasedTrip = 
 					indices.getBlock().isNoSchedule() && indices.atEndOfTrip();
 					
+
 			// The prediction is not too far into the future. Add it to the 
 			// list of predictions to be returned. But only do this if
 			// it is not last stop of non-schedule based trip since that is a

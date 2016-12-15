@@ -38,7 +38,7 @@ public class Indices implements Serializable {
 	private Block block;
 	private int tripIndex;
 	private int stopPathIndex;
-	private int segmentIndex;
+	private int segmentIndex;	
 
 	/********************** Member Functions **************************/
 
@@ -88,6 +88,8 @@ public class Indices implements Serializable {
 		this.stopPathIndex = spatialMatch.getStopPathIndex();
 		this.segmentIndex = spatialMatch.getSegmentIndex();
 	}
+
+	
 
 	/**
 	 * Creates a copy of the Indices parameter. Useful if need to increment() or

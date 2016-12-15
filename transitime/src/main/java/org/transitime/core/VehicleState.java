@@ -18,6 +18,7 @@ package org.transitime.core;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,7 +27,9 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.Arrival;
+import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
@@ -64,6 +67,15 @@ public class VehicleState {
 	private List<IpcPrediction> predictions;
 	private TemporalDifference realTimeSchedAdh;
 	
+	private LinkedList<ArrivalDeparture> arrivalTripEndHistory =
+			new LinkedList<ArrivalDeparture>();
+	
+	private LinkedList<IpcPrediction> predictionTripEndHistory =
+			new LinkedList<IpcPrediction>();
+	
+	// create a hashamp to store the trip start times.  TODO change to LinkedList doesn't gro
+	HashMap <Integer, Long> tripStartTimesMap=new HashMap <Integer, Long>();
+	
 	// For keeping track of how many bad matches have been encountered.
 	// This way can ignore bad matches if only get a couple
 	private int numberOfBadMatches = 0;
@@ -85,6 +97,15 @@ public class VehicleState {
 	// For keeping track if vehicle delayed
 	private boolean isDelayed = false;
 	
+	private Integer tripCounter = 0;
+	
+	public Integer getTripCounter() {
+		return tripCounter;
+	}
+	public void incrementTripCounter() {
+		tripCounter=tripCounter+1;		
+	}
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(VehicleState.class);
 
@@ -325,7 +346,49 @@ public class VehicleState {
 			avlReportHistory.removeLast();
 		}
 	}
-	
+	public void setStartTripPrediction(IpcPrediction prediction)
+	{
+		if(prediction.isAtEndOfTrip())
+		{
+			predictionTripEndHistory.add(prediction);
+			
+		}
+	}
+	public IpcPrediction getStartTripPrediction()
+	{
+		return predictionTripEndHistory.getLast();
+		
+	}
+	public void putTripStartTime(Integer tripCounter, Long date)
+	{
+		/* only add time once as it is used as part of the GTFS trip descriptor for frequency based trips */
+		if(this.tripStartTimesMap.get(tripCounter)==null && date > 0)
+			this.tripStartTimesMap.put(tripCounter, date);
+	}
+	public Long getTripStartTime(Integer tripCounter)
+	{		
+		return this.tripStartTimesMap.get(tripCounter);			
+	}
+	/**
+	 * Add the event is it is the arrival at the end of the last trip. This will be used as the start time for the next frequency based trip.
+	 * @param event
+	 */
+	public void setStartTripEvent(ArrivalDeparture event)
+	{				
+		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());
+		
+		Indices indices=new Indices(vehicleState.getMatch());
+		
+		if(indices.atEndOfTrip()&&event.isArrival())
+		{
+			vehicleState.incrementTripCounter();		
+			arrivalTripEndHistory.add(event);
+		}		
+		while(arrivalTripEndHistory.size() > CoreConfig.getEventHistoryMaxSize())
+		{
+			arrivalTripEndHistory.removeLast();
+		}
+	}
 	/**
 	 * Returns the current Trip for the vehicle. Returns null if there is not
 	 * current trip.
@@ -429,6 +492,17 @@ public class VehicleState {
 			return null;
 		}
 	}
+	/**
+	 * Return the last event. Return null is there isn't one.
+	 */
+	public ArrivalDeparture getTripStartEvent() {
+		try {
+			return this.arrivalTripEndHistory.getFirst();
+		} catch (NoSuchElementException e) {
+			return null;
+		}
+	}
+	
 	
 	/**
 	 * Looks in the AvlReport history for the most recent AvlReport that is at
@@ -944,4 +1018,6 @@ public class VehicleState {
 	public boolean isDelayed() {
 		return isDelayed;
 	}
+	
+	
 }

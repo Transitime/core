@@ -68,6 +68,9 @@ public class GtfsRtTripFeed {
 	private SimpleDateFormat gtfsRealtimeDateFormatter = 
 			new SimpleDateFormat("yyyyMMdd");
 	
+	private SimpleDateFormat gtfsRealtimeTimeFormatter = 
+			new SimpleDateFormat("HH:mm:ss");
+	
 	// 25 minutes
 	private static final int PREDICTION_MAX_FUTURE_SECS = 25 * 60; 
 	
@@ -115,7 +118,17 @@ public class GtfsRtTripFeed {
 			tripDescriptor.setRouteId(firstPred.getRouteId());
 		if (firstPred.getTripId() != null) {
 			tripDescriptor.setTripId(firstPred.getTripId());
-
+			 			
+			try {
+				if(firstPred.getFreqStartTime()>0)
+				{
+					String tripStartTimeStr=gtfsRealtimeTimeFormatter.format(new Date(firstPred.getFreqStartTime()));
+					tripDescriptor.setStartTime(tripStartTimeStr);
+				}
+			} catch (Exception e) {
+				
+			}
+			
 			long tripStartEpochTime = firstPred.getTripStartEpochTime();
 			String tripStartDateStr =
 					gtfsRealtimeDateFormatter.format(new Date(

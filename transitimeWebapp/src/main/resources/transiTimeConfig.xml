@@ -6,8 +6,9 @@
     </modules>
     <holding>
      	<controlStops>4560595:6;4560595:0</controlStops>
-    </holding>    
+    </holding>     
     <autoBlockAssigner>
+    
 		<autoAssignerEnabled>true</autoAssignerEnabled>
 		<ignoreAvlAssignments>false</ignoreAvlAssignments>
 		<allowableEarlySeconds>600</allowableEarlySeconds> 
@@ -19,6 +20,8 @@
     	<headwayGeneratorClass>org.transitime.core.headwaygenerator.LastArrivalsHeadwayGenerator</headwayGeneratorClass>
     	<maxDistanceFromSegment>30000</maxDistanceFromSegment>	
     	<storeTravelTimeStopPathPredictions>true</storeTravelTimeStopPathPredictions>
+    	<!-- This setting allow more than one vehicle assigned to the same block. This should be set to true for scheduled services and false for frequency based services. -->
+    	<exclusiveBlockAssignments>false</exclusiveBlockAssignments>
     </core>	
 	<predAccuracy><maxPredTimeMinutes>30</maxPredTimeMinutes></predAccuracy>
     <avl>

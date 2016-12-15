@@ -743,6 +743,16 @@ public class CoreConfig {
 					+ "timeForDeterminingNoProgress. If GPS rate is high then "
 					+ "this value will need to be high as well.");
 	
+	private static IntegerConfigValue eventHistoryMaxSize =
+			new IntegerConfigValue(
+					"transitime.core.eventHistoryMaxSize",
+					20,
+					"How many arrival depature event reports are kept in history for vehicle so "
+					+ "that can can do things such as look back at history");
+	
+	public static int getEventHistoryMaxSize() {
+		return eventHistoryMaxSize.getValue();
+	}
 	public static String getPidFileDirectory() {
 		return pidFileDirectory.getValue();
 	}
