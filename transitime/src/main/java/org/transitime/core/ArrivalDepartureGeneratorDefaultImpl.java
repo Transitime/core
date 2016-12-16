@@ -359,9 +359,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(arrivalDeparture.getVehicleId());
 		
 		vehicleState.setStartTripEvent(arrivalDeparture);
-		
-		
-		
+						
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);
 	}

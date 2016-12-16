@@ -157,23 +157,12 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		
 		
 		Trip trip = indices.getTrip();
-		long freqStartTime=-1;
 		
-		if(trip.isNoSchedule())
-		{
-			logger.debug("This is a frequency based trip {}."+trip.toString());
-						
-			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(avlReport.getVehicleId());
-						
+		long freqStartTime=-1;		
+		if(trip.isNoSchedule()) {							
+			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(avlReport.getVehicleId());					
 			if(vehicleState.getTripStartTime(tripCounter)!=null)
-			{
-				freqStartTime=vehicleState.getTripStartTime(tripCounter).longValue();
-			}else
-			if(vehicleState.getTripStartEvent()!=null)
-			{
-				ArrivalDeparture event = vehicleState.getTripStartEvent();
-				freqStartTime=new Long(event.getTime());				
-			}
+				freqStartTime=vehicleState.getTripStartTime(tripCounter).longValue();			
 		}
 		
 		int expectedStopTimeMsec = 

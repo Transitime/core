@@ -379,7 +379,7 @@ public class VehicleState {
 		
 		Indices indices=new Indices(vehicleState.getMatch());
 		
-		if(indices.atEndOfTrip()&&event.isArrival())
+		if(indices.atEndOfTrip())
 		{
 			vehicleState.incrementTripCounter();		
 			arrivalTripEndHistory.add(event);

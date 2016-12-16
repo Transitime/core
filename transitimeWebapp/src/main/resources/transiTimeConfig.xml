@@ -16,7 +16,7 @@
     </autoBlockAssigner>
     <core>
     	<!--<predictionGeneratorClass>org.transitime.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl</predictionGeneratorClass>-->
-    	<predictionGeneratorClass>org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl</predictionGeneratorClass>
+    	<predictionGeneratorClass>org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl</predictionGeneratorClass>
     	<headwayGeneratorClass>org.transitime.core.headwaygenerator.LastArrivalsHeadwayGenerator</headwayGeneratorClass>
     	<maxDistanceFromSegment>30000</maxDistanceFromSegment>	
     	<storeTravelTimeStopPathPredictions>true</storeTravelTimeStopPathPredictions>

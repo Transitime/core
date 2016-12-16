@@ -20,6 +20,7 @@ package org.transitime.api.gtfsRealtime;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.api.utils.AgencyTimezoneCache;
+import org.transitime.core.holdingmethod.PredictionTimeComparator;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
@@ -202,23 +204,73 @@ public class GtfsRtTripFeed {
 		message.setHeader(feedheader);
 		  
 		// For each trip...
-		for (List<IpcPrediction> predsForTrip : predsByTripMap.values()) {				
-			// Create feed entity for each trip
-			FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
-					.setId(predsForTrip.get(0).getTripId());
-			try {				
-				TripUpdate tripUpdate = createTripUpdate(predsForTrip);
-				feedEntity.setTripUpdate(tripUpdate);		
-	    		message.addEntity(feedEntity);
-			} catch (Exception e) {
-				logger.error("Error parsing trip update data. {}",
-						predsForTrip, e);
+		for (List<IpcPrediction> predsForTrip : predsByTripMap.values()) {
+			
+			//  Need to check if predictions for frequency based trip and group by start time if they are. 
+			if(isFrequencyBasedTrip(predsForTrip))
+			{
+				try {
+					Map<Long, List<IpcPrediction>> map = createFreqStartTimePredictionMap(predsForTrip);
+					
+					for(Long key:map.keySet())
+					{
+						if(!map.get(key).isEmpty())
+						{
+							FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
+									.setId(map.get(key).get(0).getVehicleId());						
+							TripUpdate tripUpdate = createTripUpdate(map.get(key));
+							feedEntity.setTripUpdate(tripUpdate);		
+							message.addEntity(feedEntity);
+						}
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}							
+			}else
+			{			
+				// Create feed entity for each schedule trip
+				FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
+						.setId(predsForTrip.get(0).getTripId());
+				try {				
+					TripUpdate tripUpdate = createTripUpdate(predsForTrip);
+					feedEntity.setTripUpdate(tripUpdate);		
+		    		message.addEntity(feedEntity);
+				} catch (Exception e) {
+					logger.error("Error parsing trip update data. {}",
+							predsForTrip, e);
+				}
 			}
 		}		
 		
 		return message.build();
 	}
-
+	private boolean isFrequencyBasedTrip(List<IpcPrediction> predsForTrip)		
+	{
+		for(IpcPrediction prediction:predsForTrip) 
+		{		
+				if(prediction.getFreqStartTime() > 0)
+					return true;		
+		}
+		return false;		
+	}
+	private Map<Long, List<IpcPrediction>> createFreqStartTimePredictionMap(List<IpcPrediction> predsForTrip)
+	{
+		Map<Long, List<IpcPrediction>> map=new HashMap<>();
+		for(IpcPrediction prediction:predsForTrip)
+		{
+			if(map.get(prediction.getFreqStartTime())==null)
+			{
+				List<IpcPrediction> list=new ArrayList<IpcPrediction>(); 
+				map.put(prediction.getFreqStartTime(), list);
+								
+			}			
+			map.get(prediction.getFreqStartTime()).add(prediction);	
+			
+			Collections.sort(map.get(prediction.getFreqStartTime()), new PredictionTimeComparator());
+		}
+		return map;		
+	}
 	/**
 	 * Returns map of all predictions for the project. Returns null if there was
 	 * a problem getting the data via RMI. There is a separate list of
