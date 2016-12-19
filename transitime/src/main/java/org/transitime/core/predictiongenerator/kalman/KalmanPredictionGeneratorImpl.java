@@ -25,7 +25,7 @@ import org.transitime.core.dataCache.TripKey;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
-import org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl;
+import org.transitime.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;

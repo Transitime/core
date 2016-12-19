@@ -1,4 +1,4 @@
-package org.transitime.core.predictiongenerator.average;
+package org.transitime.core.predictiongenerator.average.scheduled;
 
 import java.util.Calendar;
 

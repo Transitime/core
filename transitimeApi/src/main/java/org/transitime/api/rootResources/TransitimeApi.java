@@ -289,7 +289,15 @@ public class TransitimeApi {
 					uiTypesForVehicles);
 
 			// return ApiVehiclesDetails response
-			return stdParameters.createResponse(apiVehiclesDetails);
+			Response result = null;
+			try {
+				result = stdParameters.createResponse(apiVehiclesDetails);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return result;
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
 			throw WebUtils.badRequestException(e.getMessage());

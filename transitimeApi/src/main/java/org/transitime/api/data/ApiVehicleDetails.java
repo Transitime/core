@@ -17,6 +17,8 @@
 
 package org.transitime.api.data;
 
+import java.util.Date;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -86,6 +88,12 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 
 	@XmlElement(name = "driver")
 	private String driverId;
+	
+	@XmlAttribute
+	private Boolean isScheduledService;
+	
+	@XmlAttribute
+	private Long freqStartTime;
 
 	/**
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
@@ -131,6 +139,13 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 				vehicle.getNextStopName() != null ? vehicle.getNextStopName()
 						: null;
 		driverId = vehicle.getAvl().getDriverId();		
+				
+		isScheduledService = vehicle.getFreqStartTime() > 0 ? false : true;
+		if(!isScheduledService)
+			freqStartTime = vehicle.getFreqStartTime();
+		else
+			freqStartTime = null;
+						
 	}
 
 }

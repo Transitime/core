@@ -27,8 +27,6 @@ import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.TripKey;
-import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
@@ -42,7 +40,6 @@ import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
-import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.utils.Time;
 
 /**

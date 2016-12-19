@@ -34,6 +34,8 @@ import org.transitime.ipc.data.IpcVehicleComplete;
  *  So do a progression from LastVehicle --> Historical Average --> Kalman. Might be interesting to look at the rate of improvement of prediction as well as the end result.
  *  
  *  Does this by changing which class each extends. How can we make configurable?
+ *  
+ *  This works for both schedules based and frequency based service out of the box. Not so for historical average or Kalman filter.
  */
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {

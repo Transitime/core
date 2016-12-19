@@ -389,7 +389,7 @@ function getVehiclePopupContent(vehicleData) {
 	var gpsTimeStr = dateFormat(vehicleData.loc.time);
     var directionStr = verbose ? "<br/><b>Direction:</b> " + vehicleData.direction : ""; 
     var tripPatternStr = verbose ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
-    
+    var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime);
     var content = "<b>Vehicle:</b> " + vehicleData.id 
     	+ "<br/><b>Route: </b> " + vehicleData.routeShortName
 		+ latLonHeadingStr
@@ -400,11 +400,11 @@ function getVehiclePopupContent(vehicleData) {
 		+ "<br/><b>Block:</b> " + vehicleData.block
 		+ "<br/><b>Trip:</b> " + vehicleData.trip
 		+ tripPatternStr
+		+ startTimeStr
 		+ layoverStr
 		+ layoverDepartureStr
 		+ nextStopNameStr
-		+ driver;
-	
+		+ driver;	
 	return content;
 }
 

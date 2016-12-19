@@ -1,5 +1,7 @@
 package org.transitime.core.dataCache;
 
+import java.util.Date;
+
 import org.transitime.core.Indices;
 /**
  * @author Sean Og Crudden
@@ -13,6 +15,9 @@ public class StopPathCacheKey implements java.io.Serializable {
 	private static final long serialVersionUID = 9119654046491298858L;
 	private String tripId;
 	private Integer stopPathIndex;
+	
+	/* this is only set for frequency based trips otherwise null */
+	private Date startTime;
 	
 	private boolean travelTime=true;
 	
@@ -35,6 +40,15 @@ public class StopPathCacheKey implements java.io.Serializable {
 		this.tripId = tripId;
 		this.stopPathIndex = stopPathIndex;	
 		this.travelTime=travelTime;
+		this.startTime = null;
+	}
+	public StopPathCacheKey(String tripId, Integer stopPathIndex, boolean travelTime, Date startTime) {
+		super();
+		
+		this.tripId = tripId;
+		this.stopPathIndex = stopPathIndex;	
+		this.travelTime=travelTime;
+		this.startTime = startTime;
 	}
 	public StopPathCacheKey(Indices indices) {
 		super();
@@ -45,10 +59,8 @@ public class StopPathCacheKey implements java.io.Serializable {
 		
 		this.tripId=indices.getBlock().getTrip(tripIndex).getId();
 		
-		this.travelTime=true;
-		
+		this.travelTime=true;		
 	}
-
 
 	public String getTripId() {
 		return tripId;
@@ -69,10 +81,13 @@ public class StopPathCacheKey implements java.io.Serializable {
 		this.stopPathIndex = stopPathIndex;
 	}
 
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
 		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
 		result = prime * result + (travelTime ? 1231 : 1237);
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
@@ -88,6 +103,11 @@ public class StopPathCacheKey implements java.io.Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		StopPathCacheKey other = (StopPathCacheKey) obj;
+		if (startTime == null) {
+			if (other.startTime != null)
+				return false;
+		} else if (!startTime.equals(other.startTime))
+			return false;
 		if (stopPathIndex == null) {
 			if (other.stopPathIndex != null)
 				return false;
@@ -105,9 +125,10 @@ public class StopPathCacheKey implements java.io.Serializable {
 
 	@Override
 	public String toString() {
-		return "StopPathCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + ", travelTime=" + travelTime
-				+ "]";
+		return "StopPathCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + ", start_time=" + startTime
+				+ ", travelTime=" + travelTime + "]";
 	}
+
 
 
 	

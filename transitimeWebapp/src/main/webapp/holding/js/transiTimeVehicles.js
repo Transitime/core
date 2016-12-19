@@ -43,7 +43,7 @@ function getNextVehicleArrivalPredictions(host, stopId, processData, data)
     console.log("Calling getNextVehicleArrival.");
 
     //http://ec2-54-187-31-47.us-west-2.compute.amazonaws.com:8080/api/v1/key/f78a2e9a/agency/ASC/command/predictions?format=json&rs=ASC_4560585%7C4560595
-    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/predictions?format=json&rs=rs=StreetCarFreq%7C4560595";
+    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/predictions?format=json&rs=StreetCarFreq%7C4560595";
 
     var xmlhttp = new XMLHttpRequest();
                                 

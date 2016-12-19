@@ -101,7 +101,7 @@ public class HistoricalAverageCache {
 	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) 
 	{
 		logger.debug("Putting :"+arrivalDeparture.toString() + " in HistoricalAverageCache cache.");
-		
+						
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
@@ -111,16 +111,22 @@ public class HistoricalAverageCache {
 		if(pathDuration>0)
 		{
 			
-			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true);
-			
-			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
-			
-			if(average==null)				
-				average=new HistoricalAverage();
-			
-			average.update(pathDuration);
-		
-			HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+			if(!trip.isNoSchedule())
+			{
+				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true);
+				
+				HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+				
+				if(average==null)				
+					average=new HistoricalAverage();
+				
+				average.update(pathDuration);
+				
+				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+			}else
+			{
+				
+			}
 		}		
 		
 		double stopDuration=getLastStopDuration(arrivalDeparture, trip);
