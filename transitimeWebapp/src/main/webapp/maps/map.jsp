@@ -389,7 +389,7 @@ function getVehiclePopupContent(vehicleData) {
 	var gpsTimeStr = dateFormat(vehicleData.loc.time);
     var directionStr = verbose ? "<br/><b>Direction:</b> " + vehicleData.direction : ""; 
     var tripPatternStr = verbose ? "<br/><b>Trip Pattern:</b> " + vehicleData.tripPattern : "";
-    var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime);
+    var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime/1000);
     var content = "<b>Vehicle:</b> " + vehicleData.id 
     	+ "<br/><b>Route: </b> " + vehicleData.routeShortName
 		+ latLonHeadingStr
