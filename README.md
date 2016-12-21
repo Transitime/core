@@ -1,11 +1,11 @@
 core
 ====
 
-The complete core Java software for the Transitime real-time transit information project. Transitime is a project created and managed by Swiftly, Inc. (www.goswift.ly).
+The complete core Java software for the Transitime 0.1 (beta) real-time transit information project. Transitime is a project created and managed by Swiftly, Inc. (www.goswift.ly).
 
 The goal of Transitime is to use any type of real-time GPS data to generate useful public transportation information. The system is for both letting passengers know the status of their vehicles and for helping agencies more effectively manage their systems. By providing a complete open-source system, agencies can have a cost effective system and have full ownership of it. 
 
-The software is currently being used in a production environment for MBTA Commuter Rail and for several smaller agencies.
+This is an early beta version of the software and it should not be used for production systems. If you would like access to the production grade version of Transitime, please reach out to the Swiftly team at contact@goswift.ly.
 
 <b>Build</b>
 
