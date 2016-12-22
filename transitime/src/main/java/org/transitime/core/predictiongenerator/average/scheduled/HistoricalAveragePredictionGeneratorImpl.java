@@ -9,10 +9,9 @@ import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.dataCache.HistoricalAverage;
-import org.transitime.core.dataCache.HistoricalAverageCache;
-
 import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.core.dataCache.StopPathPredictionCache;
+import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl;
 import org.transitime.db.structs.AvlReport;
@@ -21,7 +20,7 @@ import org.transitime.ipc.data.IpcPrediction;
 
 /**
  * @author Sean Óg Crudden
- *	This provides a prediction based on the average of historical data. The average is taken from the HistoricalAverageCache which is 
+ *	This provides a prediction based on the average of historical data for schedules based services. The average is taken from the HistoricalAverageCache which is 
  *  populated each time an arrival/departure event occurs. The HistoricalAverageCache is updated using data from the TripDataHistory cache.
  */
 public class HistoricalAveragePredictionGeneratorImpl extends
@@ -53,7 +52,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		 */				
 		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex());
 		
-		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
@@ -80,7 +79,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		
 		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),false);
 		
-		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 		
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{

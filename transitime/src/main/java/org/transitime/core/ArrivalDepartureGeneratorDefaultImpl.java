@@ -23,11 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.CoreConfig;
-import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleStateManager;
+import org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
+import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Arrival;
@@ -339,8 +340,12 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		if(StopArrivalDepartureCache.getInstance()!=null)
 			StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		
-		if(HistoricalAverageCache.getInstance()!=null)
-			HistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		 
+		if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
+			ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		
+		if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
+			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{

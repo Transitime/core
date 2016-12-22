@@ -18,8 +18,10 @@ import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitime.ipc.rmi.AbstractServer;
 
 /**
- * @author Sean Og Crudden Server to allow stored travel time predictions to be queried.
+ * @author Sean Óg Crudden 
+ * Server to allow stored travel time predictions to be queried.
  * TODO May not be set to run by default as really only for analysis of predictions.
+ * TODO This needs to be changed to also work with frequency based services.
  */
 public class PredictionAnalysisServer extends AbstractServer implements PredictionAnalysisInterface {
 	// Should only be accessed as singleton class

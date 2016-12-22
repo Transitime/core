@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.core.dataCache.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.HistoricalAverage;
-import org.transitime.core.dataCache.HistoricalAverageCache;
 import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.HoldingTimeCacheKey;
 import org.transitime.core.dataCache.KalmanErrorCache;
@@ -25,6 +24,7 @@ import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
+import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.ipc.data.IpcArrivalDeparture;
@@ -120,7 +120,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	public IpcHistoricalAverage getHistoricalAverage(String tripId, Integer stopPathIndex) throws RemoteException {
 		StopPathCacheKey key = new StopPathCacheKey(tripId, stopPathIndex);
 
-		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(key);
+		HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(key);
 		return new IpcHistoricalAverage(average);
 	}
 
@@ -189,7 +189,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	@Override
 	public List<IpcHistoricalAverageCacheKey> getHistoricalAverageCacheKeys() throws RemoteException {
 		
-		List<StopPathCacheKey> keys = HistoricalAverageCache.getInstance().getKeys();
+		List<StopPathCacheKey> keys = ScheduleBasedHistoricalAverageCache.getInstance().getKeys();
 		List<IpcHistoricalAverageCacheKey> ipcResultList = new ArrayList<IpcHistoricalAverageCacheKey>();
 				
 		for(StopPathCacheKey key:keys)

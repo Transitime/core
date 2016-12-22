@@ -4,11 +4,12 @@ import java.util.Date;
 
 import org.transitime.core.Indices;
 /**
- * @author Sean Og Crudden
+ * @author Sean Óg Crudden
  * 
  */
 public class StopPathCacheKey implements java.io.Serializable {
 		
+	
 	/**
 	 * 
 	 */
@@ -16,8 +17,8 @@ public class StopPathCacheKey implements java.io.Serializable {
 	private String tripId;
 	private Integer stopPathIndex;
 	
-	/* this is only set for frequency based trips otherwise null */
-	private Date startTime;
+	/* this is only set for frequency based trips otherwise null. This is seconds from midnight */
+	private Long startTime = null  ;
 	
 	private boolean travelTime=true;
 	
@@ -42,7 +43,7 @@ public class StopPathCacheKey implements java.io.Serializable {
 		this.travelTime=travelTime;
 		this.startTime = null;
 	}
-	public StopPathCacheKey(String tripId, Integer stopPathIndex, boolean travelTime, Date startTime) {
+	public StopPathCacheKey(String tripId, Integer stopPathIndex, boolean travelTime, Long startTime) {
 		super();
 		
 		this.tripId = tripId;
@@ -50,6 +51,19 @@ public class StopPathCacheKey implements java.io.Serializable {
 		this.travelTime=travelTime;
 		this.startTime = startTime;
 	}
+	
+	public StopPathCacheKey(StopPathCacheKey key) {
+		
+		this.stopPathIndex=new Integer(key.getStopPathIndex());
+				
+		this.tripId=new String(key.getTripId());
+		
+		this.travelTime=key.travelTime;	
+						
+		this.startTime=new Long(key.getStartTime());
+	}
+	
+
 	public StopPathCacheKey(Indices indices) {
 		super();
 				
@@ -66,6 +80,9 @@ public class StopPathCacheKey implements java.io.Serializable {
 		return tripId;
 	}
 
+	public Long getStartTime() {
+		return startTime;
+	}
 
 	public void setTripId(String tripId) {
 		this.tripId = tripId;
@@ -81,7 +98,11 @@ public class StopPathCacheKey implements java.io.Serializable {
 		this.stopPathIndex = stopPathIndex;
 	}
 
-	
+	@Override
+	public String toString() {
+		return "StopPathCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + ", startTime=" + startTime
+				+ ", travelTime=" + travelTime + "]";
+	}
 
 	@Override
 	public int hashCode() {
@@ -123,15 +144,7 @@ public class StopPathCacheKey implements java.io.Serializable {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return "StopPathCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + ", start_time=" + startTime
-				+ ", travelTime=" + travelTime + "]";
-	}
 
-
-
-	
 						
 }
 

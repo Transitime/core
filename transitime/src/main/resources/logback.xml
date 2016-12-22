@@ -368,7 +368,7 @@
 	</logger>
 	
 	<logger
-		name="org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl"
+		name="org.transitime.core.predictiongenerator.average.frequency.HistoricalAveragePredictionGeneratorImpl"
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
@@ -395,7 +395,11 @@
 		level="info" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>
-	<logger name="org.transitime.core.dataCache.HistoricalAverageCache"
+	<logger name="org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache"
+		level="debug" additivity="false">
+		<appender-ref ref="CACHE" />
+	</logger>
+	<logger name="org.transitime.core.dataCache.scheduled.ScheduledBasedHistoricalAverageCache"
 		level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>

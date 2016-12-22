@@ -1,4 +1,4 @@
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.scheduled;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -13,6 +13,10 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.dataCache.HistoricalAverage;
+import org.transitime.core.dataCache.StopPathCacheKey;
+import org.transitime.core.dataCache.TripDataHistoryCache;
+import org.transitime.core.dataCache.TripKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
@@ -20,11 +24,11 @@ import org.transitime.gtfs.DbConfig;
  * @author Sean Og Crudden
  * 
  */
-public class HistoricalAverageCache {
+public class ScheduleBasedHistoricalAverageCache {
 	final private static String cacheName = "HistoricalAverageCache";
-	private static HistoricalAverageCache singleton = new HistoricalAverageCache();
+	private static ScheduleBasedHistoricalAverageCache singleton = new ScheduleBasedHistoricalAverageCache();
 	private static final Logger logger = LoggerFactory
-			.getLogger(HistoricalAverageCache.class);
+			.getLogger(ScheduleBasedHistoricalAverageCache.class);
 
 	private Cache cache = null;
 	/**
@@ -32,11 +36,11 @@ public class HistoricalAverageCache {
 	 * 
 	 * @return
 	 */
-	public static HistoricalAverageCache getInstance() {
+	public static ScheduleBasedHistoricalAverageCache getInstance() {
 		return singleton;
 	}
 	
-	private HistoricalAverageCache() {
+	private ScheduleBasedHistoricalAverageCache() {
 		CacheManager cm = CacheManager.getInstance();
 		
 		if (cm.getCache(cacheName) == null) {
@@ -109,23 +113,19 @@ public class HistoricalAverageCache {
 		double pathDuration=getLastPathDuration(arrivalDeparture, trip);
 		
 		if(pathDuration>0)
-		{
-			
+		{			
 			if(!trip.isNoSchedule())
 			{
 				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true);
 				
-				HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+				HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 				
 				if(average==null)				
 					average=new HistoricalAverage();
 				
 				average.update(pathDuration);
 				
-				HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
-			}else
-			{
-				
+				ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}
 		}		
 		
@@ -134,14 +134,14 @@ public class HistoricalAverageCache {
 		{
 			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false);
 			
-			HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+			HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 			
 			if(average==null)				
 				average=new HistoricalAverage();
 			
 			average.update(stopDuration);
 		
-			HistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+			ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 		}
 	}
 	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)

@@ -12,13 +12,12 @@ import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.HistoricalAverage;
-import org.transitime.core.dataCache.HistoricalAverageCache;
-
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
+import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
@@ -35,7 +34,7 @@ import org.transitime.ipc.data.IpcVehicleComplete;
  *  
  *  Does this by changing which class each extends. How can we make configurable?
  *  
- *  This works for both schedules based and frequency based service out of the box. Not so for historical average or Kalman filter.
+ *  This works for both schedules based and frequency based services out of the box. Not so for historical average or Kalman filter.
  */
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
