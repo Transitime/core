@@ -13,9 +13,11 @@ import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringListConfigValue;
 import org.transitime.core.ArrivalDepartureGeneratorDefaultImpl;
+import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.Prediction;
@@ -43,25 +45,27 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
 	public HoldingTime generateHoldingTime(ArrivalDeparture event) {
-		
-		
+				
 		PredictionDataCache predictionCache = PredictionDataCache.getInstance();
 							
 		HashMap<String, List<IpcPrediction>> predictionsByVehicle = new HashMap<String, List<IpcPrediction>>();
 		
-		
 		if(event.isArrival() && isControlStop(event.getStopId(), event.getStopPathIndex()))
 		{
-			logger.debug("Calling Holding Generator for event : {}", event.toString());
+ 			logger.debug("Calling Holding Generator for event : {}", event.toString());
 															
 			List<IpcPredictionsForRouteStopDest> predictionsForRouteStopDests = predictionCache.getPredictions(event.getRouteId(), event.getStopId());
 			
+			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());
+			vehicleState.getTripStartTime(vehicleState.getTripCounter());
 			for(IpcPredictionsForRouteStopDest predictionForRouteStopDest: predictionsForRouteStopDests)
 			{						
 				for(IpcPrediction prediction:predictionForRouteStopDest.getPredictionsForRouteStop())
 				{
 					/* do not include prediction for current vehicle for current stop/trip. OK to include if on next trip around. */
-					if(!prediction.getVehicleId().equals(event.getVehicleId())|| !prediction.getTripId().equals(event.getTripId()))
+					/* TODO need to check if trip ids the same that the start time is different for frequency based trips. */
+					
+					if(!prediction.getVehicleId().equals(event.getVehicleId())|| !prediction.getTripId().equals(event.getTripId())||prediction.getFreqStartTime()!=vehicleState.getTripStartTime(vehicleState.getTripCounter()))
 					{														
 						if(predictionsByVehicle.containsKey(prediction.getVehicleId()))
 						{

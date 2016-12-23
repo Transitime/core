@@ -349,12 +349,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{
-			if(arrivalDeparture.getStopPathIndex()!=0)
-			{
+				// TODO Why was this here? if(arrivalDeparture.getStopPathIndex()!=0)			
 				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(arrivalDeparture);
 				if(holdingTime!=null)
 					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
-			}
+			
 		}
 				
 		/* add event to vehicle state. Will increment tripCounter if the last arrival in a trip */
