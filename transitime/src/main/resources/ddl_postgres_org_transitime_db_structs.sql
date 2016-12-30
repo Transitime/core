@@ -34,6 +34,7 @@
         blockId varchar(60),
         configRev int4,
         directionId varchar(60),
+        freqStartTime timestamp,
         routeId varchar(60),
         routeShortName varchar(60),
         scheduledTime timestamp,
