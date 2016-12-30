@@ -260,13 +260,13 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 */
 	protected Departure createDepartureTime(VehicleState vehicleState,
 			long departureTime, Block block, int tripIndex, int stopPathIndex) {		
-		// Store the departure in the database via the db logger
+		// Store the departure in the database via the db logger			
 		Departure departure = new Departure(vehicleState.getVehicleId(), 
 				new Date(departureTime),
 				vehicleState.getAvlReport().getDate(),
 				block,
 				tripIndex,
-				stopPathIndex);
+				stopPathIndex, new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter())));
 		logger.debug("Creating departure: {}", departure);
 		return departure;
 	}
@@ -290,7 +290,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				vehicleState.getAvlReport().getDate(),
 				block,
 				tripIndex,
-				stopPathIndex);
+				stopPathIndex, new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter())));
 		logger.debug("Creating arrival: {}", arrival);
 		
 		// Remember this arrival time so that can make sure that subsequent

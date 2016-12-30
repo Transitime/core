@@ -361,28 +361,37 @@ public class VehicleState {
 	}
 	public void putTripStartTime(Integer tripCounter, Long date)
 	{
-		/* only add time once as it is used as part of the GTFS trip descriptor for frequency based trips */
+		/* only add time once, as it is used as part of the GTFS trip descriptor for frequency based trips as is required to stay the same. */
 		if(this.tripStartTimesMap.get(tripCounter)==null && date > 0)
+		{
+			logger.debug("Setting start time for vehicle {} for trip counter {} to {}." , this.getVehicleId(), tripCounter, new Date(date));
 			this.tripStartTimesMap.put(tripCounter, date);
+		}
 	}
 	public Long getTripStartTime(Integer tripCounter)
 	{		
 		return this.tripStartTimesMap.get(tripCounter);			
 	}
 	/**
-	 * Add the event is it is the arrival at the end of the last trip. This will be used as the start time for the next frequency based trip.
+	 * Add the event if it is the arrival at the end of the last trip. This will be used as the start time for the next frequency based trip.
 	 * @param event
 	 */
 	public void setStartTripEvent(ArrivalDeparture event)
 	{				
-		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());
-		
-		Indices indices=new Indices(vehicleState.getMatch());
-		
-		if(indices.atEndOfTrip())
-		{
-			vehicleState.incrementTripCounter();		
-			arrivalTripEndHistory.add(event);
+		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());																	
+						
+		if(event.getStopPathIndex()==0)
+		{															
+			if(event.isArrival())
+			{
+				logger.debug("Setting vehicle counter to : {} because of event : {}",vehicleState.getTripCounter()+1, event);
+				vehicleState.incrementTripCounter();
+				
+				arrivalTripEndHistory.add(event);					
+			}else
+			{
+				logger.debug("Not arrival so not incrementing trip counter : {}", event);
+			}
 		}		
 		while(arrivalTripEndHistory.size() > CoreConfig.getEventHistoryMaxSize())
 		{
@@ -497,7 +506,7 @@ public class VehicleState {
 	 */
 	public ArrivalDeparture getTripStartEvent() {
 		try {
-			return this.arrivalTripEndHistory.getFirst();
+			return this.arrivalTripEndHistory.getLast();
 		} catch (NoSuchElementException e) {
 			return null;
 		}

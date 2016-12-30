@@ -168,6 +168,19 @@
 		</encoder>
 	</appender>
 
+<!-- Separate file for ArrivalDeparture logging -->
+	<appender name="FREQUENCY"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE_ROOT}/frequency.log.gz
+			</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>${DATA_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
 	<!-- Separate file for ArrivalDeparture logging -->
 	<appender name="ARRIVAL_DEPARTURE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -350,6 +363,13 @@
 
 	<!-- Taken out (by setting level to warn instead of info) for now because 
 		so verbose -->
+		
+	<logger
+		name="org.transitime.core.VehicleState"
+		level="debug" additivity="false">
+		<appender-ref ref="FREQUENCY" />
+	</logger>	
+		
 	<logger name="org.transitime.core.PredictionGeneratorDefaultImpl"
 		level="warn" additivity="false">
 		<appender-ref ref="PREDICTION" />

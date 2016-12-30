@@ -158,6 +158,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	@Column 
 	private final int tripIndex;
 	
+	/* this is required for frequenecy based services */
+	@Column
+	@Temporal(TemporalType.TIMESTAMP)
+	private final Date freqStartTime;
+	
 	// The index of which stop path this is within the trip.
 	// Different from the GTFS gtfsStopSeq. The stopPathIndex starts
 	// at 0 and increments by one for every stop. The GTFS gtfsStopSeq
@@ -204,7 +209,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param isArrival
 	 */
 	protected ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block, 
-			int tripIndex, int stopPathIndex, boolean isArrival) {
+			int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime) {
 		this.vehicleId = vehicleId;
 		this.time = time;
 		this.avlTime = avlTime;
@@ -213,6 +218,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.stopPathIndex = stopPathIndex;
 		this.isArrival = isArrival;
 		this.configRev = configRev; 
+		this.freqStartTime = freqStartTime;
 		
 		// Some useful convenience variables
 		if(block!=null)
@@ -267,10 +273,13 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		}
 	}
 	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block, 
-			int tripIndex, int stopPathIndex, boolean isArrival) {
+			int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime) {
 		
 		this(Core.getInstance().getDbConfig().getConfigRev(),vehicleId, time, avlTime, block, 
-				tripIndex, stopPathIndex, isArrival);
+				tripIndex, stopPathIndex, isArrival, freqStartTime);
+	}
+	public Date getFreqStartTime() {
+		return freqStartTime;
 	}
 	/**
 	 * Hibernate requires a no-arg constructor for reading objects
@@ -295,6 +304,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.routeId = null;
 		this.routeShortName = null;
 		this.serviceId = null;
+		this.freqStartTime = null;
 	}
 
 	/**

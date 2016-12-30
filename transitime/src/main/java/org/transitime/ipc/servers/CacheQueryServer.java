@@ -24,6 +24,7 @@ import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
+import org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -187,7 +188,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	}
 
 	@Override
-	public List<IpcHistoricalAverageCacheKey> getHistoricalAverageCacheKeys() throws RemoteException {
+	public List<IpcHistoricalAverageCacheKey> getScheduledBasedHistoricalAverageCacheKeys() throws RemoteException {
 		
 		List<StopPathCacheKey> keys = ScheduleBasedHistoricalAverageCache.getInstance().getKeys();
 		List<IpcHistoricalAverageCacheKey> ipcResultList = new ArrayList<IpcHistoricalAverageCacheKey>();
@@ -228,5 +229,12 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			ipcResultList.add(new IpcHoldingTimeCacheKey(key));
 		}
 		return ipcResultList;		
+	}
+
+	@Override
+	public List<IpcHistoricalAverageCacheKey> getFrequencyBasedHistoricalAverageCacheKeys() throws RemoteException {
+		// TODO Auto-generated method stub
+		FrequencyBasedHistoricalAverageCache.getInstance();
+		return null;
 	}
 }

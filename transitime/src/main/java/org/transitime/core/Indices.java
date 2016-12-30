@@ -19,6 +19,7 @@ package org.transitime.core;
 import java.io.Serializable;
 
 import org.transitime.applications.Core;
+import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Block;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Route;
@@ -90,6 +91,14 @@ public class Indices implements Serializable {
 	}
 
 	
+
+	public Indices(ArrivalDeparture event) {
+		
+		this.block=event.getBlock();
+		this.tripIndex = event.getTripIndex();
+		this.stopPathIndex = event.getStopPathIndex();
+				
+	}
 
 	/**
 	 * Creates a copy of the Indices parameter. Useful if need to increment() or

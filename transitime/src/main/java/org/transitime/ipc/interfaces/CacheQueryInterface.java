@@ -82,10 +82,17 @@ public interface CacheQueryInterface extends Remote {
 	
 	
 	/**
-	 * @return a list of the keys that have values in the historical average cache
+	 * @return a list of the keys that have values in the historical average cache for schedules based services
 	 * @throws RemoteException
 	 */
-	public List<IpcHistoricalAverageCacheKey> getHistoricalAverageCacheKeys()
+	public List<IpcHistoricalAverageCacheKey> getScheduledBasedHistoricalAverageCacheKeys()
+		throws RemoteException;
+	
+	/**
+	 * @return a list of the keys that have values in the historical average cache for frequency based services.
+	 * @throws RemoteException
+	 */
+	public List<IpcHistoricalAverageCacheKey> getFrequencyBasedHistoricalAverageCacheKeys()
 		throws RemoteException;
 	
 	/**

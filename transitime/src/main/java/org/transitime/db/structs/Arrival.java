@@ -47,15 +47,15 @@ public class Arrival extends ArrivalDeparture {
 	 * @param stopPathIndex
 	 */
 	public Arrival(String vehicleId, Date time, Date avlTime, Block block,
-			int tripIndex, int pathIndex) {
+			int tripIndex, int pathIndex, Date freqStartTime) {
 		super(vehicleId, time, avlTime, block, tripIndex, pathIndex, 
-				true); // isArrival
+				true, freqStartTime); // isArrival
 	}
 	
 	public Arrival(int configRev, String vehicleId, Date time, Date avlTime, Block block,
-			int tripIndex, int pathIndex) {
+			int tripIndex, int pathIndex, Date freqStartTime) {
 		super(configRev, vehicleId, time, avlTime, block, tripIndex, pathIndex, 
-				true); // isArrival
+				true, freqStartTime); // isArrival
 	}
 	/**
 	 * Hibernate always wants a no-arg constructor. Made private since 
@@ -76,7 +76,7 @@ public class Arrival extends ArrivalDeparture {
 	 */
 	public Arrival withUpdatedTime(Date newTime) {
 		return new Arrival(getVehicleId(), newTime, getAvlTime(), getBlock(),
-				getTripIndex(), getStopPathIndex());
+				getTripIndex(), getStopPathIndex(), this.getFreqStartTime());
 	}
 	
 }

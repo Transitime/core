@@ -402,7 +402,10 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			logger.debug("For vehicleId={} generated prediction {}",
 					vehicleState.getVehicleId(), predictionForStop);
 			
-			if(indices.atEndOfTrip()){								
+			if(indices.atEndOfTrip()){		
+				// This is incremented each time the prediction starts a new trip. 
+				// The first prediction for the start of a new trip is used as the 
+				// start time for a frequency based service 
 				tripCounter++;
 				vehicleState.putTripStartTime(tripCounter, predictionForStop.getPredictionTime());								
 			}

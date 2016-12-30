@@ -127,8 +127,12 @@ public class IpcVehicle implements Serializable {
 			this.nextStopName = match.getStopPath().getStopName();
 			
 			this.vehicleType = match.getRoute().getType();
-			if(vs.getTripStartEvent()!=null)
-				this.freqStartTime = vs.getTripStartEvent().getTime();
+	
+			if(vs.getTripCounter()!=null && vs.getTripStartTime(vs.getTripCounter())!=null)
+			{
+				this.freqStartTime = vs.getTripStartTime(vs.getTripCounter());
+			}
+			
 		} else {
 			// Vehicle not assigned to trip so null out parameters
 			this.blockId = null;

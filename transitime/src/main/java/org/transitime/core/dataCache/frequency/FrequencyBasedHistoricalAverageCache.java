@@ -43,7 +43,7 @@ public class FrequencyBasedHistoricalAverageCache {
 			new IntegerConfigValue(	
 					"transitime.core.frequency.cacheIncrementsForFrequencyService",
 					30,
-					"This is the intervals size of the day that the avaerge is applied to. ");
+					"This is the intervals size of the day that the average is applied to. ");
 	
 	private HashMap<StopPathKey, TreeMap<Long, HistoricalAverage>> m = new HashMap<StopPathKey,TreeMap<Long, HistoricalAverage>>();
 		
@@ -61,6 +61,7 @@ public class FrequencyBasedHistoricalAverageCache {
 			
 	synchronized public HistoricalAverage getAverage(StopPathCacheKey key) {
 		
+		logger.debug("Looking for average for : {} in FrequencyBasedHistoricalAverageCache cache.", key);
 		TreeMap<Long, HistoricalAverage> result = m.get(new StopPathKey(key));
 		if(result!=null)
 		{
@@ -70,23 +71,25 @@ public class FrequencyBasedHistoricalAverageCache {
 				
 				if(subresult.size()==1)
 				{
-					return subresult.get(subresult.lastKey());
+					logger.debug("Found average for : {} in FrequencyBasedHistoricalAverageCache cache with a value : {}", subresult.get(subresult.lastKey()));
+					return subresult.get(subresult.lastKey());					
 				}
 			}
 		}
+		logger.debug("No average found in FrequencyBasedHistoricalAverageCache cache for : {}",key);
 		return null;
 	}
 	synchronized private void putAverage(StopPathCacheKey key, HistoricalAverage average) {
 			
 		
 		TreeMap<Long, HistoricalAverage> result = m.get(new StopPathKey(key));
-		
-		logger.debug("Putting: "+new StopPathKey(key).toString()+" in FrequencyBasedHistoricalAverageCache with values : "+average);
-		
+						
 		if(result==null)
 		{			
 			m.put(new StopPathKey(key), new TreeMap<Long, HistoricalAverage> ());			
 		}
+		
+		logger.debug("Putting: {} for start time: {} in FrequencyBasedHistoricalAverageCache with value : {}",new StopPathKey(key), new Date(key.getStartTime()), average);
 		m.get(new StopPathKey(key)).put(key.getStartTime(), average);													
 	}
 	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) 
@@ -96,50 +99,44 @@ public class FrequencyBasedHistoricalAverageCache {
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 				
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
+										
+		Integer time=secondsFromMidnight(arrivalDeparture.getFreqStartTime());
+		
+		/* this is what puts the trip into the buckets (time slots) */
+		time=round(time, getCacheIncrementsForFrequencyService());
 						
-		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(arrivalDeparture.getVehicleId());
+		double pathDuration=getLastPathDuration(arrivalDeparture, trip);
 						
-		if(vehicleState!=null && vehicleState.getTripStartEvent()!=null)
-		{
-			Integer time=secondsFromMidnight(vehicleState.getTripStartEvent().getDate());
-			
-			/* this is what puts the trip into the buckets (time slots) */
-			time=round(time, getCacheIncrementsForFrequencyService());
-							
-			double pathDuration=getLastPathDuration(arrivalDeparture, trip);
-							
-			if(pathDuration>0)
-			{		
-				if(trip.isNoSchedule())
-				{							
-					StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true,new Long(time));
-					
-					HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
-					
-					if(average==null)				
-						average=new HistoricalAverage();
-					
-					average.update(pathDuration);
-					
-					FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
-				}
-			}		
-			
-			double stopDuration=getLastStopDuration(arrivalDeparture, trip);
-			if(stopDuration>0)
-			{
-				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false, new Long(time));
+		if(pathDuration>0)
+		{		
+			if(trip.isNoSchedule())
+			{							
+				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true,new Long(time));
 				
 				HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 				
 				if(average==null)				
 					average=new HistoricalAverage();
 				
-				average.update(stopDuration);
-			
+				average.update(pathDuration);
+				
 				FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}
-		}
+		}				
+		double stopDuration=getLastStopDuration(arrivalDeparture, trip);
+		if(stopDuration>0)
+		{
+			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false, new Long(time));
+			
+			HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+			
+			if(average==null)				
+				average=new HistoricalAverage();
+			
+			average.update(stopDuration);
+		
+			FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+		}		
 	}
 	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
