@@ -260,13 +260,20 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 */
 	protected Departure createDepartureTime(VehicleState vehicleState,
 			long departureTime, Block block, int tripIndex, int stopPathIndex) {		
-		// Store the departure in the database via the db logger			
+		// Store the departure in the database via the db logger
+		
+		Date freqStartDate=null;
+		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
+		{
+			freqStartDate = new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter()));
+		}	
+		
 		Departure departure = new Departure(vehicleState.getVehicleId(), 
 				new Date(departureTime),
 				vehicleState.getAvlReport().getDate(),
 				block,
 				tripIndex,
-				stopPathIndex, new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter())));
+				stopPathIndex, freqStartDate);
 		logger.debug("Creating departure: {}", departure);
 		return departure;
 	}
@@ -285,12 +292,19 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	protected Arrival createArrivalTime(VehicleState vehicleState,
 			long arrivalTime, Block block, int tripIndex, int stopPathIndex) {
 		// Store the arrival in the database via the db logger
+		
+		Date freqStartDate=null;
+		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
+		{
+			freqStartDate = new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter()));
+		}		
+				
 		Arrival arrival = new Arrival(vehicleState.getVehicleId(), 
 				new Date(arrivalTime),
 				vehicleState.getAvlReport().getDate(),
 				block,
 				tripIndex,
-				stopPathIndex, new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter())));
+				stopPathIndex, freqStartDate);
 		logger.debug("Creating arrival: {}", arrival);
 		
 		// Remember this arrival time so that can make sure that subsequent
@@ -359,7 +373,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		/* add event to vehicle state. Will increment tripCounter if the last arrival in a trip */
 		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(arrivalDeparture.getVehicleId());
 		
-		vehicleState.setStartTripEvent(arrivalDeparture);
+		vehicleState.incrementTripCounter(arrivalDeparture);
 						
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);
@@ -1183,7 +1197,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// Determine arrival/departure info for in between stops. This needs to
 		// be called after handleVehicleArrivingAtStop() because need endTime
 		// from that method.
-		handleIntermediateStops(vehicleState, beginTime, endTime);
+		//handleIntermediateStops(vehicleState, beginTime, endTime);
 	}
 	
 }

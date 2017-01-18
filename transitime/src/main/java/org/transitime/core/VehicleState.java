@@ -67,12 +67,6 @@ public class VehicleState {
 	private List<IpcPrediction> predictions;
 	private TemporalDifference realTimeSchedAdh;
 	
-	private LinkedList<ArrivalDeparture> arrivalTripEndHistory =
-			new LinkedList<ArrivalDeparture>();
-	
-	private LinkedList<IpcPrediction> predictionTripEndHistory =
-			new LinkedList<IpcPrediction>();
-	
 	// create a hashamp to store the trip start times.  TODO change to LinkedList doesn't gro
 	HashMap <Integer, Long> tripStartTimesMap=new HashMap <Integer, Long>();
 	
@@ -346,19 +340,7 @@ public class VehicleState {
 			avlReportHistory.removeLast();
 		}
 	}
-	public void setStartTripPrediction(IpcPrediction prediction)
-	{
-		if(prediction.isAtEndOfTrip())
-		{
-			predictionTripEndHistory.add(prediction);
-			
-		}
-	}
-	public IpcPrediction getStartTripPrediction()
-	{
-		return predictionTripEndHistory.getLast();
-		
-	}
+	
 	public void putTripStartTime(Integer tripCounter, Long date)
 	{
 		/* only add time once, as it is used as part of the GTFS trip descriptor for frequency based trips as is required to stay the same. */
@@ -373,30 +355,24 @@ public class VehicleState {
 		return this.tripStartTimesMap.get(tripCounter);			
 	}
 	/**
-	 * Add the event if it is the arrival at the end of the last trip. This will be used as the start time for the next frequency based trip.
+	 * Increment trip counter is event it is arrival first stop on trip. Used for frequency based services.
 	 * @param event
 	 */
-	public void setStartTripEvent(ArrivalDeparture event)
+	public void incrementTripCounter(ArrivalDeparture event)
 	{				
 		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());																	
 						
 		if(event.getStopPathIndex()==0)
-		{															
+		{									
 			if(event.isArrival())
 			{
-				logger.debug("Setting vehicle counter to : {} because of event : {}",vehicleState.getTripCounter()+1, event);
 				vehicleState.incrementTripCounter();
-				
-				arrivalTripEndHistory.add(event);					
+				logger.debug("Setting vehicle counter to : {} because of event : {}",vehicleState.getTripCounter(), event);																
 			}else
 			{
 				logger.debug("Not arrival so not incrementing trip counter : {}", event);
 			}
-		}		
-		while(arrivalTripEndHistory.size() > CoreConfig.getEventHistoryMaxSize())
-		{
-			arrivalTripEndHistory.removeLast();
-		}
+		}				
 	}
 	/**
 	 * Returns the current Trip for the vehicle. Returns null if there is not
@@ -501,16 +477,7 @@ public class VehicleState {
 			return null;
 		}
 	}
-	/**
-	 * Return the last event. Return null is there isn't one.
-	 */
-	public ArrivalDeparture getTripStartEvent() {
-		try {
-			return this.arrivalTripEndHistory.getLast();
-		} catch (NoSuchElementException e) {
-			return null;
-		}
-	}
+	
 	
 	
 	/**

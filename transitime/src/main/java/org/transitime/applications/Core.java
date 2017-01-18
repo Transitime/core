@@ -42,6 +42,8 @@ import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
+import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.db.hibernate.DataDbLogger;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
@@ -441,6 +443,26 @@ public class Core {
 				
 				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
 				StopArrivalDepartureCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+				
+				endDate=startDate;
+			}
+			endDate=Calendar.getInstance().getTime();
+			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+			{
+				Date startDate=DateUtils.addDays(endDate, -1);
+				
+				logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+				
+				endDate=startDate;
+			}
+			endDate=Calendar.getInstance().getTime();
+			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+			{
+				Date startDate=DateUtils.addDays(endDate, -1);
+				
+				logger.debug("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+				ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
 				
 				endDate=startDate;
 			}

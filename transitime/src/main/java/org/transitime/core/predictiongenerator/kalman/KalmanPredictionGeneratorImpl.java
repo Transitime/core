@@ -70,7 +70,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	 * (org.transitime.core.Indices, org.transitime.db.structs.AvlReport)
 	 */
 	@Override
-	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 
 		logger.debug("Calling Kalman prediction algorithm for : "+indices.toString());
 		
@@ -158,7 +158,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 					kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
 
 					logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+alternative+" prediction: "
-							+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
+							+ super.getTravelTimeForPath(indices, avlReport, vehicleState) +" for : " + indices.toString());
 					
 					if(storeTravelTimeStopPathPredictions.getValue())
 					{
@@ -173,7 +173,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 				}
 			}
 		}	
-		return super.getTravelTimeForPath(indices, avlReport);
+		return super.getTravelTimeForPath(indices, avlReport, vehicleState);
 	}
 
 	private Double lastVehiclePredictionError(KalmanErrorCache cache, Indices indices) {		
@@ -191,8 +191,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	}
 
 	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		// TODO Auto-generated method stub
-		return super.getStopTimeForPath(indices, avlReport);
+		return super.getStopTimeForPath(indices, avlReport, vehicleState);
 	}
 }

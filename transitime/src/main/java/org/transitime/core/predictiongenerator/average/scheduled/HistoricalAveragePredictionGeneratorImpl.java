@@ -8,6 +8,7 @@ import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
+import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.core.dataCache.StopPathPredictionCache;
@@ -42,7 +43,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	 * @see org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl#getTravelTimeForPath(org.transitime.core.Indices, org.transitime.db.structs.AvlReport)
 	 */
 	@Override
-	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 
 		logger.debug("Calling historical average algorithm : "+indices.toString());				
 		/*
@@ -64,18 +65,18 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 			}
 			
 			logger.debug("Using historical average algorithm for prediction : " +average.toString() + " instead of "+alternative+" prediction: "
-					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());
+					+ super.getTravelTimeForPath(indices, avlReport,vehicleState) +" for : " + indices.toString());
 			//logger.debug("Instead of transitime value : " + super.getTravelTimeForPath(indices, avlReport));
 			return (long)average.getAverage();
 		}
 		
 		//logger.debug("No historical average found, generating prediction using lastvehicle algorithm: " + historicalAverageCacheKey.toString());
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
-		return super.getTravelTimeForPath(indices, avlReport);
+		return super.getTravelTimeForPath(indices, avlReport, vehicleState);
 	}	
 
 	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		
 		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),false);
 		
@@ -84,10 +85,10 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
 			logger.debug("Using historical average alogrithm for dwell time prediction : "+average.toString() + " instead of "+alternative+" prediction: "
-					+ super.getStopTimeForPath(indices, avlReport) +" for : " + indices.toString());
+					+ super.getStopTimeForPath(indices, avlReport, vehicleState) +" for : " + indices.toString());
 			return (long)average.getAverage();
 		}
 					
-		return super.getStopTimeForPath(indices, avlReport);
+		return super.getStopTimeForPath(indices, avlReport, vehicleState);
 	}
 }

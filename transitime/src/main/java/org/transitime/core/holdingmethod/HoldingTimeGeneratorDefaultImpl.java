@@ -56,16 +56,20 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 															
 			List<IpcPredictionsForRouteStopDest> predictionsForRouteStopDests = predictionCache.getPredictions(event.getRouteId(), event.getStopId());
 			
-			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());
-			vehicleState.getTripStartTime(vehicleState.getTripCounter());
+			
 			for(IpcPredictionsForRouteStopDest predictionForRouteStopDest: predictionsForRouteStopDests)
 			{						
 				for(IpcPrediction prediction:predictionForRouteStopDest.getPredictionsForRouteStop())
 				{
 					/* do not include prediction for current vehicle for current stop/trip. OK to include if on next trip around. */
 					/* TODO need to check if trip ids the same that the start time is different for frequency based trips. */
+					Date eventFreqStartTime=event.getFreqStartTime();
 					
-					if(!prediction.getVehicleId().equals(event.getVehicleId())|| !prediction.getTripId().equals(event.getTripId())||prediction.getFreqStartTime()!=vehicleState.getTripStartTime(vehicleState.getTripCounter()))
+					Date predictionFreqStartTime=new Date(prediction.getFreqStartTime());
+					
+					if(!prediction.getVehicleId().equals(event.getVehicleId())
+							|| !prediction.getTripId().equals(event.getTripId())
+							|| ( eventFreqStartTime!=null && predictionFreqStartTime!=null && eventFreqStartTime!=predictionFreqStartTime))
 					{														
 						if(predictionsByVehicle.containsKey(prediction.getVehicleId()))
 						{

@@ -469,6 +469,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				+ ", stop=" + stopId 
 				+ ", gtfsStopSeq=" + gtfsStopSeq
 				+ ", stopIdx=" + stopPathIndex 
+				+ ", freqStartTime=" + freqStartTime
 				+ ", avlTime=" + Time.timeStrMsec(avlTime)
 				+ ", trip=" + tripId 
 				+ ", tripIdx=" + tripIndex 

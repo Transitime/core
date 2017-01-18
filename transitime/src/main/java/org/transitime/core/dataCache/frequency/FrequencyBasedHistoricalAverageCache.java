@@ -13,6 +13,9 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
@@ -58,7 +61,10 @@ public class FrequencyBasedHistoricalAverageCache {
 	
 	private FrequencyBasedHistoricalAverageCache() {													
 	}
-			
+	public String toString()
+	{
+		return m.toString();
+	}
 	synchronized public HistoricalAverage getAverage(StopPathCacheKey key) {
 		
 		logger.debug("Looking for average for : {} in FrequencyBasedHistoricalAverageCache cache.", key);
@@ -93,50 +99,84 @@ public class FrequencyBasedHistoricalAverageCache {
 		m.get(new StopPathKey(key)).put(key.getStartTime(), average);													
 	}
 	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) 
-	{
-		logger.debug("Putting :"+arrivalDeparture.toString() + " in FrequencyBasedHistoricalAverageCache cache.");
-						
+	{		
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 				
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
-										
-		Integer time=secondsFromMidnight(arrivalDeparture.getFreqStartTime());
 		
-		/* this is what puts the trip into the buckets (time slots) */
-		time=round(time, getCacheIncrementsForFrequencyService());
+		if(arrivalDeparture.getFreqStartTime()!=null && trip.isNoSchedule())		
+		{			
+			logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache.", arrivalDeparture);
 						
-		double pathDuration=getLastPathDuration(arrivalDeparture, trip);
-						
-		if(pathDuration>0)
-		{		
-			if(trip.isNoSchedule())
-			{							
-				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true,new Long(time));
+			Integer time=secondsFromMidnight(arrivalDeparture.getFreqStartTime());
+			
+			/* this is what puts the trip into the buckets (time slots) */
+			time=round(time, getCacheIncrementsForFrequencyService());
+							
+			double pathDuration=getLastPathDuration(arrivalDeparture, trip);
+							
+			if(pathDuration>0)
+			{		
+				if(trip.isNoSchedule())
+				{							
+					StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true,new Long(time));
+					
+					HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+					
+					if(average==null)				
+						average=new HistoricalAverage();
+					
+					average.update(pathDuration);
+					
+					FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+				}
+			}				
+			double stopDuration=getLastStopDuration(arrivalDeparture, trip);
+			if(stopDuration>0)
+			{
+				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false, new Long(time));
 				
 				HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 				
 				if(average==null)				
 					average=new HistoricalAverage();
 				
-				average.update(pathDuration);
-				
+				average.update(stopDuration);
+			
 				FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
-			}
-		}				
-		double stopDuration=getLastStopDuration(arrivalDeparture, trip);
-		if(stopDuration>0)
+			}	
+		}else
 		{
-			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false, new Long(time));
-			
-			HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
-			
-			if(average==null)				
-				average=new HistoricalAverage();
-			
-			average.update(stopDuration);
-		
-			FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+			logger.debug("Cannot add to FrequencyBasedHistoricalAverageCache as no start time set : {}", arrivalDeparture);
+		}
+	}
+	public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	{													
+		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		{
+			if(current.getFreqStartTime()!=null && tocheck.getFreqStartTime()!=null && current.getFreqStartTime().equals(tocheck.getFreqStartTime()))
+			{
+				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
+				{
+					return tocheck;
+				}
+			}
 		}		
+		return null;		
+	}
+	public ArrivalDeparture findPreviousArrivalEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	{
+		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		{
+			if(current.getFreqStartTime()!=null && tocheck.getFreqStartTime()!=null && current.getFreqStartTime().equals(tocheck.getFreqStartTime()))
+			{
+				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isDeparture() && tocheck.isArrival()))
+				{
+					return tocheck;
+				}
+			}
+		}
+		return null;
 	}
 	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
@@ -149,7 +189,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isArrival())
 		{			
-			ArrivalDeparture previousEvent = TripDataHistoryCache.findPreviousDepartureEvent(arrivalDepartures, arrivalDeparture);
+			ArrivalDeparture previousEvent = findPreviousDepartureEvent(arrivalDepartures, arrivalDeparture);
 			
 			if(previousEvent!=null && arrivalDeparture!=null && previousEvent.isDeparture())
 					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
@@ -168,14 +208,25 @@ public class FrequencyBasedHistoricalAverageCache {
 		
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isDeparture())
 		{			
-			ArrivalDeparture previousEvent = TripDataHistoryCache.findPreviousArrivalEvent(arrivalDepartures, arrivalDeparture);
+			ArrivalDeparture previousEvent = findPreviousArrivalEvent(arrivalDepartures, arrivalDeparture);
 			
 			if(previousEvent!=null && arrivalDeparture!=null && previousEvent.isArrival())
 					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
 		}
 		return -1;
 	}
-
+	public void populateCacheFromDb(Session session, Date startDate, Date endDate) 
+	{
+		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
+		
+		@SuppressWarnings("unchecked")
+		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
+		Collections.sort(results, new ArrivalDepartureComparator());
+		for(ArrivalDeparture result : results)
+		{
+			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);			
+		}		
+	}
 	private int round(double i, int v){
 	    return (int) (Math.round(i/v) * v);
 	}
@@ -193,36 +244,24 @@ public class FrequencyBasedHistoricalAverageCache {
 		
 		return (int)secondsPassed;
 	}
+	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
+		return iterable == null ? Collections.<T> emptyList() : iterable;
+	}
 	private class StopPathKey
 	{
-		@Override
-		public String toString() {
-			return "StopPathKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + "]";
-		}
-
-		String tripId;
-		Integer stopPathIndex;
 		
-		
-		public StopPathKey(StopPathCacheKey stopPathCacheKey)
-		{
-			this.tripId= stopPathCacheKey.getTripId();
-			this.stopPathIndex = stopPathCacheKey.getStopPathIndex();
-		}
-
-		private FrequencyBasedHistoricalAverageCache getOuterType() {
-			return FrequencyBasedHistoricalAverageCache.this;
-		}
-
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + getOuterType().hashCode();
 			result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
+			result = prime * result + (travelTime ? 1231 : 1237);
 			result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 			return result;
 		}
+
+
 
 		@Override
 		public boolean equals(Object obj) {
@@ -240,6 +279,8 @@ public class FrequencyBasedHistoricalAverageCache {
 					return false;
 			} else if (!stopPathIndex.equals(other.stopPathIndex))
 				return false;
+			if (travelTime != other.travelTime)
+				return false;
 			if (tripId == null) {
 				if (other.tripId != null)
 					return false;
@@ -247,6 +288,35 @@ public class FrequencyBasedHistoricalAverageCache {
 				return false;
 			return true;
 		}
+
+
+
+		@Override
+		public String toString() {
+			return "StopPathKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + ", travelTime=" + travelTime
+					+ "]";
+		}
+
+		String tripId;
+		Integer stopPathIndex;
+		
+		private boolean travelTime=true;
+		
+		public boolean isTravelTime() {
+			return travelTime;
+		}
+				
+		public StopPathKey(StopPathCacheKey stopPathCacheKey)
+		{
+			this.tripId= stopPathCacheKey.getTripId();
+			this.stopPathIndex = stopPathCacheKey.getStopPathIndex();
+			this.travelTime = stopPathCacheKey.isTravelTime();
+		}
+
+		private FrequencyBasedHistoricalAverageCache getOuterType() {
+			return FrequencyBasedHistoricalAverageCache.this;
+		}
+
 		
 	}
 }

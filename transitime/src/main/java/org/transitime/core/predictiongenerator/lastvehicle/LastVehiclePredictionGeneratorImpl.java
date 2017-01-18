@@ -47,7 +47,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 	 * @see org.transitime.core.predictiongenerator.KalmanPredictionGeneratorImpl#getTravelTimeForPath(org.transitime.core.Indices, org.transitime.db.structs.AvlReport)
 	 */
 	@Override
-	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 
 		logger.debug("Calling last vehicle algorithm : "+indices.toString());
 		
@@ -72,7 +72,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
 		{			
 			logger.debug("Using last vehicle algorithm for prediction : " + time + " instead of "+alternative+" prediction: "
-					+ super.getTravelTimeForPath(indices, avlReport) +" for : " + indices.toString());					
+					+ super.getTravelTimeForPath(indices, avlReport, currentVehicleState) +" for : " + indices.toString());					
 			
 			if(storeTravelTimeStopPathPredictions.getValue())
 			{
@@ -87,12 +87,12 @@ public class LastVehiclePredictionGeneratorImpl extends
 				
 		//logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
-		return super.getTravelTimeForPath(indices, avlReport);
+		return super.getTravelTimeForPath(indices, avlReport, currentVehicleState);
 	}
 	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		// Looking at last vehicle value would be a bad idea for dwell time, so no implementation here.
 		
-		return super.getStopTimeForPath(indices, avlReport);
+		return super.getStopTimeForPath(indices, avlReport, vehicleState);
 	}
 }

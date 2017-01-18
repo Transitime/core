@@ -34,6 +34,7 @@ import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcPrediction;
@@ -57,7 +58,7 @@ public abstract class PredictionGenerator {
 	 *            are to be based on.
 	 */
 	public abstract List<IpcPrediction> generate(VehicleState vehicleState);
-
+		
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
 			"transitime.prediction.closestvehiclestopsahead", new Integer(2),
 			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
@@ -279,5 +280,5 @@ public abstract class PredictionGenerator {
 	protected static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
-
+	
 }

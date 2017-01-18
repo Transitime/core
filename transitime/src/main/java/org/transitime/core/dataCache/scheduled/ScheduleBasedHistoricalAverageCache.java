@@ -10,13 +10,18 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.dataCache.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.StopPathCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
+import org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
@@ -103,45 +108,48 @@ public class ScheduleBasedHistoricalAverageCache {
 		// logCache(logger);
 	}
 	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) 
-	{
-		logger.debug("Putting :"+arrivalDeparture.toString() + " in HistoricalAverageCache cache.");
-						
+	{										
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 		
-		double pathDuration=getLastPathDuration(arrivalDeparture, trip);
-		
-		if(pathDuration>0)
-		{			
-			if(!trip.isNoSchedule())
+		if(!trip.isNoSchedule())
+		{					
+			logger.debug("Putting :"+arrivalDeparture.toString() + " in HistoricalAverageCache cache.");
+			
+			double pathDuration=getLastPathDuration(arrivalDeparture, trip);
+			
+			if(pathDuration>0)
+			{			
+				if(!trip.isNoSchedule())
+				{
+					StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true);
+					
+					HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+					
+					if(average==null)				
+						average=new HistoricalAverage();
+					
+					average.update(pathDuration);
+					
+					ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+				}
+			}		
+			
+			double stopDuration=getLastStopDuration(arrivalDeparture, trip);
+			if(stopDuration>0)
 			{
-				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true);
+				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false);
 				
 				HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 				
 				if(average==null)				
 					average=new HistoricalAverage();
 				
-				average.update(pathDuration);
-				
+				average.update(stopDuration);
+			
 				ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}
-		}		
-		
-		double stopDuration=getLastStopDuration(arrivalDeparture, trip);
-		if(stopDuration>0)
-		{
-			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false);
-			
-			HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
-			
-			if(average==null)				
-				average=new HistoricalAverage();
-			
-			average.update(stopDuration);
-		
-			ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 		}
 	}
 	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
@@ -163,6 +171,7 @@ public class ScheduleBasedHistoricalAverageCache {
 					
 		return -1;
 	}
+	
 	private double getLastStopDuration(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
@@ -180,5 +189,19 @@ public class ScheduleBasedHistoricalAverageCache {
 					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
 		}
 		return -1;
+	}
+	public void populateCacheFromDb(Session session, Date startDate, Date endDate) 
+	{
+		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
+		
+		@SuppressWarnings("unchecked")
+		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
+		
+		Collections.sort(results, new ArrivalDepartureComparator());
+						
+		for(ArrivalDeparture result : results)
+		{
+			ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);			
+		}		
 	}
 }

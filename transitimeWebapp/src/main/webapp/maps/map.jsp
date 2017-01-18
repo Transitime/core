@@ -176,6 +176,7 @@ function predictionCallback(preds, status) {
 				
 				// Added any special indicators for if schedule based,
 				// delayed, or not yet departed from terminal
+				/*
 				if (pred.scheduleBased)
 					content += '<sup>sched</sup>';
 				else {
@@ -185,7 +186,7 @@ function predictionCallback(preds, status) {
 						if (pred.delayed) 
 							content += '<sup>delayed</sup>';
 				}
-				
+				*/
 				// If in verbose mode add vehicle info
 				if (verbose)
 					content += ' <span class="vehicle">(vehicle ' + pred.vehicle + ')</span>';
@@ -256,11 +257,12 @@ function routeConfigCallback(routesData, status) {
 			var stop = direction.stop[j];
 			var options = stop.minor ? minorStopOptions : stopOptions;
 			// Draw first non-minor stop differently to highlight it
+			/*
 			if (!stop.minor && firstNonMinorStop) {
 				options = firstStopOptions;
 				firstNonMinorStop = false;
 			}
-			
+			*/
 			// Keep track of non-minor stop locations so can fit map to show them all
 			if (!stop.minor)
 				locsToFit.push(L.latLng(stop.lat, stop.lon));

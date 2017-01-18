@@ -476,6 +476,11 @@
 	<logger name="net.sf.ehcache" level="debug" additivity="false">
 		<appender-ref ref="HOLDING" />
 	</logger>
+		
+	<logger name="org.transitime.core.ArrivalDepartureGeneratorDefaultImpl" 
+		level="debug" additivity="true"> 
+		<appender-ref ref="ARRIVAL_DEPARTURE" /> 
+	</logger>
 
 	<!-- In order to log the hibernate SQL queries need to set org.hibernate.SQL 
 		to debug. To show the values of the parameters need to set org.hibernate.type 
@@ -512,7 +517,7 @@
 		<appender-ref ref="CORE_DEBUG" /> </logger> -->
 
 	<!-- <logger name="org.transitime.core.ArrivalDepartureGeneratorDefaultImpl" 
-		level="debug" additivity="true"> <appender-ref ref="CORE_DEBUG" /> </logger> -->
+		level="debug" additivity="true"> <appender-ref ref="ARRIVAL_DEPARTURE" /> </logger> -->
 
 	<!-- Set default level of root logger to "info" instead of to the the default 
 		of "debug". This way the default is to only see important messages. Debug 

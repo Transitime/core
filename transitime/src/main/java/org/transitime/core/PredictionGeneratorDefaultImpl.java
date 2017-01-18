@@ -159,14 +159,14 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		Trip trip = indices.getTrip();
 		
 		long freqStartTime=-1;		
-		if(trip.isNoSchedule()) {							
-			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(avlReport.getVehicleId());					
+		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(avlReport.getVehicleId());		
+		if(trip.isNoSchedule()) {													
 			if(vehicleState.getTripStartTime(tripCounter)!=null)
 				freqStartTime=vehicleState.getTripStartTime(tripCounter).longValue();			
 		}
 		
 		int expectedStopTimeMsec = 
-				(int) getStopTimeForPath(indices, avlReport);
+				(int) getStopTimeForPath(indices, avlReport, vehicleState);
 			
 		// If should generate arrival time...
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
@@ -364,7 +364,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		long now = Core.getInstance().getSystemTime();
 		
 		
-		Integer tripCounter = vehicleState.getTripCounter();
+		Integer tripCounter = new Integer(vehicleState.getTripCounter());
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
 		while (schedBasedPreds
@@ -386,30 +386,11 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					indices, predictionTime,
 					useArrivalPreds, affectedByWaitStop, 
 					vehicleState.isDelayed(), lateSoMarkAsUncertain, tripCounter);
-			
-			try {
-				/*
-				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(predictionForStop);
-				
-				if(holdingTime!=null)
-					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
-					*/
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+						
 			
 			logger.debug("For vehicleId={} generated prediction {}",
 					vehicleState.getVehicleId(), predictionForStop);
-			
-			if(indices.atEndOfTrip()){		
-				// This is incremented each time the prediction starts a new trip. 
-				// The first prediction for the start of a new trip is used as the 
-				// start time for a frequency based service 
-				tripCounter++;
-				vehicleState.putTripStartTime(tripCounter, predictionForStop.getPredictionTime());								
-			}
-			
+
 			// If prediction ended up being too far in the future (which can 
 			// happen if it is a departure prediction where the time at the 
 			// stop is added to the arrival time) then don't add the prediction
@@ -424,6 +405,14 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			// first stop of the trip
 			boolean lastStopOfNonSchedBasedTrip = 
 					indices.getBlock().isNoSchedule() && indices.atEndOfTrip();
+			
+			// This is incremented each time the prediction starts a new trip. 
+			// The first prediction for the start of a new trip is used as the 
+			// start time for a frequency based service 
+			if(lastStopOfNonSchedBasedTrip) {						
+				tripCounter++;
+				vehicleState.putTripStartTime(tripCounter, predictionForStop.getPredictionTime());								
+			}
 					
 
 			// The prediction is not too far into the future. Add it to the 
@@ -466,13 +455,14 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			
 			// Add in travel time for the next path to get to predicted 
 			// arrival time of this stop
-			predictionTime += getTravelTimeForPath(indices, avlReport);
+			predictionTime += getTravelTimeForPath(indices, avlReport, vehicleState);
 		}
 
 		// Return the results
 		return newPredictions;
 	}
-	public long getTravelTimeForPath(Indices indices, AvlReport avlReport)
+	
+	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState)
 	{
 		logger.debug("Using transiTime default algorithm for travel time prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
 		if(storeTravelTimeStopPathPredictions.getValue())
@@ -484,11 +474,13 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		return indices.getTravelTimeForPath();
 	}
 
-	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+	
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		long prediction=TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
 		logger.debug("Using transiTime default algorithm for stop time prediction : "+indices + " Value: "+prediction);
 		return prediction;		
 	}
+
+
 		
 }
