@@ -1197,7 +1197,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// Determine arrival/departure info for in between stops. This needs to
 		// be called after handleVehicleArrivingAtStop() because need endTime
 		// from that method.
-		//handleIntermediateStops(vehicleState, beginTime, endTime);
+		handleIntermediateStops(vehicleState, beginTime, endTime);
 	}
 	
 }

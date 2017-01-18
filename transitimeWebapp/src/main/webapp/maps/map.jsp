@@ -454,8 +454,10 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 		vehicleIcon = ferryIcon;
 
 	// Indicate layovers specially
+	/*
 	if (vehicleData.layover)
 		vehicleIcon = layoverIcon;
+	*/
 	
 	// Return the result
 	return vehicleIcon;

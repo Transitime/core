@@ -22,7 +22,7 @@
     	<storeTravelTimeStopPathPredictions>true</storeTravelTimeStopPathPredictions>
     	<!-- This setting allow more than one vehicle assigned to the same block. This should be set to true for scheduled services and false for frequency based services. -->
     	<exclusiveBlockAssignments>false</exclusiveBlockAssignments>
-    	<maxPredictionsTimeSecs>3600</maxPredictionsTimeSecs>
+    	<maxPredictionsTimeSecs>4800</maxPredictionsTimeSecs>
     	<beforeStopDistance>25</beforeStopDistance>
     	<afterStopDistance>25</afterStopDistance>
     	<layoverDistance>25</layoverDistance>
