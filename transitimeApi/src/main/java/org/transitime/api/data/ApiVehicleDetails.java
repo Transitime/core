@@ -94,6 +94,9 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	
 	@XmlAttribute
 	private Long freqStartTime;
+	
+	@XmlAttribute
+	private Boolean isAtStop;
 
 	/**
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
@@ -146,6 +149,7 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		else
 			freqStartTime = null;
 						
+		this.isAtStop = vehicle.isAtStop();
 	}
 
 }

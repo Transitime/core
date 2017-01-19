@@ -139,7 +139,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
-				vehicleType, freqStartTime);
+				vehicleType, freqStartTime ,atStop);
 		this.atStop = atStop;
 		this.atOrNextStopId = atOrNextStopId;
 		this.atOrNextGtfsStopSeq = atOrNextGtfsStopSeq;
