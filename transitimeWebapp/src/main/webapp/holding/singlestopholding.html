@@ -99,7 +99,7 @@ body {
 						</tr>
 						<tr>
 							<td colspan="2">
-								<div id="byline">Developed by Sean Óg Crudden (og.crudden@gmail.com) and Simon Berrebi (simon@berrebi.net)</div>
+								<div id="byline">Developed by Sean Ã“g Crudden (og.crudden@gmail.com) and Simon Berrebi (simon@berrebi.net)</div>
 							</td>
 						</tr>
 					</table>
@@ -113,7 +113,7 @@ body {
 					</tr>
 					<tr>
 						<div class="container">				
-							<iframe src="/web/maps/map.jsp?a=ASC&r=r0" frameborder="0" allowfullscreen class="mapframe">
+							<iframe src="http://127.0.0.1:8080/web/maps/map.jsp?a=ASC&r=r0" frameborder="0" allowfullscreen class="mapframe">
 							</iframe>
 						</div>
 					</tr>
@@ -148,19 +148,19 @@ body {
 	var data =  {
 			vehicle: null,
 			holdingTimeKeys:null,
-			holdingTimes: {},
-			events : null,	
+			holdingTimes: {},			
+			holdingTimes: {},			
 			predictions : null,
 			vehicleDetails: {},
 			
 	};
-	function vehicleToDisplay(data, stopid, stopPathIndex)
+	function vehicleToDisplay(data, stopid)
     {
-        if(data.holdingTimes != null && data.events != null && data.predictions!=null)
+        if(data.holdingTimes != null && data.predictions!=null)
 		{
             var keys=Object.keys(data.holdingTimes);
             for (var index = 0; index < keys.length; ++index) {
-                if(vehicleAtStop(data, stopid, keys[index],stopPathIndex))
+                if(vehicleAtStop(data, stopid, keys[index]))
                 {
                     return keys[index];
                 }
@@ -174,8 +174,7 @@ body {
     }
 	function getData(data,stopid)
 	{						
-		getStopEvents(host, stopid , processEvents, data);
-						
+								
 		getHoldingTimeKeys(host, processHoldingTimeKeys, data);
 		
 		getNextVehicleArrivalPredictions(host, stopid, processArrivalPredictions, data);
@@ -255,13 +254,7 @@ body {
             $("#counter").css({'color' : 'blue','font-size' : '400%'});
             
         }        
-        var lasteventindex=findLastEventByStopPath(data,6);
-			
-        /* This is just for debug purposes */
-        /*if(lasteventindex>-1)
-		{				
-			$("#lastevent").text(JSON.stringify(data.events[findLastEventByStopPath(data,6)]));
-		}*/
+        
         /* display the next prediction. TODO this could be a function. */
         if(data.predictions!=null)
         {
@@ -271,10 +264,7 @@ body {
         }
 	};
     
-	function processEvents(data, events)
-	{
-          data.events=events.arrivalDeparture;		
-	};
+
 	function processHoldingTime(data, vehicleid, holdingTime) {
 		data.holdingTimes[vehicleid]=holdingTime;
 	};
@@ -291,152 +281,25 @@ body {
 		console.log(vehicleDetails);
 		data.vehicleDetails[vehicleDetails.vehicles[0].id]=vehicleDetails.vehicles[0];
 	}
-	function vehicleAtStop(data, stopId, vehicleId, stopPathIndex)
+	function vehicleAtStop(data, stopId, vehicleId)
 	{		
-		if(findLastEvent(data)>-1)
-		{
-			var lastEvent=data.events[findLastEvent(data)];
-			if(lastEvent.vehicleId==vehicleId)
-			{
-				if(data.vehicleDetails[lastEvent.vehicleId].nextStopId==stopId)
-				{
-					return true;	
-				}
-			}
-		}
-		return false;
-		
-		/*if(findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)>-1)
-		{
-			var lastEvent=data.events[findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)];
-								
-			if(lastEvent.isArrival)
-			{								
-				return true;				
-			}			
-		}
-		return false;
-		*/
-	}	;
-    function findLastEvent(data)
-	{
-		var index=-1;
-		var latesttime=null;
-		if(data.events != null)
-		{
-			for(var i =0; i< data.events.length;i++)
-			{			
-				                   
-                if(latesttime==null)
-                {
-                    latesttime=new Date(data.events[i].time);	
-                    index=i;
-                }else
-                {
-                    if(new Date(data.events[i].time) > latesttime )	
-                    {
-                        latesttime=new Date(data.events[i].time);
-                        index=i;
-                    }
-                }                  				
-			}
-		}
-		return index;
+		if(data.vehicleDetails[vehicleId].nextStopId==stopId)
+        {
+            if(data.vehicleDetails[vehicleId].isAtStop)
+            {
+                return true;        
+            }
+        }
+	    return false;
 	};
-	function findLastEventByVehicle(data, vehicleid)
-	{
-		var index=-1;
-		var latesttime=null;
-		if(data.events !== 'undefined')
-		{
-			for(var i =0; i< data.events.length;i++)
-			{			
-				    if(data.events[i].vehicleId===vehicleid)
-                    {
-               
-                        if(latesttime==null)
-                        {
-                            latesttime=new Date(data.events[i].time);	
-                            index=i;
-                        }else
-                        {
-                            if(new Date(data.events[i].time) > latesttime )	
-                            {
-                                latesttime=new Date(data.events[i].time);
-                                index=i;
-                            }
-                        }
-                    }
-				
-			}
-		}
-		return index;
-	};
-	function findLastEventByVehicleAndStopPath(data, vehicleid, stopPathIndex)
-	{
-		var index=-1;
-		var latesttime=null;
-		if(data.events !== 'undefined')
-		{
-			for(var i =0; i< data.events.length;i++)
-			{			
-				    if(data.events[i].vehicleId===vehicleid && data.events.stopPathIndex===stopPathIndex)
-                    {
-               
-                        if(latesttime==null)
-                        {
-                            latesttime=new Date(data.events[i].time);	
-                            index=i;
-                        }else
-                        {
-                            if(new Date(data.events[i].time) > latesttime )	
-                            {
-                                latesttime=new Date(data.events[i].time);
-                                index=i;
-                            }
-                        }
-                    }
-				
-			}
-		}
-		return index;
-	};
-	function findLastEventByStopPath(data,  stopPathIndex)
-	{
-		var index=-1;
-		var latesttime=null;
-		if(data.events !== 'undefined')
-		{
-			for(var i =0; i< data.events.length;i++)
-			{			
-				    if(data.events[i].stopPathIndex===stopPathIndex)
-                    {
-               
-                        if(latesttime==null)
-                        {
-                            latesttime=new Date(data.events[i].time);	
-                            index=i;
-                        }else
-                        {
-                            if(new Date(data.events[i].time) > latesttime )	
-                            {
-                                latesttime=new Date(data.events[i].time);
-                                index=i;
-                            }
-                        }
-                    }
-				
-			}
-		}
-		return index;
-	};
+    	
 	$(document).ready(function() {
 
 		host = document.location.host;
-        /*host = "127.0.0.1:8080"*/
+        //host = "127.0.0.1:8080";
 		setInterval(function() {
 			getData(data, "4560595");
-			updateScreen(data, "4560595");
+			updateScreen(data, "4560596");
 		}, 1000);		
 	});
 </script>
