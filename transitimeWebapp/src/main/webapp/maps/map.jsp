@@ -210,7 +210,7 @@ function predictionCallback(preds, status) {
 function getPredictionsJson(routeShortName, stopId) {
 	// JSON request of predicton data
 	var url = apiUrlPrefix + "/command/predictions?rs=" + routeShortName 
-			+ "|" + stopId;
+			+ encodeURIComponent("|") + stopId;
 	$.getJSON(url, predictionCallback);	
 }
 
