@@ -136,6 +136,7 @@ body {
 </body>
 
 <script>
+    var myTimer = null;
 	var host = null;
 	var vehicle = null;
 	var timeofarrival = new Date(0);
@@ -201,6 +202,8 @@ body {
        
         if(vehicle!=null)
         {
+            clearInterval(myTimer);
+            myTimer = setInterval(updateDashBoard, 1000);
             console.log("Display holding info for:"+vehicle); 
             data.vehicle=vehicle;
             $("#vehicleid").text(data.vehicle);
@@ -252,7 +255,8 @@ body {
             $("#nextarrival").text("");
             $("#counter").text("00:00");
             $("#counter").css({'color' : 'blue','font-size' : '400%'});
-            
+            clearInterval(myTimer);
+            myTimer = setInterval(updateDashBoard, 5000);
         }        
         
         /* display the next prediction. TODO this could be a function. */
@@ -292,15 +296,17 @@ body {
         }
 	    return false;
 	};
-    	
+    function updateDashBoard()
+    {
+        getData(data, "4560595");
+        updateScreen(data, "4560595");
+    };
+    
 	$(document).ready(function() {
 
 		host = document.location.host;
         //host = "127.0.0.1:8080";
-		setInterval(function() {
-			getData(data, "4560595");
-			updateScreen(data, "4560596");
-		}, 1000);		
+		myTimer = setInterval(updateDashBoard, 5000);		
 	});
 </script>
 
