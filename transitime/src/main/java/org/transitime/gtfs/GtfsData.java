@@ -1189,17 +1189,22 @@ public class GtfsData {
 			// Determine if layover stop. If trip doesn't have schedule then
 			// it definitely can't be a layover.
 			boolean layoverStop = false;
-			if (depTime != null && !trip.isNoSchedule()) {
-				if (stop.isLayoverStop() == null) {
-					layoverStop = firstStopInTrip;
-				} else {
-					layoverStop = stop.isLayoverStop();
+			
+			if(!isTripFrequencyBasedWithoutExactTimes(trip.getId()))
+			{
+				if (depTime != null && !trip.isNoSchedule()) {
+					if (stop.isLayoverStop() == null) {
+						layoverStop = firstStopInTrip;
+					} else {
+						layoverStop = stop.isLayoverStop();
+					}
 				}
 			}
 				
 			// Determine if it is a waitStop. If trip doesn't have schedule then
 			// it definitely can't be a waitStop.
 			boolean waitStop = false;
+			
 			if (depTime != null && !trip.isNoSchedule()) {
 				if (stop.isWaitStop() == null) {
 					waitStop = firstStopInTrip || gtfsStopTime.isWaitStop();
