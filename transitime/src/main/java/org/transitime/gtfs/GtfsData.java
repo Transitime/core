@@ -1205,11 +1205,15 @@ public class GtfsData {
 			// it definitely can't be a waitStop.
 			boolean waitStop = false;
 			
-			if (depTime != null && !trip.isNoSchedule()) {
-				if (stop.isWaitStop() == null) {
-					waitStop = firstStopInTrip || gtfsStopTime.isWaitStop();
-				} else {
-					waitStop = stop.isWaitStop();
+					
+			if(!isTripFrequencyBasedWithoutExactTimes(trip.getId()))
+			{
+				if (depTime != null && !trip.isNoSchedule()) {
+					if (stop.isWaitStop() == null) {
+						waitStop = firstStopInTrip || gtfsStopTime.isWaitStop();
+					} else {
+						waitStop = stop.isWaitStop();
+					}
 				}
 			}
 			
@@ -1217,12 +1221,17 @@ public class GtfsData {
 			// if there is an associated time and it is configured to be such.
 			// But should also be true if there is associated time and it is
 			// first or last stop of the trip.
-			boolean scheduleAdherenceStop = 
-					(depTime != null  
-						&& (firstStopInTrip 
-								|| gtfsStopTime.isTimepointStop() 
-								|| stop.isTimepointStop())) 
-					|| (arrTime != null && lastStopInTrip);
+			boolean scheduleAdherenceStop = false;
+			
+			if(!isTripFrequencyBasedWithoutExactTimes(trip.getId()))
+			{
+				scheduleAdherenceStop = 
+						(depTime != null  
+							&& (firstStopInTrip 
+									|| gtfsStopTime.isTimepointStop() 
+									|| stop.isTimepointStop())) 
+						|| (arrTime != null && lastStopInTrip);
+			}
 			
 			// Determine the pathId. Make sure that use a unique path ID by
 			// appending "_loop" if looping over the same stops
