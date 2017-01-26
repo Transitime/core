@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringListConfigValue;
 import org.transitime.core.ArrivalDepartureGeneratorDefaultImpl;
 import org.transitime.core.VehicleState;
@@ -42,6 +43,8 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	protected static BooleanConfigValue storeHoldingTimes = new BooleanConfigValue("transitime.holding.storeHoldingTimes", 
 			true,
 			"This is set to true to record all holding times.");
+	
+	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
 	public HoldingTime generateHoldingTime(ArrivalDeparture event) {
@@ -55,8 +58,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
  			logger.debug("Calling Holding Generator for event : {}", event.toString());
 															
 			List<IpcPredictionsForRouteStopDest> predictionsForRouteStopDests = predictionCache.getPredictions(event.getRouteId(), event.getStopId());
-			
-			
+						
 			for(IpcPredictionsForRouteStopDest predictionForRouteStopDest: predictionsForRouteStopDests)
 			{						
 				for(IpcPrediction prediction:predictionForRouteStopDest.getPredictionsForRouteStop())
@@ -95,37 +97,70 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 											
 			logger.debug("Have {} predictions for stop {}.", predictions.size(), event.getStopId());
 			
-			if(predictions.size()>=2)
+			ArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getTripId(), event.getStopId(), new Date(event.getTime()));
+			
+			if(lastVehicleDeparture!=null)
 			{
-				logger.debug("Prediction for N-1 {}: {} ", predictions.get(0).getVehicleId(),predictions.get(0));
-				logger.debug("Prediction for N-2 {}: {} ", predictions.get(1).getVehicleId(),predictions.get(1));
-				 						
-				ArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getTripId(), event.getStopId(), new Date(event.getTime()));
+				logger.debug("Found last vehicle departure event: {}", lastVehicleDeparture.toString());
 				
-				if(lastVehicleDeparture!=null)
-				{				
-					logger.debug("Found last vehicle departure event: {}", lastVehicleDeparture.toString());
+				if(predictions.size()>=2)
+				{
+					logger.debug("Prediction for N-1 {}: {} ", predictions.get(0).getVehicleId(),predictions.get(0));
+					logger.debug("Prediction for N-2 {}: {} ", predictions.get(1).getVehicleId(),predictions.get(1));
+					 															
 					
 					long current_vehicle_arrival_time=event.getTime();
-					
+						
 					long holdingTimeValue=calculateHoldingTime(current_vehicle_arrival_time, lastVehicleDeparture.getTime(),predictions.get(0).getPredictionTime(), predictions.get(1).getPredictionTime());
+						
+					logger.debug("Holding time for : {} is {}.", event.toString(), holdingTimeValue);
+						
+					HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time+holdingTimeValue), Calendar.getInstance().getTime(), event.getVehicleId(), event.getStopId(), event.getTripId(),
+								event.getRouteId(), false, true, new Date(event.getTime()), true, true, true); 
+						
+					if(storeHoldingTimes.getValue())
+							Core.getInstance().getDbLogger().add(holdingTime);
+						
+					return holdingTime;				
+				}
+				else if(predictions.size()==1)
+				{
+					logger.debug("Prediction for N-1 {}: {} ", predictions.get(0).getVehicleId(),predictions.get(0));
+						
+					long current_vehicle_arrival_time=event.getTime();
+						
+					long holdingTimeValue=calculateHoldingTime(current_vehicle_arrival_time, lastVehicleDeparture.getTime(),predictions.get(0).getPredictionTime());
+						
+					logger.debug("Holding time for : {} is {}.", event.toString(), holdingTimeValue);
+						
+					HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time+holdingTimeValue), Calendar.getInstance().getTime(), event.getVehicleId(), event.getStopId(), event.getTripId(),
+								event.getRouteId(), false, true, new Date(event.getTime()), true, false, true); 
+						
+					if(storeHoldingTimes.getValue())
+							Core.getInstance().getDbLogger().add(holdingTime);
+						
+					return holdingTime;
+					
+				}
+				else if(predictions.size()==0)
+				{																																		
+					long current_vehicle_arrival_time=event.getTime();
+					
+					long holdingTimeValue=calculateHoldingTime(current_vehicle_arrival_time, lastVehicleDeparture.getTime());
 					
 					logger.debug("Holding time for : {} is {}.", event.toString(), holdingTimeValue);
 					
 					HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time+holdingTimeValue), Calendar.getInstance().getTime(), event.getVehicleId(), event.getStopId(), event.getTripId(),
-							event.getRouteId(), false, true, new Date(event.getTime())); 
+							event.getRouteId(), false, true, new Date(event.getTime()), false, false, true); 
 					
 					if(storeHoldingTimes.getValue())
 						Core.getInstance().getDbLogger().add(holdingTime);
 					
-					return holdingTime;
+					return holdingTime;				
 				}else
 				{
 					logger.debug("Did not find last vehicle departure for stop {}. This is required to calculate holding time.",event.getStopId() );
 				}
-			}else
-			{
-				logger.debug("Insufficient predictions for stop to calculate holding time.");
 			}
 		
 		}
@@ -184,6 +219,27 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		
 	}
 	
+	private long calculateHoldingTime(long current_vehicle_arrival_time, long last_vehicle_departure_time, long N_1)
+	{				
+		// HoldingTime = 0.5(TimeSinceLastDeparture - TimeUntilNextArrival)
+		long holdingTime;
+		
+		holdingTime=(long) (((current_vehicle_arrival_time-last_vehicle_departure_time)-N_1)*0.5);
+			
+		return holdingTime;
+	}
+
+	private long calculateHoldingTime(long current_vehicle_arrival_time, long last_vehicle_departure_time)
+	{		
+		// TODO to be implemented as per google doc.
+		
+		//HoldingTime= max(0,PlannedHeadway - TimeSinceLastDeparture)
+		long holdingTime;
+		
+		holdingTime=Math.max(plannedHeadwayMsec.getValue().longValue()-(current_vehicle_arrival_time-last_vehicle_departure_time) , 0);
+		
+		return holdingTime;				
+	}
 	@Override
 	public HoldingTime generateHoldingTime(IpcPrediction arrivalPrediction) {
 		
@@ -223,7 +279,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 						logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 						
 						holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue), Calendar.getInstance().getTime(), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime()));
+								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime()), true, true, true);
 																						
 					}else if(lastDeparture.getTime()<=forwardDeparturePrediction.getPredictionTime())
 					{
@@ -232,7 +288,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 						logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 						
 						holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue), Calendar.getInstance().getTime(), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime())); 
+								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime()), true, true, true); 
 
 					}
 				}else if(forwardDeparturePrediction!=null)
@@ -242,7 +298,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 					
 					holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue), Calendar.getInstance().getTime(), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()));
+							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()), true, true, true);
 					
 				}else if(lastDeparture!=null)
 				{
@@ -251,7 +307,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 					
 					holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue), Calendar.getInstance().getTime(), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()));				
+							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()), true, true, true);				
 				}
 					
 			}else

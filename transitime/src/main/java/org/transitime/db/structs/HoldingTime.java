@@ -29,12 +29,14 @@ import org.transitime.db.hibernate.HibernateUtils;
  */
 public class HoldingTime implements Serializable {
 	
+	
+
 	@Override
 	public String toString() {
-		return "HoldingTime [configRev=" + configRev + ", holdingTime=" + holdingTime + ", creationTime=" + creationTime
-				+ ", vehicleId=" + vehicleId + ", stopId=" + stopId + ", tripId=" + tripId + ", routeId=" + routeId
-				+ ", arrivalTime=" + arrivalTime + ", arrivalPredictionUsed=" + arrivalPredictionUsed + ", arrivalUsed="
-				+ arrivalUsed + "]";
+		return "HoldingTime [id=" + id + ", configRev=" + configRev + ", holdingTime=" + holdingTime + ", creationTime="
+				+ creationTime + ", vehicleId=" + vehicleId + ", stopId=" + stopId + ", tripId=" + tripId + ", routeId="
+				+ routeId + ", arrivalTime=" + arrivalTime + ", arrivalPredictionUsed=" + arrivalPredictionUsed
+				+ ", arrivalUsed=" + arrivalUsed + ", hasN1=" + hasN1 + ", hasN2=" + hasN2 + ", hasD1=" + hasD1 + "]";
 	}
 
 	@Override
@@ -152,7 +154,39 @@ public class HoldingTime implements Serializable {
 	@Column
 	private boolean arrivalUsed;
 	
+	@Column
+	private boolean hasN1;
 	
+	@Column
+	private boolean hasN2;
+	
+	@Column
+	private boolean hasD1;
+	
+	public boolean isHasN1() {
+		return hasN1;
+	}
+
+	public void setHasN1(boolean hasN1) {
+		this.hasN1 = hasN1;
+	}
+
+	public boolean isHasN2() {
+		return hasN2;
+	}
+
+	public void setHasN2(boolean hasN2) {
+		this.hasN2 = hasN2;
+	}
+
+	public boolean isHasD1() {
+		return hasD1;
+	}
+
+	public void setHasD1(boolean hasD1) {
+		this.hasD1 = hasD1;
+	}
+
 	public Date getHoldingTime() {
 		return holdingTime;
 	}
@@ -195,10 +229,13 @@ public class HoldingTime implements Serializable {
 		arrivalPredictionUsed=false;
 		arrivalUsed=false;
 		arrivalTime = null;
+		hasN1 = false;
+		hasN2 = false;
+		hasD1 = false;
 	}
 
 	public HoldingTime(Date holdingTime, Date creationTime, String vehicleId, String stopId, String tripId,
-			String routeId, boolean arrivalPredictionUsed, boolean arrivalUsed,  Date arrivalTime) {
+			String routeId, boolean arrivalPredictionUsed, boolean arrivalUsed,  Date arrivalTime, boolean hasN1, boolean hasN2, boolean hasD1) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.holdingTime = holdingTime;
 		this.creationTime = creationTime;
@@ -209,6 +246,9 @@ public class HoldingTime implements Serializable {
 		this.arrivalPredictionUsed=arrivalPredictionUsed;
 		this.arrivalTime=arrivalTime;
 		this.arrivalUsed=arrivalUsed;
+		this.hasN1=hasN1;
+		this.hasN2=hasN2;
+		this.hasD1=hasD1;
 	}
 
 
