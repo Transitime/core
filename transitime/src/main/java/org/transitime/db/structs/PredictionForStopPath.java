@@ -60,9 +60,20 @@ public class PredictionForStopPath implements Serializable{
 	@Column 
 	private String vehicleId;
 	
+	@Column 
+	private boolean travelTime;
+	
 	
 
-	public PredictionForStopPath(String vehicleId, Date creationTime, Double predictionTimeMilliseconds, String tripId, Integer stopPathIndex, String algorithm) {
+	public boolean isTravelTime() {
+		return travelTime;
+	}
+
+	public void setTravelTime(boolean travelTime) {
+		this.travelTime = travelTime;
+	}
+
+	public PredictionForStopPath(String vehicleId, Date creationTime, Double predictionTimeMilliseconds, String tripId, Integer stopPathIndex, String algorithm, boolean travelTime) {
 		super();
 		this.creationTime = creationTime;
 		this.predictionTime = predictionTimeMilliseconds;
@@ -70,6 +81,7 @@ public class PredictionForStopPath implements Serializable{
 		this.stopPathIndex = stopPathIndex;
 		this.algorithm=algorithm;
 		this.vehicleId=vehicleId;
+		this.travelTime = travelTime;
 	}
 
 	public String getVehicleId() {
@@ -120,6 +132,8 @@ public class PredictionForStopPath implements Serializable{
 	}
 
 	
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -128,6 +142,7 @@ public class PredictionForStopPath implements Serializable{
 		result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
 		result = prime * result + ((predictionTime == null) ? 0 : predictionTime.hashCode());
 		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
+		result = prime * result + (travelTime ? 1231 : 1237);
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
@@ -161,6 +176,8 @@ public class PredictionForStopPath implements Serializable{
 			if (other.stopPathIndex != null)
 				return false;
 		} else if (!stopPathIndex.equals(other.stopPathIndex))
+			return false;
+		if (travelTime != other.travelTime)
 			return false;
 		if (tripId == null) {
 			if (other.tripId != null)
