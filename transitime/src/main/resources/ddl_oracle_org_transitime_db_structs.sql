@@ -254,6 +254,7 @@
         creationTime timestamp,
         predictionTime double precision,
         stopPathIndex number(10,0),
+        travelTime number(1,0),
         tripId varchar2(60 char),
         vehicleId varchar2(255 char),
         primary key (id)

@@ -254,6 +254,7 @@
         creationTime timestamp,
         predictionTime float8,
         stopPathIndex int4,
+        travelTime boolean,
         tripId varchar(60),
         vehicleId varchar(255),
         primary key (id)
