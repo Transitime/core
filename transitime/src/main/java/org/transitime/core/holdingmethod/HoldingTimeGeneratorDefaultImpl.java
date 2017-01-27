@@ -157,10 +157,10 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 						Core.getInstance().getDbLogger().add(holdingTime);
 					
 					return holdingTime;				
-				}else
-				{
-					logger.debug("Did not find last vehicle departure for stop {}. This is required to calculate holding time.",event.getStopId() );
 				}
+			}else
+			{
+				logger.debug("Did not find last vehicle departure for stop {}. This is required to calculate holding time.",event.getStopId() );
 			}
 		
 		}

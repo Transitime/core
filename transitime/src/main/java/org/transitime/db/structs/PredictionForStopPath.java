@@ -48,21 +48,37 @@ public class PredictionForStopPath implements Serializable{
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String tripId;
 	
+	
+
+
 	@Column
 	private String algorithm;
 	
 	@Column
 	private Integer stopPathIndex;
+	
+	@Column 
+	private String vehicleId;
+	
+	
 
-	public PredictionForStopPath(Date creationTime, Double predictionTimeMilliseconds, String tripId, Integer stopPathIndex, String algorithm) {
+	public PredictionForStopPath(String vehicleId, Date creationTime, Double predictionTimeMilliseconds, String tripId, Integer stopPathIndex, String algorithm) {
 		super();
 		this.creationTime = creationTime;
 		this.predictionTime = predictionTimeMilliseconds;
 		this.tripId = tripId;
 		this.stopPathIndex = stopPathIndex;
 		this.algorithm=algorithm;
+		this.vehicleId=vehicleId;
 	}
 
+	public String getVehicleId() {
+		return vehicleId;
+	}
+
+	public void setVehicleId(String vehicleId) {
+		this.vehicleId = vehicleId;
+	}
 	public void setCreationTime(Date creationTime) {
 		this.creationTime = creationTime;
 	}
@@ -103,6 +119,7 @@ public class PredictionForStopPath implements Serializable{
 		return algorithm;
 	}
 
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -112,6 +129,7 @@ public class PredictionForStopPath implements Serializable{
 		result = prime * result + ((predictionTime == null) ? 0 : predictionTime.hashCode());
 		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
+		result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
 	}
 
@@ -149,8 +167,14 @@ public class PredictionForStopPath implements Serializable{
 				return false;
 		} else if (!tripId.equals(other.tripId))
 			return false;
+		if (vehicleId == null) {
+			if (other.vehicleId != null)
+				return false;
+		} else if (!vehicleId.equals(other.vehicleId))
+			return false;
 		return true;
 	}
+
 	@SuppressWarnings("unchecked")
 	public static List<PredictionForStopPath> getPredictionForStopPathFromDB (
 			Date beginTime, 

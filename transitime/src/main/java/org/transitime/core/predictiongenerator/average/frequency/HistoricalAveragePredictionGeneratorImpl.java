@@ -1,6 +1,7 @@
 package org.transitime.core.predictiongenerator.average.frequency;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,13 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		 */				
 		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
 		{																			
-			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(), true,  vehicleState.getTripStartTime(vehicleState.getTripCounter()).longValue());
+						
+			Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter())));
+			
+			/* this is what gets the trip from the buckets */
+			time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+			
+			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(), true, time.longValue());
 			
 			HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 			
@@ -62,7 +69,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 			{
 				if(storeTravelTimeStopPathPredictions.getValue())
 				{
-					PredictionForStopPath predictionForStopPath=new PredictionForStopPath(Calendar.getInstance().getTime(), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE");			
+					PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(),Calendar.getInstance().getTime(), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE");			
 					Core.getInstance().getDbLogger().add(predictionForStopPath);
 					StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 				}
@@ -82,8 +89,13 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		
 		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
-		{
-			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(), false, vehicleState.getTripStartTime(vehicleState.getTripCounter()).longValue());
+		{			
+			Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter())));
+			
+			/* this is what gets the trip from the buckets */
+			time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+			
+			StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(), false, time.longValue());
 			
 			HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 			
