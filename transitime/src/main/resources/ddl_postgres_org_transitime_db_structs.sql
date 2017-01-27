@@ -255,6 +255,7 @@
         predictionTime float8,
         stopPathIndex int4,
         tripId varchar(60),
+        vehicleId varchar(255),
         primary key (id)
     );
 

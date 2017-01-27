@@ -255,6 +255,7 @@
         predictionTime double precision,
         stopPathIndex integer,
         tripId varchar(60),
+        vehicleId varchar(255),
         primary key (id)
     );
 
