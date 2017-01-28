@@ -110,7 +110,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		{			
 			logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache.", arrivalDeparture);
 						
-			Integer time=secondsFromMidnight(arrivalDeparture.getFreqStartTime());
+			Integer time=secondsFromMidnight(arrivalDeparture.getFreqStartTime(), 2);
 			
 			/* this is what puts the trip into the buckets (time slots) */
 			time=round(time, getCacheIncrementsForFrequencyService());
@@ -233,12 +233,12 @@ public class FrequencyBasedHistoricalAverageCache {
 	public static int round(double i, int v){
 	    return (int) (Math.round(i/v) * v);
 	}
-	public static int secondsFromMidnight(Date date)
+	public static int secondsFromMidnight(Date date, int startHour)
 	{
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(date.getTime());		
 		long now = c.getTimeInMillis();
-		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.HOUR_OF_DAY, startHour);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);

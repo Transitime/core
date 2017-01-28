@@ -48,9 +48,6 @@ public class PredictionForStopPath implements Serializable{
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String tripId;
 	
-	
-
-
 	@Column
 	private String algorithm;
 	
@@ -227,7 +224,8 @@ public class PredictionForStopPath implements Serializable{
 		this.predictionTime = null;
 		this.tripId = null;
 		this.stopPathIndex = null;
-		this.algorithm=null;						
+		this.algorithm=null;		
+		this.travelTime = true;
 	}
 			
 }
