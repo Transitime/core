@@ -7,7 +7,7 @@
   <!-- So that get proper sized map on iOS mobile device -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   
-  <link rel="stylesheet" href="<%= request.getContextPath() %>/map/css/mapUi.css" />
+  <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
  
   <!-- Load javascript and css files -->
   <%@include file="/template/includes.jsp" %>
@@ -15,8 +15,8 @@
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
         
-  <script src="<%= request.getContextPath() %>/map/javascript/leafletRotatedMarker.js"></script>
-  <script src="<%= request.getContextPath() %>/map/javascript/mapUiOptions.js"></script>
+  <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
+  <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
   
   <!--  Override the body style from the includes.jsp/general.css files -->
   <style>
