@@ -778,13 +778,22 @@ public class SpatialMatcher {
 					spatialMatcher.smallestDistanceSpatialMatch);
 		} else {
 			// There were no spatial matches so log this problem
-			logger.warn("For vehicleId={} found no spatial matches within " +
-					"allowable distance of segments. Best spatial match " +
-					"distance was {} for spatial match {}",
-					vehicleState.getVehicleId(),
-					Geo.distanceFormat(spatialMatcher.
-							smallestDistanceSpatialMatch.getDistanceToSegment()),
-					spatialMatcher.smallestDistanceSpatialMatch);
+			if(spatialMatcher!=null && spatialMatcher.
+							smallestDistanceSpatialMatch!=null)
+			{
+				logger.warn("For vehicleId={} found no spatial matches within " +
+						"allowable distance of segments. Best spatial match " +
+						"distance was {} for spatial match {}",
+						vehicleState.getVehicleId(),
+						Geo.distanceFormat(spatialMatcher.
+								smallestDistanceSpatialMatch.getDistanceToSegment()),
+						spatialMatcher.smallestDistanceSpatialMatch);
+			}else
+			{
+				logger.warn("For vehicleId={} found no spatial matches within " +
+						"allowable distance of segments. No best match.",
+						vehicleState.getVehicleId());
+			}
 		}
 		
 		// Need to look at possibility that could match to end of the block if
