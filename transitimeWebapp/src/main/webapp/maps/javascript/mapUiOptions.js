@@ -126,7 +126,7 @@ var minorVehicleMarkerBackgroundOptions = {
 var unassignedVehicleMarkerBackgroundOptions = {
 	    radius: 10,
 	    weight: 0,
-	    fillColor: '#F0FA39',
+	    fillColor: '#ffffff',
 	    fillOpacity: 0.6,				
 };
 
