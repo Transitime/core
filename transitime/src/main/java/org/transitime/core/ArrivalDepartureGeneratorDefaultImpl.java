@@ -274,6 +274,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				block,
 				tripIndex,
 				stopPathIndex, freqStartDate);
+		updateCache(departure);
 		logger.debug("Creating departure: {}", departure);
 		return departure;
 	}
@@ -312,9 +313,32 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		if (arrivalTime > vehicleState.getLastArrivalTime())
 			vehicleState.setLastArrivalTime(arrivalTime);
 		
+		updateCache(arrival);
+		
 		return arrival;
 	}
-
+	private void updateCache(ArrivalDeparture arrivalDeparture)
+	{
+		if(TripDataHistoryCache.getInstance()!=null)
+			TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		
+		if(StopArrivalDepartureCache.getInstance()!=null)
+			StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);		
+		 
+		if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
+			ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		
+		if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
+			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		
+		if(HoldingTimeGeneratorFactory.getInstance()!=null)
+		{							
+			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(arrivalDeparture);
+			if(holdingTime!=null)
+				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);		
+		}
+		
+	}
 	/**
 	 * Stores the specified ArrivalDeparture object into the db
 	 * and log to the ArrivalsDeparatures log file that the
@@ -326,6 +350,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param arrivalDeparture
 	 */
 	protected void storeInDbAndLog(ArrivalDeparture arrivalDeparture) {
+				
+		
 		// Don't want to record arrival/departure time for last stop of a no
 		// schedule block/trip since the last stop is also the first stop of
 		// a non-schedule trip. We don't duplicate entries.
@@ -343,32 +369,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		Core.getInstance().getDbLogger().add(arrivalDeparture);
 								
 		// Log creation of ArrivalDeparture in ArrivalsDepartures.log file
-		arrivalDeparture.logCreation();
-		
-		
-		/*protected ArrivalDeparture(arrivalDeparture., String vehicleId, Date time, Date avlTime, Block block, 
-				int tripIndex, int stopPathIndex, boolean isArrival) {*/
-		if(TripDataHistoryCache.getInstance()!=null)
-			TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
-		
-		if(StopArrivalDepartureCache.getInstance()!=null)
-			StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);
-		
-		 
-		if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
-			ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
-		
-		if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
-			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
-		
-		if(HoldingTimeGeneratorFactory.getInstance()!=null)
-		{
-				// TODO Why was this here? if(arrivalDeparture.getStopPathIndex()!=0)			
-				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(arrivalDeparture);
-				if(holdingTime!=null)
-					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
-			
-		}
+		arrivalDeparture.logCreation();								
 				
 		/* add event to vehicle state. Will increment tripCounter if the last arrival in a trip */
 		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(arrivalDeparture.getVehicleId());

@@ -81,8 +81,7 @@ public class PlaybackModule extends Module {
 				|| getPlaybackVehicleId().isEmpty()
 				|| getPlaybackStartTimeStr() == null
 				|| getPlaybackStartTimeStr().isEmpty()) {
-			System.err.println("Parameters not set. See log file for details. Exiting.");
-			System.exit(-1);
+			logger.warn("Parameters not set. See log file for details. Exiting.");			
 		}
 		
 		// Initialize the dbReadBeingTime member

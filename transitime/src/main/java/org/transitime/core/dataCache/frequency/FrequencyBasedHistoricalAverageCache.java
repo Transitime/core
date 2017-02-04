@@ -25,6 +25,7 @@ import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.core.Indices;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.*;
 /**
@@ -97,7 +98,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		{			
 			m.put(new StopPathKey(key), new TreeMap<Long, HistoricalAverage> ());			
 		}
-		logger.debug("Putting: {} for start time: {} in FrequencyBasedHistoricalAverageCache with value : {}",new StopPathKey(key), new Date(key.getStartTime()), average);
+		logger.debug("Putting: {} for start time: {} in FrequencyBasedHistoricalAverageCache with value : {}",new StopPathKey(key), key.getStartTime(), average);
 		m.get(new StopPathKey(key)).put(key.getStartTime(), average);													
 	}
 	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) 
@@ -105,6 +106,11 @@ public class FrequencyBasedHistoricalAverageCache {
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 				
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
+		
+		if(arrivalDeparture.getStopPathIndex()==12)
+		{
+			logger.debug("to debug last stop");
+		}
 		
 		if(arrivalDeparture.getFreqStartTime()!=null && trip.isNoSchedule())		
 		{			
@@ -157,10 +163,12 @@ public class FrequencyBasedHistoricalAverageCache {
 		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
 			if(current.getFreqStartTime()!=null && tocheck.getFreqStartTime()!=null && current.getFreqStartTime().equals(tocheck.getFreqStartTime()))
-			{
-				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
+			{				
+				
+				 if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
 				{
 					return tocheck;
+					
 				}
 			}
 		}		
@@ -189,7 +197,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				trip.getStartTime());
 						
 		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) TripDataHistoryCache.getInstance().getTripHistory(tripKey);
-		
+		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isArrival())
 		{			
 			ArrivalDeparture previousEvent = findPreviousDepartureEvent(arrivalDepartures, arrivalDeparture);
@@ -208,7 +216,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				trip.getStartTime());
 						
 		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) TripDataHistoryCache.getInstance().getTripHistory(tripKey);
-		
+		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isDeparture())
 		{			
 			ArrivalDeparture previousEvent = findPreviousArrivalEvent(arrivalDepartures, arrivalDeparture);

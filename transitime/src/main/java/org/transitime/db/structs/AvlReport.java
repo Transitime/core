@@ -1079,14 +1079,14 @@ public class AvlReport implements Serializable {
 		String hql = "FROM AvlReport " +
 				"    WHERE time >= :beginDate " +
 				"      AND time < :endDate"; 
-		if (vehicleId != null)
+		if (vehicleId != null && !vehicleId.isEmpty())
 			hql += " AND vehicleId=:vehicleId";
 		if (clause != null)
 			hql += " " + clause;
 		Query query = session.createQuery(hql);
 		
 		// Set the parameters
-		if (vehicleId != null)
+		if (vehicleId != null && !vehicleId.isEmpty())
 			query.setString("vehicleId", vehicleId);
 		query.setTimestamp("beginDate", beginTime);
 		query.setTimestamp("endDate", endTime);
