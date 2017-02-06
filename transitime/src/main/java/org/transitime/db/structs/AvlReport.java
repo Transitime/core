@@ -1009,7 +1009,8 @@ public class AvlReport implements Serializable {
 	 * the data was actually processed.
 	 */
 	public void setTimeProcessed() {
-		timeProcessed = new Date(System.currentTimeMillis());
+		timeProcessed = new Date(Core.getInstance().getSystemTime());
+		
 	}
 	
 	public String getField1Name() {

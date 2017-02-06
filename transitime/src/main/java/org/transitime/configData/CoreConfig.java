@@ -319,7 +319,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue maxPredictionsTimeForDbSecs =
 			new IntegerConfigValue("transitime.core.maxPredictionTimeForDbSecs", 
-					0*Time.SEC_PER_MIN,
+					30*Time.SEC_PER_MIN,
 					"For determining if prediction should be stored in db. " +
 					"Set to 0 to never store predictions. A very large " +
 					"number of predictions is created so be careful with " +

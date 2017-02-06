@@ -22,6 +22,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
@@ -62,7 +63,10 @@ public class PlaybackModule extends Module {
 					"",
 					"Date and time of when to start the playback.");
 
-	
+	private static BooleanConfigValue playbackRealtime =
+			new BooleanConfigValue("transitime.avl.playbackRealtime", 
+					false,
+					"Playback at normal time speed rather than as fast as possible.");
 	/********************* Logging **************************/
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PlaybackModule.class);
@@ -158,12 +162,29 @@ public class PlaybackModule extends Module {
 			List<AvlReport> avlReports = getBatchOfAvlReportsFromDb();
 			
 			// Process the AVL Reports read in.
+			long last_avl_time=-1;
 			for (AvlReport avlReport : avlReports) {
 				logger.info("Processing avlReport={}", avlReport);
 				
 				// Update the Core SystemTime to use this AVL time
 				Core.getInstance().setSystemTime(avlReport.getTime());
 				
+				if(playbackRealtime.getValue()==true)
+				{
+					if(last_avl_time>-1)
+					{
+						try {
+							Thread.sleep(avlReport.getTime()-last_avl_time);
+							last_avl_time=avlReport.getTime();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}else
+					{
+						last_avl_time=avlReport.getTime();
+					}
+				}
 				// Do the actual processing of the AVL data
 				AvlProcessor.getInstance().processAvlReport(avlReport);
 			}

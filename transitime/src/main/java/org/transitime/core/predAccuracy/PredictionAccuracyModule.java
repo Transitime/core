@@ -196,7 +196,7 @@ public class PredictionAccuracyModule extends Module {
 			
 			try {
 				// Process data
-				getAndProcessData(getRoutesAndStops(), new Date());
+				getAndProcessData(getRoutesAndStops(), Core.getInstance().getSystemDate());
 				
 				// Make sure old predictions that were never matched to an
 				// arrival/departure don't stick around taking up memory.
