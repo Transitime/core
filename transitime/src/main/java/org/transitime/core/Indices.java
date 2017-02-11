@@ -146,7 +146,7 @@ public class Indices implements Serializable {
 	 */
 	public boolean isEarlierStopPathThan(Indices indices) {
 		if (block.isNoSchedule())
-			return stopPathIndex != indices.stopPathIndex;
+			return stopPathIndex < indices.stopPathIndex;
 		else {
 			if (tripIndex > indices.tripIndex)
 				return false;

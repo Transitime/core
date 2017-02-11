@@ -561,11 +561,12 @@ public class SpatialMatcher {
 		// But only do this for blocks that have a schedule since no-schedule
 		// blocks are loops where we don't really have the concept of 
 		// before/after for indices.
-		if (startSearchSpatialMatch != null 
-				&& potentialMatchIndices.getBlock().hasSchedule()) {
+		
+		//&& potentialMatchIndices.getBlock().hasSchedule()
+		if (startSearchSpatialMatch != null){
 			// If looking at previous index then something is really wrong.
 			// Don't need to see if this is a match.
-			if (potentialMatchIndices.lessThan(startSearchSpatialMatch.getIndices())) {
+			if (potentialMatchIndices.lessThan(startSearchSpatialMatch.getIndices())&&!startSearchSpatialMatch.getIndices().atEndOfTrip()) {
 				logger.error("For vehicleId={} looking at segment that is " +
 						"before the segment of the previous match, which " +
 						"should not happen. potentialMatchIndices={} " +

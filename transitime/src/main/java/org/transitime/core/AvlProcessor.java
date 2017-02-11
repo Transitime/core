@@ -389,7 +389,7 @@ public class AvlProcessor {
 		// Find best temporal match of the spatial matches
 		TemporalMatch bestTemporalMatch = TemporalMatcher.getInstance()
 				.getBestTemporalMatch(vehicleState, spatialMatches);
-
+				
 		// Log this as info since matching is a significant milestone
 		logger.info("For vehicleId={} the best match is {}",
 				vehicleState.getVehicleId(), bestTemporalMatch);

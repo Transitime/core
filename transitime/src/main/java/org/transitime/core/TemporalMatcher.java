@@ -381,11 +381,21 @@ public class TemporalMatcher {
 			
 			// Determine how long would expect it to take to get from previous
 			// match to the new match.
-			int expectedTravelTimeMsec = 
+			int expectedTravelTimeMsecForward = 
 					TravelTimes.getInstance().expectedTravelTimeBetweenMatches(
 							vehicleState.getVehicleId(), 
 							previousAvlTime, 
 							previousMatch, spatialMatch);
+			int expectedTravelTimeMsecBackward = 
+					TravelTimes.getInstance().expectedTravelTimeBetweenMatches(
+							vehicleState.getVehicleId(), 
+							previousAvlTime, 
+							spatialMatch, previousMatch);
+			
+			int expectedTravelTimeMsec = Math.min(expectedTravelTimeMsecForward, expectedTravelTimeMsecBackward);
+			
+		
+			//expectedTravelTimeMsec = expectedTravelTimeMsecForward;
 			
 			// If looking at layover match and the match is different from 
 			// the previous one then it means we expect that the vehicle has
@@ -428,6 +438,15 @@ public class TemporalMatcher {
 				// late since the layover time has already passed.
 				differenceFromExpectedTime = temporalDifferenceForSpecialLayover(
 						vehicleState, spatialMatch, expectedTravelTimeMsec);
+			}
+			// If it is before the last one just return the last one. 
+			// Something is not right that it thinks it is going backwards.
+			if(new Indices(spatialMatch).isEarlierStopPathThan(new Indices(previousMatch)))
+			{
+				logger.debug("Match {} is before previousMatch {}.", spatialMatch, previousMatch);
+				//bestTemporalMatchSoFar=new TemporalMatch(previousMatch,
+				//		differenceFromExpectedTime);				
+				//break;			
 			}
 			
 			logger.debug("For vehicleId={} temporal match " +

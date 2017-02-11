@@ -90,7 +90,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	// So can just get data since last query. Initialize so when first called
 	// get data for last 10 minutes. Definitely don't want to use t=0 because
 	// then can end up with some really old reports.
-	private long previousTime = System.currentTimeMillis() - 10*Time.MS_PER_MIN;
+	private long previousTime = System.currentTimeMillis() - 1*Time.MS_PER_MIN;
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(NextBusAvlModule.class);	

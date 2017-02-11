@@ -62,6 +62,11 @@ public class PlaybackModule extends Module {
 			new StringConfigValue("transitime.avl.playbackStartTime", 
 					"",
 					"Date and time of when to start the playback.");
+	
+	private static StringConfigValue playbackEndTimeStr =
+			new StringConfigValue("transitime.avl.playbackEndTime", 
+					"",
+					"Date and time of when to end the playback.");
 
 	private static BooleanConfigValue playbackRealtime =
 			new BooleanConfigValue("transitime.avl.playbackRealtime", 
@@ -118,7 +123,32 @@ public class PlaybackModule extends Module {
 			return -1;
 		}
 	}
-	
+	private static long parsePlaybackEndTime(String playbackEndTimeStr) {
+		try {
+			long playbackEndTime = Time.parse(playbackEndTimeStr).getTime();
+			
+			// If specified time is in the future then reject.
+			if (playbackEndTime > System.currentTimeMillis()) {
+				logger.error("Playback end time \"{}\" specified by " +
+						"transitime.avl.playbackEndTime parameter is in " +
+						"the future and therefore invalid!",
+						playbackEndTimeStr);
+				System.exit(-1);					
+			}
+				
+			return playbackEndTime;
+		} catch (java.text.ParseException e) {
+			logger.error("Paramater -t \"{}\" specified by " +
+					"transitime.avl.playbackEndTime parameter could not " +
+					"be parsed. Format must be \"MM-dd-yyyy HH:mm:ss\"",
+					playbackEndTimeStr);
+			System.exit(-1);
+			
+			// Will never be reached because the above state exits program but
+			// needed so compiler doesn't complain.
+			return -1;
+		}
+	}
 	/**
 	 * Gets a batch of AVl data from the database
 	 * @return
@@ -157,8 +187,8 @@ public class PlaybackModule extends Module {
 	 */
 	@Override
 	public void run() {
-		// Keep running as long as not trying to access in the future.
-		while (dbReadBeginTime < System.currentTimeMillis()) {
+		// Keep running as long as not trying to access in the future.		
+		while (dbReadBeginTime < System.currentTimeMillis() && (playbackEndTimeStr.getValue().length()==0 || dbReadBeginTime<parsePlaybackEndTime(playbackEndTimeStr.getValue()))) {
 			List<AvlReport> avlReports = getBatchOfAvlReportsFromDb();
 			
 			// Process the AVL Reports read in.
@@ -184,9 +214,9 @@ public class PlaybackModule extends Module {
 					{
 						last_avl_time=avlReport.getTime();
 					}
-				}
+				}				
 				// Do the actual processing of the AVL data
-				AvlProcessor.getInstance().processAvlReport(avlReport);
+				AvlProcessor.getInstance().processAvlReport(avlReport);							
 			}
 		}
 		
