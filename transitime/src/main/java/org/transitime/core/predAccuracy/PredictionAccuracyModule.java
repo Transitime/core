@@ -281,7 +281,7 @@ public class PredictionAccuracyModule extends Module {
 		// memory. This is important because need to limit how much 
 		// memory is used for prediction accuracy data collecting.
 		if (pred.getPredictedTime().getTime() > 
-			System.currentTimeMillis() + getMaxPredTimeMinutes()*Time.MS_PER_MIN) {
+			Core.getInstance().getSystemTime() + getMaxPredTimeMinutes()*Time.MS_PER_MIN) {
 			logger.debug("Prediction is too far into future so not storing "
 					+ "it in memory for prediction accuracy analysis. {}", 
 					pred);
@@ -320,7 +320,7 @@ public class PredictionAccuracyModule extends Module {
 			while (iter.hasNext()) {
 				PredAccuracyPrediction pred = iter.next();
 				if (pred.getPredictedTime().getTime() < 
-						System.currentTimeMillis() - 
+						Core.getInstance().getSystemTime() - 
 						getMaxPredStalenessMinutes()*Time.MS_PER_MIN) {
 					// Prediction was too old so remove it from memory
 					++numPredictionsRemoved;
