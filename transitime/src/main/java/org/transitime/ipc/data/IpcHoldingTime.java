@@ -33,9 +33,33 @@ public class IpcHoldingTime implements Serializable{
 	
 	private final Date arrivalTime;
 	
+	private boolean hasD1;
 	
+	private boolean hasN1;
+	
+	private boolean hasN2;
+	
+	
+	public boolean isHasD1() {
+		return hasD1;
+	}
+	public void setHasD1(boolean hasD1) {
+		this.hasD1 = hasD1;
+	}
+	public boolean isHasN1() {
+		return hasN1;
+	}
+	public void setHasN1(boolean hasN1) {
+		this.hasN1 = hasN1;
+	}
+	public boolean isHasN2() {
+		return hasN2;
+	}
+	public void setHasN2(boolean hasN2) {
+		this.hasN2 = hasN2;
+	}
 	public IpcHoldingTime(Date holdingTime, Date creationTime, String vehicleId, String stopId, String tripId,
-			String routeId, boolean arrivalPredictionUsed , boolean arrivalUsed, Date arrivalTime) {
+			String routeId, boolean arrivalPredictionUsed , boolean arrivalUsed, Date arrivalTime, boolean hasN1, boolean hasN2, boolean hasD1) {
 		super();
 		this.holdingTime = holdingTime;
 		this.creationTime = creationTime;
@@ -45,6 +69,9 @@ public class IpcHoldingTime implements Serializable{
 		this.routeId = routeId;
 		this.currentTime = Calendar.getInstance().getTime();
 		this.arrivalTime=arrivalTime;
+		this.hasD1=hasD1;
+		this.hasN1=hasN1;
+		this.hasN2=hasN2;
 	}
 	public IpcHoldingTime(HoldingTime holdingTime) {
 		
@@ -58,6 +85,10 @@ public class IpcHoldingTime implements Serializable{
 		this.arrivalUsed =  holdingTime.isArrivalUsed();
 		this.currentTime = Calendar.getInstance().getTime();
 		this.arrivalTime=holdingTime.getArrivalTime();
+		this.hasD1=holdingTime.isHasD1();
+		this.hasN1=holdingTime.isHasN1();
+		this.hasN2=holdingTime.isHasN2();
+	
 	}
 
 	public Date getArrivalTime() {

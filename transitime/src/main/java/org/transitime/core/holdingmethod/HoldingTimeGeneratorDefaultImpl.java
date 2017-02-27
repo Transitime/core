@@ -160,7 +160,12 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 				}
 			}else
 			{
+				
 				logger.debug("Did not find last vehicle departure for stop {}. This is required to calculate holding time.",event.getStopId() );
+				long current_vehicle_arrival_time=event.getTime();
+				HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time), Calendar.getInstance().getTime(), event.getVehicleId(), event.getStopId(), event.getTripId(),
+						event.getRouteId(), false, true, new Date(event.getTime()), false, false, false);
+				return holdingTime;
 			}
 		
 		}

@@ -39,6 +39,15 @@ public class ApiHoldingTime {
 	
 	@XmlAttribute
 	private Date arrivalTime;
+	
+	@XmlAttribute
+	private boolean hasN1;
+	
+	@XmlAttribute
+	private boolean hasN2;
+	
+	@XmlAttribute
+	private boolean hasD1;
 
 	protected ApiHoldingTime() {
 	
@@ -55,5 +64,9 @@ public class ApiHoldingTime {
 		this.arrivalUsed = ipcHoldingTime.isArrivalUsed();	
 		this.currentTime = ipcHoldingTime.getCurrentTime();
 		this.arrivalTime = ipcHoldingTime.getArrivalTime();
+		this.hasN1=ipcHoldingTime.isHasN1();
+		this.hasN2=ipcHoldingTime.isHasN2();
+		this.hasD1=ipcHoldingTime.isHasD1();
+		
 	}
 }

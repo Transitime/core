@@ -99,7 +99,7 @@ body {
 						</tr>
 						<tr>
 							<td colspan="2">
-								<div id="byline">Developed by Sean Og Crudden (og.crudden@gmail.com) and Simon Berrebi (simon@berrebi.net)</div>
+								<div id="byline">Developed by Sean Óg Crudden (og.crudden@gmail.com) and Simon Berrebi (simon@berrebi.net)</div>
 							</td>
 						</tr>
 					</table>
@@ -228,16 +228,22 @@ body {
                 
 				var seconds = time - (minutes * 60);
                 
-           
-                if(holdingTimeMilliseconds>0)
+           		if(data.holdingTimes[data.vehicle].hasD1)
+           		{
+	                if(holdingTimeMilliseconds>0)
+	                {
+	                    $("#counter").css({'color' : 'green','font-size' : '400%'});
+	                    $("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+	                }
+	                else
+	                {
+	                    $("#counter").css({'color' : 'red','font-size' : '400%'});                
+						$("#counter").text('-'+str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+	                }
+                }else
                 {
-                    $("#counter").css({'color' : 'green','font-size' : '400%'});
-                    $("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
-                }
-                else
-                {
-                    $("#counter").css({'color' : 'red','font-size' : '400%'});                
-					$("#counter").text('-'+str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
+                   	$("#counter").css({'color' : 'blue','font-size' : '400%'});                
+					$("#counter").text('No data available.');
                 }
 		    }
             else

@@ -21,8 +21,9 @@ public class HoldingTimeGeneratorFactory {
 		public static HoldingTimeGenerator getInstance() {
 			// If the PredictionGenerator hasn't been created yet then do so now
 			if (singleton == null) {
-				singleton = ClassInstantiator.instantiate(className.getValue(), 
-						HoldingTimeGenerator.class);
+				if(className.getValue().length()>0)
+					singleton = ClassInstantiator.instantiate(className.getValue(), 
+							HoldingTimeGenerator.class);
 			}
 			
 			return singleton;
