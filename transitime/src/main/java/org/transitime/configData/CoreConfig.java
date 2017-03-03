@@ -208,7 +208,7 @@ public class CoreConfig {
 	}
 	private static FloatConfigValue maxHeadingOffsetFromSegment =
 			new FloatConfigValue("transitime.core.maxHeadingOffsetFromSegment", 
-					135.0f,
+					360.0f,
 					"How far heading in degrees of vehicle can be away from " +
 					"path segment and still be considered a match. Needs to " +
 					"be pretty lenient because stopPaths and heading might " +

@@ -53,6 +53,8 @@ public class SpatialMatcher {
 	
 	// For keeping track of whether getting closer or further away
 	private double previousDistanceToSegment = Double.MAX_VALUE;
+	
+	private int previousSegmentIndex = -1;
 
 	// For keeping track of potential matches where heading and
 	// distance to segment are acceptable.
@@ -555,7 +557,7 @@ public class SpatialMatcher {
 		double distanceAlongSegment = 
 				segmentVector.matchDistanceAlongVector(avlReport.getLocation());
 		boolean atLayover = potentialMatchIndices.isLayover();
-
+		
 		// Make sure only searching starting from previous spatial match. 
 		// Otherwise would screw up determination of arrivals/departures etc.
 		// But only do this for blocks that have a schedule since no-schedule
@@ -582,19 +584,16 @@ public class SpatialMatcher {
 			if (potentialMatchIndices.equals(startSearchSpatialMatch.getIndices())
 					&& distanceAlongSegment < 
 						startSearchSpatialMatch.getDistanceAlongSegment()) {
-				// The current match would be before the starting point so
-				// adjust it.
+				
+				//TODO Check if this is OK for other operators.
 				logger.debug("For vehicleId={} the spatial match was before " +
-						"the starting previous match so will use the previous " +
-						"match. original distanceAlongSegment={} and " +
+						"the starting match so will not use. distanceAlongSegment={} and " +
 						"startSearchSpatialMatch={}",
 						avlReport.getVehicleId(), 
 						Geo.distanceFormat(distanceAlongSegment), 
 						startSearchSpatialMatch);
-				distanceAlongSegment = 
-						startSearchSpatialMatch.getDistanceAlongSegment();
-				distanceToSegment = 
-						startSearchSpatialMatch.getDistanceToSegment();
+				
+				return;
 			}
 		}
 		
@@ -685,6 +684,7 @@ public class SpatialMatcher {
 		// Remember the distance to the segment for when checking the
 		// next indices for spatial match.
 		previousDistanceToSegment = distanceToSegment;
+		previousSegmentIndex = potentialMatchIndices.getSegmentIndex();
 		
 		// A layover is always a spatial match since the vehicle is allowed to
 		// be off of the route there. So always add layovers to the list of

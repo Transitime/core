@@ -3,6 +3,7 @@ package org.transitime.core.headwaygenerator;
 import java.util.Date;
 import java.util.List;
 
+import org.transitime.applications.Core;
 import org.transitime.core.HeadwayGenerator;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
@@ -18,7 +19,7 @@ import org.transitime.db.structs.Headway;
  * 
  * This is a WIP
  * 
- * Maybe should be a list and have a predicted headway at each stop along the route. So key for headway could be (stop, vehicle, trip).
+ * Maybe should be a list and have a predicted headway at each stop along the route. So key for headway could be (stop, vehicle, trip, start_time).
  */
 public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
 
@@ -58,7 +59,7 @@ public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
 					long headwayTime=Math.abs(stopList.get(lastStopArrivalIndex).getTime()-stopList.get(previousVehicleArrivalIndex).getTime());
 	
 					Headway headway=new Headway(headwayTime, new Date(date), vehicleId, stopId, vehicleState.getTrip().getId(), vehicleState.getTrip().getRouteId());
-					
+					Core.getInstance().getDbLogger().add(headway);
 					return headway;
 				}
 			}

@@ -18,6 +18,7 @@ package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -109,6 +110,11 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					+ "If this value is set to true then the actual schedule "
 					+ "time will be used. If false then the schedule time plus "
 					+ "the wait stop time will be used.");
+	
+	private static BooleanConfigValue useHoldingTimeInPrediction =
+			new BooleanConfigValue("useHoldingTimeInPrediction",
+					false,
+					"Add holding time to prediction.");
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionGeneratorDefaultImpl.class);
@@ -435,11 +441,33 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			// handle situations where want to display to the user for wait 
 			// stops schedule times instead of the calculated prediction time.
 			predictionTime = predictionForStop.getActualPredictionTime();
+			
 			if (predictionForStop.isArrival())
-			{								
-				predictionTime += indices.getStopTimeForPath();
-				
-				/* TODO this is where we should take account of holding time */			
+			{					
+				/* TODO this is where we should take account of holding time */
+				if(useHoldingTimeInPrediction.getValue() && HoldingTimeGeneratorFactory.getInstance()!=null)
+				{
+					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(predictionForStop);
+					
+					if(holdingTime!=null)
+					{
+						long holdingTimeMsec = holdingTime.getHoldingTime().getTime()-holdingTime.getArrivalTime().getTime();
+						if(holdingTimeMsec>indices.getStopTimeForPath())
+						{
+							predictionTime += holdingTime.getHoldingTime().getTime()-holdingTime.getArrivalTime().getTime();
+						}else
+						{
+							predictionTime += indices.getStopTimeForPath();
+						}
+					}
+					else
+					{
+						predictionTime += indices.getStopTimeForPath();
+					}
+				}else
+				{
+					predictionTime += indices.getStopTimeForPath();
+				}
 			}
 			
 			// Increment indices so can generate predictions for next path
@@ -467,7 +495,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		logger.debug("Using transiTime default algorithm for travel time prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
 		if(storeTravelTimeStopPathPredictions.getValue())
 		{		
-			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), Calendar.getInstance().getTime(), new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "TRANSITIME DEFAULT", true);		
+			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()) , new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "TRANSITIME DEFAULT", true);		
 			Core.getInstance().getDbLogger().add(predictionForStopPath);
 			StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 		}
