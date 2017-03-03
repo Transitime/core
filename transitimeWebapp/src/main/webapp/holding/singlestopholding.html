@@ -36,6 +36,7 @@ body {
 </style>
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="js/ion.sound.js"></script>
 <script src="js/transiTimeHolding.js"></script>
 <script src="js/transiTimeVehicles.js"></script>
 <script src="js/transiTimeRoutes.js"></script>
@@ -136,6 +137,21 @@ body {
 </body>
 
 <script>
+	ion.sound({
+	    sounds: [	        
+	        {
+	            name: "ship_bell",
+	            volume: 0.3
+	        },
+	        {
+	            name: "store_door",
+	            volume: 0.3,	            
+	        }
+	    ],
+	    volume: 0.5,
+	    path: "sounds/",
+	    preload: true
+	});
     var myTimer = null;
 	var host = null;
 	var vehicle = null;
@@ -210,7 +226,9 @@ body {
             
             if(data.holdingTimes[data.vehicle] != null)
 		    {                       
-			     console.log("Have data");									
+			    console.log("Have data");
+			    									
+                ion.sound.play("store_door");
                 
                 $("#timeofdeparture").text(
 						new Date(data.holdingTimes[data.vehicle].holdingTime).toLocaleTimeString());
@@ -237,6 +255,7 @@ body {
 	                }
 	                else
 	                {
+	                 	ion.sound.play("ship_bell");
 	                    $("#counter").css({'color' : 'red','font-size' : '400%'});                
 						$("#counter").text('-'+str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
 	                }
