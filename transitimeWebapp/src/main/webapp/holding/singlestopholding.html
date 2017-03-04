@@ -100,7 +100,7 @@ body {
 						</tr>
 						<tr>
 							<td colspan="2">
-								<div id="byline">Developed by Sean Óg Crudden (og.crudden@gmail.com) and Simon Berrebi (simon@berrebi.net)</div>
+								<div id="byline">Developed by Sean &Oacute;g Crudden (og.crudden@gmail.com) and Simon Berrebi (simon@berrebi.net)</div>
 							</td>
 						</tr>
 					</table>
@@ -145,7 +145,7 @@ body {
 	        },
 	        {
 	            name: "store_door",
-	            volume: 0.3,	            
+	            volume: 0.3	            
 	        }
 	    ],
 	    volume: 0.5,
@@ -171,6 +171,8 @@ body {
 			vehicleDetails: {},
 			
 	};
+	var playarrivalsound=true;
+	var playdepartcound=true;
 	function vehicleToDisplay(data, stopid)
     {
         if(data.holdingTimes != null && data.predictions!=null)
@@ -228,7 +230,11 @@ body {
 		    {                       
 			    console.log("Have data");
 			    									
-                ion.sound.play("store_door");
+                if(playarrivalsound)
+                {
+                	ion.sound.play("store_door");
+                	playarrivalsound=false;
+                }
                 
                 $("#timeofdeparture").text(
 						new Date(data.holdingTimes[data.vehicle].holdingTime).toLocaleTimeString());
@@ -255,7 +261,12 @@ body {
 	                }
 	                else
 	                {
-	                 	ion.sound.play("ship_bell");
+	                 	if(playdepartsound)
+	                 	{
+	                 		ion.sound.play("ship_bell");
+	                 		playdepartsound=false;
+	                 	}
+	                 		
 	                    $("#counter").css({'color' : 'red','font-size' : '400%'});                
 						$("#counter").text('-'+str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
 	                }
@@ -280,6 +291,10 @@ body {
             $("#nextarrival").text("");
             $("#counter").text("00:00");
             $("#counter").css({'color' : 'blue','font-size' : '400%'});
+            
+            playarrivalsound=true;
+            playdepartsound=true;
+            
             clearInterval(myTimer);
             myTimer = setInterval(updateDashBoard, 5000);
         }        
