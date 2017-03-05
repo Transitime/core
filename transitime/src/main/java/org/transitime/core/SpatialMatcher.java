@@ -557,7 +557,7 @@ public class SpatialMatcher {
 		double distanceAlongSegment = 
 				segmentVector.matchDistanceAlongVector(avlReport.getLocation());
 		boolean atLayover = potentialMatchIndices.isLayover();
-		
+	
 		// Make sure only searching starting from previous spatial match. 
 		// Otherwise would screw up determination of arrivals/departures etc.
 		// But only do this for blocks that have a schedule since no-schedule
@@ -584,16 +584,22 @@ public class SpatialMatcher {
 			if (potentialMatchIndices.equals(startSearchSpatialMatch.getIndices())
 					&& distanceAlongSegment < 
 						startSearchSpatialMatch.getDistanceAlongSegment()) {
-				
-				//TODO Check if this is OK for other operators.
+				// The current match would be before the starting point so
+				// adjust it.
 				logger.debug("For vehicleId={} the spatial match was before " +
-						"the starting match so will not use. distanceAlongSegment={} and " +
+						"the starting previous match so will use the previous " +
+						"match. original distanceAlongSegment={} and " +
 						"startSearchSpatialMatch={}",
 						avlReport.getVehicleId(), 
 						Geo.distanceFormat(distanceAlongSegment), 
 						startSearchSpatialMatch);
 				
-				return;
+				distanceAlongSegment = 
+						startSearchSpatialMatch.getDistanceAlongSegment();
+				distanceToSegment = 
+						startSearchSpatialMatch.getDistanceToSegment();
+				
+				//return;
 			}
 		}
 		
@@ -618,7 +624,7 @@ public class SpatialMatcher {
 		
 		// If the match is better than the previous one then it trending 
 		// towards a minimum so keep track of it if heading and distance are OK. 
-		if (distanceToSegment <= previousDistanceToSegment) {
+		if (distanceToSegment < previousDistanceToSegment) {
 			boolean headingOK = segmentVector.headingOK(avlReport.getHeading(),
 					CoreConfig.getMaxHeadingOffsetFromSegment());
 			boolean distanceOK =
