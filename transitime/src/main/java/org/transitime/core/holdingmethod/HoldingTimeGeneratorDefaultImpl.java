@@ -107,12 +107,13 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			if(lastVehicleDeparture!=null)
 			{
 				logger.debug("Found last vehicle departure event: {}", lastVehicleDeparture.toString());
-				
+										
 				if(predictions.size()>=2 
 						&& !vehicleInBetween( VehicleDataCache.getInstance(), event.getRouteId(), event.getVehicleId(),predictions.get(0).getVehicleId())
 						&& !vehicleInBetween( VehicleDataCache.getInstance(), event.getRouteId(), predictions.get(0).getVehicleId(),predictions.get(1).getVehicleId()))
 				{
 					logger.debug("Prediction for N-1 {}: {} ", predictions.get(0).getVehicleId(),predictions.get(0));
+					
 					logger.debug("Prediction for N-2 {}: {} ", predictions.get(1).getVehicleId(),predictions.get(1));
 					 															
 					
@@ -190,21 +191,24 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 				
 		for(IpcVehicleComplete vehicle:vehicles)
 		{
-			if(vehicle.getFreqStartTime()<=vehicle_1.getFreqStartTime() && vehicle.getFreqStartTime()>=vehicle_2.getFreqStartTime() )
+			if(!vehicleId_1.equals(vehicle.getId())&&!vehicleId_2.equals(vehicle.getId()))
 			{
-				if(vehicle.getFreqStartTime()==vehicle_1.getFreqStartTime() &&  vehicle.getFreqStartTime()==vehicle_2.getFreqStartTime() )
-				{					
-					if(vehicle.getDistanceAlongTrip()>vehicle_1.getDistanceAlongTrip() && vehicle.getDistanceAlongTrip()<vehicle_2.getDistanceAlongTrip())
-					{
-						return true;
-					}
-					if(vehicle.getFreqStartTime()<vehicle_1.getFreqStartTime() && vehicle.getDistanceAlongTrip()<vehicle_2.getDistanceAlongTrip())
-					{
-						return true;
-					}
-					if(vehicle.getFreqStartTime()>vehicle_2.getFreqStartTime() && vehicle.getDistanceAlongTrip()>vehicle_1.getDistanceAlongTrip())
-					{
-						return true;
+				if(vehicle.getFreqStartTime()<=vehicle_1.getFreqStartTime() && vehicle.getFreqStartTime()>=vehicle_2.getFreqStartTime() )
+				{
+					if(vehicle.getFreqStartTime()==vehicle_1.getFreqStartTime() &&  vehicle.getFreqStartTime()==vehicle_2.getFreqStartTime() )
+					{					
+						if(vehicle.getDistanceAlongTrip()>vehicle_1.getDistanceAlongTrip() && vehicle.getDistanceAlongTrip()<vehicle_2.getDistanceAlongTrip())
+						{
+							return true;
+						}
+						if(vehicle.getFreqStartTime()<vehicle_1.getFreqStartTime() && vehicle.getDistanceAlongTrip()<vehicle_2.getDistanceAlongTrip())
+						{
+							return true;
+						}
+						if(vehicle.getFreqStartTime()>vehicle_2.getFreqStartTime() && vehicle.getDistanceAlongTrip()>vehicle_1.getDistanceAlongTrip())
+						{
+							return true;
+						}
 					}
 				}
 			}

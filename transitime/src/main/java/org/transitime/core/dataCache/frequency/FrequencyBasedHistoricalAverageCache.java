@@ -60,6 +60,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		return singleton;
 	}
 	
+	
 	private FrequencyBasedHistoricalAverageCache() {													
 	}
 	public String toString()
@@ -107,10 +108,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 		
-		if(arrivalDeparture.getStopPathIndex()==12)
-		{
-			logger.debug("to debug last stop");
-		}
+	
 		
 		if(arrivalDeparture.getFreqStartTime()!=null && trip.isNoSchedule())		
 		{			
@@ -134,7 +132,7 @@ public class FrequencyBasedHistoricalAverageCache {
 					if(average==null)				
 						average=new HistoricalAverage();
 					
-					average.update(pathDuration);
+					average.update(pathDuration);				
 					
 					FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 				}

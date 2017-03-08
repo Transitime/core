@@ -456,6 +456,9 @@ public class Core {
 				
 				endDate=startDate;
 			}
+			// TODO just here to check values reasonable.
+			logger.info(FrequencyBasedHistoricalAverageCache.getInstance().toString());
+			
 			endDate=Calendar.getInstance().getTime();
 			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
