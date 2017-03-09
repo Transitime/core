@@ -121,7 +121,7 @@ public class FrequencyBasedHistoricalAverageCache {
 							
 			double pathDuration=getLastPathDuration(arrivalDeparture, trip);
 							
-			if(pathDuration>0)
+			if(pathDuration>0||pathDuration < 600000)
 			{		
 				if(trip.isNoSchedule())
 				{							
@@ -138,7 +138,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				}
 			}				
 			double stopDuration=getLastStopDuration(arrivalDeparture, trip);
-			if(stopDuration>0)
+			if(stopDuration>0||stopDuration < 600000)
 			{
 				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false, new Long(time));
 				
