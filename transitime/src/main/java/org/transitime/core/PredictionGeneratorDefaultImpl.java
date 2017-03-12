@@ -417,7 +417,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			// start time for a frequency based service 
 			if(lastStopOfNonSchedBasedTrip) {						
 				tripCounter++;
-				vehicleState.putTripStartTime(tripCounter, predictionForStop.getPredictionTime());								
+				vehicleState.putTripStartTime(tripCounter, predictionForStop.getPredictionTime());
+				break;
 			}
 					
 

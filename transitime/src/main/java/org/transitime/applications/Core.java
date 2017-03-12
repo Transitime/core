@@ -418,9 +418,7 @@ public class Core {
 			// For making sure logger configured properly
 			outputLoggerStatus();
 			
-			// Initialize the core now
-			createCore();
-			
+		
 			Session session = HibernateUtils.getSession();
 			
 			Date endDate=Calendar.getInstance().getTime();
@@ -469,6 +467,10 @@ public class Core {
 				
 				endDate=startDate;
 			}
+			
+			// Initialize the core now
+			createCore();
+			
 			
 			// Start any optional modules. 
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();

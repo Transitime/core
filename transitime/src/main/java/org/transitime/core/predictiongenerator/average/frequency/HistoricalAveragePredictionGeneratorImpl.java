@@ -56,6 +56,10 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
 		{																			
 						
+			if(indices.getStopPathIndex() ==0)
+			{
+				logger.debug("found 0");
+			}
 			Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter())),2);
 			
 			/* this is what gets the trip from the buckets */

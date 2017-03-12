@@ -104,13 +104,13 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			
 			ArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getTripId(), event.getStopId(), new Date(event.getTime()));
 			
+		
+			
 			if(lastVehicleDeparture!=null)
 			{
 				logger.debug("Found last vehicle departure event: {}", lastVehicleDeparture.toString());
-										
-				if(predictions.size()>=2 
-						&& !vehicleInBetween( VehicleDataCache.getInstance(), event.getRouteId(), event.getVehicleId(),predictions.get(0).getVehicleId())
-						&& !vehicleInBetween( VehicleDataCache.getInstance(), event.getRouteId(), predictions.get(0).getVehicleId(),predictions.get(1).getVehicleId()))
+				
+				if(predictions.size()>=2 )
 				{
 					logger.debug("Prediction for N-1 {}: {} ", predictions.get(0).getVehicleId(),predictions.get(0));
 					
@@ -131,8 +131,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 						
 					return holdingTime;				
 				}
-				else if(predictions.size()==1 && 
-						!vehicleInBetween( VehicleDataCache.getInstance(), event.getRouteId(), event.getVehicleId(),predictions.get(0).getVehicleId()))
+				else if(predictions.size()==1)
 				{
 					logger.debug("Prediction for N-1 {}: {} ", predictions.get(0).getVehicleId(),predictions.get(0));
 						

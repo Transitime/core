@@ -563,6 +563,10 @@ public class SpatialMatcher {
 		// But only do this for blocks that have a schedule since no-schedule
 		// blocks are loops where we don't really have the concept of 
 		// before/after for indices.
+		if(distanceAlongSegment==48.04)
+		{
+			logger.debug("stophere");
+		}
 		
 		//&& potentialMatchIndices.getBlock().hasSchedule()
 		if (startSearchSpatialMatch != null){
@@ -599,7 +603,7 @@ public class SpatialMatcher {
 				distanceToSegment = 
 						startSearchSpatialMatch.getDistanceToSegment();
 				
-				//return;
+				return;
 			}
 		}
 		
@@ -748,6 +752,11 @@ public class SpatialMatcher {
 		// distanceSearched
 		// with minus that distance so that it will be determined correctly.
 		double distanceSearched = -previousMatch.getDistanceAlongSegment();
+		
+		if(distanceAlongPathToSearch>1000)
+		{
+			logger.debug("stophere");
+		}
 
 		// Start at the previous match and search along the block for best
 		// spatial matches. Look ahead until distance spanned would mean
