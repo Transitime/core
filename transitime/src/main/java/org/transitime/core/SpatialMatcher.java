@@ -16,6 +16,7 @@
  */
 package org.transitime.core;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -563,11 +564,7 @@ public class SpatialMatcher {
 		// But only do this for blocks that have a schedule since no-schedule
 		// blocks are loops where we don't really have the concept of 
 		// before/after for indices.
-		if(distanceAlongSegment==48.04)
-		{
-			logger.debug("stophere");
-		}
-		
+			
 		//&& potentialMatchIndices.getBlock().hasSchedule()
 		if (startSearchSpatialMatch != null){
 			// If looking at previous index then something is really wrong.
@@ -602,7 +599,7 @@ public class SpatialMatcher {
 						startSearchSpatialMatch.getDistanceAlongSegment();
 				distanceToSegment = 
 						startSearchSpatialMatch.getDistanceToSegment();
-				
+				previousPotentialSpatialMatch = null;
 				return;
 			}
 		}
@@ -634,6 +631,8 @@ public class SpatialMatcher {
 			boolean distanceOK =
 					distanceToSegment < getMaxAllowableDistanceFromSegment(
 							potentialMatchIndices, matchingType);
+			
+				
 			if (headingOK && distanceOK) {
 				// Heading and distance OK so store this as a potential match
 				previousPotentialSpatialMatch = spatialMatch;
@@ -753,11 +752,14 @@ public class SpatialMatcher {
 		// with minus that distance so that it will be determined correctly.
 		double distanceSearched = -previousMatch.getDistanceAlongSegment();
 		
-		if(distanceAlongPathToSearch>1000)
+		/*
+		SimpleDateFormat dateFormatter=new SimpleDateFormat("hhmmss");
+		String time=dateFormatter.format(vehicleState.getAvlReport().getDate());
+		if(time.equals("115915"))
 		{
-			logger.debug("stophere");
-		}
-
+			logger.debug("stop here");
+		}	
+		*/
 		// Start at the previous match and search along the block for best
 		// spatial matches. Look ahead until distance spanned would mean
 		// that vehicle would have had to travel too fast or that end of
