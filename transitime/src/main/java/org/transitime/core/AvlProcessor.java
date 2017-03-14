@@ -376,6 +376,7 @@ public class AvlProcessor {
 					+ vehicleState);
 		}
 
+		logger.debug("STARTOFMATCHING");
 		logger.debug("Matching already predictable vehicle using new AVL "
 				+ "report. The old spatial match is {}", vehicleState);
 
@@ -438,7 +439,7 @@ public class AvlProcessor {
 					vehicleState.getVehicleId(),
 					vehicleState.numberOfBadMatches());
 		}
-
+		logger.debug("ENDOFMATCHING");
 		// Return results
 		return bestTemporalMatch;
 	}

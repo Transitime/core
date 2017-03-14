@@ -20,8 +20,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DefaultValue;
@@ -238,6 +240,29 @@ public class CommandsApi {
 		// Create the acknowledgment and return it as JSON or XML
 		ApiCommandAck ack = new ApiCommandAck(true, "AVL processed");
 		return stdParameters.createResponse(ack);
+	}
+	@Path("/command/resetVehicle")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getVehicles(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "v") List<String> vehicleIds) throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+		
+		try {
+			CommandsInterface inter = stdParameters.getCommandsInterface();
+			
+			for(String vehicleId: vehicleIds)
+			{
+				inter.setVehicleUnpredictable(vehicleId);
+			}
+		} catch (RemoteException e) {			
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+				
+		ApiCommandAck ack = new ApiCommandAck(true, "Vehicle reset");
+		
+		return stdParameters.createResponse(ack);		
 	}
 
 }

@@ -73,7 +73,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 			{
 				if(storeTravelTimeStopPathPredictions.getValue())
 				{
-					PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE", true);			
+					PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE", true, time);			
 					Core.getInstance().getDbLogger().add(predictionForStopPath);
 					StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 				}
@@ -107,7 +107,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 			{				
 				if(storeDwellTimeStopPathPredictions.getValue())
 				{
-					PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE", false);			
+					PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE", false, time);			
 					Core.getInstance().getDbLogger().add(predictionForStopPath);
 					StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 				}

@@ -48,4 +48,10 @@ public interface CommandsInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public String pushAvl(Collection<IpcAvl> avlData) throws RemoteException;
+	
+	/*
+	 * WIP This is to give a means of manually setting a vehicle unpredictable and unassigned so it will be reassigned quickly.
+	 */
+	public void setVehicleUnpredictable(String vehicleId) throws RemoteException;
+	
 }

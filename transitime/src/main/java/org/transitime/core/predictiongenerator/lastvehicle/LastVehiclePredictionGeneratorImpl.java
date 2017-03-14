@@ -77,7 +77,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 			
 			if(storeTravelTimeStopPathPredictions.getValue())
 			{
-				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(time).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE", true);				
+				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(time).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE", true, null);				
 				
 				Core.getInstance().getDbLogger().add(predictionForStopPath);
 				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);

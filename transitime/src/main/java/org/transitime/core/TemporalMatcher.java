@@ -490,6 +490,8 @@ public class TemporalMatcher {
 		logger.debug("For vehicleId={} best temporal match was found to be {}",
 				vehicleState.getVehicleId(), bestTemporalMatchSoFar);
 		
+		
+		
 		// Return the best temporal match (if there is one)
 		return bestTemporalMatchSoFar;
 	}

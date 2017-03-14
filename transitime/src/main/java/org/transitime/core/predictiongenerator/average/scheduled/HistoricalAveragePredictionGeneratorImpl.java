@@ -60,7 +60,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		{
 			if(storeTravelTimeStopPathPredictions.getValue())
 			{
-				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE",true);			
+				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), average.getAverage(), indices.getTrip().getId(), indices.getStopPathIndex(), "HISTORICAL AVERAGE",true, null);			
 				Core.getInstance().getDbLogger().add(predictionForStopPath);
 				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 			}

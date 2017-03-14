@@ -16,9 +16,6 @@
  */
 package org.transitime.applications;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -33,10 +30,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.transitime.config.ConfigFileReader;
 import org.transitime.db.structs.Location;
-import org.transitime.api.gtfsRealtime.GtfsRtTripFeed;
-import org.transitime.api.gtfsRealtime.GtfsRtVehicleFeed;
-import org.transitime.feed.gtfsRt.OctalDecoder;
+
+import org.transitime.ipc.clients.CommandsInterfaceFactory;
 import org.transitime.ipc.clients.ConfigInterfaceFactory;
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.clients.VehiclesInterfaceFactory;
@@ -50,12 +47,11 @@ import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.ipc.interfaces.CommandsInterface;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface.RouteStop;
 import org.transitime.ipc.interfaces.VehiclesInterface;
-
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
 /**
  * A command line application that allows user to request data from the
@@ -78,9 +74,13 @@ public class RmiQuery {
 	private static String serviceId;
 	private static String tripId;
 	
+	static {
+		ConfigFileReader.processConfig();
+	}
+	
 	private static enum Command {NOT_SPECIFIED, GET_PREDICTIONS, GET_VEHICLES, 
-		GET_ROUTE_CONFIG, GET_CONFIG, GET_GTFS_RT_VEHICLES, GET_GTFS_RT_TRIPS,
-		GET_ACTIVE_BLOCKS};
+		GET_ROUTE_CONFIG, GET_CONFIG, 
+		GET_ACTIVE_BLOCKS, RESET_VEHICLE};
 
 	/********************** Member Functions **************************/
 
@@ -113,7 +113,7 @@ public class RmiQuery {
                 .isRequired()
                 .withDescription("Name of command to execute. Can be "
                 		+ "\"preds\", \"vehicles\", \"routeConfig\", \"config\", " 
-                		+ "\"gtfsRtVehiclePositions\", \"gtfsRtTripUpdates\", "
+                		+ "\"resetVehicle\", " 
                 		+ "or \"activeBlocks\" .")
                 .create("c")
                 );
@@ -193,13 +193,11 @@ public class RmiQuery {
 		else if ("routeConfig".equals(commandStr))
 			command = Command.GET_ROUTE_CONFIG;
 		else if ("config".equals(commandStr))
-			command = Command.GET_CONFIG;
-		else if ("gtfsRtVehiclePositions".equals(commandStr))
-			command = Command.GET_GTFS_RT_VEHICLES;
-		else if ("gtfsRtTripUpdates".equals(commandStr))
-			command = Command.GET_GTFS_RT_TRIPS;
+			command = Command.GET_CONFIG;		
 		else if ("activeBlocks".equals(commandStr))
 			command = Command.GET_ACTIVE_BLOCKS;
+		else if ("resetVehicle".equals(commandStr))
+			command = Command.RESET_VEHICLE;
 		else {
 			System.out.println("Command \"" + commandStr + "\" is not valid.\n");
 			displayCommandLineOptionsAndExit(options);
@@ -441,58 +439,9 @@ public class RmiQuery {
 		}
 	}
 	
-	/**
-	 * Outputs in human readable format current snapshot of vehicle positions.
-	 */
-	private static void getGtfsRtVehiclesPositions() {
-		GtfsRtVehicleFeed feed = new GtfsRtVehicleFeed(agencyId);
-		FeedMessage message = feed.createMessage();
-		
-		// Output data in human readable format. First, convert
-		// the octal escaped message to regular UTF encoding.
-		String decodedMessage = 
-				OctalDecoder.convertOctalEscapedString(message.toString());
-
-		// Write message out to stdout
-		System.out.println(decodedMessage);
-		
-		String fileName = "gtfsRtVehiclePositions";
-		System.out.println("\nWriting GTFS-RT vehicle positions file to " + fileName);
-		try {
-			OutputStream outputStream = new FileOutputStream(fileName);
-			message.writeTo(outputStream);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
 	
-	/**
-	 * Outputs in human readable format current snapshot of trip updates,
-	 * which contains all the prediction information.
-	 */
-	private static void getGtfsRtTripUpdates() {
-		GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
-		FeedMessage message = feed.createMessage();
-		
-		// Output data in human readable format. First, convert
-		// the octal escaped message to regular UTF encoding.
-		String decodedMessage = 
-				OctalDecoder.convertOctalEscapedString(message.toString());
-
-		// Write message out to stdout
-		System.out.println(decodedMessage);
-
-		// Write data to binary file
-		String fileName = "gtfsRtTripUpdate";
-		System.out.println("\nWriting GTFS-RT trip update file to " + fileName);
-		try {
-			OutputStream outputStream = new FileOutputStream(fileName);
-			message.writeTo(outputStream);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-	}
+	
+	
 	
 	/**
 	 * @param args
@@ -509,16 +458,29 @@ public class RmiQuery {
 				getRouteConfig();
 			} else if (command == Command.GET_CONFIG) {
 				getConfig();
-			} else if (command == Command.GET_GTFS_RT_VEHICLES) {
-				getGtfsRtVehiclesPositions();
-			} else if (command == Command.GET_GTFS_RT_TRIPS) {
-				getGtfsRtTripUpdates();
 			} else if (command == Command.GET_ACTIVE_BLOCKS) {
 				getActiveBlocks();
+			} else if(command == Command.RESET_VEHICLE) {
+				resetVehicles();
 			}
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			// Output stack trace as error message
 			e.printStackTrace();
+		}
+	}
+
+	private static void resetVehicles() throws Exception {		
+		CommandsInterface commandsInterface = 
+				CommandsInterfaceFactory.get(agencyId);
+		if(commandsInterface != null)
+		{
+			for(String vehicleId:vehicleIds)
+			{
+				commandsInterface.setVehicleUnpredictable(vehicleId);
+			}
+		}else 
+		{
+			throw new Exception("Cannot connect to Command server.");
 		}
 	}
 

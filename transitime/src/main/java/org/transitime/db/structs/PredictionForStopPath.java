@@ -49,6 +49,9 @@ public class PredictionForStopPath implements Serializable{
 	private String tripId;
 	
 	@Column
+	private Integer startTime;
+	
+	@Column
 	private String algorithm;
 	
 	@Column
@@ -70,7 +73,7 @@ public class PredictionForStopPath implements Serializable{
 		this.travelTime = travelTime;
 	}
 
-	public PredictionForStopPath(String vehicleId, Date creationTime, Double predictionTimeMilliseconds, String tripId, Integer stopPathIndex, String algorithm, boolean travelTime) {
+	public PredictionForStopPath(String vehicleId, Date creationTime, Double predictionTimeMilliseconds, String tripId,  Integer stopPathIndex, String algorithm, boolean travelTime, Integer startTime) {
 		super();
 		this.creationTime = creationTime;
 		this.predictionTime = predictionTimeMilliseconds;
@@ -79,6 +82,7 @@ public class PredictionForStopPath implements Serializable{
 		this.algorithm=algorithm;
 		this.vehicleId=vehicleId;
 		this.travelTime = travelTime;
+		this.startTime = startTime;
 	}
 
 	public String getVehicleId() {
@@ -137,7 +141,9 @@ public class PredictionForStopPath implements Serializable{
 		int result = 1;
 		result = prime * result + ((algorithm == null) ? 0 : algorithm.hashCode());
 		result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((predictionTime == null) ? 0 : predictionTime.hashCode());
+		result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
 		result = prime * result + ((stopPathIndex == null) ? 0 : stopPathIndex.hashCode());
 		result = prime * result + (travelTime ? 1231 : 1237);
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
@@ -164,10 +170,17 @@ public class PredictionForStopPath implements Serializable{
 				return false;
 		} else if (!creationTime.equals(other.creationTime))
 			return false;
+		if (id != other.id)
+			return false;
 		if (predictionTime == null) {
 			if (other.predictionTime != null)
 				return false;
 		} else if (!predictionTime.equals(other.predictionTime))
+			return false;
+		if (startTime == null) {
+			if (other.startTime != null)
+				return false;
+		} else if (!startTime.equals(other.startTime))
 			return false;
 		if (stopPathIndex == null) {
 			if (other.stopPathIndex != null)
@@ -226,6 +239,15 @@ public class PredictionForStopPath implements Serializable{
 		this.stopPathIndex = null;
 		this.algorithm=null;		
 		this.travelTime = true;
+		this.startTime = null;
+	}
+
+	public Integer getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Integer startTime) {
+		this.startTime = startTime;
 	}
 			
 }
