@@ -111,8 +111,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			{
 				predictions.remove(0);
 			}
-			
-											
+													
 			logger.debug("Have {} predictions for stop {}.", predictions.size(), event.getStopId());
 			
 			ArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getTripId(), event.getStopId(), new Date(event.getTime()));
