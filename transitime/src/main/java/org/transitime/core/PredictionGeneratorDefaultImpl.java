@@ -418,7 +418,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			if(lastStopOfNonSchedBasedTrip) {						
 				tripCounter++;
 				vehicleState.putTripStartTime(tripCounter, predictionForStop.getPredictionTime());
-				break;
+				//break;
 			}
 					
 
