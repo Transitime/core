@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,12 +71,18 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					Date eventFreqStartTime=event.getFreqStartTime();
 					
 					Date predictionFreqStartTime=new Date(prediction.getFreqStartTime());
+										
+					long diffInMinutes = -1;
+					if(eventFreqStartTime!=null && predictionFreqStartTime!=null)			
+						diffInMinutes=Math.abs(TimeUnit.MILLISECONDS.toMinutes(eventFreqStartTime.getTime()-predictionFreqStartTime.getTime()));
 					
 					/* do not include prediction for current vehicle for current stop/trip. OK to include if on next trip around. */
 					if(!prediction.getVehicleId().equals(event.getVehicleId())
 							|| !prediction.getTripId().equals(event.getTripId())
-							|| ( eventFreqStartTime!=null && predictionFreqStartTime!=null && eventFreqStartTime.compareTo(predictionFreqStartTime)!=0))
-					{														
+							|| ( eventFreqStartTime!=null && predictionFreqStartTime!=null && diffInMinutes>2))
+					{		
+						if(prediction.getVehicleId().equals(event.getVehicleId())  && diffInMinutes<2)
+								logger.debug("Stop here");
 						if(predictionsByVehicle.containsKey(prediction.getVehicleId()))
 						{
 							predictionsByVehicle.get(prediction.getVehicleId()).add(prediction);
@@ -99,12 +106,12 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			
 			Collections.sort(predictions, new PredictionTimeComparator());
 			
-			// This is to remove a prediction for the current vehicle and stop.
-			/*if(predictions.size()>0 && predictions.get(0).getVehicleId().equals(event.getVehicleId()))
+			//This is to remove a prediction for the current vehicle and stop. Belt and braces.
+			if(predictions.size()>0 && predictions.get(0).getVehicleId().equals(event.getVehicleId()))
 			{
 				predictions.remove(0);
 			}
-			*/
+			
 											
 			logger.debug("Have {} predictions for stop {}.", predictions.size(), event.getStopId());
 			
