@@ -58,24 +58,23 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		HashMap<String, List<IpcPrediction>> predictionsByVehicle = new HashMap<String, List<IpcPrediction>>();
 		
 		if(event.isArrival() && isControlStop(event.getStopId(), event.getStopPathIndex()))
-		{
- 			logger.debug("Calling Holding Generator for event : {}", event.toString());
-															
+		{ 				
+			logger.debug("All predictions : {}",predictionCache.getAllPredictions(5, 1000000).toString());													
 			List<IpcPredictionsForRouteStopDest> predictionsForRouteStopDests = predictionCache.getPredictions(event.getRouteId(), event.getStopId());
-						
+			
+			logger.debug("Calling Holding Generator for event : {} using predictions : {}", event.toString(),predictionsForRouteStopDests.toString());
 			for(IpcPredictionsForRouteStopDest predictionForRouteStopDest: predictionsForRouteStopDests)
 			{						
 				for(IpcPrediction prediction:predictionForRouteStopDest.getPredictionsForRouteStop())
-				{
-					/* do not include prediction for current vehicle for current stop/trip. OK to include if on next trip around. */
-					/* TODO need to check if trip ids the same that the start time is different for frequency based trips. */
+				{					
 					Date eventFreqStartTime=event.getFreqStartTime();
 					
 					Date predictionFreqStartTime=new Date(prediction.getFreqStartTime());
 					
+					/* do not include prediction for current vehicle for current stop/trip. OK to include if on next trip around. */
 					if(!prediction.getVehicleId().equals(event.getVehicleId())
 							|| !prediction.getTripId().equals(event.getTripId())
-							|| ( eventFreqStartTime!=null && predictionFreqStartTime!=null && eventFreqStartTime!=predictionFreqStartTime))
+							|| ( eventFreqStartTime!=null && predictionFreqStartTime!=null && eventFreqStartTime.compareTo(predictionFreqStartTime)!=0))
 					{														
 						if(predictionsByVehicle.containsKey(prediction.getVehicleId()))
 						{
@@ -95,17 +94,22 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			for(String key:predictionsByVehicle.keySet())
 			{
 				predictions.add(predictionCache.getPredictionForVehicle(key, event.getRouteId(), event.getStopId()));
+				
 			}
 			
 			Collections.sort(predictions, new PredictionTimeComparator());
-		
+			
+			// This is to remove a prediction for the current vehicle and stop.
+			/*if(predictions.size()>0 && predictions.get(0).getVehicleId().equals(event.getVehicleId()))
+			{
+				predictions.remove(0);
+			}
+			*/
 											
 			logger.debug("Have {} predictions for stop {}.", predictions.size(), event.getStopId());
 			
 			ArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getTripId(), event.getStopId(), new Date(event.getTime()));
-			
-		
-			
+								
 			if(lastVehicleDeparture!=null)
 			{
 				logger.debug("Found last vehicle departure event: {}", lastVehicleDeparture.toString());
