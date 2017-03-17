@@ -204,10 +204,13 @@ public class PlaybackModule extends Module {
 					if(last_avl_time>-1)
 					{
 						try {
-							Thread.sleep(avlReport.getTime()-last_avl_time);
+							// only sleep if values less than 10 minutes. This is to allow it skip days/hours of missing data.
+							if((avlReport.getTime()-last_avl_time)<600000)
+							{								
+								Thread.sleep(avlReport.getTime()-last_avl_time);
+							}
 							last_avl_time=avlReport.getTime();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
+						} catch (InterruptedException e) {							
 							e.printStackTrace();
 						}
 					}else
@@ -220,8 +223,9 @@ public class PlaybackModule extends Module {
 			}
 		}
 		
-		logger.info("Read in AVL in playback mode all the way up to current " +
+ 		logger.info("Read in AVL in playback mode all the way up to current " +
 				"time so done. Exiting.");
+		
 		System.exit(0);
 		
 	}

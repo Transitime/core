@@ -422,18 +422,7 @@ public class Core {
 			Session session = HibernateUtils.getSession();
 			
 			Date endDate=Calendar.getInstance().getTime();
-			/* populate one day at a time to avoid memory issue */
-			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-			{
-				Date startDate=DateUtils.addDays(endDate, -1);
-				
-				logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
-				TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-				
-				endDate=startDate;
-			}
-						
-			endDate=Calendar.getInstance().getTime();
+			
 			/* populate one day at a time to avoid memory issue */
 			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
@@ -445,9 +434,13 @@ public class Core {
 				endDate=startDate;
 			}
 			endDate=Calendar.getInstance().getTime();
+			endDate=DateUtils.addDays(endDate, -30);
 			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
 				Date startDate=DateUtils.addDays(endDate, -1);
+				
+				logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
+				TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
 				
 				logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
 				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
@@ -458,7 +451,8 @@ public class Core {
 			logger.info(FrequencyBasedHistoricalAverageCache.getInstance().toString());
 			
 			endDate=Calendar.getInstance().getTime();
-			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+			
+			for(int i=20;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
 				Date startDate=DateUtils.addDays(endDate, -1);
 				

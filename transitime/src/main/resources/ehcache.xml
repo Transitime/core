@@ -9,8 +9,8 @@
 	<diskStore path="/usr/local/transitime/cache" />
 	
 	<cache name="arrivalDeparturesByTrip" 
-		maxEntriesLocalHeap="200000"
-		maxEntriesLocalDisk="200000" 
+		maxEntriesLocalHeap="1000000"
+		maxEntriesLocalDisk="1000000" 
 		eternal="true" 
 		diskSpoolBufferSizeMB="50"				
 		transactionalMode="off">

@@ -74,7 +74,7 @@ public class FrequencyBasedHistoricalAverageCache {
 	}
 	
 	
-	private HashMap<StopPathKey, TreeMap<Long, HistoricalAverage>> m = new HashMap<StopPathKey,TreeMap<Long, HistoricalAverage>>();
+	private static final HashMap<StopPathKey, TreeMap<Long, HistoricalAverage>> m = new HashMap<StopPathKey,TreeMap<Long, HistoricalAverage>>();
 		
 	/**
 	 * Gets the singleton instance of this class.
@@ -149,14 +149,10 @@ public class FrequencyBasedHistoricalAverageCache {
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 				
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
-		
-	
-		
-		if(arrivalDeparture.getFreqStartTime()!=null && trip.isNoSchedule())		
-		{			
-			logger.info("Putting : {} in FrequencyBasedHistoricalAverageCache cache.", arrivalDeparture);
-						
-			Integer time=secondsFromMidnight(arrivalDeparture.getFreqStartTime(), 2);
+					
+		if(trip.isNoSchedule())		
+		{												
+			Integer time=secondsFromMidnight(arrivalDeparture.getDate(), 2);
 			
 			/* this is what puts the trip into the buckets (time slots) */
 			time=round(time, getCacheIncrementsForFrequencyService());
@@ -176,6 +172,8 @@ public class FrequencyBasedHistoricalAverageCache {
 					
 					average.update(pathDuration.getDuration());				
 					
+					logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", pathDuration, historicalAverageCacheKey,average);
+					
 					FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 				}
 			}				
@@ -190,7 +188,9 @@ public class FrequencyBasedHistoricalAverageCache {
 					average=new HistoricalAverage();
 				
 				average.update(stopDuration.getDuration());
-			
+				
+				logger.debug("Putting : {} in FrequencyBasedHistoricalAverageCache cache for key : {} which results in : {}.", stopDuration, historicalAverageCacheKey, average);
+				
 				FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}	
 		}else
@@ -286,7 +286,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		}		
 	}
 	public static int round(double i, int v){
-	    return (int) (Math.round(i/v) * v);
+	    return (int) (Math.floor(i/v) * v);
 	}
 	public static int secondsFromMidnight(Date date, int startHour)
 	{
@@ -378,6 +378,11 @@ public class FrequencyBasedHistoricalAverageCache {
 		
 	}
 	private class TravelTimeResult {
+		@Override
+		public String toString() {
+			return "TravelTimeResult [departure=" + departure + ", arrival=" + arrival + ", duration="+getDuration()+"]";
+		}
+
 		public TravelTimeResult(ArrivalDeparture departure, ArrivalDeparture arrival) {
 			super();
 			this.arrival = arrival;
@@ -400,6 +405,11 @@ public class FrequencyBasedHistoricalAverageCache {
 				
 	}
 	private class DwellTimeResult {		
+		@Override
+		public String toString() {
+			return "DwellTimeResult [arrival=" + arrival + ", departure=" + departure + ", duration="+getDuration()+"]";
+		}
+
 		public DwellTimeResult(ArrivalDeparture arrival, ArrivalDeparture departure) {
 			super();
 			this.arrival = arrival;
