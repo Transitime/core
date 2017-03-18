@@ -253,6 +253,7 @@
         algorithm varchar2(255 char),
         creationTime timestamp,
         predictionTime double precision,
+        startTime number(10,0),
         stopPathIndex number(10,0),
         travelTime number(1,0),
         tripId varchar2(60 char),

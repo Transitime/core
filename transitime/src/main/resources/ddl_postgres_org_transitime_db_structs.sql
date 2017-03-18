@@ -253,6 +253,7 @@
         algorithm varchar(255),
         creationTime timestamp,
         predictionTime float8,
+        startTime int4,
         stopPathIndex int4,
         travelTime boolean,
         tripId varchar(60),
