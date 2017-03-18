@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -74,7 +75,7 @@ public class FrequencyBasedHistoricalAverageCache {
 	}
 	
 	
-	private static final HashMap<StopPathKey, TreeMap<Long, HistoricalAverage>> m = new HashMap<StopPathKey,TreeMap<Long, HistoricalAverage>>();
+	private final ConcurrentHashMap<StopPathKey, TreeMap<Long, HistoricalAverage>> m = new ConcurrentHashMap<StopPathKey,TreeMap<Long, HistoricalAverage>>();
 		
 	/**
 	 * Gets the singleton instance of this class.
@@ -141,7 +142,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		{			
 			m.put(new StopPathKey(key), new TreeMap<Long, HistoricalAverage> ());			
 		}
-		logger.debug("Putting: {} for start time: {} in FrequencyBasedHistoricalAverageCache with value : {}",new StopPathKey(key), key.getStartTime(), average);
+		//logger.debug("Putting: {} for start time: {} in FrequencyBasedHistoricalAverageCache with value : {}",new StopPathKey(key), key.getStartTime(), average);
 		m.get(new StopPathKey(key)).put(key.getStartTime(), average);													
 	}
 	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) 
@@ -193,6 +194,18 @@ public class FrequencyBasedHistoricalAverageCache {
 				
 				FrequencyBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}	
+			if(stopDuration==null && pathDuration==null)
+			{
+				logger.debug("Cannot add to FrequencyBasedHistoricalAverageCache as cannot calculate stopDuration or pathDuration. : {}", arrivalDeparture);
+			}
+			if(pathDuration!=null && (pathDuration.getDuration() < minTravelTimeFilterValue.getValue() || pathDuration.getDuration() > maxTravelTimeFilterValue.getValue()))
+			{
+				logger.debug("Cannot add to FrequencyBasedHistoricalAverageCache as pathDuration: {} is outside parameters. : {}",pathDuration, arrivalDeparture);
+			}
+			if(stopDuration!=null && (stopDuration.getDuration() < minDwellTimeFilterValue.getValue() || stopDuration.getDuration() > maxDwellTimeFilterValue.getValue()))
+			{
+				logger.debug("Cannot add to FrequencyBasedHistoricalAverageCache as stopDuration: {} is outside parameters. : {}",stopDuration, arrivalDeparture);
+			}
 		}else
 		{
 			logger.debug("Cannot add to FrequencyBasedHistoricalAverageCache as no start time set : {}", arrivalDeparture);
@@ -203,7 +216,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());
 		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
-			if(current.getFreqStartTime()!=null && tocheck.getFreqStartTime()!=null)
+			if(current.getFreqStartTime()!=null && tocheck.getFreqStartTime()!=null&&tocheck.getFreqStartTime().equals(current.getFreqStartTime()))
 			{								
 				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()) && current.getVehicleId().equals(tocheck.getVehicleId()))
 				{
@@ -218,7 +231,7 @@ public class FrequencyBasedHistoricalAverageCache {
 		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());
 		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
-			if(current.getFreqStartTime()!=null && tocheck.getFreqStartTime()!=null)
+			if(current.getFreqStartTime()!=null && tocheck.getFreqStartTime()!=null&&tocheck.getFreqStartTime().equals(current.getFreqStartTime()))
 			{
 				if(tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival()) && current.getVehicleId().equals(tocheck.getVehicleId()))
 				{

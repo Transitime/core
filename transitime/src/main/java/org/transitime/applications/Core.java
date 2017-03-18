@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.ConfigFileReader;
+import org.transitime.config.StringConfigValue;
 import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
@@ -99,7 +100,15 @@ public class Core {
 	static {
 		ConfigFileReader.processConfig();
 	}
+	private static StringConfigValue cacheReloadStartTimeStr =
+			new StringConfigValue("transitime.core.cacheReloadStartTimeStr", 
+					"",
+					"Date and time of when to start reading arrivaldepartures to inform caches.");
 	
+	private static StringConfigValue cacheReloadEndTimeStr =
+			new StringConfigValue("transitime.core.cacheReloadEndTimeStr", 
+					"",
+					"Date and time of when to end reading arrivaldepartures to inform caches.");
 	private static final Logger logger = 
 			LoggerFactory.getLogger(Core.class);
 	
@@ -434,18 +443,28 @@ public class Core {
 				endDate=startDate;
 			}
 			endDate=Calendar.getInstance().getTime();
-			endDate=DateUtils.addDays(endDate, -30);
-			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+				
+			if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)				
 			{
-				Date startDate=DateUtils.addDays(endDate, -1);
-				
-				logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
-				TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-				
-				logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
-				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-				
-				endDate=startDate;
+				logger.debug("Populating TripDataHistoryCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				TripDataHistoryCache.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+																
+				logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));			
+			}else
+			{
+				for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+				{
+					Date startDate=DateUtils.addDays(endDate, -1);
+					
+					logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
+					TripDataHistoryCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+					
+					logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+					FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+					
+					endDate=startDate;
+				}
 			}
 			// TODO just here to check values reasonable.
 			logger.info(FrequencyBasedHistoricalAverageCache.getInstance().toString());
