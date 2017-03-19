@@ -49,9 +49,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 	 */
 	@Override
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
-
-		logger.debug("Calling last vehicle algorithm : "+indices.toString());
-		
+	
 		VehicleDataCache vehicleCache = VehicleDataCache.getInstance();
 		
 		List<VehicleState> vehiclesOnRoute = new ArrayList<VehicleState>();
@@ -72,8 +70,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 		long time = 0;
 		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
 		{			
-			logger.debug("Using last vehicle algorithm for prediction : " + time + " instead of "+alternative+" prediction: "
-					+ super.getTravelTimeForPath(indices, avlReport, currentVehicleState) +" for : " + indices.toString());					
+			logger.debug("Using last vehicle algorithm for prediction : " + time + " for : " + indices.toString());					
 			
 			if(storeTravelTimeStopPathPredictions.getValue())
 			{

@@ -156,7 +156,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			boolean affectedByWaitStop, boolean isDelayed,
 			boolean lateSoMarkAsUncertain, int tripCounter) {
 		// Determine additional parameters for the prediction to be generated
-		logger.debug("Calling default transitime prediction algorithm.");
+		
 		StopPath path = indices.getStopPath();
 		String stopId = path.getStopId();
 		int gtfsStopSeq = path.getGtfsStopSeq();
@@ -170,10 +170,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			if(vehicleState.getTripStartTime(tripCounter)!=null)
 				freqStartTime=vehicleState.getTripStartTime(tripCounter).longValue();			
 		}
-		
-		int expectedStopTimeMsec = 
-				(int) getStopTimeForPath(indices, avlReport, vehicleState);
-			
+						
 		// If should generate arrival time...
 		if ((indices.atEndOfTrip() || useArrivalTimes) && !indices.isWaitStop()) {
 			// Create and return arrival time for this stop
@@ -182,9 +179,14 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
 					ArrivalOrDeparture.ARRIVAL, freqStartTime, tripCounter);
 		} else {
+			
 			// Generate a departure time
+						int expectedStopTimeMsec = 
+								(int) getStopTimeForPath(indices, avlReport, vehicleState);
 			// If at a wait stop then need to handle specially...
 			if (indices.isWaitStop()) {
+				
+				
 				logger.debug("For vehicleId={} the original arrival time " +
 						"for waitStop stopId={} is {}",
 						avlReport.getVehicleId(), path.getStopId(),
@@ -327,6 +329,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		// departure time for anything else. But for non-layover stops
 		// can use either arrival or departure times, depending on what
 		// the agency wants. Therefore make this configurable.
+		
+		
 		boolean useArrivalPreds = useArrivalPredictionsForNormalStops.getValue();
 		
 		// If prediction is based on scheduled departure time for a layover
@@ -346,6 +350,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		AvlReport avlReport = vehicleState.getAvlReport();
 		long avlTime = avlReport.getTime();
 		boolean schedBasedPreds = avlReport.isForSchedBasedPreds();
+		
+		logger.debug("Calling default transitime prediction algorithm for {}.", avlReport);
 		
 		// Get time to end of first path and thereby determine prediction for 
 		// first stop.
@@ -370,6 +376,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		long now = Core.getInstance().getSystemTime();
 		
 		
+		//indices.incrementStopPath(predictionTime);
+		
 		Integer tripCounter = new Integer(vehicleState.getTripCounter());
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
@@ -380,6 +388,10 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			// scheduled departure time since those predictions might not
 			// be a accurate. Once a layover encountered then all subsequent
 			// predictions are affected by a layover.
+			
+			// Increment indices so can generate predictions for next path
+			
+			
 			if (indices.isWaitStop())
 				affectedByWaitStop = true;
 			
@@ -392,11 +404,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					indices, predictionTime,
 					useArrivalPreds, affectedByWaitStop, 
 					vehicleState.isDelayed(), lateSoMarkAsUncertain, tripCounter);
-						
+												
 			
-			logger.debug("For vehicleId={} generated prediction {}",
-					vehicleState.getVehicleId(), predictionForStop);
-
 			// If prediction ended up being too far in the future (which can 
 			// happen if it is a departure prediction where the time at the 
 			// stop is added to the arrival time) then don't add the prediction
@@ -431,7 +440,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			if (!lastStopOfNonSchedBasedTrip
 					&& predictionForStop.getPredictionTime() > now) {
 				newPredictions.add(predictionForStop);
-				logger.info("Generated prediction {}", predictionForStop);
+				logger.info("Generated prediction {} based on avlreport {}.", predictionForStop, avlReport);
 			}
 			
 			// Determine prediction time for the departure. For layovers
@@ -441,10 +450,10 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			// getActualPredictionTime() instead of getPredictionTime() to
 			// handle situations where want to display to the user for wait 
 			// stops schedule times instead of the calculated prediction time.
-			predictionTime = predictionForStop.getActualPredictionTime();
-			
+			predictionTime = predictionForStop.getActualPredictionTime();			
 			if (predictionForStop.isArrival())
 			{					
+				predictionTime += getStopTimeForPath(indices, avlReport, vehicleState);
 				/* TODO this is where we should take account of holding time */
 				if(useHoldingTimeInPrediction.getValue() && HoldingTimeGeneratorFactory.getInstance()!=null)
 				{
@@ -456,24 +465,12 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 						if(holdingTimeMsec>indices.getStopTimeForPath())
 						{
 							predictionTime += holdingTime.getHoldingTime().getTime()-holdingTime.getArrivalTime().getTime();
-						}else
-						{
-							predictionTime += indices.getStopTimeForPath();
 						}
 					}
-					else
-					{
-						predictionTime += indices.getStopTimeForPath();
-					}
-				}else
-				{
-					predictionTime += indices.getStopTimeForPath();
+					
 				}
 			}
-			
-			// Increment indices so can generate predictions for next path
-			indices.incrementStopPath(predictionTime);
-			
+			indices.incrementStopPath(predictionTime);						
 			// If reached end of block then done
 			if (indices.pastEndOfBlock(predictionTime)) {
 				logger.debug("For vehicleId={} reached end of block when " +
@@ -481,10 +478,12 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 						vehicleState.getVehicleId());
 				break;
 			}
-			
+			boolean isCircuitRoute=true;
 			// Add in travel time for the next path to get to predicted 
 			// arrival time of this stop
-			predictionTime += getTravelTimeForPath(indices, avlReport, vehicleState);
+			if (!lastStopOfNonSchedBasedTrip && isCircuitRoute) {
+				predictionTime += getTravelTimeForPath(indices, avlReport, vehicleState);
+			}					
 		}
 
 		// Return the results
@@ -493,7 +492,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState)
 	{
-		logger.debug("Using transiTime default algorithm for travel time prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
+		//logger.debug("Using transiTime default algorithm for travel time prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
 		if(storeTravelTimeStopPathPredictions.getValue())
 		{		
 			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()) , new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "TRANSITIME DEFAULT", true, null);		
@@ -506,7 +505,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		long prediction=TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
-		logger.debug("Using transiTime default algorithm for stop time prediction : "+indices + " Value: "+prediction);
+		//logger.debug("Using transiTime default algorithm for stop time prediction : "+indices + " Value: "+prediction);
 		return prediction;		
 	}
 

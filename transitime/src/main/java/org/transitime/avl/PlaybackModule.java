@@ -16,8 +16,12 @@
  */
 package org.transitime.avl;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,6 +203,19 @@ public class PlaybackModule extends Module {
 				// Update the Core SystemTime to use this AVL time
 				Core.getInstance().setSystemTime(avlReport.getTime());
 				
+				DateFormat estFormat = new SimpleDateFormat("yyyyMMddHHmmss");				
+		        TimeZone estTime = TimeZone.getTimeZone("EST");
+		        estFormat.setTimeZone(estTime);
+		        
+		        TimeZone gmtTime = TimeZone.getTimeZone("GMT");		        
+		        DateFormat gmtFormat =  new SimpleDateFormat("yyyyMMddHHmmss");
+		        gmtFormat.setTimeZone(gmtTime);
+		        		    		        		       
+		        String estDate=estFormat.format(avlReport.getTime());
+		        String gmtDate=gmtFormat.format(avlReport.getTime());
+		        
+		        		     
+		        
 				if(playbackRealtime.getValue()==true)
 				{
 					if(last_avl_time>-1)
