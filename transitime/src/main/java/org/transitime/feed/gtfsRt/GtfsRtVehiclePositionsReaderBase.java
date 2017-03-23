@@ -81,6 +81,8 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 	 * Returns the vehicleID. Returns null if no VehicleDescription associated
 	 * with the vehicle or if no ID associated with the VehicleDescription.
 	 * 
+	 * If not vehicleId try label (VIA San Antonio Feed).
+	 * 
 	 * @param vehicle
 	 * @return vehicle ID or null if there isn't one
 	 */
@@ -90,8 +92,11 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		}
 		VehicleDescriptor desc = vehicle.getVehicle();
 		if (!desc.hasLicensePlate()) {
+			if(desc.hasLabel())
+				return desc.getLabel();
 			return null;
 		}
+		
 		return desc.getLicensePlate();
 	}
 
@@ -126,7 +131,13 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			
 			// Determine vehicle ID. If no vehicle ID then can't handle it.
 			String vehicleId = getVehicleId(vehicle);
-			if (vehicleId == null) 
+			
+			String vehicleLabel = getVehicleLabel(vehicle);
+			
+			if (vehicleId == null && vehicleLabel!=null)
+				vehicleId=vehicleLabel;
+								
+			if(vehicleId == null)
 				continue;
 
 			// Determine the GPS time. If time is not available then use the
@@ -200,6 +211,11 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 				counter, timer.elapsedMsec());
 	}
 	
+	private String getVehicleLabel(VehiclePosition vehicle) {
+		
+		return vehicle.getVehicle().getLabel();
+	}
+
 	/**
 	 * Actually processes the GTFS-realtime file and calls handleAvlReport()
 	 * for each AvlReport.
