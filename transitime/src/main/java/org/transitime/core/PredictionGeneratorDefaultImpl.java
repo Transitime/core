@@ -351,7 +351,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		long avlTime = avlReport.getTime();
 		boolean schedBasedPreds = avlReport.isForSchedBasedPreds();
 		
-		logger.debug("Calling default transitime prediction algorithm for {} with a match {}.", avlReport, match);
+		logger.debug("Calling prediction algorithm for {} with a match {}.", avlReport, match);
 		
 		// Get time to end of first path and thereby determine prediction for 
 		// first stop.

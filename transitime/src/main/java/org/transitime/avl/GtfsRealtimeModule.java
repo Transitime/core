@@ -36,7 +36,7 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 	// If debugging feed and want to not actually process
 	// AVL reports to generate predictions and such then
 	// set shouldProcessAvl to false;
-	private static boolean shouldProcessAvl = true;
+	protected static boolean shouldProcessAvl = true;
 
 	/*********** Configurable Parameters for this module ***********/
 	public static String getGtfsRealtimeURI() {
