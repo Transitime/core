@@ -144,7 +144,7 @@ body {
 	    var results = regex.exec(location.search);
 	    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 	};
- 	document.getElementById('mapframe').src="/web/maps/map.jsp?a=ASC&verbose=true&showUnassignedVehicles=true&r="+getUrlParameter();
+ 	document.getElementById('mapframe').src="/web/maps/map.jsp?a=ASC&verbose=true&showUnassignedVehicles=true&r="+getUrlParameter('route');
  	
 	ion.sound({
 	    sounds: [	        
