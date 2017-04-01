@@ -114,7 +114,7 @@ body {
 					</tr>
 					<tr>
 						<div class="container">				
-							<iframe src="/web/maps/map.jsp?a=ASC&r=r0&verbose=true&showUnassignedVehicles=true" frameborder="0" allowfullscreen class="mapframe">
+							<iframe id="mapframe"  src="/web/maps/map.jsp?a=ASC&r=r0&verbose=true&showUnassignedVehicles=true" frameborder="0" allowfullscreen class="mapframe">
 							</iframe>
 						</div>
 					</tr>
@@ -137,6 +137,15 @@ body {
 </body>
 
 <script>
+  	function getUrlParameter(name) 
+    {
+	    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+	    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+	    var results = regex.exec(location.search);
+	    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+	};
+ 	document.getElementById('mapframe').src="/web/maps/map.jsp?a=ASC&verbose=true&showUnassignedVehicles=true&r="+getUrlParameter();
+ 	
 	ion.sound({
 	    sounds: [	        
 	        {
@@ -338,10 +347,10 @@ body {
 	};
     function updateDashBoard()
     {
-        getData(data, "4560595");
-        updateScreen(data, "4560595");
+        getData(data, getUrlParameter('stop'));
+        updateScreen(data,getUrlParameter('stop'));
     };
-    
+  
 	$(document).ready(function() {
 
 		host = document.location.host;
