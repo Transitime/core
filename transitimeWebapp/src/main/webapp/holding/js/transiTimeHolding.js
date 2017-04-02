@@ -1,11 +1,11 @@
 function alertHolding(paramTest) {
     alert(paramTest.tosay);    
 };
-function getHoldingTime(host, stopId, vehicleId, processHoldingTime, data) 
+function getHoldingTime(host, agencyId, stopId, vehicleId, processHoldingTime, data) 
 {                               
     console.log("Calling getHoldingTime.");
     
-    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/getholdingtime?";
+    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyId+"/command/getholdingtime?";
                 
     var xmlhttp = new XMLHttpRequest();
                                 
@@ -34,10 +34,10 @@ function getHoldingTime(host, stopId, vehicleId, processHoldingTime, data)
     xmlhttp.send();                             
     
 };
-function getHoldingTimeKeys(host, processHoldingTimeKeys, data)
+function getHoldingTimeKeys(host, agencyId, processHoldingTimeKeys, data)
 {
     console.log("Calling getHoldingTimeKeys.");
-    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/holdingtimecachekeys";
+    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyId+"/command/holdingtimecachekeys";
                 
     var xmlhttp = new XMLHttpRequest();
                                 

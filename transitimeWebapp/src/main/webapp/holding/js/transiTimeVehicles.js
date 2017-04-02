@@ -18,12 +18,12 @@ function getVehicleDetailsByRoute(host, routeId, processData)
     xmlhttp.open("GET", baseurl, true);
     xmlhttp.send();      
 };
-function getVehicleDetails(host, vehicleId, processData, data)
+function getVehicleDetails(host, agencyId, vehicleId, processData, data)
 {
     console.log("Calling getVehicleDetails.");
-    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/vehiclesDetails";
+    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyId+"/command/vehiclesDetails";
     if(vehicleId.length > 0)            
-        baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/vehiclesDetails?v="+vehicleId;
+        baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyId+"/command/vehiclesDetails?v="+vehicleId;
                 
     var xmlhttp = new XMLHttpRequest();
                                 
@@ -38,12 +38,12 @@ function getVehicleDetails(host, vehicleId, processData, data)
     xmlhttp.open("GET", baseurl, true);
     xmlhttp.send();      
 };
-function getNextVehicleArrivalPredictions(host, routeId, stopId, processData, data)
+function getNextVehicleArrivalPredictions(host, agencyId, routeId, stopId, processData, data)
 {
     console.log("Calling getNextVehicleArrival.");
 
     //http://ec2-54-187-31-47.us-west-2.compute.amazonaws.com:8080/api/v1/key/f78a2e9a/agency/ASC/command/predictions?format=json&rs=ASC_4560585%7C4560595
-    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/ASC/command/predictions?format=json&rs="+routeId+"%7C"+stopId;
+    var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyId+"/command/predictions?format=json&rs="+routeId+"%7C"+stopId;
 
     var xmlhttp = new XMLHttpRequest();
                                 

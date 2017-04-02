@@ -200,12 +200,12 @@ body {
             return null;
         }
     }
-	function getData(data,routeid, stopid)
+	function getData(data, agencyid, routeid, stopid)
 	{						
 								
-		getHoldingTimeKeys(host, processHoldingTimeKeys, data);
+		getHoldingTimeKeys(host, agencyid, processHoldingTimeKeys, data);
 		
-		getNextVehicleArrivalPredictions(host, routeid, stopid, processArrivalPredictions, data);
+		getNextVehicleArrivalPredictions(host, agencyid, routeid, stopid, processArrivalPredictions, data);
                     		    
         var vehicles = [];
         $.each(data.predictions, function() {
@@ -215,14 +215,14 @@ body {
         vehicles=unique(vehicles);
             
         for (var index = 0; index < vehicles.length; ++index) {
-            getHoldingTime(host, stopid, vehicles[index], processHoldingTime, data);
-            getVehicleDetails(host, vehicles[index], processVehicleDetails, data);
+            getHoldingTime(host, agencyid, stopid, vehicles[index], processHoldingTime, data);
+            getVehicleDetails(host, agencyid, vehicles[index], processVehicleDetails, data);
         }
        
 	};
 		
 
-	function updateScreen(data, routeid, stopid)
+	function updateScreen(data, agencyid, routeid, stopid)
 	{
      			
         var vehicle=vehicleToDisplay(data, stopid);
@@ -347,8 +347,8 @@ body {
 	};
     function updateDashBoard()
     {
-        getData(data, getUrlParameter('route'), getUrlParameter('stop'));
-        updateScreen(data, getUrlParameter('route'), getUrlParameter('stop'));
+        getData(data, getUrlParamter('agency'), getUrlParameter('route'), getUrlParameter('stop'));
+        updateScreen(data, , getUrlParamter('agency'), getUrlParameter('route'), getUrlParameter('stop'));
     };
   
 	$(document).ready(function() {
