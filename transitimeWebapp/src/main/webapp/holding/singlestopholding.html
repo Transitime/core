@@ -49,7 +49,7 @@ body {
 <body>
 	<div id="header">
 	<img class="gt-logo-svg" alt="Georgia Tech" src="http://www.gatech.edu/sites/all/themes/gt/images/logos/logo-gt.png"/>
-		<a href="http://www.transitime.org">transitimeExtension: Holding
+		<a href="http://www.transitime.org" id="heading">transitimeExtension: Holding
 			Times for ATLANTA STREETCAR</a>		       
 	</div>
 
@@ -145,6 +145,9 @@ body {
 	    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 	};
  	document.getElementById('mapframe').src="/web/maps/map.jsp?a="+getUrlParameter('agency')+"&verbose=true&showUnassignedVehicles=true&r="+getUrlParameter('route');
+ 	
+ 	var obj = document.getElementById("heading");  
+    obj.innerText = 'transitimeExtension: Holding Times for'+ getUrlParameter('agencyname');
  	
 	ion.sound({
 	    sounds: [	        
