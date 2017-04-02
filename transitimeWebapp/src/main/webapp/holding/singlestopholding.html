@@ -200,12 +200,12 @@ body {
             return null;
         }
     }
-	function getData(data,stopid)
+	function getData(data,routeid, stopid)
 	{						
 								
 		getHoldingTimeKeys(host, processHoldingTimeKeys, data);
 		
-		getNextVehicleArrivalPredictions(host, stopid, processArrivalPredictions, data);
+		getNextVehicleArrivalPredictions(host, routeid, stopid, processArrivalPredictions, data);
                     		    
         var vehicles = [];
         $.each(data.predictions, function() {
@@ -222,7 +222,7 @@ body {
 	};
 		
 
-	function updateScreen(data,stopid)
+	function updateScreen(data, routeid, stopid)
 	{
      			
         var vehicle=vehicleToDisplay(data, stopid);
@@ -347,8 +347,8 @@ body {
 	};
     function updateDashBoard()
     {
-        getData(data, getUrlParameter('stop'));
-        updateScreen(data,getUrlParameter('stop'));
+        getData(data, getUrlParamter('route'), getUrlParameter('stop'));
+        updateScreen(data, getUrlParameter('route'), getUrlParameter('stop'));
     };
   
 	$(document).ready(function() {
