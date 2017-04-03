@@ -3,6 +3,8 @@ package org.transitime.custom.gtt;
 import java.io.InputStream;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,9 +46,14 @@ public class GTTAvlModule extends PollUrlAvlModule {
 					Double longitude=entry.getDouble("lng");
 					
 					//2016-09-07 17:02:48
-					SimpleDateFormat dateformater=new SimpleDateFormat("HH:mm:ss");
+					SimpleDateFormat dateformater=new SimpleDateFormat("yyyyMMdd HH:mm:ss");
 					
-					Date timestamp=dateformater.parse(entry.getString("ts"));
+					LocalDate localDate = LocalDate.now();
+					
+				    String date=DateTimeFormatter.ofPattern("yyyyMMdd").format(localDate);
+
+					
+					Date timestamp=dateformater.parse(date +" "+entry.getString("ts"));
 					
 					float heading=Float.NaN;
 					
