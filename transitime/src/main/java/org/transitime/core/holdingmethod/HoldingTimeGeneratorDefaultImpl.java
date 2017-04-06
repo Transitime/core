@@ -57,8 +57,8 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		PredictionDataCache predictionCache = PredictionDataCache.getInstance();
 							
 		HashMap<String, List<IpcPrediction>> predictionsByVehicle = new HashMap<String, List<IpcPrediction>>();
-		
-		if(event.isArrival() && isControlStop(event.getStopId(), event.getStopPathIndex()))
+					
+		if(event.isArrival() && isControlStop(event.getStopId()))
 		{ 				
 			logger.debug("All predictions : {}",predictionCache.getAllPredictions(5, 1000000).toString());													
 			List<IpcPredictionsForRouteStopDest> predictionsForRouteStopDests = predictionCache.getPredictions(event.getRouteId(), event.getStopId());
@@ -100,10 +100,10 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			
 			for(String key:predictionsByVehicle.keySet())
 			{
-				predictions.add(predictionCache.getPredictionForVehicle(key, event.getRouteId(), event.getStopId()));
-				
+				if(predictionCache.getPredictionForVehicle(key, event.getRouteId(), event.getStopId())!=null)
+					predictions.add(predictionCache.getPredictionForVehicle(key, event.getRouteId(), event.getStopId()));				
 			}
-			
+		
 			Collections.sort(predictions, new PredictionTimeComparator());
 			
 			//This is to remove a prediction for the current vehicle and stop. Belt and braces.
@@ -465,7 +465,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	}
 	
 	private boolean isControlStop(String stopId)
-	{
+	{				
 		ControlStop controlStop=new ControlStop( null, stopId);
 		if(getControlPointStops()!=null)
 		{
