@@ -232,7 +232,7 @@
         id varchar(60) not null,
         configRev integer not null,
         color varchar(10),
-        description varchar(255),
+        description longtext,
         maxLat double precision,
         maxLon double precision,
         minLat double precision,

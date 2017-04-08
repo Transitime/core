@@ -81,7 +81,7 @@ public class Route implements Serializable {
 	@Column(length=2)
 	private final String type;
 	
-	@Column
+	@Column(length=1024)
 	private final String description;
 	
 	// Directly from GTFS data

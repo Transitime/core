@@ -232,7 +232,7 @@
         id varchar2(60 char) not null,
         configRev number(10,0) not null,
         color varchar2(10 char),
-        description varchar2(255 char),
+        description varchar2(1024 char),
         maxLat double precision,
         maxLon double precision,
         minLat double precision,

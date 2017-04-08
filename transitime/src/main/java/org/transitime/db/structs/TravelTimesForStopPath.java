@@ -109,7 +109,7 @@ public class TravelTimesForStopPath implements Serializable {
 	// it can make things so much more efficient want to try using it.
 	// NOTE: since trying to use serialization need to use ArrayList<> instead
 	// of List<> since List<> doesn't implement Serializable.
-	private static final int travelTimesMaxBytes = 10000;
+	private static final int travelTimesMaxBytes = 30000;
 	@Column(length=travelTimesMaxBytes)
 	private final ArrayList<Integer> travelTimesMsec;
 
