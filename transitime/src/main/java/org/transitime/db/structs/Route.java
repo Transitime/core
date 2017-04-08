@@ -85,15 +85,15 @@ public class Route implements Serializable {
 	private final String description;
 	
 	// Directly from GTFS data
-	@Column(length=80)
+	@Column(length=255)
 	private final String shortName;
 	
 	// Directly from GTFS data
-	@Column(length=80)
+	@Column(length=255)
 	private final String longName;
 	
 	// Processed name combing the GTFS route_short_name and route_long_name
-	@Column(length=80)
+	@Column(length=255)
 	private final String name;
 	
 	@Embedded
