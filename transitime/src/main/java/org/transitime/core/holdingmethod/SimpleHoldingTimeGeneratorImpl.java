@@ -64,7 +64,7 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 				logger.debug("Holding time for : {} is {}.", event.toString(), holdingTimeValue);
 				
 				HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), event.getVehicleId(), event.getStopId(), event.getTripId(),
-						event.getRouteId(), false, true, new Date(event.getTime()), false, false, true); 
+						event.getRouteId(), false, true, new Date(event.getTime()), true, 0); 
 				
 				if(storeHoldingTimes.getValue())
 					Core.getInstance().getDbLogger().add(holdingTime);
@@ -77,7 +77,7 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 				
 				long current_vehicle_arrival_time=event.getTime();
 				HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time),  new Date(Core.getInstance().getSystemTime()), event.getVehicleId(), event.getStopId(), event.getTripId(),
-						event.getRouteId(), false, true, new Date(event.getTime()), false, false, false);
+						event.getRouteId(), false, true, new Date(event.getTime()), false, 0);
 				return holdingTime;
 			}
 		

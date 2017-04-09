@@ -33,11 +33,9 @@ public class IpcHoldingTime implements Serializable{
 	
 	private final Date arrivalTime;
 	
-	private boolean hasD1;
+	private boolean hasD1;		
 	
-	private boolean hasN1;
-	
-	private boolean hasN2;
+	private int numberPredictionsUsed;
 	
 	
 	public boolean isHasD1() {
@@ -46,20 +44,9 @@ public class IpcHoldingTime implements Serializable{
 	public void setHasD1(boolean hasD1) {
 		this.hasD1 = hasD1;
 	}
-	public boolean isHasN1() {
-		return hasN1;
-	}
-	public void setHasN1(boolean hasN1) {
-		this.hasN1 = hasN1;
-	}
-	public boolean isHasN2() {
-		return hasN2;
-	}
-	public void setHasN2(boolean hasN2) {
-		this.hasN2 = hasN2;
-	}
+	
 	public IpcHoldingTime(Date holdingTime, Date creationTime, String vehicleId, String stopId, String tripId,
-			String routeId, boolean arrivalPredictionUsed , boolean arrivalUsed, Date arrivalTime, boolean hasN1, boolean hasN2, boolean hasD1) {
+			String routeId, boolean arrivalPredictionUsed , boolean arrivalUsed, Date arrivalTime, boolean hasD1, int numberPredictionsUsed) {
 		super();
 		this.holdingTime = holdingTime;
 		this.creationTime = creationTime;
@@ -70,8 +57,8 @@ public class IpcHoldingTime implements Serializable{
 		this.currentTime = Calendar.getInstance().getTime();
 		this.arrivalTime=arrivalTime;
 		this.hasD1=hasD1;
-		this.hasN1=hasN1;
-		this.hasN2=hasN2;
+		this.numberPredictionsUsed=numberPredictionsUsed;
+	
 	}
 	public IpcHoldingTime(HoldingTime holdingTime) {
 		
@@ -86,11 +73,15 @@ public class IpcHoldingTime implements Serializable{
 		this.currentTime = Calendar.getInstance().getTime();
 		this.arrivalTime=holdingTime.getArrivalTime();
 		this.hasD1=holdingTime.isHasD1();
-		this.hasN1=holdingTime.isHasN1();
-		this.hasN2=holdingTime.isHasN2();
-	
+		this.numberPredictionsUsed=holdingTime.getNumberPredictionsUsed();	
 	}
 
+	public int getNumberPredictionsUsed() {
+		return numberPredictionsUsed;
+	}
+	public void setNumberPredictionsUsed(int numberPredictionsUsed) {
+		this.numberPredictionsUsed = numberPredictionsUsed;
+	}
 	public Date getArrivalTime() {
 		return arrivalTime;
 	}
