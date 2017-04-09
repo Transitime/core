@@ -42,7 +42,7 @@ import javax.ws.rs.WebApplicationException;
 public class UsageValidator {
 
 	// The limits of requests per IP address
-	private static int MAX_REQUESTS = 1000;
+	private static int MAX_REQUESTS = 5000;
 	private static int MAX_REQUESTS_TIME_MSEC = 10000;
 
 	// This is a singleton class

@@ -211,10 +211,18 @@ body {
 		getNextVehicleArrivalPredictions(host, agencyid, routeid, stopid, processArrivalPredictions, data);
                     		    
         var vehicles = [];
+        //  Put all vehicle ids from predictions.
         $.each(data.predictions, function() {
                     vehicles.push(this.vehicle);                
         });
-            
+        // put all vehicle ids from holding times keys.
+        if(data.holdingTimeKeys)
+        {
+	        $.each(data.holdingTimeKeys.HoldingTimeCacheKey, function() {
+	            vehicles.push(this.vehicleId);                
+			});
+        }
+                            
         vehicles=unique(vehicles);
             
         for (var index = 0; index < vehicles.length; ++index) {
@@ -341,13 +349,16 @@ body {
 	{		
 		if(data.vehicleDetails[vehicleId].nextStopId==stopId)
         {
-            if(data.vehicleDetails[vehicleId].isAtStop)
+            return true;
+            /*
+			if(data.vehicleDetails[vehicleId].isAtStop)
             {
                 return true;        
-            }
+            }*/
         }
 	    return false;
 	};
+	
     function updateDashBoard()
     {
         getData(data, getUrlParameter('agency'), getUrlParameter('route'), getUrlParameter('stop'));

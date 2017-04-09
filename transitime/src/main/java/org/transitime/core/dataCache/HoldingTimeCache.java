@@ -71,6 +71,7 @@ public class HoldingTimeCache {
 		Element errorElement = new Element(key, holdingTime);
 		
 		cache.put(errorElement);
+		
 	}
 	public HoldingTime getHoldingTime(HoldingTimeCacheKey key)
 	{

@@ -17,7 +17,6 @@
 package org.transitime.core;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -26,13 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.config.LongConfigValue;
 import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.StopPathPredictionCache;
-import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
-import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.PredictionForStopPath;
@@ -40,7 +38,6 @@ import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPrediction.ArrivalOrDeparture;
-import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
@@ -80,10 +77,13 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	public static int getMaxPredictionsTimeSecs() {
 		return maxPredictionsTimeSecs.getValue();
 	}
-	
-
 			
-	
+	private static LongConfigValue generateHoldingTimeWhenPredictionWithin =
+			new LongConfigValue("transitime.core.generateHoldingTimeWhenPredictionWithin",
+					0L,
+			"If the prediction is less than this number of milliseconds from current time then use it to generate a holding time");
+			
+			
 	private static BooleanConfigValue useArrivalPredictionsForNormalStops =
 			new BooleanConfigValue("transitime.core.useArrivalPredictionsForNormalStops", 
 					true,
@@ -405,6 +405,17 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					useArrivalPreds, affectedByWaitStop, 
 					vehicleState.isDelayed(), lateSoMarkAsUncertain, tripCounter);
 												
+			
+			if((predictionForStop.getPredictionTime()-Core.getInstance().getSystemTime())<generateHoldingTimeWhenPredictionWithin.getValue() &&
+					(predictionForStop.getPredictionTime()-Core.getInstance().getSystemTime())>0)
+			{							
+				if(HoldingTimeGeneratorFactory.getInstance()!=null)
+				{							
+					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(predictionForStop);
+					if(holdingTime!=null)
+						HoldingTimeCache.getInstance().putHoldingTime(holdingTime);		
+				}			
+			}
 			
 			// If prediction ended up being too far in the future (which can 
 			// happen if it is a departure prediction where the time at the 

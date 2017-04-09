@@ -49,6 +49,10 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			true,
 			"This is set to true to record all holding times.");
 	
+	protected static IntegerConfigValue maxPredictionsForHoldingTimeCalculation = new IntegerConfigValue("transitime.holding.maxPredictionsForHoldingTimeCalculation", 
+			3,
+			"This is the maximim number of arrival predictions to include in holding time calculation");
+	
 	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
@@ -60,7 +64,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					
 		if(event.isArrival() && isControlStop(event.getStopId()))
 		{ 				
-			logger.debug("All predictions : {}",predictionCache.getAllPredictions(5, 1000000).toString());													
+			//logger.debug("All predictions : {}",predictionCache.getAllPredictions(5, 1000000).toString());													
 			List<IpcPredictionsForRouteStopDest> predictionsForRouteStopDests = predictionCache.getPredictions(event.getRouteId(), event.getStopId());
 			
 			logger.debug("Calling Holding Generator for event : {} using predictions : {}", event.toString(),predictionsForRouteStopDests.toString());
@@ -128,10 +132,16 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					}
 					Long N[]=predictionsToLongArray(predictions);
 					long current_vehicle_arrival_time=event.getTime();
-					long holdingTimeValue=calculateHoldingTime(current_vehicle_arrival_time, lastVehicleDeparture.getTime(), N);
+					long holdingTimeValue=calculateHoldingTime(current_vehicle_arrival_time, lastVehicleDeparture.getTime(), N, maxPredictionsForHoldingTimeCalculation.getValue());
+					
+					logger.debug("Holding time for : {} is {}.", event.toString(), holdingTimeValue);
 					
 					HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), event.getVehicleId(), event.getStopId(), event.getTripId(),
-							event.getRouteId(), false, true, new Date(event.getTime()), true, N.length); 
+							event.getRouteId(), false, true, new Date(event.getTime()), true, N.length);
+					
+					if(storeHoldingTimes.getValue())
+						Core.getInstance().getDbLogger().add(holdingTime);
+					
 					return holdingTime;
 				}						
 				else 
@@ -157,6 +167,10 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 				long current_vehicle_arrival_time=event.getTime();
 				HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time),  new Date(Core.getInstance().getSystemTime()), event.getVehicleId(), event.getStopId(), event.getTripId(),
 						event.getRouteId(), false, true, new Date(event.getTime()), false, 0);
+				
+				if(storeHoldingTimes.getValue())
+					Core.getInstance().getDbLogger().add(holdingTime);
+				
 				return holdingTime;
 			}
 		
@@ -224,61 +238,21 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		}
 		return closestDepartureEvent;
 	}
-	private static Long calculateHoldingTime(Long current_vehicle_arrival_time, Long last_vehicle_departure_time, Long N[])
-	{
-		int max_index=-1;
+	private static Long calculateHoldingTime(Long current_vehicle_arrival_time, Long last_vehicle_departure_time, Long N[], int max_predictions)
+	{		
 		long max_value=-1;
 		
-		for(int i=0;i<N.length;i++)
+		for(int i=0;i<N.length&&i<max_predictions;i++)
 		{
 			long value=(N[i]-last_vehicle_departure_time)/(i+2);
 			if(value>max_value)
 			{
-				max_value=value;
-				max_index=i;
-			}
-			
+				max_value=value;				
+			}		
 		}
 		return Math.max(max_value-(current_vehicle_arrival_time-last_vehicle_departure_time),0);
 	}
-	private long calculateHoldingTime(long current_vehicle_arrival_time, long last_vehicle_departure_time, long N_1, long N_2)
-	{
-		//G16=MAX(IF((E18-H15)/3>(F17-H15)/2,((E18-H15)/3-(B16-H15))/1.5,((F17-H15)/2-(B16-H15))/2),0)
-		
-		/*Vehicle Z departure time at this stop. (H15)
-		One vehicle arrive at control point at 3:20. (vehicle A) (B16)
-		The next + 1 vehicle arrives at control point at 3:29 (vehicle B) (F17)
-		The next + 2 vehicle arrives at control point at 3:42 (vehicle C) (E18) */
-		
-		long holdingTime;
-		long E18=N_2;
-		long F17=N_1;
-		long B16=current_vehicle_arrival_time;
-		long H15=last_vehicle_departure_time;
-		
-		if(((E18-H15)/3)>((F17-H15)/2))
-		{
-			holdingTime=(long) (((E18-H15)/3-(B16-H15)));
-		}else
-		{
-			holdingTime=((F17-H15)/2-(B16-H15));
-		}		
-		return Math.max(holdingTime, 0);
-		
-	}
-	
-	private long calculateHoldingTime(long current_vehicle_arrival_time, long last_vehicle_departure_time, long N_1)
-	{				
-		// HoldingTime = 0.5(TimeSinceLastDeparture - TimeUntilNextArrival)
-		long holdingTime;
-		
-		holdingTime=((long) ((Math.abs(current_vehicle_arrival_time-last_vehicle_departure_time)-Math.abs(N_1-current_vehicle_arrival_time))*0.5));
-		
-		holdingTime =  Math.max(holdingTime, 0);
-		
-		return holdingTime;		
-	}
-
+			
 	private long calculateHoldingTime(long current_vehicle_arrival_time, long last_vehicle_departure_time)
 	{		
 		// TODO to be implemented as per google doc.
@@ -315,60 +289,116 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			if(backwardArrivalPredictions!=null)
 				logger.debug("Found {} arrival predictions for stop {}.", backwardArrivalPredictions.size(),arrivalPrediction.getStopId());
 									
-			if((forwardDeparturePrediction != null || lastDeparture!=null) && backwardArrivalPredictions!=null && backwardArrivalPredictions.size()>=2)
-			{
-				logger.debug("Prediction for N-1 {}: {} ", backwardArrivalPredictions.get(0).getVehicleId(),backwardArrivalPredictions.get(0).getPredictionTime());
-				logger.debug("Prediction for N-2 {}: {} ", backwardArrivalPredictions.get(1).getVehicleId(),backwardArrivalPredictions.get(1).getPredictionTime());
-				
+			if((forwardDeparturePrediction != null || lastDeparture!=null) && backwardArrivalPredictions!=null && backwardArrivalPredictions.size()>0)
+			{				
+				for(int i=0;i<backwardArrivalPredictions.size();i++)
+				{
+					logger.debug("Prediction for N-{} {}: {} ", i+1, backwardArrivalPredictions.get(i).getVehicleId(),backwardArrivalPredictions.get(i));
+				}
+				Long N[]=predictionsToLongArray(backwardArrivalPredictions);
 				if(lastDeparture!=null&&forwardDeparturePrediction!=null)
 				{
 					if(lastDeparture.getTime()>forwardDeparturePrediction.getPredictionTime())
 					{
-						long holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), forwardDeparturePrediction.getPredictionTime() ,backwardArrivalPredictions.get(0).getPredictionTime(), backwardArrivalPredictions.get(1).getPredictionTime());
+						long holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), forwardDeparturePrediction.getPredictionTime() ,N, maxPredictionsForHoldingTimeCalculation.getValue());
 						
 						logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 						
 						holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime()),  true, 2);
+								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime()),  true, N.length);
+						
+						if(storeHoldingTimes.getValue())
+							Core.getInstance().getDbLogger().add(holdingTime);
 																						
 					}else if(lastDeparture.getTime()<=forwardDeparturePrediction.getPredictionTime())
 					{
-						long holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), lastDeparture.getTime() ,backwardArrivalPredictions.get(0).getPredictionTime(), backwardArrivalPredictions.get(1).getPredictionTime());
+						long holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), lastDeparture.getTime() ,N, maxPredictionsForHoldingTimeCalculation.getValue());
 						
 						logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 						
 						holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime()), true, 2); 
+								arrivalPrediction.getRouteId(),true, false, new Date(arrivalPrediction.getPredictionTime()), true, N.length); 
+						
+						if(storeHoldingTimes.getValue())
+							Core.getInstance().getDbLogger().add(holdingTime);
 
 					}
 				}else if(forwardDeparturePrediction!=null)
 				{
-					long holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), forwardDeparturePrediction.getPredictionTime() ,backwardArrivalPredictions.get(0).getPredictionTime(), backwardArrivalPredictions.get(1).getPredictionTime());
+					long holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), forwardDeparturePrediction.getPredictionTime() ,N, maxPredictionsForHoldingTimeCalculation.getValue());
 					
 					logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 					
 					holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()), true, 2);
+							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()), true, N.length);
+					
+					if(storeHoldingTimes.getValue())
+						Core.getInstance().getDbLogger().add(holdingTime);
 					
 				}else if(lastDeparture!=null)
 				{
-					long holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), lastDeparture.getTime() ,backwardArrivalPredictions.get(0).getPredictionTime(), backwardArrivalPredictions.get(1).getPredictionTime());
+					long holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), lastDeparture.getTime() ,N, maxPredictionsForHoldingTimeCalculation.getValue());
 					
 					logger.debug("Holding time for : {} is {}.", arrivalPrediction.toString(), holdingTimeValue);
 					
 					holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
-							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()), true, 2);				
+							arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()), true, N.length);
+					
+					if(storeHoldingTimes.getValue())
+						Core.getInstance().getDbLogger().add(holdingTime);
 				}
 					
 			}else
 			{
-				logger.debug("Insufficient data for stop to calculate holding time.");
+				if(forwardDeparturePrediction != null || lastDeparture!=null)
+				{
+					Long holdingTimeValue=null;
+					if(lastDeparture!=null&&forwardDeparturePrediction!=null)
+					{
+						holdingTimeValue=calculateHoldingTime(Math.min(lastDeparture.getTime(), forwardDeparturePrediction.getPredictionTime()), lastDeparture.getTime() );
+					}else
+					if(lastDeparture!=null&&forwardDeparturePrediction==null)
+					{
+						holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), lastDeparture.getTime() );
+					}else
+					if(lastDeparture==null&&forwardDeparturePrediction!=null)
+					{
+						holdingTimeValue=calculateHoldingTime(arrivalPrediction.getPredictionTime(), forwardDeparturePrediction.getPredictionTime() );
+					}
+					if(holdingTimeValue!=null)
+					{
+						holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
+								arrivalPrediction.getRouteId(), true, false, new Date(arrivalPrediction.getPredictionTime()), true, 0);
+						
+						if(storeHoldingTimes.getValue())
+							Core.getInstance().getDbLogger().add(holdingTime);
+						
+						return holdingTime;
+					}else
+					{
+						logger.debug("Did not calucate holding time for some strange reason.",arrivalPrediction.getStopId());
+						holdingTime=new HoldingTime(new Date(arrivalPrediction.getPredictionTime()),  new Date(Core.getInstance().getSystemTime()), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
+								arrivalPrediction.getRouteId(), true, true, new Date(arrivalPrediction.getPredictionTime()), false, 0);
+						
+						if(storeHoldingTimes.getValue())
+							Core.getInstance().getDbLogger().add(holdingTime);
+						
+						return holdingTime;
+					}
+				}else
+				{
+					logger.debug("Did not find last vehicle departure for stop {}. This is required to calculate holding time.",arrivalPrediction.getStopId());
+					long current_vehicle_arrival_time=arrivalPrediction.getPredictionTime();
+					holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time),  new Date(Core.getInstance().getSystemTime()), arrivalPrediction.getVehicleId(), arrivalPrediction.getStopId(), arrivalPrediction.getTripId(),
+							arrivalPrediction.getRouteId(), true, true, new Date(arrivalPrediction.getPredictionTime()), false, 0);
+					
+					if(storeHoldingTimes.getValue())
+						Core.getInstance().getDbLogger().add(holdingTime);
+					
+					return holdingTime;
+				}
 			}
-		}
-		
-		if(storeHoldingTimes.getValue() && holdingTime!=null)
-			Core.getInstance().getDbLogger().add(holdingTime);
-		
+		}					
 		return holdingTime;
 	}
 	protected IpcPrediction getForwardVehicleDeparturePrediction(IpcPrediction predictionEvent)
@@ -455,16 +485,19 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			return false;
 	}
 	private Long[] predictionsToLongArray(List<IpcPrediction> predictions)
-	{
-		List<Long> list=new ArrayList<Long>();
+	{		
+		Long[] list=new Long[predictions.size()];
+		
 		if(predictions!=null)
 		{
+			int i=0;
 			for(IpcPrediction prediction:predictions)
 			{
-				list.add(prediction.getPredictionTime());
+				list[i]=new Long(prediction.getPredictionTime());
+				i++;
 			}
 		}
-		return (Long[]) list.toArray();				
+		return list;				
 	}
 	
 	private boolean isControlStop(String stopId)
@@ -486,21 +519,21 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		{
 			Long N[]={new Long(11),new Long(18),new Long(28)};
 		
-			Long result=calculateHoldingTime(5L, 0L, N);
+			Long result=calculateHoldingTime(5L, 0L, N, maxPredictionsForHoldingTimeCalculation.getValue());
 		
 			System.out.println("Holding time: " + result);
 		}
 		{
 			Long N[]={9L,21L,26L};
 		
-			Long result=calculateHoldingTime(5L, 0L, N);
+			Long result=calculateHoldingTime(5L, 0L, N, maxPredictionsForHoldingTimeCalculation.getValue());
 		
 			System.out.println("Holding time: " + result);
 		}
 		{
 			Long N[]={10L};
 			
-			Long result=calculateHoldingTime(4L, 0L, N);
+			Long result=calculateHoldingTime(4L, 0L, N, maxPredictionsForHoldingTimeCalculation.getValue());
 		
 			System.out.println("Holding time: " + result);
 		
@@ -509,7 +542,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		{
 			Long N[]={12L,18L,25L};
 			
-			Long result=calculateHoldingTime(7L, 0L, N);
+			Long result=calculateHoldingTime(7L, 0L, N, maxPredictionsForHoldingTimeCalculation.getValue());
 		
 			System.out.println("Holding time: " + result);
 		
@@ -517,7 +550,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		{
 			Long N[]={10L,14L,19L};
 			
-			Long result=calculateHoldingTime(3L, 0L, N);
+			Long result=calculateHoldingTime(3L, 0L, N, maxPredictionsForHoldingTimeCalculation.getValue());
 		
 			System.out.println("Holding time: " + result);
 		
@@ -525,7 +558,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		{
 			Long N[]={13L,20L,28L};
 			
-			Long result=calculateHoldingTime(4L, 0L, N);
+			Long result=calculateHoldingTime(4L, 0L, N, maxPredictionsForHoldingTimeCalculation.getValue());
 		
 			System.out.println("Holding time: " + result);
 		
