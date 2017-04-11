@@ -9,6 +9,7 @@ import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
+import org.transitime.core.SpatialMatch;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.StopPathCacheKey;
@@ -82,6 +83,36 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		/* default to parent method if not enough data. This will be based on schedule if UpdateTravelTimes has not been called. */
 		return super.getTravelTimeForPath(indices, avlReport,vehicleState);
 	}	
+
+	@Override
+	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport,SpatialMatch match) {
+				
+		Indices indices = match.getIndices();
+		Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(new Date(match.getAvlTime()),2);
+		
+		/* this is what gets the trip from the buckets */
+		time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+		
+		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(), true, time.longValue());
+		
+		HistoricalAverage average = FrequencyBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		
+		if(average!=null && average.getCount()>=minDays.getValue())
+		{	
+			double fractionofstoppathlefttotravel=(match.getStopPath().getLength()-match.getDistanceAlongStopPath())/match.getStopPath().getLength();
+			double value = (double)(average.getAverage() * fractionofstoppathlefttotravel);
+			if(storeTravelTimeStopPathPredictions.getValue())
+			{
+				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(avlReport.getVehicleId(), new Date(Core.getInstance().getSystemTime()), value, indices.getTrip().getId(), indices.getStopPathIndex(), "PARTIAL HISTORICAL AVERAGE", true, time);			
+				Core.getInstance().getDbLogger().add(predictionForStopPath);
+				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+			}
+			return (long)value;
+		}else
+		{
+			return super.expectedTravelTimeFromMatchToEndOfStopPath(avlReport, match);
+		}
+	}
 
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {

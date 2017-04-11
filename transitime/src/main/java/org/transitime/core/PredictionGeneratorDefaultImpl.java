@@ -355,9 +355,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		
 		// Get time to end of first path and thereby determine prediction for 
 		// first stop.
-		TravelTimes travelTimes = TravelTimes.getInstance();
-		long predictionTime = avlTime + 
-				travelTimes.expectedTravelTimeFromMatchToEndOfStopPath(match);
+		
+		long predictionTime = avlTime + expectedTravelTimeFromMatchToEndOfStopPath(avlReport, match);
 		
 		// Determine if vehicle is so late that predictions for subsequent 
 		// trips should be marked as uncertain given that another vehicle
@@ -518,6 +517,12 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		long prediction=TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
 		//logger.debug("Using transiTime default algorithm for stop time prediction : "+indices + " Value: "+prediction);
 		return prediction;		
+	}
+	
+	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match)
+	{
+		TravelTimes travelTimes = TravelTimes.getInstance();
+		return travelTimes.expectedTravelTimeFromMatchToEndOfStopPath(match);
 	}
 
 

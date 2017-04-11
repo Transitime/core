@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.transitime.avl.PollUrlAvlModule;
+import org.transitime.config.StringListConfigValue;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.modules.Module;
@@ -17,6 +18,9 @@ public class GTTAvlModule extends PollUrlAvlModule {
 
 	private static String avlURL="http://m.gatech.edu/api/buses/position";
 	
+	
+	protected static StringListConfigValue vehiclesonredroute = new StringListConfigValue("transitime.gtt.vehiclesonredroute",null, "List of vehicles on read route for HoldingTime trial.");
+
 	public GTTAvlModule(String agencyId) {
 		super(agencyId);		
 	}
@@ -38,12 +42,12 @@ public class GTTAvlModule extends PollUrlAvlModule {
 			JSONObject entry = array.getJSONObject(i);
 			
 			
+				String vehicleId=entry.getString("id");
+				Double latitude=entry.getDouble("lat");
+				Double longitude=entry.getDouble("lng");
 			
-				if(entry.has("route") && !entry.isNull("route") && entry.getString("route").equals("red"))
-				{
-					String vehicleId=entry.getString("id");
-					Double latitude=entry.getDouble("lat");
-					Double longitude=entry.getDouble("lng");
+				if((entry.has("route") && !entry.isNull("route") && entry.getString("route").equals("red"))|| inVehicleList(vehicleId))
+				{				
 					
 					//2016-09-07 17:02:48
 					SimpleDateFormat dateformater=new SimpleDateFormat("yyyyMMdd HH:mm:ss");
@@ -67,8 +71,7 @@ public class GTTAvlModule extends PollUrlAvlModule {
 					avlReport.setAssignment(assignmentId, AssignmentType.ROUTE_ID);
 					
 					processAvlReport(avlReport);
-				}
-			
+				}							
 		}
 	}
 	/**
@@ -77,5 +80,19 @@ public class GTTAvlModule extends PollUrlAvlModule {
 	public static void main(String[] args) {
 		// Create a WexfordCoachAvlModule for testing
 		Module.start("org.transitime.custom.gtt.GTTAvlModule");
+	}
+	private boolean inVehicleList(String vehicleId)
+	{
+		if(vehiclesonredroute!=null && vehiclesonredroute.getValue()!=null)
+		{
+			for(String vehicle:vehiclesonredroute.getValue())
+			{
+				if(vehicle.equals(vehicleId))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

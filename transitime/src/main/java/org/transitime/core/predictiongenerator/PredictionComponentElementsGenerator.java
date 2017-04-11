@@ -1,6 +1,7 @@
 package org.transitime.core.predictiongenerator;
 
 import org.transitime.core.Indices;
+import org.transitime.core.SpatialMatch;
 import org.transitime.core.VehicleState;
 import org.transitime.db.structs.AvlReport;
 
@@ -10,5 +11,6 @@ public interface PredictionComponentElementsGenerator {
 	
 	long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState);
 	
-	
+	long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match);
+
 }

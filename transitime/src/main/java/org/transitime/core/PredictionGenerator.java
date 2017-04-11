@@ -58,6 +58,7 @@ public abstract class PredictionGenerator {
 	 *            are to be based on.
 	 */
 	public abstract List<IpcPrediction> generate(VehicleState vehicleState);
+	
 		
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
 			"transitime.prediction.closestvehiclestopsahead", new Integer(2),
