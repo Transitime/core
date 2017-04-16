@@ -42,8 +42,8 @@ public class GTTCsvAvlModule extends Module {
 	}
 
 	private static int date_index = 1;
-	private static int lat_index = 3;
-	private static int long_index = 4;
+	private static int lat_index = 4;
+	private static int long_index = 3;
 	private static int vehicle_id_index = 2;
 
 	@Override
