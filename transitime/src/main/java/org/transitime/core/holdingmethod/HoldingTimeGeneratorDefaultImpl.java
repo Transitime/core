@@ -124,7 +124,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			{
 				logger.debug("Found last vehicle departure event: {}", lastVehicleDeparture.toString());
 				
-				if(predictions.size()>0)
+				if(predictions.size()>1&& Math.abs(predictions.get(1).getPredictionTime()-Core.getInstance().getSystemTime())>(17*60*1000))
 				{
 					for(int i=0;i<predictions.size();i++)
 					{
