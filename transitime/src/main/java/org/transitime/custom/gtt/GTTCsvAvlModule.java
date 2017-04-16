@@ -36,7 +36,7 @@ public class GTTCsvAvlModule extends Module {
 					+ "When true then when reading in do at the same speed as "
 					+ "when the AVL was created. Set to false it you just want " + "to read in as fast as possible.");
 
-	protected GTTCsvAvlModule(String agencyId) {
+	public GTTCsvAvlModule(String agencyId) {
 		super(agencyId);
 
 	}
