@@ -70,11 +70,7 @@ public class GTTCsvAvlModule extends Module {
 					Double longitude = new Double(data[long_index]);
 					
 					AvlReport avlReport = new AvlReport(data[vehicle_id_index], timestamp.getTime(),
-							latitude.doubleValue(), longitude.doubleValue(), Float.NaN, Float.NaN, "GTT");
-
-					String assignmentId = "1079682";
-					
-					avlReport.setAssignment(assignmentId, AssignmentType.ROUTE_ID);
+							latitude.doubleValue(), longitude.doubleValue(), Float.NaN, Float.NaN, "GTT");				
 
 					logger.info("Processing avlReport={}", avlReport);
 

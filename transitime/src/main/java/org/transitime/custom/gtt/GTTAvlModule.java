@@ -67,8 +67,12 @@ public class GTTAvlModule extends PollUrlAvlModule {
 							new AvlReport(vehicleId, timestamp.getTime(), latitude,
 									longitude, heading, speed, "GTT");
 					
+					/* TODO This does not work for freq services. It breaks autoassigner. 
+					
 					String assignmentId = "1079682";
 					avlReport.setAssignment(assignmentId, AssignmentType.ROUTE_ID);
+					
+					*/
 					
 					processAvlReport(avlReport);
 				}							
