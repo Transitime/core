@@ -82,6 +82,18 @@ public class AvlConfig {
 					"value is exceeded then the AVL report is ignored.");
 	
 	/**
+	 * Maximum number of stopPaths to look ahead.
+	 * @return max number
+	 */
+	public static int getMaxStopPathsAhead()
+	{
+		return maxStopPathsAhead.getValue();
+	}
+	private static IntegerConfigValue maxStopPathsAhead =
+			new IntegerConfigValue("transitime.avl.maxStopPathsAhead", 
+					999, 
+					"Max stopPaths ahead to look for match.");
+	/**
 	 * If AVL report speed is below this threshold then the heading is not
 	 * considered valid.
 	 * @return

@@ -765,9 +765,10 @@ public class SpatialMatcher {
 		// that vehicle would have had to travel too fast or that end of
 		// block reached.
 		Indices indices = new Indices(previousMatch);
+		
 		spatialMatcher.setStartOfSearch(previousMatch);
 		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime())
-				&& distanceSearched < distanceAlongPathToSearch) {
+				&& distanceSearched < distanceAlongPathToSearch && Math.abs((indices.getStopPathIndex()-previousMatch.getIndices().getStopPathIndex()))<=AvlConfig.getMaxStopPathsAhead()) {
 			spatialMatcher.processPossiblePotentialMatch(
 					vehicleState.getAvlReport(), indices, spatialMatches,
 					MatchingType.STANDARD_MATCHING);

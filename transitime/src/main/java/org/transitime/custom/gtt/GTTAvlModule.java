@@ -2,6 +2,7 @@ package org.transitime.custom.gtt;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -17,7 +18,7 @@ import org.transitime.modules.Module;
 public class GTTAvlModule extends PollUrlAvlModule {
 
 	private static String avlURL="http://m.gatech.edu/api/buses/position";
-	
+	HashMap<String, Date> avlreports = new HashMap<String, Date>();
 	
 	protected static StringListConfigValue vehiclesonredroute = new StringListConfigValue("transitime.gtt.vehiclesonredroute",null, "List of vehicles on read route for HoldingTime trial.");
 
@@ -62,19 +63,36 @@ public class GTTAvlModule extends PollUrlAvlModule {
 					float heading=Float.NaN;
 					
 					float speed=Float.NaN;
+					AvlReport avlReport=null;
+					if(avlreports.containsKey(vehicleId))
+					{
+						if(!avlreports.get(vehicleId).equals(timestamp))
+						{
+							avlReport =
+									new AvlReport(vehicleId, timestamp.getTime(), latitude,
+											longitude, heading, speed, "GTT");
+						}					
+					}else
+					{
+						avlreports.put(vehicleId, timestamp);
+						avlReport =
+								new AvlReport(vehicleId, timestamp.getTime(), latitude,
+										longitude, heading, speed, "GTT");
+					}
 					
-					AvlReport avlReport =
-							new AvlReport(vehicleId, timestamp.getTime(), latitude,
-									longitude, heading, speed, "GTT");
+					
 					
 					/* TODO This does not work for freq services. It breaks autoassigner. 
 					
 					String assignmentId = "1079682";
 					avlReport.setAssignment(assignmentId, AssignmentType.ROUTE_ID);
 					
-					*/
+					*/			
 					
-					processAvlReport(avlReport);
+					if(avlReport!=null)
+					{
+						processAvlReport(avlReport);
+					}
 				}							
 		}
 	}
