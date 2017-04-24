@@ -144,9 +144,12 @@ body {
 	    var results = regex.exec(location.search);
 	    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 	};
- 	document.getElementById('mapframe').src="/web/maps/map.jsp?a="+getUrlParameter('agency')+"&verbose=true&showUnassignedVehicles=true&r="+getUrlParameter('route');
+ 	document.getElementById('mapframe').src="/web/maps/map.jsp?a="+getUrlParameter('agency')+"&verbose=true&showUnassignedVehicles=true&r="+getUrlParameter('route'); 	
  	
- 	var obj = document.getElementById("heading");  
+ 	var threshold=parseInt(getUrlParameter('threshold')); 	 
+ 	
+ 	var obj = document.getElementById("heading");
+ 	
     obj.innerText = 'transitimeExtension: Holding Times for '+ getUrlParameter('agencyname');
  	
 	ion.sound({
@@ -191,7 +194,7 @@ body {
 		{
             var keys=Object.keys(data.holdingTimes);
             for (var index = 0; index < keys.length; ++index) {
-                if(vehicleAtStop(data, stopid, keys[index]))
+                if(vehicleAtStop(data, stopid, keys[index]) || counterFinished(data, stopId, keys[index], threshold)==false)
                 {
                     return keys[index];
                 }
@@ -358,7 +361,20 @@ body {
         }
 	    return false;
 	};
-	
+	function counterFinished(data, stopId, vehicleId, treshold)
+	{
+		var holdingTimeMilliseconds = new Date(data.holdingTimes[vehicleId].holdingTime)
+		.getTime() - new Date(data.holdingTimes[vehicleId].currentTime).getTime();
+		
+		if(holdingTimeMilliseconds<(treshold*-1))
+		{
+			return true;	
+		}
+		else
+		{
+			return false;
+		}		
+	};
     function updateDashBoard()
     {
         getData(data, getUrlParameter('agency'), getUrlParameter('route'), getUrlParameter('stop'));
