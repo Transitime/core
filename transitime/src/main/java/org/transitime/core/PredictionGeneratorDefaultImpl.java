@@ -412,7 +412,9 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 				{							
 					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(predictionForStop);
 					if(holdingTime!=null)
-						HoldingTimeCache.getInstance().putHoldingTime(holdingTime);		
+					{
+						HoldingTimeCache.getInstance().putHoldingTimeExlusiveByStop(holdingTime, new Date(Core.getInstance().getSystemTime()));
+					}
 				}			
 			}
 			

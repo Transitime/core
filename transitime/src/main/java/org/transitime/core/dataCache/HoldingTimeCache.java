@@ -1,5 +1,6 @@
 package org.transitime.core.dataCache;
 
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -72,6 +73,30 @@ public class HoldingTimeCache {
 		
 		cache.put(errorElement);
 		
+	}
+	public void putHoldingTimeExlusiveByStop(HoldingTime holdingTime, Date currentTime)
+	{
+		List<HoldingTimeCacheKey> keys = getKeys();
+		boolean add=true;
+		
+		// Only add only if all other holding times for the stop have expired
+		for(HoldingTimeCacheKey key:keys)
+		{
+			if(key.getStopid().equals(holdingTime.getStopId())&& !(key.getVehicleId().equals(holdingTime.getVehicleId())))
+			{
+				if(getHoldingTime(key).getHoldingTime().before(currentTime))
+				{
+					add=false;
+				}else
+				{
+					cache.remove(key);
+				}
+			}
+		}
+		if(add)
+		{
+			putHoldingTime(holdingTime);
+		}
 	}
 	public HoldingTime getHoldingTime(HoldingTimeCacheKey key)
 	{
