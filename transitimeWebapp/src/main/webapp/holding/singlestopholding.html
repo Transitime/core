@@ -194,7 +194,7 @@ body {
 		{
             var keys=Object.keys(data.holdingTimes);
             for (var index = 0; index < keys.length; ++index) {
-                if(vehicleAtStop(data, stopid, keys[index]) || counterFinished(data, stopId, keys[index], threshold)==false)
+                if(vehicleAtStop(data, stopid, keys[index]) || counterFinished(data, stopid, keys[index], threshold)==false)
                 {
                     return keys[index];
                 }

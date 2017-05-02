@@ -126,7 +126,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 				
 				if(predictions.size()>1&& Math.abs(predictions.get(1).getPredictionTime()-Core.getInstance().getSystemTime())>(17*60*1000))
 				{
-					for(int i=0;i<predictions.size();i++)
+					for(int i=0;i<predictions.size()&&i<maxPredictionsForHoldingTimeCalculation.getValue();i++)
 					{
 						logger.debug("Prediction for N-{} {}: {} ", i+1, predictions.get(i).getVehicleId(),predictions.get(i));
 					}
