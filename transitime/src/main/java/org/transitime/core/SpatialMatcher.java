@@ -767,8 +767,9 @@ public class SpatialMatcher {
 		Indices indices = new Indices(previousMatch);
 		
 		spatialMatcher.setStartOfSearch(previousMatch);
-		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime())
-				&& distanceSearched < distanceAlongPathToSearch && Math.abs((indices.getStopPathIndex()-previousMatch.getIndices().getStopPathIndex()))<=AvlConfig.getMaxStopPathsAhead()) {
+		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime()) && 
+				distanceSearched < distanceAlongPathToSearch 
+					&& Math.abs(indices.getStopPathIndex()-previousMatch.getIndices().getStopPathIndex()) <= AvlConfig.getMaxStopPathsAhead()) {
 			spatialMatcher.processPossiblePotentialMatch(
 					vehicleState.getAvlReport(), indices, spatialMatches,
 					MatchingType.STANDARD_MATCHING);
@@ -791,9 +792,11 @@ public class SpatialMatcher {
 		}
 
 		if (spatialMatches.size() > 0) {
-			logger.debug("For vehicleId={} the match with the best " +
+			logger.debug("For vehicleId={} with search started at {} there where {} matches and the match with the best " +
 					"distance was {}",
 					vehicleState.getVehicleId(),
+					previousMatch,
+					spatialMatches.size(),
 					spatialMatcher.smallestDistanceSpatialMatch);
 		} else {
 			// There were no spatial matches so log this problem
@@ -801,9 +804,10 @@ public class SpatialMatcher {
 							smallestDistanceSpatialMatch!=null)
 			{
 				logger.warn("For vehicleId={} found no spatial matches within " +
-						"allowable distance of segments. Best spatial match " +
+						"allowable distance of segments wtih search started at {}. Best spatial match " +
 						"distance was {} for spatial match {}",
 						vehicleState.getVehicleId(),
+						previousMatch,
 						Geo.distanceFormat(spatialMatcher.
 								smallestDistanceSpatialMatch.getDistanceToSegment()),
 						spatialMatcher.smallestDistanceSpatialMatch);
