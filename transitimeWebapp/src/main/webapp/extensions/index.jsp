@@ -21,9 +21,12 @@ if (agencyId == null || agencyId.isEmpty()) {
 <div id="mainDiv">
 <div id="title">Extensions for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 <ul class="choicesList">
-  <li><a href="../holding/singlestopholding.html"
+  <li><a href="../holding/singlestopholding.html?agency=1&route=100&stop=20097&agencyname=VIA&stopname=TEXAS%20MEDICAL%20CENTER"
     title="Dispatch  Panel">
-      Holding Times</a></li>  
+      Holding Times Northern Stop</a></li>  
+  <li><a href="../holding/singlestopholding.html?agency=1&route=100&stop=93296&agencyname=VIA&stopname=CHESTNUT%20AT%20ELLIS%20ALLEY"
+    title="Dispatch  Panel">
+      Holding Times Southern Stop</a></li>
 </ul>
 </div>
 </body>
