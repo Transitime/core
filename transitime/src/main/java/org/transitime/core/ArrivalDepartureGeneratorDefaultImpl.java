@@ -336,7 +336,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(arrivalDeparture);
 			if(holdingTime!=null)
 			{				
-				HoldingTimeCache.getInstance().putHoldingTimeExlusiveByStop(holdingTime, new Date(Core.getInstance().getSystemTime()));
+				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+				//HoldingTimeCache.getInstance().putHoldingTimeExlusiveByStop(holdingTime, new Date(Core.getInstance().getSystemTime()));
 			}
 		}
 		
