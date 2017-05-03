@@ -269,6 +269,7 @@
         lastStopInTrip bit,
         layoverStop bit,
         locations blob,
+        maxDistance double precision,
         pathLength double precision,
         routeId varchar(60),
         scheduleAdherenceStop bit,

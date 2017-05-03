@@ -269,6 +269,7 @@
         lastStopInTrip number(1,0),
         layoverStop number(1,0),
         locations raw(1000),
+        maxDistance double precision,
         pathLength double precision,
         routeId varchar2(60 char),
         scheduleAdherenceStop number(1,0),

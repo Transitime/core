@@ -176,7 +176,11 @@ public class GtfsRtTripFeed {
 			else
 				stopTimeUpdate.setDeparture(stopTimeEvent);
 			
-			stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
+			if(pred.isSchedBasedPred())
+				stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
+			else
+				stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.NO_DATA);
+			
 			tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 		}
 		

@@ -603,4 +603,9 @@ public class Indices implements Serializable {
 		return segmentIndex;
 	}
 
+	public boolean controlPoint() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

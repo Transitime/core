@@ -269,6 +269,7 @@
         lastStopInTrip boolean,
         layoverStop boolean,
         locations bytea,
+        maxDistance float8,
         pathLength float8,
         routeId varchar(60),
         scheduleAdherenceStop boolean,

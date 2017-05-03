@@ -48,6 +48,8 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 
 	// For deleting a stop time via a supplemental stop_times.txt file
 	private final Boolean delete;
+	
+	private final Double maxDistance;
 
 	/********************** Member Functions **************************/
 
@@ -86,6 +88,9 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		this.delete = false;
 		
 		this.isWaitStop = null;
+		
+		this.maxDistance = null;
+		
 	}
 	
 	/**
@@ -134,6 +139,8 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		
 		delete = getOptionalBooleanValue(record, "delete");
 		isWaitStop = null;
+		
+		maxDistance = getOptionalDoubleValue(record, "max_distance");
 	}
 
 	/**
@@ -183,6 +190,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		
 		delete = false;
 		isWaitStop = null;
+		maxDistance=originalValues.maxDistance;
 	}
 
 	/**
@@ -214,6 +222,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		// Handle the special members
 		arrivalTimeSecs = newArrivalTimeSecs;
 		isWaitStop = true;
+		maxDistance=originalValues.maxDistance;
 	}
 
 	/**
@@ -232,6 +241,10 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		GtfsStopTime s = supplementStopTime;
 
 		this.tripId = o.tripId;
+		this.maxDistance =
+				s.maxDistance == null ? o.maxDistance
+						: s.maxDistance;
+		
 		this.arrivalTimeSecs =
 				s.arrivalTimeSecs == null ? o.arrivalTimeSecs
 						: s.arrivalTimeSecs;
@@ -253,6 +266,10 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 						: s.shapeDistTraveled;
 		this.delete = s.delete == null ? o.delete : s.delete;
 		this.isWaitStop = s.isWaitStop == null ? o.isWaitStop : s.isWaitStop;
+	}
+
+	public Double getMaxDistance() {
+		return maxDistance;
 	}
 
 	public String getTripId() {

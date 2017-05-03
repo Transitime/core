@@ -456,6 +456,8 @@ public class SpatialMatcher {
 	 */
 	private double getMaxAllowableDistanceFromSegment(Indices indices, 
 			MatchingType matchingType) {
+		if(indices.getStopPath().getMaxDistance()!=null)
+			return indices.getStopPath().getMaxDistance();
 		Route route = indices.getRoute();
 		return getMaxAllowableDistanceFromSegment(route, matchingType);
 	}
