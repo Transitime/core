@@ -118,7 +118,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 													
 			logger.debug("Have {} predictions for stop {}.", predictions.size(), event.getStopId());
 			
-			ArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getTripId(), event.getStopId(), new Date(event.getTime()));
+			ArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getVehicleId(), event.getTripId(), event.getStopId(), new Date(event.getTime()));
 								
 			if(lastVehicleDeparture!=null)
 			{
@@ -212,7 +212,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		}
 		return false;
 	}
-	private ArrivalDeparture getLastVehicleDepartureTime(String tripId, String stopId, Date time)
+	private ArrivalDeparture getLastVehicleDepartureTime(String currentVehicleId, String tripId, String stopId, Date time)
 	{
 		StopArrivalDepartureCacheKey currentStopKey=new StopArrivalDepartureCacheKey(stopId,time);
 		
@@ -225,13 +225,16 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			for(ArrivalDeparture event:currentStopList)
 			{
 				//if(event.isDeparture() && event.getTripId().equals(tripId)) TODO This is because of the GTFS config of Atlanta Streetcar. Could we use route_id instead?
-				if(event.isDeparture() )
+				if(!event.getVehicleId().equals(currentVehicleId))
 				{
-					if(closestDepartureEvent==null)
-						closestDepartureEvent=event;
-					else if (time.getTime()-event.getTime() < time.getTime()-closestDepartureEvent.getTime())
+					if(event.isDeparture() )
 					{
-						closestDepartureEvent=event;
+						if(closestDepartureEvent==null)
+							closestDepartureEvent=event;
+						else if (time.getTime()-event.getTime() < time.getTime()-closestDepartureEvent.getTime())
+						{
+							closestDepartureEvent=event;
+						}
 					}
 				}
 			}
@@ -279,7 +282,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			else
 				logger.debug("Found last vehicle predicted departure event: {}", forwardDeparturePrediction.toString());
 			
-			ArrivalDeparture lastDeparture = getLastVehicleDepartureTime(arrivalPrediction.getTripId(), arrivalPrediction.getStopId(), new Date(arrivalPrediction.getPredictionTime()));
+			ArrivalDeparture lastDeparture = getLastVehicleDepartureTime(arrivalPrediction.getVehicleId(),arrivalPrediction.getTripId(), arrivalPrediction.getStopId(), new Date(arrivalPrediction.getPredictionTime()));
 			if(lastDeparture==null)
 				logger.debug("Cannot find last departure for : {}", arrivalPrediction.toString());
 			else
