@@ -776,7 +776,7 @@ public class SpatialMatcher {
 					- vehicleState.getPreviousAvlReportFromSuccessfulMatch().getTime();
 			distanceAlongPathToSearch = AvlConfig.getAlternativeMaxSpeed().getValue()
 					* timeBetweenFixesMsec / Time.MS_PER_SEC;			
-			logger.info("Using alternate max speed {} which results in a distance along segment to search of {}.", AvlConfig.getAlternativeMaxSpeed().getValue(),distanceAlongPathToSearch);
+			logger.info("Using alternate max speed {} for vehicle {} which results in a distance along segment to search of {}.", AvlConfig.getAlternativeMaxSpeed().getValue(),vehicleState.getVehicleId(),distanceAlongPathToSearch);
 		}
 		
 		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime()) && 
