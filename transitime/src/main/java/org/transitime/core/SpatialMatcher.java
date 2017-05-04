@@ -770,7 +770,7 @@ public class SpatialMatcher {
 		
 		spatialMatcher.setStartOfSearch(previousMatch);		
 
-		if(previousMatch.getIndices().getStopPathIndex()>17&&previousMatch.getIndices().getStopPathIndex()<21)
+		if(previousMatch.getIndices().getStopPathIndex()>15&&previousMatch.getIndices().getStopPathIndex()<21)
 		{			
 			timeBetweenFixesMsec = vehicleState.getAvlReport().getTime()
 					- vehicleState.getPreviousAvlReportFromSuccessfulMatch().getTime();
