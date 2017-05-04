@@ -81,6 +81,16 @@ public class AvlConfig {
 					"Max speed between AVL reports for a vehicle. If this " +
 					"value is exceeded then the AVL report is ignored.");
 	
+	private static  DoubleConfigValue alternativeMaxSpeed = new DoubleConfigValue("transitime.avl.alternativemaxspeed", 
+					15.0, // 31.3m/s = 70mph
+					"Alernative max speed between AVL reports for a vehicle. If this " +
+					"value is exceeded then the AVL report is ignored.");
+	public static DoubleConfigValue getAlternativeMaxSpeed() {
+		return alternativeMaxSpeed;
+	}
+	public static void setAlternativeMaxSpeed(DoubleConfigValue alternativeMaxSpeed) {
+		AvlConfig.alternativeMaxSpeed = alternativeMaxSpeed;
+	}
 	/**
 	 * Maximum number of stopPaths to look ahead.
 	 * @return max number

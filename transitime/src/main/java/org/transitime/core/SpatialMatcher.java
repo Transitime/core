@@ -768,7 +768,17 @@ public class SpatialMatcher {
 		// block reached.
 		Indices indices = new Indices(previousMatch);
 		
-		spatialMatcher.setStartOfSearch(previousMatch);
+		spatialMatcher.setStartOfSearch(previousMatch);		
+
+		if(previousMatch.getIndices().getStopPathIndex()>17&&previousMatch.getIndices().getStopPathIndex()<21)
+		{			
+			timeBetweenFixesMsec = vehicleState.getAvlReport().getTime()
+					- vehicleState.getPreviousAvlReportFromSuccessfulMatch().getTime();
+			distanceAlongPathToSearch = AvlConfig.getAlternativeMaxSpeed().getValue()
+					* timeBetweenFixesMsec / Time.MS_PER_SEC;			
+			logger.info("Using alternate max speed {} which results in a distance along segment to search of {}.", AvlConfig.getAlternativeMaxSpeed().getValue(),distanceAlongPathToSearch);
+		}
+		
 		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime()) && 
 				distanceSearched < distanceAlongPathToSearch 
 					&& Math.abs(indices.getStopPathIndex()-previousMatch.getIndices().getStopPathIndex()) <= AvlConfig.getMaxStopPathsAhead()) {
