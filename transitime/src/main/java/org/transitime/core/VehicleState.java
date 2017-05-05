@@ -67,7 +67,7 @@ public class VehicleState {
 	private List<IpcPrediction> predictions;
 	private TemporalDifference realTimeSchedAdh;
 	
-	// create a hashamp to store the trip start times.  TODO change to LinkedList doesn't gro
+	// create a hashamp to store the trip start times.  TODO change to LinkedList doesn't grow
 	HashMap <Integer, Long> tripStartTimesMap=new HashMap <Integer, Long>();
 	
 	// For keeping track of how many bad matches have been encountered.

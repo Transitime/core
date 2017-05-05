@@ -196,7 +196,17 @@ body {
             for (var index = 0; index < keys.length; ++index) {
                 if(vehicleAtStop(data, stopid, keys[index]) || counterFinished(data, stopid, keys[index], threshold)==false)
                 {
-                    return keys[index];
+                	try
+                	{
+	                	if(getHoldingTime(data, stopid, keys[index])>-1200000)
+	                	{
+	                    	return keys[index];
+	                	}
+                	}catch(err)
+                	{
+                		
+                	}
+                	
                 }
             }
             return null;
@@ -374,6 +384,12 @@ body {
 		{
 			return false;
 		}		
+	};
+	function getHoldingTime(data, stopId, vehicleId)
+	{
+		var holdingTimeMilliseconds = new Date(data.holdingTimes[vehicleId].holdingTime)
+		.getTime() - new Date(data.holdingTimes[vehicleId].currentTime).getTime();
+		return holdingTimeMilliseconds;
 	};
     function updateDashBoard()
     {
