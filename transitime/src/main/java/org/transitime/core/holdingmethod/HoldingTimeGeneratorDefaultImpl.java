@@ -469,6 +469,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	}
 	protected HoldingTime getNextDepartureByHoldingTime(String currentVehicleId, List<HoldingTime> holdingTimes, Date currentTime)
 	{
+		logger.debug("Looking for next departure by holding time for vehicle {}.", currentVehicleId ); 
 		HoldingTime nextDeparture=null;
 		for(HoldingTime holdingTime:holdingTimes)
 		{
@@ -477,6 +478,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 				if(holdingTime.getHoldingTime().after(currentTime)&&(nextDeparture==null||holdingTime.getHoldingTime().before(nextDeparture.getHoldingTime())))
 				{
 					nextDeparture=holdingTime;
+					logger.debug("Found departure by holding time {}."+nextDeparture); 
 				}
 			}
 		}
