@@ -24,7 +24,9 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Date;
 
+import org.transitime.applications.Core;
 import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
@@ -163,9 +165,14 @@ public class IpcVehicle implements Serializable {
 			this.isAtStop = false;
 		
 		if(vs.getHoldingTime()!=null)
+		{
 			this.holdingTime = new IpcHoldingTime(vs.getHoldingTime());
+			this.holdingTime.setCurrentTime(new Date(Core.getInstance().getSystemTime()));
+		}
 		else
+		{
 			this.holdingTime = null;
+		}
 	}
 
 	/**

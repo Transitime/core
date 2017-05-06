@@ -19,6 +19,7 @@ package org.transitime.ipc.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Date;
 
 import org.transitime.ipc.data.IpcServerStatus;
 
@@ -49,4 +50,13 @@ public interface ServerStatusInterface extends Remote {
 	 */
 	public String monitor() throws RemoteException;
 	
+	
+	/**
+	 * Gets current server time.
+	 * 
+	 * 
+	 * @return
+	 * @throws RemoteException
+	 */
+	public Date getCurrentServerTime() throws RemoteException;
 }

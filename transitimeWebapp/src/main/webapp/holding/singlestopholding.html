@@ -218,35 +218,42 @@ body {
         }
     }
 	function getData(data, agencyid, routeid, stopid)
-	{						
-								
-		getHoldingTimeKeys(host, agencyid, processHoldingTimeKeys, data);
-		
+	{																		
 		getNextVehicleArrivalPredictions(host, agencyid, routeid, stopid, processArrivalPredictions, data);
-                    		    
-        var vehicles = [];
-        //  Put all vehicle ids from predictions.
-        $.each(data.predictions, function() {
-                    vehicles.push(this.vehicle);                
-        });
-        // put all vehicle ids from holding times keys.
-        if(data.holdingTimeKeys)
-        {
-	        $.each(data.holdingTimeKeys.HoldingTimeCacheKey, function() {
-	            vehicles.push(this.vehicleId);                
-			});
-        }
-                            
-        vehicles=unique(vehicles);
-            
-        for (var index = 0; index < vehicles.length; ++index) {
-            getHoldingTime(host, agencyid, stopid, vehicles[index], processHoldingTime, data);
-            getVehicleDetails(host, agencyid, vehicles[index], processVehicleDetails, data);
-        }
-       
+                    		                            
+        getAllVehicleDetails(host, agencyid, routeid, processAllVehicleDetails, data);       
 	};
 		
-
+	function getAllVehicleDetails(host, agencyid, routeid,processAllVehicleDetails, data) {
+		console.log("Calling getAllVehicleDetails.");
+		var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyid+"/command/vehiclesDetails";
+		if(routeid.length > 0)            
+			baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyid+"/command/vehiclesDetails?r="+routeid;
+		                
+		var xmlhttp = new XMLHttpRequest();
+		                                
+		xmlhttp.onreadystatechange = function() {
+		                   
+		        if (this.readyState == 4 && this.status == 200) 
+		        {                                              
+		            var allVehicleDetails = JSON.parse(this.responseText);
+		            processAllVehicleDetails(data, allVehicleDetails);                                                                                       
+		        }
+		};                                                             
+		xmlhttp.open("GET", baseurl, true);
+		xmlhttp.send();     
+	};
+	function processAllVehicleDetails(data, allVehicleDetails)
+	{
+		console.log(allVehicleDetails);
+		for (var index = 0; index < allVehicleDetails.vehicles.length; index++) {
+			data.vehicleDetails[allVehicleDetails.vehicles[index].id]=allVehicleDetails.vehicles[index];
+			if(allVehicleDetails.vehicles[index].hasOwnProperty("holdingTime")){
+				data.holdingTimes[allVehicleDetails.vehicles[index].id]=allVehicleDetails.vehicles[index].holdingTime;
+			}
+		}
+	};
+	
 	function updateScreen(data, agencyid, routeid, stopid)
 	{
      			
@@ -278,7 +285,7 @@ body {
                 
                 var holdingTimeMilliseconds = new Date(data.holdingTimes[data.vehicle].holdingTime)
 						.getTime()
-						- new Date(data.holdingTimes[data.vehicle].currentTime).getTime();
+						- new Date().getTime();
 				
 				var time = Math.abs(holdingTimeMilliseconds) / 1000;
                 

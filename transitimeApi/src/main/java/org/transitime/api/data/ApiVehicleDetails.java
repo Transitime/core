@@ -158,9 +158,13 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		this.isAtStop = vehicle.isAtStop();
 				
 		if(vehicle.getHoldingTime()!=null)
-			this.holdingTime = new ApiHoldingTime(vehicle.getHoldingTime());				
+		{
+			this.holdingTime = new ApiHoldingTime(vehicle.getHoldingTime());		
+		}
 		else
+		{
 			this.holdingTime = null;
+		}
 	}
 
 }

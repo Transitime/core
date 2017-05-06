@@ -20,6 +20,7 @@ package org.transitime.api.rootResources;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiBlocks;
 import org.transitime.api.data.ApiBlocksTerse;
 import org.transitime.api.data.ApiCalendars;
+import org.transitime.api.data.ApiCurrentServerDate;
 import org.transitime.api.data.ApiDirections;
 import org.transitime.api.data.ApiIds;
 import org.transitime.api.data.ApiPredictions;
@@ -1282,6 +1284,18 @@ public class TransitimeApi {
 
 		ApiRmiServerStatus apiRmiServerStatus = new ApiRmiServerStatus();
 		return stdParameters.createResponse(apiRmiServerStatus);
+	}
+	
+	@Path("/command/currentServerTime")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getCurrentServerTime(@BeanParam StandardParameters stdParameters) throws WebApplicationException, RemoteException {
+		// Make sure request is valid
+		stdParameters.validate();
+		ServerStatusInterface inter = stdParameters.getServerStatusInterface();
+		Date currentTime=inter.getCurrentServerTime();
+		
+		return stdParameters.createResponse(new ApiCurrentServerDate(currentTime));
 	}
 	// /**
 	// * For creating response of list of vehicles. Would like to make this a

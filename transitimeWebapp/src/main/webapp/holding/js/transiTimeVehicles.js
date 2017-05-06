@@ -40,7 +40,7 @@ function getVehicleDetails(host, agencyId, vehicleId, processData, data)
 };
 function getNextVehicleArrivalPredictions(host, agencyId, routeId, stopId, processData, data)
 {
-    console.log("Calling getNextVehicleArrival.");
+    console.log("Calling getNextVehicleArrivalPredictions.");
 
     //http://ec2-54-187-31-47.us-west-2.compute.amazonaws.com:8080/api/v1/key/f78a2e9a/agency/ASC/command/predictions?format=json&rs=ASC_4560585%7C4560595
     var baseurl = "http://"+host+"/api/v1/key/f78a2e9a/agency/"+agencyId+"/command/predictions?format=json&rs="+routeId+"%7C"+stopId;

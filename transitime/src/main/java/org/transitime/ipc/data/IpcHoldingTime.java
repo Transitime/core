@@ -17,8 +17,12 @@ public class IpcHoldingTime implements Serializable{
 
 	private final Date creationTime;
 	
-	private final Date currentTime;
+	private Date currentTime;
 	
+	public void setCurrentTime(Date currentTime) {
+		this.currentTime = currentTime;
+	}
+
 	private final String vehicleId;
 	
 	private final String stopId;

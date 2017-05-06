@@ -51,4 +51,6 @@ public class IpcServerStatus implements Serializable {
 		return monitorResults;
 	}
 	
+	
+	
 }

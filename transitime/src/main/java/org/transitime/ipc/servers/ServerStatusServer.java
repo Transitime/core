@@ -18,9 +18,11 @@
 package org.transitime.ipc.servers;
 
 import java.rmi.RemoteException;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
 import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.rmi.AbstractServer;
@@ -94,6 +96,11 @@ public class ServerStatusServer extends AbstractServer
 		String resultStr = agencyMonitor.checkAll();
 
 		return resultStr;
+	}
+
+	@Override
+	public Date getCurrentServerTime() throws RemoteException {
+		return new Date(Core.getInstance().getSystemTime());
 	}
 
 }
