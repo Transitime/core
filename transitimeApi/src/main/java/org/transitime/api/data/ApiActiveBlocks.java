@@ -17,6 +17,7 @@
 
 package org.transitime.api.data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,7 +50,7 @@ public class ApiActiveBlocks {
     protected ApiActiveBlocks() {}
 
 	public ApiActiveBlocks(Collection<IpcActiveBlock> ipcActiveBlocks,
-			String agencyId) {
+			String agencyId) throws IllegalAccessException, InvocationTargetException {
     	activeBlocks = new ArrayList<ApiActiveBlock>();
     	for (IpcActiveBlock ipcActiveBlock : ipcActiveBlocks) {
     		activeBlocks.add(new ApiActiveBlock(ipcActiveBlock, agencyId));

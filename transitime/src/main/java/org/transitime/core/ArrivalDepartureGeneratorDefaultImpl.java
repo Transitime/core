@@ -274,7 +274,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				block,
 				tripIndex,
 				stopPathIndex, freqStartDate);
-		updateCache(departure);
+		updateCache(vehicleState, departure);
 		logger.debug("Creating departure: {}", departure);
 		return departure;
 	}
@@ -313,11 +313,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		if (arrivalTime > vehicleState.getLastArrivalTime())
 			vehicleState.setLastArrivalTime(arrivalTime);
 		
-		updateCache(arrival);
+		updateCache(vehicleState, arrival);
 		
 		return arrival;
 	}
-	private void updateCache(ArrivalDeparture arrivalDeparture)
+	private void updateCache(VehicleState vehicleState, ArrivalDeparture arrivalDeparture)
 	{
 		if(TripDataHistoryCache.getInstance()!=null)
 			TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
@@ -333,10 +333,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{							
-			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(arrivalDeparture);
+			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
 			if(holdingTime!=null)
 			{				
 				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+				vehicleState.setHoldingTime(holdingTime);
 				//HoldingTimeCache.getInstance().putHoldingTimeExlusiveByStop(holdingTime, new Date(Core.getInstance().getSystemTime()));
 			}
 		}

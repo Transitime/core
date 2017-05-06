@@ -27,6 +27,7 @@ import org.transitime.core.BlockAssignmentMethod;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.VehicleState;
+import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.Trip;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
@@ -140,13 +141,13 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
 			Integer atOrNextGtfsStopSeq, String originStopId,
 			String destinationId, double distanceToNextStop,
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime) {
+			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
-				atOrNextGtfsStopSeq, freqStartTime);
+				atOrNextGtfsStopSeq, freqStartTime, holdingTime);
 
 		this.originStopId = originStopId;
 		this.destinationId = destinationId;
@@ -244,7 +245,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
 					atOrNextGtfsStopSeq, originStopId, destinationId,
 					distanceToNextStop, distanceOfNextStopFromTripStart,
-					distanceAlongTrip, freqStartTime);
+					distanceAlongTrip, freqStartTime, holdingTime);
 		}
 
 	} // End of class SiriVehicleSerializationProxy

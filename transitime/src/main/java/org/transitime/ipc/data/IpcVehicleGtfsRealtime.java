@@ -26,6 +26,7 @@ import org.transitime.core.SpatialMatch;
 import org.transitime.core.TemporalDifference;
 import org.transitime.core.TemporalMatch;
 import org.transitime.core.VehicleState;
+import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.StopPath;
 import org.transitime.utils.Time;
 
@@ -124,6 +125,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	 * @param atStopId
 	 * @param atOrNextStopId
 	 * @param atOrNextGtfsStopSeq
+	 * @param holdingTime 
 	 */
 	protected IpcVehicleGtfsRealtime(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
@@ -134,12 +136,12 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
 			String nextStopId, String nextStopName, String vehicleType,
 			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
-			Integer atOrNextGtfsStopSeq, long freqStartTime) {
+			Integer atOrNextGtfsStopSeq, long freqStartTime, IpcHoldingTime holdingTime) {
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
-				vehicleType, freqStartTime ,atStop);
+				vehicleType, freqStartTime ,atStop, holdingTime);
 		this.atStop = atStop;
 		this.atOrNextStopId = atOrNextStopId;
 		this.atOrNextGtfsStopSeq = atOrNextGtfsStopSeq;
@@ -227,7 +229,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 					schedBasedPred, realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, nextStopName,
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
-					atOrNextGtfsStopSeq, freqStartTime);
+					atOrNextGtfsStopSeq, freqStartTime, holdingTime);
 		}
 
 	} // End of class GtfsRealtimeVehicleSerializationProxy

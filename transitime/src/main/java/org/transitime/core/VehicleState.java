@@ -33,6 +33,7 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
@@ -93,13 +94,21 @@ public class VehicleState {
 	
 	private Integer tripCounter = 0;
 	
+	private HoldingTime holdingTime=null;
+	
+	public HoldingTime getHoldingTime() {
+		return holdingTime;
+	}
+	public void setHoldingTime(HoldingTime holdingTime) {
+		this.holdingTime = holdingTime;
+	}
 	public Integer getTripCounter() {
 		return tripCounter;
 	}
 	public void incrementTripCounter() {
 		tripCounter=tripCounter+1;		
 	}
-
+	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(VehicleState.class);
 

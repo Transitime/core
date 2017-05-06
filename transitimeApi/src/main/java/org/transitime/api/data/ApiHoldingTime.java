@@ -69,6 +69,6 @@ public class ApiHoldingTime {
 		this.arrivalTime = ipcHoldingTime.getArrivalTime();	
 		this.hasD1=ipcHoldingTime.isHasD1();
 		this.numberPredictionsUsed=ipcHoldingTime.getNumberPredictionsUsed();
-		
+			
 	}
 }

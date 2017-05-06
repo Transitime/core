@@ -17,6 +17,7 @@
 
 package org.transitime.api.data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -42,7 +43,7 @@ import org.transitime.utils.Time;
 		"scheduleAdherence", "scheduleAdherenceStr", "blockId",
 		"blockAssignmentMethod", "tripId", "tripPatternId", "isDelayed",
 		"isLayover", "layoverDepTime", "layoverDepTimeStr", "nextStopId",
-		"nextStopName", "driverId" })
+		"nextStopName", "driverId", "holdingTime" })
 public class ApiVehicleDetails extends ApiVehicleAbstract {
 
 	@XmlAttribute
@@ -97,6 +98,9 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	
 	@XmlAttribute
 	private Boolean isAtStop;
+	
+	@XmlElement
+	private ApiHoldingTime holdingTime;
 
 	/**
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
@@ -114,8 +118,10 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	 * @param uiType
 	 *            Optional parameter. If should be labeled as "minor" in output
 	 *            for UI. Default is UiMode.NORMAL.
+	 * @throws InvocationTargetException 
+	 * @throws IllegalAccessException 
 	 */
-	public ApiVehicleDetails(IpcVehicle vehicle, Time timeForAgency, UiMode... uiType) {
+	public ApiVehicleDetails(IpcVehicle vehicle, Time timeForAgency, UiMode... uiType) throws IllegalAccessException, InvocationTargetException {
 		super(vehicle, uiType.length > 0 ? uiType[0] : UiMode.NORMAL);
 		
 		routeName = vehicle.getRouteName();
@@ -150,6 +156,11 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 			freqStartTime = null;
 						
 		this.isAtStop = vehicle.isAtStop();
+				
+		if(vehicle.getHoldingTime()!=null)
+			this.holdingTime = new ApiHoldingTime(vehicle.getHoldingTime());				
+		else
+			this.holdingTime = null;
 	}
 
 }

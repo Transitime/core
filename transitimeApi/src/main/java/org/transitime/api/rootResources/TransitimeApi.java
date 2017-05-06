@@ -18,13 +18,8 @@
 package org.transitime.api.rootResources;
 
 import java.rmi.RemoteException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,21 +38,13 @@ import org.transitime.api.data.ApiActiveBlocks;
 import org.transitime.api.data.ApiActiveBlocksRoutes;
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
-import org.transitime.api.data.ApiArrivalDepartures;
 import org.transitime.api.data.ApiBlock;
 import org.transitime.api.data.ApiBlocks;
 import org.transitime.api.data.ApiBlocksTerse;
-import org.transitime.api.data.ApiCacheDetails;
 import org.transitime.api.data.ApiCalendars;
 import org.transitime.api.data.ApiDirections;
-import org.transitime.api.data.ApiHistoricalAverage;
-import org.transitime.api.data.ApiHistoricalAverageCacheKeys;
-import org.transitime.api.data.ApiHoldingTime;
-import org.transitime.api.data.ApiHoldingTimeCacheKeys;
 import org.transitime.api.data.ApiIds;
-import org.transitime.api.data.ApiKalmanErrorCacheKeys;
 import org.transitime.api.data.ApiPredictions;
-import org.transitime.api.data.ApiPredictionsForStopPath;
 import org.transitime.api.data.ApiRmiServerStatus;
 import org.transitime.api.data.ApiRoutes;
 import org.transitime.api.data.ApiRoutesDetails;
@@ -76,30 +63,20 @@ import org.transitime.api.utils.WebUtils;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcActiveBlock;
-import org.transitime.ipc.data.IpcArrivalDeparture;
 import org.transitime.ipc.data.IpcBlock;
 import org.transitime.ipc.data.IpcCalendar;
 import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionForStopPath;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitime.ipc.data.IpcRoute;
 import org.transitime.ipc.data.IpcRouteSummary;
 import org.transitime.ipc.data.IpcSchedule;
 import org.transitime.ipc.data.IpcServerStatus;
 import org.transitime.ipc.data.IpcDirectionsForRoute;
-import org.transitime.ipc.data.IpcHistoricalAverage;
-import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
-import org.transitime.ipc.data.IpcHoldingTime;
-import org.transitime.ipc.data.IpcHoldingTimeCacheKey;
-import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
 import org.transitime.ipc.data.IpcVehicleConfig;
-import org.transitime.ipc.interfaces.CacheQueryInterface;
 import org.transitime.ipc.interfaces.ConfigInterface;
-import org.transitime.ipc.interfaces.HoldingTimeInterface;
-import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
 import org.transitime.ipc.interfaces.ServerStatusInterface;
 import org.transitime.ipc.interfaces.VehiclesInterface;
@@ -300,6 +277,7 @@ public class TransitimeApi {
 			return result;
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
+			e.printStackTrace();
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}

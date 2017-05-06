@@ -76,6 +76,7 @@ public class IpcVehicle implements Serializable {
 	private final String vehicleType;
 	private long freqStartTime;
 	private final boolean isAtStop;
+	private final IpcHoldingTime holdingTime;
 	
 	private static final long serialVersionUID = -1744566765456572042L;
 
@@ -160,6 +161,11 @@ public class IpcVehicle implements Serializable {
 			this.isAtStop = vs.getMatch().isAtStop();
 		else
 			this.isAtStop = false;
+		
+		if(vs.getHoldingTime()!=null)
+			this.holdingTime = new IpcHoldingTime(vs.getHoldingTime());
+		else
+			this.holdingTime = null;
 	}
 
 	/**
@@ -196,7 +202,7 @@ public class IpcVehicle implements Serializable {
 			String directionId, String headsign, boolean predictable,
 			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
 			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
-			String nextStopId, String nextStopName, String vehicleType, long freqStartTime, boolean isAtStop) {
+			String nextStopId, String nextStopName, String vehicleType, long freqStartTime, boolean isAtStop, IpcHoldingTime holdingTime) {
 		this.blockId = blockId;
 		this.blockAssignmentMethod = blockAssignmentMethod;
 		this.avl = avl;
@@ -219,6 +225,7 @@ public class IpcVehicle implements Serializable {
 		this.vehicleType = vehicleType;
 		this.freqStartTime = freqStartTime;
 		this.isAtStop = isAtStop;
+		this.holdingTime = holdingTime;
 	}
 
 	/*
@@ -249,6 +256,7 @@ public class IpcVehicle implements Serializable {
 		protected String vehicleType;
 		protected long freqStartTime;
 		protected boolean isAtStop;
+		protected IpcHoldingTime holdingTime;
 
 		private static final long serialVersionUID = -4996254752417270043L;
 		private static final short currentSerializationVersion = 0;
@@ -279,6 +287,7 @@ public class IpcVehicle implements Serializable {
 			this.vehicleType = v.vehicleType;
 			this.freqStartTime = v.freqStartTime;
 			this.isAtStop = v.isAtStop;
+			this.holdingTime = v.holdingTime;
 		}
 
 		/*
@@ -313,6 +322,7 @@ public class IpcVehicle implements Serializable {
 		    stream.writeObject(vehicleType);
 		    stream.writeObject(freqStartTime);
 		    stream.writeBoolean(isAtStop);
+		    stream.writeObject(holdingTime);
 		}
 
 		/*
@@ -354,6 +364,8 @@ public class IpcVehicle implements Serializable {
 			vehicleType = (String) stream.readObject();
 			freqStartTime = stream.readLong();
 		    isAtStop = stream.readBoolean();
+		    holdingTime = (IpcHoldingTime)stream.readObject(); 
+		    
 		}
 
 		/*
@@ -367,7 +379,7 @@ public class IpcVehicle implements Serializable {
 					routeId, routeShortName, routeName, tripId, tripPatternId,
 					directionId, headsign, predictable, schedBasedPred,
 					realTimeSchdAdh, isDelayed, isLayover, layoverDepartureTime,
-					nextStopId, nextStopName, vehicleType, freqStartTime, isAtStop);
+					nextStopId, nextStopName, vehicleType, freqStartTime, isAtStop, holdingTime);
 		}
 	} // End of SerializationProxy class
 
@@ -415,6 +427,10 @@ public class IpcVehicle implements Serializable {
 	 */
 	public float getHeading() {
 		return heading;
+	}
+
+	public IpcHoldingTime getHoldingTime() {
+		return holdingTime;
 	}
 
 	/**
@@ -543,6 +559,7 @@ public class IpcVehicle implements Serializable {
 				+ ", avl=" + avl
 				+ ", heading=" + heading 
 				+ ", vehicleType=" + vehicleType
+				+ ", holdingTime=" + holdingTime
 				+ "]";
 	}
 
@@ -559,7 +576,7 @@ public class IpcVehicle implements Serializable {
 						BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl,
 						123.456f, "routeId", "routeShortName", "routeName",
 						"tripId", "tripPatternId", "dirId", "headsign", true,
-						false, null, false, false, 0, null, null, null, -1, false);
+						false, null, false, false, 0, null, null, null, -1, false, null);
 		try {
 			FileOutputStream fileOut = new FileOutputStream("foo.ser");
 			ObjectOutputStream outStream = new ObjectOutputStream(fileOut);

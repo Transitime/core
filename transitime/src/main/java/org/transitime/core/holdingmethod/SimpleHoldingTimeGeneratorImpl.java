@@ -45,7 +45,7 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
-	public HoldingTime generateHoldingTime(ArrivalDeparture event) {			
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event) {			
 		
 		if(event.isArrival() && isControlStop(event.getStopId(), event.getStopPathIndex()))
 		{
@@ -152,7 +152,7 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 		return holdingTime;				
 	}
 	@Override
-	public HoldingTime generateHoldingTime(IpcPrediction arrivalPrediction) {
+	public HoldingTime generateHoldingTime(VehicleState vehicleState,IpcPrediction arrivalPrediction) {
 		
 		HoldingTime holdingTime = null;
 		

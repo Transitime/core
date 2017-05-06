@@ -17,6 +17,7 @@
 
 package org.transitime.api.data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -65,7 +66,7 @@ public class ApiActiveBlock {
      */
 	protected ApiActiveBlock() {}
 	
-	public ApiActiveBlock(IpcActiveBlock ipcActiveBlock, String agencyId) {
+	public ApiActiveBlock(IpcActiveBlock ipcActiveBlock, String agencyId) throws IllegalAccessException, InvocationTargetException {
 		id = ipcActiveBlock.getBlock().getId();
 		serviceId = ipcActiveBlock.getBlock().getServiceId();
 		startTime = Time.timeOfDayStr(ipcActiveBlock.getBlock().getStartTime());

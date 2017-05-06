@@ -17,6 +17,7 @@
 
 package org.transitime.api.data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -54,9 +55,11 @@ public class ApiActiveBlocksRoutes {
 	 * 
 	 * @param activeBlocks Already ordered list of active blocks
 	 * @param agencyId
+	 * @throws InvocationTargetException 
+	 * @throws IllegalAccessException 
 	 */
 	public ApiActiveBlocksRoutes(Collection<IpcActiveBlock> activeBlocks,
-			String agencyId) {		
+			String agencyId) throws IllegalAccessException, InvocationTargetException {		
 		routeData = new ArrayList<ApiActiveBlocksRoute>();
 		
 		ApiActiveBlocksRoute apiRoute = null;

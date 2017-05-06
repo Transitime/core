@@ -198,10 +198,11 @@ body {
                 {
                 	try
                 	{
-	                	if(getHoldingTime(data, stopid, keys[index])>-1200000)
-	                	{
-	                    	return keys[index];
-	                	}
+                        if(getHoldingTimeMilliseconds(data, stopid, keys[index])>-1200000)
+                        {
+                                return keys[index];
+                        }
+
                 	}catch(err)
                 	{
                 		
@@ -385,7 +386,7 @@ body {
 			return false;
 		}		
 	};
-	function getHoldingTime(data, stopId, vehicleId)
+	function getHoldingTimeMilliseconds(data, stopId, vehicleId)
 	{
 		var holdingTimeMilliseconds = new Date(data.holdingTimes[vehicleId].holdingTime)
 		.getTime() - new Date(data.holdingTimes[vehicleId].currentTime).getTime();

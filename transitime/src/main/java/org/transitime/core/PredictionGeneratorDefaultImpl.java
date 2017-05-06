@@ -410,11 +410,12 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			{							
 				if(HoldingTimeGeneratorFactory.getInstance()!=null)
 				{							
-					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(predictionForStop);
+					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, predictionForStop);
 					if(holdingTime!=null)
 					{
 						//HoldingTimeCache.getInstance().putHoldingTimeExlusiveByStop(holdingTime, new Date(Core.getInstance().getSystemTime()));
 						HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+						vehicleState.setHoldingTime(holdingTime);
 					}
 				}			
 			}
@@ -470,7 +471,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 				/* TODO this is where we should take account of holding time */
 				if(useHoldingTimeInPrediction.getValue() && HoldingTimeGeneratorFactory.getInstance()!=null)
 				{
-					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(predictionForStop);
+					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, predictionForStop);
 					
 					if(holdingTime!=null)
 					{

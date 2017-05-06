@@ -13,6 +13,7 @@ import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.config.StringListConfigValue;
+import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.HoldingTimeCacheKey;
 import org.transitime.core.dataCache.PredictionDataCache;
@@ -48,7 +49,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
-	public HoldingTime generateHoldingTime(ArrivalDeparture event) {
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event) {
 				
 		PredictionDataCache predictionCache = PredictionDataCache.getInstance();
 							
@@ -272,7 +273,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		return holdingTime;				
 	}
 	@Override
-	public HoldingTime generateHoldingTime(IpcPrediction arrivalPrediction) {
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, IpcPrediction arrivalPrediction) {
 		
 		HoldingTime holdingTime = null;
 		if(arrivalPrediction.isArrival() && isControlStop(arrivalPrediction.getStopId()))
@@ -459,7 +460,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		{
 			if(key.getStopid().equals(stopId))
 			{				
-				if(HoldingTimeCache.getInstance().getHoldingTime(key).getHoldingTime().before(currentTime))
+				if(HoldingTimeCache.getInstance().getHoldingTime(key).getHoldingTime().after(currentTime))
 				{
 					currentHoldingTimes.add(HoldingTimeCache.getInstance().getHoldingTime(key));
 				}
@@ -477,8 +478,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			{
 				if(holdingTime.getHoldingTime().after(currentTime)&&(nextDeparture==null||holdingTime.getHoldingTime().before(nextDeparture.getHoldingTime())))
 				{
-					nextDeparture=holdingTime;
-					logger.debug("Found departure by holding time {}."+nextDeparture); 
+					nextDeparture=holdingTime;			
 				}
 			}
 		}

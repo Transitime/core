@@ -17,6 +17,7 @@
 
 package org.transitime.api.data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -61,9 +62,11 @@ public class ApiVehiclesDetails {
 	 * @param uiTypesForVehicles
 	 *            Specifies how vehicles should be drawn in UI. Can be NORMAL,
 	 *            SECONDARY, or MINOR
+	 * @throws InvocationTargetException 
+	 * @throws IllegalAccessException 
 	 */
 	public ApiVehiclesDetails(Collection<IpcVehicle> vehicles,
-			String agencyId, Map<String, UiMode> uiTypesForVehicles) {
+			String agencyId, Map<String, UiMode> uiTypesForVehicles) throws IllegalAccessException, InvocationTargetException {
 		// Get Time object based on timezone for agency
 		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
 		Time timeForAgency = webAgency.getAgency().getTime();				
