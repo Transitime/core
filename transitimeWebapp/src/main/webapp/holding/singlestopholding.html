@@ -184,7 +184,7 @@ body {
 			holdingTimes: {},			
 			predictions : null,
 			vehicleDetails: {},
-			
+			currentServerTime:null,
 	};
 	var playarrivalsound=true;
 	var playdepartcound=true;
@@ -217,11 +217,42 @@ body {
             return null;
         }
     }
+	function vehicleToDisplayAlternativeMethod(data, stopid)
+	{
+		  var keys=Object.keys(data.holdingTimes);
+		  var minHoldingTime = null;
+		  
+          for (var index = 0; index < keys.length; ++index) {
+        	  if(vehicleAtStop(data, stopid, keys[index]))
+        	  {
+        		  	if(getHoldingTimeMilliseconds(data, stopid, keys[index])>-1200000)
+        		  	{
+		        	 	if(minHoldingTime!=null)
+		        		{
+		        	 		if(getHoldingTimeMilliseconds(data, stopid, keys[index])<getHoldingTimeMilliseconds(data, stopid, minHoldingTime.vehicleId))
+		        	  		{
+		        	  			minHoldingTime=data.holdingTimes[keys[index]];
+		        	  		}
+		        		}
+		        	  	else
+	        	  		{
+		        	  		minHoldingTime=data.holdingTimes[keys[index]];
+	        	  		}
+        		  	}
+        	  }
+          }
+          if(minHoldingTime!=null)
+          	return minHoldingTime.vehicleId;
+          else
+        	return null;
+	};
 	function getData(data, agencyid, routeid, stopid)
-	{																		
+	{		
+		getCurrentServerTime(host, agencyid, processCurrentTime, data);
+		
 		getNextVehicleArrivalPredictions(host, agencyid, routeid, stopid, processArrivalPredictions, data);
                     		                            
-        getAllVehicleDetails(host, agencyid, routeid, processAllVehicleDetails, data);       
+        getAllVehicleDetails(host, agencyid, routeid, processAllVehicleDetails, data);     
 	};
 		
 	function getAllVehicleDetails(host, agencyid, routeid,processAllVehicleDetails, data) {
@@ -243,6 +274,10 @@ body {
 		xmlhttp.open("GET", baseurl, true);
 		xmlhttp.send();     
 	};
+	function processCurrentTime(data, currentServerTime)
+	{
+		data.currentServerTime=currentServerTime.currentTime;
+	};
 	function processAllVehicleDetails(data, allVehicleDetails)
 	{
 		console.log(allVehicleDetails);
@@ -257,7 +292,7 @@ body {
 	function updateScreen(data, agencyid, routeid, stopid)
 	{
      			
-        var vehicle=vehicleToDisplay(data, stopid);
+        var vehicle=vehicleToDisplayAlternativeMethod(data, stopid);
        
         if(vehicle!=null)
         {
@@ -285,7 +320,7 @@ body {
                 
                 var holdingTimeMilliseconds = new Date(data.holdingTimes[data.vehicle].holdingTime)
 						.getTime()
-						- new Date().getTime();
+						- new Date(data.currentServerTime).getTime();
 				
 				var time = Math.abs(holdingTimeMilliseconds) / 1000;
                 
@@ -382,7 +417,7 @@ body {
 	function counterFinished(data, stopId, vehicleId, treshold)
 	{
 		var holdingTimeMilliseconds = new Date(data.holdingTimes[vehicleId].holdingTime)
-		.getTime() - new Date(data.holdingTimes[vehicleId].currentTime).getTime();
+		.getTime() - new Date(data.currentServerTime).getTime();
 		
 		if(holdingTimeMilliseconds<(treshold*-1))
 		{
@@ -396,12 +431,14 @@ body {
 	function getHoldingTimeMilliseconds(data, stopId, vehicleId)
 	{
 		var holdingTimeMilliseconds = new Date(data.holdingTimes[vehicleId].holdingTime)
-		.getTime() - new Date(data.holdingTimes[vehicleId].currentTime).getTime();
+		.getTime() - new Date(data.currentServerTime).getTime();
 		return holdingTimeMilliseconds;
 	};
     function updateDashBoard()
     {
+    	
         getData(data, getUrlParameter('agency'), getUrlParameter('route'), getUrlParameter('stop'));
+       
         updateScreen(data, getUrlParameter('agency'), getUrlParameter('route'), getUrlParameter('stop'));
     };
   
