@@ -42,7 +42,7 @@ import javax.ws.rs.WebApplicationException;
 public class UsageValidator {
 
 	// The limits of requests per IP address
-	private static int MAX_REQUESTS = 50000;
+	private static int MAX_REQUESTS = 500000;
 	private static int MAX_REQUESTS_TIME_MSEC = 100000;
 
 	// This is a singleton class
@@ -101,14 +101,22 @@ public class UsageValidator {
 			// within the time limit.
 			if (accessTimes.size() == MAX_REQUESTS) {
 				Long oldestAccessTime = accessTimes.getLast();
-				if (oldestAccessTime > currentTime - MAX_REQUESTS_TIME_MSEC) {
-					// Note that using special HTTP response 429, which is for
-					// Too Many Requests. See
-					// http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-					throw WebUtils.badRequestException(429, "Exceeded "
-							+ MAX_REQUESTS + " requests within "
-							+ MAX_REQUESTS_TIME_MSEC + " msec for IP address "
-							+ requestIpAddress);
+				if(oldestAccessTime!=null)
+				{
+					try {
+						if (oldestAccessTime > currentTime - MAX_REQUESTS_TIME_MSEC) {
+							// Note that using special HTTP response 429, which is for
+							// Too Many Requests. See
+							// http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+							throw WebUtils.badRequestException(429, "Exceeded "
+									+ MAX_REQUESTS + " requests within "
+									+ MAX_REQUESTS_TIME_MSEC + " msec for IP address "
+									+ requestIpAddress);
+						}
+					} catch (NullPointerException e) {
+
+						e.printStackTrace();
+					}
 				}
 			}
 
