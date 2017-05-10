@@ -81,8 +81,14 @@ body {
 								<div id="timeofdeparture"></div>
 							</td>
 						</tr>
+						<tr>
+							<td>Next departure</td>
+							<td>
+								<div id="nextdeparturevehicleid"></div>
+							</td>
+						</tr>
                         <tr>
-							<td>Next vehicle</td>
+							<td>Next arrival</td>
 							<td>
 								<div id="nextarrival"></div>
 							</td>
@@ -217,6 +223,31 @@ body {
             return null;
         }
     }
+	function getNextVehicleToDepart(data, stopid, vehicleid)
+	{
+		  var keys=Object.keys(data.holdingTimes);
+		  var nextHoldingTime = null;
+		  for (var index = 0; index < keys.length; ++index) {
+        	  if(vehicleAtStop(data, stopid, keys[index]))
+        	  {
+        		  	if(getHoldingTimeMilliseconds(data, stopid, keys[index])>-1200000)
+        		  	{		        	 	
+		        	 	if(getHoldingTimeMilliseconds(data, stopid, keys[index])>getHoldingTimeMilliseconds(data, stopid, vehicleid))
+		        	  	{
+		        	  		if(getHoldingTimeMilliseconds(data, stopid, keys[index])<getHoldingTimeMilliseconds(data, stopid, nextHoldingTime.vehicleId)|| nextHoldingTime==null)
+		        	  		{
+		        	  			nextHoldingTime=data.holdingTimes[keys[index]];
+		        	  		}
+		        	 			
+		        	  	}		        				        	 
+        		  	}
+        	  }
+          }
+		  if(nextHoldingTime!=null)
+	          	return nextHoldingTime.vehicleId;
+	      else
+	        	return null;
+	};
 	function vehicleToDisplayAlternativeMethod(data, stopid)
 	{
 		  var keys=Object.keys(data.holdingTimes);
@@ -311,6 +342,7 @@ body {
                 	ion.sound.play("store_door");
                 	playarrivalsound=false;
                 }
+                $("nextdeparturevehicleid").text(getNextVehicleToDepart(data, stopid, data.vehicle));
                 
                 $("#timeofdeparture").text(
 						new Date(data.holdingTimes[data.vehicle].holdingTime).toLocaleTimeString());

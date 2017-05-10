@@ -1,5 +1,7 @@
 package org.transitime.core.holdingmethod;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.transitime.core.VehicleState;
@@ -13,4 +15,6 @@ public interface HoldingTimeGenerator {
 	public List<ControlStop> getControlPointStops();
 	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event);	
 	public HoldingTime generateHoldingTime(VehicleState vehicleState, IpcPrediction arrivalPrediction);
+	
+	public void handleDeparture(VehicleState vehicleState, ArrivalDeparture arrivalDeparture);
 }

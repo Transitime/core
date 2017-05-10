@@ -16,6 +16,7 @@
  */
 package org.transitime.core;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -338,8 +339,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			{				
 				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
 				vehicleState.setHoldingTime(holdingTime);
-				//HoldingTimeCache.getInstance().putHoldingTimeExlusiveByStop(holdingTime, new Date(Core.getInstance().getSystemTime()));
+				
 			}
+			ArrayList<Long> N_List=new ArrayList<Long>();
+			
+			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);			
 		}
 		
 	}

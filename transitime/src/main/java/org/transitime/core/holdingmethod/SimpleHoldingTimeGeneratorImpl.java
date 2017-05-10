@@ -241,5 +241,11 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 		else
 			return false;
 	}
+
+	@Override
+	public void handleDeparture(VehicleState vehicleState, ArrivalDeparture arrivalDeparture) {
+		// TODO Auto-generated method stub
+		
+	}
 		
 }
