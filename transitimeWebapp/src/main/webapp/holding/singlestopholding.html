@@ -345,11 +345,19 @@ body {
                 
                 try
                 {
-                	$("nextdeparturevehicleid").text(getNextVehicleToDepart(data, stopid, data.vehicle));
+                        var nextdep=getNextVehicleToDepart(data, stopid, data.vehicle);
+                        if(nextdep!=null)
+                        {
+                                $("#nextdeparturevehicleid").text(nextdep);
+                        }else
+                        {
+                                $("#nextdeparturevehicleid").text("");
+                        }
                 }catch(err)
                 {
-                	console.log("Caught nextdeparturevehicleid error.");
+                        console.log("Caught nextdeparturevehicleid error.");
                 }
+
                 
                 
                 $("#timeofdeparture").text(
