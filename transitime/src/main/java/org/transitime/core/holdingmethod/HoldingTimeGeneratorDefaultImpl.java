@@ -64,7 +64,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	
 	protected static BooleanConfigValue regenerateOnDeparture = new BooleanConfigValue("transitime.holding.regenerateondeparture", 
 			false,
-			"Generate a holding time for all vechickes at stop based on departure.");
+			"Regenerate a holding time for all vehicles at control point when a vehicle departs the control point.");
 				
 	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 

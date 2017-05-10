@@ -233,8 +233,8 @@ body {
         		  	if(getHoldingTimeMilliseconds(data, stopid, keys[index])>-1200000)
         		  	{		        	 	
 		        	 	if(getHoldingTimeMilliseconds(data, stopid, keys[index])>getHoldingTimeMilliseconds(data, stopid, vehicleid))
-		        	  	{
-		        	  		if(getHoldingTimeMilliseconds(data, stopid, keys[index])<getHoldingTimeMilliseconds(data, stopid, nextHoldingTime.vehicleId)|| nextHoldingTime==null)
+		        	  	{		        	 				        	 		
+		        	  		if(nextHoldingTime==null ||getHoldingTimeMilliseconds(data, stopid, keys[index])<getHoldingTimeMilliseconds(data, stopid, nextHoldingTime.vehicleId))
 		        	  		{
 		        	  			nextHoldingTime=data.holdingTimes[keys[index]];
 		        	  		}
@@ -342,7 +342,15 @@ body {
                 	ion.sound.play("store_door");
                 	playarrivalsound=false;
                 }
-                $("nextdeparturevehicleid").text(getNextVehicleToDepart(data, stopid, data.vehicle));
+                
+                try
+                {
+                	$("nextdeparturevehicleid").text(getNextVehicleToDepart(data, stopid, data.vehicle));
+                }catch(err)
+                {
+                	console.log("Caught nextdeparturevehicleid error.");
+                }
+                
                 
                 $("#timeofdeparture").text(
 						new Date(data.holdingTimes[data.vehicle].holdingTime).toLocaleTimeString());
