@@ -69,7 +69,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
-	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event) {
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event, boolean setArrivalToZero) {
 				
 		PredictionDataCache predictionCache = PredictionDataCache.getInstance();
 							
@@ -153,29 +153,25 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			{
 				logger.debug("Found waiting vehicle with holding time: {}", lastVehicleDepartureByHoldingTime);
 				if(predictions.size()>1)
-				{															
-					
-					Long N[]=null;
-					
-					ArrayList<ArrivalDeparture> otherArrivals=null;
-					
+				{																				
+					Long N[]=null;										
+											
 					int counter=0;
-					if(tryfix.getValue())
-					{
-						ArrayList<Long> N_List=new ArrayList<Long>();
-						
-						otherArrivals=addArrivalTimesForVehiclesAtStop(event.getStopId(), event.getVehicleId(), new Date(event.getTime()), N_List);
-						
-						N_List=predictionsToLongArrayList(predictions, N_List);
 					
-						N=N_List.toArray(new Long[N_List.size()]);
-						
-						for(int i=0;i<otherArrivals.size()&&counter<maxPredictionsForHoldingTimeCalculation.getValue();i++)
+					if(setArrivalToZero)
+					{
+						logger.debug("Set arrival to now {} for first prediction as more than one vehicle arrive together.", event.getTime());
+						ArrayList<Long> N_List=new ArrayList<Long>();
+						N_List.add(new Long(event.getTime()));
+						for(IpcPrediction prediction:predictions)
 						{
-							logger.debug("Other arrival for N-{} {}: {} ", counter+1, otherArrivals.get(i).getVehicleId(),otherArrivals.get(i));
-							counter++;							
-						}				
-					}else
+							N_List.add(prediction.getPredictionTime());
+						}
+						
+						N=N_List.toArray(new Long[N_List.size()]);
+						counter++;
+					}						
+					else
 					{
 						N=predictionsToLongArray(predictions);
 					}
@@ -206,9 +202,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					long current_vehicle_arrival_time=event.getTime();
 					
 					long holdingTimeValue=calculateHoldingTime(current_vehicle_arrival_time, lastVehicleDepartureByHoldingTime.getHoldingTime().getTime());
-					
-					
-					
+															
 					HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), event.getVehicleId(), event.getStopId(), event.getTripId(),
 							event.getRouteId(), false, true, new Date(event.getTime()), true, 0);
 					
@@ -227,24 +221,20 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 				if(predictions.size()>1)
 				{					
 					Long N[]=null;
-					
-					ArrayList<ArrivalDeparture> otherArrivals=null;
+									
 					int counter=0;
-					if(tryfix.getValue())
+					if(setArrivalToZero)
 					{
+						logger.debug("Set arrival to now {} for first prediction as more than one vehicle arrive together.", event.getTime());
 						ArrayList<Long> N_List=new ArrayList<Long>();
-						
-						otherArrivals=addArrivalTimesForVehiclesAtStop(event.getStopId(), event.getVehicleId(), new Date(event.getTime()), N_List);
-						
-						N_List=predictionsToLongArrayList(predictions, N_List);
-					
-						N=N_List.toArray(new Long[N_List.size()]);
-						
-						for(int i=0;i<otherArrivals.size()&&counter<maxPredictionsForHoldingTimeCalculation.getValue();i++)
+						N_List.add(new Long(event.getTime()));
+						for(IpcPrediction prediction:predictions)
 						{
-							logger.debug("Other arrival for N-{} {}: {} ", counter+1, otherArrivals.get(i).getVehicleId(),otherArrivals.get(i));
-							counter++;
-						}				
+							N_List.add(prediction.getPredictionTime());
+						}
+						
+						N=N_List.toArray(new Long[N_List.size()]);
+						counter++;
 					}else
 					{
 						N=predictionsToLongArray(predictions);
@@ -254,8 +244,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					{
 						logger.debug("Prediction for N-{} {}: {} ", counter+1, predictions.get(i).getVehicleId(),predictions.get(i));
 						counter++;
-					}
-					
+					}					
 					
 					long current_vehicle_arrival_time=event.getTime();
 					
@@ -332,7 +321,8 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		HoldingTime nextDeparture=null;
 		for(HoldingTime holdingTime:holdingTimes)
 		{
-			if(!holdingTime.getVehicleId().equals(currentVehicleId))
+			//&& holdingTime.isArrivalPredictionUsed()==false
+			if(!holdingTime.getVehicleId().equals(currentVehicleId) )
 			{
 				if(nextDeparture==null||holdingTime.getHoldingTime().before(nextDeparture.getHoldingTime()))
 				{
@@ -805,7 +795,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					
 					ArrivalDeparture lastArrival = getLastVehicleArrivalEvent(arrivalDeparture.getStopId(), otherState.getVehicleId(), arrivalDeparture.getAvlTime());
 					
-					HoldingTime otherHoldingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(otherState, lastArrival);
+					HoldingTime otherHoldingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(otherState, lastArrival, false);
 					
 					HoldingTimeCache.getInstance().putHoldingTime(otherHoldingTime);
 					

@@ -247,5 +247,12 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event,
+			boolean setArrivalToZero) {
+
+		return generateHoldingTime(vehicleState, event);
+	}
 		
 }

@@ -2,6 +2,7 @@ package org.transitime.avl.via;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.transitime.avl.GtfsRealtimeModule;
@@ -43,21 +44,35 @@ public class ViaRoute100Trial_GTFSRealtimeModule extends GtfsRealtimeModule {
 		}
 		processArrivalDepartureToCreateHoldingTimes();
 	}
-	private void processArrivalDepartureToCreateHoldingTimes ()
+	private void processArrivalDepartureToCreateHoldingTimes()
 	{
+		HashMap <String, String> first= new HashMap<String, String>();
 		for(ArrivalDeparture event:ArrivalDeparturesToProcessHoldingTimesFor.getInstance().getList())
 		{			
 			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());
 			
 			if(HoldingTimeGeneratorFactory.getInstance()!=null)
-			{							
-				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event);
-				if(holdingTime!=null)
-				{				
-					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
-					vehicleState.setHoldingTime(holdingTime);				
-				}												
-				HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, event);			
+			{												
+				HoldingTime holdingTime=null;
+				if(event.isArrival())
+				{
+					if(first.get(event.getVehicleId())==null)
+					{
+						first.put(event.getVehicleId(), event.getVehicleId());
+						holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event, true);
+					}else
+					{
+						holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event, false);
+					}				
+					if(holdingTime!=null)
+					{				
+						HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+						vehicleState.setHoldingTime(holdingTime);				
+					}												
+				}else
+				{
+					HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, event);
+				}
 			}
 		}				
 		ArrivalDeparturesToProcessHoldingTimesFor.getInstance().empty();

@@ -12,6 +12,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitime.applications.Core;
@@ -166,7 +167,7 @@ public class HoldingTime implements Serializable {
 	
 	@Column 
 	int numberPredictionsUsed;
-	
+		
 	
 	public boolean isHasD1() {
 		return hasD1;

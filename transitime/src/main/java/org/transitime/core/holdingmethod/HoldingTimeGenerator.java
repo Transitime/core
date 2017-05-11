@@ -13,7 +13,7 @@ import org.transitime.ipc.data.IpcPrediction;
  */
 public interface HoldingTimeGenerator {
 	public List<ControlStop> getControlPointStops();
-	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event);	
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event, boolean setArrivalToZero);	
 	public HoldingTime generateHoldingTime(VehicleState vehicleState, IpcPrediction arrivalPrediction);
 	
 	public void handleDeparture(VehicleState vehicleState, ArrivalDeparture arrivalDeparture);
