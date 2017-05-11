@@ -69,7 +69,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
-	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event, boolean setArrivalToZero) {
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event, boolean setFirstPredictionToZero) {
 				
 		PredictionDataCache predictionCache = PredictionDataCache.getInstance();
 							
@@ -158,7 +158,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 											
 					int counter=0;
 					
-					if(setArrivalToZero)
+					if(setFirstPredictionToZero)
 					{
 						logger.debug("Set arrival to now {} for first prediction as more than one vehicle arrive together.", event.getTime());
 						ArrayList<Long> N_List=new ArrayList<Long>();
@@ -223,7 +223,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					Long N[]=null;
 									
 					int counter=0;
-					if(setArrivalToZero)
+					if(setFirstPredictionToZero)
 					{
 						logger.debug("Set arrival to now {} for first prediction as more than one vehicle arrive together.", event.getTime());
 						ArrayList<Long> N_List=new ArrayList<Long>();

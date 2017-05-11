@@ -59,10 +59,10 @@ public class ViaRoute100Trial_GTFSRealtimeModule extends GtfsRealtimeModule {
 					if(first.get(event.getVehicleId())==null)
 					{
 						first.put(event.getVehicleId(), event.getVehicleId());
-						holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event, true);
+						holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event, false);
 					}else
 					{
-						holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event, false);
+						holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event, true);
 					}				
 					if(holdingTime!=null)
 					{				
