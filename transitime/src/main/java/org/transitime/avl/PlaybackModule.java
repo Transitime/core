@@ -178,7 +178,7 @@ public class PlaybackModule extends Module {
 		
 		logger.info("PlaybackModule read {} AVLReports.", avlReports.size());
 
-		// For next time this method is called
+		// For next time this method is called.
 		dbReadBeginTime = end;
 		
 		// Return results
@@ -212,8 +212,7 @@ public class PlaybackModule extends Module {
 		        gmtFormat.setTimeZone(gmtTime);
 		        		    		        		       
 		        String estDate=estFormat.format(avlReport.getTime());
-		        String gmtDate=gmtFormat.format(avlReport.getTime());
-		        
+		        String gmtDate=gmtFormat.format(avlReport.getTime());		        
 		        		     
 		        
 				if(playbackRealtime.getValue()==true)
@@ -236,7 +235,7 @@ public class PlaybackModule extends Module {
 					}
 				}				
 				// Do the actual processing of the AVL data
-				AvlProcessor.getInstance().processAvlReport(avlReport);							
+				AvlProcessor.getInstance().processAvlReport(avlReport);						
 			}
 		}
 		

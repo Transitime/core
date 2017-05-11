@@ -5,7 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.transitime.avl.GtfsRealtimeModule;
+import org.transitime.core.VehicleState;
+import org.transitime.core.dataCache.ArrivalDeparturesToProcessHoldingTimesFor;
+import org.transitime.core.dataCache.HoldingTimeCache;
+import org.transitime.core.dataCache.VehicleStateManager;
+import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
+import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.feed.gtfsRt.GtfsRtVehiclePositionsReader;
 
@@ -34,6 +41,26 @@ public class ViaRoute100Trial_GTFSRealtimeModule extends GtfsRealtimeModule {
 				System.out.println(avlReport);
 			}
 		}
+		processArrivalDepartureToCreateHoldingTimes();
+	}
+	private void processArrivalDepartureToCreateHoldingTimes ()
+	{
+		for(ArrivalDeparture event:ArrivalDeparturesToProcessHoldingTimesFor.getInstance().getList())
+		{			
+			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());
+			
+			if(HoldingTimeGeneratorFactory.getInstance()!=null)
+			{							
+				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event);
+				if(holdingTime!=null)
+				{				
+					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+					vehicleState.setHoldingTime(holdingTime);				
+				}												
+				HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, event);			
+			}
+		}				
+		ArrivalDeparturesToProcessHoldingTimesFor.getInstance().empty();
 	}
 	private static final String tripIds[]= {
 			"3231408",

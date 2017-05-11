@@ -483,7 +483,7 @@ public class PredictionDataCache {
 						oldPrediction.getStopId(), 
 						oldPrediction.getTrip().getHeadsign());
 				if (newPredsForVehicleByRouteStopDestMap.get(key) == null) {
-					// Remove the old prediction
+					// Remove the old prediction					
 					removePrediction(oldPrediction);
 				}
 			}

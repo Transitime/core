@@ -28,11 +28,6 @@ import org.transitime.db.hibernate.HibernateUtils;
  *
  */
 public class HoldingTime implements Serializable {
-	
-	
-
-	
-
 
 	@Override
 	public String toString() {
@@ -243,6 +238,39 @@ public class HoldingTime implements Serializable {
 		this.numberPredictionsUsed=numberPredictionsUsed;
 		
 	}
-
+	public HoldingTime(HoldingTime holdingTimeToCopy, Date holdingTime) {
+		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
+		this.holdingTime =holdingTime;
+		this.creationTime = holdingTimeToCopy.creationTime;
+		this.vehicleId = holdingTimeToCopy.vehicleId;
+		this.stopId = holdingTimeToCopy.stopId;
+		this.tripId = holdingTimeToCopy.tripId;
+		this.routeId = holdingTimeToCopy.routeId;
+		this.arrivalPredictionUsed=holdingTimeToCopy.arrivalPredictionUsed;
+		this.arrivalTime=holdingTimeToCopy.arrivalTime;
+		this.arrivalUsed=holdingTimeToCopy.arrivalUsed;		
+		this.hasD1=holdingTimeToCopy.hasD1;
+		this.numberPredictionsUsed=holdingTimeToCopy.numberPredictionsUsed;
+	}
+	public Date getTimeToLeave(Date currentTime)
+	{
+		if(currentTime.after(holdingTime))
+		{
+			return currentTime;
+		}else
+		{
+			return holdingTime;
+		}		
+	}
+	public boolean leaveStop(Date currentTime)
+	{
+		if(holdingTime.before(currentTime))
+		{
+			return true;
+		}else
+		{
+			return false;
+		}		
+	}
 
 }

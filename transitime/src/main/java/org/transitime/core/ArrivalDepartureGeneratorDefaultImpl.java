@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.dataCache.ArrivalDeparturesToProcessHoldingTimesFor;
 import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
@@ -332,6 +333,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
 		
+		
+		ArrivalDeparturesToProcessHoldingTimesFor.getInstance().add(arrivalDeparture);
+		/*
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{							
 			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
@@ -341,10 +345,12 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				vehicleState.setHoldingTime(holdingTime);
 				
 			}
+			
 			ArrayList<Long> N_List=new ArrayList<Long>();
 			
 			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);			
 		}
+		*/
 		
 	}
 	/**
