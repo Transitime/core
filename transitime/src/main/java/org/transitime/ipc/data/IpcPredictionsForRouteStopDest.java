@@ -429,10 +429,13 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			if (currentPrediction.getPredictionTime() < currentTime) {
 				// TODO This is a change for VIA. This needs to be in HoldingTimeGenerator. 
 				VehicleState vehicleState = vehicleStateManager.getVehicleState(currentPrediction.getVehicleId());
-				if(vehicleState!=null && vehicleState.getHoldingTime()==null)
+				if(vehicleState!=null)
 				{
-					iterator.remove();	
-				}				
+					if(!(vehicleState.getHoldingTime() == null && (currentPrediction.getStopId().equals("20097") || currentPrediction.getStopId().equals("93296"))))
+					{
+						iterator.remove();
+					}
+				}
 								
 			} else {
 				// The subsequent predictions are later so if this one is
