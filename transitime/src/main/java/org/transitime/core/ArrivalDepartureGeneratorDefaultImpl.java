@@ -341,7 +341,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{							
 			HoldingTimeCacheKey key=new HoldingTimeCacheKey(arrivalDeparture.getStopId(), arrivalDeparture.getVehicleId(), arrivalDeparture.getTripId());
-			if(arrivalDeparture.getStopId().equals("951")||arrivalDeparture.getStopId().equals("966"))
+			if(arrivalDeparture.getVehicleId().equals("966"))
 			{
 				System.out.println("hello");
 			}
@@ -349,7 +349,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			{
 				long sinceHoldingTimeGenerated=Math.abs(HoldingTimeCache.getInstance().getHoldingTime(key).getCreationTime().getTime()-arrivalDeparture.getAvlTime().getTime());
 			
-				if(HoldingTimeCache.getInstance().getHoldingTime(key).isArrivalPredictionUsed()==false&&sinceHoldingTimeGenerated>1400000)
+				if((HoldingTimeCache.getInstance().getHoldingTime(key).isArrivalPredictionUsed()==false&&sinceHoldingTimeGenerated>1400000)||HoldingTimeCache.getInstance().getHoldingTime(key).isArrivalPredictionUsed()==true)
 				{
 					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
 					if(holdingTime!=null)
