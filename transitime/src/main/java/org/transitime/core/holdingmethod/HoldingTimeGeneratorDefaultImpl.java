@@ -72,9 +72,11 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		if(!useArrivalEvents.getValue())
 		{
 			return null;
-		}				
+		}
+		
 		if(event.isArrival() && isControlStop(event.getStopId()))
-		{ 									
+		{
+			
 			List<IpcPrediction> predictions = new ArrayList<IpcPrediction>();
 			
 			for(IpcVehicleComplete currentVehicle:VehicleDataCache.getInstance().getVehicles())
@@ -730,7 +732,6 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 				}
 			}	
 		}
-
 	}
 		
 }

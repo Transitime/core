@@ -124,8 +124,14 @@ public class UsageValidator {
 			accessTimes.addFirst(currentTime);
 
 			// Clean up queue of old requests that are beyond the time limit
-			while (accessTimes.getLast() < currentTime - MAX_REQUESTS_TIME_MSEC)
-				accessTimes.removeLast();
+			try{
+				while (accessTimes.getLast() < currentTime - MAX_REQUESTS_TIME_MSEC)
+					accessTimes.removeLast();	
+			}catch(Exception Ex)
+			{
+				// TODO Sort out why this give a java.util.NoSuchElementException				
+			}
+			
 		}
 	}
 }

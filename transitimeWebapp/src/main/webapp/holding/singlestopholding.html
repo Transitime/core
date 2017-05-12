@@ -380,7 +380,13 @@ body {
            		{
 	                if(holdingTimeMilliseconds>0)
 	                {
-	                    $("#counter").css({'color' : 'green','font-size' : '400%'});
+	                	if(data.holdingTimes[data.vehicle].arrivalPredictionUsed)
+	                	{
+	                		$("#counter").css({'color' : 'indigo','font-size' : '400%'});
+	                	}else
+	                	{	                			                
+	                    	$("#counter").css({'color' : 'green','font-size' : '400%'});
+	                	}
 	                    $("#counter").text(str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
 	                }
 	                else

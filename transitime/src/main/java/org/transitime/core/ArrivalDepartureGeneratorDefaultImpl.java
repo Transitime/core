@@ -26,12 +26,14 @@ import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.dataCache.ArrivalDeparturesToProcessHoldingTimesFor;
 import org.transitime.core.dataCache.HoldingTimeCache;
+import org.transitime.core.dataCache.HoldingTimeCacheKey;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
+
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -276,7 +278,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				block,
 				tripIndex,
 				stopPathIndex, freqStartDate);
-		//updateCache(vehicleState, departure);
+		updateCache(vehicleState, departure);
 		logger.debug("Creating departure: {}", departure);
 		return departure;
 	}
@@ -308,13 +310,18 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				block,
 				tripIndex,
 				stopPathIndex, freqStartDate);
+		if(vehicleState.getVehicleId().equals("969"))
+		{
+			System.out.println("hello");
+		}
+		updateCache(vehicleState, arrival);
 		logger.debug("Creating arrival: {}", arrival);
 		
 		// Remember this arrival time so that can make sure that subsequent
 		// departures are for after the arrival time.
 		if (arrivalTime > vehicleState.getLastArrivalTime())
 			vehicleState.setLastArrivalTime(arrivalTime);
-						
+					
 		return arrival;
 	}
 	private void updateCache(VehicleState vehicleState, ArrivalDeparture arrivalDeparture)
@@ -333,17 +340,37 @@ public class ArrivalDepartureGeneratorDefaultImpl
 						
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{							
-			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
-			if(holdingTime!=null)
-			{				
-				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
-				vehicleState.setHoldingTime(holdingTime);
-				
+			HoldingTimeCacheKey key=new HoldingTimeCacheKey(arrivalDeparture.getStopId(), arrivalDeparture.getVehicleId(), arrivalDeparture.getTripId());
+			if(arrivalDeparture.getStopId().equals("951")||arrivalDeparture.getStopId().equals("966"))
+			{
+				System.out.println("hello");
 			}
-			ArrayList<Long> N_List=new ArrayList<Long>();
+			if(HoldingTimeCache.getInstance().getHoldingTime(key)!=null)
+			{
+				long sinceHoldingTimeGenerated=Math.abs(HoldingTimeCache.getInstance().getHoldingTime(key).getCreationTime().getTime()-arrivalDeparture.getAvlTime().getTime());
 			
+				if(HoldingTimeCache.getInstance().getHoldingTime(key).isArrivalPredictionUsed()==false&&sinceHoldingTimeGenerated>1400000)
+				{
+					HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
+					if(holdingTime!=null)
+					{
+						HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+						vehicleState.setHoldingTime(holdingTime);
+					}
+				}else
+				{
+					System.out.println("Don't generate.");
+				}
+			}else
+			{			
+				HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
+				if(holdingTime!=null)
+				{
+					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+					vehicleState.setHoldingTime(holdingTime);
+				}
+			}									
 			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);
-						
 		}
 	}
 	/**
@@ -386,7 +413,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);
 		
-		updateCache(vehicleState, arrivalDeparture);
+	
 	}
 	
 	/**
