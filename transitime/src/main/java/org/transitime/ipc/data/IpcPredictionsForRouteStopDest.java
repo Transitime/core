@@ -431,7 +431,12 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				VehicleState vehicleState = vehicleStateManager.getVehicleState(currentPrediction.getVehicleId());
 				if(vehicleState!=null)
 				{
-					if(!(vehicleState.getHoldingTime() == null && (currentPrediction.getStopId().equals("20097") || currentPrediction.getStopId().equals("93296"))))
+					
+					if((currentPrediction.getStopId().equals("20097") || currentPrediction.getStopId().equals("93296")) && vehicleState.getHoldingTime() == null )
+					{
+						// do nothing
+					}
+					else
 					{
 						iterator.remove();
 					}
