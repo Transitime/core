@@ -55,7 +55,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 			"Generate a holding time on arrival events.");
 	
 	protected static BooleanConfigValue useArrivalPredictions = new BooleanConfigValue("transitime.holding.usearrivalpredictions", 
-			false,
+			true,
 			"Generate a holding time on arrival predictions.");
 	
 	protected static BooleanConfigValue regenerateOnDeparture = new BooleanConfigValue("transitime.holding.regenerateondeparture", 

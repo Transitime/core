@@ -382,7 +382,7 @@ body {
 	                {
 	                	if(data.holdingTimes[data.vehicle].arrivalPredictionUsed)
 	                	{
-	                		$("#counter").css({'color' : 'indigo','font-size' : '400%'});
+	                		$("#counter").css({'color' : 'aquamarine','font-size' : '400%'});
 	                	}else
 	                	{	                			                
 	                    	$("#counter").css({'color' : 'green','font-size' : '400%'});
@@ -396,10 +396,24 @@ body {
 	                 		ion.sound.play("ship_bell");
 	                 		playdepartsound=false;
 	                 	}
-	                 		
-	                    $("#counter").css({'color' : 'red','font-size' : '400%'});                
+	                
+	                	if(data.holdingTimes[data.vehicle].arrivalPredictionUsed)
+	                	{
+	                    	$("#counter").css({'color' : 'darksalmon','font-size' : '400%'});
+	                	}
+	                	else
+	                	{
+	                    	$("#counter").css({'color' : 'red','font-size' : '400%'});
+	                	}
+	                	
 						$("#counter").text('-'+str_pad_left(minutes.toFixed(), '0', 2) + ':' + str_pad_left(seconds.toFixed(), '0', 2));
 	                }
+	                
+	                For positive predicted hold: #7FFFD4
+	                For negative predicted hold: #FAEBD7
+	                 
+	                For negative predicted hold: DarkSalmon 
+	                  
                 }else
                 {
                    	$("#counter").css({'color' : 'blue','font-size' : '400%'});                
