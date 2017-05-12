@@ -337,7 +337,22 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+			
+		if(HoldingTimeGeneratorFactory.getInstance()!=null)
+		{							
+			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
+			if(holdingTime!=null)
+			{				
+				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+				vehicleState.setHoldingTime(holdingTime);
+				
+			}
+			ArrayList<Long> N_List=new ArrayList<Long>();
+			
+			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);
 						
+		}
+		/*
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{							
 			HoldingTimeCacheKey key=new HoldingTimeCacheKey(arrivalDeparture.getStopId(), arrivalDeparture.getVehicleId(), arrivalDeparture.getTripId());
@@ -345,6 +360,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			{
 				System.out.println("hello");
 			}
+			
+			
+			
 			if(HoldingTimeCache.getInstance().getHoldingTime(key)!=null)
 			{
 				long sinceHoldingTimeGenerated=Math.abs(HoldingTimeCache.getInstance().getHoldingTime(key).getCreationTime().getTime()-arrivalDeparture.getAvlTime().getTime());
@@ -371,7 +389,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				}
 			}									
 			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);
-		}
+		} 
+		*/
 	}
 	/**
 	 * Stores the specified ArrivalDeparture object into the db
