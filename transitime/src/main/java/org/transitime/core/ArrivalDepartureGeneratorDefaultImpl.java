@@ -359,7 +359,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					}
 				}else
 				{
-					System.out.println("Don't generate.");
+					logger.debug("Don't generate holding time.");
 				}
 			}else
 			{			
