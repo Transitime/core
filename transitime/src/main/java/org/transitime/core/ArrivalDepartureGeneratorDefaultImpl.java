@@ -332,26 +332,20 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		
 		if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
-		
-		
-		ArrivalDeparturesToProcessHoldingTimesFor.getInstance().add(arrivalDeparture);
-		/*
+						
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{							
-			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
+			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture, false);
 			if(holdingTime!=null)
 			{				
 				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
 				vehicleState.setHoldingTime(holdingTime);
 				
 			}
-			
 			ArrayList<Long> N_List=new ArrayList<Long>();
 			
 			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);			
 		}
-		*/
-		
 	}
 	/**
 	 * Stores the specified ArrivalDeparture object into the db

@@ -42,41 +42,9 @@ public class ViaRoute100Trial_GTFSRealtimeModule extends GtfsRealtimeModule {
 				System.out.println(avlReport);
 			}
 		}
-		processArrivalDepartureToCreateHoldingTimes();
+		
 	}
-	private void processArrivalDepartureToCreateHoldingTimes()
-	{
-		HashMap <String, String> first= new HashMap<String, String>();
-		for(ArrivalDeparture event:ArrivalDeparturesToProcessHoldingTimesFor.getInstance().getList())
-		{			
-			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());
-			
-			if(HoldingTimeGeneratorFactory.getInstance()!=null)
-			{												
-				HoldingTime holdingTime=null;
-				if(event.isArrival())
-				{
-					if(first.get(event.getVehicleId())==null)
-					{
-						first.put(event.getVehicleId(), event.getVehicleId());
-						holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event, false);
-					}else
-					{
-						holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, event, true);
-					}				
-					if(holdingTime!=null)
-					{				
-						HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
-						vehicleState.setHoldingTime(holdingTime);				
-					}												
-				}else
-				{
-					HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, event);
-				}
-			}
-		}				
-		ArrivalDeparturesToProcessHoldingTimesFor.getInstance().empty();
-	}
+
 	private static final String tripIds[]= {
 			"3231408",
 			"3231409",

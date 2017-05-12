@@ -72,63 +72,25 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event, boolean setFirstPredictionToZero) {
 				
 		PredictionDataCache predictionCache = PredictionDataCache.getInstance();
-							
-		HashMap<String, List<IpcPrediction>> predictionsByVehicle = new HashMap<String, List<IpcPrediction>>();
 					
 		if(!useArrivalEvents.getValue())
 		{
 			return null;
-		}
-		
-		
+		}				
 		if(event.isArrival() && isControlStop(event.getStopId()))
-		{ 				
-			//logger.debug("All predictions : {}",predictionCache.getAllPredictions(5, 1000000).toString());													
-			List<IpcPredictionsForRouteStopDest> predictionsForRouteStopDests = predictionCache.getPredictions(event.getRouteId(), event.getStopId());
-			if(event.getVehicleId().equals("954"))
-			{
-				System.out.println("stop here");
-			}
-			logger.debug("Calling Holding Generator for event : {} using predictions : {}", event.toString(),predictionsForRouteStopDests.toString());
-			for(IpcPredictionsForRouteStopDest predictionForRouteStopDest: predictionsForRouteStopDests)
-			{						
-				for(IpcPrediction prediction:predictionForRouteStopDest.getPredictionsForRouteStop())
-				{					
-					Date eventFreqStartTime=event.getFreqStartTime();
-					
-					Date predictionFreqStartTime=new Date(prediction.getFreqStartTime());
-										
-					long diffInMinutes = -1;
-					if(eventFreqStartTime!=null && predictionFreqStartTime!=null)			
-						diffInMinutes=Math.abs(TimeUnit.MILLISECONDS.toMinutes(eventFreqStartTime.getTime()-predictionFreqStartTime.getTime()));
-					
-					/* Do not include prediction for current vehicle for current stop/trip. OK to include if on next trip around. */
-					if(!prediction.getVehicleId().equals(event.getVehicleId())
-							|| !prediction.getTripId().equals(event.getTripId())
-							|| ( eventFreqStartTime!=null && predictionFreqStartTime!=null && diffInMinutes>2))
-					{							
-						if(predictionsByVehicle.containsKey(prediction.getVehicleId()))
-						{
-							predictionsByVehicle.get(prediction.getVehicleId()).add(prediction);
-						}else
-						{
-							List<IpcPrediction> vehiclePredictions=new ArrayList<IpcPrediction>();
-							vehiclePredictions.add(prediction);
-							predictionsByVehicle.put(prediction.getVehicleId(), vehiclePredictions);								
-						}
-					}
-				}													
-			}
-			
+		{ 									
 			List<IpcPrediction> predictions = new ArrayList<IpcPrediction>();
 			
-			for(String key:predictionsByVehicle.keySet())
+			for(IpcVehicleComplete currentVehicle:VehicleDataCache.getInstance().getVehicles())
 			{
-				if(predictionCache.getPredictionForVehicle(key, event.getRouteId(), event.getStopId())!=null)
-					predictions.add(predictionCache.getPredictionForVehicle(key, event.getRouteId(), event.getStopId()));				
-			}
-		
+				if(predictionCache.getPredictionForVehicle(currentVehicle.getId(), event.getRouteId(), event.getStopId())!=null)
+				{
+					predictions.add(predictionCache.getPredictionForVehicle(currentVehicle.getId(), event.getRouteId(), event.getStopId()));				
+				}			
+			}				
 			Collections.sort(predictions, new PredictionTimeComparator());
+			
+			logger.debug("Calling Holding Generator for event : {} using predictions : {}", event.toString(),predictions.toString());
 			
 			//This is to remove a prediction for the current vehicle and stop. Belt and braces.
 			if(predictions.size()>0 && predictions.get(0).getVehicleId().equals(event.getVehicleId()))
@@ -160,7 +122,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					
 					if(setFirstPredictionToZero)
 					{
-						logger.debug("Set arrival to now {} for first prediction as more than one vehicle arrive together.", event.getTime());
+						logger.debug("Setting N-1 to now {} for first prediction as more than one vehicle arrived together.", new Date(event.getTime()));
 						ArrayList<Long> N_List=new ArrayList<Long>();
 						N_List.add(new Long(event.getTime()));
 						for(IpcPrediction prediction:predictions)
@@ -225,7 +187,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					int counter=0;
 					if(setFirstPredictionToZero)
 					{
-						logger.debug("Set arrival to now {} for first prediction as more than one vehicle arrive together.", event.getTime());
+						logger.debug("Setting N-1 to now {} for first prediction as more than one vehicle arrived together.", new Date(event.getTime()));
 						ArrayList<Long> N_List=new ArrayList<Long>();
 						N_List.add(new Long(event.getTime()));
 						for(IpcPrediction prediction:predictions)

@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.transitime.applications.Core;
+import org.transitime.core.VehicleState;
+import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
@@ -423,8 +425,15 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			// Remove predictions that are expired. It makes sense to do this 
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
+			VehicleStateManager vehicleStateManager = VehicleStateManager.getInstance();
 			if (currentPrediction.getPredictionTime() < currentTime) {
-				iterator.remove();
+				// TODO This is a change for VIA. This needs to be in HoldingTimeGenerator. 
+				VehicleState vehicleState = vehicleStateManager.getVehicleState(currentPrediction.getVehicleId());
+				if(vehicleState!=null && vehicleState.getHoldingTime()==null)
+				{
+					iterator.remove();	
+				}				
+								
 			} else {
 				// The subsequent predictions are later so if this one is
 				// into the future then the remaining ones are too. 
