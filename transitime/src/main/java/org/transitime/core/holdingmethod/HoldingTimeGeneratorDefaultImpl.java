@@ -69,7 +69,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
-	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event, boolean setFirstPredictionToZero) {
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event) {
 				
 		PredictionDataCache predictionCache = PredictionDataCache.getInstance();
 					
@@ -119,24 +119,8 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					Long N[]=null;										
 											
 					int counter=0;
-					
-					if(setFirstPredictionToZero)
-					{
-						logger.debug("Setting N-1 to now {} for first prediction as more than one vehicle arrived together.", new Date(event.getTime()));
-						ArrayList<Long> N_List=new ArrayList<Long>();
-						N_List.add(new Long(event.getTime()));
-						for(IpcPrediction prediction:predictions)
-						{
-							N_List.add(prediction.getPredictionTime());
-						}
-						
-						N=N_List.toArray(new Long[N_List.size()]);
-						counter++;
-					}						
-					else
-					{
-						N=predictionsToLongArray(predictions);
-					}
+										
+					N=predictionsToLongArray(predictions);					
 					
 					for(int i=0;i<predictions.size()&&counter<maxPredictionsForHoldingTimeCalculation.getValue();i++)
 					{
@@ -185,23 +169,9 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					Long N[]=null;
 									
 					int counter=0;
-					if(setFirstPredictionToZero)
-					{
-						logger.debug("Setting N-1 to now {} for first prediction as more than one vehicle arrived together.", new Date(event.getTime()));
-						ArrayList<Long> N_List=new ArrayList<Long>();
-						N_List.add(new Long(event.getTime()));
-						for(IpcPrediction prediction:predictions)
-						{
-							N_List.add(prediction.getPredictionTime());
-						}
-						
-						N=N_List.toArray(new Long[N_List.size()]);
-						counter++;
-					}else
-					{
-						N=predictionsToLongArray(predictions);
-					}
-															
+					
+					N=predictionsToLongArray(predictions);
+																			
 					for(int i=0;i<predictions.size()&&counter<maxPredictionsForHoldingTimeCalculation.getValue();i++)
 					{
 						logger.debug("Prediction for N-{} {}: {} ", counter+1, predictions.get(i).getVehicleId(),predictions.get(i));
@@ -757,7 +727,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 					
 					ArrivalDeparture lastArrival = getLastVehicleArrivalEvent(arrivalDeparture.getStopId(), otherState.getVehicleId(), arrivalDeparture.getAvlTime());
 					
-					HoldingTime otherHoldingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(otherState, lastArrival, false);
+					HoldingTime otherHoldingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(otherState, lastArrival);
 					
 					HoldingTimeCache.getInstance().putHoldingTime(otherHoldingTime);
 					

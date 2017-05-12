@@ -248,11 +248,5 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 		
 	}
 
-	@Override
-	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event,
-			boolean setArrivalToZero) {
-
-		return generateHoldingTime(vehicleState, event);
-	}
-		
+			
 }

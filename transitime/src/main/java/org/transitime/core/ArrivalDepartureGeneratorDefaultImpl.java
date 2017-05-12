@@ -335,7 +335,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 						
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{							
-			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture, false);
+			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
 			if(holdingTime!=null)
 			{				
 				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
