@@ -276,7 +276,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				block,
 				tripIndex,
 				stopPathIndex, freqStartDate);
-		updateCache(vehicleState, departure);
+		//updateCache(vehicleState, departure);
 		logger.debug("Creating departure: {}", departure);
 		return departure;
 	}
@@ -314,9 +314,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// departures are for after the arrival time.
 		if (arrivalTime > vehicleState.getLastArrivalTime())
 			vehicleState.setLastArrivalTime(arrivalTime);
-		
-		updateCache(vehicleState, arrival);
-		
+						
 		return arrival;
 	}
 	private void updateCache(VehicleState vehicleState, ArrivalDeparture arrivalDeparture)
@@ -344,7 +342,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			}
 			ArrayList<Long> N_List=new ArrayList<Long>();
 			
-			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);			
+			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);
+						
 		}
 	}
 	/**
@@ -386,6 +385,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 						
 		// Generate prediction accuracy info as appropriate
 		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);
+		
+		updateCache(vehicleState, arrivalDeparture);
 	}
 	
 	/**
