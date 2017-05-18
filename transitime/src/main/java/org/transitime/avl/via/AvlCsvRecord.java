@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.avl;
+package org.transitime.avl.via;
 
 import org.apache.commons.csv.CSVRecord;
 import org.transitime.db.structs.AvlReport;
@@ -24,6 +24,7 @@ import org.transitime.utils.Time;
 import org.transitime.utils.csv.CsvBase;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 /**
  * Represents a single record in a CSV file containing AVL data.
@@ -61,21 +62,20 @@ public class AvlCsvRecord extends CsvBase {
 		AvlCsvRecord avlCsvRecord = new AvlCsvRecord(record, fileName);
 
 		// Obtain the required values
-		String vehicleId = avlCsvRecord.getRequiredValue(record, "vehicleId");
+		String vehicleId = avlCsvRecord.getRequiredValue(record, "vehicleid");
 
 		String timeStr = avlCsvRecord.getRequiredValue(record, "time");
 
+		// 2017-01-09 02:19:46		
+		SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		
 		// Process time
 		long time = 0L;
-		if (timeStr.contains(":")) {
-			// Time is in the format "MM-dd-yyyy HH:mm:ss z" then use Time.parse()
-			time = Time.parse(timeStr).getTime();
-		} else {
-			// Time is already an epoch time long
-			time = Long.parseLong(timeStr);
-		}
-								
+		
+		time=dateFormatter.parse(timeStr).getTime();		
+										
 		String latStr = avlCsvRecord.getRequiredValue(record, "latitude");
+		
 		double lat=Double.NaN;
 		try {
 			lat = Double.parseDouble(latStr);
