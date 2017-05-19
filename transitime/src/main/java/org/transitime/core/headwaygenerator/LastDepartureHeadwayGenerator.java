@@ -65,8 +65,14 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 					Headway headway=new Headway(headwayTime, new Date(date), vehicleId, stopList.get(previousVehicleArrivalIndex).getVehicleId(), stopId, vehicleState.getTrip().getId(), vehicleState.getTrip().getRouteId(), new Date(stopList.get(lastStopArrivalIndex).getTime()), new Date(stopList.get(previousVehicleArrivalIndex).getTime()));
 					// TODO Core.getInstance().getDbLogger().add(headway);
 					setSystemVariance(headway);
-					
-					return headway;
+					// remove rubish data from departure sfrom t
+					if(Math.abs(headway.getCreationTime().getTime()-headway.getFirstDeparture().getTime())>1200000||lastStopArrivalIndex>5)
+					{
+						return null;
+					}else
+					{
+						return headway;
+					}
 				}
 			}
 		} catch (Exception e) {
