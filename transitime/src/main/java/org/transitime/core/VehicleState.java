@@ -33,6 +33,7 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Headway;
 import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.Location;
 import org.transitime.db.structs.StopPath;
@@ -94,6 +95,16 @@ public class VehicleState {
 	
 	private Integer tripCounter = 0;
 	
+	private Headway headway=null;
+	
+	
+	public Headway getHeadway() {
+		return headway;
+	}
+	public void setHeadway(Headway headway) {
+		this.headway = headway;
+	}
+
 	private HoldingTime holdingTime=null;
 	
 	public HoldingTime getHoldingTime() {

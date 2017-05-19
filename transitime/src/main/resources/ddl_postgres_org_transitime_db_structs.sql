@@ -153,6 +153,25 @@
         primary key (tripId, startTime, configRev)
     );
 
+    create table Headway (
+        id int8 not null,
+        average float8,
+        coefficientOfVariation float8,
+        configRev int4,
+        creationTime timestamp,
+        firstDeparture timestamp,
+        headway float8,
+        numVehicles int4,
+        otherVehicleId varchar(60),
+        routeId varchar(60),
+        secondDeparture timestamp,
+        stopId varchar(60),
+        tripId varchar(60),
+        variance float8,
+        vehicleId varchar(60),
+        primary key (id)
+    );
+
     create table HoldingTimes (
         id int8 not null,
         arrivalPredictionUsed boolean,
@@ -430,6 +449,8 @@
     create index ArrivalsDeparturesTimeIndex on ArrivalsDepartures (time);
 
     create index AvlReportsTimeIndex on AvlReports (time);
+
+    create index HeadwayIndex on Headway (creationTime);
 
     create index HoldingTimeIndex on HoldingTimes (creationTime);
 

@@ -26,6 +26,7 @@ import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitime.db.structs.Prediction;
+import org.transitime.db.structs.Headway;
 import org.transitime.db.structs.HoldingTime;
 import org.transitime.db.structs.Match;
 import org.transitime.ipc.data.IpcPrediction;
@@ -120,7 +121,20 @@ public class MatchProcessor {
 		logger.debug("Processing headways for vehicleId={}",
 				vehicleState.getVehicleId());
 
-		HeadwayGeneratorFactory.getInstance().generate(vehicleState);
+		Headway headway = HeadwayGeneratorFactory.getInstance().generate(vehicleState);
+		
+		
+		if(headway!=null)
+		{
+			/* only store headway when value changes */
+			if(vehicleState.getHeadway()==null||!vehicleState.getHeadway().equals(headway))
+			{
+				vehicleState.setHeadway(headway);
+				
+				
+				Core.getInstance().getDbLogger().add(headway);
+			}				
+		}
 	}
 	
 	/**
