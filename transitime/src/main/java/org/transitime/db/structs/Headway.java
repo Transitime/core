@@ -21,6 +21,9 @@ import org.transitime.db.hibernate.HibernateUtils;
        indexes = { @Index(name="HeadwayIndex", 
                    columnList="creationTime" ) } )
 public class Headway implements Serializable {
+	public Headway() {		
+	}
+
 	/**
 	 * 
 	 */
@@ -32,10 +35,10 @@ public class Headway implements Serializable {
 	
 	// The revision of the configuration data that was being used
 	@Column 
-	private final int configRev;
+	private  int configRev;
 	
 	@Column		
-	private final double headway;
+	private  double headway;
 	
 
 	@Column		
@@ -53,31 +56,31 @@ public class Headway implements Serializable {
 	// The time the AVL data was processed and the headway was created.
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
-	private final Date creationTime;
+	private  Date creationTime;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String vehicleId;
+	private  String vehicleId;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String otherVehicleId;
+	private  String otherVehicleId;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String stopId;
+	private  String stopId;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String tripId;
+	private  String tripId;
 	
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
-	private final String routeId;
+	private  String routeId;
 	
 	
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
-	private final Date firstDeparture;
+	private  Date firstDeparture;
 	
 	@Column	
 	@Temporal(TemporalType.TIMESTAMP)
-	private final Date secondDeparture;
+	private  Date secondDeparture;
 	
 	
 	public Headway(long headway, Date creationTime, String vehicleId, String otherVehicleId, String stopId, String tripId,
@@ -179,7 +182,45 @@ public class Headway implements Serializable {
 	public double getHeadway() {
 		return headway;
 	}
+	public void setConfigRev(int configRev) {
+		this.configRev = configRev;
+	}
 
+	public void setHeadway(double headway) {
+		this.headway = headway;
+	}
+
+	public void setCreationTime(Date creationTime) {
+		this.creationTime = creationTime;
+	}
+
+	public void setVehicleId(String vehicleId) {
+		this.vehicleId = vehicleId;
+	}
+
+	public void setOtherVehicleId(String otherVehicleId) {
+		this.otherVehicleId = otherVehicleId;
+	}
+
+	public void setStopId(String stopId) {
+		this.stopId = stopId;
+	}
+
+	public void setTripId(String tripId) {
+		this.tripId = tripId;
+	}
+
+	public void setRouteId(String routeId) {
+		this.routeId = routeId;
+	}
+
+	public void setFirstDeparture(Date firstDeparture) {
+		this.firstDeparture = firstDeparture;
+	}
+
+	public void setSecondDeparture(Date secondDeparture) {
+		this.secondDeparture = secondDeparture;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
