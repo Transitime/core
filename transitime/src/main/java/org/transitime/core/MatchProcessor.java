@@ -122,18 +122,11 @@ public class MatchProcessor {
 				vehicleState.getVehicleId());
 
 		Headway headway = HeadwayGeneratorFactory.getInstance().generate(vehicleState);
-		
-		
-		if(headway!=null)
-		{
-			/* only store headway when value changes */
-			if(vehicleState.getHeadway()==null||!vehicleState.getHeadway().equals(headway))
-			{
-				vehicleState.setHeadway(headway);
 				
-				
-				Core.getInstance().getDbLogger().add(headway);
-			}				
+		if(headway!=null)		
+		{			
+			System.out.println(headway);											
+			Core.getInstance().getDbLogger().add(headway);					
 		}
 	}
 	

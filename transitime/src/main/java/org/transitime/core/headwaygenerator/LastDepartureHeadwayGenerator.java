@@ -64,15 +64,27 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 	
 					Headway headway=new Headway(headwayTime, new Date(date), vehicleId, stopList.get(previousVehicleArrivalIndex).getVehicleId(), stopId, vehicleState.getTrip().getId(), vehicleState.getTrip().getRouteId(), new Date(stopList.get(lastStopArrivalIndex).getTime()), new Date(stopList.get(previousVehicleArrivalIndex).getTime()));
 					// TODO Core.getInstance().getDbLogger().add(headway);
-					setSystemVariance(headway);
+				
 					// remove rubish data from departure sfrom t
 					if(Math.abs(headway.getCreationTime().getTime()-headway.getFirstDeparture().getTime())>1200000||lastStopArrivalIndex>5)
 					{
+						headway=null;
+						vehicleState.setHeadway(null);
 						return null;
-					}else
-					{
-						return headway;
 					}
+					if(headway!=null)
+					{
+						if(vehicleState.getHeadway()==null||!vehicleState.getHeadway().equals(headway))
+						{
+							vehicleState.setHeadway(headway);
+							setSystemVariance(headway);
+							return headway;
+						}else
+						{
+							return null;
+						}
+					}
+					 					
 				}
 			}
 		} catch (Exception e) {
@@ -84,21 +96,33 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 	private void setSystemVariance(Headway headway)
 	{
 		ArrayList<Headway> headways=new ArrayList<Headway>();
+		
+		int total_with_headway=0;
+		int total_vehicles=0;
+		boolean error=false;
 		for(IpcVehicleComplete currentVehicle:VehicleDataCache.getInstance().getVehicles())
 		{
 			VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(currentVehicle.getId());
 			if(vehicleState.getHeadway()!=null)
-			{
+			{								
 				headways.add(vehicleState.getHeadway());
+				total_with_headway++; 
 			}
+			total_vehicles++;
 		}				
 		// ONLY SET IF HAVE VALES FOR ALL VEHICLES ON ROUTE.
-		if(VehicleDataCache.getInstance().getVehicles().size()==headways.size())
+		if(VehicleDataCache.getInstance().getVehicles().size()==headways.size()&&total_vehicles==total_with_headway)
 		{
 			headway.setAverage(average(headways));
 			headway.setVariance(variance(headways));
 			headway.setCoefficientOfVariation(coefficientOfVariance(headways));
 			headway.setNumVehicles(headways.size());
+		}else
+		{
+			headway.setAverage(-1);
+			headway.setVariance(-1);
+			headway.setCoefficientOfVariation(-1);
+			headway.setNumVehicles(total_with_headway);
 		}
 	}
 	private double average(List<Headway> headways)

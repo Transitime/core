@@ -221,13 +221,16 @@ public class Headway implements Serializable {
 	public void setSecondDeparture(Date secondDeparture) {
 		this.secondDeparture = secondDeparture;
 	}
+
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		long temp;
 		temp = Double.doubleToLongBits(headway);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + (int) (temp ^ (temp >>> 32));		
 		result = prime * result + ((otherVehicleId == null) ? 0 : otherVehicleId.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
@@ -246,7 +249,7 @@ public class Headway implements Serializable {
 			return false;
 		Headway other = (Headway) obj;
 		if (Double.doubleToLongBits(headway) != Double.doubleToLongBits(other.headway))
-			return false;
+			return false;	
 		if (otherVehicleId == null) {
 			if (other.otherVehicleId != null)
 				return false;
@@ -273,6 +276,15 @@ public class Headway implements Serializable {
 		} else if (!vehicleId.equals(other.vehicleId))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Headway [id=" + id + ", configRev=" + configRev + ", headway=" + headway + ", average=" + average
+				+ ", variance=" + variance + ", coefficientOfVariation=" + coefficientOfVariation + ", numVehicles="
+				+ numVehicles + ", creationTime=" + creationTime + ", vehicleId=" + vehicleId + ", otherVehicleId="
+				+ otherVehicleId + ", stopId=" + stopId + ", tripId=" + tripId + ", routeId=" + routeId
+				+ ", firstDeparture=" + firstDeparture + ", secondDeparture=" + secondDeparture + "]";
 	}
 
 	
