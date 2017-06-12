@@ -56,6 +56,7 @@ public class AvlSqsClientModule extends Module {
   private final static int MAX_THREADS = 100;
 
   private static final int DEFAULT_MESSAGE_LOG_FREQUENCY = 10000;
+  private static final int RECEIVE_SLEEP_TIME = 1;
   
   private static IntegerConfigValue avlQueueSize = 
       new IntegerConfigValue("transitime.avl.jmsQueueSize", 350,
@@ -293,6 +294,9 @@ public class AvlSqsClientModule extends Module {
             } catch (IllegalStateException ise) {
               logger.error("dropping ack {} as queue is full: ",  messages, ise);
             }
+            } else {
+              // we didn't get any messages, pause for some to queue up
+              Thread.sleep(RECEIVE_SLEEP_TIME * 1000);
             }
           } catch (Exception any) {
             logger.error("exception receiving: ", any);
