@@ -1248,7 +1248,7 @@ public class GtfsData {
 			StopPath path = new StopPath(revs.getConfigRev(), pathId,
 					stopId, gtfsStopTime.getStopSequence(), lastStopInTrip,
 					trip.getRouteId(), layoverStop, waitStop,
-					scheduleAdherenceStop, gtfsRoute.getBreakTime(), gtfsStopTime.getMaxDistance());
+					scheduleAdherenceStop, gtfsRoute.getBreakTime(), gtfsStopTime.getMaxDistance(), gtfsStopTime.getMaxSpeed());
 			paths.add(path);
 			
 			previousStopId = stopId;

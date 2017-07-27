@@ -289,6 +289,7 @@
         layoverStop boolean,
         locations bytea,
         maxDistance float8,
+        maxSpeed float8,
         pathLength float8,
         routeId varchar(60),
         scheduleAdherenceStop boolean,

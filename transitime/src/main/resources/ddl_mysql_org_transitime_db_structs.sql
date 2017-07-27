@@ -289,6 +289,7 @@
         layoverStop bit,
         locations blob,
         maxDistance double precision,
+        maxSpeed double precision,
         pathLength double precision,
         routeId varchar(60),
         scheduleAdherenceStop bit,

@@ -748,36 +748,31 @@ public class SpatialMatcher {
 				- vehicleState.getPreviousAvlReportFromSuccessfulMatch().getTime();
 		double distanceAlongPathToSearch = AvlConfig.getMaxAvlSpeed() * 1.2
 				* timeBetweenFixesMsec / Time.MS_PER_SEC + 200.0;
+		
+		// This allows you override the default max distance used to calculate how far along the route to look for a match. 
+		// This is set in an additional field (max_speed)in stop_times.txt. 
+		if(previousMatch.getTrip().getStopPath(previousMatch.getIndices().getStopPathIndex()).getMaxSpeed()!=null)
+		{			
+			timeBetweenFixesMsec = vehicleState.getAvlReport().getTime()
+					- vehicleState.getPreviousAvlReportFromSuccessfulMatch().getTime();
+			distanceAlongPathToSearch = previousMatch.getTrip().getStopPath(previousMatch.getIndices().getStopPathIndex()).getMaxSpeed()
+					* timeBetweenFixesMsec / Time.MS_PER_SEC;			
+			logger.info("Using alternate max speed {} for vehicle {} on stop path index {} which results in a distance along segment to search of {}.", previousMatch.getTrip().getStopPath(previousMatch.getIndices().getStopPathIndex()).getMaxSpeed(),vehicleState.getVehicleId(),previousMatch.getIndices().getStopPathIndex(),distanceAlongPathToSearch);
+		}
 
 		// Since already traveled some along segment should start
 		// distanceSearched
 		// with minus that distance so that it will be determined correctly.
 		double distanceSearched = -previousMatch.getDistanceAlongSegment();
 		
-		/*
-		SimpleDateFormat dateFormatter=new SimpleDateFormat("hhmmss");
-		String time=dateFormatter.format(vehicleState.getAvlReport().getDate());
-		if(time.equals("115915"))
-		{
-			logger.debug("stop here");
-		}	
-		*/
+		
 		// Start at the previous match and search along the block for best
 		// spatial matches. Look ahead until distance spanned would mean
 		// that vehicle would have had to travel too fast or that end of
 		// block reached.
 		Indices indices = new Indices(previousMatch);
 		
-		spatialMatcher.setStartOfSearch(previousMatch);		
-
-		if(previousMatch.getIndices().getStopPathIndex()>15&&previousMatch.getIndices().getStopPathIndex()<21)
-		{			
-			timeBetweenFixesMsec = vehicleState.getAvlReport().getTime()
-					- vehicleState.getPreviousAvlReportFromSuccessfulMatch().getTime();
-			distanceAlongPathToSearch = AvlConfig.getAlternativeMaxSpeed().getValue()
-					* timeBetweenFixesMsec / Time.MS_PER_SEC;			
-			logger.info("Using alternate max speed {} for vehicle {} on stop path index {} which results in a distance along segment to search of {}.", AvlConfig.getAlternativeMaxSpeed().getValue(),vehicleState.getVehicleId(),previousMatch.getIndices().getStopPathIndex(),distanceAlongPathToSearch);
-		}
+		spatialMatcher.setStartOfSearch(previousMatch);			
 		
 		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime()) && 
 				distanceSearched < distanceAlongPathToSearch 

@@ -50,6 +50,10 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 	private final Boolean delete;
 	
 	private final Double maxDistance;
+	
+	/* This is the max speed for using in calculating how far the spatial matcher 
+	 * is to look along the route when the vehicle is at this point. */
+	private final Double maxSpeed;
 
 	/********************** Member Functions **************************/
 
@@ -90,6 +94,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		this.isWaitStop = null;
 		
 		this.maxDistance = null;
+		this.maxSpeed = null;
 		
 	}
 	
@@ -141,6 +146,10 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		isWaitStop = null;
 		
 		maxDistance = getOptionalDoubleValue(record, "max_distance");
+		
+		maxSpeed= getOptionalDoubleValue(record, "max_speed");
+		
+		
 	}
 
 	/**
@@ -191,6 +200,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		delete = false;
 		isWaitStop = null;
 		maxDistance=originalValues.maxDistance;
+		maxSpeed=originalValues.maxSpeed;
 	}
 
 	/**
@@ -223,6 +233,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		arrivalTimeSecs = newArrivalTimeSecs;
 		isWaitStop = true;
 		maxDistance=originalValues.maxDistance;
+		maxSpeed=originalValues.maxSpeed;
 	}
 
 	/**
@@ -244,6 +255,10 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		this.maxDistance =
 				s.maxDistance == null ? o.maxDistance
 						: s.maxDistance;
+		
+		this.maxSpeed =
+				s.maxSpeed == null ? o.maxSpeed
+						: s.maxSpeed;
 		
 		this.arrivalTimeSecs =
 				s.arrivalTimeSecs == null ? o.arrivalTimeSecs
@@ -356,7 +371,13 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 						+ ", ": "")
 				+ "delete=" + delete + ", "
 				+ (isWaitStop != null ? "isWaitStop=" + isWaitStop : "")
+				+ (maxDistance != null ? "maxDistance=" + maxDistance : "")
+				+ (maxSpeed != null ? "maxSpeed=" + maxSpeed : "")
 				+ "]";
+	}
+
+	public Double getMaxSpeed() {
+		return maxSpeed;
 	}
 
 	/**
