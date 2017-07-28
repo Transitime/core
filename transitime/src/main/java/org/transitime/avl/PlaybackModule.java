@@ -236,14 +236,23 @@ public class PlaybackModule extends Module {
 				}				
 				// Do the actual processing of the AVL data
 				AvlProcessor.getInstance().processAvlReport(avlReport);						
+			
+			}
+		}
+		// Wait for database queue to be emptied before exiting.
+		while(Core.getInstance().getDbLogger().queueSize()>0)
+		{
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+			
 			}
 		}
 		
  		logger.info("Read in AVL in playback mode all the way up to current " +
 				"time so done. Exiting.");
 		
-		System.exit(0);
-		
+		System.exit(0);	
 	}
 	
 }
