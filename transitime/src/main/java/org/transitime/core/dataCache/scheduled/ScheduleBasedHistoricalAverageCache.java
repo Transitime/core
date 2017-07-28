@@ -16,6 +16,8 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.core.DwellTimeDetails;
+import org.transitime.core.TravelTimeDetails;
 import org.transitime.core.dataCache.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.StopPathCacheKey;
@@ -26,7 +28,7 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
 /**
- * @author Sean Og Crudden
+ * @author Sean Óg Crudden
  * 
  */
 public class ScheduleBasedHistoricalAverageCache {
@@ -117,9 +119,9 @@ public class ScheduleBasedHistoricalAverageCache {
 		{					
 			logger.debug("Putting :"+arrivalDeparture.toString() + " in HistoricalAverageCache cache.");
 			
-			double pathDuration=getLastPathDuration(arrivalDeparture, trip);
+			TravelTimeDetails travelTimeDetails=getLastTravelTimeDetails(arrivalDeparture, trip);
 			
-			if(pathDuration>0)
+			if(travelTimeDetails!=null)
 			{			
 				if(!trip.isNoSchedule())
 				{
@@ -129,15 +131,15 @@ public class ScheduleBasedHistoricalAverageCache {
 					
 					if(average==null)				
 						average=new HistoricalAverage();
-					
-					average.update(pathDuration);
+					logger.debug("Updating historical averege for : {} with {}",historicalAverageCacheKey, travelTimeDetails);
+					average.update(travelTimeDetails.getTravelTime());
 					
 					ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 				}
 			}		
 			
-			double stopDuration=getLastStopDuration(arrivalDeparture, trip);
-			if(stopDuration>0)
+			DwellTimeDetails dwellTimeDetails=getLastDwellTimeDetails(arrivalDeparture, trip);
+			if(dwellTimeDetails!=null)
 			{
 				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false);
 				
@@ -146,13 +148,14 @@ public class ScheduleBasedHistoricalAverageCache {
 				if(average==null)				
 					average=new HistoricalAverage();
 				
-				average.update(stopDuration);
+				logger.debug("Updating historical averege for : {} with {}",historicalAverageCacheKey, dwellTimeDetails );
+				average.update(dwellTimeDetails.getDwellTime());
 			
 				ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
 			}
 		}
 	}
-	private double getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
+	private TravelTimeDetails getLastTravelTimeDetails(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
 		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
@@ -166,13 +169,15 @@ public class ScheduleBasedHistoricalAverageCache {
 			ArrivalDeparture previousEvent = TripDataHistoryCache.findPreviousDepartureEvent(arrivalDepartures, arrivalDeparture);
 			
 			if(previousEvent!=null && arrivalDeparture!=null && previousEvent.isDeparture())
-					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
+			{
+				return new TravelTimeDetails(arrivalDeparture,previousEvent );				
+			}
 		}
 					
-		return -1;
+		return null;
 	}
 	
-	private double getLastStopDuration(ArrivalDeparture arrivalDeparture, Trip trip)
+	private DwellTimeDetails getLastDwellTimeDetails(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
 		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
@@ -186,9 +191,12 @@ public class ScheduleBasedHistoricalAverageCache {
 			ArrivalDeparture previousEvent = TripDataHistoryCache.findPreviousArrivalEvent(arrivalDepartures, arrivalDeparture);
 			
 			if(previousEvent!=null && arrivalDeparture!=null && previousEvent.isArrival())
-					return Math.abs(previousEvent.getTime()-arrivalDeparture.getTime());
+			{
+				return new DwellTimeDetails(previousEvent, arrivalDeparture);
+					
+			}
 		}
-		return -1;
+		return null;
 	}
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) 
 	{

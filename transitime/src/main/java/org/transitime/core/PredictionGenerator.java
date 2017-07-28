@@ -72,7 +72,7 @@ public abstract class PredictionGenerator {
 			false,
 			"This is set to true to record all travelTime  predictions for individual dwell times generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
 
-	protected long getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
+	protected TravelTimeDetails getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
 
 		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
 				indices.getStopPath().getStopId(),
@@ -99,23 +99,25 @@ public abstract class PredictionGenerator {
 						ArrivalDeparture found;
 											
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
-							if(found.getTime() - currentArrivalDeparture.getTime()>0)
-							{																
-								return found.getTime() - currentArrivalDeparture.getTime();
+							TravelTimeDetails travelTimeDetails=new TravelTimeDetails(currentArrivalDeparture, found);
+							if(travelTimeDetails.getTravelTime()>0)
+							{		
+								return travelTimeDetails;
+								
 							}else
 							{
 								// must be going backwards
-								return -1;
+								return null;
 							}
 						}else
 						{
-							return -1;
+							return null;
 						}
 					}
 				}
 			}
 		}
-		return -1;
+		return null;
 	}
 	protected Indices getLastVehicleIndices(VehicleState currentVehicleState, Indices indices) {
 
@@ -231,10 +233,10 @@ public abstract class PredictionGenerator {
 		return null;
 	}
 
-	protected List<Integer> lastDaysTimes(TripDataHistoryCache cache, String tripId, int stopPathIndex, Date startDate,
+	protected List<TravelTimeDetails> lastDaysTimes(TripDataHistoryCache cache, String tripId, int stopPathIndex, Date startDate,
 			Integer startTime, int num_days_look_back, int num_days) {
 
-		List<Integer> times = new ArrayList<Integer>();
+		List<TravelTimeDetails> times = new ArrayList<TravelTimeDetails>();
 		List<ArrivalDeparture> results = null;
 		int num_found = 0;
 		/*
@@ -254,13 +256,18 @@ public abstract class PredictionGenerator {
 			if (results != null) {
 
 				ArrivalDeparture arrival = getArrival(stopPathIndex, results);
+			
 				
 				ArrivalDeparture departure = TripDataHistoryCache.findPreviousDepartureEvent(results, arrival);
-														
+				
+																	
 				if (arrival != null && departure != null) {
-
-					times.add(new Integer((int) (timeBetweenStops(departure, arrival))));
-						num_found++;
+					
+					TravelTimeDetails travelTimeDetails=new TravelTimeDetails(departure, arrival);
+					
+					times.add(travelTimeDetails);
+										
+					num_found++;
 				}			
 			}
 		}

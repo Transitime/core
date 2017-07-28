@@ -11,6 +11,7 @@ import org.transitime.applications.Core;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.PredictionGeneratorDefaultImpl;
+import org.transitime.core.TravelTimeDetails;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.TripDataHistoryCache;
@@ -75,20 +76,20 @@ public class LastVehiclePredictionGeneratorImpl extends
 			vehiclesOnRoute.add(vehicleOnRouteState);
 		}
 				
-		long time = 0;
-		if((time=this.getLastVehicleTravelTime(currentVehicleState, indices))>0)
+		TravelTimeDetails travelTimeDetails = null;
+		if((travelTimeDetails=this.getLastVehicleTravelTime(currentVehicleState, indices))!=null)
 		{			
-			logger.debug("Using last vehicle algorithm for prediction : " + time + " for : " + indices.toString());					
+			logger.debug("Using last vehicle algorithm for prediction : " + travelTimeDetails.toString() + " for : " + indices.toString());					
 			
 			if(storeTravelTimeStopPathPredictions.getValue())
 			{
-				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(time).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE", true, null);				
+				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(travelTimeDetails.getTravelTime()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE", true, null);				
 				
 				Core.getInstance().getDbLogger().add(predictionForStopPath);
 				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
 			}
 			
-			return time;
+			return travelTimeDetails.getTravelTime();
 		}
 				
 		//logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());

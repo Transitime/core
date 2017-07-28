@@ -218,9 +218,14 @@ public class TripDataHistoryCache{
 		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());							
 		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
-			if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
-			{
-				return tocheck;
+			try {
+				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
+				{
+					return tocheck;
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}			
 		}		
 		return null;		
