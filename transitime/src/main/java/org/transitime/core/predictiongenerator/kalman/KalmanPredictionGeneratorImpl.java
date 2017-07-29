@@ -1,12 +1,9 @@
 package org.transitime.core.predictiongenerator.kalman;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,24 +11,17 @@ import org.transitime.applications.Core;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
-import org.transitime.core.PredictionGeneratorDefaultImpl;
 import org.transitime.core.TravelTimeDetails;
-import org.transitime.core.TravelTimes;
 import org.transitime.core.VehicleState;
 import org.transitime.core.dataCache.KalmanErrorCache;
 import org.transitime.core.dataCache.KalmanErrorCacheKey;
 import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.TripKey;
-import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitime.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl;
-import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcVehicleComplete;
 
 /**
  * @author Sean Óg Crudden This is a prediction generator that uses a Kalman
@@ -83,8 +73,6 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());		
 	
-			
-
 		TravelTimeDetails travelTimeDetails = this.getLastVehicleTravelTime(currentVehicleState, indices);
 		/*
 		 * The first vehicle of the day should use schedule or historic data to
@@ -97,10 +85,10 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 									
 			Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
 
-			List<TravelTimeDetails> lastDaysTimes = lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),
+			List<TravelTimeDetails> lastDaysTimes = lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
 					indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
 					maxKalmanDaysToSearch.getValue(), minKalmanDays.getValue());
-												
+				
 			if(lastDaysTimes!=null)
 			{												
 				logger.debug("Kalman has " +lastDaysTimes.size()+ " historical values for : " +indices.toString());

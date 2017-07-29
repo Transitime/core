@@ -1,10 +1,23 @@
 package org.transitime.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.ArrivalDeparture;
+import org.transitime.utils.Time;
 
 public class DwellTimeDetails {
 	private ArrivalDeparture departure;
 	private ArrivalDeparture arrival;
+	private static final Logger logger = LoggerFactory
+			.getLogger(DwellTimeDetails.class);
+	private static final IntegerConfigValue maxDwellTime = 
+			new IntegerConfigValue(
+					"transitime.core.maxDwellTime",
+					10 * Time.MS_PER_MIN,
+					"This is a maximum dwell time at a stop to be taken into account for cache or prediction calculations.");
+	
+	
 	public ArrivalDeparture getDeparture() {
 		return departure;
 	}	
@@ -18,17 +31,42 @@ public class DwellTimeDetails {
 	}
 	public long getDwellTime()
 	{
-		if(this.arrival!=null && this.departure!=null)
+		if(this.arrival!=null && this.departure!=null&& arrival.isArrival() && departure.isDeparture())
 		{
-			return this.departure.getTime()-this.arrival.getTime();
+			
+			
+			if(sanityCheck())
+			{
+				long dwellTime=this.departure.getTime()-this.arrival.getTime();
+				return dwellTime;
+			}else
+			{
+				logger.warn("Outside bounds : {} ", this);
+			}
+		}		
+		return -1;		
+	}
+	public boolean sanityCheck()
+	{
+		if(this.arrival!=null && this.departure!=null&& arrival.isArrival() && departure.isDeparture())
+		{
+			long dwellTime=this.departure.getTime()-this.arrival.getTime();
+			if(dwellTime<0||dwellTime>maxDwellTime.getValue())
+			{
+				return false;
+			}else
+			{
+				return true;
+			}
 		}else
 		{
-			return -1;
+			return false;
 		}
 	}
 	@Override
 	public String toString() {
 		return "DwellTimeDetails [departure=" + departure + ", arrival=" + arrival + ", getDwellTime()="
-				+ getDwellTime() + "]";
+				+ getDwellTime() + ", sanityCheck()=" + sanityCheck() + "]";
 	}
+	
 }

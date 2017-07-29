@@ -403,6 +403,12 @@
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
+	
+	<logger
+		name="org.transitime.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl"
+		level="debug" additivity="false">
+		<appender-ref ref="PREDICTION" />
+	</logger>
 
 	<logger name="org.transitime.core.schedBasedPreds" level="debug"
 		additivity="false">
@@ -478,6 +484,19 @@
 		<appender-ref ref="AUTO_ASSIGNER" />
 	</logger>
 
+	<logger name="org.transitime.core.dataCache.TripDataHistoryCache"
+		level="debug" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	
+	<logger name="org.transitime.core.TravelTimeDetails"
+		level="warn" additivity="false">
+		<appender-ref ref="PREDICTION" />
+	</logger>
+	<logger name="org.transitime.core.DwellTimeDetails"
+		level="warn" additivity="false">
+		<appender-ref ref="PREDICTION" />
+	</logger>	
 	<logger name="org.transitime.core.dataCache.TripDataHistoryCache"
 		level="debug" additivity="false">
 		<appender-ref ref="STDOUT" />

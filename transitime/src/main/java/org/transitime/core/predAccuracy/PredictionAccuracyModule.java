@@ -74,7 +74,7 @@ public class PredictionAccuracyModule extends Module {
 					"How frequently to query predictions for determining "
 					+ "prediction accuracy.");
 	
-	private static int getTimeBetweenPollingPredictionsMsec() {
+	protected static int getTimeBetweenPollingPredictionsMsec() {
 		return timeBetweenPollingPredictionsMsec.getValue();
 	}
 
@@ -308,7 +308,7 @@ public class PredictionAccuracyModule extends Module {
 	 * will not be removed from memory. In order to prevent memory use from
 	 * building up need to clear out the old predictions.
 	 */
-	private void clearStalePredictions() {
+	protected void clearStalePredictions() {
 		int numPredictionsInMemory = 0;
 		int numPredictionsRemoved = 0;
 		

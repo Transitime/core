@@ -36,6 +36,7 @@ import org.transitime.core.dataCache.TripKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcPrediction;
 
@@ -89,12 +90,14 @@ public abstract class PredictionGenerator {
 			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
 	
 			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
-	
+			
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.
 				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
 					
-					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
+					if(currentArrivalDeparture.isDeparture() 
+							&& currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId() 
+							&& (currentVehicleState.getTrip()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
 					{
 						ArrivalDeparture found;
 											
@@ -141,7 +144,8 @@ public abstract class PredictionGenerator {
 				// lists are already sorted when put into cache.
 				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
 					
-					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
+					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId()
+							&& (currentVehicleState.getTrip()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
 					{
 						ArrivalDeparture found;
 											
@@ -233,7 +237,7 @@ public abstract class PredictionGenerator {
 		return null;
 	}
 
-	protected List<TravelTimeDetails> lastDaysTimes(TripDataHistoryCache cache, String tripId, int stopPathIndex, Date startDate,
+	protected List<TravelTimeDetails> lastDaysTimes(TripDataHistoryCache cache, String tripId,String direction, int stopPathIndex, Date startDate,
 			Integer startTime, int num_days_look_back, int num_days) {
 
 		List<TravelTimeDetails> times = new ArrayList<TravelTimeDetails>();
@@ -244,31 +248,33 @@ public abstract class PredictionGenerator {
 		 * which services use this trip and only 1ook on day service is
 		 * running
 		 */
-
+		
+		
 		for (int i = 0; i < num_days_look_back && num_found < num_days; i++) {
 
 			Date nearestDay = DateUtils.truncate(DateUtils.addDays(startDate, (i + 1) * -1), Calendar.DAY_OF_MONTH);
 
-			TripKey tripKey = new TripKey(tripId, nearestDay, startTime);
+			TripKey tripKey = new TripKey(tripId,direction, nearestDay, startTime);
 
 			results = cache.getTripHistory(tripKey);
 
 			if (results != null) {
 
 				ArrivalDeparture arrival = getArrival(stopPathIndex, results);
-			
 				
-				ArrivalDeparture departure = TripDataHistoryCache.findPreviousDepartureEvent(results, arrival);
-				
-																	
-				if (arrival != null && departure != null) {
-					
-					TravelTimeDetails travelTimeDetails=new TravelTimeDetails(departure, arrival);
-					
-					times.add(travelTimeDetails);
-										
-					num_found++;
-				}			
+				if(arrival!=null)
+				{							
+					ArrivalDeparture departure = TripDataHistoryCache.findPreviousDepartureEvent(results, arrival);
+																							
+					if (arrival != null && departure != null) {
+						
+						TravelTimeDetails travelTimeDetails=new TravelTimeDetails(departure, arrival);
+						
+						times.add(travelTimeDetails);
+											
+						num_found++;
+					}
+				}
 			}
 		}
 		return times;		

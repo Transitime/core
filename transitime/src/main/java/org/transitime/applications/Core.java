@@ -427,7 +427,6 @@ public class Core {
 			// For making sure logger configured properly
 			outputLoggerStatus();
 			
-		
 			Session session = HibernateUtils.getSession();
 			
 			Date endDate=Calendar.getInstance().getTime();
@@ -471,7 +470,7 @@ public class Core {
 			
 			endDate=Calendar.getInstance().getTime();
 			
-			for(int i=20;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
 				Date startDate=DateUtils.addDays(endDate, -1);
 				
