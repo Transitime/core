@@ -14,7 +14,7 @@ public class TripKey implements java.io.Serializable {
 	
 	private Date tripStartDate;
 	private Integer startTime;
-	private String direction;
+
 	
 	/**
 	 * @return the tripId
@@ -35,24 +35,19 @@ public class TripKey implements java.io.Serializable {
 	public Integer getStartTime() {
 		return startTime;
 	}
-	public TripKey(String tripId, String direction, Date tripStartDate,
+	public TripKey(String tripId,  Date tripStartDate,
 			Integer startTime) {
 		super();
 		this.tripId = tripId;	
-		this.direction = direction;
+		
 		this.tripStartDate = tripStartDate;
 		this.startTime = startTime;
-	}
-
-	public String getDirection() {
-		return direction;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((direction == null) ? 0 : direction.hashCode());
 		result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		result = prime * result + ((tripStartDate == null) ? 0 : tripStartDate.hashCode());
@@ -68,11 +63,6 @@ public class TripKey implements java.io.Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		TripKey other = (TripKey) obj;
-		if (direction == null) {
-			if (other.direction != null)
-				return false;
-		} else if (!direction.equals(other.direction))
-			return false;
 		if (startTime == null) {
 			if (other.startTime != null)
 				return false;
@@ -93,11 +83,9 @@ public class TripKey implements java.io.Serializable {
 
 	@Override
 	public String toString() {
-		return "TripKey [tripId=" + tripId + ", tripStartDate=" + tripStartDate + ", startTime=" + startTime
-				+ ", direction=" + direction + "]";
+		return "TripKey [tripId=" + tripId + ", tripStartDate=" + tripStartDate + ", startTime=" + startTime + "]";
 	}
 
-	
 
 
 

@@ -245,7 +245,7 @@ public class FrequencyBasedHistoricalAverageCache {
 	private TravelTimeResult getLastPathDuration(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
-		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(), trip.getDirectionId(),
+		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
 				nearestDay,
 				trip.getStartTime());
 						
@@ -268,7 +268,7 @@ public class FrequencyBasedHistoricalAverageCache {
 	private DwellTimeResult getLastStopDuration(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
-		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(), trip.getDirectionId(),
+		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(), 
 				nearestDay,
 				trip.getStartTime());
 						

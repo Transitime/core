@@ -254,7 +254,7 @@ public abstract class PredictionGenerator {
 
 			Date nearestDay = DateUtils.truncate(DateUtils.addDays(startDate, (i + 1) * -1), Calendar.DAY_OF_MONTH);
 
-			TripKey tripKey = new TripKey(tripId,direction, nearestDay, startTime);
+			TripKey tripKey = new TripKey(tripId, nearestDay, startTime);
 
 			results = cache.getTripHistory(tripKey);
 

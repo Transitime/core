@@ -135,7 +135,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			if(tripId!=null && localDate!=null && starttime!=null){
 				
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-				TripKey tripKey = new TripKey(tripId, "TODO", date, starttime);
+				TripKey tripKey = new TripKey(tripId, date, starttime);
 
 				result = TripDataHistoryCache.getInstance().getTripHistory(tripKey);
 			}

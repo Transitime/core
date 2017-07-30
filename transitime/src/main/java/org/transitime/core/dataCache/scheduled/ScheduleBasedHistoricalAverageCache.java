@@ -158,7 +158,7 @@ public class ScheduleBasedHistoricalAverageCache {
 	private TravelTimeDetails getLastTravelTimeDetails(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
-		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),trip.getDirectionId(),
+		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
 				nearestDay,
 				trip.getStartTime());
 						
@@ -180,7 +180,7 @@ public class ScheduleBasedHistoricalAverageCache {
 	private DwellTimeDetails getLastDwellTimeDetails(ArrivalDeparture arrivalDeparture, Trip trip)
 	{
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
-		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),trip.getDirectionId(),
+		TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
 				nearestDay,
 				trip.getStartTime());
 						

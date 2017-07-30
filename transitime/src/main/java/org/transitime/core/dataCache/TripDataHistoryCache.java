@@ -161,7 +161,7 @@ public class TripDataHistoryCache{
 			
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 			
-			tripKey = new TripKey(arrivalDeparture.getTripId(),trip.getDirectionId(),
+			tripKey = new TripKey(arrivalDeparture.getTripId(),
 					nearestDay,
 					trip.getStartTime());
 			
