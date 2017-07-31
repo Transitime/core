@@ -529,6 +529,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		return travelTimes.expectedTravelTimeFromMatchToEndOfStopPath(match);
 	}
 
+	
+
 
 		
 }

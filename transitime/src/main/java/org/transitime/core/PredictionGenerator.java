@@ -29,6 +29,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.core.dataCache.PredictionComparator;
+import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
@@ -39,6 +41,7 @@ import org.transitime.db.structs.Block;
 import org.transitime.db.structs.Trip;
 import org.transitime.gtfs.DbConfig;
 import org.transitime.ipc.data.IpcPrediction;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
  * Defines the interface for generating predictions. To create predictions using
@@ -97,7 +100,7 @@ public abstract class PredictionGenerator {
 					
 					if(currentArrivalDeparture.isDeparture() 
 							&& currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId() 
-							&& (currentVehicleState.getTrip()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
+							&& (currentVehicleState.getTrip().getDirectionId()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
 					{
 						ArrivalDeparture found;
 											
@@ -145,7 +148,7 @@ public abstract class PredictionGenerator {
 				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
 					
 					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId()
-							&& (currentVehicleState.getTrip()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
+							&& (currentVehicleState.getTrip().getDirectionId()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
 					{
 						ArrivalDeparture found;
 											
@@ -299,4 +302,45 @@ public abstract class PredictionGenerator {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 	
+	public long getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+		
+		// This is a WIP to get a prediction headway as the stop.
+		List<IpcPrediction> masterList=new ArrayList<IpcPrediction>();
+		
+		List<IpcPredictionsForRouteStopDest> predicitonsForRouteStopDest = PredictionDataCache.getInstance().getPredictions(vehicleState.getRouteId(), vehicleState.getTrip().getDirectionId(), indices.getTrip().getStopPath(indices.getStopPathIndex()).getStopId(), 5);
+				
+		for(IpcPredictionsForRouteStopDest predictions:predicitonsForRouteStopDest)
+		{
+			for( IpcPrediction prediction:predictions.getPredictionsForRouteStop())
+			{
+				masterList.add(prediction);
+			}
+		}		
+		Collections.sort(masterList, new PredictionComparator());
+		int index=0;
+		boolean found=false;
+		for(IpcPrediction prediction:masterList)
+		{
+			/* find this vehicles prediction for this stop and the last ones prediction. */
+			if(prediction.getVehicleId().equals(vehicleState.getVehicleId()))
+			{
+				found=true;
+				break;
+			}
+			index++;
+		}
+		if(found&&index>0)
+		{
+			IpcPrediction currentVehiclePrediction = masterList.get(index);
+			IpcPrediction lastVehiclePrediction = masterList.get(index-1);
+			/* now the difference between these to gives the predicted headway. */
+			long headway=currentVehiclePrediction.getPredictionTime()-lastVehiclePrediction.getPredictionTime();
+			if(headway>0)
+			{
+				return headway;
+			}
+		}		
+		return -1;	
+		
+	}
 }

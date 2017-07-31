@@ -7,6 +7,7 @@ import java.util.List;
 import org.transitime.applications.Core;
 import org.transitime.core.HeadwayGenerator;
 import org.transitime.core.VehicleState;
+import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.VehicleDataCache;
@@ -36,24 +37,27 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 			long date = vehicleState.getMatch().getAvlTime();
 			
 			String vehicleId=vehicleState.getVehicleId();
-			
+									
 			StopArrivalDepartureCacheKey key=new StopArrivalDepartureCacheKey(stopId, new Date(date));
 			
 			List<ArrivalDeparture> stopList=StopArrivalDepartureCache.getInstance().getStopHistory(key);
 			int lastStopArrivalIndex =-1;
 			int previousVehicleArrivalIndex = -1;
+					
 			
 			if(stopList!=null)
 			{
 				for(int i=0;i<stopList.size() && previousVehicleArrivalIndex==-1 ;i++)
 				{
 					ArrivalDeparture arrivalDepature = stopList.get(i);
-					if(arrivalDepature.isDeparture() && arrivalDepature.getStopId().equals(stopId) && arrivalDepature.getVehicleId().equals(vehicleId) )
+					if(arrivalDepature.isDeparture() && arrivalDepature.getStopId().equals(stopId) && arrivalDepature.getVehicleId().equals(vehicleId) 
+							&& (vehicleState.getTrip().getDirectionId()==null || vehicleState.getTrip().getDirectionId().equals(arrivalDepature.getDirectionId())))
 					{
 						// This the arrival of this vehicle now the next arrival in the list will be the previous vehicle (The arrival of the vehicle ahead).
 						lastStopArrivalIndex=i;				
 					}
-					if(lastStopArrivalIndex>-1 && arrivalDepature.isDeparture() && arrivalDepature.getStopId().equals(stopId) && !arrivalDepature.getVehicleId().equals(vehicleId) )
+					if(lastStopArrivalIndex>-1 && arrivalDepature.isDeparture() && arrivalDepature.getStopId().equals(stopId) && !arrivalDepature.getVehicleId().equals(vehicleId) 
+							&& (vehicleState.getTrip().getDirectionId()==null || vehicleState.getTrip().getDirectionId().equals(arrivalDepature.getDirectionId())))
 					{
 						previousVehicleArrivalIndex = i;
 					}

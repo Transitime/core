@@ -48,12 +48,14 @@ public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
 				for(int i=0;i<stopList.size() && previousVehicleArrivalIndex==-1 ;i++)
 				{
 					ArrivalDeparture arrivalDepature = stopList.get(i);
-					if(arrivalDepature.isArrival() && arrivalDepature.getStopId().equals(stopId) && arrivalDepature.getVehicleId().equals(vehicleId) )
+					if(arrivalDepature.isArrival() && arrivalDepature.getStopId().equals(stopId) && arrivalDepature.getVehicleId().equals(vehicleId) 
+							&& (vehicleState.getTrip().getDirectionId()==null || vehicleState.getTrip().getDirectionId().equals(arrivalDepature.getDirectionId())))
 					{
 						// This the arrival of this vehicle now the next arrival in the list will be the previous vehicle (The arrival of the vehicle ahead).
 						lastStopArrivalIndex=i;				
 					}
-					if(lastStopArrivalIndex>-1 && arrivalDepature.isArrival() && arrivalDepature.getStopId().equals(stopId) && !arrivalDepature.getVehicleId().equals(vehicleId) )
+					if(lastStopArrivalIndex>-1 && arrivalDepature.isArrival() && arrivalDepature.getStopId().equals(stopId) && !arrivalDepature.getVehicleId().equals(vehicleId)
+							&& (vehicleState.getTrip().getDirectionId()==null || vehicleState.getTrip().getDirectionId().equals(arrivalDepature.getDirectionId())))
 					{
 						previousVehicleArrivalIndex = i;
 					}

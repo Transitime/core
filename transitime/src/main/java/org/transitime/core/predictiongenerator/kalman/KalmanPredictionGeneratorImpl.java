@@ -1,6 +1,8 @@
 package org.transitime.core.predictiongenerator.kalman;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -13,8 +15,11 @@ import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.Indices;
 import org.transitime.core.TravelTimeDetails;
 import org.transitime.core.VehicleState;
+import org.transitime.core.dataCache.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.KalmanErrorCache;
 import org.transitime.core.dataCache.KalmanErrorCacheKey;
+import org.transitime.core.dataCache.PredictionComparator;
+import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.StopPathPredictionCache;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleStateManager;
@@ -22,6 +27,8 @@ import org.transitime.core.predictiongenerator.PredictionComponentElementsGenera
 import org.transitime.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.PredictionForStopPath;
+import org.transitime.ipc.data.IpcPrediction;
+import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
  * @author Sean Óg Crudden This is a prediction generator that uses a Kalman
@@ -179,7 +186,13 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
-		// TODO Auto-generated method stub
-		return super.getStopTimeForPath(indices, avlReport, vehicleState);
+		if(this.getHeadway(indices, avlReport, vehicleState)<0)
+		{				
+			return super.getStopTimeForPath(indices, avlReport, vehicleState);
+		}else
+		{
+			//TODO do something different if we know the headway.
+			return super.getStopTimeForPath(indices, avlReport, vehicleState);
+		}
 	}
 }
