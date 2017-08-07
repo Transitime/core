@@ -257,6 +257,7 @@
 							<mainClass>org.transitime.applications.UpdateTravelTimes</mainClass>
 						</transformer>
 					</transformers>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>UpdateTravelTimes</shadedClassifierName>
 					<outputFile>target/UpdateTravelTimes.jar</outputFile>
 				</configuration>
@@ -274,6 +275,7 @@
 							<mainClass>org.transitime.applications.Core</mainClass>
 						</transformer>
 					</transformers>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>Core</shadedClassifierName>
 					<outputFile>target/Core.jar</outputFile>
 				</configuration>
@@ -291,6 +293,7 @@
 							<mainClass>org.transitime.applications.SchemaGenerator</mainClass>
 						</transformer>
 					</transformers>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>SchemaGenerator</shadedClassifierName>
 					<outputFile>target/SchemaGenerator.jar</outputFile>
 				</configuration>
@@ -308,6 +311,7 @@
 							<mainClass>org.transitime.applications.ScheduleGenerator</mainClass>
 						</transformer>
 					</transformers>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>ScheduleGenerator</shadedClassifierName>
 					<outputFile>target/ScheduleGenerator.jar</outputFile>
 				</configuration>
@@ -325,6 +329,7 @@
 							<mainClass>org.transitime.applications.GtfsFileProcessor</mainClass>
 						</transformer>
 					</transformers>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>GtfsFileProcessor</shadedClassifierName>
 					<outputFile>target/GtfsFileProcessor.jar</outputFile>
 				</configuration>
@@ -342,6 +347,7 @@
 								<mainClass>org.transitime.applications.RmiQuery</mainClass>
 							</transformer>
 						</transformers>
+						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>RmiQuery</shadedClassifierName>
 						<outputFile>target/RmiQuery.jar</outputFile>
 					</configuration>
@@ -359,6 +365,7 @@
 								<mainClass>org.transitime.applications.CreateAPIKey</mainClass>
 							</transformer>
 						</transformers>
+						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>CreateAPIKey</shadedClassifierName>
 						<outputFile>target/CreateAPIKey.jar</outputFile>
 					</configuration>
@@ -376,6 +383,7 @@
 								<mainClass>org.transitime.applications.CreateWebAgency</mainClass>
 							</transformer>
 						</transformers>
+						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>CreateWebAgency</shadedClassifierName>
 						<outputFile>target/CreateWebAgency.jar</outputFile>
 					</configuration>
