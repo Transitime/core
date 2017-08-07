@@ -259,7 +259,6 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>UpdateTravelTimes</shadedClassifierName>
-					<finalName>${project.artifactId}-${project.version}-UpdateTravelTimes</finalName>
 				</configuration>
 			</execution>
 			<execution>
@@ -277,7 +276,6 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>Core</shadedClassifierName>
-					<finalName>${project.artifactId}-${project.version}-Core</finalName>
 				</configuration>
 			</execution>
 			<execution>
@@ -295,7 +293,6 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>SchemaGenerator</shadedClassifierName>
-					<finalName>${project.artifactId}-${project.version}-SchemaGenerator</finalName>
 				</configuration>
 			</execution>
 			<execution>
@@ -313,7 +310,6 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>ScheduleGenerator</shadedClassifierName>
-					<finalName>${project.artifactId}-${project.version}-ScheduleGenerator</finalName>
 				</configuration>
 			</execution>
 			<execution>
@@ -331,7 +327,6 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>GtfsFileProcessor</shadedClassifierName>
-					<finalName>${project.artifactId}-${project.version}-GtfsFileProcessor</finalName>
 				</configuration>
 			</execution>
 				<execution>
@@ -349,7 +344,6 @@
 						</transformers>
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>RmiQuery</shadedClassifierName>
-						<finalName>${project.artifactId}-${project.version}-RmiQuery</finalName>
 					</configuration>
 				</execution>
 				<execution>
@@ -367,7 +361,6 @@
 						</transformers>
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>CreateAPIKey</shadedClassifierName>
-						<finalName>${project.artifactId}-${project.version}-CreateAPIKey</finalName>
 					</configuration>
 				</execution>
 				<execution>
@@ -385,7 +378,6 @@
 						</transformers>
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>CreateWebAgency</shadedClassifierName>
-						<finalName>${project.artifactId}-${project.version}-CreateWebAgency</finalName>
 					</configuration>
 				</execution>
 			</executions>
