@@ -260,7 +260,6 @@
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>UpdateTravelTimes</shadedClassifierName>
 					<finalName>${project.artifactId}-${project.version}-UpdateTravelTimes</finalName>
-					<outputFile>target/UpdateTravelTimes.jar</outputFile>
 				</configuration>
 			</execution>
 			<execution>
@@ -279,7 +278,6 @@
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>Core</shadedClassifierName>
 					<finalName>${project.artifactId}-${project.version}-Core</finalName>
-					<outputFile>target/Core.jar</outputFile>
 				</configuration>
 			</execution>
 			<execution>
@@ -298,7 +296,6 @@
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>SchemaGenerator</shadedClassifierName>
 					<finalName>${project.artifactId}-${project.version}-SchemaGenerator</finalName>
-					<outputFile>target/SchemaGenerator.jar</outputFile>
 				</configuration>
 			</execution>
 			<execution>
@@ -317,7 +314,6 @@
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>ScheduleGenerator</shadedClassifierName>
 					<finalName>${project.artifactId}-${project.version}-ScheduleGenerator</finalName>
-					<outputFile>target/ScheduleGenerator.jar</outputFile>
 				</configuration>
 			</execution>
 			<execution>
@@ -336,7 +332,6 @@
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>GtfsFileProcessor</shadedClassifierName>
 					<finalName>${project.artifactId}-${project.version}-GtfsFileProcessor</finalName>
-					<outputFile>target/GtfsFileProcessor.jar</outputFile>
 				</configuration>
 			</execution>
 				<execution>
@@ -355,7 +350,6 @@
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>RmiQuery</shadedClassifierName>
 						<finalName>${project.artifactId}-${project.version}-RmiQuery</finalName>
-						<outputFile>target/RmiQuery.jar</outputFile>
 					</configuration>
 				</execution>
 				<execution>
@@ -374,7 +368,6 @@
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>CreateAPIKey</shadedClassifierName>
 						<finalName>${project.artifactId}-${project.version}-CreateAPIKey</finalName>
-						<outputFile>target/CreateAPIKey.jar</outputFile>
 					</configuration>
 				</execution>
 				<execution>
@@ -393,7 +386,6 @@
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>CreateWebAgency</shadedClassifierName>
 						<finalName>${project.artifactId}-${project.version}-CreateWebAgency</finalName>
-						<outputFile>target/CreateWebAgency.jar</outputFile>
 					</configuration>
 				</execution>
 			</executions>
@@ -401,23 +393,24 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>org.transitime.applications.Core</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
 				<executions>
+					<!-- core deploy -->
 					<execution>
 						<id>make-assembly</id> <!-- this is used for inheritance merges -->
 						<phase>package</phase> <!-- bind to the packaging phase -->
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>org.transitime.applications.Core</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
