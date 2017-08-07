@@ -259,6 +259,7 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>UpdateTravelTimes</shadedClassifierName>
+					<finalName>${project.artifactId}-${project.version}-UpdateTravelTimes</finalName>
 					<outputFile>target/UpdateTravelTimes.jar</outputFile>
 				</configuration>
 			</execution>
@@ -277,6 +278,7 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>Core</shadedClassifierName>
+					<finalName>${project.artifactId}-${project.version}-Core</finalName>
 					<outputFile>target/Core.jar</outputFile>
 				</configuration>
 			</execution>
@@ -295,6 +297,7 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>SchemaGenerator</shadedClassifierName>
+					<finalName>${project.artifactId}-${project.version}-SchemaGenerator</finalName>
 					<outputFile>target/SchemaGenerator.jar</outputFile>
 				</configuration>
 			</execution>
@@ -313,6 +316,7 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>ScheduleGenerator</shadedClassifierName>
+					<finalName>${project.artifactId}-${project.version}-ScheduleGenerator</finalName>
 					<outputFile>target/ScheduleGenerator.jar</outputFile>
 				</configuration>
 			</execution>
@@ -331,6 +335,7 @@
 					</transformers>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>GtfsFileProcessor</shadedClassifierName>
+					<finalName>${project.artifactId}-${project.version}-GtfsFileProcessor</finalName>
 					<outputFile>target/GtfsFileProcessor.jar</outputFile>
 				</configuration>
 			</execution>
@@ -349,6 +354,7 @@
 						</transformers>
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>RmiQuery</shadedClassifierName>
+						<finalName>${project.artifactId}-${project.version}-RmiQuery</finalName>
 						<outputFile>target/RmiQuery.jar</outputFile>
 					</configuration>
 				</execution>
@@ -367,6 +373,7 @@
 						</transformers>
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>CreateAPIKey</shadedClassifierName>
+						<finalName>${project.artifactId}-${project.version}-CreateAPIKey</finalName>
 						<outputFile>target/CreateAPIKey.jar</outputFile>
 					</configuration>
 				</execution>
@@ -385,6 +392,7 @@
 						</transformers>
 						<shadedArtifactAttached>true</shadedArtifactAttached>
 						<shadedClassifierName>CreateWebAgency</shadedClassifierName>
+						<finalName>${project.artifactId}-${project.version}-CreateWebAgency</finalName>
 						<outputFile>target/CreateWebAgency.jar</outputFile>
 					</configuration>
 				</execution>
