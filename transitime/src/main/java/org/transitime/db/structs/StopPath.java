@@ -23,6 +23,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
@@ -108,8 +109,8 @@ public class StopPath implements Serializable, Lifecycle {
 	@Column
 	private final Integer breakTime;
 	
-  // sacrifice performance for reportability -- use a child table instead of java serialization 
-	@ElementCollection
+    // sacrifice performance for reportability -- use a child table instead of java serialization
+	@ElementCollection(fetch=FetchType.LAZY)
     @OrderColumn
 	private List<Location> locations;
 
