@@ -233,7 +233,7 @@ public final class Block implements Serializable {
       String hql = "FROM Blocks as b "
           + "join fetch b.trips t "
           + "join fetch t.travelTimes tt "
-		  + "join fetch tt.travelTimesForStopPaths tsp "
+//		  + "join fetch tt.travelTimesForStopPaths tsp "
           + "join fetch t.tripPattern tp "
           + "join fetch tp.stopPaths sp "
           /*+ "join fetch sp.locations "*/  //this makes the resultset REALLY big
