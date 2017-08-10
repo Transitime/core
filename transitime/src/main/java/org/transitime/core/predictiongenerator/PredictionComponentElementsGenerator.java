@@ -1,5 +1,6 @@
 package org.transitime.core.predictiongenerator;
 
+
 import org.transitime.core.Indices;
 import org.transitime.core.SpatialMatch;
 import org.transitime.core.VehicleState;
@@ -13,6 +14,6 @@ public interface PredictionComponentElementsGenerator {
 	
 	long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match);
 	
-	long getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState);
+	long getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception;
 
 }

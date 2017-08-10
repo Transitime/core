@@ -186,13 +186,15 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
-		if(this.getHeadway(indices, avlReport, vehicleState)<0)
-		{				
-			return super.getStopTimeForPath(indices, avlReport, vehicleState);
-		}else
-		{
-			//TODO do something different if we know the headway.
-			return super.getStopTimeForPath(indices, avlReport, vehicleState);
+		long headway=-1;
+		try {
+			headway=this.getHeadway(indices, avlReport, vehicleState);
+			
+		} catch (Exception e) {
+			
+			logger.error(e.getMessage(),e);
+	
 		}
+		return super.getStopTimeForPath(indices, avlReport, vehicleState);
 	}
 }

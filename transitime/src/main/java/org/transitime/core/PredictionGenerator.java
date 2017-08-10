@@ -302,9 +302,9 @@ public abstract class PredictionGenerator {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 	
-	public long getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+	public long getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception {
 		
-		// This is a WIP to get a prediction headway as the stop.
+		// This is a WIP to get a prediction headway at the stop.
 		List<IpcPrediction> masterList=new ArrayList<IpcPrediction>();
 		
 		List<IpcPredictionsForRouteStopDest> predicitonsForRouteStopDest = PredictionDataCache.getInstance().getPredictions(vehicleState.getRouteId(), vehicleState.getTrip().getDirectionId(), indices.getTrip().getStopPath(indices.getStopPathIndex()).getStopId(), 5);
@@ -333,11 +333,11 @@ public abstract class PredictionGenerator {
 		{
 			IpcPrediction currentVehiclePrediction = masterList.get(index);
 			IpcPrediction lastVehiclePrediction = masterList.get(index-1);
-			/* now the difference between these to gives the predicted headway. */
+			/* now the difference between these will give the predicted headway. */
 			long headway=currentVehiclePrediction.getPredictionTime()-lastVehiclePrediction.getPredictionTime();
 			if(headway>0)
 			{
-				return headway;
+				return new HeadwayDetails(currentVehiclePrediction, lastVehiclePrediction).getHeadway();
 			}
 		}		
 		return -1;	
