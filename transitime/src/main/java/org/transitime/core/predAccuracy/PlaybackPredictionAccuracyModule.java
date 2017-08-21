@@ -18,32 +18,32 @@ public class PlaybackPredictionAccuracyModule extends PredictionAccuracyModule {
 	public void run() {
 		// TODO Auto-generated method stub
 		// Log that module successfully started
-				logger.info("Started module {} for agencyId={}", 
-						getClass().getName(), getAgencyId());
-							
-				// Run forever
-				PlaybackIntervalTimer timer = new PlaybackIntervalTimer();
-				while (true) {			
-					// No need to run at startup since internal predictions won't be
-					// generated yet. So sleep a bit first.
+		logger.info("Started module {} for agencyId={}", 
+				getClass().getName(), getAgencyId());
 					
-					Time.sleep(5000);
-					if( timer.elapsedMsec() > getTimeBetweenPollingPredictionsMsec())
-					{
-						try {
-							// Process data
-							getAndProcessData(getRoutesAndStops(), Core.getInstance().getSystemDate());
-							
-							// Make sure old predictions that were never matched to an
-							// arrival/departure don't stick around taking up memory.
-							clearStalePredictions();
-						} catch (Exception e) {
-							e.printStackTrace();
-							logger.error("Error accessing predictions feed :  "+ e.getMessage(), e); 
-						} 				
-						timer.resetTimer();
-					}			
-				}
+		// Run forever
+		PlaybackIntervalTimer timer = new PlaybackIntervalTimer();
+		while (true) {			
+			// No need to run at startup since internal predictions won't be
+			// generated yet. So sleep a bit first.
+			
+			// Time.sleep(5000);
+			if( timer.elapsedMsec() > getTimeBetweenPollingPredictionsMsec())
+			{
+				try {
+					// Process data
+					getAndProcessData(getRoutesAndStops(), Core.getInstance().getSystemDate());
+					
+					// Make sure old predictions that were never matched to an
+					// arrival/departure don't stick around taking up memory.
+					clearStalePredictions();
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error("Error accessing predictions feed :  "+ e.getMessage(), e); 
+				} 				
+				timer.resetTimer();
+			}			
+		}
 	}
 
 }

@@ -31,6 +31,8 @@ import org.transitime.config.StringConfigValue;
 import org.transitime.core.AvlProcessor;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.modules.Module;
+import org.transitime.utils.IntervalTimer;
+import org.transitime.utils.PlaybackIntervalTimer;
 import org.transitime.utils.Time;
 
 /**
@@ -191,7 +193,10 @@ public class PlaybackModule extends Module {
 	 */
 	@Override
 	public void run() {
-		// Keep running as long as not trying to access in the future.		
+		
+		IntervalTimer timer = new IntervalTimer();
+		// Keep running as long as not trying to access in the future.
+				
 		while (dbReadBeginTime < System.currentTimeMillis() && (playbackEndTimeStr.getValue().length()==0 || dbReadBeginTime<parsePlaybackEndTime(playbackEndTimeStr.getValue()))) {
 			List<AvlReport> avlReports = getBatchOfAvlReportsFromDb();
 			
@@ -239,6 +244,10 @@ public class PlaybackModule extends Module {
 			
 			}
 		}
+		// logging here as the rest is database access dependent.
+		logger.info("Processed AVL from playbackStartTimeStr:{} to playbackEndTimeStr:{} in {} secs.",playbackStartTimeStr,playbackEndTimeStr,  Time.secondsStr(timer.elapsedMsec()));
+		
+		
 		// Wait for database queue to be emptied before exiting.
 		while(Core.getInstance().getDbLogger().queueSize()>0)
 		{
@@ -248,6 +257,7 @@ public class PlaybackModule extends Module {
 			
 			}
 		}
+		
 		
  		logger.info("Read in AVL in playback mode all the way up to current " +
 				"time so done. Exiting.");
