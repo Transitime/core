@@ -1,0 +1,16 @@
+# DEFAULT CACHE REGION
+jcs.KalmanErrorCache=DC
+jcs.KalmanErrorCache.cacheattributes=
+    org.apache.commons.jcs.engine.CompositeCacheAttributes
+jcs.KalmanErrorCache.cacheattributes.MaxObjects=1000
+jcs.KalmanErrorCache.cacheattributes.MemoryCacheName=
+    org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
+
+# AVAILABLE AUXILIARY CACHES
+jcs.auxiliary.DC=
+    org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheFactory
+jcs.auxiliary.DC.attributes=
+    org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheAttributes
+jcs.auxiliary.DC.attributes.DiskPath=/tmp/cache
+jcs.auxiliary.DC.attributes.maxKeySize=100000
+

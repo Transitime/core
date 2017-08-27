@@ -227,6 +227,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-jcs-core -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-jcs-core</artifactId>
+		    <version>2.2</version>
+		</dependency>
+		
 		<!-- Servlet related functionality -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
