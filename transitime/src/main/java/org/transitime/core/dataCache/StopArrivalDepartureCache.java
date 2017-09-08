@@ -117,7 +117,7 @@ public class StopArrivalDepartureCache {
 		date.set(Calendar.MILLISECOND, 0);
 		key.setDate(date.getTime());
 		Element result = cache.get(key);
-
+		
 		if (result != null) {
 			return (List<ArrivalDeparture>) result.getObjectValue();
 		} else {
