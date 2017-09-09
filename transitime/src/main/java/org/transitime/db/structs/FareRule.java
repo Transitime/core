@@ -94,7 +94,7 @@ public class FareRule implements Serializable {
 		this.routeId = routeIdToUse;
 		this.originId = gfr.getOriginId()==null?"":gfr.getOriginId();
 		this.destinationId = gfr.getDestinationId()==null?"":gfr.getDestinationId();
-		this.containsId = gfr.getContainsId();
+		this.containsId = gfr.getContainsId()==null?"":gfr.getContainsId();;
 	}
 
 	/**
