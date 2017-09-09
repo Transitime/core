@@ -139,9 +139,9 @@
         originId varchar(60) not null,
         fareId varchar(60) not null,
         destinationId varchar(60) not null,
+        containsId varchar(60) not null,
         configRev integer not null,
-        containsId varchar(60),
-        primary key (routeId, originId, fareId, destinationId, configRev)
+        primary key (routeId, originId, fareId, destinationId, containsId, configRev)
     );
 
     create table Frequencies (
@@ -290,6 +290,16 @@
         primary key (id)
     );
 
+    create table StopPath_locations (
+        StopPath_tripPatternId varchar(120) not null,
+        StopPath_stopPathId varchar(120) not null,
+        StopPath_configRev integer not null,
+        lat double precision,
+        lon double precision,
+        locations_ORDER integer not null,
+        primary key (StopPath_tripPatternId, StopPath_stopPathId, StopPath_configRev, locations_ORDER)
+    );
+
     create table StopPaths (
         tripPatternId varchar(120) not null,
         stopPathId varchar(120) not null,
@@ -298,7 +308,6 @@
         gtfsStopSeq integer,
         lastStopInTrip bit,
         layoverStop bit,
-        locations blob,
         maxDistance double precision,
         maxSpeed double precision,
         pathLength double precision,
@@ -498,6 +507,11 @@
         add constraint FK_1c1e1twdap19vq0xkav0amvm 
         foreign key (Blocks_serviceId, Blocks_configRev, Blocks_blockId) 
         references Blocks (serviceId, configRev, blockId);
+
+    alter table StopPath_locations 
+        add constraint FK_sdjt3vtd3w0cl07p0doob6khi 
+        foreign key (StopPath_tripPatternId, StopPath_stopPathId, StopPath_configRev) 
+        references StopPaths (tripPatternId, stopPathId, configRev);
 
     alter table TravelTimesForTrip_to_TravelTimesForPath_joinTable 
         add constraint FK_hh5uepurijcqj0pyc6e3h5mqw 
