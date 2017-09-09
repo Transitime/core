@@ -160,6 +160,11 @@ public abstract class CsvBaseReader<T> {
 				// Determine the record to process
 				record = iterator.next();
 				
+				// If blank line then skip it. This way avoid error messages since
+				// expected data column won't exist
+				if (record.size() == 0)
+					continue;
+				
 				// Process the record using appropriate handler
 				// and create the corresponding CSV object
 				T gtfsObject;

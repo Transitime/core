@@ -19,6 +19,8 @@ package org.transitime.custom.nyc;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jdom2.Document;
@@ -76,7 +78,7 @@ public class BusTimeSiriAvlModule extends XmlPollingAvlModule {
 	 * @throws NumberFormatException
 	 */
 	@Override
-	protected void extractAvlData(Document doc) 
+	protected Collection<AvlReport> extractAvlData(Document doc) 
 			throws NumberFormatException {
 		logger.info("Extracting data from xml file");
 		
@@ -90,12 +92,12 @@ public class BusTimeSiriAvlModule extends XmlPollingAvlModule {
 		Element serviceDelivery = rootNode.getChild("ServiceDelivery", ns);
 		if (serviceDelivery == null) {
 			logger.error("ServiceDelivery element not found in XML data");
-			return;
+			return new ArrayList<AvlReport>();
 		}
 		Element vehicleMonitoringDelivery = serviceDelivery.getChild("VehicleMonitoringDelivery", ns);
 		if (vehicleMonitoringDelivery == null) {
 			logger.error("VehicleMonitoringDelivery element not found in XML data");
-			return;
+			return new ArrayList<AvlReport>();
 		}
 		
 		// Handle any error message
@@ -104,9 +106,12 @@ public class BusTimeSiriAvlModule extends XmlPollingAvlModule {
 			Element description = errorCondition.getChild("Description", ns);
 			String errorStr = description.getTextNormalize();
 			logger.error("While processing AVL data in BusTimeSiriAvlModule: " + errorStr);
-			return;
+			return new ArrayList<AvlReport>();
 		}
 		
+		// The return value for the method
+		Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
+
 		// Handle getting vehicle location data
 		List<Element> vehicles = vehicleMonitoringDelivery.getChildren("VehicleActivity", ns);
 		for (Element vehicle : vehicles) {			
@@ -180,10 +185,12 @@ public class BusTimeSiriAvlModule extends XmlPollingAvlModule {
 								heading, "SIRI");
 				avlReport.setAssignment(block, AssignmentType.BLOCK_ID);
 				
-				processAvlReport(avlReport);
+				avlReportsReadIn.add(avlReport);
 			}
 		}
 		
+		// Return all the AVL reports read in
+		return avlReportsReadIn;
 	}
 	
 	/**

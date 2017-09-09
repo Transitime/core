@@ -17,6 +17,8 @@
 package org.transitime.custom.mbta;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,7 +86,7 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 	 * processAvlReport() for each AVL report.
 	 */
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 		// Get the JSON string containing the AVL data
 		String jsonStr = getJsonString(in);
 		try {
@@ -98,6 +100,9 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 			// so that each one can be accessed by name.
 			String tripNames[] = JSONObject.getNames(jsonObj);
 			
+			// The return value for the method
+			Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
+
 			// For each vehicle...
 			for (String tripName : tripNames) {
 				JSONObject v = jsonObj.getJSONObject(tripName);
@@ -142,12 +147,16 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 				logger.debug("From KeolisAvlModule {}", avlReport);
 				
 				if (shouldProcessAvl) {
-					processAvlReport(avlReport);
+					avlReportsReadIn.add(avlReport);
 				}
-			}			
+			}	
+			
+			// Return all the AVL reports read in
+			return avlReportsReadIn;
 		} catch (JSONException e) {
 			logger.error("Error parsing JSON. {}. {}", e.getMessage(), jsonStr,
 					e);
+			return new ArrayList<AvlReport>();
 		}
 
 	}

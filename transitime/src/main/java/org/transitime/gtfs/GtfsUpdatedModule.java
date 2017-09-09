@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.http.HttpStatus;
@@ -188,10 +190,14 @@ public class GtfsUpdatedModule extends Module {
 	 */
 	private static void archive(String fullFileName) {
 		// Determine name of directory to archive file into. Use date of
-		// lastModified time of file e.g. MM-dd-yyyy.
+		// lastModified time of file e.g. yyyy-MM-dd. Putting year first
+		// and then month means that the directories will be listed 
+		// chronologically when listed using unix ls command.
 		File file = new File(fullFileName);
 		Date lastModified = new Date(file.lastModified());
-		String dirName = Time.dateStr(lastModified);
+		DateFormat readableDateFormat =
+				new SimpleDateFormat("yyyy-MM-dd");
+		String dirName = readableDateFormat.format(lastModified);
 		
 		// Copy the file to the sibling directory with the name that is the
 		// last modified date (e.g. 03-28-2015)
@@ -232,7 +238,8 @@ public class GtfsUpdatedModule extends Module {
 				get();
 			} catch (Exception e) {
 				logger.error(Markers.email(),
-						"Exception in GtfsUpdatedModule", e);
+						"Exception in GtfsUpdatedModule for agencyId={}", 
+						AgencyConfig.getAgencyId(), e);
 			}
 		}
 	}

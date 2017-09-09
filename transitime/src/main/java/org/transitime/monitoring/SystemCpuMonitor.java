@@ -17,6 +17,9 @@
 
 package org.transitime.monitoring;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.DoubleConfigValue;
@@ -34,7 +37,7 @@ public class SystemCpuMonitor extends MonitorBase {
 
 	DoubleConfigValue cpuThreshold = new DoubleConfigValue(
 			"transitime.monitoring.cpuThreshold", 
-			0.9, 
+			0.99, 
 			"If CPU load averaged over a minute exceeds this 0.0 - 1.0 "
 			+ "value then CPU monitoring is triggered.");
 	
@@ -76,6 +79,18 @@ public class SystemCpuMonitor extends MonitorBase {
 	 */
 	@Override
 	protected boolean triggered() {
+		// If just a few, 12, minutes past midnight then don't bother checking
+		// CPU since that is when the log files are compressed and we always
+		// get high CPU then. Note that need to use calendar for the default
+		// timezone since that is what logging uses. Don't want to use timezone
+		// for the agency because that is likely different.
+		Calendar calendar = new GregorianCalendar();
+		int secondsIntoDay = calendar.get(Calendar.HOUR_OF_DAY) * 60 * 60 +
+				calendar.get(Calendar.MINUTE) * 60          +
+				calendar.get(Calendar.SECOND);
+		if (secondsIntoDay < 12 * Time.SEC_PER_MIN)
+			return false;
+			
 		Object resultObject = SystemMemoryMonitor
 				.getOperatingSystemValue("getSystemCpuLoad");
 		if (resultObject != null) {
@@ -90,7 +105,7 @@ public class SystemCpuMonitor extends MonitorBase {
 						+ "of {} so taking another reading.", 
 						StringUtils.twoDigitFormat(cpuLoad),
 						StringUtils.twoDigitFormat(cpuThreshold.getValue()));
-				Time.sleep(1000);
+				Time.sleep(1 * Time.MS_PER_MIN);
 				resultObject = SystemMemoryMonitor
 						.getOperatingSystemValue("getSystemCpuLoad");
 				double cpuLoad2 = (Double) resultObject;

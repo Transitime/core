@@ -420,12 +420,19 @@ public class TransitimeApi {
 	 *            StdParametersBean that gets the standard parameters from the
 	 *            URI, query string, and headers.
 	 * @param routeStopStrs
-	 *            List of route/stops. The route specifier is the route id or
-	 *            the route short name. It is often best to use route short name
-	 *            for consistency across configuration changes (route ID is not
-	 *            consistent for many agencies). Each route/stop is separated by
-	 *            the "|" character so for example the query string could have
-	 *            "rs=43|2029&rs=43|3029"
+	 *            List of route/stops to return predictions for. If route not
+	 *            specified then data will be returned for all routes for the
+	 *            specified stop. The route specifier is the route id or the
+	 *            route short name. It is often best to use route short name for
+	 *            consistency across configuration changes (route ID is not
+	 *            consistent for many agencies). The stop specified can either
+	 *            be the stop ID or the stop code. Each route/stop is separated
+	 *            by the "|" character so for example the query string could
+	 *            have "rs=43|2029&rs=43|3029"
+	 * @param stopStrs
+	 *            List of stops to return predictions for. Provides predictions
+	 *            for all routes that serve the stop. Can use either stop ID or
+	 *            stop code. Can specify multiple stops.
 	 * @param numberPredictions
 	 *            Maximum number of predictions to return. Default value is 3.
 	 * @return
@@ -434,9 +441,15 @@ public class TransitimeApi {
 	@Path("/command/predictions")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getPredictions(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "rs") List<String> routeStopStrs,
-			@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions) throws WebApplicationException {
+
+	public
+			Response
+			getPredictions(
+					@BeanParam StandardParameters stdParameters,
+					@QueryParam(value = "rs") List<String> routeStopStrs,
+					@QueryParam(value = "s") List<String> stopStrs,
+					@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
+					throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
@@ -444,16 +457,40 @@ public class TransitimeApi {
 			// Get Prediction data from server
 			PredictionsInterface inter = stdParameters.getPredictionsInterface();
 
-			// Get predictions by route/stops
+			// Create list of route/stops that should get predictions for
 			List<RouteStop> routeStopsList = new ArrayList<RouteStop>();
 			for (String routeStopStr : routeStopStrs) {
 				// Each route/stop is specified as a single string using "\"
 				// as a divider (e.g. "routeId|stopId")
 				String routeStopParams[] = routeStopStr.split("\\|");
-				RouteStop routeStop = new RouteStop(routeStopParams[0], routeStopParams[1]);
+
+				String routeIdOrShortName;
+				String stopIdOrCode;
+				if (routeStopParams.length == 1) {
+					// Just stop specified
+					routeIdOrShortName = null;
+					stopIdOrCode = routeStopParams[0];
+				} else {
+					// Both route and stop specified
+					routeIdOrShortName = routeStopParams[0];
+					stopIdOrCode = routeStopParams[1];
+				}
+				RouteStop routeStop =
+						new RouteStop(routeIdOrShortName, stopIdOrCode);
 				routeStopsList.add(routeStop);
 			}
-			List<IpcPredictionsForRouteStopDest> predictions = inter.get(routeStopsList, numberPredictions);
+			
+			// Add to list the stops that should get predictions for
+			for (String stopStr : stopStrs) {
+				// Use null for route identifier so get predictions for all 
+				// routes for the stop
+				RouteStop routeStop = new RouteStop(null, stopStr);
+				routeStopsList.add(routeStop);				
+			}
+			
+			// Actually get the predictions via IPC
+			List<IpcPredictionsForRouteStopDest> predictions =
+					inter.get(routeStopsList, numberPredictions);
 
 			// return ApiPredictions response
 			ApiPredictions predictionsData = new ApiPredictions(predictions);
@@ -530,17 +567,74 @@ public class TransitimeApi {
 	@Path("/command/routes")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getRoutes(@BeanParam StandardParameters stdParameters) throws WebApplicationException {
+
+	public Response getRoutes(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "r") List<String> routeIdsOrShortNames,
+			@QueryParam(value = "keepDuplicates") Boolean keepDuplicates)
+			throws WebApplicationException {
+
 		// Make sure request is valid
 		stdParameters.validate();
 
 		try {
-			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
-			Collection<IpcRouteSummary> routes = inter.getRoutes();
+			
+			// Get agency info so can also return agency name
+			List<Agency> agencies = inter.getAgencies();
+			
+			// Get route data from server
+			ApiRoutes routesData;
+			if (routeIdsOrShortNames == null || routeIdsOrShortNames.isEmpty()) {
+				// Get all routes
+				List<IpcRouteSummary> routes = 
+						new ArrayList<IpcRouteSummary>(inter.getRoutes());
+				
+				// Handle duplicates. If should keep duplicates (where couple
+				// of routes have the same route_short_name) then modify 
+				// the route name to indicate the different IDs. If should
+				// ignore duplicates then don't include them in final list
+				Collection<IpcRouteSummary> processedRoutes = 
+						new ArrayList<IpcRouteSummary>();
+				for (int i = 0; i < routes.size()-1; ++i) {
+					IpcRouteSummary route = routes.get(i);
+					IpcRouteSummary nextRoute = routes.get(i+1);
+					
+					// If find a duplicate route_short_name...
+					if (route.getShortName().equals(nextRoute.getShortName())) {
+						// Only keep route if supposed to
+						if (keepDuplicates != null && keepDuplicates) {
+							// Keep duplicates but change route name
+							IpcRouteSummary routeWithModifiedName =
+									new IpcRouteSummary(route, route.getName()
+											+ " (ID=" + route.getId() + ")");
+							processedRoutes.add(routeWithModifiedName);
 
-			// Create and return @QueryParam(value="s") String stopId response
-			ApiRoutes routesData = new ApiRoutes(routes);
+							IpcRouteSummary nextRouteWithModifiedName =
+									new IpcRouteSummary(nextRoute,
+											nextRoute.getName() + " (ID="
+													+ nextRoute.getId() + ")");
+							processedRoutes.add(nextRouteWithModifiedName);
+							
+							// Since processed both this route and the next 
+							// route can skip to next one
+							++i;
+						}
+					} else {
+						// Not a duplicate so simply add it
+						processedRoutes.add(route);
+					}
+				}
+				// Add the last route
+				processedRoutes.add(routes.get(routes.size()-1));
+				
+				routesData = new ApiRoutes(processedRoutes, agencies.get(0));
+			} else {
+				// Get specified routes
+				List<IpcRoute> ipcRoutes = inter.getRoutes(routeIdsOrShortNames);
+				routesData = new ApiRoutes(ipcRoutes, agencies.get(0));
+			}
+			
+			// Create and return response
 			return stdParameters.createResponse(routesData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -590,6 +684,9 @@ public class TransitimeApi {
 			// Get Vehicle data from server
 			ConfigInterface inter = stdParameters.getConfigInterface();
 
+			// Get agency info so can also return agency name
+			List<Agency> agencies = inter.getAgencies();
+			
 			List<IpcRoute> ipcRoutes;
 
 			// If single route specified
@@ -611,7 +708,8 @@ public class TransitimeApi {
 
 			// Take the IpcRoute data array and create and return
 			// ApiRoutesDetails object
-			ApiRoutesDetails routeData = new ApiRoutesDetails(ipcRoutes);
+			ApiRoutesDetails routeData = 
+					new ApiRoutesDetails(ipcRoutes, agencies.get(0));
 			return stdParameters.createResponse(routeData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
@@ -820,6 +918,7 @@ public class TransitimeApi {
 	 * @return
 	 * @throws WebApplicationException
 	 */
+
 	@Path("/command/activeBlocks")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

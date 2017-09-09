@@ -224,6 +224,12 @@ public class ArchiveOldFiles extends OldFileFinder {
 	private static void deleteFiles(File directory) {
 		// For each file in the directory...
 		File filesInDirectory[] = directory.listFiles();
+		if (filesInDirectory == null) {
+			logger.error("ArchiveOldFiles.deleteFiles() tried to delete old "
+					+ "files from directory {} but listFiles() returned null.",
+					directory.getAbsoluteFile());
+			return;
+		}
 		for (File fileOrDir : filesInDirectory) {
 			// If it is a directory then recursively delete all of its files
 			if (fileOrDir.isDirectory()) {

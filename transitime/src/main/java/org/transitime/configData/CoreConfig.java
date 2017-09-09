@@ -764,16 +764,4 @@ public class CoreConfig {
 					+ "can be used by monit to make sure that core process is "
 					+ "always running.");
 	
-	public static boolean useRouteShortNameAsId() {
-		return useRouteShortNameAsId.getValue();
-	}
-	private static final BooleanConfigValue useRouteShortNameAsId = 
-			new BooleanConfigValue("transitime.core.useRouteShortNameAsId", 
-					false,
-					"For problematic agencies where route_id is not stable "
-					+ "across schedule changes but route_short_name is this "
-					+ "value should be set to true so that the GTFS "
-					+ "route_short_name is passed as the ID.");
-
-
 }

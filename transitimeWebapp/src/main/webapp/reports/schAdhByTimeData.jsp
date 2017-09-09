@@ -9,8 +9,9 @@
        a - agency ID
        r - route ID or route short name. Can specify multiple routes. 
            Not specifying route provides data for all routes.
-       beginDate - date to begin query
-       numDays - number of days can do query. Limited to 31 days
+       dateRange - in format "xx/xx/xx to yy/yy/yy"
+       beginDate - date to begin query. For if dateRange not used.
+       numDays - number of days can do query. Limited to 31 days. For if dateRange not used.
        beginTime - for optionally specifying time of day for query for each day
        endTime - for optionally specifying time of day for query for each day
        allowableEarly - how early vehicle can be and still be OK.  Decimal format OK. 
@@ -21,6 +22,7 @@
 <%@ page import="org.transitime.reports.GenericJsonQuery" %>
 <%@ page import="org.transitime.reports.SqlUtils" %>
 <%
+try {
 String allowableEarlyStr = request.getParameter("allowableEarly");
 if (allowableEarlyStr == null || allowableEarlyStr.isEmpty())
 	allowableEarlyStr = "1.0";
@@ -47,7 +49,7 @@ String sql =
     + " AND ABS(EXTRACT (EPOCH FROM (scheduledtime-time))) < 3600\n"
     // Specifies which routes to provide data for
     + SqlUtils.routeClause(request, "ad") + "\n"
-    + SqlUtils.timeRangeClause(request, "ad.time", 31) + "\n"
+    + SqlUtils.timeRangeClause(request, "ad.time", 7) + "\n"
     // Grouping needed to put times in time buckets
     + " GROUP BY time_period \n"
     // Order by lateness so can easily understand results
@@ -60,5 +62,11 @@ System.out.println("\nFor schedule adherence by time buckets query sql=\n" + sql
 String agencyId = request.getParameter("a");
 String jsonString = GenericJsonQuery.getJsonString(agencyId, sql);
 response.setContentType("application/json");
+response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
+} catch (Exception e) {
+	response.setStatus(400);
+	response.getWriter().write(e.getMessage());
+	return;
+}
 %>

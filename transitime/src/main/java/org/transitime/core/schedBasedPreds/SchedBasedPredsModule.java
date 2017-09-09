@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
 import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.core.AvlProcessor;
 import org.transitime.core.BlocksInfo;
 import org.transitime.core.VehicleState;
@@ -87,19 +88,19 @@ public class SchedBasedPredsModule extends Module {
 					+ "system want to set this to true so get the predictions "
 					+ "immediately.");
 	
-	private static final IntegerConfigValue beforeStartTimeMins = 
+	private static final IntegerConfigValue beforeStartTimeMinutes = 
 			new IntegerConfigValue(
-					"transitime.schedBasedPreds.beforeStartTimeMins", 60,
-					"How much before a block start time should create a "
-							+ "schedule based vehicle for that block.");
+					"transitime.schedBasedPreds.beforeStartTimeMinutes", 60,
+					"How many minutes before a block start time should create "
+					+ "a schedule based vehicle for that block.");
 	
-	private static IntegerConfigValue afterStartTimeMins =
+	private static IntegerConfigValue afterStartTimeMinutes =
 			new IntegerConfigValue(
-					"transitime.schedBasedPreds.afterStartTimeMins",
+					"transitime.schedBasedPreds.afterStartTimeMinutes",
 					8, // Can take a while to automatically assign a vehicle
 					"If predictions created for a block based on the schedule "
 					+ "will remove those predictions this specified "
-					+ "number of seconds after the block start time. If using "
+					+ "number of minutes after the block start time. If using "
 					+ "schedule based predictions "
 					+ "to provide predictions for even when there is no GPS "
 					+ "feed then this can be disabled by using a negative value. "
@@ -110,17 +111,6 @@ public class SchedBasedPredsModule extends Module {
 					+ "important when using the automatic assignment method "
 					+ "because it can take a few minutes.");
 
-	/**
-	 * How long after start time of block want to created schedule based
-	 * prediction. Negative value means feature disabled and schedule based
-	 * vehicles should be created and be active all the way up until end time of
-	 * block.
-	 * 
-	 * @return Time after start time of block that block considered active
-	 */
-	public static int getAfterStartTimeMins() {
-		return afterStartTimeMins.getValue();
-	}
 
 	/********************** Member Functions **************************/
 
@@ -157,8 +147,8 @@ public class SchedBasedPredsModule extends Module {
 		List<Block> activeBlocks =
 				BlocksInfo.getCurrentlyActiveBlocks(null, // Get for all routes
 						blockIdsAlreadyAssigned, 
-						beforeStartTimeMins.getValue() * Time.SEC_PER_MIN,
-						afterStartTimeMins.getValue() * Time.SEC_PER_MIN);
+						beforeStartTimeMinutes.getValue() * Time.SEC_PER_MIN,
+						afterStartTimeMinutes.getValue() * Time.SEC_PER_MIN);
 		
 		// For each block about to start see if no associated vehicle
 		for (Block block : activeBlocks) {
@@ -229,7 +219,7 @@ public class SchedBasedPredsModule extends Module {
 		// If block not active anymore then must have reached end of block then
 		// should remove the schedule based vehicle
 		if (!block.isActive(now,
-				beforeStartTimeMins.getValue() * Time.SEC_PER_MIN)) {
+				beforeStartTimeMinutes.getValue() * Time.SEC_PER_MIN)) {
 			String shouldTimeoutEventDescription = 
 					"Schedule based predictions to be "
 					+ "removed for block " 
@@ -244,13 +234,13 @@ public class SchedBasedPredsModule extends Module {
 		
 		// If block is active but it is beyond the allowable number of minutes past the
 		// the block start time then should remove the schedule based vehicle
-		if (afterStartTimeMins.getValue() >= 0) {
+		if (afterStartTimeMinutes.getValue() >= 0) {
 			long scheduledDepartureTime =
 					vehicleState.getMatch().getScheduledWaitStopTime();
 			if (scheduledDepartureTime >= 0) {
 				// There is a scheduled departure time. Make sure not too
 				// far past it
-				long maxNoAvl = afterStartTimeMins.getValue() * Time.MS_PER_MIN;
+				long maxNoAvl = afterStartTimeMinutes.getValue() * Time.MS_PER_MIN;
 				if (now > scheduledDepartureTime + maxNoAvl) {	
 					String shouldTimeoutEventDescription = 
 							"Schedule based predictions removed for block " 
@@ -297,7 +287,8 @@ public class SchedBasedPredsModule extends Module {
 				createSchedBasedPredsAsNecessary();				
 			} catch (Exception e) {
 				logger.error(Markers.email(),
-						"Error with SchedBasedPredsModule", e);
+						"Error with SchedBasedPredsModule for agencyId={}", 
+						AgencyConfig.getAgencyId(), e);
 			} 
 
 			// Wait appropriate amount of time till poll again

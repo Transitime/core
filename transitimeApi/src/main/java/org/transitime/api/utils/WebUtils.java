@@ -64,8 +64,12 @@ public class WebUtils {
 	 */
 	public static WebApplicationException badRequestException(int response,
 			String s) {
-		return new WebApplicationException(Response.status(response).entity(s)
-				.type(MediaType.TEXT_PLAIN).build());
+		return new WebApplicationException(
+				Response.status(response)
+					.entity(s)
+					.type(MediaType.TEXT_PLAIN)
+					.header("Access-Control-Allow-Origin", "*")
+					.build());
 	}
 
 }

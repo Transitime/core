@@ -120,23 +120,25 @@ public class Core {
 	 * 
 	 * @param agencyId
 	 */
-	private Core(String agencyId) {
+	public Core(String agencyId) {
 		// Determine configuration rev to use. If one specified on command
 		// line, use it. If not, then use revision stored in db.
 		int configRev;
 		if (configRevStr != null) {
 			// Use config rev from command line
+			
 			configRev = Integer.parseInt(configRevStr);
 		} else {
 			// Read in config rev from ActiveRevisions table in db
 			ActiveRevisions activeRevisions = ActiveRevisions.get(agencyId);
 			
-			// If config rev not set properly then can't do anything so exit
+			// If config rev not set properly then simply log error.
+			// Originally would also exit() but found that want system to 
+			// work even without GTFS configuration so that can test AVL feed.
 			if (!activeRevisions.isValid()) {
 				logger.error("ActiveRevisions in database is not valid. The "
 						+ "configuration revs must be set to proper values. {}", 
 						activeRevisions);
-				System.exit(-1);
 			}
 			configRev = activeRevisions.getConfigRev();
 		}
@@ -393,7 +395,7 @@ public class Core {
 	 *  
 	 * @param agencyId
 	 */
-	private static void startRmiServers(String agencyId) {
+	public static void startRmiServers(String agencyId) {
 		// Start up all of the RMI servers
 		PredictionsServer.start(agencyId, PredictionDataCache.getInstance());
 		VehiclesServer.start(agencyId, VehicleDataCache.getInstance());

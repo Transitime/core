@@ -43,7 +43,7 @@ if ((beginTime != null && !beginTime.isEmpty())
 //all routes.
 String routeSql = "";
 if (routeId!=null && !routeId.trim().isEmpty()) {
- routeSql = "  AND (routeId='" + routeId + "' OR routeShortName='" + routeId + "')";
+ routeSql = "  AND routeShortName='" + routeId + "' ";
 }
 
 // NOTE: this query only works on postgreSQL. For mySQL would need to change
@@ -63,13 +63,14 @@ String sql = "SELECT "
 		+ "WHERE arrivalDepartureTime BETWEEN cast(? as timestamp) "
 		+     "AND cast(? as timestamp) + INTERVAL '" + numDays + " day' "
 		+ timeSql
-		+ "  AND predictedTime-predictionReadTime < '00:15:00' "
-		+ routeSql
+		+ "  AND predictedTime-predictionReadTime < '00:15:00' \n"
+		+ routeSql + "\n"
 		// Filter out MBTA_seconds source since it is isn't significantly different from MBTA_epoch. 
 		// TODO should clean this up by not having MBTA_seconds source at all
 		// in the prediction accuracy module for MBTA.
 		+ "  AND predictionSource <> 'MBTA_seconds' ";
 		
+		System.out.println("\nFor prediction accuracy by route query sql=\n" + sql);				
 // Do the actual query	
 String csvStr = GenericCsvQuery.getCsvString(agencyId, sql, Time.parseDate(beginDate), Time.parseDate(beginDate));
 response.getWriter().write(csvStr);

@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 
 import java.net.URI;
@@ -85,7 +86,8 @@ public class AmigoWebsockets {
 		// websocket_token will be null for this situation
 		if (result == null) {
 			logger.error(Markers.email(), 
-					"Could not determine websocket session");
+					"For agencyId={} could not determine websocket session",
+					AgencyConfig.getAgencyId());
 			return;
 		}
 		

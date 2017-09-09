@@ -48,6 +48,8 @@ public class UsageValidator {
 	// This is a singleton class
 	private static UsageValidator singleton = new UsageValidator();
 
+	// Keyed on IP address. Contains list of times API last called for the 
+	// IP address.
 	private Map<String, LinkedList<Long>> requestTimesPerIp = 
 			new ConcurrentHashMap<String, LinkedList<Long>>();
 

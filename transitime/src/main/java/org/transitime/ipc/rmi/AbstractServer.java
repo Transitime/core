@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.logging.Markers;
 import org.transitime.utils.Timer;
 
@@ -124,13 +125,15 @@ public abstract class AbstractServer {
 			// since this class is only intended to be a parent class
 			// of Remote.
 			if (!(this instanceof Remote)) {
-				logger.error("Class " + this.getClass().getName() + 
-						" is not a subclass of Remote. Therefore it cannot be used with " +
-						getClass().getSimpleName());
+				logger.error("Class {} is not a subclass of Remote. Therefore "
+						+ "it cannot be used with {}",
+						this.getClass().getName(), getClass().getSimpleName());
 				return;
 			}
 			Remote remoteThis = (Remote) this;
 			
+			logger.info("Setting up AbstractServer for RMI using secondary "
+					+ "port={}", RmiParams.getSecondaryRmiPort());
 			// Export the RMI stub. Specify that should use special port for
 			// secondary RMI communication.
 			stub = UnicastRemoteObject.exportObject(remoteThis,
@@ -147,7 +150,8 @@ public abstract class AbstractServer {
 					// Most likely registry was already running
 					logger.debug("Exception occurred when trying to create " +
 							"RMI registry. Most likely the registry was " +
-							"already running. Message={}", e.getMessage());
+							"already running, which is fine. Message={}", 
+							e.getMessage());
 				}
 				registry = LocateRegistry.getRegistry(RmiParams.getRmiPort());
 			}
@@ -162,16 +166,19 @@ public abstract class AbstractServer {
 			// REBIND_RATE_SEC seconds.
 			rebindTimer.scheduleAtFixedRate(
 					// Call rebind() using anonymous class
-					new Runnable() {public void run() { rebind(); }	}, 
-					0, REBIND_RATE_SEC, TimeUnit.SECONDS);
+					new Runnable() {
+						public void run() {
+							rebind();
+						}
+					}, 0, REBIND_RATE_SEC, TimeUnit.SECONDS);
 			
 			constructed = true;
 		} catch (Exception e) {
 			// Log the error. Since RMI is critical send out e-mail as well so
 			// that the issue is taken care of.
 			logger.error(Markers.email(), 
-					"Error occurred when constructing a " 
-							+	getClass().getSimpleName(), 
+					"For agencyId={} error occurred when constructing a RMI {}",
+					AgencyConfig.getAgencyId(), getClass().getSimpleName(), 
 					e);
 		}
 	}
@@ -217,9 +224,9 @@ public abstract class AbstractServer {
 				} catch (UnknownHostException e1) {
 				}
 				logger.error(Markers.email(), 
-						"Problem with rmiregistry on host " + 
-								hostname + 
-								" has been resolved.");
+						"For agencyId={} problem with rmiregistry on host {} "
+						+ "has been resolved.", 
+						AgencyConfig.getAgencyId(), hostname);
 				errorEmailedSoAlsoNotifyWhenSuccessful = false;
 			}
 		} catch (Exception e) {

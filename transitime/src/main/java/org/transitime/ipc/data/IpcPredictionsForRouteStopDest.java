@@ -52,6 +52,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	
 	private final String stopId;
 	private final String stopName;
+	private final Integer stopCode;
 	
 	private final String headsign;
 	private final String directionId;
@@ -89,8 +90,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeOrder = 
 				trip != null ? trip.getRoute().getRouteOrder() : -1;
 		this.stopId = stopId;
-		this.stopName = 
-				Core.getInstance().getDbConfig().getStop(stopId).getName();
+		
+		Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+		this.stopName = stop != null ? stop.getName() : null;
+		this.stopCode = stop != null ? stop.getCode() : null;
+
 		this.headsign = 
 				trip != null ? trip.getHeadsign() : null;
 		this.directionId = 
@@ -121,8 +125,10 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeName = route.getName();
 		this.routeOrder = route.getRouteOrder();
 		this.stopId = stopId;
-		this.stopName = Core.getInstance().getDbConfig().getStop(stopId)
-				.getName();
+		Stop stop = Core.getInstance().getDbConfig().getStop(stopId);
+		this.stopName = stop != null ? stop.getName() : null;
+		this.stopCode = stop != null ? stop.getCode() : null;
+
 		this.headsign = tripPattern.getHeadsign();
 		this.directionId = tripPattern.getDirectionId();
 		this.distanceToStop = distanceToStop;
@@ -151,6 +157,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeOrder = toClone.routeOrder;
 		this.stopId = toClone.stopId;
 		this.stopName = toClone.stopName;
+		this.stopCode = toClone.stopCode;
 		this.headsign = toClone.headsign;
 		this.directionId = toClone.directionId;
 		this.distanceToStop = distanceToStop;
@@ -181,6 +188,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param routeOrder
 	 * @param stopId
 	 * @param stopName
+	 * @param stopCode
 	 * @param destination
 	 * @param directionId
 	 * @param distanceToStop
@@ -188,8 +196,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 */
 	private IpcPredictionsForRouteStopDest(String routeId,
 			String routeShortName, String routeName, int routeOrder,
-			String stopId, String stopName, String destination,
-			String directionId, double distanceToStop,
+			String stopId, String stopName, Integer stopCode,
+			String destination, String directionId, double distanceToStop,
 			List<IpcPrediction> predictions) {
 		this.routeId = routeId;
 		this.routeShortName = routeShortName;
@@ -197,6 +205,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeOrder = routeOrder;
 		this.stopId = stopId;
 		this.stopName = stopName;
+		this.stopCode = stopCode;
 		this.headsign = destination;
 		this.directionId = directionId;
 		this.distanceToStop = distanceToStop;
@@ -231,6 +240,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		this.routeOrder = route.getRouteOrder();
 		this.stopId = stopId;
 		this.stopName = stop.getName();
+		this.stopCode = stop.getCode();
 		this.headsign = null;
 		this.directionId = directionId;
 		this.distanceToStop = distanceToStop;
@@ -248,12 +258,13 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		private int routeOrder;
 		private String stopId;
 		private String stopName;
+		private Integer stopCode;
 		private String headsign;
 		private String directionId;
 		private double distanceToStop;
 		private List<IpcPrediction> predictionsForRouteStop;
 
-		private static final short currentSerializationVersion = 0;
+		private static final short currentSerializationVersion = 1;
 		private static final long serialVersionUID = -2312925771271829358L;
 
 		/*
@@ -266,6 +277,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			this.routeOrder = p.routeOrder;
 			this.stopId = p.stopId;
 			this.stopName = p.stopName;
+			this.stopCode = p.stopCode;
 			this.headsign = p.headsign;
 			this.directionId = p.directionId;
 			this.distanceToStop = p.distanceToStop;
@@ -292,6 +304,8 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			stream.writeObject(directionId);
 			stream.writeDouble(distanceToStop);
 			stream.writeObject(predictionsForRouteStop);
+			// Can be null so use writeObject()
+			stream.writeObject(stopCode);
 		}
 		
 		/*
@@ -320,6 +334,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			directionId = (String) stream.readObject();
 			distanceToStop = stream.readDouble();
 			predictionsForRouteStop = (List<IpcPrediction>) stream.readObject();
+			
+			if (readVersion >=1) {
+				// Can be null so use readObject()
+				stopCode = (Integer) stream.readObject();
+			}
 		}
 
 		/*
@@ -330,8 +349,9 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		 */
 		private Object readResolve() {
 			return new IpcPredictionsForRouteStopDest(routeId, routeShortName,
-					routeName, routeOrder, stopId, stopName, headsign,
-					directionId, distanceToStop, predictionsForRouteStop);
+					routeName, routeOrder, stopId, stopName, stopCode,
+					headsign, directionId, distanceToStop,
+					predictionsForRouteStop);
 		}
 	} /* End of SerializationProxy inner class */
 	
@@ -532,6 +552,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				+ ", routeOrder=" + routeOrder
 				+ ", stopId=" + stopId
 				+ ", stopName=" + stopName 
+				+ (stopCode != null ? (", stopCode=" + stopCode) : "")
 				+ ", headsign=" + headsign
 				+ ", directionId=" + directionId 
 				+ ", distanceToStop=" + Geo.distanceFormat(distanceToStop)
@@ -550,6 +571,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 				+ ", routeOrder=" + routeOrder
 				+ ", stopId=" + stopId
 				+ ", stopName=" + stopName 
+				+ (stopCode != null ? (", stopCode=" + stopCode) : "")
 				+ ", headsign=" + headsign
 				+ ", directionId=" + directionId 
 				+ ", distanceToStop=" + Geo.distanceFormat(distanceToStop)
@@ -576,6 +598,10 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		return stopName;
 	}
 
+	public Integer getStopCode() {
+		return stopCode;
+	}
+	
 	public String getHeadsign() {
 		return headsign;
 	}

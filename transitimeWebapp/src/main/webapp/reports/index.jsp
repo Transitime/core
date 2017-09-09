@@ -49,6 +49,10 @@ finding specific issues with predictions.">
     title="Displays historic schedule adherence data by route in a bar chart. 
     Can compare schedule adherence for multiple routes.">
       Schedule Adherence by Route</a></li>
+  <li><a href="schAdhByStopParams.jsp?a=<%= agencyId %>"
+    title="Displays historic schedule adherence data for each stop for a 
+    route in a bar chart. ">
+      Schedule Adherence by Stop</a></li>
   <li><a href="schAdhByTimeParams.jsp?a=<%= agencyId %>"
     title="Displays historic schedule adherence data for a route grouped by 
     how early/late. The resulting bell curve shows the distribution of 

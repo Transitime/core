@@ -24,7 +24,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+import java.util.Date;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -42,7 +42,9 @@ import org.json.JSONObject;
 import org.transitime.api.data.ApiCommandAck;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
+import org.transitime.db.GenericQuery;
 import org.transitime.db.structs.AvlReport;
+import org.transitime.db.structs.MeasuredArrivalTime;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.ipc.data.IpcAvl;
 import org.transitime.ipc.interfaces.CommandsInterface;
@@ -265,4 +267,48 @@ public class CommandsApi {
 		return stdParameters.createResponse(ack);		
 	}
 
+	/**
+	 * Reads in information from request and stores arrival information into db.
+	 * 
+	 * @param stdParameters
+	 * @param routeId
+	 * @param stopId
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/pushMeasuredArrivalTime")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response pushAvlData(
+			@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "r") String routeId,
+			@QueryParam(value = "rShortName") String routeShortName,
+			@QueryParam(value = "s") String stopId,
+			@QueryParam(value = "d") String directionId,
+			@QueryParam(value = "headsign") String headsign)
+			throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Store the arrival time in the db
+			String agencyId = stdParameters.getAgencyId();
+			
+			MeasuredArrivalTime time =
+					new MeasuredArrivalTime(new Date(), stopId, routeId,
+							routeShortName, directionId, headsign);
+			String sql = time.getUpdateSql();
+			GenericQuery query = new GenericQuery(agencyId);
+			query.doUpdate(sql);
+			
+			// Create the acknowledgment and return it as JSON or XML
+			ApiCommandAck ack =
+					new ApiCommandAck(true, "MeasuredArrivalTime processed");
+			return stdParameters.createResponse(ack);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+	
 }

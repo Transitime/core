@@ -16,6 +16,8 @@
  */
 package org.transitime.avl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,6 +31,7 @@ import org.transitime.avl.amigocloud.AmigoWebsocketListener;
 import org.transitime.avl.amigocloud.AmigoWebsockets;
 import org.transitime.config.LongConfigValue;
 import org.transitime.config.StringConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.logging.Markers;
 import org.transitime.modules.Module;
@@ -132,6 +135,9 @@ public class AmigoCloudAvlModule extends AvlModule {
 		@Override
 		public void onMessage(String message) {
 			try {
+				// The return value for the method
+				Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
+				
 				JSONObject obj = new JSONObject(message);
 				JSONArray argsArray = obj.getJSONArray("args");
 				for (int i=0; i<argsArray.length(); ++i) {
@@ -186,9 +192,12 @@ public class AmigoCloudAvlModule extends AvlModule {
 						AvlReport avlReport =
 								new AvlReport(vehicleId, timestamp, latitude,
 										longitude, speed, heading, "AmigoCloud");
-						avlModule.processAvlReport(avlReport);
+						avlReportsReadIn.add(avlReport);
 					}
 				}
+				
+				// Process all the AVL reports read in
+				avlModule.processAvlReports(avlReportsReadIn);
 			} catch (JSONException | NumberFormatException e) {
 				logger.error("Exception {} parsing from amigocloud AVL feed {}", 
 						e.getMessage(), e);
@@ -235,9 +244,10 @@ public class AmigoCloudAvlModule extends AvlModule {
 				if (numberOfExceptions == 3) {
 					logger.error(
 							Markers.email(),
-							"Exception when starting up AmigoCloudAvlModule. "
-							+ "{}. numberOfExceptions={}",
-							e.getMessage(), numberOfExceptions, e);
+							"For agencyId={} exception when starting up "
+							+ "AmigoCloudAvlModule. {}. numberOfExceptions={}",
+							AgencyConfig.getAgencyId(), e.getMessage(), 
+							numberOfExceptions, e);
 				}
 				
 				// Sleep 10 seconds before trying again

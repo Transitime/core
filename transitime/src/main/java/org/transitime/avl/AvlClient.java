@@ -166,8 +166,8 @@ public class AvlClient implements Runnable {
 			// AVL thread even if there is an unexpected problem. Only let
 			// Errors, such as OutOfMemory errors, through.
 			logger.error(Markers.email(),
-					"Exception {} for {} for avlReport={}.", e.getMessage(),
-					AgencyConfig.getAgencyId(), avlReport, e);
+					"For agencyId={} Exception {} for avlReport={}.", 
+					AgencyConfig.getAgencyId(), e.getMessage(), avlReport, e);
 		}
 	}
 	

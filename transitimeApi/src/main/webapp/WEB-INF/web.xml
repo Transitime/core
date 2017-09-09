@@ -10,8 +10,7 @@
 		
 		<!-- <param-value>C:\\cygwin64\\home\\SeanOg\\workspace\\transitime-historical\\core\\transitimeWebapp\\src\\main\\resources\\transiTimeConfig.xml</param-value> -->
 		<param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>  
-		
-				
+					
 	</context-param>
 
 	<!-- So that configuration parameters can be read in from file -->

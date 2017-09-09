@@ -26,6 +26,7 @@ import org.transitime.db.structs.Calendar;
 import org.transitime.db.structs.CalendarDate;
 import org.transitime.db.structs.ConfigRevision;
 import org.transitime.db.structs.DbTest;
+import org.transitime.db.structs.MeasuredArrivalTime;
 import org.transitime.db.structs.Prediction;
 import org.transitime.db.structs.Departure;
 import org.transitime.db.structs.FareAttribute;
@@ -87,6 +88,7 @@ public class AnnotatedClassesList {
 		FareRule.class,
 		Frequency.class,
 		Match.class,
+		MeasuredArrivalTime.class,
 		MonitoringEvent.class,
 		PredictionAccuracy.class,
 		Route.class,

@@ -563,4 +563,5 @@
 		<appender-ref ref="CORE" />
 		<appender-ref ref="ERROR_SMTP" />
 	</root>
+
 </configuration>

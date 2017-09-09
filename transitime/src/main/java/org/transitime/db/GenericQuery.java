@@ -42,7 +42,7 @@ import org.transitime.utils.Time;
  * @author SkiBu Smith
  *
  */
-public abstract class GenericQuery {
+public class GenericQuery {
 
 	// Number of rows read in
 	private int rows;
@@ -138,8 +138,10 @@ public abstract class GenericQuery {
 	 *         (instead of null)
 	 * @throws SQLException
 	 */
+
 	protected void doQuery(String sql, Object...parameters) throws SQLException {
 		PreparedStatement statement = null;
+
 		IntervalTimer timer = new IntervalTimer();
 
 		try {			
@@ -188,6 +190,27 @@ public abstract class GenericQuery {
 	}
 
 	/**
+	 * Executes an INSERT, UPDATE, or DELETE statement. 
+	 * 
+	 * @param sql The SQL to be executed
+	 * @throws SQLException
+	 */
+	public void doUpdate(String sql) throws SQLException {
+		Statement statement = null;
+
+		try {
+			statement = connection.createStatement();
+			statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			if (statement != null)
+				statement.close();
+		}
+		
+	}
+	
+	/**
 	 * Returns number of rows read in.
 	 * 
 	 * @return
@@ -203,13 +226,13 @@ public abstract class GenericQuery {
 	 * @param type
 	 *            java.sql.Types such as Types.DOUBLE
 	 */
-	protected abstract void addColumn(String columnName, int type);
+	protected void addColumn(String columnName, int type) {}
 	
 	/**
 	 * When done processing columns. Allows subclass to insert separator
 	 * between column definitions and the row data
 	 */
-	protected void doneWithColumns() {};
+	protected void doneWithColumns() {}
 	
 	/**
 	 * Called for each row when processing query data.
@@ -217,6 +240,6 @@ public abstract class GenericQuery {
 	 * @param values
 	 *            The values for the row.
 	 */
-	protected abstract void addRow(List<Object> values);
+	protected void addRow(List<Object> values) {}
 	
 }

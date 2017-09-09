@@ -82,10 +82,11 @@ public class RmiStubInfo {
 	}
 	
 	/**
-	 * Returns the RMI hostname. Will use command line parameter
-	 * -Dtransitime.core.rmiHost if it is set. If not set then looks in cached
-	 * version of WebAgencies table from the web database. Returns null if
-	 * agency not configured.
+	 * Returns the RMI hostname that is cached. Will not update the cache even
+	 * if agency not in cache and cache not updated for a long time. Will use
+	 * command line parameter -Dtransitime.core.rmiHost if it is set. If not set
+	 * then looks in cached version of WebAgencies table from the web database.
+	 * Returns null if agency not configured.
 	 * 
 	 * @return The host name, or null if agency doesn't exist
 	 */

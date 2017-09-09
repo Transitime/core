@@ -39,6 +39,7 @@
         routeShortName varchar(60),
         scheduledTime datetime(3),
         serviceId varchar(60),
+        stopOrder integer,
         stopPathIndex integer,
         stopPathLength float,
         tripIndex integer,
@@ -202,6 +203,16 @@
         stopPathIndex integer,
         tripId varchar(60),
         primary key (vehicleId, avlTime)
+    );
+
+    create table MeasuredArrivalTimes (
+        time datetime(3) not null,
+        stopId varchar(60) not null,
+        directionId varchar(60),
+        headsign varchar(60),
+        routeId varchar(60),
+        routeShortName varchar(60),
+        primary key (time, stopId)
     );
 
     create table MonitoringEvents (
@@ -449,6 +460,8 @@
 
     create index ArrivalsDeparturesTimeIndex on ArrivalsDepartures (time);
 
+    create index ArrivalsDeparturesRouteTimeIndex on ArrivalsDepartures (routeShortName, time);
+
     create index AvlReportsTimeIndex on AvlReports (time);
 
     create index HeadwayIndex on Headway (creationTime);
@@ -456,6 +469,8 @@
     create index HoldingTimeIndex on HoldingTimes (creationTime);
 
     create index AvlTimeIndex on Matches (avlTime);
+
+    create index MeasuredArrivalTimesIndex on MeasuredArrivalTimes (time);
 
     create index MonitoringEventsTimeIndex on MonitoringEvents (time);
 

@@ -16,5 +16,6 @@ String jsonString = AvlJsonQuery.getAvlWithMatchesJson(agencyId, vehicleId, rout
 
 // Respond with the JSON string
 response.setContentType("application/json");
+response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
 %>

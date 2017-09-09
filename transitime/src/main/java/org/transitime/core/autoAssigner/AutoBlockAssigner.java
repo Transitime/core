@@ -113,15 +113,15 @@ public class AutoBlockAssigner {
 			new IntegerConfigValue(
 					"transitime.autoBlockAssigner.allowableEarlySeconds",
 					3*Time.SEC_PER_MIN,
-					"How early a vehicle can be in seconds and still be auto "
-					+ "assigned to a block");
+					"How early a vehicle can be in seconds and still be "
+					+ "automatically assigned to a block");
 	
 	private static IntegerConfigValue allowableLateSeconds =
 			new IntegerConfigValue(
 					"transitime.autoBlockAssigner.allowableLateSeconds",
 					5*Time.SEC_PER_MIN,
-					"How late a vehicle can be in seconds and still be auto "
-					+ "assigned to a block");
+					"How late a vehicle can be in seconds and still be "
+					+ "automatically assigned to a block");
 		
 	private static IntegerConfigValue minTimeBetweenAutoAssigningSecs =
 			new IntegerConfigValue(
@@ -537,9 +537,14 @@ public class AutoBlockAssigner {
 			if (!isWithinBounds) {
 				// Vehicle is too early or too late to auto match the block so
 				// return null.
-				logger.debug("For vehicleId={} for blockId={} the temporal "
-						+ "difference was not within allowed bounds. {}",
-						avlReport.getVehicleId(), block.getId(), diff);
+				logger.info("When trying to automatically assign vehicleId={} "
+						+ "to blockId={} got a temporal match but the time "
+						+ "difference {} was not within allowed bounds of "
+						+ "allowableEarlySeconds={} and "
+						+ "allowableLateSeconds={}. {}",
+						avlReport.getVehicleId(), block.getId(), diff, 
+						allowableEarlySeconds.getValue(),
+						allowableLateSeconds.getValue(), bestMatch);
 				return null;
 			}
 		}
@@ -744,6 +749,13 @@ public class AutoBlockAssigner {
 				minTimeBetweenAutoAssigningSecs.getValue());
 
 		if (tooRecent) {
+			logger.info("For vehicleId={} too recent to previous time that "
+					+ "tried to autoassign. Therefore not autoassigning."
+					+ "ElapsedSecs={} lastTime={} gpsTime={} "
+					+ "minTimeBetweenAutoAssigningSecs={} ", 
+					vehicleId, elapsedSecs, Time.timeStrMsec(lastTime), 
+					Time.timeStrMsec(gpsTime), 
+					minTimeBetweenAutoAssigningSecs.getValue());
 			return true;
 		} else {
 			// Not too recent so should auto assign. Therefore store the time 

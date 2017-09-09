@@ -16,6 +16,8 @@
  */
 package org.transitime.avl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jdom2.Document;
@@ -125,10 +127,11 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	 * Extracts the AVL data from the XML document.
 	 * Uses JDOM to parse the XML because it makes the Java code much simpler.
 	 * @param doc
+	 * @return Collection of AvlReports
 	 * @throws NumberFormatException
 	 */
 	@Override
-	protected void extractAvlData(Document doc) 
+	protected Collection<AvlReport> extractAvlData(Document doc) 
 			throws NumberFormatException {
 		logger.info("Extracting data from xml file");
 		
@@ -140,7 +143,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 		if (error != null) {
 			String errorStr = error.getTextNormalize();
 			logger.error("While processing AVL data in NextBusAvlModule: " + errorStr);
-			return;
+			return new ArrayList<AvlReport>();
 		}
 
 		// Handle getting last time. This is the system time of the server.
@@ -155,6 +158,9 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			logger.debug("PreviousTime={}", Time.dateTimeStr(previousTime));
 		}
 
+		// The return value for the method
+		Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
+		
 		// Handle getting vehicle location data
 		List<Element> vehicles = rootNode.getChildren("vehicle");
 		for (Element vehicle : vehicles) {
@@ -238,8 +244,10 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 			else
 				avlReport.setAssignment(null, AssignmentType.UNSET);
 			
-			processAvlReport(avlReport);
-		}		
+			avlReportsReadIn.add(avlReport);
+		}
+		
+		return avlReportsReadIn;
 	}
 	
 	/**

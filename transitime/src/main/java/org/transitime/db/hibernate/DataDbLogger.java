@@ -16,6 +16,8 @@
  */
 package org.transitime.db.hibernate;
 
+import java.net.SocketTimeoutException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.logging.Markers;
+import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
 import org.transitime.utils.threading.NamedThreadFactory;
 
@@ -106,12 +109,12 @@ public class DataDbLogger {
 	// Used for logging when queue use is going down.
 	private double maxQueueLevel = 0.0;
 	
-	// This is a singleton class that only returns a single object per projectId.
+	// This is a singleton class that only returns a single object per agencyId.
 	private static Map<String, DataDbLogger> dataDbLoggerMap = 
 			new HashMap<String, DataDbLogger>(1);
 	
-	// So can access projectId for logging messages
-	private String projectId;
+	// So can access agencyId for logging messages
+	private String agencyId;
 	
 	// The Session for writing data to db
 	private SessionFactory sessionFactory;
@@ -123,9 +126,9 @@ public class DataDbLogger {
 
 	/**
 	 * Factory method. Returns the singleton db logger for the specified
-	 * projectId.
+	 * agencyId.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Id of database to be written to
 	 * @param shouldStoreToDb
 	 *            Specifies whether data should actually be written to db. If in
@@ -135,16 +138,16 @@ public class DataDbLogger {
 	 *            Specifies if should pause the thread calling add() if the
 	 *            queue is filling up. Useful for when in batch mode and dumping
 	 *            a whole bunch of data to the db really quickly.
-	 * @return The DataDbLogger for the specified projectId
+	 * @return The DataDbLogger for the specified agencyId
 	 */
-	public static DataDbLogger getDataDbLogger(String projectId,
+	public static DataDbLogger getDataDbLogger(String agencyId,
 			boolean shouldStoreToDb, boolean shouldPauseToReduceQueue) {
 		synchronized (dataDbLoggerMap) {
-			DataDbLogger logger = dataDbLoggerMap.get(projectId);
+			DataDbLogger logger = dataDbLoggerMap.get(agencyId);
 			if (logger == null) {
-				logger = new DataDbLogger(projectId, shouldStoreToDb,
+				logger = new DataDbLogger(agencyId, shouldStoreToDb,
 						shouldPauseToReduceQueue);
-				dataDbLoggerMap.put(projectId, logger);
+				dataDbLoggerMap.put(agencyId, logger);
 			}
 			return logger;
 		}
@@ -155,7 +158,7 @@ public class DataDbLogger {
 	 * used. Starts up separate thread that actually reads from queue and stores
 	 * the data.
 	 * 
-	 * @param projectId
+	 * @param agencyId
 	 *            Id of database to be written to
 	 * @param shouldStoreToDb
 	 *            Specifies whether data should actually be written to db. If in
@@ -166,14 +169,14 @@ public class DataDbLogger {
 	 *            queue is filling up. Useful for when in batch mode and dumping
 	 *            a whole bunch of data to the db really quickly.
 	 */
-	private DataDbLogger(String projectId, boolean shouldStoreToDb, 
+	private DataDbLogger(String agencyId, boolean shouldStoreToDb, 
 			boolean shouldPauseToReduceQueue) {
-		this.projectId = projectId;
+		this.agencyId = agencyId;
 		this.shouldStoreToDb = shouldStoreToDb;
 		this.shouldPauseToReduceQueue = shouldPauseToReduceQueue;
 		
 		// Create the reusable heavy weight session factory
-		sessionFactory = HibernateUtils.getSessionFactory(projectId);
+		sessionFactory = HibernateUtils.getSessionFactory(agencyId);
 		
 		// Start up separate thread that reads from the queue and
 		// actually stores the data
@@ -272,12 +275,12 @@ public class DataDbLogger {
 			indexOfLevelWhenMessageLogged = levelIndex;
 			String message = success ?
 					"DataDbLogger queue filling up " +
-					" for projectId=" + projectId +". It is now at " + 
+					" for agencyId=" + agencyId +". It is now at " + 
 					String.format("%.1f", level*100) + "% capacity with " + 
 					queue.size() + " elements already in the queue."
 					:
-					"DataDbLogger queue is now completely full for projectId=" + 
-					projectId + ". LOSING DATA!!!";
+					"DataDbLogger queue is now completely full for agencyId=" + 
+					agencyId + ". LOSING DATA!!!";
 			
 			// Add to message the class names of the objects in the queue so 
 			// can see what objects are causing the problem
@@ -294,7 +297,7 @@ public class DataDbLogger {
 		// If losing data then log such
 		if (!success) {
 			logger.error("DataDbLogger queue is now completely full for " +
-					"projectId=" + projectId + ". LOSING DATA!!! Failed to " +
+					"agencyId=" + agencyId + ". LOSING DATA!!! Failed to " +
 					"store object=[" + o + "]");
 		}
 		
@@ -347,7 +350,7 @@ public class DataDbLogger {
 		int levelIndexIncludingMargin = indexOfLevel(level + 0.10);
 		if (levelIndexIncludingMargin < indexOfLevelWhenMessageLogged) {
 			logger.error(Markers.email(), "DataDbLogger queue emptying out somewhat " +
-					" for projectId=" + projectId +". It is now at " + 
+					" for agencyId=" + agencyId +". It is now at " + 
 					String.format("%.1f", level*100) + "% capacity with " + queue.size() + 
 					" elements already in the queue. The maximum capacity was " +
 					String.format("%.1f", maxQueueLevel*100) + "%.");
@@ -397,24 +400,6 @@ public class DataDbLogger {
 		} finally {			
 			if (session != null)
 				session.close();
-		}
-	}
-	
-	/**
-	 * Determines highest level cause of exception. Useful
-	 * for determine the root cause of the exception so that
-	 * appropriate error message can be displayed.
-	 * @param e
-	 * @return
-	 */
-	private Throwable getRootCause(Exception e) {
-		Throwable prev =  e;
-		while (true) {
-			Throwable next = prev.getCause();
-			if (next == null) 
-				return prev;
-			else
-				prev = next;
 		}
 	}
 	
@@ -472,15 +457,15 @@ public class DataDbLogger {
 	 * processing. Instead, need to use a transaction for each batch.
 	 */
 	private void processBatchOfData() {
-		Session session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-
 		// Create an array for holding what is being written to db. If there
 		// is an exception with one of the objects, such as a constraint violation,
 		// then can try to write the objects one at a time to make sure that the
 		// the good ones are written. This way don't lose any good data even if
 		// an exception occurs while batching data.
 		List<Object> objectsForThisBatch = new ArrayList<Object>(HibernateUtils.BATCH_SIZE);
+		
+		Transaction tx = null;
+		Session session = null;
 		
 		try {			
 			int batchingCounter = 0;
@@ -489,44 +474,90 @@ public class DataDbLogger {
 				Object objectToBeStored = get();
 				
 				objectsForThisBatch.add(objectToBeStored);
-				
+			} while (queueHasData() && ++batchingCounter < HibernateUtils.BATCH_SIZE);
+			
+			session = sessionFactory.openSession();
+			tx = session.beginTransaction();			
+			for (Object objectToBeStored : objectsForThisBatch) {				
 				// Write the data to the session. This doesn't yet
 				// actually write the data to the db though. That is only
 				// done when the session is flushed or committed.
 				logger.debug("DataDbLogger batch saving object={}", 
 						objectToBeStored);
 				session.save(objectToBeStored);
-			} while (queueHasData() && ++batchingCounter < HibernateUtils.BATCH_SIZE);
-			
-			tx.commit();
-			session.close();
-		} catch (HibernateException e) {
-			// Rollback the transaction since it likely was not committed. 
-			// Otherwise can get an error when using Postgres "ERROR: current 
-			// transaction is aborted, commands ignored until end of 
-			// transaction block".
-			try {
-				tx.rollback();
-			} catch (HibernateException e2) {
-				logger.error("Error rolling back transaction after processing "
-						+ "batch of data via DataDbLogger failed.", e2);
 			}
 			
-			// Close session here so that can process the objects individually
-			// using a new session.
+			// Sometimes useful for debugging via the console
+			//System.err.println(new Date() + " Committing " 
+			//		+ objectsForThisBatch.size() + " objects. " + queueSize() 
+			//		+ " objects still in queue.");			
+			logger.debug("Committing {} objects. {} objects still in queue.", 
+					objectsForThisBatch.size(), queueSize());			
+			IntervalTimer timer = new IntervalTimer();
+
+			// Actually do the commit
+			tx.commit();
+			
+			// Sometimes useful for debugging via the console
+			//System.err.println(new Date() + " Done committing. Took " 
+			//		+ timer.elapsedMsec() + " msec");
+			logger.debug("Done committing. Took {} msec", timer.elapsedMsec());
+			
 			session.close();
-							
-			Throwable cause = getRootCause(e);
-			// If it is a SQLGrammarException then also log the SQL to
-			// help in debugging.
-			String additionaInfo = e instanceof SQLGrammarException ?
-					" SQL=\"" + ((SQLGrammarException) e).getSQL() + "\"" 
-					: "";
-			logger.error("{} for database for project={} when batch writing "
-					+ "objects: {}. Will try to write each object from batch "
-					+ "individually. {}",
-					e.getClass().getSimpleName(), projectId, 
-					cause.getMessage(), additionaInfo);		
+		} catch (HibernateException e) {
+			e.printStackTrace();
+			
+			// If there was a connection problem then create a whole session
+			// factory so that get new connections.
+			Throwable rootCause = HibernateUtils.getRootCause(e);
+			
+			if (rootCause instanceof SocketTimeoutException
+					|| (rootCause instanceof SQLException 
+							&& rootCause.getMessage().contains("statement closed"))) {
+				logger.error(Markers.email(),
+						"Had a connection problem to the database for agencyId={}. "
+						+ "Likely means that the db was rebooted or that the "
+						+ "connection to it was lost. Therefore creating a new "
+						+ "SessionFactory so get new connections.", agencyId);
+				HibernateUtils.clearSessionFactory();
+				sessionFactory = HibernateUtils.getSessionFactory(agencyId);
+			} else {
+				// Rollback the transaction since it likely was not committed.
+				// Otherwise can get an error when using Postgres "ERROR:
+				// current transaction is aborted, commands ignored until end of
+				// transaction block".
+				try {
+					if (tx != null)
+						tx.rollback();
+				} catch (HibernateException e2) {
+					logger.error(
+							"Error rolling back transaction after processing "
+									+ "batch of data via DataDbLogger.", e2);
+				}
+
+				// Close session here so that can process the objects
+				// individually
+				// using a new session.
+				try {
+					if (session != null)
+						session.close();
+				} catch (HibernateException e2) {
+					logger.error("Error closing session after processing "
+							+ "batch of data via DataDbLogger.", e2);
+				}
+			
+				// If it is a SQLGrammarException then also log the SQL to
+				// help in debugging.
+				String additionaInfo = e instanceof SQLGrammarException ? 
+						" SQL=\"" + ((SQLGrammarException) e).getSQL() + "\""
+						: "";
+				Throwable cause = HibernateUtils.getRootCause(e);
+				logger.error("{} for database for project={} when batch writing "
+						+ "objects: {}. Will try to write each object "
+						+ "from batch individually. {}", 
+						e.getClass().getSimpleName(), agencyId,
+						cause.getMessage(), additionaInfo);
+			}
 			
 
 			// Write each object individually so that the valid ones will be
@@ -554,7 +585,7 @@ public class DataDbLogger {
 						}
 						
 						// Output message on what is going on
-						Throwable cause2 = getRootCause(e2);
+						Throwable cause2 = HibernateUtils.getRootCause(e2);
 						logger.error(e2.getClass().getSimpleName() + " when individually writing object " +
 								o + ". " + 
 								(shouldKeepTrying?"Will keep trying. " : "") +
@@ -580,8 +611,7 @@ public class DataDbLogger {
 			} catch (Exception e) {
 				logger.error("Error writing data to database via DataDbLogger. " +
 						"Look for ERROR in log file to see if the database classes " +
-						"were configured correctly. Error: "
-						+ e);
+						"were configured correctly.", e);
 				
 				// Don't try again right away because that would be wasteful
 				Time.sleep(TIME_BETWEEN_RETRIES);
