@@ -189,7 +189,7 @@ public class WebAgency {
 					List<Agency> agencies = inter.getAgencies();
 
 					// Use the first agency if there are multiple ones
-					agency = agencies.get(0);
+					agency = agencies.isEmpty() ? null : agencies.get(0);
 				} catch (RemoteException e) {
 					logger.error(
 							"Could not get Agency object for agencyId={}. "
@@ -346,10 +346,10 @@ public class WebAgency {
 	/**
 	 * Returns map of all agencies. Values are cached so won't be automatically
 	 * updated when agencies are changed in the database. Will update cache if
-	 * haven't done so in 5 minutes. This way will automatically get new
-	 * agencies that are added yet will not be reading from the database for
-	 * every page hit that needs list of agencies. Also, agencies automatically
-	 * removed.
+	 * haven't done so in rereadIfOlderThanMsecs. This way will automatically
+	 * get new agencies that are added yet will not be reading from the database
+	 * for every page hit that needs list of agencies. Also, agencies
+	 * automatically removed.
 	 * 
 	 * @param rereadIfOlderThanMsecs
 	 *            If web agencies read from db more than this time ago then they
@@ -379,6 +379,26 @@ public class WebAgency {
 		WebAgency webAgency =
 				getWebAgencyMapCache(rereadIfOlderThanMsecs).get(agencyId);
 
+		// If WebAgency for agencyId doesn't exist yet it could be because
+		// it is a newly configured agency. In this case should update
+		// cache and check again, even if was told to not update the cache.
+		// Note: the reason that can be told to not update the cache is
+		// when just doing a regular RMI call. Can do many of these calls
+		// and don't want to access the database unless there is an actual
+		// problem. But the possibility of a new agency having been configured
+		// is a special case where do need to update the cache. 
+		// And of course don't want to cause problems by repeatedly accessing
+		// the db if an agency doesn't exist anymore. Therefore if want to
+		// update the WebAgency cache should only do so once in a while, which
+		// is rereadTimeIfWebAgencyNotFoundMsecs is set to 1 minute.
+		long rereadTimeIfWebAgencyNotFoundMsecs = 1 * Time.MIN_IN_MSECS;
+		if (webAgency == null
+				&& rereadTimeIfWebAgencyNotFoundMsecs < rereadIfOlderThanMsecs) {
+			webAgency =
+					getWebAgencyMapCache(rereadTimeIfWebAgencyNotFoundMsecs)
+							.get(agencyId);
+		}
+		
 		// If web agency was not in cache update the cache and try again
 		if (webAgency == null) {
 			logger.error("Did not find agencyId={} in WebAgencies table for "

@@ -39,7 +39,7 @@ public class ApiGpsLocation extends ApiTransientLocation {
 	@XmlAttribute
 	private long time;
 
-	// A Double so if null then won't show up in output
+	// Speed in m/s. A Double so if null then won't show up in output
 	@XmlAttribute
 	private Double speed;
 

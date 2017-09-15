@@ -394,6 +394,8 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 	var vehicleIcon = busIcon;
 	if (vehicleData.vehicleType == "0")
 		vehicleIcon = streetcarIcon;
+	else if (vehicleData.vehicleType == "1")
+		vehicleIcon = subwayIcon;
 	else if (vehicleData.vehicleType == "2")
 		vehicleIcon = railIcon;
 	else if (vehicleData.vehicleType == "4")

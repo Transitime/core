@@ -43,9 +43,11 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.core.TemporalDifference;
 import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.logging.Markers;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.Time;
@@ -58,7 +60,7 @@ import org.transitime.utils.Time;
  * reading in data so that can intern() member strings. In order to do this the
  * String members could not be declared as final since they are updated after
  * the constructor is called. By interning the member strings less than half
- * (about 40%) of the RAM to be used. This is very important when reading in
+ * (about 40%) of the RAM is used. This is very important when reading in
  * large batches of ArrivalDeparture objects!
  * 
  * @author SkiBu Smith
@@ -68,7 +70,9 @@ import org.transitime.utils.Time;
 @DynamicUpdate
 @Table(name="ArrivalsDepartures",
        indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
-                      columnList="time" ) } )
+                      columnList="time" ),
+                   @Index(name="ArrivalsDeparturesRouteTimeIndex", 
+                      columnList="routeShortName, time" )} )
 public class ArrivalDeparture implements Lifecycle, Serializable  {
 	
 	@Id 
@@ -170,6 +174,16 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	@Column 
 	private final int stopPathIndex;
 	
+	// The order of the stop for the direction of the route. This can
+	// be useful for displaying data in proper stop order. The member
+	// stopPathIndex is for the current trip, but since a route's
+	// direction can have multiple trip patterns the stopPathIndex
+	// is not sufficient for properly ordering data for a route/direction.
+	// Declared an Integer instead of an int because might not always 
+	// be set.
+	@Column
+	private final Integer stopOrder;
+	
 	// Sometimes want to look at travel times using arrival/departure times.
 	// This would be complicated if had to get the path length by using
 	// tripIndex to determine trip to determine trip pattern to determine
@@ -221,11 +235,16 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.freqStartTime = freqStartTime;
 		
 		// Some useful convenience variables
+
 		if(block!=null)
 		{
 			Trip trip = block.getTrip(tripIndex);
 			StopPath stopPath = trip.getStopPath(stopPathIndex);
 			String stopId = stopPath.getStopId();
+			// Determine and store stop order
+			this.stopOrder =
+					trip.getRoute().getStopOrder(trip.getDirectionId(), stopId,
+							stopPathIndex);
 			
 			// Determine the schedule time, which is a bit complicated.
 			// Of course, only do this for schedule based assignments.
@@ -249,6 +268,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 							.getEpochTime(scheduleTime.getDepartureTime(), time);
 					scheduledEpochTime = new Date(epochTime);
 				}
+
 			}
 			this.scheduledTime = scheduledEpochTime;
 			
@@ -270,6 +290,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			this.tripId="";
 			this.stopId="";
 			this.serviceId = "";
+			this.stopOrder=0;
 		}
 	}
 	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block, 
@@ -293,6 +314,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.directionId = null;
 		this.tripIndex = -1;
 		this.stopPathIndex = -1;
+		this.stopOrder = null;
 		this.isArrival = false;
 		this.configRev = -1;
 		this.scheduledTime = null;
@@ -368,33 +390,52 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	
 	/**
 	 * Because using a composite Id Hibernate wants this member.
-	 */
+	 */	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((avlTime == null) ? 0 : avlTime.hashCode());
+		result = prime * result + ((block == null) ? 0 : block.hashCode());
 		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
 		result = prime * result + configRev;
-		result = prime * result + (isArrival ? 1231 : 1237);
-		result = prime * result + stopPathIndex;
+		result =
+				prime * result
+						+ ((directionId == null) ? 0 : directionId.hashCode());
 		result = prime * result + gtfsStopSeq;
+		result = prime * result + (isArrival ? 1231 : 1237);
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
-		result = prime * result + 
-				((routeShortName == null) ? 0 : routeShortName.hashCode());
-		result = prime * result
-				+ ((serviceId == null) ? 0 : serviceId.hashCode());
+		result =
+				prime
+						* result
+						+ ((routeShortName == null) ? 0 : routeShortName
+								.hashCode());
+		result =
+				prime
+						* result
+						+ ((scheduledTime == null) ? 0 : scheduledTime
+								.hashCode());
+		result =
+				prime * result
+						+ ((serviceId == null) ? 0 : serviceId.hashCode());
 		result = prime * result + ((stopId == null) ? 0 : stopId.hashCode());
+		result =
+				prime * result
+						+ ((stopOrder == null) ? 0 : stopOrder.hashCode());
+		result = prime * result + stopPathIndex;
+		result = prime * result + Float.floatToIntBits(stopPathLength);
 		result = prime * result + ((time == null) ? 0 : time.hashCode());
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		result = prime * result + tripIndex;
-		result = prime * result
-				+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
+		result =
+				prime * result
+						+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
 	}
 
 	/**
 	 * Because using a composite Id Hibernate wants this member.
-	 */
+	 */	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -404,6 +445,16 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		if (getClass() != obj.getClass())
 			return false;
 		ArrivalDeparture other = (ArrivalDeparture) obj;
+		if (avlTime == null) {
+			if (other.avlTime != null)
+				return false;
+		} else if (!avlTime.equals(other.avlTime))
+			return false;
+		if (block == null) {
+			if (other.block != null)
+				return false;
+		} else if (!block.equals(other.block))
+			return false;
 		if (blockId == null) {
 			if (other.blockId != null)
 				return false;
@@ -411,11 +462,14 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			return false;
 		if (configRev != other.configRev)
 			return false;
-		if (isArrival != other.isArrival)
-			return false;
-		if (stopPathIndex != other.stopPathIndex)
+		if (directionId == null) {
+			if (other.directionId != null)
+				return false;
+		} else if (!directionId.equals(other.directionId))
 			return false;
 		if (gtfsStopSeq != other.gtfsStopSeq)
+			return false;
+		if (isArrival != other.isArrival)
 			return false;
 		if (routeId == null) {
 			if (other.routeId != null)
@@ -427,6 +481,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				return false;
 		} else if (!routeShortName.equals(other.routeShortName))
 			return false;
+		if (scheduledTime == null) {
+			if (other.scheduledTime != null)
+				return false;
+		} else if (!scheduledTime.equals(other.scheduledTime))
+			return false;
 		if (serviceId == null) {
 			if (other.serviceId != null)
 				return false;
@@ -436,6 +495,16 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			if (other.stopId != null)
 				return false;
 		} else if (!stopId.equals(other.stopId))
+			return false;
+		if (stopOrder == null) {
+			if (other.stopOrder != null)
+				return false;
+		} else if (!stopOrder.equals(other.stopOrder))
+			return false;
+		if (stopPathIndex != other.stopPathIndex)
+			return false;
+		if (Float.floatToIntBits(stopPathLength) != Float
+				.floatToIntBits(other.stopPathLength))
 			return false;
 		if (time == null) {
 			if (other.time != null)
@@ -470,6 +539,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				+ ", gtfsStopSeq=" + gtfsStopSeq
 				+ ", stopIdx=" + stopPathIndex 
 				+ ", freqStartTime=" + freqStartTime
+				+ ", stopOrder=" + stopOrder
 				+ ", avlTime=" + Time.timeStrMsec(avlTime)
 				+ ", trip=" + tripId 
 				+ ", tripIdx=" + tripIndex 
@@ -694,7 +764,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param arrivalOrDeparture
 	 *            Enumeration specifying whether to read in just arrivals or
 	 *            just departures. Set to null to read in both.
-	 * @return
+	 * @return List<ArrivalDeparture> or null if there is an exception
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
 			String dbName, Date beginTime, Date endTime, 
@@ -758,7 +828,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param firstResult
 	 * @param maxResults
 	 * @param arrivalOrDeparture
-	 * @return
+	 * @return List<ArrivalDeparture> or null if there is an exception
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
 			Date beginTime, Date endTime, String sqlClause,
@@ -804,6 +874,29 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return tripId;
 	}
 
+	/**
+	 * Returns the trip short name for the trip associated with the
+	 * arrival/departure.
+	 * 
+	 * @return trip short name for the trip associated with the
+	 * arrival/departure or null if there is a problem
+	 */
+	public String getTripShortName() {
+		if (!Core.isCoreApplication()) {
+			logger.error(Markers.email(), 
+					"For agencyId={} alling ArrivalDeparture.getTripShortName() "
+					+ "but it is not part of core application", 
+					AgencyConfig.getAgencyId());
+			return null;
+		}
+		
+		Trip trip = Core.getInstance().getDbConfig().getTrip(tripId);
+		if (trip != null)
+			return trip.getShortName();
+		else
+			return null;
+	}
+	
 	public String getBlockId() {
 		return blockId;
 	}
@@ -836,6 +929,10 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return stopPathLength;
 	}
 
+	public Integer getStopOrder() {
+		return stopOrder;
+	}
+	
 	/**
 	 * Note that the block is a transient element so will not be available if
 	 * this object was read from the database. In that case it will be null.

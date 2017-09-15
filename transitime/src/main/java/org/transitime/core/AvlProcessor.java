@@ -18,13 +18,17 @@ package org.transitime.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.DoubleConfigValue;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.configData.AgencyConfig;
 import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatcher.MatchingType;
@@ -34,11 +38,13 @@ import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.Stop;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.VehicleEvent;
 import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitime.logging.Markers;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.StringUtils;
@@ -85,6 +91,28 @@ public class AvlProcessor {
 					+ "previous assignment. Useful for when assignment part "
 					+ "of AVL feed doesn't always provide a valid assignment.");
 
+	private static BooleanConfigValue emailMessagesWhenAssignmentGrabImproper =
+			new BooleanConfigValue(
+					"transitime.core.emailMessagesWhenAssignmentGrabImproper", 
+					false, 
+					"When one vehicle gets assigned by AVL feed but another "
+					+ "vehicle already has that assignment then sometimes the "
+					+ "assignment to the new vehicle would be incorrect. Could "
+					+ "be that vehicle was never logged out or simply got bad "
+					+ "assignment. For this situation it can be useful to "
+					+ "receive error message via e-mail. But can get too many "
+					+ "such e-mails. This property allows one to control those "
+					+ "e-mails.");
+	
+	private static DoubleConfigValue maxDistanceForAssignmentGrab =
+			new DoubleConfigValue(
+					"transitime.core.maxDistanceForAssignmentGrab",
+					10000.0,
+					"For when another vehicles gets assignment and needs to "
+					+ "grab it from another vehicle. The new vehicle must "
+					+ "match to route within maxDistanceForAssignmentGrab in "
+					+ "order to grab the assignment.");
+	
 	/************************** Logging *******************************/
 
 	private static final Logger logger = LoggerFactory
@@ -365,10 +393,8 @@ public class AvlProcessor {
 	 * 
 	 * @param vehicleState
 	 *            the previous vehicle state
-	 * @return the new match, if successful. Otherwise null.
 	 */
-	public TemporalMatch matchNewFixForPredictableVehicle(
-			VehicleState vehicleState) {
+	public void matchNewFixForPredictableVehicle(VehicleState vehicleState) {
 		// Make sure state is coherent
 		if (!vehicleState.isPredictable() || vehicleState.getMatch() == null) {
 			throw new RuntimeException("Called AvlProcessor.matchNewFix() "
@@ -399,11 +425,11 @@ public class AvlProcessor {
 		if (bestTemporalMatch == null)
 			vehicleState.incrementNumberOfBadMatches();
 
-		// If vehicle not making progress then return null
+		// If vehicle not making progress then return
 		boolean notMakingProgress = handleIfVehicleNotMakingProgress(
 				bestTemporalMatch, vehicleState);
 		if (notMakingProgress)
-			return null;
+			return;
 
 		// Record this match unless the match was null and haven't
 		// reached number of bad matches.
@@ -439,9 +465,15 @@ public class AvlProcessor {
 					vehicleState.getVehicleId(),
 					vehicleState.numberOfBadMatches());
 		}
+			
+		// If schedule adherence is bad then try matching vehicle to assignment
+		// again. This can make vehicle unpredictable if can't match vehicle to 
+		// assignment.
+		if (vehicleState.isPredictable() && vehicleState.lastMatchIsValid())
+			verifyRealTimeSchAdh(vehicleState);
+		
 		logger.debug("ENDOFMATCHING");
-		// Return results
-		return bestTemporalMatch;
+
 	}
 
 	/**
@@ -699,15 +731,19 @@ public class AvlProcessor {
 					+ "match so will try to match to layover stop.",
 					avlReport.getVehicleId());
 
-			Trip trip = TemporalMatcher
-					.getInstance()
+			Trip trip = TemporalMatcher.getInstance()
 					.matchToLayoverStopEvenIfOffRoute(avlReport, potentialTrips);
 			if (trip != null) {
+				// Determine distance to first stop of trip
+				Location firstStopInTripLoc = trip.getStopPath(0).getStopLocation();
+				double distanceToSegment = 
+						firstStopInTripLoc.distance(avlReport.getLocation());
+
 				SpatialMatch beginningOfTrip = new SpatialMatch(
 						avlReport.getTime(),
 						block, block.getTripIndex(trip), 0, // stopPathIndex
 						0, // segmentIndex
-						0.0, // distanceToSegment
+						distanceToSegment,
 						0.0); // distanceAlongSegment
 
 				bestMatch = new TemporalMatch(beginningOfTrip,
@@ -722,6 +758,21 @@ public class AvlProcessor {
 			}
 		}
 
+		// Sometimes get a bad assignment where there is already a valid vehicle
+		// with the assignment and the new match is actually far away from the
+		// route, indicating driver might have entered wrong ID or never
+		// logged out. For this situation ignore the match.
+		if (bestMatch != null
+				&& matchProblematicDueOtherVehicleHavingAssignment(bestMatch,
+						vehicleState)) {
+			logger.error("Got a match for vehicleId={} but that assignment is "
+					+ "already taken by another vehicle and the new match "
+					+ "doesn't appear to be valid because it is far away from "
+					+ "the route. {} {}",
+					avlReport.getVehicleId(), bestMatch, avlReport);
+			return false;
+		}
+		
 		// Update the state of the vehicle
 		updateVehicleStateFromAssignment(bestMatch, vehicleState,
 				BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, block.getId(),
@@ -731,6 +782,128 @@ public class AvlProcessor {
 		return bestMatch != null;
 	}
 
+	/**
+	 * Determines if match is problematic since other vehicle already has
+	 * assignment and the other vehicle seems to be more appropriate. Match is
+	 * problematic if 1) exclusive matching is enabled, 2) other non-schedule
+	 * based vehicle already has the assignment, 3) the other vehicle that
+	 * already has the assignment isn't having any problems such as vehicle
+	 * being delayed, and 4) the new match is far away from the route which
+	 * implies that it might be a mistaken login.
+	 * <p>
+	 * Should be noted that this issue was encountered with sfmta on 1/1/2016
+	 * around 15:00 for vehicle 8660 when avl feed showed it getting block
+	 * assignment 573 even though it was far from the route and vehicle 8151
+	 * already had that assignment and actually was on the route. This
+	 * can happen if driver enters wrong assignment, or perhaps if they
+	 * never log out.
+	 * 
+	 * @param match
+	 * @param vehicleState
+	 * @return true if the match is problematic and should not be used
+	 */
+	private boolean matchProblematicDueOtherVehicleHavingAssignment(
+			TemporalMatch match, VehicleState vehicleState) {
+		// If no match in first place then not a problem
+		if (match == null)
+			return false;
+		
+		// If matches don't need to be exclusive then don't have a problem
+		Block block = match.getBlock();
+		if (!block.shouldBeExclusive())
+			return false;
+		
+		// If no other non-schedule based vehicle assigned to the block then 
+		// not a problem
+		Collection<String> vehiclesAssignedToBlock = VehicleDataCache
+				.getInstance().getVehiclesByBlockId(block.getId());
+		if (vehiclesAssignedToBlock.isEmpty())
+			// No other vehicle has assignment so not a problem
+			return false;
+		String otherVehicleId = null;
+		for (String vehicleId : vehiclesAssignedToBlock) {
+			otherVehicleId = vehicleId;
+			VehicleState otherVehicleState =
+					VehicleStateManager.getInstance()
+							.getVehicleState(otherVehicleId);
+
+			// If other vehicle that has assignment is schedule based then not 
+			// a problem to take its assignment away
+			if (otherVehicleState.isForSchedBasedPreds())
+				return false;
+			
+			// If that other vehicle actually having any problem then not a 
+			// problem to take assignment away
+			if (!otherVehicleState.isPredictable() || vehicleState.isDelayed())
+				return false;			
+		}
+		 
+		// So far we know that another vehicle has exclusive assignment and
+		// there are no problems with that vehicle. This means the new match 
+		// could be a mistake. Shouldn't use it if the new vehicle is far
+		// away from route (it matches to a layover where matches are lenient),
+		// indicating that the vehicle might have gotten wrong assignment while
+		// doing something else.
+		if (match.getDistanceToSegment() > maxDistanceForAssignmentGrab.getValue()) {			
+			// Match is far away from route so consider it to be invalid.
+			// Log an error
+			logger.error(
+					"For agencyId={} got a match for vehicleId={} but that "
+					+ "assignment is already taken by vehicleId={} and the new "
+					+ "match doesn't appear to be valid because it is more "
+					+ "than {}m from the route. {} {}",
+					AgencyConfig.getAgencyId(), vehicleState.getVehicleId(), 
+					otherVehicleId, maxDistanceForAssignmentGrab.getValue(), 
+					match, vehicleState.getAvlReport());
+
+			// Only send e-mail error rarely
+			if (shouldSendMessage(vehicleState.getVehicleId(), 
+					vehicleState.getAvlReport())) {
+				logger.error(Markers.email(),
+					"For agencyId={} got a match for vehicleId={} but that "
+					+ "assignment is already taken by vehicleId={} and the new "
+					+ "match doesn't appear to be valid because it is more "
+					+ "than {}m from the route. {} {}",
+					AgencyConfig.getAgencyId(), vehicleState.getVehicleId(), 
+					otherVehicleId, maxDistanceForAssignmentGrab.getValue(), 
+					match, vehicleState.getAvlReport());
+			}
+			
+			return true;
+		} else {
+			// The new match is reasonably close to the route so should consider
+			// it valid
+			return false;
+		}
+	}
+	
+	// Keyed on vehicleId. Contains last time problem grabbing assignment 
+	// message sent for the vehicle. For reducing number of emails sent
+	// when there is a problem.
+	private Map<String, Long> problemGrabbingAssignmentMap = 
+			new HashMap<String, Long>();
+	
+	/**
+	 * For reducing e-mail logging messages when problem grabbing assignment.
+	 * Java property transitime.avl.emailMessagesWhenAssignmentGrabImproper must
+	 * be true for e-mail to be sent when there is an error.
+	 * 
+	 * @param vehicleId
+	 * @param avlReport
+	 * @return true if should send message
+	 */
+	private boolean shouldSendMessage(String vehicleId, AvlReport avlReport) {
+		Long lastTimeSentForVehicle = problemGrabbingAssignmentMap.get(vehicleId);
+		// If message not yet sent for vehicle or it has been more than 10 minutes...
+		if (emailMessagesWhenAssignmentGrabImproper.getValue() 
+				&& (lastTimeSentForVehicle == null 
+				    || avlReport.getTime() > lastTimeSentForVehicle + 30*Time.MS_PER_MIN)) {
+			problemGrabbingAssignmentMap.put(vehicleId, avlReport.getTime());
+			return true;
+		} else 
+			return false;
+	}
+	
 	/**
 	 * If the block assignment is supposed to be exclusive then looks for any
 	 * vehicles assigned to the specified block and removes the assignment from
@@ -814,6 +987,14 @@ public class AvlProcessor {
 			}
 		}
 
+		// This method called when there is an assignment from AVL feed. But
+		// if that assignment is invalid then will make it here. Try the
+		// auto assignment feature in case it is enabled.
+		boolean autoAssigned = 
+				automaticalyMatchVehicleToAssignment(vehicleState);
+		if (autoAssigned)
+			return true;
+		
 		// There was no valid block or route assignment from AVL feed so can't
 		// do anything. But set the block assignment for the vehicle
 		// so it is up to date. This call also sets the vehicle state
@@ -875,24 +1056,28 @@ public class AvlProcessor {
 	/**
 	 * For when vehicle is not predictable and didn't have previous assignment.
 	 * Since this method is to be called when vehicle isn't assigned and didn't
-	 * get an assignment through the feed should try to automatically assign the
-	 * vehicle based on how it matches to a currently unmatched block. If it can
-	 * match the vehicle then this method fully processes the match, generating
-	 * predictions and such.
+	 * get a valid assignment through the feed should try to automatically
+	 * assign the vehicle based on how it matches to a currently unmatched
+	 * block. If it can match the vehicle then this method fully processes the
+	 * match, generating predictions and such.
 	 * 
 	 * @param vehicleState
+	 * @return true if auto assigned vehicle
 	 */
-	private void automaticalyMatchVehicleToAssignment(VehicleState vehicleState) {
+	private boolean automaticalyMatchVehicleToAssignment(VehicleState vehicleState) {
 		// If actually creating a schedule based prediction
 		if (vehicleState.isForSchedBasedPreds())
-			return;
+			return false;
 
 		if (!AutoBlockAssigner.enabled()) {
 			logger.info("Could not automatically assign vehicleId={} because "
 					+ "AutoBlockAssigner not enabled.", 
 					vehicleState.getVehicleId());
-			return;
+			return false;
 		}
+		
+		logger.info("Trying to automatically assign vehicleId={}", 
+				vehicleState.getVehicleId());
 		
 		// Try to match vehicle to a block assignment if that feature is enabled
 		AutoBlockAssigner autoAssigner = new AutoBlockAssigner(vehicleState);
@@ -906,7 +1091,10 @@ public class AvlProcessor {
 			updateVehicleStateFromAssignment(bestMatch, vehicleState,
 					BlockAssignmentMethod.AUTO_ASSIGNER, bestMatch.getBlock()
 							.getId(), "block");
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -975,9 +1163,6 @@ public class AvlProcessor {
 	}
 
 	/**
-	 * Determines the real-time schedule adherence for the vehicle. To be called
-	 * after the vehicle is matched.
-	 * <p>
 	 * If schedule adherence is not within bounds then will try to match the
 	 * vehicle to the assignment again. This can be important if system is run
 	 * for a while and then paused and then started up again. Vehicle might
@@ -988,16 +1173,14 @@ public class AvlProcessor {
 	 * Updates vehicleState accordingly.
 	 * 
 	 * @param vehicleState
-	 * @return
 	 */
-	private TemporalDifference checkScheduleAdherence(VehicleState vehicleState) {
+	private void verifyRealTimeSchAdh(VehicleState vehicleState) {
 		// If no schedule then there can't be real-time schedule adherence
 		if (vehicleState.getBlock() == null
 				|| vehicleState.getBlock().isNoSchedule())
-			return null;
+			return;
 		
-		logger.debug(
-				"Processing real-time schedule adherence for vehicleId={}",
+		logger.debug("Confirming real-time schedule adherence for vehicleId={}",
 				vehicleState.getVehicleId());
 
 		// Determine the schedule adherence for the vehicle
@@ -1063,20 +1246,32 @@ public class AvlProcessor {
 			// Schedule adherence not reasonable so match vehicle to assignment
 			// again.
 			matchVehicleToAssignment(vehicleState);
-
-			// Now that have matched vehicle to assignment again determine
-			// schedule adherence once more.
-			scheduleAdherence = RealTimeSchedAdhProcessor
-					.generate(vehicleState);
 		}
-
-		// Store the schedule adherence with the vehicle
-		vehicleState.setRealTimeSchedAdh(scheduleAdherence);
-
-		// Return results
-		return scheduleAdherence;
 	}
 
+	/**
+	 * Determines the real-time schedule adherence and stores the value in the
+	 * vehicleState. To be called after the vehicle is matched.
+	 * 
+	 * @param vehicleState
+	 */
+	private void determineAndSetRealTimeSchAdh(VehicleState vehicleState) {
+		// If no schedule then there can't be real-time schedule adherence
+		if (vehicleState.getBlock() == null
+				|| vehicleState.getBlock().isNoSchedule())
+			return;
+		
+		logger.debug("Determining and setting real-time schedule adherence for "
+				+ "vehicleId={}", vehicleState.getVehicleId());
+
+		// Determine the schedule adherence for the vehicle
+		TemporalDifference scheduleAdherence = RealTimeSchedAdhProcessor
+				.generate(vehicleState);
+		
+		// Store the schedule adherence with the vehicle
+		vehicleState.setRealTimeSchedAdh(scheduleAdherence);		
+	}
+	
 	/**
 	 * Processes the AVL report by matching to the assignment and generating
 	 * predictions and such. Sets VehicleState for the vehicle based on the
@@ -1085,12 +1280,12 @@ public class AvlProcessor {
 	 * 
 	 * @param avlReport
 	 *            The new AVL report to be processed
-	 * @param rescursiveCall
+	 * @param recursiveCall
 	 *            Set to true if this method is calling itself. Used to make
 	 *            sure that any bug can't cause infinite recursion.
 	 */
 	private void lowLevelProcessAvlReport(AvlReport avlReport,
-			boolean rescursiveCall) {
+			boolean recursiveCall) {
 		// Determine previous state of vehicle
 		String vehicleId = avlReport.getVehicleId();
 		VehicleState vehicleState = VehicleStateManager.getInstance()
@@ -1126,7 +1321,7 @@ public class AvlProcessor {
 				// within the assignment.
 				matchNewFixForPredictableVehicle(vehicleState);
 			} else if (matchToNewAssignment) {
-				// New assignment so match the vehicle to it
+				// New assignment from AVL feed so match the vehicle to it
 				matchVehicleToAssignment(vehicleState);
 			} else {
 				// Handle bad assignment where don't have assignment or such.
@@ -1136,7 +1331,8 @@ public class AvlProcessor {
 
 			// If the last match is actually valid then generate associated
 			// data like predictions and arrival/departure times.
-			if (vehicleState.isPredictable() && vehicleState.lastMatchIsValid()) {
+			if (vehicleState.isPredictable() 
+					&& vehicleState.lastMatchIsValid()) {
 				// Reset the counter
 				vehicleState.setBadAssignmentsInARow(0);
 
@@ -1144,12 +1340,9 @@ public class AvlProcessor {
 				// progress then store that in the vehicle state
 				handlePossibleVehicleDelay(vehicleState);
 				
-				// Determine and store the schedule adherence. If schedule
-				// adherence is bad then try matching vehicle to assignment
-				// again. This can make vehicle unpredictable if can't match
-				// vehicle to assignment.
-				checkScheduleAdherence(vehicleState);
-
+				// Determine and store the schedule adherence. 
+				determineAndSetRealTimeSchAdh(vehicleState);
+				
 				// Only continue processing if vehicle is still predictable
 				// since calling checkScheduleAdherence() can make it
 				// unpredictable if schedule adherence is really bad.
@@ -1161,7 +1354,8 @@ public class AvlProcessor {
 
 					// If finished block assignment then should remove
 					// assignment
-					boolean endOfBlockReached = handlePossibleEndOfBlock(vehicleState);
+					boolean endOfBlockReached = 
+							handlePossibleEndOfBlock(vehicleState);
 
 					// If just reached the end of the block and took the block
 					// assignment away and made the vehicle unpredictable then
@@ -1172,7 +1366,7 @@ public class AvlProcessor {
 					// when vehicle finishes one trip/block it can go into the
 					// next block right away.
 					if (endOfBlockReached) {
-						if (rescursiveCall) {
+						if (recursiveCall) {
 							// This method was already called recursively which
 							// means unassigned vehicle at end of block but then
 							// it got assigned to end of block again. This
@@ -1182,7 +1376,7 @@ public class AvlProcessor {
 							// assign vehicle again.
 							logger.error(
 									"AvlProcessor.lowLevelProcessAvlReport() "
-											+ "called recursively, which is wrong. {}",
+									+ "called recursively, which is wrong. {}",
 									vehicleState);
 						} else {
 							// Actually process AVL report again to see if can
@@ -1193,6 +1387,12 @@ public class AvlProcessor {
 				}
 			}
 
+			// If called recursively (because end of block reached) but
+			// didn't match to new assignment then don't want to store the
+			// vehicle state since already did that. 
+			if (recursiveCall && !vehicleState.isPredictable())
+				return;
+			
 			// Now that VehicleState has been updated need to update the
 			// VehicleDataCache so that when data queried for API the proper
 			// info is provided.

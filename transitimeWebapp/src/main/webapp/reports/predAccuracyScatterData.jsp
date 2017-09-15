@@ -146,11 +146,12 @@ if (jsonString == null || jsonString.isEmpty()) {
 	    + " routeId=" + routeId
 	    + " source=" + source
 	    + " predictionType=" + predictionType;
-    response.sendError(416 /* Requested Range Not Satisfiable */, 
-	    message);
+	response.setStatus(400);
+	response.getWriter().write(message);
 	return;
 }
 
 // Return the JSON data
+response.setHeader("Access-Control-Allow-Origin", "*");
 response.getWriter().write(jsonString);
 %>

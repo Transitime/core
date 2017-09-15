@@ -182,8 +182,10 @@ public class DbWriter {
      *
 	 * @param session
 	 * @param configRev So can delete old data for the rev
+	 * @throws HibernateException when problem with database
 	 */
-	public void write(Session session, int configRev) {
+	public void write(Session session, int configRev)
+			throws HibernateException {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
 
@@ -199,7 +201,8 @@ public class DbWriter {
 			// Done writing data so commit it
 			tx.commit();
 		} catch (HibernateException e) {
-			logger.error("Error writing configuration data to db.", e);
+			logger.error("Error writing GTFS configuration data to db.", e);
+			throw e;
 		} 
 
 		// Let user know what is going on

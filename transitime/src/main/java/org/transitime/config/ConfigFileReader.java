@@ -84,31 +84,33 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class ConfigFileReader {
 	/**
-	 * Need to be able to synchronize reads and writes. Since
-	 * this class is static need static synchronization objects. 
-	 * Using a ReentrantReadWriteLock so that multiple threads
-	 * with reads can happen simultaneously. This works well
-	 * because writing/updating data will be very infrequent.
+	 * Need to be able to synchronize reads and writes. Since this class is
+	 * static need static synchronization objects. Using a
+	 * ReentrantReadWriteLock so that multiple threads with reads can happen
+	 * simultaneously. This works well because writing/updating data will be
+	 * very infrequent.
 	 */
 	private static final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
-    private static final Lock readLock = rwl.readLock();
-    private static final Lock writeLock = rwl.writeLock();
-    
+	private static final Lock readLock = rwl.readLock();
+	private static final Lock writeLock = rwl.writeLock();
+
 	/********************** Member Functions **************************/
 
 	/**
 	 * An exception for when a parameter is being read in
+	 * 
 	 * @author SkiBu Smith
 	 *
 	 */
 	public static class ConfigException extends Exception {
-		// Needed since subclass Exception is serializable. Otherwise get warning. 
+		// Needed since subclass Exception is serializable. Otherwise get
+		// warning.
 		private static final long serialVersionUID = 1L;
 
 		private ConfigException(Exception e) {
 			super(e);
 		}
-		
+
 		private ConfigException(String msg) {
 			super(msg);
 		}
@@ -124,80 +126,81 @@ public class ConfigFileReader {
 	 *            For keeping track of the full hierarchical parameter name such
 	 *            as "transitest.predictor.maxDistance".
 	 */
-	private static void processChildren(NodeList nodeList, 
-										List<String> names) {
-		for (int i=0; i<nodeList.getLength(); ++i) {
+	private static void processChildren(NodeList nodeList, List<String> names) {
+		for (int i = 0; i < nodeList.getLength(); ++i) {
 			Node node = nodeList.item(i);
-			
-			// Only need to deal with ELEMENT_NODES. Otherwise get 
+
+			// Only need to deal with ELEMENT_NODES. Otherwise get
 			// extraneous info.
 			if (node.getNodeType() != Node.ELEMENT_NODE)
 				continue;
-			
+
 			String nodeName = node.getNodeName();
 			names.add(nodeName);
-			
-			// If there are child nodes handle them recursively. 
+
+			// If there are child nodes handle them recursively.
 			if (hasChildNodesThatAreElements(node)) {
 				NodeList childNodeList = node.getChildNodes();
-				processChildren(childNodeList, names);				
-			} else {				
+				processChildren(childNodeList, names);
+			} else {
 				// Determine full name of parameter by appending node
 				// names together, separated by a period. So get something
 				// like "transitime.predictor.radius".
 				StringBuilder propertyNameBuilder = new StringBuilder("");
-				for (int j=0; j<names.size(); ++j) {
+				for (int j = 0; j < names.size(); ++j) {
 					String name = names.get(j);
 					propertyNameBuilder.append(name);
-					if (j != names.size()-1)
+					if (j != names.size() - 1)
 						propertyNameBuilder.append(".");
 				}
 				String propertyName = propertyNameBuilder.toString();
-				
+
 				// Determine value specified in xml file
 				String value = node.getTextContent().trim();
-				
-				// If the property hasn't yet been set then set the configured 
-				// property as a system property so it can be read in using 
-				// ConfigValue class. The reason only do this if the system 
-				// property hasn't been set yet is so that parameters set on 
+
+				// If the property hasn't yet been set then set the configured
+				// property as a system property so it can be read in using
+				// ConfigValue class. The reason only do this if the system
+				// property hasn't been set yet is so that parameters set on
 				// the system command line will take precedence.
 				if (System.getProperty(propertyName) == null)
 					System.setProperty(propertyName, value);
 			}
 
-			// Done with this part of the tree so take the current node name from the list
-			names.remove(names.size()-1);
+			// Done with this part of the tree so take the current node name
+			// from the list
+			names.remove(names.size() - 1);
 		}
 	}
 
 	/**
-	 * Determines whether a node has valid child elements. Filters out ones
-	 * that are not a real ELEMENT_NODE.
+	 * Determines whether a node has valid child elements. Filters out ones that
+	 * are not a real ELEMENT_NODE.
+	 * 
 	 * @param node
 	 * @return
 	 */
 	private static boolean hasChildNodesThatAreElements(Node node) {
 		NodeList childNodeList = node.getChildNodes();
-		for (int i=0; i<childNodeList.getLength(); ++i) {
+		for (int i = 0; i < childNodeList.getLength(); ++i) {
 			Node childNode = childNodeList.item(i);
-			
-			// Only need to deal with ELEMENT_NODES. Otherwise get extraneous info.
+
+			// Only need to deal with ELEMENT_NODES. Otherwise get extraneous
+			// info.
 			if (childNode.getNodeType() == Node.ELEMENT_NODE)
 				return true;
 		}
-		
+
 		return false;
-	}	
-	
+	}
+
 	/**
-	 * Reads the specified XML file and stores the results into a HashMap configFileData.
-	 * The file is expected to be very simple. Attributes are ignored. Only
-	 * values are used. The keys for the resulting HashMap are based on
-	 * the XML tags and their nesting. So if one is setting a value of 75
-	 * to a param with a key transitime.predictor.allowableDistanceFromPath 
-	 * the XML would look like:
-	 * {@code
+	 * Reads the specified XML file and stores the results into a HashMap
+	 * configFileData. The file is expected to be very simple. Attributes are
+	 * ignored. Only values are used. The keys for the resulting HashMap are
+	 * based on the XML tags and their nesting. So if one is setting a value of
+	 * 75 to a param with a key transitime.predictor.allowableDistanceFromPath
+	 * the XML would look like: {@code
 	 * <transitime>
 	 *   <predictor>
 	 *     <allowableDistanceFromPath>
@@ -206,10 +209,10 @@ public class ConfigFileReader {
 	 *   </predictor>
 	 * </transitime>
 	 * }
+	 * 
 	 * @param fileName
 	 */
-	public static void readXmlConfigFile(String fileName) 
-			throws ConfigException {
+	public static void readXmlConfigFile(String fileName) throws ConfigException {
 		File xmlFile = new File(fileName);
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		Document doc;
@@ -217,16 +220,15 @@ public class ConfigFileReader {
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			doc = dBuilder.parse(xmlFile);
 		} catch (Exception e) {
-			System.err.println("Error parasing XML file \"" + fileName + "\" : " + 
-					e.getMessage());
-			
+			System.err.println("Error parasing XML file \"" + fileName + "\" : " + e.getMessage());
+
 			throw new ConfigException(e);
 		}
-		
-		// So text strings separated by newlines are not 
+
+		// So text strings separated by newlines are not
 		// considered separate text nodes
 		doc.getDocumentElement().normalize();
-	 
+
 		// For keeping track of names
 		List<String> names = new ArrayList<String>();
 		// Where to start in hierarchy when recursively calling processChild()
@@ -238,110 +240,106 @@ public class ConfigFileReader {
 	 * Reads a Java properties file and stores all the properties as system
 	 * properties if they haven't yet been set.
 	 * 
-	 * @param inputStream The properties file
+	 * @param inputStream
+	 *            The properties file
 	 */
 	private static void readPropertiesConfigFile(InputStream inputStream) {
 		try {
 			// Read the properties config file
 			Properties properties = new Properties();
 			properties.load(inputStream);
-			
+
 			// For each property in the config file...
-			for (String propertyName : properties.stringPropertyNames()) {				
+			for (String propertyName : properties.stringPropertyNames()) {
 				// If property not set yet then set it now
 				if (System.getProperty(propertyName) == null) {
 					String value = properties.getProperty(propertyName);
 
-//					// Handle any property with a name ending with "File" 
-//					// specially by seeing if it if a file in the class path.
-//					// If it is then use the file name of the file that is 
-//					// found in the classpath.
-//					// NOTE: this might be confusing and therefore not a good idea.
-//					if (propertyName.endsWith("File")) {
-//						File f = new File(value);
-//						if (!f.exists()) {
-//							// Couldn't find file directly so look in classpath for it
-//							ClassLoader classLoader = HibernateUtils.class.getClassLoader();
-//							URL url = classLoader.getResource(value);
-//							if (url != null) {
-//								value = url.getFile();
-//								System.out.println("url.getFile()=" + url.getFile());
-//								System.out.println("url.getPath()=" + url.getPath());
-//								System.out.println("url.getQuery()=" + url.getQuery());
-//								System.out.println("url.toString()=" + url.toString());
-//
-//								System.out.println("url.getRef()=" + url.getRef());
-//								System.out.println("url.getProtocol()=" + url.getProtocol());
-//								System.out.println("url.toString()=" + url.toString());
-//
-//							}
-//						}
-//					}
-					
+					// // Handle any property with a name ending with "File"
+					// // specially by seeing if it if a file in the class path.
+					// // If it is then use the file name of the file that is
+					// // found in the classpath.
+					// // NOTE: this might be confusing and therefore not a good
+					// idea.
+					// if (propertyName.endsWith("File")) {
+					// File f = new File(value);
+					// if (!f.exists()) {
+					// // Couldn't find file directly so look in classpath for
+					// it
+					// ClassLoader classLoader =
+					// HibernateUtils.class.getClassLoader();
+					// URL url = classLoader.getResource(value);
+					// if (url != null) {
+					// value = url.getFile();
+					// System.out.println("url.getFile()=" + url.getFile());
+					// System.out.println("url.getPath()=" + url.getPath());
+					// System.out.println("url.getQuery()=" + url.getQuery());
+					// System.out.println("url.toString()=" + url.toString());
+					//
+					// System.out.println("url.getRef()=" + url.getRef());
+					// System.out.println("url.getProtocol()=" +
+					// url.getProtocol());
+					// System.out.println("url.toString()=" + url.toString());
+					//
+					// }
+					// }
+					// }
+
 					// Set the system property with the value
 					System.setProperty(propertyName, value);
-					
-					System.out.println("Setting property name " + propertyName 
-							+ " to value " + value);
+
+					System.out.println("Setting property name " + propertyName + " to value " + value);
 				}
 			}
 		} catch (IOException e) {
-			System.err.println("Exception occurred reading in properties file. "
-					+ e.getMessage());
+			System.err.println("Exception occurred reading in properties file. " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Reads a Java properties file and stores all the properties as system
 	 * properties if they haven't yet been set.
 	 * 
-	 * @param fileName Name of properties file
+	 * @param fileName
+	 *            Name of properties file
 	 */
 	private static void readPropertiesConfigFile(String fileName) {
 		try {
 			readPropertiesConfigFile(new FileInputStream(fileName));
 		} catch (IOException e) {
-			System.err.println("Exception occurred reading in fileName " 
-					+ fileName + " . " + e.getMessage());
+			System.err.println("Exception occurred reading in fileName " + fileName + " . " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * When reading config params should lock up the system so that data is
-	 * consistent. This is a good idea because even though each individual
-	 * param is atomic there could be situations where multiple interdependent
-	 * params are being used and don't want a write to change them between
-	 * access.
+	 * consistent. This is a good idea because even though each individual param
+	 * is atomic there could be situations where multiple interdependent params
+	 * are being used and don't want a write to change them between access.
 	 * 
-	 * The expectation is that the program is event driven. When an event
-	 * is processed then a single call to readLock() and readUnlock() can
-	 * protect the entire code where parameters might be read. The intent
-	 * is not to read lock each single access of data.
+	 * The expectation is that the program is event driven. When an event is
+	 * processed then a single call to readLock() and readUnlock() can protect
+	 * the entire code where parameters might be read. The intent is not to read
+	 * lock each single access of data.
 	 * 
-	 * Every time readLock() is called there needs to be a corresponding call
-	 * to readUnlock(). Since this important the readUnlock() should be in
-	 * a finally block. For example:
-	 * {@code
-	 *   try {
-	 *     readLock();
-	 *     ...; // Read access the data
-	 *   } finally {
-	 *     readUnlock();
-	 *   }
+	 * Every time readLock() is called there needs to be a corresponding call to
+	 * readUnlock(). Since this important the readUnlock() should be in a
+	 * finally block. For example: {@code try { readLock(); ...; // Read access
+	 * the data } finally { readUnlock(); }
 	 */
 	public static void readLock() {
 		readLock.lock();
 	}
-	
+
 	/**
 	 * Every time readLock() is called there needs to be a call to readUnlock().
-	 * Since this is important the readUnlock() should be called in a finally 
+	 * Since this is important the readUnlock() should be called in a finally
 	 * block. See readLock() for details.
 	 */
 	public static void readUnlock() {
 		readLock.unlock();
 	}
-	
+
 	/**
 	 * Processes specified config file and overrides the config parameters
 	 * accordingly. This way can use an XML config file instead of -D Java
@@ -357,13 +355,12 @@ public class ConfigFileReader {
 	 * @throws ConfigException
 	 * @throws ConfigParamException
 	 */
-	public static void processConfig(String fileName) 
-			throws ConfigException, ConfigParamException {
+	public static void processConfig(String fileName) throws ConfigException, ConfigParamException {
 		// Don't want reading while writing so lock access
 		writeLock.lock();
-		
+
 		System.out.println("Processing configuration file " + fileName);
-		
+
 		try {
 			// Read in the data from config file
 			if (fileName != null)
@@ -376,7 +373,7 @@ public class ConfigFileReader {
 			writeLock.unlock();
 		}
 	}
-	
+
 	/**
 	 * Process the configuration file specified by a file named
 	 * transitime.properties that is in the classpath. The processes
@@ -394,21 +391,21 @@ public class ConfigFileReader {
 	 * files.
 	 */
 	public static void processConfig() {
-		// Determine from the Java system property transitime.configFiles 
+		// Determine from the Java system property transitime.configFiles
 		// the configuration files to be read
 		String configFilesStr = System.getProperty("transitime.configFiles");
-		if (configFilesStr == null)
-			return;		
-		String configFiles[] = configFilesStr.split(";");
-		for (String fileName : configFiles) {
-			try {
-				// Read in and process the config file
-				processConfig(fileName);
-			} catch (ConfigException | ConfigParamException e) {
-				e.printStackTrace();
+		if (configFilesStr != null) {
+			String configFiles[] = configFilesStr.split(";");
+			for (String fileName : configFiles) {
+				try {
+					// Read in and process the config file
+					processConfig(fileName);
+				} catch (ConfigException | ConfigParamException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-		
+
 		// If the file transitime.properties exists in the classpath then
 		// process it. This is done after the transitime.configFiles files
 		// are read in so that they have precedence over the file found
@@ -418,6 +415,6 @@ public class ConfigFileReader {
 				.getResourceAsStream(defaultPropertiesFileName);
 		if (propertiesInput != null) {
 			readPropertiesConfigFile(propertiesInput);
-		}		
+		}
 	}
 }

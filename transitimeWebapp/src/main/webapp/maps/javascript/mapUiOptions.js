@@ -11,8 +11,8 @@ var shapeOptions = {
 		
 var minorShapeOptions = {
 	color: '#0080FF',
-	weight: 1,
-	opacity: 0.4,
+	weight: 4,
+	opacity: 0.5,
 };
 		
 var stopOptions = {
@@ -54,6 +54,14 @@ var busIcon = L.icon({
 var streetcarIcon = L.icon({
     iconUrl: 'images/rail-light-24.png',
     iconRetinaUrl: 'images/rail-light-24@2x.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
+});
+
+var subwayIcon = L.icon({
+    iconUrl: 'images/rail-metro-24.png',
+    iconRetinaUrl: 'images/rail-metro-24@2x.png',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
     popupAnchor: [0, -12],

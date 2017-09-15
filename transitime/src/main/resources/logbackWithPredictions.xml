@@ -262,17 +262,6 @@
     </encoder>
   </appender>
 
-  <!-- Separate file for Auto Block Assigner logging -->
-  <appender name="AUTO_ASSIGNER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_FILE_ROOT}/autoAssigner.log.gz</fileNamePattern>
-    </rollingPolicy>
-    <encoder>
-      <charset>UTF-8</charset>
-      <pattern>${DEFAULT_PATTERN}</pattern>
-    </encoder>
-  </appender>
-
   <!-- In case easiest to write logs to console.  -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
@@ -355,11 +344,6 @@
   <logger name="org.transitime.monitoring"
           level="info" additivity="false">
     <appender-ref ref="MONITORING" />
-  </logger>
-
-  <logger name="org.transitime.core.autoAssigner"
-          level="info" additivity="false">
-    <appender-ref ref="AUTO_ASSIGNER" />
   </logger>
 
   <!--  In order to log the hibernate SQL queries need to set org.hibernate.SQL

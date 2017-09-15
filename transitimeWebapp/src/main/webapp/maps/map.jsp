@@ -37,11 +37,23 @@
   <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
   <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
-  <!--  Override the body style from the includes.jsp/general.css files -->
   <style>
+    /* Override the body style from the includes.jsp/general.css files */
     body {
 	  margin: 0px;
     }
+    
+    /* Set width of route selector. For smaller displays use smaller width */
+    #routes {
+      width: 400px;
+    }
+    
+    @media (max-width:600px) {
+      #routes {
+        width: 300px;
+      }
+    }
+    
   </style>
   
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -64,7 +76,7 @@
         to set the css width here. Yes, strange! -->  
   <div id="routesContainer">
     <div id="routesDiv">
-      <select id="routes" style="width:280px" ></select>	
+      <select id="routes"></select>	
     </div>
   </div>
   
@@ -143,8 +155,11 @@ function predictionCallback(preds, status) {
 	predictionsTimeout = setTimeout(getPredictionsJson, 20000, routeStopPreds.routeShortName, routeStopPreds.stopId);
 
 	// Add route and stop info
+	var stopName = routeStopPreds.stopName;
+	if (routeStopPreds.stopCode)
+		stopName += " (" + routeStopPreds.stopCode + ")";
 	var content = '<b>Route:</b> ' + routeStopPreds.routeName + '<br/>' 
-		+ '<b>Stop:</b> ' + routeStopPreds.stopName + '<br/>';
+		+ '<b>Stop:</b> ' + stopName + '<br/>';
 	if (verbose)
 		content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
 		
@@ -448,6 +463,8 @@ function getVehicleMarkerBackgroundOptions(vehicleData) {
 	var vehicleIcon = busIcon;
 	if (vehicleData.vehicleType == "0")
 		vehicleIcon = streetcarIcon;
+	else if (vehicleData.vehicleType == "1")
+		vehicleIcon = subwayIcon;
 	else if (vehicleData.vehicleType == "2")
 		vehicleIcon = railIcon;
 	else if (vehicleData.vehicleType == "4")
@@ -792,8 +809,9 @@ function animateVehicle(vehicleMarker, origLat, origLon, newLat, newLon) {
 function updateVehiclesUsingApiData() {
 	// If route not yet configured then simply return. Don't want to read
 	// in all vehicles for agency!
-	if (!getRouteQueryStrParam())
-		return;
+	// FIXME
+	//if (!getRouteQueryStrParam())
+	//	return;
 	
 	var url = apiUrlPrefix + "/command/vehiclesDetails?" + getRouteQueryStrParam();
 	// If stop specified as query str param to this page pass it to the 
@@ -865,6 +883,13 @@ map.on('popupclose', function(e) {
 // and set map bounds to the agency extent if route not specified in query string
 $.getJSON(apiUrlPrefix + "/command/agencyGroup", 
 		function(agencies) {
+			// If agency not defined, such as when just testing AVL feed,
+			// then set map to United States
+			if (agencies.agency.length == 0) {
+				map.fitBounds([[25.0, -130.0], [55.0, -70.0]]);
+				return;
+			}
+			
 	        agencyTimezoneOffset = agencies.agency[0].timezoneOffsetMinutes;
 			
 	        // Fit the map initially to the agency, but only if route not
@@ -884,7 +909,7 @@ setRouteQueryStrParamViaQueryStr();
 if (!getRouteQueryStrParam()) {
   // Route not specified in query string. Therefore populate the route 
   // selector if route not specified in query string.
-  $.getJSON(apiUrlPrefix + "/command/routes", 
+  $.getJSON(apiUrlPrefix + "/command/routes?keepDuplicates=true", 
  		function(routes) {
 	        // Generate list of routes for the selector
 	 		var selectorData = [{id: '', text: 'Select Route'}];
@@ -929,9 +954,15 @@ if (!getRouteQueryStrParam()) {
  		 			// make sure this annoying tooltip doesn't popup.
  		 			$( "#select2-routes-container" ).tooltip({ content: 'foo' });
  		 			$( "#select2-routes-container" ).tooltip("option", "disabled", true);
-
 				});
 
+	 		// If showing unassigned vehicles then start getting vehicle 
+	 		// location data now instead instead of waiting till route selected.
+	 		if (getQueryVariable("showUnassignedVehicles")) {
+	 			updateVehiclesUsingApiData();
+	 		}
+	 		
+	 		// of waiting 
  			// Set focus to selector so that user can simply start
  			// typing to select a route. Can't use something like
  			// '#routes' since select2 changes  the input element to a

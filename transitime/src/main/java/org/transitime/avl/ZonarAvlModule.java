@@ -16,6 +16,8 @@
  */
 package org.transitime.avl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jdom2.Document;
@@ -68,11 +70,14 @@ public class ZonarAvlModule extends XmlPollingAvlModule {
 	}
 
 	@Override
-	protected void extractAvlData(Document doc) throws NumberFormatException {
+	protected Collection<AvlReport> extractAvlData(Document doc) throws NumberFormatException {
 		logger.info("Extracting data from xml file");
 
 		// Get root of doc
 		Element rootNode = doc.getRootElement();
+
+		// The return value for the method
+		Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
 
 		List<Element> assets = rootNode.getChildren("asset");
 		for (Element asset : assets) {
@@ -113,8 +118,11 @@ public class ZonarAvlModule extends XmlPollingAvlModule {
 			AvlReport avlReport = new AvlReport(vehicleId, time,
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
 					heading, "Zonar");
-			processAvlReport(avlReport);
+
+			avlReportsReadIn.add(avlReport);
 		}
+		
+		return avlReportsReadIn;
 	}
 	
 

@@ -1,6 +1,8 @@
 package org.transitime.custom.gtt;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
@@ -33,9 +35,11 @@ public class GTTAvlModule extends PollUrlAvlModule {
 	}
 
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 		
 		String json=this.getJsonString(in);
+		// The return value for the method
+		Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
 		
 		JSONArray array = new JSONArray(json);
 				
@@ -91,10 +95,11 @@ public class GTTAvlModule extends PollUrlAvlModule {
 					
 					if(avlReport!=null)
 					{
-						processAvlReport(avlReport);
+						avlReportsReadIn.add(avlReport);
 					}
 				}							
 		}
+		return avlReportsReadIn;
 	}
 	/**
 	 * Just for debugging

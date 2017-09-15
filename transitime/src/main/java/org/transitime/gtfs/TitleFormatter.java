@@ -124,6 +124,27 @@ public class TitleFormatter {
 	}
 	
 	/**
+	 * Goes through list of regex replacements and returns true if the title
+	 * passed in matches a replace string. Useful for determining if a title
+	 * already replaced and shouldn't be changed further.
+	 * 
+	 * @param title
+	 *            the title to check
+	 * @return true if title matches a replace string
+	 */
+	public boolean isReplaceTitle(String title) {
+		// Go through all title replacements that have been configured
+		for (RegexInfo regexInfo : regexReplaceList) {
+			if (regexInfo.replace.equals(title))
+				// Found a match!
+				return true;
+		}
+		
+		// No match found
+		return false;
+	}
+	
+	/**
 	 * Processes file containing a list of regular expressions along
 	 * with the corresponding replacement text. 
 	 * A line is considered a comment if it start with "--" or "//".

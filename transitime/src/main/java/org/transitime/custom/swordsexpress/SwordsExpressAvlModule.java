@@ -1,6 +1,8 @@
 package org.transitime.custom.swordsexpress;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
@@ -25,10 +27,10 @@ public class SwordsExpressAvlModule extends PollUrlAvlModule {
 	}
 
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 		
 		String json=this.getJsonString(in);
-		
+		Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
 		JSONArray array = new JSONArray(json);
 		SimpleDateFormat dateformater=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		for (int i=0; i<array.length(); ++i) {
@@ -50,9 +52,11 @@ public class SwordsExpressAvlModule extends PollUrlAvlModule {
 						new AvlReport(vehicleId, timestamp.getTime(), latitude,
 								longitude, heading, speed, "Swords Express");
 				
-				processAvlReport(avlReport);
+				
+				avlReportsReadIn.add(avlReport);
 			}		
 		}
+		return avlReportsReadIn;
 	}
 	/**
 	 * Just for debugging

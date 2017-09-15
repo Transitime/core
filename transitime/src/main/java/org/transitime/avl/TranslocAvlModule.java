@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -45,7 +47,7 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 	private static StringConfigValue feedUrl = 
 			new StringConfigValue("transitime.avl.transloc.url", 
 					"https://transloc-api-1-2.p.mashape.com/",
-					"The URL of the NextBus feed to use.");
+					"The URL of the Transloc API to use.");
 
 	private static StringConfigValue feedAgencyId =
 			new StringConfigValue("transitime.avl.transloc.agencyId",
@@ -90,9 +92,11 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 	 * processes an AvlReport.
 	 * 
 	 * @param in
+	 * @return Collection of AvlReports
 	 */
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in)
+			throws Exception {
 		String jsonStr = getJsonString(in);
 		try {
 			JSONObject jsonObj = new JSONObject(jsonStr);
@@ -102,7 +106,10 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 			// If no agency data then give up (better then getting an exception
 			// when calling getJSONArray().
 			if (dataObj.isNull(feedAgencyId.getValue()))
-				return;
+				return new ArrayList<AvlReport>();
+			
+			// The return value for the method
+			Collection<AvlReport> avlReportsReadIn = new ArrayList<AvlReport>();
 			
 			// Process data for each vehicle
 			JSONArray jsonArray = dataObj.getJSONArray(feedAgencyId.getValue());
@@ -150,11 +157,14 @@ public class TranslocAvlModule extends PollUrlAvlModule {
 				AvlReport avlReport =
 						new AvlReport(vehicleId, gpsTime.getTime(), lat, lon,
 								speed, heading, "Transloc");
-				processAvlReport(avlReport);
+				avlReportsReadIn.add(avlReport);
 			}
+			
+			return avlReportsReadIn;
 		} catch (JSONException e) {
 			logger.error("Error parsing JSON. {}. {}", 
 					e.getMessage(), jsonStr, e);
+			return new ArrayList<AvlReport>();
 		}
 	}
 

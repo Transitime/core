@@ -20,6 +20,8 @@ package org.transitime.custom.mbta;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -88,7 +90,7 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 	 * @see org.transitime.avl.AvlModule#processData(java.io.InputStream)
 	 */
 	@Override
-	protected void processData(InputStream in) throws Exception {
+	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 		// Map, keyed on vehicle ID, is for keeping track of the last AVL
 		// report for each vehicle. Since GPS reports are in chronological
 		// order in the feed the element in the map represents the last
@@ -111,10 +113,10 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 
 		// Process the last AVL report for each vehicle
 		if (shouldProcessAvl) {
-			for (AvlReport avlReport : avlReports.values()) {
-				processAvlReport(avlReport);
-			}
-		}
+			// Return all the AVL reports read in
+			return avlReports.values();
+		} else
+			return new ArrayList<AvlReport>();
 	}
 
 	/**

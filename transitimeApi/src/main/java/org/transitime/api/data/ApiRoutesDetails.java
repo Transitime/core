@@ -23,6 +23,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.transitime.db.structs.Agency;
 import org.transitime.ipc.data.IpcRoute;
 
 /**
@@ -32,6 +33,12 @@ import org.transitime.ipc.data.IpcRoute;
  */
 @XmlRootElement
 public class ApiRoutesDetails {
+	// So can easily get agency name when getting routes. Useful for db reports 
+	// and such.
+	@XmlElement(name = "agency")
+	private String agencyName;
+	
+	// List of route info
 	@XmlElement(name = "routes")
 	private List<ApiRouteDetails> routesData;
 
@@ -49,11 +56,15 @@ public class ApiRoutesDetails {
 	 * objects. 
 	 * 
 	 * @param routes
+	 * @param agency so can get agency name
 	 */
-	public ApiRoutesDetails(Collection<IpcRoute> routes) {
+	public ApiRoutesDetails(Collection<IpcRoute> routes, Agency agency) {
 		routesData = new ArrayList<ApiRouteDetails>();
 		for (IpcRoute route : routes) {
 			routesData.add(new ApiRouteDetails(route));
 		}
+		
+		// Also set agency name
+		agencyName = agency.getName();
 	}
 }

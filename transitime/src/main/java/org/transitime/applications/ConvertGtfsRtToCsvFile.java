@@ -18,6 +18,7 @@
 package org.transitime.applications;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +159,7 @@ public class ConvertGtfsRtToCsvFile {
 					new HashMap<String, List<AvlReport>>();
 					
 			// Read in all the AvlReports
-			List<AvlReport> avlReports = 
+			Collection<AvlReport> avlReports = 
 					GtfsRtVehiclePositionsReader.getAvlReports(uri);
 			
 			// Load all AvlReports into map by vehicle ID

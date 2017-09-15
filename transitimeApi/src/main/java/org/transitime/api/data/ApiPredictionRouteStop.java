@@ -53,6 +53,9 @@ public class ApiPredictionRouteStop {
 	@XmlAttribute
 	private String stopName;
 
+	@XmlAttribute
+	private Integer stopCode;
+
 	// Using String so that it will not be output if not showing predictions
 	// by location because then this value will be null. Also, can this way
 	// format it to desired number of digits of precision.
@@ -84,6 +87,7 @@ public class ApiPredictionRouteStop {
 		routeId = routeStopInfo.getRouteId();
 		stopId = routeStopInfo.getStopId();
 		stopName = routeStopInfo.getStopName();
+		stopCode = routeStopInfo.getStopCode();
 		distanceToStop =
 				Double.isNaN(routeStopInfo.getDistanceToStop()) ? null
 						: MathUtils.round(routeStopInfo.getDistanceToStop(), 1);

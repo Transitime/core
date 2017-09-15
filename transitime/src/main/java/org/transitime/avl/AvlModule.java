@@ -16,6 +16,7 @@
  */
 package org.transitime.avl;
 
+import java.util.Collection;
 import javax.jms.JMSException;
 
 import org.slf4j.Logger;
@@ -82,6 +83,18 @@ public abstract class AvlModule extends Module {
 			processAvlReportUsingJms(avlReport);
 		} else {
 			processAvlReportWithoutJms(avlReport);
+		}
+	}
+	
+	/**
+	 * Processes entire collection of AVL reports read from feed by calling
+	 * processAvlReport() on each one.
+	 * 
+	 * @param avlReports
+	 */
+	protected void processAvlReports(Collection<AvlReport> avlReports) {
+		for (AvlReport avlReport : avlReports) {
+			processAvlReport(avlReport);
 		}
 	}
 	

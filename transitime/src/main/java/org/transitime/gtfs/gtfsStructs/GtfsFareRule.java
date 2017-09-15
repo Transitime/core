@@ -86,5 +86,45 @@ public class GtfsFareRule extends CsvBase {
 				+ "]";
 	}
 
+	/**
+	 * So that can put GtfsFareRules into a set to get rid of duplicates
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GtfsFareRule other = (GtfsFareRule) obj;
+		if (containsId == null) {
+			if (other.containsId != null)
+				return false;
+		} else if (!containsId.equals(other.containsId))
+			return false;
+		if (destinationId == null) {
+			if (other.destinationId != null)
+				return false;
+		} else if (!destinationId.equals(other.destinationId))
+			return false;
+		if (fareId == null) {
+			if (other.fareId != null)
+				return false;
+		} else if (!fareId.equals(other.fareId))
+			return false;
+		if (originId == null) {
+			if (other.originId != null)
+				return false;
+		} else if (!originId.equals(other.originId))
+			return false;
+		if (routeId == null) {
+			if (other.routeId != null)
+				return false;
+		} else if (!routeId.equals(other.routeId))
+			return false;
+		return true;
+	}
+
 
 }

@@ -25,7 +25,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -38,6 +37,23 @@ import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
+import org.hibernate.CallbackException;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.classic.Lifecycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.transitime.applications.Core;
+import org.transitime.configData.CoreConfig;
+import org.transitime.db.hibernate.HibernateUtils;
+import org.transitime.utils.Geo;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -113,7 +129,7 @@ public class StopPath implements Serializable, Lifecycle {
 	// much faster.
 	@Column(length=1000)// @ElementCollection @OrderColumn
 	private ArrayList<Location> locations; 
-
+	
 	// Having the path length readily accessible via the database is handy
 	// since that way can easily do queries to determine travel speeds and
 	// such. 

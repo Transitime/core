@@ -2,6 +2,7 @@ package org.transitime.avl.via;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class ViaRoute100Trial_GTFSRealtimeModule extends GtfsRealtimeModule {
 
 	@Override
 	protected void getAndProcessData() {
-		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
+		Collection<AvlReport> avlReports = GtfsRtVehiclePositionsReader
 				.getAvlReports(getGtfsRealtimeURI());
 		for (AvlReport avlReport : avlReports) {
 			if (shouldProcessAvl)
