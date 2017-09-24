@@ -5,9 +5,12 @@ jcs.KalmanErrorCache.cacheattributes.MaxObjects=100
 jcs.KalmanErrorCache.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
 
 
-# AVAILABLE AUXILIARY CACHES
-jcs.auxiliary.DC=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheFactory
-jcs.auxiliary.DC.attributes=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheAttributes
-jcs.auxiliary.DC.attributes.DiskPath=/tmp/cache
-jcs.auxiliary.DC.attributes.maxKeySize=100000
+# Block Disk Cache
+jcs.auxiliary.DC=org.apache.commons.jcs.auxiliary.disk.block.BlockDiskCacheFactory
+jcs.auxiliary.DC.attributes=org.apache.commons.jcs.auxiliary.disk.block.BlockDiskCacheAttributes
+jcs.auxiliary.DC.attributes.DiskPath=/tmp/block-disk-cache
+jcs.auxiliary.DC.attributes.MaxPurgatorySize=300000
+jcs.auxiliary.DC.attributes.MaxKeySize=1000000
+jcs.auxiliary.DC.attributes.blockSizeBytes=500
+jcs.auxiliary.DC.attributes.EventQueueType=SINGLE
 
