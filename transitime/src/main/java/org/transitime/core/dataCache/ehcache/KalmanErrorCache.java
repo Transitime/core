@@ -119,4 +119,15 @@ public class KalmanErrorCache implements ErrorCache  {
 		List<KalmanErrorCacheKey> keys = cache.getKeys();
 		return keys;
 	}
+
+	@Override
+	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
+		
+		
+		Element errorElement = new Element(key, value);
+		
+		cache.put(errorElement);
+	}
+
+	
 }

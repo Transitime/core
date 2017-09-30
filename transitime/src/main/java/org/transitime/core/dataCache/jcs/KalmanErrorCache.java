@@ -54,7 +54,8 @@ public class KalmanErrorCache implements ErrorCache  {
 	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public Double getErrorValue(KalmanErrorCacheKey key) {		
-						
+		 System.out.println(cache.getStats().toString());
+		 
 		 Double result = cache.get(key);
 		
 		 return result;	
@@ -70,6 +71,15 @@ public class KalmanErrorCache implements ErrorCache  {
 				
 		cache.put(key, value);
 		
-	}				
+	}
+
+	@Override
+	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
+			
+		cache.put(key, value);
+		
+		
+	}	
+	
 	
 }

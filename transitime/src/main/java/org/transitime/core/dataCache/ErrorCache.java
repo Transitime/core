@@ -12,5 +12,7 @@ public interface ErrorCache {
 	Double getErrorValue(KalmanErrorCacheKey key);
 
 	void putErrorValue(Indices indices, Double value);
+		
+	void putErrorValue(KalmanErrorCacheKey key, Double value);
 
 }

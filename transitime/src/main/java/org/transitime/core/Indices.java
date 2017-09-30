@@ -62,20 +62,23 @@ public class Indices implements Serializable {
 
 		// Make sure parameters are valid to avoid bugs. This could be
 		// considered a bit wasteful though.
-		Trip trip = block.getTrip(tripIndex);
-		if (trip == null)
-			throw new IndexOutOfBoundsException("tripIndex " + tripIndex
-					+ " invalid for block " + block);
-		StopPath stopPath = trip.getStopPath(stopPathIndex);
-		if (stopPath == null)
-			throw new IndexOutOfBoundsException("stopPathIndex "
-					+ stopPathIndex + " invalid for tripIndex " + tripIndex
-					+ " and block " + block);
-		VectorWithHeading vector = stopPath.getSegmentVector(segmentIndex);
-		if (vector == null)
-			throw new IndexOutOfBoundsException("segmentIndex " + segmentIndex
-					+ " invalid for stopPathIndex " + stopPathIndex
-					+ " tripIndex " + tripIndex + " and block " + block);
+		if(block!=null)
+		{
+			Trip trip = block.getTrip(tripIndex);
+			if (trip == null)
+				throw new IndexOutOfBoundsException("tripIndex " + tripIndex
+						+ " invalid for block " + block);
+			StopPath stopPath = trip.getStopPath(stopPathIndex);
+			if (stopPath == null)
+				throw new IndexOutOfBoundsException("stopPathIndex "
+						+ stopPathIndex + " invalid for tripIndex " + tripIndex
+						+ " and block " + block);
+			VectorWithHeading vector = stopPath.getSegmentVector(segmentIndex);
+			if (vector == null)
+				throw new IndexOutOfBoundsException("segmentIndex " + segmentIndex
+						+ " invalid for stopPathIndex " + stopPathIndex
+						+ " tripIndex " + tripIndex + " and block " + block);
+		}
 	}
 
 	/**
