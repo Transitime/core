@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.transitime.core.dataCache;
+package org.transitime.core.dataCache.ehcache;
 
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +20,11 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
+import org.transitime.core.dataCache.ArrivalDepartureComparator;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheFactory;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheInterface;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitime.core.dataCache.TripKey;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.utils.Time;
 
@@ -32,8 +37,8 @@ import org.transitime.utils.Time;
  *         TODO this could do with an interface, factory class, and alternative
  *         implementations, perhaps using Infinispan.
  */
-public class StopArrivalDepartureCache {
-	private static StopArrivalDepartureCache singleton = new StopArrivalDepartureCache();
+public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterface {
+
 
 	private static boolean debug = false;
 
@@ -50,16 +55,8 @@ public class StopArrivalDepartureCache {
 			"transitime.tripdatacache.tripDataCacheMaxAgeSec", 4 * Time.SEC_PER_DAY,
 			"How old an arrivaldeparture has to be before it is removed from the cache ");
 
-	/**
-	 * Gets the singleton instance of this class.
-	 * 
-	 * @return
-	 */
-	public static StopArrivalDepartureCache getInstance() {
-		return singleton;
-	}
 
-	private StopArrivalDepartureCache() {
+	public StopArrivalDepartureCache() {
 		CacheManager cm = CacheManager.getInstance();
 		EvictionAgePolicy evictionPolicy = null;
 		if (tripDataCacheMaxAgeSec != null) {
@@ -104,6 +101,10 @@ public class StopArrivalDepartureCache {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.transitime.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#getStopHistory(org.transitime.core.dataCache.StopArrivalDepartureCacheKey)
+	 */
+	
 	@SuppressWarnings("unchecked")
 	synchronized public List<ArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
 
@@ -125,6 +126,10 @@ public class StopArrivalDepartureCache {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.transitime.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#putArrivalDeparture(org.transitime.db.structs.ArrivalDeparture)
+	 */
+	
 	@SuppressWarnings("unchecked")
 	synchronized public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 
@@ -176,7 +181,7 @@ public class StopArrivalDepartureCache {
 		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
 
 		for (ArrivalDeparture result : results) {
-			StopArrivalDepartureCache.getInstance().putArrivalDeparture(result);
+			StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(result);
 		}
 	}
 

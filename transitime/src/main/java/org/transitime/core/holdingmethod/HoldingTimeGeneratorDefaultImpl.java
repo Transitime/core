@@ -18,10 +18,11 @@ import org.transitime.core.dataCache.ArrivalDepartureComparator;
 import org.transitime.core.dataCache.HoldingTimeCache;
 
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
+import org.transitime.core.dataCache.ehcache.StopArrivalDepartureCache;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.HoldingTime;
 import org.transitime.ipc.data.IpcPrediction;
@@ -271,7 +272,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	{
 		StopArrivalDepartureCacheKey currentStopKey=new StopArrivalDepartureCacheKey(stopId,time);
 				
-		List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+		List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 		
 		ArrivalDeparture closestDepartureEvent=null;
 		if(currentStopList!=null)
@@ -316,7 +317,7 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	{
 		StopArrivalDepartureCacheKey currentStopKey=new StopArrivalDepartureCacheKey(stopid,time);
 		
-		List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+		List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 		
 		ArrivalDeparture closestArrivalEvent=null;
 		

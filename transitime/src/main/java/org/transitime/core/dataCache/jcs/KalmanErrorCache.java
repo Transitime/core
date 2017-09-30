@@ -1,5 +1,7 @@
 package org.transitime.core.dataCache.jcs;
 
+import java.util.List;
+
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
 import org.slf4j.Logger;
@@ -13,26 +15,15 @@ import org.transitime.core.dataCache.KalmanErrorCacheKey;
  */
 public class KalmanErrorCache implements ErrorCache  {
 	final private static String cacheName = "KalmanErrorCache";
-	private static ErrorCache singleton = new KalmanErrorCache();
-	
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);
 
 	private CacheAccess<KalmanErrorCacheKey, Double>  cache = null;
-	/**
-	 * Gets the singleton instance of this class.
-	 * 
-	 * @return
-	 */
-	public static ErrorCache getInstance() {
-		return singleton;
-	}
 	
 	public KalmanErrorCache() {
 		cache = JCS.getInstance(cacheName);																			
 	}
-	
 	
 	/* (non-Javadoc)
 	 * @see org.transitime.core.dataCache.ErrorCache#getErrorValue(org.transitime.core.Indices)
@@ -76,10 +67,12 @@ public class KalmanErrorCache implements ErrorCache  {
 	@Override
 	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
 			
-		cache.put(key, value);
-		
-		
-	}	
-	
-	
+		cache.put(key, value);				
+	}
+
+	@Override
+	public List<KalmanErrorCacheKey> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}			
 }

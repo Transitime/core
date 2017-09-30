@@ -7,10 +7,11 @@ import java.util.List;
 import org.transitime.applications.Core;
 import org.transitime.core.HeadwayGenerator;
 import org.transitime.core.VehicleState;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
+import org.transitime.core.dataCache.ehcache.StopArrivalDepartureCache;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Headway;
 import org.transitime.ipc.data.IpcVehicleComplete;
@@ -39,7 +40,7 @@ public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
 			
 			StopArrivalDepartureCacheKey key=new StopArrivalDepartureCacheKey(stopId, new Date(date));
 			
-			List<ArrivalDeparture> stopList=StopArrivalDepartureCache.getInstance().getStopHistory(key);
+			List<ArrivalDeparture> stopList=StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
 			int lastStopArrivalIndex =-1;
 			int previousVehicleArrivalIndex = -1;
 			

@@ -19,7 +19,7 @@ import org.transitime.core.dataCache.KalmanErrorCacheKey;
  */
 public class KalmanErrorCache implements ErrorCache  {
 	final private static String cacheName = "KalmanErrorCache";
-	private static KalmanErrorCache singleton = new KalmanErrorCache();
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);
 
@@ -29,9 +29,6 @@ public class KalmanErrorCache implements ErrorCache  {
 	 * 
 	 * @return
 	 */
-	public static KalmanErrorCache getInstance() {
-		return singleton;
-	}
 	
 	KalmanErrorCache() {
 		CacheManager cm = CacheManager.getInstance();

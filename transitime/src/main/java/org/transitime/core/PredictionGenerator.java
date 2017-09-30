@@ -31,10 +31,11 @@ import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.IntegerConfigValue;
 import org.transitime.core.dataCache.PredictionComparator;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
+import org.transitime.core.dataCache.ehcache.StopArrivalDepartureCache;
 import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
@@ -90,9 +91,9 @@ public abstract class PredictionGenerator {
 			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
 					new Date(currentVehicleState.getMatch().getAvlTime()));
 	
-			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 	
-			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 			
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.
@@ -139,9 +140,9 @@ public abstract class PredictionGenerator {
 			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
 					new Date(currentVehicleState.getMatch().getAvlTime()));
 	
-			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 	
-			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 	
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.

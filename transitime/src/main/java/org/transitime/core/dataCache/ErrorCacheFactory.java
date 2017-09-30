@@ -4,7 +4,7 @@ import org.transitime.utils.ClassInstantiator;
 
 /**
  * @author Sean Óg Crudden
- * Factoy that will provide cache to hold Kalman error values.
+ * Factory that will provide cache to hold Kalman error values.
  *
  */
 public class ErrorCacheFactory {

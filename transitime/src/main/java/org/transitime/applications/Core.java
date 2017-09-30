@@ -40,9 +40,10 @@ import org.transitime.configData.CoreConfig;
 import org.transitime.core.ServiceUtils;
 import org.transitime.core.TimeoutHandlerModule;
 import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.VehicleDataCache;
+import org.transitime.core.dataCache.ehcache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.db.hibernate.DataDbLogger;
@@ -437,7 +438,7 @@ public class Core {
 				Date startDate=DateUtils.addDays(endDate, -1);
 				
 				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
-				StopArrivalDepartureCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
 				
 				endDate=startDate;
 			}

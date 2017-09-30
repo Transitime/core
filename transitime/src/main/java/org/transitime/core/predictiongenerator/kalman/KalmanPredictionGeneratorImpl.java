@@ -1,5 +1,6 @@
 package org.transitime.core.predictiongenerator.kalman;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -86,10 +87,14 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			logger.debug("Kalman has last vehicle info for : " +indices.toString()+ " : "+travelTimeDetails);
 									
 			Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
+			
+			SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyy-MM-dd");
+			
+			logger.debug("Kalman nearest Day : "+dateFormatter.format(nearestDay));
 
 			List<TravelTimeDetails> lastDaysTimes = lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
 					indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
-					maxKalmanDaysToSearch.getValue(), minKalmanDays.getValue());
+					maxKalmanDaysToSearch.getValue(), maxKalmanDays.getValue());
 				
 			if(lastDaysTimes!=null)
 			{												

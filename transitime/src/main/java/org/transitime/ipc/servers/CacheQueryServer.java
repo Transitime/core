@@ -15,15 +15,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.core.dataCache.ArrivalDepartureComparator;
+import org.transitime.core.dataCache.ErrorCacheFactory;
 import org.transitime.core.dataCache.HistoricalAverage;
 import org.transitime.core.dataCache.HoldingTimeCache;
 import org.transitime.core.dataCache.HoldingTimeCacheKey;
 import org.transitime.core.dataCache.KalmanErrorCacheKey;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
+import org.transitime.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitime.core.dataCache.TripDataHistoryCache;
 import org.transitime.core.dataCache.TripKey;
 import org.transitime.core.dataCache.ehcache.KalmanErrorCache;
+import org.transitime.core.dataCache.ehcache.StopArrivalDepartureCache;
 import org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitime.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitime.core.dataCache.StopPathCacheKey;
@@ -91,7 +93,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(stopId,
 					Calendar.getInstance().getTime());
 
-			List<ArrivalDeparture> result = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+			List<ArrivalDeparture> result = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 
 			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
 
@@ -203,13 +205,13 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	@Override
 	public Double getKalmanErrorValue(String tripId, Integer stopPathIndex) throws RemoteException {
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(tripId, stopPathIndex);
-		Double result = KalmanErrorCache.getInstance().getErrorValue(key);
+		Double result = ErrorCacheFactory.getInstance().getErrorValue(key);
 		return result;
 	}
 
 	@Override
 	public List<IpcKalmanErrorCacheKey> getKalmanErrorCacheKeys() throws RemoteException {
-		List<KalmanErrorCacheKey> keys = KalmanErrorCache.getInstance().getKeys();
+		List<KalmanErrorCacheKey> keys = ErrorCacheFactory.getInstance().getKeys();
 		List<IpcKalmanErrorCacheKey> ipcResultList = new ArrayList<IpcKalmanErrorCacheKey>();
 				
 		for(KalmanErrorCacheKey key:keys)
