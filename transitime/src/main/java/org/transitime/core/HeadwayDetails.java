@@ -26,7 +26,7 @@ public class HeadwayDetails {
 		super();
 		this.vehicleBehindPrediction = vehicleBehindPrediction;
 		this.vehicleAheadPrediction = vehicleAheadPrediction;
-		if ((vehicleBehindPrediction != null && vehicleAheadPrediction != null
+		if (!(vehicleBehindPrediction != null && vehicleAheadPrediction != null
 				&& vehicleBehindPrediction.getStopId().equals(vehicleAheadPrediction.getStopId())
 				&& (!vehicleBehindPrediction.getVehicleId().equals(vehicleAheadPrediction.getVehicleId())))) {
 			throw new Exception("Need two predictions for same stop for different vehicles to calculate headway.");

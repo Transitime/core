@@ -86,11 +86,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 			logger.debug("Kalman has last vehicle info for : " +indices.toString()+ " : "+travelTimeDetails);
 									
-			Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
-			
-			SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyy-MM-dd");
-			
-			logger.debug("Kalman nearest Day : "+dateFormatter.format(nearestDay));
+			Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);					
 
 			List<TravelTimeDetails> lastDaysTimes = lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
 					indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
