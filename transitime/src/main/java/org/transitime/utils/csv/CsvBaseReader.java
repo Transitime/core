@@ -128,10 +128,7 @@ public abstract class CsvBaseReader<T> {
 			// way the CSV parser will process the file starting with the first
 			// true character.
 			
-			URL u = new URL(fileName);
-						
-			Reader in = new BufferedReader(new InputStreamReader(
-					u.openStream(), "UTF-8"));
+			Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
 			
 			// Deal with the possible BOM character at the beginning of the file
 			in.mark(1);

@@ -152,18 +152,24 @@ public class BatchCsvAvlFeedModule extends Module {
 				DbConfig dbConfig = Core.getInstance().getDbConfig();
 
 				Trip trip = dbConfig.getTrip(avlReport.getAssignmentId());
-
-				boolean matches = routeIdFilterRegExPattern.matcher(trip.getRouteId().trim()).matches();
-
-				if (matches) {
-					if (endTimeOfDay.getValue() != null && startTimeOfDay.getValue() != null) {
-						if (hour >= new Integer(startTimeOfDay.getValue())
-								&& hour < new Integer(endTimeOfDay.getValue())) {
-							AvlProcessor.getInstance().processAvlReport(avlReport);
-						} else {
-							AvlProcessor.getInstance().processAvlReport(avlReport);
+				
+				if(trip!=null)
+				{
+					boolean matches = routeIdFilterRegExPattern.matcher(trip.getRouteId().trim()).matches();
+	
+					if (matches) {
+						if (endTimeOfDay.getValue() != null && startTimeOfDay.getValue() != null) {
+							if (hour >= new Integer(startTimeOfDay.getValue())
+									&& hour < new Integer(endTimeOfDay.getValue())) {
+								AvlProcessor.getInstance().processAvlReport(avlReport);
+							} else {
+								AvlProcessor.getInstance().processAvlReport(avlReport);
+							}
 						}
 					}
+				}else
+				{
+					logger.info("No trup with id {} in GTFS", avlReport.getAssignmentId());
 				}
 			} else {
 				if (endTimeOfDay.getValue() != null && startTimeOfDay.getValue() != null) {

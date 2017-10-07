@@ -285,7 +285,7 @@ public class GtfsFileProcessor {
 		GtfsData gtfsData =
 				new GtfsData(configRev, notes, zipFileLastModifiedTime,
 						shouldStoreNewRevs, AgencyConfig.getAgencyId(),
-						"file:///"+gtfsDirectoryName, supplementDir,
+						gtfsDirectoryName, supplementDir,
 						pathOffsetDistance, maxStopToPathDistance,
 						maxDistanceForEliminatingVertices,
 						defaultWaitTimeAtStopMsec, maxSpeedKph,
