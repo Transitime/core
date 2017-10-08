@@ -77,6 +77,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());		
 	
 		TravelTimeDetails travelTimeDetails = this.getLastVehicleTravelTime(currentVehicleState, indices);
+		
+		
 		/*
 		 * The first vehicle of the day should use schedule or historic data to
 		 * make prediction. Cannot use Kalman as yesterdays vehicle will have
@@ -129,11 +131,11 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 					TripSegment last_vehicle_segment = ts_day_0_k_1;
 								
-					Indices previousVehicleIndices = getLastVehicleIndices(currentVehicleState, indices);
+					Indices previousVehicleIndices = new Indices(travelTimeDetails.getArrival());									
 					
 					Double last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);										
 					
-					logger.debug("Using error value: " + last_prediction_error + " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
+					logger.debug("Using error value: " + last_prediction_error +"found with vehicle id "+travelTimeDetails.getArrival().getVehicleId()+ " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
 					
 					//TODO this should also display the detail of which vehicle it choose as the last one.
 					logger.debug("Using last vehicle value: " + travelTimeDetails + " for : "+ indices.toString());

@@ -38,11 +38,7 @@ import org.transitime.utils.Time;
  * reads a single batch of data, unlike the usual AVL modules that continuously
  * read data. This module is useful for debugging because can relatively easily
  * create a plain text CSV file of AVL data and see what the code does.
- * <p>
- * CSV columns include vehicleId, time (in epoch msec or as date string as in
- * "9-14-2015 12:53:01"), latitude, longitude, speed (optional), heading
- * (optional), assignmentId, and assignmentType (optional, but can be BLOCK_ID,
- * ROUTE_ID, TRIP_ID, or TRIP_SHORT_NAME).
+ * 
  *
  * @author SkiBu Smith
  *
@@ -160,12 +156,14 @@ public class BatchCsvAvlFeedModule extends Module {
 					if (matches) {
 						if (endTimeOfDay.getValue() != null && startTimeOfDay.getValue() != null) {
 							if (hour >= new Integer(startTimeOfDay.getValue())
-									&& hour < new Integer(endTimeOfDay.getValue())) {
-								AvlProcessor.getInstance().processAvlReport(avlReport);
-							} else {
+									&& hour < new Integer(endTimeOfDay.getValue())) 
+							{
 								AvlProcessor.getInstance().processAvlReport(avlReport);
 							}
-						}
+							
+						} else {
+							AvlProcessor.getInstance().processAvlReport(avlReport);
+						}							
 					}
 				}else
 				{
@@ -175,9 +173,11 @@ public class BatchCsvAvlFeedModule extends Module {
 				if (endTimeOfDay.getValue() != null && startTimeOfDay.getValue() != null) {
 					if (hour >= new Integer(startTimeOfDay.getValue()) && hour < new Integer(endTimeOfDay.getValue())) {
 						AvlProcessor.getInstance().processAvlReport(avlReport);
-					} else {
-						AvlProcessor.getInstance().processAvlReport(avlReport);
 					}
+				} 
+				else 
+				{
+					AvlProcessor.getInstance().processAvlReport(avlReport);
 				}
 			}
 
