@@ -12,7 +12,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 %>
 <html>
 <head>
-<%@include file="/template/includes.jsp" %> 
+<%@include file="/template/includes.jsp" %>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>API Calls</title>
 </head>
@@ -29,7 +29,7 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="routeDetailsApiParams.jsp?a=<%= agencyId %>"
     title="Detailed data for selected routes. Includes stop and path information needed to show route on map.">
       Route Details</a></li>
-      
+
   <li><a href="vehiclesApiParams.jsp?a=<%= agencyId %>"
     title="Data for vehicles, including GPS info, for a route. Useful for showing location of vehicles on map.">
       Vehicles</a></li>
@@ -39,7 +39,7 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="vehicleConfigsApiParams.jsp?a=<%= agencyId %>"
     title="Configuration data for vehicles. A way of getting list of vehicles configured for agency.">
       Vehicle Configurations</a></li>
-      
+
   <li><a href="predsByRouteStopApiParams.jsp?a=<%= agencyId %>"
     title="Predictions for specified route and stop.">
       Predictions by Route/Stop</a></li>
@@ -103,6 +103,9 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="predsByLocForAllAgenciesApiParams.jsp?a=<%= agencyId %>"
     title="Predictions for stops near specified latitude, longitude. Will return predictions for all agencies that have nearby stops.">
       Predictions by Location</a></li>
+  <li><a href="resetVehicleApiParams.jsp"
+    title="Reset specific vehicle">
+      Reset vehicle</a></li>
 </ul>
 </div>
 </body>
