@@ -93,6 +93,9 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="vertStopsScheduleApiParams.jsp?a=<%= agencyId %>"
     title="Schedule for route. For displaying schedule with stops listed in vertical direction">
       Schedule for Route, stops vertical</a></li>
+  <li><a href="resetVehicleApiParams.jsp?a=<%= agencyId %>""
+    title="Reset specific vehicle">
+      Reset vehicle</a></li>
 </ul>
 
 <div id="subtitle">Not Agency Specific</div>
@@ -103,9 +106,7 @@ if (agencyId == null || agencyId.isEmpty()) {
   <li><a href="predsByLocForAllAgenciesApiParams.jsp?a=<%= agencyId %>"
     title="Predictions for stops near specified latitude, longitude. Will return predictions for all agencies that have nearby stops.">
       Predictions by Location</a></li>
-  <li><a href="resetVehicleApiParams.jsp"
-    title="Reset specific vehicle">
-      Reset vehicle</a></li>
+ 
 </ul>
 </div>
 </body>
