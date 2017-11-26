@@ -72,7 +72,13 @@ finding specific issues with predictions.">
     title="Displays the last time each vehicle reported its GPS position over the last 24 hours.">
       Last GPS Report by Vehicle</a></li>
 </ul>
-
+<div id="subtitle">Event Reports</div>
+	<ul class="choicesList">
+	  <li><a href="vehicleEventParams.jsp?a=<%= agencyId %>"
+	    title="Check that all Events for vehicle.">
+	      Event for vehicle</a></li>	  
+	</ul>
+</div>
 <div id="subtitle">Miscellaneous Reports</div>
 <ul class="choicesList">
   <li><a href="scheduleHorizStopsParams.jsp?a=<%= agencyId %>"
