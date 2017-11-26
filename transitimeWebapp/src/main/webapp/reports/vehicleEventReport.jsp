@@ -18,7 +18,7 @@ if (vehicleId == null || vehicleId.isEmpty()) {
 <head>
   <%@include file="/template/includes.jsp" %>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Last GPS Reports for Vehicles</title>
+<title>Events for Vehicle</title>
 
 <style>
 
@@ -38,7 +38,7 @@ function dataReadCallback(jsonData) {
 		row.insertCell(0).innerHTML = vehicleInfo.time;
 		row.insertCell(1).innerHTML = vehicleInfo.description;		
 	}
-}
+};
 
 // Initiate AJAX call to get data to put into table
 $( document ).ready(function() {
