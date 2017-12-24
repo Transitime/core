@@ -1,4 +1,6 @@
 *.class
+*.project
+*.classpath
 *.iml
 .idea/
 
@@ -7,5 +9,8 @@
 *.war
 *.ear
 /bin/
+<<<<<<< HEAD
 .project
 .classpath
+=======
+>>>>>>> 7f9fa2df466fd81ee86c633c4151b0dbb0c583f2

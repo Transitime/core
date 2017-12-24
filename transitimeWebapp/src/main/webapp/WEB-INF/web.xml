@@ -2,6 +2,7 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
   <display-name>Transitime webapp</display-name>
 
+
   <context-param>
       <param-name>transitime_config_file_location</param-name>
       <!-- Set to customized properties file with db config info and such -->
@@ -9,6 +10,7 @@
       <param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>      
       
   </context-param>
+
 
   <welcome-file-list>
     <welcome-file>welcome/index.jsp</welcome-file>
@@ -19,10 +21,28 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
+  
+  <filter>
+    <filter-name>XSSFilter</filter-name>
+    <filter-class>org.transitime.xssfilter.XSSFilter</filter-class>
+  </filter> 
+  <filter-mapping>
+    <filter-name>XSSFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping> 
+  <filter>
+    <filter-name>WebLoggingFilter</filter-name>
+    <filter-class>org.transitime.utils.web.WebLoggingFilter</filter-class>
+  </filter> 
+  <filter-mapping>
+    <filter-name>WebLoggingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping> 
 
-  <!-- So that configuration parameters can be read in from file -->
-  <listener>
-    <listener-class>org.transitime.web.ReadConfigListener</listener-class>
-  </listener>
+    <listener>
+        <listener-class>
+            org.transitime.web.ReadConfigListener
+        </listener-class>
+    </listener>
 
 </web-app>

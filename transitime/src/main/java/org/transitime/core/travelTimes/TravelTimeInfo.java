@@ -89,11 +89,16 @@ public class TravelTimeInfo {
 	}
 
 	public boolean isStopTimeValid() {
-		return stopTime != STOP_TIME_NOT_VALID;
+		return stopTime != STOP_TIME_NOT_VALID && stopTime >= 0;
 	}
 	
 	public boolean areTravelTimesValid() {
-		return travelTimes != null && !travelTimes.isEmpty();
+		if (travelTimes == null || travelTimes.isEmpty())
+			return false;
+		for (int time : travelTimes)
+			if (time < 0)
+				return false;
+		return true;
 	}
 	
 	public double getTravelTimeSegLength() {

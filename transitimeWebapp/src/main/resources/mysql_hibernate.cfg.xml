@@ -34,17 +34,17 @@
    <!-- Default min_size is 1 but want to make sure that can have at
         least a couple of db access happening simultaneously without
         having to create an additional connection. -->
-   <property name="hibernate.c3p0.min_size">2</property>
-   <!-- Default max_size is 100 but that seems excessive -->
+  <!-- <property name="hibernate.c3p0.min_size">2</property>
+   &lt;!&ndash; Default max_size is 100 but that seems excessive &ndash;&gt;
    <property name="hibernate.c3p0.max_size">20</property>
-   <!-- Default timeout is 0s (forever) but want to reclaim connections 
+   &lt;!&ndash; Default timeout is 0s (forever) but want to reclaim connections
         if not used for more than 5 minutes so don't get too many 
-        connections. -->
+        connections. &ndash;&gt;
    <property name="hibernate.c3p0.timeout">300</property>
-   <!-- Default max_statements is 0 but since will be doing lots of logging
+   &lt;!&ndash; Default max_statements is 0 but since will be doing lots of logging
         of data using the same query caching some prepared statements could
-        easily speed things up. --> 
-   <property name="hibernate.c3p0.max_statements">50</property>  
+        easily speed things up. &ndash;&gt;
+   <property name="hibernate.c3p0.max_statements">50</property>  -->
  
    <!-- When doing lots of writes, such as logging AVL data and other
         such regularlly occurring data then want to batch the requests
@@ -62,17 +62,17 @@
         command line arguments so that some apps, like the 
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
-<!--
+
    <property name="hibernate.connection.url">
-      jdbc:mysql://localhost/mbta
+      jdbc:mysql://localhost/transitime
    </property>
    <property name="hibernate.connection.username">
       root
    </property>
    <property name="hibernate.connection.password">
-      PASSWORD
+      changeme
    </property>
--->
+
 
    <!-- List of XML mapping files. Commented out because adding
         the classes programatically via AnnoatedClassesList so

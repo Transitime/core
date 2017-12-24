@@ -223,12 +223,13 @@ public class Core {
 	}
 	
 	/**
-	 * For obtaining singleton Core object
+	 * For obtaining singleton Core object.
+	 * Synchronized to prevent race conditions if starting lots of optional modules. 
 	 * 
 	 * @returns the Core singleton object for this application, or null if it
 	 *          could not be created
 	 */
-	public static Core getInstance() {
+	public synchronized static Core getInstance() {
 		if (Core.singleton == null)
 			createCore();
 		

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.BooleanConfigValue;
@@ -36,6 +37,7 @@ import org.transitime.db.structs.ArrivalDeparture;
 import org.transitime.db.structs.Match;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
+import org.transitime.monitoring.CloudwatchService;
 import org.transitime.statistics.Statistics;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
@@ -157,6 +159,18 @@ public class TravelTimesProcessor {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(TravelTimesProcessor.class);
 
+	private CloudwatchService cloudwatchService;
+
+  private boolean isEmpty = true;
+	
+  public boolean isEmpty() {
+    return isEmpty;
+  }
+  
+	public TravelTimesProcessor() {
+    cloudwatchService = CloudwatchService.getInstance();
+	}
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -692,8 +706,14 @@ public class TravelTimesProcessor {
 			int dwellTimeMsec = (int) (arrDep2.getTime() - arrDep1.getTime());
 
 			// Add this stop time to map so it can be averaged
-			addStopTimeToMap(mapKeyForTravelTimes, dwellTimeMsec);		
-
+			if (dwellTimeMsec >= 0)
+				addStopTimeToMap(mapKeyForTravelTimes, dwellTimeMsec);		
+			else
+				logger.error("Ignoring negative dwell time={} for stop path "
+						+ "at arrival/departures {} and {} (key = {})",
+						dwellTimeMsec, arrDep1, arrDep2,
+						mapKeyForTravelTimes);
+			
 			return;
 		}
 		
@@ -706,6 +726,21 @@ public class TravelTimesProcessor {
 			List<Integer> travelTimesForStopPath = 
 					determineTravelTimesForStopPath(dataFetcher, arrDep1, 
 							arrDep2);
+			
+			// Ignore a stop path if any segment travel time is negative. Nulls will
+			// be ignored downstream anyway so can also ignore those.
+			if (travelTimesForStopPath == null)
+				return;
+			for (Integer travelTimeForSegment : travelTimesForStopPath) {
+				if (travelTimeForSegment < 0) {
+					logger.error("Ignoring negative travel times={} for stop path "
+							+ "between arrival/departures {} and {} (key = {})",
+							travelTimesForStopPath, arrDep1, arrDep2,
+							mapKeyForTravelTimes);
+					return;
+				}
+			}
+			
 			addTravelTimesToMap(mapKeyForTravelTimes, travelTimesForStopPath);
 				
 			return;
@@ -840,10 +875,15 @@ public class TravelTimesProcessor {
 				new HashSet<ProcessedDataMapKey>();
 		combinedKeySet.addAll(travelTimesMap.keySet());
 		combinedKeySet.addAll(stopTimesMap.keySet());
+		int setSize = 0;
+		int unmatched = 0;
+		int matched = 0;
+		int invalid = 0;
 		
 		// For each trip/stop path that had historical arrivals/departures and 
 		// or matches in the database...
 		for (ProcessedDataMapKey mapKey : combinedKeySet) {
+		  setSize++;
 			// Determine the associated Trip object for the data
 			Trip trip = tripMap.get(mapKey.getTripId());
 			if (trip == null) {
@@ -851,6 +891,7 @@ public class TravelTimesProcessor {
 						"configuration data even though historic data was " +
 						"found for it.", 
 						mapKey.getTripId());
+				invalid ++;
 				continue;
 			}
 
@@ -862,6 +903,7 @@ public class TravelTimesProcessor {
 						+ "The stopPathIndex from the historical data {} is "
 						+ "greater than the number of stop paths for {}",
 						mapKey.getStopPathIndex(), trip);
+				invalid++;
 				continue;
 			}
 			String stopIdFromTrip = 
@@ -873,9 +915,9 @@ public class TravelTimesProcessor {
 						+ "stopId={}. {}",
 						mapKey.getStopPathIndex(), mapKey.getStopId(), 
 						stopIdFromTrip, trip);
+				invalid++;
 				continue;
 			}
-			
 			// Determine average travel times for this trip/stop path
 			List<List<Integer>> travelTimesForStopPathForTrip =
 					travelTimesMap.get(mapKey);
@@ -923,7 +965,7 @@ public class TravelTimesProcessor {
 					// So far have determine when vehicle has departed. But should add
 					// a bit of a bias since passengers have to get on a few seconds
 					// before doors shut and vehicle starts moving.
-					averagedStopTime -= STOP_TIME_BIAS_FOR_FIRST_STOP;
+					averagedStopTime = Math.max(0, averagedStopTime - STOP_TIME_BIAS_FOR_FIRST_STOP);
 				} else {
 					// Not first stop of trip
 					averagedStopTime = Statistics.filteredMean(
@@ -940,6 +982,8 @@ public class TravelTimesProcessor {
 				if (mapKey.getStopPathIndex() != trip.getNumberStopPaths()-1) {
 					logger.debug("No stop times for {} even though there are " +
 						"travel times for that map key", mapKey);
+				} else {
+				  unmatched++;
 				}
 			}
 			
@@ -954,17 +998,18 @@ public class TravelTimesProcessor {
 					mapKey.getStopPathIndex(), averagedStopTime,
 					averageTravelTimes, travelTimeSegLength);
 			travelTimeInfoMap.add(travelTimeInfo);
+			matched++;
 		}
 
 		// Nice to log how long things took so can see progress and bottle necks
-		logger.info("Processing data into a TravelTimeInfoMap took {} msec.", 
-				intervalTimer.elapsedMsec());
-
+		logger.info("Processing data (total={} matched={} unmatched={} invalid={}) into a TravelTimeInfoMap took {} msec.", 
+				setSize, matched, unmatched, invalid, intervalTimer.elapsedMsec());
+		reportStatus(setSize, matched, unmatched, invalid);
 		// Return the map with all the processed travel time data in it
 		return travelTimeInfoMap;	
 	}
 	
-	/**
+  /**
 	 * Reads in the Matches and the ArrivalDepartures from the database for the
 	 * time specified. Puts the data into the stopTimesMap and the travelTimesMap 
 	 * for further processing.
@@ -979,6 +1024,16 @@ public class TravelTimesProcessor {
 		// Read the arrivals/departures and matches into a DataFetcher
 		DataFetcher dataFetcher = new DataFetcher(projectId, specialDaysOfWeek);
 		dataFetcher.readData(projectId, beginTime, endTime);
+		
+    // exit here if no matches are present
+    // no further work can be done!
+    if (dataFetcher.getMatchesMap()== null || dataFetcher.getMatchesMap().isEmpty()) {
+      logger.error("No Matches:  Nothing to do!");
+      isEmpty = true;
+      reportStatus(0, 0, 0, 0);
+      return;
+    }
+    isEmpty = false;
 		
 		// Process all the historic data read from the database. Puts 
 		// resulting data into stopTimesMap and travelTimesMap.
@@ -996,7 +1051,27 @@ public class TravelTimesProcessor {
 				"times map took {} msec.", 
 				intervalTimer.elapsedMsec());
 	}	
+	
+	 public Long updateMetrics(Session session, int travelTimesRev) {
+	   Long count = Trip.countTravelTimesForTrips(session, travelTimesRev);
+	   cloudwatchService.saveMetric("PredictionLatestTravelTimeRev", travelTimesRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	   if (count != null) {
+	     cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	   } else {
+	     cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+	   }
+	   return count;
+	  }
 
+
+	// cloudwatch reporting/monitoring
+  private void reportStatus(int setSize, int matched, int unmatched, int invalid) {
+    cloudwatchService.saveMetric("TravelTimeTotal", setSize * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("TravelTimeMatched", matched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("TravelTimeUnmatched", unmatched * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("TravelTimeInvalid", invalid * 1.0 , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+
+  }
 
 	/*
 	 * Just for debugging

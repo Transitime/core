@@ -35,6 +35,9 @@ import org.transitime.applications.Core;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.ipc.data.IpcPrediction;
 
+import java.io.Serializable;
+import java.util.Date;
+
 /**
  * For persisting a prediction. 
  *
@@ -92,6 +95,9 @@ public class Prediction implements Serializable {
 
 	@Column
 	private final boolean schedBasedPred;
+
+    @Column
+    private final int gtfsStopSeq;
 	
 	// Needed because Hibernate objects must be serializable
 	private static final long serialVersionUID = 3966430062434375435L;
@@ -113,7 +119,8 @@ public class Prediction implements Serializable {
 	 */
 	public Prediction(long predictionTime, long avlTime, long creationTime, 
 			String vehicleId, String stopId, String tripId, String routeId, 
-			boolean affectedByWaitStop, boolean isArrival, boolean schedBasedPred) {
+			boolean affectedByWaitStop, boolean isArrival, boolean schedBasedPred,
+            int gtfsStopSeq) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.predictionTime = new Date(predictionTime);
 		this.avlTime = new Date(avlTime);
@@ -125,6 +132,7 @@ public class Prediction implements Serializable {
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.isArrival = isArrival;
 		this.schedBasedPred = schedBasedPred;
+     this.gtfsStopSeq = gtfsStopSeq;
 	}
 	
 	public Prediction(IpcPrediction prediction) {
@@ -139,6 +147,7 @@ public class Prediction implements Serializable {
 		this.affectedByWaitStop = prediction.isAffectedByWaitStop();
 		this.isArrival = prediction.isArrival();
 		this.schedBasedPred = prediction.isSchedBasedPred();
+    this.gtfsStopSeq = prediction.getGtfsStopSeq();
 	}
 	
 	/**
@@ -157,6 +166,7 @@ public class Prediction implements Serializable {
 		this.affectedByWaitStop = false;
 		this.isArrival = false;
 		this.schedBasedPred= false;
+    this.gtfsStopSeq = -1;
 	}
 
 	/**
@@ -299,5 +309,9 @@ public class Prediction implements Serializable {
 	
 	public boolean isSchedBasedPred() {
 		return schedBasedPred;
+	}
+	
+	public int getGtfsStopSeq() {
+		return gtfsStopSeq;
 	}
 }

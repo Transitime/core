@@ -17,8 +17,10 @@
 package org.transitime.gtfs;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -107,21 +109,16 @@ public class TravelTimesProcessorForGtfsUpdates {
 	 * @return
 	 */
 	private ScheduleTime getGtfsScheduleTime(String tripId,
-			TripPattern tripPattern, int stopPathIndex, GtfsData gtfsData) {
-		String stopId = tripPattern.getStopId(stopPathIndex);
+			TripPattern tripPattern, int gtfsStopSequence, GtfsData gtfsData) {
 		
 		// Go through list of stops for the tripId. 
-		// Note: bit tricky handling trips where stop is encountered twice.
-		// But at least can start the for loop at 1 so that don't
-		// look at all the stop times. At least this will properly handle the
-		// situations where the first and last stop for a trip are the same.
 		List<GtfsStopTime> gtfsStopTimesList = 
 				gtfsData.getGtfsStopTimesForTrip(tripId);
-		for (int stopTimeIdx = stopPathIndex>0 ? 1 : 0; 
+		for (int stopTimeIdx = 0; 
 				stopTimeIdx < gtfsStopTimesList.size(); 
 				++stopTimeIdx) {
 			GtfsStopTime gtfsStopTime = gtfsStopTimesList.get(stopTimeIdx);
-			if (gtfsStopTime.getStopId().equals(stopId)) {
+			if (gtfsStopTime.getStopSequence() == gtfsStopSequence) {
 				// Found the stop. 
 				Integer arr = gtfsStopTime.getArrivalTimeSecs();
 				Integer dep = gtfsStopTime.getDepartureTimeSecs();
@@ -159,6 +156,10 @@ public class TravelTimesProcessorForGtfsUpdates {
 		firstPathTravelTimesMsec.add(0);
 
 		StopPath firstPath = trip.getStopPath(0);
+		if (firstPath == null) {
+		  logger.error(" trip {} is missing stop paths, skipping travel times", trip.getId());
+		  return travelTimes;
+		}
 		TravelTimesForStopPath firstPathTravelTimesForPath = 
 				new TravelTimesForStopPath(
 						activeRevisions.getConfigRev(), 
@@ -175,7 +176,7 @@ public class TravelTimesProcessorForGtfsUpdates {
 		// Start at index 1 since the first stub path is a special case
 		int previousStopPathWithScheduleTimeIndex = 0;
 		ScheduleTime previousScheduleTime = getGtfsScheduleTime(trip.getId(), 
-				tripPattern, 0, gtfsData);
+				tripPattern, firstPath.getGtfsStopSeq(), gtfsData);
 		int numberOfPaths = trip.getTripPattern().getNumberStopPaths();
 		for (int stopPathWithScheduleTimeIndex = 1; 
 				stopPathWithScheduleTimeIndex < numberOfPaths; 
@@ -184,8 +185,9 @@ public class TravelTimesProcessorForGtfsUpdates {
 			// Can't use the trip stop times because those can be filtered to just
 			// be for schedule adherence stops, which could be a small subset of the 
 			// schedule times from the stop_times.txt GTFS file.
+			int stopSeq = trip.getStopPath(stopPathWithScheduleTimeIndex).getGtfsStopSeq();
 			ScheduleTime scheduleTime = getGtfsScheduleTime(trip.getId(), 
-					tripPattern, stopPathWithScheduleTimeIndex, gtfsData);
+					tripPattern, stopSeq, gtfsData);
 			if (scheduleTime == null) 
 				continue;
 			
@@ -218,6 +220,7 @@ public class TravelTimesProcessorForGtfsUpdates {
 				msecSpentStopped = elapsedScheduleTimeInSecs*1000;
 			int msecForTravelBetweenScheduleTimes = 
 					elapsedScheduleTimeInSecs*1000 - msecSpentStopped;
+			
 			// Make sure that speed is reasonable, taking default wait 
 			// stop times into account. An agency might 
 			// mistakenly only provide a few seconds of travel time and
@@ -453,7 +456,13 @@ public class TravelTimesProcessorForGtfsUpdates {
 					// Found good match of travel times from db
 					logger.debug("Found exact travel time match for " + 
 							"tripId={} from database.",	trip.getId());
-					return ttForTripFromDb;
+					
+					if (ttForTripFromDb.isValid())
+						return ttForTripFromDb;
+					
+					logger.error("Found invalid travel times for "  +
+							"tripId={} from database: {}", trip.getId(),
+							ttForTripFromDb);
 				}
 			}
 		}
@@ -496,7 +505,14 @@ public class TravelTimesProcessorForGtfsUpdates {
 						"will use the old one created for tripId={}",
 						trip.getId(), trip.getTripPattern().getId(),
 						ttForTripFromDb.getTripCreatedForId());
-				return ttForTripFromDb;
+				
+				if (ttForTripFromDb.isValid())
+					return ttForTripFromDb;
+				
+				logger.error("Found invalid travel time match for "  +
+						"tripId={}, tripPatternId={} from database: {}", 
+						trip.getId(), trip.getTripPattern().getId(),
+						ttForTripFromDb);
 			}
 		}
 		
@@ -542,6 +558,10 @@ public class TravelTimesProcessorForGtfsUpdates {
 					ttForTripFromDbList);
 		}
 		ttForTripFromDbList.add(scheduleBasedTravelTimes);
+		
+		// This would indicate a bug in the schedule-based travel time calculation code
+		if (!scheduleBasedTravelTimes.isValid())
+			logger.error("Schedule based travel time is invalid: {}", scheduleBasedTravelTimes);
 
 		return scheduleBasedTravelTimes;
 	}
@@ -610,10 +630,14 @@ public class TravelTimesProcessorForGtfsUpdates {
 	 * @param gtfsData
 	 * @param travelTimesFromDbMap
 	 *            Map keyed by tripPatternId of Lists of TripPatterns
+	 * @return the number of distinct traveltimes referenced for the travelTimesRev            
 	 * @throws HibernateException
 	 */
-	private void processTrips(GtfsData gtfsData, 
+	private Integer processTrips(GtfsData gtfsData, 
 			Map<String, List<TravelTimesForTrip>> travelTimesFromDbMap) {
+	  // keep a set of travel times for trips for metrics
+	  Set<Integer> travelTimesForTripIds = new HashSet<Integer>();
+	  
 		// For trip read from GTFS data..
 		for (Trip trip : gtfsData.getTrips()) {
 			TripPattern tripPattern = trip.getTripPattern();
@@ -667,11 +691,14 @@ public class TravelTimesProcessorForGtfsUpdates {
 								ttForTripFromDbList, travelTimesFromDbMap);
 			}
 			
+			// were he keep a count of travel times for later metrics
+			travelTimesForTripIds.add(travelTimesToUse.getId());
 			// Set the resulting TravelTimesForTrip for the Trip so travel times 
 			// will be stored as part of the trip when the trip is stored to 
 			// the database.
 			trip.setTravelTimes(travelTimesToUse);
 		}			
+		return travelTimesForTripIds.size();
 	}
 	
 	/**
@@ -727,21 +754,38 @@ public class TravelTimesProcessorForGtfsUpdates {
 				TravelTimesForTrip.getTravelTimesForTrips(session, 
 						originalTravelTimesRev);
 
-		int originalNumberTravelTimes =
-				numberOfTravelTimes(travelTimesFromDbMap);
+		setOriginalNumberOfTravelTimes(
+				numberOfTravelTimes(travelTimesFromDbMap));
 		
 		// Do the low-level processing
-		processTrips(gtfsData, travelTimesFromDbMap);
+		setNumberOfTravelTimes(processTrips(gtfsData, travelTimesFromDbMap));
 							
 		// Let user know what is going on
 		logger.info("Finished processing travel time data. " + 
 				"Number of travel times read from db={}. " + 
 				"Total number of travel times needed to cover each trip={}. " + 
 				"Total number of trips={}.  Took {} msec.", 
-				originalNumberTravelTimes,
+				getOriginalNumberOfTravelTimes(),
 				numberOfTravelTimes(travelTimesFromDbMap),
 				gtfsData.getTrips().size(),
 				timer.elapsedMsec());
 	}
+
+	int numberOfTravelTimes = 0;
+	public int getNumberOfTravelTimes() {
+	  return numberOfTravelTimes;
+	}
+	public void setNumberOfTravelTimes(Integer numberOfTravelTimes) {
+	  if (numberOfTravelTimes != null)
+	    this.numberOfTravelTimes = numberOfTravelTimes;
+  }
+
+  int originalNumberOfTravelTimes = 0;
+	public int getOriginalNumberOfTravelTimes() {
+	  return originalNumberOfTravelTimes;
+	}
+  public void setOriginalNumberOfTravelTimes(int numberOfTravelTimes) {
+    originalNumberOfTravelTimes = numberOfTravelTimes;
+  }
 
 }

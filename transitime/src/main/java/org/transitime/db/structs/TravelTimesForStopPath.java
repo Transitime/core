@@ -109,7 +109,8 @@ public class TravelTimesForStopPath implements Serializable {
 	// it can make things so much more efficient want to try using it.
 	// NOTE: since trying to use serialization need to use ArrayList<> instead
 	// of List<> since List<> doesn't implement Serializable.
-	private static final int travelTimesMaxBytes = 30000;
+	private static final int travelTimesMaxBytes = 100000;
+
 	@Column(length=travelTimesMaxBytes)
 	private final ArrayList<Integer> travelTimesMsec;
 
@@ -437,6 +438,21 @@ public class TravelTimesForStopPath implements Serializable {
 			// it might actually be detrimental and slow things down.
 			session.close();
 		}
+	}
+	
+	/**
+	 * Returns true if all travel times and dwell time are nonnegative.
+	 */
+	public boolean isValid() {
+		if (travelTimesMsec != null) {
+			for (int time : travelTimesMsec) {
+				if (time < 0)
+					return false;
+			}
+		}
+		if (stopTimeMsec < 0)
+			return false;
+		return true;
 	}
 
 	/**

@@ -37,6 +37,7 @@ import javax.ws.rs.core.Response;
 
 import org.transitime.api.data.ApiActiveBlocks;
 import org.transitime.api.data.ApiActiveBlocksRoutes;
+import org.transitime.api.data.ApiAdherenceSummary;
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
 import org.transitime.api.data.ApiBlock;
@@ -62,6 +63,7 @@ import org.transitime.api.data.ApiVehiclesDetails;
 import org.transitime.api.predsByLoc.PredsByLoc;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
+import org.transitime.core.TemporalDifference;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Location;
 import org.transitime.ipc.data.IpcActiveBlock;
@@ -77,6 +79,7 @@ import org.transitime.ipc.data.IpcDirectionsForRoute;
 import org.transitime.ipc.data.IpcTrip;
 import org.transitime.ipc.data.IpcTripPattern;
 import org.transitime.ipc.data.IpcVehicle;
+import org.transitime.ipc.data.IpcVehicleComplete;
 import org.transitime.ipc.data.IpcVehicleConfig;
 import org.transitime.ipc.interfaces.ConfigInterface;
 import org.transitime.ipc.interfaces.PredictionsInterface;
@@ -168,7 +171,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiVehicles);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -195,7 +198,29 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
+		}
+	}
+	
+	@Path("/command/vehicleLocation")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getVehicleLocation(@BeanParam StandardParameters stdParameters,
+			@QueryParam(value = "v") String vehicleId) throws WebApplicationException {
+		try {
+			
+			// Get Vehicle data from server
+			VehiclesInterface inter = stdParameters.getVehiclesInterface();
+			IpcVehicle vehicle = inter.get(vehicleId);
+			if (vehicle == null) {
+        throw WebUtils.badRequestException("Invalid specifier for "
+            + "vehicle"); 
+			}
+			
+			Location matchedLocation = new Location(vehicle.getPredictedLatitude(), vehicle.getPredictedLongitude());
+			return stdParameters.createResponse(matchedLocation.toString());
+		} catch (Exception e) {
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -279,8 +304,8 @@ public class TransitimeApi {
 			return result;
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			e.printStackTrace();
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
+
 		}
 	}
 
@@ -314,7 +339,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiVehicleConfigs);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -497,7 +522,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(predictionsData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -552,7 +577,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(predictionsData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -638,7 +663,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(routesData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -713,7 +738,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(routeData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -751,7 +776,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(directionsData);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -793,7 +818,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiBlock);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -831,7 +856,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -869,7 +894,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -897,7 +922,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -931,16 +956,20 @@ public class TransitimeApi {
 
 		try {
 			// Get active block data from server
-			VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
-			Collection<IpcActiveBlock> activeBlocks = vehiclesInterface.getActiveBlocks(routesIdOrShortNames,
-					allowableBeforeTimeSecs);
+
+			VehiclesInterface vehiclesInterface =
+					stdParameters.getVehiclesInterface();
+			Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
+					.getActiveBlocks(routesIdOrShortNames,
+                            allowableBeforeTimeSecs);
+
 
 			// Create and return ApiBlock response
 			ApiActiveBlocks apiActiveBlocks = new ApiActiveBlocks(activeBlocks, stdParameters.getAgencyId());
 			return stdParameters.createResponse(apiActiveBlocks);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -956,9 +985,11 @@ public class TransitimeApi {
 
 		try {
 			// Get active block data from server
+
 			VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
 			Collection<IpcActiveBlock> activeBlocks = vehiclesInterface.getActiveBlocks(routesIdOrShortNames,
 					allowableBeforeTimeSecs);
+
 
 			// Create and return ApiBlock response
 			ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(activeBlocks,
@@ -966,11 +997,147 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiActiveBlocksRoutes);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
-	/**
+
+    @Path("/command/activeBlocksByRouteWithoutVehicles")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getActiveBlocksByRouteWithoutVehicles(
+            @BeanParam StandardParameters stdParameters,
+            @QueryParam(value = "r") List<String> routesIdOrShortNames,
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get active block data from server
+            VehiclesInterface vehiclesInterface =
+                    stdParameters.getVehiclesInterface();
+            Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
+                    .getActiveBlocksWithoutVehicles(routesIdOrShortNames,
+                            allowableBeforeTimeSecs);
+
+            // Create and return ApiBlock response
+            ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
+                    activeBlocks, stdParameters.getAgencyId());
+            return stdParameters.createResponse(apiActiveBlocksRoutes);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+    }
+
+
+
+    @Path("/command/activeBlockByRouteWithVehicles")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getActiveBlockByRouteWithVehicles(
+            @BeanParam StandardParameters stdParameters,
+            @QueryParam(value = "r") String routesIdOrShortName,
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get active block data from server
+            VehiclesInterface vehiclesInterface =
+                    stdParameters.getVehiclesInterface();
+            Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
+                    .getActiveBlocksAndVehiclesByRouteId(routesIdOrShortName,
+                            allowableBeforeTimeSecs);
+
+            // Create and return ApiBlock response
+            ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
+                    activeBlocks, stdParameters.getAgencyId());
+            return stdParameters.createResponse(apiActiveBlocksRoutes);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+    }
+    
+    @Path("/command/activeBlockByRouteNameWithVehicles")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getActiveBlockByRouteNameWithVehicles(
+            @BeanParam StandardParameters stdParameters,
+            @QueryParam(value = "r") String routeName,
+            @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs)
+            throws WebApplicationException {
+   // Make sure request is valid
+      stdParameters.validate();
+
+      try {
+          // Get active block data from server
+          VehiclesInterface vehiclesInterface =
+                  stdParameters.getVehiclesInterface();
+          Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
+                  .getActiveBlocksAndVehiclesByRouteName(routeName,
+                          allowableBeforeTimeSecs);
+
+          // Create and return ApiBlock response
+          ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
+                  activeBlocks, stdParameters.getAgencyId());
+          return stdParameters.createResponse(apiActiveBlocksRoutes);
+      } catch (Exception e) {
+          // If problem getting data then return a Bad Request
+          throw WebUtils.badRequestException(e);
+      }
+        
+    }
+    
+  @Path("/command/vehicleAdherenceSummary")
+  @GET
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+  public Response getVehicleAdherenceSummary(@BeanParam StandardParameters stdParameters,
+      @QueryParam(value = "allowableEarlySec") @DefaultValue("0") int allowableEarlySec,
+      @QueryParam(value = "allowableLateSec") @DefaultValue("0") int allowableLateSec,
+      @QueryParam(value = "t") @DefaultValue("0") int allowableBeforeTimeSecs) throws WebApplicationException {
+
+    // Make sure request is valid
+    stdParameters.validate();
+
+    try {
+
+      int late = 0, ontime = 0, early = 0, nodata = 0, blocks = 0;
+
+      VehiclesInterface vehiclesInterface = stdParameters.getVehiclesInterface();
+
+      Collection<IpcVehicle> ipcVehicles = vehiclesInterface.getVehiclesForBlocks();
+
+      for (IpcVehicle v : ipcVehicles) {
+        TemporalDifference adh = v.getRealTimeSchedAdh();
+
+        if (adh == null)
+          nodata++;
+        else if (adh.isEarlierThan(allowableEarlySec))
+          early++;
+        else if (adh.isLaterThan(allowableLateSec))
+          late++;
+        else
+          ontime++;
+      }
+
+      blocks = vehiclesInterface.getNumActiveBlocks(null, allowableBeforeTimeSecs);
+
+      ApiAdherenceSummary resp = new ApiAdherenceSummary(late, ontime, early, nodata, blocks);
+
+      return stdParameters.createResponse(resp);
+    } catch (Exception e) {
+      // If problem getting data then return a Bad Request
+      throw WebUtils.badRequestException(e);
+    }
+  }
+
+  /**
 	 * Handles the "trip" command which outputs configuration data for the
 	 * specified trip. Includes all sub-data such as trip patterns.
 	 * 
@@ -1005,7 +1172,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiTrip);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1043,7 +1210,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiTrip);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1070,7 +1237,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1107,7 +1274,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiTripPatterns);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1146,7 +1313,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiSchedules);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1185,7 +1352,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiSchedules);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1218,7 +1385,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiAgencies);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1247,7 +1414,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiCalendars);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1276,7 +1443,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiCalendars);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1303,7 +1470,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1331,7 +1498,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiIds);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -1361,7 +1528,7 @@ public class TransitimeApi {
 			return stdParameters.createResponse(apiServerStatus);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 

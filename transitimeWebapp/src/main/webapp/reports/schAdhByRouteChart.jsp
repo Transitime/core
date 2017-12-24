@@ -50,12 +50,12 @@
   <%@include file="/template/header.jsp" %>
   
 <%
+  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " days)";
   String allowableEarly = request.getParameter("allowableEarly");;
   String allowableLate = request.getParameter("allowableLate");;
   String chartSubtitle = allowableEarly + " min early to " 
-  	+ allowableLate + " min late</br>" 
-	+ request.getParameter("dateRange");
-  
+  	+ allowableLate + " min late<br>" + dateRange;
+
   String beginTime = request.getParameter("beginTime");
   String endTime = request.getParameter("endTime");
   if (!beginTime.isEmpty() || !endTime.isEmpty()) {
@@ -220,9 +220,9 @@ var globalNumberOfRoutes;
 	    success: createDataTableAndDrawChart,
 	    // When there is an AJAX problem alert the user
 	    error: function(request, status, error) {
-	       //alert(error + '. ' + request.responseText);
-	     	$("#errorMessage").html(request.responseText +
-	     			"<br/><br/>Hit back button to try other parameters.");
+	     	console.log(request.responseText)
+            var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.")
+            $("#errorMessage").append(msg);;
 	        $("#errorMessage").fadeIn("fast");
 	        $("#loading").fadeOut("slow");
 	       },

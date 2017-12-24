@@ -16,9 +16,10 @@
  */
 package org.transitime.db.structs;
 
-import java.io.Serializable;
-
 import org.transitime.utils.Time;
+
+import javax.persistence.Embeddable;
+import java.io.Serializable;
 
 
 /**
@@ -27,6 +28,7 @@ import org.transitime.utils.Time;
  * 
  * @author SkiBu Smith
  */
+@Embeddable
 public class ScheduleTime implements Serializable {
 
 	// Times are in seconds. arrivalTime only set for last
@@ -44,8 +46,13 @@ public class ScheduleTime implements Serializable {
 		this.arrivalTime = arrivalTime;
 		this.departureTime = departureTime;
 	}
-	
-	/**
+
+    protected ScheduleTime() {
+        arrivalTime = null;
+        departureTime = null;
+    }
+
+    /**
 	 * Returns departure time if there is one. Otherwise returns arrival time if
 	 * there is one. Otherwise returns null.
 	 * 

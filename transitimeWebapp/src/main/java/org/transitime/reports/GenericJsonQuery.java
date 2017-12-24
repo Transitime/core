@@ -16,22 +16,19 @@
  */
 package org.transitime.reports;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitime.db.GenericQuery;
 
-/**
- * For web server. Allows a query on an agency db to be easily run.
- * 
- * @author Michael Smith
- *
- */
 public class GenericJsonQuery extends GenericQuery {
 
+	private static final Logger logger = LoggerFactory
+			.getLogger(GenericJsonQuery.class);
 	private StringBuilder strBuilder = new StringBuilder();
 	private List<String> columnNames = new ArrayList<String>();
 	private boolean firstRow = true;
@@ -58,10 +55,6 @@ public class GenericJsonQuery extends GenericQuery {
 	}
 	
 	private void addRowElement(int i, long value) {
-		strBuilder.append(value);
-	}
-	
-	private void addRowElement(int i, boolean value) {
 		strBuilder.append(value);
 	}
 	
@@ -100,7 +93,7 @@ public class GenericJsonQuery extends GenericQuery {
 			strBuilder.append("\"").append(columnNames.get(i)).append("\":");
 			
 			// Output value of attribute
-			if (o instanceof BigDecimal || o instanceof Double || o instanceof Float) {
+			if (o instanceof Double || o instanceof Float) {
 				addRowElement(i, ((Number) o).doubleValue());
 			} else if (o instanceof Number) {
 				addRowElement(i, ((Number) o).longValue());
@@ -108,8 +101,6 @@ public class GenericJsonQuery extends GenericQuery {
 				addRowElement(i, (String) o);
 			} else if (o instanceof Timestamp) {
 				addRowElement(i, ((Timestamp) o));
-			} else if (o instanceof Boolean) {
-				addRowElement(i, ((Boolean) o));
 			}
 		}
 		
@@ -156,6 +147,7 @@ public class GenericJsonQuery extends GenericQuery {
 			
 			// Start the JSON
 			query.strBuilder.append("{\"data\": [\n");
+			logger.debug("sql=" + sql);
 
 			query.doQuery(sql);
 

@@ -4,6 +4,7 @@
 	version="3.0">
 	<display-name>Transitime api</display-name>
 
+
 	<context-param>
 		<param-name>transitime_config_file_location</param-name>
 		<!-- Set to customized properties file with db config info and such -->
@@ -28,5 +29,13 @@
 		<location>/error/messageOnlyError.jsp</location>
 	</error-page>
 
-	
+	 <filter>
+	    <filter-name>ApiLoggingFilter</filter-name>
+	    <filter-class>org.transitime.api.utils.ApiLoggingFilter</filter-class>
+	  </filter> 
+	  <filter-mapping>
+	    <filter-name>ApiLoggingFilter</filter-name>
+	    <url-pattern>/*</url-pattern>
+	  </filter-mapping> 
 </web-app>
+

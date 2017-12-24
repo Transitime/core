@@ -302,17 +302,17 @@ public class Match implements Lifecycle, Serializable {
 	public static List<Match> getMatchesFromDb(
 			String projectId, Date beginTime, Date endTime, 
 			String sqlClause,
-			final int firstResult, final int maxResults) {
+			final Integer firstResult, final Integer maxResults) {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(projectId);
+		Session session = HibernateUtils.getSession(projectId, true);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
 		String hql = "FROM Match " +
-				"    WHERE avlTime >= :beginDate " +
-				"      AND avlTime < :endDate";
+				"    WHERE avlTime between :beginDate " +
+				"      AND :endDate";
 		if (sqlClause != null)
 			hql += " " + sqlClause;
 		Query query = session.createQuery(hql);
@@ -321,9 +321,13 @@ public class Match implements Lifecycle, Serializable {
 		query.setTimestamp("beginDate", beginTime);
 		query.setTimestamp("endDate", endTime);
 		
+		if (firstResult != null) {
 		// Only get a batch of data at a time
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
+			query.setFirstResult(firstResult);
+		}
+		if (maxResults != null) {
+			query.setMaxResults(maxResults);
+		}
 		
 		try {
 			@SuppressWarnings("unchecked")
@@ -342,7 +346,46 @@ public class Match implements Lifecycle, Serializable {
 		}
 	}
 
+	public static Long getMatchesCountFromDb(
+			String projectId, Date beginTime, Date endTime, 
+			String sqlClause) {
+		IntervalTimer timer = new IntervalTimer();
 
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(projectId, true);
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+		String hql = "Select count(*) FROM Match " +
+				"    WHERE avlTime >= :beginDate " +
+				"      AND avlTime < :endDate";
+		if (sqlClause != null)
+			hql += " " + sqlClause;
+		Query query = session.createQuery(hql);
+		
+		// Set the parameters for the query
+		query.setTimestamp("beginDate", beginTime);
+		query.setTimestamp("endDate", endTime);
+		
+		Long count = null;
+		
+		try {
+			count = (Long) query.uniqueResult();
+			logger.debug("Getting matches from database took {} msec",
+					timer.elapsedMsec());
+			return count;
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error(e.getMessage(), e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+	}
+
+	
 	public String getVehicleId() {
 		return vehicleId;
 	}

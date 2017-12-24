@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.transitime.api.utils.StandardParameters;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.api.gtfsRealtime.GtfsRtTripFeed;
 import org.transitime.api.gtfsRealtime.GtfsRtVehicleFeed;
 import org.transitime.feed.gtfsRt.OctalDecoder;
@@ -46,8 +47,15 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 @Path("/key/{key}/agency/{agency}")
 public class GtfsRealtimeApi {
 
-	private final int MAX_GTFS_RT_CACHE_SECS = 15;
+	private final static int DEFAULT_MAX_GTFS_RT_CACHE_SECS = 15;
 
+	private static IntegerConfigValue gtfsRtCacheSeconds =
+			new IntegerConfigValue(
+					"transitime.api.gtfsRtCacheSeconds", 
+					DEFAULT_MAX_GTFS_RT_CACHE_SECS,
+					"How long to cache GTFS Realtime");
+
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -91,7 +99,7 @@ public class GtfsRealtimeApi {
 					FeedMessage message =
 							GtfsRtVehicleFeed.getPossiblyCachedMessage(
 									stdParameters.getAgencyId(),
-									MAX_GTFS_RT_CACHE_SECS);
+									gtfsRtCacheSeconds.getValue());
 
 					// Output in human readable format or in standard binary
 					// format
@@ -157,7 +165,7 @@ public class GtfsRealtimeApi {
 					FeedMessage message =
 							GtfsRtTripFeed.getPossiblyCachedMessage(
 									stdParameters.getAgencyId(),
-									MAX_GTFS_RT_CACHE_SECS);
+									gtfsRtCacheSeconds.getValue());
 
 					// Output in human readable format or in standard binary
 					// format

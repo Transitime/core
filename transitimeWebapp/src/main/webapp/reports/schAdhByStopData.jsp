@@ -31,20 +31,20 @@ String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLa
     		   
 String sql =
 	"SELECT " 
-	+ "     COUNT(CASE WHEN scheduledtime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
-	+ "     COUNT(CASE WHEN scheduledtime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledtime <= " 
+	+ "     COUNT(CASE WHEN scheduledTime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
+	+ "     COUNT(CASE WHEN scheduledTime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledTime <= " 
 				+ allowableLateMinutesStr + " THEN 1 ELSE null END) AS ontime, \n" 
-    + "     COUNT(CASE WHEN time-scheduledtime > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n" 
+    + "     COUNT(CASE WHEN time-scheduledTime > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n" 
     + "     COUNT(*) AS total, \n"
     + "     s.name AS stop_name, \n"
     + "     ad.directionid AS direction_id \n"
-    + "FROM arrivalsdepartures ad, stops s \n"
+    + "FROM ArrivalsDepartures ad, Stops s \n"
     + "WHERE "
     // To get stop name
-    + " ad.configrev = s.configrev \n"
-    + " AND ad.stopid = s.id \n"
+    + " ad.configRev = s.configRev \n"
+    + " AND ad.stopId = s.id \n"
     // Only need arrivals/departures that have a schedule time
-    + " AND ad.scheduledtime IS NOT NULL \n"
+    + " AND ad.scheduledTime IS NOT NULL \n"
     // Specifies which routes to provide data for
     + SqlUtils.routeClause(request, "ad") + "\n"
     + SqlUtils.timeRangeClause(request, "ad.time", 7) + "\n"
@@ -57,8 +57,8 @@ String sql =
     // need to order by direction id and stop order, but also the stop name
     // as a backup for if stoporder not defined for data and is therefore 
     // always the same and doesn't provide any ordering info.
-    + " GROUP BY directionid, s.name, ad.stoporder \n"
-    + " ORDER BY directionid, ad.stoporder, s.name";
+    + " GROUP BY directionid, s.name, ad.stopOrder \n"
+    + " ORDER BY directionid, ad.stopOrder, s.name";
 
 // Just for debugging
 System.out.println("\nFor schedule adherence by stop query sql=\n" + sql);

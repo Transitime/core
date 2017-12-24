@@ -95,7 +95,7 @@ public class SiriApi {
 			return stdParameters.createResponse(siriVehicles);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -156,7 +156,7 @@ public class SiriApi {
 			return stdParameters.createResponse(siriStopMonitoring);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 

@@ -20,6 +20,7 @@ import java.text.ParseException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.transitime.db.webstructs.WebAgency;
 import org.transitime.utils.Time;
 
 /**
@@ -113,7 +114,7 @@ public class SqlUtils {
 		if (tableAliasName != null && !tableAliasName.isEmpty())
 			tableAlias = tableAliasName + ".";
 		
-		return " AND " + tableAlias + "routeshortname IN " + routeIdentifiers;
+		return " AND " + tableAlias + "routeShortName IN " + routeIdentifiers;
 	}
 	
 	/**
@@ -133,6 +134,9 @@ public class SqlUtils {
 	 */
 	public static String timeRangeClause(HttpServletRequest request,
 			String timeColumnName, int maxNumDays) {
+	  String agencyId = request.getParameter("a");
+	  WebAgency agency = WebAgency.getCachedWebAgency(agencyId);
+	  boolean isMysql = "mysql".equals(agency.getDbType());
 		String beginTime = request.getParameter("beginTime");
 		throwOnSqlInjection(beginTime);
 		
@@ -151,8 +155,13 @@ public class SqlUtils {
 		}
 		if (beginTime != null && !beginTime.isEmpty() 
 				&& endTime != null && !endTime.isEmpty()) {
-			timeSql = " AND " + timeColumnName + "::time BETWEEN '" 
-				+ beginTime + "' AND '" + endTime + "' ";
+		  if (isMysql) {
+        timeSql = " AND time(" + timeColumnName + ") BETWEEN '" 
+            + beginTime + "' AND '" + endTime + "' ";
+		  } else {
+        timeSql = " AND " + timeColumnName + "::time BETWEEN '" 
+            + beginTime + "' AND '" + endTime + "' ";
+		  }
 		}
 
 		String dateRange = request.getParameter("dateRange");
@@ -181,9 +190,17 @@ public class SqlUtils {
 						+ endDateStr + "\".");
 			}
 			
-			return " AND " + timeColumnName + " BETWEEN '" + beginDateStr
+			String sql = null;
+			if (isMysql) {
+			  sql = " AND " + timeColumnName + " BETWEEN '" + beginDateStr
+	          + "' " + " AND DATE_ADD(STR_TO_DATE('" + endDateStr + "', '%Y-%m-%d'), INTERVAL 1 day) " 
+	          + timeSql + ' ';
+			} else {
+			  sql = " AND " + timeColumnName + " BETWEEN '" + beginDateStr
 					+ "' " + " AND TIMESTAMP '" + endDateStr + "' + INTERVAL '1 day' " 
-					+ timeSql + ' ';						
+					+ timeSql + ' ';
+			}
+			return sql;
 		} else { // Not using dateRange so must be using beginDate and numDays params
 			String beginDate = request.getParameter("beginDate");
 			throwOnSqlInjection(beginDate);
@@ -196,10 +213,17 @@ public class SqlUtils {
 			int numDays = Integer.parseInt(numDaysStr);
 			if (numDays > maxNumDays)
 				numDays = maxNumDays;
-			
-			return " AND " + timeColumnName + " BETWEEN '" + beginDate
+			String sql = null;
+			if (isMysql) {
+			  sql = " AND " + timeColumnName + " BETWEEN '" + beginDate
+	          + "' " + " AND DATE_ADD(STR_TO_DATE('" + beginDate + "', '%Y-%m-%d'), INTERVAL "
+	          + numDays + " day) " + timeSql + ' ';
+			} else {
+			sql =" AND " + timeColumnName + " BETWEEN '" + beginDate
 					+ "' " + " AND TIMESTAMP '" + beginDate + "' + INTERVAL '"
-					+ numDays + " day' " + timeSql + ' ';			
+					+ numDays + " day' " + timeSql + ' ';
+			}
+			return sql;
 		}
 
 	}

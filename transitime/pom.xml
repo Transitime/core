@@ -1,15 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>transitime</groupId>
 	<artifactId>transitimeCore</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<repositories>
+
 		<!-- Needed to fix problem with one-jar not working with AWS SDK. Was getting 
 			error message "Fatal: Failed to load the internal config for AWS" -->
 		<repository>
@@ -23,9 +25,10 @@
 	</repositories>
 
 	<pluginRepositories>
+
 		<pluginRepository>
-			<id>onejar-maven-plugin.googlecode.com</id>
-			<url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+			<id>repo.obaweb.org</id>
+			<url>http://repo.obaweb.org:8080/archiva/repository/releases</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
@@ -53,6 +56,11 @@
 			<version>9.3-1103-jdbc41</version>
 		</dependency>
 		
+		<dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.3.2</version>
+        </dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -87,24 +95,34 @@
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.1.2</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.3</version>
 		</dependency>
 		<dependency>
-    <groupId>org.hsqldb</groupId>
-    <artifactId>hsqldb</artifactId>
-    <version>2.2.4</version>
-</dependency>
+    		<groupId>org.hsqldb</groupId>
+    		<artifactId>hsqldb</artifactId>
+    		<version>2.2.4</version>
+		</dependency>
 
-
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.2</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- So can use Amazon API for archiving files and such -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk</artifactId>
-			<version>1.9.13</version>
+			<version>1.10.16</version>
 		</dependency>
-
 		<!-- For many java utilities, such as StringEscapeUtils -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -252,7 +270,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
@@ -393,6 +410,76 @@
 
 		</plugins>
 
-	</build>
 
+	</build>
+	<profiles>
+		
+	
+        <profile>
+            <id>PredictionsAccuracyIntegrationTest</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>truezip-maven-plugin</artifactId>
+                        <version>1.2</version>
+                        <executions>
+                            <execution>
+                                <id>unzip-database</id>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <phase>test</phase>
+                                <configuration>
+                                    <verbose>true</verbose>
+                                    <fileset>
+                                        <directory>${project.basedir}/src/test/resources/database/transitime_test.zip</directory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/database/data</outputDirectory>
+                                    </fileset>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.onebusaway.plugins</groupId>
+                        <artifactId>maven-hsqldb-plugin</artifactId>
+                        <!-- version 1.0.1 supports hsqldb 2.3.2 -->
+                        <version>1.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>user-database-start</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <deleteOnEntry>true</deleteOnEntry>
+                                    <dbName>${project.basedir}/src/test/resources/database/data/transitime_test</dbName>
+                                    <port>9001</port>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.1.1</version>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <id>test-case-execution</id>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>org.transitime.applications.PredictionsAccuracyIntegrationTest</mainClass>
+                                    <commandlineArgs>-c transitime/src/test/resources/transiTimeConfigIntegrationTest.xml -gtfsDirectoryName transitime/src/test/resources/wmata_gtfs -storeNewRevs -maxTravelTimeSegmentLength 1000</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+	</profiles>
 </project>

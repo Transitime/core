@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transitime>
+    <modules>
+    </modules>
+    <schedBasedPreds>
+        <pollingRateMsec>30000</pollingRateMsec>
+        <beforeStartTimeMins>5</beforeStartTimeMins>
+    </schedBasedPreds>
+    <autoBlockAssigner>
+        <autoAssignerEnabled>false</autoAssignerEnabled>
+        <ignoreAvlAssignments>false</ignoreAvlAssignments>
+        <allowableEarlySeconds>180</allowableEarlySeconds>
+        <allowableLateSeconds>180</allowableLateSeconds>
+    </autoBlockAssigner>
+    <core>
+        <agencyId>1</agencyId>
+        <maxPredictionTimeForDbSecs>900</maxPredictionTimeForDbSecs>
+        <exclusiveBlockAssignments>true</exclusiveBlockAssignments>
+        <integrationTest>true</integrationTest>
+        <matchHistoryMaxSize>40</matchHistoryMaxSize>
+        <allowableLateSecondsForInitialMatching>2700</allowableLateSecondsForInitialMatching>
+    </core>
+    <avl>
+       <csvAvlFeedFileName>sample.csv</csvAvlFeedFileName>
+    	<maxSpeed>40</maxSpeed>
+    </avl>
+
+    <find>
+        <!--  Used to match the last stop of a vehicle to a time. Comments in VechiclesServer. Times are in milliseconds -->
+        <dwelltime>30000</dwelltime>
+        <fuzzytime>180000</fuzzytime>
+    </find>
+
+    <hibernate>
+        <configFile>src/main/resources/hsql_integration_test_hibernate.cfg.xml</configFile>
+    </hibernate>
+</transitime>

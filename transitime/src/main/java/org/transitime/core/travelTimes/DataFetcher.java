@@ -27,6 +27,8 @@ import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.BooleanConfigValue;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.db.structs.ActiveRevisions;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.ArrivalDeparture;
@@ -44,6 +46,23 @@ import org.transitime.utils.Time;
  */
 public class DataFetcher {
 
+	private static boolean pageDbReads() {
+		return pageDbReads.getValue();
+	}
+	private static BooleanConfigValue pageDbReads =
+			new BooleanConfigValue("transitime.updates.pageDbReads",
+					true,
+					"page database reads to break up long reads. "
+					+ "It may impact performance on MySql"
+					);
+	private static Integer pageSize() {
+	  return pageSize.getValue();
+	}
+	private static IntegerConfigValue pageSize =
+	    new IntegerConfigValue("transitime.updates.pageSize",
+	        50000,
+	        "Number of records to read in at a time");
+	
 	// The data ends up in arrivalDepartureMap and matchesMap.
 	// It is keyed by DbDataMapKey which means that data is grouped
 	// per vehicle trip. This way can later subsequent arrivals/departures
@@ -234,32 +253,66 @@ public class DataFetcher {
 		// Batch size of 50k found to be significantly faster than 10k,
 		// by about a factor of 2. Since sometimes using really large
 		// batches of data using 500k
-		int batchSize = 500000;  // Also known as maxResults
+		int batchSize = pageSize.getValue();  // Also known as maxResults
 		// The temporary list for the loop that contains a batch of results
+		
+		logger.info("counting arrival/departures");
+		Long count = ArrivalDeparture.getArrivalsDeparturesCountFromDb(dbName, beginTime, endTime, null);
+		logger.info("retrieving {} arrival/departures", count);
 		List<ArrivalDeparture> arrDepBatchList;
-		// Read in batch of 50k rows of data and process it
-		do {				
-			arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
-					dbName, 
-					beginTime, endTime, 
-					// Order results by time so that process them in the same
-					// way that a vehicle travels.
-					"ORDER BY time", // SQL clause
-					firstResult, batchSize,
-					null); // arrivalOrDeparture. Null means read in both
-			
-			// Add arrivals/departures to map
-			for (ArrivalDeparture arrDep : arrDepBatchList) {
-				addArrivalDepartureToMap(resultsMap, arrDep);
-			}
-			
-			logger.info("Read in total of {} arrival/departures", 
-					firstResult+arrDepBatchList.size());
-			
-			// Update firstResult for reading next batch of data
-			firstResult += batchSize;
-		} while (arrDepBatchList.size() == batchSize);
+		
+		if (!pageDbReads()) {
+			// page by day for MySql -- its batch impl falls down on large data
+			Date pageBeginTime = beginTime;
+			Date pageEndTime = new Date(beginTime.getTime() + Time.MS_PER_DAY);
+			int runningCount = 0;
+			do {
+				logger.info("querying a/d for between {} and {}", pageBeginTime, pageEndTime);
+				arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
+						dbName, 
+						pageBeginTime, pageEndTime, 
+						// Order results by time so that process them in the same
+						// way that a vehicle travels.
+						"ORDER BY time", // SQL clause
+						null, null,
+						null); // arrivalOrDeparture. Null means read in both
+				
+				// Add arrivals/departures to map
+				for (ArrivalDeparture arrDep : arrDepBatchList) {
+					addArrivalDepartureToMap(resultsMap, arrDep);
+				}
+				runningCount += arrDepBatchList.size();
+				logger.info("Read in total of {} a/ds of {} {}%", 
+						runningCount, count, (0.0+runningCount)/count*100);
 
+				pageBeginTime = pageEndTime;
+				pageEndTime = new Date(Math.min(pageBeginTime.getTime() + Time.MS_PER_DAY, endTime.getTime()));
+				
+			} while (pageEndTime.before(endTime));
+		} else {
+			// Read in batch of 50k rows of data and process it
+			do {				
+				arrDepBatchList = ArrivalDeparture.getArrivalsDeparturesFromDb(
+						dbName, 
+						beginTime, endTime, 
+						// Order results by time so that process them in the same
+						// way that a vehicle travels.
+						"ORDER BY time", // SQL clause
+						firstResult, batchSize,
+						null); // arrivalOrDeparture. Null means read in both
+				
+				// Add arrivals/departures to map
+				for (ArrivalDeparture arrDep : arrDepBatchList) {
+					addArrivalDepartureToMap(resultsMap, arrDep);
+				}
+				
+				logger.info("Read in total of {} arrival/departures of {} {}%", 
+						firstResult+arrDepBatchList.size(), count, (0.0+firstResult+arrDepBatchList.size())/count*100);
+				
+				// Update firstResult for reading next batch of data
+				firstResult += batchSize;
+			} while (arrDepBatchList.size() == batchSize);
+		}
 		logger.info("Reading arrival/departures took {} msec", 
 				timer.elapsedMsec());
 
@@ -305,33 +358,60 @@ public class DataFetcher {
 		// Batch size of 50k found to be significantly faster than 10k,
 		// by about a factor of 2.  Since sometimes using really large
 		// batches of data using 500k
-		int batchSize = 500000;  // Also known as maxResults
+		int batchSize = pageSize.getValue();  // Also known as maxResults
+		String sqlClause = "AND atStop = false ORDER BY avlTime";
+		logger.info("counting matches...");
+		Long count = Match.getMatchesCountFromDb(projectId, beginTime, endTime, "AND atStop = false");
+		logger.info("found {} matches", count);
+		
 		// The temporary list for the loop that contains a batch of results
 		List<Match> matchBatchList;
-		// Read in batch of 50k rows of data and process it
-		do {				
-			matchBatchList = Match.getMatchesFromDb(
-					projectId, 
-					beginTime, endTime, 
-					// Only want matches that are not at a stop since for that
-					// situation instead using arrivals/departures. 
-					// Order results by time so that process them in the same
-					// way that a vehicle travels.
-					"AND atStop = false ORDER BY avlTime", // SQL clause
-					firstResult, batchSize);
-			
-			// Add arrivals/departures to map
-			for (Match match : matchBatchList) {
-				addMatchToMap(resultsMap, match);
-			}
-			
-			logger.info("Read in total of {} matches", 
-					firstResult+matchBatchList.size());
-			
-			// Update firstResult for reading next batch of data
-			firstResult += batchSize;
-		} while (matchBatchList.size() == batchSize);
+		
+		if (!pageDbReads()) {
+			// page by day for MySql -- its batch impl falls down on large data
+			Date pageBeginTime = beginTime;
+			Date pageEndTime = new Date(beginTime.getTime() + Time.MS_PER_DAY);
+			int runningCount = 0;
+			do {
+				logger.info("querying matches for between {} and {}", pageBeginTime, pageEndTime);
+				matchBatchList = Match.getMatchesFromDb(projectId, pageBeginTime, pageEndTime, sqlClause, null, null);
+				// Add arrivals/departures to map
+				for (Match match : matchBatchList) {
+					addMatchToMap(resultsMap, match);
+				}
+				runningCount += matchBatchList.size();
+				logger.info("Read in total of {} matches of {} {}%", 
+						runningCount, count, (0.0+runningCount)/count*100);
 
+				pageBeginTime = pageEndTime;
+				pageEndTime = new Date(Math.min(pageBeginTime.getTime() + Time.MS_PER_DAY, endTime.getTime()));
+				
+			} while (pageEndTime.before(endTime));
+		} else {
+		// Read in batch of 50k rows of data and process it
+			do {				
+				matchBatchList = Match.getMatchesFromDb(
+						projectId, 
+						beginTime, endTime, 
+						// Only want matches that are not at a stop since for that
+						// situation instead using arrivals/departures. 
+						// Order results by time so that process them in the same
+						// way that a vehicle travels.
+						sqlClause, // SQL clause
+						firstResult, batchSize);
+				
+				// Add arrivals/departures to map
+				for (Match match : matchBatchList) {
+					addMatchToMap(resultsMap, match);
+				}
+				
+				logger.info("Read in total of {} matches of {} {}%", 
+						firstResult+matchBatchList.size(), count, (0.0+firstResult+matchBatchList.size())/count*100);
+				
+				// Update firstResult for reading next batch of data
+				firstResult += batchSize;
+			} while (matchBatchList.size() == batchSize);
+			}
 		logger.info("Reading matches took {} msec", timer.elapsedMsec());
 
 		// Return the resulting map of arrivals/departures
@@ -351,6 +431,10 @@ public class DataFetcher {
 		// Read in arrival/departure times and matches from db
 		logger.info("Reading historic data from db...");
 		matchesMap = readMatches(agencyId, beginTime, endTime);
+		if (matchesMap == null || matchesMap.isEmpty()) {
+			logger.info("No Matches present in db");
+			return;
+		}
 		arrivalDepartureMap = 
 				readArrivalsDepartures(agencyId, beginTime, endTime);
 	}

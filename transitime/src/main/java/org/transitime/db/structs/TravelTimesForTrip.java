@@ -33,12 +33,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -68,7 +69,9 @@ public class TravelTimesForTrip implements Serializable {
 	@Id 
 	@GeneratedValue 
 	private Integer id;
-
+	public Integer getId() { 
+	  return id; 
+	}
 	// Need configRev for the configuration so that when old configurations 
 	// cleaned out can also easily get rid of old travel times. Note: at one
 	// point tried making configRevan @Id so that the config rev is part of 
@@ -221,19 +224,9 @@ public class TravelTimesForTrip implements Serializable {
 		logger.info("Reading TravelTimesForTrips for travelTimesRev={} ...", 
 				travelTimesRev);
 		
-		// Get List of all TravelTimesForTrip for the specified rev
-		String hql = "FROM TravelTimesForTrip " +
-				"    WHERE travelTimesRev = :travelTimesRev";
-		Query query = session.createQuery(hql);
-		query.setInteger("travelTimesRev", travelTimesRev);
-		List<TravelTimesForTrip> allTravelTimes;
-		try {
-			allTravelTimes = query.list();
-		} catch (Exception e) {
-			logger.error("Exception in getTravelTimesForTrips(). {}", 
-					e.getMessage());
-			throw e;
-		}
+		List<TravelTimesForTrip> allTravelTimes = session.createCriteria(TravelTimesForTrip.class)
+				.add(Restrictions.eq("travelTimesRev", travelTimesRev))
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();		
 		
 		logger.info("Putting travel times into map...");
 		
@@ -275,6 +268,16 @@ public class TravelTimesForTrip implements Serializable {
 	}
 	
 	/**
+	 * Returns true if all stop paths are valid.
+	 */
+	public boolean isValid() {
+		for (TravelTimesForStopPath times : travelTimesForStopPaths)
+			if (!times.isValid())
+				return false;
+		return true;
+	}
+	
+	/**
 	 * Needed because of Hibernate and also because want to cache 
 	 * TravelTimesForTrip and to do so need to store the objects
 	 * as keys in a map and need hashCode() and equals() for doing
@@ -294,7 +297,7 @@ public class TravelTimesForTrip implements Serializable {
 		result = prime * result + travelTimesRev;
 		result = prime * result + tripPatternId.hashCode();
 //		result = prime * result + tripCreatedForId.hashCode();
-		result = prime * result + travelTimesForStopPaths.hashCode();
+//		result = prime * result + travelTimesForStopPaths.hashCode();  // Stack Overflow with lots of data
 		return result;
 	}
 

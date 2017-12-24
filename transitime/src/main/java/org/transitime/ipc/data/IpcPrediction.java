@@ -25,6 +25,7 @@ import java.util.Date;
 import org.transitime.applications.Core;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Trip;
+import org.transitime.ipc.data.IpcPrediction.ArrivalOrDeparture;
 import org.transitime.utils.StringUtils;
 import org.transitime.utils.Time;
 
@@ -77,6 +78,7 @@ public class IpcPrediction implements Serializable {
 	private final boolean isDelayed;
 	private final boolean lateAndSubsequentTripSoMarkAsUncertain;
 	private final boolean isArrival;
+	private final Integer delay;
 	
 	
 	private final long freqStartTime;
@@ -117,51 +119,52 @@ public class IpcPrediction implements Serializable {
 	 * @param isDelayed
 	 * @param lateAndSubsequentTripSoMarkAsUncertain
 	 * @param arrivalOrDeparture
+	 * @param delay scheduleDeviation or null
 	 * @param freqStartTime 
+	 * @param tripCounter
+	 * 
 	 */
 	public IpcPrediction(AvlReport avlReport, String stopId, int gtfsStopSeq,
-			Trip trip, long predictionTime, long actualPredictionTime,
-			boolean atEndOfTrip, boolean predictionAffectedByWaitStop,
-			boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
-			ArrivalOrDeparture arrivalOrDeparture, long freqStartTime, int tripCounter) {
+		      Trip trip, long predictionTime, long actualPredictionTime,
+		      boolean atEndOfTrip, boolean affectedByWaitStop,
+		      boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
+		      ArrivalOrDeparture arrivalOrDeparture, Integer delay, long freqStartTime,
+			int tripCounter) {
 		this.vehicleId = avlReport.getVehicleId();
-		this.routeId = trip.getRouteId();
-		this.stopId = stopId;
-		this.gtfsStopSeq = gtfsStopSeq;
-		this.trip = trip;
-		// For when trip is null use "" instead of null for the tripId
-		// so that when getting all predictions code for telling when
-		// tripId changes will still work when debugging.
-		this.tripId = trip != null ? trip.getId() : "";
-		this.tripPatternId = trip != null ? trip.getTripPattern().getId() : "";
-		this.blockId = trip != null ? trip.getBlockId() : null;
-		this.predictionTime = predictionTime;
-		this.actualPredictionTime = actualPredictionTime;
-		this.atEndOfTrip = atEndOfTrip;
-		this.schedBasedPred = avlReport.isForSchedBasedPreds();
-		this.avlTime = avlReport.getTime();
-		this.creationTime = avlReport.getTimeProcessed();
+	    this.routeId = trip.getRouteId();
+	    this.stopId = stopId;
+	    this.gtfsStopSeq = gtfsStopSeq;
+	    this.trip = trip;
+	    // For when trip is null use "" instead of null for the tripId
+	    // so that when getting all predictions code for telling when
+	    // tripId changes will still work when debugging.
+	    this.tripId = trip != null ? trip.getId() : "";
+	    this.tripPatternId = trip != null ? trip.getTripPattern().getId() : "";
+	    this.blockId = trip != null ? trip.getBlockId() : null;
+	    this.predictionTime = predictionTime;
+	    this.actualPredictionTime = actualPredictionTime;
+	    this.atEndOfTrip = atEndOfTrip;
+	    this.schedBasedPred = avlReport.isForSchedBasedPreds();
+	    this.avlTime = avlReport.getTime();
+	    this.creationTime = avlReport.getTimeProcessed();
 
-		Date currentTime = Core.getInstance().getSystemDate();
-		this.tripStartEpochTime =
-				Core.getInstance().getTime()
-						.getEpochTime(trip.getStartTime(), currentTime);
-		
-		this.affectedByWaitStop = predictionAffectedByWaitStop;
-		this.driverId = avlReport.getDriverId();
-		this.passengerCount = (short) avlReport.getPassengerCount();
-		this.passengerFullness = avlReport.getPassengerFullness();
-		this.isDelayed = isDelayed;
-		this.lateAndSubsequentTripSoMarkAsUncertain = 
-				lateAndSubsequentTripSoMarkAsUncertain;
-		this.isArrival = arrivalOrDeparture == ArrivalOrDeparture.ARRIVAL;
-		
-		this.freqStartTime = freqStartTime;
+	    Date currentTime = Core.getInstance().getSystemDate();
+	    this.tripStartEpochTime =
+	        Core.getInstance().getTime()
+	            .getEpochTime(trip.getStartTime(), currentTime);
+	    
+	    this.affectedByWaitStop = affectedByWaitStop;
+	    this.driverId = avlReport.getDriverId();
+	    this.passengerCount = (short) avlReport.getPassengerCount();
+	    this.passengerFullness = avlReport.getPassengerFullness();
+	    this.isDelayed = isDelayed;
+	    this.lateAndSubsequentTripSoMarkAsUncertain = 
+	        lateAndSubsequentTripSoMarkAsUncertain;
+	    this.isArrival = arrivalOrDeparture == ArrivalOrDeparture.ARRIVAL;
+	    this.delay = delay;
+	    this.freqStartTime = freqStartTime;
 		this.tripCounter =  tripCounter;
-	}
 
-	public long getFreqStartTime() {
-		return freqStartTime;
 	}
 
 	/**
@@ -175,7 +178,9 @@ public class IpcPrediction implements Serializable {
 			long creationTime, long tripStartEpochTime,
 			boolean affectedByWaitStop, String driverId, short passengerCount,
 			float passengerFullness, boolean isDelayed,
-			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival, Long freqStartTime, int tripCounter) {
+
+			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival,  Integer delay, Long freqStartTime, int tripCounter) {
+
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
 		this.stopId = stopId;
@@ -200,10 +205,15 @@ public class IpcPrediction implements Serializable {
 		this.lateAndSubsequentTripSoMarkAsUncertain = 
 				lateAndSubsequentTripSoMarkAsUncertain;
 		this.isArrival = isArrival;
+
 		this.freqStartTime = freqStartTime;
 		this.tripCounter = tripCounter;
+
+		this.delay = delay;
+
 	}
 
+	
 	/**
 	 * SerializationProxy is used so that this class can be immutable and so
 	 * that can do versioning of objects.
@@ -230,10 +240,14 @@ public class IpcPrediction implements Serializable {
 		private boolean isDelayed;
 		private boolean lateAndSubsequentTripSoMarkAsUncertain;
 		private boolean isArrival;
+
 		private long freqStartTime;
 		private int tripCounter;
 
-		private static final long serialVersionUID = -8585283691951746718L;
+		private Integer delay;
+
+
+		private static final long serialVersionUID = -8585283691951746719L;
 		private static final short currentSerializationVersion = 0;
 
 		/*
@@ -261,8 +275,12 @@ public class IpcPrediction implements Serializable {
 			this.lateAndSubsequentTripSoMarkAsUncertain = 
 					p.lateAndSubsequentTripSoMarkAsUncertain;
 			this.isArrival = p.isArrival;
+
 			this.freqStartTime = p.freqStartTime;
 			this.tripCounter = p.tripCounter;
+
+			this.delay = p.delay;
+
 		}
 
 		/*
@@ -295,8 +313,12 @@ public class IpcPrediction implements Serializable {
 			stream.writeBoolean(isArrival);
 			stream.writeBoolean(isDelayed);
 			stream.writeBoolean(lateAndSubsequentTripSoMarkAsUncertain);
+
 			stream.writeLong(freqStartTime);
 			stream.writeInt(tripCounter);
+
+			stream.writeObject(delay);
+
 		}
 
 		/*
@@ -336,8 +358,12 @@ public class IpcPrediction implements Serializable {
 			isArrival = stream.readBoolean();
 			isDelayed = stream.readBoolean();
 			lateAndSubsequentTripSoMarkAsUncertain = stream.readBoolean();
+
 			freqStartTime=stream.readLong();
 			tripCounter=stream.readInt();
+
+			delay = (Integer) stream.readObject();
+
 		}
 
 		/*
@@ -352,7 +378,8 @@ public class IpcPrediction implements Serializable {
 					atEndOfTrip, schedBasedPred, avlTime, creationTime,
 					tripStartEpochTime, affectedByWaitStop, driverId,
 					passengerCount, passengerFullness, isDelayed,
-					lateAndSubsequentTripSoMarkAsUncertain, isArrival, freqStartTime, tripCounter);
+					lateAndSubsequentTripSoMarkAsUncertain, isArrival, delay, freqStartTime, tripCounter);
+
 		}
 	}
 
@@ -540,4 +567,13 @@ public class IpcPrediction implements Serializable {
 			return null;
 		return trip.getRouteShortName();
 	}
+	
+	public Integer getDelay() {
+	  return delay;
+	}
+
+	public long getFreqStartTime() {
+		return freqStartTime;
+	}
+	
 }

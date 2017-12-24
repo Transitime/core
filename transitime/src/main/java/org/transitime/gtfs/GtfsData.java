@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import org.hibernate.HibernateException;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -89,6 +90,7 @@ import org.transitime.gtfs.readers.GtfsStopsSupplementReader;
 import org.transitime.gtfs.readers.GtfsTransfersReader;
 import org.transitime.gtfs.readers.GtfsTripsReader;
 import org.transitime.gtfs.readers.GtfsTripsSupplementReader;
+import org.transitime.monitoring.CloudwatchService;
 import org.transitime.utils.Geo;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MapKey;
@@ -111,6 +113,9 @@ public class GtfsData {
 	// The session used throughout the class
 	private final Session session;
 	
+	// log metrics
+	private CloudwatchService cloudwatchService;
+	
 	// Various params set by constructor
 	private final ActiveRevisions revs;
 	private final String notes;
@@ -125,6 +130,7 @@ public class GtfsData {
 	private final double maxSpeedKph;
 	private final double maxTravelTimeSegmentLength;
 	private final boolean trimPathBeforeFirstStopOfTrip;
+	private final boolean cleanupRevs;
 	
 	// So can make the titles more readable
 	private final TitleFormatter titleFormatter;
@@ -278,6 +284,7 @@ public class GtfsData {
 			String notes,
 			Date zipFileLastModifiedTime,
 			boolean shouldStoreNewRevs,
+			boolean shouldDeleteRevs,
 			String projectId,
 			String gtfsDirectoryName, 
 			String supplementDir, 
@@ -309,6 +316,7 @@ public class GtfsData {
 				HibernateUtils.getSessionFactory(getAgencyId());
 		session = sessionFactory.openSession();
 		
+		cloudwatchService = CloudwatchService.getInstance();
 		// Deal with the ActiveRevisions. First, store the original travel times
 		// rev since need it to read in old travel time data. 		
 		ActiveRevisions originalRevs = ActiveRevisions.get(session); 
@@ -327,7 +335,7 @@ public class GtfsData {
 			// Don't need to store new revs in db so use a transient object
 			revs = new ActiveRevisions();
 		}
-		
+		cleanupRevs = shouldDeleteRevs;
 		// If particular configuration rev specified then use it. This way
 		// can write over existing configuration revisions.
 		if (configRev >= 0) {
@@ -829,6 +837,7 @@ public class GtfsData {
 			// Therefore filter out such stops. Note that only filtering
 			// out such stops if they are the first stops in the trip.
 			GtfsStop gtfsStop = getGtfsStop(gtfsStopTime.getStopId());
+			if (gtfsStop == null) continue;
 			if (gtfsStop.getDeleteFromRoutesStr() != null
 					|| (firstStopInTrip && gtfsStop
 							.getDeleteFirstStopFromRoutesStr() != null)) {
@@ -2006,14 +2015,36 @@ public class GtfsData {
 	private void processCalendars() {
 		// Let user know what is going on
 		logger.info("Processing calendar.txt data...");
-		
-		// Create the map where the data is going to go
+
+        // Create the map where the data is going to go
 		calendars = new ArrayList<Calendar>();
 
 		// Read in the calendar.txt GTFS data from file
 		GtfsCalendarReader calendarReader = 
 				new GtfsCalendarReader(gtfsDirectoryName);
 		List<GtfsCalendar> gtfsCalendars = calendarReader.get();
+
+        if(gtfsCalendars.size() < 1){
+            logger.info("calendar.txt not found, will generate calendars and assume all services are always available...");
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            String start = format.format(cal.getTime());
+            cal.add(java.util.Calendar.MONTH, 6);
+            String end = format.format(cal.getTime());
+            GtfsTripsReader tripsReader = new GtfsTripsReader(gtfsDirectoryName);
+            List<GtfsTrip> gtfsTrips = tripsReader.get();
+            Set<String> serviceIds = new HashSet<>();
+            for(GtfsTrip gtfsTrip :gtfsTrips){
+                serviceIds.add(gtfsTrip.getServiceId());
+            }
+            for(String serviceId : serviceIds){
+                GtfsCalendar gtfsCalendar = new GtfsCalendar(
+                        serviceId, "1", "1", "1", "1", "1", "1", "1", start, end
+                );
+                gtfsCalendars.add(gtfsCalendar);
+            }
+        }
+
 		
 		for (GtfsCalendar gtfsCalendar : gtfsCalendars) {
 			// Create the Calendar object and put it into the array)
@@ -2033,7 +2064,7 @@ public class GtfsData {
 	private void processCalendarDates() {
 		// Let user know what is going on
 		logger.info("Processing calendar_dates.txt data...");
-		
+
 		// Create the map where the data is going to go
 		calendarDates = new ArrayList<CalendarDate>();
 
@@ -2673,28 +2704,31 @@ public class GtfsData {
 						defaultWaitTimeAtStopMsec, maxSpeedKph);
 		travelTimesProcesssor.process(session, this);
 		
-		// Try allowing garbage collector to free up some memory since
-		// don't need the GTFS structures anymore.
-		gtfsRoutesMap = null;
-		gtfsTripsMap = null;
-		gtfsStopTimesForTripMap = null;
-		
-		// Now that have read in all the data into collections output it
-		// to database.
+    // Try allowing garbage collector to free up some memory since
+    // don't need the GTFS structures anymore.
+    gtfsRoutesMap = null;
+    gtfsTripsMap = null;
+    gtfsStopTimesForTripMap = null; 
+    int originalNumberOfTravelTimes = travelTimesProcesssor.getOriginalNumberOfTravelTimes();
+    int numberOfTravelTimes = travelTimesProcesssor.getNumberOfTravelTimes();
+    int configRev = revs.getConfigRev();
+    int travelTimesRev= revs.getTravelTimesRev();
 		try {
-			DbWriter dbWriter = new DbWriter(this);
-			dbWriter.write(session, revs.getConfigRev());		
-			
-			// Finish things up by closing the session
-			session.close();
-			
-			// Let user know what is going on
-			logger.info("Finished processing GTFS data from {} . Took {} msec.",
-					gtfsDirectoryName, timer.elapsedMsec());
-		} catch (HibernateException e) {
-			logger.error("Exception when writing data to db", e);
-			throw e;
-		}		
+  		DbWriter dbWriter = new DbWriter(this);
+  		dbWriter.write(session, revs.getConfigRev(), cleanupRevs);	
+  		// Finish things up by closing the session
+  		session.close();
+  		
+  		// Let user know what is going on
+  		logger.info("Finished processing GTFS data from {} . Took {} msec.",
+  				gtfsDirectoryName, timer.elapsedMsec());
+    } catch (HibernateException e) {
+      logger.error("Exception when writing data to db", e);
+      throw e;
+    }   
+		updateMetrics(originalNumberOfTravelTimes, numberOfTravelTimes, configRev, travelTimesRev);
+  		
+  		
 
 		// just for debugging
 //		GtfsLoggingAppender.outputMessagesToSysErr();
@@ -2729,4 +2763,26 @@ public class GtfsData {
 //			System.err.println("  " + r);
 //		}
 	}
+
+  public Long updateMetrics(int originalTravelTimesCount, int expectedTravelTimesCount, int configRev, int travelTimesRev) {
+    HibernateUtils.clearSessionFactory();
+    SessionFactory sessionFactory =  
+        HibernateUtils.getSessionFactory(getAgencyId());
+    Session statsSession = sessionFactory.openSession();
+    cloudwatchService.saveMetric("PredictionLatestConfigRev", configRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("PredictionLatestTravelTimesRev", travelTimesRev*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    Long count = Trip.countTravelTimesForTrips(statsSession, travelTimesRev);
+    if (count != null) {
+      cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", count*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    } else {
+      cloudwatchService.saveMetric("PredictionTravelTimesForTripsCount", -1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    }
+    cloudwatchService.saveMetric("PredictionTravelTimesForTripsExpectedCount", expectedTravelTimesCount*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("PredictionTravelTimesForTripsOriginalCount", originalTravelTimesCount*1.0, 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+
+    logger.info("Found {} TravelTimesForTrips for {}:{} with expected={}, orginal={}", 
+        count, configRev, travelTimesRev, expectedTravelTimesCount, originalTravelTimesCount);
+    return count;
+    
+  }
 }

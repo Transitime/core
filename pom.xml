@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>transitime</groupId>
-  <artifactId>transitime-all</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <artifactId>transitime</artifactId>
+  <version>0.0.31-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>transitime-all</name>
+  <name>transitime</name>
   <url>http://www.transitime.org//</url>
   <modules>
     <module>transitime</module>
@@ -13,4 +13,47 @@
     <module>transitimeWebapp</module>
     <module>transitimeQuickStart</module>
   </modules>
+<<<<<<< HEAD
 </project>
+=======
+
+    <profiles>
+        <profile>
+            <id>skip-integration-tests</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>include-integration-tests</id>
+            <modules>
+                <module>transitime-integration</module>
+                <module>transitime</module>
+                <module>transitimeApi</module>
+                <module>transitimeWebapp</module>
+            </modules>
+        </profile>
+    </profiles>
+
+  <scm>
+    <connection>scm:git:http://github.com/sheldonabrown/core.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/sheldonabrown/core.git</developerConnection>
+    <url>http://github.com/sheldonabrown/core</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>releases-obaweb-repo</id>
+      <name>OneBusAway Camsys Release Repo</name>
+      <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/releases/</url> 
+    </repository>
+    <snapshotRepository>
+      <id>snapshots-obaweb-repo</id>
+      <name>OneBusAway Camsys Snapshot Repo</name>
+      <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/snapshots/</url> 
+    </snapshotRepository>
+  </distributionManagement>
+
+</project>
+>>>>>>> 7f9fa2df466fd81ee86c633c4151b0dbb0c583f2
