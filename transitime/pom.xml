@@ -4,8 +4,6 @@
 	<groupId>transitime</groupId>
 	<artifactId>transitimeCore</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -57,11 +55,6 @@
 		</dependency>
 		
 		<dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.3.2</version>
-        </dependency>
-		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>4.3.9.Final</version>
@@ -86,13 +79,6 @@
 		</dependency>
 
 		<!-- For logging -->
-
-
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<version>2.9.0</version>
-		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
@@ -105,9 +91,9 @@
 			<version>1.1.3</version>
 		</dependency>
 		<dependency>
-    		<groupId>org.hsqldb</groupId>
-    		<artifactId>hsqldb</artifactId>
-    		<version>2.2.4</version>
+    			<groupId>org.hsqldb</groupId>
+    			<artifactId>hsqldb</artifactId>
+    			<version>2.2.4</version>
 		</dependency>
 
 		<dependency>
@@ -225,12 +211,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<version>2.2.4</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- Used for reflection to find classes in package -->

@@ -62,7 +62,7 @@
     	title="How late a vehicle can arrive compared to the prediction
     	and still be acceptable. Must be a positive number to indicate
     	late." 
-    	value="1.0" 
+    	value="4.0" 
     	step="0.1"
     	type="number" /> <span class="note">minutes</span>
   </div>

@@ -105,22 +105,22 @@ if (Integer.parseInt(numDays) > 31) {
                             + "   predictionSource,"
                             + "   CASE WHEN affectedbywaitstop THEN 'True' ELSE 'False' END) AS tooltip ";
 
-        String predLengthSql = "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, ";
+        String predLengthSql = "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer ";
         String predAccuracySql = "     predictionAccuracyMsecs/1000 as predAccuracy ";
         if (isMysql) {
-          predLengthSql = "CAST(predictedTime-predictionReadTime as SIGNED) as predLength, ";
+          predLengthSql = "CAST(predictedTime-predictionReadTime as SIGNED) ";
           predAccuracySql = "CAST(predictionAccuracyMsecs/1000 AS DECIMAL) as predAccuracy "; 
         }
         
        String sql = "SELECT "
-                + predLengthSql
+                + predLengthSql + " as predLength," 
                 + predAccuracySql
                 + tooltipsSql
                 + " FROM PredictionAccuracy "
                 + "WHERE "
                 + "1=1 "
 				+ SqlUtils.timeRangeClause(request, "arrivalDepartureTime", 30)
-                + "  AND predictedTime-predictionReadTime < 900 "
+                + "  AND "+predLengthSql+" < 900 "
                 + routeSql
                 + sourceSql
                 + predTypeSql

@@ -65,8 +65,7 @@ public class RoutePerformanceQuery {
     // Project to: # of predictions in which route is on time / # of predictions
     // for route. This cannot be done with pure Criteria API. This could be
     // moved to a separate class or XML file.
-    String sqlProjection = "avg(predictionAccuracyMsecs BETWEEN " + Integer.toString(msecLo) + " AND "
-        + Integer.toString(msecHi) + ") AS avgAccuracy";
+    String sqlProjection = "avg(predictionAccuracyMsecs)  AS avgAccuracy";
 
     try {
       session = HibernateUtils.getSession(agencyId);
@@ -79,7 +78,11 @@ public class RoutePerformanceQuery {
           
       Criteria criteria = session.createCriteria(PredictionAccuracy.class)
         .setProjection(proj)
-        .add(Restrictions.between("arrivalDepartureTime", startDate, endDate));
+        .add(Restrictions.ge("arrivalDepartureTime", startDate))
+        .add(Restrictions.le("arrivalDepartureTime", endDate))
+      	.add(Restrictions.ge("predictionAccuracyMsecs", msecLo))
+    	.add(Restrictions.le("predictionAccuracyMsecs", msecHi));
+      
       
       if (predictionType == PREDICTION_TYPE_AFFECTED)
           criteria.add(Restrictions.eq("affectedByWaitStop", true));
@@ -99,6 +102,7 @@ public class RoutePerformanceQuery {
           
       @SuppressWarnings("unchecked")
       List<Object[]> results = criteria.list();
+      
 
       return results;
     }

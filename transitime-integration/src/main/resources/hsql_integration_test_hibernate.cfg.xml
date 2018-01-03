@@ -60,7 +60,7 @@
      <property name="hibernate.order_inserts">true</property>
      <property name="hibernate.order_updates">true</property>
      <property name="hibernate.connection.autocommit">true</property>
-     <property name="hibernate.hbm2ddl.auto">update</property>
+     <property name="hibernate.hbm2ddl.auto">create</property>
 
  
    <!-- Configure db settings. Currently commented out because this

@@ -1183,7 +1183,7 @@ public class Trip implements Lifecycle, Serializable {
     query.setInteger("rev", travelTimesRev);
     Long count = null;
     try {
-      BigInteger bcount = (BigInteger) query.uniqueResult();
+      Integer bcount = (Integer) query.uniqueResult();
       if (bcount != null)
         count = bcount.longValue();
     } catch (HibernateException e) {

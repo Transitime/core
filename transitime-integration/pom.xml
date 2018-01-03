@@ -16,6 +16,12 @@
 			<artifactId>transitimeCore</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.2.4</version>
+			<scope>test</scope>
+		</dependency>
         
         <!-- For logging -->
         <dependency>
@@ -60,7 +66,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
+                
                 <configuration>
+                	<argLine>-Dtransitime.logging.dir="/tmp"</argLine>
                 	<reuseForks>false</reuseForks>
                 </configuration>
             </plugin>

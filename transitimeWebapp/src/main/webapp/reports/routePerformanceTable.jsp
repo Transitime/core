@@ -59,7 +59,7 @@
 		    	and still be acceptable. Must be a positive number to indicate
 		    	late." 
 		    	type="number"
-		    	value="1.0"
+		    	value="4.0"
 		    	step="0.1" /> <span class="note">minutes</span>
 		 </div>
 		  

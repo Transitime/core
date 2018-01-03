@@ -15,12 +15,9 @@
 <script>
 
 // This needs to match the API key in the database
-<<<<<<< HEAD
-var apiKey = "<%=System.getProperty("transitime.apikey")%>"
 
-=======
-var apiKey = "4b248c1b";
->>>>>>> 7f9fa2df466fd81ee86c633c4151b0dbb0c583f2
+var apiKey = "f78a2e9a";
+
 // For accessing the api for an agency command
 var apiUrlPrefixAllAgencies = "/api/v1/key/" + apiKey;
 var apiUrlPrefix = apiUrlPrefixAllAgencies + "/agency/<%= request.getParameter("a") %>";

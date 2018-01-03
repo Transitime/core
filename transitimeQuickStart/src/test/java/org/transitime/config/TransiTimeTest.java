@@ -63,12 +63,14 @@ public class TransiTimeTest  {
 			double maxTravelTimeSegmentLength = 1000.0;
 			int configRev = -1;
 			boolean shouldStoreNewRevs = true;
+			boolean shouldDeleteRevs = false;
 			boolean trimPathBeforeFirstStopOfTrip = false;
+			
 
 			GtfsFileProcessor testprocessor = new GtfsFileProcessor(configFilePath, notes, gtfsUrl, gtfsZipFileName,
 					unzipSubdirectory, gtfsDirectoryName, supplementDir, regexReplaceListFileName, pathOffsetDistance,
 					maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
-					maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, trimPathBeforeFirstStopOfTrip);
+					maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs,shouldDeleteRevs,  trimPathBeforeFirstStopOfTrip);
 			testprocessor.process();
 			assertTrue(true);
 		} catch (Exception e) {

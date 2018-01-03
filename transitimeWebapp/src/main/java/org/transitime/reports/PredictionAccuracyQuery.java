@@ -382,7 +382,7 @@ abstract public class PredictionAccuracyQuery {
 			// Set the parameters for the query
 			int i = 1;
 			statement.setTimestamp(i++, beginDate);
-			statement.setTimestamp(i++, beginDate);
+			
 			if (beginTime != null) {
 			  if ("mysql".equals(dbType)) {
 			    // for mysql use the time str as is to avoid TZ issues

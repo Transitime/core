@@ -99,6 +99,6 @@ if (routeId!=null && !routeId.trim().isEmpty()) {
 
 
 // Do the actual query	
-String csvStr = GenericCsvQuery.getCsvString(agencyId, sql, Time.parseDate(beginDate), Time.parseDate(beginDate));
+String csvStr = GenericCsvQuery.getCsvString(agencyId, sql);
 response.getWriter().write(csvStr);
 %>
