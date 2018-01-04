@@ -4,7 +4,7 @@
 <%
 
 String sql = 
-	"SELECT a.vehicleId, maxTime, lat, lon "
+	"SELECT a.vehicleId, maxTime, lat, lon, IFNULL(assignmentId, '') AS assignmentId "
 	+ "FROM " 
 	+ "(SELECT vehicleId, max(time) AS maxTime " 
 	+ "FROM AvlReports WHERE time > date_sub(now(), interval 1 day) "
