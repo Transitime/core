@@ -62,7 +62,7 @@
         command line arguments so that some apps, like the 
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
-
+<!--
    <property name="hibernate.connection.url">
       jdbc:mysql://localhost/transitime
    </property>
@@ -72,6 +72,7 @@
    <property name="hibernate.connection.password">
       changeme
    </property>
+-->
 
 
    <!-- List of XML mapping files. Commented out because adding
