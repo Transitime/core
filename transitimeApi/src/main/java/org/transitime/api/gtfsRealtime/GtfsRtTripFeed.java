@@ -20,6 +20,8 @@ package org.transitime.api.gtfsRealtime;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -133,6 +135,9 @@ public class GtfsRtTripFeed {
 		VehicleDescriptor.Builder vehicleDescriptor =
 				VehicleDescriptor.newBuilder().setId(firstPred.getVehicleId());
 		tripUpdate.setVehicle(vehicleDescriptor);
+
+		// according to the GTFS-RT spec, predictions need to be sorted by gtfs stop seq
+		Collections.sort(predsForTrip, new GtfsStopSequenceComparator());
 
 		// Add the StopTimeUpdate information for each prediction
 		for (IpcPrediction pred : predsForTrip) {
@@ -301,4 +306,13 @@ public class GtfsRtTripFeed {
 	    return feedMessage;
 	}
 
+	public static class GtfsStopSequenceComparator implements Comparator {
+
+		@Override
+		public int compare(Object o1, Object o2) {
+			IpcPrediction ip1 = (IpcPrediction) o1;
+			IpcPrediction ip2 = (IpcPrediction) o2;
+			return ip1.getGtfsStopSeq() - ip2.getGtfsStopSeq();
+		}
+	}
 }

@@ -56,6 +56,7 @@ public class AvlSqsClientModule extends Module {
   private final static int MAX_THREADS = 100;
 
   private static final int DEFAULT_MESSAGE_LOG_FREQUENCY = 10000;
+
   
   private static IntegerConfigValue avlQueueSize = 
       new IntegerConfigValue("transitime.avl.jmsQueueSize", 350,
@@ -72,7 +73,12 @@ public class AvlSqsClientModule extends Module {
           "large systems with lots of vehicles then should use " +
           "multiple threads, such as 3-5 so that more of the cores " +
           "are used. Only for when JMS is used.");
-  
+
+  private static IntegerConfigValue jmsPauseTimeInSeconds =
+          new IntegerConfigValue("transitime.avl.jmsPauseTimeInSeconds", 1,
+                  "How long to pause for the next message after receiving an empty message.");
+
+
   private static IntegerConfigValue messageLogFrequency =
       new IntegerConfigValue("transitime.avl.messageLogFrequency", 
           DEFAULT_MESSAGE_LOG_FREQUENCY, 
@@ -293,6 +299,9 @@ public class AvlSqsClientModule extends Module {
             } catch (IllegalStateException ise) {
               logger.error("dropping ack {} as queue is full: ",  messages, ise);
             }
+            } else {
+              // we didn't get any messages, pause for some to queue up
+              Thread.sleep(jmsPauseTimeInSeconds.getValue() * 1000);
             }
           } catch (Exception any) {
             logger.error("exception receiving: ", any);

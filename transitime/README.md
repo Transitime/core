@@ -9,7 +9,7 @@ The steps to set up the system are
 	</li>
 	</li>
 	<li>Import GTFS static data using
-		processGTFSFile.jar
+		GTFSFileProcessor.jar
 	</li>		
 	<li>Get access to a source of realtime GPS data.</li>
 	<li>Create transiTime module to read realtime GPS data or create a converter to convert the realtime datasource to a GTFS-RT vechicle location source.</li>
@@ -61,12 +61,12 @@ mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -De
 mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitime.db.webstructs"
 ````
 
-processGTFSFile.jar -- Main class: org.transitime.applications.GTFSFileProcessor
+GTFSFileProcessor.jar -- Main class: org.transitime.applications.GTFSFileProcessor
 =================================    
 This class the usage can be got from specifying the -h option on its own.
 
 ```
-usage: java processGTFSFile.jar [-c <configFile>] [-combineRouteNames]
+usage: java GTFSFileProcessor.jar [-c <configFile>] [-combineRouteNames]
        [-defaultWaitTimeAtStopMsec <msec>] [-gtfsDirectoryName <dirName>]
        [-gtfsUrl <url>] [-gtfsZipFileName <zipFileName>] [-h]
        [-maxDistanceForEliminatingVertices <meters>] [-maxSpeedKph <kph>]
@@ -170,7 +170,7 @@ args:
 
 ```
 example:
-	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar processGTFSFile.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
+	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar GTFSFileProcessor.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
 ```
 
 
