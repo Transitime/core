@@ -4,13 +4,13 @@
 	<display-name>Transitime api</display-name>
 
 	
-	<context-param>
-      <param-name>transitime_config_file_location</param-name>
-      <!-- Set to customized properties file with db config info and such -->
+	<!--<context-param>-->
+      <!--<param-name>transitime_config_file_location</param-name>-->
+      <!--&lt;!&ndash; Set to customized properties file with db config info and such &ndash;&gt;-->
 
-          <param-value>/opt/wmata/transitime/config/transiTimeConfig.xml</param-value>
+          <!--<param-value>/opt/wmata/transitime/config/transiTimeConfig.xml</param-value>-->
 
-    </context-param>
+    <!--</context-param>-->
 	
 	<!-- So that configuration parameters can be read in from file -->
     <listener>
