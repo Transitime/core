@@ -34,6 +34,8 @@ function dataReadCallback(jsonData) {
 		row.insertCell(1).innerHTML = vehicleInfo.maxTime;
 		row.insertCell(2).innerHTML = vehicleInfo.lat;
 		row.insertCell(3).innerHTML = vehicleInfo.lon;
+        row.insertCell(4).innerHTML = vehicleInfo.assignmentId
+        row.insertCell(5).innerHTML = vehicleInfo.routeShortName;
 	}
 }
 
@@ -56,7 +58,7 @@ $( document ).ready(function() {
 <%@include file="/template/header.jsp" %>
 <div id="title">Last GPS Reports for Past 24 Hours</div>
 <table id="dataTable">
-  <tr><th>Vehicle</th><th>Last GPS</th><th>Latitude</th><th>Longitude</th></tr>
+  <tr><th>Vehicle</th><th>Last GPS</th><th>Latitude</th><th>Longitude</th><th>Block</th><th>Route</th></ht></tr>
   </table>
 </body>
 </html>
