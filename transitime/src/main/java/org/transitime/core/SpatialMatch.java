@@ -22,11 +22,13 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.transitime.applications.Core;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Location;
 import org.transitime.db.structs.Route;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.ScheduleTime;
 import org.transitime.db.structs.Trip;
 import org.transitime.db.structs.Vector;
+import org.transitime.db.structs.VectorWithHeading;
 import org.transitime.utils.Geo;
 import org.transitime.utils.Time;
 
@@ -46,6 +48,7 @@ public class SpatialMatch {
 	protected final double distanceToSegment;
 	protected final double distanceAlongSegment;
 	protected final VehicleAtStopInfo atStop;
+	protected final Location predictedLocation;
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(SpatialMatch.class);
@@ -66,6 +69,39 @@ public class SpatialMatch {
 		
 		// Determine whether at stop
 		this.atStop = atStop();
+		this.predictedLocation = computeLocation();
+	}
+
+	/**
+	 * based on the current trip/stop path/sgement compute the predicted 
+	 * vehicle location.
+	 */
+	private Location computeLocation() {
+		Trip trip = block.getTrip(tripIndex);
+		if (trip != null) {
+			StopPath stopPath = trip.getStopPath(stopPathIndex);
+			if (stopPath != null) {
+				VectorWithHeading vector = stopPath.getSegmentVector(segmentIndex);
+				if (vector != null) {
+					return vector.locAlongVector(distanceAlongSegment);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * based on the indices and distance along segment compute the predicted
+	 * vehicle location.
+	 */
+	public Location computeLocation(Indices i, double distanceAlongSegment) {
+		if (i != null) {
+			VectorWithHeading segment = i.getSegment();
+			if (segment != null) {
+				return segment.locAlongVector(distanceAlongSegment);
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -107,6 +143,8 @@ public class SpatialMatch {
 					this.tripIndex, 
 					toCopy.atStop().getStopPathIndex());
 		}
+		// recomupte predictedLocation for above reasons as well
+		this.predictedLocation = toCopy.computeLocation(toCopy.getIndices(), toCopy.distanceAlongSegment);
 	}
 	
 	/**
@@ -128,6 +166,7 @@ public class SpatialMatch {
 		this.distanceToSegment = toCopy.distanceToSegment;
 		this.distanceAlongSegment = distanceAlongSegment;
 		this.atStop = toCopy.atStop;
+		this.predictedLocation = computeLocation(newIndices, distanceAlongSegment);
 	}
 
 	/**
@@ -144,6 +183,7 @@ public class SpatialMatch {
 		this.distanceToSegment = toCopy.distanceToSegment;
 		this.distanceAlongSegment = toCopy.distanceAlongSegment;
 		this.atStop = toCopy.atStop;
+		this.predictedLocation = toCopy.predictedLocation;
 	}
 
 	/**
@@ -524,6 +564,7 @@ public class SpatialMatch {
 	 * @return true if this spatial match is for a layover
 	 */
 	public boolean isLayover() {
+	  if (block.isNoSchedule()) return false; // Frequency-based unscheduled blocks can't have layovers
 		return block.isLayover(tripIndex, stopPathIndex);
 	}
 	
@@ -548,10 +589,15 @@ public class SpatialMatch {
 		try {
 			ScheduleTime scheduleTime = 
 					block.getScheduleTime(tripIndex, stopPathIndex);
+			if (scheduleTime == null) {
+			  // prevent nullpointer
+			  logger.error("no scheduled wait stop time for {} {}", tripIndex, stopPathIndex);
+			  return -1;
+			}
 			return scheduleTime.getDepartureTime();
 		} catch (Exception e) {
 			logger.error("Tried to get wait stop time for a stop that didn't "
-					+ "have one. {}", this);
+					+ "have one. {} {}", this, e, e);
 			return -1; 
 		}
 	}
@@ -954,6 +1000,10 @@ public class SpatialMatch {
 	 */
 	public long getAvlTime() {
 		return avlTime;
+	}
+	
+	public Location getLocation() {
+		return predictedLocation;
 	}
 }
 

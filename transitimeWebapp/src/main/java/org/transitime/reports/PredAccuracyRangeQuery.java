@@ -162,6 +162,8 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 						+ StringUtils.oneDigitFormat(okPercentage) + "%");
 
 				rowBuilder.addRowElement(tooLatePercentage);
+				rowBuilder.addRowElement("Too Late: " + tooLate + " points, "
+				    + StringUtils.oneDigitFormat(tooLatePercentage) + "%");
 				rowBuilder.addRowElement("Later than predicted: " + tooLate + " points, "
 						+ StringUtils.oneDigitFormat(tooLatePercentage) + "%");
 			}
@@ -234,11 +236,13 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		String beginDate = "06-30-2016";
-		String numDays = "1";
+
+		String beginDate = "11-25-2014";
 		String beginTime = null;
 		String endTime = null;
-		String routeIds[] = {  };
+		String numDays = "1";
+		String routeIds[] = { "CR-Fairmount" };
+
 		String source = "Transitime";
 			
 

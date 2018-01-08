@@ -769,18 +769,18 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(
 			String dbName, Date beginTime, Date endTime, 
 			String sqlClause,
-			final int firstResult, final int maxResults,
+			final Integer firstResult, final Integer maxResults,
 			ArrivalsOrDepartures arrivalOrDeparture) {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = dbName != null ? HibernateUtils.getSession(dbName) : HibernateUtils.getSession();
+		Session session = dbName != null ? HibernateUtils.getSession(dbName, true) : HibernateUtils.getSession(true);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
 		String hql = "FROM ArrivalDeparture " +
-				"    WHERE time >= :beginDate " +
-				"      AND time < :endDate";
+				"    WHERE time between :beginDate " +
+				"      AND :endDate";
 		if (arrivalOrDeparture != null) {
 			if (arrivalOrDeparture == ArrivalsOrDepartures.ARRIVALS)
 				hql += " AND isArrival = true";
@@ -796,9 +796,12 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		query.setTimestamp("endDate", endTime);
 		
 		// Only get a batch of data at a time if maxResults specified
-		query.setFirstResult(firstResult);
-		if (maxResults > 0)
+		if (firstResult != null) {
+			query.setFirstResult(firstResult);
+		}
+		if (maxResults != null && maxResults > 0) {
 			query.setMaxResults(maxResults);
+		}
 		
 		try {
 			@SuppressWarnings("unchecked")
@@ -818,6 +821,51 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		
 	}
 
+	public static Long getArrivalsDeparturesCountFromDb(
+			String dbName, Date beginTime, Date endTime, 
+			ArrivalsOrDepartures arrivalOrDeparture) {
+		IntervalTimer timer = new IntervalTimer();
+		Long count = null;
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = dbName != null ? HibernateUtils.getSession(dbName, true) : HibernateUtils.getSession(true);
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+		String hql = "select count(*) FROM ArrivalDeparture " +
+				"    WHERE time >= :beginDate " +
+				"      AND time < :endDate";
+		if (arrivalOrDeparture != null) {
+			if (arrivalOrDeparture == ArrivalsOrDepartures.ARRIVALS)
+				hql += " AND isArrival = true";
+			else 
+				hql += " AND isArrival = false";
+		}
+		
+		Query query = session.createQuery(hql);
+		
+		// Set the parameters for the query
+		query.setTimestamp("beginDate", beginTime);
+		query.setTimestamp("endDate", endTime);
+		
+		
+		try {
+			count = (Long) query.uniqueResult();
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
+			return count;
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error(e.getMessage(), e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+		
+	}
+
+	
 	/**
 	 * Same as other getArrivalsDeparturesFromDb() but uses
 	 * -Dtransitime.db.dbName Java property to specify the name of the database.
@@ -990,4 +1038,12 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public Stop getStop() {
 		return Core.getInstance().getDbConfig().getStop(stopId);
 	}
+	
+	/**
+	 * @return the gtfsStopSequence associated with the arrival/departure
+	 */
+	public int getGtfsStopSequence() {
+		return gtfsStopSeq;
+	}
+
 }

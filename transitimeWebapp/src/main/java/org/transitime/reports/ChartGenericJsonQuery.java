@@ -17,13 +17,13 @@
 
 package org.transitime.reports;
 
+import org.transitime.db.GenericQuery;
+import org.transitime.reports.ChartJsonBuilder.RowBuilder;
+
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import java.util.List;
-
-import org.transitime.db.GenericQuery;
-import org.transitime.reports.ChartJsonBuilder.RowBuilder;
 
 /**
  * For providing data to a Google scatter chart when need to specify specific
@@ -54,14 +54,15 @@ public class ChartGenericJsonQuery extends GenericQuery {
 	protected void addColumn(String columnName, int type) {
 		if (columnName.equals("tooltip"))
 			jsonBuilder.addTooltipColumn();
-		else if (type == Types.NUMERIC || type == Types.INTEGER
-				|| type == Types.SMALLINT || type == Types.BIGINT
-				|| type == Types.FLOAT || type == Types.DOUBLE)
+    else if (type == Types.NUMERIC || type == Types.INTEGER
+        || type == Types.SMALLINT || type == Types.BIGINT
+        || type == Types.DECIMAL
+        || type == Types.FLOAT || type == Types.DOUBLE)
 			jsonBuilder.addNumberColumn(columnName);
 		else if (type == Types.VARCHAR)
 			jsonBuilder.addStringColumn(columnName);
 		else
-			logger.error("Unknown type={} for columnName={}");
+			logger.error("Unknown type={} for columnName={}", type, columnName);
 	}
 
 	/* (non-Javadoc)

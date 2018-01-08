@@ -28,6 +28,7 @@ String source = (sourceParam != null && !sourceParam.isEmpty()) ?
 	", " + sourceParam + " predictions" : ""; 
 String beginDate = request.getParameter("beginDate");
 String numDays = request.getParameter("numDays");
+if (numDays == null) numDays = "1";
 String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 
@@ -64,6 +65,13 @@ if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.
 		z-index: 9999;
 		background: url('images/page-loader.gif') 50% 50% no-repeat rgb(249,249,249);
       }
+
+      #summary {
+      	font-family: arial, sans-serif;
+      	width: 100%;
+      	text-align: center;
+      	margin-top: 1%;
+      }
       
       #errorMessage {
 		  display: none;
@@ -86,6 +94,7 @@ if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.
   <div id="chart_div" style="width: 100%; height: 600px;"></div>
   <div id="loading"></div>
   <div id="errorMessage"></div>
+  <div id="summary"><small>Schedule Adherence loading....</small></div>
 </body>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -119,9 +128,9 @@ function getDataTable() {
        },
      // When there is an AJAX problem alert the user
      error: function(request, status, error) {
-       //alert(error + '. ' + request.responseText);
-     	$("#errorMessage").html(request.responseText +
-     			"<br/><br/>Hit back button to try other parameters.");
+        console.log(request.responseText)
+        var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.")
+     	$("#errorMessage").append(msg);
         $("#errorMessage").fadeIn("slow");
        },
      }).responseJSON;
@@ -172,10 +181,36 @@ function drawChart() {
     chart.draw(globalDataTable, chartOptions);	
 }
 
+function parseSummary(data) {
+	var results = [];
+	data.forEach(function(d) {
+		results.push(d);
+	});
+	document.getElementById('summary').innerHTML = "Schedule Adherence over " + results[0] + " arrival and departures<br/>"
+	+ "Early: <b>" + results[1]
+	+ "</b>% OnTime: <b>" + results[2] 
+	+ "</b>% Late: <b>" + results[3] + "</b>%";
+	
+}
+
+function formatQueryParams() {
+  return "<%= WebUtils.getQueryParamsString(request) %>";
+}
+
+function showSummary() {
+	$("#summary").show();
+	$.get("data/summaryScheduleAdherence.jsp?"+formatQueryParams(), parseSummary)
+	.fail(function() {
+		document.getElementById('summary').innerHTML ="Error!";
+	});
+}
+
 function getDataAndDrawChart() {
     getDataTable();
-    if (globalDataTable != null)
+    if (globalDataTable != null) {
 		drawChart();
+		showSummary();
+    }
 	
     // Now that chart has been drawn faceout the loading image
     $("#loading").fadeOut("slow");

@@ -278,10 +278,12 @@ public class TravelTimes {
 	 * @return Expected travel time in msec
 	 */
 	public int expectedTravelTimeFromMatchToEndOfStopPath(SpatialMatch match) {
+	  StringBuffer sb = new StringBuffer();
 		// Get the travel times for this stop path
 		TravelTimesForStopPath travelTimesForStopPath = 
 				match.getTrip().getTravelTimesForStopPath(match.getStopPathIndex());
-
+		
+		
 		// Determine how match corresponds to travel time segments
 		TimeTravelInfo timeTravelInfo = travelTimeInfoForPartialPath(match);
 
@@ -291,15 +293,17 @@ public class TravelTimes {
 				.getTravelTimeSegmentMsec(timeTravelInfo.indexOfPartialSegment);
 		int travelTimeRemainingInPartialSegment = (int) (travelTimeForPartialSegment * 
 				(1-timeTravelInfo.fractionCompleted));
-				
+		sb.append("partial=" +travelTimeRemainingInPartialSegment);
 		// Sum up the travel times for the remaining full travel time segments 
 		// in the path.
 		int travelTimeMsec = travelTimeRemainingInPartialSegment;
 		for (int i=timeTravelInfo.indexOfPartialSegment+1; 
 				i<travelTimesForStopPath.getNumberTravelTimeSegments(); 
 				++i) {
+		  sb.append(" seg+=" + travelTimesForStopPath.getTravelTimeSegmentMsec(i));
 			travelTimeMsec += travelTimesForStopPath.getTravelTimeSegmentMsec(i);
 		}
+		logger.debug("travelTime={}:{}", Time.elapsedTimeStr(travelTimeMsec), sb.toString());
 		return travelTimeMsec; 
 	}
 	
@@ -445,6 +449,7 @@ public class TravelTimes {
 		if (!indices.equals(endIndices) && indices.isWaitStop()) {
 			travelTimeMsec = adjustTravelTimeForWaitStop(timeOfDaySecs,
 					travelTimeMsec, indices);
+			logger.debug("For vehicleId={} adding layover times of {}", travelTimeMsec);
 		}
 		
 		// Already dealt with first partial stop path so increment indices and 

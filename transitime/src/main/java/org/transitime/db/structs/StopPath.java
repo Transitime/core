@@ -16,15 +16,7 @@
  */
 package org.transitime.db.structs;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 import org.hibernate.CallbackException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -37,19 +29,6 @@ import org.transitime.applications.Core;
 import org.transitime.configData.CoreConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.utils.Geo;
-import org.hibernate.CallbackException;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.classic.Lifecycle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.transitime.applications.Core;
-import org.transitime.configData.CoreConfig;
-import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.utils.Geo;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -122,14 +101,13 @@ public class StopPath implements Serializable, Lifecycle {
 	@Column
 	private final Integer breakTime;
 	
-	// NOTE: since trying to use serialization need to use ArrayList<> instead
-	// of List<> since List<> doesn't implement Serializable. Serialization 
-	// makes the data not readable in the db using regular SQL but it means
-	// that don't need separate table and the data can be read and written
-	// much faster.
-	@Column(length=1000)// @ElementCollection @OrderColumn
-	private ArrayList<Location> locations; 
-	
+
+  // sacrifice performance for reportability -- use a child table instead of java serialization 
+	@ElementCollection
+  @OrderColumn
+	private List<Location> locations;
+
+
 	// Having the path length readily accessible via the database is handy
 	// since that way can easily do queries to determine travel speeds and
 	// such. 
@@ -714,13 +692,20 @@ public class StopPath implements Serializable, Lifecycle {
 		vectors = new ArrayList<VectorWithHeading>(locations.size()-1);
 		for (int segmentIndex=0; segmentIndex<locations.size()-1; ++segmentIndex) {
 			VectorWithHeading v = 
-					new VectorWithHeading(locations.get(segmentIndex), 
-					              		  locations.get(segmentIndex+1));
+					new VectorWithHeading(nullSafeLocation(locations.get(segmentIndex)), 
+					              		  nullSafeLocation(locations.get(segmentIndex+1)));
 			vectors.add(v);
 		}
 	}
 
-	/* (non-Javadoc)
+	private Location nullSafeLocation(Location location) {
+	  if (location == null) {
+	    location = new Location(0.0, 0.0);
+	  }
+    return location;
+  }
+
+  /* (non-Javadoc)
 	 * @see org.hibernate.classic.Lifecycle#onSave(org.hibernate.Session)
 	 */
 	@Override

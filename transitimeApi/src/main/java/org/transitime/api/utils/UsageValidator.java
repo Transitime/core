@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.transitime.config.IntegerConfigValue;
+
 /**
  * For making sure that use of API doesn't exceed limits. Intended to deal with
  * bad applications that are requesting too much data or a denial of service
@@ -42,8 +44,16 @@ import javax.ws.rs.WebApplicationException;
 public class UsageValidator {
 
 	// The limits of requests per IP address
-	private static int MAX_REQUESTS = 500000;
-	private static int MAX_REQUESTS_TIME_MSEC = 100000;
+
+	
+	private static IntegerConfigValue maxRequests = new IntegerConfigValue(
+			"transitime.usage.maxRequests", 2000,
+			"Maximum number of requests to allow within the specified time frame");
+	
+	private static IntegerConfigValue maxRequestsTimeMsec = new IntegerConfigValue(
+			"transitime.usage.maxRequestsTimeMsec", 1000,
+			"Amount of time in msec before max requests count limit is reset");
+	
 
 	// This is a singleton class
 	private static UsageValidator singleton = new UsageValidator();
@@ -71,69 +81,15 @@ public class UsageValidator {
 	}
 
 	/**
-	 * Makes sure that usage doesn't exceed limits. Intended to deal with bad
-	 * applications that are requesting too much data or a denial of service
-	 * attack. Currently simply checks to make sure that for a given request IP
-	 * address that there aren't more than a certain number of requests per time
-	 * frame.
-	 * <p>
-	 * Probably should be refined in the future.
-	 * 
+	 * TODO: previous impl was not thread safe -- so now its just a placeholder
+	 * for future checks  
 	 * @param stdParameters
 	 * @throws WebApplicationException
 	 */
 	public void validateUsage(StandardParameters stdParameters)
 			throws WebApplicationException {
 
-		if (stdParameters.getRequest() != null) {
-			String requestIpAddress = stdParameters.getRequest()
-					.getRemoteAddr();
+		return;
 
-			long currentTime = System.currentTimeMillis();
-
-			// Get the list of access times for the IP address. Can be empty.
-			LinkedList<Long> accessTimes = requestTimesPerIp
-					.get(requestIpAddress);
-			if (accessTimes == null) {
-				accessTimes = new LinkedList<Long>();
-				requestTimesPerIp.put(requestIpAddress, accessTimes);
-			}
-
-			// If number of requests already reached see if got too many
-			// within the time limit.
-			if (accessTimes.size() == MAX_REQUESTS) {
-				Long oldestAccessTime = accessTimes.getLast();
-				if(oldestAccessTime!=null)
-				{
-					try {
-						if (oldestAccessTime > currentTime - MAX_REQUESTS_TIME_MSEC) {
-							// Note that using special HTTP response 429, which is for
-							// Too Many Requests. See
-							// http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-							throw WebUtils.badRequestException(429, "Exceeded "
-									+ MAX_REQUESTS + " requests within "
-									+ MAX_REQUESTS_TIME_MSEC + " msec for IP address "
-									+ requestIpAddress);
-						}
-					} catch (NullPointerException e) {
-
-						e.printStackTrace();
-					}
-				}
-			}
-
-			// Add the current request time to the queue
-			accessTimes.addFirst(currentTime);
-
-			// Clean up queue of old requests that are beyond the time limit
-			try{
-				while (accessTimes.getLast() < currentTime - MAX_REQUESTS_TIME_MSEC)
-					accessTimes.removeLast();	
-			}catch(Exception Ex)
-			{
-				// TODO Sort out why this give a java.util.NoSuchElementException				
-			}
-			
-		}
 	}
 }

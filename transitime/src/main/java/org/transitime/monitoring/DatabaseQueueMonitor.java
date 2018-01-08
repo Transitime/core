@@ -32,6 +32,8 @@ import org.transitime.utils.StringUtils;
  */
 public class DatabaseQueueMonitor extends MonitorBase {
 
+    private CloudwatchService cloudwatchService;
+
 	DoubleConfigValue maxQueueFraction = new DoubleConfigValue(
 			"transitime.monitoring.maxQueueFraction", 
 			0.4, 
@@ -56,8 +58,9 @@ public class DatabaseQueueMonitor extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public DatabaseQueueMonitor(EmailSender emailSender, String agencyId) {
+	public DatabaseQueueMonitor(CloudwatchService cloudwatchService, EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
+        this.cloudwatchService = cloudwatchService;
 	}
 
 	/* (non-Javadoc)
@@ -78,6 +81,8 @@ public class DatabaseQueueMonitor extends MonitorBase {
 				+ ", and items in queue=" + dbLogger.queueSize()
 				+ ".",
 				dbLogger.queueLevel());
+
+        cloudwatchService.saveMetric("PredictionDatabaseQueuePercentageLevel", dbLogger.queueLevel(), 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
 		
 		// Determine the threshold for triggering. If already triggered
 		// then lower the threshold by maxQueueFractionGap in order

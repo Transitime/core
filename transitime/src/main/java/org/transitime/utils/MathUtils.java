@@ -16,6 +16,8 @@
  */
 package org.transitime.utils;
 
+import java.util.Collection;
+
 /**
  * Simple math utilities. Note that didn't call class "Math" because
  * that would cause confusion with the usual Java Math class.
@@ -51,4 +53,44 @@ public class MathUtils {
 	    long unscaledLong = (long) (unscaled + (v < 0 ? -0.5 : 0.5));
 	    return (double) unscaledLong / TENS[precision];
 	}
+
+    public static double average(Collection<Double> doubles) {
+        Double avg = 0d;
+        int count = 0;
+        for(Double doubleVal : doubles){
+            count++;
+            avg += doubleVal;
+        }
+        return avg / count;
+    }
+
+    public static double sum(Collection<Double> doubles) {
+        Double sum = 0d;
+        for(Double doubleVal : doubles){
+            sum += doubleVal;
+        }
+        return sum;
+    }
+
+    public static double min(Collection<Double> doubles) {
+        if(doubles.size() < 1)
+            throw new IllegalArgumentException("No items in list");
+        Double min = Double.MAX_VALUE;
+        for(Double doubleVal : doubles){
+            if(doubleVal < min)
+                min = doubleVal;
+        }
+        return min;
+    }
+
+    public static double max(Collection<Double> doubles) {
+        if(doubles.size() < 1)
+            throw new IllegalArgumentException("No items in list");
+        Double max = 0d;
+        for(Double doubleVal : doubles){
+            if(doubleVal > max)
+                max = doubleVal;
+        }
+        return max;
+    }
 }

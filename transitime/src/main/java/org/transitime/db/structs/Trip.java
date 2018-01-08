@@ -17,16 +17,19 @@
 package org.transitime.db.structs;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -37,6 +40,8 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.collection.internal.PersistentList;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,16 +128,10 @@ public class Trip implements Lifecycle, Serializable {
 	
 	// Contains schedule time for each stop as obtained from GTFS 
 	// stop_times.txt file. Useful for determining schedule adherence.
-	// NOTE: trying to use serialization. Serialization 
-	// makes the data not readable in the db using regular SQL but it means
-	// that don't need separate table and the data can be read and written
-	// much faster.
-	// scheduleTimesMaxBytes set to 4000 because for sfmta route 91 there
-	// is a trip with 91 schedule times.
-	private static final int scheduleTimesMaxBytes = 4000;
-	@Column(length=scheduleTimesMaxBytes)
-	private final ArrayList<ScheduleTime> scheduledTimesList = 
-			new ArrayList<ScheduleTime>(); 
+	@ElementCollection
+  @OrderColumn
+	private final List<ScheduleTime> scheduledTimesList =
+			new ArrayList<ScheduleTime>();
 	
 	// For non-scheduled blocks where vehicle runs a trip as a continuous loop 
 	@Column
@@ -421,22 +420,22 @@ public class Trip implements Lifecycle, Serializable {
 		
 		// If resulting map takes up too much memory throw an exception.
 		// Only bother checking if have at least a few schedule times.
-		if (scheduledTimesList.size() > 5) {
+		/*if (scheduledTimesList.size() > 5) {
 			int serializedSize = HibernateUtils.sizeof(scheduledTimesList);
 			if (serializedSize > scheduleTimesMaxBytes) {
 				String msg = "Too many elements in "
 						+ "scheduledTimesMap when constructing a "
 						+ "Trip. Have " + scheduledTimesList.size()
-						+ " schedule times taking up " + serializedSize 
-						+ " bytes but only have " + scheduleTimesMaxBytes 
-						+ " bytes allocated for the data. Trip=" 
+						+ " schedule times taking up " + serializedSize
+						+ " bytes but only have " + scheduleTimesMaxBytes
+						+ " bytes allocated for the data. Trip="
 						+ this.toShortString();
 				logger.error(msg);
-				
+
 				// Since this could be a really problematic issue, throw an error
 				throw new ArrayIndexOutOfBoundsException(msg);
 			}
-		}
+		}*/
 	}
 	
 	/**
@@ -498,8 +497,10 @@ public class Trip implements Lifecycle, Serializable {
 	public static Trip getTrip(Session session, int configRev, String tripId) 
 			throws HibernateException {
 		// Setup the query
-		String hql = "FROM Trip " +
-				"    WHERE configRev = :configRev" +
+		String hql = "FROM Trip t " +
+                "   left join fetch t.scheduledTimesList " +
+                "   left join fetch t.travelTimes " +
+				"    WHERE t.configRev = :configRev" +
 				"      AND tripId = :tripId";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
@@ -525,9 +526,11 @@ public class Trip implements Lifecycle, Serializable {
 	public static List<Trip> getTripByShortName(Session session, int configRev,
 			String tripShortName) throws HibernateException {
 		// Setup the query
-		String hql = "FROM Trip " +
-				"    WHERE configRev = :configRev" +
-				"      AND tripShortName = :tripShortName";
+		String hql = "FROM Trip t " +
+                "   left join fetch t.scheduledTimesList " +
+                "   left join fetch t.travelTimes " +
+				"    WHERE t.configRev = :configRev" +
+				"      AND t.tripShortName = :tripShortName";
 		Query query = session.createQuery(hql);
 		query.setInteger("configRev", configRev);
 		query.setString("tripShortName", tripShortName);
@@ -582,7 +585,7 @@ public class Trip implements Lifecycle, Serializable {
 				+ ", serviceId=" + serviceId
 				+ ", blockId=" + blockId
 				+ ", shapeId=" + shapeId
-				+ ", scheduledTimesList=" + scheduledTimesList 
+//				+ ", scheduledTimesList=" + scheduledTimesList 
 				+ "]";
 	}
 	
@@ -1016,6 +1019,17 @@ public class Trip implements Lifecycle, Serializable {
 	 * @return
 	 */
 	public ScheduleTime getScheduleTime(int stopPathIndex) {
+	  if (scheduledTimesList instanceof PersistentList) {
+	    // TODO this is an anti-pattern
+	    // instead find a way to manage sessions more consistently 
+	    PersistentList persistentListTimes = (PersistentList)scheduledTimesList;
+	    SessionImplementor session = 
+          persistentListTimes.getSession();
+	    if (session == null) {
+	      Session globalLazyLoadSession = Core.getInstance().getDbConfig().getGlobalSession();
+	      globalLazyLoadSession.update(this);
+	    }
+	  }
 		return scheduledTimesList.get(stopPathIndex);
 	}
 	
@@ -1153,5 +1167,29 @@ public class Trip implements Lifecycle, Serializable {
 	public boolean onDelete(Session s) throws CallbackException {
 		return Lifecycle.NO_VETO;
 	}
+
+	/**
+	 * Query how many travel times for trips entries exist for a given
+	 * travelTimesRev.  Used for metrics.
+	 * @param session
+	 * @param travelTimesRev
+	 * @return
+	 */
+  public static Long countTravelTimesForTrips(Session session,
+      int travelTimesRev) {
+    String sql = "Select count(*) from TravelTimesForTrips where travelTimesRev=:rev";
+    
+    Query query = session.createSQLQuery(sql);
+    query.setInteger("rev", travelTimesRev);
+    Long count = null;
+    try {
+      Integer bcount = (Integer) query.uniqueResult();
+      if (bcount != null)
+        count = bcount.longValue();
+    } catch (HibernateException e) {
+      Core.getLogger().error("exception querying for metrics", e);
+    }
+    return count;
+  }
 		
 }

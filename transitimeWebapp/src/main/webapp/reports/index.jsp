@@ -41,37 +41,26 @@ finding specific issues with predictions.">
   <li><a href="predAccuracyCsvParams.jsp?a=<%= agencyId %>"
     title="For downloading prediction accuracy data in CSV format.">
       Prediction Accuracy CSV Download</a></li>
-</ul>
-
-<div id="subtitle">Schedule Adherence Reports</div>
-<ul class="choicesList">
-  <li><a href="schAdhByRouteParams.jsp?a=<%= agencyId %>"
-    title="Displays historic schedule adherence data by route in a bar chart. 
-    Can compare schedule adherence for multiple routes.">
-      Schedule Adherence by Route</a></li>
-  <li><a href="schAdhByStopParams.jsp?a=<%= agencyId %>"
-    title="Displays historic schedule adherence data for each stop for a 
-    route in a bar chart. ">
-      Schedule Adherence by Stop</a></li>
-  <li><a href="schAdhByTimeParams.jsp?a=<%= agencyId %>"
-    title="Displays historic schedule adherence data for a route grouped by 
-    how early/late. The resulting bell curve shows the distribution of 
-    early/late times. ">
-      Schedule Adherence by how Early/Late</a></li>
+  <li><a href="routePerformanceTable.jsp?a=<%= agencyId %>"
+    title="Shows route performance, where performance is defined as the 
+    number of ontime predictions over the total number of predicitons for a
+    given route.">
+      Route Performance Table</a></li>
 </ul>
 
 <div id="subtitle">AVL Reports</div>
 <ul class="choicesList">
-  <li><a href="avlMapByRouteParams.jsp?a=<%= agencyId %>"
-    title="Displays historic AVL data for a route in a map.">
-      AVL Data in Map by Route</a></li>
-  <li><a href="avlMapByVehicleParams.jsp?a=<%= agencyId %>"
+  <li><a href="avlMap.jsp?a=<%= agencyId %>"
     title="Displays historic AVL data for a vehicle in a map.">
-      AVL Data in Map by Vehicle</a></li>
+      AVL Data in Map</a></li>
+  <li><a href="avlMapParams.jsp?a=<%= agencyId %>"
+    title="Displays historic AVL data for a vehicle in a map.">
+      AVL Data in Map (parameters page)</a></li>
   <li><a href="lastAvlReport.jsp?a=<%= agencyId %>"
     title="Displays the last time each vehicle reported its GPS position over the last 24 hours.">
       Last GPS Report by Vehicle</a></li>
 </ul>
+
 <div id="subtitle">Event Reports</div>
 	<ul class="choicesList">
 	  <li><a href="vehicleEventParams.jsp?a=<%= agencyId %>"
@@ -79,6 +68,9 @@ finding specific issues with predictions.">
 	      Event for vehicle</a></li>	  
 	</ul>
 </div>
+
+
+
 <div id="subtitle">Miscellaneous Reports</div>
 <ul class="choicesList">
   <li><a href="scheduleHorizStopsParams.jsp?a=<%= agencyId %>"
@@ -89,6 +81,17 @@ finding specific issues with predictions.">
     vertically which is useful for when there are not that many trips per day.">
       Schedule for Route (vertical stops)</a></li>
 </ul>
+
+<div id="subtitle">Status Reports</div>
+<ul class="choicesList">
+  <li><a href="../status/activeBlocks.jsp?a=<%= agencyId %>"
+    title="Shows how many block assignments are currently active and if they have assigned vehicles">
+      Active Blocks</a></li>
+  <li><a href="../status/serverStatus.jsp?a=<%= agencyId %>"
+    title="Shows how well system is running, including the AVL feed">
+      Server Status</a></li>
+</ul>
+
 </div>
 </body>
 </html>

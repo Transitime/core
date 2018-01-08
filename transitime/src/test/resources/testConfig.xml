@@ -49,15 +49,18 @@
         <feedPollingRateSecs>30</feedPollingRateSecs>
         
     </avl>   
+
     <db>        
         <dbName>GOHART</dbName>
         <dbHost>192.168.99.100:5432</dbHost>
         <dbType>postgresql</dbType>
         <dbUserName>postgres</dbUserName>
         <dbPassword>transitime</dbPassword>
+
     </db>     
     <hibernate>
         <configFile>C:\\cygwin64\\home\\SeanOg\\workspace\\transitime-all\\transitime\\src\\test\\resources\\postgres_hibernate.cfg.xml</configFile>        
     </hibernate>
-  
+
 </transitime>
+

@@ -319,7 +319,8 @@ public class IpcSchedule implements Serializable {
 				}
 				
 				// Add current trip to the IpcSchedule
-				ipcSchedule.trips.add(trip);
+				if (!ipcSchedule.trips.contains(trip))
+					ipcSchedule.trips.add(trip);
 			}
 		}
 		

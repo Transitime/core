@@ -25,6 +25,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.config.IntegerConfigValue;
 import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.webstructs.ApiKey;
@@ -48,6 +49,10 @@ public class ApiKeyManager {
 
 	// For preventing too frequent db reads
 	private long lastTimeKeysReadIntoCache = 0;
+
+	private static IntegerConfigValue lastTimeKeysReadLimitSec = new IntegerConfigValue(
+			"transitime.api.apiKeyLastUpdateLimitSec", 3,
+			"Amount of time to wait in sec before updating the apiKeyCache");
 
 	// This is a singleton class
 	private static ApiKeyManager singleton = new ApiKeyManager();
@@ -100,10 +105,10 @@ public class ApiKeyManager {
 
 			// Want to make sure a user doesn't overwhelm the system by
 			// repeatedly trying to use an invalid key. So if the cache was
-			// just updated a few (3) seconds ago then don't update it again
+			// just updated a few x seconds ago then don't update it again
 			// right now. Simply return false.
-			if (System.currentTimeMillis() < lastTimeKeysReadIntoCache + 3
-					* Time.MS_PER_SEC)
+			if (System.currentTimeMillis() < lastTimeKeysReadIntoCache
+					+ lastTimeKeysReadLimitSec.getValue() * Time.MS_PER_SEC)
 				return false;
 			lastTimeKeysReadIntoCache = System.currentTimeMillis();
 

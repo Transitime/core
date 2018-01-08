@@ -104,6 +104,13 @@ public class IpcActiveBlock implements Serializable {
 				 */
 				@Override
 				public int compare(IpcActiveBlock b1, IpcActiveBlock b2) {
+					if (b1 == null && b2 == null)
+						return 0;
+					if (b1 == null || b1.getTripForSorting() == null || b1.getTripForSorting().getRoute() == null || b1.getTripForSorting().getRoute().getRouteOrder() == null)
+						return -1;
+					if (b2 == null || b2.getTripForSorting() == null || b2.getTripForSorting().getRoute() == null || b2.getTripForSorting().getRoute().getRouteOrder() == null)
+						return 1;
+								
 					int routeOrder1 =
 							b1.getTripForSorting().getRoute().getRouteOrder();
 					int routeOrder2 =

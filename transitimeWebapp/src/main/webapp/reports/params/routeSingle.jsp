@@ -22,13 +22,16 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		var selectorData = [];
 	 		for (var i in routes.routes) {
 	 			var route = routes.routes[i];
-	 			selectorData.push({id: route.shortName, text: route.name})
+	 			var name = route.shortName + " " + route.longName
+	 			selectorData.push({id: route.shortName, text: name})
 	 		}
 	 		
 	 		// Configure the selector to be a select2 one that has
 	 		// search capability
  			$("#route").select2({
- 				data : selectorData})
+ 				placeholder: "Select Route",
+ 				data: selectorData
+ 			})
  			// Need to reset tooltip after selector is used. Sheesh!
  			.on("select2:select", function(e) {
  				var configuredTitle = $( "#route" ).attr("title");

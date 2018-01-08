@@ -29,7 +29,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.api.utils.AgencyTimezoneCache;
+
 import org.transitime.core.holdingmethod.PredictionTimeComparator;
+
+import org.transitime.config.IntegerConfigValue;
+
 import org.transitime.ipc.clients.PredictionsInterfaceFactory;
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
@@ -73,8 +77,12 @@ public class GtfsRtTripFeed {
 	private SimpleDateFormat gtfsRealtimeTimeFormatter = 
 			new SimpleDateFormat("HH:mm:ss");
 	
-	// 25 minutes
-	private static final int PREDICTION_MAX_FUTURE_SECS = 25 * 60; 
+	
+	private static IntegerConfigValue predictionMaxFutureSecs = new IntegerConfigValue(
+			"transitime.api.predictionMaxFutureSecs", 60 * 60,
+			"Number of seconds in the future to accept predictions before");
+	private static final int PREDICTION_MAX_FUTURE_SECS = predictionMaxFutureSecs.getValue();
+
 	
 	// For when creating StopTimeEvent for schedule based prediction  
 	// 5 minutes (300 seconds)
@@ -138,6 +146,8 @@ public class GtfsRtTripFeed {
 			tripDescriptor.setStartDate(tripStartDateStr);
 		}
 		tripUpdate.setTrip(tripDescriptor);
+		if (firstPred.getDelay() != null)
+		  tripUpdate.setDelay(firstPred.getDelay()); // set schedule deviation
 
 		// Add the VehicleDescriptor information
 		VehicleDescriptor.Builder vehicleDescriptor =
@@ -176,11 +186,13 @@ public class GtfsRtTripFeed {
 			else
 				stopTimeUpdate.setDeparture(stopTimeEvent);
 			
+
 			if(pred.isSchedBasedPred())
 				stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
 			else
 				stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.NO_DATA);
 			
+
 			tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 		}
 		
@@ -350,9 +362,18 @@ public class GtfsRtTripFeed {
 	    if (feedMessage != null)
 	    	return feedMessage;
 	    
-	    GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
-	    feedMessage = feed.createMessage();
-	    tripFeedDataCache.put(agencyId, feedMessage);
+	    synchronized(tripFeedDataCache) {
+	    	
+	    	// Cache may have been filled while waiting.
+	    	feedMessage = tripFeedDataCache.get(agencyId, cacheTime);
+	    	if (feedMessage != null)
+	    		return feedMessage;
+	    	
+	    	GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
+		    feedMessage = feed.createMessage();
+		    tripFeedDataCache.put(agencyId, feedMessage);
+	    }
+	    
 	    return feedMessage;
 	}
 

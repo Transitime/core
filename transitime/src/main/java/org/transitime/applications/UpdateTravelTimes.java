@@ -84,8 +84,9 @@ public class UpdateTravelTimes {
 	 *            Map of all of the trips. Keyed on tripId.
 	 * @param travelTimeInfoMap
 	 *            Contains travel times that are available by trip pattern ID
+	 * @return the newly created travelTimesRev
 	 */
-	private static void setTravelTimesForAllTrips(Session session, 
+	private static int setTravelTimesForAllTrips(Session session, 
 			Map<String, Trip> tripMap, TravelTimeInfoMap travelTimeInfoMap) {
 		// For caching TravelTimesForTrip and TravelTimesForStopPaths that are
 		// created. This way won't store duplicate objects. Caching both 
@@ -144,6 +145,8 @@ public class UpdateTravelTimes {
 						TravelTimesForStopPath originalTravelTimes =
 								trip.getTravelTimesForStopPath(stopIdx);
 						travelTimes = originalTravelTimes.getTravelTimesMsec();
+						logger.error("For trip={} stop={} invalid travel times from {} so falling back "
+								+ "on old travel times from {}", trip, stopIdx, travelTimeInfo, originalTravelTimes);
 					}
 					
 					// Determine stop time to use. There are situations where
@@ -160,6 +163,8 @@ public class UpdateTravelTimes {
 						TravelTimesForStopPath originalTravelTimes =
 								trip.getTravelTimesForStopPath(stopIdx);
 						stopTime = originalTravelTimes.getStopTimeMsec();
+						logger.error("For trip={} stop={} invalid stop times from {} so falling back "
+								+ "on old stop time from {}", trip, stopIdx, travelTimeInfo, originalTravelTimes);
 					}
 					// Create and add the travel time for this stop path
 					ttForStopPathToUse = 
@@ -179,6 +184,8 @@ public class UpdateTravelTimes {
 					// Determine original travel times
 					TravelTimesForStopPath originalTravelTimes =
 							trip.getTravelTimesForStopPath(stopIdx);
+					
+					logger.error("No historic data so using old travel times {}", originalTravelTimes);
 
 					// Create copy of the original travel times but update the 
 					// travel time rev.
@@ -231,7 +238,8 @@ public class UpdateTravelTimes {
 			
 			// Store the new travel times as part of the trip
 			trip.setTravelTimes(ttForTrip);
-		} // End of for each trip that is configured		
+		} // End of for each trip that is configured	
+		return newTravelTimesRev;
 	}
 	
 	/**
@@ -269,13 +277,16 @@ public class UpdateTravelTimes {
 	 */
 	private static Map<String, Trip> readTripsFromDb(String agencyId,
 			Session session) {
-		ActiveRevisions activeRevisions = ActiveRevisions.get(session); 
-		IntervalTimer timer = new IntervalTimer();
-		logger.info("Reading in trips from db...");
-		Map<String, Trip> tripMap = 
-				Trip.getTrips(session, activeRevisions.getConfigRev());
-		logger.info("Reading in trips from db took {} msec", timer.elapsedMsec());	
-		
+	  Map<String, Trip> tripMap = new HashMap<String, Trip>() ;
+	  IntervalTimer timer = new IntervalTimer();
+	  try {
+  		ActiveRevisions activeRevisions = ActiveRevisions.get(session); 
+  		logger.info("Reading in trips from db...");
+  		tripMap = 
+  				Trip.getTrips(session, activeRevisions.getConfigRev());
+	  } finally {
+	    logger.info("Reading in trips from db took {} msec", timer.elapsedMsec());
+	  }
 		// Return results
 		return tripMap;
 	}
@@ -293,8 +304,9 @@ public class UpdateTravelTimes {
 	 *            Not fully implemented. Should therefore be null for now.
 	 * @param beginTime
 	 * @param endTime
+	 * @return the newly created travelTimeRev
 	 */
-	private static void processTravelTimes(Session session, String agencyId,
+	private static int processTravelTimes(Session session, String agencyId,
 			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
 		// Read in historic data from db and put it into maps so that it can
 		// be processed.
@@ -302,19 +314,31 @@ public class UpdateTravelTimes {
 		processor.readAndProcessHistoricData(agencyId, specialDaysOfWeek,
 				beginTime, endTime);
 
+		if (processor.isEmpty()) {
+		  logger.info("Exiting...");
+		  return -1;
+		}
+		
 		// Read in the current Trips. This is done after the historical data
 		// is read in so that less memory is used at once.
+		logger.info("reading trips...");
 		Map<String, Trip> tripMap = readTripsFromDb(agencyId, session);
 		
+		logger.info("processing travel times...");
 		// Process the historic data into a simple TravelTimeInfoMap
 		TravelTimeInfoMap travelTimeInfoMap = 
 				processor.createTravelTimesFromMaps(tripMap);
 		
+		logger.info("assigning travel times...");
 		// Update all the Trip objects with the new travel times
-		setTravelTimesForAllTrips(session, tripMap, travelTimeInfoMap);
+		int travelTimesRev = setTravelTimesForAllTrips(session, tripMap, travelTimeInfoMap);
 		
+		logger.info("saving travel times...");
 		// Write out the trip objects, which also writes out the travel times
-		writeNewTripDataToDb(session, tripMap);		
+		writeNewTripDataToDb(session, tripMap);
+		
+		logger.info("committing....");
+		return travelTimesRev;
 	}
 
 	/**
@@ -331,8 +355,9 @@ public class UpdateTravelTimes {
 	 * @param beginTime
 	 * @param endTime
 	 */
-	private static void manageSessionAndProcessTravelTimes(String agencyId,
+	public static void manageSessionAndProcessTravelTimes(String agencyId,
 			List<Integer> specialDaysOfWeek, Date beginTime, Date endTime) {
+	  int newTravelTimesRev = -2;
 		// Get a database session
 		Session session = HibernateUtils.getSession(agencyId);
 		Transaction tx = null;
@@ -341,7 +366,7 @@ public class UpdateTravelTimes {
 			tx = session.beginTransaction();
 
 			// Actually do all the data processing
-			processTravelTimes(session, agencyId, specialDaysOfWeek, beginTime,
+			newTravelTimesRev = processTravelTimes(session, agencyId, specialDaysOfWeek, beginTime,
 					endTime);
 			
 			// Make sure that everything actually written out to db
@@ -357,7 +382,17 @@ public class UpdateTravelTimes {
 		}
 		
 		logger.info("Done processing travel times. Changes successfully "
-				+ "committed to database");
+				+ "committed to database.  Querying for metrics....");
+		HibernateUtils.clearSessionFactory();
+    Session statsSession = HibernateUtils.getSession(agencyId);
+    try {
+      TravelTimesProcessor processor = new TravelTimesProcessor();
+      Long inserts = processor.updateMetrics(statsSession, newTravelTimesRev);
+      logger.info("{} succesfully inserted for travelTimesRev={}", inserts, newTravelTimesRev);
+    } catch (Exception e) {
+      logger.error("exception querying for statistics for tavelTimesRev={}.  Update most likely failed!", newTravelTimesRev, e);
+    }
+    
 	}
 	
 	/**
@@ -420,6 +455,7 @@ public class UpdateTravelTimes {
 //		tripList.add(trip5889634);
 //		tripList.add(trip5889635);
 //		DbWriter.writeTrips(session, tripList);
+		
 	}
 
 }

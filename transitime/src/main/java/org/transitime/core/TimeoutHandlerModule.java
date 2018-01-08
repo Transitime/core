@@ -203,9 +203,17 @@ public class TimeoutHandlerModule extends Module {
 	 * @param now
 	 * @param mapIterator
 	 */
-	private void handleWaitStopPossibleTimeout(VehicleState vehicleState,
-			long now, Iterator<AvlReport> mapIterator) {
-		// If hasn't been too long between AVL reports then everything is fine
+	private void handleWaitStopPossibleTimeout(VehicleState vehicleState, long now,
+			Iterator<AvlReport> mapIterator) {
+
+	  // we can't easily determine wait stop time for frequency based trips  
+	  // so don't timeout based on stop info
+	  if (vehicleState.getBlock().isNoSchedule()) {
+      logger.debug("not timing out frequency based assignment {}", vehicleState);
+      return;
+    }
+	  
+	  // If hasn't been too long between AVL reports then everything is fine
 		// and simply return
 		long maxNoAvl = allowableNoAvlSecs.getValue() * Time.MS_PER_SEC;
 		if (now < vehicleState.getAvlReport().getTime() + maxNoAvl)

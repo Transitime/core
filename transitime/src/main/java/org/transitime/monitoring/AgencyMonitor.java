@@ -17,14 +17,14 @@
 
 package org.transitime.monitoring;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.transitime.utils.EmailSender;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.transitime.utils.EmailSender;
 
 /**
  * For monitoring whether the core system is working properly. For calling
@@ -34,6 +34,8 @@ import org.transitime.utils.EmailSender;
  *
  */
 public class AgencyMonitor {
+
+    private final CloudwatchService cloudwatchService;
 
 	// So can send out notification email if monitor triggered
 	private final EmailSender emailSender;
@@ -50,6 +52,8 @@ public class AgencyMonitor {
 	private static final Logger logger = LoggerFactory
 			.getLogger(AgencyMonitor.class);
 
+    private static final String enableSystemMonitoring = System.getProperty("transitime.enableSystemMonitoring");
+
 	/********************** Member Functions **************************/
 
 	/**
@@ -61,18 +65,21 @@ public class AgencyMonitor {
 	 */
 	private AgencyMonitor(String agencyId) {
 		emailSender = new EmailSender();
+        cloudwatchService = CloudwatchService.getInstance();
 
 		// Create all the monitors and add them to the monitors list
 		monitors = new ArrayList<MonitorBase>();
-		monitors.add(new AvlFeedMonitor(emailSender, agencyId));
-		monitors.add(new PredictabilityMonitor(emailSender, agencyId));
-		monitors.add(new SystemMemoryMonitor(emailSender, agencyId));
-		monitors.add(new SystemCpuMonitor(emailSender, agencyId));
-		monitors.add(new SystemDiskSpaceMonitor(emailSender,
-				agencyId));
-		monitors.add(new DatabaseMonitor(emailSender, agencyId));
-		monitors.add(new DatabaseQueueMonitor(emailSender,
-				agencyId));
+		monitors.add(new AvlFeedMonitor(cloudwatchService, emailSender, agencyId));
+		monitors.add(new PredictabilityMonitor(cloudwatchService, emailSender, agencyId));
+        monitors.add(new DatabaseQueueMonitor(cloudwatchService, emailSender, agencyId));
+        monitors.add(new ActiveBlocksMonitor(cloudwatchService, emailSender, agencyId));
+        if(enableSystemMonitoring != null && enableSystemMonitoring.equalsIgnoreCase("true")){
+            monitors.add(new SystemMemoryMonitor(emailSender, agencyId));
+            monitors.add(new SystemCpuMonitor(emailSender, agencyId));
+            monitors.add(new SystemDiskSpaceMonitor(emailSender,
+                    agencyId));
+            monitors.add(new DatabaseMonitor(emailSender, agencyId));
+        }
 	}
 	
 	/**

@@ -221,8 +221,7 @@ public class IpcRoute extends IpcRouteSummary {
 				if (stopId != null) {
 					isUiStop = false;
 					for (TripPattern tripPattern : uiTripPatterns) {
-						if (tripPattern.isStopAtOrAfterStop(stopId,
-								currentStopId)) {
+						if (tripPattern.isStopAtOrAfterStop(stopId, currentStopId)) {
 							isUiStop = true;
 							break;
 						}

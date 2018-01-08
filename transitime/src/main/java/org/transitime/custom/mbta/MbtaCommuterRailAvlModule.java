@@ -162,6 +162,22 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 
 		// Assignment is OK as is so return it
 		return assignmentFromFeed;
+//		
+//		// Handle special null case
+//		if (assignmentFromFeed == null)
+//			return assignmentFromFeed;
+//		
+//		// Assignment is too short so pad it
+//		if (assignmentFromFeed.length() == 1)
+//			return "00" + assignmentFromFeed;
+//		else if (assignmentFromFeed.length() == 2)
+//			return "0" + assignmentFromFeed;
+//		else if (assignmentFromFeed.length() == 4 
+//				&& assignmentFromFeed.endsWith("00"))
+//			return assignmentFromFeed.substring(0, 2);
+//		
+//		// Assignment is OK as is so return it
+//		return assignmentFromFeed;
 	}
 
 	// The following are determining the proper place in the

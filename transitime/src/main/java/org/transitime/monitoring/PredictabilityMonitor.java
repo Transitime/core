@@ -29,6 +29,10 @@ import org.transitime.db.structs.Block;
 import org.transitime.utils.EmailSender;
 import org.transitime.utils.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Monitors how many vehicles are predictable compared to how many active blocks
  * there currently are.
@@ -37,6 +41,8 @@ import org.transitime.utils.StringUtils;
  *
  */
 public class PredictabilityMonitor extends MonitorBase {
+
+    private CloudwatchService cloudwatchService;
 
 	private static DoubleConfigValue minPredictableBlocks =
 			new DoubleConfigValue(
@@ -72,8 +78,9 @@ public class PredictabilityMonitor extends MonitorBase {
 	 * @param emailSender
 	 * @param agencyId
 	 */
-	public PredictabilityMonitor(EmailSender emailSender, String agencyId) {
+	public PredictabilityMonitor(CloudwatchService cloudwatchService, EmailSender emailSender, String agencyId) {
 		super(emailSender, agencyId);
+        this.cloudwatchService = cloudwatchService;
 	}
 
 	/**
@@ -87,7 +94,6 @@ public class PredictabilityMonitor extends MonitorBase {
 	private double fractionBlocksPredictable(double threshold) {
 		// For creating message
 		List<Block> activeBlocksWithoutVehicle = new ArrayList<Block>();
-		
 		// Determine number of currently active blocks.
 		// If there are no currently active blocks then don't need to be
 		// getting AVL data so return 0
@@ -95,6 +101,7 @@ public class PredictabilityMonitor extends MonitorBase {
 		if (activeBlocks.size() == 0) {
 			setMessage("No currently active blocks so predictability "
 					+ "considered to be OK.");
+            cloudwatchService.saveMetric("PredictionPredictablePercentageOfBlocks", 1d, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
 			return 1.0;
 		}
 
@@ -113,8 +120,12 @@ public class PredictabilityMonitor extends MonitorBase {
 		
 		// Determine fraction of active blocks that have a predictable vehicle 
 		double fraction = ((double) Math.max(predictableVehicleCount,
-				minimumPredictableVehicles.getValue())) / activeBlocks.size();
-		
+		minimumPredictableVehicles.getValue())) / activeBlocks.size();
+		cloudwatchService.saveMetric("PredictionActiveBlockCount", (double)Math.max(predictableVehicleCount,
+		    minimumPredictableVehicles.getValue()), 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+		cloudwatchService.saveMetric("PredictionTotalBlockCount", (double)activeBlocks.size() , 1, CloudwatchService.MetricType.SCALAR, CloudwatchService.ReportingIntervalTimeUnit.IMMEDIATE, false);
+    cloudwatchService.saveMetric("PredictablePercentageOfBlocks", fraction, 1, CloudwatchService.MetricType.AVERAGE, CloudwatchService.ReportingIntervalTimeUnit.MINUTE, false);
+
 		// Provide simple message explaining the situation
 		String message = "Predictable blocks fraction=" 
 				+ StringUtils.twoDigitFormat(fraction) 
@@ -127,18 +138,21 @@ public class PredictabilityMonitor extends MonitorBase {
 						minimumPredictableVehicles.getValue())
 				+ ").";
 		
-		// Add all the active block IDs to the message so can more easily see 
-		// what is going on 
-		StringBuilder sb = new StringBuilder();
-		sb.append(" Currently active blocks without vehicles: ");
-		for (Block block : activeBlocksWithoutVehicle) {
-			sb.append("block=")
-				.append(block.getId())
-				.append(", serviceId=")
-				.append(block.getServiceId())
-				.append("; ");
+		// If below the threshold then add all the active block IDs to the
+		// message so can more easily see 
+		if (fraction < threshold) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(" Currently active blocks without vehicles: ");
+			for (Block block : activeBlocksWithoutVehicle) {
+	      sb.append("block=")
+        .append(block.getId())
+        .append(", serviceId=")
+        .append(block.getServiceId())
+        .append("; ");
+			}
+			message += sb.toString();
 		}
-		message += sb.toString();
+		
 
 		setMessage(message, fraction);
 		

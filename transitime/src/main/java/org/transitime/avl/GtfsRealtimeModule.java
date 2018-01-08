@@ -17,6 +17,11 @@
 package org.transitime.avl;
 
 import java.io.InputStream;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.transitime.config.StringConfigValue;
 import java.util.Collection;
 
 import org.transitime.config.StringConfigValue;
@@ -34,10 +39,16 @@ import org.transitime.modules.Module;
 public class GtfsRealtimeModule extends PollUrlAvlModule {
 
 
+
 	// If debugging feed and want to not actually process
 	// AVL reports to generate predictions and such then
 	// set shouldProcessAvl to false;
 	protected static boolean shouldProcessAvl = true;
+
+
+  private static final Logger logger = LoggerFactory
+      .getLogger(GtfsRealtimeModule.class);
+  
 
 	/*********** Configurable Parameters for this module ***********/
 	public static String getGtfsRealtimeURI() {
@@ -55,10 +66,38 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 	 */
 	public GtfsRealtimeModule(String projectId) {
 		super(projectId);
+    // GTFS-realtime is already binary so don't want to get compressed
+    // version since that would just be a waste.
+    useCompression = false;
+	}
+
+	/**
+	 * Reads and processes the data. Called by AvlModule.run().
+	 * Reading GTFS-realtime doesn't use InputSteram so overriding
+	 * getAndProcessData().
+	 */
+	@Override
+	protected void getAndProcessData() {
+	  
+	  String[] urls = getGtfsRealtimeURI().split(",");
+	  
+	  
+	  for (String urlStr : urls) {
+  	  try {
+    	  logger.info("reading {}", urlStr);
+    		List<AvlReport> avlReports = GtfsRtVehiclePositionsReader
+    				.getAvlReports(urlStr);
+    		logger.info("read complete");
+    		for (AvlReport avlReport : avlReports) {
+    			processAvlReport(avlReport);
+    		}
+    		logger.info("processed {} reports for feed {}", avlReports.size(), urlStr);
+  	  } catch (Exception any) {
+  	    logger.error("issues processing feed {}:{}", urlStr, any, any);
+  	  }
+  		
+	  }
 		
-		// GTFS-realtime is already binary so don't want to get compressed
-		// version since that would just be a waste.
-		useCompression = false;
 	}
 
 	/* (non-Javadoc)
@@ -67,10 +106,7 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 	@Override
 	protected Collection<AvlReport> processData(InputStream inputStream)
 			throws Exception {
-		Collection<AvlReport> avlReports =
-				GtfsRtVehiclePositionsReader.process(inputStream);
-
-		return avlReports;
+	  return null; // we've overriden getAndProcessData so this need not do anything
 	}
 
 	/**

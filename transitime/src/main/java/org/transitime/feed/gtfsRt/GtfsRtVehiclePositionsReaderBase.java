@@ -21,13 +21,17 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;
 import org.transitime.utils.IntervalTimer;
 import org.transitime.utils.MathUtils;
+
 import org.transitime.utils.Time;
+
 
 import com.google.protobuf.CodedInputStream;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
@@ -92,11 +96,11 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		}
 		VehicleDescriptor desc = vehicle.getVehicle();
 		if (!desc.hasLicensePlate()) {
+
 			if(desc.hasLabel())
 				return desc.getLabel();
 			return null;
-		}
-		
+		}		
 		return desc.getLicensePlate();
 	}
 
@@ -131,7 +135,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			
 			// Determine vehicle ID. If no vehicle ID then can't handle it.
 			String vehicleId = getVehicleId(vehicle);
-			
+
 			String vehicleLabel = getVehicleLabel(vehicle);
 			
 			if (vehicleId == null && vehicleLabel!=null)
@@ -145,10 +149,16 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// latency will be quite large, resulting in inaccurate predictions
 			// and arrival times. But better than not having a time at all.
 			long gpsTime;
-			if (vehicle.hasTimestamp())
-				gpsTime = vehicle.getTimestamp()*Time.MS_PER_SEC;
-			else
+
+			if (vehicle.hasTimestamp()) {
+				gpsTime = vehicle.getTimestamp();
+				if (gpsTime < 14396727760l) { // TODO if too small to be milli second epoch
+					gpsTime = gpsTime * 1000;
+				}
+			} else
+			{
 				gpsTime = System.currentTimeMillis();
+			}
 			
 			// Determine the position data
 		    Position position = vehicle.getPosition();
@@ -172,10 +182,12 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		    
 			// Create the core AVL object. The feed can provide a silly amount 
 		    // of precision so round to just 5 decimal places.
+
             // AvlReport is expecting time in ms while the proto provides it in
 		    // seconds
 			AvlReport avlReport = new AvlReport(vehicleId, 
 					gpsTime,
+
 					MathUtils.round(lat, 5), MathUtils.round(lon, 5), speed,
 					heading,
 					"GTFS-rt",
@@ -188,10 +200,12 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// Determine vehicle assignment information
 			if (vehicle.hasTrip()) {
 				TripDescriptor tripDescriptor = vehicle.getTrip();
+
 				if (tripDescriptor.hasTripId()) {
 					avlReport.setAssignment(tripDescriptor.getTripId(), 
 							AssignmentType.TRIP_ID);
 				}
+
 				if (tripDescriptor.hasRouteId()) {
 					avlReport.setAssignment(tripDescriptor.getRouteId(), 
 							AssignmentType.ROUTE_ID);
@@ -211,10 +225,12 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 				counter, timer.elapsedMsec());
 	}
 	
+
 	private String getVehicleLabel(VehiclePosition vehicle) {
 		
 		return vehicle.getVehicle().getLabel();
 	}
+
 
 	/**
 	 * Actually processes the GTFS-realtime file and calls handleAvlReport()

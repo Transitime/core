@@ -45,6 +45,10 @@ import org.transitime.gtfs.gtfsStructs.GtfsRoute;
 import org.transitime.utils.OrderedCollection;
 import org.transitime.utils.StringUtils;
 
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.*;
+
 
 /**
  * For storing in db information for a route. Based on GTFS information
@@ -391,7 +395,7 @@ public class Route implements Serializable {
 		result = prime * result + (hidden ? 1231 : 1237);
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + routeOrder;
+		result = prime * result + ((routeOrder == null) ? 0 : routeOrder);;
 		result = prime * result
 				+ ((shortName == null) ? 0 : shortName.hashCode());
 		result = prime * result
@@ -605,7 +609,8 @@ public class Route implements Serializable {
 	public List<String> getDirectionIds() {
 		List<String> directionIds = new ArrayList<String>();
 		List<TripPattern> tripPatternsForRoute = Core.getInstance()
-				.getDbConfig().getTripPatternsForRoute(getId());
+                .getDbConfig().getTripPatternsForRoute(getId());
+		if (tripPatternsForRoute == null) return directionIds;
 		for (TripPattern tripPattern : tripPatternsForRoute) {
 			String directionId = tripPattern.getDirectionId();
 			if (!directionIds.contains(directionId))

@@ -192,25 +192,37 @@ public class PredictionAccuracyModule extends Module {
 		
 		// Run forever
 		while (true) {
-			IntervalTimer timer = new IntervalTimer();
-			
-			try {
+      IntervalTimer timer = null;
+
+		  try {
+		    timer = new IntervalTimer();
 				// Process data
-				getAndProcessData(getRoutesAndStops(), Core.getInstance().getSystemDate());
+
 				
+
+		    logger.info("processing prediction accuracy....");
+				getAndProcessData(getRoutesAndStops(), Core.getInstance().getSystemDate());
+				logger.info("processing prediction accuracy complete.");
+
 				// Make sure old predictions that were never matched to an
 				// arrival/departure don't stick around taking up memory.
 				clearStalePredictions();
+				
 			} catch (Exception e) {
-				e.printStackTrace();
-				logger.error("Error accessing predictions feed :  "+ e.getMessage(), e); 
-			} finally {				
-				// Wait appropriate amount of time till poll again
-				long elapsedMsec = timer.elapsedMsec();
-				long sleepTime = 
-						getTimeBetweenPollingPredictionsMsec() - elapsedMsec;
-				if (sleepTime > 0)
-					Time.sleep(sleepTime);
+
+				logger.error("Error accessing predictions feed {}", e, e);
+				logger.debug("execption details {}", e, e);
+			} catch (Throwable t) {
+			  logger.error("possible sql exception {}", t, t);
+			} finally {
+			  // if we have an exception, we still need to wait to be nice to the cpu
+	       // Wait appropriate amount of time till poll again
+        long elapsedMsec = timer.elapsedMsec();
+        long sleepTime = 
+            getTimeBetweenPollingPredictionsMsec() - elapsedMsec;
+        if (sleepTime > 0)
+          Time.sleep(sleepTime);
+
 			}
 		}
 	}
@@ -307,8 +319,12 @@ public class PredictionAccuracyModule extends Module {
 	 * needed because sometimes a vehicle will never arrive at a stop and so
 	 * will not be removed from memory. In order to prevent memory use from
 	 * building up need to clear out the old predictions.
+	 * 
+	 * Synchronized as multiple subclasses exist.
 	 */
-	protected void clearStalePredictions() {
+
+	protected synchronized void clearStalePredictions() {
+
 		int numPredictionsInMemory = 0;
 		int numPredictionsRemoved = 0;
 		
@@ -358,7 +374,7 @@ public class PredictionAccuracyModule extends Module {
 	 *            same time can easily see from data in db which internal and
 	 *            external predictions are associated with each other.
 	 */
-	protected void getAndProcessData(List<RouteAndStops> routesAndStops,
+	protected synchronized void getAndProcessData(List<RouteAndStops> routesAndStops,
 			Date predictionsReadTime) {
 		logger.debug("Calling PredictionReaderModule.getAndProcessData() "
 				+ "to process internal prediction.");

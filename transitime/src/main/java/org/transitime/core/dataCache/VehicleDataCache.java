@@ -63,7 +63,7 @@ public class VehicleDataCache {
     // Keyed by route_short_name. Key is null for vehicles that have not
     // been successfully associated with a route. For each route there is a 
     // submap that is keyed by vehicle.
-    private Map<String, Map<String, IpcVehicleComplete>> vehiclesByRouteMap = 
+    private Map<String, Map<String, IpcVehicleComplete>> vehiclesByRouteMap =
     		new ConcurrentHashMapNullKeyOk<String, Map<String, IpcVehicleComplete>>();
 
     // So can determine vehicles associated with a block ID. Keyed on
@@ -77,8 +77,8 @@ public class VehicleDataCache {
     // in AVL feed then this map is updated and the new VehicleConfig is also
     // written to the database. Using HashMap instead of ConcurrentHashMap
     // since synchronizing puts anyways.
-    private Map<String, VehicleConfig> vehicleConfigsMap =
-    		new HashMap<String, VehicleConfig>();
+    private ConcurrentHashMap<String, VehicleConfig> vehicleConfigsMap =
+    		new ConcurrentHashMap<String, VehicleConfig>();
     
     // So can quickly look up vehicle config using tracker ID
     private Map<String, VehicleConfig> vehicleConfigByTrackerIdMap =
@@ -178,23 +178,16 @@ public class VehicleDataCache {
 		// Make sure go initial data from database
 		readVehicleConfigFromDbIfNeedTo();
 		
-		// Synchronize on the map since separately testing for object
-		// and adding object
-		synchronized (vehicleConfigsMap) {
-			// If new vehicle...
-			String vehicleId = avlReport.getVehicleId();
-			if (!vehicleConfigsMap.containsKey(vehicleId)) {
-				logger.info("Encountered new vehicle where vehicleId={} so "
-						+ "updating vehicle cache and writing the "
-						+ "VehicleConfig to database.", vehicleId);
-
-				// Add vehicle to cache and update database
-				VehicleConfig vehicleConfig = new VehicleConfig(vehicleId);
-				vehicleConfigsMap.put(vehicleId, vehicleConfig);
-
-				// Write the vehicle to the database
-				Core.getInstance().getDbLogger().add(vehicleConfig);
-			}
+		// If new vehicle...
+		String vehicleId = avlReport.getVehicleId();
+		VehicleConfig vehicleConfig = new VehicleConfig(vehicleId);
+		VehicleConfig absent = vehicleConfigsMap.putIfAbsent(vehicleId, vehicleConfig);
+		if (absent == null) {
+			logger.info("Encountered new vehicle where vehicleId={} so "
+					+ "updating vehicle cache and writing the "
+					+ "VehicleConfig to database.", vehicleId);
+			// Write the vehicle to the database
+			Core.getInstance().getDbLogger().add(vehicleConfig);
 		}
 	}
     

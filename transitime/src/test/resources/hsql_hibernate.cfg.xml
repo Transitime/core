@@ -46,6 +46,7 @@
         easily speed things up. &ndash;&gt;
    <property name="hibernate.c3p0.max_statements">50</property>  -->
  
+
    <!-- When doing lots of writes, such as logging AVL data and other
         such regularlly occurring data then want to batch the requests
         to improve efficiency. Info online indicates that a value of
@@ -54,12 +55,13 @@
         setting batch_size to 25 actually hurt performance by a few
         percent. Probably much more important when db is remote and
         network traffic could bog down the thread that is writing. -->
-     <property name="hibernate.jdbc.batch_size">1</property>
+     <property name="hibernate.jdbc.batch_size">100</property>
      <property name="default_batch_fetch_size">100</property>
      <property name="hibernate.order_inserts">true</property>
      <property name="hibernate.order_updates">true</property>
      <property name="hibernate.connection.autocommit">true</property>
      <property name="hibernate.hbm2ddl.auto">update</property>
+
 
  
    <!-- Configure db settings. Currently commented out because this

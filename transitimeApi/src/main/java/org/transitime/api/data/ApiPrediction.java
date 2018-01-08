@@ -17,11 +17,11 @@
 
 package org.transitime.api.data;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.transitime.ipc.data.IpcPrediction;
 import org.transitime.utils.Time;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Contains data for a single prediction.
@@ -53,7 +53,10 @@ public class ApiPrediction {
 
 	@XmlAttribute(name = "trip")
 	private String tripId;
-
+	
+	@XmlAttribute(name = "blockId")
+	private String blockId;
+	
 	@XmlAttribute(name = "tripPattern")
 	private String tripPatternId;
 
@@ -78,7 +81,13 @@ public class ApiPrediction {
 
 	// Only output if passenger count is valid
 	@XmlAttribute(name = "passengerCount")
-	private Integer passengerCount;
+	private String passengerCount;
+
+  @XmlAttribute(name = "isDeparture")
+  private String isDepartureDuplicate;  //same field different name
+
+  @XmlAttribute(name = "affectedByLayover")
+  private String affectedByLayover;
 
 	/********************** Member Functions **************************/
 
@@ -121,7 +130,7 @@ public class ApiPrediction {
 		// Only set passengerCount if it is valid so that it is not output if it
 		// is not valid since will then be null
 		if (prediction.isPassengerCountValid())
-			passengerCount = (int) prediction.getPassengerCount();
+			passengerCount = String.valueOf(prediction.getPassengerCount());
 		
 		// Only set if true so only output for rare case
 		if (prediction.isDelayed())
@@ -129,6 +138,13 @@ public class ApiPrediction {
 		
 		// Only set if true so only output for rare case
 		if (prediction.isLateAndSubsequentTripSoMarkAsUncertain())
+			isLateAndSubsequentTripSoMarkAsUncertain = Boolean.TRUE;
+
+      affectedByLayover = Boolean.toString(prediction.isAffectedByWaitStop());
+
+      isDepartureDuplicate = Boolean.toString(!prediction.isArrival());
+        
+      blockId = prediction.getBlockId();
 			isLateAndSubsequentTripSoMarkAsUncertain = true;
 	}
 

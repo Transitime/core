@@ -26,10 +26,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.HibernateException;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.StringConfigValue;
 import org.transitime.core.ServiceUtils;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.ActiveRevisions;
@@ -125,6 +127,16 @@ public class DbConfig {
 	private static final Logger logger = LoggerFactory
 			.getLogger(DbConfig.class);
 
+	private StringConfigValue validateTestQuery 
+	= new StringConfigValue("transitime.db.validateQuery", 
+			"SELECT 1", 
+			"query to validate database connection");
+	
+	public String getValidateTestQuery() {
+		return validateTestQuery.getValue();
+	}
+
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -134,6 +146,7 @@ public class DbConfig {
 	 */
 	public DbConfig(String agencyId) {
 		this.agencyId = agencyId;
+		new Thread(new ValidateSessionThread(this)).start();
 	}
 
 	/**
@@ -776,6 +789,15 @@ public class DbConfig {
 
 	}
 
+    public int getBlockCount(){
+        int blockCount = 0;
+        for(String serviceId : blocksByServiceMap.keySet()){
+            blockCount += (blocksByServiceMap.get(serviceId) != null
+                    ? blocksByServiceMap.get(serviceId).size() : 0);
+        }
+        return blockCount;
+    }
+
 	/**
 	 * Returns blocks for the specified blockId for all service IDs.
 	 * 
@@ -806,7 +828,7 @@ public class DbConfig {
 	 */
 	public Collection<Block> getBlocks(String serviceId) {
 		Map<String, Block> blocksForServiceMap =
-				blocksByServiceMap.get(serviceId);
+                blocksByServiceMap.get(serviceId);
 		if (blocksForServiceMap != null) {
 			Collection<Block> blocksForService = blocksForServiceMap.values();
 			return Collections.unmodifiableCollection(blocksForService);
@@ -1012,13 +1034,43 @@ public class DbConfig {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	private static class ValidateSessionThread implements Runnable {
+
+		private DbConfig service;
+		public ValidateSessionThread(DbConfig service) {
+			this.service = service;
+		}
+		
+		@Override
+		public void run() {
+			DbConfig dbConfig = Core.getInstance().getDbConfig();
+			
+			while (!Thread.interrupted()) {
+				Time.sleep(60 * 1000);
+				try {
+					SQLQuery query = service.getGlobalSession().createSQLQuery(dbConfig.getValidateTestQuery());
+					query.list();
+					logger.debug("session test success");
+				} catch (Throwable t) {
+					logger.error("session test failure: {} {}", t, t);
+					// the only reason this validate query should fail is if
+					// our db connnection is invalid 
+					// log the issue for now
+					// eventually flush connection pool or give other hints
+				}
+				
+			}
+		}
+	}
+	
 	/**
 	 * For debugging.
 	 * 
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		String projectId = "sfmta";
+		String projectId = "1";
 
 		int configRev = ActiveRevisions.get(projectId).getConfigRev();
 

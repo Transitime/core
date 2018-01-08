@@ -31,24 +31,24 @@ String allowableLateMinutesStr = "'" + SqlUtils.convertMinutesToSecs(allowableLa
     		   
 String sql =
 	"SELECT " 
-	+ "     COUNT(CASE WHEN scheduledtime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
-	+ "     COUNT(CASE WHEN scheduledtime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledtime <= " 
+	+ "     COUNT(CASE WHEN scheduledTime-time > " + allowableEarlyMinutesStr + " THEN 1 ELSE null END) as early, \n"
+	+ "     COUNT(CASE WHEN scheduledTime-time <= " + allowableEarlyMinutesStr + " AND time-scheduledTime <= " 
 				+ allowableLateMinutesStr + " THEN 1 ELSE null END) AS ontime, \n" 
-    + "     COUNT(CASE WHEN time-scheduledtime > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n" 
+    + "     COUNT(CASE WHEN time-scheduledTime > " + allowableLateMinutesStr + " THEN 1 ELSE null END) AS late, \n" 
     + "     COUNT(*) AS total, \n"
     + "     r.name \n"
-    + "FROM arrivalsdepartures ad, routes r \n"
+    + "FROM ArrivalsDepartures ad, Routes r \n"
     + "WHERE "
     // For joining in route table to get route name
     + "ad.configrev = r.configrev \n"
-    + " AND ad.routeshortname = r.shortname \n"
+    + " AND ad.routeShortName = r.shortName \n"
     // Only need arrivals/departures that have a schedule time
-    + " AND ad.scheduledtime IS NOT NULL \n"
+    + " AND ad.scheduledTime IS NOT NULL \n"
     // Specifies which routes to provide data for
     + SqlUtils.routeClause(request, "ad") + "\n"
     + SqlUtils.timeRangeClause(request, "ad.time", 7) + "\n"
     // Grouping needed since want to output route name
-    + " GROUP BY r.name, r.routeorder ORDER BY r.routeorder, r.name;";
+    + " GROUP BY r.name, r.routeOrder ORDER BY r.routeOrder, r.name;";
 
 // Just for debugging
 System.out.println("\nFor schedule adherence by route query sql=\n" + sql);

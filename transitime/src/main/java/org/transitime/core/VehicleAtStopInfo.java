@@ -17,10 +17,10 @@
  */
 package org.transitime.core;
 
-import java.util.Date;
-
 import org.transitime.applications.Core;
+import org.transitime.configData.CoreConfig;
 import org.transitime.db.structs.Block;
+import org.transitime.db.structs.Trip;
 
 /**
  * So that VehicleState can keep track of whether vehicle is matched to
@@ -87,11 +87,16 @@ public class VehicleAtStopInfo extends Indices {
 	 * @return true if vehicle at end of block
 	 */
 	@Override
-	public boolean atEndOfBlock() {
+  public boolean atEndOfBlock() {
 		Block block = getBlock();
 		if (block.isNoSchedule()) {
-			Date date = Core.getInstance().getSystemDate();
-			return !block.isActive(date);
+		  // frequency based blocks last until the last trip completes
+		  Trip trip = getTrip();
+		  int tripDuration = trip.getEndTime() - trip.getStartTime();
+		  int blockDuration = block.getEndTime() - block.getStartTime();
+		  int secondsBeforeTrip = CoreConfig.getAllowableEarlySeconds();
+		  int secondsAfterTrip = CoreConfig.getAllowableLateSeconds();
+		  return !block.isActive(Core.getInstance().getSystemDate(), secondsBeforeTrip, blockDuration + tripDuration + secondsAfterTrip); 
 		} else {
 		return getTripIndex() == block.numTrips() - 1
 				&& getStopPathIndex() == 

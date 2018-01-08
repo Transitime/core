@@ -111,7 +111,7 @@ public class TransitimeNonAgencyApi {
 			return stdParameters.createResponse(apiAgencies);
 		} catch (RemoteException e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 	}
 
@@ -181,7 +181,7 @@ public class TransitimeNonAgencyApi {
 			return stdParameters.createResponse(predsForAgencies);
 		} catch (Exception e) {
 			// If problem getting data then return a Bad Request
-			throw WebUtils.badRequestException(e.getMessage());
+			throw WebUtils.badRequestException(e);
 		}
 
 	}

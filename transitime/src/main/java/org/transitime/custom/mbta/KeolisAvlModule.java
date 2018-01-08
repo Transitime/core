@@ -157,6 +157,7 @@ public class KeolisAvlModule extends PollUrlAvlModule {
 			logger.error("Error parsing JSON. {}. {}", e.getMessage(), jsonStr,
 					e);
 			return new ArrayList<AvlReport>();
+
 		}
 
 	}

@@ -161,6 +161,7 @@ public class VehicleEvent implements Serializable {
 	public static final String NOT_LEAVING_TERMINAL = "Not leaving terminal";
 	public static final String ASSIGNMENT_GRABBED = "Assignment Grabbed";
 	public static final String ASSIGNMENT_CHANGED = "Assignment Changed";
+	public static final String AVL_CONFLICT ="AVL Conflict";
 	
 	// Hibernate requires class to be Serializable
 	private static final long serialVersionUID = -763445348557811925L;

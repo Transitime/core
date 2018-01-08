@@ -22,6 +22,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitime.configData.DbSetupConfig;
 import org.transitime.db.hibernate.HibernateUtils;
 import org.transitime.db.structs.Agency;
 import org.transitime.db.structs.Block;
@@ -63,14 +64,24 @@ public class DbWriter {
 	 * @param object
 	 */
 	private void writeObject(Session session, Object object) {
-		session.saveOrUpdate(object);
+		writeObject(session, object, true);
+	}
+	
+	private void writeObject(Session session, Object object, boolean checkForUpdate) {
+		if (checkForUpdate) {
+			session.saveOrUpdate(object);
+		} else {
+			session.save(object);
+		}
 
 		// Since can writing large amount of data should use Hibernate 
 		// batching to make sure don't run out memory.
 		counter++;
-		if (counter % HibernateUtils.BATCH_SIZE == 0) {
+		if (counter % DbSetupConfig.getBatchSize() == 0) {
+			logger.info("flushing with " + counter + " % " + DbSetupConfig.getBatchSize());
 			session.flush();
 			session.clear();
+			logger.info("flushed with " + counter + " % " + DbSetupConfig.getBatchSize());
 		}
 	}
 	
@@ -80,30 +91,32 @@ public class DbWriter {
 	 * 
 	 * @param configRev
 	 */
-	private void actuallyWriteData(Session session, int configRev) {
-		// Get rid of old data. Getting rid of trips, trip patterns, and blocks
-		// is a bit complicated. Need to delete them in proper order because
-		// of the foreign keys. Because appear to need to use plain SQL
-		// to do so successfully (without reading in objects and then
-		// deleting them, which takes too much time and memory). Therefore
-		// deleting of this data is done here before writing the data.
-		logger.info("Deleting old blocks and associated trips from rev {} of "
-				+ "database...", configRev);
-		Block.deleteFromRev(session, configRev);
-
-		logger.info("Deleting old trips from rev {} of database...", 
-				configRev);
-		Trip.deleteFromRev(session, configRev);
-
-		logger.info("Deleting old trip patterns from rev {} of database...", 
-				configRev);
-		TripPattern.deleteFromRev(session, configRev);
-		
-		// Get rid of travel times that are associated with the rev being 
-		// deleted
-		logger.info("Deleting old travel times from rev {} of database...", 
-				configRev);
-		TravelTimesForTrip.deleteFromRev(session, configRev);
+	private void actuallyWriteData(Session session, int configRev, boolean cleanupRevs) {
+		if (cleanupRevs) {
+			// Get rid of old data. Getting rid of trips, trip patterns, and blocks
+			// is a bit complicated. Need to delete them in proper order because
+			// of the foreign keys. Because appear to need to use plain SQL
+			// to do so successfully (without reading in objects and then
+			// deleting them, which takes too much time and memory). Therefore
+			// deleting of this data is done here before writing the data.
+			logger.info("Deleting old blocks and associated trips from rev {} of "
+					+ "database...", configRev);
+			Block.deleteFromRev(session, configRev);
+	
+			logger.info("Deleting old trips from rev {} of database...", 
+					configRev);
+			Trip.deleteFromRev(session, configRev);
+	
+			logger.info("Deleting old trip patterns from rev {} of database...", 
+					configRev);
+			TripPattern.deleteFromRev(session, configRev);
+			
+			// Get rid of travel times that are associated with the rev being 
+			// deleted
+			logger.info("Deleting old travel times from rev {} of database...", 
+					configRev);
+			TravelTimesForTrip.deleteFromRev(session, configRev);
+		}
 		
 		// Now write the data to the database.
 		// First write the Blocks. This will also write the Trips, TripPatterns,
@@ -112,10 +125,14 @@ public class DbWriter {
 		logger.info("Saving {} blocks (plus associated trips) to database...", 
 				gtfsData.getBlocks().size());
 		int c = 0;
+		long startTime = System.currentTimeMillis();
 		for (Block block : gtfsData.getBlocks()) {
 			logger.info("Saving block #{} with blockId={} serviceId={} blockId={}",
 					++c, block.getId(), block.getServiceId(), block.getId());
-			writeObject(session, block);
+			writeObject(session, block, false);
+			if (c % 1000 == 0) {
+				logger.info("wrote " + c + " blocks in " + (System.currentTimeMillis()-startTime)/1000 + "s");
+			}
 		}
 		
 		logger.info("Saving routes to database...");
@@ -184,7 +201,13 @@ public class DbWriter {
 	 * @param configRev So can delete old data for the rev
 	 * @throws HibernateException when problem with database
 	 */
+	
 	public void write(Session session, int configRev)
+			throws HibernateException {
+		write(session, configRev, true);
+	}
+	
+	public void write(Session session, int configRev, boolean cleanupRevs)
 			throws HibernateException {
 		// For logging how long things take
 		IntervalTimer timer = new IntervalTimer();
@@ -196,7 +219,7 @@ public class DbWriter {
 		
 		// Do the low-level processing
 		try {
-			actuallyWriteData(session, configRev);
+			actuallyWriteData(session, configRev, cleanupRevs);
 			
 			// Done writing data so commit it
 			tx.commit();

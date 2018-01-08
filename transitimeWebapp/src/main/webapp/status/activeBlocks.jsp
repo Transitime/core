@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+<%@ page import="org.transitime.reports.ScheduleAdherenceController" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%
 String agencyId = request.getParameter("a");
@@ -78,7 +79,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 	text-align: center;
 }
 
-#percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel {
+#percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel, #asOfLabel {
 	margin-left: 20px;
 }
 
@@ -86,16 +87,25 @@ if (agencyId == null || agencyId.isEmpty()) {
 	margin-left: 40px;
 }
 
-#totalBlocksLabel, #percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel, #percentLateLabel {
+#totalBlocksLabel, #percentWithVehiclesLabel, #percentOnTimeLabel, #percentEarlyLabel, #percentLateLabel, #asOfLabel {
 	margin-right: 4px;
 	color: graytext;
+}
+
+#menu {
+	text-align: center;
 }
 
 </style>
 
 <script>
-var ALLOWABLE_EARLY_MSEC = 1 * 60*1000; // 1 minute
-var ALLOWABLE_LATE_MSEC  = 4 * 60*1000; // 4 minutes
+var ALLOWABLE_EARLY_MSEC = <%= ScheduleAdherenceController.getScheduleEarlySeconds() %> * -1000; 
+var ALLOWABLE_LATE_MSEC  = <%= ScheduleAdherenceController.getScheduleLateSeconds() %> * 1000;
+
+// need to escape special character in jquery as . : are not interpreted correctly
+function jq( myid ) {	 
+    return myid.replace( /(:|\.|\[|\]|,)/g, "\\\\$1" );
+}
 
 //need to escape special character in jquery as . : are not interpreted correctly
 function jq( myid ) {	 
@@ -156,8 +166,18 @@ function idForQuery(id) {
 }
 
 function handleAjaxData(routes) {
-	// Remove blocks and routes that are not in the ajax data
-	removeUnneededBlockAndRouteElements(routes);
+    baseHandleAjaxData(routes, true);
+}
+
+function updateAjaxData(routes) {
+    baseHandleAjaxData(routes, false);
+}
+
+function baseHandleAjaxData(routes, removeAll) {
+    if(removeAll){
+        // Remove blocks and routes that are not in the ajax data
+        removeUnneededBlockAndRouteElements(routes);
+    }
 
 	var totalNumberBlocks = 0;
 	var totalVehicles = 0;
@@ -182,20 +202,24 @@ function handleAjaxData(routes) {
  					 // using an h3 element and h3 can't have a div in it.
  					 // And the spans need to be created in reverse order since
  					 // using css float: right to get spans displayed on the right.
- 				     "  <span class='routeValue' id='routeEarlyVehicles' title='Number of vehicles that are more than 1 minute early'></span>" + 
- 				     "  <span class='routeLabel' id='routeEarlyVehiclesLabel' title='Number of vehicles that are more than 1 minute early'>Early:</span>" +
+ 				     "<span class='blocksummary' style='display:none'>" +
+                     "  <span class='routeValue' id='routeEarlyVehicles' title='Number of vehicles that are more than <%= ScheduleAdherenceController.getScheduleEarlySeconds()/-60 %> minute(s) early'></span>" +
+ 				     "  <span class='routeLabel' id='routeEarlyVehiclesLabel' title='Number of vehicles that are more than <%= ScheduleAdherenceController.getScheduleEarlySeconds()/-60 %> minute(s) early'>Early:</span>" +
  				     "  <span class='routeValue' id='routeOnTimeVehicles' title='Number of vehicles that are on time'></span>" + 
  				     "  <span class='routeLabel' id='routeOnTimeVehiclesLabel' title='Number of vehicles that are on time'>On Time:</span>" +
- 				     "  <span class='routeValue' id='routeLateVehicles' title='Number of vehicles more that 4 minutes late'></span>" + 
- 				     "  <span class='routeLabel' id='routeLateVehiclesLabel' title='Number of vehicles more that 4 minutes late'>Late:</span>" +
+ 				     "  <span class='routeValue' id='routeLateVehicles' title='Number of vehicles more that <%= ScheduleAdherenceController.getScheduleLateSeconds()/60 %> minutes late'></span>" + 
+ 				     "  <span class='routeLabel' id='routeLateVehiclesLabel' title='Number of vehicles more that <%= ScheduleAdherenceController.getScheduleLateSeconds()/60 %> minutes late'>Late:</span>" +
  				     "  <span class='routeValue' id='routeVehicles' title='Number of vehicles assigned to blocks and predictable for the route'></span>" + 
  				     "  <span class='routeLabel' id='routeVehiclesLabel' title='Number of vehicles assigned to blocks and predictable for the route'>Assigned:</span>" +
+                     "</span>" +
  				     "  <span class='routeValue' id='routeBlocks' title='Number of blocks currently active for the route'></span>" + 
  				     "  <span class='routeLabel' id='routeBlocksLabel' title='Number of blocks currently active for the route'>Blocks:</span>" +
 					 " </h3>" +
  					 " <div id='blocksDiv'><table id='blocksTable'></table></div>" +
  					 "</div>");	
- 		}
+ 		}else{
+            $("#" + routeElementId + " #routeBlocks").parent().children('.blocksummary').show();
+        }
 		
 		// Update the route info by setting number of blocks
 		var blocksValueElement = $("#" + routeElementId + " #routeBlocks");
@@ -285,6 +309,11 @@ function handleAjaxData(routes) {
 			blockElementId=jq(blockElementId);
 			
 			// Update the information for the block 
+			
+			/* this is to escape . and :  characters */			
+			routeElementId=jq(routeElementId);
+			blockElementId=jq(blockElementId);
+			
 			var blockValueElement = $("#" + routeElementId + " #" + blockElementId + " #block");
 			blockValueElement.text(blockData.id);
 			
@@ -365,12 +394,21 @@ function handleAjaxData(routes) {
 			}
 			vehiclesSchedAdhElement.text(schAdhStr);
 		} // Done with each block for the route
-	} // Done with each route
+	} // Done with each route	
 	
+	// Since route widgets might have changed need to call refresh
+	$( "#accordion" ).accordion("refresh");	
+}
+
+
+function updateFooter(total) {
 	// Update the summary at bottom of page
-	$("#totalBlocksValue").text(totalNumberBlocks);
 	
-	var percentageVehicles = 100.0 * totalVehicles / totalNumberBlocks
+	$("#totalBlocksValue").text(total.blocks);
+	
+	var totalVehicles = total.late + total.ontime + total.early; 
+
+	var percentageVehicles = 100.0 * totalVehicles / total.blocks;
 	$("#percentWithVehiclesValue").text(percentageVehicles.toFixed(0) + "%");
 	if (percentageVehicles < 90.0) {
 		$("#percentWithVehiclesValue").addClass("problemColor");
@@ -378,7 +416,7 @@ function handleAjaxData(routes) {
 		$("#percentWithVehiclesValue").removeClass("problemColor");		
 	}
 	
-	var percentageLate = 100.0 * totalLate / totalNumberBlocks;
+	var percentageLate = 100.0 * total.late / total.blocks;
 	$("#percentLateValue").text(percentageLate.toFixed(0) + "%");
 	if (percentageLate > 10.0) {
 		$("#percentLateValue").addClass("lateColor");
@@ -386,29 +424,67 @@ function handleAjaxData(routes) {
 		$("#percentLateValue").removeClass("lateColor");		
 	}
 	
-	var percentageOnTime = 100.0 * totalOnTime / totalNumberBlocks;
+	var percentageOnTime = 100.0 * total.ontime / total.blocks;
 	$("#percentOnTimeValue").text(percentageOnTime.toFixed(0) + "%");
 	
-	var percentageEarly = 100.0 * totalEarly / totalNumberBlocks;
+	var percentageEarly = 100.0 * total.early / total.blocks;
 	$("#percentEarlyValue").text(percentageEarly.toFixed(0) + "%");
 	if (percentageEarly > 10.0) {
 		$("#percentLateValue").addClass("earlyColor");
 	} else {
 		$("#percentLateValue").removeClass("earlyColor");		
 	}
-
-	// Since route widgets might have changed need to call refresh
-	$( "#accordion" ).accordion("refresh");	
+	
+	$("#asOfValue").text(new Date().toLocaleTimeString())
 }
+
+function getSummaryData() {
+	var requestData = {
+			"allowableEarlySec": ALLOWABLE_EARLY_MSEC/1000,
+			"allowableLateSec": ALLOWABLE_LATE_MSEC/1000
+	}
+	$.getJSON(apiUrlPrefix + "/command/vehicleAdherenceSummary", requestData, updateFooter)
+		.fail(function() {
+			console.log("Could not access /command/vehicleAdherenceSummary");
+		});
+}
+	
+
 
 /*
  * Get active block data via AJAX
  */
 function getAndProcessData() {
-	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRoute", handleAjaxData)
+	// Populate accordion
+	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRouteWithoutVehicles", function(data) {
+		handleAjaxData(data);
+		initializeLoadAllData(data);
+	})
 		.fail(function() {
-	 		console.log( "Could not access /command/activeBlocksByRoute" );
-	 	});	
+	 		console.log( "Could not access /command/activeBlocksByRouteWithoutVehicles" );
+	 	});
+}
+
+// When loadAllData button is pressed, we should load in sequence all route data.
+// Wait for a request to finish before sending the next one.
+function initializeLoadAllData(routes) {
+	
+	var routeNames = routes.routes.map(function(d) { return d.name })
+	
+	function getDataForRoute(i) {
+		$.getJSON(apiUrlPrefix + "/command/activeBlockByRouteNameWithVehicles?r=" + routeNames[i], updateAjaxData)
+        	.fail(function() {
+            	console.log( "Could not access /command/activeBlockByRouteNameWithVehicles" );
+        	})
+        	.done(function() {
+        		if (i + 1 < routeNames.length)
+        			getDataForRoute(i + 1);
+        	})
+	}
+	
+	$("#loadAllData").click(function() {
+		getDataForRoute(0);
+	})
 }
 
 // Called when page is ready
@@ -420,7 +496,18 @@ $(function() {
 			active: false,         // Don't have any panels open at startup
 			animate: 200,
 			heightStyle: "content", // So each blocks info element can be different size 
-			header: "> div > h3"}) // So can be sortable
+			header: "> div > h3", // So can be sortable
+            beforeActivate: function(event, ui) {
+                var headerId = $(ui.newHeader).attr('id');
+                if(headerId){
+                	// route name is header title without summary
+                	var routeName = $('#'+headerId).clone().find('*').remove().end().text();                	
+                    $.getJSON(apiUrlPrefix + "/command/activeBlockByRouteNameWithVehicles?r=" + routeName, updateAjaxData)
+                            .fail(function() {
+                                console.log( "Could not access /command/activeBlockByRouteNameWithVehicles" );
+                            });
+                }
+            }})
 		.sortable({
 			axis: "y",
 			handle: "h3",
@@ -434,9 +521,14 @@ $(function() {
 		});
 	
 	// Start getting the active blocks data and processing it.
-	// Update every 30 seconds.
+// 	Update every 2 minutes.
 	getAndProcessData();
-	setInterval(getAndProcessData, 30000);
+	// do not update automatically -- until performance issues solved
+// 	setInterval(getAndProcessData, 120000);
+	
+	// update summary every minute
+	getSummaryData()
+	setInterval(getSummaryData, 60000);
 });
 
 
@@ -449,18 +541,23 @@ $(function() {
 <%@include file="/template/header.jsp" %>
 
 <div id="title">Active Blocks</div>
+<div id="menu">
+	<button id="loadAllData">Load all data</button>
+</div>
 <div id="accordion"></div>
 <div id="summary">
   <span id="totalBlocksLabel" title="Total number of blocks">Blocks:</span>
   <span id="totalBlocksValue" title="Total number of blocks"></span>
   <span id="percentWithVehiclesLabel" title="Percentage of blocks that have an assigned and predictable vehicle">Assigned:</span>
   <span id="percentWithVehiclesValue" title="Percentage of blocks that have an assigned and predictable vehicle"></span>
-  <span id="percentLateLabel" title="Percentage of blocks where vehicle is more than 4 minutes late">Late:</span>
-  <span id="percentLateValue" title="Percentage of blocks where vehicle is more than 4 minutes late"></span>
+  <span id="percentLateLabel" title="Percentage of blocks where vehicle is more than <%= ScheduleAdherenceController.getScheduleLateSeconds()/60 %> minutes late">Late:</span>
+  <span id="percentLateValue" title="Percentage of blocks where vehicle is more than <%= ScheduleAdherenceController.getScheduleLateSeconds()/60 %> minutes late"></span>
   <span id="percentOnTimeLabel" title="Percentage of blocks where vehicle is on time">OnTime:</span>
   <span id="percentOnTimeValue" title="Percentage of blocks where vehicle is on time"></span>
-  <span id="percentEarlyLabel" title="Percentage of blocks where vehicle is more than 1 minute early">Early:</span>
-  <span id="percentEarlyValue" title="Percentage of blocks where vehicle is more than 1 minute early"></span>
+  <span id="percentEarlyLabel" title="Percentage of blocks where vehicle is more than <%= ScheduleAdherenceController.getScheduleEarlySeconds()/-60 %> minute(s) early">Early:</span>
+  <span id="percentEarlyValue" title="Percentage of blocks where vehicle is more than <%= ScheduleAdherenceController.getScheduleEarlySeconds()/-60 %> minute(s) early"></span>
+  <span id="asOfLabel" title="Time that summary information was last updated">As of:</span>
+  <span id="asOfValue" title="Time that summary information was last updated"></span>
 </div>
 </body>
 </html>

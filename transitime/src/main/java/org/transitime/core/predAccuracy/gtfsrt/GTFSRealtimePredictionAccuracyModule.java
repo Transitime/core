@@ -26,16 +26,23 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.ClassConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.core.predAccuracy.PredAccuracyPrediction;
 import org.transitime.core.predAccuracy.PredictionAccuracyModule;
 import org.transitime.db.structs.ScheduleTime;
 import org.transitime.db.structs.StopPath;
 import org.transitime.db.structs.Trip;
+import org.transitime.db.structs.TripPattern;
 import org.transitime.gtfs.DbConfig;
+import org.transitime.utils.Time;
+
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
+import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 
 /**
@@ -52,9 +59,20 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 
 	/********************** Config Params **************************/
 
+
 	private static final StringConfigValue gtfsTripUpdateUrl = new StringConfigValue(
 			"transitime.predAccuracy.gtfsTripUpdateUrl", "http://127.0.0.1:8091/trip-updates",
 			"URL to access gtfs-rt trip updates.");
+
+	
+  private static ClassConfigValue translatorConfig =
+      new ClassConfigValue("transitime.predAccuracy.RtTranslator", null, 
+          "Implementation of GTFSRealtimeTranslator to perform " + 
+      "the translation of stopIds and other rt quirks");
+	
+  // if stopIds needs optional parsing/translation
+  private GTFSRealtimeTranslator translator = null;
+  
 
 	/**
 	 * @return the gtfstripupdateurl
@@ -67,9 +85,14 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 
 	/**
 	 * @param agencyId
+	 * @throws Exception 
 	 */
-	public GTFSRealtimePredictionAccuracyModule(String agencyId) {
+	public GTFSRealtimePredictionAccuracyModule(String agencyId) throws Exception {
 		super(agencyId);
+		if (translatorConfig.getValue() != null) {
+		  logger.info("instantiating translator {}", translatorConfig.getValue());
+		  translator = (GTFSRealtimeTranslator) translatorConfig.getValue().newInstance();
+		}
 	}
 
 	/**
@@ -77,6 +100,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	 * 
 	 * @return the FeedMessage to be processed
 	 */
+
 	private FeedMessage getExternalPredictions() {
 
 		// Will just read all data from gtfs-rt url
@@ -89,6 +113,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 
 			FeedMessage feed = FeedMessage.parseFrom(url.openStream());
 			logger.info("Prediction read successfully from URL={}", getGtfstripupdateurl().getValue());
+
 			return feed;
 		} catch (Exception e) {
 			logger.error("Problem when getting data from GTFS realtime trip updates URL={}", url, e);
@@ -113,6 +138,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 
 		logger.info("Processing GTFS-rt feed.....");
+
 		for (FeedEntity entity : feed.getEntityList()) {
 			if (entity.hasTripUpdate()) {
 				TripUpdate update = entity.getTripUpdate();
@@ -151,6 +177,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							} else {
 								logger.error("Got tripTag={} but no such trip in " + "the configuration.",
 										update.getTrip().getTripId());
+
 							}
 						}					
 						Trip gtfsTrip = dbConfig.getTrip(update.getTrip().getTripId());
@@ -159,6 +186,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 							
 							logger.debug("Trip loaded.");
 							
+
 							logger.debug("Processing : \n" + stopTime);
 							/* use stop as means for getting scheduled time */
 													
@@ -466,6 +494,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	}
 
 	/**
+
 	 * Processes both the internal and external predictions
 	 * 
 	 * @param routesAndStops
@@ -480,6 +509,7 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 	@Override
 	protected void getAndProcessData(List<RouteAndStops> routesAndStops, Date predictionsReadTime) {
 		// Process internal predictions
+
 		// super.getAndProcessData(routesAndStops, predictionsReadTime);
 
 		logger.info("Calling GTFSRealtimePredictionAccuracyModule." + "getAndProcessData()");
@@ -556,5 +586,6 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 		calendar.add(Calendar.SECOND, secondsFromMidnight);
 
 		return calendar.getTime();
+
 	}
 }

@@ -63,7 +63,7 @@ public class AvlJsonQuery {
 		}
 		if (beginTime != null && !beginTime.isEmpty() 
 				&& endTime != null && !endTime.isEmpty()) {
-			timeSql = " AND time::time BETWEEN '" 
+			timeSql = " AND time(time) BETWEEN '" 
 				+ beginTime + "' AND '" + endTime + "' ";
 		}
 
@@ -149,7 +149,7 @@ public class AvlJsonQuery {
 				+ "     vs.blockId, vs.tripId, vs.tripShortName, vs.routeId, "
 				+ "     vs.routeShortName, vs.schedAdhMsec, vs.schedAdh, "
 				+ "     vs.isDelayed, vs.isLayover, vs.isWaitStop  "
-				+ "FROM avlreports a "
+				+ "FROM AvlReports a "
 				+ "  LEFT JOIN vehicleStates vs "
 				+ "    ON vs.vehicleId = a.vehicleId AND vs.avlTime = a.time "
 				+ "WHERE a.time BETWEEN '" + beginDate + "' "
@@ -176,6 +176,7 @@ public class AvlJsonQuery {
 		
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 		return json;
+
 	}
 	
 }

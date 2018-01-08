@@ -35,7 +35,55 @@ import org.transitime.ipc.data.IpcVehicleConfig;
  */
 public interface VehiclesInterface extends Remote {
 
-	/**
+  /**
+   * Gets from the server IpcActiveBlocks for blocks that are currently
+   * active without vehicle data.
+   * 
+   * @param routeIds
+   *            List of routes that want data for. Can also be null or empty.
+   * @param allowableBeforeTimeSecs
+   *            How much before the block time the block is considered to be
+   *            active
+   * @return Collection of blocks that are active
+   * @throws RemoteException
+   */
+  public Collection<IpcActiveBlock> getActiveBlocksWithoutVehicles(
+     Collection<String> routeIds, int allowableBeforeTimeSecs)
+     throws RemoteException;
+
+  /**
+   * Gets from the server IpcActiveBlocks for blocks that are currently
+   * active with vehicle data for a particular route.
+   * 
+   * @param routeId
+   *            Route that want data for. Can also be null or empty.
+   * @param allowableBeforeTimeSecs
+   *            How much before the block time the block is considered to be
+   *            active
+   * @return Collection of blocks that are active
+   * @throws RemoteException
+   */
+  public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteId(
+     String routeId, int allowableBeforeTimeSecs)
+     throws RemoteException;
+
+  /**
+   * Gets from the server IpcActiveBlocks for blocks that are currently
+   * active with vehicle data for all routes with given route name.
+   * 
+   * @param routeName
+   *            Route name that want data for. Can also be null or empty.
+   * @param allowableBeforeTimeSecs
+   *            How much before the block time the block is considered to be
+   *            active
+   * @return Collection of blocks that are active
+   * @throws RemoteException
+   */
+  public Collection<IpcActiveBlock> getActiveBlocksAndVehiclesByRouteName(
+     String routeName, int allowableBeforeTimeSecs)
+     throws RemoteException;
+    
+    /**
 	 * For getting configuration information for all vehicles. Useful for
 	 * determining IDs of all vehicles in system
 	 * 
@@ -116,7 +164,7 @@ public interface VehiclesInterface extends Remote {
 			Collection<String> vehicleIds) throws RemoteException;
 
 	/**
-	 * Gets from server IpcVehicle info for all vehicles currently. associated
+	 * Gets from server IpcVehicle info for all vehicles currently associated
 	 * with route.
 	 * 
 	 * @param routeIdOrShortName
@@ -126,6 +174,16 @@ public interface VehiclesInterface extends Remote {
 	 */
 	public Collection<IpcVehicle> getForRoute(String routeIdOrShortName)
 			throws RemoteException;
+	
+	/**
+   * Gets from server IpcVehicle info for all vehicles currently associated
+   * with a block. Each block should have a IpcVehicle in the returned collection.
+   * 
+   * @return Collection of Vehicle objects
+   * @throws RemoteException
+   */
+  public Collection<IpcVehicle> getVehiclesForBlocks()
+      throws RemoteException;
 
 	/**
 	 * Gets from server IpcCompleteVehicle info for all vehicles currently.
@@ -178,4 +236,21 @@ public interface VehiclesInterface extends Remote {
 	public Collection<IpcActiveBlock> getActiveBlocks(
 			Collection<String> routeIds, int allowableBeforeTimeSecs) 
 					throws RemoteException;
+	
+	 /**
+   * Gets from the server the number of blocks that are currently active.
+   * 
+   * @param routeIds
+   *            List of routes that want data for. Can also be null or empty.
+   * @param allowableBeforeTimeSecs
+   *            How much before the block time the block is considered to be
+   *            active
+   * @return Number of blocks that are active.
+   * @throws RemoteException
+   */
+  public int getNumActiveBlocks(
+      Collection<String> routeIds, int allowableBeforeTimeSecs) 
+          throws RemoteException;
+
+  
 }

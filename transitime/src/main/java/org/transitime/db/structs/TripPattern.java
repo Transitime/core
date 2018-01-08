@@ -374,9 +374,15 @@ public class TripPattern implements Serializable, Lifecycle {
 		}
 		
 		// Add the from and to stop IDs
-		StopPath path1 = stopPaths.get(0);
-		StopPath path2 = stopPaths.get(stopPaths.size()-1);
-		tripPatternId += path1.getStopId() + "_to_" + path2.getStopId() + "_";
+		if (stopPaths != null && stopPaths.size() > 1) {
+		  StopPath path1 = stopPaths.get(0);
+		  StopPath path2 = stopPaths.get(stopPaths.size()-1);
+		  tripPatternId += path1.getStopId() + "_to_" + path2.getStopId() + "_";
+		} else {
+		  GtfsData.logger.info("There was an issue with creating trip " + 
+          "pattern for tripId={} for routeId={}, it is missing stops "); 
+		  return tripPatternId;
+		}
 		
 		// Determine hash in hexadecimal format of list of stops
 		StringBuilder sb = new StringBuilder();
@@ -517,7 +523,9 @@ public class TripPattern implements Serializable, Lifecycle {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((headsign == null) ? 0 : headsign.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
-	//	result = prime * result + ((trips == null) ? 0 : trips.hashCode());
+
+//		result = prime * result + ((trips == null) ? 0 : trips.hashCode());  // stack overflow with large db
+
 		return result;
 	}
 

@@ -86,8 +86,8 @@
   </logger>
 
  <!-- For logging the parameter values for the SQL -->
-  <logger name="org.hibernate.type.descriptor.sql.BasicBinder"
-          level="trace" additivity="false">
+  <logger name="org.hibernate.type"
+          level="all" additivity="false">
     <appender-ref ref="SQL" />
   </logger>
 
