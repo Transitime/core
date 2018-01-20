@@ -77,29 +77,27 @@ public class Time {
 	
 	// These two are for reading in dates in various formats
 	private static final DateFormat defaultDateFormat =
-			new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat.getDateInstance(DateFormat.SHORT);
 	private static final DateFormat dateFormatDashesShortYear =
-
 			new SimpleDateFormat("MM-dd-yy");
-
 	
 	private static final DateFormat readableDateFormat =
-			new SimpleDateFormat("yyyy-MM-dd");
+			new SimpleDateFormat("MM-dd-yyyy");
 	
 	private static final DateFormat readableDateFormat24 = 
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss z");
 	
 	private static final DateFormat readableDateFormat24NoSecs = 
-		new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		new SimpleDateFormat("MM-dd-yyyy HH:mm");
 
 	private static final DateFormat readableDateFormat24Msec = 
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
 	
 	private static final DateFormat readableDateFormat24NoTimeZoneMsec = 
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS");
 	
 	private static final DateFormat readableDateFormat24NoTimeZoneNoMsec = 
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
 
 	private static final DateFormat timeFormat24 =
 			new SimpleDateFormat("HH:mm:ss z");
@@ -120,11 +118,11 @@ public class Time {
 	// Note that this one is not static. It is for when need to include
 	// timezone via a Time object.
 	private final DateFormat readableDateFormat24MsecForTimeZone =
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
 	private final DateFormat readableTimeFormatForTimeZone =
 			new SimpleDateFormat("HH:mm:ss");
 	private final DateFormat readableDateFormatForTimeZone =
-			new SimpleDateFormat("yyyy-MM-dd");
+			new SimpleDateFormat("MM-dd-yyyy");
 	
 	// So can output headings and such with a consistent number of decimal places
 	private static final DecimalFormat oneDigitFormat = new DecimalFormat("0.0");
@@ -444,7 +442,7 @@ public class Time {
 	
 	/**
 	 * Parses the dateStr and returns a Date object. Format of 
-	 * date is "yyyy-MM-dd".
+	 * date is "MM-dd-yyyy".
 	 * 
 	 * @param dateStr
 	 * @return
