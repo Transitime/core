@@ -306,7 +306,7 @@ public class Match implements Lifecycle, Serializable {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(projectId, true);
+		Session session = HibernateUtils.getSession(projectId, false);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
@@ -352,7 +352,7 @@ public class Match implements Lifecycle, Serializable {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(projectId, true);
+		Session session = HibernateUtils.getSession(projectId, false);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
