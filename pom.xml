@@ -8,12 +8,11 @@
   <name>transitclock</name>
   <url>http://www.transitime.org//</url>
   <modules>
-    <module>transitime</module>
-    <module>transitimeApi</module>
-    <module>transitimeWebapp</module>
-    <module>transitimeQuickStart</module>
+    <module>transitclock</module>
+    <module>transitclockApi</module>
+    <module>transitclockWebapp</module>
+    <module>transitclockQuickStart</module>
   </modules>
-
     <profiles>
         <profile>
             <id>skip-integration-tests</id>
@@ -24,11 +23,11 @@
         <profile>
             <id>include-integration-tests</id>
             <modules>
-                <module>transitime-integration</module>
-                <module>transitime</module>
-                <module>transitimeApi</module>
-                <module>transitimeWebapp</module>
-		            <module>transitimeQuickStart</module>
+                <module>transitclockIntegration</module>
+                <module>transitclock</module>
+                <module>transitclockApi</module>
+                <module>transitclockWebapp</module>
+		            <module>transitclockQuickStart</module>
             </modules>
         </profile>
     </profiles>
