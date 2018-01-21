@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>transitime</groupId>
-	<artifactId>transitimeQuickStart</artifactId>
-	<version>0.0.1-SNAPSHOT</version>	
-	<name>transitimeQuickStart</name>
+	<groupId>TheTransitClock</groupId>
+	<artifactId>transitclockQuickStart</artifactId>
+	<version>2.0.0-SNAPSHOT</version>	
+	<name>transitclockQuickStart</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<jettyVersion>9.4.0.M0</jettyVersion>
@@ -106,7 +106,7 @@
 							<outputFile>target/transitimeQuickStart.jar</outputFile>
 						</configuration>
 					</execution>
-				
+
         </executions>
       </plugin>
 			<plugin>
