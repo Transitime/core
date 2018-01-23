@@ -67,7 +67,10 @@ public class Zip {
 			String parentDirName = new File(zipFileName).getParent();
 			String directoryName = parentDirName;
 			if (subDirectory != null) {
-				directoryName += "/" + subDirectory;
+				if(subDirectory.startsWith(File.separator))
+					directoryName=subDirectory;
+				else	
+					directoryName += "/" + subDirectory;
 			}
 			
 			logger.info("Unzipping file {} into directory {}", 
