@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.transitime.config.IntegerConfigValue;
+import org.transitclock.config.IntegerConfigValue;
 
 /**
  * For making sure that use of API doesn't exceed limits. Intended to deal with

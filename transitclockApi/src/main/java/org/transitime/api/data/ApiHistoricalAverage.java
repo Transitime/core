@@ -20,7 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcHistoricalAverage;
+import org.transitclock.ipc.data.IpcHistoricalAverage;
 
 /**
  * Describes an historical average

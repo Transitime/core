@@ -24,7 +24,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcTripPattern;
+import org.transitclock.ipc.data.IpcTripPattern;
 
 /**
  * A list of ApiTripPattern objects

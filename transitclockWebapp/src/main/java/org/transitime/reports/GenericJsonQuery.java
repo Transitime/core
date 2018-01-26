@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.db.GenericQuery;
+import org.transitclock.db.GenericQuery;
 
 public class GenericJsonQuery extends GenericQuery {
 
@@ -42,7 +42,7 @@ public class GenericJsonQuery extends GenericQuery {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.transitime.db.GenericQuery#addColumn(java.lang.String, int)
+	 * @see org.transitclock.db.GenericQuery#addColumn(java.lang.String, int)
 	 */
 	@Override
 	protected void addColumn(String columnName, int type) {
@@ -67,7 +67,7 @@ public class GenericJsonQuery extends GenericQuery {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.transitime.db.GenericQuery#addRow(java.util.List)
+	 * @see org.transitclock.db.GenericQuery#addRow(java.util.List)
 	 */
 	@Override
 	protected void addRow(List<Object> values) {

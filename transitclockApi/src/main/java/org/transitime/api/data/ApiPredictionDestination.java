@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.ipc.data.IpcPrediction;
+import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
  * Contains list of predictions for a particular headsign.

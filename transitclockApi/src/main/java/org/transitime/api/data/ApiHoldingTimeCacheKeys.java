@@ -7,8 +7,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
-import org.transitime.ipc.data.IpcHoldingTimeCacheKey;
+import org.transitclock.ipc.data.IpcHistoricalAverageCacheKey;
+import org.transitclock.ipc.data.IpcHoldingTimeCacheKey;
 /**
  *
  * @author Sean Óg Crudden

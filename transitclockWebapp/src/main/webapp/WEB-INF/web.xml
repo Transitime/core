@@ -24,7 +24,7 @@
   
   <filter>
     <filter-name>XSSFilter</filter-name>
-    <filter-class>org.transitime.xssfilter.XSSFilter</filter-class>
+    <filter-class>org.transitclock.xssfilter.XSSFilter</filter-class>
   </filter> 
   <filter-mapping>
     <filter-name>XSSFilter</filter-name>
@@ -32,7 +32,7 @@
   </filter-mapping> 
   <filter>
     <filter-name>WebLoggingFilter</filter-name>
-    <filter-class>org.transitime.utils.web.WebLoggingFilter</filter-class>
+    <filter-class>org.transitclock.utils.web.WebLoggingFilter</filter-class>
   </filter> 
   <filter-mapping>
     <filter-name>WebLoggingFilter</filter-name>
@@ -41,7 +41,7 @@
 
     <listener>
         <listener-class>
-            org.transitime.web.ReadConfigListener
+            org.transitclock.web.ReadConfigListener
         </listener-class>
     </listener>
 

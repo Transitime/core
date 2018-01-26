@@ -24,8 +24,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcDirection;
-import org.transitime.ipc.data.IpcDirectionsForRoute;
+import org.transitclock.ipc.data.IpcDirection;
+import org.transitclock.ipc.data.IpcDirectionsForRoute;
 
 /**
  * A list of directions.

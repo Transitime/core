@@ -28,17 +28,14 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.holdingmethod.PredictionTimeComparator;
+import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
+import org.transitclock.ipc.data.IpcPrediction;
+import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.utils.IntervalTimer;
+import org.transitclock.utils.Time;
 import org.transitime.api.utils.AgencyTimezoneCache;
-
-import org.transitime.core.holdingmethod.PredictionTimeComparator;
-
-import org.transitime.config.IntegerConfigValue;
-
-import org.transitime.ipc.clients.PredictionsInterfaceFactory;
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
-import org.transitime.utils.IntervalTimer;
-import org.transitime.utils.Time;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;

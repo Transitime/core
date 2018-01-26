@@ -23,9 +23,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.utils.StringUtils;
+import org.transitclock.utils.Time;
 import org.transitime.reports.ChartJsonBuilder.RowBuilder;
-import org.transitime.utils.StringUtils;
-import org.transitime.utils.Time;
 
 /**
  * For generating the JSON data for a Google chart for showing percent of

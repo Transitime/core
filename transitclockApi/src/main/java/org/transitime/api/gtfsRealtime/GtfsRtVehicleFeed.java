@@ -25,11 +25,11 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.ipc.clients.VehiclesInterfaceFactory;
+import org.transitclock.ipc.data.IpcVehicleGtfsRealtime;
+import org.transitclock.ipc.interfaces.VehiclesInterface;
+import org.transitclock.utils.Time;
 import org.transitime.api.utils.AgencyTimezoneCache;
-import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.data.IpcVehicleGtfsRealtime;
-import org.transitime.ipc.interfaces.VehiclesInterface;
-import org.transitime.utils.Time;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;

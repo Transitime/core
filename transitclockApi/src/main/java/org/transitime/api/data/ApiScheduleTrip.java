@@ -18,7 +18,8 @@
 package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import org.transitime.ipc.data.IpcSchedTrip;
+
+import org.transitclock.ipc.data.IpcSchedTrip;
 
 /**
  * Represents a single trip for an ApiSchedule

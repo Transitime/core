@@ -19,7 +19,7 @@ package org.transitime.gui;
 import javax.swing.JProgressBar;
 import javax.swing.JTextPane;
 
-import org.transitime.db.webstructs.ApiKey;
+import org.transitclock.db.webstructs.ApiKey;
 import org.transitime.quickstart.resource.QuickStartException;
 
 public class TransitimeQuickStartThread implements Runnable{

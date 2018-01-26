@@ -39,15 +39,15 @@ import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.transitclock.db.GenericQuery;
+import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.MeasuredArrivalTime;
+import org.transitclock.db.structs.AvlReport.AssignmentType;
+import org.transitclock.ipc.data.IpcAvl;
+import org.transitclock.ipc.interfaces.CommandsInterface;
 import org.transitime.api.data.ApiCommandAck;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
-import org.transitime.db.GenericQuery;
-import org.transitime.db.structs.AvlReport;
-import org.transitime.db.structs.MeasuredArrivalTime;
-import org.transitime.db.structs.AvlReport.AssignmentType;
-import org.transitime.ipc.data.IpcAvl;
-import org.transitime.ipc.interfaces.CommandsInterface;
 
 @Path("/key/{key}/agency/{agency}")
 public class CommandsApi {

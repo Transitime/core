@@ -62,7 +62,7 @@ $(function() {
 </script>
 
 <%
-String currentDateStr = org.transitime.utils.Time.dateStr(new java.util.Date());
+String currentDateStr = org.transitclock.utils.Time.dateStr(new java.util.Date());
 %>
   
   <div class="param">

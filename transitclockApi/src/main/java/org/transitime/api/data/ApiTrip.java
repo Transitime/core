@@ -24,9 +24,9 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcSchedTimes;
-import org.transitime.ipc.data.IpcTrip;
-import org.transitime.utils.Time;
+import org.transitclock.ipc.data.IpcSchedTimes;
+import org.transitclock.ipc.data.IpcTrip;
+import org.transitclock.utils.Time;
 
 /**
  * Specifies how trip data is formatted for the API.

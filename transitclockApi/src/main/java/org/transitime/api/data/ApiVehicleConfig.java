@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.transitime.ipc.data.IpcVehicleConfig;
+import org.transitclock.ipc.data.IpcVehicleConfig;
 
 /**
  * Contains config data for single vehicle.

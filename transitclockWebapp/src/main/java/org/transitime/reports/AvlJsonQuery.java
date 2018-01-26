@@ -18,7 +18,7 @@ package org.transitime.reports;
 
 import java.text.ParseException;
 
-import org.transitime.utils.Time;
+import org.transitclock.utils.Time;
 
 /**
  * Does a query of AVL data and returns result in JSON format.

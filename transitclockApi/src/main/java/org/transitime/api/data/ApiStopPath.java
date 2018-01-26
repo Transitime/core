@@ -23,9 +23,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.db.structs.Location;
-import org.transitime.ipc.data.IpcStopPath;
-import org.transitime.utils.MathUtils;
+import org.transitclock.db.structs.Location;
+import org.transitclock.ipc.data.IpcStopPath;
+import org.transitclock.utils.MathUtils;
 
 /**
  * Represents a path from one stop to another.

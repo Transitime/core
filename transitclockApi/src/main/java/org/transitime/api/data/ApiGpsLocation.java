@@ -20,9 +20,9 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-import org.transitime.ipc.data.IpcVehicle;
-import org.transitime.utils.MathUtils;
-import org.transitime.utils.Time;
+import org.transitclock.ipc.data.IpcVehicle;
+import org.transitclock.utils.MathUtils;
+import org.transitclock.utils.Time;
 
 /**
  * Extends a location by including GPS information including time, speed,

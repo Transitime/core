@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transitime>
       <modules>
-        	<!-- <optionalModulesList>org.transitime.core.schedBasedPreds.SchedBasedPredsModule;org.transitime.avl.GtfsRealtimeModule</optionalModulesList> -->                            
-			<!-- <optionalModulesList>org.transitime.avl.NextBusAvlModule;org.transitime.core.predAccuracy.PredictionAccuracyModule</optionalModulesList> -->
-			<optionalModulesList>org.transitime.avl.PlaybackModule</optionalModulesList>  -->
- 			<!-- <optionalModulesList>org.transitime.avl.NextBusAvlModule</optionalModulesList> --> 
+        	<!-- <optionalModulesList>org.transitclock.core.schedBasedPreds.SchedBasedPredsModule;org.transitclock.avl.GtfsRealtimeModule</optionalModulesList> -->                            
+			<!-- <optionalModulesList>org.transitclock.avl.NextBusAvlModule;org.transitclock.core.predAccuracy.PredictionAccuracyModule</optionalModulesList> -->
+			<optionalModulesList>org.transitclock.avl.PlaybackModule</optionalModulesList>  -->
+ 			<!-- <optionalModulesList>org.transitclock.avl.NextBusAvlModule</optionalModulesList> --> 
     </modules>
     <holding>
      	<controlStops>4560595:6</controlStops>
@@ -17,9 +17,9 @@
 		<allowableLateSeconds>600</allowableLateSeconds>
     </autoBlockAssigner>
      <core>
-        <!--<predictionGeneratorClass>org.transitime.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl</predictionGeneratorClass>-->
-        <predictionGeneratorClass>org.transitime.core.predictiongenerator.average.frequency.HistoricalAveragePredictionGeneratorImpl</predictionGeneratorClass>
-        <headwayGeneratorClass>org.transitime.core.headwaygenerator.LastArrivalsHeadwayGenerator</headwayGeneratorClass>
+        <!--<predictionGeneratorClass>org.transitclock.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl</predictionGeneratorClass>-->
+        <predictionGeneratorClass>org.transitclock.core.predictiongenerator.average.frequency.HistoricalAveragePredictionGeneratorImpl</predictionGeneratorClass>
+        <headwayGeneratorClass>org.transitclock.core.headwaygenerator.LastArrivalsHeadwayGenerator</headwayGeneratorClass>
         <maxDistanceFromSegment>100</maxDistanceFromSegment>
         <storeTravelTimeStopPathPredictions>true</storeTravelTimeStopPathPredictions>
         <storeDwellTimeStopPathPredictions>true</storeDwellTimeStopPathPredictions>

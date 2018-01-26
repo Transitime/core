@@ -17,12 +17,13 @@
 package org.transitime.config;
 
 
-import junit.framework.TestCase;
+import org.transitclock.config.ConfigFileReader;
+import org.transitclock.config.ConfigFileReader.ConfigException;
+import org.transitclock.config.ConfigValue.ConfigParamException;
+import org.transitclock.db.webstructs.ApiKey;
+import org.transitclock.db.webstructs.ApiKeyManager;
 
-import org.transitime.config.ConfigFileReader.ConfigException;
-import org.transitime.config.ConfigValue.ConfigParamException;
-import org.transitime.db.webstructs.ApiKey;
-import org.transitime.db.webstructs.ApiKeyManager;
+import junit.framework.TestCase;
 
 /**
  * 

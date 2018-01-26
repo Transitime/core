@@ -20,7 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
 
-import org.transitime.monitoring.MonitorResult;
+import org.transitclock.monitoring.MonitorResult;
 
 /**
  *

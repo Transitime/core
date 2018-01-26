@@ -19,7 +19,7 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.utils.Time;
+import org.transitclock.utils.Time;
 
 /**
  * Represents a schedule time for a stop. Intended to be used for displaying a

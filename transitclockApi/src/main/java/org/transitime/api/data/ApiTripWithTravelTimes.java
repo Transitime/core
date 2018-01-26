@@ -20,7 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcTrip;
+import org.transitclock.ipc.data.IpcTrip;
 
 /**
  * Specifies how trip data along with travel times is formatted for the API.

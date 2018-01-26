@@ -23,7 +23,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcCalendar;
+import org.transitclock.ipc.data.IpcCalendar;
 
 /**
  * List of GTFS calendars

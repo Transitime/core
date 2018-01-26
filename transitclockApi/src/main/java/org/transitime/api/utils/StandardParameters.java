@@ -29,23 +29,23 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.transitime.db.webstructs.ApiKeyManager;
-import org.transitime.ipc.clients.CacheQueryInterfaceFactory;
-import org.transitime.ipc.clients.CommandsInterfaceFactory;
-import org.transitime.ipc.clients.ConfigInterfaceFactory;
-import org.transitime.ipc.clients.HoldingTimeInterfaceFactory;
-import org.transitime.ipc.clients.PredictionAnalysisInterfaceFactory;
-import org.transitime.ipc.clients.PredictionsInterfaceFactory;
-import org.transitime.ipc.clients.ServerStatusInterfaceFactory;
-import org.transitime.ipc.clients.VehiclesInterfaceFactory;
-import org.transitime.ipc.interfaces.CacheQueryInterface;
-import org.transitime.ipc.interfaces.CommandsInterface;
-import org.transitime.ipc.interfaces.ConfigInterface;
-import org.transitime.ipc.interfaces.HoldingTimeInterface;
-import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
-import org.transitime.ipc.interfaces.PredictionsInterface;
-import org.transitime.ipc.interfaces.ServerStatusInterface;
-import org.transitime.ipc.interfaces.VehiclesInterface;
+import org.transitclock.db.webstructs.ApiKeyManager;
+import org.transitclock.ipc.clients.CacheQueryInterfaceFactory;
+import org.transitclock.ipc.clients.CommandsInterfaceFactory;
+import org.transitclock.ipc.clients.ConfigInterfaceFactory;
+import org.transitclock.ipc.clients.HoldingTimeInterfaceFactory;
+import org.transitclock.ipc.clients.PredictionAnalysisInterfaceFactory;
+import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
+import org.transitclock.ipc.clients.ServerStatusInterfaceFactory;
+import org.transitclock.ipc.clients.VehiclesInterfaceFactory;
+import org.transitclock.ipc.interfaces.CacheQueryInterface;
+import org.transitclock.ipc.interfaces.CommandsInterface;
+import org.transitclock.ipc.interfaces.ConfigInterface;
+import org.transitclock.ipc.interfaces.HoldingTimeInterface;
+import org.transitclock.ipc.interfaces.PredictionAnalysisInterface;
+import org.transitclock.ipc.interfaces.PredictionsInterface;
+import org.transitclock.ipc.interfaces.ServerStatusInterface;
+import org.transitclock.ipc.interfaces.VehiclesInterface;
 
 /**
  * For getting the standard parameters from the URI used to access the feed.

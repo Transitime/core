@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.transitime.utils.StringUtils;
+import org.transitclock.utils.StringUtils;
 
 /**
  * For creating the JSON data string used to power a Google Chart via AJAX.

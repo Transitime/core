@@ -20,8 +20,8 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcTrip;
-import org.transitime.utils.Time;
+import org.transitclock.ipc.data.IpcTrip;
+import org.transitclock.utils.Time;
 
 /**
  * A shorter version of ApiTrip for when all the detailed info is not

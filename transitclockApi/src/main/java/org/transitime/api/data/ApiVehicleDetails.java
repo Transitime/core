@@ -25,10 +25,10 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.transitclock.core.BlockAssignmentMethod;
+import org.transitclock.ipc.data.IpcVehicle;
+import org.transitclock.utils.Time;
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
-import org.transitime.core.BlockAssignmentMethod;
-import org.transitime.ipc.data.IpcVehicle;
-import org.transitime.utils.Time;
 
 /**
  * Contains data for a single vehicle with additional info that is meant more

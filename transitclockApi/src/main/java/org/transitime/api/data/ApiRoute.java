@@ -19,7 +19,7 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitclock.ipc.data.IpcRouteSummary;
 
 /**
  * A short description of a route. For when outputting list of routes for

@@ -23,8 +23,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.db.structs.Location;
-import org.transitime.ipc.data.IpcShape;
+import org.transitclock.db.structs.Location;
+import org.transitclock.ipc.data.IpcShape;
 
 /**
  * A portion of a shape that defines a trip pattern. A List of ApiLocation

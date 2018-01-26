@@ -32,6 +32,14 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.transitclock.db.structs.Agency;
+import org.transitclock.db.structs.Location;
+import org.transitclock.db.webstructs.WebAgency;
+import org.transitclock.ipc.clients.ConfigInterfaceFactory;
+import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
+import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.ipc.interfaces.ConfigInterface;
+import org.transitclock.ipc.interfaces.PredictionsInterface;
 import org.transitime.api.data.ApiAgencies;
 import org.transitime.api.data.ApiAgency;
 import org.transitime.api.data.ApiNearbyPredictionsForAgencies;
@@ -39,14 +47,6 @@ import org.transitime.api.data.ApiPredictions;
 import org.transitime.api.predsByLoc.PredsByLoc;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
-import org.transitime.db.structs.Agency;
-import org.transitime.db.structs.Location;
-import org.transitime.db.webstructs.WebAgency;
-import org.transitime.ipc.clients.ConfigInterfaceFactory;
-import org.transitime.ipc.clients.PredictionsInterfaceFactory;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
-import org.transitime.ipc.interfaces.ConfigInterface;
-import org.transitime.ipc.interfaces.PredictionsInterface;
 
 /**
  * Contains the API commands for the Transitime API for system wide commands,

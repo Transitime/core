@@ -30,9 +30,9 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.db.GenericQuery;
-import org.transitime.db.webstructs.WebAgency;
-import org.transitime.utils.Time;
+import org.transitclock.db.GenericQuery;
+import org.transitclock.db.webstructs.WebAgency;
+import org.transitclock.utils.Time;
 
 /**
  * For doing SQL query and generating JSON data for a prediction accuracy chart.

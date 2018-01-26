@@ -25,8 +25,8 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.transitclock.ipc.data.IpcVehicle;
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
-import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * For when have list of Vehicles. By using this class can control the element

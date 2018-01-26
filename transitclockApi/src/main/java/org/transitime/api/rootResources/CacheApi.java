@@ -32,6 +32,16 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.ipc.data.IpcHistoricalAverage;
+import org.transitclock.ipc.data.IpcHistoricalAverageCacheKey;
+import org.transitclock.ipc.data.IpcHoldingTime;
+import org.transitclock.ipc.data.IpcHoldingTimeCacheKey;
+import org.transitclock.ipc.data.IpcKalmanErrorCacheKey;
+import org.transitclock.ipc.data.IpcPredictionForStopPath;
+import org.transitclock.ipc.interfaces.CacheQueryInterface;
+import org.transitclock.ipc.interfaces.HoldingTimeInterface;
+import org.transitclock.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitime.api.data.ApiArrivalDepartures;
 import org.transitime.api.data.ApiCacheDetails;
 import org.transitime.api.data.ApiHistoricalAverage;
@@ -42,16 +52,6 @@ import org.transitime.api.data.ApiKalmanErrorCacheKeys;
 import org.transitime.api.data.ApiPredictionsForStopPath;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
-import org.transitime.ipc.data.IpcArrivalDeparture;
-import org.transitime.ipc.data.IpcPredictionForStopPath;
-import org.transitime.ipc.data.IpcHistoricalAverage;
-import org.transitime.ipc.data.IpcHistoricalAverageCacheKey;
-import org.transitime.ipc.data.IpcHoldingTime;
-import org.transitime.ipc.data.IpcHoldingTimeCacheKey;
-import org.transitime.ipc.data.IpcKalmanErrorCacheKey;
-import org.transitime.ipc.interfaces.CacheQueryInterface;
-import org.transitime.ipc.interfaces.HoldingTimeInterface;
-import org.transitime.ipc.interfaces.PredictionAnalysisInterface;
 
 /**
  * Contains the API commands for the Transitime API for getting info on data that is cached.

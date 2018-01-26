@@ -26,11 +26,11 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.transitclock.db.structs.Agency;
+import org.transitclock.db.webstructs.WebAgency;
+import org.transitclock.ipc.data.IpcVehicle;
+import org.transitclock.utils.Time;
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
-import org.transitime.db.structs.Agency;
-import org.transitime.db.webstructs.WebAgency;
-import org.transitime.ipc.data.IpcVehicle;
-import org.transitime.utils.Time;
 
 /**
  * For when have list of VehicleDetails. By using this class can control the

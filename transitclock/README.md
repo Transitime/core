@@ -21,7 +21,7 @@ The steps to set up the system are
 </ul>
 	
 
-generateDatabaseSchema.jar -- Main class: org.transitime.applications.SchemaGenerator
+generateDatabaseSchema.jar -- Main class: org.transitclock.applications.SchemaGenerator
 =================================
 ISSUE: skip to ISSUE below for the moment as there is a classloader issue when using onejar.
 <br/>
@@ -42,13 +42,13 @@ usage:
 
 ```
 example:
-	java -jar generateDatabaseSchema.jar -o c:\temp\ -p org.transitime.db.structs	
+	java -jar generateDatabaseSchema.jar -o c:\temp\ -p org.transitclock.db.structs	
 ```
 To create all tables require you to support the core and the webapp you could run
 
 ```
-	java -jar generateDatabaseSchema.jar -o c:\temp\core\ -p org.transitime.db.structs
-	java -jar generateDatabaseSchema.jar -o c:\temp\web\ -p org.transitime.db.webstructs
+	java -jar generateDatabaseSchema.jar -o c:\temp\core\ -p org.transitclock.db.structs
+	java -jar generateDatabaseSchema.jar -o c:\temp\web\ -p org.transitclock.db.webstructs
 ```
 
 Once these commands have been run you should run the sql created in the files in the core and web directory in your database.
@@ -57,11 +57,11 @@ ISSUE: This works in eclipse by executing the class but not on command line usin
 
 The following will can be run from the transitime directory under core and will place the required SQL in the target directory.
 ```
-mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitime.db.structs"
-mvn exec:java -Dexec.mainClass="org.transitime.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitime.db.webstructs"
+mvn exec:java -Dexec.mainClass="org.transitclock.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitclock.db.structs"
+mvn exec:java -Dexec.mainClass="org.transitclock.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitclock.db.webstructs"
 ````
 
-processGTFSFile.jar -- Main class: org.transitime.applications.GTFSFileProcessor
+processGTFSFile.jar -- Main class: org.transitclock.applications.GTFSFileProcessor
 =================================    
 This class the usage can be got from specifying the -h option on its own.
 

@@ -23,8 +23,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcDirection;
-import org.transitime.ipc.data.IpcStop;
+import org.transitclock.ipc.data.IpcDirection;
+import org.transitclock.ipc.data.IpcStop;
 
 /**
  * A single direction, containing stops

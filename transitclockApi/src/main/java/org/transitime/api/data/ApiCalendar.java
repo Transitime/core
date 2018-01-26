@@ -19,7 +19,7 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.IpcCalendar;
+import org.transitclock.ipc.data.IpcCalendar;
 
 /**
  * A GTFS calendar

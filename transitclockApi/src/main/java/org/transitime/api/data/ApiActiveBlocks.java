@@ -27,7 +27,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcActiveBlock;
+import org.transitclock.ipc.data.IpcActiveBlock;
 
 /**
  * Collection of ActiveBlocks

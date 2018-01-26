@@ -19,9 +19,9 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.utils.Geo;
-import org.transitime.utils.MathUtils;
-import org.transitime.utils.Time;
+import org.transitclock.utils.Geo;
+import org.transitclock.utils.MathUtils;
+import org.transitclock.utils.Time;
 
 /**
  * For representing travel time for a single segment.

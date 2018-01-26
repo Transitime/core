@@ -20,8 +20,8 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.transitclock.ipc.data.IpcVehicle;
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
-import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * Contains the data for a single vehicle.

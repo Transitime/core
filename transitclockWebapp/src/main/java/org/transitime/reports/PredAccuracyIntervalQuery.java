@@ -24,8 +24,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.statistics.Statistics;
 import org.transitime.reports.ChartJsonBuilder.RowBuilder;
-import org.transitime.statistics.Statistics;
 
 /**
  * For doing SQL query and generating JSON data for a prediction accuracy

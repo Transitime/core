@@ -19,8 +19,8 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.db.structs.Extent;
-import org.transitime.utils.MathUtils;
+import org.transitclock.db.structs.Extent;
+import org.transitclock.utils.MathUtils;
 
 /**
  * Describes the extent of a route or agency via a min & max lat & lon.

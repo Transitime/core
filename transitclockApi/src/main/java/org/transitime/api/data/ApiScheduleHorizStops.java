@@ -22,9 +22,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcSchedule;
-import org.transitime.ipc.data.IpcSchedTime;
-import org.transitime.ipc.data.IpcSchedTrip;
+import org.transitclock.ipc.data.IpcSchedTime;
+import org.transitclock.ipc.data.IpcSchedTrip;
+import org.transitclock.ipc.data.IpcSchedule;
 
 /**
  * Represents a schedule for a route for a specific direction and service class.

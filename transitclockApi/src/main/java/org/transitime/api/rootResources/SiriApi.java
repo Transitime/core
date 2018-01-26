@@ -31,15 +31,15 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.transitclock.ipc.data.IpcPrediction;
+import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.ipc.data.IpcVehicleComplete;
+import org.transitclock.ipc.interfaces.PredictionsInterface;
+import org.transitclock.ipc.interfaces.VehiclesInterface;
 import org.transitime.api.data.siri.SiriStopMonitoring;
 import org.transitime.api.data.siri.SiriVehiclesMonitoring;
 import org.transitime.api.utils.StandardParameters;
 import org.transitime.api.utils.WebUtils;
-import org.transitime.ipc.data.IpcVehicleComplete;
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
-import org.transitime.ipc.interfaces.PredictionsInterface;
-import org.transitime.ipc.interfaces.VehiclesInterface;
 
 /**
  * The Siri API

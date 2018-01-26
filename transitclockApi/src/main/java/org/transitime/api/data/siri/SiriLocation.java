@@ -19,7 +19,7 @@ package org.transitime.api.data.siri;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.utils.Geo;
+import org.transitclock.utils.Geo;
 
 /**
  * Location object for SIRI

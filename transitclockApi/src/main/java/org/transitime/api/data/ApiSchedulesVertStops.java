@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcSchedule;
+import org.transitclock.ipc.data.IpcSchedule;
 
 /**
  * Represents a collection of ApiScheduleVertStops objects for a route. There is

@@ -20,7 +20,7 @@ package org.transitime.api.gtfsRealtime;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.transitime.utils.Time;
+import org.transitclock.utils.Time;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 

@@ -1,5 +1,5 @@
-<%@ page import="org.transitime.reports.PredAccuracyRangeQuery" %>
-<%@ page import="org.transitime.utils.Time" %>
+<%@ page import="org.transitclock.reports.PredAccuracyRangeQuery" %>
+<%@ page import="org.transitclock.utils.Time" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.text.ParseException" %>
 

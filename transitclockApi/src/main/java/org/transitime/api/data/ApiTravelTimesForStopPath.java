@@ -23,9 +23,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.db.structs.TravelTimesForStopPath;
-import org.transitime.db.structs.TravelTimesForStopPath.HowSet;
-import org.transitime.utils.MathUtils;
+import org.transitclock.db.structs.TravelTimesForStopPath;
+import org.transitclock.db.structs.TravelTimesForStopPath.HowSet;
+import org.transitclock.utils.MathUtils;
 
 /**
  * Represents travel times for a stop path

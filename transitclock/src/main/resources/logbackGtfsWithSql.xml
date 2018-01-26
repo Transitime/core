@@ -55,7 +55,7 @@
   <!-- Special appender so that can log errors and warnings so they can be
        output at end of GTFS processing in a nice coherent way.
    -->
-  <appender name="GTFS_CUSTOM_APPENDER" class="org.transitime.gtfs.GtfsLoggingAppender">
+  <appender name="GTFS_CUSTOM_APPENDER" class="org.transitclock.gtfs.GtfsLoggingAppender">
   </appender>
   
   <!--======================================================-->
@@ -66,27 +66,27 @@
        level is specified for each class. 
     -->
 
-  <logger name="org.transitime" 
+  <logger name="org.transitclock" 
           level="info" additivity="true">
     <appender-ref ref="GTFS_CUSTOM_APPENDER" />
   </logger>
 
-  <logger name="org.transitime.config"
+  <logger name="org.transitclock.config"
           level="info" additivity="false">
     <appender-ref ref="CONFIG" />
   </logger>
 
-  <logger name="org.transitime.gtfs.PathProcessor" 
+  <logger name="org.transitclock.gtfs.PathProcessor" 
           level="info" additivity="true">
     <appender-ref ref="GTFS_CUSTOM_APPENDER" />
   </logger>
 
-  <logger name="org.transitime.gtfs.DbWriter" 
+  <logger name="org.transitclock.gtfs.DbWriter" 
           level="debug" additivity="true">
     <appender-ref ref="GTFS_CUSTOM_APPENDER" />
   </logger>
 
-  <logger name="org.transitime.gtfs.DbConfig" 
+  <logger name="org.transitclock.gtfs.DbConfig" 
           level="debug" additivity="true">
     <appender-ref ref="GTFS_CUSTOM_APPENDER" />
   </logger>

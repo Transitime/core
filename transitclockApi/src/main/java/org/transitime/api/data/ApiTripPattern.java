@@ -23,8 +23,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcStopPath;
-import org.transitime.ipc.data.IpcTripPattern;
+import org.transitclock.ipc.data.IpcStopPath;
+import org.transitclock.ipc.data.IpcTripPattern;
 
 /**
  * A single trip pattern

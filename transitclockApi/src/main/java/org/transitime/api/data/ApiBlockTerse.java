@@ -22,10 +22,10 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcBlock;
-import org.transitime.ipc.data.IpcRouteSummary;
-import org.transitime.ipc.data.IpcTrip;
-import org.transitime.utils.Time;
+import org.transitclock.ipc.data.IpcBlock;
+import org.transitclock.ipc.data.IpcRouteSummary;
+import org.transitclock.ipc.data.IpcTrip;
+import org.transitclock.utils.Time;
 
 /**
  * Describes a block in terse form, without schedule and trip pattern info

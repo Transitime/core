@@ -17,7 +17,7 @@
 
 package org.transitime.api.data;
 
-import org.transitime.db.structs.Location;
+import org.transitclock.db.structs.Location;
 
 /**
  * A simple latitude/longitude.

@@ -23,9 +23,9 @@ import junit.framework.TestCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.ConfigFileReader;
-import org.transitime.configData.DbSetupConfig;
-import org.transitime.db.structs.AvlReport;
+import org.transitclock.config.ConfigFileReader;
+import org.transitclock.configData.DbSetupConfig;
+import org.transitclock.db.structs.AvlReport;
 
 /**
  * 

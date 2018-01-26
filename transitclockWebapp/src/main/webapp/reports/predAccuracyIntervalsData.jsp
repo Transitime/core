@@ -1,5 +1,5 @@
-<%@ page import="org.transitime.reports.PredictionAccuracyQuery.IntervalsType" %>
-<%@ page import="org.transitime.reports.PredAccuracyIntervalQuery" %>
+<%@ page import="org.transitclock.reports.PredictionAccuracyQuery.IntervalsType" %>
+<%@ page import="org.transitclock.reports.PredAccuracyIntervalQuery" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.text.ParseException" %>
 

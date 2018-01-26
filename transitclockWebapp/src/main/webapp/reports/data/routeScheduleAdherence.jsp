@@ -1,4 +1,4 @@
-<%@ page import="org.transitime.reports.ScheduleAdherenceController" %>
+<%@ page import="org.transitclock.reports.ScheduleAdherenceController" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="java.util.Arrays" %>

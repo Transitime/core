@@ -20,8 +20,8 @@ import java.text.ParseException;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.transitime.db.webstructs.WebAgency;
-import org.transitime.utils.Time;
+import org.transitclock.db.webstructs.WebAgency;
+import org.transitclock.utils.Time;
 
 /**
  * SQL utilities for creating SQL statements using parameters passed in to a

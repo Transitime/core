@@ -8,19 +8,19 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.applications.Core;
-import org.transitime.applications.UpdateTravelTimes;
-import org.transitime.avl.BatchCsvAvlFeedModule;
-import org.transitime.avl.BatchCsvAvlFeedModule.AvlPostProcessor;
-import org.transitime.config.ConfigFileReader;
-import org.transitime.configData.AgencyConfig;
-import org.transitime.core.dataCache.PredictionDataCache;
-import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.gtfs.GtfsData;
-import org.transitime.gtfs.TitleFormatter;
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
-import org.transitime.utils.Time;
+import org.transitclock.applications.Core;
+import org.transitclock.applications.UpdateTravelTimes;
+import org.transitclock.avl.BatchCsvAvlFeedModule;
+import org.transitclock.avl.BatchCsvAvlFeedModule.AvlPostProcessor;
+import org.transitclock.config.ConfigFileReader;
+import org.transitclock.configData.AgencyConfig;
+import org.transitclock.core.dataCache.PredictionDataCache;
+import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.gtfs.GtfsData;
+import org.transitclock.gtfs.TitleFormatter;
+import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.utils.Time;
 
 
 /*

@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcPredictionsForRouteStopDest;
-import org.transitime.utils.MathUtils;
+import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.utils.MathUtils;
 
 /**
  * List of ApiPredictionDestination objects along with supporting information.

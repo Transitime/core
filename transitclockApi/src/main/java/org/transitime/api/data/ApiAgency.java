@@ -22,7 +22,7 @@ import java.util.TimeZone;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.db.structs.Agency;
+import org.transitclock.db.structs.Agency;
 
 /**
  * Contains API info for an agency.

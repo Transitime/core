@@ -22,11 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.transitime.db.structs.Agency;
-import org.transitime.db.structs.Extent;
-import org.transitime.db.structs.Location;
-import org.transitime.db.webstructs.WebAgency;
-import org.transitime.utils.Time;
+import org.transitclock.db.structs.Agency;
+import org.transitclock.db.structs.Extent;
+import org.transitclock.db.structs.Location;
+import org.transitclock.db.webstructs.WebAgency;
+import org.transitclock.utils.Time;
 
 /**
  * For determining predictions by location for when agency is not specified so

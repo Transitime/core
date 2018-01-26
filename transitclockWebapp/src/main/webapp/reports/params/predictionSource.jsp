@@ -1,4 +1,4 @@
-<%@ page import="org.transitime.reports.ReportsConfig" %>
+<%@ page import="org.transitclock.reports.ReportsConfig" %>
 <div class="param" 
 <%
 if(!ReportsConfig.isShowPredictionSource()) {

@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.rmi.RmiCallInvocationHandler;
+import org.transitclock.ipc.rmi.RmiCallInvocationHandler;
 
 /**
  *

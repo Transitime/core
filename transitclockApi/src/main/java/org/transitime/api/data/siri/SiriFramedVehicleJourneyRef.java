@@ -22,7 +22,7 @@ import java.util.Date;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcVehicle;
+import org.transitclock.ipc.data.IpcVehicle;
 
 /**
  * Describes the trip

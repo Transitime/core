@@ -22,8 +22,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcSchedTime;
-import org.transitime.ipc.data.IpcSchedTrip;
+import org.transitclock.ipc.data.IpcSchedTime;
+import org.transitclock.ipc.data.IpcSchedTrip;
 
 /**
  * Contains the schedule times for a trip. For when outputting stops

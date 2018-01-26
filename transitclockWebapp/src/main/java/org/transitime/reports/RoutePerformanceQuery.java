@@ -33,8 +33,8 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.db.structs.PredictionAccuracy;
+import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.structs.PredictionAccuracy;
 
 /**
  * To find route performance information.

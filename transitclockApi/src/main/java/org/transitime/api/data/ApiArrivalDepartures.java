@@ -25,8 +25,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcArrivalDeparture;
-import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.ipc.data.IpcRouteSummary;
 
 /**
  * An ordered list of routes.

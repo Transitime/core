@@ -19,8 +19,8 @@ package org.transitime.api.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import org.transitime.ipc.data.IpcSchedTimes;
-import org.transitime.utils.Time;
+import org.transitclock.ipc.data.IpcSchedTimes;
+import org.transitclock.utils.Time;
 
 /**
  * Represents a schedule time for a stop. Contains both arrival and departure

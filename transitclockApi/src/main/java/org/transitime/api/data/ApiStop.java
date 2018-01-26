@@ -20,7 +20,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-import org.transitime.ipc.data.IpcStop;
+import org.transitclock.ipc.data.IpcStop;
 
 /**
  * Full description of a stop.

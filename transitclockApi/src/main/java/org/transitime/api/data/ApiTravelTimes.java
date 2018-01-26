@@ -23,8 +23,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.db.structs.TravelTimesForStopPath;
-import org.transitime.db.structs.TravelTimesForTrip;
+import org.transitclock.db.structs.TravelTimesForStopPath;
+import org.transitclock.db.structs.TravelTimesForTrip;
 
 /**
  *

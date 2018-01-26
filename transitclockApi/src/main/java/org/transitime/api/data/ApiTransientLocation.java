@@ -20,8 +20,8 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.transitime.utils.ChinaGpsOffset;
-import org.transitime.utils.MathUtils;
+import org.transitclock.utils.ChinaGpsOffset;
+import org.transitclock.utils.MathUtils;
 
 /**
  * A simple latitude/longitude:

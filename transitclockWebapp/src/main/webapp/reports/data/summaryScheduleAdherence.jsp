@@ -1,5 +1,5 @@
-<%@ page import="org.transitime.reports.ScheduleAdherenceController" %>
-<%@ page import="org.transitime.utils.Time" %>
+<%@ page import="org.transitclock.reports.ScheduleAdherenceController" %>
+<%@ page import="org.transitclock.utils.Time" %>
 <%@ page import="java.sql.Timestamp" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Date" %>

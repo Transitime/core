@@ -17,7 +17,7 @@
 
 package org.transitime.reports;
 
-import org.transitime.config.BooleanConfigValue;
+import org.transitclock.config.BooleanConfigValue;
 
 public class ReportsConfig {
 	

@@ -35,11 +35,11 @@ import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.BooleanConfigValue;
-import org.transitime.config.IntegerConfigValue;
-import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.utils.Time;
+import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.utils.Time;
 
 public class ScheduleAdherenceController {
 	 

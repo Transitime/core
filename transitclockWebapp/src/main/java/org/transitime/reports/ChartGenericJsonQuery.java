@@ -17,7 +17,7 @@
 
 package org.transitime.reports;
 
-import org.transitime.db.GenericQuery;
+import org.transitclock.db.GenericQuery;
 import org.transitime.reports.ChartJsonBuilder.RowBuilder;
 
 import java.sql.SQLException;
@@ -48,7 +48,7 @@ public class ChartGenericJsonQuery extends GenericQuery {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.transitime.db.GenericQuery#addColumn(java.lang.String, int)
+	 * @see org.transitclock.db.GenericQuery#addColumn(java.lang.String, int)
 	 */
 	@Override
 	protected void addColumn(String columnName, int type) {
@@ -66,7 +66,7 @@ public class ChartGenericJsonQuery extends GenericQuery {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.transitime.db.GenericQuery#addRow(java.util.List)
+	 * @see org.transitclock.db.GenericQuery#addRow(java.util.List)
 	 */
 	@Override
 	protected void addRow(List<Object> values) {

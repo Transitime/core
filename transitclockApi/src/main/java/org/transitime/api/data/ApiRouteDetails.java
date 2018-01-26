@@ -23,11 +23,11 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.db.structs.Location;
-import org.transitime.ipc.data.IpcDirection;
-import org.transitime.ipc.data.IpcRoute;
-import org.transitime.ipc.data.IpcShape;
-import org.transitime.ipc.data.IpcDirectionsForRoute;
+import org.transitclock.db.structs.Location;
+import org.transitclock.ipc.data.IpcDirection;
+import org.transitclock.ipc.data.IpcDirectionsForRoute;
+import org.transitclock.ipc.data.IpcRoute;
+import org.transitclock.ipc.data.IpcShape;
 
 /**
  * Provides detailed information for a route include stops and shape info.

@@ -21,8 +21,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import org.transitclock.ipc.data.IpcVehicle;
 import org.transitime.api.rootResources.TransitimeApi.UiMode;
-import org.transitime.ipc.data.IpcVehicle;
 
 /**
  * This class exists so that can have multiple subclasses that inherent from

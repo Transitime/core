@@ -24,9 +24,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.db.structs.Agency;
-import org.transitime.ipc.data.IpcRoute;
-import org.transitime.ipc.data.IpcRouteSummary;
+import org.transitclock.db.structs.Agency;
+import org.transitclock.ipc.data.IpcRoute;
+import org.transitclock.ipc.data.IpcRouteSummary;
 
 /**
  * An ordered list of routes.

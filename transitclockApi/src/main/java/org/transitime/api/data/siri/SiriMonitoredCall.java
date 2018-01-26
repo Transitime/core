@@ -22,9 +22,9 @@ import java.util.Date;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.ipc.data.IpcVehicleComplete;
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.utils.StringUtils;
+import org.transitclock.ipc.data.IpcPrediction;
+import org.transitclock.ipc.data.IpcVehicleComplete;
+import org.transitclock.utils.StringUtils;
 
 /**
  * For SIRI MonitorCall element.

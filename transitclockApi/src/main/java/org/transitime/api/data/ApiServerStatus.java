@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcServerStatus;
-import org.transitime.monitoring.MonitorResult;
+import org.transitclock.ipc.data.IpcServerStatus;
+import org.transitclock.monitoring.MonitorResult;
 
 /**
  * Server status for an agency server

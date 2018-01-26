@@ -3,7 +3,7 @@ package org.transitime.api.data;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcHoldingTimeCacheKey;
+import org.transitclock.ipc.data.IpcHoldingTimeCacheKey;
 
 @XmlRootElement(name = "HoldingTimeCacheKey")
 public class ApiHoldingTimeCacheKey {

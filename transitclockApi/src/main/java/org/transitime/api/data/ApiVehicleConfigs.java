@@ -26,7 +26,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcVehicleConfig;
+import org.transitclock.ipc.data.IpcVehicleConfig;
 
 /**
  * For when have collection of ApiVehicleConfig

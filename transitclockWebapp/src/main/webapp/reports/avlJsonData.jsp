@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="application/json; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="org.transitime.reports.AvlJsonQuery" %>
+<%@ page import="org.transitclock.reports.AvlJsonQuery" %>
 <%
 // Get the params
 String agencyId = request.getParameter("a");

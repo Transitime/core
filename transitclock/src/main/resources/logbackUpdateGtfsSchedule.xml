@@ -82,7 +82,7 @@
     <appender-ref ref="SQL" />
   </logger>
 
-  <logger name="org.transitime.config"
+  <logger name="org.transitclock.config"
           level="info" additivity="false">
     <appender-ref ref="CONFIG" />
   </logger>
@@ -91,14 +91,14 @@
        level to debug for the root because then get a huge number
        of unuseful Hibernate messages.
     -->
-  <logger name="org.transitime" level="debug" additivity="false">
+  <logger name="org.transitclock" level="debug" additivity="false">
     <appender-ref ref="CORE" />
   </logger>
 
   <!-- There are some Transitime classes don't want debug info for
        since that would just be too verbose.
     -->
-  <logger name="org.transitime.db.hibernate.HibernateUtils" level="info" 
+  <logger name="org.transitclock.db.hibernate.HibernateUtils" level="info" 
    additivity="false">
     <appender-ref ref="CORE" />
   </logger>

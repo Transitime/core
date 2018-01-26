@@ -30,9 +30,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import org.transitclock.ipc.data.IpcVehicleComplete;
+import org.transitclock.utils.Time;
 import org.transitime.api.utils.AgencyTimezoneCache;
-import org.transitime.ipc.data.IpcVehicleComplete;
-import org.transitime.utils.Time;
 
 /**
  * Top level XML element for SIRI VehicleMonitoring command.

@@ -24,9 +24,9 @@ import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.db.structs.Agency;
-import org.transitime.ipc.clients.ConfigInterfaceFactory;
-import org.transitime.ipc.interfaces.ConfigInterface;
+import org.transitclock.db.structs.Agency;
+import org.transitclock.ipc.clients.ConfigInterfaceFactory;
+import org.transitclock.ipc.interfaces.ConfigInterface;
 
 /**
  * So that can get quick access to TimeZone for agency so that can properly

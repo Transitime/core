@@ -31,10 +31,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.transitime.api.utils.StandardParameters;
-import org.transitime.config.IntegerConfigValue;
+import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.feed.gtfsRt.OctalDecoder;
 import org.transitime.api.gtfsRealtime.GtfsRtTripFeed;
 import org.transitime.api.gtfsRealtime.GtfsRtVehicleFeed;
-import org.transitime.feed.gtfsRt.OctalDecoder;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 

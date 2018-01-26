@@ -25,11 +25,11 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.transitime.db.webstructs.WebAgency;
-import org.transitime.ipc.data.IpcActiveBlock;
-import org.transitime.ipc.data.IpcTrip;
-import org.transitime.ipc.data.IpcVehicle;
-import org.transitime.utils.Time;
+import org.transitclock.db.webstructs.WebAgency;
+import org.transitclock.ipc.data.IpcActiveBlock;
+import org.transitclock.ipc.data.IpcTrip;
+import org.transitclock.ipc.data.IpcVehicle;
+import org.transitclock.utils.Time;
 
 /**
  *

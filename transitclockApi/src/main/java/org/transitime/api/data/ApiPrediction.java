@@ -17,11 +17,11 @@
 
 package org.transitime.api.data;
 
-import org.transitime.ipc.data.IpcPrediction;
-import org.transitime.utils.Time;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.transitclock.ipc.data.IpcPrediction;
+import org.transitclock.utils.Time;
 
 /**
  * Contains data for a single prediction.

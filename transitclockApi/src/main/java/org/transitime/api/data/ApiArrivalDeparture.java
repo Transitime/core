@@ -6,7 +6,7 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcArrivalDeparture;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 @XmlRootElement(name = "arrivaldeparture")
 public class ApiArrivalDeparture {

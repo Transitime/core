@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.transitime.ipc.data.IpcSchedule;
+import org.transitclock.ipc.data.IpcSchedule;
 
 @XmlRootElement(name = "schedules")
 public class ApiSchedulesHorizStops {
