@@ -3,8 +3,8 @@ package org.transitime.integration_tests;
 import org.junit.Test;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.ipc.data.IpcVehicleComplete;
+import org.transitclock.playback.PlaybackModule;
 import org.transitclock.utils.Time;
-import org.transitime.playback.PlaybackModule;
 
 import junit.framework.TestCase;
 

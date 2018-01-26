@@ -11,7 +11,7 @@ import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Trip;
-import org.transitime.playback.PlaybackModule;
+import org.transitclock.playback.PlaybackModule;
 
 import junit.framework.TestCase;
 

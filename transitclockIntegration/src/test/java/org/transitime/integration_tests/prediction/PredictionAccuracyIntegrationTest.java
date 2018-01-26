@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Prediction;
+import org.transitclock.playback.PlaybackModule;
 import org.transitclock.utils.Time;
-import org.transitime.playback.PlaybackModule;
 
 import java.io.FileReader;
 import java.io.Reader;
