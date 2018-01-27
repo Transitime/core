@@ -9,8 +9,7 @@
 		<param-name>transitime_config_file_location</param-name>
 		<!-- Set to customized properties file with db config info and such -->
 		
-		<!-- <param-value>C:\\cygwin64\\home\\SeanOg\\workspace\\transitime-historical\\core\\transitimeWebapp\\src\\main\\resources\\transiTimeConfig.xml</param-value> -->
-		<param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>  
+		<param-value>/usr/local/transitclock/config/transitclockConfig.xml</param-value>  
 					
 	</context-param>
 
