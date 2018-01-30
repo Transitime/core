@@ -1,8 +1,8 @@
-<%@page import="org.transitime.db.webstructs.WebAgency"%>
+<%@page import="org.transitclock.db.webstructs.WebAgency"%>
 <%@page import="java.rmi.RemoteException"%>
-<%@page import="org.transitime.ipc.interfaces.ServerStatusInterface"%>
-<%@page import="org.transitime.ipc.clients.ServerStatusInterfaceFactory"%>
-<%@page import="org.transitime.monitoring.*"%>
+<%@page import="org.transitclock.ipc.interfaces.ServerStatusInterface"%>
+<%@page import="org.transitclock.ipc.clients.ServerStatusInterfaceFactory"%>
+<%@page import="org.transitclock.monitoring.*"%>
 <%@page import="java.util.List"%>
 
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
@@ -35,7 +35,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 
 <%
 ServerStatusInterface serverStatusInterface = 
-org.transitime.ipc.clients.ServerStatusInterfaceFactory.get(agencyId);
+org.transitclock.ipc.clients.ServerStatusInterfaceFactory.get(agencyId);
 try {
   List<MonitorResult> monitorResults = serverStatusInterface.get().getMonitorResults();
   for (MonitorResult monitorResult : monitorResults) {

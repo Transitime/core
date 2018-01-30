@@ -19,7 +19,7 @@
 
   <!-- Don't need all the config params to be logged -->
   <!--
-  <logger name="org.transitime.config"
+  <logger name="org.transitclock.config"
           level="warn" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>

@@ -158,9 +158,9 @@ function routeConfigCallback(data, status) {
   
 // Data in vehicles will be available as CSV when you click the `export' link.
 // CSV should be the AVL CSV format used elsewhere in Transitime.
-// org.transitime.avl.AvlCsvWriter writes the following header:
+// org.transitclock.avl.AvlCsvWriter writes the following header:
 // vehicleId,time,justTime,latitude,longitude,speed,heading,assignmentId,assignmentType
-// org.transitime.avl.AvlCsvRecord has required keys vehicleId, time, latitude, longitude
+// org.transitclock.avl.AvlCsvRecord has required keys vehicleId, time, latitude, longitude
 // all others optional
 function createExport(vehicles) {
 	

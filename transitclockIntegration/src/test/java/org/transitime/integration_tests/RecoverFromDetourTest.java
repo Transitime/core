@@ -1,10 +1,10 @@
 package org.transitime.integration_tests;
 
 import org.junit.Test;
-import org.transitime.core.dataCache.VehicleDataCache;
-import org.transitime.ipc.data.IpcVehicleComplete;
-import org.transitime.playback.PlaybackModule;
-import org.transitime.utils.Time;
+import org.transitclock.core.dataCache.VehicleDataCache;
+import org.transitclock.ipc.data.IpcVehicleComplete;
+import org.transitclock.playback.PlaybackModule;
+import org.transitclock.utils.Time;
 
 import junit.framework.TestCase;
 

@@ -135,7 +135,7 @@ log "Copying data file to Amazon AWS Glacier"
 archiveDescription=$cutoffDate
 vaultName="$agencyId-dbData"
 region="us-west-2"
-java -Dlogback.configurationFile=/home/ec2-user/config/logbackStdout.xml -cp "/home/ec2-user/jars/*" org.transitime.maintenance.AwsGlacierArchiver $dataTarFile $archiveDescription $region $vaultName $logDir
+java -Dlogback.configurationFile=/home/ec2-user/config/logbackStdout.xml -cp "/home/ec2-user/jars/*" org.transitclock.maintenance.AwsGlacierArchiver $dataTarFile $archiveDescription $region $vaultName $logDir
 if [ $? != 0 ]; then
         log "Archiving tar file to AWS Glacier failed. Exiting!"
         exit -1

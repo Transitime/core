@@ -18,9 +18,10 @@ package org.transitime.config;
 
 import java.util.List;
 
-import org.transitime.config.ConfigFileReader.ConfigException;
-import org.transitime.config.ConfigValue.ConfigParamException;
-import org.transitime.configData.CoreConfig;
+import org.transitclock.config.ConfigFileReader;
+import org.transitclock.config.ConfigFileReader.ConfigException;
+import org.transitclock.config.ConfigValue.ConfigParamException;
+import org.transitclock.configData.CoreConfig;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -57,7 +58,7 @@ public class TestConfig extends TestCase {
 			List<String> moduleList = CoreConfig.getOptionalModules();
 
 			assertTrue(moduleList.get(0).equals(
-					"org.transitime.avl.GtfsRealtimeModule"));
+					"org.transitclock.avl.GtfsRealtimeModule"));
 		} catch (ConfigException | ConfigParamException e) {			
 			fail(e.toString());
 		}

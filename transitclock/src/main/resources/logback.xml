@@ -362,12 +362,12 @@
 	<!-- For all the data logging files. Note: additivity must be set to false 
 		so that data only logged to the data files instead of also to the core logging 
 		file. -->
-	<logger name="org.transitime.db.structs.ArrivalDeparture" level="info"
+	<logger name="org.transitclock.db.structs.ArrivalDeparture" level="info"
 		additivity="false">
 		<appender-ref ref="ARRIVAL_DEPARTURE" />
 	</logger>
 
-	<logger name="org.transitime.db.structs.VehicleEvent" level="info"
+	<logger name="org.transitclock.db.structs.VehicleEvent" level="info"
 		additivity="false">
 		<appender-ref ref="VEHICLE_EVENT" />
 	</logger>
@@ -376,128 +376,128 @@
 		so verbose -->
 		
 	<logger
-		name="org.transitime.core.VehicleState"
+		name="org.transitclock.core.VehicleState"
 		level="debug" additivity="false">
 		<appender-ref ref="FREQUENCY" />
 	</logger>	
 		
-	<logger name="org.transitime.core.PredictionGeneratorDefaultImpl"
+	<logger name="org.transitclock.core.PredictionGeneratorDefaultImpl"
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
 
 	<logger
-		name="org.transitime.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl"
+		name="org.transitclock.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl"
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
 	
 	<logger
-		name="org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl"
+		name="org.transitclock.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl"
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
 	
 	<logger
-		name="org.transitime.core.predictiongenerator.average.frequency.HistoricalAveragePredictionGeneratorImpl"
+		name="org.transitclock.core.predictiongenerator.average.frequency.HistoricalAveragePredictionGeneratorImpl"
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
 	
 	<logger
-		name="org.transitime.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl"
+		name="org.transitclock.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl"
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
 
-	<logger name="org.transitime.core.schedBasedPreds" level="debug"
+	<logger name="org.transitclock.core.schedBasedPreds" level="debug"
 		additivity="false">
 		<appender-ref ref="SCHED_BASED_PREDS" />
 	</logger>
 
-	<logger name="org.transitime.db.structs.Match" level="info"
+	<logger name="org.transitclock.db.structs.Match" level="info"
 		additivity="false">
 		<appender-ref ref="MATCH" />
 	</logger>
 
-	<logger name="org.transitime.avl" level="info" additivity="false">
+	<logger name="org.transitclock.avl" level="info" additivity="false">
 		<appender-ref ref="AVL" />
 	</logger>
 
-	<logger name="org.transitime.core.dataCache.TripDataHistoryCache"
+	<logger name="org.transitclock.core.dataCache.TripDataHistoryCache"
 		level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>
-	<logger name="org.transitime.core.dataCache.KalmanErrorCache"
+	<logger name="org.transitclock.core.dataCache.KalmanErrorCache"
 		level="info" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>
-	<logger name="org.transitime.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache"
+	<logger name="org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache"
 		level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>
-	<logger name="org.transitime.core.dataCache.scheduled.ScheduledBasedHistoricalAverageCache"
+	<logger name="org.transitclock.core.dataCache.scheduled.ScheduledBasedHistoricalAverageCache"
 		level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>
-	<logger name="org.transitime.core.dataCache.StopArrivalDepartureCache"
+	<logger name="org.transitclock.core.dataCache.StopArrivalDepartureCache"
 		level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
 	</logger>
-	<logger name="org.transitime.core.holdingmethod.HoldingTimeGeneratorDefaultImpl"
+	<logger name="org.transitclock.core.holdingmethod.HoldingTimeGeneratorDefaultImpl"
 		level="debug" additivity="false">
 		<appender-ref ref="HOLDING" />
 	</logger>
- 	<logger name="org.transitime.core.TemporalMatcher" level="info" additivity="true"> 
+ 	<logger name="org.transitclock.core.TemporalMatcher" level="info" additivity="true"> 
 		<appender-ref ref="MATCHER" /> </logger> 
-	<logger name="org.transitime.core.SpatialMatcher" level="info" additivity="true"> 
+	<logger name="org.transitclock.core.SpatialMatcher" level="info" additivity="true"> 
 		<appender-ref ref="MATCHER" /> </logger>
 	<!-- For config params it is more complicated because want to both have 
 		config params logged in separate file but also want some errors to send out 
 		an e-mail. Need to use ERROR_SMTP and additivity=true to make sure the e-mail 
 		is sent out. But unfortunately when I did this the regular info logging for 
-		org.transitime.config stopped working. So not sending out e-mail error messages 
+		org.transitclock.config stopped working. So not sending out e-mail error messages 
 		for now. -->
-	<logger name="org.transitime.config" level="info" additivity="false">
+	<logger name="org.transitclock.config" level="info" additivity="false">
 		<appender-ref ref="CONFIG" />
 	</logger>
-	<!-- <logger name="org.transitime.config" level="error" additivity="false"> 
+	<!-- <logger name="org.transitclock.config" level="error" additivity="false"> 
 		<appender-ref ref="ERROR_SMTP" /> </logger> -->
 
-	<logger name="org.transitime.core.predAccuracy" level="debug"
+	<logger name="org.transitclock.core.predAccuracy" level="debug"
 		additivity="false">
 		<appender-ref ref="PRED_ACCURACY" />
 	</logger>
 	
-	<logger name="org.transitime.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule" level="debug"
+	<logger name="org.transitclock.core.predAccuracy.gtfsrt.GTFSRealtimePredictionAccuracyModule" level="debug"
 		additivity="false">
 		<appender-ref ref="EXTERNAL_PRED_ACCURACY" />
 	</logger>		
 
-	<logger name="org.transitime.monitoring" level="info"
+	<logger name="org.transitclock.monitoring" level="info"
 		additivity="false">
 		<appender-ref ref="MONITORING" />
 	</logger>
 
-	<logger name="org.transitime.core.autoAssigner" level="info"
+	<logger name="org.transitclock.core.autoAssigner" level="info"
 		additivity="false">
 		<appender-ref ref="AUTO_ASSIGNER" />
 	</logger>
 
-	<logger name="org.transitime.core.dataCache.TripDataHistoryCache"
+	<logger name="org.transitclock.core.dataCache.TripDataHistoryCache"
 		level="debug" additivity="false">
 		<appender-ref ref="STDOUT" />
 	</logger>
 	
-	<logger name="org.transitime.core.TravelTimeDetails"
+	<logger name="org.transitclock.core.TravelTimeDetails"
 		level="warn" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
-	<logger name="org.transitime.core.DwellTimeDetails"
+	<logger name="org.transitclock.core.DwellTimeDetails"
 		level="warn" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>	
-	<logger name="org.transitime.core.dataCache.TripDataHistoryCache"
+	<logger name="org.transitclock.core.dataCache.TripDataHistoryCache"
 		level="debug" additivity="false">
 		<appender-ref ref="STDOUT" />
 	</logger>
@@ -510,7 +510,7 @@
 		<appender-ref ref="HOLDING" />
 	</logger>
 		
-	<logger name="org.transitime.core.ArrivalDepartureGeneratorDefaultImpl" 
+	<logger name="org.transitclock.core.ArrivalDepartureGeneratorDefaultImpl" 
 		level="debug" additivity="true"> 
 		<appender-ref ref="ARRIVAL_DEPARTURE" /> 
 	</logger>
@@ -531,25 +531,25 @@
 		additivity="false"> <appender-ref ref="SQL" /> </logger> -->
 
 	<!-- for debugging lazy loading -->
-	<!-- <logger name="org.transitime.db.structs" level="debug" additivity="true"> 
+	<!-- <logger name="org.transitclock.db.structs" level="debug" additivity="true"> 
 		<appender-ref ref="CORE_DEBUG" /> </logger> -->
 
 	<!-- Miscellaneous debugging. Need to set additivity to true so that will 
 		still get info and error level messages even though CORE and CORE_DEBUG have 
 		filters to only show proper info. -->
-	<!-- <logger name="org.transitime.gtfs.DbConfig" level="debug" additivity="true"> 
+	<!-- <logger name="org.transitclock.gtfs.DbConfig" level="debug" additivity="true"> 
 		<appender-ref ref="CORE_DEBUG" /> </logger> -->
 
-	<!-- <logger name="org.transitime.core.AvlProcessor" level="debug" additivity="true"> 
+	<!-- <logger name="org.transitclock.core.AvlProcessor" level="debug" additivity="true"> 
 		<appender-ref ref="CORE_DEBUG" /> </logger> -->
 
-	<!-- <logger name="org.transitime.core.MatchProcessor" level="debug" additivity="true"> 
+	<!-- <logger name="org.transitclock.core.MatchProcessor" level="debug" additivity="true"> 
 		<appender-ref ref="CORE_DEBUG" /> </logger> -->
 
-	<!-- <logger name="org.transitime.core.TemporalMatcher" level="debug" additivity="true"> 
+	<!-- <logger name="org.transitclock.core.TemporalMatcher" level="debug" additivity="true"> 
 		<appender-ref ref="CORE_DEBUG" /> </logger> -->
 
-	<!-- <logger name="org.transitime.core.ArrivalDepartureGeneratorDefaultImpl" 
+	<!-- <logger name="org.transitclock.core.ArrivalDepartureGeneratorDefaultImpl" 
 		level="debug" additivity="true"> <appender-ref ref="ARRIVAL_DEPARTURE" /> </logger> -->
 
 	<!-- Set default level of root logger to "info" instead of to the the default 

@@ -75,7 +75,7 @@
   <!-- Loggers -->
 
   <!-- For logging all the configuration parameters -->
-  <logger name="org.transitime.config"
+  <logger name="org.transitclock.config"
           level="info" additivity="false">
     <appender-ref ref="CONFIG" />
   </logger>
@@ -95,7 +95,7 @@
        level to debug for the root because then get a huge number
        of unuseful Hibernate messages.
     -->
-  <logger name="org.transitime" 
+  <logger name="org.transitclock" 
           level="debug" additivity="false">
     <appender-ref ref="CORE" />
   </logger>

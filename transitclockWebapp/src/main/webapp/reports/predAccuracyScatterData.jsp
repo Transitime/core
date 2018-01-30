@@ -1,8 +1,8 @@
-<%@ page import="org.transitime.db.webstructs.WebAgency" %>
-<%@ page import="org.transitime.reports.ChartGenericJsonQuery" %>
-<%@ page import="org.transitime.utils.Time" %>
+<%@ page import="org.transitclock.db.webstructs.WebAgency" %>
+<%@ page import="org.transitclock.reports.ChartGenericJsonQuery" %>
+<%@ page import="org.transitclock.utils.Time" %>
 <%@ page import="java.text.ParseException" %>
-<%@ page import="org.transitime.reports.SqlUtils" %>
+<%@ page import="org.transitclock.reports.SqlUtils" %>
 <%
 	// Parameters from request
 String agencyId = request.getParameter("a");

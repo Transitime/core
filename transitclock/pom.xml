@@ -263,7 +263,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.transitime.applications.UpdateTravelTimes</mainClass>
+									<mainClass>org.transitclock.applications.UpdateTravelTimes</mainClass>
 								</transformer>
 							</transformers>
 							<outputFile>target/UpdateTravelTimes.jar</outputFile>
@@ -279,7 +279,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.transitime.applications.Core</mainClass>
+									<mainClass>org.transitclock.applications.Core</mainClass>
 								</transformer>
 							</transformers>
 							<outputFile>target/Core.jar</outputFile>
@@ -295,7 +295,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.transitime.applications.SchemaGenerator</mainClass>
+									<mainClass>org.transitclock.applications.SchemaGenerator</mainClass>
 								</transformer>
 							</transformers>
 							<outputFile>target/SchemaGenerator.jar</outputFile>
@@ -311,7 +311,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.transitime.applications.ScheduleGenerator</mainClass>
+									<mainClass>org.transitclock.applications.ScheduleGenerator</mainClass>
 								</transformer>
 							</transformers>
 							<outputFile>target/ScheduleGenerator.jar</outputFile>
@@ -327,7 +327,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.transitime.applications.GtfsFileProcessor</mainClass>
+									<mainClass>org.transitclock.applications.GtfsFileProcessor</mainClass>
 								</transformer>
 							</transformers>
 							<outputFile>target/GtfsFileProcessor.jar</outputFile>
@@ -343,7 +343,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.transitime.applications.RmiQuery</mainClass>
+									<mainClass>org.transitclock.applications.RmiQuery</mainClass>
 								</transformer>
 							</transformers>
 							<outputFile>target/RmiQuery.jar</outputFile>
@@ -359,7 +359,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.transitime.applications.CreateAPIKey</mainClass>
+									<mainClass>org.transitclock.applications.CreateAPIKey</mainClass>
 								</transformer>
 							</transformers>
 							<outputFile>target/CreateAPIKey.jar</outputFile>
@@ -375,7 +375,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.transitime.applications.CreateWebAgency</mainClass>
+									<mainClass>org.transitclock.applications.CreateWebAgency</mainClass>
 								</transformer>
 							</transformers>
 							<outputFile>target/CreateWebAgency.jar</outputFile>
@@ -452,7 +452,7 @@
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>org.transitime.applications.PredictionsAccuracyIntegrationTest</mainClass>
+                                    <mainClass>org.transitclock.applications.PredictionsAccuracyIntegrationTest</mainClass>
                                     <commandlineArgs>-c transitime/src/test/resources/transiTimeConfigIntegrationTest.xml -gtfsDirectoryName transitime/src/test/resources/wmata_gtfs -storeNewRevs -maxTravelTimeSegmentLength 1000</commandlineArgs>
                                 </configuration>
                             </execution>

@@ -1,6 +1,6 @@
-<%@ page import="org.transitime.db.GenericCsvQuery" %>
-<%@ page import="org.transitime.db.webstructs.WebAgency" %>
-<%@ page import="org.transitime.utils.Time" %>
+<%@ page import="org.transitclock.db.GenericCsvQuery" %>
+<%@ page import="org.transitclock.db.webstructs.WebAgency" %>
+<%@ page import="org.transitclock.utils.Time" %>
 <%@ page import="java.text.ParseException" %>
 <%-- This file is for outputting prediction accuracy data in CSV format. 
   --%>

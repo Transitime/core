@@ -1,8 +1,8 @@
 <%@ page language="java" contentType="application/json; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="org.transitime.reports.GenericJsonQuery" %>
-<%@ page import="org.transitime.db.webstructs.WebAgency" %>
-<%@ page import="org.transitime.utils.Time" %>
+<%@ page import="org.transitclock.reports.GenericJsonQuery" %>
+<%@ page import="org.transitclock.db.webstructs.WebAgency" %>
+<%@ page import="org.transitclock.utils.Time" %>
 <%@ page import="java.text.ParseException" %>
 <%
 String agencyId = request.getParameter("a");

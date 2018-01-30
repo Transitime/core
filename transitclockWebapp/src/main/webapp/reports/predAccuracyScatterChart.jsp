@@ -1,5 +1,5 @@
-<%@ page import="org.transitime.utils.web.WebUtils" %>
-<%@page import="org.transitime.db.webstructs.WebAgency"%>
+<%@ page import="org.transitclock.utils.web.WebUtils" %>
+<%@page import="org.transitclock.db.webstructs.WebAgency"%>
 <%
 // Create title for chart
 String agencyId = request.getParameter("a");

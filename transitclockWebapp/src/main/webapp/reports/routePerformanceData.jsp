@@ -1,4 +1,4 @@
-<%@ page import="org.transitime.reports.RoutePerformanceQuery" %>
+<%@ page import="org.transitclock.reports.RoutePerformanceQuery" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="java.text.SimpleDateFormat" %>

@@ -8,11 +8,11 @@ import org.hibernate.Session;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.db.hibernate.HibernateUtils;
-import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.db.structs.Prediction;
-import org.transitime.playback.PlaybackModule;
-import org.transitime.utils.Time;
+import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.db.structs.Prediction;
+import org.transitclock.playback.PlaybackModule;
+import org.transitclock.utils.Time;
 
 import java.io.FileReader;
 import java.io.Reader;

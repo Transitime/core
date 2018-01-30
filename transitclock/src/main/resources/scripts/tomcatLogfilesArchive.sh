@@ -33,7 +33,7 @@ function archive() {
   log "Copying file to Amazon AWS Glacier"
   archiveDescription="up to $cutoffDate"
   vaultName="tomcat-logs"
-  command="java -Dlogback.configurationFile=/home/ec2-user/config/logbackStdout.xml -cp \"/home/ec2-user/jars/*\" org.transitime.maintenance.AwsGlacierArchiver $zipFile \"$archiveDescription\" $region $vaultName $logDir"
+  command="java -Dlogback.configurationFile=/home/ec2-user/config/logbackStdout.xml -cp \"/home/ec2-user/jars/*\" org.transitclock.maintenance.AwsGlacierArchiver $zipFile \"$archiveDescription\" $region $vaultName $logDir"
   log "Executing: $command"
   eval "$command"
   if [ $? != 0 ]; then

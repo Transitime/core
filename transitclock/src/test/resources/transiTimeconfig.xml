@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transitime>
  <modules>
-        <optionalModulesList>org.transitime.avl.GtfsRealtimeModule</optionalModulesList>        
+        <optionalModulesList>org.transitclock.avl.GtfsRealtimeModule</optionalModulesList>        
     </modules>
     <autoBlockAssigner><autoAssignerEnabled>true</autoAssignerEnabled></autoBlockAssigner>
     <core>

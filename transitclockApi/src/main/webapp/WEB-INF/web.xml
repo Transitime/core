@@ -2,21 +2,20 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	version="3.0">
-	<display-name>Transitime api</display-name>
+	<display-name>The Transit Clock api</display-name>
 
 
 	<context-param>
 		<param-name>transitime_config_file_location</param-name>
 		<!-- Set to customized properties file with db config info and such -->
 		
-		<!-- <param-value>C:\\cygwin64\\home\\SeanOg\\workspace\\transitime-historical\\core\\transitimeWebapp\\src\\main\\resources\\transiTimeConfig.xml</param-value> -->
-		<param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>  
+		<param-value>/usr/local/transitclock/config/transitclockConfig.xml</param-value>  
 					
 	</context-param>
 
 	<!-- So that configuration parameters can be read in from file -->
 	<listener>
-		<listener-class>org.transitime.web.ReadConfigListener</listener-class>
+		<listener-class>org.transitclock.web.ReadConfigListener</listener-class>
 	</listener>
 
 	<!-- For special Http response 416 "Requested Range Not Satisfiable" which 
@@ -31,7 +30,7 @@
 
 	 <filter>
 	    <filter-name>ApiLoggingFilter</filter-name>
-	    <filter-class>org.transitime.api.utils.ApiLoggingFilter</filter-class>
+	    <filter-class>org.transitclock.api.utils.ApiLoggingFilter</filter-class>
 	  </filter> 
 	  <filter-mapping>
 	    <filter-name>ApiLoggingFilter</filter-name>

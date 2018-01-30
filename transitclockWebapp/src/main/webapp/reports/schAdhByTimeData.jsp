@@ -19,9 +19,9 @@
 --%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="org.transitime.db.webstructs.WebAgency" %>
-<%@ page import="org.transitime.reports.GenericJsonQuery" %>
-<%@ page import="org.transitime.reports.SqlUtils" %>
+<%@ page import="org.transitclock.db.webstructs.WebAgency" %>
+<%@ page import="org.transitclock.reports.GenericJsonQuery" %>
+<%@ page import="org.transitclock.reports.SqlUtils" %>
 <%
 try {
  String agencyId = request.getParameter("a");

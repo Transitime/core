@@ -85,7 +85,7 @@
         the classes programatically via AnnoatedClassesList so
         that when the classes change don't need to modify all
         of the hibernate config files. -->
-   <!-- <mapping class="org.transitime.modules.structures.AVLReport"/>  -->
+   <!-- <mapping class="org.transitclock.modules.structures.AVLReport"/>  -->
 
  </session-factory>
 </hibernate-configuration>

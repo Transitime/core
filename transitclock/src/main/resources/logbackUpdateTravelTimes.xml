@@ -83,7 +83,7 @@
 	       level to debug for the root because then get a huge number
 	       of unuseful Hibernate messages.
 	    -->
-	  <logger name="org.transitime" 
+	  <logger name="org.transitclock" 
 		  level="info" additivity="false">
 	    <appender-ref ref="CORE" />
 	  </logger>
@@ -91,22 +91,22 @@
 	  <!-- There are some Transitime classes don't want debug info for
 	       since that would just be too verbose.
 	    -->
-	  <logger name="org.transitime.core.travelTimes" 
+	  <logger name="org.transitclock.core.travelTimes" 
 		  level="info" additivity="false">
 	    <appender-ref ref="CORE" />
 	  </logger>
 
-	  <logger name="org.transitime.core.travelTimes.TravelTimesProcessor" 
+	  <logger name="org.transitclock.core.travelTimes.TravelTimesProcessor" 
 		  level="info" additivity="false">
 	    <appender-ref ref="CORE" />
 	  </logger>
 
-	  <logger name="org.transitime.db.hibernate.HibernateUtils" 
+	  <logger name="org.transitclock.db.hibernate.HibernateUtils" 
 		  level="info" additivity="false">
 	    <appender-ref ref="CORE" />
 	  </logger>
 
-	  <logger name="org.transitime.config"
+	  <logger name="org.transitclock.config"
 		  level="info" additivity="false">
 	    <appender-ref ref="CONFIG" />
 	  </logger>
