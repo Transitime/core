@@ -21,10 +21,10 @@ if (agencyId == null || agencyId.isEmpty()) {
 <div id="mainDiv">
 <div id="title">Real-time Maps for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 <ul class="choicesList">
-  <li><a href="../maps/map.jsp?a=<%= agencyId %>"
+  <li><a href="../maps/map.jsp?verbose=true&a=<%= agencyId %>"
     title="Real-time map for selected route">
       Map for Selected Route</a></li>
-  <li><a href="../maps/map.jsp?a=<%= agencyId %>&showUnassignedVehicles=true"
+  <li><a href="../maps/map.jsp?verbose=true&a=<%= agencyId %>&showUnassignedVehicles=true"
     title="Real-time map for selected route but also shows vehicles not currently assigned to a route">
       Map Including Unassigned Vehicles</a></li>
   <li><a href="../maps/schAdhMap.jsp?a=<%= agencyId %>"

@@ -45,7 +45,7 @@
   
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   
-  <title>Transitime Map</title>
+  <title>TheTransitClock Map</title>
 </head>
 
 <body>
