@@ -476,7 +476,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			if (!lastStopOfNonSchedBasedTrip
 					&& predictionForStop.getPredictionTime() > now) {
 
-				newPredictions.add(predictionForStop);
+
 				logger.info("Generated prediction {} based on avlreport {}.", predictionForStop, avlReport);
 
 
