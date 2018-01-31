@@ -29,9 +29,9 @@ import org.transitclock.config.StringConfigValue;
 public class LametroRailNextBusAvlModule extends NextBusAvlModule {
 
 	private static StringConfigValue agencyNameForFeed =
-			new StringConfigValue("transitime.custom.lametro.agencyNameForLametroRailFeed",
+			new StringConfigValue("transitclock.custom.lametro.agencyNameForLametroRailFeed",
 					"If set then specifies the agency name to use for the "
-					+ "feed. If not set then the transitime.core.agencyId "
+					+ "feed. If not set then the transitclock.core.agencyId "
 					+ "is used.");
 	@Override
 	protected String getAgencyNameForFeed() {

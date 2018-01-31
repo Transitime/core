@@ -63,39 +63,39 @@ public class GtfsFromNextBus {
 	/******************* Parameters *************************/
 	
 	private static StringConfigValue agencyId = 
-			new StringConfigValue("transitime.gtfs.agencyId", 
+			new StringConfigValue("transitclock.gtfs.agencyId", 
 					"missionBay",
 					"Agency name used in resulting GTFS files.");
 
 	private static StringConfigValue nextBusAgencyId = 
-			new StringConfigValue("transitime.gtfs.nextBusAgencyId", 
+			new StringConfigValue("transitclock.gtfs.nextBusAgencyId", 
 					"sf-mission-bay",
 					"Agency name that NextBus uses.");
 
 	private static StringConfigValue nextBusFeedUrl = 
-			new StringConfigValue("transitime.gtfs.nextbusFeedUrl", 
+			new StringConfigValue("transitclock.gtfs.nextbusFeedUrl", 
 					"http://webservices.nextbus.com/service/publicXMLFeed",
 					"The URL of the NextBus feed to use.");
 
 	private static StringConfigValue gtfsDirectory = 
-			new StringConfigValue("transitime.gtfs.gtfsDirectory",
+			new StringConfigValue("transitclock.gtfs.gtfsDirectory",
 					"C:/GTFS/",
 					"Directory where resulting GTFS files are to be written.");
 					
 	private static StringConfigValue gtfsRouteType = 
-			new StringConfigValue("transitime.gtfs.gtfsRouteType",
+			new StringConfigValue("transitclock.gtfs.gtfsRouteType",
 					"3",
 					"GTFS definition of the route type. 1=subway 2=rail "
 					+ "3=buses.");
 	
 	private static StringConfigValue serviceId = 
-			new StringConfigValue("transitime.gtfs.serviceId",
+			new StringConfigValue("transitclock.gtfs.serviceId",
 					"wkd",
 					"The service_id to use for the trips.txt file. Currently "
 					+ "only can handle a single service ID.");
 	
 	private static StringListConfigValue validBlockIds =
-			new StringListConfigValue("transitime.gtfs.validBlockIds", 
+			new StringListConfigValue("transitclock.gtfs.validBlockIds", 
 					"Only the block IDs from this list will be process from "
 					+ "the schedule from the NextBus API. Useful since NextBus "
 					+ "doesn't always clean out obsolete blocks");;

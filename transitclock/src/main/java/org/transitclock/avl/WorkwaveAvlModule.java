@@ -56,7 +56,7 @@ public class WorkwaveAvlModule extends PollUrlAvlModule {
 			new SimpleDateFormat("MM/dd/yy hh:mm:ss a");
 
 	private static StringConfigValue apiKey =
-			new StringConfigValue("transitime.avl.workwaveApiKey",
+			new StringConfigValue("transitclock.avl.workwaveApiKey",
 					"The API key to use when getting session ID for Workwave "
 					+ "AVL feed.");
 			

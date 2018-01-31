@@ -170,7 +170,7 @@ public class HibernateUtils {
 	 * 
 	 * @param agencyId
 	 *            Used as the database name if the property
-	 *            transitime.db.dbName is not set
+	 *            transitclock.db.dbName is not set
 	 * @return
 	 */
 	public static SessionFactory getSessionFactory(String agencyId) 
@@ -182,7 +182,7 @@ public class HibernateUtils {
 			throws HibernateException{
 		// Determine the database name to use. Will usually use the
 		// projectId since each project has a database. But this might
-		// be overridden by the transitime.core.dbName property.
+		// be overridden by the transitclock.core.dbName property.
 		String dbName = DbSetupConfig.getDbName();
 		if (dbName == null)
 			dbName = agencyId;
@@ -236,7 +236,7 @@ public class HibernateUtils {
 	 * 
 	 * @param agencyId
 	 *            Used as the database name if the property
-	 *            transitime.core.dbName is not set
+	 *            transitclock.core.dbName is not set
 	 * @return The Session. Make sure you close it when done because system only
 	 *         gets limited number of open sessions.
 	 * @throws HibernateException
@@ -254,7 +254,7 @@ public class HibernateUtils {
 	
 	/**
 	 * Returns the session for the database name specified by the
-	 * transitime.db.dbName Java property.
+	 * transitclock.db.dbName Java property.
 	 * <p>
 	 * NOTE: Make sure you close the session after the query!! Use a try/catch
 	 * around the query and close the session in a finally block to make sure it

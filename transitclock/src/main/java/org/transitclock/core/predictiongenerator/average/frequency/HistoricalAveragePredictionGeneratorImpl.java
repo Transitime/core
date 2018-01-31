@@ -34,7 +34,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	private String alternative="LastVehiclePredictionGeneratorImpl";
 	
 	private static final IntegerConfigValue minDays = new IntegerConfigValue(
-			"transitime.prediction.data.average.mindays",
+			"transitclock.prediction.data.average.mindays",
 			new Integer(1),
 			"Min number of days trip data that needs to be available before historical average prediciton is used instead of default transiTime prediction.");
 	

@@ -72,7 +72,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 			new ConcurrentHashMap<String, Counts>();
 	
 	private static IntegerConfigValue maxConcurrentCallsPerProjectConfig = new IntegerConfigValue(
-	    "transitime.usage.maxRmiCalls", 100000,
+	    "transitclock.usage.maxRmiCalls", 100000,
 	    "Maximum number of concurrent RMI calls to allow");
 	private static int maxConcurrentCallsPerProject = maxConcurrentCallsPerProjectConfig.getValue().intValue();
 	
@@ -270,7 +270,7 @@ public class RmiCallInvocationHandler implements InvocationHandler {
 						+ "Is the Java system property java.rmi.server.hostname "
 						+ "set to the proper host name? "
 						+ "Is the Java system "
-						+ "property transitime.rmi.timeoutSec timeout time of "
+						+ "property transitclock.rmi.timeoutSec timeout time of "
 						+ ClientFactory.getTimeoutSec()	+ " seconds adequate?";
 					
 					logger.error(message);

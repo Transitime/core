@@ -50,7 +50,7 @@ public class DataFetcher {
 		return pageDbReads.getValue();
 	}
 	private static BooleanConfigValue pageDbReads =
-			new BooleanConfigValue("transitime.updates.pageDbReads",
+			new BooleanConfigValue("transitclock.updates.pageDbReads",
 					true,
 					"page database reads to break up long reads. "
 					+ "It may impact performance on MySql"
@@ -59,7 +59,7 @@ public class DataFetcher {
 	  return pageSize.getValue();
 	}
 	private static IntegerConfigValue pageSize =
-	    new IntegerConfigValue("transitime.updates.pageSize",
+	    new IntegerConfigValue("transitclock.updates.pageSize",
 	        50000,
 	        "Number of records to read in at a time");
 	

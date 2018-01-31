@@ -227,7 +227,7 @@ public class WebAgency {
 	
 	/**
 	 * Specifies name of database to use for reading in the WebAgency objects.
-	 * Currently using the command line option transitime.core.agencyId .
+	 * Currently using the command line option transitclock.core.agencyId .
 	 * 
 	 * @return Name of db to retrieve WebAgency objects from
 	 */

@@ -39,7 +39,7 @@ public class AgencyConfig {
 		return projectId.getValue();
 	}
 	private static StringConfigValue projectId = 
-			new StringConfigValue("transitime.core.agencyId", 
+			new StringConfigValue("transitclock.core.agencyId", 
 					null,
 					"Specifies the ID of the agency. Used for the database " +
 					"name and in the logback configuration to specify the " +

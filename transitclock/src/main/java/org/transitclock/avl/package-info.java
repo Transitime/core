@@ -49,17 +49,17 @@
  * means it is very easy to start. Also means that the Module.getProjectId()
  * method is used specify which database the data is to be written to and
  * the name of the JMS topic for the feed. This also means that the
- * command line param -Dtransitime.modules.optionalModulesList=XXX is
+ * command line param -Dtransitclock.modules.optionalModulesList=XXX is
  * used to start up the desired AVL modules.
  * <p>
  * Configuration parameters for AVL modules are listed in the AvlConfig.java 
- * class. Important params include -Dtransitime.db.storeDataInDatabase=false
+ * class. Important params include -Dtransitclock.db.storeDataInDatabase=false
  * if the generated data such as arrivals/departures should not be stored
  * in the database. This is important for when in playback mode for 
  * debugging or such. Another important parameter is 
- * -Dtransitime.avl.shouldUseJms=true if you want to use JMS. In that case you
+ * -Dtransitclock.avl.shouldUseJms=true if you want to use JMS. In that case you
  * also need to specify both an AVL feed module and a JMS client module, such as
- * -Dtransitime.modules.optionalModulesList=org.transitclock.avl.MuniNextBusAvlModule;org.transitclock.avl.AvlJmsClientModule
+ * -Dtransitclock.modules.optionalModulesList=org.transitclock.avl.MuniNextBusAvlModule;org.transitclock.avl.AvlJmsClientModule
  */
 package org.transitclock.avl;
 

@@ -23,7 +23,7 @@ import org.transitclock.utils.Time;
 /**
  * Contains the info needed for creating an RMI stub, including the agency ID
  * and the agency host name. The hostname is obtained from the Java property
- * transitime.rmi.rmiHost if set. Otherwise gets the host names from the
+ * transitclock.rmi.rmiHost if set. Otherwise gets the host names from the
  * WebAgency database.
  * <p>
  * This information exists on the client side.
@@ -53,7 +53,7 @@ public class RmiStubInfo {
 
 	/**
 	 * Returns the RMI hostname. Will use command line parameter
-	 * -Dtransitime.core.rmiHost if it is set. If not set then looks in
+	 * -Dtransitclock.core.rmiHost if it is set. If not set then looks in
 	 * WebAgencies table in the web database. Returns null if not configured.
 	 * 
 	 * @param rereadIfOlderThanMsecs
@@ -84,7 +84,7 @@ public class RmiStubInfo {
 	/**
 	 * Returns the RMI hostname that is cached. Will not update the cache even
 	 * if agency not in cache and cache not updated for a long time. Will use
-	 * command line parameter -Dtransitime.core.rmiHost if it is set. If not set
+	 * command line parameter -Dtransitclock.core.rmiHost if it is set. If not set
 	 * then looks in cached version of WebAgencies table from the web database.
 	 * Returns null if agency not configured.
 	 * 
@@ -98,7 +98,7 @@ public class RmiStubInfo {
 	 * Intended for when communication was working but now is not in that this
 	 * method will get updated hostname data from db if cache is somewhat old.
 	 * Returns the RMI hostname. Will use command line parameter
-	 * -Dtransitime.core.rmiHost if it is set. If not set then looks in cached
+	 * -Dtransitclock.core.rmiHost if it is set. If not set then looks in cached
 	 * version of WebAgencies table from the web database. If cached data is
 	 * more than 30 seconds old then will reread WebAgency data from db. Returns
 	 * null if agency not configured.

@@ -60,7 +60,7 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 	/********************** Config Params **************************/
 	
 	private static final StringConfigValue externalPredictionApiUrl = 
-			new StringConfigValue("transitime.predAccuracy.externalPredictionApiUrl", 
+			new StringConfigValue("transitclock.predAccuracy.externalPredictionApiUrl", 
 					"http://webservices.nextbus.com/service/publicXMLFeed?",
 					"URL to access to obtain external predictions.");
 	
@@ -69,7 +69,7 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 	}
 	
 	private static final StringConfigValue nextBusAgencyIdForApi =
-			new StringConfigValue("transitime.predAccuracy.nextBusAgencyIdForApi",
+			new StringConfigValue("transitclock.predAccuracy.nextBusAgencyIdForApi",
 					 null,
 					 "Name of agency for API");
 	

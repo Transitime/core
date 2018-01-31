@@ -47,7 +47,7 @@ public class CoreConfig {
 		return daysPopulateHistoricalCache.getValue();
 	}
 	private static IntegerConfigValue daysPopulateHistoricalCache =
-			new IntegerConfigValue("transitime.cache.daysPopulateHistoricalCache", 4,
+			new IntegerConfigValue("transitclock.cache.daysPopulateHistoricalCache", 4,
 					"How many days data to read in to populate historical cache on start up.");
 	/**
 	 * When in playback mode or some other situations don't want to store
@@ -60,7 +60,7 @@ public class CoreConfig {
 		return storeDataInDatabase.getValue();
 	}
 	private static BooleanConfigValue storeDataInDatabase =
-			new BooleanConfigValue("transitime.db.storeDataInDatabase",
+			new BooleanConfigValue("transitclock.db.storeDataInDatabase",
 					true,
 					"When in playback mode or some other situations don't " +
 					"want to store generated data such as arrivals/" +
@@ -72,7 +72,7 @@ public class CoreConfig {
 	 * When batching large amount of AVL data through system to generate
 	 * improved schedule time (as has been done for Zhengzhou) it takes huge
 	 * amount of time to process everything. To speed things up you can set
-	 * -Dtransitime.core.onlyNeedArrivalDepartures=true such that the system
+	 * -Dtransitclock.core.onlyNeedArrivalDepartures=true such that the system
 	 * will be sped up by not generating nor logging predictions, not logging
 	 * AVL data nor storing it in db, and not logging nor storing match data in
 	 * db.
@@ -83,20 +83,20 @@ public class CoreConfig {
 		return onlyNeedArrivalDepartures.getValue();
 	}
 	private static BooleanConfigValue onlyNeedArrivalDepartures =
-			new BooleanConfigValue("transitime.core.onlyNeedArrivalDepartures",
+			new BooleanConfigValue("transitclock.core.onlyNeedArrivalDepartures",
 					false,
 					"When batching large amount of AVL data through system " +
 					"to generate improved schedule time (as has been done " +
 					"for Zhengzhou) it takes huge amount of time to process " +
 					"everything. To speed things up you can set " +
-					"-Dtransitime.core.onlyNeedArrivalDepartures=true such " +
+					"-Dtransitclock.core.onlyNeedArrivalDepartures=true such " +
 					"that the system will be sped up by not generating nor " +
 					"logging predictions, not logging AVL data nor storing " +
 					"it in db, and not logging nor storing match data in db.");
 
 	/**
 	 * When in batch mode can flood db with lots of objects. If 
-	 * transitime.core.pauseIfDbQueueFilling is set to true then when objects
+	 * transitclock.core.pauseIfDbQueueFilling is set to true then when objects
 	 * are put into the DataDbLogger queue the calling thread will be
 	 * temporarily suspended so that the separate thread can run to write
 	 * to the db and thereby empty out the queue.
@@ -106,10 +106,10 @@ public class CoreConfig {
 		return pauseIfDbQueueFilling.getValue();
 	}
 	private static BooleanConfigValue pauseIfDbQueueFilling =
-			new BooleanConfigValue("transitime.core.pauseIfDbQueueFilling", 
+			new BooleanConfigValue("transitclock.core.pauseIfDbQueueFilling", 
 					false,
 					"When in batch mode can flood db with lots of objects. If" +
-					"transitime.core.pauseIfDbQueueFilling is set to true " +
+					"transitclock.core.pauseIfDbQueueFilling is set to true " +
 					"then when objects are put into the DataDbLogger queue " +
 					"the calling thread will be temporarily suspended so " +
 					"that the separate thread can run to write to the db and " +
@@ -130,7 +130,7 @@ public class CoreConfig {
 		//optionalModulesDefaultList.add("org.transitclock.avl.NextBusAvlModule");
 	}	
 	private static StringListConfigValue optionalModules = 
-			new StringListConfigValue("transitime.modules.optionalModulesList", 
+			new StringListConfigValue("transitclock.modules.optionalModulesList", 
 						optionalModulesDefaultList,
 						"The semicolon separated list of names of all of the " +
 						"modules that should be automatically started.");
@@ -148,13 +148,13 @@ public class CoreConfig {
 		return maxDistanceFromSegment.getValue();
 	}
 	private static DoubleConfigValue maxDistanceFromSegment =
-			new DoubleConfigValue("transitime.core.maxDistanceFromSegment", 
+			new DoubleConfigValue("transitclock.core.maxDistanceFromSegment", 
 					60.0,
 					"How far a location can be from a path segment and still "
 					+ "be considered a match. Can be overridden on a per route "
 					+ "basis via max_distance supplemental column of route GTFS "
 					+ "data. When auto assigning, the parameter "
-					+ "transitime.core.maxDistanceFromSegmentForAutoAssigning "
+					+ "transitclock.core.maxDistanceFromSegmentForAutoAssigning "
 					+ "is used instead.");
 	
 	/**
@@ -166,7 +166,7 @@ public class CoreConfig {
 		return maxDistanceFromSegmentForAutoAssigning.getValue();
 	}
 	private static DoubleConfigValue maxDistanceFromSegmentForAutoAssigning =
-			new DoubleConfigValue("transitime.core.maxDistanceFromSegmentForAutoAssigning", 
+			new DoubleConfigValue("transitclock.core.maxDistanceFromSegmentForAutoAssigning", 
 					60.0,
 					"How far a location can be from a path segment and still "
 					+ "be considered a match when auto assigning a vehicle. Auto "
@@ -191,7 +191,7 @@ public class CoreConfig {
 		return allowableNumberOfBadMatches.getValue();
 	}
 	private static IntegerConfigValue allowableNumberOfBadMatches =
-			new IntegerConfigValue("transitime.core.allowableNumberOfBadMatches", 
+			new IntegerConfigValue("transitclock.core.allowableNumberOfBadMatches", 
 					2,
 					"How many bad spatial/temporal matches a predictable " +
 					"vehicle can have in a row before the vehicle is made " +
@@ -207,7 +207,7 @@ public class CoreConfig {
 		return maxHeadingOffsetFromSegment.getValue();
 	}
 	private static FloatConfigValue maxHeadingOffsetFromSegment =
-			new FloatConfigValue("transitime.core.maxHeadingOffsetFromSegment", 
+			new FloatConfigValue("transitclock.core.maxHeadingOffsetFromSegment", 
 					360.0f,
 					"How far heading in degrees of vehicle can be away from " +
 					"path segment and still be considered a match. Needs to " +
@@ -227,7 +227,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue distanceFromEndOfBlockForInitialMatching = 
 			new DoubleConfigValue(
-					"transitime.core.distanceFromEndOfBlockForInitialMatching", 
+					"transitclock.core.distanceFromEndOfBlockForInitialMatching", 
 					250.0,
 					"For initial matching of vehicle to block assignment. If " +
 					"vehicle is closer than this distance from the end of " +
@@ -248,7 +248,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue distanceFromLastStopForEndMatching = 
 			new DoubleConfigValue(
-					"transitime.core.distanceFromLastStopForEndMatching", 
+					"transitclock.core.distanceFromLastStopForEndMatching", 
 					250.0,
 					"How close vehicle needs to be from the last stop of the " +
 					"block such that the next AVL report should possibly be " +
@@ -272,7 +272,7 @@ public class CoreConfig {
 		return deadheadingShortVersusLongDistance.getValue();
 	}
 	private static FloatConfigValue deadheadingShortVersusLongDistance =
-			new FloatConfigValue("transitime.core.deadheadingShortVersusLongDistance", 
+			new FloatConfigValue("transitclock.core.deadheadingShortVersusLongDistance", 
 					1000.0f,
 					"For determining if enough time to deadhead to beginning " +
 					"of a trip. If vehicles are far away then they are more " +
@@ -289,7 +289,7 @@ public class CoreConfig {
 		return shortDistanceDeadheadingSpeed.getValue();
 	}
 	private static FloatConfigValue shortDistanceDeadheadingSpeed =
-			new FloatConfigValue("transitime.core.shortDistanceDeadheadingSpeed", 
+			new FloatConfigValue("transitclock.core.shortDistanceDeadheadingSpeed", 
 					4.0f, // 4.0m/s is about 8 mph
 					"Part of determining if enough time to deadhead to layover.");
 	
@@ -297,7 +297,7 @@ public class CoreConfig {
 		return longDistanceDeadheadingSpeed.getValue();
 	}
 	private static FloatConfigValue longDistanceDeadheadingSpeed =
-			new FloatConfigValue("transitime.core.longDistanceDeadheadingSpeed", 
+			new FloatConfigValue("transitclock.core.longDistanceDeadheadingSpeed", 
 					10.0f, // 10.0m/s is about 20mph
 					"Part of determining if enough time to deadhead to layover.");
 
@@ -318,7 +318,7 @@ public class CoreConfig {
 		return maxPredictionsTimeForDbSecs.getValue();
 	}
 	private static IntegerConfigValue maxPredictionsTimeForDbSecs =
-			new IntegerConfigValue("transitime.core.maxPredictionTimeForDbSecs", 
+			new IntegerConfigValue("transitclock.core.maxPredictionTimeForDbSecs", 
 					30*Time.SEC_PER_MIN,
 					"For determining if prediction should be stored in db. " +
 					"Set to 0 to never store predictions. A very large " +
@@ -339,7 +339,7 @@ public class CoreConfig {
 		return allowableEarlyForLayoverSeconds.getValue();
 	}
 	private static IntegerConfigValue allowableEarlyForLayoverSeconds = 
-			new IntegerConfigValue("transitime.core.allowableEarlyForLayoverSeconds", 
+			new IntegerConfigValue("transitclock.core.allowableEarlyForLayoverSeconds", 
 					60 * Time.SEC_PER_MIN,
 					"How early a vehicle can be and still be matched to a " +
 					"layover. Needs to be pretty large because sometimes " +
@@ -365,7 +365,7 @@ public class CoreConfig {
 		return allowableEarlySeconds.getID();
 	}
 	private static IntegerConfigValue allowableEarlySeconds = 
-			new IntegerConfigValue("transitime.core.allowableEarlySeconds", 
+			new IntegerConfigValue("transitclock.core.allowableEarlySeconds", 
 					15 * Time.SEC_PER_MIN,
 					"How early a vehicle can be and still be matched to its " +
 					"block assignment. If when a new AVL report is received " +
@@ -388,7 +388,7 @@ public class CoreConfig {
 		return allowableLateSeconds.getID();
 	}
 	private static IntegerConfigValue allowableLateSeconds = 
-			new IntegerConfigValue("transitime.core.allowableLateSeconds", 
+			new IntegerConfigValue("transitclock.core.allowableLateSeconds", 
 					90 * Time.SEC_PER_MIN,
 					"How late a vehicle can be and still be matched to its " +
 					"block assignment. If when a new AVL report is received " +
@@ -405,7 +405,7 @@ public class CoreConfig {
 		return allowableEarlySecondsForInitialMatching.getValue();
 	}
 	private static IntegerConfigValue allowableEarlySecondsForInitialMatching = 
-			new IntegerConfigValue("transitime.core.allowableEarlySecondsForInitialMatching", 
+			new IntegerConfigValue("transitclock.core.allowableEarlySecondsForInitialMatching", 
 					10 * Time.SEC_PER_MIN,
 					"How early a vehicle can be in seconds and still be " +
 					"matched to its block assignment.");
@@ -419,7 +419,7 @@ public class CoreConfig {
 		return allowableLateSecondsForInitialMatching.getValue();
 	}
 	private static IntegerConfigValue allowableLateSecondsForInitialMatching = 
-			new IntegerConfigValue("transitime.core.allowableLateSecondsForInitialMatching", 
+			new IntegerConfigValue("transitclock.core.allowableLateSecondsForInitialMatching", 
 					20 * Time.SEC_PER_MIN,
 					"How late a vehicle can be in seconds and still be " +
 					"matched to its block assignment.");
@@ -436,7 +436,7 @@ public class CoreConfig {
 		return distanceBetweenAvlsForInitialMatchingWithoutHeading.getValue();
 	}
 	private static DoubleConfigValue distanceBetweenAvlsForInitialMatchingWithoutHeading =
-			new DoubleConfigValue("transitime.core.distanceBetweenAvlsForInitialMatchingWithoutHeading",
+			new DoubleConfigValue("transitclock.core.distanceBetweenAvlsForInitialMatchingWithoutHeading",
 					100.0,
 					"For initial matching vehicle to assignment when there " +
 					"isn't any heading information. In that case also want " +
@@ -459,7 +459,7 @@ public class CoreConfig {
 		return distanceFromLayoverForEarlyDeparture.getValue();
 	}
 	private static DoubleConfigValue distanceFromLayoverForEarlyDeparture =
-			new DoubleConfigValue("transitime.core.distanceFromLayoverForEarlyDeparture", 
+			new DoubleConfigValue("transitclock.core.distanceFromLayoverForEarlyDeparture", 
 					180.0,
 					"How far along path past a layover stop a vehicle needs "
 					+ "to be in order for it to be considered an early "
@@ -481,7 +481,7 @@ public class CoreConfig {
 		return layoverDistance.getValue();
 	}
 	private static DoubleConfigValue layoverDistance =
-			new DoubleConfigValue("transitime.core.layoverDistance", 
+			new DoubleConfigValue("transitclock.core.layoverDistance", 
 					2000.0,
 					"How far vehicle can be away from layover stop and still "
 					+ "match to it. For when not deadheading to a trip. This "
@@ -507,7 +507,7 @@ public class CoreConfig {
 		return allowableEarlyTimeForEarlyDepartureSecs.getValue();		
 	}	
 	private static IntegerConfigValue allowableEarlyTimeForEarlyDepartureSecs = 
-			new IntegerConfigValue("transitime.core.allowableEarlyTimeForEarlyDepartureSecs", 
+			new IntegerConfigValue("transitclock.core.allowableEarlyTimeForEarlyDepartureSecs", 
 			5*Time.SEC_PER_MIN,
 			"How early in seconds a vehicle can have left terminal and have it be considered "
 					+ "an early departure instead of just moving around within "
@@ -527,7 +527,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue allowableEarlyDepartureTimeForLoggingEvent =
 			new IntegerConfigValue(
-					"transitime.core.allowableEarlyDepartureTimeForLoggingEvent",
+					"transitclock.core.allowableEarlyDepartureTimeForLoggingEvent",
 					60,
 					"How early in seconds a vehicle can depart a terminal "
 					+ "before it registers a VehicleEvent indicating a problem.");
@@ -543,7 +543,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue allowableLateDepartureTimeForLoggingEvent =
 			new IntegerConfigValue(
-					"transitime.core.allowableLateDepartureTimeForLoggingEvent",
+					"transitclock.core.allowableLateDepartureTimeForLoggingEvent",
 					4*Time.SEC_PER_MIN,
 					"How late in seconds a vehicle can depart a terminal "
 					+ "before it registers a VehicleEvent indicating a problem.");
@@ -561,7 +561,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue allowableLateAtTerminalForLoggingEvent =
 			new IntegerConfigValue(
-					"transitime.core.allowableLateAtTerminalForLoggingEvent",
+					"transitclock.core.allowableLateAtTerminalForLoggingEvent",
 					1*Time.SEC_PER_MIN,
 					"If a vehicle is sitting at a terminal and provides "
 					+ "another GPS report indicating that it is more than this "
@@ -580,7 +580,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue beforeStopDistance =
 			new DoubleConfigValue(
-					"transitime.core.beforeStopDistance", 
+					"transitclock.core.beforeStopDistance", 
 					50.0,
 					"How far a vehicle can be ahead of a stop in meters and " +
 					"be considered to have arrived.");
@@ -596,7 +596,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue afterStopDistance =
 			new DoubleConfigValue(
-					"transitime.core.afterStopDistance", 
+					"transitclock.core.afterStopDistance", 
 					50.0,
 					"How far a vehicle can be past a stop in meters and " +
 					"still be considered at the stop.");
@@ -611,7 +611,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue defaultBreakTimeSec =
 			new IntegerConfigValue(
-					"transitime.core.defaultBreakTimeSec", 
+					"transitclock.core.defaultBreakTimeSec", 
 					0,
 					"How long driver is expected to have a break for a stop.");
 	
@@ -626,7 +626,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue earlyToLateRatio =
 			new DoubleConfigValue(
-					"transitime.core.earlyToLateRatio", 
+					"transitclock.core.earlyToLateRatio", 
 					3.0,
 					"How much worse it is for a vehicle to be early as " +
 					"opposed to late when determining schedule adherence.");
@@ -644,7 +644,7 @@ public class CoreConfig {
 	}
 	private static BooleanConfigValue exclusiveBlockAssignments =
 			new BooleanConfigValue(
-					"transitime.core.exclusiveBlockAssignments", 
+					"transitclock.core.exclusiveBlockAssignments", 
 					true,
 					"True if block assignments should be exclusive. If set to "
 					+ "true then when a vehicle is assigned to a block the "
@@ -661,7 +661,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue timeForDeterminingNoProgress =
 			new IntegerConfigValue(
-					"transitime.core.timeForDeterminingNoProgress", 
+					"transitclock.core.timeForDeterminingNoProgress", 
 					8 * Time.MS_PER_MIN, 
 					"The interval in msec at which look at vehicle's history "
 					+ "to determine if it is not making any progress. A value"
@@ -674,7 +674,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue minDistanceForNoProgress =
 			new DoubleConfigValue(
-					"transitime.core.minDistanceForNoProgress",
+					"transitclock.core.minDistanceForNoProgress",
 					60.0,
 					"Minimum distance vehicle is expected to travel over "
 					+ "timeForDeterminingNoProgress to indicate vehicle is "
@@ -683,7 +683,7 @@ public class CoreConfig {
 					+ "made unpredictable.");
 	
 	/**
-	 * transitime.core.timeForDeterminingDelayedSecs
+	 * transitclock.core.timeForDeterminingDelayedSecs
 	 * 
 	 * @return
 	 */
@@ -692,13 +692,13 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue timeForDeterminingDelayedSecs =
 			new IntegerConfigValue(
-					"transitime.core.timeForDeterminingDelayedSecs", 
+					"transitclock.core.timeForDeterminingDelayedSecs", 
 					4 * Time.SEC_PER_MIN, 
 					"The interval in msec at which look at vehicle's history "
 					+ "to determine if it is delayed.");
 			
 	/**
-	 * transitime.core.minDistanceForDelayed
+	 * transitclock.core.minDistanceForDelayed
 	 * 
 	 * @return
 	 */
@@ -707,7 +707,7 @@ public class CoreConfig {
 	}
 	private static DoubleConfigValue minDistanceForDelayed =
 			new DoubleConfigValue(
-					"transitime.core.minDistanceForDelayed",
+					"transitclock.core.minDistanceForDelayed",
 					60.0,
 					"Minimum distance vehicle is expected to travel over "
 					+ "timeForDeterminingDelayed to indicate vehicle is "
@@ -718,7 +718,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue matchHistoryMaxSize =
 			new IntegerConfigValue(
-					"transitime.core.matchHistoryMaxSize",
+					"transitclock.core.matchHistoryMaxSize",
 					20,
 					"How many matches are kept in history for vehicle so that "
 					+ "can can do things such as look back at history to "
@@ -732,7 +732,7 @@ public class CoreConfig {
 	}
 	private static IntegerConfigValue avlHistoryMaxSize =
 			new IntegerConfigValue(
-					"transitime.core.avlHistoryMaxSize",
+					"transitclock.core.avlHistoryMaxSize",
 					20,
 					"How many AVL reports are kept in history for vehicle so "
 					+ "that can can do things such as look back at history to "
@@ -743,7 +743,7 @@ public class CoreConfig {
 	
 	private static IntegerConfigValue eventHistoryMaxSize =
 			new IntegerConfigValue(
-					"transitime.core.eventHistoryMaxSize",
+					"transitclock.core.eventHistoryMaxSize",
 					20,
 					"How many arrival depature event reports are kept in history for vehicle so "
 					+ "that can can do things such as look back at history");
@@ -756,7 +756,7 @@ public class CoreConfig {
 	}
 	private static StringConfigValue pidFileDirectory =
 			new StringConfigValue(
-					"transitime.core.pidDirectory", 
+					"transitclock.core.pidDirectory", 
 					"/home/ec2-user/pids/",
 					"Directory where pid file should be written. The pid file "
 					+ "can be used by monit to make sure that core process is "

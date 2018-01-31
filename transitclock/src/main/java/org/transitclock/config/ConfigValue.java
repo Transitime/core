@@ -36,7 +36,7 @@ import org.transitclock.logging.Markers;
  */
 public abstract class ConfigValue<T> {
 	// Name of the param. Also used as Java property name 
-	// (e.g. -Dtransitime.limit=2)
+	// (e.g. -Dtransitclock.limit=2)
 	protected final String id;
 	
 	// Value to use if not specified in config file. Can be null.

@@ -77,7 +77,7 @@ public class JMSWrapper {
 	
 	// Parameter that specifies URL of where to find the hornetq server
 	private static StringConfigValue hornetqServerURL = 
-			new StringConfigValue("transitime.ipc.hornetqServerURL", 
+			new StringConfigValue("transitclock.ipc.hornetqServerURL", 
 					"jnp://localhost:1099",
 					"The URL of the Hornet JMS service to use.");
 	public static String getHornetqServerURL() {

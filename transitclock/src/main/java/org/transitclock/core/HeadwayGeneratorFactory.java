@@ -23,7 +23,7 @@ import org.transitclock.utils.ClassInstantiator;
 /**
  * For instantiating a HeadwayGenerator object that generates headway info when
  * a new match is generated for a vehicle. The class to be instantiated can be
- * set using the config variable transitime.core.headwayGeneratorClass
+ * set using the config variable transitclock.core.headwayGeneratorClass
  * 
  * @author SkiBu Smith
  * 
@@ -32,7 +32,7 @@ public class HeadwayGeneratorFactory {
 
 	// The name of the class to instantiate
 	private static StringConfigValue className = 
-			new StringConfigValue("transitime.core.headwayGeneratorClass", 
+			new StringConfigValue("transitclock.core.headwayGeneratorClass", 
 					"org.transitclock.core.HeadwayGeneratorDefaultImpl",
 					"Specifies the name of the class used for generating " +
 					"headway data.");

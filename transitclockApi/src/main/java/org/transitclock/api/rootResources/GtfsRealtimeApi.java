@@ -51,7 +51,7 @@ public class GtfsRealtimeApi {
 
 	private static IntegerConfigValue gtfsRtCacheSeconds =
 			new IntegerConfigValue(
-					"transitime.api.gtfsRtCacheSeconds", 
+					"transitclock.api.gtfsRtCacheSeconds", 
 					DEFAULT_MAX_GTFS_RT_CACHE_SECS,
 					"How long to cache GTFS Realtime");
 

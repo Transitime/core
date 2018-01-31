@@ -54,7 +54,7 @@ public class GtfsRealtimeModule extends PollUrlAvlModule {
 		return gtfsRealtimeURI.getValue();
 	}
 	private static StringConfigValue gtfsRealtimeURI =
-			new StringConfigValue("transitime.avl.gtfsRealtimeFeedURI", 
+			new StringConfigValue("transitclock.avl.gtfsRealtimeFeedURI", 
 					"file:///C:/Users/Mike/gtfsRealtimeData",
 					"The URI of the GTFS-realtime feed to use.");
 

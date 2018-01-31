@@ -48,43 +48,43 @@ import org.transitclock.db.structs.AvlReport;
 public class SfmtaApiCaller {
 
 	private static StringConfigValue telemetryUrl = 
-			new StringConfigValue("transitime.sfmta.telemetryUrl", 
+			new StringConfigValue("transitclock.sfmta.telemetryUrl", 
 					"https://services.sfmta.com/shuttle/api/Telemetries/",
 					"The telemetry URL for the SFMTA API");
 
 	private static StringConfigValue stopsUrl = 
-			new StringConfigValue("transitime.sfmta.telemetryUrl", 
+			new StringConfigValue("transitclock.sfmta.telemetryUrl", 
 					"https://services.sfmta.com/shuttle/api/StopEvents/",
 					"The stops URL for the SFMTA API");
 
 	private static StringConfigValue login =
-			new StringConfigValue("transitime.sfmta.login",
+			new StringConfigValue("transitclock.sfmta.login",
 					"TransitTimeApiUser",
 					"Login for basic authentication.");
 	
 	private static StringConfigValue password =
-			new StringConfigValue("transitime.sfmta.password",
+			new StringConfigValue("transitclock.sfmta.password",
 					"SFMTA$hutt1e$3G",
 					"Password for basic authentication.");
 	
 	private static StringConfigValue techProviderId = 
-			new StringConfigValue("transitime.sfmta.techProviderId", 
+			new StringConfigValue("transitclock.sfmta.techProviderId", 
 					"248",
 					"The TechProviderId for the SFMTA API");
 
 	private static StringConfigValue shuttleCompanyId = 
-			new StringConfigValue("transitime.sfmta.shuttleCompanyId", 
+			new StringConfigValue("transitclock.sfmta.shuttleCompanyId", 
 					"11",
 					"The ShuttleCompanyId for the SFMTA API");
 
 	private static IntegerConfigValue timeout =
-			new IntegerConfigValue("transitime.sfmta.timeout",
+			new IntegerConfigValue("transitclock.sfmta.timeout",
 					10000,
 					"Timeout in msec for API calls. A timeout of 0 is "
 					+ "interpreted as an infinit timeout.");
 	
 	private static IntegerConfigValue avlReportsBatchSize =
-			new IntegerConfigValue("transitime.sfmta.avlReportsBatchSize",
+			new IntegerConfigValue("transitclock.sfmta.avlReportsBatchSize",
 					10,
 					"Won't actually post AVL reports to SFMTA API until this "
 					+ "many have been received.");

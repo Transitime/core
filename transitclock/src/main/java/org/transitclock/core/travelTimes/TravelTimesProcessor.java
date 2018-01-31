@@ -101,7 +101,7 @@ public class TravelTimesProcessor {
 		return resetEarlyTerminalDepartures.getValue();
 	}
 	private static BooleanConfigValue resetEarlyTerminalDepartures =
-			new BooleanConfigValue("transitime.travelTimes.resetEarlyTerminalDepartures",
+			new BooleanConfigValue("transitclock.travelTimes.resetEarlyTerminalDepartures",
 					true,
 					"For some agencies vehicles won't be departing terminal "
 					+ "early. If an early departure is detected for such an "
@@ -112,7 +112,7 @@ public class TravelTimesProcessor {
 		return maxTravelTimeSegmentLength.getValue();
 	}
 	private static DoubleConfigValue maxTravelTimeSegmentLength =
-			new DoubleConfigValue("transitime.traveltimes.maxTravelTimeSegmentLength",
+			new DoubleConfigValue("transitclock.traveltimes.maxTravelTimeSegmentLength",
 					250.0,
 					"The longest a travel time segment can be. If a stop path "
 					+ "is longer than this distance then it will be divided "
@@ -122,7 +122,7 @@ public class TravelTimesProcessor {
 		return minSegmentSpeedMps.getValue();
 	}
 	private static DoubleConfigValue minSegmentSpeedMps =
-			new DoubleConfigValue("transitime.traveltimes.minSegmentSpeedMps",
+			new DoubleConfigValue("transitclock.traveltimes.minSegmentSpeedMps",
 					0.0,
 					"If a travel time segment is determined to have a lower "
 					+ "speed than this value in meters/sec then the travel time"
@@ -131,7 +131,7 @@ public class TravelTimesProcessor {
 					+ "bad data.");
 	
 	private static DoubleConfigValue maxSegmentSpeedMps =
-			new DoubleConfigValue("transitime.traveltimes.maxSegmentSpeedMps",
+			new DoubleConfigValue("transitclock.traveltimes.maxSegmentSpeedMps",
 					27.0, // 27.0m/s = 60mph
 					"If a travel time segment is determined to have a higher "
 					+ "speed than this value in meters/second then the travel "
@@ -529,7 +529,7 @@ public class TravelTimesProcessor {
 				&& arrDep1.getTime() < arrDep1.getScheduledTime()) {
 			logger.debug("Note: for {} using scheduled departure time instead "
 					+ "of the calculated departure time since "
-					+ "transitime.travelTimes.resetEarlyTerminalDepartures is "
+					+ "transitclock.travelTimes.resetEarlyTerminalDepartures is "
 					+ "true and the departure time was (likely incorrectly) "
 					+ "calculated to be before the scheduled departure time",
 					arrDep1);

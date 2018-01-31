@@ -57,7 +57,7 @@ public class TimeoutHandlerModule extends Module {
 
 	private static IntegerConfigValue pollingRateSecs = 
 			new IntegerConfigValue(
-					"transitime.timeout.pollingRateSecs", 
+					"transitclock.timeout.pollingRateSecs", 
 					30,
 					"Specifies in seconds how frequently the TimeoutHandler "
 					+ "should actually look for timeouts. Don't want to do "
@@ -68,7 +68,7 @@ public class TimeoutHandlerModule extends Module {
 
 	private static IntegerConfigValue allowableNoAvlSecs =
 			new IntegerConfigValue(
-					"transitime.timeout.allowableNoAvlSecs", 
+					"transitclock.timeout.allowableNoAvlSecs", 
 					6*Time.SEC_PER_MIN,
 					"For AVL timeouts. If don't get an AVL report for the "
 					+ "vehicle in this amount of time in seconds then the " 
@@ -76,7 +76,7 @@ public class TimeoutHandlerModule extends Module {
 
 	private static IntegerConfigValue allowableNoAvlAfterSchedDepartSecs = 
 			new IntegerConfigValue(
-					"transitime.timeout.allowableNoAvlAfterSchedDepartSecs",
+					"transitclock.timeout.allowableNoAvlAfterSchedDepartSecs",
 					6 * Time.SEC_PER_MIN,
 					"If a vehicle is at a wait stop, such as "
 					+ "sitting at a terminal, and doesn't provide an AVL report "

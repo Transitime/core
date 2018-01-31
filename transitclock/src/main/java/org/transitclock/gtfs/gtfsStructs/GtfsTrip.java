@@ -46,7 +46,7 @@ public class GtfsTrip extends CsvBase {
 	// trip_short_name is not specified in GTFS file.
 	// Default of null means simply use trip_id without any modification.
 	private static StringConfigValue tripShortNameRegEx = new StringConfigValue(
-			"transitime.gtfs.tripShortNameRegEx", 
+			"transitclock.gtfs.tripShortNameRegEx", 
 			null,
 			"For agencies where trip short name not specified can use this "
 			+ "regular expression to determine the short name from the trip "
@@ -57,7 +57,7 @@ public class GtfsTrip extends CsvBase {
 	// For determining proper block_id that corresponds to AVL feed
 	// Default of null means simply use block_id without any modification.
 	private static StringConfigValue blockIdRegEx = new StringConfigValue(
-			"transitime.gtfs.blockIdRegEx", 
+			"transitclock.gtfs.blockIdRegEx", 
 			null,
 			"For agencies where block ID from GTFS datda needs to be modified "
 			+ "to match that of the AVL feed. Can use this "
@@ -213,7 +213,7 @@ public class GtfsTrip extends CsvBase {
 	
 	/**
 	 * Many agencies don't specify a trip_short_name. For these use the trip_id
-	 * or if the transitime.gtfs.tripShortNameRegEx is set to determine a group
+	 * or if the transitclock.gtfs.tripShortNameRegEx is set to determine a group
 	 * then use that group in the tripId. For example, if tripId is
 	 * "345-long unneeded description" and the regex is set to "(.*?)-" then
 	 * returned trip short name will be 345.
@@ -254,7 +254,7 @@ public class GtfsTrip extends CsvBase {
 	
 	/**
 	 * In case block IDs from GTFS needs to be modified to match block IDs from
-	 * AVL feed. Uses the property transitime.gtfs.blockIdRegEx if it is not
+	 * AVL feed. Uses the property transitclock.gtfs.blockIdRegEx if it is not
 	 * null.
 	 * 
 	 * @param originalBlockId

@@ -38,7 +38,7 @@ import org.transitclock.db.hibernate.HibernateUtils;
  * This way can keep track of reason for processing config, when it was run,
  * etc.
  *
- * @author Michael Smith (michael@transitime.org)
+ * @author Michael Smith (michael@transitclock.org)
  *
  */
 @Entity @DynamicUpdate

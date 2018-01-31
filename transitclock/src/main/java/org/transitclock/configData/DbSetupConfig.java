@@ -32,17 +32,17 @@ public class DbSetupConfig {
 		return dbName.getValue();
 	}
 	private static StringConfigValue dbName = 
-			new StringConfigValue("transitime.db.dbName", 
+			new StringConfigValue("transitclock.db.dbName", 
 					null, // Null as default to use the projectId
 					"Specifies the name of the database. If not set then the "
-					+ "transitime.core.agencyId will be used.");
+					+ "transitclock.core.agencyId will be used.");
 
 	
 	public static String getDbHost() {
 		return dbHost.getValue();
 	}
 	private static StringConfigValue dbHost = 
-			new StringConfigValue("transitime.db.dbHost", 
+			new StringConfigValue("transitclock.db.dbHost", 
 					null, // Null as default so can get it from hibernate config
 					"Specifies the name of the machine the database for the " +
 					"project resides on. Use null value to use values from " +
@@ -53,7 +53,7 @@ public class DbSetupConfig {
 		return dbType.getValue();
 	}
 	private static StringConfigValue dbType =
-			new StringConfigValue("transitime.db.dbType",
+			new StringConfigValue("transitclock.db.dbType",
 					"mysql",
 					"Specifies type of database when creating the URL to "
 					+ "connect to the database. Can be mysql or postgresql. "
@@ -63,7 +63,7 @@ public class DbSetupConfig {
 		return dbUserName.getValue();
 	}
 	private static StringConfigValue dbUserName = 
-			new StringConfigValue("transitime.db.dbUserName", 
+			new StringConfigValue("transitclock.db.dbUserName", 
 					null,
 					"Specifies login for the project database. Use null " +
 					"value to use values from hibernate config file.");
@@ -72,7 +72,7 @@ public class DbSetupConfig {
 		return dbPassword.getValue();
 	}
 	private static StringConfigValue dbPassword = 
-			new StringConfigValue("transitime.db.dbPassword", 
+			new StringConfigValue("transitclock.db.dbPassword", 
 					null,
 					"Specifies password for the project database. Use null " +
 					"value to use values from hibernate config file.",
@@ -82,7 +82,7 @@ public class DbSetupConfig {
 		return socketTimeoutSec.getValue();
 	}
 	public static IntegerConfigValue socketTimeoutSec =
-			new IntegerConfigValue("transitime.db.socketTimeoutSec", 
+			new IntegerConfigValue("transitclock.db.socketTimeoutSec", 
 					60,
 					"So can set low-level socket timeout for JDBC connections. "
 					+ "Useful for when a session dies during a request, such as "
@@ -97,7 +97,7 @@ public class DbSetupConfig {
 		return hibernateConfigFileName.getValue();
 	}
 	private static StringConfigValue hibernateConfigFileName = 
-			new StringConfigValue("transitime.hibernate.configFile", 
+			new StringConfigValue("transitclock.hibernate.configFile", 
 					"hsql_hibernate.cfg.xml",
 					"Specifies the database dependent hibernate.cfg.xml file "
 					+ "to use to configure hibernate. The system will look both "
@@ -108,7 +108,7 @@ public class DbSetupConfig {
         return batchSize.getValue();
     }
     private static IntegerConfigValue batchSize =
-            new IntegerConfigValue("transitime.db.batchSize",
+            new IntegerConfigValue("transitclock.db.batchSize",
                     100,
                     "Specifies the database batch size, defaults to 100");
 

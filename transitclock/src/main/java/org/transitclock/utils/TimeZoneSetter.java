@@ -33,7 +33,7 @@ public class TimeZoneSetter {
 		return timezone.getValue();
 	}
 	private static StringConfigValue timezone =
-			new StringConfigValue("transitime.core.timezone", 
+			new StringConfigValue("transitclock.core.timezone", 
 					"For setting timezone for application. Ideally would get "
 					+ "timezone from the agency db but once a Hibernate "
 					+ "session factory is created, such as for reading "
@@ -43,7 +43,7 @@ public class TimeZoneSetter {
 	
 	/**
 	 * For setting timezone for application to name specified by the Java
-	 * property transitime.core.timezone. Ideally would get timezone from the
+	 * property transitclock.core.timezone. Ideally would get timezone from the
 	 * agency db but once a Hibernate session factory is created, such as for
 	 * reading timezone from db, then it is too late to set the timezone.
 	 * Therefore this provides ability to set it manually.

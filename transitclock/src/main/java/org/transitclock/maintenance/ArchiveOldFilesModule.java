@@ -41,27 +41,27 @@ public class ArchiveOldFilesModule extends Module {
 	/******************** Parameters ************************************/
 
 	private static StringConfigValue timeToArchive =
-			new StringConfigValue("transitime.maintenance.timeToArchive", 
+			new StringConfigValue("transitclock.maintenance.timeToArchive", 
 					"01:00:00", // 1 am
 					"Specified time of day that should archive files. Should "
 					+ "usually be run in middle of night when load is less. "
 					+ "Time is in the format HH:MM:SS");
 
 	private static StringConfigValue awsRegion =
-			new StringConfigValue("transitime.maintenance.awsRegion",
+			new StringConfigValue("transitclock.maintenance.awsRegion",
 					AwsGlacier.OREGON_REGION,
 					"The region for Amazon AWS where files should be archive "
 					+ "to.");
 
 	private static StringConfigValue logDirForInventoryFile =
-			new StringConfigValue("transitime.maintenance.logDirForInventoryFile",
+			new StringConfigValue("transitclock.maintenance.logDirForInventoryFile",
 					"Directory where to write the inventory file that lists "
 					+ "the archiveIds and other info for the data written "
 					+ "to the specified vault. Should be something like "
 					+ "D:/Logs/mbta");
 	
 	private static StringConfigValue logFileBaseDir =
-			new StringConfigValue("transitime.maintenance.logFileBaseDir",
+			new StringConfigValue("transitclock.maintenance.logFileBaseDir",
 					"Where to find the log files. This part of the directory "
 					+ "name is not included in the file description for each "
 					+ "file in the archived zip file. This way the file names "
@@ -70,39 +70,39 @@ public class ArchiveOldFilesModule extends Module {
 					+ "D:/Logs/mbta/core/2014/12/20.");
 	
 	private static StringConfigValue awsVaultName =
-			new StringConfigValue("transitime.maintenance.awsVaultName",
+			new StringConfigValue("transitclock.maintenance.awsVaultName",
 					"For creating the vault name for archiving files to AWS "
 					+ "Glacier. Should contain the agency name such that will "
 					+ "be something like mbta-core");
 	
 	private static StringConfigValue awsVaultName2 =
-			new StringConfigValue("transitime.maintenance.awsVaultName2",
+			new StringConfigValue("transitclock.maintenance.awsVaultName2",
 					null,
 					"For when making two separate archives. Can use two "
 					+ "archives if some files should be archived sooner "
 					+ "that others. Null means not using second archive.");
 
 	private static StringConfigValue logFileSubDirectory =
-			new StringConfigValue("transitime.maintenance.logFileSubDir",
+			new StringConfigValue("transitclock.maintenance.logFileSubDir",
 					"The subdirectory beyond the base directory. Specifies "
 					+ "where to find the log files to be archived. This part "
 					+ "of the file names is included in the file descriptions "
 					+ "in the zip file. Should be something like mbta/core");
 
 	private static StringConfigValue logFileSubDirectory2 =
-			new StringConfigValue("transitime.maintenance.logFileSubDir2",
+			new StringConfigValue("transitclock.maintenance.logFileSubDir2",
 					null,
 					"For when making two separate archives. Can use two "
 					+ "archives if some files should be archived sooner "
 					+ "that others. Null means not using second archive.");
 	
 	private static IntegerConfigValue daysTillFilesArchived =
-			new IntegerConfigValue("transitime.maintenance.daysTillFilesArchived",
+			new IntegerConfigValue("transitclock.maintenance.daysTillFilesArchived",
 					90,
 					"How many days old files can be online before they are archived.");
 	
 	private static IntegerConfigValue daysTillFilesArchived2 =
-			new IntegerConfigValue("transitime.maintenance.daysTillFilesArchived2",
+			new IntegerConfigValue("transitclock.maintenance.daysTillFilesArchived2",
 					90,
 					"For when making two separate archives. Can use two "
 					+ "archives if some files should be archived sooner "

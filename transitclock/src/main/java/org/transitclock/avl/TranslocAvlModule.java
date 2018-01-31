@@ -45,18 +45,18 @@ import org.json.JSONObject;
  */
 public class TranslocAvlModule extends PollUrlAvlModule {
 	private static StringConfigValue feedUrl = 
-			new StringConfigValue("transitime.avl.transloc.url", 
+			new StringConfigValue("transitclock.avl.transloc.url", 
 					"https://transloc-api-1-2.p.mashape.com/",
 					"The URL of the Transloc API to use.");
 
 	private static StringConfigValue feedAgencyId =
-			new StringConfigValue("transitime.avl.transloc.agencyId",
+			new StringConfigValue("transitclock.avl.transloc.agencyId",
 					"255",
 					"The number Transloc agency ID obtained using the Transloc "
 					+ "API agencies.json command.");
 	
 	private static StringConfigValue apiKey =
-			new StringConfigValue("transitime.avl.transloc.apiKey", 
+			new StringConfigValue("transitclock.avl.transloc.apiKey", 
 					"tXHlJmqevJmsh4q37xKuv3k2vfZ5p1VbAvPjsnwErq18jMCSmb",
 					"The API key for the Transloc API.");
 	

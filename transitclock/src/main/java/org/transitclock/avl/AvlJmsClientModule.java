@@ -52,13 +52,13 @@ public class AvlJmsClientModule extends Module {
 	private final static int MAX_THREADS = 100;
 
 	private static IntegerConfigValue avlQueueSize = 
-			new IntegerConfigValue("transitime.avl.jmsQueueSize", 350,
+			new IntegerConfigValue("transitclock.avl.jmsQueueSize", 350,
 					"How many items to go into the blocking AVL queue "
 					+ "before need to wait for queue to have space. "
 					+ "Only for when JMS is used.");
 
 	private static IntegerConfigValue numAvlThreads = 
-			new IntegerConfigValue("transitime.avl.jmsNumThreads", 1,
+			new IntegerConfigValue("transitclock.avl.jmsNumThreads", 1,
 					"How many threads to be used for processing the AVL " +
 					"data. For most applications just using a single thread " +
 					"is probably sufficient and it makes the logging simpler " +

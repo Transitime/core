@@ -52,7 +52,7 @@ public class AgencyMonitor {
 	private static final Logger logger = LoggerFactory
 			.getLogger(AgencyMonitor.class);
 
-    private static final String enableSystemMonitoring = System.getProperty("transitime.enableSystemMonitoring");
+    private static final String enableSystemMonitoring = System.getProperty("transitclock.enableSystemMonitoring");
 
 	/********************** Member Functions **************************/
 

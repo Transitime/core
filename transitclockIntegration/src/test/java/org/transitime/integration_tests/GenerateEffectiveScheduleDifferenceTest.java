@@ -1,4 +1,4 @@
-package org.transitime.integration_tests;
+package org.transitclock.integration_tests;
 
 import org.junit.Test;
 import org.slf4j.Logger;

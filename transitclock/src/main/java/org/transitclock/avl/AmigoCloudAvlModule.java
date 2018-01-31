@@ -46,7 +46,7 @@ import org.transitclock.utils.Time;
  */
 public class AmigoCloudAvlModule extends AvlModule {
 	private static StringConfigValue feedUrl = new StringConfigValue(
-			"transitime.avl.amigocloud.apiToken",
+			"transitclock.avl.amigocloud.apiToken",
 			"R:0pKSjytdXHfGMfWdRjY5xGGUU3FgaamySwDK0u",
 			"The API token obtained from AmigoCloud via "
 					+ "https://www.amigocloud.com/accounts/tokens that allows "
@@ -54,17 +54,17 @@ public class AmigoCloudAvlModule extends AvlModule {
 
 	private static LongConfigValue userId =
 			new LongConfigValue(
-					"transitime.avl.amigocloud.userId",
+					"transitclock.avl.amigocloud.userId",
 					1194L,
 					"The ID of the client. Obtained using the amigocloud api "
 							+ "token via \"curl https://www.amigocloud.com/api/v1/me?token=API_TOKEN\"");
 
 	private static LongConfigValue projectId = new LongConfigValue(
-			"transitime.avl.amigocloud.projectId", 661L,
+			"transitclock.avl.amigocloud.projectId", 661L,
 			"The amigocloud ID of the agency that getting AVL data " + "from.");
 
 	private static LongConfigValue datasetId = new LongConfigValue(
-			"transitime.avl.amigocloud.datasetId", 12556L,
+			"transitclock.avl.amigocloud.datasetId", 12556L,
 			"The amigocloud ID of the dataset for the agency that "
 					+ "getting AVL data from.");
 

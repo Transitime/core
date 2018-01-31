@@ -901,7 +901,7 @@ public class AvlReport implements Serializable {
 				matchesUnpredictableAssignment(assignmentId))
 			logger.debug("For vehicleId={} was assigned to \"{}\" but that " +
 					"assignment is not considered valid due to " +
-					"transitime.avl.unpredictableAssignmentsRegEx being set " +
+					"transitclock.avl.unpredictableAssignmentsRegEx being set " +
 					"to \"{}\"", 
 					vehicleId, assignmentId, 
 					AvlConfig.getUnpredictableAssignmentsRegEx());

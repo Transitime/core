@@ -286,7 +286,7 @@ public class TemporalMatcher {
 	 * since system will expect a longer and longer travel time for vehicle to
 	 * go back to layover and then to the spatial match. So could get incorrect
 	 * layover match for quiet a while, until the layover distance
-	 * transitime.core.layoverDistance, which can be large, is exceeded.
+	 * transitclock.core.layoverDistance, which can be large, is exceeded.
 	 * 
 	 * Therefore need to filter out such problematic layover matches. This is
 	 * done by seeing if past schedule time for the layover match (before the

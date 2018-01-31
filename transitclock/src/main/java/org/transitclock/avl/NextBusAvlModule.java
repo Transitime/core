@@ -44,7 +44,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	
 	// Parameter that specifies URL of the NextBus feed.
 	private static StringConfigValue nextBusFeedUrl = 
-			new StringConfigValue("transitime.avl.nextbus.url", 
+			new StringConfigValue("transitclock.avl.nextbus.url", 
 					"http://webservices.nextbus.com/service/publicXMLFeed",
 					"The URL of the NextBus feed to use.");
 	private static String getNextBusFeedUrl() {
@@ -54,9 +54,9 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	// Config param that specifies the agency name to use as part
 	// of the NextBus feed URL.
 	private static StringConfigValue agencyNameForFeed =
-			new StringConfigValue("transitime.avl.nextbus.agencyNameForFeed",
+			new StringConfigValue("transitclock.avl.nextbus.agencyNameForFeed",
 					"If set then specifies the agency name to use for the "
-					+ "feed. If not set then the transitime.core.agencyId "
+					+ "feed. If not set then the transitclock.core.agencyId "
 					+ "is used.");
 	protected String getAgencyNameForFeed() {
 		return agencyNameForFeed.getValue();
@@ -64,7 +64,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	
 	private static BooleanConfigValue useTripShortNameForAssignment =
 			new BooleanConfigValue(
-					"transitime.avl.nextbus.useTripShortNameForAssignment",
+					"transitclock.avl.nextbus.useTripShortNameForAssignment",
 					false,
 					"For some agencies the block info in the feed doesn't "
 					+ "match the GTFS data. For these can sometimes use the "
@@ -78,7 +78,7 @@ public class NextBusAvlModule extends XmlPollingAvlModule {
 	// decreased.
 	private static IntegerConfigValue apiClockSkewMsecs =
 			new IntegerConfigValue(
-					"transitime.avl.nextbus.apiClockSkewMsecs",
+					"transitclock.avl.nextbus.apiClockSkewMsecs",
 					0,
 					"Determining GPS time from API is kludgey. Only have "
 					+ "secsSinceReport attribute in API. Sometimes, probably "

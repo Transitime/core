@@ -57,7 +57,7 @@ public class PlaybackModule extends Module {
 		return playbackVehicleId.getValue();
 	}
 	private static StringConfigValue playbackVehicleId =
-			new StringConfigValue("transitime.avl.playbackVehicleId", 
+			new StringConfigValue("transitclock.avl.playbackVehicleId", 
 					"",
 					"ID of vehicle to playback.");
 
@@ -65,17 +65,17 @@ public class PlaybackModule extends Module {
 		return playbackStartTimeStr.getValue();
 	}
 	private static StringConfigValue playbackStartTimeStr =
-			new StringConfigValue("transitime.avl.playbackStartTime", 
+			new StringConfigValue("transitclock.avl.playbackStartTime", 
 					"",
 					"Date and time of when to start the playback.");
 	
 	private static StringConfigValue playbackEndTimeStr =
-			new StringConfigValue("transitime.avl.playbackEndTime", 
+			new StringConfigValue("transitclock.avl.playbackEndTime", 
 					"",
 					"Date and time of when to end the playback.");
 
 	private static BooleanConfigValue playbackRealtime =
-			new BooleanConfigValue("transitime.avl.playbackRealtime", 
+			new BooleanConfigValue("transitclock.avl.playbackRealtime", 
 					false,
 					"Playback at normal time speed rather than as fast as possible.");
 	/********************* Logging **************************/
@@ -110,7 +110,7 @@ public class PlaybackModule extends Module {
 			// If specified time is in the future then reject.
 			if (playbackStartTime > System.currentTimeMillis()) {
 				logger.error("Playback start time \"{}\" specified by " +
-						"transitime.avl.playbackStartTime parameter is in " +
+						"transitclock.avl.playbackStartTime parameter is in " +
 						"the future and therefore invalid!",
 						playbackStartTimeStr);
 				System.exit(-1);					
@@ -119,7 +119,7 @@ public class PlaybackModule extends Module {
 			return playbackStartTime;
 		} catch (java.text.ParseException e) {
 			logger.error("Paramater -t \"{}\" specified by " +
-					"transitime.avl.playbackStartTime parameter could not " +
+					"transitclock.avl.playbackStartTime parameter could not " +
 					"be parsed. Format must be \"MM-dd-yyyy HH:mm:ss\"",
 					playbackStartTimeStr);
 			System.exit(-1);
@@ -136,7 +136,7 @@ public class PlaybackModule extends Module {
 			// If specified time is in the future then reject.
 			if (playbackEndTime > System.currentTimeMillis()) {
 				logger.error("Playback end time \"{}\" specified by " +
-						"transitime.avl.playbackEndTime parameter is in " +
+						"transitclock.avl.playbackEndTime parameter is in " +
 						"the future and therefore invalid!",
 						playbackEndTimeStr);
 				System.exit(-1);					
@@ -145,7 +145,7 @@ public class PlaybackModule extends Module {
 			return playbackEndTime;
 		} catch (java.text.ParseException e) {
 			logger.error("Paramater -t \"{}\" specified by " +
-					"transitime.avl.playbackEndTime parameter could not " +
+					"transitclock.avl.playbackEndTime parameter could not " +
 					"be parsed. Format must be \"MM-dd-yyyy HH:mm:ss\"",
 					playbackEndTimeStr);
 			System.exit(-1);

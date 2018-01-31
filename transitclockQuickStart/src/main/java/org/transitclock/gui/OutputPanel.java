@@ -92,7 +92,7 @@ public class OutputPanel {
 		textField = new JTextField();
 		textField.setColumns(10);
 		//gets the agencyid
-		agencyid=System.getProperties().getProperty("transitime.core.agencyId");
+		agencyid=System.getProperties().getProperty("transitclock.core.agencyId");
 		textField.setText("http://127.0.0.1:8080/api/v1/key/"+apiKey+"/agency/"+agencyid+"/command/gtfs-rt/tripUpdates");
 		
 		JLabel lblVechiclePositionsUrl = new JLabel("Vechicle Positions URL");

@@ -60,7 +60,7 @@ public class ScheduleGenerator {
 	// Read in configuration files. This should be done statically before
 	// the logback LoggerFactory.getLogger() is called so that logback can
 	// also be configured using a transitime config file. The files are
-	// specified using the java system property -Dtransitime.configFiles .
+	// specified using the java system property -Dtransitclock.configFiles .
 	static {
 		ConfigFileReader.processConfig();
 	}
@@ -78,7 +78,7 @@ public class ScheduleGenerator {
 	 */
 	private static void displayCommandLineOptions(Options options) {
 		// Display help
-		final String commandLineSyntax = "java transitime.jar";
+		final String commandLineSyntax = "java transitclock.jar";
 		final PrintWriter writer = new PrintWriter(System.out);
 		final HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.printHelp(writer,
@@ -91,7 +91,7 @@ public class ScheduleGenerator {
 								null,          // footer
 								true);         // displayUsage
 		writer.write("Also need to set VM parameters: \n" + 
-							" -Dtransitime.core.agencyId=<agencyId>\n");
+							" -Dtransitclock.core.agencyId=<agencyId>\n");
 		writer.close();
 	}
 
@@ -211,7 +211,7 @@ public class ScheduleGenerator {
 			System.exit(0);
 		}
 		
-		// Get project ID from VM param transitime.core.agencyId
+		// Get project ID from VM param transitclock.core.agencyId
 		agencyId = AgencyConfig.getAgencyId();
 		if (agencyId == null) {
 			displayCommandLineOptions(options);

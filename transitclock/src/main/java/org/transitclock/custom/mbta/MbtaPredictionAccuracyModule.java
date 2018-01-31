@@ -62,7 +62,7 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 	/********************** Config Params **************************/
 	
 	private static final StringConfigValue externalPredictionApiUrl = 
-			new StringConfigValue("transitime.predAccuracy.externalPredictionApiUrl", 
+			new StringConfigValue("transitclock.predAccuracy.externalPredictionApiUrl", 
 					"http://realtime.mbta.com/developer/api/v2/predictionsbyroute?",
 					"URL to access to obtain external predictions.");
 	
@@ -71,7 +71,7 @@ public class MbtaPredictionAccuracyModule extends PredictionAccuracyModule {
 	}
 
 	private static final StringConfigValue apiKey = 
-			new StringConfigValue("transitime.predAccuracy.apiKey", 
+			new StringConfigValue("transitclock.predAccuracy.apiKey", 
 					"wX9NwuHnZU2ToO7GmGR9uw",
 					"The API key to use when accessing the external prediction "
 					+ "feed. The default value is the public MBTA key, which "

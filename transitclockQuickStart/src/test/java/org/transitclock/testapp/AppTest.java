@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.testapp;
+package org.transitclock.testapp;
 
 import org.hsqldb.server.Server;
 

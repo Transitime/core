@@ -77,9 +77,9 @@ public class PlaybackModule {
 	}
 	
 	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log, AvlPostProcessor processor) {
-		System.setProperty("transitime.avl.csvAvlFeedFileName", avlReportsCsv);
-		System.setProperty("transitime.configFiles", transitimeConfigFile);
-		System.setProperty("transitime.core.agencyId", agencyId);
+		System.setProperty("transitclock.avl.csvAvlFeedFileName", avlReportsCsv);
+		System.setProperty("transitclock.configFiles", transitimeConfigFile);
+		System.setProperty("transitclock.core.agencyId", agencyId);
 			
 		ConfigFileReader.processConfig();
 		

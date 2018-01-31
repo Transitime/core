@@ -58,13 +58,13 @@ public class AvlSqsClientModule extends Module {
   private static final int DEFAULT_MESSAGE_LOG_FREQUENCY = 10000;
   
   private static IntegerConfigValue avlQueueSize = 
-      new IntegerConfigValue("transitime.avl.jmsQueueSize", 350,
+      new IntegerConfigValue("transitclock.avl.jmsQueueSize", 350,
           "How many items to go into the blocking AVL queue "
           + "before need to wait for queue to have space. "
           + "Only for when JMS is used.");
 
   private static IntegerConfigValue numAvlThreads = 
-      new IntegerConfigValue("transitime.avl.jmsNumThreads", 1,
+      new IntegerConfigValue("transitclock.avl.jmsNumThreads", 1,
           "How many threads to be used for processing the AVL " +
           "data. For most applications just using a single thread " +
           "is probably sufficient and it makes the logging simpler " +
@@ -74,37 +74,37 @@ public class AvlSqsClientModule extends Module {
           "are used. Only for when JMS is used.");
   
   private static IntegerConfigValue messageLogFrequency =
-      new IntegerConfigValue("transitime.avl.messageLogFrequency", 
+      new IntegerConfigValue("transitclock.avl.messageLogFrequency", 
           DEFAULT_MESSAGE_LOG_FREQUENCY, 
           "How often (in count of message) a log message is output " +
           "confirming messages have been received");
   
   private static StringConfigValue avlUrl =
-      new StringConfigValue("transitime.avl.sqsUrl", null, "The SQS URL from AWS");
+      new StringConfigValue("transitclock.avl.sqsUrl", null, "The SQS URL from AWS");
 
   private static StringConfigValue sqsKey =
-      new StringConfigValue("transitime.avl.sqsKey", null, "The AWS Key with SQS read access");
+      new StringConfigValue("transitclock.avl.sqsKey", null, "The AWS Key with SQS read access");
 
   private static StringConfigValue sqsSecret =
-      new StringConfigValue("transitime.avl.sqsSecret", null, "The AWS Secret with SQS read access");
+      new StringConfigValue("transitclock.avl.sqsSecret", null, "The AWS Secret with SQS read access");
 
   
   private static StringConfigValue snsKey =
-      new StringConfigValue("transitime.avl.snsKey", null, "The AWS Key with SNS write access");
+      new StringConfigValue("transitclock.avl.snsKey", null, "The AWS Key with SNS write access");
 
   private static StringConfigValue snsSecret =
-      new StringConfigValue("transitime.avl.snsSecret", null, "The AWS Secret with SNS write access");
+      new StringConfigValue("transitclock.avl.snsSecret", null, "The AWS Secret with SNS write access");
   
   private static StringConfigValue snsArn =
-      new StringConfigValue("transitime.avl.snsArn", null, "The AWS SNS ARN to write to");
+      new StringConfigValue("transitclock.avl.snsArn", null, "The AWS SNS ARN to write to");
 
   private static ClassConfigValue unmarshallerConfig =
-      new ClassConfigValue("transitime.avl.unmarshaller", WmataAvlTypeUnmarshaller.class, 
+      new ClassConfigValue("transitclock.avl.unmarshaller", WmataAvlTypeUnmarshaller.class, 
           "Implementation of SqsMessageUnmarshaller to perform " + 
       "the deserialization of SQS Message objects into AVLReport objects");
 
   private static StringConfigValue applicableList =
-      new StringConfigValue("transitime.avl.filterVehicleIdList", null, "List of vehicle Ids to filter on");
+      new StringConfigValue("transitclock.avl.filterVehicleIdList", null, "List of vehicle Ids to filter on");
   
     public AvlSqsClientModule(String agencyId) throws Exception {
       super(agencyId);

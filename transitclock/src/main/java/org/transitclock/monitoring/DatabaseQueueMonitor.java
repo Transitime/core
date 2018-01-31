@@ -35,14 +35,14 @@ public class DatabaseQueueMonitor extends MonitorBase {
     private CloudwatchService cloudwatchService;
 
 	DoubleConfigValue maxQueueFraction = new DoubleConfigValue(
-			"transitime.monitoring.maxQueueFraction", 
+			"transitclock.monitoring.maxQueueFraction", 
 			0.4, 
 			"If database queue fills up by more than this 0.0 - 1.0 "
 			+ "fraction then database monitoring is triggered.");
 	
 	private static DoubleConfigValue maxQueueFractionGap =
 			new DoubleConfigValue(
-					"transitime.monitoring.maxQueueFractionGap", 
+					"transitclock.monitoring.maxQueueFractionGap", 
 					0.1, 
 					"When transitioning from triggered to untriggered don't "
 					+ "want to send out an e-mail right away if actually "

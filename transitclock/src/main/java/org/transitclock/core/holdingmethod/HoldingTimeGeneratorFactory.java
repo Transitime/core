@@ -9,7 +9,7 @@ import org.transitclock.utils.ClassInstantiator;
 public class HoldingTimeGeneratorFactory {
 	// The name of the class to instantiate
 		private static StringConfigValue className = 
-				new StringConfigValue("transitime.core.holdingTimeGeneratorClass", 
+				new StringConfigValue("transitclock.core.holdingTimeGeneratorClass", 
 						"org.transitclock.core.holdingmethod.HoldingTimeGeneratorDefaultImpl",
 						"Specifies the name of the class used for generating " +
 						"holding times.");

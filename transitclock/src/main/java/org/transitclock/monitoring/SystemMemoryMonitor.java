@@ -41,7 +41,7 @@ import org.transitclock.utils.StringUtils;
 public class SystemMemoryMonitor extends MonitorBase {
 
 	LongConfigValue availableFreePhysicalMemoryThreshold = new LongConfigValue(
-			"transitime.monitoring.availableFreePhysicalMemoryThreshold", 
+			"transitclock.monitoring.availableFreePhysicalMemoryThreshold", 
 			10 * 1024 * 1024L, // ~10 MB 
 			"If available free physical memory is less than this "
 			+ "value then free memory monitoring is triggered. This should be "
@@ -52,7 +52,7 @@ public class SystemMemoryMonitor extends MonitorBase {
 
 	private static LongConfigValue availableFreePhysicalMemoryThresholdGap =
 			new LongConfigValue(
-					"transitime.monitoring.availableFreePhysicalMemoryThresholdGap", 
+					"transitclock.monitoring.availableFreePhysicalMemoryThresholdGap", 
 					150 * 1024 * 1024L, // ~150 MB 
 					"When transitioning from triggered to untriggered don't "
 					+ "want to send out an e-mail right away if actually "

@@ -52,12 +52,12 @@ import org.transitclock.utils.Time;
 public class GeorgiaTechAvlModule extends AvlModule {
 
 	private static StringConfigValue georgiaTechFeedDomainName = 
-			new StringConfigValue("transitime.avl.georgiaTechFeedDomainName", 
+			new StringConfigValue("transitclock.avl.georgiaTechFeedDomainName", 
 					"The domain name for the socket connection for the "
 					+ "Georgia Tech AVLfeed.");
 
 	private static IntegerConfigValue georgiaTechFeedPort =
-			new IntegerConfigValue("transitime.avl.georgiaTechFeedPort", 
+			new IntegerConfigValue("transitclock.avl.georgiaTechFeedPort", 
 					"The port number for the socket connection for the "
 							+ "Georgia Tech AVLfeed.");
 	

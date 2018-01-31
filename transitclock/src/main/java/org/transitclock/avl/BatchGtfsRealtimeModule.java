@@ -65,7 +65,7 @@ public class BatchGtfsRealtimeModule extends Module {
 		return gtfsRealtimeURIs.getValue();
 	}
 	private static StringListConfigValue gtfsRealtimeURIs =
-			new StringListConfigValue("transitime.avl.gtfsRealtimeFeedURIs",
+			new StringListConfigValue("transitclock.avl.gtfsRealtimeFeedURIs",
 					null,
 					"Semicolon separated list of URIs of the GTFS-realtime data to read in");
 	

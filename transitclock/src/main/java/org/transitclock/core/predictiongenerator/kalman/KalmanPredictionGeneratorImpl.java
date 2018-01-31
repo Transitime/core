@@ -43,19 +43,19 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	 * historical value. 
 	 */
 	private static final IntegerConfigValue minKalmanDays = new IntegerConfigValue(
-			"transitime.prediction.data.kalman.mindays", new Integer(1),
+			"transitclock.prediction.data.kalman.mindays", new Integer(1),
 			"Min number of days trip data that needs to be available before Kalman prediciton is used instead of default transiTime prediction.");
 
 	private static final IntegerConfigValue maxKalmanDays = new IntegerConfigValue(
-			"transitime.prediction.data.kalman.maxdays", new Integer(3),
+			"transitclock.prediction.data.kalman.maxdays", new Integer(3),
 			"Max number of historical days trips to include in Kalman prediction calculation.");
 
 	private static final IntegerConfigValue maxKalmanDaysToSearch = new IntegerConfigValue(
-			"transitime.prediction.data.kalman.maxdaystoseach", new Integer(21),
+			"transitclock.prediction.data.kalman.maxdaystoseach", new Integer(21),
 			"Max number of days to look back for data. This will also be effected by how old the data in the cache is.");
 	
 	private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(
-			"transitime.prediction.data.kalman.initialerrorvalue", new Double(100),
+			"transitclock.prediction.data.kalman.initialerrorvalue", new Double(100),
 			"Initial Kalman error value to use to start filter.");
 
 	private static final Logger logger = LoggerFactory.getLogger(KalmanPredictionGeneratorImpl.class);

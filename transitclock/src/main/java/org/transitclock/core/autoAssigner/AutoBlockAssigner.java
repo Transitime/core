@@ -83,14 +83,14 @@ public class AutoBlockAssigner {
 	
 	private static BooleanConfigValue autoAssignerEnabled =
 			new BooleanConfigValue(
-					"transitime.autoBlockAssigner.autoAssignerEnabled", 
+					"transitclock.autoBlockAssigner.autoAssignerEnabled", 
 					false, 
 					"Set to true to enable the auto assignment feature where "
 					+ "the system tries to assign vehicle to an available block");
 	
 	private static BooleanConfigValue ignoreAvlAssignments =
 			new BooleanConfigValue(
-					"transitime.autoBlockAssigner.ignoreAvlAssignments", 
+					"transitclock.autoBlockAssigner.ignoreAvlAssignments", 
 					false, 
 					"For when want to test automatic assignments. When set to "
 					+ "true then system ignores assignments from AVL feed so "
@@ -101,7 +101,7 @@ public class AutoBlockAssigner {
 	
 	private static DoubleConfigValue minDistanceFromCurrentReport =
 			new DoubleConfigValue(
-					"transitime.autoBlockAssigner.minDistanceFromCurrentReport", 
+					"transitclock.autoBlockAssigner.minDistanceFromCurrentReport", 
 					100.0, 
 					"AutoBlockAssigner looks at two AVL reports to match "
 					+ "vehicle. This parameter specifies how far away those "
@@ -111,21 +111,21 @@ public class AutoBlockAssigner {
 	
 	private static IntegerConfigValue allowableEarlySeconds =
 			new IntegerConfigValue(
-					"transitime.autoBlockAssigner.allowableEarlySeconds",
+					"transitclock.autoBlockAssigner.allowableEarlySeconds",
 					3*Time.SEC_PER_MIN,
 					"How early a vehicle can be in seconds and still be "
 					+ "automatically assigned to a block");
 	
 	private static IntegerConfigValue allowableLateSeconds =
 			new IntegerConfigValue(
-					"transitime.autoBlockAssigner.allowableLateSeconds",
+					"transitclock.autoBlockAssigner.allowableLateSeconds",
 					5*Time.SEC_PER_MIN,
 					"How late a vehicle can be in seconds and still be "
 					+ "automatically assigned to a block");
 		
 	private static IntegerConfigValue minTimeBetweenAutoAssigningSecs =
 			new IntegerConfigValue(
-					"transitime.autoBlockAssigner.minTimeBetweenAutoAssigningSecs", 
+					"transitclock.autoBlockAssigner.minTimeBetweenAutoAssigningSecs", 
 					30,
 					"Minimum time per vehicle that can do auto assigning. Auto "
 					+ "assigning is computationally expensive, especially when "
@@ -714,7 +714,7 @@ public class AutoBlockAssigner {
 	
 	/**
 	 * Determines if the auto assigner is being called too recently, as specified by
-	 * the transitime.autoBlockAssigner.minTimeBetweenAutoAssigningSecs property. This
+	 * the transitclock.autoBlockAssigner.minTimeBetweenAutoAssigningSecs property. This
 	 * is important because auto assigning is quite costly for agencies with many available
 	 * blocks. If have high reporting rate and many available blocks then the system can get bogged
 	 * down just doing auto assigning.

@@ -34,8 +34,8 @@ import org.transitclock.utils.threading.NamedThreadFactory;
  * A singleton thread executor for executing AVL reports. For when not using JMS
  * to handle queue of AVL reports. One can dump AVL reports into this executor
  * and then have them be executed, possibly using multiple threads. The number
- * of threads is specified using the Java property transitime.avl.numThreads .
- * The queue size is set using the Java property transitime.avl.queueSize .
+ * of threads is specified using the Java property transitclock.avl.numThreads .
+ * The queue size is set using the Java property transitclock.avl.queueSize .
  * <p>
  * Causes AvlClient.run() to be called on each AvlReport, unless using test
  * executor, in which case the AvlClientTester() is called.
@@ -58,7 +58,7 @@ public class AvlExecutor {
 	private final static int MAX_THREADS = 25;
 	
 	private static IntegerConfigValue avlQueueSize = 
-			new IntegerConfigValue("transitime.avl.queueSize", 2000,
+			new IntegerConfigValue("transitclock.avl.queueSize", 2000,
 					"How many items to go into the blocking AVL queue "
 					+ "before need to wait for queue to have space. Should "
 					+ "be approximately 50% more than the number of reports "
@@ -67,7 +67,7 @@ public class AvlExecutor {
 					+ "data will be rejected by the ThreadPoolExecutor. ");
 
 	private static IntegerConfigValue numAvlThreads = 
-			new IntegerConfigValue("transitime.avl.numThreads", 1,
+			new IntegerConfigValue("transitclock.avl.numThreads", 1,
 					"How many threads to be used for processing the AVL " +
 					"data. For most applications just using a single thread " +
 					"is probably sufficient and it makes the logging simpler " +

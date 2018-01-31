@@ -33,7 +33,7 @@ import org.transitclock.config.StringConfigValue;
 public class Encryption {
 
 	private static final StringConfigValue encryptionPassword =
-			new StringConfigValue("transitime.db.encryptionPassword",
+			new StringConfigValue("transitclock.db.encryptionPassword",
 					"SET THIS!",
 					"Used for encrypting, deencrypting passwords for storage "
 					+ "in a database. This value should be customized for each "

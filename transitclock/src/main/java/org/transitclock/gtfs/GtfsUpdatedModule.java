@@ -46,7 +46,7 @@ import org.transitclock.utils.Time;
  * by an agency.
  * <p>
  * When a GTFS file is downloaded then this module also e-mails recipients
- * specified by the parameter transitime.monitoring.emailRecipients
+ * specified by the parameter transitclock.monitoring.emailRecipients
  * 
  * @author SkiBu Smith
  *
@@ -56,17 +56,17 @@ public class GtfsUpdatedModule extends Module {
 	// Configuration parameters
 	private static StringConfigValue url =
 			new StringConfigValue(
-					"transitime.gtfs.url", 
+					"transitclock.gtfs.url", 
 					"URL where to retrieve the GTFS file.");
 
 	private static StringConfigValue dirName =
 			new StringConfigValue(
-					"transitime.gtfs.dirName", 
+					"transitclock.gtfs.dirName", 
 					"Directory on agency server where to place the GTFS file.");
 
 	private static LongConfigValue intervalMsec =
 			new LongConfigValue(
-					"transitime.gtfs.intervalMsec",
+					"transitclock.gtfs.intervalMsec",
 					// Low cost unless file actually downloaded so do pretty 
 					// frequently so get updates as soon as possible
 					4 * Time.MS_PER_HOUR, 

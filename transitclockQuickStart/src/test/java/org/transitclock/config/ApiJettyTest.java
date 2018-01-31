@@ -1,4 +1,4 @@
-package org.transitime.config;
+package org.transitclock.config;
 
 import static org.junit.Assert.*;
 

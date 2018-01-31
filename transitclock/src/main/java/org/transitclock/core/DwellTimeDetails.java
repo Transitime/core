@@ -13,7 +13,7 @@ public class DwellTimeDetails {
 			.getLogger(DwellTimeDetails.class);
 	private static final IntegerConfigValue maxDwellTime = 
 			new IntegerConfigValue(
-					"transitime.core.maxDwellTime",
+					"transitclock.core.maxDwellTime",
 					10 * Time.MS_PER_MIN,
 					"This is a maximum dwell time at a stop to be taken into account for cache or prediction calculations.");
 	

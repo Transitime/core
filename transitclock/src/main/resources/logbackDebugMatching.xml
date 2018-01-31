@@ -11,14 +11,14 @@
 <configuration scan="true" scanPeriod="30 seconds" >
 
   <!-- Set properties here. NOTE: it is expected that the property
-       -Dtransitime.core.agencyId=xx will be set. Also, if want logging
+       -Dtransitclock.core.agencyId=xx will be set. Also, if want logging
        to use the proper timezone then need to set the timezone property
        to something like -Dlogback.timezone=America/Los_Angeles . Valid 
        timezone format is at http://en.wikipedia.org/wiki/List_of_tz_zones
     -->
 
   <property name="LOG_FILE_ROOT" 
-            value="${transitime.logging.dir:-/Logs}/${transitime.core.agencyId:-DEFAULT}/core/%d{yyyy/MM/dd}" />
+            value="${transitclock.logging.dir:-/Logs}/${transitclock.core.agencyId:-DEFAULT}/core/%d{yyyy/MM/dd}" />
 
   <!-- The pattern layout how the log file should log info is set here. Note that 
        a newline is used at beginning so that there is a blank line between
@@ -157,7 +157,7 @@
     <SSL>true</SSL>
     <username>${logback.smtpUsername}</username>
     <password>${logback.smtpPassword}</password>
-    <from>errorLogger@transitime.org</from>
+    <from>errorLogger@transitclock.org</from>
     <subject>%level %logger{0} - %m</subject>
     <layout class="ch.qos.logback.classic.PatternLayout">
       <pattern>%d{MMM dd yyyy - HH:mm:ss.SSS} - %-5level - %logger{35} :%n%message%n</pattern>

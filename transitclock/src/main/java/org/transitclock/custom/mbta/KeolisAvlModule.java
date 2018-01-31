@@ -37,17 +37,17 @@ import org.transitclock.utils.Time;
 /**
  * AVL module for reading AVL data from Keolis feed.
  * 
- * @author Michael Smith (michael@transitime.org)
+ * @author Michael Smith (michael@transitclock.org)
  *
  */
 public class KeolisAvlModule extends PollUrlAvlModule {
 
 	private static StringConfigValue mbtaCommuterRailFeedUrl = 
-			new StringConfigValue("transitime.avl.mbtaCommuterRailFeedUrl", 
+			new StringConfigValue("transitclock.avl.mbtaCommuterRailFeedUrl", 
 					"The URL of the Keolis feed to use.");
 
 	private static IntegerConfigValue keolisFeedAvlTimeOffset =
-			new IntegerConfigValue("transitime.mbta.keolisFeedAvlTimeOffset", 
+			new IntegerConfigValue("transitclock.mbta.keolisFeedAvlTimeOffset", 
 					5, 
 					"The GPS time from the Keolis feed has a strange 4 or 5 "
 					+ "hour offset. It appears that it is 4 hours during "

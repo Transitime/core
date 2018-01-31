@@ -40,7 +40,7 @@ public class RmiConfig {
 		return rmiHost.getValue();
 	}
 	private static StringConfigValue rmiHost =
-			new StringConfigValue("transitime.rmi.rmiHost",
+			new StringConfigValue("transitclock.rmi.rmiHost",
 					null,
 					"For a client that needs to connect to an agency server. "
 					+ "When null system gets RMI host name from the WebAgencies "
@@ -58,7 +58,7 @@ public class RmiConfig {
 		return rmiPort.getValue();
 	}
 	private static IntegerConfigValue rmiPort =
-			new IntegerConfigValue("transitime.rmi.rmiPort",
+			new IntegerConfigValue("transitclock.rmi.rmiPort",
 					2099,
 					"Which port to use for RMI calls. Usually RMI uses port "
 					+ "1099 but using default of 2099 to not interfere with "
@@ -78,7 +78,7 @@ public class RmiConfig {
 		return secondaryRmiPort.getValue();
 	}
 	private static IntegerConfigValue secondaryRmiPort =
-			new IntegerConfigValue("transitime.rmi.secondaryRmiPort",
+			new IntegerConfigValue("transitclock.rmi.secondaryRmiPort",
 					2098,
 					"Which secondary port to use for RMI calls, for once "
 					+ "initial communication has been established. Usually "

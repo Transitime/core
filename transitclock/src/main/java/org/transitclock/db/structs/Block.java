@@ -145,7 +145,7 @@ public final class Block implements Serializable {
 	private static final long serialVersionUID = 6511242755235485004L;
 	
 	private static BooleanConfigValue blockLoading =
-      new BooleanConfigValue("transitime.blockLoading.agressive", false, "Set true to eagerly fetch all blocks into memory on startup");
+      new BooleanConfigValue("transitclock.blockLoading.agressive", false, "Set true to eagerly fetch all blocks into memory on startup");
 
 	private static final Logger logger = LoggerFactory.getLogger(Block.class);
 

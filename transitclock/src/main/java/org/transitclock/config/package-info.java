@@ -28,14 +28,14 @@
  *    return projectId.getValue();
  *  }
  *  private static StringConfigValue projectId = 
- *    new StringConfigValue("transitime.core.projectId", "sfmta");
+ *    new StringConfigValue("transitclock.core.projectId", "sfmta");
  * }
  * </pre>
  * 
  * Such a parameter can be set either using a command line java property when the 
  * application is invoked, such as:
  * <code>
- * -Dtransitime.core.projectId=mbta
+ * -Dtransitclock.core.projectId=mbta
  * </code>
  * <p>
  * Or in a configuration file:

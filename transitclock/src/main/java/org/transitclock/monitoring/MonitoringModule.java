@@ -32,7 +32,7 @@ import org.transitclock.utils.Time;
  * AgencyMonitor is used notification e-mails are automatically sent.
  * <p>
  * To use with a core project use:
- *   -Dtransitime.modules.optionalModulesList=org.transitclock.monitor.MonitoringModule
+ *   -Dtransitclock.modules.optionalModulesList=org.transitclock.monitor.MonitoringModule
  *
  * @author SkiBu Smith
  *
@@ -41,7 +41,7 @@ public class MonitoringModule extends Module {
 
 	private static IntegerConfigValue secondsBetweenMonitorinPolling =
 			new IntegerConfigValue(
-					"transitime.monitoring.secondsBetweenMonitorinPolling", 
+					"transitclock.monitoring.secondsBetweenMonitorinPolling", 
 					120,
 					"How frequently an monitoring should be run to look for "
 					+ "problems.");

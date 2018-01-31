@@ -105,7 +105,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	}
 	private static IntegerConfigValue maxStopsWhenNoPreviousMatch = 
 			new IntegerConfigValue(	
-					"transitime.arrivalsDepartures.maxStopsWhenNoPreviousMatch",
+					"transitclock.arrivalsDepartures.maxStopsWhenNoPreviousMatch",
 					1,
 					"If vehicle just became predictable as indicated by no " +
 					"previous match then still want to determine " +
@@ -126,7 +126,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	}
 	private static IntegerConfigValue maxStopsBetweenMatches = 
 			new IntegerConfigValue(	
-					"transitime.arrivalsDepartures.maxStopsBetweenMatches",
+					"transitclock.arrivalsDepartures.maxStopsBetweenMatches",
 					12,
 					"If between AVL reports the vehicle appears to traverse " +
 					"many stops then something is likely wrong with the " +
@@ -134,7 +134,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					"arrivals/departures are created between AVL reports.");
 
 	private static IntegerConfigValue allowableDifferenceBetweenAvlTimeSecs =
-			new IntegerConfigValue("transitime.arrivalsDepartures.allowableDifferenceBetweenAvlTimeSecs",
+			new IntegerConfigValue("transitclock.arrivalsDepartures.allowableDifferenceBetweenAvlTimeSecs",
 					// Default is to only log problem if arrival time is more 
 					// than a day off
 					1 * Time.SEC_PER_DAY, 

@@ -41,7 +41,7 @@ import org.transitclock.logging.Markers;
 
 /**
  * For programmatically sending out an e-mail. Uses a file specified by
- * Java property transitime.utils.emailConfigFile to configure parameters.
+ * Java property transitclock.utils.emailConfigFile to configure parameters.
  *
  * @author SkiBu Smith
  *
@@ -55,7 +55,7 @@ public class EmailSender {
 	/********************** Parameters ********************************/
 	
 	private static StringConfigValue emailConfigFile =
-			new StringConfigValue("transitime.utils.emailConfigFile", 
+			new StringConfigValue("transitclock.utils.emailConfigFile", 
 					"/home/ec2-user/transitimeScripts/emailConfig.txt",
 					"Specifies name of configuration file used for sending "
 					+ "out e-mails.");
@@ -154,7 +154,7 @@ public class EmailSender {
 	 */
 	public static void main(String[] args) {
 		EmailSender email = new EmailSender();
-		email.send("monitoring@transitime.org", "test subject", "test message");
+		email.send("monitoring@transitclock.org", "test subject", "test message");
 	}
 
 }

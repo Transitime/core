@@ -227,7 +227,7 @@ public class InputPanel extends JFrame {
 					// uses current directory if one none specified by user.
 					loglocation = System.getProperty("user.dir");
 				}
-				System.getProperties().setProperty("transitime.logging.dir", loglocation);
+				System.getProperties().setProperty("transitclock.logging.dir", loglocation);
 				// Creates a thread which calls all the methods of the transitimeQuickStart
 
 				TransitimeQuickStartThread quickstartthread = new TransitimeQuickStartThread();
