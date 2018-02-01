@@ -18,10 +18,10 @@ import java.util.concurrent.*;
  * Created by dbenoff on 10/6/15.
  */
 public class CloudwatchService {
-    private String environmentName = System.getProperty("transitime.environmentName");
-    private String accessKey = System.getProperty("transitime.cloudwatch.awsAccessKey");
-    private String secretKey = System.getProperty("transitime.cloudwatch.awsSecretKey");
-    private String endpoint = System.getProperty("transitime.cloudwatch.awsEndpoint");
+    private String environmentName = System.getProperty("transitclock.environmentName");
+    private String accessKey = System.getProperty("transitclock.cloudwatch.awsAccessKey");
+    private String secretKey = System.getProperty("transitclock.cloudwatch.awsSecretKey");
+    private String endpoint = System.getProperty("transitclock.cloudwatch.awsEndpoint");
     private AmazonCloudWatchClient cloudWatch;
     private Map<String, MetricDefinition> metricMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService executor;

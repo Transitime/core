@@ -216,7 +216,7 @@ public class GtfsData {
 	// for details on how to filter out matches as opposed to specifying
 	// which ones want to keep.
 	private static StringConfigValue routeIdFilterRegEx = new StringConfigValue(
-			"transitime.gtfs.routeIdFilterRegEx", 
+			"transitclock.gtfs.routeIdFilterRegEx", 
 			null, // Default of null means don't do any filtering
 			"Route is included only if route_id matches the this regular "
 			+ "expression. If only want routes with \"SPECIAL\" in the id then "
@@ -230,7 +230,7 @@ public class GtfsData {
 	// So can process only trips that match a regular expression.
 	// Default of null means don't do any filtering
 	private static StringConfigValue tripIdFilterRegEx = new StringConfigValue(
-			"transitime.gtfs.tripIdFilterRegEx", 
+			"transitclock.gtfs.tripIdFilterRegEx", 
 			null, // Default of null means don't do any filtering
 			"Trip is included only if trip_id matches the this regular "
 			+ "expression. If only want trips with \"SPECIAL\" in the id then "
@@ -242,13 +242,13 @@ public class GtfsData {
 	private static Pattern tripIdFilterRegExPattern = null;
 	
 	private static IntegerConfigValue stopCodeBaseValue = 
-			new IntegerConfigValue("transitime.gtfs.stopCodeBaseValue", 
+			new IntegerConfigValue("transitclock.gtfs.stopCodeBaseValue", 
 					"If agency doesn't specify stop codes but simply wants to "
 					+ "have them be a based number plus the stop ID then this "
 					+ "parameter can specify the base value. ");
 	
 	private static DoubleConfigValue minDistanceBetweenStopsToDisambiguateHeadsigns =
-			new DoubleConfigValue("transitime.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns", 
+			new DoubleConfigValue("transitclock.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns", 
 					1000.0,
 					"When disambiguating headsigns by appending the too stop "
 					+ "name of the last stop, won't disambiguate if the last "
@@ -1613,7 +1613,7 @@ public class GtfsData {
 							logger.warn("Modifying headsign \"{}\" to \"{}\" "
 									+ "since it has a different last stop {} away "
 									+ "which is further away than "
-									+ "transitime.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns of {}. "
+									+ "transitclock.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns of {}. "
 									+ "TripPattern {}. Other TripPattern {}", 
 									firstTripPatternForHeadsign.getHeadsign(), 
 									modifiedHeadsign, 
@@ -1638,7 +1638,7 @@ public class GtfsData {
 							logger.warn("Modifying headsign \"{}\" to \"{}\" "
 									+ "since it has a different last stop {} away "
 									+ "which is further away than "
-									+ "transitime.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns of {}. "
+									+ "transitclock.gtfs.minDistanceBetweenStopsToDisambiguateHeadsigns of {}. "
 									+ "TripPattern {}. Other TripPattern {}", 
 									tripPattern.getHeadsign(), 
 									modifiedHeadsign,
@@ -2611,7 +2611,7 @@ public class GtfsData {
 	
 	/**
 	 * Returns true if the tripId isn't supposed to be filtered out, as
-	 * specified by the transitime.gtfs.tripIdRegExPattern property.
+	 * specified by the transitclock.gtfs.tripIdRegExPattern property.
 	 * 
 	 * @param tripId
 	 * @return True if trip not to be filtered out
@@ -2630,7 +2630,7 @@ public class GtfsData {
 	
 	/**
 	 * Returns true if the routeId isn't supposed to be filtered out, as
-	 * specified by the transitime.gtfs.routeIdRegExPattern property.
+	 * specified by the transitclock.gtfs.routeIdRegExPattern property.
 	 * 
 	 * @param routeId
 	 * @return True if route not to be filtered out

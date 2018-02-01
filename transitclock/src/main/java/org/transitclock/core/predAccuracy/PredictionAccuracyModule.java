@@ -45,7 +45,7 @@ import org.transitclock.utils.MapKey;
 import org.transitclock.utils.Time;
 
 /**
- * Reads internal predictions every transitime.predAccuracy.pollingRateMsec and
+ * Reads internal predictions every transitclock.predAccuracy.pollingRateMsec and
  * stores the predictions into memory. Then when arrivals/departures occur the
  * prediction accuracy can be determined and stored.
  *
@@ -69,7 +69,7 @@ public class PredictionAccuracyModule extends Module {
 	/********************** Config Params **************************/
 	
 	private static final IntegerConfigValue timeBetweenPollingPredictionsMsec = 
-			new IntegerConfigValue("transitime.predAccuracy.pollingRateMsec", 
+			new IntegerConfigValue("transitclock.predAccuracy.pollingRateMsec", 
 					4 * Time.MS_PER_MIN,
 					"How frequently to query predictions for determining "
 					+ "prediction accuracy.");
@@ -79,7 +79,7 @@ public class PredictionAccuracyModule extends Module {
 	}
 
 	private static final IntegerConfigValue maxPredTimeMinutes = 
-			new IntegerConfigValue("transitime.predAccuracy.maxPredTimeMinutes", 
+			new IntegerConfigValue("transitclock.predAccuracy.maxPredTimeMinutes", 
 					15,
 					"Maximum time into the future for a pediction for it to "
 					+ "be stored in memory for prediction accuracy analysis.");
@@ -89,7 +89,7 @@ public class PredictionAccuracyModule extends Module {
 	}
 
 	private static final IntegerConfigValue maxPredStalenessMinutes = 
-			new IntegerConfigValue("transitime.predAccuracy.maxPredStalenessMinutes", 
+			new IntegerConfigValue("transitclock.predAccuracy.maxPredStalenessMinutes", 
 					15,
 					"Maximum time in minutes a prediction cam be into the "
 					+ "past before it is removed from memory because no "
@@ -100,7 +100,7 @@ public class PredictionAccuracyModule extends Module {
 	}
 
 	private static final IntegerConfigValue stopsPerTrip = 
-			new IntegerConfigValue("transitime.predAccuracy.stopsPerTrip", 
+			new IntegerConfigValue("transitclock.predAccuracy.stopsPerTrip", 
 					5,
 					"Number of stops per trip pattern that should collect "
 					+ "prediction data for each polling cycle.");
@@ -110,7 +110,7 @@ public class PredictionAccuracyModule extends Module {
 	}
 
 	private static final IntegerConfigValue maxLatenessComparedToPredictionMsec = 
-			new IntegerConfigValue("transitime.predAccuracy.maxLatenessComparedToPredictionMsec", 
+			new IntegerConfigValue("transitclock.predAccuracy.maxLatenessComparedToPredictionMsec", 
 					25 * Time.MS_PER_MIN,
 					"How late in msec a vehicle can arrive/departure a stop "
 					+ "compared to the prediction and still have the prediction "
@@ -121,7 +121,7 @@ public class PredictionAccuracyModule extends Module {
 	}
 
 	private static final IntegerConfigValue maxEarlynessComparedToPredictionMsec = 
-			new IntegerConfigValue("transitime.predAccuracy.maxEarlynessComparedToPredictionMsec", 
+			new IntegerConfigValue("transitclock.predAccuracy.maxEarlynessComparedToPredictionMsec", 
 					15 * Time.MS_PER_MIN,
 					"How early in msec a vehicle can arrive/departure a stop "
 					+ "compared to the prediction and still have the prediction "
@@ -283,7 +283,7 @@ public class PredictionAccuracyModule extends Module {
 	/**
 	 * Stores prediction in memory so that when arrival/departure generated
 	 * can compare with the stored prediction. Will only store prediction
-	 * if it is less then transitime.predAccuracy.maxPredTimeMinutes into
+	 * if it is less then transitclock.predAccuracy.maxPredTimeMinutes into
 	 * the future.
 	 * 
 	 * @param pred

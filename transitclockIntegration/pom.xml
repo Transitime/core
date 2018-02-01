@@ -68,7 +68,7 @@
                 <version>2.19.1</version>
 
                 <configuration>
-                	<argLine>-Dtransitime.logging.dir="/tmp"</argLine>
+                	<argLine>-Dtransitclock.logging.dir="/tmp"</argLine>
                 	<reuseForks>false</reuseForks>
                 </configuration>
             </plugin>

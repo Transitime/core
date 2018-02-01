@@ -36,14 +36,14 @@ import org.transitclock.utils.Time;
 public class SystemCpuMonitor extends MonitorBase {
 
 	DoubleConfigValue cpuThreshold = new DoubleConfigValue(
-			"transitime.monitoring.cpuThreshold", 
+			"transitclock.monitoring.cpuThreshold", 
 			0.99, 
 			"If CPU load averaged over a minute exceeds this 0.0 - 1.0 "
 			+ "value then CPU monitoring is triggered.");
 	
 	private static DoubleConfigValue cpuThresholdGap =
 			new DoubleConfigValue(
-					"transitime.monitoring.cpuThresholdGap", 
+					"transitclock.monitoring.cpuThresholdGap", 
 					0.1, 
 					"When transitioning from triggered to untriggered don't "
 					+ "want to send out an e-mail right away if actually "

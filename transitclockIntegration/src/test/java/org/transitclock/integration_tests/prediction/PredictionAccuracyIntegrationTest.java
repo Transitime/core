@@ -1,4 +1,4 @@
-package org.transitime.integration_tests.prediction;
+package org.transitclock.integration_tests.prediction;
 
 import junit.framework.TestCase;
 import org.apache.commons.csv.CSVFormat;

@@ -46,14 +46,14 @@ public class PredictabilityMonitor extends MonitorBase {
 
 	private static DoubleConfigValue minPredictableBlocks =
 			new DoubleConfigValue(
-					"transitime.monitoring.minPredictableBlocks", 
+					"transitclock.monitoring.minPredictableBlocks", 
 					0.50, 
 					"The minimum fraction of currently active blocks that "
 					+ "should have a predictable vehicle");
 
 	private static DoubleConfigValue minPredictableBlocksGap =
 			new DoubleConfigValue(
-					"transitime.monitoring.minPredictableBlocksGap", 
+					"transitclock.monitoring.minPredictableBlocksGap", 
 					0.25, 
 					"When transitioning from triggered to untriggered don't "
 					+ "want to send out an e-mail right away if actually "
@@ -63,7 +63,7 @@ public class PredictabilityMonitor extends MonitorBase {
 
 	private static IntegerConfigValue minimumPredictableVehicles =
 			new IntegerConfigValue(
-					"transitime.monitoring.minimumPredictableVehicles", 
+					"transitclock.monitoring.minimumPredictableVehicles", 
 					3, 
 					"When looking at small number of vehicles it is too easy "
 					+ "to get below minimumPredictableBlocks. So number of "

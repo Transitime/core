@@ -47,7 +47,7 @@ public class GtfsRtAvlModule extends GtfsRealtimeModule {
 	}
 	
 	private static StringConfigValue gtfsRealtimeFeedURI =
-			new StringConfigValue("transitime.avl.gtfsRealtimeFeedURI", 
+			new StringConfigValue("transitclock.avl.gtfsRealtimeFeedURI", 
 					"http://developer.onebusaway.org/wmata-gtfsr/vehiclePositions",
 					"The URI of the GTFS-realtime feed generated form the gtfs-realtime data.");
 

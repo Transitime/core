@@ -79,7 +79,7 @@ public class TransitimeQuickStart implements Runnable {
 	public void extractResources() throws QuickStartException {
 		try {
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "hibernate.cfg.xml");
-			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "transitime.properties");
+			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "transitclock.properties");
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "api.war");
 			ExtractResource.extractResourceNIO(TransitimeQuickStart.class.getClassLoader(), "web.war");
 		} catch (Exception e) {
@@ -148,7 +148,7 @@ public class TransitimeQuickStart implements Runnable {
 			ConfigFileReader.processConfig();
 
 			String name = "Joe bloggs";
-			String url = "http://www.transitime.org";
+			String url = "http://www.transitclock.org";
 			String email = "foo@default.com";
 			String phone = "123456789";
 			String description = "Foo";
@@ -179,13 +179,13 @@ public class TransitimeQuickStart implements Runnable {
 		try {
 			ConfigFileReader.processConfig();
 			// TODO set the agency id by getting it from the gtfs file.
-			String agencyid = System.getProperties().getProperty("transitime.core.agencyId");
-			System.getProperties().setProperty("transitime.core.configRevStr", "0");
+			String agencyid = System.getProperties().getProperty("transitclock.core.agencyId");
+			System.getProperties().setProperty("transitclock.core.configRevStr", "0");
 			// uses default if nothing entered
 
 			// only set the paramater for realtimeURLfeed if specified by user
 			if (!realtimefeedURL.equals("")) {
-				System.getProperties().setProperty("transitime.avl.url", realtimefeedURL);
+				System.getProperties().setProperty("transitclock.avl.url", realtimefeedURL);
 			}
 
 			// Initialize the core now
@@ -193,7 +193,7 @@ public class TransitimeQuickStart implements Runnable {
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
 			if (optionalModuleNames.size() > 0)
 				logger.info("Starting up optional modules specified via "
-						+ "transitime.modules.optionalModulesList param:");
+						+ "transitclock.modules.optionalModulesList param:");
 			else
 				logger.info("No optional modules to start up.");
 			for (String moduleName : optionalModuleNames) {
@@ -293,7 +293,7 @@ public class TransitimeQuickStart implements Runnable {
 					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
 			webapp.setOverrideDescriptor("override-web.xml");
 
-			System.setProperty("transitime.apikey", apiKey.getKey());
+			System.setProperty("transitclock.apikey", apiKey.getKey());
 			// server.join();
 			logger.info("add Webapp successful");
 		} catch (Exception e) {
@@ -334,7 +334,7 @@ public class TransitimeQuickStart implements Runnable {
 		 */
 		try {
 			// TODO have this set up right,right values for variables
-			String agencyId = System.getProperties().getProperty("transitime.core.agencyId");
+			String agencyId = System.getProperties().getProperty("transitclock.core.agencyId");
 			String hostName = "127.0.0.1";
 			boolean active = true;
 			String dbName = "02";

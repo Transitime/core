@@ -231,7 +231,7 @@ public class RmiQuery {
 	 */
 	private static void displayCommandLineOptionsAndExit(Options options) {
 		// Display help
-		final String commandLineSyntax = "java transitime.jar";
+		final String commandLineSyntax = "java transitclock.jar";
 		final PrintWriter writer = new PrintWriter(System.out);
 		writer.append(
 				"A command line application that allows user to request data\n" +

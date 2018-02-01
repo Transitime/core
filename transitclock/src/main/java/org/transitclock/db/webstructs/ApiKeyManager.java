@@ -51,7 +51,7 @@ public class ApiKeyManager {
 	private long lastTimeKeysReadIntoCache = 0;
 
 	private static IntegerConfigValue lastTimeKeysReadLimitSec = new IntegerConfigValue(
-			"transitime.api.apiKeyLastUpdateLimitSec", 3,
+			"transitclock.api.apiKeyLastUpdateLimitSec", 3,
 			"Amount of time to wait in sec before updating the apiKeyCache");
 
 	// This is a singleton class
@@ -132,7 +132,7 @@ public class ApiKeyManager {
 	 * CoreConfig.getDbHost(), CoreConfig.getDbUserName(), and
 	 * CoreConfig.getDbPassword(). The db host, user name, and password can also
 	 * be set in the hibernate.cfg.xml file if the parameter
-	 * transitime.hibernate.configFile in the CoreConfig is set.
+	 * transitclock.hibernate.configFile in the CoreConfig is set.
 	 * 
 	 * @return
 	 */

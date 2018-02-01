@@ -62,9 +62,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * since the properties are not overwritten if already set.
  * <p>
  * The params are configured in an XML or a properties file. The member
- * processConfig() first process a file named transitime.properties if one
+ * processConfig() first process a file named transitclock.properties if one
  * exists in the classpath. Then files specified by the Java system property
- * transitime.configFiles . If the file has a .xml suffix then it will be
+ * transitclock.configFiles . If the file has a .xml suffix then it will be
  * processed as XML. Otherwise it will be processed as a regular properties
  * file. Multiple config files can be used. Each XML file should have a
  * corresponding configuration class such as CoreConfig.java. In the
@@ -145,7 +145,7 @@ public class ConfigFileReader {
 			} else {
 				// Determine full name of parameter by appending node
 				// names together, separated by a period. So get something
-				// like "transitime.predictor.radius".
+				// like "transitclock.predictor.radius".
 				StringBuilder propertyNameBuilder = new StringBuilder("");
 				for (int j = 0; j < names.size(); ++j) {
 					String name = names.get(j);
@@ -199,7 +199,7 @@ public class ConfigFileReader {
 	 * configFileData. The file is expected to be very simple. Attributes are
 	 * ignored. Only values are used. The keys for the resulting HashMap are
 	 * based on the XML tags and their nesting. So if one is setting a value of
-	 * 75 to a param with a key transitime.predictor.allowableDistanceFromPath
+	 * 75 to a param with a key transitclock.predictor.allowableDistanceFromPath
 	 * the XML would look like: {@code
 	 * <transitime>
 	 *   <predictor>
@@ -376,9 +376,9 @@ public class ConfigFileReader {
 
 	/**
 	 * Process the configuration file specified by a file named
-	 * transitime.properties that is in the classpath. The processes
+	 * transitclock.properties that is in the classpath. The processes
 	 * configuration files specified by the Java system property
-	 * transitime.configFiles. The transitime.configFiles property is a ";"
+	 * transitclock.configFiles. The transitclock.configFiles property is a ";"
 	 * separated list so can specify multiple files. The files can be either in
 	 * either XML or in Java properties format.
 	 * <p>
@@ -391,9 +391,9 @@ public class ConfigFileReader {
 	 * files.
 	 */
 	public static void processConfig() {
-		// Determine from the Java system property transitime.configFiles
+		// Determine from the Java system property transitclock.configFiles
 		// the configuration files to be read
-		String configFilesStr = System.getProperty("transitime.configFiles");
+		String configFilesStr = System.getProperty("transitclock.configFiles");
 		if (configFilesStr != null) {
 			String configFiles[] = configFilesStr.split(";");
 			for (String fileName : configFiles) {
@@ -406,11 +406,11 @@ public class ConfigFileReader {
 			}
 		}
 
-		// If the file transitime.properties exists in the classpath then
-		// process it. This is done after the transitime.configFiles files
+		// If the file transitclock.properties exists in the classpath then
+		// process it. This is done after the transitclock.configFiles files
 		// are read in so that they have precedence over the file found
 		// in the classpath.
-		String defaultPropertiesFileName = "transitime.properties";
+		String defaultPropertiesFileName = "transitclock.properties";
 		InputStream propertiesInput = ConfigFileReader.class.getClassLoader()
 				.getResourceAsStream(defaultPropertiesFileName);
 		if (propertiesInput != null) {

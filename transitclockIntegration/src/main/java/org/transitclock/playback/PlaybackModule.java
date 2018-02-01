@@ -34,7 +34,7 @@ public class PlaybackModule {
 
 	private static String defaultGtfsDirectoryName = "src/main/resources/wmata_gtfs"; 
 	private static String defaultAvlReportsCsv = "src/main/resources/avl/03142016_SE-04.csv";
-	private static final String transitimeConfigFile = "src/main/resources/transiTimeConfigHsql.xml";
+	private static final String transitimeConfigFile = "src/main/resources/transitclockConfigHsql.xml";
 
 	private static final String agencyId = "1";
 	
@@ -77,9 +77,9 @@ public class PlaybackModule {
 	}
 	
 	public static void runTrace(String gtfsDirectoryName, String avlReportsCsv, boolean addPredictionAccuracy, boolean log, AvlPostProcessor processor) {
-		System.setProperty("transitime.avl.csvAvlFeedFileName", avlReportsCsv);
-		System.setProperty("transitime.configFiles", transitimeConfigFile);
-		System.setProperty("transitime.core.agencyId", agencyId);
+		System.setProperty("transitclock.avl.csvAvlFeedFileName", avlReportsCsv);
+		System.setProperty("transitclock.configFiles", transitimeConfigFile);
+		System.setProperty("transitclock.core.agencyId", agencyId);
 			
 		ConfigFileReader.processConfig();
 		

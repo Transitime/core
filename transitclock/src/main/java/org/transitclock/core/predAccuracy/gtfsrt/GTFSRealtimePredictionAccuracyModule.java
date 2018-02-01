@@ -61,12 +61,12 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 
 
 	private static final StringConfigValue gtfsTripUpdateUrl = new StringConfigValue(
-			"transitime.predAccuracy.gtfsTripUpdateUrl", "http://127.0.0.1:8091/trip-updates",
+			"transitclock.predAccuracy.gtfsTripUpdateUrl", "http://127.0.0.1:8091/trip-updates",
 			"URL to access gtfs-rt trip updates.");
 
 	
   private static ClassConfigValue translatorConfig =
-      new ClassConfigValue("transitime.predAccuracy.RtTranslator", null, 
+      new ClassConfigValue("transitclock.predAccuracy.RtTranslator", null, 
           "Implementation of GTFSRealtimeTranslator to perform " + 
       "the translation of stopIds and other rt quirks");
 	

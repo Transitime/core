@@ -45,28 +45,28 @@ public class FrequencyBasedHistoricalAverageCache {
 	
 	
 	private static IntegerConfigValue minTravelTimeFilterValue= new IntegerConfigValue(	
-			"transitime.core.frequency.minTravelTimeFilterValue",
+			"transitclock.core.frequency.minTravelTimeFilterValue",
 			0,
 			"The value to be included in average calculation for Travel times must exceed this value.");
 	
 	private static IntegerConfigValue maxTravelTimeFilterValue = new IntegerConfigValue(	
-			"transitime.core.frequency.maxTravelTimeFilterValue",
+			"transitclock.core.frequency.maxTravelTimeFilterValue",
 			600000,
 			"The value to be included in average calculation for Travel times must be less than this value.");
 	
 	private static IntegerConfigValue minDwellTimeFilterValue = new IntegerConfigValue(	
-			"transitime.core.frequency.minDwellTimeFilterValue",
+			"transitclock.core.frequency.minDwellTimeFilterValue",
 			0,
 			"The value to be included in average calculation for dwell time must exceed this value.");
 			
 	private static IntegerConfigValue maxDwellTimeFilterValue = new IntegerConfigValue(	
-			"transitime.core.frequency.maxDwellTimeFilterValue",
+			"transitclock.core.frequency.maxDwellTimeFilterValue",
 			600000,
 			"The value to be included in average calculation for dwell time must be less this value.");
 	
 	private static IntegerConfigValue cacheIncrementsForFrequencyService = 
 			new IntegerConfigValue(	
-					"transitime.core.frequency.cacheIncrementsForFrequencyService",
+					"transitclock.core.frequency.cacheIncrementsForFrequencyService",
 					180*60,
 					"This is the intervals size of the day that the average is applied to. ");
 	

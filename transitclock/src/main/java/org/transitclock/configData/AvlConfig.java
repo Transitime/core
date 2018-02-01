@@ -39,7 +39,7 @@ public class AvlConfig {
 		return shouldUseJms.getValue();
 	}
 	private static BooleanConfigValue shouldUseJms =
-			new BooleanConfigValue("transitime.avl.shouldUseJms", false,
+			new BooleanConfigValue("transitclock.avl.shouldUseJms", false,
 					"Specifies whether should use JMS queue for handling " +
 					"AVL reports. Useful for if feed is read on one machine " +
 					"but processed on another.");
@@ -52,7 +52,7 @@ public class AvlConfig {
 		return secondsBetweenAvlFeedPolling.getValue();
 	}
 	private static IntegerConfigValue secondsBetweenAvlFeedPolling =
-			new IntegerConfigValue("transitime.avl.feedPollingRateSecs", 5,
+			new IntegerConfigValue("transitclock.avl.feedPollingRateSecs", 5,
 					"How frequently an AVL feed should be polled for new data.");
 	
 	/**
@@ -63,7 +63,7 @@ public class AvlConfig {
 		return avlFeedTimeoutInMSecs.getValue();
 	}
 	private static IntegerConfigValue avlFeedTimeoutInMSecs =
-			new IntegerConfigValue("transitime.avl.feedTimeoutInMSecs", 10000,
+			new IntegerConfigValue("transitclock.avl.feedTimeoutInMSecs", 10000,
 					"For when polling AVL XML feed. The feed logs error if "
 					+ "the timeout value is exceeded when performing the XML "
 					+ "request.");
@@ -76,12 +76,12 @@ public class AvlConfig {
 		return maxAvlSpeed.getValue();
 	}
 	private static DoubleConfigValue maxAvlSpeed =
-			new DoubleConfigValue("transitime.avl.maxSpeed", 
+			new DoubleConfigValue("transitclock.avl.maxSpeed", 
 					31.3, // 31.3m/s = 70mph
 					"Max speed between AVL reports for a vehicle. If this " +
 					"value is exceeded then the AVL report is ignored.");
 	
-	private static  DoubleConfigValue alternativeMaxSpeed = new DoubleConfigValue("transitime.avl.alternativemaxspeed", 
+	private static  DoubleConfigValue alternativeMaxSpeed = new DoubleConfigValue("transitclock.avl.alternativemaxspeed", 
 					15.0, // 31.3m/s = 70mph
 					"Alernative max speed between AVL reports for a vehicle. If this " +
 					"value is exceeded then the AVL report is ignored.");
@@ -100,7 +100,7 @@ public class AvlConfig {
 		return maxStopPathsAhead.getValue();
 	}
 	private static IntegerConfigValue maxStopPathsAhead =
-			new IntegerConfigValue("transitime.avl.maxStopPathsAhead", 
+			new IntegerConfigValue("transitclock.avl.maxStopPathsAhead", 
 					999, 
 					"Max stopPaths ahead to look for match.");
 	/**
@@ -112,7 +112,7 @@ public class AvlConfig {
 		return minSpeedForValidHeading.getValue();
 	}
 	private static DoubleConfigValue minSpeedForValidHeading =
-			new DoubleConfigValue("transitime.avl.minSpeedForValidHeading", 
+			new DoubleConfigValue("transitclock.avl.minSpeedForValidHeading", 
 					1.5, // 1.5m/s = .34mph
 					"If AVL report speed is below this threshold then the " +
 					"heading is not considered valid.");
@@ -132,7 +132,7 @@ public class AvlConfig {
 		return minAvlLatitude.getID();
 	}
 	private static FloatConfigValue minAvlLatitude =
-			new FloatConfigValue("transitime.avl.minLatitude", 15.0f,
+			new FloatConfigValue("transitclock.avl.minLatitude", 15.0f,
 					"For filtering out bad AVL reports. The default values " +
 					"of latitude 15.0 to 55.0 and longitude of -135.0 to " +
 					"-60.0 are for North America, including Mexico and " +
@@ -146,7 +146,7 @@ public class AvlConfig {
 		return maxAvlLatitude.getID();
 	}
 	private static FloatConfigValue maxAvlLatitude =
-			new FloatConfigValue("transitime.avl.maxLatitude", 55.0f,
+			new FloatConfigValue("transitclock.avl.maxLatitude", 55.0f,
 					"For filtering out bad AVL reports. The default values " +
 					"of latitude 15.0 to 55.0 and longitude of -135.0 to " +
 					"-60.0 are for North America, including Mexico and " +
@@ -160,7 +160,7 @@ public class AvlConfig {
 		return minAvlLongitude.getID();
 	}
 	private static FloatConfigValue minAvlLongitude =
-			new FloatConfigValue("transitime.avl.minLongitude", -135.0f,
+			new FloatConfigValue("transitclock.avl.minLongitude", -135.0f,
 					"For filtering out bad AVL reports. The default values " +
 					"of latitude 15.0 to 55.0 and longitude of -135.0 to " +
 					"-60.0 are for North America, including Mexico and " +
@@ -174,7 +174,7 @@ public class AvlConfig {
 		return maxAvlLongitude.getID();
 	}
 	private static FloatConfigValue maxAvlLongitude =
-			new FloatConfigValue("transitime.avl.maxLongitude", -60.0f,
+			new FloatConfigValue("transitclock.avl.maxLongitude", -60.0f,
 					"For filtering out bad AVL reports. The default values " +
 					"of latitude 15.0 to 55.0 and longitude of -135.0 to " +
 					"-60.0 are for North America, including Mexico and " +
@@ -185,19 +185,19 @@ public class AvlConfig {
 	 * So can filter out unpredictable assignments such as for training coaches,
 	 * service vehicles, or simply vehicles that are not in service and should
 	 * not be attempted to be made predictable. Returns empty string, the
-	 * default value if transitime.avl.unpredictableAssignmentsRegEx is not set.
+	 * default value if transitclock.avl.unpredictableAssignmentsRegEx is not set.
 	 */
 	public static String getUnpredictableAssignmentsRegEx() {
 		return unpredictableAssignmentsRegEx.getValue();
 	}
 	private static StringConfigValue unpredictableAssignmentsRegEx =
-			new StringConfigValue("transitime.avl.unpredictableAssignmentsRegEx", 
+			new StringConfigValue("transitclock.avl.unpredictableAssignmentsRegEx", 
 					"", // default value
 					"So can filter out unpredictable assignments such as for " +
 					"training coaches, service vehicles, or simply vehicles " +
 					"that are not in service and should not be attempted to " +
 					"be made predictable. Returns empty string, the default " +
-					"value if transitime.avl.unpredictableAssignmentsRegEx " +
+					"value if transitclock.avl.unpredictableAssignmentsRegEx " +
 					"is not set.");
 	
 	/**
@@ -211,7 +211,7 @@ public class AvlConfig {
 	}
 	private static IntegerConfigValue minTimeBetweenAvlReportsSecs =
 			new IntegerConfigValue(
-					"transitime.avl.minTimeBetweenAvlReportsSecs", 
+					"transitclock.avl.minTimeBetweenAvlReportsSecs", 
 					5,
 					"Minimum allowable time in seconds between AVL reports for "
 					+ "a vehicle. If get a report closer than this number of "
@@ -230,7 +230,7 @@ public class AvlConfig {
 		return shouldLogToStdOut.getValue();
 	}
 	private static BooleanConfigValue shouldLogToStdOut =
-			new BooleanConfigValue("transitime.avl.shouldLogToStdOut", false,
+			new BooleanConfigValue("transitclock.avl.shouldLogToStdOut", false,
 					"For debugging. Logs each AVL report to stdout if set "
 					+ "to true. Default is false.");
 }

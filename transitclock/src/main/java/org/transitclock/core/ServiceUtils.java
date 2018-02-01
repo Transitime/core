@@ -51,7 +51,7 @@ public class ServiceUtils {
 	
 	private static IntegerConfigValue minutesIntoMorningToIncludePreviousServiceIds =
 			new IntegerConfigValue(
-					"transitime.service.minutesIntoMorningToIncludePreviousServiceIds",
+					"transitclock.service.minutesIntoMorningToIncludePreviousServiceIds",
 					4*Time.HOUR_IN_MINS,
 					"Early in the morning also want to include at service IDs "
 					+ "for previous day since a block might have started on "

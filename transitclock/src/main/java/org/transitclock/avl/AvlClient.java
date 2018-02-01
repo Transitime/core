@@ -134,7 +134,7 @@ public class AvlClient implements Runnable {
 						logger.debug("Not processing AVL report because the new "
 								+ "report is too close in time to the previous AVL "
 								+ "report for the vehicle. "
-								+ "transitime.avl.minTimeBetweenAvlReportsSecs={} "
+								+ "transitclock.avl.minTimeBetweenAvlReportsSecs={} "
 								+ "secs. New AVL report is {}. Previous valid AVL "
 								+ "report is {}",
 								AvlConfig.getMinTimeBetweenAvlReportsSecs(),

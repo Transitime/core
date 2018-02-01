@@ -292,9 +292,9 @@ public class VehicleState {
 					+ "at least {} msec old but match history in VehicleState "
 					+ "had only {} entries which was not large enough. The oldest "
 					+ "match in history was for {} msec old. Likely "
-					+ "should increase transitime.core.matchHistoryMaxSize "
+					+ "should increase transitclock.core.matchHistoryMaxSize "
 					+ "parameter to store more history or reduce "
-					+ "transitime.core.timeForDeterminingNoProgress to look "
+					+ "transitclock.core.timeForDeterminingNoProgress to look "
 					+ "back less far.",
 					vehicleId,
 					minimumAgeMsec,
@@ -558,7 +558,7 @@ public class VehicleState {
 			logger.error("For vehicleId={} tried to retrieve AVL "
 					+ "at least {} msec old but AVL history in VehicleState "
 					+ "had only {} entries which was not large enough. Likely "
-					+ "should increase transitime.core.avlHistoryMaxSize "
+					+ "should increase transitclock.core.avlHistoryMaxSize "
 					+ "parameter to store more history.",
 					vehicleId,
 					minimumAgeMsec,

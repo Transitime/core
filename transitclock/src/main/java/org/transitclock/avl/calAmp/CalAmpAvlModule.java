@@ -12,7 +12,7 @@ import org.transitclock.config.IntegerConfigValue;
 public class CalAmpAvlModule extends AvlModule {
 
 	private static IntegerConfigValue calAmpFeedPort = new IntegerConfigValue(
-			"transitime.avl.calAmpFeedPort", 20500,
+			"transitclock.avl.calAmpFeedPort", 20500,
 			"The port number for the UDP socket connection for the "
 					+ "CalAmp GPS tracker feed.");
 

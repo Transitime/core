@@ -41,7 +41,7 @@ import org.transitclock.utils.Time;
 public class VtaAcsAvlModule extends PollUrlAvlModule {
 
 	private static StringConfigValue feedUrl = 
-			new StringConfigValue("transitime.avl.vta.url", 
+			new StringConfigValue("transitclock.avl.vta.url", 
 					"The URL of the ACS feed to use.");
 
 	private static final Logger logger = LoggerFactory

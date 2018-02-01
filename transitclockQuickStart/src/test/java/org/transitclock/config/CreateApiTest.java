@@ -1,4 +1,4 @@
-package org.transitime.config;
+package org.transitclock.config;
 
 import static org.junit.Assert.*;
 
@@ -28,7 +28,7 @@ public class CreateApiTest {
 			
 		}
 		String name="Brendan";
-		String url="http://www.transitime.org";
+		String url="http://www.transitclock.org";
 		String email="egan129129@gmail.com";
 		String phone="123456789";
 		String description="Foo";

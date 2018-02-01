@@ -53,13 +53,13 @@ public class BatchCsvAvlFeedModule extends Module {
 		return csvAvlFeedFileName.getValue();
 	}
 	private static StringConfigValue csvAvlFeedFileName =
-			new StringConfigValue("transitime.avl.csvAvlFeedFileName", 
+			new StringConfigValue("transitclock.avl.csvAvlFeedFileName", 
 					"/Users/Mike/cvsAvlData/testAvlData.csv",
 					"The name of the CSV file containing AVL data to process.");
 	
 	
 	private static BooleanConfigValue processInRealTime =
-			new BooleanConfigValue("transitime.avl.processInRealTime",
+			new BooleanConfigValue("transitclock.avl.processInRealTime",
 					false,
 					"For when getting batch of AVL data from a CSV file. "
 					+ "When true then when reading in do at the same speed as "
@@ -134,9 +134,9 @@ public class BatchCsvAvlFeedModule extends Module {
 		}
 
 		// Kill off the whole program because done processing the AVL data
-        String integrationTest = System.getProperty("transitime.core.integrationTest");
+        String integrationTest = System.getProperty("transitclock.core.integrationTest");
         if(integrationTest != null){
-            System.setProperty("transitime.core.csvImported","true");
+            System.setProperty("transitclock.core.csvImported","true");
         }else{
             System.exit(0);
         }

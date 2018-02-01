@@ -72,7 +72,7 @@ import org.transitclock.utils.Time;
 public class PredictionGeneratorDefaultImpl extends PredictionGenerator implements PredictionComponentElementsGenerator{
 
 	private static IntegerConfigValue maxPredictionsTimeSecs =
-			new IntegerConfigValue("transitime.core.maxPredictionsTimeSecs", 
+			new IntegerConfigValue("transitclock.core.maxPredictionsTimeSecs", 
 					45 * Time.SEC_PER_MIN,
 					"How far forward into the future should generate " +
 					"predictions for.");
@@ -81,19 +81,19 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	}
 			
 	private static LongConfigValue generateHoldingTimeWhenPredictionWithin =
-			new LongConfigValue("transitime.core.generateHoldingTimeWhenPredictionWithin",
+			new LongConfigValue("transitclock.core.generateHoldingTimeWhenPredictionWithin",
 					0L,
 			"If the prediction is less than this number of milliseconds from current time then use it to generate a holding time");
 			
 			
 	private static BooleanConfigValue useArrivalPredictionsForNormalStops =
-			new BooleanConfigValue("transitime.core.useArrivalPredictionsForNormalStops", 
+			new BooleanConfigValue("transitclock.core.useArrivalPredictionsForNormalStops", 
 					true,
 					"For specifying whether to use arrival predictions or " +
 					"departure predictions for normal, non-wait time, stops.");
 	
 	private static IntegerConfigValue maxLateCutoffPredsForNextTripsSecs =
-			new IntegerConfigValue("transitime.core.maxLateCutoffPredsForNextTripsSecs",
+			new IntegerConfigValue("transitclock.core.maxLateCutoffPredsForNextTripsSecs",
 					Integer.MAX_VALUE,
 					"If a vehicle is further behind schedule than this amount "
 					+ "then predictions for subsequent trips will be marked as "
@@ -102,7 +102,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					+ "vehicle being late.");
 	
 	private static BooleanConfigValue useExactSchedTimeForWaitStops =
-			new BooleanConfigValue("transitime.core.useExactSchedTimeForWaitStops", 
+			new BooleanConfigValue("transitclock.core.useExactSchedTimeForWaitStops", 
 					true,
 					"The predicted time for wait stops includes the historic "
 					+ "wait stop time. This means it will be a bit after the "

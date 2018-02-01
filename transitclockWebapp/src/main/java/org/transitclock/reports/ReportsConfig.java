@@ -23,7 +23,7 @@ public class ReportsConfig {
 	
 	private static BooleanConfigValue showPredictionSource =
 			new BooleanConfigValue(
-					"transitime.reports.showPredictionSource", 
+					"transitclock.reports.showPredictionSource", 
 					true, 
 					"Whether prediction source UI element should be visible.");
 	

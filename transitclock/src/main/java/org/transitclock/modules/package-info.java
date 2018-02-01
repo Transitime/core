@@ -22,11 +22,11 @@
  * For the core predictor application modules can be started simply 
  * by configuring on the command line
  * which ones should be run by using the VM argument 
- * -Dtransitime.modules.optionalModulesList. Multiple modules can be specified
+ * -Dtransitclock.modules.optionalModulesList. Multiple modules can be specified
  * by separating them with a semicolon. For example, to use one module to
  * read AVL data and put it into JMS, and another module for reading the
  * AVL data from JMS and processing it could use something like:
- * -Dtransitime.modules.optionalModulesList=org.transitclock.avl.MbtaNextBusAvlModule;org.transitclock.avl.AvlJmsClientModule
+ * -Dtransitclock.modules.optionalModulesList=org.transitclock.avl.MbtaNextBusAvlModule;org.transitclock.avl.AvlJmsClientModule
  * 
  * @author SkiBu Smith
  *

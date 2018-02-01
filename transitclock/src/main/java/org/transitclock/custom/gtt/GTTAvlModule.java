@@ -22,7 +22,7 @@ public class GTTAvlModule extends PollUrlAvlModule {
 	private static String avlURL="http://m.gatech.edu/api/buses/position";
 	HashMap<String, Date> avlreports = new HashMap<String, Date>();
 	
-	protected static StringListConfigValue vehiclesonredroute = new StringListConfigValue("transitime.gtt.vehiclesonredroute",null, "List of vehicles on read route for HoldingTime trial.");
+	protected static StringListConfigValue vehiclesonredroute = new StringListConfigValue("transitclock.gtt.vehiclesonredroute",null, "List of vehicles on read route for HoldingTime trial.");
 
 	public GTTAvlModule(String agencyId) {
 		super(agencyId);		

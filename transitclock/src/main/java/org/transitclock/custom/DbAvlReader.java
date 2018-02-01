@@ -25,17 +25,17 @@ public class DbAvlReader extends Module {
 
   public static final String DB_URL = "url";
   private static StringConfigValue dbUrl =
-      new StringConfigValue("transitime.avl.dbUrl", null, "The jdbc url of the avl database");
+      new StringConfigValue("transitclock.avl.dbUrl", null, "The jdbc url of the avl database");
   private static StringConfigValue dbQuery =
-      new StringConfigValue("transitime.avl.dbQuery", "select ID as Id, BusID as busId, "
+      new StringConfigValue("transitclock.avl.dbQuery", "select ID as Id, BusID as busId, "
           + " CAST(CONCAT(RptDate, ' ', RptTime) AS DATETIME) AS rptDateTime, "
           + "LatDD as lat, LonDD as lon, LogonRoute as logonRoute, LogonTrip as logonTrip, "
           + "RptDate as reportDate from tblbuses;", "The query to execute to receive AVL data");
   
   private static StringConfigValue validationQuery =
-      new StringConfigValue("transitime.avl.validationQuery", "select 1");
+      new StringConfigValue("transitclock.avl.validationQuery", "select 1");
   private static IntegerConfigValue numAvlThreads = 
-      new IntegerConfigValue("transitime.avl.jmsNumThreads", 1,
+      new IntegerConfigValue("transitclock.avl.jmsNumThreads", 1,
           "How many threads to be used for processing the AVL " +
           "data. For most applications just using a single thread " +
           "is probably sufficient and it makes the logging simpler " +
@@ -44,12 +44,12 @@ public class DbAvlReader extends Module {
           "multiple threads, such as 3-5 so that more of the cores " +
           "are used. Only for when JMS is used.");
   private static IntegerConfigValue avlQueueSize = 
-      new IntegerConfigValue("transitime.avl.jmsQueueSize", 350,
+      new IntegerConfigValue("transitclock.avl.jmsQueueSize", 350,
           "How many items to go into the blocking AVL queue "
           + "before need to wait for queue to have space. "
           + "Only for when JMS is used.");
   private static IntegerConfigValue pollingRateMsec =
-      new IntegerConfigValue("transitime.avl.pollingRateMsec", 30000,
+      new IntegerConfigValue("transitclock.avl.pollingRateMsec", 30000,
           "Milliseconds between AVL database polls");
   
   private final BoundedExecutor _avlClientExecutor;

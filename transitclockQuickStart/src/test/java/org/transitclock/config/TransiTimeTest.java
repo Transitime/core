@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.config;
+package org.transitclock.config;
 
 import static org.junit.Assert.*;
 import java.net.URL;
@@ -84,13 +84,13 @@ public class TransiTimeTest  {
 	public void test_2_Core() {
 
 		String agencyid = "02";
-		System.getProperties().setProperty("transitime.core.configRevStr", "0");
-		System.getProperties().setProperty("transitime.core.agencyId", "02");
+		System.getProperties().setProperty("transitclock.core.configRevStr", "0");
+		System.getProperties().setProperty("transitclock.core.agencyId", "02");
 		
 		//Sending VM arguments
-		System.getProperties().setProperty("transitime.logging.dir",
+		System.getProperties().setProperty("transitclock.logging.dir",
 				"C:\\Users\\Brendan\\Documents\\TransitimeTest\\core\\transitime\\logs\\");
-		System.getProperties().setProperty("transitime.configFiles",
+		System.getProperties().setProperty("transitclock.configFiles",
 				"C:\\Users\\Brendan\\Documents\\TransitimeTest\\core\\transitime\\src\\main\\resources\\transiTimeconfig.xml");
 		try {
 
@@ -100,7 +100,7 @@ public class TransiTimeTest  {
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
 			if (optionalModuleNames.size() > 0)
 				logger.info("Starting up optional modules specified via "
-						+ "transitime.modules.optionalModulesList param:");
+						+ "transitclock.modules.optionalModulesList param:");
 			else
 				logger.info("No optional modules to start up.");
 			for (String moduleName : optionalModuleNames) {

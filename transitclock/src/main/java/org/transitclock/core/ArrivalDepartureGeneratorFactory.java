@@ -24,7 +24,7 @@ import org.transitclock.utils.ClassInstantiator;
  * For instantiating a ArrivalDepartureGenerator object that generates
  * arrival/departure data when a new match is generated for a vehicle. The class
  * to be instantiated can be set using the config variable
- * transitime.core.arrivalDepartureGeneratorClass
+ * transitclock.core.arrivalDepartureGeneratorClass
  * 
  * @author SkiBu Smith
  * 
@@ -33,7 +33,7 @@ public class ArrivalDepartureGeneratorFactory {
 
 	// The name of the class to instantiate
 	private static StringConfigValue className = 
-			new StringConfigValue("transitime.core.arrivalDepartureGeneratorClass", 
+			new StringConfigValue("transitclock.core.arrivalDepartureGeneratorClass", 
 					"org.transitclock.core.ArrivalDepartureGeneratorDefaultImpl",
 					"Specifies the name of the class used for generating " +
 					"arrival/departure data.");

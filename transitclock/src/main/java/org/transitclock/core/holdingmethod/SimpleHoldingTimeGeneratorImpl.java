@@ -38,12 +38,12 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(SimpleHoldingTimeGeneratorImpl.class);
 	
-	protected static BooleanConfigValue storeHoldingTimes = new BooleanConfigValue("transitime.holding.storeHoldingTimes", 
+	protected static BooleanConfigValue storeHoldingTimes = new BooleanConfigValue("transitclock.holding.storeHoldingTimes", 
 			true,
 			"This is set to true to record all holding times.");
 	
-	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitime.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
-	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitime.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
+	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitclock.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
+	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitclock.holding.controlStops", null, "This is a list of stops to generate holding times for."); 
 	
 	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event) {			
 		

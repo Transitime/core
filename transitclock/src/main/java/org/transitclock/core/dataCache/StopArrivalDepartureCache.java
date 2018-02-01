@@ -47,7 +47,7 @@ public class StopArrivalDepartureCache {
 	 * Default is 4 as we need 3 days worth for Kalman Filter implementation
 	 */
 	private static final IntegerConfigValue tripDataCacheMaxAgeSec = new IntegerConfigValue(
-			"transitime.tripdatacache.tripDataCacheMaxAgeSec", 4 * Time.SEC_PER_DAY,
+			"transitclock.tripdatacache.tripDataCacheMaxAgeSec", 4 * Time.SEC_PER_DAY,
 			"How old an arrivaldeparture has to be before it is removed from the cache ");
 
 	/**

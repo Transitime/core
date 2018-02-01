@@ -607,7 +607,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		// Call in standard getArrivalsDeparturesFromDb() but pass in
 		// sql clause
 		return getArrivalsDeparturesFromDb(
-				null,  // Use db specified by transitime.db.dbName
+				null,  // Use db specified by transitclock.db.dbName
 				beginTime, endTime,
 				"AND vehicleId='" + vehicleId + "'", 
 				0, 0,  // Don't use batching 
@@ -749,7 +749,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param dbName
 	 *            Name of the database to retrieve data from. If set to null
 	 *            then will use db name configured by Java property
-	 *            transitime.db.dbName
+	 *            transitclock.db.dbName
 	 * @param beginTime
 	 * @param endTime
 	 * @param sqlClause
@@ -868,7 +868,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	
 	/**
 	 * Same as other getArrivalsDeparturesFromDb() but uses
-	 * -Dtransitime.db.dbName Java property to specify the name of the database.
+	 * -Dtransitclock.db.dbName Java property to specify the name of the database.
 	 * 
 	 * @param beginTime
 	 * @param endTime

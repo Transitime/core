@@ -1,4 +1,4 @@
-package org.transitime.config;
+package org.transitclock.config;
 
 import org.junit.Test;
 

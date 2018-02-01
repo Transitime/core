@@ -32,14 +32,14 @@ import org.transitclock.utils.StringUtils;
 public class SystemDiskSpaceMonitor extends MonitorBase {
 
 	private LongConfigValue usableDiskSpaceThreshold = new LongConfigValue(
-			"transitime.monitoring.usableDiskSpaceThreshold", 
+			"transitclock.monitoring.usableDiskSpaceThreshold", 
 			1024 * 1024 * 1024L, // ~1 GB 
 			"If usable disk space is less than this "
 			+ "value then file space monitoring is triggered.");
 
 	private static LongConfigValue usableDiskSpaceThresholdGap =
 			new LongConfigValue(
-					"transitime.monitoring.usableDiskSpaceThresholdGap", 
+					"transitclock.monitoring.usableDiskSpaceThresholdGap", 
 					100 * 1024 * 1024L, // ~100 MB 
 					"When transitioning from triggered to untriggered don't "
 					+ "want to send out an e-mail right away if actually "

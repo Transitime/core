@@ -49,27 +49,27 @@ import org.transitclock.utils.Time;
  * an AvlClient. If not in JMS mode then uses a BoundedExecutor with multiple
  * threads to directly call AvlClient.run().
  *
- * @author Michael Smith (michael@transitime.org)
+ * @author Michael Smith (michael@transitclock.org)
  *
  */
 public abstract class PollUrlAvlModule extends AvlModule {
 
 	private static StringConfigValue url =
-			new StringConfigValue("transitime.avl.url", 
+			new StringConfigValue("transitclock.avl.url", 
 					"The URL of the AVL feed to poll.");
 
 	private static StringConfigValue authenticationUser =
-			new StringConfigValue("transitime.avl.authenticationUser", 
+			new StringConfigValue("transitclock.avl.authenticationUser", 
 					"If authentication used for the feed then this specifies "
 					+ "the user.");
 
 	private static StringConfigValue authenticationPassword =
-			new StringConfigValue("transitime.avl.authenticationPassword", 
+			new StringConfigValue("transitclock.avl.authenticationPassword", 
 					"If authentication used for the feed then this specifies "
 					+ "the password.");
 
 	private static BooleanConfigValue shouldProcessAvl = 
-			new BooleanConfigValue("transitime.avl.shouldProcessAvl", 
+			new BooleanConfigValue("transitclock.avl.shouldProcessAvl", 
 					true,
 					"Usually want to process the AVL data when it is read in "
 					+ "so that predictions and such are generated. But if "

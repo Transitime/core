@@ -99,7 +99,7 @@ public class TitleFormatter {
 			new ArrayList<RegexInfo>();
 	
 	private static final BooleanConfigValue capitalize = 
-			new BooleanConfigValue("transitime.gtfs.capitalize", 
+			new BooleanConfigValue("transitclock.gtfs.capitalize", 
 					false, 
 					"Sometimes GTFS titles have all capital letters or other "
 					+ "capitalization issues. If set to true then will properly "

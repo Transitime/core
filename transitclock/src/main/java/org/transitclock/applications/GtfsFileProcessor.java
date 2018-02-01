@@ -311,7 +311,7 @@ public class GtfsFileProcessor {
 	 */
 	private static void displayCommandLineOptions(Options options) {
 		// Display help
-		final String commandLineSyntax = "java transitime.jar";
+		final String commandLineSyntax = "java transitclock.jar";
 		final PrintWriter writer = new PrintWriter(System.out);
 		final HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.printHelp(writer, 80, // printedRowWidth
@@ -661,10 +661,10 @@ public class GtfsFileProcessor {
 		// Found that when running on AWS that program never terminates,
 		// probably because still have db threads running. Therefore
 		// using exit() to definitely end the process.
-        String integrationTest = System.getProperty("transitime.core.integrationTest");
+        String integrationTest = System.getProperty("transitclock.core.integrationTest");
         if(integrationTest != null){
             logger.info("GTFS import complete for integration test");
-            System.setProperty("transitime.core.gtfsImported","true");
+            System.setProperty("transitclock.core.gtfsImported","true");
         }else{
             System.exit(0);
         }

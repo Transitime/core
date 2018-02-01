@@ -24,13 +24,13 @@ import org.transitclock.utils.Time;
 public class GTTCsvAvlModule extends Module {
 	private static final Logger logger = LoggerFactory.getLogger(GTTCsvAvlModule.class);
 
-	private static StringConfigValue csvfolder = new StringConfigValue("transitime.gtt.csvfolder", "/data",
+	private static StringConfigValue csvfolder = new StringConfigValue("transitclock.gtt.csvfolder", "/data",
 			"Folder to find archived GTT avl files.");
 
 	// For running in real time
 	private long lastAvlReportTimestamp = -1;
 
-	private static BooleanConfigValue processInRealTime = new BooleanConfigValue("transitime.avl.processInRealTime",
+	private static BooleanConfigValue processInRealTime = new BooleanConfigValue("transitclock.avl.processInRealTime",
 			false,
 			"For when getting batch of AVL data from a CSV file. "
 					+ "When true then when reading in do at the same speed as "

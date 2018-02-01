@@ -76,7 +76,7 @@ public class GtfsRtTripFeed {
 	
 	
 	private static IntegerConfigValue predictionMaxFutureSecs = new IntegerConfigValue(
-			"transitime.api.predictionMaxFutureSecs", 60 * 60,
+			"transitclock.api.predictionMaxFutureSecs", 60 * 60,
 			"Number of seconds in the future to accept predictions before");
 	private static final int PREDICTION_MAX_FUTURE_SECS = predictionMaxFutureSecs.getValue();
 

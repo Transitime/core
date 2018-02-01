@@ -47,11 +47,11 @@ public class UsageValidator {
 
 	
 	private static IntegerConfigValue maxRequests = new IntegerConfigValue(
-			"transitime.usage.maxRequests", 2000,
+			"transitclock.usage.maxRequests", 2000,
 			"Maximum number of requests to allow within the specified time frame");
 	
 	private static IntegerConfigValue maxRequestsTimeMsec = new IntegerConfigValue(
-			"transitime.usage.maxRequestsTimeMsec", 1000,
+			"transitclock.usage.maxRequestsTimeMsec", 1000,
 			"Amount of time in msec before max requests count limit is reset");
 	
 

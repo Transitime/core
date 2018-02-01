@@ -79,7 +79,7 @@ public class AvlProcessor {
 
 	private static DoubleConfigValue terminalDistanceForRouteMatching = 
 			new DoubleConfigValue(
-			"transitime.core.terminalDistanceForRouteMatching", 
+			"transitclock.core.terminalDistanceForRouteMatching", 
 			100.0,
 			"How far vehicle must be away from the terminal before doing "
 			+ "initial matching. This is important because when vehicle is at "
@@ -88,7 +88,7 @@ public class AvlProcessor {
 
 	private static IntegerConfigValue allowableBadAssignments = 
 			new IntegerConfigValue(
-			"transitime.core.allowableBadAssignments", 0,
+			"transitclock.core.allowableBadAssignments", 0,
 			"If get a bad assignment, such as no assignment, but no "
 					+ "more than allowableBadAssignments then will use the "
 					+ "previous assignment. Useful for when assignment part "
@@ -96,7 +96,7 @@ public class AvlProcessor {
 
 	private static BooleanConfigValue emailMessagesWhenAssignmentGrabImproper =
 			new BooleanConfigValue(
-					"transitime.core.emailMessagesWhenAssignmentGrabImproper", 
+					"transitclock.core.emailMessagesWhenAssignmentGrabImproper", 
 					false, 
 					"When one vehicle gets assigned by AVL feed but another "
 					+ "vehicle already has that assignment then sometimes the "
@@ -109,7 +109,7 @@ public class AvlProcessor {
 	
 	private static DoubleConfigValue maxDistanceForAssignmentGrab =
 			new DoubleConfigValue(
-					"transitime.core.maxDistanceForAssignmentGrab",
+					"transitclock.core.maxDistanceForAssignmentGrab",
 					10000.0,
 					"For when another vehicles gets assignment and needs to "
 					+ "grab it from another vehicle. The new vehicle must "
@@ -118,7 +118,7 @@ public class AvlProcessor {
 
 	 private static DoubleConfigValue maxMatchDistanceFromAVLRecord =
 	      new DoubleConfigValue(
-	          "transitime.core.maxMatchDistanceFromAVLRecord",
+	          "transitclock.core.maxMatchDistanceFromAVLRecord",
 	          500.0,
 	          "For logging distance between spatial match and actual AVL assignment ");
 
@@ -239,8 +239,8 @@ public class AvlProcessor {
 	/**
 	 * Looks at the previous AVL reports to determine if vehicle is actually
 	 * moving. If it is not moving then the vehicle is made unpredictable. Uses
-	 * the system properties transitime.core.timeForDeterminingNoProgress and
-	 * transitime.core.minDistanceForNoProgress
+	 * the system properties transitclock.core.timeForDeterminingNoProgress and
+	 * transitclock.core.minDistanceForNoProgress
 	 * 
 	 * @param bestTemporalMatch
 	 * @param vehicleState
@@ -310,8 +310,8 @@ public class AvlProcessor {
 	 * Looks at the previous AVL reports to determine if vehicle is actually
 	 * moving. If it is not moving then the vehicle should be marked as being
 	 * delayed. Uses the system properties
-	 * transitime.core.timeForDeterminingDelayed and
-	 * transitime.core.minDistanceForDelayed
+	 * transitclock.core.timeForDeterminingDelayed and
+	 * transitclock.core.minDistanceForDelayed
 	 * 
 	 * @param vehicleState
 	 *            For providing the temporal match and the AVL history. It is
@@ -371,9 +371,9 @@ public class AvlProcessor {
 								+ "traveled only "
 								+ Geo.distanceFormat(distanceTraveled)
 								+ " while "
-								+ "transitime.core.timeForDeterminingDelayedSecs="
+								+ "transitclock.core.timeForDeterminingDelayedSecs="
 								+ maxDelayedSecs + " and "
-								+ "transitime.core.minDistanceForDelayed="
+								+ "transitclock.core.minDistanceForDelayed="
 								+ Geo.distanceFormat(minDistance);
 				
 				// Log the event
@@ -945,7 +945,7 @@ public class AvlProcessor {
 	
 	/**
 	 * For reducing e-mail logging messages when problem grabbing assignment.
-	 * Java property transitime.avl.emailMessagesWhenAssignmentGrabImproper must
+	 * Java property transitclock.avl.emailMessagesWhenAssignmentGrabImproper must
 	 * be true for e-mail to be sent when there is an error.
 	 * 
 	 * @param vehicleId
@@ -1106,7 +1106,7 @@ public class AvlProcessor {
 					+ oldAssignment
 					+ " but received " + vehicleState.getBadAssignmentsInARow() 
 					+ " null assignments in a row, which is configured by "
-					+ "transitime.core.allowableBadAssignments to be too many, "
+					+ "transitclock.core.allowableBadAssignments to be too many, "
 					+ "so making vehicle unpredictable.";
 			makeVehicleUnpredictable(vehicleState.getVehicleId(),
 					eventDescription, VehicleEvent.ASSIGNMENT_CHANGED);
@@ -1555,7 +1555,7 @@ public class AvlProcessor {
 		if (AutoBlockAssigner.ignoreAvlAssignments()
 				&& !avlReport.isForSchedBasedPreds()) {
 			logger.debug("Removing assignment from AVL report because "
-					+ "transitime.autoBlockAssigner.ignoreAvlAssignments=true. {}",
+					+ "transitclock.autoBlockAssigner.ignoreAvlAssignments=true. {}",
 					avlReport);
 			avlReport.setAssignment(null, AssignmentType.UNSET);
 		}

@@ -96,17 +96,17 @@ public class Core {
 	// Read in configuration files. This should be done statically before
 	// the logback LoggerFactory.getLogger() is called so that logback can
 	// also be configured using a transitime config file. The files are
-	// specified using the java system property -Dtransitime.configFiles .
+	// specified using the java system property -Dtransitclock.configFiles .
 	static {
 		ConfigFileReader.processConfig();
 	}
 	private static StringConfigValue cacheReloadStartTimeStr =
-			new StringConfigValue("transitime.core.cacheReloadStartTimeStr", 
+			new StringConfigValue("transitclock.core.cacheReloadStartTimeStr", 
 					"",
 					"Date and time of when to start reading arrivaldepartures to inform caches.");
 	
 	private static StringConfigValue cacheReloadEndTimeStr =
-			new StringConfigValue("transitime.core.cacheReloadEndTimeStr", 
+			new StringConfigValue("transitclock.core.cacheReloadEndTimeStr", 
 					"",
 					"Date and time of when to end reading arrivaldepartures to inform caches.");
 	private static final Logger logger = 
@@ -192,7 +192,7 @@ public class Core {
 	 * Creates the Core object for the application. There can only be one Core
 	 * object per application. Uses CoreConfig.getAgencyId() to determine the
 	 * agencyId. This means it typically uses the agency ID specified by the
-	 * Java property -Dtransitime.core.agencyId .
+	 * Java property -Dtransitclock.core.agencyId .
 	 * <p>
 	 * Usually doesn't need to be called directly because can simply use
 	 * Core.getInstance().
@@ -373,7 +373,7 @@ public class Core {
 		// Handle help option
 		if (cmd.hasOption("h")) {
 			// Display help
-			final String commandLineSyntax = "java transitime.jar";
+			final String commandLineSyntax = "java transitclock.jar";
 			final PrintWriter writer = new PrintWriter(System.out);
 			final HelpFormatter helpFormatter = new HelpFormatter();
 			helpFormatter.printHelp(writer,
@@ -491,7 +491,7 @@ public class Core {
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
 			if (optionalModuleNames.size() > 0)
 				logger.info("Starting up optional modules specified via " + 
-						"transitime.modules.optionalModulesList param:");
+						"transitclock.modules.optionalModulesList param:");
 			else
 				logger.info("No optional modules to start up.");
 			for (String moduleName : optionalModuleNames) {

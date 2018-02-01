@@ -58,7 +58,7 @@ import org.transitclock.utils.Time;
  * <p>
  * Schedule based predictions are removed once a regular vehicle is assigned to
  * the block or the schedule based vehicle is timed out via TimeoutHandlerModule
- * due to it being transitime.timeout.allowableNoAvlForSchedBasedPredictions
+ * due to it being transitclock.timeout.allowableNoAvlForSchedBasedPredictions
  * after the scheduled departure time for the assignment.
  * 
  * @author SkiBu Smith
@@ -73,13 +73,13 @@ public class SchedBasedPredsModule extends Module {
 
 	private static final IntegerConfigValue timeBetweenPollingMsec = 
 			new IntegerConfigValue(
-					"transitime.schedBasedPreds.pollingRateMsec",
+					"transitclock.schedBasedPreds.pollingRateMsec",
 					4 * Time.MS_PER_MIN,
 					"How frequently to look for blocks that do not have "
 							+ "associated vehicle.");
 	
 	private static final BooleanConfigValue processImmediatelyAtStartup =
-			new BooleanConfigValue("transitime.schedBasedPreds.processImmediatelyAtStartup", 
+			new BooleanConfigValue("transitclock.schedBasedPreds.processImmediatelyAtStartup", 
 					false,
 					"Whether should start creating schedule based predictions "
 					+ "right at startup. Usually want to give AVL data a "
@@ -90,13 +90,13 @@ public class SchedBasedPredsModule extends Module {
 	
 	private static final IntegerConfigValue beforeStartTimeMinutes = 
 			new IntegerConfigValue(
-					"transitime.schedBasedPreds.beforeStartTimeMinutes", 60,
+					"transitclock.schedBasedPreds.beforeStartTimeMinutes", 60,
 					"How many minutes before a block start time should create "
 					+ "a schedule based vehicle for that block.");
 	
 	private static IntegerConfigValue afterStartTimeMinutes =
 			new IntegerConfigValue(
-					"transitime.schedBasedPreds.afterStartTimeMinutes",
+					"transitclock.schedBasedPreds.afterStartTimeMinutes",
 					8, // Can take a while to automatically assign a vehicle
 					"If predictions created for a block based on the schedule "
 					+ "will remove those predictions this specified "

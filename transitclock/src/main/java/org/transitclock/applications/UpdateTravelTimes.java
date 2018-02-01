@@ -61,7 +61,7 @@ public class UpdateTravelTimes {
 	// Read in configuration files. This should be done statically before
 	// the logback LoggerFactory.getLogger() is called so that logback can
 	// also be configured using a transitime config file. The files are
-	// specified using the java system property -Dtransitime.configFiles .
+	// specified using the java system property -Dtransitclock.configFiles .
 	static {
 		ConfigFileReader.processConfig();
 	}

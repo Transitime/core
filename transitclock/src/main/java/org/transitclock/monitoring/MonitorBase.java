@@ -57,13 +57,13 @@ public abstract class MonitorBase {
 	
 	private static StringConfigValue emailRecipients =
 			new StringConfigValue(
-					"transitime.monitoring.emailRecipients", 
+					"transitclock.monitoring.emailRecipients", 
 					"Comma separated list of e-mail addresses indicating who "
 					+ "should be e-mailed when monitor state changes.");
 
 	private static IntegerConfigValue retryTimeoutSecs =
 			new IntegerConfigValue(
-					"transitime.monitoring.retryTimeoutSecs", 
+					"transitclock.monitoring.retryTimeoutSecs", 
 					5, 
 					"How long in seconds system should wait before rexamining "
 					+ "monitor. This way a short lived outage can be ignored. "
@@ -153,7 +153,7 @@ public abstract class MonitorBase {
 				emailSender.send(recipients(), subject, message);
 			} else {
 				logger.error("Could not send ERROR e-mail because "
-						+ "transitime.monitoring.emailRecipients Java property "
+						+ "transitclock.monitoring.emailRecipients Java property "
 						+ "not set");
 			}
 		} else if (wasTriggered && !isTriggered) {
@@ -168,7 +168,7 @@ public abstract class MonitorBase {
 				emailSender.send(recipients(), subject, message);			
 			} else {
 				logger.error("Could not send ERROR e-mail because "
-						+ "transitime.monitoring.emailRecipients Java property "
+						+ "transitclock.monitoring.emailRecipients Java property "
 						+ "not set");
 			}
 		}
@@ -273,7 +273,7 @@ public abstract class MonitorBase {
 	/**
 	 * Returns comma separated list of who should be notified via e-mail when
 	 * trigger state changes for the monitor. Specified by the Java property
-	 * transitime.monitoring.emailRecipients . Can be overwritten by an
+	 * transitclock.monitoring.emailRecipients . Can be overwritten by an
 	 * implementation of a monitor if want different list for a monitor.
 	 * 
 	 * @return E-mail addresses of who to notify
@@ -285,7 +285,7 @@ public abstract class MonitorBase {
 	/**
 	 * Returns comma separated list of who should be notified via e-mail when
 	 * trigger state changes for the monitor. Specified by the Java property
-	 * transitime.monitoring.emailRecipients . A static class so cannot be
+	 * transitclock.monitoring.emailRecipients . A static class so cannot be
 	 * overwritten.
 	 * 
 	 * @return E-mail addresses of who to notify

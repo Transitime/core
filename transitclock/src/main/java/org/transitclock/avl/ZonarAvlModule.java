@@ -40,17 +40,17 @@ import org.transitclock.utils.Time;
 public class ZonarAvlModule extends XmlPollingAvlModule {
 
 	private static StringConfigValue zonarAccount =
-			new StringConfigValue("transitime.avl.zonarAccount",
+			new StringConfigValue("transitclock.avl.zonarAccount",
 					"The Zonar count name used as part of the domain name for "
 					+ "requests. Consists of 3 lower-case letters and 4 "
 					+ "digits, e.g. abc1234.");
  
 	private static StringConfigValue zonarUserName =
-			new StringConfigValue("transitime.avl.zonarUserName",
+			new StringConfigValue("transitclock.avl.zonarUserName",
 					"The Zonar user name for API calls.");
  
 	private static StringConfigValue zonarPassword =
-			new StringConfigValue("transitime.avl.zonarPassword",
+			new StringConfigValue("transitclock.avl.zonarPassword",
 					"The Zonar password for API calls.");
  
 	private static final double KM_PER_HOUR_TO_METERS_PER_SEC = 0.27777777777778;

@@ -44,15 +44,15 @@ public class AvlFeedMonitor extends MonitorBase {
 
 	private static IntegerConfigValue allowableNoAvlSecs =
 			new IntegerConfigValue(
-					"transitime.monitoring.allowableNoAvlSecs", 
+					"transitclock.monitoring.allowableNoAvlSecs", 
 					5 * Time.SEC_PER_MIN, 
 					"How long in seconds that can not receive valid AVL data "
 					+ "before monitoring triggers an alert.");
 
 	private static StringConfigValue avlFeedEmailRecipients =
 			new StringConfigValue(
-					"transitime.monitoring.avlFeedEmailRecipients", 
-					"monitoring@transitime.org", 
+					"transitclock.monitoring.avlFeedEmailRecipients", 
+					"monitoring@transitclock.org", 
 					"Comma separated list of e-mail addresses indicating who "
 					+ "should be e-mail when monitor state changes for AVL "
 					+ "feed.");
@@ -75,7 +75,7 @@ public class AvlFeedMonitor extends MonitorBase {
 	
 	/**
 	 * Checks GPS time of last AVL report from the AVL feed. If it is recent, as
-	 * specified by transitime.monitoring.allowableAvlFeedTimeNoDataSecs, then
+	 * specified by transitclock.monitoring.allowableAvlFeedTimeNoDataSecs, then
 	 * this method returns 0. If no GPS data or the data is too old then returns
 	 * age of last AVL report in seconds.
 	 * 
@@ -147,7 +147,7 @@ public class AvlFeedMonitor extends MonitorBase {
 	/**
 	 * Returns comma separated list of who should be notified via e-mail when
 	 * trigger state changes for the monitor. Specified by the Java property
-	 * transitime.monitoring.emailRecipients . Can be overwritten by an
+	 * transitclock.monitoring.emailRecipients . Can be overwritten by an
 	 * implementation of a monitor if want different list for a monitor.
 	 * 
 	 * @return E-mail addresses of who to notify

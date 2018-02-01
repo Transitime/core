@@ -289,7 +289,7 @@ public class SchemaGenerator {
 	 * <p>
 	 * The resulting files have the name "ddl_" plus dialect name such as mysql
 	 * or oracle plus the first two components of the package name such as
-	 * org_transitime.
+	 * org_transitclock.
 	 */
 	public static void main(String[] args) throws Exception {
 		// Handle the command line options

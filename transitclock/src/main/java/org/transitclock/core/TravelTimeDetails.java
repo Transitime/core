@@ -12,7 +12,7 @@ public class TravelTimeDetails {
 	
 	private static final IntegerConfigValue maxTravelTime = 
 			new IntegerConfigValue(
-					"transitime.core.maxTravelTime",
+					"transitclock.core.maxTravelTime",
 					10 * Time.MS_PER_MIN,
 					"This is a maximum allowed for travel between two stops. Used as a sanity check for cache and predictions.");
 	

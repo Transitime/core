@@ -67,7 +67,7 @@ public class PredictionDataCache {
 	private static PredictionDataCache singleton = 
 			new PredictionDataCache();
 	
-	protected static BooleanConfigValue returnArrivalPredictionForEndOfTrip = new BooleanConfigValue("transitime.prediction.returnArrivalPredictionForEndOfTrip", 
+	protected static BooleanConfigValue returnArrivalPredictionForEndOfTrip = new BooleanConfigValue("transitclock.prediction.returnArrivalPredictionForEndOfTrip", 
 			false,
 			"This set to false will not return arrival predictions of the last stop on a trip.");
 	

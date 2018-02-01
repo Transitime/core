@@ -128,7 +128,7 @@ public class DbConfig {
 			.getLogger(DbConfig.class);
 
 	private StringConfigValue validateTestQuery 
-	= new StringConfigValue("transitime.db.validateQuery", 
+	= new StringConfigValue("transitclock.db.validateQuery", 
 			"SELECT 1", 
 			"query to validate database connection");
 	

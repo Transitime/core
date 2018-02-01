@@ -65,14 +65,14 @@ public abstract class PredictionGenerator {
 	
 		
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
-			"transitime.prediction.closestvehiclestopsahead", new Integer(2),
+			"transitclock.prediction.closestvehiclestopsahead", new Integer(2),
 			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
 	
-	protected static BooleanConfigValue storeTravelTimeStopPathPredictions = new BooleanConfigValue("transitime.core.storeTravelTimeStopPathPredictions", 
+	protected static BooleanConfigValue storeTravelTimeStopPathPredictions = new BooleanConfigValue("transitclock.core.storeTravelTimeStopPathPredictions", 
 			false,
 			"This is set to true to record all travelTime  predictions for individual stopPaths generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
 	
-	protected static BooleanConfigValue storeDwellTimeStopPathPredictions = new BooleanConfigValue("transitime.core.storeDwellTimeStopPathPredictions", 
+	protected static BooleanConfigValue storeDwellTimeStopPathPredictions = new BooleanConfigValue("transitclock.core.storeDwellTimeStopPathPredictions", 
 			false,
 			"This is set to true to record all travelTime  predictions for individual dwell times generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
 

@@ -23,7 +23,7 @@ import org.transitclock.utils.ClassInstantiator;
 /**
  * For instantiating a PredictionGenerator object that generates predictions
  * when a new match is generated for a vehicle. The class to be instantiated can
- * be set using the config variable transitime.core.predictionGeneratorClass
+ * be set using the config variable transitclock.core.predictionGeneratorClass
  * 
  * @author SkiBu Smith
  * 
@@ -32,7 +32,7 @@ public class PredictionGeneratorFactory {
 
 	// The name of the class to instantiate
 	private static StringConfigValue className = 
-			new StringConfigValue("transitime.core.predictionGeneratorClass", 
+			new StringConfigValue("transitclock.core.predictionGeneratorClass", 
 					"org.transitclock.core.PredictionGeneratorDefaultImpl",
 					"Specifies the name of the class used for generating " +
 					"prediction data.");

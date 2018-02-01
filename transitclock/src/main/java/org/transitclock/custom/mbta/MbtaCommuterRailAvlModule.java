@@ -58,7 +58,7 @@ public class MbtaCommuterRailAvlModule extends PollUrlAvlModule {
 	/********************** Member Functions **************************/
 
 	private static StringConfigValue mbtaCommuterRailFeedUrl =
-			new StringConfigValue("transitime.avl.mbtaCommuterRailFeedUrl",
+			new StringConfigValue("transitclock.avl.mbtaCommuterRailFeedUrl",
 					"The URL of the MBTA commuter rail feed to use.");
 
 	private static String getMbtaCommuterRailFeedUrl() {

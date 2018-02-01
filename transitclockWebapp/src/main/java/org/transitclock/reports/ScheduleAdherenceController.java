@@ -51,7 +51,7 @@ public class ScheduleAdherenceController {
 	
 	
 	private static IntegerConfigValue scheduleEarlySeconds =
-	    new IntegerConfigValue("transitime.web.scheduleEarlyMinutes", 
+	    new IntegerConfigValue("transitclock.web.scheduleEarlyMinutes", 
 	        -120, 
 	        "Schedule Adherence early limit");
 
@@ -60,7 +60,7 @@ public class ScheduleAdherenceController {
 	}
 	
 	 private static IntegerConfigValue scheduleLateSeconds =
-	      new IntegerConfigValue("transitime.web.scheduleLateMinutes", 
+	      new IntegerConfigValue("transitclock.web.scheduleLateMinutes", 
 	          420, 
 	          "Schedule Adherence late limit");
 
