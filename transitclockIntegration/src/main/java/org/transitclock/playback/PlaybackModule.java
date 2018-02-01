@@ -34,7 +34,7 @@ public class PlaybackModule {
 
 	private static String defaultGtfsDirectoryName = "src/main/resources/wmata_gtfs"; 
 	private static String defaultAvlReportsCsv = "src/main/resources/avl/03142016_SE-04.csv";
-	private static final String transitimeConfigFile = "src/main/resources/transiTimeConfigHsql.xml";
+	private static final String transitimeConfigFile = "src/main/resources/transitclockConfigHsql.xml";
 
 	private static final String agencyId = "1";
 	

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<transitime>
+<transitclock>
     <modules>
     </modules>
     <schedBasedPreds>
@@ -34,4 +34,4 @@
     <hibernate>
         <configFile>src/main/resources/hsql_integration_test_hibernate.cfg.xml</configFile>
     </hibernate>
-</transitime>
+</transitclock>
