@@ -20,7 +20,8 @@ deploy:
     - "transitclock/target/UpdateTravelTimes.jar"
     - "transitclockWebapp/target/web.war"
     - "transitclockWebapp/target/api.war"
+  skip_cleanup: true
   on:
     repo: TheTransitClock/transitime
-    tags: true
+    tags: false
     all_branches: true
