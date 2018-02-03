@@ -19,7 +19,7 @@ deploy:
     - "transitclock/target/transitclockCore-2.0.0-SNAPSHOT.jar"
     - "transitclock/target/UpdateTravelTimes.jar"
     - "transitclockWebapp/target/web.war"
-    - "transitclockWebapp/target/api.war"
+    - "transitclockApi/target/api.war"
   skip_cleanup: true
   on:
     repo: TheTransitClock/transitime
