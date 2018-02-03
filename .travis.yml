@@ -22,3 +22,5 @@ deploy:
     - "transitclockWebapp/target/api.war"
   on:
     repo: TheTransitClock/transitime
+    tags: true
+    all_branches: true
