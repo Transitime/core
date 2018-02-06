@@ -1,8 +1,27 @@
 language: java
 jdk: oraclejdk8
-
 cache:
   directories:
-  - $HOME/.m2
-  
+  - "$HOME/.m2"
 script: mvn install -DskipTests
+deploy:
+  provider: releases
+  api_key:
+    secure: gT/9kJv4oLzhXUsVOpASZi41BTiXRDohrryYg7o8txZG6caeki2B5lsLCYQlONe09IR3Mv2BwY6hcPX+GJlJa1Npvfn3Q9Th5IbYLAglRQoqDN/d3iyY8WhEY/ZqbUZ7vJXdpPNjwcyoA0dd2aA8N9pOC8QaFK43n47LCDAe+F16uGyxQN72TX4jCIANOvagVq8iUZtJUByFyubIGEHv0boEQNdODu5NdwzHsd0anCSd+Z/8zIu/rV5Ck1J5ecslqVJFSCs0LRrA3aFu31tf87KgT4+HomC79WHeo3hqrzCZ+PaqPJGrxYQ5j02Lw7rDBX3C8U9SqiP8piKKTXoHflNTWp4rrBT7Z/KehRChfXPvj3l+Oo6Nlz8e49du9HGpMbDRF6IUA5NiCrUotMR+MRMPrCmJcyLwaupPPr4Ha0+Tiy72T7Rp4oYpByuBvIrp8lzEZjKgKv4kpIkSiYhep7N3SoU5S98y6/S/FPWJvLceJrusi/LNFGCcMSY9Ntn4q1qKNt426eqksymcSy5G36DYopRDYg/z3vlTX1lyzPEWEkQv7PPlZu9MFJh0+7pUpadxuRLSiIpL9PtJ1sDPUvGVYSKGnBH2H64Wd8D13tnfPbtqPAsT+9bLFBk0mUbEGqXp93vMSs/Q9n+LC5+29rSdsO2IIR7gbLEquH/9rGo=
+  file:
+    - "transitclock/target/Core.jar"
+    - "transitclock/target/CreateAPIKey.jar"
+    - "transitclock/target/CreateWebAgency.jar"
+    - "transitclock/target/GtfsFileProcessor.jar"
+    - "transitclock/target/RmiQuery.jar"
+    - "transitclock/target/ScheduleGenerator.jar"
+    - "transitclock/target/SchemaGenerator.jar"
+    - "transitclock/target/transitclockCore-2.0.0-SNAPSHOT.jar"
+    - "transitclock/target/UpdateTravelTimes.jar"
+    - "transitclockWebapp/target/web.war"
+    - "transitclockApi/target/api.war"
+  skip_cleanup: true
+  on:
+    repo: TheTransitClock/transitime
+    tags: false
+    all_branches: true

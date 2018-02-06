@@ -1,7 +1,12 @@
+*.class
+*.project
+*.classpath
+*.iml
+.idea/
+# Package Files #
+*.jar
+*.war
+*.ear
 /target/
+/bin/
 /.settings/
-<<<<<<< HEAD
-/target/
-=======
-
->>>>>>> 7f9fa2df466fd81ee86c633c4151b0dbb0c583f2
