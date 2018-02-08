@@ -34,8 +34,8 @@ import io.swagger.client.model.Position;
 import io.swagger.client.model.User;
 
 /**
- * @author Sean Óg Crudden This module integrated with the API of a traccar
- *         server.
+ * @author Sean Óg Crudden This module integrates TheTransitClock with the API of a traccar
+ *         server to get vehicle locations.
  * 
  *         See http://www.traccar.org
  * 
