@@ -101,6 +101,7 @@ if (agencyId == null || agencyId.isEmpty()) {
 <script>
 var ALLOWABLE_EARLY_MSEC = <%= ScheduleAdherenceController.getScheduleEarlySeconds() %> * -1000; 
 var ALLOWABLE_LATE_MSEC  = <%= ScheduleAdherenceController.getScheduleLateSeconds() %> * 1000;
+var serviceDescriptions;
 
 // need to escape special character in jquery as . : are not interpreted correctly
 function jq( myid ) {	 
@@ -324,7 +325,7 @@ function baseHandleAjaxData(routes, removeAll) {
 			blockEndValueElement.text(blockData.endTime);
 			
 			var blockServiceValueElement = $("#" + routeElementId + " #" + blockElementId + " #blockService");
-			blockServiceValueElement.text(blockData.serviceId);
+			blockServiceValueElement.text(blockData.serviceId + ' ' + getServiceDescriptionForServiceId(blockData.serviceId));
 			if (blockData.serviceId.length > 10) {
 				blockServiceValueElement.addClass("blockValueSmallerFont");
 			} else {
@@ -400,6 +401,28 @@ function baseHandleAjaxData(routes, removeAll) {
 	$( "#accordion" ).accordion("refresh");	
 }
 
+function getServiceDescriptionForServiceId(serviceId) {
+    for (var i = 0; i < serviceDescriptions.length; i++) {
+        if (serviceDescriptions[i].serviceId == serviceId) {
+            return getServiceDescriptionFromCalendar(serviceDescriptions[i]);
+        }
+    }
+    return "- exception";
+}
+
+function getServiceDescriptionFromCalendar(calendar) {
+    var desc = "- ";
+    if (calendar.monday) desc += "M ";
+    if (calendar.tuesday) desc += "Tu ";
+    if (calendar.wednesday) desc += "W ";
+    if (calendar.thursday) desc += "Th ";
+    if (calendar.friday) desc += "F ";
+    if (calendar.saturday) desc += "Sa ";
+    if (calendar.sunday) desc += "Su ";
+    if (desc.length == 2) desc += "exception";
+    return desc;
+}
+
 
 function updateFooter(total) {
 	// Update the summary at bottom of page
@@ -455,6 +478,14 @@ function getSummaryData() {
  * Get active block data via AJAX
  */
 function getAndProcessData() {
+    $.getJSON(apiUrlPrefix + "/command/currentCalendars", function(data) {
+        console.log(data);
+        serviceDescriptions = data.calendars;
+    })
+        .fail(function() {
+            console.log( "Could not access /command/currentCalendars" );
+        });
+
 	// Populate accordion
 	$.getJSON(apiUrlPrefix + "/command/activeBlocksByRouteWithoutVehicles", function(data) {
 		handleAjaxData(data);
