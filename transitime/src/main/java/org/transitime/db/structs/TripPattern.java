@@ -77,7 +77,7 @@ public class TripPattern implements Serializable, Lifecycle {
 	// are accessed with the default LAZY loading. And use 
 	// CascadeType.SAVE_UPDATE so that when the TripPattern is stored the 
 	// Paths are automatically stored.
-	@OneToMany(fetch=FetchType.EAGER)
+	@OneToMany(fetch=FetchType.LAZY)
 	@Cascade({CascadeType.SAVE_UPDATE})
 	@JoinTable(name="TripPattern_to_Path_joinTable")
 	@OrderColumn( name="listIndex")

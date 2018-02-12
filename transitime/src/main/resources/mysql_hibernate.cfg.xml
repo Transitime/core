@@ -21,7 +21,7 @@
         be nice, but again, should probably be disabled
         in the future. -->
    <!-- <property name="show_sql">true</property> -->
-   <property name="format_sql">true</property> 
+   <property name="format_sql">false</property> 
    <property name="use_sql_comments">true</property> 
 
    <!--  Configure the C3P0 db connection pooler. Setting any of the
@@ -44,13 +44,13 @@
    <!-- Default max_statements is 0 but since will be doing lots of logging
         of data using the same query caching some prepared statements could
         easily speed things up. --> 
-   <property name="hibernate.c3p0.max_statements">50</property>  
+   <property name="hibernate.c3p0.max_statements">1000</property>  
  
    <!-- When using a remote datbase batching is critical.
         Though convincing hibernate to batch is not always
         easy.  The following are hints to hibernate to batch
         aggressively. -->
-   <property name="hibernate.jdbc.batch_size">100</property>  
+   <property name="hibernate.jdbc.batch_size">1000</property>  
    <property name="default_batch_fetch_size">100</property>  
    <property name="hibernate.order_inserts">true</property>  
    <property name="hibernate.order_updates">true</property>  
@@ -60,17 +60,19 @@
         command line arguments so that some apps, like the 
         website, can connect to multiple project dbs. But you can
         uncomment this part and set the db parameters here. -->
+
 <!--
    <property name="hibernate.connection.url">
-      jdbc:mysql://localhost/mbta
+      jdbc:mysql://localhost/transitime?rewriteBatchedStatements=true&amp;cachePrepStmts=true
    </property>
    <property name="hibernate.connection.username">
       root
    </property>
    <property name="hibernate.connection.password">
-      PASSWORD
+      changeme
    </property>
 -->
+
 
    <!-- List of XML mapping files. Commented out because adding
         the classes programatically via AnnoatedClassesList so

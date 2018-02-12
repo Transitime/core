@@ -207,10 +207,12 @@ public final class Block implements Serializable {
 	public static List<Block> getBlocks(Session session, int configRev) 
 			throws HibernateException {
 	  try {
-	    logger.warn("caching blocks....");
+
 	    if (Boolean.TRUE.equals(blockLoading.getValue())) {
+	      logger.warn("caching blocks aggressively....");
 	      return getBlocksAgressively(session, configRev);
 	    }
+	    logger.warn("caching blocks passively....");
 	    return getBlocksPassive(session, configRev);
 	  } finally {
 	    logger.warn("caching complete");
@@ -228,9 +230,10 @@ public final class Block implements Serializable {
 
 	  private static List<Block> getBlocksAgressively(Session session, int configRev) 
 	      throws HibernateException {
-      String hql = "FROM Blocks b "
+      String hql = "FROM Blocks as b "
           + "join fetch b.trips t "
-          + "join fetch t.travelTimes "
+          + "join fetch t.travelTimes tt "
+//		  + "join fetch tt.travelTimesForStopPaths tsp "
           + "join fetch t.tripPattern tp "
           + "join fetch tp.stopPaths sp "
           /*+ "join fetch sp.locations "*/  //this makes the resultset REALLY big
