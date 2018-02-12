@@ -90,7 +90,8 @@ public class TraccarAVLModule extends PollUrlAvlModule {
 				
 				avlReportsReadIn.add(avlReport);
 			}
-			processAvlReports(avlReportsReadIn);
+			
+			forwardAvlReports(avlReportsReadIn);
 		}
 	}
 
@@ -98,6 +99,11 @@ public class TraccarAVLModule extends PollUrlAvlModule {
 	protected Collection<AvlReport> processData(InputStream in) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
+	}	
+	
+	protected void forwardAvlReports(Collection<AvlReport> avlReportsReadIn)
+	{
+		processAvlReports(avlReportsReadIn);
 	}
 
 }
