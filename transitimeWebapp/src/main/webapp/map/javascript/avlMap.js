@@ -252,16 +252,25 @@ $("#route").change(function(evt) { drawRoute(evt.target.value) });
 
 // draw AVL data when submit button is clicked
 $("#submit").on("click", function() {
-	/* Set request object to match new values */
-	request.v = $("#vehicle").val();
-	request.beginDate = $("#beginDate").val();
-	request.numDays = $("#numDays").val();
-	request.beginTime = $("#beginTime").val();
-	request.endTime = $("#endTime").val();
-	request.r = $("#route").val();
+    /* Set request object to match new values */
+    request.v = $("#vehicle").val();
+    request.beginDate = $("#beginDate").val();
+    request.numDays = $("#numDays").val();
+    request.beginTime = $("#beginTime").val();
+    request.endTime = $("#endTime").val();
+    request.r = $("#route").val();
 
-	// Clear existing layer and draw new objects on map.
-	drawAvlData();	
+    var askConfirm = request.v == "All Vehicles" || request.v == "";
+    var confirmYes = false;
+    if (askConfirm) {
+        confirmYes = confirm('Are you sure you want All Vehicles?')
+    }
+
+    //go ahead if no confirm needed or if the confirm was a yes
+    if (!askConfirm || confirmYes) {
+		// Clear existing layer and draw new objects on map.
+		drawAvlData();
+	}
 });
 
 
