@@ -63,23 +63,31 @@ public class AvlJsonQuery {
 				+ beginTime + "' AND '" + endTime + "' ";
 		}
 
-		String sql = "SELECT vehicleId, time, assignmentId, lat, lon, speed, "
-				+ "heading, timeProcessed, source "
-				+ "FROM AvlReports "
-				+ "WHERE time BETWEEN '" + beginDate + "' "
+		String sql = "SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, a.speed, "
+				+ "a.heading, a.timeProcessed, a.source, v.routeShortName "
+				+ "FROM AvlReports a "
+				+ "JOIN "
+				+ "(SELECT i.vehicleId, j.routeShortName FROM"
+				+ " (SELECT vehicleId, MAX(avlTime) AS avlTIme "
+				+ "  FROM VehicleStates "
+				+ "  GROUP BY vehicleId) i "
+				+ " JOIN VehicleStates j ON j.avlTime=i.avlTime AND j.vehicleId=i.vehicleId"
+				+ ") v "
+				+ "ON v.vehicleId=a.vehicleId "
+				+ "WHERE a.time BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
 				+ timeSql;
 
 		// If only want data for single vehicle then specify so in SQL
 		if (vehicleId != null && !vehicleId.isEmpty())
-			sql += " AND vehicleId='" + vehicleId + "' ";
+			sql += " AND a.vehicleId='" + vehicleId + "' ";
 		
 		// Make sure data is ordered by vehicleId so that can draw lines 
 		// connecting the AVL reports per vehicle properly. Also then need
 		// to order by time to make sure they are in proper order. And
 		// lastly, limit AVL reports to 5000 so that someone doesn't try
 		// to view too much data at once.
-		sql += "ORDER BY vehicleId, time LIMIT " + MAX_ROWS;
+		sql += "ORDER BY a.vehicleId, a.time LIMIT " + MAX_ROWS;
 		
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 

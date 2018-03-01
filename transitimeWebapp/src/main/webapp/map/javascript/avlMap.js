@@ -40,8 +40,8 @@ function drawAvlMarker(avl) {
 	
   	// Create popup with detailed info
 	
-	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID"],
-		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId"];
+	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID", "Route"],
+		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId", "routeShortName"];
 	
 	// populate missing keys
 	avl.latlon = avl.lat + ", " + avl.lon
@@ -167,7 +167,7 @@ function createExport(vehicles) {
 	var data = vehicles[0].data
   	
   	// set keys
-	var keys = ["vehicleId", "time", "latitude", "longitude", "speed", "heading", "assignmentId"]
+	var keys = ["vehicleId", "time", "latitude", "longitude", "speed", "heading", "assignmentId, routeShortName"]
 	// CSV key => JS object key
 	function mapKey(k) {
 		var o = {"latitude": "lat", "longitude": "lon"}
