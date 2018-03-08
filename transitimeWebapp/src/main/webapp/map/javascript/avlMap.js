@@ -86,7 +86,7 @@ function processAvlCallback(jsonData) {
 	    	// Create a line connecting the AVL locations as long as there are 
 	    	// at least 2 AVL reports for the vehicle
 	    	if (latLngsForVehicle.length >= 2)
-	    		L.polyline(latLngsForVehicle, routePolylineOptions).addTo(map); //.bringToBack();
+	    		L.polyline(latLngsForVehicle, routePolylineOptions).addTo(vehicleGroup); //.bringToBack();
 	    	latLngsForVehicle = [];
 	    	vehicle = {id: avl.vehicleId, data: []}
 	    	vehicles.push(vehicle);
@@ -260,10 +260,10 @@ $("#submit").on("click", function() {
     request.endTime = $("#endTime").val();
     request.r = $("#route").val();
 
-    var askConfirm = request.v == "All Vehicles" || request.v == "";
+    var askConfirm = (request.v == "All Vehicles" || request.v == "") && (request.r == "All Routes" || request.r ==" ");
     var confirmYes = false;
     if (askConfirm) {
-        confirmYes = confirm('Are you sure you want All Vehicles?')
+        confirmYes = confirm('Are you sure you want All Vehicles and All Routes?');
     }
 
     //go ahead if no confirm needed or if the confirm was a yes
@@ -276,6 +276,8 @@ $("#submit").on("click", function() {
 
 //Get the AVL data via AJAX and call processAvlCallback to draw it
 function drawAvlData() {
+
+    $("#submit").attr("disabled","disabled");
 	$.ajax({
 	  	// The page being requested
 	    url: contextPath + "/reports/avlJsonData.jsp",
@@ -287,6 +289,7 @@ function drawAvlData() {
 	    async: true,
 	    // When successful process JSON data
 	    success: function(resp) {
+            $("#submit").removeAttr("disabled");
 	    	vehicleGroup.clearLayers();
 	    	var vehicles = processAvlCallback(resp);
 	    	// connect export to link to csv creation.
@@ -296,6 +299,7 @@ function drawAvlData() {
 	    },
 	    // When there is an AJAX problem alert the user
 	    error: function(request, status, error) {
+            $("#submit").removeAttr("disabled");
 	      alert(error + '. ' + request.responseText);
 	    },
 	});

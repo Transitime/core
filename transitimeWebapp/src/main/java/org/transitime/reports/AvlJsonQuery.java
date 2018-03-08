@@ -46,7 +46,7 @@ public class AvlJsonQuery {
 	 *         meets criteria.
 	 */
 	public static String getAvlJson(String agencyId, String vehicleId,
-			String beginDate, String numdays, String beginTime, String endTime) {
+			String beginDate, String numdays, String beginTime, String endTime, String routeId) {
 		//Determine the time portion of the SQL
 		String timeSql = "";
 		// If beginTime or endTime set but not both then use default values
@@ -76,6 +76,9 @@ public class AvlJsonQuery {
 		// If only want data for single vehicle then specify so in SQL
 		if (vehicleId != null && !vehicleId.isEmpty())
 			sql += " AND a.vehicleId='" + vehicleId + "' ";
+
+		if (routeId != null && !routeId.trim().isEmpty())
+			sql += " AND v.routeShortName='" + routeId + "' ";
 		
 		// Make sure data is ordered by vehicleId so that can draw lines 
 		// connecting the AVL reports per vehicle properly. Also then need
@@ -87,6 +90,7 @@ public class AvlJsonQuery {
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 
 		return json;
+
 	}
 
 	/**
