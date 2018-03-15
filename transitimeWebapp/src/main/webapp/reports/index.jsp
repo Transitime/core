@@ -71,6 +71,9 @@ finding specific issues with predictions.">
     title="Displays in a table the schedule for a specified route. Stops listed 
     vertically which is useful for when there are not that many trips per day.">
       Schedule for Route (vertical stops)</a></li>
+    <li><a href="tripBlockRouteParams.jsp?a=<%= agencyId %>"
+           title="Show all blocks assigned to a route for the selected day with trip times">
+        Trip Blocks for Route</a></li>
 </ul>
 
 <div id="subtitle">Status Reports</div>
