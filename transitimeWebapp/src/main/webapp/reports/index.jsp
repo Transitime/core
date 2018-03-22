@@ -74,6 +74,8 @@ finding specific issues with predictions.">
     <li><a href="tripBlockRouteParams.jsp?a=<%= agencyId %>"
            title="Show all blocks assigned to a route for the selected day with trip times">
         Trip Blocks for Route</a></li>
+    <li><a href="realTimeSchAdhByVehicleParams.jsp?a=<%= agencyId %>"
+        title="Real time schedule adherence by vehicle">Real Time Schedule Adherence By Vehicle</a></li>
 </ul>
 
 <div id="subtitle">Status Reports</div>
