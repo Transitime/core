@@ -105,7 +105,7 @@ public class BusLocAvlModule extends PollUrlAvlModule {
 				JSONObject vehiclePosition=vehicle.getJSONObject("position");
 				JSONObject vehicleTrip=vehicle.getJSONObject("trip");
 				
-				if(vehicleTrip.getString("route_id")!=null && (mbtaTestRoute==null || vehicleTrip.getString("route_id").equals(mbtaTestRoute.getValue())))
+				if(vehicleTrip.has("route_id") && (mbtaTestRoute==null || vehicleTrip.getString("route_id").equals(mbtaTestRoute.getValue())))
 				{
 					String blockid=vehicle.getString("block_id");
 					long timestamp=vehicle.getLong("timestamp");
