@@ -57,7 +57,7 @@ public class TraccarBarefootAVLModule extends TraccarAVLModule {
 	public TraccarBarefootAVLModule(String agencyId) throws Throwable {
 		super(agencyId);
 	}
-			
+	@Override	
 	protected void forwardAvlReports(Collection<AvlReport> avlReportsReadIn) {
 		for(AvlReport avlReport:avlReportsReadIn)
 		{
