@@ -112,7 +112,7 @@ public class BusLocAvlModule extends PollUrlAvlModule {
 										
 					// Create the AvlReport
 					AvlReport avlReport =
-							new AvlReport(vehicleIdentity.getString("id"), timestamp, vehiclePosition.getDouble("latitude"), vehiclePosition.getDouble("longitude"), Float.NaN,
+							new AvlReport(vehicleIdentity.getString("id"), timestamp*1000, vehiclePosition.getDouble("latitude"), vehiclePosition.getDouble("longitude"), Float.NaN,
 									(float) vehiclePosition.getInt("bearing"), "BusLoc");	
 					
 					// Actually set the assignment
