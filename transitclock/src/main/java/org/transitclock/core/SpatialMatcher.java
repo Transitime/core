@@ -593,7 +593,7 @@ public class SpatialMatcher {
 
 				previousPotentialSpatialMatch = null;
 				
-				return;				
+				// return;				
 				// TODO CamSys version had this comment and did not set distance to Segment.
 				// Do not set distanceToSegment to startSearchSpatialMatch value:
 				// - Need to check that it is in bounds
@@ -772,7 +772,7 @@ public class SpatialMatcher {
 		spatialMatcher.setStartOfSearch(previousMatch);			
 		
 		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime()) && 
-				(vehicleState.isLayover() || distanceSearched < distanceAlongPathToSearch) 
+				distanceSearched < distanceAlongPathToSearch 
 					&& Math.abs(indices.getStopPathIndex()-previousMatch.getIndices().getStopPathIndex()) <= AvlConfig.getMaxStopPathsAhead()) {
 
 			spatialMatcher.processPossiblePotentialMatch(
