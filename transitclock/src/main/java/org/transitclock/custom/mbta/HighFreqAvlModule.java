@@ -50,7 +50,7 @@ public class HighFreqAvlModule extends PollUrlAvlModule {
 
 	
 	private static StringConfigValue mbtaTestRoute = 
-			new StringConfigValue("transitclock.avl.testroute", "36",
+			new StringConfigValue("transitclock.avl.testroute", null,
 					"Route to test against.");
 
 	
@@ -113,29 +113,31 @@ public class HighFreqAvlModule extends PollUrlAvlModule {
 				JSONObject route=relationships.getJSONObject("route");
 				JSONObject routeData=route.getJSONObject("data");
 																							
-				if(routeData.has("id") && (mbtaTestRoute==null || routeData.getString("id").equals(mbtaTestRoute.getValue())))
+				if(routeData.has("id"))
 				{
-					String tripid=tripData.getString("id");
-					String timeStr=attributes.getString("updated_at");
-							
-					
-					SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-					Date time = dateFormat.parse(timeStr);
-					
-					
-					AvlReport avlReport =
-							new AvlReport(entity.getString("id"), time.getTime(), attributes.getDouble("latitude"), attributes.getDouble("longitude"), Float.NaN,
-									(float) attributes.getDouble("bearing"), "HighFreq");	
-					
-					avlReport.setAssignment(tripid,
-							AssignmentType.TRIP_ID);
-		
-					logger.debug("From HighFreqAvlModule {}", avlReport);
-					
-					if (shouldProcessAvl) {
-						avlReportsReadIn.add(avlReport);
+					if(mbtaTestRoute.getValue()==null|| routeData.getString("id").equals(mbtaTestRoute.getValue()))
+					{
+						String tripid=tripData.getString("id");
+						String timeStr=attributes.getString("updated_at");
+								
+						
+						SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+						Date time = dateFormat.parse(timeStr);
+						
+						
+						AvlReport avlReport =
+								new AvlReport(entity.getString("id"), time.getTime(), attributes.getDouble("latitude"), attributes.getDouble("longitude"), Float.NaN,
+										(float) attributes.getDouble("bearing"), "HighFreq");	
+						
+						avlReport.setAssignment(tripid,
+								AssignmentType.TRIP_ID);
+			
+						logger.debug("From HighFreqAvlModule {}", avlReport);
+						
+						if (shouldProcessAvl) {
+							avlReportsReadIn.add(avlReport);
+						}
 					}
-					
 
 				}
 			}							
