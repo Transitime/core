@@ -173,7 +173,7 @@ public class GtfsRtTripFeed {
 			// precedence over SCHED_BASED_PRED_UNCERTAINTY_VALUE.
 			if (pred.isLateAndSubsequentTripSoMarkAsUncertain())
 				stopTimeEvent.setUncertainty(LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE);
-			
+			 
 			// If vehicle not making forward progress then set uncertainty to
 			// special value so that client can tell. Takes precedence over 
 			// LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE.
@@ -184,6 +184,7 @@ public class GtfsRtTripFeed {
 				stopTimeUpdate.setArrival(stopTimeEvent);
 			else
 				stopTimeUpdate.setDeparture(stopTimeEvent);
+			
 			//The relationship should always be SCHEDULED if departure or arrival time is given.
 			stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
 			
