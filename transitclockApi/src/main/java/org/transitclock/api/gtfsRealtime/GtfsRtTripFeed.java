@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.api.data.IpcPredictionComparator;
 import org.transitclock.api.utils.AgencyTimezoneCache;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
@@ -182,14 +184,9 @@ public class GtfsRtTripFeed {
 				stopTimeUpdate.setArrival(stopTimeEvent);
 			else
 				stopTimeUpdate.setDeparture(stopTimeEvent);
+			//The relationship should always be SCHEDULED if departure or arrival time is given.
+			stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
 			
-
-			if(pred.isSchedBasedPred())
-				stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
-			else
-				stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.NO_DATA);
-			
-
 			tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 		}
 		
@@ -215,10 +212,12 @@ public class GtfsRtTripFeed {
 				.setIncrementality(Incrementality.FULL_DATASET)
 				.setTimestamp(System.currentTimeMillis() / Time.MS_PER_SEC);
 		message.setHeader(feedheader);
-		  
+		//Create a comparator to sort each trip data
+		Comparator<IpcPrediction> comparator=new IpcPredictionComparator();
 		// For each trip...
 		for (List<IpcPrediction> predsForTrip : predsByTripMap.values()) {
-			
+			//Sort trip data according to sequnece
+			Collections.sort(predsForTrip, comparator);
 			//  Need to check if predictions for frequency based trip and group by start time if they are. 
 			if(isFrequencyBasedTrip(predsForTrip))
 			{
