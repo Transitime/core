@@ -24,20 +24,40 @@ public class KalmanErrorCacheKey implements java.io.Serializable {
 	private String tripId;
 	private Integer stopPathIndex;
 	
+	// The vehicleId is only used for debug purposed we know log which vehicle set the error value
+	private String vehiceId;
+	
 		
+	public String getVehiceId() {
+		return vehiceId;
+	}
+
+	public void setVehiceId(String vehiceId) {
+		this.vehiceId = vehiceId;
+	}
+
 	/**
 	 * Needs to be serializable to add to cache
 	 */
 	private static final long serialVersionUID = 5029823633051153716L;
 	
 
+	public KalmanErrorCacheKey(Indices indices, String vehicleId) {
+		super();
+		
+		this.tripId=indices.getBlock().getTrip(indices.getTripIndex()).getId();
+		this.stopPathIndex=indices.getStopPathIndex();		
+		this.vehiceId=vehicleId;
+		
+	}
 	public KalmanErrorCacheKey(Indices indices) {
 		super();
 		
 		this.tripId=indices.getBlock().getTrip(indices.getTripIndex()).getId();
 		this.stopPathIndex=indices.getStopPathIndex();		
+		
+		
 	}
-	
 	@Override
 	public String toString() {
 		return "KalmanErrorCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + "]";
