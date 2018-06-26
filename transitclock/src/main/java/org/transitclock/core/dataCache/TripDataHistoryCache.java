@@ -30,6 +30,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.gtfs.GtfsData;
 import org.transitclock.utils.Time;
 
 /**
@@ -161,26 +162,30 @@ public class TripDataHistoryCache{
 			
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 			
-			tripKey = new TripKey(arrivalDeparture.getTripId(),
-					nearestDay,
-					trip.getStartTime());
-			
-			List<ArrivalDeparture> list = null;
-	
-			Element result = cache.get(tripKey);
-	
-			if (result != null && result.getObjectValue() != null) {
-				list = (List<ArrivalDeparture>) result.getObjectValue();
-				cache.remove(tripKey);
-			} else {
-				list = new ArrayList<ArrivalDeparture>();
+			if(trip!=null)
+			{
+				
+				tripKey = new TripKey(arrivalDeparture.getTripId(),
+						nearestDay,
+						trip.getStartTime());
+				
+				List<ArrivalDeparture> list = null;
+		
+				Element result = cache.get(tripKey);
+		
+				if (result != null && result.getObjectValue() != null) {
+					list = (List<ArrivalDeparture>) result.getObjectValue();
+					cache.remove(tripKey);
+				} else {
+					list = new ArrayList<ArrivalDeparture>();
+				}
+				
+				list.add(arrivalDeparture);									
+				
+				Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
+							
+				cache.put(arrivalDepartures);
 			}
-			
-			list.add(arrivalDeparture);									
-			
-			Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
-						
-			cache.put(arrivalDepartures);															
 											
 			
 		}				
@@ -194,13 +199,16 @@ public class TripDataHistoryCache{
 		@SuppressWarnings("unchecked")
 		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
 						
-		for(ArrivalDeparture result : results)
-		{
-			TripDataHistoryCache.getInstance().putArrivalDeparture(result);			
+		for(ArrivalDeparture result : results)		
+		{						
+			// TODO this might be better done in the database.						
+			if(GtfsData.routeNotFiltered(result.getRouteId()))
+			{
+				TripDataHistoryCache.getInstance().putArrivalDeparture(result);
+			}
 		}		
 	}
-	
-	
+		
 	static public ArrivalDeparture findPreviousArrivalEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
 	{
 		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());
