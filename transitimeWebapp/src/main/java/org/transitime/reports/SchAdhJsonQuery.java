@@ -48,7 +48,7 @@ public class SchAdhJsonQuery {
 	 */
 	public static String getJson(String agencyId, String vehicleId) {
 
-		String sql = "SELECT v.vehicleId, v.avlTime, v.blockId, v.routeShortName, v.schedAdh, v.avlTime "
+		String sql = "SELECT v.vehicleId, v.avlTime, v.blockId, v.routeShortName, -(v.schedAdhMsec / 60000) as schedAdh, v.avlTime "
 				+ "FROM VehicleStates v "
 				+ "JOIN "
 				+ "(select vehicleId, max(avlTime) as avlTime from VehicleStates group by vehicleId) maxv "
