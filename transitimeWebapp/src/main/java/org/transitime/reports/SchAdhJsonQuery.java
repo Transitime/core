@@ -59,7 +59,7 @@ public class SchAdhJsonQuery {
 			sql += " AND v.vehicleId = '" + vehicleId + "' ";
 		}
 
-		sql += " ORDER BY v.vehicleId";
+		sql += " ORDER BY v.schedAdhMsec, v.vehicleId";
 
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 
