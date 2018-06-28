@@ -34,7 +34,7 @@ function dataReadCallback(jsonData) {
         row.insertCell(1).innerHTML = schAdhInfo.blockId;
         row.insertCell(2).innerHTML = schAdhInfo.routeShortName;
         row.insertCell(3).innerHTML = schAdhInfo.avlTime;
-        row.insertCell(4).innerHTML = schAdhInfo.schedAdh;
+        row.insertCell(4).innerHTML = schAdhInfo.schedAdh + ' min';
 
 	}
 }
