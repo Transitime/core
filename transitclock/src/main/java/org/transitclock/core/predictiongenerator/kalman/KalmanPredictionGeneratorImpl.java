@@ -13,6 +13,7 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
+import org.transitclock.core.PredictionGeneratorDefaultImpl;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
@@ -34,10 +35,10 @@ import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
  * @author Sean Óg Crudden This is a prediction generator that uses a Kalman
  *         filter to provide predictions. It uses historical average while waiting on enough data to support a Kalman filter.
  */
-public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGeneratorImpl
+public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImpl
 		implements PredictionComponentElementsGenerator {
 	
-	private String alternative="HistoricalAveragePredictionGeneratorImpl";
+	private String alternative="PredictionGeneratorDefaultImpl";
 	/*
 	 * TODO I think this needs to be a minimum of three and if just two will use
 	 * historical value. 
