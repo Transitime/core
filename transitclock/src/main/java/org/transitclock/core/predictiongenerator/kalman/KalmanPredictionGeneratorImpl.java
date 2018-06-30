@@ -46,11 +46,11 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 	 * historical value. 
 	 */
 	private static final IntegerConfigValue minKalmanDays = new IntegerConfigValue(
-			"transitclock.prediction.data.kalman.mindays", new Integer(2),
+			"transitclock.prediction.data.kalman.mindays", new Integer(3),
 			"Min number of days trip data that needs to be available before Kalman prediciton is used instead of default transiTime prediction.");
 
 	private static final IntegerConfigValue maxKalmanDays = new IntegerConfigValue(
-			"transitclock.prediction.data.kalman.maxdays", new Integer(2),
+			"transitclock.prediction.data.kalman.maxdays", new Integer(3),
 			"Max number of historical days trips to include in Kalman prediction calculation.");
 
 	private static final IntegerConfigValue maxKalmanDaysToSearch = new IntegerConfigValue(
