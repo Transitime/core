@@ -1,6 +1,5 @@
 package org.transitclock.core;
 
-import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcPrediction;
 
 /**
@@ -26,11 +25,19 @@ public class HeadwayDetails {
 		super();
 		this.vehicleBehindPrediction = vehicleBehindPrediction;
 		this.vehicleAheadPrediction = vehicleAheadPrediction;
-		if (!(vehicleBehindPrediction != null && vehicleAheadPrediction != null
-				&& vehicleBehindPrediction.getStopId().equals(vehicleAheadPrediction.getStopId())
-				&& (!vehicleBehindPrediction.getVehicleId().equals(vehicleAheadPrediction.getVehicleId())))) {
+		
+		if(vehicleBehindPrediction == null || vehicleAheadPrediction == null)
+		{
 			throw new Exception("Need two predictions for same stop for different vehicles to calculate headway.");
 		}
+		if(!vehicleBehindPrediction.getStopId().equals(vehicleAheadPrediction.getStopId()))
+		{
+			throw new Exception("Cannot calculate headway from predictions for two different stops.");
+		}
+		if(vehicleBehindPrediction.getVehicleId().equals(vehicleAheadPrediction.getVehicleId()))
+		{
+			throw new Exception("Cannot calculate headway from two prediction for the same vehicle.");
+		}		
 	}
 
 	public long getHeadway() {

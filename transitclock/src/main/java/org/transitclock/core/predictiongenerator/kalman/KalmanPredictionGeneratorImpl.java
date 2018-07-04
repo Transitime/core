@@ -9,9 +9,12 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
+import org.transitclock.core.PredictionGeneratorDefaultImpl;
+import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.ErrorCache;
@@ -30,10 +33,11 @@ import org.transitclock.db.structs.PredictionForStopPath;
  * @author Sean Óg Crudden This is a prediction generator that uses a Kalman
  *         filter to provide predictions. It uses historical average while waiting on enough data to support a Kalman filter.
  */
-public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGeneratorImpl
+public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImpl
 		implements PredictionComponentElementsGenerator {
+	
+	private String alternative="PredictionGeneratorDefaultImpl";
 
-	private String alternative="HistoricalAveragePredictionGeneratorImpl";
 	/*
 	 * TODO I think this needs to be a minimum of three and if just two will use
 	 * historical value.
@@ -53,6 +57,13 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(
 			"transitclock.prediction.data.kalman.initialerrorvalue", new Double(100),
 			"Initial Kalman error value to use to start filter.");
+	
+	/* May be better to use the default implementation as it splits things down into segments. */
+	private static final BooleanConfigValue useKalmanForPartialStopPaths = new BooleanConfigValue (
+			"transitclock.prediction.data.kalman.usekalmanforpartialstoppaths", new Boolean(true), 
+			"Will use Kalman prediction to get to first stop of prediction."
+	);
+			
 
 	private static final Logger logger = LoggerFactory.getLogger(KalmanPredictionGeneratorImpl.class);
 
@@ -168,7 +179,35 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 		return super.getTravelTimeForPath(indices, avlReport, vehicleState);
 	}
 
+	@Override
+	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match) {
+		
+		if(useKalmanForPartialStopPaths.getValue().booleanValue())
+		{		
+			VehicleStateManager vehicleStateManager = VehicleStateManager.getInstance();
+	
+			VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());	
+			
+			long fulltime = this.getTravelTimeForPath(match.getIndices(), avlReport, currentVehicleState);
+			
+			double distanceAlongStopPath = match.getDistanceAlongStopPath();
+			
+			double stopPathLength =
+					match.getStopPath().getLength();
+			
+			long remainingtime = (long) (fulltime * ((stopPathLength-distanceAlongStopPath)/stopPathLength));
+			
+			logger.debug("Using Kalman for first stop path {} with value {} instead of {}.", match.getIndices(), remainingtime, super.expectedTravelTimeFromMatchToEndOfStopPath(avlReport, match));
+					
+			return remainingtime;
+		}else
+		{
+			return super.expectedTravelTimeFromMatchToEndOfStopPath(avlReport, match);
+		}
+	}
+
 	private Double lastVehiclePredictionError(ErrorCache cache, Indices indices) {
+
 		Double result = cache.getErrorValue(indices);
 		if(result!=null)
 		{
