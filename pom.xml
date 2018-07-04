@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>transitime</groupId>
-  <artifactId>transitime-all</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <groupId>TheTransitClock</groupId>
+  <artifactId>transitclock</artifactId>
+  <version>2.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>transitime-all</name>
-  <url>http://www.transitime.org//</url>
+  <name>transitclock</name>
+  <url>http://www.transitclock.org//</url>
   <modules>
-    <module>transitime</module>
-    <module>transitimeApi</module>
-    <module>transitimeWebapp</module>
+    <module>transitclock</module>
+    <module>transitclockApi</module>
+    <module>transitclockWebapp</module>
+    <module>transitclockQuickStart</module>
   </modules>
+    <profiles>
+        <profile>
+            <id>skip-integration-tests</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>include-integration-tests</id>
+            <modules>
+                <module>transitclockIntegration</module>
+                <module>transitclock</module>
+                <module>transitclockApi</module>
+              	<module>transitclockWebapp</module>
+		 		<module>transitclockQuickStart</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

@@ -1,4 +1,4 @@
-core
+core [![Build Status](https://travis-ci.org/TheTransitClock/transitime.svg?branch=develop)](https://travis-ci.org/TheTransitClock/transitime)
 ====
 
 The complete core Java software for the Transitime real-time transit information project. The goal is to use any type of real-time GPS data to generate useful public transportation information. The system is for both letting passengers know the status of their vehicles and helping agencies more effectively manage their systems. By providing a complete open-source system, agencies can have a cost effective system and have full ownership of it. 
@@ -21,10 +21,13 @@ GTFSFileProcessor.java will read a GTFS file into this database structure.<br/>
 Core.java is as the name implies is the workhorse of the system. <br/>
 RmiQuery.java allows you make queries to the server run in core from the command line.<br/>
 CreateAPIKey.java a test app to allow you create test/demo key to access REST api webapp.<br/>
+CreateWebAgency.java is used to create and agency that will work in transitimeWebapp.<br/>
 
 Details on how to run each of these and their respective parameters are in the README for the transitime module.
 
 Once this is set up the next step is to set up the transitimeApi which is a RESTful API. This API makes RMI calls to the RMI Server started by Core.java to provide results. This is a war file which can be deployed into Tomcat.  
 
 The transitimeWebapp in turn is a web application which uses the transitTimeAPI to provided a user interface. This is a war file which can be deployed into Tomcat. This connects to the database and the connection information is configured in hibernate.cfg.xml in the src/main/resources directory. Currently this needs to be deployed on the same server as the API.
+
+The transitimeQuickStart can be built with mvn install and ran using java -jar transitimeQuickStart it is currently a work in progress but the gui elements can be seen.
 
