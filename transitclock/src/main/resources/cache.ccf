@@ -26,4 +26,3 @@ jcs.auxiliary.DC.attributes.MaxKeySize=10000
 jcs.auxiliary.DC.attributes.OptimizeAtRemoveCount=300000
 jcs.auxiliary.DC.attributes.OptimizeOnShutdown=true
 jcs.auxiliary.DC.attributes.DiskLimitType=COUNT
-
