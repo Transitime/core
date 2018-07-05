@@ -9,8 +9,8 @@ import org.transitclock.utils.ClassInstantiator;
  */
 public class StopArrivalDepartureCacheFactory {
 	private static StringConfigValue className = 
-			new StringConfigValue("transitime.core.cache.stopArrivalDepartureCache", 
-					"org.transitime.core.dataCache.ehcache.StopArrivalDepartureCache",
+			new StringConfigValue("transitclock.core.cache.stopArrivalDepartureCache", 
+					"org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache",
 					"Specifies the class used to cache the arrival and departures for a stop.");
 	
 	private static StopArrivalDepartureCacheInterface singleton = null;
