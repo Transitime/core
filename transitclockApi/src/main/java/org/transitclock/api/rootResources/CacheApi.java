@@ -53,6 +53,9 @@ import org.transitclock.ipc.interfaces.CacheQueryInterface;
 import org.transitclock.ipc.interfaces.HoldingTimeInterface;
 import org.transitclock.ipc.interfaces.PredictionAnalysisInterface;
 
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.servers.Servers;
+
 /**
  * Contains the API commands for the Transitime API for getting info on data that is cached.
  * <p>

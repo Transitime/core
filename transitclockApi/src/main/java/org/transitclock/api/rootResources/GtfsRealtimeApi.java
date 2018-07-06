@@ -38,6 +38,11 @@ import org.transitclock.feed.gtfsRt.OctalDecoder;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.servers.Servers;
+
 /**
  * Contains API commands for the GTFS-realtime API.
  *
@@ -71,8 +76,10 @@ public class GtfsRealtimeApi {
 	@Path("/command/gtfs-rt/vehiclePositions")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM })
+	@Operation(summary="GTFS-realtime Vehicle Positions data for all vehicles.",description="Gets real time vehicle position feed. It might be in human readeable format or binary.",tags= {"GTFS","feed"})
 	public Response getGtfsRealtimeVehiclePositionsFeed(
 			final @BeanParam StandardParameters stdParameters,
+			@Parameter(description="If specified as human, it will get the output in human readable format. Otherwise will output data in binary format", required=false)
 			@QueryParam(value = "format") String format)
 			throws WebApplicationException {
 
@@ -125,7 +132,7 @@ public class GtfsRealtimeApi {
 	}
 
 	/**
-	 * For getting GTFS-realtime Vehicle Positions data for all vehicles.
+	 * For getting GTFS-realtime for all trips.
 	 * 
 	 * @param stdParameters
 	 * @param format
@@ -137,8 +144,11 @@ public class GtfsRealtimeApi {
 	@Path("/command/gtfs-rt/tripUpdates")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM })
+	@Operation(summary="GTFS-realtime trip data.",description="Gets real time trip feed. It might be in human readeable format or binary.",tags= {"GTFS","feed"})
+	
 	public Response getGtfsRealtimeTripFeed(
 			final @BeanParam StandardParameters stdParameters,
+			@Parameter(description="If specified as human, it will get the output in human readable format. Otherwise will output data in binary format", required=false)
 			@QueryParam(value = "format") String format)
 			throws WebApplicationException {
 

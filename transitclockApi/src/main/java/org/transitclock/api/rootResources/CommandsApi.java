@@ -30,6 +30,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -47,7 +48,16 @@ import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.MeasuredArrivalTime;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 import org.transitclock.ipc.data.IpcAvl;
+import org.transitclock.ipc.data.IpcTrip;
 import org.transitclock.ipc.interfaces.CommandsInterface;
+import org.transitclock.ipc.interfaces.ConfigInterface;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.servers.Servers;
 
 @Path("/key/{key}/agency/{agency}")
 public class CommandsApi {
@@ -80,16 +90,18 @@ public class CommandsApi {
 	@Path("/command/pushAvl")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Reads in a single AVL report specified by the query string parameters",
+	description="Reads in a single AVL report specified by the query string parameters.",tags= {"operation","vehicle","avl"})
 	public Response pushAvlData(
 			@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "v") String vehicleId,
-			@QueryParam(value = "t") long time,
-			@QueryParam(value = "lat") double lat,
-			@QueryParam(value = "lon") double lon,
-			@QueryParam(value = "s") @DefaultValue("NaN") float speed,
-			@QueryParam(value = "h") @DefaultValue("NaN") float heading,
-			@QueryParam(value = "assignmentId") String assignmentId,
-			@QueryParam(value = "assignmentType") String assignmentTypeStr)
+			@Parameter(description="VehicleId. Unique identifier of the vehicle.",required=true)@QueryParam(value = "v") String vehicleId,
+			@Parameter(description="GPS epoch time in msec.",required=true) @QueryParam(value = "t") long time,
+			@Parameter(description="Latitude of AVL reporte. Decimal degrees.",required=true) @QueryParam(value = "lat") double lat,
+			@Parameter(description="Longitude of AVL reporte. Decimal degrees.",required=true) @QueryParam(value = "lon") double lon,
+			@Parameter(description="Speed of AVL reporte. m/s.",required=false) @QueryParam(value = "s") @DefaultValue("NaN") float speed,
+			@Parameter(description="Heading of AVL report. Degrees. 0 degrees=North. Should be set to Float.NaN if speed not available",required=false)@QueryParam(value = "h") @DefaultValue("NaN") float heading,
+			@Parameter(description="Indicates the assignmet id of the AVL report according to the assingment tyoe. For example, if assingment type is ROUTE_ID, the assingment ID should be one route_id loaded in the system.", required=false)@QueryParam(value = "assignmentId") String assignmentId,
+			@Parameter(description="Indicates the assignmet type of the AV report. This parameter can take the next values: <ul><li>ROUTE_ID</li><li>TRIP_ID</li>TRIP_SHORT_NAME</li> </ul>")@QueryParam(value = "assignmentType") String assignmentTypeStr)
 			throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
@@ -184,8 +196,16 @@ public class CommandsApi {
 	@Path("/command/pushAvl")
 	@POST
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Reads in a single AVL report in the message body.",
+	description="Reads in a single AVL report specified by the query string parameters. <p>{avl: [{v: \"vehicleId1\", t: epochTimeMsec, lat: latitude, lon: longitude, s:speed(optional), h:heading(optional)},\r\n" + 
+			"  {v: \"vehicleId2\", t: epochTimeMsec, lat: latitude, lon: longitude, " + 
+			" s: speed(optional), h: heading(optional)}, "+
+			" {etc...}]</p>. Can also specify assignment info using "
+			+ " \"assignmentId: 4321, assignmentType: TRIP_ID\" " + 
+			" where assignmentType can be BLOCK_ID, ROUTE_ID, TRIP_ID, or " + 
+			" TRIP_SHORT_NAME.",tags= {"operation","vehicle","avl"})
 	public Response pushAvlData(@BeanParam StandardParameters stdParameters,
-			InputStream requestBody) throws WebApplicationException {
+			@Parameter(description="Json of avl report.",required=true)InputStream requestBody) throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
@@ -246,8 +266,11 @@ public class CommandsApi {
 	@Path("/command/resetVehicle")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Reset a vehicle",
+	description="This is to give the means of manually setting a vehicle unpredictable and unassigned so it will be reassigned quickly.",
+	tags= {"command","vehicle"})
 	public Response getVehicles(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "v") List<String> vehicleIds) throws WebApplicationException {
+			@Parameter(description="List of vechilesId.")@QueryParam(value = "v") List<String> vehicleIds) throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 		
@@ -279,13 +302,15 @@ public class CommandsApi {
 	@Path("/command/pushMeasuredArrivalTime")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Reads in information from request and stores arrival information into db",
+	description="For storing a measured arrival time so that can see if measured arrival time via GPS is accurate.",tags= {"command"})
 	public Response pushAvlData(
 			@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "r") String routeId,
-			@QueryParam(value = "rShortName") String routeShortName,
-			@QueryParam(value = "s") String stopId,
-			@QueryParam(value = "d") String directionId,
-			@QueryParam(value = "headsign") String headsign)
+			@Parameter(description="Route id",required=true) @QueryParam(value = "r") String routeId,
+			@Parameter(description="Route short name.",required=true) @QueryParam(value = "rShortName") String routeShortName,
+			@Parameter(description="Route stop id.",required=true) @QueryParam(value = "s") String stopId,
+			@Parameter(description="Direcction id.",required=true) @QueryParam(value = "d") String directionId,
+			@Parameter(description="headsign.",required=true) @QueryParam(value = "headsign") String headsign)
 			throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
@@ -310,5 +335,39 @@ public class CommandsApi {
 			throw WebUtils.badRequestException(e);
 		}
 	}
+	@Path("/command/cancelTrip/{tripId}")
+	@GET //SHOULD BE POST,IT IS AN UPDATE
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Cancel a trip in order to be shown in GTFS realtime.",
+	description="<font color=\"#FF0000\">Experimental. It will work olny with the correct version.</font> It cancel a trip that has no vechilce assigned."
+	,tags= {"command","trip"})
 	
+	public Response cancelTrip(@BeanParam StandardParameters stdParameters,
+			@Parameter(description="tripId to be marked as canceled.",required=true)@PathParam("tripId") String tripId)
+	{
+		stdParameters.validate();
+		String agencyId = stdParameters.getAgencyId();
+		System.out.println(agencyId);
+		String result=null;
+		try
+		{
+			CommandsInterface inter = stdParameters.getCommandsInterface();
+			//We need to get the block id in order to get the vehicle
+			ConfigInterface cofingInterface = stdParameters.getConfigInterface();
+			IpcTrip ipcTrip = cofingInterface.getTrip(tripId);
+			if(ipcTrip==null)
+				throw WebUtils.badRequestException("TripId=" + tripId + " does not exist.");
+			String blockId=ipcTrip.getBlockId();
+			result=inter.cancelTrip(blockId);
+			System.out.println(result);
+		}
+		catch (RemoteException e) {
+			e.printStackTrace();
+			throw WebUtils.badRequestException("Could not send request to Core server. "+e.getMessage());
+		}
+		if(result==null)
+			return stdParameters.createResponse(new ApiCommandAck(true,"Processed"));
+		else
+			return stdParameters.createResponse(new ApiCommandAck(true,result));
+	}
 }

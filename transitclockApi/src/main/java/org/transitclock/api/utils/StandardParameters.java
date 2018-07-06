@@ -47,6 +47,8 @@ import org.transitclock.ipc.interfaces.PredictionsInterface;
 import org.transitclock.ipc.interfaces.ServerStatusInterface;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 
+import io.swagger.v3.oas.annotations.Parameter;
+
 /**
  * For getting the standard parameters from the URI used to access the feed.
  * Includes the key, agency, and the media type (JSON or XML). Does not include
@@ -57,9 +59,11 @@ import org.transitclock.ipc.interfaces.VehiclesInterface;
  */
 public class StandardParameters {
 	@PathParam("key")
+	@Parameter(description="Application key to access this api.")
 	private String key;
 
 	@PathParam("agency")
+	@Parameter(description="Specify the agency the request is intended to.")
 	private String agencyId;
 
 	@QueryParam("format")
