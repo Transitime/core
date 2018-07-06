@@ -12,6 +12,7 @@
     <module>transitclockApi</module>
     <module>transitclockWebapp</module>
     <module>transitclockQuickStart</module>
+    <module>transitclockTraccarClient</module>
   </modules>
     <profiles>
         <profile>
@@ -28,6 +29,7 @@
                 <module>transitclockApi</module>
               	<module>transitclockWebapp</module>
 		 		<module>transitclockQuickStart</module>
+		 		<module>transitclockTraccarClient</module>
             </modules>
         </profile>
     </profiles>
