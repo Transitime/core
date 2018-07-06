@@ -50,7 +50,7 @@ public class PlaybackModule extends Module {
 	private final static long DB_POLLING_TIME_MSEC = 5 * Time.MS_PER_MIN;
 	
 	// For keeping track of beginning of timespan for doing query
-	private long dbReadBeginTime;
+	protected long dbReadBeginTime;
 		
 	/*********** Configurable Parameters for this module ***********/
 	private static String getPlaybackVehicleId() {
@@ -64,17 +64,17 @@ public class PlaybackModule extends Module {
 	private static String getPlaybackStartTimeStr() {
 		return playbackStartTimeStr.getValue();
 	}
-	private static StringConfigValue playbackStartTimeStr =
+	protected static StringConfigValue playbackStartTimeStr =
 			new StringConfigValue("transitclock.avl.playbackStartTime", 
 					"",
 					"Date and time of when to start the playback.");
 	
-	private static StringConfigValue playbackEndTimeStr =
+	protected static StringConfigValue playbackEndTimeStr =
 			new StringConfigValue("transitclock.avl.playbackEndTime", 
 					"",
 					"Date and time of when to end the playback.");
 
-	private static BooleanConfigValue playbackRealtime =
+	protected static BooleanConfigValue playbackRealtime =
 			new BooleanConfigValue("transitclock.avl.playbackRealtime", 
 					false,
 					"Playback at normal time speed rather than as fast as possible.");
@@ -96,7 +96,7 @@ public class PlaybackModule extends Module {
 				|| getPlaybackVehicleId().isEmpty()
 				|| getPlaybackStartTimeStr() == null
 				|| getPlaybackStartTimeStr().isEmpty()) {
-			logger.warn("Parameters not set. See log file for details. Exiting.");			
+			logger.warn("Parameters not set. See log file for details.");			
 		}
 		
 		// Initialize the dbReadBeingTime member
@@ -129,7 +129,7 @@ public class PlaybackModule extends Module {
 			return -1;
 		}
 	}
-	private static long parsePlaybackEndTime(String playbackEndTimeStr) {
+	protected static long parsePlaybackEndTime(String playbackEndTimeStr) {
 		try {
 			long playbackEndTime = Time.parse(playbackEndTimeStr).getTime();
 			
@@ -159,7 +159,7 @@ public class PlaybackModule extends Module {
 	 * Gets a batch of AVl data from the database
 	 * @return
 	 */
-	private List<AvlReport> getBatchOfAvlReportsFromDb() {
+	protected List<AvlReport> getBatchOfAvlReportsFromDb() {
 		// The times that should be reading data for
 		long start = dbReadBeginTime;
 		long end = dbReadBeginTime + DB_POLLING_TIME_MSEC;
