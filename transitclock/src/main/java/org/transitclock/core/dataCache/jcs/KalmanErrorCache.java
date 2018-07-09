@@ -1,6 +1,8 @@
 package org.transitclock.core.dataCache.jcs;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
@@ -22,7 +24,8 @@ public class KalmanErrorCache implements ErrorCache  {
 	private CacheAccess<KalmanErrorCacheKey, Double>  cache = null;
 	
 	public KalmanErrorCache() {
-		cache = JCS.getInstance(cacheName);																			
+		cache = JCS.getInstance(cacheName);	
+		
 	}
 	
 	/* (non-Javadoc)
@@ -72,7 +75,18 @@ public class KalmanErrorCache implements ErrorCache  {
 
 	@Override
 	public List<KalmanErrorCacheKey> getKeys() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<KalmanErrorCacheKey> fulllist=new ArrayList<KalmanErrorCacheKey>();
+		Set<String> names = JCS.getGroupCacheInstance(cacheName).getGroupNames();
+		
+		for(String name:names)
+		{
+			Set<Object> keys = JCS.getGroupCacheInstance(cacheName).getGroupKeys(name);
+			
+			for(Object key:keys)
+			{
+				fulllist.add((KalmanErrorCacheKey)key);
+			}
+		}
+		return fulllist;
 	}			
 }

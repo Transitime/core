@@ -29,9 +29,10 @@ import org.transitclock.core.dataCache.ArrivalDeparturesToProcessHoldingTimesFor
 import org.transitclock.core.dataCache.HoldingTimeCache;
 import org.transitclock.core.dataCache.HoldingTimeCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
-import org.transitclock.core.dataCache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
+import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
@@ -338,8 +339,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	}
 	private void updateCache(VehicleState vehicleState, ArrivalDeparture arrivalDeparture)
 	{
-		if(TripDataHistoryCache.getInstance()!=null)
-			TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		if(TripDataHistoryCacheFactory.getInstance()!=null)
+			TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
 
 		if(StopArrivalDepartureCacheFactory.getInstance()!=null)
 		{

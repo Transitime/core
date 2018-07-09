@@ -349,7 +349,7 @@ public class PredictionAccuracyModule extends Module {
 					storePredictionAccuracyInfo(pred, null);
 				} else {
 					++numPredictionsInMemory;		
-					logger.debug("Prediction currently held in memory. {}"+pred.toString());
+					logger.debug("Prediction currently held in memory. {}",pred);
 				}
 			}
 		}

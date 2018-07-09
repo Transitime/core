@@ -22,13 +22,11 @@ import org.transitclock.core.dataCache.HoldingTimeCacheKey;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitclock.core.dataCache.TripDataHistoryCache;
 import org.transitclock.core.dataCache.TripKey;
-import org.transitclock.core.dataCache.ehcache.KalmanErrorCache;
-import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.StopPathCacheKey;
+import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.data.IpcHistoricalAverage;
@@ -139,36 +137,36 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				TripKey tripKey = new TripKey(tripId, date, starttime);
 
-				result = TripDataHistoryCache.getInstance().getTripHistory(tripKey);
+				result = TripDataHistoryCacheFactory.getInstance().getTripHistory(tripKey);
 			}
 			else if(tripId!=null && localDate!=null && starttime==null)
 			{
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
 					if(key.getTripId().equals(tripId) && date.compareTo(key.getTripStartDate())==0)
 					{
-						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
+						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
 					}
 				}
 			}else if(tripId!=null && localDate==null && starttime==null)
 			{
-				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
 					if(key.getTripId().equals(tripId))
 					{
-						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
+						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
 					}
 				}
 			}
 			else if(tripId==null && localDate!=null && starttime==null)
 			{
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
 					if(date.compareTo(key.getTripStartDate())==0)
 					{
-						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
+						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
 					}
 				}
 			}

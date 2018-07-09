@@ -33,9 +33,11 @@ import org.transitclock.core.dataCache.PredictionComparator;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitclock.core.dataCache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
+import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
+import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Block;
@@ -241,7 +243,7 @@ public abstract class PredictionGenerator {
 		return null;
 	}
 
-	protected List<TravelTimeDetails> lastDaysTimes(TripDataHistoryCache cache, String tripId,String direction, int stopPathIndex, Date startDate,
+	protected List<TravelTimeDetails> lastDaysTimes(TripDataHistoryCacheInterface cache, String tripId,String direction, int stopPathIndex, Date startDate,
 			Integer startTime, int num_days_look_back, int num_days) {
 
 		List<TravelTimeDetails> times = new ArrayList<TravelTimeDetails>();
@@ -268,7 +270,7 @@ public abstract class PredictionGenerator {
 
 				if(arrival!=null)
 				{
-					ArrivalDeparture departure = TripDataHistoryCache.findPreviousDepartureEvent(results, arrival);
+					ArrivalDeparture departure = TripDataHistoryCacheFactory.getInstance().findPreviousDepartureEvent(results, arrival);
 
 					if (arrival != null && departure != null) {
 

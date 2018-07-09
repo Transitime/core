@@ -4,7 +4,7 @@ import org.transitclock.utils.ClassInstantiator;
 
 /**
  * @author Sean Óg Crudden
- * Factory that will provide cache to hold Kalman error values.
+ *
  *
  */
 public class StopArrivalDepartureCacheFactory {

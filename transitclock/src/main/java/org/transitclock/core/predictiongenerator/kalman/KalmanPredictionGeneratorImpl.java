@@ -21,8 +21,10 @@ import org.transitclock.core.dataCache.ErrorCache;
 import org.transitclock.core.dataCache.ErrorCacheFactory;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.core.dataCache.StopPathPredictionCache;
-import org.transitclock.core.dataCache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
+import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.VehicleStateManager;
+import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
 import org.transitclock.core.dataCache.jcs.KalmanErrorCache;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitclock.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl;
@@ -79,7 +81,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 		logger.debug("Calling Kalman prediction algorithm for : "+indices.toString());
 
-		TripDataHistoryCache tripCache = TripDataHistoryCache.getInstance();
+		TripDataHistoryCacheInterface tripCache = TripDataHistoryCacheFactory.getInstance();
 
 		ErrorCache kalmanErrorCache = ErrorCacheFactory.getInstance();
 
