@@ -6,10 +6,20 @@ import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.VehicleState;
+import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 
+/**
+ * @author Sean Og Crudden
+ * 
+ * This is an experiment to see if headway can be used to better predict dwell time. Most of what 
+ * I have read tells me it can but in conjunction with APC data and estimation of demand at stops.
+ * 
+ * I do wonder if headway alone is enough to at least improve things beyond using the schedule?
+ *
+ */
 public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorImpl {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimePredictionGeneratorImpl.class);
@@ -36,17 +46,11 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 					result = super.getStopTimeForPath(indices, avlReport, vehicleState);
 				}else
 				{								
-					/*Simplistic but for a start take (predicted_headway/scheduled_headway) * scheduled dwell time.
-					 TODO could use average dwell time instead of schedule dwell time.
-					 TODO could create an ANN to use here. It could be trained with inputs of schedule_dwell_time, headway, time_of_day.
-					*/				
-					long vehicleAheadScheduleTime = headway.getVehicleAheadPrediction().getActualPredictionTime()+headway.getVehicleAheadPrediction().getDelay();
-					long vehicleBehindScheduleTime = headway.getVehicleAheadPrediction().getActualPredictionTime()+headway.getVehicleAheadPrediction().getDelay();
-					long scheduledHeadway=vehicleBehindScheduleTime-vehicleAheadScheduleTime;
-					
+					/* Change approach to use a RLS model.
+					*/																		
 					if(super.getStopTimeForPath(indices, avlReport, vehicleState)>0)
-					{
-						result = (headway.getHeadway()/scheduledHeadway)*super.getStopTimeForPath(indices, avlReport, vehicleState);
+					{												
+						result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(indices, headway);
 					}else
 					{
 						result = super.getStopTimeForPath(indices, avlReport, vehicleState);
@@ -56,12 +60,14 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 			else
 			{
 				result = super.getStopTimeForPath(indices, avlReport, vehicleState);
-			}
+			}			
+			logger.debug("Using dwell time {} for {} instead of {}.",result,indices, super.getStopTimeForPath(indices, avlReport, vehicleState));
 		} catch (Exception e) {
 
 			logger.error(e.getMessage(),e);
 
 		}
+		
 		return result;
 	}
 

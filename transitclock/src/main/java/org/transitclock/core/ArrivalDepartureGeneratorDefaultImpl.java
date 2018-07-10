@@ -51,6 +51,8 @@ import org.transitclock.db.structs.VehicleEvent;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Time;
 
+import smile.regression.RLS;
+
 /**
  * For determining Arrival/Departure times based on a new GPS report and
  * corresponding TemporalMatch.
@@ -339,6 +341,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	}
 	private void updateCache(VehicleState vehicleState, ArrivalDeparture arrivalDeparture)
 	{
+								
 		if(TripDataHistoryCacheFactory.getInstance()!=null)
 			TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
 
