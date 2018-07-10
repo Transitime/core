@@ -140,6 +140,14 @@ function avlAnimation(map, icon, clock) {
 		updateToIndex(nextIndex);
 		console.log(nextIndex)
 	}
+
+
+	// clean up icon
+    animation.removeIcon = function() {
+        // remove old sprite.
+        if (sprite)
+            map.removeLayer(sprite);
+    }
 		
 	function updateToIndex(i) {
 		if (i > positions.length - 1)

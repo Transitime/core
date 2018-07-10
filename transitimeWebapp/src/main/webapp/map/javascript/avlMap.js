@@ -260,7 +260,7 @@ $("#submit").on("click", function() {
     request.endTime = $("#endTime").val();
     request.r = $("#route").val();
 
-    var askConfirm = (request.v == "All Vehicles" || request.v == "") && (request.r == "All Routes" || request.r ==" ");
+    var askConfirm = allVehiclesRequested() && (request.r == "All Routes" || request.r ==" ");
     var confirmYes = false;
     if (askConfirm) {
         confirmYes = confirm('Are you sure you want All Vehicles and All Routes?');
@@ -272,6 +272,10 @@ $("#submit").on("click", function() {
 		drawAvlData();
 	}
 });
+
+function allVehiclesRequested() {
+	return request.v == "All Vehicles" || request.v == "";
+}
 
 
 //Get the AVL data via AJAX and call processAvlCallback to draw it
@@ -294,8 +298,14 @@ function drawAvlData() {
 	    	var vehicles = processAvlCallback(resp);
 	    	// connect export to link to csv creation.
 	    	createExport(vehicles);
-	    	if (vehicles.length)
+	    	if (!allVehiclesRequested() && vehicles.length)
 	    		prepareAnimation(vehicles[0].data); // only animate first vehicle returned.
+
+			if (allVehiclesRequested()) {
+				$("#playback").hide();
+                animate.removeIcon();//clean up anything there already
+			}
+			else $("#playback").show();
 	    },
 	    // When there is an AJAX problem alert the user
 	    error: function(request, status, error) {
