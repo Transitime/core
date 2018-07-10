@@ -1,6 +1,7 @@
 package org.transitclock.core.predictiongenerator;
 
 
+import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.VehicleState;
@@ -14,6 +15,6 @@ public interface PredictionComponentElementsGenerator {
 	
 	long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match);
 	
-	long getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception;
+	HeadwayDetails getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception;
 
 }

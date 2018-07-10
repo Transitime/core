@@ -12,9 +12,11 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionGeneratorDefaultImpl;
 import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.ErrorCache;
@@ -225,15 +227,9 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
-		long headway=-1;
-		try {
-			headway=this.getHeadway(indices, avlReport, vehicleState);
-
-		} catch (Exception e) {
-
-			logger.error(e.getMessage(),e);
-
-		}
-		return super.getStopTimeForPath(indices, avlReport, vehicleState);
+		long result=-super.getStopTimeForPath(indices, avlReport, vehicleState);
+		
+		return result;
+		
 	}
 }

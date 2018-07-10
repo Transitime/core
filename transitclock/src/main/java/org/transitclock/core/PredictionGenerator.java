@@ -305,7 +305,7 @@ public abstract class PredictionGenerator {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 
-	public long getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception {
+	public HeadwayDetails getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception {
 		
 		// This is a WIP to get a predicted headway at the stop.
 		List<IpcPrediction> masterList=new ArrayList<IpcPrediction>();
@@ -344,10 +344,10 @@ public abstract class PredictionGenerator {
 				long headway=currentVehiclePrediction.getPredictionTime()-lastVehiclePrediction.getPredictionTime();
 				if(headway>0)
 				{
-					return new HeadwayDetails(currentVehiclePrediction, lastVehiclePrediction).getHeadway();
+					return new HeadwayDetails(currentVehiclePrediction, lastVehiclePrediction);
 				}
 			}
 		}
-		return -1;			
+		return null;			
 	}
 }
