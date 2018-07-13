@@ -65,15 +65,19 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			Indices indices = new Indices(departure);
 			StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
 			List<ArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
-			ArrivalDeparture arrival=findArrival(stopData, departure);
-			ArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
-			if(arrival!=null&&previousArrival!=null)
-			{			
-				Headway headway=new Headway();
-				headway.setHeadway(arrival.getTime()-previousArrival.getTime());
-				long dwelltime=departure.getTime()-arrival.getTime();
-				addSample(indices, headway,dwelltime);
-			}								
+			
+			if(stopData!=null && stopData.size()>1)
+			{
+				ArrivalDeparture arrival=findArrival(stopData, departure);
+				ArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
+				if(arrival!=null&&previousArrival!=null)
+				{			
+					Headway headway=new Headway();
+					headway.setHeadway(arrival.getTime()-previousArrival.getTime());
+					long dwelltime=departure.getTime()-arrival.getTime();
+					addSample(indices, headway,dwelltime);
+				}								
+			}
 		}		
 	}
 

@@ -26,6 +26,7 @@ import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.dataCache.ArrivalDeparturesToProcessHoldingTimesFor;
+import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.HoldingTimeCache;
 import org.transitclock.core.dataCache.HoldingTimeCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
@@ -342,12 +343,18 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	private void updateCache(VehicleState vehicleState, ArrivalDeparture arrivalDeparture)
 	{
 								
+		
 		if(TripDataHistoryCacheFactory.getInstance()!=null)
 			TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
 
 		if(StopArrivalDepartureCacheFactory.getInstance()!=null)
 		{
 			StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(arrivalDeparture);
+		}
+		
+		if(DwellTimeModelCacheFactory.getInstance()!=null)
+		{
+			DwellTimeModelCacheFactory.getInstance().addSample(arrivalDeparture);
 		}
 
 		if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
