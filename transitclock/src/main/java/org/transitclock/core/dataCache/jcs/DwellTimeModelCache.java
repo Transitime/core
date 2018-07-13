@@ -6,14 +6,13 @@ import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
 import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
+import org.transitclock.core.TravelTimes;
 import org.transitclock.core.dataCache.DwellTimeCacheKey;
-import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Headway;
 
-import net.sf.ehcache.Cache;
 import smile.regression.RLS;
 
 public class DwellTimeModelCache implements org.transitclock.core.dataCache.DwellTimeModelCacheInterface {
@@ -27,22 +26,33 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		
 	}
 	@Override
-	public void addSample(Indices indices, Headway headway, long dwellTime) {
-		// TODO Auto-generated method stub
+	synchronized public void addSample(Indices indices, Headway headway, long dwellTime) {
+		
 		DwellTimeCacheKey key=new DwellTimeCacheKey(indices);
 		
 		RLS rls = null;
-		if(cache.get(key)==null)
-		{
-			
+		if(cache.get(key)!=null)
+		{			
 			rls=cache.get(key);
-		}else
-		{
-			double samplex[][]=new double[1][1];
-			double sampley[]=new double[1];
 			
-			samplex[0][0]=headway.getHeadway();
-			sampley[0]=dwellTime;
+			double[] x = new double[1];
+			x[0]=headway.getHeadway();
+			
+			double y = dwellTime;
+			rls.learn(x, y);			
+		}else
+		{			
+			
+			double samplex[][]=new double[2][1];
+			double sampley[]=new double[2];
+			
+			/* TODO We will use the sample and the (scheduled headway,scheduled dwell time) to start with instead of (0, 0) and sample..*/
+			samplex[0][0]=0;
+			sampley[0]=0;						
+						
+			samplex[1][0]=headway.getHeadway();
+			sampley[1]=dwellTime;						
+									
 			rls=new RLS(samplex, sampley);
 		}
 		cache.put(key,rls);
@@ -77,7 +87,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	}
 	@Override
 	public long predictDwellTime(Indices indices, HeadwayDetails headway) {
-		// TODO Auto-generated method stub
+		
 		DwellTimeCacheKey key=new DwellTimeCacheKey(indices);
 		RLS rls=cache.get(key);
 		double[] arg0 = new double[1];
