@@ -1,7 +1,8 @@
-package org.transitclock.core.predictiongenerator.kalman.dwell;
+package org.transitclock.core.predictiongenerator.rls.dwell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
 import org.transitclock.core.TemporalDifference;
@@ -23,9 +24,11 @@ import org.transitclock.db.structs.AvlReport;
 public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorImpl {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimePredictionGeneratorImpl.class);
+	
+	private static BooleanConfigValue useScheduleWithinBounds = new BooleanConfigValue("org.transitclock.core.predictiongenerator.kalman.dwell.useScheduleWithinBounds",false,"If vehicles within bounds of schedule use the scheduled ");
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
-		long result=-1L;
+		Long result=null;
 		try {
 			HeadwayDetails headway = this.getHeadway(indices, avlReport, vehicleState);
 			if(headway!=null)
@@ -38,7 +41,7 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 				TemporalDifference aheadScheduleAdherence = vehicleStateManager.getVehicleState(headway.getVehicleAheadPrediction().getVehicleId()).getRealTimeSchedAdh();
 				TemporalDifference behindScheduleAdherence = vehicleStateManager.getVehicleState(headway.getVehicleBehindPrediction().getVehicleId()).getRealTimeSchedAdh();
 				
-				if(aheadScheduleAdherence.isWithinBounds() && behindScheduleAdherence.isWithinBounds())
+				if(useScheduleWithinBounds.getValue() && aheadScheduleAdherence.isWithinBounds() && behindScheduleAdherence.isWithinBounds())
 				{
 					/* Vehicles running as per schedule so use the scheduled dwell time or transitime default prediction method. 
 					 * This will depend on if UpdateTravelTimes has been run.
@@ -51,6 +54,18 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 					if(super.getStopTimeForPath(indices, avlReport, vehicleState)>0)
 					{												
 						result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(indices, headway);
+						
+						if(result==null)
+							result = super.getStopTimeForPath(indices, avlReport, vehicleState);
+						
+						
+						/* should never have a negative dwell time */
+						if(result<0)
+						{
+							logger.error("Predicted negative dwell time {} for {}.", result, indices);
+							result=0L;
+						}
+							
 					}else
 					{
 						result = super.getStopTimeForPath(indices, avlReport, vehicleState);

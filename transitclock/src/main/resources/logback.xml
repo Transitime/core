@@ -391,7 +391,11 @@
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
-
+	<logger
+		name="org.transitclock.core.predictiongenerator.kalman.dwell.DwellTimePredictionGeneratorImpl"
+		level="debug" additivity="false">
+		<appender-ref ref="PREDICTION" />
+	</logger>
 	<logger
 		name="org.transitclock.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl"
 		level="debug" additivity="false">

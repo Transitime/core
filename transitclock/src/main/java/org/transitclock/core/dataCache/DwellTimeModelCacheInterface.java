@@ -11,7 +11,7 @@ public interface DwellTimeModelCacheInterface {
 	
 	void addSample(ArrivalDeparture departure);
 	
-	long predictDwellTime(Indices indices, HeadwayDetails headway);
+	Long predictDwellTime(Indices indices, HeadwayDetails headway);
 
 	
 }

@@ -1,8 +1,14 @@
 package org.transitclock.core.dataCache;
 
+import java.io.Serializable;
+
 import org.transitclock.core.Indices;
 
-public class DwellTimeCacheKey {
+public class DwellTimeCacheKey implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4967988031829738238L;
 	private String tripId;
 	private Integer stopPathIndex;
 	public DwellTimeCacheKey(String tripId, Integer stopPathIndex) {	
@@ -27,6 +33,7 @@ public class DwellTimeCacheKey {
 	public void setStopPathIndex(Integer stopPathIndex) {
 		this.stopPathIndex = stopPathIndex;
 	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -35,6 +42,7 @@ public class DwellTimeCacheKey {
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -56,4 +64,6 @@ public class DwellTimeCacheKey {
 			return false;
 		return true;
 	}
+
+	
 }

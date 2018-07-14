@@ -227,7 +227,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
-		long result=-super.getStopTimeForPath(indices, avlReport, vehicleState);
+		long result=super.getStopTimeForPath(indices, avlReport, vehicleState);
 		
 		return result;
 		

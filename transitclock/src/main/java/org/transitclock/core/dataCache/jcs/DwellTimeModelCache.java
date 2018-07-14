@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
+import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
 import org.transitclock.core.TravelTimes;
@@ -18,6 +20,8 @@ import smile.regression.RLS;
 public class DwellTimeModelCache implements org.transitclock.core.dataCache.DwellTimeModelCacheInterface {
 
 	final private static String cacheName = "DwellTimeModelCache";
+
+	private static IntegerConfigValue maxDwellTimeAllowedInModel = new IntegerConfigValue("maxDwellTimeAllowedInModel", 120000, "Max dwell time to be considered in dwell RLS algotithm."); 
 	
 	private CacheAccess<DwellTimeCacheKey, RLS>  cache = null;
 	
@@ -69,35 +73,73 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			if(stopData!=null && stopData.size()>1)
 			{
 				ArrivalDeparture arrival=findArrival(stopData, departure);
-				ArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
-				if(arrival!=null&&previousArrival!=null)
-				{			
-					Headway headway=new Headway();
-					headway.setHeadway(arrival.getTime()-previousArrival.getTime());
-					long dwelltime=departure.getTime()-arrival.getTime();
-					addSample(indices, headway,dwelltime);
-				}								
+				if(arrival!=null)
+				{
+					ArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
+					if(arrival!=null&&previousArrival!=null)
+					{			
+						Headway headway=new Headway();
+						headway.setHeadway(arrival.getTime()-previousArrival.getTime());
+						long dwelltime=departure.getTime()-arrival.getTime();
+						
+						if(dwelltime<maxDwellTimeAllowedInModel.getValue())
+							addSample(indices, headway,dwelltime);
+					}
+				}
 			}
 		}		
 	}
 
-	private ArrivalDeparture findPreviousArrival(List<ArrivalDeparture> stopData, ArrivalDeparture arrival) {
-		// TODO Auto-generated method stub
+	private ArrivalDeparture findPreviousArrival(List<ArrivalDeparture> stopData, ArrivalDeparture arrival) {		
+		for(ArrivalDeparture event:stopData)
+		{
+			if(event.isArrival())
+			{
+				if(!event.getVehicleId().equals(arrival.getVehicleId()))
+				{
+					if(!event.getTripId().equals(arrival.getTripId()))
+					{
+						if(event.getTime()<arrival.getTime())
+							return event;
+					}
+				}
+			}
+		}
+
 		return null;
 	}
 	private ArrivalDeparture findArrival(List<ArrivalDeparture> stopData, ArrivalDeparture departure) {
-		// TODO Auto-generated method stub
+
+		for(ArrivalDeparture event:stopData)
+		{
+			if(event.isArrival())
+			{
+				if(event.getVehicleId().equals(departure.getVehicleId()))
+				{
+					if(event.getTripId().equals(departure.getTripId()))
+					{
+						return event;
+					}
+				}
+			}
+		}
 		return null;
 	}
 	@Override
-	public long predictDwellTime(Indices indices, HeadwayDetails headway) {
+	public Long predictDwellTime(Indices indices, HeadwayDetails headway) {
 		
 		DwellTimeCacheKey key=new DwellTimeCacheKey(indices);
 		RLS rls=cache.get(key);
-		double[] arg0 = new double[1];
-		arg0[0]=headway.getHeadway();
-		rls.predict(arg0);
-		return (long) rls.predict(arg0);
+		if(rls!=null)
+		{
+			double[] arg0 = new double[1];
+			arg0[0]=headway.getHeadway();
+			rls.predict(arg0);
+			return new Long((long) rls.predict(arg0));
+		}else
+		{
+			return null;
+		}
 	}
 
 }
