@@ -24,4 +24,4 @@ deploy:
   on:
     repo: TheTransitClock/transitime
     tags: false
-    all_branches: true
+    branch: develop
