@@ -25,7 +25,7 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 	
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimePredictionGeneratorImpl.class);
 	
-	private static BooleanConfigValue useScheduleWithinBounds = new BooleanConfigValue("org.transitclock.core.predictiongenerator.kalman.dwell.useScheduleWithinBounds",false,"If vehicles within bounds of schedule use the scheduled ");
+	private static BooleanConfigValue useScheduleWithinBounds = new BooleanConfigValue("org.transitclock.core.predictiongenerator.rls.dwell.useScheduleWithinBounds",false,"If vehicles within bounds of schedule use the scheduled ");
 	@Override
 	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		Long result=null;
