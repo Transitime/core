@@ -46,7 +46,8 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 					/* Vehicles running as per schedule so use the scheduled dwell time or transitime default prediction method. 
 					 * This will depend on if UpdateTravelTimes has been run.
 					 */
-					result = super.getStopTimeForPath(indices, avlReport, vehicleState);
+					logger.debug("Using scheduled value for dwell time as vehciles within schedule adherence for {}.", indices);
+					result = super.getStopTimeForPath(indices, avlReport, vehicleState);										
 				}else
 				{								
 					/* Change approach to use a RLS model.
@@ -56,18 +57,22 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 						result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(indices, headway);
 						
 						if(result==null)
+						{
+							logger.debug("Using scheduled value for dwell time as no RLS data available for {}.", indices);
 							result = super.getStopTimeForPath(indices, avlReport, vehicleState);
+						}
 						
 						
 						/* should never have a negative dwell time */
 						if(result<0)
 						{
-							logger.error("Predicted negative dwell time {} for {}.", result, indices);
+							logger.debug("Predicted negative dwell time {} for {}.", result, indices);
 							result=0L;
 						}
 							
 					}else
 					{
+						logger.debug("Scheduled dwell time is less than 0 for {}.", indices);
 						result = super.getStopTimeForPath(indices, avlReport, vehicleState);
 					}				
 				}

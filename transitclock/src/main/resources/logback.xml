@@ -452,9 +452,9 @@
 		level="debug" additivity="false">
 		<appender-ref ref="HOLDING" />
 	</logger>
- 	<logger name="org.transitime.core.TemporalMatcher" level="info" additivity="true">
+ 	<logger name="org.transitclock.core.TemporalMatcher" level="info" additivity="true">
 		<appender-ref ref="MATCHER" /> </logger>
-	<logger name="org.transitime.core.SpatialMatcher" level="info" additivity="true">
+	<logger name="org.transitclock.core.SpatialMatcher" level="info" additivity="true">
 		<appender-ref ref="MATCHER" /> </logger>
 	<!-- For config params it is more complicated because want to both have
 		config params logged in separate file but also want some errors to send out
@@ -468,7 +468,7 @@
 	<!-- <logger name="org.transitclock.config" level="error" additivity="false">
 		<appender-ref ref="ERROR_SMTP" /> </logger> -->
 
-	<logger name="org.transitclock.core.predAccuracy" level="debug"
+	<logger name="org.transitclock.core.predAccuracy.PredictionAccuracyModule" level="debug"
 		additivity="false">
 		<appender-ref ref="PRED_ACCURACY" />
 	</logger>
