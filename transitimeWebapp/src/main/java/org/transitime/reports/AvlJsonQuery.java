@@ -62,12 +62,15 @@ public class AvlJsonQuery {
 			timeSql = " AND time(time) BETWEEN '" 
 				+ beginTime + "' AND '" + endTime + "' ";
 		}
-
+//need to limit the vehicle state table by time as well to utilize index on avlTime column
 		String sql = "SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, a.speed, "
 				+ "a.heading, a.timeProcessed, a.source, v.routeShortName "
 				+ "FROM AvlReports a "
 				+ "JOIN "
-				+ "(SELECT vehicleId, routeShortName, avlTime FROM VehicleStates) v "
+				+ "(SELECT vehicleId, routeShortName, avlTime FROM VehicleStates "
+				+ "WHERE avlTime BETWEEN '" + beginDate + "' "
+				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
+				+ ") v "
 				+ "ON v.vehicleId=a.vehicleId and v.avlTime=a.time "
 				+ "WHERE a.time BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
