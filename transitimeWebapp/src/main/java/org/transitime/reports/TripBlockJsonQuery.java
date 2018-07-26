@@ -75,6 +75,9 @@ public class TripBlockJsonQuery {
 		d = getNoonOfDay(d);
 
 		Core core = Core.getInstance();
+		if (core == null)
+			return "Instance of Core was null";
+
 		List<String> serviceIds = core.getServiceUtils().getServiceIdsForDay(d);
 
 		String serviceIdStr = "";
