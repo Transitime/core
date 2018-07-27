@@ -17,7 +17,17 @@
 
 package org.transitime.utils.web;
 
+import org.transitime.config.IntegerConfigValue;
+import org.transitime.config.StringConfigValue;
+import org.transitime.db.webstructs.WebAgency;
+
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Map;
 
 /**
  *
@@ -27,7 +37,25 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class WebUtils {
 
-    /********************** Member Functions **************************/
+	private static StringConfigValue apiHostname =
+			new StringConfigValue("transitime.web.apiHostname",
+					"localhost",
+					"The DNS of the api tier.  The default is typical");
+
+	protected static String getApiHostname() {
+		return apiHostname.getValue();
+	}
+
+	private static IntegerConfigValue apiPort =
+			new IntegerConfigValue("transitime.web.apiPort",
+					8080,
+					"The port of the api tier.  The default is typical");
+
+	protected static Integer getApiPort() {
+		return apiPort.getValue();
+	}
+
+	/********************** Member Functions **************************/
 
     /**
      * Goes through all the request parameters, such as from the query string,
@@ -87,4 +115,38 @@ public class WebUtils {
 	return queryStringParams;
     }
 
+    public static StringBuffer getApiRequest(String command, Map<String, String> properties) throws IOException {
+    	String url = "http://" + getApiHostname() + ":" + getApiPort() +  "/api/v1/key/"
+				+ System.getProperty("transitime.apikey")
+				+ "/agency/"
+				+ WebAgency.getCachedOrderedListOfWebAgencies().get(0).getAgencyId()
+				+ command;
+
+    	int propertyCount = 0;
+    	if (properties != null && !properties.isEmpty()) {
+    	    for (String key : properties.keySet()) {
+    	        if (propertyCount == 0) {
+    	            url += "?" + key + "=" + properties.get(key);
+                } else {
+    	            url += "&" + key + "=" + properties.get(key);
+                }
+                propertyCount++;
+            }
+        }
+
+
+    	URLConnection connection = new URL(url).openConnection();
+    	connection.setReadTimeout(60 * 1000);
+    	connection.setConnectTimeout(60 * 1000);
+    	connection.setUseCaches(false);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+    	StringBuffer out = new StringBuffer();
+
+    	String line = "";
+    	while ((line = reader.readLine()) != null) {
+    		out.append(line);
+		}
+
+		return out;
+	}
 }

@@ -436,4 +436,7 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 		return blockIds;
 	}
 
+	public List<String> getServiceIdsForDay(Long day) {
+		return Core.getInstance().getServiceUtils().getServiceIdsForDay(day);
+	}
 }

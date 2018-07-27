@@ -186,6 +186,7 @@ public class ServiceUtils {
 	
 	private Date getStartOfDay(Date epochTime) {
 		java.util.Calendar c = java.util.Calendar.getInstance();
+		c.setTime(epochTime);
 		c.set(java.util.Calendar.HOUR, 0);
 		c.set(java.util.Calendar.MINUTE, 0);
 		c.set(java.util.Calendar.SECOND, 0);

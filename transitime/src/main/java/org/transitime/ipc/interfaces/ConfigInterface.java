@@ -222,6 +222,8 @@ public interface ConfigInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public List<String> getBlockIds(String serviceId)
-			throws RemoteException;	
+			throws RemoteException;
+
+	public List<String> getServiceIdsForDay(Long currentTimeMillis) throws RemoteException;
 
 }

@@ -1736,6 +1736,30 @@ public class TransitimeApi {
 			throw WebUtils.badRequestException(e.getMessage());
 		}
 	}
+
+	@Path("/command/getserviceidsforday")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getServiceIdsForDay(@BeanParam StandardParameters stdParameters,
+										   @QueryParam(value = "day") Long day
+										   )
+	{
+		try {
+			if (day == null) day = System.currentTimeMillis();
+
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<String> ids = inter.getServiceIdsForDay(day);
+			ApiIds apiIds = new ApiIds(ids);
+			Response response = stdParameters.createResponse(apiIds);
+
+			return response;
+
+		} catch (Exception e) {
+			// If problem getting result then return a Bad Request
+			throw WebUtils.badRequestException(e.getMessage());
+		}
+	}
+
 	// /**
 	// * For creating response of list of vehicles. Would like to make this a
 	// * generic type but due to type erasure cannot do so since GenericEntity

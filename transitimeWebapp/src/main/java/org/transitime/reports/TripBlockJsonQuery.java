@@ -17,14 +17,17 @@
 package org.transitime.reports;
 
 import org.apache.commons.lang3.StringUtils;
-import org.transitime.applications.Core;
-import org.transitime.core.ServiceUtils;
 import org.transitime.utils.Time;
+import org.transitime.utils.web.WebUtils;
 
+import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Does a query of trip data and returns result in JSON format.
@@ -74,11 +77,16 @@ public class TripBlockJsonQuery {
 		}
 		d = getNoonOfDay(d);
 
-		Core core = Core.getInstance();
-		if (core == null)
-			return "Instance of Core was null";
-
-		List<String> serviceIds = core.getServiceUtils().getServiceIdsForDay(d);
+		StringBuffer serviceIdsResponse;
+		List<String> serviceIds;
+        Map<String, String> properties = new HashMap<>();
+        properties.put("day", "" + d.getTime());
+		try {
+			serviceIdsResponse = WebUtils.getApiRequest("/command/getserviceidsforday", properties);
+			serviceIds = parseResponse(serviceIdsResponse.toString());
+		} catch (IOException ioe) {
+			return "Unable to retrieve service ids for day";
+		}
 
 		String serviceIdStr = "";
 		if (serviceIds != null && serviceIds.size() > 0) {
@@ -90,14 +98,18 @@ public class TripBlockJsonQuery {
 				+ "JOIN "
 				+ "Block_to_Trip_joinTable j "
 				+ "ON j.trips_TripId = t.tripId "
-				+ "WHERE t.startTime >= " + beginSecInDay + " AND t.startTime <= " + endSecInDay;
+				+ "WHERE "
+				+ "t.configRev = (select configRev from ActiveRevisions) "
+				+ "AND j.trips_configRev = t.configRev "
+				+ "AND j.Blocks_configRev = t.configRev "
+				+ "AND t.startTime >= " + beginSecInDay + " AND t.startTime <= " + endSecInDay;
 
 		if (routeId != null && !routeId.trim().isEmpty()) {
 			sql += " AND t.routeShortName = '" + routeId + "' ";
 		}
 
 		if (serviceIdStr != null && !serviceIdStr.isEmpty()) {
-			sql += " AND t.serviceId in (" + serviceIdStr + ")";
+			sql += " AND t.serviceId in (" + serviceIdStr + ") ";
 		}
 
 
@@ -105,7 +117,7 @@ public class TripBlockJsonQuery {
 		// lastly, limit to 5000 so that someone doesn't try
 		// to view too much data at once.
 		sql += "ORDER BY j.Blocks_blockId, t.startTime LIMIT " + MAX_ROWS;
-		
+
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 
 		return json;
@@ -120,6 +132,23 @@ public class TripBlockJsonQuery {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTime();
+	}
+
+
+	// todo use real json parser
+	private static List<String> parseResponse(String json) {
+		if (json == null) return null;
+		if (json.indexOf(":") < 0) return null;
+		json = json.split(":")[1];
+		json = json.replaceAll("\\[", "")
+				.replaceAll("\\]", "")
+				.replaceAll("\\}", "");
+		String[] elements = json.split(",");
+		List<String> results = new ArrayList<>();
+		for (String s : elements) {
+			results.add("'" + s.replaceAll("\"", "") + "'");
+		}
+		return results;
 	}
 	
 }
