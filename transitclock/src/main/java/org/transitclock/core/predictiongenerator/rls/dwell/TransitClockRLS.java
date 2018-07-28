@@ -2,23 +2,26 @@ package org.transitclock.core.predictiongenerator.rls.dwell;
 
 import java.io.Serializable;
 
+import org.transitclock.config.DoubleConfigValue;
+
 import smile.regression.RLS;
 
 public class TransitClockRLS implements Serializable {
 
 
 	/**
+	 * @param lambda 
 	 * 
 	 */
-	public TransitClockRLS() {
+	public TransitClockRLS(double lambda) {		
 		super();
-		// TODO Auto-generated constructor stub
+		this.lambda=lambda;
 	}
 	
 	public RLS getRls() {
 		return rls;
 	}
-
+	private double lambda;
 	Double firstx=null;
 	Long firsty=null;
 	RLS rls=null;
@@ -48,7 +51,7 @@ public class TransitClockRLS implements Serializable {
 				
 				samplex[1][0]=d;
 				sampley[1]=dwellTime;	
-				rls=new RLS(samplex, sampley, 0.5);
+				rls=new RLS(samplex, sampley, lambda);
 			}
 			else
 			{

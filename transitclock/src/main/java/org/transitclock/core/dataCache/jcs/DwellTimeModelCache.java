@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
@@ -15,6 +17,7 @@ import org.transitclock.core.TravelTimes;
 import org.transitclock.core.dataCache.DwellTimeCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitclock.core.predictiongenerator.rls.dwell.DwellTimePredictionGeneratorImpl;
 import org.transitclock.core.predictiongenerator.rls.dwell.TransitClockRLS;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
@@ -34,6 +37,8 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	private static DoubleConfigValue lambda = new DoubleConfigValue("org.transitclock.core.dataCache.jcs.lambda", 0.5, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
 	
 	private CacheAccess<DwellTimeCacheKey, TransitClockRLS>  cache = null;
+	
+	private static final Logger logger = LoggerFactory.getLogger(DwellTimeModelCache.class);
 	
 	public DwellTimeModelCache() {
 		cache = JCS.getInstance(cacheName);			
@@ -59,9 +64,9 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			if(rls.getRls()!=null)
 			{
 				double prediction = rls.getRls().predict(arg0);
-				System.out.print("Predicted before:"+prediction);
+				logger.debug("Predicted dwell: "+prediction + " for: "+key);
 				
-				System.out.print(" Actual:"+ dwellTime);
+				logger.debug("Actual dwell: "+ dwellTime + " for: "+key);
 			}
 			
 			rls.addSample(headway.getHeadway(), dwellTime);			
@@ -69,12 +74,12 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			{
 				double prediction = rls.getRls().predict(arg0);
 	
-				System.out.println(" Predicted After:"+ prediction + " for: "+key);
+				logger.debug("Predicted dwell after: "+ prediction + " for: "+key);
 			}
 		}else
 		{			
 						
-			rls=new TransitClockRLS();
+			rls=new TransitClockRLS(lambda.getValue());
 			rls.addSample(headway.getHeadway(), dwellTime);
 		}
 		cache.put(key,rls);
