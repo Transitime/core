@@ -44,6 +44,11 @@ public class DwellTimeCacheKey implements Serializable {
 	}
 
 	@Override
+	public String toString() {
+		return "DwellTimeCacheKey [tripId=" + tripId + ", stopPathIndex=" + stopPathIndex + "]";
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

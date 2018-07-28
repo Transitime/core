@@ -15,12 +15,14 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.store.Policy;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
+import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
@@ -142,32 +144,37 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-
-		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
-				date.getTime());
-
-		List<ArrivalDeparture> list = null;
-
-		Element result = cache.get(key);
-
-		if (result != null && result.getObjectValue() != null) {
-			list = (List<ArrivalDeparture>) result.getObjectValue();
-			cache.remove(key);
-		} else {
-			list = new ArrayList<ArrivalDeparture>();
+		if(arrivalDeparture.getStop()!=null)
+		{
+			StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
+					date.getTime());
+	
+			List<ArrivalDeparture> list = null;
+	
+			Element result = cache.get(key);
+	
+			if (result != null && result.getObjectValue() != null) {
+				list = (List<ArrivalDeparture>) result.getObjectValue();
+				cache.remove(key);
+			} else {
+				list = new ArrayList<ArrivalDeparture>();
+			}
+			
+			list.add(arrivalDeparture);
+			
+			Collections.sort(list, new ArrivalDepartureComparator());
+			
+			// This is java 1.8 list.sort(new ArrivalDepartureComparator());
+			
+			Element arrivalDepartures = new Element(key, Collections.synchronizedList(list));
+	
+			cache.put(arrivalDepartures);
+	
+			return key;
+		}else
+		{
+			return null;
 		}
-		
-		list.add(arrivalDeparture);
-		
-		Collections.sort(list, new ArrivalDepartureComparator());
-		
-		// This is java 1.8 list.sort(new ArrivalDepartureComparator());
-		
-		Element arrivalDepartures = new Element(key, Collections.synchronizedList(list));
-
-		cache.put(arrivalDepartures);
-
-		return key;
 	}
 
 	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
@@ -178,10 +185,18 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
 
 		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
+		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).addOrder(Order.asc("time")).list();	
 
 		for (ArrivalDeparture result : results) {
 			StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(result);
+			//TODO might be better with its own populateCacheFromdb
+			try
+			{
+			DwellTimeModelCacheFactory.getInstance().addSample(result);
+			}catch(Exception Ex)
+			{
+				Ex.printStackTrace();
+			}
 		}
 	}
 

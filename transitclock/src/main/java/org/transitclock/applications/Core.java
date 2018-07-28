@@ -447,6 +447,10 @@ public class Core {
 				endDate=startDate;
 			}
 			endDate=Calendar.getInstance().getTime();
+						
+			
+
+			
 
 			if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
 			{

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.transitclock.db.structs.ArrivalDeparture;
 
@@ -18,10 +19,12 @@ public abstract class StopArrivalDepartureCacheInterface {
 		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
 
 		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
+		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).addOrder(Order.asc("time")).list();				
 
 		for (ArrivalDeparture result : results) {
 			this.putArrivalDeparture(result);
+			//TODO might be better with its own populateCacheFromdb
+			DwellTimeModelCacheFactory.getInstance().addSample(result);
 		}
 	}
 

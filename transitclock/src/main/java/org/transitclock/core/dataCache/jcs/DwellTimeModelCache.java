@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
+import org.transitclock.applications.Core;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.LongConfigValue;
@@ -14,8 +15,11 @@ import org.transitclock.core.TravelTimes;
 import org.transitclock.core.dataCache.DwellTimeCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitclock.core.predictiongenerator.rls.dwell.TransitClockRLS;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Headway;
+import org.transitclock.gtfs.DbConfig;
 import org.transitclock.utils.Time;
 
 import smile.regression.RLS;
@@ -29,7 +33,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	
 	private static DoubleConfigValue lambda = new DoubleConfigValue("org.transitclock.core.dataCache.jcs.lambda", 0.5, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
 	
-	private CacheAccess<DwellTimeCacheKey, RLS>  cache = null;
+	private CacheAccess<DwellTimeCacheKey, TransitClockRLS>  cache = null;
 	
 	public DwellTimeModelCache() {
 		cache = JCS.getInstance(cacheName);			
@@ -37,9 +41,10 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	@Override
 	synchronized public void addSample(Indices indices, Headway headway, long dwellTime) {
 		
-		DwellTimeCacheKey key=new DwellTimeCacheKey(indices);
+		DwellTimeCacheKey key=new DwellTimeCacheKey(headway.getTripId(), indices.getStopPathIndex());
 		
-		RLS rls = null;
+		
+		TransitClockRLS rls = null;
 		if(cache.get(key)!=null)
 		{			
 			rls=cache.get(key);
@@ -48,21 +53,29 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			x[0]=headway.getHeadway();
 			
 			double y = dwellTime;
-			rls.learn(x, y);			
+								
+			double[] arg0 = new double[1];
+			arg0[0]=headway.getHeadway();
+			if(rls.getRls()!=null)
+			{
+				double prediction = rls.getRls().predict(arg0);
+				System.out.print("Predicted before:"+prediction);
+				
+				System.out.print(" Actual:"+ dwellTime);
+			}
+			
+			rls.addSample(headway.getHeadway(), dwellTime);			
+			if(rls.getRls()!=null)
+			{
+				double prediction = rls.getRls().predict(arg0);
+	
+				System.out.println(" Predicted After:"+ prediction + " for: "+key);
+			}
 		}else
 		{			
-			
-			double samplex[][]=new double[2][1];
-			double sampley[]=new double[2];
-			
-			/* TODO We will use the sample and the (scheduled headway,scheduled dwell time) to start with instead of (0, 0) and sample..*/
-			samplex[0][0]=0;
-			sampley[0]=0;						
 						
-			samplex[1][0]=headway.getHeadway();
-			sampley[1]=dwellTime;						
-									
-			rls=new RLS(samplex, sampley, lambda.getValue());
+			rls=new TransitClockRLS();
+			rls.addSample(headway.getHeadway(), dwellTime);
 		}
 		cache.put(key,rls);
 	}
@@ -71,6 +84,16 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	public void addSample(ArrivalDeparture departure) {
 		if(departure!=null && !departure.isArrival())
 		{
+			Block block=null;
+			if(departure.getBlock()==null)
+			{
+				DbConfig dbConfig = Core.getInstance().getDbConfig();
+				block=dbConfig.getBlock(departure.getServiceId(), departure.getBlockId());								
+			}else
+			{
+				block=departure.getBlock();
+			}
+			
 			Indices indices = new Indices(departure);
 			StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
 			List<ArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
@@ -86,6 +109,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 						Headway headway=new Headway();
 						headway.setHeadway(arrival.getTime()-previousArrival.getTime());
 						long dwelltime=departure.getTime()-arrival.getTime();
+						headway.setTripId(arrival.getTripId());
 						
 						/* Leave out silly values as they are most likely errors or unusual circumstance. */ 
 						if(dwelltime<maxDwellTimeAllowedInModel.getValue() && 
@@ -144,13 +168,13 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	public Long predictDwellTime(Indices indices, HeadwayDetails headway) {
 		
 		DwellTimeCacheKey key=new DwellTimeCacheKey(indices);
-		RLS rls=cache.get(key);
+		TransitClockRLS rls=cache.get(key);
 		if(rls!=null)
 		{
 			double[] arg0 = new double[1];
 			arg0[0]=headway.getHeadway();
-			rls.predict(arg0);
-			return new Long((long) rls.predict(arg0));
+			rls.getRls().predict(arg0);
+			return new Long((long) rls.getRls().predict(arg0));
 		}else
 		{
 			return null;
