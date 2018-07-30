@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>transitime</groupId>
 		<artifactId>transitime</artifactId>
-		<version>0.0.35-SNAPSHOT-SNAPSHOT</version>
+		<version>0.0.36-SNAPSHOT-SNAPSHOT-SNAPSHOT</version>
 	</parent>
 	<groupId>org.transitime.app</groupId>
 	<artifactId>transitimeQuickStart</artifactId>
