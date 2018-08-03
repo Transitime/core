@@ -304,8 +304,8 @@ public class ConfigFileReader {
 	 *            Name of properties file
 	 */
 	private static void readPropertiesConfigFile(String fileName) {
-		try {
-			readPropertiesConfigFile(new FileInputStream(fileName));
+		try (FileInputStream file = new FileInputStream(fileName)) {
+			readPropertiesConfigFile(file);
 		} catch (IOException e) {
 			System.err.println("Exception occurred reading in fileName " + fileName + " . " + e.getMessage());
 		}

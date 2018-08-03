@@ -218,6 +218,7 @@ public class HttpGetFile {
 		}
 		
 		// Close things up
+		in.close();
 		fos.close();
 		
 		// Set the last modified time so that it is the same as on the 

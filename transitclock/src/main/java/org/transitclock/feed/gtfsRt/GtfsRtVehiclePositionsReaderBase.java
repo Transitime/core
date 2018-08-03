@@ -265,6 +265,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			
 			// Process each individual VehiclePostions message
 			processMessage(feed);
+			inputStream.close();
 		} catch (Exception e) {
 			logger.error("Exception when reading GTFS-realtime data from " +
 					"URL {}", 
