@@ -10,3 +10,5 @@
 *.log
 /bin/
 /.settings/
+.DS_Store
+
