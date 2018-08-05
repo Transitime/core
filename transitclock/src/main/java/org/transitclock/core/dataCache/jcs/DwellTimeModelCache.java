@@ -70,7 +70,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 				logger.debug("Actual dwell: "+ dwellTime + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
 			}
 			
-			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));			
+			rls.addSample(headway.getHeadway(), dwellTime);			
 			if(rls.getRls()!=null)
 			{
 				double prediction = rls.getRls().predict(arg0);
@@ -180,7 +180,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			double[] arg0 = new double[1];
 			arg0[0]=headway.getHeadway();
 			rls.getRls().predict(arg0);
-			return (long) Math.pow(10, (int) rls.getRls().predict(arg0));
+			return (long)rls.getRls().predict(arg0);
 		}else
 		{
 			return null;
