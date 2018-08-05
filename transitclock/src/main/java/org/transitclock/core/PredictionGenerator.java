@@ -313,29 +313,5 @@ public abstract class PredictionGenerator {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 
-	public HeadwayDetails getHeadway(Indices indices, Long arrivalPrediction, AvlReport avlReport, VehicleState vehicleState) throws Exception {
-		
-		// TODO Using departure of vehicles a previous to extrapolate headway over route but should be good enough to start with.				
-		StopArrivalDepartureCacheKey previousStopKey=new StopArrivalDepartureCacheKey(vehicleState.getMatch().getIndices().getPreviousStopPath().getStopId(), avlReport.getDate());
-		List<ArrivalDeparture> previousStopList=StopArrivalDepartureCacheFactory.getInstance().getStopHistory(previousStopKey);
-		
-		List<ArrivalDeparture> departureList=new ArrayList<ArrivalDeparture>();
-		
-		for(ArrivalDeparture event:previousStopList)
-		{
-			if(!event.isArrival())	
-			{
-				departureList.add(event);				
-			}
-			if(departureList.size()>1)
-			{
-				break;
-			}
-		}
-		if(departureList.size()>1)
-		{
-			return new HeadwayDetails(departureList.get(0).getTime(), departureList.get(1));
-		}	
-		return null;										
-	}
+	
 }

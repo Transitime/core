@@ -171,7 +171,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		return null;
 	}
 	@Override
-	public Long predictDwellTime(Indices indices, HeadwayDetails headway) {
+	public Long predictDwellTime(Indices indices, Headway headway) {
 		
 		DwellTimeCacheKey key=new DwellTimeCacheKey(indices);
 		TransitClockRLS rls=cache.get(key);

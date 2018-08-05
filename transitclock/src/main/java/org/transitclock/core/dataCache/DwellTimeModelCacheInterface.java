@@ -1,6 +1,5 @@
 package org.transitclock.core.dataCache;
 
-import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Headway;
@@ -11,7 +10,5 @@ public interface DwellTimeModelCacheInterface {
 	
 	void addSample(ArrivalDeparture departure);
 	
-	Long predictDwellTime(Indices indices, HeadwayDetails headway);
-
-	
+	Long predictDwellTime(Indices indices, Headway headway);	
 }

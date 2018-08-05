@@ -115,7 +115,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	}
 
 	@Override
-	public long getStopTimeForPath(Indices indices, Long arrivalPrediction, AvlReport avlReport, VehicleState vehicleState) {
+	public long getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState) {
 		
 		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
 		{			
@@ -141,6 +141,6 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 				return (long)average.getAverage();
 			}
 		}			
-		return super.getStopTimeForPath(indices, arrivalPrediction, avlReport, vehicleState);
+		return super.getStopTimeForPath(indices,  avlReport, vehicleState);
 	}
 }

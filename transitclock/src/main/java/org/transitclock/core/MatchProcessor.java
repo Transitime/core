@@ -121,11 +121,11 @@ public class MatchProcessor {
 		logger.debug("Processing headways for vehicleId={}",
 				vehicleState.getVehicleId());
 
-		Headway headway = HeadwayGeneratorFactory.getInstance().generate(vehicleState);
+		Headway headway = HeadwayGeneratorFactory.getInstance().generate(vehicleState);						
 				
 		if(headway!=null)		
-		{			
-			System.out.println(headway);											
+		{							
+			vehicleState.setHeadway(headway);
 			Core.getInstance().getDbLogger().add(headway);					
 		}
 	}

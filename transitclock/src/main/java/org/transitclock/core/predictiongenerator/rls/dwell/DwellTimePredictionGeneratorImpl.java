@@ -11,6 +11,7 @@ import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.Headway;
 import org.transitclock.ipc.data.IpcPrediction;
 
 /**
@@ -27,24 +28,25 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimePredictionGeneratorImpl.class);
 		
 	@Override
-	public long getStopTimeForPath(Indices indices, Long arrivalPrediction, AvlReport avlReport, VehicleState vehicleState) {
+	public long getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState) {
 		Long result=null;
 		try {
-			HeadwayDetails headway = this.getHeadway(indices, arrivalPrediction, avlReport, vehicleState);
+			Headway headway = vehicleState.getHeadway();
+			
 			if(headway!=null)
 			{
 				logger.debug("Headway at {} based on avl {} is {}.",indices, avlReport, headway);												
 																	
 				/* Change approach to use a RLS model.
 				*/																		
-				if(super.getStopTimeForPath(indices, arrivalPrediction, avlReport, vehicleState)>0)
+				if(super.getStopTimeForPath(indices, avlReport, vehicleState)>0)
 				{																		
 					result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(indices, headway);
 					
 					if(result==null)
 					{
 						logger.debug("Using scheduled value for dwell time as no RLS data available for {}.", indices);
-						result = super.getStopTimeForPath(indices, arrivalPrediction, avlReport, vehicleState);
+						result = super.getStopTimeForPath(indices,  avlReport, vehicleState);
 					}
 					
 					
@@ -58,15 +60,15 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 				}else
 				{
 					logger.debug("Scheduled dwell time is less than 0 for {}.", indices);
-					result = super.getStopTimeForPath(indices,arrivalPrediction, avlReport, vehicleState);
+					result = super.getStopTimeForPath(indices, avlReport, vehicleState);
 				}				
 								
-				logger.debug("Using dwell time {} for {} instead of {}. Headway for vehicle {} is {}",result,indices, super.getStopTimeForPath(indices, arrivalPrediction, avlReport, vehicleState), vehicleState.getVehicleId(),headway );
+				logger.debug("Using dwell time {} for {} instead of {}. Headway for vehicle {} is {}",result,indices, super.getStopTimeForPath(indices,  avlReport, vehicleState), vehicleState.getVehicleId(),headway );
 			}
 			else
 			{
-				result = super.getStopTimeForPath(indices, arrivalPrediction, avlReport, vehicleState);
-				logger.debug("Using dwell time {} for {} instead of {}. No headway.",result,indices, super.getStopTimeForPath(indices, arrivalPrediction ,avlReport, vehicleState));
+				result = super.getStopTimeForPath(indices, avlReport, vehicleState);
+				logger.debug("Using dwell time {} for {} instead of {}. No headway.",result,indices, super.getStopTimeForPath(indices ,avlReport, vehicleState));
 			}			
 	
 		} catch (Exception e) {
