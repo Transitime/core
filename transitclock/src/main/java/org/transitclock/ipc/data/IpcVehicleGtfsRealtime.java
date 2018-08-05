@@ -28,6 +28,7 @@ import org.transitclock.core.TemporalMatch;
 import org.transitclock.core.VehicleState;
 import org.transitclock.db.structs.HoldingTime;
 import org.transitclock.db.structs.StopPath;
+import org.transitclock.db.structs.Trip;
 import org.transitclock.utils.Time;
 
 
@@ -54,7 +55,10 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	private final Integer atOrNextGtfsStopSeq;
 	
 	// For GTFS-rt to disambiguate trips
-	private final long tripStartEpochTime; 
+	private final long tripStartEpochTime;
+	
+	// For GTFS-rt to set scheduled relationship
+	private final boolean isTripUnscheduled;
 
 	private static final long serialVersionUID = -6611046660260490100L;
 
@@ -90,11 +94,14 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			this.tripStartEpochTime =
 					Core.getInstance().getTime()
 							.getEpochTime(time, currentTime);
+			Trip trip = vs.getTrip();
+			this.isTripUnscheduled = trip != null && trip.isNoSchedule() && !trip.isExactTimesHeadway();
 		} else {
 			atStop = false;
 			atOrNextStopId = null;
 			atOrNextGtfsStopSeq = null;
 			tripStartEpochTime = 0;
+			isTripUnscheduled = false;
 		}
 	}
 
@@ -111,6 +118,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	 * @param tripId
 	 * @param tripStartDateStr
 	 * @param tripPatternId
+	 * @param isTripUnscheduled
 	 * @param directionId
 	 * @param headsign
 	 * @param predictable
@@ -130,7 +138,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	protected IpcVehicleGtfsRealtime(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
-			String routeName, String tripId, String tripPatternId,
+			String routeName, String tripId, String tripPatternId, boolean isTripUnscheduled,
 			String directionId, String headsign, boolean predictable,
 			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
 			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
@@ -151,6 +159,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		this.atOrNextStopId = atOrNextStopId;
 		this.atOrNextGtfsStopSeq = atOrNextGtfsStopSeq;
 		this.tripStartEpochTime = tripStartEpochTime;
+		this.isTripUnscheduled = isTripUnscheduled;
 	}
 	
 	/*
@@ -163,6 +172,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		protected String atOrNextStopId; 
 		protected Integer atOrNextGtfsStopSeq;
 		protected long tripStartEpochTime; 
+		protected boolean isTripUnscheduled;
 		
 		private static final short currentSerializationVersion = 0;
 		private static final long serialVersionUID = 5804716921925188073L;
@@ -173,6 +183,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			this.atOrNextStopId = v.atOrNextStopId;
 			this.atOrNextGtfsStopSeq = v.atOrNextGtfsStopSeq;
 			this.tripStartEpochTime = v.tripStartEpochTime;
+			this.isTripUnscheduled = v.isTripUnscheduled;
 		}
 		
 		/*
@@ -193,6 +204,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			stream.writeObject(atOrNextStopId);
 			stream.writeObject(atOrNextGtfsStopSeq);
 		    stream.writeLong(tripStartEpochTime);
+		    stream.writeBoolean(isTripUnscheduled);
 		}
 
 		/*
@@ -219,6 +231,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			atOrNextStopId = (String) stream.readObject();
 			atOrNextGtfsStopSeq = (Integer) stream.readObject();
 			tripStartEpochTime = stream.readLong();
+			isTripUnscheduled = stream.readBoolean();
 		}
 		
 		/*
@@ -230,7 +243,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		private Object readResolve() {
 			return new IpcVehicleGtfsRealtime(blockId, blockAssignmentMethod,
 					avl, heading, routeId, routeShortName, routeName, tripId,
-					tripPatternId, directionId, headsign, predictable,
+					tripPatternId, isTripUnscheduled, directionId, headsign, predictable,
 					schedBasedPred, realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, nextStopName,
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
@@ -243,6 +256,10 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	
 	public long getTripStartEpochTime() {
 		return tripStartEpochTime;
+	}
+	
+	public boolean isTripUnscheduled() {
+		return isTripUnscheduled;
 	}
 	
 	/**
@@ -284,6 +301,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 				+ ", routeShortName=" + getRouteShortName()
 				+ ", tripId=" + getTripId()
 				+ ", tripPatternId=" + getTripPatternId()
+				+ ", isTripUnscheduled=" + isTripUnscheduled()
 				+ ", directionId=" + getDirectionId()
 				+ ", headsign=" + getHeadsign()
 				+ ", predictable=" + isPredictable()
