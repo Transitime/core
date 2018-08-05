@@ -6,15 +6,16 @@ import org.transitclock.core.Indices;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.VehicleState;
 import org.transitclock.db.structs.AvlReport;
+import org.transitclock.ipc.data.IpcPrediction;
 
 public interface PredictionComponentElementsGenerator {
 	/* this generates a prediction for travel time between stops */
 	long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState);
 	
-	long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState);
+	long getStopTimeForPath(Indices indices, Long arrivalPrediction, AvlReport avlReport, VehicleState vehicleState);
 	
 	long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match);
 	
-	HeadwayDetails getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception;
+	HeadwayDetails getHeadway(Indices indices, Long arrivalPrediction, AvlReport avlReport, VehicleState vehicleState) throws Exception;
 
 }

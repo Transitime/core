@@ -77,7 +77,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	}	
 
 	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+	public long getStopTimeForPath(Indices indices, Long arrivalPrediction, AvlReport avlReport, VehicleState vehicleState) {
 		
 		StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),false);
 		
@@ -86,10 +86,10 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 		if(average!=null && average.getCount()>=minDays.getValue())
 		{
 			logger.debug("Using historical average alogrithm for dwell time prediction : "+average.toString() + " instead of "+alternative+" prediction: "
-					+ super.getStopTimeForPath(indices, avlReport, vehicleState) +" for : " + indices.toString());
+					+ super.getStopTimeForPath(indices, arrivalPrediction, avlReport, vehicleState) +" for : " + indices.toString());
 			return (long)average.getAverage();
 		}
 					
-		return super.getStopTimeForPath(indices, avlReport, vehicleState);
+		return super.getStopTimeForPath(indices, arrivalPrediction, avlReport, vehicleState);
 	}
 }

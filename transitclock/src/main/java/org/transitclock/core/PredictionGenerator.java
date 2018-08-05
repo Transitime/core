@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
+
 import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
@@ -45,6 +46,10 @@ import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.utils.Time;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines the interface for generating predictions. To create predictions using
@@ -78,7 +83,10 @@ public abstract class PredictionGenerator {
 	protected static BooleanConfigValue storeDwellTimeStopPathPredictions = new BooleanConfigValue("transitclock.core.storeDwellTimeStopPathPredictions",
 			false,
 			"This is set to true to record all travelTime  predictions for individual dwell times generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
-
+	
+	private static final Logger logger = 
+			LoggerFactory.getLogger(PredictionGenerator.class);
+	
 	protected TravelTimeDetails getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
 
 		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
@@ -305,49 +313,29 @@ public abstract class PredictionGenerator {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 
-	public HeadwayDetails getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception {
+	public HeadwayDetails getHeadway(Indices indices, Long arrivalPrediction, AvlReport avlReport, VehicleState vehicleState) throws Exception {
 		
-		// This is a WIP to get a predicted headway at the stop.
-		List<IpcPrediction> masterList=new ArrayList<IpcPrediction>();
-
-		List<IpcPredictionsForRouteStopDest> predicitonsForRouteStopDest = PredictionDataCache.getInstance().getPredictions(vehicleState.getRouteId(), vehicleState.getTrip().getDirectionId(), indices.getTrip().getStopPath(indices.getStopPathIndex()).getStopId(), 5);
-
-		for(IpcPredictionsForRouteStopDest predictions:predicitonsForRouteStopDest)
+		// TODO Using departure of vehicles a previous to extrapolate headway over route but should be good enough to start with.				
+		StopArrivalDepartureCacheKey previousStopKey=new StopArrivalDepartureCacheKey(vehicleState.getMatch().getIndices().getPreviousStopPath().getStopId(), avlReport.getDate());
+		List<ArrivalDeparture> previousStopList=StopArrivalDepartureCacheFactory.getInstance().getStopHistory(previousStopKey);
+		
+		List<ArrivalDeparture> departureList=new ArrayList<ArrivalDeparture>();
+		
+		for(ArrivalDeparture event:previousStopList)
 		{
-			for( IpcPrediction prediction:predictions.getPredictionsForRouteStop())
+			if(!event.isArrival())	
 			{
-				masterList.add(prediction);
+				departureList.add(event);				
+			}
+			if(departureList.size()>1)
+			{
+				break;
 			}
 		}
-
-		// No such thing as headway if only one vehicle.
-		if(masterList.size()>1)
+		if(departureList.size()>1)
 		{
-			Collections.sort(masterList, new PredictionComparator());
-			int index=0;
-			boolean found=false;
-			for(IpcPrediction prediction:masterList)
-			{
-				/* find this vehicles prediction for this stop and the last ones prediction. */
-				if(prediction.getVehicleId().equals(vehicleState.getVehicleId()))
-				{
-					found=true;
-					break;
-				}
-				index++;
-			}
-			if(found&&index>0)
-			{
-				IpcPrediction currentVehiclePrediction = masterList.get(index);
-				IpcPrediction lastVehiclePrediction = masterList.get(index-1);
-				/* now the difference between these will give the predicted headway. */
-				long headway=currentVehiclePrediction.getPredictionTime()-lastVehiclePrediction.getPredictionTime();
-				if(headway>0)
-				{
-					return new HeadwayDetails(currentVehiclePrediction, lastVehiclePrediction);
-				}
-			}
-		}
-		return null;			
+			return new HeadwayDetails(departureList.get(0).getTime(), departureList.get(1));
+		}	
+		return null;										
 	}
 }

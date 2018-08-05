@@ -153,7 +153,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	 *            are less certain.
 	 * @return The generated Prediction
 	 */
-	 protected IpcPrediction generatePredictionForStop(AvlReport avlReport,
+	 protected IpcPrediction generatePredictionForStop(AvlReport avlReport,  
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
 
@@ -188,7 +188,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			
 			// Generate a departure time
 						int expectedStopTimeMsec = 
-								(int) getStopTimeForPath(indices, avlReport, vehicleState);
+								(int) getStopTimeForPath(indices, predictionTime, avlReport, vehicleState);
 			// If at a wait stop then need to handle specially...
 			if (indices.isWaitStop()) {
 				
@@ -515,7 +515,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			predictionTime = predictionForStop.getActualPredictionTime();			
 			if (predictionForStop.isArrival())
 			{					
-				predictionTime += getStopTimeForPath(indices, avlReport, vehicleState);
+				predictionTime += getStopTimeForPath(indices,predictionForStop.getActualPredictionTime(), avlReport, vehicleState);
 				/* TODO this is where we should take account of holding time */
 				if(useHoldingTimeInPrediction.getValue() && HoldingTimeGeneratorFactory.getInstance()!=null)
 				{
@@ -570,7 +570,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	}
 
 	
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+	public long getStopTimeForPath(Indices indices, Long predictionTime, AvlReport avlReport, VehicleState vehicleState) {
 		long prediction=TravelTimes.getInstance().expectedStopTimeForStopPath(indices);
 		//logger.debug("Using transiTime default algorithm for stop time prediction : "+indices + " Value: "+prediction);
 		return prediction;		

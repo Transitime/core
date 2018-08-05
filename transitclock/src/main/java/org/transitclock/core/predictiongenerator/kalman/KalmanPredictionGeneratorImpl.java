@@ -32,6 +32,7 @@ import org.transitclock.core.predictiongenerator.PredictionComponentElementsGene
 import org.transitclock.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionForStopPath;
+import org.transitclock.ipc.data.IpcPrediction;
 
 /**
  * @author Sean Óg Crudden This is a prediction generator that uses a Kalman
@@ -226,8 +227,8 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 	}
 
 	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
-		long result=super.getStopTimeForPath(indices, avlReport, vehicleState);
+	public long getStopTimeForPath(Indices indices, Long arrivalPrediction, AvlReport avlReport, VehicleState vehicleState) {
+		long result=super.getStopTimeForPath(indices, arrivalPrediction, avlReport, vehicleState);
 		
 		return result;
 		

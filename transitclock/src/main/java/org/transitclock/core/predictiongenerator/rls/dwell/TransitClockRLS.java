@@ -23,19 +23,23 @@ public class TransitClockRLS implements Serializable {
 	}
 	private double lambda;
 	Double firstx=null;
-	Long firsty=null;
+	Double firsty=null;
+	private Integer samples=0;
 	RLS rls=null;
+	
 	private static final long serialVersionUID = -5863984357400905560L;
 
 	
 	
-	public void addSample(double d, long dwellTime)
+	public void addSample(double d, double e)
 	{
+		
+		samples++;
 		
 		if(firstx==null&&firsty==null)
 		{
 			this.firstx=d;
-			this.firsty=dwellTime;
+			this.firsty=e;
 		}else
 		{
 			
@@ -50,7 +54,7 @@ public class TransitClockRLS implements Serializable {
 				sampley[0]=firsty;						
 				
 				samplex[1][0]=d;
-				sampley[1]=dwellTime;	
+				sampley[1]=e;	
 				rls=new RLS(samplex, sampley, lambda);
 			}
 			else
@@ -59,11 +63,15 @@ public class TransitClockRLS implements Serializable {
 				double sampley[]=new double[1];										
 				
 				samplex[0][0]=d;
-				sampley[0]=dwellTime;
+				sampley[0]=e;
 				
 				rls.learn(samplex, sampley);
 			}
 		}
+	}
+	public Integer numSamples()
+	{
+		return samples;
 	}
 
 }

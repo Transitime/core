@@ -1,6 +1,7 @@
 package org.transitclock.core.dataCache.jcs;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
@@ -57,24 +58,24 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			double[] x = new double[1];
 			x[0]=headway.getHeadway();
 			
-			double y = dwellTime;
+			double y = Math.log10(dwellTime);
 								
 			double[] arg0 = new double[1];
 			arg0[0]=headway.getHeadway();
 			if(rls.getRls()!=null)
 			{
 				double prediction = rls.getRls().predict(arg0);
-				logger.debug("Predicted dwell: "+prediction + " for: "+key);
+				logger.debug("Predicted dwell: "+prediction + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
 				
-				logger.debug("Actual dwell: "+ dwellTime + " for: "+key);
+				logger.debug("Actual dwell: "+ dwellTime + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
 			}
 			
-			rls.addSample(headway.getHeadway(), dwellTime);			
+			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));			
 			if(rls.getRls()!=null)
 			{
 				double prediction = rls.getRls().predict(arg0);
 	
-				logger.debug("Predicted dwell after: "+ prediction + " for: "+key);
+				logger.debug("Predicted dwell after: "+ prediction + " for: "+key+ " with samples: "+rls.numSamples());
 			}
 		}else
 		{			
@@ -174,12 +175,12 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		
 		DwellTimeCacheKey key=new DwellTimeCacheKey(indices);
 		TransitClockRLS rls=cache.get(key);
-		if(rls!=null)
+		if(rls!=null&&rls.getRls()!=null)
 		{
 			double[] arg0 = new double[1];
 			arg0[0]=headway.getHeadway();
 			rls.getRls().predict(arg0);
-			return new Long((long) rls.getRls().predict(arg0));
+			return (long) Math.pow(10, (int) rls.getRls().predict(arg0));
 		}else
 		{
 			return null;

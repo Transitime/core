@@ -505,6 +505,11 @@
 		level="debug" additivity="false">
 		<appender-ref ref="STDOUT" />
 	</logger>
+	
+	<logger name="org.transitclock.core.dataCache.jcs.DwellTimeModelCache"
+		level="debug" additivity="false">
+		<appender-ref ref="PREDICTION" />
+	</logger>
 
 	<logger name="net.sf.ehcache" level="debug" additivity="false">
 		<appender-ref ref="CACHE" />
