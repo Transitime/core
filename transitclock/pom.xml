@@ -254,6 +254,12 @@
 			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- Logback log appender for AWS CloudWatch -->
+		<dependency>
+			<groupId>com.j256.cloudwatchlogbackappender</groupId>
+			<artifactId>cloudwatchlogbackappender</artifactId>
+			<version>1.11</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -262,8 +268,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.5.1</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<plugin>
