@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.data.IpcPredictionComparator;
 import org.transitclock.api.utils.AgencyTimezoneCache;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
@@ -82,6 +83,12 @@ public class GtfsRtTripFeed {
 			"Number of seconds in the future to accept predictions before");
 	private static final int PREDICTION_MAX_FUTURE_SECS = predictionMaxFutureSecs.getValue();
 
+
+	private static BooleanConfigValue includeTripUpdateDelay = new BooleanConfigValue(
+			"transitclock.api.includeTripUpdateDelay", false,
+			"Whether or not to include delay in the TripUpdate message");
+	private static final boolean INCLUDE_TRIP_UPDATE_DELAY = includeTripUpdateDelay.getValue();
+	
 	
 	// For when creating StopTimeEvent for schedule based prediction  
 	// 5 minutes (300 seconds)
@@ -156,7 +163,7 @@ public class GtfsRtTripFeed {
 			}
 		}
 		tripUpdate.setTrip(tripDescriptor);
-		if (firstPred.getDelay() != null)
+		if (firstPred.getDelay() != null && INCLUDE_TRIP_UPDATE_DELAY)
 		  tripUpdate.setDelay(firstPred.getDelay()); // set schedule deviation
 
 		// Add the VehicleDescriptor information
