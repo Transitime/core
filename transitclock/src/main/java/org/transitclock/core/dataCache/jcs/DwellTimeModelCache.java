@@ -59,21 +59,23 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			x[0]=headway.getHeadway();
 			
 			double y = Math.log10(dwellTime);
+			
 								
 			double[] arg0 = new double[1];
 			arg0[0]=headway.getHeadway();
 			if(rls.getRls()!=null)
 			{
-				double prediction = rls.getRls().predict(arg0);
+				double prediction = Math.pow(10,rls.getRls().predict(arg0));
+				
 				logger.debug("Predicted dwell: "+prediction + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
 				
 				logger.debug("Actual dwell: "+ dwellTime + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
 			}
 			
-			rls.addSample(headway.getHeadway(), dwellTime);			
+			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));			
 			if(rls.getRls()!=null)
 			{
-				double prediction = rls.getRls().predict(arg0);
+				double prediction = Math.pow(10,rls.getRls().predict(arg0));
 	
 				logger.debug("Predicted dwell after: "+ prediction + " for: "+key+ " with samples: "+rls.numSamples());
 			}
@@ -81,7 +83,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		{			
 						
 			rls=new TransitClockRLS(lambda.getValue());
-			rls.addSample(headway.getHeadway(), dwellTime);
+			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));
 		}
 		cache.put(key,rls);
 	}
@@ -180,11 +182,19 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			double[] arg0 = new double[1];
 			arg0[0]=headway.getHeadway();
 			rls.getRls().predict(arg0);
-			return (long)rls.getRls().predict(arg0);
+			return (long) Math.pow(10, rls.getRls().predict(arg0));
 		}else
 		{
 			return null;
 		}
+	}
+	public static void main(String[] args) 
+	{
+		 double startvalue=1000;
+		 double result1 = Math.log10(startvalue);
+		 double result2 = Math.pow(10, result1);
+		 if(startvalue==result2)
+			 System.out.println("As expected they are the same.");		 		 		
 	}
 
 }
