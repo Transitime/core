@@ -1,4 +1,4 @@
-package org.transitclock.core.dataCache.jcs;
+package org.transitclock.core.dataCache.jcs.frequency;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,6 +21,7 @@ import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripKey;
+import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
@@ -29,7 +30,7 @@ import org.transitclock.gtfs.GtfsData;
 import net.sf.ehcache.Element;
 
 public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
-	final private static String cacheName = "TripDataHistoryCache";
+	final private static String cacheName = "FrequencyTripDataHistoryCache";
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(TripDataHistoryCache.class);
@@ -65,6 +66,12 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 
 	@Override
 	public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {	
+				
+		/* this is what gets the trip from the buckets */
+		int time = FrequencyBasedHistoricalAverageCache.round(tripKey.getStartTime(), FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+		
+		tripKey.setStartTime(time);
+				
 		return cache.get(tripKey);
 	}
 
@@ -88,9 +95,14 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 			
 			if(trip!=null)
 			{				
+				Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(arrivalDeparture.getDate(),2);
+				
+				/* this is what gets the trip from the buckets */
+				time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+				
 				tripKey = new TripKey(arrivalDeparture.getTripId(),
 						nearestDay,
-						trip.getStartTime());
+						time);
 										
 				List<ArrivalDeparture> list  = cache.get(tripKey);
 		

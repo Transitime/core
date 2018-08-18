@@ -53,7 +53,7 @@ public class TravelTimeDetails {
 		{
 			long travelTime=this.arrival.getTime()-this.getDeparture().getTime();
 		
-			if(travelTime<0||travelTime>maxTravelTime.getValue())
+			if(travelTime<=0||travelTime>maxTravelTime.getValue())
 			{
 				return false;
 			}else

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.transitclock.core.dataCache.ehcache;
+package org.transitclock.core.dataCache.ehcache.frequency;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -78,7 +78,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 		return singleton;
 	}
 
-	private TripDataHistoryCache() {
+	public TripDataHistoryCache() {
 		CacheManager cm = CacheManager.getInstance();
 		EvictionAgePolicy evictionPolicy = null;
 		if(tripDataCacheMaxAgeSec!=null)

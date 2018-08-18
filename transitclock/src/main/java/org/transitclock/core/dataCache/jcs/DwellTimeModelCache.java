@@ -18,8 +18,8 @@ import org.transitclock.core.TravelTimes;
 import org.transitclock.core.dataCache.DwellTimeCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitclock.core.predictiongenerator.rls.dwell.DwellTimePredictionGeneratorImpl;
-import org.transitclock.core.predictiongenerator.rls.dwell.TransitClockRLS;
+import org.transitclock.core.predictiongenerator.rls.dwell.scheduled.DwellTimePredictionGeneratorImpl;
+import org.transitclock.core.predictiongenerator.rls.dwell.scheduled.TransitClockRLS;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Headway;
@@ -32,10 +32,10 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 	final private static String cacheName = "DwellTimeModelCache";
 
-	private static IntegerConfigValue maxDwellTimeAllowedInModel = new IntegerConfigValue("org.transitclock.core.dataCache.jcs.maxDwellTimeAllowedInModel", 120000, "Max dwell time to be considered in dwell RLS algotithm.");
-	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("org.transitclock.core.dataCache.jcs.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max dwell time to be considered in dwell RLS algotithm.");
+	private static IntegerConfigValue maxDwellTimeAllowedInModel = new IntegerConfigValue("org.transitclock.core.dataCache.jcs.maxDwellTimeAllowedInModel", 2 * Time.MS_PER_MIN, "Max dwell time to be considered in dwell RLS algotithm.");
+	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("org.transitclock.core.dataCache.jcs.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
 	
-	private static DoubleConfigValue lambda = new DoubleConfigValue("org.transitclock.core.dataCache.jcs.lambda", 0.5, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
+	private static DoubleConfigValue lambda = new DoubleConfigValue("org.transitclock.core.dataCache.jcs.lambda", 0.75, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
 	
 	private CacheAccess<DwellTimeCacheKey, TransitClockRLS>  cache = null;
 	
@@ -119,11 +119,16 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 						long dwelltime=departure.getTime()-arrival.getTime();
 						headway.setTripId(arrival.getTripId());
 						
-						/* Leave out silly values as they are most likely errors or unusual circumstance. */ 
-						if(dwelltime<maxDwellTimeAllowedInModel.getValue() && 
-								headway.getHeadway() < maxHeadwayAllowedInModel.getValue())
-						{
-							addSample(indices, headway,dwelltime);
+						// Negative dwell times are errors in data so do not include.
+						// TODO not sure if it should ignore zero values.
+						if(dwelltime>=0)
+						{						
+							/* Leave out silly values as they are most likely errors or unusual circumstance. */ 
+							if(dwelltime<maxDwellTimeAllowedInModel.getValue() && 
+									headway.getHeadway() < maxHeadwayAllowedInModel.getValue())
+							{
+								addSample(indices, headway,dwelltime);
+							}
 						}
 					}
 				}

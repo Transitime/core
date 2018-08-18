@@ -225,6 +225,58 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 		// Return null so has no effect.
 		return null;
 	}
+	public static List<String> getOrderedListOfVehicles(String routeId)
+	{
+		int count=0;
+		boolean canorder=true;
+		List<VehicleState> unordered=new ArrayList<VehicleState>();
+		List<String> ordered=null;
+		for(VehicleState currentVehicleState:VehicleStateManager.getInstance().getVehiclesState())
+		{
+			if(currentVehicleState.getTrip()!=null&&currentVehicleState.getTrip().getRoute().getId().equals(routeId)&&currentVehicleState.isPredictable())
+			{
+				count++;
+				unordered.add(currentVehicleState);
+				if(currentVehicleState.getHeadway()==null)
+				{
+					canorder=false;
+					
+				}
+			}
+		}
+		if(canorder)
+		{
+			ordered=new ArrayList<String>();
+			
+			while(((count+1) > 0)&&unordered.size() > 0)			
+			{
+				if(ordered.size()==0)
+				{
+					String first=unordered.get(0).getVehicleId();
+					String second=unordered.get(0).getHeadway().getOtherVehicleId();
+				
+					ordered.add(first);
+					count--;
+					ordered.add(second);
+					count--;
+				}else
+				{
+					ordered.add(VehicleStateManager.getInstance().getVehicleState(ordered.get(ordered.size()-1)).getHeadway().getOtherVehicleId());
+					count--;
+				}
+				
+			}
+			// check first vehicle equals last vehicle
+			if(ordered.size()>1)
+			{
+				if(!ordered.get(ordered.size()-1).equals(ordered.get(0)))
+				{
+					return null;
+				}
+			}
+		}
+		return ordered;
+	}
 	protected ArrayList<HoldingTime> getCurrentHoldingTimesForStop(String stopId)
 	{
 		ArrayList<HoldingTime> currentHoldingTimes=new ArrayList<HoldingTime>();

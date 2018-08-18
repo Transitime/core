@@ -1,18 +1,13 @@
-package org.transitclock.core.predictiongenerator.rls.dwell;
+package org.transitclock.core.predictiongenerator.rls.dwell.frequency;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
-import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
-import org.transitclock.core.dataCache.VehicleStateManager;
-import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl;
+import org.transitclock.core.predictiongenerator.kalman.frequency.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Headway;
-import org.transitclock.ipc.data.IpcPrediction;
 
 /**
  * @author Sean Og Crudden
@@ -20,7 +15,9 @@ import org.transitclock.ipc.data.IpcPrediction;
  * This is an experiment to see if headway can be used to better predict dwell time. Most of what 
  * I have read tells me it can but in conjunction with APC data and estimation of demand at stops.
  * 
- * I do wonder if headway alone is enough to at least improve things beyond using the schedule?
+ * This is for frequency based services.
+ * 
+ *
  *
  */
 public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorImpl {

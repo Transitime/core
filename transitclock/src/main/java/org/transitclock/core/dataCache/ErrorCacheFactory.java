@@ -10,7 +10,7 @@ import org.transitclock.utils.ClassInstantiator;
 public class ErrorCacheFactory {
 	private static StringConfigValue className = 
 			new StringConfigValue("transitclock.core.cache.errorCacheClass", 
-					"org.transitclock.core.dataCache.jcs.KalmanErrorCache",
+					"org.transitclock.core.dataCache.ehcache.KalmanErrorCache",
 					"Specifies the class used to cache the Kalamn error values.");
 	
 	private static ErrorCache singleton = null;

@@ -27,7 +27,7 @@ import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.*;
-import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;

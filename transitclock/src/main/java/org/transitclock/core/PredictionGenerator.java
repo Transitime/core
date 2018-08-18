@@ -38,7 +38,7 @@ import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
-import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Block;
@@ -283,10 +283,12 @@ public abstract class PredictionGenerator {
 					if (arrival != null && departure != null) {
 
 						TravelTimeDetails travelTimeDetails=new TravelTimeDetails(departure, arrival);
-
-						times.add(travelTimeDetails);
-
-						num_found++;
+						
+						if(travelTimeDetails.getTravelTime()!=-1)
+						{
+							times.add(travelTimeDetails);
+							num_found++;
+						}
 					}
 				}
 			}

@@ -23,7 +23,7 @@ import org.transitclock.core.dataCache.HistoricalAverage;
 import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripKey;
-import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;

@@ -30,7 +30,7 @@ public class KalmanErrorCache implements ErrorCache  {
 	 * @return
 	 */
 	
-	KalmanErrorCache() {
+	public KalmanErrorCache() {
 		CacheManager cm = CacheManager.getInstance();
 		
 		if (cm.getCache(cacheName) == null) {

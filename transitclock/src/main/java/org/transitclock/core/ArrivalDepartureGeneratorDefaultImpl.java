@@ -33,9 +33,10 @@ import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
-import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
+import org.transitclock.core.holdingmethod.HoldingTimeGeneratorDefaultImpl;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
 
 import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
@@ -377,6 +378,9 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);
 
 		}
+		if(HoldingTimeGeneratorDefaultImpl.getOrderedListOfVehicles("66")!=null)
+			logger.info("ORDER:"+HoldingTimeGeneratorDefaultImpl.getOrderedListOfVehicles("66").toString());
+		
 		/*
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{

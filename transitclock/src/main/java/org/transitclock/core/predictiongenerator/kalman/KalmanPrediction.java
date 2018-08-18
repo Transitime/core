@@ -1,6 +1,5 @@
 package org.transitclock.core.predictiongenerator.kalman;
 
-  
 /**
  * @author Sean Óg Crudden
  *

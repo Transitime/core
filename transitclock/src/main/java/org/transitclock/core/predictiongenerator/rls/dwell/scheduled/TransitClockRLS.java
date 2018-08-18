@@ -1,4 +1,4 @@
-package org.transitclock.core.predictiongenerator.rls.dwell;
+package org.transitclock.core.predictiongenerator.rls.dwell.scheduled;
 
 import java.io.Serializable;
 
