@@ -217,23 +217,40 @@ public class IpcRoute extends IpcRouteSummary {
 				// Determine if UI stop. It is a UI stop if the stopId parameter
 				// specified and the current stop is after the stopId for a UI
 				// trip pattern.
+				TripPattern currentTripPattern=null;
 				boolean isUiStop = true;
 				if (stopId != null) {
 					isUiStop = false;
 					for (TripPattern tripPattern : uiTripPatterns) {
+						if(tripPattern.getDirectionId().compareTo(currentDirectionId)==0)
+							currentTripPattern=tripPattern;
 						if (tripPattern.isStopAtOrAfterStop(stopId, currentStopId)) {
 							isUiStop = true;
 							break;
 						}
 					}
 				}
-				
+				else
+				{
+					for (TripPattern tripPattern : uiTripPatterns) {
+						if(tripPattern.getDirectionId().compareTo(currentDirectionId)==0)
+							currentTripPattern=tripPattern;
+					}
+				}
+				Double stopPathLength=null;
+				if(currentTripPattern!=null)
+				{
+					
+					StopPath stopPath = currentTripPattern.getStopPath(currentStopId);
+					if(stopPath!=null)
+						stopPathLength=stopPath.getLength();
+				}
 				// Create the IpcStop and add it to the list of stops for the 
 				// current direction
 				Stop stop = 
 						Core.getInstance().getDbConfig().getStop(currentStopId);
 				IpcStop ipcStop =
-						new IpcStop(stop, isUiStop, currentDirectionId);
+						new IpcStop(stop, isUiStop, currentDirectionId,stopPathLength);
 				ipcStopsForDirection.add(ipcStop);
 			}
 			ipcDirections.add(new IpcDirection(dbRoute, currentDirectionId,

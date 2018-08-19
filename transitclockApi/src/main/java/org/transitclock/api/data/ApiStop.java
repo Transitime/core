@@ -32,7 +32,7 @@ import org.transitclock.ipc.data.IpcStop;
  * @author SkiBu Smith
  *
  */
-@XmlType(propOrder = { "id", "lat", "lon", "name", "code", "minor" })
+@XmlType(propOrder = { "id", "lat", "lon", "name", "code", "minor", "pathLength"})
 public class ApiStop extends ApiTransientLocation {
 
 	@XmlAttribute
@@ -48,6 +48,8 @@ public class ApiStop extends ApiTransientLocation {
 	// is not on a main trip pattern.
 	@XmlAttribute(name = "minor")
 	private Boolean minor;
+	@XmlAttribute
+	private Double pathLength;
 
 	/********************** Member Functions **************************/
 
@@ -63,6 +65,7 @@ public class ApiStop extends ApiTransientLocation {
 		this.id = stop.getId();
 		this.name = stop.getName();
 		this.code = stop.getCode();
+		this.pathLength=stop.getStopPathLength()==null?0.0:stop.getStopPathLength();
 		// If true then set to null so that this attribute won't then be
 		// output as XML/JSON, therefore making output a bit more compact.
 		this.minor = stop.isUiStop() ? null : true;

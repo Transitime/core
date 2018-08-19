@@ -38,18 +38,28 @@ public class IpcStop implements Serializable {
 	private final Location loc;
 	private final boolean isUiStop;
 	private final String directionId;
+	private Double stopPathLength;
 	
+	public Double getStopPathLength() {
+		return stopPathLength;
+	}
+
+	public void setStopPathLength(Double stopPathLength) {
+		this.stopPathLength = stopPathLength;
+	}
+
 	private static final long serialVersionUID = 8964112532327897125L;
 
 	/********************** Member Functions **************************/
 
-	public IpcStop(Stop dbStop, boolean aUiStop, String directionId) {
+	public IpcStop(Stop dbStop, boolean aUiStop, String directionId, Double stopPathLength) {
 		this.id = dbStop.getId();
 		this.name = dbStop.getName();
 		this.code = dbStop.getCode();
 		this.loc = dbStop.getLoc();
 		this.isUiStop = aUiStop;
 		this.directionId = directionId;
+		this.stopPathLength=stopPathLength;
 	}
 	
 	/**

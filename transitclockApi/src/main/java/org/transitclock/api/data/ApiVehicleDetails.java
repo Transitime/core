@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.transitclock.api.rootResources.TransitimeApi.UiMode;
 import org.transitclock.core.BlockAssignmentMethod;
 import org.transitclock.ipc.data.IpcVehicle;
+import org.transitclock.ipc.data.IpcVehicleComplete;
 import org.transitclock.utils.Time;
 
 /**
@@ -102,6 +103,9 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	@XmlElement
 	private ApiHoldingTime holdingTime;
 
+	@XmlAttribute
+	private double distanceAlongTrip;
+
 	/**
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
 	 * "MessageBodyWriter not found for media type=application/json" exception.
@@ -147,8 +151,9 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		nextStopName =
 				vehicle.getNextStopName() != null ? vehicle.getNextStopName()
 						: null;
-		driverId = vehicle.getAvl().getDriverId();		
-				
+		driverId = vehicle.getAvl().getDriverId();	
+		if(vehicle instanceof IpcVehicleComplete )
+			distanceAlongTrip=((IpcVehicleComplete)vehicle).getDistanceAlongTrip();
 		isScheduledService = vehicle.getFreqStartTime() > 0 ? false : true;
 		if(!isScheduledService)
 			freqStartTime = vehicle.getFreqStartTime();
