@@ -97,6 +97,10 @@ public class VehicleState {
 	
 	private Headway headway=null;
 	
+	private HoldingTime holdingTime=null;
+	//Used for schedPred AVL. Identify if trip is canceled.
+	private boolean isCanceled;
+	
 	
 	public Headway getHeadway() {
 		return headway;
@@ -105,8 +109,8 @@ public class VehicleState {
 		this.headway = headway;
 	}
 
-	private HoldingTime holdingTime=null;
-	
+
+
 	public HoldingTime getHoldingTime() {
 		return holdingTime;
 	}
@@ -1013,6 +1017,13 @@ public class VehicleState {
 	
 	public boolean isDelayed() {
 		return isDelayed;
+	}
+	public void setCanceled(boolean isCanceled) {
+		this.isCanceled=isCanceled;
+		
+	}
+	public boolean isCanceled() {
+		return isCanceled;
 	}
 	
 	

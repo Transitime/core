@@ -111,7 +111,14 @@ public class SchedBasedPredsModule extends Module {
 					+ "important when using the automatic assignment method "
 					+ "because it can take a few minutes.");
 
-
+	//ADD IN ORDER TO MANAGE CACELLED TRIPS
+	private static final BooleanConfigValue cancelTripOnTimeout =
+			new BooleanConfigValue("transitclock.schedBasedPreds.cancelTripOnTimeout", 
+					true,
+					"Whether should mark a ScheduleBasePred as canceled."
+					+ "This won't remove a trip after afterStartTimeMinutes. Instead it will"
+					+ " change the state to cancelled.");
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -176,7 +183,7 @@ public class SchedBasedPredsModule extends Module {
 					
 					// Set the block assignment for the AVL report and indicate 
 					// that it is for creating scheduled based predictions
-					avlReport.setAssignment(block.getId(), 
+					avlReport.setAssignment(block.getId(),
 							AssignmentType.BLOCK_FOR_SCHED_BASED_PREDS);
 	
 					logger.info("Creating a schedule based vehicle for blockId={}. "
@@ -255,7 +262,18 @@ public class SchedBasedPredsModule extends Module {
 							+ Time.dateTimeStr(scheduledDepartureTime)
 							+ " while allowable time without an AVL report is "
 							+ Time.elapsedTimeStr(maxNoAvl) + ".";
-					return shouldTimeoutEventDescription;
+					if(!cancelTripOnTimeout.getValue())
+						return shouldTimeoutEventDescription;
+					else if(!vehicleState.isCanceled() && cancelTripOnTimeout.getValue())//TODO: Check if it works on state changed
+					{
+						logger.info("Canceling trip...");
+						vehicleState.setCanceled(true);
+						VehicleDataCache.getInstance().updateVehicle(vehicleState);
+						AvlReport avlReport=vehicleState.getAvlReport();
+						AvlProcessor.getInstance().processAvlReport(avlReport);
+					
+						
+					}
 				}
 			}
 		}

@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.avl.AvlExecutor;
+import org.transitclock.core.AvlProcessor;
 import org.transitclock.core.TemporalMatch;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.PredictionDataCache;
@@ -129,6 +130,30 @@ public class CommandsServer extends AbstractServer
 		// Update VehicleDataCache with the new state for the vehicle
 		VehicleDataCache.getInstance().updateVehicle(vehicleState);
 				
+	}
+
+	@Override
+	public String cancelTrip(String blockId) {
+		/*
+		 * VehicleId is virtual and is constructed by 	"block_" + block.getId() + "_schedBasedVehicle";
+		 */
+		String vehicleId=	"block_" + blockId + "_schedBasedVehicle";
+		
+		VehicleState vehicleState = VehicleStateManager.getInstance()
+				.getVehicleState(vehicleId);
+		AvlReport avlReport=vehicleState.getAvlReport();
+		
+		if(avlReport!=null)
+		{
+			vehicleState.setCanceled(true);
+			VehicleDataCache.getInstance().updateVehicle(vehicleState);
+			AvlProcessor.getInstance().processAvlReport(avlReport);
+			return null;
+		}
+		else
+			return "Block id is not currently available";
+			
+		
 	}
 
 }

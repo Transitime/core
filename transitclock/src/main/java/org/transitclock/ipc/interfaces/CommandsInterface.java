@@ -54,4 +54,9 @@ public interface CommandsInterface extends Remote {
 	 */
 	public void setVehicleUnpredictable(String vehicleId) throws RemoteException;
 	
+	/*
+	 * Cancel a trip. It should exists in current predictions.
+	 * Retruns null on success
+	 */
+	public String cancelTrip(String blockId) throws RemoteException;
 }

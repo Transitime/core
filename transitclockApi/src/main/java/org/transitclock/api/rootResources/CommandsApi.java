@@ -336,39 +336,38 @@ public class CommandsApi {
 		}
 	}
 // WORK IN PROGRESS	
-//	@Path("/command/cancelTrip/{tripId}")
-//	@GET //SHOULD BE POST,IT IS AN UPDATE
-//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-//	@Operation(summary="Cancel a trip in order to be shown in GTFS realtime.",
-//	description="<font color=\"#FF0000\">Experimental. It will work olny with the correct version.</font> It cancel a trip that has no vechilce assigned."
-//	,tags= {"command","trip"})
-//	
-//	public Response cancelTrip(@BeanParam StandardParameters stdParameters,
-//			@Parameter(description="tripId to be marked as canceled.",required=true)@PathParam("tripId") String tripId)
-//	{
-//		stdParameters.validate();
-//		String agencyId = stdParameters.getAgencyId();
-//		System.out.println(agencyId);
-//		String result=null;
-//		try
-//		{
-//			CommandsInterface inter = stdParameters.getCommandsInterface();
-//			//We need to get the block id in order to get the vehicle
-//			ConfigInterface cofingInterface = stdParameters.getConfigInterface();
-//			IpcTrip ipcTrip = cofingInterface.getTrip(tripId);
-//			if(ipcTrip==null)
-//				throw WebUtils.badRequestException("TripId=" + tripId + " does not exist.");
-//			String blockId=ipcTrip.getBlockId();
-//			result=inter.cancelTrip(blockId);
-//			System.out.println(result);
-//		}
-//		catch (RemoteException e) {
-//			e.printStackTrace();
-//			throw WebUtils.badRequestException("Could not send request to Core server. "+e.getMessage());
-//		}
-//		if(result==null)
-//			return stdParameters.createResponse(new ApiCommandAck(true,"Processed"));
-//		else
-//			return stdParameters.createResponse(new ApiCommandAck(true,result));
-//	}
+	@Path("/command/cancelTrip/{tripId}")
+	@GET //SHOULD BE POST,IT IS AN UPDATE
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Cancel a trip in order to be shown in GTFS realtime.",
+	description="<font color=\"#FF0000\">Experimental. It will work olny with the correct version.</font> It cancel a trip that has no vechilce assigned."
+	,tags= {"command","trip"})
+	
+	public Response cancelTrip(@BeanParam StandardParameters stdParameters,
+			@Parameter(description="tripId to be marked as canceled.",required=true)@PathParam("tripId") String tripId)
+	{
+		stdParameters.validate();
+		String agencyId = stdParameters.getAgencyId();
+		System.out.println(agencyId);
+		String result=null;
+		try
+		{
+			CommandsInterface inter = stdParameters.getCommandsInterface();
+			//We need to get the block id in order to get the vehicle
+			ConfigInterface cofingInterface = stdParameters.getConfigInterface();
+			IpcTrip ipcTrip = cofingInterface.getTrip(tripId);
+			if(ipcTrip==null)
+				throw WebUtils.badRequestException("TripId=" + tripId + " does not exist.");
+			String blockId=ipcTrip.getBlockId();
+			result=inter.cancelTrip(blockId);
+		}
+		catch (RemoteException e) {
+			e.printStackTrace();
+			throw WebUtils.badRequestException("Could not send request to Core server. "+e.getMessage());
+		}
+		if(result==null)
+			return stdParameters.createResponse(new ApiCommandAck(true,"Processed"));
+		else
+			return stdParameters.createResponse(new ApiCommandAck(true,result));
+	}
 }
