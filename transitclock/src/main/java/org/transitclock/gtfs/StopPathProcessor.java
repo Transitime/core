@@ -51,8 +51,6 @@ public class StopPathProcessor {
 	private final double maxStopToPathDistance;
 	private final double maxDistanceForEliminatingVertices;
 	private final boolean trimPathBeforeFirstStopOfTrip;
-	private double maxDistanceBetweenStops;
-	private boolean disableSpecialLoopBackToBeginningCase;
 	
 	private static final Logger logger = 
 			LoggerFactory.getLogger(StopPathProcessor.class);
@@ -72,7 +70,6 @@ public class StopPathProcessor {
 	 * @param maxStopToPathDistance
 	 * @param maxDistanceForEliminatingVertices
 	 *            For getting rid of really small segments
-	 * @param disableSpecialLoopBackToBeginningCase 
 	 * @param Indicates
 	 *            that shouldn't use the shape before the first stop of the
 	 *            trip. This can be useful because sometimes a single shape is
@@ -85,7 +82,7 @@ public class StopPathProcessor {
 			double offsetDistance,
 			double maxStopToPathDistance,
 			double maxDistanceForEliminatingVertices,
-			boolean trimPathBeforeFirstStopOfTrip,double maxDistanceBetweenStops, boolean disableSpecialLoopBackToBeginningCase) {
+			boolean trimPathBeforeFirstStopOfTrip) {
 		// Create a GtfsShapes Map where can look up
 		// GtfsShapes by shapeId.
 		gtfsShapesMap = new HashMap<String, List<GtfsShape>>(gtfsShapes.size());
@@ -111,8 +108,6 @@ public class StopPathProcessor {
 		this.maxStopToPathDistance = maxStopToPathDistance;
 		this.maxDistanceForEliminatingVertices = maxDistanceForEliminatingVertices;
 		this.trimPathBeforeFirstStopOfTrip = trimPathBeforeFirstStopOfTrip;
-		this.maxDistanceBetweenStops=maxDistanceBetweenStops;
-		this.disableSpecialLoopBackToBeginningCase=disableSpecialLoopBackToBeginningCase;
 	}
 	
 	/**
@@ -292,6 +287,7 @@ public class StopPathProcessor {
 			
 			// Determine distance of stop to the current shape
 			double stopToShapeDistance = stop.getLoc().distance(shapeVector);
+			
 			// If this is the best fit so far, but 
 			// If this is the best fit so far, remember such.
 			// The 0.0001 is to make sure that don't think found 
@@ -309,10 +305,11 @@ public class StopPathProcessor {
 				boolean specialLoopBackToBeginningCase =
 						bestMatch != null
 								&& stopIndex == 0
-								&& stopToShapeDistance > bestStopToShapeDistance - 50.0 && !disableSpecialLoopBackToBeginningCase;
+								&& stopToShapeDistance > bestStopToShapeDistance - 50.0;
 				if (!specialLoopBackToBeginningCase) {
 					// Remember best distance so far
 					bestStopToShapeDistance = stopToShapeDistance;
+
 					// Remember the best match so it can be returned
 					bestMatch = new BestMatch();
 					bestMatch.distanceAlongShape =
@@ -338,7 +335,7 @@ public class StopPathProcessor {
 			// the distance along the shape is 760m. Therefore need to be 
 			// pretty generous to correctly find the 43rd Ave & Clement stop.
 			distanceAlongShapesExamined += shapeVector.length();
-			if (distanceAlongShapesExamined >(maxDistanceBetweenStops<600.0?3.0 * distanceBetweenStopsAsCrowFlies + 600.0:maxDistanceBetweenStops))
+			if (distanceAlongShapesExamined > 3.0 * distanceBetweenStopsAsCrowFlies + 600.0)
 				break;				
 		} // End of for each shape (finding best match)
 		
@@ -436,6 +433,7 @@ public class StopPathProcessor {
 			// Determine which shape the stop matches to
 			BestMatch bestMatch = determineBestMatch(tripPattern, stopIndex,
 					previousShapeIndex, previousDistanceAlongShape, shapeLocs);
+
 			// Keep track of how many stops too far away from path so can log
 			// the number for the entire system
 			if (bestMatch.stopToShapeDistance > maxStopToPathDistance) {

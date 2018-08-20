@@ -210,8 +210,6 @@ public class GtfsData {
 	// be accessed only through getDateFormatter() to make
 	// sure that it is initialized.
 	private SimpleDateFormat _dateFormatter = null;
-	private double maxDistanceBetweenStops;
-	private boolean disableSpecialLoopBackToBeginningCase;
 
 	// So can process only routes that match a regular expression.
 	// Note, see http://stackoverflow.com/questions/406230/regular-expression-to-match-text-that-doesnt-contain-a-word
@@ -289,8 +287,6 @@ public class GtfsData {
 	 * @param maxTravelTimeSegmentLength
 	 * @param trimPathBeforeFirstStopOfTrip
 	 * @param titleFormatter
-	 * @param maxDistanceBetweenStops 
-	 * @param disableSpecialLoopBackToBeginningCase 
 	 */
 	public GtfsData(int configRev, 
 			String notes,
@@ -307,7 +303,7 @@ public class GtfsData {
 			double maxSpeedKph,
 			double maxTravelTimeSegmentLength,
 			boolean trimPathBeforeFirstStopOfTrip,
-			TitleFormatter titleFormatter, double maxDistanceBetweenStops, boolean disableSpecialLoopBackToBeginningCase) {
+			TitleFormatter titleFormatter) {
 		this.agencyId = projectId;
 		this.notes = notes;
 		this.zipFileLastModifiedTime = zipFileLastModifiedTime;
@@ -322,8 +318,7 @@ public class GtfsData {
 		this.maxTravelTimeSegmentLength = maxTravelTimeSegmentLength;
 		this.trimPathBeforeFirstStopOfTrip = trimPathBeforeFirstStopOfTrip;
 		this.titleFormatter = titleFormatter;
-		this.maxDistanceBetweenStops=maxDistanceBetweenStops;
-		this.disableSpecialLoopBackToBeginningCase=disableSpecialLoopBackToBeginningCase;
+		
 		// Get the database session. Using one session for the whole process.
 		SessionFactory sessionFactory = 
 				HibernateUtils.getSessionFactory(getAgencyId());
@@ -1901,9 +1896,7 @@ public class GtfsData {
 						pathOffsetDistance,
 						maxStopToPathDistance, 
 						maxDistanceForEliminatingVertices,
-						trimPathBeforeFirstStopOfTrip,
-						maxDistanceBetweenStops,
-						disableSpecialLoopBackToBeginningCase);
+						trimPathBeforeFirstStopOfTrip);
 		pathProcessor.processPathSegments();
 						
 		// Let user know what is going on
