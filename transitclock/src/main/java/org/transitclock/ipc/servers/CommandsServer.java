@@ -15,6 +15,7 @@ import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.VehicleEvent;
 import org.transitclock.ipc.data.IpcAvl;
+import org.transitclock.ipc.data.IpcVehicleComplete;
 import org.transitclock.ipc.interfaces.CommandsInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
 
@@ -133,14 +134,30 @@ public class CommandsServer extends AbstractServer
 	}
 
 	@Override
-	public String cancelTrip(String blockId) {
+	public String cancelTrip(String tripId) {
 		/*
 		 * VehicleId is virtual and is constructed by 	"block_" + block.getId() + "_schedBasedVehicle";
 		 */
-		String vehicleId=	"block_" + blockId + "_schedBasedVehicle";
+		//String vehicleId=	"block_" + blockId + "_schedBasedVehicle";
 		
+		/**
+		 * Get the vehicle assosiated to the tripId.
+		 * Is it  possible to have more than 1 bus with the same tripId??
+		 */
+		Collection<IpcVehicleComplete> ipcVehicleCompletList = VehicleDataCache.getInstance().getVehiclesIncludingSchedBasedOnes();
+		IpcVehicleComplete ipcVehicle=null;
+		for(IpcVehicleComplete _ipcVehicle:ipcVehicleCompletList)
+		{
+			if(_ipcVehicle.getTripId()!=null && _ipcVehicle.getTripId().compareTo(tripId)==0)
+			{
+				ipcVehicle=_ipcVehicle;
+				break;
+			}
+		}
+		if(ipcVehicle==null)
+			return "TripId id is not currently available";
 		VehicleState vehicleState = VehicleStateManager.getInstance()
-				.getVehicleState(vehicleId);
+				.getVehicleState(ipcVehicle.getId());
 		AvlReport avlReport=vehicleState.getAvlReport();
 		
 		if(avlReport!=null)
@@ -151,7 +168,46 @@ public class CommandsServer extends AbstractServer
 			return null;
 		}
 		else
-			return "Block id is not currently available";
+			return "TripId id is not currently available";
+			
+		
+	}
+	@Override
+	public String reenableTrip(String tripId) {
+		/*
+		 * VehicleId is virtual and is constructed by 	"block_" + block.getId() + "_schedBasedVehicle";
+		 */
+		//String vehicleId=	"block_" + blockId + "_schedBasedVehicle";
+		
+		/**
+		 * Get the vehicle assosiated to the tripId.
+		 * Is it  possible to have more than 1 bus with the same tripId??
+		 */
+		Collection<IpcVehicleComplete> ipcVehicleCompletList = VehicleDataCache.getInstance().getVehiclesIncludingSchedBasedOnes();
+		IpcVehicleComplete ipcVehicle=null;
+		for(IpcVehicleComplete _ipcVehicle:ipcVehicleCompletList)
+		{
+			if(_ipcVehicle.getTripId()!=null && _ipcVehicle.getTripId().compareTo(tripId)==0)
+			{
+				ipcVehicle=_ipcVehicle;
+				break;
+			}
+		}
+		if(ipcVehicle==null)
+			return "TripId id is not currently available";
+		VehicleState vehicleState = VehicleStateManager.getInstance()
+				.getVehicleState(ipcVehicle.getId());
+		AvlReport avlReport=vehicleState.getAvlReport();
+		
+		if(avlReport!=null)
+		{
+			vehicleState.setCanceled(false);
+			VehicleDataCache.getInstance().updateVehicle(vehicleState);
+			AvlProcessor.getInstance().processAvlReport(avlReport);
+			return null;
+		}
+		else
+			return "TripId id is not currently available";
 			
 		
 	}

@@ -58,5 +58,11 @@ public interface CommandsInterface extends Remote {
 	 * Cancel a trip. It should exists in current predictions.
 	 * Retruns null on success
 	 */
-	public String cancelTrip(String blockId) throws RemoteException;
+	public String cancelTrip(String tripId) throws RemoteException;
+
+	/*
+	 * Enable a canceled trip. It should exists in current predictions.
+	 * Retruns null on success
+	 */
+	String reenableTrip(String tripId) throws RemoteException;;
 }

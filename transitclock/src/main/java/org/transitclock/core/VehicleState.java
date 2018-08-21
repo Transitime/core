@@ -219,6 +219,10 @@ public class VehicleState {
 	 * @param match
 	 */
 	public void setMatch(TemporalMatch match) {
+		TemporalMatch lastMatch = getMatch();
+		//To enable the vehicle if it was canceled and the trip is changed.
+		if(this.isCanceled &&(lastMatch==null || lastMatch.getTrip()==null || match==null || match.getTrip()==null || lastMatch.getTrip().getId().compareTo(match.getTrip().getId())!=0))
+				this.isCanceled=false;
 		// Add match to history
 		temporalMatchHistory.addFirst(match);
 		
