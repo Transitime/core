@@ -304,7 +304,7 @@ public abstract class PredictionGenerator {
 	
 	public long getHeadway(Indices indices, AvlReport avlReport, VehicleState vehicleState) throws Exception {
 		
-		// This is a WIP to get a prediction headway at the stop.
+		// This is a WIP to get a predicted headway at the stop.
 		List<IpcPrediction> masterList=new ArrayList<IpcPrediction>();
 		
 		List<IpcPredictionsForRouteStopDest> predicitonsForRouteStopDest = PredictionDataCache.getInstance().getPredictions(vehicleState.getRouteId(), vehicleState.getTrip().getDirectionId(), indices.getTrip().getStopPath(indices.getStopPathIndex()).getStopId(), 5);
@@ -315,31 +315,35 @@ public abstract class PredictionGenerator {
 			{
 				masterList.add(prediction);
 			}
-		}		
-		Collections.sort(masterList, new PredictionComparator());
-		int index=0;
-		boolean found=false;
-		for(IpcPrediction prediction:masterList)
-		{
-			/* find this vehicles prediction for this stop and the last ones prediction. */
-			if(prediction.getVehicleId().equals(vehicleState.getVehicleId()))
-			{
-				found=true;
-				break;
-			}
-			index++;
 		}
-		if(found&&index>0)
+		// No such thing as headway if only one vehicle.
+		if(masterList.size()>1)
 		{
-			IpcPrediction currentVehiclePrediction = masterList.get(index);
-			IpcPrediction lastVehiclePrediction = masterList.get(index-1);
-			/* now the difference between these will give the predicted headway. */
-			long headway=currentVehiclePrediction.getPredictionTime()-lastVehiclePrediction.getPredictionTime();
-			if(headway>0)
+			Collections.sort(masterList, new PredictionComparator());
+			int index=0;
+			boolean found=false;
+			for(IpcPrediction prediction:masterList)
 			{
-				return new HeadwayDetails(currentVehiclePrediction, lastVehiclePrediction).getHeadway();
+				/* find this vehicles prediction for this stop and the last ones prediction. */
+				if(prediction.getVehicleId().equals(vehicleState.getVehicleId()))
+				{
+					found=true;
+					break;
+				}
+				index++;
 			}
-		}		
+			if(found&&index>0)
+			{
+				IpcPrediction currentVehiclePrediction = masterList.get(index);
+				IpcPrediction lastVehiclePrediction = masterList.get(index-1);
+				/* now the difference between these will give the predicted headway. */
+				long headway=currentVehiclePrediction.getPredictionTime()-lastVehiclePrediction.getPredictionTime();
+				if(headway>0)
+				{
+					return new HeadwayDetails(currentVehiclePrediction, lastVehiclePrediction).getHeadway();
+				}
+			}
+		}
 		return -1;	
 		
 	}

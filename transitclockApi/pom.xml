@@ -56,6 +56,14 @@
 					<groupId>com.amazonaws</groupId>
 					<artifactId>aws-java-sdk</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>TheTransitClock</groupId>
+					<artifactId>transitclockBarefootClient</artifactId>					
+				</exclusion>
+				<exclusion>
+					<groupId>TheTransitClock</groupId>
+					<artifactId>transitclockTraccarClient</artifactId>					
+				</exclusion>									
 			</exclusions>
 		</dependency>
 		 <dependency>

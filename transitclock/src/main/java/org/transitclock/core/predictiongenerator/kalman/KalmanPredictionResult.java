@@ -1,6 +1,10 @@
 package org.transitclock.core.predictiongenerator.kalman;
 
 public class KalmanPredictionResult {
+	@Override
+	public String toString() {
+		return "KalmanPredictionResult [duration=" + duration + ", filterError=" + filterError + "]";
+	}
 	double duration;
 	double filterError;
 	public KalmanPredictionResult(double result, double filterError) {

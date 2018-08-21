@@ -199,15 +199,18 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			if (vehicle.hasTrip()) {
 				TripDescriptor tripDescriptor = vehicle.getTrip();
 
+				
+				if (tripDescriptor.hasRouteId()) {
+					avlReport.setAssignment(tripDescriptor.getRouteId(), 
+							AssignmentType.ROUTE_ID);
+				}
+				
 				if (tripDescriptor.hasTripId()) {
 					avlReport.setAssignment(tripDescriptor.getTripId(), 
 							AssignmentType.TRIP_ID);
 				}
 
-				if (tripDescriptor.hasRouteId()) {
-					avlReport.setAssignment(tripDescriptor.getRouteId(), 
-							AssignmentType.ROUTE_ID);
-				}
+			
 			}
 			
 			logger.debug("Processed {}", avlReport);
@@ -265,6 +268,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			
 			// Process each individual VehiclePostions message
 			processMessage(feed);
+			inputStream.close();
 		} catch (Exception e) {
 			logger.error("Exception when reading GTFS-realtime data from " +
 					"URL {}", 

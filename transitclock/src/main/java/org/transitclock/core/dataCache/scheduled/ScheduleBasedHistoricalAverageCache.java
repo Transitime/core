@@ -115,7 +115,7 @@ public class ScheduleBasedHistoricalAverageCache {
 		
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 		
-		if(!trip.isNoSchedule())
+		if(trip!=null && !trip.isNoSchedule())
 		{					
 			logger.debug("Putting :"+arrivalDeparture.toString() + " in HistoricalAverageCache cache.");
 			

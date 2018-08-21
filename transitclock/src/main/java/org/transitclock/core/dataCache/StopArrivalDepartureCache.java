@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.gtfs.GtfsData;
 import org.transitclock.utils.Time;
 
 /**
@@ -138,31 +139,37 @@ public class StopArrivalDepartureCache {
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
 
-		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
-				date.getTime());
-
-		List<ArrivalDeparture> list = null;
-
-		Element result = cache.get(key);
-
-		if (result != null && result.getObjectValue() != null) {
-			list = (List<ArrivalDeparture>) result.getObjectValue();
-			cache.remove(key);
-		} else {
-			list = new ArrayList<ArrivalDeparture>();
+		if(arrivalDeparture.getStop()!=null)
+		{
+			StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
+						date.getTime());
+			
+			List<ArrivalDeparture> list = null;
+	
+			Element result = cache.get(key);
+	
+			if (result != null && result.getObjectValue() != null) {
+				list = (List<ArrivalDeparture>) result.getObjectValue();
+				cache.remove(key);
+			} else {
+				list = new ArrayList<ArrivalDeparture>();
+			}
+			
+			list.add(arrivalDeparture);
+			
+			Collections.sort(list, new ArrivalDepartureComparator());
+			
+			// This is java 1.8 list.sort(new ArrivalDepartureComparator());
+			
+			Element arrivalDepartures = new Element(key, Collections.synchronizedList(list));
+	
+			cache.put(arrivalDepartures);
+	
+			return key;
+		}else
+		{
+			return null;
 		}
-		
-		list.add(arrivalDeparture);
-		
-		Collections.sort(list, new ArrivalDepartureComparator());
-		
-		// This is java 1.8 list.sort(new ArrivalDepartureComparator());
-		
-		Element arrivalDepartures = new Element(key, Collections.synchronizedList(list));
-
-		cache.put(arrivalDepartures);
-
-		return key;
 	}
 
 	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
@@ -174,9 +181,15 @@ public class StopArrivalDepartureCache {
 
 		@SuppressWarnings("unchecked")
 		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
+		
+		
 
 		for (ArrivalDeparture result : results) {
-			StopArrivalDepartureCache.getInstance().putArrivalDeparture(result);
+			// TODO this might be better done in the database.
+			if(GtfsData.routeNotFiltered(result.getRouteId()))
+			{
+				StopArrivalDepartureCache.getInstance().putArrivalDeparture(result);
+			}
 		}
 	}
 

@@ -103,6 +103,18 @@ public class GtfsRtVehicleFeed {
 				String tripStartTimeStr=gtfsRealtimeTimeFormatter.format(new Date(vehicleData.getFreqStartTime()));
 				tripDescriptor.setStartTime(tripStartTimeStr);
 			}
+
+			// Set the relation between this trip and the static schedule. ADDED and CANCELED not supported.
+			if (vehicleData.isTripUnscheduled()) {
+				// A trip that is running with no schedule associated to it - 
+				// this value is used to identify trips defined in GTFS frequencies.txt with exact_times = 0
+				tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.UNSCHEDULED);
+			} else {
+				// Trip that is running in accordance with its GTFS schedule, 
+				// or is close enough to the scheduled trip to be associated with it.
+				tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+			}
+
 			vehiclePosition.setTrip(tripDescriptor);
 			
 		}
