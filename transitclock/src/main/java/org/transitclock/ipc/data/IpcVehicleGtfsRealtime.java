@@ -266,7 +266,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 					layoverDepartureTime, nextStopId, nextStopName,
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
 
-					atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLongitude, predictedLatitude,isCanceled,isTripUnscheduled);
+					atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLongitude, predictedLatitude,isCanceled);
 
 		}
 
