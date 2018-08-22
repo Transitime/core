@@ -359,7 +359,6 @@ public class CommandsApi {
 			IpcTrip ipcTrip = cofingInterface.getTrip(tripId);
 			if(ipcTrip==null)
 				throw WebUtils.badRequestException("TripId=" + tripId + " does not exist.");
-			System.out.println("AT "+at);
 			result=inter.cancelTrip(tripId,at==null?null:at.getDate());
 		}
 		catch (RemoteException e) {
