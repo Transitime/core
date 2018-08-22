@@ -1,5 +1,7 @@
 package org.transitclock.core.dataCache.jcs;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -33,13 +35,13 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	final private static String cacheName = "DwellTimeModelCache";
 
 
-	private static LongConfigValue maxDwellTimeAllowedInModel = new LongConfigValue("org.transitclock.core.dataCache.jcs.maxDwellTimeAllowedInModel", (long) (2 * Time.MS_PER_MIN), "Max dwell time to be considered in dwell RLS algotithm.");
-	private static LongConfigValue minDwellTimeAllowedInModel = new LongConfigValue("org.transitclock.core.dataCache.jcs.minDwellTimeAllowedInModel", (long) 1000, "Min dwell time to be considered in dwell RLS algotithm.");
-	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("org.transitclock.core.dataCache.jcs.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
-	private static LongConfigValue minHeadwayAllowedInModel = new LongConfigValue("org.transitclock.core.dataCache.jcs.minHeadwayAllowedInModel", (long) 1000, "Min headway to be considered in dwell RLS algotithm.");
+	private static LongConfigValue maxDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.rls.maxDwellTimeAllowedInModel", (long) (2 * Time.MS_PER_MIN), "Max dwell time to be considered in dwell RLS algotithm.");
+	private static LongConfigValue minDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.rls.minDwellTimeAllowedInModel", (long) 1000, "Min dwell time to be considered in dwell RLS algotithm.");
+	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.rls.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
+	private static LongConfigValue minHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.rls.minHeadwayAllowedInModel", (long) 1000, "Min headway to be considered in dwell RLS algotithm.");
 
 	
-	private static DoubleConfigValue lambda = new DoubleConfigValue("org.transitclock.core.dataCache.jcs.lambda", 0.5, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
+	private static DoubleConfigValue lambda = new DoubleConfigValue("transitclock.prediction.rls.lambda", 0.5, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
 	
 	private CacheAccess<DwellTimeCacheKey, TransitClockRLS>  cache = null;
 	
@@ -151,8 +153,8 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 					if(!event.getTripId().equals(arrival.getTripId()))
 					{
 						if(event.getStopId().equals(arrival.getStopId()))
-						{
-							if(event.getTime()<arrival.getTime())
+						{																					
+							if(event.getTime()<arrival.getTime()&&(sameDay(event.getTime(), arrival.getTime())|| Math.abs(event.getTime()-arrival.getTime()) < maxHeadwayAllowedInModel.getValue()))
 								return event;
 						}
 					}
@@ -161,6 +163,17 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		}
 
 		return null;
+	}
+	private boolean sameDay(Long date1, Long date2)
+	{
+		Calendar cal1 = Calendar.getInstance();
+		Calendar cal2 = Calendar.getInstance();
+		cal1.setTime(new Date(date1));
+		cal2.setTime(new Date(date2));
+		boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+	                  cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+		
+		return sameDay;
 	}
 	private ArrivalDeparture findArrival(List<ArrivalDeparture> stopData, ArrivalDeparture departure) {
 
