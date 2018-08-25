@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.applications.Core;
 import org.transitclock.avl.PollUrlAvlModule;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.AvlReport;
@@ -38,7 +39,7 @@ public class BullrunnerPlaybackModule extends PollUrlAvlModule {
 	
 	private static StringConfigValue playbackEndTimeStr =
 			new StringConfigValue("transitclock.avl.bullrunner.playbackEndTime", 
-					"08-010-2018 23:00:00",
+					"08-09-2018 23:00:00",
 					"Date and time of when to end the playback.");
 
 	
@@ -100,17 +101,21 @@ public class BullrunnerPlaybackModule extends PollUrlAvlModule {
 				{
 					//String blockid=vehicle.getString("block_id");
 					long timestamp=header.getLong("timestamp");
-										
+					
+					Core.getInstance().setSystemTime(latesttime);
+					
+					
 					// Create the AvlReport
 					AvlReport avlReport =
-							new AvlReport(vehicleIdentity.getString("id"), timestamp*1000, vehiclePosition.getDouble("latitude"), vehiclePosition.getDouble("longitude"), Float.NaN,
-									(float) vehiclePosition.getInt("bearing"), "BusLoc");	
+							new AvlReport(vehicleIdentity.getString("id"), latesttime, vehiclePosition.getDouble("latitude"), vehiclePosition.getDouble("longitude"), Float.NaN,
+									(float) vehiclePosition.getInt("bearing"), "BullrunnerArchive");	
 					
 					// Actually set the assignment
 					avlReport.setAssignment(vehicleTrip.getString("routeId"),
 							AssignmentType.ROUTE_ID);
 		
 					logger.debug("From BullrunnerPlaybackModule {}", avlReport);
+					System.out.println(avlReport);
 					
 					if (shouldProcessAvl) {						
 						avlReportsReadIn.add(avlReport);

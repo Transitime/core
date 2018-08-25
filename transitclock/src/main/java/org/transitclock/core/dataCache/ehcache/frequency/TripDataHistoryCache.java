@@ -30,6 +30,7 @@ import org.transitclock.core.dataCache.ArrivalDepartureComparator;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripKey;
+import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Trip;
@@ -145,11 +146,13 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {
 
 		//logger.debug(cache.toString());
-
+		logger.debug("Looking for TripDataHistoryCache cache element using key {}.", tripKey);
+		
 		Element result = cache.get(tripKey);
 
 		if(result!=null)
 		{						
+			logger.debug("Found TripDataHistoryCache cache element using key {}.", tripKey);
 			return (List<ArrivalDeparture>) result.getObjectValue();
 		}
 		else
@@ -165,7 +168,16 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@SuppressWarnings("unchecked")
 	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
-		logger.debug("Putting :"+arrivalDeparture.toString() + " in TripDataHistoryCache cache.");
+		Block block=null;
+		if(arrivalDeparture.getBlock()==null)
+		{
+			DbConfig dbConfig = Core.getInstance().getDbConfig();
+			block=dbConfig.getBlock(arrivalDeparture.getServiceId(), arrivalDeparture.getBlockId());								
+		}else
+		{
+			block=arrivalDeparture.getBlock();
+		}
+		
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
 		int days_back=1;
 		if(debug)
@@ -182,15 +194,24 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 			
-			if(trip!=null)
-			{
+			// TODO need to set start time based on start of bucket
+			
+			Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(arrivalDeparture.getDate(),2);
+			
+			time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+			
+			if(trip!=null)							
+			{			
+				
 				
 				tripKey = new TripKey(arrivalDeparture.getTripId(),
 						nearestDay,
-						trip.getStartTime());
+						time);
 				
-				List<ArrivalDeparture> list = null;
-		
+				logger.debug("Putting :{} in TripDataHistoryCache cache using key {}.", arrivalDeparture, tripKey);
+				
+				List<ArrivalDeparture> list = null;						
+				
 				Element result = cache.get(tripKey);
 		
 				if (result != null && result.getObjectValue() != null) {

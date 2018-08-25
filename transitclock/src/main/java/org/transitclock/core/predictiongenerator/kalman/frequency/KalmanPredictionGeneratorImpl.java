@@ -47,15 +47,15 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	 * historical value.
 	 */
 	private static final IntegerConfigValue minKalmanDays = new IntegerConfigValue(
-			"transitclock.prediction.data.kalman.mindays", new Integer(3),
+			"transitclock.prediction.data.kalman.mindays", new Integer(2),
 			"Min number of days trip data that needs to be available before Kalman prediciton is used instead of default transiTime prediction.");
 
 	private static final IntegerConfigValue maxKalmanDays = new IntegerConfigValue(
-			"transitclock.prediction.data.kalman.maxdays", new Integer(3),
+			"transitclock.prediction.data.kalman.maxdays", new Integer(2),
 			"Max number of historical days trips to include in Kalman prediction calculation.");
 
 	private static final IntegerConfigValue maxKalmanDaysToSearch = new IntegerConfigValue(
-			"transitclock.prediction.data.kalman.maxdaystoseach", new Integer(21),
+			"transitclock.prediction.data.kalman.maxdaystoseach", new Integer(30),
 			"Max number of days to look back for data. This will also be effected by how old the data in the cache is.");
 
 	private static final DoubleConfigValue initialErrorValue = new DoubleConfigValue(
@@ -109,12 +109,12 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			logger.debug("Kalman has last vehicle info for : " +indices.toString()+ " : "+travelTimeDetails);
 
 			Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
-
+			
 			List<TravelTimeDetails> lastDaysTimes = lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
 					indices.getStopPathIndex(), nearestDay, time,
 					maxKalmanDaysToSearch.getValue(), maxKalmanDays.getValue());
 
-			if(lastDaysTimes!=null)
+			if(lastDaysTimes!=null&&lastDaysTimes.size()>0)
 			{
 				logger.debug("Kalman has " +lastDaysTimes.size()+ " historical values for : " +indices.toString());
 			}
