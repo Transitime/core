@@ -106,6 +106,9 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	@XmlAttribute
 	private double distanceAlongTrip;
 
+	@XmlAttribute
+	private String licensePlate;
+
 	/**
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
 	 * "MessageBodyWriter not found for media type=application/json" exception.
@@ -152,6 +155,7 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 				vehicle.getNextStopName() != null ? vehicle.getNextStopName()
 						: null;
 		driverId = vehicle.getAvl().getDriverId();	
+		licensePlate=vehicle.getLicensePlate();
 		if(vehicle instanceof IpcVehicleComplete )
 			distanceAlongTrip=((IpcVehicleComplete)vehicle).getDistanceAlongTrip();
 		isScheduledService = vehicle.getFreqStartTime() > 0 ? false : true;

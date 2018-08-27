@@ -132,7 +132,7 @@ function predictionCallback(preds, status) {
 	var stopName = routeStopPreds.stopName;
 	if (routeStopPreds.stopCode)
 		stopName += " (" + routeStopPreds.stopCode + ")";
-	var content = '<table class="tooltipTable"><tr style="text-align:left"><td>Route: ' + routeStopPreds.routeName + '</td></tr>' 
+	var content = '<table class="tooltipTable">' 
 		+ '<tr><td><b>Stop:</b> ' + stopName + '</td></tr>';
 	//if (verbose)
 	//	content += '<b>Stop Id:</b> ' + routeStopPreds.stopId + '<br/>';
@@ -149,21 +149,27 @@ function predictionCallback(preds, status) {
 			content += '<tr><td><b>Destination:</b> ' + routeStopPreds.dest[i].headsign + '</td></tr>';
 		content +='<tr><td>';
 		// Add each prediction for the current destination
+		
 		if (routeStopPreds.dest[i].pred.length > 0) {
-			content += '<span >';
-			
+			content += '<table  class="tooltipTable" style="border-spacing: 0px;border-collapse: collapse;">';
+			content += '<tr class="tooltipTable" style="font-weight:bold;"><td style="border: 1px solid">trip</td>';
+			content += '<td style="border: 1px solid">Vehicle</td>';
+			content += '<td style="border: 1px solid">Minutes</td>';
 			for (var j in routeStopPreds.dest[i].pred) {
 				// Separators between the predictions
-				if (j == 1)
-					content += ', ';
-				else if (j ==2)
-					content += ' & '
+				
 					
 				// Add the actual prediction
 				var pred = routeStopPreds.dest[i].pred[j];
-				content += pred.min;
+				content+= '<tr ><td style="border: 1px solid">'+  pred.trip + "</td>";
+				var ident=test.getVehicleIdentifier(pred.vehicle );
+				if(ident==null)
+					ident=pred.vehicle;
+				content+= '<td style="border: 1px solid">'+ ident + "</td>";
+				content+= '<td style="border: 1px solid">'+  pred.min + "</td></tr>";
 				
-				// Added any special indicators for if schedule based,
+				
+				// Added any special indipredcators for if schedule based,
 				// delayed, or not yet departed from terminal
 				/*
 				if (pred.scheduleBased)
@@ -178,11 +184,9 @@ function predictionCallback(preds, status) {
 				*/
 				// If in verbose mode add vehicle info
 				//if (verbose)
-					content += ' <span class="vehicle">(vehicle ' + pred.vehicle + ')</span>';
 			}
-			content += ' minutes';
 			
-			content += '</span>';
+			content += '</table>';
 			
 		} else {
 			// There are no predictions so let user know
@@ -213,7 +217,7 @@ function vehicleUpdate(vehicleDetail, status)
 		console.log(vehicle);
 		var directionVehicle=(vehicle.direction=="0")?0:1;
 		var gpsTimeStr = dateFormat(vehicle.loc.time);
-		buses.push({id:vehicle.id, projection:vehicle.distanceAlongTrip/getShapeLength(vehicle.tripPattern),identifier:vehicle.id,direction:directionVehicle,gpsTimeStr:gpsTimeStr,nextStopName:vehicle.nextStopName,schAdh:vehicle.schAdhStr,trip:vehicle.trip});
+		buses.push({id:vehicle.id, projection:vehicle.distanceAlongTrip/getShapeLength(vehicle.tripPattern),identifier:vehicle.licensePlate,direction:directionVehicle,gpsTimeStr:gpsTimeStr,nextStopName:vehicle.nextStopName,schAdh:vehicle.schAdhStr,trip:vehicle.trip});
 	}
 	test.setBuses(buses);
 	test.steps=100;

@@ -1,7 +1,8 @@
 
 .tooltip-left{
 	visibility: hidden;
-    width: 120px;
+    min-width: 180px;
+    max-width: 300px;
     background-color: #555;
     color: #fff;
     text-align: center;
@@ -25,7 +26,37 @@
 
 .tooltip-bottom{
 	visibility: hidden;
-    width: 120px;
+    min-width: 180px;
+    max-width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: relative;
+    opacity: 0;
+  	transition: opacity 0.5s;
+   
+}
+
+.tooltip-bottom-overflow-left{
+	visibility: hidden;
+    min-width: 180px;
+    max-width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: relative;
+    opacity: 0;
+  	transition: opacity 0.5s;
+   
+}
+.tooltip-bottom-overflow-right{
+	visibility: hidden;
+    min-width: 180px;
+    max-width: 300px;
     background-color: #555;
     color: #fff;
     text-align: center;
@@ -47,9 +78,32 @@
     border-color:  transparent   transparent  #555 transparent;
 }
 
+.tooltip-bottom-overflow-right::after{
+	content: "";
+    position: absolute;
+    left: 90%;
+    bottom: 100%; /* To the left of the tooltip */
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color:  transparent   transparent  #555 transparent;
+}
+
+
+.tooltip-bottom-overflow-left::after{
+	content: "";
+    position: absolute;
+    left: 10%;
+    bottom: 100%; /* To the left of the tooltip */
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color:  transparent   transparent  #555 transparent;
+}
 .tooltip-right{
 	visibility: visible;
-    width: 120px;
+     min-width: 180px;
+    max-width: 300px;
     background-color: #555;
     color: #fff;
     text-align: center;
@@ -75,38 +129,45 @@
 
 
 .tooltip-right .table{
-    width: 120px;
+	text-align: left;
+    width: 100%;
     background-color: #555;
     color: #fff;
-    text-align: center;
-    font-size:8px;
+    font-size:10px;
+    padding-left:3px;
+    padding-right:3px;
     margin: 0 auto;
 }
 	
 .tooltipTable {
-    width: 120px;
+	text-align: left;
+     width: 100%;
     background-color: #555;
     color: #fff;
-    text-align: center;
-    font-size:8px;
+    font-size:10px;
+    padding-left:3px;
+    padding-right:3px;
     margin: 0 auto;
 }
 	
 .tooltip-left .table{
-    width: 120px;
+	text-align: left;
+      width: 100%;
     background-color: #555;
     color: #fff;
-    text-align: center;
-    font-size:8px;
+    font-size:10px;
+    padding-left:3px;
+    padding-right:3px;
     margin: 0 auto;
 }
 	
 .tooltip-bottom .table{
-    width: 120px;
+	text-align: left;
+     width: 100%;
     background-color: #555;
     color: #fff;
-    text-align: center;
     font-size:8px;
+   
     margin: 0 auto;
 }
 .synopticTitle
@@ -123,7 +184,7 @@
 
 .menu {
 	visibility: visible;
-    width: 120px;
+    width: 180px;
     background-color: #555;
     color: #fff;
     text-align: center;
@@ -134,7 +195,7 @@
 
 .menu-content {
 	visibility: visible;
-	width: 120px;
+	width: 180px;
    
     position: absolute;
     background-color: #555;
