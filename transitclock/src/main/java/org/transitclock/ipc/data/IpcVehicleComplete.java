@@ -143,14 +143,14 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			Integer atOrNextGtfsStopSeq, String originStopId,
 			String destinationId, double distanceToNextStop,
 
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude) {
+			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, routeName, tripId, tripPatternId, isTripUnscheduled, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
-				atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLatitude, predictedLongitude);
+				atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled);
 
 
 		this.originStopId = originStopId;
@@ -232,6 +232,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			distanceToNextStop = stream.readDouble();
 			distanceOfNextStopFromTripStart = stream.readDouble();
 			distanceAlongTrip = stream.readDouble();
+			isCanceled=stream.readBoolean();
 		}
 		
 		/*
@@ -250,7 +251,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					atOrNextGtfsStopSeq, originStopId, destinationId,
 					distanceToNextStop, distanceOfNextStopFromTripStart,
 
-					distanceAlongTrip, freqStartTime, holdingTime, predictedLatitude, predictedLongitude);
+					distanceAlongTrip, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled);
 
 		}
 
@@ -324,6 +325,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", atOrNextGtfsStopSeq=" + getAtOrNextGtfsStopSeq()
 				+ ", tripStartEpochTime=" + getTripStartEpochTime()
 				+ ", tripStartEpochTime=" + new Date(getTripStartEpochTime())
+				+ ", isCanceled="   + isCanceled()
 				+ ", originStopId="	+ originStopId 
 				+ ", destinationId=" + destinationId
 				+ ", distanceToNextStop=" 

@@ -56,9 +56,21 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	
 	// For GTFS-rt to disambiguate trips
 	private final long tripStartEpochTime;
+
+
+	private boolean isCanceled; 
+
+	public boolean isCanceled() {
+		return isCanceled;
+	}
+
+	public void setCanceled(boolean isCanceled) {
+		this.isCanceled = isCanceled;
+	}
 	
 	// For GTFS-rt to set scheduled relationship
 	private final boolean isTripUnscheduled;
+
 
 	private static final long serialVersionUID = -6611046660260490100L;
 
@@ -86,7 +98,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 					match.getAtStop().getStopPath() : match.getStopPath();
 			atOrNextStopId = stopPath.getStopId();
 			atOrNextGtfsStopSeq = stopPath.getGtfsStopSeq();
-			
+			this.isCanceled =vs.isCanceled();
 			// Note: the trip start date is created on server side so that
 			// proper timezone is used. This unfortunately is a bit expensive.
 			int time = vs.getTrip().getStartTime();
@@ -134,6 +146,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	 * @param atOrNextStopId
 	 * @param atOrNextGtfsStopSeq
 	 * @param holdingTime 
+	 * @param isCanceled
 	 */
 	protected IpcVehicleGtfsRealtime(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
@@ -146,7 +159,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
 
 			Integer atOrNextGtfsStopSeq, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, 
-			double predictedLongitude) {
+			double predictedLongitude,boolean isCanceled) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
@@ -159,7 +172,9 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		this.atOrNextStopId = atOrNextStopId;
 		this.atOrNextGtfsStopSeq = atOrNextGtfsStopSeq;
 		this.tripStartEpochTime = tripStartEpochTime;
+		this.isCanceled=isCanceled;
 		this.isTripUnscheduled = isTripUnscheduled;
+
 	}
 	
 	/*
@@ -172,8 +187,8 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		protected String atOrNextStopId; 
 		protected Integer atOrNextGtfsStopSeq;
 		protected long tripStartEpochTime; 
+		protected boolean isCanceled;
 		protected boolean isTripUnscheduled;
-		
 		private static final short currentSerializationVersion = 0;
 		private static final long serialVersionUID = 5804716921925188073L;
 
@@ -183,6 +198,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			this.atOrNextStopId = v.atOrNextStopId;
 			this.atOrNextGtfsStopSeq = v.atOrNextGtfsStopSeq;
 			this.tripStartEpochTime = v.tripStartEpochTime;
+			this.isCanceled=v.isCanceled;
 			this.isTripUnscheduled = v.isTripUnscheduled;
 		}
 		
@@ -204,6 +220,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			stream.writeObject(atOrNextStopId);
 			stream.writeObject(atOrNextGtfsStopSeq);
 		    stream.writeLong(tripStartEpochTime);
+		    stream.writeBoolean(isCanceled);
 		    stream.writeBoolean(isTripUnscheduled);
 		}
 
@@ -231,6 +248,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			atOrNextStopId = (String) stream.readObject();
 			atOrNextGtfsStopSeq = (Integer) stream.readObject();
 			tripStartEpochTime = stream.readLong();
+			isCanceled=stream.readBoolean();
 			isTripUnscheduled = stream.readBoolean();
 		}
 		
@@ -248,7 +266,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 					layoverDepartureTime, nextStopId, nextStopName,
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
 
-					atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLongitude, predictedLatitude);
+					atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLongitude, predictedLatitude,isCanceled);
 
 		}
 
@@ -321,6 +339,8 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 				+ ", atOrNextGtfsStopSeq=" + atOrNextGtfsStopSeq
 				+ ", tripStartEpochTime=" + tripStartEpochTime 
 				+ ", tripStartEpochTime=" + new Date(tripStartEpochTime) 
+				+ ", isCanceled=" +isCanceled
+        + ", isTripUnscheduled" +isTripUnscheduled
 				+ "]";
 	}
 	

@@ -36,6 +36,7 @@ import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.Position;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
+import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
@@ -93,7 +94,10 @@ public class GtfsRtVehicleFeed {
 					TripDescriptor.newBuilder()
 							.setRouteId(vehicleData.getRouteId())
 							.setTripId(vehicleData.getTripId())
+							
 							.setStartDate(tripStartDateStr);
+			if(vehicleData.isCanceled())
+				tripDescriptor.setScheduleRelationship(ScheduleRelationship.CANCELED);
 			if(vehicleData.getFreqStartTime()>0)
 			{
 				String tripStartTimeStr=gtfsRealtimeTimeFormatter.format(new Date(vehicleData.getFreqStartTime()));

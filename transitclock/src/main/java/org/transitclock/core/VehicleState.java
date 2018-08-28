@@ -97,6 +97,10 @@ public class VehicleState {
 	
 	private Headway headway=null;
 	
+	private HoldingTime holdingTime=null;
+	//Used for schedPred AVL. Identify if trip is canceled.
+	private boolean isCanceled;
+	
 	
 	public Headway getHeadway() {
 		return headway;
@@ -105,8 +109,8 @@ public class VehicleState {
 		this.headway = headway;
 	}
 
-	private HoldingTime holdingTime=null;
-	
+
+
 	public HoldingTime getHoldingTime() {
 		return holdingTime;
 	}
@@ -215,6 +219,10 @@ public class VehicleState {
 	 * @param match
 	 */
 	public void setMatch(TemporalMatch match) {
+		TemporalMatch lastMatch = getMatch();
+		//To enable the vehicle if it was canceled and the trip is changed.
+		if(this.isCanceled &&(lastMatch==null || lastMatch.getTrip()==null || match==null || match.getTrip()==null || lastMatch.getTrip().getId().compareTo(match.getTrip().getId())!=0))
+				this.isCanceled=false;
 		// Add match to history
 		temporalMatchHistory.addFirst(match);
 		
@@ -1013,6 +1021,13 @@ public class VehicleState {
 	
 	public boolean isDelayed() {
 		return isDelayed;
+	}
+	public void setCanceled(boolean isCanceled) {
+		this.isCanceled=isCanceled;
+		
+	}
+	public boolean isCanceled() {
+		return isCanceled;
 	}
 	
 	
