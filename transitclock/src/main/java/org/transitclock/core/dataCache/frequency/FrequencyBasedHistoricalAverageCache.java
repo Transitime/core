@@ -27,9 +27,11 @@ import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.*;
+import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.gtfs.GtfsData;
 /**
  * @author Sean Óg Crudden
  * This class is to hold the historical average for frequency based services. It puts them in buckets that represent increments of time. The start time of the trip is used to decide which 
@@ -151,7 +153,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				
 		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 					
-		if(trip.isNoSchedule())		
+		if(trip!=null && trip.isNoSchedule())		
 		{												
 			Integer time=secondsFromMidnight(arrivalDeparture.getDate(), 2);
 			
@@ -249,7 +251,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				nearestDay,
 				trip.getStartTime());
 						
-		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) TripDataHistoryCache.getInstance().getTripHistory(tripKey);
+		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) TripDataHistoryCacheFactory.getInstance().getTripHistory(tripKey);
 		
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isArrival())
 		{			
@@ -272,7 +274,7 @@ public class FrequencyBasedHistoricalAverageCache {
 				nearestDay,
 				trip.getStartTime());
 						
-		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) TripDataHistoryCache.getInstance().getTripHistory(tripKey);
+		List<ArrivalDeparture> arrivalDepartures=(List<ArrivalDeparture>) TripDataHistoryCacheFactory.getInstance().getTripHistory(tripKey);
 		
 		if(arrivalDepartures!=null && arrivalDepartures.size()>0 && arrivalDeparture.isDeparture())
 		{			
@@ -294,8 +296,12 @@ public class FrequencyBasedHistoricalAverageCache {
 		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
 		Collections.sort(results, new ArrivalDepartureComparator());
 		for(ArrivalDeparture result : results)
-		{					
-			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);			
+		{								
+			// TODO this might be better done in the database.
+			if(GtfsData.routeNotFiltered(result.getRouteId()))
+			{
+				FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);
+			}
 		}		
 	}
 	public static int round(double i, int v){

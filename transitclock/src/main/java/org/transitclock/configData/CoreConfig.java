@@ -757,7 +757,7 @@ public class CoreConfig {
 	private static StringConfigValue pidFileDirectory =
 			new StringConfigValue(
 					"transitclock.core.pidDirectory", 
-					"/home/ec2-user/pids/",
+					"/usr/local/transitclock/",
 					"Directory where pid file should be written. The pid file "
 					+ "can be used by monit to make sure that core process is "
 					+ "always running.");
