@@ -105,6 +105,12 @@ public class PredictionAccuracyModule extends Module {
 					"Number of stops per trip pattern that should collect "
 					+ "prediction data for each polling cycle.");
 	
+	private static final IntegerConfigValue maxRandomStopSelectionsPerTrip = 
+			new IntegerConfigValue("transitclock.predAccuracy.maxRandomStopSelectionsPerTrip", 
+					100,
+					"Max number of random stops to look at to get the stopsPerTrip.");
+
+	
 	private static int getStopsPerTrip() {
 		return stopsPerTrip.getValue();
 	}
@@ -259,7 +265,8 @@ public class PredictionAccuracyModule extends Module {
 				} else {
 					// Get stops for direction randomly
 					Set<String> stopsSet = new HashSet<String>();
-					while (stopsSet.size() < getStopsPerTrip()) {
+					int tries=0;
+					while (stopsSet.size() < getStopsPerTrip() && tries < maxRandomStopSelectionsPerTrip.getValue()) {
 						// Randomly get a stop ID for the trip pattern
 						int index = (int) (stopIdsForTripPattern.size() * 
 								Math.random());
@@ -267,6 +274,7 @@ public class PredictionAccuracyModule extends Module {
 						if (!stopsSet.contains(stopId)) {
 							stopsSet.add(stopId);
 						}
+						tries++;
 					}
 					routeStopInfo.stopIds.put(tripPattern.getDirectionId(), 
 							stopsSet);

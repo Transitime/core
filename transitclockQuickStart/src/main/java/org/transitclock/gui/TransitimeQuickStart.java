@@ -123,11 +123,13 @@ public class TransitimeQuickStart implements Runnable {
 			boolean shouldStoreNewRevs = true;
 			boolean shouldDeleteRevs = false;
 			boolean trimPathBeforeFirstStopOfTrip = false;
+			double maxDistanceBetweenStops=6000.0;
+			boolean disableSpecialLoopBackToBeginningCase=false ;
 
 			GtfsFileProcessor processor = new GtfsFileProcessor(configFilePath, notes, gtfsUrl, gtfsZipFileName,
 					unzipSubdirectory, gtfsDirectoryName, supplementDir, regexReplaceListFileName, pathOffsetDistance,
 					maxStopToPathDistance, maxDistanceForEliminatingVertices, defaultWaitTimeAtStopMsec, maxSpeedKph,
-					maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, shouldDeleteRevs, trimPathBeforeFirstStopOfTrip);
+					maxTravelTimeSegmentLength, configRev, shouldStoreNewRevs, shouldDeleteRevs, trimPathBeforeFirstStopOfTrip,maxDistanceBetweenStops,disableSpecialLoopBackToBeginningCase);
 			
 			processor.process();
 			logger.info("startGtfsFileProcessor successful");

@@ -4,14 +4,13 @@
 	version="3.0">
 	<display-name>The Transit Clock api</display-name>
 
-
 	<context-param>
 		<param-name>transitime_config_file_location</param-name>
 		<!-- Set to customized properties file with db config info and such -->
-		
-		<param-value>/usr/local/transitclock/config/transitclockConfig.xml</param-value>  
-					
+		 <param-value>/Users/vperez/git/transitime/transitclockWebapp/src/main/resources/transiTimeconfig.xml</param-value>      
 	</context-param>
+
+
 
 	<!-- So that configuration parameters can be read in from file -->
 	<listener>
@@ -28,13 +27,62 @@
 		<location>/error/messageOnlyError.jsp</location>
 	</error-page>
 
+	
 	 <filter>
 	    <filter-name>ApiLoggingFilter</filter-name>
 	    <filter-class>org.transitclock.api.utils.ApiLoggingFilter</filter-class>
 	  </filter> 
 	  <filter-mapping>
 	    <filter-name>ApiLoggingFilter</filter-name>
-	    <url-pattern>/*</url-pattern>
+	    <url-pattern>/api/*</url-pattern>
 	  </filter-mapping> 
+	  
+<!-- Swagger v3 -->
+
+
+  <servlet>
+    <servlet-name>jersey</servlet-name>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+    <init-param>
+      <param-name>jersey.config.server.wadl.disableWadl</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>jersey.config.server.provider.packages</param-name>
+      <!-- adding 'io.swagger.v3.jaxrs2.integration.resources' is sufficent on it own to register the following paths:
+      /openapi.json : OpenApi spec in json
+      /openapi.yaml : OpenApi spec in yaml
+      /openapi (Accept:  : "application/json" : OpenApi spec in json
+      /openapi (Accept:  : "application/yaml" : OpenApi spec in yaml
+      -->
+      <param-value>
+        io.swagger.v3.jaxrs2.integration.resources, org.transitclock.api.rootResources,org.transitclock.api.utils
+      </param-value>
+    </init-param>
+    <init-param>
+      <param-name>openApi.configuration.prettyPrint</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>jersey</servlet-name>
+    <url-pattern>/doc/*</url-pattern>
+  </servlet-mapping>
+  
+    <filter>
+    <filter-name>ApiOriginFilter</filter-name>
+    <filter-class>org.transitclock.servlet.swagger.ApiOriginFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>ApiOriginFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+    
+    
+    
 </web-app>
 

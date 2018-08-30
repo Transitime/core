@@ -53,6 +53,11 @@ import org.transitclock.ipc.interfaces.CacheQueryInterface;
 import org.transitclock.ipc.interfaces.HoldingTimeInterface;
 import org.transitclock.ipc.interfaces.PredictionAnalysisInterface;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.servers.Servers;
+
 /**
  * Contains the API commands for the Transitime API for getting info on data that is cached.
  * <p>
@@ -70,6 +75,9 @@ public class CacheApi {
 	@Path("/command/kalmanerrorcachekeys")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Gets the list of Kalman Cache error.",
+	description="Gets the list of Kalman Cache error.",
+	tags= {"kalman","cache"})
 	public Response getKalmanErrorCacheKeys(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		try {
@@ -91,6 +99,9 @@ public class CacheApi {
 	@Path("/command/scheduledbasedhistoricalaveragecachekeys")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Gets a list of the keys that have values in the historical average cache for schedules based services.",
+	description="Gets a list of the keys that have values in the historical average cache for schedules based services.",
+	tags= {"cache"})
 	public Response getSchedulesBasedHistoricalAverageCacheKeys(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		try {
@@ -113,6 +124,10 @@ public class CacheApi {
 	@Path("/command/frequencybasedhistoricalaveragecachekeys")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Gets a list of the keys that have values in the historical average cache for frequency based services.",
+	description="Gets a list of the keys that have values in the historical average cache for frequency based services."
+				+ "<font color=\"#FF0000\">This is not completed and should not be used.<font>",
+	tags= {"cache"})
 	public Response getFrequencyBasedHistoricalAverageCacheKeys(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		try {
@@ -135,6 +150,9 @@ public class CacheApi {
 	@Path("/command/holdingtimecachekeys")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Gets a list of the keys for the holding times in the cache.",
+	description="Gets a list of the keys for the holding times in the cache.",
+	tags= {"cache"})
 	public Response getHoldingTimeCacheKeys(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		try {
@@ -166,7 +184,11 @@ public class CacheApi {
 	@Path("/command/cacheinfo")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns the number of entries in the cacheName cache.",
+	description="Returns the number of entries in the cacheName cache. The name is passed throug the cachename parameter.",
+	tags= {"cache"})
 	public Response getCacheInfo(@BeanParam StandardParameters stdParameters,
+			@Parameter(description="Name of the cache",required=true)
 			@QueryParam(value = "cachename") String cachename) throws WebApplicationException {
 		try {
 
@@ -189,8 +211,11 @@ public class CacheApi {
 	@Path("/command/stoparrivaldeparturecachedata")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns a list of current arrival or departure events for a specified stop that are in the cache.",
+	description="Returns a list of current arrival or departure events for a specified stop that are in the cache.",
+	tags= {"cache"})
 	public Response getStopArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "stopid") String stopid, @QueryParam(value = "date") Date date)
+			@Parameter(description="Stop Id.",required=true)@QueryParam(value = "stopid") String stopid, @QueryParam(value = "date") Date date)
 			throws WebApplicationException {
 		try {
 
@@ -211,8 +236,16 @@ public class CacheApi {
 	@Path("/command/triparrivaldeparturecachedata")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns the arrivals and departures for a trip on a specific day and start time.",
+	description="Returns a list  of the arrivals and departures for a trip on a specific day and start time."
+			+ "Either tripId or date must be specified.",
+	tags= {"cache"})
 	public Response getTripArrivalDepartureCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripId") String tripid, @QueryParam(value = "date") DateParam date,
+			@Parameter(description="if specified, returns the list for that tripId.",required=false) 
+			@QueryParam(value = "tripId") String tripid,
+			@Parameter(description="if specified, returns the list for that date.",required=false)
+			@QueryParam(value = "date") DateParam date,
+			@Parameter(description="if specified, returns the list for that starttime.",required=false)
 			@QueryParam(value = "starttime") Integer starttime) throws WebApplicationException {
 		try {
 
@@ -240,8 +273,14 @@ public class CacheApi {
 	@Path("/command/historicalaveragecachedata")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns the historical cache value for an individual stop path index of a trip.",
+	description="Returns the historical cache value for an individual stop path index of a trip.",
+	tags= {"cache"})
 	public Response getHistoricalAverageCacheData(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex") Integer stopPathIndex) {
+			@Parameter(description="Trip Id",required=true)
+			@QueryParam(value = "tripId") String tripId, 
+			@Parameter(description="Stop path index",required=true)
+			@QueryParam(value = "stopPathIndex") Integer stopPathIndex) {
 		try {
 
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
@@ -261,8 +300,14 @@ public class CacheApi {
 	@Path("/command/getkalmanerrorvalue")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns the latest Kalman error value for a the stop path of a trip.",
+	description="Returns the latest Kalman error value for a the stop path of a trip.",
+	tags= {"kalman","cache"})
 	public Response getKalmanErrorValue(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex") Integer stopPathIndex) {
+			@Parameter(description="Trip Id",required=true)
+			@QueryParam(value = "tripId") String tripId, 
+			@Parameter(description="Stop path index",required=true)
+			@QueryParam(value = "stopPathIndex") Integer stopPathIndex) {
 		try {
 
 			CacheQueryInterface cachequeryInterface = stdParameters.getCacheQueryInterface();
@@ -281,9 +326,19 @@ public class CacheApi {
 	@Path("/command/getstoppathpredictions")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns a list of predictions for a the stop path of a trip.",
+	description="Returns a list of predictions for a the stop path of a trip.",
+	tags= {"cache"})
+	//TODO: (vsperez) I believe date is not used at all 
 	public Response getStopPathPredictions(@BeanParam StandardParameters stdParameters,
+			@Parameter(description="Algorith used for calculating the perdiction",required=false)
 			@QueryParam(value = "algorithm") String algorithm,
-			@QueryParam(value = "tripId") String tripId, @QueryParam(value = "stopPathIndex" ) Integer stopPathIndex, @QueryParam(value = "date") DateParam date) 
+			@Parameter(description="Trip Id",required=true)
+			@QueryParam(value = "tripId") String tripId, 
+			@Parameter(description="Stop path index",required=true)
+			@QueryParam(value = "stopPathIndex" ) Integer stopPathIndex,
+			@Parameter(description="Specified the date.",required=true)
+			@QueryParam(value = "date") DateParam date) 
 	{
 		try {						
 			LocalTime midnight = LocalTime.MIDNIGHT;
@@ -316,8 +371,14 @@ public class CacheApi {
 	@Path("/command/getholdingtime")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns the IpcHoldingTime for a specific stop Id and vehicle Id.",
+	description="Returns the IpcHoldingTime for a specific stop Id and vehicle Id.",
+	tags= {"cache"})
 	public Response getHoldingTime(@BeanParam StandardParameters stdParameters,			
-			@QueryParam(value = "stopId") String stopId, @QueryParam(value = "vehicleId" ) String vehicleId) 
+			@Parameter(description="Stop id",required=true)
+			@QueryParam(value = "stopId") String stopId, 
+			@Parameter(description="Vehicle id",required=true)
+			@QueryParam(value = "vehicleId" ) String vehicleId) 
 	{
 		try {						
 			 HoldingTimeInterface holdingtimeInterface = stdParameters.getHoldingTimeInterface();
