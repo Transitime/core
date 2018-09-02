@@ -8,6 +8,7 @@ import org.transitclock.core.Indices;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
+import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.predictiongenerator.kalman.scheduled.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
@@ -41,7 +42,11 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 				*/																		
 				if(super.getStopTimeForPath(indices, avlReport, vehicleState)>0)
 				{																		
-					result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(indices, headway);
+					
+					StopPathCacheKey cacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),  false); 
+					
+					
+					result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(cacheKey, headway);
 					
 					if(result==null)
 					{

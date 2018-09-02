@@ -1,10 +1,14 @@
 package org.transitclock.core.predictiongenerator.rls.dwell.frequency;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.Indices;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
+import org.transitclock.core.dataCache.StopPathCacheKey;
+import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.predictiongenerator.kalman.frequency.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Headway;
@@ -37,8 +41,15 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 				/* Change approach to use a RLS model.
 				*/																		
 				if(super.getStopTimeForPath(indices, avlReport, vehicleState)>0)
-				{																		
-					result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(indices, headway);
+				{								
+					// TODO Would be more correct to use the start time of the trip.				
+					Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(new Date(avlReport.getTime()),2);
+					
+					time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+															
+					StopPathCacheKey cacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),  false, new Long(time));
+					
+					result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(cacheKey, headway);
 					
 					if(result==null)
 					{

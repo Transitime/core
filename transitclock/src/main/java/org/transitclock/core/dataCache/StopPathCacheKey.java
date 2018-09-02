@@ -33,6 +33,7 @@ public class StopPathCacheKey implements java.io.Serializable {
 		this.tripId = tripId;
 		this.stopPathIndex = stopPathIndex;	
 		this.travelTime=true;
+		this.startTime=null;
 	}
 	
 	public StopPathCacheKey(String tripId, Integer stopPathIndex, boolean travelTime) {

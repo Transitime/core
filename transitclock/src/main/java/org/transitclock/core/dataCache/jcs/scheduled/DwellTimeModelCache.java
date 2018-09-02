@@ -1,4 +1,4 @@
-package org.transitclock.core.dataCache.jcs;
+package org.transitclock.core.dataCache.jcs.scheduled;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -11,22 +11,16 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.LongConfigValue;
-import org.transitclock.config.StringConfigValue;
-import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
-import org.transitclock.core.TravelTimes;
-import org.transitclock.core.dataCache.DwellTimeCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitclock.core.predictiongenerator.rls.dwell.scheduled.DwellTimePredictionGeneratorImpl;
+import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.predictiongenerator.rls.dwell.scheduled.TransitClockRLS;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Headway;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.utils.Time;
-
-import smile.regression.RLS;
 
 public class DwellTimeModelCache implements org.transitclock.core.dataCache.DwellTimeModelCacheInterface {
 
@@ -37,7 +31,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	
 	private static DoubleConfigValue lambda = new DoubleConfigValue("org.transitclock.core.dataCache.jcs.lambda", 0.75, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
 	
-	private CacheAccess<DwellTimeCacheKey, TransitClockRLS>  cache = null;
+	private CacheAccess<StopPathCacheKey, TransitClockRLS>  cache = null;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimeModelCache.class);
 	
@@ -45,9 +39,9 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		cache = JCS.getInstance(cacheName);			
 	}
 	@Override
-	synchronized public void addSample(Indices indices, Headway headway, long dwellTime) {
+	synchronized public void addSample(ArrivalDeparture event, Headway headway, long dwellTime) {
 		
-		DwellTimeCacheKey key=new DwellTimeCacheKey(headway.getTripId(), indices.getStopPathIndex());
+		StopPathCacheKey key=new StopPathCacheKey(headway.getTripId(), event.getStopPathIndex());
 		
 		
 		TransitClockRLS rls = null;
@@ -127,7 +121,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 							if(dwelltime<maxDwellTimeAllowedInModel.getValue() && 
 									headway.getHeadway() < maxHeadwayAllowedInModel.getValue())
 							{
-								addSample(indices, headway,dwelltime);
+								addSample(departure, headway,dwelltime);
 							}
 						}
 					}
@@ -178,10 +172,9 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		return null;
 	}
 	@Override
-	public Long predictDwellTime(Indices indices, Headway headway) {
-		
-		DwellTimeCacheKey key=new DwellTimeCacheKey(indices);
-		TransitClockRLS rls=cache.get(key);
+	public Long predictDwellTime(StopPathCacheKey cacheKey, Headway headway) {
+				
+		TransitClockRLS rls=cache.get(cacheKey);
 		if(rls!=null&&rls.getRls()!=null)
 		{
 			double[] arg0 = new double[1];

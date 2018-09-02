@@ -52,7 +52,7 @@ public class AvlConfig {
 		return secondsBetweenAvlFeedPolling.getValue();
 	}
 	private static IntegerConfigValue secondsBetweenAvlFeedPolling =
-			new IntegerConfigValue("transitclock.avl.feedPollingRateSecs", 5,
+			new IntegerConfigValue("transitclock.avl.feedPollingRateSecs", -1,
 					"How frequently an AVL feed should be polled for new data.");
 	
 	/**
