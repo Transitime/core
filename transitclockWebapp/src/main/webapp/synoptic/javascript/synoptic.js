@@ -56,11 +56,13 @@ class Sinoptico
 		this.canvas.style.left="0";
 		this.canvas.style.top="0";
 		this.drawReturnUpside=true;
+		if(params.vehicleAlternColorCallBack!=undefined)
+			this.vehicleAlternColorCallBack=params.vehicleAlternColorCallBack;
+		
 		this.zoomFactor=1.0;
 //		if(params.drawReturnUpside!=undefined)
 //			this.drawReturnUpside=params.drawReturnUpside;
 		this.stopImg = new Image();
-		this.stopImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz\nAAALEwAACxMBAJqcGAAAAPVJREFUOI2Vkl1qwlAQhT/z1GQpNYRQ29XUJYkiqOiDS7GldBENFUSx\ne2jjy/XhnluHGPJzYEgyOTNz5gfu8QRsgD1wkX0DayCv4f8jAbaAa7ENENcFf4rwC0yk5EE2AqbA\nnzgf1SSh8gl4bFCZAmdx17bnULkp2CYpFZOjnpxkd8VMMSvw03ZSYlEdnsWzfAX4NTn8sLomSOQr\nox6yaxEBR70Pe8QF7iEC3vTxWiENKmYx1nMHfhUOfyRph+oZtzVmwRlWeW5JkgE/4i7tjxh/nkHJ\nDL+qRPYCzE3ld+63RmyUNNmyLtgix19YoYol8AUsbM8BV0fAV591YB1RAAAAAElFTkSuQmCC\n';
 		this.stopImg.width=10;
 		this.stopImg.height=10;
 
@@ -94,7 +96,6 @@ class Sinoptico
 //		// execute drawImage statements here
 //		}, false);
 		this.vehicleIcon.src="mybus.png";
-
 		this.vehicleIcon.width=30;
 		this.vehicleIcon.height=30;
 
@@ -134,6 +135,9 @@ class Sinoptico
 		this.canvas.addEventListener('contextmenu', this.__handleMouseEvent);
 		this.canvas.addEventListener('mousemove',this.__handleMouseEvent);
 		this.canvas.addEventListener('wheel',this.__mouseWheelHandler);
+		this.stopImg.onload = this.resize;
+		//It has to be here for the first time it loads the image.
+		this.stopImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz\nAAALEwAACxMBAJqcGAAAAPVJREFUOI2Vkl1qwlAQhT/z1GQpNYRQ29XUJYkiqOiDS7GldBENFUSx\ne2jjy/XhnluHGPJzYEgyOTNz5gfu8QRsgD1wkX0DayCv4f8jAbaAa7ENENcFf4rwC0yk5EE2AqbA\nnzgf1SSh8gl4bFCZAmdx17bnULkp2CYpFZOjnpxkd8VMMSvw03ZSYlEdnsWzfAX4NTn8sLomSOQr\nox6yaxEBR70Pe8QF7iEC3vTxWiENKmYx1nMHfhUOfyRph+oZtzVmwRlWeW5JkgE/4i7tjxh/nkHJ\nDL+qRPYCzE3ld+63RmyUNNmyLtgix19YoYol8AUsbM8BV0fAV591YB1RAAAAAElFTkSuQmCC\n';
 		this.resize();
 	}
 	getVehicleIdentifier(id)
@@ -633,9 +637,9 @@ class Sinoptico
 		this.ctx.font="10px Georgia";
 		var metrics=this.ctx.measureText("anyText");
 		metrics.height=parseInt(this.ctx.font.match(/\d+/), 10);
-		this.ctx.clearRect(0, this.forwarLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width, (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
+		this.ctx.clearRect(0, this.forwarLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width, (this.vehicleIcon.height+metrics.height+this.textSeparation)+1);//Tenemos que tener el cuadrado de los buses.
 		if(this.drawReturnUpside==true)
-			this.ctx.clearRect( 0,this.returnLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width,(this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
+			this.ctx.clearRect( 0,this.returnLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width,(this.vehicleIcon.height+metrics.height+this.textSeparation)+1);//Tenemos que tener el cuadrado de los buses.
 		else 
 			this.ctx.clearRect( 0,this.returnLinePosition+this.busDistanceToLine, this.canvas.width, (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
 		
@@ -664,7 +668,11 @@ class Sinoptico
 			}
 			this.ctx.fillStyle = bus.fill;
 			//	this.ctx.fillRect(xToDraw, yToDraw, this.vehicleIcon.width, this.vehicleIcon.height);
-			this.ctx.drawImage(this.vehicleIcon,xToDraw, yToDraw,this.vehicleIcon.width, this.vehicleIcon.height);
+		//	this.ctx.drawImage(this.vehicleIcon,xToDraw, yToDraw,this.vehicleIcon.width, this.vehicleIcon.height);
+			if(this.vehicleAlternColorCallBack==undefined)
+				this.ctx.drawImage(this.vehicleIcon,xToDraw, yToDraw,this.vehicleIcon.width, this.vehicleIcon.height);
+			else
+				this.ctx.drawImage(this.vehicleAlternColorCallBack(bus),xToDraw, yToDraw,this.vehicleIcon.width, this.vehicleIcon.height);
 
 
 			//console.log(metrics);
@@ -711,6 +719,7 @@ class Sinoptico
 			this.ctx.arc(stop.posX, stop.posY, 4, 0, Math.PI*2, true); 
 			this.ctx.closePath();
 			this.ctx.fill();*/
+			
 			this.ctx.drawImage(this.stopImg,stop.posX-this.stopImg.width/2, stop.posY-this.stopImg.height/2,this.stopImg.width, this.stopImg.height);
 		}
 		this.ctx.restore();
@@ -755,7 +764,10 @@ class Sinoptico
 			}*/
 			this.ctx.fillStyle = bus.fill;
 			//	this.ctx.fillRect(xToDraw, yToDraw, this.vehicleIcon.width, this.vehicleIcon.height);
-			this.ctx.drawImage(this.vehicleIcon,xToDraw, yToDraw,this.vehicleIcon.width, this.vehicleIcon.height);
+			if(this.vehicleAlternColorCallBack==undefined)
+				this.ctx.drawImage(this.vehicleIcon,xToDraw, yToDraw,this.vehicleIcon.width, this.vehicleIcon.height);
+			else
+				this.ctx.drawImage(this.vehicleAlternColorCallBack(bus),xToDraw, yToDraw,this.vehicleIcon.width, this.vehicleIcon.height);
 
 
 			//console.log(metrics);

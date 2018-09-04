@@ -170,6 +170,7 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build(in);
+			in.close();
 			
 			return doc;
 		} catch (IOException | JDOMException e) {

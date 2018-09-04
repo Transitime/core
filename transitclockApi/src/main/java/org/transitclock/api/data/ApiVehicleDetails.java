@@ -109,6 +109,12 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 	@XmlAttribute
 	private String licensePlate;
 
+	@XmlAttribute
+	private boolean isCanceled;
+
+	@XmlAttribute
+	private double headway;
+
 	/**
 	 * Need a no-arg constructor for Jersey. Otherwise get really obtuse
 	 * "MessageBodyWriter not found for media type=application/json" exception.
@@ -156,8 +162,14 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 						: null;
 		driverId = vehicle.getAvl().getDriverId();	
 		licensePlate=vehicle.getLicensePlate();
+		isCanceled=false;
+		headway=-1;
 		if(vehicle instanceof IpcVehicleComplete )
+		{
 			distanceAlongTrip=((IpcVehicleComplete)vehicle).getDistanceAlongTrip();
+			isCanceled=((IpcVehicleComplete)vehicle).isCanceled();
+			headway=((IpcVehicleComplete)vehicle).getHeadway();
+		}
 		isScheduledService = vehicle.getFreqStartTime() > 0 ? false : true;
 		if(!isScheduledService)
 			freqStartTime = vehicle.getFreqStartTime();

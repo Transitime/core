@@ -327,7 +327,7 @@
 			<pattern>${DEFAULT_PATTERN}</pattern>
 		</encoder>
 	</appender>
-
+	
 	<!-- Separate file for SQL logging -->
 	<appender name="SQL"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -342,6 +342,18 @@
 
 	<!-- In case easiest to write logs to console. -->
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>${DATA_PATTERN}</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- Separate file for Match logging -->
+	<appender name="MAPMATCH"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE_ROOT}/mapmatch.log.gz</fileNamePattern>
+		</rollingPolicy>
 		<encoder>
 			<charset>UTF-8</charset>
 			<pattern>${DATA_PATTERN}</pattern>
@@ -522,6 +534,11 @@
 	<logger name="org.transitclock.core.ArrivalDepartureGeneratorDefaultImpl"
 		level="debug" additivity="true">
 		<appender-ref ref="ARRIVAL_DEPARTURE" />
+	</logger>
+	
+	<logger name="org.transitclock.custom.barefoot.BarefootAVLModule" 
+		level="debug" additivity="true"> 
+		<appender-ref ref="MAPMATCH" /> 
 	</logger>
 
 	<!-- In order to log the hibernate SQL queries need to set org.hibernate.SQL

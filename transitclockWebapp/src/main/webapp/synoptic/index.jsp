@@ -113,7 +113,28 @@
 	function setShapeMapLenght(param) {
 		shapeMapLength = param;
 	}
-var test=null;	
+	var imgVehicleOnSechedule=new Image();
+	var imgVehicleNotOnSechedule=new Image();
+	this.imgVehicleOnSechedule.src="mybus.png";
+	this.imgVehicleOnSechedule.width=30;
+	this.imgVehicleOnSechedule.height=30;
+	this.imgVehicleNotOnSechedule.src="mybusRed.png";
+	this.imgVehicleNotOnSechedule.width=30;
+	this.imgVehicleNotOnSechedule.height=30;
+	
+	/** 
+	* Returns different image according to some conditions
+	*
+	**/
+	function vehicleAlternColorCallBack(vehicle)
+	{
+		if(Math.abs(vehicle.schAdh)<120000)//ON SCHEDULE
+			return imgVehicleOnSechedule;
+		else
+			return imgVehicleNotOnSechedule;
+	}
+	
+var synoptic=null;	
 function testFunc()
 {}
 
@@ -162,7 +183,7 @@ function predictionCallback(preds, status) {
 				// Add the actual prediction
 				var pred = routeStopPreds.dest[i].pred[j];
 				content+= '<tr ><td style="border: 1px solid">'+  pred.trip + "</td>";
-				var ident=test.getVehicleIdentifier(pred.vehicle );
+				var ident=synoptic.getVehicleIdentifier(pred.vehicle );
 				if(ident==null)
 					ident=pred.vehicle;
 				content+= '<td style="border: 1px solid">'+ ident + "</td>";
@@ -196,7 +217,7 @@ function predictionCallback(preds, status) {
 	}
 	
 	// Now update popup with the wonderful prediction info
-	test.setPredictionsContent(content);
+	synoptic.setPredictionsContent(content);
 }
 
 function getPredictionsJson( stopId) {
@@ -217,13 +238,13 @@ function vehicleUpdate(vehicleDetail, status)
 		console.log(vehicle);
 		var directionVehicle=(vehicle.direction=="0")?0:1;
 		var gpsTimeStr = dateFormat(vehicle.loc.time);
-		buses.push({id:vehicle.id, projection:vehicle.distanceAlongTrip/getShapeLength(vehicle.tripPattern),identifier:vehicle.licensePlate,direction:directionVehicle,gpsTimeStr:gpsTimeStr,nextStopName:vehicle.nextStopName,schAdh:vehicle.schAdhStr,trip:vehicle.trip});
+		buses.push({id:vehicle.id, projection:vehicle.distanceAlongTrip/getShapeLength(vehicle.tripPattern),identifier:vehicle.licensePlate,direction:directionVehicle,gpsTimeStr:gpsTimeStr,nextStopName:vehicle.nextStopName,schAdhStr:vehicle.schAdhStr,trip:vehicle.trip,schAdh:vehicle.schAdh,headway:vehicle.headway});
 	}
-	test.setBuses(buses);
-	test.steps=100;
-	test.counter=0;
+	synoptic.setBuses(buses);
+	synoptic.steps=100;
+	synoptic.counter=0;
 	//window.requestAnimationFrame(test.animateBus);
-	test.animateBus(20);
+	synoptic.animateBus(20);
 	console.log(vehicleDetail);
 }
 function startTimerUpdate()
@@ -280,22 +301,23 @@ function routeConfigCallback(routeDetail, status)
 		
 	}
 	setShapeMapLenght(shapeMap);
-	test=null;
+	synoptic=null;
 	var canvas = document.getElementById("synoptic");
 	var params={container:canvas,
 			onVehiClick:testFunc,
 			infoStop:function(data) {console.log(data.identifier);return "<table class=\"table\"><th >"+data.identifier+"</th><tr><td>distance: "+parseFloat(data.distance).toFixed(2) +" m. </td></tr></table>"},
-			infoVehicle:function(data) {console.log(data.identifier);return "<table class=\"table\"><th >"+data.identifier+"</th><tr><td>GPSTime: "+data.gpsTimeStr +" </td></tr><tr><td>NextStop: "+data.nextStopName+"</td></tr><tr><td>schAdh: "+data.schAdh+"</td></tr><tr><td>trip: "+data.trip+"</td></tr></table>"},
+			infoVehicle:function(data) {console.log(data.identifier);return "<table class=\"table\"><th >"+data.identifier+"</th><tr><td>GPSTime: "+data.gpsTimeStr +" </td></tr><tr><td>NextStop: "+data.nextStopName+"</td></tr><tr><td>schAdh: "+data.schAdhStr+"</td></tr><tr><td>trip: "+data.trip+"</td></tr><tr><td>headway: "+((data.headway==-1)?"-":((data.headway/60000).toFixed(2))+ " min.") +"</td><tr></table>"},
 			routeName:routeDetail.routes[0].name,
 			drawReturnUpside:false,
 			showReturn:showReturn,
-			predictionFunction:getPredictionsJson
+			predictionFunction:getPredictionsJson,
+			vehicleAlternColorCallBack:vehicleAlternColorCallBack
 	}
-	test=new Sinoptico(params);
-	test.setStops(stops);
-	test.setBuses(buses);
-	test.init();
-	test.paintBus();
+	synoptic=new Sinoptico(params);
+	synoptic.setStops(stops);
+	synoptic.setBuses(buses);
+	synoptic.init();
+	synoptic.paintBus();
 	console.log(routeDetail.routes[0].id);
 	startTimerUpdate();
 }

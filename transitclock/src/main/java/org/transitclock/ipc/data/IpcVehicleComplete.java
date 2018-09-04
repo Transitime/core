@@ -52,7 +52,6 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	private final double distanceOfNextStopFromTripStart;
 	private final double distanceAlongTrip;
 	private double headway;
-	private String headwayVehicleId;
 	
 	private static final long serialVersionUID = 8154105842499551461L;
 
@@ -93,8 +92,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			if(vs.getHeadway()!=null)
 			{
 				this.headway=vs.getHeadway().getHeadway();
-				this.headwayVehicleId=vs.getHeadway().getOtherVehicleId();
 			}
+			else
+				this.headway=-1;
 		} else {
 			// Vehicle not assigned to trip so null out parameters
 			this.originStopId = null;
@@ -117,6 +117,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	 * @param routeName
 	 * @param tripId
 	 * @param tripPatternId
+	 * @param isTripUnscheduled
 	 * @param directionId
 	 * @param headsign
 	 * @param predictable
@@ -140,7 +141,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	private IpcVehicleComplete(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
 			float pathHeading, String routeId, String routeShortName,
-			String routeName, String tripId, String tripPatternId,
+			String routeName, String tripId, String tripPatternId, boolean isTripUnscheduled,
 			String directionId, String headsign, boolean predictable,
 			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
 			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
@@ -149,14 +150,15 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			Integer atOrNextGtfsStopSeq, String originStopId,
 			String destinationId, double distanceToNextStop,
 
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude) {
+			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled,
+			double headway) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
-				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
+				routeShortName, routeName, tripId, tripPatternId, isTripUnscheduled, directionId, headsign,
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
-				atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLatitude, predictedLongitude);
+				atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled);
 
 
 		this.originStopId = originStopId;
@@ -164,6 +166,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		this.distanceToNextStop = distanceToNextStop;
 		this.distanceOfNextStopFromTripStart = distanceOfNextStopFromTripStart;
 		this.distanceAlongTrip = distanceAlongTrip;
+		this.headway=headway;
 	}
 	
 	/*
@@ -178,7 +181,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		private double distanceToNextStop;
 		private double distanceOfNextStopFromTripStart;
 		private double distanceAlongTrip;
-
+		private double headway;
 		private static final short currentSerializationVersion = 0;
 		
 		private static final long serialVersionUID = 6982458672576764027L;
@@ -190,6 +193,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			this.distanceToNextStop = v.distanceToNextStop;
 			this.distanceOfNextStopFromTripStart = v.distanceOfNextStopFromTripStart;
 			this.distanceAlongTrip = v.distanceAlongTrip;
+			this.headway=v.headway;
 		}
 		
 		/*
@@ -211,6 +215,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		    stream.writeDouble(distanceToNextStop);
 		    stream.writeDouble(distanceOfNextStopFromTripStart);
 		    stream.writeDouble(distanceAlongTrip);
+		    stream.writeDouble(headway);
 		}
 
 		/*
@@ -238,6 +243,8 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			distanceToNextStop = stream.readDouble();
 			distanceOfNextStopFromTripStart = stream.readDouble();
 			distanceAlongTrip = stream.readDouble();
+			isCanceled=stream.readBoolean();
+			headway=stream.readDouble();
 		}
 		
 		/*
@@ -249,14 +256,15 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		private Object readResolve() {
 			return new IpcVehicleComplete(blockId, blockAssignmentMethod, avl,
 					heading, routeId, routeShortName, routeName, tripId,
-					tripPatternId, directionId, headsign, predictable,
+					tripPatternId, isTripUnscheduled, directionId, headsign, predictable,
 					schedBasedPred, realTimeSchdAdh, isDelayed, isLayover,
 					layoverDepartureTime, nextStopId, nextStopName,
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
 					atOrNextGtfsStopSeq, originStopId, destinationId,
 					distanceToNextStop, distanceOfNextStopFromTripStart,
 
-					distanceAlongTrip, freqStartTime, holdingTime, predictedLatitude, predictedLongitude);
+					distanceAlongTrip, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled,
+					headway);
 
 		}
 
@@ -299,6 +307,10 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	public double getDistanceAlongTrip() {
 		return distanceAlongTrip;
 	}
+	public double getHeadway()
+	{
+		return headway;
+	}
 
 	@Override
 	public String toString() {
@@ -311,6 +323,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", routeName=" + getRouteName() 
 				+ ", tripId=" + getTripId()
 				+ ", tripPatternId=" + getTripPatternId()
+				+ ", isTripUnscheduled=" + isTripUnscheduled()
 				+ ", directionId=" + getDirectionId()
 				+ ", headsign=" + getHeadsign()
 				+ ", predictable=" + isPredictable()
@@ -329,8 +342,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", atOrNextGtfsStopSeq=" + getAtOrNextGtfsStopSeq()
 				+ ", tripStartEpochTime=" + getTripStartEpochTime()
 				+ ", tripStartEpochTime=" + new Date(getTripStartEpochTime())
+				+ ", isCanceled="   + isCanceled()
 				+ ", originStopId="	+ originStopId 
-				+ ", destinationId=" + destinationId
+				+ ", headway=" + headway
 				+ ", distanceToNextStop=" 
 					+ Geo.distanceFormat(distanceToNextStop)
 				+ ", distanceOfNextStopFromTripStart=" 

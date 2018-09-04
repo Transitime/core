@@ -1,7 +1,10 @@
 package org.transitclock.ipc.servers;
 
 import java.rmi.RemoteException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,7 @@ import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.VehicleEvent;
 import org.transitclock.ipc.data.IpcAvl;
+import org.transitclock.ipc.data.IpcVehicleComplete;
 import org.transitclock.ipc.interfaces.CommandsInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
 
@@ -131,18 +135,53 @@ public class CommandsServer extends AbstractServer
 		VehicleDataCache.getInstance().updateVehicle(vehicleState);
 				
 	}
-
-	@Override
-	public String cancelTrip(String blockId) {
-		/*
-		 * VehicleId is virtual and is constructed by 	"block_" + block.getId() + "_schedBasedVehicle";
+	private VehicleState getVehicleStateForTrip(String tripId, LocalDateTime _startTripTime)
+	{
+		/**
+		 * The startTripTime parameter should not be null if noSchedule
 		 */
-		String vehicleId=	"block_" + blockId + "_schedBasedVehicle";
+		long startTripTime=0;
+		if(_startTripTime!=null)
+			startTripTime=_startTripTime.atZone(ZoneId.systemDefault()).toEpochSecond()*1000L;
+			/**
+			 * Get the vehicle assosiated to the tripId.
+			 * Is it  possible to have more than 1 bus with the same tripId??
+			 */
+			Collection<IpcVehicleComplete> ipcVehicleCompletList = VehicleDataCache.getInstance().getVehiclesIncludingSchedBasedOnes();
+			VehicleState vehicleState=null;
+			for(IpcVehicleComplete _ipcVehicle:ipcVehicleCompletList)
+			{
+				
+				
+				if(_ipcVehicle.getTripId()!=null && _ipcVehicle.getTripId().compareTo(tripId)==0)
+				{
+					VehicleState _vehicleState = VehicleStateManager.getInstance()
+							.getVehicleState(_ipcVehicle.getId());
+					boolean noSchedule=_vehicleState.getTrip().isNoSchedule();
+					if(!noSchedule)
+					{
+						vehicleState=_vehicleState;
+						break;
+					}
+					else if(noSchedule && _ipcVehicle.getTripStartEpochTime()==startTripTime)
+					{
+						vehicleState=_vehicleState;
+						break;
+					}
+						
+				}
+			}
+			return vehicleState;
+	}
+	@Override
+	public String cancelTrip(String tripId,  LocalDateTime startTripTime) {
 		
-		VehicleState vehicleState = VehicleStateManager.getInstance()
-				.getVehicleState(vehicleId);
+		//String vehicleId=	"block_" + blockId + "_schedBasedVehicle";
+		VehicleState vehicleState=this.getVehicleStateForTrip(tripId, startTripTime);
+		if(vehicleState==null)
+			return "TripId id is not currently available";
+		 
 		AvlReport avlReport=vehicleState.getAvlReport();
-		
 		if(avlReport!=null)
 		{
 			vehicleState.setCanceled(true);
@@ -151,9 +190,27 @@ public class CommandsServer extends AbstractServer
 			return null;
 		}
 		else
-			return "Block id is not currently available";
+			return "vehicle with this trip id does not have avl report";
 			
 		
+	}
+	@Override
+	public String reenableTrip(String tripId, LocalDateTime startTripTime) {
+		
+		//String vehicleId=	"block_" + blockId + "_schedBasedVehicle";
+		VehicleState vehicleState=this.getVehicleStateForTrip(tripId, startTripTime);
+		if(vehicleState==null)
+			return "TripId id is not currently available";
+		AvlReport avlReport=vehicleState.getAvlReport();
+		if(avlReport!=null)
+		{
+			vehicleState.setCanceled(false);
+			VehicleDataCache.getInstance().updateVehicle(vehicleState);
+			AvlProcessor.getInstance().processAvlReport(avlReport);
+			return null;
+		}
+		else
+			return "vehicle with this trip id does not have avl report";
 	}
 
 }

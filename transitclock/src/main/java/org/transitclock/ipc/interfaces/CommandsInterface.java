@@ -18,6 +18,7 @@ package org.transitclock.ipc.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.transitclock.ipc.data.IpcAvl;
@@ -58,5 +59,11 @@ public interface CommandsInterface extends Remote {
 	 * Cancel a trip. It should exists in current predictions.
 	 * Retruns null on success
 	 */
-	public String cancelTrip(String blockId) throws RemoteException;
+	public String cancelTrip(String tripId,LocalDateTime at) throws RemoteException;
+
+	/*
+	 * Enable a canceled trip. It should exists in current predictions.
+	 * Retruns null on success
+	 */
+	String reenableTrip(String tripId, LocalDateTime startTripTime)  throws RemoteException;
 }
