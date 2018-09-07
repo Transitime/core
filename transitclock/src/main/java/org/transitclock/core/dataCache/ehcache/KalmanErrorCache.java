@@ -1,4 +1,4 @@
-package org.transitclock.core.dataCache;
+package org.transitclock.core.dataCache.ehcache;
 
 import java.util.List;
 
@@ -10,13 +10,16 @@ import net.sf.ehcache.config.CacheConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.Indices;
+import org.transitclock.core.dataCache.ErrorCache;
+
+import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 /**
- * @author Sean Og Crudden
+ * @author Sean Óg Crudden
  * 
  */
-public class KalmanErrorCache {
+public class KalmanErrorCache implements ErrorCache  {
 	final private static String cacheName = "KalmanErrorCache";
-	private static KalmanErrorCache singleton = new KalmanErrorCache();
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);
 
@@ -26,11 +29,8 @@ public class KalmanErrorCache {
 	 * 
 	 * @return
 	 */
-	public static KalmanErrorCache getInstance() {
-		return singleton;
-	}
 	
-	private KalmanErrorCache() {
+	KalmanErrorCache() {
 		CacheManager cm = CacheManager.getInstance();
 		
 		if (cm.getCache(cacheName) == null) {
@@ -46,6 +46,7 @@ public class KalmanErrorCache {
 		
 		config.setMaxEntriesLocalDisk(1000000);								
 	}
+	
 	public void logCache(Logger logger)
 	{
 		logger.debug("Cache content log.");
@@ -66,6 +67,10 @@ public class KalmanErrorCache {
 		}		
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.transitime.core.dataCache.ErrorCache#getErrorValue(org.transitime.core.Indices)
+	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public Double getErrorValue(Indices indices) {		
 		
@@ -78,6 +83,10 @@ public class KalmanErrorCache {
 		else
 			return (Double)result.getObjectValue();		
 	}
+	/* (non-Javadoc)
+	 * @see org.transitime.core.dataCache.ErrorCache#getErrorValue(org.transitime.core.dataCache.KalmanErrorCacheKey)
+	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public Double getErrorValue(KalmanErrorCacheKey key) {		
 						
@@ -88,6 +97,10 @@ public class KalmanErrorCache {
 		else
 			return (Double)result.getObjectValue();		
 	}
+	/* (non-Javadoc)
+	 * @see org.transitime.core.dataCache.ErrorCache#putErrorValue(org.transitime.core.Indices, java.lang.Double)
+	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public void putErrorValue(Indices indices,  Double value) {
 		
@@ -96,10 +109,22 @@ public class KalmanErrorCache {
 		
 		cache.put(errorElement);
 	}				
+
 	public List<KalmanErrorCacheKey> getKeys()
 	{
 		@SuppressWarnings("unchecked")
 		List<KalmanErrorCacheKey> keys = cache.getKeys();
 		return keys;
 	}
+
+	@Override
+	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
+		
+		
+		Element errorElement = new Element(key, value);
+		
+		cache.put(errorElement);
+	}
+
+	
 }

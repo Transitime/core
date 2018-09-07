@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.transitclock.core.dataCache;
+package org.transitclock.core.dataCache.ehcache;
 
 import java.util.Collections;
 import java.util.Date;
@@ -15,13 +15,19 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.store.Policy;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.dataCache.ArrivalDepartureComparator;
+import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
+import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
+import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
+import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.gtfs.GtfsData;
 import org.transitclock.utils.Time;
 
 /**
@@ -33,8 +39,8 @@ import org.transitclock.utils.Time;
  *         TODO this could do with an interface, factory class, and alternative
  *         implementations, perhaps using Infinispan.
  */
-public class StopArrivalDepartureCache {
-	private static StopArrivalDepartureCache singleton = new StopArrivalDepartureCache();
+public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterface {
+
 
 	private static boolean debug = false;
 
@@ -48,19 +54,11 @@ public class StopArrivalDepartureCache {
 	 * Default is 4 as we need 3 days worth for Kalman Filter implementation
 	 */
 	private static final IntegerConfigValue tripDataCacheMaxAgeSec = new IntegerConfigValue(
-			"transitclock.tripdatacache.tripDataCacheMaxAgeSec", 4 * Time.SEC_PER_DAY,
+			"transitime.tripdatacache.tripDataCacheMaxAgeSec", 4 * Time.SEC_PER_DAY,
 			"How old an arrivaldeparture has to be before it is removed from the cache ");
 
-	/**
-	 * Gets the singleton instance of this class.
-	 * 
-	 * @return
-	 */
-	public static StopArrivalDepartureCache getInstance() {
-		return singleton;
-	}
 
-	private StopArrivalDepartureCache() {
+	public StopArrivalDepartureCache() {
 		CacheManager cm = CacheManager.getInstance();
 		EvictionAgePolicy evictionPolicy = null;
 		if (tripDataCacheMaxAgeSec != null) {
@@ -105,6 +103,10 @@ public class StopArrivalDepartureCache {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.transitime.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#getStopHistory(org.transitime.core.dataCache.StopArrivalDepartureCacheKey)
+	 */
+	
 	@SuppressWarnings("unchecked")
 	synchronized public List<ArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
 
@@ -118,7 +120,7 @@ public class StopArrivalDepartureCache {
 		date.set(Calendar.MILLISECOND, 0);
 		key.setDate(date.getTime());
 		Element result = cache.get(key);
-
+		
 		if (result != null) {
 			return (List<ArrivalDeparture>) result.getObjectValue();
 		} else {
@@ -126,6 +128,10 @@ public class StopArrivalDepartureCache {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.transitime.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#putArrivalDeparture(org.transitime.db.structs.ArrivalDeparture)
+	 */
+	
 	@SuppressWarnings("unchecked")
 	synchronized public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 
@@ -138,12 +144,11 @@ public class StopArrivalDepartureCache {
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-
 		if(arrivalDeparture.getStop()!=null)
 		{
 			StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
-						date.getTime());
-			
+					date.getTime());
+	
 			List<ArrivalDeparture> list = null;
 	
 			Element result = cache.get(key);
@@ -180,15 +185,17 @@ public class StopArrivalDepartureCache {
 		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
 
 		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).list();
-		
-		
+		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).addOrder(Order.asc("time")).list();	
 
 		for (ArrivalDeparture result : results) {
-			// TODO this might be better done in the database.
-			if(GtfsData.routeNotFiltered(result.getRouteId()))
+			StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(result);
+			//TODO might be better with its own populateCacheFromdb
+			try
 			{
-				StopArrivalDepartureCache.getInstance().putArrivalDeparture(result);
+			DwellTimeModelCacheFactory.getInstance().addSample(result);
+			}catch(Exception Ex)
+			{
+				Ex.printStackTrace();
 			}
 		}
 	}

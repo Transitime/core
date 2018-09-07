@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.transitclock.core.dataCache;
+package org.transitclock.core.dataCache.ehcache;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +26,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.dataCache.ArrivalDepartureComparator;
+import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
+import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
+import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Trip;
@@ -44,8 +48,8 @@ import org.transitclock.utils.Time;
  *         
  *         TODO this could do with an interface, factory class, and alternative implementations, perhaps using Infinispan.
  */
-public class TripDataHistoryCache{
-	private static TripDataHistoryCache singleton = new TripDataHistoryCache();
+public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
+	private static TripDataHistoryCacheInterface singleton = new TripDataHistoryCache();
 	
 	private static boolean debug = false;
 
@@ -70,7 +74,7 @@ public class TripDataHistoryCache{
 	 * 
 	 * @return
 	 */
-	public static TripDataHistoryCache getInstance() {
+	public static TripDataHistoryCacheInterface getInstance() {
 		return singleton;
 	}
 
@@ -96,10 +100,18 @@ public class TripDataHistoryCache{
 		/*TODO We need to refine the eviction policy. */
 		cache.setMemoryStoreEvictionPolicy(evictionPolicy);
 	}
+	/* (non-Javadoc)
+	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#getKeys()
+	 */
+	@Override
 	public List<TripKey> getKeys()
 	{
 		return cache.getKeys();
 	}
+	/* (non-Javadoc)
+	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#logCache(org.slf4j.Logger)
+	 */
+	@Override
 	public void logCache(Logger logger)
 	{
 		logger.debug("Cache content log.");
@@ -125,6 +137,10 @@ public class TripDataHistoryCache{
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#getTripHistory(org.transitclock.core.dataCache.TripKey)
+	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {
 
@@ -142,6 +158,10 @@ public class TripDataHistoryCache{
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#putArrivalDeparture(org.transitclock.db.structs.ArrivalDeparture)
+	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
@@ -192,6 +212,11 @@ public class TripDataHistoryCache{
 		return tripKey;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#populateCacheFromDb(org.hibernate.Session, java.util.Date, java.util.Date)
+	 */
+	
+	@Override
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
 	{
  		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
@@ -204,12 +229,16 @@ public class TripDataHistoryCache{
 			// TODO this might be better done in the database.						
 			if(GtfsData.routeNotFiltered(result.getRouteId()))
 			{
-				TripDataHistoryCache.getInstance().putArrivalDeparture(result);
+				TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(result);
 			}
 		}		
 	}
 		
-	static public ArrivalDeparture findPreviousArrivalEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	/* (non-Javadoc)
+	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousArrivalEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
+	 */
+	@Override
+	public ArrivalDeparture findPreviousArrivalEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
 	{
 		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());
 		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
@@ -221,7 +250,11 @@ public class TripDataHistoryCache{
 		}
 		return null;
 	}
-	static public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	/* (non-Javadoc)
+	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousDepartureEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
+	 */
+	@Override
+	public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
 	{	
 		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());							
 		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
