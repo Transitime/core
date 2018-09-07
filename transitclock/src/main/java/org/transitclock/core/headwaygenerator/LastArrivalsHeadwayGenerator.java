@@ -35,6 +35,7 @@ public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
 			
 			if(vehicleState.getMatch().getMatchAtPreviousStop()==null)
 				return null;
+
 			String stopId = vehicleState.getMatch().getMatchAtPreviousStop().getAtStop().getStopId();
 
 			long date = vehicleState.getMatch().getAvlTime();
@@ -46,6 +47,7 @@ public class LastArrivalsHeadwayGenerator implements HeadwayGenerator {
 			List<ArrivalDeparture> stopList=StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
 			int lastStopArrivalIndex =-1;
 			int previousVehicleArrivalIndex = -1;
+
 			if(stopList!=null)
 			{
 				for(int i=0;i<stopList.size() && previousVehicleArrivalIndex==-1 ;i++)

@@ -258,18 +258,30 @@
 			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- Logback log appender for AWS CloudWatch -->
-		<dependency>
-			<groupId>com.j256.cloudwatchlogbackappender</groupId>
-			<artifactId>cloudwatchlogbackappender</artifactId>
-			<version>1.11</version>
-		</dependency>
+
 		<!--  OLS regression algorithm -->
 		<dependency>
       		<groupId>com.github.haifengl</groupId>
       		<artifactId>smile-core</artifactId>
       		<version>1.5.1</version>
     	</dependency>
+
+		<!-- Logback log appender for AWS CloudWatch -->
+		<dependency>
+			<groupId>com.j256.cloudwatchlogbackappender</groupId>
+			<artifactId>cloudwatchlogbackappender</artifactId>
+			<version>1.11</version>
+		</dependency>
+
+		<!--  OLS regression algorithm -->
+		<dependency>
+      		<groupId>com.github.haifengl</groupId>
+      		<artifactId>smile-core</artifactId>
+      		<version>1.5.1</version>
+    	</dependency>
+
+
+
 	</dependencies>
 
 	<build>
