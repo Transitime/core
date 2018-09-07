@@ -51,6 +51,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	private final double distanceToNextStop;
 	private final double distanceOfNextStopFromTripStart;
 	private final double distanceAlongTrip;
+	private double headway;
 	
 	private static final long serialVersionUID = 8154105842499551461L;
 
@@ -87,7 +88,13 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			}
 			this.distanceOfNextStopFromTripStart = sumOfStopPathLengths;
 			this.distanceAlongTrip = 
-					sumOfStopPathLengths - this.distanceToNextStop;			
+					sumOfStopPathLengths - this.distanceToNextStop;
+			if(vs.getHeadway()!=null)
+			{
+				this.headway=vs.getHeadway().getHeadway();
+			}
+			else
+				this.headway=-1;
 		} else {
 			// Vehicle not assigned to trip so null out parameters
 			this.originStopId = null;
@@ -143,7 +150,8 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			Integer atOrNextGtfsStopSeq, String originStopId,
 			String destinationId, double distanceToNextStop,
 
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled) {
+			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled,
+			double headway) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, routeName, tripId, tripPatternId, isTripUnscheduled, directionId, headsign,
@@ -158,6 +166,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		this.distanceToNextStop = distanceToNextStop;
 		this.distanceOfNextStopFromTripStart = distanceOfNextStopFromTripStart;
 		this.distanceAlongTrip = distanceAlongTrip;
+		this.headway=headway;
 	}
 	
 	/*
@@ -172,7 +181,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		private double distanceToNextStop;
 		private double distanceOfNextStopFromTripStart;
 		private double distanceAlongTrip;
-
+		private double headway;
 		private static final short currentSerializationVersion = 0;
 		
 		private static final long serialVersionUID = 6982458672576764027L;
@@ -184,6 +193,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			this.distanceToNextStop = v.distanceToNextStop;
 			this.distanceOfNextStopFromTripStart = v.distanceOfNextStopFromTripStart;
 			this.distanceAlongTrip = v.distanceAlongTrip;
+			this.headway=v.headway;
 		}
 		
 		/*
@@ -205,6 +215,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		    stream.writeDouble(distanceToNextStop);
 		    stream.writeDouble(distanceOfNextStopFromTripStart);
 		    stream.writeDouble(distanceAlongTrip);
+		    stream.writeDouble(headway);
 		}
 
 		/*
@@ -233,6 +244,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			distanceOfNextStopFromTripStart = stream.readDouble();
 			distanceAlongTrip = stream.readDouble();
 			isCanceled=stream.readBoolean();
+			headway=stream.readDouble();
 		}
 		
 		/*
@@ -251,7 +263,8 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					atOrNextGtfsStopSeq, originStopId, destinationId,
 					distanceToNextStop, distanceOfNextStopFromTripStart,
 
-					distanceAlongTrip, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled);
+					distanceAlongTrip, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled,
+					headway);
 
 		}
 
@@ -294,6 +307,10 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	public double getDistanceAlongTrip() {
 		return distanceAlongTrip;
 	}
+	public double getHeadway()
+	{
+		return headway;
+	}
 
 	@Override
 	public String toString() {
@@ -327,7 +344,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", tripStartEpochTime=" + new Date(getTripStartEpochTime())
 				+ ", isCanceled="   + isCanceled()
 				+ ", originStopId="	+ originStopId 
-				+ ", destinationId=" + destinationId
+				+ ", headway=" + headway
 				+ ", distanceToNextStop=" 
 					+ Geo.distanceFormat(distanceToNextStop)
 				+ ", distanceOfNextStopFromTripStart=" 
