@@ -97,7 +97,6 @@ public class VehicleState {
 	
 	private Headway headway=null;
 	
-	
 	public Headway getHeadway() {
 		return headway;
 	}
@@ -380,8 +379,8 @@ public class VehicleState {
 	 */
 	public void incrementTripCounter(ArrivalDeparture event)
 	{				
-		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());																	
-						
+		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(event.getVehicleId());
+										
 		if(event.getStopPathIndex()==0)
 		{									
 			if(event.isArrival())
@@ -391,8 +390,13 @@ public class VehicleState {
 			}else
 			{
 				logger.debug("Not arrival so not incrementing trip counter : {}", event);
-			}
-		}				
+			}			
+		}else	
+		if(this.getPreviousMatch().getStopPathIndex()>event.getStopPathIndex())
+		{
+			vehicleState.incrementTripCounter();
+			logger.debug("Setting vehicle counter to : {} because of event : {}",vehicleState.getTripCounter(), event);		
+		}
 	}
 	/**
 	 * Returns the current Trip for the vehicle. Returns null if there is not
