@@ -119,7 +119,6 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 						long dwelltime=departure.getTime()-arrival.getTime();
 						headway.setTripId(arrival.getTripId());
 
-
 						/* Leave out silly values as they are most likely errors or unusual circumstance. */
 						/* TODO Should abstract this behind an anomaly detention interface/Factory */
 						if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
@@ -128,7 +127,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 									&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
 
 						{
-							addSample(indices, headway,dwelltime);
+							addSample(departure,headway,dwelltime);
 						}
 
 					}
