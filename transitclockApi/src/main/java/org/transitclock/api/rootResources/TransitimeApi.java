@@ -774,7 +774,7 @@ public class TransitimeApi {
 			+ "and paths such that it can be drawn in a map.",tags= {"base data","route"})
 	public Response getRouteDetails(@BeanParam StandardParameters stdParameters,
 			@Parameter(description="List of routeId or routeShortName. Example: r=1&r=2" ,required=false) 
-			 List<String> routeIdsOrShortNames, 
+			@QueryParam(value = "r") List<String> routeIdsOrShortNames, 
 			 @Parameter(description="If set then only the shape for specified direction is marked as being for the UI." ,required=false) 
 			 @QueryParam(value = "d") String directionId,
 			 @Parameter(description="If set then only this stop and the remaining ones on "
