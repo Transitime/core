@@ -1,5 +1,7 @@
 package org.transitclock.core.dataCache.jcs.scheduled;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -26,56 +28,60 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 	final private static String cacheName = "DwellTimeModelCache";
 
-	private static IntegerConfigValue maxDwellTimeAllowedInModel = new IntegerConfigValue("org.transitclock.core.dataCache.jcs.maxDwellTimeAllowedInModel", 2 * Time.MS_PER_MIN, "Max dwell time to be considered in dwell RLS algotithm.");
-	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("org.transitclock.core.dataCache.jcs.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
-	
-	private static DoubleConfigValue lambda = new DoubleConfigValue("org.transitclock.core.dataCache.jcs.lambda", 0.75, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
-	
+
+	private static LongConfigValue maxDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.rls.maxDwellTimeAllowedInModel", (long) (2 * Time.MS_PER_MIN), "Max dwell time to be considered in dwell RLS algotithm.");
+	private static LongConfigValue minDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.rls.minDwellTimeAllowedInModel", (long) 1000, "Min dwell time to be considered in dwell RLS algotithm.");
+	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.rls.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
+	private static LongConfigValue minHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.rls.minHeadwayAllowedInModel", (long) 1000, "Min headway to be considered in dwell RLS algotithm.");
+
+
+	private static DoubleConfigValue lambda = new DoubleConfigValue("transitclock.prediction.rls.lambda", 0.75, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
+
 	private CacheAccess<StopPathCacheKey, TransitClockRLS>  cache = null;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimeModelCache.class);
-	
+
 	public DwellTimeModelCache() {
-		cache = JCS.getInstance(cacheName);			
+		cache = JCS.getInstance(cacheName);
 	}
 	@Override
 	synchronized public void addSample(ArrivalDeparture event, Headway headway, long dwellTime) {
-		
+
 		StopPathCacheKey key=new StopPathCacheKey(headway.getTripId(), event.getStopPathIndex());
-		
-		
+
+
 		TransitClockRLS rls = null;
 		if(cache.get(key)!=null)
-		{			
+		{
 			rls=cache.get(key);
-			
+
 			double[] x = new double[1];
 			x[0]=headway.getHeadway();
-			
+
 			double y = Math.log10(dwellTime);
-			
-								
+
+
 			double[] arg0 = new double[1];
 			arg0[0]=headway.getHeadway();
 			if(rls.getRls()!=null)
 			{
 				double prediction = Math.pow(10,rls.getRls().predict(arg0));
-				
+
 				logger.debug("Predicted dwell: "+prediction + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
-				
+
 				logger.debug("Actual dwell: "+ dwellTime + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
 			}
-			
-			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));			
+
+			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));
 			if(rls.getRls()!=null)
 			{
 				double prediction = Math.pow(10,rls.getRls().predict(arg0));
-	
+
 				logger.debug("Predicted dwell after: "+ prediction + " for: "+key+ " with samples: "+rls.numSamples());
 			}
 		}else
-		{			
-						
+		{
+
 			rls=new TransitClockRLS(lambda.getValue());
 			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));
 		}
@@ -90,16 +96,16 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			if(departure.getBlock()==null)
 			{
 				DbConfig dbConfig = Core.getInstance().getDbConfig();
-				block=dbConfig.getBlock(departure.getServiceId(), departure.getBlockId());								
+				block=dbConfig.getBlock(departure.getServiceId(), departure.getBlockId());
 			}else
 			{
 				block=departure.getBlock();
 			}
-			
+
 			Indices indices = new Indices(departure);
 			StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
 			List<ArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
-			
+
 			if(stopData!=null && stopData.size()>1)
 			{
 				ArrivalDeparture arrival=findArrival(stopData, departure);
@@ -107,30 +113,31 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 				{
 					ArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
 					if(arrival!=null&&previousArrival!=null)
-					{			
+					{
 						Headway headway=new Headway();
 						headway.setHeadway(arrival.getTime()-previousArrival.getTime());
 						long dwelltime=departure.getTime()-arrival.getTime();
 						headway.setTripId(arrival.getTripId());
-						
-						// Negative dwell times are errors in data so do not include.
-						// TODO not sure if it should ignore zero values.
-						if(dwelltime>=0)
-						{						
-							/* Leave out silly values as they are most likely errors or unusual circumstance. */ 
-							if(dwelltime<maxDwellTimeAllowedInModel.getValue() && 
-									headway.getHeadway() < maxHeadwayAllowedInModel.getValue())
-							{
-								addSample(departure, headway,dwelltime);
-							}
+
+
+						/* Leave out silly values as they are most likely errors or unusual circumstance. */
+						/* TODO Should abstract this behind an anomaly detention interface/Factory */
+						if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
+								dwelltime >  minDwellTimeAllowedInModel.getValue() &&
+									headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
+									&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
+
+						{
+							addSample(indices, headway,dwelltime);
 						}
+
 					}
 				}
 			}
-		}		
+		}
 	}
 
-	private ArrivalDeparture findPreviousArrival(List<ArrivalDeparture> stopData, ArrivalDeparture arrival) {		
+	private ArrivalDeparture findPreviousArrival(List<ArrivalDeparture> stopData, ArrivalDeparture arrival) {
 		for(ArrivalDeparture event:stopData)
 		{
 			if(event.isArrival())
@@ -141,7 +148,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 					{
 						if(event.getStopId().equals(arrival.getStopId()))
 						{
-							if(event.getTime()<arrival.getTime())
+							if(event.getTime()<arrival.getTime()&&(sameDay(event.getTime(), arrival.getTime())|| Math.abs(event.getTime()-arrival.getTime()) < maxHeadwayAllowedInModel.getValue()))
 								return event;
 						}
 					}
@@ -150,6 +157,17 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		}
 
 		return null;
+	}
+	private boolean sameDay(Long date1, Long date2)
+	{
+		Calendar cal1 = Calendar.getInstance();
+		Calendar cal2 = Calendar.getInstance();
+		cal1.setTime(new Date(date1));
+		cal2.setTime(new Date(date2));
+		boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+	                  cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+
+		return sameDay;
 	}
 	private ArrivalDeparture findArrival(List<ArrivalDeparture> stopData, ArrivalDeparture departure) {
 
@@ -173,7 +191,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	}
 	@Override
 	public Long predictDwellTime(StopPathCacheKey cacheKey, Headway headway) {
-				
+
 		TransitClockRLS rls=cache.get(cacheKey);
 		if(rls!=null&&rls.getRls()!=null)
 		{
@@ -186,13 +204,13 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			return null;
 		}
 	}
-	public static void main(String[] args) 
+	public static void main(String[] args)
 	{
 		 double startvalue=1000;
 		 double result1 = Math.log10(startvalue);
 		 double result2 = Math.pow(10, result1);
 		 if(startvalue==result2)
-			 System.out.println("As expected they are the same.");		 		 		
+			 System.out.println("As expected they are the same.");
 	}
 
 }

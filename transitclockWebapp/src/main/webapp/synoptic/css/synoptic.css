@@ -1,0 +1,235 @@
+
+.tooltip-left{
+	visibility: hidden;
+    min-width: 180px;
+    max-width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    opacity: 0;
+  	transition: opacity 0.5s;
+   
+}
+.tooltip-left::after{
+	content: "";
+    position: absolute;
+    top: 10px;
+    left: 100%; /* To the left of the tooltip */
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent  transparent  transparent #555;
+}
+
+
+.tooltip-bottom{
+	visibility: hidden;
+    min-width: 180px;
+    max-width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: relative;
+    opacity: 0;
+  	transition: opacity 0.5s;
+   
+}
+
+.tooltip-bottom-overflow-left{
+	visibility: hidden;
+    min-width: 180px;
+    max-width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: relative;
+    opacity: 0;
+  	transition: opacity 0.5s;
+   
+}
+.tooltip-bottom-overflow-right{
+	visibility: hidden;
+    min-width: 180px;
+    max-width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: relative;
+    opacity: 0;
+  	transition: opacity 0.5s;
+   
+}
+.tooltip-bottom::after{
+	content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 100%; /* To the left of the tooltip */
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color:  transparent   transparent  #555 transparent;
+}
+
+.tooltip-bottom-overflow-right::after{
+	content: "";
+    position: absolute;
+    left: 90%;
+    bottom: 100%; /* To the left of the tooltip */
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color:  transparent   transparent  #555 transparent;
+}
+
+
+.tooltip-bottom-overflow-left::after{
+	content: "";
+    position: absolute;
+    left: 10%;
+    bottom: 100%; /* To the left of the tooltip */
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color:  transparent   transparent  #555 transparent;
+}
+.tooltip-right{
+	visibility: visible;
+     min-width: 180px;
+    max-width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    opacity: 0;
+  	transition: opacity 0.5s;
+  
+   
+}
+
+.tooltip-right::after{
+	content: " ";
+    position: absolute;
+    top: 10px;
+    right: 100%; /* To the left of the tooltip */
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+}
+
+
+
+.tooltip-right .table{
+	text-align: left;
+    width: 100%;
+    background-color: #555;
+    color: #fff;
+    font-size:10px;
+    padding-left:3px;
+    padding-right:3px;
+    margin: 0 auto;
+}
+	
+.tooltipTable {
+	text-align: left;
+     width: 100%;
+    background-color: #555;
+    color: #fff;
+    font-size:10px;
+    padding-left:3px;
+    padding-right:3px;
+    margin: 0 auto;
+}
+	
+.tooltip-left .table{
+	text-align: left;
+      width: 100%;
+    background-color: #555;
+    color: #fff;
+    font-size:10px;
+    padding-left:3px;
+    padding-right:3px;
+    margin: 0 auto;
+}
+	
+.tooltip-bottom .table{
+	text-align: left;
+     width: 100%;
+    background-color: #555;
+    color: #fff;
+    font-size:8px;
+   
+    margin: 0 auto;
+}
+.synopticTitle
+{
+	 background-color: #555;
+	 color: #fff;
+	 font-size:10px;
+	 position: absolute;
+	 top:0;
+	 left:0;
+	 visibility: visible;
+	 width:100%
+}
+
+.menu {
+	visibility: visible;
+    width: 180px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+}
+
+.menu-content {
+	visibility: visible;
+	width: 180px;
+   
+    position: absolute;
+    background-color: #555;
+  /*  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
+    
+}
+
+.menu-content a {
+    color: black;
+    padding: 3px 3px;
+    text-decoration: none;
+    font-size: 8px;
+    color: #fff;
+    display: block;
+}
+
+.menu-content a:hover {background-color: #777}
+
+.menu .menu-content {
+    
+}
+/*
+.menu-options {
+	list-style: none;
+	padding: 10px 0;
+}
+
+.menu-item {
+	font-weight: 500;
+	font-size: 14px;
+	padding: 10px 40px 10px 20px;
+	cursor: pointer;
+}
+
+.menu-item:hover {
+	background: rgba(0, 0, 0, 0.2);
+}*/

@@ -48,6 +48,10 @@ public class ApiShape {
 
 	@XmlElement(name = "loc")
 	private List<ApiLocation> locations;
+	@XmlAttribute
+	private double length;
+	@XmlAttribute
+	private String directionId;
 
 	/********************** Member Functions **************************/
 
@@ -61,7 +65,8 @@ public class ApiShape {
 	public ApiShape(IpcShape shape) {
 		this.tripPatternId = shape.getTripPatternId();
 		this.headsign = shape.getHeadsign();
-
+		this.length=shape.getLength();
+		this.directionId=shape.getDirectionId();
 		// If true then set to null so that this attribute won't then be
 		// output as XML/JSON, therefore making output a bit more compact.
 		this.minor = shape.isUiShape() ? null : true;

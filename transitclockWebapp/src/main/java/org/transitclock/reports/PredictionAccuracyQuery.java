@@ -424,6 +424,8 @@ abstract public class PredictionAccuracyQuery {
 				logger.debug("predLength={} predAccuracy={} source={}",
 						predLength, predAccuracy, sourceResult);
 			}
+			
+			rs.close();
 		} catch (SQLException e) {
 			throw e;
 		} finally {

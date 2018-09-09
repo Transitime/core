@@ -37,7 +37,25 @@ public class IpcShape implements Serializable {
 	private String headsign;
 	private List<Location> locations;
 	private boolean isUiShape;
+	private double length;
+	private String directionId;
 	
+	public String getDirectionId() {
+		return directionId;
+	}
+
+	public void setDirectionId(String directionId) {
+		this.directionId = directionId;
+	}
+
+	public double getLength() {
+		return length;
+	}
+
+	public void setLength(double length) {
+		this.length = length;
+	}
+
 	// For determining if segment from previous stop path can be
 	// combined with segment from new stop path.
 	private static final double MAX_VERTEX_DISTANCE = 3.0;
@@ -48,6 +66,8 @@ public class IpcShape implements Serializable {
 
 	IpcShape(TripPattern tripPattern, boolean isUiShape) {
 		this.tripPatternId = tripPattern.getId();
+		this.length=tripPattern.getLength();
+		this.directionId=tripPattern.getDirectionId();
 		this.headsign = tripPattern.getHeadsign();
 		this.locations = new ArrayList<Location>();
 		this.isUiShape = isUiShape;

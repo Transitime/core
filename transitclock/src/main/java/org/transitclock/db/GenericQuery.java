@@ -178,6 +178,8 @@ public class GenericQuery {
 				addRow(row);
 			}
 			
+			rs.close();
+			
 			logger.debug("GenericQuery query took {}msec rows={}",
 					timer.elapsedMsec(), rows);
 		} catch (SQLException e) {
