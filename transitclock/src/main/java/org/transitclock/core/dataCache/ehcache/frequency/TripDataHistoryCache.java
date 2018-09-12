@@ -195,40 +195,44 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 			
 			// TODO need to set start time based on start of bucket
+			if(arrivalDeparture.getFreqStartTime()!=null)
+			{
+				Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(arrivalDeparture.getFreqStartTime(),2);
+				
+				time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+				
+				if(trip!=null)							
+				{			
+					
+					
+					tripKey = new TripKey(arrivalDeparture.getTripId(),
+							nearestDay,
+							time);
+					
+					logger.debug("Putting :{} in TripDataHistoryCache cache using key {}.", arrivalDeparture, tripKey);
+					
+					List<ArrivalDeparture> list = null;						
+					
+					Element result = cache.get(tripKey);
 			
-			Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(arrivalDeparture.getDate(),2);
-			
-			time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
-			
-			if(trip!=null)							
-			{			
-				
-				
-				tripKey = new TripKey(arrivalDeparture.getTripId(),
-						nearestDay,
-						time);
-				
-				logger.debug("Putting :{} in TripDataHistoryCache cache using key {}.", arrivalDeparture, tripKey);
-				
-				List<ArrivalDeparture> list = null;						
-				
-				Element result = cache.get(tripKey);
-		
-				if (result != null && result.getObjectValue() != null) {
-					list = (List<ArrivalDeparture>) result.getObjectValue();
-					cache.remove(tripKey);
-				} else {
-					list = new ArrayList<ArrivalDeparture>();
+					if (result != null && result.getObjectValue() != null) {
+						list = (List<ArrivalDeparture>) result.getObjectValue();
+						cache.remove(tripKey);
+					} else {
+						list = new ArrayList<ArrivalDeparture>();
+					}
+					
+					list.add(arrivalDeparture);									
+					
+					Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
+								
+					cache.put(arrivalDepartures);
 				}
-				
-				list.add(arrivalDeparture);									
-				
-				Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
-							
-				cache.put(arrivalDepartures);
+			}								
+			else
+			{
+				logger.error("Cannot add event to TripDataHistoryCache as it has no freqStartTime set. {}", arrivalDeparture);
 			}
-											
-			
 		}				
 		return tripKey;
 	}

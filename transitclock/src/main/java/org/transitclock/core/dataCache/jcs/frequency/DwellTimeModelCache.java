@@ -141,7 +141,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			{
 				if(!event.getVehicleId().equals(arrival.getVehicleId()))
 				{
-					if(!event.getTripId().equals(arrival.getTripId()))
+					if(!event.getTripId().equals(arrival.getTripId()))							
 					{
 						if(event.getStopId().equals(arrival.getStopId()))
 						{
@@ -149,6 +149,22 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 								return event;
 						}
 					}
+					// If trip id the same check that not the same trip by checking the freqStartTime 
+					if(event.getTripId().equals(arrival.getTripId()))
+					{
+						if(event.getFreqStartTime()!=null && arrival.getFreqStartTime()!=null)
+						{
+							if(!event.getFreqStartTime().equals(arrival.getFreqStartTime()))
+							{								
+								if(event.getStopId().equals(arrival.getStopId()))
+								{
+									if(event.getTime()<arrival.getTime())
+										return event;
+								}							
+							}
+						}												
+					}
+					
 				}
 			}
 		}
@@ -176,11 +192,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		return null;
 	}
 	@Override
-	public Long predictDwellTime(StopPathCacheKey cacheKey, Headway headway) {
-		//TODO null should be the start time of the freq bucket.
-		Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(null ,2);
-		
-		time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+	public Long predictDwellTime(StopPathCacheKey cacheKey, Headway headway) {		
 		
 		TransitClockRLS rls=cache.get(cacheKey);
 		if(rls!=null&&rls.getRls()!=null)
