@@ -200,7 +200,15 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			double[] arg0 = new double[1];
 			arg0[0]=headway.getHeadway();
 			rls.getRls().predict(arg0);
-			return (long) Math.pow(10, rls.getRls().predict(arg0));
+			long prediction = (long) Math.pow(10, rls.getRls().predict(arg0));
+			
+			// If silly values returned then need to reset model and allow it use the super prediction.
+			if(prediction>maxDwellTimeAllowedInModel.getValue())
+			{
+				cache.put(cacheKey,null);
+				return null;
+			}	
+			return prediction; 
 		}else
 		{
 			return null;
