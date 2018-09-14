@@ -78,7 +78,6 @@ public class ApiShape {
 		// If true then set to null so that this attribute won't then be
 		// output as XML/JSON, therefore making output a bit more compact.
 		this.minor = shape.isUiShape() ? null : true;
-
 		this.locations = new ArrayList<ApiLocation>();
 		for (Location loc : shape.getLocations()) {
 			this.locations.add(new ApiLocation(loc.getLat(), loc.getLon()));

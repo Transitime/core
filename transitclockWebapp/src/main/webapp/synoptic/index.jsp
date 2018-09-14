@@ -52,8 +52,8 @@
       <input type="hidden" id="routes" style="width:380px" />
     </div>
   </div>
-  <!-- For testing purpose  -->
-  <input type="button" onclick="myFunction()" value="asdada"/>
+  <!-- For testing purpose 
+  <input type="button" onclick="myFunction()" value="test"/> -->
   
   <div id="synoptic"
 		style="width: 100%; height: 350px; left: 0px; top: 50px; position: absolute;' "></div>

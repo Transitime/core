@@ -672,6 +672,7 @@ class Sinoptico
 			//console.log(this.vehicleIcon);
 			if(bus.direction==undefined)
 				bus.direction=0;
+			
 			if(this.ctx.measureText(bus.identifier).width>this.maxBusLabelWidth)
 				this.maxBusLabelWidth=this.ctx.measureText(bus.identifier).width;
 			
