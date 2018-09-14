@@ -131,7 +131,7 @@
 	**/
 	function vehicleAlternColorCallBack(vehicle)
 	{
-		if(Math.abs(vehicle.schAdh)<600000)//ON SCHEDULE
+		if(Math.abs(vehicle.schAdh)<120000)//ON SCHEDULE
 			return imgVehicleOnSechedule;
 		else
 			return imgVehicleNotOnSechedule;
