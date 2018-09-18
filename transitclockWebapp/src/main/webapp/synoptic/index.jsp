@@ -238,7 +238,7 @@ function vehicleUpdate(vehicleDetail, status)
 		console.log("i: "+i);
 		vehicle=vehicleDetail.vehicles[i];
 		console.log(vehicle);
-		var directionVehicle=(vehicle.direction=="0")?0:1;
+		var directionVehicle=(vehicle.direction==undefined || vehicle.direction=="0"  )?0:1;
 		var gpsTimeStr = dateFormat(vehicle.loc.time);
 		buses.push({id:vehicle.id, projection:vehicle.distanceAlongTrip/getShapeLength(vehicle.tripPattern),identifier:vehicle.licensePlate,direction:directionVehicle,gpsTimeStr:gpsTimeStr,nextStopName:vehicle.nextStopName,schAdhStr:vehicle.schAdhStr,trip:vehicle.trip,schAdh:vehicle.schAdh,headway:vehicle.headway});
 	}
