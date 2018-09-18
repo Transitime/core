@@ -52,8 +52,11 @@
       <input type="hidden" id="routes" style="width:380px" />
     </div>
   </div>
+  <!-- For testing purpose 
+  <input type="button" onclick="myFunction()" value="test"/> -->
+  
   <div id="synoptic"
-		style="width: 100%; height: 250px; left: 0px; top: 50px; position: absolute;' "></div>
+		style="width: 100%; height: 350px; left: 0px; top: 50px; position: absolute;' "></div>
 </body>
 	<script type="text/javascript">
 
@@ -134,7 +137,6 @@
 			return imgVehicleNotOnSechedule;
 	}
 	
-var synoptic=null;	
 function testFunc()
 {}
 
@@ -308,6 +310,7 @@ function routeConfigCallback(routeDetail, status)
 			infoStop:function(data) {console.log(data.identifier);return "<table class=\"table\"><th >"+data.identifier+"</th><tr><td>distance: "+parseFloat(data.distance).toFixed(2) +" m. </td></tr></table>"},
 			infoVehicle:function(data) {console.log(data.identifier);return "<table class=\"table\"><th >"+data.identifier+"</th><tr><td>GPSTime: "+data.gpsTimeStr +" </td></tr><tr><td>NextStop: "+data.nextStopName+"</td></tr><tr><td>schAdh: "+data.schAdhStr+"</td></tr><tr><td>trip: "+data.trip+"</td></tr><tr><td>headway: "+((data.headway==-1)?"-":((data.headway/60000).toFixed(2))+ " min.") +"</td><tr></table>"},
 			routeName:routeDetail.routes[0].name,
+			patternType:routeDetail.routes[0].shape[0].patternType,
 			drawReturnUpside:false,
 			showReturn:showReturn,
 			predictionFunction:getPredictionsJson,
