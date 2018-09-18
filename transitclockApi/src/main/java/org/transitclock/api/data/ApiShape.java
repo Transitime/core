@@ -58,7 +58,7 @@ public class ApiShape {
 	@XmlAttribute
 	private String patternType="linear";
 
-	private static final int LOOP_ENDING_MAX_DISTANCE=150;
+	private static final int LOOP_ENDING_MAX_DISTANCE=200;
 	private static final String LOOP_PATTERN="circular";
 	private static final String LINAR_PATTER="linear";
 	/********************** Member Functions **************************/
