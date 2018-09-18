@@ -204,8 +204,8 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			
 			// If silly values returned then need to reset model and allow it use the super prediction.
 			if(prediction>maxDwellTimeAllowedInModel.getValue())
-			{
-				cache.put(cacheKey,null);
+			{				
+				cache.remove(cacheKey);
 				return null;
 			}	
 			return prediction; 
