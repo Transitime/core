@@ -237,6 +237,27 @@ public class AvlProcessor {
 	}
 
 	/**
+	 * Marks the vehicle as not being predictable and that the assignment has
+	 * been grabbed. Updates VehicleDataCache. Creates and logs a VehicleEvent
+	 * explaining the situation.
+	 * 
+	 * @param vehicleState
+	 *            The vehicle to be made unpredictable
+	 * @param eventDescription
+	 *            A longer description of why vehicle being made unpredictable
+	 * @param vehicleEvent
+	 *            A short description from VehicleEvent class for labeling the
+	 *            event.
+	 */
+	public void makeVehicleUnpredictableAndRemoveFromVehicleDataCache(
+			String vehicleId, String eventDescription, String vehicleEvent) {
+		makeVehicleUnpredictable(vehicleId, eventDescription, vehicleEvent);
+
+		// Remove vehicle from VehicleDataCache
+		VehicleDataCache.getInstance().removeVehicle(vehicleId);
+	}
+	
+	/**
 	 * Looks at the previous AVL reports to determine if vehicle is actually
 	 * moving. If it is not moving then the vehicle is made unpredictable. Uses
 	 * the system properties transitclock.core.timeForDeterminingNoProgress and

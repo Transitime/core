@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.core.dataCache.VehicleStateManager;
@@ -87,6 +88,18 @@ public class TimeoutHandlerModule extends Module {
 					+ "for long after scheduled departure time if vehicle "
 					+ "taken out of service.");
 
+	private static BooleanConfigValue removeTimedOutVehiclesFromVehicleDataCache =
+			new BooleanConfigValue(
+					"transitclock.timeout.removeTimedOutVehiclesFromVehicleDataCache", 
+					false, 
+					"When timing out vehicles, the default behavior is to make "
+					+ "the vehicle unpredictable but leave it in the "
+					+ "VehicleDataCache. When set to true, a timeout will also "
+					+ "remove the vehicle from the VehicleDataCache. This can "
+					+ "be useful in situations where it is not desirable to "
+					+ "include timed out vehicles in data feeds, e.g. the GTFS "
+					+ "Realtime vehicle positions feed.");
+	
 	/********************* Logging ************************************/
 
 	private static final Logger logger = LoggerFactory
@@ -137,7 +150,7 @@ public class TimeoutHandlerModule extends Module {
 					+ " while allowable time without an AVL report is "
 					+ Time.elapsedTimeStr(maxNoAvl)
 					+ " and so was made unpredictable.";
-			AvlProcessor.getInstance().makeVehicleUnpredictable(
+			makeVehicleUnpredictable(
 					vehicleState.getVehicleId(), eventDescription,
 					VehicleEvent.TIMEOUT);
 			
@@ -180,7 +193,7 @@ public class TimeoutHandlerModule extends Module {
 		String shouldTimeoutEventDescription =
 				SchedBasedPredsModule.shouldTimeoutVehicle(vehicleState, now);				
 		if (shouldTimeoutEventDescription != null) {
-			AvlProcessor.getInstance().makeVehicleUnpredictable(
+			makeVehicleUnpredictable(
 					vehicleState.getVehicleId(), shouldTimeoutEventDescription,
 					VehicleEvent.TIMEOUT);
 			
@@ -253,7 +266,7 @@ public class TimeoutHandlerModule extends Module {
 						+ "time without AVL is "  
 						+ Time.elapsedTimeStr(maxNoAvlAfterSchedDepartSecs)
 						+ ". Therefore vehicle was made unpredictable.";
-				AvlProcessor.getInstance().makeVehicleUnpredictable(
+				makeVehicleUnpredictable(
 						vehicleState.getVehicleId(), eventDescription,
 						VehicleEvent.TIMEOUT);
 				
@@ -267,6 +280,28 @@ public class TimeoutHandlerModule extends Module {
 		}
 	}
 
+	/**
+	 * Call the proper AvlProcessor method depending on the configuration
+	 * Default behavior is to make the vehicle unpredictable
+	 * If removeTimedOutVehiclesFromVehicleDataCache is set to true, also remove the vehicle from the cache  
+	 * 
+	 * @param vehicleId
+	 *            The vehicle to be made unpredictable
+	 * @param eventDescription
+	 *            A longer description of why vehicle being made unpredictable
+	 * @param vehicleEvent
+	 *            A short description from VehicleEvent class for labeling the
+	 *            event.
+	 */
+	private void makeVehicleUnpredictable(String vehicleId, 
+			String eventDescription, String vehicleEvent) {
+		if (removeTimedOutVehiclesFromVehicleDataCache.getValue()) {
+			AvlProcessor.getInstance().makeVehicleUnpredictableAndRemoveFromVehicleDataCache(vehicleId, eventDescription, vehicleEvent);
+		} else {
+			AvlProcessor.getInstance().makeVehicleUnpredictable(vehicleId, eventDescription, vehicleEvent);
+		}
+	}
+	
 	/**
 	 * Goes through all vehicles and finds ones that have timed out
 	 */
