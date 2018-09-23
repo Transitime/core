@@ -1,4 +1,4 @@
-package org.transitclock.core.predictiongenerator.kalman.frequency;
+package org.transitclock.core.predictiongenerator.frequency.traveltime.kalman;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -24,7 +24,7 @@ import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
-import org.transitclock.core.predictiongenerator.average.frequency.HistoricalAveragePredictionGeneratorImpl;
+import org.transitclock.core.predictiongenerator.frequency.traveltime.average.HistoricalAveragePredictionGeneratorImpl;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPrediction;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
 import org.transitclock.core.predictiongenerator.kalman.TripSegment;

@@ -1,4 +1,4 @@
-package org.transitclock.core.predictiongenerator.kalman.scheduled;
+package org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -29,12 +29,12 @@ import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.core.dataCache.jcs.KalmanErrorCache;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
-import org.transitclock.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPrediction;
 import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
 import org.transitclock.core.predictiongenerator.kalman.TripSegment;
 import org.transitclock.core.predictiongenerator.kalman.Vehicle;
 import org.transitclock.core.predictiongenerator.kalman.VehicleStopDetail;
+import org.transitclock.core.predictiongenerator.scheduled.average.HistoricalAveragePredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionForStopPath;
 import org.transitclock.ipc.data.IpcPrediction;

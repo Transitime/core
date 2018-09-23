@@ -17,7 +17,7 @@ import org.transitclock.core.Indices;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.core.dataCache.StopPathCacheKey;
-import org.transitclock.core.predictiongenerator.rls.dwell.scheduled.TransitClockRLS;
+import org.transitclock.core.predictiongenerator.scheduled.dwell.rls.TransitClockRLS;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Headway;

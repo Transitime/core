@@ -124,14 +124,14 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			Element result=cache.get(key);
 			if(result!=null)
 			{
-				logger.debug("Key: "+key.toString());
+				logger.info("Key: "+key.toString());
 				@SuppressWarnings("unchecked")
 				
 				List<ArrivalDeparture> ads=(List<ArrivalDeparture>) result.getObjectValue();
 												
 				for(ArrivalDeparture ad : ads)
 				{
-					logger.debug(ad.toString());
+					logger.info(ad.toString());
 				}
 			}
 		}

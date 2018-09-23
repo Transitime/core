@@ -409,6 +409,77 @@ public class Core {
 		PredictionAnalysisServer.start(agencyId);
 		HoldingTimeServer.start(agencyId);
 	}
+	
+	static private void populateCaches() throws Exception
+	{
+		Session session = HibernateUtils.getSession();
+
+		Date endDate=Calendar.getInstance().getTime();
+
+		/* populate one day at a time to avoid memory issue */
+		for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+		{
+			Date startDate=DateUtils.addDays(endDate, -1);
+			if(StopArrivalDepartureCacheFactory.getInstance()!=null)
+			{
+				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
+				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+			}
+			
+			endDate=startDate;
+		}
+		endDate=Calendar.getInstance().getTime();
+										
+
+		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
+		{
+			if(TripDataHistoryCacheFactory.getInstance()!=null)
+			{
+				logger.debug("Populating TripDataHistoryCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+			}
+			
+			if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
+			{
+				logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+			}
+		}else
+		{
+			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+			{
+				Date startDate=DateUtils.addDays(endDate, -1);
+
+				if(TripDataHistoryCacheFactory.getInstance()!=null)
+				{
+					logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
+					TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+				}
+
+				if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
+				{
+					logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+					FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+				}
+
+				endDate=startDate;
+			}
+		}		
+		endDate=Calendar.getInstance().getTime();
+
+		for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+		{
+			Date startDate=DateUtils.addDays(endDate, -1);
+
+			if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
+			{
+				logger.debug("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+				ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+			}
+
+			endDate=startDate;
+		}
+	}
 
 	/**
 	 * The main program that runs the entire Transitime application.!
@@ -436,57 +507,14 @@ public class Core {
 
 			Date endDate=Calendar.getInstance().getTime();
 
-			/* populate one day at a time to avoid memory issue */
-			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-			{
-				Date startDate=DateUtils.addDays(endDate, -1);
-
-				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
-				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-
-				endDate=startDate;
-			}
-			endDate=Calendar.getInstance().getTime();
-						
-			
-
-			
-
-			if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
-			{
-				logger.debug("Populating TripDataHistoryCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
-				TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
-
-				logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
-				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
-			}else
-			{
-				for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-				{
-					Date startDate=DateUtils.addDays(endDate, -1);
-
-					logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
-					TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-
-					logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
-					FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-
-					endDate=startDate;
-				}
-			}
-			// TODO just here to check values reasonable.
-			logger.info(FrequencyBasedHistoricalAverageCache.getInstance().toString());
-
-			endDate=Calendar.getInstance().getTime();
-
-			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-			{
-				Date startDate=DateUtils.addDays(endDate, -1);
-
-				logger.debug("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
-				ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-
-				endDate=startDate;
+			// populate caches to be used by prediction methods.
+			try {
+				populateCaches();
+				if(TripDataHistoryCacheFactory.getInstance()!=null)
+					TripDataHistoryCacheFactory.getInstance().logCache(logger);
+				
+			} catch (Exception e) {
+				logger.error("Failed to populate cacche.", e);
 			}
 
 			// Initialize the core now
