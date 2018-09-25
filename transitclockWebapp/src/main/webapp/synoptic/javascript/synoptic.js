@@ -1066,7 +1066,9 @@ function myFunction()
 		projection:Math.random(),
 		identifier:"ppu-4211",
 		fill: "#444444",
-		isDragging: false
+		isDragging: false,
+		isScheduledService: false,
+		freqStartTime:1537843461864,
 	},{
 		id:1,		
 		width: 20,
