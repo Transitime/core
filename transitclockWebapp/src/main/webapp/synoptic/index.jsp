@@ -240,7 +240,7 @@ function vehicleUpdate(vehicleDetail, status)
 		console.log(vehicle);
 		var directionVehicle=(vehicle.direction==undefined || vehicle.direction=="0"  )?0:1;
 		var gpsTimeStr = dateFormat(vehicle.loc.time);
-		buses.push({id:vehicle.id, projection:vehicle.distanceAlongTrip/getShapeLength(vehicle.tripPattern),identifier:vehicle.licensePlate,direction:directionVehicle,gpsTimeStr:gpsTimeStr,nextStopName:vehicle.nextStopName,schAdhStr:vehicle.schAdhStr,trip:vehicle.trip,schAdh:vehicle.schAdh,headway:vehicle.headway,isScheduledService:vehicle.isScheduledService,freqStartTime:data.freqStartTime});
+		buses.push({id:vehicle.id, projection:vehicle.distanceAlongTrip/getShapeLength(vehicle.tripPattern),identifier:vehicle.licensePlate,direction:directionVehicle,gpsTimeStr:gpsTimeStr,nextStopName:vehicle.nextStopName,schAdhStr:vehicle.schAdhStr,trip:vehicle.trip,schAdh:vehicle.schAdh,headway:vehicle.headway,isScheduledService:vehicle.isScheduledService,freqStartTime:vehicle.freqStartTime});
 	}
 	synoptic.setBuses(buses);
 	synoptic.steps=100;
