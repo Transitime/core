@@ -327,10 +327,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				block,
 				tripIndex,
 				stopPathIndex, freqStartDate);
-		if(vehicleState.getVehicleId().equals("969"))
-		{
-			System.out.println("hello");
-		}
+		
 		updateCache(vehicleState, arrival);
 		logger.debug("Creating arrival: {}", arrival);
 

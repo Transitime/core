@@ -514,7 +514,7 @@ public class Core {
 					TripDataHistoryCacheFactory.getInstance().logCache(logger);
 				
 			} catch (Exception e) {
-				logger.error("Failed to populate cacche.", e);
+				logger.error("Failed to populate cache.", e);
 			}
 
 			// Initialize the core now

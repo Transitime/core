@@ -203,8 +203,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				
 				if(trip!=null)							
 				{			
-					
-					
+										
 					tripKey = new TripKey(arrivalDeparture.getTripId(),
 							nearestDay,
 							time);
@@ -285,8 +284,11 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
 			try {
-				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
-				{
+				
+				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) 
+						&& (current.isArrival() && tocheck.isDeparture())
+							&& current.getFreqStartTime().equals(tocheck.getFreqStartTime()))
+				{					
 					return tocheck;
 				}
 			} catch (Exception e) {

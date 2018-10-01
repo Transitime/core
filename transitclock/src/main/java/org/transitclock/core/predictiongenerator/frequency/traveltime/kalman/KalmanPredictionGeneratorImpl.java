@@ -97,8 +97,8 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());
 
 		TravelTimeDetails travelTimeDetails = this.getLastVehicleTravelTime(currentVehicleState, indices);
-
-
+		
+		
 		/*
 		 * The first vehicle of the day should use schedule or historic data to
 		 * make prediction. Cannot use Kalman as yesterdays vehicle will have
