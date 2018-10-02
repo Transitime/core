@@ -412,7 +412,7 @@ public class PredictionAccuracyModule extends Module {
 											predictionsReadTime,
 											pred.isArrival(),
 											pred.isAffectedByWaitStop(),
-											"Transitime",null,null);
+											"TransitClock",null,null);
 							storePrediction(accuracyPred);
 							predictionsFound = true;
 						}
