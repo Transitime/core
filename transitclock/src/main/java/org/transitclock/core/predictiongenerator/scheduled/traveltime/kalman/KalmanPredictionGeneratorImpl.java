@@ -219,7 +219,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 	private Double lastVehiclePredictionError(ErrorCache cache, Indices indices) {
 
 		Double result = cache.getErrorValue(indices);
-		if(result!=null)
+		if(result!=null&&!result.isNaN())
 		{
 			logger.debug("Kalman Error value : "+result +" for key: "+new KalmanErrorCacheKey(indices).toString());
 		}
