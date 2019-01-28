@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.data.IpcPredictionComparator;
 import org.transitclock.api.utils.AgencyTimezoneCache;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
@@ -82,6 +83,12 @@ public class GtfsRtTripFeed {
 			"Number of seconds in the future to accept predictions before");
 	private static final int PREDICTION_MAX_FUTURE_SECS = predictionMaxFutureSecs.getValue();
 
+
+	private static BooleanConfigValue includeTripUpdateDelay = new BooleanConfigValue(
+			"transitclock.api.includeTripUpdateDelay", false,
+			"Whether or not to include delay in the TripUpdate message");
+	private static final boolean INCLUDE_TRIP_UPDATE_DELAY = includeTripUpdateDelay.getValue();
+	
 	
 	// For when creating StopTimeEvent for schedule based prediction  
 	// 5 minutes (300 seconds)
@@ -143,9 +150,25 @@ public class GtfsRtTripFeed {
 					gtfsRealtimeDateFormatter.format(new Date(
 							tripStartEpochTime));
 			tripDescriptor.setStartDate(tripStartDateStr);
+
+			// Set the relation between this trip and the static schedule. ADDED and CANCELED not supported. 
+			if (firstPred.isTripUnscheduled()) {
+				// A trip that is running with no schedule associated to it - 
+				// this value is used to identify trips defined in GTFS frequencies.txt with exact_times = 0
+				tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.UNSCHEDULED);
+			} else {
+				// Trip that is running in accordance with its GTFS schedule, 
+				// or is close enough to the scheduled trip to be associated with it.
+				tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+			}
 		}
+	
+		//Set trip as canceled if it is mark as that from schedBasePreds
+		if(firstPred.isCanceled())
+			tripDescriptor.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship.CANCELED);
+			
 		tripUpdate.setTrip(tripDescriptor);
-		if (firstPred.getDelay() != null)
+		if (firstPred.getDelay() != null && INCLUDE_TRIP_UPDATE_DELAY)
 		  tripUpdate.setDelay(firstPred.getDelay()); // set schedule deviation
 
 		// Add the VehicleDescriptor information
@@ -154,42 +177,45 @@ public class GtfsRtTripFeed {
 		tripUpdate.setVehicle(vehicleDescriptor);
 
 		// Add the StopTimeUpdate information for each prediction
-		for (IpcPrediction pred : predsForTrip) {
-			StopTimeUpdate.Builder stopTimeUpdate =	StopTimeUpdate.newBuilder()
-					.setStopSequence(pred.getGtfsStopSeq())
-					.setStopId(pred.getStopId());
-			
-			StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
-			stopTimeEvent.setTime(pred.getPredictionTime() / Time.MS_PER_SEC);
-			
-			// If schedule based prediction then set the uncertainty to special
-			// value so that client can tell
-			if (pred.isSchedBasedPred())
-				stopTimeEvent.setUncertainty(SCHED_BASED_PRED_UNCERTAINTY_VALUE);
-			
-			// If vehicle is late and prediction is for a subsequent trip then
-			// the predictions are not as certain because it is reasonably likely
-			// that another vehicle will take over the subsequent trip. Takes
-			// precedence over SCHED_BASED_PRED_UNCERTAINTY_VALUE.
-			if (pred.isLateAndSubsequentTripSoMarkAsUncertain())
-				stopTimeEvent.setUncertainty(LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE);
-			
-			// If vehicle not making forward progress then set uncertainty to
-			// special value so that client can tell. Takes precedence over 
-			// LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE.
-			if (pred.isDelayed())
-				stopTimeEvent.setUncertainty(DELAYED_UNCERTAINTY_VALUE);
-			
-			if (pred.isArrival())
-				stopTimeUpdate.setArrival(stopTimeEvent);
-			else
-				stopTimeUpdate.setDeparture(stopTimeEvent);
-			//The relationship should always be SCHEDULED if departure or arrival time is given.
-			stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
-			
-			tripUpdate.addStopTimeUpdate(stopTimeUpdate);
+		if(!firstPred.isCanceled())
+		{
+			for (IpcPrediction pred : predsForTrip ) {
+				StopTimeUpdate.Builder stopTimeUpdate =	StopTimeUpdate.newBuilder()
+						.setStopSequence(pred.getGtfsStopSeq())
+						.setStopId(pred.getStopId());
+
+				StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
+				stopTimeEvent.setTime(pred.getPredictionTime() / Time.MS_PER_SEC);
+
+				// If schedule based prediction then set the uncertainty to special
+				// value so that client can tell
+				if (pred.isSchedBasedPred())
+					stopTimeEvent.setUncertainty(SCHED_BASED_PRED_UNCERTAINTY_VALUE);
+
+				// If vehicle is late and prediction is for a subsequent trip then
+				// the predictions are not as certain because it is reasonably likely
+				// that another vehicle will take over the subsequent trip. Takes
+				// precedence over SCHED_BASED_PRED_UNCERTAINTY_VALUE.
+				if (pred.isLateAndSubsequentTripSoMarkAsUncertain())
+					stopTimeEvent.setUncertainty(LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE);
+
+				// If vehicle not making forward progress then set uncertainty to
+				// special value so that client can tell. Takes precedence over 
+				// LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE.
+				if (pred.isDelayed())
+					stopTimeEvent.setUncertainty(DELAYED_UNCERTAINTY_VALUE);
+
+				if (pred.isArrival())
+					stopTimeUpdate.setArrival(stopTimeEvent);
+				else
+					stopTimeUpdate.setDeparture(stopTimeEvent);
+
+				//The relationship should always be SCHEDULED if departure or arrival time is given.
+				stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
+
+				tripUpdate.addStopTimeUpdate(stopTimeUpdate);
+			}
 		}
-		
 		// Add timestamp
 		tripUpdate.setTimestamp(firstPred.getAvlTime() / Time.MS_PER_SEC);
 		
@@ -217,6 +243,7 @@ public class GtfsRtTripFeed {
 		// For each trip...
 		for (List<IpcPrediction> predsForTrip : predsByTripMap.values()) {
 			//Sort trip data according to sequnece
+			
 			Collections.sort(predsForTrip, comparator);
 			//  Need to check if predictions for frequency based trip and group by start time if they are. 
 			if(isFrequencyBasedTrip(predsForTrip))

@@ -1,0 +1,28 @@
+##############################################################
+##### Default Region Configuration
+jcs.default=DC
+jcs.default.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttributes
+jcs.default.cacheattributes.MaxObjects=0
+jcs.default.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
+jcs.default.cacheattributes.DiskUsagePatternName=UPDATE
+
+##############################################################
+##### CACHE REGIONS
+jcs.region.myRegion1=DC
+jcs.region.myRegion1.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttributes
+jcs.region.myRegion1.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.myRegion1.cacheattributes.DiskUsagePatternName=UPDATE
+jcs.region.myRegion1.elementattributes.IsEternal=true
+jcs.region.myRegion1.cacheattributes.MaxObjects=0
+
+##############################################################
+##### AUXILIARY CACHES
+# Indexed Disk Cache
+jcs.auxiliary.DC=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheFactory
+jcs.auxiliary.DC.attributes=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheAttributes
+jcs.auxiliary.DC.attributes.diskPath=${user.home}/jcs_swap
+jcs.auxiliary.DC.attributes.MaxPurgatorySize=100000
+jcs.auxiliary.DC.attributes.MaxKeySize=100000
+jcs.auxiliary.DC.attributes.OptimizeAtRemoveCount=300000
+jcs.auxiliary.DC.attributes.OptimizeOnShutdown=true
+jcs.auxiliary.DC.attributes.DiskLimitType=COUNT

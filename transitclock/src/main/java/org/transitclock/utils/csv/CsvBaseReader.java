@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -125,9 +126,9 @@ public abstract class CsvBaseReader<T> {
 			// first character and then discard if it is a BOM character or
 			// reset the reader to back to the beginning if it is not. This
 			// way the CSV parser will process the file starting with the first
-			// true character.			
-			Reader in = new BufferedReader(new InputStreamReader(
-					new FileInputStream(fileName), "UTF-8"));
+			// true character.
+			
+			Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
 			
 			// Deal with the possible BOM character at the beginning of the file
 			in.mark(1);

@@ -50,7 +50,7 @@ abstract public class PredictionAccuracyQuery {
 	private final Connection connection;
 	private String dbType = null;
 
-	protected static final int MAX_PRED_LENGTH = 1800;
+	protected static final int MAX_PRED_LENGTH = 900;
 	protected static final int PREDICTION_LENGTH_BUCKET_SIZE = 30;
 
 	// Keyed on source (so can show data for multiple sources at
@@ -424,6 +424,8 @@ abstract public class PredictionAccuracyQuery {
 				logger.debug("predLength={} predAccuracy={} source={}",
 						predLength, predAccuracy, sourceResult);
 			}
+			
+			rs.close();
 		} catch (SQLException e) {
 			throw e;
 		} finally {

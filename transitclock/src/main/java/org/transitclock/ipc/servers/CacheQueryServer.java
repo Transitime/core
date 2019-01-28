@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.transitclock.ipc.servers;
 
@@ -15,18 +15,18 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
+import org.transitclock.core.dataCache.ErrorCacheFactory;
 import org.transitclock.core.dataCache.HistoricalAverage;
 import org.transitclock.core.dataCache.HoldingTimeCache;
 import org.transitclock.core.dataCache.HoldingTimeCacheKey;
-import org.transitclock.core.dataCache.KalmanErrorCache;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
-import org.transitclock.core.dataCache.StopArrivalDepartureCache;
+import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitclock.core.dataCache.StopPathCacheKey;
-import org.transitclock.core.dataCache.TripDataHistoryCache;
 import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
+import org.transitclock.core.dataCache.StopPathCacheKey;
+import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.data.IpcHistoricalAverage;
@@ -57,7 +57,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	 * Starts up the CacheQueryServer so that RMI calls can be used to query
 	 * cache. This will automatically cause the object to continue to run and
 	 * serve requests.
-	 * 
+	 *
 	 * @param agencyId
 	 * @return the singleton CacheQueryServer object. Usually does not need to
 	 *         used since the server will be fully running.
@@ -80,7 +80,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.transitclock.ipc.interfaces.CacheQueryInterface#
 	 * getStopArrivalDepartures(java.lang.String)
 	 */
@@ -91,14 +91,14 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(stopId,
 					Calendar.getInstance().getTime());
 
-			List<ArrivalDeparture> result = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+			List<ArrivalDeparture> result = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 
 			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
 
 			for (ArrivalDeparture arrivalDeparture : result) {
 				ipcResultList.add(new IpcArrivalDeparture(arrivalDeparture));
 			}
-			return ipcResultList;			
+			return ipcResultList;
 		} catch (Exception e) {
 
 			throw new RemoteException(e.toString(),e);
@@ -128,53 +128,53 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	@Override
 	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, LocalDate localDate, Integer starttime)
 			throws RemoteException {
-		
+
 		try {
 			List<ArrivalDeparture> result = new ArrayList<ArrivalDeparture>();
-			
+
 			if(tripId!=null && localDate!=null && starttime!=null){
-				
+
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				TripKey tripKey = new TripKey(tripId, date, starttime);
 
-				result = TripDataHistoryCache.getInstance().getTripHistory(tripKey);
+				result = TripDataHistoryCacheFactory.getInstance().getTripHistory(tripKey);
 			}
 			else if(tripId!=null && localDate!=null && starttime==null)
 			{
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
 					if(key.getTripId().equals(tripId) && date.compareTo(key.getTripStartDate())==0)
 					{
-						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
-					}										
+						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
+					}
 				}
 			}else if(tripId!=null && localDate==null && starttime==null)
 			{
-				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
 					if(key.getTripId().equals(tripId))
 					{
-						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
-					}										
+						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
+					}
 				}
 			}
 			else if(tripId==null && localDate!=null && starttime==null)
 			{
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-				for(TripKey key:TripDataHistoryCache.getInstance().getKeys())
+				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
 					if(date.compareTo(key.getTripStartDate())==0)
 					{
-						result.addAll(TripDataHistoryCache.getInstance().getTripHistory(key));
-					}										
+						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
+					}
 				}
 			}
-			
+
 			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
-			
+
 			Collections.sort(result, new ArrivalDepartureComparator());
-			
+
 			for (ArrivalDeparture arrivalDeparture : result) {
 				ipcResultList.add(new IpcArrivalDeparture(arrivalDeparture));
 			}
@@ -184,15 +184,15 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 		} catch (Exception e) {
 
 			throw new RemoteException(e.toString(), e);
-		}		
+		}
 	}
 
 	@Override
 	public List<IpcHistoricalAverageCacheKey> getScheduledBasedHistoricalAverageCacheKeys() throws RemoteException {
-		
+
 		List<StopPathCacheKey> keys = ScheduleBasedHistoricalAverageCache.getInstance().getKeys();
 		List<IpcHistoricalAverageCacheKey> ipcResultList = new ArrayList<IpcHistoricalAverageCacheKey>();
-				
+
 		for(StopPathCacheKey key:keys)
 		{
 			ipcResultList.add(new IpcHistoricalAverageCacheKey(key));
@@ -203,32 +203,32 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	@Override
 	public Double getKalmanErrorValue(String tripId, Integer stopPathIndex) throws RemoteException {
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(tripId, stopPathIndex);
-		Double result = KalmanErrorCache.getInstance().getErrorValue(key);
+		Double result = ErrorCacheFactory.getInstance().getErrorValue(key);
 		return result;
 	}
 
 	@Override
 	public List<IpcKalmanErrorCacheKey> getKalmanErrorCacheKeys() throws RemoteException {
-		List<KalmanErrorCacheKey> keys = KalmanErrorCache.getInstance().getKeys();
+		List<KalmanErrorCacheKey> keys = ErrorCacheFactory.getInstance().getKeys();
 		List<IpcKalmanErrorCacheKey> ipcResultList = new ArrayList<IpcKalmanErrorCacheKey>();
-				
+
 		for(KalmanErrorCacheKey key:keys)
 		{
 			ipcResultList.add(new IpcKalmanErrorCacheKey(key));
 		}
 		return ipcResultList;
 	}
-	
+
 	@Override
 	public List<IpcHoldingTimeCacheKey> getHoldingTimeCacheKeys() throws RemoteException {
 		List<HoldingTimeCacheKey> keys = HoldingTimeCache.getInstance().getKeys();
 		List<IpcHoldingTimeCacheKey> ipcResultList = new ArrayList<IpcHoldingTimeCacheKey>();
-				
+
 		for(HoldingTimeCacheKey key:keys)
 		{
 			ipcResultList.add(new IpcHoldingTimeCacheKey(key));
 		}
-		return ipcResultList;		
+		return ipcResultList;
 	}
 
 	@Override

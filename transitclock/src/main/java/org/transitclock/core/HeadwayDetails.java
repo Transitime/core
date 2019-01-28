@@ -1,5 +1,7 @@
 package org.transitclock.core;
 
+import java.util.concurrent.TimeUnit;
+
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcPrediction;
 
@@ -10,8 +12,10 @@ import org.transitclock.ipc.data.IpcPrediction;
  */
 public class HeadwayDetails {
 
-	private IpcPrediction vehicleAheadPrediction;
-	private IpcPrediction vehicleBehindPrediction;
+	private IpcPrediction vehicleAheadPrediction=null;
+	private ArrivalDeparture vehicleAheadArrival=null;
+	private IpcPrediction vehicleBehindPrediction=null;
+	Long arrivalPrediction=null; 
 
 	public IpcPrediction getVehicleAheadPrediction() {
 		return vehicleAheadPrediction;
@@ -20,31 +24,58 @@ public class HeadwayDetails {
 	public IpcPrediction getVehicleBehindPrediction() {
 		return vehicleBehindPrediction;
 	}
-
-	public HeadwayDetails(IpcPrediction vehicleBehindPrediction, IpcPrediction vehicleAheadPrediction)
-			throws Exception {
-		super();
-		this.vehicleBehindPrediction = vehicleBehindPrediction;
+	public HeadwayDetails(Long arrivalPrediction, IpcPrediction vehicleAheadPrediction)
+	{
+		super();		
 		this.vehicleAheadPrediction = vehicleAheadPrediction;
-		if ((vehicleBehindPrediction != null && vehicleAheadPrediction != null
-				&& vehicleBehindPrediction.getStopId().equals(vehicleAheadPrediction.getStopId())
-				&& (!vehicleBehindPrediction.getVehicleId().equals(vehicleAheadPrediction.getVehicleId())))) {
-			throw new Exception("Need two predictions for same stop for different vehicles to calculate headway.");
-		}
+		this.arrivalPrediction=arrivalPrediction;
 	}
-
-	public long getHeadway() {
-
-		return vehicleBehindPrediction.getPredictionTime() - vehicleAheadPrediction.getPredictionTime();
-
+	public HeadwayDetails(Long arrivalPrediction, ArrivalDeparture vehicleAheadArrival)
+	{
+		super();		
+		this.vehicleAheadArrival = vehicleAheadArrival;
+		this.arrivalPrediction=arrivalPrediction;
 	}
+	
+
+	
+
+	
+
+	
 
 	@Override
 	public String toString() {
-
-		return "HeadwayDetails [vehicleAheadPrediction=" + vehicleAheadPrediction + ", vehicleBehindPrediction="
-				+ vehicleBehindPrediction + ", getHeadway()=" + getHeadway() + "]";
-
+		return "HeadwayDetails [headway=" + TimeUnit.MILLISECONDS.toMinutes(getHeadway()) + " mins, vehicleId=" + getOtherVehicleId()
+				+ ", prediction=" + basedOnPrediction() + "]";
 	}
 
+	public Long getHeadway() {
+
+		if(vehicleBehindPrediction!=null && vehicleAheadPrediction!=null)
+			return vehicleBehindPrediction.getPredictionTime() - vehicleAheadPrediction.getPredictionTime();
+		if(vehicleBehindPrediction!=null && vehicleAheadArrival!=null)
+			return vehicleBehindPrediction.getPredictionTime()-vehicleAheadArrival.getTime();
+		if(arrivalPrediction!=null && vehicleAheadArrival!=null)
+			return arrivalPrediction-vehicleAheadArrival.getTime();
+		if(arrivalPrediction!=null && vehicleAheadPrediction!=null)
+			return arrivalPrediction-vehicleAheadPrediction.getPredictionTime();
+		
+		return null;
+	}
+	public String getOtherVehicleId()
+	{
+		if(vehicleAheadPrediction!=null)
+			return vehicleAheadPrediction.getVehicleId();
+		if(vehicleAheadArrival!=null)
+			return vehicleAheadArrival.getVehicleId();
+		return null;
+	}
+	public boolean basedOnPrediction()
+	{
+		if(vehicleAheadPrediction!=null)
+			return true;
+		else
+			return false;
+	}
 }

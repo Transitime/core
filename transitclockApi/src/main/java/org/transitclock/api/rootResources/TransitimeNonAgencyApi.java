@@ -48,6 +48,10 @@ import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.ipc.interfaces.ConfigInterface;
 import org.transitclock.ipc.interfaces.PredictionsInterface;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.servers.Servers;
+
 /**
  * Contains the API commands for the Transitime API for system wide commands,
  * such as determining all agencies. The intent of this feed is to provide what
@@ -76,6 +80,8 @@ public class TransitimeNonAgencyApi {
 	@Path("/command/agencies")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Rerives all tha agencies managed by the server.",
+	description="Rerives all tha agencies managed by the server.",tags= {"base data","agency"})
 	public Response getAgencies(@BeanParam StandardParameters stdParameters)
 			throws WebApplicationException {
 		// Make sure request is valid
@@ -135,6 +141,9 @@ public class TransitimeNonAgencyApi {
 	@Path("/command/predictionsByLoc")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Gets predictions from server by location",
+	description="Gets a list of prediction by location for all angencies managed by the api.",
+	tags= {"prediction"})
 	public Response getPredictions(
 			@BeanParam StandardParameters stdParameters,
 			@QueryParam(value = "lat") Double lat,

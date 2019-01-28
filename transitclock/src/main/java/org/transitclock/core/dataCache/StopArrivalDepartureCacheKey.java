@@ -1,6 +1,7 @@
 package org.transitclock.core.dataCache;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 /**
  * @author Sean Og Crudden
@@ -14,20 +15,26 @@ public class StopArrivalDepartureCacheKey implements Serializable {
 	private Date date;
 	public StopArrivalDepartureCacheKey(String stopid, Date date) {
 		super();
-		this.stopid = stopid;
-		this.date = date;
+		setDate(date);
+		this.stopid=stopid;
 	}
 	public String getStopid() {
 		return stopid;
 	}
-	public void setStopid(String stopid) {
-		this.stopid = stopid;
-	}
+
 	public Date getDate() {
 		return date;
 	}
 	public void setDate(Date date) {
-		this.date = date;
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		
+		this.date = calendar.getTime();				
 	}
 	@Override
 	public int hashCode() {

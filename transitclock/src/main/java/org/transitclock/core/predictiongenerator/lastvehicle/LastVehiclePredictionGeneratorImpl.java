@@ -16,9 +16,9 @@ import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.HistoricalAverage;
 import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.StopPathPredictionCache;
-import org.transitclock.core.dataCache.TripDataHistoryCache;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
+import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitclock.db.structs.AvlReport;
@@ -41,11 +41,11 @@ import org.transitclock.ipc.data.IpcVehicleComplete;
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
 	@Override
-	protected IpcPrediction generatePredictionForStop(AvlReport avlReport, Indices indices, long predictionTime,
+	protected IpcPrediction generatePredictionForStop(AvlReport avlReport,  Indices indices, long predictionTime,
 			boolean useArrivalTimes, boolean affectedByWaitStop, boolean isDelayed, boolean lateSoMarkAsUncertain,
 			int tripCounter, Integer scheduleDeviation) {
 		// TODO Auto-generated method stub
-		return super.generatePredictionForStop(avlReport, indices, predictionTime, useArrivalTimes, affectedByWaitStop,
+		return super.generatePredictionForStop(avlReport,  indices, predictionTime, useArrivalTimes, affectedByWaitStop,
 				isDelayed, lateSoMarkAsUncertain, tripCounter, scheduleDeviation);
 	}
 	private String alternative="PredictionGeneratorDefaultImpl";
@@ -97,9 +97,9 @@ public class LastVehiclePredictionGeneratorImpl extends
 		return super.getTravelTimeForPath(indices, avlReport, currentVehicleState);
 	}
 	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
+	public long getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState) {
 		// Looking at last vehicle value would be a bad idea for dwell time, so no implementation here.
 		
-		return super.getStopTimeForPath(indices, avlReport, vehicleState);
+		return super.getStopTimeForPath(indices,  avlReport, vehicleState);
 	}
 }

@@ -56,7 +56,7 @@ public class EmailSender {
 	
 	private static StringConfigValue emailConfigFile =
 			new StringConfigValue("transitclock.utils.emailConfigFile", 
-					"/home/ec2-user/transitimeScripts/emailConfig.txt",
+					"/usr/local/transitclock/config/emailconfig.properties",
 					"Specifies name of configuration file used for sending "
 					+ "out e-mails.");
 

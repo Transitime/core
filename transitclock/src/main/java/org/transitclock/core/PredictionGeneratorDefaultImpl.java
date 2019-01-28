@@ -153,7 +153,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	 *            are less certain.
 	 * @return The generated Prediction
 	 */
-	 protected IpcPrediction generatePredictionForStop(AvlReport avlReport,
+	 protected IpcPrediction generatePredictionForStop(AvlReport avlReport,  
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
 
@@ -182,7 +182,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
 					predictionTime,	predictionTime, indices.atEndOfTrip(),
 					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-					ArrivalOrDeparture.ARRIVAL, scheduleDeviation, freqStartTime, tripCounter);
+					ArrivalOrDeparture.ARRIVAL, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
 
 		} else {
 			
@@ -299,7 +299,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain,
 
-							ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter);
+							ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
 
 				} else {
 					// Use the expected departure times, possibly adjusted for 
@@ -309,7 +309,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain,
 
-							ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter);
+							ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
 
 				}
 			} else {
@@ -320,7 +320,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 						predictionTime + expectedStopTimeMsec, 
 						indices.atEndOfTrip(),
 						affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-						ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter);
+						ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
 
 
 			}

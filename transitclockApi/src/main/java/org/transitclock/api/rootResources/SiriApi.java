@@ -41,6 +41,11 @@ import org.transitclock.ipc.data.IpcVehicleComplete;
 import org.transitclock.ipc.interfaces.PredictionsInterface;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.servers.Servers;
+
 /**
  * The Siri API
  *
@@ -68,9 +73,13 @@ public class SiriApi {
 	@Path("/command/siri/vehicleMonitoring")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns vehicleMonitoring vehicle information in SIRI format.",
+	description="It is possible to specify vehicleIds, routeIds, or routeShortNames "
+			+ "to get subset of data. If not specified then vehicle information for entire agency is returned.",
+			tags= {"SIRI","feed"})
 	public Response getVehicles(@BeanParam StandardParameters stdParameters,
-			@QueryParam(value = "v") List<String> vehicleIds,
-			@QueryParam(value = "r") List<String> routesIdOrShortNames)
+			@Parameter(description="List of vehicles id", required=false)@QueryParam(value = "v") List<String> vehicleIds,
+			@Parameter(description="List of routesId or routeShortName", required=false)@QueryParam(value = "r") List<String> routesIdOrShortNames)
 			throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
@@ -114,13 +123,18 @@ public class SiriApi {
 	@Path("/command/siri/stopMonitoring")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Returns stopMonitoring vehicle information in SIRI format.",
+	description="It is possible to specify vehicleIds, routeIds, or routeShortNames "
+			+ "to get subset of data. It is possible to specify the number of perdictions per stop."
+			+ " If not specified then vehicle information for entire agency is returned.",
+			tags= {"SIRI","feed"})
 	public
 			Response
 			getVehicles(
 					@BeanParam StandardParameters stdParameters,
-					@QueryParam(value = "r") String routeIdOrShortName,
-					@QueryParam(value = "s") String stopId,
-					@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
+					@Parameter(description="RoutesId or routeShortName", required=true) @QueryParam(value = "r") String routeIdOrShortName,
+					@Parameter(description="StopIds", required=true) @QueryParam(value = "s") String stopId,
+					@Parameter(description="Number of predictions", required=false)	@QueryParam(value = "numPreds") @DefaultValue("3") int numberPredictions)
 					throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
