@@ -148,9 +148,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			String nextStopId, String nextStopName, String vehicleType,
 			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
 			Integer atOrNextGtfsStopSeq, String originStopId,
-			String destinationId, double distanceToNextStop,
+			String destinationId, Double distanceToNextStop,
 
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled,
+			Double distanceOfNextStopFromTripStart, Double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled,
 			double headway) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
@@ -178,9 +178,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		// Exact copy of fields of IpcCompleteVehicle enclosing class object
 		private String originStopId;
 		private String destinationId;
-		private double distanceToNextStop;
-		private double distanceOfNextStopFromTripStart;
-		private double distanceAlongTrip;
+		private Double distanceToNextStop;
+		private Double distanceOfNextStopFromTripStart;
+		private Double distanceAlongTrip;
 		private double headway;
 		private static final short currentSerializationVersion = 0;
 		
@@ -212,9 +212,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			
 		    stream.writeObject(originStopId);
 		    stream.writeObject(destinationId);
-		    stream.writeDouble(distanceToNextStop);
-		    stream.writeDouble(distanceOfNextStopFromTripStart);
-		    stream.writeDouble(distanceAlongTrip);
+		    stream.writeObject(distanceToNextStop);
+		    stream.writeObject(distanceOfNextStopFromTripStart);
+		    stream.writeObject(distanceAlongTrip);
 		    stream.writeDouble(headway);
 		}
 
@@ -240,9 +240,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			// Read in data for this class
 			originStopId = (String) stream.readObject();
 			destinationId = (String) stream.readObject();
-			distanceToNextStop = stream.readDouble();
-			distanceOfNextStopFromTripStart = stream.readDouble();
-			distanceAlongTrip = stream.readDouble();
+			distanceToNextStop = (Double)stream.readObject();
+			distanceOfNextStopFromTripStart = (Double)stream.readObject();
+			distanceAlongTrip =(Double) stream.readObject();
 			isCanceled=stream.readBoolean();
 			headway=stream.readDouble();
 		}
