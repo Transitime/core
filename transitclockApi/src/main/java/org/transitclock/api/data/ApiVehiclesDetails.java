@@ -63,11 +63,12 @@ public class ApiVehiclesDetails {
 	 * @param uiTypesForVehicles
 	 *            Specifies how vehicles should be drawn in UI. Can be NORMAL,
 	 *            SECONDARY, or MINOR
+	 * @param assigned 
 	 * @throws InvocationTargetException 
 	 * @throws IllegalAccessException 
 	 */
 	public ApiVehiclesDetails(Collection<IpcVehicle> vehicles,
-			String agencyId, Map<String, UiMode> uiTypesForVehicles) throws IllegalAccessException, InvocationTargetException {
+			String agencyId, Map<String, UiMode> uiTypesForVehicles, boolean assigned) throws IllegalAccessException, InvocationTargetException {
 		// Get Time object based on timezone for agency
 		WebAgency webAgency = WebAgency.getCachedWebAgency(agencyId);
 		Agency agency = webAgency.getAgency();
@@ -79,7 +80,7 @@ public class ApiVehiclesDetails {
 		for (IpcVehicle vehicle : vehicles) {
 			// Determine UI type for vehicle
 			UiMode uiType = uiTypesForVehicles.get(vehicle.getId());
-
+			if((assigned  && vehicle.getTripId()!=null ) || !assigned)
 			vehiclesData.add(new ApiVehicleDetails(vehicle, timeForAgency,
 					uiType));
 		}

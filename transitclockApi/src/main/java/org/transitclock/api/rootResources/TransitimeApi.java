@@ -295,7 +295,7 @@ public class TransitimeApi {
 			+ " adherence and driver IDs.",tags= {"vehicle"})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getVehiclesDetails(@BeanParam StandardParameters stdParameters,
-			@Parameter(description="Specifies which vehicles to get data for",required=true) 
+			@Parameter(description="Specifies which vehicles to get data for",required=false) 
 			@QueryParam(value = "v") List<String> vehicleIds,
 			@Parameter(description="Specifies which routes to get data for",required=false) 
 			@QueryParam(value = "r") List<String> routesIdOrShortNames, 
@@ -306,7 +306,12 @@ public class TransitimeApi {
 			@QueryParam(value = "s") String stopId,
 			@Parameter(description=" For when determining which vehicles are generating the"
 					+ "predictions so can label minor vehicles",required=false)@QueryParam(value = "numPreds") 
-			@DefaultValue("3") int numberPredictions) throws WebApplicationException {
+			@DefaultValue("3") int numberPredictions
+			,
+			@Parameter(description=" Return only assigned vehicles",required=false)@QueryParam(value = "assgined") 
+			@DefaultValue("false") boolean assigned
+			
+			) throws WebApplicationException {
 		// Make sure request is valid
 		stdParameters.validate();
 
@@ -337,7 +342,7 @@ public class TransitimeApi {
 
 			// Convert IpcVehiclesDetails to ApiVehiclesDetails
 			ApiVehiclesDetails apiVehiclesDetails = new ApiVehiclesDetails(vehicles, stdParameters.getAgencyId(),
-					uiTypesForVehicles);
+					uiTypesForVehicles,assigned);
 
 			// return ApiVehiclesDetails response
 			Response result = null;

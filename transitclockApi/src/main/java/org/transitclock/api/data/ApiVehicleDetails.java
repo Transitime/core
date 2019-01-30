@@ -164,7 +164,7 @@ public class ApiVehicleDetails extends ApiVehicleAbstract {
 		licensePlate=vehicle.getLicensePlate();
 		isCanceled=false;
 		headway=-1;
-		if(vehicle instanceof IpcVehicleComplete )
+		if(vehicle instanceof IpcVehicleComplete && tripId!=null )
 		{
 			distanceAlongTrip=((IpcVehicleComplete)vehicle).getDistanceAlongTrip();
 			isCanceled=((IpcVehicleComplete)vehicle).isCanceled();

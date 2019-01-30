@@ -48,9 +48,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 
 	private final String originStopId;
 	private final String destinationId;
-	private final double distanceToNextStop;
-	private final double distanceOfNextStopFromTripStart;
-	private final double distanceAlongTrip;
+	private final Double distanceToNextStop;
+	private final Double distanceOfNextStopFromTripStart;
+	private final Double distanceAlongTrip;
 	private double headway;
 	
 	private static final long serialVersionUID = 8154105842499551461L;
@@ -99,9 +99,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			// Vehicle not assigned to trip so null out parameters
 			this.originStopId = null;
 			this.destinationId = null;
-			this.distanceToNextStop = Double.NaN;
-			this.distanceOfNextStopFromTripStart = Double.NaN;
-			this.distanceAlongTrip = Double.NaN;
+			this.distanceToNextStop =null; //Double.NaN;
+			this.distanceOfNextStopFromTripStart =null;//  Double.NaN;
+			this.distanceAlongTrip =null; // Double.NaN;
 		}
 	}
 	
