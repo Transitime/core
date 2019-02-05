@@ -21,29 +21,26 @@ import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.utils.Time;
 
 import net.spy.memcached.MemcachedClient;
 
 public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
-	
-	private static StringConfigValue memcachedHost = 
-			new StringConfigValue("transitclock.cache.memcached.host", 
-					null, 
-					"Specifies the host machine that memcache is running on.");
-	
-	private static IntegerConfigValue memcachedPort = 
-			new IntegerConfigValue("transitclock.cache.memcached.port", 
-					null, 
-					"Specifies the port that memcache is running on.");
+
+	private static StringConfigValue memcachedHost = new StringConfigValue("transitclock.cache.memcached.host", "127.0.0.1",
+			"Specifies the host machine that memcache is running on.");
+
+	private static IntegerConfigValue memcachedPort = new IntegerConfigValue("transitclock.cache.memcached.port", 11211,
+			"Specifies the port that memcache is running on.");
+
 	MemcachedClient memcachedClient = null;
-	
-	
-	
-	private static String keystub="ERRORKEY_";
+
+	private static String keystub = "TRIPHISTORY_";
+	Integer expiryDuration=Time.SEC_PER_DAY*28;
 	public TripDataHistoryCache() throws IOException {
-				
-		memcachedClient = new MemcachedClient(new InetSocketAddress(
-				memcachedHost.getValue(), memcachedPort.getValue().intValue()));		
+
+		memcachedClient = new MemcachedClient(
+				new InetSocketAddress(memcachedHost.getValue(), memcachedPort.getValue().intValue()));
 	}
 
 	@Override
@@ -61,39 +58,34 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {
-		// TODO Auto-generated method stub
+
 		Object value = memcachedClient.get(createKey(tripKey));
-		if(value instanceof List<?>)
-			return (List<ArrivalDeparture>)value;
+		if (value instanceof List<?>)
+			return (List<ArrivalDeparture>) value;
 		return null;
-		
+
 	}
 
 	@Override
 	public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
-		// TODO Auto-generated method stub
+
 		Date nearestDay = DateUtils.truncate(new Date(arrivalDeparture.getTime()), Calendar.DAY_OF_MONTH);
-		
 
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
-		
-		Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
-		if(trip!=null)
-		{
-			TripKey tripKey = new TripKey(arrivalDeparture.getTripId(),
-					nearestDay,
-					trip.getStartTime());
-			
-			List<ArrivalDeparture> list  = this.getTripHistory(tripKey);
-			
-			if(list==null)				
-				list = new ArrayList<ArrivalDeparture>();				
-			
+
+		Trip trip = dbConfig.getTrip(arrivalDeparture.getTripId());
+		if (trip != null) {
+			TripKey tripKey = new TripKey(arrivalDeparture.getTripId(), nearestDay, trip.getStartTime());
+
+			List<ArrivalDeparture> list = this.getTripHistory(tripKey);
+
+			if (list == null)
+				list = new ArrayList<ArrivalDeparture>();
+
 			list.add(arrivalDeparture);
-			memcachedClient.set(createKey(tripKey),100, Collections.synchronizedList(list));	
+			memcachedClient.set(createKey(tripKey), expiryDuration, Collections.synchronizedList(list));
 		}
-			
-									
+
 		return null;
 	}
 
@@ -116,9 +108,10 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	private String createKey(TripKey tripKey)
-	{
-		SimpleDateFormat formatter=new SimpleDateFormat("yyyyMMdd");
-		return keystub+tripKey.getTripId()+"_"+formatter.format(tripKey.getTripStartDate())+"_"+tripKey.getStartTime();
+
+	private String createKey(TripKey tripKey) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		return keystub + tripKey.getTripId() + "_" + formatter.format(tripKey.getTripStartDate()) + "_"
+				+ tripKey.getStartTime();
 	}
 }
