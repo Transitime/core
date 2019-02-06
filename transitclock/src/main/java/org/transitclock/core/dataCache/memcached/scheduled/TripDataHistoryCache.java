@@ -83,7 +83,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 				list = new ArrayList<ArrivalDeparture>();
 
 			list.add(arrivalDeparture);
-			memcachedClient.set(createKey(tripKey), expiryDuration, Collections.synchronizedList(list));
+			memcachedClient.set(createKey(tripKey), expiryDuration, list);
 		}
 
 		return null;
@@ -111,7 +111,6 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 
 	private String createKey(TripKey tripKey) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-		return keystub + tripKey.getTripId() + "_" + formatter.format(tripKey.getTripStartDate()) + "_"
-				+ tripKey.getStartTime();
+		return keystub + tripKey.getTripId() + "_" + formatter.format(tripKey.getTripStartDate());				
 	}
 }
