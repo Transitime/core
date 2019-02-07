@@ -15,6 +15,7 @@ import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Headway;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.data.IpcVehicleComplete;
 
 /**
@@ -41,7 +42,7 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 
 			StopArrivalDepartureCacheKey key=new StopArrivalDepartureCacheKey(stopId, new Date(date));
 
-			List<ArrivalDeparture> stopList=StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
+			List<IpcArrivalDeparture> stopList=StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
 			int lastStopArrivalIndex =-1;
 			int previousVehicleArrivalIndex = -1;
 
@@ -50,7 +51,7 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 			{
 				for(int i=0;i<stopList.size() && previousVehicleArrivalIndex==-1 ;i++)
 				{
-					ArrivalDeparture arrivalDepature = stopList.get(i);
+					IpcArrivalDeparture arrivalDepature = stopList.get(i);
 					if(arrivalDepature.isDeparture() && arrivalDepature.getStopId().equals(stopId) && arrivalDepature.getVehicleId().equals(vehicleId)
 							&& (vehicleState.getTrip().getDirectionId()==null || vehicleState.getTrip().getDirectionId().equals(arrivalDepature.getDirectionId())))
 					{
@@ -65,9 +66,9 @@ public class LastDepartureHeadwayGenerator implements HeadwayGenerator {
 				}
 				if(previousVehicleArrivalIndex!=-1 && lastStopArrivalIndex!=-1)
 				{
-					long headwayTime=Math.abs(stopList.get(lastStopArrivalIndex).getTime()-stopList.get(previousVehicleArrivalIndex).getTime());
+					long headwayTime=Math.abs(stopList.get(lastStopArrivalIndex).getTime().getTime()-stopList.get(previousVehicleArrivalIndex).getTime().getTime());
 
-					Headway headway=new Headway(headwayTime, new Date(date), vehicleId, stopList.get(previousVehicleArrivalIndex).getVehicleId(), stopId, vehicleState.getTrip().getId(), vehicleState.getTrip().getRouteId(), new Date(stopList.get(lastStopArrivalIndex).getTime()), new Date(stopList.get(previousVehicleArrivalIndex).getTime()));
+					Headway headway=new Headway(headwayTime, new Date(date), vehicleId, stopList.get(previousVehicleArrivalIndex).getVehicleId(), stopId, vehicleState.getTrip().getId(), vehicleState.getTrip().getRouteId(), new Date(stopList.get(lastStopArrivalIndex).getTime().getTime()), new Date(stopList.get(previousVehicleArrivalIndex).getTime().getTime()));
 					// TODO Core.getInstance().getDbLogger().add(headway);
 
 					// remove rubish data from departure sfrom t

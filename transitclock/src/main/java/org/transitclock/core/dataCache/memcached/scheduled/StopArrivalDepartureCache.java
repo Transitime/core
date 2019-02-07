@@ -13,9 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
+import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 import net.spy.memcached.MemcachedClient;
@@ -36,7 +38,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<ArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
+	public List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
 
 		Calendar date = Calendar.getInstance();
 		date.setTime(key.getDate());
@@ -46,7 +48,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
 		key.setDate(date.getTime());
-		List<ArrivalDeparture> result = (List<ArrivalDeparture>) memcachedClient.get(createKey(key));
+		List<IpcArrivalDeparture> result = (List<IpcArrivalDeparture>) memcachedClient.get(createKey(key));
 
 		return result;
 	}
@@ -65,19 +67,20 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
 				date.getTime());
 
-		List<ArrivalDeparture> list = getStopHistory(key);
+		List<IpcArrivalDeparture> list = getStopHistory(key);
 
 		if (list == null)
-			list = new ArrayList<ArrivalDeparture>();
+			list = new ArrayList<IpcArrivalDeparture>();
 
-		list.add(arrivalDeparture);
-
-		Collections.sort(list, new ArrivalDepartureComparator());
-
-		memcachedClient.set(createKey(key), expiryDuration, list);
-
+		try {
+			list.add(new IpcArrivalDeparture(arrivalDeparture));
+			Collections.sort(list, new IpcArrivalDepartureComparator());
+			memcachedClient.set(createKey(key), expiryDuration, list);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 		return key;
-
 	}
 
 	public StopArrivalDepartureCache() throws IOException {

@@ -54,18 +54,26 @@ public class IpcArrivalDeparture implements Serializable {
 	private int stopPathIndex;
 	@XmlAttribute
 	private float stopPathLength;
+	@XmlAttribute
+	private Date freqStartTime;
 	
 	public IpcArrivalDeparture(ArrivalDeparture arrivalDepature) throws Exception {
 		
 		this.vehicleId=arrivalDepature.getVehicleId();
 		this.time=new Date(arrivalDepature.getTime());
+		this.avlTime=arrivalDepature.getAvlTime();
 		this.routeId=arrivalDepature.getRouteId();
 		this.tripId=arrivalDepature.getTripId();
 		this.isArrival=arrivalDepature.isArrival();
 		this.stopId=arrivalDepature.getStopId();
 		this.stopPathIndex=arrivalDepature.getStopPathIndex();
 		this.scheduledTime=arrivalDepature.getScheduledDate();
+		this.freqStartTime=arrivalDepature.getFreqStartTime();
+		this.directionId=arrivalDepature.getDirectionId();
+		this.blockId=arrivalDepature.getBlockId();
+		this.serviceId=arrivalDepature.getServiceId();
 	}
+	
 	
 	@Override
 	public int hashCode() {
@@ -74,6 +82,7 @@ public class IpcArrivalDeparture implements Serializable {
 		result = prime * result + ((avlTime == null) ? 0 : avlTime.hashCode());
 		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
 		result = prime * result + ((directionId == null) ? 0 : directionId.hashCode());
+		result = prime * result + ((freqStartTime == null) ? 0 : freqStartTime.hashCode());
 		result = prime * result + gtfsStopSeq;
 		result = prime * result + (isArrival ? 1231 : 1237);
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
@@ -89,6 +98,8 @@ public class IpcArrivalDeparture implements Serializable {
 		result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
 		return result;
 	}
+
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -112,6 +123,11 @@ public class IpcArrivalDeparture implements Serializable {
 			if (other.directionId != null)
 				return false;
 		} else if (!directionId.equals(other.directionId))
+			return false;
+		if (freqStartTime == null) {
+			if (other.freqStartTime != null)
+				return false;
+		} else if (!freqStartTime.equals(other.freqStartTime))
 			return false;
 		if (gtfsStopSeq != other.gtfsStopSeq)
 			return false;
@@ -165,6 +181,8 @@ public class IpcArrivalDeparture implements Serializable {
 			return false;
 		return true;
 	}
+
+
 	public String getVehicleId() {
 		return vehicleId;
 	}
@@ -261,4 +279,29 @@ public class IpcArrivalDeparture implements Serializable {
 	public void setStopPathLength(float stopPathLength) {
 		this.stopPathLength = stopPathLength;
 	}
+
+	public boolean isDeparture() {
+		return !isArrival;
+	}
+
+	public Date getFreqStartTime() {
+		return freqStartTime;
+	}
+
+	public void setFreqStartTime(Date freqStartTime) {
+		this.freqStartTime = freqStartTime;
+	}
+
+
+	@Override
+	public String toString() {
+		return "IpcArrivalDeparture [vehicleId=" + vehicleId + ", time=" + time + ", stopId=" + stopId
+				+ ", gtfsStopSeq=" + gtfsStopSeq + ", isArrival=" + isArrival + ", tripId=" + tripId + ", avlTime="
+				+ avlTime + ", scheduledTime=" + scheduledTime + ", blockId=" + blockId + ", routeId=" + routeId
+				+ ", serviceId=" + serviceId + ", directionId=" + directionId + ", tripIndex=" + tripIndex
+				+ ", stopPathIndex=" + stopPathIndex + ", stopPathLength=" + stopPathLength + ", freqStartTime="
+				+ freqStartTime + "]";
+	}
+
+	
 }

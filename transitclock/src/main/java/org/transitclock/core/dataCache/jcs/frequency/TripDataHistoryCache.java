@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
+import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripKey;
@@ -25,6 +26,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.GtfsData;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 import net.sf.ehcache.Element;
 
@@ -34,7 +36,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	private static final Logger logger = LoggerFactory
 			.getLogger(TripDataHistoryCache.class);
 	
-	private CacheAccess<TripKey, List<ArrivalDeparture>>  cache = null;
+	private CacheAccess<TripKey, List<IpcArrivalDeparture>>  cache = null;
 	
 	@Override
 	public List<TripKey> getKeys() {
@@ -64,7 +66,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	}
 
 	@Override
-	public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {	
+	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {	
 				
 		/* this is what gets the trip from the buckets */
 		int time = FrequencyBasedHistoricalAverageCache.round(tripKey.getStartTime(), FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
@@ -103,12 +105,17 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 						nearestDay,
 						time);
 										
-				List<ArrivalDeparture> list  = cache.get(tripKey);
+				List<IpcArrivalDeparture> list  = cache.get(tripKey);
 		
 				if(list==null)				
-					list = new ArrayList<ArrivalDeparture>();				
+					list = new ArrayList<IpcArrivalDeparture>();				
 				
-				list.add(arrivalDeparture);
+				try {
+					list.add(new IpcArrivalDeparture(arrivalDeparture));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				cache.put(tripKey, Collections.synchronizedList(list));							
 			}														
 		}				
@@ -142,10 +149,10 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousArrivalEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
 	 */
 	@Override
-	public ArrivalDeparture findPreviousArrivalEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	public IpcArrivalDeparture findPreviousArrivalEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
 	{
-		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());
-		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
+		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
 			if(tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival()))
 			{
@@ -158,10 +165,10 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousDepartureEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
 	 */
 	@Override
-	public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	public IpcArrivalDeparture findPreviousDepartureEvent(List<IpcArrivalDeparture> arrivalDepartures, IpcArrivalDeparture current)
 	{	
-		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());							
-		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());							
+		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
 			try {
 				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) 

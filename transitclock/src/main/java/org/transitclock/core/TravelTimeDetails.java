@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 public class TravelTimeDetails {
-	private ArrivalDeparture departure;
-	private ArrivalDeparture arrival;
+	private IpcArrivalDeparture departure;
+	private IpcArrivalDeparture arrival;
 	
 	private static final IntegerConfigValue maxTravelTime = 
 			new IntegerConfigValue(
@@ -19,10 +20,10 @@ public class TravelTimeDetails {
 	private static final Logger logger = LoggerFactory
 			.getLogger(TravelTimeDetails.class);
 	
-	public ArrivalDeparture getDeparture() {
+	public IpcArrivalDeparture getDeparture() {
 		return departure;
 	}	
-	public ArrivalDeparture getArrival() {
+	public IpcArrivalDeparture getArrival() {
 		return arrival;
 	}
 	
@@ -32,7 +33,7 @@ public class TravelTimeDetails {
 		{						
 			if(sanityCheck())
 			{
-				long travelTime=this.arrival.getTime()-this.getDeparture().getTime();
+				long travelTime=this.arrival.getTime().getTime()-this.getDeparture().getTime().getTime();
 				return travelTime;
 			}else
 			{
@@ -41,7 +42,7 @@ public class TravelTimeDetails {
 		}	
 		return -1;				
 	}
-	public TravelTimeDetails(ArrivalDeparture departure, ArrivalDeparture arrival) {
+	public TravelTimeDetails(IpcArrivalDeparture departure, IpcArrivalDeparture arrival) {
 		super();
 		this.departure = departure;
 		this.arrival = arrival;
@@ -51,7 +52,7 @@ public class TravelTimeDetails {
 	{
 		if(this.arrival!=null && this.departure!=null && arrival.isArrival() && departure.isDeparture())
 		{
-			long travelTime=this.arrival.getTime()-this.getDeparture().getTime();
+			long travelTime=this.arrival.getTime().getTime()-this.getDeparture().getTime().getTime();
 		
 			if(travelTime<=0||travelTime>maxTravelTime.getValue())
 			{

@@ -23,11 +23,13 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
+import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 /**
@@ -108,7 +110,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	 */
 	
 	@SuppressWarnings("unchecked")
-	synchronized public List<ArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
+	synchronized public List<IpcArrivalDeparture> getStopHistory(StopArrivalDepartureCacheKey key) {
 
 		//logger.debug(cache.toString());
 		Calendar date = Calendar.getInstance();
@@ -122,7 +124,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		Element result = cache.get(key);
 		
 		if (result != null) {
-			return (List<ArrivalDeparture>) result.getObjectValue();
+			return (List<IpcArrivalDeparture>) result.getObjectValue();
 		} else {
 			return null;
 		}
@@ -149,20 +151,25 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 			StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
 					date.getTime());
 	
-			List<ArrivalDeparture> list = null;
+			List<IpcArrivalDeparture> list = null;
 	
 			Element result = cache.get(key);
 	
 			if (result != null && result.getObjectValue() != null) {
-				list = (List<ArrivalDeparture>) result.getObjectValue();
+				list = (List<IpcArrivalDeparture>) result.getObjectValue();
 				cache.remove(key);
 			} else {
-				list = new ArrayList<ArrivalDeparture>();
+				list = new ArrayList<IpcArrivalDeparture>();
 			}
 			
-			list.add(arrivalDeparture);
+			try {
+				list.add(new IpcArrivalDeparture(arrivalDeparture));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
-			Collections.sort(list, new ArrivalDepartureComparator());
+			Collections.sort(list, new IpcArrivalDepartureComparator());
 			
 			// This is java 1.8 list.sort(new ArrivalDepartureComparator());
 			

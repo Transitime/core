@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
+import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripKey;
@@ -35,6 +36,7 @@ import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.GtfsData;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 /**
@@ -123,9 +125,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				logger.debug("Key: "+key.toString());
 				@SuppressWarnings("unchecked")
 				
-				List<ArrivalDeparture> ads=(List<ArrivalDeparture>) result.getObjectValue();
+				List<IpcArrivalDeparture> ads=(List<IpcArrivalDeparture>) result.getObjectValue();
 												
-				for(ArrivalDeparture ad : ads)
+				for(IpcArrivalDeparture ad : ads)
 				{
 					logger.debug(ad.toString());
 				}
@@ -139,7 +141,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<ArrivalDeparture> getTripHistory(TripKey tripKey) {
+	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
 
 		//logger.debug(cache.toString());
 
@@ -147,7 +149,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 
 		if(result!=null)
 		{						
-			return (List<ArrivalDeparture>) result.getObjectValue();
+			return (List<IpcArrivalDeparture>) result.getObjectValue();
 		}
 		else
 		{
@@ -186,18 +188,23 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 						nearestDay,
 						trip.getStartTime());
 				
-				List<ArrivalDeparture> list = null;
+				List<IpcArrivalDeparture> list = null;
 		
 				Element result = cache.get(tripKey);
 		
 				if (result != null && result.getObjectValue() != null) {
-					list = (List<ArrivalDeparture>) result.getObjectValue();
+					list = (List<IpcArrivalDeparture>) result.getObjectValue();
 					cache.remove(tripKey);
 				} else {
-					list = new ArrayList<ArrivalDeparture>();
+					list = new ArrayList<IpcArrivalDeparture>();
 				}
 				
-				list.add(arrivalDeparture);									
+				try {
+					list.add(new IpcArrivalDeparture(arrivalDeparture));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}									
 				
 				Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
 							
@@ -235,10 +242,10 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousArrivalEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
 	 */
 	@Override
-	public ArrivalDeparture findPreviousArrivalEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	public IpcArrivalDeparture findPreviousArrivalEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
 	{
-		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());
-		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
+		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
 			if(tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival()))
 			{
@@ -251,10 +258,10 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 * @see org.transitclock.core.dataCache.ehcache.test#findPreviousDepartureEvent(java.util.List, org.transitclock.db.structs.ArrivalDeparture)
 	 */
 	@Override
-	public ArrivalDeparture findPreviousDepartureEvent(List<ArrivalDeparture> arrivalDepartures,ArrivalDeparture current)
+	public IpcArrivalDeparture findPreviousDepartureEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
 	{	
-		Collections.sort(arrivalDepartures, new ArrivalDepartureComparator());							
-		for (ArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
+		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());							
+		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
 		{
 			try {
 				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))

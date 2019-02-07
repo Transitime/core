@@ -44,6 +44,7 @@ import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.utils.Time;
@@ -87,7 +88,7 @@ public abstract class PredictionGenerator {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionGenerator.class);
 	
-	protected TravelTimeDetails getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
+	protected TravelTimeDetails getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) throws Exception {
 
 		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
 				indices.getStopPath().getStopId(),
@@ -101,19 +102,19 @@ public abstract class PredictionGenerator {
 			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
 					new Date(currentVehicleState.getMatch().getAvlTime()));
 
-			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
+			List<IpcArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 
-			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
+			List<IpcArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.
-				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
+				for (IpcArrivalDeparture currentArrivalDeparture : currentStopList) {
 
 					if(currentArrivalDeparture.isDeparture()
-							&& currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId()
+							&& !currentArrivalDeparture.getVehicleId().equals(currentVehicleState.getVehicleId())
 							&& (currentVehicleState.getTrip().getDirectionId()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
 					{
-						ArrivalDeparture found;
+						IpcArrivalDeparture found;
 
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
 							TravelTimeDetails travelTimeDetails=new TravelTimeDetails(currentArrivalDeparture, found);
@@ -150,33 +151,29 @@ public abstract class PredictionGenerator {
 			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
 					new Date(currentVehicleState.getMatch().getAvlTime()));
 
-			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
+			List<IpcArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 
-			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
+			List<IpcArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.
-				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
+				for (IpcArrivalDeparture currentArrivalDeparture : currentStopList) {
 
-					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId()
+					if(currentArrivalDeparture.isDeparture() && !currentArrivalDeparture.getVehicleId().equals(currentVehicleState.getVehicleId())
 							&& (currentVehicleState.getTrip().getDirectionId()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
 					{
-						ArrivalDeparture found;
+						IpcArrivalDeparture found;
 
 						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
-							if(found.getTime() - currentArrivalDeparture.getTime()>0)
+							if(found.getTime().getTime() - currentArrivalDeparture.getTime().getTime()>0)
 							{
 								Block currentBlock=null;
 								/* block is transient in arrival departure so when read from database need to get from dbconfig. */
-								if(currentArrivalDeparture.getBlock()==null&&currentArrivalDeparture.getServiceId()!=null && currentArrivalDeparture.getBlockId()!=null)
-								{
-									DbConfig dbConfig = Core.getInstance().getDbConfig();
+								
+								DbConfig dbConfig = Core.getInstance().getDbConfig();
 
-									currentBlock=dbConfig.getBlock(currentArrivalDeparture.getServiceId(), currentArrivalDeparture.getBlockId());
-								}else
-								{
-									currentBlock=currentArrivalDeparture.getBlock();
-								}
+								currentBlock=dbConfig.getBlock(currentArrivalDeparture.getServiceId(), currentArrivalDeparture.getBlockId());
+								
 								if(currentBlock!=null)
 									return new Indices(currentBlock, currentArrivalDeparture.getTripIndex(), found.getStopPathIndex(), 0);
 							}else
@@ -195,11 +192,11 @@ public abstract class PredictionGenerator {
 		return null;
 	}
 	/* TODO could also make it a requirement that it is on the same route as the one we are generating prediction for */
-	protected ArrivalDeparture findMatchInList(List<ArrivalDeparture> nextStopList,
-			ArrivalDeparture currentArrivalDeparture) {
-		for (ArrivalDeparture nextStopArrivalDeparture : nextStopList) {
-			if (currentArrivalDeparture.getVehicleId() == nextStopArrivalDeparture.getVehicleId()
-					&& currentArrivalDeparture.getTripId() == nextStopArrivalDeparture.getTripId()
+	protected IpcArrivalDeparture findMatchInList(List<IpcArrivalDeparture> nextStopList,
+			IpcArrivalDeparture currentArrivalDeparture) {
+		for (IpcArrivalDeparture nextStopArrivalDeparture : nextStopList) {
+			if (currentArrivalDeparture.getVehicleId().equals(nextStopArrivalDeparture.getVehicleId())
+					&& currentArrivalDeparture.getTripId().equals(nextStopArrivalDeparture.getTripId())
 					&&  currentArrivalDeparture.isDeparture() && nextStopArrivalDeparture.isArrival() ) {
 				return nextStopArrivalDeparture;
 			}
@@ -255,7 +252,7 @@ public abstract class PredictionGenerator {
 			Integer startTime, int num_days_look_back, int num_days) {
 
 		List<TravelTimeDetails> times = new ArrayList<TravelTimeDetails>();
-		List<ArrivalDeparture> results = null;
+		List<IpcArrivalDeparture> results = null;
 		int num_found = 0;
 		/*
 		 * TODO This could be smarter about the dates it looks at by looking at
@@ -274,11 +271,11 @@ public abstract class PredictionGenerator {
 
 			if (results != null) {
 
-				ArrivalDeparture arrival = getArrival(stopPathIndex, results);
+				IpcArrivalDeparture arrival = getArrival(stopPathIndex, results);
 
 				if(arrival!=null)
 				{
-					ArrivalDeparture departure = TripDataHistoryCacheFactory.getInstance().findPreviousDepartureEvent(results, arrival);
+					IpcArrivalDeparture departure = TripDataHistoryCacheFactory.getInstance().findPreviousDepartureEvent(results, arrival);
 
 					if (arrival != null && departure != null) {
 
@@ -295,9 +292,9 @@ public abstract class PredictionGenerator {
 		}
 		return times;
 	}
-	ArrivalDeparture getArrival(int stopPathIndex, List<ArrivalDeparture> results)
+	IpcArrivalDeparture getArrival(int stopPathIndex, List<IpcArrivalDeparture> results)
 	{
-		for(ArrivalDeparture result:results)
+		for(IpcArrivalDeparture result:results)
 		{
 			if(result.isArrival()&&result.getStopPathIndex()==stopPathIndex)
 			{

@@ -21,6 +21,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Headway;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 public class DwellTimeModelCache implements org.transitclock.core.dataCache.DwellTimeModelCacheInterface {
@@ -88,54 +89,59 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 	@Override
 	public void addSample(ArrivalDeparture departure) {
-		if(departure!=null && !departure.isArrival())
-		{
-			Block block=null;
-			if(departure.getBlock()==null)
+		try {
+			if(departure!=null && !departure.isArrival())
 			{
-				DbConfig dbConfig = Core.getInstance().getDbConfig();
-				block=dbConfig.getBlock(departure.getServiceId(), departure.getBlockId());								
-			}else
-			{
-				block=departure.getBlock();
-			}
-			
-			Indices indices = new Indices(departure);
-			StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
-			List<ArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
-			
-			if(stopData!=null && stopData.size()>1)
-			{
-				ArrivalDeparture arrival=findArrival(stopData, departure);
-				if(arrival!=null)
+				Block block=null;
+				if(departure.getBlock()==null)
 				{
-					ArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
-					if(arrival!=null&&previousArrival!=null)
-					{			
-						Headway headway=new Headway();
-						headway.setHeadway(arrival.getTime()-previousArrival.getTime());
-						long dwelltime=departure.getTime()-arrival.getTime();
-						headway.setTripId(arrival.getTripId());
-						
-						// Negative dwell times are errors in data so do not include.
-						// TODO not sure if it should ignore zero values.
-						if(dwelltime>=0)
-						{						
-							/* Leave out silly values as they are most likely errors or unusual circumstance. */ 
-							if(dwelltime<maxDwellTimeAllowedInModel.getValue() && 
-									headway.getHeadway() < maxHeadwayAllowedInModel.getValue())
-							{
-								addSample(departure, headway,dwelltime);
+					DbConfig dbConfig = Core.getInstance().getDbConfig();
+					block=dbConfig.getBlock(departure.getServiceId(), departure.getBlockId());								
+				}else
+				{
+					block=departure.getBlock();
+				}
+				
+				Indices indices = new Indices(departure);
+				StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
+				List<IpcArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
+				
+				if(stopData!=null && stopData.size()>1)
+				{
+					IpcArrivalDeparture arrival=findArrival(stopData, new IpcArrivalDeparture(departure));
+					if(arrival!=null)
+					{
+						IpcArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
+						if(arrival!=null&&previousArrival!=null)
+						{			
+							Headway headway=new Headway();
+							headway.setHeadway(arrival.getTime().getTime()-previousArrival.getTime().getTime());
+							long dwelltime=departure.getTime()-arrival.getTime().getTime();
+							headway.setTripId(arrival.getTripId());
+							
+							// Negative dwell times are errors in data so do not include.
+							// TODO not sure if it should ignore zero values.
+							if(dwelltime>=0)
+							{						
+								/* Leave out silly values as they are most likely errors or unusual circumstance. */ 
+								if(dwelltime<maxDwellTimeAllowedInModel.getValue() && 
+										headway.getHeadway() < maxHeadwayAllowedInModel.getValue())
+								{
+									addSample(departure, headway,dwelltime);
+								}
 							}
 						}
 					}
 				}
 			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}		
 	}
 
-	private ArrivalDeparture findPreviousArrival(List<ArrivalDeparture> stopData, ArrivalDeparture arrival) {		
-		for(ArrivalDeparture event:stopData)
+	private IpcArrivalDeparture findPreviousArrival(List<IpcArrivalDeparture> stopData, IpcArrivalDeparture arrival) {		
+		for(IpcArrivalDeparture event:stopData)
 		{
 			if(event.isArrival())
 			{
@@ -145,7 +151,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 					{
 						if(event.getStopId().equals(arrival.getStopId()))
 						{
-							if(event.getTime()<arrival.getTime())
+							if(event.getTime().getTime()<arrival.getTime().getTime())
 								return event;
 						}
 					}
@@ -158,7 +164,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 							{								
 								if(event.getStopId().equals(arrival.getStopId()))
 								{
-									if(event.getTime()<arrival.getTime())
+									if(event.getTime().getTime()<arrival.getTime().getTime())
 										return event;
 								}							
 							}
@@ -171,9 +177,9 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 		return null;
 	}
-	private ArrivalDeparture findArrival(List<ArrivalDeparture> stopData, ArrivalDeparture departure) {
+	private IpcArrivalDeparture findArrival(List<IpcArrivalDeparture> stopData, IpcArrivalDeparture departure) {
 
-		for(ArrivalDeparture event:stopData)
+		for(IpcArrivalDeparture event:stopData)
 		{
 			if(event.isArrival())
 			{

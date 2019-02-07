@@ -27,6 +27,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.HoldingTime;
 import org.transitclock.db.structs.Prediction;
 import org.transitclock.db.structs.Stop;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.ipc.data.IpcVehicleComplete;
@@ -46,26 +47,26 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 	protected static IntegerConfigValue  plannedHeadwayMsec = new IntegerConfigValue("transitclock.holding.plannedHeadwayMsec", 60*1000*9, "Planned Headway");
 	protected static StringListConfigValue controlStopList = new StringListConfigValue("transitclock.holding.controlStops", null, "This is a list of stops to generate holding times for.");
 
-	public HoldingTime generateHoldingTime(VehicleState vehicleState, ArrivalDeparture event) {
+	public HoldingTime generateHoldingTime(VehicleState vehicleState, IpcArrivalDeparture event) {
 
 		if(event.isArrival() && isControlStop(event.getStopId(), event.getStopPathIndex()))
 		{
  			logger.debug("Calling Simple Holding Generator for event : {}", event.toString());
 
-			ArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getTripId(), event.getStopId(), new Date(event.getTime()));
+			IpcArrivalDeparture lastVehicleDeparture = getLastVehicleDepartureTime(event.getTripId(), event.getStopId(), new Date(event.getTime().getTime()));
 
 			if(lastVehicleDeparture!=null)
 			{
 				logger.debug("Found last vehicle departure event: {}", lastVehicleDeparture.toString());
 
-				long current_vehicle_arrival_time=event.getTime();
+				long current_vehicle_arrival_time=event.getTime().getTime();
 
-				long holdingTimeValue=calculateHoldingTime(current_vehicle_arrival_time, lastVehicleDeparture.getTime());
+				long holdingTimeValue=calculateHoldingTime(current_vehicle_arrival_time, lastVehicleDeparture.getTime().getTime());
 
 				logger.debug("Holding time for : {} is {}.", event.toString(), holdingTimeValue);
 
 				HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time+holdingTimeValue),  new Date(Core.getInstance().getSystemTime()), event.getVehicleId(), event.getStopId(), event.getTripId(),
-						event.getRouteId(), false, true, new Date(event.getTime()), true, 0);
+						event.getRouteId(), false, true, new Date(event.getTime().getTime()), true, 0);
 
 				if(storeHoldingTimes.getValue())
 					Core.getInstance().getDbLogger().add(holdingTime);
@@ -76,9 +77,9 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 			{
 				logger.debug("Did not find last vehicle departure for stop {}. This is required to calculate holding time.",event.getStopId() );
 
-				long current_vehicle_arrival_time=event.getTime();
+				long current_vehicle_arrival_time=event.getTime().getTime();
 				HoldingTime holdingTime=new HoldingTime(new Date(current_vehicle_arrival_time),  new Date(Core.getInstance().getSystemTime()), event.getVehicleId(), event.getStopId(), event.getTripId(),
-						event.getRouteId(), false, true, new Date(event.getTime()), false, 0);
+						event.getRouteId(), false, true, new Date(event.getTime().getTime()), false, 0);
 				return holdingTime;
 			}
 
@@ -87,24 +88,24 @@ public class SimpleHoldingTimeGeneratorImpl implements HoldingTimeGenerator {
 		return null;
 	}
 
-	private ArrivalDeparture getLastVehicleDepartureTime(String tripId, String stopId, Date time)
+	private IpcArrivalDeparture getLastVehicleDepartureTime(String tripId, String stopId, Date time)
 	{
 		StopArrivalDepartureCacheKey currentStopKey=new StopArrivalDepartureCacheKey(stopId,time);
 
-		List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
+		List<IpcArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 
-		ArrivalDeparture closestDepartureEvent=null;
+		IpcArrivalDeparture closestDepartureEvent=null;
 		if(currentStopList!=null)
 		{
 			/* These are sorted when placed in cache */
-			for(ArrivalDeparture event:currentStopList)
+			for(IpcArrivalDeparture event:currentStopList)
 			{
 				//if(event.isDeparture() && event.getTripId().equals(tripId)) TODO This is because of the GTFS config of Atlanta Streetcar. Could we use route_id instead?
 				if(event.isDeparture() )
 				{
 					if(closestDepartureEvent==null)
 						closestDepartureEvent=event;
-					else if (time.getTime()-event.getTime() < time.getTime()-closestDepartureEvent.getTime())
+					else if (time.getTime()-event.getTime().getTime() < time.getTime()-closestDepartureEvent.getTime().getTime())
 					{
 						closestDepartureEvent=event;
 					}

@@ -19,6 +19,7 @@ import org.transitclock.core.dataCache.ErrorCacheFactory;
 import org.transitclock.core.dataCache.HistoricalAverage;
 import org.transitclock.core.dataCache.HoldingTimeCache;
 import org.transitclock.core.dataCache.HoldingTimeCacheKey;
+import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
@@ -91,14 +92,10 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(stopId,
 					Calendar.getInstance().getTime());
 
-			List<ArrivalDeparture> result = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
+			List<IpcArrivalDeparture> result = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 
-			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
-
-			for (ArrivalDeparture arrivalDeparture : result) {
-				ipcResultList.add(new IpcArrivalDeparture(arrivalDeparture));
-			}
-			return ipcResultList;
+			return result;
+			
 		} catch (Exception e) {
 
 			throw new RemoteException(e.toString(),e);
@@ -130,7 +127,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 			throws RemoteException {
 
 		try {
-			List<ArrivalDeparture> result = new ArrayList<ArrivalDeparture>();
+			List<IpcArrivalDeparture> result = new ArrayList<IpcArrivalDeparture>();
 
 			if(tripId!=null && localDate!=null && starttime!=null){
 
@@ -170,16 +167,10 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 					}
 				}
 			}
+		
+			Collections.sort(result, new IpcArrivalDepartureComparator());		
 
-			List<IpcArrivalDeparture> ipcResultList = new ArrayList<IpcArrivalDeparture>();
-
-			Collections.sort(result, new ArrivalDepartureComparator());
-
-			for (ArrivalDeparture arrivalDeparture : result) {
-				ipcResultList.add(new IpcArrivalDeparture(arrivalDeparture));
-			}
-
-			return ipcResultList;
+			return result;
 
 		} catch (Exception e) {
 

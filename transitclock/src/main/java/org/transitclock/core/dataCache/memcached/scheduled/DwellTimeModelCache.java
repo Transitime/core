@@ -25,6 +25,7 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Headway;
 import org.transitclock.gtfs.DbConfig;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 import net.spy.memcached.MemcachedClient;
@@ -117,19 +118,25 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 			Indices indices = new Indices(departure);
 			StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
-			List<ArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
+			List<IpcArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
 
 			if(stopData!=null && stopData.size()>1)
 			{
-				ArrivalDeparture arrival=findArrival(stopData, departure);
+				IpcArrivalDeparture arrival = null;
+				try {
+					arrival = findArrival(stopData, new IpcArrivalDeparture(departure));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				if(arrival!=null)
 				{
-					ArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
+					IpcArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
 					if(arrival!=null&&previousArrival!=null)
 					{
 						Headway headway=new Headway();
-						headway.setHeadway(arrival.getTime()-previousArrival.getTime());
-						long dwelltime=departure.getTime()-arrival.getTime();
+						headway.setHeadway(arrival.getTime().getTime()-previousArrival.getTime().getTime());
+						long dwelltime=departure.getTime()-arrival.getTime().getTime();
 						headway.setTripId(arrival.getTripId());
 
 						/* Leave out silly values as they are most likely errors or unusual circumstance. */
@@ -149,8 +156,8 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		}
 	}
 
-	private ArrivalDeparture findPreviousArrival(List<ArrivalDeparture> stopData, ArrivalDeparture arrival) {
-		for(ArrivalDeparture event:stopData)
+	private IpcArrivalDeparture findPreviousArrival(List<IpcArrivalDeparture> stopData, IpcArrivalDeparture arrival) {
+		for(IpcArrivalDeparture event:stopData)
 		{
 			if(event.isArrival())
 			{
@@ -160,7 +167,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 					{
 						if(event.getStopId().equals(arrival.getStopId()))
 						{
-							if(event.getTime()<arrival.getTime()&&(sameDay(event.getTime(), arrival.getTime())|| Math.abs(event.getTime()-arrival.getTime()) < maxHeadwayAllowedInModel.getValue()))
+							if(event.getTime().getTime()<arrival.getTime().getTime()&&(sameDay(event.getTime().getTime(), arrival.getTime().getTime())|| Math.abs(event.getTime().getTime()-arrival.getTime().getTime()) < maxHeadwayAllowedInModel.getValue()))
 								return event;
 						}
 					}
@@ -181,9 +188,9 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 		return sameDay;
 	}
-	private ArrivalDeparture findArrival(List<ArrivalDeparture> stopData, ArrivalDeparture departure) {
+	private IpcArrivalDeparture findArrival(List<IpcArrivalDeparture> stopData, IpcArrivalDeparture departure) {
 
-		for(ArrivalDeparture event:stopData)
+		for(IpcArrivalDeparture event:stopData)
 		{
 			if(event.isArrival())
 			{
