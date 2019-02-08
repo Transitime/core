@@ -34,6 +34,10 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	private static LongConfigValue minDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.rls.minDwellTimeAllowedInModel", (long) 1000, "Min dwell time to be considered in dwell RLS algotithm.");
 	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.rls.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
 	private static LongConfigValue minHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.rls.minHeadwayAllowedInModel", (long) 1000, "Min headway to be considered in dwell RLS algotithm.");
+	private static IntegerConfigValue minSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.rls.minSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
+	private static IntegerConfigValue maxSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.rls.maxSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
+	
+	
 
 
 	private static DoubleConfigValue lambda = new DoubleConfigValue("transitclock.prediction.rls.lambda", 0.75, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
@@ -91,55 +95,68 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 	@Override
 	public void addSample(ArrivalDeparture departure) {
-		try {
-			if(departure!=null && !departure.isArrival())
-			{
-				Block block=null;
-				if(departure.getBlock()==null)
-				{
-					DbConfig dbConfig = Core.getInstance().getDbConfig();
-					block=dbConfig.getBlock(departure.getServiceId(), departure.getBlockId());
-				}else
-				{
-					block=departure.getBlock();
-				}
-
-				Indices indices = new Indices(departure);
-				StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
-				List<IpcArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
-
-				if(stopData!=null && stopData.size()>1)
-				{
-					IpcArrivalDeparture arrival=findArrival(stopData, new IpcArrivalDeparture(departure));
-					if(arrival!=null)
+				
+			try {
+				if(departure!=null && !departure.isArrival())
+				{				
+					StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
+					List<IpcArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
+	
+					if(stopData!=null && stopData.size()>1)
 					{
-						IpcArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
-						if(arrival!=null&&previousArrival!=null)
+						IpcArrivalDeparture arrival=findArrival(stopData, new IpcArrivalDeparture(departure));
+						if(arrival!=null)
 						{
-							Headway headway=new Headway();
-							headway.setHeadway(arrival.getTime().getTime()-previousArrival.getTime().getTime());
-							long dwelltime=departure.getTime()-arrival.getTime().getTime();
-							headway.setTripId(arrival.getTripId());
-
-							/* Leave out silly values as they are most likely errors or unusual circumstance. */
-							/* TODO Should abstract this behind an anomaly detention interface/Factory */
-							if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
-									dwelltime >  minDwellTimeAllowedInModel.getValue() &&
-										headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
-										&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
-
+							IpcArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
+							if(arrival!=null&&previousArrival!=null)
 							{
-								addSample(departure,headway,dwelltime);
+								Headway headway=new Headway();
+								headway.setHeadway(arrival.getTime().getTime()-previousArrival.getTime().getTime());
+								long dwelltime=departure.getTime()-arrival.getTime().getTime();
+								headway.setTripId(arrival.getTripId());
+	
+								/* Leave out silly values as they are most likely errors or unusual circumstance. */
+								/* TODO Should abstract this behind an anomaly detention interface/Factory */
+								
+								if(departure.getScheduleAdherence()!=null && departure.getScheduleAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
+								{							
+									
+									// Arrival schedule adherence appears not to be set alot. So only stop if set and outside range.
+									if(previousArrival.getScheduledAdherence()==null || previousArrival.getScheduledAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
+									{		
+										if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
+												dwelltime >  minDwellTimeAllowedInModel.getValue())
+										{
+											if(headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
+													&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
+											{
+												addSample(departure,headway,dwelltime);
+											}else
+											{
+												
+											}
+										}else
+										{
+											logger.info("Dwell time {} outside allowable range for {}.", dwelltime, departure);
+										}
+									}else
+									{
+										logger.info("Schedule adherence outside allowable range. "+previousArrival.getScheduledAdherence());
+									}
+								}else
+								{
+									logger.info("Schedule adherence outside allowable range. "+departure.getScheduleAdherence());
+								}
+	
 							}
-
 						}
 					}
 				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 
 	private IpcArrivalDeparture findPreviousArrival(List<IpcArrivalDeparture> stopData, IpcArrivalDeparture arrival) {

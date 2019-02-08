@@ -41,7 +41,9 @@ public class ApiArrivalDeparture {
 		this.isArrival=ipcArrivalDeparture.isArrival();
 		this.stopId=ipcArrivalDeparture.getStopId();
 		this.stopPathIndex=ipcArrivalDeparture.getStopPathIndex();
-		this.scheduledTime=ipcArrivalDeparture.getScheduledTime();
+		
+		// TODO 
+		//this.scheduledTime=ipcArrivalDeparture.getScheduledTime();
 	}
 
 }

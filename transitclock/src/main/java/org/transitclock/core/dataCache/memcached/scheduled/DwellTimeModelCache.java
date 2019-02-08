@@ -20,6 +20,8 @@ import org.transitclock.core.Indices;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.core.dataCache.StopPathCacheKey;
+import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellTimeModelFactory;
+import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel;
 import org.transitclock.core.predictiongenerator.scheduled.dwell.rls.TransitClockRLS;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
@@ -29,19 +31,20 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 import net.spy.memcached.MemcachedClient;
-
+/**
+ * 
+ * @author scrudden
+ * This stores DwellModel instances in the cache. TODO We should abstract the anomaly detection as per TODO in code below.
+ */
 public class DwellTimeModelCache implements org.transitclock.core.dataCache.DwellTimeModelCacheInterface {
 
-	final private static String cacheName = "DwellTimeModelCache";
-
-
-	private static LongConfigValue maxDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.rls.maxDwellTimeAllowedInModel", (long) (2 * Time.MS_PER_MIN), "Max dwell time to be considered in dwell RLS algotithm.");
-	private static LongConfigValue minDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.rls.minDwellTimeAllowedInModel", (long) 1000, "Min dwell time to be considered in dwell RLS algotithm.");
-	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.rls.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
-	private static LongConfigValue minHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.rls.minHeadwayAllowedInModel", (long) 1000, "Min headway to be considered in dwell RLS algotithm.");
-
-
-	private static DoubleConfigValue lambda = new DoubleConfigValue("transitclock.prediction.rls.lambda", 0.75, "This sets the rate at which the RLS algorithm forgets old values. Value are between 0 and 1. With 0 being the most forgetful.");
+	private static LongConfigValue maxDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.maxDwellTimeAllowedInModel", (long) (2 * Time.MS_PER_MIN), "Max dwell time to be considered in dwell RLS algotithm.");
+	private static LongConfigValue minDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.minDwellTimeAllowedInModel", (long) 1000, "Min dwell time to be considered in dwell RLS algotithm.");
+	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
+	private static LongConfigValue minHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.minHeadwayAllowedInModel", (long) 1000, "Min headway to be considered in dwell RLS algotithm.");
+	private static IntegerConfigValue minSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.dwell.minSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
+	private static IntegerConfigValue maxSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.dwell.maxSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
+		
 
 	private static StringConfigValue memcachedHost = new StringConfigValue("transitclock.cache.memcached.host", "127.0.0.1",
 			"Specifies the host machine that memcache is running on.");
@@ -63,96 +66,81 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 		StopPathCacheKey key=new StopPathCacheKey(headway.getTripId(), event.getStopPathIndex());
 
-
-		TransitClockRLS rls = null;
+		DwellModel model = null;
+		
 		if(memcachedClient.get(createKey(key))!=null)
 		{
-			rls=(TransitClockRLS) memcachedClient.get(createKey(key));
-
-			double[] x = new double[1];
-			x[0]=headway.getHeadway();
-
-			double y = Math.log10(dwellTime);
-
-
-			double[] arg0 = new double[1];
-			arg0[0]=headway.getHeadway();
-			if(rls.getRls()!=null)
-			{
-				double prediction = Math.pow(10,rls.getRls().predict(arg0));
-
-				logger.debug("Predicted dwell: "+prediction + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
-
-				logger.debug("Actual dwell: "+ dwellTime + " for: "+key + " based on headway: "+TimeUnit.MILLISECONDS.toMinutes((long) headway.getHeadway())+" mins");
-			}
-
-			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));
-			if(rls.getRls()!=null)
-			{
-				double prediction = Math.pow(10,rls.getRls().predict(arg0));
-
-				logger.debug("Predicted dwell after: "+ prediction + " for: "+key+ " with samples: "+rls.numSamples());
-			}
+			model=(DwellModel) memcachedClient.get(createKey(key));
+			
+			model.putSample((int)dwellTime, (int)headway.getHeadway(),null);		
 		}else
 		{
-
-			rls=new TransitClockRLS(lambda.getValue());
-			rls.addSample(headway.getHeadway(), Math.log10(dwellTime));
+			model=DwellTimeModelFactory.getInstance();		
 		}
-		memcachedClient.set(createKey(key),expiryDuration,rls);
+		model.putSample((int)dwellTime, (int)headway.getHeadway(),null);
+		memcachedClient.set(createKey(key),expiryDuration, model);
 	}
 
 	@Override
 	public void addSample(ArrivalDeparture departure) {
-		if(departure!=null && !departure.isArrival())
-		{
-			Block block=null;
-			if(departure.getBlock()==null)
-			{
-				DbConfig dbConfig = Core.getInstance().getDbConfig();
-				block=dbConfig.getBlock(departure.getServiceId(), departure.getBlockId());
-			}else
-			{
-				block=departure.getBlock();
-			}
+		try {
+			if(departure!=null && !departure.isArrival())
+			{				
+				StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
+				List<IpcArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
 
-			Indices indices = new Indices(departure);
-			StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
-			List<IpcArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
-
-			if(stopData!=null && stopData.size()>1)
-			{
-				IpcArrivalDeparture arrival = null;
-				try {
-					arrival = findArrival(stopData, new IpcArrivalDeparture(departure));
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if(arrival!=null)
+				if(stopData!=null && stopData.size()>1)
 				{
-					IpcArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
-					if(arrival!=null&&previousArrival!=null)
+					IpcArrivalDeparture arrival=findArrival(stopData, new IpcArrivalDeparture(departure));
+					if(arrival!=null)
 					{
-						Headway headway=new Headway();
-						headway.setHeadway(arrival.getTime().getTime()-previousArrival.getTime().getTime());
-						long dwelltime=departure.getTime()-arrival.getTime().getTime();
-						headway.setTripId(arrival.getTripId());
-
-						/* Leave out silly values as they are most likely errors or unusual circumstance. */
-						/* TODO Should abstract this behind an anomaly detention interface/Factory */
-						if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
-								dwelltime >  minDwellTimeAllowedInModel.getValue() &&
-									headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
-									&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
-
+						IpcArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
+						if(arrival!=null&&previousArrival!=null)
 						{
-							addSample(departure,headway,dwelltime);
-						}
+							Headway headway=new Headway();
+							headway.setHeadway(arrival.getTime().getTime()-previousArrival.getTime().getTime());
+							long dwelltime=departure.getTime()-arrival.getTime().getTime();
+							headway.setTripId(arrival.getTripId());
 
+							/* Leave out silly values as they are most likely errors or unusual circumstance. */
+							/* TODO Should abstract this behind an anomaly detention interface/Factory */
+							
+							if(departure.getScheduleAdherence()!=null && departure.getScheduleAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
+							{							
+								
+								// Arrival schedule adherence appears not to be set much. So only stop if set and outside range.
+								if(previousArrival.getScheduledAdherence()==null || previousArrival.getScheduledAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
+								{		
+									if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
+											dwelltime >  minDwellTimeAllowedInModel.getValue())
+									{
+										if(headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
+												&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
+										{
+											addSample(departure,headway,dwelltime);
+										}else
+										{
+											logger.warn("Headway outside allowable range . {}", headway);
+										}
+									}else
+									{
+										logger.warn("Dwell time {} outside allowable range for {}.", dwelltime, departure);
+									}
+								}else
+								{
+									logger.warn("Schedule adherence outside allowable range. "+previousArrival.getScheduledAdherence());
+								}
+							}else
+							{
+								logger.warn("Schedule adherence outside allowable range. "+departure.getScheduleAdherence());
+							}						
+						}
 					}
 				}
 			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -211,17 +199,14 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	@Override
 	public Long predictDwellTime(StopPathCacheKey cacheKey, Headway headway) {
 
-		TransitClockRLS rls=(TransitClockRLS) memcachedClient.get(createKey(cacheKey));
-		if(rls!=null&&rls.getRls()!=null)
-		{
-			double[] arg0 = new double[1];
-			arg0[0]=headway.getHeadway();
-			rls.getRls().predict(arg0);
-			return (long) Math.pow(10, rls.getRls().predict(arg0));
-		}else
-		{
+		DwellModel model=(DwellModel) memcachedClient.get(createKey(cacheKey));
+		if(model==null||headway==null)
 			return null;
-		}
+		
+		if(model.predict((int)headway.getHeadway(), null)!=null)
+			return new Long(model.predict((int)headway.getHeadway(), null));
+		
+		return null;
 	}
 	public static void main(String[] args)
 	{

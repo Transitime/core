@@ -1,4 +1,4 @@
-package org.transitclock.core.predictiongenerator.scheduled.dwell.rls;
+package org.transitclock.core.predictiongenerator.scheduled.dwell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +22,8 @@ import org.transitclock.ipc.data.IpcPrediction;
  * I have read tells me it can but in conjunction with APC data and estimation of demand at stops.
  * 
  * I do wonder if headway alone is enough to at least improve things beyond using the schedule?
+ * 
+ * This has now been changed to work with any DwellModel implementation.
  *
  */
 public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorImpl {
