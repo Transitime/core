@@ -267,7 +267,7 @@ public class TransitimeQuickStart implements Runnable {
 			// Set the path to the override descriptor, based on your
 			// $(jetty.home)
 			// directory
-			apiapp.setOverrideDescriptor("override-web.xml");
+			//apiapp.setOverrideDescriptor("override-web.xml");
 
 			// server.start();
 			// server.join();
@@ -293,7 +293,7 @@ public class TransitimeQuickStart implements Runnable {
 
 			webapp.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
 					".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
-			webapp.setOverrideDescriptor("override-web.xml");
+			//webapp.setOverrideDescriptor("override-web.xml");
 
 			System.setProperty("transitclock.apikey", apiKey.getKey());
 			// server.join();
@@ -339,7 +339,7 @@ public class TransitimeQuickStart implements Runnable {
 			String agencyId = System.getProperties().getProperty("transitclock.core.agencyId");
 			String hostName = "127.0.0.1";
 			boolean active = true;
-			String dbName = "02";
+			String dbName = "test";
 			String dbType = "hsql";
 			String dbHost = "http://127.0.0.1:8080/";
 			String dbUserName = "sa";
