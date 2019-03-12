@@ -9,7 +9,7 @@
 	<name>transitclockQuickStart</name>
 	<url>http://maven.apache.org</url>
 	<properties>
-		<jettyVersion>9.4.0.M0</jettyVersion>
+		<jettyVersion>9.4.15.v20190215</jettyVersion>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -42,15 +42,25 @@
 			<artifactId>apache-jstl</artifactId>
 			<version>${jettyVersion}</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>TheTransitClock</groupId>
 			<artifactId>transitclockCore</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.glassfish.jersey.media</groupId>
+					<artifactId>jersey-media-multipart</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.glassfish.jersey.media</groupId>
+					<artifactId>jersey-media-json-jackson</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -79,10 +89,10 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.5.1</version>
+				<version>3.8.0</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<plugin>
