@@ -197,21 +197,25 @@ public class DataDbLogger {
 	public boolean add(Prediction p) {
 	  return predictionQueue.add(p);
 	}
-  public boolean add(Match m) {
+    public boolean add(Match m) {
 	  return matchQueue.add(m);
 	}
-  public boolean add(PredictionAccuracy pa) {
-    return predictionAccuracyQueue.add(pa);
-  }
-  public boolean add(MonitoringEvent me) {
-    return monitoringEventQueue.add(me);
-  }
-  public boolean add(VehicleEvent ve) {
-    return vehicleEventQueue.add(ve);
-  }
-  public boolean add(VehicleState vs) {
-    return vehicleStateQueue.add(vs);
-  }
+    public boolean add(PredictionAccuracy pa) {
+    	if (pa != null && pa.getArrivalDepartureTime() != null) {
+			return predictionAccuracyQueue.add(pa);
+		}
+    	// reject null arrival/departure time
+    	return false;
+    }
+    public boolean add(MonitoringEvent me) {
+      return monitoringEventQueue.add(me);
+    }
+    public boolean add(VehicleEvent ve) {
+      return vehicleEventQueue.add(ve);
+    }
+    public boolean add(VehicleState vs) {
+      return vehicleStateQueue.add(vs);
+    }
 
 	
 	/**
