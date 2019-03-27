@@ -3,11 +3,11 @@
   <display-name>Transitime webapp</display-name>
 
 
-  <!--<context-param>-->
-      <!--<param-name>transitime_config_file_location</param-name>-->
-      <!-- Set to customized properties file with db config info and such -->
-      <!--<param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>      -->
-  <!--</context-param>-->
+  <context-param>
+      <param-name>transitime_config_file_location</param-name>
+       Set to customized properties file with db config info and such
+      <param-value>/usr/local/transitime/config/transiTimeConfig.xml</param-value>
+  </context-param>
 
   <welcome-file-list>
     <welcome-file>welcome/index.jsp</welcome-file>

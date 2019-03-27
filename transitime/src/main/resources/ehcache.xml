@@ -3,10 +3,10 @@
 	monitoring="autodetect" dynamicConfig="true">
 
 	<!-- By default, Ehcache stored the cached files in temp folder. -->
-	<!-- <diskStore path="java.io.tmpdir" /> -->
+	 <diskStore path="java.io.tmpdir" />
 	
 	<!-- Ask Ehcache to store cache in this path -->
-	<diskStore path="/usr/local/transitime/cache" />
+	<!--<diskStore path="/usr/local/transitime/cache" />-->
 	
 	<cache name="arrivalDeparturesByTrip" 
 		maxEntriesLocalHeap="200000"
