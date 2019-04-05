@@ -199,9 +199,11 @@ public abstract class ConfigValue<T> {
 	abstract protected T convertFromString(List<String> dataStr);
 
 	/**
-	 * Reads value from the config data and stores it
+	 * Reads value from the config data and stores it.
+	 * Allow this to be public to allow re-interpretation of values for
+	 * unit tests.
 	 */
-	private void readValue() 
+	 public void readValue()
 			throws ConfigParamException {
 		List<String> dataList = null;
 		

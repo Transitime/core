@@ -1556,6 +1556,15 @@ public class AvlProcessor {
 			avlReport.setAssignment(null, AssignmentType.UNSET);
 		}
 
+		if (ExternalBlockAssigner.enabled()) {
+			// use the results of external AVL integration
+			ExternalBlockAssigner assigner = ExternalBlockAssigner.getInstance();
+			String assignmentId = assigner.getActiveAssignmentForVehicle(avlReport);
+			if (assignmentId != null) {
+				avlReport.setAssignment(assignmentId, AssignmentType.BLOCK_ID);
+			}
+		}
+
 		// The beginning of processing AVL data is an important milestone
 		// in processing data so log it as info.
 		logger.info("===================================================="
