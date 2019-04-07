@@ -26,6 +26,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.configData.CoreConfig;
+import org.transitime.core.blockAssigner.BlockAssigner;
 import org.transitime.db.structs.Arrival;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.AvlReport.AssignmentType;

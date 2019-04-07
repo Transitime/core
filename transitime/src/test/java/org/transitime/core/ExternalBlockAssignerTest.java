@@ -17,8 +17,20 @@ public class ExternalBlockAssignerTest extends TestCase {
 
     private static String FEED_1 = "block,vehicle\nblock_1,vehicle_1\nblock_2,vehicle_2\n";
 
-    public void testGetFeed() throws Exception {
+    public void testSuite() throws Exception {
+        // we need to control order of tests
+        runGetFeed();
+        runGetActiveAssignmentForVehicle();
+    }
+
+
+    public void runGetFeed() throws Exception {
+        ExternalBlockAssigner.reset();
         ExternalBlockAssigner eba = ExternalBlockAssigner.getInstance();
+        assertNull(eba.getBlockAssignmentsByVehicleIdFeed());
+
+        System.setProperty("transitime.externalAssignerEnabled", "true");
+        eba.externalAssignerEnabled.readValue();
         assertNull(eba.getBlockAssignmentsByVehicleIdFeed());
         System.setProperty("transitime.externalAssignerUrl", "file:///tmp/no_such_file.txt");
         eba.externalAssignerUrl.readValue();
@@ -29,6 +41,7 @@ public class ExternalBlockAssignerTest extends TestCase {
         // good!
         }
 
+        // flush the feed to a file on disk and load
         writeToTempFile(eba, FEED_1);
 
         InputStream feed = eba.getBlockAssignmentsByVehicleIdFeed();
@@ -42,11 +55,27 @@ public class ExternalBlockAssignerTest extends TestCase {
         assertTrue(feedMap.containsKey("vehicle_2"));
         assertEquals("block_2", feedMap.get("vehicle_2").get(0));
 
+        eba.forceUpdate(); // ensure cache is consistent for testing
+        feedMap = eba.getBlockAssignmentsByVehicleIdMapFromCache();
+
+        assertNotNull(feedMap);
+        assertEquals(2, feedMap.size()); // force throwing away header
+        assertTrue(feedMap.containsKey("vehicle_1"));
+        assertEquals("block_1", feedMap.get("vehicle_1").get(0));
+        assertTrue(feedMap.containsKey("vehicle_2"));
+        assertEquals("block_2", feedMap.get("vehicle_2").get(0));
+
 
     }
 
-    public void testGetActiveAssignmentForVehicle() throws Exception {
+    public void runGetActiveAssignmentForVehicle() throws Exception {
+        // do some cleanup from last test
+        ExternalBlockAssigner.reset();
+        System.setProperty("transitime.externalAssignerEnabled", "false");
+        System.setProperty("transitime.externalAssignerUrl", "file:///tmp/no_such_file.txt");
 
+
+        // mock out database retrieval of block
         ExternalBlockAssigner eba = new ExternalBlockAssigner() {
             @Override
             Block getActiveBlock(String assignmentId, Date serviceDate) {
@@ -63,6 +92,21 @@ public class ExternalBlockAssignerTest extends TestCase {
             }
         };
 
+        eba.externalAssignerUrl.readValue();
+        eba.externalAssignerEnabled.readValue();
+        eba.getInstance();
+        // verify we are empty, and no state left over from previous test
+        assertNotNull(eba.getBlockAssignmentsByVehicleIdMap());
+        assertTrue(eba.getBlockAssignmentsByVehicleIdMap().isEmpty());
+        assertNotNull(eba.getBlockAssignmentsByVehicleIdMapFromCache());
+        assertTrue(eba.getBlockAssignmentsByVehicleIdMapFromCache().isEmpty());
+
+        // now re-enable
+        System.setProperty("transitime.externalAssignerEnabled", "true");
+        eba.externalAssignerEnabled.readValue();
+        eba.getInstance();
+
+        // flush the feed to a file on disk and load
         writeToTempFile(eba, FEED_1);
 
         AvlReport avl = new AvlReport("vehicle_1", System.currentTimeMillis(), 0.0, 0.0,
@@ -88,9 +132,10 @@ public class ExternalBlockAssignerTest extends TestCase {
     private void writeToTempFile(ExternalBlockAssigner eba, String contents) throws Exception {
         File tmpFile = File.createTempFile("externalBlockAssiger", ".csv");
         tmpFile.deleteOnExit();
-        writeToFile(tmpFile, FEED_1);
+        writeToFile(tmpFile, contents);
         System.setProperty("transitime.externalAssignerUrl", "file://" + tmpFile.getAbsolutePath());
         eba.externalAssignerUrl.readValue();
+        eba.getInstance().forceUpdate();
 
     }
 }
