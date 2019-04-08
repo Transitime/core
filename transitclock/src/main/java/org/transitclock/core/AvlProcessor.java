@@ -237,23 +237,12 @@ public class AvlProcessor {
 	}
 
 	/**
-	 * Marks the vehicle as not being predictable and that the assignment has
-	 * been grabbed. Updates VehicleDataCache. Creates and logs a VehicleEvent
-	 * explaining the situation.
+	 * Removes the vehicle from the VehicleDataCache.
 	 * 
-	 * @param vehicleState
-	 *            The vehicle to be made unpredictable
-	 * @param eventDescription
-	 *            A longer description of why vehicle being made unpredictable
-	 * @param vehicleEvent
-	 *            A short description from VehicleEvent class for labeling the
-	 *            event.
+	 * @param vehicleId
+	 *            The vehicle to remove
 	 */
-	public void makeVehicleUnpredictableAndRemoveFromVehicleDataCache(
-			String vehicleId, String eventDescription, String vehicleEvent) {
-		makeVehicleUnpredictable(vehicleId, eventDescription, vehicleEvent);
-
-		// Remove vehicle from VehicleDataCache
+	public void removeFromVehicleDataCache(String vehicleId) {
 		VehicleDataCache.getInstance().removeVehicle(vehicleId);
 	}
 	
@@ -1233,9 +1222,6 @@ public class AvlProcessor {
 								+ " ended for vehicle so it was made unpredictable.";
 				makeVehicleUnpredictableAndTerminateAssignment(vehicleState,
 						eventDescription, VehicleEvent.END_OF_BLOCK);
-
-				// Remove vehicle from VehicleDataCache
-				VehicleDataCache.getInstance().removeVehicle(vehicleState.getVehicleId());
 
 				// Return that end of block reached
 				return true;

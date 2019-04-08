@@ -128,6 +128,19 @@ public class TimeoutHandlerModule extends Module {
 			avlReportsMap.put(avlReport.getVehicleId(), avlReport);
 		}
 	}
+
+	/**
+	 * Removes the specified vehicle from the VehicleDataCache if configured to do so
+	 * 
+	 * @param vehicleId
+	 *            Vehicle to remove
+	 */
+	public void removeFromVehicleDataCache(String vehicleId) {
+		if (removeTimedOutVehiclesFromVehicleDataCache.getValue()) {
+			logger.info("Removing vehicleId={} from VehicleDataCache", vehicleId);
+			AvlProcessor.getInstance().removeFromVehicleDataCache(vehicleId);
+		}
+	}
 	
 	/**
 	 * For regular predictable vehicle that is not a schedule based prediction
@@ -150,7 +163,7 @@ public class TimeoutHandlerModule extends Module {
 					+ " while allowable time without an AVL report is "
 					+ Time.elapsedTimeStr(maxNoAvl)
 					+ " and so was made unpredictable.";
-			makeVehicleUnpredictable(
+			AvlProcessor.getInstance().makeVehicleUnpredictable(
 					vehicleState.getVehicleId(), eventDescription,
 					VehicleEvent.TIMEOUT);
 			
@@ -160,20 +173,30 @@ public class TimeoutHandlerModule extends Module {
 			
 			// Remove vehicle from map for next time looking for timeouts
 			mapIterator.remove();
-			
+
+			// Remove vehicle from cache if configured to do so
+			removeFromVehicleDataCache(vehicleState.getVehicleId());
 		}
 	}
 	
 	/**
-	 * Don't need to worry about vehicles that are not predictable. But might as
-	 * well remove vehicle from map so don't examine vehicle every
-	 * TimeoutHandleModule polling cycle
+	 * For not predictable vehicle. If haven't reported in too long removes the
+	 * vehicle from map and possibly cache
 	 * 
 	 * @param mapIterator
 	 *            So can remove AVL report from map
 	 */
-	private void handleNotPredictablePossibleTimeout(Iterator<AvlReport> mapIterator) {
+	private void handleNotPredictablePossibleTimeout(VehicleState vehicleState,
+					long now, Iterator<AvlReport> mapIterator) {
+		// Log the situation
+		logger.info("For not predictable vehicleId={} generated timeout "
+				+ "event.", vehicleState.getVehicleId());
+
+		// Remove vehicle from map for next time looking for timeouts
 		mapIterator.remove();
+
+		// Remove vehicle from cache if configured to do so
+		removeFromVehicleDataCache(vehicleState.getVehicleId());
 	}
 
 	/**
@@ -193,7 +216,7 @@ public class TimeoutHandlerModule extends Module {
 		String shouldTimeoutEventDescription =
 				SchedBasedPredsModule.shouldTimeoutVehicle(vehicleState, now);				
 		if (shouldTimeoutEventDescription != null) {
-			makeVehicleUnpredictable(
+			AvlProcessor.getInstance().makeVehicleUnpredictable(
 					vehicleState.getVehicleId(), shouldTimeoutEventDescription,
 					VehicleEvent.TIMEOUT);
 			
@@ -203,7 +226,10 @@ public class TimeoutHandlerModule extends Module {
 					vehicleState.getVehicleId(), shouldTimeoutEventDescription);
 			
 			// Remove vehicle from map for next time looking for timeouts
-			mapIterator.remove();			
+			mapIterator.remove();
+
+			// Remove vehicle from cache if configured to do so
+			removeFromVehicleDataCache(vehicleState.getVehicleId());
 		}
 	}
 	
@@ -266,7 +292,7 @@ public class TimeoutHandlerModule extends Module {
 						+ "time without AVL is "  
 						+ Time.elapsedTimeStr(maxNoAvlAfterSchedDepartSecs)
 						+ ". Therefore vehicle was made unpredictable.";
-				makeVehicleUnpredictable(
+				AvlProcessor.getInstance().makeVehicleUnpredictable(
 						vehicleState.getVehicleId(), eventDescription,
 						VehicleEvent.TIMEOUT);
 				
@@ -276,32 +302,13 @@ public class TimeoutHandlerModule extends Module {
 				
 				// Remove vehicle from map for next time looking for timeouts
 				mapIterator.remove();
+
+				// Remove vehicle from cache if configured to do so
+				removeFromVehicleDataCache(vehicleState.getVehicleId());
 			}
 		}
 	}
 
-	/**
-	 * Call the proper AvlProcessor method depending on the configuration
-	 * Default behavior is to make the vehicle unpredictable
-	 * If removeTimedOutVehiclesFromVehicleDataCache is set to true, also remove the vehicle from the cache  
-	 * 
-	 * @param vehicleId
-	 *            The vehicle to be made unpredictable
-	 * @param eventDescription
-	 *            A longer description of why vehicle being made unpredictable
-	 * @param vehicleEvent
-	 *            A short description from VehicleEvent class for labeling the
-	 *            event.
-	 */
-	private void makeVehicleUnpredictable(String vehicleId, 
-			String eventDescription, String vehicleEvent) {
-		if (removeTimedOutVehiclesFromVehicleDataCache.getValue()) {
-			AvlProcessor.getInstance().makeVehicleUnpredictableAndRemoveFromVehicleDataCache(vehicleId, eventDescription, vehicleEvent);
-		} else {
-			AvlProcessor.getInstance().makeVehicleUnpredictable(vehicleId, eventDescription, vehicleEvent);
-		}
-	}
-	
 	/**
 	 * Goes through all vehicles and finds ones that have timed out
 	 */
@@ -329,7 +336,8 @@ public class TimeoutHandlerModule extends Module {
 				synchronized (vehicleState) {
 					if (!vehicleState.isPredictable()) {
 						// Vehicle is not predictable
-						handleNotPredictablePossibleTimeout(mapIterator);
+						handleNotPredictablePossibleTimeout(vehicleState, now,
+								mapIterator);
 					} else if (vehicleState.isForSchedBasedPreds()) {
 						// Handle schedule based predictions vehicle
 						handleSchedBasedPredsPossibleTimeout(vehicleState, now,
