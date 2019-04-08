@@ -180,23 +180,36 @@ public class TimeoutHandlerModule extends Module {
 	}
 	
 	/**
-	 * For not predictable vehicle. If haven't reported in too long removes the
-	 * vehicle from map and possibly cache
+	 * For not predictable vehicle. If not removing vehicles from cache,
+	 * removes the vehicle from the map to avoid looking at it again. If
+	 * configured to remove timed out vehicles from cache, and haven't 
+	 * reported in too long, removes the vehicle from map and cache.
 	 * 
 	 * @param mapIterator
 	 *            So can remove AVL report from map
 	 */
 	private void handleNotPredictablePossibleTimeout(VehicleState vehicleState,
 					long now, Iterator<AvlReport> mapIterator) {
-		// Log the situation
-		logger.info("For not predictable vehicleId={} generated timeout "
-				+ "event.", vehicleState.getVehicleId());
+		if (!removeTimedOutVehiclesFromVehicleDataCache.getValue()) {
+			// Remove vehicle from map for next time looking for timeouts and return
+			mapIterator.remove();
+			return;
+		}
 
-		// Remove vehicle from map for next time looking for timeouts
-		mapIterator.remove();
+		// If haven't reported in too long...
+		long maxNoAvl = allowableNoAvlSecs.getValue() * Time.MS_PER_SEC;
+		if (now > vehicleState.getAvlReport().getTime() + maxNoAvl) {
 
-		// Remove vehicle from cache if configured to do so
-		removeFromVehicleDataCache(vehicleState.getVehicleId());
+			// Log the situation
+			logger.info("For not predictable vehicleId={} generated timeout "
+					+ "event.", vehicleState.getVehicleId());
+
+			// Remove vehicle from map for next time looking for timeouts
+			mapIterator.remove();
+
+			// Remove vehicle from cache
+			removeFromVehicleDataCache(vehicleState.getVehicleId());
+		}
 	}
 
 	/**
