@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.core.dataCache.VehicleStateManager;
@@ -87,6 +88,18 @@ public class TimeoutHandlerModule extends Module {
 					+ "for long after scheduled departure time if vehicle "
 					+ "taken out of service.");
 
+	private static BooleanConfigValue removeTimedOutVehiclesFromVehicleDataCache =
+			new BooleanConfigValue(
+					"transitclock.timeout.removeTimedOutVehiclesFromVehicleDataCache", 
+					false, 
+					"When timing out vehicles, the default behavior is to make "
+					+ "the vehicle unpredictable but leave it in the "
+					+ "VehicleDataCache. When set to true, a timeout will also "
+					+ "remove the vehicle from the VehicleDataCache. This can "
+					+ "be useful in situations where it is not desirable to "
+					+ "include timed out vehicles in data feeds, e.g. the GTFS "
+					+ "Realtime vehicle positions feed.");
+	
 	/********************* Logging ************************************/
 
 	private static final Logger logger = LoggerFactory
@@ -113,6 +126,19 @@ public class TimeoutHandlerModule extends Module {
 		// from the map.
 		synchronized (avlReportsMap) {
 			avlReportsMap.put(avlReport.getVehicleId(), avlReport);
+		}
+	}
+
+	/**
+	 * Removes the specified vehicle from the VehicleDataCache if configured to do so
+	 * 
+	 * @param vehicleId
+	 *            Vehicle to remove
+	 */
+	public void removeFromVehicleDataCache(String vehicleId) {
+		if (removeTimedOutVehiclesFromVehicleDataCache.getValue()) {
+			logger.info("Removing vehicleId={} from VehicleDataCache", vehicleId);
+			AvlProcessor.getInstance().removeFromVehicleDataCache(vehicleId);
 		}
 	}
 	
@@ -147,20 +173,43 @@ public class TimeoutHandlerModule extends Module {
 			
 			// Remove vehicle from map for next time looking for timeouts
 			mapIterator.remove();
-			
+
+			// Remove vehicle from cache if configured to do so
+			removeFromVehicleDataCache(vehicleState.getVehicleId());
 		}
 	}
 	
 	/**
-	 * Don't need to worry about vehicles that are not predictable. But might as
-	 * well remove vehicle from map so don't examine vehicle every
-	 * TimeoutHandleModule polling cycle
+	 * For not predictable vehicle. If not removing vehicles from cache,
+	 * removes the vehicle from the map to avoid looking at it again. If
+	 * configured to remove timed out vehicles from cache, and haven't 
+	 * reported in too long, removes the vehicle from map and cache.
 	 * 
 	 * @param mapIterator
 	 *            So can remove AVL report from map
 	 */
-	private void handleNotPredictablePossibleTimeout(Iterator<AvlReport> mapIterator) {
-		mapIterator.remove();
+	private void handleNotPredictablePossibleTimeout(VehicleState vehicleState,
+					long now, Iterator<AvlReport> mapIterator) {
+		if (!removeTimedOutVehiclesFromVehicleDataCache.getValue()) {
+			// Remove vehicle from map for next time looking for timeouts and return
+			mapIterator.remove();
+			return;
+		}
+
+		// If haven't reported in too long...
+		long maxNoAvl = allowableNoAvlSecs.getValue() * Time.MS_PER_SEC;
+		if (now > vehicleState.getAvlReport().getTime() + maxNoAvl) {
+
+			// Log the situation
+			logger.info("For not predictable vehicleId={} generated timeout "
+					+ "event.", vehicleState.getVehicleId());
+
+			// Remove vehicle from map for next time looking for timeouts
+			mapIterator.remove();
+
+			// Remove vehicle from cache
+			removeFromVehicleDataCache(vehicleState.getVehicleId());
+		}
 	}
 
 	/**
@@ -190,7 +239,10 @@ public class TimeoutHandlerModule extends Module {
 					vehicleState.getVehicleId(), shouldTimeoutEventDescription);
 			
 			// Remove vehicle from map for next time looking for timeouts
-			mapIterator.remove();			
+			mapIterator.remove();
+
+			// Remove vehicle from cache if configured to do so
+			removeFromVehicleDataCache(vehicleState.getVehicleId());
 		}
 	}
 	
@@ -263,6 +315,9 @@ public class TimeoutHandlerModule extends Module {
 				
 				// Remove vehicle from map for next time looking for timeouts
 				mapIterator.remove();
+
+				// Remove vehicle from cache if configured to do so
+				removeFromVehicleDataCache(vehicleState.getVehicleId());
 			}
 		}
 	}
@@ -294,7 +349,8 @@ public class TimeoutHandlerModule extends Module {
 				synchronized (vehicleState) {
 					if (!vehicleState.isPredictable()) {
 						// Vehicle is not predictable
-						handleNotPredictablePossibleTimeout(mapIterator);
+						handleNotPredictablePossibleTimeout(vehicleState, now,
+								mapIterator);
 					} else if (vehicleState.isForSchedBasedPreds()) {
 						// Handle schedule based predictions vehicle
 						handleSchedBasedPredsPossibleTimeout(vehicleState, now,

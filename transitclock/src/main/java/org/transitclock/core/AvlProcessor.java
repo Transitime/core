@@ -237,6 +237,16 @@ public class AvlProcessor {
 	}
 
 	/**
+	 * Removes the vehicle from the VehicleDataCache.
+	 * 
+	 * @param vehicleId
+	 *            The vehicle to remove
+	 */
+	public void removeFromVehicleDataCache(String vehicleId) {
+		VehicleDataCache.getInstance().removeVehicle(vehicleId);
+	}
+	
+	/**
 	 * Looks at the previous AVL reports to determine if vehicle is actually
 	 * moving. If it is not moving then the vehicle is made unpredictable. Uses
 	 * the system properties transitclock.core.timeForDeterminingNoProgress and
