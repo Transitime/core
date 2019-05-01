@@ -131,17 +131,22 @@ public class ExternalBlockAssigner {
      * @return
      */
     Block getActiveBlock(String assignmentId, Date serviceDate) {
+
         Collection<Block> dbBlocks =
                 Core.getInstance().getDbConfig().getBlocksForAllServiceIds(assignmentId);
         if (dbBlocks == null) {
             logger.warn("no block found for {}", assignmentId);
             return null;
         }
+        logger.info("getActiveBlock({}, {}) found {} potential blocks: {}",
+                assignmentId, serviceDate, dbBlocks.size(), dbBlocks);
         for (Block requestedBlock : dbBlocks) {
             if (requestedBlock.isActive(serviceDate,
                     CoreConfig.getAllowableEarlySeconds(),
                     CoreConfig.getAllowableLateSeconds())) {
                 return requestedBlock;
+            } else {
+                logger.info("requestedBlock {} is not active on serviceDate {}", requestedBlock.getId(), serviceDate);
             }
         }
         return null;
