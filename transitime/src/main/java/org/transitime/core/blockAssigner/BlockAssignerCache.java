@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.config.IntegerConfigValue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,19 +76,21 @@ public class BlockAssignerCache {
 
         public void run() {
             long start = System.currentTimeMillis();
-            Map<String, ArrayList<String>> newBlockAssignmentsByVehicleIdMap = updater.getBlockAssignmentsByVehicleIdMap();
-            if (newBlockAssignmentsByVehicleIdMap.size() > 0) {
-                // if the call fails or exception thrown preserve internal state so last value can be used
-                synchronized (blockAssignmentsByVehicleIdMap) {
-                    blockAssignmentsByVehicleIdMap.clear();
-                    blockAssignmentsByVehicleIdMap.putAll(newBlockAssignmentsByVehicleIdMap);
-
-                    long stop = System.currentTimeMillis();
-                    logger.info("cache update in {}ms", (stop - start));
+            try {
+                Map<String, ArrayList<String>> newBlockAssignmentsByVehicleIdMap = updater.getBlockAssignmentsByVehicleIdMap();
+                if (newBlockAssignmentsByVehicleIdMap != null) {
+                    // if the call fails or exception thrown preserve internal state so last value can be used
+                    synchronized (blockAssignmentsByVehicleIdMap) {
+                        blockAssignmentsByVehicleIdMap.clear();
+                        blockAssignmentsByVehicleIdMap.putAll(newBlockAssignmentsByVehicleIdMap);
+                    }
                 }
-
+            } catch (IOException ioe) {
+                logger.info("Exception retrieving external block assignments", ioe);
+            } finally {
+                long stop = System.currentTimeMillis();
+                logger.info("cache update in {}ms", (stop - start));
             }
-
         }
     }
 }

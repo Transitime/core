@@ -12,6 +12,7 @@ import org.transitime.core.blockAssigner.BlockAssignerUpdater;
 import org.transitime.db.structs.AvlReport;
 import org.transitime.db.structs.Block;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -178,7 +179,7 @@ public class ExternalBlockAssigner {
      * retrieve a list of block ids indexed on vehicleId.  Does no caching.
      * @return
      */
-    Map<String, ArrayList<String>> getBlockAssignmentsByVehicleIdMap() {
+    Map<String, ArrayList<String>> getBlockAssignmentsByVehicleIdMap() throws IOException {
         return UPDATER.getBlockAssignmentsByVehicleIdMap();
     }
 

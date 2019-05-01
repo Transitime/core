@@ -15,7 +15,9 @@ import java.util.Map;
 
 public class ExternalBlockAssignerTest extends TestCase {
 
-    private static String FEED_1 = "block,vehicle\nblock_1,vehicle_1\nblock_2,vehicle_2\n";
+    private static String FEED_0 = "block,vehicle\n";
+    private static String FEED_1 = "block,vehicle\nblock-1,vehicle-1\n";
+    private static String FEED_2 = "block,vehicle\nblock-1,vehicle-1\nblock-2,vehicle-2\n";
 
     public void testSuite() throws Exception {
         // we need to control order of tests
@@ -42,7 +44,7 @@ public class ExternalBlockAssignerTest extends TestCase {
         }
 
         // flush the feed to a file on disk and load
-        writeToTempFile(eba, FEED_1);
+        writeToTempFile(eba, FEED_2);
 
         InputStream feed = eba.getBlockAssignmentsByVehicleIdFeed();
         assertNotNull(feed);
@@ -50,21 +52,39 @@ public class ExternalBlockAssignerTest extends TestCase {
         Map<String, ArrayList<String>> feedMap = eba.getBlockAssignmentsByVehicleIdMap();
         assertNotNull(feedMap);
         assertEquals(2, feedMap.size()); // force throwing away header
-        assertTrue(feedMap.containsKey("vehicle_1"));
-        assertEquals("block_1", feedMap.get("vehicle_1").get(0));
-        assertTrue(feedMap.containsKey("vehicle_2"));
-        assertEquals("block_2", feedMap.get("vehicle_2").get(0));
+        assertTrue(feedMap.containsKey("vehicle-1"));
+        assertEquals("block-1", feedMap.get("vehicle-1").get(0));
+        assertTrue(feedMap.containsKey("vehicle-2"));
+        assertEquals("block-2", feedMap.get("vehicle-2").get(0));
 
         eba.forceUpdate(); // ensure cache is consistent for testing
         feedMap = eba.getBlockAssignmentsByVehicleIdMapFromCache();
 
         assertNotNull(feedMap);
         assertEquals(2, feedMap.size()); // force throwing away header
-        assertTrue(feedMap.containsKey("vehicle_1"));
-        assertEquals("block_1", feedMap.get("vehicle_1").get(0));
-        assertTrue(feedMap.containsKey("vehicle_2"));
-        assertEquals("block_2", feedMap.get("vehicle_2").get(0));
+        assertTrue(feedMap.containsKey("vehicle-1"));
+        assertEquals("block-1", feedMap.get("vehicle-1").get(0));
+        assertTrue(feedMap.containsKey("vehicle-2"));
+        assertEquals("block-2", feedMap.get("vehicle-2").get(0));
 
+        // now retrieve an empty feed and verify assignments were removed
+        // flush the feed to a file on disk and load
+        writeToTempFile(eba, FEED_1);
+        eba.forceUpdate(); // ensure cache is consistent for testing
+        feedMap = eba.getBlockAssignmentsByVehicleIdMapFromCache();
+
+        assertNotNull(feedMap);
+        assertEquals(1, feedMap.size());
+
+
+        // now retrieve an empty feed and verify assignments were removed
+        // flush the feed to a file on disk and load
+        writeToTempFile(eba, FEED_0);
+        eba.forceUpdate(); // ensure cache is consistent for testing
+        feedMap = eba.getBlockAssignmentsByVehicleIdMapFromCache();
+
+        assertNotNull(feedMap);
+        assertEquals(0, feedMap.size());
 
     }
 
@@ -79,7 +99,7 @@ public class ExternalBlockAssignerTest extends TestCase {
         ExternalBlockAssigner eba = new ExternalBlockAssigner() {
             @Override
             Block getActiveBlock(String assignmentId, Date serviceDate) {
-                if (assignmentId != null && assignmentId.startsWith("block_") && serviceDate.getTime() > 0) {
+                if (assignmentId != null && assignmentId.startsWith("block-") && serviceDate.getTime() > 0) {
                     Block b = new Block(-1,
                             assignmentId,
                             "serviceId",
@@ -107,16 +127,16 @@ public class ExternalBlockAssignerTest extends TestCase {
         eba.getInstance();
 
         // flush the feed to a file on disk and load
-        writeToTempFile(eba, FEED_1);
+        writeToTempFile(eba, FEED_2);
 
-        AvlReport avl = new AvlReport("vehicle_1", System.currentTimeMillis(), 0.0, 0.0,
+        AvlReport avl = new AvlReport("vehicle-1", System.currentTimeMillis(), 0.0, 0.0,
         "OpenGTS");
         String blockId = eba.getActiveAssignmentForVehicle(avl);
 
         assertNotNull(blockId);
-        assertEquals("block_1", blockId);
+        assertEquals("block-1", blockId);
 
-        avl = new AvlReport("vehicle_1", -1, 0.0, 0.0,
+        avl = new AvlReport("vehicle-1", -1, 0.0, 0.0,
                 "OpenGTS");
         blockId = eba.getActiveAssignmentForVehicle(avl);
         assertNull(blockId);

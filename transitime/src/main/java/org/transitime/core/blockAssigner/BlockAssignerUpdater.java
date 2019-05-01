@@ -9,6 +9,7 @@ import org.transitime.config.StringConfigValue;
 import org.transitime.configData.AvlConfig;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -43,9 +44,10 @@ public class BlockAssignerUpdater {
 
     /**
      * Read the web service in an assumed CSV format and return as a map
-     * @return
+     * @throws IOException on any communicaton issues
+     * @return a map, possibly empty, on successful retrieval and parsing of the external feed
      */
-    public Map<String, ArrayList<String>>  getBlockAssignmentsByVehicleIdMap() {
+    public Map<String, ArrayList<String>>  getBlockAssignmentsByVehicleIdMap() throws IOException {
         Map<String, ArrayList<String>> blockAssignmentsByVehicleId = new HashMap<>();
         CSVRecord record = null;
         CSVFormat formatter = CSVFormat.DEFAULT.withHeader().withCommentMarker('-');
@@ -94,7 +96,7 @@ public class BlockAssignerUpdater {
      * @return
      * @throws Exception
      */
-    public InputStream getBlockAssignmentsByVehicleIdFeed() throws Exception {
+    public InputStream getBlockAssignmentsByVehicleIdFeed() throws IOException {
         if (_url.getValue() == null) return null;  // we are not configured
         URL url = new URL(_url.getValue());
         URLConnection con = url.openConnection();
