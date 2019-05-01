@@ -127,10 +127,10 @@ public class ExternalBlockAssigner {
      * if the blockId is active within window of service date / now retrieve the
      * entire block.
      * @param assignmentId
-     * @param serviceDate
+     * @param avlReportDate
      * @return
      */
-    Block getActiveBlock(String assignmentId, Date serviceDate) {
+    Block getActiveBlock(String assignmentId, Date avlReportDate) {
         int agencySeparator = assignmentId.lastIndexOf('_');
         if (agencySeparator != -1) {
             assignmentId = assignmentId.substring(agencySeparator+1);
@@ -143,14 +143,14 @@ public class ExternalBlockAssigner {
             return null;
         }
         logger.info("getActiveBlock({}, {}) found {} potential blocks: {}",
-                assignmentId, serviceDate, dbBlocks.size(), dbBlocks);
+                assignmentId, avlReportDate, dbBlocks.size(), dbBlocks);
         for (Block requestedBlock : dbBlocks) {
-            if (requestedBlock.isActive(serviceDate,
+            if (requestedBlock.isActive(avlReportDate,
                     CoreConfig.getAllowableEarlySeconds(),
-                    CoreConfig.getAllowableLateSeconds())) {
+                    -1 /* use endTime*/)) {
                 return requestedBlock;
             } else {
-                logger.info("requestedBlock {} is not active on serviceDate {}", requestedBlock.getId(), serviceDate);
+                logger.info("requestedBlock {} is not active on serviceDate {}", requestedBlock.getId(), avlReportDate);
             }
         }
         return null;
