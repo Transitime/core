@@ -106,12 +106,15 @@ public class ExternalBlockAssigner {
     public String getActiveAssignmentForVehicle(AvlReport avlReport) {
         int possibleAssignments = 0;
         for (String assignmentId : blockMatch(avlReport.getVehicleId())) {
+            logger.info("possible assignment for vehicle {} = {}", avlReport.getVehicleId(), assignmentId);
             possibleAssignments++;
             if (assignmentId != null) {
                 Block requestedBlock = getActiveBlock(assignmentId, avlReport.getDate());
                 if (requestedBlock != null) {
                     logger.info("found active block {} for vehicle {}", assignmentId, avlReport.getVehicleId());
                     return assignmentId;
+                } else {
+                    logger.info("block {} mismatch for vehicle {}", assignmentId, avlReport.getVehicleId());
                 }
             }
         }
