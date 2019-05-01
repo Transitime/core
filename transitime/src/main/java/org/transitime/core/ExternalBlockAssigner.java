@@ -109,6 +109,10 @@ public class ExternalBlockAssigner {
             logger.info("possible assignment for vehicle {} = {}", avlReport.getVehicleId(), assignmentId);
             possibleAssignments++;
             if (assignmentId != null) {
+                int agencySeparator = assignmentId.lastIndexOf('_');
+                if (agencySeparator != -1) {
+                    assignmentId = assignmentId.substring(agencySeparator+1);
+                }
                 Block requestedBlock = getActiveBlock(assignmentId, avlReport.getDate());
                 if (requestedBlock != null) {
                     logger.info("found active block {} for vehicle {}", assignmentId, avlReport.getVehicleId());
@@ -131,11 +135,6 @@ public class ExternalBlockAssigner {
      * @return
      */
     Block getActiveBlock(String assignmentId, Date avlReportDate) {
-        int agencySeparator = assignmentId.lastIndexOf('_');
-        if (agencySeparator != -1) {
-            assignmentId = assignmentId.substring(agencySeparator+1);
-        }
-
         Collection<Block> dbBlocks =
                 Core.getInstance().getDbConfig().getBlocksForAllServiceIds(assignmentId);
         if (dbBlocks == null) {
