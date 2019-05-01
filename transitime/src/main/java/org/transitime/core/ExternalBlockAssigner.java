@@ -104,7 +104,9 @@ public class ExternalBlockAssigner {
      * @return
      */
     public String getActiveAssignmentForVehicle(AvlReport avlReport) {
+        int possibleAssignments = 0;
         for (String assignmentId : blockMatch(avlReport.getVehicleId())) {
+            possibleAssignments++;
             if (assignmentId != null) {
                 Block requestedBlock = getActiveBlock(assignmentId, avlReport.getDate());
                 if (requestedBlock != null) {
@@ -113,7 +115,8 @@ public class ExternalBlockAssigner {
                 }
             }
         }
-        logger.info("no active external assignment for vehicle {}", avlReport.getVehicleId());
+        logger.info("no active external assignment for vehicle {} with {} possible assignments and cache= {}",
+                avlReport.getVehicleId(), possibleAssignments, getBlockAssignmentsByVehicleIdMapFromCache().keySet());
         return null;
     }
 
