@@ -73,7 +73,7 @@ public class CsvPollingAvlModule extends PollUrlAvlModule {
 
     private static BooleanConfigValue speedInMphParam =
             new BooleanConfigValue("transitime.avl.csv.speed_is_mph_param",
-                    false,
+                    true,
                     "True if speed is in miles per hour");
 
     private static StringConfigValue headingParam =
@@ -145,8 +145,9 @@ public class CsvPollingAvlModule extends PollUrlAvlModule {
         double lat = Double.parseDouble(latStr);
         double lon = Double.parseDouble(lonStr);
         float speed = Float.parseFloat(speedStr);
-        if (!speedInMphParam.getValue()) {
-            speed = speed * KILOMETERS_PER_MILE;
+        if (speedInMphParam.getValue()) {
+            speed = speed / (float)2.237;  // mph to m/s
+
         }
         float heading = Float.parseFloat(headingStr);
 
