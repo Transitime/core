@@ -125,7 +125,7 @@ public class CsvPollingAvlModule extends PollUrlAvlModule {
             }
         }
         long stop = System.currentTimeMillis();
-        logger.info("Parsed csv feed in {} ms", (stop-start)/1000);
+        logger.warn("Parsed csv feed in {} ms", (stop-start)/1000);
         return avlReportsReadIn;
     }
 
