@@ -308,8 +308,8 @@ public class TransitimeApi {
 					+ "predictions so can label minor vehicles",required=false)@QueryParam(value = "numPreds") 
 			@DefaultValue("3") int numberPredictions
 			,
-			@Parameter(description=" Return only assigned vehicles",required=false)@QueryParam(value = "assgined") 
-			@DefaultValue("false") boolean assigned
+			@Parameter(description=" Return only assigned vehicles",required=false)@QueryParam(value = "onlyAssigned") 
+			@DefaultValue("false") boolean onlyAssigned
 			
 			) throws WebApplicationException {
 		// Make sure request is valid
@@ -342,7 +342,7 @@ public class TransitimeApi {
 
 			// Convert IpcVehiclesDetails to ApiVehiclesDetails
 			ApiVehiclesDetails apiVehiclesDetails = new ApiVehiclesDetails(vehicles, stdParameters.getAgencyId(),
-					uiTypesForVehicles,assigned);
+					uiTypesForVehicles,onlyAssigned);
 
 			// return ApiVehiclesDetails response
 			Response result = null;
