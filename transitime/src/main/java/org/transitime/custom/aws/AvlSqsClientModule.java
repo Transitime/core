@@ -75,7 +75,7 @@ public class AvlSqsClientModule extends Module {
           "are used. Only for when JMS is used.");
 
   private static IntegerConfigValue jmsPauseTimeInSeconds =
-          new IntegerConfigValue("transitime.avl.jmsPauseTimeInSeconds", 30,
+          new IntegerConfigValue("transitime.avl.jmsPauseTimeInSeconds", 20,
                   "How long to block for the next message.");
 
 
