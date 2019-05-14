@@ -296,15 +296,15 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		return destinationId;
 	}
 
-	public double getDistanceToNextStop() {
+	public Double getDistanceToNextStop() {
 		return distanceToNextStop;
 	}
 
-	public double getDistanceOfNextStopFromTripStart() {
+	public Double getDistanceOfNextStopFromTripStart() {
 		return distanceOfNextStopFromTripStart;
 	}
 	
-	public double getDistanceAlongTrip() {
+	public Double getDistanceAlongTrip() {
 		return distanceAlongTrip;
 	}
 	public double getHeadway()
