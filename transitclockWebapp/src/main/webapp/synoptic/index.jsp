@@ -291,6 +291,8 @@ function routeConfigCallback(routeDetail, status)
 			var stop=routeDetail.routes[0].direction[i].stop[j];
 			distanceOverPath+=stop.pathLength;
 			var projectionStop=distanceOverPath/routeLenght;
+			if(stop.direction==undefined)
+				stop.direction="0";
 			var directionStop=(stop.direction==routeDetail.routes[0].direction[i].id=="0")?0:1;
 			stops.push({id: stop.id, identifier: stop.name,projection:projectionStop,direction:directionStop,distance:distanceOverPath});
 		}
