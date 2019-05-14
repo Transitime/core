@@ -256,6 +256,14 @@ public class GtfsData {
 					+ "name of the last stop, won't disambiguate if the last "
 					+ "stops for the trips with the same headsign differ by "
 					+ "less than this amount.");
+
+	private static StringConfigValue outputPathsAndStopsForGraphingRouteIds = 
+		new StringConfigValue("transitclock.gtfs.outputPathsAndStopsForGraphingRouteIds", 
+			null, // Default of null means don't output any routes
+			"Outputs data for specified routes grouped by trip pattern."
+			+ "The resulting data can be visualized on a map by cutting"
+			+ "and pasting it in to http://www.gpsvisualizer.com/map_input"
+			+ "Separate multiple route ids with commas");
 	
 	// Logging
 	public static final Logger logger = 
@@ -2546,6 +2554,16 @@ public class GtfsData {
 	
 	/*************************** Main Public Methods **********************/
 	
+	public void outputRoutesForGraphing() {
+		if (outputPathsAndStopsForGraphingRouteIds.getValue() == null)
+			return;
+		
+		String[] routeIds = outputPathsAndStopsForGraphingRouteIds.getValue().split(",");
+		for (String routeId : routeIds) {
+			outputPathsAndStopsForGraphing(routeId);
+		}
+	}
+
 	/**
 	 * Outputs data for specified route grouped by trip pattern.
 	 * The resulting data can be visualized on a map by cutting
@@ -2701,8 +2719,8 @@ public class GtfsData {
 		// MBTA commuter rail.
 		trimCalendars();
 		
-		// debugging
-		//outputPathsAndStopsForGraphing("8699");
+		// Optionally output routes for debug graphing		
+		outputRoutesForGraphing();
 		
 		// Now process travel times and update the Trip objects. 
 		TravelTimesProcessorForGtfsUpdates travelTimesProcesssor =

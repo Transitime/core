@@ -539,4 +539,15 @@ public class VehicleDataCache {
 		updateVehicleIdsByBlockMap(originalVehicle, vehicle);
 		updateVehiclesMap(vehicle);
 	}
+
+	/**
+	 * Removes a vehicle from the vehiclesMap
+	 * 
+	 * @param vehicleId
+	 *            The id of the vehicle to remove from the vehiclesMap
+	 */
+	public void removeVehicle(String vehicleId) {
+		logger.debug("Removing from VehicleDataCache vehiclesMap vehicleId={}", vehicleId);
+		vehiclesMap.remove(vehicleId);
+	}
 }
