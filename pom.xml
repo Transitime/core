@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>transitime</groupId>
   <artifactId>transitime</artifactId>
-  <version>0.0.36</version>
+  <version>0.0.37-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>transitime</name>
   <url>http://www.transitime.org//</url>
@@ -38,7 +38,7 @@
     <connection>scm:git:http://github.com/sheldonabrown/core.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/sheldonabrown/core.git</developerConnection>
     <url>http://github.com/sheldonabrown/core</url>
-    <tag>transitime-0.0.36</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
