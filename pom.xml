@@ -53,5 +53,15 @@
       <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/snapshots/</url> 
     </snapshotRepository>
   </distributionManagement>
+  <plugins>
+ <!-- *** disable JavaDoc plugin *** -->
+ <plugin>
+   <groupId>org.apache.maven.plugins</groupId>
+   <artifactId>maven-javadoc-plugin</artifactId>
+   <configuration>
+     <additionalparam>-Xdoclint:none</additionalparam> 
+   </configuration>
+ </plugin>
+  </plugins>
 
 </project>
