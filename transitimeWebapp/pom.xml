@@ -3,7 +3,7 @@
 	<parent>
 	  <groupId>transitime</groupId>
 	  <artifactId>transitime</artifactId>
-	<version>0.0.36-SNAPSHOT</version>
+	<version>0.0.36</version>
 	</parent>
 	<packaging>war</packaging>
 	<artifactId>transitimeWebapp</artifactId>
@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>transitime</groupId>
 			<artifactId>transitimeCore</artifactId>
-			<version>0.0.36-SNAPSHOT</version>
+			<version>0.0.36</version>
 		</dependency>
 	</dependencies>
 	<build>
