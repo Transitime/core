@@ -53,6 +53,7 @@
       <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/snapshots/</url> 
     </snapshotRepository>
   </distributionManagement>
+<build>
   <plugins>
  <!-- *** disable JavaDoc plugin *** -->
  <plugin>
@@ -63,5 +64,6 @@
    </configuration>
  </plugin>
   </plugins>
+</build>
 
 </project>
