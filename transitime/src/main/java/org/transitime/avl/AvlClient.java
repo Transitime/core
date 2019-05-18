@@ -149,11 +149,15 @@ public class AvlClient implements Runnable {
 						// But still want to update the vehicle cache with the
 						// latest report because doing so is cheap and it allows
 						// vehicles to move on map smoothly
-						AvlProcessor.getInstance()
-								.cacheAvlReportWithoutProcessing(avlReport);
+						if (avlReport.hasValidAssignment() && !previousReportForVehicle.hasValidAssignment()) {
+							logger.info("using discarded AVL report due to its assignment {}", avlReport);
+						} else {
+							AvlProcessor.getInstance()
+									.cacheAvlReportWithoutProcessing(avlReport);
+							// Done here since not processing this AVL report
+							return;
 
-						// Done here since not processing this AVL report
-						return;
+						}
 					}
 				}
 
