@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.AvlProcessor;
 import org.transitclock.db.structs.AvlReport;
@@ -78,6 +79,17 @@ public class PlaybackModule extends Module {
 			new BooleanConfigValue("transitclock.avl.playbackRealtime", 
 					false,
 					"Playback at normal time speed rather than as fast as possible.");
+	
+	protected static IntegerConfigValue playbackSkipIntervalMinutes =
+			new IntegerConfigValue("transitclock.avl.playbackSkipIntervalMinutes", 
+					120,
+					"If no data for this amount of minutes skip forward in time.");
+	
+	protected static IntegerConfigValue playbackStartDelayMinutes=
+			new IntegerConfigValue("transitclock.avl.playbackStartDelayMinutes", 
+					3,
+					"Time to sleep before starting. Gives some time to connect remote debugger.");
+	
 	/********************* Logging **************************/
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PlaybackModule.class);
@@ -187,6 +199,19 @@ public class PlaybackModule extends Module {
 		return avlReports;
 	}
 	
+	void sleepInIncrements(long clocktime, long sleep, long increment) throws InterruptedException
+	{
+		long counter=0;
+		
+		while(counter<sleep)
+		{
+			Thread.sleep(increment);
+			counter=counter+increment;
+			clocktime=clocktime+increment;
+			Core.getInstance().setSystemTime(clocktime);
+		}
+	}
+	
 	/* Reads AVL data from db and processes it
 	 * (non-Javadoc)
 	 * @see java.lang.Runnable#run()
@@ -194,41 +219,31 @@ public class PlaybackModule extends Module {
 	@Override
 	public void run() {
 		
+		try {
+			Thread.sleep(playbackStartDelayMinutes.getValue()*Time.MS_PER_MIN);
+		} catch (InterruptedException e) {
+		
+		}
+		
 		IntervalTimer timer = new IntervalTimer();
 		// Keep running as long as not trying to access in the future.
-				
+		long last_avl_time=-1;	
 		while (dbReadBeginTime < System.currentTimeMillis() && (playbackEndTimeStr.getValue().length()==0 || dbReadBeginTime<parsePlaybackEndTime(playbackEndTimeStr.getValue()))) {
 			List<AvlReport> avlReports = getBatchOfAvlReportsFromDb();
 			
-			// Process the AVL Reports read in.
-			long last_avl_time=-1;
+			// Process the AVL Reports read in.			
 			for (AvlReport avlReport : avlReports) {
-				logger.info("Processing avlReport={}", avlReport);
-				
-				// Update the Core SystemTime to use this AVL time
-				Core.getInstance().setSystemTime(avlReport.getTime());
-				
-				DateFormat estFormat = new SimpleDateFormat("yyyyMMddHHmmss");				
-		        TimeZone estTime = TimeZone.getTimeZone("EST");
-		        estFormat.setTimeZone(estTime);
-		        
-		        TimeZone gmtTime = TimeZone.getTimeZone("GMT");		        
-		        DateFormat gmtFormat =  new SimpleDateFormat("yyyyMMddHHmmss");
-		        gmtFormat.setTimeZone(gmtTime);
-		        		    		        		       
-		        String estDate=estFormat.format(avlReport.getTime());
-		        String gmtDate=gmtFormat.format(avlReport.getTime());		        
-		        		     
-		        
+																						        
 				if(playbackRealtime.getValue()==true)
 				{
 					if(last_avl_time>-1)
 					{
 						try {
-							// only sleep if values less than 10 minutes. This is to allow it skip days/hours of missing data.
-							if((avlReport.getTime()-last_avl_time)<600000)
+							// only sleep if values less than playbackSkipIntervalMinutes minutes. This is to allow it skip days/hours of missing data.
+							if((avlReport.getTime()-last_avl_time) < (playbackSkipIntervalMinutes.getValue()*Time.MS_PER_MIN))
 							{								
-								Thread.sleep(avlReport.getTime()-last_avl_time);
+								//Thread.sleep(avlReport.getTime()-last_avl_time);
+								sleepInIncrements(Core.getInstance().getSystemTime(), avlReport.getTime()-last_avl_time, 10*Time.MS_PER_SEC);
 							}
 							last_avl_time=avlReport.getTime();
 						} catch (InterruptedException e) {							
@@ -239,6 +254,11 @@ public class PlaybackModule extends Module {
 						last_avl_time=avlReport.getTime();
 					}
 				}				
+				logger.info("Processing avlReport={}", avlReport);
+				
+				// Update the Core SystemTime to use this AVL time
+				Core.getInstance().setSystemTime(avlReport.getTime());
+				
 				// Do the actual processing of the AVL data
 				AvlProcessor.getInstance().processAvlReport(avlReport);						
 			
