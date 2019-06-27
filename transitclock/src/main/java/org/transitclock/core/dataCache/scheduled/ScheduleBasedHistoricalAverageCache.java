@@ -1,14 +1,16 @@
 package org.transitclock.core.dataCache.scheduled;
 
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.ehcache.Status;
+import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.xml.XmlConfiguration;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -20,6 +22,7 @@ import org.transitclock.core.DwellTimeDetails;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
 import org.transitclock.core.dataCache.HistoricalAverage;
+import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripKey;
@@ -38,8 +41,8 @@ public class ScheduleBasedHistoricalAverageCache {
 	private static ScheduleBasedHistoricalAverageCache singleton = new ScheduleBasedHistoricalAverageCache();
 	private static final Logger logger = LoggerFactory
 			.getLogger(ScheduleBasedHistoricalAverageCache.class);
-
-	private Cache cache = null;
+	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
+	private Cache<StopPathCacheKey, HistoricalAverage> cache = null;
 	/**
 	 * Gets the singleton instance of this class.
 	 * 
@@ -50,65 +53,36 @@ public class ScheduleBasedHistoricalAverageCache {
 	}
 	
 	private ScheduleBasedHistoricalAverageCache() {
-		CacheManager cm = CacheManager.getInstance();
+		XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
 		
-		if (cm.getCache(cacheName) == null) {
-			cm.addCache(cacheName);
-		}
-		cache = cm.getCache(cacheName);											
+		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
+		
+		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
+			cm.init();
+							
+		cache = cm.getCache(cacheName, StopPathCacheKey.class, HistoricalAverage.class);										
 	}
-	public List<StopPathCacheKey> getKeys()
-	{
-		@SuppressWarnings("unchecked")
-		List<StopPathCacheKey> keys = cache.getKeys();
-		return keys;
-	}
+	
 	public void logCache(Logger logger)
 	{
-		logger.debug("Cache content log.");
-		@SuppressWarnings("unchecked")
-		List<StopPathCacheKey> keys = cache.getKeys();
-		
-		for(StopPathCacheKey key : keys)
-		{
-			Element result=cache.get(key);
-			if(result!=null)
-			{
-				logger.debug("Key: "+key.toString());
-								
-				HistoricalAverage value=(HistoricalAverage) result.getObjectValue();
-												
-				logger.debug("Average: "+value);
-			}
-		}		
+		logger.debug("Cache content log. Not implemented.");
+				
 	}
 	public void logCacheSize(Logger logger)
 	{
-		@SuppressWarnings("unchecked")
-		List<StopPathCacheKey> keys = cache.getKeys();
-		
-		if(keys!=null)
-			logger.debug("Number of entries in HistoricalAverageCache : "+keys.size());
+		logger.debug("Log cache size. Not implemented.");
 	}
 	
 	synchronized public HistoricalAverage getAverage(StopPathCacheKey key) {		
 						
-		Element result = cache.get(key);
-		
-		if(result==null)
-			return null;
-		else
-			return (HistoricalAverage)result.getObjectValue();		
+		 HistoricalAverage result = cache.get(key);
+		 return result;			
 	}
 	synchronized public void putAverage(StopPathCacheKey key, HistoricalAverage average) {
 			
 		logger.debug("Putting: "+key.toString()+" in cache with values : "+average);
-		
-		Element averageElement = new Element(key, average);
-		
-		cache.put(averageElement);
-			
-		logCacheSize(logger);
+						
+		cache.put(key, average);				
 		// logCache(logger);
 	}
 	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) throws Exception 
@@ -213,5 +187,10 @@ public class ScheduleBasedHistoricalAverageCache {
 		{
 			ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);			
 		}		
+	}
+
+	public List<StopPathCacheKey> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

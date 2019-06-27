@@ -28,7 +28,7 @@ import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.GtfsData;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 
-import net.sf.ehcache.Element;
+
 
 public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	final private static String cacheName = "TripDataHistoryCache";
@@ -38,7 +38,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 	
 	private CacheAccess<TripKey, List<IpcArrivalDeparture>>  cache = null;
 	
-	@Override
+
 	public List<TripKey> getKeys() {
 		ArrayList<TripKey> fulllist=new ArrayList<TripKey>();
 		Set<String> names = JCS.getGroupCacheInstance(cacheName).getGroupNames();
@@ -59,7 +59,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface {
 		cache = JCS.getInstance(cacheName);		
 	}
 
-	@Override
+	
 	public void logCache(Logger logger) {
 		
 		logger.debug("Cache content log. Not implemented.");		

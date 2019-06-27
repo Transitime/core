@@ -6,17 +6,18 @@ package org.transitclock.core.dataCache.ehcache.frequency;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.store.Policy;
-
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.ehcache.Status;
+import org.ehcache.config.CacheConfiguration;
+import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.xml.XmlConfiguration;
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
@@ -30,6 +31,7 @@ import org.transitclock.core.dataCache.ArrivalDepartureComparator;
 import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
+import org.transitclock.core.dataCache.TripEvents;
 import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.db.structs.ArrivalDeparture;
@@ -58,11 +60,12 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 
 	final private static String cacheByTrip = "arrivalDeparturesByTrip";
 	
+	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(TripDataHistoryCache.class);
 
-	private Cache cache = null;
+	private Cache<TripKey, TripEvents> cache = null;
 
 	/**
 	 * Default is 4 as we need 3 days worth for Kalman Filter implementation
@@ -82,62 +85,21 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	}
 
 	public TripDataHistoryCache() {
-		CacheManager cm = CacheManager.getInstance();
-		EvictionAgePolicy evictionPolicy = null;
-		if(tripDataCacheMaxAgeSec!=null)
-		{
-			evictionPolicy = new EvictionAgePolicy(
-				tripDataCacheMaxAgeSec.getValue() * Time.MS_PER_SEC);
-		}else
-		{
-			evictionPolicy = new EvictionAgePolicy(
-					15 * Time.SEC_PER_DAY *Time.MS_PER_SEC);
-		}
-
-		if (cm.getCache(cacheByTrip) == null) {
-			cm.addCache(cacheByTrip);
-		}
-		cache = cm.getCache(cacheByTrip);
+XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
 		
-		//CacheConfiguration config = cache.getCacheConfiguration();							
-		/*TODO We need to refine the eviction policy. */
-		cache.setMemoryStoreEvictionPolicy(evictionPolicy);
+		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
+		
+		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
+			cm.init();
+							
+		cache = cm.getCache(cacheByTrip, TripKey.class, TripEvents.class);
 	}
-	/* (non-Javadoc)
-	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#getKeys()
-	 */
-	@Override
-	public List<TripKey> getKeys()
-	{
-		return cache.getKeys();
-	}
-	/* (non-Javadoc)
-	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#logCache(org.slf4j.Logger)
-	 */
-	@Override
+	
+	
 	public void logCache(Logger logger)
 	{
-		logger.debug("Cache content log.");
-		@SuppressWarnings("unchecked")
-		List<TripKey> keys = cache.getKeys();
-		
-		for(TripKey key : keys)
-		{
-			Element result=cache.get(key);
-			if(result!=null)
-			{
-				logger.info("Key: "+key.toString());
-				@SuppressWarnings("unchecked")
+		logger.debug("Cache content log. Not implemented.");
 				
-				List<IpcArrivalDeparture> ads=(List<IpcArrivalDeparture>) result.getObjectValue();
-												
-				for(IpcArrivalDeparture ad : ads)
-				{
-					logger.info(ad.toString());
-				}
-			}
-		}
-		
 	}
 
 	/* (non-Javadoc)
@@ -150,12 +112,12 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 		//logger.debug(cache.toString());
 		logger.debug("Looking for TripDataHistoryCache cache element using key {}.", tripKey);
 		
-		Element result = cache.get(tripKey);
+		TripEvents result = cache.get(tripKey);
 
 		if(result!=null)
 		{						
 			logger.debug("Found TripDataHistoryCache cache element using key {}.", tripKey);
-			return (List<IpcArrivalDeparture>) result.getObjectValue();
+			return (List<IpcArrivalDeparture>) result.getEvents();
 		}
 		else
 		{
@@ -204,8 +166,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 				time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
 				
 				if(trip!=null)							
-				{			
-										
+				{												
 					tripKey = new TripKey(arrivalDeparture.getTripId(),
 							nearestDay,
 							time);
@@ -214,10 +175,10 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 					
 					List<IpcArrivalDeparture> list = null;						
 					
-					Element result = cache.get(tripKey);
+					 TripEvents element = cache.get(tripKey);
 			
-					if (result != null && result.getObjectValue() != null) {
-						list = (List<IpcArrivalDeparture>) result.getObjectValue();
+					if (element != null && element.getEvents() != null) {
+						list = (List<IpcArrivalDeparture>) element.getEvents();
 						cache.remove(tripKey);
 					} else {
 						list = new ArrayList<IpcArrivalDeparture>();
@@ -229,10 +190,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}									
+					element.setEvents(list);					
 					
-					Element arrivalDepartures = new Element(tripKey, Collections.synchronizedList(list));
-								
-					cache.put(arrivalDepartures);
+					cache.put(tripKey, element);
 				}
 			}								
 			else
@@ -309,63 +269,11 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
-	/**
-	 * 	This policy evicts arrival departures from the cache
-	 *  when they are X (age) number of milliseconds old
-	 * 
-	 */
-	private class EvictionAgePolicy implements Policy {
-		private String name = "AGE";
 
-		private long age = 0L;
-
-		public EvictionAgePolicy(long age) {
-			super();
-			this.age = age;
-		}
-
-		@Override
-		public boolean compare(Element arg0, Element arg1) {
-			if (arg0.getObjectKey() instanceof TripKey
-					&& arg1.getObjectKey() instanceof TripKey) {
-				if (((TripKey) arg0.getObjectKey()).getTripStartDate().after(
-						((TripKey) arg1.getObjectKey()).getTripStartDate())) {
-					return true;
-				}
-				if (((TripKey) arg0.getObjectKey()).getTripStartDate()
-						.compareTo(
-								((TripKey) arg1.getObjectKey())
-										.getTripStartDate()) == 0) {
-					if (((TripKey) arg0.getObjectKey()).getStartTime() > ((TripKey) arg1
-							.getObjectKey()).getStartTime()) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-
-		@Override
-		public Element selectedBasedOnPolicy(Element[] arg0, Element arg1) {
-
-			for (int i = 0; i < arg0.length; i++) {
-
-				if (arg0[i].getObjectKey() instanceof TripKey) {
-					TripKey key = (TripKey) arg0[i].getObjectKey();
-
-					if (Calendar.getInstance().getTimeInMillis()
-							- key.getTripStartDate().getTime()
-							+ (key.getStartTime().intValue() * 1000) > age) {
-						return arg0[i];
-					}
-				}
-			}
-			return null;
-		}		
+	@Override
+	public List<TripKey> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
 	}
+	
 }

@@ -509,10 +509,7 @@ public class Core {
 
 			// populate caches to be used by prediction methods.
 			try {
-				populateCaches();
-				if(TripDataHistoryCacheFactory.getInstance()!=null)
-					TripDataHistoryCacheFactory.getInstance().logCache(logger);
-				
+				populateCaches();								
 			} catch (Exception e) {
 				logger.error("Failed to populate cache.", e);
 			}

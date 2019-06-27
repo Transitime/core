@@ -233,10 +233,10 @@
 			<artifactId>guava</artifactId>
 			<version>18.0</version>
 		</dependency>
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<version>2.10.0</version>
+		<dependency>	
+		    <groupId>org.ehcache</groupId>
+    		<artifactId>ehcache</artifactId>
+    		<version>3.4.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>

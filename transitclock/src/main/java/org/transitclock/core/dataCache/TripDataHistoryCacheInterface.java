@@ -10,9 +10,6 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 public interface TripDataHistoryCacheInterface {
 
-	List<TripKey> getKeys();
-
-	void logCache(Logger logger);
 
 	List<IpcArrivalDeparture> getTripHistory(TripKey tripKey);
 
@@ -23,4 +20,6 @@ public interface TripDataHistoryCacheInterface {
 	IpcArrivalDeparture findPreviousArrivalEvent(List<IpcArrivalDeparture> arrivalDepartures, IpcArrivalDeparture current);
 
 	IpcArrivalDeparture findPreviousDepartureEvent(List<IpcArrivalDeparture> arrivalDepartures, IpcArrivalDeparture current);
+
+	List<TripKey> getKeys();
 }

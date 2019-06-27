@@ -1,16 +1,18 @@
 package org.transitclock.core.dataCache;
 
-import java.util.Date;
+import java.net.URL;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.db.structs.HoldingTime;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+
+import org.ehcache.Status;
+import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.xml.XmlConfiguration;
 /**
  * @author Sean Óg Crudden
  * 
@@ -20,8 +22,8 @@ public class HoldingTimeCache {
 	private static HoldingTimeCache singleton = new HoldingTimeCache();
 	private static final Logger logger = LoggerFactory
 			.getLogger(HoldingTimeCache.class);
-
-	private Cache cache = null;
+	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
+	private Cache<HoldingTimeCacheKey, HoldingTime>  cache = null;
 	/**
 	 * Gets the singleton instance of this class.
 	 * 
@@ -31,86 +33,36 @@ public class HoldingTimeCache {
 		return singleton;
 	}
 	private HoldingTimeCache() {
-		CacheManager cm = CacheManager.getInstance();
+	XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
 		
-		if (cm.getCache(cacheName) == null) {
-			cm.addCache(cacheName);
-		}
-		cache = cm.getCache(cacheName);
+		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
 		
-		CacheConfiguration config = cache.getCacheConfiguration();
-		
-		config.setEternal(true);
-		
-		config.setMaxEntriesLocalHeap(10000);
-		
-		config.setMaxEntriesLocalDisk(10000);								
+		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
+			cm.init();
+							
+		cache = cm.getCache(cacheName, HoldingTimeCacheKey.class, HoldingTime.class);						
 	}
 	public void logCache(Logger logger)
 	{
-		logger.debug("Cache content log.");
-		@SuppressWarnings("unchecked")
-		List<HoldingTimeCacheKey> keys = cache.getKeys();
-		
-		for(HoldingTimeCacheKey key : keys)
-		{
-			Element result=cache.get(key);
-			if(result!=null)
-			{
-				logger.debug("Key: "+key.toString());
-								
-				Object value=result.getObjectValue();
-												
-				logger.debug("Value: " + value.toString());
-			}
-		}		
+		logger.debug("Cache content log. Not implemented");
+				
 	}
 	public void putHoldingTime(HoldingTime holdingTime)
 	{
-		HoldingTimeCacheKey key=new HoldingTimeCacheKey(holdingTime);
+		HoldingTimeCacheKey key=new HoldingTimeCacheKey(holdingTime);	
 		
-		Element errorElement = new Element(key, holdingTime);
-		
-		cache.put(errorElement);
-		
+		cache.put(key, holdingTime);		
 	}
-	public void putHoldingTimeExlusiveByStop(HoldingTime holdingTime, Date currentTime)
-	{
-		List<HoldingTimeCacheKey> keys = getKeys();
-		boolean add=true;
-		
-		// Only add only if all other holding times for the stop have expired
-		for(HoldingTimeCacheKey key:keys)
-		{
-			if(key.getStopid().equals(holdingTime.getStopId())&& !(key.getVehicleId().equals(holdingTime.getVehicleId())))
-			{
-				if(getHoldingTime(key).getHoldingTime().before(currentTime))
-				{
-					add=false;
-				}else
-				{
-					cache.remove(key);
-				}
-			}
-		}
-		if(add)
-		{
-			putHoldingTime(holdingTime);
-		}
-	}
+
 	public HoldingTime getHoldingTime(HoldingTimeCacheKey key)
 	{
-		Element result = cache.get(key);
+		return cache.get(key);
 		
-		if(result==null)
-			return null;
-		else
-			return (HoldingTime)result.getObjectValue();			
+			
 	}
-	public List<HoldingTimeCacheKey> getKeys()
-	{
-		@SuppressWarnings("unchecked")
-		List<HoldingTimeCacheKey> keys = cache.getKeys();
-		return keys;
+	public List<HoldingTimeCacheKey> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
 	}
+	
 }

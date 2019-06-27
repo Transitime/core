@@ -30,7 +30,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
+
 
 import org.hibernate.CallbackException;
 import org.hibernate.Criteria;
@@ -65,7 +65,7 @@ import org.transitclock.utils.Time;
  * 
  * @author SkiBu Smith
  */
-@IgnoreSizeOf
+
 @Entity 
 @DynamicUpdate
 @Table(name="ArrivalsDepartures",

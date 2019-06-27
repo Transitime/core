@@ -5,15 +5,16 @@ package org.transitclock.core.dataCache.ehcache;
 
 import java.util.Collections;
 import java.util.Date;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.store.Policy;
-
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.ehcache.Status;
+import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.xml.XmlConfiguration;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -24,9 +25,11 @@ import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.dataCache.ArrivalDepartureComparator;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
+import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
+import org.transitclock.core.dataCache.StopEvents;
 import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
@@ -50,8 +53,8 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 
 	private static final Logger logger = LoggerFactory.getLogger(StopArrivalDepartureCache.class);
 
-	private Cache cache = null;
-
+	private Cache<StopArrivalDepartureCacheKey, StopEvents> cache = null;
+	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
 	/**
 	 * Default is 4 as we need 3 days worth for Kalman Filter implementation
 	 */
@@ -61,48 +64,22 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 
 
 	public StopArrivalDepartureCache() {
-		CacheManager cm = CacheManager.getInstance();
-		EvictionAgePolicy evictionPolicy = null;
-		if (tripDataCacheMaxAgeSec != null) {
-			evictionPolicy = new EvictionAgePolicy(tripDataCacheMaxAgeSec.getValue() * Time.MS_PER_SEC);
-		} else {
-			evictionPolicy = new EvictionAgePolicy(4 * Time.SEC_PER_DAY * Time.MS_PER_SEC);
-		}
-
-		if (cm.getCache(cacheByStop) == null) {
-			cm.addCache(cacheByStop);
-		}
-		cache = cm.getCache(cacheByStop);
+		XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
+		
+		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
+		
+		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
+			cm.init();
+							
+		cache = cm.getCache(cacheByStop, StopArrivalDepartureCacheKey.class, StopEvents.class);	
 
 		// CacheConfiguration config = cache.getCacheConfiguration();
 
 		// cache.setMemoryStoreEvictionPolicy(evictionPolicy);
 	}
-
-	@SuppressWarnings("unchecked")
-	public List<StopArrivalDepartureCacheKey> getKeys() {
-		return (List<StopArrivalDepartureCacheKey>) cache.getKeys();
-	}
-
+	
 	public void logCache(Logger logger) {
-		logger.debug("Cache content log.");
-		@SuppressWarnings("unchecked")
-		List<StopArrivalDepartureCacheKey> keys = cache.getKeys();
-
-		for (StopArrivalDepartureCacheKey key : keys) {
-			Element result = cache.get(key);
-			if (result != null) {
-				logger.debug("Key: " + key.toString());
-				@SuppressWarnings("unchecked")
-
-				List<ArrivalDeparture> ads = (List<ArrivalDeparture>) result.getObjectValue();
-
-				for (ArrivalDeparture ad : ads) {
-					logger.debug(ad.toString());
-				}
-			}
-		}
-
+		logger.debug("Cache content log. Not implemented.");			
 	}
 
 	/* (non-Javadoc)
@@ -121,10 +98,10 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
 		key.setDate(date.getTime());
-		Element result = cache.get(key);
+		StopEvents result = cache.get(key);
 		
 		if (result != null) {
-			return (List<IpcArrivalDeparture>) result.getObjectValue();
+			return (List<IpcArrivalDeparture>) result.getEvents();
 		} else {
 			return null;
 		}
@@ -153,10 +130,10 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	
 			List<IpcArrivalDeparture> list = null;
 	
-			Element result = cache.get(key);
+			StopEvents element = cache.get(key);
 	
-			if (result != null && result.getObjectValue() != null) {
-				list = (List<IpcArrivalDeparture>) result.getObjectValue();
+			if (element != null && element.getEvents() != null) {
+				list = (List<IpcArrivalDeparture>) element.getEvents();
 				cache.remove(key);
 			} else {
 				list = new ArrayList<IpcArrivalDeparture>();
@@ -170,12 +147,10 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 			}
 			
 			Collections.sort(list, new IpcArrivalDepartureComparator());
-			
-			// This is java 1.8 list.sort(new ArrivalDepartureComparator());
-			
-			Element arrivalDepartures = new Element(key, Collections.synchronizedList(list));
-	
-			cache.put(arrivalDepartures);
+
+			element.setEvents(list);
+							
+			cache.put(key,element);
 	
 			return key;
 		}else
@@ -207,53 +182,5 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		}
 	}
 
-	/**
-	 * This policy evicts arrival departures from the cache when they are X
-	 * (age) number of milliseconds old
-	 * 
-	 */
-	private class EvictionAgePolicy implements Policy {
-		private String name = "AGE";
 
-		private long age = 0L;
-
-		public EvictionAgePolicy(long age) {
-			super();
-			this.age = age;
-		}
-
-		@Override
-		public boolean compare(Element arg0, Element arg1) {
-			if (arg0.getObjectKey() instanceof StopArrivalDepartureCacheKey
-					&& arg1.getObjectKey() instanceof StopArrivalDepartureCacheKey) {
-				if (((StopArrivalDepartureCacheKey) arg0.getObjectKey()).getDate()
-						.after(((StopArrivalDepartureCacheKey) arg1.getObjectKey()).getDate())) {
-					return true;
-				}
-
-			}
-			return false;
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-
-		@Override
-		public Element selectedBasedOnPolicy(Element[] arg0, Element arg1) {
-
-			for (int i = 0; i < arg0.length; i++) {
-
-				if (arg0[i].getObjectKey() instanceof TripKey) {
-					StopArrivalDepartureCacheKey key = (StopArrivalDepartureCacheKey) arg0[i].getObjectKey();
-
-					if (Calendar.getInstance().getTimeInMillis() - key.getDate().getTime() > age) {
-						return arg0[i];
-					}
-				}
-			}
-			return null;
-		}
-	}
 }
