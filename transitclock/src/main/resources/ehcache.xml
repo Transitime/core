@@ -1,60 +1,86 @@
-<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="true"
-	monitoring="autodetect" dynamicConfig="true">
+<?xml version="1.0" encoding="UTF-8"?>
 
-	<!-- By default, Ehcache stored the cached files in temp folder. -->
-	<!-- <diskStore path="java.io.tmpdir" /> -->
+<ehcache:config
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xmlns:ehcache='http://www.ehcache.org/v3'
+	xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.1.xsd">
+
+	<ehcache:cache alias="arrivalDeparturesByTrip">
+		<ehcache:key-type>org.transitclock.core.dataCache.TripKey</ehcache:key-type>
+		<ehcache:value-type>org.transitclock.core.dataCache.TripEvents</ehcache:value-type>
+		<ehcache:expiry>
+			<ehcache:tti unit="days">7</ehcache:tti>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">1000</ehcache:heap>
+			<ehcache:offheap unit="GB">1</ehcache:offheap>
+			<ehcache:disk unit="GB">2</ehcache:disk>
+		</ehcache:resources>
+	</ehcache:cache>
+
+	<ehcache:cache alias="arrivalDeparturesByStop">
+		<ehcache:key-type>org.transitclock.core.dataCache.StopArrivalDepartureCacheKey</ehcache:key-type>
+		<ehcache:value-type>org.transitclock.core.dataCache.StopEvents</ehcache:value-type>
+		<ehcache:expiry>
+			<ehcache:ttl unit="days">1</ehcache:ttl>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">2000</ehcache:heap>
+			<ehcache:offheap unit="GB">1</ehcache:offheap>
+			<ehcache:disk unit="GB">2</ehcache:disk>
+		</ehcache:resources>
+	</ehcache:cache>
+
+	<ehcache:cache alias="KalmanErrorCache">
+		<ehcache:key-type>org.transitclock.core.dataCache.KalmanErrorCacheKey</ehcache:key-type>
+		<ehcache:value-type>java.lang.Double</ehcache:value-type>
+		<ehcache:expiry>
+			<ehcache:ttl unit="hours">24</ehcache:ttl>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">10000</ehcache:heap>
+			<ehcache:offheap unit="MB">5</ehcache:offheap>
+		</ehcache:resources>
+	</ehcache:cache>
+
+	<ehcache:cache alias="HistoricalAverageCache">
+		<ehcache:key-type>org.transitclock.core.dataCache.StopPathCacheKey</ehcache:key-type>
+		<ehcache:value-type>org.transitclock.core.dataCache.HistoricalAverage</ehcache:value-type>
+		<ehcache:expiry>
+			<ehcache:tti unit="days">14</ehcache:tti>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">10000</ehcache:heap>
+			<ehcache:offheap unit="GB">1</ehcache:offheap>
+			<ehcache:disk unit="GB">2</ehcache:disk>
+		</ehcache:resources>
+	</ehcache:cache>
+
+	<ehcache:cache alias="StopPathPredictionCache">
+		<ehcache:key-type>java.lang.Long</ehcache:key-type>
+		<ehcache:value-type>java.lang.String</ehcache:value-type>
+		<ehcache:expiry>
+		 <ehcache:ttl unit="hours">1</ehcache:ttl>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">100</ehcache:heap>
+			<ehcache:offheap unit="MB">1</ehcache:offheap>
+		</ehcache:resources>
+	</ehcache:cache>
+
+	<ehcache:cache alias="HoldingTimeCache">
+		<ehcache:key-type>org.transitclock.core.dataCache.HoldingTimeCacheKey</ehcache:key-type>
+		<ehcache:value-type>org.transitclock.db.structs.HoldingTime</ehcache:value-type>
+		<ehcache:expiry>
+		 <ehcache:ttl unit="hours">2</ehcache:ttl>
+		</ehcache:expiry>
+		<ehcache:resources>
+			<ehcache:heap unit="entries">100</ehcache:heap>
+			<ehcache:offheap unit="MB">1</ehcache:offheap>
+		</ehcache:resources>
+	</ehcache:cache>
+</ehcache:config>
+
+
 	
-	<!-- Ask Ehcache to store cache in this path -->
-	<diskStore path="/usr/local/transitime/cache" />
-	
-	<cache name="arrivalDeparturesByTrip" 
-		maxEntriesLocalHeap="1000000"
-		maxEntriesLocalDisk="1000000" 
-		eternal="true" 
-		diskSpoolBufferSizeMB="50"				
-		transactionalMode="off">
-		<persistence strategy="none" />
-	</cache>
-	<cache name="arrivalDeparturesByStop" 
-		maxEntriesLocalHeap="200000"
-		maxEntriesLocalDisk="200000" 
-		eternal="true" 
-		diskSpoolBufferSizeMB="50"				
-		transactionalMode="off">
-		<persistence strategy="none" />
-	</cache>
-	<cache name="KalmanErrorCache" 
-		maxEntriesLocalHeap="200000"
-		maxEntriesLocalDisk="200000" 
-		eternal="true" 
-		diskSpoolBufferSizeMB="50"				
-		transactionalMode="off">
-		<persistence strategy="none" />
-	</cache>
-	<cache name="HistoricalAverageCache" 
-		maxEntriesLocalHeap="500000"
-		maxEntriesLocalDisk="500000" 
-		eternal="true" 
-		diskSpoolBufferSizeMB="100"				
-		transactionalMode="off">
-		<persistence strategy="none" />
-	</cache>
-	<cache name="StopPathPredictionCache" 
-		maxEntriesLocalHeap="500000"
-		maxEntriesLocalDisk="500000" 
-		eternal="true" 
-		diskSpoolBufferSizeMB="100"				
-		transactionalMode="off">
-		<persistence strategy="none" />
-	</cache>
-	<cache name="HoldingTimeCache" 
-		maxEntriesLocalHeap="1000"
-		maxEntriesLocalDisk="1000" 
-		eternal="true" 
-		diskSpoolBufferSizeMB="100"				
-		transactionalMode="off">
-		<persistence strategy="none" />
-	</cache>		
-	
-</ehcache>
+
