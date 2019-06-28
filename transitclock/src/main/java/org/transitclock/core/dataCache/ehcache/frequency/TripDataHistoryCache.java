@@ -33,6 +33,7 @@ import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
 import org.transitclock.core.dataCache.TripEvents;
 import org.transitclock.core.dataCache.TripKey;
+import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
@@ -85,12 +86,9 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	}
 
 	public TripDataHistoryCache() {
-XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
+		CacheManager cm = CacheManagerFactory.getInstance();
 		
-		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
-		
-		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
-			cm.init();
+
 							
 		cache = cm.getCache(cacheByTrip, TripKey.class, TripEvents.class);
 	}

@@ -415,20 +415,6 @@ public class Core {
 		Session session = HibernateUtils.getSession();
 
 		Date endDate=Calendar.getInstance().getTime();
-
-		/* populate one day at a time to avoid memory issue */
-		for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-		{
-			Date startDate=DateUtils.addDays(endDate, -1);
-			if(StopArrivalDepartureCacheFactory.getInstance()!=null)
-			{
-				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
-				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-			}
-			
-			endDate=startDate;
-		}
-		endDate=Calendar.getInstance().getTime();
 										
 
 		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
@@ -466,6 +452,21 @@ public class Core {
 			}
 		}		
 		endDate=Calendar.getInstance().getTime();
+
+		/* populate one day at a time to avoid memory issue */
+		for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+		{
+			Date startDate=DateUtils.addDays(endDate, -1);
+			if(StopArrivalDepartureCacheFactory.getInstance()!=null)
+			{
+				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
+				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+			}
+			
+			endDate=startDate;
+		}
+		endDate=Calendar.getInstance().getTime();
+		
 
 		for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 		{

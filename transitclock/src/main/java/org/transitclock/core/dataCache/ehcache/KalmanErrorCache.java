@@ -38,13 +38,8 @@ public class KalmanErrorCache implements ErrorCache {
 	
 	public KalmanErrorCache() {
 					
-		XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
-		
-		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
-		
-		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
-			cm.init();
-							
+		CacheManager cm = CacheManagerFactory.getInstance();
+									
 		cache = cm.getCache(cacheName, KalmanErrorCacheKey.class, Double.class);									
 	}
 	

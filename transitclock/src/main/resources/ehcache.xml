@@ -13,8 +13,8 @@
 		</ehcache:expiry>
 		<ehcache:resources>
 			<ehcache:heap unit="entries">1000</ehcache:heap>
-			<ehcache:offheap unit="GB">1</ehcache:offheap>
-			<ehcache:disk unit="GB">2</ehcache:disk>
+			<ehcache:offheap unit="MB">100</ehcache:offheap>
+			
 		</ehcache:resources>
 	</ehcache:cache>
 
@@ -26,8 +26,8 @@
 		</ehcache:expiry>
 		<ehcache:resources>
 			<ehcache:heap unit="entries">2000</ehcache:heap>
-			<ehcache:offheap unit="GB">1</ehcache:offheap>
-			<ehcache:disk unit="GB">2</ehcache:disk>
+			<ehcache:offheap unit="MB">100</ehcache:offheap>
+			
 		</ehcache:resources>
 	</ehcache:cache>
 
@@ -51,8 +51,8 @@
 		</ehcache:expiry>
 		<ehcache:resources>
 			<ehcache:heap unit="entries">10000</ehcache:heap>
-			<ehcache:offheap unit="GB">1</ehcache:offheap>
-			<ehcache:disk unit="GB">2</ehcache:disk>
+			<ehcache:offheap unit="MB">100</ehcache:offheap>
+			
 		</ehcache:resources>
 	</ehcache:cache>
 

@@ -63,19 +63,10 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 			"How old an arrivaldeparture has to be before it is removed from the cache ");
 
 
-	public StopArrivalDepartureCache() {
-		XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
-		
-		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
-		
-		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
-			cm.init();
-							
+	public StopArrivalDepartureCache() {		
+		CacheManager cm = CacheManagerFactory.getInstance();
+									
 		cache = cm.getCache(cacheByStop, StopArrivalDepartureCacheKey.class, StopEvents.class);	
-
-		// CacheConfiguration config = cache.getCacheConfiguration();
-
-		// cache.setMemoryStoreEvictionPolicy(evictionPolicy);
 	}
 	
 	public void logCache(Logger logger) {
