@@ -13,7 +13,7 @@ public class TripDataHistoryCacheFactory {
 					"org.transitclock.core.dataCache.ehcache.frequency.TripDataHistoryCache",
 					"Specifies the class used to cache the arrival and departures for a trip.");
 	
-	private static TripDataHistoryCacheInterface singleton = null;
+	public static TripDataHistoryCacheInterface singleton = null;
 	
 	public static TripDataHistoryCacheInterface getInstance() {
 		
