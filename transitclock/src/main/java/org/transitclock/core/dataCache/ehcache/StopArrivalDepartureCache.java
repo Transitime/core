@@ -30,6 +30,7 @@ import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.core.dataCache.StopEvents;
+import org.transitclock.core.dataCache.TripEvents;
 import org.transitclock.core.dataCache.TripKey;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
@@ -128,6 +129,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 				cache.remove(key);
 			} else {
 				list = new ArrayList<IpcArrivalDeparture>();
+				element=new StopEvents(list);	
 			}
 			
 			try {
