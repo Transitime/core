@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<ehcache:config
-	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+<ehcache:config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
 	xmlns:ehcache='http://www.ehcache.org/v3'
 	xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.1.xsd">
-
+	<ehcache:persistence directory="/usr/local/transitclock/cache/" />
+	<ehcache:disk-store thread-pool="pool-disk" />
 	<ehcache:cache alias="arrivalDeparturesByTrip">
 		<ehcache:key-type>org.transitclock.core.dataCache.TripKey</ehcache:key-type>
 		<ehcache:value-type>org.transitclock.core.dataCache.TripEvents</ehcache:value-type>
@@ -14,8 +14,10 @@
 		<ehcache:resources>
 			<ehcache:heap unit="entries">1000</ehcache:heap>
 			<ehcache:offheap unit="MB">100</ehcache:offheap>
-			
+			<ehcache:disk unit="MB">200</ehcache:disk>
 		</ehcache:resources>
+		<ehcache:disk-store-settings thread-pool="pool-disk"
+			writer-concurrency="1" />
 	</ehcache:cache>
 
 	<ehcache:cache alias="arrivalDeparturesByStop">
@@ -27,8 +29,10 @@
 		<ehcache:resources>
 			<ehcache:heap unit="entries">2000</ehcache:heap>
 			<ehcache:offheap unit="MB">100</ehcache:offheap>
-			
+			<ehcache:disk unit="MB">200</ehcache:disk>
 		</ehcache:resources>
+		<ehcache:disk-store-settings thread-pool="pool-disk"
+			writer-concurrency="1" />
 	</ehcache:cache>
 
 	<ehcache:cache alias="KalmanErrorCache">
@@ -52,7 +56,7 @@
 		<ehcache:resources>
 			<ehcache:heap unit="entries">10000</ehcache:heap>
 			<ehcache:offheap unit="MB">100</ehcache:offheap>
-			
+
 		</ehcache:resources>
 	</ehcache:cache>
 
@@ -60,7 +64,7 @@
 		<ehcache:key-type>java.lang.Long</ehcache:key-type>
 		<ehcache:value-type>java.lang.String</ehcache:value-type>
 		<ehcache:expiry>
-		 <ehcache:ttl unit="hours">1</ehcache:ttl>
+			<ehcache:ttl unit="hours">1</ehcache:ttl>
 		</ehcache:expiry>
 		<ehcache:resources>
 			<ehcache:heap unit="entries">100</ehcache:heap>
@@ -72,7 +76,7 @@
 		<ehcache:key-type>org.transitclock.core.dataCache.HoldingTimeCacheKey</ehcache:key-type>
 		<ehcache:value-type>org.transitclock.db.structs.HoldingTime</ehcache:value-type>
 		<ehcache:expiry>
-		 <ehcache:ttl unit="hours">2</ehcache:ttl>
+			<ehcache:ttl unit="hours">2</ehcache:ttl>
 		</ehcache:expiry>
 		<ehcache:resources>
 			<ehcache:heap unit="entries">100</ehcache:heap>
