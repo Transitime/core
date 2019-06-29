@@ -244,6 +244,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo -->
+		<dependency>
+    		<groupId>com.esotericsoftware</groupId>
+    		<artifactId>kryo</artifactId>
+    		<version>4.0.0</version>
+		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-jcs-core -->
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
