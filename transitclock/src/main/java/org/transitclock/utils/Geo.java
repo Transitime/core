@@ -74,6 +74,27 @@ public class Geo {
 	}
 
 	/**
+	 * For formatting distances in meters to consistent 2 decimal places.
+	 * Appends "m" to indicate units.
+	 * 
+	 * @param arg
+	 * @return
+	 */
+	public static String distanceFormat(Double arg) {
+		// Handle NaN and other special cases
+		if (arg == null)
+			return "null";
+		if (arg.isNaN())
+			return "NaN";
+		if (arg == Double.MAX_VALUE) 
+			return "Double.MAX_VALUE";
+		
+		// Not a special case so output the value with just two digits
+		// past decimal place and append "m" to indicate meters.
+		return twoDigitFormat.format(arg) + "m";
+	}
+
+	/**
 	 * Outputs arg with just a single digit. No other formatting is done.
 	 * Useful when want to output speed or heading but don't want to
 	 * include units.

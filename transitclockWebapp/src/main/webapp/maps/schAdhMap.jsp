@@ -66,7 +66,7 @@ function getVehiclePopupContent(vehicle) {
  */
 function getAndProcessSchAdhData() {
 	// Do API call to get schedule adherence data
-	$.getJSON(apiUrlPrefix + "/command/vehiclesDetails",
+	$.getJSON(apiUrlPrefix + "/command/vehiclesDetails?onlyAssigned=true",
 			// Process data
 			function(jsonData) {
 				var newVehicleLayer = L.featureGroup();

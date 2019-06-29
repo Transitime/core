@@ -5,10 +5,11 @@ to build the program, you can do this with the command
 mvn install -DskipTests
 
 This will take a few minutes to run. when complete navigate to 
-transitimeQuickStart/Target/
-from here you see the transitimeQuickStart.jar to run it from here enter the line:
+transitimeQuickStart
+from here you see the target/transitimeQuickStart.jar to run it from here enter the line:
 
-java -jar transitimeQuickStart.jar
+
+java -jar -Dtransitclock.configFiles=src/main/resources/transitclock.properties target/transitclockQuickStart.jar
 
 The gui should then pop up if done correctly.
 

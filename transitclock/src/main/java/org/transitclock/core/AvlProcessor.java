@@ -121,6 +121,15 @@ public class AvlProcessor {
 	          "transitclock.core.maxMatchDistanceFromAVLRecord",
 	          500.0,
 	          "For logging distance between spatial match and actual AVL assignment ");
+	 
+	 private static BooleanConfigValue ignoreInactiveBlocks =
+			 new BooleanConfigValue(
+					 "transitclock.core.ignoreInactiveBlocks",
+					 true,
+					 "If the block isn't active at this time then ignore it. This way " 
+					 + "don't look at each trip to see if it is active which is important " 
+					 + "because looking at each trip means all the trip data including "
+					 + "travel times needs to be lazy loaded, which can be slow.");
 
 	
   private double getMaxMatchDistanceFromAVLRecord() {
@@ -236,6 +245,16 @@ public class AvlProcessor {
 		vehicleState.unsetBlock(BlockAssignmentMethod.ASSIGNMENT_GRABBED);
 	}
 
+	/**
+	 * Removes the vehicle from the VehicleDataCache.
+	 * 
+	 * @param vehicleId
+	 *            The vehicle to remove
+	 */
+	public void removeFromVehicleDataCache(String vehicleId) {
+		VehicleDataCache.getInstance().removeVehicle(vehicleId);
+	}
+	
 	/**
 	 * Looks at the previous AVL reports to determine if vehicle is actually
 	 * moving. If it is not moving then the vehicle is made unpredictable. Uses
@@ -673,7 +692,8 @@ public class AvlProcessor {
 			// don't look at each trip to see if it is active which is important
 			// because looking at each trip means all the trip data including
 			// travel times needs to be lazy loaded, which can be slow.
-			if (!block.isActive(avlReport.getDate())) {
+			// Override by setting transitclock.core.ignoreInactiveBlocks to false
+			if (!block.isActive(avlReport.getDate()) && ignoreInactiveBlocks.getValue()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("For vehicleId={} ignoring block ID {} with "
 							+ "start_time={} and end_time={} because not "

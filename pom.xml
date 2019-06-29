@@ -29,9 +29,9 @@
                 <module>transitclock</module>
                 <module>transitclockApi</module>
               	<module>transitclockWebapp</module>
-		 		<module>transitclockQuickStart</module>
-		 		<module>transitclockTraccarClient</module>
-		 		<module>transitclockBarefootClient</module>
+ 		<module>transitclockQuickStart</module>
+ 		<module>transitclockTraccarClient</module>
+ 		<module>transitclockBarefootClient</module>
             </modules>
         </profile>
     </profiles>
