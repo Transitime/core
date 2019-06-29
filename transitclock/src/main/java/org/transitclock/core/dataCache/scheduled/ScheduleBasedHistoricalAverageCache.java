@@ -26,6 +26,7 @@ import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.TripKey;
+import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
 import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.db.structs.ArrivalDeparture;
@@ -53,12 +54,7 @@ public class ScheduleBasedHistoricalAverageCache {
 	}
 	
 	private ScheduleBasedHistoricalAverageCache() {
-		XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
-		
-		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
-		
-		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
-			cm.init();
+		CacheManager cm = CacheManagerFactory.getInstance();
 							
 		cache = cm.getCache(cacheName, StopPathCacheKey.class, HistoricalAverage.class);										
 	}

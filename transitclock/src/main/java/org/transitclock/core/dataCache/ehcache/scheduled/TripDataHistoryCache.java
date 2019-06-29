@@ -82,7 +82,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 		CacheManager cm = CacheManagerFactory.getInstance();
 							
 		cache = cm.getCache(cacheByTrip, TripKey.class, TripEvents.class);
-			
+				
 	}
 	
 
@@ -136,20 +136,16 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 		
 				TripEvents result = (TripEvents) cache.get(tripKey);
 		
-				if (result != null ) {					
-					cache.remove(tripKey);
-				} else {
-					result=new TripEvents(new ArrayList<IpcArrivalDeparture>());					
+				if (result == null ) {													
+					result=new TripEvents();					
 				}
 				
-				try {
-					List<IpcArrivalDeparture> list = (List<IpcArrivalDeparture>) result.getEvents();
-					
-					list.add(new IpcArrivalDeparture(arrivalDeparture));
+				try {										
+					result.addEvent(new IpcArrivalDeparture(arrivalDeparture));
 					
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Error adding "+arrivalDeparture.toString()+" event to TripDataHistoryCache.", e);				
+
 				}									
 							
 				cache.put(tripKey, result);

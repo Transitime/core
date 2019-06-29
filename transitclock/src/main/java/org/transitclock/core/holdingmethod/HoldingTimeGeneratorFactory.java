@@ -10,7 +10,7 @@ public class HoldingTimeGeneratorFactory {
 	// The name of the class to instantiate
 		private static StringConfigValue className = 
 				new StringConfigValue("transitclock.core.holdingTimeGeneratorClass", 
-						"org.transitclock.core.holdingmethod.HoldingTimeGeneratorDefaultImpl",
+						null,
 						"Specifies the name of the class used for generating " +
 						"holding times.");
 
@@ -19,9 +19,9 @@ public class HoldingTimeGeneratorFactory {
 		/********************** Member Functions **************************/
 
 		public static HoldingTimeGenerator getInstance() {
-			// If the PredictionGenerator hasn't been created yet then do so now
+			// If the HoldingTimeGenerator hasn't been created yet then do so now
 			if (singleton == null) {
-				if(className.getValue().length()>0)
+				if(className.getValue()!=null&&className.getValue().length()>0)
 					singleton = ClassInstantiator.instantiate(className.getValue(), 
 							HoldingTimeGenerator.class);
 			}

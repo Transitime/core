@@ -395,9 +395,10 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			}
 		
 		}
+		/*
 		if(HoldingTimeGeneratorDefaultImpl.getOrderedListOfVehicles("66")!=null)
 			logger.info("ORDER:"+HoldingTimeGeneratorDefaultImpl.getOrderedListOfVehicles("66").toString());
-		
+		*/
 		/*
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{

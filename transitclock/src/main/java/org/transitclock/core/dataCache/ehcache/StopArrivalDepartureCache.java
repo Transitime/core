@@ -119,30 +119,19 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		{
 			StopArrivalDepartureCacheKey key = new StopArrivalDepartureCacheKey(arrivalDeparture.getStop().getId(),
 					date.getTime());
-	
-			List<IpcArrivalDeparture> list = null;
-	
+					
 			StopEvents element = cache.get(key);
 	
-			if (element != null && element.getEvents() != null) {
-				list = (List<IpcArrivalDeparture>) element.getEvents();
-				cache.remove(key);
-			} else {
-				list = new ArrayList<IpcArrivalDeparture>();
-				element=new StopEvents(list);	
+			if (element == null) {														
+				element=new StopEvents();	
 			}
 			
 			try {
-				list.add(new IpcArrivalDeparture(arrivalDeparture));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			Collections.sort(list, new IpcArrivalDepartureComparator());
-
-			element.setEvents(list);
-							
+				element.addEvent(new IpcArrivalDeparture(arrivalDeparture));
+			} catch (Exception e) {				
+				logger.error("Error adding "+arrivalDeparture.toString()+" event to StopArrivalDepartureCache.", e);				
+			}			
+									
 			cache.put(key,element);
 	
 			return key;
