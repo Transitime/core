@@ -1,4 +1,7 @@
 package org.transitclock.core.predictiongenerator.scheduled.dwell;
+
+import java.io.Serializable;
+
 /**
  * 
  * @author scrudden
@@ -6,7 +9,7 @@ package org.transitclock.core.predictiongenerator.scheduled.dwell;
  * The possible inputs to any such algorithms are dwelltime, headway and demand.
  *
  */
-public interface DwellModel {	
+public interface DwellModel extends Serializable {	
 	public Integer predict(Integer headway, Integer demand);
 	public void putSample(Integer dwelltime, Integer headway, Integer demand);		
 }

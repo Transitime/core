@@ -1,26 +1,26 @@
-package org.transitclock.core.dataCache.memcached.scheduled;
+package org.transitclock.core.dataCache.ehcache.scheduled;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.LongConfigValue;
-import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.core.dataCache.StopPathCacheKey;
+import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
 import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellTimeModelFactory;
 import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Headway;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
-
-import net.spy.memcached.MemcachedClient;
 /**
  * 
  * @author scrudden
@@ -36,31 +36,29 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	private static IntegerConfigValue maxSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.dwell.maxSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
 		
 
-	private static StringConfigValue memcachedHost = new StringConfigValue("transitclock.cache.memcached.host", "127.0.0.1",
-			"Specifies the host machine that memcache is running on.");
-
-	private static IntegerConfigValue memcachedPort = new IntegerConfigValue("transitclock.cache.memcached.port", 11211,
-			"Specifies the port that memcache is running on.");
-
-
+	final private static String cacheName= "dwellTimeModelCache";
+	
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimeModelCache.class);
-	MemcachedClient memcachedClient = null;
-	private static String keystub = "DWELLTIMEMODEL_";
-	Integer expiryDuration=Time.SEC_PER_DAY*7;
+	
+	
+	private Cache<StopPathCacheKey, DwellModel> cache = null;
+	
 	public DwellTimeModelCache() throws IOException {
-		memcachedClient = new MemcachedClient(
-				new InetSocketAddress(memcachedHost.getValue(), memcachedPort.getValue().intValue()));
+		
+		CacheManager cm = CacheManagerFactory.getInstance();
+							
+		cache = cm.getCache(cacheName, StopPathCacheKey.class, DwellModel.class);
 	}
 	@Override
 	synchronized public void addSample(ArrivalDeparture event, Headway headway, long dwellTime) {
 
-		StopPathCacheKey key=new StopPathCacheKey(headway.getTripId(), event.getStopPathIndex());
+		StopPathCacheKey key=new StopPathCacheKey(headway.getTripId(), event.getStopPathIndex(), false);
 
 		DwellModel model = null;
 		
-		if(memcachedClient.get(createKey(key))!=null)
+		if(cache.get(key)!=null)
 		{
-			model=(DwellModel) memcachedClient.get(createKey(key));
+			model=(DwellModel) cache.get(key);
 			
 			model.putSample((int)dwellTime, (int)headway.getHeadway(),null);		
 		}else
@@ -68,7 +66,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 			model=DwellTimeModelFactory.getInstance();		
 		}
 		model.putSample((int)dwellTime, (int)headway.getHeadway(),null);
-		memcachedClient.set(createKey(key),expiryDuration, model);
+		cache.put(key, model);
 	}
 
 	@Override
@@ -189,7 +187,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	@Override
 	public Long predictDwellTime(StopPathCacheKey cacheKey, Headway headway) {
 
-		DwellModel model=(DwellModel) memcachedClient.get(createKey(cacheKey));
+		DwellModel model=(DwellModel) cache.get(cacheKey);
 		if(model==null||headway==null)
 			return null;
 		
@@ -198,17 +196,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		
 		return null;
 	}
-	public static void main(String[] args)
-	{
-		 double startvalue=1000;
-		 double result1 = Math.log10(startvalue);
-		 double result2 = Math.pow(10, result1);
-		 if(startvalue==result2)
-			 System.out.println("As expected they are the same.");
-	}
-	private String createKey(StopPathCacheKey key)
-	{
-		return keystub + key.getTripId() + "_" + key.getStopPathIndex();
-	}
+	
+	
 
 }

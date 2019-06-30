@@ -430,6 +430,19 @@ public class Core {
 				logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
 				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
 			}
+			
+			if(StopArrivalDepartureCacheFactory.getInstance()!=null)
+			{
+				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+			}
+			/*
+			if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
+			{
+				logger.debug("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
+			}
+			*/
 		}else
 		{
 			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
@@ -450,36 +463,38 @@ public class Core {
 
 				endDate=startDate;
 			}
-		}		
-		endDate=Calendar.getInstance().getTime();
-
-		/* populate one day at a time to avoid memory issue */
-		for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-		{
-			Date startDate=DateUtils.addDays(endDate, -1);
-			if(StopArrivalDepartureCacheFactory.getInstance()!=null)
-			{
-				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
-				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-			}
 			
-			endDate=startDate;
-		}
-		endDate=Calendar.getInstance().getTime();
-		
+			endDate=Calendar.getInstance().getTime();
 
-		for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
-		{
-			Date startDate=DateUtils.addDays(endDate, -1);
-
-			if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
+			/* populate one day at a time to avoid memory issue */
+			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
-				logger.debug("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
-				ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+				Date startDate=DateUtils.addDays(endDate, -1);
+				if(StopArrivalDepartureCacheFactory.getInstance()!=null)
+				{
+					logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
+					StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+				}
+				
+				endDate=startDate;
 			}
+			endDate=Calendar.getInstance().getTime();
+			
 
-			endDate=startDate;
-		}
+			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
+			{
+				Date startDate=DateUtils.addDays(endDate, -1);
+
+				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
+				{
+					logger.debug("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+					ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
+				}
+
+				endDate=startDate;
+			}
+		}		
+	
 	}
 
 	/**

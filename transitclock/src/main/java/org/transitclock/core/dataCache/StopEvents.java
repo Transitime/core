@@ -53,7 +53,9 @@ public class StopEvents implements Serializable {
 	public StopEvents(List<IpcArrivalDeparture> events) {
 		super();
 		this.events = events;
+		
 		Collections.sort(this.events, new IpcArrivalDepartureComparator());
+		
 	}
 	
 	public void addEvent(IpcArrivalDeparture event)

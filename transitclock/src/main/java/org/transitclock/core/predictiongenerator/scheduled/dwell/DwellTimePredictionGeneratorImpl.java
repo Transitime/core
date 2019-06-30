@@ -2,18 +2,13 @@ package org.transitclock.core.predictiongenerator.scheduled.dwell;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
-import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
 import org.transitclock.core.dataCache.StopPathCacheKey;
-import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.predictiongenerator.scheduled.traveltime.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Headway;
-import org.transitclock.ipc.data.IpcPrediction;
 
 /**
  * @author Sean Og Crudden
@@ -52,7 +47,7 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 					
 					if(result==null)
 					{
-						logger.debug("Using scheduled value for dwell time as no RLS data available for {}.", indices);
+						logger.debug("Using scheduled value for dwell time as no model available for {}.", indices);
 						result = super.getStopTimeForPath(indices,  avlReport, vehicleState);
 					}
 					
