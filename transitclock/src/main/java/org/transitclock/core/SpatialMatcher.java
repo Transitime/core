@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.configData.AvlConfig;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.db.structs.AvlReport;
@@ -72,6 +73,7 @@ public class SpatialMatcher {
 	private static final Logger logger = 
 			LoggerFactory.getLogger(SpatialMatcher.class);
 
+	private static BooleanConfigValue spatialMatchToLayoversAllowedForAutoAssignment=new BooleanConfigValue("transitclock.core.spatialMatchToLayoversAllowedForAutoAssignment", false, "Allow auto assigner consider spatial matches to layovers. Experimental.");
 	/********************** Member Functions **************************/
 
 	/**
@@ -399,14 +401,14 @@ public class SpatialMatcher {
 						MatchingType.AUTO_ASSIGNING_MATCHING);
 
 		// Filter out the ones that are layovers
-		List<SpatialMatch> spatialMatchesWithoutLayovers = 
+		List<SpatialMatch> spatialMatches = 
 				new ArrayList<SpatialMatch>();
 		for (SpatialMatch spatialMatch : allSpatialMatches) {
-			if (!spatialMatch.isLayover())
-				spatialMatchesWithoutLayovers.add(spatialMatch);
+			if (!spatialMatch.isLayover() || spatialMatchToLayoversAllowedForAutoAssignment.getValue())
+				spatialMatches.add(spatialMatch);
 		}		
 
-		return spatialMatchesWithoutLayovers;
+		return spatialMatches;
 	}
 
 	/**

@@ -27,7 +27,6 @@ import org.transitclock.core.BlockAssignmentMethod;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.VehicleState;
-import org.transitclock.db.structs.HoldingTime;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
@@ -48,9 +47,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 
 	private final String originStopId;
 	private final String destinationId;
-	private final double distanceToNextStop;
-	private final double distanceOfNextStopFromTripStart;
-	private final double distanceAlongTrip;
+	private final Double distanceToNextStop;
+	private final Double distanceOfNextStopFromTripStart;
+	private final Double distanceAlongTrip;
 	private double headway;
 	
 	private static final long serialVersionUID = 8154105842499551461L;
@@ -99,9 +98,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			// Vehicle not assigned to trip so null out parameters
 			this.originStopId = null;
 			this.destinationId = null;
-			this.distanceToNextStop = Double.NaN;
-			this.distanceOfNextStopFromTripStart = Double.NaN;
-			this.distanceAlongTrip = Double.NaN;
+			this.distanceToNextStop =null; //Double.NaN;
+			this.distanceOfNextStopFromTripStart =null;//  Double.NaN;
+			this.distanceAlongTrip =null; // Double.NaN;
 		}
 	}
 	
@@ -148,9 +147,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			String nextStopId, String nextStopName, String vehicleType,
 			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
 			Integer atOrNextGtfsStopSeq, String originStopId,
-			String destinationId, double distanceToNextStop,
+			String destinationId, Double distanceToNextStop,
 
-			double distanceOfNextStopFromTripStart, double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled,
+			Double distanceOfNextStopFromTripStart, Double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled,
 			double headway) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
@@ -178,9 +177,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		// Exact copy of fields of IpcCompleteVehicle enclosing class object
 		private String originStopId;
 		private String destinationId;
-		private double distanceToNextStop;
-		private double distanceOfNextStopFromTripStart;
-		private double distanceAlongTrip;
+		private Double distanceToNextStop;
+		private Double distanceOfNextStopFromTripStart;
+		private Double distanceAlongTrip;
 		private double headway;
 		private static final short currentSerializationVersion = 0;
 		
@@ -212,9 +211,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			
 		    stream.writeObject(originStopId);
 		    stream.writeObject(destinationId);
-		    stream.writeDouble(distanceToNextStop);
-		    stream.writeDouble(distanceOfNextStopFromTripStart);
-		    stream.writeDouble(distanceAlongTrip);
+		    stream.writeObject(distanceToNextStop);
+		    stream.writeObject(distanceOfNextStopFromTripStart);
+		    stream.writeObject(distanceAlongTrip);
 		    stream.writeDouble(headway);
 		}
 
@@ -240,9 +239,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			// Read in data for this class
 			originStopId = (String) stream.readObject();
 			destinationId = (String) stream.readObject();
-			distanceToNextStop = stream.readDouble();
-			distanceOfNextStopFromTripStart = stream.readDouble();
-			distanceAlongTrip = stream.readDouble();
+			distanceToNextStop = (Double)stream.readObject();
+			distanceOfNextStopFromTripStart = (Double)stream.readObject();
+			distanceAlongTrip =(Double) stream.readObject();
 			isCanceled=stream.readBoolean();
 			headway=stream.readDouble();
 		}
@@ -296,15 +295,15 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		return destinationId;
 	}
 
-	public double getDistanceToNextStop() {
+	public Double getDistanceToNextStop() {
 		return distanceToNextStop;
 	}
 
-	public double getDistanceOfNextStopFromTripStart() {
+	public Double getDistanceOfNextStopFromTripStart() {
 		return distanceOfNextStopFromTripStart;
 	}
 	
-	public double getDistanceAlongTrip() {
+	public Double getDistanceAlongTrip() {
 		return distanceAlongTrip;
 	}
 	public double getHeadway()

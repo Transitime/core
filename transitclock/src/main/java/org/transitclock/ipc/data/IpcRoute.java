@@ -222,7 +222,7 @@ public class IpcRoute extends IpcRouteSummary {
 				if (stopId != null) {
 					isUiStop = false;
 					for (TripPattern tripPattern : uiTripPatterns) {
-						if(tripPattern.getDirectionId().compareTo(currentDirectionId)==0)
+						if((tripPattern.getDirectionId()==null && currentDirectionId==null)  || tripPattern.getDirectionId().compareTo(currentDirectionId)==0)
 							currentTripPattern=tripPattern;
 						if (tripPattern.isStopAtOrAfterStop(stopId, currentStopId)) {
 							isUiStop = true;
@@ -233,7 +233,7 @@ public class IpcRoute extends IpcRouteSummary {
 				else
 				{
 					for (TripPattern tripPattern : uiTripPatterns) {
-						if(tripPattern.getDirectionId().compareTo(currentDirectionId)==0)
+						if((tripPattern.getDirectionId()==null && currentDirectionId==null) || tripPattern.getDirectionId().compareTo(currentDirectionId)==0)
 							currentTripPattern=tripPattern;
 					}
 				}
