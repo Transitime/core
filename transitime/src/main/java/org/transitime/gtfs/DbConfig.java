@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitime.applications.Core;
+import org.transitime.config.BooleanConfigValue;
 import org.transitime.config.StringConfigValue;
 import org.transitime.core.ServiceUtils;
 import org.transitime.db.hibernate.HibernateUtils;
@@ -136,6 +137,9 @@ public class DbConfig {
 		return validateTestQuery.getValue();
 	}
 
+	private BooleanConfigValue serviceIdSuffix = new BooleanConfigValue("transitime.avl.serviceIdSuffix",
+			false,"suffix tripId with serviceId");
+	public boolean getServiceIdSuffix() { return serviceIdSuffix.getValue(); }
 	
 	/********************** Member Functions **************************/
 
