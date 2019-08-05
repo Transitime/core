@@ -34,6 +34,7 @@ import org.transitime.configData.AvlConfig;
 import org.transitime.configData.CoreConfig;
 import org.transitime.core.SpatialMatcher.MatchingType;
 import org.transitime.core.autoAssigner.AutoBlockAssigner;
+import org.transitime.core.blockAssigner.BlockAssigner;
 import org.transitime.core.dataCache.PredictionDataCache;
 import org.transitime.core.dataCache.VehicleDataCache;
 import org.transitime.core.dataCache.VehicleStateManager;
@@ -1554,6 +1555,15 @@ public class AvlProcessor {
 					+ "transitime.autoBlockAssigner.ignoreAvlAssignments=true. {}",
 					avlReport);
 			avlReport.setAssignment(null, AssignmentType.UNSET);
+		}
+
+		if (ExternalBlockAssigner.enabled()) {
+			// use the results of external AVL integration
+			ExternalBlockAssigner assigner = ExternalBlockAssigner.getInstance();
+			String assignmentId = assigner.getActiveAssignmentForVehicle(avlReport);
+			if (assignmentId != null) {
+				avlReport.setAssignment(assignmentId, AssignmentType.BLOCK_ID);
+			}
 		}
 
 		// The beginning of processing AVL data is an important milestone

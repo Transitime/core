@@ -98,12 +98,18 @@ public class AvlClient implements Runnable {
 				if (previousReportForVehicle != null
 						&& avlReport.getTime() <= previousReportForVehicle
 								.getTime()) {
-					logger.warn("Throwing away AVL report because it is same time "
-							+ "or older than the previous AVL report for the "
-							+ "vehicle. New AVL report is {}. Previous valid AVL "
-							+ "report is {}", avlReport,
-							previousReportForVehicle);
-					return;
+					if (avlReport.hasValidAssignment() && !previousReportForVehicle.hasValidAssignment()) {
+						// assignment records have higher priority then just lat/lon updates
+						logger.info("keeping older AVL report because it contains an assignment "
+								+ "not present in cache {}", avlReport);
+					} else {
+						logger.warn("Throwing away AVL report because it is same time "
+										+ "or older than the previous AVL report for the "
+										+ "vehicle. New AVL report is {}. Previous valid AVL "
+										+ "report is {}", avlReport,
+								previousReportForVehicle);
+						return;
+					}
 				}
 
 				// If previous report happened too recently then don't want to
@@ -143,11 +149,15 @@ public class AvlClient implements Runnable {
 						// But still want to update the vehicle cache with the
 						// latest report because doing so is cheap and it allows
 						// vehicles to move on map smoothly
-						AvlProcessor.getInstance()
-								.cacheAvlReportWithoutProcessing(avlReport);
+						if (avlReport.hasValidAssignment() && !previousReportForVehicle.hasValidAssignment()) {
+							logger.info("using discarded AVL report due to its assignment {}", avlReport);
+						} else {
+							AvlProcessor.getInstance()
+									.cacheAvlReportWithoutProcessing(avlReport);
+							// Done here since not processing this AVL report
+							return;
 
-						// Done here since not processing this AVL report
-						return;
+						}
 					}
 				}
 

@@ -75,8 +75,8 @@ public class AvlSqsClientModule extends Module {
           "are used. Only for when JMS is used.");
 
   private static IntegerConfigValue jmsPauseTimeInSeconds =
-          new IntegerConfigValue("transitime.avl.jmsPauseTimeInSeconds", 1,
-                  "How long to pause for the next message after receiving an empty message.");
+          new IntegerConfigValue("transitime.avl.jmsPauseTimeInSeconds", 20,
+                  "How long to block for the next message.");
 
 
   private static IntegerConfigValue messageLogFrequency =
@@ -285,6 +285,7 @@ public class AvlSqsClientModule extends Module {
         while (!Thread.interrupted()) {
           try {
             ReceiveMessageRequest request = new ReceiveMessageRequest(_url);
+            request.setWaitTimeSeconds(jmsPauseTimeInSeconds.getValue());
             List<Message> messages = _sqs.receiveMessage(request).getMessages();
             try {
               _receiveQueue.addAll(messages);
@@ -294,14 +295,11 @@ public class AvlSqsClientModule extends Module {
             
             if (!messages.isEmpty()) {           
               try {
-                // we only need to ack receipt of the request, not each message
-              _acknowledgeQueue.add(messages.get(0));
-            } catch (IllegalStateException ise) {
-              logger.error("dropping ack {} as queue is full: ",  messages, ise);
-            }
-            } else {
-              // we didn't get any messages, pause for some to queue up
-              Thread.sleep(jmsPauseTimeInSeconds.getValue() * 1000);
+                  // we only need to ack receipt of the request, not each message
+                _acknowledgeQueue.add(messages.get(0));
+              } catch (IllegalStateException ise) {
+                logger.error("dropping ack {} as queue is full: ",  messages, ise);
+              }
             }
           } catch (Exception any) {
             logger.error("exception receiving: ", any);

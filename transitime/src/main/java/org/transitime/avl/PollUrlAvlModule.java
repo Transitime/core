@@ -173,7 +173,7 @@ public abstract class PollUrlAvlModule extends AvlModule {
 		String fullUrl = getUrl();
 		
 		// Log what is happening
-		logger.info("Getting data from feed using url=" + fullUrl);
+		logger.warn("Getting data from feed using url=" + fullUrl);
 	
 		// Create the connection
 		URL url = new URL(fullUrl);
@@ -215,14 +215,14 @@ public abstract class PollUrlAvlModule extends AvlModule {
 		}
 
 		// For debugging
-		logger.debug("Time to access inputstream {} msec", 
+		logger.warn("Time to access inputstream {} msec",
 				timer.elapsedMsec());
 				
 		// Call the abstract method to actually process the data
 		timer.resetTimer();
 		Collection<AvlReport> avlReportsReadIn = processData(in);		
 		in.close();
-		logger.debug("Time to parse document {} msec", timer.elapsedMsec());
+		logger.warn("Time to parse document {} msec", timer.elapsedMsec());
 		
 		// Process all the reports read in
 		if (shouldProcessAvl.getValue())
