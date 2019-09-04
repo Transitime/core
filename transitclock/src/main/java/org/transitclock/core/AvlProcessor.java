@@ -34,6 +34,7 @@ import org.transitclock.configData.AvlConfig;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.SpatialMatcher.MatchingType;
 import org.transitclock.core.autoAssigner.AutoBlockAssigner;
+import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
@@ -1026,7 +1027,6 @@ public class AvlProcessor {
 	 * vehicle can be made predictable. The AvlReport is obtained from the
 	 * vehicleState parameter.
 	 * 
-	 * @param avlReport
 	 * @param vehicleState
 	 *            provides current AvlReport plus is updated by this method with
 	 *            the new state.

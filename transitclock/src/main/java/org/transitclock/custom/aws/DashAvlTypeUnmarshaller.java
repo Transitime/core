@@ -1,4 +1,4 @@
-package org.transitime.custom.aws;
+package org.transitclock.custom.aws;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +8,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.db.structs.AvlReport;
-import org.transitime.db.structs.AvlReport.AssignmentType;
+import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.AvlReport.AssignmentType;
 
 import com.amazonaws.services.sqs.model.Message;
 

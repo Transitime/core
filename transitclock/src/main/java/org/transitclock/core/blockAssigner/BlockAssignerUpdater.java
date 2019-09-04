@@ -1,12 +1,12 @@
-package org.transitime.core.blockAssigner;
+package org.transitclock.core.blockAssigner;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.StringConfigValue;
-import org.transitime.configData.AvlConfig;
+import org.transitclock.config.StringConfigValue;
+import org.transitclock.configData.AvlConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;

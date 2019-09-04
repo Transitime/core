@@ -1,4 +1,4 @@
-package org.transitime.core.blockAssigner;
+package org.transitclock.core.blockAssigner;
 
 /**
  * model class representing an external vehicle block assignment.

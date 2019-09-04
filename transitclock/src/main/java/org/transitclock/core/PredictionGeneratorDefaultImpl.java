@@ -118,7 +118,12 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
              false,
              "This is set to true to record all travelTime  predictions for individual stopPaths generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
 
-	
+
+	protected static BooleanConfigValue storeDwellTimeStopPathPredictions = new BooleanConfigValue("transitclock.core.storeDwellTimeStopPathPredictions",
+			false,
+			"This is set to true to record all travelTime  predictions for individual dwell times generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
+
+
 	private static BooleanConfigValue useHoldingTimeInPrediction =
 			new BooleanConfigValue("useHoldingTimeInPrediction",
 					false,

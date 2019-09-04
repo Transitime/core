@@ -15,16 +15,17 @@
  * along with Transitime.org.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.core.predictiongenerator;
+package org.transitclock.core.predictiongenerator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.transitime.config.StringConfigValue;
-import org.transitime.core.Indices;
-import org.transitime.core.PredictionGeneratorDefaultImpl;
-import org.transitime.db.structs.AvlReport;
-import org.transitime.utils.ClassInstantiator;
+import org.transitclock.config.StringConfigValue;
+import org.transitclock.core.Indices;
+import org.transitclock.core.PredictionGeneratorDefaultImpl;
+import org.transitclock.core.VehicleState;
+import org.transitclock.db.structs.AvlReport;
+import org.transitclock.utils.ClassInstantiator;
 
 public class CascadingPredictionGenerator extends PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
 
@@ -48,23 +49,23 @@ public class CascadingPredictionGenerator extends PredictionGeneratorDefaultImpl
 	}
 	
 	@Override
-	public long getTravelTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		for (PredictionComponentElementsGenerator generator : generators) {
 			if (generator.hasDataForPath(indices, avlReport)) {
-				return generator.getTravelTimeForPath(indices, avlReport);
+				return generator.getTravelTimeForPath(indices, avlReport, vehicleState);
 			}
 		}
-		return defaultGenerator.getTravelTimeForPath(indices, avlReport);
+		return defaultGenerator.getTravelTimeForPath(indices, avlReport,vehicleState);
 	}	
 
 	@Override
-	public long getStopTimeForPath(Indices indices, AvlReport avlReport) {
+	public long getStopTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState) {
 		for (PredictionComponentElementsGenerator generator : generators) {
 			if (generator.hasDataForPath(indices, avlReport)) {
-				return generator.getStopTimeForPath(indices, avlReport);
+				return generator.getStopTimeForPath(indices, avlReport, vehicleState);
 			}
 		}
-		return defaultGenerator.getStopTimeForPath(indices, avlReport);
+		return defaultGenerator.getStopTimeForPath(indices, avlReport, vehicleState);
 	}
 	
 	private static PredictionComponentElementsGenerator getInstance(String name) {

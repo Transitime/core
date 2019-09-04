@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-		"http://hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+    "http://hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <!-- These queries are specific for HSQL -->
 <hibernate-mapping>
 	<sql-query name="create_prediction_accuracy">
 		<!-- only works because everything is on the same day and one run per tripId 
 			per day -->
-		<![CDATA[
+ <![CDATA[
 insert into PredictionAccuracy
 	(affectedByWaitStop, arrivalDepartureTime, directionId, predictedTime,
     predictionAccuracyMsecs, predictionReadTime, predictionSource, routeId, stopId,
@@ -25,15 +25,15 @@ from Predictions p join ArrivalsDepartures ad on
 ]]>
 	</sql-query>
 	<sql-query name="get_prediction_accuracy_within_length">
-		<![CDATA[
+<![CDATA[
 select predictionAccuracyMsecs/1000 accuracy
 	from PredictionAccuracy
 	where datediff('ss', predictionReadTime, predictedTime) between :minPredLength and :maxPredLength
 	order by accuracy asc
 ]]>
 	</sql-query>
-	<sql-query name="scaled_prediction_error">
-		<![CDATA[
+		<sql-query name="scaled_prediction_error">
+<![CDATA[
 select predictionAccuracyMsecs, datediff('ms', predictionReadTime, predictedTime)
 	from PredictionAccuracy
 ]]>

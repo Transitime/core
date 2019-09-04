@@ -1,10 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-	  <groupId>transitime</groupId>
-	  <artifactId>transitime</artifactId>
-	<version>0.0.42-SNAPSHOT</version>
-	</parent>
+
+	<groupId>TheTransitClock</groupId>
+	<artifactId>transitclockWebapp</artifactId>
+	<version>2.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>transitclockWebapp</name>
 	<url>http://maven.apache.org</url>
@@ -38,9 +37,9 @@
   			<version>3.4</version>
 		</dependency>
 		<dependency>
-			<groupId>transitime</groupId>
-			<artifactId>transitimeCore</artifactId>
-			<version>0.0.42-SNAPSHOT</version>
+			<groupId>TheTransitClock</groupId>
+			<artifactId>transitclockCore</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

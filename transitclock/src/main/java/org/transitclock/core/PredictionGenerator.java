@@ -19,7 +19,7 @@ package org.transitclock.core;
 
 import java.util.List;
 
-import org.transitime.ipc.data.IpcPrediction;
+import org.transitclock.ipc.data.IpcPrediction;
 
 import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;

@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.transitime.reports;
+package org.transitclock.reports;
 
 import org.apache.commons.lang3.StringUtils;
-import org.transitime.applications.Core;
-import org.transitime.utils.Time;
+import org.transitclock.applications.Core;
+import org.transitclock.utils.Time;
 
 import java.text.ParseException;
 import java.util.Calendar;

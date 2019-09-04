@@ -15,7 +15,7 @@
  * along with Transitime.org .  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.transitime.core.predictiongenerator;
+package org.transitclock.core.predictiongenerator;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,21 +24,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.time.DateUtils;
-import org.transitime.applications.Core;
-import org.transitime.config.BooleanConfigValue;
-import org.transitime.config.IntegerConfigValue;
-import org.transitime.core.Indices;
-import org.transitime.core.VehicleState;
-import org.transitime.core.dataCache.StopArrivalDepartureCache;
-import org.transitime.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitime.core.dataCache.TripDataHistoryCache;
-import org.transitime.core.dataCache.TripKey;
-import org.transitime.db.structs.ArrivalDeparture;
-import org.transitime.db.structs.Block;
-import org.transitime.gtfs.DbConfig;
-import org.transitime.ipc.data.IpcPrediction;
+import org.transitclock.applications.Core;
+import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.Indices;
+import org.transitclock.core.TravelTimeDetails;
+import org.transitclock.core.VehicleState;
+import org.transitclock.core.dataCache.*;
+import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.db.structs.Block;
+import org.transitclock.gtfs.DbConfig;
 
 /**
  * Commonly-used methods for PredictionGenerators that use historical cached data.
@@ -48,52 +43,56 @@ public class HistoricalPredictionLibrary {
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
 			"transitime.prediction.closestvehiclestopsahead", new Integer(2),
 			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
-	
-	public static long getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
 
-		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
-				indices.getStopPath().getStopId(),
-				new Date(currentVehicleState.getMatch().getAvlTime()));
-										
-		/* TODO how do we handle the the first stop path. Where do we get the first stop id. */ 		 
-		if(!indices.atBeginningOfTrip())
-		{						
-			String currentStopId = indices.getPreviousStopPath().getStopId();
-			
-			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
-					new Date(currentVehicleState.getMatch().getAvlTime()));
-	
-			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
-	
-			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
-	
-			if (currentStopList != null && nextStopList != null) {
-				// lists are already sorted when put into cache.
-				for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
-					
-					if(currentArrivalDeparture.isDeparture() && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId())
-					{
-						ArrivalDeparture found;
-											
-						if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
-							if(found.getTime() - currentArrivalDeparture.getTime()>0)
-							{																
-								return found.getTime() - currentArrivalDeparture.getTime();
-							}else
-							{
-								// must be going backwards
-								return -1;
-							}
-						}else
-						{
-							return -1;
-						}
-					}
-				}
-			}
-		}
-		return -1;
-	}
+    public static TravelTimeDetails getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {
+
+        StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
+                indices.getStopPath().getStopId(),
+                new Date(currentVehicleState.getMatch().getAvlTime()));
+
+        /* TODO how do we handle the the first stop path. Where do we get the first stop id. */
+        if(!indices.atBeginningOfTrip())
+        {
+            String currentStopId = indices.getPreviousStopPath().getStopId();
+
+            StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
+                    new Date(currentVehicleState.getMatch().getAvlTime()));
+
+            List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
+
+            List<ArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
+
+            if (currentStopList != null && nextStopList != null) {
+                // lists are already sorted when put into cache.
+                for (ArrivalDeparture currentArrivalDeparture : currentStopList) {
+
+                    if(currentArrivalDeparture.isDeparture()
+                            && currentArrivalDeparture.getVehicleId() != currentVehicleState.getVehicleId()
+                            && (currentVehicleState.getTrip().getDirectionId()==null || currentVehicleState.getTrip().getDirectionId().equals(currentArrivalDeparture.getDirectionId())))
+                    {
+                        ArrivalDeparture found;
+
+                        if ((found = findMatchInList(nextStopList, currentArrivalDeparture)) != null) {
+                            TravelTimeDetails travelTimeDetails=new TravelTimeDetails(currentArrivalDeparture, found);
+                            if(travelTimeDetails.getTravelTime()>0)
+                            {
+                                return travelTimeDetails;
+
+                            }else
+                            {
+                                // must be going backwards
+                                return null;
+                            }
+                        }else
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
 	public static Indices getLastVehicleIndices(VehicleState currentVehicleState, Indices indices) {
 
 		StopArrivalDepartureCacheKey nextStopKey = new StopArrivalDepartureCacheKey(
@@ -108,9 +107,9 @@ public class HistoricalPredictionLibrary {
 			StopArrivalDepartureCacheKey currentStopKey = new StopArrivalDepartureCacheKey(currentStopId,
 					new Date(currentVehicleState.getMatch().getAvlTime()));
 	
-			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCache.getInstance().getStopHistory(currentStopKey);
+			List<ArrivalDeparture> currentStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(currentStopKey);
 	
-			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCache.getInstance().getStopHistory(nextStopKey);
+			List<ArrivalDeparture> nextStopList = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(nextStopKey);
 	
 			if (currentStopList != null && nextStopList != null) {
 				// lists are already sorted when put into cache.
@@ -208,41 +207,49 @@ public class HistoricalPredictionLibrary {
 		return null;
 	}
 
-	public static List<Integer> lastDaysTimes(TripDataHistoryCache cache, String tripId, int stopPathIndex, Date startDate,
-			Integer startTime, int num_days_look_back, int num_days) {
+    public static List<TravelTimeDetails> lastDaysTimes(TripDataHistoryCacheInterface cache, String tripId, String direction, int stopPathIndex, Date startDate,
+                                                    Integer startTime, int num_days_look_back, int num_days) {
 
-		List<Integer> times = new ArrayList<Integer>();
-		List<ArrivalDeparture> results = null;
-		int num_found = 0;
-		/*
-		 * TODO This could be smarter about the dates it looks at by looking at
-		 * which services use this trip and only 1ook on day service is
-		 * running
-		 */
+        List<TravelTimeDetails> times = new ArrayList<TravelTimeDetails>();
+        List<ArrivalDeparture> results = null;
+        int num_found = 0;
+        /*
+         * TODO This could be smarter about the dates it looks at by looking at
+         * which services use this trip and only 1ook on day service is
+         * running
+         */
 
-		for (int i = 0; i < num_days_look_back && num_found < num_days; i++) {
 
-			Date nearestDay = DateUtils.truncate(DateUtils.addDays(startDate, (i + 1) * -1), Calendar.DAY_OF_MONTH);
+        for (int i = 0; i < num_days_look_back && num_found < num_days; i++) {
 
-			TripKey tripKey = new TripKey(tripId, nearestDay, startTime);
+            Date nearestDay = DateUtils.truncate(DateUtils.addDays(startDate, (i + 1) * -1), Calendar.DAY_OF_MONTH);
 
-			results = cache.getTripHistory(tripKey);
+            TripKey tripKey = new TripKey(tripId, nearestDay, startTime);
 
-			if (results != null) {
+            results = cache.getTripHistory(tripKey);
 
-				ArrivalDeparture arrival = getArrival(stopPathIndex, results);
-				
-				ArrivalDeparture departure = TripDataHistoryCache.findPreviousDepartureEvent(results, arrival);
-														
-				if (arrival != null && departure != null) {
+            if (results != null) {
 
-					times.add(new Integer((int) (timeBetweenStops(departure, arrival))));
-						num_found++;
-				}			
-			}
-		}
-		return times;		
-	}
+                ArrivalDeparture arrival = getArrival(stopPathIndex, results);
+
+                if(arrival!=null)
+                {
+                    ArrivalDeparture departure = TripDataHistoryCacheFactory.getInstance().findPreviousDepartureEvent(results, arrival);
+
+                    if (arrival != null && departure != null) {
+
+                        TravelTimeDetails travelTimeDetails=new TravelTimeDetails(departure, arrival);
+
+                        times.add(travelTimeDetails);
+
+                        num_found++;
+                    }
+                }
+            }
+        }
+        return times;
+    }
+
 	private static ArrivalDeparture getArrival(int stopPathIndex, List<ArrivalDeparture> results)
 	{
 		for(ArrivalDeparture result:results)
@@ -259,7 +266,7 @@ public class HistoricalPredictionLibrary {
 		return Math.abs(ad2.getTime() - ad1.getTime());		
 	}
 
-	private static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
+	public static <T> Iterable<T> emptyIfNull(Iterable<T> iterable) {
 		return iterable == null ? Collections.<T> emptyList() : iterable;
 	}
 

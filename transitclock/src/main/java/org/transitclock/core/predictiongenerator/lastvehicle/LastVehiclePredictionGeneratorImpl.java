@@ -20,6 +20,7 @@ import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
+import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionForStopPath;
@@ -69,7 +70,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 		VehicleState currentVehicleState = vehicleStateManager
 				.getVehicleState(avlReport.getVehicleId());
 
-		for (IpcVehicleComplete vehicle : emptyIfNull(vehicleCache
+		for (IpcVehicleComplete vehicle : HistoricalPredictionLibrary.emptyIfNull(vehicleCache
 				.getVehiclesForRoute(currentVehicleState.getRouteId()))) {
 			VehicleState vehicleOnRouteState = vehicleStateManager
 					.getVehicleState(vehicle.getId());
@@ -77,7 +78,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 		}
 				
 		TravelTimeDetails travelTimeDetails = null;
-		if((travelTimeDetails=this.getLastVehicleTravelTime(currentVehicleState, indices))!=null)
+		if((travelTimeDetails= HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices))!=null)
 		{			
 			logger.debug("Using last vehicle algorithm for prediction : " + travelTimeDetails.toString() + " for : " + indices.toString());					
 			

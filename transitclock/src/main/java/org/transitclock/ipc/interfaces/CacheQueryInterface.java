@@ -18,6 +18,7 @@ package org.transitclock.ipc.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -76,7 +77,7 @@ public interface CacheQueryInterface extends Remote {
 	 * @return
 	 * @throws RemoteException
 	 */
-	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, Date date, Integer starttime)
+	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, LocalDate date, Integer starttime)
 		throws RemoteException;
 	
 	

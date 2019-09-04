@@ -1,4 +1,4 @@
-
+/*
  * This file is part of Transitime.org
  *
  * Transitime.org is free software: you can redistribute it and/or modify
@@ -524,7 +524,7 @@ public class Core {
 			// For making sure logger configured properly
 			outputLoggerStatus();
 			
-			if (CoreConfig.getFillHistoricalCaches())
+			if (CoreConfig.getFillHistoricalCaches()){
 				try {
 					populateCaches();								
 				} catch (Exception e) {
@@ -535,14 +535,16 @@ public class Core {
 			// Initialize the core now
 			createCore();
 			
-			// Start any optional modules. 
-				{
+			// Start any optional modules.
 			List<String> optionalModuleNames = CoreConfig.getOptionalModules();
-			if (optionalModuleNames.size() > 0)
+			if (optionalModuleNames.size() > 0) {
 				logger.info("Starting up optional modules specified via " +
 						"transitclock.modules.optionalModulesList param:");
-			else
+			}
+			else {
 				logger.info("No optional modules to start up.");
+			}
+
 			for (String moduleName : optionalModuleNames) {
 				logger.info("Starting up optional module " + moduleName);
 				Module.start(moduleName);

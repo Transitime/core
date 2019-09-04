@@ -214,7 +214,7 @@ public class PlaybackModule {
 		boolean shouldStoreNewRevs = true, shouldDeleteRevs = false;
 		GtfsData gtfsData = new GtfsData(1, null, null, shouldStoreNewRevs, shouldDeleteRevs, AgencyConfig.getAgencyId(), gtfsDirectoryName, null, 
 				pathOffsetDistance,  maxStopToPathDistance, maxDistanceForEliminatingVertices,
-				defaultWaitTimeAtStopMsec, maxSpeedKph, maxTravelTimeSegmentLength, false, titleFormatter);
+				defaultWaitTimeAtStopMsec, maxSpeedKph, maxTravelTimeSegmentLength, false, titleFormatter, 200.0, true);
 		gtfsData.processData();
 	}
 	

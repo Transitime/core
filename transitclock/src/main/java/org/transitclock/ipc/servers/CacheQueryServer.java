@@ -4,6 +4,8 @@
 package org.transitclock.ipc.servers;
 
 import java.rmi.RemoteException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -124,7 +126,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 	}
 
 	@Override
-	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, Date date, Integer starttime)
+	public List<IpcArrivalDeparture> getTripArrivalDepartures(String tripId, LocalDate localDate, Integer starttime)
 			throws RemoteException {
 
 		try {
@@ -137,7 +139,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 
 				result = TripDataHistoryCacheFactory.getInstance().getTripHistory(tripKey);
 			}
-			else if(tripId!=null && date!=null && starttime==null)
+			else if(tripId!=null && localDate!=null && starttime==null)
 			{
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
@@ -147,7 +149,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 						result.addAll(TripDataHistoryCacheFactory.getInstance().getTripHistory(key));
 					}
 				}
-			}else if(tripId!=null && date==null && starttime==null)
+			}else if(tripId!=null && localDate==null && starttime==null)
 			{
 				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())
 				{
@@ -157,7 +159,7 @@ public class CacheQueryServer extends AbstractServer implements CacheQueryInterf
 					}
 				}
 			}
-			else if(tripId==null && date!=null && starttime==null)
+			else if(tripId==null && localDate!=null && starttime==null)
 			{
 				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 				for(TripKey key:TripDataHistoryCacheFactory.getInstance().getKeys())

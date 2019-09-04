@@ -481,19 +481,6 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 		// Log creation of ArrivalDeparture in ArrivalsDepartures.log file
 		arrivalDeparture.logCreation();
-		
-		
-		/*protected ArrivalDeparture(arrivalDeparture., String vehicleId, Date time, Date avlTime, Block block, 
-				int tripIndex, int stopPathIndex, boolean isArrival) {*/
-		
-		if (CoreConfig.getFillHistoricalCaches()) {
-		  TripDataHistoryCache.getInstance().putArrivalDeparture(arrivalDeparture);
-		
-		  StopArrivalDepartureCache.getInstance().putArrivalDeparture(arrivalDeparture);
-		
-		  HistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
-		}
-		
 
 		/* add event to vehicle state. Will increment tripCounter if the last arrival in a trip */
 		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(arrivalDeparture.getVehicleId());

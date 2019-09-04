@@ -96,7 +96,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 	@Override
 	public boolean hasDataForPath(Indices indices, AvlReport avlReport) {
 		StopPathCacheKey historicalAverageCacheKey = new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex());
-		HistoricalAverage average = HistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+		HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
 		
 		return (average!=null && average.getCount()>=minDays.getValue());
 	}

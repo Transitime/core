@@ -17,9 +17,9 @@
 
 package org.transitclock.utils.web;
 
-import org.transitime.config.IntegerConfigValue;
-import org.transitime.config.StringConfigValue;
-import org.transitime.db.webstructs.WebAgency;
+import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.config.StringConfigValue;
+import org.transitclock.db.webstructs.WebAgency;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;

@@ -1,9 +1,9 @@
-package org.transitime.core;
+package org.transitclock.core;
 
 import junit.framework.TestCase;
-import org.transitime.db.structs.AvlReport;
-import org.transitime.db.structs.Block;
-import org.transitime.db.structs.Trip;
+import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.Block;
+import org.transitclock.db.structs.Trip;
 
 import java.io.File;
 import java.io.FileNotFoundException;

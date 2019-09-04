@@ -15,5 +15,7 @@ public interface PredictionComponentElementsGenerator {
 	long getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState);
 	
 	long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match);
+
+	boolean hasDataForPath(Indices indices, AvlReport avlReport);
 		
 }

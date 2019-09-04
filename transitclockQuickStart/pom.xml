@@ -3,14 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>transitime</groupId>
-		<artifactId>transitime</artifactId>
-		<version>0.0.40-SNAPSHOT</version>
-	</parent>
-	<groupId>org.transitime.app</groupId>
-	<artifactId>transitimeQuickStart</artifactId>
-	<name>transitimeQuickStart</name>
+
+	<groupId>TheTransitClock</groupId>
+	<artifactId>transitclockQuickStart</artifactId>
+	<version>2.0.0-SNAPSHOT</version>
+	<name>transitclockQuickStart</name>
+
 	<url>http://maven.apache.org</url>
 	<properties>
 		<jettyVersion>9.4.15.v20190215</jettyVersion>
@@ -52,9 +50,19 @@
 			<version>1.2</version>
 		</dependency>-->
 		<dependency>
-			<groupId>transitime</groupId>
-			<artifactId>transitimeCore</artifactId>
-			<version>0.0.31-SNAPSHOT</version>
+			<groupId>TheTransitClock</groupId>
+			<artifactId>transitclockCore</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.glassfish.jersey.media</groupId>
+					<artifactId>jersey-media-multipart</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.glassfish.jersey.media</groupId>
+					<artifactId>jersey-media-json-jackson</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -131,7 +139,7 @@
 									<groupId>TheTransitClock</groupId>
 									<artifactId>transitclockApi</artifactId>
 									<type>war</type>
-									<version>0.0.31-SNAPSHOT</version>
+									<version>2.0.0-SNAPSHOT</version>
 									<overWrite>true</overWrite>
 									<outputDirectory>../transitclockQuickStart/src/main/resources</outputDirectory>
 									<destFileName>api.war</destFileName>
@@ -151,7 +159,7 @@
 									<groupId>TheTransitClock</groupId>
 									<artifactId>transitclockWebapp</artifactId>
 									<type>war</type>
-									<version>0.0.31-SNAPSHOT</version>
+									<version>2.0.0-SNAPSHOT</version>
 									<overWrite>true</overWrite>
 									<outputDirectory>../transitclockQuickStart/src/main/resources</outputDirectory>
 									<destFileName>web.war</destFileName>

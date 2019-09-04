@@ -1,8 +1,8 @@
-package org.transitime.core.blockAssigner;
+package org.transitclock.core.blockAssigner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.IntegerConfigValue;
+import org.transitclock.config.IntegerConfigValue;
 
 import java.io.IOException;
 import java.util.ArrayList;

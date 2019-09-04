@@ -1,12 +1,12 @@
-package org.transitime.avl;
+package org.transitclock.avl;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.config.BooleanConfigValue;
-import org.transitime.config.StringConfigValue;
-import org.transitime.db.structs.AvlReport;
+import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.config.StringConfigValue;
+import org.transitclock.db.structs.AvlReport;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

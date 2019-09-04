@@ -1,16 +1,16 @@
-package org.transitime.core;
+package org.transitclock.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitime.applications.Core;
-import org.transitime.config.BooleanConfigValue;
-import org.transitime.config.IntegerConfigValue;
-import org.transitime.config.StringConfigValue;
-import org.transitime.configData.CoreConfig;
-import org.transitime.core.blockAssigner.BlockAssignerCache;
-import org.transitime.core.blockAssigner.BlockAssignerUpdater;
-import org.transitime.db.structs.AvlReport;
-import org.transitime.db.structs.Block;
+import org.transitclock.applications.Core;
+import org.transitclock.config.BooleanConfigValue;
+import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.config.StringConfigValue;
+import org.transitclock.configData.CoreConfig;
+import org.transitclock.core.blockAssigner.BlockAssignerCache;
+import org.transitclock.core.blockAssigner.BlockAssignerUpdater;
+import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.Block;
 
 import java.io.IOException;
 import java.io.InputStream;

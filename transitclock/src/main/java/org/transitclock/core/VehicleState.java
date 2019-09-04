@@ -27,6 +27,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.configData.CoreConfig;
+import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.db.structs.Arrival;
 import org.transitclock.db.structs.ArrivalDeparture;
