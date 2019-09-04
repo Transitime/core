@@ -1,0 +1,109 @@
+<!-- This is the configuration file for the logback logging system. This file 
+     will be used if it is in the classpath (because logback looks for the file
+     logback.xml in the classpath) or if explicitly invoked using the 
+     Java param -Dlogback.configurationFile=/DIR/src/main/config/logbackGtfs.xml
+  -->
+
+<configuration scan="true" scanPeriod="30 seconds">
+
+  <!-- Need to use TIMESTAMP when using FileAppender instead of
+       RollingFileAppender -->
+  <timestamp key="TIMESTAMP" datePattern="yyyy/MM/dd" />
+
+  <property name="LOG_FILE_ROOT"
+            value="${transitclock.logging.dir:-/Logs}/${transitclock.core.agencyId:-DEFAULT}/gtfsConfig/" />
+
+  <!-- For writing log info to console.  -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%n%d{HH:mm:ss.SSS} %-5level - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- For writing to logfile -->
+  <appender name="LOGFILE" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/gtfsConfig.log</file>
+    <append>true</append>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>%n%d{HH:mm:ss.SSS} %-5level - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+   <!-- Separate file for config parameters logging -->
+  <appender name="CONFIG" class="ch.qos.logback.core.FileAppender">
+    <file>${LOG_FILE_ROOT}/${TIMESTAMP}/configParams.log</file>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>%n%d{HH:mm:ss.SSS} %-5level - %msg%n</pattern>
+    </encoder>
+  </appender>
+ 
+  <!-- Special appender so that can log errors and warnings so they can be
+       output at end of GTFS processing in a nice coherent way.
+   -->
+  <appender name="GTFS_CUSTOM_APPENDER" class="org.transitclock.gtfs.GtfsLoggingAppender">
+  </appender>
+  
+  <!--======================================================-->
+  <!--=============== Loggers defined here =================-->
+  <!--======================================================-->
+
+  <!-- Specify various loggers. This where the logging
+       level is specified for each class. 
+    -->
+
+  <logger name="org.transitclock" 
+          level="info" additivity="true">
+    <appender-ref ref="GTFS_CUSTOM_APPENDER" />
+  </logger>
+
+  <logger name="org.transitclock.config"
+          level="info" additivity="false">
+    <appender-ref ref="CONFIG" />
+  </logger>
+
+  <logger name="org.transitclock.gtfs.PathProcessor" 
+          level="info" additivity="true">
+    <appender-ref ref="GTFS_CUSTOM_APPENDER" />
+  </logger>
+
+  <logger name="org.transitclock.gtfs.DbWriter" 
+          level="debug" additivity="true">
+    <appender-ref ref="GTFS_CUSTOM_APPENDER" />
+  </logger>
+
+  <logger name="org.transitclock.gtfs.DbConfig" 
+          level="debug" additivity="true">
+    <appender-ref ref="GTFS_CUSTOM_APPENDER" />
+  </logger>
+<!--
+-->
+
+  <!--  In order to log the hibernate SQL queries need to set org.hibernate.SQL
+        to debug. To show the values of the parameters need to set
+        org.hibernate.type to trace. Probably also want to set in
+        hibernate.cfg.xml the properties format_sql and use_sql_comments
+        to true so that the output of the SQL looks nice and includes the
+        SQL comments.
+
+        NOTE: Turning on this logging can greatly slow things down.
+        When inserting 10000 rows of AVLReports the time increated
+        from about 2.5 seconds to 10 seconds when the sql logging
+        was enabled. So don't use all the time! -->
+<!--
+  <logger name="org.hibernate.SQL" level="debug" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
+  <logger name="org.hibernate.type" level="trace" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
+-->
+
+  <!-- Set default level of logging. -->
+  <root level="info">          
+    <appender-ref ref="LOGFILE" />
+    <!-- <appender-ref ref="STDOUT" /> -->
+  </root>
+
+</configuration>

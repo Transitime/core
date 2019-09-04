@@ -5,8 +5,8 @@
   <artifactId>transitime</artifactId>
   <version>0.0.42-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>transitime</name>
-  <url>http://www.transitime.org//</url>
+  <name>transitclock</name>
+  <url>http://www.transitclock.org//</url>
   <modules>
     <module>transitime</module>
     <module>transitimeApi</module>
@@ -26,10 +26,13 @@
         <profile>
             <id>include-integration-tests</id>
             <modules>
-                <module>transitime-integration</module>
-                <module>transitime</module>
-                <module>transitimeApi</module>
-                <module>transitimeWebapp</module>
+                <module>transitclockIntegration</module>
+                <module>transitclock</module>
+                <module>transitclockApi</module>
+              	<module>transitclockWebapp</module>
+ 		<module>transitclockQuickStart</module>
+ 		<module>transitclockTraccarClient</module>
+ 		<module>transitclockBarefootClient</module>
             </modules>
         </profile>
     </profiles>

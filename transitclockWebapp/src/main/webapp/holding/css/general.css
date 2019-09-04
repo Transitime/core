@@ -1,0 +1,115 @@
+@CHARSET "ISO-8859-1";
+/*
+ * This file contains general CSS config for Transitime pages
+ */
+body {
+	font-family: sans-serif;
+	font-size: large;
+	margin: 0px 0px 10px 0px;
+}
+
+/* For the header on each page */
+#header {
+    background: linear-gradient(to right, #009933 , #4DDB4D);
+	margin-left: 0px;
+	margin-right: 0px;
+	padding: 10px;	
+	font-weight: 100;
+	font-size: xx-large;
+	color: white;
+	text-shadow: 2px 2px 4px #0D6E0E;
+	box-shadow: 0px 0px 10px black;
+}
+/* For header need to override link styles */
+#header a:link { color: white;}
+#header a:visited { color: white;}
+#header a:hover { font-weight: normal;}
+
+#mainDiv {
+	margin-left: auto;
+	margin-right: auto;
+	width: 700px;
+}
+
+#title {
+	margin-top: 40px;
+	margin-bottom: 20px;
+	font-weight: normal;
+	font-size: xx-large;
+	text-align: center;
+}
+
+#subtitle {
+	text-align: center;
+}
+
+/* For list of choices to be centered in page, e.g. list of reports
+ */
+.choicesList {
+	width: 350px;
+	margin-left: auto;
+	margin-right: auto;
+	line-height: 125%;
+	margin-top: 5px;
+}
+
+/* Make links look better. No underlining, keep colors consistent. */
+a:link {
+	text-decoration: none;
+	color: #0000a6;
+}
+
+a:visited {
+	color: #0000a6;
+}
+
+a:hover {
+	color: #0000FF;
+}
+
+.ui-tooltip {
+	/* Change background color of tooltips a bit and use a reasonable font size */
+	background: #faf7f1;
+	font-size: small;
+	padding: 4px;
+}
+
+/* Make input widgets use different color and larger font */
+input, select {
+	background-color: #f8f8f8;
+	font-size: large;
+}
+
+.earlyColor {
+	background: #f2b7cd;
+	border-radius: 4px; 
+}
+
+.lateColor {
+	background: #fbfd97;
+	border-radius: 4px; 
+}
+
+.problemColor {
+	background: #f2b7cd;
+	border-radius: 4px;
+}
+
+/* For tables showing data in reports */
+#dataTable {
+	margin-left: auto;
+ 	margin-right: auto;
+}
+
+#dataTable, #dataTable th, #dataTable td {
+ border: 1px solid #BBB;
+ border-collapse: collapse;
+}
+
+#dataTable th, #dataTable td {
+    padding: 2px 10px;
+}
+
+#dataTable th, #dataTable thead {
+  background: #ddd;
+}

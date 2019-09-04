@@ -1,0 +1,60 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="true"
+	monitoring="autodetect" dynamicConfig="true">
+
+	<!-- By default, Ehcache stored the cached files in temp folder. -->
+	 <diskStore path="java.io.tmpdir" />
+	
+	<!-- Ask Ehcache to store cache in this path -->
+	<!--<diskStore path="/usr/local/transitime/cache" />-->
+	
+	<cache name="arrivalDeparturesByTrip" 
+		maxEntriesLocalHeap="1000000"
+		maxEntriesLocalDisk="1000000" 
+		eternal="true" 
+		diskSpoolBufferSizeMB="50"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+	<cache name="arrivalDeparturesByStop" 
+		maxEntriesLocalHeap="200000"
+		maxEntriesLocalDisk="200000" 
+		eternal="true" 
+		diskSpoolBufferSizeMB="50"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+	<cache name="KalmanErrorCache" 
+		maxEntriesLocalHeap="200000"
+		maxEntriesLocalDisk="200000" 
+		eternal="true" 
+		diskSpoolBufferSizeMB="50"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+	<cache name="HistoricalAverageCache" 
+		maxEntriesLocalHeap="500000"
+		maxEntriesLocalDisk="500000" 
+		eternal="true" 
+		diskSpoolBufferSizeMB="100"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+	<cache name="StopPathPredictionCache" 
+		maxEntriesLocalHeap="500000"
+		maxEntriesLocalDisk="500000" 
+		eternal="true" 
+		diskSpoolBufferSizeMB="100"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>
+	<cache name="HoldingTimeCache" 
+		maxEntriesLocalHeap="1000"
+		maxEntriesLocalDisk="1000" 
+		eternal="true" 
+		diskSpoolBufferSizeMB="100"				
+		transactionalMode="off">
+		<persistence strategy="none" />
+	</cache>		
+	
+</ehcache>

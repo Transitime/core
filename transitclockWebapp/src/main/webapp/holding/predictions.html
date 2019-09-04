@@ -1,0 +1,184 @@
+<html>
+    <link rel="stylesheet" href="css/general.css">
+    <head>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="js/transiTimeHolding.js"></script>
+        <script src="js/transiTimeVehicles.js"></script> 
+        <script src="js/transiTimeRoutes.js"></script> 
+        <script src="js/transiTimeTrips.js"></script> 
+        <script src="js/transiTimePredictions.js"></script>
+        <script src="js/transiTimeUtils.js"></script>
+        <title>transiTime Prediction Quality Analysis</title>
+    </head>
+            
+    <body>
+    <div id="header"><a href="http://www.transitime.org">Transitime Extension: To analyze the predictions produced by algorithm for indvidual stoppaths.</a></div>
+    <div id="title">Prediction Quality Analysis</div>
+    <div id="mainDiv">
+        <div class="param">
+            <label for="route">Route:</label>
+                <select name="routes" id="routes"></select>            
+        </div>
+         <div class="param">
+            <label for="vehicle">Vehicle:</label>
+                <select name="vehicles" id="vehicles"></select>
+            
+        </div>
+        <table border="1">
+            <tr>
+                <th>Name</th>
+
+                <th>Value</th>
+            </tr>                                    
+            <tr>
+                <td>tripId:</td>
+                <td><input type="text" name="tripId" id="tripId"/></td>
+            </tr>      
+            
+            <tr>
+                <td>stopPathIndex:</td>
+                <td><select name="stopPathIndex" id="stopPathIndex"></select></td>
+            </tr>
+            <tr>
+                <td>algorithm:</td>
+                <td><select name="algorithm" id="algorithm"></select></td>
+                
+            </tr>            
+            <tr>
+                <td>Calculate MAPE values:</td>
+                <td><input type="button" name="Calculate_MAPE_JS" id="Calculate_MAPE_JS" value="Call"/></td>
+            </tr>                        
+        </table>
+        <table>
+        </table>
+        <table>
+            <tr><td>
+                <div id="MAPE"></div>
+                </td>
+            </tr>
+            <tr>            
+                <td><div id="actual"></div></td>
+            </tr>
+            <tr>        
+                <td><div id="predictions"></div></td>
+            </tr>
+             <tr>        
+                <td><div id="trip"></div></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+    	var host = null;
+        var stopPathData = { predictions : null, traveltime : null, vehicle : null, trip : null };
+        var algorithms = [];
+        function processTravelTimes(travelTimes, data)
+        {            
+             data.traveltime=travelTimes;
+             $("#actual").text(JSON.stringify(travelTimes));            
+        };
+        function processRoutes(routeDetails)
+        {                                                      
+                var options = $("#routes");
+                options.append($("<option />").val("none").text("none"));
+                $.each(routeDetails.routes, function() {
+                    options.append($("<option />").val(this.id).text(this.longName));
+                });
+                /*$("#result").text(JSON.stringify(routeDetails));*/
+        };
+        function processVehicles(vehicleDetails)
+            {                                      
+                var options = $("#vehicles");
+                options.empty();
+                options.append($("<option />").val("none").text("none"));
+                $.each(vehicleDetails.vehicles, function() {
+                    options.append($("<option />").val(this.id).text(this.id));
+                });
+                $("#vehicledetails").text(JSON.stringify(vehicleDetails));
+            };
+        
+        function processPredictions(predictions, data)
+        {        
+            data.predictions=predictions;
+            $("#predictions").text(JSON.stringify(predictions));  
+            
+            var algorithms = [];
+            $.each(predictions.prediction, function() {
+                    algorithms.push(this.algorithm);                
+            });
+            
+            algorithms=unique(algorithms)
+            
+            var options = $("#algorithm");            
+            
+            for (var index = 0; index < algorithms.length; ++index) {
+            	 options.append($("<option />").val(algorithms[index]).text(algorithms[index]));
+            };            
+        };
+        function processTrip(tripDetails, data)
+        {
+             $("#trip").text(JSON.stringify(tripDetails));
+             
+             data.trip=tripDetails;
+             
+             var stopPathIndex=getCurrentStopPathIndex(data);
+             
+             var options = $("#stopPathIndex");
+             options.empty();
+             for(var i=0;i<stopPathIndex;i++)
+             {
+                  options.append($("<option />").val(i).text(i));
+             }
+        }
+        function processVehicle(vehicleDetail, data)
+        {                                                                    
+            if(vehicleDetail.vehicles.length > 0)
+            {
+                tripId=vehicleDetail.vehicles[0].trip;
+            
+                data.vehicle=vehicleDetail.vehicles[0];
+            }
+            
+            $("#tripId").val(tripId);
+            
+            getTripDetails(host, tripId, processTrip, data);                                
+            /*$("#result").text(tripId);*/            
+            
+           
+        };
+        
+        $(document).ready(function ()  {
+        	host = document.location.host;        	
+        	getRouteDetails(host, processRoutes);
+            $("#GetStopPathTravelTimes_API").click(function() {                                                
+                getStopPathTravelTimes(host, $("#tripId").val(),$("#stopPathIndex").val(),  processTravelTimes, stopPathData);                                
+            });            
+            $("#GetStopPathPredictions_API").click(function() {                
+                getStopPathPredictions(host, $("#tripId").val(),$("#stopPathIndex").val(),$("#algorithm").val(),  processPredictions, stopPathData);              
+            });            
+            $("#Calculate_MAPE_JS").click(function() {
+                var MAPE = findMAPE(stopPathData.predictions , stopPath);
+                $("#MAPE").text(MAPE);
+            });
+          
+            $("#routes").on('change', function() {
+                getVehicleDetailsByRoute(host, $( "#routes" ).val(), processVehicles);
+            });
+            $("#vehicles").on('change', function() {
+                getVehicleDetails(host, $( "#vehicles" ).val(), processVehicle, stopPathData);                              
+            });
+             $("#stopPathIndex").on('change', function() {
+                var options = $("#algorithm");
+                options.empty();
+                getStopPathTravelTimes(host, $("#tripId").val(),$("#stopPathIndex").val(),  processTravelTimes, stopPathData);                                                
+                getStopPathPredictions(host, $("#tripId").val(),$("#stopPathIndex").val(),$("#algorithm").val(),  processPredictions, stopPathData);                
+            });
+             $("#algorithm").on('change', function() {
+             	getStopPathTravelTimes(host, $("#tripId").val(),$("#stopPathIndex").val(),  processTravelTimes, stopPathData);                                                
+                getStopPathPredictions(host, $("#tripId").val(),$("#stopPathIndex").val(),$("#algorithm").val(),  processPredictions, stopPathData);
+             });
+        });      
+       
+    </script>
+    </body>
+</html>

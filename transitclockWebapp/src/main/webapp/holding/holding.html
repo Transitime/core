@@ -1,0 +1,152 @@
+<html>
+    <link rel="stylesheet" href="css/general.css">
+    <head>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="js/transiTimeHolding.js"></script>
+        <script src="js/transiTimeVehicles.js"></script> 
+        <script src="js/transiTimeRoutes.js"></script> 
+        <script src="js/transiTimeTrips.js"></script> 
+        <title>Vehicle Holding Times</title>
+    </head>
+            
+    <body>
+    <div id="header"><a href="http://www.transitime.org">Transitime Extension: Holding Times for Atlanta Streetcar.</a></div>
+    <div id="title">Holding Times</div>
+    <div id="mainDiv">
+        <div class="param">
+            <label for="route">Route:</label>
+                <select name="routeId" id="routes"></select>
+            
+        </div>
+        <div class="param">
+            <label for="vehicle">Vehicle:</label>
+                <select name="vehicleId" id="vehicles"></select>
+            
+        </div>
+        <div class="param">
+            <label for="stop">Stop:</label>
+                <select name="stopId" id="stops"></select>
+            
+        </div>
+               
+       
+   
+        <table border="1">
+           
+            
+            <tr>
+                <td> 
+                    <div class="submitDiv">
+                        <input type="button" name="GetVehicleDetails_API" id="GetVehicleDetails_API" value="Get Vehicle Details"/>
+                    </div>
+                    <div id="vehicledetails"></div>
+                </td>              
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="submitDiv">
+                        <input type="button" name="GetHoldingTime_API" id="GetHoldingTime_API" value="Get Holding Time"/>
+                        <input type="button" name="PollHoldingTime_API" id="PollHoldingTime_API" value="Poll Holding Time"/>
+                    </div>                    
+                    <div id="result"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">                                     
+                    <div id="counter"></div>
+                </td>
+            </tr>
+            <tr>   
+                <td>
+                    <div>
+                        <input type="button" name="GetHoldingTimes_API" id="GetHoldingTimes_API" value="Get Holding Times"/>
+                    </div>
+                    <div id="holdingtimes"></div>
+                </td>
+            </tr>       
+        </table>        
+    </body>
+    </div>
+    <script>  
+    		var host =   host=document.location.host;; 
+            getHoldingTimeKeys(host);
+            getRouteDetails(host,processRoutes);
+            var tripId = null;
+            function processHoldingTime(holdingTime)
+            {
+                //$("#counter").text(holdingTime.holdingTime);
+                var holdingTimeMilliseconds=new Date(holdingTime.holdingTime).getTime()-new Date(holdingTime.currentTime).getTime()
+                var seconds=holdingTimeMilliseconds/1000;
+                if(seconds < 0)
+                    $("#counter").css({ 'color': 'red', 'font-size': '200%' });  
+                else
+                    $("#counter").css({ 'color': 'green', 'font-size': '200%' });  
+                $("#counter").text("Seconds remaining: " + seconds.toFixed());
+            };
+            function processVehicles(vehicleDetails)
+            {                                      
+                var options = $("#vehicles");
+                options.empty();
+                options.append($("<option />").val("none").text("none"));
+                $.each(vehicleDetails.vehicles, function() {
+                    options.append($("<option />").val(this.id).text(this.id));
+                });
+                $("#vehicledetails").text(JSON.stringify(vehicleDetails));
+            };
+            function processTrip(tripDetails)
+            {
+                var options = $("#stops");
+                options.empty();
+                $.each(tripDetails.schedule, function() {
+                    options.append($("<option />").val(this.stopId).text(this.stopName+':'+this.stopId));
+                }); 
+                /*$("#result").text(JSON.stringify(tripDetails));*/
+            };        
+            function processVehicle(vehicleDetail)
+            {                                                                    
+                if(vehicleDetail.vehicles.length > 0)
+                    tripId=vehicleDetail.vehicles[0].trip;
+                
+                getTripDetails(host, tripId, processTrip);
+                /*$("#result").text(tripId);*/
+            };
+        
+            function processRoutes(routeDetails)
+            {                                      
+                var options = $("#routes");
+                options.append($("<option />").val("none").text("none"));
+                $.each(routeDetails.routes, function() {
+                    options.append($("<option />").val(this.id).text(this.longName));
+                });
+                /*$("#result").text(JSON.stringify(routeDetails));*/
+            };
+            $(document).ready(function ()  {
+	            host=document.location.host;
+	            	
+	            $("#GetHoldingTimes_API").click(function() {                                                
+	                getHoldingTimeKeys(host);                        
+	            });
+	                
+	            $("#GetHoldingTime_API").click(function() {getHoldingTime(host, $("#stops").val(), $("#vehicles").val(), processHoldingTime)});
+	            
+	            $("#PollHoldingTime_API").click(function() {                 
+	                setInterval(function () {getHoldingTime(host, $("#stops").val(), $("#vehicles").val(), processHoldingTime);}  , 1000);                                       
+	            });
+	            $("#GetVehicleDetails_API").click(function() {                  
+	                getVehicleDetails(host, $( "#vehicles" ).val(), processVehicles);                              
+	            });                
+	                
+	            $("#routes").on('change',  function() {
+	                getVehicleDetailsByRoute(host, $( "#routes" ).val(), processVehicles);
+	            });
+	            $("#vehicles").on('change',  function() {
+	                getVehicleDetails(host, $( "#vehicles" ).val(), processVehicle);
+	              
+	            });
+            });
+                                          
+       
+    </script>
+            
+</html>

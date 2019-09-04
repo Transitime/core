@@ -1,4 +1,4 @@
-core
+core [![Build Status](https://travis-ci.org/TheTransitClock/transitime.svg?branch=develop)](https://travis-ci.org/TheTransitClock/transitime)
 ====
 
 The complete core Java software for the Transitime real-time transit information project. Transitime is a project created and managed by Swiftly, Inc. (www.goswift.ly).
