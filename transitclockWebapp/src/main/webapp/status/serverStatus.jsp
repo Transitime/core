@@ -31,7 +31,8 @@ if (agencyId == null || agencyId.isEmpty()) {
 </head>
 <body>
 <%@include file="/template/header.jsp" %>
-<div id="title">Server Status for <%= WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
+<div id="title">Server Status for <%=
+WebAgency.getCachedWebAgency(agencyId).getAgencyName() %></div>
 
 <%
 ServerStatusInterface serverStatusInterface = 

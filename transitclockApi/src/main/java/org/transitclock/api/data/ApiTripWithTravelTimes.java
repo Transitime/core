@@ -17,10 +17,10 @@
 
 package org.transitclock.api.data;
 
+import org.transitclock.ipc.data.IpcTrip;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.transitclock.ipc.data.IpcTrip;
 
 /**
  * Specifies how trip data along with travel times is formatted for the API.
