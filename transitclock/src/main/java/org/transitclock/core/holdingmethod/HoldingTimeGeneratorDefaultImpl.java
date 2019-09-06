@@ -1,12 +1,5 @@
 package org.transitclock.core.holdingmethod;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -29,6 +22,11 @@ import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.ipc.data.IpcVehicleComplete;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Sean Óg Crudden
@@ -656,6 +654,10 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	}
 	@Override
 	public List<ControlStop> getControlPointStops() {
+
+		if(controlStopList.getValue() == null){
+			return null;
+		}
 
 		ArrayList<ControlStop> controlStops=new ArrayList<ControlStop>();
 
