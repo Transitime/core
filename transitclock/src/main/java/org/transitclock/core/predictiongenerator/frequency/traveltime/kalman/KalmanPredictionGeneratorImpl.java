@@ -1,9 +1,5 @@
 package org.transitclock.core.predictiongenerator.frequency.traveltime.kalman;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,23 +11,18 @@ import org.transitclock.core.Indices;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
-import org.transitclock.core.dataCache.ErrorCache;
-import org.transitclock.core.dataCache.ErrorCacheFactory;
-import org.transitclock.core.dataCache.KalmanErrorCacheKey;
-import org.transitclock.core.dataCache.StopPathPredictionCache;
-import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
-import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
-import org.transitclock.core.dataCache.VehicleStateManager;
+import org.transitclock.core.dataCache.*;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
+import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitclock.core.predictiongenerator.frequency.traveltime.average.HistoricalAveragePredictionGeneratorImpl;
-import org.transitclock.core.predictiongenerator.kalman.KalmanPrediction;
-import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionResult;
-import org.transitclock.core.predictiongenerator.kalman.TripSegment;
-import org.transitclock.core.predictiongenerator.kalman.Vehicle;
-import org.transitclock.core.predictiongenerator.kalman.VehicleStopDetail;
+import org.transitclock.core.predictiongenerator.kalman.*;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionForStopPath;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Sean Óg Crudden This is a prediction generator that uses a Kalman
@@ -97,7 +88,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());
 
 		try {
-			TravelTimeDetails travelTimeDetails = this.getLastVehicleTravelTime(currentVehicleState, indices);
+			TravelTimeDetails travelTimeDetails = HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices);
 			
 			
 			/*
@@ -111,7 +102,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 				Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
 				
-				List<TravelTimeDetails> lastDaysTimes = lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
+				List<TravelTimeDetails> lastDaysTimes = HistoricalPredictionLibrary.lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
 						indices.getStopPathIndex(), nearestDay, time,
 						maxKalmanDaysToSearch.getValue(), maxKalmanDays.getValue());
 
