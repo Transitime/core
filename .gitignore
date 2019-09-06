@@ -12,3 +12,9 @@
 /.settings/
 .DS_Store
 
+
+transitime/target/
+
+transitimeApi/target/
+
+transitimeWebapp/target/
