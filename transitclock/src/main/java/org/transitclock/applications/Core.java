@@ -16,19 +16,7 @@
  */
 package org.transitclock.applications;
 
-import java.io.PrintWriter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -43,8 +31,6 @@ import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.VehicleDataCache;
-import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
-import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitclock.db.hibernate.DataDbLogger;
@@ -52,20 +38,19 @@ import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.ActiveRevisions;
 import org.transitclock.db.structs.Agency;
 import org.transitclock.gtfs.DbConfig;
-import org.transitclock.ipc.servers.CacheQueryServer;
-import org.transitclock.ipc.servers.CommandsServer;
-import org.transitclock.ipc.servers.ConfigServer;
-import org.transitclock.ipc.servers.HoldingTimeServer;
-import org.transitclock.ipc.servers.PredictionAnalysisServer;
-import org.transitclock.ipc.servers.PredictionsServer;
-import org.transitclock.ipc.servers.ServerStatusServer;
-import org.transitclock.ipc.servers.VehiclesServer;
+import org.transitclock.ipc.servers.*;
 import org.transitclock.modules.Module;
 import org.transitclock.monitoring.PidFile;
 import org.transitclock.utils.SettableSystemTime;
-import org.transitclock.utils.SystemTime;
 import org.transitclock.utils.SystemCurrentTime;
+import org.transitclock.utils.SystemTime;
 import org.transitclock.utils.Time;
+
+import java.io.PrintWriter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 /**
  * The main class for running a Transitime Core real-time data processing
@@ -414,13 +399,11 @@ public class Core {
 		PredictionAnalysisServer.start(agencyId);
 		HoldingTimeServer.start(agencyId);
 	}
-
+	
 	static private void populateCaches() throws Exception
 	{
 		Session session = HibernateUtils.getSession();
-
 		Date endDate=Calendar.getInstance().getTime();
-										
 
 		if(cacheReloadStartTimeStr.getValue().length()>0&&cacheReloadEndTimeStr.getValue().length()>0)
 		{

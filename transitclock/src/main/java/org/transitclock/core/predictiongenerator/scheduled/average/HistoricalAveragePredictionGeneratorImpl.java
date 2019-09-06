@@ -1,4 +1,4 @@
-package org.transitclock.core.predictiongenerator.average.scheduled;
+package org.transitclock.core.predictiongenerator.scheduled.average;
 
 import java.util.Calendar;
 import java.util.Date;

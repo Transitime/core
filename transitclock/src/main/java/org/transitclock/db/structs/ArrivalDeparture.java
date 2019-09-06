@@ -16,27 +16,8 @@
  */
 package org.transitclock.db.structs;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
-import net.sf.ehcache.pool.sizeof.annotations.IgnoreSizeOf;
-
-import org.hibernate.CallbackException;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.Session;
+import org.hibernate.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.classic.Lifecycle;
 import org.hibernate.criterion.Restrictions;
@@ -52,6 +33,12 @@ import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * For persisting an Arrival or a Departure time. Should use Arrival or
  * Departure subclasses.
@@ -65,7 +52,7 @@ import org.transitclock.utils.Time;
  * 
  * @author SkiBu Smith
  */
-@IgnoreSizeOf
+
 @Entity 
 @DynamicUpdate
 @Table(name="ArrivalsDepartures",

@@ -17,33 +17,9 @@
 
 package org.transitclock.core;
 
+import org.transitclock.ipc.data.IpcPrediction;
+
 import java.util.List;
-
-import org.transitclock.ipc.data.IpcPrediction;
-
-import org.transitclock.applications.Core;
-import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.core.dataCache.PredictionComparator;
-import org.transitclock.core.dataCache.PredictionDataCache;
-import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
-import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
-import org.transitclock.core.dataCache.TripDataHistoryCacheInterface;
-import org.transitclock.core.dataCache.TripKey;
-import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
-import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
-import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.db.structs.AvlReport;
-import org.transitclock.db.structs.Block;
-import org.transitclock.db.structs.Trip;
-import org.transitclock.gtfs.DbConfig;
-import org.transitclock.ipc.data.IpcPrediction;
-import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
-import org.transitclock.utils.Time;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Defines the interface for generating predictions. To create predictions using

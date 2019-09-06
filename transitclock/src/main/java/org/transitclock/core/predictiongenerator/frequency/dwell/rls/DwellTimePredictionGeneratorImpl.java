@@ -1,18 +1,17 @@
-package org.transitclock.core.predictiongenerator.rls.dwell;
+package org.transitclock.core.predictiongenerator.frequency.dwell.rls;
+
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
-import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
-import org.transitclock.core.dataCache.VehicleStateManager;
-import org.transitclock.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl;
+import org.transitclock.core.dataCache.StopPathCacheKey;
+import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
+import org.transitclock.core.predictiongenerator.frequency.traveltime.kalman.KalmanPredictionGeneratorImpl;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.Headway;
-import org.transitclock.ipc.data.IpcPrediction;
 
 /**
  * @author Sean Og Crudden
@@ -20,7 +19,9 @@ import org.transitclock.ipc.data.IpcPrediction;
  * This is an experiment to see if headway can be used to better predict dwell time. Most of what 
  * I have read tells me it can but in conjunction with APC data and estimation of demand at stops.
  * 
- * I do wonder if headway alone is enough to at least improve things beyond using the schedule?
+ * This is for frequency based services.
+ * 
+ *
  *
  */
 public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorImpl {
@@ -40,8 +41,15 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 				/* Change approach to use a RLS model.
 				*/																		
 				if(super.getStopTimeForPath(indices, avlReport, vehicleState)>0)
-				{																		
-					result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(indices, headway);
+				{								
+					// TODO Would be more correct to use the start time of the trip.				
+					Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(new Date(avlReport.getTime()),2);
+					
+					time=FrequencyBasedHistoricalAverageCache.round(time, FrequencyBasedHistoricalAverageCache.getCacheIncrementsForFrequencyService());
+															
+					StopPathCacheKey cacheKey=new StopPathCacheKey(indices.getTrip().getId(), indices.getStopPathIndex(),  false, new Long(time));
+					
+					result = DwellTimeModelCacheFactory.getInstance().predictDwellTime(cacheKey, headway);
 					
 					if(result==null)
 					{
@@ -63,7 +71,7 @@ public class DwellTimePredictionGeneratorImpl extends KalmanPredictionGeneratorI
 					result = super.getStopTimeForPath(indices, avlReport, vehicleState);
 				}				
 								
-				logger.debug("Using dwell time {} for {} instead of {}. Headway for vehicle {} is {}",result,indices, super.getStopTimeForPath(indices,  avlReport, vehicleState), vehicleState.getVehicleId(),headway );
+				
 			}
 			else
 			{

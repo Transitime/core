@@ -86,6 +86,12 @@ public class TripKey implements java.io.Serializable {
 		return "TripKey [tripId=" + tripId + ", tripStartDate=" + tripStartDate + ", startTime=" + startTime + "]";
 	}
 
+	public void setStartTime(Integer time) {
+		// TODO Auto-generated method stub
+		this.startTime=time;
+		
+	}
+
 
 
 

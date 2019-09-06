@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
 public class DwellTimeDetails {
-	private ArrivalDeparture departure;
-	private ArrivalDeparture arrival;
+	private IpcArrivalDeparture departure;
+	private IpcArrivalDeparture arrival;
 	private static final Logger logger = LoggerFactory
 			.getLogger(DwellTimeDetails.class);
 	private static final IntegerConfigValue maxDwellTime = 
@@ -18,13 +19,13 @@ public class DwellTimeDetails {
 					"This is a maximum dwell time at a stop to be taken into account for cache or prediction calculations.");
 	
 	
-	public ArrivalDeparture getDeparture() {
+	public IpcArrivalDeparture getDeparture() {
 		return departure;
 	}	
-	public ArrivalDeparture getArrival() {
+	public IpcArrivalDeparture getArrival() {
 		return arrival;
 	}
-	public DwellTimeDetails(ArrivalDeparture arrival, ArrivalDeparture departure) {
+	public DwellTimeDetails(IpcArrivalDeparture arrival, IpcArrivalDeparture departure) {
 		super();
 		this.arrival = arrival;
 		this.departure = departure;
@@ -37,7 +38,7 @@ public class DwellTimeDetails {
 			
 			if(sanityCheck())
 			{
-				long dwellTime=this.departure.getTime()-this.arrival.getTime();
+				long dwellTime=this.departure.getTime().getTime()-this.arrival.getTime().getTime();
 				return dwellTime;
 			}else
 			{
@@ -50,7 +51,7 @@ public class DwellTimeDetails {
 	{
 		if(this.arrival!=null && this.departure!=null&& arrival.isArrival() && departure.isDeparture())
 		{
-			long dwellTime=this.departure.getTime()-this.arrival.getTime();
+			long dwellTime=this.departure.getTime().getTime()-this.arrival.getTime().getTime();
 			if(dwellTime<0||dwellTime>maxDwellTime.getValue())
 			{
 				return false;

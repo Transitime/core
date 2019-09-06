@@ -1,4 +1,4 @@
-package org.transitclock.core.predictiongenerator.average.frequency;
+package org.transitclock.core.predictiongenerator.frequency.traveltime.average;
 
 import java.util.Calendar;
 import java.util.Date;

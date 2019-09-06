@@ -1,10 +1,18 @@
 package org.transitclock.core.dataCache;
+
+import java.io.Serializable;
+
 /**
  * @author Sean Og Crudden
  * 
  */
-public class HistoricalAverage {
+public class HistoricalAverage  implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2103092627208174290L;
+
 	@Override
 	public String toString() {
 		return "HistoricalAverage [count=" + count + ", average=" + average + "]";

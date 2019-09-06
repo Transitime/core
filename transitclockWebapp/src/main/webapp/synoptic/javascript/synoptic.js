@@ -27,13 +27,8 @@ class Sinoptico
 		this.infoVehicle=(data)=>`<table class=\"table\"><th >Móvil ${data.identifier}</th><tr><td> ${data.projection} </td></tr></table>`;
 		if(params.infoStop!=undefined)
 		{
-			
-			console.log(this.infoStop({identifier:"test"}));
-			console.log(this.infoStop);
 			this.infoStop=params.infoStop;
-			
 			this.infoStop=this.infoStop.bind(this);
-			console.log(this.infoStop({identifier:"test"}));
 		}
 		if(params.infoVehicle!=undefined)
 		{
@@ -42,6 +37,9 @@ class Sinoptico
 		this.__showReturn=true;
 		if(params.showReturn!=undefined)
 			this.__showReturn=params.showReturn;
+		//TEST:
+		//this.__showReturn=true;
+		
 		this.toolTipDiv = document.createElement('div');
 		this.menuDiv = document.createElement('div');
 		this.menuDiv.className='menu-content';
@@ -65,7 +63,12 @@ class Sinoptico
 		this.stopImg = new Image();
 		this.stopImg.width=10;
 		this.stopImg.height=10;
-
+		//this.patternType="circular";
+		//this.patternType="linear";
+		if(params.patternType!=undefined)
+			this.patternType=params.patternType;
+		//TEST:
+		//this.patternType="linear";
 		
 		//this.canvas=canvas;
 		if(params.routeName!=undefined)
@@ -103,7 +106,21 @@ class Sinoptico
 		//	var lineWidth=(canvas.width*linewidth);
 		//this.margen=(canvas.width-lineWidth)/2.0;//MOVE TO POSITION OF THE LINE
 		this.forwarLinePosition=80;
-		this.returnLinePosition=150;
+		
+		
+		if(this.patternType=="linear")
+		{
+			this.margin=40;
+			this.returnLinePosition=150;
+		}
+		else
+		{
+			this.margin=60;
+			this.returnLinePosition=300;
+			if(this.container.height<this.returnLinePosition+this.vehicleIcon.height+50)
+				this.container.height=this.returnLinePosition+this.vehicleIcon.height+50;
+		}
+	
 		//this.separation=40;
 		this.linecolour="#CD5F48";
 		this.resize = this.resize.bind(this);
@@ -124,7 +141,7 @@ class Sinoptico
 		//	this.menu=menu;
 		this.busDistanceToLine=7;
 		this.textSeparation=6;
-	
+		this.maxBusLabelWidth=0;
 		this.__mouseWheelHandler = this.__mouseWheelHandler.bind(this);
 	}
 	init()
@@ -532,14 +549,15 @@ class Sinoptico
 	getLineWidth()
 	{
 		//return (this.canvas.width*this.linewidth);
-		return (this.canvas.width-80);
+		return (this.canvas.width-this.margin*2);
 	}
 
 	getLineMargin()
 	{
 		return (this.canvas.width-this.getLineWidth())/2.0;
 	}
-	drawLine(direction)
+	
+	drawLinearLine(direction)
 	{
 		this.ctx.save();
 		this.ctx.beginPath();
@@ -551,6 +569,38 @@ class Sinoptico
 		this.ctx.stroke();
 		this.ctx.closePath();
 		this.ctx.restore();
+	}
+	
+	drawCircularLine()
+	{
+		this.drawLinearLine(0);
+		this.ctx.save();
+		this.ctx.beginPath();
+		this.ctx.moveTo(this.getLineWidth()+this.getLineMargin(), this.forwarLinePosition);
+		this.ctx.lineWidth = 5;
+		this.ctx.strokeStyle = this.linecolour;
+		this.ctx.lineTo(this.getLineWidth()+this.getLineMargin(), this.returnLinePosition);
+		this.ctx.stroke();
+		this.ctx.closePath();
+		this.ctx.restore();
+		this.drawLinearLine(1);
+		this.ctx.save();
+		this.ctx.beginPath();
+		this.ctx.moveTo(this.getLineMargin(),this.returnLinePosition);
+		this.ctx.lineWidth = 5;
+		this.ctx.strokeStyle = this.linecolour;
+		this.ctx.lineTo(this.getLineMargin(),this.forwarLinePosition);
+		this.ctx.stroke();
+		this.ctx.closePath();
+		this.ctx.restore();
+	}
+	
+	drawLine(direction)
+	{
+		if(this.patternType=="linear")
+			this.drawLinearLine(direction);
+		if(this.patternType=="circular" && direction==0)
+			this.drawCircularLine();
 
 
 	}
@@ -593,6 +643,14 @@ class Sinoptico
 				//console.log("FOUND ID "+id);
 				lastPosition.posX=this.buses[i].posX;
 				lastPosition.posY=this.buses[i].posY;
+				if(this.patternType=="linear")
+					lastPosition.projected=this.buses[i].projection*this.getLineWidth();
+				else if(this.patternType=="circular")
+				{
+					var h=this.returnLinePosition-this.forwarLinePosition;
+					var lineLength=2*(h+this.getLineWidth());
+					lastPosition.projected=this.buses[i].projection*lineLength;
+				}
 				return lastPosition;
 			}
 
@@ -602,19 +660,27 @@ class Sinoptico
 	setBuses(buses)
 	{
 		//	console.log("SETTING BUSES");
+		if(this.vehicleIcon.width==undefined || this.vehicleIcon.height==undefined)
+		{
+			this.vehicleIcon.height=this.vehicleIcon.naturalHeight;
+			this.vehicleIcon.width=this.vehicleIcon.naturalWidth;
+		}
+		this.maxBusLabelWidth=this.vehicleIcon.width;
 		for(var pos=0;pos<buses.length;pos++)
 		{
 			var bus=buses[pos];
 			//console.log(this.vehicleIcon);
-
+			if(bus.direction==undefined)
+				bus.direction=0;
+			
+			if(this.ctx.measureText(bus.identifier).width>this.maxBusLabelWidth)
+				this.maxBusLabelWidth=this.ctx.measureText(bus.identifier).width;
+			
 //			this.vehicleIcon.width=this.vehicleIcon.naturalWidth;
 //			this.vehicleIcon.height=this.vehicleIcon.naturalHeight;
 			//console.log(this.vehicleIcon.height+ " x "+	this.vehicleIcon.width);
-			if(this.vehicleIcon.width==undefined || this.vehicleIcon.height==undefined)
-			{
-				this.vehicleIcon.height=this.vehicleIcon.naturalHeight;
-				this.vehicleIcon.width=this.vehicleIcon.naturalWidth;
-			}
+			
+			
 			bus.lastPosition=this.getLastPostition(bus.id);
 			bus.type='bus';
 
@@ -628,17 +694,66 @@ class Sinoptico
 		this.steps=steps;
 		window.requestAnimationFrame(this.__animateBus);
 	}
+	__getXYPositionByPixelDistance(distance)
+	{
+		var _object={};
+		var _objWidth=this.vehicleIcon.width;
+		var _objHeight=this.vehicleIcon.height;
+		var distanceToLine=this.busDistanceToLine;
+		var h=this.returnLinePosition-this.forwarLinePosition;
+		var lineLength=2*(h+this.getLineWidth());
+		//console.log("distance "+distance);
+		if(distance<this.getLineWidth())
+		{
+		//	console.log("CASE 1");
+			_object.posX = distance+this.getLineMargin()-_objWidth/2;
+			_object.posY =this.forwarLinePosition-(_objHeight)-distanceToLine;
+			_object.labelYPosition=_object.posY-this.textSeparation;
+		}
+		else if(distance>= this.getLineWidth() && distance<this.getLineWidth() +h)
+		{
+			//We could change icon because of the arrow.
+			//console.log("CASE 2");
+			_object.posX = this.getLineWidth()+distanceToLine+this.getLineMargin();
+			_object.posY = this.forwarLinePosition+(distance-this.getLineWidth()) -_objHeight/2;	
+			_object.labelYPosition=_object.posY-this.textSeparation;
+		}
+		else if(distance>= this.getLineWidth()+h && distance<2*this.getLineWidth()+h)
+		{
+			//TODO: THIS NEEDS TO REDRAW THE LINE
+//			if(this.drawReturnUpside==true) 
+//				_object.posY =this.returnLinePosition-this.vehicleIcon.height-this.busDistanceToLine;
+//			else
+			//console.log("CASE 3");
+				_object.posY = this.returnLinePosition+(distanceToLine);
+				_object.posX =this.getLineWidth()-(distance-(this.getLineWidth()+h))+this.getLineMargin()-_objWidth/2;
+				_object.labelYPosition=_object.posY+this.textSeparation+_objHeight;
+	
+		}
+		else
+		{
+	//		console.log("CASE 4");
+			_object.posX = this.getLineMargin()-(distanceToLine+(this.maxBusLabelWidth));
+			_object.posY = this.returnLinePosition-(distance-(2*this.getLineWidth()+h)) -(_objHeight/2);
+			_object.labelYPosition=_object.posY-this.textSeparation;
+		}
+		//console.log(_object.posX + " ,"+_object.posY );
+		return _object;
+	}
+	//TODO: Borrar bien los buses
 	__animateBus()
 	{
-
 		//Clear forward
 		this.ctx.save();
 		//console.log(counter);
 		this.ctx.font="10px Georgia";
 		var metrics=this.ctx.measureText("anyText");
 		metrics.height=parseInt(this.ctx.font.match(/\d+/), 10);
+		
+		this.ctx.clearRect(0,0,this.getLineMargin()-this.busDistanceToLine+1,this.canvas.height);
+		this.ctx.clearRect(this.canvas.width-this.getLineMargin()+this.busDistanceToLine,0,this.getLineMargin(),this.canvas.height);
 		this.ctx.clearRect(0, this.forwarLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width, (this.vehicleIcon.height+metrics.height+this.textSeparation)+1);//Tenemos que tener el cuadrado de los buses.
-		if(this.drawReturnUpside==true)
+		if(this.drawReturnUpside==true && this.patternType=="linear")//TODO: If it is circular, we should repaint line
 			this.ctx.clearRect( 0,this.returnLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width,(this.vehicleIcon.height+metrics.height+this.textSeparation)+1);//Tenemos que tener el cuadrado de los buses.
 		else 
 			this.ctx.clearRect( 0,this.returnLinePosition+this.busDistanceToLine, this.canvas.width, (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
@@ -646,12 +761,12 @@ class Sinoptico
 		for(var pos=0;pos<this.buses.length;pos++)
 		{
 			var bus=this.buses[pos];
-
-			bus.posX = (bus.direction==0)? (this.getLineWidth()*bus.projection)+this.getLineMargin()-this.vehicleIcon.width/2:(this.getLineWidth()-(this.getLineWidth()*bus.projection))+this.getLineMargin()-this.vehicleIcon.width/2;
-			if(this.drawReturnUpside==true)
-				bus.posY = (bus.direction==0)? this.forwarLinePosition-this.vehicleIcon.height-this.busDistanceToLine:this.returnLinePosition-this.vehicleIcon.height-this.busDistanceToLine;
-			else
-				bus.posY = (bus.direction==0)? this.forwarLinePosition-this.vehicleIcon.height-this.busDistanceToLine:this.returnLinePosition+this.busDistanceToLine;
+			this.setObjectPosition(bus);
+//			bus.posX = (bus.direction==0)? (this.getLineWidth()*bus.projection)+this.getLineMargin()-this.vehicleIcon.width/2:(this.getLineWidth()-(this.getLineWidth()*bus.projection))+this.getLineMargin()-this.vehicleIcon.width/2;
+//			if(this.drawReturnUpside==true)
+//				bus.posY = (bus.direction==0)? this.forwarLinePosition-this.vehicleIcon.height-this.busDistanceToLine:this.returnLinePosition-this.vehicleIcon.height-this.busDistanceToLine;
+//			else
+//				bus.posY = (bus.direction==0)? this.forwarLinePosition-this.vehicleIcon.height-this.busDistanceToLine:this.returnLinePosition+this.busDistanceToLine;
 
 			var xToDraw=bus.posX;
 			var yToDraw=bus.posY;
@@ -659,12 +774,21 @@ class Sinoptico
 
 			if(bus.lastPosition!=undefined && bus.lastPosition.posX!=undefined  )
 			{
-
-				if(bus.lastPosition.posX>bus.posX)
-					xToDraw=bus.lastPosition.posX-(bus.lastPosition.posX-bus.posX)/this.steps*this.counter;
-				else
-					xToDraw=bus.lastPosition.posX+((bus.posX-bus.lastPosition.posX)/this.steps)*this.counter;
-
+				if(this.patternType=="linear")
+				{
+					if(bus.lastPosition.posX>bus.posX)
+						xToDraw=bus.lastPosition.posX-(bus.lastPosition.posX-bus.posX)/this.steps*this.counter;
+					else
+						xToDraw=bus.lastPosition.posX+((bus.posX-bus.lastPosition.posX)/this.steps)*this.counter;
+				}
+				else if(this.patternType=="circular" &&  bus.lastPosition.projected!=undefined)
+				{
+					var distance=bus.lastPosition.projected+((bus.projected-bus.lastPosition.projected)/this.steps)*this.counter;
+					var positionStep=this.__getXYPositionByPixelDistance(distance);
+					xToDraw=positionStep.posX;
+					yToDraw=positionStep.posY;
+					bus.labelYPosition=positionStep.labelYPosition;
+				}
 			}
 			this.ctx.fillStyle = bus.fill;
 			//	this.ctx.fillRect(xToDraw, yToDraw, this.vehicleIcon.width, this.vehicleIcon.height);
@@ -674,9 +798,13 @@ class Sinoptico
 			else
 				this.ctx.drawImage(this.vehicleAlternColorCallBack(bus),xToDraw, yToDraw,this.vehicleIcon.width, this.vehicleIcon.height);
 
-
+			var fontPostY=0;
 			//console.log(metrics);
-			var fontPostY=(bus.direction==0)?bus.posY-this.textSeparation:(this.drawReturnUpside==true)?bus.posY-this.textSeparation:bus.posY+metrics.height+this.vehicleIcon.height+this.textSeparation;
+			if(this.patternType=="linear")
+				 fontPostY=(bus.direction==0)?bus.posY-this.textSeparation:(this.drawReturnUpside==true)?bus.posY-this.textSeparation:bus.posY+metrics.height+this.vehicleIcon.height+this.textSeparation;
+			else
+				 fontPostY=bus.labelYPosition;
+			//console.log("fontPostY="+fontPostY);
 			this.ctx.fillText(bus.identifier,xToDraw,fontPostY );
 
 //			ctx.stroke();
@@ -711,9 +839,10 @@ class Sinoptico
 			var stop=this.stops[pos];
 			if(this.__showReturn!= undefined && this.__showReturn==false && stop.direction==1)
 				continue;
-			
-			stop.posX = (stop.direction==0)? (this.getLineWidth()*stop.projection)+this.getLineMargin():(this.getLineWidth()-(this.getLineWidth()*stop.projection))+this.getLineMargin();
-			stop.posY = (stop.direction==0)? this.forwarLinePosition:this.returnLinePosition;
+			this.setObjectPosition(stop);
+			//console.log("PRE: "+stop.posX+ " "+stop.posY);
+//			stop.posX = (stop.direction==0)? (this.getLineWidth()*stop.projection)+this.getLineMargin():(this.getLineWidth()-(this.getLineWidth()*stop.projection))+this.getLineMargin();
+//			stop.posY = (stop.direction==0)? this.forwarLinePosition:this.returnLinePosition;
 		/*	this.ctx.lineWidth = 1;
 			this.ctx.beginPath();
 			this.ctx.arc(stop.posX, stop.posY, 4, 0, Math.PI*2, true); 
@@ -724,31 +853,112 @@ class Sinoptico
 		}
 		this.ctx.restore();
 	}
+	
+	setObjectPosition(_object)
+	{
+		var _objWidth=this.vehicleIcon.width;
+		var _objHeight=this.vehicleIcon.height;
+		var distanceToLine=this.busDistanceToLine;
+		if(_object.type=="stop")
+		{
+			_objWidth=this.stopImg.width;
+			_objHeight=this.stopImg.height;
+			distanceToLine=0;
+			
+		}
+	//	console.log("_objWidth "+ _objWidth+ " _objHeight: "+ _objHeight+ " _object.type "+_object.type);
+		if(this.patternType=="linear")
+		{
+			console.log("LINEAR");
+			_object.posX = (_object.direction==0)? (this.getLineWidth()*_object.projection)+this.getLineMargin()-_objWidth/2:(this.getLineWidth()-(this.getLineWidth()*_object.projection))+this.getLineMargin()-_objWidth/2;
+			if(this.drawReturnUpside==true)
+				_object.posY = (_object.direction==0)? this.forwarLinePosition-((_object.type=="stop")?0:_objHeight)-distanceToLine:this.returnLinePosition-((_object.type=="stop")?0:_objHeight)-distanceToLine;
+			else
+				_object.posY = (_object.direction==0)? this.forwarLinePosition-((_object.type=="stop")?0:_objHeight)-distanceToLine:this.returnLinePosition+((_object.type=="stop")?0:this.separation-_objHeight);
+			_object.projected=this.getLineWidth()*_object.projection;
+			if(_object.posX>this.getLineWidth())
+			{
+				console.warn("object projection>1");
+				_object.posX=this.getLineWidth();
+			}
+		}
+		else if(this.patternType=="circular")
+		{
+		//	console.log("CIRCULAR");
+			var h=this.returnLinePosition-this.forwarLinePosition;
+			var lineLength=2*(h+this.getLineWidth());
+			var busLinePosition=lineLength*_object.projection;
+			_object.projected=busLinePosition;
+			if(busLinePosition>lineLength)
+			{
+				console.warn("object projection>1");
+				busLinePosition=lineLength;
+			}
+			
+			if(busLinePosition<this.getLineWidth())
+			{
+			//	console.log("CASE 1");
+				_object.posX = busLinePosition+this.getLineMargin()-_objWidth/2;
+				_object.posY =this.forwarLinePosition-((_object.type=="stop")?0:_objHeight)-distanceToLine;
+				if(_object.type=='bus')
+					_object.labelYPosition=_object.posY-this.textSeparation;
+			}
+			else if(busLinePosition>= this.getLineWidth() && busLinePosition<this.getLineWidth() +h)
+			{
+				//We could change icon because of the arrow.
+				//console.log("CASE 2");
+				_object.posX = this.getLineWidth()+distanceToLine+this.getLineMargin();
+				_object.posY = this.forwarLinePosition+(busLinePosition-this.getLineWidth()) -_objHeight/2;		
+				if(_object.type=='bus')
+					_object.labelYPosition=_object.posY-this.textSeparation;
+			}
+			else if(busLinePosition>= this.getLineWidth()+h && busLinePosition<2*this.getLineWidth()+h)
+			{
+				//TODO: THIS NEEDS TO REDRAW THE LINE
+//				if(this.drawReturnUpside==true) 
+//					_object.posY =this.returnLinePosition-this.vehicleIcon.height-this.busDistanceToLine;
+//				else
+			//	console.log("CASE 3");
+					_object.posY = this.returnLinePosition+((_object.type=="stop")?0:distanceToLine);
+					_object.posX =this.getLineWidth()-(busLinePosition-(this.getLineWidth()+h))+this.getLineMargin()-_objWidth/2;
+					if(_object.type=='bus')
+						_object.labelYPosition=_object.posY+this.textSeparation+_objHeight;
+		
+			}
+			else
+			{
+		//		console.log("CASE 4");
+				_object.posX = this.getLineMargin()-(distanceToLine+((_object.type=="stop")?0:this.maxBusLabelWidth));
+				_object.posY = this.returnLinePosition-(busLinePosition-(2*this.getLineWidth()+h)) -((_object.type=="stop")?0:_objHeight/2);
+				if(_object.type=='bus')
+					_object.labelYPosition=_object.posY-this.textSeparation;
+			}
+			
+		}
+	
+	}
+	
 	paintBus()
 	{
+		//this.repaint();
 		this.ctx.save();
 		//console.log(counter);
 		this.ctx.font="10px Georgia";
 		var metrics=this.ctx.measureText("anyText");
 		metrics.height=parseInt(this.ctx.font.match(/\d+/), 10);
-		this.ctx.clearRect(0, this.forwarLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width, (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
+		this.ctx.clearRect(this.getLineMargin()+2.5, this.forwarLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width-2*this.getLineMargin()-5, (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
 		
 		//this.ctx.clearRect(0, this.forwarLinePosition-this.vehicleIcon.height-metrics.height-this.textSeparation, this.canvas.width, this.vehicleIcon.height+metrics.height+this.textSeparation-3);//Tenemos que tener el cuadrado de los buses.
-		if(this.drawReturnUpside==true)
-			this.ctx.clearRect( 0,this.returnLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width,  (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
+		if(this.drawReturnUpside==true && this.patternType=="linear")
+			this.ctx.clearRect( this.getLineMargin()+2.5,this.returnLinePosition-(this.vehicleIcon.height+metrics.height+this.textSeparation+this.busDistanceToLine+1), this.canvas.width-2*this.getLineMargin()-5,  (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
 		else 
-			this.ctx.clearRect( 0,this.returnLinePosition+this.busDistanceToLine, this.canvas.width, (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
+			this.ctx.clearRect( this.getLineMargin()+2.5,this.returnLinePosition+this.busDistanceToLine, this.canvas.width-2*this.getLineMargin()-5, (this.vehicleIcon.height+metrics.height+this.textSeparation));//Tenemos que tener el cuadrado de los buses.
 	
 		for(var pos=0;pos<this.buses.length;pos++)
 		{
 			var bus=this.buses[pos];
 
-			bus.posX = (bus.direction==0)? (this.getLineWidth()*bus.projection)+this.getLineMargin()-this.vehicleIcon.width/2:(this.getLineWidth()-(this.getLineWidth()*bus.projection))+this.getLineMargin()-this.vehicleIcon.width/2;
-			if(this.drawReturnUpside==true)
-				bus.posY = (bus.direction==0)? this.forwarLinePosition-this.vehicleIcon.height-this.busDistanceToLine:this.returnLinePosition-this.vehicleIcon.height-this.busDistanceToLine;
-			else
-				bus.posY = (bus.direction==0)? this.forwarLinePosition-this.vehicleIcon.height-this.busDistanceToLine:this.returnLinePosition+this.separation-this.vehicleIcon.height;
-
+			this.setObjectPosition(bus);
 			var xToDraw=bus.posX;
 			var yToDraw=bus.posY;
 
@@ -771,36 +981,43 @@ class Sinoptico
 
 
 			//console.log(metrics);
-			var fontPostY=(bus.direction==0)?bus.posY-this.textSeparation:(this.drawReturnUpside==true)?bus.posY-this.textSeparation:bus.posY+metrics.height+this.vehicleIcon.height+this.textSeparation;
+//			var fontPostY=(bus.direction==0)?bus.posY-this.textSeparation:(this.drawReturnUpside==true)?bus.posY-this.textSeparation:bus.posY+metrics.height+this.vehicleIcon.height+this.textSeparation;
+//			this.ctx.fillText(bus.identifier,xToDraw,fontPostY );
+			var fontPostY=0;
+			//console.log(metrics);
+			if(this.patternType=="linear")
+				 fontPostY=(bus.direction==0)?bus.posY-this.textSeparation:(this.drawReturnUpside==true)?bus.posY-this.textSeparation:bus.posY+metrics.height+this.vehicleIcon.height+this.textSeparation;
+			else
+				 fontPostY=bus.labelYPosition;
+			console.log("fontPostY="+fontPostY);
 			this.ctx.fillText(bus.identifier,xToDraw,fontPostY );
-
 //			ctx.stroke();
 		}
 		this.ctx.restore();
 
 	}
+	repaint()
+	{
+		this.drawLine(0);
+		if(this.__showReturn)
+			this.drawLine(1);
+		this.paintStop();
+	}
 	paint()
 	{
 		if(this.resize)
 		{
-			this.drawLine(0);
-			if(this.__showReturn)
-				this.drawLine(1);
-			this.paintStop();
+			this.repaint();
 		}
 		if(this.buses== undefined || this.buses==null)	
 		{
 			console.warn("no bus to paint");
 			return;
 		}
-
 		this.paintBus();
-
 		this.resized=false;
 		//
-
 		//this.ctx.translate(25,20);
-
 	}
 	draw()
 	{
@@ -825,3 +1042,48 @@ class Sinoptico
 
 }
 
+
+
+function myFunction()
+{
+
+
+
+	var buses=[{
+		id:33,		
+		width: 20,
+		height: 10,
+		direction: 0,
+		projection: Math.random(),
+		identifier:"ppu-4111",
+		fill: "#444444",
+		isDragging: false
+	},{
+		id:23,		
+		width: 20,
+		height: 10,
+		direction: 0,
+		projection:Math.random(),
+		identifier:"ppu-4211",
+		fill: "#444444",
+		isDragging: false,
+		isScheduledService: false,
+		freqStartTime:1537843461864,
+	},{
+		id:1,		
+		width: 20,
+		height: 10,
+		direction: 1,
+		projection:Math.random(),
+		identifier:"ppu-4311",
+		fill: "#444444",
+		isDragging: false
+	}];
+	synoptic.setBuses(buses);
+	synoptic.steps=100;
+	synoptic.counter=0;
+	console.log("llamando a paint bus");
+	//window.requestAnimationFrame(test.animateBus);
+	synoptic.animateBus(20);
+//	test.paintBus();
+}

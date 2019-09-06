@@ -24,7 +24,7 @@ public class KalmanErrorCacheKey implements java.io.Serializable {
 	private String tripId;
 	private Integer stopPathIndex;
 	
-	// The vehicleId is only used for debug purposed we know log which vehicle set the error value
+	// The vehicleId is only used for debug purposed we know in log which vehicle set the error value
 	private String vehiceId;
 	
 		
@@ -115,12 +115,6 @@ public class KalmanErrorCacheKey implements java.io.Serializable {
 	public void setStopPathIndex(int stopPathIndex) {
 		this.stopPathIndex = stopPathIndex;
 	}
-
-	
-	
-
-
-
 	
 }
 

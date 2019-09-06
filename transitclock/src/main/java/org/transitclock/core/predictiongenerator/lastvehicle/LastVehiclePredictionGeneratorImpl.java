@@ -18,7 +18,7 @@ import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.StopPathPredictionCache;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
-import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
@@ -77,20 +77,25 @@ public class LastVehiclePredictionGeneratorImpl extends
 			vehiclesOnRoute.add(vehicleOnRouteState);
 		}
 				
-		TravelTimeDetails travelTimeDetails = null;
-		if((travelTimeDetails= HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices))!=null)
-		{			
-			logger.debug("Using last vehicle algorithm for prediction : " + travelTimeDetails.toString() + " for : " + indices.toString());					
-			
-			if(storeTravelTimeStopPathPredictions.getValue())
-			{
-				PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(travelTimeDetails.getTravelTime()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE", true, null);				
+		try {
+			TravelTimeDetails travelTimeDetails = null;
+			if((travelTimeDetails=this.getLastVehicleTravelTime(currentVehicleState, indices))!=null)
+			{			
+				logger.debug("Using last vehicle algorithm for prediction : " + travelTimeDetails.toString() + " for : " + indices.toString());					
 				
-				Core.getInstance().getDbLogger().add(predictionForStopPath);
-				StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+				if(storeTravelTimeStopPathPredictions.getValue())
+				{
+					PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(travelTimeDetails.getTravelTime()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE", true, null);				
+					
+					Core.getInstance().getDbLogger().add(predictionForStopPath);
+					StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+				}
+				
+				return travelTimeDetails.getTravelTime();
 			}
-			
-			return travelTimeDetails.getTravelTime();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 				
 		//logger.debug("No last vehicle data found, generating default prediction : " + indices.toString());

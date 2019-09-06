@@ -27,6 +27,9 @@ import org.transitclock.ipc.jms.JMSWrapper;
 import org.transitclock.ipc.jms.RestartableMessageProducer;
 import org.transitclock.modules.Module;
 
+import javax.jms.JMSException;
+import java.util.Collection;
+
 
 /**
  * Low-level abstract AVL module class that handles the processing

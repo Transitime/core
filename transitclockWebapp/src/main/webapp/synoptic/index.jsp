@@ -52,8 +52,11 @@
       <input type="hidden" id="routes" style="width:380px" />
     </div>
   </div>
+  <!-- For testing purpose 
+  <input type="button" onclick="myFunction()" value="test"/> 
+  -->
   <div id="synoptic"
-		style="width: 100%; height: 250px; left: 0px; top: 50px; position: absolute;' "></div>
+		style="width: 100%; height: 480px; left: 0px; top: 50px; position: absolute;' "></div>
 </body>
 	<script type="text/javascript">
 
@@ -134,7 +137,6 @@
 			return imgVehicleNotOnSechedule;
 	}
 	
-var synoptic=null;	
 function testFunc()
 {}
 
@@ -236,6 +238,7 @@ function vehicleUpdate(vehicleDetail, status)
 		console.log("i: "+i);
 		vehicle=vehicleDetail.vehicles[i];
 		console.log(vehicle);
+
 		//if(vehicle.direction==undefined)
 		//	vehicle.direction=="0";
 		
@@ -243,6 +246,7 @@ function vehicleUpdate(vehicleDetail, status)
 		var _identifier=(vehicle.licensePlate==undefined)?vehicle.id:vehicle.licensePlate;
 		var gpsTimeStr = dateFormat(vehicle.loc.time);
 		buses.push({id:vehicle.id, projection:vehicle.distanceAlongTrip/getShapeLength(vehicle.tripPattern),identifier:_identifier,direction:directionVehicle,gpsTimeStr:gpsTimeStr,nextStopName:vehicle.nextStopName,schAdhStr:vehicle.schAdhStr,trip:vehicle.trip,schAdh:vehicle.schAdh,headway:vehicle.headway});
+
 	}
 	synoptic.setBuses(buses);
 	synoptic.steps=100;
@@ -319,8 +323,10 @@ function routeConfigCallback(routeDetail, status)
 	var params={container:canvas,
 			onVehiClick:testFunc,
 			infoStop:function(data) {console.log(data.identifier);return "<table class=\"table\"><th >"+data.identifier+"</th><tr><td>distance: "+parseFloat(data.distance).toFixed(2) +" m. </td></tr></table>"},
-			infoVehicle:function(data) {console.log(data.identifier);return "<table class=\"table\"><th >"+data.identifier+"</th><tr><td>GPSTime: "+data.gpsTimeStr +" </td></tr><tr><td>NextStop: "+data.nextStopName+"</td></tr><tr><td>schAdh: "+data.schAdhStr+"</td></tr><tr><td>trip: "+data.trip+"</td></tr><tr><td>headway: "+((data.headway==-1)?"-":((data.headway/60000).toFixed(2))+ " min.") +"</td><tr></table>"},
+			//var startTimeStr = vehicleData.isScheduledService ? "" : "<br/><b>Start Time:</b> "+dateFormat(vehicleData.freqStartTime/1000)
+			infoVehicle:function(data) {console.log(data.identifier);return "<table class=\"table\"><th >"+data.identifier+"</th><tr><td>GPSTime: "+data.gpsTimeStr +" </td></tr><tr><td>NextStop: "+data.nextStopName+"</td></tr><tr><td>schAdh: "+data.schAdhStr+"</td></tr><tr><td>trip: "+data.trip+((data.isScheduledService!=undefined && data.isScheduledService==false)?("</td></tr><tr><td>Start Time: "+dateFormat(data.freqStartTime/1000)):"")+"</td></tr><tr><td>headway: "+((data.headway==-1)?"-":((data.headway/60000).toFixed(2))+ " min.") +"</td><tr></table>"},
 			routeName:routeDetail.routes[0].name,
+			patternType:routeDetail.routes[0].shape[0].patternType,
 			drawReturnUpside:false,
 			showReturn:showReturn,
 			predictionFunction:getPredictionsJson,

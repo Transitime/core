@@ -27,6 +27,8 @@ import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.db.structs.TripPattern;
 import org.transitclock.db.structs.VectorWithHeading;
+import org.transitclock.gtfs.DbConfig;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 /**
  * This private class is for keeping track of the trip, path, and segment
@@ -93,11 +95,32 @@ public class Indices implements Serializable {
 		this.segmentIndex = spatialMatch.getSegmentIndex();
 	}
 
-	
+	public Indices(IpcArrivalDeparture event) {
+				
+		Block block=null;
+		
+		DbConfig dbConfig = Core.getInstance().getDbConfig();
+		block=dbConfig.getBlock(event.getServiceId(), event.getBlockId());								
+		
+		this.block=block;
+		this.tripIndex = event.getTripIndex();
+		this.stopPathIndex = event.getStopPathIndex();
+				
+	}
 
 	public Indices(ArrivalDeparture event) {
 		
-		this.block=event.getBlock();
+		
+		Block block=null;
+		if(event.getBlock()==null)
+		{
+			DbConfig dbConfig = Core.getInstance().getDbConfig();
+			block=dbConfig.getBlock(event.getServiceId(), event.getBlockId());								
+		}else
+		{
+			block=event.getBlock();
+		}
+		this.block=block;
 		this.tripIndex = event.getTripIndex();
 		this.stopPathIndex = event.getStopPathIndex();
 				

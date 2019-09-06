@@ -1,5 +1,6 @@
 package org.transitclock.core.dataCache;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,10 +11,12 @@ import org.transitclock.core.Indices;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.PredictionForStopPath;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.ehcache.Status;
+import org.ehcache.config.CacheConfiguration;
+import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.xml.XmlConfiguration;
 
 public class StopPathPredictionCache {
 	final private static String cacheName = "StopPathPredictionCache";
@@ -21,58 +24,35 @@ public class StopPathPredictionCache {
 	private static final Logger logger = LoggerFactory
 			.getLogger(StopPathPredictionCache.class);
 	
-	private Cache cache = null;
-	
+	private Cache<StopPathCacheKey, StopPredictions> cache = null;
+	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
 	public static StopPathPredictionCache getInstance() {
 		return singleton;
 	}
 	private StopPathPredictionCache() {
-		CacheManager cm = CacheManager.getInstance();
+	XmlConfiguration xmlConfig = new XmlConfiguration(xmlConfigUrl);
 		
-		if (cm.getCache(cacheName) == null) {
-			cm.addCache(cacheName);
-		}
-		cache = cm.getCache(cacheName);
+		CacheManager cm = CacheManagerBuilder.newCacheManager(xmlConfig);
 		
-		CacheConfiguration config = cache.getCacheConfiguration();
-		
-		config.setEternal(true);
-		
-		config.setMaxEntriesLocalHeap(1000000);
-		
-		config.setMaxEntriesLocalDisk(1000000);								
+		if(cm.getStatus().compareTo(Status.AVAILABLE)!=0)
+			cm.init();
+							
+		cache = cm.getCache(cacheName, StopPathCacheKey.class, StopPredictions.class);						
 	}
 	public void logCache(Logger logger)
 	{
-		logger.debug("Cache content log.");
-		@SuppressWarnings("unchecked")
-		List<StopPathCacheKey> keys = cache.getKeys();
-		
-		for(StopPathCacheKey key : keys)
-		{								
-			Element result=cache.get(key);
-			
-			if(result!=null)
-			{
-				List<PredictionForStopPath> predictions = (List<PredictionForStopPath>) result.getObjectValue();
+		logger.debug("Cache content log. Not implemented.");
 				
-				for(PredictionForStopPath prediction: predictions)
-				{
-					logger.debug(prediction.toString());
-				}
-			
-			}
-		}		
 	}
 	@SuppressWarnings("unchecked")
 	synchronized public List<PredictionForStopPath> getPredictions(StopPathCacheKey key) {		
 						
-		Element result = cache.get(key);
+		StopPredictions result = cache.get(key);
 		logCache(logger);
 		if(result==null)
 			return null;
 		else
-			return (List<PredictionForStopPath>) result.getObjectValue();		
+			return (List<PredictionForStopPath>) result.getPredictions();		
 	}
 	public void putPrediction(PredictionForStopPath prediction)
 	{
@@ -83,24 +63,19 @@ public class StopPathPredictionCache {
 	synchronized public void putPrediction(StopPathCacheKey key,  PredictionForStopPath prediction) {
 		
 		List<PredictionForStopPath> list = null;
-		Element result = cache.get(key);
+		StopPredictions element = cache.get(key);
 		
-		if (result != null && result.getObjectValue() != null) {
-			list = (List<PredictionForStopPath>) result.getObjectValue();
+		if (element != null && element.getPredictions() != null) {
+			list = (List<PredictionForStopPath>) element.getPredictions();
 			cache.remove(key);
 		} else {
 			list = new ArrayList<PredictionForStopPath>();
 		}
 		list.add(prediction);
 		
-		Element predictions = new Element(key, Collections.synchronizedList(list));
-
-		cache.put(predictions);				
+		element.setPredictions(list);
+				
+		cache.put(key, element);				
 	}		
-	public List<StopPathCacheKey> getKeys()
-	{
-		@SuppressWarnings("unchecked")
-		List<StopPathCacheKey> keys = cache.getKeys();
-		return keys;
-	}
+
 }

@@ -399,33 +399,11 @@
 	</logger>
 
 	<logger
-		name="org.transitclock.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl"
+		name="org.transitclock.core.predictiongenerator"
 		level="debug" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
-	<logger
-		name="org.transitclock.core.predictiongenerator.rls.dwell.DwellTimePredictionGeneratorImpl"
-		level="debug" additivity="false">
-		<appender-ref ref="PREDICTION" />
-	</logger>
-	<logger
-		name="org.transitclock.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl"
-		level="debug" additivity="false">
-		<appender-ref ref="PREDICTION" />
-	</logger>
-
-	<logger
-		name="org.transitclock.core.predictiongenerator.average.frequency.HistoricalAveragePredictionGeneratorImpl"
-		level="debug" additivity="false">
-		<appender-ref ref="PREDICTION" />
-	</logger>
-
-	<logger
-		name="org.transitclock.core.predictiongenerator.average.scheduled.HistoricalAveragePredictionGeneratorImpl"
-		level="debug" additivity="false">
-		<appender-ref ref="PREDICTION" />
-	</logger>
-
+	
 	<logger name="org.transitclock.core.schedBasedPreds" level="debug"
 		additivity="false">
 		<appender-ref ref="SCHED_BASED_PREDS" />
@@ -513,9 +491,9 @@
 		level="warn" additivity="false">
 		<appender-ref ref="PREDICTION" />
 	</logger>
-	<logger name="org.transitclock.core.dataCache.TripDataHistoryCache"
+	<logger name="org.transitclock.core.dataCache"
 		level="debug" additivity="false">
-		<appender-ref ref="STDOUT" />
+		<appender-ref ref="CACHE" />
 	</logger>
 	
 	<logger name="org.transitclock.core.dataCache.jcs.DwellTimeModelCache"

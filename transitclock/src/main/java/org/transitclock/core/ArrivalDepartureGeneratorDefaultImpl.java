@@ -33,9 +33,10 @@ import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
-import org.transitclock.core.dataCache.ehcache.TripDataHistoryCache;
+import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
+import org.transitclock.core.holdingmethod.HoldingTimeGeneratorDefaultImpl;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
 
 import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
@@ -49,6 +50,7 @@ import org.transitclock.db.structs.Route;
 import org.transitclock.db.structs.Stop;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.db.structs.VehicleEvent;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Time;
 
@@ -326,10 +328,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				block,
 				tripIndex,
 				stopPathIndex, freqStartDate);
-		if(vehicleState.getVehicleId().equals("969"))
-		{
-			System.out.println("hello");
-		}
+		
 		updateCache(vehicleState, arrival);
 		logger.debug("Creating arrival: {}", arrival);
 
@@ -358,25 +357,48 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		}
 
 		if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
-			ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+		{
+			try {
+				ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
 		if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
-			FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+			try {
+				FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(arrivalDeparture);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{
-			HoldingTime holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, arrivalDeparture);
-			if(holdingTime!=null)
-			{
-				HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
-				vehicleState.setHoldingTime(holdingTime);
+			HoldingTime holdingTime;
+			try {
+				holdingTime = HoldingTimeGeneratorFactory.getInstance().generateHoldingTime(vehicleState, new IpcArrivalDeparture(arrivalDeparture));
+				if(holdingTime!=null)
+				{
+					HoldingTimeCache.getInstance().putHoldingTime(holdingTime);
+					vehicleState.setHoldingTime(holdingTime);
 
+				}
+				ArrayList<Long> N_List=new ArrayList<Long>();
+
+				HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			ArrayList<Long> N_List=new ArrayList<Long>();
-
-			HoldingTimeGeneratorFactory.getInstance().handleDeparture(vehicleState, arrivalDeparture);
-
+		
 		}
+		/*
+		if(HoldingTimeGeneratorDefaultImpl.getOrderedListOfVehicles("66")!=null)
+			logger.info("ORDER:"+HoldingTimeGeneratorDefaultImpl.getOrderedListOfVehicles("66").toString());
+		*/
 		/*
 		if(HoldingTimeGeneratorFactory.getInstance()!=null)
 		{

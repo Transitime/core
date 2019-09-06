@@ -16,11 +16,6 @@
  */
 package org.transitclock.avl;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
@@ -29,6 +24,11 @@ import org.transitclock.db.structs.AvlReport;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Time;
 import org.transitclock.utils.threading.NamedThreadFactory;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A singleton thread executor for executing AVL reports. For when not using JMS
