@@ -1,31 +1,25 @@
 package org.transitclock.core.predictiongenerator.lastvehicle;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
-import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionGeneratorDefaultImpl;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
-import org.transitclock.core.dataCache.HistoricalAverage;
-import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.StopPathPredictionCache;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
-import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
-import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionForStopPath;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcVehicleComplete;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Sean Óg Crudden
@@ -79,7 +73,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 				
 		try {
 			TravelTimeDetails travelTimeDetails = null;
-			if((travelTimeDetails=this.getLastVehicleTravelTime(currentVehicleState, indices))!=null)
+			if((travelTimeDetails=HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices))!=null)
 			{			
 				logger.debug("Using last vehicle algorithm for prediction : " + travelTimeDetails.toString() + " for : " + indices.toString());					
 				
