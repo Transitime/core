@@ -77,95 +77,100 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 		VehicleState currentVehicleState = vehicleStateManager.getVehicleState(avlReport.getVehicleId());
 
-		TravelTimeDetails travelTimeDetails = HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices);
+		try {
+			TravelTimeDetails travelTimeDetails = HistoricalPredictionLibrary.getLastVehicleTravelTime(currentVehicleState, indices);
 
-		/*
-		 * The first vehicle of the day should use schedule or historic data to
-		 * make prediction. Cannot use Kalman as yesterdays vehicle will have
-		 * little to say about todays.
-		 */
-		if (travelTimeDetails!=null) {
 
-			logger.debug("Kalman has last vehicle info for : " +indices.toString()+ " : "+travelTimeDetails);
-
-			Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
-
-			List<TravelTimeDetails> lastDaysTimes = HistoricalPredictionLibrary.lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
-					indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
-					maxKalmanDaysToSearch.getValue(), maxKalmanDays.getValue());
-
-			if(lastDaysTimes!=null)
-			{
-				logger.debug("Kalman has " +lastDaysTimes.size()+ " historical values for : " +indices.toString());
-			}
 			/*
-			 * if we have enough data start using Kalman filter otherwise revert
-			 * to extended class for prediction.
+			 * The first vehicle of the day should use schedule or historic data to
+			 * make prediction. Cannot use Kalman as yesterdays vehicle will have
+			 * little to say about todays.
 			 */
-			if (lastDaysTimes != null && lastDaysTimes.size() >= minKalmanDays.getValue().intValue()) {
+			if (travelTimeDetails!=null) {
 
-				logger.debug("Generating Kalman prediction for : "+indices.toString());
+				logger.debug("Kalman has last vehicle info for : " +indices.toString()+ " : "+travelTimeDetails);
 
-				try {
+				Date nearestDay = DateUtils.truncate(avlReport.getDate(), Calendar.DAY_OF_MONTH);
 
-					KalmanPrediction kalmanPrediction = new KalmanPrediction();
+				List<TravelTimeDetails> lastDaysTimes = HistoricalPredictionLibrary.lastDaysTimes(tripCache, currentVehicleState.getTrip().getId(),currentVehicleState.getTrip().getDirectionId(),
+						indices.getStopPathIndex(), nearestDay, currentVehicleState.getTrip().getStartTime(),
+						maxKalmanDaysToSearch.getValue(), maxKalmanDays.getValue());
 
-					KalmanPredictionResult kalmanPredictionResult;
+				if(lastDaysTimes!=null)
+				{
+					logger.debug("Kalman has " +lastDaysTimes.size()+ " historical values for : " +indices.toString());
+				}
+				/*
+				 * if we have enough data start using Kalman filter otherwise revert
+				 * to extended class for prediction.
+				 */
+				if (lastDaysTimes != null && lastDaysTimes.size() >= minKalmanDays.getValue().intValue()) {
 
-					Vehicle vehicle = new Vehicle(avlReport.getVehicleId());
+					logger.debug("Generating Kalman prediction for : "+indices.toString());
 
-					VehicleStopDetail originDetail = new VehicleStopDetail(null, 0, vehicle);
-					TripSegment[] historical_segments_k = new TripSegment[lastDaysTimes.size()];
-					for (int i = 0; i < lastDaysTimes.size() && i < maxKalmanDays.getValue(); i++) {
+					try {
 
-						logger.debug("Kalman is using historical value : "+lastDaysTimes.get(i) +" for : " + indices.toString());
+						KalmanPrediction kalmanPrediction = new KalmanPrediction();
 
-						VehicleStopDetail destinationDetail = new VehicleStopDetail(null, lastDaysTimes.get(i).getTravelTime(),
-								vehicle);
-						historical_segments_k[i] = new TripSegment(originDetail, destinationDetail);
+						KalmanPredictionResult kalmanPredictionResult;
+
+						Vehicle vehicle = new Vehicle(avlReport.getVehicleId());
+
+						VehicleStopDetail originDetail = new VehicleStopDetail(null, 0, vehicle);
+						TripSegment[] historical_segments_k = new TripSegment[lastDaysTimes.size()];
+						for (int i = 0; i < lastDaysTimes.size() && i < maxKalmanDays.getValue(); i++) {
+
+							logger.debug("Kalman is using historical value : "+lastDaysTimes.get(i) +" for : " + indices.toString());
+
+							VehicleStopDetail destinationDetail = new VehicleStopDetail(null, lastDaysTimes.get(i).getTravelTime(),
+									vehicle);
+							historical_segments_k[i] = new TripSegment(originDetail, destinationDetail);
+						}
+
+						VehicleStopDetail destinationDetail_0_k_1 = new VehicleStopDetail(null, travelTimeDetails.getTravelTime(), vehicle);
+
+						TripSegment ts_day_0_k_1 = new TripSegment(originDetail, destinationDetail_0_k_1);
+
+						TripSegment last_vehicle_segment = ts_day_0_k_1;
+
+						Indices previousVehicleIndices = new Indices(travelTimeDetails.getArrival());
+
+						Double last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);
+
+						logger.debug("Using error value: " + last_prediction_error +" found with vehicle id "+travelTimeDetails.getArrival().getVehicleId()+ " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
+
+						//TODO this should also display the detail of which vehicle it choose as the last one.
+						logger.debug("Using last vehicle value: " + travelTimeDetails + " for : "+ indices.toString());
+
+						kalmanPredictionResult = kalmanPrediction.predict(last_vehicle_segment, historical_segments_k,
+								last_prediction_error);
+
+						long predictionTime = (long) kalmanPredictionResult.getResult();
+
+						logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " for : "+ new KalmanErrorCacheKey(indices).toString());
+
+						kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
+
+						logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+alternative+" prediction: "
+								+ super.getTravelTimeForPath(indices, avlReport, vehicleState) +" for : " + indices.toString());
+
+						if(storeTravelTimeStopPathPredictions.getValue())
+						{
+							PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "KALMAN", true, null);
+							Core.getInstance().getDbLogger().add(predictionForStopPath);
+							StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+						}
+						return predictionTime;
+
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
 					}
-
-					VehicleStopDetail destinationDetail_0_k_1 = new VehicleStopDetail(null, travelTimeDetails.getTravelTime(), vehicle);
-
-					TripSegment ts_day_0_k_1 = new TripSegment(originDetail, destinationDetail_0_k_1);
-
-					TripSegment last_vehicle_segment = ts_day_0_k_1;
-
-					Indices previousVehicleIndices = new Indices(travelTimeDetails.getArrival());
-
-					Double last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);
-
-					logger.debug("Using error value: " + last_prediction_error +" found with vehicle id "+travelTimeDetails.getArrival().getVehicleId()+ " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
-
-					//TODO this should also display the detail of which vehicle it choose as the last one.
-					logger.debug("Using last vehicle value: " + travelTimeDetails + " for : "+ indices.toString());
-
-					kalmanPredictionResult = kalmanPrediction.predict(last_vehicle_segment, historical_segments_k,
-							last_prediction_error);
-
-					long predictionTime = (long) kalmanPredictionResult.getResult();
-
-					logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " for : "+ new KalmanErrorCacheKey(indices).toString());
-
-					kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
-
-					logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+alternative+" prediction: "
-							+ super.getTravelTimeForPath(indices, avlReport, vehicleState) +" for : " + indices.toString());
-
-					if(storeTravelTimeStopPathPredictions.getValue())
-					{
-						PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "KALMAN", true, null);
-						Core.getInstance().getDbLogger().add(predictionForStopPath);
-						StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
-					}
-					return predictionTime;
-
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
 				}
 			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
 		return super.getTravelTimeForPath(indices, avlReport, vehicleState);
 	}
 
