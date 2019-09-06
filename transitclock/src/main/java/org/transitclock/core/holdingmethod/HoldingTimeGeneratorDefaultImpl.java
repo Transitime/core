@@ -1,12 +1,5 @@
 package org.transitclock.core.holdingmethod;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -14,20 +7,17 @@ import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringListConfigValue;
 import org.transitclock.core.VehicleState;
-import org.transitclock.core.dataCache.ArrivalDepartureComparator;
-import org.transitclock.core.dataCache.HoldingTimeCache;
-
-import org.transitclock.core.dataCache.PredictionDataCache;
-import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
-import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitclock.core.dataCache.VehicleDataCache;
-import org.transitclock.core.dataCache.VehicleStateManager;
-import org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCache;
+import org.transitclock.core.dataCache.*;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.HoldingTime;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.ipc.data.IpcVehicleComplete;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Sean Óg Crudden
@@ -603,6 +593,10 @@ public class HoldingTimeGeneratorDefaultImpl implements HoldingTimeGenerator {
 	}
 	@Override
 	public List<ControlStop> getControlPointStops() {
+
+		if(controlStopList.getValue() == null){
+			return null;
+		}
 
 		ArrayList<ControlStop> controlStops=new ArrayList<ControlStop>();
 
