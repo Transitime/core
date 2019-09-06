@@ -63,7 +63,7 @@ public class ClassInstantiator {
 			return null;
 		} catch (ClassNotFoundException | SecurityException
 				| InstantiationException | IllegalAccessException
-				| IllegalArgumentException e) {
+				| IllegalArgumentException | NoClassDefFoundError e) {
 			logger.error("Could not instantiate class {}. ", className, e);
 			return null;
 		}
