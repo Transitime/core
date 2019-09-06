@@ -4,7 +4,7 @@
 
 
   <context-param>
-      <param-name>transitime_config_file_location</param-name>
+      <param-name>transitclock_config_file_location</param-name>
       <!-- Set to customized properties file with db config info and such -->     
       <param-value>${transitclock.configFiles}</param-value>      
       

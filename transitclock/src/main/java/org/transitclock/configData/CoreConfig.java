@@ -773,7 +773,7 @@ public class CoreConfig {
 	}
 	private static BooleanConfigValue fillHistoricalCaches = 
 	    new BooleanConfigValue(
-	        "transitime.core.fillHistoricalCaches",
+	        "transitclock.core.fillHistoricalCaches",
 	        false,
 	        "whether historical caches should be filled on Core start.");
 	

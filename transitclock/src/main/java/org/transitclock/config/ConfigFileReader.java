@@ -16,14 +16,13 @@
  */
 package org.transitclock.config;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-
 import org.transitclock.config.ConfigValue.ConfigParamException;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -395,7 +394,7 @@ public class ConfigFileReader {
 	public static void processConfig() {
 		// Determine from the Java system property transitime.configFiles 
 		// the configuration files to be read
-		String configFilesStr = System.getProperty("transitime.configFiles");
+		String configFilesStr = System.getProperty("transitclock.configFiles");
 		if (configFilesStr == null)
 			return;		
 		String configFiles[] = configFilesStr.split(";");

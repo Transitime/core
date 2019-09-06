@@ -31,10 +31,10 @@ public class ExternalBlockAssignerTest extends TestCase {
         ExternalBlockAssigner eba = ExternalBlockAssigner.getInstance();
         assertNull(eba.getBlockAssignmentsByVehicleIdFeed());
 
-        System.setProperty("transitime.externalAssignerEnabled", "true");
+        System.setProperty("transitclock.externalAssignerEnabled", "true");
         eba.externalAssignerEnabled.readValue();
         assertNull(eba.getBlockAssignmentsByVehicleIdFeed());
-        System.setProperty("transitime.externalAssignerUrl", "file:///tmp/no_such_file.txt");
+        System.setProperty("transitclock.externalAssignerUrl", "file:///tmp/no_such_file.txt");
         eba.externalAssignerUrl.readValue();
         try {
             InputStream feed = eba.getBlockAssignmentsByVehicleIdFeed();
@@ -91,8 +91,8 @@ public class ExternalBlockAssignerTest extends TestCase {
     public void runGetActiveAssignmentForVehicle() throws Exception {
         // do some cleanup from last test
         ExternalBlockAssigner.reset();
-        System.setProperty("transitime.externalAssignerEnabled", "false");
-        System.setProperty("transitime.externalAssignerUrl", "file:///tmp/no_such_file.txt");
+        System.setProperty("transitclock.externalAssignerEnabled", "false");
+        System.setProperty("transitclock.externalAssignerUrl", "file:///tmp/no_such_file.txt");
 
 
         // mock out database retrieval of block
@@ -122,7 +122,7 @@ public class ExternalBlockAssignerTest extends TestCase {
         assertTrue(eba.getBlockAssignmentsByVehicleIdMapFromCache().isEmpty());
 
         // now re-enable
-        System.setProperty("transitime.externalAssignerEnabled", "true");
+        System.setProperty("transitclock.externalAssignerEnabled", "true");
         eba.externalAssignerEnabled.readValue();
         eba.getInstance();
 
@@ -153,7 +153,7 @@ public class ExternalBlockAssignerTest extends TestCase {
         File tmpFile = File.createTempFile("externalBlockAssiger", ".csv");
         tmpFile.deleteOnExit();
         writeToFile(tmpFile, contents);
-        System.setProperty("transitime.externalAssignerUrl", "file://" + tmpFile.getAbsolutePath());
+        System.setProperty("transitclock.externalAssignerUrl", "file://" + tmpFile.getAbsolutePath());
         eba.externalAssignerUrl.readValue();
         eba.getInstance().forceUpdate();
 

@@ -21,7 +21,7 @@ package org.transitclock.web;
  * properties file is read in. The webapp web.xml file should be configured to
  * associate this class as a listener so that contextInitialized() is
  * automatically called at webapp startup. And the initialization parameter
- * transitime_config_file_location needs to be set to specify the config file to
+ * transitclock_config_file_location needs to be set to specify the config file to
  * read in.
  * <p>
  * When running Tomcat within Eclipse it is most likely easiest to just set the
@@ -32,14 +32,14 @@ package org.transitclock.web;
  * 
  * @author Sean Crudden
  */
+import org.transitclock.config.ConfigFileReader;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.transitclock.config.ConfigFileReader;
-
 public class ReadConfigListener implements ServletContextListener {
 	private static final String FILE_LOCATION_PARAM_NAME =
-			"transitime_config_file_location";
+			"transitclock_config_file_location";
 
 	/**
 	 * Doesn't need to do anything since this class is only for reading on

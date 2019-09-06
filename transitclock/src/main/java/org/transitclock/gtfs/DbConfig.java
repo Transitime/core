@@ -16,15 +16,6 @@
  */
 package org.transitclock.gtfs;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -35,25 +26,13 @@ import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.ServiceUtils;
 import org.transitclock.db.hibernate.HibernateUtils;
-import org.transitclock.db.structs.ActiveRevisions;
-import org.transitclock.db.structs.Agency;
-import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Calendar;
-import org.transitclock.db.structs.CalendarDate;
-import org.transitclock.db.structs.FareAttribute;
-import org.transitclock.db.structs.FareRule;
-import org.transitclock.db.structs.Frequency;
-import org.transitclock.db.structs.Route;
-import org.transitclock.db.structs.Stop;
-import org.transitclock.db.structs.StopPath;
-import org.transitclock.db.structs.Transfer;
-import org.transitclock.db.structs.TravelTimesForStopPath;
-import org.transitclock.db.structs.TravelTimesForTrip;
-import org.transitclock.db.structs.Trip;
-import org.transitclock.db.structs.TripPattern;
+import org.transitclock.db.structs.*;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.MapKey;
 import org.transitclock.utils.Time;
+
+import java.util.*;
 
 /**
  * Reads all the configuration data from the database. The data is based on GTFS
@@ -137,7 +116,7 @@ public class DbConfig {
 		return validateTestQuery.getValue();
 	}
 
-	private BooleanConfigValue serviceIdSuffix = new BooleanConfigValue("transitime.avl.serviceIdSuffix",
+	private BooleanConfigValue serviceIdSuffix = new BooleanConfigValue("transitclock.avl.serviceIdSuffix",
 			false,"suffix tripId with serviceId");
 	public boolean getServiceIdSuffix() { return serviceIdSuffix.getValue(); }
 	

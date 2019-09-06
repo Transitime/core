@@ -55,7 +55,7 @@ public class BlockAssignerUpdater {
         try {
             feed = getBlockAssignmentsByVehicleIdFeed();
             if (feed == null) {
-                logger.warn("In ExternalBlockAssigner but \"transitime.externalAssignerUrl\" not defined!");
+                logger.warn("In ExternalBlockAssigner but \"transitclock.externalAssignerUrl\" not defined!");
                 return blockAssignmentsByVehicleId;
             }
             Iterable<CSVRecord> records = formatter.parse(new BufferedReader(new InputStreamReader(feed)));

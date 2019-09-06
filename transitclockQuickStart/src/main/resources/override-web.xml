@@ -4,8 +4,8 @@
 	<display-name>Transitime api</display-name>
 	
 	<context-param>
-      <param-name>transitime_config_file_location</param-name>
+      <param-name>transitclock_config_file_location</param-name>
       <!-- Set to customized properties file with db config info and such -->
-      <param-value>src/main/resources/transitime.properties</param-value>      
+      <param-value>src/main/resources/transitclock.properties</param-value>
     </context-param>
 </web-app>

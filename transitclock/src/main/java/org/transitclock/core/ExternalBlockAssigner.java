@@ -27,29 +27,29 @@ public class ExternalBlockAssigner {
 
     static BooleanConfigValue externalAssignerEnabled =
             new BooleanConfigValue(
-                    "transitime.externalAssignerEnabled",
+                    "transitclock.externalAssignerEnabled",
                     false,
                     "Set to true to enable the manual assignment feature where "
                             + "the system tries to assign vehicle to an available block");
 
     static StringConfigValue externalAssignerUrl =
-            new StringConfigValue("transitime.externalAssignerUrl",
+            new StringConfigValue("transitclock.externalAssignerUrl",
                     null,
                     "Set to the URL or file of the external AVL feed");
 
     static StringConfigValue blockParam =
-            new StringConfigValue("transitime.externalAssigner.block_param",
+            new StringConfigValue("transitclock.externalAssigner.block_param",
                     "block",
                     "CSV header for the block of the external AVL feed");
 
 
     static StringConfigValue vehicleParam =
-            new StringConfigValue("transitime.externalAssigner.vehicle_param",
+            new StringConfigValue("transitclock.externalAssigner.vehicle_param",
                     "vehicle",
                     "CSV header for the vehicle of the external AVL feed");
 
     static IntegerConfigValue cacheTTL =
-            new IntegerConfigValue("transitime.externalAssigner.cacheTTL",
+            new IntegerConfigValue("transitclock.externalAssigner.cacheTTL",
                     60,
                     "time in seconds to cache feed");
 
@@ -99,7 +99,7 @@ public class ExternalBlockAssigner {
 
     /**
      * for the given avlReport, regardless of the current block assignment,
-     * check configured external BLOCK_FEED (\"transitime.externalAssignerUrl\")
+     * check configured external BLOCK_FEED (\"transitclock.externalAssignerUrl\")
      * and if block is present and active override the current assignment.
      * @param avlReport
      * @return

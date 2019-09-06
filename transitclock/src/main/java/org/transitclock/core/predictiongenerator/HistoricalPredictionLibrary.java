@@ -41,7 +41,7 @@ import org.transitclock.gtfs.DbConfig;
 public class HistoricalPredictionLibrary {
 
 	private static final IntegerConfigValue closestVehicleStopsAhead = new IntegerConfigValue(
-			"transitime.prediction.closestvehiclestopsahead", new Integer(2),
+			"transitclock.prediction.closestvehiclestopsahead", new Integer(2),
 			"Num stops ahead a vehicle must be to be considers in the closest vehicle calculation");
 
     public static TravelTimeDetails getLastVehicleTravelTime(VehicleState currentVehicleState, Indices indices) {

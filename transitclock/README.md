@@ -172,7 +172,7 @@ args:
 
 ```
 example:
-	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar GTFSFileProcessor.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
+	java  -Xmx1000M -Dtransitclock.core.agencyId=02 -jar GTFSFileProcessor.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
 ```
 
 
@@ -191,7 +191,7 @@ Example using maven to execute
 ````
 
 
-mvn exec:java -Dtransitime.configFiles=/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml -Dtransitime.logging.dir=/home/scrudden/workspace/core/logs/ -Dexec.mainClass="org.transitime.applications.UpdateTravelTimes" -Dexec.args="08-24-2015"
+mvn exec:java -Dtransitclock.configFiles=/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml -Dtransitclock.logging.dir=/home/scrudden/workspace/core/logs/ -Dexec.mainClass="org.transitclock.applications.UpdateTravelTimes" -Dexec.args="08-24-2015"
 ````
 Configuration File for core.java
 ==============================
@@ -202,11 +202,11 @@ The database and hibernate config file are specified in this file.
 <b>/home/scrudden/workspace/transitimeconfig/transiTimeConfig.xml</b>
 ````
 <?xml version="1.0" encoding="UTF-8"?>
-<transitime>
+<transitclock>
     <modules>
-        <!-- <optionalModulesList>org.transitime.core.schedBasedPreds.SchedBasedPredsModule;org.transitime.avl.GtfsRealtimeModule</optionalModulesList> -->                            
-     	<!--<optionalModulesList>org.transitime.avl.GtfsRealtimeModule;org.transitime.custom.irishrail.NexalaAvlModule</optionalModulesList>-->
-     	<optionalModulesList>org.transitime.custom.irishrail.NexalaAvlModule</optionalModulesList>
+        <!-- <optionalModulesList>org.transitclock.core.schedBasedPreds.SchedBasedPredsModule;org.transitclock.avl.GtfsRealtimeModule</optionalModulesList> -->                            
+     	<!--<optionalModulesList>org.transitclock.avl.GtfsRealtimeModule;org.transitclock.custom.irishrail.NexalaAvlModule</optionalModulesList>-->
+     	<optionalModulesList>org.transitclock.custom.irishrail.NexalaAvlModule</optionalModulesList>
     </modules>
      
       <core>
@@ -238,5 +238,5 @@ The database and hibernate config file are specified in this file.
     <hibernate>
         <configFile>/home/ogcrudden/workspace/transitimeconfig/postgres_hibernate.cfg.xml</configFile>        
     </hibernate>
-</transitime>
+</transitclock>
 ````

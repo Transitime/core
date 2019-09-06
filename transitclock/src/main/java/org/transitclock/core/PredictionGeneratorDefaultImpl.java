@@ -16,13 +16,6 @@
  */
 package org.transitclock.core;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -34,15 +27,13 @@ import org.transitclock.core.dataCache.StopPathPredictionCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
-import org.transitclock.db.structs.AvlReport;
-import org.transitclock.db.structs.HoldingTime;
-import org.transitclock.db.structs.PredictionForStopPath;
-import org.transitclock.db.structs.StopPath;
-import org.transitclock.db.structs.Trip;
+import org.transitclock.db.structs.*;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPrediction.ArrivalOrDeparture;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
+
+import java.util.*;
 
 /**
  * When a new match based on AVL data is made for a vehicle the methods in this
@@ -114,7 +105,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 					+ "time will be used. If false then the schedule time plus "
 					+ "the wait stop time will be used.");
 	
-	protected static BooleanConfigValue storeTravelTimeStopPathPredictions = new BooleanConfigValue("transitime.core.storeTravelTimeStopPathPredictions", 
+	protected static BooleanConfigValue storeTravelTimeStopPathPredictions = new BooleanConfigValue("transitclock.core.storeTravelTimeStopPathPredictions",
              false,
              "This is set to true to record all travelTime  predictions for individual stopPaths generated. Useful for comparing performance of differant algorithms. (MAPE comparison). Not for normal use as will generate massive amounts of data.");
 

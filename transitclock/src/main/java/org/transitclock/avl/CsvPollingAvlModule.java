@@ -27,57 +27,57 @@ public class CsvPollingAvlModule extends PollUrlAvlModule {
     private static final float KILOMETERS_PER_MILE = 1.60934f;
 
     private static StringConfigValue feedUrl =
-            new StringConfigValue("transitime.avl.csv.url",
+            new StringConfigValue("transitclock.avl.csv.url",
                     "http://localhost:8080/csv",
                     "The URL of the CSV feed.");
 
     private static StringConfigValue vehicleParam =
-            new StringConfigValue("transitime.avl.csv.vehicle_param",
+            new StringConfigValue("transitclock.avl.csv.vehicle_param",
                     "DeviceID",
                     "CSV header for vehicleId column");
 
     private static StringConfigValue dateParam =
-            new StringConfigValue("transitime.avl.csv.date_param",
+            new StringConfigValue("transitclock.avl.csv.date_param",
                     "Date",
                     "CSV header for date column");
 
     private static BooleanConfigValue isSeparateTimeParam =
-            new BooleanConfigValue("transitime.avl.csv.need_time_param",
+            new BooleanConfigValue("transitclock.avl.csv.need_time_param",
                     true,
                     "If time is separate from date");
 
     private static StringConfigValue timeParam =
-            new StringConfigValue("transitime.avl.csv.time_param",
+            new StringConfigValue("transitclock.avl.csv.time_param",
                     "Time",
                     "CSV header for time column");
 
     private static StringConfigValue dateFormatParam =
-            new StringConfigValue("transitime.avl.csv.date_format_param",
+            new StringConfigValue("transitclock.avl.csv.date_format_param",
                     "yyyy/MM/ddHH:mm:ss",
                     "SimpleDateFormat constructor for date parsing");
 
     private static StringConfigValue latParam =
-            new StringConfigValue("transitime.avl.csv.lat_param",
+            new StringConfigValue("transitclock.avl.csv.lat_param",
                     "Latitude",
                     "CSV header for latitude column");
 
     private static StringConfigValue lonParam =
-            new StringConfigValue("transitime.avl.csv.lon_param",
+            new StringConfigValue("transitclock.avl.csv.lon_param",
                     "Longitude",
                     "CSV header for longitude column");
 
     private static StringConfigValue speedParam =
-            new StringConfigValue("transitime.avl.csv.speed_param",
+            new StringConfigValue("transitclock.avl.csv.speed_param",
                     "Speed",
                     "CSV header for speed column");
 
     private static BooleanConfigValue speedInMphParam =
-            new BooleanConfigValue("transitime.avl.csv.speed_is_mph_param",
+            new BooleanConfigValue("transitclock.avl.csv.speed_is_mph_param",
                     true,
                     "True if speed is in miles per hour");
 
     private static StringConfigValue headingParam =
-            new StringConfigValue("transitime.avl.csv.heading_param",
+            new StringConfigValue("transitclock.avl.csv.heading_param",
                     "Heading",
                     "CSV header for heading/bearing column");
 

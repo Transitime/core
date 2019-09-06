@@ -17,9 +17,6 @@
 
 package org.transitclock.core.predictiongenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionGeneratorDefaultImpl;
@@ -27,13 +24,16 @@ import org.transitclock.core.VehicleState;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.utils.ClassInstantiator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CascadingPredictionGenerator extends PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
 
 	private static StringConfigValue classNames = 
-			new StringConfigValue("transitime.core.predictionGeneratorClasses", 
-					"org.transitime.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl,"
-					+ "org.transitime.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl,"
-					+ "org.transitime.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl",
+			new StringConfigValue("transitclock.core.predictionGeneratorClasses",
+					"org.transitclock.core.predictiongenerator.kalman.KalmanPredictionGeneratorImpl,"
+					+ "org.transitclock.core.predictiongenerator.average.HistoricalAveragePredictionGeneratorImpl,"
+					+ "org.transitclock.core.predictiongenerator.lastvehicle.LastVehiclePredictionGeneratorImpl",
 					"Specifies, in order, the names of the classes used for generating " +
 					"prediction data.");
 	
