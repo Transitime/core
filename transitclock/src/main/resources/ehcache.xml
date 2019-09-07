@@ -5,7 +5,8 @@
 	xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.1.xsd">
 	<ehcache:persistence directory="/usr/local/transitclock/cache/" />
 	<ehcache:disk-store thread-pool="pool-disk" />
-
+	
+		
 	<ehcache:cache alias="dwellTimeModelCache">
 		<ehcache:key-type >org.transitclock.core.dataCache.StopPathCacheKey</ehcache:key-type>
 		<ehcache:value-type>org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel</ehcache:value-type>
@@ -23,7 +24,7 @@
 
 	<ehcache:cache alias="arrivalDeparturesByTrip">
 		<ehcache:key-type >org.transitclock.core.dataCache.TripKey</ehcache:key-type>
-		<ehcache:value-type>org.transitclock.core.dataCache.TripEvents</ehcache:value-type>
+		<ehcache:value-type serializer="org.transitclock.core.dataCache.ehcache.serializers.TripEventKyroSerializer">org.transitclock.core.dataCache.TripEvents</ehcache:value-type>		
 		<ehcache:expiry>
 			<ehcache:tti unit="days">7</ehcache:tti>
 		</ehcache:expiry>

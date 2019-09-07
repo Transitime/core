@@ -36,25 +36,25 @@ public class IpcArrivalDeparture implements Serializable {
 	@XmlAttribute
 	private String tripId;
 	@XmlAttribute
-	private Date avlTime;
+	private transient Date avlTime;
 	@XmlAttribute
-	private TemporalDifference scheduledAdherence;
+	private transient TemporalDifference scheduledAdherence;
 	@XmlAttribute
-	private String blockId;
+	private transient String blockId;
 	@XmlAttribute
-	private String routeId;
+	private transient String routeId;
 	@XmlAttribute
-	private String routeShortName;
+	private transient String routeShortName;
 	@XmlAttribute
-	private String serviceId;
+	private transient String serviceId;
 	@XmlAttribute
 	private String directionId;
 	@XmlAttribute
-	private int tripIndex;
+	private transient int tripIndex;
 	@XmlAttribute
 	private int stopPathIndex;
 	@XmlAttribute
-	private float stopPathLength;
+	private transient float stopPathLength;
 	@XmlAttribute
 	private Date freqStartTime;
 	

@@ -80,8 +80,9 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 				if(stopData!=null && stopData.size()>1)
 				{
 					IpcArrivalDeparture arrival=findArrival(stopData, new IpcArrivalDeparture(departure));
+									
 					if(arrival!=null)
-					{
+					{						
 						IpcArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
 						if(arrival!=null&&previousArrival!=null)
 						{
@@ -96,27 +97,33 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 							if(departure.getScheduleAdherence()!=null && departure.getScheduleAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
 							{							
 								
+								if(!departure.getStop().isWaitStop()&&!departure.getStop().isLayoverStop())	
+								{
 								// Arrival schedule adherence appears not to be set much. So only stop if set and outside range.
-								if(previousArrival.getScheduledAdherence()==null || previousArrival.getScheduledAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
-								{		
-									if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
-											dwelltime >  minDwellTimeAllowedInModel.getValue())
-									{
-										if(headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
-												&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
+									if(previousArrival.getScheduledAdherence()==null || previousArrival.getScheduledAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
+									{		
+										if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
+												dwelltime >  minDwellTimeAllowedInModel.getValue())
 										{
-											addSample(departure,headway,dwelltime);
+											if(headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
+													&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
+											{
+												addSample(departure,headway,dwelltime);
+											}else
+											{
+												logger.warn("Headway outside allowable range . {}", headway);
+											}
 										}else
 										{
-											logger.warn("Headway outside allowable range . {}", headway);
+											logger.warn("Dwell time {} outside allowable range for {}.", dwelltime, departure);
 										}
 									}else
 									{
-										logger.warn("Dwell time {} outside allowable range for {}.", dwelltime, departure);
+										logger.warn("Schedule adherence outside allowable range. "+previousArrival.getScheduledAdherence());
 									}
 								}else
 								{
-									logger.warn("Schedule adherence outside allowable range. "+previousArrival.getScheduledAdherence());
+									logger.warn("This is a wait stop or layover so not being included in model as dwell time is affected by if vehicle is early or late to the stop.");
 								}
 							}else
 							{
