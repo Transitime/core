@@ -47,6 +47,8 @@ import org.transitclock.utils.SystemTime;
 import org.transitclock.utils.Time;
 
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -89,12 +91,12 @@ public class Core {
 	}
 	private static StringConfigValue cacheReloadStartTimeStr =
 			new StringConfigValue("transitclock.core.cacheReloadStartTimeStr",
-					"",
+					getDateAsString(LocalDateTime.now().minusDays(3)),
 					"Date and time of when to start reading arrivaldepartures to inform caches.");
 
 	private static StringConfigValue cacheReloadEndTimeStr =
 			new StringConfigValue("transitclock.core.cacheReloadEndTimeStr",
-					"",
+					getDateAsString(LocalDateTime.now()),
 					"Date and time of when to end reading arrivaldepartures to inform caches.");
 	private static final Logger logger =
 			LoggerFactory.getLogger(Core.class);
@@ -409,19 +411,19 @@ public class Core {
 		{
 			if(TripDataHistoryCacheFactory.getInstance()!=null)
 			{
-				logger.debug("Populating TripDataHistoryCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				logger.info("Populating TripDataHistoryCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
 				TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new 		Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
 			}
 			
 			if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 			{
-				logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				logger.info("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
 				FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
 			}
 			
 			if(StopArrivalDepartureCacheFactory.getInstance()!=null)
 			{
-				logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
+				logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",cacheReloadStartTimeStr.getValue(),cacheReloadEndTimeStr.getValue());
 				StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, new Date(Time.parse(cacheReloadStartTimeStr.getValue()).getTime()), new Date(Time.parse(cacheReloadEndTimeStr.getValue()).getTime()));
 			}
 			/*
@@ -483,6 +485,11 @@ public class Core {
 			}
 		}		
 	
+	}
+
+	private static String getDateAsString(LocalDateTime date){
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		return date.format(formatter);
 	}
 
 	/**
