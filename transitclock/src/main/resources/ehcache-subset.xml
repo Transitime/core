@@ -6,14 +6,17 @@
 	<ehcache:persistence directory="/usr/local/transitclock/cache/" />
 	<ehcache:disk-store thread-pool="pool-disk" />
 
+
 	<ehcache:cache alias="dwellTimeModelCache">
 		<ehcache:key-type >org.transitclock.core.dataCache.StopPathCacheKey</ehcache:key-type>
 		<ehcache:value-type>org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel</ehcache:value-type>
 		<ehcache:expiry>
-			<ehcache:tti unit="days">1</ehcache:tti>
+			<ehcache:tti unit="days">7</ehcache:tti>
 		</ehcache:expiry>
 		<ehcache:resources>
-			<ehcache:heap unit="entries">1</ehcache:heap>
+			<ehcache:heap unit="entries">2000</ehcache:heap>
+			<ehcache:offheap unit="MB">100</ehcache:offheap>
+			<ehcache:disk unit="MB">200</ehcache:disk>
 		</ehcache:resources>
 		<ehcache:disk-store-settings thread-pool="pool-disk"
 									 writer-concurrency="1" />
@@ -23,12 +26,12 @@
 		<ehcache:key-type >org.transitclock.core.dataCache.TripKey</ehcache:key-type>
 		<ehcache:value-type serializer="org.transitclock.core.dataCache.ehcache.serializers.TripEventKyroSerializer">org.transitclock.core.dataCache.TripEvents</ehcache:value-type>
 		<ehcache:expiry>
-			<ehcache:tti unit="days">21</ehcache:tti>
+			<ehcache:tti unit="days">7</ehcache:tti>
 		</ehcache:expiry>
 		<ehcache:resources>
-			<ehcache:heap unit="entries">31500</ehcache:heap>
-			<ehcache:offheap unit="GB">30</ehcache:offheap>
-			<ehcache:disk unit="GB">40</ehcache:disk>
+			<ehcache:heap unit="entries">1000</ehcache:heap>
+			<ehcache:offheap unit="MB">100</ehcache:offheap>
+			<ehcache:disk unit="MB">200</ehcache:disk>
 		</ehcache:resources>
 		<ehcache:disk-store-settings thread-pool="pool-disk"
 									 writer-concurrency="1" />
@@ -41,9 +44,9 @@
 			<ehcache:ttl unit="days">1</ehcache:ttl>
 		</ehcache:expiry>
 		<ehcache:resources>
-			<ehcache:heap unit="entries">150000</ehcache:heap>
-			<ehcache:offheap unit="GB">30</ehcache:offheap>
-			<ehcache:disk unit="GB">40</ehcache:disk>
+			<ehcache:heap unit="entries">2000</ehcache:heap>
+			<ehcache:offheap unit="MB">100</ehcache:offheap>
+			<ehcache:disk unit="MB">200</ehcache:disk>
 		</ehcache:resources>
 		<ehcache:disk-store-settings thread-pool="pool-disk"
 									 writer-concurrency="1" />
@@ -53,14 +56,14 @@
 		<ehcache:key-type>org.transitclock.core.dataCache.KalmanErrorCacheKey</ehcache:key-type>
 		<ehcache:value-type>java.lang.Double</ehcache:value-type>
 		<ehcache:expiry>
-			<ehcache:tti unit="days">7</ehcache:tti>
+			<ehcache:ttl unit="hours">24</ehcache:ttl>
 		</ehcache:expiry>
 		<ehcache:resources>
-			<ehcache:heap unit="entries">1000000</ehcache:heap>
-			<ehcache:offheap unit="GB">5</ehcache:offheap>
-			<ehcache:disk unit="GB">10</ehcache:disk>
+			<ehcache:heap unit="entries">10000</ehcache:heap>
+			<ehcache:offheap unit="MB">5</ehcache:offheap>
 		</ehcache:resources>
 	</ehcache:cache>
+
 	<ehcache:cache alias="HistoricalAverageCache">
 		<ehcache:key-type>org.transitclock.core.dataCache.StopPathCacheKey</ehcache:key-type>
 		<ehcache:value-type>org.transitclock.core.dataCache.HistoricalAverage</ehcache:value-type>
@@ -68,7 +71,8 @@
 			<ehcache:tti unit="days">14</ehcache:tti>
 		</ehcache:expiry>
 		<ehcache:resources>
-			<ehcache:heap unit="entries">1</ehcache:heap>
+			<ehcache:heap unit="entries">10000</ehcache:heap>
+			<ehcache:offheap unit="MB">100</ehcache:offheap>
 
 		</ehcache:resources>
 	</ehcache:cache>
@@ -80,8 +84,8 @@
 			<ehcache:ttl unit="hours">1</ehcache:ttl>
 		</ehcache:expiry>
 		<ehcache:resources>
-			<ehcache:heap unit="entries">1</ehcache:heap>
-
+			<ehcache:heap unit="entries">100</ehcache:heap>
+			<ehcache:offheap unit="MB">1</ehcache:offheap>
 		</ehcache:resources>
 	</ehcache:cache>
 
@@ -89,10 +93,15 @@
 		<ehcache:key-type>org.transitclock.core.dataCache.HoldingTimeCacheKey</ehcache:key-type>
 		<ehcache:value-type>org.transitclock.db.structs.HoldingTime</ehcache:value-type>
 		<ehcache:expiry>
-			<ehcache:ttl unit="hours">1</ehcache:ttl>
+			<ehcache:ttl unit="hours">2</ehcache:ttl>
 		</ehcache:expiry>
 		<ehcache:resources>
-			<ehcache:heap unit="entries">1</ehcache:heap>
+			<ehcache:heap unit="entries">100</ehcache:heap>
+			<ehcache:offheap unit="MB">1</ehcache:offheap>
 		</ehcache:resources>
 	</ehcache:cache>
 </ehcache:config>
+
+
+
+
