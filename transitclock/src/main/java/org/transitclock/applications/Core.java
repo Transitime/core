@@ -22,6 +22,7 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.ConfigFileReader;
+import org.transitclock.config.LongConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.CoreConfig;
@@ -89,9 +90,14 @@ public class Core {
 	static {
 		ConfigFileReader.processConfig();
 	}
+	private static LongConfigValue cacheDaysToPopulate =
+			new LongConfigValue("transitclock.core.cacheDaysToPopulate",
+					3l,
+					"Number of days back to populate cache. Assumes cache start time and end time is not set.");
+
 	private static StringConfigValue cacheReloadStartTimeStr =
 			new StringConfigValue("transitclock.core.cacheReloadStartTimeStr",
-					getDateAsString(LocalDateTime.now().minusDays(3)),
+					getDateAsString(LocalDateTime.now().minusDays(cacheDaysToPopulate.getValue())),
 					"Date and time of when to start reading arrivaldepartures to inform caches.");
 
 	private static StringConfigValue cacheReloadEndTimeStr =
