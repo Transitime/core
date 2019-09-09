@@ -494,7 +494,7 @@ public class Core {
 	}
 
 	private static String getDateAsString(LocalDateTime date){
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyy HH:mm:ss");
 		return date.format(formatter);
 	}
 
