@@ -1,5 +1,10 @@
 package org.transitclock.core.dataCache.ehcache.scheduled;
 
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.slf4j.Logger;
@@ -10,17 +15,12 @@ import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
-import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel;
 import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellTimeModelFactory;
+import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Headway;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 /**
  * 
  * @author scrudden
@@ -95,19 +95,9 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 							/* TODO Should abstract this behind an anomaly detention interface/Factory */
 							
 							if(departure.getScheduleAdherence()!=null && departure.getScheduleAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
-							{
-								boolean isWaitStop = false;
-								boolean isLayoverStop = false;
-
-								try {
-									isWaitStop = departure.getStop().isWaitStop();
-									isLayoverStop = departure.getStop().isLayoverStop();
-								} catch (NullPointerException e){
-									logger.warn("Missing departure data", e);
-									return;
-								}
+							{							
 								
-								if(!isWaitStop&&!isLayoverStop)
+								if(!departure.getStop().isWaitStop()&&!departure.getStop().isLayoverStop())	
 								{
 								// Arrival schedule adherence appears not to be set much. So only stop if set and outside range.
 									if(previousArrival.getScheduledAdherence()==null || previousArrival.getScheduledAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
