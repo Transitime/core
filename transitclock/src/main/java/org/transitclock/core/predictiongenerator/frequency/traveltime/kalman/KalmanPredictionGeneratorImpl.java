@@ -168,7 +168,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 						{
 							PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(predictionTime).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "KALMAN", true, null);
 							Core.getInstance().getDbLogger().add(predictionForStopPath);
-							StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+							StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 						}
 						return predictionTime;
 

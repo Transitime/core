@@ -7,7 +7,7 @@ import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionGeneratorDefaultImpl;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
-import org.transitclock.core.dataCache.StopPathPredictionCache;
+import org.transitclock.core.dataCache.StopPathPredictionCacheFactory;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
@@ -82,7 +82,7 @@ public class LastVehiclePredictionGeneratorImpl extends
 					PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()), new Double(new Long(travelTimeDetails.getTravelTime()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "LAST VEHICLE", true, null);				
 					
 					Core.getInstance().getDbLogger().add(predictionForStopPath);
-					StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+					StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 				}
 				
 				return travelTimeDetails.getTravelTime();
