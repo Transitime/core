@@ -297,7 +297,7 @@ public class Core {
 	/**
 	 * For setting the system time when in playback or batch mode.
 	 *
-	 * @param systemTime
+	 * @param systemEpochTime
 	 */
 	public void setSystemTime(long systemEpochTime) {
 		this.systemTime = new SettableSystemTime(systemEpochTime);
@@ -494,7 +494,7 @@ public class Core {
 	}
 
 	private static String getDateAsString(LocalDateTime date){
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyy HH:mm:ss");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Time.getDateTimePattern());
 		return date.format(formatter);
 	}
 
