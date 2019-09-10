@@ -1,6 +1,6 @@
-/* 
+/*
  * This file is part of Transitime.org
- * 
+ *
  * Transitime.org is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPL) as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,11 +16,7 @@
  */
 package org.transitclock.utils;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
+import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.db.structs.Agency;
 import org.transitclock.gtfs.DbConfig;
 
@@ -28,6 +24,10 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * Contains convenience methods for dealing with time issues.
@@ -36,9 +36,9 @@ import java.text.SimpleDateFormat;
  * <code> TimeZone.setDefault(TimeZone.getTimeZone(timeZoneStr));</code> before
  * this class is initialized. Otherwise the SimpleDateFormat objects will
  * wrongly use the system default timezone.
- * 
+ *
  * @author SkiBu Smith
- * 
+ *
  */
 public class Time {
 	// Some handy constants for dealing with time.
@@ -62,7 +62,7 @@ public class Time {
 	public static final long WEEK_IN_MSECS = MS_PER_WEEK;
 	public static final long MS_PER_YEAR = 365 * MS_PER_DAY;
 	public static final long YEAR_IN_MSECS = MS_PER_YEAR;
-	
+
 	public static final int SEC_PER_MIN = 60;
 	public static final int MIN_IN_SECS = SEC_PER_MIN;
 	public static final int SEC_PER_HOUR = 60 * SEC_PER_MIN;
@@ -75,38 +75,68 @@ public class Time {
 
 	public static final long NSEC_PER_MSEC = 1000000;
 	public static final long MSEC_IN_NSECS = NSEC_PER_MSEC;
-	
-	// These two are for reading in dates in various formats
-	private static final DateFormat defaultDateFormat =
+
+
+	private static final String dateTimePatternMDY = "MM-dd-yyy HH:mm:ss";
+	private static final String dateTimePatternYMD = "yyyy-MM-dd HH:mm:ss";
+
+	// Month, Day, Year Format
+	private static final DateFormat defaultDateFormatMDY =
 			SimpleDateFormat.getDateInstance(DateFormat.SHORT);
-	private static final DateFormat dateFormatDashesShortYear =
-			new SimpleDateFormat("yy-MM-dd");
+	private static final DateFormat dateFormatDashesShortYearMDY =
+			new SimpleDateFormat("MM-dd-yy");
 
-	
-	private static final DateFormat readableDateFormat =
+	private static final DateFormat readableDateFormatMDY =
 			new SimpleDateFormat("MM-dd-yyyy");
-	
-	private static final DateFormat readableDateFormat24 = 
-			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss z");
-	
-	private static final DateFormat readableDateFormat24NoSecs = 
-		new SimpleDateFormat("MM-dd-yyyy HH:mm");
 
-	private static final DateFormat readableDateFormat24Msec = 
+	private static final DateFormat readableDateFormat24MDY =
+			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss z");
+
+	private static final DateFormat readableDateFormat24NoSecsMDY =
+			new SimpleDateFormat("MM-dd-yyyy HH:mm");
+
+	private static final DateFormat readableDateFormat24MsecMDY =
 			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
-	
-	private static final DateFormat readableDateFormat24NoTimeZoneMsec = 
+
+	private static final DateFormat readableDateFormat24NoTimeZoneMsecMDY =
 			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS");
-	
-	private static final DateFormat readableDateFormat24NoTimeZoneNoMsec = 
+
+	private static final DateFormat readableDateFormat24NoTimeZoneNoMsecMDY =
 			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
 
+	// Year, Month, Day Format
+	// These two are for reading in dates in various formats
+	private static final DateFormat defaultDateFormatYMD =
+			new SimpleDateFormat("yyyy-MM-dd");
+	private static final DateFormat dateFormatDashesShortYearYMD =
+			new SimpleDateFormat("yy-MM-dd");
+
+
+	private static final DateFormat readableDateFormatYMD =
+			new SimpleDateFormat("yyyy-MM-dd");
+
+	private static final DateFormat readableDateFormat24YMD =
+			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+
+	private static final DateFormat readableDateFormat24NoSecsYMD =
+			new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+	private static final DateFormat readableDateFormat24MsecYMD =
+			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+
+	private static final DateFormat readableDateFormat24NoTimeZoneMsecYMD =
+			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+	private static final DateFormat readableDateFormat24NoTimeZoneNoMsecYMD =
+			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+	// Time
 	private static final DateFormat timeFormat24 =
 			new SimpleDateFormat("HH:mm:ss z");
 
 	private static final DateFormat timeFormat24NoTimezone =
 			new SimpleDateFormat("HH:mm:ss");
-	
+
 	private static final DateFormat timeFormat24Msec =
 			new SimpleDateFormat("HH:mm:ss.SSS z");
 
@@ -116,38 +146,127 @@ public class Time {
 	// Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
 	private static final DateFormat httpFormat =
 			new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-	
+
 	// Note that this one is not static. It is for when need to include
 	// timezone via a Time object.
-	private final DateFormat readableDateFormat24MsecForTimeZone =
+	private final DateFormat readableDateFormat24MsecForTimeZoneMDY =
 			new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS z");
+	private final DateFormat readableDateFormatForTimeZoneMDY =
+			new SimpleDateFormat("MM-dd-yyyy");
+
+	private final DateFormat readableDateFormat24MsecForTimeZoneYMD =
+			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+	private final DateFormat readableDateFormatForTimeZoneYMD =
+			new SimpleDateFormat("yyyy-MM-dd");
+
 	private final DateFormat readableTimeFormatForTimeZone =
 			new SimpleDateFormat("HH:mm:ss");
-	private final DateFormat readableDateFormatForTimeZone =
-			new SimpleDateFormat("MM-dd-yyyy");
-	
+
 	// So can output headings and such with a consistent number of decimal places
 	private static final DecimalFormat oneDigitFormat = new DecimalFormat("0.0");
 
 	// Have a shared calendar so don't have to keep creating one
 	private Calendar calendar;
-	
+
+	private static BooleanConfigValue useMonthDayYearFormat =
+			new BooleanConfigValue(
+					"transitclock.utils.useMonthDayYearFormat",
+					false,
+					"Use the month-day-year date format instead of year-month-date.");
+
 	/******************* Methods ******************/
-	
+
 	public Time(DbConfig dbConfig) {
 
 		Agency agency = dbConfig.getFirstAgency();
 		this.calendar =
 				agency != null ? new GregorianCalendar(agency.getTimeZone())
 						: new GregorianCalendar();
-
 	}
-	
+
+	public static String getDateTimePattern(){
+		if(useMonthDayYearFormat.getValue()) {
+			return dateTimePatternMDY;
+		}
+		return dateTimePatternYMD;
+	}
+
+	private static DateFormat getDefaultDateFormat() {
+		if(useMonthDayYearFormat.getValue()) {
+			return defaultDateFormatMDY;
+		}
+		return defaultDateFormatYMD;
+	}
+
+	private static DateFormat getDateFormatDashesShortYear() {
+		if(useMonthDayYearFormat.getValue()) {
+			return dateFormatDashesShortYearMDY;
+		}
+		return dateFormatDashesShortYearYMD;
+	}
+
+	private static DateFormat getReadableDateFormat() {
+		if(useMonthDayYearFormat.getValue()) {
+			return readableDateFormatMDY;
+		}
+		return defaultDateFormatYMD;
+	}
+
+	private static DateFormat getReadableDateFormat24() {
+		if(useMonthDayYearFormat.getValue()) {
+			return readableDateFormat24MDY;
+		}
+		return readableDateFormat24YMD;
+	}
+
+	private static DateFormat getReadableDateFormat24NoSecs() {
+		if(useMonthDayYearFormat.getValue()) {
+			return readableDateFormat24NoSecsMDY;
+		}
+		return readableDateFormat24NoSecsYMD;
+	}
+
+	private static DateFormat getReadableDateFormat24Msec() {
+		if(useMonthDayYearFormat.getValue()) {
+			return readableDateFormat24MsecMDY;
+		}
+		return readableDateFormat24MsecYMD;
+	}
+
+	private static DateFormat getReadableDateFormat24NoTimeZoneMsec() {
+		if(useMonthDayYearFormat.getValue()) {
+			return readableDateFormat24NoTimeZoneMsecMDY;
+		}
+		return readableDateFormat24NoTimeZoneMsecYMD;
+	}
+
+	private static DateFormat getReadableDateFormat24NoTimeZoneNoMsec() {
+		if(useMonthDayYearFormat.getValue()) {
+			return readableDateFormat24NoTimeZoneNoMsecMDY;
+		}
+		return readableDateFormat24NoTimeZoneNoMsecYMD;
+	}
+
+	private DateFormat getReadableDateFormat24MsecForTimeZone() {
+		if(useMonthDayYearFormat.getValue()) {
+			return readableDateFormat24MsecForTimeZoneMDY;
+		}
+		return readableDateFormat24MsecForTimeZoneYMD;
+	}
+
+	private DateFormat getReadableDateFormatForTimeZone() {
+		if(useMonthDayYearFormat.getValue()) {
+			return readableDateFormatForTimeZoneMDY;
+		}
+		return readableDateFormatForTimeZoneYMD;
+	}
+
+
 	/**
 	 * Creates a Time object for the specified timezone. Useful for when have to
 	 * frequently call members such as getSecondsIntoDay() that need an
 	 * expensive calendar object.
-	 * 
+	 *
 	 * @param timeZoneStr
 	 *            Such as "America/Los_Angeles" . List of time zones can be found
 	 *            at http://en.wikipedia.org/wiki/List_of_tz_database_time_zones . 
@@ -157,18 +276,18 @@ public class Time {
 		// If no time zone string specified then use local timezone
 		if (timeZoneStr == null)
 			return;
-		
+
 		TimeZone timeZone = TimeZone.getTimeZone(timeZoneStr);
 		this.calendar = new GregorianCalendar(timeZone);
-		
-		readableDateFormat24MsecForTimeZone.setCalendar(this.calendar);
+
+		getReadableDateFormat24MsecForTimeZone().setCalendar(this.calendar);
 		readableTimeFormatForTimeZone.setCalendar(this.calendar);
-		readableDateFormatForTimeZone.setCalendar(this.calendar);
+		getReadableDateFormatForTimeZone().setCalendar(this.calendar);
 	}
-	
+
 	/**
 	 * Converts the epoch time into number of seconds into the day.
-	 * 
+	 *
 	 * @param epochTime
 	 * @return seconds into the day
 	 */
@@ -183,22 +302,22 @@ public class Time {
 					calendar.get(Calendar.SECOND);
 		}
 	}
-	
+
 	/**
 	 * Converts the epoch time into number of seconds into the day.
-	 * 
-	 * @param epochTime
+	 *
+	 * @param epochDate
 	 * @return seconds into the day
 	 */
 	public int getSecondsIntoDay(Date epochDate) {
 		return getSecondsIntoDay(epochDate.getTime());
 	}
-	
+
 	/**
 	 * Returns day of year. This method is not threadsafe in that it first sets
 	 * the time of the calendar and then gets the day of the year without
 	 * synchronizing the calendar. But this is a bit faster.
-	 * 
+	 *
 	 * @param epochDate
 	 * @return
 	 */
@@ -206,10 +325,10 @@ public class Time {
 		calendar.setTimeInMillis(epochDate.getTime());
 		return calendar.get(Calendar.DAY_OF_YEAR);
 	}
-	
+
 	/**
 	 * Converts the epoch time into number of msec into the day.
-	 * 
+	 *
 	 * @param epochTime
 	 * @return msec into the day
 	 */
@@ -225,11 +344,11 @@ public class Time {
 					calendar.get(Calendar.MILLISECOND);
 		}
 	}
-	
+
 	/**
 	 * Returns the epoch time of the start of the day for the date and timezone
 	 * specified.
-	 * 
+	 *
 	 * @param date
 	 *            the time that the start of the day is needed for
 	 * @param tz
@@ -239,7 +358,7 @@ public class Time {
 	public static long getStartOfDay(Date date, TimeZone tz) {
 		Calendar calendar = new GregorianCalendar(tz);
 		calendar.setTime(date);
-		
+
 		calendar.set(Calendar.MILLISECOND, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MINUTE, 0);
@@ -249,12 +368,12 @@ public class Time {
 		long epochTime = calendar.getTimeInMillis();
 		return epochTime;
 	}
-	
+
 	/**
 	 * Returns the epoch time of the start of the current day for the default
 	 * timezone. The default timezone should be set by the application at
 	 * startup using TimeZone.setDefault(TimeZone.getTimeZone(timezoneName)).
-	 * 
+	 *
 	 * @param date
 	 *            the time that the start of the day is needed for
 	 * @return start of the current day
@@ -272,10 +391,10 @@ public class Time {
 		long epochTime = calendar.getTimeInMillis();
 		return epochTime;
 	}
-	
+
 	/**
 	 * Converts secondsIntoDay into an epoch time.
-	 * 
+	 *
 	 * @param secondsIntoDay
 	 *            To be converted into epoch time
 	 * @param referenceDate
@@ -292,11 +411,11 @@ public class Time {
 			int minutes = minutesIntoDay % 60;
 			int hoursIntoDay = minutesIntoDay / 60;
 			int hours = hoursIntoDay % 24;
-			
+
 			// Set the calendar to use the reference time so that get the
 			// proper date.
 			calendar.setTime(referenceDate);
-			
+
 			// Set the seconds, minutes, and hours so that the calendar has
 			// the proper time. Need to also set milliseconds because otherwise
 			// would use milliseconds from the referenceDate.
@@ -304,10 +423,10 @@ public class Time {
 			calendar.set(Calendar.SECOND, seconds);
 			calendar.set(Calendar.MINUTE, minutes);
 			calendar.set(Calendar.HOUR_OF_DAY, hours);
-			
+
 			// Get the epoch time
 			long epochTime = calendar.getTimeInMillis();
-			
+
 			// Need to make sure that didn't have a problem around midnight. 
 			// For example, a vehicle is supposed to depart a layover at 
 			// 00:05:00 right after midnight but the AVL time might be for
@@ -330,15 +449,15 @@ public class Time {
 				// add a day
 				epochTime += MS_PER_DAY;
 			}
-			
+
 			// Get the results
 			return epochTime;
 		}
 	}
-	
+
 	/**
 	 * Converts secondsIntoDay into an epoch time.
-	 * 
+	 *
 	 * @param secondsIntoDay
 	 *            To be converted into epoch time
 	 * @param referenceTime
@@ -349,7 +468,7 @@ public class Time {
 	public long getEpochTime(int secondsIntoDay, long referenceTime) {
 		return getEpochTime(secondsIntoDay, new Date(referenceTime));
 	}
-	
+
 	/**
 	 * Returns time of day in msecs. But uses reference time to determine
 	 * if interested in a time before midnight (a negative value) or a
@@ -357,7 +476,7 @@ public class Time {
 	 * at schedule adherence and such it is much easier to deal with
 	 * situations where have blocks that span midnight. Only need to
 	 * get the time and do schedule adherence comparison once.
-	 * 
+	 *
 	 * @param epochTime
 	 * @param referenceTimeIntoDayMsecs
 	 * @return
@@ -365,20 +484,20 @@ public class Time {
 	public long getMsecsIntoDay(Date epochTime, long referenceTimeIntoDayMsecs) {
 		int timeIntoDay = getMsecsIntoDay(epochTime);
 		long delta = Math.abs(referenceTimeIntoDayMsecs - timeIntoDay);
-		
-		long deltaForBeforeMidnight = 
+
+		long deltaForBeforeMidnight =
 				Math.abs(referenceTimeIntoDayMsecs - (timeIntoDay - Time.MS_PER_DAY));
 		if (deltaForBeforeMidnight < delta)
 			return timeIntoDay - (int)Time.MS_PER_DAY;
-		
-		long deltaForAfterMidnight = 
+
+		long deltaForAfterMidnight =
 				Math.abs(referenceTimeIntoDayMsecs - (timeIntoDay + Time.MS_PER_DAY));
 		if (deltaForAfterMidnight < delta)
 			return timeIntoDay + (int)Time.MS_PER_DAY;
-		
+
 		return timeIntoDay;
 	}
-	
+
 	/**
 	 * Parses the dateStr into a Date using the timezone for this Time object.
 	 * @param dateStr
@@ -386,14 +505,14 @@ public class Time {
 	 * @throws ParseException
 	 */
 	public Date parseUsingTimezone(String dateStr) throws ParseException {
-		return readableDateFormatForTimeZone.parse(dateStr);
+		return getReadableDateFormatForTimeZone().parse(dateStr);
 	}
-	
+
 	/**
 	 * Parses the datetimeStr and returns a Date object. Format is
 	 * "MM-dd-yyyy HH:mm:ss z". Tries multiple formats including with
 	 * milliseconds and with and without time zones.
-	 * 
+	 *
 	 * @param datetimeStr
 	 * @return
 	 * @throws ParseException
@@ -401,72 +520,72 @@ public class Time {
 	public static Date parse(String datetimeStr) throws ParseException {
 		// First try with timezone and msec, the most complete form
 		try {
-			Date date = readableDateFormat24Msec.parse(datetimeStr);
+			Date date = getReadableDateFormat24Msec().parse(datetimeStr);
 			return date;
 		} catch (ParseException e) {}
 
 		// Got exception so try without timezone but still try msec
 		try {
-			Date date = readableDateFormat24NoTimeZoneMsec.parse(datetimeStr);
+			Date date = getReadableDateFormat24NoTimeZoneMsec().parse(datetimeStr);
 			return date;
 		} catch (ParseException e) {}
-		
+
 		// Still not working so try without seconds but with timezone
 		try {
-			Date date = readableDateFormat24.parse(datetimeStr);
+			Date date = getReadableDateFormat24().parse(datetimeStr);
 			return date;
 		} catch (ParseException e) {}
-		
+
 		// Still not working so try without msecs and without timezone
 		try {
-			Date date = readableDateFormat24NoTimeZoneNoMsec.parse(datetimeStr);
+			Date date = getReadableDateFormat24NoTimeZoneNoMsec().parse(datetimeStr);
 			return date;
 		} catch (ParseException e) {}
-		
+
 		// Still not working so try without seconds and without timezone
 		try {
-			Date date = readableDateFormat24NoSecs.parse(datetimeStr);
+			Date date = getReadableDateFormat24NoSecs().parse(datetimeStr);
 			return date;
 		} catch (ParseException e) {}
-		
+
 		// Still not working so try date alone. This will ignore any time
 		// specification so this attempt needs to be done after trying all
 		// the other formats.
 		try {
-		    Date date = readableDateFormat.parse(datetimeStr);
-		    return date;
+			Date date = getReadableDateFormat().parse(datetimeStr);
+			return date;
 		} catch (ParseException e) {}
-		
+
 		// As last resort try the default syntax. Will throw a ParseException
 		// if can't parse.
 		return new SimpleDateFormat().parse(datetimeStr);
 	}
-	
+
 	/**
 	 * Parses the dateStr and returns a Date object. Format of 
 	 * date is "MM-dd-yyyy".
-	 * 
+	 *
 	 * @param dateStr
 	 * @return
 	 * @throws ParseException
 	 */
 	public static Date parseDate(String dateStr) throws ParseException {
 		try {
-			return defaultDateFormat.parse(dateStr);
+			return getDefaultDateFormat().parse(dateStr);
 		} catch (ParseException e) {}
 
 		// Try using "-" instead of "/" as separator. Having the date formatter
 		// specify only two digits for the year means it also works when 4
 		// digits are used, making it pretty versatile.
-		return dateFormatDashesShortYear.parse(dateStr);		
+		return getDateFormatDashesShortYear().parse(dateStr);
 	}
-	
+
 	/**
 	 * Parses a time such as HH:MM:SS or HH:MM into seconds into the day.
 	 * Instead of using SimpleDateFormat or such this function does the
 	 * conversion directly and simply in order to be quicker. This is useful for
 	 * reading in large volumes of GTFS data and such.
-	 * 
+	 *
 	 * @return Seconds into the day
 	 */
 	public static int parseTimeOfDay(String timeStr) {
@@ -477,8 +596,8 @@ public class Time {
 		String positiveTimeStr = negative ? timeStr.substring(1) : timeStr;
 
 		int firstColon = positiveTimeStr.indexOf(":");
-		int hours = Integer.parseInt(positiveTimeStr.substring(0, firstColon)); 
-		
+		int hours = Integer.parseInt(positiveTimeStr.substring(0, firstColon));
+
 		// If there is a second colon then also process seconds
 		int secondColon = positiveTimeStr.lastIndexOf(":");
 		int minutes, seconds;
@@ -489,20 +608,20 @@ public class Time {
 		} else {
 			// No second colon so just handle minutes
 			minutes = Integer.parseInt(positiveTimeStr.substring(firstColon+1));
-			seconds = 0;			
+			seconds = 0;
 		}
-		
+
 		int result = hours * 60 * 60 + minutes*60 + seconds;
 		if (negative)
 			return -result;
 		else
 			return result;
 	}
-	
+
 	/**
 	 * Converts seconds in day to a string HH:MM:SS.
 	 * Note: secInDay can be negative.
-	 * 
+	 *
 	 * @param secInDay
 	 * @return
 	 */
@@ -515,7 +634,7 @@ public class Time {
 		long hours = secInDay / (60*60);
 		long minutes = (secInDay % (60*60)) / 60;
 		long seconds = secInDay % 60;
-		
+
 		// Use StringBuilder instead of just concatenating strings since it
 		// indeed is faster. Actually measured it and when writing out
 		// GTFS stop_times file it was about 10% faster when using
@@ -530,12 +649,12 @@ public class Time {
 		b.append(seconds);
 		return b.toString();
 	}
-	
+
 	/**
 	 * Converts seconds in day to a string HH:MM:SS.
 	 * If secInDay null then returns null.
 	 * Note: secInDay can be negative.
-	 * 
+	 *
 	 * @param secInDay
 	 * @return Can be null
 	 */
@@ -548,7 +667,7 @@ public class Time {
 	/**
 	 * Converts seconds in day to a string HH:MM.
 	 * Note: secInDay can be negative.
-	 * 
+	 *
 	 * @param secInDay
 	 * @return
 	 */
@@ -560,7 +679,7 @@ public class Time {
 		}
 		long hours = secInDay / (60*60);
 		long minutes = (secInDay % (60*60)) / 60;
-		
+
 		// Use StringBuilder instead of just concatenating strings since it
 		// indeed is faster. Actually measured it and when writing out
 		// GTFS stop_times file it was about 10% faster when using
@@ -573,12 +692,12 @@ public class Time {
 		b.append(minutes);
 		return b.toString();
 	}
-	
+
 	/**
 	 * Converts seconds in day to a string HH:MM.
 	 * If secInDay null then returns null.
 	 * Note: secInDay can be negative.
-	 * 
+	 *
 	 * @param secInDay
 	 * @return Can be null
 	 */
@@ -591,7 +710,7 @@ public class Time {
 	/**
 	 * Converts seconds in day to a string HH:MM AM/PM.
 	 * Note: secInDay can be negative.
-	 * 
+	 *
 	 * @param secInDay
 	 * @return
 	 */
@@ -601,21 +720,21 @@ public class Time {
 			timeStr="-";
 			secInDay = -secInDay;
 		}
-		
+
 		// Handle if time is into next day
 		if (secInDay > 24*60*60)
 			secInDay -= 24*60*60;
-		
+
 		// Handle if PM instead of AM
 		boolean pm = false;
 		if (secInDay > 12*60*60) {
 			pm = true;
 			secInDay -= 12*60*60;
 		}
-		
+
 		long hours = secInDay / (60*60);
 		long minutes = (secInDay % (60*60)) / 60;
-		
+
 		// Use StringBuilder instead of just concatenating strings since it
 		// indeed is faster. Actually measured it and when writing out
 		// GTFS stop_times file it was about 10% faster when using
@@ -626,17 +745,17 @@ public class Time {
 		b.append(hours).append(":");
 		if (minutes < 10) b.append("0");
 		b.append(minutes);
-		if (pm) 
+		if (pm)
 			b.append("PM");
 		else
 			b.append("AM");
 		return b.toString();
 	}
-	
+
 	/**
 	 * Converts seconds in day to a string HH:MM AM/PM.
 	 * Note: secInDay can be negative.
-	 * 
+	 *
 	 * @param secInDay Can be null
 	 * @return
 	 */
@@ -645,7 +764,7 @@ public class Time {
 			return null;
 		return timeOfDayAmPmStr(secInDay.intValue());
 	}
-	
+
 	/**
 	 * Outputs time in minutes with a single digit past the decimal point
 	 * @param msec
@@ -655,7 +774,7 @@ public class Time {
 		float minutes = (float) msec / Time.MS_PER_MIN;
 		return oneDigitFormat.format(minutes);
 	}
-	
+
 	/**
 	 * Outputs time in seconds with a single digit past the decimal point
 	 * @param msec
@@ -672,7 +791,7 @@ public class Time {
 	 * then it is displayed in minutes. For both, 1 digit after the 
 	 * decimal point is displayed. The units, either " sec" or " msec"
 	 * are appended.
-	 * 
+	 *
 	 * @param msec
 	 * @return
 	 */
@@ -683,83 +802,83 @@ public class Time {
 			return Time.minutesStr(msec) + " min";
 		}
 	}
-	
+
 	/**
 	 * Returns date in format "MM-dd-yyyy"
 	 * @param epochTime
 	 * @return
 	 */
 	public static String dateStr(long epochTime) {
-		return readableDateFormat.format(epochTime);
+		return getReadableDateFormat().format(epochTime);
 	}
-	
+
 	/**
 	 * Returns date in format "MM-dd-yyyy"
 	 * @param epochTime
 	 * @return
 	 */
 	public static String dateStr(Date epochTime) {
-		return readableDateFormat.format(epochTime);
+		return getReadableDateFormat().format(epochTime);
 	}
-	
+
 	/**
 	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss z
 	 * @param epochTime
 	 * @return
 	 */
 	public static String dateTimeStr(long epochTime) {
-		return readableDateFormat24.format(epochTime);
+		return getReadableDateFormat24().format(epochTime);
 	}
-	
+
 	/**
 	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss z
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
 	public static String dateTimeStr(Date epochTime) {
-		return readableDateFormat24.format(epochTime.getTime());
-	}	
-	
+		return getReadableDateFormat24().format(epochTime.getTime());
+	}
+
 	/**
 	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss.SSS z
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
 	public static String dateTimeStrMsec(long epochTime) {
-		return readableDateFormat24Msec.format(epochTime);
+		return getReadableDateFormat24Msec().format(epochTime);
 	}
-	
+
 	/**
 	 * Returns epochTime as a string in the format MM-dd-yyyy HH:mm:ss.SSS z
 	 * but does so for the Timezone specified by this Time object.
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
 	public String dateTimeStrMsecForTimezone(long epochTime) {
-		return readableDateFormat24MsecForTimeZone.format(epochTime);
+		return getReadableDateFormat24MsecForTimeZone().format(epochTime);
 	}
-	
+
 	public String timeStrForTimezone(long epochTime) {
 		return readableTimeFormatForTimeZone.format(epochTime);
 	}
-	
+
 	/**
 	 * Returns epochTime as a string, including msec, in the 
 	 * format MM-dd-yyyy HH:mm:ss.SSS z
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
 	public static String dateTimeStrMsec(Date epochTime) {
-		return readableDateFormat24Msec.format(epochTime.getTime());
-	}	
-	
+		return getReadableDateFormat24Msec().format(epochTime.getTime());
+	}
+
 	/**
 	 * Returns just the time string in format "HH:mm:ss z"
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
@@ -769,27 +888,27 @@ public class Time {
 
 	/**
 	 * Returns just the time string in format "HH:mm:ss z"
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
 	public static String timeStr(Date epochTime) {
 		return timeStr(epochTime.getTime());
 	}
-	
+
 	/**
 	 * Returns just the time string in format "HH:mm:ss"
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
 	public static String timeStrNoTimeZone(long epochTime) {
 		return timeFormat24NoTimezone.format(epochTime);
 	}
-	
+
 	/**
 	 * Returns just the time string in format "HH:mm:ss"
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
@@ -799,18 +918,18 @@ public class Time {
 
 	/**
 	 * Returns just the time string. Includes msec.
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
 	public static String timeStrMsec(Date epochTime) {
 		return timeFormat24Msec.format(epochTime.getTime());
 	}
-	
+
 	/**
 	 * Returns just the time string. Includes msec.
 	 * e.g. "HH:mm:ss.SSS z"
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
@@ -821,18 +940,18 @@ public class Time {
 	/**
 	 * Returns just the time string. Includes msec but no timezone.
 	 * e.g. "HH:mm:ss.SSS"
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
 	public static String timeStrMsecNoTimeZone(long epochTime) {
 		return timeFormat24MsecNoTimeZone.format(epochTime);
 	}
-	
+
 	/**
 	 * Returns just the time string. Includes msec but no timezone.
 	 * e.g. "HH:mm:ss.SSS"
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
@@ -843,7 +962,7 @@ public class Time {
 	/**
 	 * For when sending date as part of http request.
 	 * Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
-	 * 
+	 *
 	 * @param epochTime
 	 * @return
 	 */
@@ -851,27 +970,27 @@ public class Time {
 		httpFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 		return httpFormat.format(epochTime);
 	}
-	
+
 	/**
 	 * Returns the absolute value of the difference between the two times. If
 	 * the difference is greater than 12 hours then 24hours-difference is
 	 * returned. This is useful for when the times wrap around midnight. For
 	 * example, if the times are 11:50pm and 12:05am then the difference will be
 	 * 15 minutes instead of 23 hours and 45 minutes.
-	 * 
+	 *
 	 * @param time1SecsIntoDay
 	 * @param time2SecsIntoDay
 	 * @return The absolute value of the difference between the two times
 	 */
 	public static int getTimeDifference(int time1SecsIntoDay,
-			int time2SecsIntoDay) {
+										int time2SecsIntoDay) {
 		int timeDiffSecs = Math.abs(time1SecsIntoDay - time2SecsIntoDay);
 		if (timeDiffSecs > 12 * Time.SEC_PER_HOUR)
 			return Time.SEC_PER_DAY - timeDiffSecs;
 		else
 			return timeDiffSecs;
 	}
-	
+
 	/**
 	 * Simply calls Thread.sleep() but catches the InterruptedException
 	 * so that the calling function doesn't need to.
@@ -884,7 +1003,7 @@ public class Time {
 			// ignore
 		}
 	}
-	
+
 	public static void main(String args[]) {
 		try {
 			// TODO make this a unit test
@@ -894,6 +1013,6 @@ public class Time {
 			long epochTime = time.getEpochTime(secondsIntoDay, referenceDate);
 			System.out.println(new Date(epochTime));
 		} catch (ParseException e) {}
-		
+
 	}
 }
