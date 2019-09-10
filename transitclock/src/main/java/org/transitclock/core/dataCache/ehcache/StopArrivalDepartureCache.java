@@ -3,38 +3,25 @@
  */
 package org.transitclock.core.dataCache.ehcache;
 
-import java.util.Collections;
-import java.util.Date;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.ehcache.Status;
-import org.ehcache.config.builders.CacheManagerBuilder;
-import org.ehcache.xml.XmlConfiguration;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.core.dataCache.ArrivalDepartureComparator;
-import org.transitclock.core.dataCache.DwellTimeModelCacheFactory;
-import org.transitclock.core.dataCache.IpcArrivalDepartureComparator;
-import org.transitclock.core.dataCache.KalmanErrorCacheKey;
-import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
-import org.transitclock.core.dataCache.StopArrivalDepartureCacheInterface;
-import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
-import org.transitclock.core.dataCache.StopEvents;
-import org.transitclock.core.dataCache.TripEvents;
-import org.transitclock.core.dataCache.TripKey;
+import org.transitclock.core.dataCache.*;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
+
+import java.net.URL;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Sean Og Crudden This is a Cache to hold a sorted list of all arrival departure events
@@ -156,7 +143,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 			//TODO might be better with its own populateCacheFromdb
 			try
 			{
-			DwellTimeModelCacheFactory.getInstance().addSample(result);
+				DwellTimeModelCacheFactory.getInstance().addSample(result);
 			}catch(Exception Ex)
 			{
 				Ex.printStackTrace();

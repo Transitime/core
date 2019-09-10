@@ -23,7 +23,7 @@ import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.LongConfigValue;
 import org.transitclock.core.dataCache.HoldingTimeCache;
-import org.transitclock.core.dataCache.StopPathPredictionCache;
+import org.transitclock.core.dataCache.StopPathPredictionCacheFactory;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
@@ -566,7 +566,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		{		
 			PredictionForStopPath predictionForStopPath=new PredictionForStopPath(vehicleState.getVehicleId(), new Date(Core.getInstance().getSystemTime()) , new Double(new Long(indices.getTravelTimeForPath()).intValue()), indices.getTrip().getId(), indices.getStopPathIndex(), "TRANSITIME DEFAULT", true, null);		
 			Core.getInstance().getDbLogger().add(predictionForStopPath);
-			StopPathPredictionCache.getInstance().putPrediction(predictionForStopPath);
+			StopPathPredictionCacheFactory.getInstance().putPrediction(predictionForStopPath);
 		}
 		return indices.getTravelTimeForPath();
 	}

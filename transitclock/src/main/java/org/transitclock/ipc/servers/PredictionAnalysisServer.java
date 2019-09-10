@@ -3,19 +3,19 @@
  */
 package org.transitclock.ipc.servers;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.dataCache.StopPathCacheKey;
-import org.transitclock.core.dataCache.StopPathPredictionCache;
+import org.transitclock.core.dataCache.StopPathPredictionCacheFactory;
 import org.transitclock.db.structs.PredictionForStopPath;
 import org.transitclock.ipc.data.IpcPredictionForStopPath;
 import org.transitclock.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Sean Óg Crudden 
@@ -78,7 +78,7 @@ public class PredictionAnalysisServer extends AbstractServer implements Predicti
 	public List<IpcPredictionForStopPath> getCachedTravelTimePredictions(String tripId, Integer stopPathIndex,
 			Date startdate, Date enddate, String algorithm) throws RemoteException {
 		StopPathCacheKey key=new StopPathCacheKey(tripId,stopPathIndex,true);
-		List<PredictionForStopPath> predictions = StopPathPredictionCache.getInstance().getPredictions(key);
+		List<PredictionForStopPath> predictions = StopPathPredictionCacheFactory.getInstance().getPredictions(key);
 		List<IpcPredictionForStopPath> results=new ArrayList<IpcPredictionForStopPath>();
 		if(predictions!=null)
 		{
