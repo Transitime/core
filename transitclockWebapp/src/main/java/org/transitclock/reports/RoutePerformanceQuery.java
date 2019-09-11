@@ -16,25 +16,21 @@
  */
 package org.transitclock.reports;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.type.Type;
+import org.hibernate.criterion.*;
 import org.hibernate.type.DoubleType;
-import org.hibernate.criterion.CriteriaSpecification;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projection;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.db.structs.PredictionAccuracy;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * To find route performance information.
@@ -52,7 +48,7 @@ public class RoutePerformanceQuery {
   public static final String PREDICTION_TYPE_AFFECTED = "AffectedByWaitStop";
   public static final String PREDICTION_TYPE_NOT_AFFECTED = "NotAffectedByWaitStop";
   
-  private static final String TRANSITIME_PREDICTION_SOURCE = "Transitime";
+  private static final String TRANSITIME_PREDICTION_SOURCE = "TransitClock";
   
   public List<Object[]> query(String agencyId, Date startDate, int numDays, double allowableEarlyMin, double allowableLateMin, String predictionType, String predictionSource) {
     

@@ -63,10 +63,10 @@ if (Integer.parseInt(numDays) > 31) {
         if (source != null && !source.isEmpty()) {
             if (source.equals("Transitime")) {
                 // Only "Transitime" predictions
-                sourceSql = " AND predictionSource='Transitime'";
+                sourceSql = " AND predictionSource='TransitClock'";
             } else {
                 // Anything but "Transitime"
-                sourceSql = " AND predictionSource<>'Transitime'";
+                sourceSql = " AND predictionSource<>'TransitClock'";
             }
         }
 

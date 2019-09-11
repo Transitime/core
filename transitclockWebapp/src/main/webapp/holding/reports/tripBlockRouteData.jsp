@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="application/json; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="org.transitime.reports.TripBlockJsonQuery" %>
+<%@ page import="org.transitclock.reports.TripBlockJsonQuery" %>
 <%
 
 // Get the params

@@ -121,7 +121,7 @@ public class ChartGenericJsonQuery extends GenericQuery {
 				+ "WHERE arrivaldeparturetime BETWEEN '2014-10-31' AND '2014-11-01' "
 				+ "  AND arrivalDepartureTime-predictionReadTime < '00:15:00' "
 				+ "  AND routeId='CR-Providence' "
-				+ "  AND predictionSource='Transitime';";
+				+ "  AND predictionSource='TransitClock';";
 
 		try {
 			String str = ChartGenericJsonQuery.getJsonString(agencyId, sql);

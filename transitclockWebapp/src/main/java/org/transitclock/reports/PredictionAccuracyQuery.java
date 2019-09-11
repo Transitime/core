@@ -17,22 +17,18 @@
 
 package org.transitclock.reports;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.db.GenericQuery;
 import org.transitclock.db.webstructs.WebAgency;
 import org.transitclock.utils.Time;
+
+import java.sql.*;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * For doing SQL query and generating JSON data for a prediction accuracy chart.
@@ -273,12 +269,12 @@ abstract public class PredictionAccuracyQuery {
 		// predictions for all sources
 		String sourceSql = "";
 		if (predSource != null && !predSource.isEmpty()) {
-			if (predSource.equals("Transitime")) {
+			if (predSource.equals("TransitClock")) {
 				// Only "Transitime" predictions
-				sourceSql = " AND predictionSource='Transitime'";
+				sourceSql = " AND predictionSource='TransitClock'";
 			} else {
 				// Anything but "Transitime"
-				sourceSql = " AND predictionSource<>'Transitime'";
+				sourceSql = " AND predictionSource<>'TransitClock'";
 			}
 		}
 
@@ -383,7 +379,8 @@ abstract public class PredictionAccuracyQuery {
 			// Set the parameters for the query
 			int i = 1;
 			statement.setTimestamp(i++, beginDate);
-			
+			statement.setTimestamp(i++, beginDate);
+
 			if (beginTime != null) {
 			  if ("mysql".equals(dbType)) {
 			    // for mysql use the time str as is to avoid TZ issues
