@@ -19,6 +19,7 @@ import org.transitclock.core.predictiongenerator.frequency.traveltime.average.Hi
 import org.transitclock.core.predictiongenerator.kalman.*;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.PredictionForStopPath;
+import org.transitclock.db.structs.VehicleEvent;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -58,7 +59,10 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			"transitclock.prediction.data.kalman.usekalmanforpartialstoppaths", new Boolean(true), 
 			"Will use Kalman prediction to get to first stop of prediction."
 	);
-			
+	
+	private static final IntegerConfigValue percentagePredictionMethodDifferenceneEventLog=new IntegerConfigValue(
+			"transitclock.prediction.data.kalman.percentagePredictionMethodDifferencene", new Integer(50),
+			"If the difference in prediction method estimates is greater than this percentage log a Vehicle Event");
 
 	private static final Logger logger = LoggerFactory.getLogger(KalmanPredictionGeneratorImpl.class);
 
@@ -74,6 +78,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 
 		logger.debug("Calling frequency based Kalman prediction algorithm for : "+indices.toString());
 		
+		long alternatePrediction = super.getTravelTimeForPath(indices, avlReport, vehicleState);
 		
 		Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(avlReport.getDate(),2);
 		
@@ -160,9 +165,23 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 						logger.debug("Setting Kalman error value: " + kalmanPredictionResult.getFilterError() + " for : "+ new KalmanErrorCacheKey(indices).toString());
 
 						kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
-
+												
+						
 						logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+alternative+" prediction: "
-								+ super.getTravelTimeForPath(indices, avlReport, vehicleState) +" for : " + indices.toString());
+								+ alternatePrediction +" for : " + indices.toString());
+						
+						double percentageDifferecence = 100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction);
+						
+						if(Math.abs(percentageDifferecence)>percentagePredictionMethodDifferenceneEventLog.getValue())
+						{
+							String description="Predictions for "+ indices.toString()+ " have more that a "+percentagePredictionMethodDifferenceneEventLog.getValue() + " difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;
+							VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
+									VehicleEvent.PREDICTION_VARIATION,
+									description,
+									true,  // predictable
+									false, // becameUnpredictable
+									null); // supervisor
+						}
 
 						if(storeTravelTimeStopPathPredictions.getValue())
 						{
@@ -181,7 +200,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return super.getTravelTimeForPath(indices, avlReport, vehicleState);
+		return alternatePrediction;
 	}
 
 	@Override
