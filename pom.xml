@@ -1,23 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
     <groupId>TheTransitClock</groupId>
     <artifactId>transitclock</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>transitclock</name>
-  <url>http://www.transitclock.org//</url>
-  <modules>
-      <module>transitclock</module>
-      <module>transitclockApi</module>
-      <module>transitclockWebapp</module>
-      <module>transitclockTraccarClient</module>
-      <module>transitclockBarefootClient</module>
-<!--
-    <module>transitimeQuickStart</module>
--->
-  </modules>
+    <version>2.0.0-cs-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>transitclock</name>
+    <url>http://www.transitclock.org//</url>
+    <modules>
+        <module>transitclock</module>
+        <module>transitclockApi</module>
+        <module>transitclockWebapp</module>
+        <module>transitclockTraccarClient</module>
+        <module>transitclockBarefootClient</module>
+         <!-- <module>transitclockQuickStart</module>
+        <module>transitclockIntegration</module>-->
 
+    </modules>
     <profiles>
         <profile>
             <id>skip-integration-tests</id>
@@ -31,43 +29,41 @@
                 <module>transitclockIntegration</module>
                 <module>transitclock</module>
                 <module>transitclockApi</module>
-              	<module>transitclockWebapp</module>
- 		<module>transitclockQuickStart</module>
- 		<module>transitclockTraccarClient</module>
- 		<module>transitclockBarefootClient</module>
+                <module>transitclockWebapp</module>
+                <module>transitclockQuickStart</module>
+                <module>transitclockTraccarClient</module>
+                <module>transitclockBarefootClient</module>
             </modules>
         </profile>
     </profiles>
-
-  <scm>
-    <connection>scm:git:http://github.com/sheldonabrown/core.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/sheldonabrown/core.git</developerConnection>
-    <url>http://github.com/sheldonabrown/core</url>
-    <tag>HEAD</tag>
-  </scm>
-
-  <distributionManagement>
-    <repository>
-      <id>releases-obaweb-repo</id>
-      <name>OneBusAway Camsys Release Repo</name>
-      <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/releases/</url> 
-    </repository>
-    <snapshotRepository>
-      <id>snapshots-obaweb-repo</id>
-      <name>OneBusAway Camsys Snapshot Repo</name>
-      <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/snapshots/</url> 
-    </snapshotRepository>
-  </distributionManagement>
-<build>
-  <plugins>
- <!-- *** disable JavaDoc plugin *** -->
- <plugin>
-   <groupId>org.apache.maven.plugins</groupId>
-   <artifactId>maven-javadoc-plugin</artifactId>
-   <version>2.10.3</version>
-   <configuration>
-     <additionalparam>-Xdoclint:none</additionalparam> 
-   </configuration>
+    <scm>
+        <connection>scm:git:http://github.com/sheldonabrown/core.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/sheldonabrown/core.git</developerConnection>
+        <url>http://github.com/sheldonabrown/core</url>
+        <tag>HEAD</tag>
+    </scm>
+    <distributionManagement>
+        <repository>
+            <id>releases-obaweb-repo</id>
+            <name>OneBusAway Camsys Release Repo</name>
+            <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots-obaweb-repo</id>
+            <name>OneBusAway Camsys Snapshot Repo</name>
+            <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <build>
+        <plugins>
+            <!-- *** disable JavaDoc plugin *** -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
                 <executions>
                     <!-- Compress Javadoc into JAR and include that JAR when deploying. -->
                     <execution>
@@ -77,8 +73,7 @@
                         </goals>
                     </execution>
                 </executions>
- </plugin>
-  </plugins>
-</build>
-
+            </plugin>
+        </plugins>
+    </build>
 </project>
