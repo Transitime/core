@@ -59,6 +59,10 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 	private static final IntegerConfigValue percentagePredictionMethodDifferenceneEventLog=new IntegerConfigValue(
 			"transitclock.prediction.data.kalman.percentagePredictionMethodDifferencene", new Integer(50),
 			"If the difference in prediction method estimates is greater than this percentage log a Vehicle Event");
+	
+	private static final IntegerConfigValue tresholdForDifferenceEventLog=new IntegerConfigValue(
+			"transitclock.prediction.data.kalman.tresholdForDifferenceEventLog", new Integer(60000),
+			"This is the threshold in milliseconds that the difference has to be over before it will consider the percentage difference.");
 				
 	private static final Logger logger = LoggerFactory.getLogger(KalmanPredictionGeneratorImpl.class);
 
@@ -161,15 +165,18 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 						
 						double percentageDifferecence = 100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction);
 						
-						if(Math.abs(percentageDifferecence)>percentagePredictionMethodDifferenceneEventLog.getValue())
-						{
-							String description="Predictions for "+ indices.toString()+ " have more that a "+percentagePredictionMethodDifferenceneEventLog.getValue() + "% difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;
-							VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
-									VehicleEvent.PREDICTION_VARIATION,
-									description,
-									true,  // predictable
-									false, // becameUnpredictable
-									null); // supervisor
+						if(((percentageDifferecence *  alternatePrediction)/100) > tresholdForDifferenceEventLog.getValue())
+						{						
+							if(Math.abs(percentageDifferecence)>percentagePredictionMethodDifferenceneEventLog.getValue())
+							{
+								String description="Predictions for "+ indices.toString()+ " have more that a "+percentagePredictionMethodDifferenceneEventLog.getValue() + "% difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;
+								VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
+										VehicleEvent.PREDICTION_VARIATION,
+										description,
+										true,  // predictable
+										false, // becameUnpredictable
+										null); // supervisor
+							}
 						}
 
 						logger.debug("Using Kalman prediction: " + predictionTime + " instead of "+alternative+" prediction: "
