@@ -163,7 +163,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 						
 						if(Math.abs(percentageDifferecence)>percentagePredictionMethodDifferenceneEventLog.getValue())
 						{
-							String description="Predictions for "+ indices.toString()+ " have more that a "+percentagePredictionMethodDifferenceneEventLog.getValue() + " difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;
+							String description="Predictions for "+ indices.toString()+ " have more that a "+percentagePredictionMethodDifferenceneEventLog.getValue() + "% difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;
 							VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
 									VehicleEvent.PREDICTION_VARIATION,
 									description,

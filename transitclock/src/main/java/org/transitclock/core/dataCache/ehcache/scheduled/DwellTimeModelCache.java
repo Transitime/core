@@ -97,7 +97,8 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 							if(departure.getScheduleAdherence()!=null && departure.getScheduleAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
 							{							
 								
-								if(!departure.getStop().isWaitStop()&&!departure.getStop().isLayoverStop())	
+								if((departure.getStop().isWaitStop()==null||!departure.getStop().isWaitStop())
+										&&(departure.getStop().isLayoverStop()==null || !departure.getStop().isLayoverStop()))	
 								{
 								// Arrival schedule adherence appears not to be set much. So only stop if set and outside range.
 									if(previousArrival.getScheduledAdherence()==null || previousArrival.getScheduledAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
