@@ -22,7 +22,6 @@ import org.transitclock.gtfs.GtfsData;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -42,8 +41,6 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	private static boolean debug = false;
 
 	final private static String cacheByTrip = "arrivalDeparturesByTrip";
-	
-	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(TripDataHistoryCache.class);
@@ -68,11 +65,8 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	}
 
 	public TripDataHistoryCache() {
-				
 		CacheManager cm = CacheManagerFactory.getInstance();
-							
 		cache = cm.getCache(cacheByTrip, TripKey.class, TripEvents.class);
-				
 	}
 	
 

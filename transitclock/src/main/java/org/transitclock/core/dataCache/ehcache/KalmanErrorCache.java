@@ -1,30 +1,19 @@
 package org.transitclock.core.dataCache.ehcache;
-import java.net.URL;
-import java.util.List;
-
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.ehcache.Status;
-import org.ehcache.config.CacheConfiguration;
-import org.ehcache.config.builders.CacheConfigurationBuilder;
-import org.ehcache.config.builders.CacheManagerBuilder;
-import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.ehcache.config.units.MemoryUnit;
-import org.ehcache.xml.XmlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.Indices;
 import org.transitclock.core.dataCache.ErrorCache;
-
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
+
+import java.util.List;
 /**
  * @author Sean Óg Crudden
  * 
  */
 public class KalmanErrorCache implements ErrorCache {
 	final private static String cacheName = "KalmanErrorCache";
-	
-	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);

@@ -17,7 +17,6 @@ import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
 
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -42,7 +41,6 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	private static final Logger logger = LoggerFactory.getLogger(StopArrivalDepartureCache.class);
 
 	private Cache<StopArrivalDepartureCacheKey, StopEvents> cache = null;
-	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
 	/**
 	 * Default is 4 as we need 3 days worth for Kalman Filter implementation
 	 */
