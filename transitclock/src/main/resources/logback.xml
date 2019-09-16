@@ -360,6 +360,18 @@
 		</encoder>
 	</appender>
 
+	<!-- Separate file for SQL logging -->
+	<appender name="UPDATE_TRAVEL_TIMES"
+			  class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE_ROOT}/update_travel_times.log.gz</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>${DEFAULT_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
 
 	<!--====================================================== -->
 	<!--=============== Loggers defined here ================= -->
@@ -517,6 +529,11 @@
 	<logger name="org.transitclock.custom.barefoot.BarefootAVLModule" 
 		level="debug" additivity="true"> 
 		<appender-ref ref="MAPMATCH" /> 
+	</logger>
+
+	<logger name="org.transitclock.applications.UpdateTravelTimes"
+			level="debug" additivity="true">
+		<appender-ref ref="UPDATE_TRAVEL_TIMES" />
 	</logger>
 
 	<!-- In order to log the hibernate SQL queries need to set org.hibernate.SQL
