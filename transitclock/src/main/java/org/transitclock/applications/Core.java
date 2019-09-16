@@ -442,13 +442,13 @@ public class Core {
 
 				if(TripDataHistoryCacheFactory.getInstance()!=null)
 				{
-					logger.debug("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
+					logger.info("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
 					TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
 				}
 
 				if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					logger.debug("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+					logger.info("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
 					FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
 				}
 
@@ -463,7 +463,7 @@ public class Core {
 				Date startDate=DateUtils.addDays(endDate, -1);
 				if(StopArrivalDepartureCacheFactory.getInstance()!=null)
 				{
-					logger.debug("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
+					logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
 					StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
 				}
 				
@@ -478,7 +478,7 @@ public class Core {
 
 				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					logger.debug("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+					logger.info("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
 					ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
 				}
 
