@@ -163,11 +163,11 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 						kalmanErrorCache.putErrorValue(indices, kalmanPredictionResult.getFilterError());
 						
-						double percentageDifferecence = 100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction);
+						double percentageDifferecence = Math.abs(100 * ((predictionTime - alternatePrediction) / (double)alternatePrediction));
 						
 						if(((percentageDifferecence *  alternatePrediction)/100) > tresholdForDifferenceEventLog.getValue())
 						{						
-							if(Math.abs(percentageDifferecence)>percentagePredictionMethodDifferenceneEventLog.getValue())
+							if(percentageDifferecence > percentagePredictionMethodDifferenceneEventLog.getValue())
 							{
 								String description="Predictions for "+ indices.toString()+ " have more that a "+percentagePredictionMethodDifferenceneEventLog.getValue() + "% difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;
 								VehicleEvent.create(vehicleState.getAvlReport(), vehicleState.getMatch(),
