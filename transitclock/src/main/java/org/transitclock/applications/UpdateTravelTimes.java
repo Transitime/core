@@ -17,13 +17,6 @@
 
 package org.transitclock.applications;
 
-import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -34,13 +27,12 @@ import org.transitclock.core.travelTimes.TravelTimeInfoMap;
 import org.transitclock.core.travelTimes.TravelTimeInfoWithHowSet;
 import org.transitclock.core.travelTimes.TravelTimesProcessor;
 import org.transitclock.db.hibernate.HibernateUtils;
-import org.transitclock.db.structs.ActiveRevisions;
-import org.transitclock.db.structs.Agency;
-import org.transitclock.db.structs.TravelTimesForStopPath;
-import org.transitclock.db.structs.TravelTimesForTrip;
-import org.transitclock.db.structs.Trip;
+import org.transitclock.db.structs.*;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
+
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * Uses AVL based data of arrival/departure times and matches from the database
@@ -403,11 +395,15 @@ public class UpdateTravelTimes {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		logger.info("Starting update travel times");
 		// Determine the parameters
 		String agencyId = AgencyConfig.getAgencyId();
 		
 		String startDateStr = args[0];
 		String endDateStr = args.length > 1 ? args[1] : startDateStr;
+
+		logger.info("Starting Date {}", startDateStr);
+		logger.info("End Date {}", endDateStr);
 		
 		// Some params are hard coded simply to get things going
 //		List<Integer> specialDaysOfWeek = new ArrayList<Integer>();
@@ -417,6 +413,8 @@ public class UpdateTravelTimes {
 		// Set the timezone for the application. Must be done before
 		// determine begin and end time so that get the proper time of day.
 		int configRev = ActiveRevisions.get(agencyId).getConfigRev();
+
+		logger.info("Config Revision {}", configRev);
 		TimeZone timezone = 
 				Agency.getAgencies(agencyId, configRev).get(0).getTimeZone();
 		TimeZone.setDefault(timezone);
@@ -425,10 +423,12 @@ public class UpdateTravelTimes {
 		Date beginTime = null;
 		Date endTime = null;
 		try {
+			logger.info("Parse Date");
 			beginTime = Time.parseDate(startDateStr);
 			endTime = new Date(Time.parseDate(endDateStr).getTime() + 
 					Time.MS_PER_DAY);
 		} catch (ParseException e) {
+			logger.error("Problem parsing date", e);
 			e.printStackTrace();
 			System.exit(-1);
 		}
