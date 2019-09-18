@@ -45,12 +45,11 @@ import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 /**
- * For storing events associated with vehicles into log file and into database.
- * Used for situations such as vehicles becoming predictable or unpredictable
- * and specifying why. The resulting information can be mapped out for finding
- * problems.
+ * For storing events associated with predictions  into log file and into database.
+ * The resulting information can be mapped out for finding
+ * problems in prediction methods. Based on VehicleEvents class.
  * 
- * @author SkiBu Smith
+ * @author SkiBu Smith, Sean Óg Crudden
  * 
  */
 @Immutable // From jcip.annoations
