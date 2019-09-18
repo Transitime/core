@@ -13,6 +13,7 @@ import org.transitclock.core.predictiongenerator.HistoricalPredictionLibrary;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitclock.core.predictiongenerator.kalman.*;
 import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.db.structs.PredictionForStopPath;
 import org.transitclock.db.structs.VehicleEvent;
 import org.transitclock.ipc.data.IpcPrediction;
@@ -171,7 +172,9 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 							{
 								String description="Predictions for "+ indices.toString()+ " have more than a "+percentagePredictionMethodDifferenceneEventLog.getValue() + "% difference. Kalman predicts : "+predictionTime+" Super predicts : "+alternatePrediction;
 
-								logger.warn(description);								
+								logger.warn(description);
+								
+								PredictionEvent.create(avlReport, vehicleState.getMatch(), PredictionEvent.PREDICTION_VARIATION, description);
 							}
 						}
 

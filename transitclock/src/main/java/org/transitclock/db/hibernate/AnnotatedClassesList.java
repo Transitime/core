@@ -71,6 +71,7 @@ public class AnnotatedClassesList {
 		Trip.class,
 		TripPattern.class,
 		VehicleEvent.class,
+		PredictionEvent.class,
 		VehicleConfig.class,
 		VehicleState.class,
 		HoldingTime.class,
