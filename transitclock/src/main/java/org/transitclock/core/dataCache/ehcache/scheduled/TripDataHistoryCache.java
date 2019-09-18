@@ -94,7 +94,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override	
 	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
-		logger.debug("Putting :"+arrivalDeparture.toString() + " in TripDataHistoryCache cache.");
+		logger.trace("Putting :"+arrivalDeparture.toString() + " in TripDataHistoryCache cache.");
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
 		int days_back=1;
 		if(debug)
@@ -145,18 +145,21 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
 	{
- 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
-		
-		@SuppressWarnings("unchecked")
+ 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
 		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
-						
+
+		int counter = 0;
 		for(ArrivalDeparture result : results)		
-		{						
+		{
+			if(counter % 1000 == 0){
+				logger.info("{} out of {} Trip Data History Records for period {} to {} ({}%)", counter, results.size(), startDate, endDate, (int)((counter * 100.0f) / results.size()));
+			}
 			// TODO this might be better done in the database.						
 			if(GtfsData.routeNotFiltered(result.getRouteId()))
 			{
 				TripDataHistoryCacheFactory.getInstance().putArrivalDeparture(result);
 			}
+			counter++;
 		}		
 	}
 		

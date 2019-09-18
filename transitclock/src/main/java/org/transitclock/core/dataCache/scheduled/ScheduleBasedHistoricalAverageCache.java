@@ -1,17 +1,8 @@
 package org.transitclock.core.dataCache.scheduled;
 
-import java.net.URL;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
+import org.apache.commons.lang3.time.DateUtils;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.ehcache.Status;
-import org.ehcache.config.builders.CacheManagerBuilder;
-import org.ehcache.xml.XmlConfiguration;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -20,19 +11,17 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.core.DwellTimeDetails;
 import org.transitclock.core.TravelTimeDetails;
-import org.transitclock.core.dataCache.ArrivalDepartureComparator;
-import org.transitclock.core.dataCache.HistoricalAverage;
-import org.transitclock.core.dataCache.KalmanErrorCacheKey;
-import org.transitclock.core.dataCache.StopPathCacheKey;
-import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
-import org.transitclock.core.dataCache.TripKey;
+import org.transitclock.core.dataCache.*;
 import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
-import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
-import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 /**
  * @author Sean Óg Crudden
  * 
@@ -42,7 +31,6 @@ public class ScheduleBasedHistoricalAverageCache {
 	private static ScheduleBasedHistoricalAverageCache singleton = new ScheduleBasedHistoricalAverageCache();
 	private static final Logger logger = LoggerFactory
 			.getLogger(ScheduleBasedHistoricalAverageCache.class);
-	final URL xmlConfigUrl = getClass().getResource("/ehcache.xml");
 	private Cache<StopPathCacheKey, HistoricalAverage> cache = null;
 	/**
 	 * Gets the singleton instance of this class.
@@ -103,7 +91,7 @@ public class ScheduleBasedHistoricalAverageCache {
 					
 					if(average==null)				
 						average=new HistoricalAverage();
-					logger.debug("Updating historical averege for : {} with {}",historicalAverageCacheKey, travelTimeDetails);
+					logger.trace("Updating historical averege for : {} with {}",historicalAverageCacheKey, travelTimeDetails);
 					average.update(travelTimeDetails.getTravelTime());
 					
 					ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
@@ -120,7 +108,7 @@ public class ScheduleBasedHistoricalAverageCache {
 				if(average==null)				
 					average=new HistoricalAverage();
 				
-				logger.debug("Updating historical averege for : {} with {}",historicalAverageCacheKey, dwellTimeDetails );
+				logger.trace("Updating historical averege for : {} with {}",historicalAverageCacheKey, dwellTimeDetails );
 				average.update(dwellTimeDetails.getDwellTime());
 			
 				ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
@@ -172,16 +160,18 @@ public class ScheduleBasedHistoricalAverageCache {
 	}
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) throws Exception 
 	{
-		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
-		
-		@SuppressWarnings("unchecked")
+		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
 		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
-		
 		Collections.sort(results, new ArrivalDepartureComparator());
-						
+
+		int counter = 0;
 		for(ArrivalDeparture result : results)
 		{
-			ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);			
+			if(counter % 1000 == 0){
+				logger.info("{} out of {} ScheduleBased Historical Records for period {} to {} ({}%)", counter, results.size(), startDate, endDate, (int)((counter * 100.0f) / results.size()));
+			}
+			ScheduleBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);
+			counter++;
 		}		
 	}
 

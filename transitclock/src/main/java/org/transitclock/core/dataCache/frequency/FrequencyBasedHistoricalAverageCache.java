@@ -1,38 +1,22 @@
 package org.transitclock.core.dataCache.frequency;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.ehcache.Cache;
-import org.ehcache.CacheManager;
-
-
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.core.Indices;
-import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.*;
-import org.transitclock.core.dataCache.ehcache.scheduled.TripDataHistoryCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.gtfs.GtfsData;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Sean Óg Crudden
  * This class is to hold the historical average for frequency based services. It puts them in buckets that represent increments of time. The start time of the trip is used to decide which 
@@ -291,18 +275,22 @@ public class FrequencyBasedHistoricalAverageCache {
 	}
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate) throws Exception 
 	{
-		Criteria criteria =session.createCriteria(ArrivalDeparture.class);				
-		
-		@SuppressWarnings("unchecked")
+		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
 		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
 		Collections.sort(results, new ArrivalDepartureComparator());
+
+		int counter = 0;
 		for(ArrivalDeparture result : results)
-		{								
+		{
+			if(counter % 1000 == 0){
+				logger.info("{} out of {} Frequency Based Historical Records for period {} to {} ({}%)", counter, results.size(), startDate, endDate, (int)((counter * 100.0f) / results.size()));
+			}
 			// TODO this might be better done in the database.
 			if(GtfsData.routeNotFiltered(result.getRouteId()))
 			{
 				FrequencyBasedHistoricalAverageCache.getInstance().putArrivalDeparture(result);
 			}
+			counter++;
 		}		
 	}
 	public static int round(double i, int v){

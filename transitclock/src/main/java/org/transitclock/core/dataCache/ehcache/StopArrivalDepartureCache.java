@@ -91,7 +91,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	@SuppressWarnings("unchecked")
 	synchronized public StopArrivalDepartureCacheKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 
-		logger.debug("Putting :" + arrivalDeparture.toString() + " in StopArrivalDepartureCache cache.");
+		logger.trace("Putting :" + arrivalDeparture.toString() + " in StopArrivalDepartureCache cache.");
 	
 		Calendar date = Calendar.getInstance();
 		date.setTime(arrivalDeparture.getDate());
@@ -134,9 +134,14 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 		Criteria criteria = session.createCriteria(ArrivalDeparture.class);
 
 		@SuppressWarnings("unchecked")
-		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).addOrder(Order.asc("time")).list();	
+		List<ArrivalDeparture> results = criteria.add(Restrictions.between("time", startDate, endDate)).addOrder(Order.asc("time")).list();
+
+		int counter = 0;
 
 		for (ArrivalDeparture result : results) {
+			if(counter % 1000 == 0){
+				logger.info("{} out of {} Stop Arrival Departure Records for period {} to {} ({}%)", counter, results.size(), startDate, endDate, (int)((counter * 100.0f) / results.size()));
+			}
 			StopArrivalDepartureCacheFactory.getInstance().putArrivalDeparture(result);
 			//TODO might be better with its own populateCacheFromdb
 			try
@@ -146,6 +151,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 			{
 				Ex.printStackTrace();
 			}
+			counter++;
 		}
 	}
 
