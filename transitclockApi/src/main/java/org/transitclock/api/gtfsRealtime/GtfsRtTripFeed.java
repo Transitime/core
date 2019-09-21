@@ -17,39 +17,29 @@
 
 package org.transitclock.api.gtfsRealtime;
 
-import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.transit.realtime.GtfsRealtime.*;
+import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.data.IpcPredictionComparator;
 import org.transitclock.api.utils.AgencyTimezoneCache;
+import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.dataCache.TripScheduleStatusManager;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
+import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship;
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.*;
  
 /**
  * For creating GTFS-realtime trip feed. The data is obtained from the server
@@ -130,8 +120,10 @@ public class GtfsRtTripFeed {
 		// Add the trip descriptor information
 		IpcPrediction firstPred = predsForTrip.get(0);
 		TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
+
 		if (firstPred.getRouteId() != null)
 			tripDescriptor.setRouteId(firstPred.getRouteId());
+
 		if (firstPred.getTripId() != null) {
 			tripDescriptor.setTripId(firstPred.getTripId());
 			 			
@@ -151,6 +143,16 @@ public class GtfsRtTripFeed {
 							tripStartEpochTime));
 			tripDescriptor.setStartDate(tripStartDateStr);
 
+			DbConfig config = Core.getInstance().getDbConfig();
+
+			String tripId = firstPred.getTripId();
+			if (config.getServiceIdSuffix()) {
+				tripId = tripId.split("-", 2)[0];
+			}
+
+			TripDescriptor.ScheduleRelationship scheduleRelationship =
+					TripScheduleStatusManager.getInstance().getScheduleRelationship(tripId);
+
 			// Set the relation between this trip and the static schedule. ADDED and CANCELED not supported. 
 			if (firstPred.isTripUnscheduled()) {
 				// A trip that is running with no schedule associated to it - 
@@ -159,13 +161,13 @@ public class GtfsRtTripFeed {
 			} else {
 				// Trip that is running in accordance with its GTFS schedule, 
 				// or is close enough to the scheduled trip to be associated with it.
-				tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+				tripDescriptor.setScheduleRelationship(scheduleRelationship);
 			}
 		}
-	
+
 		//Set trip as canceled if it is mark as that from schedBasePreds
 		if(firstPred.isCanceled())
-			tripDescriptor.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship.CANCELED);
+			tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
 			
 		tripUpdate.setTrip(tripDescriptor);
 		if (firstPred.getDelay() != null && INCLUDE_TRIP_UPDATE_DELAY)
@@ -214,7 +216,7 @@ public class GtfsRtTripFeed {
 					stopTimeUpdate.setDeparture(stopTimeEvent);
 
 				//The relationship should always be SCHEDULED if departure or arrival time is given.
-				stopTimeUpdate.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
+				stopTimeUpdate.setScheduleRelationship(StopTimeUpdate.ScheduleRelationship.SCHEDULED);
 
 				tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 			}
