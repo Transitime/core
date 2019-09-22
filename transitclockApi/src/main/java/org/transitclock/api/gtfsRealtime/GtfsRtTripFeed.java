@@ -25,12 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.data.IpcPredictionComparator;
 import org.transitclock.api.utils.AgencyTimezoneCache;
-import org.transitclock.applications.Core;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.core.dataCache.TripScheduleStatusManager;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
-import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
@@ -143,15 +140,7 @@ public class GtfsRtTripFeed {
 							tripStartEpochTime));
 			tripDescriptor.setStartDate(tripStartDateStr);
 
-			DbConfig config = Core.getInstance().getDbConfig();
-
-			String tripId = firstPred.getTripId();
-			if (config.getServiceIdSuffix()) {
-				tripId = tripId.split("-", 2)[0];
-			}
-
-			TripDescriptor.ScheduleRelationship scheduleRelationship =
-					TripScheduleStatusManager.getInstance().getScheduleRelationship(tripId);
+			TripDescriptor.ScheduleRelationship scheduleRelationship = getScheduleRelationship(firstPred);
 
 			// Set the relation between this trip and the static schedule. ADDED and CANCELED not supported. 
 			if (firstPred.isTripUnscheduled()) {
@@ -226,6 +215,20 @@ public class GtfsRtTripFeed {
 		
 		// Return the results
 		return tripUpdate.build();
+	}
+
+	private TripDescriptor.ScheduleRelationship getScheduleRelationship(IpcPrediction prediction){
+
+		if(prediction.isCanceled()){
+			return TripDescriptor.ScheduleRelationship.CANCELED;
+		}
+
+		if (prediction.isAdded()){
+			return TripDescriptor.ScheduleRelationship.ADDED;
+		}
+
+		return TripDescriptor.ScheduleRelationship.SCHEDULED;
+
 	}
 	
 	/**

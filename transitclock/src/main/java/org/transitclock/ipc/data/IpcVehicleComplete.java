@@ -17,12 +17,6 @@
 
 package org.transitclock.ipc.data;
 
-import java.io.IOException;
-import java.io.InvalidObjectException;
-import java.io.ObjectInputStream;
-import java.util.Date;
-import java.util.List;
-
 import org.transitclock.core.BlockAssignmentMethod;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TemporalDifference;
@@ -30,6 +24,12 @@ import org.transitclock.core.VehicleState;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
+
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Extension of IpcVehicle class so that all info describing vehicle is
@@ -149,7 +149,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			Integer atOrNextGtfsStopSeq, String originStopId,
 			String destinationId, Double distanceToNextStop,
 
-			Double distanceOfNextStopFromTripStart, Double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled,
+			Double distanceOfNextStopFromTripStart, Double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled, boolean isAdded,
 			double headway) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
@@ -157,7 +157,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
-				atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled);
+				atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled,isAdded);
 
 
 		this.originStopId = originStopId;
@@ -263,7 +263,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					distanceToNextStop, distanceOfNextStopFromTripStart,
 
 					distanceAlongTrip, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled,
-					headway);
+					isAdded,headway);
 
 		}
 

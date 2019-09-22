@@ -3,12 +3,13 @@ package org.transitclock.core.dataCache;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
+import org.transitclock.core.VehicleState;
 
 import java.util.concurrent.TimeUnit;
 
 public class TripScheduleStatusManager {
 
-    Cache<String,ScheduleRelationship> tripStatusCache;
+    private Cache<String,ScheduleRelationship> tripStatusCache;
 
     // This is a singleton class
     private static TripScheduleStatusManager singleton = new TripScheduleStatusManager();
@@ -46,12 +47,18 @@ public class TripScheduleStatusManager {
         }
     }
 
-    public ScheduleRelationship getScheduleRelationship(String tripId){
+    public VehicleState.ScheduleStatus getScheduleRelationship(String tripId){
         ScheduleRelationship scheduleRelationship = tripStatusCache.getIfPresent(tripId);
-        if(scheduleRelationship == null){
-            return ScheduleRelationship.SCHEDULED;
+        if(scheduleRelationship == ScheduleRelationship.ADDED){
+            return VehicleState.ScheduleStatus.ADDED;
         }
-        return scheduleRelationship;
+        if(scheduleRelationship == ScheduleRelationship.CANCELED){
+            return VehicleState.ScheduleStatus.CANCELED;
+        }
+        if(scheduleRelationship == ScheduleRelationship.UNSCHEDULED){
+            return VehicleState.ScheduleStatus.UNSCHEDULED;
+        }
+        return VehicleState.ScheduleStatus.SCHEDULED;
     }
 
 }

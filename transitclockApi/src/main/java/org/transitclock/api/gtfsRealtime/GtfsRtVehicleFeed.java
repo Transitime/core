@@ -17,12 +17,9 @@
 
 package org.transitclock.api.gtfsRealtime;
 
-import java.rmi.RemoteException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-
+import com.google.transit.realtime.GtfsRealtime.*;
+import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
+import com.google.transit.realtime.GtfsRealtime.VehiclePosition.VehicleStopStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.utils.AgencyTimezoneCache;
@@ -31,16 +28,11 @@ import org.transitclock.ipc.data.IpcVehicleGtfsRealtime;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 import org.transitclock.utils.Time;
 
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.Position;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
-import com.google.transit.realtime.GtfsRealtime.VehiclePosition.VehicleStopStatus;
+import java.rmi.RemoteException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * For creating GTFS-realtime Vehicle feed. The data is obtained via RMI.
@@ -96,23 +88,24 @@ public class GtfsRtVehicleFeed {
 							.setTripId(vehicleData.getTripId())
 							
 							.setStartDate(tripStartDateStr);
-			if(vehicleData.isCanceled())
-				tripDescriptor.setScheduleRelationship(ScheduleRelationship.CANCELED);
+
 			if(vehicleData.getFreqStartTime()>0)
 			{
 				String tripStartTimeStr=gtfsRealtimeTimeFormatter.format(new Date(vehicleData.getFreqStartTime()));
 				tripDescriptor.setStartTime(tripStartTimeStr);
 			}
 
+			TripDescriptor.ScheduleRelationship scheduleRelationship = getScheduleRelationship(vehicleData);
+
 			// Set the relation between this trip and the static schedule. ADDED and CANCELED not supported.
 			if (vehicleData.isTripUnscheduled()) {
-				// A trip that is running with no schedule associated to it - 
+				// A trip that is running with no schedule associated to it -
 				// this value is used to identify trips defined in GTFS frequencies.txt with exact_times = 0
 				tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.UNSCHEDULED);
 			} else {
-				// Trip that is running in accordance with its GTFS schedule, 
+				// Trip that is running in accordance with its GTFS schedule,
 				// or is close enough to the scheduled trip to be associated with it.
-				tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+				tripDescriptor.setScheduleRelationship(scheduleRelationship);
 			}
 
 			vehiclePosition.setTrip(tripDescriptor);
@@ -166,6 +159,20 @@ public class GtfsRtVehicleFeed {
 
 		// Return the results
 		return vehiclePosition.build();
+	}
+
+	private TripDescriptor.ScheduleRelationship getScheduleRelationship(IpcVehicleGtfsRealtime prediction){
+
+		if(prediction.isCanceled()){
+			return TripDescriptor.ScheduleRelationship.CANCELED;
+		}
+
+		if (prediction.isAdded()){
+			return TripDescriptor.ScheduleRelationship.ADDED;
+		}
+
+		return TripDescriptor.ScheduleRelationship.SCHEDULED;
+
 	}
 
 	/**

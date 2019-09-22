@@ -16,33 +16,18 @@
  */
 package org.transitclock.core;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.dataCache.VehicleStateManager;
-import org.transitclock.db.structs.Arrival;
-import org.transitclock.db.structs.ArrivalDeparture;
-import org.transitclock.db.structs.AvlReport;
-import org.transitclock.db.structs.Block;
-import org.transitclock.db.structs.Headway;
-import org.transitclock.db.structs.HoldingTime;
-import org.transitclock.db.structs.Location;
-import org.transitclock.db.structs.StopPath;
-import org.transitclock.db.structs.Trip;
-import org.transitclock.db.structs.VectorWithHeading;
+import org.transitclock.db.structs.*;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.utils.StringUtils;
 import org.transitclock.utils.Time;
+
+import java.util.*;
 
 /**
  * Keeps track of vehicle state including its block assignment, where it
@@ -102,6 +87,16 @@ public class VehicleState {
 	//Used for schedPred AVL. Identify if trip is canceled.
 	private boolean isCanceled;
 
+	private boolean isAdded;
+
+	public enum ScheduleStatus {
+		SCHEDULED,
+		UNSCHEDULED,
+		CANCELED,
+		ADDED,
+	}
+
+	private ScheduleStatus scheduleStatus;
 
 	public Headway getHeadway() {
 		return headway;
@@ -1028,13 +1023,31 @@ public class VehicleState {
 	public boolean isDelayed() {
 		return isDelayed;
 	}
+
 	public void setCanceled(boolean isCanceled) {
 		this.isCanceled=isCanceled;
 
 	}
 	public boolean isCanceled() {
+		if(scheduleStatus == ScheduleStatus.CANCELED){
+			return true;
+		}
 		return isCanceled;
 	}
 
+	public void setAdded(boolean isAdded) {
+		this.isAdded = isAdded;
+	}
+
+	public boolean isAdded() {
+		if(scheduleStatus == ScheduleStatus.ADDED){
+			return true;
+		}
+		return this.isAdded;
+	}
+
+	public void setScheduleStatus(ScheduleStatus scheduleStatus){
+		this.scheduleStatus = scheduleStatus;
+	}
 
 }

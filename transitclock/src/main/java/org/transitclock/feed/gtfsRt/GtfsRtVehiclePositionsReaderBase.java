@@ -17,27 +17,19 @@
 
 package org.transitclock.feed.gtfsRt;
 
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-
-
-
+import com.google.protobuf.CodedInputStream;
+import com.google.transit.realtime.GtfsRealtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.core.dataCache.TripScheduleStatusManager;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.MathUtils;
-import org.transitclock.utils.Time;
 
-import com.google.protobuf.CodedInputStream;
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.Position;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 
 /**
  * Reads in GTFS-realtime Vehicle Positions file and converts them into List of
@@ -199,17 +191,19 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			if (vehicle.hasTrip()) {
 				TripDescriptor tripDescriptor = vehicle.getTrip();
 
-				
-				if (tripDescriptor.hasRouteId()) {
-					avlReport.setAssignment(tripDescriptor.getRouteId(), 
+				if (tripDescriptor.hasTripId()) {
+					avlReport.setAssignment(tripDescriptor.getTripId(),
+							AssignmentType.TRIP_ID);
+
+					if(tripDescriptor.hasScheduleRelationship()){
+						TripScheduleStatusManager.getInstance().update(tripDescriptor.getTripId(),
+								tripDescriptor.getScheduleRelationship());
+					}
+				}
+				else if (tripDescriptor.hasRouteId()) {
+					avlReport.setAssignment(tripDescriptor.getRouteId(),
 							AssignmentType.ROUTE_ID);
 				}
-				
-				if (tripDescriptor.hasTripId()) {
-					avlReport.setAssignment(tripDescriptor.getTripId(), 
-							AssignmentType.TRIP_ID);
-				}
-
 			
 			}
 			

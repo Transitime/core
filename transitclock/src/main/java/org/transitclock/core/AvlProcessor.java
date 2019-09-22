@@ -16,13 +16,6 @@
  */
 package org.transitclock.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -36,16 +29,10 @@ import org.transitclock.core.SpatialMatcher.MatchingType;
 import org.transitclock.core.autoAssigner.AutoBlockAssigner;
 import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.dataCache.PredictionDataCache;
+import org.transitclock.core.dataCache.TripScheduleStatusManager;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
-import org.transitclock.db.structs.AvlReport;
-import org.transitclock.db.structs.Block;
-import org.transitclock.db.structs.Location;
-import org.transitclock.db.structs.Route;
-import org.transitclock.db.structs.Stop;
-import org.transitclock.db.structs.Trip;
-import org.transitclock.db.structs.VectorWithHeading;
-import org.transitclock.db.structs.VehicleEvent;
+import org.transitclock.db.structs.*;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 import org.transitclock.logging.Markers;
 import org.transitclock.monitoring.CloudwatchService;
@@ -53,6 +40,8 @@ import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.StringUtils;
 import org.transitclock.utils.Time;
+
+import java.util.*;
 
 /**
  * This is a very important high-level class. It takes the AVL data and
@@ -181,6 +170,8 @@ public class AvlProcessor {
 
 		VehicleState vehicleState = VehicleStateManager.getInstance()
 				.getVehicleState(vehicleId);
+
+		vehicleState.setScheduleStatus(getScheduleStatus(vehicleState));
 
 		// Create a VehicleEvent to record what happened
 		AvlReport avlReport = vehicleState.getAvlReport();
@@ -1370,6 +1361,7 @@ public class AvlProcessor {
 		synchronized (vehicleState) {
 			// Keep track of last AvlReport even if vehicle not predictable.
 			vehicleState.setAvlReport(avlReport);
+			vehicleState.setScheduleStatus(getScheduleStatus(vehicleState));
 
 			// If part of consist and shouldn't be generating predictions
 			// and such and shouldn't grab assignment the simply return
@@ -1548,14 +1540,36 @@ public class AvlProcessor {
 		synchronized (vehicleState) {
 			// Update AVL report for cached VehicleState
 			vehicleState.setAvlReport(avlReport);
-			
+			vehicleState.setScheduleStatus(getScheduleStatus(vehicleState));
+
 			// Let vehicle data cache know that the vehicle state was updated
 			// so that new IPC vehicle data will be created and cached and
 			// made available to the API.
 			VehicleDataCache.getInstance().updateVehicle(vehicleState);
 		}
 	}
-	
+
+	private VehicleState.ScheduleStatus getScheduleStatus(VehicleState vehicleState) {
+
+		AvlReport report = vehicleState.getAvlReport();
+		String tripId = getTripId(report);
+
+		if(tripId != null){
+			VehicleState.ScheduleStatus scheduleStatus = TripScheduleStatusManager.getInstance()
+					.getScheduleRelationship(tripId);
+			return scheduleStatus;
+		}
+
+		return VehicleState.ScheduleStatus.SCHEDULED;
+	}
+
+	private String getTripId(AvlReport report) {
+		if(report.getAssignmentType() == AssignmentType.TRIP_ID){
+			return report.getAssignmentId();
+		}
+		return null;
+	}
+
 	/**
 	 * First does housekeeping for the AvlReport (stores it in db, logs it,
 	 * etc). Processes the AVL report by matching to the assignment and

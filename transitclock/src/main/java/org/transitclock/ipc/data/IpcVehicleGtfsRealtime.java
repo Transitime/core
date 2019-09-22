@@ -17,19 +17,14 @@
 
 package org.transitclock.ipc.data;
 
-import java.io.IOException;
-import java.util.Date;
-
 import org.transitclock.applications.Core;
-import org.transitclock.core.BlockAssignmentMethod;
-import org.transitclock.core.SpatialMatch;
-import org.transitclock.core.TemporalDifference;
-import org.transitclock.core.TemporalMatch;
-import org.transitclock.core.VehicleState;
-import org.transitclock.db.structs.HoldingTime;
+import org.transitclock.core.*;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.utils.Time;
+
+import java.io.IOException;
+import java.util.Date;
 
 
 /**
@@ -67,7 +62,17 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	public void setCanceled(boolean isCanceled) {
 		this.isCanceled = isCanceled;
 	}
-	
+
+	private boolean isAdded;
+
+	public boolean isAdded() {
+		return isAdded;
+	}
+
+	public void setAdded(boolean added) {
+		isAdded = added;
+	}
+
 	// For GTFS-rt to set scheduled relationship
 	private final boolean isTripUnscheduled;
 
@@ -99,6 +104,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			atOrNextStopId = stopPath.getStopId();
 			atOrNextGtfsStopSeq = stopPath.getGtfsStopSeq();
 			this.isCanceled =vs.isCanceled();
+			this.isAdded = vs.isAdded();
 			// Note: the trip start date is created on server side so that
 			// proper timezone is used. This unfortunately is a bit expensive.
 			int time = vs.getTrip().getStartTime();
@@ -147,6 +153,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 	 * @param atOrNextGtfsStopSeq
 	 * @param holdingTime 
 	 * @param isCanceled
+	 * @param isAdded
 	 */
 	protected IpcVehicleGtfsRealtime(String blockId,
 			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
@@ -159,7 +166,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			long tripStartEpochTime, boolean atStop, String atOrNextStopId,
 
 			Integer atOrNextGtfsStopSeq, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, 
-			double predictedLongitude,boolean isCanceled) {
+			double predictedLongitude,boolean isCanceled, boolean isAdded) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
 				routeShortName, routeName, tripId, tripPatternId, directionId, headsign,
@@ -173,6 +180,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		this.atOrNextGtfsStopSeq = atOrNextGtfsStopSeq;
 		this.tripStartEpochTime = tripStartEpochTime;
 		this.isCanceled=isCanceled;
+		this.isAdded=isAdded;
 		this.isTripUnscheduled = isTripUnscheduled;
 
 	}
@@ -188,6 +196,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		protected Integer atOrNextGtfsStopSeq;
 		protected long tripStartEpochTime; 
 		protected boolean isCanceled;
+		protected boolean isAdded;
 		protected boolean isTripUnscheduled;
 		private static final short currentSerializationVersion = 0;
 		private static final long serialVersionUID = 5804716921925188073L;
@@ -199,6 +208,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			this.atOrNextGtfsStopSeq = v.atOrNextGtfsStopSeq;
 			this.tripStartEpochTime = v.tripStartEpochTime;
 			this.isCanceled=v.isCanceled;
+			this.isAdded=v.isAdded;
 			this.isTripUnscheduled = v.isTripUnscheduled;
 		}
 		
@@ -221,6 +231,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			stream.writeObject(atOrNextGtfsStopSeq);
 		    stream.writeLong(tripStartEpochTime);
 		    stream.writeBoolean(isCanceled);
+		    stream.writeBoolean(isAdded);
 		    stream.writeBoolean(isTripUnscheduled);
 		}
 
@@ -249,6 +260,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 			atOrNextGtfsStopSeq = (Integer) stream.readObject();
 			tripStartEpochTime = stream.readLong();
 			isCanceled=stream.readBoolean();
+			isAdded=stream.readBoolean();
 			isTripUnscheduled = stream.readBoolean();
 		}
 		
@@ -266,7 +278,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 					layoverDepartureTime, nextStopId, nextStopName,
 					vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
 
-					atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLongitude, predictedLatitude,isCanceled);
+					atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLongitude, predictedLatitude,isCanceled, isAdded);
 
 		}
 
@@ -340,6 +352,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 				+ ", tripStartEpochTime=" + tripStartEpochTime 
 				+ ", tripStartEpochTime=" + new Date(tripStartEpochTime) 
 				+ ", isCanceled=" +isCanceled
+				+ ", isAdded=" +isAdded
         + ", isTripUnscheduled" +isTripUnscheduled
 				+ "]";
 	}
