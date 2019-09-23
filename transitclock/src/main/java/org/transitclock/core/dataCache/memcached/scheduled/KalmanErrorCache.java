@@ -10,6 +10,7 @@ import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.core.Indices;
 import org.transitclock.core.dataCache.ErrorCache;
+import org.transitclock.core.dataCache.KalmanError;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.utils.Time;
 
@@ -36,16 +37,16 @@ public class KalmanErrorCache implements ErrorCache {
 	}
 
 	@Override
-	public Double getErrorValue(Indices indices) {
+	public KalmanError getErrorValue(Indices indices) {
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
 		
 		return getErrorValue(key);
 	}
 
 	@Override
-	public Double getErrorValue(KalmanErrorCacheKey key) {
+	public KalmanError getErrorValue(KalmanErrorCacheKey key) {
 
-		Double value = (Double)memcachedClient.get(createKey(key));
+		KalmanError value = (KalmanError)memcachedClient.get(createKey(key));
 		return value;
 	}
 

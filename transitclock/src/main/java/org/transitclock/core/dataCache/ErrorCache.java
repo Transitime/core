@@ -7,9 +7,9 @@ import org.transitclock.core.Indices;
 
 public interface ErrorCache {
 	
-	Double getErrorValue(Indices indices);
+	KalmanError getErrorValue(Indices indices);
 
-	Double getErrorValue(KalmanErrorCacheKey key);
+	KalmanError getErrorValue(KalmanErrorCacheKey key);
 
 	void putErrorValue(Indices indices, Double value);
 		

@@ -159,8 +159,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
 
-	  boolean lateSoMarkAsUncertain, int tripCounter, Integer scheduleDeviation) {
-	  logger.debug("vehicleId {} calculated delay of {}", avlReport.getVehicleId(), scheduleDeviation);
+	  boolean lateSoMarkAsUncertain, int tripCounter, Integer scheduleDeviation) {	 
 
 
 		 // Determine additional parameters for the prediction to be generated

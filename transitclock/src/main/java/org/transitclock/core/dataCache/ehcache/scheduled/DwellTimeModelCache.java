@@ -122,10 +122,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 									{
 										logger.warn("Schedule adherence outside allowable range. "+previousArrival.getScheduledAdherence());
 									}
-								}else
-								{
-									logger.warn("This is a wait stop or layover so not being included in model as dwell time is affected by if vehicle is early or late to the stop.");
-								}
+							
 							}else
 							{
 								logger.warn("Schedule adherence outside allowable range. "+departure.getScheduleAdherence());

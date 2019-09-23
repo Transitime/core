@@ -54,7 +54,7 @@
 
 	<ehcache:cache alias="KalmanErrorCache">
 		<ehcache:key-type>org.transitclock.core.dataCache.KalmanErrorCacheKey</ehcache:key-type>
-		<ehcache:value-type>java.lang.Double</ehcache:value-type>
+		<ehcache:value-type>org.transitclock.core.dataCache.KalmanError</ehcache:value-type>
 		<ehcache:expiry>
 			<ehcache:ttl unit="hours">24</ehcache:ttl>
 		</ehcache:expiry>

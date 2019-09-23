@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.Indices;
 import org.transitclock.core.dataCache.ErrorCache;
+import org.transitclock.core.dataCache.KalmanError;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 /**
  * @author Sean Og Crudden
@@ -21,7 +22,7 @@ public class KalmanErrorCache implements ErrorCache  {
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);
 
-	private CacheAccess<KalmanErrorCacheKey, Double>  cache = null;
+	private CacheAccess<KalmanErrorCacheKey, KalmanError>  cache = null;
 	
 	public KalmanErrorCache() {
 		cache = JCS.getInstance(cacheName);	
@@ -33,11 +34,11 @@ public class KalmanErrorCache implements ErrorCache  {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	synchronized public Double getErrorValue(Indices indices) {		
+	synchronized public KalmanError getErrorValue(Indices indices) {		
 		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
 		
-		Double result = cache.get(key);
+		KalmanError result = cache.get(key);
 		
 		return result;
 					
@@ -47,10 +48,10 @@ public class KalmanErrorCache implements ErrorCache  {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	synchronized public Double getErrorValue(KalmanErrorCacheKey key) {		
+	synchronized public KalmanError getErrorValue(KalmanErrorCacheKey key) {		
 		 System.out.println(cache.getStats().toString());
 		 
-		 Double result = cache.get(key);
+		 KalmanError result = cache.get(key);
 		
 		 return result;	
 	}
@@ -63,14 +64,26 @@ public class KalmanErrorCache implements ErrorCache  {
 		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
 				
-		cache.put(key, value);
+		putErrorValue(key,value);
 		
 	}
 
 	@Override
 	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
 			
-		cache.put(key, value);				
+				
+		KalmanError error= (KalmanError)cache.get(key);
+		
+		if(error==null)
+		{
+			error=new KalmanError(value);			
+		}else
+		{
+			error.setError(value);	
+		}
+			
+								
+		cache.put(key,error);
 	}
 
 	

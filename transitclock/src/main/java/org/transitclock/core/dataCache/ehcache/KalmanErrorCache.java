@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.core.Indices;
 import org.transitclock.core.dataCache.ErrorCache;
+import org.transitclock.core.dataCache.KalmanError;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class KalmanErrorCache implements ErrorCache {
 	private static final Logger logger = LoggerFactory
 			.getLogger(KalmanErrorCache.class);
 
-	private Cache<KalmanErrorCacheKey, Double> cache = null;
+	private Cache<KalmanErrorCacheKey, KalmanError> cache = null;
 	/**
 	 * Gets the singleton instance of this class.
 	 * 
@@ -29,7 +30,7 @@ public class KalmanErrorCache implements ErrorCache {
 					
 		CacheManager cm = CacheManagerFactory.getInstance();
 									
-		cache = cm.getCache(cacheName, KalmanErrorCacheKey.class, Double.class);									
+		cache = cm.getCache(cacheName, KalmanErrorCacheKey.class, KalmanError.class);									
 	}
 	
 	public void logCache(Logger logger)
@@ -43,11 +44,11 @@ public class KalmanErrorCache implements ErrorCache {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	synchronized public Double getErrorValue(Indices indices) {		
+	synchronized public KalmanError getErrorValue(Indices indices) {		
 		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);
 		
-		Double result = (Double)cache.get(key);
+		KalmanError result = (KalmanError)cache.get(key);
 		
 		if(result==null)
 			return null;
@@ -59,9 +60,9 @@ public class KalmanErrorCache implements ErrorCache {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	synchronized public Double getErrorValue(KalmanErrorCacheKey key) {		
+	synchronized public KalmanError getErrorValue(KalmanErrorCacheKey key) {		
 						
-		Double result = (Double)cache.get(key);
+		KalmanError result = (KalmanError)cache.get(key);
 		
 		if(result==null)
 			return null;
@@ -75,13 +76,24 @@ public class KalmanErrorCache implements ErrorCache {
 	synchronized public void putErrorValue(Indices indices,  Double value) {
 		
 		KalmanErrorCacheKey key=new KalmanErrorCacheKey(indices);		
-		cache.put(key, value);		
+		putErrorValue(key,value);		
 	}				
 		
 	@Override
 	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
+		
+		KalmanError error= (KalmanError)cache.get(key);
+		
+		if(error==null)
+		{
+			error=new KalmanError(value);			
+		}else
+		{
+			error.setError(value);	
+		}
+			
 								
-		cache.put(key,value);
+		cache.put(key,error);
 	}
 
 	@Override

@@ -148,7 +148,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 
 						Indices previousVehicleIndices = new Indices(travelTimeDetails.getArrival());
 
-						Double last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);
+						KalmanError last_prediction_error = lastVehiclePredictionError(kalmanErrorCache, previousVehicleIndices);
 
 						logger.debug("Using error value: " + last_prediction_error +" found with vehicle id "+travelTimeDetails.getArrival().getVehicleId()+ " from: "+new KalmanErrorCacheKey(previousVehicleIndices).toString());
 
@@ -156,7 +156,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 						logger.debug("Using last vehicle value: " + travelTimeDetails + " for : "+ indices.toString());
 
 						kalmanPredictionResult = kalmanPrediction.predict(last_vehicle_segment, historical_segments_k,
-								last_prediction_error);
+								last_prediction_error.getError());
 
 						long predictionTime = (long) kalmanPredictionResult.getResult();
 
@@ -228,19 +228,22 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 		}
 	}
 
-	private Double lastVehiclePredictionError(ErrorCache cache, Indices indices) {
+	private KalmanError lastVehiclePredictionError(ErrorCache cache, Indices indices) {
 
-		Double result = cache.getErrorValue(indices);
-		if(result!=null&&!result.isNaN())
-		{
-			logger.debug("Kalman Error value : "+result +" for key: "+new KalmanErrorCacheKey(indices).toString());
+		KalmanError result;
+		try {
+			result = cache.getErrorValue(indices);
+			if(result==null)
+			{		
+				logger.debug("Kalman Error value set to default: "+initialErrorValue.getValue() +" for key: "+new KalmanErrorCacheKey(indices).toString());
+				result=new KalmanError(initialErrorValue.getValue());
+			}
+			return result;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		else
-		{
-			logger.debug("Kalman Error value set to default: "+initialErrorValue.getValue() +" for key: "+new KalmanErrorCacheKey(indices).toString());
-			return initialErrorValue.getValue();
-		}
-		return result;
+		return null;
 	}
 
 	@Override
