@@ -31,6 +31,7 @@ import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
 import org.transitclock.core.dataCache.VehicleDataCache;
+import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
 import org.transitclock.core.dataCache.frequency.FrequencyBasedHistoricalAverageCache;
 import org.transitclock.core.dataCache.scheduled.ScheduleBasedHistoricalAverageCache;
 import org.transitclock.db.hibernate.DataDbLogger;
