@@ -441,18 +441,19 @@ public class Core {
 					logger.info("Finished Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
 				}
 
+				// Only need to populate two days worth of stop arrival departure cache
+				if(i < 2 && StopArrivalDepartureCacheFactory.getInstance()!=null)
+				{
+					logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
+					StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
+					logger.info("Finished StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
+				}
+
 				if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 				{
 					logger.info("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
 					FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
 					logger.info("Finished FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
-				}
-
-				if(StopArrivalDepartureCacheFactory.getInstance()!=null)
-				{
-					logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
-					StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-					logger.info("Finished StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
 				}
 
 				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
@@ -464,9 +465,6 @@ public class Core {
 
 				endDate=startDate;
 			}
-			
-			endDate=Calendar.getInstance().getTime();
-
 		}		
 	
 	}
