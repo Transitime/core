@@ -1,10 +1,5 @@
 package org.transitclock.core.dataCache.ehcache.scheduled;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.slf4j.Logger;
@@ -15,14 +10,19 @@ import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.dataCache.ehcache.CacheManagerFactory;
-import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellTimeModelFactory;
 import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel;
+import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellTimeModelFactory;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Headway;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
+
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 /**
- * 
+ *
  * @author scrudden
  * This stores DwellModel instances in the cache. TODO We should abstract the anomaly detection as per TODO in code below.
  */
@@ -34,19 +34,19 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	private static LongConfigValue minHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.minHeadwayAllowedInModel", (long) 1000, "Min headway to be considered in dwell RLS algotithm.");
 	private static IntegerConfigValue minSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.dwell.minSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
 	private static IntegerConfigValue maxSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.dwell.maxSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
-		
+
 
 	final private static String cacheName= "dwellTimeModelCache";
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(DwellTimeModelCache.class);
-	
-	
+
+
 	private Cache<StopPathCacheKey, DwellModel> cache = null;
-	
+
 	public DwellTimeModelCache() throws IOException {
-		
+
 		CacheManager cm = CacheManagerFactory.getInstance();
-							
+
 		cache = cm.getCache(cacheName, StopPathCacheKey.class, DwellModel.class);
 	}
 	@Override
@@ -55,15 +55,15 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		StopPathCacheKey key=new StopPathCacheKey(headway.getTripId(), event.getStopPathIndex(), false);
 
 		DwellModel model = null;
-		
+
 		if(cache.get(key)!=null)
 		{
 			model=(DwellModel) cache.get(key);
-			
-			model.putSample((int)dwellTime, (int)headway.getHeadway(),null);		
+
+			model.putSample((int)dwellTime, (int)headway.getHeadway(),null);
 		}else
 		{
-			model=DwellTimeModelFactory.getInstance();		
+			model=DwellTimeModelFactory.getInstance();
 		}
 		model.putSample((int)dwellTime, (int)headway.getHeadway(),null);
 		cache.put(key, model);
@@ -73,16 +73,16 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 	public void addSample(ArrivalDeparture departure) {
 		try {
 			if(departure!=null && !departure.isArrival())
-			{				
+			{
 				StopArrivalDepartureCacheKey key= new StopArrivalDepartureCacheKey(departure.getStopId(), departure.getDate());
 				List<IpcArrivalDeparture> stopData = StopArrivalDepartureCacheFactory.getInstance().getStopHistory(key);
 
 				if(stopData!=null && stopData.size()>1)
 				{
 					IpcArrivalDeparture arrival=findArrival(stopData, new IpcArrivalDeparture(departure));
-									
+
 					if(arrival!=null)
-					{						
+					{
 						IpcArrivalDeparture previousArrival=findPreviousArrival(stopData, arrival);
 						if(arrival!=null&&previousArrival!=null)
 						{
@@ -93,16 +93,16 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 
 							/* Leave out silly values as they are most likely errors or unusual circumstance. */
 							/* TODO Should abstract this behind an anomaly detention interface/Factory */
-							
+
 							if(departure.getScheduleAdherence()!=null && departure.getScheduleAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
-							{							
-								
+							{
+
 								if((departure.getStop().isWaitStop()==null||!departure.getStop().isWaitStop())
-										&&(departure.getStop().isLayoverStop()==null || !departure.getStop().isLayoverStop()))	
+										&&(departure.getStop().isLayoverStop()==null || !departure.getStop().isLayoverStop()))
 								{
-								// Arrival schedule adherence appears not to be set much. So only stop if set and outside range.
+									// Arrival schedule adherence appears not to be set much. So only stop if set and outside range.
 									if(previousArrival.getScheduledAdherence()==null || previousArrival.getScheduledAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
-									{		
+									{
 										if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
 												dwelltime >  minDwellTimeAllowedInModel.getValue())
 										{
@@ -122,11 +122,14 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 									{
 										logger.warn("Schedule adherence outside allowable range. "+previousArrival.getScheduledAdherence());
 									}
-							
+								}else
+								{
+									logger.warn("This is a wait stop or layover so not being included in model as dwell time is affected by if vehicle is early or late to the stop.");
+								}
 							}else
 							{
 								logger.warn("Schedule adherence outside allowable range. "+departure.getScheduleAdherence());
-							}						
+							}
 						}
 					}
 				}
@@ -165,7 +168,7 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		cal1.setTime(new Date(date1));
 		cal2.setTime(new Date(date2));
 		boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-	                  cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+				cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
 
 		return sameDay;
 	}
@@ -195,13 +198,13 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 		DwellModel model=(DwellModel) cache.get(cacheKey);
 		if(model==null||headway==null)
 			return null;
-		
+
 		if(model.predict((int)headway.getHeadway(), null)!=null)
 			return new Long(model.predict((int)headway.getHeadway(), null));
-		
+
 		return null;
 	}
-	
-	
+
+
 
 }
