@@ -14,6 +14,8 @@ import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheKey;
 import org.transitclock.core.dataCache.StopPathCacheKey;
 import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellTimeModelFactory;
+import org.transitclock.core.predictiongenerator.datafilter.DwellTimeDataFilter;
+import org.transitclock.core.predictiongenerator.datafilter.DwellTimeFilterFactory;
 import org.transitclock.core.predictiongenerator.scheduled.dwell.DwellModel;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Headway;
@@ -28,13 +30,9 @@ import net.spy.memcached.MemcachedClient;
  */
 public class DwellTimeModelCache implements org.transitclock.core.dataCache.DwellTimeModelCacheInterface {
 
-	private static LongConfigValue maxDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.maxDwellTimeAllowedInModel", (long) (2 * Time.MS_PER_MIN), "Max dwell time to be considered in dwell RLS algotithm.");
-	private static LongConfigValue minDwellTimeAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.minDwellTimeAllowedInModel", (long) 1000, "Min dwell time to be considered in dwell RLS algotithm.");
 	private static LongConfigValue maxHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.maxHeadwayAllowedInModel", 1*Time.MS_PER_HOUR, "Max headway to be considered in dwell RLS algotithm.");
 	private static LongConfigValue minHeadwayAllowedInModel = new LongConfigValue("transitclock.prediction.dwell.minHeadwayAllowedInModel", (long) 1000, "Min headway to be considered in dwell RLS algotithm.");
-	private static IntegerConfigValue minSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.dwell.minSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
-	private static IntegerConfigValue maxSceheduleAdherence = new IntegerConfigValue("transitclock.prediction.dwell.maxSceheduleAdherence", (int)  (10 * Time.SEC_PER_MIN), "If schedule adherence of vehicle is outside this then not considerd in dwell RLS algorithm.");
-		
+	
 
 	private static StringConfigValue memcachedHost = new StringConfigValue("transitclock.cache.memcached.host", "127.0.0.1",
 			"Specifies the host machine that memcache is running on.");
@@ -92,38 +90,22 @@ public class DwellTimeModelCache implements org.transitclock.core.dataCache.Dwel
 							long dwelltime=departure.getTime()-arrival.getTime().getTime();
 							headway.setTripId(arrival.getTripId());
 
-							/* Leave out silly values as they are most likely errors or unusual circumstance. */
-							/* TODO Should abstract this behind an anomaly detention interface/Factory */
+							/* Leave out silly values as they are most likely errors or unusual circumstance. */																				
+							DwellTimeDataFilter datafilter = DwellTimeFilterFactory.getInstance();
 							
-							if(departure.getScheduleAdherence()!=null && departure.getScheduleAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
-							{							
+							if(!datafilter.filter(arrival, new IpcArrivalDeparture(departure)))
+							{						
 								
-								// Arrival schedule adherence appears not to be set much. So only stop if set and outside range.
-								if(previousArrival.getScheduledAdherence()==null || previousArrival.getScheduledAdherence().isWithinBounds(minSceheduleAdherence.getValue(),maxSceheduleAdherence.getValue()))
-								{		
-									if(dwelltime<maxDwellTimeAllowedInModel.getValue() &&
-											dwelltime >  minDwellTimeAllowedInModel.getValue())
-									{
-										if(headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
-												&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
-										{
-											addSample(departure,headway,dwelltime);
-										}else
-										{
-											logger.warn("Headway outside allowable range . {}", headway);
-										}
-									}else
-									{
-										logger.warn("Dwell time {} outside allowable range for {}.", dwelltime, departure);
-									}
+								/* TODO Should also abstract behind an anomaly detention interface/Factory */	
+								if(headway.getHeadway() < maxHeadwayAllowedInModel.getValue()
+										&& headway.getHeadway() > minHeadwayAllowedInModel.getValue())
+								{
+									addSample(departure,headway,dwelltime);
 								}else
 								{
-									logger.warn("Schedule adherence outside allowable range. "+previousArrival.getScheduledAdherence());
-								}
-							}else
-							{
-								logger.warn("Schedule adherence outside allowable range. "+departure.getScheduleAdherence());
-							}						
+									logger.warn("Headway outside allowable range . {}", headway);
+								}								
+							}
 						}
 					}
 				}

@@ -24,6 +24,8 @@ import org.transitclock.core.Indices;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.*;
+import org.transitclock.core.predictiongenerator.datafilter.TravelTimeDataFilter;
+import org.transitclock.core.predictiongenerator.datafilter.TravelTimeFilterFactory;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
 import org.transitclock.gtfs.DbConfig;
@@ -236,8 +238,12 @@ public class HistoricalPredictionLibrary {
 
 						if(travelTimeDetails.getTravelTime()!=-1)
 						{
-							times.add(travelTimeDetails);
-							num_found++;
+							TravelTimeDataFilter travelTimefilter = TravelTimeFilterFactory.getInstance();
+							if(!travelTimefilter.filter(travelTimeDetails.getDeparture(),travelTimeDetails.getArrival()))
+							{
+								times.add(travelTimeDetails);
+								num_found++;
+							}
 						}
 					}
 				}

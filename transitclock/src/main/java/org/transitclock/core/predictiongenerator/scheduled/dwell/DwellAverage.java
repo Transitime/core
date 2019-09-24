@@ -72,7 +72,7 @@ public class DwellAverage implements DwellModel, Serializable {
 		average.putSample(new Integer(9), null, null);
 		average.putSample(new Integer(2), null, null);
 		average.putSample(new Integer(2), null, null);
-		average.putSample(new Integer(2), null, null);
+		average.putSample(new Integer(11), null, null);
 		average.putSample(new Integer(2), null, null);
 		average.putSample(new Integer(2), null, null);
 		average.putSample(new Integer(2), null, null);
