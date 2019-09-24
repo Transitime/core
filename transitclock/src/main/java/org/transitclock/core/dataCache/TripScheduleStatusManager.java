@@ -3,11 +3,16 @@ package org.transitclock.core.dataCache;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
+import org.transitclock.config.LongConfigValue;
 import org.transitclock.core.VehicleState;
 
 import java.util.concurrent.TimeUnit;
 
 public class TripScheduleStatusManager {
+
+    private static LongConfigValue tripScheduleStatusExpireSec =
+            new LongConfigValue("transitclock.avl.tripScheduleStatusExpireSec", 60l,
+                    "The amount of time to keep a trip schedule status in cache.");
 
     private Cache<String,ScheduleRelationship> tripStatusCache;
 
@@ -22,7 +27,7 @@ public class TripScheduleStatusManager {
      */
     private TripScheduleStatusManager() {
         tripStatusCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .expireAfterWrite(tripScheduleStatusExpireSec.getValue(), TimeUnit.SECONDS)
                 .build();
     }
 
