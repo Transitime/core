@@ -3,6 +3,8 @@ package org.transitclock.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.predictiongenerator.datafilter.TravelTimeDataFilter;
+import org.transitclock.core.predictiongenerator.datafilter.TravelTimeFilterFactory;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.utils.Time;
@@ -19,6 +21,8 @@ public class TravelTimeDetails {
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(TravelTimeDetails.class);
+	
+	private static final TravelTimeDataFilter dataFilter=TravelTimeFilterFactory.getInstance();
 	
 	public IpcArrivalDeparture getDeparture() {
 		return departure;
@@ -52,12 +56,11 @@ public class TravelTimeDetails {
 	{
 		if(this.arrival!=null && this.departure!=null && arrival.isArrival() && departure.isDeparture())
 		{
-			long travelTime=this.arrival.getTime().getTime()-this.getDeparture().getTime().getTime();
-		
-			if(travelTime<=0||travelTime>maxTravelTime.getValue())
+			if(dataFilter.filter(departure, arrival))
 			{
 				return false;
-			}else
+			}
+			else
 			{
 				return true;
 			}

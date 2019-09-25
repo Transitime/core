@@ -28,6 +28,7 @@ import org.transitclock.core.predictiongenerator.datafilter.TravelTimeDataFilter
 import org.transitclock.core.predictiongenerator.datafilter.TravelTimeFilterFactory;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.Block;
+import org.transitclock.db.structs.PredictionEvent;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 
@@ -78,7 +79,8 @@ public class HistoricalPredictionLibrary {
 
 							}else
 							{
-								// must be going backwards
+								String description=found + " : " + currentArrivalDeparture;
+								PredictionEvent.create(currentVehicleState.getAvlReport(), currentVehicleState.getMatch(), PredictionEvent.TRAVELTIME_EXCEPTION, description);
 								return null;
 							}
 						}else
@@ -214,8 +216,6 @@ public class HistoricalPredictionLibrary {
 		 * which services use this trip and only 1ook on day service is
 		 * running
 		 */
-
-
 		for (int i = 0; i < num_days_look_back && num_found < num_days; i++) {
 
 			Date nearestDay = DateUtils.truncate(DateUtils.addDays(startDate, (i + 1) * -1), Calendar.DAY_OF_MONTH);

@@ -31,7 +31,7 @@
 		value="%msg%n" />
 
 	<property name="DATA_PATTERN"
-		value="%n%d{HH:mm:ss.SSS, ${logback.timezone:-Europe/Dublin}} %msg%n" />
+		value="%n%class{0} %d{HH:mm:ss.SSS, ${logback.timezone:-Europe/Dublin}} %msg%n" />
 
 	<!-- For logging to stdout logback status message for when logback is initializing -->
 	<!-- <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"
