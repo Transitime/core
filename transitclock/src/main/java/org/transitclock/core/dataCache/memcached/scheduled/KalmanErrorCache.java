@@ -1,9 +1,6 @@
 package org.transitclock.core.dataCache.memcached.scheduled;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.List;
-
+import net.spy.memcached.MemcachedClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.IntegerConfigValue;
@@ -14,9 +11,9 @@ import org.transitclock.core.dataCache.KalmanError;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.utils.Time;
 
-import flexjson.JSONDeserializer;
-import flexjson.JSONSerializer;
-import net.spy.memcached.MemcachedClient;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 public class KalmanErrorCache implements ErrorCache {
 
@@ -61,8 +58,7 @@ public class KalmanErrorCache implements ErrorCache {
 
 	@Override
 	public void putErrorValue(KalmanErrorCacheKey key, Double value) {
-		String jsonValue = new JSONSerializer().serialize(value);
-		memcachedClient.set(createKey(key), expiryDuration, jsonValue);
+		memcachedClient.set(createKey(key), expiryDuration, value);
 
 	}
 
