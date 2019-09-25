@@ -11,8 +11,9 @@ import org.transitclock.core.dataCache.KalmanError;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
 import org.transitclock.utils.Time;
 
-
-import net.spy.memcached.MemcachedClient;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 public class KalmanErrorCache implements ErrorCache {
 
@@ -44,7 +45,7 @@ public class KalmanErrorCache implements ErrorCache {
 	@Override
 	public KalmanError getErrorValue(KalmanErrorCacheKey key) {
 
-		Double value = (Double) memcachedClient.get(createKey(key));
+		KalmanError value = (KalmanError) memcachedClient.get(createKey(key));
 		return value;
 	}
 
