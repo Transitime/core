@@ -54,7 +54,7 @@ if (Integer.parseInt(numDays) > 31) {
 // all routes.
         String routeSql = "";
         if (routeId!=null && !routeId.trim().isEmpty()) {
-            routeSql = "  AND routeId='" + routeId + "' ";
+            routeSql = String.format(" AND (routeId='%1$s' OR routeShortName='%1$s')", routeId);
         }
 
 // Determine the source portion of the SQL. Default is to provide
