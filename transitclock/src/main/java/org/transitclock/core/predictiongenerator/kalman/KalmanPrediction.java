@@ -1,5 +1,7 @@
 package org.transitclock.core.predictiongenerator.kalman;
 
+import org.transitclock.config.BooleanConfigValue;
+
 /**
  * @author Sean Óg Crudden
  *
@@ -14,6 +16,10 @@ public class KalmanPrediction
 	 * @return KalmanPredictionResult which contains the predicted time and the last_prediction_error to be used in the next prediction calculation.
 	 * @throws Exception
 	 */
+	private static final BooleanConfigValue useaverage = new BooleanConfigValue (
+			"transitclock.prediction.kalman.useaverage", new Boolean(true), 
+			"Will use average travel time as opposed to last historical vehicle in Kalman prediction calculation."
+	);
 	public KalmanPredictionResult predict(TripSegment last_vehicle_segment,TripSegment historical_segments[], double last_prediction_error) throws Exception
 	{
 		KalmanPredictionResult result=null; 								
@@ -26,7 +32,7 @@ public class KalmanPrediction
 		
 		double loop_gain=1-gain;
 		
-		result=new KalmanPredictionResult(prediction(gain, loop_gain, historical_segments, last_vehicle_segment),filterError( variance, gain));
+		result=new KalmanPredictionResult(prediction(gain, loop_gain, historical_segments, last_vehicle_segment, average),filterError( variance, gain));
 						
 		return result;				
 	}
@@ -73,11 +79,17 @@ public class KalmanPrediction
 		return gain;				
 	}
 	
-	private double prediction(double gain, double loop_gain, TripSegment historical_segments[],  TripSegment last_vechicle_segment)	
+	private double prediction(double gain, double loop_gain, TripSegment historical_segments[],  TripSegment last_vechicle_segment, double average_duration)	
 	{
-		/* TODO This may be better use the historical average rather than just the vehicle on previous day. This would damping issues with last days value being dramtically different. */
-		long historical_duration=historical_segments[historical_segments.length-1].getDestination().getTime()-historical_segments[historical_segments.length-1].getOrigin().getTime();
-		
+				
+		double historical_duration=average_duration;
+
+		/* This may be better use the historical average rather than just the vehicle on previous day. This would damping issues with last days value being dramatically different. */
+		if(useaverage.getValue()==false)
+		{
+			historical_duration=historical_segments[historical_segments.length-1].getDestination().getTime()-historical_segments[historical_segments.length-1].getOrigin().getTime();
+		}
+							
 		long last_vehicle_duration=last_vechicle_segment.getDestination().getTime()-last_vechicle_segment.getOrigin().getTime();
 				
 		double prediction=(loop_gain*last_vehicle_duration)+(gain*historical_duration);
