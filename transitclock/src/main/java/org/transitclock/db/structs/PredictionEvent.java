@@ -126,7 +126,23 @@ public class PredictionEvent implements Serializable {
 	// Nice for providing context. 
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final String stopId;
-
+	
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private final String arrivalstopid;
+	
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private final String departurestopid;
+	
+	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
+	private final String referenceVehicleId;
+	
+	@Column
+	@Temporal(TemporalType.TIMESTAMP)
+	private final Date arrivalTime;
+	
+	@Column
+	@Temporal(TemporalType.TIMESTAMP)
+	private final Date departureTime;
 	
 	// Some standard prediciton event types
 	public static final String PREDICTION_VARIATION = "Prediction variation";
@@ -167,7 +183,7 @@ public class PredictionEvent implements Serializable {
 			String eventType, String description,
 			Location location,
 			String routeId, String routeShortName, String blockId,
-			String serviceId, String tripId, String stopId) {
+			String serviceId, String tripId, String stopId, String  arrivalStopId, String departureStopId, String referenceVehicleId, Date arrivalTime, Date departureTime) {
 		super();
 		this.time = time;
 		this.avlTime = avlTime;
@@ -182,6 +198,12 @@ public class PredictionEvent implements Serializable {
 		this.serviceId = serviceId;
 		this.tripId = tripId;
 		this.stopId = stopId;
+		this.arrivalstopid = arrivalStopId;
+		this.departurestopid = departureStopId;
+		this.referenceVehicleId = referenceVehicleId;
+		this.arrivalTime = arrivalTime;
+		this.departureTime= departureTime;
+		
 	}
 
 	/**
@@ -209,11 +231,11 @@ public class PredictionEvent implements Serializable {
 			String vehicleId, String eventType, String description,
 			Location location, String routeId,
 			String routeShortName, String blockId, String serviceId,
-			String tripId, String stopId) {
+			String tripId, String stopId,  String  arrivalStopId, String departureStopId, String referenceVehicleId, Date arrivalTime, Date departureTime) {
 		PredictionEvent predictionEvent =
 				new PredictionEvent(time, avlTime, vehicleId, eventType,
 						description, location, routeId, routeShortName, blockId,
-						serviceId, tripId, stopId);
+						serviceId, tripId, stopId, arrivalStopId, departureStopId,  referenceVehicleId, arrivalTime, departureTime);
 
 		// Log predictionEvent in log file
 		logger.info(predictionEvent.toString());
@@ -240,7 +262,7 @@ public class PredictionEvent implements Serializable {
 	 * @return The VehicleEvent constructed
 	 */
 	public static PredictionEvent create(AvlReport avlReport, TemporalMatch match,
-			String eventType, String description) {
+			String eventType, String description,  String  arrivalStopId, String departureStopId , String referenceVehicleId, Date arrivalTime, Date departureTime) {
 		// Get a log of the info from the possibly null match param
 		String routeId = match==null ? null : match.getTrip().getRouteId();
 		String routeShortName = 
@@ -253,7 +275,7 @@ public class PredictionEvent implements Serializable {
 		// Create and return the VehicleEvent
 		return create(Core.getInstance().getSystemDate(), avlReport.getDate(),
 				avlReport.getVehicleId(), eventType, description, avlReport.getLocation(),
-				routeId, routeShortName, blockId, serviceId, tripId, stopId);
+				routeId, routeShortName, blockId, serviceId, tripId, stopId, arrivalStopId, departureStopId, referenceVehicleId, arrivalTime, departureTime);
 	}
 	
 	/**
@@ -281,18 +303,83 @@ public class PredictionEvent implements Serializable {
 		this.serviceId = null;
 		this.tripId = null;
 		this.stopId = null;
+		this.arrivalstopid = null;
+		this.departurestopid = null;
+		this.referenceVehicleId = null;
+		this.departureTime = null;
+		this.arrivalTime = null;
 	}
 
-	
+	public String getArrivalstopid() {
+		return arrivalstopid;
+	}
+
+	public String getDeparturestopid() {
+		return departurestopid;
+	}
+
+	public Date getTime() {
+		return time;
+	}
+
+	public String getVehicleId() {
+		return vehicleId;
+	}
+
+	public String getEventType() {
+		return eventType;
+	}
+
+	public Date getAvlTime() {
+		return avlTime;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public Location getLocation() {
+		return location;
+	}
+
+	public String getRouteId() {
+		return routeId;
+	}
+
+	public String getRouteShortName() {
+		return routeShortName;
+	}
+
+	public String getBlockId() {
+		return blockId;
+	}
+
+	public String getServiceId() {
+		return serviceId;
+	}
+
+	public String getTripId() {
+		return tripId;
+	}
+
+	public String getStopId() {
+		return stopId;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((arrivalTime == null) ? 0 : arrivalTime.hashCode());
+		result = prime * result + ((arrivalstopid == null) ? 0 : arrivalstopid.hashCode());
 		result = prime * result + ((avlTime == null) ? 0 : avlTime.hashCode());
 		result = prime * result + ((blockId == null) ? 0 : blockId.hashCode());
+		result = prime * result + ((departureTime == null) ? 0 : departureTime.hashCode());
+		result = prime * result + ((departurestopid == null) ? 0 : departurestopid.hashCode());
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((eventType == null) ? 0 : eventType.hashCode());
 		result = prime * result + ((location == null) ? 0 : location.hashCode());
+		result = prime * result + ((referenceVehicleId == null) ? 0 : referenceVehicleId.hashCode());
 		result = prime * result + ((routeId == null) ? 0 : routeId.hashCode());
 		result = prime * result + ((routeShortName == null) ? 0 : routeShortName.hashCode());
 		result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
@@ -312,6 +399,16 @@ public class PredictionEvent implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		PredictionEvent other = (PredictionEvent) obj;
+		if (arrivalTime == null) {
+			if (other.arrivalTime != null)
+				return false;
+		} else if (!arrivalTime.equals(other.arrivalTime))
+			return false;
+		if (arrivalstopid == null) {
+			if (other.arrivalstopid != null)
+				return false;
+		} else if (!arrivalstopid.equals(other.arrivalstopid))
+			return false;
 		if (avlTime == null) {
 			if (other.avlTime != null)
 				return false;
@@ -321,6 +418,16 @@ public class PredictionEvent implements Serializable {
 			if (other.blockId != null)
 				return false;
 		} else if (!blockId.equals(other.blockId))
+			return false;
+		if (departureTime == null) {
+			if (other.departureTime != null)
+				return false;
+		} else if (!departureTime.equals(other.departureTime))
+			return false;
+		if (departurestopid == null) {
+			if (other.departurestopid != null)
+				return false;
+		} else if (!departurestopid.equals(other.departurestopid))
 			return false;
 		if (description == null) {
 			if (other.description != null)
@@ -336,6 +443,11 @@ public class PredictionEvent implements Serializable {
 			if (other.location != null)
 				return false;
 		} else if (!location.equals(other.location))
+			return false;
+		if (referenceVehicleId == null) {
+			if (other.referenceVehicleId != null)
+				return false;
+		} else if (!referenceVehicleId.equals(other.referenceVehicleId))
 			return false;
 		if (routeId == null) {
 			if (other.routeId != null)
@@ -377,126 +489,14 @@ public class PredictionEvent implements Serializable {
 
 	@Override
 	public String toString() {
-		return "PredictionEvent [" 
-				+ "time=" + Time.dateTimeStrMsec(time)
-				+ ", rShortName=" + routeShortName
-				+ ", stopId=" + stopId 
-				+ ", vehicleId=" + vehicleId
-				+ ", eventType=\"" + eventType + "\"" 
-				+ ", description=\"" + description + "\""
-				+ ", location=" + location 
-				+ ", blockId=" + blockId 
-				+ ", serviceId=" + serviceId
-				+ ", tripId=" + tripId 
-				+ ", routeId=" + routeId		
-				+ ", avlTime=" + Time.dateTimeStrMsec(avlTime)		
-				+ "]";
+		return "PredictionEvent [time=" + time + ", vehicleId=" + vehicleId + ", eventType=" + eventType + ", avlTime="
+				+ avlTime + ", description=" + description + ", location=" + location + ", routeId=" + routeId
+				+ ", routeShortName=" + routeShortName + ", blockId=" + blockId + ", serviceId=" + serviceId
+				+ ", tripId=" + tripId + ", stopId=" + stopId + ", arrivalstopid=" + arrivalstopid
+				+ ", departurestopid=" + departurestopid + ", referenceVehicleId=" + referenceVehicleId
+				+ ", arrivalTime=" + arrivalTime + ", departureTime=" + departureTime + "]";
 	}
 
-	/**
-	 * Reads in all VehicleEvents from the database that were between the
-	 * beginTime and endTime.
-	 * 
-	 * @param agencyId
-	 *            Which project getting data for
-	 * @param beginTime
-	 *            Specifies time range for query
-	 * @param endTime
-	 *            Specifies time range for query
-	 * @param sqlClause
-	 *            Optional. Can specify an SQL clause to winnow down the data,
-	 *            such as "AND routeId='71'".
-	 * @return
-	 */
-	public static List<PredictionEvent> getVehicleEvents(String agencyId,
-			Date beginTime, Date endTime, String sqlClause) {
-		IntervalTimer timer = new IntervalTimer();
-		
-		// Get the database session. This is supposed to be pretty light weight
-		Session session = HibernateUtils.getSession(agencyId);
 
-		// Create the query. Table name is case sensitive and needs to be the
-		// class name instead of the name of the db table.
-		String hql = "FROM VehicleEvent " +
-				"    WHERE time >= :beginDate " +
-				"      AND time < :endDate"; 
-		if (sqlClause != null)
-			hql += " " + sqlClause;
-		Query query = session.createQuery(hql);
-		
-		// Set the parameters
-		query.setTimestamp("beginDate", beginTime);
-		query.setTimestamp("endDate", endTime);
-		
-		try {
-			@SuppressWarnings("unchecked")
-			List<PredictionEvent> vehicleEvents = query.list();
-			logger.debug("Getting VehicleEvents from database took {} msec",
-					timer.elapsedMsec());
-			return vehicleEvents;
-		} catch (HibernateException e) {
-			logger.error(e.getMessage(), e);
-			return null;
-		} finally {
-			// Clean things up. Not sure if this absolutely needed nor if
-			// it might actually be detrimental and slow things down.
-			session.close();
-		}
-	}
 	
-	/***************** Getter/Setter methods ***************/
-	
-	/** 
-	 * @return the system time of when the event was created.
-	 */
-	public Date getTime() {
-		return time;
-	}
-
-	/**
-	 * @return the time of the AVL report that generated the event
-	 */
-	public Date getAvlTime() {
-		return avlTime;
-	}
-	
-	public String getVehicleId() {
-		return vehicleId;
-	}
-
-	public String getEventType() {
-		return eventType;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-	public Location getLocation() {
-		return location;
-	}
-
-	public String getRouteId() {
-		return routeId;
-	}
-
-	public String getRouteShortName() {
-		return routeShortName;
-	}
-	
-	public String getBlockId() {
-		return blockId;
-	}
-
-	public String getServiceId() {
-		return serviceId;
-	}
-	
-	public String getTripId() {
-		return tripId;
-	}
-
-	public String getStopId() {
-		return stopId;
-	}
-
 }
