@@ -154,9 +154,9 @@ function drawChart() {
 	         hAxis: {
 	            	title: 'Prediction Length (minutes)',
 	            	// So that last column is labeled
-	            	maxValue: 15,
+	            	maxValue: 20,
 	            	// Want a gridline for every minute, not just the default of 5 gridlines
-	       	        gridlines: {count: 16},
+	       	        gridlines: {count: 21},
 	       	        // Nice to show a faint line for every 30 seconds as well
 	            	minorGridlines: {count: 1}
 	       	    },

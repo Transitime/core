@@ -120,7 +120,7 @@ if (Integer.parseInt(numDays) > 31) {
                 + "WHERE "
                 + "1=1 "
 				+ SqlUtils.timeRangeClause(request, "arrivalDepartureTime", 30)
-                + "  AND "+predLengthSql+" < 900 "
+                + "  AND "+predLengthSql+" <= 1200 "
                 + routeSql
                 + sourceSql
                 + predTypeSql

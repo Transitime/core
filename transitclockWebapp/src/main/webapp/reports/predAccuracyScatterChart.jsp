@@ -126,9 +126,9 @@ if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.
           // Could use html tooltips so can format them but for now using regular ones
           // FIXME tooltip: {isHtml: false},
           hAxis: {
-        	  title: 'Prediction Time (secs)', 
+        	  title: 'Prediction Time (minutes)',
         	  minValue: 0, 
-        	  maxValue: 900, 
+        	  maxValue: 1200,
         	  ticks: [
         	          {v:60, f:'1'},
         	          {v:120, f:'2'},
@@ -144,7 +144,12 @@ if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.
         	          {v:720, f:'12'},
         	          {v:780, f:'13'},
         	          {v:840, f:'14'},
-        	          {v:900, f:'15'}]
+        	          {v:900, f:'15'},
+                      {v:960, f:'16'},
+                      {v:1020, f:'17'},
+                      {v:1080, f:'18'},
+                      {v:1140, f:'19'},
+                      {v:1200, f:'20'}]
                },
           vAxis: {title: 'Prediction Accuracy (secs) (postive means vehicle later than predicted)', 
           	  // Try to show accuracy on a consistent vertical axis and 

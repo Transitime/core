@@ -46,7 +46,7 @@ abstract public class PredictionAccuracyQuery {
 	private final Connection connection;
 	private String dbType = null;
 
-	protected static final int MAX_PRED_LENGTH = 900;
+	protected static final int MAX_PRED_LENGTH = 1200;
 	protected static final int PREDICTION_LENGTH_BUCKET_SIZE = 30;
 
 	// Keyed on source (so can show data for multiple sources at
@@ -300,7 +300,7 @@ abstract public class PredictionAccuracyQuery {
 				+ "WHERE arrivalDepartureTime BETWEEN ? "
 				+ "      AND TIMESTAMP '" + beginDateStr + "' + INTERVAL '" + numDays + " day' "
 				+ timeSql
-				+ "  AND predictedTime-predictionReadTime < '00:15:00' "
+				+ "  AND predictedTime-predictionReadTime < '00:20:00' "
 				+ routeSql
 				+ sourceSql 
 				+ predTypeSql;
@@ -317,7 +317,7 @@ abstract public class PredictionAccuracyQuery {
 				+ "AND DATE_ADD(CAST(? AS DATETIME), INTERVAL " + numDays + " day) " 
 				+ mySqlTimeSql
 				+ "  AND "
-				+ "abs(unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) < 900 " //15 mins
+				+ "abs(unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) < 1200 " //20 mins
 				// Filter out MBTA_seconds source since it is isn't
 				// significantly different from MBTA_epoch.
 				// TODO should clean this up by not having MBTA_seconds source
