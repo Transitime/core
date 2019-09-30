@@ -41,11 +41,11 @@ finding specific issues with predictions.">
   <li><a href="predAccuracyCsvParams.jsp?a=<%= agencyId %>"
     title="For downloading prediction accuracy data in CSV format.">
       Prediction Accuracy CSV Download</a></li>
-  <li><a href="routePerformanceTable.jsp?a=<%= agencyId %>"
+<%--  <li><a href="routePerformanceTable.jsp?a=<%= agencyId %>"
     title="Shows route performance, where performance is defined as the 
     number of ontime predictions over the total number of predicitons for a
     given route.">
-      Route Performance Table</a></li>
+      Route Performance Table</a></li>--%>
 </ul>
 
 <div id="subtitle">AVL Reports</div>
@@ -61,13 +61,13 @@ finding specific issues with predictions.">
       Last GPS Report by Vehicle</a></li>
 </ul>
 
-<div id="subtitle">Event Reports</div>
+<%--<div id="subtitle">Event Reports</div>
 	<ul class="choicesList">
 	  <li><a href="vehicleEventParams.jsp?a=<%= agencyId %>"
 	    title="Check that all Events for vehicle.">
 	      Event for vehicle</a></li>	  
 	</ul>
-</div>
+</div>--%>
 
 <div id="subtitle">Schedule Adherence Reports</div>
 <ul class="choicesList">
@@ -96,11 +96,11 @@ finding specific issues with predictions.">
     title="Displays in a table the schedule for a specified route. Stops listed 
     vertically which is useful for when there are not that many trips per day.">
       Schedule for Route (vertical stops)</a></li>
-    <li><a href="tripBlockRouteParams.jsp?a=<%= agencyId %>"
+    <%--<li><a href="tripBlockRouteParams.jsp?a=<%= agencyId %>"
            title="Show all blocks assigned to a route for the selected day with trip times">
-        Trip Blocks for Route</a></li>
-    <li><a href="realTimeSchAdhByVehicleParams.jsp?a=<%= agencyId %>"
-        title="Real time schedule adherence by vehicle">Real Time Schedule Adherence By Vehicle</a></li>
+        Trip Blocks for Route</a></li>--%>
+   <%-- <li><a href="realTimeSchAdhByVehicleParams.jsp?a=<%= agencyId %>"
+        title="Real time schedule adherence by vehicle">Real Time Schedule Adherence By Vehicle</a></li>--%>
 </ul>
 
 <div id="subtitle">Status Reports</div>
