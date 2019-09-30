@@ -16,13 +16,15 @@
  */
 package org.transitclock.ipc.interfaces;
 
+import org.transitclock.db.structs.Location;
+import org.transitclock.ipc.data.IpcCanceledTrip;
+import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.List;
-
-import org.transitclock.db.structs.Location;
-import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 
 /**
  * Defines the RMI interface used for obtaining predictions. 
@@ -98,7 +100,14 @@ public interface PredictionsInterface extends Remote {
 	public List<IpcPredictionsForRouteStopDest> get(
 			List<RouteStop> routeStops,	int predictionsPerStop)
 				throws RemoteException;
-	
+
+	/**
+	 * Returns a list of the latest canceled trips by vehicleId
+	 *
+	 */
+	public HashMap<String, IpcCanceledTrip> getAllCanceledTrips() throws RemoteException;
+
+
 	/**
 	 * Returns predictions based on the specified location.
 	 * 

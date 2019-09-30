@@ -16,15 +16,6 @@
  */
 package org.transitclock.core.dataCache;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -39,6 +30,9 @@ import org.transitclock.db.structs.VehicleConfig;
 import org.transitclock.ipc.data.IpcVehicleComplete;
 import org.transitclock.utils.ConcurrentHashMapNullKeyOk;
 import org.transitclock.utils.Time;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * For storing and retrieving vehicle information that can be used by clients.
@@ -510,7 +504,7 @@ public class VehicleDataCache {
 	 * @param vehicle
 	 */
 	private void updateVehiclesMap(IpcVehicleComplete vehicle) {
-		if (!vehicle.isForSchedBasedPred() || vehicle.isPredictable()) {
+		if (!vehicle.isForSchedBasedPred() || vehicle.isPredictable() || vehicle.isCanceled()) {
 			// Normal situation. Add vehicle to vehiclesMap
 			vehiclesMap.put(vehicle.getId(), vehicle);			
 		} else {

@@ -1,6 +1,6 @@
 /*
  * This file is part of Transitime.org
- * 
+ *
  * Transitime.org is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPL) as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -51,29 +51,29 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	private final Double distanceOfNextStopFromTripStart;
 	private final Double distanceAlongTrip;
 	private double headway;
-	
+
 	private static final long serialVersionUID = 8154105842499551461L;
 
 	/********************** Member Functions **************************/
 
 	/**
 	 * The constructor.
-	 * 
+	 *
 	 * @param vs The current vehicle state. Must not be null.
 	 */
 	public IpcVehicleComplete(VehicleState vs) {
 		super(vs);
-		
+
 		// If vehicle assigned then can set the parameters
 		Trip trip = vs.getTrip();
 		if (trip != null) {
-			List<String> stopIdsForTrip = 
+			List<String> stopIdsForTrip =
 					vs.getTrip().getTripPattern().getStopIds();
 			this.originStopId = stopIdsForTrip.get(0);
 			this.destinationId = stopIdsForTrip.get(stopIdsForTrip.size()-1);
-			
+
 			// Get the match. If match is just after a stop then adjust
-			// it to just before the stop so that can determine proper 
+			// it to just before the stop so that can determine proper
 			// stop ID and such.
 			SpatialMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();
 			// If vehicle is at a stop then "next" stop will actually be
@@ -86,7 +86,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				sumOfStopPathLengths += trip.getStopPath(spIdx).length();
 			}
 			this.distanceOfNextStopFromTripStart = sumOfStopPathLengths;
-			this.distanceAlongTrip = 
+			this.distanceAlongTrip =
 					sumOfStopPathLengths - this.distanceToNextStop;
 			if(vs.getHeadway()!=null)
 			{
@@ -103,9 +103,9 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			this.distanceAlongTrip =null; // Double.NaN;
 		}
 	}
-	
+
 	/**
-	 * Constructor used for when deserializing a proxy object. 
+	 * Constructor used for when deserializing a proxy object.
 	 *
 	 * @param blockId
 	 * @param blockAssignmentMethod
@@ -149,7 +149,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			Integer atOrNextGtfsStopSeq, String originStopId,
 			String destinationId, Double distanceToNextStop,
 
-			Double distanceOfNextStopFromTripStart, Double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled, boolean isAdded,
+			Double distanceOfNextStopFromTripStart, Double distanceAlongTrip, long freqStartTime, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude,boolean isCanceled,
 			double headway) {
 
 		super(blockId, blockAssignmentMethod, avl, pathHeading, routeId,
@@ -157,7 +157,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				predictable, schedBasedPred, realTimeSchdAdh, isDelayed,
 				isLayover, layoverDepartureTime, nextStopId, nextStopName,
 				vehicleType, tripStartEpochTime, atStop, atOrNextStopId,
-				atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled,isAdded);
+				atOrNextGtfsStopSeq, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled);
 
 
 		this.originStopId = originStopId;
@@ -167,12 +167,12 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		this.distanceAlongTrip = distanceAlongTrip;
 		this.headway=headway;
 	}
-	
+
 	/*
 	 * SerializationProxy is used so that this class can be immutable and so
 	 * that can do versioning of objects.
 	 */
-	protected static class CompleteVehicleSerializationProxy 
+	protected static class CompleteVehicleSerializationProxy
 		extends GtfsRealtimeVehicleSerializationProxy {
 		// Exact copy of fields of IpcCompleteVehicle enclosing class object
 		private String originStopId;
@@ -182,7 +182,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 		private Double distanceAlongTrip;
 		private double headway;
 		private static final short currentSerializationVersion = 0;
-		
+
 		private static final long serialVersionUID = 6982458672576764027L;
 
 		private CompleteVehicleSerializationProxy(IpcVehicleComplete v) {
@@ -194,7 +194,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			this.distanceAlongTrip = v.distanceAlongTrip;
 			this.headway=v.headway;
 		}
-		
+
 		/*
 		 * When object is serialized writeReplace() causes this
 		 * SerializationProxy object to be written. Write it in a custom way
@@ -205,10 +205,10 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				throws IOException {
 			// Write the data for IpcGtfsRealtimeVehicle super class
 			super.writeObject(stream);
-			
+
 			// Write the data for this class
 			stream.writeShort(currentSerializationVersion);
-			
+
 		    stream.writeObject(originStopId);
 		    stream.writeObject(destinationId);
 		    stream.writeObject(distanceToNextStop);
@@ -227,12 +227,12 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 
 			// If reading from a newer version of protocol then don't
 			// know how to handle it so throw exception
-			short readVersion = stream.readShort();			
+			short readVersion = stream.readShort();
 			if (currentSerializationVersion < readVersion) {
 				throw new IOException("Serialization error when reading "
 						+ getClass().getSimpleName()
-						+ " object. Read version=" + readVersion 
-						+ " but currently using software version=" 
+						+ " object. Read version=" + readVersion
+						+ " but currently using software version="
 						+ currentSerializationVersion);
 			}
 
@@ -245,7 +245,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			isCanceled=stream.readBoolean();
 			headway=stream.readDouble();
 		}
-		
+
 		/*
 		 * When an object is read in it will be a SerializatProxy object due to
 		 * writeReplace() being used by the enclosing class. When such an object
@@ -263,14 +263,14 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 					distanceToNextStop, distanceOfNextStopFromTripStart,
 
 					distanceAlongTrip, freqStartTime, holdingTime, predictedLatitude, predictedLongitude,isCanceled,
-					isAdded,headway);
+					headway);
 
 		}
 
 	} // End of class SiriVehicleSerializationProxy
-	
+
 	/*
-	 * Needed as part of using a SerializationProxy. When IpcSerialVehicle 
+	 * Needed as part of using a SerializationProxy. When IpcSerialVehicle
 	 * object is serialized the SerializationProxy will instead be used.
 	 */
 	private Object writeReplace() {
@@ -302,7 +302,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 	public Double getDistanceOfNextStopFromTripStart() {
 		return distanceOfNextStopFromTripStart;
 	}
-	
+
 	public Double getDistanceAlongTrip() {
 		return distanceAlongTrip;
 	}
@@ -313,13 +313,13 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 
 	@Override
 	public String toString() {
-		return "IpcExtVehicle [" 
+		return "IpcExtVehicle ["
 				+ "vehicleId=" + getId()
-				+ ", blockId=" + getBlockId() 
+				+ ", blockId=" + getBlockId()
 				+ ", blockAssignmentMethod=" + getBlockAssignmentMethod()
 				+ ", routeId=" + getRouteId()
 				+ ", routeShortName=" + getRouteShortName()
-				+ ", routeName=" + getRouteName() 
+				+ ", routeName=" + getRouteName()
 				+ ", tripId=" + getTripId()
 				+ ", tripPatternId=" + getTripPatternId()
 				+ ", isTripUnscheduled=" + isTripUnscheduled()
@@ -327,14 +327,14 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", headsign=" + getHeadsign()
 				+ ", predictable=" + isPredictable()
 				+ ", schedBasedPred=" + isForSchedBasedPred()
-				+ ", realTimeSchedAdh=" + getRealTimeSchedAdh() 
+				+ ", realTimeSchedAdh=" + getRealTimeSchedAdh()
 				+ ", isDelayed=" + isDelayed()
 				+ ", isLayover=" + isLayover()
-				+ ", layoverDepartureTime=" 
+				+ ", layoverDepartureTime="
 					+ Time.timeStrNoTimeZone(getLayoverDepartureTime())
-				+ ", nextStopId=" + getNextStopId() 
+				+ ", nextStopId=" + getNextStopId()
 				+ ", avl=" + getAvl()
-				+ ", heading=" + getHeading() 
+				+ ", heading=" + getHeading()
 				+ ", vehicleType=" + getVehicleType()
 				+ ", atStop=" + isAtStop()
 				+ ", atOrNextStopId=" + getAtOrNextStopId()
@@ -342,14 +342,14 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 				+ ", tripStartEpochTime=" + getTripStartEpochTime()
 				+ ", tripStartEpochTime=" + new Date(getTripStartEpochTime())
 				+ ", isCanceled="   + isCanceled()
-				+ ", originStopId="	+ originStopId 
+				+ ", originStopId="	+ originStopId
 				+ ", headway=" + headway
-				+ ", distanceToNextStop=" 
+				+ ", distanceToNextStop="
 					+ Geo.distanceFormat(distanceToNextStop)
-				+ ", distanceOfNextStopFromTripStart=" 
+				+ ", distanceOfNextStopFromTripStart="
 					+ Geo.distanceFormat(distanceOfNextStopFromTripStart)
-				+ ", distanceAlongTrip=" 
-					+ Geo.distanceFormat(distanceAlongTrip) 
+				+ ", distanceAlongTrip="
+					+ Geo.distanceFormat(distanceAlongTrip)
 				+ "]";
 	}
 

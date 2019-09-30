@@ -87,17 +87,6 @@ public class VehicleState {
 	//Used for schedPred AVL. Identify if trip is canceled.
 	private boolean isCanceled;
 
-	private boolean isAdded;
-
-	public enum ScheduleStatus {
-		SCHEDULED,
-		UNSCHEDULED,
-		CANCELED,
-		ADDED,
-	}
-
-	private ScheduleStatus scheduleStatus;
-
 	public Headway getHeadway() {
 		return headway;
 	}
@@ -1029,25 +1018,7 @@ public class VehicleState {
 
 	}
 	public boolean isCanceled() {
-		if(scheduleStatus == ScheduleStatus.CANCELED){
-			return true;
-		}
 		return isCanceled;
-	}
-
-	public void setAdded(boolean isAdded) {
-		this.isAdded = isAdded;
-	}
-
-	public boolean isAdded() {
-		if(scheduleStatus == ScheduleStatus.ADDED){
-			return true;
-		}
-		return this.isAdded;
-	}
-
-	public void setScheduleStatus(ScheduleStatus scheduleStatus){
-		this.scheduleStatus = scheduleStatus;
 	}
 
 }

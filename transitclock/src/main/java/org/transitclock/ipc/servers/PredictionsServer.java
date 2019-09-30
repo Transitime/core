@@ -16,15 +16,11 @@
  */
 package org.transitclock.ipc.servers;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.ipc.data.IpcCanceledTrip;
+import org.transitclock.core.dataCache.CanceledTripManager;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.db.structs.Location;
 import org.transitclock.gtfs.StopsByLoc;
@@ -34,6 +30,9 @@ import org.transitclock.ipc.interfaces.PredictionsInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
+
+import java.rmi.RemoteException;
+import java.util.*;
 
 /**
  * Implements the PredictionsInterface interface on the server side such that a
@@ -129,6 +128,16 @@ public class PredictionsServer
 		return predictionDataCache.getAllPredictions(Integer.MAX_VALUE, 
 				maxSystemTimeForPrediction);
 	}
+
+	/**
+	 * Gets a vehicle/trip map of all of the canceled trips
+	 *
+	 */
+	@Override
+	public HashMap<String, IpcCanceledTrip> getAllCanceledTrips(){
+		return CanceledTripManager.getInstance().getAll();
+	}
+
 
 	// If stops are relatively close then should order routes based on route
 	// order instead of distance.

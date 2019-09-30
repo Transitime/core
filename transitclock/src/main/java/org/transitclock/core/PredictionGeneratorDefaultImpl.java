@@ -184,7 +184,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip,
 					predictionTime,	predictionTime, indices.atEndOfTrip(),
 					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain, ArrivalOrDeparture.ARRIVAL,
-					scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled(), vehicleState.isAdded());
+					scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
 
 		} else {
 			
@@ -300,7 +300,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 							predictionForNextStopCalculation,
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE, scheduleDeviation,
-							freqStartTime, tripCounter,vehicleState.isCanceled(), vehicleState.isAdded());
+							freqStartTime, tripCounter,vehicleState.isCanceled());
 
 				} else {
 					// Use the expected departure times, possibly adjusted for 
@@ -309,7 +309,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 							trip, expectedDepartureTime, expectedDepartureTime,
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain, ArrivalOrDeparture.DEPARTURE,
-							scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled(), vehicleState.isAdded());
+							scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
 
 				}
 			} else {
@@ -320,7 +320,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 						predictionTime + expectedStopTimeMsec, 
 						indices.atEndOfTrip(), affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
 						ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime,
-						tripCounter,vehicleState.isCanceled(), vehicleState.isAdded());
+						tripCounter,vehicleState.isCanceled());
 			}
 		}			
 	}

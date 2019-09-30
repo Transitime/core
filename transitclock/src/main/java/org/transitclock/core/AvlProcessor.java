@@ -29,7 +29,7 @@ import org.transitclock.core.SpatialMatcher.MatchingType;
 import org.transitclock.core.autoAssigner.AutoBlockAssigner;
 import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.dataCache.PredictionDataCache;
-import org.transitclock.core.dataCache.TripScheduleStatusManager;
+import org.transitclock.core.dataCache.CanceledTripManager;
 import org.transitclock.core.dataCache.VehicleDataCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.db.structs.*;
@@ -171,7 +171,7 @@ public class AvlProcessor {
 		VehicleState vehicleState = VehicleStateManager.getInstance()
 				.getVehicleState(vehicleId);
 
-		vehicleState.setScheduleStatus(getScheduleStatus(vehicleState));
+		vehicleState.setCanceled(isCanceled(vehicleState));
 
 		// Create a VehicleEvent to record what happened
 		AvlReport avlReport = vehicleState.getAvlReport();
@@ -1361,7 +1361,15 @@ public class AvlProcessor {
 		synchronized (vehicleState) {
 			// Keep track of last AvlReport even if vehicle not predictable.
 			vehicleState.setAvlReport(avlReport);
-			vehicleState.setScheduleStatus(getScheduleStatus(vehicleState));
+			vehicleState.setCanceled(isCanceled(vehicleState));
+
+			// If asigned trip is canceled, do shouldn't be generating
+			// predictions. Update vehiclestate to reflect canceled
+			// status then return.
+			if (vehicleState.isCanceled()) {
+				VehicleDataCache.getInstance().updateVehicle(vehicleState);
+				return;
+			}
 
 			// If part of consist and shouldn't be generating predictions
 			// and such and shouldn't grab assignment the simply return
@@ -1540,7 +1548,7 @@ public class AvlProcessor {
 		synchronized (vehicleState) {
 			// Update AVL report for cached VehicleState
 			vehicleState.setAvlReport(avlReport);
-			vehicleState.setScheduleStatus(getScheduleStatus(vehicleState));
+			vehicleState.setCanceled(isCanceled(vehicleState));
 
 			// Let vehicle data cache know that the vehicle state was updated
 			// so that new IPC vehicle data will be created and cached and
@@ -1549,18 +1557,17 @@ public class AvlProcessor {
 		}
 	}
 
-	private VehicleState.ScheduleStatus getScheduleStatus(VehicleState vehicleState) {
+	private boolean isCanceled(VehicleState vehicleState) {
 
 		AvlReport report = vehicleState.getAvlReport();
+		String vehicleId = report.getVehicleId();
 		String tripId = getTripId(report);
 
-		if(tripId != null){
-			VehicleState.ScheduleStatus scheduleStatus = TripScheduleStatusManager.getInstance()
-					.getScheduleRelationship(tripId);
-			return scheduleStatus;
+		if(vehicleId != null && tripId != null){
+			return CanceledTripManager.getInstance().isCanceled(vehicleId, tripId);
 		}
 
-		return VehicleState.ScheduleStatus.SCHEDULED;
+		return false;
 	}
 
 	private String getTripId(AvlReport report) {

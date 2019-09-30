@@ -167,10 +167,6 @@ public class GtfsRtVehicleFeed {
 			return TripDescriptor.ScheduleRelationship.CANCELED;
 		}
 
-		if (prediction.isAdded()){
-			return TripDescriptor.ScheduleRelationship.ADDED;
-		}
-
 		return TripDescriptor.ScheduleRelationship.SCHEDULED;
 
 	}
