@@ -25,13 +25,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.data.IpcPredictionComparator;
 import org.transitclock.api.utils.AgencyTimezoneCache;
+import org.transitclock.api.utils.TripFormatter;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
+import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.ipc.data.IpcSkippedStop;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
@@ -76,7 +78,11 @@ public class GtfsRtTripFeed {
 			"transitclock.api.includeTripUpdateDelay", false,
 			"Whether or not to include delay in the TripUpdate message");
 	private static final boolean INCLUDE_TRIP_UPDATE_DELAY = includeTripUpdateDelay.getValue();
-	
+
+	private static BooleanConfigValue includeSkippedStops = new BooleanConfigValue(
+			"transitclock.api.includeSkippedStops", false,
+			"Whether or not to include delay in the TripUpdate message");
+	private static final boolean INCLUDE_SKIPPED_STOPS = includeSkippedStops.getValue();
 	
 	// For when creating StopTimeEvent for schedule based prediction  
 	// 5 minutes (300 seconds)
@@ -111,7 +117,7 @@ public class GtfsRtTripFeed {
 	 * @param predsForTrip
 	 * @return
 	 */
-	private TripUpdate createTripUpdate(List<IpcPrediction> predsForTrip) {
+	private TripUpdate createTripUpdate(List<IpcPrediction> predsForTrip, HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops) {
 		// Create the parent TripUpdate object that is returned.
 		TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
 
@@ -173,6 +179,11 @@ public class GtfsRtTripFeed {
 		// according to the GTFS-RT spec, predictions need to be sorted by gtfs stop seq
 		Collections.sort(predsForTrip, new GtfsStopSequenceComparator());
 
+		Set<IpcSkippedStop> skippedStopsForTrip = null;
+		if(allSkippedStops != null && !allSkippedStops.isEmpty()) {
+			skippedStopsForTrip = allSkippedStops.get(TripFormatter.getFormattedTripId(tripId));
+		}
+
 		// Add the StopTimeUpdate information for each prediction
 		if(!firstPred.isCanceled())
 		{
@@ -208,7 +219,7 @@ public class GtfsRtTripFeed {
 					stopTimeUpdate.setDeparture(stopTimeEvent);
 
 				//The relationship should always be SCHEDULED if departure or arrival time is given.
-				stopTimeUpdate.setScheduleRelationship(StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+				stopTimeUpdate.setScheduleRelationship(getStopScheduleRelationship(stopTimeUpdate, skippedStopsForTrip));
 
 				tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 			}
@@ -219,6 +230,19 @@ public class GtfsRtTripFeed {
 		// Return the results
 		return tripUpdate.build();
 	}
+
+	private StopTimeUpdate.ScheduleRelationship getStopScheduleRelationship(StopTimeUpdate.Builder stopTimeUpdate,
+																			Set<IpcSkippedStop> skippedStopsForTrip){
+		if(skippedStopsForTrip != null && !skippedStopsForTrip.isEmpty()) {
+			IpcSkippedStop stop = new IpcSkippedStop(stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
+			if (skippedStopsForTrip.contains(stop)) {
+				return StopTimeUpdate.ScheduleRelationship.SKIPPED;
+			}
+		}
+		return StopTimeUpdate.ScheduleRelationship.SCHEDULED;
+	}
+
+
 
 	private TripUpdate createCanceledTripUpdate(String vehicleId, IpcCanceledTrip canceledTrip){
 		// Create the parent TripUpdate object that is returned.
@@ -254,7 +278,7 @@ public class GtfsRtTripFeed {
 
 	private boolean isTripCanceledAndCached(List<IpcPrediction> predictions, Map<String, IpcCanceledTrip> canceledTrips) {
 		IpcPrediction firstPred = predictions.get(0);
-		String tripId = firstPred.getTripId();
+		String tripId = TripFormatter.getFormattedTripId(firstPred.getTripId());
 		String vehicleId = firstPred.getVehicleId();
 
 		IpcCanceledTrip canceledTrip = canceledTrips.get(vehicleId);
@@ -286,12 +310,21 @@ public class GtfsRtTripFeed {
 		Comparator<IpcPrediction> comparator=new IpcPredictionComparator();
 
         HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
+		HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops = new HashMap<>();
 
         try {
             allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
 		} catch (RemoteException e) {
             logger.error("Exception when getting all canceled trips from RMI", e);
         }
+
+		if(INCLUDE_SKIPPED_STOPS) {
+			try {
+				allSkippedStops = PredictionsInterfaceFactory.get(agencyId).getAllSkippedStops();
+			} catch (RemoteException e) {
+				logger.error("Exception when getting all skipped stops from RMI", e);
+			}
+		}
 
         // For each trip...
 		for (List<IpcPrediction> predsForTrip : predsByTripMap.values()) {
@@ -316,7 +349,7 @@ public class GtfsRtTripFeed {
 						{
 							FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
 									.setId(map.get(key).get(0).getVehicleId());						
-							TripUpdate tripUpdate = createTripUpdate(map.get(key));
+							TripUpdate tripUpdate = createTripUpdate(map.get(key), allSkippedStops);
 							if(tripUpdate == null) continue;
 							feedEntity.setTripUpdate(tripUpdate);		
 							message.addEntity(feedEntity);
@@ -332,7 +365,7 @@ public class GtfsRtTripFeed {
 				FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
 						.setId(predsForTrip.get(0).getTripId());
 				try {				
-					TripUpdate tripUpdate = createTripUpdate(predsForTrip);
+					TripUpdate tripUpdate = createTripUpdate(predsForTrip, allSkippedStops);
 					if(tripUpdate == null) continue;
 					feedEntity.setTripUpdate(tripUpdate);
 		    		message.addEntity(feedEntity);
@@ -364,6 +397,8 @@ public class GtfsRtTripFeed {
 		
 		return message.build();
 	}
+
+
 	private boolean isFrequencyBasedTrip(List<IpcPrediction> predsForTrip)		
 	{
 		for(IpcPrediction prediction:predsForTrip) 

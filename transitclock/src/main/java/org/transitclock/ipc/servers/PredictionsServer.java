@@ -19,6 +19,7 @@ package org.transitclock.ipc.servers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.core.dataCache.SkippedStopsManager;
 import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.core.dataCache.CanceledTripManager;
 import org.transitclock.core.dataCache.PredictionDataCache;
@@ -26,6 +27,7 @@ import org.transitclock.db.structs.Location;
 import org.transitclock.gtfs.StopsByLoc;
 import org.transitclock.gtfs.StopsByLoc.StopInfo;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
+import org.transitclock.ipc.data.IpcSkippedStop;
 import org.transitclock.ipc.interfaces.PredictionsInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
 import org.transitclock.utils.IntervalTimer;
@@ -129,13 +131,20 @@ public class PredictionsServer
 				maxSystemTimeForPrediction);
 	}
 
-	/**
-	 * Gets a vehicle/trip map of all of the canceled trips
-	 *
+	/* (non-Javadoc)
+	 * @see org.transitclock.ipc.interfaces.PredictionsInterface#getAllCanceledTrips()
 	 */
 	@Override
 	public HashMap<String, IpcCanceledTrip> getAllCanceledTrips(){
 		return CanceledTripManager.getInstance().getAll();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.transitclock.ipc.interfaces.PredictionsInterface#getAllSkippedStops()
+	 */
+	@Override
+	public HashMap<String, HashSet<IpcSkippedStop>> getAllSkippedStops(){
+		return SkippedStopsManager.getInstance().getAll();
 	}
 
 
