@@ -23,7 +23,10 @@ import com.google.transit.realtime.GtfsRealtime.VehiclePosition.VehicleStopStatu
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.utils.AgencyTimezoneCache;
+import org.transitclock.api.utils.TripFormatter;
+import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
 import org.transitclock.ipc.clients.VehiclesInterfaceFactory;
+import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.ipc.data.IpcVehicleGtfsRealtime;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 import org.transitclock.utils.Time;
@@ -33,6 +36,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * For creating GTFS-realtime Vehicle feed. The data is obtained via RMI.
@@ -161,6 +166,45 @@ public class GtfsRtVehicleFeed {
 		return vehiclePosition.build();
 	}
 
+	private VehiclePosition createCanceledVehiclePosition(String vehicleId, IpcCanceledTrip canceledTrip) throws ParseException {
+		// Create the parent VehiclePosition object that is returned.
+		VehiclePosition.Builder vehiclePosition = VehiclePosition.newBuilder();
+		TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
+
+		if(canceledTrip.getRouteId() != null){
+			tripDescriptor.setRouteId(canceledTrip.getRouteId());
+		}
+
+		if(canceledTrip.getTripId() != null){
+			tripDescriptor.setTripId(canceledTrip.getTripId());
+		}
+
+		if(canceledTrip.getTripStartDate() != null){
+			tripDescriptor.setStartDate(canceledTrip.getTripStartDate());
+		}
+
+		TripDescriptor.ScheduleRelationship scheduleRelationship = TripDescriptor.ScheduleRelationship.CANCELED;
+
+		vehiclePosition.setTrip(tripDescriptor);
+
+
+		// Add the VehicleDescriptor information
+		VehicleDescriptor.Builder vehicleDescriptor =
+				VehicleDescriptor.newBuilder().setId(vehicleId);
+
+		vehiclePosition.setVehicle(vehicleDescriptor);
+
+		// Add the Position information
+		Position.Builder position =
+				Position.newBuilder().setLatitude(canceledTrip.getLatitude())
+						.setLongitude(canceledTrip.getLongitude());
+
+		vehiclePosition.setPosition(position);
+
+		// Return the results
+		return vehiclePosition.build();
+	}
+
 	private TripDescriptor.ScheduleRelationship getScheduleRelationship(IpcVehicleGtfsRealtime prediction){
 
 		if(prediction.isCanceled()){
@@ -191,10 +235,21 @@ public class GtfsRtVehicleFeed {
 								System.currentTimeMillis() / Time.MS_PER_SEC);
 		message.setHeader(feedheader);
 
+		HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
+
+		try {
+			allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
+		} catch (RemoteException e) {
+			logger.error("Exception when getting all canceled trips from RMI", e);
+		}
+
 		for (IpcVehicleGtfsRealtime vehicle : vehicles) {
+			if(isVehicleAndTripCanceledAndCached(vehicle, allCanceledTrips)){
+				continue;
+			}
+
 			FeedEntity.Builder vehiclePositionEntity =
 					FeedEntity.newBuilder().setId(vehicle.getId());
-
 			try {
 				VehiclePosition vehiclePosition =
 						createVehiclePosition(vehicle);
@@ -203,6 +258,24 @@ public class GtfsRtVehicleFeed {
 			} catch (Exception e) {
 				logger.error("Error parsing vehicle data for vehicle={}",
 						vehicle, e);
+			}
+		}
+
+		for(Map.Entry<String, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
+			String vehicleId = entry.getKey();
+			IpcCanceledTrip canceledTrip = entry.getValue();
+			if(canceledTrip != null){
+				FeedEntity.Builder vehiclePositionEntity =
+						FeedEntity.newBuilder().setId(vehicleId);
+				try {
+					VehiclePosition vehiclePosition =
+							createCanceledVehiclePosition(vehicleId, canceledTrip);
+					vehiclePositionEntity.setVehicle(vehiclePosition);
+					message.addEntity(vehiclePositionEntity);
+				} catch (Exception e) {
+					logger.error("Error parsing vehicle data for canceled trip vehicle={}",
+							vehicleId, e);
+				}
 			}
 		}
 
@@ -225,6 +298,19 @@ public class GtfsRtVehicleFeed {
 			logger.error("Exception when getting vehicles from RMI", e);
 		}
 		return vehicles;
+	}
+
+	private boolean isVehicleAndTripCanceledAndCached(IpcVehicleGtfsRealtime vehicle, Map<String, IpcCanceledTrip> canceledTrips) {
+		String tripId = TripFormatter.getFormattedTripId(vehicle.getTripId());
+		String vehicleId = vehicle.getId();
+
+		IpcCanceledTrip canceledTrip = canceledTrips.get(vehicleId);
+
+		if(canceledTrip != null && canceledTrip.getTripId() != null && canceledTrip.getTripId().equalsIgnoreCase(tripId)){
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

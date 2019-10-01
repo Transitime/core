@@ -8,8 +8,8 @@ public class IpcCanceledTrip implements Serializable {
     private String routeId;
     private String tripStartDate;
     private long timeStamp;
-
-
+    private float latitude;
+    private float longitude;
 
     public IpcCanceledTrip(String tripId, String routeId, String tripStartTime, long timeStamp){
         this.tripId = tripId;
@@ -50,19 +50,38 @@ public class IpcCanceledTrip implements Serializable {
         this.timeStamp = timeStamp;
     }
 
+    public float getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(float latitude) {
+        this.latitude = latitude;
+    }
+
+    public float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(float longitude) {
+        this.longitude = longitude;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         IpcCanceledTrip that = (IpcCanceledTrip) o;
-        return tripId.equals(that.tripId) &&
+        return timeStamp == that.timeStamp &&
+                Float.compare(that.latitude, latitude) == 0 &&
+                Float.compare(that.longitude, longitude) == 0 &&
+                Objects.equals(tripId, that.tripId) &&
                 Objects.equals(routeId, that.routeId) &&
                 Objects.equals(tripStartDate, that.tripStartDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tripId, routeId, tripStartDate);
+        return Objects.hash(tripId, routeId, tripStartDate, timeStamp, latitude, longitude);
     }
 
     @Override
@@ -72,6 +91,8 @@ public class IpcCanceledTrip implements Serializable {
                 ", routeId='" + routeId + '\'' +
                 ", tripStartDate='" + tripStartDate + '\'' +
                 ", timeStamp=" + timeStamp +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
                 '}';
     }
 }

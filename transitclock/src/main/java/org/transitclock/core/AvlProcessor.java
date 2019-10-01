@@ -171,8 +171,6 @@ public class AvlProcessor {
 		VehicleState vehicleState = VehicleStateManager.getInstance()
 				.getVehicleState(vehicleId);
 
-		vehicleState.setCanceled(isCanceled(vehicleState));
-
 		// Create a VehicleEvent to record what happened
 		AvlReport avlReport = vehicleState.getAvlReport();
 		TemporalMatch lastMatch = vehicleState.getMatch();
@@ -1361,13 +1359,10 @@ public class AvlProcessor {
 		synchronized (vehicleState) {
 			// Keep track of last AvlReport even if vehicle not predictable.
 			vehicleState.setAvlReport(avlReport);
-			vehicleState.setCanceled(isCanceled(vehicleState));
 
 			// If asigned trip is canceled, do shouldn't be generating
-			// predictions. Update vehiclestate to reflect canceled
-			// status then return.
-			if (vehicleState.isCanceled()) {
-				VehicleDataCache.getInstance().updateVehicle(vehicleState);
+			// predictions.
+			if(isCanceled(vehicleState)){
 				return;
 			}
 
@@ -1548,7 +1543,6 @@ public class AvlProcessor {
 		synchronized (vehicleState) {
 			// Update AVL report for cached VehicleState
 			vehicleState.setAvlReport(avlReport);
-			vehicleState.setCanceled(isCanceled(vehicleState));
 
 			// Let vehicle data cache know that the vehicle state was updated
 			// so that new IPC vehicle data will be created and cached and

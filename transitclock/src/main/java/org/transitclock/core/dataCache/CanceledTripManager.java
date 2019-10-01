@@ -4,8 +4,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.transitclock.config.LongConfigValue;
 import org.transitclock.ipc.data.IpcCanceledTrip;
+import org.transitclock.ipc.data.IpcSkippedStop;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +18,8 @@ public class CanceledTripManager {
                     "The amount of time to keep a trip schedule status in cache.");
 
     private Cache<String, IpcCanceledTrip> canceledTripCache;
+
+    private Cache<String, List<IpcSkippedStop>> skippedStopsCache;
 
     // This is a singleton class
     private static CanceledTripManager singleton = new CanceledTripManager();
@@ -61,20 +63,11 @@ public class CanceledTripManager {
 
     public synchronized void putAll(Map<String, IpcCanceledTrip> tripStatusMap){
         canceledTripCache.putAll(tripStatusMap);
-        System.out.println("temp");
     }
 
-    public HashMap<String, IpcCanceledTrip> getAll(){
+    public synchronized HashMap<String, IpcCanceledTrip> getAll(){
         HashMap<String, IpcCanceledTrip> canceledTripMap = new HashMap(canceledTripCache.asMap());
         return canceledTripMap;
-    }
-
-    public List<IpcCanceledTrip> getAllList(){
-        List<IpcCanceledTrip> list = new ArrayList<>();
-        for(Map.Entry<String, IpcCanceledTrip> entry: canceledTripCache.asMap().entrySet()){
-            list.add(entry.getValue());
-        }
-        return list;
     }
 
 }
