@@ -16,9 +16,6 @@
  */
 package org.transitclock.core.blockAssigner;
 
-import java.util.Collection;
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -28,6 +25,8 @@ import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.utils.Time;
+
+import java.util.Collection;
 
 /**
  * Singleton class that handles block assignments from AVL feed.
@@ -133,10 +132,11 @@ public class BlockAssigner {
                     if (config.getServiceIdSuffix()) {
                         for (String serviceId : Core.getInstance().getDbConfig().getCurrentServiceIds()) {
                             Trip tripPrefix = config.getTrip(avlReport.getAssignmentId() + "-" + serviceId);
+                            int secondsIntoDay = 120 * Time.SEC_PER_MIN;
                             if (tripPrefix != null
                                     && tripPrefix.getBlock() != null
                                     && tripPrefix.getBlock()
-                                    .isActive(new Date(), Core.getInstance().getTime().getSecondsIntoDay(new Date()), -1)) {
+                                    .isActive( Core.getInstance().getSystemTime(), secondsIntoDay)){
                                 Block blockPrefix = tripPrefix.getBlock();
                                 logger.debug("For vehicleId={} the trip assigngment from "
                                                 + "the AVL feed is tripId={} and serviceId={} which corresponds to "
