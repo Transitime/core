@@ -5,6 +5,7 @@ import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
+import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,9 @@ import org.transitclock.utils.IntervalTimer;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public abstract class GtfsRtTripUpdatesReaderBase {
 
@@ -87,22 +90,24 @@ public abstract class GtfsRtTripUpdatesReaderBase {
         int counter = 0;
         for (FeedEntity entity : message.getEntityList()) {
             // If no trip in the entity then nothing to process
-            if (!entity.hasTripUpdate())
+            if (!entity.hasTripUpdate() || !entity.hasVehicle())
                 continue;
 
             // Get the object describing the trip
             TripUpdate tripUpdate = entity.getTripUpdate();
+            GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
 
             TripDescriptor trip = getTrip(tripUpdate);
+            VehicleDescriptor vehicle = vehiclePosition.getVehicle();
 
-            if(trip == null)
+            if(trip == null || vehicle == null)
                 continue;
 
             HashSet<IpcSkippedStop> skippedStops = new HashSet<>();
             for(TripUpdate.StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()){
                 if(stopTimeUpdate.hasScheduleRelationship() &&
                         stopTimeUpdate.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED){
-                    skippedStops.add(new IpcSkippedStop(stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence()));
+                    skippedStops.add(new IpcSkippedStop(vehicle.getId(), stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence()));
                 }
             }
 

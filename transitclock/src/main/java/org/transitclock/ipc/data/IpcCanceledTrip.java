@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class IpcCanceledTrip implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private String tripId;
     private String routeId;
     private String tripStartDate;

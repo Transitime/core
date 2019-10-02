@@ -219,7 +219,7 @@ public class GtfsRtTripFeed {
 					stopTimeUpdate.setDeparture(stopTimeEvent);
 
 				//The relationship should always be SCHEDULED if departure or arrival time is given.
-				stopTimeUpdate.setScheduleRelationship(getStopScheduleRelationship(stopTimeUpdate, skippedStopsForTrip));
+				stopTimeUpdate.setScheduleRelationship(getStopScheduleRelationship(vehicleId, stopTimeUpdate, skippedStopsForTrip));
 
 				tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 			}
@@ -231,10 +231,10 @@ public class GtfsRtTripFeed {
 		return tripUpdate.build();
 	}
 
-	private StopTimeUpdate.ScheduleRelationship getStopScheduleRelationship(StopTimeUpdate.Builder stopTimeUpdate,
+	private StopTimeUpdate.ScheduleRelationship getStopScheduleRelationship(String vehicleId, StopTimeUpdate.Builder stopTimeUpdate,
 																			Set<IpcSkippedStop> skippedStopsForTrip){
 		if(skippedStopsForTrip != null && !skippedStopsForTrip.isEmpty()) {
-			IpcSkippedStop stop = new IpcSkippedStop(stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
+			IpcSkippedStop stop = new IpcSkippedStop(vehicleId, stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
 			if (skippedStopsForTrip.contains(stop)) {
 				return StopTimeUpdate.ScheduleRelationship.SKIPPED;
 			}
