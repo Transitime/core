@@ -202,8 +202,10 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 					
 					if(tripDescriptor.hasScheduleRelationship() &&
 							tripDescriptor.getScheduleRelationship() == TripDescriptor.ScheduleRelationship.CANCELED){
-						cancelledTripsMap.put(vehicleId, new IpcCanceledTrip(tripDescriptor.getTripId(),
-								tripDescriptor.getRouteId(), tripDescriptor.getStartDate(), gpsTime));
+						IpcCanceledTrip canceledTrip = new IpcCanceledTrip(tripDescriptor.getTripId(),
+								tripDescriptor.getRouteId(), tripDescriptor.getStartDate(), gpsTime);
+						cancelledTripsMap.put(vehicleId, canceledTrip);
+						logger.debug("Adding canceledTrip to map {}", canceledTrip);
 					}
 				}
 				else if (tripDescriptor.hasRouteId()) {

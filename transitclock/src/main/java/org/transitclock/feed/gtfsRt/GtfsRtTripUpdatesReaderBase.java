@@ -107,7 +107,9 @@ public abstract class GtfsRtTripUpdatesReaderBase {
             for(TripUpdate.StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()){
                 if(stopTimeUpdate.hasScheduleRelationship() &&
                         stopTimeUpdate.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED){
-                    skippedStops.add(new IpcSkippedStop(vehicle.getId(), stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence()));
+                    IpcSkippedStop skippedStop = new IpcSkippedStop(vehicle.getId(), stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
+                    skippedStops.add(skippedStop);
+                    logger.debug("Adding skipped top to map {}", skippedStop);
                 }
             }
 
