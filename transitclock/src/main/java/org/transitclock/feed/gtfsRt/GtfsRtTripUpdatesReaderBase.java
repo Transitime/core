@@ -90,7 +90,7 @@ public abstract class GtfsRtTripUpdatesReaderBase {
         int counter = 0;
         for (FeedEntity entity : message.getEntityList()) {
             // If no trip in the entity then nothing to process
-            if (!entity.hasTripUpdate() || !entity.hasVehicle())
+            if (!entity.hasTripUpdate())
                 continue;
 
             // Get the object describing the trip
