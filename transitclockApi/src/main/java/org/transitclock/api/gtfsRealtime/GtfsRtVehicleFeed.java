@@ -183,7 +183,7 @@ public class GtfsRtVehicleFeed {
 			tripDescriptor.setStartDate(canceledTrip.getTripStartDate());
 		}
 
-		TripDescriptor.ScheduleRelationship scheduleRelationship = TripDescriptor.ScheduleRelationship.CANCELED;
+		tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
 
 		vehiclePosition.setTrip(tripDescriptor);
 
