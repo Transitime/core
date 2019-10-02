@@ -95,10 +95,9 @@ public abstract class GtfsRtTripUpdatesReaderBase {
 
             // Get the object describing the trip
             TripUpdate tripUpdate = entity.getTripUpdate();
-            GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
 
             TripDescriptor trip = getTrip(tripUpdate);
-            VehicleDescriptor vehicle = vehiclePosition.getVehicle();
+            VehicleDescriptor vehicle = tripUpdate.getVehicle();
 
             if(trip == null || vehicle == null)
                 continue;
