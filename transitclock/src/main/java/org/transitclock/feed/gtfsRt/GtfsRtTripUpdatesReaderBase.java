@@ -109,10 +109,9 @@ public abstract class GtfsRtTripUpdatesReaderBase {
                     IpcSkippedStop skippedStop = new IpcSkippedStop(vehicle.getId(), stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
                     skippedStops.add(skippedStop);
                     logger.debug("Adding skipped top to map {}", skippedStop);
+                    skippedStopsMap.put(trip.getTripId(), skippedStops);
                 }
             }
-
-            skippedStopsMap.put(trip.getTripId(), skippedStops);
 
             // The callback for each TripDescriptor
             handleTrip(trip);
