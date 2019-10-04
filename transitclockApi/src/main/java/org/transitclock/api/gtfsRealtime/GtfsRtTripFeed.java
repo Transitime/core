@@ -1,6 +1,6 @@
 /*
  * This file is part of Transitime.org
- * 
+ *
  * Transitime.org is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPL) as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -40,7 +40,7 @@ import org.transitclock.utils.Time;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.*;
- 
+
 /**
  * For creating GTFS-realtime trip feed. The data is obtained from the server
  * via RMI.
@@ -52,22 +52,22 @@ import java.util.*;
  * uncertainty is set to DELAYED_UNCERTAINTY_VALUE. And if a vehicle is late and
  * the prediction is for a subsequent trip then uncertainty is set to
  * LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE.
- * 
+ *
  * @author SkiBu Smith
  *
  */
 public class GtfsRtTripFeed {
 
 	private final String agencyId;
-	
+
 	// For outputting date in GTFS-realtime format
-	private SimpleDateFormat gtfsRealtimeDateFormatter = 
+	private SimpleDateFormat gtfsRealtimeDateFormatter =
 			new SimpleDateFormat("yyyyMMdd");
-	
-	private SimpleDateFormat gtfsRealtimeTimeFormatter = 
+
+	private SimpleDateFormat gtfsRealtimeTimeFormatter =
 			new SimpleDateFormat("HH:mm:ss");
-	
-	
+
+
 	private static IntegerConfigValue predictionMaxFutureSecs = new IntegerConfigValue(
 			"transitclock.api.predictionMaxFutureSecs", 60 * 60,
 			"Number of seconds in the future to accept predictions before");
@@ -83,37 +83,37 @@ public class GtfsRtTripFeed {
 			"transitclock.api.includeSkippedStops", false,
 			"Whether or not to include delay in the TripUpdate message");
 	private static final boolean INCLUDE_SKIPPED_STOPS = includeSkippedStops.getValue();
-	
+
 	// For when creating StopTimeEvent for schedule based prediction  
 	// 5 minutes (300 seconds)
-	private static final int SCHED_BASED_PRED_UNCERTAINTY_VALUE = 5 * 60; 
-	
+	private static final int SCHED_BASED_PRED_UNCERTAINTY_VALUE = 5 * 60;
+
 	// For when creating StopTimeEvent and the vehicle is delayed
-	private static final int DELAYED_UNCERTAINTY_VALUE = 
+	private static final int DELAYED_UNCERTAINTY_VALUE =
 			SCHED_BASED_PRED_UNCERTAINTY_VALUE + 1;
-	
+
 	// If vehicle is late and prediction is for a subsequent trip then
 	// the predictions are not as certain because it is reasonably likely
 	// that another vehicle will take over the subsequent trip. Takes
 	// precedence over SCHED_BASED_PRED_UNCERTAINTY_VALUE.
-	private static final int LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE = 
+	private static final int LATE_AND_SUBSEQUENT_TRIP_UNCERTAINTY_VALUE =
 			DELAYED_UNCERTAINTY_VALUE + 1;
-	
-	private static final Logger logger = 
+
+	private static final Logger logger =
 			LoggerFactory.getLogger(GtfsRtTripFeed.class);
 
 	/********************** Member Functions **************************/
 
 	public GtfsRtTripFeed(String agencyId) {
-		this.agencyId = agencyId;	
-		
+		this.agencyId = agencyId;
+
 		this.gtfsRealtimeDateFormatter.setTimeZone(AgencyTimezoneCache
 				.get(agencyId));
 	}
 
 	/**
 	 * Create TripUpdate for the trip.
-	 * 
+	 *
 	 * @param predsForTrip
 	 * @return
 	 */
@@ -134,7 +134,7 @@ public class GtfsRtTripFeed {
 
 		if (tripId != null) {
 			tripDescriptor.setTripId(tripId);
-			 			
+
 			try {
 				if(firstPred.getFreqStartTime()>0)
 				{
@@ -142,9 +142,9 @@ public class GtfsRtTripFeed {
 					tripDescriptor.setStartTime(tripStartTimeStr);
 				}
 			} catch (Exception e) {
-				
+
 			}
-			
+
 			long tripStartEpochTime = firstPred.getTripStartEpochTime();
 			String tripStartDateStr =
 					gtfsRealtimeDateFormatter.format(new Date(
@@ -166,10 +166,10 @@ public class GtfsRtTripFeed {
 		//Set trip as canceled if it is mark as that from schedBasePreds
 		if(firstPred.isCanceled())
 			tripDescriptor.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
-			
+
 		tripUpdate.setTrip(tripDescriptor);
 		if (firstPred.getDelay() != null && INCLUDE_TRIP_UPDATE_DELAY)
-		  tripUpdate.setDelay(firstPred.getDelay()); // set schedule deviation
+			tripUpdate.setDelay(firstPred.getDelay()); // set schedule deviation
 
 		// Add the VehicleDescriptor information
 		VehicleDescriptor.Builder vehicleDescriptor =
@@ -181,7 +181,15 @@ public class GtfsRtTripFeed {
 
 		Set<IpcSkippedStop> skippedStopsForTrip = null;
 		if(allSkippedStops != null && !allSkippedStops.isEmpty()) {
-			skippedStopsForTrip = allSkippedStops.get(TripFormatter.getFormattedTripId(tripId));
+			String formattedTripId = TripFormatter.getFormattedTripId(tripId);
+			skippedStopsForTrip = allSkippedStops.get(formattedTripId);
+			logger.info("Checking skipped stops for Trip {}", formattedTripId);
+			if(skippedStopsForTrip != null) {
+				logger.info("Skipped Stop Entries {} for Trip {}", skippedStopsForTrip.size(), formattedTripId);
+				logger.info("Skipped Stops For Trip {} {}", formattedTripId, skippedStopsForTrip);
+			}
+		} else {
+			logger.warn("All Skipped Stops is empty");
 		}
 
 		// Add the StopTimeUpdate information for each prediction
@@ -226,7 +234,7 @@ public class GtfsRtTripFeed {
 		}
 		// Add timestamp
 		tripUpdate.setTimestamp(firstPred.getAvlTime() / Time.MS_PER_SEC);
-		
+
 		// Return the results
 		return tripUpdate.build();
 	}
@@ -293,14 +301,14 @@ public class GtfsRtTripFeed {
 
 	/**
 	 * Creates a GTFS-realtime message for the predictions by trip passed in.
-	 * 
+	 *
 	 * @param predsByTripMap
 	 *            the data to be put into the GTFS-realtime message
 	 * @return the GTFS-realtime FeedMessage
 	 */
 	private FeedMessage createMessage(Map<String, List<IpcPrediction>> predsByTripMap) {
 		FeedMessage.Builder message = FeedMessage.newBuilder();
-		
+
 		FeedHeader.Builder feedheader = FeedHeader.newBuilder()
 				.setGtfsRealtimeVersion("1.0")
 				.setIncrementality(Incrementality.FULL_DATASET)
@@ -309,14 +317,14 @@ public class GtfsRtTripFeed {
 		//Create a comparator to sort each trip data
 		Comparator<IpcPrediction> comparator=new IpcPredictionComparator();
 
-        HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
+		HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
 		HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops = new HashMap<>();
 
-        try {
-            allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
+		try {
+			allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
 		} catch (RemoteException e) {
-            logger.error("Exception when getting all canceled trips from RMI", e);
-        }
+			logger.error("Exception when getting all canceled trips from RMI", e);
+		}
 
 		if(INCLUDE_SKIPPED_STOPS) {
 			try {
@@ -326,7 +334,7 @@ public class GtfsRtTripFeed {
 			}
 		}
 
-        // For each trip...
+		// For each trip...
 		for (List<IpcPrediction> predsForTrip : predsByTripMap.values()) {
 
 			// trip is already in cancelled list, skip for now
@@ -342,33 +350,33 @@ public class GtfsRtTripFeed {
 			{
 				try {
 					Map<Long, List<IpcPrediction>> map = createFreqStartTimePredictionMap(predsForTrip);
-					
+
 					for(Long key:map.keySet())
 					{
 						if(!map.get(key).isEmpty())
 						{
 							FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
-									.setId(map.get(key).get(0).getVehicleId());						
+									.setId(map.get(key).get(0).getVehicleId());
 							TripUpdate tripUpdate = createTripUpdate(map.get(key), allSkippedStops);
 							if(tripUpdate == null) continue;
-							feedEntity.setTripUpdate(tripUpdate);		
+							feedEntity.setTripUpdate(tripUpdate);
 							message.addEntity(feedEntity);
 						}
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}							
+				}
 			}else
-			{			
+			{
 				// Create feed entity for each schedule trip
 				FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
 						.setId(predsForTrip.get(0).getTripId());
-				try {				
+				try {
 					TripUpdate tripUpdate = createTripUpdate(predsForTrip, allSkippedStops);
 					if(tripUpdate == null) continue;
 					feedEntity.setTripUpdate(tripUpdate);
-		    		message.addEntity(feedEntity);
+					message.addEntity(feedEntity);
 				} catch (Exception e) {
 					logger.error("Error parsing trip update data. {}",
 							predsForTrip, e);
@@ -394,19 +402,19 @@ public class GtfsRtTripFeed {
 				}
 			}
 		}
-		
+
 		return message.build();
 	}
 
 
-	private boolean isFrequencyBasedTrip(List<IpcPrediction> predsForTrip)		
+	private boolean isFrequencyBasedTrip(List<IpcPrediction> predsForTrip)
 	{
-		for(IpcPrediction prediction:predsForTrip) 
-		{		
-				if(prediction.getFreqStartTime() > 0)
-					return true;		
+		for(IpcPrediction prediction:predsForTrip)
+		{
+			if(prediction.getFreqStartTime() > 0)
+				return true;
 		}
-		return false;		
+		return false;
 	}
 	private Map<Long, List<IpcPrediction>> createFreqStartTimePredictionMap(List<IpcPrediction> predsForTrip)
 	{
@@ -415,21 +423,21 @@ public class GtfsRtTripFeed {
 		{
 			if(map.get(prediction.getFreqStartTime())==null)
 			{
-				List<IpcPrediction> list=new ArrayList<IpcPrediction>(); 
+				List<IpcPrediction> list=new ArrayList<IpcPrediction>();
 				map.put(prediction.getFreqStartTime(), list);
-								
-			}			
-			map.get(prediction.getFreqStartTime()).add(prediction);	
-			
+
+			}
+			map.get(prediction.getFreqStartTime()).add(prediction);
+
 			Collections.sort(map.get(prediction.getFreqStartTime()), new PredictionTimeComparator());
 		}
-		return map;		
+		return map;
 	}
 	/**
 	 * Returns map of all predictions for the project. Returns null if there was
 	 * a problem getting the data via RMI. There is a separate list of
 	 * predictions for each trip. The map is keyed by tripId.
-	 * 
+	 *
 	 * @return Map keyed on tripId of List of Predictions for the trip, or null
 	 *         if could not get data from server.
 	 */
@@ -443,26 +451,26 @@ public class GtfsRtTripFeed {
 			logger.error("Exception when getting vehicles from RMI", e);
 			return null;
 		}
-		
+
 		// Group the predictions by trip instead of by vehicle
-		Map<String, List<IpcPrediction>> predictionsByTrip = 
+		Map<String, List<IpcPrediction>> predictionsByTrip =
 				new HashMap<String, List<IpcPrediction>>();
-		for (IpcPredictionsForRouteStopDest predictionsForStop : 
+		for (IpcPredictionsForRouteStopDest predictionsForStop :
 				allPredictionsByStop) {
-			for (IpcPrediction prediction : 
+			for (IpcPrediction prediction :
 					predictionsForStop.getPredictionsForRouteStop()) {
 				String tripId = prediction.getTripId();
 				List<IpcPrediction> predsForTrip = predictionsByTrip.get(tripId);
 				if (predsForTrip == null) {
 					// A new trip so need to use a new trip list
 					predsForTrip = new ArrayList<IpcPrediction>();
-					predictionsByTrip.put(tripId, predsForTrip);					
+					predictionsByTrip.put(tripId, predsForTrip);
 				}
-				
+
 				predsForTrip.add(prediction);
 			}
 		}
-		
+
 		// Return results
 		return predictionsByTrip;
 	}
@@ -470,7 +478,7 @@ public class GtfsRtTripFeed {
 	/**
 	 * Gets the Vehicle data from RMI and creates corresponding
 	 * GTFS-RT vehicle feed.
-	 * 
+	 *
 	 * @return GTFS-RT FeedMessage for vehicle positions
 	 */
 	public FeedMessage createMessage() {
@@ -478,41 +486,41 @@ public class GtfsRtTripFeed {
 		IntervalTimer timer = new IntervalTimer();
 		Map<String, List<IpcPrediction>> predsByTrip = getPredictionsPerTrip();
 		logger.debug("Getting predictions via RMI for " +
-				"GtfsRtTripFeed.createMessage() took {} msec", 
+						"GtfsRtTripFeed.createMessage() took {} msec",
 				timer.elapsedMsec());
-		
+
 		// Use prediction data to create GTFS-RT message and return it.
 		return createMessage(predsByTrip);
 	}
 
 	// For getPossiblyCachedMessage()
 	private static final DataCache tripFeedDataCache = new DataCache();
-	
+
 	/**
 	 * For caching Vehicle Positions feed messages.
-	 * 
+	 *
 	 * @param agencyId
 	 * @param cacheTime
 	 * @return
 	 */
 	public static FeedMessage getPossiblyCachedMessage(String agencyId, int cacheTime) {
-	    FeedMessage feedMessage = tripFeedDataCache.get(agencyId, cacheTime);
-	    if (feedMessage != null)
-	    	return feedMessage;
-	    
-	    synchronized(tripFeedDataCache) {
-	    	
-	    	// Cache may have been filled while waiting.
-	    	feedMessage = tripFeedDataCache.get(agencyId, cacheTime);
-	    	if (feedMessage != null)
-	    		return feedMessage;
-	    	
-	    	GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
-		    feedMessage = feed.createMessage();
-		    tripFeedDataCache.put(agencyId, feedMessage);
-	    }
-	    
-	    return feedMessage;
+		FeedMessage feedMessage = tripFeedDataCache.get(agencyId, cacheTime);
+		if (feedMessage != null)
+			return feedMessage;
+
+		synchronized(tripFeedDataCache) {
+
+			// Cache may have been filled while waiting.
+			feedMessage = tripFeedDataCache.get(agencyId, cacheTime);
+			if (feedMessage != null)
+				return feedMessage;
+
+			GtfsRtTripFeed feed = new GtfsRtTripFeed(agencyId);
+			feedMessage = feed.createMessage();
+			tripFeedDataCache.put(agencyId, feedMessage);
+		}
+
+		return feedMessage;
 	}
 
 	public static class GtfsStopSequenceComparator implements Comparator {
