@@ -773,8 +773,8 @@ public class SpatialMatcher {
 		
 		spatialMatcher.setStartOfSearch(previousMatch);			
 		
-		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime()) && 
-				distanceSearched < distanceAlongPathToSearch 
+		while (!indices.pastEndOfBlock(vehicleState.getAvlReport().getTime()) &&
+				(vehicleState.isLayover() || distanceSearched < distanceAlongPathToSearch)
 					&& Math.abs(indices.getStopPathIndex()-previousMatch.getIndices().getStopPathIndex()) <= AvlConfig.getMaxStopPathsAhead()) {
 
 			spatialMatcher.processPossiblePotentialMatch(
