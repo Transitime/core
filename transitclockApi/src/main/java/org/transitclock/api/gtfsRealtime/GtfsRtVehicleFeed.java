@@ -24,10 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.utils.AgencyTimezoneCache;
 import org.transitclock.api.utils.TripFormatter;
+import org.transitclock.ipc.clients.ConfigInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
 import org.transitclock.ipc.clients.VehiclesInterfaceFactory;
 import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.ipc.data.IpcVehicleGtfsRealtime;
+import org.transitclock.ipc.interfaces.ConfigInterface;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 import org.transitclock.utils.Time;
 
@@ -243,8 +245,10 @@ public class GtfsRtVehicleFeed {
 			logger.error("Exception when getting all canceled trips from RMI", e);
 		}
 
+		boolean serviceIdSuffix = getServiceIdSuffix();
+
 		for (IpcVehicleGtfsRealtime vehicle : vehicles) {
-			if(isVehicleAndTripCanceledAndCached(vehicle, allCanceledTrips)){
+			if(isVehicleAndTripCanceledAndCached(vehicle, allCanceledTrips, serviceIdSuffix)){
 				continue;
 			}
 
@@ -282,6 +286,19 @@ public class GtfsRtVehicleFeed {
 		return message.build();
 	}
 
+	private boolean getServiceIdSuffix(){
+		ConfigInterface configInterface = ConfigInterfaceFactory.get(agencyId);
+		if (configInterface == null) {
+			logger.error("Agency ID {} is not valid", agencyId);
+			return false;
+		}
+		try {
+			return configInterface.getServiceIdSuffix();
+		} catch (Exception e){
+			return false;
+		}
+	}
+
 	/**
 	 * Returns collection of all vehicles for the project obtained via RMI.
 	 * Returns null if there was a problem getting the data via RMI
@@ -300,8 +317,10 @@ public class GtfsRtVehicleFeed {
 		return vehicles;
 	}
 
-	private boolean isVehicleAndTripCanceledAndCached(IpcVehicleGtfsRealtime vehicle, Map<String, IpcCanceledTrip> canceledTrips) {
-		String tripId = TripFormatter.getFormattedTripId(vehicle.getTripId());
+	private boolean isVehicleAndTripCanceledAndCached(IpcVehicleGtfsRealtime vehicle,
+													  Map<String, IpcCanceledTrip> canceledTrips,
+													  boolean serviceIdSuffix) {
+		String tripId = TripFormatter.getFormattedTripId(serviceIdSuffix, vehicle.getTripId());
 		String vehicleId = vehicle.getId();
 
 		IpcCanceledTrip canceledTrip = canceledTrips.get(vehicleId);

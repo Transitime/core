@@ -17,34 +17,21 @@
 
 package org.transitclock.ipc.servers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.transitclock.applications.Core;
+import org.transitclock.core.dataCache.VehicleDataCache;
+import org.transitclock.db.structs.*;
+import org.transitclock.gtfs.DbConfig;
+import org.transitclock.ipc.data.*;
+import org.transitclock.ipc.interfaces.ConfigInterface;
+import org.transitclock.ipc.rmi.AbstractServer;
+
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.transitclock.applications.Core;
-import org.transitclock.core.dataCache.VehicleDataCache;
-import org.transitclock.db.structs.Agency;
-import org.transitclock.db.structs.Block;
-import org.transitclock.db.structs.Calendar;
-import org.transitclock.db.structs.Route;
-import org.transitclock.db.structs.Trip;
-import org.transitclock.db.structs.TripPattern;
-import org.transitclock.db.structs.VehicleConfig;
-import org.transitclock.gtfs.DbConfig;
-import org.transitclock.ipc.data.IpcBlock;
-import org.transitclock.ipc.data.IpcCalendar;
-import org.transitclock.ipc.data.IpcDirectionsForRoute;
-import org.transitclock.ipc.data.IpcRoute;
-import org.transitclock.ipc.data.IpcRouteSummary;
-import org.transitclock.ipc.data.IpcSchedule;
-import org.transitclock.ipc.data.IpcTrip;
-import org.transitclock.ipc.data.IpcTripPattern;
-import org.transitclock.ipc.interfaces.ConfigInterface;
-import org.transitclock.ipc.rmi.AbstractServer;
 
 /**
  * Implements ConfigInterface to serve up configuration information to RMI
@@ -438,5 +425,10 @@ public class ConfigServer extends AbstractServer implements ConfigInterface {
 
 	public List<String> getServiceIdsForDay(Long day) {
 		return Core.getInstance().getServiceUtils().getServiceIdsForDay(day);
+	}
+
+	@Override
+	public boolean getServiceIdSuffix() throws RemoteException {
+		return Core.getInstance().getDbConfig().getServiceIdSuffix();
 	}
 }

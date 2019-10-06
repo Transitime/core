@@ -29,11 +29,13 @@ import org.transitclock.api.utils.TripFormatter;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
+import org.transitclock.ipc.clients.ConfigInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
 import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.ipc.data.IpcPrediction;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.ipc.data.IpcSkippedStop;
+import org.transitclock.ipc.interfaces.ConfigInterface;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
@@ -117,7 +119,9 @@ public class GtfsRtTripFeed {
 	 * @param predsForTrip
 	 * @return
 	 */
-	private TripUpdate createTripUpdate(List<IpcPrediction> predsForTrip, HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops) {
+	private TripUpdate createTripUpdate(List<IpcPrediction> predsForTrip,
+										HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops,
+										boolean serviceSuffixId) {
 		// Create the parent TripUpdate object that is returned.
 		TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
 
@@ -181,7 +185,7 @@ public class GtfsRtTripFeed {
 
 		Set<IpcSkippedStop> skippedStopsForTrip = null;
 		if(allSkippedStops != null && !allSkippedStops.isEmpty()) {
-			String formattedTripId = TripFormatter.getFormattedTripId(tripId);
+			String formattedTripId = TripFormatter.getFormattedTripId(serviceSuffixId, tripId);
 			skippedStopsForTrip = allSkippedStops.get(formattedTripId);
 			logger.info("Checking skipped stops for Trip {}", formattedTripId);
 			if(skippedStopsForTrip != null) {
@@ -250,8 +254,6 @@ public class GtfsRtTripFeed {
 		return StopTimeUpdate.ScheduleRelationship.SCHEDULED;
 	}
 
-
-
 	private TripUpdate createCanceledTripUpdate(String vehicleId, IpcCanceledTrip canceledTrip){
 		// Create the parent TripUpdate object that is returned.
 		TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
@@ -284,12 +286,20 @@ public class GtfsRtTripFeed {
 
 	}
 
-	private boolean isTripCanceledAndCached(List<IpcPrediction> predictions, Map<String, IpcCanceledTrip> canceledTrips) {
+	private boolean isTripCanceledAndCached(List<IpcPrediction> predictions,
+											Map<String, IpcCanceledTrip> canceledTrips,
+											boolean serviceSuffixId) {
 		IpcPrediction firstPred = predictions.get(0);
-		String tripId = TripFormatter.getFormattedTripId(firstPred.getTripId());
+		String tripId = TripFormatter.getFormattedTripId(serviceSuffixId, firstPred.getTripId());
 		String vehicleId = firstPred.getVehicleId();
 
 		IpcCanceledTrip canceledTrip = canceledTrips.get(vehicleId);
+		if(canceledTrip != null) {
+			String canceledTripTripId = canceledTrip.getTripId();
+			logger.info("Found canceled tripId {} found for firstPred tripId {} and vehicleId {}",canceledTripTripId, tripId, vehicleId);
+		} else {
+			logger.info("No canceled trip found for firstPred tripId {} and vehicleId {}", tripId, vehicleId);
+		}
 
 		if(canceledTrip != null && canceledTrip.getTripId() != null && canceledTrip.getTripId().equalsIgnoreCase(tripId)){
 			return true;
@@ -317,28 +327,15 @@ public class GtfsRtTripFeed {
 		//Create a comparator to sort each trip data
 		Comparator<IpcPrediction> comparator=new IpcPredictionComparator();
 
-		HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
-		HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops = new HashMap<>();
-
-		try {
-			allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
-		} catch (RemoteException e) {
-			logger.error("Exception when getting all canceled trips from RMI", e);
-		}
-
-		if(INCLUDE_SKIPPED_STOPS) {
-			try {
-				allSkippedStops = PredictionsInterfaceFactory.get(agencyId).getAllSkippedStops();
-			} catch (RemoteException e) {
-				logger.error("Exception when getting all skipped stops from RMI", e);
-			}
-		}
+		HashMap<String, IpcCanceledTrip> allCanceledTrips = getAllCanceledTrips();
+		HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops = getSkippedStops();
+		boolean serviceIdSuffix = getServiceIdSuffix();
 
 		// For each trip...
 		for (List<IpcPrediction> predsForTrip : predsByTripMap.values()) {
 
 			// trip is already in cancelled list, skip for now
-			if(isTripCanceledAndCached(predsForTrip, allCanceledTrips)){
+			if(isTripCanceledAndCached(predsForTrip, allCanceledTrips, serviceIdSuffix)){
 				continue;
 			}
 
@@ -348,39 +345,10 @@ public class GtfsRtTripFeed {
 			//  Need to check if predictions for frequency based trip and group by start time if they are.
 			if(isFrequencyBasedTrip(predsForTrip))
 			{
-				try {
-					Map<Long, List<IpcPrediction>> map = createFreqStartTimePredictionMap(predsForTrip);
-
-					for(Long key:map.keySet())
-					{
-						if(!map.get(key).isEmpty())
-						{
-							FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
-									.setId(map.get(key).get(0).getVehicleId());
-							TripUpdate tripUpdate = createTripUpdate(map.get(key), allSkippedStops);
-							if(tripUpdate == null) continue;
-							feedEntity.setTripUpdate(tripUpdate);
-							message.addEntity(feedEntity);
-						}
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				createTripUpdateForFrequencyTrips(message, predsForTrip, allSkippedStops, serviceIdSuffix);
 			}else
 			{
-				// Create feed entity for each schedule trip
-				FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
-						.setId(predsForTrip.get(0).getTripId());
-				try {
-					TripUpdate tripUpdate = createTripUpdate(predsForTrip, allSkippedStops);
-					if(tripUpdate == null) continue;
-					feedEntity.setTripUpdate(tripUpdate);
-					message.addEntity(feedEntity);
-				} catch (Exception e) {
-					logger.error("Error parsing trip update data. {}",
-							predsForTrip, e);
-				}
+				createTripUpdateForTrips(message, predsForTrip, allSkippedStops, serviceIdSuffix);
 			}
 		}
 
@@ -406,6 +374,55 @@ public class GtfsRtTripFeed {
 		return message.build();
 	}
 
+	private HashMap<String, IpcCanceledTrip> getAllCanceledTrips(){
+		HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
+		try {
+			allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
+			if(allCanceledTrips != null && !allCanceledTrips.isEmpty()) {
+				for(Map.Entry<String, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
+					logger.info("Canceled Trip vehicle id is {}", entry.getKey());
+					logger.info(entry.getValue().toString());
+				}
+			}
+		} catch (RemoteException e) {
+			logger.error("Exception when getting all canceled trips from RMI", e);
+		}
+		return allCanceledTrips;
+	}
+
+	private HashMap<String, HashSet<IpcSkippedStop>> getSkippedStops(){
+		HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops = new HashMap<>();
+		if(INCLUDE_SKIPPED_STOPS) {
+			try {
+				allSkippedStops = PredictionsInterfaceFactory.get(agencyId).getAllSkippedStops();
+				if(allSkippedStops != null && !allSkippedStops.isEmpty()) {
+					for(Map.Entry<String, HashSet<IpcSkippedStop>> entry : allSkippedStops.entrySet()){
+						logger.info("Trip is {}", entry.getKey());
+						for(IpcSkippedStop stop: entry.getValue()){
+							logger.info(stop.toString());
+						}
+					}
+				}
+			} catch (RemoteException e) {
+				logger.error("Exception when getting all skipped stops from RMI", e);
+			}
+		}
+		return allSkippedStops;
+	}
+
+	private boolean getServiceIdSuffix(){
+		ConfigInterface configInterface = ConfigInterfaceFactory.get(agencyId);
+		if (configInterface == null) {
+			logger.error("Agency ID {} is not valid", agencyId);
+			return false;
+		}
+		try {
+			return configInterface.getServiceIdSuffix();
+		} catch (Exception e){
+			return false;
+		}
+	}
+
 
 	private boolean isFrequencyBasedTrip(List<IpcPrediction> predsForTrip)
 	{
@@ -416,6 +433,31 @@ public class GtfsRtTripFeed {
 		}
 		return false;
 	}
+
+	private void createTripUpdateForFrequencyTrips(FeedMessage.Builder message,
+												   List<IpcPrediction> predsForTrip,
+												   HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops,
+												   boolean serviceIdSuffix){
+		try {
+			Map<Long, List<IpcPrediction>> map = createFreqStartTimePredictionMap(predsForTrip);
+
+			for(Long key:map.keySet())
+			{
+				if(!map.get(key).isEmpty())
+				{
+					FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
+							.setId(map.get(key).get(0).getVehicleId());
+					TripUpdate tripUpdate = createTripUpdate(map.get(key), allSkippedStops, serviceIdSuffix);
+					if(tripUpdate == null) continue;
+					feedEntity.setTripUpdate(tripUpdate);
+					message.addEntity(feedEntity);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Unable to process trip update for frequency trip", e);
+		}
+	}
+
 	private Map<Long, List<IpcPrediction>> createFreqStartTimePredictionMap(List<IpcPrediction> predsForTrip)
 	{
 		Map<Long, List<IpcPrediction>> map=new HashMap<>();
@@ -433,6 +475,27 @@ public class GtfsRtTripFeed {
 		}
 		return map;
 	}
+
+	private void createTripUpdateForTrips(FeedMessage.Builder message,
+												   List<IpcPrediction> predsForTrip,
+												   HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops,
+										           boolean serviceIdSuffix){
+		// Create feed entity for each schedule trip
+		FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
+				.setId(predsForTrip.get(0).getTripId());
+		try {
+			TripUpdate tripUpdate = createTripUpdate(predsForTrip, allSkippedStops, serviceIdSuffix);
+			if(tripUpdate == null){
+				logger.warn("No trip update created for trip {}", predsForTrip.get(0).getTripId());
+				return;
+			}
+			feedEntity.setTripUpdate(tripUpdate);
+			message.addEntity(feedEntity);
+		} catch (Exception e) {
+			logger.error("Error parsing trip update data. {}", predsForTrip, e);
+		}
+	}
+
 	/**
 	 * Returns map of all predictions for the project. Returns null if there was
 	 * a problem getting the data via RMI. There is a separate list of
