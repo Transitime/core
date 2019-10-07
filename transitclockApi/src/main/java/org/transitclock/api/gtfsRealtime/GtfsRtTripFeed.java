@@ -28,6 +28,7 @@ import org.transitclock.api.utils.AgencyTimezoneCache;
 import org.transitclock.api.utils.TripFormatter;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.dataCache.CanceledTripKey;
 import org.transitclock.core.holdingmethod.PredictionTimeComparator;
 import org.transitclock.ipc.clients.ConfigInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
@@ -277,9 +278,11 @@ public class GtfsRtTripFeed {
 		tripUpdate.setTrip(tripDescriptor);
 
 		// Add the VehicleDescriptor information
-		VehicleDescriptor.Builder vehicleDescriptor =
-				VehicleDescriptor.newBuilder().setId(vehicleId);
-		tripUpdate.setVehicle(vehicleDescriptor);
+		if(vehicleId != null) {
+			VehicleDescriptor.Builder vehicleDescriptor =
+					VehicleDescriptor.newBuilder().setId(vehicleId);
+			tripUpdate.setVehicle(vehicleDescriptor);
+		}
 
 		// Return the results
 		return tripUpdate.build();
@@ -287,13 +290,13 @@ public class GtfsRtTripFeed {
 	}
 
 	private boolean isTripCanceledAndCached(List<IpcPrediction> predictions,
-											Map<String, IpcCanceledTrip> canceledTrips,
+											Map<CanceledTripKey, IpcCanceledTrip> canceledTrips,
 											boolean serviceSuffixId) {
 		IpcPrediction firstPred = predictions.get(0);
 		String tripId = TripFormatter.getFormattedTripId(serviceSuffixId, firstPred.getTripId());
 		String vehicleId = firstPred.getVehicleId();
 
-		IpcCanceledTrip canceledTrip = canceledTrips.get(vehicleId);
+		IpcCanceledTrip canceledTrip = canceledTrips.get(new CanceledTripKey(vehicleId, tripId));
 		if(canceledTrip != null) {
 			String canceledTripTripId = canceledTrip.getTripId();
 			logger.info("Found canceled tripId {} found for firstPred tripId {} and vehicleId {}",canceledTripTripId, tripId, vehicleId);
@@ -327,7 +330,7 @@ public class GtfsRtTripFeed {
 		//Create a comparator to sort each trip data
 		Comparator<IpcPrediction> comparator=new IpcPredictionComparator();
 
-		HashMap<String, IpcCanceledTrip> allCanceledTrips = getAllCanceledTrips();
+		HashMap<CanceledTripKey, IpcCanceledTrip> allCanceledTrips = getAllCanceledTrips();
 		HashMap<String, HashSet<IpcSkippedStop>> allSkippedStops = getSkippedStops();
 		boolean serviceIdSuffix = getServiceIdSuffix();
 
@@ -352,21 +355,21 @@ public class GtfsRtTripFeed {
 			}
 		}
 
-		for(Map.Entry<String, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
-			String vehicleId = entry.getKey();
+		for(Map.Entry<CanceledTripKey, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
+			CanceledTripKey key = entry.getKey();
 			IpcCanceledTrip canceledTrip = entry.getValue();
 
 			if(canceledTrip != null){
 				FeedEntity.Builder feedEntity = FeedEntity.newBuilder()
 						.setId(canceledTrip.getTripId());
 				try {
-					TripUpdate tripUpdate = createCanceledTripUpdate(vehicleId, canceledTrip);
+					TripUpdate tripUpdate = createCanceledTripUpdate(key.getVehicleId(), canceledTrip);
 					if(tripUpdate == null) continue;
 					feedEntity.setTripUpdate(tripUpdate);
 					message.addEntity(feedEntity);
 				} catch (Exception e) {
 					logger.error("Error parsing canceled trip update data {} for vehicle id {}.",
-							canceledTrip, vehicleId, e);
+							canceledTrip, key.getVehicleId(), e);
 				}
 			}
 		}
@@ -374,13 +377,13 @@ public class GtfsRtTripFeed {
 		return message.build();
 	}
 
-	private HashMap<String, IpcCanceledTrip> getAllCanceledTrips(){
-		HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
+	private HashMap<CanceledTripKey, IpcCanceledTrip> getAllCanceledTrips(){
+		HashMap<CanceledTripKey, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
 		try {
 			allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
 			if(allCanceledTrips != null && !allCanceledTrips.isEmpty()) {
-				for(Map.Entry<String, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
-					logger.info("Canceled Trip vehicle id is {}", entry.getKey());
+				for(Map.Entry<CanceledTripKey, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
+					logger.info("Canceled Trip vehicle id and trip id is {}", entry.getKey());
 					logger.info(entry.getValue().toString());
 				}
 			}

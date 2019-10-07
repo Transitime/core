@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.utils.AgencyTimezoneCache;
 import org.transitclock.api.utils.TripFormatter;
+import org.transitclock.core.dataCache.CanceledTripKey;
 import org.transitclock.ipc.clients.ConfigInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
 import org.transitclock.ipc.clients.VehiclesInterfaceFactory;
@@ -237,7 +238,7 @@ public class GtfsRtVehicleFeed {
 								System.currentTimeMillis() / Time.MS_PER_SEC);
 		message.setHeader(feedheader);
 
-		HashMap<String, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
+		HashMap<CanceledTripKey, IpcCanceledTrip> allCanceledTrips = new HashMap<>();
 
 		try {
 			allCanceledTrips = PredictionsInterfaceFactory.get(agencyId).getAllCanceledTrips();
@@ -265,10 +266,12 @@ public class GtfsRtVehicleFeed {
 			}
 		}
 
-		for(Map.Entry<String, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
-			String vehicleId = entry.getKey();
+		for(Map.Entry<CanceledTripKey, IpcCanceledTrip> entry : allCanceledTrips.entrySet()){
+			CanceledTripKey key = entry.getKey();
+			String vehicleId = key.getVehicleId();
 			IpcCanceledTrip canceledTrip = entry.getValue();
-			if(canceledTrip != null){
+
+			if(vehicleId != null && canceledTrip != null){
 				FeedEntity.Builder vehiclePositionEntity =
 						FeedEntity.newBuilder().setId(vehicleId);
 				try {
@@ -318,12 +321,12 @@ public class GtfsRtVehicleFeed {
 	}
 
 	private boolean isVehicleAndTripCanceledAndCached(IpcVehicleGtfsRealtime vehicle,
-													  Map<String, IpcCanceledTrip> canceledTrips,
+													  Map<CanceledTripKey, IpcCanceledTrip> canceledTrips,
 													  boolean serviceIdSuffix) {
 		String tripId = TripFormatter.getFormattedTripId(serviceIdSuffix, vehicle.getTripId());
 		String vehicleId = vehicle.getId();
 
-		IpcCanceledTrip canceledTrip = canceledTrips.get(vehicleId);
+		IpcCanceledTrip canceledTrip = canceledTrips.get(new CanceledTripKey(vehicleId, tripId));
 
 		if(canceledTrip != null && canceledTrip.getTripId() != null && canceledTrip.getTripId().equalsIgnoreCase(tripId)){
 			return true;

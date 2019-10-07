@@ -9,7 +9,10 @@ import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.core.dataCache.CanceledTripKey;
+import org.transitclock.core.dataCache.CanceledTripManager;
 import org.transitclock.core.dataCache.SkippedStopsManager;
+import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.ipc.data.IpcSkippedStop;
 import org.transitclock.utils.IntervalTimer;
 
@@ -85,6 +88,7 @@ public abstract class GtfsRtTripUpdatesReaderBase {
         IntervalTimer timer = new IntervalTimer();
 
         Map<String, HashSet<IpcSkippedStop>> skippedStopsMap = new HashMap<>();
+        Map<CanceledTripKey, IpcCanceledTrip> cancelledTripsMap = new HashMap<>();
 
         // For each entity/vehicle process the data
         int counter = 0;
@@ -96,37 +100,56 @@ public abstract class GtfsRtTripUpdatesReaderBase {
             // Get the object describing the trip
             TripUpdate tripUpdate = entity.getTripUpdate();
 
-            TripDescriptor trip = getTrip(tripUpdate);
-            VehicleDescriptor vehicle = tripUpdate.getVehicle();
+            TripDescriptor tripDescriptor = getTrip(tripUpdate);
+            VehicleDescriptor vehicleDescriptor = tripUpdate.getVehicle();
 
-            if(trip == null || vehicle == null)
+            if(tripDescriptor == null)
                 continue;
+
+            if (tripDescriptor.hasTripId() &&
+                tripDescriptor.hasScheduleRelationship() &&
+                tripDescriptor.getScheduleRelationship() == TripDescriptor.ScheduleRelationship.CANCELED) {
+
+                    IpcCanceledTrip canceledTrip = new IpcCanceledTrip(tripDescriptor.getTripId(),
+                            tripDescriptor.getRouteId(), tripDescriptor.getStartDate(), tripUpdate.getTimestamp());
+
+                    cancelledTripsMap.put(getCanceledTripKey(vehicleDescriptor, tripDescriptor.getTripId()), canceledTrip);
+                    logger.debug("Adding canceledTrip to map {}", canceledTrip);
+
+            }
 
             HashSet<IpcSkippedStop> skippedStops = new HashSet<>();
             for(TripUpdate.StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()){
                 if(stopTimeUpdate.hasScheduleRelationship() &&
                         stopTimeUpdate.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED){
-                    IpcSkippedStop skippedStop = new IpcSkippedStop(vehicle.getId(), stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
+                    IpcSkippedStop skippedStop = new IpcSkippedStop(vehicleDescriptor.getId(), stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
                     skippedStops.add(skippedStop);
-                    logger.debug("Adding skipped top to map {}", skippedStop);
-                    skippedStopsMap.put(trip.getTripId(), skippedStops);
+                    logger.debug("Adding skipped stop to map {}", skippedStop);
+                    skippedStopsMap.put(tripDescriptor.getTripId(), skippedStops);
                 }
             }
 
             // The callback for each TripDescriptor
-            handleTrip(trip);
+            handleTrip(tripDescriptor);
 
             ++counter;
         }
-        if(SkippedStopsManager.getInstance() != null) {
-            SkippedStopsManager.getInstance().putAll(skippedStopsMap);
-        }
+
+        CanceledTripManager.getInstance().putAll(cancelledTripsMap);
+        SkippedStopsManager.getInstance().putAll(skippedStopsMap);
 
         logger.info("Successfully processed {} Trips from " +
                         "GTFS-realtime Trip Updates feed in {} msec",
                 counter, timer.elapsedMsec());
 
 
+    }
+
+    private CanceledTripKey getCanceledTripKey(VehicleDescriptor vehicleDescriptor, String tripId){
+        if(vehicleDescriptor.hasId()){
+            return new CanceledTripKey(vehicleDescriptor.getId(), tripId);
+        }
+        return new CanceledTripKey(null, tripId);
     }
 
     /**

@@ -21,8 +21,6 @@ import com.google.protobuf.CodedInputStream;
 import com.google.transit.realtime.GtfsRealtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.transitclock.ipc.data.IpcCanceledTrip;
-import org.transitclock.core.dataCache.CanceledTripManager;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 import org.transitclock.utils.IntervalTimer;
@@ -31,8 +29,6 @@ import org.transitclock.utils.MathUtils;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Reads in GTFS-realtime Vehicle Positions file and converts them into List of
@@ -116,8 +112,6 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		logger.info("Processing each individual AvlReport...");
 		IntervalTimer timer = new IntervalTimer();
 
-		Map<String, IpcCanceledTrip> cancelledTripsMap = new HashMap<>();
-		
 		// For each entity/vehicle process the data
 		int counter = 0;
 		for (FeedEntity entity : message.getEntityList()) {
@@ -199,14 +193,6 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 				if (tripDescriptor.hasTripId()) {
 					avlReport.setAssignment(tripDescriptor.getTripId(),
 							AssignmentType.TRIP_ID);
-					
-					if(tripDescriptor.hasScheduleRelationship() &&
-							tripDescriptor.getScheduleRelationship() == TripDescriptor.ScheduleRelationship.CANCELED){
-						IpcCanceledTrip canceledTrip = new IpcCanceledTrip(tripDescriptor.getTripId(),
-								tripDescriptor.getRouteId(), tripDescriptor.getStartDate(), gpsTime);
-						cancelledTripsMap.put(vehicleId, canceledTrip);
-						logger.debug("Adding canceledTrip to map {}", canceledTrip);
-					}
 				}
 				else if (tripDescriptor.hasRouteId()) {
 					avlReport.setAssignment(tripDescriptor.getRouteId(),
@@ -222,8 +208,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 
 			++counter;
 	  	}
-		CanceledTripManager.getInstance().putAll(cancelledTripsMap);
-		
+
 		logger.info("Successfully processed {} AVL reports from " +
 				"GTFS-realtime feed in {} msec",
 				counter, timer.elapsedMsec());
