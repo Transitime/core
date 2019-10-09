@@ -16,9 +16,6 @@
  */
 package org.transitclock.core;
 
-import java.util.Date;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -28,6 +25,9 @@ import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Singleton class that does the temporal matching to determine where 
@@ -405,11 +405,11 @@ public class TemporalMatcher {
 							vehicleState.getVehicleId(), 
 							previousAvlTime, 
 							spatialMatch, previousMatch);
-			
-			int expectedTravelTimeMsec = Math.min(expectedTravelTimeMsecForward, expectedTravelTimeMsecBackward);
-			
-		
-			//expectedTravelTimeMsec = expectedTravelTimeMsecForward;
+
+			// TODO - Check why it has to look backwards. Useful for freq based trips. Currently breaks schedule based trips
+			//int expectedTravelTimeMsec = Math.min(expectedTravelTimeMsecForward, expectedTravelTimeMsecBackward);
+
+			int expectedTravelTimeMsec = expectedTravelTimeMsecForward;
 			
 			// If looking at layover match and the match is different from 
 			// the previous one then it means we expect that the vehicle has
