@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.data.IpcPredictionComparator;
 import org.transitclock.api.utils.AgencyTimezoneCache;
-import org.transitclock.api.utils.TripFormatter;
 import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.dataCache.CanceledTripKey;
@@ -186,12 +185,11 @@ public class GtfsRtTripFeed {
 
 		Set<IpcSkippedStop> skippedStopsForTrip = null;
 		if(allSkippedStops != null && !allSkippedStops.isEmpty()) {
-			String formattedTripId = TripFormatter.getFormattedTripId(serviceSuffixId, tripId);
-			skippedStopsForTrip = allSkippedStops.get(formattedTripId);
-			logger.info("Checking skipped stops for Trip {}", formattedTripId);
+			skippedStopsForTrip = allSkippedStops.get(tripId);
+			logger.info("Checking skipped stops for Trip {}", tripId);
 			if(skippedStopsForTrip != null) {
-				logger.info("Skipped Stop Entries {} for Trip {}", skippedStopsForTrip.size(), formattedTripId);
-				logger.info("Skipped Stops For Trip {} {}", formattedTripId, skippedStopsForTrip);
+				logger.info("Skipped Stop Entries {} for Trip {}", skippedStopsForTrip.size(), tripId);
+				logger.info("Skipped Stops For Trip {} {}", tripId, skippedStopsForTrip);
 			}
 		} else {
 			logger.warn("All Skipped Stops is empty");
@@ -293,7 +291,7 @@ public class GtfsRtTripFeed {
 											Map<CanceledTripKey, IpcCanceledTrip> canceledTrips,
 											boolean serviceSuffixId) {
 		IpcPrediction firstPred = predictions.get(0);
-		String tripId = TripFormatter.getFormattedTripId(serviceSuffixId, firstPred.getTripId());
+		String tripId = firstPred.getTripId();
 		String vehicleId = firstPred.getVehicleId();
 
 		IpcCanceledTrip canceledTrip = canceledTrips.get(new CanceledTripKey(vehicleId, tripId));

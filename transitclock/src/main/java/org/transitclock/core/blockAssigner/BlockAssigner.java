@@ -131,12 +131,10 @@ public class BlockAssigner {
                 } else {
                     if (config.getServiceIdSuffix()) {
                         for (String serviceId : Core.getInstance().getDbConfig().getCurrentServiceIds()) {
-                            Trip tripPrefix = config.getTrip(avlReport.getAssignmentId() + "-" + serviceId);
-                            int secondsIntoDay = 120 * Time.SEC_PER_MIN;
-                            if (tripPrefix != null
-                                    && tripPrefix.getBlock() != null
-                                    && tripPrefix.getBlock()
-                                    .isActive( Core.getInstance().getSystemTime(), secondsIntoDay)){
+
+                            Trip tripPrefix = getTripWithServiceIdSuffix(config, avlReport.getAssignmentId());
+
+                            if (tripPrefix != null){
                                 Block blockPrefix = tripPrefix.getBlock();
                                 logger.debug("For vehicleId={} the trip assigngment from "
                                                 + "the AVL feed is tripId={} and serviceId={} which corresponds to "
@@ -176,6 +174,20 @@ public class BlockAssigner {
         }
 
         // No valid block so return null
+        return null;
+    }
+
+    public Trip getTripWithServiceIdSuffix(DbConfig config, String assignmentId) {
+        for (String serviceId : Core.getInstance().getDbConfig().getCurrentServiceIds()) {
+            Trip tripPrefix = config.getTrip(assignmentId + "-" + serviceId);
+            int secondsIntoDay = 120 * Time.SEC_PER_MIN;
+            if (tripPrefix != null
+                    && tripPrefix.getBlock() != null
+                    && tripPrefix.getBlock()
+                    .isActive( Core.getInstance().getSystemTime(), secondsIntoDay)){
+               return tripPrefix;
+            }
+        }
         return null;
     }
 

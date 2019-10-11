@@ -23,7 +23,6 @@ import com.google.transit.realtime.GtfsRealtime.VehiclePosition.VehicleStopStatu
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.api.utils.AgencyTimezoneCache;
-import org.transitclock.api.utils.TripFormatter;
 import org.transitclock.core.dataCache.CanceledTripKey;
 import org.transitclock.ipc.clients.ConfigInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
@@ -323,7 +322,7 @@ public class GtfsRtVehicleFeed {
 	private boolean isVehicleAndTripCanceledAndCached(IpcVehicleGtfsRealtime vehicle,
 													  Map<CanceledTripKey, IpcCanceledTrip> canceledTrips,
 													  boolean serviceIdSuffix) {
-		String tripId = TripFormatter.getFormattedTripId(serviceIdSuffix, vehicle.getTripId());
+		String tripId = vehicle.getTripId();
 		String vehicleId = vehicle.getId();
 
 		IpcCanceledTrip canceledTrip = canceledTrips.get(new CanceledTripKey(vehicleId, tripId));

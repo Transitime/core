@@ -2,16 +2,16 @@ package org.transitclock.feed.gtfsRt;
 
 import com.google.protobuf.CodedInputStream;
 import com.google.transit.realtime.GtfsRealtime;
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate;
+import com.google.transit.realtime.GtfsRealtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.applications.Core;
+import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.dataCache.CanceledTripKey;
 import org.transitclock.core.dataCache.CanceledTripManager;
 import org.transitclock.core.dataCache.SkippedStopsManager;
+import org.transitclock.db.structs.Trip;
+import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcCanceledTrip;
 import org.transitclock.ipc.data.IpcSkippedStop;
 import org.transitclock.utils.IntervalTimer;
@@ -110,22 +110,29 @@ public abstract class GtfsRtTripUpdatesReaderBase {
                 tripDescriptor.hasScheduleRelationship() &&
                 tripDescriptor.getScheduleRelationship() == TripDescriptor.ScheduleRelationship.CANCELED) {
 
-                    IpcCanceledTrip canceledTrip = new IpcCanceledTrip(tripDescriptor.getTripId(),
-                            tripDescriptor.getRouteId(), tripDescriptor.getStartDate(), tripUpdate.getTimestamp());
+                String tripId = getTripId(tripDescriptor);
+                IpcCanceledTrip canceledTrip = new IpcCanceledTrip(tripId,
+                        tripDescriptor.getRouteId(), tripDescriptor.getStartDate(), tripUpdate.getTimestamp());
 
-                    cancelledTripsMap.put(getCanceledTripKey(vehicleDescriptor, tripDescriptor.getTripId()), canceledTrip);
-                    logger.debug("Adding canceledTrip to map {}", canceledTrip);
+                cancelledTripsMap.put(getCanceledTripKey(vehicleDescriptor, tripId), canceledTrip);
+                logger.debug("Adding canceledTrip to map {}", canceledTrip);
 
             }
 
             HashSet<IpcSkippedStop> skippedStops = new HashSet<>();
+            String skippedTripId = null;
+            boolean skippedTripAlreadyChecked = false;
             for(TripUpdate.StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()){
                 if(stopTimeUpdate.hasScheduleRelationship() &&
                         stopTimeUpdate.getScheduleRelationship() == TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED){
+                    if(skippedTripId == null && !skippedTripAlreadyChecked){
+                        skippedTripId = getTripId(tripDescriptor);
+                        skippedTripAlreadyChecked = true;
+                    }
                     IpcSkippedStop skippedStop = new IpcSkippedStop(vehicleDescriptor.getId(), stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
                     skippedStops.add(skippedStop);
                     logger.debug("Adding skipped stop to map {}", skippedStop);
-                    skippedStopsMap.put(tripDescriptor.getTripId(), skippedStops);
+                    skippedStopsMap.put(skippedTripId, skippedStops);
                 }
             }
 
@@ -143,6 +150,17 @@ public abstract class GtfsRtTripUpdatesReaderBase {
                 counter, timer.elapsedMsec());
 
 
+    }
+
+    private String getTripId(TripDescriptor tripDescriptor) {
+        DbConfig config = Core.getInstance().getDbConfig();
+        String tripId = tripDescriptor.getTripId();
+
+        if(config.getServiceIdSuffix()){
+            Trip trip = BlockAssigner.getInstance().getTripWithServiceIdSuffix(config,tripId);
+            tripId = trip.getId();
+        }
+        return tripId;
     }
 
     private CanceledTripKey getCanceledTripKey(VehicleDescriptor vehicleDescriptor, String tripId){
