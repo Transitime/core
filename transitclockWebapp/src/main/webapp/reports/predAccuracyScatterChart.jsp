@@ -171,15 +171,18 @@ if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.
           series: [{'color': '<%= (source==null || !source.equals("Other")) ? "blue" : "red" %>'},{'color': 'red'}],
           legend: 'none',
           // Use small points since have lots of them
-          pointSize: 2,
-          // Draw a trendline for data series 0
-          //trendlines: { 
-          //  0: {
-          //    color: 'purple',
-          //    lineWidth: 5,
-          //    opacity: 0.5,
-          //  } 
-          //},
+          pointSize: 1,
+          dataOpacity: 0.4,
+
+            // Draw a trendline for data series 0
+          trendlines: {
+            0: {
+              color: 'red',
+              lineWidth: 3,
+              visibleInLegend: true,
+              opacity: 1,
+            }
+          },
           // Need to not use 100% or else labels won't appear
           chartArea: {width:'90%', height:'80%', backgroundColor: '#f2f2f2'},
           // Allow zooming
