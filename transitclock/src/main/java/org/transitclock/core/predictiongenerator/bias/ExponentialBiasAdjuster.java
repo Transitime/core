@@ -4,6 +4,10 @@ import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.utils.Time;
 
+/**
+ * @author scrudden
+ * This will adjust a prediction based on a percentage which increases exponentially as the horizon gets bigger.
+ */
 public class ExponentialBiasAdjuster implements BiasAdjuster {
 	private double percentage=Double.NaN;
 	
