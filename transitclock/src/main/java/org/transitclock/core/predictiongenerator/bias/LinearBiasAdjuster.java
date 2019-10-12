@@ -1,6 +1,7 @@
 package org.transitclock.core.predictiongenerator.bias;
 
 import org.transitclock.config.DoubleConfigValue;
+import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.utils.Time;
 
 /**
@@ -17,9 +18,11 @@ public class LinearBiasAdjuster implements BiasAdjuster {
 	
 	
 	private static DoubleConfigValue rateChangePercentage = new DoubleConfigValue(
-			"org.transitclock.core.predictiongenerator.bias.linear.rate", -0.0006,
+			"org.transitclock.core.predictiongenerator.bias.linear.rate", 0.0006,
 			"Rate at which percentage adjustment changes with horizon.");
-	
+	private static IntegerConfigValue updown = new IntegerConfigValue(
+			"org.transitclock.core.predictiongenerator.bias.linear.updown", -1,
+			"Is the adjustment up or down? Set +1 or -1.");
 	
 	public LinearBiasAdjuster() {
 		super();
@@ -39,7 +42,7 @@ public class LinearBiasAdjuster implements BiasAdjuster {
 		
 		percentage = (prediction/100)*rate;
 		
-		double new_prediction = prediction+((percentage/100)*prediction);			
+		double new_prediction = prediction+(((percentage/100)*prediction)*updown.getValue());			
 		return (long) new_prediction;
 	}
 	public double getRate() {
