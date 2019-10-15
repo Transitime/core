@@ -168,6 +168,11 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		String stopId = path.getStopId();
 		int gtfsStopSeq = path.getGtfsStopSeq();
 		
+		if(BiasAdjusterFactory.getInstance()!=null)
+		{
+			BiasAdjuster adjuster = BiasAdjusterFactory.getInstance();
+			predictionTime=avlReport.getTime()+adjuster.adjustPrediction(predictionTime-avlReport.getTime());			
+		}
 		
 		Trip trip = indices.getTrip();
 		
@@ -548,6 +553,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		
 		for(IpcPrediction prediction : filteredPredictions.values()){
 			newPredictions.add(prediction);
+			
+			
 		}
 		
 		// Return the results
