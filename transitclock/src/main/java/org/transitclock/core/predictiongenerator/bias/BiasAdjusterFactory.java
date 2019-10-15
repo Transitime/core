@@ -7,7 +7,7 @@ public class BiasAdjusterFactory {
 	private static BiasAdjuster singleton=null;
 	
 	// The name of the class to instantiate
-	private static StringConfigValue className = new StringConfigValue("transitclock.core.predictiongenerator.biasabjuster",
+	private static StringConfigValue className = new StringConfigValue("transitclock.core.predictiongenerator.biasadjuster",
 				"org.transitclock.core.predictiongenerator.bias.ExponentialBiasAdjuster",
 				"Specifies the name of the class used to adjust the bias of a predction.");
 	
