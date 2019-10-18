@@ -13,9 +13,23 @@ public class ExponentialBiasAdjuster implements BiasAdjuster {
 	
 	private double number=Double.NaN;
 	
+	/*
+	 * y=a(b^x)+c
+	 * 
+	 * 
+	 */
+	
 	private static DoubleConfigValue baseNumber = new DoubleConfigValue(
-			"org.transitclock.core.predictiongenerator.bias.exponential.basenumber", 1.1,
-			"Base number to be raised to the power of the horizon minutes.");
+			"org.transitclock.core.predictiongenerator.bias.exponential.b", 1.1,
+			"Base number to be raised to the power of the horizon minutes. y=a(b^x)+c.");
+	
+	private static DoubleConfigValue multiple = new DoubleConfigValue(
+			"org.transitclock.core.predictiongenerator.bias.exponential.a", 0.5,
+			"Multiple.y=a(b^x)+c.");
+	
+	private static DoubleConfigValue constant = new DoubleConfigValue(
+			"org.transitclock.core.predictiongenerator.bias.exponential.c", -0.5,
+			"Constant. y=a(b^x)+c.");
 	
 	private static IntegerConfigValue updown = new IntegerConfigValue(
 			"org.transitclock.core.predictiongenerator.bias.exponential.updown", -1,
@@ -25,7 +39,7 @@ public class ExponentialBiasAdjuster implements BiasAdjuster {
 
 	
 		double tothepower=(prediction/1000)/60;
-		percentage = Math.pow(number, tothepower)-1;
+		percentage = ((Math.pow(number, tothepower))*multiple.getValue())-constant.getValue();
 		
 		double new_prediction = prediction + (updown.getValue()*(((percentage/100)*prediction)));			
 		return (long) new_prediction;
