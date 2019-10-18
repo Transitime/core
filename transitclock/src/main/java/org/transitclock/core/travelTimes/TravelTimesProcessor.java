@@ -65,16 +65,7 @@ import com.amazonaws.services.importexport.model.InvalidParameterException;
  */
 public class TravelTimesProcessor {
 
-	// For when determining travel times for segments. Throws out
-	// outliers if they are less than 0.7 or greater than 1/0.7
-	// of the average.
-	private final static double FRACTION_LIMIT_FOR_SEGMENT_TIMES = 0.7;
-	
-	// For when determining stop times. Throws out
-	// outliers if they are less than 0.7 or greater than 1/0.7
-	// of the average.	
-	private final static double FRACTION_LIMIT_FOR_STOP_TIMES = 0.7;
-	
+
 	// Used when determining stop time for first stop of trip. A value
 	// of 1.0 means that will use a stop time that is within 1.0 
 	// standard deviation of the mean or higher, which is,
@@ -100,6 +91,22 @@ public class TravelTimesProcessor {
 	private static boolean shouldResetEarlyTerminalDepartures() {
 		return resetEarlyTerminalDepartures.getValue();
 	}
+	
+	// For when determining stop times. Throws out
+	// outliers if they are less than 0.7 or greater than 1/0.7
+	// of the average.	 
+	private static DoubleConfigValue fractionLimitForStopTimes = new DoubleConfigValue("transitclock.traveltimes.fractionLimitForStopTimes",
+			0.7,
+			"For when determining stop times. Throws out outliers.");
+	
+	
+	// For when determining travel times for segments. Throws out
+	// outliers if they are less than 0.7 or greater than 1/0.7
+	// of the average.
+	private static DoubleConfigValue fractionLimitForTravelTimes = new DoubleConfigValue("transitclock.traveltimes.fractionLimitForTravelTimes",
+			0.7,
+			"For when determining travel times. Throws out outliers.");
+	
 	private static BooleanConfigValue resetEarlyTerminalDepartures =
 			new BooleanConfigValue("transitclock.travelTimes.resetEarlyTerminalDepartures",
 					true,
@@ -936,7 +943,7 @@ public class TravelTimesProcessor {
 							travelTimesBySegment) {
 						int averageTravelTimeForSegment = Statistics
 								.filteredMean(travelTimesByTripForSegment, 
-										FRACTION_LIMIT_FOR_SEGMENT_TIMES);
+										fractionLimitForTravelTimes.getValue());
 						averageTravelTimes.add(averageTravelTimeForSegment);
 					}
 				}
@@ -959,7 +966,7 @@ public class TravelTimesProcessor {
 					averagedStopTime =
 							Statistics.biasedFilteredMean(
 									stopTimesForStopPathForTrip,
-									FRACTION_LIMIT_FOR_STOP_TIMES,
+									fractionLimitForStopTimes.getValue(),
 									STD_DEV_BIAS_FOR_FIRST_STOP);
 					
 					// So far have determine when vehicle has departed. But should add
@@ -970,7 +977,7 @@ public class TravelTimesProcessor {
 					// Not first stop of trip
 					averagedStopTime = Statistics.filteredMean(
 							stopTimesForStopPathForTrip,
-							FRACTION_LIMIT_FOR_STOP_TIMES);
+							fractionLimitForStopTimes.getValue());
 				}
 			} else {
 				// No arrival and corresponding departure time for the stop. 
