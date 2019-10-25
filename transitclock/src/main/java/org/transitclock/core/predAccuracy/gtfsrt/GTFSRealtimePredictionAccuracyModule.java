@@ -17,30 +17,29 @@
 
 package org.transitclock.core.predAccuracy.gtfsrt;
 
-import java.net.URL;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
+import com.google.transit.realtime.GtfsRealtime;
+import com.google.transit.realtime.GtfsRealtime.FeedEntity;
+import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.ClassConfigValue;
 import org.transitclock.config.StringConfigValue;
+import org.transitclock.core.blockAssigner.BlockAssigner;
 import org.transitclock.core.predAccuracy.PredAccuracyPrediction;
 import org.transitclock.core.predAccuracy.PredictionAccuracyModule;
 import org.transitclock.db.structs.ScheduleTime;
 import org.transitclock.db.structs.StopPath;
 import org.transitclock.db.structs.Trip;
-import org.transitclock.db.structs.TripPattern;
 import org.transitclock.gtfs.DbConfig;
-import org.transitclock.utils.Time;
 
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
+import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Reads in external prediction data from a GTFS realtime trip updates feed and
@@ -157,287 +156,288 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 
 					if (stopTime.hasArrival() || stopTime.hasDeparture()) {
 
-						String direction = null;
+						String direction;
+						Trip gtfsTrip;
+						GtfsRealtime.TripDescriptor tripDescriptor = update.getTrip();
 
-						if (update.getTrip().hasDirectionId())
-							direction = "" + update.getTrip().getDirectionId();
+						if (tripDescriptor != null) {
+							String tripId = getTripId(dbConfig, tripDescriptor);
+							gtfsTrip = dbConfig.getTrip(tripId);
+							if (gtfsTrip != null) {
+								direction = gtfsTrip.getDirectionId();
+								if (gtfsTrip != null) {
 
-						if (update.getTrip() != null) {
-							Trip trip = dbConfig.getTrip(update.getTrip().getTripId());
-							if (trip != null) {
-								direction = trip.getDirectionId();
-							} else {
-								logger.error("Got tripTag={} but no such trip in " + "the configuration.",
-										update.getTrip().getTripId());
+									logger.debug("Trip loaded.");
 
-							}
-						}					
-						Trip gtfsTrip = dbConfig.getTrip(update.getTrip().getTripId());
 
-						if (gtfsTrip != null) {
-							
-							logger.debug("Trip loaded.");
-							
+									logger.debug("Processing : \n" + stopTime);
+									/* use stop as means for getting scheduled time */
 
-							logger.debug("Processing : \n" + stopTime);
-							/* use stop as means for getting scheduled time */
-													
-							int stopPathIndex = -1;
-							if (stopTime.hasStopSequence()) {
-								try {
-									stopPathIndex = getStopPathIndex(gtfsTrip, stopTime.getStopSequence());
-								} catch (Exception e) {
-									logger.error("Not valid stop sequence {} for trip {}.", stopTime.getStopSequence(),
-											gtfsTrip.getId());
-								}
-							} else if (stopTime.hasStopId() && !stopTime.hasStopSequence()) {
-								StopPath stopPath = gtfsTrip.getStopPath(stopTime.getStopId());
-								// StopPath stopPath = getStopPath(gtfsTrip,
-								// stopTime.getStopSequence());
-
-								if (stopPath != null)
-									logger.debug(stopPath.toString());
-
-								stopPathIndex = getStopPathIndex(gtfsTrip, stopPath);
-
-							} else {
-								logger.error(
-										"StopTimeUpdate must have stop id or stop sequence set:" + stopTime.toString());
-							}
-							if (stopPathIndex >= 0) {
-
-								logger.debug("StopPathIndex : " + stopPathIndex);
-								int nextStopIndexIncrement = 0;
-
-								StopTimeUpdate nextStopTime = null;
-
-								if (i + 1 < stopTimes.size())
-									nextStopTime = stopTimes.get(i + 1);
-
-								while ((nextStopTime != null && !stopTimeMatchesStopPath(nextStopTime,
-										gtfsTrip.getStopPath(stopPathIndex + nextStopIndexIncrement)))
-										|| (nextStopTime == null && (stopPathIndex + nextStopIndexIncrement) < gtfsTrip
-												.getStopPaths().size())) {
-									ScheduleTime scheduledTime = null;
-
-									scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex + nextStopIndexIncrement);
-
-									String stopId = gtfsTrip.getStopPath(stopPathIndex + nextStopIndexIncrement)
-											.getStopId();
-
-									nextStopIndexIncrement++;
-
-									if (scheduledTime != null)
-										logger.debug(scheduledTime.toString());
-									else
-										logger.debug("No schedule time found");
-
-									Date eventTime = null;
-									if (scheduledTime != null) {
-										eventTime = null;
-										if (stopTime.hasArrival()) {
-											if (stopTime.getArrival().hasTime()) {
-												eventTime = new Date(stopTime.getArrival().getTime() * 1000);
-
-												// logger.debug("Event Time : "
-												// +
-												// eventTime);
-											} else if (stopTime.getArrival().hasDelay()) {
-
-												int timeInSeconds = stopTime.getArrival().getDelay();
-
-												if (scheduledTime.getDepartureTime() != null)
-													timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
-												else if (scheduledTime.getArrivalTime() != null)
-													timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
-
-												Calendar calendar = Calendar.getInstance();
-												calendar.set(Calendar.HOUR_OF_DAY, 0);
-												calendar.set(Calendar.MINUTE, 0);
-												calendar.set(Calendar.SECOND, 0);
-
-												calendar.add(Calendar.SECOND, timeInSeconds);
-
-												eventTime = calendar.getTime();
-												logger.debug("Event Time : " + eventTime);
-												logger.debug("Time in seconds :" + timeInSeconds);
-
-											} else if (update.hasDelay()) {
-
-												int timeInSeconds = update.getDelay();
-
-												if (scheduledTime.getDepartureTime() != null)
-													timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
-												else if (scheduledTime.getArrivalTime() != null)
-													timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
-
-												Calendar calendar = Calendar.getInstance();
-												calendar.set(Calendar.HOUR_OF_DAY, 0);
-												calendar.set(Calendar.MINUTE, 0);
-												calendar.set(Calendar.SECOND, 0);
-
-												calendar.add(Calendar.SECOND, timeInSeconds);
-
-												eventTime = calendar.getTime();
-												logger.debug("Event Time : " + eventTime);
-												logger.debug("Time in seconds :" + timeInSeconds);
-											}
-											if (eventTime != null) {
-												/*
-												 * TODO could be used to cache
-												 * read times
-												 */
-												/*
-												 * if (readTimesMap.get(new
-												 * PredictionReadTimeKey(stopId,
-												 * update.getVehicle().getId(),
-												 * eventTime.getTime())) ==
-												 * null) readTimesMap.put(new
-												 * PredictionReadTimeKey(stopId,
-												 * update.getVehicle().getId(),
-												 * eventTime.getTime()),
-												 * eventReadTime.getTime());
-												 * else eventReadTime.setTime(
-												 * readTimesMap.get(new
-												 * PredictionReadTimeKey(stopId,
-												 * update.getVehicle().getId(),
-												 * eventTime.getTime())));
-												 */
-												if (eventTime.after(eventReadTime)) {
-
-													logger.info(
-															"Storing external prediction routeId={}, "
-																	+ "directionId={}, tripId={}, vehicleId={}, "
-																	+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
-															gtfsTrip.getRouteId(), direction,
-															update.getTrip().getTripId(), update.getVehicle().getId(),
-															stopId, eventTime, true, scheduledTime.toString(),
-															eventReadTime.toString());
-
-													logger.info("Prediction in milliseconds is {} and converted is {}",
-															eventTime.getTime(), eventTime);
-
-													PredAccuracyPrediction pred = new PredAccuracyPrediction(
-															gtfsTrip.getRouteId(), direction, stopId,
-															update.getTrip().getTripId(), update.getVehicle().getId(),
-															eventTime, eventReadTime, true, new Boolean(false),
-															"GTFS-rt", null,scheduledTime.toString());
-
-													storePrediction(pred);
-												} else {
-													logger.info(
-															"Discarding as prediction after event. routeId={}, "
-																	+ "directionId={}, tripId={}, vehicleId={}, "
-																	+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
-															gtfsTrip.getRouteId(), direction,
-															update.getTrip().getTripId(), update.getVehicle().getId(),
-															stopId, eventTime, true, scheduledTime.toString(),
-															eventReadTime.toString());
-												}
-											}
+									int stopPathIndex = -1;
+									if (stopTime.hasStopSequence()) {
+										try {
+											stopPathIndex = getStopPathIndex(gtfsTrip, stopTime.getStopSequence());
+										} catch (Exception e) {
+											logger.error("Not valid stop sequence {} for trip {}.", stopTime.getStopSequence(),
+													gtfsTrip.getId());
 										}
-										eventTime = null;
-										if (stopTime.hasDeparture()) {
-											if (stopTime.getDeparture().hasTime()) {
-												eventTime = new Date(stopTime.getDeparture().getTime() * 1000);
+									} else if (stopTime.hasStopId() && !stopTime.hasStopSequence()) {
+										StopPath stopPath = gtfsTrip.getStopPath(stopTime.getStopId());
+										// StopPath stopPath = getStopPath(gtfsTrip,
+										// stopTime.getStopSequence());
 
-												logger.debug("Event Time : " + eventTime);
-											} else if (stopTime.getDeparture().hasDelay()) {
+										if (stopPath != null)
+											logger.debug(stopPath.toString());
 
-												int timeInSeconds = stopTime.getDeparture().getDelay();
+										stopPathIndex = getStopPathIndex(gtfsTrip, stopPath);
 
-												if (scheduledTime.getDepartureTime() != null)
-													timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
-												else if (scheduledTime.getArrivalTime() != null)
-													timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
+									} else {
+										logger.error(
+												"StopTimeUpdate must have stop id or stop sequence set:" + stopTime.toString());
+									}
+									if (stopPathIndex >= 0) {
 
-												Calendar calendar = Calendar.getInstance();
-												calendar.set(Calendar.HOUR_OF_DAY, 0);
-												calendar.set(Calendar.MINUTE, 0);
-												calendar.set(Calendar.SECOND, 0);
+										logger.debug("StopPathIndex : " + stopPathIndex);
+										int nextStopIndexIncrement = 0;
 
-												calendar.add(Calendar.SECOND, timeInSeconds);
+										StopTimeUpdate nextStopTime = null;
 
-												eventTime = calendar.getTime();
-												logger.debug("Event Time : " + eventTime);
-												logger.debug("Time in seconds :" + timeInSeconds);
-											} else if (update.hasDelay()) {
+										if (i + 1 < stopTimes.size())
+											nextStopTime = stopTimes.get(i + 1);
 
-												int timeInSeconds = update.getDelay();
+										while ((nextStopTime != null && !stopTimeMatchesStopPath(nextStopTime,
+												gtfsTrip.getStopPath(stopPathIndex + nextStopIndexIncrement)))
+												|| (nextStopTime == null && (stopPathIndex + nextStopIndexIncrement) < gtfsTrip
+												.getStopPaths().size())) {
+											ScheduleTime scheduledTime = null;
 
-												if (scheduledTime.getDepartureTime() != null)
-													timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
-												else if (scheduledTime.getArrivalTime() != null)
-													timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
+											scheduledTime = gtfsTrip.getScheduleTime(stopPathIndex + nextStopIndexIncrement);
 
-												Calendar calendar = Calendar.getInstance();
-												calendar.set(Calendar.HOUR_OF_DAY, 0);
-												calendar.set(Calendar.MINUTE, 0);
-												calendar.set(Calendar.SECOND, 0);
+											String stopId = gtfsTrip.getStopPath(stopPathIndex + nextStopIndexIncrement)
+													.getStopId();
 
-												calendar.add(Calendar.SECOND, timeInSeconds);
+											nextStopIndexIncrement++;
 
-												eventTime = calendar.getTime();
-												logger.debug("Event Time : " + eventTime);
-												logger.debug("Time in seconds :" + timeInSeconds);
-											}
-											if (eventTime != null) {
-												/*
-												 * TODO could be used to cache
-												 * read times
-												 */
-												/*
-												 * if (readTimesMap.get(new
-												 * PredictionReadTimeKey(stopId,
-												 * update.getVehicle().getId(),
-												 * eventTime.getTime())) ==
-												 * null) readTimesMap.put(new
-												 * PredictionReadTimeKey(stopId,
-												 * update.getVehicle().getId(),
-												 * eventTime.getTime()),
-												 * eventReadTime.getTime());
-												 * else eventReadTime.setTime(
-												 * readTimesMap.get(new
-												 * PredictionReadTimeKey(stopId,
-												 * update.getVehicle().getId(),
-												 * eventTime.getTime())));
-												 */
-												if (eventTime.after(eventReadTime)) {
-													logger.info(
-															"Storing external prediction routeId={}, "
-																	+ "directionId={}, tripId={}, vehicleId={}, "
-																	+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
-															gtfsTrip.getRouteId(), direction,
-															update.getTrip().getTripId(), update.getVehicle().getId(),
-															stopId, eventTime, false, scheduledTime.toString(),
-															eventReadTime.toString());
+											if (scheduledTime != null)
+												logger.debug(scheduledTime.toString());
+											else
+												logger.debug("No schedule time found");
 
-													logger.info("Prediction in milliseonds is {} and converted is {}",
-															eventTime.getTime(), eventTime);
+											Date eventTime = null;
+											if (scheduledTime != null) {
+												eventTime = null;
+												if (stopTime.hasArrival()) {
+													if (stopTime.getArrival().hasTime()) {
+														eventTime = new Date(stopTime.getArrival().getTime() * 1000);
 
-													PredAccuracyPrediction pred = new PredAccuracyPrediction(
-															gtfsTrip.getRouteId(), direction, stopId,
-															update.getTrip().getTripId(), update.getVehicle().getId(),
-															eventTime, eventReadTime, false, new Boolean(false),
-															"GTFS-rt",null, scheduledTime.toString());
+														// logger.debug("Event Time : "
+														// +
+														// eventTime);
+													} else if (stopTime.getArrival().hasDelay()) {
 
-													storePrediction(pred);
-												} else {
-													logger.info(
-															"Discarding as prediction after event. routeId={}, "
-																	+ "directionId={}, tripId={}, vehicleId={}, "
-																	+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
-															gtfsTrip.getRouteId(), direction,
-															update.getTrip().getTripId(), update.getVehicle().getId(),
-															stopId, eventTime, false, scheduledTime.toString(),
-															eventReadTime.toString());
+														int timeInSeconds = stopTime.getArrival().getDelay();
+
+														if (scheduledTime.getDepartureTime() != null)
+															timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
+														else if (scheduledTime.getArrivalTime() != null)
+															timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
+
+														Calendar calendar = Calendar.getInstance();
+														calendar.set(Calendar.HOUR_OF_DAY, 0);
+														calendar.set(Calendar.MINUTE, 0);
+														calendar.set(Calendar.SECOND, 0);
+
+														calendar.add(Calendar.SECOND, timeInSeconds);
+
+														eventTime = calendar.getTime();
+														logger.debug("Event Time : " + eventTime);
+														logger.debug("Time in seconds :" + timeInSeconds);
+
+													} else if (update.hasDelay()) {
+
+														int timeInSeconds = update.getDelay();
+
+														if (scheduledTime.getDepartureTime() != null)
+															timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
+														else if (scheduledTime.getArrivalTime() != null)
+															timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
+
+														Calendar calendar = Calendar.getInstance();
+														calendar.set(Calendar.HOUR_OF_DAY, 0);
+														calendar.set(Calendar.MINUTE, 0);
+														calendar.set(Calendar.SECOND, 0);
+
+														calendar.add(Calendar.SECOND, timeInSeconds);
+
+														eventTime = calendar.getTime();
+														logger.debug("Event Time : " + eventTime);
+														logger.debug("Time in seconds :" + timeInSeconds);
+													}
+													if (eventTime != null) {
+														/*
+														 * TODO could be used to cache
+														 * read times
+														 */
+														/*
+														 * if (readTimesMap.get(new
+														 * PredictionReadTimeKey(stopId,
+														 * update.getVehicle().getId(),
+														 * eventTime.getTime())) ==
+														 * null) readTimesMap.put(new
+														 * PredictionReadTimeKey(stopId,
+														 * update.getVehicle().getId(),
+														 * eventTime.getTime()),
+														 * eventReadTime.getTime());
+														 * else eventReadTime.setTime(
+														 * readTimesMap.get(new
+														 * PredictionReadTimeKey(stopId,
+														 * update.getVehicle().getId(),
+														 * eventTime.getTime())));
+														 */
+														if (eventTime.after(eventReadTime)) {
+
+															logger.info(
+																	"Storing external prediction routeId={}, "
+																			+ "directionId={}, tripId={}, vehicleId={}, "
+																			+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
+																	gtfsTrip.getRouteId(), direction,
+																	tripId, update.getVehicle().getId(),
+																	stopId, eventTime, true, scheduledTime.toString(),
+																	eventReadTime.toString());
+
+															logger.info("Prediction in milliseconds is {} and converted is {}",
+																	eventTime.getTime(), eventTime);
+
+															PredAccuracyPrediction pred = new PredAccuracyPrediction(
+																	gtfsTrip.getRouteId(), direction, stopId,
+																	tripId, update.getVehicle().getId(),
+																	eventTime, eventReadTime, true, new Boolean(false),
+																	"GTFS-rt", null,scheduledTime.toString());
+
+															storePrediction(pred);
+														} else {
+															logger.info(
+																	"Discarding as prediction after event. routeId={}, "
+																			+ "directionId={}, tripId={}, vehicleId={}, "
+																			+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
+																	gtfsTrip.getRouteId(), direction,
+																	tripId, update.getVehicle().getId(),
+																	stopId, eventTime, true, scheduledTime.toString(),
+																	eventReadTime.toString());
+														}
+													}
+												}
+												eventTime = null;
+												if (stopTime.hasDeparture()) {
+													if (stopTime.getDeparture().hasTime()) {
+														eventTime = new Date(stopTime.getDeparture().getTime() * 1000);
+
+														logger.debug("Event Time : " + eventTime);
+													} else if (stopTime.getDeparture().hasDelay()) {
+
+														int timeInSeconds = stopTime.getDeparture().getDelay();
+
+														if (scheduledTime.getDepartureTime() != null)
+															timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
+														else if (scheduledTime.getArrivalTime() != null)
+															timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
+
+														Calendar calendar = Calendar.getInstance();
+														calendar.set(Calendar.HOUR_OF_DAY, 0);
+														calendar.set(Calendar.MINUTE, 0);
+														calendar.set(Calendar.SECOND, 0);
+
+														calendar.add(Calendar.SECOND, timeInSeconds);
+
+														eventTime = calendar.getTime();
+														logger.debug("Event Time : " + eventTime);
+														logger.debug("Time in seconds :" + timeInSeconds);
+													} else if (update.hasDelay()) {
+
+														int timeInSeconds = update.getDelay();
+
+														if (scheduledTime.getDepartureTime() != null)
+															timeInSeconds = timeInSeconds + scheduledTime.getDepartureTime();
+														else if (scheduledTime.getArrivalTime() != null)
+															timeInSeconds = timeInSeconds + scheduledTime.getArrivalTime();
+
+														Calendar calendar = Calendar.getInstance();
+														calendar.set(Calendar.HOUR_OF_DAY, 0);
+														calendar.set(Calendar.MINUTE, 0);
+														calendar.set(Calendar.SECOND, 0);
+
+														calendar.add(Calendar.SECOND, timeInSeconds);
+
+														eventTime = calendar.getTime();
+														logger.debug("Event Time : " + eventTime);
+														logger.debug("Time in seconds :" + timeInSeconds);
+													}
+													if (eventTime != null) {
+														/*
+														 * TODO could be used to cache
+														 * read times
+														 */
+														/*
+														 * if (readTimesMap.get(new
+														 * PredictionReadTimeKey(stopId,
+														 * update.getVehicle().getId(),
+														 * eventTime.getTime())) ==
+														 * null) readTimesMap.put(new
+														 * PredictionReadTimeKey(stopId,
+														 * update.getVehicle().getId(),
+														 * eventTime.getTime()),
+														 * eventReadTime.getTime());
+														 * else eventReadTime.setTime(
+														 * readTimesMap.get(new
+														 * PredictionReadTimeKey(stopId,
+														 * update.getVehicle().getId(),
+														 * eventTime.getTime())));
+														 */
+														if (eventTime.after(eventReadTime)) {
+															logger.info(
+																	"Storing external prediction routeId={}, "
+																			+ "directionId={}, tripId={}, vehicleId={}, "
+																			+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
+																	gtfsTrip.getRouteId(), direction,
+																	tripId, update.getVehicle().getId(),
+																	stopId, eventTime, false, scheduledTime.toString(),
+																	eventReadTime.toString());
+
+															logger.info("Prediction in milliseonds is {} and converted is {}",
+																	eventTime.getTime(), eventTime);
+
+															PredAccuracyPrediction pred = new PredAccuracyPrediction(
+																	gtfsTrip.getRouteId(), direction, stopId,
+																	tripId, update.getVehicle().getId(),
+																	eventTime, eventReadTime, false, new Boolean(false),
+																	"GTFS-rt",null, scheduledTime.toString());
+
+															storePrediction(pred);
+														} else {
+															logger.info(
+																	"Discarding as prediction after event. routeId={}, "
+																			+ "directionId={}, tripId={}, vehicleId={}, "
+																			+ "stopId={}, prediction={}, isArrival={}, scheduledTime={}, readTime={}",
+																	gtfsTrip.getRouteId(), direction,
+																	tripId, update.getVehicle().getId(),
+																	stopId, eventTime, false, scheduledTime.toString(),
+																	eventReadTime.toString());
+														}
+													}
 												}
 											}
 										}
 									}
 								}
+							} else {
+								logger.error("Got tripTag={} but no such trip in " + "the configuration.",
+										tripId);
+
 							}
-						}
+						}					
+
+
+
 					} else {
 						logger.debug("No predictions for vehicleId={} for stop={}", update.getVehicle().getId(),
 								stopTime.getStopId());
@@ -445,6 +445,16 @@ public class GTFSRealtimePredictionAccuracyModule extends PredictionAccuracyModu
 				}
 			}
 		}
+	}
+
+	private String getTripId(DbConfig config, GtfsRealtime.TripDescriptor tripDescriptor) {
+		String tripId = tripDescriptor.getTripId();
+
+		if(config.getServiceIdSuffix()){
+			Trip trip = BlockAssigner.getInstance().getTripWithServiceIdSuffix(config,tripId);
+			tripId = trip.getId();
+		}
+		return tripId;
 	}
 
 	private boolean stopTimeMatchesStopPath(StopTimeUpdate stopTimeUpdate, StopPath stopPath) {
