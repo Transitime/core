@@ -17,11 +17,7 @@
 
 package org.transitclock.configData;
 
-import org.transitclock.config.BooleanConfigValue;
-import org.transitclock.config.DoubleConfigValue;
-import org.transitclock.config.FloatConfigValue;
-import org.transitclock.config.IntegerConfigValue;
-import org.transitclock.config.StringConfigValue;
+import org.transitclock.config.*;
 
 /**
  * Handles the AVL configuration data. 
@@ -48,11 +44,11 @@ public class AvlConfig {
 	 * How frequently an AVL feed should be polled for new data.
 	 * @return
 	 */
-	public static int getSecondsBetweenAvlFeedPolling() {
+	public static float getSecondsBetweenAvlFeedPolling() {
 		return secondsBetweenAvlFeedPolling.getValue();
 	}
-	private static IntegerConfigValue secondsBetweenAvlFeedPolling =
-			new IntegerConfigValue("transitclock.avl.feedPollingRateSecs", 5,
+	private static FloatConfigValue secondsBetweenAvlFeedPolling =
+			new FloatConfigValue("transitclock.avl.feedPollingRateSecs", 5f,
 					"How frequently an AVL feed should be polled for new data.");
 	
 	/**

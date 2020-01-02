@@ -17,16 +17,6 @@
 
 package org.transitclock.avl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Collection;
-import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -39,6 +29,16 @@ import org.transitclock.db.structs.AvlReport;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Collection;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Subclass of AvlModule to be used when reading AVL data from a feed. Calls the
@@ -260,9 +260,9 @@ public abstract class PollUrlAvlModule extends AvlModule {
 			
 			// Wait appropriate amount of time till poll again
 			long elapsedMsec = timer.elapsedMsec();
-			long sleepTime = 
+			long sleepTime = (long) (
 					AvlConfig.getSecondsBetweenAvlFeedPolling()*Time.MS_PER_SEC - 
-					elapsedMsec;
+					elapsedMsec);
 			if (sleepTime < 0) {
 				logger.warn("Supposed to have a polling rate of " + 
 						AvlConfig.getSecondsBetweenAvlFeedPolling()*Time.MS_PER_SEC +
