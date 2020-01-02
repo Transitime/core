@@ -1,6 +1,6 @@
 @CHARSET "ISO-8859-1";
 /*
- * This file contains general CSS config for TheTransitClock pages
+ * This file contains general CSS config for Transitime pages
  */
 body {
 	font-family: sans-serif;
@@ -114,4 +114,5 @@ input, select {
 #dataTable th, #dataTable thead {
   background: #ddd;
 }
+
 

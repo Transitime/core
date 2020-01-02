@@ -14,6 +14,13 @@
 
 <script>
 
+function formatRoute (route) {
+    if (!route.id || route.id == " ") {
+        return route.text;
+    }
+    return route.id;
+};
+
 $.getJSON(apiUrlPrefix + "/command/routes", 
  		function(routes) {
 	        // Generate list of routes for the selector
@@ -32,7 +39,10 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 	 		// search capability
  			$("#route").select2({
  				placeholder: "All Routes", 				
- 				data : selectorData})
+ 				data : selectorData,
+                closeOnSelect: false,
+                templateSelection: formatRoute
+            })
  			// Need to reset tooltip after selector is used. Sheesh!
  			.on("select2:select", function(e) {
  				var configuredTitle = $( "#route" ).attr("title");
@@ -52,7 +62,7 @@ $.getJSON(apiUrlPrefix + "/command/routes",
 
     <div id="routesDiv"  class="param">
       <label for="route">Routes:</label>
-      <select id="route" name="r" style="width: 380px" multiple="multiple"
+      <select id="route" name="r" style="width: 450px" multiple="multiple"
       	title="Select which routes you want data for. You can use the Ctrl key along
       		   with the mouse to select multiple routes. Note: selecting all routes
       		   indeed reads in data for all routes which means it could be 

@@ -1,6 +1,6 @@
 /*
  * This file is part of Transitime.org
- * 
+ *
  * Transitime.org is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPL) as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -35,7 +35,7 @@ import java.util.Map;
  * This abstract class does the SQL query and puts data into a map. Then a
  * subclass must be used to convert the data to JSON rows and columns for Google
  * chart.
- * 
+ *
  * TODO: rewrite as hibernate criteria.
  *
  * @author SkiBu Smith
@@ -72,7 +72,7 @@ abstract public class PredictionAccuracyQuery {
 
 		/**
 		 * For converting from a string to an IntervalsType
-		 * 
+		 *
 		 * @param text
 		 *            String to be converted
 		 * @return The corresponding IntervalsType, or IntervalsType.PERCENTAGE
@@ -107,7 +107,7 @@ abstract public class PredictionAccuracyQuery {
 
 	/**
 	 * Creates connection to database.
-	 * 
+	 *
 	 * @param dbType
 	 * @param dbHost
 	 * @param dbName
@@ -116,7 +116,7 @@ abstract public class PredictionAccuracyQuery {
 	 * @throws SQLException
 	 */
 	public PredictionAccuracyQuery(String dbType, String dbHost, String dbName,
-			String dbUserName, String dbPassword) throws SQLException {
+								   String dbUserName, String dbPassword) throws SQLException {
 		this.dbType = dbType;
 		connection = GenericQuery.getConnection(dbType, dbHost, dbName,
 				dbUserName, dbPassword);
@@ -125,7 +125,7 @@ abstract public class PredictionAccuracyQuery {
 
 	/**
 	 * Creates connection to the database for the specified agency.
-	 * 
+	 *
 	 * @param agencyId
 	 * @throws SQLException
 	 */
@@ -143,7 +143,7 @@ abstract public class PredictionAccuracyQuery {
 	 * to do this is then have the predictions for that bucket be 45 seconds to
 	 * 75 seconds so that the indicator for the bucket (1 minute) is in the
 	 * middle of the range.
-	 * 
+	 *
 	 * @param predLength
 	 * @return
 	 */
@@ -152,10 +152,17 @@ abstract public class PredictionAccuracyQuery {
 				/ PREDICTION_LENGTH_BUCKET_SIZE;
 	}
 
+	private static int fiveBucketIndex(int predLength) {
+		if(predLength == 1){
+			return 0;
+		}
+		return predLength / 5;
+	}
+
 	/**
 	 * Puts the data from the query into the map so it can be further processed
 	 * later.
-	 * 
+	 *
 	 * @param predLength
 	 * @param predAccuracy
 	 * @param source
@@ -169,27 +176,26 @@ abstract public class PredictionAccuracyQuery {
 		}
 
 		// Determine the index of the appropriate prediction bucket
-		int predictionBucketIndex = index(predLength);
-
+		int predictionBucketIndex = fiveBucketIndex(predLength);
 		while (predictionBuckets.size() < predictionBucketIndex + 1)
 			predictionBuckets.add(new ArrayList<Integer>());
-			
+
 		if (predictionBucketIndex < predictionBuckets.size() && predictionBucketIndex >= 0) {
-		  List<Integer> predictionAccuracies = predictionBuckets
-		      .get(predictionBucketIndex);
-	    	// Add the prediction accuracy to the bucket.
-	    	predictionAccuracies.add(predAccuracy);
+			List<Integer> predictionAccuracies = predictionBuckets
+					.get(predictionBucketIndex);
+			// Add the prediction accuracy to the bucket.
+			predictionAccuracies.add(predAccuracy);
 		} else {
-		  // some prediction streams supply predictions in the past -- ignore those
-		  logger.error("predictionLength {} has illegal index {} for predAccuracy {} and source {}", 
-		      predLength, predictionBucketIndex, predAccuracy, source);
+			// some prediction streams supply predictions in the past -- ignore those
+			logger.error("predictionLength {} has illegal index {} for predAccuracy {} and source {}",
+					predLength, predictionBucketIndex, predAccuracy, source);
 		}
 
 	}
 
 	/**
 	 * Performs the SQL query and puts the resulting data into the map.
-	 * 
+	 *
 	 * @param beginDateStr
 	 *            Begin date for date range of data to use.
 	 * @param numDaysStr
@@ -218,8 +224,8 @@ abstract public class PredictionAccuracyQuery {
 	 * @throws ParseException
 	 */
 	protected void doQuery(String beginDateStr, String numDaysStr,
-			String beginTimeStr, String endTimeStr, String routeIds[],
-			String predSource, String predType) throws SQLException,
+						   String beginTimeStr, String endTimeStr, String routeIds[],
+						   String predSource, String predType) throws SQLException,
 			ParseException {
 		// Make sure not trying to get data for too long of a time span since
 		// that could bog down the database.
@@ -227,8 +233,8 @@ abstract public class PredictionAccuracyQuery {
 		if (numDays > 31) {
 			throw new ParseException(
 					"Begin date to end date spans more than a month for endDate="
-					+ " startDate=" + Time.parseDate(beginDateStr)
-					+ " Number of days of " + numDays + " spans more than a month", 0);
+							+ " startDate=" + Time.parseDate(beginDateStr)
+							+ " Number of days of " + numDays + " spans more than a month", 0);
 		}
 		String timeSql = "";
 		String mySqlTimeSql = "";
@@ -238,17 +244,17 @@ abstract public class PredictionAccuracyQuery {
 			if (beginTimeStr == null || beginTimeStr.isEmpty())
 				beginTimeStr = "00:00:00";
 			else {
-				// beginTimeStr set so make sure it is valid, and prevent 
+				// beginTimeStr set so make sure it is valid, and prevent
 				// possible SQL injection
 				if (!beginTimeStr.matches("\\d+:\\d+"))
-					throw new ParseException("begin time \"" + beginTimeStr 
+					throw new ParseException("begin time \"" + beginTimeStr
 							+ "\" is not valid.", 0);
 			}
 			if (endTimeStr == null || endTimeStr.isEmpty())
 				endTimeStr = "23:59:59";
 			// time param is jdbc param -- no need to check for injection attacks
 			timeSql = " AND arrivalDepartureTime::time BETWEEN ? AND ? ";
-      mySqlTimeSql = "AND CAST(arrivalDepartureTime AS TIME) BETWEEN CAST(? AS TIME) AND CAST(? AS TIME) ";
+			mySqlTimeSql = "AND CAST(arrivalDepartureTime AS TIME) BETWEEN CAST(? AS TIME) AND CAST(? AS TIME) ";
 
 		}
 
@@ -302,10 +308,10 @@ abstract public class PredictionAccuracyQuery {
 				+ timeSql
 				+ "  AND predictedTime-predictionReadTime < '00:20:00' "
 				+ routeSql
-				+ sourceSql 
+				+ sourceSql
 				+ predTypeSql;
 
-		
+
 		String mySql = "SELECT "
 				+ "     abs((unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) div 1) as predLength, "
 				+ "     predictionAccuracyMsecs/1000 as predAccuracy, "
@@ -314,7 +320,7 @@ abstract public class PredictionAccuracyQuery {
 				+ "WHERE "
 				+ "arrivalDepartureTime BETWEEN "
 				+ "CAST(? AS DATETIME) "
-				+ "AND DATE_ADD(CAST(? AS DATETIME), INTERVAL " + numDays + " day) " 
+				+ "AND DATE_ADD(CAST(? AS DATETIME), INTERVAL " + numDays + " day) "
 				+ mySqlTimeSql
 				+ "  AND "
 				+ "abs(unix_timestamp(predictedTime)-unix_timestamp(predictionReadTime)) < 1200 " //20 mins
@@ -326,22 +332,22 @@ abstract public class PredictionAccuracyQuery {
 				+ "  AND predictionSource <> 'MBTA_seconds' " + routeSql
 				+ sourceSql + predTypeSql;
 
-		
+
 		String sql = postSql;
 		if ("mysql".equals(dbType)) {
 			sql = mySql;
 		}
-		
+
 		PreparedStatement statement = null;
 		try {
-		  logger.debug("SQL: {}", sql);
+			logger.debug("SQL: {}", sql);
 			statement = connection.prepareStatement(sql);
 
 			// Determine the date parameters for the query
 			Timestamp beginDate = null;
 			java.util.Date date = Time.parse(beginDateStr);
 			beginDate = new Timestamp(date.getTime());
-	     
+
 			// Determine the time parameters for the query
 			// If begin time not set but end time is then use midnight as begin
 			// time
@@ -368,34 +374,34 @@ abstract public class PredictionAccuracyQuery {
 			}
 
 			logger.debug("beginDate {} beginDateStr {} endDateStr {} beginTime {} beginTimeStr {} endTime {} endTimeStr {}",
-			    beginDate,
-			    beginDateStr,
-			    numDays,
-			    beginTime,
-			    beginTimeStr,
-			    endTime,
-			    endTimeStr);
-			
+					beginDate,
+					beginDateStr,
+					numDays,
+					beginTime,
+					beginTimeStr,
+					endTime,
+					endTimeStr);
+
 			// Set the parameters for the query
 			int i = 1;
 			statement.setTimestamp(i++, beginDate);
 			statement.setTimestamp(i++, beginDate);
 
 			if (beginTime != null) {
-			  if ("mysql".equals(dbType)) {
-			    // for mysql use the time str as is to avoid TZ issues
-			    statement.setString(i++, beginTimeStr);
-			  } else {
-			    statement.setTime(i++, beginTime);
-			  }
+				if ("mysql".equals(dbType)) {
+					// for mysql use the time str as is to avoid TZ issues
+					statement.setString(i++, beginTimeStr);
+				} else {
+					statement.setTime(i++, beginTime);
+				}
 			}
 			if (endTime != null) {
-			  if ("mysql".equals(dbType)) {
-	         // for mysql use the time str as is to avoid TZ issues
-          statement.setString(i++, endTimeStr);
-			  } else {
-			    statement.setTime(i++, endTime);
-			  }
+				if ("mysql".equals(dbType)) {
+					// for mysql use the time str as is to avoid TZ issues
+					statement.setString(i++, endTimeStr);
+				} else {
+					statement.setTime(i++, endTime);
+				}
 			}
 			if (routeIds != null) {
 				for (String routeId : routeIds)
@@ -422,7 +428,273 @@ abstract public class PredictionAccuracyQuery {
 				logger.debug("predLength={} predAccuracy={} source={}",
 						predLength, predAccuracy, sourceResult);
 			}
-			
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			if (statement != null)
+				statement.close();
+		}
+	}
+
+	protected void doBucketQuery(String beginDateStr, String numDaysStr,
+								 String beginTimeStr, String endTimeStr, String routeIds[],
+								 String stopIds[], String predSource, String predType) throws SQLException,
+			ParseException {
+		// Make sure not trying to get data for too long of a time span since
+		// that could bog down the database.
+		int numDays = Integer.parseInt(numDaysStr);
+		if (numDays > 31) {
+			throw new ParseException(
+					"Begin date to end date spans more than a month for endDate="
+							+ " startDate=" + Time.parseDate(beginDateStr)
+							+ " Number of days of " + numDays + " spans more than a month", 0);
+		}
+		String timeSql = "";
+		String mySqlTimeSql = "";
+		if ((beginTimeStr != null && !beginTimeStr.isEmpty())
+				|| (endTimeStr != null && !endTimeStr.isEmpty())) {
+			// If only begin or only end time set then use default value
+			if (beginTimeStr == null || beginTimeStr.isEmpty())
+				beginTimeStr = "00:00:00";
+			else {
+				// beginTimeStr set so make sure it is valid, and prevent
+				// possible SQL injection
+				if (!beginTimeStr.matches("\\d+:\\d+"))
+					throw new ParseException("begin time \"" + beginTimeStr
+							+ "\" is not valid.", 0);
+			}
+			if (endTimeStr == null || endTimeStr.isEmpty())
+				endTimeStr = "23:59:59";
+			// time param is jdbc param -- no need to check for injection attacks
+			timeSql = " AND arrivalDepartureTime::time BETWEEN ? AND ? ";
+			mySqlTimeSql = "AND CAST(arrivalDepartureTime AS TIME) BETWEEN CAST(? AS TIME) AND CAST(? AS TIME) ";
+
+		}
+
+		// Determine route portion of SQL
+		// Need to examine each route ID twice since doing a
+		// routeId='stableId' OR routeShortName='stableId' in
+		// order to handle agencies where GTFS route_id is not
+		// stable but the GTFS route_short_name is.
+		String routeSql = "";
+		if (routeIds != null && routeIds.length > 0 && !routeIds[0].trim().isEmpty()) {
+			routeSql = " AND (routeId=? OR routeShortName=?";
+			for (int i = 1; i < routeIds.length; ++i)
+				routeSql += " OR routeId=? OR routeShortName=?";
+			routeSql += ")";
+		}
+
+		// Determine stop portion of SQL
+		String stopSql = "";
+		if (stopIds != null && stopIds.length > 0 && !stopIds[0].trim().isEmpty()) {
+			stopSql = " AND stopId IN (";
+			for (int i = 0; i < stopIds.length; i++) {
+				stopSql += stopIds[i];
+				if(i != stopIds.length - 1){
+					stopSql += ",";
+				}
+			}
+			stopSql += ")";
+		}
+
+		// Determine the source portion of the SQL. Default is to provide
+		// predictions for all sources
+		String sourceSql = "";
+		if (predSource != null && !predSource.isEmpty()) {
+			if (predSource.equals("Transitime")) {
+				// Only "Transitime" predictions
+				sourceSql = " AND predictionSource='Transitime'";
+			} else {
+				// Anything but "Transitime"
+				sourceSql = " AND predictionSource<>'Transitime'";
+			}
+		}
+
+		// Determine SQL for prediction type. Can be "" (for
+		// all), "AffectedByWaitStop", or "NotAffectedByWaitStop".
+		String predTypeSql = "";
+		if (predType != null && !predType.isEmpty()) {
+			if (predSource.equals("AffectedByWaitStop")) {
+				// Only "AffectedByLayover" predictions
+				predTypeSql = " AND affectedByWaitStop = true ";
+			} else {
+				// Only "NotAffectedByLayover" predictions
+				predTypeSql = " AND affectedByWaitStop = false ";
+			}
+		}
+		// TODO generate database independent SQL if possible!
+		// Put the entire SQL query together
+		String postSql = "SELECT "
+				+ "     to_char(predictedTime-predictionReadTime, 'SSSS')::integer as predLength, "
+				+ "     predictionAccuracyMsecs/1000 as predAccuracy, "
+				+ "     predictionSource as source "
+				+ " FROM predictionAccuracy "
+				+ "WHERE arrivalDepartureTime BETWEEN ? "
+				+ "      AND TIMESTAMP '" + beginDateStr + "' + INTERVAL '" + numDays + " day' "
+				+ timeSql
+				+ "  AND predictedTime-predictionReadTime < '00:15:00' "
+				+ routeSql
+				+ sourceSql
+				+ predTypeSql;
+
+
+		String mySql = "SELECT "
+				+ "     abs(((unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime)))/60 div 1) as predLength, "
+				+ "     pa1.predictionAccuracyMsecs/1000 as predAccuracy, "
+				+ "     predictionSource as source "
+				+ "FROM PredictionAccuracy AS pa1 "
+				+ "WHERE "
+				+ "pa1.arrivalDepartureTime BETWEEN "
+				+ "CAST(? AS DATETIME) "
+				+ "AND DATE_ADD(CAST(? AS DATETIME), INTERVAL " + numDays + " day) "
+				+ mySqlTimeSql
+				+ " AND "
+				+ "abs(unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime)) <= 1200 " //20 mins
+				+ " AND "
+				+ "pa1.id IN ("
+				+ "     SELECT pa2.id "
+				+ "     FROM PredictionAccuracy AS pa2 "
+				+ "     WHERE "
+				+ "     abs(((unix_timestamp(pa2.arrivalDepartureTime)-unix_timestamp(pa2.predictionReadTime)))/60 div 1) in (1, 5, 10, 15, 20) "
+				+ "     AND "
+				+ "		pa1.arrivalDepartureTime BETWEEN "
+				+ "		CAST(? AS DATETIME) "
+				+ "		AND DATE_ADD(CAST(? AS DATETIME), INTERVAL " + numDays + " day) "
+				+ 		mySqlTimeSql
+				+ " 	AND "
+				+ "		abs(unix_timestamp(pa1.arrivalDepartureTime)-unix_timestamp(pa1.predictionReadTime)) <= 1200 "
+				+ "	) "
+				+ routeSql
+				+ stopSql
+				+ sourceSql
+				+ predTypeSql;
+
+
+		String sql = postSql;
+		if ("mysql".equals(dbType)) {
+			sql = mySql;
+		}
+
+		PreparedStatement statement = null;
+		try {
+			logger.debug("SQL: {}", sql);
+			statement = connection.prepareStatement(sql);
+
+			// Determine the date parameters for the query
+			Timestamp beginDate = null;
+			java.util.Date date = Time.parse(beginDateStr);
+			beginDate = new Timestamp(date.getTime());
+
+			// Determine the time parameters for the query
+			// If begin time not set but end time is then use midnight as begin
+			// time
+			if ((beginTimeStr == null || beginTimeStr.isEmpty())
+					&& endTimeStr != null && !endTimeStr.isEmpty()) {
+				beginTimeStr = "00:00:00";
+			}
+			// If end time not set but begin time is then use midnight as end
+			// time
+			if ((endTimeStr == null || endTimeStr.isEmpty())
+					&& beginTimeStr != null && !beginTimeStr.isEmpty()) {
+				endTimeStr = "23:59:59";
+			}
+
+			java.sql.Time beginTime = null;
+			java.sql.Time endTime = null;
+			if (beginTimeStr != null && !beginTimeStr.isEmpty()) {
+				beginTime = new java.sql.Time(Time.parseTimeOfDay(beginTimeStr)
+						* Time.MS_PER_SEC);
+			}
+			if (endTimeStr != null && !endTimeStr.isEmpty()) {
+				endTime = new java.sql.Time(Time.parseTimeOfDay(endTimeStr)
+						* Time.MS_PER_SEC);
+			}
+
+			logger.debug("beginDate {} beginDateStr {} endDateStr {} beginTime {} beginTimeStr {} endTime {} endTimeStr {}",
+					beginDate,
+					beginDateStr,
+					numDays,
+					beginTime,
+					beginTimeStr,
+					endTime,
+					endTimeStr);
+
+			// Set the parameters for the query
+			int i = 1;
+			statement.setTimestamp(i++, beginDate);
+			statement.setTimestamp(i++, beginDate);
+
+			if (beginTime != null) {
+				if ("mysql".equals(dbType)) {
+					// for mysql use the time str as is to avoid TZ issues
+					statement.setString(i++, beginTimeStr);
+				} else {
+					statement.setTime(i++, beginTime);
+				}
+			}
+			if (endTime != null) {
+				if ("mysql".equals(dbType)) {
+					// for mysql use the time str as is to avoid TZ issues
+					statement.setString(i++, endTimeStr);
+				} else {
+					statement.setTime(i++, endTime);
+				}
+			}
+
+			statement.setTimestamp(i++, beginDate);
+			statement.setTimestamp(i++, beginDate);
+
+			if (beginTime != null) {
+				if ("mysql".equals(dbType)) {
+					// for mysql use the time str as is to avoid TZ issues
+					statement.setString(i++, beginTimeStr);
+				} else {
+					statement.setTime(i++, beginTime);
+				}
+			}
+			if (endTime != null) {
+				if ("mysql".equals(dbType)) {
+					// for mysql use the time str as is to avoid TZ issues
+					statement.setString(i++, endTimeStr);
+				} else {
+					statement.setTime(i++, endTime);
+				}
+			}
+
+			if (routeIds != null && routeIds.length > 0 && !routeIds[0].trim().isEmpty()) {
+				for (String routeId : routeIds)
+					if (!routeId.trim().isEmpty()) {
+						// Need to add the route ID twice since doing a
+						// routeId='stableId' OR routeShortName='stableId' in
+						// order to handle agencies where GTFS route_id is not
+						// stable but the GTFS route_short_name is.
+						statement.setString(i++, routeId);
+						statement.setString(i++, routeId);
+
+					}
+			}
+
+			// Actually execute the query
+			ResultSet rs = statement.executeQuery();
+/*
+			String var1 = new String(rs.getBytes(1));
+			String var2 = new String(rs.getBytes(2));
+			String var3 = new String(rs.getBytes(3));
+			String var4 = new String(rs.getBytes(4));
+
+			System.out.printf("Var1: %s, Var2: %s, Var3: %s, Var4: %s", var1, var2, var3, var4);*/
+
+
+			// Process results of query
+			while (rs.next()) {
+				int predLength = rs.getInt("predLength");
+				int predAccuracy = rs.getInt("predAccuracy");
+				String sourceResult = rs.getString("source");
+
+				addDataToMap(predLength, predAccuracy, sourceResult);
+				logger.debug("predLength={} predAccuracy={} source={}",
+						predLength, predAccuracy, sourceResult);
+			}
 			rs.close();
 		} catch (SQLException e) {
 			throw e;
