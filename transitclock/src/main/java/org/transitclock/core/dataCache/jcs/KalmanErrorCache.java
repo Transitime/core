@@ -1,9 +1,5 @@
 package org.transitclock.core.dataCache.jcs;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
 import org.slf4j.Logger;
@@ -12,6 +8,10 @@ import org.transitclock.core.Indices;
 import org.transitclock.core.dataCache.ErrorCache;
 import org.transitclock.core.dataCache.KalmanError;
 import org.transitclock.core.dataCache.KalmanErrorCacheKey;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 /**
  * @author Sean Og Crudden
  * 
@@ -30,7 +30,7 @@ public class KalmanErrorCache implements ErrorCache  {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.transitime.core.dataCache.ErrorCache#getErrorValue(org.transitime.core.Indices)
+	 * @see org.transitclock.core.dataCache.ErrorCache#getErrorValue(org.transitclock.core.Indices)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
@@ -44,7 +44,7 @@ public class KalmanErrorCache implements ErrorCache  {
 					
 	}
 	/* (non-Javadoc)
-	 * @see org.transitime.core.dataCache.ErrorCache#getErrorValue(org.transitime.core.dataCache.KalmanErrorCacheKey)
+	 * @see org.transitclock.core.dataCache.ErrorCache#getErrorValue(org.transitclock.core.dataCache.KalmanErrorCacheKey)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
@@ -56,7 +56,7 @@ public class KalmanErrorCache implements ErrorCache  {
 		 return result;	
 	}
 	/* (non-Javadoc)
-	 * @see org.transitime.core.dataCache.ErrorCache#putErrorValue(org.transitime.core.Indices, java.lang.Double)
+	 * @see org.transitclock.core.dataCache.ErrorCache#putErrorValue(org.transitclock.core.Indices, java.lang.Double)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")

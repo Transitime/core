@@ -60,7 +60,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	}
 
 	/* (non-Javadoc)
-	 * @see org.transitime.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#getStopHistory(org.transitime.core.dataCache.StopArrivalDepartureCacheKey)
+	 * @see org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#getStopHistory(org.transitclock.core.dataCache.StopArrivalDepartureCacheKey)
 	 */
 	
 	@SuppressWarnings("unchecked")
@@ -85,7 +85,7 @@ public class StopArrivalDepartureCache extends StopArrivalDepartureCacheInterfac
 	}
 
 	/* (non-Javadoc)
-	 * @see org.transitime.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#putArrivalDeparture(org.transitime.db.structs.ArrivalDeparture)
+	 * @see org.transitclock.core.dataCache.ehcache.StopArrivalDepartureCacheInterface#putArrivalDeparture(org.transitclock.db.structs.ArrivalDeparture)
 	 */
 	
 	@SuppressWarnings("unchecked")

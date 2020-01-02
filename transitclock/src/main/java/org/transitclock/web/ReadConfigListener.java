@@ -27,7 +27,7 @@ package org.transitclock.web;
  * When running Tomcat within Eclipse it is most likely easiest to just set the
  * necessary Java properties in the Debug Configurations VM properties.
  * <p>
- * This class in in the main transitime package so that it can be used by all
+ * This class in in the main transitclock package so that it can be used by all
  * webapps.
  * 
  * @author Sean Crudden

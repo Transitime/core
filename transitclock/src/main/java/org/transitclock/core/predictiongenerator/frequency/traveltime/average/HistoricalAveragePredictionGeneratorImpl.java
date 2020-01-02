@@ -70,7 +70,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 				}
 				
 				logger.debug("Using historical average algorithm for prediction : " +average.toString() + " for : " + indices.toString());
-				//logger.debug("Instead of transitime value : " + super.getTravelTimeForPath(indices, avlReport));
+				//logger.debug("Instead of transitclock value : " + super.getTravelTimeForPath(indices, avlReport));
 				return (long)average.getAverage();
 			}
 		}

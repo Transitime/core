@@ -56,7 +56,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>
  * For each parameter configured in the file the property is written as a system
  * property if that system property is not yet defined. This way all parameters
- * are available as system properties, even non-transitime ones such as for
+ * are available as system properties, even non-transitclock ones such as for
  * hibernate or logback. Java properties set on the command line take precedence
  * since the properties are not overwritten if already set.
  * <p>
@@ -196,13 +196,13 @@ public class ConfigFileReader {
 	 * based on the XML tags and their nesting. So if one is setting a value of
 	 * 75 to a param with a key transitclock.predictor.allowableDistanceFromPath
 	 * the XML would look like: {@code
-	 * <transitime>
+	 * <transitclock>
 	 *   <predictor>
 	 *     <allowableDistanceFromPath>
 	 *       75.0
 	 *     </allowableDistanceFromPath>
 	 *   </predictor>
-	 * </transitime>
+	 * </transitclock>
 	 * }
 	 * @param fileName
 	 */
@@ -407,8 +407,8 @@ public class ConfigFileReader {
 			}
 		}
 		
-		// If the file transitime.properties exists in the classpath then
-		// process it. This is done after the transitime.configFiles files
+		// If the file transitclock.properties exists in the classpath then
+		// process it. This is done after the transitclock.configFiles files
 		// are read in so that they have precedence over the file found
 		// in the classpath.
 		String defaultPropertiesFileName = "transitclock.properties";

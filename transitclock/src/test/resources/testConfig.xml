@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<transitime>
+<transitclock>
     <modules>
         <!-- <optionalModulesList>org.transitclock.core.schedBasedPreds.SchedBasedPredsModule;org.transitclock.avl.GtfsRealtimeModule</optionalModulesList> -->
         <!-- GtfsRealtimeModule read a GTFS vehicle location feed as the source of AVL data. -->
@@ -62,5 +62,5 @@
         <configFile>C:\\cygwin64\\home\\SeanOg\\workspace\\transitime-all\\transitime\\src\\test\\resources\\postgres_hibernate.cfg.xml</configFile>        
     </hibernate>
 
-</transitime>
+</transitclock>
 

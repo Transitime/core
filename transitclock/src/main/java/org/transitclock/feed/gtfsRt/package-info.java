@@ -17,9 +17,9 @@
 
 /**
  * Contains the classes used for providing a GTFS-realtime feed. This package is
- * part of the transitime project so that it can be accessed by the RmiQuery
+ * part of the transitclock project so that it can be accessed by the RmiQuery
  * application. At some point it could make more sense to put this package along
- * with RmiQuery class in the transitimeApi package.
+ * with RmiQuery class in the transitclockApi package.
  *
  * @author SkiBu Smith
  *

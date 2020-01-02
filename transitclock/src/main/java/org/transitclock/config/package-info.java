@@ -42,7 +42,7 @@
  * <pre>
  * {@code
  * <?xml version="1.0"?>
- * <transitime>
+ * <transitclock>
  *   <core>
  *     <projectId>
  *       sfmta
@@ -51,7 +51,7 @@
  *       120
  *     </defaultBreakTimeSec>
  *   </core>
- * </transitime>
+ * </transitclock>
  * }
  * </pre>
  * 

@@ -32,7 +32,7 @@ import java.util.*;
  *         is intended to look up a trips historical data when a trip starts and
  *         place in cache for use in generating predictions based on a Kalman
  *         filter. Uses Ehcache for caching rather than just using a concurrent
- *         hashmap. This approach to holding data in memory for transitime needs
+ *         hashmap. This approach to holding data in memory for transitclock needs
  *         to be proven.
  *         
  *         TODO this could do with an interface, factory class, and alternative implementations, perhaps using Infinispan.

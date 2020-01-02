@@ -64,7 +64,7 @@ public class HistoricalAveragePredictionGeneratorImpl extends
 			
 			logger.debug("Using historical average algorithm for prediction : " +average.toString() + " instead of "+alternative+" prediction: "
 					+ super.getTravelTimeForPath(indices, avlReport,vehicleState) +" for : " + indices.toString());
-			//logger.debug("Instead of transitime value : " + super.getTravelTimeForPath(indices, avlReport));
+			//logger.debug("Instead of transitclock value : " + super.getTravelTimeForPath(indices, avlReport));
 			return (long)average.getAverage();
 		}
 		

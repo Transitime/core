@@ -1,17 +1,5 @@
 package org.transitclock.custom;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import org.transitclock.avl.AvlClient;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
@@ -20,6 +8,14 @@ import org.transitclock.modules.Module;
 import org.transitclock.utils.Time;
 import org.transitclock.utils.threading.BoundedExecutor;
 import org.transitclock.utils.threading.NamedThreadFactory;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class DbAvlReader extends Module {
 
@@ -126,7 +122,7 @@ public class DbAvlReader extends Module {
   
   Connection getConnection(Map<String, String> properties) throws Exception {
     /* here we load the driver by hand -- the avl database may (will!) be
-     * completely different from the transitime database. 
+     * completely different from the transitclock database.
      */
     return DriverManager.getConnection(properties.get(DB_URL));
   }

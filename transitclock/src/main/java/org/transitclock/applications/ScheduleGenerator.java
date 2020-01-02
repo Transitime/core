@@ -16,17 +16,7 @@
  */
 package org.transitclock.applications;
 
-import java.io.PrintWriter;
-import java.util.Date;
-import java.util.TimeZone;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.config.ConfigFileReader;
@@ -34,6 +24,10 @@ import org.transitclock.configData.AgencyConfig;
 import org.transitclock.gtfs.readers.GtfsAgencyReader;
 import org.transitclock.statistics.ScheduleDataProcessor;
 import org.transitclock.utils.Time;
+
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * For generating more accurate schedule times for GTFS trips.txt file by
@@ -59,7 +53,7 @@ public class ScheduleGenerator {
 	
 	// Read in configuration files. This should be done statically before
 	// the logback LoggerFactory.getLogger() is called so that logback can
-	// also be configured using a transitime config file. The files are
+	// also be configured using a transitclock config file. The files are
 	// specified using the java system property -Dtransitclock.configFiles .
 	static {
 		ConfigFileReader.processConfig();

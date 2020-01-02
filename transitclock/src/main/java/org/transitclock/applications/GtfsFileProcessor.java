@@ -74,7 +74,7 @@ public class GtfsFileProcessor {
 
 	// Read in configuration files. This should be done statically before
 	// the logback LoggerFactory.getLogger() is called so that logback can
-	// also be configured using a transitime config file.
+	// also be configured using a transitclock config file.
 	static {
 		ConfigFileReader.processConfig();
 	}

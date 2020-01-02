@@ -40,7 +40,7 @@ public class KalmanErrorCache implements ErrorCache {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.transitime.core.dataCache.ErrorCache#getErrorValue(org.transitime.core.Indices)
+	 * @see org.transitclock.core.dataCache.ErrorCache#getErrorValue(org.transitclock.core.Indices)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
@@ -56,7 +56,7 @@ public class KalmanErrorCache implements ErrorCache {
 			return result;		
 	}
 	/* (non-Javadoc)
-	 * @see org.transitime.core.dataCache.ErrorCache#getErrorValue(org.transitime.core.dataCache.KalmanErrorCacheKey)
+	 * @see org.transitclock.core.dataCache.ErrorCache#getErrorValue(org.transitclock.core.dataCache.KalmanErrorCacheKey)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
@@ -70,7 +70,7 @@ public class KalmanErrorCache implements ErrorCache {
 			return result;				
 	}
 	/* (non-Javadoc)
-	 * @see org.transitime.core.dataCache.ErrorCache#putErrorValue(org.transitime.core.Indices, java.lang.Double)
+	 * @see org.transitclock.core.dataCache.ErrorCache#putErrorValue(org.transitclock.core.Indices, java.lang.Double)
 	 */
 	@Override	
 	synchronized public void putErrorValue(Indices indices,  Double value) {
