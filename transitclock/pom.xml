@@ -448,7 +448,7 @@
 					</configuration>
 					<executions>
 						<!-- Instead, we add a special integration-test execution that
-                                      runs any tests in the org.transitime.integration_tests package -->
+                                      runs any tests in the org.transitclock.integration_tests package -->
 						<execution>
 							<id>integration-tests</id>
 							<phase>integration-test</phase>
@@ -516,7 +516,7 @@
 									<goal>java</goal>
 								</goals>
 								<configuration>
-									<mainClass>org.transitime.applications.DbTest</mainClass>
+									<mainClass>org.transitclock.applications.DbTest</mainClass>
 									<arguments>
 										<argument>arg0</argument>
 										<argument>arg1</argument>
@@ -586,7 +586,7 @@
 								</goals>
 								<configuration>
 									<mainClass>org.transitclock.applications.PredictionsAccuracyIntegrationTest</mainClass>
-									<commandlineArgs>-c transitime/src/test/resources/transiTimeConfigIntegrationTest.xml -gtfsDirectoryName transitime/src/test/resources/wmata_gtfs -storeNewRevs -maxTravelTimeSegmentLength 1000</commandlineArgs>
+									<commandlineArgs>-c transitclock/src/test/resources/transiTimeConfigIntegrationTest.xml -gtfsDirectoryName transitclock/src/test/resources/wmata_gtfs -storeNewRevs -maxTravelTimeSegmentLength 1000</commandlineArgs>
 								</configuration>
 							</execution>
 						</executions>
