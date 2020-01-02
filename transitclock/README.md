@@ -16,8 +16,8 @@ The steps to set up the system are
 	<li>Config and run core module</li>
 	<li>Create Web Agency using WebAgency class</li>
 	<li>Create API key. For the moment see TestAPIKeyManager.java test. The testAPIKeyManger test will create a key for you.</li>
-	<li>Setup transitime api webapp. Instructions to be added to README.MD in transitimeApi.</li>
-	<li>Setup transitime webapp. Instructions to be added to README.MD in transitimeWebapp.</li>
+	<li>Setup transitclock api webapp. Instructions to be added to README.MD in transitclockApi.</li>
+	<li>Setup transitclock webapp. Instructions to be added to README.MD in transitclockWebapp.</li>
 	
 	<li>Configure travel times/predictions based on historical data using UpdateTravelTimes.java. Instructions in "Improving Predictions" section below.</li>
 </ul>
@@ -57,7 +57,7 @@ Once these commands have been run you should run the sql created in the files in
 	
 ISSUE: This works in eclipse by executing the class but not on command line using the executable jar. It is an issue with the ClassLoader and onejar. Maybe better to create using mvn exec plugin.
 
-The following will can be run from the transitime directory under core and will place the required SQL in the target directory.
+The following will can be run from the transitclock directory under core and will place the required SQL in the target directory.
 ```
 mvn exec:java -Dexec.mainClass="org.transitclock.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitclock.db.structs"
 mvn exec:java -Dexec.mainClass="org.transitclock.applications.SchemaGenerator" -Dexec.args="-o target -p org.transitclock.db.webstructs"
