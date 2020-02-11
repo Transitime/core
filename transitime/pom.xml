@@ -19,14 +19,14 @@
     		</snapshots>
     		<id>bintray-kevinlee-maven</id>
     		<name>bintray</name>
-    		<url>http://dl.bintray.com/kevinlee/maven</url>
+    		<url>https://dl.bintray.com/kevinlee/maven</url>
   		</repository>
   	</repositories>
 
   <pluginRepositories>
 		<pluginRepository>
 			<id>onejar-maven-plugin.googlecode.com</id>
-			<url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+			<url>https://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
