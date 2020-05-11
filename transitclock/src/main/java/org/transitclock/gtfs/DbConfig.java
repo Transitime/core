@@ -93,6 +93,8 @@ public class DbConfig {
 	private List<FareRule> fareRules;
 	private List<Frequency> frequencies;
 	private List<Transfer> transfers;
+	private List<FeedInfo> feedInfo;
+
 
 	// Keyed by stop_id.
 	private Map<String, Stop> stopsMap;
@@ -720,6 +722,8 @@ public class DbConfig {
 		fareRules = FareRule.getFareRules(globalSession, configRev);
 		frequencies = Frequency.getFrequencies(globalSession, configRev);
 		transfers = Transfer.getTransfers(globalSession, configRev);
+		feedInfo = FeedInfo.getFeedInfo(globalSession, configRev);
+
 
 		logger.debug("Reading everything else took {} msec",
 				timer.elapsedMsec());
@@ -1079,5 +1083,6 @@ public class DbConfig {
 		outputCollection("FareRules", dbConfig.fareRules);
 		outputCollection("Frequencies", dbConfig.frequencies);
 		outputCollection("Transfers", dbConfig.transfers);
+		outputCollection("FeedInfo", dbConfig.feedInfo);
 	}
 }

@@ -16,24 +16,7 @@
  */
 package org.transitclock.gtfs;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
-
 import org.hibernate.HibernateException;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -42,60 +25,18 @@ import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.hibernate.HibernateUtils;
-import org.transitclock.db.structs.ActiveRevisions;
-import org.transitclock.db.structs.Agency;
-import org.transitclock.db.structs.Block;
 import org.transitclock.db.structs.Calendar;
-import org.transitclock.db.structs.CalendarDate;
-import org.transitclock.db.structs.ConfigRevision;
-import org.transitclock.db.structs.FareAttribute;
-import org.transitclock.db.structs.FareRule;
-import org.transitclock.db.structs.Frequency;
-import org.transitclock.db.structs.Location;
-import org.transitclock.db.structs.Route;
-import org.transitclock.db.structs.ScheduleTime;
-import org.transitclock.db.structs.Stop;
-import org.transitclock.db.structs.StopPath;
-import org.transitclock.db.structs.Transfer;
-import org.transitclock.db.structs.Trip;
-import org.transitclock.db.structs.TripPattern;
-import org.transitclock.db.structs.TripPatternKey;
-import org.transitclock.gtfs.gtfsStructs.GtfsAgency;
-import org.transitclock.gtfs.gtfsStructs.GtfsCalendar;
-import org.transitclock.gtfs.gtfsStructs.GtfsCalendarDate;
-import org.transitclock.gtfs.gtfsStructs.GtfsFareAttribute;
-import org.transitclock.gtfs.gtfsStructs.GtfsFareRule;
-import org.transitclock.gtfs.gtfsStructs.GtfsFrequency;
-import org.transitclock.gtfs.gtfsStructs.GtfsRoute;
-import org.transitclock.gtfs.gtfsStructs.GtfsShape;
-import org.transitclock.gtfs.gtfsStructs.GtfsStop;
-import org.transitclock.gtfs.gtfsStructs.GtfsStopTime;
-import org.transitclock.gtfs.gtfsStructs.GtfsTransfer;
-import org.transitclock.gtfs.gtfsStructs.GtfsTrip;
-import org.transitclock.gtfs.readers.GtfsAgenciesSupplementReader;
-import org.transitclock.gtfs.readers.GtfsAgencyReader;
-import org.transitclock.gtfs.readers.GtfsCalendarDatesReader;
-import org.transitclock.gtfs.readers.GtfsCalendarReader;
-import org.transitclock.gtfs.readers.GtfsFareAttributesReader;
-import org.transitclock.gtfs.readers.GtfsFareRulesReader;
-import org.transitclock.gtfs.readers.GtfsFrequenciesReader;
-import org.transitclock.gtfs.readers.GtfsRoutesReader;
-import org.transitclock.gtfs.readers.GtfsRoutesSupplementReader;
-import org.transitclock.gtfs.readers.GtfsShapesReader;
-import org.transitclock.gtfs.readers.GtfsShapesSupplementReader;
-import org.transitclock.gtfs.readers.GtfsStopTimesReader;
-import org.transitclock.gtfs.readers.GtfsStopTimesSupplementReader;
-import org.transitclock.gtfs.readers.GtfsStopsReader;
-import org.transitclock.gtfs.readers.GtfsStopsSupplementReader;
-import org.transitclock.gtfs.readers.GtfsTransfersReader;
-import org.transitclock.gtfs.readers.GtfsTripsReader;
-import org.transitclock.gtfs.readers.GtfsTripsSupplementReader;
+import org.transitclock.db.structs.*;
+import org.transitclock.gtfs.gtfsStructs.*;
+import org.transitclock.gtfs.readers.*;
 import org.transitclock.monitoring.CloudwatchService;
-import org.transitclock.utils.Geo;
-import org.transitclock.utils.IntervalTimer;
-import org.transitclock.utils.MapKey;
-import org.transitclock.utils.StringUtils;
-import org.transitclock.utils.Time;
+import org.transitclock.utils.*;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * Contains all the GTFS data processed into Java lists and such. Also combines
@@ -205,7 +146,7 @@ public class GtfsData {
 	private List<FareAttribute> fareAttributes;
 	private List<FareRule> fareRules;
 	private List<Transfer> transfers;
-	private String feedVersion;
+	private List<FeedInfo> feedInfoList;
 
 	// This is the format that dates are in for CSV. Should
 	// be accessed only through getDateFormatter() to make
@@ -2277,27 +2218,22 @@ public class GtfsData {
 	/**
 	 * Reads feed_info.txt file and puts feed_version into ConfigRevision
 	 */
-	private void processFeedVersion() {
+	private void processFeedInfo() {
 		// Let user know what is going on
-		logger.info("Processing feed_info.txt data to extract feed version...");
+		logger.info("Processing feed_info.txt data...");
 
 		// Read in the feed_info.txt GTFS data from file
 		GtfsFeedInfosReader feedInfosReader =
 				new GtfsFeedInfosReader(gtfsDirectoryName);
 		List<GtfsFeedInfo> gtfsFeedInfos = feedInfosReader.get();
-		String feedVersion = null;
 
 		for (GtfsFeedInfo gtfsFeedInfo : gtfsFeedInfos) {
-			if(gtfsFeedInfo.getFeedVersion() != null){
-				feedVersion = gtfsFeedInfo.getFeedVersion();
-				break;
-			}
+			FeedInfo feedInfo = new FeedInfo(revs.getConfigRev(), gtfsFeedInfo, getDateFormatter());
+			feedInfoList.add(feedInfo);
 		}
 
-		this.feedVersion = feedVersion;
-
 		// Let user know what is going on
-		logger.info("Finished extracting feed_version from feed_info.txt data. ");
+		logger.info("Finished processing feed_info.txt data. ");
 	}
 
 	/******************** Getter Methods ****************************/
@@ -2567,7 +2503,12 @@ public class GtfsData {
 	public List<Transfer> getTransfers() {
 		return transfers;
 	}
-	
+
+	public List<FeedInfo> getFeedInfo() {
+		return feedInfoList;
+	}
+
+
 	/**
 	 * Returns information about the current revision.
 	 * 
@@ -2575,7 +2516,7 @@ public class GtfsData {
 	 */
 	public ConfigRevision getConfigRevision() {
 		return new ConfigRevision(revs.getConfigRev(), new Date(), 
-				zipFileLastModifiedTime, notes, feedVersion);
+				zipFileLastModifiedTime, notes);
 	}
 	
 	/*************************** Main Public Methods **********************/
@@ -2730,7 +2671,7 @@ public class GtfsData {
 		processFareAttributes();
 		processFareRules();
 		processTransfers();
-		processFeedVersion();
+		processFeedInfo();
 		
 		// Sometimes will be using a partial configuration. For example, for 
 		// MBTA commuter rail only want to use the trips defined for 

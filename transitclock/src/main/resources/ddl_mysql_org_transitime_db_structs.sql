@@ -115,7 +115,6 @@
         notes longtext,
         processedTime datetime(3),
         zipFileLastModifiedTime datetime(3),
-        feedVersion varchar(120),
         primary key (configRev)
     );
 
@@ -143,6 +142,17 @@
         containsId varchar(60) not null,
         configRev integer not null,
         primary key (routeId, originId, fareId, destinationId, containsId, configRev)
+    );
+
+    create table FeedInfo (
+        feedPublisherName varchar(60) not null,
+        feedPublisherUrl longtext not null,
+        configRev integer not null,
+        feedVersion varchar(120),
+        feedLanguage varchar(15) not null,
+        feedStartDate date,
+        feedEndDate date,
+        primary key (feedPublisherName, configRev)
     );
 
     create table Frequencies (

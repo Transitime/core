@@ -54,9 +54,6 @@ public class ConfigRevision {
 	@Column(length=512)
 	private final String notes;
 
-	@Column(length=120)
-	private final String feedVersion;
-
 	// Logging
 	public static final Logger logger = 
 			LoggerFactory.getLogger(ConfigRevision.class);
@@ -68,15 +65,13 @@ public class ConfigRevision {
 	 * @param processedTime
 	 * @param zipFileLastModifiedTime
 	 * @param notes
-	 * @param feedVersion
 	 */
 	public ConfigRevision(int configRev, Date processedTime,
-			Date zipFileLastModifiedTime, String notes, String feedVersion) {
+			Date zipFileLastModifiedTime, String notes) {
 		this.configRev = configRev;
 		this.processedTime = processedTime;
 		this.zipFileLastModifiedTime = zipFileLastModifiedTime;
 		this.notes = notes;
-		this.feedVersion = feedVersion;
 	}
 	/**
 	 * Needed because Hibernate requires no-arg constructor
@@ -87,7 +82,6 @@ public class ConfigRevision {
 		this.processedTime = null;
 		this.zipFileLastModifiedTime = null;
 		this.notes = null;
-		this.feedVersion = null;
 	}
 	
 	@Override
@@ -142,7 +136,5 @@ public class ConfigRevision {
 	public String getNotes() {
 		return notes;
 	}
-
-	public String getFeedVersion() { return feedVersion; }
 
 }
