@@ -115,6 +115,7 @@
         notes longtext,
         processedTime datetime(3),
         zipFileLastModifiedTime datetime(3),
+        feedVersion varchar(120),
         primary key (configRev)
     );
 

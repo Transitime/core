@@ -17,14 +17,6 @@
 
 package org.transitclock.db.structs;
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -32,6 +24,9 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.db.hibernate.HibernateUtils;
+
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * For keeping track of information having to do with a configuration revision.
@@ -59,6 +54,9 @@ public class ConfigRevision {
 	@Column(length=512)
 	private final String notes;
 
+	@Column(length=120)
+	private final String feedVersion;
+
 	// Logging
 	public static final Logger logger = 
 			LoggerFactory.getLogger(ConfigRevision.class);
@@ -70,13 +68,15 @@ public class ConfigRevision {
 	 * @param processedTime
 	 * @param zipFileLastModifiedTime
 	 * @param notes
+	 * @param feedVersion
 	 */
 	public ConfigRevision(int configRev, Date processedTime,
-			Date zipFileLastModifiedTime, String notes) {
+			Date zipFileLastModifiedTime, String notes, String feedVersion) {
 		this.configRev = configRev;
 		this.processedTime = processedTime;
 		this.zipFileLastModifiedTime = zipFileLastModifiedTime;
 		this.notes = notes;
+		this.feedVersion = feedVersion;
 	}
 	/**
 	 * Needed because Hibernate requires no-arg constructor
@@ -86,7 +86,8 @@ public class ConfigRevision {
 		this.configRev = -1;
 		this.processedTime = null;
 		this.zipFileLastModifiedTime = null;
-		this.notes = null;	
+		this.notes = null;
+		this.feedVersion = null;
 	}
 	
 	@Override
@@ -141,5 +142,7 @@ public class ConfigRevision {
 	public String getNotes() {
 		return notes;
 	}
+
+	public String getFeedVersion() { return feedVersion; }
 
 }

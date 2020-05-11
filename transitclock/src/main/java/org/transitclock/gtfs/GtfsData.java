@@ -205,7 +205,8 @@ public class GtfsData {
 	private List<FareAttribute> fareAttributes;
 	private List<FareRule> fareRules;
 	private List<Transfer> transfers;
-	
+	private String feedVersion;
+
 	// This is the format that dates are in for CSV. Should
 	// be accessed only through getDateFormatter() to make
 	// sure that it is initialized.
@@ -2267,10 +2268,36 @@ public class GtfsData {
 			// Create the CalendarDate object and put it into the array
 			Transfer transfer = new Transfer(revs.getConfigRev(), gtfsTransfer);
 			transfers.add(transfer);
-		}		
+		}
 					
 		// Let user know what is going on
 		logger.info("Finished processing transfers.txt data. ");
+	}
+
+	/**
+	 * Reads feed_info.txt file and puts feed_version into ConfigRevision
+	 */
+	private void processFeedVersion() {
+		// Let user know what is going on
+		logger.info("Processing feed_info.txt data to extract feed version...");
+
+		// Read in the feed_info.txt GTFS data from file
+		GtfsFeedInfosReader feedInfosReader =
+				new GtfsFeedInfosReader(gtfsDirectoryName);
+		List<GtfsFeedInfo> gtfsFeedInfos = feedInfosReader.get();
+		String feedVersion = null;
+
+		for (GtfsFeedInfo gtfsFeedInfo : gtfsFeedInfos) {
+			if(gtfsFeedInfo.getFeedVersion() != null){
+				feedVersion = gtfsFeedInfo.getFeedVersion();
+				break;
+			}
+		}
+
+		this.feedVersion = feedVersion;
+
+		// Let user know what is going on
+		logger.info("Finished extracting feed_version from feed_info.txt data. ");
 	}
 
 	/******************** Getter Methods ****************************/
@@ -2548,7 +2575,7 @@ public class GtfsData {
 	 */
 	public ConfigRevision getConfigRevision() {
 		return new ConfigRevision(revs.getConfigRev(), new Date(), 
-				zipFileLastModifiedTime, notes);
+				zipFileLastModifiedTime, notes, feedVersion);
 	}
 	
 	/*************************** Main Public Methods **********************/
@@ -2703,6 +2730,7 @@ public class GtfsData {
 		processFareAttributes();
 		processFareRules();
 		processTransfers();
+		processFeedVersion();
 		
 		// Sometimes will be using a partial configuration. For example, for 
 		// MBTA commuter rail only want to use the trips defined for 

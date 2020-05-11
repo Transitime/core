@@ -115,6 +115,7 @@
         notes varchar(512),
         processedTime timestamp,
         zipFileLastModifiedTime timestamp,
+        feedVersion varchar(120),
         primary key (configRev)
     );
 
