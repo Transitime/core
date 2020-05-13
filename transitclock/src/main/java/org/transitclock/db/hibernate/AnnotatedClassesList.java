@@ -55,6 +55,7 @@ public class AnnotatedClassesList {
 		Departure.class,
 		FareAttribute.class,
 		FareRule.class,
+		FeedInfo.class,
 		Frequency.class,
 		Location.class,
 		Match.class,
