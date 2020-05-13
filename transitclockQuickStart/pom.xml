@@ -169,7 +169,7 @@
 			<plugin>
 				<groupId>TheTransitClock</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>0.0.31-SNAPSHOT</version>
+				<version>0.0.31</version>
 				<configuration>
 					<webAppConfig>
 						<overrideDescriptor>../transitclockQuickStart/src/main/resources/transitime.properties</overrideDescriptor>
