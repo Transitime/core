@@ -43,16 +43,16 @@
         <tag>HEAD</tag>
     </scm>
     <distributionManagement>
-        <repository>
-            <id>releases-obaweb-repo</id>
-            <name>OneBusAway Camsys Release Repo</name>
-            <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots-obaweb-repo</id>
-            <name>OneBusAway Camsys Snapshot Repo</name>
-            <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/snapshots/</url>
-        </snapshotRepository>
+     <repository>
+        <id>releases-camsys-public-repo</id>
+        <name>Camsys Public Release Repo</name>
+        <url>s3://repo.camsys-apps.com/releases/</url>
+      </repository>
+      <snapshotRepository>
+        <id>snapshots-camsys-public-repo</id>
+        <name>Camsys Public Snapshot Repo</name>
+        <url>s3://repo.camsys-apps.com/snapshots/</url>
+      </snapshotRepository>
     </distributionManagement>
     <build>
         <plugins>
@@ -75,5 +75,12 @@
                 </executions>
             </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>com.github.platform-team</groupId>
+                <artifactId>aws-maven</artifactId>
+                <version>6.0.0</version>
+            </extension>
+        </extensions>
     </build>
 </project>
