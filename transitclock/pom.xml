@@ -25,7 +25,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>repo.obaweb.org</id>
-			<url>http://repo.obaweb.org:8080/archiva/repository/releases</url>
+			<url>http://repo.camsys-apps.com/releases</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
