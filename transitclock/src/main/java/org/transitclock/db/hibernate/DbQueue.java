@@ -370,9 +370,11 @@ public class DbQueue<T> {
             "Look for ERROR in log file to see if the database classes " +
             "were configured correctly. Error: "
             + e);
-        
-        // Don't try again right away because that would be wasteful
-        Time.sleep(TIME_BETWEEN_RETRIES);
+
+        if (queueSize() == 0) {
+            // avoid a tight loop if nothing to do
+            Time.sleep(TIME_BETWEEN_RETRIES);
+        }
       }
     }
   }
@@ -516,7 +518,7 @@ public class DbQueue<T> {
       throughputCount = 0;
       throughputTimestamp = System.currentTimeMillis();
       double rate = throughput / delta;
-      logger.info("wrote {} {} messages in {}s, ({}/s) ", throughput, shortType, (long)delta/1000, (long)rate);
+      logger.info("wrote {} {} messages in {}s, ({}/s) ", throughput, shortType, delta, (long)rate);
     }
   }
 }
