@@ -2,6 +2,10 @@
 <!DOCTYPE hibernate-configuration SYSTEM 
 "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 
+<!--
+  NOTE!!!!  Any configuration uncommented here may override those deployed to production!
+  That means only the simplest/defaults should be uncommented!
+-->
 <hibernate-configuration>
  <session-factory>
    <!-- Specify where database being used -->
@@ -36,15 +40,15 @@
         having to create an additional connection. -->
    <property name="hibernate.c3p0.min_size">2</property>
    <!-- Default max_size is 100 but that seems excessive -->
-   <property name="hibernate.c3p0.max_size">20</property>
+   <property name="hibernate.c3p0.max_size">50</property>
    <!-- Default timeout is 0s (forever) but want to reclaim connections 
         if not used for more than 5 minutes so don't get too many 
         connections. -->
-   <property name="hibernate.c3p0.timeout">300</property>
+   <property name="hibernate.c3p0.timeout">600</property>
    <!-- Default max_statements is 0 but since will be doing lots of logging
         of data using the same query caching some prepared statements could
         easily speed things up. --> 
-   <property name="hibernate.c3p0.max_statements">1000</property>  
+   <property name="hibernate.c3p0.max_statements">5000</property>
  
    <!-- When using a remote datbase batching is critical.
         Though convincing hibernate to batch is not always
