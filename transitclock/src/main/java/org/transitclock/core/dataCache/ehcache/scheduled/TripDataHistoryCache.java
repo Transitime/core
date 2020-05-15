@@ -74,7 +74,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#getTripHistory(org.transitclock.core.dataCache.TripKey)
 	 */
 	@Override
-	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
+	public synchronized List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
 
 		TripEvents result = (TripEvents) cache.get(tripKey);
 
@@ -145,7 +145,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
 	{
- 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
+	 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
 		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
 
 		int counter = 0;
