@@ -248,7 +248,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return new KalmanError(initialErrorValue.getValue());
 	}
 
 	@Override
