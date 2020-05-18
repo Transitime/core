@@ -28,7 +28,7 @@ public class ParallelProcessor {
     private long startTime;
 
     public ParallelProcessor() {
-        int parallelThreadCount = Runtime.getRuntime().availableProcessors()-1;
+        int parallelThreadCount = Runtime.getRuntime().availableProcessors();
         if (parallelThreads.getValue() > 0)
             parallelThreadCount = parallelThreads.getValue();
         runQueue = new ArrayBlockingQueue<TaskWrapper>(parallelThreadCount);
