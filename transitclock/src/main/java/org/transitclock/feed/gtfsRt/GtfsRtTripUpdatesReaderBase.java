@@ -111,6 +111,8 @@ public abstract class GtfsRtTripUpdatesReaderBase {
                 tripDescriptor.getScheduleRelationship() == TripDescriptor.ScheduleRelationship.CANCELED) {
 
                 String tripId = getTripId(tripDescriptor);
+                if (tripId == null)
+                    continue;
                 IpcCanceledTrip canceledTrip = new IpcCanceledTrip(tripId,
                         tripDescriptor.getRouteId(), tripDescriptor.getStartDate(), tripUpdate.getTimestamp());
 
@@ -129,6 +131,8 @@ public abstract class GtfsRtTripUpdatesReaderBase {
                         skippedTripId = getTripId(tripDescriptor);
                         skippedTripAlreadyChecked = true;
                     }
+                    if (skippedTripId == null)
+                        continue;
                     IpcSkippedStop skippedStop = new IpcSkippedStop(vehicleDescriptor.getId(), stopTimeUpdate.getStopId(), stopTimeUpdate.getStopSequence());
                     skippedStops.add(skippedStop);
                     logger.debug("Adding skipped stop to map {}", skippedStop);
@@ -158,6 +162,10 @@ public abstract class GtfsRtTripUpdatesReaderBase {
 
         if(config.getServiceIdSuffix()){
             Trip trip = BlockAssigner.getInstance().getTripWithServiceIdSuffix(config,tripId);
+            if (trip == null) {
+                logger.info("missing trip {}", tripId);
+                return null;
+            }
             tripId = trip.getId();
         }
         return tripId;
