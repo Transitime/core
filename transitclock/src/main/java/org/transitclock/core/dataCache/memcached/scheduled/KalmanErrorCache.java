@@ -46,7 +46,7 @@ public class KalmanErrorCache implements ErrorCache {
 	public KalmanError getErrorValue(KalmanErrorCacheKey key) {
 
 		Double errorValue = (Double) memcachedClient.get(createKey(key));
-		if (errorValue == null) {
+		if (errorValue == null || errorValue.isNaN()) {
 			return null;
 		}
 		return new KalmanError(errorValue);
