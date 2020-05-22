@@ -74,7 +74,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#getTripHistory(org.transitclock.core.dataCache.TripKey)
 	 */
 	@Override
-	public synchronized List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
+	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
 
 		TripEvents result = (TripEvents) cache.get(tripKey);
 
@@ -92,7 +92,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#putArrivalDeparture(org.transitclock.db.structs.ArrivalDeparture)
 	 */
 	@Override	
-	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
+	public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
 		logger.trace("Putting :"+arrivalDeparture.toString() + " in TripDataHistoryCache cache.");
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
@@ -111,30 +111,30 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
 			
-			if(trip!=null)
-			{
-				
-				tripKey = new TripKey(arrivalDeparture.getTripId(),
-						nearestDay,
-						trip.getStartTime());
-		
-				TripEvents result = (TripEvents) cache.get(tripKey);
-		
-				if (result == null ) {													
-					result=new TripEvents();					
-				}
-				
-				try {										
-					result.addEvent(new IpcArrivalDeparture(arrivalDeparture));
-					
-				} catch (Exception e) {
-					logger.error("Error adding "+arrivalDeparture.toString()+" event to TripDataHistoryCache.", e);				
+			if(trip!=null) {
+				continue;
+			}
 
-				}									
-							
+			tripKey = new TripKey(arrivalDeparture.getTripId(),
+					nearestDay,
+					trip.getStartTime());
+
+			IpcArrivalDeparture ipcad = null;
+			try {
+				ipcad = new IpcArrivalDeparture(arrivalDeparture);
+			} catch (Exception e) {
+				logger.error("Error adding "+arrivalDeparture.toString()+" event to TripDataHistoryCache.", e);
+			}
+
+			synchronized (cache) {
+				TripEvents result = (TripEvents) cache.get(tripKey);
+				if (result == null) {
+					result = new TripEvents();
+				}
+				result.addEvent(ipcad);
 				cache.put(tripKey, result);
 			}
-		}				
+		}
 		return tripKey;
 	}
 
