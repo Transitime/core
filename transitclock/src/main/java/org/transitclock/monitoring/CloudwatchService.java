@@ -35,11 +35,12 @@ public class CloudwatchService {
             100000);
 
     private void init() {
-        logger.info("re-loading system properties {}", "transitclock.cloudwatch.awsAccessKey");
         environmentName = System.getProperty("transitclock.environmentName");
         accessKey = System.getProperty("transitclock.cloudwatch.awsAccessKey");
         secretKey = System.getProperty("transitclock.cloudwatch.awsSecretKey");
         endpoint = System.getProperty("transitclock.cloudwatch.awsEndpoint");
+        logger.info("re-loading system properties env={} awsAccessKey={} awsSecretKey={} awsEndpoint={}",
+                environmentName, accessKey, secretKey, endpoint);
     }
 
     private class MetricDefinition {
