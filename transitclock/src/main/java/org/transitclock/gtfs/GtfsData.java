@@ -2221,6 +2221,7 @@ public class GtfsData {
 	private void processFeedInfo() {
 		// Let user know what is going on
 		logger.info("Processing feed_info.txt data...");
+		feedInfoList = new ArrayList<FeedInfo>();
 
 		// Read in the feed_info.txt GTFS data from file
 		GtfsFeedInfosReader feedInfosReader =
