@@ -233,4 +233,11 @@ public class AvlConfig {
 			new BooleanConfigValue("transitclock.avl.shouldLogToStdOut", false,
 					"For debugging. Logs each AVL report to stdout if set "
 					+ "to true. Default is false.");
+
+	public static boolean shouldTryTimeZoneCorrection() { return timeZoneCorrectionValue.getValue() != null; }
+	public static Integer getTimeZoneCorrection() { return timeZoneCorrectionValue.getValue(); }
+	private static IntegerConfigValue timeZoneCorrectionValue =
+			new IntegerConfigValue("transitclock.avl.tzCorrection",
+					null,
+					"Attempt to correct for a Time Zone issue by subtracting this value in seconds");
 }
