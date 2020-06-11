@@ -29,6 +29,7 @@ import org.transitclock.utils.Time;
 public class AvlJsonQuery {
 	// Maximum number of rows that can be retrieved by a query
 	private static final int MAX_ROWS = 50000;
+	private static final long MAX_HEADWAY = Time.MS_PER_HOUR * 3;
 	
 	/**
 	 * Queries agency for AVL data and returns result as a JSON string. Limited
@@ -46,13 +47,19 @@ public class AvlJsonQuery {
 	 *            optional time of day during the date range
 	 * @param endTime
 	 *            optional time of day during the date range
+	 * @param routeId
+	 *            optional routeId parameter
+	 * @param includeHeadway
+	 *            optional boolean parameter to include headway in results
 	 * @return AVL reports in JSON format. Can be empty JSON array if no data
 	 *         meets criteria.
 	 */
 	public static String getAvlJson(String agencyId, String vehicleId,
-			String beginDate, String numdays, String beginTime, String endTime, String routeId) {
+			String beginDate, String numdays, String beginTime, String endTime, String routeId, String includeHeadway) {
 		//Determine the time portion of the SQL
 		String timeSql = "";
+		String headwayColSql = "";
+		String headwayJoinSql = "";
 		// If beginTime or endTime set but not both then use default values
 		if ((beginTime != null && !beginTime.isEmpty())
 				|| (endTime != null && !endTime.isEmpty())) {
@@ -66,9 +73,21 @@ public class AvlJsonQuery {
 			timeSql = " AND time(time) BETWEEN '" 
 				+ beginTime + "' AND '" + endTime + "' ";
 		}
+		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
+			headwayColSql = ", h.headway ";
+			headwayJoinSql = "LEFT JOIN "
+					+ "(SELECT vehicleId, creationTime, FLOOR(headway / 60000) as headway FROM Headway "
+					+ "WHERE creationTime BETWEEN '" + beginDate + "' "
+					+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
+					+ "AND headway < " + MAX_HEADWAY
+					+ ") h "
+					+ "ON h.vehicleId=a.vehicleId and h.creationTime=a.time ";
+
+		}
 //need to limit the vehicle state table by time as well to utilize index on avlTime column
 		String sql = "SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, a.speed, "
 				+ "a.heading, a.timeProcessed, a.source, v.routeShortName "
+				+ headwayColSql
 				+ "FROM AvlReports a "
 				+ "JOIN "
 				+ "(SELECT vehicleId, routeShortName, avlTime FROM VehicleStates "
@@ -76,6 +95,7 @@ public class AvlJsonQuery {
 				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
 				+ ") v "
 				+ "ON v.vehicleId=a.vehicleId and v.avlTime=a.time "
+				+ headwayJoinSql
 				+ "WHERE a.time BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
 				+ timeSql;
@@ -93,7 +113,7 @@ public class AvlJsonQuery {
 		// lastly, limit AVL reports to 5000 so that someone doesn't try
 		// to view too much data at once.
 		sql += "ORDER BY a.vehicleId, a.time LIMIT " + MAX_ROWS;
-		
+
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 
 		return json;
