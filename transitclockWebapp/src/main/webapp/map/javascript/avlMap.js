@@ -40,20 +40,31 @@ function drawAvlMarker(avl) {
 	
   	// Create popup with detailed info
 	
-	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID", "Route"],
-		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId", "routeShortName"];
+	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID", "Route", "Headsign", "Schedule Adherence", "OTP", "Headway Adherence"],
+		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId", "routeShortName", "headsign", "schedAdh", "otp", "headway"];
 	
 	// populate missing keys
 	avl.latlon = avl.lat + ", " + avl.lon
 	avl.niceSpeed =  Math.round(parseFloat(avl.speed) * 10)/10 + " kph";
 	
-	var content = $("<table />").attr("class", "popupTable");
+	var content = $("<div />");
+	var table = $("<table />").attr("class", "popupTable");
 	
 	for (var i = 0; i < labels.length; i++) {
 		var label = $("<td />").attr("class", "popupTableLabel").text(labels[i] + ": ");
 		var value = $("<td />").text(avl[keys[i]]);
-		content.append( $("<tr />").append(label, value) )
+		table.append( $("<tr />").append(label, value) )
 	}
+
+	// Links to schedule and google maps for vehicle
+	var links = $("<div />")
+	var mapsLink = 'http://google.com/maps?q=loc:' + avl.lat + ',' + avl.lon
+	links.append( $("<a style='padding-right:10px;vertical-align: middle'>Schedule</a>"))
+	links.append( $("<div style='border-left:2px solid black;height:20px;display:inline-block;vertical-align:middle'></div>"))
+	links.append( $("<a href=" + mapsLink + " target='_blank' style='padding-left:10px;vertical-align:middle'>View Location in Google Maps</a>"))
+
+	content.append(table)
+	content.append(links)
 		
 	avlMarker.bindPopup(content[0]);
   	
