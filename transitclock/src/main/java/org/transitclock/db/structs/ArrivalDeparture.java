@@ -598,7 +598,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				beginTime, endTime,
 				"AND vehicleId='" + vehicleId + "'", 
 				0, 0,  // Don't use batching 
-				null); // Read both arrivals and departures
+				null,  // Read both arrivals and departures
+				false);
 	}
 	
 	/**
@@ -757,11 +758,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			String dbName, Date beginTime, Date endTime, 
 			String sqlClause,
 			final Integer firstResult, final Integer maxResults,
-			ArrivalsOrDepartures arrivalOrDeparture) {
+			ArrivalsOrDepartures arrivalOrDeparture, boolean readOnly) {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = dbName != null ? HibernateUtils.getSession(dbName, false) : HibernateUtils.getSession(true);
+		Session session = dbName != null ? HibernateUtils.getSession(dbName, readOnly) : HibernateUtils.getSession(true);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
@@ -810,7 +811,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	public static Long getArrivalsDeparturesCountFromDb(
 			String dbName, Date beginTime, Date endTime, 
-			ArrivalsOrDepartures arrivalOrDeparture) {
+			ArrivalsOrDepartures arrivalOrDeparture, boolean readOnly) {
 		IntervalTimer timer = new IntervalTimer();
 		Long count = null;
 		// Get the database session. This is supposed to be pretty light weight
@@ -870,7 +871,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			final int firstResult, final int maxResults,
 			ArrivalsOrDepartures arrivalOrDeparture) {
 		return getArrivalsDeparturesFromDb(DbSetupConfig.getDbName(), beginTime,
-				endTime, sqlClause, firstResult, maxResults, arrivalOrDeparture);
+				endTime, sqlClause, firstResult, maxResults, arrivalOrDeparture, false);
 	}
 	
 	public String getVehicleId() {
