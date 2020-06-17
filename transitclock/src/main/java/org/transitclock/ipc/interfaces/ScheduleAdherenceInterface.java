@@ -1,5 +1,6 @@
 package org.transitclock.ipc.interfaces;
 
+import org.transitclock.core.ServiceType;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 import java.rmi.Remote;
@@ -13,6 +14,6 @@ import java.util.List;
  *
  */
 public interface ScheduleAdherenceInterface extends Remote {
-    List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(Date beginDate, Date endDate, String routeId, boolean readOnly) throws Exception;
-    List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(Date beginDate, Date endDate, String routeId) throws Exception;
+    List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(Date beginDate, Date endDate, String routeIdOrShortName, ServiceType serviceType) throws Exception;
+    List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(Date beginDate, Date endDate, String routeId, ServiceType serviceType, boolean readOnly) throws Exception;
 }

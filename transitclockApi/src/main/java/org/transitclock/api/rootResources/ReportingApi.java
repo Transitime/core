@@ -2,11 +2,13 @@ package org.transitclock.api.rootResources;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.apache.commons.lang3.StringUtils;
 import org.transitclock.api.data.ApiArrivalDepartures;
 import org.transitclock.api.data.reporting.OnTimePerformanceData;
 import org.transitclock.api.data.reporting.chartjs.piechart.PieChart;
 import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
+import org.transitclock.core.ServiceType;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.interfaces.ScheduleAdherenceInterface;
 
@@ -48,6 +50,8 @@ public class ReportingApi {
             @QueryParam(value = "minEarlySec")  @DefaultValue("90") int minEarlySec,
             @Parameter(description="Begin date to use for retrieving arrival departures",required=false)
             @QueryParam(value = "minLateSec")  @DefaultValue("150") int minLateSec,
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
+            @QueryParam(value = "serviceType") String serviceType,
             @Parameter(description="Specify chart data type where applicable.",required=false)
             @QueryParam(value = "chartType")  @DefaultValue("pie") String chartType)
             throws WebApplicationException {
@@ -63,7 +67,14 @@ public class ReportingApi {
             Date beginDateTime = new Date(beginDate.getTimeStamp());
             Date endDateTime = new Date(endDate.getTimeStamp());
 
-            List<IpcArrivalDeparture> arrivalDepartures = scheduleAdherenceInterface.getArrivalsDeparturesForRoute(beginDateTime, endDateTime, route, false);
+            ServiceType serviceTypeEnum = null;
+
+            if(StringUtils.isNotBlank(serviceType)){
+                serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
+            }
+
+            List<IpcArrivalDeparture> arrivalDepartures = scheduleAdherenceInterface.getArrivalsDeparturesForRoute(
+                    beginDateTime, endDateTime, route, serviceTypeEnum, false);
             OnTimePerformanceData otpd = new OnTimePerformanceData();
             PieChart pieChart = otpd.getOnTimePerformanceForRoutesPieChart(arrivalDepartures, minEarlySec, minLateSec);
             return stdParameters.createResponse(pieChart);

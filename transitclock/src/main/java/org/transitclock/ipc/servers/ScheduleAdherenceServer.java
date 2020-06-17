@@ -3,15 +3,18 @@ package org.transitclock.ipc.servers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
+import org.transitclock.core.ServiceType;
+import org.transitclock.core.ServiceUtils;
 import org.transitclock.db.structs.ArrivalDeparture;
+import org.transitclock.db.structs.Calendar;
 import org.transitclock.db.structs.Route;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.ipc.interfaces.ScheduleAdherenceInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 /**
  * @author carabalb
  * Server to allow Schedule Adherence information to be queried.
@@ -44,19 +47,42 @@ public class ScheduleAdherenceServer extends AbstractServer implements ScheduleA
     }
 
     @Override
-    public List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(Date beginDate, Date endDate, String routeIdOrShortName) throws Exception{
-        Route dbRoute = getRoute(routeIdOrShortName);
-        if (dbRoute == null)
-            return null;
-        return ArrivalDeparture.getArrivalsDeparturesForRouteFromDb(beginDate, endDate, dbRoute.getId(), true);
+    public List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(
+            Date beginDate, Date endDate, String routeIdOrShortName, ServiceType serviceType) throws Exception{
+        return getArrivalsDeparturesForRoute(beginDate, endDate, routeIdOrShortName, serviceType, true);
     }
 
     @Override
-    public List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(Date beginDate, Date endDate, String routeIdOrShortName, boolean readOnly) throws Exception {
+    public List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(
+            Date beginDate, Date endDate, String routeIdOrShortName, ServiceType serviceType, boolean readOnly) throws Exception {
+
         Route dbRoute = getRoute(routeIdOrShortName);
         if (dbRoute == null)
             return null;
-        return ArrivalDeparture.getArrivalsDeparturesForRouteFromDb(beginDate, endDate, dbRoute.getId(), readOnly);
+
+        List<IpcArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesForRouteFromDb(beginDate, endDate, dbRoute.getId(), readOnly);
+        if(serviceType == null){
+            return arrivalDepartures;
+        }
+
+        DbConfig dbConfig = Core.getInstance().getDbConfig();
+
+        List<IpcArrivalDeparture> filteredArrivalDepartures = new ArrayList<>();
+        Set<String> serviceIdForServiceType = new HashSet<>();
+        List<Calendar> allCalendars = dbConfig.getCalendars();
+
+        for (Calendar calendar : allCalendars) {
+            if(ServiceUtils.isServiceTypeActiveForServiceCal(serviceType, calendar)){
+                serviceIdForServiceType.add(calendar.getServiceId());
+            }
+        }
+
+        for(IpcArrivalDeparture arrivalDeparture : arrivalDepartures){
+            if(serviceIdForServiceType.contains(arrivalDeparture.getServiceId())){
+                filteredArrivalDepartures.add(arrivalDeparture);
+            }
+        }
+        return filteredArrivalDepartures;
     }
 
     /**
