@@ -586,7 +586,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	/**
 	 * Read in arrivals and departures for a vehicle, over a time range.
 	 * 
-	 * @param projectId
 	 * @param beginTime
 	 * @param endTime
 	 * @param vehicleId
@@ -610,7 +609,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * 
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param serviceId
 	 * @return
 	 */
@@ -627,7 +626,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @paran session
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param serviceId
 	 * @return
 	 */
@@ -653,7 +652,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @paran session
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param stopPathIndex
 	 * @return
 	 */

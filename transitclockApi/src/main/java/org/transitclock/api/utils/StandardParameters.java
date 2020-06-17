@@ -286,7 +286,7 @@ public class StandardParameters {
 	 * Gets the HoldingTimeInterface for the specified agencyId. If not valid
 	 * then throws WebApplicationException.
 	 * 
-	 * @return The PredictionAnalysisInterface
+	 * @return The HoldingTimeInterface
 	 */
 	public HoldingTimeInterface getHoldingTimeInterface()
 	{

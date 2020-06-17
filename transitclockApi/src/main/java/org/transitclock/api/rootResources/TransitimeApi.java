@@ -836,7 +836,7 @@ public class TransitimeApi {
 	 * a stop from a list.
 	 * 
 	 * @param stdParameters
-	 * @param routeShortName
+	 * @param routesIdOrShortNames
 	 * @return
 	 * @throws WebApplicationException
 	 */
