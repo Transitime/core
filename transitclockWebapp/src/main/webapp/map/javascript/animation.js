@@ -37,7 +37,7 @@ function avlAnimation(map, icon, clock) {
 		for (var i = 0; i < positions.length - 1; i++)
 			durations.push(positions[i+1].timestamp - positions[i].timestamp);
 		
-		sprite = L.marker(positions[0], {icon: icon}).addTo(map);
+		sprite = L.marker(positions[0], {icon: icon}).bindPopup("Test").addTo(map);
 		clock.textContent = parseTime(elapsedTime);
 	}
 	

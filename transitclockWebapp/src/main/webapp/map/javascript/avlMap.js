@@ -339,7 +339,7 @@ function drawRoute(route) {
 var busIcon =  L.icon({
     iconUrl:  contextPath + "/reports/images/bus.png", 
     iconSize: [25,25]
-});
+}).bindPopup("Test");
 var animate = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
 
 var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
@@ -388,5 +388,14 @@ $("#playbackRew").on("click", function() {
 	animate.rate(rate);
 	$("#playbackRate").text(rate + "X");
 });
+
+function vehiclePopup(data) {
+	var table = $("<table />").attr("class", "popupTable");
+	var label = $("<td />").attr("class", "popupTableLabel").text("Vehicle ID: ");
+	var value = $("<td />").text(data["vehicleId"]);
+	table.append( $("<tr />").append(label, value) );
+
+	return table;
+}
 
 
