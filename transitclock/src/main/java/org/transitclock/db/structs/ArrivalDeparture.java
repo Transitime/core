@@ -16,6 +16,7 @@
  */
 package org.transitclock.db.structs;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -28,6 +29,7 @@ import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
@@ -35,6 +37,7 @@ import org.transitclock.utils.Time;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -872,6 +875,65 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			ArrivalsOrDepartures arrivalOrDeparture) {
 		return getArrivalsDeparturesFromDb(DbSetupConfig.getDbName(), beginTime,
 				endTime, sqlClause, firstResult, maxResults, arrivalOrDeparture, false);
+	}
+
+
+	/**
+	 * Reads the arrivals/departures for the timespan and routeId specified
+	 * Can specify whether you want to retrieve the data from a readOnly db
+	 *
+	 * @param beginTime
+	 * @param endTime
+	 * @param routeId
+	 * @param readOnly
+	 * @return
+	 */
+	public static List<IpcArrivalDeparture> getArrivalsDeparturesForRouteFromDb(Date beginTime, Date endTime,
+																				String routeId, boolean readOnly) throws Exception {
+		IntervalTimer timer = new IntervalTimer();
+
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(readOnly);
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+		String hql = "FROM ArrivalDeparture "
+				+ "WHERE time between :beginDate "
+				+ "AND :endDate "
+				+ "AND scheduledTime != null";
+		if (StringUtils.isNotBlank(routeId)) {
+			hql += " AND routeId = " + routeId;
+		}
+
+		Query query = session.createQuery(hql);
+
+		// Set the parameters for the query
+		query.setTimestamp("beginDate", beginTime);
+		query.setTimestamp("endDate", endTime);
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<ArrivalDeparture> arrivalsDeparatures = query.list();
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
+			List<IpcArrivalDeparture> ipcArrivalDepartures = new ArrayList<>();
+			for (ArrivalDeparture arrivalDeparture : arrivalsDeparatures) {
+				ipcArrivalDepartures.add(new IpcArrivalDeparture(arrivalDeparture));
+			}
+			return ipcArrivalDepartures;
+
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error(e.getMessage(), e);
+			return null;
+		} catch (Exception e) {
+			Core.getLogger().error("Unable to retrieve ArrivalDepartures", e);
+			throw e;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
 	}
 	
 	public String getVehicleId() {

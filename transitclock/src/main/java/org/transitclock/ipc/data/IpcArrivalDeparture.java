@@ -35,7 +35,7 @@ public class IpcArrivalDeparture implements Serializable {
 	@XmlAttribute
 	private transient Date avlTime;
 	@XmlAttribute
-	private transient TemporalDifference scheduledAdherence;
+	private TemporalDifference scheduledAdherence;
 	@XmlAttribute
 	private String blockId;
 	@XmlAttribute
