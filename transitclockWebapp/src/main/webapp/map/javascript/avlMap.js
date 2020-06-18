@@ -312,10 +312,10 @@ function drawAvlData() {
 	    	if (!allVehiclesRequested() && vehicles.length)
 	    		prepareAnimation(vehicles[0].data); // only animate first vehicle returned.
 
-			if (allVehiclesRequested()) {
-				$("#playback").hide();
-                animate.removeIcon();//clean up anything there already
-			}
+			if (allVehiclesRequested())
+                for (i in vehicles)
+                	prepareAnimation(vehicles[i].data);
+
 			else $("#playback").show();
 	    },
 	    // When there is an AJAX problem alert the user

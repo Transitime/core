@@ -13,10 +13,6 @@ function avlAnimation(map, icon, clock) {
 	// create icon for animation and initialize values
 	// positions is an array of position values: { lat, lon, timestamp }
 	function animation(data) {
-	
-		// remove old sprite.
-		if (sprite)
-			map.removeLayer(sprite);
 		
 		positions = data
 		
