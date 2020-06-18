@@ -1,8 +1,8 @@
 package org.transitclock.api.data.reporting;
 
-import org.transitclock.api.data.reporting.chartjs.piechart.PieChart;
-import org.transitclock.api.data.reporting.chartjs.piechart.PieChartData;
-import org.transitclock.api.data.reporting.chartjs.piechart.PieChartDataset;
+import org.transitclock.api.data.reporting.chartjs.pie.PieChart;
+import org.transitclock.api.data.reporting.chartjs.pie.PieChartData;
+import org.transitclock.api.data.reporting.chartjs.pie.PieChartDataset;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
 
 import java.util.LinkedHashMap;

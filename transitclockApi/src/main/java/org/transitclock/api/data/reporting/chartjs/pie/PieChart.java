@@ -1,4 +1,4 @@
-package org.transitclock.api.data.reporting.chartjs.piechart;
+package org.transitclock.api.data.reporting.chartjs.pie;
 
 import javax.xml.bind.annotation.XmlElement;
 

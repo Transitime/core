@@ -3,9 +3,8 @@ package org.transitclock.api.rootResources;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.commons.lang3.StringUtils;
-import org.transitclock.api.data.ApiArrivalDepartures;
 import org.transitclock.api.data.reporting.OnTimePerformanceData;
-import org.transitclock.api.data.reporting.chartjs.piechart.PieChart;
+import org.transitclock.api.data.reporting.chartjs.ChartType;
 import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
 import org.transitclock.core.ServiceType;
@@ -31,7 +30,7 @@ import java.util.List;
 @Path("/key/{key}/agency/{agency}")
 public class ReportingApi {
 
-    @Path("/report/chartjs/arrivalDeparturesByRoute")
+    @Path("/report/chartjs/onTimePerformanceByRoute")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Operation(summary="Gets arrival / departures for date range and route",
@@ -75,9 +74,18 @@ public class ReportingApi {
 
             List<IpcArrivalDeparture> arrivalDepartures = scheduleAdherenceInterface.getArrivalsDeparturesForRoute(
                     beginDateTime, endDateTime, route, serviceTypeEnum, false);
+
             OnTimePerformanceData otpd = new OnTimePerformanceData();
-            PieChart pieChart = otpd.getOnTimePerformanceForRoutesPieChart(arrivalDepartures, minEarlySec, minLateSec);
-            return stdParameters.createResponse(pieChart);
+
+            Object response = null;
+
+            if(arrivalDepartures != null){
+                if(ChartType.valueOf(chartType.toUpperCase()).equals(ChartType.PIE)){
+                    response = otpd.getOnTimePerformanceForRoutesPieChart(arrivalDepartures, minEarlySec, minLateSec);
+                }
+            }
+
+            return stdParameters.createResponse(response);
         } catch (Exception e) {
             // If problem getting data then return a Bad Request
             throw WebUtils.badRequestException(e);
