@@ -1,5 +1,6 @@
 package org.transitclock.ipc.servers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -56,11 +57,16 @@ public class ScheduleAdherenceServer extends AbstractServer implements ScheduleA
     public List<IpcArrivalDeparture> getArrivalsDeparturesForRoute(
             Date beginDate, Date endDate, String routeIdOrShortName, ServiceType serviceType, boolean readOnly) throws Exception {
 
-        Route dbRoute = getRoute(routeIdOrShortName);
-        if (dbRoute == null)
-            return null;
+        String routeId = null;
 
-        List<IpcArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesForRouteFromDb(beginDate, endDate, dbRoute.getId(), readOnly);
+        if(StringUtils.isNotBlank(routeIdOrShortName)){
+            Route dbRoute = getRoute(routeIdOrShortName);
+            if (dbRoute == null)
+                return null;
+            routeId = dbRoute.getId();
+        }
+
+        List<IpcArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesForRouteFromDb(beginDate, endDate, routeId, readOnly);
         if(serviceType == null){
             return arrivalDepartures;
         }
