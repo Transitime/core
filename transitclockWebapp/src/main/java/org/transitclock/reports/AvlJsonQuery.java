@@ -86,7 +86,7 @@ public class AvlJsonQuery {
 		}
 //need to limit the vehicle state table by time as well to utilize index on avlTime column
 		String sql = "SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, a.speed, "
-				+ "a.heading, a.timeProcessed, a.source, v.routeShortName, t.headsign, v.schedAdh "
+				+ "a.heading, a.timeProcessed, a.source, v.routeShortName, t.headsign, v.schedAdh, t.tripId "
 				+ headwayColSql
 				+ "FROM AvlReports a "
 				+ "JOIN "
