@@ -258,7 +258,7 @@ public class PredictionDataCache {
 			// Direction ID is OK so clone prediction and add to list
 			IpcPredictionsForRouteStopDest clone =
 					predictions.getClone(maxPredictionsPerStop,
-							maxPredictionEpochTime, distanceToStop);
+							maxPredictionEpochTime, PredictionGeneratorDefaultImpl.getTerminatePredictionsAtTripEnd(), distanceToStop);
 			clonedPredictions.add(clone);
 		}
 		
