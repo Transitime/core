@@ -32,8 +32,16 @@ function avlAnimation(map, icon, clock) {
 		durations = []
 		for (var i = 0; i < positions.length - 1; i++)
 			durations.push(positions[i+1].timestamp - positions[i].timestamp);
+
+		var popupContent = $("<div />");
+		var popupTable = $("<table />").attr("class", "popupTable");
+
+		var label = $("<td />").attr("class", "popupTableLabel").text("Vehicle ID: ");
+		var value = $("<td />").text(data[0].vehicleId);
+		popupTable.append( $("<tr />").append(label, value) );
+		popupContent.append(popupTable);
 		
-		sprite = L.marker(positions[0], {icon: icon}).bindPopup("Test").addTo(map);
+		sprite = L.marker(positions[0], {icon: icon}).bindPopup(popupContent[0]).addTo(map);
 		clock.textContent = parseTime(elapsedTime);
 	}
 	
