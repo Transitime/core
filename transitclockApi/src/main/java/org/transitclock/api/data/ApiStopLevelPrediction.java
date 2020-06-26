@@ -12,7 +12,7 @@ public class ApiStopLevelPrediction {
     @XmlElement(name = "is_valid")
     private Boolean isValid = null;
     @XmlElement(name = "time")
-    private long time;
+    private long time;  //seconds from epoch
     @XmlElement(name = "trip")
     private String trip;
     @XmlElement(name = "vehicle")
@@ -29,7 +29,11 @@ public class ApiStopLevelPrediction {
         }
         trip = prediction.getTripId();
         vehicle = prediction.getVehicleId();
-        time = prediction.getPredictionTime();
+        if (prediction.getPredictionTime() != 0) {
+            time = prediction.getPredictionTime() / 1000; // seconds
+        } else {
+            time = prediction.getPredictionTime();
+        }
 
     }
 
