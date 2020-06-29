@@ -416,7 +416,7 @@ function scheduleAjax(tripId) {
 	if ($("#schedule-modal").length == 0) {
 		var containerHeight = $(".leaflet-popup-content").height();
 		var scheduleModal =
-			$("<div class='modal' id='schedule-modal' style='display: none;z-index: -1;width: 100%;height: " + containerHeight + "px;overflow: auto;background-color: rgb(255,255,255);'>"
+			$("<div class='modal' id='schedule-modal' style='display: none;z-index: -1;width: 200%;height: " + containerHeight + "px;overflow: auto;background-color: rgb(255,255,255);'>"
 				+ "<div class='modal-content' style='z-index: -1;'>"
 					+ "<div class='modal-header'>"
 						+ "<button type='button' class='close-modal' style='float:right;'>&times;</button>"
