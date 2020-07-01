@@ -362,12 +362,8 @@ function prepareAnimation(avlData) {
 
 }
 
-$("#playbackNext").on("click", animate.next);
+function playAnimation() {
 
-$("#playbackPrev").on("click", animate.prev);
-
-$("#playbackPlay").on("click", function() {
-	
 	if (!animate.paused()) {
 		animate.pause();
 		$("#playbackPlay").attr("src", playButton);
@@ -376,7 +372,15 @@ $("#playbackPlay").on("click", function() {
 		animate.start();
 		$("#playbackPlay").attr("src", pauseButton);
 	}
-	
+
+}
+
+$("#playbackNext").on("click", animate.next);
+
+$("#playbackPrev").on("click", animate.prev);
+
+$("#playbackPlay, #popupPlayback").on("click", function() {
+	playAnimation();
 });
 
 $("#playbackFF").on("click", function() {
@@ -516,15 +520,6 @@ function dataReadCallback(jsonData) {
 			map.scrollWheelZoom.enable();
 		}
 	)
-}
-
-function vehiclePopup(data) {
-	var table = $("<table />").attr("class", "popupTable");
-	var label = $("<td />").attr("class", "popupTableLabel").text("Vehicle ID: ");
-	var value = $("<td />").text(data["vehicleId"]);
-	table.append( $("<tr />").append(label, value) );
-
-	return table;
 }
 
 

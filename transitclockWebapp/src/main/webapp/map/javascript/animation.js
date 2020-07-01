@@ -36,9 +36,11 @@ function avlAnimation(map, icon, clock) {
 		var popupContent = $("<div />");
 		var popupTable = $("<table />").attr("class", "popupTable");
 
-		var label = $("<td />").attr("class", "popupTableLabel").text("Vehicle ID: ");
-		var value = $("<td />").text(data[0].vehicleId);
-		popupTable.append( $("<tr />").append(label, value) );
+		var vehicleIdLabel = $("<td />").attr("class", "popupTableLabel").text("Vehicle ID: ");
+		var vehicleIdValue = $("<td />").text(data[0].vehicleId);
+		var playbackLink = $("<td><a href='#' onclick='playAnimation()'>Playback</a></td>");
+		popupTable.append( $("<tr />").append(vehicleIdLabel, vehicleIdValue) );
+		popupTable.append( $("<tr />").append(playbackLink));
 		popupContent.append(popupTable);
 		
 		sprite = L.marker(positions[0], {icon: icon}).bindPopup(popupContent[0]).addTo(map);
