@@ -75,16 +75,16 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override
 	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
+		// we need to protected the deserializer from modifications
+		synchronized (cache) {
+			TripEvents result = (TripEvents) cache.get(tripKey);
 
-		TripEvents result = (TripEvents) cache.get(tripKey);
-
-		if(result!=null)
-		{						
-			return result.getEvents();
-		}
-		else
-		{
-			return null;
+			if (result != null) {
+				// this call needs outer synchronization
+				return result.getEvents();
+			} else {
+				return null;
+			}
 		}
 	}
 
@@ -110,14 +110,15 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			DbConfig dbConfig = Core.getInstance().getDbConfig();
 			
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
-			
-			if(trip!=null) {
-				continue;
+			Integer tripStartTime = null;
+
+			if (trip != null) {
+				tripStartTime = trip.getStartTime();
 			}
 
 			tripKey = new TripKey(arrivalDeparture.getTripId(),
 					nearestDay,
-					trip.getStartTime());
+					tripStartTime);
 
 			IpcArrivalDeparture ipcad = null;
 			try {
