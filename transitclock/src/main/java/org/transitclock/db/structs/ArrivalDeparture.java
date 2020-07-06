@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.DbSetupConfig;
+import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
