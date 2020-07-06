@@ -4,6 +4,7 @@ import org.transitclock.api.data.reporting.chartjs.pie.PieChart;
 import org.transitclock.api.data.reporting.chartjs.pie.PieChartData;
 import org.transitclock.api.data.reporting.chartjs.pie.PieChartDataset;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.ipc.data.IpcArrivalDepartureScheduleAdherence;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,7 +22,7 @@ public class OnTimePerformanceData {
     private static final String LATE = "Late";
     private static final String ON_TIME = "On Time";
 
-    public PieChart getOnTimePerformanceForRoutesPieChart(List<IpcArrivalDeparture> arrivalDepartures,
+    public static PieChart getOnTimePerformanceForRoutesPieChart(List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures,
                                                   int minEarlySec, int minLateSec){
 
         Map<String, Integer> labelsAndCountsMap = getOTPLabelsAndCounts(arrivalDepartures, minEarlySec, minLateSec);
@@ -39,7 +40,7 @@ public class OnTimePerformanceData {
         return chart;
     }
 
-    private Map<String, Integer> getOTPLabelsAndCounts(List<IpcArrivalDeparture> arrivalDepartures,
+    private static Map<String, Integer> getOTPLabelsAndCounts(List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures,
                                                        int minEarlySec, int minLateSec){
 
         Map<String, Integer> otpLabelsAndCountsMap = new LinkedHashMap<>();
@@ -50,10 +51,10 @@ public class OnTimePerformanceData {
         int count;
 
         for(IpcArrivalDeparture ad : arrivalDepartures) {
-            if(ad.getScheduledAdherence().isEarlierThan(minEarlySec)){
+            if (ad.getScheduledAdherence().isEarlierThan(minEarlySec)) {
                 count = otpLabelsAndCountsMap.get(EARLY);
                 otpLabelsAndCountsMap.put(EARLY, count + 1);
-            } else if(ad.getScheduledAdherence().isLaterThan(minLateSec)){
+            } else if (ad.getScheduledAdherence().isLaterThan(minLateSec)) {
                 count = otpLabelsAndCountsMap.get(LATE);
                 otpLabelsAndCountsMap.put(LATE, count + 1);
             } else {

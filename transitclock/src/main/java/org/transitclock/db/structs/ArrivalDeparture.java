@@ -884,11 +884,14 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param beginTime
 	 * @param endTime
 	 * @param routeId
+	 * @param serviceType
+	 * @param timePointsOnly
 	 * @param readOnly
 	 * @return
 	 */
-	public static List<IpcArrivalDeparture> getArrivalsDeparturesForRouteFromDb(Date beginTime, Date endTime,
-																				String routeId, boolean readOnly) throws Exception {
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Date beginTime, Date endTime,
+																	 String routeId, ServiceType serviceType,
+																	 boolean timePointsOnly, boolean readOnly) throws Exception {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
@@ -896,43 +899,84 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
-		String hql = "FROM ArrivalDeparture "
-				+ "WHERE time between :beginDate "
-				+ "AND :endDate "
-				+ "AND scheduledTime != null";
-		if (StringUtils.isNotBlank(routeId)) {
-			hql += " AND routeId = " + routeId;
-		}
 
-		Query query = session.createQuery(hql);
-
-		// Set the parameters for the query
-		query.setTimestamp("beginDate", beginTime);
-		query.setTimestamp("endDate", endTime);
+		String hql = "SELECT " +
+					"ad " +
+					"FROM " +
+					"ArrivalDeparture ad " +
+					getTimePointsJoin(timePointsOnly) +
+					getServiceTypeJoin(serviceType) +
+					"WHERE " +
+					"ad.time between :beginTime AND :endTime " +
+					"AND scheduledTime != null " +
+					getRouteIdWhere(routeId) +
+					getTimePointsWhere(timePointsOnly) +
+					getServiceTypeWhere(serviceType);
 
 		try {
-			@SuppressWarnings("unchecked")
-			List<ArrivalDeparture> arrivalsDeparatures = query.list();
+			Query query = session.createQuery(hql);
+			query.setTimestamp("beginTime", beginTime);
+			query.setTimestamp("endTime", endTime);
+
+			List<ArrivalDeparture> results = query.list();
+
 			logger.debug("Getting arrival/departures from database took {} msec",
 					timer.elapsedMsec());
-			List<IpcArrivalDeparture> ipcArrivalDepartures = new ArrayList<>();
-			for (ArrivalDeparture arrivalDeparture : arrivalsDeparatures) {
-				ipcArrivalDepartures.add(new IpcArrivalDeparture(arrivalDeparture));
-			}
-			return ipcArrivalDepartures;
+
+			return results;
 
 		} catch (HibernateException e) {
 			// Log error to the Core logger
-			Core.getLogger().error(e.getMessage(), e);
+			Core.getLogger().error("Unable to retrieve arrival departures", e);
 			return null;
-		} catch (Exception e) {
-			Core.getLogger().error("Unable to retrieve ArrivalDepartures", e);
-			throw e;
 		} finally {
 			// Clean things up. Not sure if this absolutely needed nor if
 			// it might actually be detrimental and slow things down.
 			session.close();
 		}
+	}
+
+	private static String getRouteIdWhere(String routeId){
+		if(routeId !=null) {
+			String.format("AND ad.routeId = '%s' ", routeId);
+		}
+		return "";
+	}
+
+	private static String getTimePointsJoin(boolean timePointsOnly){
+		if(!timePointsOnly){
+			return "";
+		}
+		return ", StopPath sp ";
+	}
+
+	private static String getTimePointsWhere(boolean timePointsOnly){
+		if(!timePointsOnly){
+			return "";
+		}
+		return "AND ad.configRev = sp.configRev AND ad.stopId = sp.stopId AND sp.scheduleAdherenceStop = true";
+	}
+
+	private static String getServiceTypeJoin(ServiceType serviceType){
+		if(serviceType == null){
+			return "";
+		}
+		return ", Calendar c ";
+	}
+
+	private static String getServiceTypeWhere(ServiceType serviceType){
+		if(serviceType != null) {
+			String query = "AND ad.serviceId = c.serviceId AND ad.configRev = c.configRev ";
+			if (serviceType.equals(ServiceType.WEEKDAY)) {
+				query += "AND (c.monday = true OR c.tuesday = true OR c.wednesday = true OR c.thursday = true OR c.friday = true)";
+			} else if (serviceType.equals(ServiceType.SATURDAY)) {
+				query += "AND c.saturday = true ";
+			} else if (serviceType.equals(ServiceType.SUNDAY)) {
+				query += "AND c.sunday = true ";
+			}
+			return query;
+		}
+		return "";
 	}
 	
 	public String getVehicleId() {

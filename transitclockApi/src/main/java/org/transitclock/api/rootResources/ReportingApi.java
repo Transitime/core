@@ -9,6 +9,7 @@ import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
 import org.transitclock.core.ServiceType;
 import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.ipc.data.IpcArrivalDepartureScheduleAdherence;
 import org.transitclock.ipc.interfaces.ScheduleAdherenceInterface;
 
 import javax.ws.rs.*;
@@ -46,13 +47,15 @@ public class ReportingApi {
             @Parameter(description="if set, retrives only arrivalDepartures belonging to the route name specified.",required=false)
             @QueryParam(value = "r") String route,
             @Parameter(description="Begin date to use for retrieving arrival departures",required=false)
-            @QueryParam(value = "minEarlySec")  @DefaultValue("90") int minEarlySec,
+            @QueryParam(value = "minEarlySec") @DefaultValue("90") int minEarlySec,
             @Parameter(description="Begin date to use for retrieving arrival departures",required=false)
-            @QueryParam(value = "minLateSec")  @DefaultValue("150") int minLateSec,
+            @QueryParam(value = "minLateSec") @DefaultValue("150") int minLateSec,
             @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
             @QueryParam(value = "serviceType") String serviceType,
+            @Parameter(description="if set, retrives only arrivalDepartures with stops that are timePoints",required=false)
+            @QueryParam(value = "timePointsOnly") @DefaultValue("false") boolean timePointsOnly,
             @Parameter(description="Specify chart data type where applicable.",required=false)
-            @QueryParam(value = "chartType")  @DefaultValue("pie") String chartType)
+            @QueryParam(value = "chartType") @DefaultValue("pie") String chartType)
             throws WebApplicationException {
 
         // Make sure request is valid
@@ -72,16 +75,14 @@ public class ReportingApi {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
-            List<IpcArrivalDeparture> arrivalDepartures = scheduleAdherenceInterface.getArrivalsDeparturesForRoute(
-                    beginDateTime, endDateTime, route, serviceTypeEnum, false);
-
-            OnTimePerformanceData otpd = new OnTimePerformanceData();
+            List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures = scheduleAdherenceInterface.getArrivalsDeparturesForRoute(
+                    beginDateTime, endDateTime, route, serviceTypeEnum, timePointsOnly, false);
 
             Object response = null;
 
             if(arrivalDepartures != null){
                 if(ChartType.valueOf(chartType.toUpperCase()).equals(ChartType.PIE)){
-                    response = otpd.getOnTimePerformanceForRoutesPieChart(arrivalDepartures, minEarlySec, minLateSec);
+                    response = OnTimePerformanceData.getOnTimePerformanceForRoutesPieChart(arrivalDepartures, minEarlySec, minLateSec);
                 }
             }
 
