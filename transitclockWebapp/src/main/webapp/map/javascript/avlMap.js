@@ -58,8 +58,10 @@ function drawAvlMarker(avl) {
 
 	// Links to schedule and google maps for vehicle
 	var links = $("<div />")
+
 	var mapsLink = 'http://google.com/maps?q=loc:' + avl.lat + ',' + avl.lon
-	links.append( $("<a style='padding-right:10px;vertical-align: middle'>Schedule</a>"))
+
+	links.append( $("<a data-toggle='modal' href='#schedule-modal' style='padding-right:10px;vertical-align: middle' class='schedule-link' onclick='scheduleAjax(" + avl['tripId'] + "); return false;'>Schedule</a>"))
 	links.append( $("<div style='border-left:2px solid black;height:20px;display:inline-block;vertical-align:middle'></div>"))
 	links.append( $("<a href=" + mapsLink + " target='_blank' style='padding-left:10px;vertical-align:middle'>View Location in Google Maps</a>"))
 
@@ -339,7 +341,7 @@ function drawRoute(route) {
 var busIcon =  L.icon({
     iconUrl:  contextPath + "/reports/images/bus.png", 
     iconSize: [25,25]
-}).bindPopup("Test");
+});
 var animate = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
 
 var playButton = contextPath + "/reports/images/playback/media-playback-start.svg",
@@ -360,12 +362,8 @@ function prepareAnimation(avlData) {
 
 }
 
-$("#playbackNext").on("click", animate.next);
+function playAnimation() {
 
-$("#playbackPrev").on("click", animate.prev);
-
-$("#playbackPlay").on("click", function() {
-	
 	if (!animate.paused()) {
 		animate.pause();
 		$("#playbackPlay").attr("src", playButton);
@@ -374,7 +372,15 @@ $("#playbackPlay").on("click", function() {
 		animate.start();
 		$("#playbackPlay").attr("src", pauseButton);
 	}
-	
+
+}
+
+$("#playbackNext").on("click", animate.next);
+
+$("#playbackPrev").on("click", animate.prev);
+
+$("#playbackPlay, #popupPlayback").on("click", function() {
+	playAnimation();
 });
 
 $("#playbackFF").on("click", function() {
@@ -389,13 +395,131 @@ $("#playbackRew").on("click", function() {
 	$("#playbackRate").text(rate + "X");
 });
 
-function vehiclePopup(data) {
-	var table = $("<table />").attr("class", "popupTable");
-	var label = $("<td />").attr("class", "popupTableLabel").text("Vehicle ID: ");
-	var value = $("<td />").text(data["vehicleId"]);
-	table.append( $("<tr />").append(label, value) );
+function scheduleAjax(tripId) {
+	// var form = document.createElement("form");
+	// var agency = document.createElement("input");
+	// var route = document.createElement("input");
+	// var trip = document.createElement("input");
+	//
+	// form.action= "scheduleVertStopsReport.jsp";
+	// form.method = "POST";
+	// agency.name = "a";
+	// agency.value = "1";
+	// route.name= "r";
+	// route.value = routeName;
+	// trip.name = "t";
+	// trip.value = tripId;
+	//
+	// form.appendChild(agency);
+	// form.appendChild(route);
+	// form.appendChild(trip);
+	// document.body.appendChild(form);
+	//
+	// form.submit();
 
-	return table;
+	if ($("#schedule-modal").length == 0) {
+		var containerHeight = $(".leaflet-popup-content").height();
+		var scheduleModal =
+			$("<div class='modal' id='schedule-modal' style='display: none;z-index: -1;width: 200%;height: " + containerHeight + "px;overflow: auto;background-color: rgb(255,255,255);'>"
+				+ "<div class='modal-content' style='z-index: -1;'>"
+					+ "<div class='modal-header'>"
+						+ "<button type='button' class='close-modal' style='float:right;'>&times;</button>"
+					+ "</div>"
+					+ "<div class='modal-body'>"
+					+ "</div>"
+					+ "<div class='modal-footer' style='text-align: center;'>"
+						+ "<button type='button' class='btn btn-default close-modal' style='margin: 10px auto;'>Close</button>"
+					+ "</div>"
+				+ "</div>"
+			+ "</div>");
+
+		$(".leaflet-popup-content-wrapper").append(scheduleModal);
+	}
+
+	$.ajax({
+			// The page being requested
+			url: apiUrlPrefix + "/command/scheduleTripVertStops",
+			// Pass in query string parameters to page being requested
+			data: {t: tripId, a: 1},
+			// Needed so that parameters passed properly to page being requested
+			traditional: true,
+			dataType:"json",
+			success: dataReadCallback
+	})
+}
+
+function dataReadCallback(jsonData) {
+	// Set the title now that have the trip name from the API
+	if ($('.modal-title').length > 0) {
+		$('.modal-title').html("<h4 class='modal-title'>Schedule for trip " + jsonData.schedule[0].trip[0].tripShortName + "</h4>");
+	} else {
+		($('.modal-header').append("<h4 class='modal-title'>Schedule for trip " + jsonData.schedule[0].trip[0].tripShortName + "</h4>"));
+	}
+
+	// Only one schedule
+	var schedule = jsonData.schedule[0];
+
+	// Create title for schedule
+	$('.modal-body').html("<div id='scheduleTitle'>"
+		+ "Direction: " + schedule.directionId
+		+ ", Service: " + schedule.serviceName
+		+ "</div>");
+
+	if ($('#dataTable').length > 0) {
+		var table = $('.modal-body')[0].innerHTML($("<table id='dataTable'></table>"));
+	} else {
+		var table = $("<table id='dataTable'></table>").appendTo('.modal-body')[0];
+	}
+
+	// Create the columns. First column is stop name. And then there
+	// is one column per trip.
+	var headerRow = table.insertRow(0);
+	headerRow.insertCell(0).id = 'headerCell';
+
+	var trip = schedule.trip[0];
+	var tripName = trip.tripShortName;
+	if (tripName == null)
+		tripName = trip.tripId;
+	var tripNameTooLong = tripName.length > 6;
+	var html = tripNameTooLong ?
+		"Block<br/>" + trip.blockId : "Trip<br/>" + tripName;
+
+	var headerCell = headerRow.insertCell(1);
+	headerCell.id = 'headerCell';
+	headerCell.innerHTML = html;
+
+	// Add data for each row for the schedule. This is a bit complicated
+	// because the API provides data per trip but want each row in the
+	// schedule to be for a particular stop for all trips.
+	for (var stopIdx=0; stopIdx<schedule.timesForStop.length; ++stopIdx) {
+		var row = table.insertRow(stopIdx+1);
+
+		var timesForStop = schedule.timesForStop[stopIdx];
+
+		// Add stop name to row
+		var headerCell = row.insertCell(0);
+		headerCell.id = 'stopCell';
+		headerCell.innerHTML = timesForStop.stopName;
+
+		// Add the times for the stop to the row
+		for (var tripIdx=0; tripIdx<timesForStop.time.length; ++tripIdx) {
+			var time = timesForStop.time[tripIdx];
+			row.insertCell(tripIdx+1).innerHTML = time.timeStr ? time.timeStr : '';
+		}
+	}
+
+	$("#schedule-modal")[0].style.display = "block";
+
+	$(".close-modal").click(function() {
+		$("#schedule-modal")[0].style.display = "none";
+	})
+
+	$("#schedule-modal").hover(function() {
+			map.scrollWheelZoom.disable();
+		}, function() {
+			map.scrollWheelZoom.enable();
+		}
+	)
 }
 
 
