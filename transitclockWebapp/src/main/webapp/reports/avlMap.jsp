@@ -54,6 +54,25 @@
 	  	<div><span id="playbackTime">00:00:00</span></div>
 	  </div>
   </div>
+  <div id="legend">
+      <p style="margin-block-start: 0em; margin-block-end: 0.5em; font-weight: bold;">AVL Marker Legend</p>
+      <div>
+          <div class="avlTriangleOntime" style="display: inline-block;"></div>
+          <text style="display: inline-block;">= On Time</text>
+      </div>
+      <div>
+          <div class="avlTriangleLate" style="display: inline-block;"></div>
+          <text style="display: inline-block;">= Late</text>
+      </div>
+      <div>
+          <div class="avlTriangleEarly" style="display: inline-block;"></div>
+          <text style="display: inline-block;">= Early</text>
+      </div>
+      <div>
+          <div class="avlTriangle" style="display: inline-block;"></div>
+          <text style="display: inline-block;">= No Data</text>
+      </div>
+  </div>
 </body>
 
 <script>

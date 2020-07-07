@@ -25,13 +25,25 @@ var stopPopupOptions = {closeButton: false};
 
 function drawAvlMarker(avl) {
 	var latLng = L.latLng(avl.lat, avl.lon);
-	  
-	// Create the marker. Use a divIcon so that can have tooltips
+
+	// Set avl keys and values
+	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID", "Route", "Headsign", "Schedule Adherence", "OTP", "Headway Adherence"],
+		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId", "routeShortName", "headsign", "schedAdh", "otp", "headway"];
+
+	// populate missing keys
+	avl.latlon = avl.lat + ", " + avl.lon
+	avl.niceSpeed =  Math.round(parseFloat(avl.speed) * 10)/10 + " kph";
+
+	if (typeof avl['otp'] == 'undefined') {
+		avl['otp'] = '';
+	}
+
+	// Create the marker. Use a divIcon so that can have tooltips. Set color according to OTP
   	var tooltip = avl.time.substring(avl.time.indexOf(' ') + 1);  
   	var avlMarker = L.rotatedMarker(avl, {
           icon: L.divIcon({
         	  className: 'avlMarker_',
-        	  html: "<div class='avlTriangle' />",
+        	  html: "<div class='avlTriangle" + avl['otp'] + "' />",
         	  iconSize: [7,7]
           }),
           angle: avl.heading,
@@ -39,14 +51,7 @@ function drawAvlMarker(avl) {
       }).addTo(vehicleGroup); 
 	
   	// Create popup with detailed info
-	
-	var labels = ["Vehicle", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID", "Route", "Headsign", "Schedule Adherence", "OTP", "Headway Adherence"],
-		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId", "routeShortName", "headsign", "schedAdh", "otp", "headway"];
-	
-	// populate missing keys
-	avl.latlon = avl.lat + ", " + avl.lon
-	avl.niceSpeed =  Math.round(parseFloat(avl.speed) * 10)/10 + " kph";
-	
+
 	var content = $("<div />");
 	var table = $("<table />").attr("class", "popupTable");
 	
