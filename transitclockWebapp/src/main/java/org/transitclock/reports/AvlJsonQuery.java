@@ -50,8 +50,6 @@ public class AvlJsonQuery {
 	 *            get data for all vehicles
 	 * @param beginDate
 	 *            date to start query
-	 * @param numdays
-	 *            of days to collect data for
 	 * @param beginTime
 	 *            optional time of day during the date range
 	 * @param endTime
@@ -64,12 +62,12 @@ public class AvlJsonQuery {
 	 *         meets criteria.
 	 */
 	public static String getAvlJson(String agencyId, String vehicleId,
-			String beginDate, String numdays, String beginTime, String endTime, String routeId, String includeHeadway,
+			String beginDate, String beginTime, String endTime, String routeId, String includeHeadway,
 			String earlyMsec, String lateMsec) {
 
 		String timeSql = getTimeSql(beginTime, endTime);
 		String headwayColSql = getHeadwayColSql(includeHeadway);
-		String headwayJoinSql = getHeadwayJoinSql(includeHeadway, beginDate, numdays);
+		String headwayJoinSql = getHeadwayJoinSql(includeHeadway, beginDate);
 		String onTimePerformanceSql = getOnTimePerformanceSql(earlyMsec, lateMsec);
 
 		//need to limit the vehicle state table by time as well to utilize index on avlTime column
@@ -82,7 +80,7 @@ public class AvlJsonQuery {
 				+ "JOIN "
 				+ "(SELECT vehicleId, tripId, routeShortName, avlTime, schedAdh, schedAdhMsec FROM VehicleStates "
 				+ "WHERE avlTime BETWEEN '" + beginDate + "' "
-				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
+				+ "AND TIMESTAMPADD(DAY,1,'" + beginDate + "') "
 				+ ") v "
 				+ "ON v.vehicleId=a.vehicleId and v.avlTime=a.time "
 				+ headwayJoinSql
@@ -90,7 +88,7 @@ public class AvlJsonQuery {
 				+ "(SELECT tripId, headsign FROM Trips) t "
 				+ "ON t.tripId=v.tripId "
 				+ "WHERE a.time BETWEEN '" + beginDate + "' "
-				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
+				+ "AND TIMESTAMPADD(DAY,1,'" + beginDate + "') "
 				+ timeSql;
 
 		// If only want data for single vehicle then specify so in SQL
@@ -142,13 +140,13 @@ public class AvlJsonQuery {
 		return headwayColSql;
 	}
 
-	private static String getHeadwayJoinSql(String includeHeadway, String beginDate, String numdays){
+	private static String getHeadwayJoinSql(String includeHeadway, String beginDate){
 		String headwayJoinSql = "";
 		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
 			headwayJoinSql = "LEFT JOIN "
 					+ "(SELECT vehicleId, creationTime, FLOOR(headway / 60000) as headway FROM Headway "
 					+ "WHERE creationTime BETWEEN '" + beginDate + "' "
-					+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
+					+ "AND TIMESTAMPADD(DAY,1,'" + beginDate + "') "
 					+ "AND headway < " + MAX_HEADWAY
 					+ ") h "
 					+ "ON h.vehicleId=a.vehicleId and h.creationTime=a.time ";
@@ -206,8 +204,6 @@ public class AvlJsonQuery {
 	 *            for all routes. If null then will get data by vehicle.
 	 * @param beginDate
 	 *            date to start query
-	 * @param numdays
-	 *            of days to collect data for
 	 * @param beginTime
 	 *            optional time of day during the date range
 	 * @param endTime
@@ -216,7 +212,7 @@ public class AvlJsonQuery {
 	 *         meets criteria.
 	 */
 	public static String getAvlWithMatchesJson(String agencyId,
-			String vehicleId, String routeId, String beginDate, String numdays,
+			String vehicleId, String routeId, String beginDate,
 			String beginTime, String endTime) {
 		//Determine the time portion of the SQL
 		String timeSql = "";
@@ -244,7 +240,7 @@ public class AvlJsonQuery {
 				+ "  LEFT JOIN vehicleStates vs "
 				+ "    ON vs.vehicleId = a.vehicleId AND vs.avlTime = a.time "
 				+ "WHERE a.time BETWEEN '" + beginDate + "' "
-				+ "     AND TIMESTAMP '" + beginDate + "' + INTERVAL '" + numdays + " day' "
+				+ "     AND TIMESTAMP '" + beginDate + "' + INTERVAL '1 day' "
 				+ timeSql;
 
 		// If only want data for single route then specify so in SQL.

@@ -7,7 +7,6 @@ String agencyId = request.getParameter("a");
 String vehicleId = request.getParameter("v");
 String routeId = request.getParameter("r");
 String beginDate = request.getParameter("beginDate");
-String numDays = request.getParameter("numDays");
 String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 String includeHeadway = request.getParameter("includeHeadway");
@@ -17,7 +16,7 @@ String lateMsec = request.getParameter("late");
 
 
 // Query db and get JSON string
-String jsonString = AvlJsonQuery.getAvlJson(agencyId, vehicleId, beginDate, numDays, beginTime, endTime, routeId, includeHeadway,earlyMsec,lateMsec);
+String jsonString = AvlJsonQuery.getAvlJson(agencyId, vehicleId, beginDate, beginTime, endTime, routeId, includeHeadway,earlyMsec,lateMsec);
 
 // Respond with the JSON string
 response.setContentType("application/json");

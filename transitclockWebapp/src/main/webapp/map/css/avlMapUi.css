@@ -21,7 +21,7 @@ div.avlTriangle {
   border-right: 5px solid transparent
 }
 
-div.avlTriangleOntime {
+div.avlTriangleon-time {
     width: 0px;
     height: 0px;
     border-bottom: 10px solid #ff7800;
@@ -29,7 +29,7 @@ div.avlTriangleOntime {
     border-right: 5px solid transparent
 }
 
-div.avlTriangleLate {
+div.avlTrianglelate {
   width: 0px;
   height: 0px;
   border-bottom: 10px solid #ff2000;
@@ -37,7 +37,7 @@ div.avlTriangleLate {
   border-right: 5px solid transparent
 }
 
-div.avlTriangleEarly {
+div.avlTriangleearly {
   width: 0px;
   height: 0px;
   border-bottom: 10px solid #fffe00;
