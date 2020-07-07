@@ -18,6 +18,9 @@ package org.transitclock.reports;
 
 import java.text.ParseException;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.transitclock.utils.Time;
 
 /**
@@ -27,9 +30,15 @@ import org.transitclock.utils.Time;
  *
  */
 public class AvlJsonQuery {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(AvlJsonQuery.class);
+
 	// Maximum number of rows that can be retrieved by a query
 	private static final int MAX_ROWS = 50000;
 	private static final long MAX_HEADWAY = Time.MS_PER_HOUR * 3;
+	private static final long DEFAULT_EARLY = 90000l;
+	private static final long DEFAULT_LATE = -150000l;
 	
 	/**
 	 * Queries agency for AVL data and returns result as a JSON string. Limited
@@ -55,42 +64,23 @@ public class AvlJsonQuery {
 	 *         meets criteria.
 	 */
 	public static String getAvlJson(String agencyId, String vehicleId,
-			String beginDate, String numdays, String beginTime, String endTime, String routeId, String includeHeadway) {
-		//Determine the time portion of the SQL
-		String timeSql = "";
-		String headwayColSql = "";
-		String headwayJoinSql = "";
-		// If beginTime or endTime set but not both then use default values
-		if ((beginTime != null && !beginTime.isEmpty())
-				|| (endTime != null && !endTime.isEmpty())) {
-			if (beginTime == null || beginTime.isEmpty())
-				beginTime = "00:00";
-			if (endTime == null || endTime.isEmpty())
-				endTime = "24:00";
-		}
-		if (beginTime != null && !beginTime.isEmpty() 
-				&& endTime != null && !endTime.isEmpty()) {
-			timeSql = " AND time(time) BETWEEN '" 
-				+ beginTime + "' AND '" + endTime + "' ";
-		}
-		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
-			headwayColSql = ", h.headway ";
-			headwayJoinSql = "LEFT JOIN "
-					+ "(SELECT vehicleId, creationTime, FLOOR(headway / 60000) as headway FROM Headway "
-					+ "WHERE creationTime BETWEEN '" + beginDate + "' "
-					+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
-					+ "AND headway < " + MAX_HEADWAY
-					+ ") h "
-					+ "ON h.vehicleId=a.vehicleId and h.creationTime=a.time ";
+			String beginDate, String numdays, String beginTime, String endTime, String routeId, String includeHeadway,
+			String earlyMsec, String lateMsec) {
 
-		}
-//need to limit the vehicle state table by time as well to utilize index on avlTime column
+		String timeSql = getTimeSql(beginTime, endTime);
+		String headwayColSql = getHeadwayColSql(includeHeadway);
+		String headwayJoinSql = getHeadwayJoinSql(includeHeadway, beginDate, numdays);
+		String onTimePerformanceSql = getOnTimePerformanceSql(earlyMsec, lateMsec);
+
+		//need to limit the vehicle state table by time as well to utilize index on avlTime column
 		String sql = "SELECT a.vehicleId, a.time, a.assignmentId, a.lat, a.lon, a.speed, "
-				+ "a.heading, a.timeProcessed, a.source, v.routeShortName, t.headsign, v.schedAdh, t.tripId "
+				+ "a.heading, a.timeProcessed, a.source, v.routeShortName, t.headsign, t.tripId "
+				+ ",round(v.schedAdhMsec / (1000 * 60), 1) mod 60 as schedAdh "
 				+ headwayColSql
+				+ onTimePerformanceSql
 				+ "FROM AvlReports a "
 				+ "JOIN "
-				+ "(SELECT vehicleId, tripId, routeShortName, avlTime, schedAdh FROM VehicleStates "
+				+ "(SELECT vehicleId, tripId, routeShortName, avlTime, schedAdh, schedAdhMsec FROM VehicleStates "
 				+ "WHERE avlTime BETWEEN '" + beginDate + "' "
 				+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
 				+ ") v "
@@ -120,6 +110,83 @@ public class AvlJsonQuery {
 		String json = GenericJsonQuery.getJsonString(agencyId, sql);
 
 		return json;
+
+	}
+
+	/**
+	 * Determine the time portion of the SQL
+	 */
+	private static String getTimeSql(String beginTime, String endTime){
+		String timeSql = "";
+		// If beginTime or endTime set but not both then use default values
+		if ((beginTime != null && !beginTime.isEmpty())
+				|| (endTime != null && !endTime.isEmpty())) {
+			if (beginTime == null || beginTime.isEmpty())
+				beginTime = "00:00";
+			if (endTime == null || endTime.isEmpty())
+				endTime = "24:00";
+		}
+		if (beginTime != null && !beginTime.isEmpty()
+				&& endTime != null && !endTime.isEmpty()) {
+			timeSql = " AND time(time) BETWEEN '"
+					+ beginTime + "' AND '" + endTime + "' ";
+		}
+		return timeSql;
+	}
+
+	private static String getHeadwayColSql(String includeHeadway){
+		String headwayColSql = "";
+		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")) {
+			headwayColSql = ", h.headway ";
+		}
+		return headwayColSql;
+	}
+
+	private static String getHeadwayJoinSql(String includeHeadway, String beginDate, String numdays){
+		String headwayJoinSql = "";
+		if	(includeHeadway != null && includeHeadway.equalsIgnoreCase("true")){
+			headwayJoinSql = "LEFT JOIN "
+					+ "(SELECT vehicleId, creationTime, FLOOR(headway / 60000) as headway FROM Headway "
+					+ "WHERE creationTime BETWEEN '" + beginDate + "' "
+					+ "AND TIMESTAMPADD(DAY," + numdays + ",'" + beginDate + "') "
+					+ "AND headway < " + MAX_HEADWAY
+					+ ") h "
+					+ "ON h.vehicleId=a.vehicleId and h.creationTime=a.time ";
+
+		}
+		return headwayJoinSql;
+	}
+
+	private static String getOnTimePerformanceSql(String early, String late){
+		Long earlyMsec = DEFAULT_EARLY;
+		Long lateMsec = DEFAULT_LATE;
+
+		if(StringUtils.isNotBlank(early)) {
+			try{
+				earlyMsec = Math.abs(Long.valueOf(early));
+			} catch(NumberFormatException nfe){
+				logger.warn("Unable to convert early value parameter {}",early, nfe);
+			}
+		}
+
+		if(StringUtils.isNotBlank(late)) {
+			try{
+				lateMsec = Long.valueOf(late);
+				if(lateMsec > 0){
+					lateMsec *= -1;
+				}
+			} catch(NumberFormatException nfe){
+				logger.warn("Unable to convert late value parameter {}",late, nfe);
+			}
+		}
+
+		String otpSql = ", CASE " +
+						"WHEN v.schedAdhMsec >= %s THEN 'early' " +
+						"WHEN v.schedAdhMsec <= %s THEN 'late' " +
+						"ELSE 'on-time'" +
+						"END AS otp ";
+
+		return String.format(otpSql, earlyMsec, lateMsec);
 
 	}
 
@@ -161,9 +228,9 @@ public class AvlJsonQuery {
 			if (endTime == null || endTime.isEmpty())
 				endTime = "24:00";
 		}
-		if (beginTime != null && !beginTime.isEmpty() 
+		if (beginTime != null && !beginTime.isEmpty()
 				&& endTime != null && !endTime.isEmpty()) {
-			timeSql = " AND time::time BETWEEN '" 
+			timeSql = " AND time::time BETWEEN '"
 				+ beginTime + "' AND '" + endTime + "' ";
 		}
 
