@@ -273,9 +273,10 @@ $("#submit").on("click", function() {
     /* Set request object to match new values */
     request.v = $("#vehicle").val();
     request.beginDate = $("#beginDate").val();
-    request.numDays = $("#numDays").val();
     request.beginTime = $("#beginTime").val();
     request.endTime = $("#endTime").val();
+    request.early = $("#early").val() * 60000;
+    request.late = $("#late").val() * -60000;
     request.r = $("#route").val();
 
     var askConfirm = allVehiclesRequested() && (request.r == "All Routes" || request.r ==" ");

@@ -37,6 +37,14 @@
   	<table id="paramsTable"></table>
   	<jsp:include page="params/vehicle.jsp" />
   	<jsp:include page="params/fromDateNumDaysTime.jsp" />
+    <div class="param">
+        <label for="late">Allowable late (mins):</label>
+        <input type="number" id="late" name="late" min="0" max="1440" step="0.5" value="2.5">
+    </div>
+    <div class="param">
+        <label for="early">Allowable early (mins):</label>
+        <input type="number" id="early" name="early" min="0" max="1440" step="0.5" value="1.5">
+    </div>
     <jsp:include page="params/routeAllOrSingle.jsp" /> <br>
     <input type="button" id="submit" value="Submit">
     <a href="#" id="exportData">Export</a>
