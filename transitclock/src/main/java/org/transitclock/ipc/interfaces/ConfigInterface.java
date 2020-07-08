@@ -71,7 +71,7 @@ public interface ConfigInterface extends Remote {
 	
 	/**
 	 * Obtains ordered list of route details
-	 * @param routeIdOrShortName
+	 * @param routeIdsOrShortNames
 	 * @return
 	 * @throws RemoteException
 	 */
