@@ -168,6 +168,12 @@
             <input type="button" id="submit" value="Submit" style="margin-top: 10px; margin-bottom: 10px;">
 
         </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+        <div id="reportResults" style="width: 79%; display: inline-block;">
+            <canvas id="chartCanvas"></canvas>
+        </div>
     </body>
 </html>
 
@@ -176,4 +182,63 @@
     $("#route").attr("style", "width: 200px");
     $("#beginTime").attr("size", "5");
     $("#endTime").attr("size", "5");
+
+    var canvas = $("#chartCanvas");
+    var pieChart = new Chart(canvas, {
+        type: 'pie',
+        data: {
+            datasets: [{
+                data: [],
+                backgroundColor: ['#fffe00', '#ff2000', '#ff7800']
+            }],
+            labels: ['Early', 'Late', 'On time']
+        },
+        options: {}
+    });
+
+    $("#submit").click(function() {
+        $("#submit").attr("disabled","disabled");
+
+        if ($("#beginDate").val() == "Date range") {
+            var today = new Date();
+            var beginDate = endDate = today.getFullYear() + "-"
+                + (today.getMonth() <= 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))
+                + "-" + (today.getDate() < 10 ? "0" + today.getDate() : today.getDate());
+        }
+        else {
+            var dateRangeStrings = $("#beginDate").val().replace(/\s/g, "").split("-");
+            var beginYear = "20" + dateRangeStrings[0];
+            var endYear = "20" + dateRangeStrings[3];
+            var beginDate = [beginYear,  dateRangeStrings[1],  dateRangeStrings[2]].join("-");
+            var endDate = [endYear, dateRangeStrings[4], dateRangeStrings[5]].join("-");
+        }
+
+        var beginTime = $("#beginTime").val() == "" ? "00:00:00" : $("#beginTime").val() + ":00";
+        var endTime = $("#endTime").val() == "" ? "23:59:59" : $("#endTime").val() + ":00";
+
+        request = {};
+        request.beginDate = beginDate + "T" + beginTime;
+        request.endDate = endDate + "T" + endTime;
+        request.r = $("#route").val();
+        request.minEarlySec = $("#early").val() * 60;
+        request.minLateSec = $("#late").val() * 60;
+        request.serviceType = $("#serviceDayType").val();
+        request.timePointsOnly = $("#timePointsOnly")[0].checked;
+
+        $.ajax({
+            url: apiUrlPrefix + "/report/chartjs/onTimePerformanceByRoute",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType:"json",
+            success: drawChart
+        })
+    })
+
+    function drawChart(response) {
+        $("#submit").removeAttr("disabled");
+        pieChart.data.datasets[0].data = response.data.datasets[0].data;
+        pieChart.update();
+    }
 </script>
