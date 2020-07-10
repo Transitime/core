@@ -170,13 +170,14 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public IpcArrivalDeparture findPreviousArrivalEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
 	{
-		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
-		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
-		{
-			if(tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival()))
-			{
-				return tocheck;
-			}			
+		if (arrivalDepartures == null) return null;
+		synchronized (cache) {
+			Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
+			for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
+				if (tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival())) {
+					return tocheck;
+				}
+			}
 		}
 		return null;
 	}
@@ -185,20 +186,21 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override
 	public IpcArrivalDeparture findPreviousDepartureEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
-	{	
-		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());							
-		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
-		{
-			try {
-				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
-				{
-					return tocheck;
+	{
+		if (arrivalDepartures == null) return null;
+		synchronized (cache) {
+			Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
+			for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
+				try {
+					if (tocheck.getStopPathIndex() == (current.getStopPathIndex() - 1) && (current.isArrival() && tocheck.isDeparture())) {
+						return tocheck;
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
-		}		
+			}
+		}
 		return null;		
 	}
 	
