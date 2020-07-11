@@ -40,6 +40,8 @@ import org.transitclock.ipc.interfaces.PredictionsInterface.RouteStop;
 import org.transitclock.utils.MapKey;
 import org.transitclock.utils.Time;
 
+import static org.transitclock.core.PredictionGeneratorDefaultImpl.isHistoricalPredictionForFutureStop;
+
 /**
  * For storing and retrieving predictions by stop.
  * <p>
@@ -198,7 +200,7 @@ public class PredictionDataCache {
 		// schedule based predictions then generating predictions far into the 		
 		// future.
 		long maxPredictionEpochTime =
-				Core.getInstance().getSystemTime()
+						getSystemTime()
 						+ PredictionGeneratorDefaultImpl
 								.getMaxPredictionsTimeSecs()
 						* Time.SEC_IN_MSECS;
@@ -458,6 +460,9 @@ public class PredictionDataCache {
 				predictionsMap.values();		
 		for (List<IpcPredictionsForRouteStopDest> predictionsForRouteStop : predictionsByRouteStop) {
 			for (IpcPredictionsForRouteStopDest predictionForRouteStopDest : predictionsForRouteStop) {
+				// with the historical prediction / future stop checks we need to clean up the
+				// cache more often
+				predictionForRouteStopDest.removeExpiredPredictions(getSystemTime());
 				IpcPredictionsForRouteStopDest clonedPrediction = 
 						predictionForRouteStopDest.getClone(
 								maxPredictionsPerStop, maxSystemTimeForPrediction);
@@ -530,13 +535,17 @@ public class PredictionDataCache {
 						oldPrediction.getStopId(), 
 						oldPrediction.getTrip().getHeadsign());
 				if (newPredsForVehicleByRouteStopDestMap.get(key) == null) {
-					// Remove the old prediction					
-					removePrediction(oldPrediction);
+					long currentTime = getSystemTime();
+					// here we hang onto old prediction if its scheduled arrival is in the future
+					if (!isHistoricalPredictionForFutureStop(oldPrediction, currentTime)) {
+						// Remove the old prediction
+						removePrediction(oldPrediction);
+					}
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * To be called when vehicle is being made unpredictable. Removes the 
 	 * predictions.
@@ -544,10 +553,10 @@ public class PredictionDataCache {
 	 * @param vehicleState
 	 */
 	public void removePredictions(VehicleState vehicleState) {
-		logger.info("Removing predictions for vehicleId={}", 
+		logger.info("Removing predictions for vehicleId={}",
 				vehicleState.getVehicleId());
 		List<IpcPrediction> oldPredictions = vehicleState.getPredictions();
-		
+
 		updatePredictions(oldPredictions, null);
 	}
 

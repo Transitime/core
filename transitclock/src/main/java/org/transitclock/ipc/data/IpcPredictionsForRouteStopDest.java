@@ -26,14 +26,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.transitclock.applications.Core;
-import org.transitclock.core.VehicleState;
-import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.db.structs.Route;
 import org.transitclock.db.structs.Stop;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.db.structs.TripPattern;
 import org.transitclock.utils.Geo;
+
 import org.transitclock.utils.TrimmableArrayList;
+
+import static org.transitclock.core.PredictionGeneratorDefaultImpl.isHistoricalPredictionForFutureStop;
 
 /**
  * Contains list of predictions for a route/stop/destination. 
@@ -471,36 +472,19 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		while (iterator.hasNext()) {
 			IpcPrediction currentPrediction = iterator.next();
 
-			// Remove predictions that are expired. It makes sense to do this 
+
+			// Remove predictions that are expired. It makes sense to do this
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
-			VehicleStateManager vehicleStateManager = VehicleStateManager.getInstance();
 			if (currentPrediction.getPredictionTime() < currentTime) {
-				// TODO This is a change for VIA. This needs to be in HoldingTimeGenerator. 
-				VehicleState vehicleState = vehicleStateManager.getVehicleState(currentPrediction.getVehicleId());
-				if(vehicleState!=null)
-				{
-					
-					if((currentPrediction.getStopId().equals("20097") || currentPrediction.getStopId().equals("93296")) && vehicleState.getHoldingTime() == null )
-					{
-						// do nothing
-					}
-					else
-					{
-						iterator.remove();
-					}
+				// per the spec, we need to serve predictions until the scheduled time has past
+				if (!isHistoricalPredictionForFutureStop(currentPrediction, currentTime)) {
+					iterator.remove();
 				}
-								
-			} else {
-				// The subsequent predictions are later so if this one is
-				// into the future then the remaining ones are too. 
-				// Therefore done.
-				return;
 			}
 		}
-		
 	}
-	
+
 	/**
 	 * Updates the predictions for this object with the new predictions for a
 	 * vehicle.
@@ -532,16 +516,19 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 
 			// Remove existing predictions for this vehicle
 			if (currentPrediction.getVehicleId().equals(vehicleId)) {
-				iterator.remove();
-				continue;
+				// hold on to past prediction for future stop
+				if (!isHistoricalPredictionForFutureStop(currentPrediction, currentTime)) {
+					iterator.remove();
+					continue;
+				}
 			}
 			
 			// Remove predictions that are expired. It makes sense to do this 
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
 			if (currentPrediction.getPredictionTime() < currentTime) {
-				iterator.remove();
-				continue;
+					iterator.remove();
+					continue;
 			}
 		}
 
@@ -656,4 +643,5 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	public int getRouteOrder() {
 		return routeOrder;
 	}
+
 }

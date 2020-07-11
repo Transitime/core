@@ -129,7 +129,13 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 			new BooleanConfigValue("useHoldingTimeInPrediction",
 					false,
 					"Add holding time to prediction.");
-	
+
+	private static IntegerConfigValue maxAgeOfHistoricalPredictions =
+			new IntegerConfigValue("transitclock.core.maxAgeOfHistoricalPredictions",
+					6,
+					"When holding on to historical predictions for future stops, how long " +
+							"to keep message before expiring. Value in minutes.");
+
 	private static final Logger logger = 
 			LoggerFactory.getLogger(PredictionGeneratorDefaultImpl.class);
 
@@ -404,7 +410,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		Integer tripCounter = new Integer(vehicleState.getTripCounter());
 
 		Map<Integer, IpcPrediction> filteredPredictions = new HashMap<Integer, IpcPrediction>();
-		
+
 
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
@@ -633,5 +639,73 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 	@Override
 	public boolean hasDataForPath(Indices indices, AvlReport avlReport) {
 		return true;
+	}
+
+	/**
+	 * for the prediction calculate the scheduled arrival and return that
+	 * as millseconds since epoch
+	 * @param prediction
+	 * @return
+	 */
+	public static Long getScheduledArrivalTime(IpcPrediction prediction) {
+		long tripStartTime = prediction.getTripStartEpochTime();
+		long serviceDay = Time.getStartOfDay(new Date(tripStartTime));
+
+		int index = prediction.getGtfsStopSeq();
+		if (index < prediction.getTrip().getScheduleTimes().size()) {
+			long epochInMillis = serviceDay
+					+ prediction.getTrip().getScheduleTimes().get(index).getTime()
+					* Time.MS_PER_SEC;
+			return epochInMillis;
+		}
+		return null; // we may be unscheduled or at end of trip
+	}
+
+	/**
+	 * Test if vehicle is running early (negative schedule deviation)
+	 * such that it has already served a stop that is scheduled in the future.
+	 * GTFS-RT spec wants these prediction although per the codebase they are
+	 * considered historical
+	 * @param currentPrediction prediction to consider
+	 * @param currentTime reference time for comparison
+	 * @return true if prediction is in past and stop is scheduled in future
+	 */
+	public static boolean isHistoricalPredictionForFutureStop(IpcPrediction currentPrediction,
+															  long currentTime) {
+
+		// is prediction in past
+		if (currentPrediction.getPredictionTime() < currentTime) {
+			Long scheduledArrivalTime = getScheduledArrivalTime(currentPrediction);
+			// if we have a schedule associated with prediction
+			if (scheduledArrivalTime != null) {
+				long scheduleDeviation = currentPrediction.getPredictionTime() - scheduledArrivalTime;
+				long deltaArrivalFuture = scheduledArrivalTime - currentTime;
+				if (scheduleDeviation < 0 // bus running early
+						&& deltaArrivalFuture > 0 // stop in future
+						&& deltaArrivalFuture < 60 * Time.MS_PER_MIN) { // stop not too far in future
+					logger.debug("holding onto prediction for vehicle " + currentPrediction.getVehicleId()
+							+ " on trip " + currentPrediction.getTripId()
+							+ " with arrival " + new Date(scheduledArrivalTime)
+							+ " and age " + Time.elapsedTimeStr(currentTime - currentPrediction.getAvlTime())
+							+ " but prediction " + new Date(currentPrediction.getPredictionTime())
+							+ "(" + currentPrediction.getPredictionTime() + ")");
+
+					long age = currentTime - currentPrediction.getAvlTime();
+					// special case:  prune extremely old data relative to AVL age
+					if (age > maxAgeOfHistoricalPredictions.getValue() * Time.MS_PER_MIN // past config threshold
+							&& currentPrediction.getDelay() != null // trip has schedule deviation
+							&& age > currentPrediction.getDelay() * -Time.MS_PER_SEC) { // record is older than schedule deviation
+						logger.debug("expiring old prediction for vehicle "
+								+ currentPrediction.getVehicleId() + " that is "
+								+ Time.elapsedTimeStr(currentTime - currentPrediction.getAvlTime())
+								+ " old");
+						return false;
+					} else {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }
