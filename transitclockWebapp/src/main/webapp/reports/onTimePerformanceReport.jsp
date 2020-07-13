@@ -19,6 +19,11 @@
                 margin-right: 5px;
             }
 
+            label {
+                text-align: left;
+                width: auto;
+            }
+
             #paramsSidebar {
                 width: 20%;
                 margin-left: 10px;
@@ -96,7 +101,7 @@
                 <div class="param">
                     <label for="beginDate">Date:</label>
                     <input type="text" id="beginDate" name="beginDate"
-                           title="The first day of the range you want to examine data for.
+                           title="The range of dates that you want to examine data for.
                            <br><br> Begin date must be before the end date."
                            size="18"
                            value="Date range" />
@@ -109,7 +114,7 @@
                             want to see result just for rush hour, for example. Leave blank
                             if want data for entire day.
                             <br/><br/>Format: hh:mm, as in '07:00' for 7AM."
-                           size="3"
+                           size="5"
                            value="" /> <span class="note">(hh:mm)</span>
                 </div>
 
@@ -121,7 +126,7 @@
                             if want data for entire day.
                             <br/><br/>Format: hh:mm, as in '09:00' for 9AM.
                             Use '23:59' for midnight."
-                           size="3"
+                           size="5"
                            value="" /> <span class="note">(hh:mm)</span>
                 </div>
 
@@ -172,16 +177,13 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
         <div id="reportResults" style="width: 79%; display: inline-block;">
-            <canvas id="chartCanvas"></canvas>
+            <canvas id="chartCanvas" style="margin-top: 10px;"></canvas>
         </div>
     </body>
 </html>
 
 <script>
-    $("label").attr("style", "text-align: left; width: auto;")
     $("#route").attr("style", "width: 200px");
-    $("#beginTime").attr("size", "5");
-    $("#endTime").attr("size", "5");
 
     var canvas = $("#chartCanvas");
     var pieChart = new Chart(canvas, {
@@ -193,7 +195,11 @@
             }],
             labels: ['Early', 'Late', 'On time']
         },
-        options: {}
+        options: {
+            legend: {
+                position: 'bottom'
+            }
+        }
     });
 
     $("#submit").click(function() {
