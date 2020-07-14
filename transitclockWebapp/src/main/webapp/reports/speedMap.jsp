@@ -212,5 +212,7 @@
 
     function highSpeedSlider(value) {
         $("#highSpeedOutput").val(value + " mph max");
+
+        $("#highSpeed").attr("min", (parseFloat($("#midSpeed").val()) + 1));
     }
 </script>
