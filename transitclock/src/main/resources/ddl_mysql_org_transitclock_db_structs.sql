@@ -34,6 +34,7 @@
         blockId varchar(60),
         configRev integer,
         directionId varchar(60),
+        dwellTime bigint,
         freqStartTime datetime(3),
         routeId varchar(60),
         routeShortName varchar(60),
@@ -145,13 +146,13 @@
     );
 
     create table FeedInfo (
-        feedPublisherName varchar(60) not null,
-        feedPublisherUrl longtext not null,
+        feedPublisherName varchar(255) not null,
         configRev integer not null,
-        feedVersion varchar(120),
-        feedLanguage varchar(15) not null,
-        feedStartDate date,
         feedEndDate date,
+        feedLanguage varchar(15),
+        feedPublisherUrl longtext,
+        feedStartDate date,
+        feedVersion varchar(120),
         primary key (feedPublisherName, configRev)
     );
 
@@ -250,6 +251,28 @@
         tripId varchar(60),
         vehicleId varchar(60),
         primary key (id)
+    );
+
+    create table PredictionEvents (
+        vehicleId varchar(60) not null,
+        time datetime(3) not null,
+        eventType varchar(60) not null,
+        arrivalTime datetime(3),
+        arrivalstopid varchar(60),
+        avlTime datetime(3),
+        blockId varchar(60),
+        departureTime datetime(3),
+        departurestopid varchar(60),
+        description longtext,
+        lat double precision,
+        lon double precision,
+        referenceVehicleId varchar(60),
+        routeId varchar(60),
+        routeShortName varchar(60),
+        serviceId varchar(60),
+        stopId varchar(60),
+        tripId varchar(60),
+        primary key (vehicleId, time, eventType)
     );
 
     create table Predictions (
@@ -506,6 +529,8 @@
 
     create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 
+    create index PredictionEventsTimeIndex on PredictionEvents (time);
+
     create index PredictionTimeIndex on Predictions (creationTime);
 
     create index StopPathPredictionTimeIndex on StopPathPredictions (tripId, stopPathIndex);
@@ -518,6 +543,11 @@
     create index VehicleEventsTimeIndex on VehicleEvents (time);
 
     create index VehicleStateAvlTimeIndex on VehicleStates (avlTime);
+
+    alter table ArrivalsDepartures 
+        add constraint FK_m1eyesv8rr42fo6qpcrkcgjp3 
+        foreign key (stopId, configRev) 
+        references Stops (id, configRev);
 
     alter table Block_to_Trip_joinTable 
         add constraint FK_abaj8ke6oh4imbbgnaercsowo 

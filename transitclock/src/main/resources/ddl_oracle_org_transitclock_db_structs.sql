@@ -34,6 +34,7 @@
         blockId varchar2(60 char),
         configRev number(10,0),
         directionId varchar2(60 char),
+        dwellTime number(19,0),
         freqStartTime timestamp,
         routeId varchar2(60 char),
         routeShortName varchar2(60 char),
@@ -145,13 +146,13 @@
     );
 
     create table FeedInfo (
-        feedPublisherName varchar2(60 char) not null,
-        feedPublisherUrl varchar2(512 char) not null,
+        feedPublisherName varchar2(255 char) not null,
         configRev number(10,0) not null,
-        feedVersion varchar2(120 char),
-        feedLanguage varchar2(15 char) not null,
-        feedStartDate date,
         feedEndDate date,
+        feedLanguage varchar2(15 char),
+        feedPublisherUrl varchar2(512 char),
+        feedStartDate date,
+        feedVersion varchar2(120 char),
         primary key (feedPublisherName, configRev)
     );
 
@@ -250,6 +251,28 @@
         tripId varchar2(60 char),
         vehicleId varchar2(60 char),
         primary key (id)
+    );
+
+    create table PredictionEvents (
+        vehicleId varchar2(60 char) not null,
+        time timestamp not null,
+        eventType varchar2(60 char) not null,
+        arrivalTime timestamp,
+        arrivalstopid varchar2(60 char),
+        avlTime timestamp,
+        blockId varchar2(60 char),
+        departureTime timestamp,
+        departurestopid varchar2(60 char),
+        description varchar2(500 char),
+        lat double precision,
+        lon double precision,
+        referenceVehicleId varchar2(60 char),
+        routeId varchar2(60 char),
+        routeShortName varchar2(60 char),
+        serviceId varchar2(60 char),
+        stopId varchar2(60 char),
+        tripId varchar2(60 char),
+        primary key (vehicleId, time, eventType)
     );
 
     create table Predictions (
@@ -506,6 +529,8 @@
 
     create index PredictionAccuracyTimeIndex on PredictionAccuracy (arrivalDepartureTime);
 
+    create index PredictionEventsTimeIndex on PredictionEvents (time);
+
     create index PredictionTimeIndex on Predictions (creationTime);
 
     create index StopPathPredictionTimeIndex on StopPathPredictions (tripId, stopPathIndex);
@@ -518,6 +543,11 @@
     create index VehicleEventsTimeIndex on VehicleEvents (time);
 
     create index VehicleStateAvlTimeIndex on VehicleStates (avlTime);
+
+    alter table ArrivalsDepartures 
+        add constraint FK_m1eyesv8rr42fo6qpcrkcgjp3 
+        foreign key (stopId, configRev) 
+        references Stops;
 
     alter table Block_to_Trip_joinTable 
         add constraint FK_abaj8ke6oh4imbbgnaercsowo 
