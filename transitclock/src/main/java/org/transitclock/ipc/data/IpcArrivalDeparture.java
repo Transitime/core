@@ -54,6 +54,8 @@ public class IpcArrivalDeparture implements Serializable {
 	private transient float stopPathLength;
 	@XmlAttribute
 	private Date freqStartTime;
+	@XmlAttribute
+	private transient Long dwellTime;
 
 	protected IpcArrivalDeparture(){}
 
@@ -73,6 +75,7 @@ public class IpcArrivalDeparture implements Serializable {
 		this.directionId=arrivalDepature.getDirectionId();
 		this.blockId=arrivalDepature.getBlockId();
 		this.serviceId=arrivalDepature.getServiceId();
+		this.dwellTime=arrivalDepature.getDwellTime();
 	}
 	
 	
@@ -196,8 +199,13 @@ public class IpcArrivalDeparture implements Serializable {
 		this.scheduledAdherence = scheduledAdherence;
 	}
 
+	public Long getDwellTime() {
+		return dwellTime;
+	}
 
-
+	public void setDwellTime(Long dwellTime) {
+		this.dwellTime = dwellTime;
+	}
 
 	@Override
 	public int hashCode() {
@@ -219,6 +227,7 @@ public class IpcArrivalDeparture implements Serializable {
 		result = prime * result + ((tripId == null) ? 0 : tripId.hashCode());
 		result = prime * result + tripIndex;
 		result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
+		result = prime * result + ((dwellTime == null) ? 0 : dwellTime.hashCode());
 		return result;
 	}
 
@@ -299,11 +308,13 @@ public class IpcArrivalDeparture implements Serializable {
 				return false;
 		} else if (!vehicleId.equals(other.vehicleId))
 			return false;
+		if (dwellTime == null) {
+			if (other.dwellTime != null)
+				return false;
+		} else if (!dwellTime.equals(other.dwellTime))
+			return false;
 		return true;
 	}
-
-
-
 
 	@Override
 	public String toString() {
@@ -312,7 +323,7 @@ public class IpcArrivalDeparture implements Serializable {
 				+ avlTime + ", scheduledAdherence=" + scheduledAdherence + ", blockId=" + blockId + ", routeId="
 				+ routeId + ", routeShortName=" + routeShortName + ", serviceId=" + serviceId + ", directionId="
 				+ directionId + ", tripIndex=" + tripIndex + ", stopPathIndex=" + stopPathIndex + ", stopPathLength="
-				+ stopPathLength + ", freqStartTime=" + freqStartTime + "]";
+				+ stopPathLength + ", freqStartTime=" + freqStartTime + (dwellTime != null ? ", dwellTime=" + dwellTime : "") + "]";
 	}
 
 

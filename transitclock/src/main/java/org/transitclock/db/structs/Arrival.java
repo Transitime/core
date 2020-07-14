@@ -44,18 +44,19 @@ public class Arrival extends ArrivalDeparture {
 	 *            So can match arrival to the AVL report that generated it
 	 * @param block
 	 * @param tripIndex
-	 * @param stopPathIndex
+	 * @param pathIndex
+	 * @param freqStartTime
 	 */
 	public Arrival(String vehicleId, Date time, Date avlTime, Block block,
 			int tripIndex, int pathIndex, Date freqStartTime) {
 		super(vehicleId, time, avlTime, block, tripIndex, pathIndex, 
-				true, freqStartTime); // isArrival
+				true, freqStartTime, null); // isArrival
 	}
 	
 	public Arrival(int configRev, String vehicleId, Date time, Date avlTime, Block block,
 			int tripIndex, int pathIndex, Date freqStartTime) {
 		super(configRev, vehicleId, time, avlTime, block, tripIndex, pathIndex, 
-				true, freqStartTime); // isArrival
+				true, freqStartTime, null); // isArrival
 	}
 	/**
 	 * Hibernate always wants a no-arg constructor. Made private since 

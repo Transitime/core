@@ -102,7 +102,7 @@ public class ArrDepGeneratorMissionBayImpl
 			long departureTime, Block block, int tripIndex, int stopPathIndex) {
 		// Call parent class createDepartureTime()
 		Departure departure = super.createDepartureTime(vehicleState, departureTime, block,
-				tripIndex, stopPathIndex);
+				tripIndex, stopPathIndex, null);
 		
 		// If special SFMTA stop then write arrival/departure time to SFMTA API
 		if (sfmtaStopMap.containsKey(departure.getStopId())) {

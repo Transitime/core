@@ -187,10 +187,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	// So can easily create copy constructor withUpdatedTime()
 	@Transient
 	private final Block block;
-	
-	// Needed because some methods need to know if dealing with arrivals or 
-	// departures.
-	  
+
+	// Record of dwell time for departures
+	@Column
+	private final Long dwellTime;
+
 	public enum ArrivalsOrDepartures {ARRIVALS, DEPARTURES};
 
 	private static final Logger logger = 
@@ -213,8 +214,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param stopPathIndex
 	 * @param isArrival
 	 */
-	protected ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block, 
-			int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime) {
+	protected ArrivalDeparture(int configRev, String vehicleId, Date time, Date avlTime, Block block,
+							   int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime) {
 		this.vehicleId = vehicleId;
 		this.time = time;
 		this.avlTime = avlTime;
@@ -224,6 +225,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.isArrival = isArrival;
 		this.configRev = configRev; 
 		this.freqStartTime = freqStartTime;
+		this.dwellTime = dwellTime;
 		
 		// Some useful convenience variables
 
@@ -284,11 +286,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			this.stopOrder=0;
 		}
 	}
-	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block, 
-			int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime) {
+	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block,
+							   int tripIndex, int stopPathIndex, boolean isArrival, Date freqStartTime, Long dwellTime) {
 		
 		this(Core.getInstance().getDbConfig().getConfigRev(),vehicleId, time, avlTime, block, 
-				tripIndex, stopPathIndex, isArrival, freqStartTime);
+				tripIndex, stopPathIndex, isArrival, freqStartTime, dwellTime);
 	}
 	public Date getFreqStartTime() {
 		return freqStartTime;
@@ -318,6 +320,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.routeShortName = null;
 		this.serviceId = null;
 		this.freqStartTime = null;
+		this.dwellTime = null;
 	}
 
 	/**
@@ -421,12 +424,15 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		result =
 				prime * result
 						+ ((vehicleId == null) ? 0 : vehicleId.hashCode());
+		result =
+				prime * result
+						+ ((dwellTime == null) ? 0 : dwellTime.hashCode());
 		return result;
 	}
 
 	/**
 	 * Because using a composite Id Hibernate wants this member.
-	 */	
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -514,6 +520,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				return false;
 		} else if (!vehicleId.equals(other.vehicleId))
 			return false;
+		if (dwellTime == null) {
+			if (other.dwellTime != null)
+				return false;
+		} else if (!dwellTime.equals(other.dwellTime))
+			return false;
 		return true;
 	}
 
@@ -543,6 +554,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				+ (scheduledTime != null ? 
 						", schedAdh=" + new TemporalDifference(
 								scheduledTime.getTime() - time.getTime()) : "")
+				+ (dwellTime != null ? ", dwellTime=" + dwellTime : "")
 				+ "]";
 	}
 	
@@ -1140,4 +1152,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return gtfsStopSeq;
 	}
 
-}
+	public Long getDwellTime() {
+		return dwellTime;
+	}
