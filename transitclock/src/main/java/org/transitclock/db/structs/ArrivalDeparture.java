@@ -19,9 +19,13 @@ package org.transitclock.db.structs;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.*;
-import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.*;
 import org.hibernate.classic.Lifecycle;
+import org.hibernate.collection.internal.PersistentList;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.internal.SessionImpl;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
@@ -30,18 +34,21 @@ import org.transitclock.configData.DbSetupConfig;
 import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.hibernate.HibernateUtils;
-import org.transitclock.ipc.data.IpcArrivalDeparture;
+import org.transitclock.gtfs.DbConfig;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.Time;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
+import javax.transaction.Transactional;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.*;
 
 /**
  * For persisting an Arrival or a Departure time. Should use Arrival or
@@ -191,6 +198,15 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	// Record of dwell time for departures
 	@Column
 	private final Long dwellTime;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumns(
+		{
+				@JoinColumn(updatable=false,insertable=false, name="stopId", referencedColumnName="id"),
+				@JoinColumn(updatable=false,insertable=false, name="configRev", referencedColumnName="configRev")
+		}
+	)
+	private Stop stop;
 
 	public enum ArrivalsOrDepartures {ARRIVALS, DEPARTURES};
 
@@ -381,10 +397,10 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public void logCreation() {
 		logger.info(this.toString());
 	}
-	
+
 	/**
 	 * Because using a composite Id Hibernate wants this member.
-	 */	
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -904,7 +920,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Date beginTime, Date endTime,
 																	 String routeId, ServiceType serviceType,
-																	 boolean timePointsOnly, boolean readOnly) throws Exception {
+																	 boolean timePointsOnly, String headsign,
+																	 boolean readOnly) throws Exception {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
@@ -919,12 +936,16 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					"ArrivalDeparture ad " +
 					getTimePointsJoin(timePointsOnly) +
 					getServiceTypeJoin(serviceType) +
+					getStopsJoin() +
+					getTripsJoin(headsign) +
 					"WHERE " +
 					"ad.time between :beginTime AND :endTime " +
 					"AND scheduledTime != null " +
 					getRouteIdWhere(routeId) +
 					getTimePointsWhere(timePointsOnly) +
-					getServiceTypeWhere(serviceType);
+					getServiceTypeWhere(serviceType) +
+					getTripsWhere(headsign) +
+					getStopsWhere();
 
 		try {
 			Query query = session.createQuery(hql);
@@ -951,7 +972,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	private static String getRouteIdWhere(String routeId){
 		if(routeId !=null) {
-			String.format("AND ad.routeId = '%s' ", routeId);
+			return String.format("AND ad.routeId = '%s' ", routeId);
 		}
 		return "";
 	}
@@ -988,6 +1009,28 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				query += "AND c.sunday = true ";
 			}
 			return query;
+		}
+		return "";
+	}
+
+	private static String getStopsJoin(){
+		return "JOIN FETCH ad.stop s ";
+	}
+
+	private static String getStopsWhere(){
+		return "AND ad.configRev = s.configRev AND ad.stopId = s.id";
+	}
+
+	private static String getTripsJoin(String headsign){
+		if(StringUtils.isNotBlank(headsign)){
+			return ", Trip t ";
+		}
+		return "";
+	}
+
+	private static String getTripsWhere(String headsign){
+		if(StringUtils.isNotBlank(headsign)){
+			return String.format("AND ad.configRev = t.configRev AND ad.tripId = t.tripId AND t.headsign = '%s' ", headsign);
 		}
 		return "";
 	}
@@ -1110,7 +1153,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public Date getScheduledDate() {
 		return scheduledTime;
 	}
-	
+
 	/**
 	 * Same as getScheduledDate() but returns long epoch time.
 	 * @return
@@ -1118,7 +1161,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public long getScheduledTime() {
 		return scheduledTime.getTime();
 	}
-	
+
 	/**
 	 * Returns the schedule adherence for the stop if there was a schedule
 	 * time. Otherwise returns null.
@@ -1155,3 +1198,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public Long getDwellTime() {
 		return dwellTime;
 	}
+
+	public Stop getStopFromDb() {
+		return stop;
+	}
+}

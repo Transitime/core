@@ -138,7 +138,7 @@ public class Stop implements Serializable {
 	 * Needed because Hibernate requires no-arg constructor
 	 */
 	@SuppressWarnings("unused")
-	private Stop() {
+	public Stop() {
 		configRev = -1;
 		id = null;
 		code = null;

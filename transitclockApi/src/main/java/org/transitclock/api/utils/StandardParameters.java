@@ -304,14 +304,14 @@ public class StandardParameters {
 	 *
 	 * @return The ScheduleAdherenceInterface
 	 */
-	public ScheduleAdherenceInterface getScheduleAdherenceInterface()
+	public ReportingInterface getReportingInterface()
 	{
-		ScheduleAdherenceInterface scheduleAdherenceInterface = ScheduleAdherenceInterfaceFactory.get(agencyId);
-		if (scheduleAdherenceInterface  == null)
+		ReportingInterface reportingInterface = ScheduleAdherenceInterfaceFactory.get(agencyId);
+		if (reportingInterface == null)
 			throw WebUtils.badRequestException("Agency ID " + agencyId
 					+ " is not valid");
 
-		return scheduleAdherenceInterface ;
+		return reportingInterface;
 	}
 	
 	/**
