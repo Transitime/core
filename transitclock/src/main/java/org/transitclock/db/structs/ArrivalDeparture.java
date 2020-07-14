@@ -988,7 +988,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		if(!timePointsOnly){
 			return "";
 		}
-		return "AND ad.configRev = sp.configRev AND ad.stopId = sp.stopId AND sp.scheduleAdherenceStop = true";
+		return "AND ad.configRev = sp.configRev AND ad.stopId = sp.stopId AND sp.scheduleAdherenceStop = true ";
 	}
 
 	private static String getServiceTypeJoin(ServiceType serviceType){
@@ -1018,7 +1018,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	}
 
 	private static String getStopsWhere(){
-		return "AND ad.configRev = s.configRev AND ad.stopId = s.id";
+		return "AND ad.configRev = s.configRev AND ad.stopId = s.id ";
 	}
 
 	private static String getTripsJoin(String headsign){
