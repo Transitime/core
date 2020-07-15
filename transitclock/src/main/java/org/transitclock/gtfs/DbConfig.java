@@ -17,6 +17,7 @@
 package org.transitclock.gtfs;
 
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -83,6 +84,12 @@ public class DbConfig {
 	// Contains
 	private Map<String, List<Trip>> individualTripsByShortNameMap =
 			new HashMap<String, List<Trip>>();
+
+	// cache of all tripIds to prevent queries for nonexistant trips
+	private Set<String> tripIdSet = null;
+	// cache of all tripNames to prevent queries for nonexistent trips
+	private Set<String> tripNameSet = null;
+
 
 	private List<Agency> agencies;
 	private List<Calendar> calendars;
@@ -505,6 +512,16 @@ public class DbConfig {
 
 		// If trip not read in yet, do so now
 		if (trip == null) {
+
+			// make sure this trip really exists before we try to load
+			if (!getTripNameSet().contains(tripIdOrShortName)) {
+				if (!getTripIdSet().contains(tripIdOrShortName)) {
+					// perhaps it was a previous configRev
+					logger.debug("requested {} trip no longer exists", tripIdOrShortName);
+					return null;
+				}
+			}
+
 			logger.debug("Trip for tripIdOrShortName={} not read from db yet "
 					+ "so reading it now.", tripIdOrShortName);
 			
@@ -535,6 +552,55 @@ public class DbConfig {
 		}
 		
 		return trip;
+	}
+
+	/**
+	 * cache of all trip names for this configRev.
+	 * @return Set of tripNames
+	 */
+	private Set<String> getTripNameSet() {
+		if (tripNameSet == null) {
+			synchronized (Block.getLazyLoadingSyncObject()) {
+				// check to see if we won the lock
+				if (tripNameSet != null) return tripNameSet;
+				IntervalTimer tick = new IntervalTimer();
+				logger.info("loading tripShortName Cache....");
+				String hql = "select tripShortName FROM Trip t " +
+						"    WHERE t.configRev = :configRev";
+				Query query = globalSession.createQuery(hql);
+				query.setInteger("configRev", configRev);
+
+				// Actually perform the query
+				tripNameSet = new HashSet<String>(query.list());
+				logger.info("tripShortName cache loaded in {}", tick.elapsedMsec());
+			}
+		}
+		return tripNameSet;
+	}
+
+	/**
+	 * cache of all trip ids for this configRev.
+	 * @return Set of tripIds
+	 */
+
+	private Set<String> getTripIdSet() {
+		if (tripIdSet == null) {
+			synchronized (Block.getLazyLoadingSyncObject()) {
+				// check to see if we won the lock
+				if (tripIdSet != null) return tripIdSet;
+				IntervalTimer tick = new IntervalTimer();
+				logger.info("loading tripId Cache....");
+				String hql = "select tripId FROM Trip t " +
+						"    WHERE t.configRev = :configRev";
+				Query query = globalSession.createQuery(hql);
+				query.setInteger("configRev", configRev);
+
+				// Actually perform the query
+				tripIdSet = new HashSet<String>(query.list());
+				logger.info("tripId cache loaded in {}", tick.elapsedMsec());
+			}
+		}
+		return tripIdSet;
 	}
 
 	/**
@@ -587,7 +653,14 @@ public class DbConfig {
 			}
 		}
 
-		logger.info("FIXME tripShortName={} not yet read from db so reading it in now", tripShortName);
+		// if we got this far, its possible the trip doesn't exist.  Check cache
+		// before making expensive call to database
+		if (!getTripNameSet().contains(tripShortName)) {
+			logger.debug("request for non-existant trip {}", tripShortName);
+			return null;
+		}
+		logger.info("FIXME tripShortName={} not yet read from db so reading it in now ",
+				tripShortName);
 		
 		// Trips for the short name not read in yet, do so now
 		// Need to sync such that block data, which includes trip

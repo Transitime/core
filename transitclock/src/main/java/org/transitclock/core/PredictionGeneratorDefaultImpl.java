@@ -65,6 +65,14 @@ import java.util.*;
  */
 public class PredictionGeneratorDefaultImpl implements PredictionGenerator, PredictionComponentElementsGenerator{
 
+	private static BooleanConfigValue terminatePredictionsAtTripEnd =
+			new BooleanConfigValue("transitclock.core.terminatePredictionsAtTripEnd",
+					false,
+					"Once maxPredictionsTimeSecs reached, continue until end of trip");
+
+	public static boolean getTerminatePredictionsAtTripEnd() {
+		return terminatePredictionsAtTripEnd.getValue();
+	}
 	private static IntegerConfigValue maxPredictionsTimeSecs =
 			new IntegerConfigValue("transitclock.core.maxPredictionsTimeSecs", 
 					45 * Time.SEC_PER_MIN,
@@ -73,7 +81,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 	public static int getMaxPredictionsTimeSecs() {
 		return maxPredictionsTimeSecs.getValue();
 	}
-			
+
 	private static LongConfigValue generateHoldingTimeWhenPredictionWithin =
 			new LongConfigValue("transitclock.core.generateHoldingTimeWhenPredictionWithin",
 					0L,
@@ -400,9 +408,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
-		while (schedBasedPreds
-				|| predictionTime < 
-					avlTime + maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC) {
+		// also, if configured, once we exceed maxPredictionsTimeSec continue to end of trip
+		while (schedBasedPreds || isIndexWithinRange(indices, avlTime, predictionTime)) {
 			// Keep track of whether prediction is affected by layover 
 			// scheduled departure time since those predictions might not
 			// be a accurate. Once a layover encountered then all subsequent
@@ -452,6 +459,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 			// stop is added to the arrival time) then don't add the prediction
 			// and break out of the loop.
 			if (!schedBasedPreds
+					&& !terminatePredictionsAtTripEnd.getValue()
 					&& predictionForStop.getPredictionTime() > avlTime
 							+ maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC)
 				break;
@@ -551,8 +559,8 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 			if (!lastStopOfNonSchedBasedTrip && isCircuitRoute) {
 				predictionTime += getTravelTimeForPath(indices, avlReport, vehicleState);
 			}					
-		}
-		
+		} // end while loop
+
 		for(IpcPrediction prediction : filteredPredictions.values()){
 			newPredictions.add(prediction);
 			
@@ -562,7 +570,21 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 		// Return the results
 		return newPredictions;
 	}
-	
+
+	private boolean isIndexWithinRange(Indices indices, long avlTime, long predictionTime) {
+		boolean withinTimeBounds = predictionTime < avlTime + maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC;
+		if (getTerminatePredictionsAtTripEnd()) {
+			// per additional config, go to end of trip even if exceeded time range
+			if (!withinTimeBounds) {
+				if (indices.atEndOfTrip())
+					return false;
+			}
+			return true; // go to the end of the trip even though we have exceeded time
+		}
+
+		return withinTimeBounds;
+	}
+
 
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState)
 	{

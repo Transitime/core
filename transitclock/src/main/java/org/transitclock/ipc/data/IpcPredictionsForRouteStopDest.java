@@ -144,12 +144,16 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param maxSystemTimeForPrediction
 	 *            Max point in future want predictions for. This way can limit
 	 *            predictions when requesting a large number of them.
-	 * @param distanceFromStop
+	 * @param terminatePredictionsAtEndOfTrip
+	 * 			  if set continue after maxSystemTimeForPrediction to serve
+	 * 			  predictions for the entirety of the trip
+	 * @param distanceToStop
 	 *            For when getting predictions by location
 	 */
 	private IpcPredictionsForRouteStopDest(
 			IpcPredictionsForRouteStopDest toClone,
-			int maxPredictionsPerStop, long maxSystemTimeForPrediction, 
+			int maxPredictionsPerStop, long maxSystemTimeForPrediction,
+			boolean terminatePredictionsAtEndOfTrip,
 			double distanceToStop) {
 		this.routeId = toClone.routeId;
 		this.routeShortName = toClone.routeShortName;
@@ -170,8 +174,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			this.predictionsForRouteStopDest = new ArrayList<IpcPrediction>(size);			
 			for (int i=0; i<size; ++i) {
 				IpcPrediction prediction = toClone.predictionsForRouteStopDest.get(i);
-				// If prediction exceeds max time then done
-				if (prediction.getPredictionTime() > maxSystemTimeForPrediction)
+				/* If prediction exceeds max time then done
+				 * EXCEPT if terminatePredictionsAtEndOfTrip, in which case we assume
+				 * we have exactly the amount of predictions expected (we don't filter)
+				 */
+				if (!terminatePredictionsAtEndOfTrip && prediction.getPredictionTime() > maxSystemTimeForPrediction)
 					break;
 				this.predictionsForRouteStopDest.add(i, prediction);
 			}
@@ -377,9 +384,9 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * Gets a copy of this object. This is done with the object being
 	 * copied synchronized so that the predictions remain coherent. Limits
 	 * number of predictions to maxPredictionsPerStop.
-	 * 
+	 *
 	 * @param maxPredictionsPerStop
-	 * @param distanceFromStop
+	 * @param distanceToStop
 	 *            For when getting predictions by location
 	 * @return
 	 */
@@ -390,7 +397,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		// Integer.MAX_VALUE and currentTime set to 0L because it 
 		// doesn't matter.
 		IpcPredictionsForRouteStopDest clone = new IpcPredictionsForRouteStopDest(this,
-				maxPredictionsPerStop, Long.MAX_VALUE, distanceToStop);
+				maxPredictionsPerStop, Long.MAX_VALUE, false, distanceToStop);
 		return clone;
 	}
 	
@@ -404,14 +411,17 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param maxSystemTimeForPrediction
 	 *            Max point in future want predictions for. This way can limit
 	 *            predictions when requesting a large number of them.
+	 * @param terminatePredictionsAtEndOfTrip
+	 * 			  if set continue after maxSystemTimeForPrediction to complete
+	 * 			  predictions for the trip.
 	 * @param distanceToStop
 	 *            For when getting predictions by location
 	 * @return
 	 */
 	public IpcPredictionsForRouteStopDest getClone(int maxPredictionsPerStop,
-			long maxSystemTimeForPrediction, double distanceToStop) {
+			long maxSystemTimeForPrediction, boolean terminatePredictionsAtEndOfTrip, double distanceToStop) {
 		IpcPredictionsForRouteStopDest clone = new IpcPredictionsForRouteStopDest(
-				this, maxPredictionsPerStop, maxSystemTimeForPrediction, distanceToStop);
+				this, maxPredictionsPerStop, maxSystemTimeForPrediction, terminatePredictionsAtEndOfTrip, distanceToStop);
 		return clone;
 	}
 	
@@ -428,9 +438,9 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @return
 	 */
 	public IpcPredictionsForRouteStopDest getClone(int maxPredictionsPerStop,
-			long maxSystemTimeForPrediction) {
+			long maxSystemTimeForPrediction, boolean terminatePredictionsAtEndOfTrip) {
 		IpcPredictionsForRouteStopDest clone = getClone(maxPredictionsPerStop,
-				maxSystemTimeForPrediction, Double.NaN);
+				maxSystemTimeForPrediction, terminatePredictionsAtEndOfTrip, Double.NaN);
 		return clone;
 	}
 	
