@@ -59,8 +59,8 @@
         <jsp:include page="params/routeAllOrSingle.jsp" />
 
         <div class="param">
-            <label for="direction">Direction</label>
-            <select id="direction" name="direction" disabled="true">
+            <label for="direction">Direction:</label>
+            <select id="direction" name="direction" disabled="true" style="width: 177px">
 
             </select>
         </div>
@@ -181,12 +181,22 @@
     $("#route").attr("style", "width: 200px");
 
     $("#route").change(function() {
-        var headsigns = ['a', 'b', 'c', '1', '2', '3'];
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
-        headsigns.forEach(function(headsign) {
-            $("#direction").append("<option value='" + headsign + "'>" + headsign + "</option>")
-        });
+
+        $.ajax({
+            url: apiUrlPrefix + "/command/headsigns",
+            // Pass in query string parameters to page being requested
+            data: {r: $("#route").val()},
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType:"json",
+            success: function(response) {
+                response.headsigns.forEach(function(headsign) {
+                    $("#direction").append("<option value='" + headsign.headsign + "'>" + headsign.label + "</option>");
+                })
+            }
+        })
     })
 
     function lowSpeedSlider(value) {
