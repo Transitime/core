@@ -132,7 +132,7 @@ public class PredictionGeneratorDefaultImpl implements PredictionGenerator, Pred
 
 	private static IntegerConfigValue maxAgeOfHistoricalPredictions =
 			new IntegerConfigValue("transitclock.core.maxAgeOfHistoricalPredictions",
-					6,
+					1,
 					"When holding on to historical predictions for future stops, how long " +
 							"to keep message before expiring. Value in minutes.");
 
