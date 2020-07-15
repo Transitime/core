@@ -225,4 +225,50 @@
 
         $("#highSpeed").attr("min", (parseFloat($("#midSpeed").val()) + 1));
     }
+
+    $("#submit").click(function() {
+        $("#submit").attr("disabled","disabled");
+
+        if ($("#beginDate").val() == "Date range") {
+            var today = new Date();
+            var beginDate = endDate = today.getFullYear() + "-"
+                + (today.getMonth() <= 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))
+                + "-" + (today.getDate() < 10 ? "0" + today.getDate() : today.getDate());
+        }
+        else {
+            var dateRangeStrings = $("#beginDate").val().replace(/\s/g, "").split("-");
+            var beginYear = "20" + dateRangeStrings[0];
+            var endYear = "20" + dateRangeStrings[3];
+            var beginDate = [beginYear,  dateRangeStrings[1],  dateRangeStrings[2]].join("-");
+            var endDate = [endYear, dateRangeStrings[4], dateRangeStrings[5]].join("-");
+        }
+
+        var beginTime = $("#beginTime").val() == "" ? "00:00:00" : $("#beginTime").val() + ":00";
+        var endTime = $("#endTime").val() == "" ? "23:59:59" : $("#endTime").val() + ":00";
+
+        request = {}
+
+        request.beginDate = beginDate + "T" + beginTime;
+        request.endDate = endDate + "T" + endTime;
+        request.r = $("#route").val();
+        request.headsign= $("#direction").val();
+        request.serviceType = $("#serviceDayType").val();
+
+        $.ajax({
+            url: apiUrlPrefix + "/report/speedmap/stops",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType:"json",
+            success: function(response) {
+                alert(JSON.stringify(response));
+                $("#submit").removeAttr("disabled");
+            },
+            error: function() {
+                alert("Error processing request.");
+                $("#submit").removeAttr("disabled");
+            }
+        })
+    })
 </script>
