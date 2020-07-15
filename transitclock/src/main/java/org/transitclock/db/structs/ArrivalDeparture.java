@@ -16,6 +16,7 @@
  */
 package org.transitclock.db.structs;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -26,8 +27,10 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.DbSetupConfig;
+import org.transitclock.core.ServiceType;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.hibernate.HibernateUtils;
+import org.transitclock.ipc.data.IpcArrivalDeparture;
 import org.transitclock.logging.Markers;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.IntervalTimer;
@@ -35,6 +38,7 @@ import org.transitclock.utils.Time;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -583,7 +587,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	/**
 	 * Read in arrivals and departures for a vehicle, over a time range.
 	 * 
-	 * @param projectId
 	 * @param beginTime
 	 * @param endTime
 	 * @param vehicleId
@@ -598,7 +601,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				beginTime, endTime,
 				"AND vehicleId='" + vehicleId + "'", 
 				0, 0,  // Don't use batching 
-				null); // Read both arrivals and departures
+				null,  // Read both arrivals and departures
+				false);
 	}
 	
 	/**
@@ -606,7 +610,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * 
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param serviceId
 	 * @return
 	 */
@@ -623,7 +627,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @paran session
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param serviceId
 	 * @return
 	 */
@@ -649,7 +653,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @paran session
 	 * @param beginTime
 	 * @param endTime
-	 * @param trip
+	 * @param tripId
 	 * @param stopPathIndex
 	 * @return
 	 */
@@ -757,11 +761,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			String dbName, Date beginTime, Date endTime, 
 			String sqlClause,
 			final Integer firstResult, final Integer maxResults,
-			ArrivalsOrDepartures arrivalOrDeparture) {
+			ArrivalsOrDepartures arrivalOrDeparture, boolean readOnly) {
 		IntervalTimer timer = new IntervalTimer();
 		
 		// Get the database session. This is supposed to be pretty light weight
-		Session session = dbName != null ? HibernateUtils.getSession(dbName, false) : HibernateUtils.getSession(true);
+		Session session = dbName != null ? HibernateUtils.getSession(dbName, readOnly) : HibernateUtils.getSession(true);
 
 		// Create the query. Table name is case sensitive and needs to be the
 		// class name instead of the name of the db table.
@@ -810,7 +814,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	public static Long getArrivalsDeparturesCountFromDb(
 			String dbName, Date beginTime, Date endTime, 
-			ArrivalsOrDepartures arrivalOrDeparture) {
+			ArrivalsOrDepartures arrivalOrDeparture, boolean readOnly) {
 		IntervalTimer timer = new IntervalTimer();
 		Long count = null;
 		// Get the database session. This is supposed to be pretty light weight
@@ -870,7 +874,110 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			final int firstResult, final int maxResults,
 			ArrivalsOrDepartures arrivalOrDeparture) {
 		return getArrivalsDeparturesFromDb(DbSetupConfig.getDbName(), beginTime,
-				endTime, sqlClause, firstResult, maxResults, arrivalOrDeparture);
+				endTime, sqlClause, firstResult, maxResults, arrivalOrDeparture, false);
+	}
+
+
+	/**
+	 * Reads the arrivals/departures for the timespan and routeId specified
+	 * Can specify whether you want to retrieve the data from a readOnly db
+	 *
+	 * @param beginTime
+	 * @param endTime
+	 * @param routeId
+	 * @param serviceType
+	 * @param timePointsOnly
+	 * @param readOnly
+	 * @return
+	 */
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Date beginTime, Date endTime,
+																	 String routeId, ServiceType serviceType,
+																	 boolean timePointsOnly, boolean readOnly) throws Exception {
+		IntervalTimer timer = new IntervalTimer();
+
+		// Get the database session. This is supposed to be pretty light weight
+		Session session = HibernateUtils.getSession(readOnly);
+
+		// Create the query. Table name is case sensitive and needs to be the
+		// class name instead of the name of the db table.
+
+		String hql = "SELECT " +
+					"ad " +
+					"FROM " +
+					"ArrivalDeparture ad " +
+					getTimePointsJoin(timePointsOnly) +
+					getServiceTypeJoin(serviceType) +
+					"WHERE " +
+					"ad.time between :beginTime AND :endTime " +
+					"AND scheduledTime != null " +
+					getRouteIdWhere(routeId) +
+					getTimePointsWhere(timePointsOnly) +
+					getServiceTypeWhere(serviceType);
+
+		try {
+			Query query = session.createQuery(hql);
+			query.setTimestamp("beginTime", beginTime);
+			query.setTimestamp("endTime", endTime);
+
+			List<ArrivalDeparture> results = query.list();
+
+			logger.debug("Getting arrival/departures from database took {} msec",
+					timer.elapsedMsec());
+
+			return results;
+
+		} catch (HibernateException e) {
+			// Log error to the Core logger
+			Core.getLogger().error("Unable to retrieve arrival departures", e);
+			return null;
+		} finally {
+			// Clean things up. Not sure if this absolutely needed nor if
+			// it might actually be detrimental and slow things down.
+			session.close();
+		}
+	}
+
+	private static String getRouteIdWhere(String routeId){
+		if(routeId !=null) {
+			String.format("AND ad.routeId = '%s' ", routeId);
+		}
+		return "";
+	}
+
+	private static String getTimePointsJoin(boolean timePointsOnly){
+		if(!timePointsOnly){
+			return "";
+		}
+		return ", StopPath sp ";
+	}
+
+	private static String getTimePointsWhere(boolean timePointsOnly){
+		if(!timePointsOnly){
+			return "";
+		}
+		return "AND ad.configRev = sp.configRev AND ad.stopId = sp.stopId AND sp.scheduleAdherenceStop = true";
+	}
+
+	private static String getServiceTypeJoin(ServiceType serviceType){
+		if(serviceType == null){
+			return "";
+		}
+		return ", Calendar c ";
+	}
+
+	private static String getServiceTypeWhere(ServiceType serviceType){
+		if(serviceType != null) {
+			String query = "AND ad.serviceId = c.serviceId AND ad.configRev = c.configRev ";
+			if (serviceType.equals(ServiceType.WEEKDAY)) {
+				query += "AND (c.monday = true OR c.tuesday = true OR c.wednesday = true OR c.thursday = true OR c.friday = true)";
+			} else if (serviceType.equals(ServiceType.SATURDAY)) {
+				query += "AND c.saturday = true ";
+			} else if (serviceType.equals(ServiceType.SUNDAY)) {
+				query += "AND c.sunday = true ";
+			}
+			return query;
+		}
+		return "";
 	}
 	
 	public String getVehicleId() {

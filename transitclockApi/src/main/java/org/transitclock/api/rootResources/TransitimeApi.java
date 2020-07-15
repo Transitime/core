@@ -852,7 +852,7 @@ public class TransitimeApi {
 	 * a stop from a list.
 	 * 
 	 * @param stdParameters
-	 * @param routeShortName
+	 * @param routesIdOrShortNames
 	 * @return
 	 * @throws WebApplicationException
 	 */
@@ -1502,6 +1502,50 @@ public class TransitimeApi {
 	}
 
 	/**
+	 * Handles the "scheduleVertStops" command which outputs schedule for the
+	 * specified route. The data is output such that the stops are listed
+	 * vertically (and the trips are horizontal). For when there are a good
+	 * number of stops but not as many trips, such as for commuter rail.
+	 *
+	 * @param stdParameters
+	 * @param tripId
+	 * @return
+	 * @throws WebApplicationException
+	 */
+	@Path("/command/scheduleTripVertStops")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Retrives schedule for the specified trip.",
+			description="Retrives schedule for the specified trip.  The data is output such that the stops are listed "
+					+ "vertically (and the trips are horizontal)."
+			,tags= {"base data","schedule"})
+	public Response getScheduleTripVertStops(@BeanParam StandardParameters stdParameters,
+										 @Parameter(description="Specifies the tripId",required=true)
+										 @QueryParam(value = "t") String tripId) throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcSchedule> ipcSchedules = inter.getSchedulesForTrip(tripId);
+
+			// If the trip doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcSchedules == null)
+				throw WebUtils.badRequestException("trip=" + tripId + " does not exist.");
+
+			// Create and return ApiSchedules response
+			ApiSchedulesVertStops apiSchedules = new ApiSchedulesVertStops(ipcSchedules);
+			return stdParameters.createResponse(apiSchedules);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e);
+		}
+	}
+
+	/**
 	 * Handles the "scheduleHorizStops" command which outputs schedule for the
 	 * specified route. The data is output such that the stops are listed
 	 * horizontally (and the trips are vertical). For when there are many more
@@ -1535,6 +1579,40 @@ public class TransitimeApi {
 			// Bad Request with an appropriate message is returned.
 			if (ipcSchedules == null)
 				throw WebUtils.badRequestException("route=" + routesIdOrShortNames + " does not exist.");
+
+			// Create and return ApiSchedules response
+			ApiSchedulesHorizStops apiSchedules = new ApiSchedulesHorizStops(ipcSchedules);
+			return stdParameters.createResponse(apiSchedules);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e);
+		}
+	}
+
+	@Path("/command/scheduleTripHorizStops")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Operation(summary="Retrives schedule for the specified trip.",
+			description="Retrives schedule for the specified trip.  The data is output such that the stops are listed "
+					+ "horizontally (and the trip are vertical). For when there are a good number of stops but not as"
+					+ " many trips, such as for commuter rail."
+			,tags= {"base data","schedule"})
+	public Response getScheduleTripHorizStops(@BeanParam StandardParameters stdParameters,
+										  @Parameter(description="Specifies the tripId",required=true)
+										  @QueryParam(value = "t") String tripId) throws WebApplicationException {
+
+		// Make sure request is valid
+		stdParameters.validate();
+
+		try {
+			// Get block data from server
+			ConfigInterface inter = stdParameters.getConfigInterface();
+			List<IpcSchedule> ipcSchedules = inter.getSchedulesForTrip(tripId);
+
+			// If the trip doesn't exist then throw exception such that
+			// Bad Request with an appropriate message is returned.
+			if (ipcSchedules == null)
+				throw WebUtils.badRequestException("tripId=" + tripId + " does not exist.");
 
 			// Create and return ApiSchedules response
 			ApiSchedulesHorizStops apiSchedules = new ApiSchedulesHorizStops(ipcSchedules);

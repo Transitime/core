@@ -55,7 +55,7 @@ public class IpcArrivalDeparture implements Serializable {
 	@XmlAttribute
 	private Date freqStartTime;
 
-	private IpcArrivalDeparture(){}
+	protected IpcArrivalDeparture(){}
 
 	public IpcArrivalDeparture(ArrivalDeparture arrivalDepature) throws Exception {
 		

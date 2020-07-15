@@ -53,7 +53,7 @@ public class ApiArrivalDepartures {
 	 * Constructs an ApiRouteSummaries using a collection of IpcRouteSummary
 	 * objects.
 	 * 
-	 * @param routes
+	 * @param arrivalDepartures
 	 * @throws InvocationTargetException 
 	 * @throws IllegalAccessException 
 	 */
