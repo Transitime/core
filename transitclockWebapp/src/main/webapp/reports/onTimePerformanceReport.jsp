@@ -223,8 +223,10 @@
         var endTime = $("#endTime").val() == "" ? "23:59:59" : $("#endTime").val() + ":00";
 
         request = {};
-        request.beginDate = beginDate + "T" + beginTime;
-        request.endDate = endDate + "T" + endTime;
+        request.beginDate = beginDate;
+        request.beginTime = beginTime;
+        request.endDate = endDate;
+        request.endTime = endTime;
         request.r = $("#route").val();
         request.minEarlySec = $("#early").val() * 60;
         request.minLateSec = $("#late").val() * 60;
