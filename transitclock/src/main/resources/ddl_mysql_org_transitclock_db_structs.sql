@@ -44,6 +44,7 @@
         stopPathIndex integer,
         stopPathLength float,
         tripIndex integer,
+        tripPatternId varchar(120),
         primary key (vehicleId, tripId, time, stopId, isArrival, gtfsStopSeq)
     );
 
@@ -514,6 +515,8 @@
     create index ArrivalsDeparturesTimeIndex on ArrivalsDepartures (time);
 
     create index ArrivalsDeparturesRouteTimeIndex on ArrivalsDepartures (routeShortName, time);
+
+    create index ArrivalsDeparturesTripPatternIdIndex on ArrivalsDepartures (tripPatternId);
 
     create index AvlReportsTimeIndex on AvlReports (time);
 
