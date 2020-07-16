@@ -102,13 +102,6 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
         List<IpcStopWithDwellTime> stopsWithAvgDwellTime = new ArrayList<>();
 
         for(ArrivalDeparture ad : arrivalDepartures){
-            /*Trip trip1 = ad.getTripFromDb();
-            if(headsign != null) {
-                Trip trip = ad.getTripFromDb();
-                if(!trip.getHeadsign().equalsIgnoreCase(headsign)){
-                    continue;
-                }
-            }*/
             Stop stop = ad.getStopFromDb();
             IpcStopWithDwellTime ipcStopWithDwellTime = new IpcStopWithDwellTime(stop, ad.getDirectionId(), ad.getDwellTime());
             stopsWithAvgDwellTime.add(ipcStopWithDwellTime);
