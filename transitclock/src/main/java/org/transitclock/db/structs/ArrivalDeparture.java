@@ -70,7 +70,9 @@ import java.util.*;
        indexes = { @Index(name="ArrivalsDeparturesTimeIndex", 
                       columnList="time" ),
                    @Index(name="ArrivalsDeparturesRouteTimeIndex", 
-                      columnList="routeShortName, time" )} )
+                      columnList="routeShortName, time" ),
+			       @Index(name="ArrivalsDeparturesTripPatternIdIndex",
+					   columnList="tripPatternId" )} )
 public class ArrivalDeparture implements Lifecycle, Serializable  {
 	
 	@Id 
@@ -199,6 +201,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	@Column
 	private final Long dwellTime;
 
+	@Column(length=TripPattern.TRIP_PATTERN_ID_LENGTH)
+	private String tripPatternId;
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumns(
 		{
@@ -214,7 +219,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			LoggerFactory.getLogger(ArrivalDeparture.class);
 
 	// Needed because Hibernate objects must be serializable
-	private static final long serialVersionUID = 6511713704337986699L;
+	private static final long serialVersionUID = -2186334947521763886L;
 
 	/********************** Member Functions **************************/
 
@@ -249,6 +254,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		{
 			Trip trip = block.getTrip(tripIndex);
 			StopPath stopPath = trip.getStopPath(stopPathIndex);
+			this.tripPatternId = stopPath.getTripPatternId();
 			String stopId = stopPath.getStopId();
 			// Determine and store stop order
 			this.stopOrder =
@@ -300,6 +306,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			this.stopId="";
 			this.serviceId = "";
 			this.stopOrder=0;
+			this.tripPatternId = null;
 		}
 	}
 	protected ArrivalDeparture(String vehicleId, Date time, Date avlTime, Block block,
@@ -337,6 +344,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		this.serviceId = null;
 		this.freqStartTime = null;
 		this.dwellTime = null;
+		this.tripPatternId = null;
 	}
 
 	/**
@@ -361,6 +369,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			serviceId = serviceId.intern();
 		if (directionId != null)
 			directionId= directionId.intern();
+		if (tripPatternId != null)
+			tripPatternId= tripPatternId.intern();
 	}
 	
 	/**
@@ -443,6 +453,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		result =
 				prime * result
 						+ ((dwellTime == null) ? 0 : dwellTime.hashCode());
+		result =
+				prime * result
+						+ ((tripPatternId == null) ? 0 : tripPatternId.hashCode());
 		return result;
 	}
 
@@ -541,6 +554,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				return false;
 		} else if (!dwellTime.equals(other.dwellTime))
 			return false;
+		if (tripPatternId == null) {
+			if (other.tripPatternId != null)
+				return false;
+		} else if (!tripPatternId.equals(other.tripPatternId))
+			return false;
 		return true;
 	}
 
@@ -559,8 +577,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 				+ ", freqStartTime=" + freqStartTime
 				+ ", stopOrder=" + stopOrder
 				+ ", avlTime=" + Time.timeStrMsec(avlTime)
-				+ ", trip=" + tripId 
-				+ ", tripIdx=" + tripIndex 
+				+ ", trip=" + tripId
+				+ ", tripIdx=" + tripIndex
+				+ ", tripPatternId=" + tripPatternId
 				+ ", block=" + blockId 
 				+ ", srv=" + serviceId
 				+ ", cfg=" + configRev
@@ -988,7 +1007,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		if(!timePointsOnly){
 			return "";
 		}
-		return "AND ad.configRev = sp.configRev AND ad.stopId = sp.stopId AND sp.scheduleAdherenceStop = true ";
+		return "AND ad.configRev = sp.configRev AND ad.stopId = sp.stopId AND ad.tripPatternId = sp.tripPatternId AND sp.scheduleAdherenceStop = true ";
 	}
 
 	private static String getServiceTypeJoin(ServiceType serviceType){
