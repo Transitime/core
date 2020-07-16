@@ -1006,13 +1006,19 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		}
 
 		for(int i=0; i < dates.size(); i++){
-			if(i > 0){
+			if(i == 0){
+				hql += " (";
+
+			} else {
 				hql += " OR ";
 			}
 			LocalDateTime startDateTime = LocalDateTime.of(dates.get(i), beginTime);
 			LocalDateTime endDateTime = LocalDateTime.of(dates.get(i), endTime);
-			hql += String.format(" time between '%s' AND '%s' ",
+			hql += String.format(" ad.time between '%s' AND '%s' ",
 					startDateTime.format(isoDateTimeFormat), endDateTime.format(isoDateTimeFormat));
+			if(i == dates.size() -1){
+				hql += ") ";
+			}
 		}
 		return hql;
 	}
