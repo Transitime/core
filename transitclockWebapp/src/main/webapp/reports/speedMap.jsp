@@ -59,8 +59,8 @@
         <jsp:include page="params/routeAllOrSingle.jsp" />
 
         <div class="param">
-            <label for="direction">Direction</label>
-            <select id="direction" name="direction" disabled="true">
+            <label for="direction">Direction:</label>
+            <select id="direction" name="direction" disabled="true" style="width: 177px">
 
             </select>
         </div>
@@ -181,12 +181,22 @@
     $("#route").attr("style", "width: 200px");
 
     $("#route").change(function() {
-        var headsigns = ['a', 'b', 'c', '1', '2', '3'];
         $("#direction").removeAttr('disabled');
         $("#direction").empty();
-        headsigns.forEach(function(headsign) {
-            $("#direction").append("<option value='" + headsign + "'>" + headsign + "</option>")
-        });
+
+        $.ajax({
+            url: apiUrlPrefix + "/command/headsigns",
+            // Pass in query string parameters to page being requested
+            data: {r: $("#route").val()},
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType:"json",
+            success: function(response) {
+                response.headsigns.forEach(function(headsign) {
+                    $("#direction").append("<option value='" + headsign.headsign + "'>" + headsign.label + "</option>");
+                })
+            }
+        })
     })
 
     function lowSpeedSlider(value) {
@@ -215,4 +225,50 @@
 
         $("#highSpeed").attr("min", (parseFloat($("#midSpeed").val()) + 1));
     }
+
+    $("#submit").click(function() {
+        $("#submit").attr("disabled","disabled");
+
+        if ($("#beginDate").val() == "Date range") {
+            var today = new Date();
+            var beginDate = endDate = today.getFullYear() + "-"
+                + (today.getMonth() <= 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))
+                + "-" + (today.getDate() < 10 ? "0" + today.getDate() : today.getDate());
+        }
+        else {
+            var dateRangeStrings = $("#beginDate").val().replace(/\s/g, "").split("-");
+            var beginYear = "20" + dateRangeStrings[0];
+            var endYear = "20" + dateRangeStrings[3];
+            var beginDate = [beginYear,  dateRangeStrings[1],  dateRangeStrings[2]].join("-");
+            var endDate = [endYear, dateRangeStrings[4], dateRangeStrings[5]].join("-");
+        }
+
+        var beginTime = $("#beginTime").val() == "" ? "00:00:00" : $("#beginTime").val() + ":00";
+        var endTime = $("#endTime").val() == "" ? "23:59:59" : $("#endTime").val() + ":00";
+
+        request = {}
+
+        request.beginDate = beginDate + "T" + beginTime;
+        request.endDate = endDate + "T" + endTime;
+        request.r = $("#route").val();
+        request.headsign= $("#direction").val();
+        request.serviceType = $("#serviceDayType").val();
+
+        $.ajax({
+            url: apiUrlPrefix + "/report/speedmap/stops",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType:"json",
+            success: function(response) {
+                alert(JSON.stringify(response));
+                $("#submit").removeAttr("disabled");
+            },
+            error: function() {
+                alert("Error processing request.");
+                $("#submit").removeAttr("disabled");
+            }
+        })
+    })
 </script>
