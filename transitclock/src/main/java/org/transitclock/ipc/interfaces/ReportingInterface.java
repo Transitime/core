@@ -6,6 +6,8 @@ import org.transitclock.ipc.data.IpcArrivalDepartureScheduleAdherence;
 import org.transitclock.ipc.data.IpcStopWithDwellTime;
 
 import java.rmi.Remote;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -16,10 +18,19 @@ import java.util.List;
  *
  */
 public interface ReportingInterface extends Remote {
-    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(Date beginDate, Date endDate, String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly, String headsign) throws Exception;
-    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(Date beginDate, Date endDate, String routeId, ServiceType serviceType, boolean timePointsOnly, String headsign, boolean readOnly) throws Exception;
+    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(LocalDate beginDate, LocalDate endDate,
+                                                                             LocalTime beginTime, LocalTime endTime,
+                                                                             String routeIdOrShortName, ServiceType serviceType,
+                                                                             boolean timePointsOnly, String headsign) throws Exception;
 
-    List<IpcStopWithDwellTime> getStopsWithAvgDwellTimes(Date beginDate, Date endDate, String routeIdOrShortName,
+    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(LocalDate beginDate, LocalDate endDate,
+                                                                             LocalTime beginTime, LocalTime endTime,
+                                                                             String routeId, ServiceType serviceType,
+                                                                             boolean timePointsOnly, String headsign,
+                                                                             boolean readOnly) throws Exception;
+
+    List<IpcStopWithDwellTime> getStopsWithAvgDwellTimes(LocalDate beginDate, LocalDate endDate,
+                                                         LocalTime beginTime, LocalTime endTime, String routeIdOrShortName,
                                                          ServiceType serviceType, boolean timePointsOnly, String headsign,
                                                          boolean readOnly) throws Exception;
 }

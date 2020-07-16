@@ -15,6 +15,8 @@ import org.transitclock.ipc.data.IpcStopWithDwellTime;
 import org.transitclock.ipc.interfaces.ReportingInterface;
 import org.transitclock.ipc.rmi.AbstractServer;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 /**
@@ -50,15 +52,17 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
 
     @Override
     public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(
-            Date beginDate, Date endDate, String routeIdOrShortName, ServiceType serviceType,
+            LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
+            String routeIdOrShortName, ServiceType serviceType,
             boolean timePointsOnly, String headsign) throws Exception{
-        return getArrivalsDeparturesForRoute(beginDate, endDate, routeIdOrShortName, serviceType,
+        return getArrivalsDeparturesForRoute(beginDate, endDate, beginTime, endTime, routeIdOrShortName, serviceType,
                 timePointsOnly, headsign, false);
     }
 
     @Override
     public List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(
-            Date beginDate, Date endDate, String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
+            LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime,
+            String routeIdOrShortName, ServiceType serviceType, boolean timePointsOnly,
             String headsign, boolean readOnly) throws Exception {
 
         String routeId = null;
@@ -70,8 +74,9 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
             routeId = dbRoute.getId();
         }
 
-        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                                                            endDate, routeId, serviceType, timePointsOnly, headsign, readOnly);
+        List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate, endDate,
+                                                    beginTime, endTime, routeId, serviceType, timePointsOnly,
+                                                    headsign, readOnly);
 
         List<IpcArrivalDepartureScheduleAdherence> ipcArrivalDepartures = new ArrayList<>();
 
@@ -83,7 +88,8 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
     }
 
     @Override
-    public List<IpcStopWithDwellTime> getStopsWithAvgDwellTimes(Date beginDate, Date endDate, String routeIdOrShortName,
+    public List<IpcStopWithDwellTime> getStopsWithAvgDwellTimes(LocalDate beginDate, LocalDate endDate,
+                                                                LocalTime beginTime, LocalTime endTime, String routeIdOrShortName,
                                                                 ServiceType serviceType, boolean timePointsOnly,
                                                                 String headsign, boolean readOnly) throws Exception {
 
@@ -97,7 +103,7 @@ public class ReportingServer extends AbstractServer implements ReportingInterfac
         }
 
         List<ArrivalDeparture> arrivalDepartures = ArrivalDeparture.getArrivalsDeparturesFromDb(beginDate,
-                endDate, routeId, serviceType, timePointsOnly, headsign, readOnly);
+                endDate, beginTime, endTime, routeId, serviceType, timePointsOnly, headsign, readOnly);
 
         List<IpcStopWithDwellTime> stopsWithAvgDwellTime = new ArrayList<>();
 

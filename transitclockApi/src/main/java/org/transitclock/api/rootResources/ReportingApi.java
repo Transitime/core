@@ -17,6 +17,7 @@ import org.transitclock.ipc.interfaces.ReportingInterface;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,9 +45,13 @@ public class ReportingApi {
     public Response getArrivalDeparturesByRoute(
             @BeanParam StandardParameters stdParameters,
             @Parameter(description="Begin date to use for retrieving arrival departures",required=true)
-            @QueryParam(value = "beginDate") DateTimeParam beginDate,
+            @QueryParam(value = "beginDate") DateParam beginDate,
             @Parameter(description="End date to use for retrieving arrival departures",required=true)
-            @QueryParam(value = "endDate") DateTimeParam endDate,
+            @QueryParam(value = "endDate") DateParam endDate,
+            @Parameter(description="Begin time of time-band to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "beginTime") TimeParam beginTime,
+            @Parameter(description="End time of time-band to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "endTime") TimeParam endTime,
             @Parameter(description="if set, retrives only arrivalDepartures belonging to the route name specified.",required=false)
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=false)
@@ -71,9 +76,6 @@ public class ReportingApi {
             ReportingInterface reportingInterface =
                     stdParameters.getReportingInterface();
 
-            Date beginDateTime = new Date(beginDate.getTimeStamp());
-            Date endDateTime = new Date(endDate.getTimeStamp());
-
             ServiceType serviceTypeEnum = null;
 
             if(StringUtils.isNotBlank(serviceType)){
@@ -81,7 +83,8 @@ public class ReportingApi {
             }
 
             List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures = reportingInterface.getArrivalsDeparturesForRoute(
-                    beginDateTime, endDateTime, route, serviceTypeEnum, timePointsOnly, headsign,false);
+                    beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(), route,
+                    serviceTypeEnum, timePointsOnly, headsign,false);
 
             Object response = null;
 
@@ -109,9 +112,13 @@ public class ReportingApi {
     public Response getSpeedMapStops(
             @BeanParam StandardParameters stdParameters,
             @Parameter(description="Begin date to use for retrieving arrival departures",required=true)
-            @QueryParam(value = "beginDate") DateTimeParam beginDate,
+            @QueryParam(value = "beginDate") DateParam beginDate,
             @Parameter(description="End date to use for retrieving arrival departures",required=true)
-            @QueryParam(value = "endDate") DateTimeParam endDate,
+            @QueryParam(value = "endDate") DateParam endDate,
+            @Parameter(description="Begin time of time-band to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "beginTime") TimeParam beginTime,
+            @Parameter(description="End time of time-band to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "endTime") TimeParam endTime,
             @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
             @QueryParam(value = "r") String route,
             @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
@@ -130,9 +137,6 @@ public class ReportingApi {
             ReportingInterface reportingInterface =
                     stdParameters.getReportingInterface();
 
-            Date beginDateTime = new Date(beginDate.getTimeStamp());
-            Date endDateTime = new Date(endDate.getTimeStamp());
-
             ServiceType serviceTypeEnum = null;
 
             if(StringUtils.isNotBlank(serviceType)){
@@ -140,7 +144,8 @@ public class ReportingApi {
             }
 
             List<IpcStopWithDwellTime> stopsWithDwellTime = reportingInterface.getStopsWithAvgDwellTimes(
-                    beginDateTime, endDateTime, route, serviceTypeEnum, timePointsOnly, headsign, false);
+                    beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(), route,
+                    serviceTypeEnum, timePointsOnly, headsign, false);
 
             Object response = null;
 

@@ -25,6 +25,7 @@ import org.hibernate.collection.internal.PersistentList;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.internal.SessionImpl;
+import org.joda.time.Days;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,11 @@ import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -217,6 +223,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 	private static final Logger logger = 
 			LoggerFactory.getLogger(ArrivalDeparture.class);
+
+	private static DateTimeFormatter isoDateTimeFormat = DateTimeFormatter.ISO_DATE_TIME;
 
 	// Needed because Hibernate objects must be serializable
 	private static final long serialVersionUID = -2186334947521763886L;
@@ -937,7 +945,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 * @param readOnly
 	 * @return
 	 */
-	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(Date beginTime, Date endTime,
+	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(LocalDate beginDate, LocalDate endDate,
+																	 LocalTime beginTime, LocalTime endTime,
 																	 String routeId, ServiceType serviceType,
 																	 boolean timePointsOnly, String headsign,
 																	 boolean readOnly) throws Exception {
@@ -958,7 +967,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					getStopsJoin() +
 					getTripsJoin(headsign) +
 					"WHERE " +
-					"ad.time between :beginTime AND :endTime " +
+					getTimeWhere(beginDate, endDate, beginTime, endTime) +
 					"AND scheduledTime != null " +
 					getRouteIdWhere(routeId) +
 					getTimePointsWhere(timePointsOnly) +
@@ -968,8 +977,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 
 		try {
 			Query query = session.createQuery(hql);
-			query.setTimestamp("beginTime", beginTime);
-			query.setTimestamp("endTime", endTime);
 
 			List<ArrivalDeparture> results = query.list();
 
@@ -987,6 +994,27 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 			// it might actually be detrimental and slow things down.
 			session.close();
 		}
+	}
+
+	private static String getTimeWhere(LocalDate beginDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime) {
+		String hql = "";
+
+		List<LocalDate> dates = new ArrayList<>();
+		while (!beginDate.isAfter(endDate)) {
+			dates.add(beginDate);
+			beginDate = beginDate.plusDays(1);
+		}
+
+		for(int i=0; i < dates.size(); i++){
+			if(i > 0){
+				hql += " OR ";
+			}
+			LocalDateTime startDateTime = LocalDateTime.of(dates.get(i), beginTime);
+			LocalDateTime endDateTime = LocalDateTime.of(dates.get(i), endTime);
+			hql += String.format(" time between '%s' AND '%s' ",
+					startDateTime.format(isoDateTimeFormat), endDateTime.format(isoDateTimeFormat));
+		}
+		return hql;
 	}
 
 	private static String getRouteIdWhere(String routeId){
