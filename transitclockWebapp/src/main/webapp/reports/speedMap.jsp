@@ -209,11 +209,34 @@
             alert(error + '. ' + request.responseText);
         });
 
+    var routeGroup = L.layerGroup().addTo(map);
     //Set the CLIP_PADDING to a higher value so that when user pans on map
     //the route path doesn't need to be redrawn. Note: leaflet documentation
     //says that this could decrease drawing performance. But hey, it looks
     //better.
     L.Path.CLIP_PADDING = 0.8;0
+
+    /* For drawing the route and stops */
+    var routeOptions = {
+        color: '#00ee00',
+        weight: 4,
+        opacity: 0.4,
+        lineJoin: 'round',
+        clickable: false
+    };
+
+    var stopOptions = {
+        color: '#006600',
+        opacity: 0.4,
+        radius: 4,
+        weight: 2,
+        fillColor: '#006600',
+        fillOpacity: 0.3,
+    };
+
+    var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
+
+    var stopPopupOptions = {closeButton: false};
 
     $("#route").attr("style", "width: 200px");
 
@@ -263,6 +286,40 @@
         $("#highSpeed").attr("min", (parseFloat($("#midSpeed").val()) + 1));
     }
 
+    /**
+     * Reads in route data obtained via AJAX and draws route and stops on map.
+     */
+    function routeConfigCallback(data, status) {
+        // Draw the paths for the route
+
+        var route = data.routes[0];
+
+        for (var i=0; i<route.shape.length; ++i) {
+            var shape = route.shape[i];
+            L.polyline(shape.loc, routeOptions).addTo(routeGroup);
+        }
+    }
+
+    function stopsCallback(data) {
+        data.stops.forEach(function(stop) {
+            // Create the stop Marker
+            var stopMarker = L.circleMarker([stop.lat,stop.lon], stopOptions).addTo(routeGroup);
+
+            // Create popup for stop marker
+
+            var content = $("<table />").attr("class", "popupTable");
+            var labels = ["Stop ID", "Name", "Avg Dwell Time"], keys = ["stopId", "stopName", "dwelltime"];
+            stop['dwelltime'] = "TBD";
+            for (var i = 0; i < labels.length; i++) {
+                var label = $("<td />").attr("class", "popupTableLabel").text(labels[i] + ": ");
+                var value = $("<td />").text(stop[keys[i]]);
+                content.append( $("<tr />").append(label, value) );
+            }
+
+            stopMarker.bindPopup(content[0]);
+        })
+    }
+
     $("#submit").click(function() {
         $("#submit").attr("disabled","disabled");
 
@@ -293,6 +350,12 @@
         request.headsign= $("#direction").val();
         request.serviceType = $("#serviceDayType").val();
 
+        routeGroup.clearLayers();
+        if (request.r != "") {
+            var url = apiUrlPrefix + "/command/routesDetails?r=" + request.r;
+            $.getJSON(url, routeConfigCallback);
+        }
+
         $.ajax({
             url: apiUrlPrefix + "/report/speedmap/stops",
             // Pass in query string parameters to page being requested
@@ -322,7 +385,7 @@
                 }
 
                 $("#paramDetails").html("<p style='font-size: 0.8em;'>Route " + $("#route").val() + " to " + $("#direction").val() + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
-                alert(JSON.stringify(response));
+                stopsCallback(response);
             },
             error: function() {
                 $("#submit").removeAttr("disabled");
