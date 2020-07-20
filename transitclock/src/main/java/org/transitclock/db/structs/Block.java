@@ -679,7 +679,7 @@ public final class Block implements Serializable {
 		int allowableEarlyTimeSecs = 
 				CoreConfig.getAllowableEarlyForLayoverSeconds();
 		if (secsInDayForAvlReport > startTime - allowableEarlyTimeSecs 
-				&& secsInDayForAvlReport < endTime) {
+				&& secsInDayForAvlReport < endTime + CoreConfig.getAllowableLateSeconds()) {
 			tripsThatMatchTime.add(trip);
 
 			if (logger.isDebugEnabled()) {
