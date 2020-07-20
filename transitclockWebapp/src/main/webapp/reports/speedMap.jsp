@@ -11,6 +11,14 @@
     <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+
+    <script src="<%= request.getContextPath() %>/maps/javascript/leafletRotatedMarker.js"></script>
+    <script src="<%= request.getContextPath() %>/maps/javascript/mapUiOptions.js"></script>
+
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/maps/css/mapUi.css" />
+
     <link href="params/reportParams.css" rel="stylesheet"/>
     <style>
         hr {
@@ -26,10 +34,10 @@
 
         #paramsSidebar {
             width: 20%;
+            height: 100%;
             margin-left: 10px;
             float:left;
             border-right: 1px solid black;
-            border-bottom: 1px solid black;
         }
 
         .speedLegend {
@@ -177,14 +185,36 @@
 
     </div>
 
-    <div id="mainPage" style="width: 79%; display: inline-block;">
-        <div id="paramDetails" style="margin-top: 20px; margin-left: 20px;"></div>
-        <div id="map">
+    <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
+        <div id="paramDetails" style="height: 3%; margin-top: 10px; margin-bottom: 10px; margin-left: 20px;"></div>
+        <div id="map" style="height: 94%;">
 
         </div>
     </div>
 
 <script>
+    var map = L.map('map');
+    L.control.scale({metric: false}).addTo(map);
+    L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
+        attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    //fit map to agency boundaries.
+    $.getJSON(apiUrlPrefix + "/command/agencyGroup", function(agencies) {
+        var e = agencies.agency[0].extent;
+        map.fitBounds([[e.minLat, e.minLon], [e.maxLat, e.maxLon]]);
+    })
+        .fail(function(request, status, error) {
+            alert(error + '. ' + request.responseText);
+        });
+
+    //Set the CLIP_PADDING to a higher value so that when user pans on map
+    //the route path doesn't need to be redrawn. Note: leaflet documentation
+    //says that this could decrease drawing performance. But hey, it looks
+    //better.
+    L.Path.CLIP_PADDING = 0.8;0
+
     $("#route").attr("style", "width: 200px");
 
     $("#route").change(function() {
