@@ -66,7 +66,7 @@ public class TemporalMatcher {
 	 * spatial match has the best temporal match. Intended to be used when first
 	 * matching a vehicle to an assignment.
 	 * 
-	 * @param for logging messages
+	 * @param vehicleId for logging messages
 	 * @param date
 	 * @param spatialMatch
 	 * @param isFirstSpatialMatch
@@ -173,7 +173,8 @@ public class TemporalMatcher {
 	 * since the layover time has already passed.
 	 * 
 	 * @param vehicleState
-	 * @param spatialMatches
+	 * @param spatialMatch
+	 * @param expectedTravelTimeMsec
 	 * @return
 	 */
 	private TemporalDifference temporalDifferenceForSpecialLayover(VehicleState vehicleState,
@@ -240,6 +241,7 @@ public class TemporalMatcher {
 	 * @return True if current temporal match is better and should be used
 	 */
 	private static boolean currentMatchIsBetter(
+			AvlReport avlReport,
 			TemporalMatch bestTemporalMatchSoFar, SpatialMatch currentSpatialMatch,
 			TemporalDifference differenceFromExpectedTime) {
 		// If there is no current match then it can't be better
@@ -255,9 +257,18 @@ public class TemporalMatcher {
 		// If the current match is definitely better than can return true
 		if (differenceFromExpectedTime.betterThanOrEqualTo(
 						bestTemporalMatchSoFar.getTemporalDifference())) {
+			if (CoreConfig.tryForExactTripMatch()) {
+				if (!tripMatches(avlReport.getAssignmentType(), avlReport.getAssignmentId(), currentSpatialMatch.getTrip().getId()))
+				{
+					logger.warn("DROPPING preferred assignment {} for better temporal assignment {} for vehicle {}",
+							bestTemporalMatchSoFar.getTrip().getId(),
+							currentSpatialMatch.getTrip().getId(),
+							avlReport.getVehicleId());
+				}
+			}
 			return true;
 		}
-		
+
 		// The current match does not appear better than the old one. But
 		// should see if for the current match the vehicle left early. If it
 		// did leave early then want to use the current match even though 
@@ -345,21 +356,26 @@ public class TemporalMatcher {
 		// Met all the conditions as a problem layover so return true
 		return true;
 	}
-	
+
+	public TemporalMatch getBestTemporalMatch(VehicleState vehicleState,
+											  List<SpatialMatch> spatialMatches) {
+		return getBestTemporalMatch(vehicleState, spatialMatches, false);
+	}
 	/**
 	 * For the spatial matches passed in determines the one that temporally
 	 * makes the most sense. Compares the time elapsed between AVL reports and
 	 * compares that to the expected travel time between the previous and the
 	 * current spatial match. The spatial match which corresponds most to the
 	 * expected travel time is returned as the best temporal match.
-	 * 
+	 *
 	 * @param vehicleState
 	 * @param spatialMatches
+	 * @param tripIdMatchesOnly if set only consider trip-level assignment matches
 	 * @return The best temporal match for the spatial matches passed in. If no
 	 *         valid temporal match found then returns null.
 	 */
 	public TemporalMatch getBestTemporalMatch(VehicleState vehicleState,
-			List<SpatialMatch> spatialMatches) {
+			List<SpatialMatch> spatialMatches, boolean tripIdMatchesOnly) {
 		// Convenience variables		
 		SpatialMatch previousMatch = vehicleState.getMatch();
 		Date previousAvlTime =
@@ -374,11 +390,21 @@ public class TemporalMatcher {
 		  logger.debug("greedily matching to only spatial assigment for frequency based trip {}", spatialMatches.get(0).getTrip());
 		  return new TemporalMatch(spatialMatches.get(0), new TemporalDifference(0));
 		}
-		
+
 		// Find best temporal match of the spatial matches
 		TemporalMatch bestTemporalMatchSoFar = null;
 		for (int matchIdx = 0; matchIdx < spatialMatches.size(); ++matchIdx) {
 			SpatialMatch spatialMatch = spatialMatches.get(matchIdx);
+
+			if (tripIdMatchesOnly
+					&& !tripMatches(vehicleState.getAvlReport().getAssignmentType(),
+						vehicleState.getAvlReport().getAssignmentId(),
+						spatialMatch.getTrip().getId())) {
+				// we are in strict trip matching mode and this spatial assignment doesn't match
+				// if we can't match strictly we will try again in lenient mode
+				continue;
+			}
+
 			logger.debug("Examining spatial match {}", spatialMatch);
 			
 			// There is a complication with vehicles leaving a layover slightly 
@@ -482,7 +508,7 @@ public class TemporalMatcher {
 					
 			// If this temporal match is better than the previous best one
 			// then remember it. 
-			if (currentMatchIsBetter(bestTemporalMatchSoFar, spatialMatch,
+			if (currentMatchIsBetter(avlReport, bestTemporalMatchSoFar, spatialMatch,
 					differenceFromExpectedTime)) {
 				bestTemporalMatchSoFar = new TemporalMatch(spatialMatch,
 						differenceFromExpectedTime);
@@ -509,34 +535,50 @@ public class TemporalMatcher {
 		// Return the best temporal match (if there is one)
 		return bestTemporalMatchSoFar;
 	}
-	
+
+	public TemporalMatch getBestTemporalMatchComparedToSchedule(
+			AvlReport avlReport, List<SpatialMatch> spatialMatches) {
+		return getBestTemporalMatchComparedToSchedule(avlReport, spatialMatches, false);
+	}
+
 	/**
 	 * From the list of spatial matches passed in, determines which one has the
 	 * best valid temporal match. Intended to be used when first matching a
 	 * vehicle to an assignment. Does not use previous AVL report to determine
 	 * if there is a match.
-	 * 
+	 *
+	 * @param avlReport
 	 * @param spatialMatches
 	 *            The spatial matches to examine
+	 * @param tripIdMatchesOnly strict matching to assignment
 	 * @return The match passed in that best matches temporally where vehicle
 	 *         should be. Returns null if no adequate temporal match.
 	 */
 	public TemporalMatch getBestTemporalMatchComparedToSchedule(
-			AvlReport avlReport, List<SpatialMatch> spatialMatches) {
+			AvlReport avlReport, List<SpatialMatch> spatialMatches, boolean tripIdMatchesOnly) {
 		TemporalDifference bestDifferenceFromExpectedTime = null;
 		SpatialMatch bestSpatialMatch = null;
 		
 		
 		logger.debug("getBestTemporalMatchComparedToSchedule has spatialMatches {}", spatialMatches);
 		
-	  if (spatialMatches.size() == 1 && spatialMatches.get(0).getTrip().isNoSchedule()) {
-	    // again we blindly trust avl assignment if its the only match
-      logger.debug("greedily matching to only scheduled spatial assigment for frequency based trip {}", spatialMatches.get(0).getTrip());
-      return new TemporalMatch(spatialMatches.get(0), new TemporalDifference(0));
-    }
-		
+	    if (spatialMatches.size() == 1 && spatialMatches.get(0).getTrip().isNoSchedule()) {
+	      // again we blindly trust avl assignment if its the only match
+          logger.debug("greedily matching to only scheduled spatial assigment for frequency based trip {}", spatialMatches.get(0).getTrip());
+          return new TemporalMatch(spatialMatches.get(0), new TemporalDifference(0));
+    	}
+
 		for (int i=0; i<spatialMatches.size(); ++i) {	
 			SpatialMatch spatialMatch = spatialMatches.get(i);
+
+			if (tripIdMatchesOnly
+					&& !tripMatches(avlReport.getAssignmentType(),
+							avlReport.getAssignmentId(),
+							spatialMatch.getTrip().getId())) {
+				// we are in strict trip matching mode, do not consider this trip
+				// if this entire cycle fails we will try again in lenient trip matching mode
+				continue;
+			}
 			
 			// If not at wait stop then determine temporal match based on 
 			// how long it should take vehicle to travel from the beginning
@@ -574,7 +616,17 @@ public class TemporalMatcher {
 			return null;
 		}
 	}
-	
+
+	private static boolean tripMatches(AvlReport.AssignmentType assignmentType, String assignmentId, String tripId) {
+		if (tripId == null) return false;
+
+		if (Core.getInstance().getDbConfig().getServiceIdSuffix()) {
+			return AvlReport.AssignmentType.TRIP_ID.equals(assignmentType)
+					&& tripId.split("-")[0].equals(assignmentId);
+		}
+		return AvlReport.AssignmentType.TRIP_ID.equals(assignmentType) && tripId.equals(assignmentId);
+	}
+
 	/**
 	 * Determines if can make it to beginning of trip in time.
 	 * 

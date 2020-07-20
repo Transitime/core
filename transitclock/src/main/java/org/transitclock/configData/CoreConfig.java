@@ -776,5 +776,15 @@ public class CoreConfig {
 	        "transitclock.core.fillHistoricalCaches",
 	        false,
 	        "whether historical caches should be filled on Core start.");
-	
+
+	private static BooleanConfigValue strictTripAssignmentMatch =
+			new BooleanConfigValue(
+					"transitclock.core.strictTripAssignmentMatch",
+					false,
+					"AVL trip assignments are trusted, do not discard for block assignment.  Retain the" +
+							"temporal implications of the trip assignment");
+
+	public static boolean tryForExactTripMatch() {
+		return strictTripAssignmentMatch.getValue();
+	}
 }
