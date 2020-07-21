@@ -56,7 +56,7 @@ public class ApiAverageRunTime {
 		if(numberOfTrips == 0){
 			this.averageRunTime = null;
 		} else{
-			this.averageRunTime = MathUtils.round(summaryStatistics.getAverage(), 1);
+			this.averageRunTime = MathUtils.round(summaryStatistics.getAverage(), 0);
 		}
 
 	}
