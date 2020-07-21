@@ -219,6 +219,17 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	)
 	private Stop stop;
 
+	// Fetches first Trip that matches tripId and configRev
+	// Does NOT take frequencyTime into consideration
+	// TODO - add trip startTime as seconds to ArrivalDeparture and join on that
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumnsOrFormulas({
+			@JoinColumnOrFormula(column = @JoinColumn(updatable=false,insertable=false, name="tripId", referencedColumnName="tripId")),
+			@JoinColumnOrFormula(column = @JoinColumn(updatable=false,insertable=false, name="configRev", referencedColumnName="configRev")),
+			@JoinColumnOrFormula(formula = @JoinFormula(value="(SELECT t.startTime FROM Trips t WHERE t.tripId = tripId AND t.configRev = configRev LIMIT 1)", referencedColumnName="startTime"))
+	})
+	private Trip trip;
+
 	public enum ArrivalsOrDepartures {ARRIVALS, DEPARTURES};
 
 	private static final Logger logger = 
@@ -949,7 +960,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 																	 LocalTime beginTime, LocalTime endTime,
 																	 String routeId, ServiceType serviceType,
 																	 boolean timePointsOnly, String headsign,
-																	 boolean readOnly) throws Exception {
+																	 boolean fetchTrip, boolean readOnly) throws Exception {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
@@ -965,7 +976,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					getTimePointsJoin(timePointsOnly) +
 					getServiceTypeJoin(serviceType) +
 					getStopsJoin() +
-					getTripsJoin(headsign) +
+					getTripsJoin(headsign, fetchTrip) +
 					"WHERE " +
 					getTimeWhere(beginDate, endDate, beginTime, endTime) +
 					"AND scheduledTime != null " +
@@ -1074,9 +1085,13 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		return "AND ad.configRev = s.configRev AND ad.stopId = s.id ";
 	}
 
-	private static String getTripsJoin(String headsign){
+	private static String getTripsJoin(String headsign, boolean fetchTrip){
 		if(StringUtils.isNotBlank(headsign)){
-			return ", Trip t ";
+			if(fetchTrip){
+				return " JOIN FETCH ad.trip t ";
+			}else {
+				return ", Trip t ";
+			}
 		}
 		return "";
 	}
@@ -1255,4 +1270,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	public Stop getStopFromDb() {
 		return stop;
 	}
+
+	public Trip getTripFromDb() { return trip; }
 }

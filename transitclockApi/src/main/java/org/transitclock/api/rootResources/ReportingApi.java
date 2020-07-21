@@ -3,6 +3,7 @@ package org.transitclock.api.rootResources;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.commons.lang3.StringUtils;
+import org.transitclock.api.data.ApiAverageRunTime;
 import org.transitclock.api.data.ApiStopWithDwellTime;
 import org.transitclock.api.data.ApiStopsWithDwellTime;
 import org.transitclock.api.data.reporting.OnTimePerformanceData;
@@ -11,6 +12,7 @@ import org.transitclock.api.utils.StandardParameters;
 import org.transitclock.api.utils.WebUtils;
 import org.transitclock.core.ServiceType;
 import org.transitclock.ipc.data.IpcArrivalDepartureScheduleAdherence;
+import org.transitclock.ipc.data.IpcDoubleSummaryStatistics;
 import org.transitclock.ipc.data.IpcStopWithDwellTime;
 import org.transitclock.ipc.interfaces.ReportingInterface;
 
@@ -20,6 +22,7 @@ import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 
 /**
@@ -153,6 +156,63 @@ public class ReportingApi {
                 ApiStopsWithDwellTime apiStopsWithDwellTime = new ApiStopsWithDwellTime(stopsWithDwellTime);
                 response = apiStopsWithDwellTime;
             }
+            return stdParameters.createResponse(response);
+        } catch (Exception e) {
+            // If problem getting data then return a Bad Request
+            throw WebUtils.badRequestException(e);
+        }
+
+    }
+
+
+    @Path("/report/speedmap/runTime")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Operation(summary="Gets arrival / departures for date range and route",
+            description="Retrives a list of arrival departures for a specified date range "
+                    + "Optionally can be filered accorditn to routesIdOrShortNames params."
+                    + "Every trip is associated with a block.",tags= {"prediction","trip","block","route","vehicle"})
+    public Response getSpeedMapRunTime(
+            @BeanParam StandardParameters stdParameters,
+            @Parameter(description="Begin date to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "beginDate") DateParam beginDate,
+            @Parameter(description="End date to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "endDate") DateParam endDate,
+            @Parameter(description="Begin time of time-band to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "beginTime") TimeParam beginTime,
+            @Parameter(description="End time of time-band to use for retrieving arrival departures",required=true)
+            @QueryParam(value = "endTime") TimeParam endTime,
+            @Parameter(description="Retrives only arrivalDepartures belonging to the route name specified.",required=true)
+            @QueryParam(value = "r") String route,
+            @Parameter(description="Retrives only arrivalDepartures belonging to the headsign specified.",required=true)
+            @QueryParam(value = "headsign") String headsign,
+            @Parameter(description="if set, retrives only arrivalDepartures belonging to the serviceType (Weekday, Saturday,Sunday",required=false)
+            @QueryParam(value = "serviceType") String serviceType)
+            throws WebApplicationException {
+
+        // Make sure request is valid
+        stdParameters.validate();
+
+        try {
+            // Get active block data from server
+            ReportingInterface reportingInterface =
+                    stdParameters.getReportingInterface();
+
+            ServiceType serviceTypeEnum = null;
+
+            if(StringUtils.isNotBlank(serviceType)){
+                serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
+            }
+
+            IpcDoubleSummaryStatistics summaryStatistics = reportingInterface.getAverageRunTime(beginDate.getDate(), endDate.getDate(),
+                    beginTime.getTime(), endTime.getTime(), route, serviceTypeEnum, false,
+                    headsign, false);
+
+            Object response = null;
+
+           ApiAverageRunTime apiAverageRunTime = new ApiAverageRunTime(summaryStatistics);
+           response = apiAverageRunTime;
+
             return stdParameters.createResponse(response);
         } catch (Exception e) {
             // If problem getting data then return a Bad Request
