@@ -93,6 +93,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	private static final Logger logger =
 			LoggerFactory.getLogger(ArrivalDepartureGeneratorDefaultImpl.class);
 
+
+
 	/********************** Config Params **************************/
 
 	/**
@@ -145,9 +147,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					+ "wrong and the situation will be logged.");
 
 	/**
-	 * If between AVL reports the vehicle appears to traverse many stops then
-	 * something is likely wrong with the matching. So this parameter is used
-	 * to limit how many arrivals/departures are created between AVL reports.
+	 * Specify minimum allowable time in msec when calculating dwell time for departures.
 	 * @return
 	 */
 	private static long getMinAllowableDwellTime() {
@@ -156,13 +156,11 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	private static LongConfigValue minAllowableDwellTime =
 			new LongConfigValue(
 					"transitclock.arrivalsDepartures.minAllowableDwellTimeMsec",
-					1000l,
+					1l * Time.MS_PER_SEC,
 					"Specify minimum allowable time in msec when calculating dwell time for departures.");
 
 	/**
-	 * If between AVL reports the vehicle appears to traverse many stops then
-	 * something is likely wrong with the matching. So this parameter is used
-	 * to limit how many arrivals/departures are created between AVL reports.
+	 * Specifying the Max allowable time when calculating dwell time for departures.
 	 * @return
 	 */
 	private static long getMaxAllowableDwellTime() {
@@ -173,6 +171,20 @@ public class ArrivalDepartureGeneratorDefaultImpl
 					"transitclock.arrivalsDepartures.maxAllowableDwellTimeMsec",
 					60l * Time.MS_PER_MIN,
 					"Specify maximum allowable time in msec when calculating dwell time for departures.");
+
+	/**
+	 * Specifying the Max allowable time when calculating dwell time for departures.
+	 * @return
+	 */
+	private static long getDefaultArrivalDepartureBufferTime() {
+		return defaultArrivalDepartureBufferTime.getValue();
+	}
+	private static LongConfigValue defaultArrivalDepartureBufferTime =
+			new LongConfigValue(
+					"transitclock.arrivalsDepartures.defaultArrivalDepartureBufferTime",
+					1l,
+					"Used when correcting situation where arrival time is after departure time. Default " +
+							   "time to use when specifying amount of time between arrival and departure.");
 
 	/********************** Member Functions **************************/
 
@@ -341,6 +353,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	protected Arrival createArrivalTime(VehicleState vehicleState,
 			long arrivalTime, Block block, int tripIndex, int stopPathIndex) {
 		// Store the arrival in the database via the db logger
+
+		vehicleState.getTrip().getStartTime();
 
 		Date freqStartDate=null;
 		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
@@ -755,7 +769,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				long newArrivalTime = previousAvlReport.getTime()
 						+ Math.round(ratio
 								* originalTimeBetweenOldAvlAndArrival);
-				long newDepartureTime = newArrivalTime + 1;
+				long newDepartureTime = newArrivalTime + getDefaultArrivalDepartureBufferTime();
 
 				if (logger.isDebugEnabled()) {
 					logger.debug("vehicleId={} determined departure time was "
