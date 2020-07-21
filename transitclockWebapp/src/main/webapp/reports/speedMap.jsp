@@ -186,8 +186,13 @@
     </div>
 
     <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
-        <div id="paramDetails" style="height: 3%; margin-top: 10px; margin-bottom: 10px; margin-left: 20px;"></div>
-        <div id="map" style="height: 94%;">
+        <div id="paramDetails" style="height: 3%; float: left; margin-left: 20px; width: 60%;">
+            <p style='font-size: 0.8em;'></p>
+        </div>
+        <div id="avgRunTime" style="display: inline-block; float: right; margin-right: 20px; width: 30%; text-align: right">
+            <p style='font-size: 0.8em;'></p>
+        </div>
+        <div id="map" style="height: 90%; width: 90%; margin: auto;">
 
         </div>
     </div>
@@ -308,8 +313,18 @@
             // Create popup for stop marker
 
             var content = $("<table />").attr("class", "popupTable");
-            var labels = ["Stop ID", "Name", "Avg Dwell Time"], keys = ["stopId", "stopName", "dwelltime"];
-            stop['dwelltime'] = "TBD";
+            var labels = ["Stop ID", "Name", "Avg Dwell Time"], keys = ["stopId", "stopName", "avgDwellTime"];
+            if (typeof stop['avgDwellTime'] == 'undefined') {
+                stop['avgDwellTime'] = '';
+            }
+            else {
+                var dwellTimeMinutes = parseInt(stop['avgDwellTime'] / 60).toString();
+                var dwellTimeSeconds = parseInt(stop['avgDwellTime'] % 60).toString();
+                if (dwellTimeSeconds.length == 1) {
+                    dwellTimeSeconds = "0" + dwellTimeSeconds;
+                }
+                stop['avgDwellTime'] = dwellTimeMinutes + ":" + dwellTimeSeconds;
+            }
             for (var i = 0; i < labels.length; i++) {
                 var label = $("<td />").attr("class", "popupTableLabel").text(labels[i] + ": ");
                 var value = $("<td />").text(stop[keys[i]]);
@@ -321,19 +336,18 @@
     }
 
     $("#submit").click(function() {
-        $("#submit").attr("disabled","disabled");
+        $("#submit").attr("disabled", "disabled");
 
         if ($("#beginDate").val() == "Date range") {
             var today = new Date();
             var beginDate = endDate = today.getFullYear() + "-"
                 + (today.getMonth() <= 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))
                 + "-" + (today.getDate() < 10 ? "0" + today.getDate() : today.getDate());
-        }
-        else {
+        } else {
             var dateRangeStrings = $("#beginDate").val().replace(/\s/g, "").split("-");
             var beginYear = "20" + dateRangeStrings[0];
             var endYear = "20" + dateRangeStrings[3];
-            var beginDate = [beginYear,  dateRangeStrings[1],  dateRangeStrings[2]].join("-");
+            var beginDate = [beginYear, dateRangeStrings[1], dateRangeStrings[2]].join("-");
             var endDate = [endYear, dateRangeStrings[4], dateRangeStrings[5]].join("-");
         }
 
@@ -347,7 +361,7 @@
         request.beginTime = beginTime;
         request.endTime = endTime;
         request.r = $("#route").val();
-        request.headsign= $("#direction").val();
+        request.headsign = $("#direction").val();
         request.serviceType = $("#serviceDayType").val();
 
         routeGroup.clearLayers();
@@ -362,8 +376,8 @@
             data: request,
             // Needed so that parameters passed properly to page being requested
             traditional: true,
-            dataType:"json",
-            success: function(response) {
+            dataType: "json",
+            success: function (response) {
                 $("#submit").removeAttr("disabled");
                 var beginDateArray = beginDate.split("-");
                 var endDateArray = endDate.split("-");
@@ -385,12 +399,39 @@
                 }
 
                 $("#paramDetails").html("<p style='font-size: 0.8em;'>Route " + $("#route").val() + " to " + $("#direction").val() + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
+
                 stopsCallback(response);
             },
-            error: function() {
+            error: function () {
                 $("#submit").removeAttr("disabled");
-                alert("Error processing request.");
+                alert("Error processing stop details.");
+            }
+        })
+
+        $.ajax({
+            url: apiUrlPrefix + "/report/speedmap/runTime",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            success: function (response) {
+                if (response.numberOfTrips == 0) {
+                    $("#avgRunTime").html("<p style='font-size: 0.8em;'>No average run time data.</p>");
+                }
+                else {
+                    var runTimeMinutes = parseInt(response.averageRunTime / 60000).toString();
+                    var runTimeSeconds = parseInt(response.averageRunTime % 60000 / 1000).toString();
+                    if (runTimeSeconds.length == 1) {
+                        runTimeSeconds = "0" + runTimeSeconds;
+                    }
+                    $("#avgRunTime").html("<p style='font-size: 0.8em;'>Average Trip Run Time: " + runTimeMinutes + ":" + runTimeSeconds + "</p>");
+                }
+            },
+            error: function () {
+                alert("Error processing average trip run time.");
             }
         })
     })
+
 </script>
