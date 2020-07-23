@@ -197,20 +197,18 @@
     </div>
 
     <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
-        <div id="paramDetails" style="height: 3%; float: left; margin-left: 20px; width: 60%;">
+        <div id="paramDetailsTop" class="paramDetails" style="height: 3%; float: left; margin-left: 20px; width: 60%;">
             <p style='font-size: 0.8em;'></p>
         </div>
-        <div id="avgRunTime" style="display: inline-block; float: right; margin-right: 20px; margin-bottom: 20px; width: 30%; text-align: right"></div>
+        <div id="avgRunTimeTop" class="avgRunTime" style="display: inline-block; float: right; margin-right: 20px; margin-bottom: 20px; width: 30%; text-align: right"></div>
         <div id="runTimesFlyout" hidden="true">
             <div id="flyoutContents" style="margin-right: 10px; margin-left: 20px; margin-top: 10px;">
                 <div id="runTimesHeader" style="text-align: left; vertical-align: middle; font-size: medium">
                     Trip Run Time Comparison
                     <button id='closeFlyout' type='button' style='float:right;'>&times;</button>
                 </div>
-
-                <div id="runTimeParams">
-
-                </div>
+                <div id="paramDetailsFlyout" class="paramDetails"></div>
+                <div id="avgRunTimeFlyout" class="avgRunTime"></div>
             </div>
         </div>
         <div id="map" style="height: 90%; width: 90%; margin: auto;">
@@ -356,10 +354,6 @@
         })
     }
 
-    function flyout() {
-       $("#runTimesFlyout").show();
-    }
-
     $("#submit").click(function() {
         $("#submit").attr("disabled", "disabled");
         $("#runTimesFlyout").hide();
@@ -424,7 +418,9 @@
                     serviceDayString = "All days";
                 }
 
-                $("#paramDetails").html("<p style='font-size: 0.8em;'>Route " + $("#route").val() + " to " + $("#direction").val() + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
+                $(".paramDetails").each(function() {
+                    $(this).html("<p style='font-size: 0.8em;'>Route " + $("#route").val() + " to " + $("#direction").val() + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
+                })
 
                 stopsCallback(response);
             },
@@ -442,11 +438,10 @@
             traditional: true,
             dataType: "json",
             success: function (response) {
-                var compareLink = "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; color: blue; text-decoration: underline; cursor: pointer' onclick='flyout()'>Compare</a>";
+                var compareLink = "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; color: blue; text-decoration: underline; cursor: pointer' onclick='openFlyout()'>Compare</a>";
 
                 if (response.numberOfTrips == 0) {
-                    $("#avgRunTime").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>No average run time data.</p>"
-                        + compareLink);
+                    $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>No average run time data.</p>" + compareLink);
                 }
                 else {
                     var runTimeMinutes = parseInt(response.averageRunTime / 60000).toString();
@@ -454,8 +449,7 @@
                     if (runTimeSeconds.length == 1) {
                         runTimeSeconds = "0" + runTimeSeconds;
                     }
-                    $("#avgRunTime").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>Average Trip Run Time: " + runTimeMinutes + ":" + runTimeSeconds + "</p>"
-                        + compareLink);
+                    $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>Average Trip Run Time: " + runTimeMinutes + ":" + runTimeSeconds + "</p>" + compareLink);
                 }
             },
             error: function () {
@@ -463,6 +457,11 @@
             }
         })
     })
+
+    function openFlyout() {
+        $("#avgRunTimeFlyout").html($("#avgRunTimeTop > p").html()).css("font-size", "0.8em");
+        $("#runTimesFlyout").show();
+    }
 
     $("#closeFlyout").click(function() {
         $("#runTimesFlyout").hide();
