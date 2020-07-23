@@ -58,7 +58,7 @@ public class ApiStopLevel {
             services = Integer.parseInt(numberOfServices);
         } catch (NumberFormatException nfe) {
             services = 3;
-            // we just ignore an invalide service count
+            // we just ignore an invalid service count
         }
         isValid = rsn.getValidCode();
         errorDescription = rsn.getErrorDescription();
@@ -73,6 +73,13 @@ public class ApiStopLevel {
                     }
                 }
             }
+        }
+
+        // now set the services to be what was actually provided
+        this.numberOfServices = String.valueOf(servicesCount);
+        if (servicesCount == 0) {
+            this.errorDescription = "Route and Stop combination yielded no predictions";
+            this.isValid = 0;
         }
     }
 
