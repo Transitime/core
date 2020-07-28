@@ -190,7 +190,7 @@ public class StopPath implements Serializable, Lifecycle {
 	 * Needed because Hibernate requires no-arg constructor
 	 */
 	@SuppressWarnings("unused")
-	private StopPath() {
+	public StopPath() {
 		this.configRev = -1;
 		this.stopPathId = null;
 		this.stopId = null;
