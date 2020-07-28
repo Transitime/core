@@ -65,6 +65,7 @@ public class VehicleState {
 	// So can make sure that departure time is after the arrival time
 	private Arrival arrivalToStoreToDb;
 	private long lastArrivalTime = 0;
+	private Date lastAvlTime = null;
 
 	// So can keep track of whether assigning vehicle to same block that
 	// just got unassigned for. The unassignedTime member is the time when the
@@ -995,6 +996,14 @@ public class VehicleState {
 	 */
 	public long getLastArrivalTime() {
 		return lastArrivalTime;
+	}
+
+	public Date getLastAvlTime() {
+		return lastAvlTime;
+	}
+
+	public void setLastAvlTime(Date lastAvlTime) {
+		this.lastAvlTime = lastAvlTime;
 	}
 
 	public int getBadAssignmentsInARow() {

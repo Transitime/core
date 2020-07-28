@@ -328,9 +328,17 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		}
 
 		String stopPathId = block.getStopPath(tripIndex, stopPathIndex).getId();
+
+		Date avlTime=null;
+		if(vehicleState.getLastAvlTime() != vehicleState.getAvlReport().getDate()){
+			avlTime = vehicleState.getLastAvlTime();
+		} else{
+			avlTime = vehicleState.getAvlReport().getDate();
+		}
+
 		Departure departure = new Departure(vehicleState.getVehicleId(),
 				new Date(departureTime),
-				vehicleState.getAvlReport().getDate(),
+				avlTime,
 				block,
 				tripIndex,
 				stopPathIndex,
@@ -381,6 +389,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// departures are for after the arrival time.
 		if (arrivalTime > vehicleState.getLastArrivalTime())
 			vehicleState.setLastArrivalTime(arrivalTime);
+
+		vehicleState.setLastAvlTime(vehicleState.getAvlReport().getDate());
 
 		return arrival;
 	}
