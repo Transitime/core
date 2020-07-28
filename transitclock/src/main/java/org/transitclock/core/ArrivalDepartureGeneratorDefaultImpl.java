@@ -317,7 +317,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param stopPathIndex
 	 */
 	protected Departure createDepartureTime(VehicleState vehicleState,
-											long departureTime, Block block, int tripIndex, int stopPathIndex, Long dwellTime) {
+											long departureTime, Block block, int tripIndex, int stopPathIndex,
+											Long dwellTime) {
 		// Store the departure in the database via the db logger
 
 		Date freqStartDate=null;
@@ -326,6 +327,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			freqStartDate = new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter()));
 		}
 
+		String stopPathId = block.getStopPath(tripIndex, stopPathIndex).getId();
 		Departure departure = new Departure(vehicleState.getVehicleId(),
 				new Date(departureTime),
 				vehicleState.getAvlReport().getDate(),
@@ -333,7 +335,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 				tripIndex,
 				stopPathIndex,
 				freqStartDate,
-				dwellTime);
+				dwellTime,
+				stopPathId);
 		updateCache(vehicleState, departure);
 		logger.debug("Creating departure: {}", departure);
 		return departure;
@@ -354,20 +357,22 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			long arrivalTime, Block block, int tripIndex, int stopPathIndex) {
 		// Store the arrival in the database via the db logger
 
-		vehicleState.getTrip().getStartTime();
-
 		Date freqStartDate=null;
 		if(vehicleState.getTripStartTime(vehicleState.getTripCounter())!=null)
 		{
 			freqStartDate = new Date(vehicleState.getTripStartTime(vehicleState.getTripCounter()));
 		}
 
+		String stopPathId = block.getStopPath(tripIndex, stopPathIndex).getId();
+
 		Arrival arrival = new Arrival(vehicleState.getVehicleId(),
 				new Date(arrivalTime),
 				vehicleState.getAvlReport().getDate(),
 				block,
 				tripIndex,
-				stopPathIndex, freqStartDate);
+				stopPathIndex,
+				freqStartDate,
+				stopPathId);
 		
 		updateCache(vehicleState, arrival);
 		logger.debug("Creating arrival: {}", arrival);

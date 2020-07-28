@@ -48,14 +48,14 @@ public class Departure extends ArrivalDeparture {
 	 * @param dwellTime
 	 */
 	public Departure(String vehicleId, Date time, Date avlTime, Block block,
-					 int tripIndex, int stopPathIndex, Date freqStartTime, Long dwellTime) {
+					 int tripIndex, int stopPathIndex, Date freqStartTime, Long dwellTime, String stopPathId) {
 		super(vehicleId, time, avlTime, block, tripIndex, stopPathIndex, 
-				false, freqStartTime, dwellTime);
+				false, freqStartTime, dwellTime, stopPathId);
 	}
 	public Departure(int configRev, String vehicleId, Date time, Date avlTime, Block block,
-					 int tripIndex, int stopPathIndex, Date freqStartTime, Long dwellTime) {
+					 int tripIndex, int stopPathIndex, Date freqStartTime, Long dwellTime, String stopPathId) {
 		super(configRev, vehicleId, time, avlTime, block, tripIndex, stopPathIndex, 
-				false, freqStartTime, dwellTime);
+				false, freqStartTime, dwellTime, stopPathId);
 	}
 	/**
 	 * Hibernate always wants a no-arg constructor. Made private since 

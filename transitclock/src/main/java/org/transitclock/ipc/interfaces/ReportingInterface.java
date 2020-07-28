@@ -1,14 +1,11 @@
 package org.transitclock.ipc.interfaces;
 
 import org.transitclock.core.ServiceType;
-import org.transitclock.ipc.data.IpcArrivalDepartureScheduleAdherence;
-import org.transitclock.ipc.data.IpcDoubleSummaryStatistics;
-import org.transitclock.ipc.data.IpcStopWithDwellTime;
+import org.transitclock.ipc.data.*;
 
 import java.rmi.Remote;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
 
 /**
@@ -33,6 +30,10 @@ public interface ReportingInterface extends Remote {
                                                          LocalTime beginTime, LocalTime endTime, String routeIdOrShortName,
                                                          ServiceType serviceType, boolean timePointsOnly, String headsign,
                                                          boolean readOnly) throws Exception;
+
+    List<IpcStopPathWithSpeed> getStopPathsWithSpeed(LocalDate beginDate, LocalDate endDate,
+                                                     LocalTime beginTime, LocalTime endTime,
+                                                     String routeIdOrShortName, String headsign, boolean readOnly) throws Exception;
 
     IpcDoubleSummaryStatistics getAverageRunTime(LocalDate beginDate, LocalDate endDate,
                                                  LocalTime beginTime, LocalTime endTime, String routeIdOrShortName,
