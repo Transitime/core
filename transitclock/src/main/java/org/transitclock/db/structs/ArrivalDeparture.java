@@ -1151,13 +1151,6 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 		}
 		return "";
 	}
-
-	/**
-	 * Returns the trip short name for the trip associated with the
-	 * arrival/departure.
-		}
-		return "";
-	}
 	
 	public String getVehicleId() {
 		return vehicleId;
