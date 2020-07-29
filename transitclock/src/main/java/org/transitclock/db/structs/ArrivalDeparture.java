@@ -1055,13 +1055,12 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	}
 
 	private static String getTripsJoin(String headsign, boolean includeTrip){
-		if(StringUtils.isNotBlank(headsign)){
-			if(includeTrip){
-				return " JOIN FETCH ad.trip t ";
-			}else {
-				return ", Trip t ";
-			}
+		if(includeTrip){
+			return " JOIN FETCH ad.trip t ";
+		}else if(StringUtils.isNotBlank(headsign)){
+			return ", Trip t ";
 		}
+
 		return "";
 	}
 
