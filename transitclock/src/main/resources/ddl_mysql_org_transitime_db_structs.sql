@@ -144,6 +144,17 @@
         primary key (routeId, originId, fareId, destinationId, containsId, configRev)
     );
 
+    create table FeedInfo (
+        feedPublisherName varchar(60) not null,
+        feedPublisherUrl longtext not null,
+        configRev integer not null,
+        feedVersion varchar(120),
+        feedLanguage varchar(15) not null,
+        feedStartDate date,
+        feedEndDate date,
+        primary key (feedPublisherName, configRev)
+    );
+
     create table Frequencies (
         tripId varchar(60) not null,
         startTime integer not null,

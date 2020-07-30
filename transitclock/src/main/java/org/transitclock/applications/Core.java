@@ -27,6 +27,8 @@ import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.ServiceUtils;
 import org.transitclock.core.TimeoutHandlerModule;
+import org.transitclock.core.dataCache.CacheTask;
+import org.transitclock.core.dataCache.ParallelProcessor;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.core.dataCache.StopArrivalDepartureCacheFactory;
 import org.transitclock.core.dataCache.TripDataHistoryCacheFactory;
@@ -430,41 +432,50 @@ public class Core {
 			}
 		}else
 		{
+			ParallelProcessor pp = new ParallelProcessor();
+			pp.startup();
 			for(int i=0;i<CoreConfig.getDaysPopulateHistoricalCache();i++)
 			{
 				Date startDate=DateUtils.addDays(endDate, -1);
 
 				if(TripDataHistoryCacheFactory.getInstance()!=null)
 				{
-					logger.info("Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
-					TripDataHistoryCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-					logger.info("Finished Populating TripDataHistoryCache cache for period {} to {}",startDate,endDate);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.TripDataHistoryCacheFactory);
+					pp.enqueue(ct);
 				}
 
 				// Only need to populate two days worth of stop arrival departure cache
 				if(i < 2 && StopArrivalDepartureCacheFactory.getInstance()!=null)
 				{
-					logger.info("Populating StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
-					StopArrivalDepartureCacheFactory.getInstance().populateCacheFromDb(session, startDate, endDate);
-					logger.info("Finished StopArrivalDepartureCache cache for period {} to {}",startDate,endDate);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.StopArrivalDepartureCacheFactory);
+					pp.enqueue(ct);
 				}
 
 				if(FrequencyBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					logger.info("Populating FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
-					FrequencyBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-					logger.info("Finished FrequencyBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.FrequencyBasedHistoricalAverageCache);
+					pp.enqueue(ct);
 				}
 
 				if(ScheduleBasedHistoricalAverageCache.getInstance()!=null)
 				{
-					logger.info("Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
-					ScheduleBasedHistoricalAverageCache.getInstance().populateCacheFromDb(session, startDate, endDate);
-					logger.info("Finished Populating ScheduleBasedHistoricalAverageCache cache for period {} to {}",startDate,endDate);
+					CacheTask ct = new CacheTask(startDate, endDate, CacheTask.Type.ScheduleBasedHistoricalAverageCache);
+					pp.enqueue(ct);
 				}
 
 				endDate=startDate;
 			}
+			// don't continue until caches are ready!
+			while (!pp.isDone()) {
+				try {
+					logger.info("waiting on caching to complete with {} in run queue, {} in wait queue ", pp.getRunQueueSize(), pp.getWaitQueueSize() );
+					Thread.sleep(10 * 1000);
+				} catch (InterruptedException ie) {
+					return;
+				}
+			}
+			// clean up after ourselves -- releasing threads
+			pp.shutdown();
 		}		
 	
 	}

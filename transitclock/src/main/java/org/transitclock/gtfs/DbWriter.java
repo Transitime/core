@@ -23,20 +23,7 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.configData.DbSetupConfig;
-import org.transitclock.db.hibernate.HibernateUtils;
-import org.transitclock.db.structs.Agency;
-import org.transitclock.db.structs.Block;
-import org.transitclock.db.structs.Calendar;
-import org.transitclock.db.structs.CalendarDate;
-import org.transitclock.db.structs.FareAttribute;
-import org.transitclock.db.structs.FareRule;
-import org.transitclock.db.structs.Frequency;
-import org.transitclock.db.structs.Route;
-import org.transitclock.db.structs.Stop;
-import org.transitclock.db.structs.Transfer;
-import org.transitclock.db.structs.TravelTimesForTrip;
-import org.transitclock.db.structs.Trip;
-import org.transitclock.db.structs.TripPattern;
+import org.transitclock.db.structs.*;
 import org.transitclock.utils.IntervalTimer;
 
 /**
@@ -187,6 +174,12 @@ public class DbWriter {
 		Transfer.deleteFromRev(session, configRev);
 		for (Transfer transfer : gtfsData.getTransfers()) {
 			writeObject(session, transfer);
+		}
+
+		logger.info("Saving feedinfo to database...");
+		FeedInfo.deleteFromRev(session, configRev);
+		for (FeedInfo feedInfo : gtfsData.getFeedInfo()) {
+			writeObject(session, feedInfo);
 		}
 		
 		// Write out the ConfigRevision data

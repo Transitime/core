@@ -75,16 +75,16 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override
 	public List<IpcArrivalDeparture> getTripHistory(TripKey tripKey) {
+		// we need to protected the deserializer from modifications
+		synchronized (cache) {
+			TripEvents result = (TripEvents) cache.get(tripKey);
 
-		TripEvents result = (TripEvents) cache.get(tripKey);
-
-		if(result!=null)
-		{						
-			return result.getEvents();
-		}
-		else
-		{
-			return null;
+			if (result != null) {
+				// this call needs outer synchronization
+				return result.getEvents();
+			} else {
+				return null;
+			}
 		}
 	}
 
@@ -92,7 +92,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 * @see org.transitclock.core.dataCache.TripDataHistoryCacheInterface#putArrivalDeparture(org.transitclock.db.structs.ArrivalDeparture)
 	 */
 	@Override	
-	synchronized public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
+	public TripKey putArrivalDeparture(ArrivalDeparture arrivalDeparture) {
 		
 		logger.trace("Putting :"+arrivalDeparture.toString() + " in TripDataHistoryCache cache.");
 		/* just put todays time in for last three days to aid development. This means it will kick in in 1 days rather than 3. Perhaps be a good way to start rather than using default transiTime method but I doubt it. */
@@ -110,31 +110,32 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 			DbConfig dbConfig = Core.getInstance().getDbConfig();
 			
 			Trip trip=dbConfig.getTrip(arrivalDeparture.getTripId());
-			
-			if(trip!=null)
-			{
-				
-				tripKey = new TripKey(arrivalDeparture.getTripId(),
-						nearestDay,
-						trip.getStartTime());
-		
-				TripEvents result = (TripEvents) cache.get(tripKey);
-		
-				if (result == null ) {													
-					result=new TripEvents();					
-				}
-				
-				try {										
-					result.addEvent(new IpcArrivalDeparture(arrivalDeparture));
-					
-				} catch (Exception e) {
-					logger.error("Error adding "+arrivalDeparture.toString()+" event to TripDataHistoryCache.", e);				
+			Integer tripStartTime = null;
 
-				}									
-							
+			if (trip != null) {
+				tripStartTime = trip.getStartTime();
+			}
+
+			tripKey = new TripKey(arrivalDeparture.getTripId(),
+					nearestDay,
+					tripStartTime);
+
+			IpcArrivalDeparture ipcad = null;
+			try {
+				ipcad = new IpcArrivalDeparture(arrivalDeparture);
+			} catch (Exception e) {
+				logger.error("Error adding "+arrivalDeparture.toString()+" event to TripDataHistoryCache.", e);
+			}
+
+			synchronized (cache) {
+				TripEvents result = (TripEvents) cache.get(tripKey);
+				if (result == null) {
+					result = new TripEvents();
+				}
+				result.addEvent(ipcad);
 				cache.put(tripKey, result);
 			}
-		}				
+		}
 		return tripKey;
 	}
 
@@ -145,7 +146,7 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public void populateCacheFromDb(Session session, Date startDate, Date endDate)
 	{
- 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
+	 		Criteria criteria =session.createCriteria(ArrivalDeparture.class);
 		List<ArrivalDeparture> results=criteria.add(Restrictions.between("time", startDate, endDate)).list();
 
 		int counter = 0;
@@ -169,13 +170,14 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	@Override
 	public IpcArrivalDeparture findPreviousArrivalEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
 	{
-		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
-		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
-		{
-			if(tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival()))
-			{
-				return tocheck;
-			}			
+		if (arrivalDepartures == null) return null;
+		synchronized (cache) {
+			Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
+			for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
+				if (tocheck.getStopId().equals(current.getStopId()) && (current.isDeparture() && tocheck.isArrival())) {
+					return tocheck;
+				}
+			}
 		}
 		return null;
 	}
@@ -184,20 +186,21 @@ public class TripDataHistoryCache implements TripDataHistoryCacheInterface{
 	 */
 	@Override
 	public IpcArrivalDeparture findPreviousDepartureEvent(List<IpcArrivalDeparture> arrivalDepartures,IpcArrivalDeparture current)
-	{	
-		Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());							
-		for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) 
-		{
-			try {
-				if(tocheck.getStopPathIndex()==(current.getStopPathIndex()-1) && (current.isArrival() && tocheck.isDeparture()))
-				{
-					return tocheck;
+	{
+		if (arrivalDepartures == null) return null;
+		synchronized (cache) {
+			Collections.sort(arrivalDepartures, new IpcArrivalDepartureComparator());
+			for (IpcArrivalDeparture tocheck : emptyIfNull(arrivalDepartures)) {
+				try {
+					if (tocheck.getStopPathIndex() == (current.getStopPathIndex() - 1) && (current.isArrival() && tocheck.isDeparture())) {
+						return tocheck;
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
-		}		
+			}
+		}
 		return null;		
 	}
 	

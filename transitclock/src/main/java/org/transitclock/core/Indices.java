@@ -519,9 +519,9 @@ public class Indices implements Serializable {
 	@Override
 	public String toString() {
 		return "Indices [" 
-				+ "blockId=" + block.getId() 
+				+ "blockId=" + (block!=null?block.getId():"NuLl")
 				// thought tripId not part of Indices nice to show for debugging
-				+ ", tripId=" + getTrip().getId()
+				+ ", tripId=" + (getTrip()!=null?getTrip().getId():"NuLl")
 				+ ", tripIndex=" + tripIndex 
 				+ ", stopPathIndex=" + stopPathIndex
 				+ ", segmentIndex=" + segmentIndex 

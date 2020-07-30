@@ -195,7 +195,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 						return predictionTime;
 
 					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
+						logger.error("Exception {}",  e.toString(), e);
 					}
 				}
 			}
@@ -248,7 +248,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return new KalmanError(initialErrorValue.getValue());
 	}
 
 	@Override

@@ -34,6 +34,15 @@ public class CloudwatchService {
     private ArrayBlockingQueue<MetricScalar> individualMetricsQueue = new ArrayBlockingQueue<MetricScalar>(
             100000);
 
+    private void init() {
+        environmentName = System.getProperty("transitclock.environmentName");
+        accessKey = System.getProperty("transitclock.cloudwatch.awsAccessKey");
+        secretKey = System.getProperty("transitclock.cloudwatch.awsSecretKey");
+        endpoint = System.getProperty("transitclock.cloudwatch.awsEndpoint");
+        logger.info("re-loading system properties env={} awsAccessKey={} awsSecretKey={} awsEndpoint={}",
+                environmentName, accessKey, secretKey, endpoint);
+    }
+
     private class MetricDefinition {
         String metricName;
         MetricType metricType;
@@ -71,6 +80,9 @@ public class CloudwatchService {
 
     private CloudwatchService() {
         logger.info("Cloudwatch service starting up");
+
+        init();
+
         if(StringUtils.isBlank(environmentName) || StringUtils.isBlank(accessKey) || StringUtils.isBlank(secretKey) || StringUtils.isBlank(endpoint)) {
             logger.warn("Cloudwatch monitoring not enabled, please specify environmentName, accessKey, secretKey and endpoint in configuration file");
         }else{

@@ -26,14 +26,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.transitclock.applications.Core;
-import org.transitclock.core.VehicleState;
-import org.transitclock.core.dataCache.VehicleStateManager;
 import org.transitclock.db.structs.Route;
 import org.transitclock.db.structs.Stop;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.db.structs.TripPattern;
 import org.transitclock.utils.Geo;
+
 import org.transitclock.utils.TrimmableArrayList;
+
+import static org.transitclock.core.PredictionGeneratorDefaultImpl.isHistoricalPredictionForFutureStop;
 
 /**
  * Contains list of predictions for a route/stop/destination. 
@@ -144,12 +145,16 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param maxSystemTimeForPrediction
 	 *            Max point in future want predictions for. This way can limit
 	 *            predictions when requesting a large number of them.
-	 * @param distanceFromStop
+	 * @param terminatePredictionsAtEndOfTrip
+	 * 			  if set continue after maxSystemTimeForPrediction to serve
+	 * 			  predictions for the entirety of the trip
+	 * @param distanceToStop
 	 *            For when getting predictions by location
 	 */
 	private IpcPredictionsForRouteStopDest(
 			IpcPredictionsForRouteStopDest toClone,
-			int maxPredictionsPerStop, long maxSystemTimeForPrediction, 
+			int maxPredictionsPerStop, long maxSystemTimeForPrediction,
+			boolean terminatePredictionsAtEndOfTrip,
 			double distanceToStop) {
 		this.routeId = toClone.routeId;
 		this.routeShortName = toClone.routeShortName;
@@ -170,8 +175,11 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 			this.predictionsForRouteStopDest = new ArrayList<IpcPrediction>(size);			
 			for (int i=0; i<size; ++i) {
 				IpcPrediction prediction = toClone.predictionsForRouteStopDest.get(i);
-				// If prediction exceeds max time then done
-				if (prediction.getPredictionTime() > maxSystemTimeForPrediction)
+				/* If prediction exceeds max time then done
+				 * EXCEPT if terminatePredictionsAtEndOfTrip, in which case we assume
+				 * we have exactly the amount of predictions expected (we don't filter)
+				 */
+				if (!terminatePredictionsAtEndOfTrip && prediction.getPredictionTime() > maxSystemTimeForPrediction)
 					break;
 				this.predictionsForRouteStopDest.add(i, prediction);
 			}
@@ -377,9 +385,9 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * Gets a copy of this object. This is done with the object being
 	 * copied synchronized so that the predictions remain coherent. Limits
 	 * number of predictions to maxPredictionsPerStop.
-	 * 
+	 *
 	 * @param maxPredictionsPerStop
-	 * @param distanceFromStop
+	 * @param distanceToStop
 	 *            For when getting predictions by location
 	 * @return
 	 */
@@ -390,7 +398,7 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		// Integer.MAX_VALUE and currentTime set to 0L because it 
 		// doesn't matter.
 		IpcPredictionsForRouteStopDest clone = new IpcPredictionsForRouteStopDest(this,
-				maxPredictionsPerStop, Long.MAX_VALUE, distanceToStop);
+				maxPredictionsPerStop, Long.MAX_VALUE, false, distanceToStop);
 		return clone;
 	}
 	
@@ -404,14 +412,17 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @param maxSystemTimeForPrediction
 	 *            Max point in future want predictions for. This way can limit
 	 *            predictions when requesting a large number of them.
+	 * @param terminatePredictionsAtEndOfTrip
+	 * 			  if set continue after maxSystemTimeForPrediction to complete
+	 * 			  predictions for the trip.
 	 * @param distanceToStop
 	 *            For when getting predictions by location
 	 * @return
 	 */
 	public IpcPredictionsForRouteStopDest getClone(int maxPredictionsPerStop,
-			long maxSystemTimeForPrediction, double distanceToStop) {
+			long maxSystemTimeForPrediction, boolean terminatePredictionsAtEndOfTrip, double distanceToStop) {
 		IpcPredictionsForRouteStopDest clone = new IpcPredictionsForRouteStopDest(
-				this, maxPredictionsPerStop, maxSystemTimeForPrediction, distanceToStop);
+				this, maxPredictionsPerStop, maxSystemTimeForPrediction, terminatePredictionsAtEndOfTrip, distanceToStop);
 		return clone;
 	}
 	
@@ -428,9 +439,9 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	 * @return
 	 */
 	public IpcPredictionsForRouteStopDest getClone(int maxPredictionsPerStop,
-			long maxSystemTimeForPrediction) {
+			long maxSystemTimeForPrediction, boolean terminatePredictionsAtEndOfTrip) {
 		IpcPredictionsForRouteStopDest clone = getClone(maxPredictionsPerStop,
-				maxSystemTimeForPrediction, Double.NaN);
+				maxSystemTimeForPrediction, terminatePredictionsAtEndOfTrip, Double.NaN);
 		return clone;
 	}
 	
@@ -461,36 +472,19 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 		while (iterator.hasNext()) {
 			IpcPrediction currentPrediction = iterator.next();
 
-			// Remove predictions that are expired. It makes sense to do this 
+
+			// Remove predictions that are expired. It makes sense to do this
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
-			VehicleStateManager vehicleStateManager = VehicleStateManager.getInstance();
 			if (currentPrediction.getPredictionTime() < currentTime) {
-				// TODO This is a change for VIA. This needs to be in HoldingTimeGenerator. 
-				VehicleState vehicleState = vehicleStateManager.getVehicleState(currentPrediction.getVehicleId());
-				if(vehicleState!=null)
-				{
-					
-					if((currentPrediction.getStopId().equals("20097") || currentPrediction.getStopId().equals("93296")) && vehicleState.getHoldingTime() == null )
-					{
-						// do nothing
-					}
-					else
-					{
-						iterator.remove();
-					}
+				// per the spec, we need to serve predictions until the scheduled time has past
+				if (!isHistoricalPredictionForFutureStop(currentPrediction, currentTime)) {
+					iterator.remove();
 				}
-								
-			} else {
-				// The subsequent predictions are later so if this one is
-				// into the future then the remaining ones are too. 
-				// Therefore done.
-				return;
 			}
 		}
-		
 	}
-	
+
 	/**
 	 * Updates the predictions for this object with the new predictions for a
 	 * vehicle.
@@ -522,16 +516,19 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 
 			// Remove existing predictions for this vehicle
 			if (currentPrediction.getVehicleId().equals(vehicleId)) {
-				iterator.remove();
-				continue;
+				// hold on to past prediction for future stop
+				if (!isHistoricalPredictionForFutureStop(currentPrediction, currentTime)) {
+					iterator.remove();
+					continue;
+				}
 			}
 			
 			// Remove predictions that are expired. It makes sense to do this 
 			// here when adding predictions since only need to take out 
 			// predictions if more are being added.
 			if (currentPrediction.getPredictionTime() < currentTime) {
-				iterator.remove();
-				continue;
+					iterator.remove();
+					continue;
 			}
 		}
 
@@ -646,4 +643,5 @@ public class IpcPredictionsForRouteStopDest implements Serializable {
 	public int getRouteOrder() {
 		return routeOrder;
 	}
+
 }

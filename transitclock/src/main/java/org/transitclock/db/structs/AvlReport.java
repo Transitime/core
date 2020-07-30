@@ -563,8 +563,21 @@ public class AvlReport implements Serializable {
 		long currentTime = System.currentTimeMillis();
 		if (time.getTime() < currentTime - 10 * Time.MS_PER_YEAR)
 			errorMsg += "Time of " + Time.dateTimeStr(time) + " is more than 10 years old. ";
-		if (time.getTime() > currentTime + 1 * Time.MS_PER_MIN) 
-			errorMsg += "Time of " + Time.dateTimeStr(time) + " is more than 1 minute into the future. ";
+		if (time.getTime() > currentTime + 1 * Time.MS_PER_MIN) {
+			if (AvlConfig.shouldTryTimeZoneCorrection()) {
+				if (time.getTime() - (AvlConfig.getTimeZoneCorrection() * Time.MS_PER_SEC)
+						> currentTime + 1 * Time.MS_PER_MIN) {
+					errorMsg += "Time of " + Time.dateTimeStr(time)
+							+ " is more than 1 minute into the future even after correction.  Delta={ "
+							+ Time.elapsedTimeStr(time.getTime() - currentTime) + "}";
+				} else {
+					time.setTime(time.getTime() - (AvlConfig.getTimeZoneCorrection() * Time.MS_PER_SEC));
+					logger.info("correcting timestamp for vehicle {} to {}", vehicleId, time);
+				}
+			} else {
+				errorMsg += "Time of " + Time.dateTimeStr(time) + " is more than 1 minute into the future. ";
+			}
+		}
 		
 		// Make sure lat/lon is OK
 		double lat = location.getLat();

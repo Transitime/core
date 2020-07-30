@@ -56,6 +56,7 @@ public class GtfsFileProcessor {
 	private Date zipFileLastModifiedTime;
 	private final String unzipSubdirectory;
 	private String gtfsDirectoryName;
+	private String feedVersion;
 
 	// Optional command line info used for GtfsData class
 	private final String supplementDir;

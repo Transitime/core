@@ -17,14 +17,6 @@
 
 package org.transitclock.db.structs;
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -32,6 +24,9 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.db.hibernate.HibernateUtils;
+
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * For keeping track of information having to do with a configuration revision.
@@ -86,7 +81,7 @@ public class ConfigRevision {
 		this.configRev = -1;
 		this.processedTime = null;
 		this.zipFileLastModifiedTime = null;
-		this.notes = null;	
+		this.notes = null;
 	}
 	
 	@Override

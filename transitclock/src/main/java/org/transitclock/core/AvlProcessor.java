@@ -439,8 +439,18 @@ public class AvlProcessor {
 				spatialMatches.size(), spatialMatches);
 
 		// Find best temporal match of the spatial matches
-		TemporalMatch bestTemporalMatch = TemporalMatcher.getInstance()
-				.getBestTemporalMatch(vehicleState, spatialMatches);
+		TemporalMatch bestTemporalMatch = null;
+		if (CoreConfig.tryForExactTripMatch()) {
+			//strict trip-level matching
+			TemporalMatcher.getInstance()
+					.getBestTemporalMatch(vehicleState, spatialMatches, true);
+		}
+
+		if (bestTemporalMatch == null) {
+			// match anything
+			bestTemporalMatch = TemporalMatcher.getInstance()
+					.getBestTemporalMatch(vehicleState, spatialMatches);
+		}
 				
 		// Log this as info since matching is a significant milestone
 		logger.info("For vehicleId={} the best match is {}",
@@ -776,11 +786,22 @@ public class AvlProcessor {
 				avlReport.getVehicleId(), block.getId(), spatialMatches);
 
 		// Determine the best temporal match
-		TemporalMatch bestMatch = TemporalMatcher.getInstance()
-				.getBestTemporalMatchComparedToSchedule(avlReport,
-						spatialMatches);
-		logger.debug("Best temporal match for vehicleId={} is {}",
-				avlReport.getVehicleId(), bestMatch);
+		TemporalMatch bestMatch = null;
+		if (CoreConfig.tryForExactTripMatch()) {
+			// strict trip matching is configured -- only consider matches
+			// that are same as assignment
+			bestMatch = TemporalMatcher.getInstance()
+					.getBestTemporalMatchComparedToSchedule(avlReport,
+							spatialMatches, true);
+		}
+		if (bestMatch == null) {
+			// try to match to any assignment
+			bestMatch = TemporalMatcher.getInstance()
+					.getBestTemporalMatchComparedToSchedule(avlReport,
+							spatialMatches);
+			logger.debug("Best temporal match for vehicleId={} is {}",
+					avlReport.getVehicleId(), bestMatch);
+		}
 
 		// If best match is a non-layover but cannot confirm that the heading
 		// is acceptable then don't consider this a match. Instead, wait till

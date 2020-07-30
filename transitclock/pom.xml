@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>TheTransitClock</groupId>
 		<artifactId>transitclock</artifactId>
-		<version>2.0.0-cs-SNAPSHOT</version>
+		<version>2.0.22-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>transitclockCore</artifactId>
 	<name>transitclockCore</name>
@@ -55,19 +55,19 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>repo.obaweb.org</id>
-			<url>http://repo.obaweb.org:8080/archiva/repository/releases</url>
+			<url>http://repo.camsys-apps.com/releases</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
 		<dependency>
 			<groupId>TheTransitClock</groupId>
 			<artifactId>transitclockBarefootClient</artifactId>
-			<version>2.0.0-cs-SNAPSHOT</version>
+			<version>2.0.22-cs-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>TheTransitClock</groupId>
 			<artifactId>transitclockTraccarClient</artifactId>
-			<version>2.0.0-cs-SNAPSHOT</version>
+			<version>2.0.22-cs-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.esri.geometry</groupId>
@@ -88,7 +88,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.35</version>
+			<version>5.1.48</version>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>

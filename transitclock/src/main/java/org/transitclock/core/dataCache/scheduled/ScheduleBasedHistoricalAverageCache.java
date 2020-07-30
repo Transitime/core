@@ -57,19 +57,18 @@ public class ScheduleBasedHistoricalAverageCache {
 		logger.debug("Log cache size. Not implemented.");
 	}
 	
-	synchronized public HistoricalAverage getAverage(StopPathCacheKey key) {		
+	public HistoricalAverage getAverage(StopPathCacheKey key) {
 						
-		 HistoricalAverage result = cache.get(key);
-		 return result;			
+		 return cache.get(key);
 	}
-	synchronized public void putAverage(StopPathCacheKey key, HistoricalAverage average) {
+ 	public void putAverage(StopPathCacheKey key, HistoricalAverage average) {
 			
-		logger.debug("Putting: "+key.toString()+" in cache with values : "+average);
+		logger.debug("Putting: {} in cache with values : {}", key.toString(), average);
 						
 		cache.put(key, average);				
 		// logCache(logger);
 	}
-	synchronized public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) throws Exception 
+	public void putArrivalDeparture(ArrivalDeparture arrivalDeparture) throws Exception
 	{										
 		DbConfig dbConfig = Core.getInstance().getDbConfig();
 		
@@ -86,15 +85,17 @@ public class ScheduleBasedHistoricalAverageCache {
 				if(!trip.isNoSchedule())
 				{
 					StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), true);
-					
-					HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
-					
-					if(average==null)				
-						average=new HistoricalAverage();
-					logger.trace("Updating historical averege for : {} with {}",historicalAverageCacheKey, travelTimeDetails);
-					average.update(travelTimeDetails.getTravelTime());
-					
-					ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+
+					synchronized (cache) {
+						HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+
+						if (average == null)
+							average = new HistoricalAverage();
+						logger.trace("Updating historical averege for : {} with {}", historicalAverageCacheKey, travelTimeDetails);
+						average.update(travelTimeDetails.getTravelTime());
+
+						ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+					}
 				}
 			}		
 			
@@ -102,16 +103,18 @@ public class ScheduleBasedHistoricalAverageCache {
 			if(dwellTimeDetails!=null&&dwellTimeDetails.sanityCheck())
 			{
 				StopPathCacheKey historicalAverageCacheKey=new StopPathCacheKey(trip.getId(), arrivalDeparture.getStopPathIndex(), false);
-				
-				HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
-				
-				if(average==null)				
-					average=new HistoricalAverage();
-				
-				logger.trace("Updating historical averege for : {} with {}",historicalAverageCacheKey, dwellTimeDetails );
-				average.update(dwellTimeDetails.getDwellTime());
-			
-				ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+
+				synchronized (cache) {
+					HistoricalAverage average = ScheduleBasedHistoricalAverageCache.getInstance().getAverage(historicalAverageCacheKey);
+
+					if (average == null)
+						average = new HistoricalAverage();
+
+					logger.trace("Updating historical averege for : {} with {}", historicalAverageCacheKey, dwellTimeDetails);
+					average.update(dwellTimeDetails.getDwellTime());
+
+					ScheduleBasedHistoricalAverageCache.getInstance().putAverage(historicalAverageCacheKey, average);
+				}
 			}
 		}
 	}

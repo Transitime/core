@@ -54,6 +54,7 @@ import org.transitclock.api.data.ApiRoutesDetails;
 import org.transitclock.api.data.ApiSchedulesHorizStops;
 import org.transitclock.api.data.ApiSchedulesVertStops;
 import org.transitclock.api.data.ApiServerStatus;
+import org.transitclock.api.data.ApiStopLevels;
 import org.transitclock.api.data.ApiTrip;
 import org.transitclock.api.data.ApiTripPatterns;
 import org.transitclock.api.data.ApiTripWithTravelTimes;
@@ -398,6 +399,21 @@ public class TransitimeApi {
 		}
 	}
 
+	@Path("/command/stopLevel")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getStopLevelDetail(@BeanParam StandardParameters stdParameters) throws WebApplicationException {
+		// Make sure request is valid
+		stdParameters.validate();
+		try {
+			ApiStopLevels apiStopLevels = new ApiStopLevels(stdParameters);
+			return stdParameters.createResponse(apiStopLevels);
+		} catch (Exception e) {
+			// If problem getting data then return a Bad Request
+			throw WebUtils.badRequestException(e);
+		}
+
+	}
 	/**
 	 * Determines Map of UiTypes for vehicles so that the vehicles can be drawn
 	 * correctly in the UI. If when getting vehicles no specific route and stop

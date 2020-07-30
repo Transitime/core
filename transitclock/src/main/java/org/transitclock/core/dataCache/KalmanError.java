@@ -29,7 +29,8 @@ public class KalmanError implements Serializable {
 	}
 
 	public void setError(Double error) {
-		if(this.error.compareTo(error)!=0)
+
+		if(error != null && this.error != null && this.error.compareTo(error)!=0)
 		{
 			this.error = error;
 			incrementUpdates();
