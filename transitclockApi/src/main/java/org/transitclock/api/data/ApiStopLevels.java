@@ -59,7 +59,7 @@ public class ApiStopLevels {
      * @return
      */
     private List<RouteStopNumberParameter> parseQuery(String query) {
-        // query format:  stopId|route|number_of_services{:stopId|route|number_of_services}
+        // query format:  s=stopId|r=route|n=number_of_services{:s=stopId|r=route|n=number_of_services}
         ArrayList<RouteStopNumberParameter> queries = new ArrayList<RouteStopNumberParameter>();
 
 
@@ -77,11 +77,35 @@ public class ApiStopLevels {
         String lastQuery = query.substring(start);
         RouteStopNumberParameter rsn = parseFragment(lastQuery);
         queries.add(rsn);
-
-
         return queries;
     }
 
+    private String[] toArray(String s) {
+        String a[] = {s};
+        return a;
+    }
+    private String[] toArray(String s1, String s2) {
+        String a[] = {s1, s2};
+        return a;
+    }
+    private String[] toArray(String s1, String s2, String s3) {
+        String a[] = {s1, s2, s3};
+        return a;
+    }
+
+    private RouteStopNumberParameter parseArgs(String[] args) {
+        RouteStopNumberParameter rsn = new RouteStopNumberParameter();
+        if (args == null) return rsn;
+        for (String s:args) {
+            if (s.startsWith("s="))
+                rsn.setStopId(s.substring(2));
+            if (s.startsWith("r="))
+                rsn.setRoute(s.substring(2));
+            if (s.startsWith("n="))
+                rsn.setNumberOfServices(s.substring(2));
+        }
+        return rsn;
+    }
     /**
      * Break a fragment of the query into a single RouteStopNumberParemeter
      * or pupulate errorDescription if the syntax is invald.
@@ -99,19 +123,16 @@ public class ApiStopLevels {
 
         int firstDelim = query.indexOf("|");
         if (firstDelim < 0) {
-            rsn.setStopId(query);
-            return rsn;
+            return parseArgs(toArray(query));
         }
         int secondDelim = query.indexOf("|", firstDelim+1);
         if (secondDelim < 0) {
-            rsn.setStopId(query.substring(0, firstDelim));
-            rsn.setRoute(query.substring(firstDelim+1));
-            return rsn;
+            return parseArgs(toArray(query.substring(0, firstDelim),
+                        query.substring(firstDelim+1)));
         }
-        rsn.setStopId(query.substring(0, firstDelim));
-        rsn.setRoute(query.substring(firstDelim+1, secondDelim));
-        rsn.setNumberOfServices(query.substring(secondDelim+1));
-        return rsn;
+        return parseArgs(toArray(query.substring(0, firstDelim),
+                    query.substring(firstDelim+1, secondDelim),
+                    query.substring(secondDelim+1)));
     }
 
     public static void main(String[] argsv) {
@@ -133,28 +154,36 @@ public class ApiStopLevels {
         testAssert(rsn.getRoute() == null);
         testAssert(rsn.getNumberOfServices() == null);
 
-        String p2 = "stop1";
+        String p2 = "s=stop1";
         rsn = asl.parseFragment(p2);
         testAssert(rsn.isInvalid() == false);
-        testAssert(rsn.getStopId().equals(p2));
+        testAssert(rsn.getStopId().equals("stop1"));
         testAssert(rsn.getRoute() ==  null);
         testAssert(rsn.getNumberOfServices().equals("3"));
 
-        String p3 = "stop1|routeShortName2";
+        String p2a = "s=stop1|n=6";
+        rsn = asl.parseFragment(p2a);
+        testAssert(rsn.isInvalid() == false);
+        testAssert(rsn.getStopId().equals("stop1"));
+        testAssert(rsn.getRoute() ==  null);
+        testAssert(rsn.getNumberOfServices().equals("6"));
+
+
+        String p3 = "s=stop1|r=routeShortName2";
         rsn = asl.parseFragment(p3);
         testAssert(rsn.isInvalid() == false);
         testAssert(rsn.getStopId().equals("stop1"));
         testAssert(rsn.getRoute().equals("routeShortName2"));
         testAssert(rsn.getNumberOfServices().equals("3"));
 
-        String p4 = "stop1|routeShortName2|4";
+        String p4 = "s=stop1|r=routeShortName2|n=4";
         rsn = asl.parseFragment(p4);
         testAssert(rsn.isInvalid() == false);
         testAssert(rsn.getStopId().equals("stop1"));
         testAssert(rsn.getRoute().equals("routeShortName2"));
         testAssert(rsn.getNumberOfServices().equals("4"));
 
-        String p5 = "stop1|routeShortName2|4";
+        String p5 = "s=stop1|r=routeShortName2|n=4";
         rsns = asl.parseQuery(p5);
         testAssert(rsns.size() == 1);
         rsn = asl.parseQuery(p5).get(0);
@@ -163,7 +192,7 @@ public class ApiStopLevels {
         testAssert(rsn.getRoute().equals("routeShortName2"));
         testAssert(rsn.getNumberOfServices().equals("4"));
 
-        String p6 = "stop1|routeShortName2|4:";
+        String p6 = "s=stop1|r=routeShortName2|n=4:";
         rsns = asl.parseQuery(p6);
         testAssert(rsns.size() == 2);
         rsn = rsns.get(0);
@@ -177,7 +206,35 @@ public class ApiStopLevels {
         testAssert(rsn.getRoute() == null);
         testAssert(rsn.getNumberOfServices() == null);
 
-        String p7 = "stop1|routeShortName2|4:stop2|routeShortName3|5:";
+        String p6a = "r=routeShortName2|s=stop1|n=4:";
+        rsns = asl.parseQuery(p6a);
+        testAssert(rsns.size() == 2);
+        rsn = rsns.get(0);
+        testAssert(rsn.isInvalid() == false);
+        testAssert(rsn.getStopId().equals("stop1"));
+        testAssert(rsn.getRoute().equals("routeShortName2"));
+        testAssert(rsn.getNumberOfServices().equals("4"));
+        rsn = rsns.get(1);
+        testAssert(rsn != null);
+        testAssert(rsn.isInvalid() == true);
+        testAssert(rsn.getRoute() == null);
+        testAssert(rsn.getNumberOfServices() == null);
+
+        String p6b = "n=4|r=routeShortName2|s=stop1:";
+        rsns = asl.parseQuery(p6b);
+        testAssert(rsns.size() == 2);
+        rsn = rsns.get(0);
+        testAssert(rsn.isInvalid() == false);
+        testAssert(rsn.getStopId().equals("stop1"));
+        testAssert(rsn.getRoute().equals("routeShortName2"));
+        testAssert(rsn.getNumberOfServices().equals("4"));
+        rsn = rsns.get(1);
+        testAssert(rsn != null);
+        testAssert(rsn.isInvalid() == true);
+        testAssert(rsn.getRoute() == null);
+        testAssert(rsn.getNumberOfServices() == null);
+
+        String p7 = "s=stop1|r=routeShortName2|n=4:s=stop2|r=routeShortName3|n=5:";
         rsns = asl.parseQuery(p7);
         testAssert(rsns.size() == 3);
         rsn = rsns.get(0);
@@ -196,7 +253,7 @@ public class ApiStopLevels {
         testAssert(rsn.getRoute() == null);
         testAssert(rsn.getNumberOfServices() == null);
 
-        String p8 = "stop1|routeShortName2|4:stop2|routeShortName3|5:stop3:";
+        String p8 = "s=stop1|r=routeShortName2|n=4:s=stop2|r=routeShortName3|n=5:s=stop3:";
         rsns = asl.parseQuery(p8);
         testAssert(rsns.size() == 4);
         rsn = rsns.get(0);
