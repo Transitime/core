@@ -974,10 +974,11 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	 */
 	public static List<ArrivalDeparture> getArrivalsDeparturesFromDb(LocalDate beginDate, LocalDate endDate,
 																	 LocalTime beginTime, LocalTime endTime,
-																	 String routeId, ServiceType serviceType,
-																	 boolean timePointsOnly, String headsign,
-																	 boolean includeTrip, boolean includeStop,
-																	 boolean includeStopPath, boolean readOnly) throws Exception {
+																	 String routeId, String headsign,
+																	 ServiceType serviceType, boolean timePointsOnly,
+																	 boolean dwellTimeOnly, boolean includeTrip,
+																	 boolean includeStop, boolean includeStopPath,
+																	 boolean readOnly) throws Exception {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
@@ -1002,7 +1003,8 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					getServiceTypeWhere(serviceType) +
 					getTripsWhere(headsign) +
 					getStopsWhere(includeStop) +
-					getStopPathsWhere(includeStopPath);
+					getStopPathsWhere(includeStopPath) +
+					getDwellTimesWhere(dwellTimeOnly);
 
 		try {
 			Query query = session.createQuery(hql);
@@ -1147,6 +1149,13 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	private static String getStopPathsWhere(boolean includeStopPaths){
 		if(includeStopPaths){
 			return "AND ad.configRev = sp.configRev AND ad.stopPathId = sp.stopPathId AND ad.tripPatternId = sp.tripPatternId ";
+		}
+		return "";
+	}
+
+	private static String getDwellTimesWhere(boolean dwellTimesOnly){
+		if(dwellTimesOnly){
+			return "AND ad.dwellTime != null ";
 		}
 		return "";
 	}
