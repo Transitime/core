@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class ApiStopLevelPrediction {
 
     @XmlElement(name = "is_valid")
-    private Boolean isValid = null;
+    private Integer isValid = 1;
     @XmlElement(name = "time")
     private long time;  //seconds from epoch
     @XmlElement(name = "trip")
@@ -24,13 +24,14 @@ public class ApiStopLevelPrediction {
 
     public ApiStopLevelPrediction(IpcPrediction prediction) {
         if (prediction == null) {
-            isValid = Boolean.FALSE;
+            isValid = 1;
             return;
         }
         trip = prediction.getTripId();
         vehicle = prediction.getVehicleId();
         if (prediction.getPredictionTime() != 0) {
             time = prediction.getPredictionTime() / 1000; // seconds
+            isValid = 0;
         } else {
             time = prediction.getPredictionTime();
         }

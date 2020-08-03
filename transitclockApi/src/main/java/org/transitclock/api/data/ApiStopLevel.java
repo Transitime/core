@@ -21,7 +21,7 @@ public class ApiStopLevel {
     @XmlElement(name = "number_of_services")
     private String numberOfServices = "3";
     @XmlElement(name = "is_valid")
-    private Integer isValid = null;
+    private Integer isValid = 1;
     @XmlElement(name = "error_desc")
     private String errorDescription;
     @XmlElement(name = "predictions")
