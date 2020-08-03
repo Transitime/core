@@ -41,11 +41,11 @@
         }
 
         #runTimesFlyout {
-            width: 17%;
+            width: 20%;
             height: 100%;
             position: absolute;
             right: 0px;
-            z-index: 9999;
+            z-index: 999;
             border-left: 1px solid black;
             background-color: white;
             transition: all .5s ease
@@ -58,6 +58,7 @@
             border: 1px solid black;
             margin-right: 10px;
         }
+
     </style>
     <%--        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>--%>
     <link rel="stylesheet" type="text/css" href="../jquery.datepick.package-5.1.0/css/jquery.datepick.css">
@@ -91,7 +92,7 @@
                 $(function() {
                     var calendarIconTooltip = "Popup calendar to select date";
 
-                    $( "#beginDate" ).datepick({
+                    $( "#mainDatepicker" ).datepick({
                         dateFormat: "yy-mm-dd",
                         showOtherMonths: true,
                         selectOtherMonths: true,
@@ -130,8 +131,8 @@
             </script>
 
             <div class="param">
-                <label for="beginDate">Date:</label>
-                <input type="text" id="beginDate" name="beginDate"
+                <label for="mainDatepicker">Date:</label>
+                <input type="text" id="mainDatepicker" name="mainDatepicker"
                        title="The range of dates that you want to examine data for.
                                <br><br> Begin date must be before the end date."
                        size="18"
@@ -192,7 +193,7 @@
             </div>
         </div>
 
-        <input type="button" id="submit" value="Submit" style="margin-top: 10px; margin-bottom: 10px;">
+        <input type="button" id="mainSubmit" class="submit" value="Submit" style="margin-top: 10px; margin-bottom: 10px;">
 
     </div>
 
@@ -207,8 +208,55 @@
                     Trip Run Time Comparison
                     <button id='closeFlyout' type='button' style='float:right;'>&times;</button>
                 </div>
-                <div id="paramDetailsFlyout" class="paramDetails"></div>
-                <div id="avgRunTimeFlyout" class="avgRunTime"></div>
+                <div id="paramDetailsFlyout" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
+                <div id="avgRunTimeFlyout" class="avgRunTime" style="margin-top: 20px; margin-bottom: 20px;"></div>
+
+                <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+                <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
+
+                <script>
+                    $(function() {
+                            var calendarIconTooltip = "Popup calendar to select date";
+
+                            $("#flyoutDatepicker").datepick({
+                                dateFormat: "yy-mm-dd",
+                                showOtherMonths: true,
+                                selectOtherMonths: true,
+                                // Show button for calendar
+                                buttonImage: "img/calendar.gif",
+                                buttonImageOnly: true,
+                                showOn: "both",
+                                // Don't allow going past current date
+                                maxDate: 0,
+                                // onClose is for restricting end date to be after start date,
+                                // though it is potentially confusing to user
+                                rangeSelect: true,
+                                showTrigger: '<button type="button" class="trigger">' +
+                                    '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+                                onClose: function (selectedDate) {
+                                    // Strangely need to set the title attribute for the icon again
+                                    // so that don't revert back to a "..." tooltip
+                                    // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                                }
+                            });
+
+                            // Use a better tooltip than the default "..." for the calendar icon
+                            $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                        })
+                </script>
+
+                <div class="param">
+                    <label for="flyoutDatepicker">Date:</label>
+                    <input type="text" id="flyoutDatepicker" name="flyoutDatepicker"
+                           title="The range of dates that you want to examine data for.
+                               <br><br> Begin date must be before the end date."
+                           size="18"
+                           value="Date range" />
+                </div>
+
+                <input type="button" id="runTimeSubmit" class="submit" value="Submit" style="margin-top: 20px; margin-bottom: 20px;">
+
+                <div id="avgRunTimeComparison" style="margin-top: 40px;"></div>
             </div>
         </div>
         <div id="map" style="height: 90%; width: 90%; margin: auto;">
@@ -242,11 +290,18 @@
 
     /* For drawing the route and stops */
     var routeOptions = {
-        color: '#00ee00',
+        color: '#36aaff',
         weight: 4,
         opacity: 0.4,
         lineJoin: 'round',
         clickable: false
+    };
+
+    var speedOptions = {
+        weight: 3,
+        opacity: 0.8,
+        lineJoin: 'round',
+        clickable: true
     };
 
     var stopOptions = {
@@ -310,6 +365,32 @@
         $("#highSpeed").attr("min", (parseFloat($("#midSpeed").val()) + 1));
     }
 
+    function getParams(dateParam) {
+        if ($(dateParam).val() == "Date range") {
+            var today = new Date();
+            var beginDate = endDate = today.getFullYear() + "-"
+                + (today.getMonth() <= 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))
+                + "-" + (today.getDate() < 10 ? "0" + today.getDate() : today.getDate());
+        } else {
+            var dateRangeStrings = $(dateParam).val().replace(/\s/g, "").split("-");
+            var beginYear = "20" + dateRangeStrings[0];
+            var endYear = "20" + dateRangeStrings[3];
+            var beginDate = [beginYear, dateRangeStrings[1], dateRangeStrings[2]].join("-");
+            var endDate = [endYear, dateRangeStrings[4], dateRangeStrings[5]].join("-");
+        }
+
+        var beginTime = $("#beginTime").val() == "" ? "00:00:00" : $("#beginTime").val() + ":00";
+        var endTime = $("#endTime").val() == "" ? "23:59:59" : $("#endTime").val() + ":00";
+
+        request.beginDate = beginDate;
+        request.endDate = endDate;
+        request.beginTime = beginTime;
+        request.endTime = endTime;
+        request.r = $("#route").val();
+        request.headsign = $("#direction").val();
+        request.serviceType = $("#serviceDayType").val();
+    }
+
     /**
      * Reads in route data obtained via AJAX and draws route and stops on map.
      */
@@ -322,6 +403,36 @@
             var shape = route.shape[i];
             L.polyline(shape.loc, routeOptions).addTo(routeGroup);
         }
+    }
+
+    function speedsCallback(data) {
+        data.stopPaths.forEach(function(stopPath) {
+            var options = speedOptions;
+
+            if (stopPath.speed < parseFloat($("#lowSpeed").val())) {
+                options.color = '#008000';
+            }
+            else if (stopPath.speed < parseFloat($("#midSpeed").val())) {
+                options.color = '#FFFF00';
+            }
+            else if (stopPath.speed < parseFloat($("#highSpeed").val())) {
+                options.color = '#FF0000';
+            }
+            else {
+                options.color = '#000000';
+            }
+
+            for (i = 0; i < stopPath.latlngs.length; i++) {
+                stopPath.latlngs[i] = {lat: JSON.parse(stopPath.latlngs[i])[0], lon: JSON.parse(stopPath.latlngs[i])[1]};
+            }
+
+            var speedSegment = L.polyline(stopPath.latlngs, options).addTo(routeGroup);
+
+            var content = $("<table />").attr("class", "popupTable");
+            content.append( $("<tr />").append("<td>" + stopPath.speed + " mph </td>") );
+
+            speedSegment.bindPopup(content[0]);
+        })
     }
 
     function stopsCallback(data) {
@@ -354,35 +465,15 @@
         })
     }
 
-    $("#submit").click(function() {
-        $("#submit").attr("disabled", "disabled");
+    $("#mainSubmit").click(function() {
+        $("#mainSubmit").attr("disabled", "disabled");
+        $("#flyoutDatepicker").val("Date range")
+        $("#avgRunTimeComparison").html("");
         $("#runTimesFlyout").hide();
-
-        if ($("#beginDate").val() == "Date range") {
-            var today = new Date();
-            var beginDate = endDate = today.getFullYear() + "-"
-                + (today.getMonth() <= 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))
-                + "-" + (today.getDate() < 10 ? "0" + today.getDate() : today.getDate());
-        } else {
-            var dateRangeStrings = $("#beginDate").val().replace(/\s/g, "").split("-");
-            var beginYear = "20" + dateRangeStrings[0];
-            var endYear = "20" + dateRangeStrings[3];
-            var beginDate = [beginYear, dateRangeStrings[1], dateRangeStrings[2]].join("-");
-            var endDate = [endYear, dateRangeStrings[4], dateRangeStrings[5]].join("-");
-        }
-
-        var beginTime = $("#beginTime").val() == "" ? "00:00:00" : $("#beginTime").val() + ":00";
-        var endTime = $("#endTime").val() == "" ? "23:59:59" : $("#endTime").val() + ":00";
 
         request = {}
 
-        request.beginDate = beginDate;
-        request.endDate = endDate;
-        request.beginTime = beginTime;
-        request.endTime = endTime;
-        request.r = $("#route").val();
-        request.headsign = $("#direction").val();
-        request.serviceType = $("#serviceDayType").val();
+        getParams("#mainDatepicker");
 
         routeGroup.clearLayers();
         if (request.r != "") {
@@ -398,35 +489,50 @@
             traditional: true,
             dataType: "json",
             success: function (response) {
-                $("#submit").removeAttr("disabled");
-                var beginDateArray = beginDate.split("-");
-                var endDateArray = endDate.split("-");
+                $("#mainSubmit").removeAttr("disabled");
+                var beginDateArray = request.beginDate.split("-");
+                var endDateArray = request.endDate.split("-");
                 [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
                 [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
                 var beginDateString = beginDateArray.join("/");
                 var endDateString = endDateArray.join("/");
 
-                var timeRange = beginTime + " to " + endTime;
+                var timeRange = request.beginTime + " to " + request.endTime;
 
                 if (beginTime == "00:00:00" && endTime == "23:59:59") {
                     timeRange = "All times";
                 }
 
-                var serviceDayString = $("#serviceDayType").val();
+                var serviceDayString = request.serviceType;
 
                 if (serviceDayString == "") {
                     serviceDayString = "All days";
                 }
 
                 $(".paramDetails").each(function() {
-                    $(this).html("<p style='font-size: 0.8em;'>Route " + $("#route").val() + " to " + $("#direction").val() + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
+                    $(this).html("<p style='font-size: 0.8em;'>Route " + request.r + " to " + request.headsign + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
                 })
 
                 stopsCallback(response);
             },
             error: function () {
-                $("#submit").removeAttr("disabled");
+                $("#mainSubmit").removeAttr("disabled");
                 alert("Error processing stop details.");
+            }
+        })
+
+        $.ajax({
+            url: apiUrlPrefix + "/report/speedmap/stopPathsSpeed",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            success: function(response) {
+                speedsCallback(response);
+            },
+            error: function () {
+                alert("Error processing speed details for stops.");
             }
         })
 
@@ -462,6 +568,39 @@
         $("#avgRunTimeFlyout").html($("#avgRunTimeTop > p").html()).css("font-size", "0.8em");
         $("#runTimesFlyout").show();
     }
+
+    $("#runTimeSubmit").click(function() {
+        $(".submit").attr("disabled", "disabled");
+
+        getParams("#flyoutDatepicker");
+
+        $.ajax({
+            url: apiUrlPrefix + "/report/speedmap/runTime",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            success: function (response) {
+                $(".submit").removeAttr("disabled");
+
+                if (response.numberOfTrips == 0) {
+                    $("#avgRunTimeComparison").html("<p style='font-size: 0.8em;'>Run Time Comparison: No average run time data.</p>");
+                }
+                else {
+                    var runTimeMinutes = parseInt(response.averageRunTime / 60000).toString();
+                    var runTimeSeconds = parseInt(response.averageRunTime % 60000 / 1000).toString();
+                    if (runTimeSeconds.length == 1) {
+                        runTimeSeconds = "0" + runTimeSeconds;
+                    }
+                    $("#avgRunTimeComparison").html("<p style='font-size: 0.8em;'>Run Time Comparison: " + runTimeMinutes + ":" + runTimeSeconds + "</p>");
+                }
+            },
+            error: function () {
+                alert("Error processing average trip run time.");
+            }
+        })
+    })
 
     $("#closeFlyout").click(function() {
         $("#runTimesFlyout").hide();
