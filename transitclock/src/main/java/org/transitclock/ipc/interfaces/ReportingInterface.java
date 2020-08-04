@@ -15,12 +15,12 @@ import java.util.List;
  *
  */
 public interface ReportingInterface extends Remote {
-    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(LocalDate beginDate, LocalDate endDate,
+    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate, LocalDate endDate,
                                                                              LocalTime beginTime, LocalTime endTime,
                                                                              String routeIdOrShortName, ServiceType serviceType,
                                                                              boolean timePointsOnly, String headsign) throws Exception;
 
-    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForRoute(LocalDate beginDate, LocalDate endDate,
+    List<IpcArrivalDepartureScheduleAdherence> getArrivalsDeparturesForOtp(LocalDate beginDate, LocalDate endDate,
                                                                              LocalTime beginTime, LocalTime endTime,
                                                                              String routeId, ServiceType serviceType,
                                                                              boolean timePointsOnly, String headsign,

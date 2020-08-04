@@ -976,9 +976,9 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 																	 LocalTime beginTime, LocalTime endTime,
 																	 String routeId, String headsign,
 																	 ServiceType serviceType, boolean timePointsOnly,
-																	 boolean dwellTimeOnly, boolean includeTrip,
-																	 boolean includeStop, boolean includeStopPath,
-																	 boolean readOnly) throws Exception {
+																	 boolean scheduledTimesOnly, boolean dwellTimeOnly,
+																	 boolean includeTrip, boolean includeStop,
+																	 boolean includeStopPath, boolean readOnly) throws Exception {
 		IntervalTimer timer = new IntervalTimer();
 
 		// Get the database session. This is supposed to be pretty light weight
@@ -999,6 +999,7 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 					"WHERE " +
 					getArrivalDepartureTimeWhere(beginDate, endDate, beginTime, endTime) +
 					getRouteIdWhere(routeId) +
+					getScheduledTimesWhere(scheduledTimesOnly) +
 					getTimePointsWhere(timePointsOnly) +
 					getServiceTypeWhere(serviceType) +
 					getTripsWhere(headsign) +
@@ -1106,6 +1107,13 @@ public class ArrivalDeparture implements Lifecycle, Serializable  {
 	private static String getRouteIdWhere(String routeId){
 		if(routeId !=null) {
 			return String.format("AND ad.routeId = '%s' ", routeId);
+		}
+		return "";
+	}
+
+	private static String getScheduledTimesWhere(boolean scheduledTimesOnly){
+		if(scheduledTimesOnly){
+			return "AND ad.scheduledTime IS NOT NULL ";
 		}
 		return "";
 	}

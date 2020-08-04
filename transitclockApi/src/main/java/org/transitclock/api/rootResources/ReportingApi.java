@@ -77,7 +77,7 @@ public class ReportingApi {
                 serviceTypeEnum = ServiceType.valueOf(serviceType.toUpperCase());
             }
 
-            List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures = reportingInterface.getArrivalsDeparturesForRoute(
+            List<IpcArrivalDepartureScheduleAdherence> arrivalDepartures = reportingInterface.getArrivalsDeparturesForOtp(
                     beginDate.getDate(), endDate.getDate(), beginTime.getTime(), endTime.getTime(), route,
                     serviceTypeEnum, timePointsOnly, headsign,false);
 
