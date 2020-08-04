@@ -18,12 +18,29 @@
             width: auto;
         }
 
+        hr {
+            height: 2px;
+            background-color: darkgray;
+            margin-right: 5px;
+        }
+
         #paramsSidebar {
-            width: 20%;
+            width: 29%;
             height: 100vh;
             margin-left: 10px;
             float:left;
             border-right: 1px solid black;
+        }
+
+        #comparisonModal {
+            width: 40%;
+            height: 40%;
+            z-index: 999;
+            border: 1px solid black;
+            background-color: white;
+            transition: all .5s ease;
+            position: absolute;
+            left: 44%;
         }
 
     </style>
@@ -35,7 +52,7 @@
 <body>
     <%@include file="/template/header.jsp" %>
     <div id="paramsSidebar">
-        <div id="title" style="text-align: left; font-size:x-large">
+        <div id="title" style="text-align: left; font-size:xx-large; margin-bottom: 20px;">
             Run Time Analysis
         </div>
 
@@ -145,9 +162,118 @@
         <input type="button" id="submit" class="submit" value="Submit" style="margin-top: 10px; margin-bottom: 10px;">
     </div>
 
-    <div id="mainPage" style="width: 79%; height: 100%; display: inline-block;">
-        <div id="paramDetails" class="paramDetails" style="height: 3%; float: left; margin-left: 20px; width: 60%;">
-            <p style='font-size: 0.8em;'></p>
+    <div id="mainPage" style="width: 69%; height: 100%; display: inline-block; margin-left: 20px;">
+        <div id="mainResults">
+            <div id="paramDetails" class="paramDetails" style="float: left;">
+                <p style='font-size: 0.8em;'></p>
+            </div>
+
+            <div id="avgRunTime" style="margin-left: 20px; width: 35%; vertical-align: middle;">
+                <p style="font-size: 0.9em;display: inline-block;"></p>
+                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+            </div>
+
+            <div id="runTimeBreakdown" style="margin-left: 20px; width: 70%; vertical-align: middle;">
+                <p style="font-size: 0.9em;display: inline-block;"></p>
+                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+                <p style="font-size: 0.9em;display: inline-block;"></p>
+                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+                <p style="font-size: 0.9em;display: inline-block;"></p>
+                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+            </div>
+
+            <input type="button" id="visualizeButton" class="visualizeButton" value="Visualize trips" style="margin-top: 10px; margin-bottom: 10px;" hidden="true">
+        </div>
+
+        <div id="comparisonModal" hidden="true">
+            <div id="modalContents" style="margin-right: 30px; margin-left: 30px; margin-top: 10px;">
+                <div id="modalHeader" style="text-align: left; vertical-align: middle; font-size: medium">
+                    Trip Run Time Comparison
+                    <button id='closeModal' type='button' style='float:right; margin-right: -10px;'>&times;</button>
+                </div>
+                <div id="paramDetailsModal" class="paramDetails" style="margin-top: 20px; margin-bottom: 20px;"></div>
+
+                <script src="../javascript/jquery-timepicker/jquery.timepicker.min.js"></script>
+                <link rel="stylesheet" type="text/css" href="../javascript/jquery-timepicker/jquery.timepicker.css"></link>
+
+                <script>
+                    $(function() {
+                        var calendarIconTooltip = "Popup calendar to select date";
+
+                        $("#modalDatepicker").datepick({
+                            dateFormat: "yy-mm-dd",
+                            showOtherMonths: true,
+                            selectOtherMonths: true,
+                            // Show button for calendar
+                            buttonImage: "img/calendar.gif",
+                            buttonImageOnly: true,
+                            showOn: "both",
+                            // Don't allow going past current date
+                            maxDate: 0,
+                            // onClose is for restricting end date to be after start date,
+                            // though it is potentially confusing to user
+                            rangeSelect: true,
+                            showTrigger: '<button type="button" class="trigger">' +
+                                '<img src="../jquery.datepick.package-5.1.0/img/calendar.gif" alt="Popup"></button>',
+                            onClose: function (selectedDate) {
+                                // Strangely need to set the title attribute for the icon again
+                                // so that don't revert back to a "..." tooltip
+                                // FIXME $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                            }
+                        });
+
+                        // Use a better tooltip than the default "..." for the calendar icon
+                        $(".ui-datepicker-trigger").attr("title", calendarIconTooltip);
+                    })
+                </script>
+
+                <div style='font-size: medium;'>Select Comparison Range:</div>
+
+                <div class="param" style="display: inline-block;">
+                    <label for="modalDatepicker">Date:</label>
+                    <input type="text" id="modalDatepicker" name="modalDatepicker"
+                           title="The range of dates that you want to examine data for.
+                               <br><br> Begin date must be before the end date."
+                           size="18"
+                           value="Date range" />
+                </div>
+
+                <div class="param" style="display: inline-block; margin-left: 30px;">
+                    <select id="modalServiceDayType" name="modalServiceDayType">
+                        <option value="">Service Day Type</option>
+                        <option value="">All</option>
+                        <option value="weekday">Weekday</option>
+                        <option value="saturday">Saturday</option>
+                        <option value="sunday">Sunday</option>
+                    </select>
+                </div>
+
+                <input type="button" id="modalSubmit" class="submit" value="Submit" style="display: block; margin-top: 20px; margin-bottom: 20px;">
+            </div>
+        </div>
+
+        <div id="comparisonResults" hidden="true">
+            <hr>
+
+            <div id="comparisonParams" class="paramDetails" style="float: left;">
+                <p style='font-size: 0.8em;'></p>
+            </div>
+
+            <div id="comparisonAvgRunTime" style="margin-left: 20px; width: 35%; vertical-align: middle;">
+                <p style="font-size: 0.9em;display: inline-block;"></p>
+                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+            </div>
+
+            <div id="comparisonRunTimeBreakdown" style="margin-left: 20px; width: 70%; vertical-align: middle;">
+                <p style="font-size: 0.9em;display: inline-block;"></p>
+                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+                <p style="font-size: 0.9em;display: inline-block;"></p>
+                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+                <p style="font-size: 0.9em;display: inline-block;"></p>
+                <p style="font-size: 0.9em;display: inline-block; width: 80px; height: 1.5em;"></p>
+            </div>
+
+            <input type="button" id="comparisonVisualizeButton" class="visualizeButton" value="Visualize trips" style="margin-top: 10px; margin-bottom: 10px;">
         </div>
     </div>
 
@@ -176,6 +302,8 @@
 
     $("#submit").click(function() {
         $("#submit").attr("disabled", "disabled");
+        $("#modalDatepicker").val("Date range")
+        $("#comparisonModal").hide();
 
         request = {}
 
@@ -213,20 +341,6 @@
             traditional: true,
             dataType: "json",
             success: function (response) {
-                // var compareLink = "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; color: blue; text-decoration: underline; cursor: pointer'>Compare</a>";
-
-                // // if (response.numberOfTrips == 0) {
-                // //     $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>No average run time data.</p>" + compareLink);
-                // // }
-                // else {
-                //     var runTimeMinutes = parseInt(response.averageRunTime / 60000).toString();
-                //     var runTimeSeconds = parseInt(response.averageRunTime % 60000 / 1000).toString();
-                //     if (runTimeSeconds.length == 1) {
-                //         runTimeSeconds = "0" + runTimeSeconds;
-                //     }
-                //     $("#avgRunTimeTop").html("<p style='font-size: 0.8em; margin-bottom: 0em;'>Average Trip Run Time: " + runTimeMinutes + ":" + runTimeSeconds + "</p>" + compareLink);
-                // }
-
                 $("#submit").removeAttr("disabled");
                 var beginDateArray = request.beginDate.split("-");
                 var endDateArray = request.endDate.split("-");
@@ -247,9 +361,26 @@
                     serviceDayString = "All days";
                 }
 
-                $(".paramDetails").each(function() {
-                    $(this).html("<p style='font-size: 0.8em;'>Route " + request.r + " to " + request.headsign + " | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
-                })
+                $("#paramDetails").html("<p style='font-size: 0.8em;'>Route " + request.r + " to " + request.headsign + " | All stops | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='openModal()'>Compare</a></p>");
+                $("#paramDetailsModal").html("<p style='font-size: 0.7em;'>Route " + request.r + " to " + request.headsign + " | All stops | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "</p>");
+
+                var runTimes = {"avgRunTime": "10.5", "fixed": "8", "variable": "6", "dwell": "8"};
+
+                $("#avgRunTime").html(
+                    "<p style='font-size: 0.9em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 50px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + runTimes.avgRunTime + "</p>"
+                );
+
+                $("#runTimeBreakdown").html(
+                    "<p style='font-size: 0.9em;display: inline-block;'>Fixed</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 50px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + runTimes.fixed + "</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + runTimes.variable + "</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + runTimes.dwell + "</p>"
+                );
+
+                $("#visualizeButton").show();
 
                 alert("Success");
             },
@@ -258,6 +389,103 @@
                 alert("Error processing average trip run time.");
             }
         })
+    })
+
+    $("#modalSubmit").click(function() {
+        $(".submit").attr("disabled", "disabled");
+        $("#comparisonModal").hide();
+
+        request = {}
+
+        if ($("#modalDatepicker").val() == "Date range") {
+            var today = new Date();
+            var beginDate = endDate = today.getFullYear() + "-"
+                + (today.getMonth() <= 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))
+                + "-" + (today.getDate() < 10 ? "0" + today.getDate() : today.getDate());
+        } else {
+            var dateRangeStrings = $("#modalDatepicker").val().replace(/\s/g, "").split("-");
+            var beginYear = "20" + dateRangeStrings[0];
+            var endYear = "20" + dateRangeStrings[3];
+            var beginDate = [beginYear, dateRangeStrings[1], dateRangeStrings[2]].join("-");
+            var endDate = [endYear, dateRangeStrings[4], dateRangeStrings[5]].join("-");
+        }
+
+        var beginTime = $("#beginTime").val() == "" ? "00:00:00" : $("#beginTime").val() + ":00";
+        var endTime = $("#endTime").val() == "" ? "23:59:59" : $("#endTime").val() + ":00";
+
+        request.beginDate = beginDate;
+        request.endDate = endDate;
+        request.beginTime = beginTime;
+        request.endTime = endTime;
+        request.r = $("#route").val();
+        request.headsign = $("#direction").val();
+        request.serviceType = $("#modalServiceDayType").val();
+        request.startStop = $("#startStop").val();
+        request.endStop = $("#endStop").val();
+
+        $.ajax({
+            url: apiUrlPrefix + "/report/speedmap/runTime",
+            // Pass in query string parameters to page being requested
+            data: request,
+            // Needed so that parameters passed properly to page being requested
+            traditional: true,
+            dataType: "json",
+            success: function (response) {
+                $(".submit").removeAttr("disabled");
+                var beginDateArray = request.beginDate.split("-");
+                var endDateArray = request.endDate.split("-");
+                [beginDateArray[0], beginDateArray[1], beginDateArray[2]] = [beginDateArray[1], beginDateArray[2], beginDateArray[0]];
+                [endDateArray[0], endDateArray[1], endDateArray[2]] = [endDateArray[1], endDateArray[2], endDateArray[0]];
+                var beginDateString = beginDateArray.join("/");
+                var endDateString = endDateArray.join("/");
+
+                var timeRange = request.beginTime + " to " + request.endTime;
+
+                if (beginTime == "00:00:00" && endTime == "23:59:59") {
+                    timeRange = "All times";
+                }
+
+                var serviceDayString = request.serviceType;
+
+                if (serviceDayString == "") {
+                    serviceDayString = "All days";
+                }
+
+                $("#comparisonParams").html("<p style='font-size: 0.8em;'>Route " + request.r + " to " + request.headsign + " | All stops | " + beginDateString + " to " + endDateString + " | " + timeRange + " | " + serviceDayString + "<a id='compareLink' style='font-size: 0.8em; margin-bottom: 1em; margin-left: 4em; color: blue; text-decoration: underline; cursor: pointer' onclick='openModal()'>Compare</a></p>");
+
+                var runTimes = {"avgRunTime": "10.5", "fixed": "8", "variable": "6", "dwell": "8"};
+
+                $("#comparisonAvgRunTime").html(
+                    "<p style='font-size: 0.9em;display: inline-block; vertical-align: middle;'>Average run time</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 50px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + runTimes.avgRunTime + "</p>"
+                );
+
+                $("#comparisonRunTimeBreakdown").html(
+                    "<p style='font-size: 0.9em;display: inline-block;'>Fixed</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 50px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + runTimes.fixed + "</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Variable</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + runTimes.variable + "</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; vertical-align: middle;'>Dwell</p>" +
+                    "<p style='font-size: 0.9em;display: inline-block; margin-left: 40px; width: 80px; height: 1.5em; background-color: gray; vertical-align: middle;'>" + runTimes.dwell + "</p>"
+                );
+
+                $("#comparisonResults").show();
+
+                alert("Success");
+            },
+            error: function () {
+                $(".submit").removeAttr("disabled");
+                alert("Error processing average trip run time.");
+            }
+        })
+    })
+
+    function openModal() {
+        $("#comparisonModal").show();
+    }
+
+    $("#closeModal").click(function() {
+        $("#comparisonModal").hide();
     })
 
 </script>
